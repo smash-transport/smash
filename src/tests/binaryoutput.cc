@@ -38,7 +38,7 @@ TEST(init_particletypes) { Test::create_smashon_particletypes(); }
 
 static const int current_format_version = 4;
 
-/* A set of convienient functions to read binary */
+/* A set of convenient functions to read binary */
 
 static void read_binary(std::string &s, FILE *file) {
   std::int32_t size = s.size();

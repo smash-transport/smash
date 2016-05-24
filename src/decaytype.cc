@@ -143,16 +143,17 @@ float TwoBodyDecaySemistable::get_Lambda() {
 }
 
 // number of tabulation points
-const int num_tab_pts = 200;
+constexpr int num_tab_pts = 200;
+static thread_local Integrator integrate;
 
 float TwoBodyDecaySemistable::rho(float mass) const {
   if (tabulation_ == nullptr) {
-    const_cast<TwoBodyDecaySemistable*>(this)->tabulation_
-        = make_unique<Tabulation>(
+    /* TODO(weil): Move this lazy init to a global initialization function,
+      * in order to avoid race conditions in multi-threading. */
+    tabulation_ = make_unique<Tabulation>(
                 particle_types_[0]->mass() + particle_types_[1]->minimum_mass(),
                 10*particle_types_[1]->width_at_pole(), num_tab_pts,
                 [&](float sqrts) {
-                  Integrator integrate;
                   return integrate(particle_types_[1]->minimum_mass(),
                                     sqrts - particle_types_[0]->mass(),
                                     [&](float m) {
@@ -202,17 +203,20 @@ float TwoBodyDecayUnstable::get_Lambda() {
   return 0.6;
 }
 
+static thread_local Integrator2d integrate2d(1E4);
+
 float TwoBodyDecayUnstable::rho(float mass) const {
   if (tabulation_ == nullptr) {
+    /* TODO(weil): Move this lazy init to a global initialization function,
+      * in order to avoid race conditions in multi-threading. */
     const float m1_min = particle_types_[0]->minimum_mass();
     const float m2_min = particle_types_[1]->minimum_mass();
     const float sum_gamma = particle_types_[0]->width_at_pole()
                           + particle_types_[1]->width_at_pole();
-    const_cast<TwoBodyDecayUnstable*>(this)->tabulation_
+    tabulation_
           = make_unique<Tabulation>(m1_min + m2_min, 10*sum_gamma, num_tab_pts,
             [&](float sqrts) {
-              Integrator2d integrate(1E4);
-              return integrate(m1_min, sqrts - m2_min, m2_min, sqrts - m1_min,
+              return integrate2d(m1_min, sqrts - m2_min, m2_min, sqrts - m1_min,
                                 [&](float m1, float m2) {
                                   return integrand_rho_Manley_2res(sqrts,
                                                     m1, m2, particle_types_[0],
@@ -305,11 +309,13 @@ float ThreeBodyDecay::in_width(float, float G0, float, float, float) const {
   return G0;  // use on-shell width
 }
 
+
 // ThreeBodyDecayDilepton
 
-ThreeBodyDecayDilepton::ThreeBodyDecayDilepton(ParticleTypePtrList part_types,
-                                           int l)
-                         : ThreeBodyDecay(part_types, l), tabulation_(nullptr) {
+ThreeBodyDecayDilepton::ThreeBodyDecayDilepton(ParticleTypePtr mother,
+                                          ParticleTypePtrList part_types, int l)
+                         : ThreeBodyDecay(part_types, l), tabulation_(nullptr),
+                           mother_(mother) {
   if (!has_lepton_pair(particle_types_[0]->pdgcode(),
                        particle_types_[1]->pdgcode(),
                        particle_types_[2]->pdgcode())) {
@@ -319,123 +325,133 @@ ThreeBodyDecayDilepton::ThreeBodyDecayDilepton(ParticleTypePtrList part_types,
      part_types[1]->pdgcode().string() + " " +
      part_types[2]->pdgcode().string());
   }
+
+  int non_lepton_position = -1;
+  for (int i = 0; i < 3; ++i) {
+    if (!particle_types_[i]->is_lepton()) {
+      non_lepton_position = i;
+      break;
+    }
+  }
+
+  if (mother->pdgcode() == 0x0 || non_lepton_position == -1) {
+    throw std::runtime_error("Error: Unsupported dilepton Dalitz decay!");
+  }
 }
 
+bool ThreeBodyDecayDilepton::has_mother(ParticleTypePtr mother) const {
+  return mother == mother_;
+}
 
 float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
-                                             float m_other, PdgCode pdg) {
+                                         float m_other, ParticleTypePtr t) {
+  // check threshold
   if (m_par < m_dil + m_other) {
     return 0;
-  } else {
-    float gamma = 0.0;
-    // abbreviations
-    const float m_dil_sqr = m_dil * m_dil;
-    const float m_par_sqr = m_par * m_par;
-    const float m_par_cubed = m_par * m_par*m_par;
-    const float m_other_sqr = m_other*m_other;
+  }
 
-    switch (pdg.code()) {
-      case 0x111: /* pi0 */ {
-        /// see \iref{Landsberg:1986fd}, equation (3.8)
-        gamma = 7.6e-9;
-        const float ff = form_factor_pi(m_dil);
-        return (4.*alpha/(3.*M_PI)) * gamma/m_dil *
-                                    pow(1.-m_dil/m_par*m_dil/m_par, 3.) * ff*ff;
-      }
-      case 0x221: /* eta */ {
-        /// see \iref{Landsberg:1986fd}, equation (3.8)
-        gamma = 52e-8;
-        const float ff = form_factor_eta(m_dil);
-        return (4.*alpha/(3.*M_PI)) * gamma/m_dil *
-                                    pow(1.-m_dil/m_par*m_dil/m_par, 3.) * ff*ff;
-      }
-      case 0x223: /* omega */ {
-        /// see \iref{Landsberg:1986fd}, equation (3.4)
-        gamma = 0.703e-3;
-        const float n1 = m_par_sqr - m_other_sqr;
-        const float rad = pow(1. + m_dil_sqr/n1, 2)
-                          - 4.*m_par_sqr*m_dil_sqr/(n1*n1);
-        if (rad < 0.) {
-          assert(rad > -1E-5);
-          return 0.;
-        } else {
-          return (2.*alpha/(3.*M_PI)) * gamma/m_dil * pow(rad, 3./2.) *
-                                                   form_factor_sqr_omega(m_dil);
-        }
-      }
-      case 0x2214: case 0x2114: /* Delta+ and Delta0 */ {
-        /// see \iref{Krivoruchenko:2001hs}
-        const float rad1 = (m_par+m_other)*(m_par+m_other) - m_dil_sqr;
-        const float rad2 = (m_par-m_other)*(m_par-m_other) - m_dil_sqr;
-        const float t1 = alpha/16. *
-                   (m_par+m_other)*(m_par+m_other)/(m_par_cubed*m_other_sqr) *
-                   std::sqrt(rad1);
-        const float t2 =
-              pow(std::sqrt(rad2), 3.0);
-        const float ff = form_factor_delta(m_dil);
-        const float gamma_vi = t1 * t2 * ff*ff;
-        return 2.*alpha/(3.*M_PI) * gamma_vi/m_dil;
-      }
-      default:
-        throw std::runtime_error("Error in ThreeBodyDecayDilepton");
+  // abbreviations
+  const float m_dil_sqr = m_dil * m_dil;
+  const float m_par_sqr = m_par * m_par;
+  const float m_par_cubed = m_par * m_par*m_par;
+  const float m_other_sqr = m_other*m_other;
+
+  PdgCode pdg = t->pdgcode();
+  if (pdg.is_meson()) {
+    const ParticleType &photon = ParticleType::find(0x22);
+    const ParticleType &pi0 = ParticleType::find(0x111);
+    switch (pdg.spin()) {
+    case 0:  /* pseudoscalars: π⁰, η, η' */ {
+      // width for decay into 2γ
+      const float gamma_2g = t->get_partial_width(m_par, photon, photon);
+      float ff = em_form_factor_ps(pdg, m_dil);  // form factor
+      /// see \iref{Landsberg:1986fd}, equation (3.8)
+      return (4.*alpha/(3.*M_PI)) * gamma_2g/m_dil
+                                  * pow(1.-m_dil/m_par*m_dil/m_par, 3.) * ff*ff;
     }
-  }  // else
+    case 2: /* vectors: ω, φ */ {
+      // width for decay into π⁰γ
+      const float gamma_pig = t->get_partial_width(m_par, pi0, photon);
+      float ff_sqr = em_form_factor_sqr_vec(pdg, m_dil);  // form factor squared
+      /// see \iref{Landsberg:1986fd}, equation (3.4)
+      const float n1 = m_par_sqr - m_other_sqr;
+      const float rad = pow(1. + m_dil_sqr/n1, 2)
+                        - 4.*m_par_sqr*m_dil_sqr/(n1*n1);
+      if (rad < 0.) {
+        assert(rad > -1E-5);
+        return 0.;
+      } else {
+        return (2.*alpha/(3.*M_PI)) * gamma_pig/m_dil
+               * pow(rad, 3./2.) * ff_sqr;
+      }
+    }
+    default:
+      throw std::runtime_error("Bad meson in ThreeBodyDecayDilepton: "
+                               + pdg.string());
+    }
+  } else if (pdg.is_baryon()) {
+    switch (pdg.code()) {
+    case 0x2214: case -0x2214:
+    case 0x2114: case -0x2114:  /* Δ⁺, Δ⁰ (and antiparticles) */ {
+      /// see \iref{Krivoruchenko:2001hs}
+      const float rad1 = (m_par+m_other)*(m_par+m_other) - m_dil_sqr;
+      const float rad2 = (m_par-m_other)*(m_par-m_other) - m_dil_sqr;
+      const float t1 = alpha/16. *
+                  (m_par+m_other)*(m_par+m_other)/(m_par_cubed*m_other_sqr) *
+                  std::sqrt(rad1);
+      const float t2 = pow(std::sqrt(rad2), 3.0);
+      const float ff = form_factor_delta(m_dil);
+      const float gamma_vi = t1 * t2 * ff*ff;
+      return 2.*alpha/(3.*M_PI) * gamma_vi/m_dil;
+    }
+    default:
+      throw std::runtime_error("Bad baryon in ThreeBodyDecayDilepton: "
+                               + pdg.string());
+    }
+  } else {
+    throw std::runtime_error("Non-hadron in ThreeBodyDecayDilepton: "
+                             + pdg.string());
+  }
 }
 
+
 float ThreeBodyDecayDilepton::width(float, float G0, float m) const {
-  PdgCode pdg_par;
-  int non_lepton_position = -1;
-
-  for (int i = 0; i < 3; ++i) {
-    if (particle_types_[i]->pdgcode() == 0x111) {
-      pdg_par = 0x223;  // only omega decays into a lepton pair and a pi0
-      non_lepton_position = i;
-      break;
-    }
-    if (particle_types_[i]->pdgcode() == 0x2212) {
-      pdg_par = 0x2214;  // only Delta+ decays into a lepton pair and a proton
-      non_lepton_position = i;
-      break;
-    }
-    if (particle_types_[i]->pdgcode() == 0x2112) {
-      pdg_par = 0x2114;  // only Delta0 decays into a lepton pair and a neutron
-      non_lepton_position = i;
-      break;
-    }
-    if (particle_types_[i]->pdgcode() == 0x22) {
-      // Only eta and pi0 decay into lepton pair and a photon. We assume here
-      // that their width is on-shell.
-      return G0;
-    }
+  if (mother_->is_stable()) {
+    return G0;
   }
 
-  if (pdg_par == 0x0 || non_lepton_position == -1) {
-    throw std::runtime_error("Error unsupported Dalitz Dilepton Decay");
-  }
+  if (!tabulation_) {
+    int non_lepton_position = -1;
+    for (int i = 0; i < 3; ++i) {
+      if (!particle_types_[i]->is_lepton()) {
+        non_lepton_position = i;
+        break;
+      }
+    }
+    // lepton mass
+    const float m_l = particle_types_[(non_lepton_position+1)%3]->mass();
+    // mass of non-leptonic particle in final state
+    const float m_other = particle_types_[non_lepton_position]->mass();
 
-  // lepton mass
-  const float m_l = particle_types_[(non_lepton_position+1)%3]->mass();
-  // mass of non-leptonic particle in final state
-  const float m_other = particle_types_[non_lepton_position]->mass();
-
-  // integrate differential width to obtain partial width
-  if (tabulation_ == nullptr) {
-    const_cast<ThreeBodyDecayDilepton*>(this)->tabulation_
-          = make_unique<Tabulation>(m_other+2*m_l, 10*G0, num_tab_pts,
+    // integrate differential width to obtain partial width
+    float M0 = mother_->mass();
+    float G0tot = mother_->width_at_pole();
+    tabulation_
+          = make_unique<Tabulation>(m_other+2*m_l, M0 + 10*G0tot, num_tab_pts,
               [&](float m_parent) {
                 const float bottom = 2*m_l;
                 const float top = m_parent-m_other;
                 if (top < bottom) {  // numerical problems at lower bound
-                  return 0.0;
+                  return 0.;
                 }
-                Integrator integrate;
                 return integrate(bottom, top,
-                                [&](float m_dil) {
-                                  return diff_width(m_parent, m_dil,
-                                                    m_other, pdg_par);
-                                }).value();
+                                 [&](float m_dil) {
+                                    return diff_width(m_parent, m_dil, m_other,
+                                                      mother_);
+                                 }).value();
                 });
   }
+
   return tabulation_->get_value_linear(m);
 }
 

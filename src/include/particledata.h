@@ -171,7 +171,7 @@ class ParticleData {
    *
    * \fpPrecision This function must use double-precision for the calculation of
    * \f$ \beta \f$ and \f$ 1-\beta \f$ as the latter results in a value close to
-   * zero and thus exhibits catastrophic cancelation.
+   * zero and thus exhibits catastrophic cancellation.
    */
   double inverse_gamma() const {
     return std::sqrt(1. -

@@ -152,6 +152,12 @@ void Configuration::remove_all_but(const std::string &key) {
   }
 }
 
+bool Configuration::has_value_including_empty(
+                    std::initializer_list<const char *> keys) const {
+  const auto n = find_node_at(root_node_, keys);
+  return n.IsDefined();
+}
+
 bool Configuration::has_value(std::initializer_list<const char *> keys) const {
   const auto n = find_node_at(root_node_, keys);
   return n.IsDefined() && (!n.IsNull());

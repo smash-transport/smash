@@ -148,8 +148,8 @@ namespace {
  * \li "none"             - do not calculate density, print 0.0
  *
  * The output section has several subsections, relating to different output
- * files. To enable a certain output, set the 'Enable' key in the corresponding
- * subsection:
+ * files. To disable a certain output, comment the corresponding section out:
+ *
  * \li \subpage input_oscar_particlelist
  * \li \subpage input_oscar_collisions
  * \li \subpage input_vtk
@@ -209,6 +209,29 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
   return out;
 }
 
+template <typename Modus>
+template <typename TOutput>
+void Experiment<Modus>::create_output(const char * name,
+                   const bf::path &output_path,
+                   Configuration&& conf) {
+  const bool exists = conf.has_value_including_empty({name});
+  if (!exists) {
+    return;
+  }
+  if (conf.has_value({name, "Enable"})) {
+    const auto &log = logger<LogArea::Experiment>();
+    log.warn("Enable option is deprecated."
+             " To disable/enable output comment/uncomment"
+             " it out in the config.yaml.");
+  }
+  const bool enable = conf.take({name, "Enable"}, true);
+  if (!enable) {
+    conf.take({name});
+    return;
+  }
+  outputs_.emplace_back(make_unique<TOutput>(output_path, conf[name]));
+}
+
 /*!\Userguide
  * \page input_general_
  * \key End_Time (float, required): \n
@@ -265,8 +288,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
   const bool two_to_two = config.take({"Collision_Term", "Two_to_Two"}, true);
-  const bool dileptons_switch = config.take(
-                                      {"Output", "Dileptons", "Enable"}, false);
+  const bool dileptons_switch = config.has_value({"Output", "Dileptons"}) ?
+                    config.take({"Output", "Dileptons", "Enable"}, true) :
+                    false;
 
   // create finders
   if (two_to_one) {
@@ -351,7 +375,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     * \code smash -o <user_output_dir> \endcode
     * SMASH supports several kinds of configurable output formats.
     * They are called OSCAR1999, OSCAR2013, binary OSCAR2013, VTK and ROOT
-    * outputs. Every format can be switched on/off using option Enable in the
+    * outputs. Every format can be switched on/off by commenting/uncommenting the
+    * corresponding section in the
     * configuration file config.yaml. For more information on configuring the
     * output see corresponding pages: \ref input_oscar_particlelist,
     * \ref input_oscar_collisions, \ref input_binary_collisions,
@@ -379,42 +404,21 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   while (OutputPtr oscar = create_oscar_output(output_path, output_conf)) {
     outputs_.emplace_back(std::move(oscar));
   }
-  if (static_cast<bool>(output_conf.take({"Vtk", "Enable"}))) {
-    outputs_.emplace_back(make_unique<VtkOutput>(output_path,
-                                                 output_conf["Vtk"]));
-  } else {
-    output_conf.take({"Vtk"});
-  }
-  if (static_cast<bool>(output_conf.take({"Binary_Collisions", "Enable"}))) {
-    outputs_.emplace_back(make_unique<BinaryOutputCollisions>(output_path,
-                                            output_conf["Binary_Collisions"]));
-  } else {
-    output_conf.take({"Binary_Collisions"});
-  }
-  if (static_cast<bool>(output_conf.take({"Binary_Particles", "Enable"}))) {
-    outputs_.emplace_back(make_unique<BinaryOutputParticles>(output_path,
-                                              output_conf["Binary_Particles"]));
-  } else {
-    output_conf.take({"Binary_Particles"});
-  }
-  if (static_cast<bool>(output_conf.take({"Root", "Enable"}))) {
+  create_output<VtkOutput>("Vtk", output_path, std::move(output_conf));
+  create_output<BinaryOutputCollisions>("Binary_Collisions",
+                                        output_path, std::move(output_conf));
+  create_output<BinaryOutputParticles>("Binary_Particles",
+                                        output_path, std::move(output_conf));
 #ifdef SMASH_USE_ROOT
-    outputs_.emplace_back(make_unique<RootOutput>(output_path,
-                                                  output_conf["Root"]));
+  create_output<RootOutput>("Root", output_path, std::move(output_conf));
 #else
-    log.error() << "You requested Root output, but Root support has not been "
-                    "compiled in.";
-    output_conf.take({"Root"});
+  const bool enable_root = output_conf.take({"Root", "Enable"}, true);
+  if (enable_root && output_conf.has_value_including_empty({"Root"})) {
+    log.error("Root output requested, but Root support not compiled in");
+  }
 #endif
-  } else {
-    output_conf.take({"Root"});
-  }
-  if (static_cast<bool>(output_conf.take({"Thermodynamics", "Enable"}))) {
-    outputs_.emplace_back(make_unique<ThermodynamicOutput>(output_path,
-                                               output_conf["Thermodynamics"]));
-  } else {
-    output_conf.take({"Thermodynamics"});
-  }
+  create_output<ThermodynamicOutput>("Thermodynamics",
+                                     output_path, std::move(output_conf));
 
   /*!\Userguide
    * \page input_dileptons Dileptons
@@ -435,10 +439,6 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *
    * \note If you want dilepton decays, you also have to modify decaymodes.txt.
    * Dilepton decays are commented out by default.
-   *
-   * \key Enable (bool, optional, default = false):\n
-   * true - Dilepton Output and DecayActionsFinderDilepton enabled\n
-   * false - no Dilepton Output and no DecayActionsFinderDilepton
    *
    * \key Format (string, required):\n
    * "Oscar" - The dilepton output is written to the file \c DileptonOutput.oscar

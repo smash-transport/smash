@@ -51,8 +51,9 @@ class ScatterActionBaryonBaryon : public ScatterAction {
 
  protected:
   /**
-   * Scattering matrix amplitude squared for resonance production processes like
-   * NN → NR and NN → ΔR, where R is a baryon resonance (Δ, N*, Δ*).
+   * Scattering matrix amplitude squared (divided by 16π) for resonance
+   * production processes like NN → NR and NN → ΔR, where R is a baryon
+   * resonance (Δ, N*, Δ*).
    * Includes a spin factor \f$ (2S_a+1)(2S_b+1) \f$, but no isospin factors.
    *
    * \param[in] srts sqrt(Mandelstam-s), i.e. collision CMS energy.

@@ -41,7 +41,7 @@ CollisionBranchList ScatterActionBaryonBaryon::two_to_two_cross_sections() {
 
   if (type_a.pdgcode().is_nucleon() || type_a.pdgcode().is_Delta() ||
       type_b.pdgcode().is_nucleon() || type_b.pdgcode().is_Delta()) {
-    /* N R -> N N, Delta R -> N N */
+    /* N R → N N, Δ R → N N */
     process_list = bar_bar_to_nuc_nuc(type_a, type_b);
   }
 
@@ -84,9 +84,9 @@ CollisionBranchList ScatterActionBaryonBaryon::bar_bar_to_nuc_nuc(
         }
 
         /** Cross section for 2->2 resonance absorption, obtained via detailed
-        * balance from the inverse reaction.
-        * See eqs. (B.6), (B.9) and (181) in \iref{Buss:2011mx}.
-        * There are factors for spin, isospin and symmetry involved. */
+         * balance from the inverse reaction.
+         * See eqs. (B.6), (B.9) and (181) in \iref{Buss:2011mx}.
+         * There are factors for spin, isospin and symmetry involved. */
         const float spin_factor = 4. / ((type_a.spin()+1)*(type_b.spin()+1));
         const int sym_fac_in =
                     (type_a.iso_multiplet() == type_b.iso_multiplet()) ? 2 : 1;
@@ -114,16 +114,16 @@ CollisionBranchList ScatterActionBaryonBaryon::bar_bar_to_nuc_nuc(
 float ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(double sqrts,
       const ParticleType &type_a, const ParticleType &type_b, const int twoI) {
   const float spin_factor = (type_a.spin()+1) * (type_b.spin()+1);
-  const float m_plus = type_a.mass() + type_b.mass();
-  const float m_minus = type_a.mass() - type_b.mass();
-  const float msqr = m_plus * m_plus + m_minus * m_minus;
+  const float m_a = type_a.mass();
+  const float m_b = type_b.mass();
+  const float msqr = 2. * (m_a*m_a + m_b*m_b);
 
   /** NN → NΔ: fit sqrt(s)-dependence to OBE model [\iref{Dmitriev:1986st}] */
   if ((type_a.is_Delta() && type_b.is_nucleon()) ||
       (type_b.is_Delta() && type_a.is_nucleon())) {
     return 68. * spin_factor / std::pow(sqrts - 1.104, 1.951);
   /** All other processes use a constant matrix element,
-   *  cf. \iref{Bass:1998ca}, equ. (3.35). */
+   *  similar to \iref{Bass:1998ca}, equ. (3.35). */
   } else if ((type_a.is_Nstar() && type_b.is_nucleon()) ||
              (type_b.is_Nstar() && type_a.is_nucleon())) {
     // NN → NN*

@@ -106,10 +106,9 @@ TEST(phase_space_density_nucleus) {
   ThreeVector r(0.0, 0.0, 0.0);
   ThreeVector p;
   PdgCode pdg = 0x2212;
-  float f;
   for (int i = 1; i < 100; i++) {
     p = ThreeVector(0.0, 0.0, 0.5/100*i);
-    f = pb->phasespace_dens(r, p, part_Au, pdg);
+    const float f = pb->phasespace_dens(r, p, part_Au, pdg);
     std::cout << 0.5/100*i << "  " << f << std::endl;
   }
 }
