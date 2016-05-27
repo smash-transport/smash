@@ -30,6 +30,11 @@ class ScatterActionPhoton : public ScatterAction {
       return total_cross_section_;
     }
   }
+  /** Overridden to effectively return the reaction channel. */
+  virtual ProcessType get_type() const {
+    return static_cast<ProcessType>(reac);
+  }
+
   CollisionBranchList two_to_two_cross_sections() override;
 
  private:
