@@ -45,13 +45,13 @@ class ScatterActionPhoton : public ScatterAction {
   float cross_section_photons_ = 0.0;
   static const int num_tab_pts = 200;
   enum ReactionType {
-    pi_pi,
-    pi0_pi,
-    piplus_rho0,
-    pi_rho,
-    pi0_rho,
-    piplus_eta,
-    no_reaction
+    pi_pi = 0,
+    pi0_pi = 1,
+    piplus_rho0 = 2,
+    pi_rho = 3,
+    pi0_rho = 4,
+    piplus_eta = 5,
+    no_reaction = 6
   };
   ReactionType reac = no_reaction;
   float pi_pi_rho0(const float M, const float s) const;
