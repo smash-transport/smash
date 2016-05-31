@@ -174,11 +174,7 @@ class ParticleData {
    * zero and thus exhibits catastrophic cancellation.
    */
   double inverse_gamma() const {
-    return std::sqrt(1. -
-                     (momentum_.x1() * momentum_.x1() +
-                      momentum_.x2() * momentum_.x2() +
-                      momentum_.x3() * momentum_.x3()) /
-                         (momentum_.x0() * momentum_.x0()));
+    return std::sqrt(1. - momentum_.sqr3() / (momentum_.x0()*momentum_.x0()));
   }
 
   /// Apply a full Lorentz boost of momentum and position
