@@ -55,7 +55,8 @@ ThreeVector GrandCanThermalizer::uniform_in_cell() const {
 }
 
 void GrandCanThermalizer::sample_in_random_cell(ParticleList& plist,
-                                                const double time) {
+                            const double time,
+                            std::function<bool(int, int, int)> condition) {
   plist.clear();
   // Choose random cell
   int cells_to_sample_size = cells_to_sample_.size();
@@ -66,7 +67,8 @@ void GrandCanThermalizer::sample_in_random_cell(ParticleList& plist,
   const double gamma = 1.0 / std::sqrt(1.0 - cell.v().sqr());
   // Loop over all existing hadrons (no leptons/quarks/etc)
   for (const ParticleType &ptype : ParticleType::list_all()) {
-    if (!ptype.is_hadron()) {
+    if (!ptype.is_hadron() ||
+        !condition(ptype.strangeness(), ptype.baryon_number(), ptype.charge())) {
       continue;
     }
     // First find out how many particles of this kind to sample
@@ -167,7 +169,8 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
   // Mode 1: sample until energy is conserved, take only strangeness < 0
   while (conserved_initial.momentum().x0() > energy ||
          S_plus < conserved_initial.strangeness()) {
-    sample_in_random_cell(mode_list, time);
+    sample_in_random_cell(mode_list, time,
+      [] (int, int, int) { return true; });
     for (auto &particle : mode_list) {
       energy += particle.momentum().x0();
       if (particle.pdgcode().strangeness() > 0) {
@@ -179,12 +182,12 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
 
   // Mode 2: sample until strangeness is conserved
   while (S_plus + S_minus > conserved_initial.strangeness()) {
-    sample_in_random_cell(mode_list, time);
+    sample_in_random_cell(mode_list, time,
+      [] (int S, int, int) { return (S < 0); });
     for (auto &particle : mode_list) {
       const int s_part = particle.pdgcode().strangeness();
-      if (s_part < 0 &&
-          // Do not allow particles with S = -2 or -3 spoil the total sum
-          S_plus + S_minus + s_part >= conserved_initial.strangeness()) {
+      // Do not allow particles with S = -2 or -3 spoil the total sum
+      if (S_plus + S_minus + s_part >= conserved_initial.strangeness()) {
         sampled_list.push_back(particle);
         S_minus += s_part;
       }
@@ -196,11 +199,11 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
   energy = 0.0;
   while (conserved_remaining.momentum().x0() > energy ||
          B_plus < conserved_remaining.baryon_number()) {
-    sample_in_random_cell(mode_list, time);
+    sample_in_random_cell(mode_list, time,
+      [] (int S, int, int) { return (S == 0); });
     for (auto &particle : mode_list) {
       energy += particle.momentum().x0();
-      if (particle.pdgcode().strangeness() == 0 &&
-          particle.pdgcode().baryon_number() > 0) {
+      if (particle.pdgcode().baryon_number() > 0) {
         sampled_list.push_back(particle);
         B_plus += particle.pdgcode().baryon_number();
       }
@@ -209,11 +212,11 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
 
   // Mode 4: sample non-strange anti-baryons
   while (B_plus + B_minus > conserved_remaining.baryon_number()) {
-    sample_in_random_cell(mode_list, time);
+    sample_in_random_cell(mode_list, time,
+      [] (int S, int B, int) { return (S == 0) && (B < 0); });
     for (auto &particle : mode_list) {
       const int bar = particle.pdgcode().baryon_number();
-      if (particle.pdgcode().strangeness() == 0 && bar < 0 &&
-          B_plus + B_minus + bar >= conserved_remaining.baryon_number()) {
+      if (B_plus + B_minus + bar >= conserved_remaining.baryon_number()) {
         sampled_list.push_back(particle);
         B_minus += bar;
       }
@@ -225,12 +228,11 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
   energy = 0.0;
   while (conserved_remaining.momentum().x0() > energy ||
          E_plus < conserved_remaining.charge()) {
-    sample_in_random_cell(mode_list, time);
+    sample_in_random_cell(mode_list, time,
+      [] (int S, int B, int) { return (S == 0) && (B == 0); });
     for (auto &particle : mode_list) {
       energy += particle.momentum().x0();
-      if (particle.pdgcode().strangeness() == 0 &&
-          particle.pdgcode().baryon_number() == 0 &&
-          particle.pdgcode().charge() > 0) {
+      if (particle.pdgcode().charge() > 0) {
         sampled_list.push_back(particle);
         E_plus += particle.pdgcode().charge();
       }
@@ -239,13 +241,11 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
 
   // Mode 6: sample non_strange mesons to conserve charge
   while (E_plus + E_minus > conserved_remaining.charge()) {
-    sample_in_random_cell(mode_list, time);
+    sample_in_random_cell(mode_list, time,
+      [] (int S, int B, int C) { return (S == 0) && (B == 0) && (C < 0); });
     for (auto &particle : mode_list) {
       const int charge = particle.pdgcode().charge();
-      if (particle.pdgcode().strangeness() == 0 &&
-          particle.pdgcode().baryon_number() == 0 &&
-          charge < 0 &&
-          E_plus + E_minus + charge >= conserved_remaining.charge()) {
+      if (E_plus + E_minus + charge >= conserved_remaining.charge()) {
         sampled_list.push_back(particle);
         E_minus += charge;
       }
@@ -256,14 +256,11 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
   conserved_remaining = conserved_initial - QuantumNumbers(sampled_list);
   energy = 0.0;
   while (conserved_remaining.momentum().x0() > energy) {
-    sample_in_random_cell(mode_list, time);
+    sample_in_random_cell(mode_list, time,
+      [] (int S, int B, int C) { return (S == 0) && (B == 0) && (C == 0); });
     for (auto &particle : mode_list) {
-      if (particle.pdgcode().strangeness() == 0 &&
-          particle.pdgcode().baryon_number() == 0 &&
-          particle.pdgcode().charge() == 0) {
         sampled_list.push_back(particle);
         energy += particle.momentum().x0();
-      }
     }
   }
   log.info("Sampled ", sampled_list.size(), " particles.");
