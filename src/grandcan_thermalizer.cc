@@ -157,7 +157,7 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
   log.info("Number of cells in the thermalization region = ",
            cells_to_sample_.size(), ", its total volume [fm^3]: ",
            cells_to_sample_.size()*cell_volume_, ", in \% of lattice: ",
-           100.0*cells_to_sample_.size()*cell_volume_/lattice_total_cells);
+           100.0*cells_to_sample_.size()/lattice_total_cells);
 
   ParticleList mode_list, sampled_list;
   double energy = 0.0;
