@@ -22,22 +22,25 @@ class ScatterActionPhoton : public ScatterAction {
       : ScatterAction(in_part1, in_part2, time),
         number_of_fractional_photons(nofp) {}
   void generate_final_state() override;
+  void add_all_processes(float elastic_parameter, bool two_to_one,
+           bool two_to_two) override;
   float raw_weight_value() const override { return weight_; }
   float cross_section() const override {
     if (cross_section_photons_ < really_small) {
       return cross_section_photons_;
     } else {
-      return total_cross_section_;
+      return total_cross_section_ + cross_section_photons_;
     }
   }
   /** Overridden to effectively return the reaction channel. */
   virtual ProcessType get_type() const {
-    return static_cast<ProcessType>(reac);
+    int a = static_cast<int>(reac);
+    return static_cast<ProcessType>(a);
   }
 
-  CollisionBranchList two_to_two_cross_sections() override;
-
  private:
+
+  CollisionBranchList photon_cross_sections();
   int const number_of_fractional_photons;
   float weight_ = 0.0;
   /** List of possible collisions producing photons */

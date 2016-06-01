@@ -301,12 +301,15 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
                     false;
 
   // create finders
+  const double elastic_cross_section = config.take({"Collision_Term",
+                                      "Elastic_Cross_Section"}, -1.0f);
+  const bool isotropic = config.take({"Collision_Term", "Isotropic"}, false);
   if (two_to_one) {
     action_finders_.emplace_back(make_unique<DecayActionsFinder>());
   }
   if (two_to_one || two_to_two) {
     auto scat_finder = make_unique<ScatterActionsFinder>(
-        config, parameters_, two_to_one, two_to_two);
+        elastic_cross_section, parameters_, isotropic, two_to_one, two_to_two);
     max_transverse_distance_sqr_ =
         scat_finder->max_transverse_distance_sqr(parameters_.testparticles);
     action_finders_.emplace_back(std::move(scat_finder));
@@ -318,7 +321,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     number_of_fractional_photons = config.take(
          {"Output", "Photons", "Fractions"});
     photon_finder_ = make_unique<ScatterActionsFinderPhoton>(
-        config, parameters_, two_to_one,
+        elastic_cross_section, parameters_,isotropic, two_to_one,
         two_to_two, number_of_fractional_photons);
   }
   if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {

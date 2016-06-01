@@ -68,8 +68,8 @@ void ScatterActionPhoton::generate_final_state() {
                                        -phitheta.threevec() * pcm);
 
   /* Weighing of the fractional photons */
-  weight_ = diff_cross_section(t) * (t2 - t1) / number_of_fractional_photons /
-            total_cross_section_;
+  weight_ = diff_cross_section(t) * (t2 - t1)
+          / (number_of_fractional_photons * cross_section());
 
   /* Set positions & boost to computational frame. */
   for (ParticleData &new_particle : outgoing_particles_) {
@@ -78,7 +78,27 @@ void ScatterActionPhoton::generate_final_state() {
   }
 }
 
-CollisionBranchList ScatterActionPhoton::two_to_two_cross_sections() {
+void ScatterActionPhoton::add_all_processes(float elastic_parameter,
+                                      bool two_to_one, bool two_to_two) {
+  if (two_to_one) {
+    /* resonance formation (2->1) */
+    add_collisions(resonance_cross_sections());
+  }
+  if (two_to_two) {
+    /* elastic */
+    add_collision(elastic_cross_section(elastic_parameter));
+    /* 2->2 (inelastic) */
+    add_collisions(two_to_two_cross_sections());
+    // add to extra CollisionBranch only for photon producing reactions!
+    add_processes<CollisionBranch>(photon_cross_sections(),
+                                   collision_channels_photons_,
+                                   cross_section_photons_);
+  }
+  /* string excitation */
+  add_collision(string_excitation_cross_section());
+}
+
+CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
   CollisionBranchList process_list;
   ParticleTypePtr rho0_particle = &ParticleType::find(0x113);
   ParticleTypePtr charged_rho_particle = &ParticleType::find(0x213);
@@ -97,16 +117,15 @@ CollisionBranchList ScatterActionPhoton::two_to_two_cross_sections() {
                         pow(pow(m_rho, 2) - 4 * pow(m_pi, 2), 3.0 / 2.0);
   const float to_mb = 0.3894;
 
-  ParticleData &part_a = incoming_particles_[0];
-  ParticleData &part_b = incoming_particles_[1];
+  ParticleData part_a = incoming_particles_[0];
+  ParticleData part_b = incoming_particles_[1];
 
   bool pion_found = true;
 
   if (!part_a.type().pdgcode().is_pion()) {
     if (part_b.type().pdgcode().is_pion()) {
-      ParticleData dummy = part_a;
-      part_a = part_b;
-      part_b = dummy;
+      part_a = incoming_particles_[1];
+      part_b = incoming_particles_[0];
     } else {
       pion_found = false;
     }
@@ -137,7 +156,7 @@ CollisionBranchList ScatterActionPhoton::two_to_two_cross_sections() {
         }
       }
     } else if (part_b.type().charge() == 0) {
-        // so part_a.type().charge()!=0
+        // now part_a.type().charge()!=0
         if (part_b.type().pdgcode().is_pion()) {
           reac = pi0_pi;
           part_out = charged_rho_particle;
@@ -326,10 +345,6 @@ CollisionBranchList ScatterActionPhoton::two_to_two_cross_sections() {
       }
     }
 
-    // add to extra CollisionBranch only for photon producing reactions!
-    add_processes<CollisionBranch>(std::move(process_list),
-                                   collision_channels_photons_,
-                                   cross_section_photons_);
   }
 
   return process_list;

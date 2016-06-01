@@ -58,7 +58,7 @@ class ScatterAction : public Action {
   float raw_weight_value() const override;
 
   /** Add all possible subprocesses for this action object. */
-  void add_all_processes(float elastic_parameter, bool two_to_one,
+  virtual void add_all_processes(float elastic_parameter, bool two_to_one,
                          bool two_to_two);
 
   /**

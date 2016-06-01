@@ -26,9 +26,8 @@ namespace Smash {
 class ScatterActionsFinder : public ActionFinderInterface {
  public:
   /** Initialize the finder with the given parameters. */
-  ScatterActionsFinder(Configuration config,
-                       const ExperimentParameters &parameters,
-                       bool two_to_one, bool two_to_two);
+  ScatterActionsFinder(double el_param, const ExperimentParameters &parameters,
+    bool iso, bool two_to_one, bool two_to_two);
   /** Constructor for testing purposes. */
   ScatterActionsFinder(float elastic_parameter, int testparticles);
 
