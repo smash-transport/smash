@@ -150,8 +150,10 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
 
         /** Cross section for 2->2 process with one resonance in final state.
          * Based on Eq. (46) in \iref{Weil:2013mya}. */
-        float xsection = isospin_factor * matrix_element
-                      * resonance_integral / (s * cm_momentum());
+        const float spin_factor = (type_resonance->spin()+1)
+                                * (second_type->spin()+1);
+        const float xsection = isospin_factor * spin_factor * matrix_element
+                             * resonance_integral / (s * cm_momentum());
 
         if (xsection > really_small) {
           process_list.push_back(make_unique<CollisionBranch>
@@ -211,8 +213,10 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
 
         /** Cross section for 2->2 process with two resonances in final state.
          * Based on Eq. (51) in \iref{Weil:2013mya}. */
-        float xsection = isospin_factor * matrix_element
-                      * resonance_integral / (s * cm_momentum());
+        const float spin_factor = (type_res_1->spin()+1)
+                                * (type_res_2->spin()+1);
+        const float xsection = isospin_factor * spin_factor * matrix_element
+                             * resonance_integral / (s * cm_momentum());
 
         if (xsection > really_small) {
           process_list.push_back(make_unique<CollisionBranch>
