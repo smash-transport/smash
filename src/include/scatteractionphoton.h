@@ -34,8 +34,7 @@ class ScatterActionPhoton : public ScatterAction {
   }
   /** Overridden to effectively return the reaction channel. */
   virtual ProcessType get_type() const {
-    int a = static_cast<int>(reac);
-    return static_cast<ProcessType>(a);
+    return static_cast<ProcessType>(reac);
   }
 
  private:
@@ -47,16 +46,16 @@ class ScatterActionPhoton : public ScatterAction {
   CollisionBranchList collision_channels_photons_;
   float cross_section_photons_ = 0.0;
   static const int num_tab_pts = 200;
-  enum ReactionType {
-    pi_pi = 0,
+  enum class ReactionType {
+    no_reaction = 0,
     pi0_pi = 1,
     piplus_rho0 = 2,
     pi_rho = 3,
     pi0_rho = 4,
     piplus_eta = 5,
-    no_reaction = 6
+    pi_pi = 6
   };
-  ReactionType reac = no_reaction;
+  ReactionType reac = ReactionType::no_reaction;
   float pi_pi_rho0(const float M, const float s) const;
   float pi_pi0_rho(const float M, const float s) const;
   float diff_cross_section(float t) const;

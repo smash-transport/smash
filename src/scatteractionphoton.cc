@@ -144,43 +144,43 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
     ParticleTypePtr part_out = photon_particle;
     ParticleTypePtr photon_out = photon_particle;
 
-    reac = no_reaction;
+    reac = ReactionType::no_reaction;
     if (part_a.type().charge() == 0) {
       if (part_b.type().charge() != 0) {
         if (part_b.type().pdgcode().is_pion()) {
-          reac = pi0_pi;
+          reac = ReactionType::pi0_pi;
           part_out = charged_rho_particle;
         } else if (part_b.type().pdgcode().is_rho()) {
-          reac = pi0_rho;
+          reac = ReactionType::pi0_rho;
           part_out = charged_pi_particle;
         }
       }
     } else if (part_b.type().charge() == 0) {
         // now part_a.type().charge()!=0
         if (part_b.type().pdgcode().is_pion()) {
-          reac = pi0_pi;
+          reac = ReactionType::pi0_pi;
           part_out = charged_rho_particle;
         } else if (part_b.type().pdgcode().is_rho()) {
-          reac = piplus_rho0;
+          reac = ReactionType::piplus_rho0;
           part_out = charged_pi_particle;
         } else if (part_b.type().pdgcode() == 0x221) {  // corresponds to eta meson
-          reac = piplus_eta;
+          reac = ReactionType::piplus_eta;
           part_out = charged_pi_particle;
         }
       } else if (part_b.type().charge() == -part_a.type().charge()) {
         if (part_b.type().pdgcode().is_pion()) {
-          reac = pi_pi;
+          reac = ReactionType::pi_pi;
           // actually three reactions possible for pi_pi, so part_out is fixed later
         } else if (part_b.type().pdgcode().is_rho()) {
-          reac = pi_rho;
+          reac = ReactionType::pi_rho;
           part_out = pi_particle;
         }
       }
 
     m3 = part_out->mass();
     if (sqrts <= m1 + m2)
-      reac = no_reaction;
-    if (reac != no_reaction) {
+      reac = ReactionType::no_reaction;
+    if (reac != ReactionType::no_reaction) {
       std::array<double, 2> mandelstam_t = get_t_range(sqrts, m1, m2, m3, 0.0);
       double t1 = mandelstam_t[1];
       double t2 = mandelstam_t[0];
@@ -194,7 +194,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
       Integrator1dMonte integrate;
 
       switch (reac) {
-        case pi_pi:  // there are three possible reaction channels
+        case ReactionType::pi_pi:  // there are three possible reaction channels
           // the first possible reaction has part_out = photon_particle,
           // which is the default declared above
           xsection = twopi * pow(alpha, 2) / (s * p_cm_2);
@@ -253,7 +253,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
           process_list.push_back(make_unique<CollisionBranch>(
               *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
           break;
-        case pi0_pi:
+        case ReactionType::pi0_pi:
           if (tabulation_pi0_pi_rho == nullptr) {
             tabulation_pi0_pi_rho = make_unique<Tabulation>(
                 2.0f * m_pi, 15.0f - 2.0f * m_pi, num_tab_pts,
@@ -268,7 +268,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
           process_list.push_back(make_unique<CollisionBranch>(
               *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
           break;
-        case piplus_rho0:
+        case ReactionType::piplus_rho0:
           xsection = alpha * g_rho_2 / (12 * s * p_cm_2);
           t1 += -m_pi_2;
           t2 += -m_pi_2;
@@ -283,7 +283,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
           process_list.push_back(make_unique<CollisionBranch>(
               *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
           break;
-        case pi_rho:
+        case ReactionType::pi_rho:
           xsection = -alpha * g_rho_2 / (48 * s * p_cm_2);
           t1 += -m_pi_2;
           t2 += -m_pi_2;
@@ -301,7 +301,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
           process_list.push_back(make_unique<CollisionBranch>(
               *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
           break;
-        case pi0_rho:
+        case ReactionType::pi0_rho:
           xsection = alpha * g_rho_2 / (48 * s * p_cm_2);
           u1 += -pow(m2, 2);  // is u+
           u2 += -pow(m2, 2);
@@ -319,7 +319,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
           process_list.push_back(make_unique<CollisionBranch>(
               *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
           break;
-        case piplus_eta:
+        case ReactionType::piplus_eta:
           xsection = M_PI * alpha * 4.7 / (16 * m_eta_2 * s * p_cm_2);
           I0 = 1 / (m_rho * gamma_rho_tot) *
                (atan((u1 - m_rho_2) / (m_rho * gamma_rho_tot)) -
@@ -339,7 +339,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
           process_list.push_back(make_unique<CollisionBranch>(
               *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
           break;
-        case no_reaction:
+        case ReactionType::no_reaction:
           // never reached
           break;
       }
@@ -465,7 +465,7 @@ float ScatterActionPhoton::diff_cross_section(float t) const {
   float diff_xsection = 0.0;
   float e = 0.0;
   switch (reac) {
-    case pi_pi:
+    case ReactionType::pi_pi:
       if (outgoing_particles_[0].type().pdgcode().is_rho()) {
         diff_xsection = alpha * g_rho_2 / (4 * s * p_cm_2);
         diff_xsection =
@@ -475,16 +475,14 @@ float ScatterActionPhoton::diff_cross_section(float t) const {
                  ((s - 2 * m_pi_2) / (s - pow(m3, 2)) + m_pi_2 / (t - m_pi_2)) -
              DM / (u - m_pi_2) *
                  ((s - 2 * m_pi_2) / (s - pow(m3, 2)) + m_pi_2 / (u - m_pi_2)));
-      }
-      if (outgoing_particles_[0].type().pdgcode() == 0x221) {
+      } else if (outgoing_particles_[0].type().pdgcode() == 0x221) {
         diff_xsection =
             twopi * alpha * 4.7 * pow(m_rho, 4) /
             (pow(s - m_rho_2, 2) + pow(gamma_rho_tot, 2) * m_rho_2) /
             (32 * m_eta_2 * pow(m_rho, 4) * s * p_cm_2);
         diff_xsection = diff_xsection * (s * (u - m_pi_2) * (t - m_pi_2) -
                                          m_pi_2 * pow(s - m_eta_2, 2));
-      }
-      if (outgoing_particles_[0].type().pdgcode() == 0x022) {
+      } else if (outgoing_particles_[0].type().pdgcode() == 0x022) {
         diff_xsection = twopi * pow(alpha, 2) / (s * p_cm_2);
         u += -m_pi_2;
         t += -m_pi_2;
@@ -493,7 +491,7 @@ float ScatterActionPhoton::diff_cross_section(float t) const {
                              2 * pow(m_pi, 4) * pow(1 / t + 1 / u, 2));
       }
       break;
-    case pi0_pi:
+    case ReactionType::pi0_pi:
       diff_xsection = -alpha * g_rho_2 / (16 * s * p_cm_2);
       e = (s - 2 * m3_2) * pow(t - m_pi_2, 2) / m3_2 / pow(s - m3_2, 2) +
           (s - 2 * m3_2) * pow(u - m_pi_2, 2) / m3_2 / pow(s - m3_2, 2);
@@ -505,7 +503,7 @@ float ScatterActionPhoton::diff_cross_section(float t) const {
       e += 2 * (m_pi_2 / m3_2 - 4.5);
       diff_xsection = diff_xsection * e;
       break;
-    case piplus_rho0:
+    case ReactionType::piplus_rho0:
       diff_xsection = alpha * g_rho_2 / (12 * s * p_cm_2);
       diff_xsection =
           diff_xsection *
@@ -514,7 +512,7 @@ float ScatterActionPhoton::diff_cross_section(float t) const {
                ((s - pow(m2, 2) + m_pi_2) / (s - m_pi_2) +
                 m_pi_2 / (t - m_pi_2)));
       break;
-    case pi_rho:
+    case ReactionType::pi_rho:
       diff_xsection = -alpha * g_rho_2 / (48 * s * p_cm_2);
       e = 4 * (pow(m2, 2) - 4 * pow(m_pi, 2)) *
           (t / pow(t - m_pi_2, 2) + u / pow(u - m2, 2) -
@@ -523,7 +521,7 @@ float ScatterActionPhoton::diff_cross_section(float t) const {
            pow((s - m_pi_2) / (u - m2), 2);
       diff_xsection = diff_xsection * e;
       break;
-    case pi0_rho:
+    case ReactionType::pi0_rho:
       diff_xsection = alpha * g_rho_2 / (48 * s * p_cm_2);
       e = 4.5 - s / m2 -
           4 * s * (pow(m2, 2) - 4 * pow(m_pi, 2)) / pow(s - m_pi_2, 2) +
@@ -534,7 +532,7 @@ float ScatterActionPhoton::diff_cross_section(float t) const {
                                (s - m_pi_2 + m2) / (s - m_pi_2));
       diff_xsection = diff_xsection * e;
       break;
-    case piplus_eta:
+    case ReactionType::piplus_eta:
       diff_xsection = twopi * alpha * 4.7 *
                       (pow(m_rho, 4) / (pow(u - m_rho_2, 2) +
                                         pow(gamma_rho_tot, 2) * m_rho_2)) /
@@ -542,7 +540,7 @@ float ScatterActionPhoton::diff_cross_section(float t) const {
       diff_xsection = diff_xsection * (u * (s - m_pi_2) * (t - m_pi_2) -
                                        m_pi_2 * pow(u - m_eta_2, 2));
       break;
-    case no_reaction:
+    case ReactionType::no_reaction:
       // never reached
       break;
   }
