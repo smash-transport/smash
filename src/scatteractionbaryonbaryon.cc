@@ -87,7 +87,7 @@ CollisionBranchList ScatterActionBaryonBaryon::bar_bar_to_nuc_nuc(
          * balance from the inverse reaction.
          * See eqs. (B.6), (B.9) and (181) in \iref{Buss:2011mx}.
          * There are factors for spin, isospin and symmetry involved. */
-        const float spin_factor = (nuc_a->spin()+1) * (nuc_b->spin()+1);
+        const float spin_factor = (nuc_a->spin() + 1) * (nuc_b->spin() + 1);
         const int sym_fac_in =
                     (type_a.iso_multiplet() == type_b.iso_multiplet()) ? 2 : 1;
         const int sym_fac_out =
@@ -120,7 +120,7 @@ float ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(double sqrts,
   /** NN → NΔ: fit sqrt(s)-dependence to OBE model [\iref{Dmitriev:1986st}] */
   if ((type_a.is_Delta() && type_b.is_nucleon()) ||
       (type_b.is_Delta() && type_a.is_nucleon())) {
-    return 68. /  std::pow(sqrts - 1.104, 1.951);
+    return 68. / std::pow(sqrts - 1.104, 1.951);
   /** All other processes use a constant matrix element,
    *  similar to \iref{Bass:1998ca}, equ. (3.35). */
   } else if ((type_a.is_Nstar() && type_b.is_nucleon()) ||
