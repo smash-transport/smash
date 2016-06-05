@@ -54,30 +54,56 @@ ThreeVector GrandCanThermalizer::uniform_in_cell() const {
                        +0.5 * static_cast<double>(lat_->cell_sizes()[2])));
 }
 
+void GrandCanThermalizer::compute_N_in_cells(
+               std::function<bool(int, int, int)> condition) {
+  N_in_cells_.clear();
+  N_total_in_cells_ = 0.0;
+  for(auto cell_index : cells_to_sample_) {
+    const ThermLatticeNode cell = (*lat_)[cell_index];
+    const double gamma = 1.0 / std::sqrt(1.0 - cell.v().sqr());
+    double N_tot = 0.0;
+    for (const ParticleType &ptype : ParticleType::list_all()) {
+      if (ptype.is_hadron() &&
+          condition(ptype.strangeness(), ptype.baryon_number(), ptype.charge())) {
+        // N_i = n u^mu dsigma_mu = (isochronous hypersurface) n * V * gamma
+        N_tot += cell_volume_ * gamma *
+          HadronGasEos::partial_density(ptype, cell.T(), cell.mub(), cell.mus());
+      }
+    }
+    N_in_cells_.push_back(N_tot);
+    N_total_in_cells_ += N_tot;
+  }
+}
+
 void GrandCanThermalizer::sample_in_random_cell(ParticleList& plist,
                             const double time,
                             std::function<bool(int, int, int)> condition) {
   plist.clear();
-  // Choose random cell
-  int cells_to_sample_size = cells_to_sample_.size();
-  const int cell_index =
-              cells_to_sample_[Random::uniform_int(0, cells_to_sample_size-1)];
+  // Choose random cell, probability = N_in_cell/N_total
+  double r = Random::uniform(0.0, N_total_in_cells_);
+  double partial_sum = 0.0;
+  int index_only_thermalized = -1;
+  while (partial_sum < r) {
+    index_only_thermalized++;
+    partial_sum += N_in_cells_[index_only_thermalized];
+  }
+  const int cell_index = cells_to_sample_[index_only_thermalized];
   const ThermLatticeNode cell = (*lat_)[cell_index];
   const ThreeVector cell_center = lat_->cell_center(cell_index);
   const double gamma = 1.0 / std::sqrt(1.0 - cell.v().sqr());
-  // Loop over all existing hadrons (no leptons/quarks/etc)
+  const double N_in_cell = N_in_cells_[index_only_thermalized];
+
+  // Which sort to sample - probability N_i/N_tot
+  r = Random::uniform(0.0, N_in_cell);
+  double N_sum = 0.0; 
   for (const ParticleType &ptype : ParticleType::list_all()) {
     if (!ptype.is_hadron() ||
-        !condition(ptype.strangeness(), ptype.baryon_number(), ptype.charge())) {
+      !condition(ptype.strangeness(), ptype.baryon_number(), ptype.charge())) {
       continue;
     }
-    // First find out how many particles of this kind to sample
-    // N = n u^mu dsigma_mu = (isochronous hypersurface) n * V * gamma
-    const double N_average = cell_volume_ * gamma *
+    N_sum += cell_volume_ * gamma * 
       HadronGasEos::partial_density(ptype, cell.T(), cell.mub(), cell.mus());
-    const int N_to_sample = Random::poisson(N_average);
-    // Sample particles: uniform in the cell, momenta from Cooper-Frye
-    for (int i = 0; i < N_to_sample; i++) {
+    if (N_sum >= r) {
       ParticleData particle(ptype);
       // Note: it's pole mass for resonances!
       const double m = static_cast<double>(ptype.mass());
@@ -90,6 +116,7 @@ void GrandCanThermalizer::sample_in_random_cell(ParticleList& plist,
       particle.set_4momentum(m, phitheta.threevec() * momentum_radial);
       particle.boost_momentum(cell.v());
       plist.push_back(particle);
+      break;
     }
   }
 }
@@ -167,6 +194,7 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
       B_plus = 0, B_minus = 0,
       E_plus = 0, E_minus = 0;
   // Mode 1: sample until energy is conserved, take only strangeness < 0
+  compute_N_in_cells([] (int, int, int) { return true; });
   while (conserved_initial.momentum().x0() > energy ||
          S_plus < conserved_initial.strangeness()) {
     sample_in_random_cell(mode_list, time,
@@ -181,6 +209,7 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
   }
 
   // Mode 2: sample until strangeness is conserved
+  compute_N_in_cells([] (int S, int, int) { return (S < 0); });
   while (S_plus + S_minus > conserved_initial.strangeness()) {
     sample_in_random_cell(mode_list, time,
       [] (int S, int, int) { return (S < 0); });
@@ -197,6 +226,7 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
   // Mode 3: sample non-strange baryons
   conserved_remaining = conserved_initial - QuantumNumbers(sampled_list);
   energy = 0.0;
+  compute_N_in_cells([] (int S, int, int) { return (S == 0); });
   while (conserved_remaining.momentum().x0() > energy ||
          B_plus < conserved_remaining.baryon_number()) {
     sample_in_random_cell(mode_list, time,
@@ -211,6 +241,7 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
   }
 
   // Mode 4: sample non-strange anti-baryons
+  compute_N_in_cells([] (int S, int B, int) { return (S == 0) && (B < 0); });
   while (B_plus + B_minus > conserved_remaining.baryon_number()) {
     sample_in_random_cell(mode_list, time,
       [] (int S, int B, int) { return (S == 0) && (B < 0); });
@@ -226,6 +257,7 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
   // Mode 5: sample non_strange mesons, but take only with charge > 0
   conserved_remaining = conserved_initial - QuantumNumbers(sampled_list);
   energy = 0.0;
+  compute_N_in_cells([] (int S, int B, int) { return (S == 0) && (B == 0); });
   while (conserved_remaining.momentum().x0() > energy ||
          E_plus < conserved_remaining.charge()) {
     sample_in_random_cell(mode_list, time,
@@ -240,6 +272,7 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
   }
 
   // Mode 6: sample non_strange mesons to conserve charge
+  compute_N_in_cells([] (int S, int B, int C) { return (S == 0) && (B == 0) && (C < 0); });
   while (E_plus + E_minus > conserved_remaining.charge()) {
     sample_in_random_cell(mode_list, time,
       [] (int S, int B, int C) { return (S == 0) && (B == 0) && (C < 0); });
@@ -255,6 +288,7 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
   // Mode 7: sample neutral non-strange mesons to conserve energy
   conserved_remaining = conserved_initial - QuantumNumbers(sampled_list);
   energy = 0.0;
+  compute_N_in_cells([] (int S, int B, int C) { return (S == 0) && (B == 0) && (C == 0); });
   while (conserved_remaining.momentum().x0() > energy) {
     sample_in_random_cell(mode_list, time,
       [] (int S, int B, int C) { return (S == 0) && (B == 0) && (C == 0); });

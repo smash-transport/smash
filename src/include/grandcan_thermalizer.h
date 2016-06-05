@@ -71,6 +71,7 @@ class GrandCanThermalizer {
   void update_lattice(const Particles& particles, const DensityParameters& par,
                       bool ignore_cells_under_treshold = true);
   ThreeVector uniform_in_cell() const;
+  void compute_N_in_cells(std::function<bool(int, int, int)> condition);
   void sample_in_random_cell(ParticleList& plist, const double time,
                              std::function<bool(int, int, int)> condition);
   void thermalize(Particles& particles, double time);
@@ -82,9 +83,11 @@ class GrandCanThermalizer {
   float e_crit() const { return e_crit_; }
 
  private:
+  std::vector<double> N_in_cells_;
   std::vector<size_t> cells_to_sample_;
   HadronGasEos eos_ = HadronGasEos(true);
   std::unique_ptr<RectangularLattice<ThermLatticeNode>> lat_;
+  double N_total_in_cells_;
   float cell_volume_;
   const float e_crit_;
   const float t_start_;
