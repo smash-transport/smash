@@ -12,6 +12,7 @@
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_multiroots.h>
 #include <array>
+#include <vector>
 
 #include "constants.h"
 #include "particletype.h"
@@ -22,6 +23,9 @@ namespace Smash {
 // Forward declaration of HadronGasEos - it is used in EosTable
 class HadronGasEos;
 
+/**
+ * A class to hold, compute and access tabulated EoS.
+ */
 class EosTable {
  public:
   EosTable(double de, double dnb, int n_e, int n_b);
@@ -44,6 +48,7 @@ class EosTable {
 };
 
 /**
+ * \class HadronGasEos
  * Class to handle the equation of state (EoS) of the hadron gas, consisting
  * of all hadrons included into SMASH. This implementation deals with ideal
  * Boltzmann gas and allows to compute:
@@ -57,24 +62,96 @@ class EosTable {
  */
 class HadronGasEos {
  public:
-  HadronGasEos(const bool tabulate);
+  explicit HadronGasEos(const bool tabulate = false);
   ~HadronGasEos();
+  /**
+   * \brief Compute energy density
+   * Grand-canonical Boltzmann ideal gas, consisting of all hadrons in SMASH:
+   * \f[ \epsilon = \sum \frac{g_i m_i^2 T^2}{2\pi^2(\hbar c)^3}
+   *               exp \left(\frac{\mu_B B_i + \mu_S S_i}{T} \right) \times
+   *               \left[ 3 K_2\left( \frac{m_i}{T}\right) +
+   *               \frac{m_i}{T} K_1\left( \frac{m_i}{T}\right)\right]
+   * \f]
+   *
+   * \param T temperature [GeV]
+   * \param mub baryon chemical potential [GeV]
+   * \param mus strangeness chemical potential [GeV]
+   *
+   * \return energy density e [GeV/fm\f$^3\f$]
+   */
   static double energy_density(double T, double mub, double mus);
+  /**
+   * \brief Compute particle number density
+   * Grand-canonical Boltzmann ideal gas, consisting of all hadrons in SMASH:
+   * \f[ n = \sum \frac{g_i m_i^2 T}{2\pi^2(\hbar c)^3}
+   *               exp \left(\frac{\mu_B B_i + \mu_S S_i}{T} \right)
+   *               K_2\left( \frac{m_i}{T}\right)
+   * \f]
+   *
+   * \param T temperature [GeV]
+   * \param mub baryon chemical potential [GeV]
+   * \param mus strangeness chemical potential [GeV]
+   *
+   * \return particle number density n [fm\f$^{-3}\f$]
+   */
   static double density(double T, double mub, double mus);
+  /// Compute pressure \f$ p = n T \f$, same arguments as above
   static double pressure(double T, double mub, double mus) {
     return T * density(T, mub, mus);
   }
+  /**
+   * \brief Compute net baryon density
+   * Grand-canonical Boltzmann ideal gas, consisting of all hadrons in SMASH:
+   * \f[ n_B = \sum B_i \frac{g_i m_i^2 T}{2\pi^2(\hbar c)^3}
+   *               exp \left(\frac{\mu_B B_i + \mu_S S_i}{T} \right)
+   *               K_2\left( \frac{m_i}{T}\right)
+   * \f]
+   *
+   * \param T temperature [GeV]
+   * \param mub baryon chemical potential [GeV]
+   * \param mus strangeness chemical potential [GeV]
+   *
+   * \return net baryon density density \f$n_B\f$ [fm\f$^{-3}\f$]
+   */
   static double net_baryon_density(double T, double mub, double mus);
+  /**
+   * \brief Compute net strangeness density
+   * Grand-canonical Boltzmann ideal gas, consisting of all hadrons in SMASH:
+   * \f[ n_S = \sum S_i \frac{g_i m_i^2 T}{2\pi^2(\hbar c)^3}
+   *               exp \left(\frac{\mu_B B_i + \mu_S S_i}{T} \right)
+   *               K_2\left( \frac{m_i}{T}\right)
+   * \f]
+   *
+   * \param T temperature [GeV]
+   * \param mub baryon chemical potential [GeV]
+   * \param mus strangeness chemical potential [GeV]
+   *
+   * \return net strangeness density density \f$n_S\f$ [fm\f$^{-3}\f$]
+   */
   static double net_strange_density(double T, double mub, double mus);
+  /**
+   * \brief Compute partial density of one hadron sort
+   * Grand-canonical Boltzmann ideal gas:
+   * \f[ n =  \frac{g m^2 T}{2\pi^2(\hbar c)^3}
+   *               exp \left(\frac{\mu_B B + \mu_S S}{T} \right)
+   *               K_2\left( \frac{m}{T}\right)
+   * \f]
+   *
+   * \param T temperature [GeV]
+   * \param mub baryon chemical potential [GeV]
+   * \param mus strangeness chemical potential [GeV]
+   *
+   * \return partial density of the given hadron sort \f$n\f$ [fm\f$^{-3}\f$]
+   */
   static double partial_density(const ParticleType& ptype,
                                 double T, double mub, double mus);
   /**
-   * Computes temperature and chemical potentials given energy-,
+   * Compute temperature and chemical potentials given energy-,
    * net baryon- and net strangeness density.
    *
-   * \param e energy density [GeV/fm^3]
-   * \param nb net baryon density [fm^-3]
-   * \param ns net strangeness density [fm^-3]
+   * \param e energy density [GeV/fm\f$^3\f$]
+   * \param nb net baryon density [fm\f$^{-3}\f$]
+   * \param ns net strangeness density [fm\f$^{-3}\f$]
    *
    * \return array of 3 values: temperature, baryon chemical potential
    *         and strange chemical potential

@@ -9,10 +9,10 @@
 
 #include <gsl/gsl_sf_bessel.h>
 
+#include <boost/filesystem.hpp>
 #include <iostream>
 #include <fstream>
 #include <iomanip>
-#include <boost/filesystem.hpp>
 
 #include "include/constants.h"
 #include "include/forwarddeclarations.h"
@@ -102,8 +102,10 @@ const struct EosTable::table_element EosTable::get(double e, double nb) const {
   struct EosTable::table_element res;
   res.p = ae*(an*s4.p + (1.0-an)*s2.p) + (1.0-ae)*(an*s3.p + (1.0-an)*s1.p);
   res.T = ae*(an*s4.T + (1.0-an)*s2.T) + (1.0-ae)*(an*s3.T + (1.0-an)*s1.T);
-  res.mub = ae*(an*s4.mub + (1.0-an)*s2.mub) + (1.0-ae)*(an*s3.mub + (1.0-an)*s1.mub);
-  res.mus = ae*(an*s4.mus + (1.0-an)*s2.mus) + (1.0-ae)*(an*s3.mus + (1.0-an)*s1.mus);
+  res.mub = ae*(an*s4.mub + (1.0-an)*s2.mub) +
+            (1.0-ae)*(an*s3.mub + (1.0-an)*s1.mub);
+  res.mus = ae*(an*s4.mus + (1.0-an)*s2.mus) +
+            (1.0-ae)*(an*s3.mus + (1.0-an)*s1.mus);
   return res;
 }
 
@@ -258,7 +260,6 @@ int HadronGasEos::eos_equations(const gsl_vector* x,
 }
 
 std::array<double, 3> HadronGasEos::solve_eos(double e, double nb, double ns) {
-
   int status;
   size_t iter = 0;
 
