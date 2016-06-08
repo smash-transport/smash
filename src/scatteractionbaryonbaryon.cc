@@ -87,7 +87,7 @@ CollisionBranchList ScatterActionBaryonBaryon::bar_bar_to_nuc_nuc(
          * balance from the inverse reaction.
          * See eqs. (B.6), (B.9) and (181) in \iref{Buss:2011mx}.
          * There are factors for spin, isospin and symmetry involved. */
-        const float spin_factor = 4. / ((type_a.spin()+1)*(type_b.spin()+1));
+        const float spin_factor = (nuc_a->spin() + 1) * (nuc_b->spin() + 1);
         const int sym_fac_in =
                     (type_a.iso_multiplet() == type_b.iso_multiplet()) ? 2 : 1;
         const int sym_fac_out =
@@ -113,7 +113,6 @@ CollisionBranchList ScatterActionBaryonBaryon::bar_bar_to_nuc_nuc(
 
 float ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(double sqrts,
       const ParticleType &type_a, const ParticleType &type_b, const int twoI) {
-  const float spin_factor = (type_a.spin()+1) * (type_b.spin()+1);
   const float m_a = type_a.mass();
   const float m_b = type_b.mass();
   const float msqr = 2. * (m_a*m_a + m_b*m_b);
@@ -121,39 +120,39 @@ float ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(double sqrts,
   /** NN → NΔ: fit sqrt(s)-dependence to OBE model [\iref{Dmitriev:1986st}] */
   if ((type_a.is_Delta() && type_b.is_nucleon()) ||
       (type_b.is_Delta() && type_a.is_nucleon())) {
-    return 68. * spin_factor / std::pow(sqrts - 1.104, 1.951);
+    return 68. / std::pow(sqrts - 1.104, 1.951);
   /** All other processes use a constant matrix element,
    *  similar to \iref{Bass:1998ca}, equ. (3.35). */
   } else if ((type_a.is_Nstar() && type_b.is_nucleon()) ||
              (type_b.is_Nstar() && type_a.is_nucleon())) {
     // NN → NN*
     if (twoI == 2) {
-      return 7. * spin_factor / msqr;
+      return 7. / msqr;
     } else if (twoI == 0) {
-      return 14. * spin_factor / msqr;
+      return 14. / msqr;
     }
   } else if ((type_a.is_Deltastar() && type_b.is_nucleon()) ||
              (type_b.is_Deltastar() && type_a.is_nucleon())) {
     // NN → NΔ*
-    return 15. * spin_factor / msqr;
+    return 15. / msqr;
   } else if (type_a.is_Delta() && type_b.is_Delta()) {
     // NN → ΔΔ
     if (twoI == 2) {
-      return 45. * spin_factor / msqr;
+      return 45. / msqr;
     } else if (twoI == 0) {
-      return 120. * spin_factor / msqr;
+      return 120. / msqr;
     }
   } else if ((type_a.is_Nstar() && type_b.is_Delta()) ||
              (type_b.is_Nstar() && type_a.is_Delta())) {
     // NN → ΔN*
-    return 7. * spin_factor / msqr;
+    return 7. / msqr;
   } else if ((type_a.is_Deltastar() && type_b.is_Delta()) ||
              (type_b.is_Deltastar() && type_a.is_Delta())) {
     // NN → ΔΔ*
     if (twoI == 2) {
-      return 15. * spin_factor / msqr;
+      return 15. / msqr;
     } else if (twoI == 0) {
-      return 25. * spin_factor / msqr;
+      return 25. / msqr;
     }
   }
   // all cases not listed: zero!
