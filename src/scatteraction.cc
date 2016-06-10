@@ -361,7 +361,6 @@ ParticleList ScatterAction::string_excitation() {
   // Disable floating point exception trap for Pythia
   {
   DisableFloatTraps guard;
-            
   /* set all necessary parameters for Pythia
    * Create Pythia object */
   std::string xmlpath = PYTHIA_XML_DIR;
@@ -491,8 +490,6 @@ ParticleList ScatterAction::string_excitation() {
     return outgoing_particles_;
   }
 }
-    
-
 void ScatterAction::format_debug_output(std::ostream &out) const {
   out << "Scatter of " << incoming_particles_;
   if (outgoing_particles_.empty()) {

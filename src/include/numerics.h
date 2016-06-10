@@ -12,6 +12,7 @@
 
 #include<cmath>
 #include "constants.h"
+#include "logging.h"
 
 /**
  * \file
@@ -24,7 +25,6 @@
  */
 
 namespace Smash {
-
 /** checks two numbers for relative approximate equality.
  *
  * \param x
@@ -39,7 +39,7 @@ namespace Smash {
  */
 template <typename N>
 bool almost_equal(const N x, const N y) {
-  return (std::abs(x - y) <= N(really_small)
+    return (std::abs(x - y) <= N(really_small)
        || std::abs(x - y) <= N(0.5 * really_small)
                                    * (std::abs(x) + std::abs(y)));
 }
