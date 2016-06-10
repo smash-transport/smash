@@ -116,7 +116,6 @@ set(smash_src
         potentials.cc
         processbranch.cc
         propagation.cc
-        pythia.cc
         quantumnumbers.cc
         random.cc
         resonances.cc
