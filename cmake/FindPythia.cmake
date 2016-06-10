@@ -31,7 +31,7 @@ ENDIF()
 message(${Pythia_LIBDIR})
 FIND_LIBRARY( Pythia_LIBRARY
   NAMES pythia8
-  ATHS ${Pythia_LIBDIR}
+  PATHS ${Pythia_LIBDIR}
   PATH_SUFFIXES PYTHIA pythia Pythia PYTHIA8 Pythia8 pythia8  # suggest some path suffixes in which the headers could be located
 )
 # FIND_LIBRARY( Pythia_LHAPDFDummy_LIBRARY
