@@ -243,7 +243,7 @@ double HadronGasEos::mus_net_strangeness0(double T, double mub) {
   return mus;
 }
 
-int HadronGasEos::eos_equations(const gsl_vector* x,
+int HadronGasEos::set_eos_solver_equations(const gsl_vector* x,
                                     void *params, gsl_vector* f) {
   double e =  reinterpret_cast<struct rparams*>(params)->e;
   double nb = reinterpret_cast<struct rparams*>(params)->nb;
@@ -265,7 +265,7 @@ std::array<double, 3> HadronGasEos::solve_eos(double e, double nb, double ns) {
   size_t iter = 0;
 
   struct rparams p = {e, nb, ns};
-  gsl_multiroot_function f = {&HadronGasEos::eos_equations,
+  gsl_multiroot_function f = {&HadronGasEos::set_eos_solver_equations,
                               n_equations_, &p};
   // Initial approximation
   gsl_vector_set(x_, 0, 0.15);

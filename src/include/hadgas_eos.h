@@ -179,7 +179,8 @@ class HadronGasEos {
   static double scaled_partial_density(const ParticleType& ptype,
                                        double beta, double mub, double mus);
   /// Interfaces EoS equations to be solved to gnu library
-  static int eos_equations(const gsl_vector* x, void* params, gsl_vector* f);
+  static int set_eos_solver_equations(const gsl_vector* x,
+                                      void* params, gsl_vector* f);
   /// Helpful printout, useful for debugging if gnu equation solving goes crazy
   void print_solver_state(size_t iter) const;
   /// Constant factor, that appears in front of many thermodyn. expressions
