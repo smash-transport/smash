@@ -152,11 +152,13 @@ class HadronGasEos {
    * \param e energy density [GeV/fm\f$^3\f$]
    * \param nb net baryon density [fm\f$^{-3}\f$]
    * \param ns net strangeness density [fm\f$^{-3}\f$]
+   * \param initial_approximation (e, nb, ns) to use as starting point
    *
    * \return array of 3 values: temperature, baryon chemical potential
    *         and strange chemical potential
    */
-  std::array<double, 3> solve_eos(double e, double nb, double ns);
+  std::array<double, 3> solve_eos(double e, double nb, double ns,
+             std::array<double, 3> initial_approximation = {0.15, 0.5, 0.05});
   /// Compute strange chemical potential, requiring that net strangeness = 0
   static double mus_net_strangeness0(double T, double mub);
   /// Get the element of eos table

@@ -270,17 +270,17 @@ int HadronGasEos::set_eos_solver_equations(const gsl_vector* x,
   return GSL_SUCCESS;
 }
 
-std::array<double, 3> HadronGasEos::solve_eos(double e, double nb, double ns) {
+std::array<double, 3> HadronGasEos::solve_eos(double e, double nb, double ns,
+                                 std::array<double, 3> initial_approximation) {
   int status;
   size_t iter = 0;
 
   struct rparams p = {e, nb, ns};
   gsl_multiroot_function f = {&HadronGasEos::set_eos_solver_equations,
                               n_equations_, &p};
-  // Initial approximation
-  gsl_vector_set(x_, 0, 0.15);
-  gsl_vector_set(x_, 1, 0.5);
-  gsl_vector_set(x_, 2, 0.05);
+  gsl_vector_set(x_, 0, initial_approximation[0]);
+  gsl_vector_set(x_, 1, initial_approximation[1]);
+  gsl_vector_set(x_, 2, initial_approximation[2]);
 
   gsl_multiroot_fsolver_set(solver_, &f, x_);
   do {
