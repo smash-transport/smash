@@ -134,6 +134,11 @@ double HadronGasEos::scaled_partial_density(const ParticleType& ptype,
   if (z > 400.0 || x - z < -100.0 || x > 200.0) {
     return 0.0;
   }
+  // The case of small mass: K_n(z) -> (n-1)!/2 *(2/z)^n, z -> 0
+  // z*z*K_2(z) -> 2
+  if (z < really_small) {
+    return 2.0 * g * std::exp(x);
+  }
   return z*z * g * std::exp(x) * gsl_sf_bessel_Kn(2, z);
 }
 
@@ -162,8 +167,13 @@ double HadronGasEos::energy_density(double T, double mub, double mus) {
       continue;
     }
     const unsigned int g = ptype.spin() + 1;
-    e += z*z * g * std::exp(x) * (3.0*gsl_sf_bessel_Kn(2, z) +
-                                    z * gsl_sf_bessel_K1(z));
+    if (z > really_small) {
+      e += z*z * g * std::exp(x) * (3.0*gsl_sf_bessel_Kn(2, z) +
+                                      z * gsl_sf_bessel_K1(z));
+    } else {
+      // Small mass case, z*z*K_2(z) -> 2, z*z*z*K_1(z) -> 0 at z->0
+      e += 3.0 * g * std::exp(x);
+    }
   }
   e *= prefactor_ * T*T*T*T;
   return e;
