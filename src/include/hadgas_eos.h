@@ -36,7 +36,7 @@ class EosTable {
     double mus;
   };
   void compile_table(HadronGasEos &eos);
-  const struct table_element get(double e, double nb) const;
+  const table_element get(double e, double nb) const;
 
  private:
   int index(int ie, int inb) const { return ie*n_nb_ + inb; }
@@ -160,7 +160,7 @@ class HadronGasEos {
   /// Compute strange chemical potential, requiring that net strangeness = 0
   static double mus_net_strangeness0(double T, double mub);
   /// Get the element of eos table
-  const struct EosTable::table_element from_table(double e, double nb) {
+  const EosTable::table_element from_table(double e, double nb) {
     return eos_table_.get(e, nb);
   }
   bool is_tabulated() const { return tabulate_; }

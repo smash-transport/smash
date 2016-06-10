@@ -75,7 +75,7 @@ void EosTable::compile_table(HadronGasEos &eos) {
     file << std::fixed;
     for (int ie = 0; ie < n_e_; ie++) {
       for (int inb = 0; inb < n_nb_; inb++) {
-        const struct EosTable::table_element x = table_[index(ie, inb)];
+        const EosTable::table_element x = table_[index(ie, inb)];
         file << x.p << " " <<
                 x.T << " " <<
                 x.mub << " " <<
@@ -85,7 +85,7 @@ void EosTable::compile_table(HadronGasEos &eos) {
   }
 }
 
-const struct EosTable::table_element EosTable::get(double e, double nb) const {
+const EosTable::table_element EosTable::get(double e, double nb) const {
   const int ie  = static_cast<int>(std::floor(e/de_));
   const int inb = static_cast<int>(std::floor(nb/dnb_));
   if (ie < 0 || ie >= n_e_ - 1 ||
@@ -95,11 +95,11 @@ const struct EosTable::table_element EosTable::get(double e, double nb) const {
   // 1st order interpolation
   const double ae = e/de_ - ie;
   const double an = nb/dnb_ - inb;
-  const struct EosTable::table_element s1  = table_[index(ie,     inb)];
-  const struct EosTable::table_element s2  = table_[index(ie + 1, inb)];
-  const struct EosTable::table_element s3  = table_[index(ie    , inb + 1)];
-  const struct EosTable::table_element s4  = table_[index(ie + 1, inb + 1)];
-  struct EosTable::table_element res;
+  const EosTable::table_element s1  = table_[index(ie,     inb)];
+  const EosTable::table_element s2  = table_[index(ie + 1, inb)];
+  const EosTable::table_element s3  = table_[index(ie    , inb + 1)];
+  const EosTable::table_element s4  = table_[index(ie + 1, inb + 1)];
+  EosTable::table_element res;
   res.p = ae*(an*s4.p + (1.0-an)*s2.p) + (1.0-ae)*(an*s3.p + (1.0-an)*s1.p);
   res.T = ae*(an*s4.T + (1.0-an)*s2.T) + (1.0-ae)*(an*s3.T + (1.0-an)*s1.T);
   res.mub = ae*(an*s4.mub + (1.0-an)*s2.mub) +
