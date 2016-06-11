@@ -53,10 +53,10 @@ FourVector FourVector::LorentzBoost(const ThreeVector &v) const {
 /* Check if all four vector components are almost equal
  * (accuracy \f$10^{-12}\f$). */
 bool FourVector::operator==(const FourVector &a) const {
-  return almost_equal(x_[0], a.x_[0])
-      && almost_equal(x_[1], a.x_[1])
-      && almost_equal(x_[2], a.x_[2])
-      && almost_equal(x_[3], a.x_[3]);
+  return almost_equal_physics(x_[0], a.x_[0])
+      && almost_equal_physics(x_[1], a.x_[1])
+      && almost_equal_physics(x_[2], a.x_[2])
+      && almost_equal_physics(x_[3], a.x_[3]);
 }
 
 std::ostream& operator<<(std::ostream& out, const FourVector& vec) {

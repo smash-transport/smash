@@ -487,6 +487,16 @@ ParticleList ScatterAction::string_excitation() {
         incoming_particles_[1].formation_time());
       }
     }
+    /* Check momentum difference for debugging */
+    FourVector in_mom = incoming_particles_[0].momentum() +
+      incoming_particles_[1].momentum();
+    FourVector out_mom;
+    for(ParticleData data : outgoing_particles_) {
+      out_mom = out_mom + data.momentum();
+    }
+    log.debug("Incoming momenta string:", in_mom);
+    log.debug("Outgoing momenta string:", out_mom);
+    /* Return the new particles */
     return outgoing_particles_;
   }
 }

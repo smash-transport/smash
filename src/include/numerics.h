@@ -12,7 +12,6 @@
 
 #include<cmath>
 #include "constants.h"
-#include "logging.h"
 
 /**
  * \file
