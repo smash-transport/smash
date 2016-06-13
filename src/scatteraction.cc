@@ -70,7 +70,7 @@ void ScatterAction::generate_final_state() {
       break;
     case ProcessType::String:
       /* string excitation */
-      outgoing_particles_ = string_excitation();
+      string_excitation();
       break;
     default:
       throw InvalidScatterAction(
@@ -356,7 +356,7 @@ void ScatterAction::resonance_formation() {
 
 /* This function will generate outgoing particles in CM frame
  * from a hard process. */
-ParticleList ScatterAction::string_excitation() {
+void ScatterAction::string_excitation() {
   const auto &log = logger<LogArea::Pythia>();
   // Disable floating point exception trap for Pythia
   {
@@ -405,7 +405,6 @@ ParticleList ScatterAction::string_excitation() {
   /* Short notation for Pythia event */
   Pythia8::Event &event = pythia.event;
   pythia.next();
-  ParticleList outgoing_particles_;
   ParticleList new_intermediate_particles;
   for (int i = 0; i < event.size(); i++) {
     if (event[i].isFinal()) {
@@ -491,13 +490,11 @@ ParticleList ScatterAction::string_excitation() {
     FourVector in_mom = incoming_particles_[0].momentum() +
       incoming_particles_[1].momentum();
     FourVector out_mom;
-    for(ParticleData data : outgoing_particles_) {
+    for (ParticleData data : outgoing_particles_) {
       out_mom = out_mom + data.momentum();
     }
     log.debug("Incoming momenta string:", in_mom);
     log.debug("Outgoing momenta string:", out_mom);
-    /* Return the new particles */
-    return outgoing_particles_;
   }
 }
 void ScatterAction::format_debug_output(std::ostream &out) const {

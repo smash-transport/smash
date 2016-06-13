@@ -102,10 +102,6 @@ class ScatterAction : public Action {
    */
   virtual CollisionBranchPtr string_excitation_cross_section();
 
-  /** Perform the string excitation and decay via Pythia
-   */
-  virtual ParticleList string_excitation();
-
   /**
   * Find all resonances that can be produced in a 2->1 collision of the two
   * input particles and the production cross sections of these resonances.
@@ -181,6 +177,10 @@ class ScatterAction : public Action {
   /** Perform an elastic two-body scattering, i.e. just exchange momentum. */
   void elastic_scattering();
 
+  /** Perform the string excitation and decay via Pythia
+   */
+  void string_excitation();
+  
   /**
    * \ingroup logging
    * Writes information about this scatter action to the \p out stream.
