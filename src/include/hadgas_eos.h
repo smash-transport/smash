@@ -152,7 +152,8 @@ class HadronGasEos {
    * \param e energy density [GeV/fm\f$^3\f$]
    * \param nb net baryon density [fm\f$^{-3}\f$]
    * \param ns net strangeness density [fm\f$^{-3}\f$]
-   * \param initial_approximation (e, nb, ns) to use as starting point
+   * \param initial_approximation (T [GeV], mub [GeV], mus [GeV])
+   *        to use as starting point, optional, default = (0.15, 0.5, 0.05)
    *
    * \return array of 3 values: temperature, baryon chemical potential
    *         and strange chemical potential
