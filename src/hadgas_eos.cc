@@ -85,7 +85,7 @@ void EosTable::compile_table(HadronGasEos &eos) {
   }
 }
 
-const EosTable::table_element& EosTable::get(double e, double nb) const {
+const EosTable::table_element EosTable::get(double e, double nb) const {
   const int ie  = static_cast<int>(std::floor(e/de_));
   const int inb = static_cast<int>(std::floor(nb/dnb_));
   EosTable::table_element res = {-1.0, -1.0, -1.0, -1.0};
@@ -107,7 +107,7 @@ const EosTable::table_element& EosTable::get(double e, double nb) const {
             (1.0-ae)*(an*s3.mub + (1.0-an)*s1.mub);
   res.mus = ae*(an*s4.mus + (1.0-an)*s2.mus) +
             (1.0-ae)*(an*s3.mus + (1.0-an)*s1.mus);
-  return std::move(res);
+  return res;
 }
 
 HadronGasEos::HadronGasEos(const bool tabulate) :
