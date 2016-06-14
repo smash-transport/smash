@@ -108,11 +108,10 @@ float BoxModus::initial_conditions(Particles *particles,
 
   /* Create NUMBER OF PARTICLES according to configuration, or thermal case */
   if (use_thermal_) {
-    const HadronGasEos &had_gas_eos = HadronGasEos();
     for (const ParticleType &ptype : ParticleType::list_all()) {
       if (ptype.is_hadron()) {
         int thermal_particles = length_*length_*length_*
-                                had_gas_eos.partial_density(ptype,temperature_,mub_,mus_);
+          HadronGasEos::partial_density(ptype, temperature_, mub_, mus_);
         particles->create(thermal_particles*parameters.testparticles, ptype.pdgcode());
         log.debug() << "Particle " << ptype.pdgcode()
                     << " initial multiplicity " << thermal_particles;
