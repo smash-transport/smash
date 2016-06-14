@@ -9,10 +9,10 @@
 
 #include <gsl/gsl_sf_bessel.h>
 
+#include <boost/filesystem.hpp>
 #include <iostream>
 #include <fstream>
 #include <iomanip>
-#include <boost/filesystem.hpp>
 
 #include "include/constants.h"
 #include "include/forwarddeclarations.h"
@@ -28,8 +28,8 @@ EosTable::EosTable(double de, double dnb, int n_e, int n_nb) :
   table_.resize(n_e_*n_nb_);
 }
 
-void EosTable::compile_table(HadronGasEos &eos) {
-  const std::string eos_savefile_name("hadgas_eos.dat");
+void EosTable::compile_table(HadronGasEos &eos,
+                             const std::string eos_savefile_name) {
   if (boost::filesystem::exists(eos_savefile_name)) {
     // Read table from file
     std::cout << "Reading table from file " << eos_savefile_name << std::endl;
@@ -85,31 +85,33 @@ void EosTable::compile_table(HadronGasEos &eos) {
   }
 }
 
-const struct EosTable::table_element EosTable::get(double e, double nb) const {
+void EosTable::get(EosTable::table_element& res, double e, double nb) const {
   const int ie  = static_cast<int>(std::floor(e/de_));
   const int inb = static_cast<int>(std::floor(nb/dnb_));
+
   if (ie < 0 || ie >= n_e_ - 1 ||
       inb < 0 || inb >= n_nb_ - 1) {
-    return {-1.0, -1.0, -1.0, -1.0};
+    res = {-1.0, -1.0, -1.0, -1.0};
+  } else {
+    // 1st order interpolation
+    const double ae = e/de_ - ie;
+    const double an = nb/dnb_ - inb;
+    const EosTable::table_element s1  = table_[index(ie,     inb)];
+    const EosTable::table_element s2  = table_[index(ie + 1, inb)];
+    const EosTable::table_element s3  = table_[index(ie    , inb + 1)];
+    const EosTable::table_element s4  = table_[index(ie + 1, inb + 1)];
+    res.p = ae*(an*s4.p + (1.0-an)*s2.p) + (1.0-ae)*(an*s3.p + (1.0-an)*s1.p);
+    res.T = ae*(an*s4.T + (1.0-an)*s2.T) + (1.0-ae)*(an*s3.T + (1.0-an)*s1.T);
+    res.mub = ae*(an*s4.mub + (1.0-an)*s2.mub) +
+              (1.0-ae)*(an*s3.mub + (1.0-an)*s1.mub);
+    res.mus = ae*(an*s4.mus + (1.0-an)*s2.mus) +
+              (1.0-ae)*(an*s3.mus + (1.0-an)*s1.mus);
   }
-  // 1st order interpolation
-  const double ae = e/de_ - ie;
-  const double an = nb/dnb_ - inb;
-  const struct EosTable::table_element s1  = table_[index(ie,     inb)];
-  const struct EosTable::table_element s2  = table_[index(ie + 1, inb)];
-  const struct EosTable::table_element s3  = table_[index(ie    , inb + 1)];
-  const struct EosTable::table_element s4  = table_[index(ie + 1, inb + 1)];
-  struct EosTable::table_element res;
-  res.p = ae*(an*s4.p + (1.0-an)*s2.p) + (1.0-ae)*(an*s3.p + (1.0-an)*s1.p);
-  res.T = ae*(an*s4.T + (1.0-an)*s2.T) + (1.0-ae)*(an*s3.T + (1.0-an)*s1.T);
-  res.mub = ae*(an*s4.mub + (1.0-an)*s2.mub) + (1.0-ae)*(an*s3.mub + (1.0-an)*s1.mub);
-  res.mus = ae*(an*s4.mus + (1.0-an)*s2.mus) + (1.0-ae)*(an*s3.mus + (1.0-an)*s1.mus);
-  return res;
 }
 
 HadronGasEos::HadronGasEos(const bool tabulate) :
-              x_(gsl_vector_alloc(n_equations_)),
-              tabulate_(tabulate) {
+  x_(gsl_vector_alloc(n_equations_)),
+  tabulate_(tabulate) {
   const gsl_multiroot_fsolver_type *solver_type;
   solver_type = gsl_multiroot_fsolver_hybrid;
   solver_ = gsl_multiroot_fsolver_alloc(solver_type, n_equations_);
@@ -130,6 +132,11 @@ double HadronGasEos::scaled_partial_density(const ParticleType& ptype,
   const unsigned int g = ptype.spin() + 1;
   if (z > 400.0 || x - z < -100.0 || x > 200.0) {
     return 0.0;
+  }
+  // The case of small mass: K_n(z) -> (n-1)!/2 *(2/z)^n, z -> 0
+  // z*z*K_2(z) -> 2
+  if (z < really_small) {
+    return 2.0 * g * std::exp(x);
   }
   return z*z * g * std::exp(x) * gsl_sf_bessel_Kn(2, z);
 }
@@ -159,8 +166,13 @@ double HadronGasEos::energy_density(double T, double mub, double mus) {
       continue;
     }
     const unsigned int g = ptype.spin() + 1;
-    e += z*z * g * std::exp(x) * (3.0*gsl_sf_bessel_Kn(2, z) +
-                                    z * gsl_sf_bessel_K1(z));
+    if (z > really_small) {
+      e += z*z * g * std::exp(x) * (3.0*gsl_sf_bessel_Kn(2, z) +
+                                      z * gsl_sf_bessel_K1(z));
+    } else {
+      // Small mass case, z*z*K_2(z) -> 2, z*z*z*K_1(z) -> 0 at z->0
+      e += 3.0 * g * std::exp(x);
+    }
   }
   e *= prefactor_ * T*T*T*T;
   return e;
@@ -240,7 +252,7 @@ double HadronGasEos::mus_net_strangeness0(double T, double mub) {
   return mus;
 }
 
-int HadronGasEos::eos_equations(const gsl_vector* x,
+int HadronGasEos::set_eos_solver_equations(const gsl_vector* x,
                                     void *params, gsl_vector* f) {
   double e =  reinterpret_cast<struct rparams*>(params)->e;
   double nb = reinterpret_cast<struct rparams*>(params)->nb;
@@ -257,18 +269,17 @@ int HadronGasEos::eos_equations(const gsl_vector* x,
   return GSL_SUCCESS;
 }
 
-std::array<double, 3> HadronGasEos::solve_eos(double e, double nb, double ns) {
-
+std::array<double, 3> HadronGasEos::solve_eos(double e, double nb, double ns,
+                                 std::array<double, 3> initial_approximation) {
   int status;
   size_t iter = 0;
 
   struct rparams p = {e, nb, ns};
-  gsl_multiroot_function f = {&HadronGasEos::eos_equations,
+  gsl_multiroot_function f = {&HadronGasEos::set_eos_solver_equations,
                               n_equations_, &p};
-  // Initial approximation
-  gsl_vector_set(x_, 0, 0.15);
-  gsl_vector_set(x_, 1, 0.5);
-  gsl_vector_set(x_, 2, 0.05);
+  gsl_vector_set(x_, 0, initial_approximation[0]);
+  gsl_vector_set(x_, 1, initial_approximation[1]);
+  gsl_vector_set(x_, 2, initial_approximation[2]);
 
   gsl_multiroot_fsolver_set(solver_, &f, x_);
   do {

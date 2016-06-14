@@ -125,6 +125,6 @@ TEST(photon_widths) {
   COMPARE_ABSOLUTE_ERROR( eta.get_partial_width( eta.mass(), photon, photon), 5.189818921e-07f, err);
   COMPARE_ABSOLUTE_ERROR(etap.get_partial_width(etap.mass(), photon, photon), 4.393343261e-06f, err);
 
-  COMPARE_ABSOLUTE_ERROR(omega.get_partial_width(omega.mass(), pi0, photon), 0.0007108373102f, err);
-  COMPARE_ABSOLUTE_ERROR(  phi.get_partial_width(  phi.mass(), pi0, photon), 5.470464203e-06f, err);
+  COMPARE_ABSOLUTE_ERROR(omega.get_partial_width(omega.mass(), pi0, photon), 0.0007100010407f, err);
+  COMPARE_ABSOLUTE_ERROR(  phi.get_partial_width(  phi.mass(), pi0, photon), 5.432298167e-06f, err);
 }

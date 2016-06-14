@@ -16,19 +16,15 @@ using namespace Smash;
 TEST(init_particle_types) {
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "σ 0.123 1.2 661\n"
-      "π0 0.1350 -1.0 111\n"
-      "π+ 0.1396 -1.0 211\n"
-      "ρ0 0.7755 0.149 113\n"
-      "ρ+ 0.7755 0.149 213\n"
-      "η 0.5479 1.0e-6 221\n"
-      "ω 0.7827 0.0085 223\n"
-      "N+ 0.9383 -1.0 2212\n"
-      "N0 0.9396 -1.0 2112\n"
-      "Δ++ 1.232 0.117 2224\n"
-      "Δ+ 1.232 0.117 2214\n"
-      "Δ0 1.232 0.117 2114\n"
-      "Δ- 1.232 0.117 1114\n");
+      "σ  0.123  1.2    661\n"
+      "π⁰ 0.1350 0      111\n"
+      "π⁺ 0.1396 0      211\n"
+      "ρ  0.7755 0.149  113 213\n"
+      "η  0.5479 1.3e-6 221\n"
+      "ω  0.7827 0.0085 223\n"
+      "N⁺ 0.9383 0     2212\n"
+      "N⁰ 0.9396 0     2112\n"
+      "Δ  1.232  0.117 2224 2214 2114 1114\n");
 }
 
 TEST(create_particledata_piplus) {
@@ -86,11 +82,15 @@ TEST(set_get2) {
   COMPARE(v.x1(), 2.1/sqrt(4.0 + M.sqr()));
   COMPARE(v.x2(), 2.3/sqrt(4.0 + M.sqr()));
   COMPARE(v.x3(), 2.5/sqrt(4.0 + M.sqr()));
+  COMPARE_RELATIVE_ERROR(v.abs(), 0.8941469381, 1e-10);
+  COMPARE_RELATIVE_ERROR(p.inverse_gamma(), 0.4477736628, 1e-10);
   p.boost(v);
   COMPARE_RELATIVE_ERROR(p.momentum().x0(), 2.0, 1e-15);
   COMPARE_ABSOLUTE_ERROR(p.momentum().x1(), 0.0, 1e-15);
   COMPARE_ABSOLUTE_ERROR(p.momentum().x2(), 0.0, 1e-15);
   COMPARE_ABSOLUTE_ERROR(p.momentum().x3(), 0.0, 1e-15);
+  COMPARE_ABSOLUTE_ERROR(p.velocity().abs(), 0., 1e-15);
+  COMPARE_RELATIVE_ERROR(p.inverse_gamma(), 1., 1e-15);
 }
 
 TEST(comparisons) {

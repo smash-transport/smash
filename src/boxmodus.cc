@@ -90,8 +90,8 @@ BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
             temperature_(modus_config.take({"Box", "Temperature"})),
              start_time_(modus_config.take({"Box", "Start_Time"})),
             use_thermal_(modus_config.take({"Box", "Use_Thermal"}, false)),
-                    mub_(modus_config.take({"Box", "Baryon_Chemical_Potential"})),
-                    mus_(modus_config.take({"Box", "Strange_Chemical_Potential"})),
+                    mub_(modus_config.take({"Box", "Baryon_Chemical_Potential"},0.0)),
+                    mus_(modus_config.take({"Box", "Strange_Chemical_Potential"},0.0)),
            init_multipl_(modus_config.take({"Box", "Init_Multiplicities"}).
                                                 convert_for(init_multipl_)) {
 }
