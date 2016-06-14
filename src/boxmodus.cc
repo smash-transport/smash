@@ -118,6 +118,10 @@ float BoxModus::initial_conditions(Particles *particles,
                     << " initial multiplicity " << thermal_particles;
       }
     }
+    log.info() << "Initial baryon density " 
+               << had_gas_eos.net_baryon_density(temperature_, mub_, mus_);
+    log.info() << "Initial strange density "
+               << had_gas_eos.net_strange_density(temperature_, mub_, mus_);
   }
   else {
     for (const auto &p : init_multipl_) {

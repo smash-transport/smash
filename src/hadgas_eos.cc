@@ -75,7 +75,7 @@ void EosTable::compile_table(HadronGasEos &eos) {
     file << std::fixed;
     for (int ie = 0; ie < n_e_; ie++) {
       for (int inb = 0; inb < n_nb_; inb++) {
-        const struct EosTable::table_element x = table_[index(ie, inb)];
+        const EosTable::table_element x = table_[index(ie, inb)];
         file << x.p << " " <<
                 x.T << " " <<
                 x.mub << " " <<

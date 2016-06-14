@@ -32,7 +32,7 @@ class EosTable {
     double mus;
   };
   void compile_table(HadronGasEos &eos);
-  const struct table_element get(double e, double nb) const;
+  const table_element get(double e, double nb) const;
 
  private:
   int index(int ie, int inb) const { return ie*n_nb_ + inb; }
