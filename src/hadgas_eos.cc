@@ -85,29 +85,28 @@ void EosTable::compile_table(HadronGasEos &eos) {
   }
 }
 
-const EosTable::table_element EosTable::get(double e, double nb) const {
+void EosTable::get(EosTable::table_element& res, double e, double nb) const {
   const int ie  = static_cast<int>(std::floor(e/de_));
   const int inb = static_cast<int>(std::floor(nb/dnb_));
-  EosTable::table_element res = {-1.0, -1.0, -1.0, -1.0};
 
   if (ie < 0 || ie >= n_e_ - 1 ||
       inb < 0 || inb >= n_nb_ - 1) {
-    return std::move(res);
+    res = {-1.0, -1.0, -1.0, -1.0};
+  } else {
+    // 1st order interpolation
+    const double ae = e/de_ - ie;
+    const double an = nb/dnb_ - inb;
+    const EosTable::table_element s1  = table_[index(ie,     inb)];
+    const EosTable::table_element s2  = table_[index(ie + 1, inb)];
+    const EosTable::table_element s3  = table_[index(ie    , inb + 1)];
+    const EosTable::table_element s4  = table_[index(ie + 1, inb + 1)];
+    res.p = ae*(an*s4.p + (1.0-an)*s2.p) + (1.0-ae)*(an*s3.p + (1.0-an)*s1.p);
+    res.T = ae*(an*s4.T + (1.0-an)*s2.T) + (1.0-ae)*(an*s3.T + (1.0-an)*s1.T);
+    res.mub = ae*(an*s4.mub + (1.0-an)*s2.mub) +
+              (1.0-ae)*(an*s3.mub + (1.0-an)*s1.mub);
+    res.mus = ae*(an*s4.mus + (1.0-an)*s2.mus) +
+              (1.0-ae)*(an*s3.mus + (1.0-an)*s1.mus);
   }
-  // 1st order interpolation
-  const double ae = e/de_ - ie;
-  const double an = nb/dnb_ - inb;
-  const EosTable::table_element s1  = table_[index(ie,     inb)];
-  const EosTable::table_element s2  = table_[index(ie + 1, inb)];
-  const EosTable::table_element s3  = table_[index(ie    , inb + 1)];
-  const EosTable::table_element s4  = table_[index(ie + 1, inb + 1)];
-  res.p = ae*(an*s4.p + (1.0-an)*s2.p) + (1.0-ae)*(an*s3.p + (1.0-an)*s1.p);
-  res.T = ae*(an*s4.T + (1.0-an)*s2.T) + (1.0-ae)*(an*s3.T + (1.0-an)*s1.T);
-  res.mub = ae*(an*s4.mub + (1.0-an)*s2.mub) +
-            (1.0-ae)*(an*s3.mub + (1.0-an)*s1.mub);
-  res.mus = ae*(an*s4.mus + (1.0-an)*s2.mus) +
-            (1.0-ae)*(an*s3.mus + (1.0-an)*s1.mus);
-  return res;
 }
 
 HadronGasEos::HadronGasEos(const bool tabulate) :
