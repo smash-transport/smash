@@ -86,9 +86,9 @@ class BoxModus : public ModusDefault {
   /// whether to use a thermal initialization for all particles instead of specific numbers
   const bool use_thermal_ = false;
   /// baryon chemical potential for thermal box
-  const float mub_ = 0.0f;
+  const float mub_;
   /// strange chemical potential for thermal box
-  const float mus_ = 0.0f;
+  const float mus_;
   /// particle multiplicities at initialization
   const std::map<PdgCode, int> init_multipl_;
 
