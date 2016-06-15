@@ -75,6 +75,14 @@ class BoxModus : public ModusDefault {
             strategy};
   }
 
+  /// \copydoc Smash::ModusDefault::create_grandcan_thermalizer
+  GrandCanThermalizer create_grandcan_thermalizer(Configuration& conf) const {
+    const std::array<float, 3> lat_size = {length_, length_, length_};
+    const std::array<float, 3> origin = {0.0f, 0.0f, 0.0f};
+    const bool periodicity = true;
+    return {conf, lat_size, origin, periodicity};
+  }
+
  private:
   const BoxInitialCondition initial_condition_;
   /// length of the cube's edge in fm/c

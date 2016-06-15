@@ -585,7 +585,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   // Create forced thermalizer
   if (config.has_value({"Forced_Thermalization"})) {
     Configuration&& th_conf = config["Forced_Thermalization"];
-    gc_thermalizer_ = make_unique<GrandCanThermalizer>(th_conf);
+    gc_thermalizer_ = make_unique<GrandCanThermalizer>(
+                                  modus_.create_grandcan_thermalizer(th_conf));
   }
 }
 

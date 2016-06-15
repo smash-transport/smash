@@ -164,7 +164,7 @@ class HadronGasEos {
   /// Compute strange chemical potential, requiring that net strangeness = 0
   static double mus_net_strangeness0(double T, double mub);
   /// Get the element of eos table
-  void from_table(EosTable::table_element& res, double e, double nb) {
+  void from_table(EosTable::table_element& res, double e, double nb) const {
     eos_table_.get(res, e, nb);
   }
   bool is_tabulated() const { return tabulate_; }
