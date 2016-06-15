@@ -52,6 +52,20 @@ TEST(solve_EoS_substitute) {
   COMPARE_ABSOLUTE_ERROR(sol[1], mub, 1.e-4);
   COMPARE_ABSOLUTE_ERROR(sol[2], mus, 1.e-4);
 }
+
+TEST(EoS_table) {
+  // make a small table of EoS
+  HadronGasEos eos = HadronGasEos(false);
+  EosTable table = EosTable(0.2, 0.05, 5, 5);
+  table.compile_table(eos, "small_test_table_fakegas_eos.dat");
+  EosTable::table_element x;
+  const double my_e = 0.39, my_nb = 0.09;
+  table.get(x, my_e, my_nb);
+  // check if tabulated values are the right solutions
+  COMPARE_ABSOLUTE_ERROR(HadronGasEos::energy_density(x.T, x.mub, x.mus), my_e, 1.e-2);
+  COMPARE_ABSOLUTE_ERROR(HadronGasEos::net_baryon_density(x.T, x.mub, x.mus), my_nb, 1.e-3);
+}
+
 /*
 TEST(make_test_table) {
   // To switch on these tests, comment out the previous ones.

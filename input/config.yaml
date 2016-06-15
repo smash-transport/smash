@@ -91,12 +91,12 @@ Collision_Term:
 #        Momentum_Averaging_Radius:  0.08
 #        Gaussian_Cutoff:            2.2
 
-Forced_Thermalization:
-    Lattice_Spacing:        [1.0, 1.0, 0.5]
-    Cell_Number:            [21, 21, 101]
-    Critical_Edens:         0.3     # forced therm. above this energy density [GeV/fm^3]
-    Start_Time:             0.0     # forced therm. at t > this time [fm/c]
-    Timestep:               1.0     # timestep of thermalization [fm/c]
+#Forced_Thermalization:
+#    Lattice_Sizes:          [20.0, 20.0, 50.0]
+#    Cell_Number:            [21, 21, 101]
+#    Critical_Edens:         0.3     # forced therm. above this energy density [GeV/fm^3]
+#    Start_Time:             0.0     # forced therm. at t > this time [fm/c]
+#    Timestep:               1.0     # timestep of thermalization [fm/c]
 
 #Potentials:
 #    Skyrme:
@@ -130,6 +130,11 @@ Modi:
 
         # start time of simulation
         Start_Time:    0.0
+
+        # use thermal box, if so with which chemical potentials
+        Use_Thermal: False
+        Baryon_Chemical_Potential: 0.0
+        Strange_Chemical_Potential: 0.0
 
         Init_Multiplicities:
             211:    100

@@ -51,14 +51,21 @@ std::ostream &operator<<(std::ostream &s, const ThermLatticeNode &node);
 class GrandCanThermalizer {
  public:
   /// Create the thermalizer: allocate the lattice
-  GrandCanThermalizer(const std::array<float, 3> cell_sizes,
+  GrandCanThermalizer(const std::array<float, 3> lat_sizes,
                       const std::array<int, 3> n_cells,
+                      const std::array<float, 3> origin,
+                      bool periodicity,
                       float e_critical,
                       float t_start,
                       float delta_t);
-  GrandCanThermalizer(Configuration& conf) :
-    GrandCanThermalizer(conf.take({"Lattice_Spacing"}),
+  GrandCanThermalizer(Configuration& conf,
+                      const std::array<float, 3> lat_sizes,
+                      const std::array<float, 3> origin,
+                      bool periodicity) :
+    GrandCanThermalizer(lat_sizes,
                         conf.take({"Cell_Number"}),
+                        origin,
+                        periodicity,
                         conf.take({"Critical_Edens"}),
                         conf.take({"Start_Time"}),
                         conf.take({"Timestep"})) {};

@@ -18,35 +18,30 @@
 
 namespace Smash {
 
-GrandCanThermalizer::GrandCanThermalizer(const std::array<float, 3> cell_sizes,
+GrandCanThermalizer::GrandCanThermalizer(const std::array<float, 3> lat_sizes,
                                          const std::array<int, 3> n_cells,
+                                         const std::array<float, 3> origin,
+                                         bool periodicity,
                                          float e_critical,
                                          float t_start,
                                          float delta_t) :
   e_crit_(e_critical),
   t_start_(t_start),
   period_(delta_t) {
-  const std::array<float, 3> l = {cell_sizes[0]*n_cells[0],
-                                  cell_sizes[1]*n_cells[1],
-                                  cell_sizes[2]*n_cells[2]};
-  /* Lattice is placed such that the center is 0,0,0.
-     If one wants to have a central cell with center at 0,0,0 then
-     number of cells should be odd (2k+1) in each direction.
-   */
-  const std::array<float, 3> origin = {-0.5f*l[0], -0.5f*l[1], -0.5f*l[2]};
-  const bool periodicity = false;
   const LatticeUpdate upd = LatticeUpdate::EveryFixedInterval;
-  lat_ = make_unique<RectangularLattice<ThermLatticeNode>>(l,
+  lat_ = make_unique<RectangularLattice<ThermLatticeNode>>(lat_sizes,
                                                            n_cells,
                                                            origin,
                                                            periodicity,
                                                            upd);
-  cell_volume_ = cell_sizes[0] * cell_sizes[1] * cell_sizes[2];
+  const std::array<float, 3> abc = lat_->cell_sizes();
+  cell_volume_ = abc[0] * abc[1] * abc[2];
   cells_to_sample_.resize(50000);
 }
 
 ThreeVector GrandCanThermalizer::uniform_in_cell() const {
-  return ThreeVector(Random::uniform(-0.5 * static_cast<double>(lat_->cell_sizes()[0]),
+  return ThreeVector(
+       Random::uniform(-0.5 * static_cast<double>(lat_->cell_sizes()[0]),
                        +0.5 * static_cast<double>(lat_->cell_sizes()[0])),
        Random::uniform(-0.5 * static_cast<double>(lat_->cell_sizes()[1]),
                        +0.5 * static_cast<double>(lat_->cell_sizes()[1])),
@@ -95,13 +90,13 @@ void GrandCanThermalizer::sample_in_random_cell(ParticleList& plist,
 
   // Which sort to sample - probability N_i/N_tot
   r = Random::uniform(0.0, N_in_cell);
-  double N_sum = 0.0; 
+  double N_sum = 0.0;
   for (const ParticleType &ptype : ParticleType::list_all()) {
     if (!ptype.is_hadron() ||
       !condition(ptype.strangeness(), ptype.baryon_number(), ptype.charge())) {
       continue;
     }
-    N_sum += cell_volume_ * gamma * 
+    N_sum += cell_volume_ * gamma *
       HadronGasEos::partial_density(ptype, cell.T(), cell.mub(), cell.mus());
     if (N_sum >= r) {
       ParticleData particle(ptype);
@@ -449,14 +444,15 @@ void ThermLatticeNode::compute_rest_frame_quantities(HadronGasEos& eos) {
   double e_previous_step = 0.0;
   const double tolerance = 5.e-4;
   int iter;
-  for(iter = 0; iter < max_iter; iter++) {
+  for (iter = 0; iter < max_iter; iter++) {
     e_previous_step = e_;
     e_ = Tmu0_.x0() - Tmu0_.threevec()*v_;
     if (std::abs(e_ - e_previous_step) < tolerance) {
       break;
     }
     const double gamma_inv = std::sqrt(1.0 - v_.sqr());
-    auto tabulated = eos.from_table(e_, gamma_inv*nb_);
+    EosTable::table_element tabulated;
+    eos.from_table(tabulated, e_, gamma_inv*nb_);
     if (!eos.is_tabulated() || tabulated.p < 0.0) {
       auto T_mub_mus = eos.solve_eos(e_, gamma_inv*nb_, gamma_inv*ns_);
       T_   = T_mub_mus[0];
