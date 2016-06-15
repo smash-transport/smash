@@ -83,6 +83,13 @@ class BoxModus : public ModusDefault {
   const float temperature_;
   /// initial time of the box
   const float start_time_ = 0.0f;
+  /** whether to use a thermal initialization for all particles
+   *  instead of specific numbers */
+  const bool use_thermal_ = false;
+  /// baryon chemical potential for thermal box
+  const float mub_;
+  /// strange chemical potential for thermal box
+  const float mus_;
   /// particle multiplicities at initialization
   const std::map<PdgCode, int> init_multipl_;
 

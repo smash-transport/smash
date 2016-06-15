@@ -131,6 +131,11 @@ Modi:
         # start time of simulation
         Start_Time:    0.0
 
+        # use thermal box, if so with which chemical potentials
+        Use_Thermal: False
+        Baryon_Chemical_Potential: 0.0
+        Strange_Chemical_Potential: 0.0
+
         Init_Multiplicities:
             211:    100
             111:    100

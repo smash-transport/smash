@@ -35,8 +35,9 @@ class EosTable {
     double mub;
     double mus;
   };
-  void compile_table(HadronGasEos &eos);
-  const struct table_element get(double e, double nb) const;
+  void compile_table(HadronGasEos &eos,
+    const std::string eos_savefile_name = std::string("hadgas_eos.dat"));
+  void get(table_element& res, double e, double nb) const;
 
  private:
   int index(int ie, int inb) const { return ie*n_nb_ + inb; }
@@ -152,16 +153,19 @@ class HadronGasEos {
    * \param e energy density [GeV/fm\f$^3\f$]
    * \param nb net baryon density [fm\f$^{-3}\f$]
    * \param ns net strangeness density [fm\f$^{-3}\f$]
+   * \param initial_approximation (T [GeV], mub [GeV], mus [GeV])
+   *        to use as starting point, optional, default = (0.15, 0.5, 0.05)
    *
    * \return array of 3 values: temperature, baryon chemical potential
    *         and strange chemical potential
    */
-  std::array<double, 3> solve_eos(double e, double nb, double ns);
+  std::array<double, 3> solve_eos(double e, double nb, double ns,
+             std::array<double, 3> initial_approximation = {0.15, 0.5, 0.05});
   /// Compute strange chemical potential, requiring that net strangeness = 0
   static double mus_net_strangeness0(double T, double mub);
   /// Get the element of eos table
-  const struct EosTable::table_element from_table(double e, double nb) {
-    return eos_table_.get(e, nb);
+  void from_table(EosTable::table_element& res, double e, double nb) {
+    eos_table_.get(res, e, nb);
   }
   bool is_tabulated() const { return tabulate_; }
 
@@ -179,7 +183,8 @@ class HadronGasEos {
   static double scaled_partial_density(const ParticleType& ptype,
                                        double beta, double mub, double mus);
   /// Interfaces EoS equations to be solved to gnu library
-  static int eos_equations(const gsl_vector* x, void* params, gsl_vector* f);
+  static int set_eos_solver_equations(const gsl_vector* x,
+                                      void* params, gsl_vector* f);
   /// Helpful printout, useful for debugging if gnu equation solving goes crazy
   void print_solver_state(size_t iter) const;
   /// Constant factor, that appears in front of many thermodyn. expressions
