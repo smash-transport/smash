@@ -42,8 +42,7 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
     out << "Using thermal initialization instead of initial multiplicities\n";
     out << "Baryon chemical potential: " << m.mub_ << "\n"
         << "Strange chemical potential: " << m.mus_ << "\n";
-  }
-  else {
+  } else {
     for (const auto &p : m.init_multipl_) {
       out << "Particle " << p.first << " initial multiplicity "
                          << p.second << '\n';
@@ -85,7 +84,7 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
  * It means that 200 neutrons and 100 antineutrons will be initialized.
  */
 BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
-     : initial_condition_(modus_config.take({"Box", "Initial_Condition"})),
+    : initial_condition_(modus_config.take({"Box", "Initial_Condition"})),
         length_(modus_config.take({"Box", "Length"})),
    temperature_(modus_config.take({"Box", "Temperature"})),
     start_time_(modus_config.take({"Box", "Start_Time"})),
@@ -112,7 +111,8 @@ float BoxModus::initial_conditions(Particles *particles,
       if (ptype.is_hadron()) {
         int thermal_particles = length_*length_*length_*
           HadronGasEos::partial_density(ptype, temperature_, mub_, mus_);
-        particles->create(thermal_particles*parameters.testparticles, ptype.pdgcode());
+        particles->create(thermal_particles*parameters.testparticles,
+                          ptype.pdgcode());
         log.debug() << "Particle " << ptype.pdgcode()
                     << " initial multiplicity " << thermal_particles;
       }
@@ -121,8 +121,7 @@ float BoxModus::initial_conditions(Particles *particles,
                << HadronGasEos::net_baryon_density(temperature_, mub_, mus_);
     log.info() << "Initial strange density "
                << HadronGasEos::net_strange_density(temperature_, mub_, mus_);
-  }
-  else {
+  } else {
     for (const auto &p : init_multipl_) {
       particles->create(p.second*parameters.testparticles, p.first);
       log.debug() << "Particle " << p.first
