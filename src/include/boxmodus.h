@@ -76,11 +76,12 @@ class BoxModus : public ModusDefault {
   }
 
   /// \copydoc Smash::ModusDefault::create_grandcan_thermalizer
-  GrandCanThermalizer create_grandcan_thermalizer(Configuration& conf) const {
+  std::unique_ptr<GrandCanThermalizer> create_grandcan_thermalizer(
+                                                   Configuration& conf) const {
     const std::array<float, 3> lat_size = {length_, length_, length_};
     const std::array<float, 3> origin = {0.0f, 0.0f, 0.0f};
     const bool periodicity = true;
-    return {conf, lat_size, origin, periodicity};
+    return make_unique<GrandCanThermalizer>(conf, lat_size, origin, periodicity);
   }
 
  private:

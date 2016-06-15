@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_MODUSDEFAULT_H_
 #define SRC_INCLUDE_MODUSDEFAULT_H_
 
+#include "cxx14compat.h"
 #include "forwarddeclarations.h"
 #include "grandcan_thermalizer.h"
 #include "grid.h"
@@ -72,7 +73,8 @@ class ModusDefault {
    * \param[in] conf configuration object
    * \param[out] th unique pointer to created thermalizer class
    */
-  GrandCanThermalizer create_grandcan_thermalizer(Configuration& conf) const {
+  std::unique_ptr<GrandCanThermalizer> create_grandcan_thermalizer(
+                                               Configuration& conf) const {
     /* Lattice is placed such that the center is 0,0,0.
        If one wants to have a central cell with center at 0,0,0 then
        number of cells should be odd (2k+1) in each direction.
@@ -80,7 +82,7 @@ class ModusDefault {
     const std::array<float, 3> l = conf.take({"Lattice_Sizes"});
     const std::array<float, 3> origin = {-0.5f*l[0], -0.5f*l[1], -0.5f*l[2]};
     const bool periodicity = false;
-    return {conf, l, origin, periodicity};
+    return make_unique<GrandCanThermalizer>(conf, l, origin, periodicity);
   }
 
   /** \ingroup exception
