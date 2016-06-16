@@ -30,6 +30,7 @@ EosTable::EosTable(double de, double dnb, int n_e, int n_nb) :
 
 void EosTable::compile_table(HadronGasEos &eos,
                              const std::string eos_savefile_name) {
+  bool table_read_success = false;
   if (boost::filesystem::exists(eos_savefile_name)) {
     // Read table from file
     std::cout << "Reading table from file " << eos_savefile_name << std::endl;
@@ -45,7 +46,39 @@ void EosTable::compile_table(HadronGasEos &eos,
         table_[index(ie, inb)] = {p, T, mub, mus};
       }
     }
-  } else {
+    table_read_success = true;
+  }
+
+  // Check if the saved table is consistent with the current particle table
+  std::cout << "Checking consistency of the table... " << std::endl;
+  bool table_consistency = true;
+  for (int ie = 0; ie < n_e_; ie++) {
+    for (int inb = 0; inb < n_nb_; inb++) {
+      const table_element x = table_[index(ie, inb)];
+      const double err_e = ie * de_ - eos.energy_density(x.T, x.mub, x.mus);
+      const double err_nb = inb * dnb_ -
+                            eos.net_baryon_density(x.T, x.mub, x.mus);
+      const double err_ns = eos.net_strange_density(x.T, x.mub, x.mus);
+      const double err_p = x.p - eos.pressure(x.T, x.mub, x.mus);
+      // Precision is just 10^-3, this is precision of saved data in the file
+      const double eps = 1.e-3;
+      // Only check the physical region, hence T > 0 condition
+      if ((std::abs(err_e) > eps ||
+          std::abs(err_nb) > eps ||
+          std::abs(err_ns) > eps ||
+          std::abs(err_p) > eps) && (x.T > 0.0)) {
+        /*std::cout << "discrepancy: "
+          << ie * de_ << " = " << eos.energy_density(x.T, x.mub, x.mus)
+          << ", " << inb * dnb_ << " = " <<
+                                      eos.net_baryon_density(x.T, x.mub, x.mus)
+          << ", " << x.p << " = " << eos.pressure(x.T, x.mub, x.mus)
+          << ", 0 = " << err_ns << std::endl;*/
+        table_consistency = false;
+      }
+    }
+  }
+
+  if (!table_read_success || !table_consistency) {
     std::cout << "Compiling an EoS table..." << std::endl;
     const double ns = 0.0;
     for (int ie = 0; ie < n_e_; ie++) {
