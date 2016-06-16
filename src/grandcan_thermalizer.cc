@@ -57,12 +57,11 @@ void GrandCanThermalizer::compute_N_in_cells(
     const ThermLatticeNode cell = (*lat_)[cell_index];
     const double gamma = 1.0 / std::sqrt(1.0 - cell.v().sqr());
     double N_tot = 0.0;
-    for (const ParticleType &ptype : ParticleType::list_all()) {
-      if (ptype.is_hadron() &&
-          condition(ptype.strangeness(), ptype.baryon_number(), ptype.charge())) {
+    for (ParticleTypePtr i : HadronGasEos::list_eos_particles()) {
+      if (condition(i->strangeness(), i->baryon_number(), i->charge())) {
         // N_i = n u^mu dsigma_mu = (isochronous hypersurface) n * V * gamma
         N_tot += cell_volume_ * gamma *
-          HadronGasEos::partial_density(ptype, cell.T(), cell.mub(), cell.mus());
+          HadronGasEos::partial_density(*i, cell.T(), cell.mub(), cell.mus());
       }
     }
     N_in_cells_.push_back(N_tot);
@@ -91,17 +90,16 @@ void GrandCanThermalizer::sample_in_random_cell(ParticleList& plist,
   // Which sort to sample - probability N_i/N_tot
   r = Random::uniform(0.0, N_in_cell);
   double N_sum = 0.0;
-  for (const ParticleType &ptype : ParticleType::list_all()) {
-    if (!ptype.is_hadron() ||
-      !condition(ptype.strangeness(), ptype.baryon_number(), ptype.charge())) {
+  for (ParticleTypePtr i : HadronGasEos::list_eos_particles()) {
+    if (!condition(i->strangeness(), i->baryon_number(), i->charge())) {
       continue;
     }
     N_sum += cell_volume_ * gamma *
-      HadronGasEos::partial_density(ptype, cell.T(), cell.mub(), cell.mus());
+      HadronGasEos::partial_density(*i, cell.T(), cell.mub(), cell.mus());
     if (N_sum >= r) {
-      ParticleData particle(ptype);
+      ParticleData particle(*i);
       // Note: it's pole mass for resonances!
-      const double m = static_cast<double>(ptype.mass());
+      const double m = static_cast<double>(i->mass());
       // Position
       particle.set_4position(FourVector(time, cell_center + uniform_in_cell()));
       // Momentum

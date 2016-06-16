@@ -125,6 +125,17 @@ HadronGasEos::~HadronGasEos() {
   gsl_vector_free(x_);
 }
 
+ParticleTypePtrList HadronGasEos::list_eos_particles() {
+  ParticleTypePtrList list;
+  list.reserve(300);
+  for (const ParticleType &ptype : ParticleType::list_all()) {
+    if (ptype.is_hadron() && ptype.pdgcode().charmness() == 0) {
+      list.emplace_back(&ptype);
+    }
+  }
+  return list;
+}
+
 double HadronGasEos::scaled_partial_density(const ParticleType& ptype,
                                          double beta, double mub, double mus) {
   const double z = ptype.mass()*beta;
@@ -155,17 +166,14 @@ double HadronGasEos::energy_density(double T, double mub, double mus) {
   }
   const double beta = 1.0/T;
   double e = 0.0;
-  for (const ParticleType &ptype : ParticleType::list_all()) {
-    if (!ptype.is_hadron()) {
-      continue;
-    }
-    const double z = ptype.mass()*beta;
-    const double x = beta * (mub*ptype.baryon_number() +
-                             mus*ptype.strangeness());
+  for (ParticleTypePtr ptype : list_eos_particles()) {
+    const double z = ptype->mass()*beta;
+    const double x = beta * (mub*ptype->baryon_number() +
+                             mus*ptype->strangeness());
     if (z > 400.0 || x - z < -100.0 || x > 200.0) {
       continue;
     }
-    const unsigned int g = ptype.spin() + 1;
+    const unsigned int g = ptype->spin() + 1;
     if (z > really_small) {
       e += z*z * g * std::exp(x) * (3.0*gsl_sf_bessel_Kn(2, z) +
                                       z * gsl_sf_bessel_K1(z));
@@ -184,11 +192,8 @@ double HadronGasEos::density(double T, double mub, double mus) {
   }
   const double beta = 1.0/T;
   double rho = 0.0;
-  for (const ParticleType &ptype : ParticleType::list_all()) {
-    if (!ptype.is_hadron()) {
-      continue;
-    }
-    rho += scaled_partial_density(ptype, beta, mub, mus);
+  for (ParticleTypePtr ptype : list_eos_particles()) {
+    rho += scaled_partial_density(*ptype, beta, mub, mus);
   }
   rho *= prefactor_ * T*T*T;
   return rho;
@@ -200,12 +205,12 @@ double HadronGasEos::net_baryon_density(double T, double mub, double mus) {
   }
   const double beta = 1.0/T;
   double rho = 0.0;
-  for (const ParticleType &ptype : ParticleType::list_all()) {
-    if (!ptype.is_baryon()) {
+  for (ParticleTypePtr ptype : list_eos_particles()) {
+    if (!ptype->is_baryon()) {
       continue;
     }
-    rho += scaled_partial_density(ptype, beta, mub, mus) *
-           ptype.baryon_number();
+    rho += scaled_partial_density(*ptype, beta, mub, mus) *
+           ptype->baryon_number();
   }
   rho *= prefactor_ * T*T*T;
   return rho;
@@ -217,12 +222,12 @@ double HadronGasEos::net_strange_density(double T, double mub, double mus) {
   }
   const double beta = 1.0/T;
   double rho = 0.0;
-  for (const ParticleType &ptype : ParticleType::list_all()) {
-    if (ptype.strangeness() == 0) {
+  for (ParticleTypePtr ptype : list_eos_particles()) {
+    if (ptype->strangeness() == 0) {
       continue;
     }
-    rho += scaled_partial_density(ptype, beta, mub, mus) *
-           ptype.strangeness();
+    rho += scaled_partial_density(*ptype, beta, mub, mus) *
+           ptype->strangeness();
   }
   rho *= prefactor_ * T*T*T;
   return rho;
