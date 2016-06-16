@@ -748,9 +748,7 @@ template <typename Modus>
 void Experiment<Modus>::write_photon_action(
     Action &action, const ParticleList &particles_before_actions) {
   if (action.is_valid(particles_)) {
-    // loop over action to get many fractional photons
-    // where to store number_of_fractional_photons? -> needed for weighing?
-    // maybe read in from config file?
+    // loop over action.generate_final_state to get many fractional photons
     for (int i = 0; i < number_of_fractional_photons;
          i++) {
       action.generate_final_state();
@@ -955,8 +953,6 @@ uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step() {
 
     /* (1.e) Photons */
     if (photon_finder_ != nullptr) {
-      // photon_actions.insert(photon_finder_->find_actions_in_cell(particles_before_actions,
-      // dt));
       grid.iterate_cells(
           [&](const ParticleList &search_list) {
             photon_actions.insert(
