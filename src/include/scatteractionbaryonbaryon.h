@@ -53,8 +53,7 @@ class ScatterActionBaryonBaryon : public ScatterAction {
   /**
    * Scattering matrix amplitude squared (divided by 16π) for resonance
    * production processes like NN → NR and NN → ΔR, where R is a baryon
-   * resonance (Δ, N*, Δ*).
-   * Includes a spin factor \f$ (2S_a+1)(2S_b+1) \f$, but no isospin factors.
+   * resonance (Δ, N*, Δ*). Includes no spin or isospin factors.
    *
    * \param[in] srts sqrt(Mandelstam-s), i.e. collision CMS energy.
    * \param[in] type_a Type information for the first final-state particle.

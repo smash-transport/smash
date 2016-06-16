@@ -29,7 +29,8 @@ ThermodynamicOutput::ThermodynamicOutput(const bf::path &path,
                                          Configuration &&config)
     : file_{std::fopen((path / ("thermodynamics.dat")).native().c_str(), "w")},
       td_set_(config.take({"Quantities"}).convert_for(td_set_)),
-      dens_type_(config.take({"Type"})) {
+      dens_type_(config.take({"Type"})),
+      smearing_(config.take({"Smearing"}, true)) {
   const std::array<double, 3> a = config.take({"Position"});
   r_ = ThreeVector(a[0], a[1], a[2]);
   std::fprintf(file_.get(), "# %s thermodynamics output\n", VERSION_MAJOR);
@@ -88,20 +89,24 @@ void ThermodynamicOutput::at_intermediate_time(const Particles &particles,
       if (std::abs(dens_factor) < really_small) {
         continue;
       }
-      const auto sf = unnormalized_smearing_factor(
-                            p.position().threevec() -r_,
-                            p.momentum(), 1.0/p.momentum().abs(),
-                            dens_param, compute_gradient).first;
-      if (sf < really_small) {
-        continue;
+      if (smearing_) {
+        const auto sf = unnormalized_smearing_factor(
+                              p.position().threevec() -r_,
+                              p.momentum(), 1.0/p.momentum().abs(),
+                              dens_param, compute_gradient).first;
+        if (sf < really_small) {
+          continue;
+        }
+        Tmn.add_particle(p, dens_factor * sf * dens_param.norm_factor_sf());
+      } else {
+        Tmn.add_particle(p, dens_factor);
       }
-      Tmn.add_particle(p, dens_factor * sf * dens_param.norm_factor_sf());
     }
     const FourVector u = Tmn.landau_frame_4velocity();
     const EnergyMomentumTensor Tmn_L = Tmn.boosted(u);
     if (td_set_.count(ThermodynamicQuantity::Tmn) > 0) {
       for (int i = 0; i < 10; i++) {
-        std::fprintf(file_.get(), "%7.4f ", Tmn[i]);
+        std::fprintf(file_.get(), "%15.12f ", Tmn[i]);
       }
     }
     if (td_set_.count(ThermodynamicQuantity::TmnLandau) > 0) {

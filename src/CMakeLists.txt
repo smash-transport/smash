@@ -19,6 +19,7 @@ if(GIT_FOUND)
   #message("git found: ${GIT_EXECUTABLE} in version ${GIT_VERSION_STRING}")
   execute_process(
     COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     OUTPUT_VARIABLE GIT_BRANCH)
   string(STRIP ${GIT_BRANCH} GIT_BRANCH)
   #message("git branch: ${GIT_BRANCH}")
@@ -84,6 +85,7 @@ set(smash_src
         fourvector.cc
         fpenvironment.cc
         grid.cc
+        hadgas_eos.cc
         inputfunctions.cc
         interpolation.cc
         isoparticletype.cc
