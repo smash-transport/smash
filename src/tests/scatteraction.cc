@@ -69,7 +69,8 @@ TEST(elastic_collision) {
 
   // add elastic channel
   constexpr float sigma = 10.0;
-  act.add_all_processes(sigma, true, true);
+  constexpr bool strings_switch = false;
+  act.add_all_processes(sigma, true, true, strings_switch);
 
   // check cross section
   COMPARE(act.cross_section(), sigma);
@@ -140,7 +141,9 @@ TEST(outgoing_valid) {
 
   // add processes
   constexpr float elastic_parameter = 0.f;  // don't include elastic scattering
-  act->add_all_processes(elastic_parameter, true, true);
+  constexpr bool strings_switch = false;
+  act->add_all_processes(elastic_parameter, true, true, strings_switch);
+
   VERIFY(act->cross_section() > 0.f);
 
   // perform actions
@@ -182,7 +185,9 @@ TEST(update_incoming) {
 
   // add elastic channel
   constexpr float sigma = 10.0;
-  act.add_all_processes(sigma, true, true);
+  bool string_switch = true;
+ 
+  act.add_all_processes(sigma, true, true, string_switch);
 
   // change the position of one of the particles
   const FourVector new_position(0.1, 0., 0., 0.);

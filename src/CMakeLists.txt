@@ -41,6 +41,22 @@ if(USE_ROOT)
   endif()
 endif()
 
+######### Find Pythia8 library #########
+find_package(Pythia REQUIRED)
+if(Pythia_FOUND)
+  include_directories(SYSTEM
+	"${Pythia_INCLUDE_DIRS}"
+  )
+  set(SMASH_LIBRARIES
+     ${SMASH_LIBRARIES}
+     ${Pythia_LIBRARIES} -ldl
+  )
+  add_definitions(
+  "-DPYTHIA_XML_DIR=\"${Pythia_xmldoc_PATH}\""
+  -DPYTHIA_FOUND
+  )
+endif()
+
 # set up include paths
 include_directories(
     "${CMAKE_CURRENT_BINARY_DIR}"

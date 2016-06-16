@@ -291,6 +291,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   const bool dileptons_switch = config.has_value({"Output", "Dileptons"}) ?
                     config.take({"Output", "Dileptons", "Enable"}, true) :
                     false;
+  const bool strings_switch = config.take({"Collision_Term", "Strings"}, true);
 
   // create finders
   if (two_to_one) {
@@ -298,7 +299,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   }
   if (two_to_one || two_to_two) {
     auto scat_finder = make_unique<ScatterActionsFinder>(config, parameters_,
-                                                       two_to_one, two_to_two);
+                                                       two_to_one, two_to_two,
+                                                       strings_switch);
     max_transverse_distance_sqr_ = scat_finder->max_transverse_distance_sqr(
                                                     parameters_.testparticles);
     action_finders_.emplace_back(std::move(scat_finder));
@@ -917,7 +919,6 @@ uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step() {
         throw std::runtime_error("Violation of conserved quantities!");
       }
     }
-
     check_interactions_total(interactions_total);
   }
 

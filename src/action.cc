@@ -156,7 +156,7 @@ void Action::sample_2body_phasespace() {
 }
 
 
-void Action::check_conservation(const uint32_t &id_process) const {
+void Action::check_conservation(const uint32_t id_process) const {
   const auto &log = logger<LogArea::Action>();
   QuantumNumbers before(incoming_particles_);
   QuantumNumbers after(outgoing_particles_);
@@ -164,7 +164,7 @@ void Action::check_conservation(const uint32_t &id_process) const {
   if (before != after) {
     log.error() << err_msg;
     throw std::runtime_error("Conservation laws violated in process " +
-                             std::to_string(id_process));
+                            std::to_string(id_process));
   }
 }
 

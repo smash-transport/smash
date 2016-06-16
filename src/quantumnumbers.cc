@@ -37,7 +37,7 @@ std::string QuantumNumbers::report_deviations(const QuantumNumbers& rhs) const {
             rhs_iter = rhs.momentum_.cbegin();
         mu < 4;
         ++here_iter, ++rhs_iter, ++mu) {
-    if (!almost_equal(*here_iter, *rhs_iter)) {
+    if (!almost_equal_physics(*here_iter, *rhs_iter)) {
       error_msg << " P_" << mu << ": " << *here_iter << " vs. " << *rhs_iter
                 << "; Δ = " << (*here_iter - *rhs_iter) << "\n";
     }
