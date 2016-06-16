@@ -381,23 +381,21 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   /*!\Userguide
     * \page output_general_ Output formats
     * Several different output formats are available in SMASH. They are
-   * explained
-    * below in more detail. Per default, the selected output files will be
-    * saved in the directory ./data/\<run_id\>, where \<run_id\> is an integer
-    * number starting from 0. At the beginning
-    * of a run SMASH checks, if the ./data/0 directory exists. If it does not
-   * exist, it
-    * is created and all output files are written there. If the directory
-    * already exists, SMASH tries for ./data/1, ./data/2 and so on until it
-    * finds a free number. The user can change output directory by a command
-    * line option, if desired:
+    * explained below in more detail. Per default, the selected output files
+    * will be saved in the directory ./data/\<run_id\>, where \<run_id\> is an
+    * integer number starting from 0. At the beginning of a run SMASH checks,
+    * if the ./data/0 directory exists. If it does not exist, it is created and
+    * all output files are written there. If the directory already exists,
+    * SMASH tries for ./data/1, ./data/2 and so on until it finds a free
+    * number. The user can change output directory by a command line option, if
+    * desired:
     * \code smash -o <user_output_dir> \endcode
     * SMASH supports several kinds of configurable output formats.
     * They are called OSCAR1999, OSCAR2013, binary OSCAR2013, VTK and ROOT
-    * outputs. Every format can be switched on/off by commenting/uncommenting the
-    * corresponding section in the
-    * configuration file config.yaml. For more information on configuring the
-    * output see corresponding pages: \ref input_oscar_particlelist,
+    * outputs. Every format can be switched on/off by commenting/uncommenting
+    * the corresponding section in the configuration file config.yaml. For more
+    * information on configuring the output see corresponding pages: \ref
+    * input_oscar_particlelist,
     * \ref input_oscar_collisions, \ref input_binary_collisions,
     * \ref input_binary_particles, \ref input_root, \ref input_vtk.
     *
@@ -450,9 +448,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * \li Dileptons are treated via the time integration method, also called
    * 'shining', as described in \iref{Schmidt:2008hm}, chapter 2D.
    * This means that, because dilepton decays are so rare, possible decays are
-   * written in the ouput in every single timestep without ever performing them.
-   * The are weighted with a "shining weight" to compensate for the
-   *over-production.
+   * written in the ouput in every single timestep without ever performing
+   * them.  The are weighted with a "shining weight" to compensate for the
+   * over-production.
    * \li The shining weight can be found in the weight element of the ouput.
    * \li The shining method is implemented in the DecayActionsFinderDilepton,
    * which is enabled together with the dilepton output.
@@ -461,8 +459,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * Dilepton decays are commented out by default.
    *
    * \key Format (string, required):\n
-   * "Oscar" - The dilepton output is written to the file \c
-   *DileptonOutput.oscar
+   * "Oscar" - The dilepton output is written to the file \c DileptonOutput.oscar
    * in \ref format_oscar_collisions (OSCAR2013 format) .\n
    * "Binary" - The dilepton output is written to the file \c DileptonOutput.bin
    * in \ref format_binary_ .\n
@@ -708,10 +705,9 @@ void Experiment<Modus>::perform_action(
   /*!\Userguide
    * \page collisions_output_in_box_modus_ Collision output in box modus
    * \note When SMASH is running in the box modus, particle coordinates
-   * in the collision output can be out of the box. This is not an error.
-   * Box boundary conditions are intentionally not imposed before
-   * collision output to allow unambiguous finding of the interaction
-   * point.
+   * in the collision output can be out of the box. This is not an error.  Box
+   * boundary conditions are intentionally not imposed before collision output
+   * to allow unambiguous finding of the interaction point.
    * <I>Example</I>: two particles in the box have x coordinates 0.1 and
    * 9.9 fm, while box L = 10 fm. Suppose these particles collide.
    * For calculating collision the first one is wrapped to 10.1 fm.
