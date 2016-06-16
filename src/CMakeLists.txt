@@ -84,6 +84,7 @@ set(smash_src
         fourvector.cc
         fpenvironment.cc
         grid.cc
+        hadgas_eos.cc
         inputfunctions.cc
         interpolation.cc
         isoparticletype.cc
