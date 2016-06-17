@@ -19,6 +19,7 @@ if(GIT_FOUND)
   #message("git found: ${GIT_EXECUTABLE} in version ${GIT_VERSION_STRING}")
   execute_process(
     COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     OUTPUT_VARIABLE GIT_BRANCH)
   string(STRIP ${GIT_BRANCH} GIT_BRANCH)
   #message("git branch: ${GIT_BRANCH}")
@@ -38,6 +39,22 @@ if(USE_ROOT)
     set(SMASH_LIBRARIES ${ROOT_LIBRARIES})
     add_definitions(-DSMASH_USE_ROOT)
   endif()
+endif()
+
+######### Find Pythia8 library #########
+find_package(Pythia REQUIRED)
+if(Pythia_FOUND)
+  include_directories(SYSTEM
+	"${Pythia_INCLUDE_DIRS}"
+  )
+  set(SMASH_LIBRARIES
+     ${SMASH_LIBRARIES}
+     ${Pythia_LIBRARIES} -ldl
+  )
+  add_definitions(
+  "-DPYTHIA_XML_DIR=\"${Pythia_xmldoc_PATH}\""
+  -DPYTHIA_FOUND
+  )
 endif()
 
 # set up include paths

@@ -11,18 +11,22 @@
 
 #include "include/constants.h"
 #include "include/cxx14compat.h"
+#include "include/fpenvironment.h"
 #include "include/kinematics.h"
 #include "include/logging.h"
 #include "include/pdgcode.h"
+#include "Pythia8/Pythia.h"
 #include "include/random.h"
 
 namespace Smash {
 
 ScatterAction::ScatterAction(const ParticleData &in_part_a,
                              const ParticleData &in_part_b,
-                             float time, bool isotropic)
+                             float time, bool isotropic,
+                             float formation_time)
     : Action({in_part_a, in_part_b}, time),
-      total_cross_section_(0.), isotropic_(isotropic) {}
+      total_cross_section_(0.), isotropic_(isotropic),
+      formation_time_(formation_time) {}
 
 void ScatterAction::add_collision(CollisionBranchPtr p) {
   add_process<CollisionBranch>(p, collision_channels_, total_cross_section_);
@@ -66,7 +70,7 @@ void ScatterAction::generate_final_state() {
       break;
     case ProcessType::String:
       /* string excitation */
-      /// string_excitation(incoming_particles_, outgoing_particles_);
+      string_excitation();
       break;
     default:
       throw InvalidScatterAction(
@@ -88,7 +92,8 @@ void ScatterAction::generate_final_state() {
 
 
 void ScatterAction::add_all_processes(float elastic_parameter,
-                                      bool two_to_one, bool two_to_two) {
+                                      bool two_to_one, bool two_to_two,
+                                      bool strings_switch) {
   if (two_to_one) {
     /* resonance formation (2->1) */
     add_collisions(resonance_cross_sections());
@@ -99,8 +104,32 @@ void ScatterAction::add_all_processes(float elastic_parameter,
     /* 2->2 (inelastic) */
     add_collisions(two_to_two_cross_sections());
   }
-  /* string excitation */
-  add_collision(string_excitation_cross_section());
+  /* string excitation: the sqrt(s) cut-off is the sum of the masses of the
+   * incoming particles + 2 GeV, which is given by PYTHIA as the
+   * minimum energy that needs to be available for particle production */
+  if (strings_switch &&
+     sqrt_s() >= incoming_particles_[0].type().mass() +
+                 incoming_particles_[1].type().mass() + 2.) {
+  /* Only allow string excitation for the particles that PYTHIA can cope
+   * with, i.e. p/n, p/nbar, pi+, pi- and pi0 */
+    bool a_in_pythia = false;
+    bool b_in_pythia = false;
+    if (incoming_particles_[0].type().is_nucleon() ||
+        incoming_particles_[0].type().pdgcode() == -0x2212 ||
+        incoming_particles_[0].type().pdgcode() == -0x2112 ||
+        incoming_particles_[0].type().pdgcode().is_pion() ) {
+        a_in_pythia = true;
+    }
+    if (incoming_particles_[1].type().is_nucleon() ||
+        incoming_particles_[1].type().pdgcode() == -0x2212 ||
+        incoming_particles_[1].type().pdgcode() == -0x2112 ||
+        incoming_particles_[1].type().pdgcode().is_pion() ) {
+        b_in_pythia = true;
+    }
+    if (a_in_pythia && b_in_pythia) {
+      add_collision(string_excitation_cross_section());
+    }
+  }
 }
 
 
@@ -114,6 +143,9 @@ ThreeVector ScatterAction::beta_cm() const {
           incoming_particles_[1].momentum()).velocity();
 }
 
+double ScatterAction::gamma_cm() const {
+  return (1./sqrt(1-beta_cm().sqr()));
+}
 
 double ScatterAction::mandelstam_s() const {
   return (incoming_particles_[0].momentum() +
@@ -188,13 +220,11 @@ CollisionBranchPtr ScatterAction::elastic_cross_section(float elast_par) {
 }
 
 CollisionBranchPtr ScatterAction::string_excitation_cross_section() {
+  const auto &log = logger<LogArea::ScatterAction>();
   /* Calculate string-excitation cross section:
    * Parametrized total minus all other present channels. */
-  /* TODO(weil): This is currently set to zero,
-   * since Pythia is not yet implemented. */
-  float sig_string = 0.f;
-  // = std::max(0.f, total_cross_section() - total_weight_);
-
+  float sig_string = std::max(0.f, total_cross_section() - cross_section());
+  log.debug("String cross section is: ", sig_string);
   return make_unique<CollisionBranch>(sig_string, ProcessType::String);
 }
 
@@ -303,11 +333,170 @@ void ScatterAction::resonance_formation() {
    * is the rest frame of the resonance.  */
   outgoing_particles_[0].set_4momentum(FourVector(sqrt_s(), 0., 0., 0.));
 
+  /* Set the formation time of the resonance to the larger formation time of the
+   * incoming particles */
+  if (incoming_particles_[0].formation_time() > time_of_execution_ ||
+     incoming_particles_[1].formation_time() > time_of_execution_) {
+    if (incoming_particles_[0].formation_time() >
+       incoming_particles_[1].formation_time()) {
+      outgoing_particles_[0].set_formation_time(
+        incoming_particles_[0].formation_time());
+      outgoing_particles_[0].set_cross_section_scaling_factor(
+        incoming_particles_[0].cross_section_scaling_factor());
+    } else {
+      outgoing_particles_[0].set_formation_time(
+        incoming_particles_[1].formation_time());
+      outgoing_particles_[0].set_cross_section_scaling_factor(
+        incoming_particles_[1].cross_section_scaling_factor());
+    }
+  }
   log.debug("Momentum of the new particle: ",
             outgoing_particles_[0].momentum());
 }
 
-
+/* This function will generate outgoing particles in CM frame
+ * from a hard process. */
+void ScatterAction::string_excitation() {
+  const auto &log = logger<LogArea::Pythia>();
+  // Disable floating point exception trap for Pythia
+  {
+  DisableFloatTraps guard;
+  /* set all necessary parameters for Pythia
+   * Create Pythia object */
+  std::string xmlpath = PYTHIA_XML_DIR;
+  log.debug("Creating Pythia object.");
+  Pythia8::Pythia pythia(xmlpath, false);
+  /* select only inelastic events: */
+  pythia.readString("SoftQCD:inelastic = on");
+  /* suppress unnecessary output */
+  pythia.readString("Print:quiet = on");
+  /* Create output of the Pythia particle list */
+  // pythia.readString("Init:showAllParticleData = on");
+  /* No resonance decays, since the resonances will be handled by SMASH */
+  pythia.readString("HadronLevel:Decay = off");
+  /* Set the random seed of the Pythia Random Number Generator.
+   * Please note: Here we use a random number generated by the
+   * SMASH, since every call of pythia.init should produce
+   * different events. */
+  pythia.readString("Random:setSeed = on");
+  std::stringstream buffer1;
+  buffer1 << "Random:seed = " << Random::canonical();
+  pythia.readString(buffer1.str());
+  /* set the incoming particles */
+  std::stringstream buffer2;
+  buffer2 << "Beams:idA = " << incoming_particles_[0].type().pdgcode();
+  pythia.readString(buffer2.str());
+  log.debug("First particle in string excitation: ",
+            incoming_particles_[0].type().pdgcode());
+  std::stringstream buffer3;
+  buffer3 << "Beams:idB = " << incoming_particles_[1].type().pdgcode();
+  log.debug("Second particle in string excitation: ",
+            incoming_particles_[1].type().pdgcode());
+  pythia.readString(buffer3.str());
+  /* Calculate the center-of-mass energy of this collision */
+  double sqrts = (incoming_particles_[0].momentum() +
+                  incoming_particles_[1].momentum()).abs();
+  std::stringstream buffer4;
+  buffer4 << "Beams:eCM = " << sqrts;
+  pythia.readString(buffer4.str());
+  log.debug("Pythia call with eCM = ", buffer4.str());
+  /* Initialize. */
+  pythia.init();
+  /* Short notation for Pythia event */
+  Pythia8::Event &event = pythia.event;
+  pythia.next();
+  ParticleList new_intermediate_particles;
+  for (int i = 0; i < event.size(); i++) {
+    if (event[i].isFinal()) {
+      if (event[i].isHadron()) {
+        const int pythia_id = event[i].id();
+        log.debug("PDG ID from Pythia:", pythia_id);
+        const std::string s = std::to_string(pythia_id);
+        PdgCode pythia_code(s);
+        ParticleData new_particle(ParticleType::find(pythia_code));
+        FourVector momentum;
+        momentum.set_x0(event[i].e());
+        momentum.set_x1(event[i].px());
+        momentum.set_x2(event[i].py());
+        momentum.set_x3(event[i].pz());
+        new_particle.set_4momentum(momentum);
+        log.debug("4-momentum from Pythia: ", momentum);
+        new_intermediate_particles.push_back(new_particle);
+        }
+      }
+    }
+    /*
+     * sort new_intermediate_particles according to z-Momentum
+     */
+    std::sort(new_intermediate_particles.begin(),
+              new_intermediate_particles.end(),
+              [&](ParticleData i, ParticleData j) {
+              return fabs(i.momentum().x3()) > fabs(j.momentum().x3());
+              });
+    for (ParticleData data : new_intermediate_particles) {
+      log.debug("Particle momenta after sorting: ", data.momentum());
+      /* The hadrons are not immediately formed, currently a formation time of
+       * 1 fm is universally applied and cross section is reduced to zero and
+       * to a fraction corresponding to the valence quark content. Hadrons
+       * containing a valence quark are determined by highest z-momentum. */
+      log.debug("The formation time is: ", formation_time_, "fm/c.");
+      /* Additional suppression factor to mimic coherence taken as 0.7
+       * from UrQMD (CTParam(59) */
+      const float suppression_factor = 0.7;
+      if (incoming_particles_[0].is_baryon() ||
+          incoming_particles_[1].is_baryon()) {
+        if (data == 0) {
+          data.set_cross_section_scaling_factor(suppression_factor * 0.66);
+        } else if (data == 1) {
+          data.set_cross_section_scaling_factor(suppression_factor * 0.34);
+        } else {
+          data.set_cross_section_scaling_factor(suppression_factor * 0.0);
+        }
+      } else {
+        if (data == 0 || data == 1) {
+          data.set_cross_section_scaling_factor(suppression_factor * 0.50);
+        } else {
+          data.set_cross_section_scaling_factor(suppression_factor * 0.0);
+        }
+      }
+      data.set_formation_time(formation_time_ * gamma_cm());
+      outgoing_particles_.push_back(data);
+    }
+    /* If the incoming particles already were unformed, the formation
+     * times and cross section scaling factors need to be adjusted */
+    if (incoming_particles_[0].formation_time() >
+        incoming_particles_[0].position().x0()) {
+      outgoing_particles_[0].set_cross_section_scaling_factor(
+      outgoing_particles_[0].cross_section_scaling_factor() *
+      incoming_particles_[0].cross_section_scaling_factor());
+      if (incoming_particles_[0].formation_time() >
+        outgoing_particles_[0].formation_time()) {
+        outgoing_particles_[0].set_formation_time(
+        incoming_particles_[0].formation_time());
+      }
+    }
+    if (incoming_particles_[1].formation_time() >
+      incoming_particles_[1].position().x0()) {
+      outgoing_particles_[1].set_cross_section_scaling_factor(
+      outgoing_particles_[1].cross_section_scaling_factor() *
+      incoming_particles_[1].cross_section_scaling_factor());
+      if (incoming_particles_[1].formation_time() >
+        outgoing_particles_[1].formation_time()) {
+        outgoing_particles_[1].set_formation_time(
+        incoming_particles_[1].formation_time());
+      }
+    }
+    /* Check momentum difference for debugging */
+    FourVector in_mom = incoming_particles_[0].momentum() +
+      incoming_particles_[1].momentum();
+    FourVector out_mom;
+    for (ParticleData data : outgoing_particles_) {
+      out_mom = out_mom + data.momentum();
+    }
+    log.debug("Incoming momenta string:", in_mom);
+    log.debug("Outgoing momenta string:", out_mom);
+  }
+}
 void ScatterAction::format_debug_output(std::ostream &out) const {
   out << "Scatter of " << incoming_particles_;
   if (outgoing_particles_.empty()) {

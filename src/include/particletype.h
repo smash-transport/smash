@@ -321,7 +321,6 @@ class ParticleType {
    * ParticleTypePtr instead.
    */
   static const ParticleType &find(PdgCode pdgcode);
-
   /// \ingroup exception
   struct PdgNotFoundFailure : public std::runtime_error {
     using std::runtime_error::runtime_error;

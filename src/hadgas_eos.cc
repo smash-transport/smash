@@ -83,7 +83,7 @@ void EosTable::compile_table(HadronGasEos &eos,
     const double ns = 0.0;
     for (int ie = 0; ie < n_e_; ie++) {
       const double e = ie * de_;
-      std::array<double, 3> init_approx = {0.15, 0.0, 0.0};
+      std::array<double, 3> init_approx = {0.1, 0.0, 0.0};
       for (int inb = 0; inb < n_nb_; inb++) {
         const double nb = inb * dnb_;
         // It is physically impossible to have energy density > nucleon mass*nb,
@@ -91,6 +91,15 @@ void EosTable::compile_table(HadronGasEos &eos,
         if (nb*nucleon_mass >= e) {
           table_[index(ie, inb)] = {0.0, 0.0, 0.0, 0.0};
           continue;
+        }
+        // Take extrapolated (T, mub, mus) as initial approximation, but not
+        // for cases close to unphysical region
+        if (nb > e) {
+          init_approx = {0.1, 0.7, 0.0};
+        } else if (inb >= 2) {
+          const table_element y = table_[index(ie, inb - 2)];
+          const table_element x = table_[index(ie, inb - 1)];
+          init_approx = {2.0*x.T - y.T, 2.0*x.mub - y.mub, 2.0*x.mus - y.mus};
         }
         const std::array<double, 3> res = eos.solve_eos(e, nb, ns, init_approx);
         const double T   = res[0];
