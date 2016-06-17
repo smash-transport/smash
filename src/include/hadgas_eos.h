@@ -65,6 +65,8 @@ class HadronGasEos {
  public:
   explicit HadronGasEos(const bool tabulate = false);
   ~HadronGasEos();
+  /// List particle species included in the eos
+  static ParticleTypePtrList list_eos_particles();
   /**
    * \brief Compute energy density
    * Grand-canonical Boltzmann ideal gas, consisting of all hadrons in SMASH:
@@ -160,11 +162,11 @@ class HadronGasEos {
    *         and strange chemical potential
    */
   std::array<double, 3> solve_eos(double e, double nb, double ns,
-             std::array<double, 3> initial_approximation = {0.15, 0.5, 0.05});
+             std::array<double, 3> initial_approximation = {0.15, 0.0, 0.0});
   /// Compute strange chemical potential, requiring that net strangeness = 0
   static double mus_net_strangeness0(double T, double mub);
   /// Get the element of eos table
-  void from_table(EosTable::table_element& res, double e, double nb) {
+  void from_table(EosTable::table_element& res, double e, double nb) const {
     eos_table_.get(res, e, nb);
   }
   bool is_tabulated() const { return tabulate_; }
