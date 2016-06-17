@@ -64,6 +64,7 @@ TEST(EoS_table) {
   // check if tabulated values are the right solutions
   COMPARE_ABSOLUTE_ERROR(HadronGasEos::energy_density(x.T, x.mub, x.mus), my_e, 1.e-2);
   COMPARE_ABSOLUTE_ERROR(HadronGasEos::net_baryon_density(x.T, x.mub, x.mus), my_nb, 1.e-3);
+  remove("small_test_table_fakegas_eos.dat");
 }
 
 /*
