@@ -23,7 +23,6 @@ Further tools that can be helpful (mainly for development):
 - valgrind
 - cpplint
 - cppcheck
-- PYTHIA, if string excitation is necessary
 
 Support for ROOT output is only enabled if a suitable version of ROOT is found
 on the system.
@@ -32,7 +31,8 @@ on the system.
 Building SMASH
 --------------
 
-Build it in a separate directory:
+Assuming Pythia is already build, run the following to build SMASH in a separate
+directory:
 
     mkdir build
     cd build
@@ -132,14 +132,12 @@ Let's assume Eigen headers will be unpacked in $HOME.
 
 
 Compiling Pythia
-------------------------------
+----------------
 
 The Pythia code is provided in the directory 3rdparty/pythia8215 and can be
-compiled by doing
+compiled by executing
 
    ./configure
    make
 
 in that directory.
-In addition, the file pythia8-config in the folder 3rdparty/pythia8215/bin 
-needs to be executable.  
