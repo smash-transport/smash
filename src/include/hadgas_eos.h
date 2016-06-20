@@ -195,7 +195,7 @@ class HadronGasEos {
   static constexpr double tolerance_ = 1.e-5;
   /// Number of equations in the system of equations to be solved
   static constexpr size_t n_equations_ = 3;
-  EosTable eos_table_ = EosTable(1.e-3, 1.e-3, 900, 900);
+  EosTable eos_table_ = EosTable(1.e-2, 1.e-2, 900, 900);
   /**
    * Variables used by gnu equation solver. They are stored here to allocate
    * and deallocate memory for them only once. It is expected that this class

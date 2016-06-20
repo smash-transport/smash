@@ -83,20 +83,18 @@ void EosTable::compile_table(HadronGasEos &eos,
     const double ns = 0.0;
     for (int ie = 0; ie < n_e_; ie++) {
       const double e = ie * de_;
-      std::array<double, 3> init_approx = {0.1, 0.0, 0.0};
+      std::array<double, 3> init_approx = {0.2, 0.0, 0.0};
       for (int inb = 0; inb < n_nb_; inb++) {
         const double nb = inb * dnb_;
+        // std::cout << e << " " << nb << std::endl;
         // It is physically impossible to have energy density > nucleon mass*nb,
         // therefore eqns have no solutions.
-        if (nb*nucleon_mass >= e) {
+        if (nb >= e) {
           table_[index(ie, inb)] = {0.0, 0.0, 0.0, 0.0};
           continue;
         }
-        // Take extrapolated (T, mub, mus) as initial approximation, but not
-        // for cases close to unphysical region
-        if (nb > e) {
-          init_approx = {0.1, 0.7, 0.0};
-        } else if (inb >= 2) {
+        // Take extrapolated (T, mub, mus) as initial approximation
+        if (inb >= 2) {
           const table_element y = table_[index(ie, inb - 2)];
           const table_element x = table_[index(ie, inb - 1)];
           init_approx = {2.0*x.T - y.T, 2.0*x.mub - y.mub, 2.0*x.mus - y.mus};
@@ -106,13 +104,6 @@ void EosTable::compile_table(HadronGasEos &eos,
         const double mub = res[1];
         const double mus = res[2];
         table_[index(ie, inb)] = {eos.pressure(T, mub, mus), T, mub, mus};
-        // Take previous (T, mub, mus) as initial approximation, but not
-        // for cases close to unphysical region
-        if (nb < e) {
-          init_approx = {T, mub, mus};
-        } else {
-          init_approx = {0.1, 0.7, 0.0};
-        }
       }
     }
     // Save table to file
@@ -163,7 +154,7 @@ HadronGasEos::HadronGasEos(const bool tabulate) :
   x_(gsl_vector_alloc(n_equations_)),
   tabulate_(tabulate) {
   const gsl_multiroot_fsolver_type *solver_type;
-  solver_type = gsl_multiroot_fsolver_dnewton;
+  solver_type = gsl_multiroot_fsolver_hybrid;
   solver_ = gsl_multiroot_fsolver_alloc(solver_type, n_equations_);
   if (tabulate_) {
     eos_table_.compile_table(*this);
@@ -219,6 +210,10 @@ double HadronGasEos::energy_density(double T, double mub, double mus) {
     double x = beta * (mub*ptype->baryon_number() +
                        mus*ptype->strangeness() -
                        ptype->mass());
+    if (x > 100.0) {
+      std::cout << "Overflow? - x = " << x << ", T = " << T
+                << ", mub = " << mub << ", mus = " << mus << ", m = " << ptype->mass() << std::endl;
+    }
     x = (x < -700.0) ? 0.0 : std::exp(x);
     const unsigned int g = ptype->spin() + 1;
     // Small mass case, z*z*K_2(z) -> 2, z*z*z*K_1(z) -> 0 at z->0
@@ -350,6 +345,7 @@ std::array<double, 3> HadronGasEos::solve_eos(double e, double nb, double ns,
   } while (status == GSL_CONTINUE && iter < 1000);
 
   if (status != GSL_SUCCESS) {
+    std::cout << "e = " << e << ", nb = " << nb << ", ns = " << ns << std::endl;
     print_solver_state(iter);
     throw std::runtime_error(gsl_strerror(status));
   }
