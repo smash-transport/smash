@@ -156,7 +156,7 @@ class Integrator1dMonte {
    *                  (defaults to 1E6 if omitted), i.e. how often the integrand
    *                  is sampled in the Monte-Carlo integration. Larger numbers
    *                  lead to a more precise result, but also to increased
-   * runtime.
+   *                  runtime.
    *
    * \note Since the workspace is allocated in the constructor and deallocated
    * on destruction, you should not recreate Integrator objects unless required.
