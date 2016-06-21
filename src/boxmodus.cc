@@ -107,14 +107,20 @@ float BoxModus::initial_conditions(Particles *particles,
 
   /* Create NUMBER OF PARTICLES according to configuration, or thermal case */
   if (use_thermal_) {
+    const double V = length_*length_*length_;
     for (const ParticleType &ptype : ParticleType::list_all()) {
       if (ptype.is_hadron()) {
-        int thermal_particles = length_*length_*length_*
-          HadronGasEos::partial_density(ptype, temperature_, mub_, mus_);
-        particles->create(thermal_particles*parameters.testparticles,
-                          ptype.pdgcode());
+        const double n = HadronGasEos::partial_density(ptype, temperature_,
+                                                       mub_, mus_);
+        const double thermal_mult = n*V*parameters.testparticles;
+        assert(thermal_mult > 0.0);
+        int thermal_mult_int = static_cast<int>(std::floor(thermal_mult));
+        if (Random::canonical() < thermal_mult - thermal_mult_int) {
+          thermal_mult_int++;
+        }
+        particles->create(thermal_mult_int, ptype.pdgcode());
         log.debug() << "Particle " << ptype.pdgcode()
-                    << " initial multiplicity " << thermal_particles;
+                    << " initial multiplicity " << thermal_mult_int;
       }
     }
     log.info() << "Initial baryon density "
