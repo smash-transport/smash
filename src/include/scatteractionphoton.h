@@ -58,7 +58,7 @@ class ScatterActionPhoton : public ScatterAction {
   ReactionType reac = ReactionType::no_reaction;
   float pi_pi_rho0(const float M, const float s) const;
   float pi_pi0_rho(const float M, const float s) const;
-  float diff_cross_section(float t) const;
+  float diff_cross_section(float t, float m3) const;
 };
 
 }  // namespace Smash

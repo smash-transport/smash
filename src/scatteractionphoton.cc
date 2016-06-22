@@ -57,15 +57,15 @@ void ScatterActionPhoton::generate_final_state() {
   double t = t1;
   double dummy = 0;
   while (t<t2){
-    dummy = diff_cross_section(t);
+    dummy = diff_cross_section(t,m3);
     if (dummy>diff_xsection_max){
       diff_xsection_max = dummy;
     }
     t = t + 0.01;
   }
   t = Random::uniform(t1, t2);
-  while (diff_cross_section(t)<Random::uniform(0.0,diff_xsection_max)){
-    Random::uniform(t1, t2);
+  while (diff_cross_section(t,m3)<Random::uniform(0.0,diff_xsection_max)){
+    t = Random::uniform(t1, t2);
   }
 
   double costheta =
@@ -82,7 +82,7 @@ void ScatterActionPhoton::generate_final_state() {
                                        -phitheta.threevec() * pcm);
 
   /* Weighing of the fractional photons */
-  weight_ = diff_cross_section(t) * (t2 - t1)
+  weight_ = diff_cross_section(t,m3) * (t2 - t1)
           / (number_of_fractional_photons * cross_section());
 
   /* Set positions & boost to computational frame. */
@@ -472,7 +472,7 @@ float ScatterActionPhoton::pi_pi0_rho(const float M, const float s) const {
   }
 }
 
-float ScatterActionPhoton::diff_cross_section(float t) const {
+float ScatterActionPhoton::diff_cross_section(float t, float m3) const {
   const float to_mb = 0.3894;
   const float m_rho = ParticleType::find(0x113).mass();
   const float m_rho_2 = pow(m_rho, 2);
@@ -483,11 +483,10 @@ float ScatterActionPhoton::diff_cross_section(float t) const {
   const float gamma_rho_tot = ParticleType::find(0x113).width_at_pole();
   const float g_rho_2 = 24 * twopi * gamma_rho_tot * pow(m_rho, 2) /
                         pow(pow(m_rho, 2) - 4 * pow(m_pi, 2), 3.0 / 2.0);
-  const float s = mandelstam_s();
+  float s = mandelstam_s();
   const float p_cm_2 = cm_momentum_squared();
   const float m1 = incoming_particles_[0].effective_mass();
   const float m2 = incoming_particles_[1].effective_mass();
-  const float m3 = outgoing_particles_[0].effective_mass();
   const float m3_2 = pow(m3, 2);
   const float DM = pow(m3, 2) - 4 * pow(m_pi, 2);
   float u = pow(m1, 2) + pow(m2, 2) + pow(m3, 2) - s - t;
