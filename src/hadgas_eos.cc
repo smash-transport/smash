@@ -170,7 +170,7 @@ HadronGasEos::~HadronGasEos() {
 
 ParticleTypePtrList HadronGasEos::list_eos_particles() {
   ParticleTypePtrList list;
-  list.reserve(300);
+  list.reserve(ParticleType::list_all().size());
   for (const ParticleType &ptype : ParticleType::list_all()) {
     if (ptype.is_hadron() && ptype.pdgcode().charmness() == 0) {
       list.emplace_back(&ptype);
@@ -184,7 +184,7 @@ double HadronGasEos::scaled_partial_density(const ParticleType& ptype,
   const double z = ptype.mass()*beta;
   double x = beta*(ptype.baryon_number()*mub +
                    ptype.strangeness()*mus -
-                    ptype.mass());
+                   ptype.mass());
   const unsigned int g = ptype.spin() + 1;
   x = (x < -700.0) ? 0.0 : std::exp(x);
   // The case of small mass: K_n(z) -> (n-1)!/2 *(2/z)^n, z -> 0
