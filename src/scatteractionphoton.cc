@@ -53,7 +53,21 @@ void ScatterActionPhoton::generate_final_state() {
   const double t2 = mandelstam_t[0];
 
   const double pcm = cm_momentum();
-  double t = Random::uniform(t1, t2);
+  double diff_xsection_max = 0;
+  double t = t1;
+  double dummy = 0;
+  while (t<t2){
+    dummy = diff_cross_section(t);
+    if (dummy>diff_xsection_max){
+      diff_xsection_max = dummy;
+    }
+    t = t + 0.01;
+  }
+  t = Random::uniform(t1, t2);
+  while (diff_cross_section(t)<Random::uniform(0.0,diff_xsection_max)){
+    Random::uniform(t1, t2);
+  }
+
   double costheta =
       (t - pow(m1, 2) +
        0.5 * (s + pow(m1, 2) - pow(m2, 2)) * (s - pow(m3, 2)) / s) /
