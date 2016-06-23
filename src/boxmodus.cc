@@ -29,6 +29,7 @@
 #include "include/random.h"
 #include "include/threevector.h"
 #include "include/wallcrossingaction.h"
+#include "include/quantumnumbers.h"
 
 namespace Smash {
 
@@ -108,26 +109,22 @@ float BoxModus::initial_conditions(Particles *particles,
   /* Create NUMBER OF PARTICLES according to configuration, or thermal case */
   if (use_thermal_) {
     const double V = length_*length_*length_;
-    for (const ParticleType &ptype : ParticleType::list_all()) {
-      if (ptype.is_hadron()) {
-        const double n = HadronGasEos::partial_density(ptype, temperature_,
-                                                       mub_, mus_);
-        const double thermal_mult = n*V*parameters.testparticles;
-        assert(thermal_mult > 0.0);
-        int thermal_mult_int = static_cast<int>(std::floor(thermal_mult));
-        if (Random::canonical() < thermal_mult - thermal_mult_int) {
-          thermal_mult_int++;
-        }
-        particles->create(thermal_mult_int, ptype.pdgcode());
-        log.debug() << "Particle " << ptype.pdgcode()
-                    << " initial multiplicity " << thermal_mult_int;
-      }
+    for (ParticleTypePtr ptype : HadronGasEos::list_eos_particles()) {
+      const double n = HadronGasEos::partial_density(*ptype, temperature_,
+                                                     mub_, mus_);
+      const double thermal_mult = n*V*parameters.testparticles;
+      assert(thermal_mult > 0.0);
+      int thermal_mult_int = Random::poisson(thermal_mult);
+      particles->create(thermal_mult_int, ptype->pdgcode());
+      log.info() << "Particle " << ptype->pdgcode()
+                  << " initial multiplicity " << thermal_mult_int <<
+                   ", thermal - " << thermal_mult;
     }
-    log.info() << "Initial baryon density "
+    log.info() << "Initial hadron gas baryon density "
                << HadronGasEos::net_baryon_density(temperature_, mub_, mus_);
-    log.info() << "Initial strange density "
+    log.info() << "Initial hadron gas strange density "
                << HadronGasEos::net_strange_density(temperature_, mub_, mus_);
-  } else {
+ } else {
     for (const auto &p : init_multipl_) {
       particles->create(p.second*parameters.testparticles, p.first);
       log.debug() << "Particle " << p.first

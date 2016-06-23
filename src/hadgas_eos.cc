@@ -53,8 +53,8 @@ void EosTable::compile_table(HadronGasEos &eos,
   if (table_read_success) {
     // Check if the saved table is consistent with the current particle table
     std::cout << "Checking consistency of the table... " << std::endl;
-    for (int ie = 0; (ie < n_e_) && (table_consistency); ie++) {
-      for (int inb = 0; (inb < n_nb_) && (table_consistency); inb++) {
+    for (int ie = 0; (ie < n_e_) && (table_consistency); ie+=20) {
+      for (int inb = 0; (inb < n_nb_) && (table_consistency); inb+=20) {
         const table_element x = table_[index(ie, inb)];
         const double e_comp  = eos.energy_density(x.T, x.mub, x.mus);
         const double nb_comp = eos.net_baryon_density(x.T, x.mub, x.mus);
