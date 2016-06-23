@@ -64,8 +64,11 @@ void ScatterActionPhoton::generate_final_state() {
     t = t + 0.01;
   }
   t = Random::uniform(t1, t2);
+  dummy=0;
   while (diff_cross_section(t,m3)<Random::uniform(0.0,diff_xsection_max)){
     t = Random::uniform(t1, t2);
+    dummy++;
+    if (dummy>100) break;
   }
 
   double costheta =
