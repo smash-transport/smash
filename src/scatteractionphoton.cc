@@ -85,9 +85,12 @@ void ScatterActionPhoton::generate_final_state() {
                                        -phitheta.threevec() * pcm);
 
   /* Weighing of the fractional photons */
-  weight_ = diff_cross_section(t,m3) * (t2 - t1)
+  if (number_of_fractional_photons > 1){
+    weight_ = diff_cross_section(t,m3) * (t2 - t1)
           / (number_of_fractional_photons * cross_section());
-
+  } else {
+    weight_ = cross_section_photons_ / cross_section();
+  }
   /* Set positions & boost to computational frame. */
   for (ParticleData &new_particle : outgoing_particles_) {
     new_particle.set_4position(middle_point);
