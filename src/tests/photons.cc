@@ -27,16 +27,17 @@ TEST(pi_rho0_pi_gamma) {
   const ParticleType &type_pi = ParticleType::find(0x211);
   ParticleData pi{type_pi};
   pi.set_4momentum(type_pi.mass(),           // pole mass
-                    ThreeVector(0., 0., 2.)); 
+                    ThreeVector(0., 0., 2.));
   const ParticleType &type_rho0 = ParticleType::find(0x113);
   ParticleData rho0{type_rho0};
   rho0.set_4momentum(type_rho0.mass(),           // pole mass
-                    ThreeVector(0., 0., -2.)); 
+                    ThreeVector(0., 0., -2.));
   const int number_of_photons = 10000;
-  const auto act = make_unique<ScatterActionPhoton>(pi, rho0, 0.05f, number_of_photons);
+  const auto act = make_unique<ScatterActionPhoton>(
+            pi, rho0, 0.05f, number_of_photons);
   act-> add_single_channel();
   float tot_weight = 0.0;
-  for (int i = 0; i<number_of_photons; i++){
+  for (int i = 0; i < number_of_photons; i++) {
     act->generate_final_state();
     tot_weight += act->raw_weight_value();
   }
