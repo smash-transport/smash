@@ -67,8 +67,8 @@ ActionList DecayActionsFinder::find_actions_in_cell(
   return actions;
 }
 
-ActionList DecayActionsFinder::find_final_actions
-    (const Particles &search_list) const {
+ActionList DecayActionsFinder::find_final_actions(const Particles &search_list,
+                                                  bool /*only_res*/) const {
   ActionList actions;
 
   for (const auto &p : search_list) {

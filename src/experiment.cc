@@ -1205,7 +1205,8 @@ template <typename Modus>
 void Experiment<Modus>::do_final_decays(uint64_t &interactions_total) {
   uint64_t total_pauli_blocked = 0;
 
-  // at end of time evolution: force all resonances to decay
+  /* At end of time evolution: Force all resonances to decay. In order to handle
+   * decay chains, we need to loop until no further actions occur. */
   uint64_t interactions_old;
   do {
     Actions actions;
@@ -1214,10 +1215,10 @@ void Experiment<Modus>::do_final_decays(uint64_t &interactions_total) {
     interactions_old = interactions_total;
     const auto particles_before_actions = particles_.copy_to_vector();
 
-    /* Dileptons */
+    /* Dileptons: shining of remaining resonances */
     if (dilepton_finder_ != nullptr) {
-      dilepton_actions.insert(dilepton_finder_->find_final_actions(particles_));
-
+      dilepton_actions.insert(dilepton_finder_->find_final_actions(particles_,
+                                                                   true));
       if (!dilepton_actions.is_empty()) {
         while (!dilepton_actions.is_empty()) {
           write_dilepton_action(*dilepton_actions.pop(),
@@ -1236,6 +1237,20 @@ void Experiment<Modus>::do_final_decays(uint64_t &interactions_total) {
     }
     // loop until no more decays occur
   } while (interactions_total > interactions_old);
+
+  /* Dileptons: shining of stable particles at the end */
+  if (dilepton_finder_ != nullptr) {
+    Actions dilepton_actions;
+    dilepton_actions.insert(dilepton_finder_->find_final_actions(particles_,
+                                                                 false));
+    if (!dilepton_actions.is_empty()) {
+      const auto particles_before_actions = particles_.copy_to_vector();
+      while (!dilepton_actions.is_empty()) {
+        write_dilepton_action(*dilepton_actions.pop(),
+                              particles_before_actions);
+      }
+    }
+  }
 
   /* Do one final propagation step. */
   if (potentials_) {
