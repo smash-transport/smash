@@ -291,7 +291,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   const bool dileptons_switch = config.has_value({"Output", "Dileptons"}) ?
                     config.take({"Output", "Dileptons", "Enable"}, true) :
                     false;
-  const bool strings_switch = config.take({"Collision_Term", "Strings"}, true);
+  const bool strings_switch = config.take({"Collision_Term", "Strings"}, false);
 
   // create finders
   if (two_to_one) {
