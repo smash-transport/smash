@@ -42,7 +42,8 @@ class DecayActionsFinderDilepton : public DecayActionsFinder {
   /** All resonances decay at the end of the simulation. Take all the shining
    * weight for the remaining time.
    */
-  ActionList find_final_actions(const Particles &search_list) const override;
+  ActionList find_final_actions(const Particles &search_list,
+                                bool only_res = false) const override;
 };
 
 }  // namespace Smash
