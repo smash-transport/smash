@@ -69,10 +69,8 @@ void GrandCanThermalizer::compute_N_in_cells(
   }
 }
 
-void GrandCanThermalizer::sample_in_random_cell(ParticleList& plist,
-                            const double time,
+ParticleData GrandCanThermalizer::sample_in_random_cell(const double time,
                             std::function<bool(int, int, int)> condition) {
-  plist.clear();
   // Choose random cell, probability = N_in_cell/N_total
   double r = Random::uniform(0.0, N_total_in_cells_);
   double partial_sum = 0.0;
@@ -90,6 +88,7 @@ void GrandCanThermalizer::sample_in_random_cell(ParticleList& plist,
   // Which sort to sample - probability N_i/N_tot
   r = Random::uniform(0.0, N_in_cell);
   double N_sum = 0.0;
+  ParticleTypePtr type_to_sample;
   for (ParticleTypePtr i : HadronGasEos::list_eos_particles()) {
     if (!condition(i->strangeness(), i->baryon_number(), i->charge())) {
       continue;
@@ -97,21 +96,24 @@ void GrandCanThermalizer::sample_in_random_cell(ParticleList& plist,
     N_sum += cell_volume_ * gamma *
       HadronGasEos::partial_density(*i, cell.T(), cell.mub(), cell.mus());
     if (N_sum >= r) {
-      ParticleData particle(*i);
-      // Note: it's pole mass for resonances!
-      const double m = static_cast<double>(i->mass());
-      // Position
-      particle.set_4position(FourVector(time, cell_center + uniform_in_cell()));
-      // Momentum
-      double momentum_radial = sample_momenta_from_thermal(cell.T(), m);
-      Angles phitheta;
-      phitheta.distribute_isotropically();
-      particle.set_4momentum(m, phitheta.threevec() * momentum_radial);
-      particle.boost_momentum(cell.v());
-      plist.push_back(particle);
+      type_to_sample = i;
       break;
     }
   }
+
+  ParticleData particle(*type_to_sample);
+  // Note: it's pole mass for resonances!
+  const double m = static_cast<double>(type_to_sample->mass());
+  // Position
+  particle.set_4position(FourVector(time, cell_center + uniform_in_cell()));
+  // Momentum
+  double momentum_radial = sample_momenta_from_thermal(cell.T(), m);
+  Angles phitheta;
+  phitheta.distribute_isotropically();
+  particle.set_4momentum(m, phitheta.threevec() * momentum_radial);
+  particle.boost_momentum(cell.v());
+
+  return particle;
 }
 
 void GrandCanThermalizer::update_lattice(const Particles& particles,
@@ -181,7 +183,7 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
            cells_to_sample_.size()*cell_volume_, ", in \% of lattice: ",
            100.0*cells_to_sample_.size()/lattice_total_cells);
 
-  ParticleList mode_list, sampled_list;
+  ParticleList sampled_list;
   double energy = 0.0;
   int S_plus = 0, S_minus = 0,
       B_plus = 0, B_minus = 0,
@@ -191,13 +193,11 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
   compute_N_in_cells(condition1);
   while (conserved_initial.momentum().x0() > energy ||
          S_plus < conserved_initial.strangeness()) {
-    sample_in_random_cell(mode_list, time, condition1);
-    for (auto &particle : mode_list) {
-      energy += particle.momentum().x0();
-      if (particle.pdgcode().strangeness() > 0) {
-        sampled_list.push_back(particle);
-        S_plus += particle.pdgcode().strangeness();
-      }
+    ParticleData p = sample_in_random_cell(time, condition1);
+    energy += p.momentum().x0();
+    if (p.pdgcode().strangeness() > 0) {
+      sampled_list.push_back(p);
+      S_plus += p.pdgcode().strangeness();
     }
   }
 
@@ -205,14 +205,12 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
   auto condition2 = [] (int S, int, int) { return (S < 0); };
   compute_N_in_cells(condition2);
   while (S_plus + S_minus > conserved_initial.strangeness()) {
-    sample_in_random_cell(mode_list, time, condition2);
-    for (auto &particle : mode_list) {
-      const int s_part = particle.pdgcode().strangeness();
-      // Do not allow particles with S = -2 or -3 spoil the total sum
-      if (S_plus + S_minus + s_part >= conserved_initial.strangeness()) {
-        sampled_list.push_back(particle);
-        S_minus += s_part;
-      }
+    ParticleData p = sample_in_random_cell(time, condition2);
+    const int s_part = p.pdgcode().strangeness();
+    // Do not allow particles with S = -2 or -3 spoil the total sum
+    if (S_plus + S_minus + s_part >= conserved_initial.strangeness()) {
+      sampled_list.push_back(p);
+      S_minus += s_part;
     }
   }
 
@@ -223,13 +221,11 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
   compute_N_in_cells(condition3);
   while (conserved_remaining.momentum().x0() > energy ||
          B_plus < conserved_remaining.baryon_number()) {
-    sample_in_random_cell(mode_list, time, condition3);
-    for (auto &particle : mode_list) {
-      energy += particle.momentum().x0();
-      if (particle.pdgcode().baryon_number() > 0) {
-        sampled_list.push_back(particle);
-        B_plus += particle.pdgcode().baryon_number();
-      }
+    ParticleData p = sample_in_random_cell(time, condition3);
+    energy += p.momentum().x0();
+    if (p.pdgcode().baryon_number() > 0) {
+      sampled_list.push_back(p);
+      B_plus += p.pdgcode().baryon_number();
     }
   }
 
@@ -237,13 +233,11 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
   auto condition4 = [] (int S, int B, int) { return (S == 0) && (B < 0); };
   compute_N_in_cells(condition4);
   while (B_plus + B_minus > conserved_remaining.baryon_number()) {
-    sample_in_random_cell(mode_list, time, condition4);
-    for (auto &particle : mode_list) {
-      const int bar = particle.pdgcode().baryon_number();
-      if (B_plus + B_minus + bar >= conserved_remaining.baryon_number()) {
-        sampled_list.push_back(particle);
-        B_minus += bar;
-      }
+    ParticleData p = sample_in_random_cell(time, condition4);
+    const int bar = p.pdgcode().baryon_number();
+    if (B_plus + B_minus + bar >= conserved_remaining.baryon_number()) {
+      sampled_list.push_back(p);
+      B_minus += bar;
     }
   }
 
@@ -254,13 +248,11 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
   compute_N_in_cells(condition5);
   while (conserved_remaining.momentum().x0() > energy ||
          E_plus < conserved_remaining.charge()) {
-    sample_in_random_cell(mode_list, time, condition5);
-    for (auto &particle : mode_list) {
-      energy += particle.momentum().x0();
-      if (particle.pdgcode().charge() > 0) {
-        sampled_list.push_back(particle);
-        E_plus += particle.pdgcode().charge();
-      }
+    ParticleData p = sample_in_random_cell(time, condition5);
+    energy += p.momentum().x0();
+    if (p.pdgcode().charge() > 0) {
+      sampled_list.push_back(p);
+      E_plus += p.pdgcode().charge();
     }
   }
 
@@ -268,13 +260,11 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
   auto condition6 = [] (int S, int B, int C) { return (S == 0) && (B == 0) && (C < 0); };
   compute_N_in_cells(condition6);
   while (E_plus + E_minus > conserved_remaining.charge()) {
-    sample_in_random_cell(mode_list, time, condition6);
-    for (auto &particle : mode_list) {
-      const int charge = particle.pdgcode().charge();
-      if (E_plus + E_minus + charge >= conserved_remaining.charge()) {
-        sampled_list.push_back(particle);
-        E_minus += charge;
-      }
+    ParticleData p = sample_in_random_cell(time, condition6);
+    const int charge = p.pdgcode().charge();
+    if (E_plus + E_minus + charge >= conserved_remaining.charge()) {
+      sampled_list.push_back(p);
+      E_minus += charge;
     }
   }
 
@@ -284,11 +274,9 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
   energy = 0.0;
   compute_N_in_cells(condition7);
   while (conserved_remaining.momentum().x0() > energy) {
-    sample_in_random_cell(mode_list, time, condition7);
-    for (auto &particle : mode_list) {
-        sampled_list.push_back(particle);
-        energy += particle.momentum().x0();
-    }
+    ParticleData p = sample_in_random_cell(time, condition7);
+    sampled_list.push_back(p);
+    energy += p.momentum().x0();
   }
   log.info("Sampled ", sampled_list.size(), " particles.");
 

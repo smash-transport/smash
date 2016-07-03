@@ -116,7 +116,7 @@ float BoxModus::initial_conditions(Particles *particles,
       assert(thermal_mult > 0.0);
       int thermal_mult_int = Random::poisson(thermal_mult);
       particles->create(thermal_mult_int, ptype->pdgcode());
-      log.info() << "Particle " << ptype->pdgcode()
+      log.debug() << "Particle " << ptype->pdgcode()
                   << " initial multiplicity " << thermal_mult_int <<
                    ", thermal - " << thermal_mult;
     }

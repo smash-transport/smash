@@ -79,7 +79,7 @@ class GrandCanThermalizer {
                       bool ignore_cells_under_treshold = true);
   ThreeVector uniform_in_cell() const;
   void compute_N_in_cells(std::function<bool(int, int, int)> condition);
-  void sample_in_random_cell(ParticleList& plist, const double time,
+  ParticleData sample_in_random_cell(const double time,
                              std::function<bool(int, int, int)> condition);
   void thermalize(Particles& particles, double time);
   void print_statistics(const Clock& clock) const;
