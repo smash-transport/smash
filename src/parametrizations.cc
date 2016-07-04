@@ -391,4 +391,54 @@ float kbar0n_elastic(double mandelstam_s) {
   return kminusp_elastic(mandelstam_s);
 }
 
+
+/// PDG data on K+ N total cross section: momentum in lab frame.
+const std::initializer_list<double> KPLUSN_TOTAL_P_LAB = {
+    0.770,   0.888,   0.939,   0.970,   0.989,   1.040,   1.091,   1.141,
+    1.170,   1.191,   1.242,   1.292,   1.300,   1.342,   1.392,   1.440,
+    1.442,   1.492,   1.550,   1.593,   1.600,   1.643,   1.690,   1.693,
+    1.700,   1.743,   1.750,   1.793,   1.800,   1.850,   1.893,   1.900,
+    1.950,   1.970,   1.993,   2.000,   2.050,   2.093,   2.100,   2.150,
+    2.193,   2.200,   2.260,   2.300,   2.350,   2.393,   2.400,   2.450,
+    2.500,   2.550,   2.550,   2.600,   2.650,   2.700,   2.750,   2.800,
+    2.830,   2.850,   2.900,   2.950,   3.000,   3.050,   3.100,   3.150,
+    3.200,   3.250,   3.300,   6.000,   8.000,  10.000,  12.000,  14.000,
+   15.000,  16.000,  18.000,  20.000,  20.000,  25.000,  30.000,  35.000,
+   35.000,  40.000,  45.000,  50.000,  50.000,  50.000,  55.000,  70.000,
+  100.000, 100.000, 120.000, 150.000, 150.000, 170.000, 200.000, 200.000,
+  240.000, 280.000, 310.000
+};
+/// PDG data on K+ N total cross section: cross section.
+const std::initializer_list<double> KPLUSN_TOTAL_SIG = {
+  15.50, 16.85, 17.60, 17.80, 18.53, 18.91, 20.61, 21.25, 18.20, 20.87, 20.26,
+  19.68, 18.50, 19.32, 19.22, 18.10, 19.07, 18.95, 18.91, 18.79, 18.89, 18.67,
+  18.50, 18.69, 18.83, 18.88, 18.86, 18.73, 18.53, 18.66, 18.50, 18.69, 18.70,
+  18.60, 18.55, 18.79, 18.54, 18.67, 18.49, 18.43, 18.40, 18.40, 17.70, 18.27,
+  18.26, 18.63, 18.09, 18.25, 18.11, 17.10, 18.17, 18.09, 18.02, 18.11, 18.06,
+  18.01, 17.50, 17.95, 17.85, 17.81, 17.81, 17.83, 17.85, 17.61, 17.61, 17.66,
+  17.55, 17.50, 17.60, 17.50, 17.60, 17.50, 17.87, 17.40, 17.60, 17.94, 17.70,
+  17.78, 17.69, 18.29, 18.12, 18.15, 18.30, 18.66, 18.56, 18.02, 18.43, 18.60,
+  19.04, 18.99, 19.23, 19.63, 19.55, 19.74, 19.72, 19.82, 20.37, 20.61, 20.80,
+};
+static std::unique_ptr<InterpolateDataLinear<double>>
+    kplusp_total_interpolation = nullptr;
+
+/** K+ p inelastic cross section parametrization.
+ * Source: \iref{Buss:2011mx}, B.3.8 */
+float kplusp_inelastic(double mandelstam_s) {
+  if (kplusp_total_interpolation == nullptr) {
+    std::vector<double> x = KPLUSN_TOTAL_P_LAB;
+    std::vector<double> y = KPLUSN_TOTAL_SIG;
+    std::vector<double> dedup_x;
+    std::vector<double> dedup_y;
+    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    dedup_y = smooth(dedup_x, dedup_y, 0.1, 5);
+    kplusp_total_interpolation =
+        make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
+  }
+  const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
+  return (*kplusp_total_interpolation)(p_lab)
+         - kplusp_elastic(mandelstam_s);
+}
+
 }  // namespace Smash

@@ -95,6 +95,12 @@ float kbar0p_elastic(double mandelstam_s);
  */
 float kbar0n_elastic(double mandelstam_s);
 
+/* K+ p inelastic cross section parametrization
+ *
+ * \fpPrecision Why \c double?
+ */
+float kplusp_inelastic(double mandelstam_s);
+
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_PARAMETRIZATIONS_H_
