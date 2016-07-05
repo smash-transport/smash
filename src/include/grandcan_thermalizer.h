@@ -81,7 +81,7 @@ class GrandCanThermalizer {
   void compute_N_in_cells(std::function<bool(int, int, int)> condition);
   ParticleData sample_in_random_cell(const double time,
                              std::function<bool(int, int, int)> condition);
-  void thermalize(Particles& particles, double time);
+  void thermalize(Particles& particles, double time, int ntest);
   void print_statistics(const Clock& clock) const;
 
   RectangularLattice<ThermLatticeNode>& lattice() const {

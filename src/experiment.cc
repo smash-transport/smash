@@ -869,7 +869,8 @@ uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step() {
       gc_thermalizer_->update_lattice(particles_, density_param_,
                                       ignore_cells_under_treshold);
       gc_thermalizer_->thermalize(particles_,
-                                  parameters_.labclock.current_time());
+                                  parameters_.labclock.current_time(),
+                                  parameters_.testparticles);
     }
 
     /* (1.a) Create grid. */

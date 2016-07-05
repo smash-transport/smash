@@ -53,7 +53,7 @@ void GrandCanThermalizer::compute_N_in_cells(
                std::function<bool(int, int, int)> condition) {
   N_in_cells_.clear();
   N_total_in_cells_ = 0.0;
-  for(auto cell_index : cells_to_sample_) {
+  for (auto cell_index : cells_to_sample_) {
     const ThermLatticeNode cell = (*lat_)[cell_index];
     const double gamma = 1.0 / std::sqrt(1.0 - cell.v().sqr());
     double N_tot = 0.0;
@@ -138,7 +138,7 @@ void GrandCanThermalizer::update_lattice(const Particles& particles,
   }
 }
 
-void GrandCanThermalizer::thermalize(Particles& particles, double time) {
+void GrandCanThermalizer::thermalize(Particles& particles, double time, int ntest) {
   const auto &log = logger<LogArea::GrandcanThermalizer>();
   log.info("Starting forced thermalization, time ", time, " fm/c");
   // Remove particles from the cells with e > e_crit_,
@@ -184,100 +184,119 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time) {
            100.0*cells_to_sample_.size()/lattice_total_cells);
 
   ParticleList sampled_list;
-  double energy = 0.0;
-  int S_plus = 0, S_minus = 0,
-      B_plus = 0, B_minus = 0,
-      E_plus = 0, E_minus = 0;
-  // Mode 1: sample until energy is conserved, take only strangeness < 0
-  auto condition1 = [] (int, int, int) { return true; };
-  compute_N_in_cells(condition1);
-  while (conserved_initial.momentum().x0() > energy ||
-         S_plus < conserved_initial.strangeness()) {
-    ParticleData p = sample_in_random_cell(time, condition1);
-    energy += p.momentum().x0();
-    if (p.pdgcode().strangeness() > 0) {
-      sampled_list.push_back(p);
-      S_plus += p.pdgcode().strangeness();
-    }
-  }
 
-  // Mode 2: sample until strangeness is conserved
-  auto condition2 = [] (int S, int, int) { return (S < 0); };
-  compute_N_in_cells(condition2);
-  while (S_plus + S_minus > conserved_initial.strangeness()) {
-    ParticleData p = sample_in_random_cell(time, condition2);
-    const int s_part = p.pdgcode().strangeness();
-    // Do not allow particles with S = -2 or -3 spoil the total sum
-    if (S_plus + S_minus + s_part >= conserved_initial.strangeness()) {
-      sampled_list.push_back(p);
-      S_minus += s_part;
-    }
-  }
+  const auto B_list = std::initializer_list<int>{-1, 1};
+  const auto S_list_mesons = std::initializer_list<int>{-1, 1};
+  const auto E_list = std::initializer_list<int>{-1, 1};
 
-  // Mode 3: sample non-strange baryons
-  auto condition3 = [] (int S, int, int) { return (S == 0); };
-  conserved_remaining = conserved_initial - QuantumNumbers(sampled_list);
-  energy = 0.0;
-  compute_N_in_cells(condition3);
-  while (conserved_remaining.momentum().x0() > energy ||
-         B_plus < conserved_remaining.baryon_number()) {
-    ParticleData p = sample_in_random_cell(time, condition3);
-    energy += p.momentum().x0();
-    if (p.pdgcode().baryon_number() > 0) {
-      sampled_list.push_back(p);
-      B_plus += p.pdgcode().baryon_number();
-    }
-  }
+  std::vector<std::pair<int,double>> B_mult, S_mult, E_mult;
+  std::vector<std::pair<int,int>> B_mult_int, S_mult_int, E_mult_int;
+  int conserved;
+  double energy_deviation, energy_init;
 
-  // Mode 4: sample non-strange anti-baryons
-  auto condition4 = [] (int S, int B, int) { return (S == 0) && (B < 0); };
-  compute_N_in_cells(condition4);
-  while (B_plus + B_minus > conserved_remaining.baryon_number()) {
-    ParticleData p = sample_in_random_cell(time, condition4);
-    const int bar = p.pdgcode().baryon_number();
-    if (B_plus + B_minus + bar >= conserved_remaining.baryon_number()) {
-      sampled_list.push_back(p);
-      B_minus += bar;
-    }
-  }
+  do {
+    sampled_list.clear();
 
-  // Mode 5: sample non_strange mesons, but take only with charge > 0
-  auto condition5 = [] (int S, int B, int) { return (S == 0) && (B == 0); };
-  conserved_remaining = conserved_initial - QuantumNumbers(sampled_list);
-  energy = 0.0;
-  compute_N_in_cells(condition5);
-  while (conserved_remaining.momentum().x0() > energy ||
-         E_plus < conserved_remaining.charge()) {
-    ParticleData p = sample_in_random_cell(time, condition5);
-    energy += p.momentum().x0();
-    if (p.pdgcode().charge() > 0) {
-      sampled_list.push_back(p);
-      E_plus += p.pdgcode().charge();
+    // Baryon number conservation
+    conserved_remaining = conserved_initial;
+    B_mult.clear();
+    for (auto bar: B_list) {
+      auto condition = [&] (int, int B, int) { return (B == bar); };
+      compute_N_in_cells(condition);
+      const int N = N_total_in_cells_ * ntest;
+      B_mult.push_back(std::make_pair(bar, N));
     }
-  }
 
-  // Mode 6: sample non_strange mesons to conserve charge
-  auto condition6 = [] (int S, int B, int C) { return (S == 0) && (B == 0) && (C < 0); };
-  compute_N_in_cells(condition6);
-  while (E_plus + E_minus > conserved_remaining.charge()) {
-    ParticleData p = sample_in_random_cell(time, condition6);
-    const int charge = p.pdgcode().charge();
-    if (E_plus + E_minus + charge >= conserved_remaining.charge()) {
-      sampled_list.push_back(p);
-      E_minus += charge;
+    do {
+      conserved = 0;
+      B_mult_int.clear();
+      for (auto bar_pair : B_mult) {
+        const int mult = Random::poisson(bar_pair.second);
+        B_mult_int.push_back(std::make_pair(bar_pair.first, mult));
+        conserved += mult * bar_pair.first;
+      }
+    } while (conserved != conserved_remaining.baryon_number());
+
+    for (auto bar_pair : B_mult_int) {
+      auto condition = [&] (int, int B, int) { return (B == bar_pair.first); };
+      compute_N_in_cells(condition);
+      for (int i = 0; i < bar_pair.second; i++) {
+        sampled_list.push_back(sample_in_random_cell(time, condition));
+      }
     }
-  }
 
-  // Mode 7: sample neutral non-strange mesons to conserve energy
-  auto condition7 = [] (int S, int B, int C) { return (S == 0) && (B == 0) && (C == 0); };
-  conserved_remaining = conserved_initial - QuantumNumbers(sampled_list);
-  energy = 0.0;
-  compute_N_in_cells(condition7);
-  while (conserved_remaining.momentum().x0() > energy) {
-    ParticleData p = sample_in_random_cell(time, condition7);
-    sampled_list.push_back(p);
-    energy += p.momentum().x0();
-  }
+    // Strangeness conservation
+    conserved_remaining = conserved_initial - QuantumNumbers(sampled_list);
+
+    S_mult.clear();
+    for (auto str: S_list_mesons) {
+      auto condition = [&] (int S, int B, int) { return (S == str) && (B == 0); };
+      compute_N_in_cells(condition);
+      const int N = N_total_in_cells_ * ntest;
+      S_mult.push_back(std::make_pair(str, N));
+    }
+
+    do {
+      conserved = 0;
+      S_mult_int.clear();
+      for (auto str_pair : S_mult) {
+        const int mult = Random::poisson(str_pair.second);
+        S_mult_int.push_back(std::make_pair(str_pair.first, mult));
+        conserved += mult * str_pair.first;
+      }
+    } while (conserved != conserved_remaining.strangeness());
+
+    for (auto str_pair : S_mult_int) {
+      auto condition = [&] (int S, int B, int) { return (S == str_pair.first) && (B == 0); };
+      compute_N_in_cells(condition);
+      for (int i = 0; i < str_pair.second; i++) {
+        sampled_list.push_back(sample_in_random_cell(time, condition));
+      }
+    }
+
+    // Electric charge conservation
+    conserved_remaining = conserved_initial - QuantumNumbers(sampled_list);
+
+    E_mult.clear();
+    for (auto ch: E_list) {
+      auto condition = [&] (int S, int B, int E) { return (S == 0) && (B == 0) && (E == ch); };
+      compute_N_in_cells(condition);
+      const int N = N_total_in_cells_ * ntest;
+      E_mult.push_back(std::make_pair(ch, N));
+    }
+
+    do {
+      conserved = 0;
+      E_mult_int.clear();
+      for (auto ch_pair : E_mult) {
+        const int mult = Random::poisson(ch_pair.second);
+        E_mult_int.push_back(std::make_pair(ch_pair.first, mult));
+        conserved += mult * ch_pair.first;
+      }
+    } while (conserved != conserved_remaining.charge());
+
+    for (auto ch_pair : E_mult_int) {
+      auto condition = [&] (int S, int B, int E) { return (S == 0) && (B == 0) && (E == ch_pair.first); };
+      compute_N_in_cells(condition);
+      for (int i = 0; i < ch_pair.second; i++) {
+        sampled_list.push_back(sample_in_random_cell(time, condition));
+      }
+    }
+
+    // Sample neutral mesons
+    auto condition = [&] (int S, int B, int E) { return (S == 0) && (B == 0) && (E == 0); };
+    compute_N_in_cells(condition);
+    const double mult = N_total_in_cells_ * ntest;
+    const int mult_int = Random::poisson(mult);
+    for (int i = 0; i < mult_int; i++) {
+      sampled_list.push_back(sample_in_random_cell(time, condition));
+    }
+    conserved_remaining = conserved_initial - QuantumNumbers(sampled_list);
+    energy_deviation = std::abs(conserved_remaining.momentum().x0());
+    energy_init = conserved_initial.momentum().x0();
+
+  } while (energy_deviation > 0.01 * energy_init);
+
   log.info("Sampled ", sampled_list.size(), " particles.");
 
   // Centralize momenta
