@@ -162,6 +162,10 @@ template <typename T> int poisson(const T & lam ) {
   return std::poisson_distribution<int>(lam)(engine);
 }
 
+template <typename T> int binomial(const int N, const T & p) {
+  return std::binomial_distribution<int>(N, p)(engine);
+}
+
 /** \return: one integer number sampled from discrete distribution
 * whose weight given by probability vector
 */

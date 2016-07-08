@@ -16,7 +16,6 @@
 #include "lattice.h"
 #include "quantumnumbers.h"
 
-
 namespace Smash {
 
 class ThermLatticeNode {
@@ -78,9 +77,9 @@ class GrandCanThermalizer {
   void update_lattice(const Particles& particles, const DensityParameters& par,
                       bool ignore_cells_under_treshold = true);
   ThreeVector uniform_in_cell() const;
-  void compute_N_in_cells(std::function<bool(int, int, int)> condition);
-  ParticleData sample_in_random_cell(const double time,
-                             std::function<bool(int, int, int)> condition);
+  void sample_in_random_cell(ParticleList& plist, const double time,
+                             size_t type_index);
+  void sample_multinomial(int particle_class, int N);
   void thermalize(Particles& particles, double time, int ntest);
   void print_statistics(const Clock& clock) const;
 
@@ -90,10 +89,26 @@ class GrandCanThermalizer {
   float e_crit() const { return e_crit_; }
 
  private:
+  int get_class(size_t typelist_index) const {
+    const int B = eos_typelist_[typelist_index]->baryon_number();
+    const int S = eos_typelist_[typelist_index]->strangeness();
+    const int ch = eos_typelist_[typelist_index]->charge();
+    return (B > 0) ? 0 :
+           (B < 0) ? 1 :
+           (S > 0) ? 2 :
+           (S < 0) ? 3 :
+           (ch > 0) ? 4 :
+           (ch < 0) ? 5 : 6;
+  }
   std::vector<double> N_in_cells_;
   std::vector<size_t> cells_to_sample_;
   HadronGasEos eos_ = HadronGasEos(true);
   std::unique_ptr<RectangularLattice<ThermLatticeNode>> lat_;
+  const ParticleTypePtrList eos_typelist_;
+  const size_t N_sorts_;
+  std::vector<double> mult_sort_;
+  std::vector<int> mult_int_;
+  std::array<double, 7> mult_classes_;
   double N_total_in_cells_;
   float cell_volume_;
   const float e_crit_;

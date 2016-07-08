@@ -7,6 +7,8 @@
 
 #include "include/grandcan_thermalizer.h"
 
+#include <time.h>
+
 #include "include/angles.h"
 #include "include/cxx14compat.h"
 #include "include/distributions.h"
@@ -25,6 +27,8 @@ GrandCanThermalizer::GrandCanThermalizer(const std::array<float, 3> lat_sizes,
                                          float e_critical,
                                          float t_start,
                                          float delta_t) :
+  eos_typelist_(HadronGasEos::list_eos_particles()),
+  N_sorts_(eos_typelist_.size()),
   e_crit_(e_critical),
   t_start_(t_start),
   period_(delta_t) {
@@ -37,6 +41,8 @@ GrandCanThermalizer::GrandCanThermalizer(const std::array<float, 3> lat_sizes,
   const std::array<float, 3> abc = lat_->cell_sizes();
   cell_volume_ = abc[0] * abc[1] * abc[2];
   cells_to_sample_.resize(50000);
+  mult_sort_.resize(N_sorts_);
+  mult_int_.resize(N_sorts_);
 }
 
 ThreeVector GrandCanThermalizer::uniform_in_cell() const {
@@ -49,71 +55,48 @@ ThreeVector GrandCanThermalizer::uniform_in_cell() const {
                        +0.5 * static_cast<double>(lat_->cell_sizes()[2])));
 }
 
-void GrandCanThermalizer::compute_N_in_cells(
-               std::function<bool(int, int, int)> condition) {
+void GrandCanThermalizer::sample_in_random_cell(ParticleList& plist,
+                                                const double time,
+                                                size_t type_index) {
   N_in_cells_.clear();
   N_total_in_cells_ = 0.0;
   for (auto cell_index : cells_to_sample_) {
     const ThermLatticeNode cell = (*lat_)[cell_index];
     const double gamma = 1.0 / std::sqrt(1.0 - cell.v().sqr());
-    double N_tot = 0.0;
-    for (ParticleTypePtr i : HadronGasEos::list_eos_particles()) {
-      if (condition(i->strangeness(), i->baryon_number(), i->charge())) {
-        // N_i = n u^mu dsigma_mu = (isochronous hypersurface) n * V * gamma
-        N_tot += cell_volume_ * gamma *
-          HadronGasEos::partial_density(*i, cell.T(), cell.mub(), cell.mus());
-      }
-    }
-    N_in_cells_.push_back(N_tot);
-    N_total_in_cells_ += N_tot;
-  }
-}
-
-ParticleData GrandCanThermalizer::sample_in_random_cell(const double time,
-                            std::function<bool(int, int, int)> condition) {
-  // Choose random cell, probability = N_in_cell/N_total
-  double r = Random::uniform(0.0, N_total_in_cells_);
-  double partial_sum = 0.0;
-  int index_only_thermalized = -1;
-  while (partial_sum < r) {
-    index_only_thermalized++;
-    partial_sum += N_in_cells_[index_only_thermalized];
-  }
-  const int cell_index = cells_to_sample_[index_only_thermalized];
-  const ThermLatticeNode cell = (*lat_)[cell_index];
-  const ThreeVector cell_center = lat_->cell_center(cell_index);
-  const double gamma = 1.0 / std::sqrt(1.0 - cell.v().sqr());
-  const double N_in_cell = N_in_cells_[index_only_thermalized];
-
-  // Which sort to sample - probability N_i/N_tot
-  r = Random::uniform(0.0, N_in_cell);
-  double N_sum = 0.0;
-  ParticleTypePtr type_to_sample;
-  for (ParticleTypePtr i : HadronGasEos::list_eos_particles()) {
-    if (!condition(i->strangeness(), i->baryon_number(), i->charge())) {
-      continue;
-    }
-    N_sum += cell_volume_ * gamma *
-      HadronGasEos::partial_density(*i, cell.T(), cell.mub(), cell.mus());
-    if (N_sum >= r) {
-      type_to_sample = i;
-      break;
-    }
+    const double N_this_cell = cell_volume_ * gamma *
+          HadronGasEos::partial_density(*eos_typelist_[type_index],
+                                        cell.T(), cell.mub(), cell.mus());
+    N_in_cells_.push_back(N_this_cell);
+    N_total_in_cells_ += N_this_cell;
   }
 
-  ParticleData particle(*type_to_sample);
-  // Note: it's pole mass for resonances!
-  const double m = static_cast<double>(type_to_sample->mass());
-  // Position
-  particle.set_4position(FourVector(time, cell_center + uniform_in_cell()));
-  // Momentum
-  double momentum_radial = sample_momenta_from_thermal(cell.T(), m);
-  Angles phitheta;
-  phitheta.distribute_isotropically();
-  particle.set_4momentum(m, phitheta.threevec() * momentum_radial);
-  particle.boost_momentum(cell.v());
+  for (int i = 0; i < mult_int_[type_index]; i++) {
+    // Choose random cell, probability = N_in_cell/N_total
+    double r = Random::uniform(0.0, N_total_in_cells_);
+    double partial_sum = 0.0;
+    int index_only_thermalized = -1;
+    while (partial_sum < r) {
+      index_only_thermalized++;
+      partial_sum += N_in_cells_[index_only_thermalized];
+    }
+    const int cell_index = cells_to_sample_[index_only_thermalized];
+    const ThermLatticeNode cell = (*lat_)[cell_index];
+    const ThreeVector cell_center = lat_->cell_center(cell_index);
 
-  return particle;
+    ParticleData particle(*eos_typelist_[type_index]);
+    // Note: it's pole mass for resonances!
+    const double m = static_cast<double>(eos_typelist_[type_index]->mass());
+    // Position
+    particle.set_4position(FourVector(time, cell_center + uniform_in_cell()));
+    // Momentum
+    double momentum_radial = sample_momenta_from_thermal(cell.T(), m);
+    Angles phitheta;
+    phitheta.distribute_isotropically();
+    particle.set_4momentum(m, phitheta.threevec() * momentum_radial);
+    particle.boost_momentum(cell.v());
+
+    plist.push_back(particle);
+  }
 }
 
 void GrandCanThermalizer::update_lattice(const Particles& particles,
@@ -138,13 +121,27 @@ void GrandCanThermalizer::update_lattice(const Particles& particles,
   }
 }
 
+void GrandCanThermalizer::sample_multinomial(int particle_class, int N) {
+  double sum = mult_classes_[particle_class];
+  for (size_t i_type = 0; i_type < N_sorts_; i_type++) {
+    if (get_class(i_type) != particle_class) {
+      continue;
+    }
+    const double p = mult_sort_[i_type]/sum;
+    mult_int_[i_type] = Random::binomial(N, p);
+    /*std::cout << eos_typelist_[i_type]->name() << ": mult_sort = " << mult_sort_[i_type] << ", sum = " << sum <<
+              ", p = " << p << ", N = " << N << ", mult_int_ = " << mult_int_[i_type] << std::endl;*/
+    sum -= mult_sort_[i_type];
+    N -= mult_int_[i_type];
+  }
+}
+
 void GrandCanThermalizer::thermalize(Particles& particles, double time, int ntest) {
   const auto &log = logger<LogArea::GrandcanThermalizer>();
   log.info("Starting forced thermalization, time ", time, " fm/c");
   // Remove particles from the cells with e > e_crit_,
   // sum up their conserved quantities
-  QuantumNumbers conserved_initial   = QuantumNumbers(),
-                 conserved_remaining = QuantumNumbers();
+  QuantumNumbers conserved_initial = QuantumNumbers();
   ThermLatticeNode node;
   ParticleList to_remove;
   for (auto &particle : particles) {
@@ -183,119 +180,82 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time, int ntes
            cells_to_sample_.size()*cell_volume_, ", in \% of lattice: ",
            100.0*cells_to_sample_.size()/lattice_total_cells);
 
+  std::fill(mult_sort_.begin(), mult_sort_.end(), 0.0);
+  for (auto cell_index : cells_to_sample_) {
+    const ThermLatticeNode cell = (*lat_)[cell_index];
+    const double gamma = 1.0 / std::sqrt(1.0 - cell.v().sqr());
+    for (size_t i = 0; i < N_sorts_; i++) {
+      // N_i = n u^mu dsigma_mu = (isochronous hypersurface) n * V * gamma
+      mult_sort_[i] += cell_volume_ * gamma * ntest *
+                  HadronGasEos::partial_density(*eos_typelist_[i],
+                                             cell.T(), cell.mub(), cell.mus());
+    }
+  }
+
+  std::fill(mult_classes_.begin(), mult_classes_.end(), 0.0);
+  for (size_t i = 0; i < N_sorts_; i++) {
+    mult_classes_[get_class(i)] += mult_sort_[i];
+  }
+
   ParticleList sampled_list;
 
-  const auto B_list = std::initializer_list<int>{-1, 1};
-  const auto S_list_mesons = std::initializer_list<int>{-1, 1};
-  const auto E_list = std::initializer_list<int>{-1, 1};
-
-  std::vector<std::pair<int,double>> B_mult, S_mult, E_mult;
-  std::vector<std::pair<int,int>> B_mult_int, S_mult_int, E_mult_int;
-  int conserved;
-  double energy_deviation, energy_init;
-
-  do {
+  while (true) {
     sampled_list.clear();
-
-    // Baryon number conservation
-    conserved_remaining = conserved_initial;
-    B_mult.clear();
-    for (auto bar: B_list) {
-      auto condition = [&] (int, int B, int) { return (B == bar); };
-      compute_N_in_cells(condition);
-      const int N = N_total_in_cells_ * ntest;
-      B_mult.push_back(std::make_pair(bar, N));
-    }
-
+    std::fill(mult_int_.begin(), mult_int_.end(), 0);
+    int Nbar, Nantibar;
     do {
-      conserved = 0;
-      B_mult_int.clear();
-      for (auto bar_pair : B_mult) {
-        const int mult = Random::poisson(bar_pair.second);
-        B_mult_int.push_back(std::make_pair(bar_pair.first, mult));
-        conserved += mult * bar_pair.first;
-      }
-    } while (conserved != conserved_remaining.baryon_number());
+      Nbar = Random::poisson(mult_classes_[0]);
+      Nantibar = Random::poisson(mult_classes_[1]);
+    } while (Nbar - Nantibar != conserved_initial.baryon_number());
 
-    for (auto bar_pair : B_mult_int) {
-      auto condition = [&] (int, int B, int) { return (B == bar_pair.first); };
-      compute_N_in_cells(condition);
-      for (int i = 0; i < bar_pair.second; i++) {
-        sampled_list.push_back(sample_in_random_cell(time, condition));
-      }
+    sample_multinomial(0, Nbar);
+    sample_multinomial(1, Nantibar);
+
+    // Count strangeness of the sampled particles
+    int S_sampled = 0;
+    for (size_t i = 0; i < N_sorts_; i++) {
+      S_sampled += eos_typelist_[i]->strangeness() * mult_int_[i];
     }
-
-    // Strangeness conservation
-    conserved_remaining = conserved_initial - QuantumNumbers(sampled_list);
-
-    S_mult.clear();
-    for (auto str: S_list_mesons) {
-      auto condition = [&] (int S, int B, int) { return (S == str) && (B == 0); };
-      compute_N_in_cells(condition);
-      const int N = N_total_in_cells_ * ntest;
-      S_mult.push_back(std::make_pair(str, N));
+    const int Nmes_S = Random::poisson(mult_classes_[2]);
+    const int Nmes_antiS = Random::poisson(mult_classes_[3]);
+    if (Nmes_S - Nmes_antiS != conserved_initial.strangeness() - S_sampled) {
+      /*std::cout << "strangeness fail: NmesS = " << Nmes_S << ", Nmes_antiS = " << Nmes_antiS <<
+               ", initial S = " << conserved_initial.strangeness() << ", sampled S = " << S_sampled << std::endl;*/
+      continue;
     }
-
-    do {
-      conserved = 0;
-      S_mult_int.clear();
-      for (auto str_pair : S_mult) {
-        const int mult = Random::poisson(str_pair.second);
-        S_mult_int.push_back(std::make_pair(str_pair.first, mult));
-        conserved += mult * str_pair.first;
-      }
-    } while (conserved != conserved_remaining.strangeness());
-
-    for (auto str_pair : S_mult_int) {
-      auto condition = [&] (int S, int B, int) { return (S == str_pair.first) && (B == 0); };
-      compute_N_in_cells(condition);
-      for (int i = 0; i < str_pair.second; i++) {
-        sampled_list.push_back(sample_in_random_cell(time, condition));
-      }
+    sample_multinomial(2, Nmes_S);
+    sample_multinomial(3, Nmes_antiS);
+    // Count charge of the sampled particles
+    int ch_sampled = 0;
+    for (size_t i = 0; i < N_sorts_; i++) {
+      ch_sampled += eos_typelist_[i]->charge() * mult_int_[i];
     }
-
-    // Electric charge conservation
-    conserved_remaining = conserved_initial - QuantumNumbers(sampled_list);
-
-    E_mult.clear();
-    for (auto ch: E_list) {
-      auto condition = [&] (int S, int B, int E) { return (S == 0) && (B == 0) && (E == ch); };
-      compute_N_in_cells(condition);
-      const int N = N_total_in_cells_ * ntest;
-      E_mult.push_back(std::make_pair(ch, N));
+    const int Nmes_S0_chplus = Random::poisson(mult_classes_[4]);
+    const int Nmes_S0_chminus = Random::poisson(mult_classes_[5]);
+    if (Nmes_S0_chplus - Nmes_S0_chminus != conserved_initial.charge() - ch_sampled) {
+      /*std::cout << "charge fail: Nmes_S0_chplus = " << Nmes_S0_chplus << ", Nmes_S0_chminus = " << Nmes_S0_chminus <<
+               ", initial ch = " << conserved_initial.charge() << ", sampled ch = " << ch_sampled << std::endl;*/
+      continue;
     }
+    sample_multinomial(4, Nmes_S0_chplus);
+    sample_multinomial(5, Nmes_S0_chminus);
+    sample_multinomial(6, Random::poisson(mult_classes_[6]));
 
-    do {
-      conserved = 0;
-      E_mult_int.clear();
-      for (auto ch_pair : E_mult) {
-        const int mult = Random::poisson(ch_pair.second);
-        E_mult_int.push_back(std::make_pair(ch_pair.first, mult));
-        conserved += mult * ch_pair.first;
-      }
-    } while (conserved != conserved_remaining.charge());
-
-    for (auto ch_pair : E_mult_int) {
-      auto condition = [&] (int S, int B, int E) { return (S == 0) && (B == 0) && (E == ch_pair.first); };
-      compute_N_in_cells(condition);
-      for (int i = 0; i < ch_pair.second; i++) {
-        sampled_list.push_back(sample_in_random_cell(time, condition));
-      }
+    for (size_t itype = 0; itype < N_sorts_; itype++) {
+      sample_in_random_cell(sampled_list, time, itype);
     }
-
-    // Sample neutral mesons
-    auto condition = [&] (int S, int B, int E) { return (S == 0) && (B == 0) && (E == 0); };
-    compute_N_in_cells(condition);
-    const double mult = N_total_in_cells_ * ntest;
-    const int mult_int = Random::poisson(mult);
-    for (int i = 0; i < mult_int; i++) {
-      sampled_list.push_back(sample_in_random_cell(time, condition));
+    double e_tot;
+    const double e_init = conserved_initial.momentum().x0();
+    e_tot = 0.0;
+    for (auto &particle : sampled_list) {
+      e_tot += particle.momentum().x0();
     }
-    conserved_remaining = conserved_initial - QuantumNumbers(sampled_list);
-    energy_deviation = std::abs(conserved_remaining.momentum().x0());
-    energy_init = conserved_initial.momentum().x0();
-
-  } while (energy_deviation > 0.01 * energy_init);
+    if (std::abs(e_tot - e_init) > 0.01*e_init) {
+      std::cout << "Energy " << e_tot << " too far from e_init = " << e_init << std::endl;
+      continue;
+    }
+    break;
+  }
 
   log.info("Sampled ", sampled_list.size(), " particles.");
 
