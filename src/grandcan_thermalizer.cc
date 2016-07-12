@@ -10,6 +10,7 @@
 #include <time.h>
 
 #include "include/angles.h"
+#include "include/bessel_sampler.h"
 #include "include/cxx14compat.h"
 #include "include/distributions.h"
 #include "include/forwarddeclarations.h"
@@ -199,14 +200,33 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time, int ntes
 
   ParticleList sampled_list;
 
+  //
+  const double NB = conserved_initial.baryon_number();
+  const double m = 0.5*(std::sqrt(4.0*mult_classes_[0]*mult_classes_[1] + NB*NB) - NB);
+  std::cout << " m = " << m
+            << ", average Nbar = " << mult_classes_[0]
+            << ", average Nantibar = " << mult_classes_[1]
+            << ", NB = " << NB << std::endl;
+  BesselSampler bessel_sampler(mult_classes_[1], mult_classes_[0], std::abs(NB));
+
   while (true) {
     sampled_list.clear();
     std::fill(mult_int_.begin(), mult_int_.end(), 0);
-    int Nbar, Nantibar;
+    int Nantibar, Nbar;
+    if (NB >= 0) {
+      Nantibar = bessel_sampler.sample();
+      Nbar = Nantibar + NB;
+    } else {
+      Nbar = bessel_sampler.sample();
+      Nantibar = Nbar - NB;
+    }
+/*    int rejections = 0;
     do {
       Nbar = Random::poisson(mult_classes_[0]);
       Nantibar = Random::poisson(mult_classes_[1]);
+      rejections++;
     } while (Nbar - Nantibar != conserved_initial.baryon_number());
+    std::cout << "Sampled Nbar, Nantibar: " << Nbar << " " << Nantibar << std::endl;*/
 
     sample_multinomial(0, Nbar);
     sample_multinomial(1, Nantibar);
@@ -219,7 +239,7 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time, int ntes
     const int Nmes_S = Random::poisson(mult_classes_[2]);
     const int Nmes_antiS = Random::poisson(mult_classes_[3]);
     if (Nmes_S - Nmes_antiS != conserved_initial.strangeness() - S_sampled) {
-      /*std::cout << "strangeness fail: NmesS = " << Nmes_S << ", Nmes_antiS = " << Nmes_antiS <<
+     /* std::cout << "strangeness fail: NmesS = " << Nmes_S << ", Nmes_antiS = " << Nmes_antiS <<
                ", initial S = " << conserved_initial.strangeness() << ", sampled S = " << S_sampled << std::endl;*/
       continue;
     }
@@ -233,7 +253,7 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time, int ntes
     const int Nmes_S0_chplus = Random::poisson(mult_classes_[4]);
     const int Nmes_S0_chminus = Random::poisson(mult_classes_[5]);
     if (Nmes_S0_chplus - Nmes_S0_chminus != conserved_initial.charge() - ch_sampled) {
-      /*std::cout << "charge fail: Nmes_S0_chplus = " << Nmes_S0_chplus << ", Nmes_S0_chminus = " << Nmes_S0_chminus <<
+    /*  std::cout << "charge fail: Nmes_S0_chplus = " << Nmes_S0_chplus << ", Nmes_S0_chminus = " << Nmes_S0_chminus <<
                ", initial ch = " << conserved_initial.charge() << ", sampled ch = " << ch_sampled << std::endl;*/
       continue;
     }

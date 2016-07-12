@@ -166,6 +166,11 @@ template <typename T> int binomial(const int N, const T & p) {
   return std::binomial_distribution<int>(N, p)(engine);
 }
 
+template <typename T> double normal(const T & mean, const T & sigma) {
+  return std::normal_distribution<double>(mean, sigma)(engine);
+}
+
+
 /** \return: one integer number sampled from discrete distribution
 * whose weight given by probability vector
 */
