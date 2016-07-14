@@ -114,13 +114,9 @@ float BoxModus::initial_conditions(Particles *particles,
                                                        mub_, mus_);
         const double thermal_mult = n*V*parameters.testparticles;
         assert(thermal_mult > 0.0);
-        int thermal_mult_int = static_cast<int>(std::floor(thermal_mult));
-        if (Random::canonical() < thermal_mult - thermal_mult_int) {
-          thermal_mult_int++;
-        }
+        const int thermal_mult_int = Random::poisson(thermal_mult);
         particles->create(thermal_mult_int, ptype.pdgcode());
-        log.debug() << "Particle " << ptype.pdgcode()
-                    << " initial multiplicity " << thermal_mult_int;
+        log.debug(ptype.name(), " initial multiplicity ", thermal_mult_int);
       }
     }
     log.info() << "Initial baryon density "
