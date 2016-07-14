@@ -66,7 +66,7 @@ class HadronGasEos {
   explicit HadronGasEos(const bool tabulate = false);
   ~HadronGasEos();
   /// List particle species included in the eos
-  static ParticleTypePtrList list_eos_particles();
+  static const ParticleTypePtrList list_eos_particles();
   /**
    * \brief Compute energy density
    * Grand-canonical Boltzmann ideal gas, consisting of all hadrons in SMASH:
@@ -168,6 +168,9 @@ class HadronGasEos {
   /// Get the element of eos table
   void from_table(EosTable::table_element& res, double e, double nb) const {
     eos_table_.get(res, e, nb);
+  }
+  static bool is_eos_particle(const ParticleType& ptype) {
+    return ptype.is_hadron() && ptype.pdgcode().charmness() == 0;
   }
   bool is_tabulated() const { return tabulate_; }
 
