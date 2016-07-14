@@ -29,7 +29,7 @@ EosTable::EosTable(double de, double dnb, int n_e, int n_nb) :
 }
 
 void EosTable::compile_table(HadronGasEos &eos,
-                             const std::string eos_savefile_name) {
+                             const std::string &eos_savefile_name) {
   if (boost::filesystem::exists(eos_savefile_name)) {
     // Read table from file
     std::cout << "Reading table from file " << eos_savefile_name << std::endl;

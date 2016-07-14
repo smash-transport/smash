@@ -35,7 +35,7 @@ namespace Smash {
 *
 * \key Isotropic (bool, optional, default = false) \n
 * Do all collisions isotropically.
-* \key Strings (bool, optional, default = true): \n
+* \key Strings (bool, optional, default = false): \n
 * true - string excitation is enabled\n
 * false - string excitation is disabled
 * \key Formation_Time (float, optional, default = 1.0) \n

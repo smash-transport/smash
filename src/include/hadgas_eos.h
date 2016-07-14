@@ -36,7 +36,7 @@ class EosTable {
     double mus;
   };
   void compile_table(HadronGasEos &eos,
-    const std::string eos_savefile_name = std::string("hadgas_eos.dat"));
+    const std::string& eos_savefile_name = "hadgas_eos.dat");
   void get(table_element& res, double e, double nb) const;
 
  private:

@@ -72,7 +72,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
       float dt) const override;
   /** Find some final collisions at the end of the simulation.
    * Currently does nothing. */
-  ActionList find_final_actions(const Particles &) const override {
+  ActionList find_final_actions(const Particles & /*search_list*/,
+                                bool /*only_res*/ = false) const override {
     return ActionList();
   }
 

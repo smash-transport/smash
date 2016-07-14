@@ -177,10 +177,9 @@ class ScatterAction : public Action {
   /** Perform an elastic two-body scattering, i.e. just exchange momentum. */
   void elastic_scattering();
 
-  /** Perform the string excitation and decay via Pythia
-   */
+  /** Perform the string excitation and decay via Pythia. */
   void string_excitation();
-  
+
   /**
    * \ingroup logging
    * Writes information about this scatter action to the \p out stream.

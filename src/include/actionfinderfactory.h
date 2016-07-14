@@ -71,10 +71,18 @@ class ActionFinderInterface {
       float dt) const = 0;
 
   /**
-   * This abstract function finds 'final' actions
-   * (for cleaning up at the end of the simulation).
+   * This abstract function finds 'final' actions (for cleaning up at the end
+   * of the simulation, e.g. letting the remaining resonances decay).
+   * \param search_list a list of particles where each particle needs to be
+   *                    tested for possible interactions with the surrounding
+   *                    particles
+   * \param only_res this optional parameter requests that only actions
+   *                 regarding resonances are considered (disregarding stable
+   *                 particles)
+   * \return The function returns a list (std::vector) of Action objects.
    */
-  virtual ActionList find_final_actions(const Particles &) const = 0;
+  virtual ActionList find_final_actions(const Particles &search_list,
+                                        bool only_res = false) const = 0;
 };
 
 }  // namespace Smash
