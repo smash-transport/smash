@@ -43,7 +43,8 @@ class DecayActionsFinder : public ActionFinderInterface {
   }
 
   /** Force all resonances to decay at the end of the simulation. */
-  ActionList find_final_actions(const Particles &search_list) const override;
+  ActionList find_final_actions(const Particles &search_list,
+                                bool only_res = false) const override;
 };
 
 }  // namespace Smash
