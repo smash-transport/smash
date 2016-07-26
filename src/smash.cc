@@ -301,8 +301,8 @@ int main(int argc, char *argv[]) {
     if (!lock.acquire()) {
       throw std::runtime_error(
           "Another instance of SMASH is already writing to the specified "
-          "output directory. If you are sure this is not the case, remove \""
-          + lock_path.native() + "\".");
+          "output directory. If you are sure this is not the case, remove \"" +
+          lock_path.native() + "\".");
     }
     log.debug("output path: ", output_path);
     if (!force_overwrite && bf::exists(output_path / "config.yaml")) {

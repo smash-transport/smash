@@ -80,6 +80,11 @@ Output:
 #        Position:           [0.0, 0.0, 0.0]
 #    Dileptons:
 #        Format:             Oscar
+#    Photons:
+#        Format:             Oscar
+#        # number of fractional photons produced per single reaction
+#        Fractions:          100
+
 
 Collision_Term:
     Two_to_One:             True

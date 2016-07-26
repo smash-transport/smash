@@ -15,7 +15,6 @@
 
 namespace Smash {
 
-
 /**
  * \ingroup action
  * ScatterAction is a special action which takes two incoming particles
@@ -61,24 +60,20 @@ class ScatterAction : public Action {
   float raw_weight_value() const override;
 
   /** Add all possible subprocesses for this action object. */
-  void add_all_processes(float elastic_parameter,
+  virtual void add_all_processes(float elastic_parameter,
                          bool two_to_one, bool two_to_two, bool strings_switch);
 
   /**
    * Determine the (parametrized) total cross section for this collision. This
    * is currently only used for calculating the string excitation cross section.
    */
-  virtual float total_cross_section() const {
-    return 0.;
-  }
+  virtual float total_cross_section() const { return 0.; }
 
   /**
    * Determine the (parametrized) elastic cross section for this collision.
    * It is zero by default, but can be overridden in the child classes.
    */
-  virtual float elastic_parametrization() {
-    return 0.;
-  }
+  virtual float elastic_parametrization() { return 0.; }
 
   /**
    * Determine the elastic cross section for this collision. If elastic_par is
@@ -119,7 +114,8 @@ class ScatterAction : public Action {
   /**
    * Return the 2-to-1 resonance production cross section for a given resonance.
    *
-   * \param[in] type_resonance Type information for the resonance to be produced.
+   * \param[in] type_resonance Type information for the resonance to be
+   * produced.
    * \param[in] srts Total energy in the center-of-mass frame.
    * \param[in] cm_momentum_sqr Square of the center-of-mass momentum of the
    * two initial particles.
@@ -129,8 +125,8 @@ class ScatterAction : public Action {
    *
    * \fpPrecision Why \c double?
    */
-  double two_to_one_formation(const ParticleType &type_resonance,
-                              double srts, double cm_momentum_sqr);
+  double two_to_one_formation(const ParticleType &type_resonance, double srts,
+                              double cm_momentum_sqr);
 
   /** Find all inelastic 2->2 processes for this reaction. */
   virtual CollisionBranchList two_to_two_cross_sections() {
@@ -148,9 +144,7 @@ class ScatterAction : public Action {
     using std::invalid_argument::invalid_argument;
   };
 
-  float cross_section() const {
-    return total_cross_section_;
-  }
+  virtual float cross_section() const { return total_cross_section_; }
 
  protected:
   /** Determine the Mandelstam s variable,
@@ -205,7 +199,6 @@ class ScatterAction : public Action {
   /** Perform a 2->1 resonance-formation process. */
   void resonance_formation();
 };
-
 
 }  // namespace Smash
 
