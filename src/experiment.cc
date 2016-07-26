@@ -912,13 +912,13 @@ uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step() {
     }
     // Check conservation of conserved quantities if potentials are off.
     // If potentials are on then momentum is conserved only in average
-    if (!potentials_) {
+  /*  if (!potentials_) {
       std::string err_msg = conserved_initial_.report_deviations(particles_);
       if (!err_msg.empty()) {
         log.error() << err_msg;
         throw std::runtime_error("Violation of conserved quantities!");
       }
-    }
+    }*/
     check_interactions_total(interactions_total);
   }
 

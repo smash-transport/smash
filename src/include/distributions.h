@@ -117,7 +117,7 @@ double juttner_distribution_func(const double momentum_radial,
 double woods_saxon_dist_func(const double r,  const double radius,
         const double diffusion);
 
-
+double sample_noneq_photon_momenta (const double temperature);
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_DISTRIBUTIONS_H_

@@ -15,6 +15,8 @@
 
 namespace Smash {
 
+double calc_hubble (double time);
+
 /** Propagates the positions of all particles on a straight line
   * through the current time step.
   *

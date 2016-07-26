@@ -160,4 +160,16 @@ double sample_momenta_from_thermal(const double temperature,
   return momentum_radial;
 }
 
+double sample_noneq_photon_momenta(const double temperature)
+{
+ double momentum_radial;
+ const double a = -std::log(Random::canonical_nonzero());
+ const double b = -std::log(Random::canonical_nonzero());
+ const double c = -std::log(Random::canonical_nonzero());
+ const double d = -std::log(Random::canonical_nonzero());
+ momentum_radial = (3.0/4.0)*temperature * (a + b + c + d );
+ 
+ return momentum_radial;
+}
+
 }  // namespace Smash

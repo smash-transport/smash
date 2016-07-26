@@ -171,6 +171,7 @@ float BoxModus::initial_conditions(Particles *particles,
   return start_time_;
 }
 
+
 /* Enforce periodic boundaries and output wall hits to collision files */
 int BoxModus::impose_boundary_conditions(Particles *particles,
                          const OutputsList &output_list) {
