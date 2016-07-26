@@ -109,7 +109,7 @@ float BoxModus::initial_conditions(Particles *particles,
   if (use_thermal_) {
     const double V = length_*length_*length_;
     for (const ParticleType &ptype : ParticleType::list_all()) {
-      if (ptype.is_hadron()) {
+      if (HadronGasEos::is_eos_particle(ptype)) {
         const double n = HadronGasEos::partial_density(ptype, temperature_,
                                                        mub_, mus_);
         const double thermal_mult = n*V*parameters.testparticles;
