@@ -10,7 +10,8 @@ Logging:
   #Action: ALL
   #FindScatter: ALL
   #DecayModes: ALL
-  #ScatterAction: ALL
+  ScatterAction: ALL
+  Pythia: ALL
 
 General:
     # Modus decision
@@ -88,6 +89,7 @@ Output:
 Collision_Term:
     Two_to_One:             True
     Two_to_Two:             True
+    Strings:                False
     Force_Decays_At_End:    True
     Isotropic:              False
     Elastic_Cross_Section:  -1.0  # Globally used if non-negative, [mb]

@@ -35,22 +35,31 @@ namespace Smash {
 *
 * \key Isotropic (bool, optional, default = false) \n
 * Do all collisions isotropically.
+* \key Strings (bool, optional, default = false): \n
+* true - string excitation is enabled\n
+* false - string excitation is disabled
+* \key Formation_Time (float, optional, default = 1.0) \n
+* Parameter for formation time in string fragmentation in fm/c
 */
 
 ScatterActionsFinder::ScatterActionsFinder(
-    double el_param, const ExperimentParameters &parameters,
-    bool iso, bool two_to_one, bool two_to_two)
-    : elastic_parameter_(el_param),
+    Configuration config, const ExperimentParameters &parameters,
+    bool two_to_one, bool two_to_two, bool strings_switch)
+    : elastic_parameter_(config.take({"Collision_Term",
+                                      "Elastic_Cross_Section"}, -1.0f)),
       testparticles_(parameters.testparticles),
       isotropic_(iso),
       two_to_one_(two_to_one),
-      two_to_two_(two_to_two) {
-  if (is_constant_elastic_isotropic()) {
-    const auto &log = logger<LogArea::FindScatter>();
-    log.info("Constant elastic isotropic cross-section mode:",
-             " using ", elastic_parameter_, " mb as maximal cross-section.");
-  }
-}
+      two_to_two_(two_to_two),
+      strings_switch_(strings_switch),
+      formation_time_(config.take({"Collision_Term",
+                                   "Formation_Time"}, 1.0f)) {
+        if (is_constant_elastic_isotropic()) {
+          const auto &log = logger<LogArea::FindScatter>();
+          log.info("Constant elastic isotropic cross-section mode:",
+          " using ", elastic_parameter_, " mb as maximal cross-section.");
+        }
+      }
 
 ScatterActionsFinder::ScatterActionsFinder(
     float elastic_parameter, int testparticles)
@@ -58,35 +67,43 @@ ScatterActionsFinder::ScatterActionsFinder(
       testparticles_(testparticles),
       isotropic_(false),
       two_to_one_(true),
-      two_to_two_(true) {}
+      two_to_two_(true),
+      strings_switch_(true),
+      formation_time_(1.0f) {}
 
 ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
                                             const ParticleData &data_a,
                                             const ParticleData &data_b,
-                                            float time_until_collision) const {
+                                            float time_until_collision)
+                                            const {
   const auto &pdg_a = data_a.pdgcode();
   const auto &pdg_b = data_b.pdgcode();
   ScatterActionPtr act;
   if (data_a.is_baryon() && data_b.is_baryon()) {
     if (pdg_a.is_nucleon() && pdg_b.is_nucleon()) {
       act = make_unique<ScatterActionNucleonNucleon>(data_a, data_b,
-                                              time_until_collision, isotropic_);
+                                              time_until_collision, isotropic_,
+                                              formation_time_);
     } else {
       act = make_unique<ScatterActionBaryonBaryon>(data_a, data_b,
-                                              time_until_collision, isotropic_);
+                                              time_until_collision, isotropic_,
+                                              formation_time_);
     }
   } else if (data_a.is_baryon() || data_b.is_baryon()) {
     if ((pdg_a.is_nucleon() && pdg_b.is_kaon()) ||
         (pdg_b.is_nucleon() && pdg_a.is_kaon())) {
       act = make_unique<ScatterActionNucleonKaon>(data_a, data_b,
-                                              time_until_collision, isotropic_);
+                                              time_until_collision, isotropic_,
+                                              formation_time_);
     } else {
       act = make_unique<ScatterActionBaryonMeson>(data_a, data_b,
-                                              time_until_collision, isotropic_);
+                                              time_until_collision, isotropic_,
+                                              formation_time_);
     }
   } else {
     act = make_unique<ScatterActionMesonMeson>(data_a, data_b,
-                                              time_until_collision, isotropic_);
+                                              time_until_collision, isotropic_,
+                                              formation_time_);
   }
   return act;
 }
@@ -127,7 +144,8 @@ ActionPtr ScatterActionsFinder::check_collision(
   }
 
   /* Add various subprocesses.  */
-  act->add_all_processes(elastic_parameter_, two_to_one_, two_to_two_);
+  act->add_all_processes(elastic_parameter_, two_to_one_,
+                         two_to_two_, strings_switch_);
 
   /* distance criterion according to cross_section */
   if (distance_squared >= act->cross_section() * fm2_mb * M_1_PI

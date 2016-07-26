@@ -35,10 +35,16 @@ ActionList DecayActionsFinderDilepton::find_actions_in_cell(
     DecayBranchList dil_modes = p.type().get_partial_widths_dilepton(m_eff);
 
     // if particle can only decay into dileptons or is stable, use shining only
-    // in find_final_actions and ignore them here
-    if (dil_modes.size() == n_all_modes || p.type().is_stable()) {
+    // in find_final_actions and ignore them here, also unformed
+    // resonances cannot decay
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wfloat-equal"
+    if (dil_modes.size() == n_all_modes || p.type().is_stable()
+        || (p.formation_time() > p.position().x0() &&
+            p.cross_section_scaling_factor() == 0.0)) {
       continue;
     }
+    #pragma GCC diagnostic pop
 
     for (DecayBranchPtr & mode : dil_modes) {
       // SHINING as described in \iref{Schmidt:2008hm}, chapter 2D
@@ -57,21 +63,25 @@ ActionList DecayActionsFinderDilepton::find_actions_in_cell(
 
 
 ActionList DecayActionsFinderDilepton::find_final_actions(
-                  const Particles &search_list) const {
+                  const Particles &search_list, bool only_res) const {
   ActionList actions;
 
   for (const auto &p : search_list) {
-    if (p.type().decay_modes().decay_mode_list().size() == 0) {
+    const ParticleType &t = p.type();
+    if (t.decay_modes().decay_mode_list().size() == 0) {
+      continue;
+    }
+    if (only_res && t.is_stable()) {
       continue;
     }
 
     // effective mass of decaying particle
     const float m_eff = p.effective_mass();
-    DecayBranchList dil_modes = p.type().get_partial_widths_dilepton(m_eff);
+    DecayBranchList dil_modes = t.get_partial_widths_dilepton(m_eff);
 
     // total decay width, also hadronic decays
     const float width_tot = total_weight<DecayBranch>(
-                                            p.type().get_partial_widths(m_eff));
+                                                  t.get_partial_widths(m_eff));
 
     for (DecayBranchPtr & mode : dil_modes) {
       const float shining_weight = mode->weight() / width_tot;

@@ -21,10 +21,12 @@ namespace Smash {
 class ScatterActionsFinderPhoton : public ScatterActionsFinder {
  public:
   /** Initialize the finder with the given parameters. */
-  ScatterActionsFinderPhoton(double el_param,
-                 const ExperimentParameters &parameters,
-                 bool iso, bool two_to_one, bool two_to_two, int nofp)
-      : ScatterActionsFinder(el_param, parameters, iso, two_to_one, two_to_two),
+  ScatterActionsFinderPhoton(Configuration config,
+                       const ExperimentParameters &parameters,
+                       bool two_to_one, bool two_to_two,
+                       bool strings_switch, int nofp)
+      : ScatterActionsFinder(config, parameters_,two_to_one, two_to_two,
+        strings_switch),
         number_of_fractional_photons(nofp) {}
 
   /** Constructor for testing purposes. */

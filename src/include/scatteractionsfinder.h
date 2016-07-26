@@ -26,8 +26,12 @@ namespace Smash {
 class ScatterActionsFinder : public ActionFinderInterface {
  public:
   /** Initialize the finder with the given parameters. */
-  ScatterActionsFinder(double el_param, const ExperimentParameters &parameters,
-    bool iso, bool two_to_one, bool two_to_two);
+
+  ScatterActionsFinder(Configuration config,
+                       const ExperimentParameters &parameters,
+                       bool two_to_one, bool two_to_two,
+                       bool strings_switch);
+
   /** Constructor for testing purposes. */
   ScatterActionsFinder(float elastic_parameter, int testparticles);
 
@@ -70,7 +74,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
       float dt) const override;
   /** Find some final collisions at the end of the simulation.
    * Currently does nothing. */
-  ActionList find_final_actions(const Particles &) const override {
+  ActionList find_final_actions(const Particles & /*search_list*/,
+                                bool /*only_res*/ = false) const override {
     return ActionList();
   }
 
@@ -119,6 +124,10 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const bool two_to_one_;
   /** Enable 2->2 processes. */
   const bool two_to_two_;
+  /** Switch to turn off string excitation. */
+  const bool strings_switch_;
+  /** Parameter for formation time */
+  const float formation_time_;
 };
 
 #if 0

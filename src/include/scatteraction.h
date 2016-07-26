@@ -12,6 +12,7 @@
 
 #include "action.h"
 
+
 namespace Smash {
 
 /**
@@ -30,7 +31,8 @@ class ScatterAction : public Action {
    * \param[in] isotropic if true, do the collision isotropically
    */
   ScatterAction(const ParticleData &in_part1, const ParticleData &in_part2,
-                float time, bool isotropic = false);
+                float time, bool isotropic = false,
+                float formation_time = 1.0f);
 
   /** Add a new collision channel. */
   void add_collision(CollisionBranchPtr p);
@@ -58,8 +60,8 @@ class ScatterAction : public Action {
   float raw_weight_value() const override;
 
   /** Add all possible subprocesses for this action object. */
-  virtual void add_all_processes(float elastic_parameter, bool two_to_one,
-                         bool two_to_two);
+  virtual void add_all_processes(float elastic_parameter,
+                         bool two_to_one, bool two_to_two, bool strings_switch);
 
   /**
    * Determine the (parametrized) total cross section for this collision. This
@@ -163,9 +165,14 @@ class ScatterAction : public Action {
   double cm_momentum_squared() const;
   /// determine the velocity of the center-of-mass frame in the lab
   ThreeVector beta_cm() const;
+  /// determine the corresponding gamma factor
+  double gamma_cm() const;
 
   /** Perform an elastic two-body scattering, i.e. just exchange momentum. */
   void elastic_scattering();
+
+  /** Perform the string excitation and decay via Pythia. */
+  void string_excitation();
 
   /**
    * \ingroup logging
@@ -181,6 +188,9 @@ class ScatterAction : public Action {
 
   /** Do this collision isotropically. */
   bool isotropic_ = false;
+
+  /** Formation time parameter for string fragmentation*/
+  float formation_time_ = 1.0f;
 
  private:
   /** Check if the scattering is elastic. */
