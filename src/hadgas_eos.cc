@@ -53,7 +53,7 @@ void EosTable::compile_table(HadronGasEos &eos,
   if (table_read_success) {
     // Check if the saved table is consistent with the current particle table
     std::cout << "Checking consistency of the table... " << std::endl;
-    const size_t number_of_steps = 50;
+    constexpr size_t number_of_steps = 50;
     const size_t ie_step = 1 + n_e_/number_of_steps;
     const size_t inb_step = 1 + n_nb_/number_of_steps;
     for (size_t ie = 0; ie < n_e_; ie += ie_step) {
