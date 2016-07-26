@@ -25,7 +25,7 @@ class ScatterActionsFinderPhoton : public ScatterActionsFinder {
                        const ExperimentParameters &parameters,
                        bool two_to_one, bool two_to_two,
                        bool strings_switch, int nofp)
-      : ScatterActionsFinder(config, parameters_,two_to_one, two_to_two,
+      : ScatterActionsFinder(config, parameters,two_to_one, two_to_two,
         strings_switch),
         number_of_fractional_photons(nofp) {}
 

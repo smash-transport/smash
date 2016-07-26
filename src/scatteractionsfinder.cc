@@ -48,7 +48,7 @@ ScatterActionsFinder::ScatterActionsFinder(
     : elastic_parameter_(config.take({"Collision_Term",
                                       "Elastic_Cross_Section"}, -1.0f)),
       testparticles_(parameters.testparticles),
-      isotropic_(iso),
+      isotropic_(config.take({"Collision_Term", "Isotropic"}, false)),
       two_to_one_(two_to_one),
       two_to_two_(two_to_two),
       strings_switch_(strings_switch),

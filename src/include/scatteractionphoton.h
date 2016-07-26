@@ -24,8 +24,9 @@ class ScatterActionPhoton : public ScatterAction {
 
   void generate_final_state() override;
 
-  void add_all_processes(float elastic_parameter, bool two_to_one,
-           bool two_to_two) override;
+  void add_all_processes(float elastic_parameter,
+                         bool two_to_one, bool two_to_two, 
+			 bool strings_switch) override;
 
   float raw_weight_value() const override { return weight_; }
 

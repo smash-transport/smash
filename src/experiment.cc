@@ -304,9 +304,6 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   const bool strings_switch = config.take({"Collision_Term", "Strings"}, false);
 
   // create finders
-  const double elastic_cross_section = config.take({"Collision_Term",
-                                      "Elastic_Cross_Section"}, -1.0f);
-  const bool isotropic = config.take({"Collision_Term", "Isotropic"}, false);
   if (two_to_one) {
     action_finders_.emplace_back(make_unique<DecayActionsFinder>());
   }
