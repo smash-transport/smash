@@ -172,17 +172,6 @@ HadronGasEos::~HadronGasEos() {
   gsl_vector_free(x_);
 }
 
-const ParticleTypePtrList HadronGasEos::list_eos_particles() {
-  ParticleTypePtrList list;
-  list.reserve(ParticleType::list_all().size());
-  for (const ParticleType &ptype : ParticleType::list_all()) {
-    if (is_eos_particle(ptype)) {
-      list.emplace_back(&ptype);
-    }
-  }
-  return list;
-}
-
 double HadronGasEos::scaled_partial_density(const ParticleType& ptype,
                                          double beta, double mub, double mus) {
   const double z = ptype.mass()*beta;
