@@ -31,13 +31,13 @@ void propagate_straight_line(Particles *particles,
   for (ParticleData &data : *particles) {
     double h = calc_hubble(parameters.labclock.current_time());
     FourVector distance = FourVector(0.0, data.velocity() * dt);
-    FourVector delta_mom = FourVector(h*dt*data.momentum().x0(), 0.0, 0.0, 0.0);
+   // FourVector delta_mom = FourVector(h*dt*data.momentum().x0(), 0.0, 0.0, 0.0);
     FourVector expan_dist = FourVector(0.0, h*data.position().threevec()*dt);
     log.debug("Particle ", data, " motion: ", distance);
     FourVector position = data.position() + distance + expan_dist;
     position.set_x0(parameters.new_particle_time());
     data.set_4position(position);
-    data.set_4momentum(data.momentum() - delta_mom);
+   // data.set_4momentum(data.momentum() - delta_mom);
     /* Test, if particle is formed and reset cross_section_scaling_factor
        TODO: Is there a way to only do that for particles that were unformed 
        in the previous timestep? */
