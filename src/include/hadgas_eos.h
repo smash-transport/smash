@@ -28,7 +28,7 @@ class HadronGasEos;
  */
 class EosTable {
  public:
-  EosTable(double de, double dnb, int n_e, int n_b);
+  EosTable(double de, double dnb, size_t n_e, size_t n_b);
   struct table_element {
     double p;
     double T;
@@ -40,12 +40,12 @@ class EosTable {
   void get(table_element& res, double e, double nb) const;
 
  private:
-  int index(int ie, int inb) const { return ie*n_nb_ + inb; }
+  size_t index(size_t ie, size_t inb) const { return ie*n_nb_ + inb; }
   std::vector<table_element> table_;
   double de_;
   double dnb_;
-  int n_e_;
-  int n_nb_;
+  size_t n_e_;
+  size_t n_nb_;
 };
 
 /**
