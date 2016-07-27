@@ -16,9 +16,10 @@
 
 #include "include/average.h"
 #include "include/cxx14compat.h"
-#include "include/kinematics.h"
 #include "include/interpolation.h"
+#include "include/kinematics.h"
 #include "include/lowess.h"
+#include "include/pow.h"
 
 namespace Smash {
 
@@ -439,6 +440,100 @@ float kplusp_inelastic(double mandelstam_s) {
   const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
   return (*kplusp_total_interpolation)(p_lab)
          - kplusp_elastic(mandelstam_s);
+}
+
+
+/* Parametrizations of strangeness exchange channels
+ *
+ * Taken from UrQMD (\iref{Graef:2014mra}).
+ */
+
+float kminusp_piminussigmaplus(double sqrts) {
+  return 0.0788265 / Smash::square(sqrts - 1.38841);
+}
+
+float kminusp_piplussigmaminus(double sqrts) {
+  return 0.0196741 / Smash::square(sqrts - 1.42318);
+}
+
+float kminusp_pi0sigma0(double sqrts) {
+  return 0.55 * 0.0508208 / Smash::square(sqrts - 1.38837);
+}
+
+float kminusp_pi0lambda(double sqrts) {
+  return 0.45 * 0.0508208 / Smash::square(sqrts - 1.38837);
+}
+
+// TODO(steinberg): Rest by isospin symmetry and detailed balance.
+
+// Two hyperon exchange, based on effective model by Feng Li,
+// as in UrQMD (\iref{Graef:2014mra}).
+
+float lambdalambda_ximinusp(double sqrts_sqrts0, double p_N, double p_lambda) {
+  assert(p_lambda != 0);
+  assert(sqrts_sqrts0 >= 0);
+  return 37.15 / 2 * p_N / p_lambda * std::pow(sqrts_sqrts0, -0.16);
+}
+
+float lambdalambda_xi0n(double sqrts_sqrts0, double p_N, double p_lambda) {
+  return lambdalambda_ximinusp(sqrts_sqrts0, p_N, p_lambda);
+}
+
+float lambdalambda_xiN(double sqrts_sqrts0, double p_N, double p_lambda) {
+  return 2 * lambdalambda_ximinusp(sqrts_sqrts0, p_N, p_lambda);
+}
+
+float lambdasigmaplus_xi0p(double sqrts_sqrts0) {
+  assert(sqrts_sqrts0 >= 0);
+  return 24.3781 * std::pow(sqrts_sqrts0, -0.479);
+}
+
+float lambdasigmaminus_ximinusn(double sqrts_sqrts0) {
+  return lambdasigmaplus_xi0p(sqrts_sqrts0);
+}
+
+float lambdasigma0_ximinusp(double sqrts_sqrts0) {
+  assert(sqrts_sqrts0 >= 0);
+  if (sqrts_sqrts0 < 0.03336) {
+    return 6.475 * std::pow(sqrts_sqrts0, -0.4167);
+  } else {
+    return 14.5054 * std::pow(sqrts_sqrts0, -0.1795);
+  }
+}
+
+float lambdasigma0_xi0n(double sqrts_sqrts0) {
+  return lambdasigma0_ximinusp(sqrts_sqrts0);
+}
+
+float sigma0sigma0_ximinusp(double sqrts_sqrts0) {
+  assert(sqrts_sqrts0 >= 0);
+  if (sqrts_sqrts0 < 0.09047) {
+    return 5.625 * std::pow(sqrts_sqrts0, -0.318);
+  } else {
+    return 4.174 * std::pow(sqrts_sqrts0, -0.4421);
+  }
+}
+
+// Note that there is a typo in the paper in equation (6):
+// "Lambda Sigma0 -> Xi0 n" should be "Sigma0 Sigma0 -> Xi0 n".
+float sigma0sigma0_xi0n(double sqrts_sqrts0) {
+  return sigma0sigma0_ximinusp(sqrts_sqrts0);
+}
+
+float sigmaplussigmaminus_xi0p(double sqrts_sqrts0) {
+  return 4 * sigma0sigma0_ximinusp(sqrts_sqrts0);
+}
+
+float sigma0sigmaminus_ximinusn(double sqrts_sqrts0) {
+  return 4 * sigma0sigma0_ximinusp(sqrts_sqrts0);
+}
+
+float sigmaplussigmaminus_ximinusp(double sqrts_sqrts0) {
+  return 14.194 * std::pow(sqrts_sqrts0, -0.442);
+}
+
+float sigmaplussigmaminus_xi0n(double sqrts_sqrts0) {
+  return sigmaplussigmaminus_ximinusp(sqrts_sqrts0);
 }
 
 }  // namespace Smash
