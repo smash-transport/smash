@@ -119,9 +119,6 @@ float lambdalambda_ximinusp(double sqrts_sqrts0, double p_N, double p_lambda);
 /// Lambda Lambda <-> Xi0 n cross section parametrization
 float lambdalambda_xi0n(double sqrts_sqrts0, double p_N, double p_lambda);
 
-/// Lambda Lambda <-> Xi N cross section parametrization
-float lambdalambda_xiN(double sqrts_sqrts0, double p_N, double p_lambda);
-
 /// Lambda Sigma+ <-> Xi0 p cross section parametrization
 float lambdasigmaplus_xi0p(double sqrts_sqrts0);
 

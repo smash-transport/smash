@@ -479,10 +479,6 @@ float lambdalambda_xi0n(double sqrts_sqrts0, double p_N, double p_lambda) {
   return lambdalambda_ximinusp(sqrts_sqrts0, p_N, p_lambda);
 }
 
-float lambdalambda_xiN(double sqrts_sqrts0, double p_N, double p_lambda) {
-  return 2 * lambdalambda_ximinusp(sqrts_sqrts0, p_N, p_lambda);
-}
-
 float lambdasigmaplus_xi0p(double sqrts_sqrts0) {
   assert(sqrts_sqrts0 >= 0);
   return 24.3781 * std::pow(sqrts_sqrts0, -0.479);
