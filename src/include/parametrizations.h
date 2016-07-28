@@ -113,6 +113,15 @@ float kminusp_pi0sigma0(double sqrts);
 /// K- p <-> pi0 Lambda cross section parametrization
 float kminusp_pi0lambda(double sqrts);
 
+/// K- n <-> pi- Sigma0 cross section parametrization
+float kminusn_piminussigma0(double sqrts);
+
+/// K- n <-> pi0 Sigma- cross section parametrization
+float kminusn_pi0sigmaminus(double sqrts);
+
+/// K- n <-> pi- Lambda cross section parametrization
+float kminusn_piminuslambda(double sqrts);
+
 /// Lambda Lambda <-> Xi- p cross section parametrization
 float lambdalambda_ximinusp(double sqrts_sqrts0, double p_N, double p_lambda);
 

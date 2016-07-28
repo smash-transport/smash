@@ -464,7 +464,24 @@ float kminusp_pi0lambda(double sqrts) {
   return 0.45 * 0.0508208 / Smash::square(sqrts - 1.38837);
 }
 
-// TODO(steinberg): Rest by isospin symmetry and detailed balance.
+// The other channels follow from isospin symmetry:
+
+float kminusn_piminussigma0(double sqrts) {
+  constexpr float clebsch_factor = (0.5 + 1/std::sqrt(6)) * std::sqrt(2);
+  return clebsch_factor * kminusp_piminussigmaplus(sqrts);
+  // It is not clear which of the parametrizations should be used, because they
+  // are isospin symmetric.
+}
+
+float kminusn_pi0sigmaminus(double sqrts) {
+  return kminusn_piminussigma0(sqrts);
+}
+
+float kminusn_piminuslambda(double sqrts) {
+  return 1/std::sqrt(2) * kminusp_pi0lambda(sqrts);
+}
+
+// All K+ p and K+ n channels are forbidden by isospin.
 
 // Two hyperon exchange, based on effective model by Feng Li,
 // as in UrQMD (\iref{Graef:2014mra}).
