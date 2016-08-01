@@ -46,7 +46,7 @@ class BesselSampler {
     const auto &log = logger<LogArea::GrandcanThermalizer>();
     assert(poisson_mean1 > 0.0);
     assert(poisson_mean2 > 0.0);
-    log.info("Bessel sampler",
+    log.debug("Bessel sampler",
              ": Poisson mean N1 = ", poisson_mean1,
              ", Poisson mean N2 = ", poisson_mean2,
              ", N1 - N2 fixed to ", fixed_difference);
@@ -55,10 +55,10 @@ class BesselSampler {
       mu_ = 0.5 * a_ * r(N_, a_);
       const double mean_sqr = mu_* (1.0 + 0.5 * a_ * r(N_+1, a_));
       sigma_ = std::sqrt(mean_sqr - mu_*mu_);
-      log.info("m = ", m_," -> using gaussian sampling with mean = ",
+      log.debug("m = ", m_," -> using gaussian sampling with mean = ",
                mu_, ", sigma = ", sigma_);
     } else {
-      log.info("m = ", m_," -> using direct sampling method");
+      log.debug("m = ", m_," -> using direct sampling method");
       std::vector<double> probabilities;
       double wi = 1.0, sum = 0.0;
       int i = 0;
@@ -71,7 +71,7 @@ class BesselSampler {
       i = 0;
       for (double p : probabilities) {
         p /= sum;
-        log.info("Probability (", i, ") = ", p);
+        log.debug("Probability (", i, ") = ", p);
         i++;
       }
       dist_.reset_weights(probabilities);

@@ -200,13 +200,13 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time, int ntes
 
   ParticleList sampled_list;
 
-  BesselSampler bessel_sampler(mult_classes_[0], mult_classes_[1],
-                               conserved_initial.baryon_number());
+  BesselSampler bessel_sampler_B(mult_classes_[0], mult_classes_[1],
+                                 conserved_initial.baryon_number());
 
   while (true) {
     sampled_list.clear();
     std::fill(mult_int_.begin(), mult_int_.end(), 0);
-    const auto Nbar_antibar = bessel_sampler.sample();
+    const auto Nbar_antibar = bessel_sampler_B.sample();
 
     sample_multinomial(0, Nbar_antibar.first);
     sample_multinomial(1, Nbar_antibar.second);
@@ -216,29 +216,24 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time, int ntes
     for (size_t i = 0; i < N_sorts_; i++) {
       S_sampled += eos_typelist_[i]->strangeness() * mult_int_[i];
     }
-    const int Nmes_S = Random::poisson(mult_classes_[2]);
-    const int Nmes_antiS = Random::poisson(mult_classes_[3]);
-    if (Nmes_S - Nmes_antiS != conserved_initial.strangeness() - S_sampled) {
-     /* std::cout << "strangeness fail: NmesS = " << Nmes_S << ", Nmes_antiS = " << Nmes_antiS <<
-               ", initial S = " << conserved_initial.strangeness() << ", sampled S = " << S_sampled << std::endl;*/
-      continue;
-    }
-    sample_multinomial(2, Nmes_S);
-    sample_multinomial(3, Nmes_antiS);
+    BesselSampler bessel_sampler_S(mult_classes_[2], mult_classes_[3],
+                                   conserved_initial.strangeness() - S_sampled);
+    const auto NS_antiS = bessel_sampler_S.sample();
+
+    sample_multinomial(2, NS_antiS.first);
+    sample_multinomial(3, NS_antiS.second);
     // Count charge of the sampled particles
     int ch_sampled = 0;
     for (size_t i = 0; i < N_sorts_; i++) {
       ch_sampled += eos_typelist_[i]->charge() * mult_int_[i];
     }
-    const int Nmes_S0_chplus = Random::poisson(mult_classes_[4]);
-    const int Nmes_S0_chminus = Random::poisson(mult_classes_[5]);
-    if (Nmes_S0_chplus - Nmes_S0_chminus != conserved_initial.charge() - ch_sampled) {
-    /*  std::cout << "charge fail: Nmes_S0_chplus = " << Nmes_S0_chplus << ", Nmes_S0_chminus = " << Nmes_S0_chminus <<
-               ", initial ch = " << conserved_initial.charge() << ", sampled ch = " << ch_sampled << std::endl;*/
-      continue;
-    }
-    sample_multinomial(4, Nmes_S0_chplus);
-    sample_multinomial(5, Nmes_S0_chminus);
+
+    BesselSampler bessel_sampler_C(mult_classes_[4], mult_classes_[5],
+                                   conserved_initial.charge() - ch_sampled);
+    const auto NC_antiC = bessel_sampler_C.sample();
+
+    sample_multinomial(4, NC_antiC.first);
+    sample_multinomial(5, NC_antiC.second);
     sample_multinomial(6, Random::poisson(mult_classes_[6]));
 
     for (size_t itype = 0; itype < N_sorts_; itype++) {
