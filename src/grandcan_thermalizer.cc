@@ -122,18 +122,23 @@ void GrandCanThermalizer::update_lattice(const Particles& particles,
   }
 }
 
-void GrandCanThermalizer::sample_multinomial(int particle_class, int N) {
+void GrandCanThermalizer::sample_multinomial(int particle_class,
+                                             int N_to_sample) {
   double sum = mult_classes_[particle_class];
-  for (size_t i_type = 0; i_type < N_sorts_; i_type++) {
+  for (size_t i_type = 0; (i_type < N_sorts_) && (N_to_sample > 0); i_type++) {
     if (get_class(i_type) != particle_class) {
       continue;
     }
     const double p = mult_sort_[i_type]/sum;
-    mult_int_[i_type] = Random::binomial(N, p);
-    /*std::cout << eos_typelist_[i_type]->name() << ": mult_sort = " << mult_sort_[i_type] << ", sum = " << sum <<
-              ", p = " << p << ", N = " << N << ", mult_int_ = " << mult_int_[i_type] << std::endl;*/
+    mult_int_[i_type] = Random::binomial(N_to_sample, p);
+    /*std::cout << eos_typelist_[i_type]->name() <<
+             ": mult_sort = " << mult_sort_[i_type] <<
+             ", sum = " << sum <<
+             ", p = " << p <<
+             ", N to sample = " << N_to_sample <<
+             ", mult_int_ = " << mult_int_[i_type] << std::endl;*/
     sum -= mult_sort_[i_type];
-    N -= mult_int_[i_type];
+    N_to_sample -= mult_int_[i_type];
   }
 }
 
