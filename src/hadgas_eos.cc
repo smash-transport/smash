@@ -184,11 +184,17 @@ double HadronGasEos::scaled_partial_density(const ParticleType& ptype,
                    ptype.strangeness()*mus -
                     ptype.mass());
   const unsigned int g = ptype.spin() + 1;
-  x = (x < -700.0) ? 0.0 : std::exp(x);
+  /*if (x < -600.0) {
+    std::cout << x << " " << z << " " << g << std::endl;
+  }*/
+  if (x < -500.0) {
+    return 0.0;
+  }
+  x = std::exp(x);
   // The case of small mass: K_n(z) -> (n-1)!/2 *(2/z)^n, z -> 0
   // z*z*K_2(z) -> 2
   return (z < really_small) ? 2.0*g*x :
-           z*z * g*x * gsl_sf_bessel_Kn_scaled(2, z);
+          z*z * g*x * gsl_sf_bessel_Kn_scaled(2, z);
 }
 
 double HadronGasEos::partial_density(const ParticleType& ptype,
@@ -214,7 +220,10 @@ double HadronGasEos::energy_density(double T, double mub, double mus) {
       std::cout << "Overflow? - x = " << x << ", T = " << T
                 << ", mub = " << mub << ", mus = " << mus << ", m = " << ptype->mass() << std::endl;
     }
-    x = (x < -700.0) ? 0.0 : std::exp(x);
+    if (x < -500.0) {
+      return 0.0;
+    }
+    x = std::exp(x);
     const unsigned int g = ptype->spin() + 1;
     // Small mass case, z*z*K_2(z) -> 2, z*z*z*K_1(z) -> 0 at z->0
     e += (z < really_small) ? 3.0*g*x :
