@@ -81,5 +81,67 @@ void ScatterActionNucleonKaon::format_debug_output(std::ostream &out) const {
   ScatterAction::format_debug_output(out);
 }
 
+CollisionBranchList ScatterActionNucleonKaon::two_to_two_cross_sections() {
+  const ParticleType &type_particle_a = incoming_particles_[0].type();
+  const ParticleType &type_particle_b = incoming_particles_[1].type();
+
+  CollisionBranchList process_list = two_to_two_inel(type_particle_a,
+                                                     type_particle_b);
+
+  return process_list;
+}
+
+CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
+                            const ParticleType &type_particle_a,
+                            const ParticleType &type_particle_b) {
+  CollisionBranchList process_list;
+
+  const ParticleType &type_nucleon =
+      type_particle_a.pdgcode().is_nucleon() ? type_particle_a : type_particle_b;
+  const ParticleType &type_kaon =
+      type_particle_a.pdgcode().is_nucleon() ? type_particle_b : type_particle_a;
+  assert(kaon != nucleon);
+
+  const auto pdg_nucleon = type_nucleon.pdgcode().code();
+  const auto pdg_kaon = type_kaon.pdgcode().code();
+
+  const double sqrts = sqrt_s();
+
+  // calculate cross section
+  auto add_channel
+    = [&](float xsection, const ParticleType &type_a, const ParticleType &type_b) {
+      if (xsection > really_small) {
+        process_list.push_back(make_unique<CollisionBranch>(
+          type_a, type_b, xsection, ProcessType::TwoToTwo));
+      }
+  };
+  if (pdg_kaon == -0x321) {
+    switch (pdg_nucleon) {
+      case 0x2212: {  // p
+        const ParticleType &type_pi0 = ParticleType::find(0x111);
+        add_channel(kminusp_piminussigmaplus(sqrts),
+                    ParticleType::find(-0x211), ParticleType::find(0x3222));
+        add_channel(kminusp_piplussigmaminus(sqrts),
+                    ParticleType::find(0x211), ParticleType::find(-0x3222));
+        add_channel(kminusp_pi0sigma0(sqrts),
+                    type_pi0, ParticleType::find(0x3212));
+        add_channel(kminusp_pi0lambda(sqrts),
+                    type_pi0, ParticleType::find(0x3122));
+        break;
+      }
+      case 0x2112:  // n
+        const ParticleType &type_piminus = ParticleType::find(-0x211);
+        add_channel(kminusn_piminussigma0(sqrts),
+                    type_piminus, ParticleType::find(0x3212));
+        add_channel(kminusn_pi0sigmaminus(sqrts),
+                    ParticleType::find(0x111), ParticleType::find(0x3222));
+        add_channel(kminusn_piminuslambda(sqrts),
+                    type_piminus, ParticleType::find(0x3122));
+        break;
+    }
+  }
+
+  return process_list;
+}
 
 }  // namespace Smash
