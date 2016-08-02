@@ -63,7 +63,7 @@ class ScatterActionPhoton : public ScatterAction {
 
   float cross_section_photons_ = 0.0;
 
-  static const int num_tab_pts = 200;
+  const int num_tab_pts = 200;
 
   enum class ReactionType {
     no_reaction = 0,
