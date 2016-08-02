@@ -25,8 +25,8 @@ class ScatterActionPhoton : public ScatterAction {
   void generate_final_state() override;
 
   void add_all_processes(float elastic_parameter,
-                         bool two_to_one, bool two_to_two, 
-			 bool strings_switch) override;
+                         bool two_to_one, bool two_to_two,
+                         bool strings_switch) override;
 
   float raw_weight_value() const override { return weight_; }
 
@@ -39,11 +39,11 @@ class ScatterActionPhoton : public ScatterAction {
   }
 
   /** Overridden to effectively return the reaction channel. */
-  virtual ProcessType get_type() const {
+  virtual ProcessType get_type() const override {
     return static_cast<ProcessType>(reac);
   }
 
-  /**To add only one reaction for testing purposes */
+  /** To add only one reaction for testing purposes */
   void add_single_channel(){
     add_processes<CollisionBranch>(photon_cross_sections(),
                                   collision_channels_photons_,

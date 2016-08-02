@@ -99,8 +99,7 @@ void ScatterActionPhoton::generate_final_state() {
 }
 
 void ScatterActionPhoton::add_all_processes(float elastic_parameter,
-                                      bool two_to_one, bool two_to_two, 
-				      bool strings_switch) {
+                                      bool two_to_one, bool two_to_two, bool) {
   if (two_to_one) {
     /* resonance formation (2->1) */
     add_collisions(resonance_cross_sections());
