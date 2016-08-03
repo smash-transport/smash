@@ -158,7 +158,15 @@ class ParticleData {
   void set_cross_section_scaling_factor(const float &xsec_scal) {
     cross_section_scaling_factor_ = xsec_scal;
   }
-
+  /// Return collision counter per particle
+  const int &collisions_per_particle() const {
+    return collisions_per_particle_;
+  }
+  /// Set collision counter per particle
+  void set_collisions_per_particle(const int &coll_particle) {
+    collisions_per_particle_ = coll_particle;
+  }
+    
   /// get the velocity 3-vector
   ThreeVector velocity() const { return momentum_.velocity(); }
 
@@ -276,7 +284,8 @@ class ParticleData {
   float formation_time_ = 0.0;
   /// cross section scaling factor for unformed particles
   float cross_section_scaling_factor_ = 1.0;
-
+  /// Collision counter per particle, zero only for initially present particles
+  int collisions_per_particle_ = 0;
   // history information
   HistoryData history_;
 };
