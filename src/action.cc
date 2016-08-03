@@ -79,7 +79,7 @@ void Action::perform(Particles *particles, uint32_t id_process) {
 
   for (ParticleData &p : outgoing_particles_) {
     // store the history info
-    p.set_history(id_process, process_type_, incoming_particles_);
+    p.set_history(id_process, process_type_, time_of_execution_, incoming_particles_);
   }
 
   particles->update(incoming_particles_, outgoing_particles_,

@@ -25,6 +25,8 @@ struct HistoryData {
   uint32_t id_process = 0;
   // type of the last action
   ProcessType process_type = ProcessType::None;
+  // time of the last action (excluding walls)
+  float time_of_origin = 0.0;
   // PdgCodes of the parent particles
   PdgCode p1 = 0x0, p2 = 0x0;
 };
@@ -81,7 +83,8 @@ class ParticleData {
   HistoryData get_history() const { return history_; }
   /** Store history information, i.e. the type of process and possibly the
    * PdgCodes of the parent particles (\p plist). */
-  void set_history(uint32_t pid, ProcessType pt, const ParticleList& plist);
+  void set_history(uint32_t pid, ProcessType pt, float too,
+                   const ParticleList& plist);
 
   /// return the particle's 4-momentum
   const FourVector &momentum() const { return momentum_; }
