@@ -320,6 +320,14 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * # SMASH_version
  * \endcode
  *
+ * For the extended version of this output the header is modified to read:\n
+ * **Header**
+ * \code
+ * #!OSCAR2013 particle_lists t x y z mass p0 px py pz pdg ID ncoll form_time xsecfac proc_id_origin proc_type_origin time_origin pdg_mother1 pdg_mother2
+ * # Units: fm fm fm fm GeV GeV GeV GeV GeV none none none fm none none none fm none none
+ * # SMASH_version
+ * \endcode
+ 
  * **Output block header**\n
  * At start of event:
  * \code
@@ -335,6 +343,11 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * t x y z mass p0 px py pz pdg ID
  * \endcode
  *
+ * For the extended version the particle line contains
+ * \code
+ * t x y z mass p0 px py pz pdg ID Ncoll formation_time cross_section_scaling_factor 
+ * process_ID_origin process_type_origin time_of_origin PDG_mother1 PDG_mother2
+ * \endcode
  * **Event end line**
  * \code
  * # event ev_num end 0
