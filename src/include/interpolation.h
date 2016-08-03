@@ -94,22 +94,27 @@ std::vector<T> apply_permutation(const std::vector<T>& v,
   return copied_v;
 }
 
+/// check whether two components have the same value in vector x
+template<typename T>
+void check_duplicates(const std::vector<T> & x, std::string error_position) {
+  // to see whether there are two duplicate xi in x
+  auto it = std::adjacent_find(x.begin(), x.end());
+  if (it != x.end()) {
+      std::stringstream error_msg;
+      error_msg << error_position << ": Each x value must be unique. \""
+                    << *it << "\" was found twice.";
+          throw std::runtime_error(error_msg.str());
+  }
+}
+
 template <typename T>
 InterpolateDataLinear<T>::InterpolateDataLinear(const std::vector<T>& x,
                                     const std::vector<T>& y) {
   assert(x.size() == y.size());
   const size_t n = x.size();
+  check_duplicates(x, "InterpolateDataLinear");
   const auto p = generate_sort_permutation(
       x, [&](T const& a, T const& b) {
-        #pragma GCC diagnostic push
-        #pragma GCC diagnostic ignored "-Wfloat-equal"
-        if (a == b) {
-        #pragma GCC diagnostic pop
-          std::stringstream error_msg;
-          error_msg << "InterpolateDataSpline: Each x value must be unique. \""
-                    << a << "\" was found twice.";
-          throw std::runtime_error(error_msg.str());
-        }
         return a < b;
       });
   x_ = std::move(apply_permutation(x, p));
