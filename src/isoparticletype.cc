@@ -19,6 +19,8 @@ IsoParticleType::IsoParticleType(const std::string &n, float m, float w,
                                  unsigned int s)
                                 : name_(n), mass_(m), width_(w), spin_(s) {}
 
+const IsoParticleTypeList& IsoParticleType::list_all() { return iso_type_list; }
+
 const IsoParticleType& IsoParticleType::find(const std::string &name) {
   const auto found = std::lower_bound(
       iso_type_list.begin(), iso_type_list.end(), name,
