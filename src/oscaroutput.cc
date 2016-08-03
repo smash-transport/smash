@@ -40,6 +40,10 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
    * true - output will be in OSCAR2013 format\n
    * false - output will be in OSCAR1999 format
    *
+   * \key 2013_Extended (bool, optional, default = false): \n
+   * true - print extended information for each particle \n
+   * false - regular output for each particle
+   *
    * \key Only_Final (bool, optional, default = true): \n
    * true - print only final particle list \n
    * false - particle list at output interval including initial time
@@ -56,6 +60,10 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
    * \key 2013_Format (bool, optional, default = false): \n
    * true - output will be in OSCAR2013 format\n
    * false - output will be in OSCAR1999 format
+   *
+   * \key 2013_Extended (bool, optional, default = false): \n
+   * true - print extended information for each particle \n
+   * false - regular output for each particle
    *
    * \key Print_Start_End (bool, optional, default = false): \n
    * true - initial and final particle list is written out \n
@@ -112,13 +120,19 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
    * Collisions output contains all collisions / decays / box wall crossings
    * and optionally initial and final configuration.
    */
-
   if (Format == OscarFormat2013) {
     std::fprintf(file_.get(),
                  "#!OSCAR2013 %s t x y z mass p0 px py pz pdg ID\n",
                  name.c_str());
     std::fprintf(file_.get(),
                  "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none\n");
+    std::fprintf(file_.get(), "# %s\n", VERSION_MAJOR);
+  } else if (Format == OscarFormat2013Extended) {
+    std::fprintf(file_.get(),
+                 "#!OSCAR2013Extended %s t x y z mass p0 px py pz pdg ID ncoll form_time xsecfac proc_id_origin proc_type_origin time_origin pdg_mother1 pdg_mother2 \n",
+                 name.c_str());
+    std::fprintf(file_.get(),
+                 "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none none fm none none none fm none none\n");
     std::fprintf(file_.get(), "# %s\n", VERSION_MAJOR);
   } else {
     if (name == "particle_lists") {
@@ -417,6 +431,16 @@ void OscarOutput<Format, Contents>::write_particledata(
                  pos.x0(), pos.x1(), pos.x2(), pos.x3(), data.effective_mass(),
                  mom.x0(), mom.x1(), mom.x2(), mom.x3(),
                  data.pdgcode().string().c_str(), data.id());
+  } else if (Format == OscarFormat2013Extended) {
+    std::fprintf(file_.get(), "%g %g %g %g %g %.9g %.9g %.9g %.9g %s %i %i %g %g %i %i %g %s %s\n",
+                 pos.x0(), pos.x1(), pos.x2(), pos.x3(), data.effective_mass(),
+                 mom.x0(), mom.x1(), mom.x2(), mom.x3(),
+                 data.pdgcode().string().c_str(), data.id(),
+                 data.collisions_per_particle(), data.formation_time(),
+                 data.cross_section_scaling_factor(), data.get_history().id_process,
+                 data.get_history().process_type, data.get_history().time_of_origin,
+                 data.get_history().p1.string().c_str(), data.get_history().p2.string().c_str());
+      
   } else {
     std::fprintf(file_.get(), "%i %s %i %g %g %g %g %g %g %g %g %g\n",
                  data.id(), data.pdgcode().string().c_str(), 0, mom.x1(),
@@ -432,9 +456,15 @@ std::unique_ptr<OutputInterface> create_select_format(const bf::path &path,
                                                       std::string name) {
   const bool modern_format =
       config.has_value({"2013_Format"}) ? config.take({"2013_Format"}) : false;
+  const bool extended_format =
+    config.has_value({"2013_Extended"}) ? config.take({"2013_Extended"}) : false;
+
   if (modern_format) {
     return make_unique<OscarOutput<OscarFormat2013, Contents>>(std::move(path),
                                                                std::move(name));
+  } else if (extended_format) {
+    return make_unique<OscarOutput<OscarFormat2013Extended,
+                                    Contents>>(std::move(path),std::move(name));
   } else {
     return make_unique<OscarOutput<OscarFormat1999, Contents>>(std::move(path),
                                                                std::move(name));
