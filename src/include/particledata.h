@@ -83,7 +83,7 @@ class ParticleData {
   HistoryData get_history() const { return history_; }
   /** Store history information, i.e. the type of process and possibly the
    * PdgCodes of the parent particles (\p plist). */
-  void set_history(uint32_t pid, ProcessType pt, float too,
+  void set_history(uint32_t pid, ProcessType pt, float time_of_or,
                    const ParticleList& plist);
 
   /// return the particle's 4-momentum

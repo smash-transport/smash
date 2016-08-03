@@ -28,13 +28,10 @@ float ParticleData::effective_mass() const {
   }
 }
 
-void ParticleData::set_history(uint32_t pid, ProcessType pt, float too,
+void ParticleData::set_history(uint32_t pid, ProcessType pt, float time_of_or,
                                const ParticleList& plist) {
-  if (pt == ProcessType::Wall) {
-    history_.time_of_origin = history_.time_of_origin;
-  }
-  else {
-    history_.time_of_origin = too;
+  if (pt != ProcessType::Wall) {
+    history_.time_of_origin = time_of_or;
   }
   history_.id_process = pid;
   history_.process_type = pt;
