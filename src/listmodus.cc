@@ -141,9 +141,13 @@ float ListModus::initial_conditions(Particles *particles,
         try {
           ParticleData &particle = particles->create(pdgcode);
           particle.set_4momentum(FourVector(E, px, py, pz));
-          particle.set_4position(FourVector(start_time_, x, y, z));
-        }
-        catch ( ParticleType::PdgNotFoundFailure ) {
+          float delta_t = t - start_time_;
+          FourVector start_timespace = FourVector(t, x, y, z) - delta_t * 
+              FourVector(E, px, py, pz) / E;
+          particle.set_4position(start_timespace);
+          particle.set_formation_time(t);
+          particle.set_cross_section_scaling_factor(0.0);
+        } catch ( ParticleType::PdgNotFoundFailure ) {
             throw LoadFailure(build_error_string(
                         "While loading external particle lists data:\n"
                         "PDG code not found for the particle. In " +
