@@ -25,6 +25,8 @@ struct HistoryData {
   uint32_t id_process = 0;
   // type of the last action
   ProcessType process_type = ProcessType::None;
+  // time of the last action (excluding walls)
+  float time_of_origin = 0.0;
   // PdgCodes of the parent particles
   PdgCode p1 = 0x0, p2 = 0x0;
 };
@@ -81,7 +83,8 @@ class ParticleData {
   HistoryData get_history() const { return history_; }
   /** Store history information, i.e. the type of process and possibly the
    * PdgCodes of the parent particles (\p plist). */
-  void set_history(uint32_t pid, ProcessType pt, const ParticleList& plist);
+  void set_history(uint32_t pid, ProcessType pt, float time_of_or,
+                   const ParticleList& plist);
 
   /// return the particle's 4-momentum
   const FourVector &momentum() const { return momentum_; }
@@ -155,7 +158,15 @@ class ParticleData {
   void set_cross_section_scaling_factor(const float &xsec_scal) {
     cross_section_scaling_factor_ = xsec_scal;
   }
-
+  /// Return collision counter per particle
+  const int &collisions_per_particle() const {
+    return collisions_per_particle_;
+  }
+  /// Set collision counter per particle
+  void set_collisions_per_particle(const int &coll_particle) {
+    collisions_per_particle_ = coll_particle;
+  }
+    
   /// get the velocity 3-vector
   ThreeVector velocity() const { return momentum_.velocity(); }
 
@@ -273,7 +284,8 @@ class ParticleData {
   float formation_time_ = 0.0;
   /// cross section scaling factor for unformed particles
   float cross_section_scaling_factor_ = 1.0;
-
+  /// Collision counter per particle, zero only for initially present particles
+  int collisions_per_particle_ = 0;
   // history information
   HistoryData history_;
 };

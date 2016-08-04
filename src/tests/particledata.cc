@@ -54,9 +54,9 @@ TEST(set_get) {
   COMPARE(p.id(), 4);
   COMPARE(p.pdgcode(), smashon);
   COMPARE(p.is_hadron(), smashon.is_hadron());
-  p.set_history(5, ProcessType::None, ParticleList{});
+  p.set_history(5, ProcessType::None, 1.2, ParticleList{});
   COMPARE(p.id_process(), 5u);
-  p.set_history(6, ProcessType::None, ParticleList{});
+  p.set_history(6, ProcessType::None, 1.2, ParticleList{});
   COMPARE(p.id_process(), 6u);
   FourVector m(1.0, 1.2, 1.4, 1.6);
   p.set_4momentum(m);
