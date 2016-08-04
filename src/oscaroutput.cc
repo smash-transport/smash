@@ -469,9 +469,7 @@ std::unique_ptr<OutputInterface> create_select_format(const bf::path &path,
                                                       std::string name) {
   const bool modern_format =
       config.has_value({"2013_Format"}) ? config.take({"2013_Format"}) : false;
-  const bool extended_format =
-    config.has_value({"2013_Extended"}) ? config.take({"2013_Extended"}) : false;
-
+  const bool extended_format = config.take({"2013_Extended"}, false);
   if (modern_format) {
     return make_unique<OscarOutput<OscarFormat2013, Contents>>(std::move(path),
                                                                std::move(name));
