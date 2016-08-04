@@ -262,6 +262,8 @@ void Experiment<Modus>::create_output(const char * name,
  *
  * \page input_collision_term_ Collision_Term
  *
+ * To dump a list of all possible 2->n reactions (n > 1) see \ref dump_react_.
+ *
  * \key Two_to_One (bool, optional, default = true) \n
  * Enable 2 <--> 1 processes (resonance formation and decays).
  *

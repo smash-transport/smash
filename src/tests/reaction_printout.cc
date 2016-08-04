@@ -48,7 +48,13 @@ TEST(init_particle_types) {
 TEST(init_decaymodes) {
   Test::create_actual_decaymodes();
 }
-
+/*!\Userguide
+ * \page dump_react_
+ *
+ * To dump the list of  all possible 2->n reactions (n > 1) run
+ * make run_reaction_printout
+ * in the build directory.
+ */
 TEST(printout_possible_channels) {
   const size_t N_isotypes = IsoParticleType::list_all().size();
   const size_t N_pairs = N_isotypes * (N_isotypes - 1) / 2;
