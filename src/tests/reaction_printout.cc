@@ -55,9 +55,8 @@ TEST(init_decaymodes) {
  * make run_reaction_printout
  * in the build directory. Every particle available in SMASH is
  * collided against every and reactions with non-zero cross-section
- * are dumped. Both colliding particles are assinged momenta of 3 GeV in the
- * opposite directions. This is enough to have a non-zero string contribution
- * to cross-sections.
+ * are dumped. Both colliding particles are assinged momenta from
+ * 0.1 to 10 GeV in the opposite directions to scan the possible sqrt(S).
  */
 TEST(printout_possible_channels) {
   const size_t N_isotypes = IsoParticleType::list_all().size();
@@ -69,6 +68,7 @@ TEST(printout_possible_channels) {
   constexpr bool two_to_two = true, strings_switch = true;
   std::cout << N_isotypes << " iso-particle types." << std::endl;
   std::cout << "They can make " << N_pairs << " pairs." << std::endl;
+  std::vector<double> momentum_scan_list = {0.1, 0.3, 0.5, 1.0, 2.0, 3.0, 5.0, 10.0};
 
   for (const IsoParticleType &A_isotype : IsoParticleType::list_all()) {
     for (const IsoParticleType &B_isotype : IsoParticleType::list_all()) {
@@ -83,36 +83,37 @@ TEST(printout_possible_channels) {
             continue;
           }
           ParticleData A(*A_type), B(*B_type);
-          // Momentum should be enough to get non-zero string cross-section
-          A.set_4momentum(A.pole_mass(), 3.0, 0.0, 0.0);
-          B.set_4momentum(B.pole_mass(), -3.0, 0.0, 0.0);
-          ScatterActionPtr act = construct_scatter_action(A, B);
-          act->add_all_processes(elastic_parameter, two_to_one,
-                                 two_to_two, strings_switch);
-          const float total_cs = act->cross_section();
-          if (total_cs <= 0.0) {
-            continue;
-          }
-          any_nonzero_cs = true;
-          for (const auto& channel : act->collision_channels()) {
-            std::string r;
-            if (channel->get_type() == ProcessType::String) {
-              r =  A_type->name() + B_type->name()
-                   + std::string("->strings");
-            } else {
-              std::string r_type =
-                (channel->get_type() == ProcessType::Elastic) ?
-                std::string(" (el)") :
-                      (channel->get_type() == ProcessType::TwoToTwo) ?
-                      std::string(" (inel)") :
-                           std::string(" (?)");
-              r = A_type->name() + B_type->name()
-                    + std::string("->")
-                    + channel->particle_types()[0]->name()
-                    + channel->particle_types()[1]->name()
-                    + r_type;
+          for (auto mom : momentum_scan_list) {
+            A.set_4momentum(A.pole_mass(), mom, 0.0, 0.0);
+            B.set_4momentum(B.pole_mass(), -mom, 0.0, 0.0);
+            ScatterActionPtr act = construct_scatter_action(A, B);
+            act->add_all_processes(elastic_parameter, two_to_one,
+                                   two_to_two, strings_switch);
+            const float total_cs = act->cross_section();
+            if (total_cs <= 0.0) {
+              continue;
             }
-            r_list.push_back(isoclean(r));
+            any_nonzero_cs = true;
+            for (const auto& channel : act->collision_channels()) {
+              std::string r;
+              if (channel->get_type() == ProcessType::String) {
+                r =  A_type->name() + B_type->name()
+                     + std::string("->strings");
+              } else {
+                std::string r_type =
+                  (channel->get_type() == ProcessType::Elastic) ?
+                  std::string(" (el)") :
+                        (channel->get_type() == ProcessType::TwoToTwo) ?
+                        std::string(" (inel)") :
+                             std::string(" (?)");
+                r = A_type->name() + B_type->name()
+                      + std::string("->")
+                      + channel->particle_types()[0]->name()
+                      + channel->particle_types()[1]->name()
+                      + r_type;
+              }
+              r_list.push_back(isoclean(r));
+            }
           }
         }
       }
