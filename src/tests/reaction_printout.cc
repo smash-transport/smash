@@ -93,8 +93,8 @@ TEST(printout_possible_channels) {
             continue;
           }
           ParticleData A(*A_type), B(*B_type);
-          A.set_4momentum(A.pole_mass(), 1.0, 0.0, 0.0);
-          B.set_4momentum(B.pole_mass(), -1.0, 0.0, 0.0);
+          A.set_4momentum(A.pole_mass(), 3.0, 0.0, 0.0);
+          B.set_4momentum(B.pole_mass(), -3.0, 0.0, 0.0);
           ScatterActionPtr act = construct_scatter_action(A, B);
           act->add_all_processes(elastic_parameter, two_to_one,
                                  two_to_two, strings_switch);
@@ -104,10 +104,23 @@ TEST(printout_possible_channels) {
           }
           any_nonzero_cs = true;
           for (const auto& channel : act->collision_channels()) {
-            std::string r = A_type->name() + B_type->name()
-                          + std::string("->")
-                          + channel->particle_types()[0]->name()
-                          + channel->particle_types()[1]->name();
+            std::string r;
+            if (channel->get_type() == ProcessType::String) {
+              r =  A_type->name() + B_type->name()
+                   + std::string("-> strings");
+            } else {
+              std::string r_type =
+                (channel->get_type() == ProcessType::Elastic) ?
+                std::string(" (el)") :
+                      (channel->get_type() == ProcessType::TwoToTwo) ?
+                      std::string(" (inel)") :
+                           std::string(" (?)");
+              r = A_type->name() + B_type->name()
+                    + std::string("->")
+                    + channel->particle_types()[0]->name()
+                    + channel->particle_types()[1]->name()
+                    + r_type;
+            }
             r_list.push_back(isoclean(r));
           }  
         }
