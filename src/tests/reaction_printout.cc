@@ -53,7 +53,11 @@ TEST(init_decaymodes) {
  *
  * To dump the list of  all possible 2->n reactions (n > 1) run
  * make run_reaction_printout
- * in the build directory.
+ * in the build directory. Every particle available in SMASH is
+ * collided against every and reactions with non-zero cross-section
+ * are dumped. Both colliding particles are assinged momenta of 3 GeV in the
+ * opposite directions. This is enough to have a non-zero string contribution
+ * to cross-sections.
  */
 TEST(printout_possible_channels) {
   const size_t N_isotypes = IsoParticleType::list_all().size();
