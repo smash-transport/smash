@@ -160,7 +160,7 @@ class ParticleData {
   void set_cross_section_scaling_factor(const float &xsec_scal) {
     cross_section_scaling_factor_ = xsec_scal;
   }
-    
+
   /// get the velocity 3-vector
   ThreeVector velocity() const { return momentum_.velocity(); }
 

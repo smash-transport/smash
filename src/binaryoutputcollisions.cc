@@ -161,7 +161,7 @@ void BinaryOutputBase::write_particledata(const ParticleData &p) {
   write(p.momentum());
   write(p.pdgcode().get_decimal());
   write(p.id());
-  if(extended_) {
+  if (extended_) {
     write(p.get_history().collisions_per_particle);
     write(p.formation_time());
     write(p.cross_section_scaling_factor());
