@@ -16,6 +16,7 @@
 #include "actionfinderfactory.h"
 #include "configuration.h"
 #include "constants.h"
+#include "scatteraction.h"
 
 namespace Smash {
 
