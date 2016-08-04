@@ -118,7 +118,6 @@ std::pair<bool, float> ListModus::check_formation_time_(
 
     bool anti_streaming_needed = (formation_time_difference > really_small)
                                   ? true : false; 
-    std::cout << "anti_streaming_needed=" << anti_streaming_needed << std::endl;
     return std::make_pair(anti_streaming_needed, earliest_formation_time);
 }
 
