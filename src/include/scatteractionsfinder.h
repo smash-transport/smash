@@ -104,6 +104,13 @@ class ScatterActionsFinder : public ActionFinderInterface {
             maximum_cross_section) / testparticles * fm2_mb * M_1_PI;
   }
 
+  /// Public interface to construct_scatter_action for testing purposes
+  ScatterActionPtr construct_scatter(const ParticleData &a,
+                                     const ParticleData &b) const {
+    constexpr float time = 0.0f;
+    return construct_scatter_action(a, b, time);
+  }
+
  private:
   /* Construct a ScatterAction object,
    * based on the types of the incoming particles. */

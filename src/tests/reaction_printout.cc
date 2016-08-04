@@ -14,36 +14,16 @@
 #include "../include/particletype.h"
 #include "../include/particledata.h"
 #include "../include/scatteraction.h"
-#include "../include/scatteractionbaryonbaryon.h"
-#include "../include/scatteractionbaryonmeson.h"
-#include "../include/scatteractionmesonmeson.h"
-#include "../include/scatteractionnucleonkaon.h"
-#include "../include/scatteractionnucleonnucleon.h"
+#include "../include/scatteractionsfinder.h"
 
 using namespace Smash;
 
 static ScatterActionPtr construct_scatter_action(const ParticleData &a,
                                                  const ParticleData &b) {
-  const auto &pdg_a = a.pdgcode();
-  const auto &pdg_b = b.pdgcode();
-  const float time = 1.0f;  // It does not matter here anyway
-  ScatterActionPtr act;
-  if (a.is_baryon() && b.is_baryon()) {
-    if (pdg_a.is_nucleon() && pdg_b.is_nucleon()) {
-      act = make_unique<ScatterActionNucleonNucleon>(a, b, time);
-    } else {
-      act = make_unique<ScatterActionBaryonBaryon>(a, b, time);
-    }
-  } else if (a.is_baryon() || b.is_baryon()) {
-    if ((pdg_a.is_nucleon() && pdg_b.is_kaon()) ||
-        (pdg_b.is_nucleon() && pdg_a.is_kaon())) {
-      act = make_unique<ScatterActionNucleonKaon>(a, b, time);
-    } else {
-      act = make_unique<ScatterActionBaryonMeson>(a, b, time);
-    }
-  } else {
-    act = make_unique<ScatterActionMesonMeson>(a, b, time);
-  }
+  constexpr float elastic_parameter = -1.0f;
+  constexpr int ntest = 1;
+  ScatterActionsFinder finder(elastic_parameter, ntest);
+  ScatterActionPtr act = finder.construct_scatter(a, b);
   return act;
 }
 
@@ -93,6 +73,7 @@ TEST(printout_possible_channels) {
             continue;
           }
           ParticleData A(*A_type), B(*B_type);
+          // Momentum should be enough to get non-zero string cross-section
           A.set_4momentum(A.pole_mass(), 3.0, 0.0, 0.0);
           B.set_4momentum(B.pole_mass(), -3.0, 0.0, 0.0);
           ScatterActionPtr act = construct_scatter_action(A, B);
@@ -107,7 +88,7 @@ TEST(printout_possible_channels) {
             std::string r;
             if (channel->get_type() == ProcessType::String) {
               r =  A_type->name() + B_type->name()
-                   + std::string("-> strings");
+                   + std::string("->strings");
             } else {
               std::string r_type =
                 (channel->get_type() == ProcessType::Elastic) ?
