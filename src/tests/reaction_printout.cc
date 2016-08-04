@@ -27,7 +27,7 @@ static ScatterActionPtr construct_scatter_action(const ParticleData &a,
   return act;
 }
 
-static void remove_substr(std::string& s, const std::string& p) { 
+static void remove_substr(std::string& s, const std::string& p) {
   std::string::size_type n = p.length();
   for (std::string::size_type i = s.find(p); i != std::string::npos; i = s.find(p)) {
     s.erase(i, n);
@@ -58,14 +58,14 @@ TEST(init_decaymodes) {
 TEST(printout_possible_channels) {
   const size_t N_isotypes = IsoParticleType::list_all().size();
   const size_t N_pairs = N_isotypes * (N_isotypes - 1) / 2;
-  // We do not consider decays here, only 2->n processes, where n > 1, 
+  // We do not consider decays here, only 2->n processes, where n > 1,
   constexpr bool two_to_one = false;
   // We do not set all elastic cross-sections to fixed value
   constexpr float elastic_parameter = -1.0f;
   constexpr bool two_to_two = true, strings_switch = true;
   std::cout << N_isotypes << " iso-particle types." << std::endl;
   std::cout << "They can make " << N_pairs << " pairs." << std::endl;
-  
+
   for (const IsoParticleType &A_isotype : IsoParticleType::list_all()) {
     for (const IsoParticleType &B_isotype : IsoParticleType::list_all()) {
       if (&A_isotype > &B_isotype) {
@@ -109,7 +109,7 @@ TEST(printout_possible_channels) {
                     + r_type;
             }
             r_list.push_back(isoclean(r));
-          }  
+          }
         }
       }
       std::sort(r_list.begin(), r_list.end());
