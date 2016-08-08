@@ -467,7 +467,7 @@ float kminusp_pi0lambda(double sqrts) {
 // The other channels follow from isospin symmetry:
 
 float kminusn_piminussigma0(double sqrts) {
-  constexpr float clebsch_factor = (0.5 + 1/std::sqrt(6)) * std::sqrt(2);
+  constexpr float clebsch_factor = (0.25 + 1./6) * 2;
   return clebsch_factor * kminusp_piminussigmaplus(sqrts);
   // It is not clear which of the parametrizations should be used, because they
   // are isospin symmetric.
@@ -478,7 +478,7 @@ float kminusn_pi0sigmaminus(double sqrts) {
 }
 
 float kminusn_piminuslambda(double sqrts) {
-  return 1/std::sqrt(2) * kminusp_pi0lambda(sqrts);
+  return 0.5 * kminusp_pi0lambda(sqrts);
 }
 
 // All K+ p and K+ n channels are forbidden by isospin.
