@@ -464,17 +464,15 @@ float kminusp_pi0lambda(double sqrts) {
   return 0.45 * 0.0508208 / Smash::square(sqrts - 1.38837);
 }
 
-// The other channels follow from isospin symmetry:
+// The other channels follow from the paramatreziation with the same strange
+// product via isospin symmetry.
 
 float kminusn_piminussigma0(double sqrts) {
-  constexpr float clebsch_factor = (0.25 + 1./6) * 2;
-  return clebsch_factor * kminusp_piminussigmaplus(sqrts);
-  // It is not clear which of the parametrizations should be used, because they
-  // are isospin symmetric.
+  return 1./6 * 2 * kminusp_pi0sigma0(sqrts);
 }
 
 float kminusn_pi0sigmaminus(double sqrts) {
-  return kminusn_piminussigma0(sqrts);
+  return (0.25 + 1./6) * 2 * kminusp_piplussigmaminus(sqrts);
 }
 
 float kminusn_piminuslambda(double sqrts) {
