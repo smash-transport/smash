@@ -94,16 +94,15 @@ std::vector<T> apply_permutation(const std::vector<T>& v,
   return copied_v;
 }
 
-/// check whether two components have the same value in vector x
+/// Check whether two components have the same value in a sorted vector x.
 template<typename T>
-void check_duplicates(const std::vector<T> & x, std::string error_position) {
-  // to see whether there are two duplicate xi in x
+void check_duplicates(const std::vector<T>& x, const std::string& error_position) {
   auto it = std::adjacent_find(x.begin(), x.end());
   if (it != x.end()) {
-      std::stringstream error_msg;
-      error_msg << error_position << ": Each x value must be unique. \""
-                    << *it << "\" was found twice.";
-          throw std::runtime_error(error_msg.str());
+    std::stringstream error_msg;
+    error_msg << error_position << ": Each x value must be unique. \""
+              << *it << "\" was found twice.";
+    throw std::runtime_error(error_msg.str());
   }
 }
 
@@ -112,12 +111,12 @@ InterpolateDataLinear<T>::InterpolateDataLinear(const std::vector<T>& x,
                                     const std::vector<T>& y) {
   assert(x.size() == y.size());
   const size_t n = x.size();
-  check_duplicates(x, "InterpolateDataLinear");
   const auto p = generate_sort_permutation(
       x, [&](T const& a, T const& b) {
         return a < b;
       });
-  x_ = std::move(apply_permutation(x, p));
+  x_ = apply_permutation(x, p);
+  check_duplicates(x_, "InterpolateDataLinear");
   std::vector<T> y_sorted = std::move(apply_permutation(y, p));
   f_.reserve(n - 1);
   for (size_t i = 0; i < n - 1; i++) {
