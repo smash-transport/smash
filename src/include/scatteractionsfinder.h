@@ -34,7 +34,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
                        bool strings_switch);
 
   /** Constructor for testing purposes. */
-  ScatterActionsFinder(float elastic_parameter, int testparticles);
+  ScatterActionsFinder(float elastic_parameter, int testparticles,
+                       bool two_to_one = true);
 
   /** Determine the collision time of the two particles [fm/c].
    *  Time of the closest approach is taken as collision time.
@@ -105,12 +106,11 @@ class ScatterActionsFinder : public ActionFinderInterface {
             maximum_cross_section) / testparticles * fm2_mb * M_1_PI;
   }
 
-  /// Public interface to construct_scatter_action for testing purposes
-  ScatterActionPtr construct_scatter(const ParticleData &a,
-                                     const ParticleData &b) const {
-    constexpr float time = 0.0f;
-    return construct_scatter_action(a, b, time);
-  }
+  /**
+   * Prints out all the 2-> n (n > 1) reactions with non-zero cross-sections
+   * between all possible pairs of particle types.
+   */
+  void dump_reactions() const;
 
  private:
   /* Construct a ScatterAction object,

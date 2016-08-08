@@ -12,12 +12,14 @@
 
 #include <getopt.h>
 
+#include "include/cxx14compat.h"
 #include "include/decaymodes.h"
 #include "include/experiment.h"
 #include "include/filelock.h"
 #include "include/fpenvironment.h"
 #include "include/inputfunctions.h"
 #include "include/random.h"
+#include "include/scatteractionsfinder.h"
 /* build dependent variables */
 #include "include/config.h"
 
@@ -287,7 +289,18 @@ int main(int argc, char *argv[]) {
       configuration["decaymodes"] = read_all(bf::ifstream{decaymodes});
     }
     if (list2n) {
-      std::cout << "Dumping reactions" << std::endl;
+      // Do not make all elastic cross-sections a fixed number
+      constexpr float elastic_parameter = -1.0f;
+      // Does not matter here, just dummy
+      constexpr int ntest = 1;
+      // Print only 2->n, n > 1. Do not dump decays, which can be found in
+      // decaymodes.txt anyway
+      constexpr bool two_to_one = false;
+      ParticleType::create_type_list(configuration.take({"particles"}));
+      DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
+      auto scat_finder = make_unique<ScatterActionsFinder>(elastic_parameter,
+                                                           ntest, two_to_one);
+      scat_finder->dump_reactions();
       std::exit(EXIT_SUCCESS);
     }
     if (modus) {
