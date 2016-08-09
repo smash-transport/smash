@@ -107,7 +107,9 @@ ParticleType::ParticleType(std::string n, float m, float w, PdgCode id)
       width_(w),
       pdgcode_(id),
       minimum_mass_(-1.f),
-      charge_(pdgcode_.charge()) {}
+      charge_(pdgcode_.charge()),
+      isospin_(-1),
+      I3_(pdgcode_.isospin3()) {}
 
 /* Construct an antiparticle name-string from the given name-string for the
  * particle and its PDG code. */
@@ -271,8 +273,11 @@ float ParticleType::minimum_mass() const {
 }
 
 int ParticleType::isospin() const {
-  return (pdgcode_.is_hadron() && iso_multiplet_) ?
-          iso_multiplet_->isospin() : 0;
+  if (isospin_ < 0) {
+    isospin_ =  (pdgcode_.is_hadron() && iso_multiplet_) ?
+                iso_multiplet_->isospin() : 0;
+  }
+  return isospin_;
 }
 
 float ParticleType::partial_width(const float m,
