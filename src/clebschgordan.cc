@@ -18,11 +18,12 @@ namespace Smash {
 float clebsch_gordan(const int j_a, const int j_b, const int j_c,
                       const int m_a, const int m_b, const int m_c) {
   const double wigner_3j =  gsl_sf_coupling_3j(j_a, j_b, j_c, m_a, m_b, -m_c);
-  if (std::abs(wigner_3j) < really_small)
+  if (std::abs(wigner_3j) < really_small) {
     return 0.;
-
-  const float result = std::pow(-1, (j_a-j_b+m_c)/2.)
-                      * std::sqrt(j_c + 1) * wigner_3j;
+  }
+  assert(j_a-j_b+m_c % 2 == 0);
+  const int j = (j_a-j_b+m_c)/2;
+  const float result = std::sqrt(j_c + 1) * wigner_3j;
 
 #ifndef NDEBUG
   const auto &log = logger<LogArea::Resonances>();
@@ -30,7 +31,7 @@ float clebsch_gordan(const int j_a, const int j_b, const int j_c,
             " iz1: ", m_a, " iz2: ", m_b, " izR: ", m_c);
 #endif
 
-  return result;
+  return (j%2 == 0) ? result : -result;
 }
 
 
