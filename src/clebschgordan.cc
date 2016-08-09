@@ -16,7 +16,7 @@ namespace Smash {
 
 
 float clebsch_gordan(const int j_a, const int j_b, const int j_c,
-                      const int m_a, const int m_b, const int m_c) {
+                     const int m_a, const int m_b, const int m_c) {
   const double wigner_3j =  gsl_sf_coupling_3j(j_a, j_b, j_c, m_a, m_b, -m_c);
   if (std::abs(wigner_3j) < really_small) {
     return 0.;
