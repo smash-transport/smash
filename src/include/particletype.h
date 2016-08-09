@@ -99,7 +99,7 @@ class ParticleType {
   int isospin() const;
 
   /// \copydoc PdgCode::isospin3
-  int isospin3() const { return pdgcode_.isospin3(); }
+  int isospin3() const { return I3_; }
 
   /// Returns the isospin-3 component relative to the total isospin.
   float isospin3_rel() const {
@@ -423,11 +423,13 @@ class ParticleType {
   /** This normalization factor ensures that the spectral function is normalized
    * to unity, when integrated over its full domain. */
   mutable float norm_factor_ = -1.;
-  /** charge of the particle
+  /** charge, isospin and isospin projection of the particle
    *
    * This is filled automatically from pdgcode_.
    */
   int charge_;
+  mutable int isospin_;
+  int I3_;
 
   IsoParticleType *iso_multiplet_ = nullptr;
 
