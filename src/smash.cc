@@ -82,12 +82,12 @@ void usage(const int rc, const std::string &progname) {
    *     integer. Note that this might cause races if several instances of SMASH
    *     run in parallel. In that case, make sure to specify a different output
    *     directory for every instance of SMASH.
-   * <tr><td>`-l <dir>` <td>`--list_2_to_n <dir>`
+   * <tr><td>`-l <dir>` <td>`--list-2-to-n <dir>`
    * <td>Dumps the list of all possible 2->n reactions (n > 1). Note that
    *     resonance decays and formations are NOT dumped. Every particle
    *     available in SMASH is collided against every and reactions with
    *     non-zero cross-section are dumped. Both colliding particles are
-   *     assinged momenta from 0.1 to 10 GeV in the opposite directions to
+   *     assigned momenta from 0.1 to 10 GeV in the opposite directions to
    *     scan the possible sqrt(S).
    * <tr><td>`-f` <td>`--force`
    * <td>Forces overwriting files in the output directory. Normally, if you
@@ -113,7 +113,7 @@ void usage(const int rc, const std::string &progname) {
       "\n"
       "\n"
       "  -o, --output <dir>      output directory (default: ./data/<runid>)\n"
-      "  -l, --list_2_to_n       list all possible 2->2 reactions\n"
+      "  -l, --list-2-to-n       list all possible 2->2 reactions\n"
       "  -f, --force             force overwriting files in the output "
       "directory"
       "\n"
@@ -193,7 +193,7 @@ int main(int argc, char *argv[]) {
                                  {"modus", required_argument, 0, 'm'},
                                  {"particles", required_argument, 0, 'p'},
                                  {"output", required_argument, 0, 'o'},
-                                 {"list_2_to_n", no_argument, 0, 'l'},
+                                 {"list-2-to-n", no_argument, 0, 'l'},
                                  {"version", no_argument, 0, 'v'},
                                  {nullptr, 0, 0, 0}};
 
@@ -206,7 +206,8 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> extra_config;
     char *particles = nullptr, *decaymodes = nullptr, *modus = nullptr,
          *end_time = nullptr;
-    bool list2n = false;
+    // This variable remembers if --list-2-to-n option is activated
+    bool list2n_activated = false;
 
     /* parse command-line arguments */
     int opt;
@@ -241,7 +242,7 @@ int main(int argc, char *argv[]) {
           output_path = optarg;
           break;
         case 'l':
-          list2n = true;
+          list2n_activated = true;
           break;
         case 'v':
           std::printf(
@@ -288,7 +289,7 @@ int main(int argc, char *argv[]) {
       }
       configuration["decaymodes"] = read_all(bf::ifstream{decaymodes});
     }
-    if (list2n) {
+    if (list2n_activated) {
       // Do not make all elastic cross-sections a fixed number
       constexpr float elastic_parameter = -1.0f;
       // Does not matter here, just dummy

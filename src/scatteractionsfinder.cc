@@ -262,7 +262,7 @@ void ScatterActionsFinder::dump_reactions() const {
               std::string r;
               if (channel->get_type() == ProcessType::String) {
                 r =  A_type->name() + B_type->name()
-                     + std::string("->strings");
+                     + std::string(" → strings");
               } else {
                 std::string r_type =
                   (channel->get_type() == ProcessType::Elastic) ?
@@ -271,7 +271,7 @@ void ScatterActionsFinder::dump_reactions() const {
                         std::string(" (inel)") :
                              std::string(" (?)");
                 r = A_type->name() + B_type->name()
-                      + std::string("->")
+                      + std::string(" → ")
                       + channel->particle_types()[0]->name()
                       + channel->particle_types()[1]->name()
                       + r_type;
