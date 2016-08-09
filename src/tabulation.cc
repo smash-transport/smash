@@ -38,11 +38,9 @@ float Tabulation::get_value_linear(float x) const {
   }
   const float index_float = (x - x_min_) * inv_dx_;
   // here n is the lower index
-  const unsigned int n = static_cast<unsigned int>(index_float);
+  const size_t n = std::min(static_cast<size_t>(index_float),
+                            values_.size() - 2);
   const float r = index_float - n;
-  if (n > values_.size() - 2) {
-    return values_.back();
-  }
   return values_[n] + (values_[n + 1] - values_[n]) * r;
 }
 

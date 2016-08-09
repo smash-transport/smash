@@ -89,7 +89,8 @@ float isospin_clebsch_gordan_sqr_2to2(const ParticleType &t_a,
 
   /* Loop over total isospin in allowed range. */
   float isospin_factor = 0.;
-  for (int I_tot : I_tot_range(t_a, t_b, t_c, t_d)) {
+  const std::pair<int, int> I_range = I_tot_range(t_a, t_b, t_c, t_d);
+  for (int I_tot = I_range.first; I_tot >= I_range.second; I_tot -= 2) {
     if (I < 0 || I_tot == I) {
       const float cg_in = isospin_clebsch_gordan_2to1(t_a, t_b, I_tot, I_z);
       const float cg_out = isospin_clebsch_gordan_2to1(t_c, t_d, I_tot, I_z);
@@ -100,37 +101,28 @@ float isospin_clebsch_gordan_sqr_2to2(const ParticleType &t_a,
 }
 
 
-std::vector<int> I_tot_range(const ParticleType &t_a, const ParticleType &t_b) {
-  const int I_z = t_a.isospin3() + t_b.isospin3();
-  /* Compute total isospin range with given initial and final particles. */
+std::pair<int, int> I_tot_range(const ParticleType &t_a,
+                                const ParticleType &t_b) {
+  const int I_z_abs = std::abs(t_a.isospin3() + t_b.isospin3());
+  /* Compute total isospin range with given particles. */
   const int I_max = t_a.isospin() + t_b.isospin();
-  int I_min = std::abs(t_a.isospin() - t_b.isospin());
-  I_min = std::max(I_min, std::abs(I_z));
-  std::vector<int> range;
-  /* Add all allowed values.
-   * Use decrement of 2, since isospin is multiplied by 2. */
-  for (int I = I_max; I >= I_min; I -= 2) {
-    range.push_back(I);
-  }
-  return range;
+  const int I_min = std::max(std::abs(t_a.isospin() - t_b.isospin()), I_z_abs);
+  // loop - for(int I = I_max; I >= I_min; I -= 2)
+  return std::pair<int, int>(I_max, I_min);
 }
 
-std::vector<int> I_tot_range(const ParticleType &t_a, const ParticleType &t_b,
-                             const ParticleType &t_c, const ParticleType &t_d) {
-  const int I_z = t_a.isospin3() + t_b.isospin3();
+std::pair<int, int> I_tot_range(const ParticleType &t_a,
+                                const ParticleType &t_b,
+                                const ParticleType &t_c,
+                                const ParticleType &t_d) {
+  const int I_z_abs = std::abs(t_a.isospin3() + t_b.isospin3());
   /* Compute total isospin range with given initial and final particles. */
   const int I_max = std::min(t_a.isospin() + t_b.isospin(),
                              t_c.isospin() + t_d.isospin());
   int I_min = std::max(std::abs(t_a.isospin() - t_b.isospin()),
                        std::abs(t_c.isospin() - t_d.isospin()));
-  I_min = std::max(I_min, std::abs(I_z));
-  std::vector<int> range;
-  /* Add all allowed values.
-   * Use decrement of 2, since isospin is multiplied by 2. */
-  for (int I = I_max; I >= I_min; I -= 2) {
-    range.push_back(I);
-  }
-  return range;
+  I_min = std::max(I_min, I_z_abs);
+  return std::pair<int, int>(I_max, I_min);
 }
 
 
