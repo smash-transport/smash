@@ -304,10 +304,10 @@ class ParticleType {
   static const ParticleTypeList &list_all();
 
   /** Returns a list of all nucleons (i.e. proton and neutron). */
-  static ParticleTypePtrList list_nucleons();
-  /** Returns a list of the Delta(1232) baryons
+  static ParticleTypePtrList &list_nucleons();
+  /** Returns a list of the Delta(1232) baryons // oliiny: only 1232?!
    *  (i.e. all four charge states). */
-  static ParticleTypePtrList list_Deltas();
+  static ParticleTypePtrList &list_Deltas();
   /** Returns a list of all baryon resonances,
    * i.e. unstable baryons (not including antibaryons). */
   static ParticleTypePtrList list_baryon_resonances();

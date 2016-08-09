@@ -37,6 +37,8 @@ const ParticleTypeList *all_particle_types = nullptr;
 namespace {
 /// Global pointer to the Particle Type list.
 const ParticleTypeList *all_particle_types = nullptr;
+ParticleTypePtrList nucleons_list;
+ParticleTypePtrList deltas_list;
 }  // unnamed namespace
 
 const ParticleTypeList &ParticleType::list_all() {
@@ -57,20 +59,12 @@ ParticleTypePtr ParticleType::operator&() const {
 }
 #endif
 
-ParticleTypePtrList ParticleType::list_nucleons() {
-  if (IsoParticleType::exists("N")) {
-    return IsoParticleType::find("N").get_states();
-  } else {
-    return ParticleTypePtrList();
-  }
+ParticleTypePtrList &ParticleType::list_nucleons() {
+  return nucleons_list;
 }
 
-ParticleTypePtrList ParticleType::list_Deltas() {
-  if (IsoParticleType::exists("Δ")) {
-    return IsoParticleType::find("Δ").get_states();
-  } else {
-    return ParticleTypePtrList();
-  }
+ParticleTypePtrList &ParticleType::list_Deltas() {
+  return deltas_list;
 }
 
 ParticleTypePtrList ParticleType::list_baryon_resonances() {
@@ -243,6 +237,22 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
   for (auto &t : type_list) {
     t.iso_multiplet_ = IsoParticleType::find(t);
   }
+
+ // Create nucleons list
+ if (IsoParticleType::exists("N")) {
+   for (const auto state : IsoParticleType::find("N").get_states()) {
+     nucleons_list.push_back(state);
+   }
+ }
+
+ // Create deltas list
+ if (IsoParticleType::exists("Δ")) {
+   for (const auto state : IsoParticleType::find("Δ").get_states()) {
+     deltas_list.push_back(state);
+   }
+ }
+
+
 }/*}}}*/
 
 
