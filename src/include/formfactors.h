@@ -79,8 +79,8 @@ inline float post_ff_sqr(float m, float M0, float srts0, float L) {
   const auto L4 = L*L*L*L;
   const auto M2 = M0*M0;
   const auto s0 = srts0*srts0;
-  const auto sminus = (s0-M2)/2.;
-  const auto splus = m*m - (s0+M2)/2.;
+  const auto sminus = (s0-M2)*0.5;
+  const auto splus = m*m - (s0+M2)*0.5;
   const auto FF = (L4 + sminus*sminus) / (L4 + splus*splus);
   return FF*FF;
 }
