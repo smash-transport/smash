@@ -75,6 +75,9 @@ class ScatterAction : public Action {
    */
   virtual float elastic_parametrization() { return 0.; }
 
+  /// Returns list of possible collision channels
+  const CollisionBranchList& collision_channels() { return collision_channels_; }
+
   /**
    * Determine the elastic cross section for this collision. If elastic_par is
    * given (and positive), we just use a constant cross section of that size,

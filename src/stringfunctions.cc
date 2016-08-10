@@ -66,4 +66,18 @@ std::string trim(const std::string &s) {
   return s.substr(begin, end - begin + 1);
 }
 
+void remove_substr(std::string& s, const std::string& p) {
+  using str = std::string;
+  str::size_type n = p.length();
+  for (str::size_type i = s.find(p); i != str::npos; i = s.find(p)) {
+    s.erase(i, n);
+  }
+}
+
+void isoclean(std::string& s) {
+  remove_substr(s, "⁺");
+  remove_substr(s, "⁻");
+  remove_substr(s, "⁰");
+}
+
 }  // namespace Smash
