@@ -117,9 +117,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
       }
 
       // loop over total isospin
-      const std::pair<int, int> I_range = I_tot_range(type_particle_a,
-                                                      type_particle_b);
-      for (int twoI = I_range.first; twoI >= I_range.second; twoI -= 2) {
+      for (const int twoI : I_tot_range(type_particle_a, type_particle_b)) {
         const float isospin_factor = isospin_clebsch_gordan_sqr_2to2(
                                           type_particle_a, type_particle_b,
                                           *type_resonance, *second_type, twoI);
@@ -182,9 +180,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
       }
 
       // loop over total isospin
-      const std::pair<int, int> I_range = I_tot_range(type_particle_a,
-                                                      type_particle_b);
-      for (int twoI = I_range.first; twoI >= I_range.second; twoI -= 2) {
+      for (const int twoI : I_tot_range(type_particle_a, type_particle_b)) {
         const float isospin_factor = isospin_clebsch_gordan_sqr_2to2(
               type_particle_a, type_particle_b, *type_res_1, *type_res_2, twoI);
         /* If Clebsch-Gordan coefficient is zero, don't bother with the rest. */
