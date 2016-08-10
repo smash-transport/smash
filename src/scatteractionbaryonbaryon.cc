@@ -68,7 +68,8 @@ CollisionBranchList ScatterActionBaryonBaryon::bar_bar_to_nuc_nuc(
         continue;
       }
       // loop over total isospin
-      for (const int twoI : I_tot_range(*nuc_a, *nuc_b)) {
+      const std::pair<int, int> I_range = I_tot_range(*nuc_a, *nuc_b);
+      for (int twoI = I_range.first; twoI >= I_range.second; twoI -= 2) {
         const float isospin_factor = isospin_clebsch_gordan_sqr_2to2(type_a,
                                                   type_b, *nuc_a, *nuc_b, twoI);
         /* If Clebsch-Gordan coefficient is zero, don't bother with the rest */
