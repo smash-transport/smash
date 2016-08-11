@@ -553,4 +553,12 @@ TEST(antiparticles) {
 
 TEST(pack_int) {
   VERIFY(pack(pdg::Lambda, pdg::pi_m) != pack(pdg::Sigma_z, pdg::pi_m));
+
+  const uint32_t x = 0xfeeddead;
+  const uint32_t y = 0xbeefface;
+  const auto x_signed = static_cast<int32_t>(x);
+  const auto y_signed = static_cast<int32_t>(y);
+  const auto xy = pack(x_signed, y_signed);
+  const uint64_t expected = 0xfeeddeadbeefface;
+  COMPARE(xy, expected);
 }
