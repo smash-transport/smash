@@ -21,6 +21,10 @@
 #include "include/lowess.h"
 #include "include/pow.h"
 
+// All quantities in this file use they same units as the rest of SMASH.
+// That is: GeV for energies and momenta, fm for distances and time, and mb for
+// cross sections.
+
 namespace Smash {
 
 /** pp elastic cross section parametrization.
