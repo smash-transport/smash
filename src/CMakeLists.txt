@@ -126,6 +126,7 @@ set(smash_src
         scatteractionmesonmeson.cc
         scatteractionnucleonkaon.cc
         scatteractionnucleonnucleon.cc
+        scatteractionhyperonpion.cc
         scatteractionphoton.cc
         scatteractionsfinder.cc
         scatteractionsfinderphoton.cc

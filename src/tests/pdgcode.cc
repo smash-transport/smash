@@ -9,6 +9,7 @@
 
 #include "unittest.h"
 #include "../include/pdgcode.h"
+#include "../include/pdgcode_constants.h"
 
 using namespace Smash;
 
@@ -548,4 +549,8 @@ TEST(antiparticles) {
   COMPARE(electron.has_antiparticle(), true);
   COMPARE(antimu.has_antiparticle(), true);
   COMPARE(photon.has_antiparticle(), false);
+}
+
+TEST(pack_int) {
+  VERIFY(pack(pdg::Lambda, pdg::pi_m) != pack(pdg::Sigma_z, pdg::pi_m));
 }

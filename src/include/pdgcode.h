@@ -270,6 +270,19 @@ class PdgCode {
       return (code() == 0x2224) || (code() == 0x2214) ||
              (code() == 0x2114) || (code() == 0x1114);
   }
+  /// Is this a hyperon (Lambda, Sigma, Xi, Omega)?
+  inline bool is_hyperon() const {
+      const auto abs_code = std::abs(code());
+      switch (abs_code) {
+          case 3122:  // Lambda
+          case 3222: case 3212:  // Sigma
+          case 3322: case 3312:  // Xi
+          case 3334:  // Omega
+              return true;
+          default:
+              return false;
+      }
+  }
   /// Is this a kaon (K+, K-, K0, Kbar0)?
   inline bool is_kaon() const {
       const auto abs_code = std::abs(code());

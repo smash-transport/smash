@@ -25,6 +25,7 @@
 #include "include/scatteractionmesonmeson.h"
 #include "include/scatteractionnucleonkaon.h"
 #include "include/scatteractionnucleonnucleon.h"
+#include "include/scatteractionhyperonpion.h"
 #include "include/stringfunctions.h"
 
 namespace Smash {
@@ -95,6 +96,11 @@ ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
     if ((pdg_a.is_nucleon() && pdg_b.is_kaon()) ||
         (pdg_b.is_nucleon() && pdg_a.is_kaon())) {
       act = make_unique<ScatterActionNucleonKaon>(data_a, data_b,
+                                              time_until_collision, isotropic_,
+                                              formation_time_);
+    } else if ((pdg_a.is_hyperon() && pdg_b.is_pion()) ||
+               (pdg_b.is_hyperon() && pdg_a.is_pion())) {
+      act = make_unique<ScatterActionHyperonPion>(data_a, data_b,
                                               time_until_collision, isotropic_,
                                               formation_time_);
     } else {
