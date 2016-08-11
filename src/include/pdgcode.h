@@ -16,6 +16,8 @@
 #include <stdexcept>
 #include <string>
 
+#include "pdgcode_constants.h"
+
 namespace Smash {
 
 /**
@@ -274,10 +276,10 @@ class PdgCode {
   inline bool is_hyperon() const {
       const auto abs_code = std::abs(code());
       switch (abs_code) {
-          case 3122:  // Lambda
-          case 3222: case 3212:  // Sigma
-          case 3322: case 3312:  // Xi
-          case 3334:  // Omega
+          case pdg::Lambda:
+          case pdg::Sigma_p: case pdg::Sigma_z: case pdg::Sigma_m:
+          case pdg::Xi_z: case pdg::Xi_m:
+          case pdg::Omega_m:
               return true;
           default:
               return false;
