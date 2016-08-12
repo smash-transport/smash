@@ -166,9 +166,18 @@ void Action::check_conservation(const uint32_t id_process) const {
   QuantumNumbers after(outgoing_particles_);
   std::string err_msg = before.report_deviations(after);
   if (before != after) {
-    log.error() << err_msg;
+    std::stringstream particle_names;
+    for (const auto& p : incoming_particles_) {
+      particle_names << p.type().name();
+    }
+    particle_names << " vs. ";
+    for (const auto& p : outgoing_particles_) {
+      particle_names << p.type().name();
+    }
+    particle_names << "\n";
+    log.error() << particle_names.str() << err_msg;
     throw std::runtime_error("Conservation laws violated in process " +
-                            std::to_string(id_process));
+                             std::to_string(id_process));
   }
 }
 
