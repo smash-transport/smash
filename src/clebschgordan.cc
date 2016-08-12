@@ -21,7 +21,7 @@ float clebsch_gordan(const int j_a, const int j_b, const int j_c,
   if (std::abs(wigner_3j) < really_small) {
     return 0.;
   }
-  assert(j_a - j_b + m_c % 2 == 0);
+  assert((j_a - j_b + m_c) % 2 == 0);
   const int j = (j_a - j_b + m_c)/2;
   float result = std::sqrt(j_c + 1) * wigner_3j;
   result *= (j % 2 == 0) * 2 - 1;  // == (-1)**j
