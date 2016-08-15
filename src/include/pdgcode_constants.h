@@ -40,6 +40,7 @@ constexpr int pi_m = -0x211;
 
 constexpr int K_p = 0x321;
 constexpr int K_z = 0x311;
+constexpr int Kbar_z = -0x311;
 constexpr int K_m = -0x321;
 
 }  // namespace pdg

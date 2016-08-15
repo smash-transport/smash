@@ -11,6 +11,7 @@
 
 #include "include/cxx14compat.h"
 #include "include/parametrizations.h"
+#include "include/pdgcode_constants.h"
 
 namespace Smash {
 
@@ -26,34 +27,34 @@ float ScatterActionNucleonKaon::elastic_parametrization() {
 
   float sig_el = 0.f;
   switch (nucleon.code()) {
-    case 0x2212:  // p
+      case pdg::p:
       switch (kaon.code()) {
-        case 0x321:  // K+
+        case pdg::K_p:
           sig_el = kplusp_elastic(s);
           break;
-        case -0x321:  // K-
+        case pdg::K_m:
           sig_el = kminusp_elastic(s);
           break;
-        case 0x311:  // K0
+        case pdg::K_z:
           sig_el = k0p_elastic(s);
           break;
-        case -0x311:  // Kbar0
+        case pdg::Kbar_z:
           sig_el = kbar0p_elastic(s);
           break;
       }
       break;
-    case 0x2112:  // n
+      case pdg::n:
       switch (kaon.code()) {
-        case 0x321:  // K+
+        case pdg::K_p:
           sig_el = kplusn_elastic(s);
           break;
-        case -0x321:  // K-
+        case pdg::K_m:
           sig_el = kminusn_elastic(s);
           break;
-        case 0x311:  // K0
+        case pdg::K_z:
           sig_el = k0n_elastic(s);
           break;
-        case -0x311:  // Kbar0
+        case pdg::Kbar_z:
           sig_el = kbar0n_elastic(s);
           break;
       }
@@ -114,28 +115,28 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
           type_a, type_b, xsection, ProcessType::TwoToTwo));
       }
   };
-  if (pdg_kaon == -0x321) {
+  if (pdg_kaon == pdg::K_m) {
     switch (pdg_nucleon) {
-      case 0x2212: {  // p
-        const ParticleType &type_pi0 = ParticleType::find(0x111);
+      case pdg::p: {
+        const ParticleType &type_pi0 = ParticleType::find(pdg::pi_z);
         add_channel(kminusp_piminussigmaplus(sqrts),
-                    ParticleType::find(-0x211), ParticleType::find(0x3222));
+                    ParticleType::find(pdg::pi_m), ParticleType::find(pdg::Sigma_p));
         add_channel(kminusp_piplussigmaminus(sqrts),
-                    ParticleType::find(0x211), ParticleType::find(-0x3222));
+                    ParticleType::find(pdg::pi_p), ParticleType::find(pdg::Sigma_m));
         add_channel(kminusp_pi0sigma0(sqrts),
-                    type_pi0, ParticleType::find(0x3212));
+                    type_pi0, ParticleType::find(pdg::Sigma_z));
         add_channel(kminusp_pi0lambda(sqrts),
-                    type_pi0, ParticleType::find(0x3122));
+                    type_pi0, ParticleType::find(pdg::Lambda));
         break;
       }
-      case 0x2112:  // n
-        const ParticleType &type_piminus = ParticleType::find(-0x211);
+      case pdg::n:
+        const ParticleType &type_piminus = ParticleType::find(pdg::pi_m);
         add_channel(kminusn_piminussigma0(sqrts),
-                    type_piminus, ParticleType::find(0x3212));
+                    type_piminus, ParticleType::find(pdg::Sigma_z));
         add_channel(kminusn_pi0sigmaminus(sqrts),
-                    ParticleType::find(0x111), ParticleType::find(0x3222));
+                    ParticleType::find(pdg::pi_z), ParticleType::find(pdg::Sigma_m));
         add_channel(kminusn_piminuslambda(sqrts),
-                    type_piminus, ParticleType::find(0x3122));
+                    type_piminus, ParticleType::find(pdg::Lambda));
         break;
     }
   }
