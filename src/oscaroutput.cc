@@ -327,7 +327,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * # Units: fm fm fm fm GeV GeV GeV GeV GeV none none none fm none none none fm none none
  * # SMASH_version
  * \endcode
- 
+
  * **Output block header**\n
  * At start of event:
  * \code
@@ -345,7 +345,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *
  * For the extended version the particle line contains
  * \code
- * t x y z mass p0 px py pz pdg ID Ncoll formation_time cross_section_scaling_factor 
+ * t x y z mass p0 px py pz pdg ID Ncoll formation_time cross_section_scaling_factor
  * process_ID_origin process_type_origin time_of_origin PDG_mother1 PDG_mother2
  * \endcode
  * **Event end line**
