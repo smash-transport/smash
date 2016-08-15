@@ -470,15 +470,14 @@ template <int Contents>
 std::unique_ptr<OutputInterface> create_select_format(const bf::path &path,
                                                       Configuration config,
                                                       std::string name) {
-  const bool modern_format =
-      config.has_value({"2013_Format"}) ? config.take({"2013_Format"}) : false;
+  const bool modern_format = config.take({"2013_Format"}, false);
   const bool extended_format = config.take({"2013_Extended"}, false);
-  if (modern_format) {
-    return make_unique<OscarOutput<OscarFormat2013, Contents>>(std::move(path),
-                                                               std::move(name));
-  } else if (extended_format) {
+  if (modern_format && extended_format) {
     return make_unique<OscarOutput<OscarFormat2013Extended,
                                 Contents>>(std::move(path), std::move(name));
+  } else if (modern_format) {
+   return make_unique<OscarOutput<OscarFormat2013, Contents>>(std::move(path),
+                                                               std::move(name));
   } else {
     return make_unique<OscarOutput<OscarFormat1999, Contents>>(std::move(path),
                                                                std::move(name));
