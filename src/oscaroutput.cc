@@ -121,18 +121,19 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
    * and optionally initial and final configuration.
    */
   if (Format == OscarFormat2013) {
-    std::fprintf(file_.get(),
-                 "#!OSCAR2013 %s t x y z mass p0 px py pz pdg ID\n",
-                 name.c_str());
-    std::fprintf(file_.get(),
-                 "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none\n");
+    std::fprintf(file_.get(), "#!OSCAR2013 %s t x y z mass "
+                "p0 px py pz pdg ID\n", name.c_str());
+    std::fprintf(file_.get(), "# Units: fm fm fm fm "
+                "GeV GeV GeV GeV GeV none none\n");
     std::fprintf(file_.get(), "# %s\n", VERSION_MAJOR);
   } else if (Format == OscarFormat2013Extended) {
-    std::fprintf(file_.get(),
-                 "#!OSCAR2013Extended %s t x y z mass p0 px py pz pdg ID ncoll form_time xsecfac proc_id_origin proc_type_origin time_origin pdg_mother1 pdg_mother2 \n",
+    std::fprintf(file_.get(), "#!OSCAR2013Extended %s t x y z mass p0 px py pz"
+                 " pdg ID ncoll form_time xsecfac proc_id_origin"
+                 " proc_type_origin time_origin pdg_mother1 pdg_mother2 \n",
                  name.c_str());
     std::fprintf(file_.get(),
-                 "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none none fm none none none fm none none\n");
+                 "# Units: fm fm fm fm GeV GeV GeV GeV GeV"
+                " none none none fm none none none fm none none\n");
     std::fprintf(file_.get(), "# %s\n", VERSION_MAJOR);
   } else {
     if (name == "particle_lists") {
@@ -445,7 +446,8 @@ void OscarOutput<Format, Contents>::write_particledata(
                  mom.x0(), mom.x1(), mom.x2(), mom.x3(),
                  data.pdgcode().string().c_str(), data.id());
   } else if (Format == OscarFormat2013Extended) {
-    std::fprintf(file_.get(), "%g %g %g %g %g %.9g %.9g %.9g %.9g %s %i %i %g %g %i %i %g %s %s\n",
+    std::fprintf(file_.get(), "%g %g %g %g %g %.9g %.9g %.9g"
+                 " %.9g %s %i %i %g %g %i %i %g %s %s\n",
                  pos.x0(), pos.x1(), pos.x2(), pos.x3(), data.effective_mass(),
                  mom.x0(), mom.x1(), mom.x2(), mom.x3(),
                  data.pdgcode().string().c_str(), data.id(),
