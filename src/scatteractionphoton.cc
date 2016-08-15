@@ -120,12 +120,12 @@ void ScatterActionPhoton::add_all_processes(float elastic_parameter,
 
 CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
   CollisionBranchList process_list;
-  ParticleTypePtr rho0_particle = &ParticleType::find(0x113);
-  ParticleTypePtr charged_rho_particle = &ParticleType::find(0x213);
-  ParticleTypePtr eta_particle = &ParticleType::find(0x221);
-  ParticleTypePtr pi_particle = &ParticleType::find(0x111);
-  ParticleTypePtr charged_pi_particle = &ParticleType::find(0x211);
-  ParticleTypePtr photon_particle = &ParticleType::find(0x022);
+  ParticleTypePtr rho0_particle = &ParticleType::find(pdg::rho_z);
+  ParticleTypePtr charged_rho_particle = &ParticleType::find(pdg::rho_p);
+  ParticleTypePtr eta_particle = &ParticleType::find(pdg::eta);
+  ParticleTypePtr pi_particle = &ParticleType::find(pdg::pi_z);
+  ParticleTypePtr charged_pi_particle = &ParticleType::find(pdg::pi_p);
+  ParticleTypePtr photon_particle = &ParticleType::find(pdg::photon);
   const float m_rho = rho0_particle->mass();
   const float m_rho_2 = pow(m_rho, 2);
   const float m_pi = pi_particle->mass();
@@ -183,8 +183,8 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
         } else if (part_b.type().pdgcode().is_rho()) {
           reac = ReactionType::piplus_rho0;
           part_out = charged_pi_particle;
-        } else if (part_b.type().pdgcode() == 0x221) {
-            // corresponds to eta meson
+        } else if (part_b.type().pdgcode() == pdg::eta) {
+          // corresponds to eta meson
           reac = ReactionType::piplus_eta;
           part_out = charged_pi_particle;
         }
@@ -386,10 +386,10 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
 
 float ScatterActionPhoton::pi_pi_rho0(const float M, const float s) const {
   const float to_mb = 0.3894;
-  const float m_pi = ParticleType::find(0x111).mass();
+  const float m_pi = ParticleType::find(pdg::pi_z).mass();
   const float m_pi_2 = pow(m_pi, 2);
-  const float m_rho = ParticleType::find(0x113).mass();
-  const float gamma_rho_tot = ParticleType::find(0x113).width_at_pole();
+  const float m_rho = ParticleType::find(pdg::rho_z).mass();
+  const float gamma_rho_tot = ParticleType::find(pdg::rho_z).width_at_pole();
   const float g_rho_2 = 24 * twopi * gamma_rho_tot * pow(m_rho, 2) /
                         pow(pow(m_rho, 2) - 4 * pow(m_pi, 2), 3.0 / 2.0);
   const float DM = pow(M, 2) - 4 * pow(m_pi, 2);
@@ -437,10 +437,10 @@ float ScatterActionPhoton::pi_pi_rho0(const float M, const float s) const {
 
 float ScatterActionPhoton::pi_pi0_rho(const float M, const float s) const {
   const float to_mb = 0.3894;
-  const float m_pi = ParticleType::find(0x111).mass();
+  const float m_pi = ParticleType::find(pdg::pi_z).mass();
   const float m_pi_2 = pow(m_pi, 2);
-  const float m_rho = ParticleType::find(0x113).mass();
-  const float gamma_rho_tot = ParticleType::find(0x113).width_at_pole();
+  const float m_rho = ParticleType::find(pdg::rho_z).mass();
+  const float gamma_rho_tot = ParticleType::find(pdg::rho_z).width_at_pole();
   const float g_rho_2 = 24 * twopi * gamma_rho_tot * pow(m_rho, 2) /
                         pow(pow(m_rho, 2) - 4 * pow(m_pi, 2), 3.0 / 2.0);
   const float DM = pow(M, 2) - 4 * pow(m_pi, 2);
@@ -479,13 +479,13 @@ float ScatterActionPhoton::pi_pi0_rho(const float M, const float s) const {
 
 float ScatterActionPhoton::diff_cross_section(float t, float m3) const {
   const float to_mb = 0.3894;
-  const float m_rho = ParticleType::find(0x113).mass();
+  const float m_rho = ParticleType::find(pdg::rho_z).mass();
   const float m_rho_2 = pow(m_rho, 2);
-  const float m_pi = ParticleType::find(0x111).mass();
+  const float m_pi = ParticleType::find(pdg::pi_z).mass();
   const float m_pi_2 = pow(m_pi, 2);
-  const float m_eta = ParticleType::find(0x221).mass();
+  const float m_eta = ParticleType::find(pdg::eta).mass();
   const float m_eta_2 = pow(m_eta, 2);
-  const float gamma_rho_tot = ParticleType::find(0x113).width_at_pole();
+  const float gamma_rho_tot = ParticleType::find(pdg::rho_z).width_at_pole();
   const float g_rho_2 = 24 * twopi * gamma_rho_tot * pow(m_rho, 2) /
                         pow(pow(m_rho, 2) - 4 * pow(m_pi, 2), 3.0 / 2.0);
   float s = mandelstam_s();
@@ -508,14 +508,14 @@ float ScatterActionPhoton::diff_cross_section(float t, float m3) const {
                  ((s - 2 * m_pi_2) / (s - pow(m3, 2)) + m_pi_2 / (t - m_pi_2)) -
              DM / (u - m_pi_2) *
                  ((s - 2 * m_pi_2) / (s - pow(m3, 2)) + m_pi_2 / (u - m_pi_2)));
-      } else if (outgoing_particles_[0].type().pdgcode() == 0x221) {
+      } else if (outgoing_particles_[0].type().pdgcode() == pdg::eta) {
         diff_xsection =
             twopi * alpha * 4.7 * pow(m_rho, 4) /
             (pow(s - m_rho_2, 2) + pow(gamma_rho_tot, 2) * m_rho_2) /
             (32 * m_eta_2 * pow(m_rho, 4) * s * p_cm_2);
         diff_xsection = diff_xsection * (s * (u - m_pi_2) * (t - m_pi_2) -
                                          m_pi_2 * pow(s - m_eta_2, 2));
-      } else if (outgoing_particles_[0].type().pdgcode() == 0x022) {
+      } else if (outgoing_particles_[0].type().pdgcode() == pdg::photon) {
         diff_xsection = twopi * pow(alpha, 2) / (s * p_cm_2);
         u += -m_pi_2;
         t += -m_pi_2;

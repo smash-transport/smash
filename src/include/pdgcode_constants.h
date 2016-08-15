@@ -18,6 +18,10 @@ namespace Smash {
  */
 namespace pdg {
 
+constexpr int invalid = 0x0;
+
+constexpr int photon = 0x22;
+
 constexpr int p = 0x2212;
 constexpr int n = 0x2112;
 
@@ -42,6 +46,13 @@ constexpr int K_p = 0x321;
 constexpr int K_z = 0x311;
 constexpr int Kbar_z = -0x311;
 constexpr int K_m = -0x321;
+
+constexpr int eta = 0x221;
+constexpr int omega = 0x223;
+
+constexpr int rho_p = 0x213;
+constexpr int rho_z = 0x113;
+constexpr int rho_m = -0x213;
 
 }  // namespace pdg
 
