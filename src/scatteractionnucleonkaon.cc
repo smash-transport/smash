@@ -100,7 +100,6 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
       type_particle_a.pdgcode().is_nucleon() ? type_particle_a : type_particle_b;
   const ParticleType &type_kaon =
       type_particle_a.pdgcode().is_nucleon() ? type_particle_b : type_particle_a;
-  assert(kaon != nucleon);
 
   const auto pdg_nucleon = type_nucleon.pdgcode().code();
   const auto pdg_kaon = type_kaon.pdgcode().code();
