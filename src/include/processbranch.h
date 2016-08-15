@@ -110,6 +110,8 @@ class ProcessBranch {
  protected:
   /// Weight of the branch, typically a cross section or a branching ratio
   float branch_weight_;
+  /// Threshold of the branch
+  mutable float threshold_ = -1.0f;
 };
 
 /**

@@ -16,6 +16,7 @@
 #include "actionfinderfactory.h"
 #include "configuration.h"
 #include "constants.h"
+#include "scatteraction.h"
 
 namespace Smash {
 
@@ -33,7 +34,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
                        bool strings_switch);
 
   /** Constructor for testing purposes. */
-  ScatterActionsFinder(float elastic_parameter, int testparticles);
+  ScatterActionsFinder(float elastic_parameter, int testparticles,
+                       bool two_to_one = true);
 
   /** Determine the collision time of the two particles [fm/c].
    *  Time of the closest approach is taken as collision time.
@@ -103,6 +105,12 @@ class ScatterActionsFinder : public ActionFinderInterface {
     return (is_constant_elastic_isotropic() ? elastic_parameter_ :
             maximum_cross_section) / testparticles * fm2_mb * M_1_PI;
   }
+
+  /**
+   * Prints out all the 2-> n (n > 1) reactions with non-zero cross-sections
+   * between all possible pairs of particle types.
+   */
+  void dump_reactions() const;
 
  private:
   /* Construct a ScatterAction object,

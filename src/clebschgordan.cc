@@ -16,13 +16,15 @@ namespace Smash {
 
 
 float clebsch_gordan(const int j_a, const int j_b, const int j_c,
-                      const int m_a, const int m_b, const int m_c) {
+                     const int m_a, const int m_b, const int m_c) {
   const double wigner_3j =  gsl_sf_coupling_3j(j_a, j_b, j_c, m_a, m_b, -m_c);
-  if (std::abs(wigner_3j) < really_small)
+  if (std::abs(wigner_3j) < really_small) {
     return 0.;
-
-  const float result = std::pow(-1, (j_a-j_b+m_c)/2.)
-                      * std::sqrt(j_c + 1) * wigner_3j;
+  }
+  assert((j_a - j_b + m_c) % 2 == 0);
+  const int j = (j_a - j_b + m_c)/2;
+  float result = std::sqrt(j_c + 1) * wigner_3j;
+  result *= (j % 2 == 0) * 2 - 1;  // == (-1)**j
 
 #ifndef NDEBUG
   const auto &log = logger<LogArea::Resonances>();
@@ -88,7 +90,7 @@ float isospin_clebsch_gordan_sqr_2to2(const ParticleType &t_a,
 
   /* Loop over total isospin in allowed range. */
   float isospin_factor = 0.;
-  for (int I_tot : I_tot_range(t_a, t_b, t_c, t_d)) {
+  for (const int I_tot : I_tot_range(t_a, t_b, t_c, t_d)) {
     if (I < 0 || I_tot == I) {
       const float cg_in = isospin_clebsch_gordan_2to1(t_a, t_b, I_tot, I_z);
       const float cg_out = isospin_clebsch_gordan_2to1(t_c, t_d, I_tot, I_z);
@@ -97,40 +99,5 @@ float isospin_clebsch_gordan_sqr_2to2(const ParticleType &t_a,
   }
   return isospin_factor;
 }
-
-
-std::vector<int> I_tot_range(const ParticleType &t_a, const ParticleType &t_b) {
-  const int I_z = t_a.isospin3() + t_b.isospin3();
-  /* Compute total isospin range with given initial and final particles. */
-  const int I_max = t_a.isospin() + t_b.isospin();
-  int I_min = std::abs(t_a.isospin() - t_b.isospin());
-  I_min = std::max(I_min, std::abs(I_z));
-  std::vector<int> range;
-  /* Add all allowed values.
-   * Use decrement of 2, since isospin is multiplied by 2. */
-  for (int I = I_max; I >= I_min; I -= 2) {
-    range.push_back(I);
-  }
-  return range;
-}
-
-std::vector<int> I_tot_range(const ParticleType &t_a, const ParticleType &t_b,
-                             const ParticleType &t_c, const ParticleType &t_d) {
-  const int I_z = t_a.isospin3() + t_b.isospin3();
-  /* Compute total isospin range with given initial and final particles. */
-  const int I_max = std::min(t_a.isospin() + t_b.isospin(),
-                             t_c.isospin() + t_d.isospin());
-  int I_min = std::max(std::abs(t_a.isospin() - t_b.isospin()),
-                       std::abs(t_c.isospin() - t_d.isospin()));
-  I_min = std::max(I_min, std::abs(I_z));
-  std::vector<int> range;
-  /* Add all allowed values.
-   * Use decrement of 2, since isospin is multiplied by 2. */
-  for (int I = I_max; I >= I_min; I -= 2) {
-    range.push_back(I);
-  }
-  return range;
-}
-
 
 }  // namespace Smash

@@ -16,6 +16,8 @@
 #include <stdexcept>
 #include <string>
 
+#include "pdgcode_constants.h"
+
 namespace Smash {
 
 /**
@@ -269,6 +271,19 @@ class PdgCode {
   inline bool is_Delta() const {
       return (code() == 0x2224) || (code() == 0x2214) ||
              (code() == 0x2114) || (code() == 0x1114);
+  }
+  /// Is this a hyperon (Lambda, Sigma, Xi, Omega)?
+  inline bool is_hyperon() const {
+      const auto abs_code = std::abs(code());
+      switch (abs_code) {
+          case pdg::Lambda:
+          case pdg::Sigma_p: case pdg::Sigma_z: case pdg::Sigma_m:
+          case pdg::Xi_z: case pdg::Xi_m:
+          case pdg::Omega_m:
+              return true;
+          default:
+              return false;
+      }
   }
   /// Is this a kaon (K+, K-, K0, Kbar0)?
   inline bool is_kaon() const {
