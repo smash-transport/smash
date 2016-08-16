@@ -150,6 +150,7 @@ Modi:
         Sphere_Temperature: 0.2
         # start time of simulation
         Start_Time: 0.0
+        Use_Thermal: False
         # Number of particles in Sphere
         Init_Multiplicities:
             211:    100
