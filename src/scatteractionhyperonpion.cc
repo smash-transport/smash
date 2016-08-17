@@ -60,7 +60,6 @@ CollisionBranchList ScatterActionHyperonPion::two_to_two_inel(
       add_channel(kminusn_piminussigma0(sqrts),
                   ParticleType::find(pdg::n), ParticleType::find(pdg::K_m));
       break;
-    /*
     case pack(pdg::Sigma_m, pdg::pi_z):
       add_channel(kminusn_pi0sigmaminus(sqrts),
                   ParticleType::find(pdg::n), ParticleType::find(pdg::K_m));
@@ -85,7 +84,6 @@ CollisionBranchList ScatterActionHyperonPion::two_to_two_inel(
       add_channel(kminusp_piminussigmaplus(sqrts),
                   ParticleType::find(pdg::p), ParticleType::find(pdg::K_m));
       break;
-    */
     default:
       break;
   }
