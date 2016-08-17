@@ -28,7 +28,7 @@ GrandCanThermalizer::GrandCanThermalizer(const std::array<float, 3> lat_sizes,
                                          float e_critical,
                                          float t_start,
                                          float delta_t) :
-  eos_typelist_(HadronGasEos::list_eos_particles()),
+  eos_typelist_(list_eos_particles()),
   N_sorts_(eos_typelist_.size()),
   e_crit_(e_critical),
   t_start_(t_start),

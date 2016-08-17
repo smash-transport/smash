@@ -89,6 +89,15 @@ class GrandCanThermalizer {
   float e_crit() const { return e_crit_; }
 
  private:
+  ParticleTypePtrList list_eos_particles() const {
+    ParticleTypePtrList res;
+    for (const ParticleType &ptype : ParticleType::list_all()) {
+      if (HadronGasEos::is_eos_particle(ptype)) {
+        res.push_back(&ptype);
+      }
+    }
+    return res;
+  }
   int get_class(size_t typelist_index) const {
     const int B = eos_typelist_[typelist_index]->baryon_number();
     const int S = eos_typelist_[typelist_index]->strangeness();
