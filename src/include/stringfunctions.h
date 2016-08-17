@@ -21,6 +21,12 @@ std::string fill_both(const std::string &s, int width, char fill = ' ');
 /// takes a string and strips leading and trailing whitespaces.
 std::string trim(const std::string &s);
 
+/// removes all instances of a substring p in a string s
+void remove_substr(std::string& s, const std::string& p);
+
+/// Removes ⁺,⁻,⁰ from string
+void isoclean(std::string& s);
+
 namespace utf8 {
     // The functions here were taken from the Boost-licensed library UTF8-CPP.
     // See http://utfcpp.sourceforge.net/.

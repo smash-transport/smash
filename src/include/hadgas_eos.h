@@ -28,7 +28,7 @@ class HadronGasEos;
  */
 class EosTable {
  public:
-  EosTable(double de, double dnb, int n_e, int n_b);
+  EosTable(double de, double dnb, size_t n_e, size_t n_b);
   struct table_element {
     double p;
     double T;
@@ -36,16 +36,16 @@ class EosTable {
     double mus;
   };
   void compile_table(HadronGasEos &eos,
-    const std::string eos_savefile_name = std::string("hadgas_eos.dat"));
+    const std::string& eos_savefile_name = "hadgas_eos.dat");
   void get(table_element& res, double e, double nb) const;
 
  private:
-  int index(int ie, int inb) const { return ie*n_nb_ + inb; }
+  size_t index(size_t ie, size_t inb) const { return ie*n_nb_ + inb; }
   std::vector<table_element> table_;
   double de_;
   double dnb_;
-  int n_e_;
-  int n_nb_;
+  size_t n_e_;
+  size_t n_nb_;
 };
 
 /**
@@ -65,8 +65,6 @@ class HadronGasEos {
  public:
   explicit HadronGasEos(const bool tabulate = false);
   ~HadronGasEos();
-  /// List particle species included in the eos
-  static ParticleTypePtrList list_eos_particles();
   /**
    * \brief Compute energy density
    * Grand-canonical Boltzmann ideal gas, consisting of all hadrons in SMASH:
@@ -168,6 +166,9 @@ class HadronGasEos {
   /// Get the element of eos table
   void from_table(EosTable::table_element& res, double e, double nb) const {
     eos_table_.get(res, e, nb);
+  }
+  static bool is_eos_particle(const ParticleType& ptype) {
+    return ptype.is_hadron() && ptype.pdgcode().charmness() == 0;
   }
   bool is_tabulated() const { return tabulate_; }
 

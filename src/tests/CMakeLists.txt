@@ -141,6 +141,19 @@ else()
    message(WARNING "cppcheck was not found. The cppcheck test will be disabled.")
 endif()
 
+# one more linter tool: clang-tidy
+find_program(CLANGTIDY clang-tidy NAMES clang-tidy clang-tidy-3.6 clang-tidy-3.5)
+if(CLANGTIDY)
+   message(STATUS "clang-tidy found at ${CLANGTIDY}")
+   file(GLOB CLANGTIDY_FILES ${PROJECT_SOURCE_DIR}/src/*.cc)
+   add_custom_target(clang-tidy
+                     COMMAND ${CLANGTIDY} ${CLANGTIDY_FILES} "-p=${PROJECT_BINARY_DIR}"
+                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/src/
+                     COMMENT "Executing test clang-tidy")
+else()
+   message(WARNING "clang-tidy was not found. The clang-tidy test will be disabled.")
+endif()
+
 # generate git statistics, requires gitstats in the path
 find_program(GITSTATS gitstats)
 if(GITSTATS)
@@ -196,11 +209,13 @@ smash_add_unittest(mass_sampling)
 smash_add_unittest(nucleus)
 smash_add_unittest(oscar2013output)
 smash_add_unittest(oscaroutput)
+smash_add_unittest(parametrizations)
 smash_add_unittest(particledata)
 smash_add_unittest(particles)
 smash_add_unittest(particletype)
 smash_add_unittest(pauliblocking)
 smash_add_unittest(pdgcode)
+smash_add_unittest(photons)
 smash_add_unittest(potentials)
 smash_add_unittest(processbranch)
 smash_add_unittest(propagate)

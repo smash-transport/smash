@@ -50,12 +50,12 @@ TEST(elastic_collision) {
   ParticleData a{ParticleType::find(0x211)};  // pi+
   a.set_4position(pos_a);
   a.set_4momentum(Momentum{1.1, 1.0, 0., 0.});
-  a.set_history(1, ProcessType::None, ParticleList{});
+  a.set_history(1, ProcessType::None, 1.2, ParticleList{});
 
   ParticleData b{ParticleType::find(0x211)};  // pi+
   b.set_4position(pos_b);
   b.set_4momentum(Momentum{1.1, 1.0, 0., 0.});
-  b.set_history(1, ProcessType::None, ParticleList{});
+  b.set_history(1, ProcessType::None, 1.2, ParticleList{});
 
   a = particles.insert(a);
   b = particles.insert(b);

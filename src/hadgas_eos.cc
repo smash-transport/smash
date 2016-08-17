@@ -20,7 +20,7 @@
 
 namespace Smash {
 
-EosTable::EosTable(double de, double dnb, int n_e, int n_nb) :
+EosTable::EosTable(double de, double dnb, size_t n_e, size_t n_nb) :
   de_(de),
   dnb_(dnb),
   n_e_(n_e),
@@ -29,7 +29,7 @@ EosTable::EosTable(double de, double dnb, int n_e, int n_nb) :
 }
 
 void EosTable::compile_table(HadronGasEos &eos,
-                             const std::string eos_savefile_name) {
+                             const std::string& eos_savefile_name) {
   bool table_read_success = false, table_consistency = true;
   if (boost::filesystem::exists(eos_savefile_name)) {
     // Read table from file
@@ -39,8 +39,8 @@ void EosTable::compile_table(HadronGasEos &eos,
     file >> de_ >> dnb_;
     file >> n_e_ >> n_nb_;
     table_.resize(n_e_*n_nb_);
-    for (int ie = 0; ie < n_e_; ie++) {
-      for (int inb = 0; inb < n_nb_; inb++) {
+    for (size_t ie = 0; ie < n_e_; ie++) {
+      for (size_t inb = 0; inb < n_nb_; inb++) {
         double p, T, mub, mus;
         file >> p >> T >> mub >> mus;
         table_[index(ie, inb)] = {p, T, mub, mus};
@@ -53,8 +53,11 @@ void EosTable::compile_table(HadronGasEos &eos,
   if (table_read_success) {
     // Check if the saved table is consistent with the current particle table
     std::cout << "Checking consistency of the table... " << std::endl;
-    for (int ie = 0; (ie < n_e_) && (table_consistency); ie+=20) {
-      for (int inb = 0; (inb < n_nb_) && (table_consistency); inb+=20) {
+    constexpr size_t number_of_steps = 50;
+    const size_t ie_step = 1 + n_e_/number_of_steps;
+    const size_t inb_step = 1 + n_nb_/number_of_steps;
+    for (size_t ie = 0; ie < n_e_; ie += ie_step) {
+      for (size_t inb = 0; inb < n_nb_; inb += inb_step) {
         const table_element x = table_[index(ie, inb)];
         const double e_comp  = eos.energy_density(x.T, x.mub, x.mus);
         const double nb_comp = eos.net_baryon_density(x.T, x.mub, x.mus);
@@ -63,30 +66,31 @@ void EosTable::compile_table(HadronGasEos &eos,
         // Precision is just 10^-3, this is precision of saved data in the file
         const double eps = 1.e-3;
         // Only check the physical region, hence T > 0 condition
-        if ((std::abs(ie * de_ - e_comp) > eps ||
-             std::abs(inb * dnb_ - nb_comp) > eps ||
+        if ((std::abs(de_*ie - e_comp) > eps ||
+             std::abs(dnb_*inb - nb_comp) > eps ||
              std::abs(ns_comp) > eps ||
              std::abs(x.p - p_comp) > eps) && (x.T > 0.0)) {
            std::cout << "discrepancy: "
-             << ie * de_   << " = " << e_comp  << ", "
-             << inb * dnb_ << " = " << nb_comp << ", "
+             << de_*ie   << " = " << e_comp  << ", "
+             << dnb_*inb << " = " << nb_comp << ", "
              << x.p        << " = " << p_comp  << ", "
              << "0"        << " = " << ns_comp << std::endl;
           table_consistency = false;
+          goto finish_consistency_check;
         }
       }
     }
   }
+  finish_consistency_check:
 
   if (!table_read_success || !table_consistency) {
     std::cout << "Compiling an EoS table..." << std::endl;
     const double ns = 0.0;
-    for (int ie = 0; ie < n_e_; ie++) {
-      const double e = ie * de_;
-      std::array<double, 3> init_approx = {0.2, 0.0, 0.0};
-      for (int inb = 0; inb < n_nb_; inb++) {
-        const double nb = inb * dnb_;
-        // std::cout << e << " " << nb << std::endl;
+    for (size_t ie = 0; ie < n_e_; ie++) {
+      const double e = de_ * ie;
+      std::array<double, 3> init_approx = {0.1, 0.0, 0.0};
+      for (size_t inb = 0; inb < n_nb_; inb++) {
+        const double nb = dnb_ * inb;
         // It is physically impossible to have energy density > nucleon mass*nb,
         // therefore eqns have no solutions.
         if (nb >= e) {
@@ -114,8 +118,8 @@ void EosTable::compile_table(HadronGasEos &eos,
     file << n_e_ << " " << n_nb_ << std::endl;
     file << std::setprecision(7);
     file << std::fixed;
-    for (int ie = 0; ie < n_e_; ie++) {
-      for (int inb = 0; inb < n_nb_; inb++) {
+    for (size_t ie = 0; ie < n_e_; ie++) {
+      for (size_t inb = 0; inb < n_nb_; inb++) {
         const EosTable::table_element x = table_[index(ie, inb)];
         file << x.p << " " <<
                 x.T << " " <<
@@ -127,11 +131,10 @@ void EosTable::compile_table(HadronGasEos &eos,
 }
 
 void EosTable::get(EosTable::table_element& res, double e, double nb) const {
-  const int ie  = static_cast<int>(std::floor(e/de_));
-  const int inb = static_cast<int>(std::floor(nb/dnb_));
+  const size_t ie  = static_cast<size_t>(std::floor(e/de_));
+  const size_t inb = static_cast<size_t>(std::floor(nb/dnb_));
 
-  if (ie < 0 || ie >= n_e_ - 1 ||
-      inb < 0 || inb >= n_nb_ - 1) {
+  if (ie >= n_e_ - 1 || inb >= n_nb_ - 1) {
     res = {-1.0, -1.0, -1.0, -1.0};
   } else {
     // 1st order interpolation
@@ -166,23 +169,12 @@ HadronGasEos::~HadronGasEos() {
   gsl_vector_free(x_);
 }
 
-ParticleTypePtrList HadronGasEos::list_eos_particles() {
-  ParticleTypePtrList list;
-  list.reserve(300);
-  for (const ParticleType &ptype : ParticleType::list_all()) {
-    if (ptype.is_hadron() && ptype.pdgcode().charmness() == 0) {
-      list.emplace_back(&ptype);
-    }
-  }
-  return list;
-}
-
 double HadronGasEos::scaled_partial_density(const ParticleType& ptype,
                                          double beta, double mub, double mus) {
   const double z = ptype.mass()*beta;
   double x = beta*(ptype.baryon_number()*mub +
                    ptype.strangeness()*mus -
-                    ptype.mass());
+                   ptype.mass());
   const unsigned int g = ptype.spin() + 1;
   /*if (x < -600.0) {
     std::cout << x << " " << z << " " << g << std::endl;
@@ -211,20 +203,19 @@ double HadronGasEos::energy_density(double T, double mub, double mus) {
   }
   const double beta = 1.0/T;
   double e = 0.0;
-  for (ParticleTypePtr ptype : list_eos_particles()) {
-    const double z = ptype->mass()*beta;
-    double x = beta * (mub*ptype->baryon_number() +
-                       mus*ptype->strangeness() -
-                       ptype->mass());
-    if (x > 100.0) {
-      std::cout << "Overflow? - x = " << x << ", T = " << T
-                << ", mub = " << mub << ", mus = " << mus << ", m = " << ptype->mass() << std::endl;
+  for (const ParticleType &ptype : ParticleType::list_all()) {
+    if (!is_eos_particle(ptype)) {
+      continue;
     }
+    const double z = ptype.mass()*beta;
+    double x = beta * (mub*ptype.baryon_number() +
+                       mus*ptype.strangeness() -
+                       ptype.mass());
     if (x < -500.0) {
       return 0.0;
     }
     x = std::exp(x);
-    const unsigned int g = ptype->spin() + 1;
+    const size_t g = ptype.spin() + 1;
     // Small mass case, z*z*K_2(z) -> 2, z*z*z*K_1(z) -> 0 at z->0
     e += (z < really_small) ? 3.0*g*x :
            z*z * g*x * (3.0*gsl_sf_bessel_Kn_scaled(2, z) +
@@ -240,8 +231,11 @@ double HadronGasEos::density(double T, double mub, double mus) {
   }
   const double beta = 1.0/T;
   double rho = 0.0;
-  for (ParticleTypePtr ptype : list_eos_particles()) {
-    rho += scaled_partial_density(*ptype, beta, mub, mus);
+  for (const ParticleType &ptype : ParticleType::list_all()) {
+    if (!is_eos_particle(ptype)) {
+      continue;
+    }
+    rho += scaled_partial_density(ptype, beta, mub, mus);
   }
   rho *= prefactor_ * T*T*T;
   return rho;
@@ -253,12 +247,12 @@ double HadronGasEos::net_baryon_density(double T, double mub, double mus) {
   }
   const double beta = 1.0/T;
   double rho = 0.0;
-  for (ParticleTypePtr ptype : list_eos_particles()) {
-    if (!ptype->is_baryon()) {
+  for (const ParticleType &ptype : ParticleType::list_all()) {
+    if (!ptype.is_baryon() || !is_eos_particle(ptype)) {
       continue;
     }
-    rho += scaled_partial_density(*ptype, beta, mub, mus) *
-           ptype->baryon_number();
+    rho += scaled_partial_density(ptype, beta, mub, mus) *
+           ptype.baryon_number();
   }
   rho *= prefactor_ * T*T*T;
   return rho;
@@ -270,12 +264,12 @@ double HadronGasEos::net_strange_density(double T, double mub, double mus) {
   }
   const double beta = 1.0/T;
   double rho = 0.0;
-  for (ParticleTypePtr ptype : list_eos_particles()) {
-    if (ptype->strangeness() == 0) {
+  for (const ParticleType &ptype : ParticleType::list_all()) {
+    if (ptype.strangeness() == 0 || !is_eos_particle(ptype)) {
       continue;
     }
-    rho += scaled_partial_density(*ptype, beta, mub, mus) *
-           ptype->strangeness();
+    rho += scaled_partial_density(ptype, beta, mub, mus) *
+           ptype.strangeness();
   }
   rho *= prefactor_ * T*T*T;
   return rho;
@@ -286,9 +280,9 @@ double HadronGasEos::mus_net_strangeness0(double T, double mub) {
   double mus_u = mub + T;
   double mus_l = 0.0;
   double mus, rhos;
-  int iteration = 0;
+  size_t iteration = 0;
   // 30 iterations should give precision 2^-30 ~ 10^-9
-  const int max_iteration = 30;
+  const size_t max_iteration = 30;
   do {
     mus = 0.5 * (mus_u + mus_l);
     rhos = net_strange_density(T, mub, mus);

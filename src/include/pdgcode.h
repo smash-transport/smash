@@ -16,6 +16,8 @@
 #include <stdexcept>
 #include <string>
 
+#include "pdgcode_constants.h"
+
 namespace Smash {
 
 /**
@@ -263,31 +265,44 @@ class PdgCode {
 
   /// Is this a nucleon (p, n)?
   inline bool is_nucleon() const {
-      return (code() == 0x2212) || (code() == 0x2112);
+      return (code() == pdg::p) || (code() == pdg::n);
   }
-  /// Is this a Delta(1232)?
+  /// Is this a Delta(1232) (no anti-Delta)?
   inline bool is_Delta() const {
-      return (code() == 0x2224) || (code() == 0x2214) ||
-             (code() == 0x2114) || (code() == 0x1114);
+      return (code() == pdg::Delta_pp) || (code() == pdg::Delta_p) ||
+             (code() == pdg::Delta_z) || (code() == pdg::Delta_m);
+  }
+  /// Is this a hyperon (Lambda, Sigma, Xi, Omega)?
+  inline bool is_hyperon() const {
+      const auto abs_code = std::abs(code());
+      switch (abs_code) {
+          case pdg::Lambda:
+          case pdg::Sigma_p: case pdg::Sigma_z: case pdg::Sigma_m:
+          case pdg::Xi_z: case pdg::Xi_m:
+          case pdg::Omega_m:
+              return true;
+          default:
+              return false;
+      }
   }
   /// Is this a kaon (K+, K-, K0, Kbar0)?
   inline bool is_kaon() const {
       const auto abs_code = std::abs(code());
-      return (abs_code == 0x321) || (abs_code == 0x311);
+      return (abs_code == pdg::K_p) || (abs_code == pdg::K_z);
   }
   /// Is this a pion (pi+/pi0/pi-)?
   inline bool is_pion() const {
       const auto c = code();
-      return (c == 0x111)    // pi0
-          || (c == 0x211)    // pi+
-          || (c == -0x211);  // pi-
+      return (c == pdg::pi_z)
+          || (c == pdg::pi_p)
+          || (c == pdg::pi_m);
   }
   /// Is this a rho meson (rho+/rho0/rho-)?
   inline bool is_rho() const {
     const auto c = code();
-    return (c == 0x113)    // rho0
-        || (c == 0x213)    // rho+
-        || (c == -0x213);  // rho-
+    return (c == pdg::rho_z)
+        || (c == pdg::rho_p)
+        || (c == pdg::rho_m);
   }
 
   /** Determine whether a particle has a distinct antiparticle

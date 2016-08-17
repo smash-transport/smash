@@ -16,6 +16,7 @@
 #include "actionfinderfactory.h"
 #include "configuration.h"
 #include "constants.h"
+#include "scatteraction.h"
 
 namespace Smash {
 
@@ -26,12 +27,15 @@ namespace Smash {
 class ScatterActionsFinder : public ActionFinderInterface {
  public:
   /** Initialize the finder with the given parameters. */
+
   ScatterActionsFinder(Configuration config,
                        const ExperimentParameters &parameters,
                        bool two_to_one, bool two_to_two,
                        bool strings_switch);
+
   /** Constructor for testing purposes. */
-  ScatterActionsFinder(float elastic_parameter, int testparticles);
+  ScatterActionsFinder(float elastic_parameter, int testparticles,
+                       bool two_to_one = true);
 
   /** Determine the collision time of the two particles [fm/c].
    *  Time of the closest approach is taken as collision time.
@@ -72,7 +76,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
       float dt) const override;
   /** Find some final collisions at the end of the simulation.
    * Currently does nothing. */
-  ActionList find_final_actions(const Particles &) const override {
+  ActionList find_final_actions(const Particles & /*search_list*/,
+                                bool /*only_res*/ = false) const override {
     return ActionList();
   }
 
@@ -101,10 +106,16 @@ class ScatterActionsFinder : public ActionFinderInterface {
             maximum_cross_section) / testparticles * fm2_mb * M_1_PI;
   }
 
+  /**
+   * Prints out all the 2-> n (n > 1) reactions with non-zero cross-sections
+   * between all possible pairs of particle types.
+   */
+  void dump_reactions() const;
+
  private:
   /* Construct a ScatterAction object,
    * based on the types of the incoming particles. */
-  ScatterActionPtr construct_scatter_action(const ParticleData &data_a,
+  virtual ScatterActionPtr construct_scatter_action(const ParticleData &data_a,
                                             const ParticleData &data_b,
                                             float time_until_collision) const;
   /** Check for a single pair of particles (id_a, id_b) if a collision will happen

@@ -16,9 +16,14 @@
 
 #include "include/average.h"
 #include "include/cxx14compat.h"
-#include "include/kinematics.h"
 #include "include/interpolation.h"
+#include "include/kinematics.h"
 #include "include/lowess.h"
+#include "include/pow.h"
+
+// All quantities in this file use they same units as the rest of SMASH.
+// That is: GeV for energies and momenta, fm for distances and time, and mb for
+// cross sections.
 
 namespace Smash {
 
@@ -250,32 +255,31 @@ static std::unique_ptr<InterpolateDataLinear<double>>
 
 /// Center-of-mass energy.
 const std::initializer_list<double> KMINUSP_RES_SQRTS = {
-  1.4325, 1.45, 1.47, 1.49, 1.51, 1.53, 1.55, 1.57, 1.59, 1.61, 1.63, 1.65,
-  1.67,   1.69, 1.71, 1.73, 1.75, 1.77, 1.79, 1.81, 1.83, 1.85, 1.87, 1.89,
-  1.91,   1.93, 1.95, 1.97, 1.99, 2.01, 2.03, 2.05, 2.07, 2.09, 2.11, 2.13,
-  2.15,   2.17, 2.19, 2.21, 2.23, 2.25, 2.27, 2.29, 2.31, 2.33, 2.35, 2.37,
-  2.39,   2.41, 2.43, 2.45, 2.47, 2.49, 2.51, 2.53,
+  1.4325, 1.4500, 1.4700, 1.4900, 1.5100, 1.5300, 1.5500, 1.5700, 1.5900, 1.6100,
+  1.6300, 1.6500, 1.6700, 1.6900, 1.7100, 1.7300, 1.7500, 1.7700, 1.7900, 1.8100,
+  1.8300, 1.8500, 1.8700, 1.8900, 1.9100, 1.9300, 1.9500, 1.9700, 1.9900, 2.0100,
+  2.0300, 2.0500, 2.0700, 2.0900, 2.1100, 2.1300, 2.1500, 2.1700, 2.1900, 2.2100,
+  2.2300, 2.2500, 2.2700, 2.2900, 2.3100, 2.3300, 2.3500, 2.3700, 2.3900, 2.4100,
+  2.4300, 2.4500, 2.4700, 2.4900, 2.5100, 2.5300
 };
-/// Elastic K- p cross section contributions from decays.
+/// Elastic $K^-$ p cross section contributions from decays.
 ///
 /// These need to be subtracted from the interpolation of the PDG data on
 /// elastic cross sections. This data was generated using the SMASH analysis
 /// suite and should be updated when strange resonances are changed or added.
 const std::initializer_list<double> KMINUSP_RES_SIG = {
-    0.181508888856, 0.276824217055, 0.52709680347,   0.809170022877,
-    5.4306649414,   2.73623096896,  1.00335277069,   0.831092759384,
-    0.96487816871,  1.11429990074,  1.63535440366,   2.43199415481,
-    3.35420549211,  3.5880964655,   3.55175458501,   4.17980540217,
-    5.69214168171,  6.8367923342,   9.03411977658,   10.7000792054,
-    10.4654818833,  9.42857422653,  10.2164594715,   10.7163541445,
-    8.93164259792,  7.09269895697,  5.17386434884,   3.75480313343,
-    2.62782096271,  2.07496543859,  1.64469989838,   1.17591535168,
-    0.966825136065, 0.885320244975, 0.758643195654,  0.637513694965,
-    0.467191033361, 0.462018802703, 0.371174185596,  0.366647793383,
-    0.297093948546, 0.267488464682, 0.256312096717,  0.208579409826,
-    0.190407843837, 0.175917906512, 0.178264019383,  0.149864315214,
-    0.135615565435, 0.13676468557,  0.113707047901,  0.127858971204,
-    0.111330153509, 0.105314540758, 0.0897379082466, 0.0810976351292,
+   0.33367129511,  0.50169807071,  0.81215608591,  1.81425185871,  9.73878541251,
+   4.72942298787,  1.64110137713,  1.29907690636,  1.45132667219,  1.71867719084,
+   2.39088023526,  3.71927701425,  5.20320581341,  5.39379062402,  5.73765670210,
+   7.13462691623,  9.59060875433, 11.52191181500, 14.55085371550, 16.60736427130,
+  14.02383890030,  9.82138787521,  7.74700751400,  5.70551632076,  4.37202276878,
+   3.06489586700,  2.28183945733,  1.83920912408,  1.40165435359,  1.06008207577,
+   0.81583198079,  0.76663983079,  0.61601816015,  0.55005296573,  0.48486316803,
+   0.39262267967,  0.36575657252,  0.33427926436,  0.26292819528,  0.26549081727,
+   0.22493534086,  0.23026481368,  0.18399816802,  0.16801899889,  0.17045653508,
+   0.13612053285,  0.13359129739,  0.11907757417,  0.11595499898,  0.10646106065,
+   0.10646488139,  0.08225463854,  0.08293506562,  0.08910192954,  0.07059081341,
+   0.06994780581
 };
 static std::unique_ptr<InterpolateDataSpline> kminusp_elastic_res_interpolation
     = nullptr;
@@ -390,6 +394,161 @@ float kbar0p_elastic(double mandelstam_s) {
 float kbar0n_elastic(double mandelstam_s) {
   // by isospin symmetry
   return kminusp_elastic(mandelstam_s);
+}
+
+
+/// PDG data on K+ N total cross section: momentum in lab frame.
+const std::initializer_list<double> KPLUSN_TOTAL_P_LAB = {
+    0.770,   0.888,   0.939,   0.970,   0.989,   1.040,   1.091,   1.141,
+    1.170,   1.191,   1.242,   1.292,   1.300,   1.342,   1.392,   1.440,
+    1.442,   1.492,   1.550,   1.593,   1.600,   1.643,   1.690,   1.693,
+    1.700,   1.743,   1.750,   1.793,   1.800,   1.850,   1.893,   1.900,
+    1.950,   1.970,   1.993,   2.000,   2.050,   2.093,   2.100,   2.150,
+    2.193,   2.200,   2.260,   2.300,   2.350,   2.393,   2.400,   2.450,
+    2.500,   2.550,   2.550,   2.600,   2.650,   2.700,   2.750,   2.800,
+    2.830,   2.850,   2.900,   2.950,   3.000,   3.050,   3.100,   3.150,
+    3.200,   3.250,   3.300,   6.000,   8.000,  10.000,  12.000,  14.000,
+   15.000,  16.000,  18.000,  20.000,  20.000,  25.000,  30.000,  35.000,
+   35.000,  40.000,  45.000,  50.000,  50.000,  50.000,  55.000,  70.000,
+  100.000, 100.000, 120.000, 150.000, 150.000, 170.000, 200.000, 200.000,
+  240.000, 280.000, 310.000
+};
+/// PDG data on K+ N total cross section: cross section.
+const std::initializer_list<double> KPLUSN_TOTAL_SIG = {
+  15.50, 16.85, 17.60, 17.80, 18.53, 18.91, 20.61, 21.25, 18.20, 20.87, 20.26,
+  19.68, 18.50, 19.32, 19.22, 18.10, 19.07, 18.95, 18.91, 18.79, 18.89, 18.67,
+  18.50, 18.69, 18.83, 18.88, 18.86, 18.73, 18.53, 18.66, 18.50, 18.69, 18.70,
+  18.60, 18.55, 18.79, 18.54, 18.67, 18.49, 18.43, 18.40, 18.40, 17.70, 18.27,
+  18.26, 18.63, 18.09, 18.25, 18.11, 17.10, 18.17, 18.09, 18.02, 18.11, 18.06,
+  18.01, 17.50, 17.95, 17.85, 17.81, 17.81, 17.83, 17.85, 17.61, 17.61, 17.66,
+  17.55, 17.50, 17.60, 17.50, 17.60, 17.50, 17.87, 17.40, 17.60, 17.94, 17.70,
+  17.78, 17.69, 18.29, 18.12, 18.15, 18.30, 18.66, 18.56, 18.02, 18.43, 18.60,
+  19.04, 18.99, 19.23, 19.63, 19.55, 19.74, 19.72, 19.82, 20.37, 20.61, 20.80,
+};
+static std::unique_ptr<InterpolateDataLinear<double>>
+    kplusp_total_interpolation = nullptr;
+
+/** K+ p inelastic cross section parametrization.
+ * Source: \iref{Buss:2011mx}, B.3.8 */
+float kplusp_inelastic(double mandelstam_s) {
+  if (kplusp_total_interpolation == nullptr) {
+    std::vector<double> x = KPLUSN_TOTAL_P_LAB;
+    std::vector<double> y = KPLUSN_TOTAL_SIG;
+    std::vector<double> dedup_x;
+    std::vector<double> dedup_y;
+    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    dedup_y = smooth(dedup_x, dedup_y, 0.1, 5);
+    kplusp_total_interpolation =
+        make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
+  }
+  const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
+  return (*kplusp_total_interpolation)(p_lab)
+         - kplusp_elastic(mandelstam_s);
+}
+
+
+/* Parametrizations of strangeness exchange channels
+ *
+ * Taken from UrQMD (\iref{Graef:2014mra}).
+ */
+
+float kminusp_piminussigmaplus(double sqrts) {
+  return 0.0788265 / Smash::square(sqrts - 1.38841);
+}
+
+float kminusp_piplussigmaminus(double sqrts) {
+  return 0.0196741 / Smash::square(sqrts - 1.42318);
+}
+
+float kminusp_pi0sigma0(double sqrts) {
+  return 0.55 * 0.0508208 / Smash::square(sqrts - 1.38837);
+}
+
+float kminusp_pi0lambda(double sqrts) {
+  return 0.45 * 0.0508208 / Smash::square(sqrts - 1.38837);
+}
+
+// The other channels follow from the paramatreziation with the same strange
+// product via isospin symmetry.
+
+float kminusn_piminussigma0(double sqrts) {
+  return 1./6 * 2 * kminusp_pi0sigma0(sqrts);
+}
+
+float kminusn_pi0sigmaminus(double sqrts) {
+  return (0.25 + 1./6) * 2 * kminusp_piplussigmaminus(sqrts);
+}
+
+float kminusn_piminuslambda(double sqrts) {
+  return 0.5 * kminusp_pi0lambda(sqrts);
+}
+
+// All K+ p and K+ n channels are forbidden by isospin.
+
+// Two hyperon exchange, based on effective model by Feng Li,
+// as in UrQMD (\iref{Graef:2014mra}).
+
+float lambdalambda_ximinusp(double sqrts_sqrts0, double p_N, double p_lambda) {
+  assert(p_lambda != 0);
+  assert(sqrts_sqrts0 >= 0);
+  return 37.15 / 2 * p_N / p_lambda * std::pow(sqrts_sqrts0, -0.16);
+}
+
+float lambdalambda_xi0n(double sqrts_sqrts0, double p_N, double p_lambda) {
+  return lambdalambda_ximinusp(sqrts_sqrts0, p_N, p_lambda);
+}
+
+float lambdasigmaplus_xi0p(double sqrts_sqrts0) {
+  assert(sqrts_sqrts0 >= 0);
+  return 24.3781 * std::pow(sqrts_sqrts0, -0.479);
+}
+
+float lambdasigmaminus_ximinusn(double sqrts_sqrts0) {
+  return lambdasigmaplus_xi0p(sqrts_sqrts0);
+}
+
+float lambdasigma0_ximinusp(double sqrts_sqrts0) {
+  assert(sqrts_sqrts0 >= 0);
+  if (sqrts_sqrts0 < 0.03336) {
+    return 6.475 * std::pow(sqrts_sqrts0, -0.4167);
+  } else {
+    return 14.5054 * std::pow(sqrts_sqrts0, -0.1795);
+  }
+}
+
+float lambdasigma0_xi0n(double sqrts_sqrts0) {
+  return lambdasigma0_ximinusp(sqrts_sqrts0);
+}
+
+float sigma0sigma0_ximinusp(double sqrts_sqrts0) {
+  assert(sqrts_sqrts0 >= 0);
+  if (sqrts_sqrts0 < 0.09047) {
+    return 5.625 * std::pow(sqrts_sqrts0, -0.318);
+  } else {
+    return 4.174 * std::pow(sqrts_sqrts0, -0.4421);
+  }
+}
+
+// Note that there is a typo in the paper in equation (6):
+// "Lambda Sigma0 -> Xi0 n" should be "Sigma0 Sigma0 -> Xi0 n".
+float sigma0sigma0_xi0n(double sqrts_sqrts0) {
+  return sigma0sigma0_ximinusp(sqrts_sqrts0);
+}
+
+float sigmaplussigmaminus_xi0p(double sqrts_sqrts0) {
+  return 4 * sigma0sigma0_ximinusp(sqrts_sqrts0);
+}
+
+float sigma0sigmaminus_ximinusn(double sqrts_sqrts0) {
+  return 4 * sigma0sigma0_ximinusp(sqrts_sqrts0);
+}
+
+float sigmaplussigmaminus_ximinusp(double sqrts_sqrts0) {
+  return 14.194 * std::pow(sqrts_sqrts0, -0.442);
+}
+
+float sigmaplussigmaminus_xi0n(double sqrts_sqrts0) {
+  return sigmaplussigmaminus_ximinusp(sqrts_sqrts0);
 }
 
 }  // namespace Smash

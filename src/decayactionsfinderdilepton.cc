@@ -63,21 +63,25 @@ ActionList DecayActionsFinderDilepton::find_actions_in_cell(
 
 
 ActionList DecayActionsFinderDilepton::find_final_actions(
-                  const Particles &search_list) const {
+                  const Particles &search_list, bool only_res) const {
   ActionList actions;
 
   for (const auto &p : search_list) {
-    if (p.type().decay_modes().decay_mode_list().size() == 0) {
+    const ParticleType &t = p.type();
+    if (t.decay_modes().decay_mode_list().size() == 0) {
+      continue;
+    }
+    if (only_res && t.is_stable()) {
       continue;
     }
 
     // effective mass of decaying particle
     const float m_eff = p.effective_mass();
-    DecayBranchList dil_modes = p.type().get_partial_widths_dilepton(m_eff);
+    DecayBranchList dil_modes = t.get_partial_widths_dilepton(m_eff);
 
     // total decay width, also hadronic decays
     const float width_tot = total_weight<DecayBranch>(
-                                            p.type().get_partial_widths(m_eff));
+                                                  t.get_partial_widths(m_eff));
 
     for (DecayBranchPtr & mode : dil_modes) {
       const float shining_weight = mode->weight() / width_tot;

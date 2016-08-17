@@ -115,14 +115,14 @@ void ScatterAction::add_all_processes(float elastic_parameter,
     bool a_in_pythia = false;
     bool b_in_pythia = false;
     if (incoming_particles_[0].type().is_nucleon() ||
-        incoming_particles_[0].type().pdgcode() == -0x2212 ||
-        incoming_particles_[0].type().pdgcode() == -0x2112 ||
+        incoming_particles_[0].type().pdgcode() == -pdg::p ||
+        incoming_particles_[0].type().pdgcode() == -pdg::n ||
         incoming_particles_[0].type().pdgcode().is_pion() ) {
         a_in_pythia = true;
     }
     if (incoming_particles_[1].type().is_nucleon() ||
-        incoming_particles_[1].type().pdgcode() == -0x2212 ||
-        incoming_particles_[1].type().pdgcode() == -0x2112 ||
+        incoming_particles_[1].type().pdgcode() == -pdg::p ||
+        incoming_particles_[1].type().pdgcode() == -pdg::n ||
         incoming_particles_[1].type().pdgcode().is_pion() ) {
         b_in_pythia = true;
     }

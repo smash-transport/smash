@@ -362,29 +362,35 @@ float ColliderModus::initial_conditions(Particles *particles,
 }
 
 void ColliderModus::sample_impact() {
-  if (sampling_ == Sampling::Quadratic) {
-    // quadratic sampling: Note that for bmin > bmax, this still yields
-    // the correct distribution (only that canonical() = 0 then is the
-    // upper end, not the lower).
-    impact_ = std::sqrt(imp_min_ * imp_min_ +
-                        Random::canonical() *
-                            (imp_max_ * imp_max_ - imp_min_ * imp_min_));
-  } else if (sampling_ == Sampling::Custom) {
-    // rejection sampling based on given distribution
-    assert(impact_interpolation_ != nullptr);
-    float probability_random = 1;
-    float probability = 0;
-    float b;
-    while (probability_random > probability) {
-      b = Random::uniform(imp_min_, imp_max_);
-      probability = (*impact_interpolation_)(b) / yield_max_;
-      assert(probability < 1.0f);
-      probability_random = Random::uniform(0.f, 1.f);
+  switch (sampling_) {
+    case Sampling::Quadratic: {
+      // quadratic sampling: Note that for bmin > bmax, this still yields
+      // the correct distribution (only that canonical() = 0 then is the
+      // upper end, not the lower).
+      impact_ = std::sqrt(imp_min_ * imp_min_ +
+                          Random::canonical() *
+                              (imp_max_ * imp_max_ - imp_min_ * imp_min_));
     }
-    impact_ = b;
-  } else {
-    // linear sampling. Still, min > max works fine.
-    impact_ = Random::uniform(imp_min_, imp_max_);
+    break;
+    case Sampling::Custom: {
+      // rejection sampling based on given distribution
+      assert(impact_interpolation_ != nullptr);
+      float probability_random = 1;
+      float probability = 0;
+      float b;
+      while (probability_random > probability) {
+        b = Random::uniform(imp_min_, imp_max_);
+        probability = (*impact_interpolation_)(b) / yield_max_;
+        assert(probability < 1.0f);
+        probability_random = Random::uniform(0.f, 1.f);
+      }
+      impact_ = b;
+    }
+    break;
+    case Sampling::Uniform: {
+      // linear sampling. Still, min > max works fine.
+      impact_ = Random::uniform(imp_min_, imp_max_);
+    }
   }
 }
 

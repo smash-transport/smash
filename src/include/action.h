@@ -67,7 +67,7 @@ class Action {
   virtual float raw_weight_value() const = 0;
 
   /** Return the process type. */
-  ProcessType get_type() const {
+  virtual ProcessType get_type() const {
     return process_type_;
   }
 

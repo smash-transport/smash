@@ -10,8 +10,8 @@ Logging:
   #Action: ALL
   #FindScatter: ALL
   #DecayModes: ALL
-  ScatterAction: ALL
-  Pythia: ALL
+  #ScatterAction: ALL
+  #Pythia: ALL
 
 General:
     # Modus decision
@@ -80,6 +80,11 @@ Output:
 #        Position:           [0.0, 0.0, 0.0]
 #    Dileptons:
 #        Format:             Oscar
+#    Photons:
+#        Format:             Oscar
+#        # number of fractional photons produced per single reaction
+#        Fractions:          100
+
 
 Collision_Term:
     Two_to_One:             True
@@ -152,6 +157,8 @@ Modi:
         Sphere_Temperature: 0.2
         # start time of simulation
         Start_Time: 0.0
+        # Initialize sphere with thermal multiplicities
+        Use_Thermal: False
         # Number of particles in Sphere
         Init_Multiplicities:
             211:    100

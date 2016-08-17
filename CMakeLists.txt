@@ -21,6 +21,9 @@ cmake_minimum_required(VERSION 2.8.11)
 # Tell cmake where to find our modules
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
+# needed for clang-tidy
+set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
+
 # Set a default value for CMAKE_BUILD_TYPE, otherwise we get something
 # which is none of the options.
 if(NOT CMAKE_BUILD_TYPE)

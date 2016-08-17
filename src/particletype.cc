@@ -37,6 +37,8 @@ const ParticleTypeList *all_particle_types = nullptr;
 namespace {
 /// Global pointer to the Particle Type list.
 const ParticleTypeList *all_particle_types = nullptr;
+ParticleTypePtrList nucleons_list;
+ParticleTypePtrList deltas_list;
 }  // unnamed namespace
 
 const ParticleTypeList &ParticleType::list_all() {
@@ -57,20 +59,12 @@ ParticleTypePtr ParticleType::operator&() const {
 }
 #endif
 
-ParticleTypePtrList ParticleType::list_nucleons() {
-  if (IsoParticleType::exists("N")) {
-    return IsoParticleType::find("N").get_states();
-  } else {
-    return ParticleTypePtrList();
-  }
+ParticleTypePtrList &ParticleType::list_nucleons() {
+  return nucleons_list;
 }
 
-ParticleTypePtrList ParticleType::list_Deltas() {
-  if (IsoParticleType::exists("Δ")) {
-    return IsoParticleType::find("Δ").get_states();
-  } else {
-    return ParticleTypePtrList();
-  }
+ParticleTypePtrList &ParticleType::list_Deltas() {
+  return deltas_list;
 }
 
 ParticleTypePtrList ParticleType::list_baryon_resonances() {
@@ -113,7 +107,9 @@ ParticleType::ParticleType(std::string n, float m, float w, PdgCode id)
       width_(w),
       pdgcode_(id),
       minimum_mass_(-1.f),
-      charge_(pdgcode_.charge()) {}
+      charge_(pdgcode_.charge()),
+      isospin_(-1),
+      I3_(pdgcode_.isospin3()) {}
 
 /* Construct an antiparticle name-string from the given name-string for the
  * particle and its PDG code. */
@@ -243,6 +239,22 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
   for (auto &t : type_list) {
     t.iso_multiplet_ = IsoParticleType::find(t);
   }
+
+ // Create nucleons list
+ if (IsoParticleType::exists("N")) {
+   for (const auto state : IsoParticleType::find("N").get_states()) {
+     nucleons_list.push_back(state);
+   }
+ }
+
+ // Create deltas list
+ if (IsoParticleType::exists("Δ")) {
+   for (const auto state : IsoParticleType::find("Δ").get_states()) {
+     deltas_list.push_back(state);
+   }
+ }
+
+
 }/*}}}*/
 
 
@@ -261,8 +273,11 @@ float ParticleType::minimum_mass() const {
 }
 
 int ParticleType::isospin() const {
-  return (pdgcode_.is_hadron() && iso_multiplet_) ?
-          iso_multiplet_->isospin() : 0;
+  if (isospin_ < 0) {
+    isospin_ =  (pdgcode_.is_hadron() && iso_multiplet_) ?
+                iso_multiplet_->isospin() : 0;
+  }
+  return isospin_;
 }
 
 float ParticleType::partial_width(const float m,
