@@ -48,7 +48,8 @@ CollisionBranchList ScatterActionHyperonPion::two_to_two_inel(
   // calculate cross section
   auto add_channel
     = [&](float xsection, const ParticleType &type_a, const ParticleType &type_b) {
-      if (xsection > really_small) {
+      const float sqrt_s_min = type_a.minimum_mass() + type_b.minimum_mass();
+      if ((xsection > really_small) && (sqrts > sqrt_s_min)) {
         process_list.push_back(make_unique<CollisionBranch>(
           type_a, type_b, xsection, ProcessType::TwoToTwo));
       }
