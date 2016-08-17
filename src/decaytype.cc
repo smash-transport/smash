@@ -15,6 +15,7 @@
 #include "include/formfactors.h"
 #include "include/integrate.h"
 #include "include/kinematics.h"
+#include "include/pdgcode_constants.h"
 
 namespace Smash {
 
@@ -334,7 +335,7 @@ ThreeBodyDecayDilepton::ThreeBodyDecayDilepton(ParticleTypePtr mother,
     }
   }
 
-  if (mother->pdgcode() == 0x0 || non_lepton_position == -1) {
+  if (mother->pdgcode() == pdg::invalid || non_lepton_position == -1) {
     throw std::runtime_error("Error: Unsupported dilepton Dalitz decay!");
   }
 }
@@ -358,8 +359,8 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
 
   PdgCode pdg = t->pdgcode();
   if (pdg.is_meson()) {
-    const ParticleType &photon = ParticleType::find(0x22);
-    const ParticleType &pi0 = ParticleType::find(0x111);
+    const ParticleType &photon = ParticleType::find(pdg::photon);
+    const ParticleType &pi0 = ParticleType::find(pdg::pi_z);
     switch (pdg.spin()) {
     case 0:  /* pseudoscalars: π⁰, η, η' */ {
       // width for decay into 2γ
@@ -391,8 +392,8 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
     }
   } else if (pdg.is_baryon()) {
     switch (pdg.code()) {
-    case 0x2214: case -0x2214:
-    case 0x2114: case -0x2114:  /* Δ⁺, Δ⁰ (and antiparticles) */ {
+      case pdg::Delta_p: case -pdg::Delta_p:
+      case pdg::Delta_z: case -pdg::Delta_z:  /* Δ⁺, Δ⁰ (and antiparticles) */ {
       /// see \iref{Krivoruchenko:2001hs}
       const float rad1 = (m_par+m_other)*(m_par+m_other) - m_dil_sqr;
       const float rad2 = (m_par-m_other)*(m_par-m_other) - m_dil_sqr;

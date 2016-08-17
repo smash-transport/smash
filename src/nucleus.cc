@@ -331,9 +331,9 @@ void Nucleus::set_parameters_from_config(Configuration &config) {
 void Nucleus::generate_fermi_momenta() {
   double r, rho, p;
   const int N_n = std::count_if(begin(), end(),
-                  [](const ParticleData i) {return i.pdgcode() == 0x2112;});
+                  [](const ParticleData i) {return i.pdgcode() == pdg::n;});
   const int N_p = std::count_if(begin(), end(),
-                  [](const ParticleData i) {return i.pdgcode() == 0x2212;});
+                  [](const ParticleData i) {return i.pdgcode() == pdg::p;});
   const FourVector nucleus_center = center();
   const int A = N_n + N_p;
   const double pi2_3 = 3.0 * M_PI * M_PI;
@@ -345,7 +345,7 @@ void Nucleus::generate_fermi_momenta() {
   ThreeVector ptot = ThreeVector(0.0, 0.0, 0.0);
   for (auto i = begin(); i != end(); i++) {
     // Only protons and neutrons get Fermi momenta
-    if (i->pdgcode() != 0x2212 && i->pdgcode() != 0x2112) {
+    if (i->pdgcode() != pdg::p && i->pdgcode() != pdg::n) {
       if (i->is_baryon()) {
         log.error() << "No rule to calculate Fermi momentum " <<
                        "for particle " << i->pdgcode();
@@ -355,10 +355,10 @@ void Nucleus::generate_fermi_momenta() {
     r = (i->position() - nucleus_center).abs3();
     rho = nuclear_density
           / (std::exp((r - nuclear_radius_)/diffusiveness_) + 1.);
-    if (i->pdgcode() == 0x2212) {  // proton
+    if (i->pdgcode() == pdg::p) {
       rho = rho * N_p / A;
     }
-    if (i->pdgcode() == 0x2112) {  // neutron
+    if (i->pdgcode() == pdg::n) {
       rho = rho * N_n / A;
     }
     p = hbarc * std::pow(pi2_3 * rho * Random::uniform(0.0, 1.0), 1.0/3.0);
@@ -382,7 +382,7 @@ void Nucleus::generate_fermi_momenta() {
     // protons and neutrons
     const ThreeVector centralizer = ptot/A;
     for (auto i = begin(); i != end(); i++) {
-      if (i->pdgcode() == 0x2212 || i->pdgcode() == 0x2112) {
+      if (i->pdgcode() == pdg::p || i->pdgcode() == pdg::n) {
         i->set_4momentum(i->pole_mass(),
                          i->momentum().threevec() - centralizer);
       }
