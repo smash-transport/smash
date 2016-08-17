@@ -75,9 +75,13 @@ std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
   out << "-- Sphere Modus:\nRadius of the sphere: " << m.radius_ << " [fm]"
       << "\nTemperature for momentum sampling: " << m.sphere_temperature_
       << "\nStarting time for Sphere calculation: " << m.start_time_ << '\n';
-  for (const auto &p : m.init_multipl_) {
-    out << "Particle " << p.first << " initial multiplicity "
-                       << p.second << '\n';
+  if (m.use_thermal_) {
+    out << "Thermal multiplicities\n";
+  } else {
+    for (const auto &p : m.init_multipl_) {
+      out << "Particle " << p.first << " initial multiplicity "
+                         << p.second << '\n';
+    }
   }
   return out;
 }
