@@ -685,7 +685,7 @@ void Experiment<Modus>::perform_action(
   action.generate_final_state();
   log.debug("Process Type is: ", action.get_type());
   if (pauli_blocker_ &&
-      action.is_pauli_blocked(particles_, *pauli_blocker_.get())) {
+      action.is_pauli_blocked(particles_, *pauli_blocker_)) {
     total_pauli_blocked++;
     return;
   }
