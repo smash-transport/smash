@@ -162,11 +162,9 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
         }
         case pdg::n: {
           const auto sigma_kplusn = kplusn_inelastic(s);
-          add_channel(sigma_kplusn / 3, ParticleType::find(pdg::K_m),
-                      ParticleType::find(pdg::Delta_pp));
-          add_channel(sigma_kplusn / 3, ParticleType::find(pdg::K_z),
+          add_channel(sigma_kplusn * 0.5, ParticleType::find(pdg::K_z),
                       ParticleType::find(pdg::Delta_p));
-          add_channel(sigma_kplusn / 3, ParticleType::find(pdg::K_p),
+          add_channel(sigma_kplusn * 0.5, ParticleType::find(pdg::K_p),
                       ParticleType::find(pdg::Delta_z));
           break;
         }
