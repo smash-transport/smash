@@ -105,6 +105,7 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
   const auto pdg_nucleon = type_nucleon.pdgcode().code();
   const auto pdg_kaon = type_kaon.pdgcode().code();
 
+  const double s = mandelstam_s();
   const double sqrts = sqrt_s();
 
   // calculate cross section
@@ -115,29 +116,58 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
           type_a, type_b, xsection, ProcessType::TwoToTwo));
       }
   };
-  if (pdg_kaon == pdg::K_m) {
-    switch (pdg_nucleon) {
-      case pdg::p: {
-        const ParticleType &type_pi0 = ParticleType::find(pdg::pi_z);
-        add_channel(kminusp_piminussigmaplus(sqrts),
-                    ParticleType::find(pdg::pi_m), ParticleType::find(pdg::Sigma_p));
-        add_channel(kminusp_piplussigmaminus(sqrts),
-                    ParticleType::find(pdg::pi_p), ParticleType::find(pdg::Sigma_m));
-        add_channel(kminusp_pi0sigma0(sqrts),
-                    type_pi0, ParticleType::find(pdg::Sigma_z));
-        add_channel(kminusp_pi0lambda(sqrts),
-                    type_pi0, ParticleType::find(pdg::Lambda));
-        break;
+  switch (pdg_kaon) {
+    case pdg::K_m: {
+      // All inelatic K- N channels here are strangeness exchange.
+      switch (pdg_nucleon) {
+        case pdg::p: {
+          const ParticleType &type_pi0 = ParticleType::find(pdg::pi_z);
+          add_channel(kminusp_piminussigmaplus(sqrts),
+                      ParticleType::find(pdg::pi_m), ParticleType::find(pdg::Sigma_p));
+          add_channel(kminusp_piplussigmaminus(sqrts),
+                      ParticleType::find(pdg::pi_p), ParticleType::find(pdg::Sigma_m));
+          add_channel(kminusp_pi0sigma0(sqrts),
+                      type_pi0, ParticleType::find(pdg::Sigma_z));
+          add_channel(kminusp_pi0lambda(sqrts),
+                      type_pi0, ParticleType::find(pdg::Lambda));
+          break;
+        }
+        case pdg::n: {
+          const ParticleType &type_piminus = ParticleType::find(pdg::pi_m);
+          add_channel(kminusn_piminussigma0(sqrts),
+                      type_piminus, ParticleType::find(pdg::Sigma_z));
+          add_channel(kminusn_pi0sigmaminus(sqrts),
+                      ParticleType::find(pdg::pi_z), ParticleType::find(pdg::Sigma_m));
+          add_channel(kminusn_piminuslambda(sqrts),
+                      type_piminus, ParticleType::find(pdg::Lambda));
+          break;
+        }
       }
-      case pdg::n:
-        const ParticleType &type_piminus = ParticleType::find(pdg::pi_m);
-        add_channel(kminusn_piminussigma0(sqrts),
-                    type_piminus, ParticleType::find(pdg::Sigma_z));
-        add_channel(kminusn_pi0sigmaminus(sqrts),
-                    ParticleType::find(pdg::pi_z), ParticleType::find(pdg::Sigma_m));
-        add_channel(kminusn_piminuslambda(sqrts),
-                    type_piminus, ParticleType::find(pdg::Lambda));
-        break;
+      break;
+    }
+    case pdg::K_p: {
+      // All inelastic channels are K+ N -> K Delta -> K pi N, with identical
+      // cross section.
+      const auto sigma_kplusp = kplusp_inelastic(s);
+      switch (pdg_nucleon) {
+        case pdg::p: {
+          add_channel(sigma_kplusp * 0.5, ParticleType::find(pdg::K_z),
+                      ParticleType::find(pdg::Delta_pp));
+          add_channel(sigma_kplusp * 0.5, ParticleType::find(pdg::K_p),
+                      ParticleType::find(pdg::Delta_p));
+          break;
+        }
+        case pdg::n: {
+          add_channel(sigma_kplusp / 3, ParticleType::find(pdg::K_m),
+                      ParticleType::find(pdg::Delta_pp));
+          add_channel(sigma_kplusp / 3, ParticleType::find(pdg::K_z),
+                      ParticleType::find(pdg::Delta_p));
+          add_channel(sigma_kplusp / 3, ParticleType::find(pdg::K_p),
+                      ParticleType::find(pdg::Delta_z));
+          break;
+        }
+      }
+      break;
     }
   }
 
