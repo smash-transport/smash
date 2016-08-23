@@ -151,9 +151,9 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
       if (sqrts < kaon_mass + delta_mass) {
           break;
       }
-      const auto sigma_kplusp = kplusp_inelastic(s);
       switch (pdg_nucleon) {
         case pdg::p: {
+          const auto sigma_kplusp = kplusp_inelastic(s);
           add_channel(sigma_kplusp * 0.5, ParticleType::find(pdg::K_z),
                       ParticleType::find(pdg::Delta_pp));
           add_channel(sigma_kplusp * 0.5, ParticleType::find(pdg::K_p),
@@ -161,11 +161,12 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
           break;
         }
         case pdg::n: {
-          add_channel(sigma_kplusp / 3, ParticleType::find(pdg::K_m),
+          const auto sigma_kplusn = kplusn_inelastic(s);
+          add_channel(sigma_kplusn / 3, ParticleType::find(pdg::K_m),
                       ParticleType::find(pdg::Delta_pp));
-          add_channel(sigma_kplusp / 3, ParticleType::find(pdg::K_z),
+          add_channel(sigma_kplusn / 3, ParticleType::find(pdg::K_z),
                       ParticleType::find(pdg::Delta_p));
-          add_channel(sigma_kplusp / 3, ParticleType::find(pdg::K_p),
+          add_channel(sigma_kplusn / 3, ParticleType::find(pdg::K_p),
                       ParticleType::find(pdg::Delta_z));
           break;
         }

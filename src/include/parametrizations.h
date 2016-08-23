@@ -101,6 +101,12 @@ float kbar0n_elastic(double mandelstam_s);
  */
 float kplusp_inelastic(double mandelstam_s);
 
+/* K+ n inelastic cross section parametrization
+ *
+ * \fpPrecision Why \c double?
+ */
+float kplusn_inelastic(double mandelstam_s);
+
 /// K- p <-> pi- Sigma+ cross section parametrization
 float kminusp_piminussigmaplus(double sqrts);
 
