@@ -235,7 +235,7 @@ class QuantumNumbers {
    * Deviation in Charge:
    *  164 vs. 163
    * Deviation in Isospin 3:
-   *  -88 vs -90
+   *  -88 vs. -90
    * \endcode
    *
    */
