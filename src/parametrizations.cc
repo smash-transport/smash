@@ -314,6 +314,21 @@ float kplusn_inelastic(double mandelstam_s) {
 }
 
 
+/** K- p <-> Kbar0 n cross section parametrization.
+ * Source: \iref{Buss:2011mx}, B.3.9 */
+float kminusp_kbar0n(double mandelstam_s) {
+  constexpr float a0 = 100;  // mb GeV^2
+  constexpr float a1 = 0.15;  // GeV
+  constexpr unsigned a2 = 2;
+
+  const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
+  const double p_i = p_lab;
+  const double p_f = p_lab;
+
+  return a0 * p_f/(p_i * mandelstam_s) * pow_int(a1*a1 / (a1*a1 + p_f*p_f), a2);
+}
+
+
 /* Parametrizations of strangeness exchange channels
  *
  * Taken from UrQMD (\iref{Graef:2014mra}).

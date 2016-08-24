@@ -118,7 +118,8 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
   };
   switch (pdg_kaon) {
     case pdg::K_m: {
-      // All inelatic K- N channels here are strangeness exchange.
+      // All inelastic K- N channels here are strangeness exchange, plus one
+      // charge exchange.
       switch (pdg_nucleon) {
         case pdg::p: {
           const ParticleType &type_pi0 = ParticleType::find(pdg::pi_z);
@@ -130,6 +131,8 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
                       type_pi0, ParticleType::find(pdg::Sigma_z));
           add_channel(kminusp_pi0lambda(sqrts),
                       type_pi0, ParticleType::find(pdg::Lambda));
+          add_channel(kminusp_kbar0n(s),
+                      ParticleType::find(pdg::Kbar_z), ParticleType::find(pdg::n));
           break;
         }
         case pdg::n: {
@@ -198,6 +201,12 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
       }
       break;
     }
+    case pdg::Kbar_z:
+      if (pdg_nucleon == pdg::n) {
+        add_channel(kminusp_kbar0n(s),
+                    ParticleType::find(pdg::K_m), ParticleType::find(pdg::p));
+      }
+      break;
   }
 
   return process_list;

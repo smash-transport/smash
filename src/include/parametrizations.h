@@ -107,6 +107,10 @@ float kplusp_inelastic(double mandelstam_s);
  */
 float kplusn_inelastic(double mandelstam_s);
 
+/** K- p <-> Kbar0 n cross section parametrization.
+ * Source: \iref{Buss:2011mx}, B.3.9 */
+float kminusp_kbar0n(double mandelstam_s);
+
 /// K- p <-> pi- Sigma+ cross section parametrization
 float kminusp_piminussigmaplus(double sqrts);
 
