@@ -171,6 +171,33 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
       }
       break;
     }
+    case pdg::K_z: {
+      // K+ and K0 have the same isospin projection, they are assumed to have
+      // the same cross section here.
+
+      if (sqrts < kaon_mass + delta_mass) {
+          break;
+      }
+      switch (pdg_nucleon) {
+        case pdg::p: {
+          const auto sigma_kplusp = kplusp_inelastic(s);
+          add_channel(sigma_kplusp * 0.5, ParticleType::find(pdg::K_z),
+                      ParticleType::find(pdg::Delta_p));
+          add_channel(sigma_kplusp * 0.5, ParticleType::find(pdg::K_p),
+                      ParticleType::find(pdg::Delta_z));
+          break;
+        }
+        case pdg::n: {
+          const auto sigma_kplusn = kplusn_inelastic(s);
+          add_channel(sigma_kplusn * 0.5, ParticleType::find(pdg::K_z),
+                      ParticleType::find(pdg::Delta_z));
+          add_channel(sigma_kplusn * 0.5, ParticleType::find(pdg::K_p),
+                      ParticleType::find(pdg::Delta_m));
+          break;
+        }
+      }
+      break;
+    }
   }
 
   return process_list;
