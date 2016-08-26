@@ -86,12 +86,12 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
 BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
     : initial_condition_(modus_config.take({"Box", "Initial_Condition"})),
         length_(modus_config.take({"Box", "Length"})),
-   temperature_(modus_config.take({"Box", "Temperature"})),
-    start_time_(modus_config.take({"Box", "Start_Time"})),
-   use_thermal_(modus_config.take({"Box", "Use_Thermal"}, false)),
-           mub_(modus_config.take({"Box", "Baryon_Chemical_Potential"}, 0.0f)),
-           mus_(modus_config.take({"Box", "Strange_Chemical_Potential"}, 0.0f)),
-  init_multipl_(modus_config.take({"Box", "Init_Multiplicities"}).
+        temperature_(modus_config.take({"Box", "Temperature"})),
+        start_time_(modus_config.take({"Box", "Start_Time"})),
+        use_thermal_(modus_config.take({"Box", "Use_Thermal"}, false)),
+        mub_(modus_config.take({"Box", "Baryon_Chemical_Potential"}, 0.0f)),
+        mus_(modus_config.take({"Box", "Strange_Chemical_Potential"}, 0.0f)),
+        init_multipl_(modus_config.take({"Box", "Init_Multiplicities"}).
                                                 convert_for(init_multipl_)) {
 }
 

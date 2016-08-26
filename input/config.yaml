@@ -60,9 +60,11 @@ Output:
     # output formats
 #    Oscar_Collisions:
 #        2013_Format:        True
+#        2013_Extended:      False
 #        Print_Start_End:    False
 #    Oscar_Particlelist:
 #        2013_Format:        True
+#        2013_Extended:      False
 #        Only_Final:         True
 #    Vtk:
 #    Root:
@@ -70,8 +72,10 @@ Output:
 #        Write_Particles:    True
 #        Autosave_Frequency: 1000
 #    Binary_Collisions:
+#        Extended:           False
 #        Print_Start_End:    True
 #    Binary_Particles:
+#        Extended:           False
 #        Only_Final:         False
 #    Thermodynamics:
 #        # ("hadron", "baryon", "baryonic isospin", "pion", "none")

@@ -322,7 +322,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     number_of_fractional_photons = config.take(
          {"Output", "Photons", "Fractions"});
     photon_finder_ = make_unique<ScatterActionsFinderPhoton>(
-        config, parameters_,two_to_one, two_to_two,
+        config, parameters_, two_to_one, two_to_two,
         strings_switch, number_of_fractional_photons);
   }
   if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
