@@ -253,7 +253,7 @@ double ScatterAction::two_to_one_formation(const ParticleType &type_resonance,
   }
 
   /* Calculate spin factor */
-  const double spinfactor = (type_resonance.spin() + 1)
+  const double spinfactor = static_cast<double>(type_resonance.spin() + 1)
     / ((type_particle_a.spin() + 1) * (type_particle_b.spin() + 1));
   const int sym_factor = (type_particle_a.pdgcode() ==
                           type_particle_b.pdgcode()) ? 2 : 1;
