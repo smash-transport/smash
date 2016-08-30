@@ -88,7 +88,7 @@ void EosTable::compile_table(HadronGasEos &eos,
     const double ns = 0.0;
     for (size_t ie = 0; ie < n_e_; ie++) {
       const double e = de_ * ie;
-      std::array<double, 3> init_approx = {0.1, 0.0, 0.0};
+      std::array<double, 3> init_approx = {0.15, 0.5, 0.1};
       for (size_t inb = 0; inb < n_nb_; inb++) {
         const double nb = dnb_ * inb;
         // It is physically impossible to have energy density > nucleon mass*nb,

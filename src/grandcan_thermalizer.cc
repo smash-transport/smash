@@ -221,9 +221,12 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time, int ntes
     for (size_t i = 0; i < N_sorts_; i++) {
       S_sampled += eos_typelist_[i]->strangeness() * mult_int_[i];
     }
-    BesselSampler bessel_sampler_S(mult_classes_[2], mult_classes_[3],
-                                   conserved_initial.strangeness() - S_sampled);
-    const auto NS_antiS = bessel_sampler_S.sample();
+    const std::pair<int, int> NS_antiS = std::make_pair(
+                                            Random::poisson(mult_classes_[2]),
+                                            Random::poisson(mult_classes_[3]));
+    if (NS_antiS.first - NS_antiS.second != conserved_initial.strangeness() - S_sampled) {
+      continue;
+    }
 
     sample_multinomial(2, NS_antiS.first);
     sample_multinomial(3, NS_antiS.second);
@@ -232,10 +235,12 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time, int ntes
     for (size_t i = 0; i < N_sorts_; i++) {
       ch_sampled += eos_typelist_[i]->charge() * mult_int_[i];
     }
-
-    BesselSampler bessel_sampler_C(mult_classes_[4], mult_classes_[5],
-                                   conserved_initial.charge() - ch_sampled);
-    const auto NC_antiC = bessel_sampler_C.sample();
+    const std::pair<int, int> NC_antiC = std::make_pair(
+                                            Random::poisson(mult_classes_[4]),
+                                            Random::poisson(mult_classes_[5]));
+    if (NC_antiC.first - NC_antiC.second != conserved_initial.charge() - ch_sampled) {
+      continue;
+    }
 
     sample_multinomial(4, NC_antiC.first);
     sample_multinomial(5, NC_antiC.second);
