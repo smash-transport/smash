@@ -15,6 +15,7 @@
 #include "include/isoparticletype.h"
 #include "include/kinematics.h"
 #include "include/parametrizations.h"
+#include "include/pow.h"
 
 namespace Smash {
 
@@ -58,7 +59,7 @@ float ScatterActionNucleonNucleon::elastic_parametrization() {
  */
 static float Cugnon_bpp(float plab) {
   if (plab < 2.) {
-    float p8 = std::pow(plab, 8);
+    float p8 = pow_int(plab, 8);
     return 5.5*p8 / (7.7+p8);
   } else {
     return std::min(9.0, 5.334 + 0.67*(plab-2.));

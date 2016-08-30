@@ -79,10 +79,9 @@ void Action::perform(Particles *particles, uint32_t id_process) {
 
   for (ParticleData &p : outgoing_particles_) {
     // store the history info
-    p.set_history(id_process, process_type_, time_of_execution_, incoming_particles_);
-    if(process_type_ != ProcessType::Wall) {
-      p.set_collisions_per_particle(p.collisions_per_particle()+1);
-      log.debug("Collisions per particle: ", p.collisions_per_particle());
+    if (process_type_ != ProcessType::Wall) {
+      p.set_history(p.get_history().collisions_per_particle+1, id_process,
+                  process_type_, time_of_execution_, incoming_particles_);
     }
   }
 
