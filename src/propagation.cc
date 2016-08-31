@@ -17,27 +17,47 @@
 
 namespace Smash {
 
+/*Function to caclulate the hubble parameter*/
 double calc_hubble(double time){
 
-return 0.1 / (2.0 * (0.1*time + 1));
+ //Massless Particle Case
+ //return 0.1 / (2.0 * (0.1*time + 1));
+
+ //No Expansion Case
+ //return 0;
+
+ //Massive Particle Case
+ return (2*0.1)/(3*(0.1*time + 1));
 }
 
 
-/* Simple straight line propagation without potentials*/
+/* Simple straight line propagation without potentials but with expansion option*/
 void propagate_straight_line(Particles *particles,
                              const ExperimentParameters &parameters) {
   const auto &log = logger<LogArea::Propagation>();
   const double dt = parameters.timestep_duration();
   for (ParticleData &data : *particles) {
+    //calculate the hubble parameter
     double h = calc_hubble(parameters.labclock.current_time());
+    //usual line of code for calculating the distance to propagate based on particle's velocity
     FourVector distance = FourVector(0.0, data.velocity() * dt);
-   // FourVector delta_mom = FourVector(h*dt*data.momentum().x0(), 0.0, 0.0, 0.0);
+
+    //two vectors which need to be added to momentum and position to ensure appropriate expansion
+    FourVector delta_mom = FourVector(0.0, h*data.momentum().threevec()*dt);
     FourVector expan_dist = FourVector(0.0, h*data.position().threevec()*dt);
+
     log.debug("Particle ", data, " motion: ", distance);
+    //New position and momentum 
     FourVector position = data.position() + distance + expan_dist;
+    FourVector momentum = data.momentum() - delta_mom;
     position.set_x0(parameters.new_particle_time());
+
+    //set the new momentum and position variables
     data.set_4position(position);
-   // data.set_4momentum(data.momentum() - delta_mom);
+    data.set_4momentum(momentum);
+    //force the on shell condition to ensure correct energy
+    data.set_4momentum(data.pole_mass(), data.momentum().threevec());
+
     /* Test, if particle is formed and reset cross_section_scaling_factor
        TODO: Is there a way to only do that for particles that were unformed 
        in the previous timestep? */

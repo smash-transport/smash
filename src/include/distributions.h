@@ -61,6 +61,18 @@ float cauchy(float x, float pole, float width);
 double density_integrand(const double energy, const double momentum_sqr,
                          const double temperature);
 
+double density_integrand_mass(const double energy, const double momentum_sqr,
+                         const double temperature);
+
+
+double density_integrand_1M_IC(const double energy, const double momentum_sqr,
+                         const double temperature);
+
+double density_integrand_2M_IC(const double energy, const double momentum_sqr,
+                         const double temperature);
+
+
+
 /** samples a momentum from the Maxwell-Boltzmann distribution
  *
  * \todo rename this function to make clear what it is
@@ -74,6 +86,7 @@ double density_integrand(const double energy, const double momentum_sqr,
  * \fpPrecision Why \c double?
  */
 double sample_momenta(const double temperature, const double mass);
+double sample_momenta_expan(const double temperature, const double mass);
 
 
 
@@ -117,7 +130,7 @@ double juttner_distribution_func(const double momentum_radial,
 double woods_saxon_dist_func(const double r,  const double radius,
         const double diffusion);
 
-double sample_noneq_photon_momenta (const double temperature);
+double sample_momenta_ES_IC (const double temperature);
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_DISTRIBUTIONS_H_
