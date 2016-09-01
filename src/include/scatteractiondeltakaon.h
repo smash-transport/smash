@@ -39,7 +39,7 @@ class ScatterActionDeltaKaon : public ScatterActionBaryonMeson {
   /**
    * Calculate cross sections for charge exchange in Delta-kaon
    * collisions. It is given by the cross section of the corresponding
-   * delta-kaon collision.
+   * Delta-kaon collision.
    */
   CollisionBranchList two_to_two_inel(const ParticleType &type_particle_a,
                                       const ParticleType &type_particle_b);
