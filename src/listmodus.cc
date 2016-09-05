@@ -190,11 +190,9 @@ float ListModus::initial_conditions(Particles *particles,
             particle.set_cross_section_scaling_factor(0.0);
           }
         } catch ( ParticleType::PdgNotFoundFailure ) {
-            //throw LoadFailure(build_error_string(
-            //            "While loading external particle lists data:\n"
-            //            "PDG code not found for the particle. In " +
-            //            fpath.filename().native(), line));
-          std::cout << "PDG code not found: " << line.text << std::endl;
+            log.warn() << "While loading external particle lists data, "
+                       << "PDG code not found for the particle:\n"
+                       << line.text << std::endl;
         }
     }
 
