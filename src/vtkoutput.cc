@@ -93,30 +93,42 @@ void VtkOutput::write(const Particles &particles) {
                VERSION_MAJOR);
   std::fprintf(file_.get(), "ASCII\n");
 
+  /* the number of formed particles whose formaiton time < current time*/
+  size_t size_formed = 0;
+  float current_time = particles.time();
+  for (const auto &p : particles) {
+      if (p.formation_time() < current_time) {
+          size_formed++;
+      }
+  }
+
   /* Unstructured data sets are composed of points, lines, polygons, .. */
   std::fprintf(file_.get(), "DATASET UNSTRUCTURED_GRID\n");
-  std::fprintf(file_.get(), "POINTS %zu double\n", particles.size());
+  std::fprintf(file_.get(), "POINTS %zu double\n", size_formed);
   for (const auto &p : particles) {
+    if (p.formation_time() > current_time) continue;
     std::fprintf(file_.get(), "%g %g %g\n", p.position().x1(),
                  p.position().x2(), p.position().x3());
   }
-  std::fprintf(file_.get(), "CELLS %zu %zu\n", particles.size(),
-               particles.size() * 2);
-  for (size_t point_index = 0; point_index < particles.size(); point_index++) {
+  std::fprintf(file_.get(), "CELLS %zu %zu\n", size_formed,
+               size_formed * 2);
+  for (size_t point_index = 0; point_index < size_formed; point_index++) {
     std::fprintf(file_.get(), "1 %zu\n", point_index);
   }
-  std::fprintf(file_.get(), "CELL_TYPES %zu\n", particles.size());
-  for (size_t point_index = 0; point_index < particles.size(); point_index++) {
+  std::fprintf(file_.get(), "CELL_TYPES %zu\n", size_formed);
+  for (size_t point_index = 0; point_index < size_formed; point_index++) {
     std::fprintf(file_.get(), "1\n");
   }
-  std::fprintf(file_.get(), "POINT_DATA %zu\n", particles.size());
+  std::fprintf(file_.get(), "POINT_DATA %zu\n", size_formed);
   std::fprintf(file_.get(), "SCALARS pdg_codes int 1\n");
   std::fprintf(file_.get(), "LOOKUP_TABLE default\n");
   for (const auto &p : particles) {
+    if (p.formation_time() > current_time) continue;
     std::fprintf(file_.get(), "%s\n", p.pdgcode().string().c_str());
   }
   std::fprintf(file_.get(), "VECTORS momentum double\n");
   for (const auto &p : particles) {
+    if (p.formation_time() > current_time) continue;
     std::fprintf(file_.get(), "%g %g %g\n", p.momentum().x1(),
                  p.momentum().x2(), p.momentum().x3());
   }
