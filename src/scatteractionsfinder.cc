@@ -15,15 +15,19 @@
 #include "include/constants.h"
 #include "include/cxx14compat.h"
 #include "include/experimentparameters.h"
+#include "include/isoparticletype.h"
 #include "include/logging.h"
 #include "include/macros.h"
 #include "include/particles.h"
 #include "include/scatteraction.h"
 #include "include/scatteractionbaryonbaryon.h"
 #include "include/scatteractionbaryonmeson.h"
+#include "include/scatteractiondeltakaon.h"
 #include "include/scatteractionmesonmeson.h"
 #include "include/scatteractionnucleonkaon.h"
 #include "include/scatteractionnucleonnucleon.h"
+#include "include/scatteractionhyperonpion.h"
+#include "include/stringfunctions.h"
 
 namespace Smash {
 /*!\Userguide
@@ -62,11 +66,11 @@ ScatterActionsFinder::ScatterActionsFinder(
       }
 
 ScatterActionsFinder::ScatterActionsFinder(
-    float elastic_parameter, int testparticles)
+    float elastic_parameter, int testparticles, bool two_to_one)
     : elastic_parameter_(elastic_parameter),
       testparticles_(testparticles),
       isotropic_(false),
-      two_to_one_(true),
+      two_to_one_(two_to_one),
       two_to_two_(true),
       strings_switch_(true),
       formation_time_(1.0f) {}
@@ -93,6 +97,16 @@ ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
     if ((pdg_a.is_nucleon() && pdg_b.is_kaon()) ||
         (pdg_b.is_nucleon() && pdg_a.is_kaon())) {
       act = make_unique<ScatterActionNucleonKaon>(data_a, data_b,
+                                              time_until_collision, isotropic_,
+                                              formation_time_);
+    } else if ((pdg_a.is_hyperon() && pdg_b.is_pion()) ||
+               (pdg_b.is_hyperon() && pdg_a.is_pion())) {
+      act = make_unique<ScatterActionHyperonPion>(data_a, data_b,
+                                              time_until_collision, isotropic_,
+                                              formation_time_);
+    } else if ((pdg_a.is_Delta() && pdg_b.is_kaon()) ||
+               (pdg_b.is_Delta() && pdg_a.is_kaon())) {
+      act = make_unique<ScatterActionDeltaKaon>(data_a, data_b,
                                               time_until_collision, isotropic_,
                                               formation_time_);
     } else {
@@ -220,6 +234,79 @@ ActionList ScatterActionsFinder::find_actions_with_surrounding_particles(
     }
   }
   return actions;
+}
+
+void ScatterActionsFinder::dump_reactions() const {
+  constexpr float time = 0.0f;
+
+  const size_t N_isotypes = IsoParticleType::list_all().size();
+  const size_t N_pairs = N_isotypes * (N_isotypes - 1) / 2;
+
+  std::cout << N_isotypes << " iso-particle types." << std::endl;
+  std::cout << "They can make " << N_pairs << " pairs." << std::endl;
+  std::vector<double> momentum_scan_list = {0.1, 0.3, 0.5, 1.0, 2.0,
+                                            3.0, 5.0, 10.0};
+  for (const IsoParticleType &A_isotype : IsoParticleType::list_all()) {
+    for (const IsoParticleType &B_isotype : IsoParticleType::list_all()) {
+      if (&A_isotype > &B_isotype) {
+        continue;
+      }
+      bool any_nonzero_cs = false;
+      std::vector<std::string> r_list;
+      for (const ParticleTypePtr A_type : A_isotype.get_states()) {
+        for (const ParticleTypePtr B_type : B_isotype.get_states()) {
+          if (A_type > B_type) {
+            continue;
+          }
+          ParticleData A(*A_type), B(*B_type);
+          for (auto mom : momentum_scan_list) {
+            A.set_4momentum(A.pole_mass(), mom, 0.0, 0.0);
+            B.set_4momentum(B.pole_mass(), -mom, 0.0, 0.0);
+            ScatterActionPtr act = construct_scatter_action(A, B, time);
+            act->add_all_processes(elastic_parameter_, two_to_one_,
+                                   two_to_two_, strings_switch_);
+            const float total_cs = act->cross_section();
+            if (total_cs <= 0.0) {
+              continue;
+            }
+            any_nonzero_cs = true;
+            for (const auto& channel : act->collision_channels()) {
+              std::string r;
+              if (channel->get_type() == ProcessType::String) {
+                r =  A_type->name() + B_type->name()
+                     + std::string(" → strings");
+              } else {
+                std::string r_type =
+                  (channel->get_type() == ProcessType::Elastic) ?
+                  std::string(" (el)") :
+                        (channel->get_type() == ProcessType::TwoToTwo) ?
+                        std::string(" (inel)") :
+                             std::string(" (?)");
+                r = A_type->name() + B_type->name()
+                      + std::string(" → ")
+                      + channel->particle_types()[0]->name()
+                      + channel->particle_types()[1]->name()
+                      + r_type;
+              }
+              isoclean(r);
+              r_list.push_back(r);
+            }
+          }
+        }
+      }
+      std::sort(r_list.begin(), r_list.end());
+      r_list.erase(std::unique(r_list.begin(), r_list.end()), r_list.end() );
+      if (any_nonzero_cs) {
+        for (auto r : r_list) {
+          std::cout << r;
+          if (r_list.back() != r) {
+            std::cout <<  ", ";
+          }
+        }
+        std::cout << std::endl;
+      }
+    }
+  }
 }
 
 }  // namespace Smash

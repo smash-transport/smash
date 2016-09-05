@@ -109,10 +109,10 @@ TEST(insert) {
   VERIFY(p.is_valid(p.back()));
 
   ParticleData smashon = Test::smashon();
-  smashon.set_history(1, ProcessType::None, 1.2, ParticleList{});
+  smashon.set_history(3, 1, ProcessType::None, 1.2, ParticleList{});
   p.insert(smashon);
   COMPARE(p.back().id_process(), 1u);
-  smashon.set_history(2, ProcessType::None, 1.2, ParticleList{});
+  smashon.set_history(3, 2, ProcessType::None, 1.2, ParticleList{});
   p.insert(smashon);
   COMPARE(p.back().id_process(), 2u);
 }
@@ -227,7 +227,7 @@ TEST(id_process) {
   uint32_t id = 0;
   for (auto &pd : p) {
     COMPARE(pd.id_process(), 0u);
-    pd.set_history(++id, ProcessType::None, 1.2, ParticleList{});
+    pd.set_history(3, ++id, ProcessType::None, 1.2, ParticleList{});
   }
   id = 0;
   for (auto &pd : p) {
@@ -239,7 +239,7 @@ TEST(id_process) {
   id = 0;
   for (auto &pd : p) {
     COMPARE(pd.id_process(), 0u);
-    pd.set_history(++id, ProcessType::None, 1.2, ParticleList{});
+    pd.set_history(3, ++id, ProcessType::None, 1.2, ParticleList{});
   }
   id = 0;
   for (auto &pd : p) {
@@ -322,7 +322,7 @@ TEST(update) {
   Particles p;
   auto pd =
       Test::smashon(Test::Momentum{1, 1, 1, 1}, Test::Position{1, 1, 1, 1});
-  pd.set_history(1, ProcessType::None, 1.2, ParticleList{});
+  pd.set_history(3, 1, ProcessType::None, 1.2, ParticleList{});
   p.insert(pd);
   p.insert(pd);
   p.insert(pd);
@@ -330,7 +330,7 @@ TEST(update) {
   COMPARE(p.front().momentum(), FourVector(1, 1, 1, 1));
   COMPARE(p.front().position(), FourVector(1, 1, 1, 1));
   COMPARE(p.front().id_process(), 1u);
-  pd.set_history(2, ProcessType::None, 1.2, ParticleList{});
+  pd.set_history(3, 2, ProcessType::None, 1.2, ParticleList{});
   pd.set_4momentum({2, 2, 2, 2});
   pd.set_4position({3, 3, 3, 3});
   p.update_particle(p.front(), pd);

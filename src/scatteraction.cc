@@ -115,14 +115,14 @@ void ScatterAction::add_all_processes(float elastic_parameter,
     bool a_in_pythia = false;
     bool b_in_pythia = false;
     if (incoming_particles_[0].type().is_nucleon() ||
-        incoming_particles_[0].type().pdgcode() == -0x2212 ||
-        incoming_particles_[0].type().pdgcode() == -0x2112 ||
+        incoming_particles_[0].type().pdgcode() == -pdg::p ||
+        incoming_particles_[0].type().pdgcode() == -pdg::n ||
         incoming_particles_[0].type().pdgcode().is_pion() ) {
         a_in_pythia = true;
     }
     if (incoming_particles_[1].type().is_nucleon() ||
-        incoming_particles_[1].type().pdgcode() == -0x2212 ||
-        incoming_particles_[1].type().pdgcode() == -0x2112 ||
+        incoming_particles_[1].type().pdgcode() == -pdg::p ||
+        incoming_particles_[1].type().pdgcode() == -pdg::n ||
         incoming_particles_[1].type().pdgcode().is_pion() ) {
         b_in_pythia = true;
     }
@@ -253,7 +253,7 @@ double ScatterAction::two_to_one_formation(const ParticleType &type_resonance,
   }
 
   /* Calculate spin factor */
-  const double spinfactor = (type_resonance.spin() + 1)
+  const double spinfactor = static_cast<double>(type_resonance.spin() + 1)
     / ((type_particle_a.spin() + 1) * (type_particle_b.spin() + 1));
   const int sym_factor = (type_particle_a.pdgcode() ==
                           type_particle_b.pdgcode()) ? 2 : 1;

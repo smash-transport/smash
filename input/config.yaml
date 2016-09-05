@@ -10,8 +10,8 @@ Logging:
   #Action: ALL
   #FindScatter: ALL
   #DecayModes: ALL
-  ScatterAction: ALL
-  Pythia: ALL
+  #ScatterAction: ALL
+  #Pythia: ALL
 
 General:
     # Modus decision
@@ -60,9 +60,11 @@ Output:
     # output formats
 #    Oscar_Collisions:
 #        2013_Format:        True
+#        2013_Extended:      False
 #        Print_Start_End:    False
 #    Oscar_Particlelist:
 #        2013_Format:        True
+#        2013_Extended:      False
 #        Only_Final:         True
 #    Vtk:
 #    Root:
@@ -70,8 +72,10 @@ Output:
 #        Write_Particles:    True
 #        Autosave_Frequency: 1000
 #    Binary_Collisions:
+#        Extended:           False
 #        Print_Start_End:    True
 #    Binary_Particles:
+#        Extended:           False
 #        Only_Final:         False
 #    Thermodynamics:
 #        # ("hadron", "baryon", "baryonic isospin", "pion", "none")
@@ -150,6 +154,8 @@ Modi:
         Sphere_Temperature: 0.2
         # start time of simulation
         Start_Time: 0.0
+        # Initialize sphere with thermal multiplicities
+        Use_Thermal: False
         # Number of particles in Sphere
         Init_Multiplicities:
             211:    100

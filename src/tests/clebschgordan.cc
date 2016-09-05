@@ -261,3 +261,57 @@ TEST (iso_clebsch_2to2) {
   iso_cg = isospin_clebsch_gordan_sqr_2to2(proton, proton, Delta_m, Delta_m);
   COMPARE_ABSOLUTE_ERROR(iso_cg, 0.f, tolerance);
 }
+
+TEST (range) {
+  const auto &proton = ParticleType::find(0x2212);
+  const auto &neutron = ParticleType::find(0x2112);
+  const auto &Delta_pp = ParticleType::find(0x2224);
+  const auto &Delta_z = ParticleType::find(0x2114);
+  const auto &Lambda = ParticleType::find(0x3122);
+  const auto &Lambda1520 = ParticleType::find(0x3124);
+  const auto &Sigma1385_z = ParticleType::find(0x3214);
+
+  {
+    auto range = I_tot_range(Delta_z, Delta_pp);
+    std::vector<int> isospins_from_range;
+    std::copy(range.begin(), range.end(), std::back_inserter(isospins_from_range));
+    std::vector<int> isospins_expected = {6, 4, 2};
+    COMPARE(isospins_from_range.size(), isospins_expected.size());
+    for (size_t i = 0; i < isospins_expected.size(); i++) {
+      COMPARE(isospins_from_range[i], isospins_expected[i]);
+    }
+  }
+
+  {
+    auto range = I_tot_range(proton, Lambda);
+    std::vector<int> isospins_from_range;
+    std::copy(range.begin(), range.end(), std::back_inserter(isospins_from_range));
+    std::vector<int> isospins_expected = {1};
+    COMPARE(isospins_from_range.size(), isospins_expected.size());
+    for (size_t i = 0; i < isospins_expected.size(); i++) {
+      COMPARE(isospins_from_range[i], isospins_expected[i]);
+    }
+  }
+
+  {
+    auto range = I_tot_range(proton, proton, Lambda1520, Delta_pp);
+    std::vector<int> isospins_from_range;
+    std::copy(range.begin(), range.end(), std::back_inserter(isospins_from_range));
+    std::vector<int> isospins_expected = {};
+    COMPARE(isospins_from_range.size(), isospins_expected.size());
+    for (size_t i = 0; i < isospins_expected.size(); i++) {
+      COMPARE(isospins_from_range[i], isospins_expected[i]);
+    }
+  }
+
+  {
+    auto range = I_tot_range(proton, neutron, Sigma1385_z, proton);
+    std::vector<int> isospins_from_range;
+    std::copy(range.begin(), range.end(), std::back_inserter(isospins_from_range));
+    std::vector<int> isospins_expected = {};
+    COMPARE(isospins_from_range.size(), isospins_expected.size());
+    for (size_t i = 0; i < isospins_expected.size(); i++) {
+      COMPARE(isospins_from_range[i], isospins_expected[i]);
+    }
+  }
+}

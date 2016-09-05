@@ -25,12 +25,16 @@ namespace Smash {
  **/
 class BinaryOutputBase : public OutputInterface {
  protected:
-  explicit BinaryOutputBase(FILE *f);
+  explicit BinaryOutputBase(FILE *f, bool extended_format);
   void write(const std::string &s);
+    void write(const float x);
   void write(const FourVector &v);
   void write(std::int32_t x) {
     std::fwrite(&x, sizeof(x), 1, file_.get());
   }
+    void write(const size_t x) {
+        write(static_cast<int32_t>(x));
+    }
   void write(const Particles &particles);
   void write(const ParticleList &particles);
   void write_particledata(const ParticleData &p);
@@ -41,6 +45,8 @@ class BinaryOutputBase : public OutputInterface {
  private:
   /// file format version number
   const int format_version_ = 4;
+  /// Option for extended output
+  bool extended_;
 };
 
 /**

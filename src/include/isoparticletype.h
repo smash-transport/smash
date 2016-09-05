@@ -79,6 +79,11 @@ class IsoParticleType {
   bool has_anti_multiplet() const;
 
   /**
+   * Returns a list of all IsoParticleTypes
+   */
+  static const IsoParticleTypeList& list_all();
+
+  /**
    * Returns the IsoParticleType object for the given \p name.
    *
    * \note The complexity of the search is \f$\mathcal O(\log N)\f$.

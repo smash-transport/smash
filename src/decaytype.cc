@@ -15,6 +15,8 @@
 #include "include/formfactors.h"
 #include "include/integrate.h"
 #include "include/kinematics.h"
+#include "include/pdgcode_constants.h"
+#include "include/pow.h"
 
 namespace Smash {
 
@@ -334,7 +336,7 @@ ThreeBodyDecayDilepton::ThreeBodyDecayDilepton(ParticleTypePtr mother,
     }
   }
 
-  if (mother->pdgcode() == 0x0 || non_lepton_position == -1) {
+  if (mother->pdgcode() == pdg::invalid || non_lepton_position == -1) {
     throw std::runtime_error("Error: Unsupported dilepton Dalitz decay!");
   }
 }
@@ -358,8 +360,8 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
 
   PdgCode pdg = t->pdgcode();
   if (pdg.is_meson()) {
-    const ParticleType &photon = ParticleType::find(0x22);
-    const ParticleType &pi0 = ParticleType::find(0x111);
+    const ParticleType &photon = ParticleType::find(pdg::photon);
+    const ParticleType &pi0 = ParticleType::find(pdg::pi_z);
     switch (pdg.spin()) {
     case 0:  /* pseudoscalars: π⁰, η, η' */ {
       // width for decay into 2γ
@@ -367,7 +369,7 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
       float ff = em_form_factor_ps(pdg, m_dil);  // form factor
       /// see \iref{Landsberg:1986fd}, equation (3.8)
       return (4.*alpha/(3.*M_PI)) * gamma_2g/m_dil
-                                  * pow(1.-m_dil/m_par*m_dil/m_par, 3.) * ff*ff;
+                                  * pow_int(1.-m_dil/m_par*m_dil/m_par, 3) * ff*ff;
     }
     case 2: /* vectors: ω, φ */ {
       // width for decay into π⁰γ
@@ -375,7 +377,7 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
       float ff_sqr = em_form_factor_sqr_vec(pdg, m_dil);  // form factor squared
       /// see \iref{Landsberg:1986fd}, equation (3.4)
       const float n1 = m_par_sqr - m_other_sqr;
-      const float rad = pow(1. + m_dil_sqr/n1, 2)
+      const float rad = pow_int(1. + m_dil_sqr/n1, 2)
                         - 4.*m_par_sqr*m_dil_sqr/(n1*n1);
       if (rad < 0.) {
         assert(rad > -1E-5);
@@ -391,15 +393,15 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
     }
   } else if (pdg.is_baryon()) {
     switch (pdg.code()) {
-    case 0x2214: case -0x2214:
-    case 0x2114: case -0x2114:  /* Δ⁺, Δ⁰ (and antiparticles) */ {
+      case pdg::Delta_p: case -pdg::Delta_p:
+      case pdg::Delta_z: case -pdg::Delta_z:  /* Δ⁺, Δ⁰ (and antiparticles) */ {
       /// see \iref{Krivoruchenko:2001hs}
       const float rad1 = (m_par+m_other)*(m_par+m_other) - m_dil_sqr;
       const float rad2 = (m_par-m_other)*(m_par-m_other) - m_dil_sqr;
       const float t1 = alpha/16. *
                   (m_par+m_other)*(m_par+m_other)/(m_par_cubed*m_other_sqr) *
                   std::sqrt(rad1);
-      const float t2 = pow(std::sqrt(rad2), 3.0);
+      const float t2 = pow_int(std::sqrt(rad2), 3);
       const float ff = form_factor_delta(m_dil);
       const float gamma_vi = t1 * t2 * ff*ff;
       return 2.*alpha/(3.*M_PI) * gamma_vi/m_dil;

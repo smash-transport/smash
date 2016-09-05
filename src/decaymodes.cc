@@ -185,6 +185,9 @@ void DecayModes::load_decaymodes(const std::string &input) {
     }
   };
 
+  // Track the line number for better error messages.
+  // FIXME: At the moment this does not include comments and empty lines.
+  uint64_t linenumber = 1;
   for (const Line &line : line_parser(input)) {
     const auto trimmed = trim(line.text);
     assert(!trimmed.empty());  // trim(line.text) is never empty,
@@ -203,7 +206,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
         PdgCode pdgcode = mother_states[m]->pdgcode();
         if (!decaymodes[find_offset(pdgcode)].is_empty()) {
           throw LoadFailure("Duplicate entry for " + name +
-                            " in decaymodes.txt");
+                            " in decaymodes.txt:" + std::to_string(linenumber));
         }
       }
     } else {
@@ -297,7 +300,8 @@ void DecayModes::load_decaymodes(const std::string &input) {
             throw std::runtime_error(
                 "References to isospin multiplets only "
                 "allowed in two-body or three-body decays: " +
-                line.text);
+                line.text + " (line " + std::to_string(linenumber) + ": \""
+                + trimmed + "\")");
         }
       } else {
         /* References to specific states, not multiplets:
@@ -305,7 +309,13 @@ void DecayModes::load_decaymodes(const std::string &input) {
         ParticleTypePtrList types;
         int charge = 0;
         for (auto part : decay_particles) {
-          types.push_back(IsoParticleType::find_state(part));
+          try {
+            types.push_back(IsoParticleType::find_state(part));
+          } catch (std::runtime_error& e) {
+            throw std::runtime_error(std::string() + e.what()
+                    + " (line " + std::to_string(linenumber) + ": \""
+                    + trimmed + "\")");
+          }
           charge += types.back()->charge();
         }
         bool no_decays = true;
@@ -320,10 +330,12 @@ void DecayModes::load_decaymodes(const std::string &input) {
         if (no_decays) {
           throw InvalidDecay(isotype_mother->name() +
                              " decay mode violates charge conservation: \"" +
-                             line.text + "\"");
+                             line.text + "\" (line " + std::to_string(linenumber)
+                             + ": \"" + trimmed + "\"");
         }
       }
     }
+    linenumber++;
   }
   end_of_decaymodes();
 }

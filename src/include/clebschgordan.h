@@ -57,14 +57,68 @@ float isospin_clebsch_gordan_sqr_2to2(const ParticleType &t_a,
                                       const ParticleType &t_d,
                                       const int I = -1);
 
-/** Get the allowed range of total isospin for a collision A + B. Returns a
- * vector of allowed values, where each entry represents twice the isospin. */
-std::vector<int> I_tot_range(const ParticleType &t_a, const ParticleType &t_b);
-/** Get the allowed range of total isospin for a collision A + B <-> C + D.
- * Returns a vector of allowed values, where each entry represents twice the
- * isospin. */
-std::vector<int> I_tot_range(const ParticleType &t_a, const ParticleType &t_b,
-                             const ParticleType &t_c, const ParticleType &t_d);
+class I_tot_range {
+ private:
+  int I_min_;
+  int I_max_;
+
+ public:
+  /** Get the allowed range of total isospin for a collision A + B. Returns
+   * maximum and minimum of allowed values. */
+  I_tot_range(const ParticleType &t_a, const ParticleType &t_b) {
+    // Compute total isospin range with given particles.
+    const int I_z_abs = std::abs(t_a.isospin3() + t_b.isospin3());
+    I_max_ = t_a.isospin() + t_b.isospin();
+    I_min_ = std::max(std::abs(t_a.isospin() - t_b.isospin()), I_z_abs);
+  }
+
+  /** Get the allowed range of total isospin for a collision A + B <-> C + D.
+   * Returns maximum and minimum of allowed values. */
+  I_tot_range(const ParticleType &t_a, const ParticleType &t_b,
+              const ParticleType &t_c, const ParticleType &t_d) {
+    // Compute total isospin range with given initial and final particles.
+    const int I_z = t_a.isospin3() + t_b.isospin3();
+    if (I_z != t_c.isospin3() + t_d.isospin3()) {
+        // This reaction is forbidden by isospin conservation.
+        // Set impossible values to make sure an empty range is returned.
+        I_min_ = 1;
+        I_max_ = 0;
+        return;
+    }
+    I_max_ = std::min(t_a.isospin() + t_b.isospin(), t_c.isospin() + t_d.isospin());
+    I_min_ = std::max(std::abs(t_a.isospin() - t_b.isospin()),
+                      std::abs(t_c.isospin() - t_d.isospin()));
+    I_min_ = std::max(I_min_, std::abs(I_z));
+  }
+
+  class iterator : public std::iterator<std::forward_iterator_tag, int> {
+  private:
+    int c_;
+    I_tot_range &parent_;
+
+  public:
+    iterator(int start, I_tot_range &parent) : c_(start), parent_(parent) {}
+    int operator*() { return c_; }
+    const iterator *operator++() {
+      c_ -= 2;
+      return this;
+    };
+    iterator operator++(int) {
+      c_ -= 2;
+      return iterator(c_ + 2, parent_);
+    }
+    bool operator==(const iterator &other) { return c_ == other.c_; }
+    bool operator!=(const iterator &other) { return c_ != other.c_; }
+  };
+
+  iterator begin() { return iterator(I_max_, *this); }
+  iterator end() {
+    if (I_min_ > I_max_) {
+      return begin();
+    }
+    return iterator(I_min_ - 2, *this);
+  }
+};
 
 }  // namespace Smash
 

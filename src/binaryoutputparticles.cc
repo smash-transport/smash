@@ -24,7 +24,8 @@ namespace Smash {
 BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
                                              Configuration &&config)
     : BinaryOutputBase(
-          std::fopen(((path / "particles_binary.bin")).native().c_str(), "wb")),
+          std::fopen(((path / "particles_binary.bin")).native().c_str(), "wb"),
+                       config.take({"Extended"}, false)),
       only_final_(config.has_value({"Only_Final"}) ? config.take({"Only_Final"})
                                                    : true) {
   /*!\Userguide
@@ -92,6 +93,16 @@ BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
    * \code
    *     9*double             int int
    * t x y z mass p0 px py pz pdg ID
+   * \endcode
+   *
+   * **Extended Particle line**
+   * \code
+   *     9*double             int int int     float
+   * t x y z mass p0 px py pz pdg ID Ncoll formation_time
+   *        float                    int                 int
+   * cross_section_scaling_factor process_ID_origin process_type_origin
+   *        float        int         int
+   * time_of_origin PDG_mother1 PDG_mother2
    * \endcode
    *
    * **Event end line**
