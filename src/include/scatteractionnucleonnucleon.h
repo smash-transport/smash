@@ -57,6 +57,15 @@ class ScatterActionNucleonNucleon : public ScatterActionBaryonBaryon {
    */
   CollisionBranchList two_to_two_inel(const ParticleType &type_particle1,
                                       const ParticleType &type_particle2);
+  /**
+   * Utility function to avoid code replication in two_to_two_inel
+   */
+  template<class IntegrationMethod>
+  CollisionBranchList find_xsection_from_type(const ParticleType &type_particle_a,
+                                          const ParticleType &type_particle_b,
+                                          const ParticleTypePtrList &type_res_1,
+                                          const ParticleTypePtrList &type_res_2,
+                                          const IntegrationMethod integrator);
 };
 
 
