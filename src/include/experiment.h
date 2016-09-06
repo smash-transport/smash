@@ -164,14 +164,12 @@ class Experiment : public ExperimentBase {
   void write_photon_action(Action &action,
                            const ParticleList &particles_before_actions);
 
-  void run_time_evolution();
-
-  /** Runs the time evolution of an event with fixed-sized time steps
-   *
-   * Here, the time steps are looped over, collisions and decays are
-   * carried out and particles are propagated.
+  /** Runs the time evolution of an event with fixed-sized time steps,
+   *  adaptive time steps or without timesteps, from action to actions.
+   *  Within one timestep (fixed or adaptive) evolution from action to action
+   *  is invoked.
    */
-  void run_time_evolution_fixed_time_step();
+  void run_time_evolution();
 
   /** Runs the time evolution of an event without time steps
    *
@@ -179,17 +177,6 @@ class Experiment : public ExperimentBase {
    * carried out and particles are propagated.
    */
   void run_time_evolution_without_time_steps(float end_time, Actions& actions);
-
-  /** Runs the time evolution of an event with adaptive time steps
-   *
-   * Here, the time steps are looped over, collisions and decays are carried
-   * out and particles are propagated while the size of the time step is adapted
-   * to the state of the system.
-   *
-   * \param adaptive_parameters Additional parameters for adaptive time steps
-   */
-  void run_time_evolution_adaptive_time_steps(
-                                const AdaptiveParameters &adaptive_parameters);
 
   /** Performs the final decays of an event
    */

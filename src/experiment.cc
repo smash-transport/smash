@@ -775,22 +775,24 @@ void Experiment<Modus>::run_time_evolution() {
   }
 
   while (parameters_.labclock.current_time() < end_time_) {
-    parameters_.labclock.set_timestep_duration(dt);
     num_steps++;
     float t_step_end;
     // Set end time of the step
     switch (time_step_mode_) {
       case TimeStepMode::None:
         t_step_end = end_time_;
+        dt = t_step_end - parameters_.labclock.current_time();
         break;
       case TimeStepMode::Fixed:
       case TimeStepMode::Adaptive:
         t_step_end = std::min(parameters_.labclock.current_time() + dt, end_time_);
         break;
     }
+    parameters_.labclock.set_timestep_duration(dt);
     log.debug("Timestepless propagation for next ", dt, " fm/c.");
     /* (1.a) Create grid. */
     float min_cell_length = compute_min_cell_length(dt);
+    log.debug("Creating grid with minimal cell length ", min_cell_length);
     const auto &grid = use_grid_
                            ? modus_.create_grid(particles_, min_cell_length)
                            : modus_.create_grid(particles_, min_cell_length,
@@ -801,14 +803,14 @@ void Experiment<Modus>::run_time_evolution() {
         [&](const ParticleList &search_list) {
           for (const auto &finder : action_finders_) {
             actions.insert(finder->find_actions_in_cell(
-                search_list, parameters_.timestep_duration()));
+                search_list, dt));
           }
         },
         [&](const ParticleList &search_list,
             const ParticleList &neighbors_list) {
           for (const auto &finder : action_finders_) {
             actions.insert(finder->find_actions_with_neighbors(
-                search_list, neighbors_list, parameters_.timestep_duration()));
+                search_list, neighbors_list, dt));
           }
         });
 
@@ -847,7 +849,6 @@ void Experiment<Modus>::run_time_evolution() {
       }
     }
 
-
     /* (2) In case of adaptive timesteps adapt timestep size */
     if (time_step_mode_ ==  TimeStepMode::Adaptive && actions.size() > 0u) {
       log_ad_ts.debug() << hline;
@@ -877,7 +878,7 @@ void Experiment<Modus>::run_time_evolution() {
     run_time_evolution_without_time_steps(t_step_end, actions);
   }
 
-  log.info(num_steps, " timesteps performed.");
+  log.debug("Timesteps performed:", num_steps);
   if (pauli_blocker_) {
     log.info("Interactions: Pauli-blocked/performed = ", total_pauli_blocked_,
              "/", interactions_total_);
@@ -957,295 +958,6 @@ void Experiment<Modus>::run_time_evolution_without_time_steps(float end_time, Ac
   log.debug("Propagating from current time ",
            parameters_.labclock.current_time(), " to step end time ", end_time);
   propagate_all_until(end_time);
-}
-
-/* This is the loop over timesteps, carrying out collisions and decays
- * and propagating particles. */
-template <typename Modus>
-void Experiment<Modus>::run_time_evolution_fixed_time_step() {
-  const auto &log = logger<LogArea::Experiment>();
-  modus_.impose_boundary_conditions(&particles_);
-  log.info() << format_measurements(particles_, interactions_total_, 0u,
-                                    conserved_initial_, time_start_,
-                                    parameters_.labclock.current_time());
-
-  Actions actions;
-  Actions dilepton_actions;
-  Actions photon_actions;
-  const float dt = parameters_.timestep_duration();
-  // minimal cell length of the grid for collision finding
-  const float min_cell_length = compute_min_cell_length(dt);
-
-  while (!(++parameters_.labclock > end_time_)) {
-    /* (1.a) Create grid. */
-    const auto &grid = use_grid_
-                           ? modus_.create_grid(particles_, min_cell_length)
-                           : modus_.create_grid(particles_, min_cell_length,
-                                                CellSizeStrategy::Largest);
-    /* (1.b) Iterate over cells and find actions. */
-    grid.iterate_cells(
-        [&](const ParticleList &search_list) {
-          for (const auto &finder : action_finders_) {
-            actions.insert(finder->find_actions_in_cell(search_list, dt));
-          }
-        },
-        [&](const ParticleList &search_list,
-            const ParticleList &neighbors_list) {
-          for (const auto &finder : action_finders_) {
-            actions.insert(finder->find_actions_with_neighbors(
-                search_list, neighbors_list, dt));
-          }
-        });
-
-    const auto particles_before_actions = particles_.copy_to_vector();
-
-    /* (1.d) Dileptons */
-    if (dilepton_finder_ != nullptr) {
-      dilepton_actions.insert(
-          dilepton_finder_->find_actions_in_cell(particles_before_actions, dt));
-
-      if (!dilepton_actions.is_empty()) {
-        while (!dilepton_actions.is_empty()) {
-          write_dilepton_action(*dilepton_actions.pop(),
-                                particles_before_actions);
-        }
-      }
-    }
-
-    /* (1.e) Photons */
-    if (photon_finder_ != nullptr) {
-      grid.iterate_cells(
-          [&](const ParticleList &search_list) {
-            photon_actions.insert(
-                photon_finder_->find_actions_in_cell(search_list, dt));
-          },
-          [&](const ParticleList &search_list,
-              const ParticleList &neighbors_list) {
-            photon_actions.insert(photon_finder_->find_actions_with_neighbors(
-                search_list, neighbors_list, dt));
-          });
-
-      if (!photon_actions.is_empty()) {
-        while (!photon_actions.is_empty()) {
-          write_photon_action(*photon_actions.pop(), particles_before_actions);
-        }
-      }
-    }
-
-    /* (2) Perform actions. */
-    if (!actions.is_empty()) {
-      while (!actions.is_empty()) {
-        perform_action(*actions.pop(), particles_before_actions);
-      }
-      log.debug(~einhard::Blue(), particles_);
-    } else {
-      log.debug("no actions performed");
-    }
-    modus_.impose_boundary_conditions(&particles_);
-
-    /* (3) Do propagation. */
-    propagate_all();
-
-    /* (4) Physics output during the run. */
-    if (parameters_.need_intermediate_output()) {
-      intermediate_output();
-    }
-    // Check conservation of conserved quantities if potentials are off.
-    // If potentials are on then momentum is conserved only in average
-    if (!potentials_) {
-      std::string err_msg = conserved_initial_.report_deviations(particles_);
-      if (!err_msg.empty()) {
-        log.error() << err_msg;
-        throw std::runtime_error("Violation of conserved quantities!");
-      }
-    }
-    check_interactions_total(interactions_total_);
-  }
-
-  if (pauli_blocker_) {
-    log.info("Interactions: Pauli-blocked/performed = ", total_pauli_blocked_,
-             "/", interactions_total_);
-  }
-}
-
-/* This is the loop over timesteps, carrying out collisions and decays
- * and propagating particles. */
-template <typename Modus>
-void Experiment<Modus>::run_time_evolution_adaptive_time_steps(
-    const AdaptiveParameters &adaptive_parameters) {
-  const auto &log = logger<LogArea::Experiment>();
-  const auto &log_ad_ts = logger<LogArea::AdaptiveTS>();
-  modus_.impose_boundary_conditions(&particles_);
-  bool observed_first_action = false;
-
-  // if there is no output scheduled at the beginning, trigger it manually
-  if (!parameters_.is_output_time()) {
-    log.info() << format_measurements(particles_, interactions_total_, 0u,
-                                      conserved_initial_, time_start_,
-                                      parameters_.labclock.current_time());
-  }
-
-  float rate =
-      adaptive_parameters.rate_from_dt(parameters_.timestep_duration());
-  Actions actions;
-  uint32_t num_time_steps = 0u;
-  float min_dt = std::numeric_limits<float>::infinity();
-  while (parameters_.labclock.current_time() < end_time_) {
-    num_time_steps++;
-    if (parameters_.labclock.next_time() > end_time_) {
-      // set the time step size such that we stop at end_time_
-      parameters_.labclock.end_tick_on_multiple(end_time_);
-    }
-    float dt = parameters_.timestep_duration();
-
-    /* (1.a) Create grid. */
-    float min_cell_length = compute_min_cell_length(dt);
-    const auto &grid = modus_.create_grid(particles_, min_cell_length);
-
-    /* (1.b) Iterate over cells and find actions. */
-    grid.iterate_cells(
-        [&](const ParticleList &search_list) {
-          for (const auto &finder : action_finders_) {
-            actions.insert(finder->find_actions_in_cell(
-                search_list, parameters_.timestep_duration()));
-          }
-        },
-        [&](const ParticleList &search_list,
-            const ParticleList &neighbors_list) {
-          for (const auto &finder : action_finders_) {
-            actions.insert(finder->find_actions_with_neighbors(
-                search_list, neighbors_list, parameters_.timestep_duration()));
-          }
-        });
-
-    /* (2) Calculate time step size. */
-    log_ad_ts.debug() << hline;
-    if (!observed_first_action && actions.size() > 0u) {
-      log_ad_ts.debug("First interaction.");
-      observed_first_action = true;
-    }
-
-    bool end_early = false;
-    if (observed_first_action) {
-      float fraction_missed;
-      float allowed_deviation;
-      std::tie(fraction_missed, allowed_deviation) =
-          adaptive_parameters.calc_missed_actions_allowed_deviation(
-              actions, rate, particles_.size());
-      const float current_rate = fraction_missed / dt;
-      const float rate_deviation = current_rate - rate;
-      // check if the current rate deviates too strongly from the expected value
-      if (rate_deviation > allowed_deviation) {
-        log_ad_ts.debug("End time step early.");
-        end_early = true;
-        parameters_.labclock.set_timestep_duration(
-            adaptive_parameters.new_dt(current_rate));
-      }
-      // update the estimate of the rate
-      rate += adaptive_parameters.smoothing_factor * rate_deviation;
-      // set the size of the next time step
-      dt = adaptive_parameters.new_dt(rate);
-    }
-
-    if (!observed_first_action) {
-      log_ad_ts.debug("Averaged rate: ", 0.f);
-    } else {
-      log_ad_ts.debug("Averaged rate: ", rate);
-    }
-    log_ad_ts.debug("Time step size: ",
-                    parameters_.labclock.timestep_duration());
-    const float this_dt = parameters_.labclock.timestep_duration();
-    if (this_dt < min_dt) {
-      min_dt = this_dt;
-    }
-
-    /* (3) Physics output during the run. */
-    if (parameters_.need_intermediate_output()) {
-      // The following block is necessary because we want to make sure that the
-      // intermediate output happens at exactly the requested time and not
-      // slightly before.
-      if (!parameters_.is_output_time()) {
-        const float next_time = parameters_.labclock.next_time();
-        // set the time step such that it ends on the next output time
-        parameters_.set_timestep_for_next_output();
-        ++parameters_.labclock;
-
-        // perform actions until the output time
-        const auto particles_before_actions = particles_.copy_to_vector();
-        while (!actions.is_empty()) {
-          auto action = actions.pop();
-          if (action->time_of_execution() >
-              parameters_.labclock.current_time()) {
-            // reinsert action
-            actions.insert(std::move(action));
-            break;
-          }
-          perform_action(*action, particles_before_actions);
-        }
-        modus_.impose_boundary_conditions(&particles_);
-        propagate_all();
-        for (const ActionPtr &action : actions) {
-          if (action->is_valid(particles_)) {
-            action->update_incoming(particles_);
-          }
-        }
-        parameters_.labclock.end_tick_on_multiple(next_time);
-      }
-
-      intermediate_output();
-    }
-
-    ++parameters_.labclock;
-
-    /* (4) Perform actions. */
-    if (!actions.is_empty()) {
-      const auto particles_before_actions = particles_.copy_to_vector();
-      while (!actions.is_empty()) {
-        auto action = actions.pop();
-        if (end_early &&
-            action->time_of_execution() > parameters_.labclock.current_time()) {
-          actions.clear();
-          log_ad_ts.debug("Actions discarded because of early ending.");
-          break;
-        }
-        perform_action(*action, particles_before_actions);
-      }
-      log.debug(~einhard::Blue(), particles_);
-    } else {
-      log.debug("no actions performed");
-    }
-    modus_.impose_boundary_conditions(&particles_);
-
-    /* (5) Do propagation. */
-    propagate_all();
-
-    /* (6) Set duration of next time step. */
-    parameters_.labclock.set_timestep_duration(dt);
-
-    // Check conservation of conserved quantities if potentials are off.
-    // If potentials are on then momentum is conserved only in average
-    if (!potentials_) {
-      std::string err_msg = conserved_initial_.report_deviations(particles_);
-      if (!err_msg.empty()) {
-        log.error() << err_msg;
-        throw std::runtime_error("Violation of conserved quantities!");
-      }
-    }
-
-    check_interactions_total(interactions_total_);
-  }
-
-  // check if a final intermediate output is needed
-  if (parameters_.is_output_time()) {
-    intermediate_output();
-  }
-
-  if (pauli_blocker_) {
-    log.info("Collisions: pauliblocked/total = ", total_pauli_blocked_, "/",
-             interactions_total_);
-  }
-  log.info("Number of time steps = ", num_time_steps);
-  log.info("Smallest time step size = ", min_dt);
 }
 
 template <typename Modus>
