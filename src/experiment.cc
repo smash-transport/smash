@@ -657,9 +657,8 @@ static std::string format_measurements(const Particles &particles,
 
 template <typename Modus>
 template <typename Container>
-void Experiment<Modus>::perform_action(
-    Action &action, uint64_t &interactions_total, uint64_t &total_pauli_blocked,
-    const Container &particles_before_actions) {
+void Experiment<Modus>::perform_action(Action &action,
+                                 const Container &particles_before_actions) {
   const auto &log = logger<LogArea::Experiment>();
   if (!action.is_valid(particles_)) {
     log.debug(~einhard::DRed(), "✘ ", action, " (discarded: invalid)");
@@ -669,14 +668,14 @@ void Experiment<Modus>::perform_action(
   log.debug("Process Type is: ", action.get_type());
   if (pauli_blocker_ &&
       action.is_pauli_blocked(particles_, *pauli_blocker_)) {
-    total_pauli_blocked++;
+    total_pauli_blocked_++;
     return;
   }
   // Make sure to pick a non-zero integer, because 0 is reserved for "no
   // interaction yet".
-  const auto id_process = static_cast<uint32_t>(interactions_total + 1);
+  const auto id_process = static_cast<uint32_t>(interactions_total_ + 1);
   action.perform(&particles_, id_process);
-  interactions_total++;
+  interactions_total_++;
   // Calculate Eckart rest frame density at the interaction point
   double rho = 0.0;
   if (dens_type_ != DensityType::None) {
@@ -843,7 +842,7 @@ uint64_t Experiment<Modus>::run_time_evolution_without_time_steps() {
     // propagated since the construction of the action.
     act->update_incoming(particles_);
 
-    perform_action(*act, interactions_total, total_pauli_blocked, particles_);
+    perform_action(*act, particles_);
     modus_.impose_boundary_conditions(&particles_);
 
     /* (3) Check conservation laws. */
@@ -880,12 +879,10 @@ uint64_t Experiment<Modus>::run_time_evolution_without_time_steps() {
 /* This is the loop over timesteps, carrying out collisions and decays
  * and propagating particles. */
 template <typename Modus>
-uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step() {
+void Experiment<Modus>::run_time_evolution_fixed_time_step() {
   const auto &log = logger<LogArea::Experiment>();
   modus_.impose_boundary_conditions(&particles_);
-  uint64_t interactions_total = 0, previous_interactions_total = 0,
-           total_pauli_blocked = 0;
-  log.info() << format_measurements(particles_, interactions_total, 0u,
+  log.info() << format_measurements(particles_, interactions_total_, 0u,
                                     conserved_initial_, time_start_,
                                     parameters_.labclock.current_time());
 
@@ -955,8 +952,7 @@ uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step() {
     /* (2) Perform actions. */
     if (!actions.is_empty()) {
       while (!actions.is_empty()) {
-        perform_action(*actions.pop(), interactions_total, total_pauli_blocked,
-                       particles_before_actions);
+        perform_action(*actions.pop(), particles_before_actions);
       }
       log.debug(~einhard::Blue(), particles_);
     } else {
@@ -969,7 +965,7 @@ uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step() {
 
     /* (4) Physics output during the run. */
     if (parameters_.need_intermediate_output()) {
-      intermediate_output(interactions_total, previous_interactions_total);
+      intermediate_output();
     }
     // Check conservation of conserved quantities if potentials are off.
     // If potentials are on then momentum is conserved only in average
@@ -980,31 +976,28 @@ uint64_t Experiment<Modus>::run_time_evolution_fixed_time_step() {
         throw std::runtime_error("Violation of conserved quantities!");
       }
     }
-    check_interactions_total(interactions_total);
+    check_interactions_total(interactions_total_);
   }
 
   if (pauli_blocker_) {
-    log.info("Interactions: Pauli-blocked/performed = ", total_pauli_blocked,
-             "/", interactions_total);
+    log.info("Interactions: Pauli-blocked/performed = ", total_pauli_blocked_,
+             "/", interactions_total_);
   }
-  return interactions_total;
 }
 
 /* This is the loop over timesteps, carrying out collisions and decays
  * and propagating particles. */
 template <typename Modus>
-uint64_t Experiment<Modus>::run_time_evolution_adaptive_time_steps(
+void Experiment<Modus>::run_time_evolution_adaptive_time_steps(
     const AdaptiveParameters &adaptive_parameters) {
   const auto &log = logger<LogArea::Experiment>();
   const auto &log_ad_ts = logger<LogArea::AdaptiveTS>();
   modus_.impose_boundary_conditions(&particles_);
-  uint64_t interactions_total = 0, previous_interactions_total = 0,
-           total_pauli_blocked = 0;
   bool observed_first_action = false;
 
   // if there is no output scheduled at the beginning, trigger it manually
   if (!parameters_.is_output_time()) {
-    log.info() << format_measurements(particles_, interactions_total, 0u,
+    log.info() << format_measurements(particles_, interactions_total_, 0u,
                                       conserved_initial_, time_start_,
                                       parameters_.labclock.current_time());
   }
@@ -1104,8 +1097,7 @@ uint64_t Experiment<Modus>::run_time_evolution_adaptive_time_steps(
             actions.insert(std::move(action));
             break;
           }
-          perform_action(*action, interactions_total, total_pauli_blocked,
-                         particles_before_actions);
+          perform_action(*action, particles_before_actions);
         }
         modus_.impose_boundary_conditions(&particles_);
         propagate_all();
@@ -1117,7 +1109,7 @@ uint64_t Experiment<Modus>::run_time_evolution_adaptive_time_steps(
         parameters_.labclock.end_tick_on_multiple(next_time);
       }
 
-      intermediate_output(interactions_total, previous_interactions_total);
+      intermediate_output();
     }
 
     ++parameters_.labclock;
@@ -1133,8 +1125,7 @@ uint64_t Experiment<Modus>::run_time_evolution_adaptive_time_steps(
           log_ad_ts.debug("Actions discarded because of early ending.");
           break;
         }
-        perform_action(*action, interactions_total, total_pauli_blocked,
-                       particles_before_actions);
+        perform_action(*action, particles_before_actions);
       }
       log.debug(~einhard::Blue(), particles_);
     } else {
@@ -1158,32 +1149,30 @@ uint64_t Experiment<Modus>::run_time_evolution_adaptive_time_steps(
       }
     }
 
-    check_interactions_total(interactions_total);
+    check_interactions_total(interactions_total_);
   }
 
   // check if a final intermediate output is needed
   if (parameters_.is_output_time()) {
-    intermediate_output(interactions_total, previous_interactions_total);
+    intermediate_output();
   }
 
   if (pauli_blocker_) {
-    log.info("Collisions: pauliblocked/total = ", total_pauli_blocked, "/",
-             interactions_total);
+    log.info("Collisions: pauliblocked/total = ", total_pauli_blocked_, "/",
+             interactions_total_);
   }
   log.info("Number of time steps = ", num_time_steps);
   log.info("Smallest time step size = ", min_dt);
-  return interactions_total;
 }
 
 template <typename Modus>
-void Experiment<Modus>::intermediate_output(
-    uint64_t &interactions_total, uint64_t &previous_interactions_total) {
+void Experiment<Modus>::intermediate_output() {
   const auto &log = logger<LogArea::Experiment>();
   const uint64_t interactions_this_interval =
-      interactions_total - previous_interactions_total;
-  previous_interactions_total = interactions_total;
+      interactions_total_ - previous_interactions_total_;
+  previous_interactions_total_ = interactions_total_;
   log.info() << format_measurements(
-      particles_, interactions_total, interactions_this_interval,
+      particles_, interactions_total_, interactions_this_interval,
       conserved_initial_, time_start_, parameters_.labclock.current_time());
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
   /* save evolution data */
@@ -1270,6 +1259,8 @@ template <typename Modus>
 void Experiment<Modus>::do_final_decays(uint64_t &interactions_total) {
   uint64_t total_pauli_blocked = 0;
 
+template <typename Modus>
+void Experiment<Modus>::do_final_decays() {
   /* At end of time evolution: Force all resonances to decay. In order to handle
    * decay chains, we need to loop until no further actions occur. */
   uint64_t interactions_old;
@@ -1277,7 +1268,7 @@ void Experiment<Modus>::do_final_decays(uint64_t &interactions_total) {
     Actions actions;
     Actions dilepton_actions;
 
-    interactions_old = interactions_total;
+    interactions_old = interactions_total_;
     const auto particles_before_actions = particles_.copy_to_vector();
 
     /* Dileptons: shining of remaining resonances */
@@ -1297,11 +1288,10 @@ void Experiment<Modus>::do_final_decays(uint64_t &interactions_total) {
     }
     /* Perform actions. */
     while (!actions.is_empty()) {
-      perform_action(*actions.pop(), interactions_total, total_pauli_blocked,
-                     particles_before_actions);
+      perform_action(*actions.pop(), particles_before_actions);
     }
     // loop until no more decays occur
-  } while (interactions_total > interactions_old);
+  } while (interactions_total_ > interactions_old);
 
   /* Dileptons: shining of stable particles at the end */
   if (dilepton_finder_ != nullptr) {
@@ -1328,8 +1318,7 @@ void Experiment<Modus>::do_final_decays(uint64_t &interactions_total) {
 }
 
 template <typename Modus>
-void Experiment<Modus>::final_output(uint64_t interactions_total,
-                                     const int evt_num) {
+void Experiment<Modus>::final_output(const int evt_num) {
   const auto &log = logger<LogArea::Experiment>();
   // make sure the experiment actually ran (note: we should compare this
   // to the start time, but we don't know that. Therefore, we check that
@@ -1343,7 +1332,7 @@ void Experiment<Modus>::final_output(uint64_t interactions_total,
                                                 particles_.time() /
                                                 particles_.size()))
                << " [fm-1]";
-    log.info() << "Final interaction number: " << interactions_total;
+    log.info() << "Final interaction number: " << interactions_total_;
   }
 
   for (const auto &output : outputs_) {
@@ -1378,10 +1367,9 @@ void Experiment<Modus>::run() {
     }
 
     /* the time evolution of the relevant subsystem */
-    uint64_t interactions_total;
-    switch (time_step_mode_) {
+    /* switch (time_step_mode_) {
       case TimeStepMode::None:
-        interactions_total = run_time_evolution_without_time_steps();
+        //interactions_total = run_time_evolution_without_time_steps();
         break;
       case TimeStepMode::Fixed:
         interactions_total = run_time_evolution_fixed_time_step();
@@ -1390,14 +1378,15 @@ void Experiment<Modus>::run() {
         interactions_total =
             run_time_evolution_adaptive_time_steps(*adaptive_parameters_);
         break;
-    }
+    } */
+    run_time_evolution();
 
     if (force_decays_) {
-      do_final_decays(interactions_total);
+      do_final_decays();
     }
 
     /* Output at event end */
-    final_output(interactions_total, j);
+    final_output(j);
   }
 }
 
