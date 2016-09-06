@@ -357,66 +357,6 @@ class Particles {
    */
   friend std::ostream &operator<<(std::ostream &out, const Particles &p);
 
-  /////////////////////// deprecated functions ///////////////////////////
-
-  SMASH_DEPRECATED("use the begin() and end() iterators of Particles directly")
-  Particles &data() { return *this; }
-  SMASH_DEPRECATED("use the begin() and end() iterators of Particles directly")
-  const Particles &data() const { return *this; }
-
-  SMASH_DEPRECATED("don't reference particles by id") ParticleData
-      &data(int id) {
-    for (ParticleData &x : *this) {
-      if (x.id() == id) {
-        return x;
-      }
-    }
-    throw std::out_of_range("missing particle id");
-  }
-
-  SMASH_DEPRECATED("don't reference particles by id") const ParticleData
-      &data(int id) const {
-    for (const ParticleData &x : *this) {
-      if (x.id() == id) {
-        return x;
-      }
-    }
-    throw std::out_of_range("missing particle id");
-  }
-
-  SMASH_DEPRECATED("don't reference particles by id") int id_max() const {
-    return id_max_;
-  }
-
-  SMASH_DEPRECATED("don't reference particles by id") void remove(int id) {
-    for (auto it = begin(); it != end(); ++it) {
-      if (it->id() == id) {
-        remove(*it);
-        return;
-      }
-    }
-  }
-
-  SMASH_DEPRECATED("don't reference particles by id") bool has_data(
-      int id) const {
-    for (auto &&x : *this) {
-      if (x.id() == id) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  SMASH_DEPRECATED("use insert instead") int add_data(
-      const ParticleData &particle_data) {
-    insert(particle_data);
-    return id_max_;
-  }
-
-  SMASH_DEPRECATED("use is_empty instead") bool empty() const {
-    return is_empty();
-  }
-
  private:
   /// Highest id of a given particle. The first particle added to data_ will
   /// have id 0.
