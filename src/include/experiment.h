@@ -211,6 +211,12 @@ class Experiment : public ExperimentBase {
   void propagate_all();
 
   /**
+   * Collisionless propagation until given time with proper intermediate output
+   * \param t_end The time until particles should be propagated
+   */
+  void propagate_all_until(float t_end);
+
+  /**
    * Calculate the minimal size for the grid cells such that the
    * ScatterActionsFinder will find all collisions within the maximal transverse
    * distance (which is determined by the maximal cross section).

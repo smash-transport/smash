@@ -753,28 +753,107 @@ static void check_interactions_total(uint64_t interactions_total) {
 }
 
 template <typename Modus>
-uint64_t Experiment<Modus>::run_time_evolution_without_time_steps() {
+void Experiment<Modus>::run_time_evolution() {
+  float dt = parameters_.timestep_duration();
+  uint32_t num_steps = 0u;
+  bool observed_first_action = false;
+  float rate;
+  Actions actions;
   const auto &log = logger<LogArea::Experiment>();
   modus_.impose_boundary_conditions(&particles_);
-  uint64_t interactions_total = 0, previous_interactions_total = 0,
-           total_pauli_blocked = 0;
 
   // if no output is scheduled, trigger it manually
   if (!parameters_.is_output_time()) {
-    log.info() << format_measurements(particles_, interactions_total, 0u,
+    log.info() << format_measurements(particles_, interactions_total_, 0u,
                                       conserved_initial_, time_start_,
                                       parameters_.labclock.current_time());
   }
 
-  const float start_time = parameters_.labclock.current_time();
-  float time_left = end_time_ - start_time;
-
-  // find actions for the initial list
-  ParticleList search_list = particles_.copy_to_vector();
-  Actions actions;
-  for (const auto &finder : action_finders_) {
-    actions.insert(finder->find_actions_in_cell(search_list, time_left));
+  if (time_step_mode_ == TimeStepMode::Adaptive) {
+    rate = adaptive_parameters_->rate_from_dt(dt);
   }
+
+  while (parameters_.labclock.current_time() < end_time_) {
+    parameters_.labclock.set_timestep_duration(dt);
+    dt = parameters_.timestep_duration();
+    num_steps++;
+    float t_step_end;
+    // Set end time of the step
+    switch (time_step_mode_) {
+      case TimeStepMode::None:
+        t_step_end = end_time_;
+        break;
+      case TimeStepMode::Fixed:
+      case TimeStepMode::Adaptive:
+        t_step_end = std::min(parameters_.labclock.current_time() + dt, end_time_);
+        break;
+    }
+    log.debug("Timestepless propagation for next ", dt, " fm/c.");
+    /* (1.a) Create grid. */
+    float min_cell_length = compute_min_cell_length(dt);
+    const auto &grid = use_grid_
+                           ? modus_.create_grid(particles_, min_cell_length)
+                           : modus_.create_grid(particles_, min_cell_length,
+                                                CellSizeStrategy::Largest);
+ 
+    /* (1.b) Iterate over cells and find actions. */
+    grid.iterate_cells(
+        [&](const ParticleList &search_list) {
+          for (const auto &finder : action_finders_) {
+            actions.insert(finder->find_actions_in_cell(
+                search_list, parameters_.timestep_duration()));
+          }
+        },
+        [&](const ParticleList &search_list,
+            const ParticleList &neighbors_list) {
+          for (const auto &finder : action_finders_) {
+            actions.insert(finder->find_actions_with_neighbors(
+                search_list, neighbors_list, parameters_.timestep_duration()));
+          }
+        });
+
+    /* (2) In case of adaptive timesteps adapt timestep size */
+    if (time_step_mode_ ==  TimeStepMode::Adaptive) {
+      if (!observed_first_action && actions.size() > 0u) {
+        observed_first_action = true;
+      }
+
+      bool end_early = false;
+      if (observed_first_action) {
+        float fraction_missed;
+        float allowed_deviation;
+        std::tie(fraction_missed, allowed_deviation) =
+            adaptive_parameters_->calc_missed_actions_allowed_deviation(
+                actions, rate, particles_.size());
+        const float current_rate = fraction_missed / dt;
+        const float rate_deviation = current_rate - rate;
+        // check if the current rate deviates too strongly from the expected value
+        if (rate_deviation > allowed_deviation) {
+          end_early = true;
+          parameters_.labclock.set_timestep_duration(
+              adaptive_parameters_->new_dt(current_rate));
+        }
+        // update the estimate of the rate
+        rate += adaptive_parameters_->smoothing_factor * rate_deviation;
+        // set the size of the next time step
+        dt = adaptive_parameters_->new_dt(rate);
+      }
+    }
+    run_time_evolution_without_time_steps(t_step_end, actions);
+  }
+}
+
+
+template <typename Modus>
+void Experiment<Modus>::run_time_evolution_without_time_steps(float end_time, Actions& actions) {
+  const auto &log = logger<LogArea::Experiment>();
+  modus_.impose_boundary_conditions(&particles_);
+
+  const float start_time = parameters_.labclock.current_time();
+  float time_left = end_time - start_time;
+  log.debug("Timestepless propagation: ", "Actions size = ", actions.size(),
+            ", start time = ", start_time,
+            ", end time = ", end_time);
 
   // iterate over all actions
   while (!actions.is_empty()) {
@@ -787,53 +866,8 @@ uint64_t Experiment<Modus>::run_time_evolution_without_time_steps() {
     log.debug(~einhard::Green(), "✔ ", act);
 
     /* (1) Propagate to the next action. */
-
-    const float action_time = act->time_of_execution();
-    const float dt = action_time - parameters_.labclock.current_time();
-
-    // we allow a very small negative time step that can result from imprecise
-    // addition
-    if (dt < -really_small) {
-      log.error() << "dt = " << dt;
-      throw std::runtime_error("Negative time step!");
-    }
-
-    float current_time;
-
-    // only propagate the particles if dt is significantly larger than 0
-    if (dt > really_small) {
-      // set the time step according to our plan
-      parameters_.labclock.set_timestep_duration(dt);
-
-      // check if we need to do the intermediate output in the time until the
-      // next action
-      if (parameters_.need_intermediate_output()) {
-        if (!parameters_.is_output_time()) {
-          // we now set the clock to the output time and propagate the particles
-          // until that time; then we do the output
-          parameters_.set_timestep_for_next_output();
-          ++parameters_.labclock;
-          propagate_all();
-          // after the output, the particles need to be propagated until the
-          // action time
-          const float remaining_dt =
-              action_time - parameters_.labclock.current_time();
-          parameters_.labclock.set_timestep_duration(remaining_dt);
-        }
-        intermediate_output(interactions_total, previous_interactions_total);
-      }
-
-      // set the clock manually instead of advancing it with the time step
-      // to avoid loss of precision
-      parameters_.labclock.reset(action_time);
-      current_time = action_time;
-
-      propagate_all();
-    } else {
-      // otherwise just keep the current time
-      current_time = parameters_.labclock.current_time();
-      parameters_.labclock.set_timestep_duration(0.f);
-    }
+    log.info("Propagating until next action ", act);
+    propagate_all_until(act->time_of_execution());
 
     /* (2) Perform action. */
 
@@ -855,25 +889,22 @@ uint64_t Experiment<Modus>::run_time_evolution_without_time_steps() {
 
     /* (4) Find new actions. */
 
-    time_left = end_time_ - current_time;
+    time_left = end_time - parameters_.labclock.current_time();
     const ParticleList &outgoing_particles = act->outgoing_particles();
     for (const auto &finder : action_finders_) {
+      // Outgoing particles can still decay...
       actions.insert(
           finder->find_actions_in_cell(outgoing_particles, time_left));
+      // ... and collide with other particles.
       actions.insert(finder->find_actions_with_surrounding_particles(
           outgoing_particles, particles_, time_left));
     }
 
-    check_interactions_total(interactions_total);
+    // log.info("End of loop, Current time: ",  parameters_.labclock.current_time());
+    check_interactions_total(interactions_total_);
   }
-  // check if a final intermediate output is needed
-  parameters_.labclock.end_tick_on_multiple(end_time_);
-  ++parameters_.labclock;
-  if (parameters_.is_output_time()) {
-    propagate_all();
-    intermediate_output(interactions_total, previous_interactions_total);
-  }
-  return interactions_total;
+  propagate_all_until(end_time);
+  //log.info("After loop, Current time: ",  parameters_.labclock.current_time());
 }
 
 /* This is the loop over timesteps, carrying out collisions and decays
@@ -1256,8 +1287,20 @@ void Experiment<Modus>::propagate_all() {
 }
 
 template <typename Modus>
-void Experiment<Modus>::do_final_decays(uint64_t &interactions_total) {
-  uint64_t total_pauli_blocked = 0;
+void Experiment<Modus>::propagate_all_until(float t_end) {
+  //parameters_.labclock.set_timestep_duration(time_left);
+  const float dt_output = parameters_.output_interval;
+  float next_output_time = parameters_.labclock.next_multiple(dt_output);
+  // Current time -> (output) x n -> t_end
+  while (next_output_time < t_end) {
+    parameters_.reach_time_in_one_timestep(next_output_time);
+    propagate_all();
+    intermediate_output();
+    next_output_time += dt_output;
+  }
+  parameters_.reach_time_in_one_timestep(t_end);
+  propagate_all();
+}
 
 template <typename Modus>
 void Experiment<Modus>::do_final_decays() {
