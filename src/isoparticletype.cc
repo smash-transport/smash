@@ -233,23 +233,39 @@ double IsoParticleType::get_integral_DR(double sqrts) {
     // initialize tabulation
     /* TODO(weil): Move this lazy init to a global initialization function,
       * in order to avoid race conditions in multi-threading. */
-    ParticleTypePtr type_res = states_[0];
+//    ParticleTypePtr type_res = states_[0];
     ParticleTypePtr Delta = IsoParticleType::find("Δ").get_states()[0];
-    XS_DR_tabulation = make_unique<Tabulation>(
-          type_res->minimum_mass() + Delta->minimum_mass(), 2.5f, 100,
-          [&](float srts) {
-            return integrate2d(type_res->minimum_mass(),
-                               srts - Delta->minimum_mass(),
-                               Delta->minimum_mass(),
-                               srts - type_res->minimum_mass(),
-                               [&](float m1, float m2) {
-                                 return spec_func_integrand_2res(srts, m1, m2,
-                                                            *type_res, *Delta);
-                               });
-          });
+    XS_DR_tabulation = integrate_RR(Delta);
+//make_unique<Tabulation>(
+//          type_res->minimum_mass() + Delta->minimum_mass(), 2.5f, 100,
+//          [&](float srts) {
+//            return integrate2d(type_res->minimum_mass(),
+//                               srts - Delta->minimum_mass(),
+//                               Delta->minimum_mass(),
+//                               srts - type_res->minimum_mass(),
+//                               [&](float m1, float m2) {
+//                                 return spec_func_integrand_2res(srts, m1, m2,
+//                                                            *type_res, *Delta);
+//                               });
+//          });
   }
   return XS_DR_tabulation->get_value_linear(sqrts);
 }
 
+TabulationPtr IsoParticleType::integrate_RR(ParticleTypePtr &type_res_2) {
+  ParticleTypePtr type_res_1 = states_[0];
+  return make_unique<Tabulation>(
+         type_res_1->minimum_mass() + type_res_2->minimum_mass(), 3.f, 125,
+         [&](float srts) {
+            return integrate2d(type_res_1->minimum_mass(),
+                               srts - type_res_2->minimum_mass(),
+                               type_res_2->minimum_mass(),
+                               srts - type_res_1->minimum_mass(),
+                               [&](float m1, float m2) {
+                                  return spec_func_integrand_2res(srts, m1, m2,
+                                                      *type_res_1, *type_res_2);
+                               });
+         });
+}
 
 }  // namespace Smash

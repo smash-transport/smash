@@ -127,6 +127,9 @@ class IsoParticleType {
   /// Look up the tabulated resonance integral for the NN -> DR cross section.
   double get_integral_DR(double sqrts);
 
+  /// Utility function to help compute various NN->RR spectral integrals
+  TabulationPtr integrate_RR(ParticleTypePtr &type_res_2);
+
  private:
   /// name of the multiplet
   std::string name_;
