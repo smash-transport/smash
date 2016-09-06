@@ -68,18 +68,14 @@ struct AdaptiveParameters {
    * \f$ \alpha \f$ of 1 corresponds to not taking an average at all and 0
    * corresponds to not changing the estimate of the rate at all with the new
    * data.
-   *
-   * Default value: 0.1
    */
-  float smoothing_factor = 0.1f;
+  float smoothing_factor;
 
   /**
    * The fraction of missed actions that is targeted by the algorithm. A smaller
    * value will lead to smaller time steps but also less missed actions.
-   *
-   * Default value: 1%
    */
-  float target_missed_actions = 0.01f;
+  float target_missed_actions;
 
   /**
    * The deviation factor \f$ f_D \f$ sets the limit by how much the criterion
@@ -87,11 +83,16 @@ struct AdaptiveParameters {
    * corresponds to no room for overshooting at all which will lead to many
    * aborted time steps and consequently longer runtime. The condition is
    * \f[ r - \bar{r} < f_D \sqrt{\bar{r}/(dt \cdot N_P)} \f].
-   *
-   * Default value: 2.5
    */
-  float deviation_factor = 2.5f;
+  float deviation_factor;
 };
+
+inline std::ostream& operator << (std::ostream &o, const AdaptiveParameters &a) {
+  return o << "Adaptive time step:\n" <<
+       "  Smoothing factor: " << a.smoothing_factor << "\n" <<
+       "  Target missed actions: " << 100 * a.target_missed_actions << "%\n" <<
+       "  Allowed deviation: " << a.deviation_factor << "\n";
+}
 
 }  // namespace Smash
 

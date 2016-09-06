@@ -351,28 +351,11 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *
    **/
   if (time_step_mode_ == TimeStepMode::Adaptive) {
-    std::unique_ptr<AdaptiveParameters> adapt_params =
-        make_unique<AdaptiveParameters>();
-    if (config.has_value(
-            {"General", "Adaptive_Time_Step", "Smoothing_Factor"})) {
-      adapt_params->smoothing_factor =
-          config.take({"General", "Adaptive_Time_Step", "Smoothing_Factor"});
-    }
-    if (config.has_value(
-            {"General", "Adaptive_Time_Step", "Target_Missed_Actions"})) {
-      adapt_params->target_missed_actions = config.take(
-          {"General", "Adaptive_Time_Step", "Target_Missed_Actions"});
-    }
-    if (config.has_value(
-            {"General", "Adaptive_Time_Step", "Allowed_Deviation"})) {
-      adapt_params->deviation_factor =
-          config.take({"General", "Adaptive_Time_Step", "Allowed_Deviation"});
-    }
-    log.info("Parameters for the adaptive time step:\n", "  Smoothing factor: ",
-             adapt_params->smoothing_factor, "\n", "  Target missed actions: ",
-             100 * adapt_params->target_missed_actions, "%", "\n",
-             "  Allowed deviation: ", adapt_params->deviation_factor);
-    adaptive_parameters_ = std::move(adapt_params);
+    adaptive_parameters_ = make_unique<AdaptiveParameters>(
+      config.take({"General", "Adaptive_Time_Step", "Smoothing_Factor"}, 0.1f),
+      config.take({"General", "Adaptive_Time_Step", "Target_Missed_Actions"}, 0.01f),
+      config.take({"General", "Adaptive_Time_Step", "Allowed_Deviation"}, 2.5f));
+   log.info() << *adaptive_parameters_;
   }
 
   // create outputs
@@ -665,7 +648,7 @@ static std::string format_measurements(const Particles &particles,
   ss << field<5> << time << field<12, 3> << difference.momentum().x0()
      << field<12, 3> << difference.momentum().abs3()
      << field<12, 3> << (time > really_small
-                             ? scatterings_total * 2 / (particles.size() * time)
+                             ? 2.0 * scatterings_total / (particles.size() * time)
                              : 0.)
      << field<10, 3> << scatterings_this_interval
      << field<12, 3> << particles.size() << field<10, 3> << elapsed_seconds;
@@ -761,7 +744,8 @@ void Experiment<Modus>::write_photon_action(
 }
 
 /// Make sure `interactions_total` can be represented as a 32-bit integer.
-/// This is necessary for converting to a `id_process`.
+/// This is necessary for converting to a `id_process`. The latter is 32-bit
+/// integer, because it is written like this to binary output.
 static void check_interactions_total(uint64_t interactions_total) {
   constexpr uint64_t max_uint32 = std::numeric_limits<uint32_t>::max();
   if (interactions_total >= max_uint32) {
@@ -1355,7 +1339,7 @@ void Experiment<Modus>::final_output(uint64_t interactions_total,
     log.info() << "Time real: " << SystemClock::now() - time_start_;
     /* if there are no particles no interactions happened */
     log.info() << "Final scattering rate: "
-               << (particles_.is_empty() ? 0 : (interactions_total * 2 /
+               << (particles_.is_empty() ? 0 : (2.0 * interactions_total_ /
                                                 particles_.time() /
                                                 particles_.size()))
                << " [fm-1]";
