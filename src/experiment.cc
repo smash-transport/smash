@@ -756,10 +756,11 @@ template <typename Modus>
 void Experiment<Modus>::run_time_evolution() {
   float dt = parameters_.timestep_duration();
   uint32_t num_steps = 0u;
-  bool observed_first_action = false;
   float rate;
-  Actions actions;
+  Actions actions, dilepton_actions, photon_actions;
+
   const auto &log = logger<LogArea::Experiment>();
+  const auto &log_ad_ts = logger<LogArea::AdaptiveTS>();
   modus_.impose_boundary_conditions(&particles_);
 
   // if no output is scheduled, trigger it manually
@@ -775,7 +776,6 @@ void Experiment<Modus>::run_time_evolution() {
 
   while (parameters_.labclock.current_time() < end_time_) {
     parameters_.labclock.set_timestep_duration(dt);
-    dt = parameters_.timestep_duration();
     num_steps++;
     float t_step_end;
     // Set end time of the step
@@ -812,34 +812,75 @@ void Experiment<Modus>::run_time_evolution() {
           }
         });
 
-    /* (2) In case of adaptive timesteps adapt timestep size */
-    if (time_step_mode_ ==  TimeStepMode::Adaptive) {
-      if (!observed_first_action && actions.size() > 0u) {
-        observed_first_action = true;
-      }
+    const auto particles_before_actions = particles_.copy_to_vector();
 
-      bool end_early = false;
-      if (observed_first_action) {
-        float fraction_missed;
-        float allowed_deviation;
-        std::tie(fraction_missed, allowed_deviation) =
-            adaptive_parameters_->calc_missed_actions_allowed_deviation(
-                actions, rate, particles_.size());
-        const float current_rate = fraction_missed / dt;
-        const float rate_deviation = current_rate - rate;
-        // check if the current rate deviates too strongly from the expected value
-        if (rate_deviation > allowed_deviation) {
-          end_early = true;
-          parameters_.labclock.set_timestep_duration(
-              adaptive_parameters_->new_dt(current_rate));
+    /* (1.c) Dileptons */
+    if (dilepton_finder_ != nullptr) {
+      dilepton_actions.insert(
+          dilepton_finder_->find_actions_in_cell(particles_before_actions, dt));
+
+      if (!dilepton_actions.is_empty()) {
+        while (!dilepton_actions.is_empty()) {
+          write_dilepton_action(*dilepton_actions.pop(),
+                                particles_before_actions);
         }
-        // update the estimate of the rate
-        rate += adaptive_parameters_->smoothing_factor * rate_deviation;
-        // set the size of the next time step
-        dt = adaptive_parameters_->new_dt(rate);
       }
     }
+
+    /* (1.d) Photons */
+    if (photon_finder_ != nullptr) {
+      grid.iterate_cells(
+          [&](const ParticleList &search_list) {
+            photon_actions.insert(
+                photon_finder_->find_actions_in_cell(search_list, dt));
+          },
+          [&](const ParticleList &search_list,
+              const ParticleList &neighbors_list) {
+            photon_actions.insert(photon_finder_->find_actions_with_neighbors(
+                search_list, neighbors_list, dt));
+          });
+
+      if (!photon_actions.is_empty()) {
+        while (!photon_actions.is_empty()) {
+          write_photon_action(*photon_actions.pop(), particles_before_actions);
+        }
+      }
+    }
+
+
+    /* (2) In case of adaptive timesteps adapt timestep size */
+    if (time_step_mode_ ==  TimeStepMode::Adaptive && actions.size() > 0u) {
+      log_ad_ts.debug() << hline;
+
+      float fraction_missed;
+      float allowed_deviation;
+      std::tie(fraction_missed, allowed_deviation) =
+          adaptive_parameters_->calc_missed_actions_allowed_deviation(
+              actions, rate, particles_.size());
+      const float current_rate = fraction_missed / dt;
+      const float rate_deviation = current_rate - rate;
+      // check if the current rate deviates too strongly from the expected value
+      if (rate_deviation > allowed_deviation) {
+        float new_dt = adaptive_parameters_->new_dt(current_rate);
+        parameters_.labclock.set_timestep_duration(new_dt);
+        log_ad_ts.debug("New timestep is set to ", new_dt);
+        t_step_end = parameters_.labclock.current_time() + new_dt;
+      }
+      // update the estimate of the rate
+      rate += adaptive_parameters_->smoothing_factor * rate_deviation;
+      // set the size of the next time step
+      dt = adaptive_parameters_->new_dt(rate);
+      log_ad_ts.debug("dt set to ", dt);
+    }
+
+    /* (3) Propagation from action to action within timestep */
     run_time_evolution_without_time_steps(t_step_end, actions);
+  }
+
+  log.info(num_steps, " timesteps performed.");
+  if (pauli_blocker_) {
+    log.info("Interactions: Pauli-blocked/performed = ", total_pauli_blocked_,
+             "/", interactions_total_);
   }
 }
 
@@ -863,10 +904,17 @@ void Experiment<Modus>::run_time_evolution_without_time_steps(float end_time, Ac
       log.debug(~einhard::DRed(), "✘ ", act, " (discarded: invalid)");
       continue;
     }
+    if ((act->time_of_execution() > end_time) &&
+        (time_step_mode_ == TimeStepMode::Adaptive)) {
+      log.info(~einhard::DRed(), "✘ ", act, " (discarded: adaptive timestep"
+                " mode decreased timestep and this action is too late)");
+      continue;
+    }
     log.debug(~einhard::Green(), "✔ ", act);
 
     /* (1) Propagate to the next action. */
-    log.info("Propagating until next action ", act);
+    log.debug("Propagating until next action ", act, ", action time = ",
+             act->time_of_execution());
     propagate_all_until(act->time_of_execution());
 
     /* (2) Perform action. */
@@ -881,13 +929,17 @@ void Experiment<Modus>::run_time_evolution_without_time_steps(float end_time, Ac
 
     /* (3) Check conservation laws. */
 
-    std::string err_msg = conserved_initial_.report_deviations(particles_);
-    if (!err_msg.empty()) {
-      log.error() << err_msg;
-      throw std::runtime_error("Violation of conserved quantities!");
+    // Check conservation of conserved quantities if potentials are off.
+    // If potentials are on then momentum is conserved only in average
+    if (!potentials_) {
+      std::string err_msg = conserved_initial_.report_deviations(particles_);
+      if (!err_msg.empty()) {
+        log.error() << err_msg;
+        throw std::runtime_error("Violation of conserved quantities!");
+      }
     }
 
-    /* (4) Find new actions. */
+    /* (4) Update actions for newly-produced particles. */
 
     time_left = end_time - parameters_.labclock.current_time();
     const ParticleList &outgoing_particles = act->outgoing_particles();
@@ -900,11 +952,11 @@ void Experiment<Modus>::run_time_evolution_without_time_steps(float end_time, Ac
           outgoing_particles, particles_, time_left));
     }
 
-    // log.info("End of loop, Current time: ",  parameters_.labclock.current_time());
     check_interactions_total(interactions_total_);
   }
+  log.debug("Propagating from current time ",
+           parameters_.labclock.current_time(), " to step end time ", end_time);
   propagate_all_until(end_time);
-  //log.info("After loop, Current time: ",  parameters_.labclock.current_time());
 }
 
 /* This is the loop over timesteps, carrying out collisions and decays
@@ -1288,7 +1340,6 @@ void Experiment<Modus>::propagate_all() {
 
 template <typename Modus>
 void Experiment<Modus>::propagate_all_until(float t_end) {
-  //parameters_.labclock.set_timestep_duration(time_left);
   const float dt_output = parameters_.output_interval;
   float next_output_time = parameters_.labclock.next_multiple(dt_output);
   // Current time -> (output) x n -> t_end
@@ -1409,19 +1460,6 @@ void Experiment<Modus>::run() {
       photon_output_->at_eventstart(particles_, j);
     }
 
-    /* the time evolution of the relevant subsystem */
-    /* switch (time_step_mode_) {
-      case TimeStepMode::None:
-        //interactions_total = run_time_evolution_without_time_steps();
-        break;
-      case TimeStepMode::Fixed:
-        interactions_total = run_time_evolution_fixed_time_step();
-        break;
-      case TimeStepMode::Adaptive:
-        interactions_total =
-            run_time_evolution_adaptive_time_steps(*adaptive_parameters_);
-        break;
-    } */
     run_time_evolution();
 
     if (force_decays_) {
