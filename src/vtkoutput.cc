@@ -120,12 +120,15 @@ void VtkOutput::write(const Particles &particles) {
   std::fprintf(file_.get(), "LOOKUP_TABLE default\n");
   float current_time = particles.time();
   for (const auto &p : particles) {
-    if (p.formation_time() > current_time) {
-      std::fprintf(file_.get(), "%s\n", "0");
-    } else {
-      std::fprintf(file_.get(), "%s\n", "1");
-    }
+    std::fprintf(file_.get(), "%s\n",
+                 (p.formation_time() > current_time) ? "0" : "1");
   }
+  std::fprintf(file_.get(), "SCALARS cross_section_scaling_factor float 1\n");
+  std::fprintf(file_.get(), "LOOKUP_TABLE default\n");
+  for (const auto &p : particles) {
+    std::fprintf(file_.get(), "%g\n", p.cross_section_scaling_factor());
+  }
+
   std::fprintf(file_.get(), "VECTORS momentum double\n");
   for (const auto &p : particles) {
     std::fprintf(file_.get(), "%g %g %g\n", p.momentum().x1(),
