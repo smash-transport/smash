@@ -161,11 +161,35 @@ ActionPtr ScatterActionsFinder::check_collision(
   act->add_all_processes(elastic_parameter_, two_to_one_,
                          two_to_two_, strings_switch_);
 
-  /* distance criterion according to cross_section */
-  if (distance_squared >= act->cross_section() * fm2_mb * M_1_PI
+  /* Cross section for collision criterion */
+  float cross_section_criterion_;
+  /* Consider cross section scaling factors only if the particles 
+   * are not formed yet at the prospective time of the interaction */
+  if (data_a.formation_time() > data_a.position().x0() + time_until_collision
+     && data_b.formation_time() < data_b.position().x0() + time_until_collision) {
+    cross_section_criterion_ =  act->cross_section() * fm2_mb * M_1_PI
+                          * data_a.cross_section_scaling_factor()
+                          / static_cast<float>(testparticles_);
+  }
+  else if (data_b.formation_time() > data_b.position().x0() + time_until_collision
+     && data_a.formation_time() < data_a.position().x0() + time_until_collision) {
+    cross_section_criterion_ =  act->cross_section() * fm2_mb * M_1_PI
+                          * data_b.cross_section_scaling_factor()
+                          / static_cast<float>(testparticles_);
+  }
+  else if (data_b.formation_time() > data_b.position().x0() + time_until_collision
+     && data_a.formation_time() > data_a.position().x0() + time_until_collision) {
+    cross_section_criterion_ =  act->cross_section() * fm2_mb * M_1_PI
                           * data_a.cross_section_scaling_factor()
                           * data_b.cross_section_scaling_factor()
-                          / static_cast<float>(testparticles_)) {
+                          / static_cast<float>(testparticles_);
+  }
+  else { 
+    cross_section_criterion_ =  act->cross_section() * fm2_mb * M_1_PI
+                          / static_cast<float>(testparticles_);
+  }
+  /* distance criterion according to cross_section */
+  if (distance_squared >= cross_section_criterion_) {
     return nullptr;
   }
 
