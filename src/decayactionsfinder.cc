@@ -54,7 +54,7 @@ ActionList DecayActionsFinder::find_actions_in_cell(
         p.inverse_gamma()  // The clock goes slower in the rest frame of the
                            // resonance
         * width * p.cross_section_scaling_factor());
-    /*If the particle is not yet formed at the decay time, 
+    /* If the particle is not yet formed at the decay time,
      * it should not be able to decay */
     if (decay_time < dt && (p.formation_time() < decay_time
         && p.cross_section_scaling_factor() > really_small)) {
