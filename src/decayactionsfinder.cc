@@ -53,11 +53,12 @@ ActionList DecayActionsFinder::find_actions_in_cell(
         one_over_hbarc *
         p.inverse_gamma()  // The clock goes slower in the rest frame of the
                            // resonance
-        * width * p.cross_section_scaling_factor());
+        * width);
     /* If the particle is not yet formed at the decay time,
      * it should not be able to decay */
-    if (decay_time < dt && (p.formation_time() < decay_time
-        && p.cross_section_scaling_factor() > really_small)) {
+    if (decay_time < dt && ((p.formation_time() > decay_time
+        && p.cross_section_scaling_factor() > really_small) ||
+        (p.formation_time() < decay_time))) {
       // => decay_time ∈ [0, dt[
       // => the particle decays in this timestep.
       auto act = make_unique<DecayAction>(p, decay_time);
