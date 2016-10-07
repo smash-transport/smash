@@ -314,7 +314,7 @@ float kplusn_inelastic(double mandelstam_s) {
 }
 
 
-/** K- p <-> Kbar0 n cross section parametrization.
+/** K- p -> Kbar0 n cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.9 */
 float kminusp_kbar0n(double mandelstam_s) {
   constexpr float a0 = 100;  // mb GeV^2
@@ -350,7 +350,7 @@ float kminusp_pi0lambda(double sqrts) {
   return 0.45 * 0.0508208 / Smash::square(sqrts - 1.38837);
 }
 
-// The other channels follow from the paramatreziation with the same strange
+// The other channels follow from the paramatriziation with the same strange
 // product via isospin symmetry.
 
 float kminusn_piminussigma0(double sqrts) {
