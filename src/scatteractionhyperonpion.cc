@@ -12,7 +12,6 @@
 #include "include/cxx14compat.h"
 #include "include/parametrizations.h"
 #include "include/pdgcode_constants.h"
-#include "include/kinematics.h"
 
 namespace Smash {
 
@@ -29,16 +28,6 @@ CollisionBranchList ScatterActionHyperonPion::two_to_two_cross_sections() {
                                                      type_particle_b);
 
   return process_list;
-}
-
-static float detailed_balance_factor(float s, const ParticleType& particle_a, const ParticleType& particle_b, const ParticleType& particle_c, const ParticleType& particle_d) {
-    float spin_factor = (particle_c.spin() + 1)*(particle_d.spin() + 1);
-    spin_factor /= (particle_a.spin() + 1)*(particle_b.spin() + 1);
-    float symmetry_factor = (1 + (particle_a == particle_b));
-    symmetry_factor /= (1 + (particle_c == particle_d));
-    const float momentum_factor = pCM_sqr_from_s(s, particle_c.mass(), particle_d.mass())
-        / pCM_sqr_from_s(s, particle_a.mass(), particle_b.mass());
-    return spin_factor * symmetry_factor * momentum_factor;
 }
 
 CollisionBranchList ScatterActionHyperonPion::two_to_two_inel(
