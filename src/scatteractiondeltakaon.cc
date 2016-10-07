@@ -58,22 +58,34 @@ CollisionBranchList ScatterActionDeltaKaon::two_to_two_inel(
 
   switch (pack(pdg_delta, pdg_kaon)) {
     case pack(pdg::Delta_pp, pdg::K_z):
-    case pack(pdg::Delta_p, pdg::K_p):
-      add_channel(0.5 * kplusp_inelastic(s),
-                  ParticleType::find(pdg::p), ParticleType::find(pdg::K_p));
+    case pack(pdg::Delta_p, pdg::K_p): {
+      const auto& proton = ParticleType::find(pdg::p);
+      const auto& kaon = ParticleType::find(pdg::K_p);
+      const auto factor = detailed_balance_factor(s, proton, kaon, type_delta, type_kaon);
+      add_channel(0.5 * factor * kplusp_inelastic(s), proton, kaon);
       break;
+    }
     case pack(pdg::Delta_p, pdg::K_z):
-    case pack(pdg::Delta_z, pdg::K_p):
-      add_channel(0.5 * kplusn_inelastic(s),
-                  ParticleType::find(pdg::n), ParticleType::find(pdg::K_p));
-      add_channel(0.5 * kplusp_inelastic(s),
-                  ParticleType::find(pdg::p), ParticleType::find(pdg::K_z));
+    case pack(pdg::Delta_z, pdg::K_p): {
+      const auto& neutron = ParticleType::find(pdg::n);
+      const auto& kaon_p = ParticleType::find(pdg::K_p);
+      const auto factor1 = detailed_balance_factor(s, neutron, kaon_p, type_delta, type_kaon);
+      add_channel(0.5 * factor1 * kplusn_inelastic(s), neutron, kaon_p);
+
+      const auto& proton = ParticleType::find(pdg::p);
+      const auto& kaon_z = ParticleType::find(pdg::K_z);
+      const auto factor2 = detailed_balance_factor(s, proton, kaon_z, type_delta, type_kaon);
+      add_channel(0.5 * factor2 * kplusp_inelastic(s), proton, kaon_z);
       break;
+    }
     case pack(pdg::Delta_z, pdg::K_z):
-    case pack(pdg::Delta_m, pdg::K_p):
-      add_channel(0.5 * kplusn_inelastic(s),
-                  ParticleType::find(pdg::n), ParticleType::find(pdg::K_z));
+    case pack(pdg::Delta_m, pdg::K_p): {
+      const auto& neutron = ParticleType::find(pdg::n);
+      const auto& kaon = ParticleType::find(pdg::K_z);
+      const auto factor = detailed_balance_factor(s, neutron, kaon, type_delta, type_kaon);
+      add_channel(0.5 * factor * kplusn_inelastic(s), neutron, kaon);
       break;
+    }
     default:
       break;
   }
