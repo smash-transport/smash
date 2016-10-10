@@ -56,6 +56,10 @@ CollisionBranchList ScatterActionDeltaKaon::two_to_two_inel(
       }
   };
 
+  // The cross sections are deterimined from the backward reactions via
+  // detailed balance. The factors of 0.5 are there because the backwards
+  // direction cross section is equally distributed among all charge
+  // combinations.
   switch (pack(pdg_delta, pdg_kaon)) {
     case pack(pdg::Delta_pp, pdg::K_z):
     case pack(pdg::Delta_p, pdg::K_p): {
