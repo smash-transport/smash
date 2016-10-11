@@ -46,64 +46,68 @@ CollisionBranchList ScatterActionHyperonPion::two_to_two_inel(
   const double s = mandelstam_s();
   const double sqrts = sqrt_s();
 
-  // calculate cross section
-  auto add_channel
-    = [&](float xsection, const ParticleType &type_a, const ParticleType &type_b) {
-      const float sqrt_s_min = type_a.minimum_mass() + type_b.minimum_mass();
-      if ((xsection > really_small) && (sqrts > sqrt_s_min)) {
-        process_list.push_back(make_unique<CollisionBranch>(
-          type_a, type_b, xsection, ProcessType::TwoToTwo));
-      }
-  };
-
   switch (pack(pdg_hyperon, pdg_pion)) {
     case pack(pdg::Sigma_z, pdg::pi_m): {
       const auto& neutron = ParticleType::find(pdg::n);
       const auto& kaon = ParticleType::find(pdg::K_m);
-      const auto factor = detailed_balance_factor(s, neutron, kaon, type_hyperon, type_pion);
-      add_channel(factor * kminusn_piminussigma0(sqrts), neutron, kaon);
+      add_channel(process_list,
+                  [&] { return detailed_balance_factor(s, neutron, kaon, type_hyperon, type_pion)
+                               * kminusn_piminussigma0(sqrts); },
+                  sqrts, neutron, kaon);
       break;
     }
     case pack(pdg::Sigma_m, pdg::pi_z): {
       const auto& neutron = ParticleType::find(pdg::n);
       const auto& kaon = ParticleType::find(pdg::K_m);
-      const auto factor = detailed_balance_factor(s, neutron, kaon, type_hyperon, type_pion);
-      add_channel(factor * kminusn_pi0sigmaminus(sqrts), neutron, kaon);
+      add_channel(process_list,
+                  [&] { return detailed_balance_factor(s, neutron, kaon, type_hyperon, type_pion)
+                               * kminusn_pi0sigmaminus(sqrts); },
+                  sqrts, neutron, kaon);
       break;
     }
     case pack(pdg::Lambda, pdg::pi_m): {
       const auto& neutron = ParticleType::find(pdg::n);
       const auto& kaon = ParticleType::find(pdg::K_m);
-      const auto factor = detailed_balance_factor(s, neutron, kaon, type_hyperon, type_pion);
-      add_channel(factor * kminusn_piminuslambda(sqrts), neutron, kaon);
+      add_channel(process_list,
+                  [&] { return detailed_balance_factor(s, neutron, kaon, type_hyperon, type_pion)
+                               * kminusn_piminuslambda(sqrts); },
+                  sqrts, neutron, kaon);
       break;
     }
     case pack(pdg::Sigma_z, pdg::pi_z): {
       const auto& proton = ParticleType::find(pdg::p);
       const auto& kaon = ParticleType::find(pdg::K_m);
-      const auto factor = detailed_balance_factor(s, proton, kaon, type_hyperon, type_pion);
-      add_channel(factor * kminusp_pi0sigma0(sqrts), proton, kaon);
+      add_channel(process_list,
+                  [&] { return detailed_balance_factor(s, proton, kaon, type_hyperon, type_pion)
+                               * kminusp_pi0sigma0(sqrts); },
+                  sqrts, proton, kaon);
       break;
     }
     case pack(pdg::Sigma_m, pdg::pi_p): {
       const auto& proton = ParticleType::find(pdg::p);
       const auto& kaon = ParticleType::find(pdg::K_m);
-      const auto factor = detailed_balance_factor(s, proton, kaon, type_hyperon, type_pion);
-      add_channel(factor * kminusp_piplussigmaminus(sqrts), proton, kaon);
+      add_channel(process_list,
+                  [&] { return detailed_balance_factor(s, proton, kaon, type_hyperon, type_pion)
+                               * kminusp_piplussigmaminus(sqrts); },
+                  sqrts, proton, kaon);
       break;
     }
     case pack(pdg::Lambda, pdg::pi_z): {
       const auto& proton = ParticleType::find(pdg::p);
       const auto& kaon = ParticleType::find(pdg::K_m);
-      const auto factor = detailed_balance_factor(s, proton, kaon, type_hyperon, type_pion);
-      add_channel(factor * kminusp_pi0lambda(sqrts), proton, kaon);
+      add_channel(process_list,
+                  [&] { return detailed_balance_factor(s, proton, kaon, type_hyperon, type_pion)
+                               * kminusp_pi0lambda(sqrts); },
+                  sqrts, proton, kaon);
       break;
     }
     case pack(pdg::Sigma_p, pdg::pi_m): {
       const auto& proton = ParticleType::find(pdg::p);
       const auto& kaon = ParticleType::find(pdg::K_m);
-      const auto factor = detailed_balance_factor(s, proton, kaon, type_hyperon, type_pion);
-      add_channel(factor * kminusp_piminussigmaplus(sqrts), proton, kaon);
+      add_channel(process_list,
+                  [&] { return detailed_balance_factor(s, proton, kaon, type_hyperon, type_pion)
+                               * kminusp_piminussigmaplus(sqrts); },
+                  sqrts, proton, kaon);
       break;
     }
     default:
