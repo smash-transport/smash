@@ -9,6 +9,7 @@
 
 #include "include/scatteractionnucleonkaon.h"
 
+#include "include/clebschgordan.h"
 #include "include/cxx14compat.h"
 #include "include/parametrizations.h"
 #include "include/pdgcode_constants.h"
@@ -151,26 +152,46 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
     }
     case pdg::K_p: {
       // All inelastic channels are K+ N -> K Delta -> K pi N, with identical
-      // cross section.
+      // cross section, weighted by the isospin factor.
       switch (pdg_nucleon) {
         case pdg::p: {
           const auto sigma_kplusp = kplusp_inelastic(s);
+          const auto& type_K_z = ParticleType::find(pdg::K_z);
+          const auto& type_Delta_pp = ParticleType::find(pdg::Delta_pp);
+          const auto& type_K_p = ParticleType::find(pdg::K_p);
+          const auto& type_Delta_p = ParticleType::find(pdg::Delta_p);
+
+          const auto weight1 = isospin_clebsch_gordan_sqr_2to2(
+            type_nucleon, type_kaon, type_K_z, type_Delta_pp);
+          const auto weight2 = isospin_clebsch_gordan_sqr_2to2(
+            type_nucleon, type_kaon, type_K_p, type_Delta_p);
+
           add_channel(process_list,
-                      [&] { return sigma_kplusp * 0.5; },
-                      sqrts, ParticleType::find(pdg::K_z), ParticleType::find(pdg::Delta_pp));
+                      [&] { return sigma_kplusp * weight1 / (weight1 + weight2); },
+                      sqrts, type_K_z, type_Delta_pp);
           add_channel(process_list,
-                      [&] { return sigma_kplusp * 0.5; },
-                      sqrts, ParticleType::find(pdg::K_p), ParticleType::find(pdg::Delta_p));
+                      [&] { return sigma_kplusp * weight2 / (weight1 + weight2); },
+                      sqrts, type_K_p, type_Delta_p);
           break;
         }
         case pdg::n: {
           const auto sigma_kplusn = kplusn_inelastic(s);
+          const auto& type_K_z = ParticleType::find(pdg::K_z);
+          const auto& type_Delta_p = ParticleType::find(pdg::Delta_p);
+          const auto& type_K_p = ParticleType::find(pdg::K_p);
+          const auto& type_Delta_z = ParticleType::find(pdg::Delta_z);
+
+          const auto weight1 = isospin_clebsch_gordan_sqr_2to2(
+            type_nucleon, type_kaon, type_K_z, type_Delta_p);
+          const auto weight2 = isospin_clebsch_gordan_sqr_2to2(
+            type_nucleon, type_kaon, type_K_p, type_Delta_z);
+
           add_channel(process_list,
-                      [&] { return sigma_kplusn * 0.5; },
-                      sqrts, ParticleType::find(pdg::K_z), ParticleType::find(pdg::Delta_p));
+                      [&] { return sigma_kplusn * weight1 / (weight1 + weight2); },
+                      sqrts, type_K_z, type_Delta_p);
           add_channel(process_list,
-                      [&] { return sigma_kplusn * 0.5; },
-                      sqrts, ParticleType::find(pdg::K_p), ParticleType::find(pdg::Delta_z));
+                      [&] { return sigma_kplusn * weight2 / (weight1 + weight2); },
+                      sqrts, type_K_p, type_Delta_z);
           break;
         }
       }
@@ -183,21 +204,41 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
       switch (pdg_nucleon) {
         case pdg::p: {
           const auto sigma_kplusp = kplusp_inelastic(s);
+          const auto& type_K_z = ParticleType::find(pdg::K_z);
+          const auto& type_Delta_p = ParticleType::find(pdg::Delta_p);
+          const auto& type_K_p = ParticleType::find(pdg::K_p);
+          const auto& type_Delta_z = ParticleType::find(pdg::Delta_z);
+
+          const auto weight1 = isospin_clebsch_gordan_sqr_2to2(
+            type_nucleon, type_kaon, type_K_z, type_Delta_p);
+          const auto weight2 = isospin_clebsch_gordan_sqr_2to2(
+            type_nucleon, type_kaon, type_K_p, type_Delta_z);
+
           add_channel(process_list,
-                      [&] { return sigma_kplusp * 0.5; },
+                      [&] { return sigma_kplusp * weight1 / (weight1 + weight2); },
                       sqrts, ParticleType::find(pdg::K_z), ParticleType::find(pdg::Delta_p));
           add_channel(process_list,
-                      [&] { return sigma_kplusp * 0.5; },
+                      [&] { return sigma_kplusp * weight2 / (weight1 + weight2); },
                       sqrts, ParticleType::find(pdg::K_p), ParticleType::find(pdg::Delta_z));
           break;
         }
         case pdg::n: {
           const auto sigma_kplusn = kplusn_inelastic(s);
+          const auto& type_K_z = ParticleType::find(pdg::K_z);
+          const auto& type_Delta_p = ParticleType::find(pdg::Delta_p);
+          const auto& type_K_p = ParticleType::find(pdg::K_p);
+          const auto& type_Delta_z = ParticleType::find(pdg::Delta_z);
+
+          const auto weight1 = isospin_clebsch_gordan_sqr_2to2(
+            type_nucleon, type_kaon, type_K_z, type_Delta_p);
+          const auto weight2 = isospin_clebsch_gordan_sqr_2to2(
+            type_nucleon, type_kaon, type_K_p, type_Delta_z);
+
           add_channel(process_list,
-                      [&] { return sigma_kplusn * 0.5; },
+                      [&] { return sigma_kplusn * weight1 / (weight1 + weight2); },
                       sqrts, ParticleType::find(pdg::K_z), ParticleType::find(pdg::Delta_z));
           add_channel(process_list,
-                      [&] { return sigma_kplusn * 0.5; },
+                      [&] { return sigma_kplusn * weight2 / (weight1 + weight2); },
                       sqrts, ParticleType::find(pdg::K_p), ParticleType::find(pdg::Delta_m));
           break;
         }
