@@ -53,39 +53,39 @@ CollisionBranchList ScatterActionDeltaKaon::two_to_two_inel(
   switch (pack(pdg_delta, pdg_kaon)) {
     case pack(pdg::Delta_pp, pdg::K_z):
     case pack(pdg::Delta_p, pdg::K_p): {
-      const auto& proton = ParticleType::find(pdg::p);
-      const auto& kaon = ParticleType::find(pdg::K_p);
+      const auto& type_p = ParticleType::find(pdg::p);
+      const auto& type_K_p = ParticleType::find(pdg::K_p);
       add_channel(process_list,
-                  [&] { return 0.5 * detailed_balance_factor(s, proton, kaon, type_delta, type_kaon)
+                  [&] { return 0.5 * detailed_balance_factor(s, type_p, type_K_p, type_delta, type_kaon)
                                * kplusp_inelastic(s); },
-                  sqrts, proton, kaon);
+                  sqrts, type_p, type_K_p);
       break;
     }
     case pack(pdg::Delta_p, pdg::K_z):
     case pack(pdg::Delta_z, pdg::K_p): {
-      const auto& neutron = ParticleType::find(pdg::n);
-      const auto& kaon_p = ParticleType::find(pdg::K_p);
+      const auto& type_n = ParticleType::find(pdg::n);
+      const auto& type_K_p = ParticleType::find(pdg::K_p);
       add_channel(process_list,
-                  [&] { return 0.5 * detailed_balance_factor(s, neutron, kaon_p, type_delta, type_kaon)
+                  [&] { return 0.5 * detailed_balance_factor(s, type_n, type_K_p, type_delta, type_kaon)
                                * kplusn_inelastic(s); },
-                  sqrts, neutron, kaon_p);
+                  sqrts, type_n, type_K_p);
 
-      const auto& proton = ParticleType::find(pdg::p);
-      const auto& kaon_z = ParticleType::find(pdg::K_z);
+      const auto& type_p = ParticleType::find(pdg::p);
+      const auto& type_K_z = ParticleType::find(pdg::K_z);
       add_channel(process_list,
-                  [&] { return 0.5 * detailed_balance_factor(s, proton, kaon_z, type_delta, type_kaon)
+                  [&] { return 0.5 * detailed_balance_factor(s, type_p, type_K_z, type_delta, type_kaon)
                                * kplusp_inelastic(s); },
-                  sqrts, proton, kaon_z);
+                  sqrts, type_p, type_K_z);
       break;
     }
     case pack(pdg::Delta_z, pdg::K_z):
     case pack(pdg::Delta_m, pdg::K_p): {
-      const auto& neutron = ParticleType::find(pdg::n);
-      const auto& kaon = ParticleType::find(pdg::K_z);
+      const auto& type_n = ParticleType::find(pdg::n);
+      const auto& type_K_z = ParticleType::find(pdg::K_z);
       add_channel(process_list,
-                  [&] { return 0.5 * detailed_balance_factor(s, neutron, kaon, type_delta, type_kaon)
+                  [&] { return 0.5 * detailed_balance_factor(s, type_n, type_K_z, type_delta, type_kaon)
                                * kplusn_inelastic(s); },
-                  sqrts, neutron, kaon);
+                  sqrts, type_n, type_K_z);
       break;
     }
     default:
