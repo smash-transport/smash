@@ -152,9 +152,6 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
     case pdg::K_p: {
       // All inelastic channels are K+ N -> K Delta -> K pi N, with identical
       // cross section.
-      if (sqrts < kaon_mass + delta_mass) {
-          break;
-      }
       switch (pdg_nucleon) {
         case pdg::p: {
           const auto sigma_kplusp = kplusp_inelastic(s);
@@ -183,9 +180,6 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
       // K+ and K0 have the same isospin projection, they are assumed to have
       // the same cross section here.
 
-      if (sqrts < kaon_mass + delta_mass) {
-          break;
-      }
       switch (pdg_nucleon) {
         case pdg::p: {
           const auto sigma_kplusp = kplusp_inelastic(s);
