@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "include/average.h"
+#include "include/clebschgordan.h"
 #include "include/cxx14compat.h"
 #include "include/interpolation.h"
 #include "include/kinematics.h"
@@ -312,6 +313,92 @@ float kplusn_inelastic(double mandelstam_s) {
   return (*kplusn_total_interpolation)(p_lab)
          - kplusn_elastic(mandelstam_s);
 }
+
+
+/// Calculate and store all isospin ratios for K+ N reactions.
+void KplusNRatios::initialize() {
+  const auto& type_p = ParticleType::find(pdg::p);
+  const auto& type_n = ParticleType::find(pdg::n);
+  const auto& type_K_p = ParticleType::find(pdg::K_p);
+  const auto& type_K_z = ParticleType::find(pdg::K_z);
+  const auto& type_Delta_pp = ParticleType::find(pdg::Delta_pp);
+  const auto& type_Delta_p = ParticleType::find(pdg::Delta_p);
+  const auto& type_Delta_z = ParticleType::find(pdg::Delta_z);
+
+  auto add_to_ratios = [&] (const ParticleType& a, const ParticleType& b,
+                            const ParticleType& c, const ParticleType& d,
+                            float weight_numerator, float weight_other) {
+      const auto key = std::make_pair(pack(a.pdgcode().code(), b.pdgcode().code()),
+                                      pack(c.pdgcode().code(), d.pdgcode().code()));
+      const float ratio = weight_numerator / (weight_numerator + weight_other);
+      ratios_[key] = ratio;
+  };
+
+  // All inelastic channels are K+ N -> K Delta -> K pi N, with identical
+  // cross section, weighted by the isospin factor.
+  {
+    const auto weight1 = isospin_clebsch_gordan_sqr_2to2(
+      type_p, type_K_p, type_K_z, type_Delta_pp);
+    const auto weight2 = isospin_clebsch_gordan_sqr_2to2(
+      type_p, type_K_p, type_K_p, type_Delta_p);
+
+    add_to_ratios(type_p, type_K_p, type_K_z, type_Delta_pp,
+                  weight1, weight2);
+    add_to_ratios(type_p, type_K_p, type_K_p, type_Delta_p,
+                  weight2, weight1);
+  }
+  {
+    const auto weight1 = isospin_clebsch_gordan_sqr_2to2(
+      type_n, type_K_p, type_K_z, type_Delta_p);
+    const auto weight2 = isospin_clebsch_gordan_sqr_2to2(
+      type_n, type_K_p, type_K_p, type_Delta_z);
+
+    add_to_ratios(type_n, type_K_p, type_K_z, type_Delta_p,
+                  weight1, weight2);
+    add_to_ratios(type_n, type_K_p, type_K_p, type_Delta_z,
+                  weight2, weight1);
+  }
+
+  // K+ and K0 have the same isospin projection, they are assumed to have
+  // the same cross section here.
+  {
+    const auto weight1 = isospin_clebsch_gordan_sqr_2to2(
+      type_p, type_K_z, type_K_z, type_Delta_p);
+    const auto weight2 = isospin_clebsch_gordan_sqr_2to2(
+      type_p, type_K_z, type_K_p, type_Delta_z);
+
+    add_to_ratios(type_p, type_K_z, type_K_z, type_Delta_p,
+                  weight1, weight2);
+    add_to_ratios(type_p, type_K_z, type_K_p, type_Delta_z,
+                  weight2, weight1);
+  }
+  {
+    const auto weight1 = isospin_clebsch_gordan_sqr_2to2(
+      type_n, type_K_z, type_K_z, type_Delta_p);
+    const auto weight2 = isospin_clebsch_gordan_sqr_2to2(
+      type_n, type_K_z, type_K_p, type_Delta_z);
+
+    add_to_ratios(type_n, type_K_z, type_K_z, type_Delta_p,
+                  weight1, weight2);
+    add_to_ratios(type_n, type_K_z, type_K_p, type_Delta_z,
+                  weight2, weight1);
+  }
+}
+
+/// Return the isospin ratio of the given K+ N reaction's cross section.
+float KplusNRatios::get_ratio(const ParticleType& a, const ParticleType& b,
+                const ParticleType& c, const ParticleType& d) const {
+  const auto key = std::make_pair(pack(a.pdgcode().code(), b.pdgcode().code()),
+                                  pack(c.pdgcode().code(), d.pdgcode().code()));
+  return ratios_.at(key);
+}
+
+/// Check whether the isopin ratio storage is empty.
+bool KplusNRatios::is_empty() const {
+  return ratios_.empty();
+}
+
+thread_local KplusNRatios kplusn_ratios;
 
 
 /** K- p -> Kbar0 n cross section parametrization.
