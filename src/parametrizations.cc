@@ -324,10 +324,12 @@ void KplusNRatios::initialize() {
   const auto& type_Delta_pp = ParticleType::find(pdg::Delta_pp);
   const auto& type_Delta_p = ParticleType::find(pdg::Delta_p);
   const auto& type_Delta_z = ParticleType::find(pdg::Delta_z);
+  const auto& type_Delta_m = ParticleType::find(pdg::Delta_m);
 
   auto add_to_ratios = [&] (const ParticleType& a, const ParticleType& b,
                             const ParticleType& c, const ParticleType& d,
                             float weight_numerator, float weight_other) {
+      assert(weight_numerator + weight_other != 0);
       const auto key = std::make_pair(pack(a.pdgcode().code(), b.pdgcode().code()),
                                       pack(c.pdgcode().code(), d.pdgcode().code()));
       const float ratio = weight_numerator / (weight_numerator + weight_other);
@@ -374,13 +376,13 @@ void KplusNRatios::initialize() {
   }
   {
     const auto weight1 = isospin_clebsch_gordan_sqr_2to2(
-      type_n, type_K_z, type_K_z, type_Delta_p);
+      type_n, type_K_z, type_K_z, type_Delta_z);
     const auto weight2 = isospin_clebsch_gordan_sqr_2to2(
-      type_n, type_K_z, type_K_p, type_Delta_z);
+      type_n, type_K_z, type_K_p, type_Delta_m);
 
-    add_to_ratios(type_n, type_K_z, type_K_z, type_Delta_p,
+    add_to_ratios(type_n, type_K_z, type_K_z, type_Delta_z,
                   weight1, weight2);
-    add_to_ratios(type_n, type_K_z, type_K_p, type_Delta_z,
+    add_to_ratios(type_n, type_K_z, type_K_p, type_Delta_m,
                   weight2, weight1);
   }
 }
