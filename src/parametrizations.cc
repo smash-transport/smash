@@ -316,7 +316,7 @@ float kplusn_inelastic(double mandelstam_s) {
 
 
 /// Calculate and store all isospin ratios for K+ N reactions.
-void KplusNRatios::initialize() {
+static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>, float, pair_hash>& ratios) {
   const auto& type_p = ParticleType::find(pdg::p);
   const auto& type_n = ParticleType::find(pdg::n);
   const auto& type_K_p = ParticleType::find(pdg::K_p);
@@ -333,7 +333,7 @@ void KplusNRatios::initialize() {
       const auto key = std::make_pair(pack(a.pdgcode().code(), b.pdgcode().code()),
                                       pack(c.pdgcode().code(), d.pdgcode().code()));
       const float ratio = weight_numerator / (weight_numerator + weight_other);
-      ratios_[key] = ratio;
+      ratios[key] = ratio;
   };
 
   // All inelastic channels are K+ N -> K Delta -> K pi N, with identical
@@ -392,12 +392,10 @@ float KplusNRatios::get_ratio(const ParticleType& a, const ParticleType& b,
                 const ParticleType& c, const ParticleType& d) const {
   const auto key = std::make_pair(pack(a.pdgcode().code(), b.pdgcode().code()),
                                   pack(c.pdgcode().code(), d.pdgcode().code()));
+  if (ratios_.empty()) {
+    initialize(ratios_);
+  }
   return ratios_.at(key);
-}
-
-/// Check whether the isopin ratio storage is empty.
-bool KplusNRatios::is_empty() const {
-  return ratios_.empty();
 }
 
 thread_local KplusNRatios kplusn_ratios;

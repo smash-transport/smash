@@ -49,9 +49,6 @@ CollisionBranchList ScatterActionDeltaKaon::two_to_two_inel(
   // The cross sections are determined from the backward reactions via
   // detailed balance. The same isospin factors as for the backward reaction
   // are used.
-  if (kplusn_ratios.is_empty()) {
-    kplusn_ratios.initialize();
-  }
   switch (pack(pdg_delta, pdg_kaon)) {
     case pack(pdg::Delta_pp, pdg::K_z):
     case pack(pdg::Delta_p, pdg::K_p): {

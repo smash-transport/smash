@@ -133,20 +133,16 @@ struct pair_hash {
  */
 class KplusNRatios {
  private:
-  std::unordered_map<std::pair<uint64_t, uint64_t>, float, pair_hash> ratios_;
+  mutable std::unordered_map<std::pair<uint64_t, uint64_t>, float, pair_hash> ratios_;
  public:
   /// Create an empty K+ N isospin ratio storage.
   KplusNRatios() : ratios_({}) {};
 
-  /// Calculate and store all isospin ratios for K+ N reactions.
-  void initialize();
-
   /// Return the isospin ratio of the given K+ N reaction's cross section.
+  ///
+  /// On the first call all ratios are calculated.
   float get_ratio(const ParticleType& a, const ParticleType& b,
                   const ParticleType& c, const ParticleType& d) const;
-
-  /// Check whether the isopin ratio storage is empty.
-  bool is_empty() const;
 };
 
 extern thread_local KplusNRatios kplusn_ratios;
