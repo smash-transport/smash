@@ -152,9 +152,11 @@ float TwoBodyDecaySemistable::rho(float mass) const {
   if (tabulation_ == nullptr) {
     /* TODO(weil): Move this lazy init to a global initialization function,
       * in order to avoid race conditions in multi-threading. */
+    const float tabulation_interval =
+      std::max(2.f, 10.f*particle_types_[1]->width_at_pole());
     tabulation_ = make_unique<Tabulation>(
                 particle_types_[0]->mass() + particle_types_[1]->minimum_mass(),
-                10*particle_types_[1]->width_at_pole(), num_tab_pts,
+                tabulation_interval, num_tab_pts,
                 [&](float sqrts) {
                   return integrate(particle_types_[1]->minimum_mass(),
                                     sqrts - particle_types_[0]->mass(),
@@ -215,8 +217,9 @@ float TwoBodyDecayUnstable::rho(float mass) const {
     const float m2_min = particle_types_[1]->minimum_mass();
     const float sum_gamma = particle_types_[0]->width_at_pole()
                           + particle_types_[1]->width_at_pole();
+    const float tab_interval = std::max(2.f, 10.f*sum_gamma);
     tabulation_
-          = make_unique<Tabulation>(m1_min + m2_min, 10*sum_gamma, num_tab_pts,
+          = make_unique<Tabulation>(m1_min + m2_min, tab_interval, num_tab_pts,
             [&](float sqrts) {
               return integrate2d(m1_min, sqrts - m2_min, m2_min, sqrts - m1_min,
                                 [&](float m1, float m2) {
