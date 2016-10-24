@@ -93,11 +93,8 @@ float TwoBodyDecayStable::rho(float m) const {
 }
 
 float TwoBodyDecayStable::width(float m0, float G0, float m) const {
-  if (m <= particle_types_[0]->mass() + particle_types_[1]->mass()) {
-    return 0;
-  } else {
-    return G0 * rho(m) / rho(m0);
-  }
+  return (m <= threshold()) ? 0.f :
+         G0 * rho(m) / rho(m0);
 }
 
 float TwoBodyDecayStable::in_width(float m0, float G0, float m,
@@ -155,7 +152,7 @@ float TwoBodyDecaySemistable::rho(float mass) const {
     const float tabulation_interval =
       std::max(2.f, 10.f*particle_types_[1]->width_at_pole());
     tabulation_ = make_unique<Tabulation>(
-                particle_types_[0]->mass() + particle_types_[1]->minimum_mass(),
+                threshold(),
                 tabulation_interval, num_tab_pts,
                 [&](float sqrts) {
                   return integrate(particle_types_[1]->minimum_mass(),
@@ -181,9 +178,7 @@ float TwoBodyDecaySemistable::in_width(float m0, float G0, float m,
   const float p_f = pCM(m, m1, m2);
 
   return G0 * p_f * blatt_weisskopf_sqr(p_f, L_)
-         * post_ff_sqr(m, m0, particle_types_[0]->mass()
-                              + particle_types_[1]->minimum_mass(), Lambda_)
-         / (m * rho(m0));
+         * post_ff_sqr(m, m0, threshold(), Lambda_) / (m * rho(m0));
 }
 
 
@@ -233,9 +228,7 @@ float TwoBodyDecayUnstable::rho(float mass) const {
 }
 
 float TwoBodyDecayUnstable::width(float m0, float G0, float m) const {
-  return G0 * rho(m) / rho(m0)
-            * post_ff_sqr(m, m0, particle_types_[0]->minimum_mass()
-                               + particle_types_[1]->minimum_mass(), Lambda_);
+  return G0 * rho(m) / rho(m0) * post_ff_sqr(m, m0, threshold(), Lambda_);
 }
 
 float TwoBodyDecayUnstable::in_width(float m0, float G0, float m,
@@ -243,9 +236,7 @@ float TwoBodyDecayUnstable::in_width(float m0, float G0, float m,
   const float p_f = pCM(m, m1, m2);
 
   return G0 * p_f * blatt_weisskopf_sqr(p_f, L_)
-         * post_ff_sqr(m, m0, particle_types_[0]->minimum_mass()
-                            + particle_types_[1]->minimum_mass(), Lambda_)
-         / (m * rho(m0));
+         * post_ff_sqr(m, m0, threshold(), Lambda_) / (m * rho(m0));
 }
 
 // TwoBodyDecayDilepton
@@ -263,7 +254,7 @@ TwoBodyDecayDilepton::TwoBodyDecayDilepton(ParticleTypePtrList part_types,
 }
 
 float TwoBodyDecayDilepton::width(float m0, float G0, float m) const {
-  if (m <= particle_types_[0]->mass() + particle_types_[1]->mass()) {
+  if (m <= threshold()) {
     return 0;
   } else {
     /// dilepton decays: use width from \iref{Li:1996mi}, equation (19)
