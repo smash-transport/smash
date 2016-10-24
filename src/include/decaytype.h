@@ -84,6 +84,9 @@ class TwoBodyDecay : public DecayType {
     return particle_types_[0]->minimum_mass() +
            particle_types_[1]->minimum_mass();
   }
+  float tabulation_interval(float m0, float G0) const {
+    return m0 + 10.f * G0 - threshold();
+  }
 
  protected:
   /* This is a virtual helper method which is used to write the width as
@@ -147,7 +150,7 @@ class TwoBodyDecaySemistable : public TwoBodyDecay {
                  float m1, float m2) const override;
 
  protected:
-  float rho(float m) const override;
+  float rho(float m, float tab_interval) const;
   /**
    * Determine the cutoff parameter Λ for semi-stable decays,
    * given the types of the daughter particles.
@@ -176,7 +179,7 @@ class TwoBodyDecayUnstable : public TwoBodyDecay {
   float in_width(float m0, float G0, float m,
                  float m1, float m2) const override;
  protected:
-  float rho(float m) const override;
+  float rho(float m, float tab_interval) const;
   /**
    * Determine the cutoff parameter Λ for unstable decays,
    * given the types of the daughter particles.
