@@ -168,9 +168,7 @@ float TwoBodyDecaySemistable::rho(float mass) const {
 }
 
 float TwoBodyDecaySemistable::width(float m0, float G0, float m) const {
-  return G0 * rho(m) / rho(m0)
-         * post_ff_sqr(m, m0, particle_types_[0]->mass()
-                              + particle_types_[1]->minimum_mass(), Lambda_);
+  return G0 * rho(m) / rho(m0) * post_ff_sqr(m, m0, threshold(), Lambda_);
 }
 
 float TwoBodyDecaySemistable::in_width(float m0, float G0, float m,
