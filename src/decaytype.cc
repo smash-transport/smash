@@ -168,11 +168,13 @@ float TwoBodyDecaySemistable::rho(float mass) const {
 }
 
 float TwoBodyDecaySemistable::width(float m0, float G0, float m) const {
+  assert(rho(m0) != 0);
   return G0 * rho(m) / rho(m0) * post_ff_sqr(m, m0, threshold(), Lambda_);
 }
 
 float TwoBodyDecaySemistable::in_width(float m0, float G0, float m,
                                        float m1, float m2) const {
+  assert(rho(m0) != 0);
   const float p_f = pCM(m, m1, m2);
 
   return G0 * p_f * blatt_weisskopf_sqr(p_f, L_)
