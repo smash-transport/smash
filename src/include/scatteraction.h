@@ -12,6 +12,7 @@
 
 #include "action.h"
 #include "kinematics.h"
+#include "cxx14compat.h"
 
 namespace Smash {
 
@@ -27,6 +28,25 @@ inline float detailed_balance_factor(float s, const ParticleType& particle_a, co
     const float momentum_factor = pCM_sqr_from_s(s, particle_c.mass(), particle_d.mass())
         / pCM_sqr_from_s(s, particle_a.mass(), particle_b.mass());
     return spin_factor * symmetry_factor * momentum_factor;
+}
+
+/**
+ * Add a 2-to-2 channel to a collision branch list given a cross section.
+ *
+ * The cross section is only calculated if there is enough energy for the process.
+ * If the cross section is small, the branch is not added.
+ */
+template <typename F>
+inline void add_channel(CollisionBranchList &process_list, F get_xsection, float sqrts, const ParticleType &type_a, const ParticleType &type_b) {
+  const float sqrt_s_min = type_a.minimum_mass() + type_b.minimum_mass();
+  if (sqrts < sqrt_s_min) {
+      return;
+  }
+  const auto xsection = get_xsection();
+  if (xsection > really_small) {
+    process_list.push_back(make_unique<CollisionBranch>(
+      type_a, type_b, xsection, ProcessType::TwoToTwo));
+  }
 }
 
 /**
