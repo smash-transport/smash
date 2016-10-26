@@ -145,12 +145,15 @@ float TwoBodyDecaySemistable::get_Lambda() {
 constexpr int num_tab_pts = 200;
 static thread_local Integrator integrate;
 
-float TwoBodyDecaySemistable::rho(float mass, float tab_interval) const {
+float TwoBodyDecaySemistable::rho(float mass) const {
   if (tabulation_ == nullptr) {
     /* TODO(weil): Move this lazy init to a global initialization function,
       * in order to avoid race conditions in multi-threading. */
+    const float tabulation_interval =
+      std::max(2.f, 10.f*particle_types_[1]->width_at_pole());
     tabulation_ = make_unique<Tabulation>(
-                threshold(), tab_interval, num_tab_pts,
+                threshold(),
+                tabulation_interval, num_tab_pts,
                 [&](float sqrts) {
                   return integrate(particle_types_[1]->minimum_mass(),
                                     sqrts - particle_types_[0]->mass(),
@@ -165,18 +168,17 @@ float TwoBodyDecaySemistable::rho(float mass, float tab_interval) const {
 }
 
 float TwoBodyDecaySemistable::width(float m0, float G0, float m) const {
-  const float a = tabulation_interval(m0, G0);
-  return G0 * rho(m, a) / rho(m0, a)
-         * post_ff_sqr(m, m0, threshold(), Lambda_);
+  return G0 * rho(m) / rho(m0)
+         * post_ff_sqr(m, m0, particle_types_[0]->mass()
+                              + particle_types_[1]->minimum_mass(), Lambda_);
 }
 
 float TwoBodyDecaySemistable::in_width(float m0, float G0, float m,
                                        float m1, float m2) const {
   const float p_f = pCM(m, m1, m2);
-  const float a = tabulation_interval(m0, G0);
 
   return G0 * p_f * blatt_weisskopf_sqr(p_f, L_)
-         * post_ff_sqr(m, m0, threshold(), Lambda_) / (m * rho(m0, a));
+         * post_ff_sqr(m, m0, threshold(), Lambda_) / (m * rho(m0));
 }
 
 
@@ -202,12 +204,15 @@ float TwoBodyDecayUnstable::get_Lambda() {
 
 static thread_local Integrator2d integrate2d(1E4);
 
-float TwoBodyDecayUnstable::rho(float mass, float tab_interval) const {
+float TwoBodyDecayUnstable::rho(float mass) const {
   if (tabulation_ == nullptr) {
     /* TODO(weil): Move this lazy init to a global initialization function,
       * in order to avoid race conditions in multi-threading. */
     const float m1_min = particle_types_[0]->minimum_mass();
     const float m2_min = particle_types_[1]->minimum_mass();
+    const float sum_gamma = particle_types_[0]->width_at_pole()
+                          + particle_types_[1]->width_at_pole();
+    const float tab_interval = std::max(2.f, 10.f*sum_gamma);
     tabulation_
           = make_unique<Tabulation>(m1_min + m2_min, tab_interval, num_tab_pts,
             [&](float sqrts) {
@@ -223,17 +228,15 @@ float TwoBodyDecayUnstable::rho(float mass, float tab_interval) const {
 }
 
 float TwoBodyDecayUnstable::width(float m0, float G0, float m) const {
-  const float a = tabulation_interval(m0, G0);
-  return G0 * rho(m, a)/rho(m0, a) * post_ff_sqr(m, m0, threshold(), Lambda_);
+  return G0 * rho(m) / rho(m0) * post_ff_sqr(m, m0, threshold(), Lambda_);
 }
 
 float TwoBodyDecayUnstable::in_width(float m0, float G0, float m,
                                      float m1, float m2) const {
   const float p_f = pCM(m, m1, m2);
-  const float a = tabulation_interval(m0, G0);
 
   return G0 * p_f * blatt_weisskopf_sqr(p_f, L_)
-         * post_ff_sqr(m, m0, threshold(), Lambda_) / (m * rho(m0, a));
+         * post_ff_sqr(m, m0, threshold(), Lambda_) / (m * rho(m0));
 }
 
 // TwoBodyDecayDilepton
