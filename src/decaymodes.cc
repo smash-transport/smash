@@ -244,6 +244,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
             const IsoParticleType &isotype_daughter_2 =
                 IsoParticleType::find(decay_particles[1]);
             // loop through multiplets
+            bool forbidden_by_isospin = true;
             for (size_t m = 0; m < mother_states.size(); m++) {
               for (const auto &daughter1 : isotype_daughter_1.get_states()) {
                 for (const auto &daughter2 : isotype_daughter_2.get_states()) {
@@ -259,9 +260,19 @@ void DecayModes::load_decaymodes(const std::string &input) {
                     decay_modes_to_add[m].add_mode(mother_states[m],
                                                    ratio * cg_sqr, L,
                                                    {daughter1, daughter2});
+                    forbidden_by_isospin = false;
                   }
                 }
               }
+            }
+            if (forbidden_by_isospin) {
+              std::stringstream s;
+              s << ",\nwhere isospin mother: " << isotype_mother->isospin()
+                << ", daughters: " << isotype_daughter_1.isospin()
+                << " " << isotype_daughter_2.isospin();
+              throw InvalidDecay(isotype_mother->name() +
+                " decay mode is forbidden by isospin: \"" + line.text + "\"" + s.str()
+              );
             }
             break;
           }
