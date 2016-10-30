@@ -93,6 +93,7 @@ float TwoBodyDecayStable::rho(float m) const {
 }
 
 float TwoBodyDecayStable::width(float m0, float G0, float m) const {
+  assert(rho(m0) != 0);
   return (m <= threshold()) ? 0.f :
          G0 * rho(m) / rho(m0);
 }
