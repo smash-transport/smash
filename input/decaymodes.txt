@@ -51,7 +51,7 @@ f₀(980)
 a₀(980)
 0.86    0  π η # dominant
 0.14    0  K K̅  # >0
-#^ similar to UrQMD, optimized for f₁(1285) decay
+#^ similar to UrQMD, optimized for f₁(1285) decay branching ratios
 #0.01    1  γ γ  # >0
 
 φ
@@ -130,7 +130,7 @@ f₀(1370)
 
 f₁(1420)
 1.      1  π a₀(980)   # >0, emulating ηππ and KK̅π
-#^ should be rather KK̅*(892)
+#^ according to PDG, KK̅π is mostly from KK̅*(892)
 
 ω(1420)
 1.      1  π ρ         # dominant
