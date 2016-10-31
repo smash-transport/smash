@@ -28,21 +28,6 @@ std::vector<DecayTypePtr> *all_decay_types = nullptr;
 void DecayModes::add_mode(ParticleTypePtr mother, float ratio, int L,
                           ParticleTypePtrList particle_types) {
   DecayType *type = get_decay_type(mother, particle_types, L);
-  // Check whether the pole mass is larger than the masses of the daughters.
-  // This is required by the Manley-Saleski ansatz.
-  float mass_daughters = 0;
-  for (const auto p : particle_types) {
-    mass_daughters += p->mass();
-  }
-  if (mother->mass() < mass_daughters) {
-    std::stringstream s;
-    s << mother->name() << " →  ";
-    for (const auto p : particle_types) {
-      s << p->name();
-    }
-    throw InvalidDecay("For all decays, the mass of daughters must be smaller than the mother's pole mass.\n"
-            "This was violated by the following decay: " + s.str());
-  }
   // Check if mode already exists: if yes, add weight.
   for (auto &mode : decay_modes_) {
     if (type == &mode->type()) {
@@ -364,6 +349,28 @@ void DecayModes::load_decaymodes(const std::string &input) {
     linenumber++;
   }
   end_of_decaymodes();
+
+  // Check whether the mother's pole mass is strictly larger than the minimal
+  // masses of the daughters. This is required by the Manley-Saleski ansatz.
+  const auto& particles = ParticleType::list_all();
+  for (const auto& mother : particles) {
+    if (mother.is_stable()) {
+      continue;
+    }
+    const auto& decays = mother.decay_modes().decay_mode_list();
+    for (const auto& decay : decays) {
+      if (mother.mass() <= decay->threshold()) {
+        std::stringstream s;
+        s << mother.name() << " →  ";
+        for (const auto p : decay->particle_types()) {
+          s << p->name();
+        }
+        s << " with " << mother.mass() << " ≤ " << decay->threshold();
+        throw InvalidDecay("For all decays, the mass of daughters must be smaller than the mother's pole mass.\n"
+                "This was violated by the following decay: " + s.str());
+      }
+    }
+  }
 }
 
 }  // namespace Smash
