@@ -37,7 +37,7 @@ class ParticleType {
    * Decay width cutoff for considering a particle as stable.
    *
    * We currently regard a particle type as stable if its on-shell width is less
-   * than 200 keV.
+   * than 200 keV. The cutoff is chosen such that the η and the η' are stable.
    */
   static constexpr float width_cutoff = 2e-4f;
 
