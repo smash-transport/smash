@@ -76,9 +76,9 @@ class ColliderModus : public ModusDefault {
    **/
   std::unique_ptr<Nucleus> target_;
   /** Center-of-mass energy squared of the nucleus-nucleus collision. **/
-  float total_s_;
+  double total_s_;
   /** Center-of-mass energy of a nucleon-nucleon collision. **/
-  float sqrt_s_NN_;
+  double sqrt_s_NN_;
   /** Impact parameter.
    *
    * The nuclei projectile_ and target_ will be shifted along the x axis
@@ -132,8 +132,8 @@ class ColliderModus : public ModusDefault {
    *
    * \fpPrecision Why \c double?
    **/
-  std::pair<double, double> get_velocities(float mandelstam_s, float m_a,
-                                           float m_b);
+  std::pair<double, double> get_velocities(double mandelstam_s, double m_a,
+                                           double m_b);
 
   /**\ingroup logging
    * Writes the initial state for the ColliderModus to the output stream.

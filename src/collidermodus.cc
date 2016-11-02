@@ -171,15 +171,14 @@ ColliderModus::ColliderModus(Configuration modus_config,
   // no meaningful choice for a default energy, we require the user to
   // give one (and only one) energy input from the available options.
   int energy_input = 0;
-  const float mass_projec = projectile_->mass();
-  const float mass_target = target_->mass();
+  const double mass_projec = projectile_->mass();
+  const double mass_target = target_->mass();
   // average mass of a particle in that nucleus
-  const float mass_a = projectile_->mass() / projectile_->number_of_particles();
-  const float mass_b = target_->mass() / target_->number_of_particles();
+  const double mass_a = projectile_->mass() / projectile_->number_of_particles();
+  const double mass_b = target_->mass() / target_->number_of_particles();
   // Option 1: Center of mass energy.
   if (modus_cfg.has_value({"Sqrtsnn"})) {
     sqrt_s_NN_ = modus_cfg.take({"Sqrtsnn"});
-
     // Check that input satisfies the lower bound (everything at rest).
     if (sqrt_s_NN_ <= mass_a + mass_b) {
       throw ModusDefault::InvalidEnergy(
@@ -188,9 +187,16 @@ ColliderModus::ColliderModus(Configuration modus_config,
           " GeV + " + std::to_string(mass_b) + " GeV.");
     }
     // Set the total nucleus-nucleus collision energy.
+    std::cout << "sqrt_s_NN"<< sqrt_s_NN_ <<"\n";
+    std::cout << "mass_a"<< mass_a <<"\n";
+    std::cout << "mass_b"<< mass_b <<"\n";
+    std::cout << "mass_projec"<< mass_projec <<"\n";
+    std::cout << "mass_target"<< mass_target <<"\n";
+     
     total_s_ = (sqrt_s_NN_ * sqrt_s_NN_ - mass_a * mass_a - mass_b * mass_b) *
                    mass_projec * mass_target / (mass_a * mass_b) +
                mass_projec * mass_projec + mass_target * mass_target;
+    std::cout << "Center_of_velocity"<< total_s_; 
     energy_input++;
   }
   /* Option 2: Kinetic energy per nucleon of the projectile nucleus
@@ -314,6 +320,7 @@ float ColliderModus::initial_conditions(Particles *particles,
 
   // Use the total mandelstam variable to get the frame-dependent velocity for
   // each nucleus. Position a is projectile, position b is target.
+  log.info("projectile_mass = ", projectile_->mass(), "ẗarget_mass = ", target_->mass(), "sqrts = ", total_s_);
   double v_a, v_b;
   std::tie(v_a, v_b) =
       get_velocities(total_s_, projectile_->mass(), target_->mass());
@@ -394,8 +401,8 @@ void ColliderModus::sample_impact() {
   }
 }
 
-std::pair<double, double> ColliderModus::get_velocities(float s, float m_a,
-                                                        float m_b) {
+std::pair<double, double> ColliderModus::get_velocities(double s, double m_a,
+                                                        double m_b) {
   double v_a = 0.0;
   double v_b = 0.0;
   // Frame dependent calculations of velocities. Assume v_a >= 0, v_b <= 0.

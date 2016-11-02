@@ -36,7 +36,7 @@ class Nucleus {
   Nucleus(Configuration &config, int nTest);
 
   /// returns the mass of the nucleus
-  float mass() const;
+  double mass() const;
 
   /** Returns a Woods-Saxon distributed position.
    * The distribution of return values from this function is according to a
