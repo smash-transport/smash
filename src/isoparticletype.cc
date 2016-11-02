@@ -252,6 +252,17 @@ double IsoParticleType::get_integral_DR(double sqrts) {
   return XS_DR_tabulation->get_value_linear(sqrts);
 }
 
+double IsoParticleType::get_integral_RR(const ParticleType &type_res_2, double sqrts) {
+  for(int i=0;i<XS_RR_tabulations.size(); i++) {
+    if (*resonances_[i] == type_res_2) {
+      return XS_RR_tabulations[i]->get_value_linear(sqrts);
+    }
+  }
+  XS_RR_tabulations.push_back(integrate_RR(find(type_res_2)->get_states()[0]));
+  resonances_.push_back(find(type_res_2)->get_states()[0]);
+  return XS_RR_tabulations.back()->get_value_linear(sqrts);
+}
+
 TabulationPtr IsoParticleType::integrate_RR(ParticleTypePtr &type_res_2) {
   ParticleTypePtr type_res_1 = states_[0];
   return make_unique<Tabulation>(

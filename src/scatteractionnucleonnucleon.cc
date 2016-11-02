@@ -147,7 +147,7 @@ CollisionBranchList ScatterActionNucleonNucleon::find_xsection_from_type(
         /* Calculate resonance production cross section
          * using the Breit-Wigner distribution as probability amplitude.
          * Integrate over the allowed resonance mass range. */
-        const double resonance_integral = integrator(*type_res_1);
+        const double resonance_integral = integrator(*type_res_1, *type_res_2);
 
         /** Cross section for 2->2 process with 1/2 resonance(s) in final state.
          * Based on Eq. (46) in \iref{Weil:2013mya} and Eq. (3.29) in
@@ -183,7 +183,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
   /* First: Find N N → N R channels. */
   channel_list = find_xsection_from_type(type_particle_a, type_particle_b,
       ParticleType::list_baryon_resonances(), ParticleType::list_nucleons(),
-      [&sqrts](const ParticleType &type_res_1){
+      [&sqrts](const ParticleType &type_res_1, const ParticleType &type_res_2){
           return type_res_1.iso_multiplet()->get_integral_NR(sqrts);
       });
   process_list.reserve(process_list.size() + channel_list.size());
@@ -193,10 +193,10 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
 
   /* Second: Find N N → Δ R channels. */
   channel_list = find_xsection_from_type(type_particle_a, type_particle_b,
-      ParticleType::list_baryon_resonances(), ParticleType::list_Deltas(),
-      [&sqrts](const ParticleType &type_res_1){
-          return type_res_1.iso_multiplet()->get_integral_DR(sqrts);
-      });
+    ParticleType::list_baryon_resonances(), ParticleType::list_Deltas(),
+    [&sqrts](const ParticleType &type_res_1, const ParticleType &type_res_2){
+      return type_res_1.iso_multiplet()->get_integral_RR(type_res_2, sqrts);
+    });
   process_list.reserve(process_list.size() + channel_list.size());
   std::move(channel_list.begin(), channel_list.end(),
       std::inserter(process_list, process_list.end()));

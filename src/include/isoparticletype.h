@@ -127,6 +127,9 @@ class IsoParticleType {
   /// Look up the tabulated resonance integral for the NN -> DR cross section.
   double get_integral_DR(double sqrts);
 
+  /// Look up the tabulated resonance integral for the NN -> RR cross section.
+  double get_integral_RR(const ParticleType &type_res_2, double sqrts);
+
   /// Utility function to help compute various NN->RR spectral integrals
   TabulationPtr integrate_RR(ParticleTypePtr &type_res_2);
 
@@ -145,6 +148,10 @@ class IsoParticleType {
   /* A tabulation for the NN -> NR and NN -> DR cross sections,
    * where R is a resonance from this multiplet. */
   TabulationPtr XS_NR_tabulation, XS_DR_tabulation;
+  /* A tabulation list for the NN -> RR' cross sections,
+   * where R is this multiplet and R' is a baryon resonance */ 
+  TabulationList XS_RR_tabulations;
+  ParticleTypePtrList resonances_;
 
   /**
    * Private version of the 'find' method that returns a non-const reference.
