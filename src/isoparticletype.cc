@@ -207,13 +207,13 @@ static float spec_func_integrand_2res(float sqrts,
 static thread_local Integrator integrate;
 
 double IsoParticleType::get_integral_NR(double sqrts) {
-  if (XS_NR_tabulation == nullptr) {
+  if (XS_NR_tabulation_ == nullptr) {
     // initialize tabulation
     /* TODO(weil): Move this lazy init to a global initialization function,
       * in order to avoid race conditions in multi-threading. */
     ParticleTypePtr type_res = states_[0];
     ParticleTypePtr nuc = IsoParticleType::find("N").get_states()[0];
-    XS_NR_tabulation = make_unique<Tabulation>(
+    XS_NR_tabulation_ = make_unique<Tabulation>(
           type_res->minimum_mass() + nuc->mass(), 2.f, 100,
           [&](float srts) {
             return integrate(type_res->minimum_mass(), srts - nuc->mass(),
@@ -223,19 +223,19 @@ double IsoParticleType::get_integral_NR(double sqrts) {
                              });
           });
   }
-  return XS_NR_tabulation->get_value_linear(sqrts);
+  return XS_NR_tabulation_->get_value_linear(sqrts);
 }
 
 static thread_local Integrator2d integrate2d(1E4);
 
 double IsoParticleType::get_integral_DR(double sqrts) {
-  if (XS_DR_tabulation == nullptr) {
+  if (XS_DR_tabulation_ == nullptr) {
     // initialize tabulation
     /* TODO(weil): Move this lazy init to a global initialization function,
       * in order to avoid race conditions in multi-threading. */
     ParticleTypePtr type_res = states_[0];
     ParticleTypePtr Delta = IsoParticleType::find("Δ").get_states()[0];
-    XS_DR_tabulation = make_unique<Tabulation>(
+    XS_DR_tabulation_ = make_unique<Tabulation>(
           type_res->minimum_mass() + Delta->minimum_mass(), 2.5f, 100,
           [&](float srts) {
             return integrate2d(type_res->minimum_mass(),
@@ -248,7 +248,7 @@ double IsoParticleType::get_integral_DR(double sqrts) {
                                });
           });
   }
-  return XS_DR_tabulation->get_value_linear(sqrts);
+  return XS_DR_tabulation_->get_value_linear(sqrts);
 }
 
 

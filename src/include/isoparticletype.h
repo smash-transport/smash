@@ -141,7 +141,7 @@ class IsoParticleType {
 
   /* A tabulation for the NN -> NR and NN -> DR cross sections,
    * where R is a resonance from this multiplet. */
-  TabulationPtr XS_NR_tabulation, XS_DR_tabulation;
+  TabulationPtr XS_NR_tabulation_, XS_DR_tabulation_;
 
   /**
    * Private version of the 'find' method that returns a non-const reference.
