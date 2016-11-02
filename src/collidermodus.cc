@@ -323,7 +323,7 @@ float ColliderModus::initial_conditions(Particles *particles,
       almost_equal(std::abs(1.0 - v_b), 0.0)) {
     throw std::domain_error(
         "Found velocity equal to 1 in "
-        "nucleusmodus::initial_conditions.\nConsider using"
+        "ColliderModus::initial_conditions.\nConsider using "
         "the center of velocity reference frame.");
   }
 
