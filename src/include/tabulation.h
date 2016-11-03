@@ -105,9 +105,10 @@ inline float spec_func_integrand_2res(float sqrts,
 
 /// Create a table for the spectral integral of a resonance and a stable particle.
 inline std::unique_ptr<Tabulation> spectral_integral_semistable(
-    Integrator& integrate, const ParticleType& resonance, const ParticleType& stable) {
+    Integrator& integrate, const ParticleType& resonance, const ParticleType& stable,
+    float range) {
   return make_unique<Tabulation>(
-          resonance.minimum_mass() + stable.mass(), 2.f, 100,
+          resonance.minimum_mass() + stable.mass(), range, 100,
           [&](float srts) {
             return integrate(resonance.minimum_mass(), srts - stable.mass(),
                              [&](float m) {
@@ -120,9 +121,10 @@ inline std::unique_ptr<Tabulation> spectral_integral_semistable(
 
 /// Create a table for the spectral integral of two resonances.
 inline std::unique_ptr<Tabulation> spectral_integral_unstable(
-    Integrator2d& integrate2d, const ParticleType& res1, const ParticleType& res2) {
+    Integrator2d& integrate2d, const ParticleType& res1, const ParticleType& res2,
+    float range) {
     return make_unique<Tabulation>(
-          res1.minimum_mass() + res2.minimum_mass(), 2.5f, 100,
+          res1.minimum_mass() + res2.minimum_mass(), range, 100,
           [&](float srts) {
             return integrate2d(res1.minimum_mass(),
                                srts - res2.minimum_mass(),
