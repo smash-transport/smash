@@ -149,60 +149,6 @@ void IsoParticleType::create_multiplet(const ParticleType &type) {
 }
 
 
-/**
- * Spectral function integrand for GSL integration, with one resonance in the
- * final state (the second particle is stable).
- *
- * The integrand is \f$ A(m) p_{cm}^f \f$, where \f$ m \f$ is the
- * resonance mass, \f$ A(m) \f$ is the spectral function
- *  and \f$ p_{cm}^f \f$ is the center-of-mass momentum of the final state.
- *
- * \param[in] resonance_mass Actual mass of the resonance.
- * \param[in] sqrts Center-of-mass energy, i.e. sqrt of Mandelstam s.
- * \param[in] stable_mass mass of the stable particle in the final state
- * \param[in] type type of the resonance
- */
-static float spec_func_integrand_1res(float resonance_mass, float sqrts,
-                               float stable_mass, const ParticleType &type) {
-  if (sqrts <= stable_mass + resonance_mass) {
-    return 0.;
-  }
-
-  /* Integrand is the spectral function weighted by the CM momentum of the
-   * final state. */
-  return type.spectral_function(resonance_mass)
-       * pCM(sqrts, stable_mass, resonance_mass);
-}
-
-
-/**
- * Spectral function integrand for GSL integration, with two resonances in the
- * final state.
- *
- * The integrand is \f$ A_1(m_1) A_2(m_2) p_{cm}^f \f$, where \f$ m_1 \f$ and
- * \f$ m_2 \f$ are the resonance masses, \f$ A_1 \f$ and \f$ A_2 \f$ are the
- * spectral functions and \f$ p_{cm}^f \f$ is the center-of-mass momentum of
- * the final state.
- *
- * \param[in] sqrts Center-of-mass energy, i.e. sqrt of Mandelstam s.
- * \param[in] res_mass_1 Actual mass of the first resonance.
- * \param[in] res_mass_2 Actual mass of the second resonance.
- * \param[in] t1 Type of the first resonance.
- * \param[in] t2 Type of the second resonance.
- */
-static float spec_func_integrand_2res(float sqrts,
-                              float res_mass_1, float res_mass_2,
-                              const ParticleType &t1, const ParticleType &t2) {
-  if (sqrts <= res_mass_1 + res_mass_2) {
-    return 0.;
-  }
-
-  /* Integrand is the product of the spectral function weighted by the
-   * CM momentum of the final state. */
-  return t1.spectral_function(res_mass_1)
-       * t2.spectral_function(res_mass_2)
-       * pCM(sqrts, res_mass_1, res_mass_2);
-}
 
 static thread_local Integrator integrate;
 
@@ -213,15 +159,7 @@ double IsoParticleType::get_integral_NR(double sqrts) {
       * in order to avoid race conditions in multi-threading. */
     ParticleTypePtr type_res = states_[0];
     ParticleTypePtr nuc = IsoParticleType::find("N").get_states()[0];
-    XS_NR_tabulation_ = make_unique<Tabulation>(
-          type_res->minimum_mass() + nuc->mass(), 2.f, 100,
-          [&](float srts) {
-            return integrate(type_res->minimum_mass(), srts - nuc->mass(),
-                             [&](float m) {
-                               return spec_func_integrand_1res(m, srts,
-                                                        nuc->mass(), *type_res);
-                             });
-          });
+    XS_NR_tabulation_ = spectral_integral_semistable(integrate, *type_res, *nuc);
   }
   return XS_NR_tabulation_->get_value_linear(sqrts);
 }
@@ -235,18 +173,7 @@ double IsoParticleType::get_integral_DR(double sqrts) {
       * in order to avoid race conditions in multi-threading. */
     ParticleTypePtr type_res = states_[0];
     ParticleTypePtr Delta = IsoParticleType::find("Δ").get_states()[0];
-    XS_DR_tabulation_ = make_unique<Tabulation>(
-          type_res->minimum_mass() + Delta->minimum_mass(), 2.5f, 100,
-          [&](float srts) {
-            return integrate2d(type_res->minimum_mass(),
-                               srts - Delta->minimum_mass(),
-                               Delta->minimum_mass(),
-                               srts - type_res->minimum_mass(),
-                               [&](float m1, float m2) {
-                                 return spec_func_integrand_2res(srts, m1, m2,
-                                                            *type_res, *Delta);
-                               });
-          });
+    XS_DR_tabulation_ = spectral_integral_unstable(integrate2d, *type_res, *Delta);
   }
   return XS_DR_tabulation_->get_value_linear(sqrts);
 }
