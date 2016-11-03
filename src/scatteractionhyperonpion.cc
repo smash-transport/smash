@@ -52,7 +52,7 @@ CollisionBranchList ScatterActionHyperonPion::two_to_two_inel(
       const auto& kaon = ParticleType::find(pdg::K_m);
       add_channel(process_list,
                   [&] { return detailed_balance_factor_stable(s,
-                               neutron, kaon, type_hyperon, type_pion)
+                               type_hyperon, type_pion, neutron, kaon)
                                * kminusn_piminussigma0(sqrts); },
                   sqrts, neutron, kaon);
       break;
@@ -62,7 +62,7 @@ CollisionBranchList ScatterActionHyperonPion::two_to_two_inel(
       const auto& kaon = ParticleType::find(pdg::K_m);
       add_channel(process_list,
                   [&] { return detailed_balance_factor_stable(s,
-                               neutron, kaon, type_hyperon, type_pion)
+                               type_hyperon, type_pion, neutron, kaon)
                                * kminusn_pi0sigmaminus(sqrts); },
                   sqrts, neutron, kaon);
       break;
@@ -72,7 +72,7 @@ CollisionBranchList ScatterActionHyperonPion::two_to_two_inel(
       const auto& kaon = ParticleType::find(pdg::K_m);
       add_channel(process_list,
                   [&] { return detailed_balance_factor_stable(s,
-                               neutron, kaon, type_hyperon, type_pion)
+                               type_hyperon, type_pion, neutron, kaon)
                                * kminusn_piminuslambda(sqrts); },
                   sqrts, neutron, kaon);
       break;
@@ -82,7 +82,7 @@ CollisionBranchList ScatterActionHyperonPion::two_to_two_inel(
       const auto& kaon = ParticleType::find(pdg::K_m);
       add_channel(process_list,
                   [&] { return detailed_balance_factor_stable(s,
-                               proton, kaon, type_hyperon, type_pion)
+                               type_hyperon, type_pion, proton, kaon)
                                * kminusp_pi0sigma0(sqrts); },
                   sqrts, proton, kaon);
       break;
@@ -92,7 +92,7 @@ CollisionBranchList ScatterActionHyperonPion::two_to_two_inel(
       const auto& kaon = ParticleType::find(pdg::K_m);
       add_channel(process_list,
                   [&] { return detailed_balance_factor_stable(s,
-                               proton, kaon, type_hyperon, type_pion)
+                               type_hyperon, type_pion, proton, kaon)
                                * kminusp_piplussigmaminus(sqrts); },
                   sqrts, proton, kaon);
       break;
@@ -102,7 +102,7 @@ CollisionBranchList ScatterActionHyperonPion::two_to_two_inel(
       const auto& kaon = ParticleType::find(pdg::K_m);
       add_channel(process_list,
                   [&] { return detailed_balance_factor_stable(s,
-                               proton, kaon, type_hyperon, type_pion)
+                               type_hyperon, type_pion, proton, kaon)
                                * kminusp_pi0lambda(sqrts); },
                   sqrts, proton, kaon);
       break;
@@ -112,7 +112,7 @@ CollisionBranchList ScatterActionHyperonPion::two_to_two_inel(
       const auto& kaon = ParticleType::find(pdg::K_m);
       add_channel(process_list,
                   [&] { return detailed_balance_factor_stable(s,
-                               proton, kaon, type_hyperon, type_pion)
+                               type_hyperon, type_pion, proton, kaon)
                                * kminusp_piminussigmaplus(sqrts); },
                   sqrts, proton, kaon);
       break;
