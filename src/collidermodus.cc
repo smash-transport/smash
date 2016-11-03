@@ -325,11 +325,10 @@ float ColliderModus::initial_conditions(Particles *particles,
   std::tie(v_a, v_b) =
       get_velocities(total_s_, projectile_->mass(), target_->mass());
 
-  // If velocities are too close to 1 for our calculations, throw an exception.
-  if (almost_equal(std::abs(1.0 - v_a), 0.0) ||
-      almost_equal(std::abs(1.0 - v_b), 0.0)) {
+  // If velocities are larger or equal to 1, throw an exception.
+  if (v_a >= 1.0 || v_b >=1.0) {
     throw std::domain_error(
-        "Found velocity equal to 1 in "
+        "Found velocity equal or larger to 1 in "
         "ColliderModus::initial_conditions.\nConsider using "
         "the center of velocity reference frame.");
   }
