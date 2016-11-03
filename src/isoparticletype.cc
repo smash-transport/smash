@@ -156,12 +156,24 @@ double IsoParticleType::get_integral_NR(double sqrts) {
   if (XS_NR_tabulation_ == nullptr) {
     // initialize tabulation
     /* TODO(weil): Move this lazy init to a global initialization function,
-      * in order to avoid race conditions in multi-threading. */
+     * in order to avoid race conditions in multi-threading. */
     ParticleTypePtr type_res = states_[0];
     ParticleTypePtr nuc = IsoParticleType::find("N").get_states()[0];
     XS_NR_tabulation_ = spectral_integral_semistable(integrate, *type_res, *nuc);
   }
   return XS_NR_tabulation_->get_value_linear(sqrts);
+}
+
+double IsoParticleType::get_integral_RK(double sqrts) {
+  if (XS_RK_tabulation_ == nullptr) {
+    // initialize tabulation
+    /* TODO(weil): Move this lazy init to a global initialization function,
+     * in order to avoid race conditions in multi-threading. */
+    ParticleTypePtr type_res = states_[0];
+    ParticleTypePtr kaon = IsoParticleType::find("K").get_states()[0];
+    XS_RK_tabulation_ = spectral_integral_semistable(integrate, *type_res, *kaon);
+  }
+  return XS_RK_tabulation_->get_value_linear(sqrts);
 }
 
 static thread_local Integrator2d integrate2d(1E4);
@@ -170,7 +182,7 @@ double IsoParticleType::get_integral_DR(double sqrts) {
   if (XS_DR_tabulation_ == nullptr) {
     // initialize tabulation
     /* TODO(weil): Move this lazy init to a global initialization function,
-      * in order to avoid race conditions in multi-threading. */
+     * in order to avoid race conditions in multi-threading. */
     ParticleTypePtr type_res = states_[0];
     ParticleTypePtr Delta = IsoParticleType::find("Δ").get_states()[0];
     XS_DR_tabulation_ = spectral_integral_unstable(integrate2d, *type_res, *Delta);
