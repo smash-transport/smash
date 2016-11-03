@@ -31,8 +31,7 @@ on the system.
 Building SMASH
 --------------
 
-Assuming Pythia is already build, run the following to build SMASH in a separate
-directory:
+Build SMASH in a separate directory:
 
     mkdir build
     cd build
@@ -129,15 +128,3 @@ Let's assume Eigen headers will be unpacked in $HOME.
 - in smash/build/, create build files with
 
   cmake -DCMAKE_INSTALL_PREFIX=$HOME/[latest-eigen]/ ..
-
-
-Compiling Pythia
-----------------
-
-The Pythia code is provided in the directory 3rdparty/pythia8215 and can be
-compiled by executing
-
-   ./configure
-   make
-
-in that directory.
