@@ -41,21 +41,11 @@ if(USE_ROOT)
   endif()
 endif()
 
-######### Find Pythia8 library #########
-find_package(Pythia REQUIRED)
-if(Pythia_FOUND)
-  include_directories(SYSTEM
-	"${Pythia_INCLUDE_DIRS}"
-  )
-  set(SMASH_LIBRARIES
-     ${SMASH_LIBRARIES}
-     ${Pythia_LIBRARIES} -ldl
-  )
-  add_definitions(
-  "-DPYTHIA_XML_DIR=\"${Pythia_xmldoc_PATH}\""
-  -DPYTHIA_FOUND
-  )
-endif()
+# set up Pythia
+get_filename_component(xmldoc "../3rdparty/pythia8215/share/xmldoc" ABSOLUTE)
+add_definitions(
+    "-DPYTHIA_XML_DIR=\"${xmldoc}\""
+)
 
 # set up include paths
 include_directories(
@@ -74,6 +64,8 @@ set(SMASH_LIBRARIES ${SMASH_LIBRARIES}
    ${Boost_LIBRARIES}
    einhard
    yaml-cpp
+   pythia
+   -ldl  # required by pythia
    )
 
 # list the source files
