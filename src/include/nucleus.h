@@ -35,7 +35,9 @@ class Nucleus {
   Nucleus(const std::map<PdgCode, int>& particle_list, int nTest);
   Nucleus(Configuration &config, int nTest);
 
-  /// returns the mass of the nucleus
+  /** returns the mass of the nucleus
+   * needs to be double to allow for calculations at LHC energies
+   * */
   double mass() const;
 
   /** Returns a Woods-Saxon distributed position.

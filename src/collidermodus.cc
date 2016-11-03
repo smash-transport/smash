@@ -187,16 +187,9 @@ ColliderModus::ColliderModus(Configuration modus_config,
           " GeV + " + std::to_string(mass_b) + " GeV.");
     }
     // Set the total nucleus-nucleus collision energy.
-    std::cout << "sqrt_s_NN"<< sqrt_s_NN_ <<"\n";
-    std::cout << "mass_a"<< mass_a <<"\n";
-    std::cout << "mass_b"<< mass_b <<"\n";
-    std::cout << "mass_projec"<< mass_projec <<"\n";
-    std::cout << "mass_target"<< mass_target <<"\n";
-     
     total_s_ = (sqrt_s_NN_ * sqrt_s_NN_ - mass_a * mass_a - mass_b * mass_b) *
                    mass_projec * mass_target / (mass_a * mass_b) +
                mass_projec * mass_projec + mass_target * mass_target;
-    std::cout << "Center_of_velocity"<< total_s_; 
     energy_input++;
   }
   /* Option 2: Kinetic energy per nucleon of the projectile nucleus
@@ -320,7 +313,6 @@ float ColliderModus::initial_conditions(Particles *particles,
 
   // Use the total mandelstam variable to get the frame-dependent velocity for
   // each nucleus. Position a is projectile, position b is target.
-  log.info("projectile_mass = ", projectile_->mass(), "ẗarget_mass = ", target_->mass(), "sqrts = ", total_s_);
   double v_a, v_b;
   std::tie(v_a, v_b) =
       get_velocities(total_s_, projectile_->mass(), target_->mass());

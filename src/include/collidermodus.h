@@ -75,9 +75,15 @@ class ColliderModus : public ModusDefault {
    * at rest.
    **/
   std::unique_ptr<Nucleus> target_;
-  /** Center-of-mass energy squared of the nucleus-nucleus collision. **/
+  /** Center-of-mass energy squared of the nucleus-nucleus collision. 
+   * 
+   * needs to be double to allow for calculations at LHC energies
+   * **/
   double total_s_;
-  /** Center-of-mass energy of a nucleon-nucleon collision. **/
+  /** Center-of-mass energy of a nucleon-nucleon collision. 
+   * 
+   * needs to be double to allow for calculations at LHC energies
+   * **/
   double sqrt_s_NN_;
   /** Impact parameter.
    *
