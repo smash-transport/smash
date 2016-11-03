@@ -38,7 +38,7 @@ inline float detailed_balance_factor_stable(float s, const ParticleType& particl
  * where $A$ is unstable, $B$ is a kaon and $C, D$ are stable.
  */
 inline float detailed_balance_factor_RK(float s, const ParticleType& particle_a, const ParticleType& particle_b, const ParticleType& particle_c, const ParticleType& particle_d) {
-    assert(b.pdgcode().is_kaon());
+    assert(particle_b.pdgcode().is_kaon());
     float spin_factor = (particle_c.spin() + 1)*(particle_d.spin() + 1);
     spin_factor /= (particle_a.spin() + 1)*(particle_b.spin() + 1);
     float symmetry_factor = (1 + (particle_a == particle_b));
