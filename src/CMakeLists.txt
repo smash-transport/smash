@@ -42,7 +42,7 @@ if(USE_ROOT)
 endif()
 
 # set up Pythia
-get_filename_component(xmldoc "../3rdparty/pythia8215/share/xmldoc" ABSOLUTE)
+get_filename_component(xmldoc "../3rdparty/pythia8215/share/Pythia8/xmldoc" ABSOLUTE)
 add_definitions(
     "-DPYTHIA_XML_DIR=\"${xmldoc}\""
 )

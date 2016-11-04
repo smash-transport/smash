@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.6.2)
 project(Pythia)
 
 # set the relevant compiler flags
-get_filename_component(xmldoc "share/xmldoc" ABSOLUTE)
+get_filename_component(xmldoc "share/Pythia8/xmldoc" ABSOLUTE)
 add_definitions(
     "-DXMLDIR=\"${xmldoc}\""
 )
