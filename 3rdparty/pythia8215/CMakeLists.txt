@@ -2,7 +2,11 @@ cmake_minimum_required(VERSION 2.6.2)
 project(Pythia)
 
 # set the relevant compiler flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -march=native -mfpmath=sse -DXMLDIR=\\\"share/xmldoc\\\"")
+get_filename_component(xmldoc "share/xmldoc" ABSOLUTE)
+add_definitions(
+    "-DXMLDIR=\"${xmldoc}\""
+)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -march=native -mfpmath=sse")
 
 add_library(pythia
     src/Analysis.cc
