@@ -134,7 +134,6 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
           break;
         }
         case pdg::n: {
-          break;
           const ParticleType &type_piminus = ParticleType::find(pdg::pi_m);
           add_channel(process_list,
                       [&] { return kminusn_piminussigma0(sqrts); },
