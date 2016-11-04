@@ -127,6 +127,9 @@ class IsoParticleType {
   /// Look up the tabulated resonance integral for the NN -> DR cross section.
   double get_integral_DR(double sqrts);
 
+  /// Look up the tabulated resonance integral for the NK -> RK cross section.
+  double get_integral_RK(double sqrts);
+
  private:
   /// name of the multiplet
   std::string name_;
@@ -139,9 +142,11 @@ class IsoParticleType {
   /// list of states that are contained in the multiplet
   ParticleTypePtrList states_;
 
-  /* A tabulation for the NN -> NR and NN -> DR cross sections,
-   * where R is a resonance from this multiplet. */
-  TabulationPtr XS_NR_tabulation, XS_DR_tabulation;
+  /** A tabulation of the spectral integral for the NN -> NR and NN -> DR cross
+   * sections, where R is a resonance from this multiplet. */
+  TabulationPtr XS_NR_tabulation_, XS_DR_tabulation_;
+  /// A tabulation of the spectral integral for the NK -> RK cross sections.
+  TabulationPtr XS_RK_tabulation_;
 
   /**
    * Private version of the 'find' method that returns a non-const reference.
