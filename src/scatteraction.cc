@@ -402,8 +402,18 @@ void ScatterAction::string_excitation() {
   for (int i = 0; i < event.size(); i++) {
     if (event[i].isFinal()) {
       if (event[i].isHadron()) {
-        const int pythia_id = event[i].id();
+        int pythia_id = event[i].id();
         log.debug("PDG ID from Pythia:", pythia_id);
+        /* K_short and K_long need to be converted to K0
+         * since SMASH only knows K0 */
+        if (pythia_id == 310 || pythia_id == 130) {
+          const float prob = Random::uniform(0.f, 1.f);
+          if (prob <= 0.5f){
+            pythia_id = 311;
+          } else {
+            pythia_id = -311;
+          }
+        }
         const std::string s = std::to_string(pythia_id);
         PdgCode pythia_code(s);
         ParticleData new_particle(ParticleType::find(pythia_code));
