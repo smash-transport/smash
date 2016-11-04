@@ -22,7 +22,9 @@ namespace Smash {
  * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
  * where $A, B, C, D$ are stable.
  */
-inline float detailed_balance_factor_stable(float s, const ParticleType& particle_a, const ParticleType& particle_b, const ParticleType& particle_c, const ParticleType& particle_d) {
+inline float detailed_balance_factor_stable(float s,
+               const ParticleType& particle_a, const ParticleType& particle_b,
+               const ParticleType& particle_c, const ParticleType& particle_d) {
     float spin_factor = (particle_c.spin() + 1)*(particle_d.spin() + 1);
     spin_factor /= (particle_a.spin() + 1)*(particle_b.spin() + 1);
     float symmetry_factor = (1 + (particle_a == particle_b));
@@ -37,16 +39,17 @@ inline float detailed_balance_factor_stable(float s, const ParticleType& particl
  * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
  * where $A$ is unstable, $B$ is a kaon and $C, D$ are stable.
  */
-inline float detailed_balance_factor_RK(float s, const ParticleType& particle_a, const ParticleType& particle_b, const ParticleType& particle_c, const ParticleType& particle_d) {
+inline float detailed_balance_factor_RK(float sqrts, float pcm,
+               const ParticleType& particle_a, const ParticleType& particle_b,
+               const ParticleType& particle_c, const ParticleType& particle_d) {
     assert(!particle_a.is_stable());
     assert(particle_b.pdgcode().is_kaon());
     float spin_factor = (particle_c.spin() + 1)*(particle_d.spin() + 1);
     spin_factor /= (particle_a.spin() + 1)*(particle_b.spin() + 1);
     float symmetry_factor = (1 + (particle_a == particle_b));
     symmetry_factor /= (1 + (particle_c == particle_d));
-    const float momentum_factor = pCM_sqr_from_s(s, particle_c.mass(), particle_d.mass())
-        / (pCM_from_s(s, particle_a.mass(), particle_b.mass())
-           * particle_a.iso_multiplet()->get_integral_RK(sqrt(s)));
+    const float momentum_factor = pCM_sqr(sqrts, particle_c.mass(), particle_d.mass())
+        / (pcm * particle_a.iso_multiplet()->get_integral_RK(sqrts));
     return spin_factor * symmetry_factor * momentum_factor;
 }
 
@@ -57,7 +60,9 @@ inline float detailed_balance_factor_RK(float s, const ParticleType& particle_a,
  * If the cross section is small, the branch is not added.
  */
 template <typename F>
-inline void add_channel(CollisionBranchList &process_list, F get_xsection, float sqrts, const ParticleType &type_a, const ParticleType &type_b) {
+inline void add_channel(CollisionBranchList &process_list, F get_xsection,
+                        float sqrts, const ParticleType &type_a,
+                                     const ParticleType &type_b) {
   const float sqrt_s_min = type_a.minimum_mass() + type_b.minimum_mass();
   if (sqrts < sqrt_s_min) {
       return;

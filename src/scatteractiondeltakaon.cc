@@ -45,6 +45,7 @@ CollisionBranchList ScatterActionDeltaKaon::two_to_two_inel(
 
   const double s = mandelstam_s();
   const double sqrts = sqrt_s();
+  const double pcm = cm_momentum();
 
   // The cross sections are determined from the backward reactions via
   // detailed balance. The same isospin factors as for the backward reaction
@@ -55,7 +56,7 @@ CollisionBranchList ScatterActionDeltaKaon::two_to_two_inel(
       const auto& type_p = ParticleType::find(pdg::p);
       const auto& type_K_p = ParticleType::find(pdg::K_p);
       add_channel(process_list,
-                  [&] { return detailed_balance_factor_RK(s,
+                  [&] { return detailed_balance_factor_RK(sqrts, pcm,
                                type_delta, type_kaon, type_p, type_K_p)
                                * kplusn_ratios.get_ratio(type_p, type_K_p, type_kaon, type_delta)
                                * kplusp_inelastic(s); },
@@ -67,7 +68,7 @@ CollisionBranchList ScatterActionDeltaKaon::two_to_two_inel(
       const auto& type_n = ParticleType::find(pdg::n);
       const auto& type_K_p = ParticleType::find(pdg::K_p);
       add_channel(process_list,
-                  [&] { return detailed_balance_factor_RK(s,
+                  [&] { return detailed_balance_factor_RK(sqrts, pcm,
                                type_delta, type_kaon, type_n, type_K_p)
                                * kplusn_ratios.get_ratio(type_n, type_K_p, type_kaon, type_delta)
                                * kplusn_inelastic(s); },
@@ -76,7 +77,7 @@ CollisionBranchList ScatterActionDeltaKaon::two_to_two_inel(
       const auto& type_p = ParticleType::find(pdg::p);
       const auto& type_K_z = ParticleType::find(pdg::K_z);
       add_channel(process_list,
-                  [&] { return detailed_balance_factor_RK(s,
+                  [&] { return detailed_balance_factor_RK(sqrts, pcm,
                                type_delta, type_kaon, type_p, type_K_z)
                                * kplusn_ratios.get_ratio(type_p, type_K_z, type_kaon, type_delta)
                                * kplusp_inelastic(s); },
@@ -88,7 +89,7 @@ CollisionBranchList ScatterActionDeltaKaon::two_to_two_inel(
       const auto& type_n = ParticleType::find(pdg::n);
       const auto& type_K_z = ParticleType::find(pdg::K_z);
       add_channel(process_list,
-                  [&] { return detailed_balance_factor_RK(s,
+                  [&] { return detailed_balance_factor_RK(sqrts, pcm,
                                type_delta, type_kaon, type_n, type_K_z)
                                * kplusn_ratios.get_ratio(type_n, type_K_z, type_kaon, type_delta)
                                * kplusn_inelastic(s); },
