@@ -64,7 +64,7 @@ inline void add_channel(CollisionBranchList &process_list, F get_xsection,
                         float sqrts, const ParticleType &type_a,
                                      const ParticleType &type_b) {
   const float sqrt_s_min = type_a.minimum_mass() + type_b.minimum_mass();
-  if (sqrts < sqrt_s_min) {
+  if (sqrts <= sqrt_s_min) {
       return;
   }
   const auto xsection = get_xsection();
