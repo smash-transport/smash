@@ -51,17 +51,17 @@ class AdaptiveParameters {
     }
     // factor for the incoming particles
     const float f_inc =
-        N_inc == 0u ? 0.f : static_cast<float>(N_inc) / actions.size();
-    log.debug("Factor for the incoming particles: ", f_inc);
+        (N_inc == 0u) ? 0.f : static_cast<float>(N_inc) / actions.size();
     const float fraction_missed = 0.5f * N_inc * f_inc / N_particles;
-    log.debug("Fraction of missed actions: ", fraction_missed);
     const float allowed_deviation = deviation_factor_ * rate_ *
         std::sqrt(0.5f * f_inc / target_missed_actions_ / N_particles);
-    log.debug("Allowed deviation: ", allowed_deviation);
-
     const float current_rate = fraction_missed / (*dt);
-    // todo(oliiny): shoun't this only decrease timestep? Maybe abs?
     const float rate_deviation = current_rate - rate_;
+    log.debug("Factor for the incoming particles: ", f_inc,
+              ", fraction of missed actions: ", fraction_missed,
+              ", rate estimate: ", rate_,
+              ", rate deviation = ", rate_deviation,
+              ", allowed = ", allowed_deviation);
     if (rate_deviation > allowed_deviation) {
       changed_timestep = true;
       *dt = target_missed_actions_ / rate_;

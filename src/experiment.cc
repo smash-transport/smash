@@ -888,7 +888,7 @@ void Experiment<Modus>::run_time_evolution_without_time_steps(float end_time, Ac
     }
     if ((act->time_of_execution() > end_time) &&
         (time_step_mode_ == TimeStepMode::Adaptive)) {
-      log.info(~einhard::DRed(), "✘ ", act, " (discarded: adaptive timestep"
+      log.debug(~einhard::DRed(), "✘ ", act, " (discarded: adaptive timestep"
                 " mode decreased timestep and this action is too late)");
       continue;
     }
