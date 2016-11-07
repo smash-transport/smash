@@ -10,6 +10,7 @@
 η'              0.958   1.98e-4     331
 f₀(980)         0.990   0.070   9010221
 a₀(980)         0.989   0.075   9000111 9000211     # should be heavy enough for KK
+#^ The pole mass was increased to be heavy enough for the KK decay, like in UrQMD.
 φ               1.019   4.27e-3     333
 h₁(1170)        1.170   0.360     10223
 b₁(1235)        1.2295  0.142     10113   10213
