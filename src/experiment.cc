@@ -352,10 +352,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    **/
   if (time_step_mode_ == TimeStepMode::Adaptive) {
     adaptive_parameters_ = make_unique<AdaptiveParameters>(
-      config.take({"General", "Adaptive_Time_Step", "Smoothing_Factor"}, 0.1f),
-      config.take({"General", "Adaptive_Time_Step", "Target_Missed_Actions"}, 0.01f),
-      config.take({"General", "Adaptive_Time_Step", "Allowed_Deviation"}, 2.5f));
-   log.info() << *adaptive_parameters_;
+      config["General"]["Adaptive_Time_Step"]);
+    log.info() << *adaptive_parameters_;
   }
 
   // create outputs
@@ -756,7 +754,6 @@ template <typename Modus>
 void Experiment<Modus>::run_time_evolution() {
   float dt = parameters_.timestep_duration();
   uint32_t num_steps = 0u;
-  float rate;
   Actions actions, dilepton_actions, photon_actions;
 
   const auto &log = logger<LogArea::Experiment>();
@@ -771,7 +768,7 @@ void Experiment<Modus>::run_time_evolution() {
   }
 
   if (time_step_mode_ == TimeStepMode::Adaptive) {
-    rate = adaptive_parameters_->rate_from_dt(dt);
+    adaptive_parameters_->initialize(dt);
   }
 
   while (parameters_.labclock.current_time() < end_time_) {
@@ -851,27 +848,11 @@ void Experiment<Modus>::run_time_evolution() {
 
     /* (2) In case of adaptive timesteps adapt timestep size */
     if (time_step_mode_ ==  TimeStepMode::Adaptive && actions.size() > 0u) {
-      log_ad_ts.debug() << hline;
-
-      float fraction_missed;
-      float allowed_deviation;
-      std::tie(fraction_missed, allowed_deviation) =
-          adaptive_parameters_->calc_missed_actions_allowed_deviation(
-              actions, rate, particles_.size());
-      const float current_rate = fraction_missed / dt;
-      const float rate_deviation = current_rate - rate;
-      // check if the current rate deviates too strongly from the expected value
-      if (rate_deviation > allowed_deviation) {
-        float new_dt = adaptive_parameters_->new_dt(current_rate);
-        parameters_.labclock.set_timestep_duration(new_dt);
-        log_ad_ts.debug("New timestep is set to ", new_dt);
-        t_step_end = parameters_.labclock.current_time() + new_dt;
+      if (adaptive_parameters_->update_timestep(actions, particles_.size(), &dt)) {
+        parameters_.labclock.set_timestep_duration(dt);
+        log_ad_ts.info("New timestep is set to ", dt);
+        t_step_end = parameters_.labclock.current_time() + dt;
       }
-      // update the estimate of the rate
-      rate += adaptive_parameters_->smoothing_factor * rate_deviation;
-      // set the size of the next time step
-      dt = adaptive_parameters_->new_dt(rate);
-      log_ad_ts.debug("dt set to ", dt);
     }
 
     /* (3) Propagation from action to action within timestep */

@@ -11,39 +11,40 @@
 
 #include "action.h"
 #include "actions.h"
+#include "configuration.h"
 
 namespace Smash {
 
 /**
- * This struct contains all the additional parameters that are needed when
- * using adaptive time steps.
+ * This class implements the updating of adaptive timestep based on the
+ * estimate scattering rate. If the rate is too high for a given timestep then
+ * the timestep is decreased and vice vesa.
  */
-struct AdaptiveParameters {
-  /**
-   * Calculate the recommended time step size.
-   */
-  float new_dt(float rate) const {
-    return target_missed_actions / rate;
+
+class AdaptiveParameters {
+
+ public:
+  explicit AdaptiveParameters(Configuration conf) :
+    smoothing_factor_(conf.take({"Smoothing_Factor"}, 0.1f)),
+    target_missed_actions_(conf.take({"Target_Missed_Actions"}, 0.01f)),
+    deviation_factor_(conf.take({"Allowed_Deviation"}, 2.5f)) {};
+
+  void initialize(float dt) {
+    // Calculate the rate that would lead to the given time step size.
+    rate_ = target_missed_actions_ / dt;
   }
 
   /**
-   * Calculate the rate that would lead to the given time step size.
-   */
-  float rate_from_dt(float dt) const {
-    return target_missed_actions / dt;
-  }
-
-  /**
-   * Calculate the fraction of missed actions and the allowed deviation.
+   * Updates timestep if necessary.
    *
    * \param actions The actions from the current time step.
-   * \param previous_rate The smoothed rate from the previous time step.
    * \param N_particles The number of particles in the system.
-   * \return Fraction of missed actions and allowed deviation.
+   * \return if timestep was changed or not.
    */
-  std::pair<float, float> calc_missed_actions_allowed_deviation(
-      const Actions &actions, float previous_rate, size_t N_particles) const {
+  bool update_timestep(const Actions &actions, size_t N_particles, float* dt) {
     const auto &log = logger<LogArea::AdaptiveTS>();
+    bool changed_timestep = false;
+
     uint32_t N_inc = 0u;
     for (const auto &a : actions) {
       N_inc += a->incoming_particles().size();
@@ -52,14 +53,25 @@ struct AdaptiveParameters {
     const float f_inc =
         N_inc == 0u ? 0.f : static_cast<float>(N_inc) / actions.size();
     log.debug("Factor for the incoming particles: ", f_inc);
-    const float fr_mi = 0.5f * N_inc * f_inc / N_particles;
-    log.debug("Fraction of missed actions: ", fr_mi);
-    const float al_dev =
-        deviation_factor * previous_rate *
-        std::sqrt(0.5f * f_inc / target_missed_actions / N_particles);
-    log.debug("Allowed deviation: ", al_dev);
-    return std::make_pair(fr_mi, al_dev);
+    const float fraction_missed = 0.5f * N_inc * f_inc / N_particles;
+    log.debug("Fraction of missed actions: ", fraction_missed);
+    const float allowed_deviation = deviation_factor_ * rate_ *
+        std::sqrt(0.5f * f_inc / target_missed_actions_ / N_particles);
+    log.debug("Allowed deviation: ", allowed_deviation);
+
+    const float current_rate = fraction_missed / (*dt);
+    // todo(oliiny): shoun't this only decrease timestep? Maybe abs?
+    const float rate_deviation = current_rate - rate_;
+    if (rate_deviation > allowed_deviation) {
+      changed_timestep = true;
+      *dt = target_missed_actions_ / rate_;
+    }
+    // update the estimate of the rate
+    rate_ += smoothing_factor_ * rate_deviation;
+    return changed_timestep;
   }
+
+  float rate() const { return rate_; }
 
   /**
    * The smoothing factor \f$ \alpha \f$ is responsible for smoothing the
@@ -69,13 +81,13 @@ struct AdaptiveParameters {
    * corresponds to not changing the estimate of the rate at all with the new
    * data.
    */
-  float smoothing_factor;
+  const float smoothing_factor_;
 
   /**
    * The fraction of missed actions that is targeted by the algorithm. A smaller
    * value will lead to smaller time steps but also less missed actions.
    */
-  float target_missed_actions;
+  const float target_missed_actions_;
 
   /**
    * The deviation factor \f$ f_D \f$ sets the limit by how much the criterion
@@ -84,14 +96,18 @@ struct AdaptiveParameters {
    * aborted time steps and consequently longer runtime. The condition is
    * \f[ r - \bar{r} < f_D \sqrt{\bar{r}/(dt \cdot N_P)} \f].
    */
-  float deviation_factor;
+  const float deviation_factor_;
+
+ private:
+  /// Estimate of current scattering rate
+  float rate_;
 };
 
 inline std::ostream& operator << (std::ostream &o, const AdaptiveParameters &a) {
   return o << "Adaptive time step:\n" <<
-       "  Smoothing factor: " << a.smoothing_factor << "\n" <<
-       "  Target missed actions: " << 100 * a.target_missed_actions << "%\n" <<
-       "  Allowed deviation: " << a.deviation_factor << "\n";
+       "  Smoothing factor: " << a.smoothing_factor_ << "\n" <<
+       "  Target missed actions: " << 100 * a.target_missed_actions_ << "%\n" <<
+       "  Allowed deviation: " << a.deviation_factor_ << "\n";
 }
 
 }  // namespace Smash

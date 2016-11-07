@@ -357,7 +357,7 @@ class Experiment : public ExperimentBase {
   /**
    * Pointer to additional parameters that are needed for adaptive time steps.
    */
-  std::unique_ptr<const AdaptiveParameters> adaptive_parameters_ = nullptr;
+  std::unique_ptr<AdaptiveParameters> adaptive_parameters_ = nullptr;
 
   /**
    *  Total number of interactions for current and for previous timestep.
