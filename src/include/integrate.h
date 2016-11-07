@@ -133,7 +133,7 @@ class Integrator {
   std::size_t subintervals_max_ = 500;
 
   /// Parameter to the GSL integration function: integration rule
-  int gauss_points_ = GSL_INTEG_GAUSS21;
+  int gauss_points_ = GSL_INTEG_GAUSS31;
 };
 
 /**

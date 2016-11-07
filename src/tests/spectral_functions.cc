@@ -26,7 +26,7 @@ TEST(spectral_functions) {
    * so this should really be on the safe side. */
   const float max_mass = 100.;
   // error tolerance (max. deviation from one)
-  const float error_tolerance_no_norm = 0.26;
+  const float error_tolerance_no_norm = 0.53;
   const float warning_level = 0.21;
   // error tolerance (max. deviation from one) for constant-width SF
   const float error_tolerance_const = 0.0032;
