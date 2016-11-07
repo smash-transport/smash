@@ -499,5 +499,4 @@ void ScatterAction::format_debug_output(std::ostream &out) const {
   }
 }
 
-
 }  // namespace Smash
