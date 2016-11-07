@@ -136,7 +136,7 @@ Modi:
         Start_Time:    0.0
 
         # use thermal box, if so with which chemical potentials
-        Use_Thermal: False
+        Use_Thermal_Multiplicities: False
         Baryon_Chemical_Potential: 0.0
         Strange_Chemical_Potential: 0.0
 
@@ -155,7 +155,7 @@ Modi:
         # start time of simulation
         Start_Time: 0.0
         # Initialize sphere with thermal multiplicities
-        Use_Thermal: False
+        Use_Thermal_Multiplicities: False
         # Number of particles in Sphere
         Init_Multiplicities:
             211:    100
