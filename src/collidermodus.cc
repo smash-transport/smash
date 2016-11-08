@@ -126,12 +126,15 @@ namespace Smash {
  *
  * Note that this distance is applied before the Lorentz boost
  * to chosen calculation frame, and thus the actual distance may be different.
- *
- * \key Fermi_Motion (bool, optional, default = false): \n
+ * 
+ * \key Fermi_Motion (string, optional, default = "off"): \n
  * Defines if Fermi motion is included. Note that Fermi motion
  * is senseless physicswise if potentials are off: without potentials
- * nucleons will just fly apart.
+ * nucleons will just fly apart.\n
+ * "off", "on" or "frozen"
  */
+
+// \key Fermi_Motion (bool, optional, default = false): \n
 
 ColliderModus::ColliderModus(Configuration modus_config,
                              const ExperimentParameters &params) {
@@ -141,7 +144,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
   if (modus_cfg.has_value({"Calculation_Frame"})) {
     frame_ = modus_cfg.take({"Calculation_Frame"});
   }
-
+  
   // Set up the projectile nucleus
   Configuration proj_cfg = modus_cfg["Projectile"];
   if (proj_cfg.has_value({"Deformed"}) && proj_cfg.take({"Deformed"})) {
@@ -164,9 +167,27 @@ ColliderModus::ColliderModus(Configuration modus_config,
     throw ColliderEmpty("Input Error: Target nucleus is empty.");
   }
 
-  // Consider an option to include Fermi-motion
-  fermi_motion_ = modus_cfg.take({"Fermi_Motion"}, false);
-
+	// Generate Fermi momenta if necessary
+	if (modus_cfg.has_value({"Fermi_Motion"})) {
+		fermi_motion_ = modus_cfg.take({"Fermi_Motion"});
+		if (fermi_motion_ == FermiMotion::Off) {
+			// no Fermi momenta is generated in this case
+			//log.info() << "Fermi motion is OFF.";
+		} else if (fermi_motion_ == FermiMotion::On) {
+			//log.info() << "Fermi motion is ON.";
+			projectile_->generate_fermi_momenta();	 
+			target_->generate_fermi_momenta();
+		} else if (fermi_motion_ == FermiMotion::Frozen) {
+			// different execution compared to On
+			//log.info() << "FROZEN Fermi motion is on.";
+			projectile_->generate_fermi_momenta();	 
+			target_->generate_fermi_momenta();
+		} else {
+			throw std::domain_error(
+					"Invalid Fermi_Motion input.");
+		}
+	}
+					
   // Get the total nucleus-nucleus collision energy. Since there is
   // no meaningful choice for a default energy, we require the user to
   // give one (and only one) energy input from the available options.
@@ -327,13 +348,6 @@ float ColliderModus::initial_conditions(Particles *particles,
         "the center of velocity reference frame.");
   }
 
-  // Generate Fermi momenta if necessary
-  if (fermi_motion_) {
-    log.info() << "Fermi motion is ON";
-    projectile_->generate_fermi_momenta();
-    target_->generate_fermi_momenta();
-  }
-
   // Boost the nuclei to the appropriate velocity.
   projectile_->boost(v_a);
   target_->boost(v_b);
@@ -393,6 +407,33 @@ void ColliderModus::sample_impact() {
     }
   }
 }
+
+/*
+void ColliderModus::fermi_motion() {
+  switch (fermi_motion_) {
+    case FermiMotion::On: {
+			//log.info() << "Fermi motion is ON.";
+			projectile_->generate_fermi_momenta();
+			target_->generate_fermi_momenta();
+    }
+    break;
+    case FermiMotion::Frozen: {
+			//log.info() << "FROZEN Fermi motion is on.";
+			projectile_->generate_fermi_momenta();
+			target_->generate_fermi_momenta();
+    }
+    break;
+    case FermiMotion::Off: {
+			//log.info() << "Fermi motion is OFF.";
+			// do nothing in this case
+    }
+    break;
+    default:
+      throw std::domain_error(
+          "Invalid Fermi_Motion input.");
+  }
+}
+*/
 
 std::pair<double, double> ColliderModus::get_velocities(float s, float m_a,
                                                         float m_b) {

@@ -188,6 +188,7 @@ Modi:
             Value: 0.0
 
         # Include Fermi motion
+	# ("on", "frozen", "off")
         Fermi_Motion: false
 
     List:
