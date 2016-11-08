@@ -128,13 +128,13 @@ namespace Smash {
  * to chosen calculation frame, and thus the actual distance may be different.
  * 
  * \key Fermi_Motion (string, optional, default = "off"): \n
- * Defines if Fermi motion is included. Note that Fermi motion
- * is senseless physicswise if potentials are off: without potentials
- * nucleons will just fly apart.\n
- * "off", "on" or "frozen"
+ * Defines if Fermi motion is included.\n
+ * "off", "on" or "frozen"\n
+ * Use "frozen", if you want to use Fermi motion 
+ * without potentials. Use "on", if you want to use Fermi motion 
+ * in combination with potentials.\n
+ * 
  */
-
-// \key Fermi_Motion (bool, optional, default = false): \n
 
 ColliderModus::ColliderModus(Configuration modus_config,
                              const ExperimentParameters &params) {
@@ -172,14 +172,11 @@ ColliderModus::ColliderModus(Configuration modus_config,
 		fermi_motion_ = modus_cfg.take({"Fermi_Motion"});
 		if (fermi_motion_ == FermiMotion::Off) {
 			// no Fermi momenta is generated in this case
-			//log.info() << "Fermi motion is OFF.";
 		} else if (fermi_motion_ == FermiMotion::On) {
-			//log.info() << "Fermi motion is ON.";
 			projectile_->generate_fermi_momenta();	 
 			target_->generate_fermi_momenta();
 		} else if (fermi_motion_ == FermiMotion::Frozen) {
 			// different execution compared to On
-			//log.info() << "FROZEN Fermi motion is on.";
 			projectile_->generate_fermi_momenta();	 
 			target_->generate_fermi_momenta();
 		} else {
@@ -407,33 +404,6 @@ void ColliderModus::sample_impact() {
     }
   }
 }
-
-/*
-void ColliderModus::fermi_motion() {
-  switch (fermi_motion_) {
-    case FermiMotion::On: {
-			//log.info() << "Fermi motion is ON.";
-			projectile_->generate_fermi_momenta();
-			target_->generate_fermi_momenta();
-    }
-    break;
-    case FermiMotion::Frozen: {
-			//log.info() << "FROZEN Fermi motion is on.";
-			projectile_->generate_fermi_momenta();
-			target_->generate_fermi_momenta();
-    }
-    break;
-    case FermiMotion::Off: {
-			//log.info() << "Fermi motion is OFF.";
-			// do nothing in this case
-    }
-    break;
-    default:
-      throw std::domain_error(
-          "Invalid Fermi_Motion input.");
-  }
-}
-*/
 
 std::pair<double, double> ColliderModus::get_velocities(float s, float m_a,
                                                         float m_b) {

@@ -188,8 +188,8 @@ Modi:
             Value: 0.0
 
         # Include Fermi motion
-	# ("on", "frozen", "off")
-        Fermi_Motion: false
+	# ("off", "on", "frozen")
+        Fermi_Motion: "off"
 
     List:
         # path of external particle list == File_Directory/File_Prefix{eventid}

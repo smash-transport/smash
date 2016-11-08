@@ -280,10 +280,10 @@ class Configuration {
     
     operator FermiMotion() const {
 			const std::string s = operator std::string();
-			if (s == "on") {
+			if (s == "off") {
 				return FermiMotion::Off;
 			}
-			if (s == "off") {
+			if (s == "on") {
 				return FermiMotion::On;
 			}
 			if (s == "frozen") {
