@@ -753,12 +753,9 @@ void Experiment<Modus>::run_time_evolution() {
   const auto &log_ad_ts = logger<LogArea::AdaptiveTS>();
   modus_.impose_boundary_conditions(&particles_);
 
-  // if no output is scheduled, trigger it manually
-  if (!parameters_.is_output_time()) {
-    log.info() << format_measurements(particles_, interactions_total_, 0u,
-                                      conserved_initial_, time_start_,
-                                      parameters_.labclock.current_time());
-  }
+  log.info() << format_measurements(particles_, interactions_total_, 0u,
+                                    conserved_initial_, time_start_,
+                                    parameters_.labclock.current_time());
 
   if (time_step_mode_ == TimeStepMode::Adaptive) {
     adaptive_parameters_->initialize(dt);
@@ -767,7 +764,7 @@ void Experiment<Modus>::run_time_evolution() {
   while (parameters_.labclock.current_time() < end_time_) {
     num_steps++;
     const float t = parameters_.labclock.current_time();
-    // Take care of the box modus + timestepless propagation: limit dt to l/2
+    // Take care of the box modus + timestepless propagation
     if (time_step_mode_ == TimeStepMode::None) {
       const float max_dt = modus_.max_timestep(max_transverse_distance_sqr_);
       dt = (max_dt > 0.f) ? max_dt : (end_time_ - t);
@@ -1028,7 +1025,7 @@ void Experiment<Modus>::propagate_all_until(float t_end) {
   const float dt_output = parameters_.output_interval;
   float next_output_time = parameters_.labclock.next_multiple(dt_output);
   // Current time -> (output) x n -> t_end
-  while (next_output_time < t_end) {
+  while (next_output_time <= t_end) {
     parameters_.reach_time_in_one_timestep(next_output_time);
     propagate_all();
     intermediate_output();
