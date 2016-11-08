@@ -98,13 +98,6 @@ ExperimentPtr ExperimentBase::create(Configuration config,
   config["Modi"].remove_all_but(modus_chooser);
 
   if (modus_chooser.compare("Box") == 0) {
-    if (config.has_value({"General", "Time_Step_Mode"}) &&
-        config.read({"General", "Time_Step_Mode"}) == TimeStepMode::None) {
-      log.error() << "Box modus does not work correctly without time steps for "
-                  << "now: periodic boundaries are not taken into account when "
-                  << "looking for interactions.";
-      throw std::invalid_argument("Can't use box modus without time steps!");
-    }
     return make_unique<Experiment<BoxModus>>(config, output_path);
   } else if (modus_chooser.compare("List") == 0) {
     return make_unique<Experiment<ListModus>>(config, output_path);
@@ -773,17 +766,16 @@ void Experiment<Modus>::run_time_evolution() {
 
   while (parameters_.labclock.current_time() < end_time_) {
     num_steps++;
-    float t_step_end;
-    // Set end time of the step
-    switch (time_step_mode_) {
-      case TimeStepMode::None:
-        t_step_end = end_time_;
-        dt = t_step_end - parameters_.labclock.current_time();
-        break;
-      case TimeStepMode::Fixed:
-      case TimeStepMode::Adaptive:
-        t_step_end = std::min(parameters_.labclock.current_time() + dt, end_time_);
-        break;
+    const float t = parameters_.labclock.current_time();
+    // Take care of the box modus + timestepless propagation: limit dt to l/2
+    if (time_step_mode_ == TimeStepMode::None) {
+      const float max_dt = modus_.max_timestep(max_transverse_distance_sqr_);
+      dt = (max_dt > 0.f) ? max_dt : (end_time_ - t);
+    }
+    float t_step_end = t + dt;
+    if (t_step_end > end_time_) {
+      t_step_end = end_time_;
+      dt = t_step_end - t;
     }
     parameters_.labclock.set_timestep_duration(dt);
     log.debug("Timestepless propagation for next ", dt, " fm/c.");
@@ -794,7 +786,7 @@ void Experiment<Modus>::run_time_evolution() {
                            ? modus_.create_grid(particles_, min_cell_length)
                            : modus_.create_grid(particles_, min_cell_length,
                                                 CellSizeStrategy::Largest);
- 
+
     /* (1.b) Iterate over cells and find actions. */
     grid.iterate_cells(
         [&](const ParticleList &search_list) {
