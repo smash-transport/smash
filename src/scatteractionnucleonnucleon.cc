@@ -124,10 +124,6 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
       std::inserter(process_list, process_list.end()));
   channel_list.clear();
 
-  std::cout << process_list.size() << " ";
-  for(int i=0; i<process_list.size(); i++) std::cout << process_list[i]->weight() << " ";
-  std::cout << std::endl;
-
   return process_list;
 }
 

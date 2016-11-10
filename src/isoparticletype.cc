@@ -228,38 +228,12 @@ double IsoParticleType::get_integral_NR(double sqrts) {
 
 static thread_local Integrator2d integrate2d(1E4);
 
-double IsoParticleType::get_integral_DR(double sqrts) {
-  if (XS_DR_tabulation == nullptr) {
-    // initialize tabulation
-    /* TODO(weil): Move this lazy init to a global initialization function,
-      * in order to avoid race conditions in multi-threading. */
-//    ParticleTypePtr type_res = states_[0];
-    ParticleTypePtr Delta = IsoParticleType::find("Δ").get_states()[0];
-    XS_DR_tabulation = integrate_RR(Delta);
-//make_unique<Tabulation>(
-//          type_res->minimum_mass() + Delta->minimum_mass(), 2.5f, 100,
-//          [&](float srts) {
-//            return integrate2d(type_res->minimum_mass(),
-//                               srts - Delta->minimum_mass(),
-//                               Delta->minimum_mass(),
-//                               srts - type_res->minimum_mass(),
-//                               [&](float m1, float m2) {
-//                                 return spec_func_integrand_2res(srts, m1, m2,
-//                                                            *type_res, *Delta);
-//                               });
-//          });
-  }
-  return XS_DR_tabulation->get_value_linear(sqrts);
-}
-
 double IsoParticleType::get_integral_RR(const ParticleType &type_res_2, double sqrts) {
   for(int i=0;i<XS_RR_tabulations.size(); i++) {
     if (resonances_[i] == find(type_res_2)) {
-      std::cout << "WAZZA\n";
       return XS_RR_tabulations[i]->get_value_linear(sqrts);
     }
   }
-  std::cout << "Found new resonance pair : " << states_[0]->pdgcode() << " " << type_res_2.pdgcode() << std::endl;
   XS_RR_tabulations.push_back(integrate_RR(find(type_res_2)->get_states()[0]));
   resonances_.push_back(find(type_res_2));
   return XS_RR_tabulations.back()->get_value_linear(sqrts);
