@@ -144,7 +144,7 @@ ThreeVector ScatterAction::beta_cm() const {
 }
 
 double ScatterAction::gamma_cm() const {
-  return (1./sqrt(1-beta_cm().sqr()));
+  return (1./std::sqrt(1-beta_cm().sqr()));
 }
 
 double ScatterAction::mandelstam_s() const {
@@ -335,20 +335,13 @@ void ScatterAction::resonance_formation() {
 
   /* Set the formation time of the resonance to the larger formation time of the
    * incoming particles */
-  if (incoming_particles_[0].formation_time() > time_of_execution_ ||
-     incoming_particles_[1].formation_time() > time_of_execution_) {
-    if (incoming_particles_[0].formation_time() >
-       incoming_particles_[1].formation_time()) {
-      outgoing_particles_[0].set_formation_time(
-        incoming_particles_[0].formation_time());
-      outgoing_particles_[0].set_cross_section_scaling_factor(
-        incoming_particles_[0].cross_section_scaling_factor());
-    } else {
-      outgoing_particles_[0].set_formation_time(
-        incoming_particles_[1].formation_time());
-      outgoing_particles_[0].set_cross_section_scaling_factor(
-        incoming_particles_[1].cross_section_scaling_factor());
-    }
+  const float t0 = incoming_particles_[0].formation_time();
+  const float t1 = incoming_particles_[1].formation_time();
+  const size_t index_tmax = (t0 > t1) ? 0 : 1;
+  const float sc = incoming_particles_[index_tmax].cross_section_scaling_factor();
+  if (t0 > time_of_execution_ || t1 > time_of_execution_) {
+    outgoing_particles_[0].set_formation_time(std::max(t0,t1));
+    outgoing_particles_[0].set_cross_section_scaling_factor(sc);
   }
   log.debug("Momentum of the new particle: ",
             outgoing_particles_[0].momentum());
@@ -464,26 +457,16 @@ void ScatterAction::string_excitation() {
     }
     /* If the incoming particles already were unformed, the formation
      * times and cross section scaling factors need to be adjusted */
-    if (incoming_particles_[0].formation_time() >
-        incoming_particles_[0].position().x0()) {
-      outgoing_particles_[0].set_cross_section_scaling_factor(
-      outgoing_particles_[0].cross_section_scaling_factor() *
-      incoming_particles_[0].cross_section_scaling_factor());
-      if (incoming_particles_[0].formation_time() >
-        outgoing_particles_[0].formation_time()) {
-        outgoing_particles_[0].set_formation_time(
-        incoming_particles_[0].formation_time());
-      }
-    }
-    if (incoming_particles_[1].formation_time() >
-      incoming_particles_[1].position().x0()) {
-      outgoing_particles_[1].set_cross_section_scaling_factor(
-      outgoing_particles_[1].cross_section_scaling_factor() *
-      incoming_particles_[1].cross_section_scaling_factor());
-      if (incoming_particles_[1].formation_time() >
-        outgoing_particles_[1].formation_time()) {
-        outgoing_particles_[1].set_formation_time(
-        incoming_particles_[1].formation_time());
+    for (size_t i = 0; i < 2; i++) {
+      const float tform_in  = incoming_particles_[i].formation_time();
+      const float tform_out = outgoing_particles_[i].formation_time();
+      const float fin  = incoming_particles_[i].cross_section_scaling_factor();
+      const float fout = outgoing_particles_[i].cross_section_scaling_factor();
+      if (tform_in > incoming_particles_[i].position().x0()) {
+        outgoing_particles_[i].set_cross_section_scaling_factor(fin * fout);
+        if (tform_in > tform_out) {
+          outgoing_particles_[i].set_formation_time(tform_in);
+        }
       }
     }
     /* Check momentum difference for debugging */
