@@ -1040,6 +1040,8 @@ void Experiment<Modus>::propagate_all_until(float t_end) {
   if (t_end > parameters_.labclock.current_time()) {
     parameters_.reach_time_in_one_timestep(t_end);
     propagate_all();
+    // Reset clock to get rid of small numerical errors from multiple additions
+    parameters_.labclock.reset(t_end);
   } else if (parameters_.labclock.current_time() - t_end > really_small) {
      // current time and t_end may be approximately equal, so the code can get here
      // because of numerics, but if current_time > t_end significantly, then it's a bug
