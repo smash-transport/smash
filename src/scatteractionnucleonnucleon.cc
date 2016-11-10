@@ -96,6 +96,41 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_cross_sections() {
   return process_list;
 }
 
+CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
+                            const ParticleType &type_particle_a,
+                            const ParticleType &type_particle_b) {
+  CollisionBranchList process_list, channel_list;
+  const double sqrts = sqrt_s();
+
+  /* First: Find N N → N R channels. */
+  channel_list = find_xsection_from_type(type_particle_a, type_particle_b,
+      ParticleType::list_baryon_resonances(), ParticleType::list_nucleons(),
+      [&sqrts](const ParticleType &type_res_1, const ParticleType &type_res_2){
+          return type_res_1.iso_multiplet()->get_integral_NR(sqrts);
+      });
+  process_list.reserve(process_list.size() + channel_list.size());
+  std::move(channel_list.begin(), channel_list.end(),
+      std::inserter(process_list, process_list.end()));
+  channel_list.clear();
+
+  /* Second: Find N N → Δ R channels. */
+  channel_list = find_xsection_from_type(type_particle_a, type_particle_b,
+    ParticleType::list_baryon_resonances(), ParticleType::list_Deltas(),
+    [&sqrts](const ParticleType &type_res_1, const ParticleType &type_res_2){
+      return type_res_1.iso_multiplet()->get_integral_RR(type_res_2, sqrts);
+    });
+  process_list.reserve(process_list.size() + channel_list.size());
+  std::move(channel_list.begin(), channel_list.end(),
+      std::inserter(process_list, process_list.end()));
+  channel_list.clear();
+
+  std::cout << process_list.size() << " ";
+  for(int i=0; i<process_list.size(); i++) std::cout << process_list[i]->weight() << " ";
+  std::cout << std::endl;
+
+  return process_list;
+}
+
 template<class IntegrationMethod>
 CollisionBranchList ScatterActionNucleonNucleon::find_xsection_from_type(
                             const ParticleType &type_particle_a,
@@ -173,42 +208,6 @@ CollisionBranchList ScatterActionNucleonNucleon::find_xsection_from_type(
   //std::cout << std::endl;
   return channel_list;
 }
-
-CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
-                            const ParticleType &type_particle_a,
-                            const ParticleType &type_particle_b) {
-  CollisionBranchList process_list, channel_list;
-  const double sqrts = sqrt_s();
-
-  /* First: Find N N → N R channels. */
-  channel_list = find_xsection_from_type(type_particle_a, type_particle_b,
-      ParticleType::list_baryon_resonances(), ParticleType::list_nucleons(),
-      [&sqrts](const ParticleType &type_res_1, const ParticleType &type_res_2){
-          return type_res_1.iso_multiplet()->get_integral_NR(sqrts);
-      });
-  process_list.reserve(process_list.size() + channel_list.size());
-  std::move(channel_list.begin(), channel_list.end(),
-      std::inserter(process_list, process_list.end()));
-  channel_list.clear();
-
-  /* Second: Find N N → Δ R channels. */
-  channel_list = find_xsection_from_type(type_particle_a, type_particle_b,
-    ParticleType::list_baryon_resonances(), ParticleType::list_Deltas(),
-    [&sqrts](const ParticleType &type_res_1, const ParticleType &type_res_2){
-      return type_res_1.iso_multiplet()->get_integral_RR(type_res_2, sqrts);
-    });
-  process_list.reserve(process_list.size() + channel_list.size());
-  std::move(channel_list.begin(), channel_list.end(),
-      std::inserter(process_list, process_list.end()));
-  channel_list.clear();
-
-  std::cout << process_list.size() << " ";
-  for(int i=0; i<process_list.size(); i++) std::cout << process_list[i]->weight() << " ";
-  std::cout << std::endl;
-
-  return process_list;
-}
-
 
 void ScatterActionNucleonNucleon::sample_angles(
                                   std::pair<double, double> masses) {
