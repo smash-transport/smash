@@ -52,6 +52,8 @@ class ModusDefault {
   /// Maximal timestep accepted by this modus. Negative means infinity.
   float max_timestep(float ) const { return -1.f; }
 
+  float length() const { return -1.f; }
+
   /**
    * Creates the Grid with normal boundary conditions.
    *
