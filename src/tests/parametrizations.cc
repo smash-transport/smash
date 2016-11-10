@@ -32,7 +32,7 @@ TEST(clebsch_strangeness_exchange) {
   const auto& Sigma_z = ParticleType::find(0x3212);
   const auto& Sigma_m = ParticleType::find(0x3112);
 
-  const double sqrts = 1.0;
+  const double sqrts = 2.0;
 
   {
     const auto ratio = kminusn_piminussigma0(sqrts) / kminusp_pi0sigma0(sqrts);
