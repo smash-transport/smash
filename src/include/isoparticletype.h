@@ -46,6 +46,14 @@ class IsoParticleType {
   IsoParticleType(IsoParticleType &&) = default;
   IsoParticleType &operator=(IsoParticleType &&) = default;
 
+  /** 
+   * Returns whether the two IsoParticleType objects have the same PDG code for
+   * their first state; if it is, it is the same iso multiplet.
+   */
+  bool operator==(const IsoParticleType &rhs) const {
+    return states_[0]->pdgcode() == rhs.states_[0]->pdgcode();
+  }
+
   /// Returns the name of the multiplet.
   const std::string &name() const { return name_; }
 
@@ -151,7 +159,7 @@ class IsoParticleType {
   /* A tabulation list for the NN -> RR' cross sections,
    * where R is this multiplet and R' is a baryon resonance */ 
   TabulationList XS_RR_tabulations;
-  ParticleTypePtrList resonances_;
+  std::vector<IsoParticleType*> resonances_;
 
   /**
    * Private version of the 'find' method that returns a non-const reference.

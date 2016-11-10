@@ -254,12 +254,14 @@ double IsoParticleType::get_integral_DR(double sqrts) {
 
 double IsoParticleType::get_integral_RR(const ParticleType &type_res_2, double sqrts) {
   for(int i=0;i<XS_RR_tabulations.size(); i++) {
-    if (*resonances_[i] == type_res_2) {
+    if (resonances_[i] == find(type_res_2)) {
+      std::cout << "WAZZA\n";
       return XS_RR_tabulations[i]->get_value_linear(sqrts);
     }
   }
+  std::cout << "Found new resonance pair : " << states_[0]->pdgcode() << " " << type_res_2.pdgcode() << std::endl;
   XS_RR_tabulations.push_back(integrate_RR(find(type_res_2)->get_states()[0]));
-  resonances_.push_back(find(type_res_2)->get_states()[0]);
+  resonances_.push_back(find(type_res_2));
   return XS_RR_tabulations.back()->get_value_linear(sqrts);
 }
 
