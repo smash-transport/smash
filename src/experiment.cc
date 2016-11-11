@@ -309,10 +309,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
                                                     parameters_.testparticles);
     action_finders_.emplace_back(std::move(scat_finder));
   }
-  const float modus_l = modus_.length();
+  /*const float modus_l = modus_.length();
   if (modus_l > 0.f) {
     action_finders_.emplace_back(make_unique<WallCrossActionsFinder>(modus_l));
-  }
+  }*/
 
   if (dileptons_switch) {
     dilepton_finder_ = make_unique<DecayActionsFinderDilepton>();
@@ -865,7 +865,7 @@ void Experiment<Modus>::run_time_evolution() {
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution_without_time_steps(float end_time, Actions& actions) {
   const auto &log = logger<LogArea::Experiment>();
-  // modus_.impose_boundary_conditions(&particles_);
+  modus_.impose_boundary_conditions(&particles_);
 
   const float start_time = parameters_.labclock.current_time();
   float time_left = end_time - start_time;
@@ -902,7 +902,7 @@ void Experiment<Modus>::run_time_evolution_without_time_steps(float end_time, Ac
     act->update_incoming(particles_);
 
     perform_action(*act, particles_);
-    // modus_.impose_boundary_conditions(&particles_);
+    modus_.impose_boundary_conditions(&particles_);
 
     /* (3) Check conservation laws. */
 
@@ -1023,7 +1023,7 @@ void Experiment<Modus>::propagate_all() {
   } else {
     propagate_straight_line(&particles_, parameters_);
   }
-  // modus_.impose_boundary_conditions(&particles_, outputs_);
+  modus_.impose_boundary_conditions(&particles_, outputs_);
 }
 
 template <typename Modus>
