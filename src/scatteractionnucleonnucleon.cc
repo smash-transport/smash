@@ -105,7 +105,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
   /* First: Find N N → N R channels. */
   channel_list = find_xsection_from_type(type_particle_a, type_particle_b,
       ParticleType::list_baryon_resonances(), ParticleType::list_nucleons(),
-      [&sqrts](const ParticleType &type_res_1, const ParticleType &type_res_2){
+      [&sqrts](const ParticleType &type_res_1, const ParticleType&){
           return type_res_1.iso_multiplet()->get_integral_NR(sqrts);
       });
   process_list.reserve(process_list.size() + channel_list.size());
