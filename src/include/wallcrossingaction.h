@@ -44,8 +44,8 @@ class WallCrossActionsFinder : public ActionFinderInterface {
                                   float t_max) const override {
     std::vector<ActionPtr> actions;
     for (const ParticleData &p : plist) {
-      const ThreeVector r = p.position().threevec();
-      const ThreeVector v = p.velocity();
+      const ThreeVector& r = p.position().threevec();
+      const ThreeVector& v = p.velocity();
       double time_until_crossing = t_max;
       int i_cross = -1;
       for (int i = 0; i < 3; i++) {
@@ -72,7 +72,7 @@ class WallCrossActionsFinder : public ActionFinderInterface {
       outgoing_particle.set_4position(crossing_point);
       ActionPtr action = make_unique<WallcrossingAction>(p, outgoing_particle,
                                                          time_until_crossing);
-      actions.push_back(std::move(action));
+      actions.emplace_back(std::move(action));
     }
     return actions;
   }
@@ -96,6 +96,7 @@ class WallCrossActionsFinder : public ActionFinderInterface {
   }
 
  private:
+  /// Periods in x,y,z directions in fm.
   const std::array<float, 3> l_;
 };
 
