@@ -309,6 +309,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
                                                     parameters_.testparticles);
     action_finders_.emplace_back(std::move(scat_finder));
   }
+  //todo(oliiny): Fix the wall-crossing action finder and uncommit this
   /*const float modus_l = modus_.length();
   if (modus_l > 0.f) {
     action_finders_.emplace_back(make_unique<WallCrossActionsFinder>(modus_l));
