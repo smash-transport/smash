@@ -813,11 +813,8 @@ void Experiment<Modus>::run_time_evolution() {
       dilepton_actions.insert(
           dilepton_finder_->find_actions_in_cell(particles_before_actions, dt));
 
-      if (!dilepton_actions.is_empty()) {
-        while (!dilepton_actions.is_empty()) {
-          write_dilepton_action(*dilepton_actions.pop(),
-                                particles_before_actions);
-        }
+      while (!dilepton_actions.is_empty()) {
+        write_dilepton_action(*dilepton_actions.pop(), particles_before_actions);
       }
     }
 
@@ -834,10 +831,8 @@ void Experiment<Modus>::run_time_evolution() {
                 search_list, neighbors_list, dt));
           });
 
-      if (!photon_actions.is_empty()) {
-        while (!photon_actions.is_empty()) {
-          write_photon_action(*photon_actions.pop(), particles_before_actions);
-        }
+      while (!photon_actions.is_empty()) {
+        write_photon_action(*photon_actions.pop(), particles_before_actions);
       }
     }
 
