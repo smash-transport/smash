@@ -310,7 +310,7 @@ class ParticleType {
   static ParticleTypePtrList &list_Deltas();
   /** Returns a list of all baryon resonances,
    * i.e. unstable baryons (not including antibaryons). */
-  static ParticleTypePtrList list_baryon_resonances();
+  static ParticleTypePtrList &list_baryon_resonances();
 
   /**
    * Returns the ParticleType object for the given \p pdgcode.

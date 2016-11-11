@@ -40,6 +40,7 @@ namespace {
 const ParticleTypeList *all_particle_types = nullptr;
 ParticleTypePtrList nucleons_list;
 ParticleTypePtrList deltas_list;
+ParticleTypePtrList baryon_resonances_list;
 }  // unnamed namespace
 
 const ParticleTypeList &ParticleType::list_all() {
@@ -68,18 +69,8 @@ ParticleTypePtrList &ParticleType::list_Deltas() {
   return deltas_list;
 }
 
-ParticleTypePtrList ParticleType::list_baryon_resonances() {
-  ParticleTypePtrList list;
-  list.reserve(10);
-  for (const ParticleType &type_resonance : ParticleType::list_all()) {
-    /* Only loop over baryon resonances. */
-    if (type_resonance.is_stable()
-        || type_resonance.pdgcode().baryon_number() != 1) {
-      continue;
-    }
-    list.emplace_back(&type_resonance);
-  }
-  return list;
+ParticleTypePtrList &ParticleType::list_baryon_resonances() {
+  return baryon_resonances_list;
 }
 
 const ParticleType &ParticleType::find(PdgCode pdgcode) {
@@ -252,20 +243,29 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
     t.iso_multiplet_ = IsoParticleType::find(t);
   }
 
- // Create nucleons list
- if (IsoParticleType::exists("N")) {
-   for (const auto state : IsoParticleType::find("N").get_states()) {
-     nucleons_list.push_back(state);
-   }
- }
+  // Create nucleons list
+  if (IsoParticleType::exists("N")) {
+    for (const auto state : IsoParticleType::find("N").get_states()) {
+      nucleons_list.push_back(state);
+    }
+  }
 
- // Create deltas list
- if (IsoParticleType::exists("Δ")) {
-   for (const auto state : IsoParticleType::find("Δ").get_states()) {
-     deltas_list.push_back(state);
-   }
- }
+  // Create deltas list
+  if (IsoParticleType::exists("Δ")) {
+    for (const auto state : IsoParticleType::find("Δ").get_states()) {
+      deltas_list.push_back(state);
+    }
+  }
 
+  // Create baryon resonances list
+  for (const ParticleType &type_resonance : ParticleType::list_all()) {
+    /* Only loop over baryon resonances. */
+    if (type_resonance.is_stable()
+        || type_resonance.pdgcode().baryon_number() != 1) {
+      continue;
+    }
+    baryon_resonances_list.push_back(&type_resonance);
+  }
 
 }/*}}}*/
 
