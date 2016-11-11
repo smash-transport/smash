@@ -179,14 +179,13 @@ double IsoParticleType::get_integral_RK(double sqrts) {
 static thread_local Integrator2d integrate2d(1E4);
 
 double IsoParticleType::get_integral_RR(const ParticleType &type_res_2, double sqrts) {
-  for(int i=0;i<XS_RR_tabulations.size(); i++) {
-    if (resonances_[i] == find(type_res_2)) {
-      return XS_RR_tabulations[i]->get_value_linear(sqrts);
-    }
+  auto search = XS_RR_tabulations.find(find(type_res_2));
+  if (search != XS_RR_tabulations.end()) {
+    return search->second->get_value_linear(sqrts);
   }
-  XS_RR_tabulations.push_back(integrate_RR(find(type_res_2)->get_states()[0]));
-  resonances_.push_back(find(type_res_2));
-  return XS_RR_tabulations.back()->get_value_linear(sqrts);
+  IsoParticleType* key = find(type_res_2);
+  XS_RR_tabulations.emplace(key, integrate_RR(find(type_res_2)->get_states()[0]));
+  return XS_RR_tabulations.at(key)->get_value_linear(sqrts);
 }
 
 TabulationPtr IsoParticleType::integrate_RR(ParticleTypePtr &type_res_2) {

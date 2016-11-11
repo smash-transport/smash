@@ -70,17 +70,6 @@ ParticleTypePtrList &ParticleType::list_Deltas() {
 
 ParticleTypePtrList &ParticleType::list_baryon_resonances() {
   return baryon_resonances_list;
-  //ParticleTypePtrList list;
-  //list.reserve(10);
-  //for (const ParticleType &type_resonance : ParticleType::list_all()) {
-    /* Only loop over baryon resonances. */
-  //  if (type_resonance.is_stable()
-  //      || type_resonance.pdgcode().baryon_number() != 1) {
-  //    continue;
-  //  }
-  //  list.emplace_back(&type_resonance);
-  //}
-  //return list;
 }
 
 const ParticleType &ParticleType::find(PdgCode pdgcode) {

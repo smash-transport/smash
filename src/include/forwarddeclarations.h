@@ -146,7 +146,6 @@ using CollisionBranchPtr = build_unique_ptr_<CollisionBranch>;
 using CollisionBranchList = build_vector_<CollisionBranchPtr>;
 
 using TabulationPtr = build_unique_ptr_<Tabulation>;
-using TabulationList = build_vector_<TabulationPtr>;
 using ExperimentPtr = build_unique_ptr_<ExperimentBase>;
 using DecayTypePtr = build_unique_ptr_<DecayType>;
 

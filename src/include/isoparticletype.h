@@ -9,6 +9,7 @@
 #define SRC_INCLUDE_ISOPARTICLETYPE_H_
 
 #include <string>
+#include<unordered_map>
 
 #include "particletype.h"
 #include "tabulation.h"
@@ -159,12 +160,11 @@ class IsoParticleType {
    * where R is a resonance from this multiplet. */
   TabulationPtr XS_NR_tabulation_, XS_DR_tabulation_;
   /* A tabulation list for the NN -> RR' cross sections,
-   * where R is this multiplet and R' is a baryon resonance */ 
-  TabulationList XS_RR_tabulations;
-  /* A list of resonances R' for the NN -> RR' cross sections,
+   * where R is this multiplet and R' is a baryon resonance, associated 
+   * with a list of resonances R' for the NN -> RR' cross sections;
    * used to calculate every multiplet spectral function only once*/
-  std::vector<IsoParticleType*> resonances_;
-
+  std::unordered_map<IsoParticleType*, TabulationPtr> XS_RR_tabulations;
+  
   /**
    * Private version of the 'find' method that returns a non-const reference.
    */
