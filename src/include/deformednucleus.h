@@ -85,7 +85,7 @@ class DeformedNucleus : public Nucleus {
   /**
    * Does not allow to generate Fermi-momenta for a deformed nucleus.
    **/
-  void generate_fermi_momenta() override;
+  void generate_fermi_momenta(FermiMotion &fermi_motion_) override;  
 
   /// Spherical harmonics Y_2_0 and Y_4_0.
   double y_l_0(int l, double cosx) const;

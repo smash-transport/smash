@@ -148,7 +148,7 @@ void DeformedNucleus::rotate() {
   }
 }
 
-void DeformedNucleus::generate_fermi_momenta() {
+void DeformedNucleus::generate_fermi_momenta(FermiMotion &fermi_motion_) { 
   throw std::domain_error("Fermi momenta currently not implemented"
                           " for a deformed nucleus.");
 }

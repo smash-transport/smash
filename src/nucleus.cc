@@ -328,7 +328,7 @@ void Nucleus::set_parameters_from_config(Configuration &config) {
   }
 }
 
-void Nucleus::generate_fermi_momenta() {
+void Nucleus::generate_fermi_momenta(FermiMotion &fermi_motion_) {	
   double r, rho, p;
   const int N_n = std::count_if(begin(), end(),
                   [](const ParticleData i) {return i.pdgcode() == pdg::n;});
@@ -339,7 +339,7 @@ void Nucleus::generate_fermi_momenta() {
   const double pi2_3 = 3.0 * M_PI * M_PI;
   Angles phitheta;
   const auto &log = logger<LogArea::Nucleus>();
-
+	
   log.debug() << N_n << " neutrons, " << N_p << " protons.";
 
   ThreeVector ptot = ThreeVector(0.0, 0.0, 0.0);
@@ -382,10 +382,19 @@ void Nucleus::generate_fermi_momenta() {
     // protons and neutrons
     const ThreeVector centralizer = ptot/A;
     for (auto i = begin(); i != end(); i++) {
-      if (i->pdgcode() == pdg::p || i->pdgcode() == pdg::n) {
-        i->set_4momentum(i->pole_mass(),
-                         i->momentum().threevec() - centralizer);
-      }
+	  // Distinguish between Fermi motion is "on" and "frozen"
+      if (fermi_motion_ == FermiMotion::On) {  
+		if (i->pdgcode() == pdg::p || i->pdgcode() == pdg::n) {
+		  i->set_4momentum(i->pole_mass(),
+                i->momentum().threevec() - centralizer);
+		}
+	  }
+	  if (fermi_motion_ == FermiMotion::Frozen) {  
+		if (i->pdgcode() == pdg::p || i->pdgcode() == pdg::n) {
+		  i->set_4momentum(i->pole_mass(),
+                i->momentum().threevec() - centralizer);
+		}
+	  }
     }
   }
 }

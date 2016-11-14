@@ -169,20 +169,29 @@ ColliderModus::ColliderModus(Configuration modus_config,
 
 	// Generate Fermi momenta if necessary
 	if (modus_cfg.has_value({"Fermi_Motion"})) {
-		fermi_motion_ = modus_cfg.take({"Fermi_Motion"});
-		if (fermi_motion_ == FermiMotion::Off) {
-			// no Fermi momenta is generated in this case
-		} else if (fermi_motion_ == FermiMotion::On) {
-			projectile_->generate_fermi_momenta();	 
-			target_->generate_fermi_momenta();
-		} else if (fermi_motion_ == FermiMotion::Frozen) {
-			// different execution compared to On
-			projectile_->generate_fermi_momenta();	 
-			target_->generate_fermi_momenta();
-		} else {
-			throw std::domain_error(
-					"Invalid Fermi_Motion input.");
-		}
+		fermi_motion_ = modus_cfg.take({"Fermi_Motion"}); {
+			switch (fermi_motion_) {
+				case FermiMotion::Off: {
+					// no Fermi momenta is generated in this case
+				}
+				break;
+				case FermiMotion::On: {
+					projectile_->generate_fermi_momenta(fermi_motion_);	 
+					target_->generate_fermi_momenta(fermi_motion_);
+				}
+				break;
+				case FermiMotion::Frozen: {
+					// Different execution in Nucleus:generate_fermi_momenta
+					// compared to FermiMotion::On
+					projectile_->generate_fermi_momenta(fermi_motion_);	 
+					target_->generate_fermi_momenta(fermi_motion_);
+				}
+				break;
+				default:
+					throw std::domain_error(
+							"Invalid Fermi_Motion input.");
+			}
+		}	
 	}
 					
   // Get the total nucleus-nucleus collision energy. Since there is

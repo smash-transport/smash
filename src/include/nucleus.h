@@ -80,7 +80,7 @@ class Nucleus {
    * Actual momenta \f$p_x\f$, \f$p_y\f$, \f$p_z\f$ are uniformly distributed
    * in the sphere with radius \f$p_F\f$.
    **/
-  virtual void generate_fermi_momenta();
+  virtual void generate_fermi_momenta(FermiMotion &fermi_motion_);  
 
   /**
    * Boosts the nuclei so that the nucleons have the appropriate
