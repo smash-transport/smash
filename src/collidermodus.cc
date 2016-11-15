@@ -172,7 +172,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
 		fermi_motion_ = modus_cfg.take({"Fermi_Motion"}); {
 			switch (fermi_motion_) {
 				case FermiMotion::Off: {
-					// no Fermi momenta is generated in this case
+				// no Fermi momentum is generated in this case
 				}
 				break;
 				case FermiMotion::On: {

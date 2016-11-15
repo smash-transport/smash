@@ -90,10 +90,14 @@ class ParticleData {
 
   /// return the particle's 4-momentum
   const FourVector &momentum() const { return momentum_; }
+  /// return the particle's fermi-4-momentum
+  // Markus
+  const FourVector &fermimomentum() const { return fermimomentum_; }
   /// set the particle's 4-momentum directly
   void set_4momentum(const FourVector &momentum_vector) {
     momentum_ = momentum_vector;
   }
+
   /**
    * Set the momentum of the particle.
    *
@@ -126,6 +130,26 @@ class ParticleData {
   void set_3momentum(const ThreeVector &mom) {
     momentum_ = FourVector(momentum_.x0(), mom);
   }
+  
+	/// Set the fermi momentum of the particle.
+  // Markus  
+  void set_fermi3momentum(const ThreeVector &mom) {
+    fermimomentum_ = FourVector(fermimomentum_.x0(), mom);
+  }
+  /**
+   * Set the fermi momentum of the particle.
+   *
+   * \param[in] mass the mass of the particle (without E_kin contribution)
+   * \param[in] mom the fermi-momentum of the particle
+   *
+   * \fpPrecision The momentum FourVector requires double-precision.
+   */
+  // Markus
+	void set_fermi4momentum(double mass, const ThreeVector &mom) {
+    fermimomentum_ = FourVector(std::sqrt(mass * mass + mom * mom), mom);
+  }
+
+
 
   /// The particle's position in Minkowski space
   const FourVector &position() const { return position_; }
@@ -270,6 +294,9 @@ class ParticleData {
 
   /// momenta of the particle: x0, x1, x2, x3 as E, px, py, pz
   FourVector momentum_;
+  /// fermi-momenta of the particle: x0, x1, x2, x3 as EF, pFx, pFy, pFz
+  // Markus
+  FourVector fermimomentum_;  
   /// position in space: x0, x1, x2, x3 as t, x, y, z
   FourVector position_;
   /** Formation time at which the particle is fully formed

@@ -365,11 +365,25 @@ void Nucleus::generate_fermi_momenta(FermiMotion &fermi_motion_) {
     phitheta.distribute_isotropically();
     const ThreeVector ith_3momentum = phitheta.threevec() * p;
     ptot += ith_3momentum;
-    i->set_3momentum(ith_3momentum);
-    log.debug() << "Particle: " << *i <<
+    if (fermi_motion_ == FermiMotion::On) {
+			i->set_3momentum(ith_3momentum);
+			//log.info() << "ith_3momentum" << ith_3momentum;
+			log.debug() << "Particle: " << *i <<
                ", pF[GeV]: " << hbarc * std::pow(pi2_3 * rho, 1.0/3.0) <<
                " r[fm]: " << r <<
                " Nuclear radius[fm]: " << nuclear_radius_;
+    }
+    if (fermi_motion_ == FermiMotion::Frozen) {
+			// Store fermi momenta in an own vector, so that it can be
+			// added to the particles momentum right before the collision
+			i->set_fermi3momentum(ith_3momentum);
+			//log.info() << "ith_3momentum" << ith_3momentum;
+			log.debug() << "Particle: " << *i <<
+               ", pF[GeV]: " << hbarc * std::pow(pi2_3 * rho, 1.0/3.0) <<
+               " r[fm]: " << r <<
+               " Nuclear radius[fm]: " << nuclear_radius_;
+      
+    }    
   }
   if (A == 0) {
     // No Fermi momenta should be assigned
@@ -382,21 +396,26 @@ void Nucleus::generate_fermi_momenta(FermiMotion &fermi_motion_) {
     // protons and neutrons
     const ThreeVector centralizer = ptot/A;
     for (auto i = begin(); i != end(); i++) {
-	  // Distinguish between Fermi motion is "on" and "frozen"
+			// Distinguish between Fermi motion is "on" and "frozen"
       if (fermi_motion_ == FermiMotion::On) {  
-		if (i->pdgcode() == pdg::p || i->pdgcode() == pdg::n) {
-		  i->set_4momentum(i->pole_mass(),
+				// Add fermi momenta directly to 4momentum vector.
+				if (i->pdgcode() == pdg::p || i->pdgcode() == pdg::n) {
+					i->set_4momentum(i->pole_mass(),
                 i->momentum().threevec() - centralizer);
+          //log.info() << "i:" << *i;
+				}
+			}
+			if (fermi_motion_ == FermiMotion::Frozen) {
+				// Store fermi-momenta of particles in an own vector. 
+				// Thus spatial 4momentum is empty, p^mu = (m,0,0,0)   
+				if (i->pdgcode() == pdg::p || i->pdgcode() == pdg::n) {
+					i->set_fermi4momentum(i->pole_mass(),
+                i->fermimomentum().threevec() - centralizer);
+          //log.info() << "i:" << *i;
+				}
+			}
 		}
-	  }
-	  if (fermi_motion_ == FermiMotion::Frozen) {  
-		if (i->pdgcode() == pdg::p || i->pdgcode() == pdg::n) {
-		  i->set_4momentum(i->pole_mass(),
-                i->momentum().threevec() - centralizer);
-		}
-	  }
-    }
-  }
+	}
 }
 
 void Nucleus::boost(double beta_scalar) {
