@@ -43,47 +43,80 @@ CollisionBranchList ScatterActionHyperonPion::two_to_two_inel(
   const auto pdg_hyperon = type_hyperon.pdgcode().code();
   const auto pdg_pion = type_pion.pdgcode().code();
 
+  const double s = mandelstam_s();
   const double sqrts = sqrt_s();
 
-  // calculate cross section
-  auto add_channel
-    = [&](float xsection, const ParticleType &type_a, const ParticleType &type_b) {
-      const float sqrt_s_min = type_a.minimum_mass() + type_b.minimum_mass();
-      if ((xsection > really_small) && (sqrts > sqrt_s_min)) {
-        process_list.push_back(make_unique<CollisionBranch>(
-          type_a, type_b, xsection, ProcessType::TwoToTwo));
-      }
-  };
-
   switch (pack(pdg_hyperon, pdg_pion)) {
-    case pack(pdg::Sigma_z, pdg::pi_m):
-      add_channel(kminusn_piminussigma0(sqrts),
-                  ParticleType::find(pdg::n), ParticleType::find(pdg::K_m));
+    case pack(pdg::Sigma_z, pdg::pi_m): {
+      const auto& neutron = ParticleType::find(pdg::n);
+      const auto& kaon = ParticleType::find(pdg::K_m);
+      add_channel(process_list,
+                  [&] { return detailed_balance_factor_stable(s,
+                               type_hyperon, type_pion, neutron, kaon)
+                               * kminusn_piminussigma0(sqrts); },
+                  sqrts, neutron, kaon);
       break;
-    case pack(pdg::Sigma_m, pdg::pi_z):
-      add_channel(kminusn_pi0sigmaminus(sqrts),
-                  ParticleType::find(pdg::n), ParticleType::find(pdg::K_m));
+    }
+    case pack(pdg::Sigma_m, pdg::pi_z): {
+      const auto& neutron = ParticleType::find(pdg::n);
+      const auto& kaon = ParticleType::find(pdg::K_m);
+      add_channel(process_list,
+                  [&] { return detailed_balance_factor_stable(s,
+                               type_hyperon, type_pion, neutron, kaon)
+                               * kminusn_pi0sigmaminus(sqrts); },
+                  sqrts, neutron, kaon);
       break;
-    case pack(pdg::Lambda, pdg::pi_m):
-      add_channel(kminusn_piminuslambda(sqrts),
-                  ParticleType::find(pdg::n), ParticleType::find(pdg::K_m));
+    }
+    case pack(pdg::Lambda, pdg::pi_m): {
+      const auto& neutron = ParticleType::find(pdg::n);
+      const auto& kaon = ParticleType::find(pdg::K_m);
+      add_channel(process_list,
+                  [&] { return detailed_balance_factor_stable(s,
+                               type_hyperon, type_pion, neutron, kaon)
+                               * kminusn_piminuslambda(sqrts); },
+                  sqrts, neutron, kaon);
       break;
-    case pack(pdg::Sigma_z, pdg::pi_z):
-      add_channel(kminusp_pi0sigma0(sqrts),
-                  ParticleType::find(pdg::p), ParticleType::find(pdg::K_m));
+    }
+    case pack(pdg::Sigma_z, pdg::pi_z): {
+      const auto& proton = ParticleType::find(pdg::p);
+      const auto& kaon = ParticleType::find(pdg::K_m);
+      add_channel(process_list,
+                  [&] { return detailed_balance_factor_stable(s,
+                               type_hyperon, type_pion, proton, kaon)
+                               * kminusp_pi0sigma0(sqrts); },
+                  sqrts, proton, kaon);
       break;
-    case pack(pdg::Sigma_m, pdg::pi_p):
-      add_channel(kminusp_piplussigmaminus(sqrts),
-                  ParticleType::find(pdg::p), ParticleType::find(pdg::K_m));
+    }
+    case pack(pdg::Sigma_m, pdg::pi_p): {
+      const auto& proton = ParticleType::find(pdg::p);
+      const auto& kaon = ParticleType::find(pdg::K_m);
+      add_channel(process_list,
+                  [&] { return detailed_balance_factor_stable(s,
+                               type_hyperon, type_pion, proton, kaon)
+                               * kminusp_piplussigmaminus(sqrts); },
+                  sqrts, proton, kaon);
       break;
-    case pack(pdg::Lambda, pdg::pi_z):
-      add_channel(kminusp_pi0lambda(sqrts),
-                  ParticleType::find(pdg::p), ParticleType::find(pdg::K_m));
+    }
+    case pack(pdg::Lambda, pdg::pi_z): {
+      const auto& proton = ParticleType::find(pdg::p);
+      const auto& kaon = ParticleType::find(pdg::K_m);
+      add_channel(process_list,
+                  [&] { return detailed_balance_factor_stable(s,
+                               type_hyperon, type_pion, proton, kaon)
+                               * kminusp_pi0lambda(sqrts); },
+                  sqrts, proton, kaon);
       break;
-    case pack(pdg::Sigma_p, pdg::pi_m):
-      add_channel(kminusp_piminussigmaplus(sqrts),
-                  ParticleType::find(pdg::p), ParticleType::find(pdg::K_m));
+    }
+    case pack(pdg::Sigma_p, pdg::pi_m): {
+      const auto& proton = ParticleType::find(pdg::p);
+      const auto& kaon = ParticleType::find(pdg::K_m);
+      add_channel(process_list,
+                  [&] { return detailed_balance_factor_stable(s,
+                               type_hyperon, type_pion, proton, kaon)
+                               * kminusp_piminussigmaplus(sqrts); },
+                  sqrts, proton, kaon);
       break;
+    }
     default:
       break;
   }

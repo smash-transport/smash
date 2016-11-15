@@ -145,7 +145,6 @@ using ParticleList = build_vector_<ParticleData>;
 using ParticleTypeList = build_vector_<ParticleType>;
 using ParticleTypePtrList = build_vector_<ParticleTypePtr>;
 using IsoParticleTypeList = build_vector_<IsoParticleType>;
-using IsoParticleTypeRefList = build_vector_<const IsoParticleType&>;
 
 template<typename T>
 using ProcessBranchPtr = build_unique_ptr_<T>;

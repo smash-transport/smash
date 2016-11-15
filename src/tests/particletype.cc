@@ -57,8 +57,8 @@ TEST(create_type_list) {
       "ω 0.7827 0.0085 223\n"
       "K⁺ 0.494 0.0    321\n"
       "K⁰ 0.494 0.0    311\n"
-      "N⁺ 0.9383 -1.0 2212\n"
-      "N⁰ 0.9396 -1.0 2112\n"
+      "N⁺ 0.938 -1.0 2212\n"
+      "N⁰ 0.938 -1.0 2112\n"
       "Δ  1.232 0.117 2224 2214 2114 1114\n"  // full multiplet in one line
       "Λ  1.116 0.0   3122\n"
       "Σ  1.189 0.0   3222 3212 3112\n"       // full multiplet in one line
@@ -125,7 +125,7 @@ TEST(create_type_list) {
 
   // proton
   type = &ParticleType::find(0x2212);
-  COMPARE(type->mass(), .9383f);
+  COMPARE(type->mass(), .938f);
   COMPARE(type->width_at_pole(), -1.f);
   COMPARE(type->pdgcode().dump(), 0x2212u);
   COMPARE(type->charge(), 1);
@@ -136,7 +136,7 @@ TEST(create_type_list) {
 
   // neutron
   type = &ParticleType::find(0x2112);
-  COMPARE(type->mass(), .9396f);
+  COMPARE(type->mass(), .938f);
   COMPARE(type->width_at_pole(), -1.f);
   COMPARE(type->pdgcode().dump(), 0x2112u);
   COMPARE(type->charge(), 0);

@@ -139,15 +139,11 @@ class Experiment : public ExperimentBase {
    * Perform the given action.
    *
    * \param action The action to perform
-   * \param[in,out] interactions_total The number of interactions until now
-   * \param[in,out] total_pauliblocked The number of pauli blocked actions until
-   *                                   now
    * \param particles_before_actions A container with the ParticleData from this
    *                                 time step before any actions were performed
    */
   template <typename Container>
-  void perform_action(Action &action, uint64_t &interactions_total,
-                      uint64_t &total_pauliblocked,
+  void perform_action(Action &action,
                       const Container &particles_before_actions);
 
   template <typename TOutput>
@@ -168,62 +164,44 @@ class Experiment : public ExperimentBase {
   void write_photon_action(Action &action,
                            const ParticleList &particles_before_actions);
 
-  /** Runs the time evolution of an event with fixed-sized time steps
-   *
-   * Here, the time steps are looped over, collisions and decays are
-   * carried out and particles are propagated.
-   *
-   * \return The number of interactions from the event
+  /** Runs the time evolution of an event with fixed-sized time steps,
+   *  adaptive time steps or without timesteps, from action to actions.
+   *  Within one timestep (fixed or adaptive) evolution from action to action
+   *  is invoked.
    */
-  uint64_t run_time_evolution_fixed_time_step();
+  void run_time_evolution();
 
   /** Runs the time evolution of an event without time steps
    *
    * Here, all actions are looped over, collisions and decays are
    * carried out and particles are propagated.
-   *
-   * \return The number of interactions from the event
    */
-  uint64_t run_time_evolution_without_time_steps();
-
-  /** Runs the time evolution of an event with adaptive time steps
-   *
-   * Here, the time steps are looped over, collisions and decays are carried
-   * out and particles are propagated while the size of the time step is adapted
-   * to the state of the system.
-   *
-   * \param adaptive_parameters Additional parameters for adaptive time steps
-   * \return The number of interactions from the event
-   */
-  uint64_t run_time_evolution_adaptive_time_steps(
-                                const AdaptiveParameters &adaptive_parameters);
+  void run_time_evolution_without_time_steps(float end_time, Actions& actions);
 
   /** Performs the final decays of an event
-   *
-   * \param interactions_total The number of interactions so far
    */
-  void do_final_decays(uint64_t &interactions_total);
+  void do_final_decays();
 
   /** Output at the end of an event
    *
-   * \param interactions_total The number of interactions from the event
    * \param evt_num Number of the event
    */
-  void final_output(uint64_t interactions_total, const int evt_num);
+  void final_output(const int evt_num);
 
   /** Intermediate output during an event
-   *
-   * \param interactions_total The total number of interactions so far
-   * \param previous_interactions_total The number of interactions at the
-   *                                    previous output
    */
-  void intermediate_output(uint64_t& interactions_total,
-                           uint64_t& previous_interactions_total);
+  void intermediate_output();
 
   /**
    * Propagate all particles to the current time.
    */
   void propagate_all();
+
+  /**
+   * Collisionless propagation until given time with proper intermediate output
+   * \param t_end The time until particles should be propagated
+   */
+  void propagate_all_until(float t_end);
 
   /**
    * Calculate the minimal size for the grid cells such that the
@@ -379,7 +357,14 @@ class Experiment : public ExperimentBase {
   /**
    * Pointer to additional parameters that are needed for adaptive time steps.
    */
-  std::unique_ptr<const AdaptiveParameters> adaptive_parameters_ = nullptr;
+  std::unique_ptr<AdaptiveParameters> adaptive_parameters_ = nullptr;
+
+  /**
+   *  Total number of interactions for current and for previous timestep.
+   *  For timestepless mode the whole run time is considered as one timestep.
+   */
+  uint64_t interactions_total_ = 0, previous_interactions_total_ = 0,
+           total_pauli_blocked_ = 0;
 
   /**\ingroup logging
    * Writes the initial state for the Experiment to the output stream.
