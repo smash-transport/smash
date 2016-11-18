@@ -138,6 +138,11 @@ ActionPtr ScatterActionsFinder::check_collision(
 #endif
     return nullptr;
   }
+  //Rule out the FIRST collisions among the particles within the same nuclei.
+  if (data_a.nucleus_id() >= 0 && data_b.nucleus_id() >= 0 &&
+      data_a.nucleus_id() == data_b.nucleus_id()) {
+    return nullptr;
+  }
 
   /* Determine time of collision. */
   const float time_until_collision = collision_time(data_a, data_b);

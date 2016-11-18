@@ -164,6 +164,10 @@ ColliderModus::ColliderModus(Configuration modus_config,
     throw ColliderEmpty("Input Error: Target nucleus is empty.");
   }
 
+  // Set nucleus_id_ (see the explanation in particledata.h) equal to 0 for the nucleons in the target nuclei, and equal to 1 for those  in the projectile nuclei. 
+  target_->set_nucleus_id(0);
+  projectile_->set_nucleus_id(1);
+
   // Consider an option to include Fermi-motion
   fermi_motion_ = modus_cfg.take({"Fermi_Motion"}, false);
 

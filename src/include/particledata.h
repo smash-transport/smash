@@ -73,6 +73,10 @@ class ParticleData {
   /** Returns the particle's effective mass
    * (as determined from the 4-momentum, possibly "off-shell"). */
   float effective_mass() const;
+  // Returns the parameter nucleus_id_ (see the comments after the constructor)
+  int nucleus_id() const { return nucleus_id_; }
+  // Assign the value nucl_id to the parameter nucleus_id_ (see the comments after constructor)
+  void set_nucleus_id(int nucl_id) { nucleus_id_ = nucl_id; }
 
   /**
    * Return the ParticleType object associated to this particle.
@@ -211,6 +215,15 @@ class ParticleData {
    */
   ParticleData(const ParticleType &ptype, int uid, int index)
       : id_(uid), index_(index), type_(&ptype) {}
+  /***
+   * The new parameter nucleus_id is introduced to indicate the which nuclei the particles belong to.
+   * If the particle is within the target nuclei nucleus_id=0.
+   * If the particle is within the projectile nuclei nucleus_id=1.
+   * Otherwise nucleus_id=-1.
+   * This parameter is introduced since the nucleons in a nuclei should first collide with the nucleons in the other nuclei.
+   * So the collisions between the particles with nucleus_id=0&0 or 1&1 are banned.
+   * After the first collisions  nucleus_id will be set to -1, the restriction is thus removed.
+   */
 
  private:
   friend class Particles;
@@ -228,6 +241,9 @@ class ParticleData {
     dst.formation_time_ = formation_time_;
     dst.cross_section_scaling_factor_ = cross_section_scaling_factor_;
   }
+
+ //nucleus_id_ is by default set to -1. The values will be reset in collidermodus.cc for the nucleons within the two colliding nucleis.  
+  int nucleus_id_ = -1;
 
   /**
    * Each particle has a unique identifier. This identifier is used for

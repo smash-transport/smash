@@ -185,7 +185,7 @@ Modi:
 
         # Specify an impact parameter
         Impact:
-            Value: 0.0
+            Value: 10.0
 
         # Include Fermi motion
         Fermi_Motion: false
