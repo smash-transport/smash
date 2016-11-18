@@ -240,9 +240,11 @@ class ParticleData {
     dst.position_ = position_;
     dst.formation_time_ = formation_time_;
     dst.cross_section_scaling_factor_ = cross_section_scaling_factor_;
+    dst.nucleus_id_ = nucleus_id_;
   }
 
- //nucleus_id_ is by default set to -1. The values will be reset in collidermodus.cc for the nucleons within the two colliding nucleis.  
+  // nucleus_id_ is by default set to -1. The values will be reset in
+  // collidermodus.cc for the nucleons within the two colliding nuclei.
   int nucleus_id_ = -1;
 
   /**
