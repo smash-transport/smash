@@ -44,17 +44,23 @@ namespace Smash {
 * false - string excitation is disabled
 * \key Formation_Time (float, optional, default = 1.0) \n
 * Parameter for formation time in string fragmentation in fm/c
+* \key low_snn_cut (double) in GeV \n
+* The elastic collisions betwen two nucleons with sqrt_s below 
+* low_snn_cut cannot happen.
+* <1.88 - below the threshold energy of the elastic collsion, no effect
+* >2.02 - beyond the threshold energy of the inelastic collision NN->NNpi, not suggested 
 */
 
 ScatterActionsFinder::ScatterActionsFinder(
     Configuration config, const ExperimentParameters &parameters,
-    bool two_to_one, bool two_to_two, bool strings_switch)
+    bool two_to_one, bool two_to_two, double low_snn_cut, bool strings_switch)
     : elastic_parameter_(config.take({"Collision_Term",
                                       "Elastic_Cross_Section"}, -1.0f)),
       testparticles_(parameters.testparticles),
       isotropic_(config.take({"Collision_Term", "Isotropic"}, false)),
       two_to_one_(two_to_one),
       two_to_two_(two_to_two),
+      low_snn_cut_(low_snn_cut),
       strings_switch_(strings_switch),
       formation_time_(config.take({"Collision_Term",
                                    "Formation_Time"}, 1.0f)) {
@@ -72,6 +78,7 @@ ScatterActionsFinder::ScatterActionsFinder(
       isotropic_(false),
       two_to_one_(two_to_one),
       two_to_two_(true),
+      low_snn_cut_(0.0),
       strings_switch_(true),
       formation_time_(1.0f) {}
 
@@ -164,7 +171,7 @@ ActionPtr ScatterActionsFinder::check_collision(
 
   /* Add various subprocesses.  */
   act->add_all_processes(elastic_parameter_, two_to_one_,
-                         two_to_two_, strings_switch_);
+                         two_to_two_, low_snn_cut_, strings_switch_);
 
   /* Cross section for collision criterion */
   float cross_section_criterion = act->cross_section() * fm2_mb * M_1_PI
@@ -278,7 +285,7 @@ void ScatterActionsFinder::dump_reactions() const {
             B.set_4momentum(B.pole_mass(), -mom, 0.0, 0.0);
             ScatterActionPtr act = construct_scatter_action(A, B, time);
             act->add_all_processes(elastic_parameter_, two_to_one_,
-                                   two_to_two_, strings_switch_);
+                                   two_to_two_,low_snn_cut_, strings_switch_);
             const float total_cs = act->cross_section();
             if (total_cs <= 0.0) {
               continue;

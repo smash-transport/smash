@@ -92,15 +92,20 @@ void ScatterAction::generate_final_state() {
 
 
 void ScatterAction::add_all_processes(float elastic_parameter,
-                                      bool two_to_one, bool two_to_two,
+                                      bool two_to_one, bool two_to_two, double low_snn_cut,
                                       bool strings_switch) {
   if (two_to_one) {
     /* resonance formation (2->1) */
     add_collisions(resonance_cross_sections());
   }
   if (two_to_two) {
-    /* elastic */
-    add_collision(elastic_cross_section(elastic_parameter));
+    /* Elastic collstions between two nucleons with sqrt_s() below 
+     * low_snn_cut can not happen*/
+    if (!incoming_particles_[0].type().is_nucleon() || 
+        !incoming_particles_[1].type().is_nucleon() || 
+        sqrt_s() >= low_snn_cut) {
+        add_collision(elastic_cross_section(elastic_parameter));
+    }
     /* 2->2 (inelastic) */
     add_collisions(two_to_two_cross_sections());
   }

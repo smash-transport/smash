@@ -122,6 +122,10 @@ class ColliderModus : public ModusDefault {
    * An option to include Fermi motion
    */
   bool fermi_motion_;
+   /**
+   * An option to exclude the first collisions within the same nucleus
+   */
+  bool avoid_cll_in_nucleus_;
   /** Get the frame dependent velocity for each nucleus, using
    * the current reference frame. \see frame_
    *

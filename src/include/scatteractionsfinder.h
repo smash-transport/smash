@@ -30,7 +30,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
 
   ScatterActionsFinder(Configuration config,
                        const ExperimentParameters &parameters,
-                       bool two_to_one, bool two_to_two,
+                       bool two_to_one, bool two_to_two, double low_snn_cut,
                        bool strings_switch);
 
   /** Constructor for testing purposes. */
@@ -134,6 +134,9 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const bool two_to_two_;
   /** Switch to turn off string excitation. */
   const bool strings_switch_;
+  /** Elastic collsions between two nucleons with 
+   ** sqrt_s below low_snn_cut_ are excluded. */ 
+  const double low_snn_cut_;
   /** Parameter for formation time */
   const float formation_time_;
 };

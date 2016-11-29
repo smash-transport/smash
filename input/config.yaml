@@ -30,7 +30,7 @@ General:
     Delta_Time:    0.1
 
     # end time of simulation
-    End_Time:      20.0
+    End_Time:      60.0
 
     # initial random seed (auto-generated if negative)
     Randomseed:    1
@@ -39,7 +39,7 @@ General:
     Testparticles: 1
 
     # number of events
-    Nevents:       1
+    Nevents:       10
 
     # width of gaussians representing particles, fm
     Gaussian_Sigma: 1.0
@@ -71,12 +71,12 @@ Output:
 #        Write_Collisions:   True
 #        Write_Particles:    True
 #        Autosave_Frequency: 1000
-#    Binary_Collisions:
-#        Extended:           False
-#        Print_Start_End:    True
-#    Binary_Particles:
-#        Extended:           False
-#        Only_Final:         False
+    Binary_Collisions:
+        Extended:           False
+        Print_Start_End:    True
+    Binary_Particles:
+        Extended:           False
+        Only_Final:         False
 #    Thermodynamics:
 #        # ("hadron", "baryon", "baryonic isospin", "pion", "none")
 #        Type:               "baryon"
@@ -97,6 +97,12 @@ Collision_Term:
     Force_Decays_At_End:    True
     Isotropic:              False
     Elastic_Cross_Section:  -1.0  # Globally used if non-negative, [mb]
+    NN_Cut_Mandestam_Sqrts: 2.0 # Exclude the elastic collisions between the two 
+                                # nucleons with the square root s below the value [GeV]. 
+                                # Exclusion is effectively turned off by setting any value
+                                # below 1.88 (the threshold energy of the elastic collsion).
+                                # And the value is at best not beyond 2.02 ( the threshold
+                                # energy of the inelastic collision NN->NNpi)    
 #    Pauli_Blocking:
 #        Spatial_Averaging_Radius:   1.86
 #        Momentum_Averaging_Radius:  0.08
@@ -185,10 +191,12 @@ Modi:
 
         # Specify an impact parameter
         Impact:
-            Value: 10.0
+            Value: 7.0
 
         # Include Fermi motion
         Fermi_Motion: false
+        # Avoid the first collisions within the same nuclues
+        Avoid_Cll_in_Nucleus: true
 
     List:
         # path of external particle list == File_Directory/File_Prefix{eventid}

@@ -142,6 +142,11 @@ ColliderModus::ColliderModus(Configuration modus_config,
     frame_ = modus_cfg.take({"Calculation_Frame"});
   }
 
+  // Determine whether to avoid the first collsions within the same nucleus
+  if (modus_cfg.has_value({"Avoid_Cll_in_Nucleus"})) {
+    avoid_cll_in_nucleus_ = modus_cfg.take({"Avoid_Cll_in_Nucleus"});
+  }
+
   // Set up the projectile nucleus
   Configuration proj_cfg = modus_cfg["Projectile"];
   if (proj_cfg.has_value({"Deformed"}) && proj_cfg.take({"Deformed"})) {
@@ -358,9 +363,10 @@ float ColliderModus::initial_conditions(Particles *particles,
   // Set nucleus_id_ (see the explanation in particledata.h) equal to 0 for
   // the nucleons in the target nuclei, and equal to 1 for those
   // in the projectile nuclei.
-  target_->set_nucleus_id(0);
-  projectile_->set_nucleus_id(1);
-
+  if (avoid_cll_in_nucleus_) {
+    target_->set_nucleus_id(0);
+    projectile_->set_nucleus_id(1);
+  } 
   // Put the particles in the nuclei into code particles.
   projectile_->copy_particles(particles);
   target_->copy_particles(particles);

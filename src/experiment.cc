@@ -293,14 +293,14 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
   const bool two_to_two = config.take({"Collision_Term", "Two_to_Two"}, true);
+  // Elastic collisions between the nucleons with the square root s below low_snn_cut are excluded.
+  const double low_snn_cut = config.take({"Collision_Term", "NN_Cut_Mandestam_Sqrts"});
   const bool dileptons_switch = config.has_value({"Output", "Dileptons"}) ?
                     config.take({"Output", "Dileptons", "Enable"}, true) :
                     false;
-
   const bool photons_switch = config.has_value({"Output", "Photons"}) ?
                     config.take({"Output", "Photons", "Enable"}, true) :
                     false;
-
   const bool strings_switch = config.take({"Collision_Term", "Strings"}, false);
 
   // create finders
@@ -309,7 +309,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   }
   if (two_to_one || two_to_two) {
     auto scat_finder = make_unique<ScatterActionsFinder>(config, parameters_,
-                                                       two_to_one, two_to_two,
+                                                       two_to_one, two_to_two,low_snn_cut,
                                                        strings_switch);
     max_transverse_distance_sqr_ = scat_finder->max_transverse_distance_sqr(
                                                     parameters_.testparticles);
@@ -322,7 +322,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     number_of_fractional_photons = config.take(
          {"Output", "Photons", "Fractions"});
     photon_finder_ = make_unique<ScatterActionsFinderPhoton>(
-        config, parameters_, two_to_one, two_to_two,
+        config, parameters_, two_to_one, two_to_two,low_snn_cut,
         strings_switch, number_of_fractional_photons);
   }
   if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
