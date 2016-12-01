@@ -295,6 +295,12 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   const bool two_to_two = config.take({"Collision_Term", "Two_to_Two"}, true);
   // Elastic collisions between the nucleons with the square root s below low_snn_cut are excluded.
   const double low_snn_cut = config.take({"Collision_Term", "NN_Cut_Mandestam_Sqrts"});
+  if (low_snn_cut > ParticleType::find(pdg::p).mass() +
+                    ParticleType::find(pdg::p).mass() +
+                    ParticleType::find(pdg::pi_z).mass()) {
+    log.warn("The cut-off should be below the threshold energy of the process: NN to NNpi");
+  }
+
   const bool dileptons_switch = config.has_value({"Output", "Dileptons"}) ?
                     config.take({"Output", "Dileptons", "Enable"}, true) :
                     false;
