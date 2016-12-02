@@ -50,7 +50,7 @@ TEST(pion_decay) {
   act->add_decay(std::move(mode));
 
   // sample the final state and sum up all weights
-  const int N_samples = 1E9;
+  const int N_samples = 1E7;
   const int st = 1E6;
   float weight_sum = 0.;
   printf("sampling Dalitz ...\n");
@@ -63,7 +63,7 @@ TEST(pion_decay) {
   }
   std::cout << std::endl;
   std::cout << "weight_sum / N_samples = " << weight_sum / N_samples << std::endl;
-  std::cout << "for # sameples: " << N_samples << std::endl;
+  std::cout << "for # samples: " << N_samples << std::endl;
   std::cout << "should be --> 0.01174" << std::endl;
   std::cout << std::endl;
 
