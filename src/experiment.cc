@@ -1044,7 +1044,7 @@ void Experiment<Modus>::propagate_all_until(float t_end) {
      const auto &log = logger<LogArea::Experiment>();
      log.error() << " Propagate_all_until " << t_end
                  << " fm/c < current time = " << parameters_.labclock.current_time()
-                 << " fm/c.";
+                 << " fm/c. Difference: " << std::abs(parameters_.labclock.current_time() - t_end);
   }
 }
 
