@@ -285,7 +285,12 @@ float ParticleType::partial_width(const float m,
   if (m < mode->threshold()) {
     return 0.;
   }
-  float partial_width_at_pole = width_at_pole()*mode->weight();
+  float mode_weight = mode->weight();
+  float wap = width_at_pole();
+  std::cout << "mode->weight in ParticleType.::partial_width = " << mode_weight << std::endl;
+  std::cout << "width_at_pole in ParticleType.::partial_width = " << wap << std::endl;
+  std::cout << std::endl;
+  float partial_width_at_pole = wap*mode_weight;
   return mode->type().width(mass(), partial_width_at_pole, m);
 }
 

@@ -12,6 +12,13 @@
 
 using namespace Smash;
 
+TEST(set_random_seed) {
+    std::random_device rd;
+    int64_t seed = rd();
+    Random::set_seed(seed);
+    printf("Random number seed: %lld\n", seed);
+}
+
 TEST(init_particle_types) {
   // enable debugging output
   create_all_loggers(Configuration(""));
@@ -43,6 +50,7 @@ TEST(pion_decay) {
   COMPARE(dil_modes.size(), 1u);
   const float piz_width = total_weight<DecayBranch>(type_piz.get_partial_widths(srts));
   FUZZY_COMPARE(piz_width, 7.7e-9f);
+  std::cout << "total width = " << piz_width << std::endl;
   DecayBranchPtr &mode = dil_modes[0];
   // π⁰ decay action
   const auto act = make_unique<DecayActionDilepton>(piz, 0.f,
@@ -50,7 +58,7 @@ TEST(pion_decay) {
   act->add_decay(std::move(mode));
 
   // sample the final state and sum up all weights
-  const int N_samples = 1E7;
+  const int N_samples = 1E5;
   const int st = 1E6;
   float weight_sum = 0.;
   printf("sampling Dalitz ...\n");
