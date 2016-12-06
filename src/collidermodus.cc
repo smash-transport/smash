@@ -130,8 +130,8 @@ namespace Smash {
  * \key Fermi_Motion (string, optional, default = "off"): \n
  * Defines if Fermi motion is included.\n
  * "off", "on" or "frozen"\n
- * Use "frozen", if you want to use Fermi motion 
- * without potentials. Use "on", if you want to use Fermi motion 
+ * Use "frozen" if you want to use Fermi motion 
+ * without potentials. Use "on" if you want to use Fermi motion 
  * in combination with potentials.\n
  * 
  */
@@ -167,31 +167,9 @@ ColliderModus::ColliderModus(Configuration modus_config,
     throw ColliderEmpty("Input Error: Target nucleus is empty.");
   }
 
-	// Generate Fermi momenta if necessary
+	// Get the Fermi-Motion input (off, on, frozen)
 	if (modus_cfg.has_value({"Fermi_Motion"})) {
-		fermi_motion_ = modus_cfg.take({"Fermi_Motion"}); {
-			switch (fermi_motion_) {
-				case FermiMotion::Off: {
-				// no Fermi momentum is generated in this case
-				}
-				break;
-				case FermiMotion::On: {
-					projectile_->generate_fermi_momenta(fermi_motion_);	 
-					target_->generate_fermi_momenta(fermi_motion_);
-				}
-				break;
-				case FermiMotion::Frozen: {
-					// Different execution in Nucleus:generate_fermi_momenta
-					// compared to FermiMotion::On
-					projectile_->generate_fermi_momenta(fermi_motion_);	 
-					target_->generate_fermi_momenta(fermi_motion_);
-				}
-				break;
-				default:
-					throw std::domain_error(
-							"Invalid Fermi_Motion input.");
-			}
-		}	
+		fermi_motion_ = modus_cfg.take({"Fermi_Motion"}); {} 
 	}
 					
   // Get the total nucleus-nucleus collision energy. Since there is
@@ -351,6 +329,33 @@ float ColliderModus::initial_conditions(Particles *particles,
         "ColliderModus::initial_conditions.\nConsider using "
         "the center of velocity reference frame.");
   }
+
+	// Generate Fermi momenta if necessary
+	switch (fermi_motion_) {
+		case FermiMotion::Off: {
+			// No Fermi-momenta are generated in this case
+			log.info() << "Fermi Motion is OFF.";
+		}
+		break;
+		case FermiMotion::On: {
+			log.info() << "Fermi Motion is ON.";
+			projectile_->generate_fermi_momenta();	 
+			target_->generate_fermi_momenta();		
+		}
+		break;
+		case FermiMotion::Frozen: {
+			// Generate Fermi momenta as in FermiMotion::On case, but these 
+			// Fermi momenta will be ignored during the propagation to avoid 
+			// that the nucleus will fly apart.  
+			log.info() << "FROZEN Fermi Motion is on.";
+			projectile_->generate_fermi_momenta();	 
+			target_->generate_fermi_momenta();	
+		}
+		break;
+		default:
+			throw std::domain_error(
+					"Invalid Fermi_Motion input.");
+	}
 
   // Boost the nuclei to the appropriate velocity.
   projectile_->boost(v_a);

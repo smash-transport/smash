@@ -328,7 +328,7 @@ void Nucleus::set_parameters_from_config(Configuration &config) {
   }
 }
 
-void Nucleus::generate_fermi_momenta(FermiMotion &fermi_motion_) {	
+void Nucleus::generate_fermi_momenta() {	
   double r, rho, p;
   const int N_n = std::count_if(begin(), end(),
                   [](const ParticleData i) {return i.pdgcode() == pdg::n;});
@@ -365,25 +365,11 @@ void Nucleus::generate_fermi_momenta(FermiMotion &fermi_motion_) {
     phitheta.distribute_isotropically();
     const ThreeVector ith_3momentum = phitheta.threevec() * p;
     ptot += ith_3momentum;
-    if (fermi_motion_ == FermiMotion::On) {
-			i->set_3momentum(ith_3momentum);
-			//log.info() << "ith_3momentum" << ith_3momentum;
-			log.debug() << "Particle: " << *i <<
+		i->set_3momentum(ith_3momentum);
+		log.debug() << "Particle: " << *i <<
                ", pF[GeV]: " << hbarc * std::pow(pi2_3 * rho, 1.0/3.0) <<
                " r[fm]: " << r <<
                " Nuclear radius[fm]: " << nuclear_radius_;
-    }
-    if (fermi_motion_ == FermiMotion::Frozen) {
-			// Store fermi momenta in an own vector, so that it can be
-			// added to the particles momentum right before the collision
-			i->set_fermi3momentum(ith_3momentum);
-			//log.info() << "ith_3momentum" << ith_3momentum;
-			log.debug() << "Particle: " << *i <<
-               ", pF[GeV]: " << hbarc * std::pow(pi2_3 * rho, 1.0/3.0) <<
-               " r[fm]: " << r <<
-               " Nuclear radius[fm]: " << nuclear_radius_;
-      
-    }    
   }
   if (A == 0) {
     // No Fermi momenta should be assigned
@@ -392,27 +378,14 @@ void Nucleus::generate_fermi_momenta(FermiMotion &fermi_motion_) {
     assert(ptot.x1() == 0.0 && ptot.x2() == 0.0 && ptot.x3() == 0.0);
     #pragma GCC diagnostic pop
   } else {
-    // Make sure that total momentum is zero - redistribute ptot equally among
-    // protons and neutrons
+    // Make sure that total momentum is zero - redistribute ptot equally 
+    // among protons and neutrons
     const ThreeVector centralizer = ptot/A;
     for (auto i = begin(); i != end(); i++) {
-			// Distinguish between Fermi motion is "on" and "frozen"
-      if (fermi_motion_ == FermiMotion::On) {  
-				// Add fermi momenta directly to 4momentum vector.
-				if (i->pdgcode() == pdg::p || i->pdgcode() == pdg::n) {
-					i->set_4momentum(i->pole_mass(),
-                i->momentum().threevec() - centralizer);
-          //log.info() << "i:" << *i;
-				}
-			}
-			if (fermi_motion_ == FermiMotion::Frozen) {
-				// Store fermi-momenta of particles in an own vector. 
-				// Thus spatial 4momentum is empty, p^mu = (m,0,0,0)   
-				if (i->pdgcode() == pdg::p || i->pdgcode() == pdg::n) {
-					i->set_fermi4momentum(i->pole_mass(),
-                i->fermimomentum().threevec() - centralizer);
-          //log.info() << "i:" << *i;
-				}
+			if (i->pdgcode() == pdg::p || i->pdgcode() == pdg::n) {
+				i->set_4momentum(i->pole_mass(), 
+						i->momentum().threevec() - centralizer);
+				
 			}
 		}
 	}
@@ -444,7 +417,12 @@ void Nucleus::boost(double beta_scalar) {
     // the same binding energy.
     ThreeVector mom_i = i->momentum().threevec();
     i->set_4momentum(i->pole_mass(), mom_i.x1(), mom_i.x2(),
-                     gamma*(beta_scalar*i->pole_mass() + mom_i.x3()));
+                     gamma*(beta_scalar*i->pole_mass() + mom_i.x3())); 
+		// Create a vector that contains only the boosted initial 
+		// beam momentum - necessary for the propagation of particles
+		// in the FermiMotion::Frozen case.
+    i->set_beam4momentum(i->pole_mass(), 0.0, 0.0,
+                     gamma*(beta_scalar*i->pole_mass()));         
   }
 }
 

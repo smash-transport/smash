@@ -6,7 +6,7 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
-
+#include <iostream>
 #include "include/propagation.h"
 
 #include "include/logging.h"
@@ -23,11 +23,35 @@ void propagate_straight_line(Particles *particles,
   const auto &log = logger<LogArea::Propagation>();
   const double dt = parameters.timestep_duration();
   for (ParticleData &data : *particles) {
-    FourVector distance = FourVector(0.0, data.velocity() * dt);
-    log.debug("Particle ", data, " motion: ", distance);
-    FourVector position = data.position() + distance;
-    position.set_x0(parameters.new_particle_time());
-    data.set_4position(position);
+		// Do a propagation without Fermi motion to avoid that the nucleus 
+		// will fly apart, i.e. propagate only initial beam momentum. However, 
+		// "new" particles will have an empty beam momentum, thus we need 
+		// to distinguish between initially present and produced particles.
+		//  
+		// Calculate distance and position of initially present particles, 
+		// i.e. of those who are bound in the nuclei and have not yet collided. 
+		// For these particles the Fermi momenta "are frozen"; they get 
+		// their total momentum when they are not bound anymore.
+		if (data.beammomentum().x0() > really_small && 
+				data.get_history().collisions_per_particle == 0) {
+			FourVector distance = FourVector(0.0, data.beamvelocity() * dt);
+			log.debug("Particle ", data, " motion: ", distance);
+			FourVector position = data.position() + distance;
+			position.set_x0(parameters.new_particle_time());
+			data.set_4position(position);
+    }
+    // Calculate distance and position of produced (and already collided) 
+    // particles. These particles are not bound to a nucleus, thus no 
+    // nucleus could fly apart. For these particles the total momentum 
+    // is relevant and therefore we have to propagate them according to it. 
+    else {
+			FourVector distance = FourVector(0.0, data.velocity() * dt);
+			log.debug("Particle ", data, " motion: ", distance);
+			FourVector position = data.position() + distance;
+			position.set_x0(parameters.new_particle_time());
+			data.set_4position(position);
+		}
+     
     /* Test, if particle is formed and reset cross_section_scaling_factor
        TODO: Is there a way to only do that for particles that were unformed 
        in the previous timestep? */
@@ -82,7 +106,7 @@ void propagate(Particles *particles, const ExperimentParameters &parameters,
     FourVector position = data.position() + distance;
     position.set_x0(parameters.new_particle_time());
     data.set_4position(position);
-
+    
     // calculate the time scale of the change in momentum
     const double dU_dr_abs = dU_dr.abs();
     if (dU_dr_abs < really_small) {
