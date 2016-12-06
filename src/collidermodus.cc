@@ -142,9 +142,9 @@ ColliderModus::ColliderModus(Configuration modus_config,
     frame_ = modus_cfg.take({"Calculation_Frame"});
   }
 
-  // Determine whether to avoid the first collsions within the same nucleus
-  if (modus_cfg.has_value({"Avoid_Cll_in_Nucleus"})) {
-    avoid_cll_in_nucleus_ = modus_cfg.take({"Avoid_Cll_in_Nucleus"});
+  /// Determine whether to avoid the first collsions within the same nucleus
+  if (modus_cfg.has_value({"Collisions_Within_Nucleus"})) {
+    cll_in_nucleus_ = modus_cfg.take({"Collisions_Within_Nucleus"});
   }
 
   // Set up the projectile nucleus
@@ -360,10 +360,10 @@ float ColliderModus::initial_conditions(Particles *particles,
   projectile_->shift(proj_z, +impact_ / 2.0, simulation_time);
   target_->    shift(targ_z, -impact_ / 2.0, simulation_time);
 
-  // Set nucleus_id_ (see the explanation in particledata.h) equal to 0 for
-  // the nucleons in the target nuclei, and equal to 1 for those
-  // in the projectile nuclei.
-  if (avoid_cll_in_nucleus_) {
+  /// Set nucleus_id_ (see the explanation in particledata.h) equal to 0 for
+  /// the nucleons in the target nuclei, and equal to 1 for those
+  /// in the projectile nuclei.
+  if (!cll_in_nucleus_) {
     target_->set_nucleus_id(0);
     projectile_->set_nucleus_id(1);
   } 

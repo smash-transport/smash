@@ -293,8 +293,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
   const bool two_to_two = config.take({"Collision_Term", "Two_to_Two"}, true);
-  // Elastic collisions between the nucleons with the square root s below low_snn_cut are excluded.
-  const double low_snn_cut = config.take({"Collision_Term", "NN_Cut_Mandestam_Sqrts"});
+  /// Elastic collisions between the nucleons with the square root s below low_snn_cut are excluded.
+  const double low_snn_cut = config.take({"Collision_Term", "Elastic_NN_Cutoff_Sqrts"});
   if (low_snn_cut > ParticleType::find(pdg::p).mass() +
                     ParticleType::find(pdg::p).mass() +
                     ParticleType::find(pdg::pi_z).mass()) {

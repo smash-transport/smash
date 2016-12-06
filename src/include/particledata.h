@@ -73,9 +73,9 @@ class ParticleData {
   /** Returns the particle's effective mass
    * (as determined from the 4-momentum, possibly "off-shell"). */
   float effective_mass() const;
-  // Returns the parameter nucleus_id_ (see the comments after the constructor)
+  /// Returns the parameter nucleus_id_ (see the comments after the constructor)
   int nucleus_id() const { return nucleus_id_; }
-  // Assign the value nucl_id to the parameter nucleus_id_ (see the comments after constructor)
+  /// Assign the value nucl_id to the parameter nucleus_id_ (see the comments after constructor)
   void set_nucleus_id(int nucl_id) { nucleus_id_ = nucl_id; }
 
   /**
@@ -243,8 +243,8 @@ class ParticleData {
     dst.nucleus_id_ = nucleus_id_;
   }
 
-  // nucleus_id_ is by default set to -1. The values will be reset in
-  // collidermodus.cc for the nucleons within the two colliding nuclei.
+  /// nucleus_id_ is by default set to -1. The values will be reset in
+  /// collidermodus.cc for the nucleons within the two colliding nuclei.
   int nucleus_id_ = -1;
 
   /**

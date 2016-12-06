@@ -97,7 +97,7 @@ Collision_Term:
     Force_Decays_At_End:    True
     Isotropic:              False
     Elastic_Cross_Section:  -1.0  # Globally used if non-negative, [mb]
-    NN_Cut_Mandestam_Sqrts: 2.0 # Exclude the elastic collisions between the two 
+    Elastic_NN_Cutoff_Sqrts: 2.0 # Exclude the elastic collisions between the two 
                                 # nucleons with the square root s below the value [GeV]. 
                                 # Exclusion is effectively turned off by setting any value
                                 # below 1.88 (the threshold energy of the elastic collsion).
@@ -195,8 +195,8 @@ Modi:
 
         # Include Fermi motion
         Fermi_Motion: false
-        # Avoid the first collisions within the same nuclues
-        Avoid_Cll_in_Nucleus: true
+        # Determine whether the first collisions within the same nuclues are allowed
+        Collisions_Within_Nucleus: false
 
     List:
         # path of external particle list == File_Directory/File_Prefix{eventid}
