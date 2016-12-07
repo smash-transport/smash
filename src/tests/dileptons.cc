@@ -58,7 +58,7 @@ TEST(pion_decay) {
   act->add_decay(std::move(mode));
 
   // sample the final state and sum up all weights
-  const int N_samples = 1E8;
+  const int N_samples = 5E8;
   const int st = 1E6;
   double weight_sum = 0.;
   printf("sampling Dalitz ...\n");
@@ -67,9 +67,7 @@ TEST(pion_decay) {
       std::cout << "progress (" << i/st << "/" << N_samples/st << ")" << std::endl;
     }
     act->generate_final_state();
-    float rwv = act->raw_weight_value();
-    // std::cout << rwv << std::endl;
-    weight_sum += rwv;
+    weight_sum += act->raw_weight_value();
   }
   std::cout << std::endl;
   std::cout << "weight_sum / N_samples = " << weight_sum / N_samples << std::endl;
@@ -77,8 +75,7 @@ TEST(pion_decay) {
   std::cout << "should be --> 0.01174" << std::endl;
   std::cout << std::endl;
 
-  float rel = weight_sum / N_samples;
   // verify that the shining weight for the π⁰ Dalitz decay is correct
   // (to an accuracy of five percent)
-  COMPARE_RELATIVE_ERROR(rel, 0.01174f, 0.05f);
+  COMPARE_RELATIVE_ERROR(weight_sum / N_samples, 0.01174, 0.05f);
 }
