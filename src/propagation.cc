@@ -6,7 +6,7 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
-#include <iostream>
+
 #include "include/propagation.h"
 
 #include "include/logging.h"
