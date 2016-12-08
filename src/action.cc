@@ -178,6 +178,11 @@ void Action::check_conservation(const uint32_t id_process) const {
     const auto &log = logger<LogArea::Action>();
     std::string err_msg = before.report_deviations(after);
     log.error() << particle_names.str() << err_msg;
+    // Pythia does not conserve energy and momentum at high energy, so we just
+    // print the error and continue.
+    if (process_type_ == ProcessType::String) {
+      return;
+    }
     throw std::runtime_error("Conservation laws violated in process " +
                              std::to_string(id_process));
   }

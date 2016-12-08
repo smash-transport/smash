@@ -280,6 +280,13 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       force_decays_(
           config.take({"Collision_Term", "Force_Decays_At_End"}, true)),
       use_grid_(config.take({"General", "Use_Grid"}, true)),
+      strings_switch_(config.take({"Collision_Term", "Strings"}, false)),
+      dileptons_switch_(config.has_value({"Output", "Dileptons"}) ?
+                    config.take({"Output", "Dileptons", "Enable"}, true) :
+                    false),
+      photons_switch_(config.has_value({"Output", "Photons"}) ?
+                    config.take({"Output", "Photons", "Enable"}, true) :
+                    false),
       time_step_mode_(
           config.take({"General", "Time_Step_Mode"}, TimeStepMode::Fixed)) {
   const auto &log = logger<LogArea::Experiment>();
@@ -287,15 +294,6 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
   const bool two_to_two = config.take({"Collision_Term", "Two_to_Two"}, true);
-  const bool dileptons_switch = config.has_value({"Output", "Dileptons"}) ?
-                    config.take({"Output", "Dileptons", "Enable"}, true) :
-                    false;
-
-  const bool photons_switch = config.has_value({"Output", "Photons"}) ?
-                    config.take({"Output", "Photons", "Enable"}, true) :
-                    false;
-
-  const bool strings_switch = config.take({"Collision_Term", "Strings"}, false);
 
   // create finders
   if (two_to_one) {
@@ -304,7 +302,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   if (two_to_one || two_to_two) {
     auto scat_finder = make_unique<ScatterActionsFinder>(config, parameters_,
                                                        two_to_one, two_to_two,
-                                                       strings_switch);
+                                                       strings_switch_);
     max_transverse_distance_sqr_ = scat_finder->max_transverse_distance_sqr(
                                                     parameters_.testparticles);
     action_finders_.emplace_back(std::move(scat_finder));
@@ -315,15 +313,15 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     action_finders_.emplace_back(make_unique<WallCrossActionsFinder>(modus_l));
   }*/
 
-  if (dileptons_switch) {
+  if (dileptons_switch_) {
     dilepton_finder_ = make_unique<DecayActionsFinderDilepton>();
   }
-  if (photons_switch) {
+  if (photons_switch_) {
     number_of_fractional_photons = config.take(
          {"Output", "Photons", "Fractions"});
     photon_finder_ = make_unique<ScatterActionsFinderPhoton>(
         config, parameters_, two_to_one, two_to_two,
-        strings_switch, number_of_fractional_photons);
+        strings_switch_, number_of_fractional_photons);
   }
   if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
     log.info() << "Pauli blocking is ON.";
@@ -448,7 +446,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * "Root" - The dilepton output is written to the file \c DileptonOutput.root
    * in \ref format_root .\n
    **/
-  if (dileptons_switch) {
+  if (dileptons_switch_) {
     // create dilepton output object
     std::string format = config.take({"Output", "Dileptons", "Format"});
     if (format == "Oscar") {
@@ -469,7 +467,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     }
   }
 
-  if (photons_switch) {
+  if (photons_switch_) {
     // create photon output object
     std::string format = config.take({"Output", "Photons", "Format"});
     if (format == "Oscar") {
@@ -902,9 +900,12 @@ void Experiment<Modus>::run_time_evolution_without_time_steps(float end_time, Ac
 
     /* (3) Check conservation laws. */
 
-    // Check conservation of conserved quantities if potentials are off.
-    // If potentials are on then momentum is conserved only in average
-    if (!potentials_) {
+    // Check conservation of conserved quantities if potentials and string
+    // fragmentation are off.
+    // If potentials are on then momentum is conserved only in average.
+    // If string fragmentation is on, then energy and momentum are only very
+    // roughly conserved in high-energy collisions.
+    if (!potentials_ && !strings_switch_) {
       std::string err_msg = conserved_initial_.report_deviations(particles_);
       if (!err_msg.empty()) {
         log.error() << err_msg;
