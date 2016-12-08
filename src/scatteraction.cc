@@ -356,9 +356,8 @@ void ScatterAction::string_excitation() {
   DisableFloatTraps guard;
   /* set all necessary parameters for Pythia
    * Create Pythia object */
-  std::string xmlpath = PYTHIA_XML_DIR;
   log.debug("Creating Pythia object.");
-  Pythia8::Pythia pythia(xmlpath, false);
+  static thread_local Pythia8::Pythia pythia(PYTHIA_XML_DIR, false);
   /* select only inelastic events: */
   pythia.readString("SoftQCD:inelastic = on");
   /* suppress unnecessary output */
