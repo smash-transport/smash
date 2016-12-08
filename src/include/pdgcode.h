@@ -10,9 +10,9 @@
 #ifndef SRC_INCLUDE_PDGCODE_H_
 #define SRC_INCLUDE_PDGCODE_H_
 
-#include <cstdio>
 #include <cstdlib>
 #include <iosfwd>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 
@@ -209,13 +209,12 @@ class PdgCode {
 
   /// returns a C++ string from the PDG Code.
   inline std::string string() const {
-    char hexstring[8];
+    std::stringstream ss;
     if (digits_.antiparticle_) {
-      snprintf(hexstring, sizeof(hexstring), "-%x", ucode());
-    } else {
-      snprintf(hexstring, sizeof(hexstring), "%x", ucode());
+      ss << "-";
     }
-    return std::string(hexstring);
+    ss << std::hex << ucode();
+    return ss.str();
   }
 
   /// Construct the antiparticle to a given PDG code.

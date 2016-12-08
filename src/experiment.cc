@@ -1038,13 +1038,14 @@ void Experiment<Modus>::propagate_all_until(float t_end) {
     propagate_all();
     // Reset clock to get rid of small numerical errors from multiple additions
     parameters_.labclock.reset(t_end);
-  } else if (parameters_.labclock.current_time() - t_end > really_small) {
-     // current time and t_end may be approximately equal, so the code can get here
-     // because of numerics, but if current_time > t_end significantly, then it's a bug
+  } else if (std::abs(parameters_.labclock.current_time() - t_end) > 1e-5) {
+     // Current time and t_end may be approximately equal, so the code can get here
+     // because of numerics, but if current_time > t_end significantly, then it's a bug.
+     // Because we are using floats, we are expecting numerical errors on the order of 1e-6.
      const auto &log = logger<LogArea::Experiment>();
      log.error() << " Propagate_all_until " << t_end
                  << " fm/c < current time = " << parameters_.labclock.current_time()
-                 << " fm/c.";
+                 << " fm/c. Difference: " << std::abs(parameters_.labclock.current_time() - t_end);
   }
 }
 
