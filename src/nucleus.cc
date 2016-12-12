@@ -328,7 +328,7 @@ void Nucleus::set_parameters_from_config(Configuration &config) {
   }
 }
 
-void Nucleus::generate_fermi_momenta() {	
+void Nucleus::generate_fermi_momenta() {
   double r, rho, p;
   const int N_n = std::count_if(begin(), end(),
                   [](const ParticleData i) {return i.pdgcode() == pdg::n;});
@@ -339,7 +339,7 @@ void Nucleus::generate_fermi_momenta() {
   const double pi2_3 = 3.0 * M_PI * M_PI;
   Angles phitheta;
   const auto &log = logger<LogArea::Nucleus>();
-	
+
   log.debug() << N_n << " neutrons, " << N_p << " protons.";
 
   ThreeVector ptot = ThreeVector(0.0, 0.0, 0.0);
@@ -365,8 +365,8 @@ void Nucleus::generate_fermi_momenta() {
     phitheta.distribute_isotropically();
     const ThreeVector ith_3momentum = phitheta.threevec() * p;
     ptot += ith_3momentum;
-		i->set_3momentum(ith_3momentum);
-		log.debug() << "Particle: " << *i <<
+    i->set_3momentum(ith_3momentum);
+    log.debug() << "Particle: " << *i <<
                ", pF[GeV]: " << hbarc * std::pow(pi2_3 * rho, 1.0/3.0) <<
                " r[fm]: " << r <<
                " Nuclear radius[fm]: " << nuclear_radius_;
@@ -378,20 +378,19 @@ void Nucleus::generate_fermi_momenta() {
     assert(ptot.x1() == 0.0 && ptot.x2() == 0.0 && ptot.x3() == 0.0);
     #pragma GCC diagnostic pop
   } else {
-    // Make sure that total momentum is zero - redistribute ptot equally 
+    // Make sure that total momentum is zero - redistribute ptot equally
     // among protons and neutrons
     const ThreeVector centralizer = ptot/A;
     for (auto i = begin(); i != end(); i++) {
-			if (i->pdgcode() == pdg::p || i->pdgcode() == pdg::n) {
-				i->set_4momentum(i->pole_mass(), 
-						i->momentum().threevec() - centralizer);
-				
-			}
-		}
-	}
+      if (i->pdgcode() == pdg::p || i->pdgcode() == pdg::n) {
+        i->set_4momentum(i->pole_mass(),
+                         i->momentum().threevec() - centralizer);
+      }
+    }
+  }
 }
 
-void Nucleus::boost(double beta_scalar) {
+void Nucleus::boost(double beta_scalar, FermiMotion &fermi_motion_) {
   double beta_squared = beta_scalar * beta_scalar;
   double one_over_gamma = std::sqrt(1.0 - beta_squared);
   double gamma = 1.0/one_over_gamma;
@@ -417,12 +416,14 @@ void Nucleus::boost(double beta_scalar) {
     // the same binding energy.
     ThreeVector mom_i = i->momentum().threevec();
     i->set_4momentum(i->pole_mass(), mom_i.x1(), mom_i.x2(),
-                     gamma*(beta_scalar*i->pole_mass() + mom_i.x3())); 
-		// Create a vector that contains only the boosted initial 
-		// beam momentum - necessary for the propagation of particles
-		// in the FermiMotion::Frozen case.
-    i->set_beam4momentum(i->pole_mass(), 0.0, 0.0,
-                     gamma*(beta_scalar*i->pole_mass()));         
+                     gamma*(beta_scalar*i->pole_mass() + mom_i.x3()));
+    // Create a vector that contains only the boosted initial
+    // beam momentum - necessary for the propagation of particles
+    // in the FermiMotion::Frozen case.
+    if (fermi_motion_ == FermiMotion::Frozen) {
+      i->set_beam4momentum(i->pole_mass(), 0.0, 0.0,
+                           gamma*(beta_scalar*i->pole_mass()));
+    }
   }
 }
 

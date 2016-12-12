@@ -82,13 +82,13 @@ enum class CalculationFrame {
 
 /// Option to use Fermi Motion
 enum class FermiMotion {
-	/// Don't use fermi motion.
-	Off,
-	/// Use fermi motion in combination with potentials.
-	On,
-	/// Use fermi motion without potentials.
-	Frozen,
-};  
+  /// Don't use fermi motion.
+  Off,
+  /// Use fermi motion in combination with potentials.
+  On,
+  /// Use fermi motion without potentials.
+  Frozen,
+};
 
 /// Possible methods of impact parameter sampling.
 enum class Sampling {

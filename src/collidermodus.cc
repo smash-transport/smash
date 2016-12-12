@@ -144,7 +144,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
   if (modus_cfg.has_value({"Calculation_Frame"})) {
     frame_ = modus_cfg.take({"Calculation_Frame"});
   }
-  
+
   // Set up the projectile nucleus
   Configuration proj_cfg = modus_cfg["Projectile"];
   if (proj_cfg.has_value({"Deformed"}) && proj_cfg.take({"Deformed"})) {
@@ -167,11 +167,11 @@ ColliderModus::ColliderModus(Configuration modus_config,
     throw ColliderEmpty("Input Error: Target nucleus is empty.");
   }
 
-	// Get the Fermi-Motion input (off, on, frozen)
-	if (modus_cfg.has_value({"Fermi_Motion"})) {
-		fermi_motion_ = modus_cfg.take({"Fermi_Motion"}); {} 
-	}
-					
+  // Get the Fermi-Motion input (off, on, frozen)
+  if (modus_cfg.has_value({"Fermi_Motion"})) {
+    fermi_motion_ = modus_cfg.take({"Fermi_Motion"}); {}
+  }
+
   // Get the total nucleus-nucleus collision energy. Since there is
   // no meaningful choice for a default energy, we require the user to
   // give one (and only one) energy input from the available options.
@@ -330,36 +330,28 @@ float ColliderModus::initial_conditions(Particles *particles,
         "the center of velocity reference frame.");
   }
 
-	// Generate Fermi momenta if necessary
-	switch (fermi_motion_) {
-		case FermiMotion::Off: {
-			// No Fermi-momenta are generated in this case
-			log.info() << "Fermi Motion is OFF.";
-		}
-		break;
-		case FermiMotion::On: {
-			log.info() << "Fermi Motion is ON.";
-			projectile_->generate_fermi_momenta();	 
-			target_->generate_fermi_momenta();		
-		}
-		break;
-		case FermiMotion::Frozen: {
-			// Generate Fermi momenta as in FermiMotion::On case, but these 
-			// Fermi momenta will be ignored during the propagation to avoid 
-			// that the nucleus will fly apart.  
-			log.info() << "FROZEN Fermi Motion is on.";
-			projectile_->generate_fermi_momenta();	 
-			target_->generate_fermi_momenta();	
-		}
-		break;
-		default:
-			throw std::domain_error(
-					"Invalid Fermi_Motion input.");
-	}
+  // Generate Fermi momenta if necessary
+  if (fermi_motion_ == FermiMotion::On ||
+      fermi_motion_ == FermiMotion::Frozen) {
+    // Frozen: Fermi momenta will be ignored during the propagation to
+    // avoid that the nuclei will fly apart.
+    projectile_->generate_fermi_momenta();
+    target_->generate_fermi_momenta();
+    if (fermi_motion_ == FermiMotion::On) {
+      log.info() << "Fermi motion is ON.";
+    } else {
+      log.info() << "FROZEN Fermi motion is on.";
+    }
+  } else if (fermi_motion_ == FermiMotion::Off) {
+    // No Fermi-momenta are generated in this case
+    log.info() << "Fermi motion is OFF.";
+  } else {
+    throw std::domain_error("Invalid Fermi_Motion input.");
+  }
 
   // Boost the nuclei to the appropriate velocity.
-  projectile_->boost(v_a);
-  target_->boost(v_b);
+  projectile_->boost(v_a, fermi_motion_);
+  target_->boost(v_b, fermi_motion_);
 
   // Shift the nuclei into starting positions. Contracted spheres with
   // nuclear radii should touch exactly at t=0. Modus starts at negative

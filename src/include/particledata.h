@@ -92,7 +92,7 @@ class ParticleData {
   const FourVector &momentum() const { return momentum_; }
   /// return the particle's beam-4-momentum
   const FourVector &beammomentum() const { return beammomentum_; }
-   
+
   /// set the particle's 4-momentum directly
   void set_4momentum(const FourVector &momentum_vector) {
     momentum_ = momentum_vector;
@@ -145,7 +145,7 @@ class ParticleData {
     beammomentum_ = FourVector(std::sqrt(mass*mass + pBx*pBx + pBy*pBy + pBz*pBz), 
 																pBx, pBy, pBz);
   }
-  
+
   /// The particle's position in Minkowski space
   const FourVector &position() const { return position_; }
   /// Set the particle's position directly
@@ -294,7 +294,7 @@ class ParticleData {
   /// momenta of the particle: x0, x1, x2, x3 as E, px, py, pz
   FourVector momentum_;
   /// beam-momenta of the particle: x0, x1, x2, x3 as E, pBx, pBy, pBz
-  FourVector beammomentum_;  
+  FourVector beammomentum_;
   /// position in space: x0, x1, x2, x3 as t, x, y, z
   FourVector position_;
   /** Formation time at which the particle is fully formed
