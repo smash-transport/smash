@@ -256,8 +256,11 @@ void ScatterActionNucleonNucleon::sample_angles(
     phitheta = Angles(2.*M_PI*Random::canonical(),
                       1. - 2.*(t-t_range[0])/(t_range[1]-t_range[0]));
   } else if (p_b->pdgcode().is_nucleon() && !isotropic_ &&
-             (p_a->type().is_Nstar() || p_a->type().is_Deltastar())) {
-    /** NN → NR: Fit to HADES data, see \iref{Agakishiev:2014wqa}. */
+             (p_a->type().is_Nstar() || p_a->type().is_Deltastar()) &&
+             process_type_ != ProcessType::String) {
+    /** NN → NR: Fit to HADES data, see \iref{Agakishiev:2014wqa}.
+     * We cannot use this fit for string fragmentation, because it does not
+     * work well for very high energies (TeV). */
     const std::array<float, 4> p { 1.46434, 5.80311, -6.89358, 1.94302 };
     const double a = p[0] + mass_a * (p[1] + mass_a * (p[2] + mass_a * p[3]));
     double t = Random::power(-a, t_range[0], t_range[1]);
