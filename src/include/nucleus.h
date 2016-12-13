@@ -93,7 +93,7 @@ class Nucleus {
    *
    * \fpPrecision Why \c double?
    **/
-  void boost(double beta_scalar, FermiMotion &fermi_motion_);
+  void boost(double beta_scalar, FermiMotion fermi_motion_);
 
   /** Adds a particle to the nucleus
    *

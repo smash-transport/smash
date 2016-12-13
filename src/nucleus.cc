@@ -390,7 +390,7 @@ void Nucleus::generate_fermi_momenta() {
   }
 }
 
-void Nucleus::boost(double beta_scalar, FermiMotion &fermi_motion_) {
+void Nucleus::boost(double beta_scalar, FermiMotion fermi_motion_) {
   double beta_squared = beta_scalar * beta_scalar;
   double one_over_gamma = std::sqrt(1.0 - beta_squared);
   double gamma = 1.0/one_over_gamma;

@@ -136,14 +136,14 @@ class ParticleData {
    *
    * \param[in] mass the mass of the particle (without E_kin contribution)
    * \param[in] px x-component of the momentum, zero because beam in z-direction
-   * \param[in] py y-component of the momentum, zero beacuse beam in z-direction
+   * \param[in] py y-component of the momentum, zero because beam in z-direction
    * \param[in] pz z-component of the momentum
    *
    * \fpPrecision The momentum FourVector requires double-precision.
    */
   void set_beam4momentum(double mass, double pBx, double pBy, double pBz) {
-    beammomentum_ = FourVector(std::sqrt(mass*mass + pBx*pBx + pBy*pBy + pBz*pBz), 
-																pBx, pBy, pBz);
+    beammomentum_ = FourVector(std::sqrt(mass*mass + pBx*pBx + pBy*pBy + pBz*pBz),
+                               pBx, pBy, pBz);
   }
 
   /// The particle's position in Minkowski space

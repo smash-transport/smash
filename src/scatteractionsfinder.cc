@@ -127,7 +127,7 @@ ActionPtr ScatterActionsFinder::check_collision(
 #ifndef NDEBUG
   const auto &log = logger<LogArea::FindScatter>();
 #endif
-	
+
   /* just collided with this particle */
   if (data_a.id_process() > 0 && data_a.id_process() == data_b.id_process()) {
 #ifndef NDEBUG
