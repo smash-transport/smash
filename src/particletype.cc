@@ -27,6 +27,7 @@
 #include "include/numerics.h"
 #include "include/particledata.h"
 #include "include/pdgcode.h"
+#include "include/pow.h"
 #include "include/processbranch.h"
 #include "include/stringfunctions.h"
 
@@ -479,11 +480,11 @@ float ParticleType::spectral_function(float m) const {
     /* Initialize the normalization factor
      * by integrating over the unnormalized spectral function. */
     Integrator integrate;
-    const float max_mass = 100.;
-    norm_factor_ = 1./integrate(minimum_mass(), max_mass,
-                                [&](double mm) {
-                                  return spectral_function_no_norm(mm);
-                                });
+    norm_factor_ = 1./integrate(0., 1.,
+        [&](double mm) {
+          // Transform the integral from (m_min, oo) to (0, 1).
+          return spectral_function_no_norm(minimum_mass() + (1 - mm)/mm) / square(mm);
+    });
   }
   return norm_factor_ * spectral_function_no_norm(m);
 }
