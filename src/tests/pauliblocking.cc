@@ -25,7 +25,6 @@ using namespace Smash;
 TEST(init_particle_types) {
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "ΔΔ 0.1 0.0 2114\n"
       "N+ 0.938 0.0 2212\n"
       "N0 0.938 0.0 2112\n");
 }

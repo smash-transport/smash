@@ -22,6 +22,11 @@ struct ExperimentParameters {
   /// system clock (for simulation time keeping in the computational
   /// frame)
   Clock labclock;
+  /// Make one timestep to reach given time
+  void reach_time_in_one_timestep(float time) {
+    labclock.set_timestep_duration(time - labclock.current_time());
+    ++labclock;
+  }
   /// Time step size
   float timestep_duration() const {
     return labclock.timestep_duration();

@@ -24,6 +24,7 @@
 #include "include/isoparticletype.h"
 #include "include/kinematics.h"
 #include "include/logging.h"
+#include "include/numerics.h"
 #include "include/particledata.h"
 #include "include/pdgcode.h"
 #include "include/processbranch.h"
@@ -39,6 +40,7 @@ namespace {
 const ParticleTypeList *all_particle_types = nullptr;
 ParticleTypePtrList nucleons_list;
 ParticleTypePtrList deltas_list;
+ParticleTypePtrList baryon_resonances_list;
 }  // unnamed namespace
 
 const ParticleTypeList &ParticleType::list_all() {
@@ -67,18 +69,8 @@ ParticleTypePtrList &ParticleType::list_Deltas() {
   return deltas_list;
 }
 
-ParticleTypePtrList ParticleType::list_baryon_resonances() {
-  ParticleTypePtrList list;
-  list.reserve(10);
-  for (const ParticleType &type_resonance : ParticleType::list_all()) {
-    /* Only loop over baryon resonances. */
-    if (type_resonance.is_stable()
-        || type_resonance.pdgcode().baryon_number() != 1) {
-      continue;
-    }
-    list.emplace_back(&type_resonance);
-  }
-  return list;
+ParticleTypePtrList &ParticleType::list_baryon_resonances() {
+  return baryon_resonances_list;
 }
 
 const ParticleType &ParticleType::find(PdgCode pdgcode) {
@@ -191,6 +183,17 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
     }
     ensure_all_read(lineinput, line);
 
+    //Check if nucleon, kaon, and delta masses are the same as hardcoded ones, if present
+    if (pdgcode[0].is_nucleon() && !almost_equal(mass, nucleon_mass)) {
+      throw std::runtime_error("Nucleon mass in input file different from 0.938");
+    }
+    if (pdgcode[0].is_kaon() && !almost_equal(mass, kaon_mass)) {
+      throw std::runtime_error("Kaon mass in input file different from 0.494"); 
+    }
+    if (pdgcode[0].is_Delta() && !almost_equal(mass, delta_mass)) {
+      throw std::runtime_error("Delta mass in input file different from 1.232"); 
+    }
+
     // add all states to type list
     for (unsigned int i = 0; i < n; i++) {
       std::string full_name = name;
@@ -240,20 +243,29 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
     t.iso_multiplet_ = IsoParticleType::find(t);
   }
 
- // Create nucleons list
- if (IsoParticleType::exists("N")) {
-   for (const auto state : IsoParticleType::find("N").get_states()) {
-     nucleons_list.push_back(state);
-   }
- }
+  // Create nucleons list
+  if (IsoParticleType::exists("N")) {
+    for (const auto state : IsoParticleType::find("N").get_states()) {
+      nucleons_list.push_back(state);
+    }
+  }
 
- // Create deltas list
- if (IsoParticleType::exists("Δ")) {
-   for (const auto state : IsoParticleType::find("Δ").get_states()) {
-     deltas_list.push_back(state);
-   }
- }
+  // Create deltas list
+  if (IsoParticleType::exists("Δ")) {
+    for (const auto state : IsoParticleType::find("Δ").get_states()) {
+      deltas_list.push_back(state);
+    }
+  }
 
+  // Create baryon resonances list
+  for (const ParticleType &type_resonance : ParticleType::list_all()) {
+    /* Only loop over baryon resonances. */
+    if (type_resonance.is_stable()
+        || type_resonance.pdgcode().baryon_number() != 1) {
+      continue;
+    }
+    baryon_resonances_list.push_back(&type_resonance);
+  }
 
 }/*}}}*/
 

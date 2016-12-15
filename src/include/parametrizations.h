@@ -9,6 +9,10 @@
 #ifndef SRC_INCLUDE_PARAMETRIZATIONS_H_
 #define SRC_INCLUDE_PARAMETRIZATIONS_H_
 
+#include <unordered_map>
+
+#include "particletype.h"
+
 namespace Smash {
 
 /* pp elastic cross section parametrization
@@ -106,6 +110,42 @@ float kplusp_inelastic(double mandelstam_s);
  * \fpPrecision Why \c double?
  */
 float kplusn_inelastic(double mandelstam_s);
+
+/* Hash a pair of integers.
+ *
+ * Note that symmetric pairs and permutations yield identical hashes with this
+ * implementation.
+ */
+struct pair_hash {
+    std::size_t operator () (const std::pair<uint64_t, uint64_t> &p) const {
+        auto h1 = std::hash<uint64_t>{}(p.first);
+        auto h2 = std::hash<uint64_t>{}(p.second);
+
+        // In our case the integers are PDG codes. We know they are different
+        // and their order is defined, so we can simply combine the hashes
+        // using XOR. Note that this yields 0 for h1 == h2. Also,
+        // std::swap(h1, h2) does not not change the final hash.
+        return h1 ^ h2;
+    }
+};
+
+/* Isospin weights for inelastic K+ N channels.
+ */
+class KplusNRatios {
+ private:
+  mutable std::unordered_map<std::pair<uint64_t, uint64_t>, float, pair_hash> ratios_;
+ public:
+  /// Create an empty K+ N isospin ratio storage.
+  KplusNRatios() : ratios_({}) {};
+
+  /// Return the isospin ratio of the given K+ N reaction's cross section.
+  ///
+  /// On the first call all ratios are calculated.
+  float get_ratio(const ParticleType& a, const ParticleType& b,
+                  const ParticleType& c, const ParticleType& d) const;
+};
+
+extern thread_local KplusNRatios kplusn_ratios;
 
 /** K- p <-> Kbar0 n cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.9 */

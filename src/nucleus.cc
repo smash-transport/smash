@@ -39,8 +39,8 @@ Nucleus::Nucleus(Configuration &config, int nTest) {
   }
 }
 
-float Nucleus::mass() const {
-  float total_mass = 0.f;
+double Nucleus::mass() const {
+  double total_mass = 0.;
   for (auto i = cbegin(); i != cend(); i++) {
     total_mass += i->momentum().abs();
   }
