@@ -329,7 +329,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
          {"Output", "Photons", "Fractions"});
     photon_finder_ = make_unique<ScatterActionsFinderPhoton>(
         config, parameters_, two_to_one, two_to_two,low_snn_cut,
-        strings_switch, number_of_fractional_photons);
+        strings_switch,nucleus_id_,modus_.total_N_number(),modus_.proj_N_number(),number_of_fractional_photons);
   }
   if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
     log.info() << "Pauli blocking is ON.";
@@ -687,8 +687,8 @@ void Experiment<Modus>::perform_action(
   if (!action.is_valid(particles_)) {
     log.debug(~einhard::DRed(), "✘ ", action, " (discarded: invalid)");
 /// using par_a and par_b to label the unique ids of the two colliding particles
-    int par_a = action->incoming_particles_[0].id();
-    int par_b = action->incoming_particles_[1].id();
+    int par_a = (action.incoming_particles())[0].id();
+    int par_b = (action.incoming_particles())[1].id();
 /// set the nucleus_id_ equal to false after the collisions
     nucleus_id_[par_a]=true;
     nucleus_id_[par_b]=true;

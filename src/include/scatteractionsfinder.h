@@ -132,19 +132,19 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const bool two_to_one_;
   /** Enable 2->2 processes. */
   const bool two_to_two_;
-  /** Switch to turn off string excitation. */
-  const bool strings_switch_;
   /** Elastic collsions between two nucleons with 
    ** sqrt_s below low_snn_cut_ are excluded. */ 
   const double low_snn_cut_;
-  /** Parameter for formation time */
-  const float formation_time_;
+  /** Switch to turn off string excitation. */
+  const bool strings_switch_;
   /** Parameter to record whether the nucleon has experienced a collision or not*/
   const std::vector<bool> &nucleus_id_;
   /** Record the total number of the nucleons in the two colliding nuclei */
   const int N_tot_;
   /** Record the number of the nucleons in the projectile */
   const int N_proj_;
+  /** Parameter for formation time */
+  const float formation_time_;
 };
 
 #if 0
