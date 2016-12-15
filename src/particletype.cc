@@ -480,10 +480,10 @@ float ParticleType::spectral_function(float m) const {
     /* Initialize the normalization factor
      * by integrating over the unnormalized spectral function. */
     Integrator integrate;
-    norm_factor_ = 1./integrate(0., 1.,
-        [&](double mm) {
-          // Transform the integral from (m_min, oo) to (0, 1).
-          return spectral_function_no_norm(minimum_mass() + (1 - mm)/mm) / square(mm);
+    norm_factor_ = 1./integrate(std::atan((minimum_mass() - mass())/width_at_pole()), M_PI/2.,
+        [&](double x) {
+          return spectral_function_no_norm(mass() + width_at_pole()*std::tan(x)) * width_at_pole()
+                 * (1 + square(std::tan(x))) ;
     });
   }
   return norm_factor_ * spectral_function_no_norm(m);
