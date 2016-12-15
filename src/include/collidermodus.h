@@ -54,7 +54,15 @@ class ColliderModus : public ModusDefault {
    */
   float initial_conditions(Particles *particles,
                            const ExperimentParameters &parameters);
-
+  /// return the total nucleon number 
+  int total_N_number() const { return target_->number_of_particles()
+                                     +projectile_->number_of_particles(); }
+  /// return the nucleon number in the projectile nucleus
+  int proj_N_number() const { return projectile_->number_of_particles(); }
+  /// return the flag: whether to allow the first collsions within the same nucleus
+  bool cll_in_nucleus() { return cll_in_nucleus_; }
+  /// return whether the modus is collider modus
+  bool is_collider() const { return true; } 
   /// \ingroup exception
   /// Thrown when either \a projectile_ or \a target_ nuclei are empty.
   struct ColliderEmpty : public ModusDefault::BadInput {

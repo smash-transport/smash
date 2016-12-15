@@ -316,9 +316,6 @@ void ScatterAction::elastic_scattering() {
   // copy initial particles into final state
   outgoing_particles_[0] = incoming_particles_[0];
   outgoing_particles_[1] = incoming_particles_[1];
-  // Set the nucleus_id_ (see the explanation in particledata.h) of the colliding particles equal to -1 after collisions. Namely, remove the restriction that they cannot collide with the particles once belong to the same nuclei.) 
-  outgoing_particles_[0].set_nucleus_id(-1);
-  outgoing_particles_[1].set_nucleus_id(-1);
   // resample momenta
   sample_angles({outgoing_particles_[0].effective_mass(),
                  outgoing_particles_[1].effective_mass()});

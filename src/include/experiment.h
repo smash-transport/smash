@@ -285,6 +285,11 @@ class Experiment : public ExperimentBase {
   /// The Photon output
   OutputPtr photon_output_;
 
+  /** nucleus_id_ labels whether the particles in the nuclei 
+   *  have experienced any collisions or not. It's only valid in 
+   *  the ColliderMode, so is set as an empty vector by default.*/
+  std::vector<bool> nucleus_id_={};
+
   /// The Action finder objects
   std::vector<std::unique_ptr<ActionFinderInterface>> action_finders_;
 

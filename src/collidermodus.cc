@@ -360,16 +360,6 @@ float ColliderModus::initial_conditions(Particles *particles,
   projectile_->shift(proj_z, +impact_ / 2.0, simulation_time);
   target_->    shift(targ_z, -impact_ / 2.0, simulation_time);
 
-  /// Set nucleus_id_ (see the explanation in particledata.h) equal to 0 for
-  /// the nucleons in the target nuclei, and equal to 1 for those
-  /// in the projectile nuclei.
-  if (!cll_in_nucleus_) {
-    target_->set_nucleus_id(0);
-    projectile_->set_nucleus_id(1);
-  } 
-  // Put the particles in the nuclei into code particles.
-  projectile_->copy_particles(particles);
-  target_->copy_particles(particles);
   return simulation_time;
 }
 

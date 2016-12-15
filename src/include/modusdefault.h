@@ -49,6 +49,10 @@ class ModusDefault {
                          const OutputsList & /*out_list*/ = {})
   { return 0;}
 
+  int total_N_number() const { return 0; }
+  int proj_N_number() const {return 0; } 
+  bool cll_in_nucleus() const { return true; }
+  bool is_collider() const { return false; }
   /**
    * Creates the Grid with normal boundary conditions.
    *

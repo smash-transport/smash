@@ -170,15 +170,6 @@ class Nucleus {
       p->set_4position(p->position()-centerpoint);
     }
   }
-  /** Assign the value nucl_id to the parameter nucleus_id_ of each particle
-   *  in the nuclei. The value will be 0 for the nucleons in the target nuclei
-   *  and 1 for the nucleons in the projectile nuclei.
-   */
-  void set_nucleus_id(int nucl_id) {
-    for (auto p = particles_.begin(); p != particles_.end(); ++p) {
-      p->set_nucleus_id(nucl_id);
-    }
-  }
 
   /// Write the nucleon positions to a text file.
 //   void print_nucleus(const char * file_name) const;

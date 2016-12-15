@@ -316,7 +316,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   if (two_to_one || two_to_two) {
     auto scat_finder = make_unique<ScatterActionsFinder>(config, parameters_,
                                                        two_to_one, two_to_two,low_snn_cut,
-                                                       strings_switch);
+                                                       strings_switch,nucleus_id_,modus_.total_N_number(),modus_.proj_N_number());
     max_transverse_distance_sqr_ = scat_finder->max_transverse_distance_sqr(
                                                     parameters_.testparticles);
     action_finders_.emplace_back(std::move(scat_finder));
@@ -686,6 +686,12 @@ void Experiment<Modus>::perform_action(
   const auto &log = logger<LogArea::Experiment>();
   if (!action.is_valid(particles_)) {
     log.debug(~einhard::DRed(), "✘ ", action, " (discarded: invalid)");
+/// using par_a and par_b to label the unique ids of the two colliding particles
+    int par_a = action->incoming_particles_[0].id();
+    int par_b = action->incoming_particles_[1].id();
+/// set the nucleus_id_ equal to false after the collisions
+    nucleus_id_[par_a]=true;
+    nucleus_id_[par_b]=true;
     return;
   }
   action.generate_final_state();
@@ -1387,7 +1393,12 @@ void Experiment<Modus>::run() {
 
     /* Sample initial particles, start clock, some printout and book-keeping */
     initialize_new_event();
-
+    /** In the ColliderMode, if the first collisions within the same nucleus are 
+     *  forbidden, then nucleus_id_ is created to record wether the nucleons inside
+     *  the colliding nuclei have experienced any collisions or not */ 
+    if (modus_.is_collider() && (!modus_.cll_in_nucleus())){
+       nucleus_id_.assign(modus_.total_N_number(),true);
+     }
     /* Output at event start */
     for (const auto &output : outputs_) {
       output->at_eventstart(particles_, j);
