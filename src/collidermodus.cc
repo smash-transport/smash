@@ -359,7 +359,10 @@ float ColliderModus::initial_conditions(Particles *particles,
                         std::sqrt(1.0 - v_b*v_b) * (r_b + d_b);
   projectile_->shift(proj_z, +impact_ / 2.0, simulation_time);
   target_->    shift(targ_z, -impact_ / 2.0, simulation_time);
-
+ 
+  // Put the particles in the nuclei into code particles.
+  projectile_->copy_particles(particles);
+  target_->copy_particles(particles);     
   return simulation_time;
 }
 

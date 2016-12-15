@@ -30,7 +30,7 @@ General:
     Delta_Time:    0.1
 
     # end time of simulation
-    End_Time:      60.0
+    End_Time:      20.0
 
     # initial random seed (auto-generated if negative)
     Randomseed:    1
@@ -39,7 +39,7 @@ General:
     Testparticles: 1
 
     # number of events
-    Nevents:       10
+    Nevents:       1
 
     # width of gaussians representing particles, fm
     Gaussian_Sigma: 1.0
@@ -71,12 +71,12 @@ Output:
 #        Write_Collisions:   True
 #        Write_Particles:    True
 #        Autosave_Frequency: 1000
-    Binary_Collisions:
-        Extended:           False
-        Print_Start_End:    True
-    Binary_Particles:
-        Extended:           False
-        Only_Final:         False
+#    Binary_Collisions:
+#        Extended:           False
+#        Print_Start_End:    True
+#    Binary_Particles:
+#        Extended:           False
+#        Only_Final:         False
 #    Thermodynamics:
 #        # ("hadron", "baryon", "baryonic isospin", "pion", "none")
 #        Type:               "baryon"
@@ -191,7 +191,7 @@ Modi:
 
         # Specify an impact parameter
         Impact:
-            Value: 7.0
+            Value: 0.0
 
         # Include Fermi motion
         Fermi_Motion: false

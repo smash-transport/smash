@@ -53,7 +53,8 @@ namespace Smash {
 
 ScatterActionsFinder::ScatterActionsFinder(
     Configuration config, const ExperimentParameters &parameters,
-    bool two_to_one, bool two_to_two, double low_snn_cut, bool strings_switch, const std::vector<bool> &nucleus_id, int N_tot, int N_proj)
+    bool two_to_one, bool two_to_two, double low_snn_cut, bool strings_switch,
+    const std::vector<bool> &nucleus_id, int N_tot, int N_proj)
     : elastic_parameter_(config.take({"Collision_Term",
                                       "Elastic_Cross_Section"}, -1.0f)),
       testparticles_(parameters.testparticles),
@@ -75,7 +76,8 @@ ScatterActionsFinder::ScatterActionsFinder(
       }
 
 ScatterActionsFinder::ScatterActionsFinder(
-    float elastic_parameter, int testparticles, const std::vector<bool> &nucleus_id, bool two_to_one)
+    float elastic_parameter, int testparticles,
+    const std::vector<bool> &nucleus_id, bool two_to_one)
     : elastic_parameter_(elastic_parameter),
       testparticles_(testparticles),
       isotropic_(false),
@@ -157,7 +159,7 @@ ActionPtr ScatterActionsFinder::check_collision(
     * 3) both of them have never experienced any collisons,
     * then the collision between them are banned.*/
   if (data_a.id() < N_tot_ && data_b.id() < N_tot_ &&
-      ((data_a.id() < N_proj_ && data_b.id() < N_proj_) || 
+      ((data_a.id() < N_proj_ && data_b.id() < N_proj_) ||
        (data_a.id() > N_proj_ && data_b.id() > N_proj_)) &&
        !(nucleus_id_[data_a.id()] || nucleus_id_[data_b.id()])) {
     return nullptr;
@@ -297,7 +299,7 @@ void ScatterActionsFinder::dump_reactions() const {
             B.set_4momentum(B.pole_mass(), -mom, 0.0, 0.0);
             ScatterActionPtr act = construct_scatter_action(A, B, time);
             act->add_all_processes(elastic_parameter_, two_to_one_,
-                                   two_to_two_,low_snn_cut_, strings_switch_);
+                                   two_to_two_, low_snn_cut_, strings_switch_);
             const float total_cs = act->cross_section();
             if (total_cs <= 0.0) {
               continue;

@@ -293,12 +293,15 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
   const bool two_to_two = config.take({"Collision_Term", "Two_to_Two"}, true);
-  /// Elastic collisions between the nucleons with the square root s below low_snn_cut are excluded.
-  const double low_snn_cut = config.take({"Collision_Term", "Elastic_NN_Cutoff_Sqrts"});
+  /// Elastic collisions between the nucleons with the square root s
+  //  below low_snn_cut are excluded.
+  const double low_snn_cut = config.take({"Collision_Term",
+                                          "Elastic_NN_Cutoff_Sqrts"});
   if (low_snn_cut > ParticleType::find(pdg::p).mass() +
                     ParticleType::find(pdg::p).mass() +
                     ParticleType::find(pdg::pi_z).mass()) {
-    log.warn("The cut-off should be below the threshold energy of the process: NN to NNpi");
+    log.warn("The cut-off should be below the threshold energy",
+             " of the process: NN to NNpi");
   }
 
   const bool dileptons_switch = config.has_value({"Output", "Dileptons"}) ?
@@ -315,10 +318,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   }
   if (two_to_one || two_to_two) {
     auto scat_finder = make_unique<ScatterActionsFinder>(config, parameters_,
-                                                       two_to_one, two_to_two,low_snn_cut,
-                                                       strings_switch,nucleus_id_,modus_.total_N_number(),modus_.proj_N_number());
+                       two_to_one, two_to_two, low_snn_cut, strings_switch,
+               nucleus_id_, modus_.total_N_number(), modus_.proj_N_number());
     max_transverse_distance_sqr_ = scat_finder->max_transverse_distance_sqr(
-                                                    parameters_.testparticles);
+                                                  parameters_.testparticles);
     action_finders_.emplace_back(std::move(scat_finder));
   }
   if (dileptons_switch) {
@@ -328,8 +331,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     number_of_fractional_photons = config.take(
          {"Output", "Photons", "Fractions"});
     photon_finder_ = make_unique<ScatterActionsFinderPhoton>(
-        config, parameters_, two_to_one, two_to_two,low_snn_cut,
-        strings_switch,nucleus_id_,modus_.total_N_number(),modus_.proj_N_number(),number_of_fractional_photons);
+        config, parameters_, two_to_one, two_to_two, low_snn_cut,
+        strings_switch, nucleus_id_, modus_.total_N_number(),
+        modus_.proj_N_number(), number_of_fractional_photons);
   }
   if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
     log.info() << "Pauli blocking is ON.";
@@ -686,12 +690,19 @@ void Experiment<Modus>::perform_action(
   const auto &log = logger<LogArea::Experiment>();
   if (!action.is_valid(particles_)) {
     log.debug(~einhard::DRed(), "✘ ", action, " (discarded: invalid)");
-/// using par_a and par_b to label the unique ids of the two colliding particles
-    int par_a = (action.incoming_particles())[0].id();
-    int par_b = (action.incoming_particles())[1].id();
-/// set the nucleus_id_ equal to false after the collisions
-    nucleus_id_[par_a]=true;
-    nucleus_id_[par_b]=true;
+    if (modus_.is_collider()) {
+/// using par_a and par_b to label the unique ids of the two
+//  colliding particles
+      const int par_a = (action.incoming_particles())[0].id();
+      const int par_b = (action.incoming_particles())[1].id();
+/// set the nucleus_id_ equal to true after the collisions
+      if (par_a < modus_.total_N_number()) {
+        nucleus_id_[par_a] = true;
+      }
+      if (par_b < modus_.total_N_number()) {
+        nucleus_id_[par_b] = true;
+      }
+    }
     return;
   }
   action.generate_final_state();
@@ -1395,9 +1406,13 @@ void Experiment<Modus>::run() {
     initialize_new_event();
     /** In the ColliderMode, if the first collisions within the same nucleus are 
      *  forbidden, then nucleus_id_ is created to record wether the nucleons inside
-     *  the colliding nuclei have experienced any collisions or not */ 
-    if (modus_.is_collider() && (!modus_.cll_in_nucleus())){
-       nucleus_id_.assign(modus_.total_N_number(),true);
+     *  the colliding nuclei have experienced any collisions or not */
+    if (modus_.is_collider()) {
+      if (!modus_.cll_in_nucleus()) {
+        nucleus_id_.assign(modus_.total_N_number(), false);
+      } else {
+        nucleus_id_.assign(modus_.total_N_number(), true);
+      }
      }
     /* Output at event start */
     for (const auto &output : outputs_) {
