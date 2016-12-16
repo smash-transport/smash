@@ -38,6 +38,7 @@ TEST(init_decay_modes) {
 }
 
 TEST(pion_decay) {
+  printf("PI TEST ...\n");
   // set up a π⁰ at rest
   const ParticleType &type_piz = ParticleType::find(0x111);
   ParticleData piz{type_piz};
@@ -58,7 +59,7 @@ TEST(pion_decay) {
   act->add_decay(std::move(mode));
 
   // sample the final state and sum up all weights
-  const int N_samples = 5E8;
+  const int N_samples = 1E4;
   const int st = 1E6;
   double weight_sum = 0.;
   printf("sampling Dalitz ...\n");
@@ -81,6 +82,7 @@ TEST(pion_decay) {
 }
 
 TEST(eta_decay) {
+  printf("ETA TEST ...\n");
   // set up a π⁰ at rest
   const ParticleType &type_etaz = ParticleType::find(0x221);
   ParticleData etaz{type_etaz};
@@ -101,7 +103,7 @@ TEST(eta_decay) {
   act->add_decay(std::move(mode));
 
   // sample the final state and sum up all weights
-  const int N_samples = 1E8;
+  const int N_samples = 1E4;
   const int st = 1E6;
   double weight_sum = 0.;
   printf("sampling Dalitz ...\n");

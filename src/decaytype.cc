@@ -357,7 +357,9 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
     switch (pdg.spin()) {
     case 0:  /* pseudoscalars: π⁰, η, η' */ {
       // width for decay into 2γ
-      const float gamma_2g = t->get_partial_width(m_par, photon, photon);
+      const float gamma_2g = t->get_partial_width(m_par, photon, photon); // richtig?
+      std::cout << "gamma_2g = " << gamma_2g << std::endl;
+      std::cout << std::endl;
       float ff = em_form_factor_ps(pdg, m_dil);  // form factor
       /// see \iref{Landsberg:1986fd}, equation (3.8)
       return (4.*alpha/(3.*M_PI)) * gamma_2g/m_dil
