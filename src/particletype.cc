@@ -480,6 +480,8 @@ float ParticleType::spectral_function(float m) const {
     /* Initialize the normalization factor
      * by integrating over the unnormalized spectral function. */
     Integrator integrate;
+    //^ This should be static, but for some reason then the integrals sometimes
+    //  yield different results. See #4299.
     const auto width = width_at_pole();
     norm_factor_ = 1./integrate(std::atan((minimum_mass() - mass())/width), M_PI/2.,
         [&](double x) {
