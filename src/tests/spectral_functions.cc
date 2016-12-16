@@ -34,7 +34,8 @@ TEST(spectral_functions) {
       continue;
     }
     /* Integrate spectral function.
-     * We transform the integrals from the interval (m_min, oo) to (0, 1). */
+     * We transform the integrals using m = m_min + (1 - t)/t to make them
+     * definite and to avoid numerical problems. */
     const auto result_no_norm = integrate(0., 1.,
                           [&](double t) {
                             return type.spectral_function_no_norm(type.minimum_mass() + (1 - t)/t) / (t*t);

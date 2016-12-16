@@ -483,6 +483,8 @@ float ParticleType::spectral_function(float m) const {
     //^ This should be static, but for some reason then the integrals sometimes
     //  yield different results. See #4299.
     const auto width = width_at_pole();
+    // We transform the integral using m = m_min + width_pole * tan(x), to
+    // make it definite and to avoid numerical issues.
     norm_factor_ = 1./integrate(std::atan((minimum_mass() - mass())/width), M_PI/2.,
         [&](double x) {
           return spectral_function_no_norm(mass() + width*std::tan(x)) * width
