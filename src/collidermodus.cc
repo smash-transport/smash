@@ -126,14 +126,14 @@ namespace Smash {
  *
  * Note that this distance is applied before the Lorentz boost
  * to chosen calculation frame, and thus the actual distance may be different.
- * 
+ *
  * \key Fermi_Motion (string, optional, default = "off"): \n
  * Defines if Fermi motion is included.\n
  * "off", "on" or "frozen"\n
- * Use "frozen" if you want to use Fermi motion 
- * without potentials. Use "on" if you want to use Fermi motion 
+ * Use "frozen" if you want to use Fermi motion
+ * without potentials. Use "on" if you want to use Fermi motion
  * in combination with potentials.\n
- * 
+ *
  */
 
 ColliderModus::ColliderModus(Configuration modus_config,
