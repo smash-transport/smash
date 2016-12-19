@@ -670,11 +670,11 @@ void Experiment<Modus>::perform_action(Action &action,
   if (!action.is_valid(particles_)) {
     log.debug(~einhard::DRed(), "✘ ", action, " (discarded: invalid)");
     if (modus_.is_collider()) {
-/// using par_a and par_b to label the unique ids of the two
-//  colliding particles
+      // using par_a and par_b to label the unique ids of the two colliding
+      // particles
       const int par_a = (action.incoming_particles())[0].id();
       const int par_b = (action.incoming_particles())[1].id();
-/// set the nucleus_id_ equal to true after the collisions
+      // set the nucleus_id_ equal to true after the collisions
       if (par_a < modus_.total_N_number()) {
         nucleus_id_[par_a] = true;
       }
@@ -1169,8 +1169,8 @@ void Experiment<Modus>::run() {
 
     /* Sample initial particles, start clock, some printout and book-keeping */
     initialize_new_event();
-    /** In the ColliderMode, if the first collisions within the same nucleus are 
-     *  forbidden, then nucleus_id_ is created to record wether the nucleons inside
+    /** In the ColliderMode, if the first collisions within the same nucleus are
+     *  forbidden, then nucleus_id_ is created to record whether the nucleons inside
      *  the colliding nuclei have experienced any collisions or not */
     if (modus_.is_collider()) {
       if (!modus_.cll_in_nucleus()) {
@@ -1178,7 +1178,7 @@ void Experiment<Modus>::run() {
       } else {
         nucleus_id_.assign(modus_.total_N_number(), true);
       }
-     }
+    }
     /* Output at event start */
     for (const auto &output : outputs_) {
       output->at_eventstart(particles_, j);

@@ -153,11 +153,11 @@ ActionPtr ScatterActionsFinder::check_collision(
 #endif
     return nullptr;
   }
-  /** If the two particles 
+  /** If the two particles
     * 1) belong to the two colliding nuclei
     * 2) are within the same nucleus
     * 3) both of them have never experienced any collisons,
-    * then the collision between them are banned.*/
+    * then the collision between them are banned. */
   if (data_a.id() < N_tot_ && data_b.id() < N_tot_ &&
       ((data_a.id() < N_proj_ && data_b.id() < N_proj_) ||
        (data_a.id() > N_proj_ && data_b.id() > N_proj_)) &&
