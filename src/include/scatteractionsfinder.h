@@ -31,12 +31,12 @@ class ScatterActionsFinder : public ActionFinderInterface {
   ScatterActionsFinder(Configuration config,
                        const ExperimentParameters &parameters,
                        bool two_to_one, bool two_to_two, double low_snn_cut,
-                       bool strings_switch, const std::vector<bool> &nucleus_id,
+                       bool strings_switch, const std::vector<bool> &nucleon_has_interacted,
                        int N_tot, int N_proj);
 
   /** Constructor for testing purposes. */
   ScatterActionsFinder(float elastic_parameter, int testparticles,
-                       const std::vector<bool> &nucleus_id,
+                       const std::vector<bool> &nucleon_has_interacted,
                        bool two_to_one = true);
 
   /** Determine the collision time of the two particles [fm/c].
@@ -141,7 +141,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const bool strings_switch_;
   /** Parameter to record whether the nucleon
    *  has experienced a collision or not*/
-  const std::vector<bool> &nucleus_id_;
+  const std::vector<bool> &nucleon_has_interacted_;
   /** Record the total number of the nucleons in the two colliding nuclei */
   const int N_tot_;
   /** Record the number of the nucleons in the projectile */

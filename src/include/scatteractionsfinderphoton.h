@@ -26,17 +26,17 @@ class ScatterActionsFinderPhoton : public ScatterActionsFinder {
   ScatterActionsFinderPhoton(Configuration config,
                        const ExperimentParameters &parameters,
                        bool two_to_one, bool two_to_two, double low_snn_cut,
-                       bool strings_switch, const std::vector<bool> &nucleus_id,
+                       bool strings_switch, const std::vector<bool> &nucleon_has_interacted,
                        int N_tot, int N_proj, int nofp)
       : ScatterActionsFinder(config, parameters, two_to_one, two_to_two,
-                             low_snn_cut, strings_switch, nucleus_id,
+                             low_snn_cut, strings_switch, nucleon_has_interacted,
                              N_tot, N_proj),
         number_of_fractional_photons(nofp) {}
 
   /** Constructor for testing purposes. */
   ScatterActionsFinderPhoton(float elastic_parameter, int testparticles,
-                              const std::vector<bool> &nucleus_id)
-      : ScatterActionsFinder(elastic_parameter, testparticles, nucleus_id) {}
+                              const std::vector<bool> &nucleon_has_interacted)
+      : ScatterActionsFinder(elastic_parameter, testparticles, nucleon_has_interacted) {}
 
   /// Number of fractional photons produced per single reaction
   int number_of_fractional_photons;

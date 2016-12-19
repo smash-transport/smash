@@ -301,9 +301,9 @@ int main(int argc, char *argv[]) {
       constexpr bool two_to_one = false;
       ParticleType::create_type_list(configuration.take({"particles"}));
       DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
-      std::vector<bool> nucleus_id = {};
+      std::vector<bool> nucleon_has_interacted = {};
       auto scat_finder = make_unique<ScatterActionsFinder>(elastic_parameter,
-                                               ntest, nucleus_id, two_to_one);
+                                               ntest, nucleon_has_interacted, two_to_one);
       scat_finder->dump_reactions();
       std::exit(EXIT_SUCCESS);
     }

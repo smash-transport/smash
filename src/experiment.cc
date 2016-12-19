@@ -312,7 +312,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   if (two_to_one || two_to_two) {
     auto scat_finder = make_unique<ScatterActionsFinder>(config, parameters_,
                        two_to_one, two_to_two, low_snn_cut, strings_switch_,
-               nucleus_id_, modus_.total_N_number(), modus_.proj_N_number());
+               nucleon_has_interacted_, modus_.total_N_number(), modus_.proj_N_number());
     max_transverse_distance_sqr_ = scat_finder->max_transverse_distance_sqr(
                                                   parameters_.testparticles);
     action_finders_.emplace_back(std::move(scat_finder));
@@ -331,7 +331,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
          {"Output", "Photons", "Fractions"});
     photon_finder_ = make_unique<ScatterActionsFinderPhoton>(
         config, parameters_, two_to_one, two_to_two, low_snn_cut,
-        strings_switch_, nucleus_id_, modus_.total_N_number(),
+        strings_switch_, nucleon_has_interacted_, modus_.total_N_number(),
         modus_.proj_N_number(), number_of_fractional_photons);
   }
   if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
@@ -674,12 +674,12 @@ void Experiment<Modus>::perform_action(Action &action,
       // particles
       const int par_a = (action.incoming_particles())[0].id();
       const int par_b = (action.incoming_particles())[1].id();
-      // set the nucleus_id_ equal to true after the collisions
+      // set the nucleon_has_interacted_ equal to true after the collisions
       if (par_a < modus_.total_N_number()) {
-        nucleus_id_[par_a] = true;
+        nucleon_has_interacted_[par_a] = true;
       }
       if (par_b < modus_.total_N_number()) {
-        nucleus_id_[par_b] = true;
+        nucleon_has_interacted_[par_b] = true;
       }
     }
     return;
@@ -1170,13 +1170,13 @@ void Experiment<Modus>::run() {
     /* Sample initial particles, start clock, some printout and book-keeping */
     initialize_new_event();
     /** In the ColliderMode, if the first collisions within the same nucleus are
-     *  forbidden, then nucleus_id_ is created to record whether the nucleons inside
+     *  forbidden, then nucleon_has_interacted_ is created to record whether the nucleons inside
      *  the colliding nuclei have experienced any collisions or not */
     if (modus_.is_collider()) {
       if (!modus_.cll_in_nucleus()) {
-        nucleus_id_.assign(modus_.total_N_number(), false);
+        nucleon_has_interacted_.assign(modus_.total_N_number(), false);
       } else {
-        nucleus_id_.assign(modus_.total_N_number(), true);
+        nucleon_has_interacted_.assign(modus_.total_N_number(), true);
       }
     }
     /* Output at event start */

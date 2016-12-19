@@ -54,7 +54,7 @@ namespace Smash {
 ScatterActionsFinder::ScatterActionsFinder(
     Configuration config, const ExperimentParameters &parameters,
     bool two_to_one, bool two_to_two, double low_snn_cut, bool strings_switch,
-    const std::vector<bool> &nucleus_id, int N_tot, int N_proj)
+    const std::vector<bool> &nucleon_has_interacted, int N_tot, int N_proj)
     : elastic_parameter_(config.take({"Collision_Term",
                                       "Elastic_Cross_Section"}, -1.0f)),
       testparticles_(parameters.testparticles),
@@ -63,7 +63,7 @@ ScatterActionsFinder::ScatterActionsFinder(
       two_to_two_(two_to_two),
       low_snn_cut_(low_snn_cut),
       strings_switch_(strings_switch),
-      nucleus_id_(nucleus_id),
+      nucleon_has_interacted_(nucleon_has_interacted),
       N_tot_(N_tot),
       N_proj_(N_proj),
       formation_time_(config.take({"Collision_Term",
@@ -77,7 +77,7 @@ ScatterActionsFinder::ScatterActionsFinder(
 
 ScatterActionsFinder::ScatterActionsFinder(
     float elastic_parameter, int testparticles,
-    const std::vector<bool> &nucleus_id, bool two_to_one)
+    const std::vector<bool> &nucleon_has_interacted, bool two_to_one)
     : elastic_parameter_(elastic_parameter),
       testparticles_(testparticles),
       isotropic_(false),
@@ -85,7 +85,7 @@ ScatterActionsFinder::ScatterActionsFinder(
       two_to_two_(true),
       low_snn_cut_(0.0),
       strings_switch_(true),
-      nucleus_id_(nucleus_id),
+      nucleon_has_interacted_(nucleon_has_interacted),
       N_tot_(0),
       N_proj_(0),
       formation_time_(1.0f) {}
@@ -161,7 +161,7 @@ ActionPtr ScatterActionsFinder::check_collision(
   if (data_a.id() < N_tot_ && data_b.id() < N_tot_ &&
       ((data_a.id() < N_proj_ && data_b.id() < N_proj_) ||
        (data_a.id() > N_proj_ && data_b.id() > N_proj_)) &&
-       !(nucleus_id_[data_a.id()] || nucleus_id_[data_b.id()])) {
+       !(nucleon_has_interacted_[data_a.id()] || nucleon_has_interacted_[data_b.id()])) {
     return nullptr;
   }
 
