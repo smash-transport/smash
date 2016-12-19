@@ -75,12 +75,6 @@ void propagate(Particles *particles, const ExperimentParameters &parameters,
   float min_time_scale = std::numeric_limits<float>::infinity();
 
   for (ParticleData &data : *particles) {
-    // Print error message if one uses Frozen Fermi motion in combination
-    // with potentials. Frozen Fermi motion means there exists a non-empty
-    // beammomentum.
-    if (data.beammomentum().x0() > really_small) {
-      log.error("Don't use Frozen Fermi motion with potentials.");
-    }
     ThreeVector r = data.position().threevec();
     /* Lattices can be used for calculation if 1-2 are fulfilled:
      * 1) Required lattices are not nullptr - possibly_use_lattice
