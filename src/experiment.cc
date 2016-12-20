@@ -167,18 +167,14 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
 
   const int ntest = config.take({"General", "Testparticles"}, 1);
   if (ntest <= 0) {
-    throw std::invalid_argument(
-        "Invalid number of Testparticles "
-        "in config file!");
+    throw std::invalid_argument( "Testparticle number should be positive!");
   }
 
-  const float dt =
-      (config.has_value({"General", "Time_Step_Mode"}) &&
-       config.read({"General", "Time_Step_Mode"}) == TimeStepMode::None)
-          ? 0.0f
-          : config.take({"General", "Delta_Time"});
-  return {{0.0f, dt},
-          config.take({"Output", "Output_Interval"}),
+  // If this Delta_Time option is absent (this can be for timestepless mode)
+  // just assign 1.0, reasonable value will be set at event initialization.
+  const float dt = config.take({"General", "Delta_Time"}, 1.0f);
+  const float output_dt = config.take({"Output", "Output_Interval"});
+  return {{0.0f, dt}, {0.0, output_dt},
           ntest,
           config.take({"General", "Gaussian_Sigma"}, 1.0f),
           config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.0f)};
@@ -615,9 +611,37 @@ void Experiment<Modus>::initialize_new_event() {
   /* Sample particles according to the initial conditions */
   float start_time = modus_.initial_conditions(&particles_, parameters_);
 
-  // reset the clock:
+  /* For box modus: make sure that particles are in the box */
+  // Todo(oliiny): this should not be necessary, can we remove it?
+  modus_.impose_boundary_conditions(&particles_);
+
+  /* Reset the simulation clock */:
+  float timestep;
+
+  switch time_step_mode_{
+    case TimeStepMode::Fixed:
+      timestep = delta_time_startup_;
+      break;
+    case TimestepMode::Adaptive:
+      timestep = delta_time_startup_;
+      adaptive_parameters_->initialize(timestep);
+      break;
+    case TimestepMode::None:
+      // Take care of the box modus + timestepless propagation
+      const float max_dt = modus_.max_timestep(max_transverse_distance_sqr_);
+      timestep = std::min(end_time_, max_dt);
+      break;
+  }
   Clock clock_for_this_event(start_time, delta_time_startup_);
   parameters_.labclock = std::move(clock_for_this_event);
+
+  /* Reset the output clock */
+  const float dt_output = parameters_.outputclock.timestep_duration();
+  Clock output_clock(std::ceil(start_time/dt_output)*dt_output, dt_output);
+  parameters_.outputclock = std::move(output_clock);
+
+  log.debug("Lab clock: ", parameters_.labclock,
+            ", output clock: ", parameters_.outputclock);
 
   /* Save the initial conserved quantum numbers and total momentum in
    * the system for conservation checks */
@@ -750,37 +774,21 @@ static void check_interactions_total(uint64_t interactions_total) {
 
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution() {
-  float dt = parameters_.timestep_duration();
-  uint32_t num_steps = 0u;
   Actions actions, dilepton_actions, photon_actions;
 
   const auto &log = logger<LogArea::Experiment>();
   const auto &log_ad_ts = logger<LogArea::AdaptiveTS>();
-  modus_.impose_boundary_conditions(&particles_);
 
   log.info() << format_measurements(particles_, interactions_total_, 0u,
                                     conserved_initial_, time_start_,
                                     parameters_.labclock.current_time());
 
-  if (time_step_mode_ == TimeStepMode::Adaptive) {
-    adaptive_parameters_->initialize(dt);
-  }
-
   while (parameters_.labclock.current_time() < end_time_) {
-    num_steps++;
     const float t = parameters_.labclock.current_time();
-    // Take care of the box modus + timestepless propagation
-    if (time_step_mode_ == TimeStepMode::None) {
-      const float max_dt = modus_.max_timestep(max_transverse_distance_sqr_);
-      dt = (max_dt > 0.f) ? max_dt : (end_time_ - t);
-    }
-    float t_step_end = t + dt;
-    if (t_step_end > end_time_) {
-      t_step_end = end_time_;
-      dt = t_step_end - t;
-    }
-    parameters_.labclock.set_timestep_duration(dt);
+    const float dt = std::min(parameters_.labclock.timestep_duration(),
+                              end_time_ - t);
     log.debug("Timestepless propagation for next ", dt, " fm/c.");
+
     /* (1.a) Create grid. */
     float min_cell_length = compute_min_cell_length(dt);
     log.debug("Creating grid with minimal cell length ", min_cell_length);
@@ -805,59 +813,30 @@ void Experiment<Modus>::run_time_evolution() {
           }
         });
 
-    const auto particles_before_actions = particles_.copy_to_vector();
+    /* (2) Propagation from action to action within timestep */
+    run_time_evolution_timestepless(actions);
 
-    /* (1.c) Dileptons */
-    if (dilepton_finder_ != nullptr) {
-      dilepton_actions.insert(
-          dilepton_finder_->find_actions_in_cell(particles_before_actions, dt));
-
-      while (!dilepton_actions.is_empty()) {
-        write_dilepton_action(*dilepton_actions.pop(), particles_before_actions);
-      }
-    }
-
-    /* (1.d) Photons */
-    if (photon_finder_ != nullptr) {
-      grid.iterate_cells(
-          [&](const ParticleList &search_list) {
-            photon_actions.insert(
-                photon_finder_->find_actions_in_cell(search_list, dt));
-          },
-          [&](const ParticleList &search_list,
-              const ParticleList &neighbors_list) {
-            photon_actions.insert(photon_finder_->find_actions_with_neighbors(
-                search_list, neighbors_list, dt));
-          });
-
-      while (!photon_actions.is_empty()) {
-        write_photon_action(*photon_actions.pop(), particles_before_actions);
-      }
-    }
-
-    /* (2) In case of adaptive timesteps adapt timestep size */
+    /* (3) In case of adaptive timesteps adapt timestep size */
     if (time_step_mode_ ==  TimeStepMode::Adaptive && actions.size() > 0u) {
-      if (adaptive_parameters_->update_timestep(actions, particles_.size(), &dt)) {
-        parameters_.labclock.set_timestep_duration(dt);
-        log_ad_ts.info("New timestep is set to ", dt);
-        t_step_end = parameters_.labclock.current_time() + dt;
+      const float new_timestep = parameters_.labclock.timestep_duration();
+      if (adaptive_parameters_->update_timestep(actions, particles_.size(),
+          &new_timestep)) {
+        parameters_.labclock.set_timestep_duration(new_timestep);
+        log_ad_ts.info("New timestep is set to ", new_timestep);
       }
     }
 
-    /* (3) Propagation from action to action within timestep */
-    run_time_evolution_without_time_steps(t_step_end, actions);
   }
 
-  log.debug("Timesteps performed:", num_steps);
   if (pauli_blocker_) {
     log.info("Interactions: Pauli-blocked/performed = ", total_pauli_blocked_,
              "/", interactions_total_);
   }
 }
 
-
+// From parameters_.labclock.current_time() to parameters_.labclock.next_tick()
 template <typename Modus>
-void Experiment<Modus>::run_time_evolution_without_time_steps(float end_time, Actions& actions) {
+void Experiment<Modus>::run_time_evolution_timestepless(Actions& actions) {
   const auto &log = logger<LogArea::Experiment>();
   modus_.impose_boundary_conditions(&particles_);
 
@@ -897,6 +876,38 @@ void Experiment<Modus>::run_time_evolution_without_time_steps(float end_time, Ac
 
     perform_action(*act, particles_);
     modus_.impose_boundary_conditions(&particles_);
+
+    const auto particles_before_actions = particles_.copy_to_vector();
+
+    /* (1.c) Dileptons */
+    if (dilepton_finder_ != nullptr) {
+      dilepton_actions.insert(
+          dilepton_finder_->find_actions_in_cell(particles_before_actions, dt));
+
+      while (!dilepton_actions.is_empty()) {
+        write_dilepton_action(*dilepton_actions.pop(), particles_before_actions);
+      }
+    }
+
+    /* (1.d) Photons */
+    if (photon_finder_ != nullptr) {
+      grid.iterate_cells(
+          [&](const ParticleList &search_list) {
+            photon_actions.insert(
+                photon_finder_->find_actions_in_cell(search_list, dt));
+          },
+          [&](const ParticleList &search_list,
+              const ParticleList &neighbors_list) {
+            photon_actions.insert(photon_finder_->find_actions_with_neighbors(
+                search_list, neighbors_list, dt));
+          });
+
+      while (!photon_actions.is_empty()) {
+        write_photon_action(*photon_actions.pop(), particles_before_actions);
+      }
+    }
+
+
 
     /* (3) Check conservation laws. */
 
