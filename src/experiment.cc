@@ -488,10 +488,21 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     }
   }
 
+  // We can take away the Fermi motion flag, because the collider modus is already
+  // initialized. We only need it when potentials are enabled, but we always
+  // have to take it, otherwise SMASH will complain about unused options.
+  // We have to provide a default value for modi other than Collider.
+  const FermiMotion motion = config.take({"Modi", "Collider", "Fermi_Motion"},
+                                         FermiMotion::Off);
   if (config.has_value({"Potentials"})) {
     if (time_step_mode_ == TimeStepMode::None) {
       log.error() << "Potentials only work with time steps!";
       throw std::invalid_argument("Can't use potentials without time steps!");
+    }
+    if (motion == FermiMotion::Frozen) {
+      log.error() << "Potentials don't work with frozen Fermi momenta! "
+                     "Use normal Fermi motion instead.";
+      throw std::invalid_argument("Can't use potentials with frozen Fermi momenta!");
     }
     log.info() << "Potentials are ON.";
     // potentials need testparticles and gaussian sigma from parameters_

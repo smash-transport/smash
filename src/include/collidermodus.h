@@ -125,9 +125,9 @@ class ColliderModus : public ModusDefault {
    */
   CalculationFrame frame_ = CalculationFrame::CenterOfVelocity;
   /**
-   * An option to include Fermi motion
+   * An option to include Fermi motion ("off", "on", "frozen")
    */
-  bool fermi_motion_;
+  FermiMotion fermi_motion_ = FermiMotion::Off;
   /** Get the frame dependent velocity for each nucleus, using
    * the current reference frame. \see frame_
    *

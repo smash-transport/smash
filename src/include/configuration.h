@@ -278,6 +278,22 @@ class Configuration {
           "or \"fixed target\".");
     }
 
+    operator FermiMotion() const {
+      const std::string s = operator std::string();
+      if (s == "off") {
+        return FermiMotion::Off;
+      }
+      if (s == "on") {
+        return FermiMotion::On;
+      }
+      if (s == "frozen") {
+        return FermiMotion::Frozen;
+      }
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) +
+          "\" should be \"off\" or \"on\" or \"frozen\".");
+    }
+
     operator DensityType() const {
       const std::string s = operator std::string();
       if (s == "hadron") {
