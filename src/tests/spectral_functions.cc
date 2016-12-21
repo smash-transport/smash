@@ -22,32 +22,31 @@ TEST(spectral_functions) {
   Smash::Test::create_actual_decaymodes();
 
   Integrator integrate;
-  /* Upper limit for integration in GeV. Hadron masses are usually a few GeV,
-   * so this should really be on the safe side. */
-  const float max_mass = 100.;
   // error tolerance (max. deviation from one)
-  const float error_tolerance_no_norm = 0.53;
-  const float warning_level = 0.21;
+  const double error_tolerance_no_norm = 0.55;
+  const double warning_level = 0.21;
   // error tolerance (max. deviation from one) for constant-width SF
-  const float error_tolerance_const = 0.0032;
+  const double error_tolerance_const = 0.0032;
 
   /* Loop over all resonances. */
   for (const ParticleType &type : ParticleType::list_all()) {
     if (type.is_stable()) {
       continue;
     }
-    /* Integrate spectral function. */
-    const auto result_no_norm = integrate(type.minimum_mass(), max_mass,
-                          [&](double m) {
-                            return type.spectral_function_no_norm(m);
+    /* Integrate spectral function.
+     * We transform the integrals using m = m_min + (1 - t)/t to make them
+     * definite and to avoid numerical problems. */
+    const auto result_no_norm = integrate(0., 1.,
+                          [&](double t) {
+                            return type.spectral_function_no_norm(type.minimum_mass() + (1 - t)/t) / (t*t);
                           });
-    const auto result_const = integrate(0., max_mass,
-                          [&](double m) {
-                            return type.spectral_function_const_width(m);
+    const auto result_const = integrate(0., 1.,
+                          [&](double t) {
+                            return type.spectral_function_const_width((1 - t)/t) / (t*t);
                           });
-    const auto result = integrate(type.minimum_mass(), max_mass,
-                          [&](double m) {
-                            return type.spectral_function(m);
+    const auto result = integrate(0., 1.,
+                          [&](double t) {
+                            return type.spectral_function(type.minimum_mass() + (1 - t)/t) / (t*t);
                           });
     if (result_no_norm.value() > 1 + warning_level) {
       std::cout << AnsiColor::blue;
@@ -62,6 +61,8 @@ TEST(spectral_functions) {
     // check if integral is approximately equal to one
     COMPARE_ABSOLUTE_ERROR(result_no_norm.value(), 1., error_tolerance_no_norm);
     COMPARE_ABSOLUTE_ERROR(result_const.value(), 1., error_tolerance_const);
-    COMPARE_ABSOLUTE_ERROR(result.value(), 1., result.error());
+    COMPARE_ABSOLUTE_ERROR(result.value(), 1., 5*result.error());
+    //^ We use a bit higher tolerance, because the numerical algorithm might underestimate
+    //  the error.
   }
 }

@@ -133,9 +133,9 @@ class ColliderModus : public ModusDefault {
    */
   CalculationFrame frame_ = CalculationFrame::CenterOfVelocity;
   /**
-   * An option to include Fermi motion
+   * An option to include Fermi motion ("off", "on", "frozen")
    */
-  bool fermi_motion_;
+  FermiMotion fermi_motion_ = FermiMotion::Off;
    /**
    * An option to include the first collisions within the same nucleus
    */
