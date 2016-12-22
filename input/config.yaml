@@ -194,7 +194,7 @@ Modi:
             Value: 0.0
 
         # Include Fermi motion
- 	# ("off", "on", "frozen")
+        # ("off", "on", "frozen")
         Fermi_Motion: "off"
         # Determine whether the first collisions within the same nuclues are allowed
         Collisions_Within_Nucleus: false
