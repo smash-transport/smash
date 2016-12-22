@@ -97,7 +97,7 @@ Collision_Term:
     Force_Decays_At_End:    True
     Isotropic:              False
     Elastic_Cross_Section:  -1.0  # Globally used if non-negative, [mb]
-    Elastic_NN_Cutoff_Sqrts: 2.0 # Exclude the elastic collisions between the two
+    Elastic_NN_Cutoff_Sqrts: 1.98 # Exclude the elastic collisions between the two
                                  # nucleons with the square root s below the value [GeV].
                                  # Exclusion is effectively turned off by setting any value
                                  # below 1.88 (the threshold energy of the elastic collsion).
