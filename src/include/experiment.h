@@ -263,6 +263,11 @@ class Experiment : public ExperimentBase {
   /// The Photon output
   OutputPtr photon_output_;
 
+  /** nucleon_has_interacted_ labels whether the particles in the nuclei
+   *  have experienced any collisions or not. It's only valid in
+   *  the ColliderMode, so is set as an empty vector by default.*/
+  std::vector<bool> nucleon_has_interacted_ = {};
+
   /// The Action finder objects
   std::vector<std::unique_ptr<ActionFinderInterface>> action_finders_;
 

@@ -290,6 +290,16 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
   const bool two_to_two = config.take({"Collision_Term", "Two_to_Two"}, true);
+  /// Elastic collisions between the nucleons with the square root s
+  //  below low_snn_cut are excluded.
+  const double low_snn_cut = config.take({"Collision_Term",
+                                          "Elastic_NN_Cutoff_Sqrts"});
+  if (low_snn_cut > ParticleType::find(pdg::p).mass() +
+                    ParticleType::find(pdg::p).mass() +
+                    ParticleType::find(pdg::pi_z).mass()) {
+    log.warn("The cut-off should be below the threshold energy",
+             " of the process: NN to NNpi");
+  }
 
   // create finders
   if (two_to_one) {
@@ -297,10 +307,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   }
   if (two_to_one || two_to_two) {
     auto scat_finder = make_unique<ScatterActionsFinder>(config, parameters_,
-                                                       two_to_one, two_to_two,
-                                                       strings_switch_);
+                       two_to_one, two_to_two, low_snn_cut, strings_switch_,
+               nucleon_has_interacted_, modus_.total_N_number(), modus_.proj_N_number());
     max_transverse_distance_sqr_ = scat_finder->max_transverse_distance_sqr(
-                                                    parameters_.testparticles);
+                                                  parameters_.testparticles);
     action_finders_.emplace_back(std::move(scat_finder));
   }
   //todo(oliiny): Fix the wall-crossing action finder and uncommit this
@@ -316,8 +326,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     number_of_fractional_photons = config.take(
          {"Output", "Photons", "Fractions"});
     photon_finder_ = make_unique<ScatterActionsFinderPhoton>(
-        config, parameters_, two_to_one, two_to_two,
-        strings_switch_, number_of_fractional_photons);
+        config, parameters_, two_to_one, two_to_two, low_snn_cut,
+        strings_switch_, nucleon_has_interacted_, modus_.total_N_number(),
+        modus_.proj_N_number(), number_of_fractional_photons);
   }
   if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
     log.info() << "Pauli blocking is ON.";
@@ -484,10 +495,21 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     }
   }
 
+  // We can take away the Fermi motion flag, because the collider modus is already
+  // initialized. We only need it when potentials are enabled, but we always
+  // have to take it, otherwise SMASH will complain about unused options.
+  // We have to provide a default value for modi other than Collider.
+  const FermiMotion motion = config.take({"Modi", "Collider", "Fermi_Motion"},
+                                         FermiMotion::Off);
   if (config.has_value({"Potentials"})) {
     if (time_step_mode_ == TimeStepMode::None) {
       log.error() << "Potentials only work with time steps!";
       throw std::invalid_argument("Can't use potentials without time steps!");
+    }
+    if (motion == FermiMotion::Frozen) {
+      log.error() << "Potentials don't work with frozen Fermi momenta! "
+                     "Use normal Fermi motion instead.";
+      throw std::invalid_argument("Can't use potentials with frozen Fermi momenta!");
     }
     log.info() << "Potentials are ON.";
     // potentials need testparticles and gaussian sigma from parameters_
@@ -682,6 +704,19 @@ void Experiment<Modus>::perform_action(Action &action,
   const auto &log = logger<LogArea::Experiment>();
   if (!action.is_valid(particles_)) {
     log.debug(~einhard::DRed(), "✘ ", action, " (discarded: invalid)");
+    if (modus_.is_collider()) {
+      // using par_a and par_b to label the unique ids of the two colliding
+      // particles
+      const int par_a = (action.incoming_particles())[0].id();
+      const int par_b = (action.incoming_particles())[1].id();
+      // set the nucleon_has_interacted_ equal to true after the collisions
+      if (par_a < modus_.total_N_number()) {
+        nucleon_has_interacted_[par_a] = true;
+      }
+      if (par_b < modus_.total_N_number()) {
+        nucleon_has_interacted_[par_b] = true;
+      }
+    }
     return;
   }
   action.generate_final_state();
@@ -1156,7 +1191,16 @@ void Experiment<Modus>::run() {
 
     /* Sample initial particles, start clock, some printout and book-keeping */
     initialize_new_event();
-
+    /** In the ColliderMode, if the first collisions within the same nucleus are
+     *  forbidden, then nucleon_has_interacted_ is created to record whether the nucleons inside
+     *  the colliding nuclei have experienced any collisions or not */
+    if (modus_.is_collider()) {
+      if (!modus_.cll_in_nucleus()) {
+        nucleon_has_interacted_.assign(modus_.total_N_number(), false);
+      } else {
+        nucleon_has_interacted_.assign(modus_.total_N_number(), true);
+      }
+    }
     /* Output at event start */
     for (const auto &output : outputs_) {
       output->at_eventstart(particles_, j);

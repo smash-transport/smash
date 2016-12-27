@@ -49,6 +49,16 @@ class ModusDefault {
                          const OutputsList & /*out_list*/ = {})
   { return 0;}
 
+  /** The following four parameters tell the number of nucleons in the 
+   *  colliding nuclei, the number of nucleons in the projectile, whether
+   *  the first collisions within the same nucleus are forbiden, and whether
+   *  the modus is Collider. They are all needed in the Collider modus. In 
+   *  the other modus, they take the following default value. */
+  int total_N_number() const { return 0; }
+  int proj_N_number() const {return 0; } 
+  bool cll_in_nucleus() const { return true; }
+  bool is_collider() const { return false; }
+
   /// Maximal timestep accepted by this modus. Negative means infinity.
   float max_timestep(float ) const { return -1.f; }
 
