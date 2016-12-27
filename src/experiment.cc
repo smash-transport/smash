@@ -191,12 +191,14 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
       out << "Not using time steps\n";
       break;
     case TimeStepMode::Fixed:
-      out << "Using fixed time step size: " << e.parameters_.timestep_duration()
+      out << "Using fixed time step size: "
+          << e.parameters_.labclock.timestep_duration()
           << " fm/c\n";
       break;
     case TimeStepMode::Adaptive:
       out << "Using adaptive time steps, starting with: "
-          << e.parameters_.timestep_duration() << " fm/c\n";
+          << e.parameters_.labclock.timestep_duration()
+          << " fm/c\n";
       break;
   }
   out << "End time: " << e.end_time_ << " fm/c\n";
@@ -272,7 +274,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       particles_(),
       nevents_(config.take({"General", "Nevents"})),
       end_time_(config.take({"General", "End_Time"})),
-      delta_time_startup_(parameters_.timestep_duration()),
+      delta_time_startup_(parameters_.labclock.timestep_duration()),
       force_decays_(
           config.take({"Collision_Term", "Force_Decays_At_End"}, true)),
       use_grid_(config.take({"General", "Use_Grid"}, true)),
@@ -637,33 +639,36 @@ void Experiment<Modus>::initialize_new_event() {
   // Todo(oliiny): this should not be necessary, can we remove it?
   modus_.impose_boundary_conditions(&particles_);
 
-  /* Reset the simulation clock */:
-  float timestep;
+  /* Reset the simulation clock */
+  float timestep = delta_time_startup_;
 
-  switch time_step_mode_{
+  switch (time_step_mode_) {
     case TimeStepMode::Fixed:
-      timestep = delta_time_startup_;
       break;
-    case TimestepMode::Adaptive:
-      timestep = delta_time_startup_;
+    case TimeStepMode::Adaptive:
       adaptive_parameters_->initialize(timestep);
       break;
-    case TimestepMode::None:
+    case TimeStepMode::None:
+      timestep = end_time_ - start_time;
       // Take care of the box modus + timestepless propagation
       const float max_dt = modus_.max_timestep(max_transverse_distance_sqr_);
-      timestep = std::min(end_time_, max_dt);
+      if (max_dt > 0.f && max_dt < timestep) {
+        timestep = max_dt;
+      }
       break;
   }
-  Clock clock_for_this_event(start_time, delta_time_startup_);
+  Clock clock_for_this_event(start_time, timestep);
   parameters_.labclock = std::move(clock_for_this_event);
 
   /* Reset the output clock */
   const float dt_output = parameters_.outputclock.timestep_duration();
-  Clock output_clock(std::ceil(start_time/dt_output)*dt_output, dt_output);
+  Clock output_clock(std::floor(start_time/dt_output)*dt_output, dt_output);
   parameters_.outputclock = std::move(output_clock);
 
-  log.debug("Lab clock: ", parameters_.labclock,
-            ", output clock: ", parameters_.outputclock);
+  log.debug("Lab clock: t_start = ", parameters_.labclock.current_time(),
+           ", dt = ", parameters_.labclock.timestep_duration());
+  log.debug("Output clock: t_start = ", parameters_.outputclock.current_time(),
+           ", dt = ", parameters_.outputclock.timestep_duration());
 
   /* Save the initial conserved quantum numbers and total momentum in
    * the system for conservation checks */
@@ -703,7 +708,7 @@ void Experiment<Modus>::perform_action(Action &action,
                                  const Container &particles_before_actions) {
   const auto &log = logger<LogArea::Experiment>();
   if (!action.is_valid(particles_)) {
-    log.debug(~einhard::DRed(), "✘ ", action, " (discarded: invalid)");
+    log.info(~einhard::DRed(), "✘ ", action, " (discarded: invalid)");
     if (modus_.is_collider()) {
       // using par_a and par_b to label the unique ids of the two colliding
       // particles
@@ -848,18 +853,21 @@ void Experiment<Modus>::run_time_evolution() {
           }
         });
 
-    /* (2) Propagation from action to action within timestep */
-    run_time_evolution_timestepless(actions);
-
-    /* (3) In case of adaptive timesteps adapt timestep size */
+    /* (2) In case of adaptive timesteps adapt timestep size */
     if (time_step_mode_ ==  TimeStepMode::Adaptive && actions.size() > 0u) {
-      const float new_timestep = parameters_.labclock.timestep_duration();
+      float new_timestep = parameters_.labclock.timestep_duration();
       if (adaptive_parameters_->update_timestep(actions, particles_.size(),
           &new_timestep)) {
         parameters_.labclock.set_timestep_duration(new_timestep);
         log_ad_ts.info("New timestep is set to ", new_timestep);
       }
     }
+
+
+    /* (3) Propagation from action to action within timestep */
+    run_time_evolution_timestepless(actions);
+    ++parameters_.labclock;
+
 
   }
 
@@ -869,13 +877,13 @@ void Experiment<Modus>::run_time_evolution() {
   }
 }
 
-// From parameters_.labclock.current_time() to parameters_.labclock.next_tick()
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution_timestepless(Actions& actions) {
   const auto &log = logger<LogArea::Experiment>();
   modus_.impose_boundary_conditions(&particles_);
 
   const float start_time = parameters_.labclock.current_time();
+  const float end_time = std::min(parameters_.labclock.next_time(), end_time_);
   float time_left = end_time - start_time;
   log.debug("Timestepless propagation: ", "Actions size = ", actions.size(),
             ", start time = ", start_time,
@@ -889,18 +897,55 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions& actions) {
       log.debug(~einhard::DRed(), "✘ ", act, " (discarded: invalid)");
       continue;
     }
-    if ((act->time_of_execution() > end_time) &&
-        (time_step_mode_ == TimeStepMode::Adaptive)) {
-      log.debug(~einhard::DRed(), "✘ ", act, " (discarded: adaptive timestep"
-                " mode decreased timestep and this action is too late)");
-      continue;
+    if (act->time_of_execution() > end_time) {
+      if (time_step_mode_ == TimeStepMode::Adaptive) {
+        log.debug(~einhard::DRed(), "✘ ", act, " (discarded: adaptive timestep"
+                  " mode decreased timestep and this action is too late)");
+      } else {
+        log.error(act, " scheduled later than end time.");
+      }
     }
     log.debug(~einhard::Green(), "✔ ", act);
+
+    while(parameters_.outputclock.next_time() <= act->time_of_execution()) {
+      log.debug("Propagating until output time: ", parameters_.outputclock.next_time());
+      ++parameters_.outputclock;
+      propagate_all(parameters_.outputclock.current_time());
+      intermediate_output();
+    }
 
     /* (1) Propagate to the next action. */
     log.debug("Propagating until next action ", act, ", action time = ",
              act->time_of_execution());
-    propagate_all_until(act->time_of_execution());
+    propagate_all(act->time_of_execution());
+
+    /* (1.c) Dileptons */
+//    if (dilepton_finder_ != nullptr) {
+//      dilepton_actions.insert(
+//          dilepton_finder_->find_actions_in_cell(particles_before_actions, dt));
+//
+//      while (!dilepton_actions.is_empty()) {
+//        write_dilepton_action(*dilepton_actions.pop(), particles_before_actions);
+//      }
+//    }
+
+    /* (1.d) Photons */
+//    if (photon_finder_ != nullptr) {
+//      grid.iterate_cells(
+//          [&](const ParticleList &search_list) {
+//            photon_actions.insert(
+//                photon_finder_->find_actions_in_cell(search_list, dt));
+//          },
+//          [&](const ParticleList &search_list,
+//              const ParticleList &neighbors_list) {
+//            photon_actions.insert(photon_finder_->find_actions_with_neighbors(
+//                search_list, neighbors_list, dt));
+//          });
+//
+//      while (!photon_actions.is_empty()) {
+//        write_photon_action(*photon_actions.pop(), particles_before_actions);
+//      }
+//    }
 
     /* (2) Perform action. */
 
@@ -913,36 +958,6 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions& actions) {
     modus_.impose_boundary_conditions(&particles_);
 
     const auto particles_before_actions = particles_.copy_to_vector();
-
-    /* (1.c) Dileptons */
-    if (dilepton_finder_ != nullptr) {
-      dilepton_actions.insert(
-          dilepton_finder_->find_actions_in_cell(particles_before_actions, dt));
-
-      while (!dilepton_actions.is_empty()) {
-        write_dilepton_action(*dilepton_actions.pop(), particles_before_actions);
-      }
-    }
-
-    /* (1.d) Photons */
-    if (photon_finder_ != nullptr) {
-      grid.iterate_cells(
-          [&](const ParticleList &search_list) {
-            photon_actions.insert(
-                photon_finder_->find_actions_in_cell(search_list, dt));
-          },
-          [&](const ParticleList &search_list,
-              const ParticleList &neighbors_list) {
-            photon_actions.insert(photon_finder_->find_actions_with_neighbors(
-                search_list, neighbors_list, dt));
-          });
-
-      while (!photon_actions.is_empty()) {
-        write_photon_action(*photon_actions.pop(), particles_before_actions);
-      }
-    }
-
-
 
     /* (3) Check conservation laws. */
 
@@ -961,7 +976,7 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions& actions) {
 
     /* (4) Update actions for newly-produced particles. */
 
-    time_left = end_time - parameters_.labclock.current_time();
+    time_left = end_time - act->time_of_execution();
     const ParticleList &outgoing_particles = act->outgoing_particles();
     for (const auto &finder : action_finders_) {
       // Outgoing particles can still decay, cross walls...
@@ -974,9 +989,16 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions& actions) {
 
     check_interactions_total(interactions_total_);
   }
-  log.debug("Propagating from current time ",
-           parameters_.labclock.current_time(), " to step end time ", end_time);
-  propagate_all_until(end_time);
+
+  while(parameters_.outputclock.next_time() <= end_time) {
+    log.debug("Propagating until output time: ", parameters_.outputclock.next_time());
+    ++parameters_.outputclock;
+    propagate_all(parameters_.outputclock.current_time());
+    intermediate_output();
+  }
+
+  log.debug("Propagating to time ", end_time);
+  propagate_all(end_time);
 }
 
 template <typename Modus>
@@ -987,11 +1009,11 @@ void Experiment<Modus>::intermediate_output() {
   previous_interactions_total_ = interactions_total_;
   log.info() << format_measurements(
       particles_, interactions_total_, interactions_this_interval,
-      conserved_initial_, time_start_, parameters_.labclock.current_time());
+      conserved_initial_, time_start_, parameters_.outputclock.current_time());
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
   /* save evolution data */
   for (const auto &output : outputs_) {
-    output->at_intermediate_time(particles_, parameters_.labclock,
+    output->at_intermediate_time(particles_, parameters_.outputclock,
                                  density_param_);
 
     // Thermodynamic output on the lattice versus time
@@ -1040,7 +1062,7 @@ void Experiment<Modus>::intermediate_output() {
 }
 
 template <typename Modus>
-void Experiment<Modus>::propagate_all() {
+void Experiment<Modus>::propagate_all(double final_time) {
   if (potentials_) {
     if (potentials_->use_skyrme() && jmu_B_lat_ != nullptr) {
       update_density_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
@@ -1061,39 +1083,12 @@ void Experiment<Modus>::propagate_all() {
       }
       UI3_lat_->compute_gradient_lattice(dUI3_dr_lat_.get());
     }
-    propagate(&particles_, parameters_, *potentials_, dUB_dr_lat_.get(),
+    propagate(&particles_, final_time, *potentials_, dUB_dr_lat_.get(),
               dUI3_dr_lat_.get());
   } else {
-    propagate_straight_line(&particles_, parameters_);
+    propagate_straight_line(&particles_, final_time);
   }
   modus_.impose_boundary_conditions(&particles_, outputs_);
-}
-
-template <typename Modus>
-void Experiment<Modus>::propagate_all_until(float t_end) {
-  const float dt_output = parameters_.output_interval;
-  float next_output_time = parameters_.labclock.next_multiple(dt_output);
-  // Current time -> (output) x n -> t_end
-  while (next_output_time <= t_end) {
-    parameters_.reach_time_in_one_timestep(next_output_time);
-    propagate_all();
-    intermediate_output();
-    next_output_time += dt_output;
-  }
-  if (t_end > parameters_.labclock.current_time()) {
-    parameters_.reach_time_in_one_timestep(t_end);
-    propagate_all();
-    // Reset clock to get rid of small numerical errors from multiple additions
-    parameters_.labclock.reset(t_end);
-  } else if (std::abs(parameters_.labclock.current_time() - t_end) > 1e-5) {
-     // Current time and t_end may be approximately equal, so the code can get here
-     // because of numerics, but if current_time > t_end significantly, then it's a bug.
-     // Because we are using floats, we are expecting numerical errors on the order of 1e-6.
-     const auto &log = logger<LogArea::Experiment>();
-     log.error() << " Propagate_all_until " << t_end
-                 << " fm/c < current time = " << parameters_.labclock.current_time()
-                 << " fm/c. Difference: " << std::abs(parameters_.labclock.current_time() - t_end);
-  }
 }
 
 template <typename Modus>
@@ -1112,11 +1107,9 @@ void Experiment<Modus>::do_final_decays() {
     if (dilepton_finder_ != nullptr) {
       dilepton_actions.insert(dilepton_finder_->find_final_actions(particles_,
                                                                    true));
-      if (!dilepton_actions.is_empty()) {
-        while (!dilepton_actions.is_empty()) {
+      while (!dilepton_actions.is_empty()) {
           write_dilepton_action(*dilepton_actions.pop(),
                                 particles_before_actions);
-        }
       }
     }
     /* Find actions. */
@@ -1146,10 +1139,10 @@ void Experiment<Modus>::do_final_decays() {
 
   /* Do one final propagation step. */
   if (potentials_) {
-    propagate(&particles_, parameters_, *potentials_, dUB_dr_lat_.get(),
+    propagate(&particles_, end_time_, *potentials_, dUB_dr_lat_.get(),
               dUI3_dr_lat_.get());
   } else {
-    propagate_straight_line(&particles_, parameters_);
+    propagate_straight_line(&particles_, end_time_);
   }
   modus_.impose_boundary_conditions(&particles_, outputs_);
 }

@@ -176,7 +176,7 @@ class Experiment : public ExperimentBase {
    * Here, all actions are looped over, collisions and decays are
    * carried out and particles are propagated.
    */
-  void run_time_evolution_without_time_steps(float end_time, Actions& actions);
+  void run_time_evolution_timestepless(Actions& actions);
 
   /** Performs the final decays of an event
    */
@@ -193,15 +193,9 @@ class Experiment : public ExperimentBase {
   void intermediate_output();
 
   /**
-   * Propagate all particles to the current time.
+   * Propagate all particles to the time final_time without collisions.
    */
-  void propagate_all();
-
-  /**
-   * Collisionless propagation until given time with proper intermediate output
-   * \param t_end The time until particles should be propagated
-   */
-  void propagate_all_until(float t_end);
+  void propagate_all(double final_time);
 
   /**
    * Calculate the minimal size for the grid cells such that the
