@@ -49,7 +49,8 @@ bool Action::is_pauli_blocked(const Particles & particles,
     if (p.is_baryon()) {
       const auto f = p_bl.phasespace_dens(p.position().threevec(),
                                            p.momentum().threevec(),
-                                           particles, p.pdgcode());
+                                           particles, p.pdgcode(),
+                                           incoming_particles_);
       if (f >  Random::uniform(0.f, 1.f)) {
         log.debug("Action ", *this, " is pauli-blocked with f = ", f);
         return true;
