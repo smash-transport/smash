@@ -662,7 +662,7 @@ void Experiment<Modus>::initialize_new_event() {
 
   /* Reset the output clock */
   const float dt_output = parameters_.outputclock.timestep_duration();
-  Clock output_clock(std::floor(start_time/dt_output)*dt_output, dt_output);
+  Clock output_clock(std::ceil(start_time/dt_output)*dt_output, dt_output);
   parameters_.outputclock = std::move(output_clock);
 
   log.debug("Lab clock: t_start = ", parameters_.labclock.current_time(),
@@ -788,8 +788,7 @@ void Experiment<Modus>::write_photon_action(
     Action &action, const ParticleList &particles_before_actions) {
   if (action.is_valid(particles_)) {
     // loop over action.generate_final_state to get many fractional photons
-    for (int i = 0; i < number_of_fractional_photons;
-         i++) {
+    for (int i = 0; i < number_of_fractional_photons; i++) {
       action.generate_final_state();
       const FourVector r_interaction = action.get_interaction_point();
       constexpr bool compute_grad = false;
@@ -828,6 +827,7 @@ void Experiment<Modus>::run_time_evolution() {
     const float dt = std::min(parameters_.labclock.timestep_duration(),
                               end_time_ - t);
     log.debug("Timestepless propagation for next ", dt, " fm/c.");
+    modus_.impose_boundary_conditions(&particles_, outputs_);
 
     /* (1.a) Create grid. */
     float min_cell_length = compute_min_cell_length(dt);
@@ -863,11 +863,32 @@ void Experiment<Modus>::run_time_evolution() {
       }
     }
 
-
-    /* (3) Propagation from action to action within timestep */
+    /* (3) Propagation from action to action until the end of timestep */
     run_time_evolution_timestepless(actions);
+
+    /* (4) Update potentials (if computed on the lattice) and
+           compute new momenta according to equations of motion */
+    if (potentials_) {
+      update_potentials();
+      update_momenta(&particles_, parameters_.labclock.timestep_duration(),
+                     *potentials_, dUB_dr_lat_.get(), dUI3_dr_lat_.get());
+    }
+
     ++parameters_.labclock;
 
+    /* (5) Check conservation laws. */
+
+    // Check conservation of conserved quantities if potentials and string
+    // fragmentation are off.  If potentials are on then momentum is conserved
+    // only in average.  If string fragmentation is on, then energy and
+    // momentum are only very roughly conserved in high-energy collisions.
+    if (!potentials_ && !strings_switch_) {
+      std::string err_msg = conserved_initial_.report_deviations(particles_);
+      if (!err_msg.empty()) {
+        log.error() << err_msg;
+        throw std::runtime_error("Violation of conserved quantities!");
+      }
+    }
 
   }
 
@@ -907,17 +928,17 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions& actions) {
     }
     log.debug(~einhard::Green(), "✔ ", act);
 
-    while(parameters_.outputclock.next_time() <= act->time_of_execution()) {
-      log.debug("Propagating until output time: ", parameters_.outputclock.next_time());
-      ++parameters_.outputclock;
-      propagate_all(parameters_.outputclock.current_time());
+    while(next_output_time() <= end_time) {
+      log.debug("Propagating until output time: ", next_output_time());
+      propagate_straight_line(&particles_, next_output_time());
       intermediate_output();
+      ++parameters_.outputclock;
     }
 
     /* (1) Propagate to the next action. */
     log.debug("Propagating until next action ", act, ", action time = ",
              act->time_of_execution());
-    propagate_all(act->time_of_execution());
+    propagate_straight_line(&particles_, act->time_of_execution());
 
     /* (1.c) Dileptons */
 //    if (dilepton_finder_ != nullptr) {
@@ -955,26 +976,10 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions& actions) {
     act->update_incoming(particles_);
 
     perform_action(*act, particles_);
-    modus_.impose_boundary_conditions(&particles_);
 
     const auto particles_before_actions = particles_.copy_to_vector();
 
-    /* (3) Check conservation laws. */
-
-    // Check conservation of conserved quantities if potentials and string
-    // fragmentation are off.
-    // If potentials are on then momentum is conserved only in average.
-    // If string fragmentation is on, then energy and momentum are only very
-    // roughly conserved in high-energy collisions.
-    if (!potentials_ && !strings_switch_) {
-      std::string err_msg = conserved_initial_.report_deviations(particles_);
-      if (!err_msg.empty()) {
-        log.error() << err_msg;
-        throw std::runtime_error("Violation of conserved quantities!");
-      }
-    }
-
-    /* (4) Update actions for newly-produced particles. */
+    /* (3) Update actions for newly-produced particles. */
 
     time_left = end_time - act->time_of_execution();
     const ParticleList &outgoing_particles = act->outgoing_particles();
@@ -990,15 +995,15 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions& actions) {
     check_interactions_total(interactions_total_);
   }
 
-  while(parameters_.outputclock.next_time() <= end_time) {
-    log.debug("Propagating until output time: ", parameters_.outputclock.next_time());
-    ++parameters_.outputclock;
-    propagate_all(parameters_.outputclock.current_time());
+  while(next_output_time() <= end_time) {
+    log.debug("Propagating until output time: ", next_output_time());
+    propagate_straight_line(&particles_, next_output_time());
     intermediate_output();
+    ++parameters_.outputclock;
   }
 
   log.debug("Propagating to time ", end_time);
-  propagate_all(end_time);
+  propagate_straight_line(&particles_, end_time);
 }
 
 template <typename Modus>
@@ -1062,7 +1067,7 @@ void Experiment<Modus>::intermediate_output() {
 }
 
 template <typename Modus>
-void Experiment<Modus>::propagate_all(double final_time) {
+void Experiment<Modus>::update_potentials() {
   if (potentials_) {
     if (potentials_->use_skyrme() && jmu_B_lat_ != nullptr) {
       update_density_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
@@ -1083,12 +1088,7 @@ void Experiment<Modus>::propagate_all(double final_time) {
       }
       UI3_lat_->compute_gradient_lattice(dUI3_dr_lat_.get());
     }
-    propagate(&particles_, final_time, *potentials_, dUB_dr_lat_.get(),
-              dUI3_dr_lat_.get());
-  } else {
-    propagate_straight_line(&particles_, final_time);
   }
-  modus_.impose_boundary_conditions(&particles_, outputs_);
 }
 
 template <typename Modus>
@@ -1136,15 +1136,6 @@ void Experiment<Modus>::do_final_decays() {
       }
     }
   }
-
-  /* Do one final propagation step. */
-  if (potentials_) {
-    propagate(&particles_, end_time_, *potentials_, dUB_dr_lat_.get(),
-              dUI3_dr_lat_.get());
-  } else {
-    propagate_straight_line(&particles_, end_time_);
-  }
-  modus_.impose_boundary_conditions(&particles_, outputs_);
 }
 
 template <typename Modus>

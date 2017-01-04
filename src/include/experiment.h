@@ -193,9 +193,9 @@ class Experiment : public ExperimentBase {
   void intermediate_output();
 
   /**
-   * Propagate all particles to the time final_time without collisions.
+   * Recompute potentials on lattices if necessary.
    */
-  void propagate_all(double final_time);
+  void update_potentials();
 
   /**
    * Calculate the minimal size for the grid cells such that the
@@ -209,6 +209,10 @@ class Experiment : public ExperimentBase {
     return std::sqrt(4 * dt * dt + max_transverse_distance_sqr_);
   }
 
+  /// Shortcut for next output time
+  float next_output_time() const {
+    return parameters_.outputclock.next_time();
+  }
 
   /**
    * Struct of several member variables.

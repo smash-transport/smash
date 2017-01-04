@@ -50,25 +50,22 @@ void propagate_straight_line(Particles *particles, double t1) {
   }
 }
 
-void propagate(Particles *particles, double t1,
+void update_momenta(Particles *particles, double dt,
                const Potentials &pot,
                RectangularLattice<ThreeVector>* UB_grad_lat,
                RectangularLattice<ThreeVector>* UI3_grad_lat) {
   // Copy particles before propagation to calculate potentials from them
   const ParticleList plist = particles->copy_to_vector();
+
   const auto &log = logger<LogArea::Propagation>();
   bool possibly_use_lattice =
          (pot.use_skyrme() ? (UB_grad_lat != nullptr) : true) &&
          (pot.use_symmetry() ? (UI3_grad_lat != nullptr) : true);
   ThreeVector dUB_dr, dUI3_dr;
   float min_time_scale = std::numeric_limits<float>::infinity();
-  double dt = 0.0;
 
   for (ParticleData &data : *particles) {
-    const double t0 = data.position().x0();
-    dt = t1 - t0;
-    assert(dt >= 0.0);
-    ThreeVector r = data.position().threevec();
+    const ThreeVector r = data.position().threevec();
     /* Lattices can be used for calculation if 1-2 are fulfilled:
      * 1) Required lattices are not nullptr - possibly_use_lattice
      * 2) r is not out of required lattices
@@ -83,21 +80,11 @@ void propagate(Particles *particles, double t1,
       dUI3_dr = ThreeVector(0.0, 0.0, 0.0);
     }
     // Compute potential gradient from lattice if possible
-    ThreeVector dU_dr = use_lattice ? (dUB_dr + dUI3_dr):
-                        pot.potential_gradient(r, plist, data.type());
-    log.debug("Propagate: dU/dr = ", dU_dr);
-    ThreeVector v = data.velocity();
-    // predictor step assuming momentum-indep. potential, dU/dp = 0
-    // then for momentum predictor = corrector
+    const ThreeVector dU_dr = use_lattice ? (dUB_dr + dUI3_dr):
+                              pot.potential_gradient(r, plist, data.type());
+    log.debug("Update momenta: dU/dr [GeV/fm] = ", dU_dr);
     data.set_4momentum(data.effective_mass(),
                        data.momentum().threevec() - dU_dr * dt);
-    ThreeVector v_pred = data.velocity();
-    // corrector step
-    FourVector distance = FourVector(0.0, (v + v_pred) * (0.5 * dt));
-    log.debug("Particle ", data, " motion: ", distance);
-    FourVector position = data.position() + distance;
-    position.set_x0(t1);
-    data.set_4position(position);
 
     // calculate the time scale of the change in momentum
     const double dU_dr_abs = dU_dr.abs();

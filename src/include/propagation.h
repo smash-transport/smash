@@ -28,28 +28,21 @@ namespace Smash {
 void propagate_straight_line(Particles *particles, double t1);
 
 /**
- * Propagates the positions and momenta of all particles through the current
- * time step, according to the equations of motion.
+ * Updates the momenta of all particles at the current
+ * time step according to the equations of motion:
  *
- * For each particle, the position is shifted:
- * \f[\vec x^\prime = \vec x + \vec v \cdot \Delta t\f]
- * where \f$\vec x\f$ is the current position, \f$\vec v\f$ its
- * velocity and \f$\Delta t\f$ the duration of this timestep.
- *
- * The following equations of motion are solved:
- * \f[ \frac{dr}{dt} = p/E \f]
  * \f[ \frac{dp}{dt} = -dU(r)/dr \f]
  *
  * \param[in,out] particles The particle list in the event
- * \param[in] t1 final time
+ * \param[in] dt timestep
  * \param pot The potentials in the system
  * \param UB_grad_lat Lattice for Skyrme potential gradient
  * \param UI3_grad_lat Lattice for symmetry potential gradient
  */
-void propagate(Particles *particles, double t1,
-               const Potentials &pot,
-               RectangularLattice<ThreeVector>* UB_grad_lat,
-               RectangularLattice<ThreeVector>* UI3_grad_lat);
+void update_momenta(Particles *particles, double dt,
+                    const Potentials &pot,
+                    RectangularLattice<ThreeVector>* UB_grad_lat,
+                    RectangularLattice<ThreeVector>* UI3_grad_lat);
 
 }  // namespace Smash
 #endif  // SRC_INCLUDE_PROPAGATION_H_
