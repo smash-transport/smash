@@ -18,10 +18,10 @@
 
 namespace Smash {
 
-ActionList DecayActionsFinderDilepton::find_actions_in_cell(
-      const ParticleList &search_list,
+void DecayActionsFinderDilepton::shine(
+      const Particles &search_list,
+      const OutputPtr output,
       float dt) const {
-  ActionList actions;
 
   for (const auto &p : search_list) {
     // effective mass of decaying particle
@@ -53,25 +53,22 @@ ActionList DecayActionsFinderDilepton::find_actions_in_cell(
       if (shining_weight > 0.0) {  // decays that can happen
         auto act = make_unique<DecayActionDilepton>(p, 0.f, shining_weight);
         act->add_decay(std::move(mode));
-        actions.emplace_back(std::move(act));
+        output->at_interaction(*act, 0.0);
       }
     }
   }
-
-  return actions;
 }
 
 
-ActionList DecayActionsFinderDilepton::find_final_actions(
-                  const Particles &search_list, bool only_res) const {
-  ActionList actions;
+void DecayActionsFinderDilepton::shine_final(
+                  const Particles &search_list,
+                  const OutputPtr output,
+                  bool only_res) const {
 
   for (const auto &p : search_list) {
     const ParticleType &t = p.type();
-    if (t.decay_modes().decay_mode_list().size() == 0) {
-      continue;
-    }
-    if (only_res && t.is_stable()) {
+    if (t.decay_modes().decay_mode_list().empty() ||
+        (only_res && t.is_stable())) {
       continue;
     }
 
@@ -89,12 +86,10 @@ ActionList DecayActionsFinderDilepton::find_final_actions(
       if (shining_weight > 0.0) {  // decays that can happen
         auto act = make_unique<DecayActionDilepton>(p, 0.f, shining_weight);
         act->add_decay(std::move(mode));
-        actions.emplace_back(std::move(act));
+        output->at_interaction(*act, 0.0);
       }
     }
   }
-
-  return actions;
 }
 
 }  // namespace Smash

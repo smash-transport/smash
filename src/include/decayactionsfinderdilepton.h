@@ -10,7 +10,7 @@
 #ifndef SRC_INCLUDE_DECAYACTIONSFINDERDILEPTON_H_
 #define SRC_INCLUDE_DECAYACTIONSFINDERDILEPTON_H_
 
-#include "decayactionsfinder.h"
+#include "outputinterface.h"
 
 namespace Smash {
 
@@ -28,22 +28,24 @@ namespace Smash {
  * dilepton decays.
  */
 
-class DecayActionsFinderDilepton : public DecayActionsFinder {
+class DecayActionsFinderDilepton {
  public:
   /** Initialize the finder */
   DecayActionsFinderDilepton() {}
 
   /** Check the whole particle list for possible dilepton decays
    * and return a list with the corrsponding Action objects. */
-  ActionList find_actions_in_cell(
-      const ParticleList &search_list,
-      float dt) const override;
+  void shine(
+      const Particles &search_list,
+      const OutputPtr output,
+      float dt) const;
 
   /** All resonances decay at the end of the simulation. Take all the shining
    * weight for the remaining time.
    */
-  ActionList find_final_actions(const Particles &search_list,
-                                bool only_res = false) const override;
+  void shine_final(const Particles &search_list,
+                   const OutputPtr output,
+                   bool only_res = false) const;
 };
 
 }  // namespace Smash

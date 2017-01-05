@@ -10,6 +10,7 @@
 #include "actionfinderfactory.h"
 #include "adaptiveparameters.h"
 #include "chrono.h"
+#include "decayactionsfinderdilepton.h"
 #include "energymomentumtensor.h"
 #include "pauliblocking.h"
 #include "potentials.h"
@@ -164,6 +165,11 @@ class Experiment : public ExperimentBase {
   void write_photon_action(Action &action,
                            const ParticleList &particles_before_actions);
 
+  /** Propagate all particles until time to_time without any interactions
+   *  and shine dileptons.
+   */
+  void propagate_and_shine(double to_time);
+
   /** Runs the time evolution of an event with fixed-sized time steps,
    *  adaptive time steps or without timesteps, from action to actions.
    *  Within one timestep (fixed or adaptive) evolution from action to action
@@ -270,7 +276,7 @@ class Experiment : public ExperimentBase {
   std::vector<std::unique_ptr<ActionFinderInterface>> action_finders_;
 
   /// The Dilepton Action Finder
-  std::unique_ptr<ActionFinderInterface> dilepton_finder_;
+  std::unique_ptr<DecayActionsFinderDilepton> dilepton_finder_;
 
   /// The (Scatter) Actions Finder for Direct Photons
   std::unique_ptr<ActionFinderInterface> photon_finder_;

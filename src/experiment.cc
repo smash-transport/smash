@@ -813,7 +813,7 @@ static void check_interactions_total(uint64_t interactions_total) {
 
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution() {
-  Actions actions, dilepton_actions, photon_actions;
+  Actions actions;
 
   const auto &log = logger<LogArea::Experiment>();
   const auto &log_ad_ts = logger<LogArea::AdaptiveTS>();
@@ -899,6 +899,14 @@ void Experiment<Modus>::run_time_evolution() {
 }
 
 template <typename Modus>
+void Experiment<Modus>::propagate_and_shine(double to_time) {
+  const double dt = propagate_straight_line(&particles_, to_time);
+  if (dilepton_finder_ != nullptr) {
+    dilepton_finder_->shine(particles_, std::move(dilepton_output_), dt);
+  }
+}
+
+template <typename Modus>
 void Experiment<Modus>::run_time_evolution_timestepless(Actions& actions) {
   const auto &log = logger<LogArea::Experiment>();
   modus_.impose_boundary_conditions(&particles_);
@@ -930,7 +938,7 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions& actions) {
 
     while(next_output_time() <= end_time) {
       log.debug("Propagating until output time: ", next_output_time());
-      propagate_straight_line(&particles_, next_output_time());
+      propagate_and_shine(next_output_time());
       intermediate_output();
       ++parameters_.outputclock;
     }
@@ -938,17 +946,7 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions& actions) {
     /* (1) Propagate to the next action. */
     log.debug("Propagating until next action ", act, ", action time = ",
              act->time_of_execution());
-    propagate_straight_line(&particles_, act->time_of_execution());
-
-    /* (1.c) Dileptons */
-//    if (dilepton_finder_ != nullptr) {
-//      dilepton_actions.insert(
-//          dilepton_finder_->find_actions_in_cell(particles_before_actions, dt));
-//
-//      while (!dilepton_actions.is_empty()) {
-//        write_dilepton_action(*dilepton_actions.pop(), particles_before_actions);
-//      }
-//    }
+    propagate_and_shine(act->time_of_execution());
 
     /* (1.d) Photons */
 //    if (photon_finder_ != nullptr) {
@@ -997,13 +995,13 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions& actions) {
 
   while(next_output_time() <= end_time) {
     log.debug("Propagating until output time: ", next_output_time());
-    propagate_straight_line(&particles_, next_output_time());
+    propagate_and_shine(next_output_time());
     intermediate_output();
     ++parameters_.outputclock;
   }
 
   log.debug("Propagating to time ", end_time);
-  propagate_straight_line(&particles_, end_time);
+  propagate_and_shine(end_time);
 }
 
 template <typename Modus>
@@ -1096,21 +1094,15 @@ void Experiment<Modus>::do_final_decays() {
   /* At end of time evolution: Force all resonances to decay. In order to handle
    * decay chains, we need to loop until no further actions occur. */
   uint64_t interactions_old;
+  const auto particles_before_actions = particles_.copy_to_vector();
   do {
     Actions actions;
-    Actions dilepton_actions;
 
     interactions_old = interactions_total_;
-    const auto particles_before_actions = particles_.copy_to_vector();
 
     /* Dileptons: shining of remaining resonances */
     if (dilepton_finder_ != nullptr) {
-      dilepton_actions.insert(dilepton_finder_->find_final_actions(particles_,
-                                                                   true));
-      while (!dilepton_actions.is_empty()) {
-          write_dilepton_action(*dilepton_actions.pop(),
-                                particles_before_actions);
-      }
+      dilepton_finder_->shine_final(particles_, std::move(dilepton_output_), true);
     }
     /* Find actions. */
     for (const auto &finder : action_finders_) {
@@ -1125,16 +1117,7 @@ void Experiment<Modus>::do_final_decays() {
 
   /* Dileptons: shining of stable particles at the end */
   if (dilepton_finder_ != nullptr) {
-    Actions dilepton_actions;
-    dilepton_actions.insert(dilepton_finder_->find_final_actions(particles_,
-                                                                 false));
-    if (!dilepton_actions.is_empty()) {
-      const auto particles_before_actions = particles_.copy_to_vector();
-      while (!dilepton_actions.is_empty()) {
-        write_dilepton_action(*dilepton_actions.pop(),
-                              particles_before_actions);
-      }
-    }
+    dilepton_finder_->shine_final(particles_, std::move(dilepton_output_), false);
   }
 }
 
