@@ -902,7 +902,7 @@ template <typename Modus>
 void Experiment<Modus>::propagate_and_shine(double to_time) {
   const double dt = propagate_straight_line(&particles_, to_time);
   if (dilepton_finder_ != nullptr) {
-    dilepton_finder_->shine(particles_, std::move(dilepton_output_), dt);
+    dilepton_finder_->shine(particles_, dilepton_output_.get(), dt);
   }
 }
 
@@ -1102,7 +1102,7 @@ void Experiment<Modus>::do_final_decays() {
 
     /* Dileptons: shining of remaining resonances */
     if (dilepton_finder_ != nullptr) {
-      dilepton_finder_->shine_final(particles_, std::move(dilepton_output_), true);
+      dilepton_finder_->shine_final(particles_, dilepton_output_.get(), true);
     }
     /* Find actions. */
     for (const auto &finder : action_finders_) {
@@ -1117,7 +1117,7 @@ void Experiment<Modus>::do_final_decays() {
 
   /* Dileptons: shining of stable particles at the end */
   if (dilepton_finder_ != nullptr) {
-    dilepton_finder_->shine_final(particles_, std::move(dilepton_output_), false);
+    dilepton_finder_->shine_final(particles_, dilepton_output_.get(), false);
   }
 }
 

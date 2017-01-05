@@ -37,14 +37,14 @@ class DecayActionsFinderDilepton {
    * and return a list with the corrsponding Action objects. */
   void shine(
       const Particles &search_list,
-      const OutputPtr output,
+      OutputInterface* output,
       float dt) const;
 
   /** All resonances decay at the end of the simulation. Take all the shining
    * weight for the remaining time.
    */
   void shine_final(const Particles &search_list,
-                   const OutputPtr output,
+                   OutputInterface* output,
                    bool only_res = false) const;
 };
 

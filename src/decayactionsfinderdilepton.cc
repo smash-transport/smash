@@ -20,7 +20,7 @@ namespace Smash {
 
 void DecayActionsFinderDilepton::shine(
       const Particles &search_list,
-      const OutputPtr output,
+      OutputInterface* output,
       float dt) const {
 
   for (const auto &p : search_list) {
@@ -51,9 +51,9 @@ void DecayActionsFinderDilepton::shine(
       const float shining_weight = dt * inv_gamma * mode->weight() / hbarc;
 
       if (shining_weight > 0.0) {  // decays that can happen
-        auto act = make_unique<DecayActionDilepton>(p, 0.f, shining_weight);
-        act->add_decay(std::move(mode));
-        output->at_interaction(*act, 0.0);
+        DecayActionDilepton act(p, 0.f, shining_weight);
+        act.add_decay(std::move(mode));
+        output->at_interaction(act, 0.0);
       }
     }
   }
@@ -62,7 +62,7 @@ void DecayActionsFinderDilepton::shine(
 
 void DecayActionsFinderDilepton::shine_final(
                   const Particles &search_list,
-                  const OutputPtr output,
+                  OutputInterface* output,
                   bool only_res) const {
 
   for (const auto &p : search_list) {
@@ -84,9 +84,9 @@ void DecayActionsFinderDilepton::shine_final(
       const float shining_weight = mode->weight() / width_tot;
 
       if (shining_weight > 0.0) {  // decays that can happen
-        auto act = make_unique<DecayActionDilepton>(p, 0.f, shining_weight);
-        act->add_decay(std::move(mode));
-        output->at_interaction(*act, 0.0);
+        DecayActionDilepton act(p, 0.f, shining_weight);
+        act.add_decay(std::move(mode));
+        output->at_interaction(act, 0.0);
       }
     }
   }
