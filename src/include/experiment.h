@@ -152,15 +152,8 @@ class Experiment : public ExperimentBase {
                      const bf::path &output_path,
                      Configuration&& conf);
 
-  /** It generates the final state with the right kinematics and then writes
-   * the given dilepton action in the dilepton output file, instead of
-   * actually performing the action.
-   */
-  void write_dilepton_action(Action &action,
-                             const ParticleList &particles_before_actions);
-
    /** Generates kinematics and weighing of final states and writes them into output file,
-    * the actions are NOT performed. 
+    * the actions are NOT performed.
     */
   void write_photon_action(Action &action,
                            const ParticleList &particles_before_actions);

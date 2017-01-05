@@ -53,6 +53,7 @@ void DecayActionsFinderDilepton::shine(
       if (shining_weight > 0.0) {  // decays that can happen
         DecayActionDilepton act(p, 0.f, shining_weight);
         act.add_decay(std::move(mode));
+        act.generate_final_state();
         output->at_interaction(act, 0.0);
       }
     }
@@ -86,6 +87,7 @@ void DecayActionsFinderDilepton::shine_final(
       if (shining_weight > 0.0) {  // decays that can happen
         DecayActionDilepton act(p, 0.f, shining_weight);
         act.add_decay(std::move(mode));
+        act.generate_final_state();
         output->at_interaction(act, 0.0);
       }
     }

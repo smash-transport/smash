@@ -767,23 +767,6 @@ void Experiment<Modus>::perform_action(Action &action,
 }
 
 template <typename Modus>
-void Experiment<Modus>::write_dilepton_action(
-    Action &action, const ParticleList &particles_before_actions) {
-  if (action.is_valid(particles_)) {
-    action.generate_final_state();
-    // Calculate Eckart rest frame density at the interaction point
-    const FourVector r_interaction = action.get_interaction_point();
-    constexpr bool compute_grad = false;
-    const double rho =
-        rho_eckart(r_interaction.threevec(), particles_before_actions,
-                   density_param_, dens_type_, compute_grad)
-            .first;
-    // write dilepton output
-    dilepton_output_->at_interaction(action, rho);
-  }
-}
-
-template <typename Modus>
 void Experiment<Modus>::write_photon_action(
     Action &action, const ParticleList &particles_before_actions) {
   if (action.is_valid(particles_)) {
