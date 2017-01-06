@@ -99,26 +99,6 @@ void ScatterActionPhoton::generate_final_state() {
   }
 }
 
-void ScatterActionPhoton::add_all_processes(float elastic_parameter,
-                          bool two_to_one, bool two_to_two, double, bool) {
-  if (two_to_one) {
-    /* resonance formation (2->1) */
-    add_collisions(resonance_cross_sections());
-  }
-  if (two_to_two) {
-    /* elastic */
-    add_collision(elastic_cross_section(elastic_parameter));
-    /* 2->2 (inelastic) */
-    add_collisions(two_to_two_cross_sections());
-    // add to extra CollisionBranch only for photon producing reactions!
-    add_processes<CollisionBranch>(photon_cross_sections(),
-                                   collision_channels_photons_,
-                                   cross_section_photons_);
-  }
-  /* string excitation */
-  add_collision(string_excitation_cross_section());
-}
-
 CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
   CollisionBranchList process_list;
   ParticleTypePtr rho0_particle = &ParticleType::find(pdg::rho_z);

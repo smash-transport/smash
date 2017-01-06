@@ -19,7 +19,6 @@
 #include "include/propagation.h"
 #include "include/scatteractionphoton.h"
 #include "include/scatteractionsfinder.h"
-#include "include/scatteractionsfinderphoton.h"
 #include "include/spheremodus.h"
 /* Outputs */
 #include "include/binaryoutputcollisions.h"
@@ -325,12 +324,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     dilepton_finder_ = make_unique<DecayActionsFinderDilepton>();
   }
   if (photons_switch_) {
-    number_of_fractional_photons = config.take(
-         {"Output", "Photons", "Fractions"});
-    photon_finder_ = make_unique<ScatterActionsFinderPhoton>(
-        config, parameters_, two_to_one, two_to_two, low_snn_cut,
-        strings_switch_, nucleon_has_interacted_, modus_.total_N_number(),
-        modus_.proj_N_number(), number_of_fractional_photons);
+    n_fractional_photons_ = config.take({"Output", "Photons", "Fractions"});
   }
   if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
     log.info() << "Pauli blocking is ON.";
@@ -763,25 +757,29 @@ void Experiment<Modus>::perform_action(Action &action,
   for (const auto &output : outputs_) {
     output->at_interaction(action, rho);
   }
-  log.debug(~einhard::Green(), "✔ ", action);
-}
 
-template <typename Modus>
-void Experiment<Modus>::write_photon_action(
-    Action &action, const ParticleList &particles_before_actions) {
-  if (action.is_valid(particles_)) {
-    // loop over action.generate_final_state to get many fractional photons
-    for (int i = 0; i < number_of_fractional_photons; i++) {
-      action.generate_final_state();
-      const FourVector r_interaction = action.get_interaction_point();
-      constexpr bool compute_grad = false;
-      const double rho =
-          rho_eckart(r_interaction.threevec(), particles_before_actions,
-                     density_param_, dens_type_, compute_grad)
-              .first;
-      photon_output_->at_interaction(action, rho);  // generate output
+  // At every collision photons can be produced.
+  if (photons_switch_ &&
+      ScatterActionPhoton::is_photon_reaction(action.incoming_particles())) {
+    const ParticleData a = action.incoming_particles()[0];
+    const ParticleData b = action.incoming_particles()[1];
+    // Time in the action constructor is relative to current time of incoming
+    constexpr float action_time = 0.f;
+    ScatterActionPhoton photon_act(a, b, action_time, n_fractional_photons_);
+    // Add a completely dummy process to photon action.  The only important
+    // thing is that its cross-section is equal to cross-section of action.
+    // This can be done, because photon action is never performed, only
+    // final state is generated and printed to photon output.
+    photon_act.add_dummy_hadronic_channels(action.raw_weight_value());
+    // Now add the actual photon reaction channel
+    photon_act.add_single_channel();
+    for (int i = 0; i < n_fractional_photons_; i++) {
+      photon_act.generate_final_state();
+      photon_output_->at_interaction(action, rho);
     }
   }
+
+  log.debug(~einhard::Green(), "✔ ", action);
 }
 
 /// Make sure `interactions_total` can be represented as a 32-bit integer.
@@ -930,24 +928,6 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions& actions) {
     log.debug("Propagating until next action ", act, ", action time = ",
              act->time_of_execution());
     propagate_and_shine(act->time_of_execution());
-
-    /* (1.d) Photons */
-//    if (photon_finder_ != nullptr) {
-//      grid.iterate_cells(
-//          [&](const ParticleList &search_list) {
-//            photon_actions.insert(
-//                photon_finder_->find_actions_in_cell(search_list, dt));
-//          },
-//          [&](const ParticleList &search_list,
-//              const ParticleList &neighbors_list) {
-//            photon_actions.insert(photon_finder_->find_actions_with_neighbors(
-//                search_list, neighbors_list, dt));
-//          });
-//
-//      while (!photon_actions.is_empty()) {
-//        write_photon_action(*photon_actions.pop(), particles_before_actions);
-//      }
-//    }
 
     /* (2) Perform action. */
 

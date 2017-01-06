@@ -152,12 +152,6 @@ class Experiment : public ExperimentBase {
                      const bf::path &output_path,
                      Configuration&& conf);
 
-   /** Generates kinematics and weighing of final states and writes them into output file,
-    * the actions are NOT performed.
-    */
-  void write_photon_action(Action &action,
-                           const ParticleList &particles_before_actions);
-
   /** Propagate all particles until time to_time without any interactions
    *  and shine dileptons.
    */
@@ -275,7 +269,7 @@ class Experiment : public ExperimentBase {
   std::unique_ptr<ActionFinderInterface> photon_finder_;
 
   /// Number of fractional photons produced per single reaction
-  int number_of_fractional_photons = 100;
+  int n_fractional_photons_ = 100;
 
   /// Lattices holding different physical quantities
 

@@ -122,7 +122,6 @@ set(smash_src
         scatteractionhyperonpion.cc
         scatteractionphoton.cc
         scatteractionsfinder.cc
-        scatteractionsfinderphoton.cc
         spheremodus.cc
         stringfunctions.cc
         tabulation.cc
