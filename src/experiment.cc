@@ -680,20 +680,16 @@ void Experiment<Modus>::perform_action(Action &action,
   const auto &log = logger<LogArea::Experiment>();
   if (!action.is_valid(particles_)) {
     log.debug(~einhard::DRed(), "✘ ", action, " (discarded: invalid)");
-    if (modus_.is_collider()) {
-      // using par_a and par_b to label the unique ids of the two colliding
-      // particles
-      const int par_a = (action.incoming_particles())[0].id();
-      const int par_b = (action.incoming_particles())[1].id();
-      // set the nucleon_has_interacted_ equal to true after the collisions
-      if (par_a < modus_.total_N_number()) {
-        nucleon_has_interacted_[par_a] = true;
-      }
-      if (par_b < modus_.total_N_number()) {
-        nucleon_has_interacted_[par_b] = true;
+    return;
+  }
+  if (modus_.is_collider()) {
+    // Mark incoming nucleons as interacted - now they are permitted
+    // to collide with nucleons from their native nucleus
+    for (const auto &incoming : action.incoming_particles()) {
+      if (incoming.id() < modus_.total_N_number()) {
+        nucleon_has_interacted_[incoming.id()] = true;
       }
     }
-    return;
   }
   action.generate_final_state();
   log.debug("Process Type is: ", action.get_type());
