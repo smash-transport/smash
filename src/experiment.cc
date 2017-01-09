@@ -166,7 +166,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
 
   const int ntest = config.take({"General", "Testparticles"}, 1);
   if (ntest <= 0) {
-    throw std::invalid_argument( "Testparticle number should be positive!");
+    throw std::invalid_argument("Testparticle number should be positive!");
   }
 
   // If this Delta_Time option is absent (this can be for timestepless mode)
@@ -309,12 +309,13 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   if (two_to_one || two_to_two) {
     auto scat_finder = make_unique<ScatterActionsFinder>(config, parameters_,
                        two_to_one, two_to_two, low_snn_cut, strings_switch_,
-               nucleon_has_interacted_, modus_.total_N_number(), modus_.proj_N_number());
+                       nucleon_has_interacted_,
+                       modus_.total_N_number(), modus_.proj_N_number());
     max_transverse_distance_sqr_ = scat_finder->max_transverse_distance_sqr(
                                                   parameters_.testparticles);
     action_finders_.emplace_back(std::move(scat_finder));
   }
-  //todo(oliiny): Fix the wall-crossing action finder and uncommit this
+  // todo(oliiny): Fix the wall-crossing action finder and uncommit this
   /*const float modus_l = modus_.length();
   if (modus_l > 0.f) {
     action_finders_.emplace_back(make_unique<WallCrossActionsFinder>(modus_l));
@@ -491,10 +492,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     }
   }
 
-  // We can take away the Fermi motion flag, because the collider modus is already
-  // initialized. We only need it when potentials are enabled, but we always
-  // have to take it, otherwise SMASH will complain about unused options.
-  // We have to provide a default value for modi other than Collider.
+  // We can take away the Fermi motion flag, because the collider modus is
+  // already initialized. We only need it when potentials are enabled, but we
+  // always have to take it, otherwise SMASH will complain about unused
+  // options.  We have to provide a default value for modi other than Collider.
   const FermiMotion motion = config.take({"Modi", "Collider", "Fermi_Motion"},
                                          FermiMotion::Off);
   if (config.has_value({"Potentials"})) {
@@ -505,7 +506,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     if (motion == FermiMotion::Frozen) {
       log.error() << "Potentials don't work with frozen Fermi momenta! "
                      "Use normal Fermi motion instead.";
-      throw std::invalid_argument("Can't use potentials with frozen Fermi momenta!");
+      throw std::invalid_argument("Can't use potentials "
+                                  "with frozen Fermi momenta!");
     }
     log.info() << "Potentials are ON.";
     // potentials need testparticles and gaussian sigma from parameters_
@@ -690,8 +692,8 @@ static std::string format_measurements(const Particles &particles,
   ss << field<5> << time << field<12, 3> << difference.momentum().x0()
      << field<12, 3> << difference.momentum().abs3()
      << field<12, 3> << (time > really_small
-                             ? 2.0 * scatterings_total / (particles.size() * time)
-                             : 0.)
+                         ? 2.0 * scatterings_total / (particles.size() * time)
+                         : 0.)
      << field<10, 3> << scatterings_this_interval
      << field<12, 3> << particles.size() << field<10, 3> << elapsed_seconds;
   return ss.str();
@@ -871,7 +873,6 @@ void Experiment<Modus>::run_time_evolution() {
         throw std::runtime_error("Violation of conserved quantities!");
       }
     }
-
   }
 
   if (pauli_blocker_) {
@@ -918,7 +919,7 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions& actions) {
     }
     log.debug(~einhard::Green(), "✔ ", act);
 
-    while(next_output_time() <= end_time) {
+    while (next_output_time() <= end_time) {
       log.debug("Propagating until output time: ", next_output_time());
       propagate_and_shine(next_output_time());
       intermediate_output();
@@ -957,7 +958,7 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions& actions) {
     check_interactions_total(interactions_total_);
   }
 
-  while(next_output_time() <= end_time) {
+  while (next_output_time() <= end_time) {
     log.debug("Propagating until output time: ", next_output_time());
     propagate_and_shine(next_output_time());
     intermediate_output();
