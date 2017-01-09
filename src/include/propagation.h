@@ -23,10 +23,10 @@ namespace Smash {
   * velocity and \f$\Delta t\f$ the duration of this timestep.
   *
   * \param[in,out] particles The particle list in the event
-  * \param[in] t1 final time
+  * \param[in] to_time final time
   * \param[out] dt time interval of propagation
   */
-double propagate_straight_line(Particles *particles, double t1);
+double propagate_straight_line(Particles *particles, double to_time);
 
 /**
  * Updates the momenta of all particles at the current

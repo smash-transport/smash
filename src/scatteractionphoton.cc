@@ -99,6 +99,16 @@ void ScatterActionPhoton::generate_final_state() {
   }
 }
 
+void ScatterActionPhoton::add_dummy_hadronic_channels(
+                            float reaction_cross_section) {
+  CollisionBranchPtr dummy_process = make_unique<CollisionBranch>(
+    incoming_particles_[0].type(),
+    incoming_particles_[1].type(),
+    reaction_cross_section,
+    ProcessType::TwoToTwo);
+  add_collision(std::move(dummy_process));
+}
+
 CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
   CollisionBranchList process_list;
   ParticleTypePtr rho0_particle = &ParticleType::find(pdg::rho_z);

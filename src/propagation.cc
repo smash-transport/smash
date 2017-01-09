@@ -18,12 +18,12 @@
 namespace Smash {
 
 /* Simple straight line propagation without potentials*/
-double propagate_straight_line(Particles *particles, double t1) {
+double propagate_straight_line(Particles *particles, double to_time) {
   const auto &log = logger<LogArea::Propagation>();
   double dt = 0.0;
   for (ParticleData &data : *particles) {
     const double t0 = data.position().x0();
-    dt = t1 - t0;
+    dt = to_time - t0;
     assert(dt >= 0.0);
     // "Frozen Fermi motion": Fermi momenta are only used for collisions,
     // but not for propagation. This is done to avoid nucleus flying apart
@@ -41,11 +41,11 @@ double propagate_straight_line(Particles *particles, double t1) {
     const FourVector distance = FourVector(0.0, v * dt);
     log.debug("Particle ", data, " motion: ", distance);
     FourVector position = data.position() + distance;
-    position.set_x0(t1);
+    position.set_x0(to_time);
     data.set_4position(position);
 
     // If particle is formed reset cross_section_scaling_factor
-    if (data.formation_time() < t1) {
+    if (data.formation_time() < to_time) {
       data.set_cross_section_scaling_factor(1.0);
     }
   }

@@ -39,14 +39,12 @@ class ScatterActionPhoton : public ScatterAction {
     return static_cast<ProcessType>(reac);
   }
 
-  void add_dummy_hadronic_channels(float reaction_cross_section) {
-    CollisionBranchPtr dummy_process = make_unique<CollisionBranch>(
-      incoming_particles_[0].type(),
-      incoming_particles_[1].type(),
-      reaction_cross_section,
-      ProcessType::TwoToTwo);
-    add_collision(std::move(dummy_process));
-  }
+  /** Adds one dummy channel with a given cross-section. The intended use is to
+   * add the hadronic cross-section from already performed hadronic action
+   * without recomputing it. The photon action is never performed, so
+   * this channel itself will never play any role. Only its cross-section will.
+   */
+  void add_dummy_hadronic_channels(float reaction_cross_section);
 
   /** To add only one reaction for testing purposes */
   void add_single_channel() {

@@ -170,7 +170,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   }
 
   // If this Delta_Time option is absent (this can be for timestepless mode)
-  // just assign 1.0, reasonable value will be set at event initialization.
+  // just assign 1.0 fm/c, reasonable value will be set at event initialization
   const float dt = config.take({"General", "Delta_Time"}, 1.0f);
   const float output_dt = config.take({"Output", "Output_Interval"});
   return {{0.0f, dt}, {0.0, output_dt},
@@ -656,7 +656,8 @@ void Experiment<Modus>::initialize_new_event() {
 
   /* Reset the output clock */
   const float dt_output = parameters_.outputclock.timestep_duration();
-  Clock output_clock(std::ceil(start_time/dt_output)*dt_output, dt_output);
+  const float first_output_time = std::ceil(start_time/dt_output)*dt_output;
+  Clock output_clock(first_output_time, dt_output);
   parameters_.outputclock = std::move(output_clock);
 
   log.debug("Lab clock: t_start = ", parameters_.labclock.current_time(),
