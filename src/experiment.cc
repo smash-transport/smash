@@ -775,7 +775,7 @@ void Experiment<Modus>::perform_action(Action &action,
     photon_act.add_single_channel();
     for (int i = 0; i < n_fractional_photons_; i++) {
       photon_act.generate_final_state();
-      photon_output_->at_interaction(action, rho);
+      photon_output_->at_interaction(photon_act, rho);
     }
   }
 
