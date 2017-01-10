@@ -303,6 +303,12 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   }
 
   // create finders
+  if (dileptons_switch_) {
+    dilepton_finder_ = make_unique<DecayActionsFinderDilepton>();
+  }
+  if (photons_switch_) {
+    n_fractional_photons_ = config.take({"Output", "Photons", "Fractions"});
+  }
   if (two_to_one) {
     action_finders_.emplace_back(make_unique<DecayActionsFinder>());
   }
@@ -310,7 +316,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     auto scat_finder = make_unique<ScatterActionsFinder>(config, parameters_,
                        two_to_one, two_to_two, low_snn_cut, strings_switch_,
                        nucleon_has_interacted_,
-                       modus_.total_N_number(), modus_.proj_N_number());
+                       modus_.total_N_number(), modus_.proj_N_number(),
+                       photons_switch_, n_fractional_photons_);
     max_transverse_distance_sqr_ = scat_finder->max_transverse_distance_sqr(
                                                   parameters_.testparticles);
     action_finders_.emplace_back(std::move(scat_finder));
@@ -321,12 +328,6 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     action_finders_.emplace_back(make_unique<WallCrossActionsFinder>(modus_l));
   }*/
 
-  if (dileptons_switch_) {
-    dilepton_finder_ = make_unique<DecayActionsFinderDilepton>();
-  }
-  if (photons_switch_) {
-    n_fractional_photons_ = config.take({"Output", "Photons", "Fractions"});
-  }
   if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
     log.info() << "Pauli blocking is ON.";
     pauli_blocker_ = make_unique<PauliBlocker>(
@@ -764,11 +765,10 @@ void Experiment<Modus>::perform_action(Action &action,
   // At every collision photons can be produced.
   if (photons_switch_ &&
       ScatterActionPhoton::is_photon_reaction(action.incoming_particles())) {
-    const ParticleData a = action.incoming_particles()[0];
-    const ParticleData b = action.incoming_particles()[1];
     // Time in the action constructor is relative to current time of incoming
     constexpr float action_time = 0.f;
-    ScatterActionPhoton photon_act(a, b, action_time, n_fractional_photons_);
+    ScatterActionPhoton photon_act(action.incoming_particles(),
+                                   action_time, n_fractional_photons_);
     // Add a completely dummy process to photon action.  The only important
     // thing is that its cross-section is equal to cross-section of action.
     // This can be done, because photon action is never performed, only

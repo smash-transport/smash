@@ -33,8 +33,9 @@ TEST(pi_rho0_pi_gamma) {
   rho0.set_4momentum(type_rho0.mass(),           // pole mass
                     ThreeVector(0., 0., -2.));
   const int number_of_photons = 10000;
+  ParticleList in{pi, rho0};
   const auto act = make_unique<ScatterActionPhoton>(
-            pi, rho0, 0.05f, number_of_photons);
+                     in, 0.05f, number_of_photons);
   act-> add_single_channel();
   float tot_weight = 0.0;
   for (int i = 0; i < number_of_photons; i++) {
