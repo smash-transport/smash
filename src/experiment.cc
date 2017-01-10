@@ -921,7 +921,7 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions& actions) {
     log.debug(~einhard::Green(), "✔ ", act);
 
     while (next_output_time() < act->time_of_execution()) {
-      log.info("Propagating until output time: ", next_output_time());
+      log.debug("Propagating until output time: ", next_output_time());
       propagate_and_shine(next_output_time());
       ++parameters_.outputclock;
       intermediate_output();
