@@ -99,24 +99,14 @@ void ScatterActionPhoton::generate_final_state() {
   }
 }
 
-void ScatterActionPhoton::add_all_processes(float elastic_parameter,
-                          bool two_to_one, bool two_to_two, double, bool) {
-  if (two_to_one) {
-    /* resonance formation (2->1) */
-    add_collisions(resonance_cross_sections());
-  }
-  if (two_to_two) {
-    /* elastic */
-    add_collision(elastic_cross_section(elastic_parameter));
-    /* 2->2 (inelastic) */
-    add_collisions(two_to_two_cross_sections());
-    // add to extra CollisionBranch only for photon producing reactions!
-    add_processes<CollisionBranch>(photon_cross_sections(),
-                                   collision_channels_photons_,
-                                   cross_section_photons_);
-  }
-  /* string excitation */
-  add_collision(string_excitation_cross_section());
+void ScatterActionPhoton::add_dummy_hadronic_channels(
+                            float reaction_cross_section) {
+  CollisionBranchPtr dummy_process = make_unique<CollisionBranch>(
+    incoming_particles_[0].type(),
+    incoming_particles_[1].type(),
+    reaction_cross_section,
+    ProcessType::TwoToTwo);
+  add_collision(std::move(dummy_process));
 }
 
 CollisionBranchList ScatterActionPhoton::photon_cross_sections() {

@@ -10,6 +10,8 @@
 #ifndef SRC_INCLUDE_SCATTERACTIONPHOTON_H_
 #define SRC_INCLUDE_SCATTERACTIONPHOTON_H_
 
+#include <algorithm>
+
 #include "constants.h"
 #include "scatteraction.h"
 
@@ -23,10 +25,6 @@ class ScatterActionPhoton : public ScatterAction {
         number_of_fractional_photons(nofp) {}
 
   void generate_final_state() override;
-
-  void add_all_processes(float elastic_parameter,
-                         bool two_to_one, bool two_to_two, double low_snn_cut,
-                         bool strings_switch) override;
 
   float raw_weight_value() const override { return weight_; }
 
@@ -43,11 +41,54 @@ class ScatterActionPhoton : public ScatterAction {
     return static_cast<ProcessType>(reac);
   }
 
+  /** Adds one dummy channel with a given cross-section. The intended use is to
+   * add the hadronic cross-section from already performed hadronic action
+   * without recomputing it. The photon action is never performed, so
+   * this channel itself will never play any role. Only its cross-section will.
+   */
+  void add_dummy_hadronic_channels(float reaction_cross_section);
+
   /** To add only one reaction for testing purposes */
   void add_single_channel() {
     add_processes<CollisionBranch>(photon_cross_sections(),
                                   collision_channels_photons_,
                                   cross_section_photons_);
+  }
+
+  /// Tells if the given incoming particles may produce photon
+  static bool is_photon_reaction(const ParticleList &in) {
+    if (in.size() != 2) {
+      return false;
+    }
+    // Turn all pi- and rho- into pi+ and rho+ to avoid listing
+    // too many variants further, swap so that pion should be first.
+    PdgCode a = (in[0].type().charge() >= 0) ? in[0].pdgcode() :
+                 in[0].pdgcode().get_antiparticle();
+    PdgCode b = (in[1].type().charge() >= 0) ? in[1].pdgcode() :
+                 in[1].pdgcode().get_antiparticle();
+    if (!a.is_pion()) {
+      std::swap(a, b);
+    }
+
+    switch (pack(a.code(), b.code())) {
+      case(pack(pdg::pi_p, pdg::pi_z)):
+      case(pack(pdg::pi_z, pdg::pi_p)):
+        // ReactionType::pi0_pi
+      case(pack(pdg::pi_p, pdg::rho_z)):
+        // ReactionType::piplus_rho0
+      case(pack(pdg::pi_p, pdg::rho_p)):
+        // ReactionType::pi_rho
+      case(pack(pdg::pi_z, pdg::rho_p)):
+        // ReactionType::pi0_rho
+      case(pack(pdg::pi_p, pdg::eta)):
+        // ReactionType::piplus_eta
+      case(pack(pdg::pi_p, pdg::pi_p)):
+        // ReactionType::pi_pi
+        return true;
+        break;
+      default:
+        return false;
+    }
   }
 
  private:
