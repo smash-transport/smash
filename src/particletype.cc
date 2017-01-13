@@ -192,10 +192,10 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
       throw std::runtime_error("Nucleon mass in input file different from 0.938");
     }
     if (pdgcode[0].is_kaon() && !almost_equal(mass, kaon_mass)) {
-      throw std::runtime_error("Kaon mass in input file different from 0.494"); 
+      throw std::runtime_error("Kaon mass in input file different from 0.494");
     }
     if (pdgcode[0].is_Delta() && !almost_equal(mass, delta_mass)) {
-      throw std::runtime_error("Delta mass in input file different from 1.232"); 
+      throw std::runtime_error("Delta mass in input file different from 1.232");
     }
 
     // add all states to type list
@@ -301,9 +301,7 @@ float ParticleType::partial_width(const float m,
   if (m < mode->threshold()) {
     return 0.;
   }
-  float mode_weight = mode->weight();
-  float wap = width_at_pole();
-  float partial_width_at_pole = wap*mode_weight;
+  float partial_width_at_pole = width_at_pole()*mode->weight();
   return mode->type().width(mass(), partial_width_at_pole, m);
 }
 
