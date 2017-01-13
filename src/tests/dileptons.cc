@@ -38,7 +38,6 @@ TEST(init_decay_modes) {
 }
 
 TEST(pion_decay) {
-  printf("PI TEST ...\n");
   // set up a π⁰ at rest
   const ParticleType &type_piz = ParticleType::find(0x111);
   ParticleData piz{type_piz};
@@ -51,7 +50,6 @@ TEST(pion_decay) {
   COMPARE(dil_modes.size(), 1u);
   const float piz_width = total_weight<DecayBranch>(type_piz.get_partial_widths(srts));
   FUZZY_COMPARE(piz_width, 7.7e-9f);
-  std::cout << "total width = " << piz_width << std::endl;
   DecayBranchPtr &mode = dil_modes[0];
   // π⁰ decay action
   const auto act = make_unique<DecayActionDilepton>(piz, 0.f,
@@ -59,31 +57,23 @@ TEST(pion_decay) {
   act->add_decay(std::move(mode));
 
   // sample the final state and sum up all weights
-  const int N_samples = 1E4;
-  const int st = 1E6;
+  const int N_samples = 1E5;
   double weight_sum = 0.;
-  printf("sampling Dalitz ...\n");
+  printf("sampling pion Dalitz ...\n");
   for (int i = 0; i < N_samples; i++) {
-    if (i%st == 0) {
-      std::cout << "progress (" << i/st << "/" << N_samples/st << ")" << std::endl;
-    }
     act->generate_final_state();
     weight_sum += act->raw_weight_value();
   }
-  std::cout << std::endl;
-  std::cout << "weight_sum / N_samples = " << weight_sum / N_samples << std::endl;
-  std::cout << "for # samples: " << N_samples << std::endl;
-  std::cout << "should be --> 0.01174" << std::endl;
-  std::cout << std::endl;
-
   // verify that the shining weight for the π⁰ Dalitz decay is correct
   // (to an accuracy of five percent)
+  // the result for the π⁰ Dalitz will never match the BR exactly (even with
+  // more event), because the analytic result of the formula that we use for the
+  // differntial width (s. decaytype.cc) results in 4,7% overshoot of the BR
   COMPARE_RELATIVE_ERROR(weight_sum / N_samples, 0.01174, 0.05f);
 }
 
 TEST(eta_decay) {
-  printf("ETA TEST ...\n");
-  // set up a π⁰ at rest
+  // set up a η at rest
   const ParticleType &type_etaz = ParticleType::find(0x221);
   ParticleData etaz{type_etaz};
   etaz.set_4momentum(type_etaz.mass(),           // pole mass
@@ -95,7 +85,6 @@ TEST(eta_decay) {
   COMPARE(dil_modes.size(), 1u);
   const float etaz_width = total_weight<DecayBranch>(type_etaz.get_partial_widths(srts));
   FUZZY_COMPARE(etaz_width, 1.31e-6f);
-  std::cout << "total width = " << etaz_width << std::endl;
   DecayBranchPtr &mode = dil_modes[0];
   // π⁰ decay action
   const auto act = make_unique<DecayActionDilepton>(etaz, 0.f,
@@ -103,24 +92,14 @@ TEST(eta_decay) {
   act->add_decay(std::move(mode));
 
   // sample the final state and sum up all weights
-  const int N_samples = 1E4;
-  const int st = 1E6;
+  const int N_samples = 1E5;
   double weight_sum = 0.;
-  printf("sampling Dalitz ...\n");
+  printf("sampling eta Dalitz ...\n");
   for (int i = 0; i < N_samples; i++) {
-    if (i%st == 0) {
-      std::cout << "progress (" << i/st << "/" << N_samples/st << ")" << std::endl;
-    }
     act->generate_final_state();
     weight_sum += act->raw_weight_value();
   }
-  std::cout << std::endl;
-  std::cout << "weight_sum / N_samples = " << weight_sum / N_samples << std::endl;
-  std::cout << "for # samples: " << N_samples << std::endl;
-  std::cout << "should be --> 0.0069" << std::endl;
-  std::cout << std::endl;
-
-  // verify that the shining weight for the π⁰ Dalitz decay is correct
+  // verify that the shining weight for the η Dalitz decay is correct
   // (to an accuracy of five percent)
   COMPARE_RELATIVE_ERROR(weight_sum / N_samples, 0.0069, 0.05f);
 }
