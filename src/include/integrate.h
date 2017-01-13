@@ -80,9 +80,12 @@ class Integrator {
    * \param workspace_size The internal workspace is allocated such that it can
    *                       hold the given number of double precision intervals,
    *                       their integration results, and error estimates.
+   *                       It also determines the maximum number of subintervals
+   *                       the integration algorithm will use.
    */
   explicit Integrator(int workspace_size)
-      : workspace_(gsl_integration_workspace_alloc(workspace_size)) {}
+      : workspace_(gsl_integration_workspace_alloc(workspace_size)),
+        subintervals_max_(workspace_size) {}
 
   /// Convenience overload of the above with a workspace size of 1000.
   Integrator() : Integrator(1000) {}
@@ -123,17 +126,17 @@ class Integrator {
   std::unique_ptr<gsl_integration_workspace, GslWorkspaceDeleter> workspace_;
 
   /// Parameter to the GSL integration function: desired absolute error limit
-  double accuracy_absolute_ = 1.0e-5;
+  const double accuracy_absolute_ = 1.0e-5;
 
   /// Parameter to the GSL integration function: desired relative error limit
-  double accuracy_relative_ = 5.0e-4;
+  const double accuracy_relative_ = 5.0e-4;
 
   /// Parameter to the GSL integration function: maximum number of subintervals
   /// (may not exceed workspace size)
-  std::size_t subintervals_max_ = 500;
+  const std::size_t subintervals_max_;
 
   /// Parameter to the GSL integration function: integration rule
-  int gauss_points_ = GSL_INTEG_GAUSS21;
+  const int gauss_points_ = GSL_INTEG_GAUSS51;
 };
 
 /**

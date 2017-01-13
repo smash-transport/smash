@@ -216,8 +216,8 @@ class Clock {
    **/
   void reset(const float reset_time) {
     if (reset_time < current_time()) {
-      logger<LogArea::Clock>().info("Resetting clock from", current_time(),
-                                    " fm/c to ", reset_time, " fm/c");
+      logger<LogArea::Clock>().debug("Resetting clock from", current_time(),
+                                     " fm/c to ", reset_time, " fm/c");
     }
     reset_time_ = convert(reset_time);
     counter_ = 0;

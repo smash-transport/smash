@@ -232,11 +232,6 @@ std::pair<double, double> DecayAction::sample_masses() const {
 }
 
 
-float DecayAction::raw_weight_value() const {
-  return total_width_;
-}
-
-
 void DecayAction::format_debug_output(std::ostream &out) const {
   out << "Decay of " << incoming_particles_ << " to " << outgoing_particles_ <<
   ", sqrt(s)=" << format(sqrt_s(), "GeV", 11, 9);

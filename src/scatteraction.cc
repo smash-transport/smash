@@ -92,15 +92,20 @@ void ScatterAction::generate_final_state() {
 
 
 void ScatterAction::add_all_processes(float elastic_parameter,
-                                      bool two_to_one, bool two_to_two,
+                                      bool two_to_one, bool two_to_two, double low_snn_cut,
                                       bool strings_switch) {
   if (two_to_one) {
     /* resonance formation (2->1) */
     add_collisions(resonance_cross_sections());
   }
   if (two_to_two) {
-    /* elastic */
-    add_collision(elastic_cross_section(elastic_parameter));
+    /** Elastic collstions between two nucleons with sqrt_s() below 
+     * low_snn_cut can not happen*/
+    if (!incoming_particles_[0].type().is_nucleon() || 
+        !incoming_particles_[1].type().is_nucleon() || 
+        sqrt_s() >= low_snn_cut) {
+        add_collision(elastic_cross_section(elastic_parameter));
+    }
     /* 2->2 (inelastic) */
     add_collisions(two_to_two_cross_sections());
   }
@@ -356,9 +361,8 @@ void ScatterAction::string_excitation() {
   DisableFloatTraps guard;
   /* set all necessary parameters for Pythia
    * Create Pythia object */
-  std::string xmlpath = PYTHIA_XML_DIR;
   log.debug("Creating Pythia object.");
-  Pythia8::Pythia pythia(xmlpath, false);
+  static thread_local Pythia8::Pythia pythia(PYTHIA_XML_DIR, false);
   /* select only inelastic events: */
   pythia.readString("SoftQCD:inelastic = on");
   /* suppress unnecessary output */
@@ -402,8 +406,18 @@ void ScatterAction::string_excitation() {
   for (int i = 0; i < event.size(); i++) {
     if (event[i].isFinal()) {
       if (event[i].isHadron()) {
-        const int pythia_id = event[i].id();
+        int pythia_id = event[i].id();
         log.debug("PDG ID from Pythia:", pythia_id);
+        /* K_short and K_long need to be converted to K0
+         * since SMASH only knows K0 */
+        if (pythia_id == 310 || pythia_id == 130) {
+          const float prob = Random::uniform(0.f, 1.f);
+          if (prob <= 0.5f){
+            pythia_id = 311;
+          } else {
+            pythia_id = -311;
+          }
+        }
         const std::string s = std::to_string(pythia_id);
         PdgCode pythia_code(s);
         ParticleData new_particle(ParticleType::find(pythia_code));
@@ -488,6 +502,5 @@ void ScatterAction::format_debug_output(std::ostream &out) const {
     out << " to " << outgoing_particles_;
   }
 }
-
 
 }  // namespace Smash

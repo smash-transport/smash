@@ -22,10 +22,12 @@ namespace Smash {
  * \param s mandelstamm s of the collision [GeV^2]
  * \param ma Mass of the first particle [GeV]
  * \param mb Mass of the second particle [GeV]
+ * 
+ * needs to be double to allow for calculations at LHC energies
  */
-inline double center_of_velocity_v(float s, float ma, float mb) {
-  const float m_sum = ma + mb;
-  const float m_dif = ma - mb;
+inline double center_of_velocity_v(double s, double ma, double mb) {
+  const double m_sum = ma + mb;
+  const double m_dif = ma - mb;
   return std::sqrt((s - m_sum*m_sum) / (s - m_dif*m_dif));
 }
 

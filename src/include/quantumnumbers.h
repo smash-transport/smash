@@ -119,6 +119,7 @@ class QuantumNumbers {
   FourVector momentum() const {
     return momentum_;
   }
+
   /** returns the total charge \f$Q = \sum_{i \in \mbox{particles}}
    * q_i\f$
    *
@@ -247,6 +248,7 @@ class QuantumNumbers {
    * \see QuantumNumbers::momentum()
    */
   FourVector momentum_;
+
   /** total charge
    *
    * \see QuantumNumbers::charge()

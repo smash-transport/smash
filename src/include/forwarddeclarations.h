@@ -80,6 +80,16 @@ enum class CalculationFrame {
     FixedTarget,
 };
 
+/// Option to use Fermi Motion
+enum class FermiMotion {
+  /// Don't use fermi motion.
+  Off,
+  /// Use fermi motion in combination with potentials.
+  On,
+  /// Use fermi motion without potentials.
+  Frozen,
+};
+
 /// Possible methods of impact parameter sampling.
 enum class Sampling {
   /// Sample from uniform distribution.
@@ -135,7 +145,6 @@ using ParticleList = build_vector_<ParticleData>;
 using ParticleTypeList = build_vector_<ParticleType>;
 using ParticleTypePtrList = build_vector_<ParticleTypePtr>;
 using IsoParticleTypeList = build_vector_<IsoParticleType>;
-using IsoParticleTypeRefList = build_vector_<const IsoParticleType&>;
 
 template<typename T>
 using ProcessBranchPtr = build_unique_ptr_<T>;

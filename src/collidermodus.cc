@@ -127,10 +127,13 @@ namespace Smash {
  * Note that this distance is applied before the Lorentz boost
  * to chosen calculation frame, and thus the actual distance may be different.
  *
- * \key Fermi_Motion (bool, optional, default = false): \n
- * Defines if Fermi motion is included. Note that Fermi motion
- * is senseless physicswise if potentials are off: without potentials
- * nucleons will just fly apart.
+ * \key Fermi_Motion (string, optional, default = "off"): \n
+ * Defines if Fermi motion is included.\n
+ * "off", "on" or "frozen"\n
+ * Use "frozen" if you want to use Fermi motion
+ * without potentials. Use "on" if you want to use Fermi motion
+ * in combination with potentials.\n
+ *
  */
 
 ColliderModus::ColliderModus(Configuration modus_config,
@@ -140,6 +143,11 @@ ColliderModus::ColliderModus(Configuration modus_config,
   // Get the reference frame for the collision calculation.
   if (modus_cfg.has_value({"Calculation_Frame"})) {
     frame_ = modus_cfg.take({"Calculation_Frame"});
+  }
+
+  /// Determine whether to avoid the first collsions within the same nucleus
+  if (modus_cfg.has_value({"Collisions_Within_Nucleus"})) {
+    cll_in_nucleus_ = modus_cfg.take({"Collisions_Within_Nucleus"});
   }
 
   // Set up the projectile nucleus
@@ -164,22 +172,25 @@ ColliderModus::ColliderModus(Configuration modus_config,
     throw ColliderEmpty("Input Error: Target nucleus is empty.");
   }
 
-  // Consider an option to include Fermi-motion
-  fermi_motion_ = modus_cfg.take({"Fermi_Motion"}, false);
+  // Get the Fermi-Motion input (off, on, frozen)
+  if (modus_cfg.has_value({"Fermi_Motion"})) {
+    // We only read the value, because it is still required by the experiment
+    // class to make sure we don't use frozen Fermi momenta with potentials.
+    fermi_motion_ = modus_cfg.read({"Fermi_Motion"});
+  }
 
   // Get the total nucleus-nucleus collision energy. Since there is
   // no meaningful choice for a default energy, we require the user to
   // give one (and only one) energy input from the available options.
   int energy_input = 0;
-  const float mass_projec = projectile_->mass();
-  const float mass_target = target_->mass();
+  const double mass_projec = projectile_->mass();
+  const double mass_target = target_->mass();
   // average mass of a particle in that nucleus
-  const float mass_a = projectile_->mass() / projectile_->number_of_particles();
-  const float mass_b = target_->mass() / target_->number_of_particles();
+  const double mass_a = projectile_->mass() / projectile_->number_of_particles();
+  const double mass_b = target_->mass() / target_->number_of_particles();
   // Option 1: Center of mass energy.
   if (modus_cfg.has_value({"Sqrtsnn"})) {
     sqrt_s_NN_ = modus_cfg.take({"Sqrtsnn"});
-
     // Check that input satisfies the lower bound (everything at rest).
     if (sqrt_s_NN_ <= mass_a + mass_b) {
       throw ModusDefault::InvalidEnergy(
@@ -318,25 +329,36 @@ float ColliderModus::initial_conditions(Particles *particles,
   std::tie(v_a, v_b) =
       get_velocities(total_s_, projectile_->mass(), target_->mass());
 
-  // If velocities are too close to 1 for our calculations, throw an exception.
-  if (almost_equal(std::abs(1.0 - v_a), 0.0) ||
-      almost_equal(std::abs(1.0 - v_b), 0.0)) {
+  // If velocities are larger or equal to 1, throw an exception.
+  if (v_a >= 1.0 || v_b >=1.0) {
     throw std::domain_error(
-        "Found velocity equal to 1 in "
-        "nucleusmodus::initial_conditions.\nConsider using"
+        "Found velocity equal to or larger than 1 in "
+        "ColliderModus::initial_conditions.\nConsider using "
         "the center of velocity reference frame.");
   }
 
   // Generate Fermi momenta if necessary
-  if (fermi_motion_) {
-    log.info() << "Fermi motion is ON";
+  if (fermi_motion_ == FermiMotion::On ||
+      fermi_motion_ == FermiMotion::Frozen) {
+    // Frozen: Fermi momenta will be ignored during the propagation to
+    // avoid that the nuclei will fly apart.
     projectile_->generate_fermi_momenta();
     target_->generate_fermi_momenta();
+    if (fermi_motion_ == FermiMotion::On) {
+      log.info() << "Fermi motion is ON.";
+    } else {
+      log.info() << "FROZEN Fermi motion is on.";
+    }
+  } else if (fermi_motion_ == FermiMotion::Off) {
+    // No Fermi-momenta are generated in this case
+    log.info() << "Fermi motion is OFF.";
+  } else {
+    throw std::domain_error("Invalid Fermi_Motion input.");
   }
 
   // Boost the nuclei to the appropriate velocity.
-  projectile_->boost(v_a);
-  target_->boost(v_b);
+  projectile_->boost(v_a, fermi_motion_);
+  target_->boost(v_b, fermi_motion_);
 
   // Shift the nuclei into starting positions. Contracted spheres with
   // nuclear radii should touch exactly at t=0. Modus starts at negative
@@ -354,10 +376,10 @@ float ColliderModus::initial_conditions(Particles *particles,
                         std::sqrt(1.0 - v_b*v_b) * (r_b + d_b);
   projectile_->shift(proj_z, +impact_ / 2.0, simulation_time);
   target_->    shift(targ_z, -impact_ / 2.0, simulation_time);
-
+ 
   // Put the particles in the nuclei into code particles.
   projectile_->copy_particles(particles);
-  target_->copy_particles(particles);
+  target_->copy_particles(particles);    
   return simulation_time;
 }
 
@@ -394,8 +416,8 @@ void ColliderModus::sample_impact() {
   }
 }
 
-std::pair<double, double> ColliderModus::get_velocities(float s, float m_a,
-                                                        float m_b) {
+std::pair<double, double> ColliderModus::get_velocities(double s, double m_a,
+                                                        double m_b) {
   double v_a = 0.0;
   double v_b = 0.0;
   // Frame dependent calculations of velocities. Assume v_a >= 0, v_b <= 0.
