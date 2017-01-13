@@ -702,7 +702,7 @@ static std::string format_measurements(const Particles &particles,
 
 template <typename Modus>
 template <typename Container>
-void Experiment<Modus>::perform_action(Action &action,
+bool Experiment<Modus>::perform_action(Action &action,
                                  const Container &particles_before_actions) {
   const auto &log = logger<LogArea::Experiment>();
   if (!action.is_valid(particles_)) {
@@ -720,14 +720,14 @@ void Experiment<Modus>::perform_action(Action &action,
         nucleon_has_interacted_[par_b] = true;
       }
     }
-    return;
+    return false;
   }
   action.generate_final_state();
   log.debug("Process Type is: ", action.get_type());
   if (pauli_blocker_ &&
       action.is_pauli_blocked(particles_, *pauli_blocker_)) {
     total_pauli_blocked_++;
-    return;
+    return false;
   }
   // Make sure to pick a non-zero integer, because 0 is reserved for "no
   // interaction yet".
@@ -783,6 +783,7 @@ void Experiment<Modus>::perform_action(Action &action,
   }
 
   log.debug(~einhard::Green(), "✔ ", action);
+  return true;
 }
 
 /// Make sure `interactions_total` can be represented as a 32-bit integer.
@@ -939,8 +940,13 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions& actions) {
     // propagated since the construction of the action.
     act->update_incoming(particles_);
 
-    perform_action(*act, particles_);
+    const bool performed = perform_action(*act, particles_);
 
+    // No need to update actions for outgoing particles
+    // if the action is not performed.
+    if (!performed) {
+      continue;
+    }
     const auto particles_before_actions = particles_.copy_to_vector();
 
     /* (3) Update actions for newly-produced particles. */

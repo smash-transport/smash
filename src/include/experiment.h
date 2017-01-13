@@ -144,7 +144,7 @@ class Experiment : public ExperimentBase {
    *                                 time step before any actions were performed
    */
   template <typename Container>
-  void perform_action(Action &action,
+  bool perform_action(Action &action,
                       const Container &particles_before_actions);
 
   template <typename TOutput>
