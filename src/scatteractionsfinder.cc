@@ -163,6 +163,8 @@ ActionPtr ScatterActionsFinder::check_collision(
     * 2) are within the same nucleus
     * 3) both of them have never experienced any collisons,
     * then the collision between them are banned. */
+  assert(data_a.id() >= 0);
+  assert(data_b.id() >= 0);
   if (data_a.id() < N_tot_ && data_b.id() < N_tot_ &&
       ((data_a.id() < N_proj_ && data_b.id() < N_proj_) ||
        (data_a.id() > N_proj_ && data_b.id() > N_proj_)) &&
