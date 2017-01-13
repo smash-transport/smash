@@ -234,7 +234,7 @@ inline ParticlesPtr create_particles(
  * 1.
  */
 inline ExperimentParameters default_parameters(int testparticles = 1, float dt = 0.1f) {
-  return ExperimentParameters{{0.f, dt}, 1.f, testparticles, 1.0, 4.0};
+  return ExperimentParameters{{0.f, dt}, {0.f, 1.f}, testparticles, 1.0, 4.0};
 }
 
 /**

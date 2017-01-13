@@ -18,55 +18,49 @@
 namespace Smash {
 
 /* Simple straight line propagation without potentials*/
-void propagate_straight_line(Particles *particles,
-                             const ExperimentParameters &parameters) {
+double propagate_straight_line(Particles *particles, double to_time) {
   const auto &log = logger<LogArea::Propagation>();
-  const double dt = parameters.timestep_duration();
+  double dt = 0.0;
   for (ParticleData &data : *particles) {
-    // Do a propagation without Fermi motion to avoid that the nucleus
-    // will fly apart, i.e. propagate only initial beam momentum. However,
-    // "new" particles will have an empty beam momentum, thus we need
-    // to distinguish between initially present and produced particles.
+    const double t0 = data.position().x0();
+    dt = to_time - t0;
+    assert(dt >= 0.0);
+    // "Frozen Fermi motion": Fermi momenta are only used for collisions,
+    // but not for propagation. This is done to avoid nucleus flying apart
+    // even if potentials are off. Initial nucleons before the first collision
+    // are propagated only according to beam momentum.
     //
-    // Calculate distance and position of initially present particles,
-    // i.e. of those who are bound in the nuclei and have not yet collided.
-    // For these particles the Fermi momenta "are frozen"; they get
-    // their total momentum when they are not bound anymore.
-    if (data.beammomentum().x0() > really_small &&
-        data.get_history().collisions_per_particle == 0) {
-      FourVector distance = FourVector(0.0, data.beamvelocity() * dt);
-      log.debug("Particle ", data, " motion: ", distance);
-      FourVector position = data.position() + distance;
-      position.set_x0(parameters.new_particle_time());
-      data.set_4position(position);
-    } else {
-    // Calculate distance and position of produced (and already collided)
-    // particles. These particles are not bound to a nucleus, thus no
-    // nucleus could fly apart. For these particles the total momentum
-    // is relevant and therefore we have to propagate them according to it.
-      FourVector distance = FourVector(0.0, data.velocity() * dt);
-      log.debug("Particle ", data, " motion: ", distance);
-      FourVector position = data.position() + distance;
-      position.set_x0(parameters.new_particle_time());
-      data.set_4position(position);
-    }
+    // Initial nucleons are distinguished by beammomentum variable, which
+    // is set non-zero for them.
 
-    /* Test, if particle is formed and reset cross_section_scaling_factor
-       TODO: Is there a way to only do that for particles that were unformed 
-       in the previous timestep? */
-    if (data.formation_time() < data.position().x0()) {
+    // todo(m. mayer): improve this condition (see comment #11 issue #4213)
+    const bool avoid_fermi_motion =
+                 (data.beammomentum().x0() > really_small) &&
+                 (data.get_history().collisions_per_particle == 0);
+    const ThreeVector v = avoid_fermi_motion  ?
+                          data.beamvelocity() :
+                          data.velocity();
+    const FourVector distance = FourVector(0.0, v * dt);
+    log.debug("Particle ", data, " motion: ", distance);
+    FourVector position = data.position() + distance;
+    position.set_x0(to_time);
+    data.set_4position(position);
+
+    // If particle is formed reset cross_section_scaling_factor
+    if (data.formation_time() < to_time) {
       data.set_cross_section_scaling_factor(1.0);
     }
   }
+  return dt;
 }
 
-void propagate(Particles *particles, const ExperimentParameters &parameters,
+void update_momenta(Particles *particles, double dt,
                const Potentials &pot,
                RectangularLattice<ThreeVector>* UB_grad_lat,
                RectangularLattice<ThreeVector>* UI3_grad_lat) {
   // Copy particles before propagation to calculate potentials from them
   const ParticleList plist = particles->copy_to_vector();
-  const double dt = parameters.timestep_duration();
+
   const auto &log = logger<LogArea::Propagation>();
   bool possibly_use_lattice =
          (pot.use_skyrme() ? (UB_grad_lat != nullptr) : true) &&
@@ -75,7 +69,7 @@ void propagate(Particles *particles, const ExperimentParameters &parameters,
   float min_time_scale = std::numeric_limits<float>::infinity();
 
   for (ParticleData &data : *particles) {
-    ThreeVector r = data.position().threevec();
+    const ThreeVector r = data.position().threevec();
     /* Lattices can be used for calculation if 1-2 are fulfilled:
      * 1) Required lattices are not nullptr - possibly_use_lattice
      * 2) r is not out of required lattices
@@ -90,21 +84,11 @@ void propagate(Particles *particles, const ExperimentParameters &parameters,
       dUI3_dr = ThreeVector(0.0, 0.0, 0.0);
     }
     // Compute potential gradient from lattice if possible
-    ThreeVector dU_dr = use_lattice ? (dUB_dr + dUI3_dr):
-                        pot.potential_gradient(r, plist, data.type());
-    log.debug("Propagate: dU/dr = ", dU_dr);
-    ThreeVector v = data.velocity();
-    // predictor step assuming momentum-indep. potential, dU/dp = 0
-    // then for momentum predictor = corrector
+    const ThreeVector dU_dr = use_lattice ? (dUB_dr + dUI3_dr):
+                              pot.potential_gradient(r, plist, data.type());
+    log.debug("Update momenta: dU/dr [GeV/fm] = ", dU_dr);
     data.set_4momentum(data.effective_mass(),
                        data.momentum().threevec() - dU_dr * dt);
-    ThreeVector v_pred = data.velocity();
-    // corrector step
-    FourVector distance = FourVector(0.0, (v + v_pred) * (0.5 * dt));
-    log.debug("Particle ", data, " motion: ", distance);
-    FourVector position = data.position() + distance;
-    position.set_x0(parameters.new_particle_time());
-    data.set_4position(position);
 
     // calculate the time scale of the change in momentum
     const double dU_dr_abs = dU_dr.abs();
@@ -119,7 +103,7 @@ void propagate(Particles *particles, const ExperimentParameters &parameters,
 
   // warn if the time step is too big
   constexpr float safety_factor = 0.1f;
-  if (parameters.timestep_duration() > safety_factor * min_time_scale) {
+  if (dt > safety_factor * min_time_scale) {
     log.warn() << "The time step size is too large for an accurate propagation "
                << "with potentials. Maximum safe value: "
                << safety_factor * min_time_scale << " fm/c.";

@@ -313,7 +313,20 @@ class ParticleType {
   static ParticleTypePtrList &list_baryon_resonances();
 
   /**
+   * Returns the ParticleTypePtr for the given \p pdgcode.
+   * If the particle type is not found, an invalid ParticleTypePtr is returned.
+   * You can convert a ParticleTypePtr to a bool to check whether it is valid.
+   *
+   * \note The complexity of the search is \f$\mathcal O(\log N)\f$. Therefore,
+   * do not use this function except for user input that selects a particle
+   * type. All other internal references for a particle type should use
+   * ParticleTypePtr instead.
+   */
+  static const ParticleTypePtr try_find(PdgCode pdgcode);
+
+  /**
    * Returns the ParticleType object for the given \p pdgcode.
+   * If the particle is not found, a PdgNotFoundFailure is thrown.
    *
    * \note The complexity of the search is \f$\mathcal O(\log N)\f$. Therefore,
    * do not use this function except for user input that selects a particle

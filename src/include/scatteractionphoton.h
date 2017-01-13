@@ -10,6 +10,8 @@
 #ifndef SRC_INCLUDE_SCATTERACTIONPHOTON_H_
 #define SRC_INCLUDE_SCATTERACTIONPHOTON_H_
 
+#include <algorithm>
+
 #include "constants.h"
 #include "scatteraction.h"
 
@@ -17,16 +19,11 @@ namespace Smash {
 
 class ScatterActionPhoton : public ScatterAction {
  public:
-  ScatterActionPhoton(const ParticleData &in_part1,
-                      const ParticleData &in_part2, float time, int nofp)
-      : ScatterAction(in_part1, in_part2, time),
+  ScatterActionPhoton(const ParticleList &in, float time, int nofp)
+      : ScatterAction(in[0], in[1], time),
         number_of_fractional_photons(nofp) {}
 
   void generate_final_state() override;
-
-  void add_all_processes(float elastic_parameter,
-                         bool two_to_one, bool two_to_two, double low_snn_cut,
-                         bool strings_switch) override;
 
   float raw_weight_value() const override { return weight_; }
 
@@ -43,12 +40,22 @@ class ScatterActionPhoton : public ScatterAction {
     return static_cast<ProcessType>(reac);
   }
 
+  /** Adds one dummy channel with a given cross-section. The intended use is to
+   * add the hadronic cross-section from already performed hadronic action
+   * without recomputing it. The photon action is never performed, so
+   * this channel itself will never play any role. Only its cross-section will.
+   */
+  void add_dummy_hadronic_channels(float reaction_cross_section);
+
   /** To add only one reaction for testing purposes */
   void add_single_channel() {
     add_processes<CollisionBranch>(photon_cross_sections(),
                                   collision_channels_photons_,
                                   cross_section_photons_);
   }
+
+  /// Tells if the given incoming particles may produce photon
+  static bool is_photon_reaction(const ParticleList &in);
 
  private:
   CollisionBranchList photon_cross_sections();

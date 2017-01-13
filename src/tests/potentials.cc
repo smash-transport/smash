@@ -131,6 +131,7 @@ TEST(nucleus_potential_profile) {
   const ParticleType &proton = ParticleType::find(0x2212);
 
   std::ofstream a_file;
+  const float timestep = param.labclock.timestep_duration();
   for (auto it = 0; it < 20; it++) {
     a_file.open(("Nucleus_U_xy.vtk." + std::to_string(it)).c_str(),
                                                      std::ios::out);
@@ -158,7 +159,9 @@ TEST(nucleus_potential_profile) {
     }
     a_file.close();
     for (auto i = 0; i < 50; i++) {
-      propagate(&P, param, *pot, nullptr, nullptr);
+      const float time_to = 5.0*it + i*timestep;
+      const double dt = propagate_straight_line(&P, time_to);
+      update_momenta(&P, dt, *pot, nullptr, nullptr);
     }
   }
 }
@@ -216,8 +219,12 @@ TEST(propagation_in_test_potential) {
   COMPARE(P.back().id(), 0);
 
   // Propagate, until particle is at x>>d, where d is parameter of potential
+  const float timestep = param.labclock.timestep_duration();
+  double time_to = 0.0;
   while (P.front().position().x1() < 20*d) {
-    propagate(&P, param, *pot, nullptr, nullptr);
+    time_to += timestep;
+    const double dt = propagate_straight_line(&P, time_to);
+    update_momenta(&P, dt, *pot, nullptr, nullptr);
   }
   // Calculate 4-momentum, expected from conservation laws
   const FourVector pm = part.momentum();

@@ -32,7 +32,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
                        const ExperimentParameters &parameters,
                        bool two_to_one, bool two_to_two, double low_snn_cut,
                        bool strings_switch, const std::vector<bool> &nucleon_has_interacted,
-                       int N_tot, int N_proj);
+                       int N_tot, int N_proj, bool photons, int n_fractional_photons);
 
   /** Constructor for testing purposes. */
   ScatterActionsFinder(float elastic_parameter, int testparticles,
@@ -148,6 +148,10 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const int N_proj_;
   /** Parameter for formation time */
   const float formation_time_;
+  /** Photons switch */
+  const bool photons_;
+  /** Number of fractional photons */
+  const bool n_fractional_photons_;
 };
 
 #if 0
