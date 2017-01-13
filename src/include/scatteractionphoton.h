@@ -19,9 +19,8 @@ namespace Smash {
 
 class ScatterActionPhoton : public ScatterAction {
  public:
-  ScatterActionPhoton(const ParticleData &in_part1,
-                      const ParticleData &in_part2, float time, int nofp)
-      : ScatterAction(in_part1, in_part2, time),
+  ScatterActionPhoton(const ParticleList &in, float time, int nofp)
+      : ScatterAction(in[0], in[1], time),
         number_of_fractional_photons(nofp) {}
 
   void generate_final_state() override;
@@ -56,40 +55,7 @@ class ScatterActionPhoton : public ScatterAction {
   }
 
   /// Tells if the given incoming particles may produce photon
-  static bool is_photon_reaction(const ParticleList &in) {
-    if (in.size() != 2) {
-      return false;
-    }
-    // Turn all pi- and rho- into pi+ and rho+ to avoid listing
-    // too many variants further, swap so that pion should be first.
-    PdgCode a = (in[0].type().charge() >= 0) ? in[0].pdgcode() :
-                 in[0].pdgcode().get_antiparticle();
-    PdgCode b = (in[1].type().charge() >= 0) ? in[1].pdgcode() :
-                 in[1].pdgcode().get_antiparticle();
-    if (!a.is_pion()) {
-      std::swap(a, b);
-    }
-
-    switch (pack(a.code(), b.code())) {
-      case(pack(pdg::pi_p, pdg::pi_z)):
-      case(pack(pdg::pi_z, pdg::pi_p)):
-        // ReactionType::pi0_pi
-      case(pack(pdg::pi_p, pdg::rho_z)):
-        // ReactionType::piplus_rho0
-      case(pack(pdg::pi_p, pdg::rho_p)):
-        // ReactionType::pi_rho
-      case(pack(pdg::pi_z, pdg::rho_p)):
-        // ReactionType::pi0_rho
-      case(pack(pdg::pi_p, pdg::eta)):
-        // ReactionType::piplus_eta
-      case(pack(pdg::pi_p, pdg::pi_p)):
-        // ReactionType::pi_pi
-        return true;
-        break;
-      default:
-        return false;
-    }
-  }
+  static bool is_photon_reaction(const ParticleList &in);
 
  private:
   CollisionBranchList photon_cross_sections();

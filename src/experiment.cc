@@ -303,6 +303,12 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   }
 
   // create finders
+  if (dileptons_switch_) {
+    dilepton_finder_ = make_unique<DecayActionsFinderDilepton>();
+  }
+  if (photons_switch_) {
+    n_fractional_photons_ = config.take({"Output", "Photons", "Fractions"});
+  }
   if (two_to_one) {
     action_finders_.emplace_back(make_unique<DecayActionsFinder>());
   }
@@ -310,7 +316,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     auto scat_finder = make_unique<ScatterActionsFinder>(config, parameters_,
                        two_to_one, two_to_two, low_snn_cut, strings_switch_,
                        nucleon_has_interacted_,
-                       modus_.total_N_number(), modus_.proj_N_number());
+                       modus_.total_N_number(), modus_.proj_N_number(),
+                       photons_switch_, n_fractional_photons_);
     max_transverse_distance_sqr_ = scat_finder->max_transverse_distance_sqr(
                                                   parameters_.testparticles);
     action_finders_.emplace_back(std::move(scat_finder));
@@ -321,12 +328,6 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     action_finders_.emplace_back(make_unique<WallCrossActionsFinder>(modus_l));
   }*/
 
-  if (dileptons_switch_) {
-    dilepton_finder_ = make_unique<DecayActionsFinderDilepton>();
-  }
-  if (photons_switch_) {
-    n_fractional_photons_ = config.take({"Output", "Photons", "Fractions"});
-  }
   if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
     log.info() << "Pauli blocking is ON.";
     pauli_blocker_ = make_unique<PauliBlocker>(
@@ -658,8 +659,8 @@ void Experiment<Modus>::initialize_new_event() {
 
   /* Reset the output clock */
   const float dt_output = parameters_.outputclock.timestep_duration();
-  const float first_output_time = std::ceil(start_time/dt_output)*dt_output;
-  Clock output_clock(first_output_time, dt_output);
+  const float zeroth_output_time = std::floor(start_time/dt_output)*dt_output;
+  Clock output_clock(zeroth_output_time, dt_output);
   parameters_.outputclock = std::move(output_clock);
 
   log.debug("Lab clock: t_start = ", parameters_.labclock.current_time(),
@@ -764,11 +765,10 @@ void Experiment<Modus>::perform_action(Action &action,
   // At every collision photons can be produced.
   if (photons_switch_ &&
       ScatterActionPhoton::is_photon_reaction(action.incoming_particles())) {
-    const ParticleData a = action.incoming_particles()[0];
-    const ParticleData b = action.incoming_particles()[1];
     // Time in the action constructor is relative to current time of incoming
     constexpr float action_time = 0.f;
-    ScatterActionPhoton photon_act(a, b, action_time, n_fractional_photons_);
+    ScatterActionPhoton photon_act(action.incoming_particles(),
+                                   action_time, n_fractional_photons_);
     // Add a completely dummy process to photon action.  The only important
     // thing is that its cross-section is equal to cross-section of action.
     // This can be done, because photon action is never performed, only
@@ -914,16 +914,17 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions& actions) {
         log.debug(~einhard::DRed(), "✘ ", act, " (discarded: adaptive timestep"
                   " mode decreased timestep and this action is too late)");
       } else {
-        log.error(act, " scheduled later than end time.");
+        log.error(act, " scheduled later than end time: t_action[fm/c] = ",
+                  act->time_of_execution(), ", t_end[fm/c] = ", end_time);
       }
     }
     log.debug(~einhard::Green(), "✔ ", act);
 
-    while (next_output_time() <= end_time) {
+    while (next_output_time() < act->time_of_execution()) {
       log.debug("Propagating until output time: ", next_output_time());
       propagate_and_shine(next_output_time());
-      intermediate_output();
       ++parameters_.outputclock;
+      intermediate_output();
     }
 
     /* (1) Propagate to the next action. */
@@ -961,8 +962,11 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions& actions) {
   while (next_output_time() <= end_time) {
     log.debug("Propagating until output time: ", next_output_time());
     propagate_and_shine(next_output_time());
-    intermediate_output();
     ++parameters_.outputclock;
+    // Avoid duplicating printout at event end time
+    if (parameters_.outputclock.current_time() < end_time_) {
+      intermediate_output();
+    }
   }
 
   log.debug("Propagating to time ", end_time);
@@ -1093,6 +1097,11 @@ void Experiment<Modus>::final_output(const int evt_num) {
   // to the start time, but we don't know that. Therefore, we check that
   // the time is positive, which should heuristically be the same).
   if (likely(parameters_.labclock > 0)) {
+    const uint64_t interactions_this_interval =
+        interactions_total_ - previous_interactions_total_;
+    log.info() << format_measurements(
+      particles_, interactions_total_, interactions_this_interval,
+      conserved_initial_, time_start_, parameters_.outputclock.current_time());
     log.info() << hline;
     log.info() << "Time real: " << SystemClock::now() - time_start_;
     /* if there are no particles no interactions happened */

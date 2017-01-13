@@ -32,6 +32,8 @@ double propagate_straight_line(Particles *particles, double to_time) {
     //
     // Initial nucleons are distinguished by beammomentum variable, which
     // is set non-zero for them.
+
+    // todo(m. mayer): improve this condition (see comment #11 issue #4213)
     const bool avoid_fermi_motion =
                  (data.beammomentum().x0() > really_small) &&
                  (data.get_history().collisions_per_particle == 0);
