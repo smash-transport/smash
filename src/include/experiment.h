@@ -10,6 +10,7 @@
 #include "actionfinderfactory.h"
 #include "adaptiveparameters.h"
 #include "chrono.h"
+#include "decayactionsfinderdilepton.h"
 #include "energymomentumtensor.h"
 #include "pauliblocking.h"
 #include "potentials.h"
@@ -143,7 +144,7 @@ class Experiment : public ExperimentBase {
    *                                 time step before any actions were performed
    */
   template <typename Container>
-  void perform_action(Action &action,
+  bool perform_action(Action &action,
                       const Container &particles_before_actions);
 
   template <typename TOutput>
@@ -151,18 +152,10 @@ class Experiment : public ExperimentBase {
                      const bf::path &output_path,
                      Configuration&& conf);
 
-  /** It generates the final state with the right kinematics and then writes
-   * the given dilepton action in the dilepton output file, instead of
-   * actually performing the action.
+  /** Propagate all particles until time to_time without any interactions
+   *  and shine dileptons.
    */
-  void write_dilepton_action(Action &action,
-                             const ParticleList &particles_before_actions);
-
-   /** Generates kinematics and weighing of final states and writes them into output file,
-    * the actions are NOT performed. 
-    */
-  void write_photon_action(Action &action,
-                           const ParticleList &particles_before_actions);
+  void propagate_and_shine(double to_time);
 
   /** Runs the time evolution of an event with fixed-sized time steps,
    *  adaptive time steps or without timesteps, from action to actions.
@@ -176,7 +169,7 @@ class Experiment : public ExperimentBase {
    * Here, all actions are looped over, collisions and decays are
    * carried out and particles are propagated.
    */
-  void run_time_evolution_without_time_steps(float end_time, Actions& actions);
+  void run_time_evolution_timestepless(Actions& actions);
 
   /** Performs the final decays of an event
    */
@@ -193,15 +186,9 @@ class Experiment : public ExperimentBase {
   void intermediate_output();
 
   /**
-   * Propagate all particles to the current time.
+   * Recompute potentials on lattices if necessary.
    */
-  void propagate_all();
-
-  /**
-   * Collisionless propagation until given time with proper intermediate output
-   * \param t_end The time until particles should be propagated
-   */
-  void propagate_all_until(float t_end);
+  void update_potentials();
 
   /**
    * Calculate the minimal size for the grid cells such that the
@@ -215,6 +202,10 @@ class Experiment : public ExperimentBase {
     return std::sqrt(4 * dt * dt + max_transverse_distance_sqr_);
   }
 
+  /// Shortcut for next output time
+  float next_output_time() const {
+    return parameters_.outputclock.next_time();
+  }
 
   /**
    * Struct of several member variables.
@@ -272,13 +263,13 @@ class Experiment : public ExperimentBase {
   std::vector<std::unique_ptr<ActionFinderInterface>> action_finders_;
 
   /// The Dilepton Action Finder
-  std::unique_ptr<ActionFinderInterface> dilepton_finder_;
+  std::unique_ptr<DecayActionsFinderDilepton> dilepton_finder_;
 
   /// The (Scatter) Actions Finder for Direct Photons
   std::unique_ptr<ActionFinderInterface> photon_finder_;
 
   /// Number of fractional photons produced per single reaction
-  int number_of_fractional_photons = 100;
+  int n_fractional_photons_ = 100;
 
   /// Lattices holding different physical quantities
 

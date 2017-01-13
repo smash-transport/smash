@@ -27,6 +27,7 @@
 #include "include/scatteractionnucleonkaon.h"
 #include "include/scatteractionnucleonnucleon.h"
 #include "include/scatteractionhyperonpion.h"
+#include "include/scatteractionphoton.h"
 #include "include/stringfunctions.h"
 
 namespace Smash {
@@ -54,7 +55,8 @@ namespace Smash {
 ScatterActionsFinder::ScatterActionsFinder(
     Configuration config, const ExperimentParameters &parameters,
     bool two_to_one, bool two_to_two, double low_snn_cut, bool strings_switch,
-    const std::vector<bool> &nucleon_has_interacted, int N_tot, int N_proj)
+    const std::vector<bool> &nucleon_has_interacted, int N_tot, int N_proj,
+    bool photons = false, int n_fractional_photons = 1)
     : elastic_parameter_(config.take({"Collision_Term",
                                       "Elastic_Cross_Section"}, -1.0f)),
       testparticles_(parameters.testparticles),
@@ -66,8 +68,9 @@ ScatterActionsFinder::ScatterActionsFinder(
       nucleon_has_interacted_(nucleon_has_interacted),
       N_tot_(N_tot),
       N_proj_(N_proj),
-      formation_time_(config.take({"Collision_Term",
-                                   "Formation_Time"}, 1.0f)) {
+      formation_time_(config.take({"Collision_Term", "Formation_Time"}, 1.0f)),
+      photons_(photons),
+      n_fractional_photons_(n_fractional_photons) {
         if (is_constant_elastic_isotropic()) {
           const auto &log = logger<LogArea::FindScatter>();
           log.info("Constant elastic isotropic cross-section mode:",
@@ -88,7 +91,9 @@ ScatterActionsFinder::ScatterActionsFinder(
       nucleon_has_interacted_(nucleon_has_interacted),
       N_tot_(0),
       N_proj_(0),
-      formation_time_(1.0f) {}
+      formation_time_(1.0f),
+      photons_(false),
+      n_fractional_photons_(1) {}
 
 ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
                                             const ParticleData &data_a,
@@ -158,6 +163,8 @@ ActionPtr ScatterActionsFinder::check_collision(
     * 2) are within the same nucleus
     * 3) both of them have never experienced any collisons,
     * then the collision between them are banned. */
+  assert(data_a.id() >= 0);
+  assert(data_b.id() >= 0);
   if (data_a.id() < N_tot_ && data_b.id() < N_tot_ &&
       ((data_a.id() < N_proj_ && data_b.id() < N_proj_) ||
        (data_a.id() > N_proj_ && data_b.id() > N_proj_)) &&
@@ -187,8 +194,18 @@ ActionPtr ScatterActionsFinder::check_collision(
   act->add_all_processes(elastic_parameter_, two_to_one_,
                          two_to_two_, low_snn_cut_, strings_switch_);
 
+  /* Add photons to collision finding if necessary */
+  double photon_cross_section = 0.0;
+  if (photons_ &&
+      ScatterActionPhoton::is_photon_reaction(act->incoming_particles()))  {
+    ScatterActionPhoton photon_act(act->incoming_particles(), 0.0,
+                                   n_fractional_photons_);
+    photon_act.add_single_channel();
+    photon_cross_section = photon_act.cross_section();
+  }
   /* Cross section for collision criterion */
-  float cross_section_criterion = act->cross_section() * fm2_mb * M_1_PI
+  float cross_section_criterion = (act->cross_section() + photon_cross_section)
+                                  * fm2_mb * M_1_PI
                                   / static_cast<float>(testparticles_);
   /* Consider cross section scaling factors only if the particles
    * are not formed yet at the prospective time of the interaction */

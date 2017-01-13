@@ -74,24 +74,27 @@ ParticleTypePtrList &ParticleType::list_baryon_resonances() {
   return baryon_resonances_list;
 }
 
-const ParticleType &ParticleType::find(PdgCode pdgcode) {
+const ParticleTypePtr ParticleType::try_find(PdgCode pdgcode) {
   const auto found = std::lower_bound(
       all_particle_types->begin(), all_particle_types->end(), pdgcode,
       [](const ParticleType &l, const PdgCode &r) { return l.pdgcode() < r; });
   if (found == all_particle_types->end() || found->pdgcode() != pdgcode) {
+    return {};  // The default constructor creates an invalid pointer.
+  }
+  return &*found;
+}
+
+const ParticleType &ParticleType::find(PdgCode pdgcode) {
+  const auto found = ParticleType::try_find(pdgcode);
+  if (!found) {
     throw PdgNotFoundFailure("PDG code " + pdgcode.string() + " not found!");
   }
   return *found;
 }
 
 bool ParticleType::exists(PdgCode pdgcode) {
-  const auto found = std::lower_bound(
-      all_particle_types->begin(), all_particle_types->end(), pdgcode,
-      [](const ParticleType &l, const PdgCode &r) { return l.pdgcode() < r; });
-  if (found != all_particle_types->end()) {
-    return found->pdgcode() == pdgcode;
-  }
-  return false;
+  const auto found = ParticleType::try_find(pdgcode);
+  return found;
 }
 
 ParticleType::ParticleType(std::string n, float m, float w, PdgCode id)
