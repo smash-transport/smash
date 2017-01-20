@@ -295,7 +295,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   //  below low_snn_cut are excluded.
   const double low_snn_cut = config.take({"Collision_Term",
                                           "Elastic_NN_Cutoff_Sqrts"});
-  if (low_snn_cut > ParticleType::find(pdg::p).mass() +
+  if (ParticleType::exists(pdg::p) && ParticleType::exists(pdg::pi_z) &&
+      low_snn_cut > ParticleType::find(pdg::p).mass() +
                     ParticleType::find(pdg::p).mass() +
                     ParticleType::find(pdg::pi_z).mass()) {
     log.warn("The cut-off should be below the threshold energy",
