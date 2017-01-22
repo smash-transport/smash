@@ -155,6 +155,15 @@ class ScatterAction : public Action {
   CollisionBranchPtr elastic_cross_section(float elast_par);
 
   /**
+   * Determine the cross section for NNbar annihilation, which is given by the
+   * difference between the parametrized total cross section and all the 
+   * explicitly implemented channels at low energy (in this case only elastic).
+   * This method has to be called after all other processes 
+   * have been added to the Action object. 
+   */
+  virtual CollisionBranchPtr NNbar_annihilation_cross_sections();
+
+  /**
    * Determine the cross section for string excitations, which is given by the
    * difference between the parametrized total cross section and all the
    * explicitly implemented channels at low energy (elastic, resonance
