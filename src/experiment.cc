@@ -294,7 +294,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   /// Elastic collisions between the nucleons with the square root s
   //  below low_snn_cut are excluded.
   const double low_snn_cut = config.take({"Collision_Term",
-                                          "Elastic_NN_Cutoff_Sqrts"});
+                                          "Elastic_NN_Cutoff_Sqrts"}, 1.98);
   if (low_snn_cut > ParticleType::find(pdg::p).mass() +
                     ParticleType::find(pdg::p).mass() +
                     ParticleType::find(pdg::pi_z).mass()) {
