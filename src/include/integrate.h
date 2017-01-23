@@ -16,6 +16,7 @@
 #include <tuple>
 
 #include "cxx14compat.h"
+#include "fpenvironment.h"
 #include "random.h"
 
 namespace Smash {
@@ -29,12 +30,12 @@ struct GslWorkspaceDeleter {
   /// The class has no members, so this is a noop.
   constexpr GslWorkspaceDeleter() = default;
 
-  /// frees the gsl_integration_workspace resource if it is non-zero.
-  void operator()(gsl_integration_workspace *ptr) const {
+  /// Frees the gsl_integration_cquad_workspace resource if it is non-zero.
+  void operator()(gsl_integration_cquad_workspace *ptr) const {
     if (ptr == nullptr) {
       return;
     }
-    gsl_integration_workspace_free(ptr);
+    gsl_integration_cquad_workspace_free(ptr);
   }
 };
 
@@ -59,7 +60,7 @@ class Result : public std::pair<double, double> {
 
 /**
  * A C++ interface for numerical integration in one dimension
- * with the GSL integration functions.
+ * with the GSL CQUAD integration functions.
  *
  * Example:
  * \code
@@ -84,7 +85,7 @@ class Integrator {
    *                       the integration algorithm will use.
    */
   explicit Integrator(int workspace_size)
-      : workspace_(gsl_integration_workspace_alloc(workspace_size)),
+      : workspace_(gsl_integration_cquad_workspace_alloc(workspace_size)),
         subintervals_max_(workspace_size) {}
 
   /// Convenience overload of the above with a workspace size of 1000.
@@ -112,18 +113,19 @@ class Integrator {
           return f(x);
         },
         &fun};
-    gsl_integration_qag(&gslfun, a, b,
-                        accuracy_absolute_,  // epsabs
-                        accuracy_relative_,  // epsrel
-                        subintervals_max_,   // limit
-                        gauss_points_,       // key
-                        workspace_.get(), &result.first, &result.second);
+    // We disable float traps when calling GSL code we cannot control.
+    DisableFloatTraps guard;
+    gsl_integration_cquad(&gslfun, a, b,
+                          accuracy_absolute_, accuracy_relative_,
+                          workspace_.get(),
+                          &result.first, &result.second,
+                          nullptr /* Don't store the number of evaluations */);
     return result;
   }
 
  private:
   /// Holds the workspace pointer.
-  std::unique_ptr<gsl_integration_workspace, GslWorkspaceDeleter> workspace_;
+  std::unique_ptr<gsl_integration_cquad_workspace, GslWorkspaceDeleter> workspace_;
 
   /// Parameter to the GSL integration function: desired absolute error limit
   const double accuracy_absolute_ = 1.0e-5;
@@ -134,9 +136,6 @@ class Integrator {
   /// Parameter to the GSL integration function: maximum number of subintervals
   /// (may not exceed workspace size)
   const std::size_t subintervals_max_;
-
-  /// Parameter to the GSL integration function: integration rule
-  const int gauss_points_ = GSL_INTEG_GAUSS51;
 };
 
 /**
