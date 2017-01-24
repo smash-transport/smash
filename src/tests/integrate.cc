@@ -16,11 +16,11 @@ TEST(on_dim_no_arguments) {
   Smash::Integrator integrate;
   for (int i = 0; i < 10; ++i) {
     const auto result = integrate(0, i, [](double) { return 1.; });
-    COMPARE_ABSOLUTE_ERROR(result.value(), double(i), result.error());
+    COMPARE_ABSOLUTE_ERROR(result.value(), double(i), 1.1*result.error());
   }
   for (int i = 0; i < 10; ++i) {
     const auto result = integrate(0, i, [](double x) { return x; });
-    COMPARE_ABSOLUTE_ERROR(result.value(), i * i * 0.5, result.error());
+    COMPARE_ABSOLUTE_ERROR(result.value(), i * i * 0.5, 1.2*result.error());
   }
 }
 
