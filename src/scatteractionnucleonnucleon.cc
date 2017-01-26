@@ -102,9 +102,20 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
   CollisionBranchList process_list, channel_list;
   const double sqrts = sqrt_s();
 
+  /* Find whether colliding particles are nucleons or anti-nucleons;
+   * adjust lists of produced particles. */
+  ParticleTypePtrList nuc_or_anti_nuc, delta_or_anti_delta;
+  if (type_particle_a.is_anti_nucleon() && type_particle_b.is_anti_nucleon()) {
+    nuc_or_anti_nuc = ParticleType::list_anti_nucleons();
+    delta_or_anti_delta = ParticleType::list_anti_Deltas();
+  }
+  else {
+    nuc_or_anti_nuc = ParticleType::list_nucleons();
+    delta_or_anti_delta = ParticleType::list_Deltas();
+  }
   /* First: Find N N → N R channels. */
   channel_list = find_xsection_from_type(type_particle_a, type_particle_b,
-      ParticleType::list_baryon_resonances(), ParticleType::list_nucleons(),
+      ParticleType::list_baryon_resonances(), nuc_or_anti_nuc,
       [&sqrts](const ParticleType &type_res_1, const ParticleType&){
           return type_res_1.iso_multiplet()->get_integral_NR(sqrts);
       });
@@ -115,7 +126,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
 
   /* Second: Find N N → Δ R channels. */
   channel_list = find_xsection_from_type(type_particle_a, type_particle_b,
-    ParticleType::list_baryon_resonances(), ParticleType::list_Deltas(),
+    ParticleType::list_baryon_resonances(), delta_or_anti_delta,
     [&sqrts](const ParticleType &type_res_1, const ParticleType &type_res_2){
       return type_res_1.iso_multiplet()->get_integral_RR(type_res_2, sqrts);
     });
@@ -148,7 +159,7 @@ CollisionBranchList ScatterActionNucleonNucleon::find_xsection_from_type(
           type_particle_a.charge() + type_particle_b.charge()) {
         continue;
       }
-    
+
       // loop over total isospin
       for (const int twoI : I_tot_range(type_particle_a, type_particle_b)) {
         const float isospin_factor = isospin_clebsch_gordan_sqr_2to2(
@@ -196,12 +207,10 @@ CollisionBranchList ScatterActionNucleonNucleon::find_xsection_from_type(
                     type_res_1, ", ", type_res_2);
           log.debug("2->2 with original particles: ",
                     type_particle_a, type_particle_b);
-       //   std::cout << xsection << " ";
         }
       }
     }
   }
-  //std::cout << std::endl;
   return channel_list;
 }
 

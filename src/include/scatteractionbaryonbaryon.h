@@ -47,7 +47,8 @@ class ScatterActionBaryonBaryon : public ScatterAction {
   * for that particular process.
   */
   CollisionBranchList bar_bar_to_nuc_nuc(const ParticleType &type_a,
-                                         const ParticleType &type_b);
+                                         const ParticleType &type_b,
+                                         const bool is_anti_particles);
 
  protected:
   /**

@@ -39,10 +39,15 @@ CollisionBranchList ScatterActionBaryonBaryon::two_to_two_cross_sections() {
   const ParticleType &type_a = incoming_particles_[0].type();
   const ParticleType &type_b = incoming_particles_[1].type();
 
-  if (type_a.pdgcode().is_nucleon() || type_a.pdgcode().is_Delta() ||
-      type_b.pdgcode().is_nucleon() || type_b.pdgcode().is_Delta()) {
+  if (type_a.is_nucleon() || type_a.is_Delta() ||
+      type_b.is_nucleon() || type_b.is_Delta()) {
     /* N R → N N, Δ R → N N */
-    process_list = bar_bar_to_nuc_nuc(type_a, type_b);
+    process_list = bar_bar_to_nuc_nuc(type_a, type_b, false);
+  }
+  if (type_a.is_anti_nucleon() || type_a.is_anti_Delta() ||
+      type_b.is_anti_nucleon() || type_b.is_anti_Delta()) {
+    /* N̅ R → N̅ N̅, Δ̅ R → N̅ N̅ */
+    process_list = bar_bar_to_nuc_nuc(type_a, type_b, true);
   }
 
   return process_list;
@@ -51,7 +56,8 @@ CollisionBranchList ScatterActionBaryonBaryon::two_to_two_cross_sections() {
 
 CollisionBranchList ScatterActionBaryonBaryon::bar_bar_to_nuc_nuc(
                             const ParticleType &type_a,
-                            const ParticleType &type_b) {
+                            const ParticleType &type_b,
+                            const bool is_anti_particles) {
   CollisionBranchList process_list;
 
   const double s = mandelstam_s();
@@ -59,9 +65,15 @@ CollisionBranchList ScatterActionBaryonBaryon::bar_bar_to_nuc_nuc(
   /* CM momentum in final state */
   double p_cm_final = std::sqrt(s - 4.*nucleon_mass*nucleon_mass)/2.;
 
-  /* Loop over all nucleon charge states. */
-  for (ParticleTypePtr nuc_a : ParticleType::list_nucleons()) {
-    for (ParticleTypePtr nuc_b : ParticleType::list_nucleons()) {
+  ParticleTypePtrList nuc_or_anti_nuc;
+  if (is_anti_particles) {
+    nuc_or_anti_nuc = ParticleType::list_anti_nucleons();
+  }
+  else nuc_or_anti_nuc = ParticleType::list_nucleons();
+
+  /* Loop over all nucleon or anti-nucleon charge states. */
+  for (ParticleTypePtr nuc_a : nuc_or_anti_nuc) {
+    for (ParticleTypePtr nuc_b : nuc_or_anti_nuc) {
       /* Check for charge conservation. */
       if (type_a.charge() + type_b.charge()
           != nuc_a->charge() + nuc_b->charge()) {
@@ -119,35 +131,38 @@ float ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(double sqrts,
 
   /** NN → NΔ: fit sqrt(s)-dependence to OBE model [\iref{Dmitriev:1986st}] */
   if ((type_a.is_Delta() && type_b.is_nucleon()) ||
-      (type_b.is_Delta() && type_a.is_nucleon())) {
+      (type_b.is_Delta() && type_a.is_nucleon()) ||
+      (type_a.is_anti_Delta() && type_b.is_anti_nucleon()) ||
+      (type_b.is_anti_Delta() && type_a.is_anti_nucleon())) {
     return 68. / std::pow(sqrts - 1.104, 1.951);
   /** All other processes use a constant matrix element,
    *  similar to \iref{Bass:1998ca}, equ. (3.35). */
-  } else if ((type_a.is_Nstar() && type_b.is_nucleon()) ||
-             (type_b.is_Nstar() && type_a.is_nucleon())) {
+  } else if ((type_a.is_Nstar() && (type_b.is_nucleon() || type_b.is_anti_nucleon())) ||
+             (type_b.is_Nstar() && (type_a.is_nucleon() || type_a.is_anti_nucleon()))) {
     // NN → NN*
     if (twoI == 2) {
       return 7. / msqr;
     } else if (twoI == 0) {
       return 14. / msqr;
     }
-  } else if ((type_a.is_Deltastar() && type_b.is_nucleon()) ||
-             (type_b.is_Deltastar() && type_a.is_nucleon())) {
+  } else if ((type_a.is_Deltastar() && (type_b.is_nucleon() || type_b.is_anti_nucleon())) ||
+             (type_b.is_Deltastar() && (type_a.is_nucleon() || type_a.is_anti_nucleon()))) {
     // NN → NΔ*
     return 15. / msqr;
-  } else if (type_a.is_Delta() && type_b.is_Delta()) {
+  } else if ((type_a.is_Delta() && type_b.is_Delta()) ||
+             (type_a.is_anti_Delta() && type_b.is_anti_Delta())) {
     // NN → ΔΔ
     if (twoI == 2) {
       return 45. / msqr;
     } else if (twoI == 0) {
       return 120. / msqr;
     }
-  } else if ((type_a.is_Nstar() && type_b.is_Delta()) ||
-             (type_b.is_Nstar() && type_a.is_Delta())) {
+  } else if ((type_a.is_Nstar() && (type_b.is_Delta() || type_b.is_anti_Delta())) ||
+             (type_b.is_Nstar() && (type_a.is_Delta() || type_a.is_anti_Delta()))) {
     // NN → ΔN*
     return 7. / msqr;
-  } else if ((type_a.is_Deltastar() && type_b.is_Delta()) ||
-             (type_b.is_Deltastar() && type_a.is_Delta())) {
+  } else if ((type_a.is_Deltastar() && (type_b.is_Delta()  || type_b.is_anti_Delta())) ||
+             (type_b.is_Deltastar() && (type_a.is_Delta()  || type_a.is_anti_Delta()))) {
     // NN → ΔΔ*
     if (twoI == 2) {
       return 15. / msqr;
