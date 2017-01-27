@@ -104,7 +104,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
 
   /* Find whether colliding particles are nucleons or anti-nucleons;
    * adjust lists of produced particles. */
-  const ParticleTypePtrList& nuc_or_anti_nuc = 
+  const ParticleTypePtrList& nuc_or_anti_nuc =
     type_particle_a.antiparticle_sign() == -1 &&
     type_particle_b.antiparticle_sign() == -1 ?
     ParticleType::list_anti_nucleons() :
