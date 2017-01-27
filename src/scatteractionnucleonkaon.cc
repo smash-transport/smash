@@ -141,9 +141,14 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
   const double s = mandelstam_s();
   const double sqrts = sqrt_s();
 
+  //Type declarations, since the find routine is inefficient
   const auto& type_pi_z = ParticleType::find(pdg::pi_z);
   const auto& type_pi_m = ParticleType::find(pdg::pi_m);
   const auto& type_pi_p = ParticleType::find(pdg::pi_p);
+  const auto& type_p = ParticleType::find(pdg::p);
+  const auto& type_p_bar = ParticleType::find(-pdg::p);
+  const auto& type_n = ParticleType::find(pdg::n);
+  const auto& type_n_bar = ParticleType::find(-pdg::n);
   const auto& type_K_z = ParticleType::find(pdg::K_z);
   const auto& type_K_p = ParticleType::find(pdg::K_p);
   const auto& type_K_m = ParticleType::find(pdg::K_m);
@@ -165,6 +170,10 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
   const auto& type_Lambda = ParticleType::find(pdg::Lambda);
   const auto& type_Lambda_bar = ParticleType::find(-pdg::Lambda);
 
+  //Some function declarations
+  const auto sigma_kplusp = kplusp_inelastic(s);
+  const auto sigma_kplusn = kplusn_inelastic(s);
+
   switch (pdg_kaon) {
     case pdg::K_m: {
       // All inelastic K- N channels here are strangeness exchange, plus one
@@ -185,7 +194,7 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
                       sqrts, type_pi_z, type_Lambda);
           add_channel(process_list,
                       [&] { return kminusp_kbar0n(s); },
-                      sqrts, type_Kbar_z, ParticleType::find(pdg::n));
+                      sqrts, type_Kbar_z, type_n);
           break;
         }
         case pdg::n: {
@@ -200,12 +209,28 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
                       sqrts, type_pi_m, type_Lambda);
           break;
         }
-        /*case -pdg::p: {
+        case -pdg::p: {
           add_channel(process_list,
                       [&] { return sigma_kplusp * kplusn_ratios.get_ratio(
-                                   type_nucleon, type_kaon, type_K_z, type_Delta_pp); },
-                      sqrts, type_K_z, type_Delta_pp);
-       }*/
+                                   type_p, type_K_p, type_K_z, type_Delta_pp); },
+                      sqrts, type_Kbar_z, type_Delta_pp_bar);
+          add_channel(process_list,
+                      [&] { return sigma_kplusp * kplusn_ratios.get_ratio(
+                                   type_p, type_K_p, type_K_p, type_Delta_p); },
+                      sqrts, type_K_m, type_Delta_p_bar);
+          break;
+        }
+        case -pdg::n: {
+          add_channel(process_list,
+                      [&] { return sigma_kplusn * kplusn_ratios.get_ratio(
+                                   type_n, type_K_p, type_K_z, type_Delta_p); },
+                      sqrts, type_Kbar_z, type_Delta_p_bar);
+          add_channel(process_list,
+                      [&] { return sigma_kplusn * kplusn_ratios.get_ratio(
+                                   type_n, type_K_p, type_K_p, type_Delta_z); },
+                      sqrts, type_K_m, type_Delta_z_bar);
+          break;
+        }
       }
       break;
     }
@@ -214,29 +239,55 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
       // cross section, weighted by the isospin factor.
       switch (pdg_nucleon) {
         case pdg::p: {
-          const auto sigma_kplusp = kplusp_inelastic(s);
-
           add_channel(process_list,
                       [&] { return sigma_kplusp * kplusn_ratios.get_ratio(
-                                   type_nucleon, type_kaon, type_K_z, type_Delta_pp); },
+                                   type_p, type_K_p, type_K_z, type_Delta_pp); },
                       sqrts, type_K_z, type_Delta_pp);
           add_channel(process_list,
                       [&] { return sigma_kplusp * kplusn_ratios.get_ratio(
-                                   type_nucleon, type_kaon, type_K_p, type_Delta_p); },
+                                   type_p, type_K_p, type_K_p, type_Delta_p); },
                       sqrts, type_K_p, type_Delta_p);
           break;
         }
         case pdg::n: {
-          const auto sigma_kplusn = kplusn_inelastic(s);
-
           add_channel(process_list,
                       [&] { return sigma_kplusn * kplusn_ratios.get_ratio(
-                                   type_nucleon, type_kaon, type_K_z, type_Delta_p); },
+                                   type_n, type_K_p, type_K_z, type_Delta_p); },
                       sqrts, type_K_z, type_Delta_p);
           add_channel(process_list,
                       [&] { return sigma_kplusn * kplusn_ratios.get_ratio(
-                                   type_nucleon, type_kaon, type_K_p, type_Delta_z); },
+                                   type_n, type_K_p, type_K_p, type_Delta_z); },
                       sqrts, type_K_p, type_Delta_z);
+          break;
+        }
+        case -pdg::p: {
+          add_channel(process_list,
+                      [&] { return kminusp_piminussigmaplus(sqrts); },
+                      sqrts, type_pi_p, type_Sigma_p_bar);
+          add_channel(process_list,
+                      [&] { return kminusp_piplussigmaminus(sqrts); },
+                      sqrts, type_pi_m, type_Sigma_m_bar);
+          add_channel(process_list,
+                      [&] { return kminusp_pi0sigma0(sqrts); },
+                      sqrts, type_pi_z, type_Sigma_z_bar);
+          add_channel(process_list,
+                      [&] { return kminusp_pi0lambda(sqrts); },
+                      sqrts, type_pi_z, type_Lambda_bar);
+          add_channel(process_list,
+                      [&] { return kminusp_kbar0n(s); },
+                      sqrts, type_K_z, type_n_bar);
+          break;
+        }
+        case -pdg::n: {
+          add_channel(process_list,
+                      [&] { return kminusn_piminussigma0(sqrts); },
+                      sqrts, type_pi_p, type_Sigma_z_bar);
+          add_channel(process_list,
+                      [&] { return kminusn_pi0sigmaminus(sqrts); },
+                      sqrts, type_pi_z, type_Sigma_m_bar);
+          add_channel(process_list,
+                      [&] { return kminusn_piminuslambda(sqrts); },
+                      sqrts, type_pi_p, type_Lambda_bar);
           break;
         }
       }
@@ -248,39 +299,66 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
 
       switch (pdg_nucleon) {
         case pdg::p: {
-          const auto sigma_kplusp = kplusp_inelastic(s);
-
           add_channel(process_list,
                       [&] { return sigma_kplusp * kplusn_ratios.get_ratio(
-                                   type_nucleon, type_kaon, type_K_z, type_Delta_p); },
+                                   type_p, type_K_z, type_K_z, type_Delta_p); },
                       sqrts, type_K_z, type_Delta_p);
           add_channel(process_list,
                       [&] { return sigma_kplusp * kplusn_ratios.get_ratio(
-                                   type_nucleon, type_kaon, type_K_p, type_Delta_z); },
+                                   type_p, type_K_z, type_K_p, type_Delta_z); },
                       sqrts, type_K_p, type_Delta_z);
           break;
         }
         case pdg::n: {
-          const auto sigma_kplusn = kplusn_inelastic(s);
-
           add_channel(process_list,
                       [&] { return sigma_kplusn * kplusn_ratios.get_ratio(
-                                   type_nucleon, type_kaon, type_K_z, type_Delta_z); },
+                                   type_n, type_K_z, type_K_z, type_Delta_z); },
                       sqrts, type_K_z, type_Delta_z);
           add_channel(process_list,
                       [&] { return sigma_kplusn * kplusn_ratios.get_ratio(
-                                   type_nucleon, type_kaon, type_K_p, type_Delta_m); },
+                                   type_n, type_K_z, type_K_p, type_Delta_m); },
                       sqrts, type_K_p, type_Delta_m);
+          break;
+        }
+        case -pdg::n: {
+          add_channel(process_list,
+                      [&] { return kminusp_kbar0n(s); },
+                      sqrts, type_K_p, type_p_bar);
           break;
         }
       }
       break;
     }
     case pdg::Kbar_z:
-      if (pdg_nucleon == pdg::n) {
-        add_channel(process_list,
-                    [&] { return kminusp_kbar0n(s); },
-                    sqrts, type_K_m, ParticleType::find(pdg::p));
+      switch (pdg_nucleon) {
+        case pdg::n: {
+          add_channel(process_list,
+                      [&] { return kminusp_kbar0n(s); },
+                      sqrts, type_K_m, type_p);
+          break;
+        }
+        case -pdg::p: {
+          add_channel(process_list,
+                      [&] { return sigma_kplusp * kplusn_ratios.get_ratio(
+                                   type_p, type_K_z, type_K_z, type_Delta_p); },
+                      sqrts, type_Kbar_z, type_Delta_p_bar);
+          add_channel(process_list,
+                      [&] { return sigma_kplusp * kplusn_ratios.get_ratio(
+                                   type_p, type_K_z, type_K_p, type_Delta_z); },
+                      sqrts, type_K_m, type_Delta_z_bar);
+          break;
+        }
+        case -pdg::n: {
+          add_channel(process_list,
+                      [&] { return sigma_kplusn * kplusn_ratios.get_ratio(
+                                   type_n, type_K_z, type_K_z, type_Delta_z); },
+                      sqrts, type_Kbar_z, type_Delta_z_bar);
+          add_channel(process_list,
+                      [&] { return sigma_kplusn * kplusn_ratios.get_ratio(
+                                   type_n, type_K_z, type_K_p, type_Delta_m); },
+                      sqrts, type_K_m, type_Delta_m_bar);
+          break;
+        }
       }
       break;
   }
