@@ -60,7 +60,7 @@ float ScatterActionNucleonKaon::elastic_parametrization() {
           break;
       }
       break;
-      case pdg::pbar:
+      case -pdg::p:
       switch (kaon.code()) {
         case pdg::K_p:
           sig_el = kminusp_elastic(s);
@@ -76,7 +76,7 @@ float ScatterActionNucleonKaon::elastic_parametrization() {
           break;
       }
       break;
-      case pdg::nbar:
+      case -pdg::n:
       switch (kaon.code()) {
         case pdg::K_p:
           sig_el = kminusn_elastic(s);
