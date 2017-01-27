@@ -105,7 +105,8 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
   /* Find whether colliding particles are nucleons or anti-nucleons;
    * adjust lists of produced particles. */
   ParticleTypePtrList nuc_or_anti_nuc, delta_or_anti_delta;
-  if (type_particle_a.is_anti_nucleon() && type_particle_b.is_anti_nucleon()) {
+  if (type_particle_a.antiparticle_sign() == -1 &&
+      type_particle_b.antiparticle_sign() == -1) {
     nuc_or_anti_nuc = ParticleType::list_anti_nucleons();
     delta_or_anti_delta = ParticleType::list_anti_Deltas();
   }
@@ -237,8 +238,9 @@ void ScatterActionNucleonNucleon::sample_angles(
       = get_t_range<double>(cms_energy, nucleon_mass, nucleon_mass,
                             mass_a, mass_b);
   Angles phitheta;
-  if (p_a->pdgcode().is_nucleon() &&
-      p_b->pdgcode().is_nucleon() && !isotropic_) {
+  if (p_a->pdgcode().is_nucleon() && p_b->pdgcode().is_nucleon() &&
+      p_a->pdgcode().antiparticle_sign() ==
+      p_b->pdgcode().antiparticle_sign() && !isotropic_) {
     /** NN → NN: Choose angular distribution according to Cugnon parametrization,
      * see \iref{Cugnon:1996kh}. */
     double bb, a, plab = plab_from_s(mandelstam_s());
@@ -258,8 +260,9 @@ void ScatterActionNucleonNucleon::sample_angles(
     // determine scattering angles in center-of-mass frame
     phitheta = Angles(2.*M_PI*Random::canonical(),
                       1. - 2.*(t-t_range[0])/(t_range[1]-t_range[0]));
-  } else if (p_a->pdgcode().is_Delta() && p_b->pdgcode().is_nucleon()
-             && !isotropic_) {
+  } else if (p_a->pdgcode().is_Delta() && p_b->pdgcode().is_nucleon() &&
+             p_a->pdgcode().antiparticle_sign() ==
+             p_b->pdgcode().antiparticle_sign() && !isotropic_) {
     /** NN → NΔ: Sample scattering angles in center-of-mass frame from an
      * anisotropic angular distribution, using the same distribution as for
      * elastic pp scattering, as suggested in \iref{Cugnon:1996kh}. */

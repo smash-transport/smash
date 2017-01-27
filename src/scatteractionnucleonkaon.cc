@@ -60,6 +60,38 @@ float ScatterActionNucleonKaon::elastic_parametrization() {
           break;
       }
       break;
+      case pdg::pbar:
+      switch (kaon.code()) {
+        case pdg::K_p:
+          sig_el = kminusp_elastic(s);
+          break;
+        case pdg::K_m:
+          sig_el = kplusp_elastic(s);
+          break;
+        case pdg::K_z:
+          sig_el = kbar0p_elastic(s);
+          break;
+        case pdg::Kbar_z:
+          sig_el = k0p_elastic(s);
+          break;
+      }
+      break;
+      case pdg::nbar:
+      switch (kaon.code()) {
+        case pdg::K_p:
+          sig_el = kminusn_elastic(s);
+          break;
+        case pdg::K_m:
+          sig_el = kplusn_elastic(s);
+          break;
+        case pdg::K_z:
+          sig_el = kbar0n_elastic(s);
+          break;
+        case pdg::Kbar_z:
+          sig_el = k0n_elastic(s);
+          break;
+      }
+      break;
     default:
       throw std::runtime_error("elastic cross section for antinucleon-kaon "
                                "not implemented");

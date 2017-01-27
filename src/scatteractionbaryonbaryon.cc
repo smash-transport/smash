@@ -41,13 +41,14 @@ CollisionBranchList ScatterActionBaryonBaryon::two_to_two_cross_sections() {
 
   if (type_a.is_nucleon() || type_a.is_Delta() ||
       type_b.is_nucleon() || type_b.is_Delta()) {
-    /* N R → N N, Δ R → N N */
-    process_list = bar_bar_to_nuc_nuc(type_a, type_b, false);
-  }
-  if (type_a.is_anti_nucleon() || type_a.is_anti_Delta() ||
-      type_b.is_anti_nucleon() || type_b.is_anti_Delta()) {
-    /* N̅ R → N̅ N̅, Δ̅ R → N̅ N̅ */
-    process_list = bar_bar_to_nuc_nuc(type_a, type_b, true);
+    if (type_a.antiparticle_sign() == 1 && type_b.antiparticle_sign() == 1) {
+      /* N R → N N, Δ R → N N */
+      process_list = bar_bar_to_nuc_nuc(type_a, type_b, false);
+    }
+    else if (type_a.antiparticle_sign() == -1 && type_b.antiparticle_sign() == -1) {
+      /* N̅ R → N̅ N̅, Δ̅ R → N̅ N̅ */
+      process_list = bar_bar_to_nuc_nuc(type_a, type_b, true);
+    }
   }
 
   return process_list;
@@ -130,39 +131,42 @@ float ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(double sqrts,
   const float msqr = 2. * (m_a*m_a + m_b*m_b);
 
   /** NN → NΔ: fit sqrt(s)-dependence to OBE model [\iref{Dmitriev:1986st}] */
-  if ((type_a.is_Delta() && type_b.is_nucleon()) ||
-      (type_b.is_Delta() && type_a.is_nucleon()) ||
-      (type_a.is_anti_Delta() && type_b.is_anti_nucleon()) ||
-      (type_b.is_anti_Delta() && type_a.is_anti_nucleon())) {
+  if (((type_a.is_Delta() && type_b.is_nucleon()) ||
+       (type_b.is_Delta() && type_a.is_nucleon())) &&
+       (type_a.antiparticle_sign() == type_b.antiparticle_sign())) {
     return 68. / std::pow(sqrts - 1.104, 1.951);
   /** All other processes use a constant matrix element,
    *  similar to \iref{Bass:1998ca}, equ. (3.35). */
-  } else if ((type_a.is_Nstar() && (type_b.is_nucleon() || type_b.is_anti_nucleon())) ||
-             (type_b.is_Nstar() && (type_a.is_nucleon() || type_a.is_anti_nucleon()))) {
+  } else if (((type_a.is_Nstar() && type_b.is_nucleon()) ||
+              (type_b.is_Nstar() && type_a.is_nucleon())) &&
+               type_a.antiparticle_sign() == type_b.antiparticle_sign()) {
     // NN → NN*
     if (twoI == 2) {
       return 7. / msqr;
     } else if (twoI == 0) {
       return 14. / msqr;
     }
-  } else if ((type_a.is_Deltastar() && (type_b.is_nucleon() || type_b.is_anti_nucleon())) ||
-             (type_b.is_Deltastar() && (type_a.is_nucleon() || type_a.is_anti_nucleon()))) {
+  } else if (((type_a.is_Deltastar() && type_b.is_nucleon()) ||
+              (type_b.is_Deltastar() && type_a.is_nucleon())) &&
+               type_a.antiparticle_sign() == type_b.antiparticle_sign()) {
     // NN → NΔ*
     return 15. / msqr;
-  } else if ((type_a.is_Delta() && type_b.is_Delta()) ||
-             (type_a.is_anti_Delta() && type_b.is_anti_Delta())) {
+  } else if ((type_a.is_Delta() && type_b.is_Delta()) &&
+             (type_a.antiparticle_sign() == type_b.antiparticle_sign())) {
     // NN → ΔΔ
     if (twoI == 2) {
       return 45. / msqr;
     } else if (twoI == 0) {
       return 120. / msqr;
     }
-  } else if ((type_a.is_Nstar() && (type_b.is_Delta() || type_b.is_anti_Delta())) ||
-             (type_b.is_Nstar() && (type_a.is_Delta() || type_a.is_anti_Delta()))) {
+  } else if (((type_a.is_Nstar() && type_b.is_Delta()) ||
+              (type_b.is_Nstar() && type_a.is_Delta())) &&
+               type_a.antiparticle_sign() == type_b.antiparticle_sign()) {
     // NN → ΔN*
     return 7. / msqr;
-  } else if ((type_a.is_Deltastar() && (type_b.is_Delta()  || type_b.is_anti_Delta())) ||
-             (type_b.is_Deltastar() && (type_a.is_Delta()  || type_a.is_anti_Delta()))) {
+  } else if (((type_a.is_Deltastar() && type_b.is_Delta()) ||
+              (type_b.is_Deltastar() && type_a.is_Delta())) &&
+               type_a.antiparticle_sign() == type_b.antiparticle_sign()) {
     // NN → ΔΔ*
     if (twoI == 2) {
       return 15. / msqr;

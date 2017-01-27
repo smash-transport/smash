@@ -104,8 +104,8 @@ ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
   const auto &pdg_b = data_b.pdgcode();
   ScatterActionPtr act;
   if (data_a.is_baryon() && data_b.is_baryon()) {
-    if ((pdg_a.is_nucleon() && pdg_b.is_nucleon()) ||
-        (pdg_a.is_anti_nucleon() && pdg_b.is_anti_nucleon())) {
+    if ((pdg_a.is_nucleon() && pdg_b.is_nucleon()) &&
+        (pdg_a.antiparticle_sign() == pdg_b.antiparticle_sign())) {
       act = make_unique<ScatterActionNucleonNucleon>(data_a, data_b,
                                               time_until_collision, isotropic_,
                                               formation_time_);

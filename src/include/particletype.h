@@ -91,6 +91,9 @@ class ParticleType {
   /// Return a pointer to the corresponding antiparticle ParticleType object.
   ParticleTypePtr get_antiparticle() const;
 
+  /// \copydoc PdgCode::antiparticle_sign
+  int antiparticle_sign() const { return pdgcode_.antiparticle_sign(); }
+
   /** Returns twice the isospin vector length \f$I\f$.
    *
    * This returns e.g. 1 for nucleons, 2 for pions and 3 for Deltas.
@@ -141,14 +144,8 @@ class ParticleType {
   /// \copydoc PdgCode::is_nucleon
   bool is_nucleon() const { return pdgcode_.is_nucleon(); }
 
-  /// \copydoc PdgCode::is_anti_nucleon
-  bool is_anti_nucleon() const { return pdgcode_.is_anti_nucleon(); }
-
   /// \copydoc PdgCode::is_Delta
   bool is_Delta() const { return pdgcode_.is_Delta(); }
-
-  /// \copydoc PdgCode::is_anti_Delta
-  bool is_anti_Delta() const { return pdgcode_.is_anti_Delta(); }
 
   /// Is this a nucleon resonance (N*)?
   inline bool is_Nstar() const {
