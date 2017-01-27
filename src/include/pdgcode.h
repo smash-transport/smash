@@ -269,7 +269,7 @@ class PdgCode {
 
   /// Is this an anti-nucleon (-p, -n)?
   inline bool is_anti_nucleon() const {
-      return (code() == -pdg::p) || (code() == -pdg::n); 
+      return (code() == -pdg::p) || (code() == -pdg::n);
   }
 
   /// Is this a Delta(1232) (no anti-Delta)?
@@ -279,9 +279,9 @@ class PdgCode {
   }
 
   /// Is this a anti-Delta(1232) (no Delta)?
-  inline bool is_anti_Delta() const { 
-      return (code() == -pdg::Delta_pp) || (code() == -pdg::Delta_p) || 
-             (code() == -pdg::Delta_z) || (code() == -pdg::Delta_m); 
+  inline bool is_anti_Delta() const {
+      return (code() == -pdg::Delta_pp) || (code() == -pdg::Delta_p) ||
+             (code() == -pdg::Delta_z) || (code() == -pdg::Delta_m);
   }
 
   /// Is this a hyperon (Lambda, Sigma, Xi, Omega)?

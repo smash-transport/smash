@@ -141,14 +141,14 @@ class ParticleType {
   /// \copydoc PdgCode::is_nucleon
   bool is_nucleon() const { return pdgcode_.is_nucleon(); }
 
-  /// \copydoc PdgCode::is_anti_nucleon 
+  /// \copydoc PdgCode::is_anti_nucleon
   bool is_anti_nucleon() const { return pdgcode_.is_anti_nucleon(); }
 
   /// \copydoc PdgCode::is_Delta
   bool is_Delta() const { return pdgcode_.is_Delta(); }
 
-  /// \copydoc PdgCode::is_anti_Delta 
-  bool is_anti_Delta() const { return pdgcode_.is_anti_Delta(); } 
+  /// \copydoc PdgCode::is_anti_Delta
+  bool is_anti_Delta() const { return pdgcode_.is_anti_Delta(); }
 
   /// Is this a nucleon resonance (N*)?
   inline bool is_Nstar() const {
@@ -311,12 +311,12 @@ class ParticleType {
 
   /** Returns a list of all nucleons (i.e. proton and neutron). */
   static ParticleTypePtrList &list_nucleons();
-  /** Returns a list of all anti-nucleons (i.e. anti-proton and anti-neutron). */ 
+  /** Returns a list of all anti-nucleons (i.e. anti-proton and anti-neutron). */
   static ParticleTypePtrList &list_anti_nucleons();
   /** Returns a list of the Delta(1232) baryons // oliiny: only 1232?!
    *  (i.e. all four charge states). */
   static ParticleTypePtrList &list_Deltas();
-  /** Returns a list of the anti-Delta(1232) baryons // oliiny: only 1232?!
+  /** Returns a list of the anti-Delta(1232) baryons
    *  (i.e. all four charge states). */
   static ParticleTypePtrList &list_anti_Deltas();
   /** Returns a list of all baryon resonances,
