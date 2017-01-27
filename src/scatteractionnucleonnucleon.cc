@@ -104,16 +104,16 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
 
   /* Find whether colliding particles are nucleons or anti-nucleons;
    * adjust lists of produced particles. */
-  ParticleTypePtrList nuc_or_anti_nuc, delta_or_anti_delta;
-  if (type_particle_a.antiparticle_sign() == -1 &&
-      type_particle_b.antiparticle_sign() == -1) {
-    nuc_or_anti_nuc = ParticleType::list_anti_nucleons();
-    delta_or_anti_delta = ParticleType::list_anti_Deltas();
-  }
-  else {
-    nuc_or_anti_nuc = ParticleType::list_nucleons();
-    delta_or_anti_delta = ParticleType::list_Deltas();
-  }
+  const ParticleTypePtrList& nuc_or_anti_nuc = 
+    type_particle_a.antiparticle_sign() == -1 &&
+    type_particle_b.antiparticle_sign() == -1 ?
+    ParticleType::list_anti_nucleons() :
+    ParticleType::list_nucleons();
+  const ParticleTypePtrList& delta_or_anti_delta =
+    type_particle_a.antiparticle_sign() == -1 &&
+    type_particle_b.antiparticle_sign() == -1 ?
+    ParticleType::list_anti_Deltas() :
+    ParticleType::list_Deltas();
   /* First: Find N N → N R channels. */
   channel_list = find_xsection_from_type(type_particle_a, type_particle_b,
       ParticleType::list_baryon_resonances(), nuc_or_anti_nuc,
