@@ -390,8 +390,17 @@ static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>, float, 
 /// Return the isospin ratio of the given K+ N reaction's cross section.
 float KplusNRatios::get_ratio(const ParticleType& a, const ParticleType& b,
                 const ParticleType& c, const ParticleType& d) const {
-  const auto key = std::make_pair(pack(a.pdgcode().code(), b.pdgcode().code()),
-                                  pack(c.pdgcode().code(), d.pdgcode().code()));
+  int flip=1;
+  if ((a.is_nucleon() && a.antiparticle_sign() == -1) ||
+      (b.is_nucleon() && b.antiparticle_sign() == -1) ||
+      (c.is_nucleon() && c.antiparticle_sign() == -1) ||
+      (d.is_nucleon() && d.antiparticle_sign() == -1)) {
+  /* If this method is called with anti-nucleons, flip all particles to anti-particles;
+   * the ratio is equal */
+    flip=-1;
+  }
+  const auto key = std::make_pair(pack(a.pdgcode().code()*flip, b.pdgcode().code()*flip),
+                                  pack(c.pdgcode().code()*flip, d.pdgcode().code()*flip));
   if (ratios_.empty()) {
     initialize(ratios_);
   }
