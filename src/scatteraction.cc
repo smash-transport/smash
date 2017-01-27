@@ -99,7 +99,7 @@ void ScatterAction::add_all_processes(float elastic_parameter,
     add_collisions(resonance_cross_sections());
   }
   if (two_to_two) {
-    /** Elastic collisions between two nucleons with sqrt_s() below 
+    /** Elastic collisions between two nucleons with sqrt_s() below
      * low_snn_cut can not happen*/
     if (!incoming_particles_[0].type().is_nucleon() || 
         !incoming_particles_[1].type().is_nucleon() || 

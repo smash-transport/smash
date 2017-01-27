@@ -63,7 +63,7 @@ CollisionBranchList ScatterActionHyperonPion::two_to_two_inel(
                   sqrts, neutron, k_m);
       break;
     }
-    case pack(-pdg::Sigma_z, pdg::pi_p): { 
+    case pack(-pdg::Sigma_z, pdg::pi_p): {
       add_channel(process_list,
                   [&] { return detailed_balance_factor_stable(s,
                                type_hyperon, type_pion, anti_n, k_p)
