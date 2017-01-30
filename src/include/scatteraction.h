@@ -176,18 +176,18 @@ class ScatterAction : public Action {
 
   /**
    * Determine the cross section for NNbar annihilation, which is given by the
-   * difference between the parametrized total cross section and all the 
+   * difference between the parametrized total cross section and all the
    * explicitly implemented channels at low energy (in this case only elastic).
-   * This method has to be called after all other processes 
-   * have been added to the Action object. 
+   * This method has to be called after all other processes
+   * have been added to the Action object.
    */
-  virtual CollisionBranchPtr NNbar_annihilation_cross_section();
+  CollisionBranchPtr NNbar_annihilation_cross_section();
 
   /**
    * Determine the cross section for NNbar annihilation, which is given by
    * detailed balance from the reverse reaction. See NNbar_annihilation_cross_section
    */
-  virtual CollisionBranchPtr NNbar_creation_cross_section();
+  CollisionBranchPtr NNbar_creation_cross_section();
 
   /**
    * Determine the cross section for string excitations, which is given by the

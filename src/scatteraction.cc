@@ -18,6 +18,7 @@
 #include "include/logging.h"
 #include "include/pdgcode.h"
 #include "include/random.h"
+#include "include/parametrizations.h"
 
 namespace Smash {
 
@@ -269,9 +270,10 @@ CollisionBranchPtr ScatterAction::NNbar_creation_cross_section() {
   float xsection = detailed_balance_factor_RR(sqrts, pcm,
           incoming_particles_[0].type(), incoming_particles_[1].type(),
           type_N, type_Nbar) *
-          std::max(0.f, total_cross_section() - cross_section());
+          std::max(0.f, ppbar_total(s) - ppbar_elastic(s));
   log.debug("NNbar reverse cross section is: ", xsection);
-  return make_unique<CollisionBranch>(type_N, type_Nbar, xsection, ProcessType::TwoToTwo);
+  return make_unique<CollisionBranch>(type_N, type_Nbar,
+                                      xsection, ProcessType::TwoToTwo);
 }
 
 CollisionBranchPtr ScatterAction::string_excitation_cross_section() {

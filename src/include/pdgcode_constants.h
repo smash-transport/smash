@@ -57,6 +57,8 @@ constexpr int rho_p = 0x213;
 constexpr int rho_z = 0x113;
 constexpr int rho_m = -0x213;
 
+constexpr int h1 = 0x10223;
+
 }  // namespace pdg
 
 /// Pack two int32_t into an uint64_t.
