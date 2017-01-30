@@ -119,12 +119,10 @@ void ScatterAction::add_all_processes(float elastic_parameter,
    *  Only use in cases when detailed balance MUST happen, i.e. in a box! */
   bool NNbar_detailed_balance=true;
   if (NNbar_detailed_balance) {
-    if ((incoming_particles_[0].type().is_nucleon() &&
-        (incoming_particles_[1].type().pdgcode() == -pdg::p ||
-         incoming_particles_[1].type().pdgcode() == -pdg::n)) ||
-        (incoming_particles_[1].type().is_nucleon() &&
-        (incoming_particles_[0].type().pdgcode() == -pdg::p ||
-         incoming_particles_[0].type().pdgcode() == -pdg::n))) {
+    if (incoming_particles_[0].type().is_nucleon() &&
+        incoming_particles_[1].type().is_nucleon() &&
+        incoming_particles_[0].type().antiparticle_sign() !=
+        incoming_particles_[1].type().antiparticle_sign()) {
       add_collision(NNbar_annihilation_cross_section());
     }
     if ((incoming_particles_[0].type().is_rho() &&
