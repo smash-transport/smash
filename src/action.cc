@@ -163,10 +163,8 @@ void Action::sample_2body_phasespace() {
 
 
 void Action::check_conservation(const uint32_t id_process) const {
-  const auto &log = logger<LogArea::Action>();
   QuantumNumbers before(incoming_particles_);
   QuantumNumbers after(outgoing_particles_);
-  std::string err_msg = before.report_deviations(after);
   if (before != after) {
     std::stringstream particle_names;
     for (const auto& p : incoming_particles_) {
@@ -177,7 +175,14 @@ void Action::check_conservation(const uint32_t id_process) const {
       particle_names << p.type().name();
     }
     particle_names << "\n";
+    const auto &log = logger<LogArea::Action>();
+    std::string err_msg = before.report_deviations(after);
     log.error() << particle_names.str() << err_msg;
+    // Pythia does not conserve energy and momentum at high energy, so we just
+    // print the error and continue.
+    if (process_type_ == ProcessType::String) {
+      return;
+    }
     throw std::runtime_error("Conservation laws violated in process " +
                              std::to_string(id_process));
   }

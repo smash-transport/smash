@@ -11,9 +11,68 @@
 #define SRC_INCLUDE_SCATTERACTION_H_
 
 #include "action.h"
-
+#include "kinematics.h"
+#include "cxx14compat.h"
+#include "isoparticletype.h"
 
 namespace Smash {
+
+/**
+ * Calculate the detailed balance factor R such that
+ * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
+ * where $A, B, C, D$ are stable.
+ */
+inline float detailed_balance_factor_stable(float s,
+               const ParticleType& particle_a, const ParticleType& particle_b,
+               const ParticleType& particle_c, const ParticleType& particle_d) {
+    float spin_factor = (particle_c.spin() + 1)*(particle_d.spin() + 1);
+    spin_factor /= (particle_a.spin() + 1)*(particle_b.spin() + 1);
+    float symmetry_factor = (1 + (particle_a == particle_b));
+    symmetry_factor /= (1 + (particle_c == particle_d));
+    const float momentum_factor = pCM_sqr_from_s(s, particle_c.mass(), particle_d.mass())
+        / pCM_sqr_from_s(s, particle_a.mass(), particle_b.mass());
+    return spin_factor * symmetry_factor * momentum_factor;
+}
+
+/**
+ * Calculate the detailed balance factor R such that
+ * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
+ * where $A$ is unstable, $B$ is a kaon and $C, D$ are stable.
+ */
+inline float detailed_balance_factor_RK(float sqrts, float pcm,
+               const ParticleType& particle_a, const ParticleType& particle_b,
+               const ParticleType& particle_c, const ParticleType& particle_d) {
+    assert(!particle_a.is_stable());
+    assert(particle_b.pdgcode().is_kaon());
+    float spin_factor = (particle_c.spin() + 1)*(particle_d.spin() + 1);
+    spin_factor /= (particle_a.spin() + 1)*(particle_b.spin() + 1);
+    float symmetry_factor = (1 + (particle_a == particle_b));
+    symmetry_factor /= (1 + (particle_c == particle_d));
+    const float momentum_factor = pCM_sqr(sqrts, particle_c.mass(), particle_d.mass())
+        / (pcm * particle_a.iso_multiplet()->get_integral_RK(sqrts));
+    return spin_factor * symmetry_factor * momentum_factor;
+}
+
+/**
+ * Add a 2-to-2 channel to a collision branch list given a cross section.
+ *
+ * The cross section is only calculated if there is enough energy for the process.
+ * If the cross section is small, the branch is not added.
+ */
+template <typename F>
+inline void add_channel(CollisionBranchList &process_list, F get_xsection,
+                        float sqrts, const ParticleType &type_a,
+                                     const ParticleType &type_b) {
+  const float sqrt_s_min = type_a.minimum_mass() + type_b.minimum_mass();
+  if (sqrts <= sqrt_s_min) {
+      return;
+  }
+  const auto xsection = get_xsection();
+  if (xsection > really_small) {
+    process_list.push_back(make_unique<CollisionBranch>(
+      type_a, type_b, xsection, ProcessType::TwoToTwo));
+  }
+}
 
 /**
  * \ingroup action
@@ -61,7 +120,7 @@ class ScatterAction : public Action {
 
   /** Add all possible subprocesses for this action object. */
   virtual void add_all_processes(float elastic_parameter,
-                         bool two_to_one, bool two_to_two, bool strings_switch);
+                         bool two_to_one, bool two_to_two, double low_snn_cut,  bool strings_switch);
 
   /**
    * Determine the (parametrized) total cross section for this collision. This

@@ -54,7 +54,15 @@ class ColliderModus : public ModusDefault {
    */
   float initial_conditions(Particles *particles,
                            const ExperimentParameters &parameters);
-
+  /// return the total nucleon number 
+  int total_N_number() const { return target_->number_of_particles()
+                                     +projectile_->number_of_particles(); }
+  /// return the nucleon number in the projectile nucleus
+  int proj_N_number() const { return projectile_->number_of_particles(); }
+  /// return the flag: whether to allow the first collsions within the same nucleus
+  bool cll_in_nucleus() { return cll_in_nucleus_; }
+  /// return whether the modus is collider modus
+  bool is_collider() const { return true; } 
   /// \ingroup exception
   /// Thrown when either \a projectile_ or \a target_ nuclei are empty.
   struct ColliderEmpty : public ModusDefault::BadInput {
@@ -75,10 +83,16 @@ class ColliderModus : public ModusDefault {
    * at rest.
    **/
   std::unique_ptr<Nucleus> target_;
-  /** Center-of-mass energy squared of the nucleus-nucleus collision. **/
-  float total_s_;
-  /** Center-of-mass energy of a nucleon-nucleon collision. **/
-  float sqrt_s_NN_;
+  /** Center-of-mass energy squared of the nucleus-nucleus collision. 
+   * 
+   * needs to be double to allow for calculations at LHC energies
+   * **/
+  double total_s_;
+  /** Center-of-mass energy of a nucleon-nucleon collision. 
+   * 
+   * needs to be double to allow for calculations at LHC energies
+   * **/
+  double sqrt_s_NN_;
   /** Impact parameter.
    *
    * The nuclei projectile_ and target_ will be shifted along the x axis
@@ -119,9 +133,13 @@ class ColliderModus : public ModusDefault {
    */
   CalculationFrame frame_ = CalculationFrame::CenterOfVelocity;
   /**
-   * An option to include Fermi motion
+   * An option to include Fermi motion ("off", "on", "frozen")
    */
-  bool fermi_motion_;
+  FermiMotion fermi_motion_ = FermiMotion::Off;
+   /**
+   * An option to include the first collisions within the same nucleus
+   */
+  bool cll_in_nucleus_;
   /** Get the frame dependent velocity for each nucleus, using
    * the current reference frame. \see frame_
    *
@@ -132,8 +150,8 @@ class ColliderModus : public ModusDefault {
    *
    * \fpPrecision Why \c double?
    **/
-  std::pair<double, double> get_velocities(float mandelstam_s, float m_a,
-                                           float m_b);
+  std::pair<double, double> get_velocities(double mandelstam_s, double m_a,
+                                           double m_b);
 
   /**\ingroup logging
    * Writes the initial state for the ColliderModus to the output stream.

@@ -37,9 +37,9 @@ class ParticleType {
    * Decay width cutoff for considering a particle as stable.
    *
    * We currently regard a particle type as stable if its on-shell width is less
-   * than 10 keV.
+   * than 200 keV. The cutoff is chosen such that the η and the η' are stable.
    */
-  static constexpr float width_cutoff = 1e-5f;
+  static constexpr float width_cutoff = 2e-4f;
 
   /**
    * Creates a fully initialized ParticleType object.
@@ -310,10 +310,23 @@ class ParticleType {
   static ParticleTypePtrList &list_Deltas();
   /** Returns a list of all baryon resonances,
    * i.e. unstable baryons (not including antibaryons). */
-  static ParticleTypePtrList list_baryon_resonances();
+  static ParticleTypePtrList &list_baryon_resonances();
+
+  /**
+   * Returns the ParticleTypePtr for the given \p pdgcode.
+   * If the particle type is not found, an invalid ParticleTypePtr is returned.
+   * You can convert a ParticleTypePtr to a bool to check whether it is valid.
+   *
+   * \note The complexity of the search is \f$\mathcal O(\log N)\f$. Therefore,
+   * do not use this function except for user input that selects a particle
+   * type. All other internal references for a particle type should use
+   * ParticleTypePtr instead.
+   */
+  static const ParticleTypePtr try_find(PdgCode pdgcode);
 
   /**
    * Returns the ParticleType object for the given \p pdgcode.
+   * If the particle is not found, a PdgNotFoundFailure is thrown.
    *
    * \note The complexity of the search is \f$\mathcal O(\log N)\f$. Therefore,
    * do not use this function except for user input that selects a particle

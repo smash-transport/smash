@@ -24,8 +24,10 @@
 #include "include/isoparticletype.h"
 #include "include/kinematics.h"
 #include "include/logging.h"
+#include "include/numerics.h"
 #include "include/particledata.h"
 #include "include/pdgcode.h"
+#include "include/pow.h"
 #include "include/processbranch.h"
 #include "include/stringfunctions.h"
 
@@ -39,6 +41,7 @@ namespace {
 const ParticleTypeList *all_particle_types = nullptr;
 ParticleTypePtrList nucleons_list;
 ParticleTypePtrList deltas_list;
+ParticleTypePtrList baryon_resonances_list;
 }  // unnamed namespace
 
 const ParticleTypeList &ParticleType::list_all() {
@@ -67,38 +70,31 @@ ParticleTypePtrList &ParticleType::list_Deltas() {
   return deltas_list;
 }
 
-ParticleTypePtrList ParticleType::list_baryon_resonances() {
-  ParticleTypePtrList list;
-  list.reserve(10);
-  for (const ParticleType &type_resonance : ParticleType::list_all()) {
-    /* Only loop over baryon resonances. */
-    if (type_resonance.is_stable()
-        || type_resonance.pdgcode().baryon_number() != 1) {
-      continue;
-    }
-    list.emplace_back(&type_resonance);
-  }
-  return list;
+ParticleTypePtrList &ParticleType::list_baryon_resonances() {
+  return baryon_resonances_list;
 }
 
-const ParticleType &ParticleType::find(PdgCode pdgcode) {
+const ParticleTypePtr ParticleType::try_find(PdgCode pdgcode) {
   const auto found = std::lower_bound(
       all_particle_types->begin(), all_particle_types->end(), pdgcode,
       [](const ParticleType &l, const PdgCode &r) { return l.pdgcode() < r; });
   if (found == all_particle_types->end() || found->pdgcode() != pdgcode) {
+    return {};  // The default constructor creates an invalid pointer.
+  }
+  return &*found;
+}
+
+const ParticleType &ParticleType::find(PdgCode pdgcode) {
+  const auto found = ParticleType::try_find(pdgcode);
+  if (!found) {
     throw PdgNotFoundFailure("PDG code " + pdgcode.string() + " not found!");
   }
   return *found;
 }
 
 bool ParticleType::exists(PdgCode pdgcode) {
-  const auto found = std::lower_bound(
-      all_particle_types->begin(), all_particle_types->end(), pdgcode,
-      [](const ParticleType &l, const PdgCode &r) { return l.pdgcode() < r; });
-  if (found != all_particle_types->end()) {
-    return found->pdgcode() == pdgcode;
-  }
-  return false;
+  const auto found = ParticleType::try_find(pdgcode);
+  return found;
 }
 
 ParticleType::ParticleType(std::string n, float m, float w, PdgCode id)
@@ -191,6 +187,17 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
     }
     ensure_all_read(lineinput, line);
 
+    //Check if nucleon, kaon, and delta masses are the same as hardcoded ones, if present
+    if (pdgcode[0].is_nucleon() && !almost_equal(mass, nucleon_mass)) {
+      throw std::runtime_error("Nucleon mass in input file different from 0.938");
+    }
+    if (pdgcode[0].is_kaon() && !almost_equal(mass, kaon_mass)) {
+      throw std::runtime_error("Kaon mass in input file different from 0.494");
+    }
+    if (pdgcode[0].is_Delta() && !almost_equal(mass, delta_mass)) {
+      throw std::runtime_error("Delta mass in input file different from 1.232");
+    }
+
     // add all states to type list
     for (unsigned int i = 0; i < n; i++) {
       std::string full_name = name;
@@ -240,20 +247,29 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
     t.iso_multiplet_ = IsoParticleType::find(t);
   }
 
- // Create nucleons list
- if (IsoParticleType::exists("N")) {
-   for (const auto state : IsoParticleType::find("N").get_states()) {
-     nucleons_list.push_back(state);
-   }
- }
+  // Create nucleons list
+  if (IsoParticleType::exists("N")) {
+    for (const auto state : IsoParticleType::find("N").get_states()) {
+      nucleons_list.push_back(state);
+    }
+  }
 
- // Create deltas list
- if (IsoParticleType::exists("Δ")) {
-   for (const auto state : IsoParticleType::find("Δ").get_states()) {
-     deltas_list.push_back(state);
-   }
- }
+  // Create deltas list
+  if (IsoParticleType::exists("Δ")) {
+    for (const auto state : IsoParticleType::find("Δ").get_states()) {
+      deltas_list.push_back(state);
+    }
+  }
 
+  // Create baryon resonances list
+  for (const ParticleType &type_resonance : ParticleType::list_all()) {
+    /* Only loop over baryon resonances. */
+    if (type_resonance.is_stable()
+        || type_resonance.pdgcode().baryon_number() != 1) {
+      continue;
+    }
+    baryon_resonances_list.push_back(&type_resonance);
+  }
 
 }/*}}}*/
 
@@ -467,11 +483,16 @@ float ParticleType::spectral_function(float m) const {
     /* Initialize the normalization factor
      * by integrating over the unnormalized spectral function. */
     Integrator integrate;
-    const float max_mass = 100.;
-    norm_factor_ = 1./integrate(minimum_mass(), max_mass,
-                                [&](double mm) {
-                                  return spectral_function_no_norm(mm);
-                                });
+    //^ This should be static, but for some reason then the integrals sometimes
+    //  yield different results. See #4299.
+    const auto width = width_at_pole();
+    // We transform the integral using m = m_min + width_pole * tan(x), to
+    // make it definite and to avoid numerical issues.
+    norm_factor_ = 1./integrate(std::atan((minimum_mass() - mass())/width), M_PI/2.,
+        [&](double x) {
+          return spectral_function_no_norm(mass() + width*std::tan(x)) * width
+                 * (1 + square(std::tan(x))) ;
+    });
   }
   return norm_factor_ * spectral_function_no_norm(m);
 }

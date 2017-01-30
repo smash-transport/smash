@@ -27,6 +27,7 @@
 #include "include/scatteractionnucleonkaon.h"
 #include "include/scatteractionnucleonnucleon.h"
 #include "include/scatteractionhyperonpion.h"
+#include "include/scatteractionphoton.h"
 #include "include/stringfunctions.h"
 
 namespace Smash {
@@ -44,20 +45,32 @@ namespace Smash {
 * false - string excitation is disabled
 * \key Formation_Time (float, optional, default = 1.0) \n
 * Parameter for formation time in string fragmentation in fm/c
+* \key low_snn_cut (double) in GeV \n
+* The elastic collisions betwen two nucleons with sqrt_s below 
+* low_snn_cut cannot happen.
+* <1.88 - below the threshold energy of the elastic collsion, no effect
+* >2.02 - beyond the threshold energy of the inelastic collision NN->NNpi, not suggested 
 */
 
 ScatterActionsFinder::ScatterActionsFinder(
     Configuration config, const ExperimentParameters &parameters,
-    bool two_to_one, bool two_to_two, bool strings_switch)
+    bool two_to_one, bool two_to_two, double low_snn_cut, bool strings_switch,
+    const std::vector<bool> &nucleon_has_interacted, int N_tot, int N_proj,
+    bool photons = false, int n_fractional_photons = 1)
     : elastic_parameter_(config.take({"Collision_Term",
                                       "Elastic_Cross_Section"}, -1.0f)),
       testparticles_(parameters.testparticles),
       isotropic_(config.take({"Collision_Term", "Isotropic"}, false)),
       two_to_one_(two_to_one),
       two_to_two_(two_to_two),
+      low_snn_cut_(low_snn_cut),
       strings_switch_(strings_switch),
-      formation_time_(config.take({"Collision_Term",
-                                   "Formation_Time"}, 1.0f)) {
+      nucleon_has_interacted_(nucleon_has_interacted),
+      N_tot_(N_tot),
+      N_proj_(N_proj),
+      formation_time_(config.take({"Collision_Term", "Formation_Time"}, 1.0f)),
+      photons_(photons),
+      n_fractional_photons_(n_fractional_photons) {
         if (is_constant_elastic_isotropic()) {
           const auto &log = logger<LogArea::FindScatter>();
           log.info("Constant elastic isotropic cross-section mode:",
@@ -66,14 +79,21 @@ ScatterActionsFinder::ScatterActionsFinder(
       }
 
 ScatterActionsFinder::ScatterActionsFinder(
-    float elastic_parameter, int testparticles, bool two_to_one)
+    float elastic_parameter, int testparticles,
+    const std::vector<bool> &nucleon_has_interacted, bool two_to_one)
     : elastic_parameter_(elastic_parameter),
       testparticles_(testparticles),
       isotropic_(false),
       two_to_one_(two_to_one),
       two_to_two_(true),
+      low_snn_cut_(0.0),
       strings_switch_(true),
-      formation_time_(1.0f) {}
+      nucleon_has_interacted_(nucleon_has_interacted),
+      N_tot_(0),
+      N_proj_(0),
+      formation_time_(1.0f),
+      photons_(false),
+      n_fractional_photons_(1) {}
 
 ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
                                             const ParticleData &data_a,
@@ -138,6 +158,19 @@ ActionPtr ScatterActionsFinder::check_collision(
 #endif
     return nullptr;
   }
+  /** If the two particles
+    * 1) belong to the two colliding nuclei
+    * 2) are within the same nucleus
+    * 3) both of them have never experienced any collisons,
+    * then the collision between them are banned. */
+  assert(data_a.id() >= 0);
+  assert(data_b.id() >= 0);
+  if (data_a.id() < N_tot_ && data_b.id() < N_tot_ &&
+      ((data_a.id() < N_proj_ && data_b.id() < N_proj_) ||
+       (data_a.id() > N_proj_ && data_b.id() > N_proj_)) &&
+       !(nucleon_has_interacted_[data_a.id()] || nucleon_has_interacted_[data_b.id()])) {
+    return nullptr;
+  }
 
   /* Determine time of collision. */
   const float time_until_collision = collision_time(data_a, data_b);
@@ -159,13 +192,32 @@ ActionPtr ScatterActionsFinder::check_collision(
 
   /* Add various subprocesses.  */
   act->add_all_processes(elastic_parameter_, two_to_one_,
-                         two_to_two_, strings_switch_);
+                         two_to_two_, low_snn_cut_, strings_switch_);
+
+  /* Add photons to collision finding if necessary */
+  double photon_cross_section = 0.0;
+  if (photons_ &&
+      ScatterActionPhoton::is_photon_reaction(act->incoming_particles()))  {
+    ScatterActionPhoton photon_act(act->incoming_particles(), 0.0,
+                                   n_fractional_photons_);
+    photon_act.add_single_channel();
+    photon_cross_section = photon_act.cross_section();
+  }
+  /* Cross section for collision criterion */
+  float cross_section_criterion = (act->cross_section() + photon_cross_section)
+                                  * fm2_mb * M_1_PI
+                                  / static_cast<float>(testparticles_);
+  /* Consider cross section scaling factors only if the particles
+   * are not formed yet at the prospective time of the interaction */
+  if (data_a.formation_time() > data_a.position().x0() + time_until_collision) {
+    cross_section_criterion *= data_a.cross_section_scaling_factor();
+  }
+  if (data_b.formation_time() > data_b.position().x0() + time_until_collision) {
+    cross_section_criterion *= data_b.cross_section_scaling_factor();
+  }
 
   /* distance criterion according to cross_section */
-  if (distance_squared >= act->cross_section() * fm2_mb * M_1_PI
-                          * data_a.cross_section_scaling_factor()
-                          * data_b.cross_section_scaling_factor()
-                          / static_cast<float>(testparticles_)) {
+  if (distance_squared >= cross_section_criterion) {
     return nullptr;
   }
 
@@ -264,7 +316,7 @@ void ScatterActionsFinder::dump_reactions() const {
             B.set_4momentum(B.pole_mass(), -mom, 0.0, 0.0);
             ScatterActionPtr act = construct_scatter_action(A, B, time);
             act->add_all_processes(elastic_parameter_, two_to_one_,
-                                   two_to_two_, strings_switch_);
+                                   two_to_two_, low_snn_cut_, strings_switch_);
             const float total_cs = act->cross_section();
             if (total_cs <= 0.0) {
               continue;

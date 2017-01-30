@@ -239,6 +239,7 @@ smash_add_runtest(smash_help smash smash -h)
 smash_add_runtest(smash_run smash smash)
 smash_add_runtest(box_run smash smash -m Box)
 smash_add_runtest(collider_run smash smash -m Collider)
+smash_add_runtest(collider_frozen_fermi_run smash smash -m Collider -c "Modi: {Collider: {Fermi_Motion: frozen}}")
 smash_add_runtest(sphere_run smash smash -m Sphere)
 
 # verify that binary runs certain time (this corresponds to 20 steps)

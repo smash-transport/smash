@@ -162,7 +162,7 @@ void OscarOutput<Format, Contents>::at_eventstart(const Particles &particles,
                                                   const int event_number) {
   current_event_ = event_number;
   if (Contents & OscarAtEventstart) {
-    if (Format == OscarFormat2013) {
+    if (Format == OscarFormat2013 || Format == OscarFormat2013Extended) {
       std::fprintf(file_.get(), "# event %i in %zu\n", event_number + 1,
                    particles.size());
     } else {
@@ -180,7 +180,7 @@ void OscarOutput<Format, Contents>::at_eventstart(const Particles &particles,
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
                                                 const int event_number) {
-  if (Format == OscarFormat2013) {
+  if (Format == OscarFormat2013 || Format == OscarFormat2013Extended) {
     if (Contents & OscarParticlesAtEventend) {
       std::fprintf(file_.get(), "# event %i out %zu\n", event_number + 1,
                    particles.size());
@@ -209,7 +209,7 @@ template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::at_interaction(const Action &action,
                                                    const double density) {
   if (Contents & OscarInteractions) {
-    if (Format == OscarFormat2013) {
+    if (Format == OscarFormat2013 || Format == OscarFormat2013Extended) {
       std::fprintf(
           file_.get(),
           "# interaction in %zu out %zu rho %12.7f weight %12.7g type %5i \n",
@@ -243,7 +243,7 @@ template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::at_intermediate_time(
     const Particles &particles, const Clock &, const DensityParameters &) {
   if (Contents & OscarTimesteps) {
-    if (Format == OscarFormat2013) {
+    if (Format == OscarFormat2013 || Format == OscarFormat2013Extended) {
       std::fprintf(file_.get(), "# event %i out %zu\n", current_event_ + 1,
                    particles.size());
     } else {
@@ -527,7 +527,7 @@ std::unique_ptr<OutputInterface> create_oscar_output(const bf::path &path,
 std::unique_ptr<OutputInterface> create_dilepton_output(bf::path path) {
   /* for now the Oscar Output in the 2013 format is sufficient
    * for dilepton output */
-  return make_unique<OscarOutput<OscarFormat2013, OscarInteractions>>(
+  return make_unique<OscarOutput<OscarFormat2013Extended, OscarInteractions>>(
       std::move(path), "DileptonOutput");
 }
 

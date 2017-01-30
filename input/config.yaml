@@ -30,7 +30,7 @@ General:
     Delta_Time:    0.1
 
     # end time of simulation
-    End_Time:      20.0
+    End_Time:      100.0
 
     # initial random seed (auto-generated if negative)
     Randomseed:    1
@@ -97,6 +97,12 @@ Collision_Term:
     Force_Decays_At_End:    True
     Isotropic:              False
     Elastic_Cross_Section:  -1.0  # Globally used if non-negative, [mb]
+    Elastic_NN_Cutoff_Sqrts: 1.98 # Exclude the elastic collisions between the two
+                                 # nucleons with the square root s below the value [GeV].
+                                 # Exclusion is effectively turned off by setting any value
+                                 # below 1.88 (the threshold energy of the elastic collsion).
+                                 # And the value is at best not beyond 2.02 ( the threshold
+                                 # energy of the inelastic collision NN->NNpi)
 #    Pauli_Blocking:
 #        Spatial_Averaging_Radius:   1.86
 #        Momentum_Averaging_Radius:  0.08
@@ -136,7 +142,7 @@ Modi:
         Start_Time:    0.0
 
         # use thermal box, if so with which chemical potentials
-        Use_Thermal: False
+        Use_Thermal_Multiplicities: False
         Baryon_Chemical_Potential: 0.0
         Strange_Chemical_Potential: 0.0
 
@@ -155,7 +161,7 @@ Modi:
         # start time of simulation
         Start_Time: 0.0
         # Initialize sphere with thermal multiplicities
-        Use_Thermal: False
+        Use_Thermal_Multiplicities: False
         # Number of particles in Sphere
         Init_Multiplicities:
             211:    100
@@ -188,7 +194,10 @@ Modi:
             Value: 0.0
 
         # Include Fermi motion
-        Fermi_Motion: false
+        # ("off", "on", "frozen")
+        Fermi_Motion: "off"
+        # Determine whether the first collisions within the same nuclues are allowed
+        Collisions_Within_Nucleus: false
 
     List:
         # path of external particle list == File_Directory/File_Prefix{eventid}
