@@ -294,11 +294,11 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   /// Elastic collisions between the nucleons with the square root s
   //  below low_snn_cut are excluded.
   const double low_snn_cut = config.take({"Collision_Term",
-                                          "Elastic_NN_Cutoff_Sqrts"});
-  if (ParticleType::exists(pdg::p) && ParticleType::exists(pdg::pi_z) &&
-      low_snn_cut > ParticleType::find(pdg::p).mass() +
-                    ParticleType::find(pdg::p).mass() +
-                    ParticleType::find(pdg::pi_z).mass()) {
+                                          "Elastic_NN_Cutoff_Sqrts"}, 1.98);
+  const auto proton = ParticleType::try_find(pdg::p);
+  const auto pion = ParticleType::try_find(pdg::pi_z);
+  if (proton && pion &&
+      low_snn_cut > proton->mass() + proton->mass() + pion->mass()) {
     log.warn("The cut-off should be below the threshold energy",
              " of the process: NN to NNpi");
   }
