@@ -84,9 +84,8 @@ class Integrator {
    *                       It also determines the maximum number of subintervals
    *                       the integration algorithm will use.
    */
-  explicit Integrator(int workspace_size)
-      : workspace_(gsl_integration_cquad_workspace_alloc(workspace_size)),
-        subintervals_max_(workspace_size) {}
+  explicit Integrator(size_t workspace_size)
+      : workspace_(gsl_integration_cquad_workspace_alloc(workspace_size)) {}
 
   /// Convenience overload of the above with a workspace size of 1000.
   Integrator() : Integrator(1000) {}
@@ -132,10 +131,6 @@ class Integrator {
 
   /// Parameter to the GSL integration function: desired relative error limit
   const double accuracy_relative_ = 5.0e-4;
-
-  /// Parameter to the GSL integration function: maximum number of subintervals
-  /// (may not exceed workspace size)
-  const std::size_t subintervals_max_;
 };
 
 /**
