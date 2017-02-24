@@ -12,7 +12,9 @@
 
 // test one-dimensional integration
 
-TEST(on_dim_no_arguments) {
+TEST(one_dim_no_arguments) {
+  // The used algorithm sometimes underestimates the true error by a few bits
+  // of precision.
   Smash::Integrator integrate;
   for (int i = 0; i < 10; ++i) {
     const auto result = integrate(0, i, [](double) { return 1.; });
