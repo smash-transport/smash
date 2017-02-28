@@ -187,7 +187,7 @@ class ScatterAction : public Action {
    * Determine the cross section for NNbar annihilation, which is given by
    * detailed balance from the reverse reaction. See NNbar_annihilation_cross_section
    */
-  CollisionBranchPtr NNbar_creation_cross_section();
+  CollisionBranchList NNbar_creation_cross_section();
 
   /**
    * Determine the cross section for string excitations, which is given by the

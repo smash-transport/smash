@@ -120,16 +120,15 @@ void ScatterAction::add_all_processes(float elastic_parameter,
   bool NNbar_detailed_balance=true;
   if (NNbar_detailed_balance) {
     if (incoming_particles_[0].type().is_nucleon() &&
-        incoming_particles_[1].type().is_nucleon() &&
-        incoming_particles_[0].type().antiparticle_sign() !=
-        incoming_particles_[1].type().antiparticle_sign()) {
+        incoming_particles_[1].type().pdgcode() ==
+        incoming_particles_[0].type().get_antiparticle()->pdgcode()) {
       add_collision(NNbar_annihilation_cross_section());
     }
-    if ((incoming_particles_[0].type().is_rho() &&
+    if ((incoming_particles_[0].type().pdgcode() == pdg::rho_z &&
          incoming_particles_[1].type().pdgcode() == pdg::h1) ||
         (incoming_particles_[0].type().pdgcode() == pdg::h1 &&
-         incoming_particles_[1].type().is_rho())) {
-      add_collision(NNbar_creation_cross_section());
+         incoming_particles_[1].type().pdgcode() == pdg::rho_z)) {
+      add_collisions(NNbar_creation_cross_section());
     }
   }
   /* string excitation: the sqrt(s) cut-off is the sum of the masses of the
@@ -250,12 +249,13 @@ CollisionBranchPtr ScatterAction::NNbar_annihilation_cross_section() {
   float nnbar_xsec = std::max(0.f, total_cross_section() - cross_section());
   log.debug("NNbar cross section is: ", nnbar_xsec);
   //Make collision channel NNbar -> ρh₁(1170); eventually decays into 5π
-  return make_unique<CollisionBranch>(ParticleType::find(0x10223),
+  return make_unique<CollisionBranch>(ParticleType::find(pdg::h1),
            ParticleType::find(pdg::rho_z), nnbar_xsec, ProcessType::TwoToTwo);
 }
 
-CollisionBranchPtr ScatterAction::NNbar_creation_cross_section() {
+CollisionBranchList ScatterAction::NNbar_creation_cross_section() {
   const auto &log = logger<LogArea::ScatterAction>();
+  CollisionBranchList channel_list;
   /* Calculate NNbar reverse cross section:
    * from reverse reaction (see NNbar_annihilation_cross_section).*/
   const double s = mandelstam_s();
@@ -265,13 +265,21 @@ CollisionBranchPtr ScatterAction::NNbar_creation_cross_section() {
   const auto& type_N = ParticleType::find(pdg::p);
   const auto& type_Nbar = ParticleType::find(-pdg::p);
 
+  //Check available energy
+  if(sqrts - 2*type_N.mass() < 0) {
+    return channel_list;
+  }
+
   float xsection = detailed_balance_factor_RR(sqrts, pcm,
           incoming_particles_[0].type(), incoming_particles_[1].type(),
           type_N, type_Nbar) *
           std::max(0.f, ppbar_total(s) - ppbar_elastic(s));
   log.debug("NNbar reverse cross section is: ", xsection);
-  return make_unique<CollisionBranch>(type_N, type_Nbar,
-                                      xsection, ProcessType::TwoToTwo);
+  channel_list.push_back(make_unique<CollisionBranch>(type_N, type_Nbar,
+                                      xsection, ProcessType::TwoToTwo));
+  channel_list.push_back(make_unique<CollisionBranch>(ParticleType::find(pdg::n),
+                 ParticleType::find(-pdg::n), xsection, ProcessType::TwoToTwo));
+  return channel_list;
 }
 
 CollisionBranchPtr ScatterAction::string_excitation_cross_section() {
