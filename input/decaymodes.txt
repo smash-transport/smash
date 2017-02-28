@@ -89,8 +89,8 @@ a₁(1260)
 #1.      0  π γ         # >0
 
 f₂
-0.65  0  π π   # PDG value: 0.848 (modified to better fit the π⁺π⁻ cross section)
-0.30  0  ρ ρ   # to emulate 4π (whose PDG value is 0.102)
+0.50  0  π π   # PDG value: 0.848 (modified to better fit the π⁺π⁻ cross section)
+0.45  0  ρ ρ   # to emulate 4π (whose PDG value is 0.102)
 0.05  0  K K̅
 
 f₁(1285)
@@ -145,10 +145,10 @@ a₀(1450)
 # not in UrQMD
 
 ρ(1450)
-0.50    1  π π         # >0
-0.50    1  ρ ρ         # >0
-#^ taken from UrQMD
-#0.??    1  ρ η         # >0
+0.10    1  π π         # >0
+0.80    1  ρ ρ         # >0
+0.10    1  ρ η         # >0
+#^ modified to match π⁺π⁻ cross section
 
 η(1475)
 1.      0  π a₀(980)   # >0, emulating ηππ and KK̅π
