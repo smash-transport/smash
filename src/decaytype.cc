@@ -393,13 +393,18 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
       /// see \iref{Krivoruchenko:2001hs}
       const float rad1 = (m_par+m_other)*(m_par+m_other) - m_dil_sqr;
       const float rad2 = (m_par-m_other)*(m_par-m_other) - m_dil_sqr;
-      const float t1 = alpha/16. *
-                  (m_par+m_other)*(m_par+m_other)/(m_par_cubed*m_other_sqr) *
-                  std::sqrt(rad1);
-      const float t2 = pow_int(std::sqrt(rad2), 3);
-      const float ff = form_factor_delta(m_dil);
-      const float gamma_vi = t1 * t2 * ff*ff;
-      return 2.*alpha/(3.*M_PI) * gamma_vi/m_dil;
+      if (rad1 < 0.|| rad2 < 0.) {
+        //TODO(staudenmaier): maybe insert an assert()-statement like in line 378
+        return 0.;
+      } else {
+        const float t1 = alpha/16. *
+                    (m_par+m_other)*(m_par+m_other)/(m_par_cubed*m_other_sqr) *
+                    std::sqrt(rad1);
+        const float t2 = pow_int(std::sqrt(rad2), 3);
+        const float ff = form_factor_delta(m_dil);
+        const float gamma_vi = t1 * t2 * ff*ff;
+        return 2.*alpha/(3.*M_PI) * gamma_vi/m_dil;
+      }
     }
     default:
       throw std::runtime_error("Bad baryon in ThreeBodyDecayDilepton: "
