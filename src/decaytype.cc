@@ -393,8 +393,11 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
       /// see \iref{Krivoruchenko:2001hs}
       const float rad1 = (m_par+m_other)*(m_par+m_other) - m_dil_sqr;
       const float rad2 = (m_par-m_other)*(m_par-m_other) - m_dil_sqr;
-      if (rad1 < 0.|| rad2 < 0.) {
-        //TODO(staudenmaier): maybe insert an assert()-statement like in line 378
+      if (rad1 < 0.) {
+        assert(rad1 > -1E-5);
+        return 0.;
+      } else if (rad2 < 0.) {
+        assert(rad2 > -1E-5);
         return 0.;
       } else {
         const float t1 = alpha/16. *
