@@ -672,6 +672,9 @@ void Experiment<Modus>::initialize_new_event() {
   /* Save the initial conserved quantum numbers and total momentum in
    * the system for conservation checks */
   conserved_initial_ = QuantumNumbers(particles_);
+  interactions_total_ = 0;
+  previous_interactions_total_ = 0;
+  total_pauli_blocked_ = 0;
   /* Print output headers */
   log.info() << hline;
   log.info() << " Time       <Ediff>      <pdiff>  <scattrate>    <scatt>  "
