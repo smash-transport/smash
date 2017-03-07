@@ -142,5 +142,6 @@ cd $GSL
 make -j
 make install
 
-In the .bash_profile write (substitute $GSL by its value):
-export PATH=$GSL:$PATH
+In the .bash_profile write (enter GSL_ROOT_DIR's value in the first line):
+GSL_ROOT_DIR=...
+export PATH=$GSL_ROOT_DIR:$GSL_ROOT_DIR/lib:$PATH
