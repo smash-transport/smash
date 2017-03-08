@@ -1,0 +1,83 @@
+cmake_minimum_required(VERSION 2.6.2)
+project(Pythia)
+
+# set the relevant compiler flags
+get_filename_component(xmldoc "share/Pythia8/xmldoc" ABSOLUTE)
+add_definitions(
+    "-DXMLDIR=\"${xmldoc}\""
+)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -march=native -mfpmath=sse")
+
+add_library(pythia
+    src/Analysis.cc
+    src/Basics.cc
+    src/BeamParticle.cc
+    src/BeamRemnants.cc
+    src/BeamShape.cc
+    src/BoseEinstein.cc
+    src/ColourReconnection.cc
+    src/ColourTracing.cc
+    src/Event.cc
+    src/FJcore.cc
+    src/FragmentationFlavZpT.cc
+    src/FragmentationSystems.cc
+    src/GammaKinematics.cc
+    src/HadronLevel.cc
+    src/HadronScatter.cc
+    src/HardDiffraction.cc
+    src/HelicityBasics.cc
+    src/HelicityMatrixElements.cc
+    src/HiddenValleyFragmentation.cc
+    src/History.cc
+    src/Info.cc
+    src/JunctionSplitting.cc
+    src/LesHouches.cc
+    src/LHEF3.cc
+    src/Merging.cc
+    src/MergingHooks.cc
+    src/MiniStringFragmentation.cc
+    src/MultipartonInteractions.cc
+    src/ParticleData.cc
+    src/ParticleDecays.cc
+    src/PartonDistributions.cc
+    src/PartonLevel.cc
+    src/PartonSystems.cc
+    src/PhaseSpace.cc
+    src/ProcessContainer.cc
+    src/ProcessLevel.cc
+    src/Pythia.cc
+    src/PythiaStdlib.cc
+    src/ResonanceDecays.cc
+    src/ResonanceWidths.cc
+    src/ResonanceWidthsDM.cc
+    src/RHadrons.cc
+    src/Settings.cc
+    src/SigmaCompositeness.cc
+    src/SigmaDM.cc
+    src/SigmaEW.cc
+    src/SigmaExtraDim.cc
+    src/SigmaGeneric.cc
+    src/SigmaHiggs.cc
+    src/SigmaLeftRightSym.cc
+    src/SigmaLeptoquark.cc
+    src/SigmaNewGaugeBosons.cc
+    src/SigmaOnia.cc
+    src/SigmaProcess.cc
+    src/SigmaQCD.cc
+    src/SigmaSUSY.cc
+    src/SigmaTotal.cc
+    src/SLHAinterface.cc
+    src/SpaceShower.cc
+    src/StandardModel.cc
+    src/Streams.cc
+    src/StringFragmentation.cc
+    src/StringLength.cc
+    src/SusyCouplings.cc
+    src/SusyLesHouches.cc
+    src/SusyResonanceWidths.cc
+    src/SusyWidthFunctions.cc
+    src/TauDecays.cc
+    src/TimeShower.cc
+    src/UserHooks.cc
+    src/WeakShowerMEs.cc
+)
