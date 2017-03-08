@@ -145,3 +145,5 @@ Assume that GSL will be installed in $GSL.
 In the .bash_profile write (enter GSL_ROOT_DIR's value $GSL in the first line):
     GSL_ROOT_DIR=...
     export PATH=$GSL_ROOT_DIR:$GSL_ROOT_DIR/lib:$PATH
+
+*/
