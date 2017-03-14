@@ -46,125 +46,145 @@ CollisionBranchList ScatterActionHyperonPion::two_to_two_inel(
   const double s = mandelstam_s();
   const double sqrts = sqrt_s();
 
-  //Some declaration of particle types
-  const auto& neutron = ParticleType::find(pdg::n);
-  const auto& anti_n = ParticleType::find(-pdg::n);
-  const auto& proton = ParticleType::find(pdg::p);
-  const auto& anti_p = ParticleType::find(-pdg::p);
-  const auto& k_m = ParticleType::find(pdg::K_m);
-  const auto& k_p = ParticleType::find(pdg::K_p);
-
   switch (pack(pdg_hyperon, pdg_pion)) {
     case pack(pdg::Sigma_z, pdg::pi_m): {
+      const auto& type_n = ParticleType::find(pdg::n);
+      const auto& type_K_m = ParticleType::find(pdg::K_m);
       add_channel(process_list,
                   [&] { return detailed_balance_factor_stable(s,
-                               type_hyperon, type_pion, neutron, k_m)
+                               type_hyperon, type_pion, type_n, type_K_m)
                                * kminusn_piminussigma0(sqrts); },
-                  sqrts, neutron, k_m);
+                  sqrts, type_n, type_K_m);
       break;
     }
     case pack(-pdg::Sigma_z, pdg::pi_p): {
+      const auto& type_n_bar = ParticleType::find(-pdg::n);
+      const auto& type_K_p = ParticleType::find(pdg::K_p);
       add_channel(process_list,
                   [&] { return detailed_balance_factor_stable(s,
-                               type_hyperon, type_pion, anti_n, k_p)
+                               type_hyperon, type_pion, type_n_bar, type_K_p)
                                * kminusn_piminussigma0(sqrts); },
-                  sqrts, anti_n, k_p);
+                  sqrts, type_n_bar, type_K_p);
       break;
     }
     case pack(pdg::Sigma_m, pdg::pi_z): {
+      const auto& type_n = ParticleType::find(pdg::n);
+      const auto& type_K_m = ParticleType::find(pdg::K_m);
       add_channel(process_list,
                   [&] { return detailed_balance_factor_stable(s,
-                               type_hyperon, type_pion, neutron, k_m)
+                               type_hyperon, type_pion, type_n, type_K_m)
                                * kminusn_pi0sigmaminus(sqrts); },
-                  sqrts, neutron, k_m);
+                  sqrts, type_n, type_K_m);
       break;
     }
     case pack(-pdg::Sigma_m, pdg::pi_z): {
+      const auto& type_n_bar = ParticleType::find(-pdg::n);
+      const auto& type_K_p = ParticleType::find(pdg::K_p);
       add_channel(process_list,
                   [&] { return detailed_balance_factor_stable(s,
-                               type_hyperon, type_pion, anti_n, k_p)
+                               type_hyperon, type_pion, type_n_bar, type_K_p)
                                * kminusn_pi0sigmaminus(sqrts); },
-                  sqrts, anti_n, k_p);
+                  sqrts, type_n_bar, type_K_p);
       break;
     }
     case pack(pdg::Lambda, pdg::pi_m): {
+      const auto& type_n = ParticleType::find(pdg::n);
+      const auto& type_K_m = ParticleType::find(pdg::K_m);
       add_channel(process_list,
                   [&] { return detailed_balance_factor_stable(s,
-                               type_hyperon, type_pion, neutron, k_m)
+                               type_hyperon, type_pion, type_n, type_K_m)
                                * kminusn_piminuslambda(sqrts); },
-                  sqrts, neutron, k_m);
+                  sqrts, type_n, type_K_m);
       break;
     }
     case pack(-pdg::Lambda, pdg::pi_p): {
+      const auto& type_n_bar = ParticleType::find(-pdg::n);
+      const auto& type_K_p = ParticleType::find(pdg::K_p);
       add_channel(process_list,
                   [&] { return detailed_balance_factor_stable(s,
-                               type_hyperon, type_pion, anti_n, k_p)
+                               type_hyperon, type_pion, type_n_bar, type_K_p)
                                * kminusn_piminuslambda(sqrts); },
-                  sqrts, anti_n, k_p);
+                  sqrts, type_n_bar, type_K_p);
       break;
     }
     case pack(pdg::Sigma_z, pdg::pi_z): {
+      const auto& type_p = ParticleType::find(pdg::p);
+      const auto& type_K_m = ParticleType::find(pdg::K_m);
       add_channel(process_list,
                   [&] { return detailed_balance_factor_stable(s,
-                               type_hyperon, type_pion, proton, k_m)
+                               type_hyperon, type_pion, type_p, type_K_m)
                                * kminusp_pi0sigma0(sqrts); },
-                  sqrts, proton, k_m);
+                  sqrts, type_p, type_K_m);
       break;
     }
     case pack(-pdg::Sigma_z, pdg::pi_z): {
+      const auto& type_p_bar = ParticleType::find(-pdg::p);
+      const auto& type_K_p = ParticleType::find(pdg::K_p);
       add_channel(process_list,
                   [&] { return detailed_balance_factor_stable(s,
-                               type_hyperon, type_pion, anti_p, k_p)
+                               type_hyperon, type_pion, type_p_bar, type_K_p)
                                * kminusp_pi0sigma0(sqrts); },
-                  sqrts, anti_p, k_p);
+                  sqrts, type_p_bar, type_K_p);
       break;
     }
     case pack(pdg::Sigma_m, pdg::pi_p): {
+      const auto& type_p = ParticleType::find(pdg::p);
+      const auto& type_K_m = ParticleType::find(pdg::K_m);
       add_channel(process_list,
                   [&] { return detailed_balance_factor_stable(s,
-                               type_hyperon, type_pion, proton, k_m)
+                               type_hyperon, type_pion, type_p, type_K_m)
                                * kminusp_piplussigmaminus(sqrts); },
-                  sqrts, proton, k_m);
+                  sqrts, type_p, type_K_m);
       break;
     }
     case pack(-pdg::Sigma_m, pdg::pi_m): {
+      const auto& type_p_bar = ParticleType::find(-pdg::p);
+      const auto& type_K_p = ParticleType::find(pdg::K_p);
       add_channel(process_list,
                   [&] { return detailed_balance_factor_stable(s,
-                               type_hyperon, type_pion, anti_p, k_p)
+                               type_hyperon, type_pion, type_p_bar, type_K_p)
                                * kminusp_piplussigmaminus(sqrts); },
-                  sqrts, anti_p, k_p);
+                  sqrts, type_p_bar, type_K_p);
       break;
     }
     case pack(pdg::Lambda, pdg::pi_z): {
+      const auto& type_p = ParticleType::find(pdg::p);
+      const auto& type_K_m = ParticleType::find(pdg::K_m);
       add_channel(process_list,
                   [&] { return detailed_balance_factor_stable(s,
-                               type_hyperon, type_pion, proton, k_m)
+                               type_hyperon, type_pion, type_p, type_K_m)
                                * kminusp_pi0lambda(sqrts); },
-                  sqrts, proton, k_m);
+                  sqrts, type_p, type_K_m);
       break;
     }
     case pack(-pdg::Lambda, pdg::pi_z): {
+      const auto& type_p_bar = ParticleType::find(-pdg::p);
+      const auto& type_K_p = ParticleType::find(pdg::K_p);
       add_channel(process_list,
                   [&] { return detailed_balance_factor_stable(s,
-                               type_hyperon, type_pion, anti_p, k_p)
+                               type_hyperon, type_pion, type_p_bar, type_K_p)
                                * kminusp_pi0lambda(sqrts); },
-                  sqrts, anti_p, k_p);
+                  sqrts, type_p_bar, type_K_p);
       break;
     }
     case pack(pdg::Sigma_p, pdg::pi_m): {
+      const auto& type_p = ParticleType::find(pdg::p);
+      const auto& type_K_m = ParticleType::find(pdg::K_m);
       add_channel(process_list,
                   [&] { return detailed_balance_factor_stable(s,
-                               type_hyperon, type_pion, proton, k_m)
+                               type_hyperon, type_pion, type_p, type_K_m)
                                * kminusp_piminussigmaplus(sqrts); },
-                  sqrts, proton, k_m);
+                  sqrts, type_p, type_K_m);
       break;
     }
     case pack(-pdg::Sigma_p, pdg::pi_p): {
+      const auto& type_p_bar = ParticleType::find(-pdg::p);
+      const auto& type_K_p = ParticleType::find(pdg::K_p);
       add_channel(process_list,
                   [&] { return detailed_balance_factor_stable(s,
-                               type_hyperon, type_pion, anti_p, k_p)
+                               type_hyperon, type_pion, type_p_bar, type_K_p)
                                * kminusp_piminussigmaplus(sqrts); },
-                  sqrts, anti_p, k_p);
+                  sqrts, type_p_bar, type_K_p);
       break;
     }
     default:

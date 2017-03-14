@@ -141,36 +141,7 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
   const double s = mandelstam_s();
   const double sqrts = sqrt_s();
 
-  //Type declarations, since the find routine is inefficient
-  const auto& type_pi_z = ParticleType::find(pdg::pi_z);
-  const auto& type_pi_m = ParticleType::find(pdg::pi_m);
-  const auto& type_pi_p = ParticleType::find(pdg::pi_p);
-  const auto& type_p = ParticleType::find(pdg::p);
-  const auto& type_p_bar = ParticleType::find(-pdg::p);
-  const auto& type_n = ParticleType::find(pdg::n);
-  const auto& type_n_bar = ParticleType::find(-pdg::n);
-  const auto& type_K_z = ParticleType::find(pdg::K_z);
-  const auto& type_K_p = ParticleType::find(pdg::K_p);
-  const auto& type_K_m = ParticleType::find(pdg::K_m);
-  const auto& type_Kbar_z= ParticleType::find(pdg::Kbar_z);
-  const auto& type_Delta_pp = ParticleType::find(pdg::Delta_pp);
-  const auto& type_Delta_p = ParticleType::find(pdg::Delta_p);
-  const auto& type_Delta_z = ParticleType::find(pdg::Delta_z);
-  const auto& type_Delta_m = ParticleType::find(pdg::Delta_m);
-  const auto& type_Delta_pp_bar = ParticleType::find(-pdg::Delta_pp);
-  const auto& type_Delta_p_bar = ParticleType::find(-pdg::Delta_p);
-  const auto& type_Delta_z_bar = ParticleType::find(-pdg::Delta_z);
-  const auto& type_Delta_m_bar = ParticleType::find(-pdg::Delta_m);
-  const auto& type_Sigma_p = ParticleType::find(pdg::Sigma_p);
-  const auto& type_Sigma_m = ParticleType::find(pdg::Sigma_m);
-  const auto& type_Sigma_z = ParticleType::find(pdg::Sigma_z);
-  const auto& type_Sigma_p_bar = ParticleType::find(-pdg::Sigma_p);
-  const auto& type_Sigma_m_bar = ParticleType::find(-pdg::Sigma_m);
-  const auto& type_Sigma_z_bar = ParticleType::find(-pdg::Sigma_z);
-  const auto& type_Lambda = ParticleType::find(pdg::Lambda);
-  const auto& type_Lambda_bar = ParticleType::find(-pdg::Lambda);
-
-  //Some function declarations
+  //Some variable declarations for frequently used quantities
   const auto sigma_kplusp = kplusp_inelastic(s);
   const auto sigma_kplusn = kplusn_inelastic(s);
 
@@ -180,6 +151,15 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
       // charge exchange.
       switch (pdg_nucleon) {
         case pdg::p: {
+          const auto& type_n = ParticleType::find(pdg::n);
+          const auto& type_pi_z = ParticleType::find(pdg::pi_z);
+          const auto& type_pi_m = ParticleType::find(pdg::pi_m);
+          const auto& type_pi_p = ParticleType::find(pdg::pi_p);
+          const auto& type_Kbar_z = ParticleType::find(pdg::Kbar_z);
+          const auto& type_Sigma_p = ParticleType::find(pdg::Sigma_p);
+          const auto& type_Sigma_m = ParticleType::find(pdg::Sigma_m);
+          const auto& type_Sigma_z = ParticleType::find(pdg::Sigma_z);
+          const auto& type_Lambda = ParticleType::find(pdg::Lambda);
           add_channel(process_list,
                       [&] { return kminusp_piminussigmaplus(sqrts); },
                       sqrts, type_pi_m, type_Sigma_p);
@@ -198,6 +178,11 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
           break;
         }
         case pdg::n: {
+          const auto& type_pi_z = ParticleType::find(pdg::pi_z);
+          const auto& type_pi_m = ParticleType::find(pdg::pi_m);
+          const auto& type_Sigma_m = ParticleType::find(pdg::Sigma_m);
+          const auto& type_Sigma_z = ParticleType::find(pdg::Sigma_z);
+          const auto& type_Lambda = ParticleType::find(pdg::Lambda);
           add_channel(process_list,
                       [&] { return kminusn_piminussigma0(sqrts); },
                       sqrts, type_pi_m, type_Sigma_z);
@@ -210,6 +195,10 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
           break;
         }
         case -pdg::p: {
+          const auto& type_K_m = ParticleType::find(pdg::K_m);
+          const auto& type_Kbar_z = ParticleType::find(pdg::Kbar_z);
+          const auto& type_Delta_pp_bar = ParticleType::find(-pdg::Delta_pp);
+          const auto& type_Delta_p_bar = ParticleType::find(-pdg::Delta_p);
           add_channel(process_list,
                       [&] { return sigma_kplusp * kplusn_ratios.get_ratio(
                                    type_nucleon, type_kaon, type_Kbar_z, type_Delta_pp_bar); },
@@ -221,6 +210,10 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
           break;
         }
         case -pdg::n: {
+          const auto& type_K_m = ParticleType::find(pdg::K_m);
+          const auto& type_Kbar_z = ParticleType::find(pdg::Kbar_z);
+          const auto& type_Delta_p_bar = ParticleType::find(-pdg::Delta_p);
+          const auto& type_Delta_z_bar = ParticleType::find(-pdg::Delta_z);
           add_channel(process_list,
                       [&] { return sigma_kplusn * kplusn_ratios.get_ratio(
                                    type_nucleon, type_kaon, type_Kbar_z, type_Delta_p_bar); },
@@ -239,6 +232,10 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
       // cross section, weighted by the isospin factor.
       switch (pdg_nucleon) {
         case pdg::p: {
+          const auto& type_K_p = ParticleType::find(pdg::K_p);
+          const auto& type_K_z = ParticleType::find(pdg::K_z);
+          const auto& type_Delta_pp = ParticleType::find(pdg::Delta_pp);
+          const auto& type_Delta_p = ParticleType::find(pdg::Delta_p);
           add_channel(process_list,
                       [&] { return sigma_kplusp * kplusn_ratios.get_ratio(
                                    type_nucleon, type_kaon, type_K_z, type_Delta_pp); },
@@ -250,6 +247,10 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
           break;
         }
         case pdg::n: {
+          const auto& type_K_p = ParticleType::find(pdg::K_p);
+          const auto& type_K_z = ParticleType::find(pdg::K_z);
+          const auto& type_Delta_p = ParticleType::find(pdg::Delta_p);
+          const auto& type_Delta_z = ParticleType::find(pdg::Delta_z);
           add_channel(process_list,
                       [&] { return sigma_kplusn * kplusn_ratios.get_ratio(
                                    type_nucleon, type_kaon, type_K_z, type_Delta_p); },
@@ -261,6 +262,15 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
           break;
         }
         case -pdg::p: {
+          const auto& type_n_bar = ParticleType::find(-pdg::n);
+          const auto& type_pi_z = ParticleType::find(pdg::pi_z);
+          const auto& type_pi_m = ParticleType::find(pdg::pi_m);
+          const auto& type_pi_p = ParticleType::find(pdg::pi_p);
+          const auto& type_K_z = ParticleType::find(pdg::K_z);
+          const auto& type_Sigma_p_bar = ParticleType::find(-pdg::Sigma_p);
+          const auto& type_Sigma_m_bar = ParticleType::find(-pdg::Sigma_m);
+          const auto& type_Sigma_z_bar = ParticleType::find(-pdg::Sigma_z);
+          const auto& type_Lambda_bar = ParticleType::find(-pdg::Lambda);
           add_channel(process_list,
                       [&] { return kminusp_piminussigmaplus(sqrts); },
                       sqrts, type_pi_p, type_Sigma_p_bar);
@@ -279,6 +289,11 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
           break;
         }
         case -pdg::n: {
+          const auto& type_pi_z = ParticleType::find(pdg::pi_z);
+          const auto& type_pi_p = ParticleType::find(pdg::pi_p);
+          const auto& type_Sigma_m_bar = ParticleType::find(-pdg::Sigma_m);
+          const auto& type_Sigma_z_bar = ParticleType::find(-pdg::Sigma_z);
+          const auto& type_Lambda_bar = ParticleType::find(-pdg::Lambda);
           add_channel(process_list,
                       [&] { return kminusn_piminussigma0(sqrts); },
                       sqrts, type_pi_p, type_Sigma_z_bar);
@@ -299,6 +314,10 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
 
       switch (pdg_nucleon) {
         case pdg::p: {
+          const auto& type_K_p = ParticleType::find(pdg::K_p);
+          const auto& type_K_z = ParticleType::find(pdg::K_z);
+          const auto& type_Delta_p = ParticleType::find(pdg::Delta_p);
+          const auto& type_Delta_z = ParticleType::find(pdg::Delta_z);
           add_channel(process_list,
                       [&] { return sigma_kplusp * kplusn_ratios.get_ratio(
                                    type_nucleon, type_kaon, type_K_z, type_Delta_p); },
@@ -310,6 +329,10 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
           break;
         }
         case pdg::n: {
+          const auto& type_K_p = ParticleType::find(pdg::K_p);
+          const auto& type_K_z = ParticleType::find(pdg::K_z);
+          const auto& type_Delta_z = ParticleType::find(pdg::Delta_z);
+          const auto& type_Delta_m = ParticleType::find(pdg::Delta_m);
           add_channel(process_list,
                       [&] { return sigma_kplusn * kplusn_ratios.get_ratio(
                                    type_nucleon, type_kaon, type_K_z, type_Delta_z); },
@@ -321,6 +344,8 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
           break;
         }
         case -pdg::n: {
+          const auto& type_K_p = ParticleType::find(pdg::K_p);
+          const auto& type_p_bar = ParticleType::find(-pdg::p);
           add_channel(process_list,
                       [&] { return kminusp_kbar0n(s); },
                       sqrts, type_K_p, type_p_bar);
@@ -332,12 +357,18 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
     case pdg::Kbar_z:
       switch (pdg_nucleon) {
         case pdg::n: {
+          const auto& type_p = ParticleType::find(pdg::p);
+          const auto& type_K_m = ParticleType::find(pdg::K_m);
           add_channel(process_list,
                       [&] { return kminusp_kbar0n(s); },
                       sqrts, type_K_m, type_p);
           break;
         }
         case -pdg::p: {
+          const auto& type_K_m = ParticleType::find(pdg::K_m);
+          const auto& type_Kbar_z = ParticleType::find(pdg::Kbar_z);
+          const auto& type_Delta_p_bar = ParticleType::find(-pdg::Delta_p);
+          const auto& type_Delta_z_bar = ParticleType::find(-pdg::Delta_z);
           add_channel(process_list,
                       [&] { return sigma_kplusp * kplusn_ratios.get_ratio(
                                    type_nucleon, type_kaon, type_Kbar_z, type_Delta_p_bar); },
@@ -349,6 +380,10 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
           break;
         }
         case -pdg::n: {
+          const auto& type_K_m = ParticleType::find(pdg::K_m);
+          const auto& type_Kbar_z = ParticleType::find(pdg::Kbar_z);
+          const auto& type_Delta_z_bar = ParticleType::find(-pdg::Delta_z);
+          const auto& type_Delta_m_bar = ParticleType::find(-pdg::Delta_m);
           add_channel(process_list,
                       [&] { return sigma_kplusn * kplusn_ratios.get_ratio(
                                    type_nucleon, type_kaon, type_Kbar_z, type_Delta_z_bar); },
