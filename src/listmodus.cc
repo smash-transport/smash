@@ -187,7 +187,7 @@ float ListModus::initial_conditions(Particles *particles,
             /* for smash output where formation time is the same*/
             particle.set_4position(FourVector(t, x, y, z));
             particle.set_formation_time(t);
-            particle.set_cross_section_scaling_factor(0.0);
+            particle.set_cross_section_scaling_factor(1.0);
           }
         } catch ( ParticleType::PdgNotFoundFailure ) {
             log.warn() << "While loading external particle lists data, "
