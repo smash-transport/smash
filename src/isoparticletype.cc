@@ -200,14 +200,25 @@ TabulationPtr IsoParticleType::integrate_RR(ParticleTypePtr &type_res_2) {
          type_res_2->min_mass_kinematic(),
          3.f, 125,
          [&](float srts) {
-            return integrate2d(type_res_1->min_mass_kinematic(),
-                               srts - type_res_2->min_mass_kinematic(),
-                               type_res_2->min_mass_kinematic(),
-                               srts - type_res_1->min_mass_kinematic(),
+            const auto result = integrate2d(type_res_1->minimum_mass_kinematic(),
+                               srts - type_res_2->minimum_mass_kinematic(),
+                               type_res_2->minimum_mass_kinematic(),
+                               srts - type_res_1->minimum_mass_kinematic(),
                                [&](float m1, float m2) {
                                   return spec_func_integrand_2res(srts, m1, m2,
                                                       *type_res_1, *type_res_2);
                                });
+            if (result.first == 0.) {
+              return 0.;
+            }
+            const auto relerror = std::abs(result.second / result.first);
+            const auto tol = 9e-2;
+            if (relerror > tol) {
+              std::stringstream error_msg;
+              error_msg << "Integration error larger than " << tol*100 << "%: " << result.first << " +- " << result.second;
+              throw std::runtime_error(error_msg.str());
+            }
+            return result.first;
          });
 }
 
