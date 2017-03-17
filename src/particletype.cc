@@ -97,6 +97,16 @@ bool ParticleType::exists(PdgCode pdgcode) {
   return found;
 }
 
+bool ParticleType::exists(const std::string& name) {
+  const auto found = std::find_if(
+      all_particle_types->begin(), all_particle_types->end(),
+      [&](const ParticleType &p) { return p.name() == name; });
+  if (found == all_particle_types->end()) {
+    return false;
+  }
+  return true;
+}
+
 ParticleType::ParticleType(std::string n, float m, float w, PdgCode id)
     : name_(n),
       mass_(m),
