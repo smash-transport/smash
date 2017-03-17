@@ -223,17 +223,11 @@ float TwoBodyDecayUnstable::rho(float mass) const {
                                                     m1, m2, particle_types_[0],
                                                     particle_types_[1], L_);
                                 });
-              if (result.first == 0.) {
-                return 0.;
+              const auto error_msg = result.check_error();
+              if (error_msg != "") {
+                throw std::runtime_error(error_msg);
               }
-              const auto relerror = std::abs(result.second / result.first);
-              const auto tol = 9e-2;
-              if (relerror > tol) {
-                std::stringstream error_msg;
-                error_msg << "Integration error larger than " << tol*100 << "%: " << result.first << " +- " << result.second;
-                throw std::runtime_error(error_msg.str());
-              }
-              return result.first;
+              return result.value();
             });
   }
   return tabulation_->get_value_linear(mass);

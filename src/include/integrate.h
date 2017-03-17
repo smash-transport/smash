@@ -60,6 +60,25 @@ class Result : public std::pair<double, double> {
 
   /// access the second entry in the pair as the absolute error
   double error() const { return Base::second; }
+
+  /// check whether the relative error is small
+  ///
+  /// Returns an empty string if it is small and an error message if it is
+  /// large.
+  std::string check_error(double relative_tolerance=9e-2) const {
+    if (value() == 0) {
+      return "";
+    }
+    const auto relative_error = std::abs(error() / value());
+    if (relative_error < relative_tolerance) {
+      return "";
+    } else {
+      std::stringstream error_msg;
+      error_msg << "Integration error larger than " << relative_tolerance*100
+                << "%: " << value() << " +- " << error();
+      return error_msg.str();
+    }
+  }
 };
 
 /**

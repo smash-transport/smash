@@ -208,17 +208,11 @@ TabulationPtr IsoParticleType::integrate_RR(ParticleTypePtr &type_res_2) {
                                   return spec_func_integrand_2res(srts, m1, m2,
                                                       *type_res_1, *type_res_2);
                                });
-            if (result.first == 0.) {
-              return 0.;
+            const auto error_msg = result.check_error();
+            if (error_msg != "") {
+              throw std::runtime_error(error_msg);
             }
-            const auto relerror = std::abs(result.second / result.first);
-            const auto tol = 9e-2;
-            if (relerror > tol) {
-              std::stringstream error_msg;
-              error_msg << "Integration error larger than " << tol*100 << "%: " << result.first << " +- " << result.second;
-              throw std::runtime_error(error_msg.str());
-            }
-            return result.first;
+            return result.value();
          });
 }
 
