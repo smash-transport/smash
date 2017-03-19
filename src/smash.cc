@@ -18,7 +18,6 @@
 #include "include/decaymodes.h"
 #include "include/experiment.h"
 #include "include/filelock.h"
-#include "include/fpenvironment.h"
 #include "include/inputfunctions.h"
 #include "include/random.h"
 #include "include/scatteractionsfinder.h"

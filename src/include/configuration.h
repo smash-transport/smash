@@ -142,8 +142,9 @@ class Configuration {
      */
     Value(const YAML::Node &n, const char *key) : node_(n), key_(key) {
       if (!(n.IsScalar() || n.IsSequence() || n.IsMap())) {
-        std::fprintf(stderr, "Configuration::Value fails at %s\n", key);
-        std::abort();
+        std::stringstream err;
+        err << "Configuration value for \"" << key << "\" is missing or invalid";
+        throw std::runtime_error(err.str());
       }
     }
 

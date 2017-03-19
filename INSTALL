@@ -128,3 +128,22 @@ Let's assume Eigen headers will be unpacked in $HOME.
 - in smash/build/, create build files with
 
   cmake -DCMAKE_INSTALL_PREFIX=$HOME/[latest-eigen]/ ..
+
+
+Including GSL from custom location
+----------------------------------
+
+Assume that GSL will be installed in $GSL.
+
+    wget ftp://ftp.gnu.org/gnu/gsl/gsl-latest.tar.gz
+    tar -zxvf gsl-latest.tar.gz
+    cd $GSL
+    ./configure -prefix $GSL
+    make -j
+    make install
+
+In the .bash_profile write (enter GSL_ROOT_DIR's value $GSL in the first line):
+    GSL_ROOT_DIR=...
+    export PATH=$GSL_ROOT_DIR:$GSL_ROOT_DIR/lib:$PATH
+
+*/
