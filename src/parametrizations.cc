@@ -11,6 +11,7 @@
 #include "include/parametrizations_data.h"
 
 #include <cmath>
+#include <initializer_list>
 #include <iostream>
 #include <memory>
 #include <vector>
@@ -390,8 +391,20 @@ static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>, float, 
 /// Return the isospin ratio of the given K+ N reaction's cross section.
 float KplusNRatios::get_ratio(const ParticleType& a, const ParticleType& b,
                 const ParticleType& c, const ParticleType& d) const {
-  const auto key = std::make_pair(pack(a.pdgcode().code(), b.pdgcode().code()),
-                                  pack(c.pdgcode().code(), d.pdgcode().code()));
+  /* If this method is called with anti-nucleons, flip all particles to anti-particles;
+   * the ratio is equal */
+  int flip = 0;
+  for (const auto& p : {&a, &b, &c, &d}) {
+    if (p->is_nucleon()) {
+      if (flip == 0) {
+        flip = p->antiparticle_sign();
+      } else {
+        assert(p->antiparticle_sign() == flip);
+      }
+    }
+  }
+  const auto key = std::make_pair(pack(a.pdgcode().code()*flip, b.pdgcode().code()*flip),
+                                  pack(c.pdgcode().code()*flip, d.pdgcode().code()*flip));
   if (ratios_.empty()) {
     initialize(ratios_);
   }
