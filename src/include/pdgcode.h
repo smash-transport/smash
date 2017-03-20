@@ -262,7 +262,7 @@ class PdgCode {
   /// Returns whether this PDG code identifies a meson.
   inline bool is_meson() const { return is_hadron() && digits_.n_q1_ == 0; }
 
-  /// Is this a nucleon (p, n)?
+  /// Is this a nucleon/anti-nucleon (p, n, -p, -n)?
   inline bool is_nucleon() const {
       const auto abs_code = std::abs(code());
       return (abs_code == pdg::p || abs_code == pdg::n);
