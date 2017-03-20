@@ -207,7 +207,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
   /* Option 2: Kinetic energy per nucleon of the projectile nucleus
    * (target at rest).  */
   if (modus_cfg.has_value({"E_Kin"})) {
-    float e_kin = modus_cfg.take({"E_Kin"});
+    const float e_kin = modus_cfg.take({"E_Kin"});
     // Check that energy is nonnegative.
     if (e_kin < 0) {
       throw ModusDefault::InvalidEnergy(
@@ -222,7 +222,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
   }
   // Option 3: Momentum of the projectile nucleus (target at rest).
   if (modus_cfg.has_value({"P_Lab"})) {
-    float p_lab = modus_cfg.take({"P_Lab"});
+    const float p_lab = modus_cfg.take({"P_Lab"});
     // Check that p_lab is nonnegative.
     if (p_lab < 0) {
       throw ModusDefault::InvalidEnergy(
@@ -274,14 +274,14 @@ ColliderModus::ColliderModus(Configuration modus_config,
         impact_interpolation_ = make_unique<InterpolateDataLinear<float>>(
             InterpolateDataLinear<float>(impacts, yields));
 
-        auto imp_minmax = std::minmax_element(impacts.begin(), impacts.end());
+        const auto imp_minmax = std::minmax_element(impacts.begin(), impacts.end());
         imp_min_ = *imp_minmax.first;
         imp_max_ = *imp_minmax.second;
         yield_max_ = *std::max_element(yields.begin(), yields.end());
       }
     }
     if (modus_cfg.has_value({"Impact", "Range"})) {
-      std::array<float, 2> range = modus_cfg.take({"Impact", "Range"});
+      const std::array<float, 2> range = modus_cfg.take({"Impact", "Range"});
       imp_min_ = range[0];
       imp_max_ = range[1];
     }
