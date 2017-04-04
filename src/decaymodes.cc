@@ -230,8 +230,17 @@ void DecayModes::load_decaymodes(const std::string &input) {
       bool multi = true;  // does the decay channel refer to whole multiplets?
       while (lineinput) {
         decay_particles.emplace_back(name);
-        multi &= IsoParticleType::exists(name)
-              && IsoParticleType::find(name).get_states()[0]->is_hadron();
+        const bool is_multiplet = IsoParticleType::exists(name);
+        const bool is_state = ParticleType::exists(name);
+        if (!is_multiplet && !is_state) {
+          throw InvalidDecay("Daughter " + name
+              + " is neither an isospin multiplet nor a particle."
+              + " (line " + std::to_string(linenumber)
+              + ": \"" + trimmed + "\")");
+        }
+        const bool is_hadronic_multiplet = is_multiplet
+            && IsoParticleType::find(name).get_states()[0]->is_hadron();
+        multi &= is_hadronic_multiplet;
         lineinput >> name;
       }
       if (multi) {
