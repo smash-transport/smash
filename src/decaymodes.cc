@@ -230,8 +230,8 @@ void DecayModes::load_decaymodes(const std::string &input) {
       bool multi = true;  // does the decay channel refer to whole multiplets?
       while (lineinput) {
         decay_particles.emplace_back(name);
-        multi &= IsoParticleType::exists(name)
-              && IsoParticleType::find(name).get_states()[0]->is_hadron();
+        const auto isotype = IsoParticleType::try_find(name);
+        multi &= isotype && isotype->get_states()[0]->is_hadron();
         lineinput >> name;
       }
       if (multi) {
