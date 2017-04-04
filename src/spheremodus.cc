@@ -78,7 +78,6 @@ std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
   return out;
 }
 
-
 /* initial_conditions - sets particle data for @particles */
 float SphereModus::initial_conditions(Particles *particles,
   const ExperimentParameters &parameters) {

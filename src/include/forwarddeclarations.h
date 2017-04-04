@@ -116,6 +116,20 @@ enum class BoxInitialCondition {
   PeakedMomenta,
 };
 
+/** Defines properties of expansion for the metric (e.g. FRW)
+ *
+ *  If anything else than NoExpansion is used, then a non-zero
+ *  Hubble parameter is computed and corrections are brought to the
+ *  propagation of all particles according to selected expanding
+ *  metric.
+ */
+enum class ExpansionMode {
+  NoExpansion,
+  MasslessFRW,
+  MassiveFRW,
+  Exponential,
+};
+
 /// Represents thermodynamic quantities that can be printed out
 enum class ThermodynamicQuantity : char {
   EckartDensity,

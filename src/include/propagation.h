@@ -15,7 +15,19 @@
 
 namespace Smash {
 
-double calc_hubble (double time);
+struct ExpansionProperties {
+  //Defines the metric to be used
+  ExpansionMode mode_;
+  //Defines the expansion parameter (faster expansion for larger values)
+  double b_;
+
+  ExpansionProperties(ExpansionMode mode, double b) :
+    mode_(mode),
+    b_(b)
+  {}
+};
+
+double calc_hubble (double time, const ExpansionProperties &metric);
 
 /** Propagates the positions of all particles on a straight line
   * through the current time step.
@@ -29,7 +41,8 @@ double calc_hubble (double time);
   * \param[in] parameters parameters for the experiment
   */
 void propagate_straight_line(Particles *particles,
-                             const ExperimentParameters &parameters);
+                             const ExperimentParameters &parameters,
+                             const ExpansionProperties &metric);
 
 /**
  * Propagates the positions and momenta of all particles through the current

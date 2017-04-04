@@ -17,32 +17,43 @@
 
 namespace Smash {
 
-/*Function to caclulate the hubble parameter*/
-double calc_hubble(double time){
+/*Function to calculate the hubble parameter*/
+double calc_hubble(double time, const ExpansionProperties &metric){
+  double h; //Hubble parameter 
 
- //Massless Particle Case
- //return 0.1 / (2.0 * (0.1*time + 1));
+  //No expansion case
+  switch (metric.mode_) {
+    case ExpansionMode::NoExpansion:
+      h = 0.;
+      break;
+    case ExpansionMode::MasslessFRW:
+      h = metric.b_ / (2 * (metric.b_*time + 1));
+      break;
+    case ExpansionMode::MassiveFRW:
+      h = 2 * metric.b_ / (3 * (metric.b_*time + 1));
+      break;
+    case ExpansionMode::Exponential:
+      h = metric.b_ * time;
+      break;
+    default:
+      h = 0.;
+  }
 
- //No Expansion Case
- //return 0;
-
- //Massive Particle Case
- return (2*0.1)/(3*(0.1*time + 1));
+  return h;
 }
 
 
 /* Simple straight line propagation without potentials but with expansion option*/
 void propagate_straight_line(Particles *particles,
-                             const ExperimentParameters &parameters) {
+                             const ExperimentParameters &parameters,
+                             const ExpansionProperties &metric) {
   const auto &log = logger<LogArea::Propagation>();
   const double dt = parameters.timestep_duration();
   for (ParticleData &data : *particles) {
-    //calculate the hubble parameter
-    double h = calc_hubble(parameters.labclock.current_time());
-    //usual line of code for calculating the distance to propagate based on particle's velocity
     FourVector distance = FourVector(0.0, data.velocity() * dt);
 
-    //two vectors which need to be added to momentum and position to ensure appropriate expansion
+    //Momentum and position modification to ensure appropriate expansion
+    double h = calc_hubble(parameters.labclock.current_time(),metric);
     FourVector delta_mom = FourVector(0.0, h*data.momentum().threevec()*dt);
     FourVector expan_dist = FourVector(0.0, h*data.position().threevec()*dt);
 

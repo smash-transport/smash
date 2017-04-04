@@ -16,7 +16,6 @@
 #include "include/decayactionsfinder.h"
 #include "include/decayactionsfinderdilepton.h"
 #include "include/listmodus.h"
-#include "include/propagation.h"
 #include "include/scatteractionsfinder.h"
 #include "include/spheremodus.h"
 /* Outputs */
@@ -281,6 +280,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       force_decays_(
           config.take({"Collision_Term", "Force_Decays_At_End"}, true)),
       use_grid_(config.take({"General", "Use_Grid"}, true)),
+      metric_(config.take({"General", "Metric_Type"}, ExpansionMode::NoExpansion),
+          config.take({"General", "Expansion_Rate"}, 0.1)),
       time_step_mode_(
           config.take({"General", "Time_Step_Mode"}, TimeStepMode::Fixed)) {
   const auto &log = logger<LogArea::Experiment>();
@@ -1196,7 +1197,7 @@ void Experiment<Modus>::propagate_all() {
     propagate(&particles_, parameters_, *potentials_,
               dUB_dr_lat_.get(), dUI3_dr_lat_.get());
   } else {
-    propagate_straight_line(&particles_, parameters_);
+    propagate_straight_line(&particles_, parameters_, metric_);
   }
   modus_.impose_boundary_conditions(&particles_, outputs_);
 }
@@ -1242,7 +1243,7 @@ void Experiment<Modus>::do_final_decays(uint64_t &interactions_total) {
     propagate(&particles_, parameters_, *potentials_,
               dUB_dr_lat_.get(), dUI3_dr_lat_.get());
   } else {
-    propagate_straight_line(&particles_, parameters_);
+    propagate_straight_line(&particles_, parameters_, metric_);
   }
   modus_.impose_boundary_conditions(&particles_, outputs_);
 }

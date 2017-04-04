@@ -302,6 +302,26 @@ class Configuration {
                                       "or \"none\".");
     }
 
+    operator ExpansionMode() const {
+      const std::string s = operator std::string();
+      if (s == "NoExpansion") {
+        return ExpansionMode::NoExpansion;
+      }
+      if (s == "MasslessFRW") {
+        return ExpansionMode::MasslessFRW;
+      }
+      if (s == "MassiveFRW") {
+        return ExpansionMode::MassiveFRW;
+      }
+      if (s == "Exponential") {
+        return ExpansionMode::Exponential;
+      }
+      throw IncorrectTypeInAssignment( 
+          "The value for key \"" + std::string(key_) + 
+          "\" should be \"NoExpansion\", \"MasslessFRW\"," +
+          "\"MassiveFRW\" or \"Exponential\".");
+    }
+
     operator TimeStepMode() const {
       const std::string s = operator std::string();
       if (s == "None") {
