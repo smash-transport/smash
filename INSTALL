@@ -71,6 +71,8 @@ After that you have to instruct cmake that it should use the newly installed cla
 
     cmake .. -DCMAKE_CXX_COMPILER=/usr/local/opt/llvm/bin/clang++ -DCMAKE_EXE_LINKER_FLAGS="-L/usr/local/opt/llvm/lib -lc++abi" -DCMAKE_CXX_FLAGS=-I/usr/local/opt/llvm/include
 
+Note: FPE environment only works with gcc, so e.g. you won't get backtraces from floating point traps with clang.
+
 
 Disabling ROOT support
 ---------------------------
@@ -128,3 +130,22 @@ Let's assume Eigen headers will be unpacked in $HOME.
 - in smash/build/, create build files with
 
   cmake -DCMAKE_INSTALL_PREFIX=$HOME/[latest-eigen]/ ..
+
+
+Including GSL from custom location
+----------------------------------
+
+Assume that GSL will be installed in $GSL.
+
+    wget ftp://ftp.gnu.org/gnu/gsl/gsl-latest.tar.gz
+    tar -zxvf gsl-latest.tar.gz
+    cd $GSL
+    ./configure -prefix $GSL
+    make -j
+    make install
+
+In the .bash_profile write (enter GSL_ROOT_DIR's value $GSL in the first line):
+    GSL_ROOT_DIR=...
+    export PATH=$GSL_ROOT_DIR:$GSL_ROOT_DIR/lib:$PATH
+
+*/

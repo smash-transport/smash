@@ -102,9 +102,21 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
   CollisionBranchList process_list, channel_list;
   const double sqrts = sqrt_s();
 
+  /* Find whether colliding particles are nucleons or anti-nucleons;
+   * adjust lists of produced particles. */
+  const ParticleTypePtrList& nuc_or_anti_nuc =
+    type_particle_a.antiparticle_sign() == -1 &&
+    type_particle_b.antiparticle_sign() == -1 ?
+    ParticleType::list_anti_nucleons() :
+    ParticleType::list_nucleons();
+  const ParticleTypePtrList& delta_or_anti_delta =
+    type_particle_a.antiparticle_sign() == -1 &&
+    type_particle_b.antiparticle_sign() == -1 ?
+    ParticleType::list_anti_Deltas() :
+    ParticleType::list_Deltas();
   /* First: Find N N → N R channels. */
   channel_list = find_xsection_from_type(type_particle_a, type_particle_b,
-      ParticleType::list_baryon_resonances(), ParticleType::list_nucleons(),
+      ParticleType::list_baryon_resonances(), nuc_or_anti_nuc,
       [&sqrts](const ParticleType &type_res_1, const ParticleType&){
           return type_res_1.iso_multiplet()->get_integral_NR(sqrts);
       });
@@ -115,7 +127,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
 
   /* Second: Find N N → Δ R channels. */
   channel_list = find_xsection_from_type(type_particle_a, type_particle_b,
-    ParticleType::list_baryon_resonances(), ParticleType::list_Deltas(),
+    ParticleType::list_baryon_resonances(), delta_or_anti_delta,
     [&sqrts](const ParticleType &type_res_1, const ParticleType &type_res_2){
       return type_res_1.iso_multiplet()->get_integral_RR(type_res_2, sqrts);
     });
@@ -148,7 +160,7 @@ CollisionBranchList ScatterActionNucleonNucleon::find_xsection_from_type(
           type_particle_a.charge() + type_particle_b.charge()) {
         continue;
       }
-    
+
       // loop over total isospin
       for (const int twoI : I_tot_range(type_particle_a, type_particle_b)) {
         const float isospin_factor = isospin_clebsch_gordan_sqr_2to2(
@@ -196,12 +208,10 @@ CollisionBranchList ScatterActionNucleonNucleon::find_xsection_from_type(
                     type_res_1, ", ", type_res_2);
           log.debug("2->2 with original particles: ",
                     type_particle_a, type_particle_b);
-       //   std::cout << xsection << " ";
         }
       }
     }
   }
-  //std::cout << std::endl;
   return channel_list;
 }
 
@@ -228,8 +238,9 @@ void ScatterActionNucleonNucleon::sample_angles(
       = get_t_range<double>(cms_energy, nucleon_mass, nucleon_mass,
                             mass_a, mass_b);
   Angles phitheta;
-  if (p_a->pdgcode().is_nucleon() &&
-      p_b->pdgcode().is_nucleon() && !isotropic_) {
+  if (p_a->pdgcode().is_nucleon() && p_b->pdgcode().is_nucleon() &&
+      p_a->pdgcode().antiparticle_sign() ==
+      p_b->pdgcode().antiparticle_sign() && !isotropic_) {
     /** NN → NN: Choose angular distribution according to Cugnon parametrization,
      * see \iref{Cugnon:1996kh}. */
     double bb, a, plab = plab_from_s(mandelstam_s());
@@ -249,8 +260,9 @@ void ScatterActionNucleonNucleon::sample_angles(
     // determine scattering angles in center-of-mass frame
     phitheta = Angles(2.*M_PI*Random::canonical(),
                       1. - 2.*(t-t_range[0])/(t_range[1]-t_range[0]));
-  } else if (p_a->pdgcode().is_Delta() && p_b->pdgcode().is_nucleon()
-             && !isotropic_) {
+  } else if (p_a->pdgcode().is_Delta() && p_b->pdgcode().is_nucleon() &&
+             p_a->pdgcode().antiparticle_sign() ==
+             p_b->pdgcode().antiparticle_sign() && !isotropic_) {
     /** NN → NΔ: Sample scattering angles in center-of-mass frame from an
      * anisotropic angular distribution, using the same distribution as for
      * elastic pp scattering, as suggested in \iref{Cugnon:1996kh}. */

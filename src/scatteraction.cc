@@ -99,10 +99,12 @@ void ScatterAction::add_all_processes(float elastic_parameter,
     add_collisions(resonance_cross_sections());
   }
   if (two_to_two) {
-    /** Elastic collstions between two nucleons with sqrt_s() below 
+    /** Elastic collisions between two nucleons with sqrt_s() below
      * low_snn_cut can not happen*/
     if (!incoming_particles_[0].type().is_nucleon() || 
         !incoming_particles_[1].type().is_nucleon() || 
+        !(incoming_particles_[0].type().antiparticle_sign() ==
+          incoming_particles_[1].type().antiparticle_sign()) ||
         sqrt_s() >= low_snn_cut) {
         add_collision(elastic_cross_section(elastic_parameter));
     }
@@ -120,14 +122,10 @@ void ScatterAction::add_all_processes(float elastic_parameter,
     bool a_in_pythia = false;
     bool b_in_pythia = false;
     if (incoming_particles_[0].type().is_nucleon() ||
-        incoming_particles_[0].type().pdgcode() == -pdg::p ||
-        incoming_particles_[0].type().pdgcode() == -pdg::n ||
         incoming_particles_[0].type().pdgcode().is_pion() ) {
         a_in_pythia = true;
     }
     if (incoming_particles_[1].type().is_nucleon() ||
-        incoming_particles_[1].type().pdgcode() == -pdg::p ||
-        incoming_particles_[1].type().pdgcode() == -pdg::n ||
         incoming_particles_[1].type().pdgcode().is_pion() ) {
         b_in_pythia = true;
     }

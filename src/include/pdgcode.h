@@ -262,15 +262,19 @@ class PdgCode {
   /// Returns whether this PDG code identifies a meson.
   inline bool is_meson() const { return is_hadron() && digits_.n_q1_ == 0; }
 
-  /// Is this a nucleon (p, n)?
+  /// Is this a nucleon/anti-nucleon (p, n, -p, -n)?
   inline bool is_nucleon() const {
-      return (code() == pdg::p) || (code() == pdg::n);
+      const auto abs_code = std::abs(code());
+      return (abs_code == pdg::p || abs_code == pdg::n);
   }
-  /// Is this a Delta(1232) (no anti-Delta)?
+
+  /// Is this a Delta(1232) (with anti-delta)?
   inline bool is_Delta() const {
-      return (code() == pdg::Delta_pp) || (code() == pdg::Delta_p) ||
-             (code() == pdg::Delta_z) || (code() == pdg::Delta_m);
+      const auto abs_code = std::abs(code());
+      return (abs_code == pdg::Delta_pp || abs_code == pdg::Delta_p ||
+              abs_code == pdg::Delta_z || abs_code == pdg::Delta_m);
   }
+
   /// Is this a hyperon (Lambda, Sigma, Xi, Omega)?
   inline bool is_hyperon() const {
       const auto abs_code = std::abs(code());

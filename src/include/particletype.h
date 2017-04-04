@@ -39,7 +39,7 @@ class ParticleType {
    * We currently regard a particle type as stable if its on-shell width is less
    * than 200 keV. The cutoff is chosen such that the η and the η' are stable.
    */
-  static constexpr float width_cutoff = 2e-4f;
+  static constexpr float width_cutoff = 1e-5f;
 
   /**
    * Creates a fully initialized ParticleType object.
@@ -90,6 +90,9 @@ class ParticleType {
 
   /// Return a pointer to the corresponding antiparticle ParticleType object.
   ParticleTypePtr get_antiparticle() const;
+
+  /// \copydoc PdgCode::antiparticle_sign
+  int antiparticle_sign() const { return pdgcode_.antiparticle_sign(); }
 
   /** Returns twice the isospin vector length \f$I\f$.
    *
@@ -305,9 +308,14 @@ class ParticleType {
 
   /** Returns a list of all nucleons (i.e. proton and neutron). */
   static ParticleTypePtrList &list_nucleons();
+  /** Returns a list of all anti-nucleons (i.e. anti-proton and anti-neutron). */
+  static ParticleTypePtrList &list_anti_nucleons();
   /** Returns a list of the Delta(1232) baryons // oliiny: only 1232?!
    *  (i.e. all four charge states). */
   static ParticleTypePtrList &list_Deltas();
+  /** Returns a list of the anti-Delta(1232) baryons
+   *  (i.e. all four charge states). */
+  static ParticleTypePtrList &list_anti_Deltas();
   /** Returns a list of all baryon resonances,
    * i.e. unstable baryons (not including antibaryons). */
   static ParticleTypePtrList &list_baryon_resonances();

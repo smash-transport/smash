@@ -40,7 +40,9 @@ namespace {
 /// Global pointer to the Particle Type list.
 const ParticleTypeList *all_particle_types = nullptr;
 ParticleTypePtrList nucleons_list;
+ParticleTypePtrList anti_nucs_list;
 ParticleTypePtrList deltas_list;
+ParticleTypePtrList anti_deltas_list;
 ParticleTypePtrList baryon_resonances_list;
 }  // unnamed namespace
 
@@ -66,8 +68,16 @@ ParticleTypePtrList &ParticleType::list_nucleons() {
   return nucleons_list;
 }
 
+ParticleTypePtrList &ParticleType::list_anti_nucleons() {
+  return anti_nucs_list;
+}
+
 ParticleTypePtrList &ParticleType::list_Deltas() {
   return deltas_list;
+}
+
+ParticleTypePtrList &ParticleType::list_anti_Deltas() {
+  return anti_deltas_list;
 }
 
 ParticleTypePtrList &ParticleType::list_baryon_resonances() {
@@ -247,10 +257,11 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
     t.iso_multiplet_ = IsoParticleType::find(t);
   }
 
-  // Create nucleons list
+  // Create nucleons/anti-nucleons list
   if (IsoParticleType::exists("N")) {
     for (const auto state : IsoParticleType::find("N").get_states()) {
       nucleons_list.push_back(state);
+      anti_nucs_list.push_back(state->get_antiparticle());
     }
   }
 
@@ -258,6 +269,7 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
   if (IsoParticleType::exists("Δ")) {
     for (const auto state : IsoParticleType::find("Δ").get_states()) {
       deltas_list.push_back(state);
+      anti_deltas_list.push_back(state->get_antiparticle());
     }
   }
 
@@ -269,6 +281,7 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
       continue;
     }
     baryon_resonances_list.push_back(&type_resonance);
+    baryon_resonances_list.push_back(type_resonance.get_antiparticle());
   }
 
 }/*}}}*/
@@ -482,7 +495,7 @@ float ParticleType::spectral_function(float m) const {
   if (norm_factor_ < 0.) {
     /* Initialize the normalization factor
      * by integrating over the unnormalized spectral function. */
-    Integrator integrate;
+    static thread_local Integrator integrate;
     //^ This should be static, but for some reason then the integrals sometimes
     //  yield different results. See #4299.
     const auto width = width_at_pole();
