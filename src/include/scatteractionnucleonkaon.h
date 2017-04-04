@@ -45,8 +45,7 @@ class ScatterActionNucleonKaon : public ScatterActionBaryonMeson {
    * Calculate cross sections for strangeness exchange in nucleon-kaon
    * collisions.
    */
-  CollisionBranchList two_to_two_inel(const ParticleType &type_particle_a,
-                                      const ParticleType &type_particle_b);
+  CollisionBranchList two_to_two_inel();
 };
 
 }  // namespace Smash

@@ -21,18 +21,15 @@ void ScatterActionDeltaKaon::format_debug_output(std::ostream &out) const {
 }
 
 CollisionBranchList ScatterActionDeltaKaon::two_to_two_cross_sections() {
-  const ParticleType &type_particle_a = incoming_particles_[0].type();
-  const ParticleType &type_particle_b = incoming_particles_[1].type();
 
-  CollisionBranchList process_list = two_to_two_inel(type_particle_a,
-                                                     type_particle_b);
+  CollisionBranchList process_list = two_to_two_inel();
 
   return process_list;
 }
 
-CollisionBranchList ScatterActionDeltaKaon::two_to_two_inel(
-                            const ParticleType &type_particle_a,
-                            const ParticleType &type_particle_b) {
+CollisionBranchList ScatterActionDeltaKaon::two_to_two_inel() {
+  const ParticleType &type_particle_a = incoming_particles_[0].type();
+  const ParticleType &type_particle_b = incoming_particles_[1].type();
   CollisionBranchList process_list;
 
   const ParticleType &type_delta =

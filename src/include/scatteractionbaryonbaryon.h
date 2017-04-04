@@ -39,16 +39,13 @@ class ScatterActionBaryonBaryon : public ScatterAction {
   * Calculate cross sections for resonance absorption
   * (i.e. NR->NN and ΔR->NN).
   *
-  * \param[in] type_a Type information of the first incoming baryon.
-  * \param[in] type_b Type information of the second incoming baryon.
+  * \param[in] is_anti_particles Whether the colliding particles are antiparticles
   *
   * \return List of possible resonance absorption processes. Each element of the
   * list contains the types of the final-state particles and the cross section
   * for that particular process.
   */
-  CollisionBranchList bar_bar_to_nuc_nuc(const ParticleType &type_a,
-                                         const ParticleType &type_b,
-                                         const bool is_anti_particles);
+  CollisionBranchList bar_bar_to_nuc_nuc(const bool is_anti_particles);
 
  protected:
   /**

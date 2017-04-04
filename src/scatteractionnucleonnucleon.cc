@@ -86,36 +86,30 @@ static float Cugnon_bnp(float plab) {
 
 
 CollisionBranchList ScatterActionNucleonNucleon::two_to_two_cross_sections() {
-  const ParticleType &type_particle_a = incoming_particles_[0].type();
-  const ParticleType &type_particle_b = incoming_particles_[1].type();
-
   /* Find all single-resonance production channels. */
-  CollisionBranchList process_list = two_to_two_inel(type_particle_a,
-                                                     type_particle_b);
+  CollisionBranchList process_list = two_to_two_inel();
 
   return process_list;
 }
 
-CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
-                            const ParticleType &type_particle_a,
-                            const ParticleType &type_particle_b) {
+CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel() {
   CollisionBranchList process_list, channel_list;
   const double sqrts = sqrt_s();
 
   /* Find whether colliding particles are nucleons or anti-nucleons;
    * adjust lists of produced particles. */
   const ParticleTypePtrList& nuc_or_anti_nuc =
-    type_particle_a.antiparticle_sign() == -1 &&
-    type_particle_b.antiparticle_sign() == -1 ?
+    incoming_particles_[0].type().antiparticle_sign() == -1 &&
+    incoming_particles_[1].type().antiparticle_sign() == -1 ?
     ParticleType::list_anti_nucleons() :
     ParticleType::list_nucleons();
   const ParticleTypePtrList& delta_or_anti_delta =
-    type_particle_a.antiparticle_sign() == -1 &&
-    type_particle_b.antiparticle_sign() == -1 ?
+    incoming_particles_[0].type().antiparticle_sign() == -1 &&
+    incoming_particles_[1].type().antiparticle_sign() == -1 ?
     ParticleType::list_anti_Deltas() :
     ParticleType::list_Deltas();
   /* First: Find N N → N R channels. */
-  channel_list = find_xsection_from_type(type_particle_a, type_particle_b,
+  channel_list = find_xsection_from_type(
       ParticleType::list_baryon_resonances(), nuc_or_anti_nuc,
       [&sqrts](const ParticleType &type_res_1, const ParticleType&){
           return type_res_1.iso_multiplet()->get_integral_NR(sqrts);
@@ -126,7 +120,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
   channel_list.clear();
 
   /* Second: Find N N → Δ R channels. */
-  channel_list = find_xsection_from_type(type_particle_a, type_particle_b,
+  channel_list = find_xsection_from_type(
     ParticleType::list_baryon_resonances(), delta_or_anti_delta,
     [&sqrts](const ParticleType &type_res_1, const ParticleType &type_res_2){
       return type_res_1.iso_multiplet()->get_integral_RR(type_res_2, sqrts);
@@ -141,11 +135,12 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
 
 template<class IntegrationMethod>
 CollisionBranchList ScatterActionNucleonNucleon::find_xsection_from_type(
-                            const ParticleType &type_particle_a,
-                            const ParticleType &type_particle_b,
                             const ParticleTypePtrList &list_res_1,
                             const ParticleTypePtrList &list_res_2,
                             const IntegrationMethod integrator) {
+  const ParticleType &type_particle_a = incoming_particles_[0].type();
+  const ParticleType &type_particle_b = incoming_particles_[1].type();
+
   const auto &log = logger<LogArea::ScatterAction>();
   CollisionBranchList channel_list;
   const double s = mandelstam_s();
@@ -182,7 +177,7 @@ CollisionBranchList ScatterActionNucleonNucleon::find_xsection_from_type(
 
         /* Calculate matrix element. */
         const float matrix_element = nn_to_resonance_matrix_element(sqrts,
-                                     *type_res_1, *type_res_2, twoI);
+                                     type_particle_a, type_particle_b, twoI);
         if (matrix_element <= 0.) {
           continue;
         }

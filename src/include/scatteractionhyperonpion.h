@@ -41,8 +41,7 @@ class ScatterActionHyperonPion : public ScatterActionBaryonMeson {
    * collisions. It is given by the cross section of the corresponding
    * nucleon-kaon collision.
    */
-  CollisionBranchList two_to_two_inel(const ParticleType &type_particle_a,
-                                      const ParticleType &type_particle_b);
+  CollisionBranchList two_to_two_inel();
 };
 
 }  // namespace Smash
