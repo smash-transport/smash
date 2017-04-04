@@ -85,8 +85,12 @@ void Action::perform(Particles *particles, uint32_t id_process) {
     }
   }
 
+  // For elastic collisions and box wall crossings it is not necessary to remove
+  // particles from the list and insert new ones, it is enough to update their
+  // properties.
   particles->update(incoming_particles_, outgoing_particles_,
-                    process_type_ != ProcessType::Elastic);
+                    (process_type_ != ProcessType::Elastic) &&
+                    (process_type_ != ProcessType::Wall));
 
   log.debug("Particle map now has ", particles->size(), " elements.");
 

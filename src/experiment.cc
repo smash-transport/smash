@@ -323,11 +323,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
                                                   parameters_.testparticles);
     action_finders_.emplace_back(std::move(scat_finder));
   }
-  // todo(oliiny): Fix the wall-crossing action finder and uncommit this
-  /*const float modus_l = modus_.length();
+  const float modus_l = modus_.length();
   if (modus_l > 0.f) {
     action_finders_.emplace_back(make_unique<WallCrossActionsFinder>(modus_l));
-  }*/
+  }
 
   if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
     log.info() << "Pauli blocking is ON.";
@@ -632,10 +631,9 @@ void Experiment<Modus>::initialize_new_event() {
 
   /* Sample particles according to the initial conditions */
   float start_time = modus_.initial_conditions(&particles_, parameters_);
-
-  /* For box modus: make sure that particles are in the box */
-  // Todo(oliiny): this should not be necessary, can we remove it?
-  modus_.impose_boundary_conditions(&particles_);
+  // For box modus make sure that particles are in the box. In principle, after
+  // a correct initialization they should be, so this is just playing it safe.
+  modus_.impose_boundary_conditions(&particles_, outputs_);
 
   /* Reset the simulation clock */
   float timestep = delta_time_startup_;
@@ -814,7 +812,6 @@ void Experiment<Modus>::run_time_evolution() {
     const float dt = std::min(parameters_.labclock.timestep_duration(),
                               end_time_ - t);
     log.debug("Timestepless propagation for next ", dt, " fm/c.");
-    modus_.impose_boundary_conditions(&particles_, outputs_);
 
     /* (1.a) Create grid. */
     float min_cell_length = compute_min_cell_length(dt);
@@ -895,7 +892,6 @@ void Experiment<Modus>::propagate_and_shine(double to_time) {
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution_timestepless(Actions& actions) {
   const auto &log = logger<LogArea::Experiment>();
-  modus_.impose_boundary_conditions(&particles_);
 
   const float start_time = parameters_.labclock.current_time();
   const float end_time = std::min(parameters_.labclock.next_time(), end_time_);
