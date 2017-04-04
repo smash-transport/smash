@@ -23,7 +23,7 @@
 
 namespace Smash {
 
-Action::Action(const ParticleList &in_part, float time)
+Action::Action(const ParticleList &in_part, double time)
               : incoming_particles_(in_part),
                 time_of_execution_(time+in_part[0].position().x0()) {}
 

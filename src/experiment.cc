@@ -171,8 +171,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
 
   // If this Delta_Time option is absent (this can be for timestepless mode)
   // just assign 1.0 fm/c, reasonable value will be set at event initialization
-  const float dt = config.take({"General", "Delta_Time"}, 1.0f);
-  const float output_dt = config.take({"Output", "Output_Interval"});
+  const double dt = config.take({"General", "Delta_Time"}, 1.0f);
+  const double output_dt = config.take({"Output", "Output_Interval"});
   return {{0.0f, dt}, {0.0, output_dt},
           ntest,
           config.take({"General", "Gaussian_Sigma"}, 1.0f),
@@ -630,13 +630,13 @@ void Experiment<Modus>::initialize_new_event() {
   particles_.reset();
 
   /* Sample particles according to the initial conditions */
-  float start_time = modus_.initial_conditions(&particles_, parameters_);
+  double start_time = modus_.initial_conditions(&particles_, parameters_);
   // For box modus make sure that particles are in the box. In principle, after
   // a correct initialization they should be, so this is just playing it safe.
   modus_.impose_boundary_conditions(&particles_, outputs_);
 
   /* Reset the simulation clock */
-  float timestep = delta_time_startup_;
+  double timestep = delta_time_startup_;
 
   switch (time_step_mode_) {
     case TimeStepMode::Fixed:
@@ -647,7 +647,7 @@ void Experiment<Modus>::initialize_new_event() {
     case TimeStepMode::None:
       timestep = end_time_ - start_time;
       // Take care of the box modus + timestepless propagation
-      const float max_dt = modus_.max_timestep(max_transverse_distance_sqr_);
+      const double max_dt = modus_.max_timestep(max_transverse_distance_sqr_);
       if (max_dt > 0.f && max_dt < timestep) {
         timestep = max_dt;
       }
@@ -657,8 +657,8 @@ void Experiment<Modus>::initialize_new_event() {
   parameters_.labclock = std::move(clock_for_this_event);
 
   /* Reset the output clock */
-  const float dt_output = parameters_.outputclock.timestep_duration();
-  const float zeroth_output_time = std::floor(start_time/dt_output)*dt_output;
+  const double dt_output = parameters_.outputclock.timestep_duration();
+  const double zeroth_output_time = std::floor(start_time/dt_output)*dt_output;
   Clock output_clock(zeroth_output_time, dt_output);
   parameters_.outputclock = std::move(output_clock);
 
@@ -766,7 +766,7 @@ bool Experiment<Modus>::perform_action(Action &action,
   if (photons_switch_ &&
       ScatterActionPhoton::is_photon_reaction(action.incoming_particles())) {
     // Time in the action constructor is relative to current time of incoming
-    constexpr float action_time = 0.f;
+    constexpr double action_time = 0.f;
     ScatterActionPhoton photon_act(action.incoming_particles(),
                                    action_time, n_fractional_photons_);
     // Add a completely dummy process to photon action.  The only important
@@ -808,8 +808,8 @@ void Experiment<Modus>::run_time_evolution() {
                                     parameters_.labclock.current_time());
 
   while (parameters_.labclock.current_time() < end_time_) {
-    const float t = parameters_.labclock.current_time();
-    const float dt = std::min(parameters_.labclock.timestep_duration(),
+    const double t = parameters_.labclock.current_time();
+    const double dt = std::min(parameters_.labclock.timestep_duration(),
                               end_time_ - t);
     log.debug("Timestepless propagation for next ", dt, " fm/c.");
 
@@ -839,7 +839,7 @@ void Experiment<Modus>::run_time_evolution() {
 
     /* (2) In case of adaptive timesteps adapt timestep size */
     if (time_step_mode_ ==  TimeStepMode::Adaptive && actions.size() > 0u) {
-      float new_timestep = parameters_.labclock.timestep_duration();
+      double new_timestep = parameters_.labclock.timestep_duration();
       if (adaptive_parameters_->update_timestep(actions, particles_.size(),
           &new_timestep)) {
         parameters_.labclock.set_timestep_duration(new_timestep);
@@ -893,9 +893,9 @@ template <typename Modus>
 void Experiment<Modus>::run_time_evolution_timestepless(Actions& actions) {
   const auto &log = logger<LogArea::Experiment>();
 
-  const float start_time = parameters_.labclock.current_time();
-  const float end_time = std::min(parameters_.labclock.next_time(), end_time_);
-  float time_left = end_time - start_time;
+  const double start_time = parameters_.labclock.current_time();
+  const double end_time = std::min(parameters_.labclock.next_time(), end_time_);
+  double time_left = end_time - start_time;
   log.debug("Timestepless propagation: ", "Actions size = ", actions.size(),
             ", start time = ", start_time,
             ", end time = ", end_time);
@@ -919,7 +919,7 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions& actions) {
     }
     log.debug(~einhard::Green(), "✔ ", act);
 
-    while (next_output_time() < act->time_of_execution()) {
+    while (next_output_time() <= act->time_of_execution()) {
       log.debug("Propagating until output time: ", next_output_time());
       propagate_and_shine(next_output_time());
       ++parameters_.outputclock;

@@ -36,10 +36,10 @@ class Action {
    * \param[in] time Time at which the action is supposed to take place
    *                 (relative to the current time of the incoming particles)
    */
-  Action(const ParticleList &in_part, float time);
+  Action(const ParticleList &in_part, double time);
 
   Action(const ParticleData &in_part, const ParticleData &out_part,
-         float time, ProcessType type)
+         double time, ProcessType type)
         : incoming_particles_({in_part}),
           outgoing_particles_({out_part}),
           time_of_execution_(time+in_part.position().x0()),
@@ -158,7 +158,7 @@ class Action {
    * Return the time at which the action is supposed to be performed
    * (absolute time in the lab frame in fm/c).
    */
-  float time_of_execution() const { return time_of_execution_; }
+  double time_of_execution() const { return time_of_execution_; }
 
   /** Check various conservation laws.
    *
@@ -191,7 +191,7 @@ class Action {
   /**
    * Time at which the action is supposed to be performed
    * (absolute time in the lab frame in fm/c). */
-  const float time_of_execution_;
+  const double time_of_execution_;
   /** type of process */
   ProcessType process_type_;
 
