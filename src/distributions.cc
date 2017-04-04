@@ -54,17 +54,23 @@ double density_integrand_mass(const double energy, const double momentum_sqr,
   return momentum_sqr * std::sqrt(momentum_sqr)* exp(-energy / temperature);
 }
 
-/* density integrand - 1M_IC massless particles, see expan paper*/
+/* density integrand - 1M_IC massless particles for expanding metric initialization,
+ * see \iref{Bazow:2016oky}*/
 double density_integrand_1M_IC(const double energy, const double momentum_sqr,
 			const double temperature) {
-  return ((3.0/20.0) * (momentum_sqr/(temperature*temperature)) - (6.0/5.0) * (energy/temperature) + (14.0/5.0))*exp(-energy / temperature)*momentum_sqr;
+  return ((3.0/20.0) * (momentum_sqr/(temperature*temperature)) - (6.0/5.0) *
+    (energy/temperature) + (14.0/5.0))*exp(-energy / temperature)*momentum_sqr;
 }
 
-/* density integrand - 2M_IC massless particles, see expan paper */
+/* density integrand - 2M_IC massless particles for expanding metric initialization,
+ * see \iref{Bazow:2016oky}*/
 double density_integrand_2M_IC(const double energy, const double momentum_sqr,
 			const double temperature) {
-  return (0.75 + 0.125 * (momentum_sqr / (temperature * temperature)) - (1.0/30.0)*(momentum_sqr * energy / (temperature * temperature * temperature)) + 
-	(1.0 / 480.0)*(momentum_sqr * momentum_sqr / (temperature * temperature *temperature * temperature)))*exp(-energy / temperature)*momentum_sqr;
+  return (0.75 + 0.125 * (momentum_sqr / (temperature * temperature)) -
+         (1.0/30.0) * (momentum_sqr * energy / (temperature * temperature * temperature)) + 
+         (1.0/480.0) * (momentum_sqr * momentum_sqr/
+         (temperature * temperature * temperature * temperature)))
+         *exp(-energy/temperature) * momentum_sqr;
 }
 
 /* General Juttner distribution
