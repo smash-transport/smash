@@ -144,6 +144,10 @@ bool ScatterActionPhoton::is_photon_reaction(const ParticleList &in) {
   }
 }
 
+// this is where particles are defined independently whether their charge
+// is possitive or negative. So probably, additional constants need to be 
+// added in order to account for all the possible charge combinations.
+
 
 CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
   CollisionBranchList process_list;
