@@ -95,7 +95,7 @@ class IsoParticleType {
   /**
    * Returns the IsoParticleType pointer for the given \p name.
    * If the particle type is not found, an invalid pointer is returned.
-   * You can convert the pointer to a bool to check whether is is valid.
+   * You can convert the pointer to a bool to check whether it is valid.
    *
    * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
    */
