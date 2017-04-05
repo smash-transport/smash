@@ -266,6 +266,12 @@ void Experiment<Modus>::create_output(const char * name,
  * true - force all resonances to decay after last timestep \n
  * false - don't force decays (final output can contain resonances)
  *
+ * \key Metric_Type (ExpansionMode, optional, default = NoExpansion): \n
+ * NoExpansion - default SMASH run, with Minkowski metric \n
+ * MasslessFRW - FRW expansion going as t^(1/2)
+ * MassiveFRW - FRW expansion going as t^(2/3)
+ * Exponential - FRW expansion going as e^(t/2)
+ *
  * \subpage pauliblocker
  */
 template <typename Modus>

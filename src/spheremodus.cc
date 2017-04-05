@@ -63,7 +63,9 @@ SphereModus::SphereModus(Configuration modus_config,
       sphere_temperature_(modus_config.take({"Sphere", "Sphere_Temperature"})),
       start_time_(modus_config.take({"Sphere", "Start_Time"})),
       init_multipl_(modus_config.take({"Sphere", "Init_Multiplicities"}).
-                                        convert_for(init_multipl_)) {
+                                        convert_for(init_multipl_)),
+      init_distr_(modus_config.take({"Sphere", "Initial_Condition"},
+                                        SphereInitialCondition::ThermalMomenta)) {
 }
 
 /* console output on startup of sphere specific parameters */

@@ -60,6 +60,8 @@ class SphereModus : public ModusDefault {
   const float start_time_ = 0.0f;
   /// particle multiplicities at initialization
   const std::map<PdgCode, int> init_multipl_;
+  /// Initialization scheme for momenta in the sphere; used for expanding metric setup
+  const SphereInitialCondition init_distr_;
   /**\ingroup logging
    * Writes the initial state for the Sphere to the output stream.
    */

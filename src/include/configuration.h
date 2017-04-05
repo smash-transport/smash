@@ -351,6 +351,29 @@ class Configuration {
           "\" should be \"thermal momenta\" or \"peaked momenta\".");
     }
 
+    operator SphereInitialCondition() const {
+      const std::string s = operator std::string();
+      if (s == "thermal") {
+        return SphereInitialCondition::ThermalMomenta;
+      }
+      if (s == "IC_ES") {
+        return SphereInitialCondition::IC_ES;
+      }
+      if (s == "IC_1M") {
+        return SphereInitialCondition::IC_1M;
+      }
+      if (s == "IC_2M") {
+        return SphereInitialCondition::IC_2M;
+      }
+      if (s == "IC_Massive") {
+        return SphereInitialCondition::IC_Massive;
+      }
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) +
+          "\" should be \"thermal\", \"IC_ES\", \"IC_1M\", \"IC_2M\" or" +
+          "\"IC_Massive\"."); 
+    }
+
     operator Sampling() const {
       const std::string s = operator std::string();
       if (s == "quadratic") {
