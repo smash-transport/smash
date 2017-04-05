@@ -86,7 +86,15 @@ double density_integrand_2M_IC(const double energy, const double momentum_sqr,
  * \fpPrecision Why \c double?
  */
 double sample_momenta(const double temperature, const double mass);
-double sample_momenta_expan(const double temperature, const double mass);
+/* Similar to sample_momenta, but returns non-equilibrium distribution
+ * \f[f=pe^{-\frac{\sqrt{m^2+p^2}}{T_0}}\f] */
+double sample_momenta_non_eq_mass(const double temperature, const double mass);
+/* Similar to sample_momenta, but returns non-equilibrium distribution
+ * IC_1M from \iref{Bazow:2016oky} */
+double sample_momenta_IC_1M(const double temperature, const double mass);
+/* Similar to sample_momenta, but returns non-equilibrium distribution
+ * IC_2M from \iref{Bazow:2016oky} */
+double sample_momenta_IC_2M(const double temperature, const double mass);
 
 
 
@@ -130,7 +138,7 @@ double juttner_distribution_func(const double momentum_radial,
 double woods_saxon_dist_func(const double r,  const double radius,
         const double diffusion);
 
-double sample_momenta_ES_IC (const double temperature);
+double sample_momenta_IC_ES(const double temperature);
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_DISTRIBUTIONS_H_

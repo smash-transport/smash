@@ -96,7 +96,32 @@ float SphereModus::initial_conditions(Particles *particles,
     Angles phitheta;
     /* thermal momentum according Maxwell-Boltzmann distribution */
     double momentum_radial;
-   /*assign momentum_radial by requested distribution*/
+    /*assign momentum_radial according to requested distribution*/
+    switch (init_distr_) {
+      case (SphereInitialCondition::ThermalMomenta):
+        momentum_radial = sample_momenta_from_thermal(this->sphere_temperature_,
+                                                      data.pole_mass());
+        break;
+      case (SphereInitialCondition::IC_ES):
+        momentum_radial = sample_momenta_IC_ES(this->sphere_temperature_);
+        break;
+      case (SphereInitialCondition::IC_1M):
+        momentum_radial = sample_momenta_IC_1M(this->sphere_temperature_,
+                                                      data.pole_mass());
+        break;
+      case (SphereInitialCondition::IC_2M):
+        momentum_radial = sample_momenta_IC_2M(this->sphere_temperature_,
+                                                      data.pole_mass());
+        break;
+      case (SphereInitialCondition::IC_Massive):
+        momentum_radial = sample_momenta_non_eq_mass(this->sphere_temperature_,
+                                                      data.pole_mass());
+        break;
+      default:
+        momentum_radial = sample_momenta_from_thermal(this->sphere_temperature_,
+                                                      data.pole_mass());
+        break;
+    }
     momentum_radial = sample_momenta_from_thermal(this->sphere_temperature_,
                                                 data.pole_mass());
    // momentum_radial = sample_momenta_ES_IC(this->sphere_temperature_);

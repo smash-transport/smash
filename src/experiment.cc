@@ -272,6 +272,11 @@ void Experiment<Modus>::create_output(const char * name,
  * MassiveFRW - FRW expansion going as t^(2/3)
  * Exponential - FRW expansion going as e^(t/2)
  *
+ * \key Expansion_Rate (double, optional, default = 0.1) \n
+ * Corresponds to the speed of expansion of the universe in non minkovski metrics \n
+ * This value is useless if NoExpansion is selected; it corresponds to \n
+ * \f$b_r/l_0\f$ if the metric type is MasslessFRW or MassiveFRW, and to \n
+ * the parameter b in the Exponential expansion where \f$a(t) ~ e^{bt/2}\f$
  * \subpage pauliblocker
  */
 template <typename Modus>
