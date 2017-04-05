@@ -39,8 +39,8 @@ Nucleus::Nucleus(Configuration &config, int nTest) {
   }
 }
 
-float Nucleus::mass() const {
-  float total_mass = 0.f;
+double Nucleus::mass() const {
+  double total_mass = 0.;
   for (auto i = cbegin(); i != cend(); i++) {
     total_mass += i->momentum().abs();
   }
@@ -329,15 +329,13 @@ void Nucleus::set_parameters_from_config(Configuration &config) {
 }
 
 void Nucleus::generate_fermi_momenta() {
-  double r, rho, p;
   const int N_n = std::count_if(begin(), end(),
-                  [](const ParticleData i) {return i.pdgcode() == 0x2112;});
+                  [](const ParticleData i) {return i.pdgcode() == pdg::n;});
   const int N_p = std::count_if(begin(), end(),
-                  [](const ParticleData i) {return i.pdgcode() == 0x2212;});
+                  [](const ParticleData i) {return i.pdgcode() == pdg::p;});
   const FourVector nucleus_center = center();
   const int A = N_n + N_p;
-  const double pi2_3 = 3.0 * M_PI * M_PI;
-  Angles phitheta;
+  constexpr double pi2_3 = 3.0 * M_PI * M_PI;
   const auto &log = logger<LogArea::Nucleus>();
 
   log.debug() << N_n << " neutrons, " << N_p << " protons.";
@@ -345,23 +343,24 @@ void Nucleus::generate_fermi_momenta() {
   ThreeVector ptot = ThreeVector(0.0, 0.0, 0.0);
   for (auto i = begin(); i != end(); i++) {
     // Only protons and neutrons get Fermi momenta
-    if (i->pdgcode() != 0x2212 && i->pdgcode() != 0x2112) {
+    if (i->pdgcode() != pdg::p && i->pdgcode() != pdg::n) {
       if (i->is_baryon()) {
         log.error() << "No rule to calculate Fermi momentum " <<
                        "for particle " << i->pdgcode();
       }
       continue;
     }
-    r = (i->position() - nucleus_center).abs3();
-    rho = nuclear_density
+    const double r = (i->position() - nucleus_center).abs3();
+    double rho = nuclear_density
           / (std::exp((r - nuclear_radius_)/diffusiveness_) + 1.);
-    if (i->pdgcode() == 0x2212) {  // proton
+    if (i->pdgcode() == pdg::p) {
       rho = rho * N_p / A;
     }
-    if (i->pdgcode() == 0x2112) {  // neutron
+    if (i->pdgcode() == pdg::n) {
       rho = rho * N_n / A;
     }
-    p = hbarc * std::pow(pi2_3 * rho * Random::uniform(0.0, 1.0), 1.0/3.0);
+    const double p = hbarc * std::pow(pi2_3 * rho * Random::uniform(0.0, 1.0), 1.0/3.0);
+    Angles phitheta;
     phitheta.distribute_isotropically();
     const ThreeVector ith_3momentum = phitheta.threevec() * p;
     ptot += ith_3momentum;
@@ -378,11 +377,11 @@ void Nucleus::generate_fermi_momenta() {
     assert(ptot.x1() == 0.0 && ptot.x2() == 0.0 && ptot.x3() == 0.0);
     #pragma GCC diagnostic pop
   } else {
-    // Make sure that total momentum is zero - redistribute ptot equally among
-    // protons and neutrons
+    // Make sure that total momentum is zero - redistribute ptot equally
+    // among protons and neutrons
     const ThreeVector centralizer = ptot/A;
     for (auto i = begin(); i != end(); i++) {
-      if (i->pdgcode() == 0x2212 || i->pdgcode() == 0x2112) {
+      if (i->pdgcode() == pdg::p || i->pdgcode() == pdg::n) {
         i->set_4momentum(i->pole_mass(),
                          i->momentum().threevec() - centralizer);
       }
@@ -390,7 +389,7 @@ void Nucleus::generate_fermi_momenta() {
   }
 }
 
-void Nucleus::boost(double beta_scalar) {
+void Nucleus::boost(double beta_scalar, FermiMotion fermi_motion_) {
   double beta_squared = beta_scalar * beta_scalar;
   double one_over_gamma = std::sqrt(1.0 - beta_squared);
   double gamma = 1.0/one_over_gamma;
@@ -417,6 +416,13 @@ void Nucleus::boost(double beta_scalar) {
     ThreeVector mom_i = i->momentum().threevec();
     i->set_4momentum(i->pole_mass(), mom_i.x1(), mom_i.x2(),
                      gamma*(beta_scalar*i->pole_mass() + mom_i.x3()));
+    // Create a vector that contains only the boosted initial
+    // beam momentum - necessary for the propagation of particles
+    // in the FermiMotion::Frozen case.
+    if (fermi_motion_ == FermiMotion::Frozen) {
+      i->set_beam4momentum(i->pole_mass(), 0.0, 0.0,
+                           gamma*(beta_scalar*i->pole_mass()));
+    }
   }
 }
 

@@ -85,17 +85,12 @@ void setup_default_float_traps() {
       log.warn("Failed to setup trap on overflow.");
     }
 
-    // the result of the earlier floating-point operation was subnormal with a
-    // loss of precision:
-    if (!enable_float_traps(FE_UNDERFLOW)) {
-      log.warn("Failed to setup trap on underflow.");
-    }
-
-    // there's also FE_INEXACT, but this traps if "rounding was necessary to
-    // store
-    // the result of an earlier floating-point operation". This is common and
-    // not
-    // really an error condition.
+    // There's also FE_UNDERFLOW, where the result of the earlier
+    // floating-point operation was subnormal with a loss of precision.
+    // We do not consider this an error by default.
+    // Furthermore, there's FE_INEXACT, but this traps if "rounding was
+    // necessary to store the result of an earlier floating-point
+    // operation". This is common and not really an error condition.
   }
 
   // Install the signal handler if we have the functionality.

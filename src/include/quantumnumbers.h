@@ -119,6 +119,7 @@ class QuantumNumbers {
   FourVector momentum() const {
     return momentum_;
   }
+
   /** returns the total charge \f$Q = \sum_{i \in \mbox{particles}}
    * q_i\f$
    *
@@ -235,7 +236,7 @@ class QuantumNumbers {
    * Deviation in Charge:
    *  164 vs. 163
    * Deviation in Isospin 3:
-   *  -88 vs -90
+   *  -88 vs. -90
    * \endcode
    *
    */
@@ -247,6 +248,7 @@ class QuantumNumbers {
    * \see QuantumNumbers::momentum()
    */
   FourVector momentum_;
+
   /** total charge
    *
    * \see QuantumNumbers::charge()

@@ -15,6 +15,7 @@
 #include "include/isoparticletype.h"
 #include "include/kinematics.h"
 #include "include/parametrizations.h"
+#include "include/pow.h"
 
 namespace Smash {
 
@@ -58,7 +59,7 @@ float ScatterActionNucleonNucleon::elastic_parametrization() {
  */
 static float Cugnon_bpp(float plab) {
   if (plab < 2.) {
-    float p8 = std::pow(plab, 8);
+    float p8 = pow_int(plab, 8);
     return 5.5*p8 / (7.7+p8);
   } else {
     return std::min(9.0, 5.334 + 0.67*(plab-2.));
@@ -95,84 +96,65 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_cross_sections() {
   return process_list;
 }
 
-
 CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
                             const ParticleType &type_particle_a,
                             const ParticleType &type_particle_b) {
-  const auto &log = logger<LogArea::ScatterAction>();
-  CollisionBranchList process_list;
-  const double s = mandelstam_s();
+  CollisionBranchList process_list, channel_list;
   const double sqrts = sqrt_s();
 
+  /* Find whether colliding particles are nucleons or anti-nucleons;
+   * adjust lists of produced particles. */
+  const ParticleTypePtrList& nuc_or_anti_nuc =
+    type_particle_a.antiparticle_sign() == -1 &&
+    type_particle_b.antiparticle_sign() == -1 ?
+    ParticleType::list_anti_nucleons() :
+    ParticleType::list_nucleons();
+  const ParticleTypePtrList& delta_or_anti_delta =
+    type_particle_a.antiparticle_sign() == -1 &&
+    type_particle_b.antiparticle_sign() == -1 ?
+    ParticleType::list_anti_Deltas() :
+    ParticleType::list_Deltas();
   /* First: Find N N → N R channels. */
-  /* Loop over all baryon resonances. */
-  for (ParticleTypePtr type_resonance :
-       ParticleType::list_baryon_resonances()) {
-    /* Loop over second particle (nucleon). */
-    for (ParticleTypePtr second_type : ParticleType::list_nucleons()) {
-      /* Check for charge conservation. */
-      if (type_resonance->charge() + second_type->charge() !=
-          type_particle_a.charge() + type_particle_b.charge()) {
-        continue;
-      }
-
-      // loop over total isospin
-      for (const int twoI : I_tot_range(type_particle_a, type_particle_b)) {
-        const float isospin_factor = isospin_clebsch_gordan_sqr_2to2(
-                                          type_particle_a, type_particle_b,
-                                          *type_resonance, *second_type, twoI);
-        /* If Clebsch-Gordan coefficient is zero, don't bother with the rest. */
-        if (std::abs(isospin_factor) < really_small) {
-          continue;
-        }
-
-        /* Integration limits. */
-        const double lower_limit = type_resonance->minimum_mass();
-        const double upper_limit = sqrts - second_type->mass();
-        /* Check the available energy (requiring it to be a little above the
-         * threshold, because the integration will not work if it's too close). */
-        if (upper_limit - lower_limit < 1E-3) {
-          continue;
-        }
-
-        /* Calculate matrix element. */
-        const float matrix_element = nn_to_resonance_matrix_element(sqrts,
-                                          *type_resonance, *second_type, twoI);
-        if (matrix_element <= 0.) {
-          continue;
-        }
-
-        /* Calculate resonance production cross section
-         * using the Breit-Wigner distribution as probability amplitude.
-         * Integrate over the allowed resonance mass range. */
-        const double resonance_integral =
-                      type_resonance->iso_multiplet()->get_integral_NR(sqrts);
-
-        /** Cross section for 2->2 process with one resonance in final state.
-         * Based on Eq. (46) in \iref{Weil:2013mya}. */
-        const float spin_factor = (type_resonance->spin() + 1)
-                                * (second_type->spin() + 1);
-        const float xsection = isospin_factor * spin_factor * matrix_element
-                             * resonance_integral / (s * cm_momentum());
-
-        if (xsection > really_small) {
-          process_list.push_back(make_unique<CollisionBranch>
-                                (*type_resonance, *second_type, xsection,
-                                  ProcessType::TwoToTwo));
-          log.debug("Found 2->2 creation process for resonance ",
-                    *type_resonance);
-          log.debug("2->2 with original particles: ",
-                    type_particle_a, type_particle_b);
-        }
-      }
-    }
-  }
+  channel_list = find_xsection_from_type(type_particle_a, type_particle_b,
+      ParticleType::list_baryon_resonances(), nuc_or_anti_nuc,
+      [&sqrts](const ParticleType &type_res_1, const ParticleType&){
+          return type_res_1.iso_multiplet()->get_integral_NR(sqrts);
+      });
+  process_list.reserve(process_list.size() + channel_list.size());
+  std::move(channel_list.begin(), channel_list.end(),
+      std::inserter(process_list, process_list.end()));
+  channel_list.clear();
 
   /* Second: Find N N → Δ R channels. */
-  /* Loop over all baryon resonances. */
-  for (ParticleTypePtr type_res_1 : ParticleType::list_baryon_resonances()) {
-    /* Loop over second particle (Δ). */
-    for (ParticleTypePtr type_res_2 : ParticleType::list_Deltas()) {
+  channel_list = find_xsection_from_type(type_particle_a, type_particle_b,
+    ParticleType::list_baryon_resonances(), delta_or_anti_delta,
+    [&sqrts](const ParticleType &type_res_1, const ParticleType &type_res_2){
+      return type_res_1.iso_multiplet()->get_integral_RR(type_res_2, sqrts);
+    });
+  process_list.reserve(process_list.size() + channel_list.size());
+  std::move(channel_list.begin(), channel_list.end(),
+      std::inserter(process_list, process_list.end()));
+  channel_list.clear();
+
+  return process_list;
+}
+
+template<class IntegrationMethod>
+CollisionBranchList ScatterActionNucleonNucleon::find_xsection_from_type(
+                            const ParticleType &type_particle_a,
+                            const ParticleType &type_particle_b,
+                            const ParticleTypePtrList &list_res_1,
+                            const ParticleTypePtrList &list_res_2,
+                            const IntegrationMethod integrator) {
+  const auto &log = logger<LogArea::ScatterAction>();
+  CollisionBranchList channel_list;
+  const double s = mandelstam_s();
+  const double sqrts = sqrt_s();
+  
+  /* Loop over specified first resonance list */
+  for (ParticleTypePtr type_res_1 : list_res_1) {
+    /* Loop over specified second resonance list */
+    for (ParticleTypePtr type_res_2 : list_res_2) {
       /* Check for charge conservation. */
       if (type_res_1->charge() + type_res_2->charge() !=
           type_particle_a.charge() + type_particle_b.charge()) {
@@ -182,7 +164,8 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
       // loop over total isospin
       for (const int twoI : I_tot_range(type_particle_a, type_particle_b)) {
         const float isospin_factor = isospin_clebsch_gordan_sqr_2to2(
-              type_particle_a, type_particle_b, *type_res_1, *type_res_2, twoI);
+                                          type_particle_a, type_particle_b,
+                                          *type_res_1, *type_res_2, twoI);
         /* If Clebsch-Gordan coefficient is zero, don't bother with the rest. */
         if (std::abs(isospin_factor) < really_small) {
           continue;
@@ -190,7 +173,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
 
         /* Integration limits. */
         const double lower_limit = type_res_1->minimum_mass();
-        const double upper_limit = sqrts - type_res_2->minimum_mass();
+        const double upper_limit = sqrts - type_res_2->mass();
         /* Check the available energy (requiring it to be a little above the
          * threshold, because the integration will not work if it's too close). */
         if (upper_limit - lower_limit < 1E-3) {
@@ -199,7 +182,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
 
         /* Calculate matrix element. */
         const float matrix_element = nn_to_resonance_matrix_element(sqrts,
-                                                *type_res_1, *type_res_2, twoI);
+                                     *type_res_1, *type_res_2, twoI);
         if (matrix_element <= 0.) {
           continue;
         }
@@ -207,36 +190,40 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel(
         /* Calculate resonance production cross section
          * using the Breit-Wigner distribution as probability amplitude.
          * Integrate over the allowed resonance mass range. */
+        const double resonance_integral = integrator(*type_res_1, *type_res_2);
 
-        const double resonance_integral =
-                      type_res_1->iso_multiplet()->get_integral_DR(sqrts);
-
-        /** Cross section for 2->2 process with two resonances in final state.
-         * Based on Eq. (51) in \iref{Weil:2013mya}. */
+        /** Cross section for 2->2 process with 1/2 resonance(s) in final state.
+         * Based on Eq. (46) in \iref{Weil:2013mya} and Eq. (3.29) in
+         * \iref{Bass:1998ca} */
         const float spin_factor = (type_res_1->spin() + 1)
                                 * (type_res_2->spin() + 1);
         const float xsection = isospin_factor * spin_factor * matrix_element
                              * resonance_integral / (s * cm_momentum());
 
         if (xsection > really_small) {
-          process_list.push_back(make_unique<CollisionBranch>
+          channel_list.push_back(make_unique<CollisionBranch>
                                 (*type_res_1, *type_res_2, xsection,
-                                  ProcessType::TwoToTwo));
-          log.debug("Found 2->2 creation process with two resonances: ",
-                    *type_res_1, " ", *type_res_2);
+                                ProcessType::TwoToTwo));
+          log.debug("Found 2->2 creation process for resonance ",
+                    type_res_1, ", ", type_res_2);
           log.debug("2->2 with original particles: ",
                     type_particle_a, type_particle_b);
         }
       }
     }
   }
-
-  return process_list;
+  return channel_list;
 }
-
 
 void ScatterActionNucleonNucleon::sample_angles(
                                   std::pair<double, double> masses) {
+  if (process_type_ == ProcessType::String) {
+      // We potentially have more than two particles, so the following angular
+      // distributions don't work. Instead we just keep the angular
+      // distributions generated by string fragmentation.
+      return;
+  }
+  assert(outgoing_particles_.size() == 2);
   const auto &log = logger<LogArea::ScatterAction>();
 
   ParticleData *p_a = &outgoing_particles_[0];
@@ -251,8 +238,9 @@ void ScatterActionNucleonNucleon::sample_angles(
       = get_t_range<double>(cms_energy, nucleon_mass, nucleon_mass,
                             mass_a, mass_b);
   Angles phitheta;
-  if (p_a->pdgcode().is_nucleon() &&
-      p_b->pdgcode().is_nucleon() && !isotropic_) {
+  if (p_a->pdgcode().is_nucleon() && p_b->pdgcode().is_nucleon() &&
+      p_a->pdgcode().antiparticle_sign() ==
+      p_b->pdgcode().antiparticle_sign() && !isotropic_) {
     /** NN → NN: Choose angular distribution according to Cugnon parametrization,
      * see \iref{Cugnon:1996kh}. */
     double bb, a, plab = plab_from_s(mandelstam_s());
@@ -272,8 +260,9 @@ void ScatterActionNucleonNucleon::sample_angles(
     // determine scattering angles in center-of-mass frame
     phitheta = Angles(2.*M_PI*Random::canonical(),
                       1. - 2.*(t-t_range[0])/(t_range[1]-t_range[0]));
-  } else if (p_a->pdgcode().is_Delta() && p_b->pdgcode().is_nucleon()
-             && !isotropic_) {
+  } else if (p_a->pdgcode().is_Delta() && p_b->pdgcode().is_nucleon() &&
+             p_a->pdgcode().antiparticle_sign() ==
+             p_b->pdgcode().antiparticle_sign() && !isotropic_) {
     /** NN → NΔ: Sample scattering angles in center-of-mass frame from an
      * anisotropic angular distribution, using the same distribution as for
      * elastic pp scattering, as suggested in \iref{Cugnon:1996kh}. */

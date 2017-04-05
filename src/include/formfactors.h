@@ -9,6 +9,7 @@
 #define SRC_INCLUDE_FORMFACTORS_H_
 
 #include "constants.h"
+#include "pdgcode_constants.h"
 
 namespace Smash {
 
@@ -79,8 +80,8 @@ inline float post_ff_sqr(float m, float M0, float srts0, float L) {
   const auto L4 = L*L*L*L;
   const auto M2 = M0*M0;
   const auto s0 = srts0*srts0;
-  const auto sminus = (s0-M2)/2.;
-  const auto splus = m*m - (s0+M2)/2.;
+  const auto sminus = (s0-M2)*0.5;
+  const auto splus = m*m - (s0+M2)*0.5;
   const auto FF = (L4 + sminus*sminus) / (L4 + splus*splus);
   return FF*FF;
 }
@@ -94,9 +95,9 @@ inline float post_ff_sqr(float m, float M0, float srts0, float L) {
  * fitted to NA60 data, see \iref{Arnaldi:2009aa}. */
 inline float em_form_factor_ps(PdgCode pdg, float mass) {
   switch (pdg.code()) {
-  case 0x111:  /* π⁰ */
+  case pdg::pi_z:
     return 1. + 5.5*mass*mass;
-  case 0x221:  /* η */ {
+  case pdg::eta: {
     const float lambda_eta = 0.716;
     const float m_over_eta = mass / lambda_eta;
     return 1. / (1. - m_over_eta*m_over_eta);
@@ -111,7 +112,7 @@ inline float em_form_factor_ps(PdgCode pdg, float mass) {
  * For the ω see \iref{Bratkovskaya:1996qe}. */
 inline float em_form_factor_sqr_vec(PdgCode pdg, float mass) {
   switch (pdg.code()) {
-  case 0x223:  /* ω */ {
+  case pdg::omega: {
     constexpr float lambda = 0.65;
     constexpr float gamma = 0.075;
     constexpr float lambda_sqr = lambda * lambda;

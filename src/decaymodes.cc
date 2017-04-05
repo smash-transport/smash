@@ -28,14 +28,14 @@ std::vector<DecayTypePtr> *all_decay_types = nullptr;
 void DecayModes::add_mode(ParticleTypePtr mother, float ratio, int L,
                           ParticleTypePtrList particle_types) {
   DecayType *type = get_decay_type(mother, particle_types, L);
-  // check if mode already exists: if yes, add weight
+  // Check if mode already exists: if yes, add weight.
   for (auto &mode : decay_modes_) {
     if (type == &mode->type()) {
       mode->set_weight(mode->weight()+ratio);
       return;
     }
   }
-  // add new mode
+  // Add new mode.
   decay_modes_.push_back(make_unique<DecayBranch>(*type, ratio));
 }
 
@@ -185,6 +185,9 @@ void DecayModes::load_decaymodes(const std::string &input) {
     }
   };
 
+  // Track the line number for better error messages.
+  // FIXME: At the moment this does not include comments and empty lines.
+  uint64_t linenumber = 1;
   for (const Line &line : line_parser(input)) {
     const auto trimmed = trim(line.text);
     assert(!trimmed.empty());  // trim(line.text) is never empty,
@@ -203,7 +206,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
         PdgCode pdgcode = mother_states[m]->pdgcode();
         if (!decaymodes[find_offset(pdgcode)].is_empty()) {
           throw LoadFailure("Duplicate entry for " + name +
-                            " in decaymodes.txt");
+                            " in decaymodes.txt:" + std::to_string(linenumber));
         }
       }
     } else {
@@ -227,8 +230,18 @@ void DecayModes::load_decaymodes(const std::string &input) {
       bool multi = true;  // does the decay channel refer to whole multiplets?
       while (lineinput) {
         decay_particles.emplace_back(name);
-        multi &= IsoParticleType::exists(name)
-              && IsoParticleType::find(name).get_states()[0]->is_hadron();
+        const auto isotype = IsoParticleType::try_find(name);
+        const bool is_multiplet = isotype;
+        const bool is_state = ParticleType::exists(name);
+        if (!is_multiplet && !is_state) {
+          throw InvalidDecay("Daughter " + name
+              + " is neither an isospin multiplet nor a particle."
+              + " (line " + std::to_string(linenumber)
+              + ": \"" + trimmed + "\")");
+        }
+        const bool is_hadronic_multiplet = is_multiplet
+            && isotype->get_states()[0]->is_hadron();
+        multi &= is_hadronic_multiplet;
         lineinput >> name;
       }
       if (multi) {
@@ -241,6 +254,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
             const IsoParticleType &isotype_daughter_2 =
                 IsoParticleType::find(decay_particles[1]);
             // loop through multiplets
+            bool forbidden_by_isospin = true;
             for (size_t m = 0; m < mother_states.size(); m++) {
               for (const auto &daughter1 : isotype_daughter_1.get_states()) {
                 for (const auto &daughter2 : isotype_daughter_2.get_states()) {
@@ -256,9 +270,19 @@ void DecayModes::load_decaymodes(const std::string &input) {
                     decay_modes_to_add[m].add_mode(mother_states[m],
                                                    ratio * cg_sqr, L,
                                                    {daughter1, daughter2});
+                    forbidden_by_isospin = false;
                   }
                 }
               }
+            }
+            if (forbidden_by_isospin) {
+              std::stringstream s;
+              s << ",\nwhere isospin mother: " << isotype_mother->isospin()
+                << ", daughters: " << isotype_daughter_1.isospin()
+                << " " << isotype_daughter_2.isospin();
+              throw InvalidDecay(isotype_mother->name() +
+                " decay mode is forbidden by isospin: \"" + line.text + "\"" + s.str()
+              );
             }
             break;
           }
@@ -297,7 +321,8 @@ void DecayModes::load_decaymodes(const std::string &input) {
             throw std::runtime_error(
                 "References to isospin multiplets only "
                 "allowed in two-body or three-body decays: " +
-                line.text);
+                line.text + " (line " + std::to_string(linenumber) + ": \""
+                + trimmed + "\")");
         }
       } else {
         /* References to specific states, not multiplets:
@@ -305,7 +330,13 @@ void DecayModes::load_decaymodes(const std::string &input) {
         ParticleTypePtrList types;
         int charge = 0;
         for (auto part : decay_particles) {
-          types.push_back(IsoParticleType::find_state(part));
+          try {
+            types.push_back(IsoParticleType::find_state(part));
+          } catch (std::runtime_error& e) {
+            throw std::runtime_error(std::string() + e.what()
+                    + " (line " + std::to_string(linenumber) + ": \""
+                    + trimmed + "\")");
+          }
           charge += types.back()->charge();
         }
         bool no_decays = true;
@@ -320,12 +351,36 @@ void DecayModes::load_decaymodes(const std::string &input) {
         if (no_decays) {
           throw InvalidDecay(isotype_mother->name() +
                              " decay mode violates charge conservation: \"" +
-                             line.text + "\"");
+                             line.text + "\" (line " + std::to_string(linenumber)
+                             + ": \"" + trimmed + "\"");
         }
       }
     }
+    linenumber++;
   }
   end_of_decaymodes();
+
+  // Check whether the mother's pole mass is strictly larger than the minimal
+  // masses of the daughters. This is required by the Manley-Saleski ansatz.
+  const auto& particles = ParticleType::list_all();
+  for (const auto& mother : particles) {
+    if (mother.is_stable()) {
+      continue;
+    }
+    const auto& decays = mother.decay_modes().decay_mode_list();
+    for (const auto& decay : decays) {
+      if (mother.mass() <= decay->threshold()) {
+        std::stringstream s;
+        s << mother.name() << " →  ";
+        for (const auto p : decay->particle_types()) {
+          s << p->name();
+        }
+        s << " with " << mother.mass() << " ≤ " << decay->threshold();
+        throw InvalidDecay("For all decays, the mass of daughters must be smaller than the mother's pole mass.\n"
+                "This was violated by the following decay: " + s.str());
+      }
+    }
+  }
 }
 
 }  // namespace Smash

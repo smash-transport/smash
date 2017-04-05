@@ -11,10 +11,68 @@
 #define SRC_INCLUDE_SCATTERACTION_H_
 
 #include "action.h"
-
+#include "kinematics.h"
+#include "cxx14compat.h"
+#include "isoparticletype.h"
 
 namespace Smash {
 
+/**
+ * Calculate the detailed balance factor R such that
+ * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
+ * where $A, B, C, D$ are stable.
+ */
+inline float detailed_balance_factor_stable(float s,
+               const ParticleType& particle_a, const ParticleType& particle_b,
+               const ParticleType& particle_c, const ParticleType& particle_d) {
+    float spin_factor = (particle_c.spin() + 1)*(particle_d.spin() + 1);
+    spin_factor /= (particle_a.spin() + 1)*(particle_b.spin() + 1);
+    float symmetry_factor = (1 + (particle_a == particle_b));
+    symmetry_factor /= (1 + (particle_c == particle_d));
+    const float momentum_factor = pCM_sqr_from_s(s, particle_c.mass(), particle_d.mass())
+        / pCM_sqr_from_s(s, particle_a.mass(), particle_b.mass());
+    return spin_factor * symmetry_factor * momentum_factor;
+}
+
+/**
+ * Calculate the detailed balance factor R such that
+ * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
+ * where $A$ is unstable, $B$ is a kaon and $C, D$ are stable.
+ */
+inline float detailed_balance_factor_RK(float sqrts, float pcm,
+               const ParticleType& particle_a, const ParticleType& particle_b,
+               const ParticleType& particle_c, const ParticleType& particle_d) {
+    assert(!particle_a.is_stable());
+    assert(particle_b.pdgcode().is_kaon());
+    float spin_factor = (particle_c.spin() + 1)*(particle_d.spin() + 1);
+    spin_factor /= (particle_a.spin() + 1)*(particle_b.spin() + 1);
+    float symmetry_factor = (1 + (particle_a == particle_b));
+    symmetry_factor /= (1 + (particle_c == particle_d));
+    const float momentum_factor = pCM_sqr(sqrts, particle_c.mass(), particle_d.mass())
+        / (pcm * particle_a.iso_multiplet()->get_integral_RK(sqrts));
+    return spin_factor * symmetry_factor * momentum_factor;
+}
+
+/**
+ * Add a 2-to-2 channel to a collision branch list given a cross section.
+ *
+ * The cross section is only calculated if there is enough energy for the process.
+ * If the cross section is small, the branch is not added.
+ */
+template <typename F>
+inline void add_channel(CollisionBranchList &process_list, F get_xsection,
+                        float sqrts, const ParticleType &type_a,
+                                     const ParticleType &type_b) {
+  const float sqrt_s_min = type_a.minimum_mass() + type_b.minimum_mass();
+  if (sqrts <= sqrt_s_min) {
+      return;
+  }
+  const auto xsection = get_xsection();
+  if (xsection > really_small) {
+    process_list.push_back(make_unique<CollisionBranch>(
+      type_a, type_b, xsection, ProcessType::TwoToTwo));
+  }
+}
 
 /**
  * \ingroup action
@@ -61,24 +119,23 @@ class ScatterAction : public Action {
   float raw_weight_value() const override;
 
   /** Add all possible subprocesses for this action object. */
-  void add_all_processes(float elastic_parameter,
-                         bool two_to_one, bool two_to_two, bool strings_switch);
+  virtual void add_all_processes(float elastic_parameter,
+                         bool two_to_one, bool two_to_two, double low_snn_cut,  bool strings_switch);
 
   /**
    * Determine the (parametrized) total cross section for this collision. This
    * is currently only used for calculating the string excitation cross section.
    */
-  virtual float total_cross_section() const {
-    return 0.;
-  }
+  virtual float total_cross_section() const { return 0.; }
 
   /**
    * Determine the (parametrized) elastic cross section for this collision.
    * It is zero by default, but can be overridden in the child classes.
    */
-  virtual float elastic_parametrization() {
-    return 0.;
-  }
+  virtual float elastic_parametrization() { return 0.; }
+
+  /// Returns list of possible collision channels
+  const CollisionBranchList& collision_channels() { return collision_channels_; }
 
   /**
    * Determine the elastic cross section for this collision. If elastic_par is
@@ -119,7 +176,8 @@ class ScatterAction : public Action {
   /**
    * Return the 2-to-1 resonance production cross section for a given resonance.
    *
-   * \param[in] type_resonance Type information for the resonance to be produced.
+   * \param[in] type_resonance Type information for the resonance to be
+   * produced.
    * \param[in] srts Total energy in the center-of-mass frame.
    * \param[in] cm_momentum_sqr Square of the center-of-mass momentum of the
    * two initial particles.
@@ -129,8 +187,8 @@ class ScatterAction : public Action {
    *
    * \fpPrecision Why \c double?
    */
-  double two_to_one_formation(const ParticleType &type_resonance,
-                              double srts, double cm_momentum_sqr);
+  double two_to_one_formation(const ParticleType &type_resonance, double srts,
+                              double cm_momentum_sqr);
 
   /** Find all inelastic 2->2 processes for this reaction. */
   virtual CollisionBranchList two_to_two_cross_sections() {
@@ -148,9 +206,7 @@ class ScatterAction : public Action {
     using std::invalid_argument::invalid_argument;
   };
 
-  float cross_section() const {
-    return total_cross_section_;
-  }
+  virtual float cross_section() const { return total_cross_section_; }
 
  protected:
   /** Determine the Mandelstam s variable,
@@ -177,10 +233,9 @@ class ScatterAction : public Action {
   /** Perform an elastic two-body scattering, i.e. just exchange momentum. */
   void elastic_scattering();
 
-  /** Perform the string excitation and decay via Pythia
-   */
+  /** Perform the string excitation and decay via Pythia. */
   void string_excitation();
-  
+
   /**
    * \ingroup logging
    * Writes information about this scatter action to the \p out stream.
@@ -206,7 +261,6 @@ class ScatterAction : public Action {
   /** Perform a 2->1 resonance-formation process. */
   void resonance_formation();
 };
-
 
 }  // namespace Smash
 

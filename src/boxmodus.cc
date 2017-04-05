@@ -86,12 +86,13 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
 BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
     : initial_condition_(modus_config.take({"Box", "Initial_Condition"})),
         length_(modus_config.take({"Box", "Length"})),
-   temperature_(modus_config.take({"Box", "Temperature"})),
-    start_time_(modus_config.take({"Box", "Start_Time"})),
-   use_thermal_(modus_config.take({"Box", "Use_Thermal"}, false)),
-           mub_(modus_config.take({"Box", "Baryon_Chemical_Potential"}, 0.0f)),
-           mus_(modus_config.take({"Box", "Strange_Chemical_Potential"}, 0.0f)),
-  init_multipl_(modus_config.take({"Box", "Init_Multiplicities"}).
+        temperature_(modus_config.take({"Box", "Temperature"})),
+        start_time_(modus_config.take({"Box", "Start_Time"})),
+        use_thermal_(modus_config.take({"Box", "Use_Thermal_Multiplicities"}, false)),
+        mub_(modus_config.take({"Box", "Baryon_Chemical_Potential"}, 0.0f)),
+        mus_(modus_config.take({"Box", "Strange_Chemical_Potential"}, 0.0f)),
+        init_multipl_(use_thermal_ ? std::map<PdgCode, int>() :
+                      modus_config.take({"Box", "Init_Multiplicities"}).
                                                 convert_for(init_multipl_)) {
 }
 
@@ -107,14 +108,16 @@ float BoxModus::initial_conditions(Particles *particles,
 
   /* Create NUMBER OF PARTICLES according to configuration, or thermal case */
   if (use_thermal_) {
+    const double V = length_*length_*length_;
     for (const ParticleType &ptype : ParticleType::list_all()) {
-      if (ptype.is_hadron()) {
-        int thermal_particles = length_*length_*length_*
-          HadronGasEos::partial_density(ptype, temperature_, mub_, mus_);
-        particles->create(thermal_particles*parameters.testparticles,
-                          ptype.pdgcode());
-        log.debug() << "Particle " << ptype.pdgcode()
-                    << " initial multiplicity " << thermal_particles;
+      if (HadronGasEos::is_eos_particle(ptype)) {
+        const double n = HadronGasEos::partial_density(ptype, temperature_,
+                                                       mub_, mus_);
+        const double thermal_mult = n*V*parameters.testparticles;
+        assert(thermal_mult > 0.0);
+        const int thermal_mult_int = Random::poisson(thermal_mult);
+        particles->create(thermal_mult_int, ptype.pdgcode());
+        log.debug(ptype.name(), " initial multiplicity ", thermal_mult_int);
       }
     }
     log.info() << "Initial baryon density "

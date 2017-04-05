@@ -141,6 +141,19 @@ else()
    message(WARNING "cppcheck was not found. The cppcheck test will be disabled.")
 endif()
 
+# one more linter tool: clang-tidy
+find_program(CLANGTIDY clang-tidy NAMES clang-tidy clang-tidy-3.6 clang-tidy-3.5)
+if(CLANGTIDY)
+   message(STATUS "clang-tidy found at ${CLANGTIDY}")
+   file(GLOB CLANGTIDY_FILES ${PROJECT_SOURCE_DIR}/src/*.cc)
+   add_custom_target(clang-tidy
+                     COMMAND ${CLANGTIDY} ${CLANGTIDY_FILES} "-p=${PROJECT_BINARY_DIR}"
+                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/src/
+                     COMMENT "Executing test clang-tidy")
+else()
+   message(WARNING "clang-tidy was not found. The clang-tidy test will be disabled.")
+endif()
+
 # generate git statistics, requires gitstats in the path
 find_program(GITSTATS gitstats)
 if(GITSTATS)
@@ -195,11 +208,13 @@ smash_add_unittest(mass_sampling)
 smash_add_unittest(nucleus)
 smash_add_unittest(oscar2013output)
 smash_add_unittest(oscaroutput)
+smash_add_unittest(parametrizations)
 smash_add_unittest(particledata)
 smash_add_unittest(particles)
 smash_add_unittest(particletype)
 smash_add_unittest(pauliblocking)
 smash_add_unittest(pdgcode)
+smash_add_unittest(photons)
 smash_add_unittest(potentials)
 smash_add_unittest(processbranch)
 smash_add_unittest(propagate)
@@ -224,6 +239,7 @@ smash_add_runtest(smash_help smash smash -h)
 smash_add_runtest(smash_run smash smash)
 smash_add_runtest(box_run smash smash -m Box)
 smash_add_runtest(collider_run smash smash -m Collider)
+smash_add_runtest(collider_frozen_fermi_run smash smash -m Collider -c "Modi: {Collider: {Fermi_Motion: frozen}}")
 smash_add_runtest(sphere_run smash smash -m Sphere)
 
 # verify that binary runs certain time (this corresponds to 20 steps)

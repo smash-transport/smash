@@ -25,7 +25,8 @@ namespace Smash {
  */
 
 /// Selector for the output format of OscarOutput
-enum OscarOutputFormat { OscarFormat2013, OscarFormat1999 };
+enum OscarOutputFormat { OscarFormat2013, OscarFormat2013Extended,
+                         OscarFormat1999 };
 
 /**
  * \brief Flags for the \p Contents template parameter of OscarOutput.
@@ -89,7 +90,6 @@ class OscarOutput : public OutputInterface {
 std::unique_ptr<OutputInterface> create_oscar_output(const bf::path &path,
                                                      Configuration config);
 
-
 /**
  * Returns a OscarOutput for the dilepton output routine in the
  * DecayActionsFinderDilepton. The Format is always 2013 and OscarInterations.
@@ -101,9 +101,17 @@ std::unique_ptr<OutputInterface> create_oscar_output(const bf::path &path,
 
 std::unique_ptr<OutputInterface> create_dilepton_output(bf::path path);
 
+/**
+ * Returns a OscarOutput for the photon output routine in the
+ * ScatterActionsFinderPhoton. The Format is always 2013 and OscarInterations.
+ *
+ * \param path The path to the output directory where the file(s) will be
+ *             placed.
+ */
+
+std::unique_ptr<OutputInterface> create_photon_output(bf::path path);
 
 // @}
-
 
 }  // namespace Smash
 

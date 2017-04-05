@@ -18,10 +18,10 @@
 
 namespace Smash {
 
-ActionList DecayActionsFinderDilepton::find_actions_in_cell(
-      const ParticleList &search_list,
+void DecayActionsFinderDilepton::shine(
+      const Particles &search_list,
+      OutputInterface* output,
       float dt) const {
-  ActionList actions;
 
   for (const auto &p : search_list) {
     // effective mass of decaying particle
@@ -51,46 +51,47 @@ ActionList DecayActionsFinderDilepton::find_actions_in_cell(
       const float shining_weight = dt * inv_gamma * mode->weight() / hbarc;
 
       if (shining_weight > 0.0) {  // decays that can happen
-        auto act = make_unique<DecayActionDilepton>(p, 0.f, shining_weight);
-        act->add_decay(std::move(mode));
-        actions.emplace_back(std::move(act));
+        DecayActionDilepton act(p, 0.f, shining_weight);
+        act.add_decay(std::move(mode));
+        act.generate_final_state();
+        output->at_interaction(act, 0.0);
       }
     }
   }
-
-  return actions;
 }
 
 
-ActionList DecayActionsFinderDilepton::find_final_actions(
-                  const Particles &search_list) const {
-  ActionList actions;
+void DecayActionsFinderDilepton::shine_final(
+                  const Particles &search_list,
+                  OutputInterface* output,
+                  bool only_res) const {
 
   for (const auto &p : search_list) {
-    if (p.type().decay_modes().decay_mode_list().size() == 0) {
+    const ParticleType &t = p.type();
+    if (t.decay_modes().decay_mode_list().empty() ||
+        (only_res && t.is_stable())) {
       continue;
     }
 
     // effective mass of decaying particle
     const float m_eff = p.effective_mass();
-    DecayBranchList dil_modes = p.type().get_partial_widths_dilepton(m_eff);
+    DecayBranchList dil_modes = t.get_partial_widths_dilepton(m_eff);
 
     // total decay width, also hadronic decays
     const float width_tot = total_weight<DecayBranch>(
-                                            p.type().get_partial_widths(m_eff));
+                                                  t.get_partial_widths(m_eff));
 
     for (DecayBranchPtr & mode : dil_modes) {
       const float shining_weight = mode->weight() / width_tot;
 
       if (shining_weight > 0.0) {  // decays that can happen
-        auto act = make_unique<DecayActionDilepton>(p, 0.f, shining_weight);
-        act->add_decay(std::move(mode));
-        actions.emplace_back(std::move(act));
+        DecayActionDilepton act(p, 0.f, shining_weight);
+        act.add_decay(std::move(mode));
+        act.generate_final_state();
+        output->at_interaction(act, 0.0);
       }
     }
   }
-
-  return actions;
 }
 
 }  // namespace Smash

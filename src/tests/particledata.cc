@@ -22,8 +22,8 @@ TEST(init_particle_types) {
       "ρ  0.7755 0.149  113 213\n"
       "η  0.5479 1.3e-6 221\n"
       "ω  0.7827 0.0085 223\n"
-      "N⁺ 0.9383 0     2212\n"
-      "N⁰ 0.9396 0     2112\n"
+      "N⁺ 0.938 0     2212\n"
+      "N⁰ 0.938 0     2112\n"
       "Δ  1.232  0.117 2224 2214 2114 1114\n");
 }
 
@@ -54,10 +54,14 @@ TEST(set_get) {
   COMPARE(p.id(), 4);
   COMPARE(p.pdgcode(), smashon);
   COMPARE(p.is_hadron(), smashon.is_hadron());
-  p.set_history(5, ProcessType::None, ParticleList{});
+  p.set_history(3, 5, ProcessType::None, 1.2, ParticleList{});
   COMPARE(p.id_process(), 5u);
-  p.set_history(6, ProcessType::None, ParticleList{});
+  COMPARE(p.get_history().collisions_per_particle, 3);
+  COMPARE(p.get_history().time_of_origin, 1.2f);
+  p.set_history(4, 6, ProcessType::None, 2.5, ParticleList{});
   COMPARE(p.id_process(), 6u);
+  COMPARE(p.get_history().collisions_per_particle, 4);
+  COMPARE(p.get_history().time_of_origin, 2.5f);
   FourVector m(1.0, 1.2, 1.4, 1.6);
   p.set_4momentum(m);
   COMPARE(p.momentum(), FourVector(1.0, 1.2, 1.4, 1.6));

@@ -9,6 +9,7 @@
 #define SRC_INCLUDE_ISOPARTICLETYPE_H_
 
 #include <string>
+#include<unordered_map>
 
 #include "particletype.h"
 #include "tabulation.h"
@@ -46,6 +47,14 @@ class IsoParticleType {
   IsoParticleType(IsoParticleType &&) = default;
   IsoParticleType &operator=(IsoParticleType &&) = default;
 
+  /** 
+   * Returns whether the two IsoParticleType objects have the same PDG code for
+   * their first state; if it is, it is the same iso multiplet.
+   */
+  bool operator==(const IsoParticleType &rhs) const {
+    return states_[0]->pdgcode() == rhs.states_[0]->pdgcode();
+  }
+
   /// Returns the name of the multiplet.
   const std::string &name() const { return name_; }
 
@@ -77,6 +86,20 @@ class IsoParticleType {
    * the original multiplet.
    */
   bool has_anti_multiplet() const;
+
+  /**
+   * Returns a list of all IsoParticleTypes
+   */
+  static const IsoParticleTypeList& list_all();
+
+  /**
+   * Returns the IsoParticleType pointer for the given \p name.
+   * If the particle type is not found, an invalid pointer is returned.
+   * You can convert the pointer to a bool to check whether it is valid.
+   *
+   * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
+   */
+  static const IsoParticleType* try_find(const std::string &name);
 
   /**
    * Returns the IsoParticleType object for the given \p name.
@@ -119,8 +142,14 @@ class IsoParticleType {
   /// Look up the tabulated resonance integral for the NN -> NR cross section.
   double get_integral_NR(double sqrts);
 
-  /// Look up the tabulated resonance integral for the NN -> DR cross section.
-  double get_integral_DR(double sqrts);
+  /// Look up the tabulated resonance integral for the NN -> RR cross section.
+  double get_integral_RR(const ParticleType &type_res_2, double sqrts);
+
+  /// Utility function to help compute various NN->RR spectral integrals
+  TabulationPtr integrate_RR(ParticleTypePtr &type_res_2);
+
+  /// Look up the tabulated resonance integral for the NK -> RK cross section.
+  double get_integral_RK(double sqrts);
 
  private:
   /// name of the multiplet
@@ -134,10 +163,17 @@ class IsoParticleType {
   /// list of states that are contained in the multiplet
   ParticleTypePtrList states_;
 
+  /// A tabulation of the spectral integral for the NK -> RK cross sections.
+  TabulationPtr XS_RK_tabulation_;
   /* A tabulation for the NN -> NR and NN -> DR cross sections,
    * where R is a resonance from this multiplet. */
-  TabulationPtr XS_NR_tabulation, XS_DR_tabulation;
-
+  TabulationPtr XS_NR_tabulation_, XS_DR_tabulation_;
+  /* A tabulation list for the NN -> RR' cross sections,
+   * where R is this multiplet and R' is a baryon resonance, associated 
+   * with a list of resonances R' for the NN -> RR' cross sections;
+   * used to calculate every multiplet spectral function only once*/
+  std::unordered_map<IsoParticleType*, TabulationPtr> XS_RR_tabulations;
+  
   /**
    * Private version of the 'find' method that returns a non-const reference.
    */

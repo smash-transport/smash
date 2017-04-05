@@ -21,6 +21,9 @@ cmake_minimum_required(VERSION 2.8.11)
 # Tell cmake where to find our modules
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
+# needed for clang-tidy
+set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
+
 # Set a default value for CMAKE_BUILD_TYPE, otherwise we get something
 # which is none of the options.
 if(NOT CMAKE_BUILD_TYPE)
@@ -34,8 +37,8 @@ endif(NOT CMAKE_BUILD_TYPE)
 # add 3rd-party libraries (before setting compiler flags etc)
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/einhard")
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/yaml-cpp-0.5.3/include")
+include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/pythia8223/include")
 add_subdirectory(3rdparty)
-
 
 # RelWithDebInfo is just like Release, it only adds -g to add debug symbols
 # (useful for better debug and profiling information on Release builds)

@@ -32,7 +32,7 @@ TEST(width_Delta) {
 }
 
 TEST(width_Roper) {
-  const ParticleType &t = ParticleType::find(0x202212);
+  const ParticleType &t = ParticleType::find(0x12212);  // N(1440)
   printf("%7.4f \n",t.minimum_mass());
   const int nModes = t.decay_modes().decay_mode_list().size();
   for (int i = 0; i < 100; i++) {
@@ -83,7 +83,7 @@ static void compare_in_vs_out_width(const ParticleType &t,
 
 TEST(Roper_in_vs_out_width) {
   // the Roper resonance, N*(1440)
-  const ParticleType &t = ParticleType::find(0x202212);
+  const ParticleType &t = ParticleType::find(0x12212);
 
   // find a decay mode with unstable daughter meson:
   // for the Roper, this should be the σN decay

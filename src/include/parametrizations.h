@@ -9,6 +9,10 @@
 #ifndef SRC_INCLUDE_PARAMETRIZATIONS_H_
 #define SRC_INCLUDE_PARAMETRIZATIONS_H_
 
+#include <unordered_map>
+
+#include "particletype.h"
+
 namespace Smash {
 
 /* pp elastic cross section parametrization
@@ -94,6 +98,115 @@ float kbar0p_elastic(double mandelstam_s);
  * \fpPrecision Why \c double?
  */
 float kbar0n_elastic(double mandelstam_s);
+
+/* K+ p inelastic cross section parametrization
+ *
+ * \fpPrecision Why \c double?
+ */
+float kplusp_inelastic(double mandelstam_s);
+
+/* K+ n inelastic cross section parametrization
+ *
+ * \fpPrecision Why \c double?
+ */
+float kplusn_inelastic(double mandelstam_s);
+
+/* Hash a pair of integers.
+ *
+ * Note that symmetric pairs and permutations yield identical hashes with this
+ * implementation.
+ */
+struct pair_hash {
+    std::size_t operator () (const std::pair<uint64_t, uint64_t> &p) const {
+        auto h1 = std::hash<uint64_t>{}(p.first);
+        auto h2 = std::hash<uint64_t>{}(p.second);
+
+        // In our case the integers are PDG codes. We know they are different
+        // and their order is defined, so we can simply combine the hashes
+        // using XOR. Note that this yields 0 for h1 == h2. Also,
+        // std::swap(h1, h2) does not not change the final hash.
+        return h1 ^ h2;
+    }
+};
+
+/* Isospin weights for inelastic K+ N channels.
+ */
+class KplusNRatios {
+ private:
+  mutable std::unordered_map<std::pair<uint64_t, uint64_t>, float, pair_hash> ratios_;
+ public:
+  /// Create an empty K+ N isospin ratio storage.
+  KplusNRatios() : ratios_({}) {};
+
+  /// Return the isospin ratio of the given K+ N reaction's cross section.
+  ///
+  /// On the first call all ratios are calculated.
+  float get_ratio(const ParticleType& a, const ParticleType& b,
+                  const ParticleType& c, const ParticleType& d) const;
+};
+
+extern thread_local KplusNRatios kplusn_ratios;
+
+/** K- p <-> Kbar0 n cross section parametrization.
+ * Source: \iref{Buss:2011mx}, B.3.9 */
+float kminusp_kbar0n(double mandelstam_s);
+
+/// K- p <-> pi- Sigma+ cross section parametrization
+float kminusp_piminussigmaplus(double sqrts);
+
+/// K- p <-> pi+ Sigma- cross section parametrization
+float kminusp_piplussigmaminus(double sqrts);
+
+/// K- p <-> pi0 Sigma0 cross section parametrization
+float kminusp_pi0sigma0(double sqrts);
+
+/// K- p <-> pi0 Lambda cross section parametrization
+float kminusp_pi0lambda(double sqrts);
+
+/// K- n <-> pi- Sigma0 cross section parametrization
+float kminusn_piminussigma0(double sqrts);
+
+/// K- n <-> pi0 Sigma- cross section parametrization
+float kminusn_pi0sigmaminus(double sqrts);
+
+/// K- n <-> pi- Lambda cross section parametrization
+float kminusn_piminuslambda(double sqrts);
+
+/// Lambda Lambda <-> Xi- p cross section parametrization
+float lambdalambda_ximinusp(double sqrts_sqrts0, double p_N, double p_lambda);
+
+/// Lambda Lambda <-> Xi0 n cross section parametrization
+float lambdalambda_xi0n(double sqrts_sqrts0, double p_N, double p_lambda);
+
+/// Lambda Sigma+ <-> Xi0 p cross section parametrization
+float lambdasigmaplus_xi0p(double sqrts_sqrts0);
+
+/// Lambda Sigma- <-> Xi- n cross section parametrization
+float lambdasigmaminus_ximinusn(double sqrts_sqrts0);
+
+/// Lambda Sigma0 <-> Xi- p cross section parametrization
+float lambdasigma0_ximinusp(double sqrts_sqrts0);
+
+/// Lambda Sigma0 <-> Xi0 n cross section parametrization
+float lambdasigma0_xi0n(double sqrts_sqrts0);
+
+/// Sigma0 Sigma0 <-> Xi- p cross section parametrization
+float sigma0sigma0_ximinusp(double sqrts_sqrts0);
+
+/// Sigma0 Sigma0 <-> Xi0 n cross section parametrization
+float sigma0sigma0_xi0n(double sqrts_sqrts0);
+
+/// Sigma+ Sigma- <-> Xi0 p cross section parametrization
+float sigmaplussigmaminus_xi0p(double sqrts_sqrts0);
+
+/// Sigma0 Sigma- <-> Xi- n cross section parametrization
+float sigma0sigmaminus_ximinusn(double sqrts_sqrts0);
+
+/// Sigma+ Sigma- <-> Xi- p cross section parametrization
+float sigmaplussigmaminus_ximinusp(double sqrts_sqrts0);
+
+/// Sigma+ Sigma- <-> Xi0 n cross section parametrization
+float sigmaplussigmaminus_xi0n(double sqrts_sqrts0);
 
 }  // namespace Smash
 

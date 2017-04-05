@@ -80,6 +80,10 @@ class TwoBodyDecay : public DecayType {
   TwoBodyDecay(ParticleTypePtrList part_types, int l);
   unsigned int particle_number() const override;
   bool has_particles(ParticleTypePtrList list) const override;
+  float threshold() const {
+    return particle_types_[0]->minimum_mass() +
+           particle_types_[1]->minimum_mass();
+  }
 
  protected:
   /* This is a virtual helper method which is used to write the width as

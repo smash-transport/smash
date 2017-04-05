@@ -21,10 +21,14 @@ namespace Smash {
 /* A structure to hold information about the history of the particle,
  * e.g. the last interaction etc. */
 struct HistoryData {
+  /// Collision counter per particle, zero only for initially present particles
+  int collisions_per_particle = 0;
   // id of the last action
   uint32_t id_process = 0;
   // type of the last action
   ProcessType process_type = ProcessType::None;
+  // time of the last action (excluding walls)
+  float time_of_origin = 0.0;
   // PdgCodes of the parent particles
   PdgCode p1 = 0x0, p2 = 0x0;
 };
@@ -69,7 +73,6 @@ class ParticleData {
   /** Returns the particle's effective mass
    * (as determined from the 4-momentum, possibly "off-shell"). */
   float effective_mass() const;
-
   /**
    * Return the ParticleType object associated to this particle.
    */
@@ -81,14 +84,19 @@ class ParticleData {
   HistoryData get_history() const { return history_; }
   /** Store history information, i.e. the type of process and possibly the
    * PdgCodes of the parent particles (\p plist). */
-  void set_history(uint32_t pid, ProcessType pt, const ParticleList& plist);
+  void set_history(int ncoll, uint32_t pid, ProcessType pt, float time_of_or,
+                   const ParticleList& plist);
 
   /// return the particle's 4-momentum
   const FourVector &momentum() const { return momentum_; }
+  /// return the particle's beam-4-momentum
+  const FourVector &beammomentum() const { return beammomentum_; }
+
   /// set the particle's 4-momentum directly
   void set_4momentum(const FourVector &momentum_vector) {
     momentum_ = momentum_vector;
   }
+
   /**
    * Set the momentum of the particle.
    *
@@ -100,6 +108,7 @@ class ParticleData {
   void set_4momentum(double mass, const ThreeVector &mom) {
     momentum_ = FourVector(std::sqrt(mass * mass + mom * mom), mom);
   }
+
   /**
    * Set the momentum of the particle.
    *
@@ -120,6 +129,20 @@ class ParticleData {
    */
   void set_3momentum(const ThreeVector &mom) {
     momentum_ = FourVector(momentum_.x0(), mom);
+  }
+  /**
+   * Set the beammomentum of the projectile- and targetparticle.
+   *
+   * \param[in] mass the mass of the particle (without E_kin contribution)
+   * \param[in] px x-component of the momentum, zero because beam in z-direction
+   * \param[in] py y-component of the momentum, zero because beam in z-direction
+   * \param[in] pz z-component of the momentum
+   *
+   * \fpPrecision The momentum FourVector requires double-precision.
+   */
+  void set_beam4momentum(double mass, double pBx, double pBy, double pBz) {
+    beammomentum_ = FourVector(std::sqrt(mass*mass + pBx*pBx + pBy*pBy + pBz*pBz),
+                               pBx, pBy, pBz);
   }
 
   /// The particle's position in Minkowski space
@@ -158,6 +181,9 @@ class ParticleData {
 
   /// get the velocity 3-vector
   ThreeVector velocity() const { return momentum_.velocity(); }
+
+  /// get the beamvelocity 3-vector
+  ThreeVector beamvelocity() const { return beammomentum_.velocity(); }
 
   /**
    * Returns the inverse of the gamma factor from the current velocity of the
@@ -219,6 +245,7 @@ class ParticleData {
   void copy_to(ParticleData &dst) const {
     dst.history_ = history_;
     dst.momentum_ = momentum_;
+    dst.beammomentum_ = beammomentum_;
     dst.position_ = position_;
     dst.formation_time_ = formation_time_;
     dst.cross_section_scaling_factor_ = cross_section_scaling_factor_;
@@ -265,6 +292,8 @@ class ParticleData {
 
   /// momenta of the particle: x0, x1, x2, x3 as E, px, py, pz
   FourVector momentum_;
+  /// beam-momenta of the particle: x0, x1, x2, x3 as E, pBx, pBy, pBz
+  FourVector beammomentum_;
   /// position in space: x0, x1, x2, x3 as t, x, y, z
   FourVector position_;
   /** Formation time at which the particle is fully formed
@@ -273,7 +302,6 @@ class ParticleData {
   float formation_time_ = 0.0;
   /// cross section scaling factor for unformed particles
   float cross_section_scaling_factor_ = 1.0;
-
   // history information
   HistoryData history_;
 };

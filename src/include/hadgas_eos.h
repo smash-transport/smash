@@ -28,7 +28,7 @@ class HadronGasEos;
  */
 class EosTable {
  public:
-  EosTable(double de, double dnb, int n_e, int n_b);
+  EosTable(double de, double dnb, size_t n_e, size_t n_b);
   struct table_element {
     double p;
     double T;
@@ -36,16 +36,16 @@ class EosTable {
     double mus;
   };
   void compile_table(HadronGasEos &eos,
-    const std::string eos_savefile_name = std::string("hadgas_eos.dat"));
+    const std::string& eos_savefile_name = "hadgas_eos.dat");
   void get(table_element& res, double e, double nb) const;
 
  private:
-  int index(int ie, int inb) const { return ie*n_nb_ + inb; }
+  size_t index(size_t ie, size_t inb) const { return ie*n_nb_ + inb; }
   std::vector<table_element> table_;
   double de_;
   double dnb_;
-  int n_e_;
-  int n_nb_;
+  size_t n_e_;
+  size_t n_nb_;
 };
 
 /**
@@ -160,12 +160,15 @@ class HadronGasEos {
    *         and strange chemical potential
    */
   std::array<double, 3> solve_eos(double e, double nb, double ns,
-             std::array<double, 3> initial_approximation = {0.15, 0.5, 0.05});
+             std::array<double, 3> initial_approximation = {0.15, 0.0, 0.0});
   /// Compute strange chemical potential, requiring that net strangeness = 0
   static double mus_net_strangeness0(double T, double mub);
   /// Get the element of eos table
-  void from_table(EosTable::table_element& res, double e, double nb) {
+  void from_table(EosTable::table_element& res, double e, double nb) const {
     eos_table_.get(res, e, nb);
+  }
+  static bool is_eos_particle(const ParticleType& ptype) {
+    return ptype.is_hadron() && ptype.pdgcode().charmness() == 0;
   }
   bool is_tabulated() const { return tabulate_; }
 

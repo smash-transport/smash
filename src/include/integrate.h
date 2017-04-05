@@ -12,9 +12,11 @@
 
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_monte_plain.h>
+#include <gsl/gsl_monte_vegas.h>
 #include <tuple>
 
 #include "cxx14compat.h"
+#include "fpenvironment.h"
 #include "random.h"
 
 namespace Smash {
@@ -28,15 +30,14 @@ struct GslWorkspaceDeleter {
   /// The class has no members, so this is a noop.
   constexpr GslWorkspaceDeleter() = default;
 
-  /// frees the gsl_integration_workspace resource if it is non-zero.
-  void operator()(gsl_integration_workspace *ptr) const {
+  /// Frees the gsl_integration_cquad_workspace resource if it is non-zero.
+  void operator()(gsl_integration_cquad_workspace *ptr) const {
     if (ptr == nullptr) {
       return;
     }
-    gsl_integration_workspace_free(ptr);
+    gsl_integration_cquad_workspace_free(ptr);
   }
 };
-
 
 /** The result type returned from integrations,
  * containing the value and an error. */
@@ -57,10 +58,9 @@ class Result : public std::pair<double, double> {
   double error() const { return Base::second; }
 };
 
-
 /**
  * A C++ interface for numerical integration in one dimension
- * with the GSL integration functions.
+ * with the GSL CQUAD integration functions.
  *
  * Example:
  * \code
@@ -81,9 +81,11 @@ class Integrator {
    * \param workspace_size The internal workspace is allocated such that it can
    *                       hold the given number of double precision intervals,
    *                       their integration results, and error estimates.
+   *                       It also determines the maximum number of subintervals
+   *                       the integration algorithm will use.
    */
-  explicit Integrator(int workspace_size)
-      : workspace_(gsl_integration_workspace_alloc(workspace_size)) {}
+  explicit Integrator(size_t workspace_size)
+      : workspace_(gsl_integration_cquad_workspace_alloc(workspace_size)) {}
 
   /// Convenience overload of the above with a workspace size of 1000.
   Integrator() : Integrator(1000) {}
@@ -110,33 +112,117 @@ class Integrator {
           return f(x);
         },
         &fun};
-    gsl_integration_qag(&gslfun, a, b,
-                        accuracy_absolute_,  // epsabs
-                        accuracy_relative_,  // epsrel
-                        subintervals_max_,   // limit
-                        gauss_points_,       // key
-                        workspace_.get(), &result.first, &result.second);
+    // We disable float traps when calling GSL code we cannot control.
+    DisableFloatTraps guard;
+    gsl_integration_cquad(&gslfun, a, b,
+                          accuracy_absolute_, accuracy_relative_,
+                          workspace_.get(),
+                          &result.first, &result.second,
+                          nullptr /* Don't store the number of evaluations */);
     return result;
   }
 
  private:
   /// Holds the workspace pointer.
-  std::unique_ptr<gsl_integration_workspace, GslWorkspaceDeleter> workspace_;
+  std::unique_ptr<gsl_integration_cquad_workspace, GslWorkspaceDeleter> workspace_;
 
   /// Parameter to the GSL integration function: desired absolute error limit
-  double accuracy_absolute_ = 1.0e-5;
+  const double accuracy_absolute_ = 1.0e-5;
 
   /// Parameter to the GSL integration function: desired relative error limit
-  double accuracy_relative_ = 5.0e-4;
-
-  /// Parameter to the GSL integration function: maximum number of subintervals
-  /// (may not exceed workspace size)
-  std::size_t subintervals_max_ = 500;
-
-  /// Parameter to the GSL integration function: integration rule
-  int gauss_points_ = GSL_INTEG_GAUSS21;
+  const double accuracy_relative_ = 5.0e-4;
 };
 
+/**
+ * A C++ interface for numerical integration in one dimension
+ * with the GSL Monte-Carlo integration functions.
+ *
+ * Example:
+ * \code
+ * Integrator integrate;
+ * const auto result = integrate(0.1, 0.9,
+ *                               [](double x) { return x * x; });
+ * \endcode
+ */
+class Integrator1dMonte {
+ public:
+  /**
+   * Construct an integration functor.
+   *
+   * \param num_calls The desired number of calls to the integrand function
+   *                  (defaults to 1E6 if omitted), i.e. how often the integrand
+   *                  is sampled in the Monte-Carlo integration. Larger numbers
+   *                  lead to a more precise result, but also to increased
+   *                  runtime.
+   *
+   * \note Since the workspace is allocated in the constructor and deallocated
+   * on destruction, you should not recreate Integrator objects unless required.
+   * Thus, if you want to calculate multiple integrals with the same \p
+   * workspace_size, keep the Integrator object around.
+   */
+  explicit Integrator1dMonte(size_t num_calls = 1E6)
+      : state_(gsl_monte_plain_alloc(1)),
+        rng_(gsl_rng_alloc(gsl_rng_mt19937)),
+        number_of_calls_(num_calls) {
+    gsl_monte_plain_init(state_);
+    // initialize the GSL RNG with a random seed
+    unsigned long int seed = Random::uniform_int(0ul, ULONG_MAX);
+    gsl_rng_set(rng_, seed);
+  }
+
+  /**
+   * Destructor: Clean up internal state and RNG.
+   */
+  ~Integrator1dMonte() {
+    gsl_monte_plain_free(state_);
+    gsl_rng_free(rng_);
+  }
+
+  /**
+   * The function call operator implements the integration functionality.
+   *
+   * \param min The lower limit of the integration.
+   * \param max The upper limit of the integration.
+   * \param fun The callable to integrate over. This callable may be a function
+   *            pointer, lambda, or a functor object. In any case, the callable
+   *            must return a `double` and take two `double` arguments. If you
+   *            want to pass additional data to the callable you can e.g. use
+   *            lambda captures.
+   */
+  template <typename F>
+  Result operator()(double min, double max, F &&fun) {
+    Result result = {0, 0};
+
+    const double lower[1] = {min};
+    const double upper[1] = {max};
+
+    if (max <= min)
+      return result;
+
+    const gsl_monte_function monte_fun{
+        // trick: pass integrand function as 'params'
+        [](double *x, size_t /*dim*/, void *params) -> double {
+          auto &&f = *static_cast<F *>(params);
+          return f(x[0]);
+        },
+        1, &fun};
+
+    gsl_monte_plain_integrate(&monte_fun, lower, upper, 1, number_of_calls_,
+                              rng_, state_, &result.first, &result.second);
+
+    return result;
+  }
+
+ private:
+  /// internal state of the Monte-Carlo integrator
+  gsl_monte_plain_state *state_;
+
+  /// random number generator
+  gsl_rng *rng_;
+
+  /// number of calls to the integrand
+  const std::size_t number_of_calls_;
+};
 
 /**
  * A C++ interface for numerical integration in two dimensions
@@ -157,7 +243,8 @@ class Integrator2d {
    * \param num_calls The desired number of calls to the integrand function
    *                  (defaults to 1E6 if omitted), i.e. how often the integrand
    *                  is sampled in the Monte-Carlo integration. Larger numbers
-   *                  lead to a more precise result, but also to increased runtime.
+   *                  lead to a more precise result, but also to increased
+   * runtime.
    *
    * \note Since the workspace is allocated in the constructor and deallocated
    * on destruction, you should not recreate Integrator objects unless required.
@@ -165,9 +252,9 @@ class Integrator2d {
    * workspace_size, keep the Integrator object around.
    */
   explicit Integrator2d(size_t num_calls = 1E6)
-            : state_(gsl_monte_plain_alloc(2)),
-              rng_(gsl_rng_alloc(gsl_rng_mt19937)),
-              number_of_calls_(num_calls) {
+      : state_(gsl_monte_plain_alloc(2)),
+        rng_(gsl_rng_alloc(gsl_rng_mt19937)),
+        number_of_calls_(num_calls) {
     gsl_monte_plain_init(state_);
     // initialize the GSL RNG with a random seed
     unsigned long int seed = Random::uniform_int(0ul, ULONG_MAX);
@@ -196,8 +283,8 @@ class Integrator2d {
    *            lambda captures.
    */
   template <typename F>
-  Result operator()(double min1, double max1,
-                    double min2, double max2, F &&fun) {
+  Result operator()(double min1, double max1, double min2, double max2,
+                    F &&fun) {
     Result result = {0, 0};
 
     const double lower[2] = {min1, min2};
@@ -206,18 +293,16 @@ class Integrator2d {
     if (max1 <= min1 || max2 <= min2)
       return result;
 
-    const gsl_monte_function monte_fun {
+    const gsl_monte_function monte_fun{
         // trick: pass integrand function as 'params'
         [](double *x, size_t /*dim*/, void *params) -> double {
           auto &&f = *static_cast<F *>(params);
           return f(x[0], x[1]);
         },
-        2, &fun
-    };
+        2, &fun};
 
-    gsl_monte_plain_integrate(&monte_fun, lower, upper, 2,
-                              number_of_calls_, rng_, state_,
-                              &result.first, &result.second);
+    gsl_monte_plain_integrate(&monte_fun, lower, upper, 2, number_of_calls_,
+                              rng_, state_, &result.first, &result.second);
 
     return result;
   }

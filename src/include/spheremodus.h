@@ -58,6 +58,13 @@ class SphereModus : public ModusDefault {
   float sphere_temperature_;
   /// Starting time for the Sphere
   const float start_time_ = 0.0f;
+  /** whether to use a thermal initialization for all particles
+   *  instead of specific numbers */
+  const bool use_thermal_ = false;
+  /// baryon chemical potential for thermal box
+  const float mub_;
+  /// strange chemical potential for thermal box
+  const float mus_;
   /// particle multiplicities at initialization
   const std::map<PdgCode, int> init_multipl_;
   /// Initialization scheme for momenta in the sphere; used for expanding metric setup

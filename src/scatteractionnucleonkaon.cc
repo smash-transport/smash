@@ -9,8 +9,10 @@
 
 #include "include/scatteractionnucleonkaon.h"
 
+#include "include/clebschgordan.h"
 #include "include/cxx14compat.h"
 #include "include/parametrizations.h"
+#include "include/pdgcode_constants.h"
 
 namespace Smash {
 
@@ -26,35 +28,67 @@ float ScatterActionNucleonKaon::elastic_parametrization() {
 
   float sig_el = 0.f;
   switch (nucleon.code()) {
-    case 0x2212:  // p
+      case pdg::p:
       switch (kaon.code()) {
-        case 0x321:  // K+
+        case pdg::K_p:
           sig_el = kplusp_elastic(s);
           break;
-        case -0x321:  // K-
+        case pdg::K_m:
           sig_el = kminusp_elastic(s);
           break;
-        case 0x311:  // K0
+        case pdg::K_z:
           sig_el = k0p_elastic(s);
           break;
-        case -0x311:  // Kbar0
+        case pdg::Kbar_z:
           sig_el = kbar0p_elastic(s);
           break;
       }
       break;
-    case 0x2112:  // n
+      case pdg::n:
       switch (kaon.code()) {
-        case 0x321:  // K+
+        case pdg::K_p:
           sig_el = kplusn_elastic(s);
           break;
-        case -0x321:  // K-
+        case pdg::K_m:
           sig_el = kminusn_elastic(s);
           break;
-        case 0x311:  // K0
+        case pdg::K_z:
           sig_el = k0n_elastic(s);
           break;
-        case -0x311:  // Kbar0
+        case pdg::Kbar_z:
           sig_el = kbar0n_elastic(s);
+          break;
+      }
+      break;
+      case -pdg::p:
+      switch (kaon.code()) {
+        case pdg::K_p:
+          sig_el = kminusp_elastic(s);
+          break;
+        case pdg::K_m:
+          sig_el = kplusp_elastic(s);
+          break;
+        case pdg::K_z:
+          sig_el = kbar0p_elastic(s);
+          break;
+        case pdg::Kbar_z:
+          sig_el = k0p_elastic(s);
+          break;
+      }
+      break;
+      case -pdg::n:
+      switch (kaon.code()) {
+        case pdg::K_p:
+          sig_el = kminusn_elastic(s);
+          break;
+        case pdg::K_m:
+          sig_el = kplusn_elastic(s);
+          break;
+        case pdg::K_z:
+          sig_el = kbar0n_elastic(s);
+          break;
+        case pdg::Kbar_z:
+          sig_el = k0n_elastic(s);
           break;
       }
       break;
@@ -81,5 +115,290 @@ void ScatterActionNucleonKaon::format_debug_output(std::ostream &out) const {
   ScatterAction::format_debug_output(out);
 }
 
+CollisionBranchList ScatterActionNucleonKaon::two_to_two_cross_sections() {
+  const ParticleType &type_particle_a = incoming_particles_[0].type();
+  const ParticleType &type_particle_b = incoming_particles_[1].type();
+
+  CollisionBranchList process_list = two_to_two_inel(type_particle_a,
+                                                     type_particle_b);
+
+  return process_list;
+}
+
+CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel(
+                            const ParticleType &type_particle_a,
+                            const ParticleType &type_particle_b) {
+  CollisionBranchList process_list;
+
+  const ParticleType &type_nucleon =
+      type_particle_a.pdgcode().is_nucleon() ? type_particle_a : type_particle_b;
+  const ParticleType &type_kaon =
+      type_particle_a.pdgcode().is_nucleon() ? type_particle_b : type_particle_a;
+
+  const auto pdg_nucleon = type_nucleon.pdgcode().code();
+  const auto pdg_kaon = type_kaon.pdgcode().code();
+
+  const double s = mandelstam_s();
+  const double sqrts = sqrt_s();
+
+  //Some variable declarations for frequently used quantities
+  const auto sigma_kplusp = kplusp_inelastic(s);
+  const auto sigma_kplusn = kplusn_inelastic(s);
+
+  switch (pdg_kaon) {
+    case pdg::K_m: {
+      // All inelastic K- N channels here are strangeness exchange, plus one
+      // charge exchange.
+      switch (pdg_nucleon) {
+        case pdg::p: {
+          const auto& type_n = ParticleType::find(pdg::n);
+          const auto& type_pi_z = ParticleType::find(pdg::pi_z);
+          const auto& type_pi_m = ParticleType::find(pdg::pi_m);
+          const auto& type_pi_p = ParticleType::find(pdg::pi_p);
+          const auto& type_Kbar_z = ParticleType::find(pdg::Kbar_z);
+          const auto& type_Sigma_p = ParticleType::find(pdg::Sigma_p);
+          const auto& type_Sigma_m = ParticleType::find(pdg::Sigma_m);
+          const auto& type_Sigma_z = ParticleType::find(pdg::Sigma_z);
+          const auto& type_Lambda = ParticleType::find(pdg::Lambda);
+          add_channel(process_list,
+                      [&] { return kminusp_piminussigmaplus(sqrts); },
+                      sqrts, type_pi_m, type_Sigma_p);
+          add_channel(process_list,
+                      [&] { return kminusp_piplussigmaminus(sqrts); },
+                      sqrts, type_pi_p, type_Sigma_m);
+          add_channel(process_list,
+                      [&] { return kminusp_pi0sigma0(sqrts); },
+                      sqrts, type_pi_z, type_Sigma_z);
+          add_channel(process_list,
+                      [&] { return kminusp_pi0lambda(sqrts); },
+                      sqrts, type_pi_z, type_Lambda);
+          add_channel(process_list,
+                      [&] { return kminusp_kbar0n(s); },
+                      sqrts, type_Kbar_z, type_n);
+          break;
+        }
+        case pdg::n: {
+          const auto& type_pi_z = ParticleType::find(pdg::pi_z);
+          const auto& type_pi_m = ParticleType::find(pdg::pi_m);
+          const auto& type_Sigma_m = ParticleType::find(pdg::Sigma_m);
+          const auto& type_Sigma_z = ParticleType::find(pdg::Sigma_z);
+          const auto& type_Lambda = ParticleType::find(pdg::Lambda);
+          add_channel(process_list,
+                      [&] { return kminusn_piminussigma0(sqrts); },
+                      sqrts, type_pi_m, type_Sigma_z);
+          add_channel(process_list,
+                      [&] { return kminusn_pi0sigmaminus(sqrts); },
+                      sqrts, type_pi_z, type_Sigma_m);
+          add_channel(process_list,
+                      [&] { return kminusn_piminuslambda(sqrts); },
+                      sqrts, type_pi_m, type_Lambda);
+          break;
+        }
+        case -pdg::p: {
+          const auto& type_K_m = ParticleType::find(pdg::K_m);
+          const auto& type_Kbar_z = ParticleType::find(pdg::Kbar_z);
+          const auto& type_Delta_pp_bar = ParticleType::find(-pdg::Delta_pp);
+          const auto& type_Delta_p_bar = ParticleType::find(-pdg::Delta_p);
+          add_channel(process_list,
+                      [&] { return sigma_kplusp * kplusn_ratios.get_ratio(
+                                   type_nucleon, type_kaon, type_Kbar_z, type_Delta_pp_bar); },
+                      sqrts, type_Kbar_z, type_Delta_pp_bar);
+          add_channel(process_list,
+                      [&] { return sigma_kplusp * kplusn_ratios.get_ratio(
+                                   type_nucleon, type_kaon, type_K_m, type_Delta_p_bar); },
+                      sqrts, type_K_m, type_Delta_p_bar);
+          break;
+        }
+        case -pdg::n: {
+          const auto& type_K_m = ParticleType::find(pdg::K_m);
+          const auto& type_Kbar_z = ParticleType::find(pdg::Kbar_z);
+          const auto& type_Delta_p_bar = ParticleType::find(-pdg::Delta_p);
+          const auto& type_Delta_z_bar = ParticleType::find(-pdg::Delta_z);
+          add_channel(process_list,
+                      [&] { return sigma_kplusn * kplusn_ratios.get_ratio(
+                                   type_nucleon, type_kaon, type_Kbar_z, type_Delta_p_bar); },
+                      sqrts, type_Kbar_z, type_Delta_p_bar);
+          add_channel(process_list,
+                      [&] { return sigma_kplusn * kplusn_ratios.get_ratio(
+                                   type_nucleon, type_kaon, type_K_m, type_Delta_z_bar); },
+                      sqrts, type_K_m, type_Delta_z_bar);
+          break;
+        }
+      }
+      break;
+    }
+    case pdg::K_p: {
+      // All inelastic channels are K+ N -> K Delta -> K pi N, with identical
+      // cross section, weighted by the isospin factor.
+      switch (pdg_nucleon) {
+        case pdg::p: {
+          const auto& type_K_p = ParticleType::find(pdg::K_p);
+          const auto& type_K_z = ParticleType::find(pdg::K_z);
+          const auto& type_Delta_pp = ParticleType::find(pdg::Delta_pp);
+          const auto& type_Delta_p = ParticleType::find(pdg::Delta_p);
+          add_channel(process_list,
+                      [&] { return sigma_kplusp * kplusn_ratios.get_ratio(
+                                   type_nucleon, type_kaon, type_K_z, type_Delta_pp); },
+                      sqrts, type_K_z, type_Delta_pp);
+          add_channel(process_list,
+                      [&] { return sigma_kplusp * kplusn_ratios.get_ratio(
+                                   type_nucleon, type_kaon, type_K_p, type_Delta_p); },
+                      sqrts, type_K_p, type_Delta_p);
+          break;
+        }
+        case pdg::n: {
+          const auto& type_K_p = ParticleType::find(pdg::K_p);
+          const auto& type_K_z = ParticleType::find(pdg::K_z);
+          const auto& type_Delta_p = ParticleType::find(pdg::Delta_p);
+          const auto& type_Delta_z = ParticleType::find(pdg::Delta_z);
+          add_channel(process_list,
+                      [&] { return sigma_kplusn * kplusn_ratios.get_ratio(
+                                   type_nucleon, type_kaon, type_K_z, type_Delta_p); },
+                      sqrts, type_K_z, type_Delta_p);
+          add_channel(process_list,
+                      [&] { return sigma_kplusn * kplusn_ratios.get_ratio(
+                                   type_nucleon, type_kaon, type_K_p, type_Delta_z); },
+                      sqrts, type_K_p, type_Delta_z);
+          break;
+        }
+        case -pdg::p: {
+          const auto& type_n_bar = ParticleType::find(-pdg::n);
+          const auto& type_pi_z = ParticleType::find(pdg::pi_z);
+          const auto& type_pi_m = ParticleType::find(pdg::pi_m);
+          const auto& type_pi_p = ParticleType::find(pdg::pi_p);
+          const auto& type_K_z = ParticleType::find(pdg::K_z);
+          const auto& type_Sigma_p_bar = ParticleType::find(-pdg::Sigma_p);
+          const auto& type_Sigma_m_bar = ParticleType::find(-pdg::Sigma_m);
+          const auto& type_Sigma_z_bar = ParticleType::find(-pdg::Sigma_z);
+          const auto& type_Lambda_bar = ParticleType::find(-pdg::Lambda);
+          add_channel(process_list,
+                      [&] { return kminusp_piminussigmaplus(sqrts); },
+                      sqrts, type_pi_p, type_Sigma_p_bar);
+          add_channel(process_list,
+                      [&] { return kminusp_piplussigmaminus(sqrts); },
+                      sqrts, type_pi_m, type_Sigma_m_bar);
+          add_channel(process_list,
+                      [&] { return kminusp_pi0sigma0(sqrts); },
+                      sqrts, type_pi_z, type_Sigma_z_bar);
+          add_channel(process_list,
+                      [&] { return kminusp_pi0lambda(sqrts); },
+                      sqrts, type_pi_z, type_Lambda_bar);
+          add_channel(process_list,
+                      [&] { return kminusp_kbar0n(s); },
+                      sqrts, type_K_z, type_n_bar);
+          break;
+        }
+        case -pdg::n: {
+          const auto& type_pi_z = ParticleType::find(pdg::pi_z);
+          const auto& type_pi_p = ParticleType::find(pdg::pi_p);
+          const auto& type_Sigma_m_bar = ParticleType::find(-pdg::Sigma_m);
+          const auto& type_Sigma_z_bar = ParticleType::find(-pdg::Sigma_z);
+          const auto& type_Lambda_bar = ParticleType::find(-pdg::Lambda);
+          add_channel(process_list,
+                      [&] { return kminusn_piminussigma0(sqrts); },
+                      sqrts, type_pi_p, type_Sigma_z_bar);
+          add_channel(process_list,
+                      [&] { return kminusn_pi0sigmaminus(sqrts); },
+                      sqrts, type_pi_z, type_Sigma_m_bar);
+          add_channel(process_list,
+                      [&] { return kminusn_piminuslambda(sqrts); },
+                      sqrts, type_pi_p, type_Lambda_bar);
+          break;
+        }
+      }
+      break;
+    }
+    case pdg::K_z: {
+      // K+ and K0 have the same isospin projection, they are assumed to have
+      // the same cross section here.
+
+      switch (pdg_nucleon) {
+        case pdg::p: {
+          const auto& type_K_p = ParticleType::find(pdg::K_p);
+          const auto& type_K_z = ParticleType::find(pdg::K_z);
+          const auto& type_Delta_p = ParticleType::find(pdg::Delta_p);
+          const auto& type_Delta_z = ParticleType::find(pdg::Delta_z);
+          add_channel(process_list,
+                      [&] { return sigma_kplusp * kplusn_ratios.get_ratio(
+                                   type_nucleon, type_kaon, type_K_z, type_Delta_p); },
+                      sqrts, type_K_z, type_Delta_p);
+          add_channel(process_list,
+                      [&] { return sigma_kplusp * kplusn_ratios.get_ratio(
+                                   type_nucleon, type_kaon, type_K_p, type_Delta_z); },
+                      sqrts, type_K_p, type_Delta_z);
+          break;
+        }
+        case pdg::n: {
+          const auto& type_K_p = ParticleType::find(pdg::K_p);
+          const auto& type_K_z = ParticleType::find(pdg::K_z);
+          const auto& type_Delta_z = ParticleType::find(pdg::Delta_z);
+          const auto& type_Delta_m = ParticleType::find(pdg::Delta_m);
+          add_channel(process_list,
+                      [&] { return sigma_kplusn * kplusn_ratios.get_ratio(
+                                   type_nucleon, type_kaon, type_K_z, type_Delta_z); },
+                      sqrts, type_K_z, type_Delta_z);
+          add_channel(process_list,
+                      [&] { return sigma_kplusn * kplusn_ratios.get_ratio(
+                                   type_nucleon, type_kaon, type_K_p, type_Delta_m); },
+                      sqrts, type_K_p, type_Delta_m);
+          break;
+        }
+        case -pdg::n: {
+          const auto& type_K_p = ParticleType::find(pdg::K_p);
+          const auto& type_p_bar = ParticleType::find(-pdg::p);
+          add_channel(process_list,
+                      [&] { return kminusp_kbar0n(s); },
+                      sqrts, type_K_p, type_p_bar);
+          break;
+        }
+      }
+      break;
+    }
+    case pdg::Kbar_z:
+      switch (pdg_nucleon) {
+        case pdg::n: {
+          const auto& type_p = ParticleType::find(pdg::p);
+          const auto& type_K_m = ParticleType::find(pdg::K_m);
+          add_channel(process_list,
+                      [&] { return kminusp_kbar0n(s); },
+                      sqrts, type_K_m, type_p);
+          break;
+        }
+        case -pdg::p: {
+          const auto& type_K_m = ParticleType::find(pdg::K_m);
+          const auto& type_Kbar_z = ParticleType::find(pdg::Kbar_z);
+          const auto& type_Delta_p_bar = ParticleType::find(-pdg::Delta_p);
+          const auto& type_Delta_z_bar = ParticleType::find(-pdg::Delta_z);
+          add_channel(process_list,
+                      [&] { return sigma_kplusp * kplusn_ratios.get_ratio(
+                                   type_nucleon, type_kaon, type_Kbar_z, type_Delta_p_bar); },
+                      sqrts, type_Kbar_z, type_Delta_p_bar);
+          add_channel(process_list,
+                      [&] { return sigma_kplusp * kplusn_ratios.get_ratio(
+                                   type_nucleon, type_kaon, type_K_m, type_Delta_z_bar); },
+                      sqrts, type_K_m, type_Delta_z_bar);
+          break;
+        }
+        case -pdg::n: {
+          const auto& type_K_m = ParticleType::find(pdg::K_m);
+          const auto& type_Kbar_z = ParticleType::find(pdg::Kbar_z);
+          const auto& type_Delta_z_bar = ParticleType::find(-pdg::Delta_z);
+          const auto& type_Delta_m_bar = ParticleType::find(-pdg::Delta_m);
+          add_channel(process_list,
+                      [&] { return sigma_kplusn * kplusn_ratios.get_ratio(
+                                   type_nucleon, type_kaon, type_Kbar_z, type_Delta_z_bar); },
+                      sqrts, type_Kbar_z, type_Delta_z_bar);
+          add_channel(process_list,
+                      [&] { return sigma_kplusn * kplusn_ratios.get_ratio(
+                                   type_nucleon, type_kaon, type_K_m, type_Delta_m_bar); },
+                      sqrts, type_K_m, type_Delta_m_bar);
+          break;
+        }
+      }
+      break;
+  }
+
+  return process_list;
+}
 
 }  // namespace Smash

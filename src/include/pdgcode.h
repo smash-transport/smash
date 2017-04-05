@@ -10,11 +10,13 @@
 #ifndef SRC_INCLUDE_PDGCODE_H_
 #define SRC_INCLUDE_PDGCODE_H_
 
-#include <cstdio>
 #include <cstdlib>
 #include <iosfwd>
+#include <sstream>
 #include <stdexcept>
 #include <string>
+
+#include "pdgcode_constants.h"
 
 namespace Smash {
 
@@ -207,13 +209,12 @@ class PdgCode {
 
   /// returns a C++ string from the PDG Code.
   inline std::string string() const {
-    char hexstring[8];
+    std::stringstream ss;
     if (digits_.antiparticle_) {
-      snprintf(hexstring, sizeof(hexstring), "-%x", ucode());
-    } else {
-      snprintf(hexstring, sizeof(hexstring), "%x", ucode());
+      ss << "-";
     }
-    return std::string(hexstring);
+    ss << std::hex << ucode();
+    return ss.str();
   }
 
   /// Construct the antiparticle to a given PDG code.
@@ -261,33 +262,50 @@ class PdgCode {
   /// Returns whether this PDG code identifies a meson.
   inline bool is_meson() const { return is_hadron() && digits_.n_q1_ == 0; }
 
-  /// Is this a nucleon (p, n)?
+  /// Is this a nucleon/anti-nucleon (p, n, -p, -n)?
   inline bool is_nucleon() const {
-      return (code() == 0x2212) || (code() == 0x2112);
+      const auto abs_code = std::abs(code());
+      return (abs_code == pdg::p || abs_code == pdg::n);
   }
-  /// Is this a Delta(1232)?
+
+  /// Is this a Delta(1232) (with anti-delta)?
   inline bool is_Delta() const {
-      return (code() == 0x2224) || (code() == 0x2214) ||
-             (code() == 0x2114) || (code() == 0x1114);
+      const auto abs_code = std::abs(code());
+      return (abs_code == pdg::Delta_pp || abs_code == pdg::Delta_p ||
+              abs_code == pdg::Delta_z || abs_code == pdg::Delta_m);
+  }
+
+  /// Is this a hyperon (Lambda, Sigma, Xi, Omega)?
+  inline bool is_hyperon() const {
+      const auto abs_code = std::abs(code());
+      switch (abs_code) {
+          case pdg::Lambda:
+          case pdg::Sigma_p: case pdg::Sigma_z: case pdg::Sigma_m:
+          case pdg::Xi_z: case pdg::Xi_m:
+          case pdg::Omega_m:
+              return true;
+          default:
+              return false;
+      }
   }
   /// Is this a kaon (K+, K-, K0, Kbar0)?
   inline bool is_kaon() const {
       const auto abs_code = std::abs(code());
-      return (abs_code == 0x321) || (abs_code == 0x311);
+      return (abs_code == pdg::K_p) || (abs_code == pdg::K_z);
   }
   /// Is this a pion (pi+/pi0/pi-)?
   inline bool is_pion() const {
       const auto c = code();
-      return (c == 0x111)    // pi0
-          || (c == 0x211)    // pi+
-          || (c == -0x211);  // pi-
+      return (c == pdg::pi_z)
+          || (c == pdg::pi_p)
+          || (c == pdg::pi_m);
   }
   /// Is this a rho meson (rho+/rho0/rho-)?
   inline bool is_rho() const {
     const auto c = code();
-    return (c == 0x113)    // rho0
-        || (c == 0x213)    // rho+
-        || (c == -0x213);  // rho-
+    return (c == pdg::rho_z)
+        || (c == pdg::rho_p)
+        || (c == pdg::rho_m);
   }
 
   /** Determine whether a particle has a distinct antiparticle

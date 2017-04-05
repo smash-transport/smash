@@ -15,6 +15,8 @@
 #include "include/formfactors.h"
 #include "include/integrate.h"
 #include "include/kinematics.h"
+#include "include/pdgcode_constants.h"
+#include "include/pow.h"
 
 namespace Smash {
 
@@ -91,11 +93,9 @@ float TwoBodyDecayStable::rho(float m) const {
 }
 
 float TwoBodyDecayStable::width(float m0, float G0, float m) const {
-  if (m <= particle_types_[0]->mass() + particle_types_[1]->mass()) {
-    return 0;
-  } else {
-    return G0 * rho(m) / rho(m0);
-  }
+  assert(rho(m0) != 0);
+  return (m <= threshold()) ? 0.f :
+         G0 * rho(m) / rho(m0);
 }
 
 float TwoBodyDecayStable::in_width(float m0, float G0, float m,
@@ -150,9 +150,11 @@ float TwoBodyDecaySemistable::rho(float mass) const {
   if (tabulation_ == nullptr) {
     /* TODO(weil): Move this lazy init to a global initialization function,
       * in order to avoid race conditions in multi-threading. */
+    const float tabulation_interval =
+      std::max(2.f, 10.f*particle_types_[1]->width_at_pole());
     tabulation_ = make_unique<Tabulation>(
-                particle_types_[0]->mass() + particle_types_[1]->minimum_mass(),
-                10*particle_types_[1]->width_at_pole(), num_tab_pts,
+                threshold(),
+                tabulation_interval, num_tab_pts,
                 [&](float sqrts) {
                   return integrate(particle_types_[1]->minimum_mass(),
                                     sqrts - particle_types_[0]->mass(),
@@ -167,19 +169,17 @@ float TwoBodyDecaySemistable::rho(float mass) const {
 }
 
 float TwoBodyDecaySemistable::width(float m0, float G0, float m) const {
-  return G0 * rho(m) / rho(m0)
-         * post_ff_sqr(m, m0, particle_types_[0]->mass()
-                              + particle_types_[1]->minimum_mass(), Lambda_);
+  assert(rho(m0) != 0);
+  return G0 * rho(m) / rho(m0) * post_ff_sqr(m, m0, threshold(), Lambda_);
 }
 
 float TwoBodyDecaySemistable::in_width(float m0, float G0, float m,
                                        float m1, float m2) const {
+  assert(rho(m0) != 0);
   const float p_f = pCM(m, m1, m2);
 
   return G0 * p_f * blatt_weisskopf_sqr(p_f, L_)
-         * post_ff_sqr(m, m0, particle_types_[0]->mass()
-                              + particle_types_[1]->minimum_mass(), Lambda_)
-         / (m * rho(m0));
+         * post_ff_sqr(m, m0, threshold(), Lambda_) / (m * rho(m0));
 }
 
 
@@ -213,8 +213,9 @@ float TwoBodyDecayUnstable::rho(float mass) const {
     const float m2_min = particle_types_[1]->minimum_mass();
     const float sum_gamma = particle_types_[0]->width_at_pole()
                           + particle_types_[1]->width_at_pole();
+    const float tab_interval = std::max(2.f, 10.f*sum_gamma);
     tabulation_
-          = make_unique<Tabulation>(m1_min + m2_min, 10*sum_gamma, num_tab_pts,
+          = make_unique<Tabulation>(m1_min + m2_min, tab_interval, num_tab_pts,
             [&](float sqrts) {
               return integrate2d(m1_min, sqrts - m2_min, m2_min, sqrts - m1_min,
                                 [&](float m1, float m2) {
@@ -228,9 +229,7 @@ float TwoBodyDecayUnstable::rho(float mass) const {
 }
 
 float TwoBodyDecayUnstable::width(float m0, float G0, float m) const {
-  return G0 * rho(m) / rho(m0)
-            * post_ff_sqr(m, m0, particle_types_[0]->minimum_mass()
-                               + particle_types_[1]->minimum_mass(), Lambda_);
+  return G0 * rho(m) / rho(m0) * post_ff_sqr(m, m0, threshold(), Lambda_);
 }
 
 float TwoBodyDecayUnstable::in_width(float m0, float G0, float m,
@@ -238,9 +237,7 @@ float TwoBodyDecayUnstable::in_width(float m0, float G0, float m,
   const float p_f = pCM(m, m1, m2);
 
   return G0 * p_f * blatt_weisskopf_sqr(p_f, L_)
-         * post_ff_sqr(m, m0, particle_types_[0]->minimum_mass()
-                            + particle_types_[1]->minimum_mass(), Lambda_)
-         / (m * rho(m0));
+         * post_ff_sqr(m, m0, threshold(), Lambda_) / (m * rho(m0));
 }
 
 // TwoBodyDecayDilepton
@@ -258,7 +255,7 @@ TwoBodyDecayDilepton::TwoBodyDecayDilepton(ParticleTypePtrList part_types,
 }
 
 float TwoBodyDecayDilepton::width(float m0, float G0, float m) const {
-  if (m <= particle_types_[0]->mass() + particle_types_[1]->mass()) {
+  if (m <= threshold()) {
     return 0;
   } else {
     /// dilepton decays: use width from \iref{Li:1996mi}, equation (19)
@@ -334,7 +331,7 @@ ThreeBodyDecayDilepton::ThreeBodyDecayDilepton(ParticleTypePtr mother,
     }
   }
 
-  if (mother->pdgcode() == 0x0 || non_lepton_position == -1) {
+  if (mother->pdgcode() == pdg::invalid || non_lepton_position == -1) {
     throw std::runtime_error("Error: Unsupported dilepton Dalitz decay!");
   }
 }
@@ -358,8 +355,8 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
 
   PdgCode pdg = t->pdgcode();
   if (pdg.is_meson()) {
-    const ParticleType &photon = ParticleType::find(0x22);
-    const ParticleType &pi0 = ParticleType::find(0x111);
+    const ParticleType &photon = ParticleType::find(pdg::photon);
+    const ParticleType &pi0 = ParticleType::find(pdg::pi_z);
     switch (pdg.spin()) {
     case 0:  /* pseudoscalars: π⁰, η, η' */ {
       // width for decay into 2γ
@@ -367,7 +364,7 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
       float ff = em_form_factor_ps(pdg, m_dil);  // form factor
       /// see \iref{Landsberg:1986fd}, equation (3.8)
       return (4.*alpha/(3.*M_PI)) * gamma_2g/m_dil
-                                  * pow(1.-m_dil/m_par*m_dil/m_par, 3.) * ff*ff;
+                                  * pow_int(1.-m_dil/m_par*m_dil/m_par, 3) * ff*ff;
     }
     case 2: /* vectors: ω, φ */ {
       // width for decay into π⁰γ
@@ -375,7 +372,7 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
       float ff_sqr = em_form_factor_sqr_vec(pdg, m_dil);  // form factor squared
       /// see \iref{Landsberg:1986fd}, equation (3.4)
       const float n1 = m_par_sqr - m_other_sqr;
-      const float rad = pow(1. + m_dil_sqr/n1, 2)
+      const float rad = pow_int(1. + m_dil_sqr/n1, 2)
                         - 4.*m_par_sqr*m_dil_sqr/(n1*n1);
       if (rad < 0.) {
         assert(rad > -1E-5);
@@ -391,18 +388,26 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
     }
   } else if (pdg.is_baryon()) {
     switch (pdg.code()) {
-    case 0x2214: case -0x2214:
-    case 0x2114: case -0x2114:  /* Δ⁺, Δ⁰ (and antiparticles) */ {
+      case pdg::Delta_p: case -pdg::Delta_p:
+      case pdg::Delta_z: case -pdg::Delta_z:  /* Δ⁺, Δ⁰ (and antiparticles) */ {
       /// see \iref{Krivoruchenko:2001hs}
       const float rad1 = (m_par+m_other)*(m_par+m_other) - m_dil_sqr;
       const float rad2 = (m_par-m_other)*(m_par-m_other) - m_dil_sqr;
-      const float t1 = alpha/16. *
-                  (m_par+m_other)*(m_par+m_other)/(m_par_cubed*m_other_sqr) *
-                  std::sqrt(rad1);
-      const float t2 = pow(std::sqrt(rad2), 3.0);
-      const float ff = form_factor_delta(m_dil);
-      const float gamma_vi = t1 * t2 * ff*ff;
-      return 2.*alpha/(3.*M_PI) * gamma_vi/m_dil;
+      if (rad1 < 0.) {
+        assert(rad1 > -1E-5);
+        return 0.;
+      } else if (rad2 < 0.) {
+        assert(rad2 > -1E-5);
+        return 0.;
+      } else {
+        const float t1 = alpha/16. *
+                    (m_par+m_other)*(m_par+m_other)/(m_par_cubed*m_other_sqr) *
+                    std::sqrt(rad1);
+        const float t2 = pow_int(std::sqrt(rad2), 3);
+        const float ff = form_factor_delta(m_dil);
+        const float gamma_vi = t1 * t2 * ff*ff;
+        return 2.*alpha/(3.*M_PI) * gamma_vi/m_dil;
+      }
     }
     default:
       throw std::runtime_error("Bad baryon in ThreeBodyDecayDilepton: "

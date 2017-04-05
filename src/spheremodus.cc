@@ -21,6 +21,7 @@
 #include "include/constants.h"
 #include "include/distributions.h"
 #include "include/experimentparameters.h"
+#include "include/hadgas_eos.h"
 #include "include/fourvector.h"
 #include "include/logging.h"
 #include "include/macros.h"
@@ -62,10 +63,14 @@ SphereModus::SphereModus(Configuration modus_config,
     : radius_(modus_config.take({"Sphere", "Radius"})),
       sphere_temperature_(modus_config.take({"Sphere", "Sphere_Temperature"})),
       start_time_(modus_config.take({"Sphere", "Start_Time"})),
-      init_multipl_(modus_config.take({"Sphere", "Init_Multiplicities"}).
-                                        convert_for(init_multipl_)),
       init_distr_(modus_config.take({"Sphere", "Initial_Condition"},
                                         SphereInitialCondition::ThermalMomenta)) {
+      use_thermal_(modus_config.take({"Sphere", "Use_Thermal_Multiplicities"}, false)),
+      mub_(modus_config.take({"Sphere", "Baryon_Chemical_Potential"}, 0.0f)),
+      mus_(modus_config.take({"Sphere", "Strange_Chemical_Potential"}, 0.0f)),
+      init_multipl_(use_thermal_ ? std::map<PdgCode, int>() :
+                    modus_config.take({"Sphere", "Init_Multiplicities"}).
+                                        convert_for(init_multipl_)) {
 }
 
 /* console output on startup of sphere specific parameters */
@@ -73,9 +78,13 @@ std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
   out << "-- Sphere Modus:\nRadius of the sphere: " << m.radius_ << " [fm]"
       << "\nTemperature for momentum sampling: " << m.sphere_temperature_
       << "\nStarting time for Sphere calculation: " << m.start_time_ << '\n';
-  for (const auto &p : m.init_multipl_) {
-    out << "Particle " << p.first << " initial multiplicity "
-                       << p.second << '\n';
+  if (m.use_thermal_) {
+    out << "Thermal multiplicities\n";
+  } else {
+    for (const auto &p : m.init_multipl_) {
+      out << "Particle " << p.first << " initial multiplicity "
+                         << p.second << '\n';
+    }
   }
   return out;
 }
@@ -86,10 +95,29 @@ float SphereModus::initial_conditions(Particles *particles,
   const auto &log = logger<LogArea::Sphere>();
   FourVector momentum_total(0, 0, 0, 0);
   /* Create NUMBER OF PARTICLES according to configuration */
-  for (const auto &p : init_multipl_) {
-    particles->create(p.second*parameters.testparticles, p.first);
-    log.debug() << "Particle " << p.first
-                << " initial multiplicity " << p.second;
+  if (use_thermal_) {
+    const double T = sphere_temperature_;
+    const double V = 4.0/3.0 * M_PI * radius_*radius_*radius_;
+    for (const ParticleType &ptype : ParticleType::list_all()) {
+      if (HadronGasEos::is_eos_particle(ptype)) {
+        const double n = HadronGasEos::partial_density(ptype, T, mub_, mus_);
+        const double thermal_mult = n*V*parameters.testparticles;
+        assert(thermal_mult > 0.0);
+        const int thermal_mult_int = Random::poisson(thermal_mult);
+        particles->create(thermal_mult_int, ptype.pdgcode());
+        log.debug(ptype.name(), " initial multiplicity ", thermal_mult_int);
+      }
+    }
+    log.info() << "Initial baryon density "
+               << HadronGasEos::net_baryon_density(T, mub_, mus_);
+    log.info() << "Initial strange density "
+               << HadronGasEos::net_strange_density(T, mub_, mus_);
+  } else {
+    for (const auto &p : init_multipl_) {
+      particles->create(p.second*parameters.testparticles, p.first);
+      log.debug() << "Particle " << p.first
+                  << " initial multiplicity " << p.second;
+    }
   }
   /* loop over particle data to fill in momentum and position information */
   for (ParticleData &data : *particles) {

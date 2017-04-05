@@ -31,8 +31,7 @@ on the system.
 Building SMASH
 --------------
 
-Assuming Pythia is already build, run the following to build SMASH in a separate
-directory:
+Build SMASH in a separate directory:
 
     mkdir build
     cd build
@@ -66,11 +65,13 @@ Unfortunately the Clang Compiler shipped with XCode or the Command Line Tools fr
 
 The workaround is to install the official clang version. For example, this can be done with Homebrew (http://brew.sh):
 
-    brew install llvm --with--compiler-rt --with-libcxx --with-clang
+    brew install llvm
 
 After that you have to instruct cmake that it should use the newly installed clang compiler and also tell the linker where the libraries are by altering some cmake flags. Enter cmake like below:
 
     cmake .. -DCMAKE_CXX_COMPILER=/usr/local/opt/llvm/bin/clang++ -DCMAKE_EXE_LINKER_FLAGS="-L/usr/local/opt/llvm/lib -lc++abi" -DCMAKE_CXX_FLAGS=-I/usr/local/opt/llvm/include
+
+Note: FPE environment only works with gcc, so e.g. you won't get backtraces from floating point traps with clang.
 
 
 Disabling ROOT support
@@ -131,13 +132,20 @@ Let's assume Eigen headers will be unpacked in $HOME.
   cmake -DCMAKE_INSTALL_PREFIX=$HOME/[latest-eigen]/ ..
 
 
-Compiling Pythia
-----------------
+Including GSL from custom location
+----------------------------------
 
-The Pythia code is provided in the directory 3rdparty/pythia8215 and can be
-compiled by executing
+Assume that GSL will be installed in $GSL.
 
-   ./configure
-   make
+    wget ftp://ftp.gnu.org/gnu/gsl/gsl-latest.tar.gz
+    tar -zxvf gsl-latest.tar.gz
+    cd $GSL
+    ./configure -prefix $GSL
+    make -j
+    make install
 
-in that directory.
+In the .bash_profile write (enter GSL_ROOT_DIR's value $GSL in the first line):
+    GSL_ROOT_DIR=...
+    export PATH=$GSL_ROOT_DIR:$GSL_ROOT_DIR/lib:$PATH
+
+*/

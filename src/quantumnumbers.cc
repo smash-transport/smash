@@ -47,7 +47,7 @@ std::string QuantumNumbers::report_deviations(const QuantumNumbers& rhs) const {
               << rhs.charge_ << "\n";
   }
   if (isospin3_ != rhs.isospin3_) {
-    error_msg << "Deviation in Isospin 3:\n " << isospin3_ << " vs ."
+    error_msg << "Deviation in Isospin 3:\n " << isospin3_ << " vs. "
               << rhs.isospin3_ << "\n";
   }
   if (strangeness_ != rhs.strangeness_) {
