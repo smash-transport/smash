@@ -170,7 +170,7 @@ CollisionBranchList ScatterActionNucleonNucleon::find_xsection_from_type(
 
         /* Calculate matrix element. */
         const float matrix_element = nn_to_resonance_matrix_element(sqrts,
-                                     type_particle_a, type_particle_b, twoI);
+                                     *type_res_1, *type_res_2, twoI);
         if (matrix_element <= 0.) {
           continue;
         }
