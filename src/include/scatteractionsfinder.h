@@ -119,11 +119,11 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * based on the types of the incoming particles. */
   virtual ScatterActionPtr construct_scatter_action(const ParticleData &data_a,
                                             const ParticleData &data_b,
-                                            float time_until_collision) const;
+                                            double time_until_collision) const;
   /** Check for a single pair of particles (id_a, id_b) if a collision will happen
    * in the next timestep and create a corresponding Action object in that case. */
   ActionPtr check_collision(const ParticleData &data_a,
-                            const ParticleData &data_b, float dt) const;
+                            const ParticleData &data_b, double dt) const;
   /** Elastic cross section parameter (in mb). */
   const float elastic_parameter_;
   /** Number of test particles. */
