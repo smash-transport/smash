@@ -43,11 +43,11 @@ CollisionBranchList ScatterActionBaryonBaryon::two_to_two_cross_sections() {
       type_b.is_nucleon() || type_b.is_Delta()) {
     if (type_a.antiparticle_sign() == 1 && type_b.antiparticle_sign() == 1) {
       /* N R → N N, Δ R → N N */
-      process_list = bar_bar_to_nuc_nuc(type_a, type_b, false);
+      process_list = bar_bar_to_nuc_nuc(false);
     }
     else if (type_a.antiparticle_sign() == -1 && type_b.antiparticle_sign() == -1) {
       /* N̅ R → N̅ N̅, Δ̅ R → N̅ N̅ */
-      process_list = bar_bar_to_nuc_nuc(type_a, type_b, true);
+      process_list = bar_bar_to_nuc_nuc(true);
     }
   }
 
@@ -56,9 +56,9 @@ CollisionBranchList ScatterActionBaryonBaryon::two_to_two_cross_sections() {
 
 
 CollisionBranchList ScatterActionBaryonBaryon::bar_bar_to_nuc_nuc(
-                            const ParticleType &type_a,
-                            const ParticleType &type_b,
                             const bool is_anti_particles) {
+  const ParticleType &type_a = incoming_particles_[0].type();
+  const ParticleType &type_b = incoming_particles_[1].type();
   CollisionBranchList process_list;
 
   const double s = mandelstam_s();
