@@ -873,6 +873,12 @@ void Experiment<Modus>::run_time_evolution() {
                      *potentials_, dUB_dr_lat_.get(), dUI3_dr_lat_.get());
     }
 
+    /* (5) Expand universe if non-minkovskian metric; updates
+           positions and momenta according to the selected expansion */
+    if (metric_.mode_ != ExpansionMode::NoExpansion) {
+      expand_space_time(&particles_, parameters_, metric_);
+    }
+
     ++parameters_.labclock;
 
     /* (5) Check conservation laws. */

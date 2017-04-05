@@ -370,7 +370,7 @@ class Configuration {
 
     operator SphereInitialCondition() const {
       const std::string s = operator std::string();
-      if (s == "thermal") {
+      if (s == "thermal momenta") {
         return SphereInitialCondition::ThermalMomenta;
       }
       if (s == "IC_ES") {
@@ -387,7 +387,7 @@ class Configuration {
       }
       throw IncorrectTypeInAssignment(
           "The value for key \"" + std::string(key_) +
-          "\" should be \"thermal\", \"IC_ES\", \"IC_1M\", \"IC_2M\" or" +
+          "\" should be \"thermal momenta\", \"IC_ES\", \"IC_1M\", \"IC_2M\" or" +
           "\"IC_Massive\"."); 
     }
 

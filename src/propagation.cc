@@ -83,7 +83,7 @@ double propagate_straight_line(Particles *particles, double to_time) {
 void expand_space_time(Particles *particles, const ExperimentParameters &parameters,
                              const ExpansionProperties &metric) {
   const auto &log = logger<LogArea::Propagation>();
-  double dt = 0.0;
+  double dt = parameters.labclock.timestep_duration();
   for (ParticleData &data : *particles) {
     //Momentum and position modification to ensure appropriate expansion                     
     double h = calc_hubble(parameters.labclock.current_time(),metric);
