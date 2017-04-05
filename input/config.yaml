@@ -15,7 +15,7 @@ Logging:
 
 General:
     # Modus decision
-    Modus:         Sphere
+    Modus:         Collider
 
     # Mode of time stepping. Possible values: None, Fixed, Adaptive
     Time_Step_Mode: Fixed
