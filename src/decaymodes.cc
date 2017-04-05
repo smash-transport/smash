@@ -230,7 +230,8 @@ void DecayModes::load_decaymodes(const std::string &input) {
       bool multi = true;  // does the decay channel refer to whole multiplets?
       while (lineinput) {
         decay_particles.emplace_back(name);
-        const bool is_multiplet = IsoParticleType::exists(name);
+        const auto isotype = IsoParticleType::try_find(name);
+        const bool is_multiplet = isotype;
         const bool is_state = ParticleType::exists(name);
         if (!is_multiplet && !is_state) {
           throw InvalidDecay("Daughter " + name
@@ -239,7 +240,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
               + ": \"" + trimmed + "\")");
         }
         const bool is_hadronic_multiplet = is_multiplet
-            && IsoParticleType::find(name).get_states()[0]->is_hadron();
+            && isotype->get_states()[0]->is_hadron();
         multi &= is_hadronic_multiplet;
         lineinput >> name;
       }

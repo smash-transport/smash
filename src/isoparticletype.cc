@@ -21,41 +21,42 @@ IsoParticleType::IsoParticleType(const std::string &n, float m, float w,
 
 const IsoParticleTypeList& IsoParticleType::list_all() { return iso_type_list; }
 
-const IsoParticleType& IsoParticleType::find(const std::string &name) {
-  const auto found = std::lower_bound(
-      iso_type_list.begin(), iso_type_list.end(), name,
-      [](const IsoParticleType &l, const std::string &r) {
-        return l.name() < r;
-      });
-  if (found == iso_type_list.end() || found->name() != name) {
-    throw ParticleNotFoundFailure("Isospin multiplet " + name + " not found!");
-  }
-  return *found;
-}
-
-IsoParticleType& IsoParticleType::find_private(const std::string &name) {
+/// Helper function for IsoParticleType::try_find and friends.
+static IsoParticleType* try_find_private(const std::string &name) {
   auto found = std::lower_bound(
       iso_type_list.begin(), iso_type_list.end(), name,
       [](const IsoParticleType &l, const std::string &r) {
         return l.name() < r;
       });
   if (found == iso_type_list.end() || found->name() != name) {
-    throw std::runtime_error("Isospin multiplet " + name +
-                             " not found (privately)!");
+    return {};  // The default constructor creates an invalid pointer.
+  }
+  return &*found;
+}
+
+const IsoParticleType* IsoParticleType::try_find(const std::string &name) {
+  return try_find_private(name);
+}
+
+const IsoParticleType& IsoParticleType::find(const std::string &name) {
+  const auto found = try_find_private(name);
+  if (!found) {
+    throw ParticleNotFoundFailure("Isospin multiplet " + name + " not found!");
+  }
+  return *found;
+}
+
+IsoParticleType& IsoParticleType::find_private(const std::string &name) {
+  auto found = try_find_private(name);
+  if (!found) {
+    throw ParticleNotFoundFailure("Isospin multiplet " + name + " not found (privately)!");
   }
   return *found;
 }
 
 bool IsoParticleType::exists(const std::string &name) {
-  const auto found = std::lower_bound(
-      iso_type_list.begin(), iso_type_list.end(), name,
-      [](const IsoParticleType &l, const std::string &r) {
-        return l.name() < r;
-      });
-  if (found != iso_type_list.end()) {
-    return found->name() == name;
-  }
-  return false;
+  const auto found = try_find_private(name);
+  return found;
 }
 
 /* Construct the name-string for an isospin multiplet from the given
