@@ -203,7 +203,7 @@ class Experiment : public ExperimentBase {
   }
 
   /// Shortcut for next output time
-  float next_output_time() const {
+  double next_output_time() const {
     return parameters_.outputclock.next_time();
   }
 
@@ -309,12 +309,12 @@ class Experiment : public ExperimentBase {
   const int nevents_;
 
   /// simulation time at which the evolution is stopped.
-  const float end_time_;
+  const double end_time_;
   /** The clock's timestep size at start up
    *
    * Stored here so that the next event will remember this.
    */
-  const float delta_time_startup_;
+  const double delta_time_startup_;
 
   /**
    * This indicates whether we force all resonances to decay in the last timestep.
