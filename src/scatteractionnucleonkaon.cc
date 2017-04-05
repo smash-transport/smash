@@ -116,13 +116,6 @@ void ScatterActionNucleonKaon::format_debug_output(std::ostream &out) const {
 }
 
 CollisionBranchList ScatterActionNucleonKaon::two_to_two_cross_sections() {
-
-  CollisionBranchList process_list = two_to_two_inel();
-
-  return process_list;
-}
-
-CollisionBranchList ScatterActionNucleonKaon::two_to_two_inel() {
   const ParticleType &type_particle_a = incoming_particles_[0].type();
   const ParticleType &type_particle_b = incoming_particles_[1].type();
   CollisionBranchList process_list;

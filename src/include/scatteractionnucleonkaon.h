@@ -40,12 +40,6 @@ class ScatterActionNucleonKaon : public ScatterActionBaryonMeson {
    */
   void format_debug_output(std::ostream &out) const override;
 
- private:
-  /**
-   * Calculate cross sections for strangeness exchange in nucleon-kaon
-   * collisions.
-   */
-  CollisionBranchList two_to_two_inel();
 };
 
 }  // namespace Smash

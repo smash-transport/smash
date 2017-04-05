@@ -86,13 +86,6 @@ static float Cugnon_bnp(float plab) {
 
 
 CollisionBranchList ScatterActionNucleonNucleon::two_to_two_cross_sections() {
-  /* Find all single-resonance production channels. */
-  CollisionBranchList process_list = two_to_two_inel();
-
-  return process_list;
-}
-
-CollisionBranchList ScatterActionNucleonNucleon::two_to_two_inel() {
   CollisionBranchList process_list, channel_list;
   const double sqrts = sqrt_s();
 
