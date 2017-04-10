@@ -22,7 +22,7 @@ namespace Smash {
 
 ScatterAction::ScatterAction(const ParticleData &in_part_a,
                              const ParticleData &in_part_b,
-                             float time, bool isotropic,
+                             double time, bool isotropic,
                              float formation_time)
     : Action({in_part_a, in_part_b}, time),
       total_cross_section_(0.), isotropic_(isotropic),

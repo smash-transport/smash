@@ -17,7 +17,19 @@
 using namespace Smash;
 
 TEST(init_particle_types) {
-  Test::create_actual_particletypes();
+  ParticleType::create_type_list(
+      "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
+      "π               0.138   7.7e-9      111     211\n"
+      "σ               0.800   0.400   9000221\n"
+      "ρ               0.776   0.149       113     213\n"
+      "ω               0.783   8.49e-3     223\n"
+      "N       0.938 0         2112    2212\n"
+      "Δ       1.232 0.117    1114    2114    2214    2224\n"
+      "Λ        1.116 0         3122\n"
+      "Λ(1520)  1.520 0.0156    3124\n"
+      "Λ(1690)  1.690 0.0600   13124\n"
+      "Σ       1.189 0        3112    3212    3222\n"
+      "e⁻ 0.000511 0 11\n");
 }
 
 TEST_CATCH(load_decaymodes_missing_pdg, IsoParticleType::ParticleNotFoundFailure) {
@@ -55,7 +67,6 @@ TEST_CATCH(load_decaymodes_duplicate, DecayModes::LoadFailure) {
 
 const float tolerance = 2.0e-7;
 
-TEST(load_decay_modes) {
   const std::string decays_input(
       " ρ\t# rho\n"
       "\n"
@@ -68,7 +79,19 @@ TEST(load_decay_modes) {
       "\n"
       "Δ\n"
       "1.  1  N π\n"
+      "\n"
+      "Λ(1520)\n"
+      "1.0 1 Λ π π\n"
+      "\n"
+      "Λ(1690)\n"
+      "1.0 1 Σ π π\n"
+      "\n"
+      "σ \n"
+      "1.  0  π π\n"
       );
+
+
+TEST(load_decay_modes) {
   DecayModes::load_decaymodes(decays_input);
 
   // check that the decays of the rho and omega are generated correctly
@@ -180,16 +203,6 @@ TEST(load_decay_modes) {
 }
 
 TEST(load_decaymodes_3body) {
-  const std::string decays_input(
-      "Λ(1520)\n"
-      "1.0 1 Λ π π\n"
-      "\n"
-      "Λ(1690)\n"
-      "1.0 1 Σ π π\n"
-      "\n"
-      "ω\n"
-      "1.0 1 π π π\n"
-      );
   DecayModes::load_decaymodes(decays_input);
   {
     const auto &antiLambda = ParticleType::find(-0x3124).decay_modes();
@@ -224,8 +237,8 @@ TEST(load_decaymodes_3body) {
     const auto &omega = ParticleType::find(0x223).decay_modes();
     VERIFY(!omega.is_empty());
     const auto &modelist = omega.decay_mode_list();
-    COMPARE(modelist.size(), 1u);
-    COMPARE_ABSOLUTE_ERROR(modelist[0]->weight(), 1.f, tolerance);
+    COMPARE(modelist.size(), 3u);
+    COMPARE_ABSOLUTE_ERROR(modelist[0]->weight(), 1.f/3.f, tolerance);
     VERIFY(modelist[0]->particle_types()[0]->pdgcode().is_pion());
   }
 }

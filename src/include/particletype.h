@@ -356,6 +356,13 @@ class ParticleType {
   static bool exists(PdgCode pdgcode);
 
   /**
+   * Returns whether the ParticleType with the given \p name exists.
+   *
+   * \note The complexity of the search is \f$\mathcal O(N)\f$.
+   */
+  static bool exists(const std::string& name);
+
+  /**
    * Initialize the global ParticleType list (list_all) from the given input
    * data. This function must only be called once (will fail on second
    * invocation).

@@ -129,6 +129,7 @@ set(smash_src
         threevector.cc
         tsc.cc
         vtkoutput.cc
+        wallcrossingaction.cc
         )
 
 if(USE_ROOT AND ROOT_FOUND)

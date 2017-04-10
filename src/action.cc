@@ -23,7 +23,7 @@
 
 namespace Smash {
 
-Action::Action(const ParticleList &in_part, float time)
+Action::Action(const ParticleList &in_part, double time)
               : incoming_particles_(in_part),
                 time_of_execution_(time+in_part[0].position().x0()) {}
 
@@ -38,6 +38,12 @@ bool Action::is_valid(const Particles &particles) const {
 
 bool Action::is_pauli_blocked(const Particles & particles,
                              const PauliBlocker& p_bl) const {
+  // Wall-crossing actions should never be blocked: currently
+  // if the action is blocked, a particle continues to propagate in a straight
+  // line. This would simply bring it out of the box.
+  if (process_type_ == ProcessType::Wall) {
+    return false;
+  }
   const auto &log = logger<LogArea::PauliBlocking>();
   for (const auto &p : outgoing_particles_) {
     if (p.is_baryon()) {
@@ -85,8 +91,12 @@ void Action::perform(Particles *particles, uint32_t id_process) {
     }
   }
 
+  // For elastic collisions and box wall crossings it is not necessary to remove
+  // particles from the list and insert new ones, it is enough to update their
+  // properties.
   particles->update(incoming_particles_, outgoing_particles_,
-                    process_type_ != ProcessType::Elastic);
+                    (process_type_ != ProcessType::Elastic) &&
+                    (process_type_ != ProcessType::Wall));
 
   log.debug("Particle map now has ", particles->size(), " elements.");
 

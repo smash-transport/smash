@@ -24,6 +24,9 @@ double propagate_straight_line(Particles *particles, double to_time) {
   for (ParticleData &data : *particles) {
     const double t0 = data.position().x0();
     dt = to_time - t0;
+    if (dt < 0.0) {
+      log.error("propagate_straight_line - negative dt = ", dt);
+    }
     assert(dt >= 0.0);
     // "Frozen Fermi motion": Fermi momenta are only used for collisions,
     // but not for propagation. This is done to avoid nucleus flying apart

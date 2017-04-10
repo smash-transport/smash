@@ -29,7 +29,7 @@ class AdaptiveParameters {
     target_missed_actions_(conf.take({"Target_Missed_Actions"}, 0.01f)),
     deviation_factor_(conf.take({"Allowed_Deviation"}, 2.5f)) {};
 
-  void initialize(float dt) {
+  void initialize(double dt) {
     // Calculate the rate that would lead to the given time step size.
     rate_ = target_missed_actions_ / dt;
   }
@@ -41,7 +41,7 @@ class AdaptiveParameters {
    * \param N_particles The number of particles in the system.
    * \return if timestep was changed or not.
    */
-  bool update_timestep(const Actions &actions, size_t N_particles, float* dt) {
+  bool update_timestep(const Actions &actions, size_t N_particles, double* dt) {
     const auto &log = logger<LogArea::AdaptiveTS>();
     bool changed_timestep = false;
 
