@@ -115,10 +115,14 @@ bool ScatterActionPhoton::is_photon_reaction(const ParticleList &in) {
   }
   // Turn all pi- and rho- into pi+ and rho+ to avoid listing
   // too many variants further, swap so that pion should be first.
-  PdgCode a = (in[0].type().charge() >= 0) ? in[0].pdgcode() :
-               in[0].pdgcode().get_antiparticle();
-  PdgCode b = (in[1].type().charge() >= 0) ? in[1].pdgcode() :
-               in[1].pdgcode().get_antiparticle();
+  // PdgCode a = (in[0].type().charge() >= 0) ? in[0].pdgcode() :
+  //             in[0].pdgcode().get_antiparticle();
+  // PdgCode b = (in[1].type().charge() >= 0) ? in[1].pdgcode() :
+  //             in[1].pdgcode().get_antiparticle();
+
+  PdgCode a = in[0].pdgcode();
+  PdgCode b = in[1].pdgcode();
+
   if (!a.is_pion()) {
     std::swap(a, b);
   }
@@ -127,15 +131,35 @@ bool ScatterActionPhoton::is_photon_reaction(const ParticleList &in) {
     case(pack(pdg::pi_p, pdg::pi_z)):
     case(pack(pdg::pi_z, pdg::pi_p)):
       // ReactionType::pi0_pi
+    case(pack(pdg::pi_m, pdg::pi_z)):
+    case(pack(pdg::pi_z, pdg::pi_m)):
+      //new
     case(pack(pdg::pi_p, pdg::rho_z)):
+    case(pack(pdg::rho_z, pdg::pi_p)):
       // ReactionType::piplus_rho0
-    case(pack(pdg::pi_p, pdg::rho_p)):
+    case(pack(pdg::pi_m, pdg::rho_z)):
+    case(pack(pdg::rho_z, pdg::pi_m)):
+      //new
+    case(pack(pdg::pi_m, pdg::rho_p)):
+    case(pack(pdg::rho_p, pdg::pi_m)):
       // ReactionType::pi_rho
+    case(pack(pdg::pi_p, pdg::rho_m)):
+    case(pack(pdg::rho_m, pdg::pi_p)):
+      //new
     case(pack(pdg::pi_z, pdg::rho_p)):
+    case(pack(pdg::rho_p, pdg::pi_z)):
       // ReactionType::pi0_rho
+    case(pack(pdg::pi_z, pdg::rho_m)):
+    case(pack(pdg::rho_m, pdg::pi_z)):
+      //new
     case(pack(pdg::pi_p, pdg::eta)):
+    case(pack(pdg::eta, pdg::pi_p)):
       // ReactionType::piplus_eta
-    case(pack(pdg::pi_p, pdg::pi_p)):
+    case(pack(pdg::pi_m, pdg::eta)):
+    case(pack(pdg::eta, pdg::pi_m)):
+      //new
+    case(pack(pdg::pi_p, pdg::pi_m)):
+    case(pack(pdg::pi_m, pdg::pi_p)):
       // ReactionType::pi_pi
       return true;
       break;
@@ -145,21 +169,23 @@ bool ScatterActionPhoton::is_photon_reaction(const ParticleList &in) {
 }
 
 // this is where particles are defined independently whether their charge
-// is possitive or negative. So probably, additional constants need to be 
+// is possitive or negative. So probably, additional constants need to be
 // added in order to account for all the possible charge combinations.
 
 
 CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
   CollisionBranchList process_list;
   ParticleTypePtr rho0_particle = &ParticleType::find(pdg::rho_z);
-  ParticleTypePtr charged_rho_particle = &ParticleType::find(pdg::rho_p);
+  ParticleTypePtr rho_plus_particle = &ParticleType::find(pdg::rho_p);
+  ParticleTypePtr rho_minus_particle = &ParticleType::find(pdg::rho_m);
   ParticleTypePtr eta_particle = &ParticleType::find(pdg::eta);
-  ParticleTypePtr pi_particle = &ParticleType::find(pdg::pi_z);
-  ParticleTypePtr charged_pi_particle = &ParticleType::find(pdg::pi_p);
+  ParticleTypePtr pi0_particle = &ParticleType::find(pdg::pi_z);
+  ParticleTypePtr pi_plus_particle = &ParticleType::find(pdg::pi_p);
+  ParticleTypePtr pi_minus_particle = &ParticleType::find(pdg::pi_m);
   ParticleTypePtr photon_particle = &ParticleType::find(pdg::photon);
   const float m_rho = rho0_particle->mass();
   const float m_rho_2 = pow_int(m_rho, 2);
-  const float m_pi = pi_particle->mass();
+  const float m_pi = pi0_particle->mass();
   const float m_pi_2 = pow_int(m_pi, 2);
   const float m_eta = eta_particle->mass();
   const float m_eta_2 = pow_int(m_eta, 2);
@@ -192,32 +218,35 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
     const double &m2 = part_b.effective_mass();
     double m3 = 0.0;  // will be fixed according to reaction outcome
     const double p_cm_2 = cm_momentum_squared();
-    ParticleTypePtr part_out = photon_particle;
+    ParticleTypePtr part_out = photon_particle; // deafult: -> Gam + Gam
     ParticleTypePtr photon_out = photon_particle;
 
     reac = ReactionType::no_reaction;
+    // Pi0 + X -> Y + Gamma
     if (part_a.type().charge() == 0) {
       if (part_b.type().charge() != 0) {
         if (part_b.type().pdgcode().is_pion()) {
           reac = ReactionType::pi0_pi;
-          part_out = charged_rho_particle;
+        //  part_out = charged_rho_particle;
+        // should it not be sufficient to define the outgoing particle
+        // in the ReactionType?? Otherwise this would be doubled...
         } else if (part_b.type().pdgcode().is_rho()) {
           reac = ReactionType::pi0_rho;
-          part_out = charged_pi_particle;
+        //  part_out = charged_pi_particle;
         }
       }
-    } else if (part_b.type().charge() == 0) {
+    } else if (part_a.type().charge() != 0) {
         // now part_a.type().charge()!=0
         if (part_b.type().pdgcode().is_pion()) {
           reac = ReactionType::pi0_pi;
-          part_out = charged_rho_particle;
+        //  part_out = charged_rho_particle;
         } else if (part_b.type().pdgcode().is_rho()) {
-          reac = ReactionType::piplus_rho0;
-          part_out = charged_pi_particle;
+          reac = ReactionType::pi_rho0;
+          // part_out = charged_pi_particle;
         } else if (part_b.type().pdgcode() == pdg::eta) {
           // corresponds to eta meson
-          reac = ReactionType::piplus_eta;
-          part_out = charged_pi_particle;
+          reac = ReactionType::pi_eta;
+          // part_out = charged_pi_particle;
         }
       } else if (part_b.type().charge() == -part_a.type().charge()) {
         if (part_b.type().pdgcode().is_pion()) {
@@ -226,11 +255,13 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
           // so part_out is fixed later
         } else if (part_b.type().pdgcode().is_rho()) {
           reac = ReactionType::pi_rho;
-          part_out = pi_particle;
+        //  part_out = pi_particle;
         }
       }
 
-    m3 = part_out->mass();
+    // Unnecessary to declare m3 here, since it will be declared once more
+    // in the ReactionType ... ?!?
+    // m3 = part_out->mass();
     if (sqrts <= m1 + m2)
       reac = ReactionType::no_reaction;
     if (reac != ReactionType::no_reaction) {
@@ -250,6 +281,8 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
         case ReactionType::pi_pi:  // there are three possible reaction channels
           // the first possible reaction has part_out = photon_particle,
           // which is the default declared above
+          part_out = photon_particle;
+          m3 = part_out->mass();
           xsection = twopi * pow_int(alpha, 2) / (s * p_cm_2);
           t1 += -m_pi_2;  // is t+
           t2 += -m_pi_2;
@@ -312,6 +345,12 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
           break;
 
          case ReactionType::pi0_pi:
+          if (part_a.type().charge() == 1 || part_b.type().charge() == 1) {
+            part_out = rho_plus_particle;
+          } else {
+            part_out = rho_minus_particle;
+          }
+
            if (gamma_rho_tot > really_small) {
              if (tabulation_pi0_pi_rho == nullptr) {
                tabulation_pi0_pi_rho = make_unique<Tabulation>(
@@ -331,7 +370,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
               *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
           break;
 
-        case ReactionType::piplus_rho0:
+        case ReactionType::pi_rho0:
           xsection = alpha * g_rho_2 / (12 * s * p_cm_2);
           t1 += -m_pi_2;
           t2 += -m_pi_2;
@@ -348,6 +387,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
           break;
 
         case ReactionType::pi_rho:
+          part_out = rho0_particle;
           xsection = -alpha * g_rho_2 / (48 * s * p_cm_2);
           t1 += -m_pi_2;
           t2 += -m_pi_2;
@@ -367,6 +407,12 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
           break;
 
         case ReactionType::pi0_rho:
+          if (part_b.type().charge() == 1) {
+            part_out = pi_plus_particle;
+          } else {
+            part_out = pi_minus_particle;
+          }
+
           xsection = alpha * g_rho_2 / (48 * s * p_cm_2);
           u1 += -pow_int(m2, 2);  // is u+
           u2 += -pow_int(m2, 2);
@@ -385,7 +431,13 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
               *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
           break;
 
-        case ReactionType::piplus_eta:
+        case ReactionType::pi_eta:
+          if (part_a.type().charge() == 1) {
+            part_out = pi_plus_particle;
+          } else {
+            part_out = pi_minus_particle;
+          }
+
           xsection = M_PI * alpha * 4.7 / (16 * m_eta_2 * s * p_cm_2);
           I0 = 1 / (m_rho * gamma_rho_tot) *
                (atan((u1 - m_rho_2) / (m_rho * gamma_rho_tot)) -
@@ -567,7 +619,7 @@ float ScatterActionPhoton::diff_cross_section(float t, float m3) const {
       e += 2 * (m_pi_2 / m3_2 - 4.5);
       diff_xsection = diff_xsection * e;
       break;
-    case ReactionType::piplus_rho0:
+    case ReactionType::pi_rho0:
       diff_xsection = alpha * g_rho_2 / (12 * s * p_cm_2);
       diff_xsection =
           diff_xsection *
@@ -596,7 +648,7 @@ float ScatterActionPhoton::diff_cross_section(float t, float m3) const {
                                (s - m_pi_2 + m2) / (s - m_pi_2));
       diff_xsection = diff_xsection * e;
       break;
-    case ReactionType::piplus_eta:
+    case ReactionType::pi_eta:
       diff_xsection = twopi * alpha * 4.7 *
                       (pow_int(m_rho, 4) / (pow_int(u - m_rho_2, 2) +
                                         pow_int(gamma_rho_tot, 2) * m_rho_2)) /

@@ -74,10 +74,10 @@ class ScatterActionPhoton : public ScatterAction {
   enum class ReactionType {
     no_reaction = 0,
     pi0_pi = 1,
-    piplus_rho0 = 2,
+    pi_rho0 = 2,
     pi_rho = 3,
     pi0_rho = 4,
-    piplus_eta = 5,
+    pi_eta = 5,
     pi_pi = 6
   };
 
