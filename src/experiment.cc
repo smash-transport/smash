@@ -173,10 +173,32 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   // just assign 1.0 fm/c, reasonable value will be set at event initialization
   const double dt = config.take({"General", "Delta_Time"}, 1.0f);
   const double output_dt = config.take({"Output", "Output_Interval"});
+  const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
+  const bool two_to_two = config.take({"Collision_Term", "Two_to_Two"}, true);
+  const bool strings_switch = config.take({"Collision_Term", "Strings"}, false),
+  const bool photons_switch = config.has_value({"Output", "Photons"}) ?
+                    config.take({"Output", "Photons", "Enable"}, true) :
+                    false,
+  /// Elastic collisions between the nucleons with the square root s
+  //  below low_snn_cut are excluded.
+  const double low_snn_cut = config.take({"Collision_Term",
+                                          "Elastic_NN_Cutoff_Sqrts"}, 1.98);
+  const auto proton = ParticleType::try_find(pdg::p);
+  const auto pion = ParticleType::try_find(pdg::pi_z);
+  if (proton && pion &&
+      low_snn_cut > proton->mass() + proton->mass() + pion->mass()) {
+    log.warn("The cut-off should be below the threshold energy",
+             " of the process: NN to NNpi");
+  }
   return {{0.0f, dt}, {0.0, output_dt},
           ntest,
           config.take({"General", "Gaussian_Sigma"}, 1.0f),
-          config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.0f)};
+          config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.0f),
+          two_to_one,
+          two_to_two,
+          strings_switch,
+          photons_switch,
+          low_snn_cut};
 }
 }  // unnamed namespace
 
@@ -277,48 +299,30 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       force_decays_(
           config.take({"Collision_Term", "Force_Decays_At_End"}, true)),
       use_grid_(config.take({"General", "Use_Grid"}, true)),
-      strings_switch_(config.take({"Collision_Term", "Strings"}, false)),
       dileptons_switch_(config.has_value({"Output", "Dileptons"}) ?
                     config.take({"Output", "Dileptons", "Enable"}, true) :
-                    false),
-      photons_switch_(config.has_value({"Output", "Photons"}) ?
-                    config.take({"Output", "Photons", "Enable"}, true) :
                     false),
       time_step_mode_(
           config.take({"General", "Time_Step_Mode"}, TimeStepMode::Fixed)) {
   const auto &log = logger<LogArea::Experiment>();
   log.info() << *this;
-
-  const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
-  const bool two_to_two = config.take({"Collision_Term", "Two_to_Two"}, true);
-  /// Elastic collisions between the nucleons with the square root s
-  //  below low_snn_cut are excluded.
-  const double low_snn_cut = config.take({"Collision_Term",
-                                          "Elastic_NN_Cutoff_Sqrts"}, 1.98);
-  const auto proton = ParticleType::try_find(pdg::p);
-  const auto pion = ParticleType::try_find(pdg::pi_z);
-  if (proton && pion &&
-      low_snn_cut > proton->mass() + proton->mass() + pion->mass()) {
-    log.warn("The cut-off should be below the threshold energy",
-             " of the process: NN to NNpi");
   }
 
   // create finders
   if (dileptons_switch_) {
     dilepton_finder_ = make_unique<DecayActionsFinderDilepton>();
   }
-  if (photons_switch_) {
+  if (parameters_.photons_switch) {
     n_fractional_photons_ = config.take({"Output", "Photons", "Fractions"});
   }
-  if (two_to_one) {
+  if (parameters_.two_to_one) {
     action_finders_.emplace_back(make_unique<DecayActionsFinder>());
   }
-  if (two_to_one || two_to_two) {
+  if (parameters_.two_to_one || parameters_.two_to_two) {
     auto scat_finder = make_unique<ScatterActionsFinder>(config, parameters_,
-                       two_to_one, two_to_two, low_snn_cut, strings_switch_,
                        nucleon_has_interacted_,
                        modus_.total_N_number(), modus_.proj_N_number(),
-                       photons_switch_, n_fractional_photons_);
+                       n_fractional_photons_);
     max_transverse_distance_sqr_ = scat_finder->max_transverse_distance_sqr(
                                                   parameters_.testparticles);
     action_finders_.emplace_back(std::move(scat_finder));
