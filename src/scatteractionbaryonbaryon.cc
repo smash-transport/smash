@@ -141,10 +141,16 @@ float ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(double sqrts,
               (type_b.is_Nstar() && type_a.is_nucleon())) &&
                type_a.antiparticle_sign() == type_b.antiparticle_sign()) {
     // NN → NN*
-    if (twoI == 2) {
+    if (twoI == 2) {  // pp
       return 7. / msqr;
-    } else if (twoI == 0) {
-      return 14. / msqr;
+    } else if (twoI == 0) {  // pn
+      const float parametrization = 14. / msqr;
+      if (type_a.is_Nstar1535() || type_b.is_Nstar1535()) {  // TODO: documentation
+        // std::cout << "Found and enhanced pn --> N*(1535)+X" << '\n';
+        return 6.5 * parametrization;
+      } else {
+        return parametrization;
+      }
     }
   } else if (((type_a.is_Deltastar() && type_b.is_nucleon()) ||
               (type_b.is_Deltastar() && type_a.is_nucleon())) &&
