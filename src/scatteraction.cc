@@ -336,10 +336,10 @@ void ScatterAction::resonance_formation() {
    * is the rest frame of the resonance.  */
   outgoing_particles_[0].set_4momentum(FourVector(sqrt_s(), 0., 0., 0.));
 
-  /* Set the formation time of the resonance to the larger formation time of the
+  /* Set the formation time of the resonance to the larger actual time of the
    * incoming particles */
-  const float t0 = incoming_particles_[0].formation_time();
-  const float t1 = incoming_particles_[1].formation_time();
+  const float t0 = incoming_particles_[0].position().x0();
+  const float t1 = incoming_particles_[1].position().x0();
   const size_t index_tmax = (t0 > t1) ? 0 : 1;
   const float sc = incoming_particles_[index_tmax].cross_section_scaling_factor();
   if (t0 > time_of_execution_ || t1 > time_of_execution_) {
@@ -464,7 +464,10 @@ void ScatterAction::string_excitation() {
           data.set_cross_section_scaling_factor(suppression_factor * 0.0);
         }
       }
-      data.set_formation_time(formation_time_ * gamma_cm());
+      //Set formation time: actual time of collision + time to form the particle
+      double t0 = incoming_particles_[0].position().x0();
+      double t1 = incoming_particles_[1].position().x0();
+      data.set_formation_time(formation_time_ * gamma_cm() + std::max(t0,t1));
       outgoing_particles_.push_back(data);
     }
     /* If the incoming particles already were unformed, the formation
