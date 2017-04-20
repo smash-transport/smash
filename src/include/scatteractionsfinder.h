@@ -30,9 +30,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
 
   ScatterActionsFinder(Configuration config,
                        const ExperimentParameters &parameters,
-                       bool two_to_one, bool two_to_two, double low_snn_cut,
-                       bool strings_switch, const std::vector<bool> &nucleon_has_interacted,
-                       int N_tot, int N_proj, bool photons, int n_fractional_photons);
+                       const std::vector<bool> &nucleon_has_interacted,
+                       int N_tot, int N_proj, int n_fractional_photons);
 
   /** Constructor for testing purposes. */
   ScatterActionsFinder(float elastic_parameter, int testparticles,

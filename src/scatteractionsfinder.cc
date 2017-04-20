@@ -54,22 +54,21 @@ namespace Smash {
 
 ScatterActionsFinder::ScatterActionsFinder(
     Configuration config, const ExperimentParameters &parameters,
-    bool two_to_one, bool two_to_two, double low_snn_cut, bool strings_switch,
     const std::vector<bool> &nucleon_has_interacted, int N_tot, int N_proj,
-    bool photons = false, int n_fractional_photons = 1)
+     int n_fractional_photons = 1)
     : elastic_parameter_(config.take({"Collision_Term",
                                       "Elastic_Cross_Section"}, -1.0f)),
       testparticles_(parameters.testparticles),
       isotropic_(config.take({"Collision_Term", "Isotropic"}, false)),
-      two_to_one_(two_to_one),
-      two_to_two_(two_to_two),
-      low_snn_cut_(low_snn_cut),
-      strings_switch_(strings_switch),
+      two_to_one_(parameters.two_to_one),
+      two_to_two_(parameters.two_to_two),
+      low_snn_cut_(parameters.low_snn_cut),
+      strings_switch_(parameters.strings_switch),
       nucleon_has_interacted_(nucleon_has_interacted),
       N_tot_(N_tot),
       N_proj_(N_proj),
       formation_time_(config.take({"Collision_Term", "Formation_Time"}, 1.0f)),
-      photons_(photons),
+      photons_(parameters.photons_switch),
       n_fractional_photons_(n_fractional_photons) {
         if (is_constant_elastic_isotropic()) {
           const auto &log = logger<LogArea::FindScatter>();

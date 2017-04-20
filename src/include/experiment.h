@@ -327,19 +327,9 @@ class Experiment : public ExperimentBase {
   const bool use_grid_;
 
   /**
-   * This indicates whether string fragmentation is switched on.
-   */
-  const bool strings_switch_;
-
-  /**
    * This indicates whether dileptons are switched on.
    */
   const bool dileptons_switch_;
-
-  /**
-   * This indicates whether photons are switched on.
-   */
-  const bool photons_switch_;
 
   /**
    * This indicates whether to use time steps.
