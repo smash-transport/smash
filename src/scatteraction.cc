@@ -67,6 +67,9 @@ void ScatterAction::generate_final_state() {
       /* 2->2 inelastic scattering */
       /* Sample the particle momenta in CM system. */
       sample_2body_phasespace();
+      for (auto &p : outgoing_particles_) {
+        p.set_formation_time(middle_point.x0());
+      }
       break;
     case ProcessType::String:
       /* string excitation */
@@ -336,14 +339,13 @@ void ScatterAction::resonance_formation() {
    * is the rest frame of the resonance.  */
   outgoing_particles_[0].set_4momentum(FourVector(sqrt_s(), 0., 0., 0.));
 
-  /* Set the formation time of the resonance to the larger actual time of the
-   * incoming particles */
+  /* Set the formation time of the resonance to the time associated with its origin */
   const float t0 = incoming_particles_[0].position().x0();
   const float t1 = incoming_particles_[1].position().x0();
   const size_t index_tmax = (t0 > t1) ? 0 : 1;
   const float sc = incoming_particles_[index_tmax].cross_section_scaling_factor();
   if (t0 > time_of_execution_ || t1 > time_of_execution_) {
-    outgoing_particles_[0].set_formation_time(std::max(t0,t1));
+    outgoing_particles_[0].set_formation_time(get_interaction_point().x0());
     outgoing_particles_[0].set_cross_section_scaling_factor(sc);
   }
   log.debug("Momentum of the new particle: ",
@@ -465,9 +467,8 @@ void ScatterAction::string_excitation() {
         }
       }
       //Set formation time: actual time of collision + time to form the particle
-      double t0 = incoming_particles_[0].position().x0();
-      double t1 = incoming_particles_[1].position().x0();
-      data.set_formation_time(formation_time_ * gamma_cm() + std::max(t0,t1));
+      data.set_formation_time(formation_time_ * gamma_cm() +
+                              get_interaction_point().x0());
       outgoing_particles_.push_back(data);
     }
     /* If the incoming particles already were unformed, the formation
