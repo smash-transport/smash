@@ -72,13 +72,13 @@ class ScatterActionPhoton : public ScatterAction {
   const int num_tab_pts = 200;
 
   enum class ReactionType {
-    no_reaction = 0,
-    pi0_pi = 1,
-    pi_rho0 = 2,
-    pi_rho = 3,
-    pi0_rho = 4,
-    pi_eta = 5,
-    pi_pi = 6
+    no_reaction,
+    pi0_pi,
+    pi_rho0,
+    pi_rho,
+    pi0_rho,
+    pi_eta,
+    pi_pi
   };
 
   ReactionType reac = ReactionType::no_reaction;
