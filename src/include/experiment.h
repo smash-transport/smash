@@ -332,11 +332,6 @@ class Experiment : public ExperimentBase {
   const bool dileptons_switch_;
 
   /**
-   * This indicates whether photons are switched on.
-   */
-  const bool photons_switch_;
-
-  /**
    * This indicates whether to use time steps.
    */
   const TimeStepMode time_step_mode_;

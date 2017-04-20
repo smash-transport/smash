@@ -175,10 +175,10 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   const double output_dt = config.take({"Output", "Output_Interval"});
   const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
   const bool two_to_two = config.take({"Collision_Term", "Two_to_Two"}, true);
-  const bool strings_switch = config.take({"Collision_Term", "Strings"}, false),
+  const bool strings_switch = config.take({"Collision_Term", "Strings"}, false);
   const bool photons_switch = config.has_value({"Output", "Photons"}) ?
                     config.take({"Output", "Photons", "Enable"}, true) :
-                    false,
+                    false;
   /// Elastic collisions between the nucleons with the square root s
   //  below low_snn_cut are excluded.
   const double low_snn_cut = config.take({"Collision_Term",
@@ -306,7 +306,6 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
           config.take({"General", "Time_Step_Mode"}, TimeStepMode::Fixed)) {
   const auto &log = logger<LogArea::Experiment>();
   log.info() << *this;
-  }
 
   // create finders
   if (dileptons_switch_) {
@@ -476,7 +475,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     }
   }
 
-  if (photons_switch_) {
+  if (parameters_.photons_switch) {
     // create photon output object
     std::string format = config.take({"Output", "Photons", "Format"});
     if (format == "Oscar") {
@@ -767,7 +766,7 @@ bool Experiment<Modus>::perform_action(Action &action,
   }
 
   // At every collision photons can be produced.
-  if (photons_switch_ &&
+  if (parameters_.photons_switch &&
       ScatterActionPhoton::is_photon_reaction(action.incoming_particles())) {
     // Time in the action constructor is relative to current time of incoming
     constexpr double action_time = 0.f;
@@ -870,7 +869,7 @@ void Experiment<Modus>::run_time_evolution() {
     // fragmentation are off.  If potentials are on then momentum is conserved
     // only in average.  If string fragmentation is on, then energy and
     // momentum are only very roughly conserved in high-energy collisions.
-    if (!potentials_ && !strings_switch_) {
+    if (!potentials_ && !parameters_.strings_switch) {
       std::string err_msg = conserved_initial_.report_deviations(particles_);
       if (!err_msg.empty()) {
         log.error() << err_msg;
