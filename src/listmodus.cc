@@ -100,7 +100,7 @@ std::pair<bool, float> ListModus::check_formation_time_(
                             const std::string & particle_list) {
     float earliest_formation_time = FLT_MAX;
     float formation_time_difference = 0.0;
-    float reference_formation_time;
+    float reference_formation_time = 0.0;  // avoid compiler warning
     for (const Line &line : line_parser(particle_list)) {
         std::istringstream lineinput(line.text);
         float t;
