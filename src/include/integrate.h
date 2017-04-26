@@ -115,7 +115,7 @@ class Integrator {
         &fun};
     // We disable float traps when calling GSL code we cannot control.
     DisableFloatTraps guard;
-    int error_code = gsl_integration_cquad(&gslfun, a, b,
+    const int error_code = gsl_integration_cquad(&gslfun, a, b,
                           accuracy_absolute_, accuracy_relative_,
                           workspace_.get(),
                           &result.first, &result.second,
