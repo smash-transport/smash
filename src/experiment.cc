@@ -358,7 +358,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    **/
   if (time_step_mode_ == TimeStepMode::Adaptive) {
     adaptive_parameters_ = make_unique<AdaptiveParameters>(
-      config["General"]["Adaptive_Time_Step"]);
+      config["General"]["Adaptive_Time_Step"], delta_time_startup_);
     log.info() << *adaptive_parameters_;
   }
 
