@@ -36,7 +36,7 @@ bool enable_float_traps(int femask) {
 
 #if defined __GNUC__ /*for inline asm*/
   // get the current FPU control word
-  unsigned short fpucw;
+  uint16_t fpucw;
   asm volatile("fstcw %0" : "=m"(fpucw));
 
   // clear the bits where the FPU should trap
