@@ -20,6 +20,7 @@
 #include "include/inputfunctions.h"
 #include "include/random.h"
 #include "include/scatteractionsfinder.h"
+#include "include/stringfunctions.h"
 /* build dependent variables */
 #include "include/config.h"
 
@@ -119,6 +120,12 @@ void usage(const int rc, const std::string &progname) {
       "  -l, --list-2-to-n       list all possible 2->2 reactions\n"
       "  -r, --resonance <pdg>   dump width(m) and m*spectral function(m^2)"
       " for resonance pdg\n"
+      "  -s, --cross-sections <pdg1>,<pdg2>[,mass1][,mass2] \n"
+      "                          dump all partial cross-sections of "
+      "pdg1 + pdg2 reactions versus sqrt(s).\n"
+      "                          Masses are optional, by default pole masses"
+      " are used.\n"
+      "                          Note the required comma and no spaces.\n"
       "  -f, --force             force overwriting files in the output "
       "directory"
       "\n"
@@ -200,6 +207,7 @@ int main(int argc, char *argv[]) {
                                  {"output", required_argument, 0, 'o'},
                                  {"list-2-to-n", no_argument, 0, 'l'},
                                  {"resonance", required_argument, 0, 'r'},
+                                 {"cross-sections", required_argument, 0, 's'},
                                  {"version", no_argument, 0, 'v'},
                                  {nullptr, 0, 0, 0}};
 
@@ -211,14 +219,15 @@ int main(int argc, char *argv[]) {
     bf::path output_path = default_output_path(), input_path("./config.yaml");
     std::vector<std::string> extra_config;
     char *particles = nullptr, *decaymodes = nullptr, *modus = nullptr,
-         *end_time = nullptr, *pdg_string = nullptr;
+         *end_time = nullptr, *pdg_string = nullptr, *cs_string = nullptr;
     // This variable remembers if --list-2-to-n option is activated
     bool list2n_activated = false;
     bool resonance_dump_activated = false;
+    bool cross_section_dump_activated = false;
 
     /* parse command-line arguments */
     int opt;
-    while ((opt = getopt_long(argc, argv, "c:d:e:fhi:m:p:o:lr:v", longopts,
+    while ((opt = getopt_long(argc, argv, "c:d:e:fhi:m:p:o:lr:s:v", longopts,
                               nullptr)) != -1) {
       switch (opt) {
         case 'c':
@@ -254,6 +263,10 @@ int main(int argc, char *argv[]) {
         case 'r':
           resonance_dump_activated = true;
           pdg_string = optarg;
+          break;
+        case 's':
+          cross_section_dump_activated = true;
+          cs_string = optarg;
           break;
         case 'v':
           std::printf(
@@ -322,6 +335,39 @@ int main(int argc, char *argv[]) {
       PdgCode pdg(pdg_string);
       const ParticleType &res = ParticleType::find(pdg);
       res.dump_width_and_spectral_function();
+      std::exit(EXIT_SUCCESS);
+    }
+    if (cross_section_dump_activated) {
+      ParticleType::create_type_list(configuration.take({"particles"}));
+      DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
+      std::string arg_string(cs_string);
+      std::vector<std::string> args = split(arg_string, ',');
+      const unsigned int n_arg = args.size();
+      if (n_arg < 2 || n_arg > 4) {
+        throw std::invalid_argument("-s usage: pdg1,pdg2[,m1][,m2]");
+      }
+      PdgCode pdg_a(args[0]), pdg_b(args[1]);
+      const ParticleType &a = ParticleType::find(pdg_a);
+      const ParticleType &b = ParticleType::find(pdg_b);
+      for (unsigned int i = 0; i < 4 - n_arg; i++) {
+        args.push_back("");
+      }
+      float ma = (args[2] == "") ? a.mass() : std::stod(args[2]);
+      float mb = (args[3] == "") ? b.mass() : std::stod(args[3]);
+      if (a.is_stable() && args[2] != "") {
+        ma = a.mass();
+        std::cout << "Warning: pole mass is used for stable particle "
+                  <<  a.name() << " instead of " << args[2] << std::endl;
+      }
+      if (b.is_stable() && args[3] != "") {
+        mb = b.mass();
+        std::cout << "Warning: pole mass is used for stable particle "
+                  << a.name() << " instead of " << args[3] << std::endl;
+      }
+      std::vector<bool> nucleon_has_interacted = {};
+      auto scat_finder = make_unique<ScatterActionsFinder>(-1.f, 1,
+                                               nucleon_has_interacted, true);
+      scat_finder->dump_cs(a, b, ma, mb);
       std::exit(EXIT_SUCCESS);
     }
     if (modus) {

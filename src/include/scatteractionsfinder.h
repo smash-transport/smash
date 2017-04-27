@@ -113,6 +113,9 @@ class ScatterActionsFinder : public ActionFinderInterface {
    */
   void dump_reactions() const;
 
+  void dump_cs(const ParticleType &a, const ParticleType &b,
+               float m_a, float m_b) const;
+
  private:
   /* Construct a ScatterAction object,
    * based on the types of the incoming particles. */
