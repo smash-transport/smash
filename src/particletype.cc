@@ -648,6 +648,46 @@ std::pair<float, float> ParticleType::sample_resonance_masses(
   return {mass_1, mass_2};
 }
 
+void ParticleType::dump_width_and_spectral_function() const {
+  if (is_stable()) {
+    std::stringstream err;
+    err << "Particle " << *this << " is stable, so it makes no" <<
+           " sense to print its spectral function, etc.";
+    throw std::runtime_error(err.str());
+  }
+
+ double largest_decay_channel_pole = 0.0;
+  const auto &decaymodes = decay_modes().decay_mode_list();
+  for (const auto &mode : decaymodes) {
+    double pole_mass_sum = 0.0;
+    for (const ParticleTypePtr p : mode->type().particle_types()) {
+      pole_mass_sum +=p->mass();
+    }
+    if (pole_mass_sum > largest_decay_channel_pole) {
+      largest_decay_channel_pole = pole_mass_sum;
+    }
+  }
+
+  std::cout << "# mass m[GeV], width w(m) [GeV],"
+            << " spectral function(m^2)*m [GeV^-1] of "
+            << *this << std::endl;
+  constexpr double m_step = 0.02;
+  const double m_min = minimum_mass();
+  // An emprical value used to stop the printout. Assumes that spectral
+  // function decays at high mass, which is true for all known resonances.
+  constexpr double spectral_function_threshold = 8.e-3;
+  std::cout << std::fixed << std::setprecision(5);
+  for (unsigned int i = 0; ; i++) {
+    const double m = m_min + m_step*i;
+    const double w = total_width(m), sf = spectral_function(m);
+    if (m > largest_decay_channel_pole*2 &&
+        sf < spectral_function_threshold) {
+      break;
+    }
+    std::cout << m << " " << w << " " << sf << std::endl;
+  }
+}
+
 
 std::ostream &operator<<(std::ostream &out, const ParticleType &type) {
   const PdgCode &pdg = type.pdgcode();

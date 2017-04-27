@@ -300,6 +300,12 @@ class ParticleType {
                                                   int L = 0) const;
 
   /**
+   *  Prints out width and spectral function versus mass to the
+   *  standard output. This is useful for debugging and analysis.
+   */
+  void dump_width_and_spectral_function() const;
+
+  /**
    * Returns a list of all ParticleType objects.
    *
    * \note The order of the list may be sorted by PDG codes, but do not rely on

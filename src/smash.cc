@@ -114,6 +114,8 @@ void usage(const int rc, const std::string &progname) {
       "\n"
       "  -o, --output <dir>      output directory (default: ./data/<runid>)\n"
       "  -l, --list-2-to-n       list all possible 2->2 reactions\n"
+      "  -r, --resonance <pdg>   dump width(m) and m*spectral function(m)"
+      " for resonance pdg\n"
       "  -f, --force             force overwriting files in the output "
       "directory"
       "\n"
@@ -194,6 +196,7 @@ int main(int argc, char *argv[]) {
                                  {"particles", required_argument, 0, 'p'},
                                  {"output", required_argument, 0, 'o'},
                                  {"list-2-to-n", no_argument, 0, 'l'},
+                                 {"resonance", required_argument, 0, 'r'},
                                  {"version", no_argument, 0, 'v'},
                                  {nullptr, 0, 0, 0}};
 
@@ -205,13 +208,14 @@ int main(int argc, char *argv[]) {
     bf::path output_path = default_output_path(), input_path("./config.yaml");
     std::vector<std::string> extra_config;
     char *particles = nullptr, *decaymodes = nullptr, *modus = nullptr,
-         *end_time = nullptr;
+         *end_time = nullptr, *pdg_string = nullptr;
     // This variable remembers if --list-2-to-n option is activated
     bool list2n_activated = false;
+    bool resonance_dump_activated = false;
 
     /* parse command-line arguments */
     int opt;
-    while ((opt = getopt_long(argc, argv, "c:d:e:fhi:m:p:o:lv", longopts,
+    while ((opt = getopt_long(argc, argv, "c:d:e:fhi:m:p:o:lr:v", longopts,
                               nullptr)) != -1) {
       switch (opt) {
         case 'c':
@@ -243,6 +247,10 @@ int main(int argc, char *argv[]) {
           break;
         case 'l':
           list2n_activated = true;
+          break;
+        case 'r':
+          resonance_dump_activated = true;
+          pdg_string = optarg;
           break;
         case 'v':
           std::printf(
@@ -303,6 +311,14 @@ int main(int argc, char *argv[]) {
       auto scat_finder = make_unique<ScatterActionsFinder>(elastic_parameter,
                                      ntest, nucleon_has_interacted, two_to_one);
       scat_finder->dump_reactions();
+      std::exit(EXIT_SUCCESS);
+    }
+    if (resonance_dump_activated) {
+      ParticleType::create_type_list(configuration.take({"particles"}));
+      DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
+      PdgCode pdg(pdg_string);
+      const ParticleType &res = ParticleType::find(pdg);
+      res.dump_width_and_spectral_function();
       std::exit(EXIT_SUCCESS);
     }
     if (modus) {
