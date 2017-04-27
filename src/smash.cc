@@ -180,7 +180,7 @@ void ensure_path_is_valid(const bf::path &path) {
 
 /* main - do command line parsing and hence decides modus */
 int main(int argc, char *argv[]) {
-  using namespace Smash;
+  using namespace Smash;  // NOLINT(build/namespaces)
   setup_default_float_traps();
 
   const auto &log = logger<LogArea::Main>();
