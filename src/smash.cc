@@ -89,6 +89,9 @@ void usage(const int rc, const std::string &progname) {
    *     non-zero cross-section are dumped. Both colliding particles are
    *     assigned momenta from 0.1 to 10 GeV in the opposite directions to
    *     scan the possible sqrt(S).
+   * <tr><td>`-r <pdg>` <td>`--resonance <pdg>`
+   * <td> Dumps the width(m) and m * spectral function(m^2) versus resonance
+   *     mass m.
    * <tr><td>`-f` <td>`--force`
    * <td>Forces overwriting files in the output directory. Normally, if you
    *     specifiy an output directory with `-o`, the directory must be empty.
@@ -114,7 +117,7 @@ void usage(const int rc, const std::string &progname) {
       "\n"
       "  -o, --output <dir>      output directory (default: ./data/<runid>)\n"
       "  -l, --list-2-to-n       list all possible 2->2 reactions\n"
-      "  -r, --resonance <pdg>   dump width(m) and m*spectral function(m)"
+      "  -r, --resonance <pdg>   dump width(m) and m*spectral function(m^2)"
       " for resonance pdg\n"
       "  -f, --force             force overwriting files in the output "
       "directory"
