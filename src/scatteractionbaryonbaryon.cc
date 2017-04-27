@@ -44,8 +44,8 @@ CollisionBranchList ScatterActionBaryonBaryon::two_to_two_cross_sections() {
     if (type_a.antiparticle_sign() == 1 && type_b.antiparticle_sign() == 1) {
       /* N R → N N, Δ R → N N */
       process_list = bar_bar_to_nuc_nuc(false);
-    }
-    else if (type_a.antiparticle_sign() == -1 && type_b.antiparticle_sign() == -1) {
+    } else if (type_a.antiparticle_sign() == -1
+               && type_b.antiparticle_sign() == -1) {
       /* N̅ R → N̅ N̅, Δ̅ R → N̅ N̅ */
       process_list = bar_bar_to_nuc_nuc(true);
     }
@@ -69,8 +69,9 @@ CollisionBranchList ScatterActionBaryonBaryon::bar_bar_to_nuc_nuc(
   ParticleTypePtrList nuc_or_anti_nuc;
   if (is_anti_particles) {
     nuc_or_anti_nuc = ParticleType::list_anti_nucleons();
+  } else {
+    nuc_or_anti_nuc = ParticleType::list_nucleons();
   }
-  else nuc_or_anti_nuc = ParticleType::list_nucleons();
 
   /* Loop over all nucleon or anti-nucleon charge states. */
   for (ParticleTypePtr nuc_a : nuc_or_anti_nuc) {

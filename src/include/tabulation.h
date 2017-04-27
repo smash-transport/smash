@@ -116,8 +116,7 @@ inline std::unique_ptr<Tabulation> spectral_integral_semistable(
                                return spec_func_integrand_1res(m, srts,
                                                         stable.mass(), resonance);
                              });
-          }
-  );
+          });
 }
 
 /// Create a table for the spectral integral of two resonances.
@@ -135,8 +134,7 @@ inline std::unique_ptr<Tabulation> spectral_integral_unstable(
                                  return spec_func_integrand_2res(srts, m1, m2,
                                                             res1, res2);
                                });
-          }
-    );
+          });
 }
 
 }  // namespace Smash

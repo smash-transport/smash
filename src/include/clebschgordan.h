@@ -92,17 +92,17 @@ class I_tot_range {
   }
 
   class iterator : public std::iterator<std::forward_iterator_tag, int> {
-  private:
+   private:
     int c_;
     I_tot_range &parent_;
 
-  public:
+   public:
     iterator(int start, I_tot_range &parent) : c_(start), parent_(parent) {}
     int operator*() { return c_; }
     const iterator *operator++() {
       c_ -= 2;
       return this;
-    };
+    }
     iterator operator++(int) {
       c_ -= 2;
       return iterator(c_ + 2, parent_);

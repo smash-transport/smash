@@ -36,7 +36,7 @@ class ScatterActionPhoton : public ScatterAction {
   }
 
   /** Overridden to effectively return the reaction channel. */
-  virtual ProcessType get_type() const override {
+  ProcessType get_type() const override {
     return static_cast<ProcessType>(reac);
   }
 

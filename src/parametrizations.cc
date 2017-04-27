@@ -317,7 +317,8 @@ float kplusn_inelastic(double mandelstam_s) {
 
 
 /// Calculate and store all isospin ratios for K+ N reactions.
-static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>, float, pair_hash>& ratios) {
+static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>,
+    float, pair_hash>& ratios) {
   const auto& type_p = ParticleType::find(pdg::p);
   const auto& type_n = ParticleType::find(pdg::n);
   const auto& type_K_p = ParticleType::find(pdg::K_p);

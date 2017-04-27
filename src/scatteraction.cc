@@ -101,8 +101,8 @@ void ScatterAction::add_all_processes(float elastic_parameter,
   if (two_to_two) {
     /** Elastic collisions between two nucleons with sqrt_s() below
      * low_snn_cut can not happen*/
-    if (!incoming_particles_[0].type().is_nucleon() || 
-        !incoming_particles_[1].type().is_nucleon() || 
+    if (!incoming_particles_[0].type().is_nucleon() ||
+        !incoming_particles_[1].type().is_nucleon() ||
         !(incoming_particles_[0].type().antiparticle_sign() ==
           incoming_particles_[1].type().antiparticle_sign()) ||
         sqrt_s() >= low_snn_cut) {
@@ -343,7 +343,7 @@ void ScatterAction::resonance_formation() {
   const size_t index_tmax = (t0 > t1) ? 0 : 1;
   const float sc = incoming_particles_[index_tmax].cross_section_scaling_factor();
   if (t0 > time_of_execution_ || t1 > time_of_execution_) {
-    outgoing_particles_[0].set_formation_time(std::max(t0,t1));
+    outgoing_particles_[0].set_formation_time(std::max(t0, t1));
     outgoing_particles_[0].set_cross_section_scaling_factor(sc);
   }
   log.debug("Momentum of the new particle: ",
@@ -410,7 +410,7 @@ void ScatterAction::string_excitation() {
          * since SMASH only knows K0 */
         if (pythia_id == 310 || pythia_id == 130) {
           const float prob = Random::uniform(0.f, 1.f);
-          if (prob <= 0.5f){
+          if (prob <= 0.5f) {
             pythia_id = 311;
           } else {
             pythia_id = -311;

@@ -67,7 +67,7 @@ if(NOT CPPLINT)
 endif()
 if(CPPLINT)
    message(STATUS "cpplint.py found at ${CPPLINT}")
-   set(CPPLINT_ARGS --filter=-build/c++11,-build/include,-readability/streams,-runtime/references --counting=detailed)
+   set(CPPLINT_ARGS --filter=-build/c++11,-build/include,-runtime/operator,-readability/streams,-readability/function,-runtime/references,-whitespace/operators --counting=detailed)
    file(GLOB CPPLINT_FILES
         ${PROJECT_SOURCE_DIR}/src/include/*.h ${PROJECT_SOURCE_DIR}/src/*.cc)
    add_custom_target(cpplint

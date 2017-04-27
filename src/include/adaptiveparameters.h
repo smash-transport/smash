@@ -22,12 +22,11 @@ namespace Smash {
  */
 
 class AdaptiveParameters {
-
  public:
   explicit AdaptiveParameters(Configuration conf) :
     smoothing_factor_(conf.take({"Smoothing_Factor"}, 0.1f)),
     target_missed_actions_(conf.take({"Target_Missed_Actions"}, 0.01f)),
-    deviation_factor_(conf.take({"Allowed_Deviation"}, 2.5f)) {};
+    deviation_factor_(conf.take({"Allowed_Deviation"}, 2.5f)) {}
 
   void initialize(double dt) {
     // Calculate the rate that would lead to the given time step size.

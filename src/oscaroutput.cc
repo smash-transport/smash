@@ -477,7 +477,7 @@ std::unique_ptr<OutputInterface> create_select_format(const bf::path &path,
     return make_unique<OscarOutput<OscarFormat2013Extended,
                                 Contents>>(std::move(path), std::move(name));
   } else if (modern_format) {
-   return make_unique<OscarOutput<OscarFormat2013, Contents>>(std::move(path),
+    return make_unique<OscarOutput<OscarFormat2013, Contents>>(std::move(path),
                                                                std::move(name));
   } else {
     return make_unique<OscarOutput<OscarFormat1999, Contents>>(std::move(path),

@@ -281,8 +281,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
                 << ", daughters: " << isotype_daughter_1.isospin()
                 << " " << isotype_daughter_2.isospin();
               throw InvalidDecay(isotype_mother->name() +
-                " decay mode is forbidden by isospin: \"" + line.text + "\"" + s.str()
-              );
+                " decay mode is forbidden by isospin: \"" + line.text + "\"" + s.str());
             }
             break;
           }
@@ -376,7 +375,8 @@ void DecayModes::load_decaymodes(const std::string &input) {
           s << p->name();
         }
         s << " with " << mother.mass() << " ≤ " << decay->threshold();
-        throw InvalidDecay("For all decays, the mass of daughters must be smaller than the mother's pole mass.\n"
+        throw InvalidDecay("For all decays, the mass of daughters must be"
+                " smaller than the mother's pole mass.\n"
                 "This was violated by the following decay: " + s.str());
       }
     }

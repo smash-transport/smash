@@ -131,7 +131,7 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_cross_sections() {
   const double s = mandelstam_s();
   const double sqrts = sqrt_s();
 
-  //Some variable declarations for frequently used quantities
+  // Some variable declarations for frequently used quantities
   const auto sigma_kplusp = kplusp_inelastic(s);
   const auto sigma_kplusn = kplusn_inelastic(s);
 

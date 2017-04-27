@@ -39,7 +39,6 @@ class ScatterActionNucleonKaon : public ScatterActionBaryonMeson {
    * Writes information about this scatter action to the \p out stream.
    */
   void format_debug_output(std::ostream &out) const override;
-
 };
 
 }  // namespace Smash

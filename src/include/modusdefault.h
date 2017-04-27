@@ -55,7 +55,7 @@ class ModusDefault {
    *  the modus is Collider. They are all needed in the Collider modus. In 
    *  the other modus, they take the following default value. */
   int total_N_number() const { return 0; }
-  int proj_N_number() const {return 0; } 
+  int proj_N_number() const {return 0; }
   bool cll_in_nucleus() const { return true; }
   bool is_collider() const { return false; }
 
