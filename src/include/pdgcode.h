@@ -268,6 +268,12 @@ class PdgCode {
       return (abs_code == pdg::p || abs_code == pdg::n);
   }
 
+  /// Is this a N*(1535) (+/0)?
+  inline bool is_Nstar1535() const {
+      const auto abs_code = std::abs(code());
+      return (abs_code == pdg::N1535_p || abs_code == pdg::N1535_z);
+  }
+
   /// Is this a Delta(1232) (with anti-delta)?
   inline bool is_Delta() const {
       const auto abs_code = std::abs(code());

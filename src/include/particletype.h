@@ -153,10 +153,8 @@ class ParticleType {
            pdgcode_.strangeness() == 0 && pdgcode_.charmness() == 0;
   }
 
-  /// Is this a N*(1535) resonance?
-  inline bool is_Nstar1535() const {
-    return (pdgcode_.get_decimal() == 22112 || pdgcode_.get_decimal() == 22212);
-  }
+  /// \copydoc PdgCode::is_Nstar1535
+  bool is_Nstar1535() const { return pdgcode_.is_Nstar1535(); }
 
   /// Is this a Delta resonance (Delta*)?
   inline bool is_Deltastar() const {
