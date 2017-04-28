@@ -11,7 +11,9 @@
 
 #include <iostream>
 #include <iomanip>
-#include <Eigen/Dense>
+
+#include <Eigen/Dense>  // NOLINT(build/include_order)
+
 #include "include/numerics.h"
 #include "include/logging.h"
 

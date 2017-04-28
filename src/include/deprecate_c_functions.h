@@ -15,7 +15,6 @@
  * It should not be included in default builds since it slows down compilation.
  */
 
-#include "forwarddeclarations.h"
 #include <cmath>
 #include <csetjmp>
 #include <csignal>
@@ -26,6 +25,8 @@
 #include <ctime>
 #include <cctype>
 #include <cwctype>
+
+#include "forwarddeclarations.h"
 #include "macros.h"
 
 namespace Smash {

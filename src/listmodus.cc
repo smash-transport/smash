@@ -9,9 +9,6 @@
 
 #include "include/listmodus.h"
 
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
-
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -22,7 +19,9 @@
 #include <utility>
 #include <vector>
 #include <cfloat>
-#include <utility>
+
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 #include "include/algorithms.h"
 #include "include/angles.h"

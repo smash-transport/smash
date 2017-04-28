@@ -7,9 +7,10 @@
 #ifndef SRC_INCLUDE_PARTICLETYPE_H_
 #define SRC_INCLUDE_PARTICLETYPE_H_
 
-#include <assert.h>
+#include <cassert>
 #include <string>
 #include <vector>
+#include <utility>
 
 #include "forwarddeclarations.h"
 #include "macros.h"

@@ -12,6 +12,7 @@
 
 #include <stdexcept>
 #include <vector>
+#include <utility>
 
 #include "pauliblocking.h"
 #include "particles.h"

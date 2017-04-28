@@ -10,8 +10,10 @@
 #ifndef SRC_INCLUDE_ROOTOUTPUT_H_
 #define SRC_INCLUDE_ROOTOUTPUT_H_
 
-#include <boost/filesystem.hpp>
 #include <vector>
+#include <string>
+
+#include <boost/filesystem.hpp>
 
 #include "configuration.h"
 #include "forwarddeclarations.h"

@@ -6,13 +6,12 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
-#include <sstream>
+#include <getopt.h>
 
+#include <sstream>
 #include <vector>
 
 #include <boost/filesystem/fstream.hpp>
-
-#include <getopt.h>
 
 #include "include/cxx14compat.h"
 #include "include/decaymodes.h"

@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_THERMODYNAMICOUTPUT_H_
 #define SRC_INCLUDE_THERMODYNAMICOUTPUT_H_
 
+#include <set>
 #include <string>
 
 #include "configuration.h"

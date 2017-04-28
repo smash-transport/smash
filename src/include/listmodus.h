@@ -7,10 +7,11 @@
 #ifndef SRC_INCLUDE_LISTMODUS_H_
 #define SRC_INCLUDE_LISTMODUS_H_
 
-#include <stdint.h>
+#include <cstdint>
 #include <cmath>
 #include <list>
 #include <string>
+#include <utility>
 
 #include "forwarddeclarations.h"
 #include "modusdefault.h"

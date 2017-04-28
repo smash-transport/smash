@@ -11,8 +11,10 @@
 
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_multiroots.h>
+
 #include <array>
 #include <vector>
+#include <string>
 
 #include "constants.h"
 #include "particletype.h"

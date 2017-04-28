@@ -10,16 +10,17 @@
 #ifndef SRC_INCLUDE_INTERPOLATION_H_
 #define SRC_INCLUDE_INTERPOLATION_H_
 
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_spline.h>
+
 #include <vector>
 #include <cassert>
 #include <cstddef>
 #include <algorithm>
 #include <numeric>
 #include <stdexcept>
+#include <string>
 #include <sstream>
-
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_spline.h>
 
 
 /*

@@ -8,7 +8,7 @@
 #include "include/decaytype.h"
 
 #include <algorithm>
-#include <math.h>
+#include <cmath>
 
 #include "include/constants.h"
 #include "include/cxx14compat.h"

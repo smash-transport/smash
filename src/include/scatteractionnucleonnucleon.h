@@ -10,6 +10,8 @@
 #ifndef SRC_INCLUDE_SCATTERACTIONNUCLEONNUCLEON_H_
 #define SRC_INCLUDE_SCATTERACTIONNUCLEONNUCLEON_H_
 
+#include <utility>
+
 #include "scatteractionbaryonbaryon.h"
 
 namespace Smash {

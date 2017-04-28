@@ -8,6 +8,8 @@
 #ifndef SRC_INCLUDE_CLEBSCHGORDAN_H_
 #define SRC_INCLUDE_CLEBSCHGORDAN_H_
 
+#include <algorithm>
+
 #include "particletype.h"
 
 namespace Smash {

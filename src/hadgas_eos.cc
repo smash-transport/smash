@@ -9,10 +9,11 @@
 
 #include <gsl/gsl_sf_bessel.h>
 
-#include <boost/filesystem.hpp>
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+
+#include <boost/filesystem.hpp>
 
 #include "include/constants.h"
 #include "include/forwarddeclarations.h"

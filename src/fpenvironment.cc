@@ -8,13 +8,14 @@
  */
 
 #include "include/fpenvironment.h"
-#include "include/logging.h"
-
-#include <csignal>
 
 #if defined __SSE__
 #include <xmmintrin.h>
 #endif
+
+#include <csignal>
+
+#include "include/logging.h"
 
 namespace Smash {
 

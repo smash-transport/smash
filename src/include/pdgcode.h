@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_PDGCODE_H_
 #define SRC_INCLUDE_PDGCODE_H_
 
+#include <algorithm>
 #include <cstdlib>
 #include <iosfwd>
 #include <sstream>

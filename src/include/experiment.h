@@ -7,6 +7,9 @@
 #ifndef SRC_INCLUDE_EXPERIMENT_H_
 #define SRC_INCLUDE_EXPERIMENT_H_
 
+#include <limits>
+#include <vector>
+
 #include "actionfinderfactory.h"
 #include "adaptiveparameters.h"
 #include "chrono.h"
