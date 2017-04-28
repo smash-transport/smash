@@ -15,6 +15,7 @@
 #include "pauliblocking.h"
 #include "potentials.h"
 #include "quantumnumbers.h"
+#include "fourvector.h"
 
 namespace Smash {
 
@@ -256,8 +257,13 @@ class Experiment : public ExperimentBase {
 
   /** nucleon_has_interacted_ labels whether the particles in the nuclei
    *  have experienced any collisions or not. It's only valid in
-   *  the ColliderMode, so is set as an empty vector by default.*/
+   *  the ColliderModus, so is set as an empty vector by default.*/
   std::vector<bool> nucleon_has_interacted_ = {};
+
+  /** The initial nucleons in the ColliderModus propagate with
+   *  beam_momentum_, if Fermi motion is frozen. It's only valid in
+   *  the ColliderModus, so is set as an empty vector by default.*/
+  std::vector<FourVector> beam_momentum_ = {};
 
   /// The Action finder objects
   std::vector<std::unique_ptr<ActionFinderInterface>> action_finders_;

@@ -46,10 +46,10 @@ namespace Smash {
 * \key Formation_Time (float, optional, default = 1.0) \n
 * Parameter for formation time in string fragmentation in fm/c
 * \key low_snn_cut (double) in GeV \n
-* The elastic collisions betwen two nucleons with sqrt_s below 
+* The elastic collisions betwen two nucleons with sqrt_s below
 * low_snn_cut cannot happen.
 * <1.88 - below the threshold energy of the elastic collsion, no effect
-* >2.02 - beyond the threshold energy of the inelastic collision NN->NNpi, not suggested 
+* >2.02 - beyond the threshold energy of the inelastic collision NN->NNpi, not suggested
 */
 
 ScatterActionsFinder::ScatterActionsFinder(

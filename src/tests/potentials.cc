@@ -160,7 +160,7 @@ TEST(nucleus_potential_profile) {
     a_file.close();
     for (auto i = 0; i < 50; i++) {
       const float time_to = 5.0*it + i*timestep;
-      const double dt = propagate_straight_line(&P, time_to);
+      const double dt = propagate_straight_line(&P, time_to, {});
       update_momenta(&P, dt, *pot, nullptr, nullptr);
     }
   }
@@ -223,7 +223,7 @@ TEST(propagation_in_test_potential) {
   double time_to = 0.0;
   while (P.front().position().x1() < 20*d) {
     time_to += timestep;
-    const double dt = propagate_straight_line(&P, time_to);
+    const double dt = propagate_straight_line(&P, time_to, {});
     update_momenta(&P, dt, *pot, nullptr, nullptr);
   }
   // Calculate 4-momentum, expected from conservation laws

@@ -133,8 +133,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const bool two_to_one_;
   /** Enable 2->2 processes. */
   const bool two_to_two_;
-  /** Elastic collsions between two nucleons with 
-   ** sqrt_s below low_snn_cut_ are excluded. */ 
+  /** Elastic collsions between two nucleons with
+   ** sqrt_s below low_snn_cut_ are excluded. */
   const double low_snn_cut_;
   /** Switch to turn off string excitation. */
   const bool strings_switch_;
