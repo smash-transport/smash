@@ -8,9 +8,9 @@
 #ifndef SRC_INCLUDE_PROPAGATION_H_
 #define SRC_INCLUDE_PROPAGATION_H_
 
+#include "lattice.h"
 #include "particles.h"
 #include "potentials.h"
-#include "lattice.h"
 
 namespace Smash {
 

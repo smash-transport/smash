@@ -9,9 +9,9 @@
 
 #include <gsl/gsl_sf_bessel.h>
 
-#include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <iostream>
 
 #include <boost/filesystem.hpp>
 

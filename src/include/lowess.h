@@ -14,11 +14,11 @@
 #ifndef SRC_INCLUDE_LOWESS_H_
 #define SRC_INCLUDE_LOWESS_H_
 
-#include <vector>
 #include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
+#include <vector>
 
 namespace Smash {
 

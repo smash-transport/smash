@@ -9,12 +9,12 @@
 #ifndef SRC_INCLUDE_HADGAS_EOS_H_
 #define SRC_INCLUDE_HADGAS_EOS_H_
 
-#include <gsl/gsl_vector.h>
 #include <gsl/gsl_multiroots.h>
+#include <gsl/gsl_vector.h>
 
 #include <array>
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "constants.h"
 #include "particletype.h"

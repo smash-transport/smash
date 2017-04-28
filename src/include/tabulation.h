@@ -8,15 +8,15 @@
 #ifndef SRC_INCLUDE_TABULATION_H_
 #define SRC_INCLUDE_TABULATION_H_
 
-#include <vector>
+#include <functional>
 #include <map>
 #include <memory>
-#include <functional>
+#include <vector>
 
 #include "forwarddeclarations.h"
-#include "particletype.h"
 #include "integrate.h"
 #include "kinematics.h"
+#include "particletype.h"
 
 namespace Smash {
 

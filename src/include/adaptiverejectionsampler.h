@@ -10,9 +10,10 @@
 #ifndef SRC_INCLUDE_ADAPTIVEREJECTIONSAMPLER_H_
 #define SRC_INCLUDE_ADAPTIVEREJECTIONSAMPLER_H_
 
-#include <vector>
-#include <list>
 #include <functional>
+#include <list>
+#include <vector>
+
 #include "random.h"
 
 namespace Smash {

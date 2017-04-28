@@ -9,13 +9,14 @@
 
 #include "include/scatteraction.h"
 
+#include "Pythia8/Pythia.h"
+
 #include "include/constants.h"
 #include "include/cxx14compat.h"
 #include "include/fpenvironment.h"
 #include "include/kinematics.h"
 #include "include/logging.h"
 #include "include/pdgcode.h"
-#include "Pythia8/Pythia.h"
 #include "include/random.h"
 
 namespace Smash {

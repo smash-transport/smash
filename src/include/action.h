@@ -11,11 +11,11 @@
 #define SRC_INCLUDE_ACTION_H_
 
 #include <stdexcept>
-#include <vector>
 #include <utility>
+#include <vector>
 
-#include "pauliblocking.h"
 #include "particles.h"
+#include "pauliblocking.h"
 #include "processbranch.h"
 #include "random.h"
 

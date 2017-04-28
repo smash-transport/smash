@@ -15,15 +15,15 @@
  * It should not be included in default builds since it slows down compilation.
  */
 
+#include <cctype>
+#include <clocale>
 #include <cmath>
 #include <csetjmp>
 #include <csignal>
 #include <cstdio>
-#include <clocale>
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
-#include <cctype>
 #include <cwctype>
 
 #include "forwarddeclarations.h"

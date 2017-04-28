@@ -12,8 +12,8 @@
 #include <sstream>
 #include <vector>
 
-#include "include/stringfunctions.h"
 #include "include/logging.h"
+#include "include/stringfunctions.h"
 
 namespace Smash {
 

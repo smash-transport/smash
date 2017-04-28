@@ -9,6 +9,7 @@
 
 #include "include/listmodus.h"
 
+#include <cfloat>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -18,7 +19,6 @@
 #include <sstream>
 #include <utility>
 #include <vector>
-#include <cfloat>
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>

@@ -7,9 +7,9 @@
 #ifndef SRC_INCLUDE_PROCESSBRANCH_H_
 #define SRC_INCLUDE_PROCESSBRANCH_H_
 
+#include <iostream>
 #include <memory>
 #include <vector>
-#include <iostream>
 
 #include "decaytype.h"
 #include "forwarddeclarations.h"

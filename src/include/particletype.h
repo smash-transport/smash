@@ -9,8 +9,8 @@
 
 #include <cassert>
 #include <string>
-#include <vector>
 #include <utility>
+#include <vector>
 
 #include "forwarddeclarations.h"
 #include "macros.h"

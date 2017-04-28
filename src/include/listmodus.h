@@ -7,8 +7,8 @@
 #ifndef SRC_INCLUDE_LISTMODUS_H_
 #define SRC_INCLUDE_LISTMODUS_H_
 
-#include <cstdint>
 #include <cmath>
+#include <cstdint>
 #include <list>
 #include <string>
 #include <utility>

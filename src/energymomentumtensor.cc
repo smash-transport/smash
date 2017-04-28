@@ -9,13 +9,13 @@
 
 #include "include/energymomentumtensor.h"
 
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 
 #include <Eigen/Dense>  // NOLINT(build/include_order)
 
-#include "include/numerics.h"
 #include "include/logging.h"
+#include "include/numerics.h"
 
 namespace Smash {
 

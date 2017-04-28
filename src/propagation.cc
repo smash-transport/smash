@@ -9,10 +9,10 @@
 
 #include "include/propagation.h"
 
-#include "include/logging.h"
 #include "include/boxmodus.h"
 #include "include/collidermodus.h"
 #include "include/listmodus.h"
+#include "include/logging.h"
 #include "include/spheremodus.h"
 
 namespace Smash {

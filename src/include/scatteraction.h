@@ -11,9 +11,9 @@
 #define SRC_INCLUDE_SCATTERACTION_H_
 
 #include "action.h"
-#include "kinematics.h"
 #include "cxx14compat.h"
 #include "isoparticletype.h"
+#include "kinematics.h"
 
 namespace Smash {
 

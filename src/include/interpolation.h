@@ -13,14 +13,14 @@
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_spline.h>
 
-#include <vector>
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
-#include <algorithm>
 #include <numeric>
+#include <sstream>
 #include <stdexcept>
 #include <string>
-#include <sstream>
+#include <vector>
 
 
 /*

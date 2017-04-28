@@ -21,8 +21,8 @@
 #ifndef SRC_INCLUDE_TSC_H_
 #define SRC_INCLUDE_TSC_H_
 
-#include <iosfwd>
 #include <cstdint>
+#include <iosfwd>
 
 #ifdef _MSC_VER
 #include <intrin.h>

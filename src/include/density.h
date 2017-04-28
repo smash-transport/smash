@@ -9,12 +9,12 @@
 #ifndef SRC_INCLUDE_DENSITY_H_
 #define SRC_INCLUDE_DENSITY_H_
 
+#include <iostream>
 #include <utility>
 #include <vector>
-#include <iostream>
 
-#include "experimentparameters.h"
 #include "energymomentumtensor.h"
+#include "experimentparameters.h"
 #include "forwarddeclarations.h"
 #include "fourvector.h"
 #include "lattice.h"

@@ -10,8 +10,8 @@
 #ifndef SRC_INCLUDE_RANDOM_H_
 #define SRC_INCLUDE_RANDOM_H_
 
-#include <random>
 #include <limits>
+#include <random>
 #include <vector>
 
 namespace Smash {
