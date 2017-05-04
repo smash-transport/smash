@@ -469,13 +469,19 @@ void ScatterAction::string_excitation() {
     }
     /* If the incoming particles already were unformed, the formation
      * times and cross section scaling factors need to be adjusted */
-    for (size_t i = 0; i < 2; i++) {
-      const float tform_in  = incoming_particles_[i].formation_time();
-      const float tform_out = outgoing_particles_[i].formation_time();
-      const float fin  = incoming_particles_[i].cross_section_scaling_factor();
-      const float fout = outgoing_particles_[i].cross_section_scaling_factor();
-      if (tform_in > incoming_particles_[i].position().x0()) {
+    const float tform_in = std::max(incoming_particles_[0].formation_time(),
+                                    incoming_particles_[1].formation_time());
+    if (tform_in > time_of_execution_) {
+      const size_t index_tmax = (incoming_particles_[0].formation_time() >
+                                 incoming_particles_[1].formation_time()) ? 0 : 1;
+      const float fin = incoming_particles_[index_tmax].cross_section_scaling_factor();
+      for (size_t i = 0; i < outgoing_particles_.size(); i++) {
+        const float tform_out = outgoing_particles_[i].formation_time();
+        const float fout = outgoing_particles_[i].cross_section_scaling_factor();
         outgoing_particles_[i].set_cross_section_scaling_factor(fin * fout);
+        /* If the unformed incoming particles' formation time is larger than
+         * the current outgoing particle's formation time, then the latter
+         * is overwritten by the former*/
         if (tform_in > tform_out) {
           outgoing_particles_[i].set_formation_time(tform_in);
         }
