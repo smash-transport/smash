@@ -54,8 +54,20 @@ class ScatterActionPhoton : public ScatterAction {
                                   cross_section_photons_);
   }
 
+  enum class ReactionType {
+    no_reaction,
+    pi0_pi,
+    pi_rho0,
+    pi_rho,
+    pi0_rho,
+    pi_eta,
+    pi_pi
+  };
+
+  ReactionType reac = ReactionType::no_reaction;
+
   /// Tells if the given incoming particles may produce photon
-  static bool is_photon_reaction(const ParticleList &in);
+  static ReactionType is_photon_reaction(const ParticleList &in);
 
  private:
   CollisionBranchList photon_cross_sections();
@@ -70,18 +82,6 @@ class ScatterActionPhoton : public ScatterAction {
   float cross_section_photons_ = 0.0;
 
   const int num_tab_pts = 200;
-
-  enum class ReactionType {
-    no_reaction,
-    pi0_pi,
-    pi_rho0,
-    pi_rho,
-    pi0_rho,
-    pi_eta,
-    pi_pi
-  };
-
-  ReactionType reac = ReactionType::no_reaction;
 
   float pi_pi_rho0(const float M, const float s) const;
 

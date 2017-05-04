@@ -766,24 +766,25 @@ bool Experiment<Modus>::perform_action(Action &action,
 
   // At every collision photons can be produced.
   if (photons_switch_ &&
-      ScatterActionPhoton::is_photon_reaction(action.incoming_particles())) {
-    // Time in the action constructor is relative to current time of incoming
-    constexpr float action_time = 0.f;
-    ScatterActionPhoton photon_act(action.incoming_particles(),
-                                   action_time, n_fractional_photons_);
-    // Add a completely dummy process to photon action.  The only important
-    // thing is that its cross-section is equal to cross-section of action.
-    // This can be done, because photon action is never performed, only
-    // final state is generated and printed to photon output.
-    photon_act.add_dummy_hadronic_channels(action.raw_weight_value());
-    // Now add the actual photon reaction channel
-    photon_act.add_single_channel();
-    for (int i = 0; i < n_fractional_photons_; i++) {
-      photon_act.generate_final_state();
-      photon_output_->at_interaction(photon_act, rho);
+    (ScatterActionPhoton::is_photon_reaction(action.incoming_particles())
+      != ScatterActionPhoton::ReactionType::no_reaction)) {
+        // Time in the action constructor is relative to
+        // current time of incoming
+        constexpr float action_time = 0.f;
+        ScatterActionPhoton photon_act(action.incoming_particles(),
+                                       action_time, n_fractional_photons_);
+        // Add a completely dummy process to photon action.  The only important
+        // thing is that its cross-section is equal to cross-section of action.
+        // This can be done, because photon action is never performed, only
+        // final state is generated and printed to photon output.
+        photon_act.add_dummy_hadronic_channels(action.raw_weight_value());
+        // Now add the actual photon reaction channel
+        photon_act.add_single_channel();
+        for (int i = 0; i < n_fractional_photons_; i++) {
+          photon_act.generate_final_state();
+          photon_output_->at_interaction(photon_act, rho);
+        }
     }
-  }
-
   log.debug(~einhard::Green(), "✔ ", action);
   return true;
 }

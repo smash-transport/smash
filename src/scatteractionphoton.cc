@@ -109,10 +109,11 @@ void ScatterActionPhoton::add_dummy_hadronic_channels(
   add_collision(std::move(dummy_process));
 }
 
-bool ScatterActionPhoton::is_photon_reaction(const ParticleList &in) {
-  if (in.size() != 2) {
-    return false;
-  }
+ScatterActionPhoton::ReactionType
+  ScatterActionPhoton::is_photon_reaction(const ParticleList &in) {
+    if (in.size() != 2) {
+      return ReactionType::no_reaction;
+    }
 
   PdgCode a = in[0].pdgcode();
   PdgCode b = in[1].pdgcode();
@@ -129,25 +130,29 @@ bool ScatterActionPhoton::is_photon_reaction(const ParticleList &in) {
     case(pack(pdg::pi_z, pdg::pi_p)):
     case(pack(pdg::pi_m, pdg::pi_z)):
     case(pack(pdg::pi_z, pdg::pi_m)):
+      return ReactionType::pi0_pi;
       // ReactionType::pi_rho0:
     case(pack(pdg::pi_p, pdg::rho_z)):
     case(pack(pdg::pi_m, pdg::rho_z)):
+      return ReactionType::pi_rho0;
       // ReactionType::pi_rho:
     case(pack(pdg::pi_m, pdg::rho_p)):
     case(pack(pdg::pi_p, pdg::rho_m)):
+      return ReactionType::pi_rho;
       // ReactionType::pi0_rho:
     case(pack(pdg::pi_z, pdg::rho_p)):
     case(pack(pdg::pi_z, pdg::rho_m)):
+      return ReactionType::pi0_rho;
       // ReactionType::pi_eta:
     case(pack(pdg::pi_p, pdg::eta)):
     case(pack(pdg::pi_m, pdg::eta)):
+      return ReactionType::pi_eta;
       // ReactionType::pi_pi:
     case(pack(pdg::pi_p, pdg::pi_m)):
     case(pack(pdg::pi_m, pdg::pi_p)):
-      return true;
-      break;
+      return ReactionType::pi_pi;
     default:
-      return false;
+      return ReactionType::no_reaction;
   }
 }
 
@@ -199,41 +204,10 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
     ParticleTypePtr part_out = photon_particle;
     ParticleTypePtr photon_out = photon_particle;
 
+    reac = is_photon_reaction(Action::incoming_particles());
+
     if (sqrts <= m1 + m2) {
       reac = ReactionType::no_reaction;
-    } else {
-      if (part_a.type().pdgcode() == pdg::pi_z) {
-        // pi0 + X -> Y + gamma
-        if (part_b.type().pdgcode().is_pion()) {
-          // pi0 + pi -> rho + gamma
-          reac = ReactionType::pi0_pi;
-        } else if (part_b.type().pdgcode().is_rho()) {
-            // pi0 + rho -> pi + gamma
-            reac = ReactionType::pi0_rho;
-        }
-      } else if (part_b.type().pdgcode() == pdg::pi_z) {
-        if (part_a.type().pdgcode().is_pion()) {
-          // pi + pi0 -> rho + gamma
-          reac = ReactionType::pi0_pi;
-        }
-      } else if (part_b.type().pdgcode() == pdg::eta) {
-          // pi + eta -> pi + gamma
-          reac = ReactionType::pi_eta;
-      } else if (part_b.type().pdgcode() == pdg::rho_z) {
-          // pi + rho0 -> pi + gamma
-          reac = ReactionType::pi_rho0;
-      } else if (part_b.type().charge() == -part_a.type().charge()) {
-          // pi + X -> Y + gamma
-          if (part_b.type().pdgcode().is_pion()) {
-            // pi + pi -> Y + gamma
-            reac = ReactionType::pi_pi;
-          } else if (part_b.type().pdgcode().is_rho()) {
-              // pi + rho -> pi0 + gamma
-              reac = ReactionType::pi_rho;
-          }
-        } else {
-            reac = ReactionType::no_reaction;
-      }
     }
 
     if (reac != ReactionType::no_reaction) {
@@ -594,7 +568,7 @@ float ScatterActionPhoton::diff_cross_section(float t, float m3) const {
       break;
     case ReactionType::pi0_pi:
       diff_xsection = -alpha * g_rho_2 / (16 * s * p_cm_2);
-      e = (s - 2 * m3_2) * pow_int(t - m_pi_2, 2) / m3_2 / pow_int(s - m3_2, 2) +
+      e = (s - 2 * m3_2) * pow_int(t - m_pi_2, 2) / m3_2 / pow_int(s - m3_2, 2)+
           (s - 2 * m3_2) * pow_int(u - m_pi_2, 2) / m3_2 / pow_int(s - m3_2, 2);
       e += (s - 6 * m3_2) * (t - m_pi_2) / m3_2 / (s - m3_2) +
            (s - 6 * m3_2) * (u - m_pi_2) / m3_2 / (s - m3_2);
