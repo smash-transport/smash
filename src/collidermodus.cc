@@ -27,6 +27,7 @@
 #include "include/particles.h"
 #include "include/pdgcode.h"
 #include "include/random.h"
+#include "include/fourvector.h"
 
 namespace Smash {
 
@@ -339,6 +340,13 @@ float ColliderModus::initial_conditions(Particles *particles,
         "the center of velocity reference frame.");
   }
 
+  // Calculate the beam velocity of the projectile and the target, which will
+  // be used to calculate the beam momenta in experiment.cc
+  if (fermi_motion_ == FermiMotion::Frozen){
+      velocity_projectile_ = v_a;
+      velocity_target_ = v_b;
+  }
+
   // Generate Fermi momenta if necessary
   if (fermi_motion_ == FermiMotion::On ||
       fermi_motion_ == FermiMotion::Frozen) {
@@ -359,8 +367,8 @@ float ColliderModus::initial_conditions(Particles *particles,
   }
 
   // Boost the nuclei to the appropriate velocity.
-  projectile_->boost(v_a, fermi_motion_);
-  target_->boost(v_b, fermi_motion_);
+  projectile_->boost(v_a);
+  target_->boost(v_b);
 
   // Shift the nuclei into starting positions. Contracted spheres with
   // nuclear radii should touch exactly at t=0. Modus starts at negative

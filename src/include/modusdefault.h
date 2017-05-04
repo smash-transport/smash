@@ -14,6 +14,8 @@
 #include "grid.h"
 #include "outputinterface.h"
 #include "potentials.h"
+#include "configuration.h"
+#include "fourvector.h"
 
 namespace Smash {
 
@@ -49,16 +51,24 @@ class ModusDefault {
                          const OutputsList & /*out_list*/ = {})
   { return 0;}
 
-  /** The following four parameters tell the number of nucleons in the 
+  /** The following four parameters tell the number of nucleons in the
    *  colliding nuclei, the number of nucleons in the projectile, whether
    *  the first collisions within the same nucleus are forbiden, and whether
-   *  the modus is Collider. They are all needed in the Collider modus. In 
+   *  the modus is Collider. They are all needed in the Collider modus. In
    *  the other modus, they take the following default value. */
   int total_N_number() const { return 0; }
   int proj_N_number() const {return 0; }
   bool cll_in_nucleus() const { return true; }
   bool is_collider() const { return false; }
-
+  /** The beam velocity of the projectile required in the Collider modus.
+   *   In the other modus, return zero. */
+  double velocity_projectile() const { return 0.0; }
+  /** The beam velocity of the target required in the Collider modus.
+   *   In the other modus, return zero. */
+  double velocity_target() const { return 0.0; }
+  /** The type of Fermi motion required in the Collider modus. In the other
+   *  modus, just return FermiMotion::Off. */
+  FermiMotion fermi_motion() const { return FermiMotion::Off; }
   /// Maximal timestep accepted by this modus. Negative means infinity.
   float max_timestep(float ) const { return -1.f; }
 

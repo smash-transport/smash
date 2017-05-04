@@ -89,8 +89,6 @@ class ParticleData {
 
   /// return the particle's 4-momentum
   const FourVector &momentum() const { return momentum_; }
-  /// return the particle's beam-4-momentum
-  const FourVector &beammomentum() const { return beammomentum_; }
 
   /// set the particle's 4-momentum directly
   void set_4momentum(const FourVector &momentum_vector) {
@@ -130,21 +128,6 @@ class ParticleData {
   void set_3momentum(const ThreeVector &mom) {
     momentum_ = FourVector(momentum_.x0(), mom);
   }
-  /**
-   * Set the beammomentum of the projectile- and targetparticle.
-   *
-   * \param[in] mass the mass of the particle (without E_kin contribution)
-   * \param[in] px x-component of the momentum, zero because beam in z-direction
-   * \param[in] py y-component of the momentum, zero because beam in z-direction
-   * \param[in] pz z-component of the momentum
-   *
-   * \fpPrecision The momentum FourVector requires double-precision.
-   */
-  void set_beam4momentum(double mass, double pBx, double pBy, double pBz) {
-    beammomentum_ = FourVector(std::sqrt(mass*mass + pBx*pBx +
-                                           pBy*pBy + pBz*pBz),
-                               pBx, pBy, pBz);
-  }
 
   /// The particle's position in Minkowski space
   const FourVector &position() const { return position_; }
@@ -183,8 +166,6 @@ class ParticleData {
   /// get the velocity 3-vector
   ThreeVector velocity() const { return momentum_.velocity(); }
 
-  /// get the beamvelocity 3-vector
-  ThreeVector beamvelocity() const { return beammomentum_.velocity(); }
 
   /**
    * Returns the inverse of the gamma factor from the current velocity of the
@@ -246,7 +227,6 @@ class ParticleData {
   void copy_to(ParticleData &dst) const {
     dst.history_ = history_;
     dst.momentum_ = momentum_;
-    dst.beammomentum_ = beammomentum_;
     dst.position_ = position_;
     dst.formation_time_ = formation_time_;
     dst.cross_section_scaling_factor_ = cross_section_scaling_factor_;
@@ -293,8 +273,6 @@ class ParticleData {
 
   /// momenta of the particle: x0, x1, x2, x3 as E, px, py, pz
   FourVector momentum_;
-  /// beam-momenta of the particle: x0, x1, x2, x3 as E, pBx, pBy, pBz
-  FourVector beammomentum_;
   /// position in space: x0, x1, x2, x3 as t, x, y, z
   FourVector position_;
   /** Formation time at which the particle is fully formed

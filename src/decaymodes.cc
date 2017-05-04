@@ -376,9 +376,9 @@ void DecayModes::load_decaymodes(const std::string &input) {
           s << p->name();
         }
         s << " with " << mother.mass() << " ≤ " << decay->threshold();
-        throw InvalidDecay("For all decays, the mass of daughters must be"
-                " smaller than the mother's pole mass.\n"
-                "This was violated by the following decay: " + s.str());
+        throw InvalidDecay("For all decays, the minimum mass of daughters"
+          "must be smaller\nthan the mother's pole mass (Manley-Saleski Ansatz)\n"
+          "Violated by the following decay: " + s.str());
       }
     }
   }
