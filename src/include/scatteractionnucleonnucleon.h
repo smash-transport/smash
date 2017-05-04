@@ -57,9 +57,10 @@ class ScatterActionNucleonNucleon : public ScatterActionBaryonBaryon {
    * Utility function to avoid code replication in two_to_two_cross_sections
    */
   template<class IntegrationMethod>
-  CollisionBranchList find_xsection_from_type(const ParticleTypePtrList &type_res_1,
-                                          const ParticleTypePtrList &type_res_2,
-                                          const IntegrationMethod integrator);
+  CollisionBranchList find_xsection_from_type(
+                                         const ParticleTypePtrList &type_res_1,
+                                         const ParticleTypePtrList &type_res_2,
+                                         const IntegrationMethod integrator);
 };
 
 

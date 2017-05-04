@@ -104,7 +104,8 @@ class AdaptiveParameters {
   float rate_;
 };
 
-inline std::ostream& operator << (std::ostream &o, const AdaptiveParameters &a) {
+inline std::ostream& operator << (std::ostream &o,
+                                  const AdaptiveParameters &a) {
   return o << "Adaptive time step:\n" <<
        "  Smoothing factor: " << a.smoothing_factor_ << "\n" <<
        "  Target missed actions: " << 100 * a.target_missed_actions_ << "%\n" <<

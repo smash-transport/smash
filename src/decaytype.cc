@@ -364,7 +364,8 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
       float ff = em_form_factor_ps(pdg, m_dil);  // form factor
       /// see \iref{Landsberg:1986fd}, equation (3.8)
       return (4.*alpha/(3.*M_PI)) * gamma_2g/m_dil
-                                  * pow_int(1.-m_dil/m_par*m_dil/m_par, 3) * ff*ff;
+                                  * pow_int(1.-m_dil/m_par*m_dil/m_par, 3)
+                                  * ff*ff;
     }
     case 2: /* vectors: ω, φ */ {
       // width for decay into π⁰γ

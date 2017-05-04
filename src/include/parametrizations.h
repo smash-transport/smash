@@ -135,7 +135,8 @@ struct pair_hash {
  */
 class KplusNRatios {
  private:
-  mutable std::unordered_map<std::pair<uint64_t, uint64_t>, float, pair_hash> ratios_;
+  mutable std::unordered_map<std::pair<uint64_t, uint64_t>,
+                             float, pair_hash> ratios_;
  public:
   /// Create an empty K+ N isospin ratio storage.
   KplusNRatios() : ratios_({}) {}

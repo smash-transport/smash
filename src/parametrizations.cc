@@ -332,8 +332,10 @@ static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>,
                             const ParticleType& c, const ParticleType& d,
                             float weight_numerator, float weight_other) {
       assert(weight_numerator + weight_other != 0);
-      const auto key = std::make_pair(pack(a.pdgcode().code(), b.pdgcode().code()),
-                                      pack(c.pdgcode().code(), d.pdgcode().code()));
+      const auto key = std::make_pair(pack(a.pdgcode().code(),
+                                           b.pdgcode().code()),
+                                      pack(c.pdgcode().code(),
+                                           d.pdgcode().code()));
       const float ratio = weight_numerator / (weight_numerator + weight_other);
       ratios[key] = ratio;
   };
@@ -390,8 +392,10 @@ static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>,
 }
 
 /// Return the isospin ratio of the given K+ N reaction's cross section.
-float KplusNRatios::get_ratio(const ParticleType& a, const ParticleType& b,
-                const ParticleType& c, const ParticleType& d) const {
+float KplusNRatios::get_ratio(const ParticleType& a,
+                              const ParticleType& b,
+                              const ParticleType& c,
+                              const ParticleType& d) const {
   /* If this method is called with anti-nucleons, flip all particles to anti-particles;
    * the ratio is equal */
   int flip = 0;
@@ -404,8 +408,10 @@ float KplusNRatios::get_ratio(const ParticleType& a, const ParticleType& b,
       }
     }
   }
-  const auto key = std::make_pair(pack(a.pdgcode().code()*flip, b.pdgcode().code()*flip),
-                                  pack(c.pdgcode().code()*flip, d.pdgcode().code()*flip));
+  const auto key = std::make_pair(pack(a.pdgcode().code()*flip,
+                                       b.pdgcode().code()*flip),
+                                  pack(c.pdgcode().code()*flip,
+                                       d.pdgcode().code()*flip));
   if (ratios_.empty()) {
     initialize(ratios_);
   }

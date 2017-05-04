@@ -186,7 +186,8 @@ ColliderModus::ColliderModus(Configuration modus_config,
   const double mass_projec = projectile_->mass();
   const double mass_target = target_->mass();
   // average mass of a particle in that nucleus
-  const double mass_a = projectile_->mass() / projectile_->number_of_particles();
+  const double mass_a = projectile_->mass() /
+                        projectile_->number_of_particles();
   const double mass_b = target_->mass() / target_->number_of_particles();
   // Option 1: Center of mass energy.
   if (modus_cfg.has_value({"Sqrtsnn"})) {
@@ -274,7 +275,8 @@ ColliderModus::ColliderModus(Configuration modus_config,
         impact_interpolation_ = make_unique<InterpolateDataLinear<float>>(
             InterpolateDataLinear<float>(impacts, yields));
 
-        const auto imp_minmax = std::minmax_element(impacts.begin(), impacts.end());
+        const auto imp_minmax = std::minmax_element(impacts.begin(),
+                                                    impacts.end());
         imp_min_ = *imp_minmax.first;
         imp_max_ = *imp_minmax.second;
         yield_max_ = *std::max_element(yields.begin(), yields.end());

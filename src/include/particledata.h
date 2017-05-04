@@ -141,7 +141,8 @@ class ParticleData {
    * \fpPrecision The momentum FourVector requires double-precision.
    */
   void set_beam4momentum(double mass, double pBx, double pBy, double pBz) {
-    beammomentum_ = FourVector(std::sqrt(mass*mass + pBx*pBx + pBy*pBy + pBz*pBz),
+    beammomentum_ = FourVector(std::sqrt(mass*mass + pBx*pBx +
+                                           pBy*pBy + pBz*pBz),
                                pBx, pBy, pBz);
   }
 

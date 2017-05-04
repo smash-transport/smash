@@ -359,7 +359,8 @@ void Nucleus::generate_fermi_momenta() {
     if (i->pdgcode() == pdg::n) {
       rho = rho * N_n / A;
     }
-    const double p = hbarc * std::pow(pi2_3 * rho * Random::uniform(0.0, 1.0), 1.0/3.0);
+    const double p = hbarc * std::pow(pi2_3 * rho *
+                                      Random::uniform(0.0, 1.0), 1.0/3.0);
     Angles phitheta;
     phitheta.distribute_isotropically();
     const ThreeVector ith_3momentum = phitheta.threevec() * p;

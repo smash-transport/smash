@@ -49,7 +49,8 @@ const IsoParticleType& IsoParticleType::find(const std::string &name) {
 IsoParticleType& IsoParticleType::find_private(const std::string &name) {
   auto found = try_find_private(name);
   if (!found) {
-    throw ParticleNotFoundFailure("Isospin multiplet " + name + " not found (privately)!");
+    throw ParticleNotFoundFailure("Isospin multiplet " + name
+                                + " not found (privately)!");
   }
   return *found;
 }
@@ -159,7 +160,8 @@ double IsoParticleType::get_integral_NR(double sqrts) {
      * in order to avoid race conditions in multi-threading. */
     ParticleTypePtr type_res = states_[0];
     ParticleTypePtr nuc = IsoParticleType::find("N").get_states()[0];
-    XS_NR_tabulation_ = spectral_integral_semistable(integrate, *type_res, *nuc, 2.0);
+    XS_NR_tabulation_ = spectral_integral_semistable(integrate,
+                                                     *type_res, *nuc, 2.0);
   }
   return XS_NR_tabulation_->get_value_linear(sqrts);
 }
@@ -171,20 +173,23 @@ double IsoParticleType::get_integral_RK(double sqrts) {
      * in order to avoid race conditions in multi-threading. */
     ParticleTypePtr type_res = states_[0];
     ParticleTypePtr kaon = IsoParticleType::find("K").get_states()[0];
-    XS_RK_tabulation_ = spectral_integral_semistable(integrate, *type_res, *kaon, 2.0);
+    XS_RK_tabulation_ = spectral_integral_semistable(integrate,
+                                                     *type_res, *kaon, 2.0);
   }
   return XS_RK_tabulation_->get_value_linear(sqrts);
 }
 
 static thread_local Integrator2d integrate2d(1E4);
 
-double IsoParticleType::get_integral_RR(const ParticleType &type_res_2, double sqrts) {
+double IsoParticleType::get_integral_RR(const ParticleType &type_res_2,
+                                        double sqrts) {
   auto search = XS_RR_tabulations.find(find(type_res_2));
   if (search != XS_RR_tabulations.end()) {
     return search->second->get_value_linear(sqrts);
   }
   IsoParticleType* key = find(type_res_2);
-  XS_RR_tabulations.emplace(key, integrate_RR(find(type_res_2)->get_states()[0]));
+  XS_RR_tabulations.emplace(key,
+                            integrate_RR(find(type_res_2)->get_states()[0]));
   return XS_RR_tabulations.at(key)->get_value_linear(sqrts);
 }
 

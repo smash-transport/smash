@@ -8,6 +8,7 @@
 #define SRC_INCLUDE_EXPERIMENT_H_
 
 #include <limits>
+#include <memory>
 #include <vector>
 
 #include "actionfinderfactory.h"

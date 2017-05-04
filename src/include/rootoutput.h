@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_ROOTOUTPUT_H_
 #define SRC_INCLUDE_ROOTOUTPUT_H_
 
+#include <memory>
 #include <string>
 #include <vector>
 

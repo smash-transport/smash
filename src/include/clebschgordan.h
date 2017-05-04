@@ -87,7 +87,8 @@ class I_tot_range {
         I_max_ = 0;
         return;
     }
-    I_max_ = std::min(t_a.isospin() + t_b.isospin(), t_c.isospin() + t_d.isospin());
+    I_max_ = std::min(t_a.isospin() + t_b.isospin(),
+                      t_c.isospin() + t_d.isospin());
     I_min_ = std::max(std::abs(t_a.isospin() - t_b.isospin()),
                       std::abs(t_c.isospin() - t_d.isospin()));
     I_min_ = std::max(I_min_, std::abs(I_z));

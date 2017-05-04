@@ -207,9 +207,11 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
     }
     ensure_all_read(lineinput, line);
 
-    // Check if nucleon, kaon, and delta masses are the same as hardcoded ones, if present
+    /* Check if nucleon, kaon, and delta masses are
+     * the same as hardcoded ones, if present */
     if (pdgcode[0].is_nucleon() && !almost_equal(mass, nucleon_mass)) {
-      throw std::runtime_error("Nucleon mass in input file different from 0.938");
+      throw std::runtime_error("Nucleon mass in input file"
+                               " different from 0.938");
     }
     if (pdgcode[0].is_kaon() && !almost_equal(mass, kaon_mass)) {
       throw std::runtime_error("Kaon mass in input file different from 0.494");
@@ -510,7 +512,8 @@ float ParticleType::spectral_function(float m) const {
     const auto width = width_at_pole();
     // We transform the integral using m = m_min + width_pole * tan(x), to
     // make it definite and to avoid numerical issues.
-    norm_factor_ = 1./integrate(std::atan((minimum_mass() - mass())/width), M_PI/2.,
+    norm_factor_ = 1./integrate(std::atan((minimum_mass() - mass())/width),
+                                M_PI/2.,
         [&](double x) {
           return spectral_function_no_norm(mass() + width*std::tan(x)) * width
                  * (1 + square(std::tan(x)));

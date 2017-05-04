@@ -93,7 +93,8 @@ void ScatterAction::generate_final_state() {
 
 
 void ScatterAction::add_all_processes(float elastic_parameter,
-                                      bool two_to_one, bool two_to_two, double low_snn_cut,
+                                      bool two_to_one, bool two_to_two,
+                                      double low_snn_cut,
                                       bool strings_switch) {
   if (two_to_one) {
     /* resonance formation (2->1) */
@@ -342,7 +343,8 @@ void ScatterAction::resonance_formation() {
   const float t0 = incoming_particles_[0].formation_time();
   const float t1 = incoming_particles_[1].formation_time();
   const size_t index_tmax = (t0 > t1) ? 0 : 1;
-  const float sc = incoming_particles_[index_tmax].cross_section_scaling_factor();
+  const float sc =
+    incoming_particles_[index_tmax].cross_section_scaling_factor();
   if (t0 > time_of_execution_ || t1 > time_of_execution_) {
     outgoing_particles_[0].set_formation_time(std::max(t0, t1));
     outgoing_particles_[0].set_cross_section_scaling_factor(sc);

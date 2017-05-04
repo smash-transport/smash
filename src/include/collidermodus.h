@@ -59,7 +59,7 @@ class ColliderModus : public ModusDefault {
                                      +projectile_->number_of_particles(); }
   /// return the nucleon number in the projectile nucleus
   int proj_N_number() const { return projectile_->number_of_particles(); }
-  /// return the flag: whether to allow the first collsions within the same nucleus
+  /// return the flag: allow the first collsions within the same nucleus or not
   bool cll_in_nucleus() { return cll_in_nucleus_; }
   /// return whether the modus is collider modus
   bool is_collider() const { return true; }

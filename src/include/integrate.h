@@ -14,6 +14,7 @@
 #include <gsl/gsl_monte_plain.h>
 #include <gsl/gsl_monte_vegas.h>
 
+#include <memory>
 #include <tuple>
 #include <utility>
 
@@ -126,7 +127,8 @@ class Integrator {
 
  private:
   /// Holds the workspace pointer.
-  std::unique_ptr<gsl_integration_cquad_workspace, GslWorkspaceDeleter> workspace_;
+  std::unique_ptr<gsl_integration_cquad_workspace,
+                  GslWorkspaceDeleter> workspace_;
 
   /// Parameter to the GSL integration function: desired absolute error limit
   const double accuracy_absolute_ = 1.0e-5;
