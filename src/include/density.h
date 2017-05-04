@@ -102,7 +102,7 @@ enum class DensityType {
  */
 class DensityParameters {
  public:
-  DensityParameters(const ExperimentParameters &par) :  // NOLINT(runtime/explicit)
+  DensityParameters(const ExperimentParameters &par) :  // NOLINT
       sig_(par.gaussian_sigma),
       r_cut_(par.gauss_cutoff_in_sigma * par.gaussian_sigma),
       ntest_(par.testparticles) {
