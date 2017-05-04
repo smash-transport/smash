@@ -15,6 +15,7 @@
 #include "include/cxx14compat.h"
 #include "include/decayactionsfinder.h"
 #include "include/decayactionsfinderdilepton.h"
+#include "include/fourvector.h"
 #include "include/listmodus.h"
 #include "include/propagation.h"
 #include "include/scatteractionphoton.h"
@@ -30,7 +31,6 @@
 #endif
 #include "include/vtkoutput.h"
 #include "include/wallcrossingaction.h"
-#include "include/fourvector.h"
 
 namespace std {
 /**
@@ -886,7 +886,8 @@ void Experiment<Modus>::run_time_evolution() {
 
 template <typename Modus>
 void Experiment<Modus>::propagate_and_shine(double to_time) {
-  const double dt = propagate_straight_line(&particles_, to_time, beam_momentum_);
+  const double dt = propagate_straight_line(
+      &particles_, to_time, beam_momentum_);
   if (dilepton_finder_ != nullptr) {
     dilepton_finder_->shine(particles_, dilepton_output_.get(), dt);
   }
@@ -1151,14 +1152,19 @@ void Experiment<Modus>::run() {
     }
     /* In the ColliderModus, if Fermi motion is frozen, assign the beam momenta to
      * the nucleons in both the projectile and the target. */
-    if (modus_.is_collider() && modus_.fermi_motion() == FermiMotion::Frozen) {
+    if (modus_.is_collider()
+        && modus_.fermi_motion() == FermiMotion::Frozen) {
         for (int i = 0; i < modus_.total_N_number(); i++) {
-            const auto mass_beam = particles_.copy_to_vector()[i].effective_mass();
-            const auto v_beam = (i < modus_.proj_N_number()) ? modus_.velocity_projectile() :
-                                modus_.velocity_target();
+            const auto mass_beam = particles_.copy_to_vector()[i]
+                .effective_mass();
+            const auto v_beam =
+                i < modus_.proj_N_number() ?
+                modus_.velocity_projectile() :
+                modus_.velocity_target();
             const auto gamma = 1.0 / std::sqrt(1.0 - v_beam * v_beam);
-            beam_momentum_.emplace_back(FourVector(gamma * mass_beam, 0.0, 0.0,
-                                      gamma * v_beam * mass_beam));
+            beam_momentum_.emplace_back(
+                FourVector(gamma * mass_beam, 0.0, 0.0,
+                           gamma * v_beam * mass_beam));
         }
     }
     /* Output at event start */

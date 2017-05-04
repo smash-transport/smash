@@ -14,9 +14,9 @@
 #include <gsl/gsl_monte_plain.h>
 #include <gsl/gsl_monte_vegas.h>
 
+#include <iostream>
 #include <memory>
 #include <tuple>
-#include <iostream>
 #include <utility>
 
 #include "cxx14compat.h"

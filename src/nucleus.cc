@@ -14,12 +14,12 @@
 
 #include "include/angles.h"
 #include "include/constants.h"
+#include "include/fourvector.h"
 #include "include/logging.h"
 #include "include/numerics.h"
 #include "include/particles.h"
 #include "include/pdgcode.h"
 #include "include/threevector.h"
-#include "include/fourvector.h"
 
 namespace Smash {
 

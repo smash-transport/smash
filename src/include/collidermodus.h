@@ -13,11 +13,11 @@
 
 #include "deformednucleus.h"
 #include "forwarddeclarations.h"
+#include "fourvector.h"
 #include "interpolation.h"
 #include "modusdefault.h"
 #include "nucleus.h"
 #include "pdgcode.h"
-#include "fourvector.h"
 
 namespace Smash {
 

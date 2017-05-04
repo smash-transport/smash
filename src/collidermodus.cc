@@ -20,6 +20,7 @@
 #include "include/configuration.h"
 #include "include/cxx14compat.h"
 #include "include/experimentparameters.h"
+#include "include/fourvector.h"
 #include "include/interpolation.h"
 #include "include/kinematics.h"
 #include "include/logging.h"
@@ -27,7 +28,6 @@
 #include "include/particles.h"
 #include "include/pdgcode.h"
 #include "include/random.h"
-#include "include/fourvector.h"
 
 namespace Smash {
 
@@ -333,16 +333,16 @@ float ColliderModus::initial_conditions(Particles *particles,
       get_velocities(total_s_, projectile_->mass(), target_->mass());
 
   // If velocities are larger or equal to 1, throw an exception.
-  if (v_a >= 1.0 || v_b >=1.0) {
+  if (v_a >= 1.0 || v_b >= 1.0) {
     throw std::domain_error(
         "Found velocity equal to or larger than 1 in "
         "ColliderModus::initial_conditions.\nConsider using "
         "the center of velocity reference frame.");
   }
 
-  // Calculate the beam velocity of the projectile and the target, which will
-  // be used to calculate the beam momenta in experiment.cc
-  if (fermi_motion_ == FermiMotion::Frozen){
+  // Calculate the beam velocity of the projectile and the target, which will be
+  // used to calculate the beam momenta in experiment.cc
+  if (fermi_motion_ == FermiMotion::Frozen) {
       velocity_projectile_ = v_a;
       velocity_target_ = v_b;
   }

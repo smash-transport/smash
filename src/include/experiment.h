@@ -16,10 +16,10 @@
 #include "chrono.h"
 #include "decayactionsfinderdilepton.h"
 #include "energymomentumtensor.h"
+#include "fourvector.h"
 #include "pauliblocking.h"
 #include "potentials.h"
 #include "quantumnumbers.h"
-#include "fourvector.h"
 
 namespace Smash {
 

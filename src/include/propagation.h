@@ -8,6 +8,8 @@
 #ifndef SRC_INCLUDE_PROPAGATION_H_
 #define SRC_INCLUDE_PROPAGATION_H_
 
+#include <vector>
+
 #include "lattice.h"
 #include "particles.h"
 #include "potentials.h"
@@ -27,7 +29,7 @@ namespace Smash {
   * \param[out] dt time interval of propagation
   */
 double propagate_straight_line(Particles *particles, double to_time,
-                       const std::vector<FourVector> &beam_momentum); 
+                       const std::vector<FourVector> &beam_momentum);
 
 /**
  * Updates the momenta of all particles at the current
