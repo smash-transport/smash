@@ -118,7 +118,7 @@ TEST(Landau_frame) {
   // By definition of Landau frame T^{0i} = 0 should be fulfilled.
   EnergyMomentumTensor T3L = T3.boosted(T3.landau_frame_4velocity());
   for (size_t i = 1; i < 4; i++) {
-    COMPARE_ABSOLUTE_ERROR(T3L[i], 0.0, 1.e-15);
+    COMPARE_ABSOLUTE_ERROR(T3L[i], 0.0, 2.e-15);
   }
 }
 

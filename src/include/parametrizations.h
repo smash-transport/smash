@@ -149,6 +149,7 @@ struct pair_hash {
         // and their order is defined, so we can simply combine the hashes
         // using XOR. Note that this yields 0 for h1 == h2. Also,
         // std::swap(h1, h2) does not not change the final hash.
+        assert(h1 != h2);
         return h1 ^ h2;
     }
 };

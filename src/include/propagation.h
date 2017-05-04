@@ -26,7 +26,8 @@ namespace Smash {
   * \param[in] to_time final time
   * \param[out] dt time interval of propagation
   */
-double propagate_straight_line(Particles *particles, double to_time);
+double propagate_straight_line(Particles *particles, double to_time,
+                       const std::vector<FourVector> &beam_momentum); 
 
 /**
  * Updates the momenta of all particles at the current

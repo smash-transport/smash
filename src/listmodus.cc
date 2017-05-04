@@ -100,7 +100,7 @@ std::pair<bool, float> ListModus::check_formation_time_(
                             const std::string & particle_list) {
     float earliest_formation_time = FLT_MAX;
     float formation_time_difference = 0.0;
-    float reference_formation_time;
+    float reference_formation_time = 0.0;  // avoid compiler warning
     for (const Line &line : line_parser(particle_list)) {
         std::istringstream lineinput(line.text);
         float t;
@@ -117,7 +117,7 @@ std::pair<bool, float> ListModus::check_formation_time_(
     }
 
     bool anti_streaming_needed = (formation_time_difference > really_small)
-                                  ? true : false; 
+                                  ? true : false;
     return std::make_pair(anti_streaming_needed, earliest_formation_time);
 }
 
@@ -178,7 +178,7 @@ float ListModus::initial_conditions(Particles *particles,
           if (anti_streaming_needed) {
             /* for hydro output where formation time is different*/
             float delta_t = t - start_time_;
-            FourVector start_timespace = FourVector(t, x, y, z) - delta_t * 
+            FourVector start_timespace = FourVector(t, x, y, z) - delta_t *
                 FourVector(E, px, py, pz) / E;
             particle.set_4position(start_timespace);
             particle.set_formation_time(t);

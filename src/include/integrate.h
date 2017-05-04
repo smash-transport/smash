@@ -14,6 +14,7 @@
 #include <gsl/gsl_monte_plain.h>
 #include <gsl/gsl_monte_vegas.h>
 #include <tuple>
+#include <iostream>
 
 #include "cxx14compat.h"
 #include "fpenvironment.h"
@@ -114,11 +115,16 @@ class Integrator {
         &fun};
     // We disable float traps when calling GSL code we cannot control.
     DisableFloatTraps guard;
-    gsl_integration_cquad(&gslfun, a, b,
+    const int error_code = gsl_integration_cquad(&gslfun, a, b,
                           accuracy_absolute_, accuracy_relative_,
                           workspace_.get(),
                           &result.first, &result.second,
                           nullptr /* Don't store the number of evaluations */);
+    if (error_code) {
+      std::stringstream err;
+      err << "GSL integration: " << gsl_strerror(error_code);
+      throw std::runtime_error(err.str());
+    }
     return result;
   }
 

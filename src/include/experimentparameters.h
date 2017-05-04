@@ -29,6 +29,26 @@ struct ExperimentParameters {
   float gaussian_sigma;
   /// distance at which gaussian is cut, i.e. set to zero, IN SIGMA (not fm)
   float gauss_cutoff_in_sigma;
+  /**
+  * This indicates whether two to one reaction is switched on.
+  */
+  bool two_to_one;
+  /**
+  * This indicates whether two to two reaction is switched on.
+  */
+  bool two_to_two;
+  /**
+  * This indicates whether string fragmentation is switched on.
+  */
+  bool strings_switch;
+  /**
+  * This indicates whether photons are switched on.
+  */
+  bool photons_switch;
+
+  /// Elastic collisions between the nucleons with the square root s
+  //  below low_snn_cut are excluded.
+  double low_snn_cut;
 };
 
 }  // namespace Smash
