@@ -59,10 +59,9 @@ PauliBlocker::~PauliBlocker() {
 }
 
 float PauliBlocker::phasespace_dens(const ThreeVector &r, const ThreeVector &p,
-                        const Particles &particles, const PdgCode pdg) const {
+                        const Particles &particles, const PdgCode pdg,
+                        const ParticleList& disregard) const {
   float f = 0.0;
-  float rdist_sqr, pdist_sqr;
-  size_t index;
 
   // TODO(oliiny): looping over all particles is inefficient,
   // I need only particles within rp_ radius in momentum and
@@ -73,19 +72,33 @@ float PauliBlocker::phasespace_dens(const ThreeVector &r, const ThreeVector &p,
       continue;
     }
     // Only consider momenta in sphere of radius rp_ with center at p
-    pdist_sqr = (part.momentum().threevec() - p).sqr();
+    const float pdist_sqr = (part.momentum().threevec() - p).sqr();
     if (pdist_sqr > rp_*rp_) {
       continue;
     }
-    rdist_sqr = (part.position().threevec() - r).sqr();
+    const float rdist_sqr = (part.position().threevec() - r).sqr();
     // Only consider coordinates in sphere of radius rr_+rc_ with center at r
-    if (rdist_sqr > (rr_+rc_)*(rr_+rc_)) {
+    if (rdist_sqr >= (rr_+rc_)*(rr_+rc_)) {
       continue;
     }
-    // 0th order interpolation using tabulated values
-    index = std::round(std::sqrt(rdist_sqr) / (rr_ + rc_) * weights_.size());
-    if (likely(index < weights_.size())) {
-      f += weights_[index];
+    // Do not count particles that should be disregarded. This is intended to
+    // avoid counting incoming particles when the phase-space density for
+    // outgoing ones is estimated.
+    bool to_disregard = false;
+    for (const auto &disregard_part : disregard) {
+      if (part.id() == disregard_part.id()) {
+        to_disregard = true;
+      }
+    }
+    if (to_disregard) {
+      continue;
+    }
+    // 1st order interpolation using tabulated values
+    const float i_real = std::sqrt(rdist_sqr) / (rr_ + rc_) * weights_.size();
+    const size_t i = std::floor(i_real);
+    const float rest = i_real - i;
+    if (likely(i + 1 < weights_.size())) {
+      f += weights_[i] * rest + weights_[i + 1] * (1.f - rest);
     }
   }
   return f / ntest_;
