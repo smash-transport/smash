@@ -281,8 +281,8 @@ void DecayModes::load_decaymodes(const std::string &input) {
                 << ", daughters: " << isotype_daughter_1.isospin()
                 << " " << isotype_daughter_2.isospin();
               throw InvalidDecay(isotype_mother->name() +
-                " decay mode is forbidden by isospin: \"" + line.text + "\"" + s.str()
-              );
+                " decay mode is forbidden by isospin: \"" +
+                line.text + "\"" + s.str());
             }
             break;
           }
@@ -350,9 +350,9 @@ void DecayModes::load_decaymodes(const std::string &input) {
         }
         if (no_decays) {
           throw InvalidDecay(isotype_mother->name() +
-                             " decay mode violates charge conservation: \"" +
-                             line.text + "\" (line " + std::to_string(linenumber)
-                             + ": \"" + trimmed + "\"");
+                            " decay mode violates charge conservation: \"" +
+                            line.text + "\" (line " + std::to_string(linenumber)
+                            + ": \"" + trimmed + "\"");
         }
       }
     }
@@ -377,7 +377,8 @@ void DecayModes::load_decaymodes(const std::string &input) {
         }
         s << " with " << mother.mass() << " ≤ " << decay->threshold();
         throw InvalidDecay("For all decays, the minimum mass of daughters"
-          "must be smaller\nthan the mother's pole mass (Manley-Saleski Ansatz)\n"
+          "must be smaller\nthan the mother's pole mass "
+          "(Manley-Saleski Ansatz)\n"
           "Violated by the following decay: " + s.str());
       }
     }

@@ -10,9 +10,9 @@
 #ifndef SRC_INCLUDE_OUTPUTINTERFACE_H_
 #define SRC_INCLUDE_OUTPUTINTERFACE_H_
 
-#include "forwarddeclarations.h"
 #include "density.h"
 #include "energymomentumtensor.h"
+#include "forwarddeclarations.h"
 #include "lattice.h"
 #include "macros.h"
 

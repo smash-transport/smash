@@ -169,11 +169,11 @@ class IsoParticleType {
    * where R is a resonance from this multiplet. */
   TabulationPtr XS_NR_tabulation_, XS_DR_tabulation_;
   /* A tabulation list for the NN -> RR' cross sections,
-   * where R is this multiplet and R' is a baryon resonance, associated 
+   * where R is this multiplet and R' is a baryon resonance, associated
    * with a list of resonances R' for the NN -> RR' cross sections;
    * used to calculate every multiplet spectral function only once*/
   std::unordered_map<IsoParticleType*, TabulationPtr> XS_RR_tabulations;
-  
+
   /**
    * Private version of the 'find' method that returns a non-const reference.
    */

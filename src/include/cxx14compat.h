@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_CXX14COMPAT_H_
 
 #include <memory>
+#include <utility>
 
 namespace Smash {
 

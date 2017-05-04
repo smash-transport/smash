@@ -10,6 +10,7 @@
 #define SRC_INCLUDE_PARAMETRIZATIONS_H_
 
 #include <unordered_map>
+#include <utility>
 
 #include "particletype.h"
 
@@ -134,10 +135,11 @@ struct pair_hash {
  */
 class KplusNRatios {
  private:
-  mutable std::unordered_map<std::pair<uint64_t, uint64_t>, float, pair_hash> ratios_;
+  mutable std::unordered_map<std::pair<uint64_t, uint64_t>,
+                             float, pair_hash> ratios_;
  public:
   /// Create an empty K+ N isospin ratio storage.
-  KplusNRatios() : ratios_({}) {};
+  KplusNRatios() : ratios_({}) {}
 
   /// Return the isospin ratio of the given K+ N reaction's cross section.
   ///

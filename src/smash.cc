@@ -6,13 +6,12 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
-#include <sstream>
+#include <getopt.h>
 
+#include <sstream>
 #include <vector>
 
 #include <boost/filesystem/fstream.hpp>
-
-#include <getopt.h>
 
 #include "include/cxx14compat.h"
 #include "include/decaymodes.h"
@@ -180,7 +179,7 @@ void ensure_path_is_valid(const bf::path &path) {
 
 /* main - do command line parsing and hence decides modus */
 int main(int argc, char *argv[]) {
-  using namespace Smash;
+  using namespace Smash;  // NOLINT(build/namespaces)
   setup_default_float_traps();
 
   const auto &log = logger<LogArea::Main>();
@@ -302,7 +301,7 @@ int main(int argc, char *argv[]) {
       DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
       std::vector<bool> nucleon_has_interacted = {};
       auto scat_finder = make_unique<ScatterActionsFinder>(elastic_parameter,
-                                               ntest, nucleon_has_interacted, two_to_one);
+                                     ntest, nucleon_has_interacted, two_to_one);
       scat_finder->dump_reactions();
       std::exit(EXIT_SUCCESS);
     }

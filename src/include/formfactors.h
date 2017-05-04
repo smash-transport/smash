@@ -8,6 +8,8 @@
 #ifndef SRC_INCLUDE_FORMFACTORS_H_
 #define SRC_INCLUDE_FORMFACTORS_H_
 
+#include <string>
+
 #include "constants.h"
 #include "pdgcode_constants.h"
 

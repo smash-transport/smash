@@ -21,20 +21,18 @@ void ScatterActionHyperonPion::format_debug_output(std::ostream &out) const {
 }
 
 CollisionBranchList ScatterActionHyperonPion::two_to_two_cross_sections() {
-  const ParticleType &type_particle_a = incoming_particles_[0].type();
-  const ParticleType &type_particle_b = incoming_particles_[1].type();
-  CollisionBranchList process_list;
-
-  const ParticleType &type_hyperon =
-      type_particle_a.pdgcode().is_hyperon() ? type_particle_a : type_particle_b;
-  const ParticleType &type_pion =
-      type_particle_a.pdgcode().is_hyperon() ? type_particle_b : type_particle_a;
+  const ParticleType &a = incoming_particles_[0].type();
+  const ParticleType &b = incoming_particles_[1].type();
+  const ParticleType &type_hyperon = a.pdgcode().is_hyperon() ? a : b;
+  const ParticleType &type_pion    = a.pdgcode().is_hyperon() ? b : a;
 
   const auto pdg_hyperon = type_hyperon.pdgcode().code();
   const auto pdg_pion = type_pion.pdgcode().code();
 
   const double s = mandelstam_s();
   const double sqrts = sqrt_s();
+
+  CollisionBranchList process_list;
 
   switch (pack(pdg_hyperon, pdg_pion)) {
     case pack(pdg::Sigma_z, pdg::pi_m): {

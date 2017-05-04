@@ -15,6 +15,7 @@
 #include "include/cxx14compat.h"
 #include "include/decayactionsfinder.h"
 #include "include/decayactionsfinderdilepton.h"
+#include "include/fourvector.h"
 #include "include/listmodus.h"
 #include "include/propagation.h"
 #include "include/scatteractionphoton.h"
@@ -358,7 +359,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    **/
   if (time_step_mode_ == TimeStepMode::Adaptive) {
     adaptive_parameters_ = make_unique<AdaptiveParameters>(
-      config["General"]["Adaptive_Time_Step"]);
+      config["General"]["Adaptive_Time_Step"], delta_time_startup_);
     log.info() << *adaptive_parameters_;
   }
 
@@ -637,7 +638,6 @@ void Experiment<Modus>::initialize_new_event() {
   // For box modus make sure that particles are in the box. In principle, after
   // a correct initialization they should be, so this is just playing it safe.
   modus_.impose_boundary_conditions(&particles_, outputs_);
-
   /* Reset the simulation clock */
   double timestep = delta_time_startup_;
 
@@ -886,7 +886,8 @@ void Experiment<Modus>::run_time_evolution() {
 
 template <typename Modus>
 void Experiment<Modus>::propagate_and_shine(double to_time) {
-  const double dt = propagate_straight_line(&particles_, to_time);
+  const double dt = propagate_straight_line(
+      &particles_, to_time, beam_momentum_);
   if (dilepton_finder_ != nullptr) {
     dilepton_finder_->shine(particles_, dilepton_output_.get(), dt);
   }
@@ -1139,15 +1140,32 @@ void Experiment<Modus>::run() {
 
     /* Sample initial particles, start clock, some printout and book-keeping */
     initialize_new_event();
-    /** In the ColliderMode, if the first collisions within the same nucleus are
-     *  forbidden, then nucleon_has_interacted_ is created to record whether the nucleons inside
-     *  the colliding nuclei have experienced any collisions or not */
+    /* In the ColliderModus, if the first collisions within the same nucleus are
+     * forbidden, then nucleon_has_interacted_ is created to record whether the nucleons inside
+     * the colliding nuclei have experienced any collisions or not */
     if (modus_.is_collider()) {
       if (!modus_.cll_in_nucleus()) {
         nucleon_has_interacted_.assign(modus_.total_N_number(), false);
       } else {
         nucleon_has_interacted_.assign(modus_.total_N_number(), true);
       }
+    }
+    /* In the ColliderModus, if Fermi motion is frozen, assign the beam momenta to
+     * the nucleons in both the projectile and the target. */
+    if (modus_.is_collider()
+        && modus_.fermi_motion() == FermiMotion::Frozen) {
+        for (int i = 0; i < modus_.total_N_number(); i++) {
+            const auto mass_beam = particles_.copy_to_vector()[i]
+                .effective_mass();
+            const auto v_beam =
+                i < modus_.proj_N_number() ?
+                modus_.velocity_projectile() :
+                modus_.velocity_target();
+            const auto gamma = 1.0 / std::sqrt(1.0 - v_beam * v_beam);
+            beam_momentum_.emplace_back(
+                FourVector(gamma * mass_beam, 0.0, 0.0,
+                           gamma * v_beam * mass_beam));
+        }
     }
     /* Output at event start */
     for (const auto &output : outputs_) {

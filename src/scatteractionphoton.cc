@@ -86,9 +86,9 @@ void ScatterActionPhoton::generate_final_state() {
                                        -phitheta.threevec() * pcm);
 
   /* Weighing of the fractional photons */
-  if (number_of_fractional_photons > 1) {
+  if (number_of_fractional_photons_ > 1) {
     weight_ = diff_cross_section(t, m3) * (t2 - t1)
-          / (number_of_fractional_photons * cross_section());
+          / (number_of_fractional_photons_ * cross_section());
   } else {
     weight_ = proc->weight() / cross_section();
   }
@@ -191,45 +191,45 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
     ParticleTypePtr part_out = photon_particle;
     ParticleTypePtr photon_out = photon_particle;
 
-    reac = ReactionType::no_reaction;
+    reac_ = ReactionType::no_reaction;
     if (part_a.type().charge() == 0) {
       if (part_b.type().charge() != 0) {
         if (part_b.type().pdgcode().is_pion()) {
-          reac = ReactionType::pi0_pi;
+          reac_ = ReactionType::pi0_pi;
           part_out = charged_rho_particle;
         } else if (part_b.type().pdgcode().is_rho()) {
-          reac = ReactionType::pi0_rho;
+          reac_ = ReactionType::pi0_rho;
           part_out = charged_pi_particle;
         }
       }
     } else if (part_b.type().charge() == 0) {
         // now part_a.type().charge()!=0
         if (part_b.type().pdgcode().is_pion()) {
-          reac = ReactionType::pi0_pi;
+          reac_ = ReactionType::pi0_pi;
           part_out = charged_rho_particle;
         } else if (part_b.type().pdgcode().is_rho()) {
-          reac = ReactionType::piplus_rho0;
+          reac_ = ReactionType::piplus_rho0;
           part_out = charged_pi_particle;
         } else if (part_b.type().pdgcode() == pdg::eta) {
           // corresponds to eta meson
-          reac = ReactionType::piplus_eta;
+          reac_ = ReactionType::piplus_eta;
           part_out = charged_pi_particle;
         }
       } else if (part_b.type().charge() == -part_a.type().charge()) {
         if (part_b.type().pdgcode().is_pion()) {
-          reac = ReactionType::pi_pi;
+          reac_ = ReactionType::pi_pi;
           // actually three reactions possible for pi_pi,
           // so part_out is fixed later
         } else if (part_b.type().pdgcode().is_rho()) {
-          reac = ReactionType::pi_rho;
+          reac_ = ReactionType::pi_rho;
           part_out = pi_particle;
         }
       }
 
     m3 = part_out->mass();
     if (sqrts <= m1 + m2)
-      reac = ReactionType::no_reaction;
-    if (reac != ReactionType::no_reaction) {
+      reac_ = ReactionType::no_reaction;
+    if (reac_ != ReactionType::no_reaction) {
       std::array<double, 2> mandelstam_t = get_t_range(sqrts, m1, m2, m3, 0.0);
       double t1 = mandelstam_t[1];
       double t2 = mandelstam_t[0];
@@ -242,7 +242,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
 
       Integrator1dMonte integrate;
 
-      switch (reac) {
+      switch (reac_) {
         case ReactionType::pi_pi:  // there are three possible reaction channels
           // the first possible reaction has part_out = photon_particle,
           // which is the default declared above
@@ -291,7 +291,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
           if (gamma_rho_tot > really_small) {
             if (tabulation_pi_pi_rho0 == nullptr) {
               tabulation_pi_pi_rho0 = make_unique<Tabulation>(
-                2.0f * m_pi, 15.0f - 2.0f * m_pi, num_tab_pts,
+                2.0f * m_pi, 15.0f - 2.0f * m_pi, num_tab_pts_,
                   [&](float sqrts1) {
                     return integrate(2.0f * m_pi, sqrts1, [&](float M) {
                       return pi_pi_rho0(M, pow_int(sqrts1, 2)) *
@@ -311,7 +311,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
            if (gamma_rho_tot > really_small) {
              if (tabulation_pi0_pi_rho == nullptr) {
                tabulation_pi0_pi_rho = make_unique<Tabulation>(
-                 2.0f * m_pi, 15.0f - 2.0f * m_pi, num_tab_pts,
+                 2.0f * m_pi, 15.0f - 2.0f * m_pi, num_tab_pts_,
                  [&](float sqrts1) {
                    return integrate(2.0f * m_pi, sqrts1, [&](float M) {
                       return pi_pi0_rho(M, pow_int(sqrts1, 2)) *
@@ -524,7 +524,7 @@ float ScatterActionPhoton::diff_cross_section(float t, float m3) const {
   float u = pow_int(m1, 2) + pow_int(m2, 2) + pow_int(m3, 2) - s - t;
   float diff_xsection = 0.0;
   float e = 0.0;
-  switch (reac) {
+  switch (reac_) {
     case ReactionType::pi_pi:
       if (outgoing_particles_[0].type().pdgcode().is_rho()) {
         diff_xsection = alpha * g_rho_2 / (4 * s * p_cm_2);

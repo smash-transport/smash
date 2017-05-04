@@ -7,8 +7,9 @@
 #ifndef SRC_INCLUDE_PARTICLETYPE_H_
 #define SRC_INCLUDE_PARTICLETYPE_H_
 
-#include <assert.h>
+#include <cassert>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "forwarddeclarations.h"
@@ -308,7 +309,8 @@ class ParticleType {
 
   /** Returns a list of all nucleons (i.e. proton and neutron). */
   static ParticleTypePtrList &list_nucleons();
-  /** Returns a list of all anti-nucleons (i.e. anti-proton and anti-neutron). */
+  /** Returns a list of all anti-nucleons (i.e. anti-proton and anti-neutron).
+    */
   static ParticleTypePtrList &list_anti_nucleons();
   /** Returns a list of the Delta(1232) baryons // oliiny: only 1232?!
    *  (i.e. all four charge states). */

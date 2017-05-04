@@ -6,11 +6,12 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
+
 #include "include/filelock.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 namespace Smash {
 
