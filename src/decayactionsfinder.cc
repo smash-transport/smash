@@ -55,13 +55,9 @@ ActionList DecayActionsFinder::find_actions_in_cell(
                            // resonance
         * width);
     /* If the particle is not yet formed at the decay time,
-     * it should not be able to decay; decay time here is relative
-     * so we need to add to it the current time of the particle
-     * to compare to p.formation_time() 
-     */
-    if (decay_time < dt && ((p.formation_time() > (p.position().x0() + decay_time)
-        && p.cross_section_scaling_factor() > really_small) ||
-        (p.formation_time() < (p.position().x0() + decay_time)))) {
+     * it should not be able to decay */
+    if (decay_time < dt &&
+        (p.formation_time() < (p.position().x0()))) {
       // => decay_time ∈ [0, dt[
       // => the particle decays in this timestep.
       auto act = make_unique<DecayAction>(p, decay_time);

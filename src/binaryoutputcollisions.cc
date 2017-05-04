@@ -138,6 +138,10 @@ void BinaryOutputBase::write(const float x) {
   std::fwrite(&x, sizeof(x), 1, file_.get());
 }
 
+void BinaryOutputBase::write(const double x) {
+  std::fwrite(&x, sizeof(x), 1, file_.get());
+}
+
 void BinaryOutputBase::write(const FourVector &v) {
   std::fwrite(v.begin(), sizeof(*v.begin()), 4, file_.get());
 }
