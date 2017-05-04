@@ -101,8 +101,8 @@ void ScatterAction::add_all_processes(float elastic_parameter,
   if (two_to_two) {
     /** Elastic collisions between two nucleons with sqrt_s() below
      * low_snn_cut can not happen*/
-    if (!incoming_particles_[0].type().is_nucleon() || 
-        !incoming_particles_[1].type().is_nucleon() || 
+    if (!incoming_particles_[0].type().is_nucleon() ||
+        !incoming_particles_[1].type().is_nucleon() ||
         !(incoming_particles_[0].type().antiparticle_sign() ==
           incoming_particles_[1].type().antiparticle_sign()) ||
         sqrt_s() >= low_snn_cut) {
@@ -226,7 +226,9 @@ CollisionBranchPtr ScatterAction::string_excitation_cross_section() {
   const auto &log = logger<LogArea::ScatterAction>();
   /* Calculate string-excitation cross section:
    * Parametrized total minus all other present channels. */
-  float sig_string = std::max(0.f, total_cross_section() - cross_section());
+  float sig_string = std::max(0.f, string_cross_section());
+  /* Feng: print sig_string */
+  std::cout << "sig_string" << std::endl;
   log.debug("String cross section is: ", sig_string);
   return make_unique<CollisionBranch>(sig_string, ProcessType::String);
 }
@@ -405,6 +407,8 @@ void ScatterAction::string_excitation() {
     if (event[i].isFinal()) {
       if (event[i].isHadron()) {
         int pythia_id = event[i].id();
+           /*Feng: print pdg id*/
+        std::cout << "pythia_id" << pythia_id << std::endl;
         log.debug("PDG ID from Pythia:", pythia_id);
         /* K_short and K_long need to be converted to K0
          * since SMASH only knows K0 */

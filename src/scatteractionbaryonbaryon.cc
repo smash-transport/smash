@@ -33,6 +33,20 @@ float ScatterActionBaryonBaryon::total_cross_section() const {
   }
 }
 
+float ScatterActionBaryonBaryon::string_cross_section() const {
+  const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
+  const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
+  const double s = mandelstam_s();
+
+  /* Currently all BB collisions use the nucleon-nucleon parametrizations. */
+  if (pdg_a == pdg_b) {
+    return pp_string(s);     // pp, nn
+  } else if (!pdg_a.is_antiparticle_of(pdg_b)) {
+    return np_string(s);     // np
+  } else {
+     return 0;
+  }
+}
 
 CollisionBranchList ScatterActionBaryonBaryon::two_to_two_cross_sections() {
   CollisionBranchList process_list;
@@ -129,55 +143,61 @@ float ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(double sqrts,
   const float m_a = type_a.mass();
   const float m_b = type_b.mass();
   const float msqr = 2. * (m_a*m_a + m_b*m_b);
-
-  /** NN → NΔ: fit sqrt(s)-dependence to OBE model [\iref{Dmitriev:1986st}] */
-  if (((type_a.is_Delta() && type_b.is_nucleon()) ||
-       (type_b.is_Delta() && type_a.is_nucleon())) &&
-       (type_a.antiparticle_sign() == type_b.antiparticle_sign())) {
-    return 68. / std::pow(sqrts - 1.104, 1.951);
-  /** All other processes use a constant matrix element,
-   *  similar to \iref{Bass:1998ca}, equ. (3.35). */
-  } else if (((type_a.is_Nstar() && type_b.is_nucleon()) ||
-              (type_b.is_Nstar() && type_a.is_nucleon())) &&
-               type_a.antiparticle_sign() == type_b.antiparticle_sign()) {
-    // NN → NN*
-    if (twoI == 2) {
-      return 7. / msqr;
-    } else if (twoI == 0) {
-      return 14. / msqr;
-    }
-  } else if (((type_a.is_Deltastar() && type_b.is_nucleon()) ||
-              (type_b.is_Deltastar() && type_a.is_nucleon())) &&
-               type_a.antiparticle_sign() == type_b.antiparticle_sign()) {
-    // NN → NΔ*
-    return 15. / msqr;
-  } else if ((type_a.is_Delta() && type_b.is_Delta()) &&
-             (type_a.antiparticle_sign() == type_b.antiparticle_sign())) {
-    // NN → ΔΔ
-    if (twoI == 2) {
-      return 45. / msqr;
-    } else if (twoI == 0) {
-      return 120. / msqr;
-    }
-  } else if (((type_a.is_Nstar() && type_b.is_Delta()) ||
-              (type_b.is_Nstar() && type_a.is_Delta())) &&
-               type_a.antiparticle_sign() == type_b.antiparticle_sign()) {
-    // NN → ΔN*
-    return 7. / msqr;
-  } else if (((type_a.is_Deltastar() && type_b.is_Delta()) ||
-              (type_b.is_Deltastar() && type_a.is_Delta())) &&
-               type_a.antiparticle_sign() == type_b.antiparticle_sign()) {
-    // NN → ΔΔ*
-    if (twoI == 2) {
-      return 15. / msqr;
-    } else if (twoI == 0) {
-      return 25. / msqr;
-    }
+  /** Feng */
+  const float w_a = type_a.width_at_pole();
+  const float w_b = type_b.width_at_pole();
+  const float uplmt = m_a + m_b + 3.0 * (w_a + w_b) + 3.0;
+  if (sqrts > uplmt) {
+     return 0.; 
+  } else {
+     /** NN → NΔ: fit sqrt(s)-dependence to OBE model [\iref{Dmitriev:1986st}] */
+     if (((type_a.is_Delta() && type_b.is_nucleon()) ||
+          (type_b.is_Delta() && type_a.is_nucleon())) &&
+          (type_a.antiparticle_sign() == type_b.antiparticle_sign())) {
+       return 68. / std::pow(sqrts - 1.104, 1.951);
+     /** All other processes use a constant matrix element,
+      *  similar to \iref{Bass:1998ca}, equ. (3.35). */
+     } else if (((type_a.is_Nstar() && type_b.is_nucleon()) ||
+                 (type_b.is_Nstar() && type_a.is_nucleon())) &&
+                  type_a.antiparticle_sign() == type_b.antiparticle_sign()) {
+       // NN → NN*
+       if (twoI == 2) {
+         return 7. / msqr;
+       } else if (twoI == 0) {
+         return 14. / msqr;
+       }
+     } else if (((type_a.is_Deltastar() && type_b.is_nucleon()) ||
+                 (type_b.is_Deltastar() && type_a.is_nucleon())) &&
+                  type_a.antiparticle_sign() == type_b.antiparticle_sign()) {
+       // NN → NΔ*
+       return 15. / msqr;
+     } else if ((type_a.is_Delta() && type_b.is_Delta()) &&
+                (type_a.antiparticle_sign() == type_b.antiparticle_sign())) {
+       // NN → ΔΔ
+       if (twoI == 2) {
+         return 45. / msqr;
+       } else if (twoI == 0) {
+         return 120. / msqr;
+       }
+     } else if (((type_a.is_Nstar() && type_b.is_Delta()) ||
+                 (type_b.is_Nstar() && type_a.is_Delta())) &&
+                  type_a.antiparticle_sign() == type_b.antiparticle_sign()) {
+       // NN → ΔN*
+       return 7. / msqr;
+     } else if (((type_a.is_Deltastar() && type_b.is_Delta()) ||
+                 (type_b.is_Deltastar() && type_a.is_Delta())) &&
+                  type_a.antiparticle_sign() == type_b.antiparticle_sign()) {
+       // NN → ΔΔ*
+       if (twoI == 2) {
+         return 15. / msqr;
+       } else if (twoI == 0) {
+         return 25. / msqr;
+       }
+     }
+     // all cases not listed: zero!
+     return 0.;
   }
-  // all cases not listed: zero!
-  return 0.;
-}
-
+ }
 
 void ScatterActionBaryonBaryon::format_debug_output(std::ostream &out) const {
   out << "Baryon-Baryon ";

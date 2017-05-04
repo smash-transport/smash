@@ -73,6 +73,17 @@ float pp_total(double mandelstam_s) {
   }
 }
 
+/** pp string cross section parametrization.
+ * Sources:
+ */
+float pp_string(double mandelstam_s) {
+  if (mandelstam_s < 16) {
+    return 0;
+  } else {
+    return atan((std::sqrt(mandelstam_s) - 4) * 0.33) * 60 / 3.1416;
+  }
+}
+
 /** np elastic cross section parametrization.
  * Source: \iref{Weil:2013mya}, eq. (45) */
 float np_elastic(double mandelstam_s) {
@@ -114,6 +125,17 @@ float np_total(double mandelstam_s) {
   }
 }
 
+/** np string cross section parametrization.
+ * Sources:
+ */
+float np_string(double mandelstam_s) {
+  if (mandelstam_s < 16) {
+    return 0;
+  } else {
+    return atan((std::sqrt(mandelstam_s) - 4) * 0.33) * 60 / 3.1416;
+  }
+}
+
 /** ppbar elastic cross section parametrization.
  * Source: \iref{Bass:1998ca} */
 float ppbar_elastic(double mandelstam_s) {
@@ -144,6 +166,26 @@ float ppbar_total(double mandelstam_s) {
   }
 }
 
+/** pi+p string cross section parametrization.
+ * Sources:
+ */
+float piplusp_string(double mandelstam_s) {
+  if (mandelstam_s < 6.25) {
+    return 0;
+  } else {
+    return 25;
+  }
+}
+/** pi-p string cross section parametrization.
+ * Sources:
+ */
+float piminusp_string(double mandelstam_s) {
+  if (mandelstam_s < 6.25) {
+    return 0;
+  } else {
+    return 25;
+  }
+}
 /** K+ p elastic cross section parametrization.
  * sigma(K+n->K+n) = sigma(K+n->K0p) = 0.5 * sigma(K+p->K+p)
  * Source: \iref{Buss:2011mx}, B.3.8 */

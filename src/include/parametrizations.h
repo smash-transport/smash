@@ -27,6 +27,12 @@ float pp_elastic(double mandelstam_s);
  */
 float pp_total(double mandelstam_s);
 
+/* pp string excitation cross section parametrization
+ *
+ * \fpPrecision Why \c double?
+ */
+float pp_string(double mandelstam_s);
+
 /* np elastic cross section parametrization
  *
  * \fpPrecision Why \c double?
@@ -39,6 +45,12 @@ float np_elastic(double mandelstam_s);
  */
 float np_total(double mandelstam_s);
 
+/* np string excitation cross section parametrization
+ *
+ * \fpPrecision Why \c double?
+ */
+float np_string(double mandelstam_s);
+
 /* ppbar elastic cross section parametrization
  *
  * \fpPrecision Why \c double?
@@ -50,6 +62,18 @@ float ppbar_elastic(double mandelstam_s);
  * \fpPrecision Why \c double?
  */
 float ppbar_total(double mandelstam_s);
+
+/* pi+p string excitation cross section parametrization
+ *
+ * \fpPrecision Why \c double?
+ */
+float piplusp_string(double mandelstam_s);
+
+/* pi-p string excitation cross section parametrization
+ *
+ * \fpPrecision Why \c double?
+ */
+float piminusp_string(double mandelstam_s);
 
 /* K+ p elastic cross section parametrization
  *

@@ -24,7 +24,9 @@ class ScatterActionBaryonMeson : public ScatterAction {
  public:
   /* Inherit constructor. */
   using ScatterAction::ScatterAction;
-
+  /** Determine the parametrized string excitation cross section
+   * for a baryon-meson collision. */
+  float string_cross_section() const override;
  protected:
   /**
    * \ingroup logging
