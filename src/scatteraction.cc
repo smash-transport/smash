@@ -353,6 +353,8 @@ void ScatterAction::resonance_formation() {
 /* This function will generate outgoing particles in CM frame
  * from a hard process. */
 void ScatterAction::string_excitation() {
+  //Check that there are 2 particles in incoming_particles_
+  assert(incoming_particles_.size() == 2);
   const auto &log = logger<LogArea::Pythia>();
   // Disable floating point exception trap for Pythia
   {
@@ -472,9 +474,10 @@ void ScatterAction::string_excitation() {
     const float tform_in = std::max(incoming_particles_[0].formation_time(),
                                     incoming_particles_[1].formation_time());
     if (tform_in > time_of_execution_) {
-      const size_t index_tmax = (incoming_particles_[0].formation_time() >
-                                 incoming_particles_[1].formation_time()) ? 0 : 1;
-      const float fin = incoming_particles_[index_tmax].cross_section_scaling_factor();
+      const float fin = (incoming_particles_[0].formation_time() >
+                         incoming_particles_[1].formation_time()) ?
+                         incoming_particles_[0].cross_section_scaling_factor() :
+                         incoming_particles_[1].cross_section_scaling_factor();
       for (size_t i = 0; i < outgoing_particles_.size(); i++) {
         const float tform_out = outgoing_particles_[i].formation_time();
         const float fout = outgoing_particles_[i].cross_section_scaling_factor();
