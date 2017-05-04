@@ -367,7 +367,7 @@ int main(int argc, char *argv[]) {
       std::vector<bool> nucleon_has_interacted = {};
       auto scat_finder = make_unique<ScatterActionsFinder>(-1.f, 1,
                                                nucleon_has_interacted, true);
-      scat_finder->dump_cs(a, b, ma, mb);
+      scat_finder->dump_cross_sections(a, b, ma, mb);
       std::exit(EXIT_SUCCESS);
     }
     if (modus) {

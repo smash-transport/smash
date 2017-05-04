@@ -364,10 +364,10 @@ void ScatterActionsFinder::dump_reactions() const {
   }
 }
 
-void ScatterActionsFinder::dump_cs(const ParticleType &a,
-                                   const ParticleType &b,
-                                   float m_a,
-                                   float m_b) const {
+void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
+                                               const ParticleType &b,
+                                               float m_a,
+                                               float m_b) const {
   const ParticleTypePtrList l = {&a, &b};
   std::vector<ParticleTypePtr> ab_products;
 
