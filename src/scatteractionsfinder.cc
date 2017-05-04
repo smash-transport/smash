@@ -98,7 +98,7 @@ ScatterActionsFinder::ScatterActionsFinder(
 ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
                                             const ParticleData &data_a,
                                             const ParticleData &data_b,
-                                            float time_until_collision)
+                                            double time_until_collision)
                                             const {
   const auto &pdg_a = data_a.pdgcode();
   const auto &pdg_b = data_b.pdgcode();
@@ -144,7 +144,7 @@ ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
 }
 
 ActionPtr ScatterActionsFinder::check_collision(
-    const ParticleData &data_a, const ParticleData &data_b, float dt) const {
+    const ParticleData &data_a, const ParticleData &data_b, double dt) const {
 #ifndef NDEBUG
   const auto &log = logger<LogArea::FindScatter>();
 #endif
@@ -174,7 +174,7 @@ ActionPtr ScatterActionsFinder::check_collision(
   }
 
   /* Determine time of collision. */
-  const float time_until_collision = collision_time(data_a, data_b);
+  const double time_until_collision = collision_time(data_a, data_b);
 
   /* Check that collision happens in this timestep. */
   if (time_until_collision < 0.f || time_until_collision >= dt) {
@@ -291,7 +291,7 @@ ActionList ScatterActionsFinder::find_actions_with_surrounding_particles(
 }
 
 void ScatterActionsFinder::dump_reactions() const {
-  constexpr float time = 0.0f;
+  constexpr double time = 0.0;
 
   const size_t N_isotypes = IsoParticleType::list_all().size();
   const size_t N_pairs = N_isotypes * (N_isotypes - 1) / 2;

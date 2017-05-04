@@ -73,7 +73,7 @@ TEST(collision_order) {
   ParticleList search_list = particles.copy_to_vector();
 
   // delta t (in fermi)
-  float dt;
+  double dt;
 
   // test for different times
   dt = 0.9;
@@ -141,7 +141,7 @@ TEST(scatter_particle_pair_only_once) {
   const std::vector<bool> has_interacted = {};
   ScatterActionsFinder finder(elastic_parameter, testparticles, has_interacted);
   ParticleList search_list = p.copy_to_vector();
-  float dt = 0.9;  // fm/c
+  double dt = 0.9;  // fm/c
 
   // look for scatters, we expect one
   auto actions = finder.find_actions_in_cell(search_list, dt);
@@ -215,7 +215,7 @@ TEST(find_next_action) {
   ActionPtr action = std::move(action_list[0]);
 
   // calculate the expected time until the collision
-  constexpr float collision_time = static_cast<float>(0.5*delta_x/v);
+  constexpr double collision_time = 0.5*delta_x/v;
   // compare to what the action finder found
   FUZZY_COMPARE(action->time_of_execution(), collision_time);
 }
