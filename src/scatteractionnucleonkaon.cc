@@ -119,10 +119,10 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_cross_sections() {
   const ParticleType &a = incoming_particles_[0].type();
   const ParticleType &b = incoming_particles_[1].type();
   const ParticleType &type_nucleon = a.pdgcode().is_nucleon() ? a : b;
-  const ParticleType &type_kaon    = a.pdgcode().is_nucleon() ? b : a;
+  const ParticleType &type_kaon = a.pdgcode().is_nucleon() ? b : a;
 
   const auto pdg_nucleon = type_nucleon.pdgcode().code();
-  const auto pdg_kaon    = type_kaon.pdgcode().code();
+  const auto pdg_kaon = type_kaon.pdgcode().code();
 
   const double s = mandelstam_s();
   const double sqrts = sqrt_s();
