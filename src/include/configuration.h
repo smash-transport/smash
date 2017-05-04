@@ -10,14 +10,14 @@
 #ifndef SRC_INCLUDE_CONFIGURATION_H_
 #define SRC_INCLUDE_CONFIGURATION_H_
 
-#include <yaml-cpp/yaml.h>
-
 #include <array>
 #include <set>
 #include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <yaml-cpp/yaml.h>  // NOLINT(build/include_order)
 
 #include "density.h"
 #include "forwarddeclarations.h"
