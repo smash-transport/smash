@@ -57,8 +57,12 @@ TEST(is_photon_reaction_function) {
 
   const ParticleList l1{pip,pim}, l2{rhop,pim}, l3{p,pim}, l4{pip,eta};
 
-  VERIFY(ScatterActionPhoton::is_photon_reaction(l1));
-  VERIFY(ScatterActionPhoton::is_photon_reaction(l2));
-  VERIFY(!ScatterActionPhoton::is_photon_reaction(l3));
-  VERIFY(ScatterActionPhoton::is_photon_reaction(l4));
+  VERIFY(ScatterActionPhoton::is_photon_reaction(l1)
+    != ScatterActionPhoton::ReactionType::no_reaction);
+  VERIFY(ScatterActionPhoton::is_photon_reaction(l2)
+    != ScatterActionPhoton::ReactionType::no_reaction);
+  VERIFY(ScatterActionPhoton::is_photon_reaction(l3)
+    == ScatterActionPhoton::ReactionType::no_reaction);
+  VERIFY(ScatterActionPhoton::is_photon_reaction(l4)
+    != ScatterActionPhoton::ReactionType::no_reaction);
 }
