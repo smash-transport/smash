@@ -125,29 +125,23 @@ ScatterActionPhoton::ReactionType
   }
 
   switch (pack(a.code(), b.code())) {
-      // ReactionType::pi0_pi:
     case(pack(pdg::pi_p, pdg::pi_z)):
     case(pack(pdg::pi_z, pdg::pi_p)):
     case(pack(pdg::pi_m, pdg::pi_z)):
     case(pack(pdg::pi_z, pdg::pi_m)):
       return ReactionType::pi0_pi;
-      // ReactionType::pi_rho0:
     case(pack(pdg::pi_p, pdg::rho_z)):
     case(pack(pdg::pi_m, pdg::rho_z)):
       return ReactionType::pi_rho0;
-      // ReactionType::pi_rho:
     case(pack(pdg::pi_m, pdg::rho_p)):
     case(pack(pdg::pi_p, pdg::rho_m)):
       return ReactionType::pi_rho;
-      // ReactionType::pi0_rho:
     case(pack(pdg::pi_z, pdg::rho_p)):
     case(pack(pdg::pi_z, pdg::rho_m)):
       return ReactionType::pi0_rho;
-      // ReactionType::pi_eta:
     case(pack(pdg::pi_p, pdg::eta)):
     case(pack(pdg::pi_m, pdg::eta)):
       return ReactionType::pi_eta;
-      // ReactionType::pi_pi:
     case(pack(pdg::pi_p, pdg::pi_m)):
     case(pack(pdg::pi_m, pdg::pi_p)):
       return ReactionType::pi_pi;
@@ -568,8 +562,9 @@ float ScatterActionPhoton::diff_cross_section(float t, float m3) const {
       break;
     case ReactionType::pi0_pi:
       diff_xsection = -alpha * g_rho_2 / (16 * s * p_cm_2);
-      e = (s - 2 * m3_2) * pow_int(t - m_pi_2, 2) / m3_2 / pow_int(s - m3_2, 2)+
-          (s - 2 * m3_2) * pow_int(u - m_pi_2, 2) / m3_2 / pow_int(s - m3_2, 2);
+      e = (s - 2 * m3_2) * pow_int(t - m_pi_2, 2) / m3_2 / pow_int(s - m3_2, 2)
+          + (s - 2 * m3_2) *
+          pow_int(u - m_pi_2, 2) / m3_2 / pow_int(s - m3_2, 2);
       e += (s - 6 * m3_2) * (t - m_pi_2) / m3_2 / (s - m3_2) +
            (s - 6 * m3_2) * (u - m_pi_2) / m3_2 / (s - m3_2);
       e += 2 * 4 * s * DM / pow_int(s - m3_2, 2);
