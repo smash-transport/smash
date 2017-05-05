@@ -356,7 +356,6 @@ void ScatterAction::resonance_formation() {
 /* This function will generate outgoing particles in CM frame
  * from a hard process. */
 void ScatterAction::string_excitation() {
-  //Check that there are 2 particles in incoming_particles_
   assert(incoming_particles_.size() == 2);
   const auto &log = logger<LogArea::Pythia>();
   // Disable floating point exception trap for Pythia
