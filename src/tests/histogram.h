@@ -66,7 +66,7 @@ class Histogram1d {
 void Histogram1d::print_to_file(std::string fname) const {
   std::FILE *file = std::fopen(fname.c_str(), "w");
   for (auto b : data_) {
-    const double m = dx() * b.first;         // mass bin
+    const double m = dx() * (b.first + 0.5); // mass bin
     const int result = b.second;             // number of counts
     const double stat_err = sqrt(result);    // statistical error is sqrt(N)
     fprintf(file, "%7.3f %7d %7.3f\n", m, result, stat_err);
