@@ -218,7 +218,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
 
       Integrator1dMonte integrate;
 
-      switch (reac_) {
+      switch (reac) {
         case ReactionType::pi_pi:  // there are three possible reaction channels
           // the first possible reaction has part_out = photon_particle with
           // m3 = 0, which is the default declared above
@@ -535,7 +535,7 @@ float ScatterActionPhoton::diff_cross_section(float t, float m3) const {
   float u = pow_int(m1, 2) + pow_int(m2, 2) + pow_int(m3, 2) - s - t;
   float diff_xsection = 0.0;
   float e = 0.0;
-  switch (reac_) {
+  switch (reac) {
     case ReactionType::pi_pi:
       if (outgoing_particles_[0].type().pdgcode().is_rho()) {
         diff_xsection = alpha * g_rho_2 / (4 * s * p_cm_2);

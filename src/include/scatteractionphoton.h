@@ -37,7 +37,7 @@ class ScatterActionPhoton : public ScatterAction {
 
   /** Overridden to effectively return the reaction channel. */
   ProcessType get_type() const override {
-    return static_cast<ProcessType>(reac_);
+    return static_cast<ProcessType>(reac);
   }
 
   /** Adds one dummy channel with a given cross-section. The intended use is to
