@@ -145,7 +145,7 @@ float ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(double sqrts,
       return 7. / msqr;
     } else if (twoI == 0) {  // pn
       const float parametrization = 14. / msqr;
-      /** pn → pnη cross section is known to be larger than the corresponding
+      /* pn → pnη cross section is known to be larger than the corresponding
        * pp → ppη cross section by a factor of 6.5 [\iref{Calen:1998vh}].
        * Since the eta is mainly produced by an intermediate N*(1535) we
        * introduce an explicit isospin asymmetry for the production of N*(1535)
