@@ -93,6 +93,11 @@ void usage(const int rc, const std::string &progname) {
    * <tr><td>`-r <pdg>` <td>`--resonance <pdg>`
    * <td> Dumps the width(m) and m * spectral function(m^2) versus resonance
    *     mass m.
+   * <tr><td>`-s <pdg1>,<pdg2>[,mass1,mass2]`
+   * <td>`--cross-sections <pdg1>,<pdg2>[,mass1,mass2]`
+   * <td> Dumps the partial 2->1 cross-section of <pdg1> + <pdg2> with
+   *     masses mass1 and mass2. Masses are optional, default values are pole
+   *     masses.
    * <tr><td>`-f` <td>`--force`
    * <td>Forces overwriting files in the output directory. Normally, if you
    *     specifiy an output directory with `-o`, the directory must be empty.
@@ -120,8 +125,8 @@ void usage(const int rc, const std::string &progname) {
       "  -l, --list-2-to-n       list all possible 2->2 reactions\n"
       "  -r, --resonance <pdg>   dump width(m) and m*spectral function(m^2)"
       " for resonance pdg\n"
-      "  -s, --cross-sections <pdg1>,<pdg2>[,mass1][,mass2] \n"
-      "                          dump all partial cross-sections of "
+      "  -s, --cross-sections    <pdg1>,<pdg2>[,mass1,mass2] \n"
+      "                          dump all 2->1 partial cross-sections of "
       "pdg1 + pdg2 reactions versus sqrt(s).\n"
       "                          Masses are optional, by default pole masses"
       " are used.\n"

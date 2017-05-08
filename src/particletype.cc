@@ -507,8 +507,8 @@ float ParticleType::spectral_function(float m) const {
     /* Initialize the normalization factor
      * by integrating over the unnormalized spectral function. */
     static thread_local Integrator integrate;
-    //^ This should be static, but for some reason then the integrals sometimes
-    //  yield different results. See #4299.
+    // This should be static, but for some reason then the integrals sometimes
+    // yield different results. See #4299.
     const auto width = width_at_pole();
     // We transform the integral using m = m_min + width_pole * tan(x), to
     // make it definite and to avoid numerical issues.
@@ -656,15 +656,15 @@ void ParticleType::dump_width_and_spectral_function() const {
     throw std::runtime_error(err.str());
   }
 
- double largest_decay_channel_pole = 0.0;
+  double rightmost_pole = 0.0;
   const auto &decaymodes = decay_modes().decay_mode_list();
   for (const auto &mode : decaymodes) {
     double pole_mass_sum = 0.0;
     for (const ParticleTypePtr p : mode->type().particle_types()) {
       pole_mass_sum +=p->mass();
     }
-    if (pole_mass_sum > largest_decay_channel_pole) {
-      largest_decay_channel_pole = pole_mass_sum;
+    if (pole_mass_sum > rightmost_pole) {
+      rightmost_pole = pole_mass_sum;
     }
   }
 
@@ -680,7 +680,7 @@ void ParticleType::dump_width_and_spectral_function() const {
   for (unsigned int i = 0; ; i++) {
     const double m = m_min + m_step*i;
     const double w = total_width(m), sf = spectral_function(m);
-    if (m > largest_decay_channel_pole*2 &&
+    if (m > rightmost_pole*2 &&
         sf < spectral_function_threshold) {
       break;
     }

@@ -368,13 +368,13 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
                                                const ParticleType &b,
                                                float m_a,
                                                float m_b) const {
-  const ParticleTypePtrList l = {&a, &b};
+  const ParticleTypePtrList incoming_list = {&a, &b};
   std::vector<ParticleTypePtr> ab_products;
 
   for (const ParticleType &resonance : ParticleType::list_all()) {
     const auto &decaymodes = resonance.decay_modes().decay_mode_list();
     for (const auto &mode : decaymodes) {
-      if (mode->type().has_particles(l)) {
+      if (mode->type().has_particles(incoming_list)) {
         ab_products.push_back(&resonance);
       }
     }
@@ -399,9 +399,9 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
       std::cout << sqrts << " ";
       for (const ParticleTypePtr resonance : ab_products) {
         const double p_cm_sqr = pCM_sqr(sqrts, m_a, m_b);
-        const double cs = (sqrts < resonance->minimum_mass()) ? 0.0 :
+        const double xs = (sqrts < resonance->minimum_mass()) ? 0.0 :
             act.two_to_one_formation(*resonance, sqrts, p_cm_sqr);
-        std::cout << cs << " ";
+        std::cout << xs << " ";
       }
       std::cout << std::endl;
     }
