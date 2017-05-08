@@ -225,7 +225,6 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> extra_config;
     char *particles = nullptr, *decaymodes = nullptr, *modus = nullptr,
          *end_time = nullptr, *pdg_string = nullptr, *cs_string = nullptr;
-    // This variable remembers if --list-2-to-n option is activated
     bool list2n_activated = false;
     bool resonance_dump_activated = false;
     bool cross_section_dump_activated = false;

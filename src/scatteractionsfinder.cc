@@ -394,8 +394,9 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
 
     std::cout << std::fixed;
     std::cout << std::setprecision(8);
+    constexpr float m_step = 0.01f;
     for (int i = 1; i < n_points; i++) {
-      const float sqrts = m_a + m_b + 0.01f * i;
+      const float sqrts = m_a + m_b + m_step * i;
       std::cout << sqrts << " ";
       for (const ParticleTypePtr resonance : ab_products) {
         const double p_cm_sqr = pCM_sqr(sqrts, m_a, m_b);
