@@ -556,16 +556,18 @@ float ParticleType::sample_resonance_mass(const float mass_stable,
   // largest possible cm momentum (from smallest mass)
   const float pcm_max = pCM(cms_energy, mass_stable, this->minimum_mass());
   const float blw_max = pcm_max * blatt_weisskopf_sqr(pcm_max, L);
+  /* The maximum of the spectral-function ratio 'usually' happens at the
+   * largest mass. However, this is not always the case, therefore we need
+   * and additional fudge factor (determined automatically). Additionally,
+   * a heuristic knowledge is used that usually such mass exist that
+   * spectral_function(m) > spectral_function_simple(m). */
+  const float sf_ratio_max = std::max(1.f, this->spectral_function(max_mass)
+                                  / this->spectral_function_simple(max_mass));
 
   float mass_res, val;
   // outer loop: repeat if maximum is too small
   do {
-    /* The maximum of the spectral-function ratio 'usually' happens at the
-     * largest mass. However, this is not always the case, therefore we need
-     * and additional fudge factor (determined automatically). */
-    const float q_max = this->spectral_function(max_mass)
-                      / this->spectral_function_simple(max_mass)
-                      * this->max_factor1_;
+    const float q_max = sf_ratio_max * this->max_factor1_;
     const float max = blw_max * q_max;  // maximum value for rejection sampling
     // inner loop: rejection sampling
     do {
