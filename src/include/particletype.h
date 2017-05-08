@@ -154,6 +154,9 @@ class ParticleType {
            pdgcode_.strangeness() == 0 && pdgcode_.charmness() == 0;
   }
 
+  /// \copydoc PdgCode::is_Nstar1535
+  bool is_Nstar1535() const { return pdgcode_.is_Nstar1535(); }
+
   /// Is this a Delta resonance (Delta*)?
   inline bool is_Deltastar() const {
     return is_baryon() && isospin() == 3 && !pdgcode_.is_Delta() &&

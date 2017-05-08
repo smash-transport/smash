@@ -142,10 +142,20 @@ float ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(double sqrts,
               (type_b.is_Nstar() && type_a.is_nucleon())) &&
                type_a.antiparticle_sign() == type_b.antiparticle_sign()) {
     // NN → NN*
-    if (twoI == 2) {
+    if (twoI == 2) {  // pp
       return 7. / msqr;
-    } else if (twoI == 0) {
-      return 14. / msqr;
+    } else if (twoI == 0) {  // pn
+      const float parametrization = 14. / msqr;
+      /* pn → pnη cross section is known to be larger than the corresponding
+       * pp → ppη cross section by a factor of 6.5 [\iref{Calen:1998vh}].
+       * Since the eta is mainly produced by an intermediate N*(1535) we
+       * introduce an explicit isospin asymmetry for the production of N*(1535)
+       * produced in pn vs. pp similar to [\iref{Teis:1996kx}], eq. 29. */
+      if (type_a.is_Nstar1535() || type_b.is_Nstar1535()) {
+        return 6.5 * parametrization;
+      } else {
+        return parametrization;
+      }
     }
   } else if (((type_a.is_Deltastar() && type_b.is_nucleon()) ||
               (type_b.is_Deltastar() && type_a.is_nucleon())) &&
