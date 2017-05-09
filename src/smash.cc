@@ -366,7 +366,7 @@ int main(int argc, char *argv[]) {
       if (b.is_stable() && args[3] != "") {
         mb = b.mass();
         std::cout << "Warning: pole mass is used for stable particle "
-                  << a.name() << " instead of " << args[3] << std::endl;
+                  << b.name() << " instead of " << args[3] << std::endl;
       }
       std::vector<bool> nucleon_has_interacted = {};
       auto scat_finder = make_unique<ScatterActionsFinder>(-1.f, 1,

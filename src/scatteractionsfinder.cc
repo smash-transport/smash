@@ -389,14 +389,17 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
 
   if (ab_products.size() > 0) {
     ParticleData a_data(a), b_data(b);
-    ScatterAction act(a_data, b_data, 0.0, false, 0.0);
     constexpr int n_points = 1000;
 
     std::cout << std::fixed;
     std::cout << std::setprecision(8);
-    constexpr float m_step = 0.01f;
+    constexpr float momentum_step = 0.01f;
     for (int i = 1; i < n_points; i++) {
-      const float sqrts = m_a + m_b + m_step * i;
+      const double momentum = momentum_step * i;
+      a_data.set_4momentum(m_a,  momentum, 0.0, 0.0);
+      b_data.set_4momentum(m_b, -momentum, 0.0, 0.0);
+      ScatterAction act(a_data, b_data, 0.0, false, 0.0);
+      const float sqrts = act.sqrt_s();
       std::cout << sqrts << " ";
       for (const ParticleTypePtr resonance : ab_products) {
         const double p_cm_sqr = pCM_sqr(sqrts, m_a, m_b);
