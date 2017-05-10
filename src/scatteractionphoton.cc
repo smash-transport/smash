@@ -256,7 +256,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
                         s / 3 * (pow_int(t2, 3) - pow_int(t1, 3)) -
                         (t2 - t1) * m_pi_2 *
                             (pow_int(m_eta, 4) + s * (m_pi_2 - m_eta_2))) *
-                       to_mb;           
+                       to_mb;
             process_list.push_back(make_unique<CollisionBranch>(
                 *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
           }
@@ -286,6 +286,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
               *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
           break;
           }
+
          case ReactionType::pi0_pi:
           if (part_a.type().pdgcode() == pdg::pi_p ||
               part_b.type().pdgcode() == pdg::pi_p) {
@@ -294,7 +295,6 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
             part_out = rho_minus_particle;
           }
            m3 = part_out->mass();
-
           if (sqrts > m3) {
            if (gamma_rho_tot > really_small) {
              if (tabulation_pi0_pi_rho == nullptr) {
