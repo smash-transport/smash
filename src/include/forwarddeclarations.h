@@ -136,6 +136,18 @@ enum class ThermodynamicQuantity : char {
   LandauVelocity,
 };
 
+/**
+ * Defines the algorithm used for the forced thermalization.
+ *  For the description of algorithms see \iref{Oliinychenko:2016vkg}.
+ */
+enum class ThermalizationAlgorithm {
+  ModeSampling,
+  BiasedBF,
+  UnbiasedBF,
+};
+
+
+
 using ActionPtr = build_unique_ptr_<Action>;
 using ScatterActionPtr = build_unique_ptr_<ScatterAction>;
 using ActionList = build_vector_<ActionPtr>;

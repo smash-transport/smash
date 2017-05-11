@@ -27,12 +27,14 @@ GrandCanThermalizer::GrandCanThermalizer(const std::array<float, 3> lat_sizes,
                                          bool periodicity,
                                          float e_critical,
                                          float t_start,
-                                         float delta_t) :
+                                         float delta_t,
+                                         ThermalizationAlgorithm algo) :
   eos_typelist_(list_eos_particles()),
   N_sorts_(eos_typelist_.size()),
   e_crit_(e_critical),
   t_start_(t_start),
-  period_(delta_t) {
+  period_(delta_t),
+  algorithm_(algo) {
   const LatticeUpdate upd = LatticeUpdate::EveryFixedInterval;
   lat_ = make_unique<RectangularLattice<ThermLatticeNode>>(lat_sizes,
                                                            n_cells,
@@ -44,6 +46,11 @@ GrandCanThermalizer::GrandCanThermalizer(const std::array<float, 3> lat_sizes,
   cells_to_sample_.resize(50000);
   mult_sort_.resize(N_sorts_);
   mult_int_.resize(N_sorts_);
+  if (algorithm_ != ThermalizationAlgorithm::BiasedBF &&
+      algorithm_ != ThermalizationAlgorithm::UnbiasedBF) {
+    throw std::invalid_argument("This thermalization algorithm is"
+                                " not yet implemented");
+  }
 }
 
 ThreeVector GrandCanThermalizer::uniform_in_cell() const {
@@ -221,11 +228,19 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time, int ntes
     for (size_t i = 0; i < N_sorts_; i++) {
       S_sampled += eos_typelist_[i]->strangeness() * mult_int_[i];
     }
-    const std::pair<int, int> NS_antiS = std::make_pair(
-                                            Random::poisson(mult_classes_[2]),
-                                            Random::poisson(mult_classes_[3]));
-    if (NS_antiS.first - NS_antiS.second != conserved_initial.strangeness() - S_sampled) {
-      continue;
+
+    std::pair<int, int> NS_antiS;
+    if (algorithm_ == ThermalizationAlgorithm::BiasedBF) {
+      BesselSampler bessel_sampler_S(mult_classes_[2], mult_classes_[3],
+                             conserved_initial.strangeness() - S_sampled);
+      NS_antiS = bessel_sampler_S.sample();
+    } else if (algorithm_ == ThermalizationAlgorithm::UnbiasedBF) {
+      NS_antiS = std::make_pair(Random::poisson(mult_classes_[2]),
+                                Random::poisson(mult_classes_[3]));
+      if (NS_antiS.first - NS_antiS.second !=
+          conserved_initial.strangeness() - S_sampled) {
+        continue;
+      }
     }
 
     sample_multinomial(2, NS_antiS.first);
@@ -235,11 +250,19 @@ void GrandCanThermalizer::thermalize(Particles& particles, double time, int ntes
     for (size_t i = 0; i < N_sorts_; i++) {
       ch_sampled += eos_typelist_[i]->charge() * mult_int_[i];
     }
-    const std::pair<int, int> NC_antiC = std::make_pair(
-                                            Random::poisson(mult_classes_[4]),
-                                            Random::poisson(mult_classes_[5]));
-    if (NC_antiC.first - NC_antiC.second != conserved_initial.charge() - ch_sampled) {
-      continue;
+
+    std::pair<int, int> NC_antiC;
+    if (algorithm_ == ThermalizationAlgorithm::BiasedBF) {
+      BesselSampler bessel_sampler_C(mult_classes_[4], mult_classes_[5],
+                                conserved_initial.charge() - ch_sampled);
+      NC_antiC = bessel_sampler_C.sample();
+    } else if (algorithm_ == ThermalizationAlgorithm::UnbiasedBF) {
+      NC_antiC = std::make_pair(Random::poisson(mult_classes_[4]),
+                                Random::poisson(mult_classes_[5]));
+      if (NC_antiC.first - NC_antiC.second !=
+          conserved_initial.charge() - ch_sampled) {
+        continue;
+      }
     }
 
     sample_multinomial(4, NC_antiC.first);

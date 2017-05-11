@@ -114,6 +114,7 @@ Collision_Term:
 #    Critical_Edens:         0.3     # forced therm. above this energy density [GeV/fm^3]
 #    Start_Time:             0.0     # forced therm. at t > this time [fm/c]
 #    Timestep:               1.0     # timestep of thermalization [fm/c]
+#    Algorithm:              biased BF  # mode sampling, biased BF, unbiased BF
 
 #Potentials:
 #    Skyrme:

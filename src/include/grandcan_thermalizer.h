@@ -7,13 +7,13 @@
 #ifndef SRC_INCLUDE_GRANDCAN_THERMALIZER_H_
 #define SRC_INCLUDE_GRANDCAN_THERMALIZER_H_
 
-#include "hadgas_eos.h"
-
 #include "clock.h"
 #include "configuration.h"
 #include "density.h"
-#include "particledata.h"
+#include "forwarddeclarations.h"
+#include "hadgas_eos.h"
 #include "lattice.h"
+#include "particledata.h"
 #include "quantumnumbers.h"
 
 namespace Smash {
@@ -56,7 +56,8 @@ class GrandCanThermalizer {
                       bool periodicity,
                       float e_critical,
                       float t_start,
-                      float delta_t);
+                      float delta_t,
+                      ThermalizationAlgorithm algo);
   GrandCanThermalizer(Configuration& conf,
                       const std::array<float, 3> lat_sizes,
                       const std::array<float, 3> origin,
@@ -67,7 +68,9 @@ class GrandCanThermalizer {
                         periodicity,
                         conf.take({"Critical_Edens"}),
                         conf.take({"Start_Time"}),
-                        conf.take({"Timestep"})) {};
+                        conf.take({"Timestep"}),
+                        conf.take({"Algorithm"},
+                            ThermalizationAlgorithm::BiasedBF)) {};
   bool is_time_to_thermalize(const Clock& clock) const {
     const float t = clock.current_time();
     const int n = static_cast<int>(std::floor((t - t_start_)/period_));
@@ -123,6 +126,7 @@ class GrandCanThermalizer {
   const float e_crit_;
   const float t_start_;
   const float period_;
+  const ThermalizationAlgorithm algorithm_;
 };
 
 }  // namespace Smash
