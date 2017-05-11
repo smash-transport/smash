@@ -13,7 +13,6 @@
 #include "configuration.h"
 #include "cxx14compat.h"
 #include "forwarddeclarations.h"
-#include "forwarddeclarations.h"
 #include "fourvector.h"
 #include "grandcan_thermalizer.h"
 #include "grid.h"
