@@ -77,13 +77,41 @@ class GrandCanThermalizer {
     return (t > t_start_ &&
             t < t_start_ + n*period_ + clock.timestep_duration());
   }
-  void update_lattice(const Particles& particles, const DensityParameters& par,
+
+  void update_lattice(const Particles& particles,
+                      const DensityParameters& par,
                       bool ignore_cells_under_treshold = true);
   ThreeVector uniform_in_cell() const;
-  void sample_in_random_cell(ParticleList& plist, const double time,
-                             size_t type_index);
   void sample_multinomial(int particle_class, int N);
-  void thermalize(Particles& particles, double time, int ntest);
+
+  // Functions for BF-sampling algorithm
+  void sample_in_random_cell_BF_algo(ParticleList& plist,
+                                     const double time,
+                                     size_t type_index);
+  void thermalize_BF_algo(Particles& particles,
+                          double time, int ntest);
+
+  // Functions for mode-sampling algorithm
+  void compute_N_in_cells_mode_algo(
+                        std::function<bool(int, int, int)> condition);
+  ParticleData sample_in_random_cell_mode_algo(const double time,
+                        std::function<bool(int, int, int)> condition);
+  void thermalize_mode_algo(Particles& particles, double time);
+
+  void thermalize(Particles& particles,
+                  double time, int ntest) {
+    if (algorithm == ThermalizationAlgorithm::BiasedBF ||
+        algorithm == ThermalizationAlgorithm::UnbiasedBF) {
+      thermalize_BF_algo(particles, time, ntest);
+    } else if (algorithm == ThermalizationAlgorithm::ModeSampling) {
+      thermalize_mode_algo(particles, time);
+    } else {
+      throw std::invalid_argument("This thermalization algorithm is"
+                                  " not yet implemented");
+    }
+  }
+
+
   void print_statistics(const Clock& clock) const;
 
   RectangularLattice<ThermLatticeNode>& lattice() const {
