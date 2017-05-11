@@ -83,6 +83,8 @@ class GrandCanThermalizer {
                       bool ignore_cells_under_treshold = true);
   ThreeVector uniform_in_cell() const;
   void sample_multinomial(int particle_class, int N);
+  void renormalize_momenta(ParticleList& plist,
+           const FourVector required_total_momentum);
 
   // Functions for BF-sampling algorithm
   void sample_in_random_cell_BF_algo(ParticleList& plist,

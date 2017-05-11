@@ -287,27 +287,39 @@ void GrandCanThermalizer::thermalize_BF_algo(
 
   log.info("Sampled ", sampled_list.size(), " particles.");
 
-  // Centralize momenta
-  QuantumNumbers conserved_final = QuantumNumbers(sampled_list);
-  log.info("Initial particles' 4-momentum: ", conserved_initial.momentum());
-  log.info("Samples particles' 4-momentum: ", conserved_final.momentum());
-  const QuantumNumbers deviation = conserved_initial - conserved_final;
-  const ThreeVector mom_to_add = deviation.momentum().threevec() /
-                                 sampled_list.size();
-  log.info("Adjusting momenta by ", mom_to_add);
+  // Adjust momenta
+  renormalize_momenta(sampled_list, conserved_initial.momentum());
+
+  // Add sampled particles to particles
   for (auto &particle : sampled_list) {
+    particles.insert(particle);
+  }
+}
+
+void GrandCanThermalizer::renormalize_momenta(ParticleList& plist,
+                          const FourVector required_total_momentum) {
+  const auto &log = logger<LogArea::GrandcanThermalizer>();
+
+  // Centralize momenta
+  QuantumNumbers conserved = QuantumNumbers(plist);
+  log.info("Required 4-momentum: ", required_total_momentum);
+  log.info("Sampled 4-momentum: ", conserved.momentum());
+  const QuantumNumbers deviation = required_total_momentum - conserved;
+  const ThreeVector mom_to_add = deviation.momentum().threevec() / plist.size();
+  log.info("Adjusting momenta by ", mom_to_add);
+  for (auto &particle : plist) {
     particle.set_4momentum(particle.type().mass(),
                            particle.momentum().threevec() + mom_to_add);
   }
 
   // Boost every particle to the common center of mass frame
-  conserved_final = QuantumNumbers(sampled_list);
-  const ThreeVector beta_CM_generated = conserved_final.momentum().velocity();
-  const ThreeVector beta_CM_initial = conserved_initial.momentum().velocity();
+  conserved = QuantumNumbers(plist);
+  const ThreeVector beta_CM_generated = conserved.momentum().velocity();
+  const ThreeVector beta_CM_required  = required_total_momentum.velocity();
 
   double E = 0.0;
-  double E_expected = conserved_initial.momentum().abs();
-  for (auto &particle : sampled_list) {
+  double E_expected = required_total_momentum.abs();
+  for (auto &particle : plist) {
     particle.boost_momentum(beta_CM_generated);
     E += particle.momentum().x0();
   }
@@ -326,7 +338,7 @@ void GrandCanThermalizer::thermalize_BF_algo(
   do {
     a = 0.5 * (a_min + a_max);
     E = 0.0;
-    for (const auto &particle : sampled_list) {
+    for (const auto &particle : plist) {
       const double p2 = particle.momentum().threevec().sqr();
       const double E2 = particle.momentum().x0() * particle.momentum().x0();
       E += std::sqrt(E2 + a*(a + 2.0) * p2);
@@ -342,15 +354,10 @@ void GrandCanThermalizer::thermalize_BF_algo(
   } while (std::abs(er) > tolerance && iter < max_iter);
 
   log.info("Renormalizing momenta by factor 1+a, a = ", a);
-  for (auto &particle : sampled_list) {
+  for (auto &particle : plist) {
     particle.set_4momentum(particle.type().mass(),
                            (1+a)*particle.momentum().threevec());
     particle.boost_momentum(-beta_CM_initial);
-  }
-
-  // Add sampled particles to particles
-  for (auto &particle : sampled_list) {
-    particles.insert(particle);
   }
 }
 
@@ -569,68 +576,9 @@ void GrandCanThermalizer::thermalize_mode_algo(Particles& particles,
   }
   log.info("Sampled ", sampled_list.size(), " particles.");
 
-  // Centralize momenta
-  QuantumNumbers conserved_final = QuantumNumbers(sampled_list);
-  log.info("Initial particles' 4-momentum: ", conserved_initial.momentum());
-  log.info("Samples particles' 4-momentum: ", conserved_final.momentum());
-  const QuantumNumbers deviation = conserved_initial - conserved_final;
-  const ThreeVector mom_to_add = deviation.momentum().threevec() /
-                                 sampled_list.size();
-  log.info("Adjusting momenta by ", mom_to_add);
-  for (auto &particle : sampled_list) {
-    particle.set_4momentum(particle.type().mass(),
-                           particle.momentum().threevec() + mom_to_add);
-  }
+  // Adjust momenta
+  renormalize_momenta(sampled_list, conserved_initial.momentum());
 
-  // Boost every particle to the common center of mass frame
-  conserved_final = QuantumNumbers(sampled_list);
-  const ThreeVector beta_CM_generated = conserved_final.momentum().velocity();
-  const ThreeVector beta_CM_initial = conserved_initial.momentum().velocity();
-
-  double E = 0.0;
-  double E_expected = conserved_initial.momentum().abs();
-  for (auto &particle : sampled_list) {
-    particle.boost_momentum(beta_CM_generated);
-    E += particle.momentum().x0();
-  }
-  // Renorm. momenta by factor (1+a) to get the right energy, binary search
-  const double tolerance = really_small;
-  double a, a_min, a_max, er;
-  const int max_iter = 50;
-  int iter = 0;
-  if (E_expected >= E) {
-    a_min = 0.0;
-    a_max = 0.5;
-  } else {
-    a_min = -0.5;
-    a_max = 0.0;
-  }
-  do {
-    a = 0.5 * (a_min + a_max);
-    E = 0.0;
-    for (const auto &particle : sampled_list) {
-      const double p2 = particle.momentum().threevec().sqr();
-      const double E2 = particle.momentum().x0() * particle.momentum().x0();
-      E += std::sqrt(E2 + a*(a + 2.0) * p2);
-    }
-    er = E - E_expected;
-    if (er >= 0.0) {
-      a_max = a;
-    } else {
-      a_min = a;
-    }
-    log.debug("Iteration ", iter, ": a = ", a, ", Δ = ", er);
-    iter++;
-  } while (std::abs(er) > tolerance && iter < max_iter);
-
-  log.info("Renormalizing momenta by factor 1+a, a = ", a);
-  for (auto &particle : sampled_list) {
-    particle.set_4momentum(particle.type().mass(),
-                           (1+a)*particle.momentum().threevec());
-    particle.boost_momentum(-beta_CM_initial);
-  }
-
-  // Add sampled particles to particles
   for (auto &particle : sampled_list) {
     particles.insert(particle);
   }
