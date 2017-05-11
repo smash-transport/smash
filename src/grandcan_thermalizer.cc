@@ -147,9 +147,8 @@ void GrandCanThermalizer::sample_multinomial(int particle_class,
   }
 }
 
-void GrandCanThermalizer::thermalize_BF_algo(
-                            Particles& particles,
-                            double time, int ntest) {
+void GrandCanThermalizer::thermalize(Particles& particles,
+                                     double time, int ntest) {
   const auto &log = logger<LogArea::GrandcanThermalizer>();
   log.info("Starting forced thermalization, time ", time, " fm/c");
   // Remove particles from the cells with e > e_crit_,
@@ -193,6 +192,32 @@ void GrandCanThermalizer::thermalize_BF_algo(
            cells_to_sample_.size()*cell_volume_, ", in \% of lattice: ",
            100.0*cells_to_sample_.size()/lattice_total_cells);
 
+  ParticleList sampled_list;
+  if (algorithm_ == ThermalizationAlgorithm::BiasedBF ||
+      algorithm_ == ThermalizationAlgorithm::UnbiasedBF) {
+    thermalize_BF_algo(sampled_list, conserved_initial, time, ntest);
+  } else if (algorithm_ == ThermalizationAlgorithm::ModeSampling) {
+    thermalize_mode_algo(sampled_list, conserved_initial, time);
+  } else {
+    throw std::invalid_argument("This thermalization algorithm is"
+                                " not yet implemented");
+  }
+  log.info("Sampled ", sampled_list.size(), " particles.");
+
+  // Adjust momenta
+  renormalize_momenta(sampled_list, conserved_initial.momentum());
+
+  for (auto &particle : sampled_list) {
+    particles.insert(particle);
+  }
+}
+
+void GrandCanThermalizer::thermalize_BF_algo(
+                            ParticleList& sampled_list,
+                            QuantumNumbers& conserved_initial,
+                            double time, int ntest) {
+  const auto &log = logger<LogArea::GrandcanThermalizer>();
+
   std::fill(mult_sort_.begin(), mult_sort_.end(), 0.0);
   for (auto cell_index : cells_to_sample_) {
     const ThermLatticeNode cell = (*lat_)[cell_index];
@@ -209,8 +234,6 @@ void GrandCanThermalizer::thermalize_BF_algo(
   for (size_t i = 0; i < N_sorts_; i++) {
     mult_classes_[get_class(i)] += mult_sort_[i];
   }
-
-  ParticleList sampled_list;
 
   BesselSampler bessel_sampler_B(mult_classes_[0], mult_classes_[1],
                                  conserved_initial.baryon_number());
@@ -283,16 +306,6 @@ void GrandCanThermalizer::thermalize_BF_algo(
       continue;
     }
     break;
-  }
-
-  log.info("Sampled ", sampled_list.size(), " particles.");
-
-  // Adjust momenta
-  renormalize_momenta(sampled_list, conserved_initial.momentum());
-
-  // Add sampled particles to particles
-  for (auto &particle : sampled_list) {
-    particles.insert(particle);
   }
 }
 
@@ -430,53 +443,10 @@ ParticleData GrandCanThermalizer::sample_in_random_cell_mode_algo(
   return particle;
 }
 
-void GrandCanThermalizer::thermalize_mode_algo(Particles& particles,
-                                               double time) {
-  const auto &log = logger<LogArea::GrandcanThermalizer>();
-  log.info("Starting forced thermalization, time ", time, " fm/c");
-  // Remove particles from the cells with e > e_crit_,
-  // sum up their conserved quantities
-  QuantumNumbers conserved_initial   = QuantumNumbers(),
-                 conserved_remaining = QuantumNumbers();
-  ThermLatticeNode node;
-  ParticleList to_remove;
-  for (auto &particle : particles) {
-    const bool is_on_lattice = lat_->value_at(particle.position().threevec(),
-                                              node);
-    if (is_on_lattice && node.e() > e_crit_) {
-      to_remove.push_back(particle);
-    }
-  }
-  // Do not thermalize too small number of particles
-  if (to_remove.size() > 30) {
-    for (auto &particle : to_remove) {
-      conserved_initial.add_values(particle);
-      particles.remove(particle);
-    }
-  } else {
-    to_remove.clear();
-    conserved_initial = QuantumNumbers();
-  }
-  log.info("Removed ", to_remove.size(), " particles.");
-
-  // Exit if there is nothing to thermalize
-  if (conserved_initial == QuantumNumbers()) {
-    return;
-  }
-  // Save the indices of cells inside the volume with e > e_crit_
-  cells_to_sample_.clear();
-  const size_t lattice_total_cells = lat_->size();
-  for (size_t i = 0; i < lattice_total_cells; i++) {
-    if ((*lat_)[i].e() > e_crit_) {
-      cells_to_sample_.push_back(i);
-    }
-  }
-  log.info("Number of cells in the thermalization region = ",
-           cells_to_sample_.size(), ", its total volume [fm^3]: ",
-           cells_to_sample_.size()*cell_volume_, ", in \% of lattice: ",
-           100.0*cells_to_sample_.size()/lattice_total_cells);
-
-  ParticleList sampled_list;
+void GrandCanThermalizer::thermalize_mode_algo(
+                             ParticleList& sampled_list,
+                             QuantumNumbers& conserved_initial,
+                             double time) {
   double energy = 0.0;
   int S_plus = 0, S_minus = 0,
       B_plus = 0, B_minus = 0,
@@ -509,7 +479,8 @@ void GrandCanThermalizer::thermalize_mode_algo(Particles& particles,
 
   // Mode 3: sample non-strange baryons
   auto condition3 = [] (int S, int, int) { return (S == 0); };
-  conserved_remaining = conserved_initial - QuantumNumbers(sampled_list);
+  QuantumNumbers conserved_remaining =
+                   conserved_initial - QuantumNumbers(sampled_list);
   energy = 0.0;
   compute_N_in_cells_mode_algo(condition3);
   while (conserved_remaining.momentum().x0() > energy ||
@@ -574,14 +545,6 @@ void GrandCanThermalizer::thermalize_mode_algo(Particles& particles,
     ParticleData p = sample_in_random_cell_mode_algo(time, condition7);
     sampled_list.push_back(p);
     energy += p.momentum().x0();
-  }
-  log.info("Sampled ", sampled_list.size(), " particles.");
-
-  // Adjust momenta
-  renormalize_momenta(sampled_list, conserved_initial.momentum());
-
-  for (auto &particle : sampled_list) {
-    particles.insert(particle);
   }
 }
 

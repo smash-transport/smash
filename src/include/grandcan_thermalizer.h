@@ -90,7 +90,8 @@ class GrandCanThermalizer {
   void sample_in_random_cell_BF_algo(ParticleList& plist,
                                      const double time,
                                      size_t type_index);
-  void thermalize_BF_algo(Particles& particles,
+  void thermalize_BF_algo(ParticleList& sampled_list,
+                          QuantumNumbers& conserved_initial,
                           double time, int ntest);
 
   // Functions for mode-sampling algorithm
@@ -98,21 +99,12 @@ class GrandCanThermalizer {
                         std::function<bool(int, int, int)> condition);
   ParticleData sample_in_random_cell_mode_algo(const double time,
                         std::function<bool(int, int, int)> condition);
-  void thermalize_mode_algo(Particles& particles, double time);
+  void thermalize_mode_algo(ParticleList& sampled_list,
+                            QuantumNumbers& conserved_initial,
+                            double time);
 
-  void thermalize(Particles& particles,
-                  double time, int ntest) {
-    if (algorithm_ == ThermalizationAlgorithm::BiasedBF ||
-        algorithm_ == ThermalizationAlgorithm::UnbiasedBF) {
-      thermalize_BF_algo(particles, time, ntest);
-    } else if (algorithm_ == ThermalizationAlgorithm::ModeSampling) {
-      thermalize_mode_algo(particles, time);
-    } else {
-      throw std::invalid_argument("This thermalization algorithm is"
-                                  " not yet implemented");
-    }
-  }
-
+  // Main thermalize function, that chooses algorithm
+  void thermalize(Particles& particles, double time, int ntest);
 
   void print_statistics(const Clock& clock) const;
 
