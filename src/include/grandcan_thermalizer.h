@@ -100,10 +100,10 @@ class GrandCanThermalizer {
 
   void thermalize(Particles& particles,
                   double time, int ntest) {
-    if (algorithm == ThermalizationAlgorithm::BiasedBF ||
-        algorithm == ThermalizationAlgorithm::UnbiasedBF) {
+    if (algorithm_ == ThermalizationAlgorithm::BiasedBF ||
+        algorithm_ == ThermalizationAlgorithm::UnbiasedBF) {
       thermalize_BF_algo(particles, time, ntest);
-    } else if (algorithm == ThermalizationAlgorithm::ModeSampling) {
+    } else if (algorithm_ == ThermalizationAlgorithm::ModeSampling) {
       thermalize_mode_algo(particles, time);
     } else {
       throw std::invalid_argument("This thermalization algorithm is"
