@@ -304,8 +304,9 @@ void GrandCanThermalizer::renormalize_momenta(ParticleList& plist,
   QuantumNumbers conserved = QuantumNumbers(plist);
   log.info("Required 4-momentum: ", required_total_momentum);
   log.info("Sampled 4-momentum: ", conserved.momentum());
-  const QuantumNumbers deviation = required_total_momentum - conserved;
-  const ThreeVector mom_to_add = deviation.momentum().threevec() / plist.size();
+  const ThreeVector mom_to_add = (required_total_momentum.threevec()
+                                  - conserved.momentum().threevec()
+                                 ) / plist.size();
   log.info("Adjusting momenta by ", mom_to_add);
   for (auto &particle : plist) {
     particle.set_4momentum(particle.type().mass(),
@@ -357,7 +358,7 @@ void GrandCanThermalizer::renormalize_momenta(ParticleList& plist,
   for (auto &particle : plist) {
     particle.set_4momentum(particle.type().mass(),
                            (1+a)*particle.momentum().threevec());
-    particle.boost_momentum(-beta_CM_initial);
+    particle.boost_momentum(-beta_CM_required);
   }
 }
 
