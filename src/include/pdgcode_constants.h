@@ -25,6 +25,9 @@ constexpr int photon = 0x22;
 constexpr int p = 0x2212;
 constexpr int n = 0x2112;
 
+constexpr int N1535_p = 0x22212;
+constexpr int N1535_z = 0x22112;
+
 constexpr int Delta_pp = 0x2224;
 constexpr int Delta_p = 0x2214;
 constexpr int Delta_z = 0x2114;

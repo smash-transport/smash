@@ -34,15 +34,6 @@ class ScatterActionDeltaKaon : public ScatterActionBaryonMeson {
    * Writes information about this scatter action to the \p out stream.
    */
   void format_debug_output(std::ostream &out) const override;
-
- private:
-  /**
-   * Calculate cross sections for charge exchange in Delta-kaon
-   * collisions. It is given by the cross section of the corresponding
-   * Delta-kaon collision.
-   */
-  CollisionBranchList two_to_two_inel(const ParticleType &type_particle_a,
-                                      const ParticleType &type_particle_b);
 };
 
 }  // namespace Smash

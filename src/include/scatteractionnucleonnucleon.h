@@ -10,6 +10,8 @@
 #ifndef SRC_INCLUDE_SCATTERACTIONNUCLEONNUCLEON_H_
 #define SRC_INCLUDE_SCATTERACTIONNUCLEONNUCLEON_H_
 
+#include <utility>
+
 #include "scatteractionbaryonbaryon.h"
 
 namespace Smash {
@@ -27,7 +29,19 @@ class ScatterActionNucleonNucleon : public ScatterActionBaryonBaryon {
   /** Determine the (parametrized) elastic cross section for a
    * nucleon-nucleon collision. */
   float elastic_parametrization() override;
-  /** Find all inelastic 2->2 processes for this reaction. */
+  /** Find all inelastic 2->2 processes for this reaction.
+   * Calculate cross sections for resonance production from
+   * nucleon-nucleon collisions (i.e. N N -> N R, N N -> Delta R).
+   *
+   * Checks are processed in the following order:
+   * 1. Charge conservation
+   * 2. Isospin factors (Clebsch-Gordan)
+   * 3. Enough energy for all decay channels to be available for the resonance
+   *
+   * \return List of resonance production processes possible in the collision
+   * of the two nucleons. Each element in the list contains the type(s) of the
+   * final state particle(s) and the cross section for that particular process.
+   */
   CollisionBranchList two_to_two_cross_sections() override;
 
  protected:
@@ -40,32 +54,13 @@ class ScatterActionNucleonNucleon : public ScatterActionBaryonBaryon {
 
  private:
   /**
-   * Calculate cross sections for resonance production from
-   * nucleon-nucleon collisions (i.e. N N -> N R, N N -> Delta R).
-   *
-   * Checks are processed in the following order:
-   * 1. Charge conservation
-   * 2. Isospin factors (Clebsch-Gordan)
-   * 3. Enough energy for all decay channels to be available for the resonance
-   *
-   * \param[in] type_particle1 Type information of the first incoming nucleon.
-   * \param[in] type_particle2 Type information of the second incoming nucleon.
-   *
-   * \return List of resonance production processes possible in the collision
-   * of the two nucleons. Each element in the list contains the type(s) of the
-   * final state particle(s) and the cross section for that particular process.
-   */
-  CollisionBranchList two_to_two_inel(const ParticleType &type_particle1,
-                                      const ParticleType &type_particle2);
-  /**
-   * Utility function to avoid code replication in two_to_two_inel
+   * Utility function to avoid code replication in two_to_two_cross_sections
    */
   template<class IntegrationMethod>
-  CollisionBranchList find_xsection_from_type(const ParticleType &type_particle_a,
-                                          const ParticleType &type_particle_b,
-                                          const ParticleTypePtrList &type_res_1,
-                                          const ParticleTypePtrList &type_res_2,
-                                          const IntegrationMethod integrator);
+  CollisionBranchList find_xsection_from_type(
+                                         const ParticleTypePtrList &type_res_1,
+                                         const ParticleTypePtrList &type_res_2,
+                                         const IntegrationMethod integrator);
 };
 
 

@@ -9,9 +9,10 @@
 
 #include "include/thermodynamicoutput.h"
 
-#include <boost/filesystem.hpp>
 #include <fstream>
 #include <memory>
+
+#include <boost/filesystem.hpp>
 
 #include "include/clock.h"
 #include "include/config.h"

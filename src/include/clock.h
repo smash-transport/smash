@@ -107,14 +107,14 @@ class Clock {
    * \param dt step size
    *
    */
-  Clock(const float time, const float dt)
+  Clock(const double time, const double dt)
       : timestep_duration_(convert(dt)), reset_time_(convert(time)) {
     if (dt < 0.f) {
       throw std::range_error("No negative time increment allowed");
     }
   }
   /// returns the current time
-  float current_time() const {
+  double current_time() const {
     return convert(reset_time_ + timestep_duration_ * counter_);
   }
   /** returns the time in the next tick
@@ -123,7 +123,7 @@ class Clock {
    * is not the same as the next tick (numerically; this is due to
    * floating point arithmetic).
    */
-  float next_time() const {
+  double next_time() const {
     if (counter_ * timestep_duration_ >=
         std::numeric_limits<Representation>::max() - timestep_duration_) {
       throw std::overflow_error("Too many timesteps, clock overflow imminent");
@@ -131,13 +131,13 @@ class Clock {
     return convert(reset_time_ + timestep_duration_ * (counter_ + 1));
   }
   /// returns the time step size.
-  float timestep_duration() const { return convert(timestep_duration_); }
+  double timestep_duration() const { return convert(timestep_duration_); }
   /** sets the time step size (and resets the counter)
    *
    * \param dt new time step size
    *
    */
-  void set_timestep_duration(const float dt) {
+  void set_timestep_duration(const double dt) {
     if (dt < 0.f) {
       throw std::range_error("No negative time increment allowed");
     }
@@ -160,7 +160,7 @@ class Clock {
    * current time step, if not, then the multiple must be within.
    *
    */
-  bool multiple_is_in_next_tick(const float interval) const {
+  bool multiple_is_in_next_tick(const double interval) const {
     if (interval < 0.f) {
       throw std::range_error("Negative interval makes no sense for clock");
     }
@@ -183,7 +183,7 @@ class Clock {
    * \return The smallest multiple of \p interval that is larger than
    * the current time.
    */
-  float next_multiple(const float interval) const {
+  double next_multiple(const double interval) const {
     const Representation int_interval = convert(interval);
     const auto current = reset_time_ + timestep_duration_ * counter_;
     if (unlikely(current < 0)) {
@@ -195,7 +195,7 @@ class Clock {
    *
    * \param interval The given interval
    */
-  void end_tick_on_multiple(const float interval) {
+  void end_tick_on_multiple(const double interval) {
     const Representation int_interval = convert(interval);
     const auto current = reset_time_ + timestep_duration_ * counter_;
     reset_time_ = current;
@@ -214,7 +214,7 @@ class Clock {
    * initial conditions may require different starting times).
    *
    **/
-  void reset(const float reset_time) {
+  void reset(const double reset_time) {
     if (reset_time < current_time()) {
       logger<LogArea::Clock>().debug("Resetting clock from", current_time(),
                                      " fm/c to ", reset_time, " fm/c");
@@ -266,18 +266,20 @@ class Clock {
            (rhs.reset_time_ + rhs.timestep_duration_ * rhs.counter_);
   }
   /// compares the time of the clock against a fixed time.
-  bool operator<(float time) const { return current_time() < time; }
+  bool operator<(double time) const { return current_time() < time; }
   /// compares the time of the clock against a fixed time.
-  bool operator>(float time) const { return current_time() > time; }
+  bool operator>(double time) const { return current_time() > time; }
 
  private:
-  static constexpr float to_float = static_cast<float>(resolution);
-  static constexpr float from_float = static_cast<float>(1. / resolution);
+  static constexpr double to_double = static_cast<double>(resolution);
+  static constexpr double from_double = static_cast<double>(1. / resolution);
 
-  /// convert a float value into the internal int representation
-  static Representation convert(float x) { return std::round(x * from_float); }
-  /// convert an internal int value into the float representation
-  static float convert(Representation x) { return x * to_float; }
+  /// convert a double value into the internal int representation
+  static Representation convert(double x) {
+    return std::round(x * from_double);
+  }
+  /// convert an internal int value into the double representation
+  static double convert(Representation x) { return x * to_double; }
 
   /// clock tick. This is purely internal and will be reset when the
   /// timestep size is changed

@@ -22,14 +22,15 @@ namespace Smash {
  */
 
 class AdaptiveParameters {
-
  public:
-  explicit AdaptiveParameters(Configuration conf) :
+  explicit AdaptiveParameters(Configuration conf, double dt) :
     smoothing_factor_(conf.take({"Smoothing_Factor"}, 0.1f)),
     target_missed_actions_(conf.take({"Target_Missed_Actions"}, 0.01f)),
-    deviation_factor_(conf.take({"Allowed_Deviation"}, 2.5f)) {};
+    deviation_factor_(conf.take({"Allowed_Deviation"}, 2.5f)) {
+    initialize(dt);
+  }
 
-  void initialize(float dt) {
+  void initialize(double dt) {
     // Calculate the rate that would lead to the given time step size.
     rate_ = target_missed_actions_ / dt;
   }
@@ -41,7 +42,7 @@ class AdaptiveParameters {
    * \param N_particles The number of particles in the system.
    * \return if timestep was changed or not.
    */
-  bool update_timestep(const Actions &actions, size_t N_particles, float* dt) {
+  bool update_timestep(const Actions &actions, size_t N_particles, double* dt) {
     const auto &log = logger<LogArea::AdaptiveTS>();
     bool changed_timestep = false;
 
@@ -103,7 +104,8 @@ class AdaptiveParameters {
   float rate_;
 };
 
-inline std::ostream& operator << (std::ostream &o, const AdaptiveParameters &a) {
+inline std::ostream& operator << (std::ostream &o,
+                                  const AdaptiveParameters &a) {
   return o << "Adaptive time step:\n" <<
        "  Smoothing factor: " << a.smoothing_factor_ << "\n" <<
        "  Target missed actions: " << 100 * a.target_missed_actions_ << "%\n" <<

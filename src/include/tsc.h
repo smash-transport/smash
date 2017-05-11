@@ -21,6 +21,7 @@
 #ifndef SRC_INCLUDE_TSC_H_
 #define SRC_INCLUDE_TSC_H_
 
+#include <cstdint>
 #include <iosfwd>
 
 #ifdef _MSC_VER
@@ -32,11 +33,11 @@ class TimeStampCounter {
  public:
         void start();
         void stop();
-        unsigned long long cycles() const;
+        uint64_t cycles() const;
 
  private:
         union Data {
-            unsigned long long a;
+            uint64_t a;
             unsigned int b[2];
         } m_start, m_end;
 };
@@ -65,7 +66,7 @@ inline void TimeStampCounter::stop() {
 #endif
 }
 
-inline unsigned long long TimeStampCounter::cycles() const {
+inline uint64_t TimeStampCounter::cycles() const {
     return m_end.a - m_start.a;
 }
 

@@ -10,14 +10,17 @@
 #ifndef SRC_INCLUDE_ROOTOUTPUT_H_
 #define SRC_INCLUDE_ROOTOUTPUT_H_
 
-#include <boost/filesystem.hpp>
+#include <memory>
+#include <string>
 #include <vector>
+
+#include <boost/filesystem.hpp>
+#include "TFile.h"
+#include "TTree.h"
 
 #include "configuration.h"
 #include "forwarddeclarations.h"
 #include "outputinterface.h"
-#include "TFile.h"
-#include "TTree.h"
 
 namespace Smash {
 class Particles;

@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_PDGCODE_H_
 #define SRC_INCLUDE_PDGCODE_H_
 
+#include <algorithm>
 #include <cstdlib>
 #include <iosfwd>
 #include <sstream>
@@ -119,7 +120,7 @@ class PdgCode {
    * \param codenumber The number 0x221 is interpreted as an η meson,
    * -0x211 is a "charged pi antiparticle", i.e., a \f$\pi^-\f$.
    */
-  PdgCode(std::int32_t codenumber) : dump_(0x0)  {
+  PdgCode(std::int32_t codenumber) : dump_(0x0) {  // NOLINT(runtime/explicit)
     digits_.antiparticle_ = false;
     if (codenumber < 0) {
       digits_.antiparticle_ = true;
@@ -266,6 +267,12 @@ class PdgCode {
   inline bool is_nucleon() const {
       const auto abs_code = std::abs(code());
       return (abs_code == pdg::p || abs_code == pdg::n);
+  }
+
+  /// Is this a N*(1535) (+/0)?
+  inline bool is_Nstar1535() const {
+      const auto abs_code = std::abs(code());
+      return (abs_code == pdg::N1535_p || abs_code == pdg::N1535_z);
   }
 
   /// Is this a Delta(1232) (with anti-delta)?

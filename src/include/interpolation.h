@@ -10,16 +10,18 @@
 #ifndef SRC_INCLUDE_INTERPOLATION_H_
 #define SRC_INCLUDE_INTERPOLATION_H_
 
-#include <vector>
-#include <cassert>
-#include <cstddef>
-#include <algorithm>
-#include <numeric>
-#include <stdexcept>
-#include <sstream>
-
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_spline.h>
+
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <numeric>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
 
 
 /*
@@ -96,7 +98,8 @@ std::vector<T> apply_permutation(const std::vector<T>& v,
 
 /// Check whether two components have the same value in a sorted vector x.
 template<typename T>
-void check_duplicates(const std::vector<T>& x, const std::string& error_position) {
+void check_duplicates(const std::vector<T>& x,
+                      const std::string& error_position) {
   auto it = std::adjacent_find(x.begin(), x.end());
   if (it != x.end()) {
     std::stringstream error_msg;

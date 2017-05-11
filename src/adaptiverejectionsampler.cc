@@ -6,14 +6,15 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
-#include<iostream>
-#include<cmath>
-#include<exception>
 
-#include "include/logging.h"
+#include <cmath>
+#include <exception>
+#include <iostream>
+
 #include "include/adaptiverejectionsampler.h"
 #include "include/constants.h"
 #include "include/fpenvironment.h"
+#include "include/logging.h"
 
 namespace Smash {
 

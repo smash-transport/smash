@@ -7,11 +7,16 @@
 #ifndef SRC_INCLUDE_EXPERIMENT_H_
 #define SRC_INCLUDE_EXPERIMENT_H_
 
+#include <limits>
+#include <memory>
+#include <vector>
+
 #include "actionfinderfactory.h"
 #include "adaptiveparameters.h"
 #include "chrono.h"
 #include "decayactionsfinderdilepton.h"
 #include "energymomentumtensor.h"
+#include "fourvector.h"
 #include "pauliblocking.h"
 #include "potentials.h"
 #include "propagation.h"
@@ -204,7 +209,7 @@ class Experiment : public ExperimentBase {
   }
 
   /// Shortcut for next output time
-  float next_output_time() const {
+  double next_output_time() const {
     return parameters_.outputclock.next_time();
   }
 
@@ -257,8 +262,13 @@ class Experiment : public ExperimentBase {
 
   /** nucleon_has_interacted_ labels whether the particles in the nuclei
    *  have experienced any collisions or not. It's only valid in
-   *  the ColliderMode, so is set as an empty vector by default.*/
+   *  the ColliderModus, so is set as an empty vector by default.*/
   std::vector<bool> nucleon_has_interacted_ = {};
+
+  /** The initial nucleons in the ColliderModus propagate with
+   *  beam_momentum_, if Fermi motion is frozen. It's only valid in
+   *  the ColliderModus, so is set as an empty vector by default.*/
+  std::vector<FourVector> beam_momentum_ = {};
 
   /// The Action finder objects
   std::vector<std::unique_ptr<ActionFinderInterface>> action_finders_;
@@ -310,12 +320,12 @@ class Experiment : public ExperimentBase {
   const int nevents_;
 
   /// simulation time at which the evolution is stopped.
-  const float end_time_;
+  const double end_time_;
   /** The clock's timestep size at start up
    *
    * Stored here so that the next event will remember this.
    */
-  const float delta_time_startup_;
+  const double delta_time_startup_;
 
   /**
    * This indicates whether we force all resonances to decay in the last timestep.
