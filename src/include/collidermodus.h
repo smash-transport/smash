@@ -13,6 +13,7 @@
 
 #include "deformednucleus.h"
 #include "forwarddeclarations.h"
+#include "fourvector.h"
 #include "interpolation.h"
 #include "modusdefault.h"
 #include "nucleus.h"
@@ -54,7 +55,29 @@ class ColliderModus : public ModusDefault {
    */
   float initial_conditions(Particles *particles,
                            const ExperimentParameters &parameters);
-
+  /// return the total test particle number of the initial nucleus
+  int total_N_number() const { return target_->size()
+                                    + projectile_->size(); }
+  /// return the test particle number in the projectile nucleus
+  int proj_N_number() const { return projectile_->size(); }
+  /** return the beam velocity of the projectile, which will be
+   *  used to calculate the beam momenta in experiment.cc if Fermi
+   *  motion is frozen.
+   */
+  double velocity_projectile() const { return velocity_projectile_; }
+  /** return the beam velocity of the target, which will be
+   *  used to calculate the beam momenta in experiment.cc if fermi
+   *  motion is frozen.
+   */
+  double velocity_target() const { return velocity_target_; }
+  /** return the flag: whether to allow the first collsions within the same
+   *  nucleus.
+   */
+  bool cll_in_nucleus() { return cll_in_nucleus_; }
+  /// return the fermi motion type
+  FermiMotion fermi_motion() { return fermi_motion_; }
+  /// return whether the modus is collider modus
+  bool is_collider() const { return true; }
   /// \ingroup exception
   /// Thrown when either \a projectile_ or \a target_ nuclei are empty.
   struct ColliderEmpty : public ModusDefault::BadInput {
@@ -75,10 +98,16 @@ class ColliderModus : public ModusDefault {
    * at rest.
    **/
   std::unique_ptr<Nucleus> target_;
-  /** Center-of-mass energy squared of the nucleus-nucleus collision. **/
-  float total_s_;
-  /** Center-of-mass energy of a nucleon-nucleon collision. **/
-  float sqrt_s_NN_;
+  /** Center-of-mass energy squared of the nucleus-nucleus collision.
+   *
+   * needs to be double to allow for calculations at LHC energies
+   * **/
+  double total_s_;
+  /** Center-of-mass energy of a nucleon-nucleon collision.
+   *
+   * needs to be double to allow for calculations at LHC energies
+   * **/
+  double sqrt_s_NN_;
   /** Impact parameter.
    *
    * The nuclei projectile_ and target_ will be shifted along the x axis
@@ -119,9 +148,21 @@ class ColliderModus : public ModusDefault {
    */
   CalculationFrame frame_ = CalculationFrame::CenterOfVelocity;
   /**
-   * An option to include Fermi motion
+   * An option to include Fermi motion ("off", "on", "frozen")
    */
-  bool fermi_motion_;
+  FermiMotion fermi_motion_ = FermiMotion::Off;
+  /**
+   * An option to include the first collisions within the same nucleus
+   */
+  bool cll_in_nucleus_;
+  /**
+   * beam velocity of the projectile
+   */
+  double velocity_projectile_ = 0.0;
+  /**
+   * beam velocity of the target
+   */
+  double velocity_target_ = 0.0;
   /** Get the frame dependent velocity for each nucleus, using
    * the current reference frame. \see frame_
    *
@@ -132,8 +173,8 @@ class ColliderModus : public ModusDefault {
    *
    * \fpPrecision Why \c double?
    **/
-  std::pair<double, double> get_velocities(float mandelstam_s, float m_a,
-                                           float m_b);
+  std::pair<double, double> get_velocities(double mandelstam_s, double m_a,
+                                           double m_b);
 
   /**\ingroup logging
    * Writes the initial state for the ColliderModus to the output stream.

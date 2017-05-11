@@ -30,11 +30,12 @@ class ScatterActionsFinder : public ActionFinderInterface {
 
   ScatterActionsFinder(Configuration config,
                        const ExperimentParameters &parameters,
-                       bool two_to_one, bool two_to_two,
-                       bool strings_switch);
+                       const std::vector<bool> &nucleon_has_interacted,
+                       int N_tot, int N_proj, int n_fractional_photons);
 
   /** Constructor for testing purposes. */
   ScatterActionsFinder(float elastic_parameter, int testparticles,
+                       const std::vector<bool> &nucleon_has_interacted,
                        bool two_to_one = true);
 
   /** Determine the collision time of the two particles [fm/c].
@@ -112,16 +113,23 @@ class ScatterActionsFinder : public ActionFinderInterface {
    */
   void dump_reactions() const;
 
+  /**
+   * Print out partial cross-sections of all processes that can occur in
+   * the collision of a(mass = m_a) and b(mass = m_b).
+   */
+  void dump_cross_sections(const ParticleType &a, const ParticleType &b,
+                           float m_a, float m_b) const;
+
  private:
   /* Construct a ScatterAction object,
    * based on the types of the incoming particles. */
   virtual ScatterActionPtr construct_scatter_action(const ParticleData &data_a,
                                             const ParticleData &data_b,
-                                            float time_until_collision) const;
+                                            double time_until_collision) const;
   /** Check for a single pair of particles (id_a, id_b) if a collision will happen
    * in the next timestep and create a corresponding Action object in that case. */
   ActionPtr check_collision(const ParticleData &data_a,
-                            const ParticleData &data_b, float dt) const;
+                            const ParticleData &data_b, double dt) const;
   /** Elastic cross section parameter (in mb). */
   const float elastic_parameter_;
   /** Number of test particles. */
@@ -132,10 +140,24 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const bool two_to_one_;
   /** Enable 2->2 processes. */
   const bool two_to_two_;
+  /** Elastic collsions between two nucleons with
+   ** sqrt_s below low_snn_cut_ are excluded. */
+  const double low_snn_cut_;
   /** Switch to turn off string excitation. */
   const bool strings_switch_;
+  /** Parameter to record whether the nucleon
+   *  has experienced a collision or not*/
+  const std::vector<bool> &nucleon_has_interacted_;
+  /** Record the total number of the nucleons in the two colliding nuclei */
+  const int N_tot_;
+  /** Record the number of the nucleons in the projectile */
+  const int N_proj_;
   /** Parameter for formation time */
   const float formation_time_;
+  /** Photons switch */
+  const bool photons_;
+  /** Number of fractional photons */
+  const bool n_fractional_photons_;
 };
 
 #if 0

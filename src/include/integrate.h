@@ -13,9 +13,14 @@
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_monte_plain.h>
 #include <gsl/gsl_monte_vegas.h>
+
+#include <sstream>
+#include <memory>
 #include <tuple>
+#include <utility>
 
 #include "cxx14compat.h"
+#include "fpenvironment.h"
 #include "random.h"
 
 namespace Smash {
@@ -29,12 +34,12 @@ struct GslWorkspaceDeleter {
   /// The class has no members, so this is a noop.
   constexpr GslWorkspaceDeleter() = default;
 
-  /// frees the gsl_integration_workspace resource if it is non-zero.
-  void operator()(gsl_integration_workspace *ptr) const {
+  /// Frees the gsl_integration_cquad_workspace resource if it is non-zero.
+  void operator()(gsl_integration_cquad_workspace *ptr) const {
     if (ptr == nullptr) {
       return;
     }
-    gsl_integration_workspace_free(ptr);
+    gsl_integration_cquad_workspace_free(ptr);
   }
 };
 
@@ -59,7 +64,7 @@ class Result : public std::pair<double, double> {
 
 /**
  * A C++ interface for numerical integration in one dimension
- * with the GSL integration functions.
+ * with the GSL CQUAD integration functions.
  *
  * Example:
  * \code
@@ -80,9 +85,11 @@ class Integrator {
    * \param workspace_size The internal workspace is allocated such that it can
    *                       hold the given number of double precision intervals,
    *                       their integration results, and error estimates.
+   *                       It also determines the maximum number of subintervals
+   *                       the integration algorithm will use.
    */
-  explicit Integrator(int workspace_size)
-      : workspace_(gsl_integration_workspace_alloc(workspace_size)) {}
+  explicit Integrator(size_t workspace_size)
+      : workspace_(gsl_integration_cquad_workspace_alloc(workspace_size)) {}
 
   /// Convenience overload of the above with a workspace size of 1000.
   Integrator() : Integrator(1000) {}
@@ -109,31 +116,31 @@ class Integrator {
           return f(x);
         },
         &fun};
-    gsl_integration_qag(&gslfun, a, b,
-                        accuracy_absolute_,  // epsabs
-                        accuracy_relative_,  // epsrel
-                        subintervals_max_,   // limit
-                        gauss_points_,       // key
-                        workspace_.get(), &result.first, &result.second);
+    // We disable float traps when calling GSL code we cannot control.
+    DisableFloatTraps guard;
+    const int error_code = gsl_integration_cquad(&gslfun, a, b,
+                          accuracy_absolute_, accuracy_relative_,
+                          workspace_.get(),
+                          &result.first, &result.second,
+                          nullptr /* Don't store the number of evaluations */);
+    if (error_code) {
+      std::stringstream err;
+      err << "GSL integration: " << gsl_strerror(error_code);
+      throw std::runtime_error(err.str());
+    }
     return result;
   }
 
  private:
   /// Holds the workspace pointer.
-  std::unique_ptr<gsl_integration_workspace, GslWorkspaceDeleter> workspace_;
+  std::unique_ptr<gsl_integration_cquad_workspace,
+                  GslWorkspaceDeleter> workspace_;
 
   /// Parameter to the GSL integration function: desired absolute error limit
-  double accuracy_absolute_ = 1.0e-5;
+  const double accuracy_absolute_ = 1.0e-5;
 
   /// Parameter to the GSL integration function: desired relative error limit
-  double accuracy_relative_ = 5.0e-4;
-
-  /// Parameter to the GSL integration function: maximum number of subintervals
-  /// (may not exceed workspace size)
-  std::size_t subintervals_max_ = 500;
-
-  /// Parameter to the GSL integration function: integration rule
-  int gauss_points_ = GSL_INTEG_GAUSS21;
+  const double accuracy_relative_ = 5.0e-4;
 };
 
 /**
@@ -169,7 +176,7 @@ class Integrator1dMonte {
         number_of_calls_(num_calls) {
     gsl_monte_plain_init(state_);
     // initialize the GSL RNG with a random seed
-    unsigned long int seed = Random::uniform_int(0ul, ULONG_MAX);
+    const uint32_t seed = Random::uniform_int(0ul, ULONG_MAX);
     gsl_rng_set(rng_, seed);
   }
 
@@ -260,7 +267,7 @@ class Integrator2d {
         number_of_calls_(num_calls) {
     gsl_monte_plain_init(state_);
     // initialize the GSL RNG with a random seed
-    unsigned long int seed = Random::uniform_int(0ul, ULONG_MAX);
+    const uint32_t seed = Random::uniform_int(0ul, ULONG_MAX);
     gsl_rng_set(rng_, seed);
   }
 

@@ -33,47 +33,46 @@ static Test::ParticlesPtr create_box_particles() {
        Test::smashon(Position{0.0, 0.6, 0.7, 0.8},
                      Momentum{4.0, 0.0, 0.0, 0.0}),
        // particle that moves with speed of light
-       Test::smashon(Position{0.5, 0.7, 0.8, 0.9},
+       Test::smashon(Position{0.0, 0.7, 0.8, 0.9},
                      Momentum{sqrt(0.03), 0.1, -.1, 0.0}),
        // particle that moves slowly:
-       Test::smashon(Position{0.7, 0.1, 0.2, 0.3},
+       Test::smashon(Position{0.0, 0.1, 0.2, 0.3},
                      Momentum{sqrt(1.14), 0.1, 0.2, -.3}),
        // particle that will cross a box boundary at high x:
-       Test::smashon(Position{1.2, 4.5, 0.0, 0.0},
+       Test::smashon(Position{0.0, 4.5, 0.0, 0.0},
                      Momentum{0.11, 0.1, 0.0, 0.0}),
        // particle that will cross a box boundary at low y:
-       Test::smashon(Position{1.8, 0.0, 0.2, 0.0},
+       Test::smashon(Position{0.0, 0.0, 0.2, 0.0},
                      Momentum{0.11, 0.0, -.1, 0.0}),
        // particle that will cross a box boundary at low x and high z:
-       Test::smashon(Position{2.2, 0.2, 0.0, 4.8},
+       Test::smashon(Position{0.0, 0.2, 0.0, 4.8},
                      Momentum{0.51, -.3, 0.0, 0.4})});
 }
 
 TEST(propagate_default_no_potentials) {
-  ExperimentParameters param = Smash::Test::default_parameters(1, 1.f);
   auto Pdef = create_box_particles();
-  propagate_straight_line(Pdef.get(), param);
+  propagate_straight_line(Pdef.get(), 1.0, {});
   // after propagation: Momenta should be unchanged.
   // but positions should be updated.
   auto it = Pdef->begin();
   COMPARE(it->momentum(), FourVector(4.0, 0.0, 0.0, 0.0));
-  COMPARE(it->position(), FourVector(0.0, 0.6, 0.7, 0.8));
+  COMPARE(it->position(), FourVector(1.0, 0.6, 0.7, 0.8));
   ++it;
   COMPARE(it->momentum(), FourVector(sqrt(0.03), 0.1, -.1, 0.0));
-  COMPARE(it->position(), FourVector(0.0, 0.7 + 0.1/std::sqrt(0.03),
+  COMPARE(it->position(), FourVector(1.0, 0.7 + 0.1/std::sqrt(0.03),
                                                    0.8 - 0.1/std::sqrt(0.03), 0.9));
   ++it;
   COMPARE(it->momentum(), FourVector(sqrt(1.14), 0.1, 0.2, -.3));
-  COMPARE(it->position(), FourVector(0., 0.1 + 0.1 / std::sqrt(1.14),
+  COMPARE(it->position(), FourVector(1., 0.1 + 0.1 / std::sqrt(1.14),
                                                   0.2 + 0.2 / std::sqrt(1.14),
                                                   0.3 - 0.3 / std::sqrt(1.14)));
   ++it;
   COMPARE(it->momentum(), FourVector(0.11, 0.1, 0.0, 0.0));
-  COMPARE(it->position(), FourVector(0.0, 4.5 + 0.1/0.11, 0.0, 0.0));
+  COMPARE(it->position(), FourVector(1.0, 4.5 + 0.1/0.11, 0.0, 0.0));
   ++it;
   COMPARE(it->momentum(), FourVector(0.11, 0.0, -.1, 0.0));
-  COMPARE(it->position(), FourVector(0.0, 0.0, 0.2 - 0.1/0.11, 0.0));
+  COMPARE(it->position(), FourVector(1.0, 0.0, 0.2 - 0.1/0.11, 0.0));
   ++it;
   COMPARE(it->momentum(), FourVector(0.51, -.3, 0.0, 0.4));
-  COMPARE(it->position(), FourVector(0.0, 0.2 - 0.3/0.51, 0.0, 4.8 + 0.4/0.51));
+  COMPARE(it->position(), FourVector(1.0, 0.2 - 0.3/0.51, 0.0, 4.8 + 0.4/0.51));
 }

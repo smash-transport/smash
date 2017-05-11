@@ -6,20 +6,21 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
+#include <getopt.h>
+
 #include <sstream>
+#include <vector>
 
 #include <boost/filesystem/fstream.hpp>
-
-#include <getopt.h>
 
 #include "include/cxx14compat.h"
 #include "include/decaymodes.h"
 #include "include/experiment.h"
 #include "include/filelock.h"
-#include "include/fpenvironment.h"
 #include "include/inputfunctions.h"
 #include "include/random.h"
 #include "include/scatteractionsfinder.h"
+#include "include/stringfunctions.h"
 /* build dependent variables */
 #include "include/config.h"
 
@@ -89,6 +90,14 @@ void usage(const int rc, const std::string &progname) {
    *     non-zero cross-section are dumped. Both colliding particles are
    *     assigned momenta from 0.1 to 10 GeV in the opposite directions to
    *     scan the possible sqrt(S).
+   * <tr><td>`-r <pdg>` <td>`--resonance <pdg>`
+   * <td> Dumps the width(m) and m * spectral function(m^2) versus resonance
+   *     mass m.
+   * <tr><td>`-s <pdg1>,<pdg2>[,mass1,mass2]`
+   * <td>`--cross-sections <pdg1>,<pdg2>[,mass1,mass2]`
+   * <td> Dumps the partial 2->1 cross-section of <pdg1> + <pdg2> with
+   *     masses mass1 and mass2. Masses are optional, default values are pole
+   *     masses.
    * <tr><td>`-f` <td>`--force`
    * <td>Forces overwriting files in the output directory. Normally, if you
    *     specifiy an output directory with `-o`, the directory must be empty.
@@ -114,6 +123,14 @@ void usage(const int rc, const std::string &progname) {
       "\n"
       "  -o, --output <dir>      output directory (default: ./data/<runid>)\n"
       "  -l, --list-2-to-n       list all possible 2->2 reactions\n"
+      "  -r, --resonance <pdg>   dump width(m) and m*spectral function(m^2)"
+      " for resonance pdg\n"
+      "  -s, --cross-sections    <pdg1>,<pdg2>[,mass1,mass2] \n"
+      "                          dump all 2->1 partial cross-sections of "
+      "pdg1 + pdg2 reactions versus sqrt(s).\n"
+      "                          Masses are optional, by default pole masses"
+      " are used.\n"
+      "                          Note the required comma and no spaces.\n"
       "  -f, --force             force overwriting files in the output "
       "directory"
       "\n"
@@ -179,7 +196,7 @@ void ensure_path_is_valid(const bf::path &path) {
 
 /* main - do command line parsing and hence decides modus */
 int main(int argc, char *argv[]) {
-  using namespace Smash;
+  using namespace Smash;  // NOLINT(build/namespaces)
   setup_default_float_traps();
 
   const auto &log = logger<LogArea::Main>();
@@ -194,6 +211,8 @@ int main(int argc, char *argv[]) {
                                  {"particles", required_argument, 0, 'p'},
                                  {"output", required_argument, 0, 'o'},
                                  {"list-2-to-n", no_argument, 0, 'l'},
+                                 {"resonance", required_argument, 0, 'r'},
+                                 {"cross-sections", required_argument, 0, 's'},
                                  {"version", no_argument, 0, 'v'},
                                  {nullptr, 0, 0, 0}};
 
@@ -205,13 +224,14 @@ int main(int argc, char *argv[]) {
     bf::path output_path = default_output_path(), input_path("./config.yaml");
     std::vector<std::string> extra_config;
     char *particles = nullptr, *decaymodes = nullptr, *modus = nullptr,
-         *end_time = nullptr;
-    // This variable remembers if --list-2-to-n option is activated
+         *end_time = nullptr, *pdg_string = nullptr, *cs_string = nullptr;
     bool list2n_activated = false;
+    bool resonance_dump_activated = false;
+    bool cross_section_dump_activated = false;
 
     /* parse command-line arguments */
     int opt;
-    while ((opt = getopt_long(argc, argv, "c:d:e:fhi:m:p:o:lv", longopts,
+    while ((opt = getopt_long(argc, argv, "c:d:e:fhi:m:p:o:lr:s:v", longopts,
                               nullptr)) != -1) {
       switch (opt) {
         case 'c':
@@ -243,6 +263,14 @@ int main(int argc, char *argv[]) {
           break;
         case 'l':
           list2n_activated = true;
+          break;
+        case 'r':
+          resonance_dump_activated = true;
+          pdg_string = optarg;
+          break;
+        case 's':
+          cross_section_dump_activated = true;
+          cs_string = optarg;
           break;
         case 'v':
           std::printf(
@@ -299,9 +327,51 @@ int main(int argc, char *argv[]) {
       constexpr bool two_to_one = false;
       ParticleType::create_type_list(configuration.take({"particles"}));
       DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
+      std::vector<bool> nucleon_has_interacted = {};
       auto scat_finder = make_unique<ScatterActionsFinder>(elastic_parameter,
-                                                           ntest, two_to_one);
+                                     ntest, nucleon_has_interacted, two_to_one);
       scat_finder->dump_reactions();
+      std::exit(EXIT_SUCCESS);
+    }
+    if (resonance_dump_activated) {
+      ParticleType::create_type_list(configuration.take({"particles"}));
+      DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
+      PdgCode pdg(pdg_string);
+      const ParticleType &res = ParticleType::find(pdg);
+      res.dump_width_and_spectral_function();
+      std::exit(EXIT_SUCCESS);
+    }
+    if (cross_section_dump_activated) {
+      ParticleType::create_type_list(configuration.take({"particles"}));
+      DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
+      std::string arg_string(cs_string);
+      std::vector<std::string> args = split(arg_string, ',');
+      const unsigned int n_arg = args.size();
+      if (n_arg < 2 || n_arg > 4) {
+        throw std::invalid_argument("-s usage: pdg1,pdg2[,m1][,m2]");
+      }
+      PdgCode pdg_a(args[0]), pdg_b(args[1]);
+      const ParticleType &a = ParticleType::find(pdg_a);
+      const ParticleType &b = ParticleType::find(pdg_b);
+      for (unsigned int i = 0; i < 4 - n_arg; i++) {
+        args.push_back("");
+      }
+      float ma = (args[2] == "") ? a.mass() : std::stod(args[2]);
+      float mb = (args[3] == "") ? b.mass() : std::stod(args[3]);
+      if (a.is_stable() && args[2] != "") {
+        ma = a.mass();
+        std::cout << "Warning: pole mass is used for stable particle "
+                  <<  a.name() << " instead of " << args[2] << std::endl;
+      }
+      if (b.is_stable() && args[3] != "") {
+        mb = b.mass();
+        std::cout << "Warning: pole mass is used for stable particle "
+                  << b.name() << " instead of " << args[3] << std::endl;
+      }
+      std::vector<bool> nucleon_has_interacted = {};
+      auto scat_finder = make_unique<ScatterActionsFinder>(-1.f, 1,
+                                               nucleon_has_interacted, true);
+      scat_finder->dump_cross_sections(a, b, ma, mb);
       std::exit(EXIT_SUCCESS);
     }
     if (modus) {

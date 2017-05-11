@@ -8,11 +8,14 @@
 #ifndef SRC_INCLUDE_TABULATION_H_
 #define SRC_INCLUDE_TABULATION_H_
 
-#include <vector>
+#include <functional>
 #include <map>
 #include <memory>
+#include <vector>
 
 #include "forwarddeclarations.h"
+#include "integrate.h"
+#include "kinematics.h"
 #include "particletype.h"
 
 namespace Smash {
@@ -46,6 +49,100 @@ class Tabulation {
   // lower bound and inverse step size 1/dx for tabulation
   const float x_min_, inv_dx_;
 };
+
+/**
+ * Spectral function integrand for GSL integration, with one resonance in the
+ * final state (the second particle is stable).
+ *
+ * The integrand is \f$ A(m) p_{cm}^f \f$, where \f$ m \f$ is the
+ * resonance mass, \f$ A(m) \f$ is the spectral function
+ *  and \f$ p_{cm}^f \f$ is the center-of-mass momentum of the final state.
+ *
+ * \param[in] resonance_mass Actual mass of the resonance.
+ * \param[in] sqrts Center-of-mass energy, i.e. sqrt of Mandelstam s.
+ * \param[in] stable_mass mass of the stable particle in the final state
+ * \param[in] type type of the resonance
+ */
+inline float spec_func_integrand_1res(float resonance_mass, float sqrts,
+                               float stable_mass, const ParticleType &type) {
+  if (sqrts <= stable_mass + resonance_mass) {
+    return 0.;
+  }
+
+  /* Integrand is the spectral function weighted by the CM momentum of the
+   * final state. */
+  return type.spectral_function(resonance_mass)
+       * pCM(sqrts, stable_mass, resonance_mass);
+}
+
+/**
+ * Spectral function integrand for GSL integration, with two resonances in the
+ * final state.
+ *
+ * The integrand is \f$ A_1(m_1) A_2(m_2) p_{cm}^f \f$, where \f$ m_1 \f$ and
+ * \f$ m_2 \f$ are the resonance masses, \f$ A_1 \f$ and \f$ A_2 \f$ are the
+ * spectral functions and \f$ p_{cm}^f \f$ is the center-of-mass momentum of
+ * the final state.
+ *
+ * \param[in] sqrts Center-of-mass energy, i.e. sqrt of Mandelstam s.
+ * \param[in] res_mass_1 Actual mass of the first resonance.
+ * \param[in] res_mass_2 Actual mass of the second resonance.
+ * \param[in] t1 Type of the first resonance.
+ * \param[in] t2 Type of the second resonance.
+ */
+inline float spec_func_integrand_2res(float sqrts,
+                              float res_mass_1, float res_mass_2,
+                              const ParticleType &t1, const ParticleType &t2) {
+  if (sqrts <= res_mass_1 + res_mass_2) {
+    return 0.;
+  }
+
+  /* Integrand is the product of the spectral function weighted by the
+   * CM momentum of the final state. */
+  return t1.spectral_function(res_mass_1)
+       * t2.spectral_function(res_mass_2)
+       * pCM(sqrts, res_mass_1, res_mass_2);
+}
+
+/**
+ * Create a table for the spectral integral
+ *  of a resonance and a stable particle.
+ */
+inline std::unique_ptr<Tabulation> spectral_integral_semistable(
+    Integrator& integrate,
+    const ParticleType& resonance,
+    const ParticleType& stable,
+    float range) {
+  return make_unique<Tabulation>(
+          resonance.minimum_mass() + stable.mass(), range, 100,
+          [&](float srts) {
+            return integrate(resonance.minimum_mass(), srts - stable.mass(),
+                             [&](float m) {
+                               return spec_func_integrand_1res(m, srts,
+                                                     stable.mass(), resonance);
+                             });
+          });
+}
+
+/// Create a table for the spectral integral of two resonances.
+inline std::unique_ptr<Tabulation> spectral_integral_unstable(
+    Integrator2d& integrate2d,
+    const ParticleType& res1,
+    const ParticleType& res2,
+    float range) {
+    return make_unique<Tabulation>(
+          res1.minimum_mass() + res2.minimum_mass(), range, 100,
+          [&](float srts) {
+            return integrate2d(res1.minimum_mass(),
+                               srts - res2.minimum_mass(),
+                               res2.minimum_mass(),
+                               srts - res1.minimum_mass(),
+                               [&](float m1, float m2) {
+                                 return spec_func_integrand_2res(srts, m1, m2,
+                                                            res1, res2);
+                               });
+          });
+}
 
 }  // namespace Smash
 

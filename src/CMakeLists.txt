@@ -27,7 +27,7 @@ endif (GIT_FOUND)
 
 string(TIMESTAMP BUILD_DATE)
 
-find_package(GSL REQUIRED)
+find_package(GSL 1.15 REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(Boost 1.49.0 REQUIRED COMPONENTS filesystem system)
 
@@ -41,21 +41,11 @@ if(USE_ROOT)
   endif()
 endif()
 
-######### Find Pythia8 library #########
-find_package(Pythia REQUIRED)
-if(Pythia_FOUND)
-  include_directories(SYSTEM
-	"${Pythia_INCLUDE_DIRS}"
-  )
-  set(SMASH_LIBRARIES
-     ${SMASH_LIBRARIES}
-     ${Pythia_LIBRARIES} -ldl
-  )
-  add_definitions(
-  "-DPYTHIA_XML_DIR=\"${Pythia_xmldoc_PATH}\""
-  -DPYTHIA_FOUND
-  )
-endif()
+# set up Pythia
+get_filename_component(xmldoc "../3rdparty/pythia8215/share/Pythia8/xmldoc" ABSOLUTE)
+add_definitions(
+    "-DPYTHIA_XML_DIR=\"${xmldoc}\""
+)
 
 # set up include paths
 include_directories(
@@ -74,6 +64,8 @@ set(SMASH_LIBRARIES ${SMASH_LIBRARIES}
    ${Boost_LIBRARIES}
    einhard
    yaml-cpp
+   pythia
+   -ldl  # required by pythia
    )
 
 # list the source files
@@ -124,13 +116,13 @@ set(smash_src
         scatteraction.cc
         scatteractionbaryonbaryon.cc
         scatteractionbaryonmeson.cc
+        scatteractiondeltakaon.cc
         scatteractionmesonmeson.cc
         scatteractionnucleonkaon.cc
         scatteractionnucleonnucleon.cc
         scatteractionhyperonpion.cc
         scatteractionphoton.cc
         scatteractionsfinder.cc
-        scatteractionsfinderphoton.cc
         spheremodus.cc
         stringfunctions.cc
         tabulation.cc
@@ -138,6 +130,7 @@ set(smash_src
         threevector.cc
         tsc.cc
         vtkoutput.cc
+        wallcrossingaction.cc
         )
 
 if(USE_ROOT AND ROOT_FOUND)

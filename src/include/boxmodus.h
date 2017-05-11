@@ -84,6 +84,13 @@ class BoxModus : public ModusDefault {
     return make_unique<GrandCanThermalizer>(conf, lat_size, origin, periodicity);
   }
 
+  /// \copydoc Smash::ModusDefault::max_timestep()
+  float max_timestep(float max_transverse_distance_sqr) const {
+    return 0.5f*std::sqrt(length_*length_ - max_transverse_distance_sqr);
+  }
+
+  float length() const { return length_; }
+
  private:
   const BoxInitialCondition initial_condition_;
   /// length of the cube's edge in fm/c

@@ -7,10 +7,11 @@
 #ifndef SRC_INCLUDE_LISTMODUS_H_
 #define SRC_INCLUDE_LISTMODUS_H_
 
-#include <stdint.h>
 #include <cmath>
+#include <cstdint>
 #include <list>
 #include <string>
+#include <utility>
 
 #include "forwarddeclarations.h"
 #include "modusdefault.h"
@@ -67,14 +68,19 @@ class ListModus : public ModusDefault {
   /// File prefix of the particle list
   std::string particle_list_file_prefix_;
 
-  /// Starting time for the List
-  const float start_time_ = 0.0f;
+  /// Starting time for the List; changed to the earliest formation time
+  float start_time_ = 0.0f;
 
   /// shift_id is the start number of event_id
   const int shift_id_;
 
   /// event_id_ = the unique id of the current even
   int event_id_;
+
+  /// check whether anti-freestreaming is needed, if yes return
+  /// earliest formation time as start_time_
+  std::pair<bool, float> check_formation_time_(const std::string &
+                                              particle_list);
 
   /**\ingroup logging
    * Writes the initial state for the List to the output stream.

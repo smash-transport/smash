@@ -564,7 +564,7 @@ namespace einhard
 			/**
 			 * Check whether the output stream is colorized.
 			 */
-			void getColorize() const noexcept
+			bool getColorize() const noexcept
 			{
 				return this->colorize_stdout || this->colorize_stderr;
 			}

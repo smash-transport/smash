@@ -23,7 +23,7 @@
 
 namespace Smash {
 
-Action::Action(const ParticleList &in_part, float time)
+Action::Action(const ParticleList &in_part, double time)
               : incoming_particles_(in_part),
                 time_of_execution_(time+in_part[0].position().x0()) {}
 
@@ -38,12 +38,19 @@ bool Action::is_valid(const Particles &particles) const {
 
 bool Action::is_pauli_blocked(const Particles & particles,
                              const PauliBlocker& p_bl) const {
+  // Wall-crossing actions should never be blocked: currently
+  // if the action is blocked, a particle continues to propagate in a straight
+  // line. This would simply bring it out of the box.
+  if (process_type_ == ProcessType::Wall) {
+    return false;
+  }
   const auto &log = logger<LogArea::PauliBlocking>();
   for (const auto &p : outgoing_particles_) {
     if (p.is_baryon()) {
       const auto f = p_bl.phasespace_dens(p.position().threevec(),
                                            p.momentum().threevec(),
-                                           particles, p.pdgcode());
+                                           particles, p.pdgcode(),
+                                           incoming_particles_);
       if (f >  Random::uniform(0.f, 1.f)) {
         log.debug("Action ", *this, " is pauli-blocked with f = ", f);
         return true;
@@ -85,8 +92,12 @@ void Action::perform(Particles *particles, uint32_t id_process) {
     }
   }
 
+  // For elastic collisions and box wall crossings it is not necessary to remove
+  // particles from the list and insert new ones, it is enough to update their
+  // properties.
   particles->update(incoming_particles_, outgoing_particles_,
-                    process_type_ != ProcessType::Elastic);
+                    (process_type_ != ProcessType::Elastic) &&
+                    (process_type_ != ProcessType::Wall));
 
   log.debug("Particle map now has ", particles->size(), " elements.");
 
@@ -163,10 +174,8 @@ void Action::sample_2body_phasespace() {
 
 
 void Action::check_conservation(const uint32_t id_process) const {
-  const auto &log = logger<LogArea::Action>();
   QuantumNumbers before(incoming_particles_);
   QuantumNumbers after(outgoing_particles_);
-  std::string err_msg = before.report_deviations(after);
   if (before != after) {
     std::stringstream particle_names;
     for (const auto& p : incoming_particles_) {
@@ -177,7 +186,14 @@ void Action::check_conservation(const uint32_t id_process) const {
       particle_names << p.type().name();
     }
     particle_names << "\n";
+    const auto &log = logger<LogArea::Action>();
+    std::string err_msg = before.report_deviations(after);
     log.error() << particle_names.str() << err_msg;
+    // Pythia does not conserve energy and momentum at high energy, so we just
+    // print the error and continue.
+    if (process_type_ == ProcessType::String) {
+      return;
+    }
     throw std::runtime_error("Conservation laws violated in process " +
                              std::to_string(id_process));
   }

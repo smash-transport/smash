@@ -67,7 +67,7 @@ if(NOT CPPLINT)
 endif()
 if(CPPLINT)
    message(STATUS "cpplint.py found at ${CPPLINT}")
-   set(CPPLINT_ARGS --filter=-build/c++11,-build/include,-readability/streams,-runtime/references --counting=detailed)
+   set(CPPLINT_ARGS --filter=-build/c++11,-build/include_subdir,+build/include_alpha,-runtime/operator,-readability/streams,-readability/function,-runtime/references,-whitespace/operators --counting=detailed)
    file(GLOB CPPLINT_FILES
         ${PROJECT_SOURCE_DIR}/src/include/*.h ${PROJECT_SOURCE_DIR}/src/*.cc)
    add_custom_target(cpplint
@@ -240,6 +240,7 @@ smash_add_runtest(smash_help smash smash -h)
 smash_add_runtest(smash_run smash smash)
 smash_add_runtest(box_run smash smash -m Box)
 smash_add_runtest(collider_run smash smash -m Collider)
+smash_add_runtest(collider_frozen_fermi_run smash smash -m Collider -c "Modi: {Collider: {Fermi_Motion: frozen}}")
 smash_add_runtest(sphere_run smash smash -m Sphere)
 
 # verify that binary runs certain time (this corresponds to 20 steps)

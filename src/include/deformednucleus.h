@@ -7,6 +7,8 @@
 #ifndef SRC_INCLUDE_DEFORMEDNUCLEUS_H_
 #define SRC_INCLUDE_DEFORMEDNUCLEUS_H_
 
+#include <map>
+
 #include "angles.h"
 #include "configuration.h"
 #include "forwarddeclarations.h"

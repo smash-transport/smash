@@ -37,8 +37,8 @@ endif(NOT CMAKE_BUILD_TYPE)
 # add 3rd-party libraries (before setting compiler flags etc)
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/einhard")
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/yaml-cpp-0.5.3/include")
+include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/pythia8223/include")
 add_subdirectory(3rdparty)
-
 
 # RelWithDebInfo is just like Release, it only adds -g to add debug symbols
 # (useful for better debug and profiling information on Release builds)

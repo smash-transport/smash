@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2016-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_WALLCROSSINGACTION_H_
 
 #include "action.h"
+#include "actionfinderfactory.h"
 
 namespace Smash {
 
@@ -22,8 +23,9 @@ namespace Smash {
  */
 class WallcrossingAction : public Action {
  public:
-  WallcrossingAction(const ParticleData &in_part, const ParticleData &out_part)
-                      : Action(in_part, out_part, 0., ProcessType::Wall ) {}
+  WallcrossingAction(const ParticleData &in_part, const ParticleData &out_part,
+                     const double time_until = 0.0)
+                 : Action(in_part, out_part, time_until, ProcessType::Wall) {}
   float raw_weight_value() const override { return 1; };
   void generate_final_state() override {};
   double sqrt_s() const override {
@@ -34,6 +36,36 @@ class WallcrossingAction : public Action {
   }
 };
 
+class WallCrossActionsFinder : public ActionFinderInterface {
+ public:
+  explicit WallCrossActionsFinder(float l) : l_{l, l, l} {};
+
+  /// Find the next wall crossings for every particle before time t_max
+  ActionList find_actions_in_cell(const ParticleList &plist,
+                                  float t_max) const override;
+
+  /// Ignore the neighbor searches for wall crossing
+  ActionList find_actions_with_neighbors(const ParticleList &,
+                                         const ParticleList &,
+                                         float) const override {
+    return {};
+  }
+  /// Ignore the surrounding searches for wall crossing
+  ActionList find_actions_with_surrounding_particles(const ParticleList &,
+                                                     const Particles &,
+                                                     float) const override {
+    return {};
+  }
+
+  /// No final actions for wall crossing
+  ActionList find_final_actions(const Particles &, bool) const override {
+    return {};
+  }
+
+ private:
+  /// Periods in x,y,z directions in fm.
+  const std::array<float, 3> l_;
+};
 
 }  // namespace Smash
 

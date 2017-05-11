@@ -9,9 +9,7 @@
 
 #include "include/listmodus.h"
 
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
-
+#include <cfloat>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -21,6 +19,9 @@
 #include <sstream>
 #include <utility>
 #include <vector>
+
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 #include "include/algorithms.h"
 #include "include/angles.h"
@@ -89,13 +90,41 @@ std::ostream &operator<<(std::ostream &out, const ListModus &m) {
     return out;
 }
 
+
+
+/* Judge whether formation time are the same for all the particles;
+ * Don't do anti-freestreaming if start with the same formation time.
+ * Choose the earliest formation time as start_time_ */
+std::pair<bool, float> ListModus::check_formation_time_(
+                            const std::string & particle_list) {
+    float earliest_formation_time = FLT_MAX;
+    float formation_time_difference = 0.0;
+    float reference_formation_time = 0.0;  // avoid compiler warning
+    for (const Line &line : line_parser(particle_list)) {
+        std::istringstream lineinput(line.text);
+        float t;
+        lineinput >> t;
+        if (t < earliest_formation_time) {
+          earliest_formation_time = t;
+        }
+
+        if (line.number == 0) {
+          reference_formation_time = t;
+        } else {
+          formation_time_difference += std::abs(t - reference_formation_time);
+        }
+    }
+
+    bool anti_streaming_needed = (formation_time_difference > really_small)
+                                  ? true : false;
+    return std::make_pair(anti_streaming_needed, earliest_formation_time);
+}
+
 /* initial_conditions - sets particle data for @particles */
 float ListModus::initial_conditions(Particles *particles,
         const ExperimentParameters &) {
     const auto &log = logger<LogArea::List>();
-
     /* Readin PARTICLES from file */
-
     std::stringstream fname;
     fname << particle_list_file_prefix_ << event_id_;
 
@@ -120,6 +149,10 @@ float ListModus::initial_conditions(Particles *particles,
 
     std::string particle_lists = read_all(bf::ifstream{fpath});
 
+    auto check = check_formation_time_(particle_lists);
+    bool anti_streaming_needed = std::get<0>(check);
+    start_time_ = std::get<1>(check);
+
     for (const Line &line : line_parser(particle_lists)) {
         std::istringstream lineinput(line.text);
         float t, x, y, z, mass, E, px, py, pz, id;
@@ -141,13 +174,24 @@ float ListModus::initial_conditions(Particles *particles,
         try {
           ParticleData &particle = particles->create(pdgcode);
           particle.set_4momentum(FourVector(E, px, py, pz));
-          particle.set_4position(FourVector(start_time_, x, y, z));
-        }
-        catch ( ParticleType::PdgNotFoundFailure ) {
-            throw LoadFailure(build_error_string(
-                        "While loading external particle lists data:\n"
-                        "PDG code not found for the particle. In " +
-                        fpath.filename().native(), line));
+          if (anti_streaming_needed) {
+            /* for hydro output where formation time is different*/
+            float delta_t = t - start_time_;
+            FourVector start_timespace = FourVector(t, x, y, z) - delta_t *
+                FourVector(E, px, py, pz) / E;
+            particle.set_4position(start_timespace);
+            particle.set_formation_time(t);
+            particle.set_cross_section_scaling_factor(0.0);
+          } else {
+            /* for smash output where formation time is the same*/
+            particle.set_4position(FourVector(t, x, y, z));
+            particle.set_formation_time(t);
+            particle.set_cross_section_scaling_factor(1.0);
+          }
+        } catch ( ParticleType::PdgNotFoundFailure ) {
+            log.warn() << "While loading external particle lists data, "
+                       << "PDG code not found for the particle:\n"
+                       << line.text << std::endl;
         }
     }
 

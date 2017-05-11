@@ -10,6 +10,8 @@
 #ifndef SRC_INCLUDE_DECAYACTION_H_
 #define SRC_INCLUDE_DECAYACTION_H_
 
+#include <utility>
+
 #include "action.h"
 
 namespace Smash {
@@ -49,7 +51,9 @@ class DecayAction : public Action {
 
   std::pair<double, double> sample_masses() const override;
 
-  float raw_weight_value() const override;
+  float raw_weight_value() const override {
+    return total_width_;
+  }
 
   float total_width() const {
     return total_width_;

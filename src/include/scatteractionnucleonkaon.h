@@ -39,14 +39,6 @@ class ScatterActionNucleonKaon : public ScatterActionBaryonMeson {
    * Writes information about this scatter action to the \p out stream.
    */
   void format_debug_output(std::ostream &out) const override;
-
- private:
-  /**
-   * Calculate cross sections for strangeness exchange in nucleon-kaon
-   * collisions.
-   */
-  CollisionBranchList two_to_two_inel(const ParticleType &type_particle_a,
-                                      const ParticleType &type_particle_b);
 };
 
 }  // namespace Smash

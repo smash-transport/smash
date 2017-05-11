@@ -14,6 +14,7 @@
 
 #include "include/angles.h"
 #include "include/constants.h"
+#include "include/fourvector.h"
 #include "include/logging.h"
 #include "include/numerics.h"
 #include "include/particles.h"
@@ -39,8 +40,8 @@ Nucleus::Nucleus(Configuration &config, int nTest) {
   }
 }
 
-float Nucleus::mass() const {
-  float total_mass = 0.f;
+double Nucleus::mass() const {
+  double total_mass = 0.;
   for (auto i = cbegin(); i != cend(); i++) {
     total_mass += i->momentum().abs();
   }
@@ -329,15 +330,13 @@ void Nucleus::set_parameters_from_config(Configuration &config) {
 }
 
 void Nucleus::generate_fermi_momenta() {
-  double r, rho, p;
   const int N_n = std::count_if(begin(), end(),
                   [](const ParticleData i) {return i.pdgcode() == pdg::n;});
   const int N_p = std::count_if(begin(), end(),
                   [](const ParticleData i) {return i.pdgcode() == pdg::p;});
   const FourVector nucleus_center = center();
   const int A = N_n + N_p;
-  const double pi2_3 = 3.0 * M_PI * M_PI;
-  Angles phitheta;
+  constexpr double pi2_3 = 3.0 * M_PI * M_PI;
   const auto &log = logger<LogArea::Nucleus>();
 
   log.debug() << N_n << " neutrons, " << N_p << " protons.";
@@ -352,8 +351,8 @@ void Nucleus::generate_fermi_momenta() {
       }
       continue;
     }
-    r = (i->position() - nucleus_center).abs3();
-    rho = nuclear_density
+    const double r = (i->position() - nucleus_center).abs3();
+    double rho = nuclear_density
           / (std::exp((r - nuclear_radius_)/diffusiveness_) + 1.);
     if (i->pdgcode() == pdg::p) {
       rho = rho * N_p / A;
@@ -361,7 +360,9 @@ void Nucleus::generate_fermi_momenta() {
     if (i->pdgcode() == pdg::n) {
       rho = rho * N_n / A;
     }
-    p = hbarc * std::pow(pi2_3 * rho * Random::uniform(0.0, 1.0), 1.0/3.0);
+    const double p = hbarc * std::pow(pi2_3 * rho *
+                                      Random::uniform(0.0, 1.0), 1.0/3.0);
+    Angles phitheta;
     phitheta.distribute_isotropically();
     const ThreeVector ith_3momentum = phitheta.threevec() * p;
     ptot += ith_3momentum;
@@ -378,8 +379,8 @@ void Nucleus::generate_fermi_momenta() {
     assert(ptot.x1() == 0.0 && ptot.x2() == 0.0 && ptot.x3() == 0.0);
     #pragma GCC diagnostic pop
   } else {
-    // Make sure that total momentum is zero - redistribute ptot equally among
-    // protons and neutrons
+    // Make sure that total momentum is zero - redistribute ptot equally
+    // among protons and neutrons
     const ThreeVector centralizer = ptot/A;
     for (auto i = begin(); i != end(); i++) {
       if (i->pdgcode() == pdg::p || i->pdgcode() == pdg::n) {

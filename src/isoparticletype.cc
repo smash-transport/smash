@@ -21,41 +21,43 @@ IsoParticleType::IsoParticleType(const std::string &n, float m, float w,
 
 const IsoParticleTypeList& IsoParticleType::list_all() { return iso_type_list; }
 
-const IsoParticleType& IsoParticleType::find(const std::string &name) {
-  const auto found = std::lower_bound(
-      iso_type_list.begin(), iso_type_list.end(), name,
-      [](const IsoParticleType &l, const std::string &r) {
-        return l.name() < r;
-      });
-  if (found == iso_type_list.end() || found->name() != name) {
-    throw ParticleNotFoundFailure("Isospin multiplet " + name + " not found!");
-  }
-  return *found;
-}
-
-IsoParticleType& IsoParticleType::find_private(const std::string &name) {
+/// Helper function for IsoParticleType::try_find and friends.
+static IsoParticleType* try_find_private(const std::string &name) {
   auto found = std::lower_bound(
       iso_type_list.begin(), iso_type_list.end(), name,
       [](const IsoParticleType &l, const std::string &r) {
         return l.name() < r;
       });
   if (found == iso_type_list.end() || found->name() != name) {
-    throw std::runtime_error("Isospin multiplet " + name +
-                             " not found (privately)!");
+    return {};  // The default constructor creates an invalid pointer.
+  }
+  return &*found;
+}
+
+const IsoParticleType* IsoParticleType::try_find(const std::string &name) {
+  return try_find_private(name);
+}
+
+const IsoParticleType& IsoParticleType::find(const std::string &name) {
+  const auto found = try_find_private(name);
+  if (!found) {
+    throw ParticleNotFoundFailure("Isospin multiplet " + name + " not found!");
+  }
+  return *found;
+}
+
+IsoParticleType& IsoParticleType::find_private(const std::string &name) {
+  auto found = try_find_private(name);
+  if (!found) {
+    throw ParticleNotFoundFailure("Isospin multiplet " + name
+                                + " not found (privately)!");
   }
   return *found;
 }
 
 bool IsoParticleType::exists(const std::string &name) {
-  const auto found = std::lower_bound(
-      iso_type_list.begin(), iso_type_list.end(), name,
-      [](const IsoParticleType &l, const std::string &r) {
-        return l.name() < r;
-      });
-  if (found != iso_type_list.end()) {
-    return found->name() == name;
-  }
-  return false;
+  const auto found = try_find_private(name);
+  return found;
 }
 
 /* Construct the name-string for an isospin multiplet from the given
@@ -85,15 +87,14 @@ bool IsoParticleType::has_anti_multiplet() const {
   }
 }
 
-const ParticleTypePtr IsoParticleType::find_state(
-                                                        const std::string &n) {
+const ParticleTypePtr IsoParticleType::find_state(const std::string &n) {
   const IsoParticleType &multiplet = IsoParticleType::find(multiplet_name(n));
   auto found = std::find_if(
     multiplet.states_.begin(), multiplet.states_.end(),
     [&n](ParticleTypePtr p) {
       return p->name() == n;
     });
-  if (found == multiplet.states_.end() || (*found)->name() != n) {
+  if (found == multiplet.states_.end()) {
     throw std::runtime_error("Isospin state " + n + " not found!");
   }
   return *found;
@@ -149,107 +150,63 @@ void IsoParticleType::create_multiplet(const ParticleType &type) {
 }
 
 
-/**
- * Spectral function integrand for GSL integration, with one resonance in the
- * final state (the second particle is stable).
- *
- * The integrand is \f$ A(m) p_{cm}^f \f$, where \f$ m \f$ is the
- * resonance mass, \f$ A(m) \f$ is the spectral function
- *  and \f$ p_{cm}^f \f$ is the center-of-mass momentum of the final state.
- *
- * \param[in] resonance_mass Actual mass of the resonance.
- * \param[in] sqrts Center-of-mass energy, i.e. sqrt of Mandelstam s.
- * \param[in] stable_mass mass of the stable particle in the final state
- * \param[in] type type of the resonance
- */
-static float spec_func_integrand_1res(float resonance_mass, float sqrts,
-                               float stable_mass, const ParticleType &type) {
-  if (sqrts <= stable_mass + resonance_mass) {
-    return 0.;
-  }
-
-  /* Integrand is the spectral function weighted by the CM momentum of the
-   * final state. */
-  return type.spectral_function(resonance_mass)
-       * pCM(sqrts, stable_mass, resonance_mass);
-}
-
-
-/**
- * Spectral function integrand for GSL integration, with two resonances in the
- * final state.
- *
- * The integrand is \f$ A_1(m_1) A_2(m_2) p_{cm}^f \f$, where \f$ m_1 \f$ and
- * \f$ m_2 \f$ are the resonance masses, \f$ A_1 \f$ and \f$ A_2 \f$ are the
- * spectral functions and \f$ p_{cm}^f \f$ is the center-of-mass momentum of
- * the final state.
- *
- * \param[in] sqrts Center-of-mass energy, i.e. sqrt of Mandelstam s.
- * \param[in] res_mass_1 Actual mass of the first resonance.
- * \param[in] res_mass_2 Actual mass of the second resonance.
- * \param[in] t1 Type of the first resonance.
- * \param[in] t2 Type of the second resonance.
- */
-static float spec_func_integrand_2res(float sqrts,
-                              float res_mass_1, float res_mass_2,
-                              const ParticleType &t1, const ParticleType &t2) {
-  if (sqrts <= res_mass_1 + res_mass_2) {
-    return 0.;
-  }
-
-  /* Integrand is the product of the spectral function weighted by the
-   * CM momentum of the final state. */
-  return t1.spectral_function(res_mass_1)
-       * t2.spectral_function(res_mass_2)
-       * pCM(sqrts, res_mass_1, res_mass_2);
-}
 
 static thread_local Integrator integrate;
 
 double IsoParticleType::get_integral_NR(double sqrts) {
-  if (XS_NR_tabulation == nullptr) {
+  if (XS_NR_tabulation_ == nullptr) {
     // initialize tabulation
     /* TODO(weil): Move this lazy init to a global initialization function,
-      * in order to avoid race conditions in multi-threading. */
+     * in order to avoid race conditions in multi-threading. */
     ParticleTypePtr type_res = states_[0];
     ParticleTypePtr nuc = IsoParticleType::find("N").get_states()[0];
-    XS_NR_tabulation = make_unique<Tabulation>(
-          type_res->minimum_mass() + nuc->mass(), 2.f, 100,
-          [&](float srts) {
-            return integrate(type_res->minimum_mass(), srts - nuc->mass(),
-                             [&](float m) {
-                               return spec_func_integrand_1res(m, srts,
-                                                        nuc->mass(), *type_res);
-                             });
-          });
+    XS_NR_tabulation_ = spectral_integral_semistable(integrate,
+                                                     *type_res, *nuc, 2.0);
   }
-  return XS_NR_tabulation->get_value_linear(sqrts);
+  return XS_NR_tabulation_->get_value_linear(sqrts);
+}
+
+double IsoParticleType::get_integral_RK(double sqrts) {
+  if (XS_RK_tabulation_ == nullptr) {
+    // initialize tabulation
+    /* TODO(weil): Move this lazy init to a global initialization function,
+     * in order to avoid race conditions in multi-threading. */
+    ParticleTypePtr type_res = states_[0];
+    ParticleTypePtr kaon = IsoParticleType::find("K").get_states()[0];
+    XS_RK_tabulation_ = spectral_integral_semistable(integrate,
+                                                     *type_res, *kaon, 2.0);
+  }
+  return XS_RK_tabulation_->get_value_linear(sqrts);
 }
 
 static thread_local Integrator2d integrate2d(1E4);
 
-double IsoParticleType::get_integral_DR(double sqrts) {
-  if (XS_DR_tabulation == nullptr) {
-    // initialize tabulation
-    /* TODO(weil): Move this lazy init to a global initialization function,
-      * in order to avoid race conditions in multi-threading. */
-    ParticleTypePtr type_res = states_[0];
-    ParticleTypePtr Delta = IsoParticleType::find("Δ").get_states()[0];
-    XS_DR_tabulation = make_unique<Tabulation>(
-          type_res->minimum_mass() + Delta->minimum_mass(), 2.5f, 100,
-          [&](float srts) {
-            return integrate2d(type_res->minimum_mass(),
-                               srts - Delta->minimum_mass(),
-                               Delta->minimum_mass(),
-                               srts - type_res->minimum_mass(),
-                               [&](float m1, float m2) {
-                                 return spec_func_integrand_2res(srts, m1, m2,
-                                                            *type_res, *Delta);
-                               });
-          });
+double IsoParticleType::get_integral_RR(const ParticleType &type_res_2,
+                                        double sqrts) {
+  auto search = XS_RR_tabulations.find(find(type_res_2));
+  if (search != XS_RR_tabulations.end()) {
+    return search->second->get_value_linear(sqrts);
   }
-  return XS_DR_tabulation->get_value_linear(sqrts);
+  IsoParticleType* key = find(type_res_2);
+  XS_RR_tabulations.emplace(key,
+                            integrate_RR(find(type_res_2)->get_states()[0]));
+  return XS_RR_tabulations.at(key)->get_value_linear(sqrts);
 }
 
+TabulationPtr IsoParticleType::integrate_RR(ParticleTypePtr &type_res_2) {
+  ParticleTypePtr type_res_1 = states_[0];
+  return make_unique<Tabulation>(
+         type_res_1->minimum_mass() + type_res_2->minimum_mass(), 3.f, 125,
+         [&](float srts) {
+            return integrate2d(type_res_1->minimum_mass(),
+                               srts - type_res_2->minimum_mass(),
+                               type_res_2->minimum_mass(),
+                               srts - type_res_1->minimum_mass(),
+                               [&](float m1, float m2) {
+                                  return spec_func_integrand_2res(srts, m1, m2,
+                                                      *type_res_1, *type_res_2);
+                               });
+         });
+}
 
 }  // namespace Smash

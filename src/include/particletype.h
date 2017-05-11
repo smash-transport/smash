@@ -7,8 +7,9 @@
 #ifndef SRC_INCLUDE_PARTICLETYPE_H_
 #define SRC_INCLUDE_PARTICLETYPE_H_
 
-#include <assert.h>
+#include <cassert>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "forwarddeclarations.h"
@@ -37,7 +38,7 @@ class ParticleType {
    * Decay width cutoff for considering a particle as stable.
    *
    * We currently regard a particle type as stable if its on-shell width is less
-   * than 10 keV.
+   * than 200 keV. The cutoff is chosen such that the η and the η' are stable.
    */
   static constexpr float width_cutoff = 1e-5f;
 
@@ -90,6 +91,9 @@ class ParticleType {
 
   /// Return a pointer to the corresponding antiparticle ParticleType object.
   ParticleTypePtr get_antiparticle() const;
+
+  /// \copydoc PdgCode::antiparticle_sign
+  int antiparticle_sign() const { return pdgcode_.antiparticle_sign(); }
 
   /** Returns twice the isospin vector length \f$I\f$.
    *
@@ -149,6 +153,9 @@ class ParticleType {
     return is_baryon() && isospin() == 1 && !pdgcode_.is_nucleon() &&
            pdgcode_.strangeness() == 0 && pdgcode_.charmness() == 0;
   }
+
+  /// \copydoc PdgCode::is_Nstar1535
+  bool is_Nstar1535() const { return pdgcode_.is_Nstar1535(); }
 
   /// Is this a Delta resonance (Delta*)?
   inline bool is_Deltastar() const {
@@ -296,6 +303,12 @@ class ParticleType {
                                                   int L = 0) const;
 
   /**
+   *  Prints out width and spectral function versus mass to the
+   *  standard output. This is useful for debugging and analysis.
+   */
+  void dump_width_and_spectral_function() const;
+
+  /**
    * Returns a list of all ParticleType objects.
    *
    * \note The order of the list may be sorted by PDG codes, but do not rely on
@@ -305,15 +318,34 @@ class ParticleType {
 
   /** Returns a list of all nucleons (i.e. proton and neutron). */
   static ParticleTypePtrList &list_nucleons();
-  /** Returns a list of the Delta(1232) baryons // oliiny: only 1232?!
+  /** Returns a list of all anti-nucleons (i.e. anti-proton and anti-neutron).
+    */
+  static ParticleTypePtrList &list_anti_nucleons();
+  /** Returns a list of the Delta(1232) baryons
    *  (i.e. all four charge states). */
   static ParticleTypePtrList &list_Deltas();
+  /** Returns a list of the anti-Delta(1232) baryons
+   *  (i.e. all four charge states). */
+  static ParticleTypePtrList &list_anti_Deltas();
   /** Returns a list of all baryon resonances,
    * i.e. unstable baryons (not including antibaryons). */
-  static ParticleTypePtrList list_baryon_resonances();
+  static ParticleTypePtrList &list_baryon_resonances();
+
+  /**
+   * Returns the ParticleTypePtr for the given \p pdgcode.
+   * If the particle type is not found, an invalid ParticleTypePtr is returned.
+   * You can convert a ParticleTypePtr to a bool to check whether it is valid.
+   *
+   * \note The complexity of the search is \f$\mathcal O(\log N)\f$. Therefore,
+   * do not use this function except for user input that selects a particle
+   * type. All other internal references for a particle type should use
+   * ParticleTypePtr instead.
+   */
+  static const ParticleTypePtr try_find(PdgCode pdgcode);
 
   /**
    * Returns the ParticleType object for the given \p pdgcode.
+   * If the particle is not found, a PdgNotFoundFailure is thrown.
    *
    * \note The complexity of the search is \f$\mathcal O(\log N)\f$. Therefore,
    * do not use this function except for user input that selects a particle
@@ -333,6 +365,13 @@ class ParticleType {
    * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
    */
   static bool exists(PdgCode pdgcode);
+
+  /**
+   * Returns whether the ParticleType with the given \p name exists.
+   *
+   * \note The complexity of the search is \f$\mathcal O(N)\f$.
+   */
+  static bool exists(const std::string& name);
 
   /**
    * Initialize the global ParticleType list (list_all) from the given input

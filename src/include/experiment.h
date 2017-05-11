@@ -7,10 +7,16 @@
 #ifndef SRC_INCLUDE_EXPERIMENT_H_
 #define SRC_INCLUDE_EXPERIMENT_H_
 
+#include <limits>
+#include <memory>
+#include <vector>
+
 #include "actionfinderfactory.h"
 #include "adaptiveparameters.h"
 #include "chrono.h"
+#include "decayactionsfinderdilepton.h"
 #include "energymomentumtensor.h"
+#include "fourvector.h"
 #include "grandcan_thermalizer.h"
 #include "pauliblocking.h"
 #include "potentials.h"
@@ -140,15 +146,11 @@ class Experiment : public ExperimentBase {
    * Perform the given action.
    *
    * \param action The action to perform
-   * \param[in,out] interactions_total The number of interactions until now
-   * \param[in,out] total_pauliblocked The number of pauli blocked actions until
-   *                                   now
    * \param particles_before_actions A container with the ParticleData from this
    *                                 time step before any actions were performed
    */
   template <typename Container>
-  void perform_action(Action &action, uint64_t &interactions_total,
-                      uint64_t &total_pauliblocked,
+  bool perform_action(Action &action,
                       const Container &particles_before_actions);
 
   template <typename TOutput>
@@ -156,75 +158,43 @@ class Experiment : public ExperimentBase {
                      const bf::path &output_path,
                      Configuration&& conf);
 
-  /** It generates the final state with the right kinematics and then writes
-   * the given dilepton action in the dilepton output file, instead of
-   * actually performing the action.
+  /** Propagate all particles until time to_time without any interactions
+   *  and shine dileptons.
    */
-  void write_dilepton_action(Action &action,
-                             const ParticleList &particles_before_actions);
+  void propagate_and_shine(double to_time);
 
-   /** Generates kinematics and weighing of final states and writes them into output file,
-    * the actions are NOT performed. 
-    */
-  void write_photon_action(Action &action,
-                           const ParticleList &particles_before_actions);
-
-  /** Runs the time evolution of an event with fixed-sized time steps
-   *
-   * Here, the time steps are looped over, collisions and decays are
-   * carried out and particles are propagated.
-   *
-   * \return The number of interactions from the event
+  /** Runs the time evolution of an event with fixed-sized time steps,
+   *  adaptive time steps or without timesteps, from action to actions.
+   *  Within one timestep (fixed or adaptive) evolution from action to action
+   *  is invoked.
    */
-  uint64_t run_time_evolution_fixed_time_step();
+  void run_time_evolution();
 
   /** Runs the time evolution of an event without time steps
    *
    * Here, all actions are looped over, collisions and decays are
    * carried out and particles are propagated.
-   *
-   * \return The number of interactions from the event
    */
-  uint64_t run_time_evolution_without_time_steps();
-
-  /** Runs the time evolution of an event with adaptive time steps
-   *
-   * Here, the time steps are looped over, collisions and decays are carried
-   * out and particles are propagated while the size of the time step is adapted
-   * to the state of the system.
-   *
-   * \param adaptive_parameters Additional parameters for adaptive time steps
-   * \return The number of interactions from the event
-   */
-  uint64_t run_time_evolution_adaptive_time_steps(
-                                const AdaptiveParameters &adaptive_parameters);
+  void run_time_evolution_timestepless(Actions& actions);
 
   /** Performs the final decays of an event
-   *
-   * \param interactions_total The number of interactions so far
    */
-  void do_final_decays(uint64_t &interactions_total);
+  void do_final_decays();
 
   /** Output at the end of an event
    *
-   * \param interactions_total The number of interactions from the event
    * \param evt_num Number of the event
    */
-  void final_output(uint64_t interactions_total, const int evt_num);
+  void final_output(const int evt_num);
 
   /** Intermediate output during an event
-   *
-   * \param interactions_total The total number of interactions so far
-   * \param previous_interactions_total The number of interactions at the
-   *                                    previous output
    */
-  void intermediate_output(uint64_t& interactions_total,
-                           uint64_t& previous_interactions_total);
+  void intermediate_output();
 
   /**
-   * Propagate all particles to the current time.
+   * Recompute potentials on lattices if necessary.
    */
-  void propagate_all();
+  void update_potentials();
 
   /**
    * Calculate the minimal size for the grid cells such that the
@@ -238,6 +208,10 @@ class Experiment : public ExperimentBase {
     return std::sqrt(4 * dt * dt + max_transverse_distance_sqr_);
   }
 
+  /// Shortcut for next output time
+  double next_output_time() const {
+    return parameters_.outputclock.next_time();
+  }
 
   /**
    * Struct of several member variables.
@@ -286,17 +260,27 @@ class Experiment : public ExperimentBase {
   /// The Photon output
   OutputPtr photon_output_;
 
+  /** nucleon_has_interacted_ labels whether the particles in the nuclei
+   *  have experienced any collisions or not. It's only valid in
+   *  the ColliderModus, so is set as an empty vector by default.*/
+  std::vector<bool> nucleon_has_interacted_ = {};
+
+  /** The initial nucleons in the ColliderModus propagate with
+   *  beam_momentum_, if Fermi motion is frozen. It's only valid in
+   *  the ColliderModus, so is set as an empty vector by default.*/
+  std::vector<FourVector> beam_momentum_ = {};
+
   /// The Action finder objects
   std::vector<std::unique_ptr<ActionFinderInterface>> action_finders_;
 
   /// The Dilepton Action Finder
-  std::unique_ptr<ActionFinderInterface> dilepton_finder_;
+  std::unique_ptr<DecayActionsFinderDilepton> dilepton_finder_;
 
   /// The (Scatter) Actions Finder for Direct Photons
   std::unique_ptr<ActionFinderInterface> photon_finder_;
 
   /// Number of fractional photons produced per single reaction
-  int number_of_fractional_photons = 100;
+  int n_fractional_photons_ = 100;
 
   /// Lattices holding different physical quantities
 
@@ -320,7 +304,7 @@ class Experiment : public ExperimentBase {
        printout_v_landau_ = false;
 
   /// Instance of class used for forced thermalization
-  std::unique_ptr<GrandCanThermalizer> gc_thermalizer_;
+  std::unique_ptr<GrandCanThermalizer> thermalizer_;
 
   /**
    * Number of events.
@@ -339,12 +323,12 @@ class Experiment : public ExperimentBase {
   const int nevents_;
 
   /// simulation time at which the evolution is stopped.
-  const float end_time_;
+  const double end_time_;
   /** The clock's timestep size at start up
    *
    * Stored here so that the next event will remember this.
    */
-  const float delta_time_startup_;
+  const double delta_time_startup_;
 
   /**
    * This indicates whether we force all resonances to decay in the last timestep.
@@ -355,6 +339,16 @@ class Experiment : public ExperimentBase {
    * This indicates whether to use the grid.
    */
   const bool use_grid_;
+
+  /**
+   * This indicates whether dileptons are switched on.
+   */
+  const bool dileptons_switch_;
+
+  /**
+   * This indicates whether photons are switched on.
+   */
+  const bool photons_switch_;
 
   /**
    * This indicates whether to use time steps.
@@ -383,7 +377,14 @@ class Experiment : public ExperimentBase {
   /**
    * Pointer to additional parameters that are needed for adaptive time steps.
    */
-  std::unique_ptr<const AdaptiveParameters> adaptive_parameters_ = nullptr;
+  std::unique_ptr<AdaptiveParameters> adaptive_parameters_ = nullptr;
+
+  /**
+   *  Total number of interactions for current and for previous timestep.
+   *  For timestepless mode the whole run time is considered as one timestep.
+   */
+  uint64_t interactions_total_ = 0, previous_interactions_total_ = 0,
+           total_pauli_blocked_ = 0;
 
   /**\ingroup logging
    * Writes the initial state for the Experiment to the output stream.

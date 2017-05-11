@@ -51,6 +51,7 @@ class SphereModus : public ModusDefault {
    */
   float initial_conditions(Particles *particles,
                           const ExperimentParameters &parameters);
+
  private:
   /// Sphere radius length
   float radius_;

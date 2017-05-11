@@ -73,7 +73,6 @@ class ParticleData {
   /** Returns the particle's effective mass
    * (as determined from the 4-momentum, possibly "off-shell"). */
   float effective_mass() const;
-
   /**
    * Return the ParticleType object associated to this particle.
    */
@@ -90,10 +89,12 @@ class ParticleData {
 
   /// return the particle's 4-momentum
   const FourVector &momentum() const { return momentum_; }
+
   /// set the particle's 4-momentum directly
   void set_4momentum(const FourVector &momentum_vector) {
     momentum_ = momentum_vector;
   }
+
   /**
    * Set the momentum of the particle.
    *
@@ -105,6 +106,7 @@ class ParticleData {
   void set_4momentum(double mass, const ThreeVector &mom) {
     momentum_ = FourVector(std::sqrt(mass * mass + mom * mom), mom);
   }
+
   /**
    * Set the momentum of the particle.
    *
@@ -163,6 +165,7 @@ class ParticleData {
 
   /// get the velocity 3-vector
   ThreeVector velocity() const { return momentum_.velocity(); }
+
 
   /**
    * Returns the inverse of the gamma factor from the current velocity of the

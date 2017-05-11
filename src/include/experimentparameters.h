@@ -19,46 +19,36 @@ namespace Smash {
  * function argument passing.
  */
 struct ExperimentParameters {
-  /// system clock (for simulation time keeping in the computational
-  /// frame)
+  /// system clock (for simulation time keeping in the computational frame)
   Clock labclock;
-  /// Time step size
-  float timestep_duration() const {
-    return labclock.timestep_duration();
-  }
-  /// returns if output should happen now
-  bool need_intermediate_output() const {
-    return labclock.multiple_is_in_next_tick(output_interval);
-  }
-  /// sets the time step such that it ends on the next output time
-  void set_timestep_for_next_output() {
-    labclock.end_tick_on_multiple(output_interval);
-  }
-  /// returns if the current time is exactly an output time
-  bool is_output_time() const {
-    return need_intermediate_output() &&
-           labclock.next_time() < labclock.next_multiple(output_interval);
-  }
-  /// replaces the current clock with a new one.
-  void reset_clock(const Clock &initial_clock) {
-    labclock = std::move(initial_clock);
-  }
-  /// this is the time particles will have after propagating through the
-  /// current time step.
-  float new_particle_time() const {
-    // I'm not certain if they should have the current time or the next
-    // tick.
-    return labclock.current_time();
-        // labclock.next_time();
-  }
-  /// time interval between SMASH giving measurables
-  const float output_interval;
+  /// output clock to keep track of the next output time
+  Clock outputclock;
   /// number of test particle
   int testparticles;
   /// width of gaussian Wigner density of particles
   float gaussian_sigma;
   /// distance at which gaussian is cut, i.e. set to zero, IN SIGMA (not fm)
   float gauss_cutoff_in_sigma;
+  /**
+  * This indicates whether two to one reaction is switched on.
+  */
+  bool two_to_one;
+  /**
+  * This indicates whether two to two reaction is switched on.
+  */
+  bool two_to_two;
+  /**
+  * This indicates whether string fragmentation is switched on.
+  */
+  bool strings_switch;
+  /**
+  * This indicates whether photons are switched on.
+  */
+  bool photons_switch;
+
+  /// Elastic collisions between the nucleons with the square root s
+  //  below low_snn_cut are excluded.
+  double low_snn_cut;
 };
 
 }  // namespace Smash

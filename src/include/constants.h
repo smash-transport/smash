@@ -52,6 +52,12 @@ constexpr float nucleon_mass = 0.938;
  * Note that this should be the same as in particles.txt.
  */
 constexpr float kaon_mass = 0.494;
+/**
+ * Delta mass in GeV
+ *
+ * Note that this should be the same as in particles.txt.
+ */
+constexpr float delta_mass = 1.232;
 
 /**
  * Fine-struture constant, approximately 1/137

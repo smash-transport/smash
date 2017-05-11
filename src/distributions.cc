@@ -78,8 +78,9 @@ double sample_momenta(const double temperature, const double mass) {
   }
   const float momentum_average_sqr = (energy_average - mass) *
                                      (energy_average + mass);
-  const float energy_min = mass;
-  const float energy_max = 50.0f * temperature;
+
+  const float momentum_min = 0.0;
+  const float momentum_max = 50.0f * temperature;
   /* double the massless peak value to be above maximum of the distribution */
   const float probability_max = 2.0f * density_integrand(energy_average,
                                                          momentum_average_sqr,
@@ -89,8 +90,9 @@ double sample_momenta(const double temperature, const double mass) {
    * random momenta and random probability need to be below the distribution */
   float momentum_radial_sqr, probability;
   do {
-    float energy = Random::uniform(energy_min, energy_max);
-    momentum_radial_sqr = (energy - mass) * (energy + mass);
+    float momentum = Random::uniform(momentum_min, momentum_max);
+    momentum_radial_sqr = momentum*momentum;
+    float energy = std::sqrt(momentum_radial_sqr + mass*mass);
     probability = density_integrand(energy, momentum_radial_sqr, temperature);
   } while (Random::uniform(0.f, probability_max) > probability);
 

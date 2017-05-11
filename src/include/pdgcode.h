@@ -10,9 +10,10 @@
 #ifndef SRC_INCLUDE_PDGCODE_H_
 #define SRC_INCLUDE_PDGCODE_H_
 
-#include <cstdio>
+#include <algorithm>
 #include <cstdlib>
 #include <iosfwd>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 
@@ -119,7 +120,7 @@ class PdgCode {
    * \param codenumber The number 0x221 is interpreted as an η meson,
    * -0x211 is a "charged pi antiparticle", i.e., a \f$\pi^-\f$.
    */
-  PdgCode(std::int32_t codenumber) : dump_(0x0)  {
+  PdgCode(std::int32_t codenumber) : dump_(0x0) {  // NOLINT(runtime/explicit)
     digits_.antiparticle_ = false;
     if (codenumber < 0) {
       digits_.antiparticle_ = true;
@@ -209,13 +210,12 @@ class PdgCode {
 
   /// returns a C++ string from the PDG Code.
   inline std::string string() const {
-    char hexstring[8];
+    std::stringstream ss;
     if (digits_.antiparticle_) {
-      snprintf(hexstring, sizeof(hexstring), "-%x", ucode());
-    } else {
-      snprintf(hexstring, sizeof(hexstring), "%x", ucode());
+      ss << "-";
     }
-    return std::string(hexstring);
+    ss << std::hex << ucode();
+    return ss.str();
   }
 
   /// Construct the antiparticle to a given PDG code.
@@ -263,15 +263,25 @@ class PdgCode {
   /// Returns whether this PDG code identifies a meson.
   inline bool is_meson() const { return is_hadron() && digits_.n_q1_ == 0; }
 
-  /// Is this a nucleon (p, n)?
+  /// Is this a nucleon/anti-nucleon (p, n, -p, -n)?
   inline bool is_nucleon() const {
-      return (code() == pdg::p) || (code() == pdg::n);
+      const auto abs_code = std::abs(code());
+      return (abs_code == pdg::p || abs_code == pdg::n);
   }
-  /// Is this a Delta(1232) (no anti-Delta)?
+
+  /// Is this a N*(1535) (+/0)?
+  inline bool is_Nstar1535() const {
+      const auto abs_code = std::abs(code());
+      return (abs_code == pdg::N1535_p || abs_code == pdg::N1535_z);
+  }
+
+  /// Is this a Delta(1232) (with anti-delta)?
   inline bool is_Delta() const {
-      return (code() == pdg::Delta_pp) || (code() == pdg::Delta_p) ||
-             (code() == pdg::Delta_z) || (code() == pdg::Delta_m);
+      const auto abs_code = std::abs(code());
+      return (abs_code == pdg::Delta_pp || abs_code == pdg::Delta_p ||
+              abs_code == pdg::Delta_z || abs_code == pdg::Delta_m);
   }
+
   /// Is this a hyperon (Lambda, Sigma, Xi, Omega)?
   inline bool is_hyperon() const {
       const auto abs_code = std::abs(code());

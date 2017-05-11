@@ -25,7 +25,6 @@ using namespace Smash;
 TEST(init_particle_types) {
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "ΔΔ 0.1 0.0 2114\n"
       "N+ 0.938 0.0 2212\n"
       "N0 0.938 0.0 2112\n");
 }
@@ -49,8 +48,9 @@ TEST(phase_space_density) {
   part.insert(one_particle);
   VERIFY(part.size() == 1);
   ThreeVector r(1.218, 0.0, 0.0), p(0.0, 0.0, 0.0);
-  const float f = pb->phasespace_dens(r, p, part, pdg);
-  const float f_expected = 9.12726f;
+  ParticleList disregard;
+  const float f = pb->phasespace_dens(r, p, part, pdg, disregard);
+  const float f_expected = 9.93318f;
   COMPARE_RELATIVE_ERROR(f, f_expected, 1.e-3) << f << " ?= " << f_expected;
 }
 
@@ -73,12 +73,11 @@ TEST(phase_space_density) {
   Particles Pbox;
   b->initial_conditions(&Pbox, param);
   ThreeVector r(0.0, 0.0, 0.0);
-  ThreeVector p;
   PdgCode pdg = 0x2114;
-  float f;
+  ParticleList disregard;
   for (int i = 1; i < 100; i++) {
-    p = ThreeVector(0.0, 0.0, 5.0/100*i);
-    f = pb->phasespace_dens(r, p, Pbox, pdg);
+    const ThreeVector p = ThreeVector(0.0, 0.0, 5.0/100*i);
+    const float f = pb->phasespace_dens(r, p, Pbox, pdg, disregard);
    // std::cout << 5.0/100*i << "  " << f << std::endl;
   }
 }*/
@@ -106,9 +105,10 @@ TEST(phase_space_density_nucleus) {
   ThreeVector r(0.0, 0.0, 0.0);
   ThreeVector p;
   PdgCode pdg = 0x2212;
+  ParticleList disregard;
   for (int i = 1; i < 100; i++) {
     p = ThreeVector(0.0, 0.0, 0.5/100*i);
-    const float f = pb->phasespace_dens(r, p, part_Au, pdg);
+    const float f = pb->phasespace_dens(r, p, part_Au, pdg, disregard);
     std::cout << 0.5/100*i << "  " << f << std::endl;
   }
 }

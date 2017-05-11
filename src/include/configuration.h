@@ -10,12 +10,14 @@
 #ifndef SRC_INCLUDE_CONFIGURATION_H_
 #define SRC_INCLUDE_CONFIGURATION_H_
 
-#include <yaml-cpp/yaml.h>
-
 #include <array>
+#include <set>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
+
+#include <yaml-cpp/yaml.h>  // NOLINT(build/include_order)
 
 #include "density.h"
 #include "forwarddeclarations.h"
@@ -142,8 +144,10 @@ class Configuration {
      */
     Value(const YAML::Node &n, const char *key) : node_(n), key_(key) {
       if (!(n.IsScalar() || n.IsSequence() || n.IsMap())) {
-        std::fprintf(stderr, "Configuration::Value fails at %s\n", key);
-        std::abort();
+        std::stringstream err;
+        err << "Configuration value for \"" << key
+            << "\" is missing or invalid";
+        throw std::runtime_error(err.str());
       }
     }
 
@@ -276,6 +280,22 @@ class Configuration {
           "The value for key \"" + std::string(key_) +
           "\" should be \"center of velocity\" or \"center of mass\" "
           "or \"fixed target\".");
+    }
+
+    operator FermiMotion() const {
+      const std::string s = operator std::string();
+      if (s == "off") {
+        return FermiMotion::Off;
+      }
+      if (s == "on") {
+        return FermiMotion::On;
+      }
+      if (s == "frozen") {
+        return FermiMotion::Frozen;
+      }
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) +
+          "\" should be \"off\" or \"on\" or \"frozen\".");
     }
 
     operator DensityType() const {
