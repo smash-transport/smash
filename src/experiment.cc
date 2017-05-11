@@ -826,7 +826,7 @@ void Experiment<Modus>::run_time_evolution() {
                               end_time_ - t);
     log.debug("Timestepless propagation for next ", dt, " fm/c.");
 
-    /* Perform forced thermalization at if required */
+    /* Perform forced thermalization if required */
     if (thermalizer_ &&
         thermalizer_->is_time_to_thermalize(parameters_.labclock)) {
       const bool ignore_cells_under_treshold = true;
