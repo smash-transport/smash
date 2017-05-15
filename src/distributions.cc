@@ -58,7 +58,7 @@ double density_integrand_mass(const double energy, const double momentum_sqr,
 /* density integrand - 1M_IC massless particles for expanding metric initialization,
  * see \iref{Bazow:2016oky}*/
 double density_integrand_1M_IC(const double energy, const double momentum_sqr,
-			const double temperature) {
+                        const double temperature) {
   return ((3.0/20.0) * (momentum_sqr/(temperature*temperature)) - (6.0/5.0) *
     (energy/temperature) + (14.0/5.0))*exp(-energy / temperature)*momentum_sqr;
 }
@@ -66,9 +66,10 @@ double density_integrand_1M_IC(const double energy, const double momentum_sqr,
 /* density integrand - 2M_IC massless particles for expanding metric initialization,
  * see \iref{Bazow:2016oky}*/
 double density_integrand_2M_IC(const double energy, const double momentum_sqr,
-			const double temperature) {
+                        const double temperature) {
   return (0.75 + 0.125 * (momentum_sqr / (temperature * temperature)) -
-         (1.0/30.0) * (momentum_sqr * energy / (temperature * temperature * temperature)) + 
+         (1.0/30.0) * (momentum_sqr * energy /
+         (temperature * temperature * temperature)) +
          (1.0/480.0) * (momentum_sqr * momentum_sqr/
          (temperature * temperature * temperature * temperature)))
          *exp(-energy/temperature) * momentum_sqr;
@@ -91,101 +92,108 @@ double sample_momenta(const double temperature, const double mass) {
   const auto &log = logger<LogArea::Distributions>();
   log.debug("Sample momenta with mass ", mass, " and T ", temperature);
 
-  //calculate range on momentum values to use
-  //ideally 0.0 and as large as possible but we want to be efficient!
+  // calculate range on momentum values to use
+  // ideally 0.0 and as large as possible but we want to be efficient!
   const float mom_min = 0.0;
-  const float mom_max = std::sqrt(50.0f * 50.0f * temperature * temperature - mass * mass);
-  //calculate momentum and energy values that will give
-  //maxima of density_integrand, verified by differentiation
-  const float p_boltzmann_sq = 2.0*(temperature*temperature + 
+  const float mom_max = std::sqrt(50.0f * 50.0f * temperature * temperature
+                        - mass * mass);
+  // calculate momentum and energy values that will give
+  // maxima of density_integrand, verified by differentiation
+  const float p_boltzmann_sq = 2.0*(temperature*temperature +
                    std::sqrt(temperature*temperature + mass*mass)*temperature);
   const float e_boltzmann = std::sqrt(p_boltzmann_sq + mass*mass);
   const float probability_max = 2.0f * density_integrand(e_boltzmann,
-                                                         p_boltzmann_sq,temperature);
+                                       p_boltzmann_sq, temperature);
 
   /* sample by rejection method: (see numerical recipes for more efficient)
    * random momenta and random probability need to be below the distribution */
   float energy, momentum_radial, probability;
   do {
-    //sample uniformly in momentum, DONT sample uniformly in energy!
+    // sample uniformly in momentum, DONT sample uniformly in energy!
     momentum_radial = Random::uniform(mom_min, mom_max);
-    //Energy by on-shell condition
+    // Energy by on-shell condition
     energy = std::sqrt(momentum_radial*momentum_radial + mass*mass);
-    probability = density_integrand(energy, momentum_radial*momentum_radial, temperature);
+    probability = density_integrand(energy, momentum_radial*momentum_radial,
+                                    temperature);
   } while (Random::uniform(0.f, probability_max) > probability);
 
   return momentum_radial;
 }
 
-/* sample_momenta via rejection method, according to non-equilibrium distribution
- * \f[f=pe^{-\frac{\sqrt{m^2+p^2}}{T_0}}\f]
- */                            
-double sample_momenta_non_eq_mass(const double temperature, const double mass) {                         
+/* sample_momenta via rejection method, according to non-equilibrium 
+ * distribution \f[f=pe^{-\frac{\sqrt{m^2+p^2}}{T_0}}\f]
+ */
+double sample_momenta_non_eq_mass(const double temperature, const double mass) {
   const auto &log = logger<LogArea::Distributions>();
   log.debug("Sample momenta with mass ", mass, " and T ", temperature);
 
-  //calculate range on momentum values to use
-  //ideally 0.0 and as large as possible but we want to be efficient!
+  // calculate range on momentum values to use
+  // ideally 0.0 and as large as possible but we want to be efficient!
   const float mom_min = 0.0;
-  const float mom_max = std::sqrt(50.0f * 50.0f * temperature * temperature - mass * mass);
-  //calculate momentum and energy values that will give 
-  //maxima of density_integrand_mass, verified by differentiation
-  const float p_non_eq_sq = 0.5*(9*temperature*temperature + 
-                  temperature*std::sqrt(81*temperature*temperature + 36*mass*mass));
-  const float e_non_eq = std::sqrt(p_non_eq_sq + mass*mass);                                 
+  const float mom_max = std::sqrt(50.0f * 50.0f * temperature * temperature
+                                  - mass * mass);
+  // calculate momentum and energy values that will give
+  // maxima of density_integrand_mass, verified by differentiation
+  const float p_non_eq_sq = 0.5*(9*temperature*temperature +
+                  temperature*std::sqrt(81*temperature*temperature
+                                        + 36*mass*mass));
+  const float e_non_eq = std::sqrt(p_non_eq_sq + mass*mass);
   const float probability_max = 2.0f*
-                  density_integrand_mass(e_non_eq, p_non_eq_sq, temperature);  
-  
+                  density_integrand_mass(e_non_eq, p_non_eq_sq, temperature);
+
   /* sample by rejection method: (see numerical recipes for more efficient)
-   * random momenta and random probability need to be below the distribution */              
-  float energy, momentum_radial, probability;                                                
+   * random momenta and random probability need to be below the distribution */
+  float energy, momentum_radial, probability;
   do {
-    //sample uniformly in momentum, DONT sample uniformly in energy!                         
-    momentum_radial = Random::uniform(mom_min, mom_max);                                     
-    //Energy by on-shell condition
-    energy = std::sqrt(momentum_radial*momentum_radial + mass*mass);                         
-    probability = density_integrand_mass(energy, momentum_radial*momentum_radial, temperature);   
-  } while (Random::uniform(0.f, probability_max) > probability);                             
-                                                                                             
-  return momentum_radial;                                                                    
+    // sample uniformly in momentum, DONT sample uniformly in energy!
+    momentum_radial = Random::uniform(mom_min, mom_max);
+    // Energy by on-shell condition
+    energy = std::sqrt(momentum_radial*momentum_radial + mass*mass);
+    probability = density_integrand_mass(energy,
+                          momentum_radial*momentum_radial, temperature);
+  } while (Random::uniform(0.f, probability_max) > probability);
+
+  return momentum_radial;
 }
 
 /* sample_momenta for the 1M IC condition - return thermal momenta */
 double sample_momenta_IC_1M(const double temperature, const double mass) {
   const auto &log = logger<LogArea::Distributions>();
-  log.debug("Sample momenta with mass ", mass, " and T ", temperature);                      
-  /* Maxwell-Boltzmann average E <E>=3T + m * K_1(m/T) / K_2(m/T) */                         
-  float energy_average;                                                                      
+  log.debug("Sample momenta with mass ", mass, " and T ", temperature);
+  /* Maxwell-Boltzmann average E <E>=3T + m * K_1(m/T) / K_2(m/T) */
+  float energy_average;
   if (mass > 0.) {
-    // massive particles 
-    const float m_over_T = mass / temperature;                                               
+    // massive particles
+    const float m_over_T = mass / temperature;
     energy_average = 3 * temperature
                      + mass * gsl_sf_bessel_K1(m_over_T)
-                            / gsl_sf_bessel_Kn(2, m_over_T);                                 
+                            / gsl_sf_bessel_Kn(2, m_over_T);
   } else {
     // massless particles
-    energy_average = 3 * temperature;                                                        
+    energy_average = 3 * temperature;
   }
-  const float momentum_average_sqr = (energy_average - mass) *                               
-                                     (energy_average + mass);                                
-  const float energy_min = mass; 
+  const float momentum_average_sqr = (energy_average - mass) *
+                                     (energy_average + mass);
+  const float energy_min = mass;
   const float energy_max = 50.0f * temperature;
-  /* 16 * the massless peak value to be well above maximum of the distribution */            
-  const float probability_max = 16.0f * density_integrand_1M_IC(energy_average,              
-                                                         momentum_average_sqr,               
-                                                         temperature);                       
-  
+  /* 16 * the massless peak value to be well above maximum of the
+   * distribution */
+  const float probability_max = 16.0f * density_integrand_1M_IC(energy_average,
+                                                         momentum_average_sqr,
+                                                         temperature);
+
   /* sample by rejection method: (see numerical recipes for more efficient)
-   * random momenta and random probability need to be below the distribution */              
-  float momentum_radial_sqr, probability;                                                    
+   * random momenta and random probability need to be below the distribution */
+  float momentum_radial_sqr, probability;
   do {
     float energy = Random::uniform(energy_min, energy_max);
     momentum_radial_sqr = (energy - mass) * (energy + mass);
-    probability = density_integrand_1M_IC(energy, momentum_radial_sqr, temperature);         
-  } while (Random::uniform(0.f, probability_max) > probability);                             
-  
-  return std::sqrt(momentum_radial_sqr);                                                     
-}  
+    probability = density_integrand_1M_IC(energy,
+                          momentum_radial_sqr, temperature);
+  } while (Random::uniform(0.f, probability_max) > probability);
+
+  return std::sqrt(momentum_radial_sqr);
+}
 
 /* sample_momenta for the 2M IC condition - return thermal momenta */
 double sample_momenta_IC_2M(const double temperature, const double mass) {
@@ -207,7 +215,8 @@ double sample_momenta_IC_2M(const double temperature, const double mass) {
                                      (energy_average + mass);
   const float energy_min = mass;
   const float energy_max = 50.0f * temperature;
-  /* 16 * the massless peak value to be well above maximum of the distribution */
+  /* 16 * the massless peak value to be well above maximum of the
+   * distribution */
   const float probability_max = 16.0f * density_integrand_2M_IC(energy_average,
                                                          momentum_average_sqr,
                                                          temperature);
@@ -218,7 +227,8 @@ double sample_momenta_IC_2M(const double temperature, const double mass) {
   do {
     float energy = Random::uniform(energy_min, energy_max);
     momentum_radial_sqr = (energy - mass) * (energy + mass);
-    probability = density_integrand_2M_IC(energy, momentum_radial_sqr, temperature);
+    probability = density_integrand_2M_IC(energy, momentum_radial_sqr,
+                                          temperature);
   } while (Random::uniform(0.f, probability_max) > probability);
 
   return std::sqrt(momentum_radial_sqr);
@@ -286,17 +296,16 @@ double sample_momenta_from_thermal(const double temperature,
   }
   return momentum_radial;
 }
-//sample momenta according to the momentum distribution in expansion paper
-double sample_momenta_IC_ES(const double temperature)
-{
- double momentum_radial;
- const double a = -std::log(Random::canonical_nonzero());
- const double b = -std::log(Random::canonical_nonzero());
- const double c = -std::log(Random::canonical_nonzero());
- const double d = -std::log(Random::canonical_nonzero());
- momentum_radial = (3.0/4.0)*temperature * (a + b + c + d );
- 
- return momentum_radial;
+// sample momenta according to the momentum distribution in expansion paper
+double sample_momenta_IC_ES(const double temperature) {
+  double momentum_radial;
+  const double a = -std::log(Random::canonical_nonzero());
+  const double b = -std::log(Random::canonical_nonzero());
+  const double c = -std::log(Random::canonical_nonzero());
+  const double d = -std::log(Random::canonical_nonzero());
+  momentum_radial = (3.0/4.0)*temperature * (a + b + c + d);
+
+  return momentum_radial;
 }
 
 }  // namespace Smash

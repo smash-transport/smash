@@ -336,8 +336,8 @@ class Configuration {
       if (s == "Exponential") {
         return ExpansionMode::Exponential;
       }
-      throw IncorrectTypeInAssignment( 
-          "The value for key \"" + std::string(key_) + 
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) +
           "\" should be \"NoExpansion\", \"MasslessFRW\"," +
           "\"MassiveFRW\" or \"Exponential\".");
     }
@@ -390,8 +390,8 @@ class Configuration {
       }
       throw IncorrectTypeInAssignment(
           "The value for key \"" + std::string(key_) +
-          "\" should be \"thermal momenta\", \"IC_ES\", \"IC_1M\", \"IC_2M\" or" +
-          "\"IC_Massive\"."); 
+          "\" should be \"thermal momenta\", \"IC_ES\", " +
+          "\"IC_1M\", \"IC_2M\" or" + "\"IC_Massive\".");
     }
 
     operator Sampling() const {

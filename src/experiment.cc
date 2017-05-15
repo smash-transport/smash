@@ -310,7 +310,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       force_decays_(
           config.take({"Collision_Term", "Force_Decays_At_End"}, true)),
       use_grid_(config.take({"General", "Use_Grid"}, true)),
-      metric_(config.take({"General", "Metric_Type"}, ExpansionMode::NoExpansion),
+      metric_(config.take({"General", "Metric_Type"},
+          ExpansionMode::NoExpansion),
           config.take({"General", "Expansion_Rate"}, 0.1)),
       strings_switch_(config.take({"Collision_Term", "Strings"}, false)),
       dileptons_switch_(config.has_value({"Output", "Dileptons"}) ?
@@ -318,7 +319,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
                     false),
       photons_switch_(config.has_value({"Output", "Photons"}) ?
                     config.take({"Output", "Photons", "Enable"}, true) :
-                    false),              
+                    false),
       time_step_mode_(
           config.take({"General", "Time_Step_Mode"}, TimeStepMode::Fixed)) {
   const auto &log = logger<LogArea::Experiment>();
@@ -892,11 +893,8 @@ void Experiment<Modus>::run_time_evolution() {
     // fragmentation are off.  If potentials are on then momentum is conserved
     // only in average.  If string fragmentation is on, then energy and
     // momentum are only very roughly conserved in high-energy collisions.
-<<<<<<< HEAD
-    if (!potentials_ && !strings_switch_ && metric_.mode_ == ExpansionMode::NoExpansion) {
-=======
-    if (!potentials_ && !parameters_.strings_switch) {
->>>>>>> master
+    if (!potentials_ && !strings_switch_ &&
+        metric_.mode_ == ExpansionMode::NoExpansion) {
       std::string err_msg = conserved_initial_.report_deviations(particles_);
       if (!err_msg.empty()) {
         log.error() << err_msg;

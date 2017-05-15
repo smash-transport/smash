@@ -64,7 +64,6 @@ class BoxModus : public ModusDefault {
    * collision output: this is where OutputsList is used.
    */
 
-   
   int impose_boundary_conditions(Particles *particles,
                          const OutputsList &output_list = {});
 

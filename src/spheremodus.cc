@@ -69,9 +69,9 @@ SphereModus::SphereModus(Configuration modus_config,
       mus_(modus_config.take({"Sphere", "Strange_Chemical_Potential"}, 0.0f)),
       init_multipl_(use_thermal_ ? std::map<PdgCode, int>() :
                     modus_config.take({"Sphere", "Init_Multiplicities"}).
-                                        convert_for(init_multipl_)),
+                    convert_for(init_multipl_)),
       init_distr_(modus_config.take({"Sphere", "Initial_Condition"},
-                                        SphereInitialCondition::ThermalMomenta)) {
+                    SphereInitialCondition::ThermalMomenta)) {
 }
 
 /* console output on startup of sphere specific parameters */
@@ -153,9 +153,6 @@ float SphereModus::initial_conditions(Particles *particles,
     }
     momentum_radial = sample_momenta_from_thermal(this->sphere_temperature_,
                                                 data.pole_mass());
-   // momentum_radial = sample_momenta_ES_IC(this->sphere_temperature_);
-   // momentum_radial = sample_momenta_expan(this->sphere_temperature_, data.pole_mass());
-    //momentum_radial = sample_momenta(this->sphere_temperature_, data.pole_mass());
     phitheta.distribute_isotropically();
     log.debug("Particle ", data.id(), " radial momenta ", momentum_radial, ' ',
               phitheta);

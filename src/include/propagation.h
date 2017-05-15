@@ -17,9 +17,9 @@
 namespace Smash {
 
 struct ExpansionProperties {
-  //Defines the metric to be used
+  // Defines the metric to be used
   ExpansionMode mode_;
-  //Defines the expansion parameter (faster expansion for larger values)
+  // Defines the expansion parameter (faster expansion for larger values)
   double b_;
 
   ExpansionProperties(ExpansionMode mode, double b) :
@@ -28,7 +28,7 @@ struct ExpansionProperties {
   {}
 };
 
-double calc_hubble (double time, const ExpansionProperties &metric);
+double calc_hubble(double time, const ExpansionProperties &metric);
 
 /** Propagates the positions of all particles on a straight line
   * through the current time step.

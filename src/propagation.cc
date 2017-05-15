@@ -18,10 +18,10 @@
 namespace Smash {
 
 /*Function to calculate the hubble parameter*/
-double calc_hubble(double time, const ExpansionProperties &metric){
-  double h; //Hubble parameter 
+double calc_hubble(double time, const ExpansionProperties &metric) {
+  double h;  // Hubble parameter
 
-  //No expansion case
+  // No expansion case
   switch (metric.mode_) {
     case ExpansionMode::NoExpansion:
       h = 0.;
@@ -89,25 +89,26 @@ double propagate_straight_line(Particles *particles, double to_time,
   return dt;
 }
 
-void expand_space_time(Particles *particles, const ExperimentParameters &parameters,
-                             const ExpansionProperties &metric) {
+void expand_space_time(Particles *particles,
+                       const ExperimentParameters &parameters,
+                       const ExpansionProperties &metric) {
   const auto &log = logger<LogArea::Propagation>();
   double dt = parameters.labclock.timestep_duration();
   for (ParticleData &data : *particles) {
-    //Momentum and position modification to ensure appropriate expansion                     
-    double h = calc_hubble(parameters.labclock.current_time(),metric);
+    // Momentum and position modification to ensure appropriate expansion
+    double h = calc_hubble(parameters.labclock.current_time(), metric);
     FourVector delta_mom = FourVector(0.0, h*data.momentum().threevec()*dt);
-    FourVector expan_dist = FourVector(0.0, h*data.position().threevec()*dt);                
-    
+    FourVector expan_dist = FourVector(0.0, h*data.position().threevec()*dt);
+
     log.debug("Particle ", data, " expansion motion: ", expan_dist);
-    //New position and momentum 
+    // New position and momentum
     FourVector position = data.position() + expan_dist;
-    FourVector momentum = data.momentum() - delta_mom;                                       
-    
-    //set the new momentum and position variables                                            
-    data.set_4position(position);                                                            
+    FourVector momentum = data.momentum() - delta_mom;
+
+    // set the new momentum and position variables
+    data.set_4position(position);
     data.set_4momentum(momentum);
-    //force the on shell condition to ensure correct energy
+    // force the on shell condition to ensure correct energy
     data.set_4momentum(data.pole_mass(), data.momentum().threevec());
   }
 }
