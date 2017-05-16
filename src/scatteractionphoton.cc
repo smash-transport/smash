@@ -175,6 +175,14 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
   const float to_mb = 0.3894;
   const float Const = 0.059;
   const float g_POR = 25.8;
+  const float ma1 = 1.26;
+  const float ghat = 6.4483;
+  const float eta1 = 2.3920;
+  const float eta2 = 1.9430;
+  const float delta = -0.6426;
+  const float C4 = -0.14095;
+  const float Gammaa1 = 0.4;
+  const float Pi = M_PI;
   float m_omega = omega_particle->mass();
 
   ParticleData part_a = incoming_particles_[0];
@@ -195,6 +203,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
     // do a check according to incoming_particles_ and calculate the
     // cross sections (xsection) for all possible reactions
 
+    float mrho = rho0_particle->mass();
     float m_rho_case = rho0_particle->mass();
     const double s = mandelstam_s();
     double sqrts = sqrt_s();
@@ -328,10 +337,16 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
           }
           m3 = part_out->mass();
 
-          xsection = alpha * g_rho_2 / (12 * s * p_cm_2);
-          t1 += -m_pi_2;
-          t2 += -m_pi_2;
-          xsection = xsection * (2 * (t2 - t1) -
+          if (incoming_particles_[0].pdgcode().is_rho()){
+            mrho = incoming_particles_[0].effective_mass();
+          } else {
+            mrho = incoming_particles_[1].effective_mass();
+          }
+
+        //  xsection = alpha * g_rho_2 / (12 * s * p_cm_2);
+        //  t1 += -m_pi_2;
+        //  t2 += -m_pi_2;
+        /*  xsection = xsection * (2 * (t2 - t1) -
                                  s * (pow_int(m2, 2) - 4 * m_pi_2) /
                                      pow_int(s - m_pi_2, 2) * (t2 - t1) -
                                  (pow_int(m2, 2) - 4 * m_pi_2) *
@@ -339,7 +354,374 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
                                      +m_pi_2)/(s - m_pi_2) *
                                           std::log(t2 / t1) +
                                       m_pi_2 * (t2 - t1) / (t1 * t2))) *
-                     to_mb;
+                     to_mb; */
+
+                     xsection = to_mb*(pow(Const,2)*pow(ghat,4)*((pow(eta1 - eta2,2)*(-2*eta1*eta2*
+                      (pow(ma1,8) + pow(m_pi,8) - pow(m_pi,4)*pow(mrho,4) - 2*pow(ma1,2)*pow(m_pi,2)*(pow(m_pi,2) - pow(mrho,2))*(pow(mrho,2) + s) +
+                        pow(ma1,6)*(-4*pow(m_pi,2) + 2*s) + pow(ma1,4)*
+                         (4*pow(m_pi,4) - pow(mrho,4) + 2*pow(m_pi,2)*(pow(mrho,2) - 2*s) - 2*pow(mrho,2)*s + 2*pow(s,2))) +
+                     pow(eta2,2)*(pow(ma1,8) + pow(m_pi,4)*pow(pow(m_pi,2) - pow(mrho,2),2) + 2*pow(ma1,6)*(-2*pow(m_pi,2) + pow(mrho,2) + s) +
+                        2*pow(ma1,2)*pow(m_pi,2)*(-pow(mrho,4) + pow(m_pi,2)*(2*pow(mrho,2) - s) + pow(mrho,2)*s) +
+                        pow(ma1,4)*(4*pow(m_pi,4) + pow(mrho,4) - 2*pow(mrho,2)*s + 2*pow(s,2) - 4*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                     pow(eta1,2)*(pow(ma1,8) + pow(m_pi,8) - 2*pow(m_pi,6)*pow(mrho,2) - 2*pow(ma1,6)*(2*pow(m_pi,2) + pow(mrho,2) - s) -
+                        2*pow(m_pi,2)*pow(mrho,4)*s + pow(m_pi,4)*(3*pow(mrho,4) + 2*pow(mrho,2)*s) +
+                        pow(ma1,4)*(4*pow(m_pi,4) + pow(mrho,4) + pow(m_pi,2)*(8*pow(mrho,2) - 4*s) - 4*pow(mrho,2)*s + 2*pow(s,2)) -
+                        2*pow(ma1,2)*(pow(mrho,2)*s*(-pow(mrho,2) + s) + pow(m_pi,4)*(3*pow(mrho,2) + s) + pow(m_pi,2)*(2*pow(mrho,4) - 3*pow(mrho,2)*s)))))
+                  /((pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))*(pow(ma1,2) - t2)) +
+                (8*pow(-2 + delta,2)*pow(m_pi,2)*(4*pow(m_pi,2) - pow(mrho,2)))/
+                 ((pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))*(pow(m_pi,2) - t2)) -
+                (8*pow(-2 + delta,2)*pow(m_pi,2)*t2)/(pow(mrho,2)*pow(pow(m_pi,2) - s,2)) -
+                (8*pow(-2 + delta,2)*pow(m_pi,2)*t2)/(pow(mrho,2)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) -
+                (8*(-2 + delta)*(-8*C4*pow(mrho,4) + pow(m_pi,2)*(2 + delta - 8*C4*pow(mrho,2)) - (2 + 3*delta)*s + pow(mrho,2)*(-2 + 3*delta + 16*C4*s))*t2)/
+                 (pow(mrho,2)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) -
+                (4*(-2 + delta)*(eta1 - eta2)*(pow(ma1,2) - s)*(eta2*(pow(m_pi,2) + pow(mrho,2) - 2*s)*(pow(m_pi,2) + s) +
+                     eta1*(-2*pow(m_pi,4) + pow(mrho,4) - 3*pow(mrho,2)*s + 2*pow(s,2) + pow(m_pi,2)*(pow(mrho,2) + s)))*t2)/
+                 ((pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (pow(eta1 - eta2,2)*(pow(eta1,2)*(3*pow(ma1,4) + 4*pow(m_pi,4) + pow(mrho,4) + pow(m_pi,2)*(8*pow(mrho,2) - 4*s) -
+                        4*pow(ma1,2)*(2*pow(m_pi,2) + pow(mrho,2) - s) - 4*pow(mrho,2)*s + 2*pow(s,2)) +
+                     pow(eta2,2)*(3*pow(ma1,4) + 4*pow(m_pi,4) + pow(mrho,4) - 2*pow(mrho,2)*s + 2*pow(s,2) - 4*pow(m_pi,2)*(pow(mrho,2) + s) +
+                        4*pow(ma1,2)*(-2*pow(m_pi,2) + pow(mrho,2) + s)) -
+                     2*eta1*eta2*(3*pow(ma1,4) + 4*pow(m_pi,4) - pow(mrho,4) + 2*pow(m_pi,2)*(pow(mrho,2) - 2*s) - 2*pow(mrho,2)*s + 2*pow(s,2) +
+                        pow(ma1,2)*(-8*pow(m_pi,2) + 4*s)))*t2)/(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s)) +
+                (8*(pow(delta,2)*(8*pow(m_pi,4) + 3*pow(mrho,4) + 4*pow(m_pi,2)*(3*pow(mrho,2) - 2*s) - 6*pow(mrho,2)*s + 2*pow(s,2)) +
+                     4*pow(mrho,4)*(3 + 12*C4*(2*pow(m_pi,2) - s) + 8*pow(C4,2)*pow(-2*pow(m_pi,2) + s,2)) -
+                     4*delta*pow(mrho,2)*(16*C4*pow(m_pi,4) + 2*pow(m_pi,2)*(3 + 6*C4*pow(mrho,2) - 8*C4*s) + pow(mrho,2)*(3 - 6*C4*s) + s*(-3 + 4*C4*s)))*t2)/
+                 (pow(mrho,4)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (8*(-2 + delta)*(pow(m_pi,4)*(-2 + 3*delta - 8*C4*pow(mrho,2)) + (pow(mrho,2) - s)*((-2 + 3*delta)*s + pow(mrho,2)*(-2 + delta - 8*C4*s)) +
+                     4*pow(m_pi,2)*(2*C4*pow(mrho,4) + delta*s - pow(mrho,2)*(-1 + delta + 4*C4*s)))*t2)/
+                 (pow(mrho,2)*(pow(m_pi,2) - s)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (4*(-2 + delta)*(eta1 - eta2)*(pow(ma1,2) - s)*(eta2*(pow(m_pi,2) + s)*(pow(m_pi,4) - pow(m_pi,2)*(pow(mrho,2) - 2*s) + (pow(mrho,2) - s)*s) +
+                     eta1*(-4*pow(m_pi,6) + pow(pow(mrho,2) - s,2)*s + pow(m_pi,4)*(3*pow(mrho,2) + s) -
+                        pow(m_pi,2)*(pow(mrho,4) - pow(mrho,2)*s + 2*pow(s,2))))*t2)/
+                 ((pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*(pow(m_pi,2) - s)*
+                   (pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (pow(eta1 - eta2,2)*(-2*eta1*eta2*(pow(m_pi,8) - pow(mrho,4)*pow(s,2) + pow(s,4) -
+                        pow(m_pi,4)*(pow(mrho,4) + 2*pow(mrho,2)*s - 4*pow(s,2)) + 2*pow(m_pi,2)*s*(pow(mrho,4) + pow(mrho,2)*s - 2*pow(s,2))) +
+                     pow(eta2,2)*(pow(m_pi,8) - 2*pow(m_pi,6)*pow(mrho,2) + pow(s,2)*pow(pow(mrho,2) + s,2) + pow(m_pi,4)*pow(pow(mrho,2) + 2*s,2) -
+                        2*pow(m_pi,2)*s*(pow(mrho,4) + 2*pow(mrho,2)*s + 2*pow(s,2))) +
+                     pow(eta1,2)*(pow(m_pi,8) - 2*pow(m_pi,6)*pow(mrho,2) - 4*pow(m_pi,2)*pow(pow(mrho,2) - s,2)*s + pow(pow(mrho,2) - s,2)*pow(s,2) +
+                        pow(m_pi,4)*(3*pow(mrho,4) - 6*pow(mrho,2)*s + 4*pow(s,2))))*t2)/
+                 ((pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) -
+                (2*pow(eta1 - eta2,2)*(pow(ma1,2) - s)*(pow(eta1,2)*(pow(ma1,4)*s + pow(m_pi,4)*(-3*pow(mrho,2) + 2*s) +
+                        s*(2*pow(mrho,4) - 3*pow(mrho,2)*s + pow(s,2)) - 2*pow(m_pi,2)*(pow(mrho,4) - 4*pow(mrho,2)*s + 2*pow(s,2)) +
+                        pow(ma1,2)*(2*pow(m_pi,2)*(pow(mrho,2) - 2*s) + 3*s*(-pow(mrho,2) + s))) -
+                     2*eta1*eta2*(pow(ma1,4)*s + s*(2*pow(m_pi,4) + 4*pow(m_pi,2)*(pow(mrho,2) - s) + s*(-2*pow(mrho,2) + s)) +
+                        pow(ma1,2)*(pow(m_pi,2)*(pow(mrho,2) - 4*s) + s*(-2*pow(mrho,2) + 3*s))) +
+                     pow(eta2,2)*(-4*pow(m_pi,2)*s*(pow(ma1,2) + pow(mrho,2) + s) + pow(m_pi,4)*(pow(mrho,2) + 2*s) +
+                        s*(pow(ma1,4) + s*(pow(mrho,2) + s) + pow(ma1,2)*(pow(mrho,2) + 3*s))))*t2)/
+                 ((pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (4*(eta1 - eta2)*(pow(ma1,2) - s)*(eta1*(-4*pow(m_pi,4)*(6*C4*pow(mrho,4) + 2*delta*s + pow(mrho,2)*(1 - 2*delta - 8*C4*s)) +
+                        2*pow(m_pi,2)*(4*delta*pow(s,2) + pow(mrho,2)*s*(6 - 7*delta - 16*C4*s) + 2*pow(mrho,4)*(-2 + delta + 8*C4*s)) -
+                        (pow(mrho,2) - s)*s*(-2*delta*s + pow(mrho,2)*(-6 + 3*delta + 8*C4*s))) +
+                     eta2*(delta*(2*pow(m_pi,4)*(pow(mrho,2) + 4*s) + pow(m_pi,2)*(2*pow(mrho,4) + pow(mrho,2)*s - 8*pow(s,2)) +
+                           s*(-2*pow(mrho,4) - pow(mrho,2)*s + 2*pow(s,2))) -
+                        2*pow(mrho,2)*(4*C4*pow(m_pi,4)*(pow(mrho,2) + 4*s) + pow(m_pi,2)*(s*(5 - 16*C4*s) + pow(mrho,2)*(2 - 8*C4*s)) +
+                           s*(s*(-3 + 4*C4*s) + pow(mrho,2)*(-2 + 4*C4*s)))))*t2)/
+                 (pow(mrho,2)*(pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*
+                   (pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (8*(eta1 - eta2)*(delta*(eta1*(4*pow(m_pi,6) + pow(m_pi,4)*(7*pow(mrho,2) - 8*s) + pow(ma1,4)*(pow(m_pi,2) - s) -
+                           pow(ma1,2)*(2*pow(m_pi,2) + pow(mrho,2) - 2*s)*(2*pow(m_pi,2) - s) + pow(m_pi,2)*s*(-8*pow(mrho,2) + 5*s) +
+                           s*(pow(mrho,4) + pow(mrho,2)*s - pow(s,2))) +
+                        eta2*(-4*pow(m_pi,6) - pow(m_pi,4)*(pow(mrho,2) - 8*s) + pow(ma1,4)*(-pow(m_pi,2) + s) +
+                           pow(m_pi,2)*(2*pow(mrho,4) - 5*pow(s,2)) + s*(-2*pow(mrho,4) + pow(mrho,2)*s + pow(s,2)) +
+                           pow(ma1,2)*(4*pow(m_pi,4) - 6*pow(m_pi,2)*s + s*(pow(mrho,2) + 2*s)))) -
+                     2*pow(mrho,2)*(eta1*(8*C4*pow(m_pi,6) + pow(m_pi,4)*(3 + 8*C4*(pow(mrho,2) - 2*s)) + 2*C4*pow(ma1,4)*(pow(m_pi,2) - s) +
+                           2*pow(m_pi,2)*s*(-1 - 6*C4*pow(mrho,2) + 5*C4*s) -
+                           pow(ma1,2)*(8*C4*pow(m_pi,4) + pow(m_pi,2)*(1 + 2*C4*(pow(mrho,2) - 6*s)) + 2*C4*s*(-pow(mrho,2) + 2*s)) +
+                           s*(-(s*(1 + 2*C4*s)) + pow(mrho,2)*(1 + 4*C4*s))) +
+                        eta2*(2*C4*pow(ma1,4)*(-pow(m_pi,2) + s) - (pow(m_pi,2) - s)*
+                            (8*C4*pow(m_pi,4) - 2*pow(mrho,2) + s + 2*C4*pow(s,2) + pow(m_pi,2)*(3 - 4*C4*(pow(mrho,2) + 2*s))) +
+                           pow(ma1,2)*(8*C4*pow(m_pi,4) + 2*C4*s*(pow(mrho,2) + 2*s) + pow(m_pi,2)*(1 - 2*C4*(pow(mrho,2) + 6*s))))))*t2)/
+                 (pow(mrho,2)*(pow(m_pi,2) - s)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (8*(-2 + delta)*(delta - 4*C4*pow(mrho,2))*pow(t2,2))/
+                 (pow(mrho,2)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) -
+                (16*(-2 + delta)*(delta - 4*C4*pow(mrho,2))*s*pow(t2,2))/
+                 (pow(mrho,2)*(pow(m_pi,2) - s)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (pow(eta1 - eta2,2)*(pow(eta1,2)*(pow(mrho,2) - s) + 2*eta1*eta2*s - pow(eta2,2)*s)*
+                   (pow(m_pi,4) - pow(m_pi,2)*(pow(mrho,2) - 2*s) + (pow(mrho,2) - s)*s)*pow(t2,2))/
+                 ((pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) -
+                (2*(-2 + delta)*(eta1 - eta2)*(pow(ma1,2) - s)*(-(eta1*(pow(m_pi,2) + 2*pow(mrho,2) - 3*s)) - eta2*(pow(m_pi,2) + s))*pow(t2,2))/
+                 ((pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (2*(-2 + delta)*(eta1 - eta2)*(pow(ma1,2) - s)*(pow(m_pi,2) + s)*(-2*eta2*s + eta1*(pow(m_pi,2) - pow(mrho,2) + s))*pow(t2,2))/
+                 ((pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*(pow(m_pi,2) - s)*
+                   (pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (pow(eta1 - eta2,3)*(eta1*(pow(ma1,2) - 2*pow(m_pi,2) - pow(mrho,2) + s) - eta2*(pow(ma1,2) - 2*pow(m_pi,2) + pow(mrho,2) + s))*
+                   pow(t2,2))/(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s)) -
+                (8*(delta - 4*C4*pow(mrho,2))*(delta*(4*pow(m_pi,2) + 3*pow(mrho,2) - 2*s) - 2*pow(mrho,2)*(3 + 8*C4*pow(m_pi,2) - 4*C4*s))*pow(t2,2))/
+                 (pow(mrho,4)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) -
+                (pow(eta1 - eta2,2)*(pow(ma1,2) - s)*(pow(eta2,2)*s*(pow(ma1,2) - 4*pow(m_pi,2) + pow(mrho,2) + 3*s) +
+                     pow(eta1,2)*(2*pow(m_pi,2)*(pow(mrho,2) - 2*s) + s*(pow(ma1,2) - 3*pow(mrho,2) + 3*s)) -
+                     2*eta1*eta2*(pow(m_pi,2)*(pow(mrho,2) - 4*s) + s*(pow(ma1,2) - 2*pow(mrho,2) + 3*s)))*pow(t2,2))/
+                 ((pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) -
+                (2*(eta1 - eta2)*(pow(ma1,2) - s)*(eta1*(4*delta*pow(s,2) - 2*pow(mrho,2)*s*(-2 + 3*delta + 8*C4*s) + pow(mrho,4)*(-2 + delta + 16*C4*s) -
+                        2*pow(m_pi,2)*(8*C4*pow(mrho,4) + 4*delta*s + pow(mrho,2)*(2 - 3*delta - 16*C4*s))) +
+                     eta2*(pow(m_pi,2)*(8*delta*s + pow(mrho,2)*(-2 + delta - 32*C4*s)) + s*(-4*delta*s + pow(mrho,2)*(-2 + delta + 16*C4*s))))*pow(t2,2))/
+                 (pow(mrho,2)*(pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*
+                   (pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (4*(eta1 - eta2)*(delta*(eta1*(pow(ma1,2)*(pow(m_pi,2) - s) - (2*pow(m_pi,2) + pow(mrho,2) - 2*s)*(2*pow(m_pi,2) - s)) +
+                        eta2*(4*pow(m_pi,4) - 6*pow(m_pi,2)*s + pow(ma1,2)*(-pow(m_pi,2) + s) + s*(pow(mrho,2) + 2*s))) +
+                     2*pow(mrho,2)*(eta1*(8*C4*pow(m_pi,4) + 2*C4*s*(pow(ma1,2) - pow(mrho,2) + 2*s) +
+                           pow(m_pi,2)*(1 - 2*C4*(pow(ma1,2) - pow(mrho,2) + 6*s))) -
+                        eta2*(8*C4*pow(m_pi,4) + 2*C4*s*(pow(ma1,2) + pow(mrho,2) + 2*s) - pow(m_pi,2)*(-1 + 2*C4*(pow(ma1,2) + pow(mrho,2) + 6*s)))))*
+                   pow(t2,2))/(pow(mrho,2)*(pow(m_pi,2) - s)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (pow(eta1 - eta2,4)*pow(t2,3))/(3.*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (8*pow(eta1 - eta2,2)*(delta - 4*C4*pow(mrho,2))*pow(t2,3))/
+                 (3.*pow(mrho,2)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (16*pow(delta - 4*C4*pow(mrho,2),2)*pow(t2,3))/
+                 (3.*pow(mrho,4)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) -
+                (4*(-2 + delta)*eta1*(eta1 - eta2)*(pow(ma1,2) - s)*pow(t2,3))/
+                 (3.*(pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) -
+                (2*pow(eta1 - eta2,4)*(pow(ma1,2) - s)*s*pow(t2,3))/
+                 (3.*(pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (2*pow(eta1 - eta2,2)*s*(-2*eta1*eta2*s + pow(eta2,2)*s + pow(eta1,2)*(-pow(mrho,2) + s))*pow(t2,3))/
+                 (3.*(pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (4*(eta1 - eta2)*(pow(ma1,2) - s)*(2*eta2*(delta - 4*C4*pow(mrho,2))*s + eta1*(-2*delta*s + pow(mrho,2)*(-2 + delta + 8*C4*s)))*pow(t2,3))/
+                 (3.*pow(mrho,2)*(pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*
+                   (pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) -
+                (pow(eta1 - eta2,2)*(-2*eta1*eta2*(pow(ma1,8) + pow(m_pi,8) - pow(m_pi,4)*pow(mrho,4) -
+                        2*pow(ma1,2)*pow(m_pi,2)*(pow(m_pi,2) - pow(mrho,2))*(pow(mrho,2) + s) + pow(ma1,6)*(-4*pow(m_pi,2) + 2*s) +
+                        pow(ma1,4)*(4*pow(m_pi,4) - pow(mrho,4) + 2*pow(m_pi,2)*(pow(mrho,2) - 2*s) - 2*pow(mrho,2)*s + 2*pow(s,2))) +
+                     pow(eta2,2)*(pow(ma1,8) + pow(m_pi,4)*pow(pow(m_pi,2) - pow(mrho,2),2) + 2*pow(ma1,6)*(-2*pow(m_pi,2) + pow(mrho,2) + s) +
+                        2*pow(ma1,2)*pow(m_pi,2)*(-pow(mrho,4) + pow(m_pi,2)*(2*pow(mrho,2) - s) + pow(mrho,2)*s) +
+                        pow(ma1,4)*(4*pow(m_pi,4) + pow(mrho,4) - 2*pow(mrho,2)*s + 2*pow(s,2) - 4*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                     pow(eta1,2)*(pow(ma1,8) + pow(m_pi,8) - 2*pow(m_pi,6)*pow(mrho,2) - 2*pow(ma1,6)*(2*pow(m_pi,2) + pow(mrho,2) - s) -
+                        2*pow(m_pi,2)*pow(mrho,4)*s + pow(m_pi,4)*(3*pow(mrho,4) + 2*pow(mrho,2)*s) +
+                        pow(ma1,4)*(4*pow(m_pi,4) + pow(mrho,4) + pow(m_pi,2)*(8*pow(mrho,2) - 4*s) - 4*pow(mrho,2)*s + 2*pow(s,2)) -
+                        2*pow(ma1,2)*(pow(mrho,2)*s*(-pow(mrho,2) + s) + pow(m_pi,4)*(3*pow(mrho,2) + s) + pow(m_pi,2)*(2*pow(mrho,4) - 3*pow(mrho,2)*s)))))
+                  /((pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))*(pow(ma1,2) - t1)) -
+                (8*pow(-2 + delta,2)*pow(m_pi,2)*(4*pow(m_pi,2) - pow(mrho,2)))/
+                 ((pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))*(pow(m_pi,2) - t1)) +
+                (8*pow(-2 + delta,2)*pow(m_pi,2)*t1)/(pow(mrho,2)*pow(pow(m_pi,2) - s,2)) +
+                (8*pow(-2 + delta,2)*pow(m_pi,2)*t1)/(pow(mrho,2)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (8*(-2 + delta)*(-8*C4*pow(mrho,4) + pow(m_pi,2)*(2 + delta - 8*C4*pow(mrho,2)) - (2 + 3*delta)*s + pow(mrho,2)*(-2 + 3*delta + 16*C4*s))*t1)/
+                 (pow(mrho,2)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (4*(-2 + delta)*(eta1 - eta2)*(pow(ma1,2) - s)*(eta2*(pow(m_pi,2) + pow(mrho,2) - 2*s)*(pow(m_pi,2) + s) +
+                     eta1*(-2*pow(m_pi,4) + pow(mrho,4) - 3*pow(mrho,2)*s + 2*pow(s,2) + pow(m_pi,2)*(pow(mrho,2) + s)))*t1)/
+                 ((pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) -
+                (pow(eta1 - eta2,2)*(pow(eta1,2)*(3*pow(ma1,4) + 4*pow(m_pi,4) + pow(mrho,4) + pow(m_pi,2)*(8*pow(mrho,2) - 4*s) -
+                        4*pow(ma1,2)*(2*pow(m_pi,2) + pow(mrho,2) - s) - 4*pow(mrho,2)*s + 2*pow(s,2)) +
+                     pow(eta2,2)*(3*pow(ma1,4) + 4*pow(m_pi,4) + pow(mrho,4) - 2*pow(mrho,2)*s + 2*pow(s,2) - 4*pow(m_pi,2)*(pow(mrho,2) + s) +
+                        4*pow(ma1,2)*(-2*pow(m_pi,2) + pow(mrho,2) + s)) -
+                     2*eta1*eta2*(3*pow(ma1,4) + 4*pow(m_pi,4) - pow(mrho,4) + 2*pow(m_pi,2)*(pow(mrho,2) - 2*s) - 2*pow(mrho,2)*s + 2*pow(s,2) +
+                        pow(ma1,2)*(-8*pow(m_pi,2) + 4*s)))*t1)/(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s)) -
+                (8*(pow(delta,2)*(8*pow(m_pi,4) + 3*pow(mrho,4) + 4*pow(m_pi,2)*(3*pow(mrho,2) - 2*s) - 6*pow(mrho,2)*s + 2*pow(s,2)) +
+                     4*pow(mrho,4)*(3 + 12*C4*(2*pow(m_pi,2) - s) + 8*pow(C4,2)*pow(-2*pow(m_pi,2) + s,2)) -
+                     4*delta*pow(mrho,2)*(16*C4*pow(m_pi,4) + 2*pow(m_pi,2)*(3 + 6*C4*pow(mrho,2) - 8*C4*s) + pow(mrho,2)*(3 - 6*C4*s) + s*(-3 + 4*C4*s)))*t1)/
+                 (pow(mrho,4)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) -
+                (8*(-2 + delta)*(pow(m_pi,4)*(-2 + 3*delta - 8*C4*pow(mrho,2)) + (pow(mrho,2) - s)*((-2 + 3*delta)*s + pow(mrho,2)*(-2 + delta - 8*C4*s)) +
+                     4*pow(m_pi,2)*(2*C4*pow(mrho,4) + delta*s - pow(mrho,2)*(-1 + delta + 4*C4*s)))*t1)/
+                 (pow(mrho,2)*(pow(m_pi,2) - s)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) -
+                (4*(-2 + delta)*(eta1 - eta2)*(pow(ma1,2) - s)*(eta2*(pow(m_pi,2) + s)*(pow(m_pi,4) - pow(m_pi,2)*(pow(mrho,2) - 2*s) + (pow(mrho,2) - s)*s) +
+                     eta1*(-4*pow(m_pi,6) + pow(pow(mrho,2) - s,2)*s + pow(m_pi,4)*(3*pow(mrho,2) + s) -
+                        pow(m_pi,2)*(pow(mrho,4) - pow(mrho,2)*s + 2*pow(s,2))))*t1)/
+                 ((pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*(pow(m_pi,2) - s)*
+                   (pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) -
+                (pow(eta1 - eta2,2)*(-2*eta1*eta2*(pow(m_pi,8) - pow(mrho,4)*pow(s,2) + pow(s,4) -
+                        pow(m_pi,4)*(pow(mrho,4) + 2*pow(mrho,2)*s - 4*pow(s,2)) + 2*pow(m_pi,2)*s*(pow(mrho,4) + pow(mrho,2)*s - 2*pow(s,2))) +
+                     pow(eta2,2)*(pow(m_pi,8) - 2*pow(m_pi,6)*pow(mrho,2) + pow(s,2)*pow(pow(mrho,2) + s,2) + pow(m_pi,4)*pow(pow(mrho,2) + 2*s,2) -
+                        2*pow(m_pi,2)*s*(pow(mrho,4) + 2*pow(mrho,2)*s + 2*pow(s,2))) +
+                     pow(eta1,2)*(pow(m_pi,8) - 2*pow(m_pi,6)*pow(mrho,2) - 4*pow(m_pi,2)*pow(pow(mrho,2) - s,2)*s + pow(pow(mrho,2) - s,2)*pow(s,2) +
+                        pow(m_pi,4)*(3*pow(mrho,4) - 6*pow(mrho,2)*s + 4*pow(s,2))))*t1)/
+                 ((pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (2*pow(eta1 - eta2,2)*(pow(ma1,2) - s)*(pow(eta1,2)*(pow(ma1,4)*s + pow(m_pi,4)*(-3*pow(mrho,2) + 2*s) +
+                        s*(2*pow(mrho,4) - 3*pow(mrho,2)*s + pow(s,2)) - 2*pow(m_pi,2)*(pow(mrho,4) - 4*pow(mrho,2)*s + 2*pow(s,2)) +
+                        pow(ma1,2)*(2*pow(m_pi,2)*(pow(mrho,2) - 2*s) + 3*s*(-pow(mrho,2) + s))) -
+                     2*eta1*eta2*(pow(ma1,4)*s + s*(2*pow(m_pi,4) + 4*pow(m_pi,2)*(pow(mrho,2) - s) + s*(-2*pow(mrho,2) + s)) +
+                        pow(ma1,2)*(pow(m_pi,2)*(pow(mrho,2) - 4*s) + s*(-2*pow(mrho,2) + 3*s))) +
+                     pow(eta2,2)*(-4*pow(m_pi,2)*s*(pow(ma1,2) + pow(mrho,2) + s) + pow(m_pi,4)*(pow(mrho,2) + 2*s) +
+                        s*(pow(ma1,4) + s*(pow(mrho,2) + s) + pow(ma1,2)*(pow(mrho,2) + 3*s))))*t1)/
+                 ((pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (4*(eta1 - eta2)*(pow(ma1,2) - s)*(eta1*(4*pow(m_pi,4)*(6*C4*pow(mrho,4) + 2*delta*s + pow(mrho,2)*(1 - 2*delta - 8*C4*s)) -
+                        2*pow(m_pi,2)*(4*delta*pow(s,2) + pow(mrho,2)*s*(6 - 7*delta - 16*C4*s) + 2*pow(mrho,4)*(-2 + delta + 8*C4*s)) +
+                        (pow(mrho,2) - s)*s*(-2*delta*s + pow(mrho,2)*(-6 + 3*delta + 8*C4*s))) +
+                     eta2*(-(delta*(2*pow(m_pi,4)*(pow(mrho,2) + 4*s) + pow(m_pi,2)*(2*pow(mrho,4) + pow(mrho,2)*s - 8*pow(s,2)) +
+                             s*(-2*pow(mrho,4) - pow(mrho,2)*s + 2*pow(s,2)))) +
+                        2*pow(mrho,2)*(4*C4*pow(m_pi,4)*(pow(mrho,2) + 4*s) + pow(m_pi,2)*(s*(5 - 16*C4*s) + pow(mrho,2)*(2 - 8*C4*s)) +
+                           s*(s*(-3 + 4*C4*s) + pow(mrho,2)*(-2 + 4*C4*s)))))*t1)/
+                 (pow(mrho,2)*(pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*
+                   (pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) -
+                (8*(eta1 - eta2)*(delta*(eta1*(4*pow(m_pi,6) + pow(m_pi,4)*(7*pow(mrho,2) - 8*s) + pow(ma1,4)*(pow(m_pi,2) - s) -
+                           pow(ma1,2)*(2*pow(m_pi,2) + pow(mrho,2) - 2*s)*(2*pow(m_pi,2) - s) + pow(m_pi,2)*s*(-8*pow(mrho,2) + 5*s) +
+                           s*(pow(mrho,4) + pow(mrho,2)*s - pow(s,2))) +
+                        eta2*(-4*pow(m_pi,6) - pow(m_pi,4)*(pow(mrho,2) - 8*s) + pow(ma1,4)*(-pow(m_pi,2) + s) +
+                           pow(m_pi,2)*(2*pow(mrho,4) - 5*pow(s,2)) + s*(-2*pow(mrho,4) + pow(mrho,2)*s + pow(s,2)) +
+                           pow(ma1,2)*(4*pow(m_pi,4) - 6*pow(m_pi,2)*s + s*(pow(mrho,2) + 2*s)))) -
+                     2*pow(mrho,2)*(eta1*(8*C4*pow(m_pi,6) + pow(m_pi,4)*(3 + 8*C4*(pow(mrho,2) - 2*s)) + 2*C4*pow(ma1,4)*(pow(m_pi,2) - s) +
+                           2*pow(m_pi,2)*s*(-1 - 6*C4*pow(mrho,2) + 5*C4*s) -
+                           pow(ma1,2)*(8*C4*pow(m_pi,4) + pow(m_pi,2)*(1 + 2*C4*(pow(mrho,2) - 6*s)) + 2*C4*s*(-pow(mrho,2) + 2*s)) +
+                           s*(-(s*(1 + 2*C4*s)) + pow(mrho,2)*(1 + 4*C4*s))) +
+                        eta2*(2*C4*pow(ma1,4)*(-pow(m_pi,2) + s) - (pow(m_pi,2) - s)*
+                            (8*C4*pow(m_pi,4) - 2*pow(mrho,2) + s + 2*C4*pow(s,2) + pow(m_pi,2)*(3 - 4*C4*(pow(mrho,2) + 2*s))) +
+                           pow(ma1,2)*(8*C4*pow(m_pi,4) + 2*C4*s*(pow(mrho,2) + 2*s) + pow(m_pi,2)*(1 - 2*C4*(pow(mrho,2) + 6*s))))))*t1)/
+                 (pow(mrho,2)*(pow(m_pi,2) - s)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) -
+                (8*(-2 + delta)*(delta - 4*C4*pow(mrho,2))*pow(t1,2))/
+                 (pow(mrho,2)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (16*(-2 + delta)*(delta - 4*C4*pow(mrho,2))*s*pow(t1,2))/
+                 (pow(mrho,2)*(pow(m_pi,2) - s)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) -
+                (pow(eta1 - eta2,2)*(pow(eta1,2)*(pow(mrho,2) - s) + 2*eta1*eta2*s - pow(eta2,2)*s)*
+                   (pow(m_pi,4) - pow(m_pi,2)*(pow(mrho,2) - 2*s) + (pow(mrho,2) - s)*s)*pow(t1,2))/
+                 ((pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (2*(-2 + delta)*(eta1 - eta2)*(pow(ma1,2) - s)*(-(eta1*(pow(m_pi,2) + 2*pow(mrho,2) - 3*s)) - eta2*(pow(m_pi,2) + s))*pow(t1,2))/
+                 ((pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) -
+                (2*(-2 + delta)*(eta1 - eta2)*(pow(ma1,2) - s)*(pow(m_pi,2) + s)*(-2*eta2*s + eta1*(pow(m_pi,2) - pow(mrho,2) + s))*pow(t1,2))/
+                 ((pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*(pow(m_pi,2) - s)*
+                   (pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (pow(eta1 - eta2,3)*(-(eta1*(pow(ma1,2) - 2*pow(m_pi,2) - pow(mrho,2) + s)) + eta2*(pow(ma1,2) - 2*pow(m_pi,2) + pow(mrho,2) + s))*
+                   pow(t1,2))/(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s)) +
+                (8*(delta - 4*C4*pow(mrho,2))*(delta*(4*pow(m_pi,2) + 3*pow(mrho,2) - 2*s) - 2*pow(mrho,2)*(3 + 8*C4*pow(m_pi,2) - 4*C4*s))*pow(t1,2))/
+                 (pow(mrho,4)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (pow(eta1 - eta2,2)*(pow(ma1,2) - s)*(pow(eta2,2)*s*(pow(ma1,2) - 4*pow(m_pi,2) + pow(mrho,2) + 3*s) +
+                     pow(eta1,2)*(2*pow(m_pi,2)*(pow(mrho,2) - 2*s) + s*(pow(ma1,2) - 3*pow(mrho,2) + 3*s)) -
+                     2*eta1*eta2*(pow(m_pi,2)*(pow(mrho,2) - 4*s) + s*(pow(ma1,2) - 2*pow(mrho,2) + 3*s)))*pow(t1,2))/
+                 ((pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (2*(eta1 - eta2)*(pow(ma1,2) - s)*(eta1*(4*delta*pow(s,2) - 2*pow(mrho,2)*s*(-2 + 3*delta + 8*C4*s) + pow(mrho,4)*(-2 + delta + 16*C4*s) -
+                        2*pow(m_pi,2)*(8*C4*pow(mrho,4) + 4*delta*s + pow(mrho,2)*(2 - 3*delta - 16*C4*s))) +
+                     eta2*(pow(m_pi,2)*(8*delta*s + pow(mrho,2)*(-2 + delta - 32*C4*s)) + s*(-4*delta*s + pow(mrho,2)*(-2 + delta + 16*C4*s))))*pow(t1,2))/
+                 (pow(mrho,2)*(pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*
+                   (pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) -
+                (4*(eta1 - eta2)*(delta*(eta1*(pow(ma1,2)*(pow(m_pi,2) - s) - (2*pow(m_pi,2) + pow(mrho,2) - 2*s)*(2*pow(m_pi,2) - s)) +
+                        eta2*(4*pow(m_pi,4) - 6*pow(m_pi,2)*s + pow(ma1,2)*(-pow(m_pi,2) + s) + s*(pow(mrho,2) + 2*s))) +
+                     2*pow(mrho,2)*(eta1*(8*C4*pow(m_pi,4) + 2*C4*s*(pow(ma1,2) - pow(mrho,2) + 2*s) +
+                           pow(m_pi,2)*(1 - 2*C4*(pow(ma1,2) - pow(mrho,2) + 6*s))) -
+                        eta2*(8*C4*pow(m_pi,4) + 2*C4*s*(pow(ma1,2) + pow(mrho,2) + 2*s) - pow(m_pi,2)*(-1 + 2*C4*(pow(ma1,2) + pow(mrho,2) + 6*s)))))*
+                   pow(t1,2))/(pow(mrho,2)*(pow(m_pi,2) - s)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) -
+                (pow(eta1 - eta2,4)*pow(t1,3))/(3.*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) -
+                (8*pow(eta1 - eta2,2)*(delta - 4*C4*pow(mrho,2))*pow(t1,3))/
+                 (3.*pow(mrho,2)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) -
+                (16*pow(delta - 4*C4*pow(mrho,2),2)*pow(t1,3))/
+                 (3.*pow(mrho,4)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (4*(-2 + delta)*eta1*(eta1 - eta2)*(pow(ma1,2) - s)*pow(t1,3))/
+                 (3.*(pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (2*pow(eta1 - eta2,4)*(pow(ma1,2) - s)*s*pow(t1,3))/
+                 (3.*(pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) -
+                (2*pow(eta1 - eta2,2)*s*(-2*eta1*eta2*s + pow(eta2,2)*s + pow(eta1,2)*(-pow(mrho,2) + s))*pow(t1,3))/
+                 (3.*(pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) -
+                (4*(eta1 - eta2)*(pow(ma1,2) - s)*(2*eta2*(delta - 4*C4*pow(mrho,2))*s + eta1*(-2*delta*s + pow(mrho,2)*(-2 + delta + 8*C4*s)))*pow(t1,3))/
+                 (3.*pow(mrho,2)*(pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*
+                   (pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (2*pow(eta1 - eta2,2)*(pow(eta1,2)*(2*pow(ma1,6) - 3*pow(ma1,4)*(2*pow(m_pi,2) + pow(mrho,2) - s) + pow(mrho,2)*(pow(mrho,2) - s)*s -
+                        pow(m_pi,4)*(3*pow(mrho,2) + s) + pow(m_pi,2)*(-2*pow(mrho,4) + 3*pow(mrho,2)*s) +
+                        pow(ma1,2)*(4*pow(m_pi,4) + pow(mrho,4) + pow(m_pi,2)*(8*pow(mrho,2) - 4*s) - 4*pow(mrho,2)*s + 2*pow(s,2))) -
+                     2*eta1*eta2*(2*pow(ma1,6) - pow(m_pi,2)*(pow(m_pi,2) - pow(mrho,2))*(pow(mrho,2) + s) + pow(ma1,4)*(-6*pow(m_pi,2) + 3*s) +
+                        pow(ma1,2)*(4*pow(m_pi,4) - pow(mrho,4) + 2*pow(m_pi,2)*(pow(mrho,2) - 2*s) - 2*pow(mrho,2)*s + 2*pow(s,2))) +
+                     pow(eta2,2)*(2*pow(ma1,6) + 3*pow(ma1,4)*(-2*pow(m_pi,2) + pow(mrho,2) + s) +
+                        pow(m_pi,2)*(-pow(mrho,4) + pow(m_pi,2)*(2*pow(mrho,2) - s) + pow(mrho,2)*s) +
+                        pow(ma1,2)*(4*pow(m_pi,4) + pow(mrho,4) - 2*pow(mrho,2)*s + 2*pow(s,2) - 4*pow(m_pi,2)*(pow(mrho,2) + s))))*log(fabs(-pow(ma1,2) + t2)))
+                  /(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s)) -
+                (2*pow(eta1 - eta2,2)*(pow(ma1,2) - s)*(-2*eta1*eta2*(pow(m_pi,8) - 2*pow(m_pi,6)*pow(mrho,2) + 2*pow(ma1,2)*pow(m_pi,4)*s +
+                        pow(m_pi,2)*(pow(ma1,4)*(pow(mrho,2) - 4*s) + 4*pow(ma1,2)*(pow(mrho,2) - s)*s + pow(mrho,2)*pow(s,2)) +
+                        pow(ma1,2)*s*(pow(ma1,4) + s*(-2*pow(mrho,2) + s) + pow(ma1,2)*(-2*pow(mrho,2) + 3*s))) +
+                     pow(eta2,2)*(pow(m_pi,8) - 4*pow(ma1,2)*pow(m_pi,2)*s*(pow(ma1,2) + pow(mrho,2) + s) +
+                        pow(m_pi,4)*(pow(mrho,2)*s + pow(ma1,2)*(pow(mrho,2) + 2*s)) +
+                        pow(ma1,2)*s*(pow(ma1,4) + s*(pow(mrho,2) + s) + pow(ma1,2)*(pow(mrho,2) + 3*s))) +
+                     pow(eta1,2)*(pow(m_pi,8) + pow(ma1,2)*s*(pow(ma1,4) + 2*pow(mrho,4) - 3*pow(ma1,2)*(pow(mrho,2) - s) - 3*pow(mrho,2)*s + pow(s,2)) +
+                        pow(m_pi,4)*(2*pow(mrho,4) - 3*pow(mrho,2)*s + pow(ma1,2)*(-3*pow(mrho,2) + 2*s)) +
+                        2*pow(m_pi,2)*(pow(ma1,4)*(pow(mrho,2) - 2*s) + pow(mrho,2)*s*(-pow(mrho,2) + s) -
+                           pow(ma1,2)*(pow(mrho,4) - 4*pow(mrho,2)*s + 2*pow(s,2)))))*log(fabs(-pow(ma1,2) + t2)))/
+                 ((pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (8*(eta1 - eta2)*(delta*(eta2*(pow(m_pi,6)*pow(mrho,2)*(2*pow(m_pi,2) - s) + pow(ma1,8)*(-pow(m_pi,2) + s) +
+                           pow(ma1,6)*(5*pow(m_pi,4) - 7*pow(m_pi,2)*s + s*(pow(mrho,2) + 2*s)) +
+                           pow(ma1,4)*(-8*pow(m_pi,6) - pow(m_pi,4)*(pow(mrho,2) - 14*s) + pow(m_pi,2)*(2*pow(mrho,4) - pow(mrho,2)*s - 7*pow(s,2)) +
+                              s*(-2*pow(mrho,4) + pow(mrho,2)*s + pow(s,2))) +
+                           pow(ma1,2)*pow(m_pi,2)*(4*pow(m_pi,6) + pow(m_pi,4)*(pow(mrho,2) - 8*s) + s*(2*pow(mrho,4) + pow(mrho,2)*s - pow(s,2)) +
+                              pow(m_pi,2)*(-2*pow(mrho,4) - 3*pow(mrho,2)*s + 5*pow(s,2)))) +
+                        eta1*(pow(ma1,8)*(pow(m_pi,2) - s) + pow(ma1,6)*(-5*pow(m_pi,4) + (pow(mrho,2) - 2*s)*s + pow(m_pi,2)*(-2*pow(mrho,2) + 7*s)) +
+                           pow(m_pi,2)*pow(mrho,2)*(2*pow(m_pi,6) + pow(m_pi,4)*(4*pow(mrho,2) - 5*s) + pow(mrho,4)*s -
+                              pow(m_pi,2)*(pow(mrho,4) + 3*pow(mrho,2)*s - 2*pow(s,2))) +
+                           pow(ma1,4)*(8*pow(m_pi,6) + pow(m_pi,4)*(9*pow(mrho,2) - 14*s) + pow(m_pi,2)*s*(-9*pow(mrho,2) + 7*s) +
+                              s*(pow(mrho,4) + pow(mrho,2)*s - pow(s,2))) +
+                           pow(ma1,2)*(-4*pow(m_pi,8) + pow(mrho,4)*s*(-pow(mrho,2) + s) + pow(m_pi,6)*(-11*pow(mrho,2) + 8*s) +
+                              pow(m_pi,4)*(-3*pow(mrho,4) + 17*pow(mrho,2)*s - 5*pow(s,2)) + pow(m_pi,2)*(pow(mrho,6) - 5*pow(mrho,2)*pow(s,2) + pow(s,3))
+                              ))) - 2*pow(mrho,2)*(eta2*(pow(m_pi,8)*(1 + 2*C4*pow(mrho,2)) - 2*C4*pow(m_pi,6)*pow(mrho,2)*s +
+                           2*C4*pow(ma1,8)*(-pow(m_pi,2) + s) + pow(ma1,4)*
+                            (-16*C4*pow(m_pi,6) + pow(m_pi,4)*(-4 + 6*C4*pow(mrho,2) + 28*C4*s) +
+                              2*pow(m_pi,2)*(pow(mrho,2) + s - 3*C4*pow(mrho,2)*s - 7*C4*pow(s,2)) + s*(-2*pow(mrho,2) + s + 2*C4*pow(s,2))) +
+                           pow(ma1,6)*(10*C4*pow(m_pi,4) + 2*C4*s*(pow(mrho,2) + 2*s) + pow(m_pi,2)*(1 - 2*C4*(pow(mrho,2) + 7*s))) +
+                           pow(ma1,2)*pow(m_pi,2)*(8*C4*pow(m_pi,6) - 2*pow(m_pi,4)*(-2 + 3*C4*pow(mrho,2) + 8*C4*s) +
+                              s*(2*pow(mrho,2) + s - 2*C4*pow(s,2)) + 2*pow(m_pi,2)*(pow(mrho,2)*(-1 + 3*C4*s) + s*(-3 + 5*C4*s)))) +
+                        eta1*(pow(m_pi,8)*(-1 + 6*C4*pow(mrho,2)) + 2*C4*pow(ma1,8)*(pow(m_pi,2) - s) + pow(m_pi,2)*pow(mrho,4)*s +
+                           2*pow(m_pi,6)*pow(mrho,2)*(2 - 5*C4*s) - pow(ma1,6)*
+                            (10*C4*pow(m_pi,4) + pow(m_pi,2)*(1 + 2*C4*(pow(mrho,2) - 7*s)) + 2*C4*s*(-pow(mrho,2) + 2*s)) -
+                           pow(m_pi,4)*pow(mrho,2)*(pow(mrho,2) + s*(3 - 4*C4*s)) +
+                           pow(ma1,4)*(16*C4*pow(m_pi,6) + 2*pow(m_pi,4)*(2 + 5*C4*pow(mrho,2) - 14*C4*s) + 2*pow(m_pi,2)*s*(-1 - 7*C4*pow(mrho,2) + 7*C4*s) +
+                              s*(-(s*(1 + 2*C4*s)) + pow(mrho,2)*(1 + 4*C4*s))) -
+                           pow(ma1,2)*(8*C4*pow(m_pi,8) + pow(mrho,2)*(pow(mrho,2) - s)*s + 2*pow(m_pi,6)*(2 + 7*C4*pow(mrho,2) - 8*C4*s) +
+                              pow(m_pi,2)*(-pow(mrho,4) + pow(s,2) + 8*C4*pow(mrho,2)*pow(s,2) - 2*C4*pow(s,3)) +
+                              pow(m_pi,4)*(pow(mrho,2)*(3 - 22*C4*s) + 2*s*(-3 + 5*C4*s))))))*log(fabs(-pow(ma1,2) + t2)))/
+                 ((pow(ma1,2) - pow(m_pi,2))*pow(mrho,2)*(pow(m_pi,2) - s)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (16*pow(-2 + delta,2)*pow(m_pi,2)*log(fabs(-pow(m_pi,2) + t2)))/(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s)) -
+                (8*pow(-2 + delta,2)*(3*pow(m_pi,4) - 4*pow(m_pi,2)*(pow(mrho,2) - s) + pow(pow(mrho,2) - s,2))*log(fabs(-pow(m_pi,2) + t2)))/
+                 ((pow(m_pi,2) - s)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (8*(-2 + delta)*(eta1 - eta2)*pow(m_pi,2)*(2*eta1*pow(m_pi,2) - 2*eta2*pow(m_pi,2) - eta1*pow(mrho,2))*(pow(m_pi,2) - s)*
+                   log(fabs(-pow(m_pi,2) + t2)))/((pow(ma1,2) - pow(m_pi,2))*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (8*(-2 + delta)*(eta1 - eta2)*pow(m_pi,2)*(pow(ma1,2) - s)*(pow(m_pi,2) - s)*
+                   (-(eta2*(pow(m_pi,2) + s)) + eta1*(pow(m_pi,2) - pow(mrho,2) + s))*log(fabs(-pow(m_pi,2) + t2)))/
+                 ((pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (8*(-2 + delta)*(-(delta*(4*pow(m_pi,2) - pow(mrho,2))*(pow(m_pi,2) + pow(mrho,2) - s)) +
+                     2*pow(mrho,2)*(8*C4*pow(m_pi,4) - pow(mrho,2) + s + pow(m_pi,2)*(3 - 8*C4*s)))*log(fabs(-pow(m_pi,2) + t2)))/
+                 (pow(mrho,2)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) -
+                (2*pow(eta1 - eta2,2)*(pow(eta1,2)*(2*pow(ma1,6) - 3*pow(ma1,4)*(2*pow(m_pi,2) + pow(mrho,2) - s) + pow(mrho,2)*(pow(mrho,2) - s)*s -
+                        pow(m_pi,4)*(3*pow(mrho,2) + s) + pow(m_pi,2)*(-2*pow(mrho,4) + 3*pow(mrho,2)*s) +
+                        pow(ma1,2)*(4*pow(m_pi,4) + pow(mrho,4) + pow(m_pi,2)*(8*pow(mrho,2) - 4*s) - 4*pow(mrho,2)*s + 2*pow(s,2))) -
+                     2*eta1*eta2*(2*pow(ma1,6) - pow(m_pi,2)*(pow(m_pi,2) - pow(mrho,2))*(pow(mrho,2) + s) + pow(ma1,4)*(-6*pow(m_pi,2) + 3*s) +
+                        pow(ma1,2)*(4*pow(m_pi,4) - pow(mrho,4) + 2*pow(m_pi,2)*(pow(mrho,2) - 2*s) - 2*pow(mrho,2)*s + 2*pow(s,2))) +
+                     pow(eta2,2)*(2*pow(ma1,6) + 3*pow(ma1,4)*(-2*pow(m_pi,2) + pow(mrho,2) + s) +
+                        pow(m_pi,2)*(-pow(mrho,4) + pow(m_pi,2)*(2*pow(mrho,2) - s) + pow(mrho,2)*s) +
+                        pow(ma1,2)*(4*pow(m_pi,4) + pow(mrho,4) - 2*pow(mrho,2)*s + 2*pow(s,2) - 4*pow(m_pi,2)*(pow(mrho,2) + s))))*log(fabs(-pow(ma1,2) + t1)))
+                  /(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s)) +
+                (2*pow(eta1 - eta2,2)*(pow(ma1,2) - s)*(-2*eta1*eta2*(pow(m_pi,8) - 2*pow(m_pi,6)*pow(mrho,2) + 2*pow(ma1,2)*pow(m_pi,4)*s +
+                        pow(m_pi,2)*(pow(ma1,4)*(pow(mrho,2) - 4*s) + 4*pow(ma1,2)*(pow(mrho,2) - s)*s + pow(mrho,2)*pow(s,2)) +
+                        pow(ma1,2)*s*(pow(ma1,4) + s*(-2*pow(mrho,2) + s) + pow(ma1,2)*(-2*pow(mrho,2) + 3*s))) +
+                     pow(eta2,2)*(pow(m_pi,8) - 4*pow(ma1,2)*pow(m_pi,2)*s*(pow(ma1,2) + pow(mrho,2) + s) +
+                        pow(m_pi,4)*(pow(mrho,2)*s + pow(ma1,2)*(pow(mrho,2) + 2*s)) +
+                        pow(ma1,2)*s*(pow(ma1,4) + s*(pow(mrho,2) + s) + pow(ma1,2)*(pow(mrho,2) + 3*s))) +
+                     pow(eta1,2)*(pow(m_pi,8) + pow(ma1,2)*s*(pow(ma1,4) + 2*pow(mrho,4) - 3*pow(ma1,2)*(pow(mrho,2) - s) - 3*pow(mrho,2)*s + pow(s,2)) +
+                        pow(m_pi,4)*(2*pow(mrho,4) - 3*pow(mrho,2)*s + pow(ma1,2)*(-3*pow(mrho,2) + 2*s)) +
+                        2*pow(m_pi,2)*(pow(ma1,4)*(pow(mrho,2) - 2*s) + pow(mrho,2)*s*(-pow(mrho,2) + s) -
+                           pow(ma1,2)*(pow(mrho,4) - 4*pow(mrho,2)*s + 2*pow(s,2)))))*log(fabs(-pow(ma1,2) + t1)))/
+                 ((pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) -
+                (8*(eta1 - eta2)*(delta*(eta2*(pow(m_pi,6)*pow(mrho,2)*(2*pow(m_pi,2) - s) + pow(ma1,8)*(-pow(m_pi,2) + s) +
+                           pow(ma1,6)*(5*pow(m_pi,4) - 7*pow(m_pi,2)*s + s*(pow(mrho,2) + 2*s)) +
+                           pow(ma1,4)*(-8*pow(m_pi,6) - pow(m_pi,4)*(pow(mrho,2) - 14*s) + pow(m_pi,2)*(2*pow(mrho,4) - pow(mrho,2)*s - 7*pow(s,2)) +
+                              s*(-2*pow(mrho,4) + pow(mrho,2)*s + pow(s,2))) +
+                           pow(ma1,2)*pow(m_pi,2)*(4*pow(m_pi,6) + pow(m_pi,4)*(pow(mrho,2) - 8*s) + s*(2*pow(mrho,4) + pow(mrho,2)*s - pow(s,2)) +
+                              pow(m_pi,2)*(-2*pow(mrho,4) - 3*pow(mrho,2)*s + 5*pow(s,2)))) +
+                        eta1*(pow(ma1,8)*(pow(m_pi,2) - s) + pow(ma1,6)*(-5*pow(m_pi,4) + (pow(mrho,2) - 2*s)*s + pow(m_pi,2)*(-2*pow(mrho,2) + 7*s)) +
+                           pow(m_pi,2)*pow(mrho,2)*(2*pow(m_pi,6) + pow(m_pi,4)*(4*pow(mrho,2) - 5*s) + pow(mrho,4)*s -
+                              pow(m_pi,2)*(pow(mrho,4) + 3*pow(mrho,2)*s - 2*pow(s,2))) +
+                           pow(ma1,4)*(8*pow(m_pi,6) + pow(m_pi,4)*(9*pow(mrho,2) - 14*s) + pow(m_pi,2)*s*(-9*pow(mrho,2) + 7*s) +
+                              s*(pow(mrho,4) + pow(mrho,2)*s - pow(s,2))) +
+                           pow(ma1,2)*(-4*pow(m_pi,8) + pow(mrho,4)*s*(-pow(mrho,2) + s) + pow(m_pi,6)*(-11*pow(mrho,2) + 8*s) +
+                              pow(m_pi,4)*(-3*pow(mrho,4) + 17*pow(mrho,2)*s - 5*pow(s,2)) + pow(m_pi,2)*(pow(mrho,6) - 5*pow(mrho,2)*pow(s,2) + pow(s,3))
+                              ))) - 2*pow(mrho,2)*(eta2*(pow(m_pi,8)*(1 + 2*C4*pow(mrho,2)) - 2*C4*pow(m_pi,6)*pow(mrho,2)*s +
+                           2*C4*pow(ma1,8)*(-pow(m_pi,2) + s) + pow(ma1,4)*
+                            (-16*C4*pow(m_pi,6) + pow(m_pi,4)*(-4 + 6*C4*pow(mrho,2) + 28*C4*s) +
+                              2*pow(m_pi,2)*(pow(mrho,2) + s - 3*C4*pow(mrho,2)*s - 7*C4*pow(s,2)) + s*(-2*pow(mrho,2) + s + 2*C4*pow(s,2))) +
+                           pow(ma1,6)*(10*C4*pow(m_pi,4) + 2*C4*s*(pow(mrho,2) + 2*s) + pow(m_pi,2)*(1 - 2*C4*(pow(mrho,2) + 7*s))) +
+                           pow(ma1,2)*pow(m_pi,2)*(8*C4*pow(m_pi,6) - 2*pow(m_pi,4)*(-2 + 3*C4*pow(mrho,2) + 8*C4*s) +
+                              s*(2*pow(mrho,2) + s - 2*C4*pow(s,2)) + 2*pow(m_pi,2)*(pow(mrho,2)*(-1 + 3*C4*s) + s*(-3 + 5*C4*s)))) +
+                        eta1*(pow(m_pi,8)*(-1 + 6*C4*pow(mrho,2)) + 2*C4*pow(ma1,8)*(pow(m_pi,2) - s) + pow(m_pi,2)*pow(mrho,4)*s +
+                           2*pow(m_pi,6)*pow(mrho,2)*(2 - 5*C4*s) - pow(ma1,6)*
+                            (10*C4*pow(m_pi,4) + pow(m_pi,2)*(1 + 2*C4*(pow(mrho,2) - 7*s)) + 2*C4*s*(-pow(mrho,2) + 2*s)) -
+                           pow(m_pi,4)*pow(mrho,2)*(pow(mrho,2) + s*(3 - 4*C4*s)) +
+                           pow(ma1,4)*(16*C4*pow(m_pi,6) + 2*pow(m_pi,4)*(2 + 5*C4*pow(mrho,2) - 14*C4*s) + 2*pow(m_pi,2)*s*(-1 - 7*C4*pow(mrho,2) + 7*C4*s) +
+                              s*(-(s*(1 + 2*C4*s)) + pow(mrho,2)*(1 + 4*C4*s))) -
+                           pow(ma1,2)*(8*C4*pow(m_pi,8) + pow(mrho,2)*(pow(mrho,2) - s)*s + 2*pow(m_pi,6)*(2 + 7*C4*pow(mrho,2) - 8*C4*s) +
+                              pow(m_pi,2)*(-pow(mrho,4) + pow(s,2) + 8*C4*pow(mrho,2)*pow(s,2) - 2*C4*pow(s,3)) +
+                              pow(m_pi,4)*(pow(mrho,2)*(3 - 22*C4*s) + 2*s*(-3 + 5*C4*s))))))*log(fabs(-pow(ma1,2) + t1)))/
+                 ((pow(ma1,2) - pow(m_pi,2))*pow(mrho,2)*(pow(m_pi,2) - s)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) -
+                (16*pow(-2 + delta,2)*pow(m_pi,2)*log(fabs(-pow(m_pi,2) + t1)))/(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s)) +
+                (8*pow(-2 + delta,2)*(3*pow(m_pi,4) - 4*pow(m_pi,2)*(pow(mrho,2) - s) + pow(pow(mrho,2) - s,2))*log(fabs(-pow(m_pi,2) + t1)))/
+                 ((pow(m_pi,2) - s)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) -
+                (8*(-2 + delta)*(eta1 - eta2)*pow(m_pi,2)*(2*eta1*pow(m_pi,2) - 2*eta2*pow(m_pi,2) - eta1*pow(mrho,2))*(pow(m_pi,2) - s)*
+                   log(fabs(-pow(m_pi,2) + t1)))/((pow(ma1,2) - pow(m_pi,2))*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) -
+                (8*(-2 + delta)*(eta1 - eta2)*pow(m_pi,2)*(pow(ma1,2) - s)*(pow(m_pi,2) - s)*
+                   (-(eta2*(pow(m_pi,2) + s)) + eta1*(pow(m_pi,2) - pow(mrho,2) + s))*log(fabs(-pow(m_pi,2) + t1)))/
+                 ((pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+                (8*(-2 + delta)*(delta*(4*pow(m_pi,2) - pow(mrho,2))*(pow(m_pi,2) + pow(mrho,2) - s) -
+                     2*pow(mrho,2)*(8*C4*pow(m_pi,4) - pow(mrho,2) + s + pow(m_pi,2)*(3 - 8*C4*s)))*log(fabs(-pow(m_pi,2) + t1)))/
+                 (pow(mrho,2)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s)))))/(512.*Pi);
+
           process_list.push_back(make_unique<CollisionBranch>(
               *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
           break;
@@ -588,8 +970,17 @@ float ScatterActionPhoton::diff_cross_section(float t, float m3) const {
 
   const float Const = 0.059;
   const float g_POR = 25.8;
+  const float ma1 = 1.26;
+  const float ghat = 6.4483;
+  const float eta1 = 2.3920;
+  const float eta2 = 1.9430;
+  const float delta = -0.6426;
+  const float C4 = -0.14095;
+  const float Gammaa1 = 0.4;
+  const float Pi = M_PI;
   float m_omega = ParticleType::find(pdg::omega).mass();
   float m_rho_case = m_rho;
+  float mrho = m_rho;
 
   switch (reac) {
     case ReactionType::pi_pi:
@@ -631,14 +1022,101 @@ float ScatterActionPhoton::diff_cross_section(float t, float m3) const {
       diff_xsection = diff_xsection * e;
       break;
     case ReactionType::pi_rho0:
-      diff_xsection = alpha * g_rho_2 / (12 * s * p_cm_2);
+      if (incoming_particles_[0].pdgcode().is_rho()){
+        mrho = incoming_particles_[0].effective_mass();
+      } else {
+        mrho = incoming_particles_[1].effective_mass();
+      }
+
+    /*  diff_xsection = alpha * g_rho_2 / (12 * s * p_cm_2);
       diff_xsection =
           diff_xsection *
           (2 - s * (pow_int(m2, 2) -
           4*pow_int(m_pi, 2)) / pow_int(s - m_pi_2, 2) -
            (pow_int(m2, 2) - 4 * pow_int(m_pi, 2)) / (t - m_pi_2) *
                ((s - pow_int(m2, 2) + m_pi_2) / (s - m_pi_2) +
-                m_pi_2 / (t - m_pi_2)));
+                m_pi_2 / (t - m_pi_2))); */
+
+      diff_xsection = (pow(Const,2)*pow(ghat,4)*((-8*pow(-2 + delta,2)*pow(m_pi,2))/(pow(mrho,2)*pow(pow(m_pi,2) - s,2)) -
+       (8*pow(-2 + delta,2)*pow(m_pi,2)*(pow(m_pi,4) + pow(pow(mrho,2) - t,2) - 2*pow(m_pi,2)*(pow(mrho,2) + t)))/
+        (pow(mrho,2)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))*pow(pow(m_pi,2) - t,2)) +
+       (4*(-2 + delta)*(eta1 - eta2)*(pow(ma1,2) - s)*(-(eta2*(pow(m_pi,2) + s)) + eta1*(-pow(mrho,2) + s + t))*
+          (-pow(m_pi,4) + pow(m_pi,2)*(pow(mrho,2) - 2*t) + t*(-pow(mrho,2) + 2*s + t)))/
+        ((pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))*
+          (pow(m_pi,2) - t)) - (8*(-2 + delta)*(pow(m_pi,4)*(2 - 3*delta + 8*C4*pow(mrho,2)) + pow(mrho,4)*(-2 + delta + 8*C4*t) +
+            t*((2 + 3*delta)*s + 2*delta*t) + pow(m_pi,2)*(-8*C4*pow(mrho,4) + (-2 + delta)*s - (2 + 3*delta)*t + 4*pow(mrho,2)*(1 + 4*C4*t)) -
+            pow(mrho,2)*(t*(-2 + 3*delta + 8*C4*t) + s*(-2 + delta + 16*C4*t))))/
+        (pow(mrho,2)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))*(pow(m_pi,2) - t)) +
+       (4*(-2 + delta)*(eta1 - eta2)*(pow(ma1,2) - s)*(eta2*(pow(m_pi,2) + s)*
+             (pow(m_pi,4) - pow(m_pi,2)*(pow(mrho,2) - 2*s) + s*(pow(mrho,2) - s - 2*t)) +
+            eta1*(-4*pow(m_pi,6) + s*(-pow(mrho,2) + s)*(-pow(mrho,2) + s + t) + pow(m_pi,4)*(3*pow(mrho,2) + s + t) -
+               pow(m_pi,2)*(pow(mrho,4) + 2*s*(s - t) + pow(mrho,2)*(-s + t)))))/
+        ((pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*(pow(m_pi,2) - s)*
+          (pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+       (pow(eta1 - eta2,2)*(pow(eta2,2)*(pow(m_pi,8) - 2*pow(m_pi,6)*pow(mrho,2) + pow(m_pi,4)*(pow(pow(mrho,2) + 2*s,2) - 2*s*t) +
+               pow(s,2)*(pow(pow(mrho,2) + s,2) + 2*(-pow(mrho,2) + s)*t + 2*pow(t,2)) -
+               2*pow(m_pi,2)*s*(pow(mrho,4) + pow(mrho,2)*(2*s - t) + 2*s*(s + t))) +
+            2*eta1*eta2*(-pow(m_pi,8) + pow(m_pi,4)*(pow(mrho,4) + 2*pow(mrho,2)*s + 2*s*(-2*s + t)) -
+               2*pow(m_pi,2)*s*(pow(mrho,4) + pow(mrho,2)*(s + t) - 2*s*(s + t)) + pow(s,2)*(pow(mrho,4) - pow(s,2) + 2*pow(mrho,2)*t - 2*t*(s + t)))\
+             + pow(eta1,2)*(pow(m_pi,8) - 2*pow(m_pi,6)*pow(mrho,2) + pow(m_pi,4)*(3*pow(mrho,4) + 2*s*(2*s - t) + 2*pow(mrho,2)*(-3*s + t)) -
+               2*pow(m_pi,2)*(pow(mrho,2) - s)*(-2*s*(s + t) + pow(mrho,2)*(2*s + t)) +
+               s*(-pow(mrho,2) + s)*(pow(s,2) + 2*s*t + 2*pow(t,2) - pow(mrho,2)*(s + 2*t)))))/
+        ((pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+       (pow(eta1 - eta2,2)*(-2*eta1*eta2*(pow(m_pi,8) - pow(m_pi,4)*(pow(mrho,4) + 2*(pow(mrho,2) + s)*t - 4*pow(t,2)) +
+               pow(t,2)*(-pow(mrho,4) - 2*pow(mrho,2)*s + 2*pow(s,2) + 2*s*t + pow(t,2)) +
+               2*pow(m_pi,2)*t*(pow(mrho,4) + pow(mrho,2)*(s + t) - 2*t*(s + t))) +
+            pow(eta2,2)*(pow(m_pi,8) - 2*pow(m_pi,6)*pow(mrho,2) + pow(m_pi,4)*(pow(mrho,4) + 4*pow(mrho,2)*t - 2*(s - 2*t)*t) +
+               pow(t,2)*(pow(mrho,4) + 2*pow(s,2) + 2*s*t + pow(t,2) + 2*pow(mrho,2)*(-s + t)) -
+               2*pow(m_pi,2)*t*(pow(mrho,4) - pow(mrho,2)*(s - 2*t) + 2*t*(s + t))) +
+            pow(eta1,2)*(pow(m_pi,8) - 2*pow(m_pi,6)*pow(mrho,2) + pow(m_pi,4)*(3*pow(mrho,4) + 2*pow(mrho,2)*(s - 3*t) - 2*(s - 2*t)*t) +
+               t*(-pow(mrho,2) + t)*(2*pow(s,2) + 2*s*t + pow(t,2) - pow(mrho,2)*(2*s + t)) -
+               2*pow(m_pi,2)*(-pow(mrho,2) + t)*(2*t*(s + t) - pow(mrho,2)*(s + 2*t)))))/
+        ((pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))*pow(pow(ma1,2) - t,2)) +
+       (8*(-2 + delta)*((-2 + delta)*pow(mrho,6) + pow(m_pi,6)*(-2 + 3*delta - 8*C4*pow(mrho,2)) + s*t*((-2 + 3*delta)*s + 4*delta*t) +
+            pow(m_pi,4)*(8*C4*pow(mrho,4) + 4*delta*s + 2*t - 3*delta*t - pow(mrho,2)*(2 + delta + 16*C4*s - 8*C4*t)) +
+            pow(mrho,4)*(-((-2 + delta)*t) + s*(4 - 2*delta + 8*C4*t)) + pow(mrho,2)*s*(s*(-2 + delta - 8*C4*t) - 2*t*(delta + 8*C4*t)) +
+            pow(m_pi,2)*(s*((2 - 3*delta)*s - 8*delta*t) - pow(mrho,4)*(-6 + 3*delta + 8*C4*(s + t)) +
+               pow(mrho,2)*(8*C4*pow(s,2) + 4*(-1 + delta)*t + s*(-8 + 6*delta + 32*C4*t)))))/
+        (pow(mrho,2)*(pow(m_pi,2) - s)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))*(pow(m_pi,2) - t)) +
+       (2*pow(eta1 - eta2,2)*(pow(ma1,2) - s)*(pow(eta1,2)*(pow(m_pi,8) + pow(m_pi,4)*(2*pow(mrho,4) + 2*s*t - 3*pow(mrho,2)*(s + t)) +
+               s*t*(2*pow(mrho,4) + pow(s,2) + 3*s*t + pow(t,2) - 3*pow(mrho,2)*(s + t)) -
+               2*pow(m_pi,2)*(pow(mrho,2) - s - t)*(-2*s*t + pow(mrho,2)*(s + t))) +
+            pow(eta2,2)*(pow(m_pi,8) - 4*pow(m_pi,2)*s*t*(pow(mrho,2) + s + t) + pow(m_pi,4)*(2*s*t + pow(mrho,2)*(s + t)) +
+               s*t*(pow(s,2) + 3*s*t + pow(t,2) + pow(mrho,2)*(s + t))) +
+            2*eta1*eta2*(-pow(m_pi,8) + 2*pow(m_pi,6)*pow(mrho,2) - 2*pow(m_pi,4)*s*t - s*t*(pow(s,2) + 3*s*t + pow(t,2) - 2*pow(mrho,2)*(s + t)) -
+               pow(m_pi,2)*(-4*s*t*(s + t) + pow(mrho,2)*(pow(s,2) + 4*s*t + pow(t,2))))))/
+        ((pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))*
+          (pow(ma1,2) - t)) + (8*(pow(delta,2)*(8*pow(m_pi,4) + 3*pow(mrho,4) - 6*pow(mrho,2)*(s + t) + 2*pow(s + t,2) +
+               4*pow(m_pi,2)*(3*pow(mrho,2) - 2*(s + t))) - 4*delta*pow(mrho,2)*
+             (16*C4*pow(m_pi,4) + pow(mrho,2)*(3 - 6*C4*(s + t)) + (s + t)*(-3 + 4*C4*(s + t)) + 2*pow(m_pi,2)*(3 + C4*(6*pow(mrho,2) - 8*(s + t)))) +
+            4*pow(mrho,4)*(3 + 4*C4*(2*pow(m_pi,2) - s - t)*(3 + C4*(4*pow(m_pi,2) - 2*(s + t))))))/
+        (pow(mrho,4)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+       (4*(eta1 - eta2)*(-pow(ma1,2) + s)*(eta2*(-2*pow(m_pi,4)*(delta - 4*C4*pow(mrho,2))*(pow(mrho,2) + 4*s) +
+               pow(m_pi,2)*(-2*pow(mrho,4)*(-2 + delta + 8*C4*s) + 8*delta*s*(s + t) - pow(mrho,2)*((-10 + delta)*s - (-2 + delta)*t + 32*C4*s*(s + t))) +
+               s*(2*pow(mrho,4)*(-2 + delta + 4*C4*s) - 2*delta*pow(s + t,2) + pow(mrho,2)*((-6 + delta)*s + (-2 + delta)*t + 8*C4*pow(s + t,2)))) +
+            eta1*(4*pow(m_pi,4)*(6*C4*pow(mrho,4) + 2*delta*s + pow(mrho,2)*(1 - 2*delta - 8*C4*s)) + 2*delta*s*pow(s + t,2) -
+               pow(mrho,2)*((-6 + 5*delta)*pow(s,2) + 2*(-2 + 3*delta)*s*t + (-2 + delta)*pow(t,2) + 8*C4*s*pow(s + t,2)) +
+               pow(mrho,4)*((-2 + delta)*(3*s + t) + 8*C4*s*(s + 2*t)) -
+               2*pow(m_pi,2)*(4*delta*s*(s + t) - pow(mrho,2)*(-6*s + 7*delta*s - 2*t + 3*delta*t + 16*C4*s*(s + t)) +
+                  2*pow(mrho,4)*(-2 + delta + 4*C4*(2*s + t))))))/
+        (pow(mrho,2)*(pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - s,2))*
+          (pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))) +
+       (4*(eta1 - eta2)*(((-2 + delta)*(pow(m_pi,4) - pow(m_pi,2)*(pow(mrho,2) - 2*s) + s*(pow(mrho,2) - s - 2*t))*
+               (eta1*(pow(mrho,2) - s - t) + eta2*(pow(m_pi,2) + t)))/((pow(m_pi,2) - s)*(pow(ma1,2) - t)) +
+            ((-2 + delta)*(eta2*(pow(m_pi,2) + t)*(pow(m_pi,4) - pow(m_pi,2)*(pow(mrho,2) - 2*t) + (pow(mrho,2) - 2*s - t)*t) +
+                 eta1*(-4*pow(m_pi,6) + (pow(mrho,2) - t)*(pow(mrho,2) - s - t)*t + pow(m_pi,4)*(3*pow(mrho,2) + s + t) -
+                    pow(m_pi,2)*(pow(mrho,4) + pow(mrho,2)*(s - t) + 2*t*(-s + t)))))/((-pow(ma1,2) + t)*(-pow(m_pi,2) + t)) +
+            (eta2*(-2*pow(m_pi,4)*(delta - 4*C4*pow(mrho,2))*(pow(mrho,2) + 4*t) +
+                  pow(m_pi,2)*(8*delta*t*(s + t) - 2*pow(mrho,4)*(-2 + delta + 8*C4*t) -
+                     pow(mrho,2)*(-((-2 + delta)*s) + (-10 + delta)*t + 32*C4*t*(s + t))) +
+                  t*(-2*delta*pow(s + t,2) + 2*pow(mrho,4)*(-2 + delta + 4*C4*t) + pow(mrho,2)*((-2 + delta)*s + (-6 + delta)*t + 8*C4*pow(s + t,2)))) +
+               eta1*(2*delta*t*pow(s + t,2) - pow(mrho,2)*((-2 + delta)*pow(s,2) + 2*(-2 + 3*delta)*s*t + (-6 + 5*delta)*pow(t,2) + 8*C4*t*pow(s + t,2)) +
+                  pow(mrho,4)*(8*C4*t*(2*s + t) + (-2 + delta)*(s + 3*t)) +
+                  4*pow(m_pi,4)*(6*C4*pow(mrho,4) + 2*delta*t + pow(mrho,2)*(1 - 2*delta - 8*C4*t)) -
+                  2*pow(m_pi,2)*(4*delta*t*(s + t) - pow(mrho,2)*(-2*s + 3*delta*s - 6*t + 7*delta*t + 16*C4*t*(s + t)) +
+                     2*pow(mrho,4)*(-2 + delta + 4*C4*(s + 2*t)))))/(pow(mrho,2)*(-pow(ma1,2) + t))))/
+        (pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))))/(512.*Pi);
+
       break;
     case ReactionType::pi_rho:
       diff_xsection = -alpha * g_rho_2 / (48 * s * p_cm_2);
