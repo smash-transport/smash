@@ -94,7 +94,7 @@ TEST(fullhistory_format) {
 
   /* Create elastic interaction (smashon + smashon). */
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.f);
-  action->add_all_processes(10., true, true, 0., true);
+  action->add_all_processes(10., true, true, 0., true, false);
   action->generate_final_state();
   ParticleList final_particles = action->outgoing_particles();
   oscfull->at_interaction(*action, 0.);
@@ -216,7 +216,7 @@ TEST(particlelist_format) {
 
   /* Create interaction ("elastic scattering") */
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.f);
-  action->add_all_processes(10., true, true, 0., true);
+  action->add_all_processes(10., true, true, 0., true, false);
   action->generate_final_state();
 
   /* As with initial state output, this should not do anything */

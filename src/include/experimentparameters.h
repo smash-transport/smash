@@ -42,6 +42,12 @@ struct ExperimentParameters {
   */
   bool strings_switch;
   /**
+  * This indicates whether NN̅ annihilation is made to conserve
+  * detailed balance using NN̅ → h₁(1170)ρ (which goes to 5 pions
+  * on average).
+  */
+  bool nnbar_detbal;
+  /**
   * This indicates whether photons are switched on.
   */
   bool photons_switch;

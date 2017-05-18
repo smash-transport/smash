@@ -177,6 +177,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
   const bool two_to_two = config.take({"Collision_Term", "Two_to_Two"}, true);
   const bool strings_switch = config.take({"Collision_Term", "Strings"}, false);
+  const bool nnbar_detbal = config.take({"Collision_Term", "NNbar_DetBal"},
+                                        false);
   const bool photons_switch = config.has_value({"Output", "Photons"}) ?
                     config.take({"Output", "Photons", "Enable"}, true) :
                     false;
@@ -198,6 +200,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
           two_to_one,
           two_to_two,
           strings_switch,
+          nnbar_detbal,
           photons_switch,
           low_snn_cut};
 }

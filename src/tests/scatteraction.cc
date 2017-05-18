@@ -71,7 +71,8 @@ TEST(elastic_collision) {
   // add elastic channel
   constexpr float sigma = 10.0;
   constexpr bool strings_switch = false;
-  act.add_all_processes(sigma, true, true, 0., strings_switch);
+  constexpr bool nnbar_detbal = false;
+  act.add_all_processes(sigma, true, true, 0., strings_switch, nnbar_detbal);
 
   // check cross section
   COMPARE(act.cross_section(), sigma);
@@ -143,7 +144,9 @@ TEST(outgoing_valid) {
   // add processes
   constexpr float elastic_parameter = 0.f;  // don't include elastic scattering
   constexpr bool strings_switch = false;
-  act->add_all_processes(elastic_parameter, true, true, 0., strings_switch);
+  constexpr bool nnbar_detbal = false;
+  act->add_all_processes(elastic_parameter, true, true, 0., strings_switch,
+                         nnbar_detbal);
 
   VERIFY(act->cross_section() > 0.f);
 
@@ -197,7 +200,9 @@ TEST(pythia_running) {
   // add processes
   constexpr float elastic_parameter = 0.f;  // don't include elastic scattering
   constexpr bool strings_switch = true;
-  act->add_all_processes(elastic_parameter, false, false, 0., strings_switch);
+  constexpr bool nnbar_detbal = false;
+  act->add_all_processes(elastic_parameter, false, false, 0., strings_switch,
+                         nnbar_detbal);
 
   VERIFY(act->cross_section() > 0.f);
 
@@ -240,8 +245,8 @@ TEST(update_incoming) {
   // add elastic channel
   constexpr float sigma = 10.0;
   bool string_switch = true;
-
-  act.add_all_processes(sigma, true, true, 0., string_switch);
+  bool nnbar_detbal = false;
+  act.add_all_processes(sigma, true, true, 0., string_switch, nnbar_detbal);
 
   // change the position of one of the particles
   const FourVector new_position(0.1, 0., 0., 0.);
