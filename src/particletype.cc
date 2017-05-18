@@ -507,8 +507,6 @@ float ParticleType::spectral_function(float m) const {
     /* Initialize the normalization factor
      * by integrating over the unnormalized spectral function. */
     static thread_local Integrator integrate;
-    // This should be static, but for some reason then the integrals sometimes
-    // yield different results. See #4299.
     const auto width = width_at_pole();
     // We transform the integral using m = m_min + width_pole * tan(x), to
     // make it definite and to avoid numerical issues.
