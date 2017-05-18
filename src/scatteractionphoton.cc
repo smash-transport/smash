@@ -53,7 +53,7 @@ void ScatterActionPhoton::generate_final_state() {
   const double t1 = mandelstam_t[1];
   const double t2 = mandelstam_t[0];
 
-  const double pcm = cm_momentum();
+  const double pcm = pCM(sqrts,m3,0.0);
   double diff_xsection_max = 0;
   double t = t1;
   double dummy = 0;
