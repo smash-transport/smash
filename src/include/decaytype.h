@@ -8,8 +8,8 @@
 #ifndef SRC_INCLUDE_DECAYTYPE_H_
 #define SRC_INCLUDE_DECAYTYPE_H_
 
-#include <vector>
 #include <memory>
+#include <vector>
 
 #include "forwarddeclarations.h"
 #include "particletype.h"

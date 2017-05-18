@@ -8,15 +8,15 @@
 #ifndef SRC_INCLUDE_TABULATION_H_
 #define SRC_INCLUDE_TABULATION_H_
 
-#include <vector>
+#include <functional>
 #include <map>
 #include <memory>
-#include <functional>
+#include <vector>
 
 #include "forwarddeclarations.h"
-#include "particletype.h"
 #include "integrate.h"
 #include "kinematics.h"
+#include "particletype.h"
 
 namespace Smash {
 
@@ -104,9 +104,14 @@ inline float spec_func_integrand_2res(float sqrts,
        * pCM(sqrts, res_mass_1, res_mass_2);
 }
 
-/// Create a table for the spectral integral of a resonance and a stable particle.
+/**
+ * Create a table for the spectral integral
+ *  of a resonance and a stable particle.
+ */
 inline std::unique_ptr<Tabulation> spectral_integral_semistable(
-    Integrator& integrate, const ParticleType& resonance, const ParticleType& stable,
+    Integrator& integrate,
+    const ParticleType& resonance,
+    const ParticleType& stable,
     float range) {
   return make_unique<Tabulation>(
           resonance.minimum_mass() + stable.mass(), range, 100,
@@ -114,15 +119,16 @@ inline std::unique_ptr<Tabulation> spectral_integral_semistable(
             return integrate(resonance.minimum_mass(), srts - stable.mass(),
                              [&](float m) {
                                return spec_func_integrand_1res(m, srts,
-                                                        stable.mass(), resonance);
+                                                     stable.mass(), resonance);
                              });
-          }
-  );
+          });
 }
 
 /// Create a table for the spectral integral of two resonances.
 inline std::unique_ptr<Tabulation> spectral_integral_unstable(
-    Integrator2d& integrate2d, const ParticleType& res1, const ParticleType& res2,
+    Integrator2d& integrate2d,
+    const ParticleType& res1,
+    const ParticleType& res2,
     float range) {
     return make_unique<Tabulation>(
           res1.minimum_mass() + res2.minimum_mass(), range, 100,
@@ -135,8 +141,7 @@ inline std::unique_ptr<Tabulation> spectral_integral_unstable(
                                  return spec_func_integrand_2res(srts, m1, m2,
                                                             res1, res2);
                                });
-          }
-    );
+          });
 }
 
 }  // namespace Smash

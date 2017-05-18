@@ -41,7 +41,7 @@ Static code analysis & coding style
 
 The SMASH source code can be checked via:
 
-      make cpplint
+      make cpplint 2>&1 | grep -v 'Done processing'
       make cppcheck
 
 \section debug_profiling Profiling / Benchmarking

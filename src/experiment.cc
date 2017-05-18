@@ -15,6 +15,7 @@
 #include "include/cxx14compat.h"
 #include "include/decayactionsfinder.h"
 #include "include/decayactionsfinderdilepton.h"
+#include "include/fourvector.h"
 #include "include/listmodus.h"
 #include "include/propagation.h"
 #include "include/scatteractionphoton.h"
@@ -173,10 +174,32 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   // just assign 1.0 fm/c, reasonable value will be set at event initialization
   const double dt = config.take({"General", "Delta_Time"}, 1.0f);
   const double output_dt = config.take({"Output", "Output_Interval"});
+  const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
+  const bool two_to_two = config.take({"Collision_Term", "Two_to_Two"}, true);
+  const bool strings_switch = config.take({"Collision_Term", "Strings"}, false);
+  const bool photons_switch = config.has_value({"Output", "Photons"}) ?
+                    config.take({"Output", "Photons", "Enable"}, true) :
+                    false;
+  /// Elastic collisions between the nucleons with the square root s
+  //  below low_snn_cut are excluded.
+  const double low_snn_cut = config.take({"Collision_Term",
+                                          "Elastic_NN_Cutoff_Sqrts"}, 1.98);
+  const auto proton = ParticleType::try_find(pdg::p);
+  const auto pion = ParticleType::try_find(pdg::pi_z);
+  if (proton && pion &&
+      low_snn_cut > proton->mass() + proton->mass() + pion->mass()) {
+    log.warn("The cut-off should be below the threshold energy",
+             " of the process: NN to NNpi");
+  }
   return {{0.0f, dt}, {0.0, output_dt},
           ntest,
           config.take({"General", "Gaussian_Sigma"}, 1.0f),
-          config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.0f)};
+          config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.0f),
+          two_to_one,
+          two_to_two,
+          strings_switch,
+          photons_switch,
+          low_snn_cut};
 }
 }  // unnamed namespace
 
@@ -277,48 +300,32 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       force_decays_(
           config.take({"Collision_Term", "Force_Decays_At_End"}, true)),
       use_grid_(config.take({"General", "Use_Grid"}, true)),
-      strings_switch_(config.take({"Collision_Term", "Strings"}, false)),
       dileptons_switch_(config.has_value({"Output", "Dileptons"}) ?
                     config.take({"Output", "Dileptons", "Enable"}, true) :
                     false),
       photons_switch_(config.has_value({"Output", "Photons"}) ?
                     config.take({"Output", "Photons", "Enable"}, true) :
-                    false),
+                    false),              
       time_step_mode_(
           config.take({"General", "Time_Step_Mode"}, TimeStepMode::Fixed)) {
   const auto &log = logger<LogArea::Experiment>();
   log.info() << *this;
 
-  const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
-  const bool two_to_two = config.take({"Collision_Term", "Two_to_Two"}, true);
-  /// Elastic collisions between the nucleons with the square root s
-  //  below low_snn_cut are excluded.
-  const double low_snn_cut = config.take({"Collision_Term",
-                                          "Elastic_NN_Cutoff_Sqrts"}, 1.98);
-  const auto proton = ParticleType::try_find(pdg::p);
-  const auto pion = ParticleType::try_find(pdg::pi_z);
-  if (proton && pion &&
-      low_snn_cut > proton->mass() + proton->mass() + pion->mass()) {
-    log.warn("The cut-off should be below the threshold energy",
-             " of the process: NN to NNpi");
-  }
-
   // create finders
   if (dileptons_switch_) {
     dilepton_finder_ = make_unique<DecayActionsFinderDilepton>();
   }
-  if (photons_switch_) {
+  if (parameters_.photons_switch) {
     n_fractional_photons_ = config.take({"Output", "Photons", "Fractions"});
   }
-  if (two_to_one) {
+  if (parameters_.two_to_one) {
     action_finders_.emplace_back(make_unique<DecayActionsFinder>());
   }
-  if (two_to_one || two_to_two) {
+  if (parameters_.two_to_one || parameters_.two_to_two) {
     auto scat_finder = make_unique<ScatterActionsFinder>(config, parameters_,
-                       two_to_one, two_to_two, low_snn_cut, strings_switch_,
                        nucleon_has_interacted_,
                        modus_.total_N_number(), modus_.proj_N_number(),
-                       photons_switch_, n_fractional_photons_);
+                       n_fractional_photons_);
     max_transverse_distance_sqr_ = scat_finder->max_transverse_distance_sqr(
                                                   parameters_.testparticles);
     action_finders_.emplace_back(std::move(scat_finder));
@@ -355,7 +362,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    **/
   if (time_step_mode_ == TimeStepMode::Adaptive) {
     adaptive_parameters_ = make_unique<AdaptiveParameters>(
-      config["General"]["Adaptive_Time_Step"]);
+      config["General"]["Adaptive_Time_Step"], delta_time_startup_);
     log.info() << *adaptive_parameters_;
   }
 
@@ -472,7 +479,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     }
   }
 
-  if (photons_switch_) {
+  if (parameters_.photons_switch) {
     // create photon output object
     std::string format = config.take({"Output", "Photons", "Format"});
     if (format == "Oscar") {
@@ -634,7 +641,6 @@ void Experiment<Modus>::initialize_new_event() {
   // For box modus make sure that particles are in the box. In principle, after
   // a correct initialization they should be, so this is just playing it safe.
   modus_.impose_boundary_conditions(&particles_, outputs_);
-
   /* Reset the simulation clock */
   double timestep = delta_time_startup_;
 
@@ -764,24 +770,25 @@ bool Experiment<Modus>::perform_action(Action &action,
 
   // At every collision photons can be produced.
   if (photons_switch_ &&
-      ScatterActionPhoton::is_photon_reaction(action.incoming_particles())) {
-    // Time in the action constructor is relative to current time of incoming
-    constexpr double action_time = 0.f;
-    ScatterActionPhoton photon_act(action.incoming_particles(),
-                                   action_time, n_fractional_photons_);
-    // Add a completely dummy process to photon action.  The only important
-    // thing is that its cross-section is equal to cross-section of action.
-    // This can be done, because photon action is never performed, only
-    // final state is generated and printed to photon output.
-    photon_act.add_dummy_hadronic_channels(action.raw_weight_value());
-    // Now add the actual photon reaction channel
-    photon_act.add_single_channel();
-    for (int i = 0; i < n_fractional_photons_; i++) {
-      photon_act.generate_final_state();
-      photon_output_->at_interaction(photon_act, rho);
+    (ScatterActionPhoton::is_photon_reaction(action.incoming_particles())
+      != ScatterActionPhoton::ReactionType::no_reaction)) {
+        // Time in the action constructor is relative to
+        // current time of incoming
+        constexpr double action_time = 0.f;
+        ScatterActionPhoton photon_act(action.incoming_particles(),
+                                       action_time, n_fractional_photons_);
+        // Add a completely dummy process to photon action.  The only important
+        // thing is that its cross-section is equal to cross-section of action.
+        // This can be done, because photon action is never performed, only
+        // final state is generated and printed to photon output.
+        photon_act.add_dummy_hadronic_channels(action.raw_weight_value());
+        // Now add the actual photon reaction channel
+        photon_act.add_single_channel();
+        for (int i = 0; i < n_fractional_photons_; i++) {
+          photon_act.generate_final_state();
+          photon_output_->at_interaction(photon_act, rho);
+        }
     }
-  }
-
   log.debug(~einhard::Green(), "✔ ", action);
   return true;
 }
@@ -866,7 +873,7 @@ void Experiment<Modus>::run_time_evolution() {
     // fragmentation are off.  If potentials are on then momentum is conserved
     // only in average.  If string fragmentation is on, then energy and
     // momentum are only very roughly conserved in high-energy collisions.
-    if (!potentials_ && !strings_switch_) {
+    if (!potentials_ && !parameters_.strings_switch) {
       std::string err_msg = conserved_initial_.report_deviations(particles_);
       if (!err_msg.empty()) {
         log.error() << err_msg;
@@ -883,7 +890,8 @@ void Experiment<Modus>::run_time_evolution() {
 
 template <typename Modus>
 void Experiment<Modus>::propagate_and_shine(double to_time) {
-  const double dt = propagate_straight_line(&particles_, to_time);
+  const double dt = propagate_straight_line(
+      &particles_, to_time, beam_momentum_);
   if (dilepton_finder_ != nullptr) {
     dilepton_finder_->shine(particles_, dilepton_output_.get(), dt);
   }
@@ -1136,15 +1144,32 @@ void Experiment<Modus>::run() {
 
     /* Sample initial particles, start clock, some printout and book-keeping */
     initialize_new_event();
-    /** In the ColliderMode, if the first collisions within the same nucleus are
-     *  forbidden, then nucleon_has_interacted_ is created to record whether the nucleons inside
-     *  the colliding nuclei have experienced any collisions or not */
+    /* In the ColliderModus, if the first collisions within the same nucleus are
+     * forbidden, then nucleon_has_interacted_ is created to record whether the nucleons inside
+     * the colliding nuclei have experienced any collisions or not */
     if (modus_.is_collider()) {
       if (!modus_.cll_in_nucleus()) {
         nucleon_has_interacted_.assign(modus_.total_N_number(), false);
       } else {
         nucleon_has_interacted_.assign(modus_.total_N_number(), true);
       }
+    }
+    /* In the ColliderModus, if Fermi motion is frozen, assign the beam momenta to
+     * the nucleons in both the projectile and the target. */
+    if (modus_.is_collider()
+        && modus_.fermi_motion() == FermiMotion::Frozen) {
+        for (int i = 0; i < modus_.total_N_number(); i++) {
+            const auto mass_beam = particles_.copy_to_vector()[i]
+                .effective_mass();
+            const auto v_beam =
+                i < modus_.proj_N_number() ?
+                modus_.velocity_projectile() :
+                modus_.velocity_target();
+            const auto gamma = 1.0 / std::sqrt(1.0 - v_beam * v_beam);
+            beam_momentum_.emplace_back(
+                FourVector(gamma * mass_beam, 0.0, 0.0,
+                           gamma * v_beam * mass_beam));
+        }
     }
     /* Output at event start */
     for (const auto &output : outputs_) {

@@ -22,7 +22,6 @@ void DecayActionsFinderDilepton::shine(
       const Particles &search_list,
       OutputInterface* output,
       float dt) const {
-
   for (const auto &p : search_list) {
     // effective mass of decaying particle
     const float m_eff = p.effective_mass();
@@ -65,7 +64,6 @@ void DecayActionsFinderDilepton::shine_final(
                   const Particles &search_list,
                   OutputInterface* output,
                   bool only_res) const {
-
   for (const auto &p : search_list) {
     const ParticleType &t = p.type();
     if (t.decay_modes().decay_mode_list().empty() ||

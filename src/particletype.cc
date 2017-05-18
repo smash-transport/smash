@@ -207,9 +207,11 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
     }
     ensure_all_read(lineinput, line);
 
-    //Check if nucleon, kaon, and delta masses are the same as hardcoded ones, if present
+    /* Check if nucleon, kaon, and delta masses are
+     * the same as hardcoded ones, if present */
     if (pdgcode[0].is_nucleon() && !almost_equal(mass, nucleon_mass)) {
-      throw std::runtime_error("Nucleon mass in input file different from 0.938");
+      throw std::runtime_error("Nucleon mass in input file"
+                               " different from 0.938");
     }
     if (pdgcode[0].is_kaon() && !almost_equal(mass, kaon_mass)) {
       throw std::runtime_error("Kaon mass in input file different from 0.494");
@@ -293,7 +295,6 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
     baryon_resonances_list.push_back(&type_resonance);
     baryon_resonances_list.push_back(type_resonance.get_antiparticle());
   }
-
 }/*}}}*/
 
 
@@ -506,15 +507,16 @@ float ParticleType::spectral_function(float m) const {
     /* Initialize the normalization factor
      * by integrating over the unnormalized spectral function. */
     static thread_local Integrator integrate;
-    //^ This should be static, but for some reason then the integrals sometimes
-    //  yield different results. See #4299.
+    // This should be static, but for some reason then the integrals sometimes
+    // yield different results. See #4299.
     const auto width = width_at_pole();
     // We transform the integral using m = m_min + width_pole * tan(x), to
     // make it definite and to avoid numerical issues.
-    norm_factor_ = 1./integrate(std::atan((minimum_mass() - mass())/width), M_PI/2.,
+    norm_factor_ = 1./integrate(std::atan((minimum_mass() - mass())/width),
+                                M_PI/2.,
         [&](double x) {
           return spectral_function_no_norm(mass() + width*std::tan(x)) * width
-                 * (1 + square(std::tan(x))) ;
+                 * (1 + square(std::tan(x)));
     });
   }
   return norm_factor_ * spectral_function_no_norm(m);
@@ -554,16 +556,18 @@ float ParticleType::sample_resonance_mass(const float mass_stable,
   // largest possible cm momentum (from smallest mass)
   const float pcm_max = pCM(cms_energy, mass_stable, this->minimum_mass());
   const float blw_max = pcm_max * blatt_weisskopf_sqr(pcm_max, L);
+  /* The maximum of the spectral-function ratio 'usually' happens at the
+   * largest mass. However, this is not always the case, therefore we need
+   * and additional fudge factor (determined automatically). Additionally,
+   * a heuristic knowledge is used that usually such mass exist that
+   * spectral_function(m) > spectral_function_simple(m). */
+  const float sf_ratio_max = std::max(1.f, this->spectral_function(max_mass)
+                                  / this->spectral_function_simple(max_mass));
 
   float mass_res, val;
   // outer loop: repeat if maximum is too small
   do {
-    /* The maximum of the spectral-function ratio 'usually' happens at the
-     * largest mass. However, this is not always the case, therefore we need
-     * and additional fudge factor (determined automatically). */
-    const float q_max = this->spectral_function(max_mass)
-                      / this->spectral_function_simple(max_mass)
-                      * this->max_factor1_;
+    const float q_max = sf_ratio_max * this->max_factor1_;
     const float max = blw_max * q_max;  // maximum value for rejection sampling
     // inner loop: rejection sampling
     do {
@@ -642,6 +646,46 @@ std::pair<float, float> ParticleType::sample_resonance_masses(
   } while (true);
 
   return {mass_1, mass_2};
+}
+
+void ParticleType::dump_width_and_spectral_function() const {
+  if (is_stable()) {
+    std::stringstream err;
+    err << "Particle " << *this << " is stable, so it makes no" <<
+           " sense to print its spectral function, etc.";
+    throw std::runtime_error(err.str());
+  }
+
+  double rightmost_pole = 0.0;
+  const auto &decaymodes = decay_modes().decay_mode_list();
+  for (const auto &mode : decaymodes) {
+    double pole_mass_sum = 0.0;
+    for (const ParticleTypePtr p : mode->type().particle_types()) {
+      pole_mass_sum +=p->mass();
+    }
+    if (pole_mass_sum > rightmost_pole) {
+      rightmost_pole = pole_mass_sum;
+    }
+  }
+
+  std::cout << "# mass m[GeV], width w(m) [GeV],"
+            << " spectral function(m^2)*m [GeV^-1] of "
+            << *this << std::endl;
+  constexpr double m_step = 0.02;
+  const double m_min = minimum_mass();
+  // An emprical value used to stop the printout. Assumes that spectral
+  // function decays at high mass, which is true for all known resonances.
+  constexpr double spectral_function_threshold = 8.e-3;
+  std::cout << std::fixed << std::setprecision(5);
+  for (unsigned int i = 0; ; i++) {
+    const double m = m_min + m_step*i;
+    const double w = total_width(m), sf = spectral_function(m);
+    if (m > rightmost_pole*2 &&
+        sf < spectral_function_threshold) {
+      break;
+    }
+    std::cout << m << " " << w << " " << sf << std::endl;
+  }
 }
 
 

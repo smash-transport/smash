@@ -9,8 +9,9 @@
 
 #include "include/binaryoutputcollisions.h"
 
-#include <boost/filesystem.hpp>
 #include <string>
+
+#include <boost/filesystem.hpp>
 
 #include "include/action.h"
 #include "include/clock.h"

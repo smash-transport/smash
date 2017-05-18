@@ -10,8 +10,8 @@
 #ifndef SRC_INCLUDE_LATTICE_H_
 #define SRC_INCLUDE_LATTICE_H_
 
-#include <cstring>
 #include <array>
+#include <cstring>
 #include <functional>
 #include <utility>
 #include <vector>

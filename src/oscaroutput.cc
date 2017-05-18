@@ -8,8 +8,9 @@
  */
 #include "include/oscaroutput.h"
 
-#include <boost/filesystem.hpp>
 #include <string>
+
+#include <boost/filesystem.hpp>
 
 #include "include/action.h"
 #include "include/clock.h"
@@ -477,7 +478,7 @@ std::unique_ptr<OutputInterface> create_select_format(const bf::path &path,
     return make_unique<OscarOutput<OscarFormat2013Extended,
                                 Contents>>(std::move(path), std::move(name));
   } else if (modern_format) {
-   return make_unique<OscarOutput<OscarFormat2013, Contents>>(std::move(path),
+    return make_unique<OscarOutput<OscarFormat2013, Contents>>(std::move(path),
                                                                std::move(name));
   } else {
     return make_unique<OscarOutput<OscarFormat1999, Contents>>(std::move(path),

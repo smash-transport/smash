@@ -10,8 +10,9 @@
 #ifndef SRC_INCLUDE_ENERGYMOMENTUMTENSOR_H_
 #define SRC_INCLUDE_ENERGYMOMENTUMTENSOR_H_
 
-#include <array>
 #include <cmath>
+
+#include <array>
 #include <string>
 
 #include "fourvector.h"

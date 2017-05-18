@@ -51,7 +51,7 @@ static Test::ParticlesPtr create_box_particles() {
 
 TEST(propagate_default_no_potentials) {
   auto Pdef = create_box_particles();
-  propagate_straight_line(Pdef.get(), 1.0);
+  propagate_straight_line(Pdef.get(), 1.0, {});
   // after propagation: Momenta should be unchanged.
   // but positions should be updated.
   auto it = Pdef->begin();

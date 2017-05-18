@@ -9,12 +9,12 @@
 #ifndef SRC_INCLUDE_DENSITY_H_
 #define SRC_INCLUDE_DENSITY_H_
 
+#include <iostream>
 #include <utility>
 #include <vector>
-#include <iostream>
 
-#include "experimentparameters.h"
 #include "energymomentumtensor.h"
+#include "experimentparameters.h"
 #include "forwarddeclarations.h"
 #include "fourvector.h"
 #include "lattice.h"
@@ -102,7 +102,7 @@ enum class DensityType {
  */
 class DensityParameters {
  public:
-  DensityParameters(const ExperimentParameters &par) :
+  DensityParameters(const ExperimentParameters &par) :  // NOLINT
       sig_(par.gaussian_sigma),
       r_cut_(par.gauss_cutoff_in_sigma * par.gaussian_sigma),
       ntest_(par.testparticles) {

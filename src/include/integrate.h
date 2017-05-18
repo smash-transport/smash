@@ -13,7 +13,11 @@
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_monte_plain.h>
 #include <gsl/gsl_monte_vegas.h>
+
+#include <sstream>
+#include <memory>
 #include <tuple>
+#include <utility>
 
 #include "cxx14compat.h"
 #include "fpenvironment.h"
@@ -114,17 +118,23 @@ class Integrator {
         &fun};
     // We disable float traps when calling GSL code we cannot control.
     DisableFloatTraps guard;
-    gsl_integration_cquad(&gslfun, a, b,
+    const int error_code = gsl_integration_cquad(&gslfun, a, b,
                           accuracy_absolute_, accuracy_relative_,
                           workspace_.get(),
                           &result.first, &result.second,
                           nullptr /* Don't store the number of evaluations */);
+    if (error_code) {
+      std::stringstream err;
+      err << "GSL integration: " << gsl_strerror(error_code);
+      throw std::runtime_error(err.str());
+    }
     return result;
   }
 
  private:
   /// Holds the workspace pointer.
-  std::unique_ptr<gsl_integration_cquad_workspace, GslWorkspaceDeleter> workspace_;
+  std::unique_ptr<gsl_integration_cquad_workspace,
+                  GslWorkspaceDeleter> workspace_;
 
   /// Parameter to the GSL integration function: desired absolute error limit
   const double accuracy_absolute_ = 1.0e-5;
@@ -166,7 +176,7 @@ class Integrator1dMonte {
         number_of_calls_(num_calls) {
     gsl_monte_plain_init(state_);
     // initialize the GSL RNG with a random seed
-    unsigned long int seed = Random::uniform_int(0ul, ULONG_MAX);
+    const uint32_t seed = Random::uniform_int(0ul, ULONG_MAX);
     gsl_rng_set(rng_, seed);
   }
 
@@ -257,7 +267,7 @@ class Integrator2d {
         number_of_calls_(num_calls) {
     gsl_monte_plain_init(state_);
     // initialize the GSL RNG with a random seed
-    unsigned long int seed = Random::uniform_int(0ul, ULONG_MAX);
+    const uint32_t seed = Random::uniform_int(0ul, ULONG_MAX);
     gsl_rng_set(rng_, seed);
   }
 

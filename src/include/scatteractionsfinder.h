@@ -30,9 +30,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
 
   ScatterActionsFinder(Configuration config,
                        const ExperimentParameters &parameters,
-                       bool two_to_one, bool two_to_two, double low_snn_cut,
-                       bool strings_switch, const std::vector<bool> &nucleon_has_interacted,
-                       int N_tot, int N_proj, bool photons, int n_fractional_photons);
+                       const std::vector<bool> &nucleon_has_interacted,
+                       int N_tot, int N_proj, int n_fractional_photons);
 
   /** Constructor for testing purposes. */
   ScatterActionsFinder(float elastic_parameter, int testparticles,
@@ -114,6 +113,13 @@ class ScatterActionsFinder : public ActionFinderInterface {
    */
   void dump_reactions() const;
 
+  /**
+   * Print out partial cross-sections of all processes that can occur in
+   * the collision of a(mass = m_a) and b(mass = m_b).
+   */
+  void dump_cross_sections(const ParticleType &a, const ParticleType &b,
+                           float m_a, float m_b) const;
+
  private:
   /* Construct a ScatterAction object,
    * based on the types of the incoming particles. */
@@ -134,8 +140,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const bool two_to_one_;
   /** Enable 2->2 processes. */
   const bool two_to_two_;
-  /** Elastic collsions between two nucleons with 
-   ** sqrt_s below low_snn_cut_ are excluded. */ 
+  /** Elastic collsions between two nucleons with
+   ** sqrt_s below low_snn_cut_ are excluded. */
   const double low_snn_cut_;
   /** Switch to turn off string excitation. */
   const bool strings_switch_;

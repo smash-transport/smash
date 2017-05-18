@@ -275,7 +275,9 @@ class Clock {
   static constexpr double from_double = static_cast<double>(1. / resolution);
 
   /// convert a double value into the internal int representation
-  static Representation convert(double x) { return std::round(x * from_double); }
+  static Representation convert(double x) {
+    return std::round(x * from_double);
+  }
   /// convert an internal int value into the double representation
   static double convert(Representation x) { return x * to_double; }
 

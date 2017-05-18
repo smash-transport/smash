@@ -10,6 +10,8 @@
 #ifndef SRC_INCLUDE_DECAYACTION_H_
 #define SRC_INCLUDE_DECAYACTION_H_
 
+#include <utility>
+
 #include "action.h"
 
 namespace Smash {

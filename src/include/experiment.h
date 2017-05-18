@@ -7,11 +7,16 @@
 #ifndef SRC_INCLUDE_EXPERIMENT_H_
 #define SRC_INCLUDE_EXPERIMENT_H_
 
+#include <limits>
+#include <memory>
+#include <vector>
+
 #include "actionfinderfactory.h"
 #include "adaptiveparameters.h"
 #include "chrono.h"
 #include "decayactionsfinderdilepton.h"
 #include "energymomentumtensor.h"
+#include "fourvector.h"
 #include "pauliblocking.h"
 #include "potentials.h"
 #include "quantumnumbers.h"
@@ -256,8 +261,13 @@ class Experiment : public ExperimentBase {
 
   /** nucleon_has_interacted_ labels whether the particles in the nuclei
    *  have experienced any collisions or not. It's only valid in
-   *  the ColliderMode, so is set as an empty vector by default.*/
+   *  the ColliderModus, so is set as an empty vector by default.*/
   std::vector<bool> nucleon_has_interacted_ = {};
+
+  /** The initial nucleons in the ColliderModus propagate with
+   *  beam_momentum_, if Fermi motion is frozen. It's only valid in
+   *  the ColliderModus, so is set as an empty vector by default.*/
+  std::vector<FourVector> beam_momentum_ = {};
 
   /// The Action finder objects
   std::vector<std::unique_ptr<ActionFinderInterface>> action_finders_;
@@ -325,11 +335,6 @@ class Experiment : public ExperimentBase {
    * This indicates whether to use the grid.
    */
   const bool use_grid_;
-
-  /**
-   * This indicates whether string fragmentation is switched on.
-   */
-  const bool strings_switch_;
 
   /**
    * This indicates whether dileptons are switched on.

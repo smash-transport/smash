@@ -9,16 +9,17 @@
 
 #include "include/propagation.h"
 
-#include "include/logging.h"
 #include "include/boxmodus.h"
 #include "include/collidermodus.h"
 #include "include/listmodus.h"
+#include "include/logging.h"
 #include "include/spheremodus.h"
 
 namespace Smash {
 
 /* Simple straight line propagation without potentials*/
-double propagate_straight_line(Particles *particles, double to_time) {
+double propagate_straight_line(Particles *particles, double to_time,
+      const std::vector<FourVector> &beam_momentum) {
   const auto &log = logger<LogArea::Propagation>();
   double dt = 0.0;
   for (ParticleData &data : *particles) {
@@ -32,17 +33,22 @@ double propagate_straight_line(Particles *particles, double to_time) {
     // but not for propagation. This is done to avoid nucleus flying apart
     // even if potentials are off. Initial nucleons before the first collision
     // are propagated only according to beam momentum.
-    //
-    // Initial nucleons are distinguished by beammomentum variable, which
-    // is set non-zero for them.
-
+    // Initial nucleons are distinguished by data.id() < the size of
+    // beam_momentum, which is by default zero except for the collider modus
+    // with the fermi motion == frozen.
     // todo(m. mayer): improve this condition (see comment #11 issue #4213)
+    assert(data.id() > 0);
     const bool avoid_fermi_motion =
-                 (data.beammomentum().x0() > really_small) &&
-                 (data.get_history().collisions_per_particle == 0);
-    const ThreeVector v = avoid_fermi_motion  ?
-                          data.beamvelocity() :
-                          data.velocity();
+      (static_cast<uint64_t>(data.id())
+       < static_cast<uint64_t>(beam_momentum.size()))
+      && (data.get_history().collisions_per_particle == 0);
+    ThreeVector v;
+    if (avoid_fermi_motion) {
+        const FourVector vbeam = beam_momentum[data.id()];
+        v = vbeam.velocity();
+    } else {
+        v = data.velocity();
+    }
     const FourVector distance = FourVector(0.0, v * dt);
     log.debug("Particle ", data, " motion: ", distance);
     FourVector position = data.position() + distance;
@@ -56,6 +62,7 @@ double propagate_straight_line(Particles *particles, double to_time) {
   }
   return dt;
 }
+
 
 void update_momenta(Particles *particles, double dt,
                const Potentials &pot,
