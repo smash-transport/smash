@@ -326,6 +326,9 @@ void ScatterActionsFinder::dump_reactions() const {
             }
             any_nonzero_cs = true;
             for (const auto& channel : act->collision_channels()) {
+              if (channel->weight() < really_small) {
+                continue;
+              }
               std::string r;
               if (channel->get_type() == ProcessType::String) {
                 r =  A_type->name() + B_type->name()
