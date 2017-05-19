@@ -53,7 +53,8 @@ void ScatterActionPhoton::generate_final_state() {
   const double t1 = mandelstam_t[1];
   const double t2 = mandelstam_t[0];
 
-  const double pcm = pCM(sqrts, m3, 0.0);
+  const double pcm_in = cm_momentum();
+  const double pcm_out = pCM(sqrts, m3, 0.0);
   double diff_xsection_max = 0;
   double t = t1;
   double dummy = 0;
@@ -75,15 +76,16 @@ void ScatterActionPhoton::generate_final_state() {
   double costheta =
       (t - pow_int(m1, 2) +
        0.5 * (s + pow_int(m1, 2) - pow_int(m2, 2)) * (s - pow_int(m3, 2)) / s) /
-      (pcm * (s - pow_int(m3, 2)) / sqrts);
+      (pcm_in * (s - pow_int(m3, 2)) / sqrts);
   if (costheta > 1)
     costheta = 1;
   if (costheta < -1)
     costheta = -1;
   Angles phitheta(Random::uniform(0.0, twopi), costheta);
-  outgoing_particles_[0].set_4momentum(masses.first, phitheta.threevec() * pcm);
+  outgoing_particles_[0].set_4momentum(masses.first,
+                                        phitheta.threevec() * pcm_out);
   outgoing_particles_[1].set_4momentum(masses.second,
-                                       -phitheta.threevec() * pcm);
+                                       -phitheta.threevec() * pcm_out);
 
   /* Weighing of the fractional photons */
   if (number_of_fractional_photons_ > 1) {
