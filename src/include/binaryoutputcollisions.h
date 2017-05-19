@@ -27,7 +27,8 @@ class BinaryOutputBase : public OutputInterface {
  protected:
   explicit BinaryOutputBase(FILE *f, bool extended_format);
   void write(const std::string &s);
-    void write(const float x);
+  void write(const float x);
+  void write(const double x);
   void write(const FourVector &v);
   void write(std::int32_t x) {
     std::fwrite(&x, sizeof(x), 1, file_.get());

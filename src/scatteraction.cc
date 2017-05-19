@@ -67,7 +67,7 @@ void ScatterAction::generate_final_state() {
     case ProcessType::TwoToTwo:
       /* 2->2 inelastic scattering */
       /* Sample the particle momenta in CM system. */
-      sample_2body_phasespace();
+      inelastic_scattering();
       break;
     case ProcessType::String:
       /* string excitation */
@@ -321,6 +321,29 @@ void ScatterAction::elastic_scattering() {
                  outgoing_particles_[1].effective_mass()});
 }
 
+void ScatterAction::inelastic_scattering() {
+  //create new particles
+  sample_2body_phasespace();
+  /* Set the formation time of the 2 particles to the larger formation time of the
+   * incoming particles, if it is larger than the execution time; execution time
+   * is otherwise taken to be the formation time */
+  const float t0 = incoming_particles_[0].formation_time();
+  const float t1 = incoming_particles_[1].formation_time();
+
+  const size_t index_tmax = (t0 > t1) ? 0 : 1;
+  const float sc = incoming_particles_[index_tmax].cross_section_scaling_factor();
+  if (t0 > time_of_execution_ || t1 > time_of_execution_) {
+    outgoing_particles_[0].set_formation_time(std::max(t0,t1));
+    outgoing_particles_[1].set_formation_time(std::max(t0,t1));
+    outgoing_particles_[0].set_cross_section_scaling_factor(sc);
+    outgoing_particles_[1].set_cross_section_scaling_factor(sc);
+  }
+  else {
+    outgoing_particles_[0].set_formation_time(time_of_execution_);
+    outgoing_particles_[1].set_formation_time(time_of_execution_);
+  }
+}
+
 
 void ScatterAction::resonance_formation() {
   const auto &log = logger<LogArea::ScatterAction>();
@@ -339,15 +362,20 @@ void ScatterAction::resonance_formation() {
   outgoing_particles_[0].set_4momentum(FourVector(sqrt_s(), 0., 0., 0.));
 
   /* Set the formation time of the resonance to the larger formation time of the
-   * incoming particles */
+   * incoming particles, if it is larger than the execution time; execution time
+   * is otherwise taken to be the formation time */
   const float t0 = incoming_particles_[0].formation_time();
   const float t1 = incoming_particles_[1].formation_time();
+
   const size_t index_tmax = (t0 > t1) ? 0 : 1;
   const float sc =
     incoming_particles_[index_tmax].cross_section_scaling_factor();
   if (t0 > time_of_execution_ || t1 > time_of_execution_) {
     outgoing_particles_[0].set_formation_time(std::max(t0, t1));
     outgoing_particles_[0].set_cross_section_scaling_factor(sc);
+  }
+  else {
+    outgoing_particles_[0].set_formation_time(time_of_execution_);
   }
   log.debug("Momentum of the new particle: ",
             outgoing_particles_[0].momentum());
@@ -468,7 +496,8 @@ void ScatterAction::string_excitation() {
           data.set_cross_section_scaling_factor(suppression_factor * 0.0);
         }
       }
-      data.set_formation_time(formation_time_ * gamma_cm());
+      //Set formation time: actual time of collision + time to form the particle
+      data.set_formation_time(formation_time_*gamma_cm() + time_of_execution_);
       outgoing_particles_.push_back(data);
     }
     /* If the incoming particles already were unformed, the formation

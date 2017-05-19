@@ -14,6 +14,7 @@
 #include "include/configuration.h"
 #include "include/constants.h"
 #include "include/cxx14compat.h"
+#include "include/decaymodes.h"
 #include "include/experimentparameters.h"
 #include "include/isoparticletype.h"
 #include "include/logging.h"
@@ -359,6 +360,54 @@ void ScatterActionsFinder::dump_reactions() const {
         }
         std::cout << std::endl;
       }
+    }
+  }
+}
+
+void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
+                                               const ParticleType &b,
+                                               float m_a,
+                                               float m_b) const {
+  const ParticleTypePtrList incoming_list = {&a, &b};
+  std::vector<ParticleTypePtr> ab_products;
+
+  for (const ParticleType &resonance : ParticleType::list_all()) {
+    const auto &decaymodes = resonance.decay_modes().decay_mode_list();
+    for (const auto &mode : decaymodes) {
+      if (mode->type().has_particles(incoming_list)) {
+        ab_products.push_back(&resonance);
+      }
+    }
+  }
+
+  std::string description = "# sqrt(s) [GeV]";
+  std::string ab_string = " " + a.name() + b.name() + "->";
+  for (const ParticleTypePtr resonance : ab_products) {
+    description += ab_string + resonance->name();
+  }
+  std::cout << description << std::endl;
+
+  if (ab_products.size() > 0) {
+    ParticleData a_data(a), b_data(b);
+    constexpr int n_points = 1000;
+
+    std::cout << std::fixed;
+    std::cout << std::setprecision(8);
+    constexpr float momentum_step = 0.01f;
+    for (int i = 1; i < n_points; i++) {
+      const double momentum = momentum_step * i;
+      a_data.set_4momentum(m_a,  momentum, 0.0, 0.0);
+      b_data.set_4momentum(m_b, -momentum, 0.0, 0.0);
+      ScatterAction act(a_data, b_data, 0.0, false, 0.0);
+      const float sqrts = act.sqrt_s();
+      std::cout << sqrts << " ";
+      for (const ParticleTypePtr resonance : ab_products) {
+        const double p_cm_sqr = pCM_sqr(sqrts, m_a, m_b);
+        const double xs = (sqrts < resonance->minimum_mass()) ? 0.0 :
+            act.two_to_one_formation(*resonance, sqrts, p_cm_sqr);
+        std::cout << xs << " ";
+      }
+      std::cout << std::endl;
     }
   }
 }

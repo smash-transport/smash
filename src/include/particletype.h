@@ -154,6 +154,9 @@ class ParticleType {
            pdgcode_.strangeness() == 0 && pdgcode_.charmness() == 0;
   }
 
+  /// \copydoc PdgCode::is_Nstar1535
+  bool is_Nstar1535() const { return pdgcode_.is_Nstar1535(); }
+
   /// Is this a Delta resonance (Delta*)?
   inline bool is_Deltastar() const {
     return is_baryon() && isospin() == 3 && !pdgcode_.is_Delta() &&
@@ -300,6 +303,12 @@ class ParticleType {
                                                   int L = 0) const;
 
   /**
+   *  Prints out width and spectral function versus mass to the
+   *  standard output. This is useful for debugging and analysis.
+   */
+  void dump_width_and_spectral_function() const;
+
+  /**
    * Returns a list of all ParticleType objects.
    *
    * \note The order of the list may be sorted by PDG codes, but do not rely on
@@ -312,7 +321,7 @@ class ParticleType {
   /** Returns a list of all anti-nucleons (i.e. anti-proton and anti-neutron).
     */
   static ParticleTypePtrList &list_anti_nucleons();
-  /** Returns a list of the Delta(1232) baryons // oliiny: only 1232?!
+  /** Returns a list of the Delta(1232) baryons
    *  (i.e. all four charge states). */
   static ParticleTypePtrList &list_Deltas();
   /** Returns a list of the anti-Delta(1232) baryons
