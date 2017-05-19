@@ -74,8 +74,8 @@ void ScatterActionPhoton::generate_final_state() {
   }
 
   double costheta =
-      (t - pow_int(m1, 2) +
-       0.5 * (s + pow_int(m1, 2) - pow_int(m2, 2)) * (s - pow_int(m3, 2)) / s) /
+      (t - pow_int(m2, 2) +
+       0.5 * (s + pow_int(m2, 2) - pow_int(m1, 2)) * (s - pow_int(m3, 2)) / s) /
       (pcm_in * (s - pow_int(m3, 2)) / sqrts);
   if (costheta > 1)
     costheta = 1;
