@@ -469,7 +469,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       dilepton_output_ = create_dilepton_output(output_path);
     } else if (format == "Binary") {
       dilepton_output_ =
-          make_unique<BinaryOutputCollisions>(output_path, "DileptonOutput");
+          make_unique<BinaryOutputCollisions>(output_path, "DileptonOutput",
+                                              true);
     } else if (format == "Root") {
 #ifdef SMASH_USE_ROOT
       dilepton_output_ = make_unique<RootOutput>(output_path, "DileptonOutput");
@@ -490,7 +491,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       photon_output_ = create_photon_output(output_path);
     } else if (format == "Binary") {
       photon_output_ =
-          make_unique<BinaryOutputCollisions>(output_path, "PhotonOutput");
+          make_unique<BinaryOutputCollisions>(output_path, "PhotonOutput",
+                                              false);
     } else if (format == "Root") {
 #ifdef SMASH_USE_ROOT
       photon_output_ = make_unique<RootOutput>(output_path, "PhotonOutput");
