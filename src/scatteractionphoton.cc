@@ -52,35 +52,31 @@ void ScatterActionPhoton::generate_final_state() {
   std::array<double, 2> mandelstam_t = get_t_range(sqrts, m1, m2, m3, 0.0);
   const double t1 = mandelstam_t[1];
   const double t2 = mandelstam_t[0];
-
   const double pcm_in = cm_momentum();
   const double pcm_out = pCM(sqrts, m3, 0.0);
-  double diff_xsection_max = 0;
-  double t = t1;
-  double dummy = 0;
-  while (t < t2) {
-    dummy = diff_cross_section(t, m3);
-    if (dummy > diff_xsection_max) {
-      diff_xsection_max = dummy;
-    }
-    t = t + 0.01;
-  }
-  t = Random::uniform(t1, t2);
-  dummy = 0;
-  while (diff_cross_section(t, m3) < Random::uniform(0.0, diff_xsection_max)) {
-    t = Random::uniform(t1, t2);
-    dummy++;
-    if (dummy > 100) break;
+
+  assert(t1 < t2);
+  const double stepsize = (t2-t1)/100.0;
+  for (double t = t1; t < t2; t += stepsize) {
+    float diff_xsection_max = std::max(diff_cross_section(t, m3),
+                                              diff_xsection_max);
   }
 
+  float t = Random::uniform(t1, t2);
+  float diff_xsection_max = 0;
+  int iteration_number = 0;
+  do {
+    t = Random::uniform(t1, t2);
+    iteration_number++;
+  } while (diff_cross_section(t, m3) < Random::uniform(0.f, diff_xsection_max)
+           && iteration_number < 100);
+
+  // todo: this should move to kinematics.h and tested
   double costheta =
       (t - pow_int(m2, 2) +
        0.5 * (s + pow_int(m2, 2) - pow_int(m1, 2)) * (s - pow_int(m3, 2)) / s) /
       (pcm_in * (s - pow_int(m3, 2)) / sqrts);
-  if (costheta > 1)
-    costheta = 1;
-  if (costheta < -1)
-    costheta = -1;
+
   Angles phitheta(Random::uniform(0.0, twopi), costheta);
   outgoing_particles_[0].set_4momentum(masses.first,
                                         phitheta.threevec() * pcm_out);
