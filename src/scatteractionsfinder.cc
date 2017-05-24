@@ -24,6 +24,7 @@
 #include "include/scatteractionbaryonmeson.h"
 #include "include/scatteractiondeltakaon.h"
 #include "include/scatteractionmesonmeson.h"
+#include "include/scatteractionnucleonpion.h"
 #include "include/scatteractionnucleonkaon.h"
 #include "include/scatteractionnucleonnucleon.h"
 #include "include/scatteractionhyperonpion.h"
@@ -114,7 +115,12 @@ ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
                                               formation_time_);
     }
   } else if (data_a.is_baryon() || data_b.is_baryon()) {
-    if ((pdg_a.is_nucleon() && pdg_b.is_kaon()) ||
+    if ((pdg_a.is_nucleon() && pdg_b.is_pion()) ||
+        (pdg_b.is_nucleon() && pdg_a.is_pion())) {
+      act = make_unique<ScatterActionNucleonPion>(data_a, data_b,
+                                              time_until_collision, isotropic_,
+                                              formation_time_);
+    } else if ((pdg_a.is_nucleon() && pdg_b.is_kaon()) ||
         (pdg_b.is_nucleon() && pdg_a.is_kaon())) {
       act = make_unique<ScatterActionNucleonKaon>(data_a, data_b,
                                               time_until_collision, isotropic_,

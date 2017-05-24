@@ -68,7 +68,7 @@ class instance.
 </option> 
 </modepick> 
  
-<parm name="Beams:eCM" default="14000." min="2.276"> 
+<parm name="Beams:eCM" default="14000." min="4.0"> 
 Collision CM energy, to be set if <code>Beams:frameType</code> = 1. 
 </parm> 
  

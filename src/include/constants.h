@@ -47,6 +47,12 @@ constexpr float small_number = 1.0e-4;
  */
 constexpr float nucleon_mass = 0.938;
 /**
+ * pion mass in GeV
+ *
+ * Note that this should be the same as in particles.txt.
+ */
+constexpr float pion_mass = 0.138;
+/**
  * kaon mass in GeV
  *
  * Note that this should be the same as in particles.txt.

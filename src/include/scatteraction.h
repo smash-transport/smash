@@ -120,7 +120,7 @@ class ScatterAction : public Action {
 
   /** Add all possible subprocesses for this action object. */
   virtual void add_all_processes(float elastic_parameter,
-                         bool two_to_one, bool two_to_two, double low_snn_cut,  bool strings_switch);
+                bool two_to_one, bool two_to_two, double low_snn_cut,  bool strings_switch);
 
   /**
    * Determine the (parametrized) total cross section for this collision. This
@@ -129,10 +129,10 @@ class ScatterAction : public Action {
   virtual float total_cross_section() const { return 0.; }
 
   /**
-   * Determine the (parametrized) string excitation cross section for this collision.
+   * Determine the (parametrized) total cross section at high energies for this collision.
    * This is currently only used for calculating the string excitation cross section.
    */
-  virtual float string_cross_section() const { return 0.; }
+  virtual float high_energy_cross_section() const { return 0.; }
 
   /**
    * Determine the (parametrized) elastic cross section for this collision.

@@ -15,6 +15,41 @@
 
 namespace Smash {
 
+/** total hadronic cross sections at high energies parametrized in the 2016 PDG
+ *  book(http://pdg.lbl.gov/2016/reviews/rpp2016-rev-cross-section-plots.pdf) */
+float xs_high_energy(double mandelstam_s, bool is_opposite_charge,
+                     float ma, float mb, float P, float R1, float R2);
+
+/* pp total cross section at high energies */
+float pp_high_energy(double mandelstam_s);
+
+/* ppbar total cross section at high energies */
+float ppbar_high_energy(double mandelstam_s);
+
+/* np total cross section at high energies */
+float np_high_energy(double mandelstam_s);
+
+/* npbar total cross section at high energies */
+float npbar_high_energy(double mandelstam_s);
+
+/* pi+p total cross section at high energies */
+float piplusp_high_energy(double mandelstam_s);
+
+/* pi-p total cross section at high energies */
+float piminusp_high_energy(double mandelstam_s);
+
+/* pi+p elastic cross section parametrization
+ *
+ * \fpPrecision Why \c double?
+ */
+float piplusp_elastic(double mandelstam_s);
+
+/* pi-p elastic cross section parametrization
+ *
+ * \fpPrecision Why \c double?
+ */
+float piminusp_elastic(double mandelstam_s);
+
 /* pp elastic cross section parametrization
  *
  * \fpPrecision Why \c double?
@@ -26,12 +61,6 @@ float pp_elastic(double mandelstam_s);
  * \fpPrecision Why \c double?
  */
 float pp_total(double mandelstam_s);
-
-/* pp string excitation cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
-float pp_string(double mandelstam_s);
 
 /* np elastic cross section parametrization
  *
@@ -45,11 +74,6 @@ float np_elastic(double mandelstam_s);
  */
 float np_total(double mandelstam_s);
 
-/* np string excitation cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
-float np_string(double mandelstam_s);
 
 /* ppbar elastic cross section parametrization
  *
@@ -62,18 +86,6 @@ float ppbar_elastic(double mandelstam_s);
  * \fpPrecision Why \c double?
  */
 float ppbar_total(double mandelstam_s);
-
-/* pi+p string excitation cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
-float piplusp_string(double mandelstam_s);
-
-/* pi-p string excitation cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
-float piminusp_string(double mandelstam_s);
 
 /* K+ p elastic cross section parametrization
  *
