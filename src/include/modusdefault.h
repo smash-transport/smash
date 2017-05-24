@@ -10,12 +10,12 @@
 #ifndef SRC_INCLUDE_MODUSDEFAULT_H_
 #define SRC_INCLUDE_MODUSDEFAULT_H_
 
+#include "configuration.h"
 #include "forwarddeclarations.h"
+#include "fourvector.h"
 #include "grid.h"
 #include "outputinterface.h"
 #include "potentials.h"
-#include "configuration.h"
-#include "fourvector.h"
 
 namespace Smash {
 

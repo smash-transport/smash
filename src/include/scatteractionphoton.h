@@ -21,7 +21,7 @@ class ScatterActionPhoton : public ScatterAction {
  public:
   ScatterActionPhoton(const ParticleList &in, float time, int nofp)
       : ScatterAction(in[0], in[1], time),
-        number_of_fractional_photons(nofp) {}
+        number_of_fractional_photons_(nofp) {}
 
   void generate_final_state() override;
 
@@ -36,7 +36,7 @@ class ScatterActionPhoton : public ScatterAction {
   }
 
   /** Overridden to effectively return the reaction channel. */
-  virtual ProcessType get_type() const override {
+  ProcessType get_type() const override {
     return static_cast<ProcessType>(reac);
   }
 
@@ -54,13 +54,25 @@ class ScatterActionPhoton : public ScatterAction {
                                   cross_section_photons_);
   }
 
+  enum class ReactionType {
+    no_reaction,
+    pi0_pi,
+    pi_rho0,
+    pi_rho,
+    pi0_rho,
+    pi_eta,
+    pi_pi
+  };
+
+  ReactionType reac = ReactionType::no_reaction;
+
   /// Tells if the given incoming particles may produce photon
-  static bool is_photon_reaction(const ParticleList &in);
+  static ReactionType is_photon_reaction(const ParticleList &in);
 
  private:
   CollisionBranchList photon_cross_sections();
 
-  int const number_of_fractional_photons;
+  int const number_of_fractional_photons_;
 
   float weight_ = 0.0;
 
@@ -69,19 +81,7 @@ class ScatterActionPhoton : public ScatterAction {
 
   float cross_section_photons_ = 0.0;
 
-  const int num_tab_pts = 200;
-
-  enum class ReactionType {
-    no_reaction = 0,
-    pi0_pi = 1,
-    piplus_rho0 = 2,
-    pi_rho = 3,
-    pi0_rho = 4,
-    piplus_eta = 5,
-    pi_pi = 6
-  };
-
-  ReactionType reac = ReactionType::no_reaction;
+  const int num_tab_pts_ = 200;
 
   float pi_pi_rho0(const float M, const float s) const;
 

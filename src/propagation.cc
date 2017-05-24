@@ -9,17 +9,17 @@
 
 #include "include/propagation.h"
 
-#include "include/logging.h"
 #include "include/boxmodus.h"
 #include "include/collidermodus.h"
 #include "include/listmodus.h"
+#include "include/logging.h"
 #include "include/spheremodus.h"
 
 namespace Smash {
 
 /* Simple straight line propagation without potentials*/
 double propagate_straight_line(Particles *particles, double to_time,
-                       const std::vector<FourVector> &beam_momentum) {
+      const std::vector<FourVector> &beam_momentum) {
   const auto &log = logger<LogArea::Propagation>();
   double dt = 0.0;
   for (ParticleData &data : *particles) {
@@ -37,9 +37,10 @@ double propagate_straight_line(Particles *particles, double to_time,
     // beam_momentum, which is by default zero except for the collider modus
     // with the fermi motion == frozen.
     // todo(m. mayer): improve this condition (see comment #11 issue #4213)
-    assert (data.id() > 0);
+    assert(data.id() > 0);
     const bool avoid_fermi_motion =
-      (static_cast<uint64_t>(data.id()) < static_cast<uint64_t>(beam_momentum.size()))
+      (static_cast<uint64_t>(data.id())
+       < static_cast<uint64_t>(beam_momentum.size()))
       && (data.get_history().collisions_per_particle == 0);
     ThreeVector v;
     if (avoid_fermi_motion) {

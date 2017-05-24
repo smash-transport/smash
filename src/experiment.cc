@@ -15,6 +15,7 @@
 #include "include/cxx14compat.h"
 #include "include/decayactionsfinder.h"
 #include "include/decayactionsfinderdilepton.h"
+#include "include/fourvector.h"
 #include "include/listmodus.h"
 #include "include/propagation.h"
 #include "include/scatteractionphoton.h"
@@ -30,7 +31,6 @@
 #endif
 #include "include/vtkoutput.h"
 #include "include/wallcrossingaction.h"
-#include "include/fourvector.h"
 
 namespace std {
 /**
@@ -303,6 +303,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       dileptons_switch_(config.has_value({"Output", "Dileptons"}) ?
                     config.take({"Output", "Dileptons", "Enable"}, true) :
                     false),
+      photons_switch_(config.has_value({"Output", "Photons"}) ?
+                    config.take({"Output", "Photons", "Enable"}, true) :
+                    false),              
       time_step_mode_(
           config.take({"General", "Time_Step_Mode"}, TimeStepMode::Fixed)) {
   const auto &log = logger<LogArea::Experiment>();
@@ -359,7 +362,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    **/
   if (time_step_mode_ == TimeStepMode::Adaptive) {
     adaptive_parameters_ = make_unique<AdaptiveParameters>(
-      config["General"]["Adaptive_Time_Step"]);
+      config["General"]["Adaptive_Time_Step"], delta_time_startup_);
     log.info() << *adaptive_parameters_;
   }
 
@@ -766,25 +769,26 @@ bool Experiment<Modus>::perform_action(Action &action,
   }
 
   // At every collision photons can be produced.
-  if (parameters_.photons_switch &&
-      ScatterActionPhoton::is_photon_reaction(action.incoming_particles())) {
-    // Time in the action constructor is relative to current time of incoming
-    constexpr double action_time = 0.f;
-    ScatterActionPhoton photon_act(action.incoming_particles(),
-                                   action_time, n_fractional_photons_);
-    // Add a completely dummy process to photon action.  The only important
-    // thing is that its cross-section is equal to cross-section of action.
-    // This can be done, because photon action is never performed, only
-    // final state is generated and printed to photon output.
-    photon_act.add_dummy_hadronic_channels(action.raw_weight_value());
-    // Now add the actual photon reaction channel
-    photon_act.add_single_channel();
-    for (int i = 0; i < n_fractional_photons_; i++) {
-      photon_act.generate_final_state();
-      photon_output_->at_interaction(photon_act, rho);
+  if (photons_switch_ &&
+    (ScatterActionPhoton::is_photon_reaction(action.incoming_particles())
+      != ScatterActionPhoton::ReactionType::no_reaction)) {
+        // Time in the action constructor is relative to
+        // current time of incoming
+        constexpr double action_time = 0.f;
+        ScatterActionPhoton photon_act(action.incoming_particles(),
+                                       action_time, n_fractional_photons_);
+        // Add a completely dummy process to photon action.  The only important
+        // thing is that its cross-section is equal to cross-section of action.
+        // This can be done, because photon action is never performed, only
+        // final state is generated and printed to photon output.
+        photon_act.add_dummy_hadronic_channels(action.raw_weight_value());
+        // Now add the actual photon reaction channel
+        photon_act.add_single_channel();
+        for (int i = 0; i < n_fractional_photons_; i++) {
+          photon_act.generate_final_state();
+          photon_output_->at_interaction(photon_act, rho);
+        }
     }
-  }
-
   log.debug(~einhard::Green(), "✔ ", action);
   return true;
 }
@@ -886,7 +890,8 @@ void Experiment<Modus>::run_time_evolution() {
 
 template <typename Modus>
 void Experiment<Modus>::propagate_and_shine(double to_time) {
-  const double dt = propagate_straight_line(&particles_, to_time, beam_momentum_);
+  const double dt = propagate_straight_line(
+      &particles_, to_time, beam_momentum_);
   if (dilepton_finder_ != nullptr) {
     dilepton_finder_->shine(particles_, dilepton_output_.get(), dt);
   }
@@ -1151,14 +1156,19 @@ void Experiment<Modus>::run() {
     }
     /* In the ColliderModus, if Fermi motion is frozen, assign the beam momenta to
      * the nucleons in both the projectile and the target. */
-    if (modus_.is_collider() && modus_.fermi_motion() == FermiMotion::Frozen) {
+    if (modus_.is_collider()
+        && modus_.fermi_motion() == FermiMotion::Frozen) {
         for (int i = 0; i < modus_.total_N_number(); i++) {
-            const auto mass_beam = particles_.copy_to_vector()[i].effective_mass();
-            const auto v_beam = (i < modus_.proj_N_number()) ? modus_.velocity_projectile() :
-                                modus_.velocity_target();
+            const auto mass_beam = particles_.copy_to_vector()[i]
+                .effective_mass();
+            const auto v_beam =
+                i < modus_.proj_N_number() ?
+                modus_.velocity_projectile() :
+                modus_.velocity_target();
             const auto gamma = 1.0 / std::sqrt(1.0 - v_beam * v_beam);
-            beam_momentum_.emplace_back(FourVector(gamma * mass_beam, 0.0, 0.0,
-                                      gamma * v_beam * mass_beam));
+            beam_momentum_.emplace_back(
+                FourVector(gamma * mass_beam, 0.0, 0.0,
+                           gamma * v_beam * mass_beam));
         }
     }
     /* Output at event start */

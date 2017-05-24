@@ -9,13 +9,14 @@
 
 #include "include/scatteraction.h"
 
+#include "Pythia8/Pythia.h"
+
 #include "include/constants.h"
 #include "include/cxx14compat.h"
 #include "include/fpenvironment.h"
 #include "include/kinematics.h"
 #include "include/logging.h"
 #include "include/pdgcode.h"
-#include "Pythia8/Pythia.h"
 #include "include/random.h"
 
 namespace Smash {
@@ -66,7 +67,7 @@ void ScatterAction::generate_final_state() {
     case ProcessType::TwoToTwo:
       /* 2->2 inelastic scattering */
       /* Sample the particle momenta in CM system. */
-      sample_2body_phasespace();
+      inelastic_scattering();
       break;
     case ProcessType::String:
       /* string excitation */
@@ -92,7 +93,8 @@ void ScatterAction::generate_final_state() {
 
 
 void ScatterAction::add_all_processes(float elastic_parameter,
-                                      bool two_to_one, bool two_to_two, double low_snn_cut,
+                                      bool two_to_one, bool two_to_two,
+                                      double low_snn_cut,
                                       bool strings_switch) {
   /* The string fragmentation is implemented in the same way in GiBUU (Physics Reports
    * 512(2012), 1-124, pg. 33). If the center of mass energy is low, two particles scatter
@@ -346,6 +348,29 @@ void ScatterAction::elastic_scattering() {
                  outgoing_particles_[1].effective_mass()});
 }
 
+void ScatterAction::inelastic_scattering() {
+  //create new particles
+  sample_2body_phasespace();
+  /* Set the formation time of the 2 particles to the larger formation time of the
+   * incoming particles, if it is larger than the execution time; execution time
+   * is otherwise taken to be the formation time */
+  const float t0 = incoming_particles_[0].formation_time();
+  const float t1 = incoming_particles_[1].formation_time();
+
+  const size_t index_tmax = (t0 > t1) ? 0 : 1;
+  const float sc = incoming_particles_[index_tmax].cross_section_scaling_factor();
+  if (t0 > time_of_execution_ || t1 > time_of_execution_) {
+    outgoing_particles_[0].set_formation_time(std::max(t0,t1));
+    outgoing_particles_[1].set_formation_time(std::max(t0,t1));
+    outgoing_particles_[0].set_cross_section_scaling_factor(sc);
+    outgoing_particles_[1].set_cross_section_scaling_factor(sc);
+  }
+  else {
+    outgoing_particles_[0].set_formation_time(time_of_execution_);
+    outgoing_particles_[1].set_formation_time(time_of_execution_);
+  }
+}
+
 
 void ScatterAction::resonance_formation() {
   const auto &log = logger<LogArea::ScatterAction>();
@@ -364,14 +389,20 @@ void ScatterAction::resonance_formation() {
   outgoing_particles_[0].set_4momentum(FourVector(sqrt_s(), 0., 0., 0.));
 
   /* Set the formation time of the resonance to the larger formation time of the
-   * incoming particles */
+   * incoming particles, if it is larger than the execution time; execution time
+   * is otherwise taken to be the formation time */
   const float t0 = incoming_particles_[0].formation_time();
   const float t1 = incoming_particles_[1].formation_time();
+
   const size_t index_tmax = (t0 > t1) ? 0 : 1;
-  const float sc = incoming_particles_[index_tmax].cross_section_scaling_factor();
+  const float sc =
+    incoming_particles_[index_tmax].cross_section_scaling_factor();
   if (t0 > time_of_execution_ || t1 > time_of_execution_) {
-    outgoing_particles_[0].set_formation_time(std::max(t0,t1));
+    outgoing_particles_[0].set_formation_time(std::max(t0, t1));
     outgoing_particles_[0].set_cross_section_scaling_factor(sc);
+  }
+  else {
+    outgoing_particles_[0].set_formation_time(time_of_execution_);
   }
   log.debug("Momentum of the new particle: ",
             outgoing_particles_[0].momentum());
@@ -380,6 +411,7 @@ void ScatterAction::resonance_formation() {
 /* This function will generate outgoing particles in CM frame
  * from a hard process. */
 void ScatterAction::string_excitation() {
+  assert(incoming_particles_.size() == 2);
   const auto &log = logger<LogArea::Pythia>();
   // Disable floating point exception trap for Pythia
   {
@@ -437,7 +469,7 @@ void ScatterAction::string_excitation() {
          * since SMASH only knows K0 */
         if (pythia_id == 310 || pythia_id == 130) {
           const float prob = Random::uniform(0.f, 1.f);
-          if (prob <= 0.5f){
+          if (prob <= 0.5f) {
             pythia_id = 311;
           } else {
             pythia_id = -311;
@@ -491,18 +523,26 @@ void ScatterAction::string_excitation() {
           data.set_cross_section_scaling_factor(suppression_factor * 0.0);
         }
       }
-      data.set_formation_time(formation_time_ * gamma_cm());
+      //Set formation time: actual time of collision + time to form the particle
+      data.set_formation_time(formation_time_*gamma_cm() + time_of_execution_);
       outgoing_particles_.push_back(data);
     }
     /* If the incoming particles already were unformed, the formation
      * times and cross section scaling factors need to be adjusted */
-    for (size_t i = 0; i < 2; i++) {
-      const float tform_in  = incoming_particles_[i].formation_time();
-      const float tform_out = outgoing_particles_[i].formation_time();
-      const float fin  = incoming_particles_[i].cross_section_scaling_factor();
-      const float fout = outgoing_particles_[i].cross_section_scaling_factor();
-      if (tform_in > incoming_particles_[i].position().x0()) {
+    const float tform_in = std::max(incoming_particles_[0].formation_time(),
+                                    incoming_particles_[1].formation_time());
+    if (tform_in > time_of_execution_) {
+      const float fin = (incoming_particles_[0].formation_time() >
+                         incoming_particles_[1].formation_time()) ?
+                         incoming_particles_[0].cross_section_scaling_factor() :
+                         incoming_particles_[1].cross_section_scaling_factor();
+      for (size_t i = 0; i < outgoing_particles_.size(); i++) {
+        const float tform_out = outgoing_particles_[i].formation_time();
+        const float fout = outgoing_particles_[i].cross_section_scaling_factor();
         outgoing_particles_[i].set_cross_section_scaling_factor(fin * fout);
+        /* If the unformed incoming particles' formation time is larger than
+         * the current outgoing particle's formation time, then the latter
+         * is overwritten by the former*/
         if (tform_in > tform_out) {
           outgoing_particles_[i].set_formation_time(tform_in);
         }

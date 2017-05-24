@@ -8,10 +8,12 @@
  */
 
 #include "unittest.h"
+#include "histogram.h"
 #include "setup.h"
 
 #include "../include/formfactors.h"
 #include "../include/integrate.h"
+#include "../include/kinematics.h"
 #include "../include/stringfunctions.h"
 
 using namespace Smash;
@@ -65,4 +67,25 @@ TEST(spectral_functions) {
     //^ We use a bit higher tolerance, because the numerical algorithm might underestimate
     //  the error.
   }
+}
+
+TEST(mass_sampling) {
+  const ParticleType &res = ParticleType::find(0x12212);
+  // Dummy reaction NN -> NN(1440) at sqrt(s) = 6 GeV
+  const double sqrts = 6.0;
+  const double mass_stable = 0.938;
+  const int L = 0;
+  const double dm_hist = 0.01;
+  Histogram1d hist(dm_hist);
+  // sample distribution and populate histogram
+  const int N_sample = 1000000;
+  hist.populate(N_sample, [&](){
+    return res.sample_resonance_mass(mass_stable, sqrts, L);
+  });
+  // hist.print_to_file("N1440_sampling.dat");
+  hist.test([&](double m){
+    const double pcm = pCM(sqrts, mass_stable, m);
+    const double bw = blatt_weisskopf_sqr(pcm, L);
+    return res.spectral_function(m)*pcm*bw;
+  });
 }

@@ -20,6 +20,7 @@
 #include "include/configuration.h"
 #include "include/cxx14compat.h"
 #include "include/experimentparameters.h"
+#include "include/fourvector.h"
 #include "include/interpolation.h"
 #include "include/kinematics.h"
 #include "include/logging.h"
@@ -27,7 +28,6 @@
 #include "include/particles.h"
 #include "include/pdgcode.h"
 #include "include/random.h"
-#include "include/fourvector.h"
 
 namespace Smash {
 
@@ -187,7 +187,8 @@ ColliderModus::ColliderModus(Configuration modus_config,
   const double mass_projec = projectile_->mass();
   const double mass_target = target_->mass();
   // average mass of a particle in that nucleus
-  const double mass_a = projectile_->mass() / projectile_->number_of_particles();
+  const double mass_a = projectile_->mass() /
+                        projectile_->number_of_particles();
   const double mass_b = target_->mass() / target_->number_of_particles();
   // Option 1: Center of mass energy.
   if (modus_cfg.has_value({"Sqrtsnn"})) {
@@ -275,7 +276,8 @@ ColliderModus::ColliderModus(Configuration modus_config,
         impact_interpolation_ = make_unique<InterpolateDataLinear<float>>(
             InterpolateDataLinear<float>(impacts, yields));
 
-        const auto imp_minmax = std::minmax_element(impacts.begin(), impacts.end());
+        const auto imp_minmax = std::minmax_element(impacts.begin(),
+                                                    impacts.end());
         imp_min_ = *imp_minmax.first;
         imp_max_ = *imp_minmax.second;
         yield_max_ = *std::max_element(yields.begin(), yields.end());
@@ -331,16 +333,16 @@ float ColliderModus::initial_conditions(Particles *particles,
       get_velocities(total_s_, projectile_->mass(), target_->mass());
 
   // If velocities are larger or equal to 1, throw an exception.
-  if (v_a >= 1.0 || v_b >=1.0) {
+  if (v_a >= 1.0 || v_b >= 1.0) {
     throw std::domain_error(
         "Found velocity equal to or larger than 1 in "
         "ColliderModus::initial_conditions.\nConsider using "
         "the center of velocity reference frame.");
   }
 
-  // Calculate the beam velocity of the projectile and the target, which will
-  // be used to calculate the beam momenta in experiment.cc
-  if (fermi_motion_ == FermiMotion::Frozen){
+  // Calculate the beam velocity of the projectile and the target, which will be
+  // used to calculate the beam momenta in experiment.cc
+  if (fermi_motion_ == FermiMotion::Frozen) {
       velocity_projectile_ = v_a;
       velocity_target_ = v_b;
   }

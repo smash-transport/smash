@@ -13,11 +13,11 @@
 
 #include "deformednucleus.h"
 #include "forwarddeclarations.h"
+#include "fourvector.h"
 #include "interpolation.h"
 #include "modusdefault.h"
 #include "nucleus.h"
 #include "pdgcode.h"
-#include "fourvector.h"
 
 namespace Smash {
 
@@ -57,20 +57,22 @@ class ColliderModus : public ModusDefault {
                            const ExperimentParameters &parameters);
   /// return the total test particle number of the initial nucleus
   int total_N_number() const { return target_->size()
-                                     + projectile_->size(); }
+                                    + projectile_->size(); }
   /// return the test particle number in the projectile nucleus
   int proj_N_number() const { return projectile_->size(); }
-  /** return the beam velocitis of the projectile, which will be
-   *  used to calculate the beam momenta in experiment.cc if fermi
+  /** return the beam velocity of the projectile, which will be
+   *  used to calculate the beam momenta in experiment.cc if Fermi
    *  motion is frozen.
    */
   double velocity_projectile() const { return velocity_projectile_; }
-  /** return the beam velocitis of the target, which will be
+  /** return the beam velocity of the target, which will be
    *  used to calculate the beam momenta in experiment.cc if fermi
    *  motion is frozen.
    */
   double velocity_target() const { return velocity_target_; }
-  /// return the flag: whether to allow the first collsions within the same nucleus
+  /** return the flag: whether to allow the first collsions within the same
+   *  nucleus.
+   */
   bool cll_in_nucleus() { return cll_in_nucleus_; }
   /// return the fermi motion type
   FermiMotion fermi_motion() { return fermi_motion_; }

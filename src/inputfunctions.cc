@@ -8,12 +8,12 @@
  */
 
 #include "include/inputfunctions.h"
-#include "include/stringfunctions.h"
 
 #include <sstream>
 #include <vector>
 
 #include "include/logging.h"
+#include "include/stringfunctions.h"
 
 namespace Smash {
 

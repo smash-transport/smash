@@ -14,12 +14,12 @@
 
 #include "include/angles.h"
 #include "include/constants.h"
+#include "include/fourvector.h"
 #include "include/logging.h"
 #include "include/numerics.h"
 #include "include/particles.h"
 #include "include/pdgcode.h"
 #include "include/threevector.h"
-#include "include/fourvector.h"
 
 namespace Smash {
 
@@ -360,7 +360,8 @@ void Nucleus::generate_fermi_momenta() {
     if (i->pdgcode() == pdg::n) {
       rho = rho * N_n / A;
     }
-    const double p = hbarc * std::pow(pi2_3 * rho * Random::uniform(0.0, 1.0), 1.0/3.0);
+    const double p = hbarc * std::pow(pi2_3 * rho *
+                                      Random::uniform(0.0, 1.0), 1.0/3.0);
     Angles phitheta;
     phitheta.distribute_isotropically();
     const ThreeVector ith_3momentum = phitheta.threevec() * p;

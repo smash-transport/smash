@@ -45,8 +45,8 @@ CollisionBranchList ScatterActionBaryonBaryon::two_to_two_cross_sections() {
     if (type_a.antiparticle_sign() == 1 && type_b.antiparticle_sign() == 1) {
       /* N R → N N, Δ R → N N */
       process_list = bar_bar_to_nuc_nuc(false);
-    }
-    else if (type_a.antiparticle_sign() == -1 && type_b.antiparticle_sign() == -1) {
+    } else if (type_a.antiparticle_sign() == -1
+               && type_b.antiparticle_sign() == -1) {
       /* N̅ R → N̅ N̅, Δ̅ R → N̅ N̅ */
       process_list = bar_bar_to_nuc_nuc(true);
     }
@@ -70,8 +70,9 @@ CollisionBranchList ScatterActionBaryonBaryon::bar_bar_to_nuc_nuc(
   ParticleTypePtrList nuc_or_anti_nuc;
   if (is_anti_particles) {
     nuc_or_anti_nuc = ParticleType::list_anti_nucleons();
+  } else {
+    nuc_or_anti_nuc = ParticleType::list_nucleons();
   }
-  else nuc_or_anti_nuc = ParticleType::list_nucleons();
 
   /* Loop over all nucleon or anti-nucleon charge states. */
   for (ParticleTypePtr nuc_a : nuc_or_anti_nuc) {
@@ -130,7 +131,9 @@ float ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(double sqrts,
   const float m_a = type_a.mass();
   const float m_b = type_b.mass();
   const float msqr = 2. * (m_a*m_a + m_b*m_b);
-  /** Feng */
+  /* Feng: If the c.m. energy is larger than the sum of the pole masses of the
+   * outgoing particles plus three times of the sum of the widths plus 3 GeV,
+   * the collision will be neglected.*/
   const float w_a = type_a.width_at_pole();
   const float w_b = type_b.width_at_pole();
   const float uplmt = m_a + m_b + 3.0 * (w_a + w_b) + 3.0;
@@ -151,7 +154,17 @@ float ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(double sqrts,
        if (twoI == 2) {
          return 7. / msqr;
        } else if (twoI == 0) {
-         return 14. / msqr;
+         const float parametrization = 14. / msqr;
+         /* pn → pnη cross section is known to be larger than the corresponding
+          * pp → ppη cross section by a factor of 6.5 [\iref{Calen:1998vh}].
+          * Since the eta is mainly produced by an intermediate N*(1535) we
+          * introduce an explicit isospin asymmetry for the production of N*(1535)
+          * produced in pn vs. pp similar to [\iref{Teis:1996kx}], eq. 29. */
+         if (type_a.is_Nstar1535() || type_b.is_Nstar1535()) {
+           return 6.5 * parametrization;
+         } else {
+           return parametrization;
+         }
        }
      } else if (((type_a.is_Deltastar() && type_b.is_nucleon()) ||
                  (type_b.is_Deltastar() && type_a.is_nucleon())) &&

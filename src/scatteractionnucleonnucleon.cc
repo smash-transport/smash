@@ -138,7 +138,7 @@ CollisionBranchList ScatterActionNucleonNucleon::find_xsection_from_type(
   CollisionBranchList channel_list;
   const double s = mandelstam_s();
   const double sqrts = sqrt_s();
-  
+
   /* Loop over specified first resonance list */
   for (ParticleTypePtr type_res_1 : list_res_1) {
     /* Loop over specified second resonance list */

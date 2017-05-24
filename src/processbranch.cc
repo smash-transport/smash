@@ -26,14 +26,18 @@ ParticleList ProcessBranch::particle_list() const {
 
 float ProcessBranch::threshold() const {
   if (threshold_ < 0.f) {
-    // Sum up the (minimum) masses of all final-state particles
-    double thr = 0.;  // this requires double-precision to ensure that the sum is
-                      // never smaller than the real sum would be without rounding
+    /* Sum up the (minimum) masses of all final-state particles
+     * this requires double-precision to ensure that the sum is never
+     * smaller than the real sum would be without rounding
+     */
+    double thr = 0.;
     for (const auto &type : particle_types()) {
       thr += type->minimum_mass();
     }
-    const float rounded = thr;  // This may round up or down. Up is good. If down
-                                // we must add one ULP via 'nextafter'.
+    /* This may round up or down. Up is good. If down
+     * we must add one ULP via 'nextafter'.
+     */
+    const float rounded = thr;
     threshold_ =  rounded < thr
                   ? std::nextafter(rounded, std::numeric_limits<float>::max())
                   : rounded;

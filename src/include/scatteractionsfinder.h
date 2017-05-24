@@ -113,6 +113,13 @@ class ScatterActionsFinder : public ActionFinderInterface {
    */
   void dump_reactions() const;
 
+  /**
+   * Print out partial cross-sections of all processes that can occur in
+   * the collision of a(mass = m_a) and b(mass = m_b).
+   */
+  void dump_cross_sections(const ParticleType &a, const ParticleType &b,
+                           float m_a, float m_b) const;
+
  private:
   /* Construct a ScatterAction object,
    * based on the types of the incoming particles. */

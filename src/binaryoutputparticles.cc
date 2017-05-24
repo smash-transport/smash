@@ -9,8 +9,9 @@
 
 #include "include/binaryoutputparticles.h"
 
-#include <boost/filesystem.hpp>
 #include <string>
+
+#include <boost/filesystem.hpp>
 
 #include "include/clock.h"
 #include "include/config.h"

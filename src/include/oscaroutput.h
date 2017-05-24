@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_OSCAROUTPUT_H_
 #define SRC_INCLUDE_OSCAROUTPUT_H_
 
+#include <memory>
 #include <string>
 
 #include "configuration.h"

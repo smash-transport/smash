@@ -7,15 +7,19 @@
 #ifndef SRC_INCLUDE_EXPERIMENT_H_
 #define SRC_INCLUDE_EXPERIMENT_H_
 
+#include <limits>
+#include <memory>
+#include <vector>
+
 #include "actionfinderfactory.h"
 #include "adaptiveparameters.h"
 #include "chrono.h"
 #include "decayactionsfinderdilepton.h"
 #include "energymomentumtensor.h"
+#include "fourvector.h"
 #include "pauliblocking.h"
 #include "potentials.h"
 #include "quantumnumbers.h"
-#include "fourvector.h"
 
 namespace Smash {
 
@@ -336,6 +340,11 @@ class Experiment : public ExperimentBase {
    * This indicates whether dileptons are switched on.
    */
   const bool dileptons_switch_;
+
+  /**
+   * This indicates whether photons are switched on.
+   */
+  const bool photons_switch_;
 
   /**
    * This indicates whether to use time steps.

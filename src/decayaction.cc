@@ -190,7 +190,8 @@ void DecayAction::generate_final_state() {
     log.debug("particle momenta in lrf ", p);
     p.boost_momentum(-velocity_CM);
     p.set_4position(incoming_particles_[0].position());
-    p.set_formation_time(incoming_particles_[0].formation_time());
+    p.set_formation_time(std::max(time_of_execution_,
+                                  incoming_particles_[0].formation_time()));
     p.set_cross_section_scaling_factor(
       incoming_particles_[0].cross_section_scaling_factor());
     log.debug("particle momenta in comp ", p);

@@ -10,8 +10,9 @@
 #ifndef SRC_INCLUDE_RANDOM_H_
 #define SRC_INCLUDE_RANDOM_H_
 
-#include <random>
 #include <limits>
+#include <random>
+#include <utility>
 #include <vector>
 
 namespace Smash {
@@ -76,6 +77,11 @@ template <typename T> T uniform_int(T min, T max) {
 }
 
 /** returns a uniformly distributed random number \f$\chi \in [0,1)\f$
+ *
+ * Not that the popular implementations in GCC and clang may return 1:
+ *
+ * https://gcc.gnu.org/bugzilla/show_bug.cgi?id=64351
+ * https://llvm.org/bugs/show_bug.cgi?id=18767
  */
 template <typename T = double> T canonical() {
   return std::generate_canonical<T, std::numeric_limits<double>::digits>(

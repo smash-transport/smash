@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_STRINGFUNCTIONS_H_
 
 #include <string>
+#include <vector>
 
 namespace Smash {
 
@@ -26,6 +27,13 @@ void remove_substr(std::string& s, const std::string& p);
 
 /// Removes ⁺,⁻,⁰ from string
 void isoclean(std::string& s);
+
+/// Split string by delimiter - necessary for the next function
+template<typename Out>
+void split(const std::string &s, char delim, Out result);
+
+/// Split string by delimiter
+std::vector<std::string> split(const std::string &s, char delim);
 
 namespace utf8 {
     // The functions here were taken from the Boost-licensed library UTF8-CPP.
