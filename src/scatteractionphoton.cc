@@ -71,7 +71,7 @@ void ScatterActionPhoton::generate_final_state() {
   } while (diff_cross_section(t, m3) < Random::uniform(0.f, diff_xsection_max)
            && iteration_number < 100);
 
-  // todo: this should move to kinematics.h and tested
+  // todo: this should be moved to kinematics.h and tested
   double costheta =
       (t - pow_int(m2, 2) +
        0.5 * (s + pow_int(m2, 2) - pow_int(m1, 2)) * (s - pow_int(m3, 2)) / s) /
