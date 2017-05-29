@@ -65,10 +65,11 @@ BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
    * Specifics for both particles and collisions output are the following:\n
    * **Header**
    * \code
-   *    4*char          int        int    len*char
-   * magic_number, format_version, len, smash_version
+   *    4*char       uint16_t        uint16_t      int    len*char
+   * magic_number, format_variant, format_version, len, smash_version
    * \endcode
    * \li magic_number - 4 bytes that in ASCII read as "SMSH".
+   * \li Format variant is an integer number: 0 for default, 1 for extended.
    * \li Format version is an integer number, currently it is 4.
    * \li len is the length of smash version string
    * \li smash_version is len chars that give information about SMASH version.
