@@ -124,10 +124,10 @@ void BinaryOutputCollisions::at_interaction(const Action &action,
 BinaryOutputBase::BinaryOutputBase(FILE *f, bool extended) : file_{f},
     extended_(extended) {
   std::fwrite("SMSH", 4, 1, file_.get());  // magic number
-  write(format_version_);   // file format version number
   std::uint16_t format_variant = static_cast<uint16_t>(extended_);
   write(format_variant);
-  write(VERSION_MAJOR);               // SMASH version
+  write(format_version_);   // file format version number
+  write(VERSION_MAJOR);     // SMASH version
 }
 
 
@@ -171,7 +171,7 @@ void BinaryOutputBase::write_particledata(const ParticleData &p) {
   write(p.id());
   if (extended_) {
     write(p.get_history().collisions_per_particle);
-    write(p.formation_time());  //DOUBLE?!?
+    write(p.formation_time());
     write(p.cross_section_scaling_factor());
     write(static_cast<int32_t>(p.get_history().id_process));
     write(static_cast<int32_t>((p.get_history().process_type)));
