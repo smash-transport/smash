@@ -307,6 +307,22 @@ float ParticleType::minimum_mass() const {
       for (const auto &mode : decay_modes().decay_mode_list()) {
         minimum_mass_ = std::min(minimum_mass_, mode->threshold());
       }
+      // check if spectral function is non-zero above minimum_mass_
+      const float small_m_step = 0.000511 / 10.0;  // tenth of electron mass
+      const float min_mass_before = minimum_mass_;
+      if (total_width(minimum_mass_ + small_m_step) < width_cutoff) {  // spectral_function will  be zero then
+        int steps = 0;
+        do {
+          steps += 1;
+          minimum_mass_ = minimum_mass_ + small_m_step;
+          // std::cout << "DEBUG OUT increase min_mass to " << minimum_mass_ << "  " << steps <<'\n';
+          // std::cout << "for particle: " << *this <<'\n';
+        } while(total_width(minimum_mass_) < width_cutoff);
+      std::cout << "Needed " << steps << " steps to increase minimum_mass_" <<'\n';
+      std::cout << "from min_mass_before: " << min_mass_before <<'\n';
+      std::cout << "to " << minimum_mass_ <<'\n';
+      std::cout << "for particle: " << *this <<'\n';
+      }
     }
   }
   return minimum_mass_;
