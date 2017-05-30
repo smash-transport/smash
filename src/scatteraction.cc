@@ -322,7 +322,7 @@ void ScatterAction::elastic_scattering() {
 }
 
 void ScatterAction::inelastic_scattering() {
-  //create new particles
+  // create new particles
   sample_2body_phasespace();
   /* Set the formation time of the 2 particles to the larger formation time of the
    * incoming particles, if it is larger than the execution time; execution time
@@ -331,14 +331,14 @@ void ScatterAction::inelastic_scattering() {
   const float t1 = incoming_particles_[1].formation_time();
 
   const size_t index_tmax = (t0 > t1) ? 0 : 1;
-  const float sc = incoming_particles_[index_tmax].cross_section_scaling_factor();
+  const float sc = incoming_particles_[index_tmax]
+      .cross_section_scaling_factor();
   if (t0 > time_of_execution_ || t1 > time_of_execution_) {
-    outgoing_particles_[0].set_formation_time(std::max(t0,t1));
-    outgoing_particles_[1].set_formation_time(std::max(t0,t1));
+    outgoing_particles_[0].set_formation_time(std::max(t0, t1));
+    outgoing_particles_[1].set_formation_time(std::max(t0, t1));
     outgoing_particles_[0].set_cross_section_scaling_factor(sc);
     outgoing_particles_[1].set_cross_section_scaling_factor(sc);
-  }
-  else {
+  } else {
     outgoing_particles_[0].set_formation_time(time_of_execution_);
     outgoing_particles_[1].set_formation_time(time_of_execution_);
   }
@@ -373,8 +373,7 @@ void ScatterAction::resonance_formation() {
   if (t0 > time_of_execution_ || t1 > time_of_execution_) {
     outgoing_particles_[0].set_formation_time(std::max(t0, t1));
     outgoing_particles_[0].set_cross_section_scaling_factor(sc);
-  }
-  else {
+  } else {
     outgoing_particles_[0].set_formation_time(time_of_execution_);
   }
   log.debug("Momentum of the new particle: ",
@@ -496,7 +495,8 @@ void ScatterAction::string_excitation() {
           data.set_cross_section_scaling_factor(suppression_factor * 0.0);
         }
       }
-      //Set formation time: actual time of collision + time to form the particle
+      // Set formation time: actual time of collision + time to form the
+      // particle
       data.set_formation_time(formation_time_*gamma_cm() + time_of_execution_);
       outgoing_particles_.push_back(data);
     }
@@ -511,8 +511,10 @@ void ScatterAction::string_excitation() {
                          incoming_particles_[1].cross_section_scaling_factor();
       for (size_t i = 0; i < outgoing_particles_.size(); i++) {
         const float tform_out = outgoing_particles_[i].formation_time();
-        const float fout = outgoing_particles_[i].cross_section_scaling_factor();
-        outgoing_particles_[i].set_cross_section_scaling_factor(fin * fout);
+        const float fout = outgoing_particles_[i]
+            .cross_section_scaling_factor();
+        outgoing_particles_[i]
+            .set_cross_section_scaling_factor(fin * fout);
         /* If the unformed incoming particles' formation time is larger than
          * the current outgoing particle's formation time, then the latter
          * is overwritten by the former*/

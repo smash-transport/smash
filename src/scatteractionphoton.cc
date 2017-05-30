@@ -205,7 +205,6 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
     }
 
     if (reac != ReactionType::no_reaction) {
-
       std::array<double, 2> mandelstam_t = get_t_range(sqrts, m1, m2, m3, 0.0);
       double t1 = mandelstam_t[1];
       double t2 = mandelstam_t[0];

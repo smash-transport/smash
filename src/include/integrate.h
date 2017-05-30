@@ -14,8 +14,8 @@
 #include <gsl/gsl_monte_plain.h>
 #include <gsl/gsl_monte_vegas.h>
 
-#include <sstream>
 #include <memory>
+#include <sstream>
 #include <tuple>
 #include <utility>
 
