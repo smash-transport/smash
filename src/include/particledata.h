@@ -278,7 +278,7 @@ class ParticleData {
   /** Formation time at which the particle is fully formed
    *  given as an absolute value in the computational frame
    */
-  float formation_time_ = 0.0;
+  double formation_time_ = 0.0;
   /// cross section scaling factor for unformed particles
   float cross_section_scaling_factor_ = 1.0;
   // history information
