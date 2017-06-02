@@ -430,6 +430,7 @@ N(1990)
 0.03   3  Λ K
 0.23   4  N σ  # σ and ππ combined
 # From UrQMD
+# FIXME The UrQMD papers are ambigious whether this state produces φ
 
 N(2080)
 0.42   2  N π
