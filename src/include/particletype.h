@@ -180,6 +180,20 @@ class ParticleType {
   float minimum_mass() const;
 
   /**
+   * The minimum mass of the resonance, where the spectral function is non-zero.
+   *
+   * Calculate the the smallest mass where the spectral function still has a
+   * contribution.
+   * This value can be different from minimum_mass, if the spectral function
+   * becomes zero at masses higher than minimum_mass.
+   *
+   * \return The minimum mass that a particle of this type can assume, where the
+   * spectral function still has a non-zero value.
+   */
+  float min_mass_spectral_func_non_zero() const;
+
+
+  /**
    * Get the mass-dependent partial decay width of a particle with mass m
    * in a particular decay mode.
    *
@@ -459,6 +473,8 @@ class ParticleType {
      so it's logically const, but not physically const, which is a classical
      case for using mutable. */
   mutable float minimum_mass_;
+  /// minimum mass, where the spectral function is non-zero
+  mutable float min_mass_spectral_func_non_zero_;
   /** This normalization factor ensures that the spectral function is normalized
    * to unity, when integrated over its full domain. */
   mutable float norm_factor_ = -1.;
