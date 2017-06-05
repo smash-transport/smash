@@ -98,14 +98,13 @@ void ScatterActionPhoton::generate_final_state() {
                                        -phitheta.threevec() * pcm_out);
 
   /* Weighing of the fractional photons */
-  std::cout << "xsec " << "\t" << cross_section()  << std::endl;
 
-  if (number_of_fractional_photons_ > 1) {
+//  if (number_of_fractional_photons_ > 1) {
     weight_ = diff_cross_section(t, m3) * (t2 - t1)
           / (number_of_fractional_photons_ * cross_section());
-  } else {
-    weight_ = proc->weight() / cross_section();
-  }
+  //} else {
+  //  weight_ = proc->weight() / cross_section();
+  //}
   /* Set positions & boost to computational frame. */
   for (ParticleData &new_particle : outgoing_particles_) {
     new_particle.set_4position(middle_point);
@@ -381,7 +380,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
                                       m_pi_2 * (t2 - t1) / (t1 * t2))) *
                      to_mb; */
 
-                     xsection = to_mb*(pow(Const,2)*pow(ghat,4)*((pow(eta1 - eta2,2)*(-2*eta1*eta2*
+           xsection = to_mb*(pow(Const,2)*pow(ghat,4)*((pow(eta1 - eta2,2)*(-2*eta1*eta2*
                       (pow(ma1,8) + pow(m_pi,8) - pow(m_pi,4)*pow(mrho,4) - 2*pow(ma1,2)*pow(m_pi,2)*(pow(m_pi,2) - pow(mrho,2))*(pow(mrho,2) + s) +
                         pow(ma1,6)*(-4*pow(m_pi,2) + 2*s) + pow(ma1,4)*
                          (4*pow(m_pi,4) - pow(mrho,4) + 2*pow(m_pi,2)*(pow(mrho,2) - 2*s) - 2*pow(mrho,2)*s + 2*pow(s,2))) +

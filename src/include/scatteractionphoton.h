@@ -28,7 +28,6 @@ class ScatterActionPhoton : public ScatterAction {
   float raw_weight_value() const override { return weight_; }
 
   float cross_section() const override {
-    std::cout << total_cross_section_ << "\t" << cross_section_photons_ << std::endl;
     return total_cross_section_ + cross_section_photons_;
   }
 
