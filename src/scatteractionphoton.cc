@@ -57,19 +57,33 @@ void ScatterActionPhoton::generate_final_state() {
 
   assert(t1 < t2);
   const double stepsize = (t2-t1)/100.0;
-  for (double t = t1; t < t2; t += stepsize) {
-    float diff_xsection_max = std::max(diff_cross_section(t, m3),
-                                              diff_xsection_max);
-  }
-
-  float t = Random::uniform(t1, t2);
+  double t_max = t1;
   float diff_xsection_max = 0;
+  for (double t = t1; t < t2; t += stepsize) {
+    float diff_xsec_new = diff_cross_section(t, m3);
+    if (diff_xsec_new > diff_xsection_max) {
+      t_max = t;
+      diff_xsection_max = diff_xsec_new;
+    }
+    //float diff_xsection_max = std::max(diff_cross_section(t, m3),
+      //                                        diff_xsection_max);
+  }
+  float t = t_max;
+
+
+
+  /*float t = Random::uniform(t1, t2);
+  float t_max = t;
+  float diff_xsection_max = 0;
+  float diff_max = 0;
   int iteration_number = 0;
   do {
     t = Random::uniform(t1, t2);
     iteration_number++;
+    t_max = t;
+    diff_max = diff_cross_section(t, m3);
   } while (diff_cross_section(t, m3) < Random::uniform(0.f, diff_xsection_max)
-           && iteration_number < 100);
+           && iteration_number < 100); */
 
   // todo: this should move to kinematics.h and tested
   double costheta =
@@ -84,6 +98,8 @@ void ScatterActionPhoton::generate_final_state() {
                                        -phitheta.threevec() * pcm_out);
 
   /* Weighing of the fractional photons */
+  std::cout << "xsec " << "\t" << cross_section()  << std::endl;
+
   if (number_of_fractional_photons_ > 1) {
     weight_ = diff_cross_section(t, m3) * (t2 - t1)
           / (number_of_fractional_photons_ * cross_section());
@@ -143,8 +159,8 @@ ScatterActionPhoton::ReactionType
     case(pack(pdg::pi_p, pdg::pi_m)):
     case(pack(pdg::pi_m, pdg::pi_p)):
       return ReactionType::pi_pi;*/
-    case(pack(pdg::pi_z, pdg::rho_z)):
-      return ReactionType::pi0_rho0;
+  //  case(pack(pdg::pi_z, pdg::rho_z)):
+  //    return ReactionType::pi0_rho0;
     default:
       return ReactionType::no_reaction;
   }
@@ -200,6 +216,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
   }
 
   if (pion_found) {
+
     // do a check according to incoming_particles_ and calculate the
     // cross sections (xsection) for all possible reactions
 
@@ -220,8 +237,8 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
 
     if (reac != ReactionType::no_reaction) {
       std::array<double, 2> mandelstam_t = get_t_range(sqrts, m1, m2, m3, 0.0);
-      double t1 = mandelstam_t[1];
-      double t2 = mandelstam_t[0];
+      double t1;
+      double t2;
 
       //double u1 = pow_int(m1, 2) + pow_int(m2, 2) + pow_int(m3, 2) - s - t1;
       //double u2 = pow_int(m1, 2) + pow_int(m2, 2) + pow_int(m3, 2) - s - t2;
@@ -229,7 +246,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
       //double e, I0, I1;
       float xsection = 0.0;
 
-      Integrator1dMonte integrate;
+      // Integrator1dMonte integrate;
 
       switch (reac) {
         /* case ReactionType::pi_pi:  // there are three possible reaction channels
@@ -340,6 +357,10 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
             part_out = pi_minus_particle;
           }
           m3 = part_out->mass();
+
+          mandelstam_t = get_t_range(sqrts, m1, m2, m3, 0.0);
+          t1 = mandelstam_t[1];
+          t2 = mandelstam_t[0];
 
           /*if (incoming_particles_[0].pdgcode().is_rho()){
             mrho = incoming_particles_[0].effective_mass();
@@ -806,16 +827,16 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
               *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
           break; */
 
-        case ReactionType::pi0_rho0:
+      /*  case ReactionType::pi0_rho0:
           part_out = pi0_particle;
-          m3 = part_out->mass();
+          m3 = part_out->mass(); */
 
           /*if (part_a.pdgcode().is_rho()) {
             m_rho_case = part_a.effective_mass();
           } else if (part_b.pdgcode().is_rho()) {
             m_rho_case = part_b.effective_mass();
           }*/
-          xsection = to_mb*(pow(Const,2)*pow(g_POR,4)*((pow(pow(m_omega,2) - s,2)*(pow(m_pi,8) - 2*pow(m_pi,6)*pow(m_rho,2) + pow(m_pi,4)*(pow(m_rho,4) + 4*pow(m_omega,4) - 2*pow(m_omega,2)*s) +
+          /*xsection = to_mb*(pow(Const,2)*pow(g_POR,4)*((pow(pow(m_omega,2) - s,2)*(pow(m_pi,8) - 2*pow(m_pi,6)*pow(m_rho,2) + pow(m_pi,4)*(pow(m_rho,4) + 4*pow(m_omega,4) - 2*pow(m_omega,2)*s) +
             pow(m_omega,4)*(pow(m_rho,4) + pow(m_omega,4) + 2*pow(m_omega,2)*s + 2*pow(s,2) - 2*pow(m_rho,2)*(pow(m_omega,2) + s)) -
             2*pow(m_pi,2)*pow(m_omega,2)*(pow(m_rho,4) + 2*pow(m_omega,2)*(pow(m_omega,2) + s) - pow(m_rho,2)*(2*pow(m_omega,2) + s))))/(pow(m_omega,2) - t2) +
        (pow(m_pi,8) - 2*pow(m_pi,6)*pow(m_rho,2) + 3*pow(m_omega,8) - 4*pow(m_omega,6)*s - 7*pow(m_omega,4)*pow(s,2) + 4*pow(m_omega,2)*pow(s,3) + 5*pow(s,4) +
@@ -846,7 +867,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
 
             process_list.push_back(make_unique<CollisionBranch>(
             *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
-            break;
+            break; */
 
         case ReactionType::no_reaction:
           // never reached
@@ -1154,7 +1175,7 @@ float ScatterActionPhoton::diff_cross_section(float t, float m3) const {
       diff_xsection = diff_xsection * (u * (s - m_pi_2) * (t - m_pi_2) -
                                        m_pi_2 * pow_int(u - m_eta_2, 2));
       break;*/
-    case ReactionType::pi0_rho0:
+  //  case ReactionType::pi0_rho0:
 
     /*if (incoming_particles_[0].pdgcode().is_rho()) {
       m_rho_case = incoming_particles_[0].effective_mass();
@@ -1162,7 +1183,7 @@ float ScatterActionPhoton::diff_cross_section(float t, float m3) const {
       m_rho_case = incoming_particles_[1].effective_mass();
     }*/
 
-      diff_xsection = (pow(Const,2)*pow(g_POR,4)*(pow(m_omega,4)*pow(s,4) + 4*pow(m_omega,4)*pow(s,3)*t - 4*pow(m_omega,2)*pow(s,4)*t + 10*pow(m_omega,4)*pow(s,2)*pow(t,2) -
+    /*  diff_xsection = (pow(Const,2)*pow(g_POR,4)*(pow(m_omega,4)*pow(s,4) + 4*pow(m_omega,4)*pow(s,3)*t - 4*pow(m_omega,2)*pow(s,4)*t + 10*pow(m_omega,4)*pow(s,2)*pow(t,2) -
        16*pow(m_omega,2)*pow(s,3)*pow(t,2) + 5*pow(s,4)*pow(t,2) + 4*pow(m_omega,4)*s*pow(t,3) - 16*pow(m_omega,2)*pow(s,2)*pow(t,3) +
        10*pow(s,3)*pow(t,3) + pow(m_omega,4)*pow(t,4) - 4*pow(m_omega,2)*s*pow(t,4) + 5*pow(s,2)*pow(t,4) + pow(m_pi,8)*pow(-2*pow(m_omega,2) + s + t,2) -
        2*pow(m_pi,6)*pow(m_rho,2)*(2*pow(m_omega,4) + pow(s,2) + pow(t,2) - 2*pow(m_omega,2)*(s + t)) +
@@ -1174,7 +1195,7 @@ float ScatterActionPhoton::diff_cross_section(float t, float m3) const {
        2*pow(m_pi,2)*(2*(s + t)*pow(-2*s*t + pow(m_omega,2)*(s + t),2) + pow(m_rho,4)*(-4*pow(m_omega,2)*s*t + pow(m_omega,4)*(s + t) + s*t*(s + t)) -
           pow(m_rho,2)*(-10*pow(m_omega,2)*s*t*(s + t) + 2*pow(m_omega,4)*(pow(s,2) + 3*s*t + pow(t,2)) + s*t*(pow(s,2) + 8*s*t + pow(t,2))))))/
    (128.*Pi*pow(pow(m_omega,2) - s,2)*(pow(pow(m_pi,2) - pow(m_rho,2),2) - 2*(pow(m_pi,2) + pow(m_rho,2))*s + pow(s,2))*pow(pow(m_omega,2) - t,2));
-      break;
+      break; */
     case ReactionType::no_reaction:
       // never reached
       break;
