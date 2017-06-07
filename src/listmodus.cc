@@ -9,6 +9,7 @@
 
 #include "include/listmodus.h"
 
+#include <cfloat>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -96,7 +97,7 @@ std::ostream &operator<<(std::ostream &out, const ListModus &m) {
  * Choose the earliest formation time as start_time_ */
 std::pair<bool, double> ListModus::check_formation_time_(
                             const std::string & particle_list) {
-    double earliest_formation_time = FLT_MAX;
+    double earliest_formation_time = DBL_MAX;
     double formation_time_difference = 0.0;
     double reference_formation_time = 0.0;  // avoid compiler warning
     for (const Line &line : line_parser(particle_list)) {
