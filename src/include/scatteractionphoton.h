@@ -58,7 +58,7 @@ class ScatterActionPhoton : public ScatterAction {
     //pi0_rho,
     //pi_eta,
     //pi_pi,
-    //pi0_rho0
+    pi0_rho0
   };
 
   ReactionType reac = ReactionType::no_reaction;

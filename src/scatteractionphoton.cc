@@ -143,8 +143,8 @@ ScatterActionPhoton::ReactionType
     case(pack(pdg::pi_p, pdg::pi_m)):
     case(pack(pdg::pi_m, pdg::pi_p)):
       return ReactionType::pi_pi;*/
-  //  case(pack(pdg::pi_z, pdg::rho_z)):
-  //    return ReactionType::pi0_rho0;
+    case(pack(pdg::pi_z, pdg::rho_z)):
+      return ReactionType::pi0_rho0;
     default:
       return ReactionType::no_reaction;
   }
@@ -365,7 +365,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
                                       m_pi_2 * (t2 - t1) / (t1 * t2))) *
                      to_mb; */
 
-           xsection = to_mb*(pow(Const,2)*pow(ghat,4)*((pow(eta1 - eta2,2)*(-2*eta1*eta2*
+           xsection = to_mb*1/3.0*(pow(Const,2)*pow(ghat,4)*((pow(eta1 - eta2,2)*(-2*eta1*eta2*
                       (pow(ma1,8) + pow(m_pi,8) - pow(m_pi,4)*pow(mrho,4) - 2*pow(ma1,2)*pow(m_pi,2)*(pow(m_pi,2) - pow(mrho,2))*(pow(mrho,2) + s) +
                         pow(ma1,6)*(-4*pow(m_pi,2) + 2*s) + pow(ma1,4)*
                          (4*pow(m_pi,4) - pow(mrho,4) + 2*pow(m_pi,2)*(pow(mrho,2) - 2*s) - 2*pow(mrho,2)*s + 2*pow(s,2))) +
@@ -811,16 +811,19 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
               *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
           break; */
 
-      /*  case ReactionType::pi0_rho0:
+        case ReactionType::pi0_rho0:
           part_out = pi0_particle;
-          m3 = part_out->mass(); */
+          m3 = part_out->mass();
 
+          mandelstam_t = get_t_range(sqrts, m1, m2, m3, 0.0);
+          t1 = mandelstam_t[1];
+          t2 = mandelstam_t[0];
           /*if (part_a.pdgcode().is_rho()) {
             m_rho_case = part_a.effective_mass();
           } else if (part_b.pdgcode().is_rho()) {
             m_rho_case = part_b.effective_mass();
           }*/
-          /*xsection = to_mb*(pow(Const,2)*pow(g_POR,4)*((pow(pow(m_omega,2) - s,2)*(pow(m_pi,8) - 2*pow(m_pi,6)*pow(m_rho,2) + pow(m_pi,4)*(pow(m_rho,4) + 4*pow(m_omega,4) - 2*pow(m_omega,2)*s) +
+          xsection = to_mb*1/3.0*(pow(Const,2)*pow(g_POR,4)*((pow(pow(m_omega,2) - s,2)*(pow(m_pi,8) - 2*pow(m_pi,6)*pow(m_rho,2) + pow(m_pi,4)*(pow(m_rho,4) + 4*pow(m_omega,4) - 2*pow(m_omega,2)*s) +
             pow(m_omega,4)*(pow(m_rho,4) + pow(m_omega,4) + 2*pow(m_omega,2)*s + 2*pow(s,2) - 2*pow(m_rho,2)*(pow(m_omega,2) + s)) -
             2*pow(m_pi,2)*pow(m_omega,2)*(pow(m_rho,4) + 2*pow(m_omega,2)*(pow(m_omega,2) + s) - pow(m_rho,2)*(2*pow(m_omega,2) + s))))/(pow(m_omega,2) - t2) +
        (pow(m_pi,8) - 2*pow(m_pi,6)*pow(m_rho,2) + 3*pow(m_omega,8) - 4*pow(m_omega,6)*s - 7*pow(m_omega,4)*pow(s,2) + 4*pow(m_omega,2)*pow(s,3) + 5*pow(s,4) +
@@ -847,11 +850,11 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
              pow(m_rho,2)*(4*pow(m_omega,4) - 7*pow(m_omega,2)*s - pow(s,2))) +
           pow(m_omega,2)*(2*pow(m_omega,6) + pow(m_rho,4)*(pow(m_omega,2) - s) - 4*pow(m_omega,2)*pow(s,2) - 3*pow(s,3) +
              pow(m_rho,2)*(-3*pow(m_omega,4) + 2*pow(m_omega,2)*s + 3*pow(s,2))))*log((-pow(m_omega,2) + t2)/(-pow(m_omega,2) + t1))))/
-   (128.0*M_PI*pow(pow(m_omega,2) - s,2)*(pow(m_pi,4) + pow(pow(m_rho,2) - s,2) - 2*pow(m_pi,2)*(pow(m_rho,2) + s)));
+             (128.0*M_PI*pow(pow(m_omega,2) - s,2)*(pow(m_pi,4) + pow(pow(m_rho,2) - s,2) - 2*pow(m_pi,2)*(pow(m_rho,2) + s)));
 
             process_list.push_back(make_unique<CollisionBranch>(
             *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
-            break; */
+            break;
 
         case ReactionType::no_reaction:
           // never reached
@@ -1049,7 +1052,7 @@ float ScatterActionPhoton::diff_cross_section(float t, float m3) const {
                ((s - pow_int(m2, 2) + m_pi_2) / (s - m_pi_2) +
                 m_pi_2 / (t - m_pi_2))); */
 
-      diff_xsection = (pow(Const,2)*pow(ghat,4)*((-8*pow(-2 + delta,2)*pow(m_pi,2))/(pow(mrho,2)*pow(pow(m_pi,2) - s,2)) -
+      diff_xsection = 1/3.0*(pow(Const,2)*pow(ghat,4)*((-8*pow(-2 + delta,2)*pow(m_pi,2))/(pow(mrho,2)*pow(pow(m_pi,2) - s,2)) -
        (8*pow(-2 + delta,2)*pow(m_pi,2)*(pow(m_pi,4) + pow(pow(mrho,2) - t,2) - 2*pow(m_pi,2)*(pow(mrho,2) + t)))/
         (pow(mrho,2)*(pow(m_pi,4) + pow(pow(mrho,2) - s,2) - 2*pow(m_pi,2)*(pow(mrho,2) + s))*pow(pow(m_pi,2) - t,2)) +
        (4*(-2 + delta)*(eta1 - eta2)*(pow(ma1,2) - s)*(-(eta2*(pow(m_pi,2) + s)) + eta1*(-pow(mrho,2) + s + t))*
@@ -1159,7 +1162,7 @@ float ScatterActionPhoton::diff_cross_section(float t, float m3) const {
       diff_xsection = diff_xsection * (u * (s - m_pi_2) * (t - m_pi_2) -
                                        m_pi_2 * pow_int(u - m_eta_2, 2));
       break;*/
-  //  case ReactionType::pi0_rho0:
+    case ReactionType::pi0_rho0:
 
     /*if (incoming_particles_[0].pdgcode().is_rho()) {
       m_rho_case = incoming_particles_[0].effective_mass();
@@ -1167,7 +1170,7 @@ float ScatterActionPhoton::diff_cross_section(float t, float m3) const {
       m_rho_case = incoming_particles_[1].effective_mass();
     }*/
 
-    /*  diff_xsection = (pow(Const,2)*pow(g_POR,4)*(pow(m_omega,4)*pow(s,4) + 4*pow(m_omega,4)*pow(s,3)*t - 4*pow(m_omega,2)*pow(s,4)*t + 10*pow(m_omega,4)*pow(s,2)*pow(t,2) -
+      diff_xsection = 1/3.0*(pow(Const,2)*pow(g_POR,4)*(pow(m_omega,4)*pow(s,4) + 4*pow(m_omega,4)*pow(s,3)*t - 4*pow(m_omega,2)*pow(s,4)*t + 10*pow(m_omega,4)*pow(s,2)*pow(t,2) -
        16*pow(m_omega,2)*pow(s,3)*pow(t,2) + 5*pow(s,4)*pow(t,2) + 4*pow(m_omega,4)*s*pow(t,3) - 16*pow(m_omega,2)*pow(s,2)*pow(t,3) +
        10*pow(s,3)*pow(t,3) + pow(m_omega,4)*pow(t,4) - 4*pow(m_omega,2)*s*pow(t,4) + 5*pow(s,2)*pow(t,4) + pow(m_pi,8)*pow(-2*pow(m_omega,2) + s + t,2) -
        2*pow(m_pi,6)*pow(m_rho,2)*(2*pow(m_omega,4) + pow(s,2) + pow(t,2) - 2*pow(m_omega,2)*(s + t)) +
@@ -1179,7 +1182,7 @@ float ScatterActionPhoton::diff_cross_section(float t, float m3) const {
        2*pow(m_pi,2)*(2*(s + t)*pow(-2*s*t + pow(m_omega,2)*(s + t),2) + pow(m_rho,4)*(-4*pow(m_omega,2)*s*t + pow(m_omega,4)*(s + t) + s*t*(s + t)) -
           pow(m_rho,2)*(-10*pow(m_omega,2)*s*t*(s + t) + 2*pow(m_omega,4)*(pow(s,2) + 3*s*t + pow(t,2)) + s*t*(pow(s,2) + 8*s*t + pow(t,2))))))/
    (128.*Pi*pow(pow(m_omega,2) - s,2)*(pow(pow(m_pi,2) - pow(m_rho,2),2) - 2*(pow(m_pi,2) + pow(m_rho,2))*s + pow(s,2))*pow(pow(m_omega,2) - t,2));
-      break; */
+      break;
     case ReactionType::no_reaction:
       // never reached
       break;
