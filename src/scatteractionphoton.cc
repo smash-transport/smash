@@ -57,33 +57,19 @@ void ScatterActionPhoton::generate_final_state() {
 
   assert(t1 < t2);
   const double stepsize = (t2-t1)/100.0;
-  double t_max = t1;
-  float diff_xsection_max = 0;
   for (double t = t1; t < t2; t += stepsize) {
-    float diff_xsec_new = diff_cross_section(t, m3);
-    if (diff_xsec_new > diff_xsection_max) {
-      t_max = t;
-      diff_xsection_max = diff_xsec_new;
-    }
-    //float diff_xsection_max = std::max(diff_cross_section(t, m3),
-      //                                        diff_xsection_max);
+    float diff_xsection_max = std::max(diff_cross_section(t, m3),
+                                       diff_xsection_max);
   }
-  float t = t_max;
 
-
-
-  /*float t = Random::uniform(t1, t2);
-  float t_max = t;
+  float t = Random::uniform(t1, t2);
   float diff_xsection_max = 0;
-  float diff_max = 0;
   int iteration_number = 0;
   do {
     t = Random::uniform(t1, t2);
     iteration_number++;
-    t_max = t;
-    diff_max = diff_cross_section(t, m3);
   } while (diff_cross_section(t, m3) < Random::uniform(0.f, diff_xsection_max)
-           && iteration_number < 100); */
+           && iteration_number < 100);
 
   // todo: this should move to kinematics.h and tested
   double costheta =
@@ -98,13 +84,12 @@ void ScatterActionPhoton::generate_final_state() {
                                        -phitheta.threevec() * pcm_out);
 
   /* Weighing of the fractional photons */
-
-//  if (number_of_fractional_photons_ > 1) {
+  if (number_of_fractional_photons_ > 1) {
     weight_ = diff_cross_section(t, m3) * (t2 - t1)
           / (number_of_fractional_photons_ * cross_section());
-  //} else {
-  //  weight_ = proc->weight() / cross_section();
-  //}
+  } else {
+    weight_ = proc->weight() / cross_section();
+  }
   /* Set positions & boost to computational frame. */
   for (ParticleData &new_particle : outgoing_particles_) {
     new_particle.set_4position(middle_point);
