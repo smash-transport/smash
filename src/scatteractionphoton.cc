@@ -160,7 +160,6 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
   ParticleTypePtr pi_plus_particle = &ParticleType::find(pdg::pi_p);
   ParticleTypePtr pi_minus_particle = &ParticleType::find(pdg::pi_m);
   ParticleTypePtr photon_particle = &ParticleType::find(pdg::photon);
-  ParticleTypePtr omega_particle = &ParticleType::find(pdg::omega);
   const float m_rho = rho0_particle->mass();
   //const float m_rho_2 = pow_int(m_rho, 2);
   const float m_pi = pi0_particle->mass();
@@ -182,7 +181,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
   const float C4 = -0.14095;
   const float Gammaa1 = 0.4;
   const float Pi = M_PI;
-  float m_omega = omega_particle->mass();
+  float m_omega = 0.783;
   float mrho = m_rho;
 
   ParticleData part_a = incoming_particles_[0];
@@ -993,7 +992,7 @@ float ScatterActionPhoton::diff_cross_section(float t, float m3) const {
   const float C4 = -0.14095;
   const float Gammaa1 = 0.4;
   const float Pi = M_PI;
-  float m_omega = ParticleType::find(pdg::omega).mass();
+  float m_omega = 0.783;
 //  float m_rho_case = m_rho;
   float mrho = m_rho;
 
