@@ -77,8 +77,10 @@ class Action {
   void add_process(ProcessBranchPtr<Branch> &p,
                    ProcessBranchList<Branch>& subprocesses,
                    float& total_weight) {
-    total_weight += p->weight();
-    subprocesses.emplace_back(std::move(p));
+    if (p->weight() > 0) {
+      total_weight += p->weight();
+      subprocesses.emplace_back(std::move(p));
+    }
   }
   /** Add several new subprocesses at once.  */
   template<typename Branch>
@@ -86,8 +88,10 @@ class Action {
       ProcessBranchList<Branch>& subprocesses, float& total_weight) {
     subprocesses.reserve(subprocesses.size() + pv.size());
     for (auto &proc : pv) {
-      total_weight += proc->weight();
-      subprocesses.emplace_back(std::move(proc));
+      if (proc->weight() > 0) {
+        total_weight += proc->weight();
+        subprocesses.emplace_back(std::move(proc));
+      }
     }
   }
 
