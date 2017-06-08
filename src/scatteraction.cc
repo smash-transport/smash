@@ -103,11 +103,13 @@ void ScatterAction::add_all_processes(float elastic_parameter,
   if (two_to_two) {
     /** Elastic collisions between two nucleons with sqrt_s() below
      * low_snn_cut can not happen*/
-    if (!incoming_particles_[0].type().is_nucleon() ||
-        !incoming_particles_[1].type().is_nucleon() ||
-        !(incoming_particles_[0].type().antiparticle_sign() ==
-          incoming_particles_[1].type().antiparticle_sign()) ||
-        sqrt_s() >= low_snn_cut) {
+    const ParticleType& t1 = incoming_particles_[0].type();
+    const ParticleType& t2 = incoming_particles_[1].type();
+    const bool both_are_nucleons = t1.is_nucleon() && t2.is_nucleon();
+    const bool reject_by_nucleon_elastic_cutoff = both_are_nucleons
+                           && t1.antiparticle_sign() == t2.antiparticle_sign()
+                           && sqrt_s() < low_snn_cut;
+    if (!reject_by_nucleon_elastic_cutoff) {
         add_collision(elastic_cross_section(elastic_parameter));
     }
     /* 2->2 (inelastic) */
