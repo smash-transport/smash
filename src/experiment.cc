@@ -305,7 +305,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
                     false),
       photons_switch_(config.has_value({"Output", "Photons"}) ?
                     config.take({"Output", "Photons", "Enable"}, true) :
-                    false),              
+                    false),
       time_step_mode_(
           config.take({"General", "Time_Step_Mode"}, TimeStepMode::Fixed)) {
   const auto &log = logger<LogArea::Experiment>();

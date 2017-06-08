@@ -7,8 +7,12 @@
 #ifndef SRC_INCLUDE_GRANDCAN_THERMALIZER_H_
 #define SRC_INCLUDE_GRANDCAN_THERMALIZER_H_
 
+#include <vector>
+
+#include "angles.h"
 #include "clock.h"
 #include "configuration.h"
+#include "distributions.h"
 #include "density.h"
 #include "forwarddeclarations.h"
 #include "hadgas_eos.h"
@@ -33,6 +37,7 @@ class ThermLatticeNode {
   double T()   const { return T_; }
   double mub() const { return mub_; }
   double mus() const { return mus_; }
+
  private:
   FourVector Tmu0_;
   double nb_;
@@ -95,10 +100,75 @@ class GrandCanThermalizer {
                           double time, int ntest);
 
   // Functions for mode-sampling algorithm
-  void compute_N_in_cells_mode_algo(
-                        std::function<bool(int, int, int)> condition);
+  template <typename F>
+  void compute_N_in_cells_mode_algo(F &&condition) {
+    N_in_cells_.clear();
+    N_total_in_cells_ = 0.0;
+    for (auto cell_index : cells_to_sample_) {
+      const ThermLatticeNode cell = (*lat_)[cell_index];
+      const double gamma = 1.0 / std::sqrt(1.0 - cell.v().sqr());
+      double N_tot = 0.0;
+      for (ParticleTypePtr i : eos_typelist_) {
+        if (condition(i->strangeness(), i->baryon_number(), i->charge())) {
+          // N_i = n u^mu dsigma_mu = (isochronous hypersurface) n * V * gamma
+          N_tot += cell_volume_ * gamma *
+            HadronGasEos::partial_density(*i, cell.T(), cell.mub(), cell.mus());
+        }
+      }
+      N_in_cells_.push_back(N_tot);
+      N_total_in_cells_ += N_tot;
+    }
+  }
+
+  template <typename F>
   ParticleData sample_in_random_cell_mode_algo(const double time,
-                        std::function<bool(int, int, int)> condition);
+                                               F &&condition) {
+    // Choose random cell, probability = N_in_cell/N_total
+    double r = Random::uniform(0.0, N_total_in_cells_);
+    double partial_sum = 0.0;
+    int index_only_thermalized = -1;
+    while (partial_sum < r) {
+      index_only_thermalized++;
+      partial_sum += N_in_cells_[index_only_thermalized];
+    }
+    const int cell_index = cells_to_sample_[index_only_thermalized];
+    const ThermLatticeNode cell = (*lat_)[cell_index];
+    const ThreeVector cell_center = lat_->cell_center(cell_index);
+    const double gamma = 1.0 / std::sqrt(1.0 - cell.v().sqr());
+    const double N_in_cell = N_in_cells_[index_only_thermalized];
+
+    // Which sort to sample - probability N_i/N_tot
+    r = Random::uniform(0.0, N_in_cell);
+    double N_sum = 0.0;
+    ParticleTypePtr type_to_sample;
+    for (ParticleTypePtr i : eos_typelist_) {
+      if (!condition(i->strangeness(), i->baryon_number(), i->charge())) {
+        continue;
+      }
+      N_sum += cell_volume_ * gamma *
+        HadronGasEos::partial_density(*i, cell.T(), cell.mub(), cell.mus());
+      if (N_sum >= r) {
+        type_to_sample = i;
+        break;
+      }
+    }
+
+    ParticleData particle(*type_to_sample);
+    // Note: it's pole mass for resonances!
+    const double m = static_cast<double>(type_to_sample->mass());
+    // Position
+    particle.set_4position(FourVector(time, cell_center + uniform_in_cell()));
+    // Momentum
+    double momentum_radial = sample_momenta_from_thermal(cell.T(), m);
+    Angles phitheta;
+    phitheta.distribute_isotropically();
+    particle.set_4momentum(m, phitheta.threevec() * momentum_radial);
+    particle.boost_momentum(-cell.v());
+
+    return particle;
+  }
+
+
   void thermalize_mode_algo(ParticleList& sampled_list,
                             QuantumNumbers& conserved_initial,
                             double time);

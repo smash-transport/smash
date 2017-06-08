@@ -189,18 +189,21 @@ void GrandCanThermalizer::thermalize(Particles& particles,
   }
   log.info("Number of cells in the thermalization region = ",
            cells_to_sample_.size(), ", its total volume [fm^3]: ",
-           cells_to_sample_.size()*cell_volume_, ", in \% of lattice: ",
+           cells_to_sample_.size()*cell_volume_, ", in % of lattice: ",
            100.0*cells_to_sample_.size()/lattice_total_cells);
 
   ParticleList sampled_list;
-  if (algorithm_ == ThermalizationAlgorithm::BiasedBF ||
-      algorithm_ == ThermalizationAlgorithm::UnbiasedBF) {
-    thermalize_BF_algo(sampled_list, conserved_initial, time, ntest);
-  } else if (algorithm_ == ThermalizationAlgorithm::ModeSampling) {
-    thermalize_mode_algo(sampled_list, conserved_initial, time);
-  } else {
-    throw std::invalid_argument("This thermalization algorithm is"
-                                " not yet implemented");
+  switch (algorithm_) {
+    case ThermalizationAlgorithm::BiasedBF:
+    case ThermalizationAlgorithm::UnbiasedBF:
+      thermalize_BF_algo(sampled_list, conserved_initial, time, ntest);
+      break;
+    case ThermalizationAlgorithm::ModeSampling:
+      thermalize_mode_algo(sampled_list, conserved_initial, time);
+      break;
+    default:
+      throw std::invalid_argument("This thermalization algorithm is"
+                                  " not yet implemented");
   }
   log.info("Sampled ", sampled_list.size(), " particles.");
 
@@ -318,8 +321,8 @@ void GrandCanThermalizer::renormalize_momenta(ParticleList& plist,
   log.info("Required 4-momentum: ", required_total_momentum);
   log.info("Sampled 4-momentum: ", conserved.momentum());
   const ThreeVector mom_to_add = (required_total_momentum.threevec()
-                                  - conserved.momentum().threevec()
-                                 ) / plist.size();
+                                  - conserved.momentum().threevec())
+                                 / plist.size();
   log.info("Adjusting momenta by ", mom_to_add);
   for (auto &particle : plist) {
     particle.set_4momentum(particle.type().mass(),
@@ -373,74 +376,6 @@ void GrandCanThermalizer::renormalize_momenta(ParticleList& plist,
                            (1+a)*particle.momentum().threevec());
     particle.boost_momentum(-beta_CM_required);
   }
-}
-
-void GrandCanThermalizer::compute_N_in_cells_mode_algo(
-               std::function<bool(int, int, int)> condition) {
-  N_in_cells_.clear();
-  N_total_in_cells_ = 0.0;
-  for(auto cell_index : cells_to_sample_) {
-    const ThermLatticeNode cell = (*lat_)[cell_index];
-    const double gamma = 1.0 / std::sqrt(1.0 - cell.v().sqr());
-    double N_tot = 0.0;
-    for (ParticleTypePtr i : eos_typelist_) {
-      if (condition(i->strangeness(), i->baryon_number(), i->charge())) {
-        // N_i = n u^mu dsigma_mu = (isochronous hypersurface) n * V * gamma
-        N_tot += cell_volume_ * gamma *
-          HadronGasEos::partial_density(*i, cell.T(), cell.mub(), cell.mus());
-      }
-    }
-    N_in_cells_.push_back(N_tot);
-    N_total_in_cells_ += N_tot;
-  }
-}
-
-ParticleData GrandCanThermalizer::sample_in_random_cell_mode_algo(
-                const double time,
-                std::function<bool(int, int, int)> condition) {
-  // Choose random cell, probability = N_in_cell/N_total
-  double r = Random::uniform(0.0, N_total_in_cells_);
-  double partial_sum = 0.0;
-  int index_only_thermalized = -1;
-  while (partial_sum < r) {
-    index_only_thermalized++;
-    partial_sum += N_in_cells_[index_only_thermalized];
-  }
-  const int cell_index = cells_to_sample_[index_only_thermalized];
-  const ThermLatticeNode cell = (*lat_)[cell_index];
-  const ThreeVector cell_center = lat_->cell_center(cell_index);
-  const double gamma = 1.0 / std::sqrt(1.0 - cell.v().sqr());
-  const double N_in_cell = N_in_cells_[index_only_thermalized];
-
-  // Which sort to sample - probability N_i/N_tot
-  r = Random::uniform(0.0, N_in_cell);
-  double N_sum = 0.0;
-  ParticleTypePtr type_to_sample;
-  for (ParticleTypePtr i : eos_typelist_) {
-    if (!condition(i->strangeness(), i->baryon_number(), i->charge())) {
-      continue;
-    }
-    N_sum += cell_volume_ * gamma *
-      HadronGasEos::partial_density(*i, cell.T(), cell.mub(), cell.mus());
-    if (N_sum >= r) {
-      type_to_sample = i;
-      break;
-    }
-  }
-
-  ParticleData particle(*type_to_sample);
-  // Note: it's pole mass for resonances!
-  const double m = static_cast<double>(type_to_sample->mass());
-  // Position
-  particle.set_4position(FourVector(time, cell_center + uniform_in_cell()));
-  // Momentum
-  double momentum_radial = sample_momenta_from_thermal(cell.T(), m);
-  Angles phitheta;
-  phitheta.distribute_isotropically();
-  particle.set_4momentum(m, phitheta.threevec() * momentum_radial);
-  particle.boost_momentum(-cell.v());
-
-  return particle;
 }
 
 void GrandCanThermalizer::thermalize_mode_algo(
