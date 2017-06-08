@@ -71,8 +71,9 @@ TEST(elastic_collision) {
   // add elastic channel
   constexpr float sigma = 10.0;
   constexpr bool strings_switch = false;
-  constexpr NNbarTreatment nnbar_detbal = NNbarTreatment::NoAnnihilation;
-  act.add_all_processes(sigma, true, true, 0., strings_switch, nnbar_detbal);
+  constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
+  act.add_all_processes(sigma, true, true, 0., strings_switch,
+                        nnbar_treatment);
 
   // check cross section
   COMPARE(act.cross_section(), sigma);
@@ -144,9 +145,9 @@ TEST(outgoing_valid) {
   // add processes
   constexpr float elastic_parameter = 0.f;  // don't include elastic scattering
   constexpr bool strings_switch = false;
-  constexpr NNbarTreatment nnbar_detbal = NNbarTreatment::NoAnnihilation;
+  constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act->add_all_processes(elastic_parameter, true, true, 0., strings_switch,
-                         nnbar_detbal);
+                         nnbar_treatment);
 
   VERIFY(act->cross_section() > 0.f);
 
@@ -200,9 +201,9 @@ TEST(pythia_running) {
   // add processes
   constexpr float elastic_parameter = 0.f;  // don't include elastic scattering
   constexpr bool strings_switch = true;
-  constexpr NNbarTreatment nnbar_detbal = NNbarTreatment::NoAnnihilation;
+  constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act->add_all_processes(elastic_parameter, false, false, 0., strings_switch,
-                         nnbar_detbal);
+                         nnbar_treatment);
 
   VERIFY(act->cross_section() > 0.f);
 
@@ -245,8 +246,8 @@ TEST(update_incoming) {
   // add elastic channel
   constexpr float sigma = 10.0;
   bool string_switch = true;
-  NNbarTreatment nnbar_detbal = NNbarTreatment::NoAnnihilation;
-  act.add_all_processes(sigma, true, true, 0., string_switch, nnbar_detbal);
+  NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
+  act.add_all_processes(sigma, true, true, 0., string_switch, nnbar_treatment);
 
   // change the position of one of the particles
   const FourVector new_position(0.1, 0., 0., 0.);

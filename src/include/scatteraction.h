@@ -69,8 +69,9 @@ inline float detailed_balance_factor_RR(float sqrts, float pcm,
     spin_factor /= (particle_a.spin() + 1)*(particle_b.spin() + 1);
     float symmetry_factor = (1 + (particle_a == particle_b));
     symmetry_factor /= (1 + (particle_c == particle_d));
-    const float momentum_factor = pCM_sqr(sqrts, particle_c.mass(), particle_d.mass())
-        / (pcm * particle_a.iso_multiplet()->get_integral_RR(particle_b, sqrts));
+    const float momentum_factor = pCM_sqr(
+        sqrts, particle_c.mass(), particle_d.mass()) /
+        (pcm * particle_a.iso_multiplet()->get_integral_RR(particle_b, sqrts));
     return spin_factor * symmetry_factor * momentum_factor;
 }
 

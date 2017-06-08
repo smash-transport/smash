@@ -356,8 +356,8 @@ class Configuration {
       if (s == "no annihilation") {
         return NNbarTreatment::NoAnnihilation;
       }
-      if (s == "detailed balance") {
-        return NNbarTreatment::DetBal;
+      if (s == "resonances") {
+        return NNbarTreatment::Resonances;
       }
       if (s == "strings") {
         return NNbarTreatment::Strings;
@@ -365,7 +365,6 @@ class Configuration {
       throw IncorrectTypeInAssignment(
           "The value for key \"" + std::string(key_) + "\" should be "
           + "\"no annihilation\", \"detailed balance\", or \"strings\".");
-
     }
 
     operator Sampling() const {

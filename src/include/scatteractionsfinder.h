@@ -145,7 +145,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const double low_snn_cut_;
   /** Switch to turn off string excitation. */
   const bool strings_switch_;
-  /** Switch for  NNbar reactions */
+  /** Switch for NNbar reactions */
   const NNbarTreatment nnbar_treatment_;
   /** Parameter to record whether the nucleon
    *  has experienced a collision or not*/

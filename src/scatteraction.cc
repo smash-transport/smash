@@ -16,9 +16,9 @@
 #include "include/fpenvironment.h"
 #include "include/kinematics.h"
 #include "include/logging.h"
+#include "include/parametrizations.h"
 #include "include/pdgcode.h"
 #include "include/random.h"
-#include "include/parametrizations.h"
 
 namespace Smash {
 
@@ -118,7 +118,7 @@ void ScatterAction::add_all_processes(float elastic_parameter,
   /** NNbar annihilation thru NNbar → ρh₁(1170); combined with the decays
    *  ρ → ππ and h₁(1170) → πρ, this gives a final state of 5 pions.
    *  Only use in cases when detailed balance MUST happen, i.e. in a box! */
-  if (nnbar_treatment == NNbarTreatment::DetBal) {//might want to use a switch
+  if (nnbar_treatment == NNbarTreatment::Resonances) {
     if (incoming_particles_[0].type().is_nucleon() &&
         incoming_particles_[1].type().pdgcode() ==
         incoming_particles_[0].type().get_antiparticle()->pdgcode()) {
@@ -141,24 +141,25 @@ void ScatterAction::add_all_processes(float elastic_parameter,
    * with, i.e. p/n, p/nbar, pi+, pi- and pi0 */
     bool a_in_pythia = false;
     bool b_in_pythia = false;
-    if (incoming_particles_[0].type().is_nucleon() ||
-        incoming_particles_[0].type().pdgcode().is_pion() ) {
+    bool is_nnbar = false;
+    const ParticleType& t1 = incoming_particles_[0].type();
+    const ParticleType& t2 = incoming_particles_[1].type();
+    if (t1.is_nucleon() || t1.pdgcode().is_pion()) {
         a_in_pythia = true;
     }
-    if (incoming_particles_[1].type().is_nucleon() ||
-        incoming_particles_[1].type().pdgcode().is_pion() ) {
+    if (t2.is_nucleon() || t2.pdgcode().is_pion()) {
         b_in_pythia = true;
     }
-    if (a_in_pythia && b_in_pythia &&
-        (nnbar_treatment != NNbarTreatment::Strings ||
-         (nnbar_treatment == NNbarTreatment::Strings &&
-          incoming_particles_[0].type().antiparticle_sign() ==
-          incoming_particles_[1].type().antiparticle_sign()))) {
-      add_collision(string_excitation_cross_section());
+    if (t1.is_nucleon() && t2.is_nucleon() &&
+        t1.antiparticle_sign() != t2.antiparticle_sign()) {
+        is_nnbar = true;
+    }
+    if (a_in_pythia && b_in_pythia) && (!is_nnbar ||
+       is_nnbar && nnbar_treatment == NNbarTreatment::Strings) {
+       add_collision(string_excitation_cross_section());
     }
   }
 }
-
 
 float ScatterAction::raw_weight_value() const {
   return total_cross_section_;
@@ -252,7 +253,7 @@ CollisionBranchPtr ScatterAction::NNbar_annihilation_cross_section() {
    * Parametrized total minus all other present channels.*/
   float nnbar_xsec = std::max(0.f, total_cross_section() - cross_section());
   log.debug("NNbar cross section is: ", nnbar_xsec);
-  //Make collision channel NNbar -> ρh₁(1170); eventually decays into 5π
+  // Make collision channel NNbar -> ρh₁(1170); eventually decays into 5π
   return make_unique<CollisionBranch>(ParticleType::find(pdg::h1),
            ParticleType::find(pdg::rho_z), nnbar_xsec, ProcessType::TwoToTwo);
 }
@@ -269,8 +270,8 @@ CollisionBranchList ScatterAction::NNbar_creation_cross_section() {
   const auto& type_N = ParticleType::find(pdg::p);
   const auto& type_Nbar = ParticleType::find(-pdg::p);
 
-  //Check available energy
-  if(sqrts - 2*type_N.mass() < 0) {
+  // Check available energy
+  if (sqrts - 2*type_N.mass() < 0) {
     return channel_list;
   }
 
@@ -281,8 +282,9 @@ CollisionBranchList ScatterAction::NNbar_creation_cross_section() {
   log.debug("NNbar reverse cross section is: ", xsection);
   channel_list.push_back(make_unique<CollisionBranch>(type_N, type_Nbar,
                                       xsection, ProcessType::TwoToTwo));
-  channel_list.push_back(make_unique<CollisionBranch>(ParticleType::find(pdg::n),
-                 ParticleType::find(-pdg::n), xsection, ProcessType::TwoToTwo));
+  channel_list.push_back(make_unique<CollisionBranch>(
+                 ParticleType::find(pdg::n), ParticleType::find(-pdg::n),
+                 xsection, ProcessType::TwoToTwo));
   return channel_list;
 }
 
@@ -596,6 +598,7 @@ void ScatterAction::string_excitation() {
     log.debug("Outgoing momenta string:", out_mom);
   }
 }
+
 void ScatterAction::format_debug_output(std::ostream &out) const {
   out << "Scatter of " << incoming_particles_;
   if (outgoing_particles_.empty()) {

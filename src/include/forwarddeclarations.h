@@ -130,7 +130,7 @@ enum class BoxInitialCondition {
 
 enum class NNbarTreatment {
   NoAnnihilation,
-  DetBal,
+  Resonances,
   Strings,
 };
 
