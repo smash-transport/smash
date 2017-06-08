@@ -351,6 +351,23 @@ class Configuration {
           "\" should be \"thermal momenta\" or \"peaked momenta\".");
     }
 
+    operator NNbarTreatment() const {
+      const std::string s = operator std::string();
+      if (s == "no annihilation") {
+        return NNbarTreatment::NoAnnihilation;
+      }
+      if (s == "detailed balance") {
+        return NNbarTreatment::DetBal;
+      }
+      if (s == "strings") {
+        return NNbarTreatment::Strings;
+      }
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) + "\" should be "
+          + "\"no annihilation\", \"detailed balance\", or \"strings\".");
+
+    }
+
     operator Sampling() const {
       const std::string s = operator std::string();
       if (s == "quadratic") {

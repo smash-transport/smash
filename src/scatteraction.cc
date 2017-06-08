@@ -97,7 +97,7 @@ void ScatterAction::add_all_processes(float elastic_parameter,
                                       bool two_to_one, bool two_to_two,
                                       double low_snn_cut,
                                       bool strings_switch,
-                                      bool nnbar_detbal) {
+                                      NNbarTreatment nnbar_treatment) {
   if (two_to_one) {
     /* resonance formation (2->1) */
     add_collisions(resonance_cross_sections());
@@ -118,7 +118,7 @@ void ScatterAction::add_all_processes(float elastic_parameter,
   /** NNbar annihilation thru NNbar → ρh₁(1170); combined with the decays
    *  ρ → ππ and h₁(1170) → πρ, this gives a final state of 5 pions.
    *  Only use in cases when detailed balance MUST happen, i.e. in a box! */
-  if (nnbar_detbal) {
+  if (nnbar_treatment == NNbarTreatment::DetBal) {//might want to use a switch
     if (incoming_particles_[0].type().is_nucleon() &&
         incoming_particles_[1].type().pdgcode() ==
         incoming_particles_[0].type().get_antiparticle()->pdgcode()) {

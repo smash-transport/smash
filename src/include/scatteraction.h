@@ -143,7 +143,7 @@ class ScatterAction : public Action {
   /** Add all possible subprocesses for this action object. */
   virtual void add_all_processes(float elastic_parameter,
     bool two_to_one, bool two_to_two, double low_snn_cut,
-    bool strings_switch, bool nnbar_detbal);
+    bool strings_switch, NNbarTreatment nnbar_treatment);
 
   /**
    * Determine the (parametrized) total cross section for this collision. This

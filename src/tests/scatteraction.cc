@@ -71,7 +71,7 @@ TEST(elastic_collision) {
   // add elastic channel
   constexpr float sigma = 10.0;
   constexpr bool strings_switch = false;
-  constexpr bool nnbar_detbal = false;
+  constexpr NNbarTreatment nnbar_detbal = NNbarTreatment::NoAnnihilation;
   act.add_all_processes(sigma, true, true, 0., strings_switch, nnbar_detbal);
 
   // check cross section
@@ -144,7 +144,7 @@ TEST(outgoing_valid) {
   // add processes
   constexpr float elastic_parameter = 0.f;  // don't include elastic scattering
   constexpr bool strings_switch = false;
-  constexpr bool nnbar_detbal = false;
+  constexpr NNbarTreatment nnbar_detbal = NNbarTreatment::NoAnnihilation;
   act->add_all_processes(elastic_parameter, true, true, 0., strings_switch,
                          nnbar_detbal);
 
@@ -200,7 +200,7 @@ TEST(pythia_running) {
   // add processes
   constexpr float elastic_parameter = 0.f;  // don't include elastic scattering
   constexpr bool strings_switch = true;
-  constexpr bool nnbar_detbal = false;
+  constexpr NNbarTreatment nnbar_detbal = NNbarTreatment::NoAnnihilation;
   act->add_all_processes(elastic_parameter, false, false, 0., strings_switch,
                          nnbar_detbal);
 
@@ -245,7 +245,7 @@ TEST(update_incoming) {
   // add elastic channel
   constexpr float sigma = 10.0;
   bool string_switch = true;
-  bool nnbar_detbal = false;
+  NNbarTreatment nnbar_detbal = NNbarTreatment::NoAnnihilation;
   act.add_all_processes(sigma, true, true, 0., string_switch, nnbar_detbal);
 
   // change the position of one of the particles
