@@ -84,17 +84,10 @@ class Action {
   template<typename Branch>
   void add_processes(ProcessBranchList<Branch> pv,
       ProcessBranchList<Branch>& subprocesses, float& total_weight) {
-    if (subprocesses.empty()) {
-      subprocesses = std::move(pv);
-      for (auto &proc : subprocesses) {
-        total_weight += proc->weight();
-      }
-    } else {
-      subprocesses.reserve(subprocesses.size() + pv.size());
-      for (auto &proc : pv) {
-        total_weight += proc->weight();
-        subprocesses.emplace_back(std::move(proc));
-      }
+    subprocesses.reserve(subprocesses.size() + pv.size());
+    for (auto &proc : pv) {
+      total_weight += proc->weight();
+      subprocesses.emplace_back(std::move(proc));
     }
   }
 
