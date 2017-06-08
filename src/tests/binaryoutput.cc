@@ -142,7 +142,8 @@ TEST(fullhistory_format) {
 
   /* Create elastic interaction (smashon + smashon). */
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.f);
-  action->add_all_processes(10., true, true, 0., true);
+  action->add_all_processes(10., true, true, 0., true,
+                            NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
   ParticleList final_particles = action->outgoing_particles();
   const double rho = 0.123;
