@@ -56,6 +56,27 @@ inline float detailed_balance_factor_RK(float sqrts, float pcm,
 }
 
 /**
+ * Calculate the detailed balance factor R such that
+ * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
+ * where $A$ and $B$ are unstable, and $C$ and $D$ are stable.
+ */
+inline float detailed_balance_factor_RR(float sqrts, float pcm,
+               const ParticleType& particle_a, const ParticleType& particle_b,
+               const ParticleType& particle_c, const ParticleType& particle_d) {
+    assert(!particle_a.is_stable());
+    assert(!particle_b.is_stable());
+    float spin_factor = (particle_c.spin() + 1)*(particle_d.spin() + 1);
+    spin_factor /= (particle_a.spin() + 1)*(particle_b.spin() + 1);
+    float symmetry_factor = (1 + (particle_a == particle_b));
+    symmetry_factor /= (1 + (particle_c == particle_d));
+    const float momentum_factor = pCM_sqr(
+        sqrts, particle_c.mass(), particle_d.mass()) /
+        (pcm * particle_a.iso_multiplet()->get_integral_RR(particle_b, sqrts));
+    return spin_factor * symmetry_factor * momentum_factor;
+}
+
+
+/**
  * Add a 2-to-2 channel to a collision branch list given a cross section.
  *
  * The cross section is only calculated if there is enough energy
@@ -122,7 +143,8 @@ class ScatterAction : public Action {
 
   /** Add all possible subprocesses for this action object. */
   virtual void add_all_processes(float elastic_parameter,
-    bool two_to_one, bool two_to_two, double low_snn_cut, bool strings_switch);
+    bool two_to_one, bool two_to_two, double low_snn_cut,
+    bool strings_switch, NNbarTreatment nnbar_treatment);
 
   /**
    * Determine the (parametrized) total cross section for this collision. This
@@ -153,6 +175,21 @@ class ScatterAction : public Action {
    * final-state IDs.
    */
   CollisionBranchPtr elastic_cross_section(float elast_par);
+
+  /**
+   * Determine the cross section for NNbar annihilation, which is given by the
+   * difference between the parametrized total cross section and all the
+   * explicitly implemented channels at low energy (in this case only elastic).
+   * This method has to be called after all other processes
+   * have been added to the Action object.
+   */
+  CollisionBranchPtr NNbar_annihilation_cross_section();
+
+  /**
+   * Determine the cross section for NNbar annihilation, which is given by
+   * detailed balance from the reverse reaction. See NNbar_annihilation_cross_section
+   */
+  CollisionBranchList NNbar_creation_cross_section();
 
   /**
    * Determine the cross section for string excitations, which is given by the

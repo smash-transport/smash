@@ -139,16 +139,16 @@ class IsoParticleType {
    */
   static void create_multiplet(const ParticleType &type);
 
-  /// Look up the tabulated resonance integral for the NN -> NR cross section.
+  /// Look up the tabulated resonance integral for the XX -> NR cross section.
   double get_integral_NR(double sqrts);
 
-  /// Look up the tabulated resonance integral for the NN -> RR cross section.
+  /// Look up the tabulated resonance integral for the XX -> RR cross section.
   double get_integral_RR(const ParticleType &type_res_2, double sqrts);
 
-  /// Utility function to help compute various NN->RR spectral integrals
+  /// Utility function to help compute various XX->RR spectral integrals
   TabulationPtr integrate_RR(ParticleTypePtr &type_res_2);
 
-  /// Look up the tabulated resonance integral for the NK -> RK cross section.
+  /// Look up the tabulated resonance integral for the XX -> RK cross section.
   double get_integral_RK(double sqrts);
 
  private:

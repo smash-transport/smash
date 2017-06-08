@@ -16,6 +16,7 @@
 #include "include/fpenvironment.h"
 #include "include/kinematics.h"
 #include "include/logging.h"
+#include "include/parametrizations.h"
 #include "include/pdgcode.h"
 #include "include/random.h"
 
@@ -95,7 +96,8 @@ void ScatterAction::generate_final_state() {
 void ScatterAction::add_all_processes(float elastic_parameter,
                                       bool two_to_one, bool two_to_two,
                                       double low_snn_cut,
-                                      bool strings_switch) {
+                                      bool strings_switch,
+                                      NNbarTreatment nnbar_treatment) {
   if (two_to_one) {
     /* resonance formation (2->1) */
     add_collisions(resonance_cross_sections());
@@ -103,15 +105,33 @@ void ScatterAction::add_all_processes(float elastic_parameter,
   if (two_to_two) {
     /** Elastic collisions between two nucleons with sqrt_s() below
      * low_snn_cut can not happen*/
-    if (!incoming_particles_[0].type().is_nucleon() ||
-        !incoming_particles_[1].type().is_nucleon() ||
-        !(incoming_particles_[0].type().antiparticle_sign() ==
-          incoming_particles_[1].type().antiparticle_sign()) ||
-        sqrt_s() >= low_snn_cut) {
+    const ParticleType& t1 = incoming_particles_[0].type();
+    const ParticleType& t2 = incoming_particles_[1].type();
+    const bool both_are_nucleons = t1.is_nucleon() && t2.is_nucleon();
+    const bool reject_by_nucleon_elastic_cutoff = both_are_nucleons
+                           && t1.antiparticle_sign() == t2.antiparticle_sign()
+                           && sqrt_s() < low_snn_cut;
+    if (!reject_by_nucleon_elastic_cutoff) {
         add_collision(elastic_cross_section(elastic_parameter));
     }
     /* 2->2 (inelastic) */
     add_collisions(two_to_two_cross_sections());
+  }
+  /** NNbar annihilation thru NNbar → ρh₁(1170); combined with the decays
+   *  ρ → ππ and h₁(1170) → πρ, this gives a final state of 5 pions.
+   *  Only use in cases when detailed balance MUST happen, i.e. in a box! */
+  if (nnbar_treatment == NNbarTreatment::Resonances) {
+    if (incoming_particles_[0].type().is_nucleon() &&
+        incoming_particles_[1].type().pdgcode() ==
+        incoming_particles_[0].type().get_antiparticle()->pdgcode()) {
+      add_collision(NNbar_annihilation_cross_section());
+    }
+    if ((incoming_particles_[0].type().pdgcode() == pdg::rho_z &&
+         incoming_particles_[1].type().pdgcode() == pdg::h1) ||
+        (incoming_particles_[0].type().pdgcode() == pdg::h1 &&
+         incoming_particles_[1].type().pdgcode() == pdg::rho_z)) {
+      add_collisions(NNbar_creation_cross_section());
+    }
   }
   /* string excitation: the sqrt(s) cut-off is the sum of the masses of the
    * incoming particles + 2 GeV, which is given by PYTHIA as the
@@ -123,20 +143,25 @@ void ScatterAction::add_all_processes(float elastic_parameter,
    * with, i.e. p/n, p/nbar, pi+, pi- and pi0 */
     bool a_in_pythia = false;
     bool b_in_pythia = false;
-    if (incoming_particles_[0].type().is_nucleon() ||
-        incoming_particles_[0].type().pdgcode().is_pion() ) {
+    bool is_nnbar = false;
+    const ParticleType& t1 = incoming_particles_[0].type();
+    const ParticleType& t2 = incoming_particles_[1].type();
+    if (t1.is_nucleon() || t1.pdgcode().is_pion()) {
         a_in_pythia = true;
     }
-    if (incoming_particles_[1].type().is_nucleon() ||
-        incoming_particles_[1].type().pdgcode().is_pion() ) {
+    if (t2.is_nucleon() || t2.pdgcode().is_pion()) {
         b_in_pythia = true;
     }
-    if (a_in_pythia && b_in_pythia) {
-      add_collision(string_excitation_cross_section());
+    if (t1.is_nucleon() && t2.is_nucleon() &&
+        t1.antiparticle_sign() != t2.antiparticle_sign()) {
+        is_nnbar = true;
+    }
+    if ((a_in_pythia && b_in_pythia) && (!is_nnbar ||
+        (is_nnbar && nnbar_treatment == NNbarTreatment::Strings))) {
+       add_collision(string_excitation_cross_section());
     }
   }
 }
-
 
 float ScatterAction::raw_weight_value() const {
   return total_cross_section_;
@@ -222,6 +247,47 @@ CollisionBranchPtr ScatterAction::elastic_cross_section(float elast_par) {
   return make_unique<CollisionBranch>(incoming_particles_[0].type(),
                                       incoming_particles_[1].type(),
                                       elastic_xs, ProcessType::Elastic);
+}
+
+CollisionBranchPtr ScatterAction::NNbar_annihilation_cross_section() {
+  const auto &log = logger<LogArea::ScatterAction>();
+  /* Calculate NNbar cross section:
+   * Parametrized total minus all other present channels.*/
+  float nnbar_xsec = std::max(0.f, total_cross_section() - cross_section());
+  log.debug("NNbar cross section is: ", nnbar_xsec);
+  // Make collision channel NNbar -> ρh₁(1170); eventually decays into 5π
+  return make_unique<CollisionBranch>(ParticleType::find(pdg::h1),
+           ParticleType::find(pdg::rho_z), nnbar_xsec, ProcessType::TwoToTwo);
+}
+
+CollisionBranchList ScatterAction::NNbar_creation_cross_section() {
+  const auto &log = logger<LogArea::ScatterAction>();
+  CollisionBranchList channel_list;
+  /* Calculate NNbar reverse cross section:
+   * from reverse reaction (see NNbar_annihilation_cross_section).*/
+  const double s = mandelstam_s();
+  const double sqrts = sqrt_s();
+  const double pcm = cm_momentum();
+
+  const auto& type_N = ParticleType::find(pdg::p);
+  const auto& type_Nbar = ParticleType::find(-pdg::p);
+
+  // Check available energy
+  if (sqrts - 2*type_N.mass() < 0) {
+    return channel_list;
+  }
+
+  float xsection = detailed_balance_factor_RR(sqrts, pcm,
+          incoming_particles_[0].type(), incoming_particles_[1].type(),
+          type_N, type_Nbar) *
+          std::max(0.f, ppbar_total(s) - ppbar_elastic(s));
+  log.debug("NNbar reverse cross section is: ", xsection);
+  channel_list.push_back(make_unique<CollisionBranch>(type_N, type_Nbar,
+                                      xsection, ProcessType::TwoToTwo));
+  channel_list.push_back(make_unique<CollisionBranch>(
+                 ParticleType::find(pdg::n), ParticleType::find(-pdg::n),
+                 xsection, ProcessType::TwoToTwo));
+  return channel_list;
 }
 
 CollisionBranchPtr ScatterAction::string_excitation_cross_section() {
@@ -322,7 +388,7 @@ void ScatterAction::elastic_scattering() {
 }
 
 void ScatterAction::inelastic_scattering() {
-  //create new particles
+  // create new particles
   sample_2body_phasespace();
   /* Set the formation time of the 2 particles to the larger formation time of the
    * incoming particles, if it is larger than the execution time; execution time
@@ -331,14 +397,14 @@ void ScatterAction::inelastic_scattering() {
   const float t1 = incoming_particles_[1].formation_time();
 
   const size_t index_tmax = (t0 > t1) ? 0 : 1;
-  const float sc = incoming_particles_[index_tmax].cross_section_scaling_factor();
+  const float sc = incoming_particles_[index_tmax]
+      .cross_section_scaling_factor();
   if (t0 > time_of_execution_ || t1 > time_of_execution_) {
-    outgoing_particles_[0].set_formation_time(std::max(t0,t1));
-    outgoing_particles_[1].set_formation_time(std::max(t0,t1));
+    outgoing_particles_[0].set_formation_time(std::max(t0, t1));
+    outgoing_particles_[1].set_formation_time(std::max(t0, t1));
     outgoing_particles_[0].set_cross_section_scaling_factor(sc);
     outgoing_particles_[1].set_cross_section_scaling_factor(sc);
-  }
-  else {
+  } else {
     outgoing_particles_[0].set_formation_time(time_of_execution_);
     outgoing_particles_[1].set_formation_time(time_of_execution_);
   }
@@ -373,8 +439,7 @@ void ScatterAction::resonance_formation() {
   if (t0 > time_of_execution_ || t1 > time_of_execution_) {
     outgoing_particles_[0].set_formation_time(std::max(t0, t1));
     outgoing_particles_[0].set_cross_section_scaling_factor(sc);
-  }
-  else {
+  } else {
     outgoing_particles_[0].set_formation_time(time_of_execution_);
   }
   log.debug("Momentum of the new particle: ",
@@ -496,7 +561,8 @@ void ScatterAction::string_excitation() {
           data.set_cross_section_scaling_factor(suppression_factor * 0.0);
         }
       }
-      //Set formation time: actual time of collision + time to form the particle
+      // Set formation time: actual time of collision + time to form the
+      // particle
       data.set_formation_time(formation_time_*gamma_cm() + time_of_execution_);
       outgoing_particles_.push_back(data);
     }
@@ -511,8 +577,10 @@ void ScatterAction::string_excitation() {
                          incoming_particles_[1].cross_section_scaling_factor();
       for (size_t i = 0; i < outgoing_particles_.size(); i++) {
         const float tform_out = outgoing_particles_[i].formation_time();
-        const float fout = outgoing_particles_[i].cross_section_scaling_factor();
-        outgoing_particles_[i].set_cross_section_scaling_factor(fin * fout);
+        const float fout = outgoing_particles_[i]
+            .cross_section_scaling_factor();
+        outgoing_particles_[i]
+            .set_cross_section_scaling_factor(fin * fout);
         /* If the unformed incoming particles' formation time is larger than
          * the current outgoing particle's formation time, then the latter
          * is overwritten by the former*/
@@ -532,6 +600,7 @@ void ScatterAction::string_excitation() {
     log.debug("Outgoing momenta string:", out_mom);
   }
 }
+
 void ScatterAction::format_debug_output(std::ostream &out) const {
   out << "Scatter of " << incoming_particles_;
   if (outgoing_particles_.empty()) {

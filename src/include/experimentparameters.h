@@ -42,6 +42,12 @@ struct ExperimentParameters {
   */
   bool strings_switch;
   /**
+  * This indicates how NN̅ annihilation should be treated; options are to
+  * neglect it, make it conserve detailed balance using NN̅ → h₁(1170)ρ
+  * (which goes to 5 pions on average) or use strings.
+  */
+  NNbarTreatment nnbar_treatment;
+  /**
   * This indicates whether photons are switched on.
   */
   bool photons_switch;
