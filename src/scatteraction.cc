@@ -149,7 +149,11 @@ void ScatterAction::add_all_processes(float elastic_parameter,
         incoming_particles_[1].type().pdgcode().is_pion() ) {
         b_in_pythia = true;
     }
-    if (a_in_pythia && b_in_pythia) {
+    if (a_in_pythia && b_in_pythia &&
+        (nnbar_treatment != NNbarTreatment::Strings ||
+         (nnbar_treatment == NNbarTreatment::Strings &&
+          incoming_particles_[0].type().antiparticle_sign() ==
+          incoming_particles_[1].type().antiparticle_sign()))) {
       add_collision(string_excitation_cross_section());
     }
   }
