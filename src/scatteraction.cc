@@ -154,8 +154,8 @@ void ScatterAction::add_all_processes(float elastic_parameter,
         t1.antiparticle_sign() != t2.antiparticle_sign()) {
         is_nnbar = true;
     }
-    if (a_in_pythia && b_in_pythia) && (!is_nnbar ||
-       is_nnbar && nnbar_treatment == NNbarTreatment::Strings) {
+    if ((a_in_pythia && b_in_pythia) && (!is_nnbar ||
+        (is_nnbar && nnbar_treatment == NNbarTreatment::Strings))) {
        add_collision(string_excitation_cross_section());
     }
   }
