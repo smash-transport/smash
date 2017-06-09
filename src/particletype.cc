@@ -329,18 +329,18 @@ float ParticleType::min_mass_spectral() const {
       if (this->spectral_function(minimum_mass()) < really_small) { // otherwise no need to search
         // find right bound that has a non-zero spectral_function value
         const float m_step_MeV = 0.001;
-        float right_bound_bis = minimum_mass(); // start
+        float right_bound_bis = minimum_mass();
         for (unsigned int i = 0; ; i++) {
-          right_bound_bis = minimum_mass() + i*m_step;
+          right_bound_bis = minimum_mass() + i*m_step_MeV;
           // this is the criterion where spectral function is set zero
           if (this->spectral_function(right_bound_bis) > really_small) {
             break;
           }
         }
         // bisection
-        float left_bound_bis = right_bound_bis - m_step;
+        float left_bound_bis = right_bound_bis - m_step_MeV;
         float mid;
-        float precision_keV = 1E-6
+        float precision_keV = 1E-6;
         while (right_bound_bis - left_bound_bis >  precision_keV)  {
           mid = (left_bound_bis + right_bound_bis) / 2.0;
           if (this->spectral_function(mid) > really_small) {
