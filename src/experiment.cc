@@ -177,6 +177,9 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
   const bool two_to_two = config.take({"Collision_Term", "Two_to_Two"}, true);
   const bool strings_switch = config.take({"Collision_Term", "Strings"}, false);
+  const NNbarTreatment nnbar_treatment = config.take(
+                         {"Collision_Term", "NNbar_Treatment"},
+                         NNbarTreatment::NoAnnihilation);
   const bool photons_switch = config.has_value({"Output", "Photons"}) ?
                     config.take({"Output", "Photons", "Enable"}, true) :
                     false;
@@ -198,6 +201,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
           two_to_one,
           two_to_two,
           strings_switch,
+          nnbar_treatment,
           photons_switch,
           low_snn_cut};
 }
@@ -305,7 +309,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
                     false),
       photons_switch_(config.has_value({"Output", "Photons"}) ?
                     config.take({"Output", "Photons", "Enable"}, true) :
-                    false),              
+                    false),
       time_step_mode_(
           config.take({"General", "Time_Step_Mode"}, TimeStepMode::Fixed)) {
   const auto &log = logger<LogArea::Experiment>();
@@ -465,7 +469,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       dilepton_output_ = create_dilepton_output(output_path);
     } else if (format == "Binary") {
       dilepton_output_ =
-          make_unique<BinaryOutputCollisions>(output_path, "DileptonOutput");
+          make_unique<BinaryOutputCollisions>(output_path, "DileptonOutput",
+                                              true);
     } else if (format == "Root") {
 #ifdef SMASH_USE_ROOT
       dilepton_output_ = make_unique<RootOutput>(output_path, "DileptonOutput");
@@ -486,7 +491,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       photon_output_ = create_photon_output(output_path);
     } else if (format == "Binary") {
       photon_output_ =
-          make_unique<BinaryOutputCollisions>(output_path, "PhotonOutput");
+          make_unique<BinaryOutputCollisions>(output_path, "PhotonOutput",
+                                              false);
     } else if (format == "Root") {
 #ifdef SMASH_USE_ROOT
       photon_output_ = make_unique<RootOutput>(output_path, "PhotonOutput");

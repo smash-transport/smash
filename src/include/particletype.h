@@ -148,6 +148,9 @@ class ParticleType {
   /// \copydoc PdgCode::is_Delta
   bool is_Delta() const { return pdgcode_.is_Delta(); }
 
+  /// \copydoc PdgCode::is_rho
+  bool is_rho() const { return pdgcode_.is_rho(); }
+
   /// Is this a nucleon resonance (N*)?
   inline bool is_Nstar() const {
     return is_baryon() && isospin() == 1 && !pdgcode_.is_nucleon() &&

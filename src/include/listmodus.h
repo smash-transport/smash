@@ -53,7 +53,7 @@ class ListModus : public ModusDefault {
 
   /** creates initial conditions for the particles.
    */
-  float initial_conditions(Particles *particles,
+  double initial_conditions(Particles *particles,
                           const ExperimentParameters &parameters);
 
   /// \ingroup exception
@@ -69,7 +69,7 @@ class ListModus : public ModusDefault {
   std::string particle_list_file_prefix_;
 
   /// Starting time for the List; changed to the earliest formation time
-  float start_time_ = 0.0f;
+  double start_time_ = 0.0f;
 
   /// shift_id is the start number of event_id
   const int shift_id_;
@@ -79,7 +79,7 @@ class ListModus : public ModusDefault {
 
   /// check whether anti-freestreaming is needed, if yes return
   /// earliest formation time as start_time_
-  std::pair<bool, float> check_formation_time_(const std::string &
+  std::pair<bool, double> check_formation_time_(const std::string &
                                               particle_list);
 
   /**\ingroup logging

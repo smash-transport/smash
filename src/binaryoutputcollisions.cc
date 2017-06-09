@@ -24,9 +24,10 @@
 namespace Smash {
 
 BinaryOutputCollisions::BinaryOutputCollisions(const bf::path &path,
-                                               const std::string &name)
+                                               const std::string &name,
+                                               bool extended_format)
     : BinaryOutputBase(std::fopen(
-          (path / (name + ".bin")).native().c_str(), "wb"), false),
+          (path / (name + ".bin")).native().c_str(), "wb"), extended_format),
       print_start_end_(false) {
 }
 
@@ -123,8 +124,10 @@ void BinaryOutputCollisions::at_interaction(const Action &action,
 BinaryOutputBase::BinaryOutputBase(FILE *f, bool extended) : file_{f},
     extended_(extended) {
   std::fwrite("SMSH", 4, 1, file_.get());  // magic number
-  write(format_version_);             // file format version number
-  write(VERSION_MAJOR);               // SMASH version
+  std::uint16_t format_variant = static_cast<uint16_t>(extended_);
+  write(format_variant);
+  write(format_version_);   // file format version number
+  write(VERSION_MAJOR);     // SMASH version
 }
 
 

@@ -48,7 +48,7 @@ namespace Smash {
  * \key File_Prefix    (string, required):\n
  * Prefix for the external particle lists file
  *
- * \key Start_Time (float, required):\n
+ * \key Start_Time (double, required):\n
  * Starting time of List calculation.
  *
  * \key Shift_Id (int, required):\n
@@ -95,14 +95,14 @@ std::ostream &operator<<(std::ostream &out, const ListModus &m) {
 /* Judge whether formation time are the same for all the particles;
  * Don't do anti-freestreaming if start with the same formation time.
  * Choose the earliest formation time as start_time_ */
-std::pair<bool, float> ListModus::check_formation_time_(
+std::pair<bool, double> ListModus::check_formation_time_(
                             const std::string & particle_list) {
-    float earliest_formation_time = FLT_MAX;
-    float formation_time_difference = 0.0;
-    float reference_formation_time = 0.0;  // avoid compiler warning
+    double earliest_formation_time = DBL_MAX;
+    double formation_time_difference = 0.0;
+    double reference_formation_time = 0.0;  // avoid compiler warning
     for (const Line &line : line_parser(particle_list)) {
         std::istringstream lineinput(line.text);
-        float t;
+        double t;
         lineinput >> t;
         if (t < earliest_formation_time) {
           earliest_formation_time = t;
@@ -121,7 +121,7 @@ std::pair<bool, float> ListModus::check_formation_time_(
 }
 
 /* initial_conditions - sets particle data for @particles */
-float ListModus::initial_conditions(Particles *particles,
+double ListModus::initial_conditions(Particles *particles,
         const ExperimentParameters &) {
     const auto &log = logger<LogArea::List>();
     /* Readin PARTICLES from file */
@@ -155,7 +155,8 @@ float ListModus::initial_conditions(Particles *particles,
 
     for (const Line &line : line_parser(particle_lists)) {
         std::istringstream lineinput(line.text);
-        float t, x, y, z, mass, E, px, py, pz, id;
+        double t, x, y, z, mass, E, px, py, pz;
+        int id;
         PdgCode pdgcode;
         lineinput >> t >> x >> y >> z >> mass >> E
             >> px >> py >> pz >> pdgcode >> id;
@@ -176,7 +177,7 @@ float ListModus::initial_conditions(Particles *particles,
           particle.set_4momentum(FourVector(E, px, py, pz));
           if (anti_streaming_needed) {
             /* for hydro output where formation time is different*/
-            float delta_t = t - start_time_;
+            double delta_t = t - start_time_;
             FourVector start_timespace = FourVector(t, x, y, z) - delta_t *
                 FourVector(E, px, py, pz) / E;
             particle.set_4position(start_timespace);
