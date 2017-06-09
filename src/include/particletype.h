@@ -190,7 +190,7 @@ class ParticleType {
    * \return The minimum mass that a particle of this type can assume, where the
    * spectral function still has a non-zero value.
    */
-  float min_mass_spectral_func_non_zero() const;
+  float min_mass_spectral() const;
 
 
   /**
@@ -474,7 +474,7 @@ class ParticleType {
      case for using mutable. */
   mutable float minimum_mass_;
   /// minimum mass, where the spectral function is non-zero
-  mutable float min_mass_spectral_func_non_zero_;
+  mutable float min_mass_spectral_;
   /** This normalization factor ensures that the spectral function is normalized
    * to unity, when integrated over its full domain. */
   mutable float norm_factor_ = -1.;

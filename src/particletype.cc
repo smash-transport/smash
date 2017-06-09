@@ -124,7 +124,7 @@ ParticleType::ParticleType(std::string n, float m, float w, PdgCode id)
       width_(w),
       pdgcode_(id),
       minimum_mass_(-1.f),
-      min_mass_spectral_func_non_zero_(-1.f),
+      min_mass_spectral_(-1.f),
       charge_(pdgcode_.charge()),
       isospin_(-1),
       I3_(pdgcode_.isospin3()) {}
@@ -314,29 +314,34 @@ float ParticleType::minimum_mass() const {
   return minimum_mass_;
 }
 
-float ParticleType::min_mass_spectral_func_non_zero() const {
+float ParticleType::min_mass_spectral() const {
   // TODO(staudenmaier):
   // * clean up comments
   // * check cpplint
   // * replace in more places
-  if (unlikely(min_mass_spectral_func_non_zero_ < 0.f)) {
+  if (unlikely(min_mass_spectral_ < 0.f)) {
     /* If the particle is stable, min. mass with non-zero spectral function is
     * just the min. mass. */
-    min_mass_spectral_func_non_zero_ = minimum_mass();
+    min_mass_spectral_ = minimum_mass();
     /* Otherwise, find the lowest mass value where spectral function non-zero
     * by bisection.*/
     if (!is_stable()) {
       if (this->spectral_function(minimum_mass()) < really_small) { // otherwise no need to search
         // find right bound that has a non-zero spectral_function value
-        const float m_step = 0.001;  // 1 MeV steps
+        const float m_step_MeV = 0.001;
         float right_bound_bis = minimum_mass(); // start
-        do {
-          right_bound_bis += m_step;
-        } while (this->spectral_function(right_bound_bis) < really_small);  // this is the criterion where spectral function is set zero with
+        for (unsigned int i = 0; ; i++) {
+          right_bound_bis = minimum_mass() + i*m_step;
+          // this is the criterion where spectral function is set zero
+          if (this->spectral_function(right_bound_bis) > really_small) {
+            break;
+          }
+        }
         // bisection
         float left_bound_bis = right_bound_bis - m_step;
         float mid;
-        while (right_bound_bis - left_bound_bis > 1E-6 )  {  // precision is 1 keV
+        float precision_keV = 1E-6
+        while (right_bound_bis - left_bound_bis >  precision_keV)  {
           mid = (left_bound_bis + right_bound_bis) / 2.0;
           if (this->spectral_function(mid) > really_small) {
             right_bound_bis = mid;
@@ -344,11 +349,11 @@ float ParticleType::min_mass_spectral_func_non_zero() const {
             left_bound_bis = mid;
           }
         }
-        min_mass_spectral_func_non_zero_ = right_bound_bis;
+        min_mass_spectral_ = right_bound_bis;
       }
     }
   }
-  return min_mass_spectral_func_non_zero_;
+  return min_mass_spectral_;
 }
 
 int ParticleType::isospin() const {
@@ -591,7 +596,7 @@ float ParticleType::sample_resonance_mass(const float mass_stable,
    * physical limit by numerical error. */
   const float max_mass = std::nextafter(cms_energy - mass_stable, 0.f);
   // largest possible cm momentum (from smallest mass)
-  const float pcm_max = pCM(cms_energy, mass_stable, this->min_mass_spectral_func_non_zero());
+  const float pcm_max = pCM(cms_energy, mass_stable, this->min_mass_spectral());
   const float blw_max = pcm_max * blatt_weisskopf_sqr(pcm_max, L);
   /* The maximum of the spectral-function ratio 'usually' happens at the
    * largest mass. However, this is not always the case, therefore we need
@@ -610,7 +615,7 @@ float ParticleType::sample_resonance_mass(const float mass_stable,
     do {
       // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
       mass_res = Random::cauchy(this->mass(), this->width_at_pole()/2.f,
-                                this->min_mass_spectral_func_non_zero(), max_mass);
+                                this->min_mass_spectral(), max_mass);
       // determine cm momentum for this case
       const float pcm = pCM(cms_energy, mass_stable, mass_res);
       const float blw = pcm * blatt_weisskopf_sqr(pcm, L);
@@ -642,10 +647,10 @@ std::pair<float, float> ParticleType::sample_resonance_masses(
   const ParticleType &t1 = *this;
   /* Sample resonance mass from the distribution
    * used for calculating the cross section. */
-  const float max_mass_1 = std::nextafter(cms_energy - t2.min_mass_spectral_func_non_zero(), 0.f);
-  const float max_mass_2 = std::nextafter(cms_energy - t1.min_mass_spectral_func_non_zero(), 0.f);
+  const float max_mass_1 = std::nextafter(cms_energy - t2.min_mass_spectral(), 0.f);
+  const float max_mass_2 = std::nextafter(cms_energy - t1.min_mass_spectral(), 0.f);
   // largest possible cm momentum (from smallest mass)
-  const float pcm_max = pCM(cms_energy, t1.min_mass_spectral_func_non_zero(), t2.min_mass_spectral_func_non_zero());
+  const float pcm_max = pCM(cms_energy, t1.min_mass_spectral(), t2.min_mass_spectral());
   const float blw_max = pcm_max * blatt_weisskopf_sqr(pcm_max, L);
 
   float mass_1, mass_2, val;
@@ -657,9 +662,9 @@ std::pair<float, float> ParticleType::sample_resonance_masses(
     do {
       // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
       mass_1 = Random::cauchy(t1.mass(), t1.width_at_pole()/2.f,
-                              t1.min_mass_spectral_func_non_zero(), max_mass_1);
+                              t1.min_mass_spectral(), max_mass_1);
       mass_2 = Random::cauchy(t2.mass(), t2.width_at_pole()/2.f,
-                              t2.min_mass_spectral_func_non_zero(), max_mass_2);
+                              t2.min_mass_spectral(), max_mass_2);
       // determine cm momentum for this case
       const float pcm = pCM(cms_energy, mass_1, mass_2);
       const float blw = pcm * blatt_weisskopf_sqr(pcm, L);
@@ -709,7 +714,7 @@ void ParticleType::dump_width_and_spectral_function() const {
             << " spectral function(m^2)*m [GeV^-1] of "
             << *this << std::endl;
   constexpr double m_step = 0.02;
-  const double m_min = min_mass_spectral_func_non_zero();
+  const double m_min = min_mass_spectral();
   // An emprical value used to stop the printout. Assumes that spectral
   // function decays at high mass, which is true for all known resonances.
   constexpr double spectral_function_threshold = 8.e-3;
