@@ -128,6 +128,12 @@ enum class BoxInitialCondition {
   PeakedMomenta,
 };
 
+enum class NNbarTreatment {
+  NoAnnihilation,
+  Resonances,
+  Strings,
+};
+
 /// Represents thermodynamic quantities that can be printed out
 enum class ThermodynamicQuantity : char {
   EckartDensity,
