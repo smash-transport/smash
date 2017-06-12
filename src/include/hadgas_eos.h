@@ -212,7 +212,7 @@ class HadronGasEos {
   /// Constant factor, that appears in front of many thermodyn. expressions
   static constexpr double prefactor_ = 0.5*M_1_PI*M_1_PI/(hbarc*hbarc*hbarc);
   /// Precision of equation solving
-  static constexpr double tolerance_ = 1.e-14;
+  static constexpr double tolerance_ = 1.e-8;
   /// Number of equations in the system of equations to be solved
   static constexpr size_t n_equations_ = 3;
   EosTable eos_table_ = EosTable(1.e-2, 1.e-2, 900, 900);

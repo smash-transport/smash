@@ -382,7 +382,7 @@ std::array<double,3> HadronGasEos::solve_eos_initial_approximation(
 
 std::array<double, 3> HadronGasEos::solve_eos(double e, double nb, double ns,
                                  std::array<double, 3> initial_approximation) {
-  int status;
+  int iterate_status, residual_status;
   size_t iter = 0;
 
   struct rparams p = {e, nb, ns};
@@ -396,7 +396,7 @@ std::array<double, 3> HadronGasEos::solve_eos(double e, double nb, double ns,
   gsl_multiroot_fsolver_set(solver_, &f, x_);
   do {
     iter++;
-    status = gsl_multiroot_fsolver_iterate(solver_);
+    iterate_status = gsl_multiroot_fsolver_iterate(solver_);
 
     // print_solver_state(iter);
     // Avoiding too low temperature
@@ -405,17 +405,24 @@ std::array<double, 3> HadronGasEos::solve_eos(double e, double nb, double ns,
     }
 
     // check if solver is stuck
-    if (status) {
+    if (iterate_status) {
         break;
     }
-    status = gsl_multiroot_test_residual(solver_->f, tolerance_);
-  } while (status == GSL_CONTINUE && iter < 1000);
+    residual_status = gsl_multiroot_test_residual(solver_->f, tolerance_);
+  } while (residual_status == GSL_CONTINUE && iter < 1000);
 
-  if (status != GSL_SUCCESS) {
+  if (residual_status != GSL_SUCCESS) {
     std::cout << "e = " << e << ", nb = " << nb << ", ns = " << ns << std::endl;
+    const double T = gsl_vector_get(solver_->x, 0);
+    const double mub = gsl_vector_get(solver_->x, 1);
+    const double mus = gsl_vector_get(solver_->x, 2);
+    std::cout << "From solution: e = " << energy_density(T, mub, mus)
+              << ", nb = " << net_baryon_density(T, mub, mus)
+              << ", ns = " << net_strange_density(T, mub, mus) << std::endl;
     print_solver_state(iter);
-    throw std::runtime_error(gsl_strerror(status));
+    throw std::runtime_error(gsl_strerror(residual_status));
   }
+
   return {gsl_vector_get(solver_->x, 0),
           gsl_vector_get(solver_->x, 1),
           gsl_vector_get(solver_->x, 2)};
