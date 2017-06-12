@@ -89,7 +89,6 @@ void EosTable::compile_table(HadronGasEos &eos,
     const double ns = 0.0;
     for (size_t ie = 0; ie < n_e_; ie++) {
       const double e = de_ * ie;
-      std::array<double, 3> init_approx = {0.15, 0.5, 0.1};
       for (size_t inb = 0; inb < n_nb_; inb++) {
         const double nb = dnb_ * inb;
         // It is physically impossible to have energy density > nucleon mass*nb,
@@ -99,10 +98,13 @@ void EosTable::compile_table(HadronGasEos &eos,
           continue;
         }
         // Take extrapolated (T, mub, mus) as initial approximation
+        std::array<double, 3> init_approx;
         if (inb >= 2) {
           const table_element y = table_[index(ie, inb - 2)];
           const table_element x = table_[index(ie, inb - 1)];
           init_approx = {2.0*x.T - y.T, 2.0*x.mub - y.mub, 2.0*x.mus - y.mus};
+        } else {
+          init_approx = eos.solve_eos_initial_approximation(e, nb, 0.0);
         }
         const std::array<double, 3> res = eos.solve_eos(e, nb, ns, init_approx);
         const double T   = res[0];
@@ -282,8 +284,8 @@ double HadronGasEos::mus_net_strangeness0(double T, double mub) {
   double mus_l = 0.0;
   double mus, rhos;
   size_t iteration = 0;
-  // 30 iterations should give precision 2^-30 ~ 10^-9
-  const size_t max_iteration = 30;
+  // 50 iterations should give precision 2^-50 ~ 10^-15
+  const size_t max_iteration = 50;
   do {
     mus = 0.5 * (mus_u + mus_l);
     rhos = net_strange_density(T, mub, mus);
@@ -315,6 +317,67 @@ int HadronGasEos::set_eos_solver_equations(const gsl_vector* x,
   gsl_vector_set(f, 2, net_strange_density(T, mub, mus) - ns);
 
   return GSL_SUCCESS;
+}
+
+double HadronGasEos::e_equation(double T, void *params) {
+    const double edens = reinterpret_cast<struct eparams*>(params)->edens;
+    return edens - energy_density(T, 0.0, 0.0);
+}
+
+std::array<double,3> HadronGasEos::solve_eos_initial_approximation(
+                       double e, double nb, double /*ns*/) {
+  // 1. Get temperature from energy density assuming zero chemical potentials
+  int degeneracies_sum = 0.0;
+  for (const ParticleType &ptype : ParticleType::list_all()) {
+    if (is_eos_particle(ptype)) {
+      degeneracies_sum += ptype.spin() + 1;
+    }
+  }
+  // Temperature in case of massless gas. For massive it should be larger.
+  const double T_min = std::pow(e/prefactor_/6/degeneracies_sum, 1./4.);
+  // Simply assume that the temperature is not higher than 2 GeV.
+  const double T_max = 2.0;
+
+  struct eparams parameters = {e};
+  gsl_function F = {&e_equation, &parameters};
+  const gsl_root_fsolver_type *T = gsl_root_fsolver_brent;
+  gsl_root_fsolver *e_solver;
+  e_solver = gsl_root_fsolver_alloc(T);
+  gsl_root_fsolver_set(e_solver, &F, T_min, T_max);
+
+  int iter = 0, status, max_iter = 100;
+  double T_init = 0.0;
+
+  do {
+    iter++;
+    status = gsl_root_fsolver_iterate(e_solver);
+    T_init = gsl_root_fsolver_root(e_solver);
+    double x_lo = gsl_root_fsolver_x_lower(e_solver);
+    double x_hi = gsl_root_fsolver_x_upper(e_solver);
+    status = gsl_root_test_interval(x_lo, x_hi, 0.0, 0.001);
+
+    /* if (status == GSL_SUCCESS) {
+      std::cout << "number of iterations = " << iter << std::endl;
+    } */
+
+  } while (status == GSL_CONTINUE && iter < max_iter);
+
+  gsl_root_fsolver_free(e_solver);
+
+  // 2. Get the baryon chemical potential for mus = 0 and previously obtained T
+  double n_only_baryons = 0.0;
+  for (const ParticleType &ptype : ParticleType::list_all()) {
+    if (is_eos_particle(ptype) && ptype.baryon_number() == 1) {
+      n_only_baryons += scaled_partial_density(ptype, 1.0/T_init, 0.0, 0.0);
+    }
+  }
+  const double nb_scaled = nb/prefactor_/(T_init*T_init*T_init);
+  double mub_init = T_init * std::asinh(nb_scaled/n_only_baryons/2.0);
+
+  // 3. mus = 0 is typically a good initial approximation
+
+  std::array<double,3> initial_approximation = {T_init, mub_init, 0.0};
+  return initial_approximation;
 }
 
 std::array<double, 3> HadronGasEos::solve_eos(double e, double nb, double ns,
