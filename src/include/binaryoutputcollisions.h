@@ -33,6 +33,9 @@ class BinaryOutputBase : public OutputInterface {
   void write(std::int32_t x) {
     std::fwrite(&x, sizeof(x), 1, file_.get());
   }
+  void write(std::uint16_t x) {
+    std::fwrite(&x, sizeof(x), 1, file_.get());
+  }
     void write(const size_t x) {
         write(static_cast<int32_t>(x));
     }
@@ -45,7 +48,7 @@ class BinaryOutputBase : public OutputInterface {
 
  private:
   /// file format version number
-  const int format_version_ = 4;
+  uint16_t format_version_ = 4;
   /// Option for extended output
   bool extended_;
 };
@@ -64,7 +67,8 @@ class BinaryOutputBase : public OutputInterface {
  */
 class BinaryOutputCollisions : public BinaryOutputBase {
  public:
-  BinaryOutputCollisions(const bf::path &path, const std::string &name);
+  BinaryOutputCollisions(const bf::path &path, const std::string &name,
+                         bool extended_format);
   BinaryOutputCollisions(const bf::path &path, Configuration&& config);
 
   /// writes the initial particle information of an event

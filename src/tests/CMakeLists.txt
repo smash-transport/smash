@@ -241,6 +241,7 @@ smash_add_runtest(box_run smash smash -m Box)
 smash_add_runtest(collider_run smash smash -m Collider)
 smash_add_runtest(collider_frozen_fermi_run smash smash -m Collider -c "Modi: {Collider: {Fermi_Motion: frozen}}")
 smash_add_runtest(sphere_run smash smash -m Sphere)
+smash_add_runtest(dilepton_run smash smash -d ${CMAKE_CURRENT_SOURCE_DIR}/decaymodes_incl_dileptons.txt -c "Output: {Dileptons: {Format: Oscar}}")
 
 # verify that binary runs certain time (this corresponds to 20 steps)
 smash_add_runtest(box_steps smash smash -e 2.0 -c "General: {Delta_Time: 0.1}" -m Box)
