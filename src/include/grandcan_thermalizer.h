@@ -22,10 +22,34 @@
 
 namespace Smash {
 
+/**
+ * The ThermLatticeNode class is intended to compute thermodynamical
+ * quantities in a cell given particles. It accumulates upper row of
+ * the energy-momentum tensor T^{\mu 0}, baryon density nb and strangeness
+ * densities in the computational frame. From these quantities it allows
+ * to compute the local rest frame quantites: temperature T, chemical
+ * potentials mub and mus, the velocity of the local rest frame with respect
+ * to computational frame.
+ *
+ * An example of the intended use is:
+ *
+ * ThermLatticeNode node;
+ * for (const ParticleData &particle: some_particles_list) {
+ *   const double some_smearing_factor = ...;
+ *   node.add_particle(particle, some_smearing_factor);
+ * }
+ * HadronGasEos eos = HadronGasEos(false);
+ * node.compute_rest_frame_quantities(eos);
+ *
+ * Note that before calling the compute_rest_frame_quantities T, mu, p and e
+ * and simply set to zero.
+ */
 class ThermLatticeNode {
  public:
   ThermLatticeNode();
+  /// Add particle contribution to Tmu0, nb and ns
   void add_particle(const ParticleData& p, double factor);
+  /// Compute T, mu, v given Tmu0, nb and ns
   void compute_rest_frame_quantities(HadronGasEos& eos);
 
   FourVector Tmu0() const { return Tmu0_; }
@@ -39,19 +63,45 @@ class ThermLatticeNode {
   double mus() const { return mus_; }
 
  private:
+  /// Four-momentum of the cell
   FourVector Tmu0_;
+  /// Net baryon density of the cell in the computational frame
   double nb_;
+  /// Net strangeness density of the cell in the computational frame
   double ns_;
+  /// Energy density in the rest frame
   double e_;
+  /// Pressure in the rest frame
   double p_;
+  /// Velocity of the rest frame
   ThreeVector v_;
+  /// Temperature
   double T_;
+  /// Baryon chemical potential
   double mub_;
+  /// Strangeness chemical potential
   double mus_;
 };
 
 std::ostream &operator<<(std::ostream &s, const ThermLatticeNode &node);
 
+/** The GrandCanThermalizer class implements the following functionality:
+ *  1. Create a lattice and find the local rest frame energy density in each
+ *     cell from the particles.
+ *  2. Remove partices from the cells, where the energy density is high enough.
+ *     Save the energy, momentum and quantum numbers of the removed particles.
+ *  3. Sample new particles instead of the removed ones according to the
+ *     grand-canonical thermal distribution, but with additional constraint:
+ *     the energy, momentum and quantum numbers should be the same as those of
+ *     the remove particles.
+ *
+ *  The step 3. is a challenging task, so several algorithms are implemented
+ *  that try to fulfil the requirements. The algorithms are a trade-off between
+ *  the mathematical rigour and computational speed. All of them are shown
+ *  to reproduce the mean values of multiplicities correctly. However, this
+ *  is not the case for multiplicity fluctuations. For details see
+ *  \iref{Oliinychenko:2016vkg}.
+ */
 class GrandCanThermalizer {
  public:
   /// Create the thermalizer: allocate the lattice
@@ -76,30 +126,60 @@ class GrandCanThermalizer {
                         conf.take({"Timestep"}),
                         conf.take({"Algorithm"},
                             ThermalizationAlgorithm::BiasedBF)) {};
+  /// Check that the clock is close to n * period of thermalization
   bool is_time_to_thermalize(const Clock& clock) const {
     const float t = clock.current_time();
     const int n = static_cast<int>(std::floor((t - t_start_)/period_));
     return (t > t_start_ &&
             t < t_start_ + n*period_ + clock.timestep_duration());
   }
-
+  /// Compute all the thermodynamical quantities on the lattice from particles.
   void update_lattice(const Particles& particles,
                       const DensityParameters& par,
                       bool ignore_cells_under_treshold = true);
+  /// Simply returns a vector distributed uniformly in a rectangular cell.
   ThreeVector uniform_in_cell() const;
-  void sample_multinomial(int particle_class, int N);
+  /** Changes energy and momenta of the particles in plist to match the
+   *  required_total_momentum. The procedure is described in
+   *  \iref{Oliinychenko:2016vkg}.
+   */
   void renormalize_momenta(ParticleList& plist,
            const FourVector required_total_momentum);
 
   // Functions for BF-sampling algorithm
+
+  /**
+   *  The sample_multinomial function samples integer numbers n_i
+   *  distributed according to the multinomial distribution with sum N:
+   *  p(n_1, n_2, \dots) = \prod a_i^{n_i} \times \frac{N!}{n_1!n_2! \dots} if
+   *  \sum n_i = N and p = 0 otherwise.
+   *
+   * The array mult_sort_ contains real numbers a_i. The numbers n_i are
+   * saved in the mult_int_ array. Only particles of class particle_class
+   * are sampled, where particle_class is defined by the get_class function.
+   */
+  void sample_multinomial(int particle_class, int N);
+  /**
+   * The total number of particles of sort type_index is defined by mult_int_
+   * array. This function samples mult_int_[type_index] particles. It chooses
+   * the cell to sample, picks up momentum and coordinate from the
+   * corresponding distributions.
+   */
   void sample_in_random_cell_BF_algo(ParticleList& plist,
                                      const double time,
                                      size_t type_index);
+  /**
+   * Samples particles to the sampled_list according to the BF algorithm.
+   * Quantum numbers of the sampled particles are required to be as in
+   * conserved_initial.
+   */
   void thermalize_BF_algo(ParticleList& sampled_list,
                           QuantumNumbers& conserved_initial,
                           double time, int ntest);
 
   // Functions for mode-sampling algorithm
+
+  /// Computes average number of particles in each cell.
   template <typename F>
   void compute_N_in_cells_mode_algo(F &&condition) {
     N_in_cells_.clear();
@@ -120,6 +200,10 @@ class GrandCanThermalizer {
     }
   }
 
+  /** Samples one particle. The specie, cell, momentum and coordinate
+   *  are chosen from the corresponding distributions. The condition
+   *  function limits the choice of possible species.
+   */
   template <typename F>
   ParticleData sample_in_random_cell_mode_algo(const double time,
                                                F &&condition) {
@@ -168,12 +252,16 @@ class GrandCanThermalizer {
     return particle;
   }
 
-
+  /*
+   * Samples particles to the sampled_list according to the mode algorithm.
+   * Quantum numbers of the sampled particles are required to be as in
+   * conserved_initial.
+   */
   void thermalize_mode_algo(ParticleList& sampled_list,
                             QuantumNumbers& conserved_initial,
                             double time);
 
-  // Main thermalize function, that chooses algorithm
+  /// Main thermalize function, that chooses algorithm
   void thermalize(Particles& particles, double time, int ntest);
 
   void print_statistics(const Clock& clock) const;

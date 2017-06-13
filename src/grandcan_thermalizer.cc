@@ -163,7 +163,8 @@ void GrandCanThermalizer::thermalize(Particles& particles,
       to_remove.push_back(particle);
     }
   }
-  // Do not thermalize too small number of particles
+  // Do not thermalize too small number of particles: for the number
+  // of particles < 30 the algorithm tends to hand or crash too often.
   if (to_remove.size() > 30) {
     for (auto &particle : to_remove) {
       conserved_initial.add_values(particle);
