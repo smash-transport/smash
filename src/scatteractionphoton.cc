@@ -58,7 +58,7 @@ void ScatterActionPhoton::generate_final_state() {
   assert(t1 < t2);
   const double stepsize = (t2-t1)/100.0;
   for (double t = t1; t < t2; t += stepsize) {
-    float diff_xsection_max = std::max(diff_cross_section(t, m3),
+    float diff_xsection_max = std::max(diff_cross_section(t, m3,t2,t1),
                                        diff_xsection_max);
   }
 
@@ -68,7 +68,7 @@ void ScatterActionPhoton::generate_final_state() {
   do {
     t = Random::uniform(t1, t2);
     iteration_number++;
-  } while (diff_cross_section(t, m3) < Random::uniform(0.f, diff_xsection_max)
+  } while (diff_cross_section(t, m3,t2,t1) < Random::uniform(0.f, diff_xsection_max)
            && iteration_number < 100);
 
   // todo: this should move to kinematics.h and tested
@@ -85,7 +85,7 @@ void ScatterActionPhoton::generate_final_state() {
 
   /* Weighing of the fractional photons */
   if (number_of_fractional_photons_ > 1) {
-    weight_ = diff_cross_section(t, m3) * (t2 - t1)
+    weight_ = diff_cross_section(t, m3,t2,t1) * (t2 - t1)
           / (number_of_fractional_photons_ * cross_section());
   } else {
     weight_ = proc->weight() / cross_section();
@@ -139,10 +139,10 @@ ScatterActionPhoton::ReactionType
       return ReactionType::pi0_rho;
     case(pack(pdg::pi_p, pdg::eta)):
     case(pack(pdg::pi_m, pdg::eta)):
-      return ReactionType::pi_eta;
+      return ReactionType::pi_eta;*/
     case(pack(pdg::pi_p, pdg::pi_m)):
     case(pack(pdg::pi_m, pdg::pi_p)):
-      return ReactionType::pi_pi;*/
+      return ReactionType::pi_pi;
     case(pack(pdg::pi_z, pdg::rho_z)):
       return ReactionType::pi0_rho0;
     default:
@@ -214,10 +214,10 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
       float xsection = 0.0;
 
       switch (reac) {
-        /* case ReactionType::pi_pi:
+         case ReactionType::pi_pi:
         // there are three possible reaction channels
         // the first possible reaction produces eta
-          part_out = eta_particle;
+        /*  part_out = eta_particle;
           m3 = part_out->mass();
 
           if (sqrts > m3) {
@@ -228,7 +228,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
             xsection = to_be_determined * to_mb;
             process_list.push_back(make_unique<CollisionBranch>(
                 *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
-          }
+          }*/
 
           // the second possible reaction (produces rho0)
 
@@ -240,7 +240,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
           t1 = mandelstam_t[1];
           t2 = mandelstam_t[0];
 
-          xsection = to_be_determined * to_mb;
+          xsection = 10.0 * to_mb;
           process_list.push_back(make_unique<CollisionBranch>(
               *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
           }
@@ -253,10 +253,10 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
           t1 = mandelstam_t[1];
           t2 = mandelstam_t[0];
 
-          xsection = to_be_determined * to_mb;
+          xsection = 1.0 * to_mb;
           process_list.push_back(make_unique<CollisionBranch>(
               *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
-          break; */
+          break;
 
         /* case ReactionType::pi0_pi:
           if (part_a.type().pdgcode() == pdg::pi_p ||
@@ -717,33 +717,33 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
           t2 = mandelstam_t[0];
 
           xsection = to_mb*1/3.0*(pow(Const,2)*pow(g_POR,4)*((pow(pow(m_omega,2) - s,2)*(pow(m_pi,8) - 2*pow(m_pi,6)*pow(m_rho,2) + pow(m_pi,4)*(pow(m_rho,4) + 4*pow(m_omega,4) - 2*pow(m_omega,2)*s) +
-            pow(m_omega,4)*(pow(m_rho,4) + pow(m_omega,4) + 2*pow(m_omega,2)*s + 2*pow(s,2) - 2*pow(m_rho,2)*(pow(m_omega,2) + s)) -
-            2*pow(m_pi,2)*pow(m_omega,2)*(pow(m_rho,4) + 2*pow(m_omega,2)*(pow(m_omega,2) + s) - pow(m_rho,2)*(2*pow(m_omega,2) + s))))/(pow(m_omega,2) - t2) +
-       (pow(m_pi,8) - 2*pow(m_pi,6)*pow(m_rho,2) + 3*pow(m_omega,8) - 4*pow(m_omega,6)*s - 7*pow(m_omega,4)*pow(s,2) + 4*pow(m_omega,2)*pow(s,3) + 5*pow(s,4) +
-          pow(m_rho,4)*(pow(m_omega,4) - 2*pow(m_omega,2)*s + 2*pow(s,2)) + pow(m_rho,2)*(-4*pow(m_omega,6) + 8*pow(m_omega,4)*s - 6*pow(s,3)) -
-          2*pow(m_pi,2)*(4*pow(m_omega,6) - 2*pow(m_rho,2)*pow(pow(m_omega,2) - 2*s,2) + pow(m_rho,4)*s - 10*pow(m_omega,4)*s + 8*pow(s,3)) +
-          pow(m_pi,4)*(pow(m_rho,4) + 2*pow(m_rho,2)*(pow(m_omega,2) - s) + 4*(pow(m_omega,4) - 3*pow(m_omega,2)*s + 3*pow(s,2))))*t2 -
-       2*pow(m_pi,2)*pow(m_omega,4)*pow(t2,2) - pow(m_rho,2)*pow(m_omega,4)*pow(t2,2) + pow(m_omega,6)*pow(t2,2) - pow(m_pi,4)*s*pow(t2,2) +
-       pow(m_pi,2)*pow(m_rho,2)*s*pow(t2,2) + 8*pow(m_pi,2)*pow(m_omega,2)*s*pow(t2,2) + 3*pow(m_rho,2)*pow(m_omega,2)*s*pow(t2,2) -
-       2*pow(m_omega,4)*s*pow(t2,2) - 8*pow(m_pi,2)*pow(s,2)*pow(t2,2) - 3*pow(m_rho,2)*pow(s,2)*pow(t2,2) - 3*pow(m_omega,2)*pow(s,2)*pow(t2,2) +
-       5*pow(s,3)*pow(t2,2) + ((pow(m_omega,4) - 4*pow(m_omega,2)*s + 5*pow(s,2))*pow(t2,3))/3. -
-       (pow(pow(m_omega,2) - s,2)*(pow(m_pi,8) - 2*pow(m_pi,6)*pow(m_rho,2) + pow(m_pi,4)*(pow(m_rho,4) + 4*pow(m_omega,4) - 2*pow(m_omega,2)*s) +
-            pow(m_omega,4)*(pow(m_rho,4) + pow(m_omega,4) + 2*pow(m_omega,2)*s + 2*pow(s,2) - 2*pow(m_rho,2)*(pow(m_omega,2) + s)) -
-            2*pow(m_pi,2)*pow(m_omega,2)*(pow(m_rho,4) + 2*pow(m_omega,2)*(pow(m_omega,2) + s) - pow(m_rho,2)*(2*pow(m_omega,2) + s))))/(pow(m_omega,2) - t1) -
-       (pow(m_pi,8) - 2*pow(m_pi,6)*pow(m_rho,2) + 3*pow(m_omega,8) - 4*pow(m_omega,6)*s - 7*pow(m_omega,4)*pow(s,2) + 4*pow(m_omega,2)*pow(s,3) + 5*pow(s,4) +
-          pow(m_rho,4)*(pow(m_omega,4) - 2*pow(m_omega,2)*s + 2*pow(s,2)) + pow(m_rho,2)*(-4*pow(m_omega,6) + 8*pow(m_omega,4)*s - 6*pow(s,3)) -
-          2*pow(m_pi,2)*(4*pow(m_omega,6) - 2*pow(m_rho,2)*pow(pow(m_omega,2) - 2*s,2) + pow(m_rho,4)*s - 10*pow(m_omega,4)*s + 8*pow(s,3)) +
-          pow(m_pi,4)*(pow(m_rho,4) + 2*pow(m_rho,2)*(pow(m_omega,2) - s) + 4*(pow(m_omega,4) - 3*pow(m_omega,2)*s + 3*pow(s,2))))*t1 +
-       2*pow(m_pi,2)*pow(m_omega,4)*pow(t1,2) + pow(m_rho,2)*pow(m_omega,4)*pow(t1,2) - pow(m_omega,6)*pow(t1,2) + pow(m_pi,4)*s*pow(t1,2) -
-       pow(m_pi,2)*pow(m_rho,2)*s*pow(t1,2) - 8*pow(m_pi,2)*pow(m_omega,2)*s*pow(t1,2) - 3*pow(m_rho,2)*pow(m_omega,2)*s*pow(t1,2) +
-       2*pow(m_omega,4)*s*pow(t1,2) + 8*pow(m_pi,2)*pow(s,2)*pow(t1,2) + 3*pow(m_rho,2)*pow(s,2)*pow(t1,2) + 3*pow(m_omega,2)*pow(s,2)*pow(t1,2) -
-       5*pow(s,3)*pow(t1,2) - ((pow(m_omega,4) - 4*pow(m_omega,2)*s + 5*pow(s,2))*pow(t1,3))/3. +
-       2*(pow(m_omega,2) - s)*(-pow(m_pi,8) + pow(m_pi,4)*(4*pow(m_omega,4) - 7*pow(m_omega,2)*s + pow(s,2) + pow(m_rho,2)*(pow(m_omega,2) + s)) +
-          pow(m_pi,2)*(-6*pow(m_omega,6) + 6*pow(m_omega,4)*s + 8*pow(m_omega,2)*pow(s,2) + pow(m_rho,4)*(-pow(m_omega,2) + s) +
-             pow(m_rho,2)*(4*pow(m_omega,4) - 7*pow(m_omega,2)*s - pow(s,2))) +
-          pow(m_omega,2)*(2*pow(m_omega,6) + pow(m_rho,4)*(pow(m_omega,2) - s) - 4*pow(m_omega,2)*pow(s,2) - 3*pow(s,3) +
-             pow(m_rho,2)*(-3*pow(m_omega,4) + 2*pow(m_omega,2)*s + 3*pow(s,2))))*log((-pow(m_omega,2) + t2)/(-pow(m_omega,2) + t1))))/
-             (128.0*M_PI*pow(pow(m_omega,2) - s,2)*(pow(m_pi,4) + pow(pow(m_rho,2) - s,2) - 2*pow(m_pi,2)*(pow(m_rho,2) + s)));
+                  pow(m_omega,4)*(pow(m_rho,4) + pow(m_omega,4) + 2*pow(m_omega,2)*s + 2*pow(s,2) - 2*pow(m_rho,2)*(pow(m_omega,2) + s)) -
+                  2*pow(m_pi,2)*pow(m_omega,2)*(pow(m_rho,4) + 2*pow(m_omega,2)*(pow(m_omega,2) + s) - pow(m_rho,2)*(2*pow(m_omega,2) + s))))/(pow(m_omega,2) - t2) +
+             (pow(m_pi,8) - 2*pow(m_pi,6)*pow(m_rho,2) + 3*pow(m_omega,8) - 4*pow(m_omega,6)*s - 7*pow(m_omega,4)*pow(s,2) + 4*pow(m_omega,2)*pow(s,3) + 5*pow(s,4) +
+                pow(m_rho,4)*(pow(m_omega,4) - 2*pow(m_omega,2)*s + 2*pow(s,2)) + pow(m_rho,2)*(-4*pow(m_omega,6) + 8*pow(m_omega,4)*s - 6*pow(s,3)) -
+                2*pow(m_pi,2)*(4*pow(m_omega,6) - 2*pow(m_rho,2)*pow(pow(m_omega,2) - 2*s,2) + pow(m_rho,4)*s - 10*pow(m_omega,4)*s + 8*pow(s,3)) +
+                pow(m_pi,4)*(pow(m_rho,4) + 2*pow(m_rho,2)*(pow(m_omega,2) - s) + 4*(pow(m_omega,4) - 3*pow(m_omega,2)*s + 3*pow(s,2))))*t2 -
+             2*pow(m_pi,2)*pow(m_omega,4)*pow(t2,2) - pow(m_rho,2)*pow(m_omega,4)*pow(t2,2) + pow(m_omega,6)*pow(t2,2) - pow(m_pi,4)*s*pow(t2,2) +
+             pow(m_pi,2)*pow(m_rho,2)*s*pow(t2,2) + 8*pow(m_pi,2)*pow(m_omega,2)*s*pow(t2,2) + 3*pow(m_rho,2)*pow(m_omega,2)*s*pow(t2,2) -
+             2*pow(m_omega,4)*s*pow(t2,2) - 8*pow(m_pi,2)*pow(s,2)*pow(t2,2) - 3*pow(m_rho,2)*pow(s,2)*pow(t2,2) - 3*pow(m_omega,2)*pow(s,2)*pow(t2,2) +
+             5*pow(s,3)*pow(t2,2) + ((pow(m_omega,4) - 4*pow(m_omega,2)*s + 5*pow(s,2))*pow(t2,3))/3. -
+             (pow(pow(m_omega,2) - s,2)*(pow(m_pi,8) - 2*pow(m_pi,6)*pow(m_rho,2) + pow(m_pi,4)*(pow(m_rho,4) + 4*pow(m_omega,4) - 2*pow(m_omega,2)*s) +
+                  pow(m_omega,4)*(pow(m_rho,4) + pow(m_omega,4) + 2*pow(m_omega,2)*s + 2*pow(s,2) - 2*pow(m_rho,2)*(pow(m_omega,2) + s)) -
+                  2*pow(m_pi,2)*pow(m_omega,2)*(pow(m_rho,4) + 2*pow(m_omega,2)*(pow(m_omega,2) + s) - pow(m_rho,2)*(2*pow(m_omega,2) + s))))/(pow(m_omega,2) - t1) -
+             (pow(m_pi,8) - 2*pow(m_pi,6)*pow(m_rho,2) + 3*pow(m_omega,8) - 4*pow(m_omega,6)*s - 7*pow(m_omega,4)*pow(s,2) + 4*pow(m_omega,2)*pow(s,3) + 5*pow(s,4) +
+                pow(m_rho,4)*(pow(m_omega,4) - 2*pow(m_omega,2)*s + 2*pow(s,2)) + pow(m_rho,2)*(-4*pow(m_omega,6) + 8*pow(m_omega,4)*s - 6*pow(s,3)) -
+                2*pow(m_pi,2)*(4*pow(m_omega,6) - 2*pow(m_rho,2)*pow(pow(m_omega,2) - 2*s,2) + pow(m_rho,4)*s - 10*pow(m_omega,4)*s + 8*pow(s,3)) +
+                pow(m_pi,4)*(pow(m_rho,4) + 2*pow(m_rho,2)*(pow(m_omega,2) - s) + 4*(pow(m_omega,4) - 3*pow(m_omega,2)*s + 3*pow(s,2))))*t1 +
+             2*pow(m_pi,2)*pow(m_omega,4)*pow(t1,2) + pow(m_rho,2)*pow(m_omega,4)*pow(t1,2) - pow(m_omega,6)*pow(t1,2) + pow(m_pi,4)*s*pow(t1,2) -
+             pow(m_pi,2)*pow(m_rho,2)*s*pow(t1,2) - 8*pow(m_pi,2)*pow(m_omega,2)*s*pow(t1,2) - 3*pow(m_rho,2)*pow(m_omega,2)*s*pow(t1,2) +
+             2*pow(m_omega,4)*s*pow(t1,2) + 8*pow(m_pi,2)*pow(s,2)*pow(t1,2) + 3*pow(m_rho,2)*pow(s,2)*pow(t1,2) + 3*pow(m_omega,2)*pow(s,2)*pow(t1,2) -
+             5*pow(s,3)*pow(t1,2) - ((pow(m_omega,4) - 4*pow(m_omega,2)*s + 5*pow(s,2))*pow(t1,3))/3. +
+             2*(pow(m_omega,2) - s)*(-pow(m_pi,8) + pow(m_pi,4)*(4*pow(m_omega,4) - 7*pow(m_omega,2)*s + pow(s,2) + pow(m_rho,2)*(pow(m_omega,2) + s)) +
+                pow(m_pi,2)*(-6*pow(m_omega,6) + 6*pow(m_omega,4)*s + 8*pow(m_omega,2)*pow(s,2) + pow(m_rho,4)*(-pow(m_omega,2) + s) +
+                   pow(m_rho,2)*(4*pow(m_omega,4) - 7*pow(m_omega,2)*s - pow(s,2))) +
+                pow(m_omega,2)*(2*pow(m_omega,6) + pow(m_rho,4)*(pow(m_omega,2) - s) - 4*pow(m_omega,2)*pow(s,2) - 3*pow(s,3) +
+                   pow(m_rho,2)*(-3*pow(m_omega,4) + 2*pow(m_omega,2)*s + 3*pow(s,2))))*log((-pow(m_omega,2) + t2)/(-pow(m_omega,2) + t1))))/
+                   (128.0*M_PI*pow(pow(m_omega,2) - s,2)*(pow(m_pi,4) + pow(pow(m_rho,2) - s,2) - 2*pow(m_pi,2)*(pow(m_rho,2) + s)));
 
             process_list.push_back(make_unique<CollisionBranch>(
             *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
@@ -758,7 +758,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
   return process_list;
 }
 
-float ScatterActionPhoton::diff_cross_section(float t, float m3) const {
+float ScatterActionPhoton::diff_cross_section(float t, float m3, float t2, float t1) const {
   const float to_mb = 0.3894;
   const float m_rho = ParticleType::find(pdg::rho_z).mass();
   const float m_pi = ParticleType::find(pdg::pi_z).mass();
@@ -779,16 +779,16 @@ float ScatterActionPhoton::diff_cross_section(float t, float m3) const {
   float mrho = m_rho;
 
   switch (reac) {
-  /*  case ReactionType::pi_pi:
+    case ReactionType::pi_pi:
       if (outgoing_particles_[0].type().pdgcode().is_rho()) {
-        diff_xsection = to_be_determined;
-      } else if (outgoing_particles_[0].type().pdgcode() == pdg::eta) {
-        diff_xsection = to_be_determined;
+        diff_xsection = 10.0/to_mb/(t2-t1);
+    //  } else if (outgoing_particles_[0].type().pdgcode() == pdg::eta) {
+    //    diff_xsection = to_be_determined;
       } else if (outgoing_particles_[0].type().pdgcode() == pdg::photon) {
-        diff_xsection = to_be_determined;
+        diff_xsection = 1.0/to_mb;
       }
       break;
-    case ReactionType::pi0_pi:
+    /*case ReactionType::pi0_pi:
       diff_xsection = to_be_determined;
       break; */
     case ReactionType::pi_rho0:
@@ -886,17 +886,17 @@ float ScatterActionPhoton::diff_cross_section(float t, float m3) const {
     case ReactionType::pi0_rho0:
 
       diff_xsection = 1/3.0*(pow(Const,2)*pow(g_POR,4)*(pow(m_omega,4)*pow(s,4) + 4*pow(m_omega,4)*pow(s,3)*t - 4*pow(m_omega,2)*pow(s,4)*t + 10*pow(m_omega,4)*pow(s,2)*pow(t,2) -
-       16*pow(m_omega,2)*pow(s,3)*pow(t,2) + 5*pow(s,4)*pow(t,2) + 4*pow(m_omega,4)*s*pow(t,3) - 16*pow(m_omega,2)*pow(s,2)*pow(t,3) +
-       10*pow(s,3)*pow(t,3) + pow(m_omega,4)*pow(t,4) - 4*pow(m_omega,2)*s*pow(t,4) + 5*pow(s,2)*pow(t,4) + pow(m_pi,8)*pow(-2*pow(m_omega,2) + s + t,2) -
-       2*pow(m_pi,6)*pow(m_rho,2)*(2*pow(m_omega,4) + pow(s,2) + pow(t,2) - 2*pow(m_omega,2)*(s + t)) +
-       pow(m_rho,4)*(2*pow(s,2)*pow(t,2) - 2*pow(m_omega,2)*s*t*(s + t) + pow(m_omega,4)*(pow(s,2) + pow(t,2))) -
-       2*pow(m_rho,2)*(3*pow(s,2)*pow(t,2)*(s + t) - 3*pow(m_omega,2)*s*t*pow(s + t,2) +
-          pow(m_omega,4)*(pow(s,3) + 2*pow(s,2)*t + 2*s*pow(t,2) + pow(t,3))) +
-       pow(m_pi,4)*(-2*pow(m_rho,2)*(pow(m_omega,2) - s)*(pow(m_omega,2) - t)*(s + t) - 8*pow(m_omega,2)*s*t*(s + t) + 4*pow(m_omega,4)*(pow(s,2) + pow(t,2)) -
-          2*s*t*(pow(s,2) - 6*s*t + pow(t,2)) + pow(m_rho,4)*(2*pow(m_omega,4) + pow(s,2) + pow(t,2) - 2*pow(m_omega,2)*(s + t))) -
-       2*pow(m_pi,2)*(2*(s + t)*pow(-2*s*t + pow(m_omega,2)*(s + t),2) + pow(m_rho,4)*(-4*pow(m_omega,2)*s*t + pow(m_omega,4)*(s + t) + s*t*(s + t)) -
-          pow(m_rho,2)*(-10*pow(m_omega,2)*s*t*(s + t) + 2*pow(m_omega,4)*(pow(s,2) + 3*s*t + pow(t,2)) + s*t*(pow(s,2) + 8*s*t + pow(t,2))))))/
-   (128.*Pi*pow(pow(m_omega,2) - s,2)*(pow(pow(m_pi,2) - pow(m_rho,2),2) - 2*(pow(m_pi,2) + pow(m_rho,2))*s + pow(s,2))*pow(pow(m_omega,2) - t,2));
+             16*pow(m_omega,2)*pow(s,3)*pow(t,2) + 5*pow(s,4)*pow(t,2) + 4*pow(m_omega,4)*s*pow(t,3) - 16*pow(m_omega,2)*pow(s,2)*pow(t,3) +
+             10*pow(s,3)*pow(t,3) + pow(m_omega,4)*pow(t,4) - 4*pow(m_omega,2)*s*pow(t,4) + 5*pow(s,2)*pow(t,4) + pow(m_pi,8)*pow(-2*pow(m_omega,2) + s + t,2) -
+             2*pow(m_pi,6)*pow(m_rho,2)*(2*pow(m_omega,4) + pow(s,2) + pow(t,2) - 2*pow(m_omega,2)*(s + t)) +
+             pow(m_rho,4)*(2*pow(s,2)*pow(t,2) - 2*pow(m_omega,2)*s*t*(s + t) + pow(m_omega,4)*(pow(s,2) + pow(t,2))) -
+             2*pow(m_rho,2)*(3*pow(s,2)*pow(t,2)*(s + t) - 3*pow(m_omega,2)*s*t*pow(s + t,2) +
+                pow(m_omega,4)*(pow(s,3) + 2*pow(s,2)*t + 2*s*pow(t,2) + pow(t,3))) +
+             pow(m_pi,4)*(-2*pow(m_rho,2)*(pow(m_omega,2) - s)*(pow(m_omega,2) - t)*(s + t) - 8*pow(m_omega,2)*s*t*(s + t) + 4*pow(m_omega,4)*(pow(s,2) + pow(t,2)) -
+                2*s*t*(pow(s,2) - 6*s*t + pow(t,2)) + pow(m_rho,4)*(2*pow(m_omega,4) + pow(s,2) + pow(t,2) - 2*pow(m_omega,2)*(s + t))) -
+             2*pow(m_pi,2)*(2*(s + t)*pow(-2*s*t + pow(m_omega,2)*(s + t),2) + pow(m_rho,4)*(-4*pow(m_omega,2)*s*t + pow(m_omega,4)*(s + t) + s*t*(s + t)) -
+                pow(m_rho,2)*(-10*pow(m_omega,2)*s*t*(s + t) + 2*pow(m_omega,4)*(pow(s,2) + 3*s*t + pow(t,2)) + s*t*(pow(s,2) + 8*s*t + pow(t,2))))))/
+         (128.*Pi*pow(pow(m_omega,2) - s,2)*(pow(pow(m_pi,2) - pow(m_rho,2),2) - 2*(pow(m_pi,2) + pow(m_rho,2))*s + pow(s,2))*pow(pow(m_omega,2) - t,2));
       break;
     case ReactionType::no_reaction:
       // never reached
