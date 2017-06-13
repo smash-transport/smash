@@ -237,7 +237,7 @@ ActionPtr ScatterActionsFinder::check_collision(
 }
 
 ActionList ScatterActionsFinder::find_actions_in_cell(
-    const ParticleList &search_list, float dt) const {
+    const ParticleList &search_list, double dt) const {
   std::vector<ActionPtr> actions;
   for (const ParticleData &p1 : search_list) {
     for (const ParticleData &p2 : search_list) {
@@ -255,7 +255,7 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
 
 ActionList ScatterActionsFinder::find_actions_with_neighbors(
     const ParticleList &search_list, const ParticleList &neighbors_list,
-    float dt) const {
+    double dt) const {
   std::vector<ActionPtr> actions;
   for (const ParticleData &p1 : search_list) {
     for (const ParticleData &p2 : neighbors_list) {
@@ -272,7 +272,7 @@ ActionList ScatterActionsFinder::find_actions_with_neighbors(
 
 ActionList ScatterActionsFinder::find_actions_with_surrounding_particles(
     const ParticleList &search_list, const Particles &surrounding_list,
-    float dt) const {
+    double dt) const {
   std::vector<ActionPtr> actions;
   for (const ParticleData &p2 : surrounding_list) {
     // don't look for collisions if the particle from the surrounding list is

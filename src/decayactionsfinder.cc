@@ -20,7 +20,7 @@
 namespace Smash {
 
 ActionList DecayActionsFinder::find_actions_in_cell(
-    const ParticleList &search_list, float dt) const {
+    const ParticleList &search_list, double dt) const {
   ActionList actions;
   actions.reserve(10);  // for short time steps this seems reasonable to expect
                         // less than 10 decays in most time steps
