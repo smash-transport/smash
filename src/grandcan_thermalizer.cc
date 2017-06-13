@@ -561,6 +561,20 @@ void ThermLatticeNode::add_particle(const ParticleData& part, double factor) {
   ns_ += static_cast<double>(part.type().strangeness()) * factor;
 }
 
+void ThermLatticeNode::set_rest_frame_quantities(double T0,
+                                                 double mub0,
+                                                 double mus0,
+                                                 const ThreeVector v0) {
+  T_ = T0;
+  mub_ = mub0;
+  mus_ = mus0;
+  v_ = v0;
+  e_ = HadronGasEos::energy_density(T_, mub_, mus_);
+  p_ = HadronGasEos::pressure(T_, mub_, mus_);
+  nb_ = HadronGasEos::net_baryon_density(T_, mub_, mus_);
+  ns_ = HadronGasEos::net_strange_density(T_, mub_, mus_);
+}
+
 void ThermLatticeNode::compute_rest_frame_quantities(HadronGasEos& eos) {
   // ToDo(oliiny): use Newton's method instead of these iterations
   const int max_iter = 50;

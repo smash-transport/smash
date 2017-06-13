@@ -382,7 +382,7 @@ std::array<double,3> HadronGasEos::solve_eos_initial_approximation(
 
 std::array<double, 3> HadronGasEos::solve_eos(double e, double nb, double ns,
                                  std::array<double, 3> initial_approximation) {
-  int iterate_status, residual_status;
+  int iterate_status, residual_status = GSL_SUCCESS;
   size_t iter = 0;
 
   struct rparams p = {e, nb, ns};

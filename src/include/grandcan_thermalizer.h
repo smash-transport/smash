@@ -51,6 +51,9 @@ class ThermLatticeNode {
   void add_particle(const ParticleData& p, double factor);
   /// Compute T, mu, v given Tmu0, nb and ns
   void compute_rest_frame_quantities(HadronGasEos& eos);
+  /// Simply set rest frame quantities. Useful for testing.
+  void set_rest_frame_quantities(double T0, double mub0, double mus0,
+                                 const ThreeVector v0);
 
   FourVector Tmu0() const { return Tmu0_; }
   double nb() const { return nb_; }
