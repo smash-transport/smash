@@ -21,11 +21,14 @@ namespace Smash {
 double propagate_straight_line(Particles *particles, double to_time,
       const std::vector<FourVector> &beam_momentum) {
   const auto &log = logger<LogArea::Propagation>();
+  bool negative_dt_error = false;
   double dt = 0.0;
   for (ParticleData &data : *particles) {
     const double t0 = data.position().x0();
     dt = to_time - t0;
-    if (dt < 0.0) {
+    if (dt < 0.0 && !negative_dt_error) {
+      // Print error message once, not for every particle
+      negative_dt_error = true;
       log.error("propagate_straight_line - negative dt = ", dt);
     }
     assert(dt >= 0.0);
