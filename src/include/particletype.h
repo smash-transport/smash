@@ -172,23 +172,24 @@ class ParticleType {
   }
 
   /**
-   * The minimum mass of the resonance.
+   * The minimum mass of the resonance that is kinematically allowed.
    *
    * Calculate the minimum rest energy the resonance must have
    * for any decay channel to be kinematically available.
    * (In other words, find the smallest sum of final-state particle masses.)
    *
-   * \return The minimum mass that a particle of this type can assume.
+   * \return The minimum mass that a particle of this type can assume, where at
+   * least one decay is possible.
    */
-  float minimum_mass() const;
+  float min_mass_kinematic() const;
 
   /**
    * The minimum mass of the resonance, where the spectral function is non-zero.
    *
    * Calculate the the smallest mass where the spectral function still has a
    * contribution.
-   * This value can be different from minimum_mass, if the spectral function
-   * becomes zero at masses higher than minimum_mass.
+   * This value can be different from min_mass_kinematic, if the spectral function
+   * becomes zero at masses higher than min_mass_kinematic.
    *
    * \return The minimum mass that a particle of this type can assume, where the
    * spectral function still has a non-zero value.
@@ -471,11 +472,11 @@ class ParticleType {
   float width_;
   /// PDG Code of the particle
   PdgCode pdgcode_;
-  /// minimum mass of the particle
+  /// minimum kinematically allowed mass of the particle
   /* Mutable, because it is initialized at first call of minimum mass function,
      so it's logically const, but not physically const, which is a classical
      case for using mutable. */
-  mutable float minimum_mass_;
+  mutable float min_mass_kinematic_;
   /// minimum mass, where the spectral function is non-zero
   mutable float min_mass_spectral_;
   /** This normalization factor ensures that the spectral function is normalized

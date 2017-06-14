@@ -156,7 +156,7 @@ float TwoBodyDecaySemistable::rho(float mass) const {
                 threshold(),
                 tabulation_interval, num_tab_pts,
                 [&](float sqrts) {
-                  return integrate(particle_types_[1]->minimum_mass(),
+                  return integrate(particle_types_[1]->min_mass_kinematic(),
                                     sqrts - particle_types_[0]->mass(),
                                     [&](float m) {
                                       return integrand_rho_Manley_1res(sqrts, m,
@@ -209,8 +209,8 @@ float TwoBodyDecayUnstable::rho(float mass) const {
   if (tabulation_ == nullptr) {
     /* TODO(weil): Move this lazy init to a global initialization function,
       * in order to avoid race conditions in multi-threading. */
-    const float m1_min = particle_types_[0]->minimum_mass();
-    const float m2_min = particle_types_[1]->minimum_mass();
+    const float m1_min = particle_types_[0]->min_mass_kinematic();
+    const float m2_min = particle_types_[1]->min_mass_kinematic();
     const float sum_gamma = particle_types_[0]->width_at_pole()
                           + particle_types_[1]->width_at_pole();
     const float tab_interval = std::max(2.f, 10.f*sum_gamma);

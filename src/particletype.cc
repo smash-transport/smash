@@ -123,7 +123,7 @@ ParticleType::ParticleType(std::string n, float m, float w, PdgCode id)
       mass_(m),
       width_(w),
       pdgcode_(id),
-      minimum_mass_(-1.f),
+      min_mass_kinematic_(-1.f),
       min_mass_spectral_(-1.f),
       charge_(pdgcode_.charge()),
       isospin_(-1),
@@ -300,18 +300,18 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
 }/*}}}*/
 
 
-float ParticleType::minimum_mass() const {
-  if (unlikely(minimum_mass_ < 0.f)) {
+float ParticleType::min_mass_kinematic() const {
+  if (unlikely(min_mass_kinematic_ < 0.f)) {
     /* If the particle is stable, min. mass is just the mass. */
-    minimum_mass_ = mass_;
+    min_mass_kinematic_ = mass_;
     /* Otherwise, find the lowest mass value needed in any decay mode */
     if (!is_stable()) {
       for (const auto &mode : decay_modes().decay_mode_list()) {
-        minimum_mass_ = std::min(minimum_mass_, mode->threshold());
+        min_mass_kinematic_ = std::min(min_mass_kinematic_, mode->threshold());
       }
     }
   }
-  return minimum_mass_;
+  return min_mass_kinematic_;
 }
 
 float ParticleType::min_mass_spectral() const {
@@ -319,16 +319,16 @@ float ParticleType::min_mass_spectral() const {
     /* If the particle is stable or it has a non-zero spectral function value at
      * the minimum mass that is allowed by kinematics, min_mass_spectral is just
      * the min_mass_kinetic. */
-    min_mass_spectral_ = minimum_mass();
+    min_mass_spectral_ = min_mass_kinematic();
     /* Otherwise, find the lowest mass value where spectral function has a
      * non-zero value by bisection.*/
     if (!is_stable() &&
-        this->spectral_function(minimum_mass()) < really_small) {
+        this->spectral_function(min_mass_kinematic()) < really_small) {
       // find a right bound that has non-zero spectral function for bisection
       const float m_step = 0.01;
       float right_bound_bis;
       for (unsigned int i = 0; ; i++) {
-        right_bound_bis = minimum_mass() + m_step*i;
+        right_bound_bis = min_mass_kinematic() + m_step*i;
         if (this->spectral_function(right_bound_bis) > really_small) {
           break;
         }
@@ -549,8 +549,9 @@ float ParticleType::spectral_function(float m) const {
     const auto width = width_at_pole();
     // We transform the integral using m = m_min + width_pole * tan(x), to
     // make it definite and to avoid numerical issues.
-    norm_factor_ = 1./integrate(std::atan((minimum_mass() - mass())/width),
-                                M_PI/2.,
+    norm_factor_ = 1./integrate(
+                               std::atan((min_mass_kinematic() - mass())/width),
+                               M_PI/2.,
         [&](double x) {
           return spectral_function_no_norm(mass() + width*std::tan(x)) * width
                  * (1 + square(std::tan(x)));

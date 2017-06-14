@@ -33,7 +33,7 @@ TEST(width_Delta) {
 
 TEST(width_Roper) {
   const ParticleType &t = ParticleType::find(0x12212);  // N(1440)
-  printf("%7.4f \n",t.minimum_mass());
+  printf("%7.4f \n",t.min_mass_kinematic());
   const int nModes = t.decay_modes().decay_mode_list().size();
   for (int i = 0; i < 100; i++) {
     float m = 1. + i*0.01;
@@ -68,7 +68,7 @@ static void compare_in_vs_out_width(const ParticleType &t,
   p0.set_4momentum(pt[0]->mass(), 0., 0., 0.);
   ParticleData p1 = ParticleData(*pt[1]);
   Integrator integrate;
-  const float Gam_in = integrate(pt[1]->minimum_mass(), m_R - pt[0]->mass(),
+  const float Gam_in = integrate(pt[1]->min_mass_kinematic(), m_R - pt[0]->mass(),
                                   [&](float m) {
                                     p1.set_4momentum(m, 0., 0., 0.);
                                     return t.get_partial_in_width(m_R, p0, p1)

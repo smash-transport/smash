@@ -114,9 +114,10 @@ inline std::unique_ptr<Tabulation> spectral_integral_semistable(
     const ParticleType& stable,
     float range) {
   return make_unique<Tabulation>(
-          resonance.minimum_mass() + stable.mass(), range, 100,
+          resonance.min_mass_kinematic() + stable.mass(), range, 100,
           [&](float srts) {
-            return integrate(resonance.minimum_mass(), srts - stable.mass(),
+            return integrate(resonance.min_mass_kinematic(),
+                             srts - stable.mass(),
                              [&](float m) {
                                return spec_func_integrand_1res(m, srts,
                                                      stable.mass(), resonance);
@@ -131,12 +132,12 @@ inline std::unique_ptr<Tabulation> spectral_integral_unstable(
     const ParticleType& res2,
     float range) {
     return make_unique<Tabulation>(
-          res1.minimum_mass() + res2.minimum_mass(), range, 100,
+          res1.min_mass_kinematic() + res2.min_mass_kinematic(), range, 100,
           [&](float srts) {
-            return integrate2d(res1.minimum_mass(),
-                               srts - res2.minimum_mass(),
-                               res2.minimum_mass(),
-                               srts - res1.minimum_mass(),
+            return integrate2d(res1.min_mass_kinematic(),
+                               srts - res2.min_mass_kinematic(),
+                               res2.min_mass_kinematic(),
+                               srts - res1.min_mass_kinematic(),
                                [&](float m1, float m2) {
                                  return spec_func_integrand_2res(srts, m1, m2,
                                                             res1, res2);
