@@ -165,14 +165,13 @@ class HadronGasEos {
   std::array<double, 3> solve_eos(double e, double nb, double ns,
                                   std::array<double, 3> initial_approximation);
   std::array<double, 3> solve_eos(double e, double nb, double ns) {
-    return solve_eos(e, nb, ns, solve_eos_initial_approximation(e, nb, ns));
+    return solve_eos(e, nb, ns, solve_eos_initial_approximation(e, nb));
   }
   /**
    * Compute a reasonable initial approximation for solve_eos
-   * Input and return are the same that for solve_eos function
+   * Input and output are the same that for solve_eos function
    */
-  std::array<double, 3> solve_eos_initial_approximation(double e, double nb,
-                                                        double ns);
+  std::array<double, 3> solve_eos_initial_approximation(double e, double nb);
   /// Compute strange chemical potential, requiring that net strangeness = 0
   static double mus_net_strangeness0(double T, double mub);
   /// Get the element of eos table
@@ -208,7 +207,7 @@ class HadronGasEos {
   static double e_equation(double T, void *params);
 
   /// Helpful printout, useful for debugging if gnu equation solving goes crazy
-  void print_solver_state(size_t iter) const;
+  std::string print_solver_state(size_t iter) const;
   /// Constant factor, that appears in front of many thermodyn. expressions
   static constexpr double prefactor_ = 0.5*M_1_PI*M_1_PI/(hbarc*hbarc*hbarc);
   /// Precision of equation solving

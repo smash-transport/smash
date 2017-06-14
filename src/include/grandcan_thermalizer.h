@@ -24,7 +24,7 @@ namespace Smash {
 
 /**
  * The ThermLatticeNode class is intended to compute thermodynamical
- * quantities in a cell given particles. It accumulates upper row of
+ * quantities in a cell given particles. It accumulates the upper row of
  * the energy-momentum tensor T^{\mu 0}, baryon density nb and strangeness
  * densities in the computational frame. From these quantities it allows
  * to compute the local rest frame quantites: temperature T, chemical
@@ -88,19 +88,30 @@ class ThermLatticeNode {
 
 std::ostream &operator<<(std::ostream &s, const ThermLatticeNode &node);
 
+enum class HadronClass {
+  Baryon = 0,
+  Antibaryon = 1,
+  PositiveSMeson = 2,
+  NegativeSMeson = 3,
+  PositiveQNonstrangeMeson = 4,
+  NegativeQNonstrangeMeson = 5,
+  NeutralNonstrangeMeson = 6,
+};
+
+
 /** The GrandCanThermalizer class implements the following functionality:
  *  1. Create a lattice and find the local rest frame energy density in each
  *     cell from the particles.
- *  2. Remove partices from the cells, where the energy density is high enough.
+ *  2. Remove particles from the cells, where the energy density is high enough.
  *     Save the energy, momentum and quantum numbers of the removed particles.
  *  3. Sample new particles instead of the removed ones according to the
- *     grand-canonical thermal distribution, but with additional constraint:
+ *     grand-canonical thermal distribution, but with an additional constraint:
  *     the energy, momentum and quantum numbers should be the same as those of
- *     the remove particles.
+ *     the removed particles.
  *
  *  The step 3. is a challenging task, so several algorithms are implemented
  *  that try to fulfil the requirements. The algorithms are a trade-off between
- *  the mathematical rigour and computational speed. All of them are shown
+ *  mathematical rigour and computational speed. All of them are shown
  *  to reproduce the mean values of multiplicities correctly. However, this
  *  is not the case for multiplicity fluctuations. For details see
  *  \iref{Oliinychenko:2016vkg}.
@@ -140,7 +151,7 @@ class GrandCanThermalizer {
   void update_lattice(const Particles& particles,
                       const DensityParameters& par,
                       bool ignore_cells_under_treshold = true);
-  /// Simply returns a vector distributed uniformly in a rectangular cell.
+  /// Simply returns a vector uniformly sampled from the rectangular cell.
   ThreeVector uniform_in_cell() const;
   /** Changes energy and momenta of the particles in plist to match the
    *  required_total_momentum. The procedure is described in
@@ -161,7 +172,7 @@ class GrandCanThermalizer {
    * saved in the mult_int_ array. Only particles of class particle_class
    * are sampled, where particle_class is defined by the get_class function.
    */
-  void sample_multinomial(int particle_class, int N);
+  void sample_multinomial(HadronClass particle_class, int N);
   /**
    * The total number of particles of sort type_index is defined by mult_int_
    * array. This function samples mult_int_[type_index] particles. It chooses
@@ -203,9 +214,12 @@ class GrandCanThermalizer {
     }
   }
 
-  /** Samples one particle. The specie, cell, momentum and coordinate
+  /** Samples one particle. The species, cell, momentum and coordinate
    *  are chosen from the corresponding distributions. The condition
    *  function limits the choice of possible species.
+   *
+   *  Condition is the function of the signature
+   *  bool condition(int strangeness, int baryon_number, int charge);
    */
   template <typename F>
   ParticleData sample_in_random_cell_mode_algo(const double time,
@@ -284,16 +298,21 @@ class GrandCanThermalizer {
     }
     return res;
   }
-  int get_class(size_t typelist_index) const {
+  HadronClass get_class(size_t typelist_index) const {
     const int B = eos_typelist_[typelist_index]->baryon_number();
     const int S = eos_typelist_[typelist_index]->strangeness();
     const int ch = eos_typelist_[typelist_index]->charge();
-    return (B > 0) ? 0 :
-           (B < 0) ? 1 :
-           (S > 0) ? 2 :
-           (S < 0) ? 3 :
-           (ch > 0) ? 4 :
-           (ch < 0) ? 5 : 6;
+    return (B > 0) ? HadronClass::Baryon :
+           (B < 0) ? HadronClass::Antibaryon :
+           (S > 0) ? HadronClass::PositiveSMeson :
+           (S < 0) ? HadronClass::NegativeSMeson :
+           (ch > 0) ? HadronClass::PositiveQNonstrangeMeson :
+           (ch < 0) ? HadronClass::NegativeQNonstrangeMeson :
+                      HadronClass::NeutralNonstrangeMeson;
+  }
+  /// Returns multiplicity of the hadron class cl
+  double mult_class(const HadronClass cl) const {
+    return mult_classes_[static_cast<size_t>(cl)];
   }
   std::vector<double> N_in_cells_;
   std::vector<size_t> cells_to_sample_;

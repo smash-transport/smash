@@ -127,9 +127,9 @@ void GrandCanThermalizer::update_lattice(const Particles& particles,
   }
 }
 
-void GrandCanThermalizer::sample_multinomial(int particle_class,
+void GrandCanThermalizer::sample_multinomial(HadronClass particle_class,
                                              int N_to_sample) {
-  double sum = mult_classes_[particle_class];
+  double sum = mult_class(particle_class);
   for (size_t i_type = 0; (i_type < N_sorts_) && (N_to_sample > 0); i_type++) {
     if (get_class(i_type) != particle_class) {
       continue;
@@ -164,7 +164,7 @@ void GrandCanThermalizer::thermalize(Particles& particles,
     }
   }
   // Do not thermalize too small number of particles: for the number
-  // of particles < 30 the algorithm tends to hand or crash too often.
+  // of particles < 30 the algorithm tends to hang or crash too often.
   if (to_remove.size() > 30) {
     for (auto &particle : to_remove) {
       conserved_initial.add_values(particle);
@@ -236,10 +236,11 @@ void GrandCanThermalizer::thermalize_BF_algo(
 
   std::fill(mult_classes_.begin(), mult_classes_.end(), 0.0);
   for (size_t i = 0; i < N_sorts_; i++) {
-    mult_classes_[get_class(i)] += mult_sort_[i];
+    mult_classes_[static_cast<size_t>(get_class(i))] += mult_sort_[i];
   }
 
-  BesselSampler bessel_sampler_B(mult_classes_[0], mult_classes_[1],
+  BesselSampler bessel_sampler_B(mult_class(HadronClass::Baryon),
+                                 mult_class(HadronClass::Antibaryon),
                                  conserved_initial.baryon_number());
 
   while (true) {
@@ -247,8 +248,8 @@ void GrandCanThermalizer::thermalize_BF_algo(
     std::fill(mult_int_.begin(), mult_int_.end(), 0);
     const auto Nbar_antibar = bessel_sampler_B.sample();
 
-    sample_multinomial(0, Nbar_antibar.first);
-    sample_multinomial(1, Nbar_antibar.second);
+    sample_multinomial(HadronClass::Baryon, Nbar_antibar.first);
+    sample_multinomial(HadronClass::Antibaryon, Nbar_antibar.second);
 
     // Count strangeness of the sampled particles
     int S_sampled = 0;
@@ -258,20 +259,23 @@ void GrandCanThermalizer::thermalize_BF_algo(
 
     std::pair<int, int> NS_antiS;
     if (algorithm_ == ThermalizationAlgorithm::BiasedBF) {
-      BesselSampler bessel_sampler_S(mult_classes_[2], mult_classes_[3],
+      BesselSampler bessel_sampler_S(
+                             mult_class(HadronClass::PositiveSMeson),
+                             mult_class(HadronClass::NegativeSMeson),
                              conserved_initial.strangeness() - S_sampled);
       NS_antiS = bessel_sampler_S.sample();
     } else if (algorithm_ == ThermalizationAlgorithm::UnbiasedBF) {
-      NS_antiS = std::make_pair(Random::poisson(mult_classes_[2]),
-                                Random::poisson(mult_classes_[3]));
+      NS_antiS = std::make_pair(
+        Random::poisson(mult_class(HadronClass::PositiveSMeson)),
+        Random::poisson(mult_class(HadronClass::NegativeSMeson)));
       if (NS_antiS.first - NS_antiS.second !=
           conserved_initial.strangeness() - S_sampled) {
         continue;
       }
     }
 
-    sample_multinomial(2, NS_antiS.first);
-    sample_multinomial(3, NS_antiS.second);
+    sample_multinomial(HadronClass::PositiveSMeson, NS_antiS.first);
+    sample_multinomial(HadronClass::NegativeSMeson, NS_antiS.second);
     // Count charge of the sampled particles
     int ch_sampled = 0;
     for (size_t i = 0; i < N_sorts_; i++) {
@@ -280,21 +284,25 @@ void GrandCanThermalizer::thermalize_BF_algo(
 
     std::pair<int, int> NC_antiC;
     if (algorithm_ == ThermalizationAlgorithm::BiasedBF) {
-      BesselSampler bessel_sampler_C(mult_classes_[4], mult_classes_[5],
-                                conserved_initial.charge() - ch_sampled);
+      BesselSampler bessel_sampler_C(
+        mult_class(HadronClass::PositiveQNonstrangeMeson),
+        mult_class(HadronClass::NegativeQNonstrangeMeson),
+        conserved_initial.charge() - ch_sampled);
       NC_antiC = bessel_sampler_C.sample();
     } else if (algorithm_ == ThermalizationAlgorithm::UnbiasedBF) {
-      NC_antiC = std::make_pair(Random::poisson(mult_classes_[4]),
-                                Random::poisson(mult_classes_[5]));
+      NC_antiC = std::make_pair(
+        Random::poisson(mult_class(HadronClass::PositiveQNonstrangeMeson)),
+        Random::poisson(mult_class(HadronClass::NegativeQNonstrangeMeson)));
       if (NC_antiC.first - NC_antiC.second !=
           conserved_initial.charge() - ch_sampled) {
         continue;
       }
     }
 
-    sample_multinomial(4, NC_antiC.first);
-    sample_multinomial(5, NC_antiC.second);
-    sample_multinomial(6, Random::poisson(mult_classes_[6]));
+    sample_multinomial(HadronClass::PositiveQNonstrangeMeson, NC_antiC.first);
+    sample_multinomial(HadronClass::NegativeQNonstrangeMeson, NC_antiC.second);
+    sample_multinomial(HadronClass::NeutralNonstrangeMeson,
+      Random::poisson(mult_class(HadronClass::NeutralNonstrangeMeson)));
 
     for (size_t itype = 0; itype < N_sorts_; itype++) {
       sample_in_random_cell_BF_algo(sampled_list, time, itype);
