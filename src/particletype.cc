@@ -316,23 +316,22 @@ float ParticleType::minimum_mass() const {
 
 float ParticleType::min_mass_spectral() const {
   // TODO(staudenmaier):
-  // * clean up comments
   // * check cpplint
   // * replace in more places
   if (unlikely(min_mass_spectral_ < 0.f)) {
-    /* If the particle is stable, min. mass with non-zero spectral function is
-    * just the min. mass. */
+    /* If the particle is stable or it has a non-zero spectral function value at
+     * the minimum mass that is allowed by kinematics, min_mass_spectral is just
+     * this min_mass_kinetic. */
     min_mass_spectral_ = minimum_mass();
-    /* Otherwise, find the lowest mass value where spectral function non-zero
-    * by bisection.*/
+    /* Otherwise, find the lowest mass value where spectral function has a
+     * non-zero value by bisection.*/
     if (!is_stable()) {
-      if (this->spectral_function(minimum_mass()) < really_small) { // otherwise no need to search
-        // find right bound that has a non-zero spectral_function value
+      if (this->spectral_function(minimum_mass()) < really_small) {
+        // find a right bound that has non-zero spectral function for bisection
         const float m_step_MeV = 0.001;
         float right_bound_bis = minimum_mass();
         for (unsigned int i = 0; ; i++) {
           right_bound_bis = minimum_mass() + i*m_step_MeV;
-          // this is the criterion where spectral function is set zero
           if (this->spectral_function(right_bound_bis) > really_small) {
             break;
           }
@@ -647,10 +646,13 @@ std::pair<float, float> ParticleType::sample_resonance_masses(
   const ParticleType &t1 = *this;
   /* Sample resonance mass from the distribution
    * used for calculating the cross section. */
-  const float max_mass_1 = std::nextafter(cms_energy - t2.min_mass_spectral(), 0.f);
-  const float max_mass_2 = std::nextafter(cms_energy - t1.min_mass_spectral(), 0.f);
+  const float max_mass_1 = std::nextafter(cms_energy - t2.min_mass_spectral(),
+                                                                           0.f);
+  const float max_mass_2 = std::nextafter(cms_energy - t1.min_mass_spectral(),
+                                                                           0.f);
   // largest possible cm momentum (from smallest mass)
-  const float pcm_max = pCM(cms_energy, t1.min_mass_spectral(), t2.min_mass_spectral());
+  const float pcm_max = pCM(cms_energy, t1.min_mass_spectral(),
+                                                        t2.min_mass_spectral());
   const float blw_max = pcm_max * blatt_weisskopf_sqr(pcm_max, L);
 
   float mass_1, mass_2, val;

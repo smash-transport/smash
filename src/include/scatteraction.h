@@ -86,7 +86,8 @@ template <typename F>
 inline void add_channel(CollisionBranchList &process_list, F get_xsection,
                         float sqrts, const ParticleType &type_a,
                                      const ParticleType &type_b) {
-  const float sqrt_s_min = type_a.min_mass_spectral() + type_b.min_mass_spectral();
+  const float sqrt_s_min = type_a.min_mass_spectral() +
+                                                     type_b.min_mass_spectral();
   if (sqrts <= sqrt_s_min) {
       return;
   }
