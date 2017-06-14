@@ -356,9 +356,9 @@ void GrandCanThermalizer::renormalize_momenta(ParticleList& plist,
   int iter = 0;
   if (E_expected >= E) {
     a_min = 0.0;
-    a_max = 0.5;
+    a_max = 1.0;
   } else {
-    a_min = -0.5;
+    a_min = -1.0;
     a_max = 0.0;
   }
   do {
