@@ -315,41 +315,37 @@ float ParticleType::minimum_mass() const {
 }
 
 float ParticleType::min_mass_spectral() const {
-  // TODO(staudenmaier):
-  // * check cpplint
-  // * replace in more places
   if (unlikely(min_mass_spectral_ < 0.f)) {
     /* If the particle is stable or it has a non-zero spectral function value at
      * the minimum mass that is allowed by kinematics, min_mass_spectral is just
-     * this min_mass_kinetic. */
+     * the min_mass_kinetic. */
     min_mass_spectral_ = minimum_mass();
     /* Otherwise, find the lowest mass value where spectral function has a
      * non-zero value by bisection.*/
-    if (!is_stable()) {
-      if (this->spectral_function(minimum_mass()) < really_small) {
-        // find a right bound that has non-zero spectral function for bisection
-        const float m_step_MeV = 0.001;
-        float right_bound_bis = minimum_mass();
-        for (unsigned int i = 0; ; i++) {
-          right_bound_bis = minimum_mass() + i*m_step_MeV;
-          if (this->spectral_function(right_bound_bis) > really_small) {
-            break;
-          }
+    if (!is_stable() &&
+        this->spectral_function(minimum_mass()) < really_small) {
+      // find a right bound that has non-zero spectral function for bisection
+      const float m_step = 0.01;
+      float right_bound_bis;
+      for (unsigned int i = 0; ; i++) {
+        right_bound_bis = minimum_mass() + m_step*i;
+        if (this->spectral_function(right_bound_bis) > really_small) {
+          break;
         }
-        // bisection
-        float left_bound_bis = right_bound_bis - m_step_MeV;
-        float mid;
-        float precision_keV = 1E-6;
-        while (right_bound_bis - left_bound_bis >  precision_keV)  {
-          mid = (left_bound_bis + right_bound_bis) / 2.0;
-          if (this->spectral_function(mid) > really_small) {
-            right_bound_bis = mid;
-          } else {
-            left_bound_bis = mid;
-          }
-        }
-        min_mass_spectral_ = right_bound_bis;
       }
+      // bisection
+      const float precision = 1E-6;
+      float left_bound_bis = right_bound_bis - m_step;
+      float mid;
+      while (right_bound_bis - left_bound_bis >  precision)  {
+        mid = (left_bound_bis + right_bound_bis) / 2.0;
+        if (this->spectral_function(mid) > really_small) {
+          right_bound_bis = mid;
+        } else {
+          left_bound_bis = mid;
+        }
+      }
+      min_mass_spectral_ = right_bound_bis;
     }
   }
   return min_mass_spectral_;
