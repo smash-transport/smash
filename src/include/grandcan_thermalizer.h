@@ -89,13 +89,20 @@ class ThermLatticeNode {
 std::ostream &operator<<(std::ostream &s, const ThermLatticeNode &node);
 
 enum class HadronClass {
+  /// All baryons
   Baryon = 0,
+  /// All anti-baryons
   Antibaryon = 1,
+  /// Mesons with strangeness S > 0
   PositiveSMeson = 2,
+  /// Mesons with strangeness S < 0
   NegativeSMeson = 3,
-  PositiveQNonstrangeMeson = 4,
-  NegativeQNonstrangeMeson = 5,
-  NeutralNonstrangeMeson = 6,
+  /// Non-strange mesons (S = 0) with electric cherge Q > 0
+  PositiveQZeroSMeson = 4,
+  /// Non-strange mesons (S = 0) with electric cherge Q < 0
+  NegativeQZeroSMeson = 5,
+  /// Neutral non-strange mesons
+  ZeroQZeroSMeson = 6,
 };
 
 
@@ -306,9 +313,9 @@ class GrandCanThermalizer {
            (B < 0) ? HadronClass::Antibaryon :
            (S > 0) ? HadronClass::PositiveSMeson :
            (S < 0) ? HadronClass::NegativeSMeson :
-           (ch > 0) ? HadronClass::PositiveQNonstrangeMeson :
-           (ch < 0) ? HadronClass::NegativeQNonstrangeMeson :
-                      HadronClass::NeutralNonstrangeMeson;
+           (ch > 0) ? HadronClass::PositiveQZeroSMeson :
+           (ch < 0) ? HadronClass::NegativeQZeroSMeson :
+                      HadronClass::ZeroQZeroSMeson;
   }
   /// Returns multiplicity of the hadron class cl
   double mult_class(const HadronClass cl) const {

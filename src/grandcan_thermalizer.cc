@@ -285,24 +285,24 @@ void GrandCanThermalizer::thermalize_BF_algo(
     std::pair<int, int> NC_antiC;
     if (algorithm_ == ThermalizationAlgorithm::BiasedBF) {
       BesselSampler bessel_sampler_C(
-        mult_class(HadronClass::PositiveQNonstrangeMeson),
-        mult_class(HadronClass::NegativeQNonstrangeMeson),
+        mult_class(HadronClass::PositiveQZeroSMeson),
+        mult_class(HadronClass::NegativeQZeroSMeson),
         conserved_initial.charge() - ch_sampled);
       NC_antiC = bessel_sampler_C.sample();
     } else if (algorithm_ == ThermalizationAlgorithm::UnbiasedBF) {
       NC_antiC = std::make_pair(
-        Random::poisson(mult_class(HadronClass::PositiveQNonstrangeMeson)),
-        Random::poisson(mult_class(HadronClass::NegativeQNonstrangeMeson)));
+        Random::poisson(mult_class(HadronClass::PositiveQZeroSMeson)),
+        Random::poisson(mult_class(HadronClass::NegativeQZeroSMeson)));
       if (NC_antiC.first - NC_antiC.second !=
           conserved_initial.charge() - ch_sampled) {
         continue;
       }
     }
 
-    sample_multinomial(HadronClass::PositiveQNonstrangeMeson, NC_antiC.first);
-    sample_multinomial(HadronClass::NegativeQNonstrangeMeson, NC_antiC.second);
-    sample_multinomial(HadronClass::NeutralNonstrangeMeson,
-      Random::poisson(mult_class(HadronClass::NeutralNonstrangeMeson)));
+    sample_multinomial(HadronClass::PositiveQZeroSMeson, NC_antiC.first);
+    sample_multinomial(HadronClass::NegativeQZeroSMeson, NC_antiC.second);
+    sample_multinomial(HadronClass::ZeroQZeroSMeson,
+      Random::poisson(mult_class(HadronClass::ZeroQZeroSMeson)));
 
     for (size_t itype = 0; itype < N_sorts_; itype++) {
       sample_in_random_cell_BF_algo(sampled_list, time, itype);
