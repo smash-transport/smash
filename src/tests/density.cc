@@ -74,11 +74,10 @@ TEST(density_type) {
   COMPARE(density_factor(proton, DensityType::Pion), 0.f);
 
   // verify that all are recognized as particles
-  VERIFY(density_factor(proton,   DensityType::Hadron) == 1.f
-      && density_factor(pi_zero,  DensityType::Hadron) == 1.f
-      && density_factor(pi_plus,  DensityType::Hadron) == 1.f
-      && density_factor(pi_minus, DensityType::Hadron) == 1.f
-      );
+  COMPARE(density_factor(proton,   DensityType::Hadron), 1.f);
+  COMPARE(density_factor(pi_zero,  DensityType::Hadron), 1.f);
+  COMPARE(density_factor(pi_plus,  DensityType::Hadron), 1.f);
+  COMPARE(density_factor(pi_minus, DensityType::Hadron), 1.f);
 }
 
 // create one particle moving along x axis and check density in comp. frame

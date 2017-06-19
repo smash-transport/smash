@@ -51,7 +51,7 @@ TEST(merge) {
   const auto extra = foo["Extra"];
   COMPARE(foo["Bar"].Scalar(), "Hallo Welt");
   COMPARE(foo["Baz"].Scalar(), "1.2");
-  VERIFY(foo["Length"].as<std::vector<int>>() == (std::vector<int>{1, 2, 3}));
+  COMPARE(foo["Length"].as<std::vector<int>>(), (std::vector<int>{1, 2, 3}));
   COMPARE(foo["Height"].Scalar(), "21.8");
   COMPARE(extra["radius"].Scalar(), "5.2");
   COMPARE(extra["height"].Scalar(), "1.3");
