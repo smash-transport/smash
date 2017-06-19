@@ -142,6 +142,23 @@ enum class ThermodynamicQuantity : char {
   LandauVelocity,
 };
 
+/**
+ * Defines the algorithm used for the forced thermalization.
+ *  For the description of algorithms see \iref{Oliinychenko:2016vkg}.
+ *  All of them intend to conserve the net baryon number, strangeness
+ *  and electric charge, as well as energy. Mode sampling is the fastest,
+ *  but least theoretically robust, unbiased BF is the slowest
+ *  (even hangs completely from time to time), but it is also the most
+ *  theoretically robust.
+ */
+enum class ThermalizationAlgorithm {
+  ModeSampling,
+  BiasedBF,
+  UnbiasedBF,
+};
+
+
+
 using ActionPtr = build_unique_ptr_<Action>;
 using ScatterActionPtr = build_unique_ptr_<ScatterAction>;
 using ActionList = build_vector_<ActionPtr>;

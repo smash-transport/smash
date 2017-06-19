@@ -630,6 +630,12 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
                                                     LatticeUpdate::AtOutput);
     }
   }
+
+  // Create forced thermalizer
+  if (config.has_value({"Forced_Thermalization"})) {
+    Configuration&& th_conf = config["Forced_Thermalization"];
+    thermalizer_ = modus_.create_grandcan_thermalizer(th_conf);
+  }
 }
 
 const std::string hline(80, '-');
@@ -826,6 +832,17 @@ void Experiment<Modus>::run_time_evolution() {
                               end_time_ - t);
     log.debug("Timestepless propagation for next ", dt, " fm/c.");
 
+    /* Perform forced thermalization if required */
+    if (thermalizer_ &&
+        thermalizer_->is_time_to_thermalize(parameters_.labclock)) {
+      const bool ignore_cells_under_treshold = true;
+      thermalizer_->update_lattice(particles_, density_param_,
+                                      ignore_cells_under_treshold);
+      thermalizer_->thermalize(particles_,
+                                  parameters_.labclock.current_time(),
+                                  parameters_.testparticles);
+    }
+
     /* (1.a) Create grid. */
     float min_cell_length = compute_min_cell_length(dt);
     log.debug("Creating grid with minimal cell length ", min_cell_length);
@@ -1001,6 +1018,10 @@ void Experiment<Modus>::intermediate_output() {
       particles_, interactions_total_, interactions_this_interval,
       conserved_initial_, time_start_, parameters_.outputclock.current_time());
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
+  /*if (thermalizer_) {
+    thermalizer_->update_lattice(particles_, density_param_);
+    thermalizer_->print_statistics(parameters_.labclock);
+  }*/
   /* save evolution data */
   for (const auto &output : outputs_) {
     output->at_intermediate_time(particles_, parameters_.outputclock,
@@ -1047,6 +1068,10 @@ void Experiment<Modus>::intermediate_output() {
         output->thermodynamics_output(ThermodynamicQuantity::LandauVelocity,
                                       dens_type_lattice_printout_, *Tmn_);
       }
+    }
+
+    if (thermalizer_) {
+      output->thermodynamics_output(*thermalizer_);
     }
   }
 }

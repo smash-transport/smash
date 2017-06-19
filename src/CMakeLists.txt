@@ -92,6 +92,7 @@ set(smash_src
         filelock.cc
         fourvector.cc
         fpenvironment.cc
+        grandcan_thermalizer.cc
         grid.cc
         hadgas_eos.cc
         inputfunctions.cc

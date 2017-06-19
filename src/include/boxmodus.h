@@ -75,6 +75,15 @@ class BoxModus : public ModusDefault {
             strategy};
   }
 
+  /// \copydoc Smash::ModusDefault::create_grandcan_thermalizer
+  std::unique_ptr<GrandCanThermalizer> create_grandcan_thermalizer(
+                                                   Configuration& conf) const {
+    const std::array<float, 3> lat_size = {length_, length_, length_};
+    const std::array<float, 3> origin = {0.0f, 0.0f, 0.0f};
+    const bool periodicity = true;
+    return make_unique<GrandCanThermalizer>(conf, lat_size, origin, periodicity);
+  }
+
   /// \copydoc Smash::ModusDefault::max_timestep()
   float max_timestep(float max_transverse_distance_sqr) const {
     return 0.5f*std::sqrt(length_*length_ - max_transverse_distance_sqr);

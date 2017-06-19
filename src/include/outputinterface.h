@@ -13,6 +13,7 @@
 #include "density.h"
 #include "energymomentumtensor.h"
 #include "forwarddeclarations.h"
+#include "grandcan_thermalizer.h"
 #include "lattice.h"
 #include "macros.h"
 
@@ -84,8 +85,8 @@ class OutputInterface {
    * \param lattice Lattice of tabulated values.
    */
   virtual void thermodynamics_output(const ThermodynamicQuantity tq,
-                            const DensityType dt,
-                            RectangularLattice<DensityOnLattice> &lattice) {
+                      const DensityType dt,
+                      RectangularLattice<DensityOnLattice> &lattice) {
     SMASH_UNUSED(tq);
     SMASH_UNUSED(dt);
     SMASH_UNUSED(lattice);
@@ -98,11 +99,15 @@ class OutputInterface {
    * \param lattice Lattice of tabulated values.
    */
   virtual void thermodynamics_output(const ThermodynamicQuantity tq,
-                            const DensityType dt,
-                            RectangularLattice<EnergyMomentumTensor> &lattice) {
+                   const DensityType dt,
+                   RectangularLattice<EnergyMomentumTensor> &lattice) {
     SMASH_UNUSED(tq);
     SMASH_UNUSED(dt);
     SMASH_UNUSED(lattice);
+  }
+
+  virtual void thermodynamics_output(const GrandCanThermalizer& gct) {
+    SMASH_UNUSED(gct);
   }
 
   const char *to_string(const ThermodynamicQuantity tq) {

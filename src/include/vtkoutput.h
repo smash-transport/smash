@@ -45,8 +45,34 @@ class VtkOutput : public OutputInterface {
       const ThermodynamicQuantity tq, const DensityType dt,
       RectangularLattice<EnergyMomentumTensor> &lattice) override;
 
+  /// Printout of the thermodynamic quantities from thethermalizer class
+  void thermodynamics_output(const GrandCanThermalizer& gct) override;
+
  private:
   void write(const Particles &particles);
+
+  std::string make_filename(const std::string &description, int counter);
+
+  std::string make_varname(const ThermodynamicQuantity tq,
+                           const DensityType dens_type);
+
+  template<typename T>
+  void write_vtk_header(std::ofstream &file,
+                        RectangularLattice<T> &lat,
+                        const std::string &description);
+
+  template<typename T, typename F>
+  void write_vtk_scalar(std::ofstream &file,
+                        RectangularLattice<T> &lat,
+                        const std::string &varname,
+                        F &&function);
+
+  template<typename T, typename F>
+  void write_vtk_vector(std::ofstream &file,
+                        RectangularLattice<T> &lat,
+                        const std::string &varname,
+                        F &&function);
+
 
   /// filesystem path for output
   const bf::path base_path_;
@@ -64,6 +90,8 @@ class VtkOutput : public OutputInterface {
   int vtk_tmn_landau_output_counter_ = 0;
   /// Number of Landau rest frame velocity vtk output in current event
   int vtk_v_landau_output_counter_ = 0;
+  /// Number of fluidization output
+  int vtk_fluidization_counter_ = 0;
 };
 
 }  // namespace Smash

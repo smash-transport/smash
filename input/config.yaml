@@ -110,6 +110,14 @@ Collision_Term:
 #        Momentum_Averaging_Radius:  0.08
 #        Gaussian_Cutoff:            2.2
 
+#Forced_Thermalization:
+#    Lattice_Sizes:          [20.0, 20.0, 50.0]
+#    Cell_Number:            [21, 21, 101]
+#    Critical_Edens:         0.3     # forced therm. above this energy density [GeV/fm^3]
+#    Start_Time:             0.0     # forced therm. at t > this time [fm/c]
+#    Timestep:               1.0     # timestep of thermalization [fm/c]
+#    Algorithm:              biased BF  # mode sampling, biased BF, unbiased BF
+
 #Potentials:
 #    Skyrme:
 #        Skyrme_A: -209.2

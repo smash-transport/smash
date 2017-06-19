@@ -80,6 +80,11 @@ TEST(cell_center) {
   VERIFY(lattice->cell_center(1, 1, 1).x1() == 3.75);
   VERIFY(lattice->cell_center(1, 1, 1).x2() == 0.375 * 3);
   FUZZY_COMPARE(float(lattice->cell_center(1, 1, 1).x3()), 1.0f);
+  // Cell center from 1d index
+  auto dims = lattice->dimensions();
+  const ThreeVector r1 = lattice->cell_center(1, 3, 2);
+  const ThreeVector r2 = lattice->cell_center(1 + dims[0]*(3 + dims[1]*2));
+  VERIFY(r1 == r2);
 }
 
 TEST(iterators) {

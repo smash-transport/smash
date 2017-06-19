@@ -10,6 +10,7 @@
 #define SRC_INCLUDE_HADGAS_EOS_H_
 
 #include <gsl/gsl_multiroots.h>
+#include <gsl/gsl_roots.h>
 #include <gsl/gsl_vector.h>
 
 #include <array>
@@ -156,13 +157,21 @@ class HadronGasEos {
    * \param nb net baryon density [fm\f$^{-3}\f$]
    * \param ns net strangeness density [fm\f$^{-3}\f$]
    * \param initial_approximation (T [GeV], mub [GeV], mus [GeV])
-   *        to use as starting point, optional, default = (0.15, 0.5, 0.05)
+   *        to use as starting point
    *
    * \return array of 3 values: temperature, baryon chemical potential
    *         and strange chemical potential
    */
   std::array<double, 3> solve_eos(double e, double nb, double ns,
-             std::array<double, 3> initial_approximation = {0.15, 0.0, 0.0});
+                                  std::array<double, 3> initial_approximation);
+  std::array<double, 3> solve_eos(double e, double nb, double ns) {
+    return solve_eos(e, nb, ns, solve_eos_initial_approximation(e, nb));
+  }
+  /**
+   * Compute a reasonable initial approximation for solve_eos
+   * Input and output are the same that for solve_eos function
+   */
+  std::array<double, 3> solve_eos_initial_approximation(double e, double nb);
   /// Compute strange chemical potential, requiring that net strangeness = 0
   static double mus_net_strangeness0(double T, double mub);
   /// Get the element of eos table
@@ -181,6 +190,11 @@ class HadronGasEos {
     double nb;
     double ns;
   };
+  /// Another structure for passing equation parameters to the gnu library
+  struct eparams {
+    double edens;
+  };
+
   /**
    * Compute (unnormalized) density of one hadron sort - helper function
    * used to reduce code duplication.
@@ -190,15 +204,17 @@ class HadronGasEos {
   /// Interfaces EoS equations to be solved to gnu library
   static int set_eos_solver_equations(const gsl_vector* x,
                                       void* params, gsl_vector* f);
+  static double e_equation(double T, void *params);
+
   /// Helpful printout, useful for debugging if gnu equation solving goes crazy
-  void print_solver_state(size_t iter) const;
+  std::string print_solver_state(size_t iter) const;
   /// Constant factor, that appears in front of many thermodyn. expressions
   static constexpr double prefactor_ = 0.5*M_1_PI*M_1_PI/(hbarc*hbarc*hbarc);
   /// Precision of equation solving
-  static constexpr double tolerance_ = 1.e-5;
+  static constexpr double tolerance_ = 1.e-8;
   /// Number of equations in the system of equations to be solved
   static constexpr size_t n_equations_ = 3;
-  EosTable eos_table_ = EosTable(1.e-3, 1.e-3, 900, 900);
+  EosTable eos_table_ = EosTable(1.e-2, 1.e-2, 900, 900);
   /**
    * Variables used by gnu equation solver. They are stored here to allocate
    * and deallocate memory for them only once. It is expected that this class

@@ -31,7 +31,8 @@ namespace Smash {
  */
 enum class LatticeUpdate {
   AtOutput = 0,
-  EveryTimestep = 1
+  EveryTimestep = 1,
+  EveryFixedInterval = 2,
 };
 
 /**
@@ -95,6 +96,15 @@ class RectangularLattice {
     return ThreeVector(origin_[0] + cell_sizes_[0] * (ix + 0.5f),
                        origin_[1] + cell_sizes_[1] * (iy + 0.5f),
                        origin_[2] + cell_sizes_[2] * (iz + 0.5f));
+  }
+
+  /// Returns coordinate of cell center given the 1d index of the cell
+  inline ThreeVector cell_center(int index) const {
+    const int ix = index % n_cells_[0];
+    index = index / n_cells_[0];
+    const int iy = index % n_cells_[1];
+    const int iz = index / n_cells_[1];
+    return cell_center(ix, iy, iz);
   }
 
   /// Returns lengths of the lattice in x,y,z directions
