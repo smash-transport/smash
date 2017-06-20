@@ -14,6 +14,7 @@
 #include <map>
 #include <vector>
 
+#include "include/constants.h"
 #include "include/cxx14compat.h"
 #include "include/decaymodes.h"
 #include "include/distributions.h"
@@ -122,7 +123,8 @@ ParticleType::ParticleType(std::string n, float m, float w, PdgCode id)
       mass_(m),
       width_(w),
       pdgcode_(id),
-      minimum_mass_(-1.f),
+      min_mass_kinematic_(-1.f),
+      min_mass_spectral_(-1.f),
       charge_(pdgcode_.charge()),
       isospin_(-1),
       I3_(pdgcode_.isospin3()) {}
@@ -298,18 +300,55 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
 }/*}}}*/
 
 
-float ParticleType::minimum_mass() const {
-  if (unlikely(minimum_mass_ < 0.f)) {
+float ParticleType::min_mass_kinematic() const {
+  if (unlikely(min_mass_kinematic_ < 0.f)) {
     /* If the particle is stable, min. mass is just the mass. */
-    minimum_mass_ = mass_;
+    min_mass_kinematic_ = mass_;
     /* Otherwise, find the lowest mass value needed in any decay mode */
     if (!is_stable()) {
       for (const auto &mode : decay_modes().decay_mode_list()) {
-        minimum_mass_ = std::min(minimum_mass_, mode->threshold());
+        min_mass_kinematic_ = std::min(min_mass_kinematic_, mode->threshold());
       }
     }
   }
-  return minimum_mass_;
+  return min_mass_kinematic_;
+}
+
+float ParticleType::min_mass_spectral() const {
+  if (unlikely(min_mass_spectral_ < 0.f)) {
+    /* If the particle is stable or it has a non-zero spectral function value at
+     * the minimum mass that is allowed by kinematics, min_mass_spectral is just
+     * the min_mass_kinetic. */
+    min_mass_spectral_ = min_mass_kinematic();
+    /* Otherwise, find the lowest mass value where spectral function has a
+     * non-zero value by bisection.*/
+    if (!is_stable() &&
+        this->spectral_function(min_mass_kinematic()) < really_small) {
+      // find a right bound that has non-zero spectral function for bisection
+      const float m_step = 0.01;
+      float right_bound_bis;
+      for (unsigned int i = 0; ; i++) {
+        right_bound_bis = min_mass_kinematic() + m_step*i;
+        if (this->spectral_function(right_bound_bis) > really_small) {
+          break;
+        }
+      }
+      // bisection
+      const float precision = 1E-6;
+      float left_bound_bis = right_bound_bis - m_step;
+      float mid;
+      while (right_bound_bis - left_bound_bis >  precision)  {
+        mid = (left_bound_bis + right_bound_bis) / 2.0;
+        if (this->spectral_function(mid) > really_small) {
+          right_bound_bis = mid;
+        } else {
+          left_bound_bis = mid;
+        }
+      }
+      min_mass_spectral_ = right_bound_bis;
+    }
+  }
+  return min_mass_spectral_;
 }
 
 int ParticleType::isospin() const {
@@ -510,8 +549,9 @@ float ParticleType::spectral_function(float m) const {
     const auto width = width_at_pole();
     // We transform the integral using m = m_min + width_pole * tan(x), to
     // make it definite and to avoid numerical issues.
-    norm_factor_ = 1./integrate(std::atan((minimum_mass() - mass())/width),
-                                M_PI/2.,
+    norm_factor_ = 1./integrate(
+                               std::atan((min_mass_kinematic() - mass())/width),
+                               M_PI/2.,
         [&](double x) {
           return spectral_function_no_norm(mass() + width*std::tan(x)) * width
                  * (1 + square(std::tan(x)));
@@ -552,7 +592,7 @@ float ParticleType::sample_resonance_mass(const float mass_stable,
    * physical limit by numerical error. */
   const float max_mass = std::nextafter(cms_energy - mass_stable, 0.f);
   // largest possible cm momentum (from smallest mass)
-  const float pcm_max = pCM(cms_energy, mass_stable, this->minimum_mass());
+  const float pcm_max = pCM(cms_energy, mass_stable, this->min_mass_spectral());
   const float blw_max = pcm_max * blatt_weisskopf_sqr(pcm_max, L);
   /* The maximum of the spectral-function ratio 'usually' happens at the
    * largest mass. However, this is not always the case, therefore we need
@@ -571,7 +611,7 @@ float ParticleType::sample_resonance_mass(const float mass_stable,
     do {
       // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
       mass_res = Random::cauchy(this->mass(), this->width_at_pole()/2.f,
-                                this->minimum_mass(), max_mass);
+                                this->min_mass_spectral(), max_mass);
       // determine cm momentum for this case
       const float pcm = pCM(cms_energy, mass_stable, mass_res);
       const float blw = pcm * blatt_weisskopf_sqr(pcm, L);
@@ -603,10 +643,13 @@ std::pair<float, float> ParticleType::sample_resonance_masses(
   const ParticleType &t1 = *this;
   /* Sample resonance mass from the distribution
    * used for calculating the cross section. */
-  const float max_mass_1 = std::nextafter(cms_energy - t2.minimum_mass(), 0.f);
-  const float max_mass_2 = std::nextafter(cms_energy - t1.minimum_mass(), 0.f);
+  const float max_mass_1 = std::nextafter(cms_energy - t2.min_mass_spectral(),
+                                                                           0.f);
+  const float max_mass_2 = std::nextafter(cms_energy - t1.min_mass_spectral(),
+                                                                           0.f);
   // largest possible cm momentum (from smallest mass)
-  const float pcm_max = pCM(cms_energy, t1.minimum_mass(), t2.minimum_mass());
+  const float pcm_max = pCM(cms_energy, t1.min_mass_spectral(),
+                                                        t2.min_mass_spectral());
   const float blw_max = pcm_max * blatt_weisskopf_sqr(pcm_max, L);
 
   float mass_1, mass_2, val;
@@ -618,9 +661,9 @@ std::pair<float, float> ParticleType::sample_resonance_masses(
     do {
       // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
       mass_1 = Random::cauchy(t1.mass(), t1.width_at_pole()/2.f,
-                              t1.minimum_mass(), max_mass_1);
+                              t1.min_mass_spectral(), max_mass_1);
       mass_2 = Random::cauchy(t2.mass(), t2.width_at_pole()/2.f,
-                              t2.minimum_mass(), max_mass_2);
+                              t2.min_mass_spectral(), max_mass_2);
       // determine cm momentum for this case
       const float pcm = pCM(cms_energy, mass_1, mass_2);
       const float blw = pcm * blatt_weisskopf_sqr(pcm, L);
@@ -670,7 +713,7 @@ void ParticleType::dump_width_and_spectral_function() const {
             << " spectral function(m^2)*m [GeV^-1] of "
             << *this << std::endl;
   constexpr double m_step = 0.02;
-  const double m_min = minimum_mass();
+  const double m_min = min_mass_spectral();
   // An emprical value used to stop the printout. Assumes that spectral
   // function decays at high mass, which is true for all known resonances.
   constexpr double spectral_function_threshold = 8.e-3;

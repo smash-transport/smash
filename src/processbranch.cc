@@ -32,7 +32,7 @@ float ProcessBranch::threshold() const {
      */
     double thr = 0.;
     for (const auto &type : particle_types()) {
-      thr += type->minimum_mass();
+      thr += type->min_mass_kinematic();
     }
     /* This may round up or down. Up is good. If down
      * we must add one ULP via 'nextafter'.
