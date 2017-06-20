@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_BESSEL_SAMPLER_H_
 
 #include <utility>
+#include <vector>
 
 #include "logging.h"
 #include "random.h"
@@ -35,7 +36,6 @@ namespace Smash {
  */
 
 class BesselSampler {
-
  public:
   BesselSampler(const double poisson_mean1,
                 const double poisson_mean2,
@@ -55,10 +55,10 @@ class BesselSampler {
       mu_ = 0.5 * a_ * r(N_, a_);
       const double mean_sqr = mu_* (1.0 + 0.5 * a_ * r(N_+1, a_));
       sigma_ = std::sqrt(mean_sqr - mu_*mu_);
-      log.debug("m = ", m_," -> using gaussian sampling with mean = ",
+      log.debug("m = ", m_, " -> using gaussian sampling with mean = ",
                mu_, ", sigma = ", sigma_);
     } else {
-      log.debug("m = ", m_," -> using direct sampling method");
+      log.debug("m = ", m_, " -> using direct sampling method");
       std::vector<double> probabilities;
       double wi = 1.0, sum = 0.0;
       int i = 0;
@@ -88,40 +88,40 @@ class BesselSampler {
     return N_is_positive_ ?
            std::make_pair(N_smaller + N_, N_smaller) :
            std::make_pair(N_smaller, N_smaller + N_);
-  };
+  }
 
  private:
-   /** Compute ratio of Bessel functions r(n,a) = bessel_I(n+1,a)/bessel_I(n,a)
-    *  using continued fraction representation, see \iref{Yuan2000}.
-    */
-   static double r(int n, double a) {
-     const double a_inv = 1.0/a;
-     double res = 0.0;
-     // |x - continued fraction of order n| < 2^(-n+1), see the book
-     // "Continued fractions" by Khinchin. For 10^-16 = ~2^-50 precision
-     // 50 iterations should be sufficient. However, I found that for some
-     // numerical reason at least 100 terms are needed.
-     int i = 200;
-     for (; i > 0; i--) {
-       res = 1.0 / (a_inv * 2 * (n + i) + res);
-     }
-     // Check the known property of r(n,a) function, see iref{Yuan2000}.
-     assert(a/(std::sqrt(a*a + (n+1)*(n+1)) + n + 1) <= res);
-     assert(res <= a/(std::sqrt(a*a + n*n) + n));
-     return res;
-   }
-   /// Vector to store tabulated values of probabilities for small m case
-   Random::discrete_dist<double> dist_;
-   /// Parameters of the Bessel distribution
-   double m_;
-   const double a_;
-   const int N_;
-   const bool N_is_positive_;
-   static constexpr double m_switch_method_ = 6.0;
-   static constexpr double negligible_probability_ = 1.e-12;
-   /// Mean and variance of the Bessel distribution
-   double mu_;
-   double sigma_;
+  /** Compute ratio of Bessel functions r(n,a) = bessel_I(n+1,a)/bessel_I(n,a)
+   *  using continued fraction representation, see \iref{Yuan2000}.
+   */
+  static double r(int n, double a) {
+    const double a_inv = 1.0/a;
+    double res = 0.0;
+    // |x - continued fraction of order n| < 2^(-n+1), see the book
+    // "Continued fractions" by Khinchin. For 10^-16 = ~2^-50 precision
+    // 50 iterations should be sufficient. However, I found that for some
+    // numerical reason at least 100 terms are needed.
+    int i = 200;
+    for (; i > 0; i--) {
+      res = 1.0 / (a_inv * 2 * (n + i) + res);
+    }
+    // Check the known property of r(n,a) function, see iref{Yuan2000}.
+    assert(a/(std::sqrt(a*a + (n+1)*(n+1)) + n + 1) <= res);
+    assert(res <= a/(std::sqrt(a*a + n*n) + n));
+    return res;
+  }
+  /// Vector to store tabulated values of probabilities for small m case
+  Random::discrete_dist<double> dist_;
+  /// Parameters of the Bessel distribution
+  double m_;
+  const double a_;
+  const int N_;
+  const bool N_is_positive_;
+  static constexpr double m_switch_method_ = 6.0;
+  static constexpr double negligible_probability_ = 1.e-12;
+  /// Mean and variance of the Bessel distribution
+  double mu_;
+  double sigma_;
 };
 
 }  // namespace Smash

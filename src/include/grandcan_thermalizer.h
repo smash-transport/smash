@@ -12,8 +12,8 @@
 #include "angles.h"
 #include "clock.h"
 #include "configuration.h"
-#include "distributions.h"
 #include "density.h"
+#include "distributions.h"
 #include "forwarddeclarations.h"
 #include "hadgas_eos.h"
 #include "lattice.h"
@@ -146,7 +146,7 @@ class GrandCanThermalizer {
                         conf.take({"Start_Time"}),
                         conf.take({"Timestep"}),
                         conf.take({"Algorithm"},
-                            ThermalizationAlgorithm::BiasedBF)) {};
+                            ThermalizationAlgorithm::BiasedBF)) {}
   /// Check that the clock is close to n * period of thermalization
   bool is_time_to_thermalize(const Clock& clock) const {
     const float t = clock.current_time();

@@ -10,6 +10,8 @@
 #ifndef SRC_INCLUDE_VTKOUTPUT_H_
 #define SRC_INCLUDE_VTKOUTPUT_H_
 
+#include <string>
+
 #include <boost/filesystem.hpp>
 
 #include "configuration.h"

@@ -256,7 +256,8 @@ void VtkOutput::thermodynamics_output(
       }
     }
   } else if (tq == ThermodynamicQuantity::TmnLandau) {
-    file.open(make_filename(varname, vtk_tmn_landau_output_counter_++), std::ios::out);
+    file.open(make_filename(varname, vtk_tmn_landau_output_counter_++),
+        std::ios::out);
     write_vtk_header(file, Tmn_lattice, varname);
     for (int i = 0; i < 4; i++) {
       for (int j = i; j < 4; j++) {
@@ -270,7 +271,8 @@ void VtkOutput::thermodynamics_output(
       }
     }
   } else {
-    file.open(make_filename(varname, vtk_v_landau_output_counter_++), std::ios::out);
+    file.open(make_filename(varname, vtk_v_landau_output_counter_++),
+        std::ios::out);
     write_vtk_header(file, Tmn_lattice, varname);
     write_vtk_vector(file, Tmn_lattice, varname,
       [&](EnergyMomentumTensor &node) {
@@ -283,7 +285,8 @@ void VtkOutput::thermodynamics_output(
 
 void VtkOutput::thermodynamics_output(const GrandCanThermalizer& gct) {
   std::ofstream file;
-  file.open(make_filename("fluidization_td", vtk_fluidization_counter_++), std::ios::out);
+  file.open(make_filename("fluidization_td", vtk_fluidization_counter_++),
+    std::ios::out);
   write_vtk_header(file, gct.lattice(), "fluidization_td");
   write_vtk_scalar(file, gct.lattice(), "e",
                    [&](ThermLatticeNode &node) { return node.e(); });

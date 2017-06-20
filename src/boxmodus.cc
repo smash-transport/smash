@@ -26,10 +26,10 @@
 #include "include/outputinterface.h"
 #include "include/particles.h"
 #include "include/processbranch.h"
+#include "include/quantumnumbers.h"
 #include "include/random.h"
 #include "include/threevector.h"
 #include "include/wallcrossingaction.h"
-#include "include/quantumnumbers.h"
 
 namespace Smash {
 
@@ -126,7 +126,7 @@ float BoxModus::initial_conditions(Particles *particles,
                << HadronGasEos::net_baryon_density(temperature_, mub_, mus_);
     log.info() << "Initial hadron gas strange density "
                << HadronGasEos::net_strange_density(temperature_, mub_, mus_);
- } else {
+  } else {
     for (const auto &p : init_multipl_) {
       particles->create(p.second*parameters.testparticles, p.first);
       log.debug() << "Particle " << p.first

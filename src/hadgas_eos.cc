@@ -324,7 +324,7 @@ double HadronGasEos::e_equation(double T, void *params) {
     return edens - energy_density(T, 0.0, 0.0);
 }
 
-std::array<double,3> HadronGasEos::solve_eos_initial_approximation(
+std::array<double, 3> HadronGasEos::solve_eos_initial_approximation(
                        double e, double nb) {
   assert(e >= 0.0);
   // 1. Get temperature from energy density assuming zero chemical potentials
@@ -363,7 +363,7 @@ std::array<double,3> HadronGasEos::solve_eos_initial_approximation(
     err_msg << "Solver of equation for temperature with e = " << e <<
                " failed to converge. Maybe Tmax = " << T_max <<
                " is too small?" << std::endl;
-   throw std::runtime_error(gsl_strerror(status) + err_msg.str());
+    throw std::runtime_error(gsl_strerror(status) + err_msg.str());
   }
 
   gsl_root_fsolver_free(e_solver);
@@ -380,7 +380,7 @@ std::array<double,3> HadronGasEos::solve_eos_initial_approximation(
 
   // 3. mus = 0 is typically a good initial approximation
 
-  std::array<double,3> initial_approximation = {T_init, mub_init, 0.0};
+  std::array<double, 3> initial_approximation = {T_init, mub_init, 0.0};
   return initial_approximation;
 }
 
@@ -444,7 +444,7 @@ std::string HadronGasEos::print_solver_state(size_t iter) const {
        "f(x) = " << gsl_vector_get(solver_->f, 0) << " " <<
                     gsl_vector_get(solver_->f, 1) << " " <<
                     gsl_vector_get(solver_->f, 2) << std::endl;
- return s.str();
+  return s.str();
 }
 
 
