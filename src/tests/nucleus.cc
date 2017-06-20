@@ -208,7 +208,7 @@ TEST(Fermi_motion) {
                                         {0x3122, 1},  // Lambda
                                          {0x13, 1}};  // muon
   Nucleus myfunnynucleus(myfunnylist, 1);
-  COMPARE(myfunnynucleus.size(), 22+35+5+1+1);
+  COMPARE(myfunnynucleus.size(), 22 + 35 + 5 + 1 + 1);
   // Set some arbitrary radius and diffusiveness
   myfunnynucleus.set_nuclear_radius(3.0f);
   myfunnynucleus.set_diffusiveness(0.5f);
