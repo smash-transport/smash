@@ -10,6 +10,8 @@
 #ifndef SRC_INCLUDE_MODUSDEFAULT_H_
 #define SRC_INCLUDE_MODUSDEFAULT_H_
 
+#include <memory>
+
 #include "configuration.h"
 #include "cxx14compat.h"
 #include "forwarddeclarations.h"

@@ -7,6 +7,7 @@
 #ifndef SRC_INCLUDE_GRANDCAN_THERMALIZER_H_
 #define SRC_INCLUDE_GRANDCAN_THERMALIZER_H_
 
+#include <memory>
 #include <vector>
 
 #include "angles.h"

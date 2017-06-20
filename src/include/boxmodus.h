@@ -8,6 +8,7 @@
 #define SRC_INCLUDE_BOXMODUS_H_
 
 #include <map>
+#include <memory>
 
 #include "forwarddeclarations.h"
 #include "modusdefault.h"
