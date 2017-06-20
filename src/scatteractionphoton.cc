@@ -95,7 +95,7 @@ void ScatterActionPhoton::generate_final_state() {
     new_particle.set_4position(middle_point);
     new_particle.boost_momentum(-beta_cm());
   }
-  uint32_t id_process = 22;
+  uint32_t id_process = 0;
   Action::check_conservation(id_process);
 
 }
