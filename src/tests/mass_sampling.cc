@@ -68,7 +68,7 @@ TEST(omega_decay) {
       rho = &fs[0];
     }
     float m = rho->effective_mass();
-    if (rho->type().charge()==0) {
+    if (rho->type().charge() == 0) {
       hist_neutral.add(m);
     } else {
       hist_charged.add(m);

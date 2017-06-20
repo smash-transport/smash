@@ -46,7 +46,7 @@ TEST(phase_space_density) {
   one_particle.set_4position(FourVector(0.0, 0.0, 0.0, 0.0));
   one_particle.set_4momentum(0.0, 0.0, 0.0, 0.0);
   part.insert(one_particle);
-  VERIFY(part.size() == 1);
+  COMPARE(part.size(), 1u);
   ThreeVector r(1.218, 0.0, 0.0), p(0.0, 0.0, 0.0);
   ParticleList disregard;
   const float f = pb->phasespace_dens(r, p, part, pdg, disregard);

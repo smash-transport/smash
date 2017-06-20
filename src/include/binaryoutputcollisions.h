@@ -12,6 +12,8 @@
 
 #include <string>
 
+#include <boost/numeric/conversion/cast.hpp>
+
 #include "configuration.h"
 #include "filedeleter.h"
 #include "forwarddeclarations.h"
@@ -30,15 +32,18 @@ class BinaryOutputBase : public OutputInterface {
   void write(const float x);
   void write(const double x);
   void write(const FourVector &v);
-  void write(std::int32_t x) {
+  void write(const std::int32_t x) {
     std::fwrite(&x, sizeof(x), 1, file_.get());
   }
-  void write(std::uint16_t x) {
+  void write(const std::uint32_t x) {
     std::fwrite(&x, sizeof(x), 1, file_.get());
   }
-    void write(const size_t x) {
-        write(static_cast<int32_t>(x));
-    }
+  void write(const std::uint16_t x) {
+    std::fwrite(&x, sizeof(x), 1, file_.get());
+  }
+  void write(const size_t x) {
+    write(boost::numeric_cast<uint32_t>(x));
+  }
   void write(const Particles &particles);
   void write(const ParticleList &particles);
   void write_particledata(const ParticleData &p);

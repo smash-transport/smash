@@ -114,8 +114,8 @@ void BinaryOutputCollisions::at_interaction(const Action &action,
   std::fwrite(&density, sizeof(double), 1, file_.get());
   const double weight = action.raw_weight_value();
   std::fwrite(&weight, sizeof(double), 1, file_.get());
-  const ProcessType type = action.get_type();
-  std::fwrite(&type, sizeof(int), 1, file_.get());
+  const auto type = static_cast<uint32_t>(action.get_type());
+  std::fwrite(&type, sizeof(uint32_t), 1, file_.get());
   write(action.incoming_particles());
   write(action.outgoing_particles());
 }
@@ -124,17 +124,17 @@ void BinaryOutputCollisions::at_interaction(const Action &action,
 BinaryOutputBase::BinaryOutputBase(FILE *f, bool extended) : file_{f},
     extended_(extended) {
   std::fwrite("SMSH", 4, 1, file_.get());  // magic number
+  write(format_version_);   // file format version number
   std::uint16_t format_variant = static_cast<uint16_t>(extended_);
   write(format_variant);
-  write(format_version_);   // file format version number
   write(VERSION_MAJOR);     // SMASH version
 }
 
 
 // write functions:
 void BinaryOutputBase::write(const std::string &s) {
-  std::int32_t size = s.size();
-  std::fwrite(&size, sizeof(std::int32_t), 1, file_.get());
+  const auto size = boost::numeric_cast<uint32_t>(s.size());
+  std::fwrite(&size, sizeof(std::uint32_t), 1, file_.get());
   std::fwrite(s.c_str(), s.size(), 1, file_.get());
 }
 
@@ -173,8 +173,8 @@ void BinaryOutputBase::write_particledata(const ParticleData &p) {
     write(p.get_history().collisions_per_particle);
     write(p.formation_time());
     write(p.cross_section_scaling_factor());
-    write(static_cast<int32_t>(p.get_history().id_process));
-    write(static_cast<int32_t>((p.get_history().process_type)));
+    write(p.get_history().id_process);
+    write(static_cast<uint32_t>((p.get_history().process_type)));
     write(p.get_history().time_of_origin);
     write(p.get_history().p1.get_decimal());
     write(p.get_history().p2.get_decimal());
