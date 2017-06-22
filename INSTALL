@@ -118,6 +118,26 @@ a multicore machine, e.g. via
 (on a quad-core machine).
 
 
+Installing clang-format
+-----------------------
+
+clang-format is a part of the clang compiler. You can download the most recent
+binaries here:
+
+    http://releases.llvm.org/download.html
+
+It is sufficient to unpack the archive with `tar xf` and to copy only the
+binary you need. For example:
+
+    mkdir ~/bin
+    cp ./clang-format ~/bin
+    echo 'export PATH=$PATH:~/bin' >> ~/.bashrc
+    source ~/.bashrc
+
+After this, you can just copy executable files to `~/bin` to install them. This
+also works for other exectuables like cpplint.
+
+
 Including Eigen header files from custom location
 -------------------------------------------------
 
