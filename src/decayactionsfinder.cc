@@ -42,12 +42,10 @@ ActionList DecayActionsFinder::find_actions_in_cell(
 
     constexpr float one_over_hbarc = 1.f/static_cast<float>(hbarc);
 
-    /* Exponential decay. Lifetime tau = 1 / width
-     * t / tau = width * t (remember GeV-fm conversion)
-     * P(decay at Delta_t) = width * Delta_t
-     * P(alive after n steps) = (1 - width * Delta_t)^n
-     * = (1 - width * Delta_t)^(t / Delta_t)
-     * -> exp(-width * t) when Delta_t -> 0
+    /* The decay_time is sampled from an exponential distribution.
+     * Even though it may seem suspicious that it is sampled every
+     * timestep, it can be proven that this still overall obeys
+     * the exponential decay law.
      */
     const float decay_time = Random::exponential<float>(
         one_over_hbarc *
