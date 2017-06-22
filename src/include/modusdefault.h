@@ -98,7 +98,7 @@ class ModusDefault {
    * Creates GrandCanThermalizer
    *
    * \param[in] conf configuration object
-   * \param[out] th unique pointer to created thermalizer class
+   * \return unique pointer to created thermalizer class
    */
   std::unique_ptr<GrandCanThermalizer> create_grandcan_thermalizer(
                                                Configuration& conf) const {

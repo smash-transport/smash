@@ -141,6 +141,7 @@ class HadronGasEos {
    *               K_2\left( \frac{m}{T}\right)
    * \f]
    *
+   * \param ptype the hadron sort, for which partial density is computed
    * \param T temperature [GeV]
    * \param mub baryon chemical potential [GeV]
    * \param mus strangeness chemical potential [GeV]
@@ -178,6 +179,7 @@ class HadronGasEos {
   void from_table(EosTable::table_element& res, double e, double nb) const {
     eos_table_.get(res, e, nb);
   }
+  /// Check if a particle belongs to the EoS
   static bool is_eos_particle(const ParticleType& ptype) {
     return ptype.is_hadron() && ptype.pdgcode().charmness() == 0;
   }

@@ -40,6 +40,7 @@ class AdaptiveParameters {
    *
    * \param actions The actions from the current time step.
    * \param N_particles The number of particles in the system.
+   * \param[in,out] dt timestep, which can be updated
    * \return if timestep was changed or not.
    */
   bool update_timestep(const Actions &actions, size_t N_particles, double* dt) {

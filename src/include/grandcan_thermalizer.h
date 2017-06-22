@@ -24,13 +24,13 @@
 namespace Smash {
 
 /**
- * The ThermLatticeNode class is intended to compute thermodynamical
- * quantities in a cell given particles. It accumulates the upper row of
- * the energy-momentum tensor T^{\mu 0}, baryon density nb and strangeness
- * densities in the computational frame. From these quantities it allows
- * to compute the local rest frame quantites: temperature T, chemical
- * potentials mub and mus, the velocity of the local rest frame with respect
- * to computational frame.
+ * The ThermLatticeNode class is intended to compute thermodynamical quantities
+ * in a cell given particles. It accumulates the upper row of the
+ * energy-momentum tensor \f$ T^{\mu 0}\f$, baryon density nb and strangeness
+ * densities in the computational frame. From these quantities it allows to
+ * compute the local rest frame quantites: temperature T, chemical potentials
+ * mub and mus, the velocity of the local rest frame with respect to
+ * computational frame.
  *
  * An example of the intended use is:
  *
@@ -171,14 +171,15 @@ class GrandCanThermalizer {
   // Functions for BF-sampling algorithm
 
   /**
-   *  The sample_multinomial function samples integer numbers n_i
-   *  distributed according to the multinomial distribution with sum N:
-   *  p(n_1, n_2, \dots) = \prod a_i^{n_i} \times \frac{N!}{n_1!n_2! \dots} if
-   *  \sum n_i = N and p = 0 otherwise.
+   *  The sample_multinomial function samples integer numbers n_i distributed
+   *  according to the multinomial distribution with sum N: \f$ p(n_1, n_2,
+   *  \dots) = \prod a_i^{n_i} \times \frac{N!}{n_1!n_2! \dots} \f$ if \f$ \sum
+   *  n_i = N \f$  and \f$ p = 0 \f$ otherwise.
    *
-   * The array mult_sort_ contains real numbers a_i. The numbers n_i are
-   * saved in the mult_int_ array. Only particles of class particle_class
-   * are sampled, where particle_class is defined by the get_class function.
+   * The array mult_sort_ contains real numbers \f$ a_i \f$. The numbers \f$
+   * n_i \f$ are saved in the mult_int_ array. Only particles of class
+   * particle_class are sampled, where particle_class is defined by the
+   * get_class function.
    */
   void sample_multinomial(HadronClass particle_class, int N);
   /**
