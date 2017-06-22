@@ -37,8 +37,7 @@ void DecayActionsFinderDilepton::shine(
     // in find_final_actions and ignore them here, also unformed
     // resonances cannot decay
     if (dil_modes.size() == n_all_modes || p.type().is_stable()
-        || (p.formation_time() > p.position().x0() &&
-            p.cross_section_scaling_factor() == 0.0)) {
+        || (p.formation_time() > p.position().x0())) {
       continue;
     }
 
