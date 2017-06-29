@@ -333,6 +333,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     max_transverse_distance_sqr_ = scat_finder->max_transverse_distance_sqr(
                                                   parameters_.testparticles);
     action_finders_.emplace_back(std::move(scat_finder));
+  } else {
+    max_transverse_distance_sqr_ = maximum_cross_section / M_PI * fm2_mb;
   }
   const float modus_l = modus_.length();
   if (modus_l > 0.f) {
