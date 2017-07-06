@@ -120,9 +120,9 @@ void ScatterAction::add_all_processes(float elastic_parameter,
               incoming_particles_[1].type().is_nucleon()) ||
               (incoming_particles_[0].type().is_nucleon() &&
               incoming_particles_[1].type().pdgcode().is_pion())) {
-  // The energy region of the mixed scattering type for pion-nucleon collision is 4.0 - 5.0 GeV.
-      mix_scatter_type_energy = 2.3;
-      mix_scatter_type_window_width = 0.3;
+  // The energy region of the mixed scattering type for pion-nucleon collision is 2.3 - 3.1 GeV.
+      mix_scatter_type_energy = 2.7;
+      mix_scatter_type_window_width = 0.4;
   // pion-nucleon collisions are included in pythia.
       include_pythia = true;
   }
