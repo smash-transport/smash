@@ -115,11 +115,14 @@ void ScatterAction::add_all_processes(float elastic_parameter,
         add_collision(elastic_cross_section(elastic_parameter));
     }
     /* 2->2 (inelastic) */
+    /* Uncomment this for debugging the 2->2 cross section.
+    // Print cross sections for debugging.
     for (auto &c : collision_channels_) {
       std::cout << incoming_particles_ << "->" << c->particle_list() <<
                    " σ[mb] = " << std::setprecision(10) <<
                    c->weight() << std::endl;
     }
+    */
     add_collisions(two_to_two_cross_sections());
   }
   /** NNbar annihilation thru NNbar → ρh₁(1170); combined with the decays
