@@ -100,7 +100,6 @@ void ScatterActionPhoton::generate_final_state() {
   // constant arbitrary number.
   const auto id_process = ID_PROCESS_PHOTON;
   Action::check_conservation(id_process);
-
 }
 
 void ScatterActionPhoton::add_dummy_hadronic_channels(
