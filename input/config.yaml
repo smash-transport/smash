@@ -94,6 +94,8 @@ Collision_Term:
     Two_to_One:             True
     Two_to_Two:             True
     Strings:                False
+    NNbar_Treatment:        no annihilation #Options are "no annihilation",
+                                            #"resonances", "strings"
     Force_Decays_At_End:    True
     Isotropic:              False
     Elastic_Cross_Section:  -1.0  # Globally used if non-negative, [mb]
@@ -107,6 +109,14 @@ Collision_Term:
 #        Spatial_Averaging_Radius:   1.86
 #        Momentum_Averaging_Radius:  0.08
 #        Gaussian_Cutoff:            2.2
+
+#Forced_Thermalization:
+#    Lattice_Sizes:          [20.0, 20.0, 50.0]
+#    Cell_Number:            [21, 21, 101]
+#    Critical_Edens:         0.3     # forced therm. above this energy density [GeV/fm^3]
+#    Start_Time:             0.0     # forced therm. at t > this time [fm/c]
+#    Timestep:               1.0     # timestep of thermalization [fm/c]
+#    Algorithm:              biased BF  # mode sampling, biased BF, unbiased BF
 
 #Potentials:
 #    Skyrme:

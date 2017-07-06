@@ -26,6 +26,7 @@
 #include "include/outputinterface.h"
 #include "include/particles.h"
 #include "include/processbranch.h"
+#include "include/quantumnumbers.h"
 #include "include/random.h"
 #include "include/threevector.h"
 #include "include/wallcrossingaction.h"
@@ -82,6 +83,24 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
        -2112: 100
    \endverbatim
  * It means that 200 neutrons and 100 antineutrons will be initialized.
+ *
+ * \key Use_Thermal_Multiplicities (bool, optional, default = false): \n
+ * If this option is set to true then Init_Multiplicities are ignored and the
+ * box is initialized with all particle species of the particle table that
+ * belong to the hadron gas equation of state, see
+ * HadronGasEos::is_eos_particle(). The multiplicities are sampled from
+ * Poisson distributions \f$ Poi(n_i V) \f$, where \f$ n_i \f$ are the
+ * grand-canonical thermal densities of the corresponding species and \f$ V \f$
+ * is the box volume. This option simulates the grand-canonical ensemble, where
+ * the number of particles is not fixed from event to event.
+ *
+ * \key Baryon_Chemical_Potential (double, optional, default = 0.0): \n
+ * Baryon chemical potential \f$ \mu_B \f$ used in case if
+ * Use_Thermal_Multiplicities is true to compute thermal densities \f$ n_i \f$.
+ *
+ * \key Strange_Chemical_Potential (double, optional, default = 0.0): \n
+ * Strangeness chemical potential \f$ \mu_S \f$ used in case if
+ * Use_Thermal_Multiplicities is true to compute thermal densities \f$ n_i \f$.
  */
 BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
     : initial_condition_(modus_config.take({"Box", "Initial_Condition"})),
@@ -121,9 +140,9 @@ float BoxModus::initial_conditions(Particles *particles,
         log.debug(ptype.name(), " initial multiplicity ", thermal_mult_int);
       }
     }
-    log.info() << "Initial baryon density "
+    log.info() << "Initial hadron gas baryon density "
                << HadronGasEos::net_baryon_density(temperature_, mub_, mus_);
-    log.info() << "Initial strange density "
+    log.info() << "Initial hadron gas strange density "
                << HadronGasEos::net_strange_density(temperature_, mub_, mus_);
   } else {
     for (const auto &p : init_multipl_) {

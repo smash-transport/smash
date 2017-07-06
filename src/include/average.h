@@ -70,10 +70,7 @@ std::pair<std::vector<T>, std::vector<T>> dedup_avg(
     Average<T> avg;
     T prev_x = x[0];
     for (size_t i = 0; i < x.size(); i++) {
-        #pragma GCC diagnostic push
-        #pragma GCC diagnostic ignored "-Wfloat-equal"
         if (x[i] == prev_x) {
-        #pragma GCC diagnostic pop
             avg.add(y[i]);
         } else {
             assert(i != 0);

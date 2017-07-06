@@ -66,6 +66,7 @@ ScatterActionsFinder::ScatterActionsFinder(
       two_to_two_(parameters.two_to_two),
       low_snn_cut_(parameters.low_snn_cut),
       strings_switch_(parameters.strings_switch),
+      nnbar_treatment_(parameters.nnbar_treatment),
       nucleon_has_interacted_(nucleon_has_interacted),
       N_tot_(N_tot),
       N_proj_(N_proj),
@@ -89,6 +90,7 @@ ScatterActionsFinder::ScatterActionsFinder(
       two_to_two_(true),
       low_snn_cut_(0.0),
       strings_switch_(true),
+      nnbar_treatment_(NNbarTreatment::NoAnnihilation),
       nucleon_has_interacted_(nucleon_has_interacted),
       N_tot_(0),
       N_proj_(0),
@@ -200,7 +202,8 @@ ActionPtr ScatterActionsFinder::check_collision(
 
   /* Add various subprocesses.  */
   act->add_all_processes(elastic_parameter_, two_to_one_,
-                         two_to_two_, low_snn_cut_, strings_switch_);
+                         two_to_two_, low_snn_cut_, strings_switch_,
+                         nnbar_treatment_);
 
   /* Add photons to collision finding if necessary */
   double photon_cross_section = 0.0;
@@ -240,7 +243,7 @@ ActionPtr ScatterActionsFinder::check_collision(
 }
 
 ActionList ScatterActionsFinder::find_actions_in_cell(
-    const ParticleList &search_list, float dt) const {
+    const ParticleList &search_list, double dt) const {
   std::vector<ActionPtr> actions;
   for (const ParticleData &p1 : search_list) {
     for (const ParticleData &p2 : search_list) {
@@ -258,7 +261,7 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
 
 ActionList ScatterActionsFinder::find_actions_with_neighbors(
     const ParticleList &search_list, const ParticleList &neighbors_list,
-    float dt) const {
+    double dt) const {
   std::vector<ActionPtr> actions;
   for (const ParticleData &p1 : search_list) {
     for (const ParticleData &p2 : neighbors_list) {
@@ -275,7 +278,7 @@ ActionList ScatterActionsFinder::find_actions_with_neighbors(
 
 ActionList ScatterActionsFinder::find_actions_with_surrounding_particles(
     const ParticleList &search_list, const Particles &surrounding_list,
-    float dt) const {
+    double dt) const {
   std::vector<ActionPtr> actions;
   for (const ParticleData &p2 : surrounding_list) {
     // don't look for collisions if the particle from the surrounding list is
@@ -325,7 +328,8 @@ void ScatterActionsFinder::dump_reactions() const {
             B.set_4momentum(B.pole_mass(), -mom, 0.0, 0.0);
             ScatterActionPtr act = construct_scatter_action(A, B, time);
             act->add_all_processes(elastic_parameter_, two_to_one_,
-                                   two_to_two_, low_snn_cut_, strings_switch_);
+                                   two_to_two_, low_snn_cut_, strings_switch_,
+                                   nnbar_treatment_);
             const float total_cs = act->cross_section();
             if (total_cs <= 0.0) {
               continue;
@@ -409,7 +413,7 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
       std::cout << sqrts << " ";
       for (const ParticleTypePtr resonance : ab_products) {
         const double p_cm_sqr = pCM_sqr(sqrts, m_a, m_b);
-        const double xs = (sqrts < resonance->minimum_mass()) ? 0.0 :
+        const double xs = (sqrts < resonance->min_mass_kinematic()) ? 0.0 :
             act.two_to_one_formation(*resonance, sqrts, p_cm_sqr);
         std::cout << xs << " ";
       }

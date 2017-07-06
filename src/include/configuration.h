@@ -351,6 +351,22 @@ class Configuration {
           "\" should be \"thermal momenta\" or \"peaked momenta\".");
     }
 
+    operator NNbarTreatment() const {
+      const std::string s = operator std::string();
+      if (s == "no annihilation") {
+        return NNbarTreatment::NoAnnihilation;
+      }
+      if (s == "resonances") {
+        return NNbarTreatment::Resonances;
+      }
+      if (s == "strings") {
+        return NNbarTreatment::Strings;
+      }
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) + "\" should be "
+          + "\"no annihilation\", \"detailed balance\", or \"strings\".");
+    }
+
     operator Sampling() const {
       const std::string s = operator std::string();
       if (s == "quadratic") {
@@ -365,6 +381,22 @@ class Configuration {
       throw IncorrectTypeInAssignment(
           "The value for key \"" + std::string(key_) +
           "\" should be \"quadratic\", \"uniform\" or \"custom\".");
+    }
+
+    operator ThermalizationAlgorithm() const {
+      const std::string s = operator std::string();
+      if (s == "mode sampling") {
+        return ThermalizationAlgorithm::ModeSampling;
+      }
+      if (s == "biased BF") {
+        return ThermalizationAlgorithm::BiasedBF;
+      }
+      if (s == "unbiased BF") {
+        return ThermalizationAlgorithm::UnbiasedBF;
+      }
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) +
+          "\" should be \"mode sampling\", \"biased BF\" or \"unbiased BF\".");
     }
   };
 

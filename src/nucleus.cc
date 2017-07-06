@@ -374,10 +374,7 @@ void Nucleus::generate_fermi_momenta() {
   }
   if (A == 0) {
     // No Fermi momenta should be assigned
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wfloat-equal"
     assert(ptot.x1() == 0.0 && ptot.x2() == 0.0 && ptot.x3() == 0.0);
-    #pragma GCC diagnostic pop
   } else {
     // Make sure that total momentum is zero - redistribute ptot equally
     // among protons and neutrons

@@ -114,14 +114,14 @@ std::pair<double, double> Action::sample_masses() const {
 
   const double cms_energy = sqrt_s();
 
-  if (cms_energy < t_a.minimum_mass() + t_b.minimum_mass()) {
+  if (cms_energy < t_a.min_mass_kinematic() + t_b.min_mass_kinematic()) {
     const std::string reaction = incoming_particles_[0].type().name() +
                                  incoming_particles_[1].type().name() + "→" +
                                  t_a.name() + t_b.name();
     throw InvalidResonanceFormation(reaction + ": not enough energy, " +
       std::to_string(cms_energy) + " < " +
-      std::to_string(t_a.minimum_mass()) + " + " +
-      std::to_string(t_b.minimum_mass()));
+      std::to_string(t_a.min_mass_kinematic()) + " + " +
+      std::to_string(t_b.min_mass_kinematic()));
   }
 
   /* If one of the particles is a resonance, sample its mass. */

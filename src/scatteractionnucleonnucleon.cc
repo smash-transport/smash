@@ -160,7 +160,7 @@ CollisionBranchList ScatterActionNucleonNucleon::find_xsection_from_type(
         }
 
         /* Integration limits. */
-        const double lower_limit = type_res_1->minimum_mass();
+        const double lower_limit = type_res_1->min_mass_kinematic();
         const double upper_limit = sqrts - type_res_2->mass();
         /* Check the available energy (requiring it to be a little above the
          * threshold, because the integration will not work if it's too close). */

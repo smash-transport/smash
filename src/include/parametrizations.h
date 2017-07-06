@@ -88,6 +88,11 @@ float ppbar_elastic(double mandelstam_s);
  */
 float ppbar_total(double mandelstam_s);
 
+/* ppbar total cross section parametrization;
+ * Used for reverse cross-section from detailed balance
+ */
+float ppbar_total(double mandelstam_s, double m_proj, double m_target);
+
 /* K+ p elastic cross section parametrization
  *
  * \fpPrecision Why \c double?

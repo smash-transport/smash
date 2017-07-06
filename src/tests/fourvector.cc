@@ -39,15 +39,15 @@ TEST(comparisons) {
 TEST(assignment) {
   /* check assignment */
   FourVector f = A;
-  VERIFY(f == A);
+  COMPARE(f, A);
 }
 
 TEST(addition) {
   FourVector g = B + B;
-  VERIFY(A == g);
+  COMPARE(A, g);
 }
 
 TEST(division) {
   A /= 2;
-  VERIFY(A == B);
+  COMPARE(A, B);
 }

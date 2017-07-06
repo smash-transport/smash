@@ -42,22 +42,22 @@ static const int current_format_version = 4;
 
 static void read_binary(std::string &s, FILE *file) {
   std::int32_t size = s.size();
-  VERIFY(std::fread(&size, sizeof(std::int32_t), 1, file) == 1);
+  COMPARE(std::fread(&size, sizeof(std::int32_t), 1, file), 1);
   std::vector<char> buf(size);
-  VERIFY(std::fread(&buf[0], 1, size, file) == static_cast<size_t>(size));
+  COMPARE(std::fread(&buf[0], 1, size, file), static_cast<size_t>(size));
   s.assign(&buf[0], size);
 }
 
 static void read_binary(FourVector &v, FILE *file) {
-  VERIFY(std::fread(v.begin(), sizeof(*v.begin()), 4, file) == 4);
+  COMPARE(std::fread(v.begin(), sizeof(*v.begin()), 4, file), 4);
 }
 
 static void read_binary(std::int32_t &x, FILE *file) {
-  VERIFY(std::fread(&x, sizeof(x), 1, file) == 1);
+  COMPARE(std::fread(&x, sizeof(x), 1, file), 1);
 }
 
 static void read_binary(double &x, FILE *file) {
-  VERIFY(std::fread(&x, sizeof(x), 1, file) == 1);
+  COMPARE(std::fread(&x, sizeof(x), 1, file), 1);
 }
 
 /* Function to read and compare particle */
@@ -80,7 +80,7 @@ static bool compare_particle(const ParticleData &p, FILE *file) {
 static bool compare_particles_block_header(const int &npart, FILE *file) {
   int npart_read;
   char c_read;
-  VERIFY(std::fread(&c_read, sizeof(char), 1, file) == 1);
+  COMPARE(std::fread(&c_read, sizeof(char), 1, file), 1);
   read_binary(npart_read, file);
   // std::cout << c_read << std::endl;
   // std::cout << npart_read << " " << npart << std::endl;
@@ -95,11 +95,11 @@ static bool compare_interaction_block_header(const int &nin, const int &nout,
   double rho_read, weight_read;
   char c_read;
   int process_type = static_cast<int>(action.get_type());
-  VERIFY(std::fread(&c_read, sizeof(char), 1, file) == 1);
+  COMPARE(std::fread(&c_read, sizeof(char), 1, file), 1);
   read_binary(nin_read, file);
   read_binary(nout_read, file);
-  VERIFY(std::fread(&rho_read, sizeof(double), 1, file) == 1);
-  VERIFY(std::fread(&weight_read, sizeof(double), 1, file) == 1);
+  COMPARE(std::fread(&rho_read, sizeof(double), 1, file), 1);
+  COMPARE(std::fread(&weight_read, sizeof(double), 1, file), 1);
   read_binary(process_type_read, file);
   // std::cout << c_read << std::endl;
   // std::cout << nin_read << " " << nin << std::endl;
@@ -114,7 +114,7 @@ static bool compare_interaction_block_header(const int &nin, const int &nout,
 static bool compare_final_block_header(const int &ev, FILE *file) {
   int ev_read;
   char c_read;
-  VERIFY(std::fread(&c_read, sizeof(char), 1, file) == 1);
+  COMPARE(std::fread(&c_read, sizeof(char), 1, file), 1);
   read_binary(ev_read, file);
   return (c_read == 'f') && (ev_read == ev);
 }
@@ -142,7 +142,8 @@ TEST(fullhistory_format) {
 
   /* Create elastic interaction (smashon + smashon). */
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.f);
-  action->add_all_processes(10., true, true, 0., true);
+  action->add_all_processes(10., true, true, 0., true,
+                            NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
   ParticleList final_particles = action->outgoing_particles();
   const double rho = 0.123;
@@ -167,14 +168,14 @@ TEST(fullhistory_format) {
   std::string magic, smash_version;
   int format_version_number;
 
-  VERIFY(std::fread(&buf[0], 1, 4, binF) == 4);  // magic number
+  COMPARE(std::fread(&buf[0], 1, 4, binF), 4);  // magic number
   magic.assign(&buf[0], 4);
   read_binary(format_version_number, binF);  // format version number
   read_binary(smash_version, binF);          // smash version
 
-  VERIFY(magic == "SMSH");
-  VERIFY(format_version_number == current_format_version);
-  VERIFY(smash_version == VERSION_MAJOR);
+  COMPARE(magic, "SMSH");
+  COMPARE(format_version_number, current_format_version);
+  COMPARE(smash_version, VERSION_MAJOR);
 
   // particles at event atart: expect two smashons
   VERIFY(compare_particles_block_header(2, binF));
@@ -246,14 +247,14 @@ TEST(particles_format) {
   std::string magic, smash_version;
   int format_version_number;
 
-  VERIFY(std::fread(&buf[0], 1, 4, binF) == 4);  // magic number
+  COMPARE(std::fread(&buf[0], 1, 4, binF), 4);  // magic number
   magic.assign(&buf[0], 4);
   read_binary(format_version_number, binF);  // format version number
   read_binary(smash_version, binF);          // smash version
 
-  VERIFY(magic == "SMSH");
-  VERIFY(format_version_number == current_format_version);
-  VERIFY(smash_version == VERSION_MAJOR);
+  COMPARE(magic, "SMSH");
+  COMPARE(format_version_number, current_format_version);
+  COMPARE(smash_version, VERSION_MAJOR);
 
   int npart;
   // particles at event start: expect two smashons

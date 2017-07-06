@@ -42,18 +42,18 @@ class WallCrossActionsFinder : public ActionFinderInterface {
 
   /// Find the next wall crossings for every particle before time t_max
   ActionList find_actions_in_cell(const ParticleList &plist,
-                                  float t_max) const override;
+                                  double t_max) const override;
 
   /// Ignore the neighbor searches for wall crossing
   ActionList find_actions_with_neighbors(const ParticleList &,
                                          const ParticleList &,
-                                         float) const override {
+                                         double) const override {
     return {};
   }
   /// Ignore the surrounding searches for wall crossing
   ActionList find_actions_with_surrounding_particles(const ParticleList &,
                                                      const Particles &,
-                                                     float) const override {
+                                                     double) const override {
     return {};
   }
 
