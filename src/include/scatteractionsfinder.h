@@ -155,7 +155,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
   /** Record the number of the nucleons in the projectile */
   const int N_proj_;
   /** Parameter for formation time */
-  const float formation_time_;
+  const float string_formation_time_;
   /** Photons switch */
   const bool photons_;
   /** Number of fractional photons */
