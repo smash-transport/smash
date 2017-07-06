@@ -200,10 +200,10 @@ TabulationPtr IsoParticleType::integrate_RR(ParticleTypePtr &type_res_2) {
          type_res_2->min_mass_kinematic(),
          3.f, 125,
          [&](float srts) {
-            const auto result = integrate2d(type_res_1->minimum_mass_kinematic(),
-                               srts - type_res_2->minimum_mass_kinematic(),
-                               type_res_2->minimum_mass_kinematic(),
-                               srts - type_res_1->minimum_mass_kinematic(),
+            const auto result = integrate2d(type_res_1->min_mass_kinematic(),
+                               srts - type_res_2->min_mass_kinematic(),
+                               type_res_2->min_mass_kinematic(),
+                               srts - type_res_1->min_mass_kinematic(),
                                [&](float m1, float m2) {
                                   return spec_func_integrand_2res(srts, m1, m2,
                                                       *type_res_1, *type_res_2);
