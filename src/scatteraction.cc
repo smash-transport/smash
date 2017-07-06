@@ -114,7 +114,7 @@ void ScatterAction::add_all_processes(float elastic_parameter,
   bool include_pythia = false;
   float mix_scatter_type_energy;
   float mix_scatter_type_window_width;
-  if both_are_nucleons {
+  if (both_are_nucleons) {
   // The energy region of the mixed scattering type for nucleon-nucleon collision is 4.0 - 5.0 GeV.
       mix_scatter_type_energy = 4.5;
       mix_scatter_type_window_width = 0.5;
