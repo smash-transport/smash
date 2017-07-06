@@ -297,7 +297,7 @@ class ScatterAction : public Action {
   bool isotropic_ = false;
 
   /** Formation time parameter for string fragmentation*/
-  float formation_time_ = 1.0f;
+  float string_formation_time_ = 1.0f;
 
  private:
   /** Check if the scattering is elastic. */
