@@ -13,6 +13,7 @@
 #include "include/scatteractionphoton.h"
 
 #include "include/angles.h"
+#include "include/constants.h"
 #include "include/cxx14compat.h"
 #include "include/integrate.h"
 #include "include/kinematics.h"
@@ -95,7 +96,9 @@ void ScatterActionPhoton::generate_final_state() {
     new_particle.set_4position(middle_point);
     new_particle.boost_momentum(-beta_cm());
   }
-  uint32_t id_process = 0;
+  // Photons are not really part of the normal processes, so we have to set a
+  // constant arbitrary number.
+  const auto id_process = ID_PROCESS_PHOTON;
   Action::check_conservation(id_process);
 
 }
