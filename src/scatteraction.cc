@@ -115,7 +115,7 @@ void ScatterAction::add_all_processes(float elastic_parameter,
         add_collision(elastic_cross_section(elastic_parameter));
     }
     /* 2->2 (inelastic) */
-    for(auto &c : collision_channels_) {
+    for (auto &c : collision_channels_) {
       std::cout << incoming_particles_ << "->" << c->particle_list() <<
                    " σ[mb] = " << std::setprecision(10) <<
                    c->weight() << std::endl;

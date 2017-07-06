@@ -217,12 +217,13 @@ float TwoBodyDecayUnstable::rho(float mass) const {
     tabulation_
           = make_unique<Tabulation>(m1_min + m2_min, tab_interval, num_tab_pts,
             [&](float sqrts) {
-              const auto result = integrate2d(m1_min, sqrts - m2_min, m2_min, sqrts - m1_min,
-                                [&](float m1, float m2) {
-                                  return integrand_rho_Manley_2res(sqrts,
-                                                    m1, m2, particle_types_[0],
-                                                    particle_types_[1], L_);
-                                });
+              const auto result = integrate2d(m1_min, sqrts - m2_min,
+                m2_min, sqrts - m1_min,
+                [&](float m1, float m2) {
+                  return integrand_rho_Manley_2res(sqrts,
+                                    m1, m2, particle_types_[0],
+                                    particle_types_[1], L_);
+                });
               const auto error_msg = result.check_error();
               if (error_msg != "") {
                 throw std::runtime_error(error_msg);
