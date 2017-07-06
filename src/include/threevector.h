@@ -90,7 +90,7 @@ class ThreeVector {
   /** Rotate the vector around the z axis by the given angle theta. */
   void inline rotate_around_z(double theta);
   /** Rotate the z-axis onto the vector r. */
-  void inline rotate_to(ThreeVector &r);
+  void inline rotate_z_axis_to(ThreeVector &r);
   /// negation: Returns \f$-\vec x\f$
   ThreeVector inline operator- () const;
   /// increase this vector by \f$\vec v: \vec x^\prime = \vec x + \vec v\f$
@@ -295,7 +295,7 @@ void inline ThreeVector::rotate_around_z(double theta) {
   // x_[2] is unchanged
 }
 
-void inline ThreeVector::rotate_to(ThreeVector &r) {
+void inline ThreeVector::rotate_z_axis_to(ThreeVector &r) {
   rotate_around_y(r.get_theta());
   rotate_around_z(r.get_phi());
 }

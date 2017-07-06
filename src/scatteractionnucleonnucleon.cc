@@ -282,7 +282,7 @@ void ScatterActionNucleonNucleon::sample_angles(
   // 3-momentum of first incoming particle in center-of-mass frame
   ThreeVector pcm = incoming_particles_[0].momentum().
                     LorentzBoost(beta_cm()).threevec();
-  pscatt.rotate_to(pcm);
+  pscatt.rotate_z_axis_to(pcm);
 
   // final-state CM momentum
   const double p_f = pCM(cms_energy, mass_a, mass_b);
