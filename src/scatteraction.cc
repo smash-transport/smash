@@ -25,10 +25,10 @@ namespace Smash {
 ScatterAction::ScatterAction(const ParticleData &in_part_a,
                              const ParticleData &in_part_b,
                              double time, bool isotropic,
-                             float formation_time)
+                             float string_formation_time)
     : Action({in_part_a, in_part_b}, time),
       total_cross_section_(0.), isotropic_(isotropic),
-      string_formation_time_(formation_time) {}
+      string_formation_time_(string_formation_time) {}
 
 void ScatterAction::add_collision(CollisionBranchPtr p) {
   add_process<CollisionBranch>(p, collision_channels_, total_cross_section_);

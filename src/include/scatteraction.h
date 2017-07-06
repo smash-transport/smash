@@ -112,10 +112,11 @@ class ScatterAction : public Action {
    * \param[in] in_part2 second scattering partner
    * \param[in] time Time at which the action is supposed to take place
    * \param[in] isotropic if true, do the collision isotropically
+   * \param[in] string_formation_time the time a string takes to form
    */
   ScatterAction(const ParticleData &in_part1, const ParticleData &in_part2,
                 double time, bool isotropic = false,
-                float formation_time = 1.0f);
+                float string_formation_time = 1.0f);
 
   /** Add a new collision channel. */
   void add_collision(CollisionBranchPtr p);
