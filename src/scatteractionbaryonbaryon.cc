@@ -31,7 +31,7 @@ float ScatterActionBaryonBaryon::high_energy_cross_section() const {
   } else if (pdg_a.antiparticle_sign() * pdg_b.antiparticle_sign() == 1) {
     return np_high_energy(s);     // np, nbarpbar
   } else {
-    return npbar_high_energy(s); // npbar, nbarp
+    return npbar_high_energy(s);  // npbar, nbarp
   }
 }
 
@@ -196,7 +196,7 @@ float ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(double sqrts,
   }
   // all cases not listed: zero!
   return 0.;
- }
+}
 
 void ScatterActionBaryonBaryon::format_debug_output(std::ostream &out) const {
   out << "Baryon-Baryon ";

@@ -143,8 +143,6 @@ void Action::sample_angles(std::pair<double, double> masses) {
 
   ParticleData *p_a = &outgoing_particles_[0];
   ParticleData *p_b = &outgoing_particles_[1];
-  
-
 
   const double cms_energy = sqrt_s();
 

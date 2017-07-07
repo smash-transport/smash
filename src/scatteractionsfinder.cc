@@ -26,9 +26,9 @@
 #include "include/scatteractiondeltakaon.h"
 #include "include/scatteractionhyperonpion.h"
 #include "include/scatteractionmesonmeson.h"
-#include "include/scatteractionnucleonpion.h"
 #include "include/scatteractionnucleonkaon.h"
 #include "include/scatteractionnucleonnucleon.h"
+#include "include/scatteractionnucleonpion.h"
 #include "include/scatteractionphoton.h"
 #include "include/stringfunctions.h"
 
