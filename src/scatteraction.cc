@@ -25,10 +25,10 @@ namespace Smash {
 ScatterAction::ScatterAction(const ParticleData &in_part_a,
                              const ParticleData &in_part_b,
                              double time, bool isotropic,
-                             float formation_time)
+                             float string_formation_time)
     : Action({in_part_a, in_part_b}, time),
       total_cross_section_(0.), isotropic_(isotropic),
-      formation_time_(formation_time) {}
+      string_formation_time_(string_formation_time) {}
 
 void ScatterAction::add_collision(CollisionBranchPtr p) {
   add_process<CollisionBranch>(p, collision_channels_, total_cross_section_);
@@ -541,7 +541,7 @@ void ScatterAction::string_excitation() {
        * 1 fm is universally applied and cross section is reduced to zero and
        * to a fraction corresponding to the valence quark content. Hadrons
        * containing a valence quark are determined by highest z-momentum. */
-      log.debug("The formation time is: ", formation_time_, "fm/c.");
+      log.debug("The formation time is: ", string_formation_time_, "fm/c.");
       /* Additional suppression factor to mimic coherence taken as 0.7
        * from UrQMD (CTParam(59) */
       const float suppression_factor = 0.7;
@@ -563,7 +563,8 @@ void ScatterAction::string_excitation() {
       }
       // Set formation time: actual time of collision + time to form the
       // particle
-      data.set_formation_time(formation_time_*gamma_cm() + time_of_execution_);
+      data.set_formation_time(string_formation_time_*gamma_cm() +
+                              time_of_execution_);
       outgoing_particles_.push_back(data);
     }
     /* If the incoming particles already were unformed, the formation

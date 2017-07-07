@@ -44,7 +44,7 @@ namespace Smash {
 * \key Strings (bool, optional, default = false): \n
 * true - string excitation is enabled\n
 * false - string excitation is disabled
-* \key Formation_Time (float, optional, default = 1.0) \n
+* \key String_Formation_Time (float, optional, default = 1.0) \n
 * Parameter for formation time in string fragmentation in fm/c
 * \key low_snn_cut (double) in GeV \n
 * The elastic collisions betwen two nucleons with sqrt_s below
@@ -69,7 +69,8 @@ ScatterActionsFinder::ScatterActionsFinder(
       nucleon_has_interacted_(nucleon_has_interacted),
       N_tot_(N_tot),
       N_proj_(N_proj),
-      formation_time_(config.take({"Collision_Term", "Formation_Time"}, 1.0f)),
+      string_formation_time_(config.take({"Collision_Term",
+                                          "String_Formation_Time"}, 1.0f)),
       photons_(parameters.photons_switch),
       n_fractional_photons_(n_fractional_photons) {
         if (is_constant_elastic_isotropic()) {
@@ -93,7 +94,7 @@ ScatterActionsFinder::ScatterActionsFinder(
       nucleon_has_interacted_(nucleon_has_interacted),
       N_tot_(0),
       N_proj_(0),
-      formation_time_(1.0f),
+      string_formation_time_(1.0f),
       photons_(false),
       n_fractional_photons_(1) {}
 
@@ -110,37 +111,37 @@ ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
         (pdg_a.antiparticle_sign() == pdg_b.antiparticle_sign())) {
       act = make_unique<ScatterActionNucleonNucleon>(data_a, data_b,
                                               time_until_collision, isotropic_,
-                                              formation_time_);
+                                              string_formation_time_);
     } else {
       act = make_unique<ScatterActionBaryonBaryon>(data_a, data_b,
                                               time_until_collision, isotropic_,
-                                              formation_time_);
+                                              string_formation_time_);
     }
   } else if (data_a.is_baryon() || data_b.is_baryon()) {
     if ((pdg_a.is_nucleon() && pdg_b.is_kaon()) ||
         (pdg_b.is_nucleon() && pdg_a.is_kaon())) {
       act = make_unique<ScatterActionNucleonKaon>(data_a, data_b,
                                               time_until_collision, isotropic_,
-                                              formation_time_);
+                                              string_formation_time_);
     } else if ((pdg_a.is_hyperon() && pdg_b.is_pion()) ||
                (pdg_b.is_hyperon() && pdg_a.is_pion())) {
       act = make_unique<ScatterActionHyperonPion>(data_a, data_b,
                                               time_until_collision, isotropic_,
-                                              formation_time_);
+                                              string_formation_time_);
     } else if ((pdg_a.is_Delta() && pdg_b.is_kaon()) ||
                (pdg_b.is_Delta() && pdg_a.is_kaon())) {
       act = make_unique<ScatterActionDeltaKaon>(data_a, data_b,
                                               time_until_collision, isotropic_,
-                                              formation_time_);
+                                              string_formation_time_);
     } else {
       act = make_unique<ScatterActionBaryonMeson>(data_a, data_b,
                                               time_until_collision, isotropic_,
-                                              formation_time_);
+                                              string_formation_time_);
     }
   } else {
     act = make_unique<ScatterActionMesonMeson>(data_a, data_b,
                                               time_until_collision, isotropic_,
-                                              formation_time_);
+                                              string_formation_time_);
   }
   return act;
 }
