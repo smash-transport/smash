@@ -131,7 +131,7 @@ float ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(double sqrts,
   const float m_a = type_a.mass();
   const float m_b = type_b.mass();
   const float msqr = 2. * (m_a*m_a + m_b*m_b);
-  /* Feng: If the c.m. energy is larger than the sum of the pole masses of the
+  /* If the c.m. energy is larger than the sum of the pole masses of the
    * outgoing particles plus three times of the sum of the widths plus 3 GeV,
    * the collision will be neglected.*/
   const float w_a = type_a.width_at_pole();

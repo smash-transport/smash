@@ -607,7 +607,6 @@ float ParticleType::sample_resonance_mass(const float mass_stable,
   do {
     const float q_max = sf_ratio_max * this->max_factor1_;
     const float max = blw_max * q_max;  // maximum value for rejection sampling
-   // std::cout << "Feng: max_1 = " << max << "pdg" << this->pdgcode() << std::endl;
     // inner loop: rejection sampling
     do {
       // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
@@ -658,7 +657,6 @@ std::pair<float, float> ParticleType::sample_resonance_masses(
   do {
     // maximum value for rejection sampling (determined automatically)
     const float max = blw_max * t1.max_factor2_;
-   // std::cout << "Feng: max_2 = " << max << "pdg1 " << t1.pdgcode() << "pdg2 " << t2.pdgcode() << std::endl;
     // inner loop: rejection sampling
     do {
       // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
