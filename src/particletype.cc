@@ -336,9 +336,8 @@ float ParticleType::min_mass_spectral() const {
       // bisection
       const float precision = 1E-6;
       float left_bound_bis = right_bound_bis - m_step;
-      float mid;
       while (right_bound_bis - left_bound_bis >  precision)  {
-        mid = (left_bound_bis + right_bound_bis) / 2.0;
+        const float mid = (left_bound_bis + right_bound_bis) / 2.0;
         if (this->spectral_function(mid) > really_small) {
           right_bound_bis = mid;
         } else {
