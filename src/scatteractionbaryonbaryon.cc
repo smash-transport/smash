@@ -138,65 +138,64 @@ float ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(double sqrts,
   const float w_b = type_b.width_at_pole();
   const float uplmt = m_a + m_b + 3.0 * (w_a + w_b) + 3.0;
   if (sqrts > uplmt) {
-     return 0.; 
-  } else {
-     /** NN → NΔ: fit sqrt(s)-dependence to OBE model [\iref{Dmitriev:1986st}] */
-     if (((type_a.is_Delta() && type_b.is_nucleon()) ||
-          (type_b.is_Delta() && type_a.is_nucleon())) &&
-          (type_a.antiparticle_sign() == type_b.antiparticle_sign())) {
-       return 68. / std::pow(sqrts - 1.104, 1.951);
-     /** All other processes use a constant matrix element,
-      *  similar to \iref{Bass:1998ca}, equ. (3.35). */
-     } else if (((type_a.is_Nstar() && type_b.is_nucleon()) ||
-                 (type_b.is_Nstar() && type_a.is_nucleon())) &&
-                  type_a.antiparticle_sign() == type_b.antiparticle_sign()) {
-       // NN → NN*
-       if (twoI == 2) {
-         return 7. / msqr;
-       } else if (twoI == 0) {
-         const float parametrization = 14. / msqr;
-         /* pn → pnη cross section is known to be larger than the corresponding
-          * pp → ppη cross section by a factor of 6.5 [\iref{Calen:1998vh}].
-          * Since the eta is mainly produced by an intermediate N*(1535) we
-          * introduce an explicit isospin asymmetry for the production of N*(1535)
-          * produced in pn vs. pp similar to [\iref{Teis:1996kx}], eq. 29. */
-         if (type_a.is_Nstar1535() || type_b.is_Nstar1535()) {
-           return 6.5 * parametrization;
-         } else {
-           return parametrization;
-         }
-       }
-     } else if (((type_a.is_Deltastar() && type_b.is_nucleon()) ||
-                 (type_b.is_Deltastar() && type_a.is_nucleon())) &&
-                  type_a.antiparticle_sign() == type_b.antiparticle_sign()) {
-       // NN → NΔ*
-       return 15. / msqr;
-     } else if ((type_a.is_Delta() && type_b.is_Delta()) &&
-                (type_a.antiparticle_sign() == type_b.antiparticle_sign())) {
-       // NN → ΔΔ
-       if (twoI == 2) {
-         return 45. / msqr;
-       } else if (twoI == 0) {
-         return 120. / msqr;
-       }
-     } else if (((type_a.is_Nstar() && type_b.is_Delta()) ||
-                 (type_b.is_Nstar() && type_a.is_Delta())) &&
-                  type_a.antiparticle_sign() == type_b.antiparticle_sign()) {
-       // NN → ΔN*
-       return 7. / msqr;
-     } else if (((type_a.is_Deltastar() && type_b.is_Delta()) ||
-                 (type_b.is_Deltastar() && type_a.is_Delta())) &&
-                  type_a.antiparticle_sign() == type_b.antiparticle_sign()) {
-       // NN → ΔΔ*
-       if (twoI == 2) {
-         return 15. / msqr;
-       } else if (twoI == 0) {
-         return 25. / msqr;
-       }
-     }
-     // all cases not listed: zero!
      return 0.;
   }
+  /** NN → NΔ: fit sqrt(s)-dependence to OBE model [\iref{Dmitriev:1986st}] */
+  if (((type_a.is_Delta() && type_b.is_nucleon()) ||
+       (type_b.is_Delta() && type_a.is_nucleon())) &&
+       (type_a.antiparticle_sign() == type_b.antiparticle_sign())) {
+    return 68. / std::pow(sqrts - 1.104, 1.951);
+  /** All other processes use a constant matrix element,
+   *  similar to \iref{Bass:1998ca}, equ. (3.35). */
+  } else if (((type_a.is_Nstar() && type_b.is_nucleon()) ||
+              (type_b.is_Nstar() && type_a.is_nucleon())) &&
+               type_a.antiparticle_sign() == type_b.antiparticle_sign()) {
+    // NN → NN*
+    if (twoI == 2) {
+      return 7. / msqr;
+    } else if (twoI == 0) {
+      const float parametrization = 14. / msqr;
+      /* pn → pnη cross section is known to be larger than the corresponding
+       * pp → ppη cross section by a factor of 6.5 [\iref{Calen:1998vh}].
+       * Since the eta is mainly produced by an intermediate N*(1535) we
+       * introduce an explicit isospin asymmetry for the production of N*(1535)
+       * produced in pn vs. pp similar to [\iref{Teis:1996kx}], eq. 29. */
+      if (type_a.is_Nstar1535() || type_b.is_Nstar1535()) {
+        return 6.5 * parametrization;
+      } else {
+        return parametrization;
+      }
+    }
+  } else if (((type_a.is_Deltastar() && type_b.is_nucleon()) ||
+              (type_b.is_Deltastar() && type_a.is_nucleon())) &&
+               type_a.antiparticle_sign() == type_b.antiparticle_sign()) {
+    // NN → NΔ*
+    return 15. / msqr;
+  } else if ((type_a.is_Delta() && type_b.is_Delta()) &&
+             (type_a.antiparticle_sign() == type_b.antiparticle_sign())) {
+    // NN → ΔΔ
+    if (twoI == 2) {
+      return 45. / msqr;
+    } else if (twoI == 0) {
+      return 120. / msqr;
+    }
+  } else if (((type_a.is_Nstar() && type_b.is_Delta()) ||
+              (type_b.is_Nstar() && type_a.is_Delta())) &&
+               type_a.antiparticle_sign() == type_b.antiparticle_sign()) {
+    // NN → ΔN*
+    return 7. / msqr;
+  } else if (((type_a.is_Deltastar() && type_b.is_Delta()) ||
+              (type_b.is_Deltastar() && type_a.is_Delta())) &&
+               type_a.antiparticle_sign() == type_b.antiparticle_sign()) {
+    // NN → ΔΔ*
+    if (twoI == 2) {
+      return 15. / msqr;
+    } else if (twoI == 0) {
+      return 25. / msqr;
+    }
+  }
+  // all cases not listed: zero!
+  return 0.;
  }
 
 void ScatterActionBaryonBaryon::format_debug_output(std::ostream &out) const {
