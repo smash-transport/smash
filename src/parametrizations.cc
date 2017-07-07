@@ -73,10 +73,10 @@ float piminusp_high_energy(double mandelstam_s) {
 /** pi+p elastic cross section parametrization.
  * Source: GiBUU:parametrizationBarMes_HighEnergy.f90
  * The parametrizations of the elastic pion+nucleon cross sections
- * are still under tunning. The parametrizaton is employed to give a
+ * are still under tuning. The parametrizaton is employed to give a
  * non-zero cross section at high energies. To make sure it
  * doesn't affect the cross section at the low energies, I truncate
- * the parametrization at p_lab = 8 GeV, which corresponding to square
+ * the parametrization at p_lab = 8 GeV, which correspons to square
  * root of s equal to 4 GeV. */
 float piplusp_elastic(double mandelstam_s) {
   double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
