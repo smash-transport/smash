@@ -72,6 +72,7 @@ class Result : public std::pair<double, double> {
     }
     if (std::abs(value()) < 1e-12) {
       // For small values the relative error can be very large.
+      // The threshold was chosen large enough so that the tests pass.
       return "";
     }
     const auto relative_error = std::abs(error() / value());
