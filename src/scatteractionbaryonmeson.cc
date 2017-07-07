@@ -25,7 +25,7 @@ float ScatterActionBaryonMeson::high_energy_cross_section() const {
 
   /* Currently only include pion nucleon interaction. */
   if ((pdg_a == pdg::pi_p && pdg_b == pdg::p)
-      ||(pdg_b == pdg::pi_p && pdg_a == pdg::p)
+      || (pdg_b == pdg::pi_p && pdg_a == pdg::p)
       || (pdg_a == pdg::pi_m && pdg_b == pdg::n)
       || (pdg_b == pdg::pi_m && pdg_a == pdg::n)) {
     return piplusp_high_energy(s);     // pi+ p, pi- n

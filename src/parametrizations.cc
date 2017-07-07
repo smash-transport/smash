@@ -71,7 +71,7 @@ float piminusp_high_energy(double mandelstam_s) {
 }
 
 /** pi+p elastic cross section parametrization.
- * Source: GiBUU:parametrizationBarMes_HighEnergy.f90 
+ * Source: GiBUU:parametrizationBarMes_HighEnergy.f90
  * The parametrizations of the elastic pion+nucleon cross sections
  * are still under tunning. The parametrizaton is employed to give a
  * non-zero cross section at high energies. To make sure it
