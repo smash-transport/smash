@@ -16,108 +16,144 @@
 
 namespace Smash {
 
-/* pp elastic cross section parametrization
+/** total hadronic cross sections at high energies parametrized in the 2016 PDG
+ *  book(http://pdg.lbl.gov/2016/reviews/rpp2016-rev-cross-section-plots.pdf) */
+float xs_high_energy(double mandelstam_s, bool is_opposite_charge,
+                     float ma, float mb, float P, float R1, float R2);
+
+/** pp total cross section at high energies */
+float pp_high_energy(double mandelstam_s);
+
+/** ppbar total cross section at high energies */
+float ppbar_high_energy(double mandelstam_s);
+
+/** np total cross section at high energies */
+float np_high_energy(double mandelstam_s);
+
+/** npbar total cross section at high energies */
+float npbar_high_energy(double mandelstam_s);
+
+/** pi+p total cross section at high energies */
+float piplusp_high_energy(double mandelstam_s);
+
+/** pi-p total cross section at high energies */
+float piminusp_high_energy(double mandelstam_s);
+
+/** pi+p elastic cross section parametrization
+ *
+ * \fpPrecision Why \c double?
+ */
+float piplusp_elastic(double mandelstam_s);
+
+/** pi-p elastic cross section parametrization
+ *
+ * \fpPrecision Why \c double?
+ */
+float piminusp_elastic(double mandelstam_s);
+
+/** pp elastic cross section parametrization
  *
  * \fpPrecision Why \c double?
  */
 float pp_elastic(double mandelstam_s);
 
-/* pp total cross section parametrization
+/** pp total cross section parametrization
  *
  * \fpPrecision Why \c double?
  */
 float pp_total(double mandelstam_s);
 
-/* np elastic cross section parametrization
+/** np elastic cross section parametrization
  *
  * \fpPrecision Why \c double?
  */
 float np_elastic(double mandelstam_s);
 
-/* np total cross section parametrization
+/** np total cross section parametrization
  *
  * \fpPrecision Why \c double?
  */
 float np_total(double mandelstam_s);
 
-/* ppbar elastic cross section parametrization
+
+/** ppbar elastic cross section parametrization
  *
  * \fpPrecision Why \c double?
  */
 float ppbar_elastic(double mandelstam_s);
 
-/* ppbar total cross section parametrization
+/** ppbar total cross section parametrization
  *
  * \fpPrecision Why \c double?
  */
 float ppbar_total(double mandelstam_s);
 
-/* ppbar total cross section parametrization;
+/** ppbar total cross section parametrization;
  * Used for reverse cross-section from detailed balance
  */
 float ppbar_total(double mandelstam_s, double m_proj, double m_target);
 
-/* K+ p elastic cross section parametrization
+/** K+ p elastic cross section parametrization
  *
  * \fpPrecision Why \c double?
  */
 float kplusp_elastic(double mandelstam_s);
 
-/* K+ n elastic cross section parametrization
+/** K+ n elastic cross section parametrization
  *
  * \fpPrecision Why \c double?
  */
 float kplusn_elastic(double mandelstam_s);
 
-/* K- p elastic cross section parametrization
+/** K- p elastic cross section parametrization
  *
  * \fpPrecision Why \c double?
  */
 float kminusp_elastic(double mandelstam_s);
 
-/* K- n elastic cross section parametrization
+/** K- n elastic cross section parametrization
  *
  * \fpPrecision Why \c double?
  */
 float kminusn_elastic(double mandelstam_s);
 
-/* K0 p elastic cross section parametrization
+/** K0 p elastic cross section parametrization
  *
  * \fpPrecision Why \c double?
  */
 float k0p_elastic(double mandelstam_s);
 
-/* K0 n elastic cross section parametrization
+/** K0 n elastic cross section parametrization
  *
  * \fpPrecision Why \c double?
  */
 float k0n_elastic(double mandelstam_s);
 
-/* Kbar0 p elastic cross section parametrization
+/** Kbar0 p elastic cross section parametrization
  *
  * \fpPrecision Why \c double?
  */
 float kbar0p_elastic(double mandelstam_s);
 
-/* Kbar0 n elastic cross section parametrization
+/** Kbar0 n elastic cross section parametrization
  *
  * \fpPrecision Why \c double?
  */
 float kbar0n_elastic(double mandelstam_s);
 
-/* K+ p inelastic cross section parametrization
+/** K+ p inelastic cross section parametrization
  *
  * \fpPrecision Why \c double?
  */
 float kplusp_inelastic(double mandelstam_s);
 
-/* K+ n inelastic cross section parametrization
+/** K+ n inelastic cross section parametrization
  *
  * \fpPrecision Why \c double?
  */
 float kplusn_inelastic(double mandelstam_s);
 
-/* Hash a pair of integers.
+/** Hash a pair of integers.
  *
  * Note that symmetric pairs and permutations yield identical hashes with this
  * implementation.
@@ -136,7 +172,7 @@ struct pair_hash {
     }
 };
 
-/* Isospin weights for inelastic K+ N channels.
+/** Isospin weights for inelastic K+ N channels.
  */
 class KplusNRatios {
  private:

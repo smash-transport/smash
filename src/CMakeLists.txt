@@ -118,6 +118,7 @@ set(smash_src
         scatteractionbaryonmeson.cc
         scatteractiondeltakaon.cc
         scatteractionmesonmeson.cc
+        scatteractionnucleonpion.cc
         scatteractionnucleonkaon.cc
         scatteractionnucleonnucleon.cc
         scatteractionhyperonpion.cc

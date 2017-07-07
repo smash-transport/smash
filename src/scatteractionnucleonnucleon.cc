@@ -220,6 +220,7 @@ void ScatterActionNucleonNucleon::sample_angles(
   const double mass_a = masses.first;
   const double mass_b = masses.second;
 
+
   const double cms_energy = sqrt_s();
 
   const std::array<double, 2> t_range
@@ -267,7 +268,12 @@ void ScatterActionNucleonNucleon::sample_angles(
     /** NN → NR: Fit to HADES data, see \iref{Agakishiev:2014wqa}. */
     const std::array<float, 4> p { 1.46434, 5.80311, -6.89358, 1.94302 };
     const double a = p[0] + mass_a * (p[1] + mass_a * (p[2] + mass_a * p[3]));
-    double t = Random::power(-a, t_range[0], t_range[1]);
+    /*  If the resonance is so heavy that the index "a" exceeds 30,
+     *  the power function turns out to be too sharp. Take t directly to be
+     *  t_0 in such a case. */
+    double t = t_range[0];
+    if (a < 30) {
+      t = Random::power(-a, t_range[0], t_range[1]);}
     if (Random::canonical() > 0.5) {
       t = t_range[0] + t_range[1] - t;  // symmetrize
     }

@@ -155,6 +155,12 @@ class ScatterAction : public Action {
   virtual float total_cross_section() const { return 0.; }
 
   /**
+   * Determine the (parametrized) total cross section at high energies for this collision.
+   * This is currently only used for calculating the string excitation cross section.
+   */
+  virtual float high_energy_cross_section() const { return 0.; }
+
+  /**
    * Determine the (parametrized) elastic cross section for this collision.
    * It is zero by default, but can be overridden in the child classes.
    */
