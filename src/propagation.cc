@@ -40,7 +40,7 @@ double propagate_straight_line(Particles *particles, double to_time,
     // beam_momentum, which is by default zero except for the collider modus
     // with the fermi motion == frozen.
     // todo(m. mayer): improve this condition (see comment #11 issue #4213)
-    assert(data.id() > 0);
+    assert(data.id() >= 0);
     const bool avoid_fermi_motion =
       (static_cast<uint64_t>(data.id())
        < static_cast<uint64_t>(beam_momentum.size()))
