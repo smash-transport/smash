@@ -8,9 +8,9 @@
 #ifndef _stddecl_h_
 #define _stddecl_h_
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+//#ifdef HAVE_CONFIG_H
+//#include "config.h"
+//#endif
 
 #define _BSD_SOURCE
 #define _SVID_SOURCE
