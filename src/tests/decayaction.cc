@@ -52,14 +52,14 @@ TEST(create_decayaction) {
   const float m_H = H.effective_mass();
   COMPARE(m0_H, 3.0f);
   COMPARE(G0_H, 0.3f);
-  COMPARE(m_H,  4.0f);
+  COMPARE(m_H, 4.0f);
   COMPARE(m0_A1, 0.4f);
   // Check consistency for width at pole
   COMPARE(H.type().total_width(m0_H), G0_H);
 
   // Initialize decays of H and check their properties
   DecayBranchList H_decays = H.type().get_partial_widths(m_H);
-  COMPARE(H_decays.size(), 3);
+  COMPARE(H_decays.size(), 3u);
   float tmp1, tmp2, width_expected;
 
   int decaymodes_counter = 0;
