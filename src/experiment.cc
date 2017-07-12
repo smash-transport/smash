@@ -690,6 +690,8 @@ void Experiment<Modus>::initialize_new_event() {
   /* Save the initial conserved quantum numbers and total momentum in
    * the system for conservation checks */
   conserved_initial_ = QuantumNumbers(particles_);
+  wall_actions_total_ = 0;
+  previous_wall_actions_total_ = 0;
   interactions_total_ = 0;
   previous_interactions_total_ = 0;
   total_pauli_blocked_ = 0;
@@ -754,6 +756,9 @@ bool Experiment<Modus>::perform_action(Action &action,
   const auto id_process = static_cast<uint32_t>(interactions_total_ + 1);
   action.perform(&particles_, id_process);
   interactions_total_++;
+  if (action.get_type() == ProcessType::Wall) {
+    wall_actions_total_++;
+  }
   // Calculate Eckart rest frame density at the interaction point
   double rho = 0.0;
   if (dens_type_ != DensityType::None) {
@@ -824,7 +829,8 @@ void Experiment<Modus>::run_time_evolution() {
   const auto &log = logger<LogArea::Experiment>();
   const auto &log_ad_ts = logger<LogArea::AdaptiveTS>();
 
-  log.info() << format_measurements(particles_, interactions_total_, 0u,
+  log.info() << format_measurements(particles_, interactions_total_ -
+                                    wall_actions_total_, 0u,
                                     conserved_initial_, time_start_,
                                     parameters_.labclock.current_time());
 
@@ -909,7 +915,7 @@ void Experiment<Modus>::run_time_evolution() {
 
   if (pauli_blocker_) {
     log.info("Interactions: Pauli-blocked/performed = ", total_pauli_blocked_,
-             "/", interactions_total_);
+             "/", interactions_total_ - wall_actions_total_);
   }
 }
 
@@ -1013,12 +1019,17 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions& actions) {
 template <typename Modus>
 void Experiment<Modus>::intermediate_output() {
   const auto &log = logger<LogArea::Experiment>();
+  const uint64_t wall_actions_this_interval =
+      wall_actions_total_ - previous_wall_actions_total_;
+  previous_wall_actions_total_ = wall_actions_total_;
   const uint64_t interactions_this_interval =
-      interactions_total_ - previous_interactions_total_;
+      interactions_total_ - previous_interactions_total_
+                          - wall_actions_this_interval;
   previous_interactions_total_ = interactions_total_;
   log.info() << format_measurements(
-      particles_, interactions_total_, interactions_this_interval,
-      conserved_initial_, time_start_, parameters_.outputclock.current_time());
+      particles_, interactions_total_ - wall_actions_total_,
+      interactions_this_interval, conserved_initial_, time_start_,
+      parameters_.outputclock.current_time());
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
   /*if (thermalizer_) {
     thermalizer_->update_lattice(particles_, density_param_);
@@ -1142,20 +1153,26 @@ void Experiment<Modus>::final_output(const int evt_num) {
   // to the start time, but we don't know that. Therefore, we check that
   // the time is positive, which should heuristically be the same).
   if (likely(parameters_.labclock > 0)) {
+    const uint64_t wall_actions_this_interval =
+        wall_actions_total_ - previous_wall_actions_total_;
     const uint64_t interactions_this_interval =
-        interactions_total_ - previous_interactions_total_;
+        interactions_total_ - previous_interactions_total_
+                            - wall_actions_this_interval;
     log.info() << format_measurements(
-      particles_, interactions_total_, interactions_this_interval,
-      conserved_initial_, time_start_, parameters_.outputclock.current_time());
+      particles_, interactions_total_ - wall_actions_total_,
+      interactions_this_interval, conserved_initial_, time_start_,
+      parameters_.outputclock.current_time());
     log.info() << hline;
     log.info() << "Time real: " << SystemClock::now() - time_start_;
     /* if there are no particles no interactions happened */
     log.info() << "Final scattering rate: "
-               << (particles_.is_empty() ? 0 : (2.0 * interactions_total_ /
+               << (particles_.is_empty() ? 0 : (2.0 * (interactions_total_ -
+                                                wall_actions_total_) /
                                                 particles_.time() /
                                                 particles_.size()))
                << " [fm-1]";
-    log.info() << "Final interaction number: " << interactions_total_;
+    log.info() << "Final interaction number: " << interactions_total_
+                                                - wall_actions_total_;
   }
 
   for (const auto &output : outputs_) {
