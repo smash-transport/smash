@@ -116,7 +116,7 @@ class ScatterAction : public Action {
    */
   ScatterAction(const ParticleData &in_part1, const ParticleData &in_part2,
                 double time, bool isotropic = false,
-                double string_formation_time = 1.0f);
+                double string_formation_time = 1.0);
 
   /** Add a new collision channel. */
   void add_collision(CollisionBranchPtr p);
@@ -304,7 +304,7 @@ class ScatterAction : public Action {
   bool isotropic_ = false;
 
   /** Formation time parameter for string fragmentation*/
-  double string_formation_time_ = 1.0f;
+  double string_formation_time_ = 1.0;
 
  private:
   /** Check if the scattering is elastic. */

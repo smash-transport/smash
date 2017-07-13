@@ -74,9 +74,9 @@ class ModusDefault {
    *  modus, just return FermiMotion::Off. */
   FermiMotion fermi_motion() const { return FermiMotion::Off; }
   /// Maximal timestep accepted by this modus. Negative means infinity.
-  double max_timestep(double ) const { return -1.f; }
+  double max_timestep(double ) const { return -1.; }
 
-  double length() const { return -1.f; }
+  double length() const { return -1.; }
 
   /**
    * Creates the Grid with normal boundary conditions.
@@ -107,7 +107,7 @@ class ModusDefault {
        number of cells should be odd (2k+1) in each direction.
      */
     const std::array<double, 3> l = conf.take({"Lattice_Sizes"});
-    const std::array<double, 3> origin = {-0.5f*l[0], -0.5f*l[1], -0.5f*l[2]};
+    const std::array<double, 3> origin = {-0.5*l[0], -0.5*l[1], -0.5*l[2]};
     const bool periodicity = false;
     return make_unique<GrandCanThermalizer>(conf, l, origin, periodicity);
   }

@@ -112,7 +112,7 @@ class ProcessBranch {
   /// Weight of the branch, typically a cross section or a branching ratio
   double branch_weight_;
   /// Threshold of the branch
-  mutable double threshold_ = -1.0f;
+  mutable double threshold_ = -1.;
 };
 
 /**
@@ -135,7 +135,7 @@ inline double ProcessBranch::weight() const {
  */
 template<typename Branch>
 inline double total_weight(const ProcessBranchList<Branch>& l) {
-  double sum = 0.f;
+  double sum = 0.;
   for (const auto &p : l) {
     sum += p->weight();
   }

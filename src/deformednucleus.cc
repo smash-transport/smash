@@ -27,7 +27,7 @@ namespace Smash {
  * beta decomposition of the nuclear radius in the deformed woods-saxon distribution.
  * \li \key Beta_4 (double, optional, default = 0.0):\n
  * The deformation coefficient for the spherical harmonic Y_4_0.
- * \li \key Saturation_Density (double, optional, default = .168f)\n
+ * \li \key Saturation_Density (double, optional, default = .168)\n
  * The normalization coefficient in the Woods-Saxon distribution,
  * needed here (and not in nucleus) due to the accept/reject sampling used. Default is
  * given as the infinite nuclear matter value.

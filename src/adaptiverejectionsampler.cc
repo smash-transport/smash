@@ -329,12 +329,12 @@ inline double AdaptiveRejectionSampler::sample_x(int j) {
   // m != 0, sample from piecewise exponential distribution
   if ( m > std::numeric_limits<double>::min() ) {
     return std::log(r*std::exp(m*upper_bounds_.at(j).right_point.x)+
-                    (1.0f-r)*std::exp(m*upper_bounds_.at(j).left_point.x))/m;
+                    (1.-r)*std::exp(m*upper_bounds_.at(j).left_point.x))/m;
   } else {
     // if it happens in really tiny opportunity that the slope m == 0
     // sample from unifrom distribution
     return r*upper_bounds_.at(j).right_point.x +
-        (1.0f-r)*upper_bounds_.at(j).left_point.x;
+        (1.-r)*upper_bounds_.at(j).left_point.x;
   }
 }
 

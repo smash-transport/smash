@@ -136,9 +136,9 @@ Grid<O>::Grid(
 
   // This normally equals 1/max_interaction_length, but if the number of cells
   // is reduced (because of low density) then this value is smaller.
-  std::array<double, 3> index_factor = {1.f / max_interaction_length,
-                                       1.f / max_interaction_length,
-                                       1.f / max_interaction_length};
+  std::array<double, 3> index_factor = {1. / max_interaction_length,
+                                       1. / max_interaction_length,
+                                       1. / max_interaction_length};
   for (std::size_t i = 0; i < number_of_cells_.size(); ++i) {
     number_of_cells_[i] =
         (strategy == CellSizeStrategy::Largest)
@@ -162,7 +162,7 @@ Grid<O>::Grid(
       number_of_cells_[i] = max_cells;
       index_factor[i] = number_of_cells_[i] / length_[i];
       while (index_factor[i] * length_[i] >= number_of_cells_[i]) {
-        index_factor[i] = std::nextafter(index_factor[i], 0.f);
+        index_factor[i] = std::nextafter(index_factor[i], 0.);
       }
       assert(index_factor[i] * length_[i] < number_of_cells_[i]);
     } else if (O == GridOptions::PeriodicBoundaries) {
@@ -171,7 +171,7 @@ Grid<O>::Grid(
       }
       index_factor[i] = number_of_cells_[i] / length_[i];
       while (index_factor[i] * length_[i] >= number_of_cells_[i]) {
-        index_factor[i] = std::nextafter(index_factor[i], 0.f);
+        index_factor[i] = std::nextafter(index_factor[i], 0.);
       }
       assert(index_factor[i] * length_[i] < number_of_cells_[i]);
     }

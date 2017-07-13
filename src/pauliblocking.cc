@@ -98,7 +98,7 @@ double PauliBlocker::phasespace_dens(const ThreeVector &r, const ThreeVector &p,
     const size_t i = std::floor(i_real);
     const double rest = i_real - i;
     if (likely(i + 1 < weights_.size())) {
-      f += weights_[i] * rest + weights_[i + 1] * (1.f - rest);
+      f += weights_[i] * rest + weights_[i + 1] * (1. - rest);
     }
   }
   return f / ntest_;
@@ -108,15 +108,15 @@ void PauliBlocker::init_weights_analytical() {
   const auto &log = logger<LogArea::PauliBlocking>();
 
   const double pi = static_cast<double>(M_PI);
-  const double sqrt2 = std::sqrt(2.0f);
-  const double sqrt_2pi = std::sqrt(2.0f * pi);
+  const double sqrt2 = std::sqrt(2.);
+  const double sqrt_2pi = std::sqrt(2. * pi);
   // Volume of the phase-space area; Factor 2 stands for spin.
-  const double phase_volume = 2 * (4.0f/3.0f*pi*rr_*rr_*rr_) *
-                                 (4.0f/3.0f*pi*rp_*rp_*rp_) /
+  const double phase_volume = 2 * (4./3.*pi*rr_*rr_*rr_) *
+                                 (4./3.*pi*rp_*rp_*rp_) /
                                  ((2*pi*hbarc)*(2*pi*hbarc)*(2*pi*hbarc));
   // Analytical expression for integral in denominator
   const double norm = std::erf(rc_/sqrt2/sig_) -
-            rc_* 2 / sqrt_2pi / sig_ * std::exp(-0.5f*rc_*rc_/sig_/sig_);
+            rc_* 2 / sqrt_2pi / sig_ * std::exp(-0.5*rc_*rc_/sig_/sig_);
 
   double integral;
   // Step of the table for tabulated integral
@@ -134,17 +134,17 @@ void PauliBlocker::init_weights_analytical() {
       const double A = (rj+rr_)/sqrt2/sig_;
       const double B = (rj-rr_)/sqrt2/sig_;
       integral = sig_ / rj * (std::exp(-A*A) - std::exp(-B*B)) +
-                 0.5f*sqrt_2pi*(std::erf(A) - std::erf(B));
+                 0.5*sqrt_2pi*(std::erf(A) - std::erf(B));
       integral *= sig_*sig_*sig_;
     } else {
       const double A = rc_/sqrt2/sig_;
       const double B = (rj-rr_)/sqrt2/sig_;
       const double C = (rc_-rj)*(rc_-rj) - rr_*rr_ + 2*sig_*sig_;
-      integral = (0.5f*std::exp(-A*A)*C - sig_*sig_*std::exp(-B*B)) / rj +
-                 0.5f*sqrt_2pi*sig_*(std::erf(A) - std::erf(B));
+      integral = (0.5*std::exp(-A*A)*C - sig_*sig_*std::exp(-B*B)) / rj +
+                 0.5*sqrt_2pi*sig_*(std::erf(A) - std::erf(B));
       integral *= sig_*sig_;
     }
-    integral *= 2*pi / std::pow(2*pi*sig_*sig_, 1.5f);
+    integral *= 2*pi / std::pow(2*pi*sig_*sig_, 1.5);
     weights_[k] = integral / norm / phase_volume;
     log.debug("Analytical weights[", k, "] = ", weights_[k]);
   }

@@ -30,16 +30,16 @@ namespace Smash {
  * Usage:
  * ------
  * \code
- *   Clock labtime(0.f, 0.1f);
- *   Clock endtime(10.f, 0.f);
+ *   Clock labtime(0., 0.1);
+ *   Clock endtime(10., 0.);
  *   while (labtime < endtime) {
  *     // do something
  *     // adapt the timestep size to external circumstances:
  *     if (system_is_very_dense()) {
- *       labtime.set_timestep_duration(labtime.timestep_duration() / 2.0f);
+ *       labtime.set_timestep_duration(labtime.timestep_duration() / 2.);
  *     }
  *     if (system_is_very_dilute()) {
- *       labtime.set_timestep_duration(labtime.timestep_duration() * 2.0f);
+ *       labtime.set_timestep_duration(labtime.timestep_duration() * 2.);
  *     }
  *     // let the clock tick
  *     ++labtime;
@@ -109,7 +109,7 @@ class Clock {
    */
   Clock(const double time, const double dt)
       : timestep_duration_(convert(dt)), reset_time_(convert(time)) {
-    if (dt < 0.f) {
+    if (dt < 0.) {
       throw std::range_error("No negative time increment allowed");
     }
   }
@@ -138,7 +138,7 @@ class Clock {
    *
    */
   void set_timestep_duration(const double dt) {
-    if (dt < 0.f) {
+    if (dt < 0.) {
       throw std::range_error("No negative time increment allowed");
     }
     reset_time_ += timestep_duration_ * counter_;
@@ -161,7 +161,7 @@ class Clock {
    *
    */
   bool multiple_is_in_next_tick(const double interval) const {
-    if (interval < 0.f) {
+    if (interval < 0.) {
       throw std::range_error("Negative interval makes no sense for clock");
     }
     const Representation int_interval = convert(interval);
@@ -245,7 +245,7 @@ class Clock {
   template <typename T>
   typename std::enable_if<std::is_floating_point<T>::value, Clock&>::type
   operator+=(T big_timestep) {
-    if (big_timestep < 0.f) {
+    if (big_timestep < 0.) {
       throw std::range_error("The clock cannot be turned back.");
     }
     reset_time_ += convert(big_timestep);

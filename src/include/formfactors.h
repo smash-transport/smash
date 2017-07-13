@@ -38,16 +38,16 @@ inline double blatt_weisskopf_sqr(const double p_ab, const int L)
   const auto x4 = x2 * x2;
   switch (L) {
     case 0:
-      return 1.f;
+      return 1.;
     case 1:
-      return x2 / (1.f + x2);
+      return x2 / (1. + x2);
     case 2:
-      return x4 / (9.f + 3.f * x2 + x4);
+      return x4 / (9. + 3. * x2 + x4);
     case 3:
-      return x4 * x2 / (225.f + 45.f * x2 + 6.f * x4 + x4 * x2);
+      return x4 * x2 / (225. + 45. * x2 + 6. * x4 + x4 * x2);
     case 4:
       return x4 * x4 /
-             (11025.f + 1575.f * x2 + 135.f * x4 + 10.f * x2 * x4 + x4 * x4);
+             (11025. + 1575. * x2 + 135. * x4 + 10. * x2 * x4 + x4 * x4);
       // See also input sanitization in load_decaymodes in decaymodes.cc.
 #ifndef NDEBUG
     default:
@@ -56,7 +56,7 @@ inline double blatt_weisskopf_sqr(const double p_ab, const int L)
           std::to_string(L));
 #endif
   }
-  return 0.f;
+  return 0.;
 }
 
 

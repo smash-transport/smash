@@ -24,7 +24,7 @@ double Tabulation::get_value_step(double x) const {
     return 0.;
   }
   // this rounds correctly because double -> int conversion truncates
-  const unsigned int n = (x - x_min_) * inv_dx_ + 0.5f;
+  const unsigned int n = (x - x_min_) * inv_dx_ + 0.5;
   if (n >= values_.size()) {
     return values_.back();
   } else {

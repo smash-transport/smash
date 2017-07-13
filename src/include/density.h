@@ -109,13 +109,13 @@ class DensityParameters {
       ntest_(par.testparticles) {
     r_cut_sqr_ = r_cut_ * r_cut_;
     const double two_sig_sqr = 2 * sig_ * sig_;
-    two_sig_sqr_inv_ = 1.f / two_sig_sqr;
+    two_sig_sqr_inv_ = 1. / two_sig_sqr;
     const double norm1 = smearing_factor_norm(two_sig_sqr);
     const double norm2 = smearing_factor_grad_norm(two_sig_sqr);
     const double corr_factor = smearing_factor_rcut_correction(
                                                par.gauss_cutoff_in_sigma);
-    norm_factor_sf_ = 1.f / (norm1 * ntest_ * corr_factor);
-    norm_factor_sf_grad_ = 1.f / (norm2 * ntest_ * corr_factor);
+    norm_factor_sf_ = 1. / (norm1 * ntest_ * corr_factor);
+    norm_factor_sf_grad_ = 1. / (norm2 * ntest_ * corr_factor);
   }
   /// Testparticle number
   int ntest() const { return ntest_; }

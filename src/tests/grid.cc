@@ -52,7 +52,7 @@ static inline double minimal_cell_length(int testparticles) {
   // To make the test work with ScatterActionsFinder::min_cell_length() the
   // placements of the particles would need to be adapted to the different
   // minimal cell size.
-  return 2.5f / std::sqrt(static_cast<double>(testparticles));
+  return 2.5 / std::sqrt(static_cast<double>(testparticles));
 }
 
 TEST(init) {

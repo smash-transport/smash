@@ -185,7 +185,7 @@ class Nucleus {
   /** diffusiveness of Woods-Saxon-distribution in this nucleus in fm
    * (for diffusiveness_ == 0, we obtain a hard sphere.
    **/
-  double diffusiveness_ = .545f;
+  double diffusiveness_ = .545;
   /// Saturation density of this nucleus.
   double saturation_density_ = nuclear_density;
   /// Nuclear radius of this nucleus
@@ -194,7 +194,7 @@ class Nucleus {
    *
    * \see default_nuclear_radius
    * */
-  double proton_radius_ = 1.2f;
+  double proton_radius_ = 1.2;
   /// Number of testparticles per physical particle
   size_t testparticles_ = 1;
   /// particles associated with this nucleus.

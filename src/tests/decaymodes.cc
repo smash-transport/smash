@@ -246,18 +246,18 @@ TEST(load_decaymodes_3body) {
 
 TEST_CATCH(add_no_particles, DecayModes::InvalidDecay) {
   DecayModes m;
-  m.add_mode(&ParticleType::find(0x113), 1.f, 0, {});
+  m.add_mode(&ParticleType::find(0x113), 1., 0, {});
 }
 
 TEST_CATCH(add_one_particle, DecayModes::InvalidDecay) {
   DecayModes m;
-  m.add_mode(&ParticleType::find(0x113), 1.f, 0, {&ParticleType::find(0x211)});
+  m.add_mode(&ParticleType::find(0x113), 1., 0, {&ParticleType::find(0x211)});
 }
 
 TEST(add_two_particles) {
   DecayModes m;
   VERIFY(m.is_empty());
-  m.add_mode(&ParticleType::find(0x113), 1.f, 0,
+  m.add_mode(&ParticleType::find(0x113), 1., 0,
              {&ParticleType::find(0x211), &ParticleType::find(-0x211)});
   VERIFY(!m.is_empty());
 }

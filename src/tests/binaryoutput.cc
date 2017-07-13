@@ -141,7 +141,7 @@ TEST(fullhistory_format) {
   bin_output->at_eventstart(particles, event_id);
 
   /* Create elastic interaction (smashon + smashon). */
-  ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.f);
+  ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_processes(10., true, true, 0., true,
                             NNbarTreatment::NoAnnihilation);
   action->generate_final_state();

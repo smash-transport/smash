@@ -115,7 +115,7 @@ void update_momenta(Particles *particles, double dt,
   }
 
   // warn if the time step is too big
-  constexpr double safety_factor = 0.1f;
+  constexpr double safety_factor = 0.1;
   if (dt > safety_factor * min_time_scale) {
     log.warn() << "The time step size is too large for an accurate propagation "
                << "with potentials. Maximum safe value: "

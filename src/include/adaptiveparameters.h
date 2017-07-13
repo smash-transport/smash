@@ -24,9 +24,9 @@ namespace Smash {
 class AdaptiveParameters {
  public:
   explicit AdaptiveParameters(Configuration conf, double dt) :
-    smoothing_factor_(conf.take({"Smoothing_Factor"}, 0.1f)),
-    target_missed_actions_(conf.take({"Target_Missed_Actions"}, 0.01f)),
-    deviation_factor_(conf.take({"Allowed_Deviation"}, 2.5f)) {
+    smoothing_factor_(conf.take({"Smoothing_Factor"}, 0.1)),
+    target_missed_actions_(conf.take({"Target_Missed_Actions"}, 0.01)),
+    deviation_factor_(conf.take({"Allowed_Deviation"}, 2.5)) {
     initialize(dt);
   }
 
@@ -53,10 +53,10 @@ class AdaptiveParameters {
     }
     // factor for the incoming particles
     const double f_inc =
-        (N_inc == 0u) ? 0.f : static_cast<double>(N_inc) / actions.size();
-    const double fraction_missed = 0.5f * N_inc * f_inc / N_particles;
+        (N_inc == 0u) ? 0. : static_cast<double>(N_inc) / actions.size();
+    const double fraction_missed = 0.5 * N_inc * f_inc / N_particles;
     const double allowed_deviation = deviation_factor_ * rate_ *
-        std::sqrt(0.5f * f_inc / target_missed_actions_ / N_particles);
+        std::sqrt(0.5 * f_inc / target_missed_actions_ / N_particles);
     const double current_rate = fraction_missed / (*dt);
     const double rate_deviation = current_rate - rate_;
     log.debug("Factor for the incoming particles: ", f_inc,

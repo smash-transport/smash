@@ -123,8 +123,8 @@ ParticleType::ParticleType(std::string n, double m, double w, PdgCode id)
       mass_(m),
       width_(w),
       pdgcode_(id),
-      min_mass_kinematic_(-1.f),
-      min_mass_spectral_(-1.f),
+      min_mass_kinematic_(-1.),
+      min_mass_spectral_(-1.),
       charge_(pdgcode_.charge()),
       isospin_(-1),
       I3_(pdgcode_.isospin3()) {}
@@ -301,7 +301,7 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
 
 
 double ParticleType::min_mass_kinematic() const {
-  if (unlikely(min_mass_kinematic_ < 0.f)) {
+  if (unlikely(min_mass_kinematic_ < 0.)) {
     /* If the particle is stable, min. mass is just the mass. */
     min_mass_kinematic_ = mass_;
     /* Otherwise, find the lowest mass value needed in any decay mode */
@@ -315,7 +315,7 @@ double ParticleType::min_mass_kinematic() const {
 }
 
 double ParticleType::min_mass_spectral() const {
-  if (unlikely(min_mass_spectral_ < 0.f)) {
+  if (unlikely(min_mass_spectral_ < 0.)) {
     /* If the particle is stable or it has a non-zero spectral function value at
      * the minimum mass that is allowed by kinematics, min_mass_spectral is just
      * the min_mass_kinetic. */
@@ -609,7 +609,7 @@ double ParticleType::sample_resonance_mass(const double mass_stable,
     // inner loop: rejection sampling
     do {
       // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
-      mass_res = Random::cauchy(this->mass(), this->width_at_pole()/2.f,
+      mass_res = Random::cauchy(this->mass(), this->width_at_pole()/2.,
                                 this->min_mass_spectral(), max_mass);
       // determine cm momentum for this case
       const double pcm = pCM(cms_energy, mass_stable, mass_res);
@@ -643,9 +643,9 @@ std::pair<double, double> ParticleType::sample_resonance_masses(
   /* Sample resonance mass from the distribution
    * used for calculating the cross section. */
   const double max_mass_1 = std::nextafter(cms_energy - t2.min_mass_spectral(),
-                                                                           0.f);
+                                                                           0.);
   const double max_mass_2 = std::nextafter(cms_energy - t1.min_mass_spectral(),
-                                                                           0.f);
+                                                                           0.);
   // largest possible cm momentum (from smallest mass)
   const double pcm_max = pCM(cms_energy, t1.min_mass_spectral(),
                                                         t2.min_mass_spectral());
@@ -659,9 +659,9 @@ std::pair<double, double> ParticleType::sample_resonance_masses(
     // inner loop: rejection sampling
     do {
       // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
-      mass_1 = Random::cauchy(t1.mass(), t1.width_at_pole()/2.f,
+      mass_1 = Random::cauchy(t1.mass(), t1.width_at_pole()/2.,
                               t1.min_mass_spectral(), max_mass_1);
-      mass_2 = Random::cauchy(t2.mass(), t2.width_at_pole()/2.f,
+      mass_2 = Random::cauchy(t2.mass(), t2.width_at_pole()/2.,
                               t2.min_mass_spectral(), max_mass_2);
       // determine cm momentum for this case
       const double pcm = pCM(cms_energy, mass_1, mass_2);

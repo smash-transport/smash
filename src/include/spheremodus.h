@@ -58,7 +58,7 @@ class SphereModus : public ModusDefault {
   /// Temperature for momentum distribution
   double sphere_temperature_;
   /// Starting time for the Sphere
-  const double start_time_ = 0.0f;
+  const double start_time_ = 0.;
   /** whether to use a thermal initialization for all particles
    *  instead of specific numbers */
   const bool use_thermal_ = false;

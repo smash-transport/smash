@@ -271,9 +271,9 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
           if (gamma_rho_tot > really_small) {
             if (tabulation_pi_pi_rho0 == nullptr) {
               tabulation_pi_pi_rho0 = make_unique<Tabulation>(
-                2.0f * m_pi, 15.0f - 2.0f * m_pi, num_tab_pts_,
+                2. * m_pi, 15. - 2. * m_pi, num_tab_pts_,
                   [&](double sqrts1) {
-                    return integrate(2.0f * m_pi, sqrts1, [&](double M) {
+                    return integrate(2. * m_pi, sqrts1, [&](double M) {
                       return pi_pi_rho0(M, pow_int(sqrts1, 2)) *
                              part_out->spectral_function(M);
                     });
@@ -299,9 +299,9 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
            if (gamma_rho_tot > really_small) {
              if (tabulation_pi0_pi_rho == nullptr) {
                tabulation_pi0_pi_rho = make_unique<Tabulation>(
-                 2.0f * m_pi, 15.0f - 2.0f * m_pi, num_tab_pts_,
+                 2. * m_pi, 15. - 2. * m_pi, num_tab_pts_,
                  [&](double sqrts1) {
-                   return integrate(2.0f * m_pi, sqrts1, [&](double M) {
+                   return integrate(2. * m_pi, sqrts1, [&](double M) {
                       return pi_pi0_rho(M, pow_int(sqrts1, 2)) *
                              part_out->spectral_function(M);
                     });

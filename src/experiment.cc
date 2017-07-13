@@ -172,7 +172,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
 
   // If this Delta_Time option is absent (this can be for timestepless mode)
   // just assign 1.0 fm/c, reasonable value will be set at event initialization
-  const double dt = config.take({"General", "Delta_Time"}, 1.0f);
+  const double dt = config.take({"General", "Delta_Time"}, 1.);
   const double output_dt = config.take({"Output", "Output_Interval"});
   const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
   const bool two_to_two = config.take({"Collision_Term", "Two_to_Two"}, true);
@@ -194,10 +194,10 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
     log.warn("The cut-off should be below the threshold energy",
              " of the process: NN to NNpi");
   }
-  return {{0.0f, dt}, {0.0, output_dt},
+  return {{0., dt}, {0.0, output_dt},
           ntest,
-          config.take({"General", "Gaussian_Sigma"}, 1.0f),
-          config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.0f),
+          config.take({"General", "Gaussian_Sigma"}, 1.),
+          config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.),
           two_to_one,
           two_to_two,
           strings_switch,
@@ -337,7 +337,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     max_transverse_distance_sqr_ = maximum_cross_section / M_PI * fm2_mb;
   }
   const double modus_l = modus_.length();
-  if (modus_l > 0.f) {
+  if (modus_l > 0.) {
     action_finders_.emplace_back(make_unique<WallCrossActionsFinder>(modus_l));
   }
 
@@ -668,7 +668,7 @@ void Experiment<Modus>::initialize_new_event() {
       timestep = end_time_ - start_time;
       // Take care of the box modus + timestepless propagation
       const double max_dt = modus_.max_timestep(max_transverse_distance_sqr_);
-      if (max_dt > 0.f && max_dt < timestep) {
+      if (max_dt > 0. && max_dt < timestep) {
         timestep = max_dt;
       }
       break;
@@ -788,7 +788,7 @@ bool Experiment<Modus>::perform_action(Action &action,
       != ScatterActionPhoton::ReactionType::no_reaction)) {
         // Time in the action constructor is relative to
         // current time of incoming
-        constexpr double action_time = 0.f;
+        constexpr double action_time = 0.;
         ScatterActionPhoton photon_act(action.incoming_particles(),
                                        action_time, n_fractional_photons_);
         // Add a completely dummy process to photon action.  The only important

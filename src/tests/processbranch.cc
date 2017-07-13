@@ -73,10 +73,10 @@ TEST(add_particle) {
 }
 
 TEST(weights) {
-  CollisionBranch branch(0.f,ProcessType::Elastic);
-  branch.set_weight(0.34f);
-  COMPARE(branch.weight(), 0.34f);
+  CollisionBranch branch(0.,ProcessType::Elastic);
+  branch.set_weight(0.34);
+  COMPARE(branch.weight(), 0.34);
   // double is intentional here.
   branch.set_weight(0.33);
-  COMPARE(branch.weight(), 0.33f);
+  COMPARE(branch.weight(), 0.33);
 }

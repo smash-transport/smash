@@ -114,7 +114,7 @@ class ColliderModus : public ModusDefault {
    * so that their centers move on antiparallel lines that are this
    * distance apart from each other.
    **/
-  double impact_ = 0.f;
+  double impact_ = 0.;
   /// Method used for sampling of impact parameter.
   Sampling sampling_ = Sampling::Quadratic;
   /// Minimum value of impact parameter.

@@ -94,7 +94,7 @@ double TwoBodyDecayStable::rho(double m) const {
 
 double TwoBodyDecayStable::width(double m0, double G0, double m) const {
   assert(rho(m0) != 0);
-  return (m <= threshold()) ? 0.f :
+  return (m <= threshold()) ? 0. :
          G0 * rho(m) / rho(m0);
 }
 
@@ -268,8 +268,8 @@ double TwoBodyDecayDilepton::width(double m0, double G0, double m) const {
     const double ml = particle_types_[0]->mass();  // lepton mass
     const double ml_to_m_sqr = (ml/m) * (ml/m);
     const double m0_to_m_cubed = (m0/m) * (m0/m) * (m0/m);
-    return G0 * m0_to_m_cubed * std::sqrt(1.0f - 4.0f * ml_to_m_sqr) *
-           (1.0f + 2.0f * ml_to_m_sqr);
+    return G0 * m0_to_m_cubed * std::sqrt(1. - 4. * ml_to_m_sqr) *
+           (1. + 2. * ml_to_m_sqr);
   }
 }
 

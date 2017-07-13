@@ -93,7 +93,7 @@ TEST(fullhistory_format) {
   oscfull->at_eventstart(particles, event_id);
 
   /* Create elastic interaction (smashon + smashon). */
-  ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.f);
+  ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_processes(10., true, true, 0., true,
                             NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
@@ -216,7 +216,7 @@ TEST(particlelist_format) {
   oscfinal->at_eventstart(particles, event_id);
 
   /* Create interaction ("elastic scattering") */
-  ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.f);
+  ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_processes(10., true, true, 0., true,
                             NNbarTreatment::NoAnnihilation);
   action->generate_final_state();

@@ -93,9 +93,9 @@ class RectangularLattice {
 
   /// Returns coordinate of cell center given its index
   inline ThreeVector cell_center(int ix, int iy, int iz) const {
-    return ThreeVector(origin_[0] + cell_sizes_[0] * (ix + 0.5f),
-                       origin_[1] + cell_sizes_[1] * (iy + 0.5f),
-                       origin_[2] + cell_sizes_[2] * (iz + 0.5f));
+    return ThreeVector(origin_[0] + cell_sizes_[0] * (ix + 0.5),
+                       origin_[1] + cell_sizes_[1] * (iy + 0.5),
+                       origin_[2] + cell_sizes_[2] * (iz + 0.5));
   }
 
   /// Returns coordinate of cell center given the 1d index of the cell
@@ -217,9 +217,9 @@ class RectangularLattice {
     // (r-r_cut)*csize - 0.5 < i < (r+r_cut)*csize - 0.5, r = r_center - r_0
     for (int i = 0; i < 3; i++) {
       l_bounds[i] = std::ceil((point[i] - origin_[i] - r_cut) / cell_sizes_[i]
-                               - 0.5f);
+                               - 0.5);
       u_bounds[i] = std::ceil((point[i] - origin_[i] + r_cut) / cell_sizes_[i]
-                               - 0.5f);
+                               - 0.5);
     }
 
     if (!periodic_) {

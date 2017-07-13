@@ -198,7 +198,7 @@ TabulationPtr IsoParticleType::integrate_RR(ParticleTypePtr &type_res_2) {
   return make_unique<Tabulation>(
          type_res_1->min_mass_kinematic() +
          type_res_2->min_mass_kinematic(),
-         3.f, 125,
+         3., 125,
          [&](double srts) {
             const auto result = integrate2d(type_res_1->min_mass_kinematic(),
                                srts - type_res_2->min_mass_kinematic(),

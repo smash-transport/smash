@@ -61,7 +61,7 @@ TEST_CATCH(initialize_testparticles_wrong, Nucleus::TestparticleConfusion) {
 TEST(nuclear_radius) {
   Nucleus lead(list, 1);
   FUZZY_COMPARE(lead.default_nuclear_radius(),
-                static_cast<double>(1.2f * std::pow(208, 1. / 3.)));
+                static_cast<double>(1.2 * std::pow(208, 1. / 3.)));
 }
 
 // check that center is at (0/0/0):
@@ -184,7 +184,7 @@ TEST(woods_saxon) {
   double expected_at_radius =
                            projectile.woods_saxon(R);
   // we'll probe at these values:
-  double probes[9] = { 1.0, 5.0, 7.2, 8.0, 8.5, .5f*R, 1.1f*R, 1.2f*R, 1.3f*R };
+  double probes[9] = { 1.0, 5.0, 7.2, 8.0, 8.5, .5*R, 1.1*R, 1.2*R, 1.3*R };
   // now do probe these values:
   for (int i = 0; i < 9; ++i) {
     // value we have simulated:
@@ -193,7 +193,7 @@ TEST(woods_saxon) {
     double expec = projectile.woods_saxon(probes[i])/expected_at_radius;
     // standard error we expect the histogram to have is 1/sqrt(N); we
     // give 3 sigma "space".
-    double margin = 3.f / std::sqrt(value);
+    double margin = 3. / std::sqrt(value);
     VERIFY(std::abs(value - expec) < margin) << " x = " << probes[i]
             << ": simulated: " << value
             << " vs. calculated: " << expec

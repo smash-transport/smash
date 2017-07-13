@@ -36,11 +36,11 @@ TEST(sorting) {
   b.set_4position(pos_b);
   a.set_4momentum(Momentum{1.1, 1.0, 0., 0.});
 
-  constexpr double time1 = 1.f;
+  constexpr double time1 = 1.;
   ScatterAction act1(a, b, time1);
   COMPARE(act1.get_interaction_point(), middle);
 
-  constexpr double time2 = 1.1f;
+  constexpr double time2 = 1.1;
   ScatterAction act2(a, b, time2);
   VERIFY(act1 < act2);
 }
@@ -62,7 +62,7 @@ TEST(elastic_collision) {
   b = particles.insert(b);
 
   // create action
-  constexpr double time = 1.f;
+  constexpr double time = 1.;
   ScatterAction act(a, b, time);
   ScatterAction act_copy(a, b, time);
   VERIFY(act.is_valid(particles));
@@ -138,18 +138,18 @@ TEST(outgoing_valid) {
 
   // construct action
   ScatterActionPtr act;
-  act = make_unique<ScatterActionBaryonMeson>(p1_copy, p2_copy, 0.2f);
+  act = make_unique<ScatterActionBaryonMeson>(p1_copy, p2_copy, 0.2);
   VERIFY(act != nullptr);
   COMPARE(p2_copy.type(), ParticleType::find(0x111));
 
   // add processes
-  constexpr double elastic_parameter = 0.f;  // don't include elastic scattering
+  constexpr double elastic_parameter = 0.;  // don't include elastic scattering
   constexpr bool strings_switch = false;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act->add_all_processes(elastic_parameter, true, true, 0., strings_switch,
                          nnbar_treatment);
 
-  VERIFY(act->cross_section() > 0.f);
+  VERIFY(act->cross_section() > 0.);
 
   // perform actions
   VERIFY(act->is_valid(particles));
@@ -194,18 +194,18 @@ TEST(pythia_running) {
 
   // construct action
   ScatterActionPtr act;
-  act = make_unique<ScatterActionBaryonBaryon>(p1_copy, p2_copy, 0.2f);
+  act = make_unique<ScatterActionBaryonBaryon>(p1_copy, p2_copy, 0.2);
   VERIFY(act != nullptr);
   COMPARE(p2_copy.type(), ParticleType::find(0x2212));
 
   // add processes
-  constexpr double elastic_parameter = 0.f;  // don't include elastic scattering
+  constexpr double elastic_parameter = 0.;  // don't include elastic scattering
   constexpr bool strings_switch = true;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act->add_all_processes(elastic_parameter, false, false, 0., strings_switch,
                          nnbar_treatment);
 
-  VERIFY(act->cross_section() > 0.f);
+  VERIFY(act->cross_section() > 0.);
 
   // perform actions
   VERIFY(act->is_valid(particles));
@@ -239,7 +239,7 @@ TEST(update_incoming) {
   b = particles.insert(b);
 
   // create action
-  constexpr double time = 0.2f;
+  constexpr double time = 0.2;
   ScatterAction act(a, b, time);
   VERIFY(act.is_valid(particles));
 

@@ -14,9 +14,9 @@
 using namespace Smash;
 
 TEST(center_of_velocity_v) {
-  const double s = 2.9f*2.9f;
-  const double ma = 0.6f;
-  const double mb = 1.2f;
+  const double s = 2.9*2.9;
+  const double ma = 0.6;
+  const double mb = 1.2;
   const double v = center_of_velocity_v(s, ma, mb);
   const double gamma = 1.0 / std::sqrt(1.0 - v*v);
   const double E = gamma * (ma + mb);
@@ -25,9 +25,9 @@ TEST(center_of_velocity_v) {
 }
 
 TEST(fixed_target_projectile_v) {
-  const double s = 2.9f*2.9f;
-  const double ma = 0.6f;
-  const double mb = 1.2f;
+  const double s = 2.9*2.9;
+  const double ma = 0.6;
+  const double mb = 1.2;
   const double v = fixed_target_projectile_v(s, ma, mb);
   const double gamma = 1.0 / std::sqrt(1.0 - v*v);
   const double E = gamma*ma + mb;
@@ -36,9 +36,9 @@ TEST(fixed_target_projectile_v) {
 }
 
 TEST(pCM) {
-  const double srts = 2.9f;
-  const double ma = 0.6f;
-  const double mb = 1.2f;
+  const double srts = 2.9;
+  const double ma = 0.6;
+  const double mb = 1.2;
   const double pcm_sqr = pCM_sqr(srts, ma, mb);
   const double pcm = pCM(srts, ma, mb);
   FUZZY_COMPARE(std::sqrt(pcm_sqr + ma*ma) +
@@ -76,8 +76,8 @@ TEST(plab_from_s_KN_small) {
 
 TEST(s_from_Ekin) {
   const double Ekin = 1.1;
-  const double ma = 0.6f;
-  const double mb = 1.2f;
+  const double ma = 0.6;
+  const double mb = 1.2;
   const double E = Ekin + ma + mb;
   const double p_sqr = (Ekin + ma) * (Ekin + ma) - ma*ma;
   const double s = s_from_Ekin(Ekin, ma, mb);
@@ -86,8 +86,8 @@ TEST(s_from_Ekin) {
 
 TEST(s_from_plab) {
   const double plab = 1.1;
-  const double ma = 0.6f;
-  const double mb = 1.2f;
+  const double ma = 0.6;
+  const double mb = 1.2;
   const double E = std::sqrt(plab*plab + ma*ma) + mb;
   FUZZY_COMPARE(s_from_plab(plab, ma, mb), E*E - plab*plab);
 }

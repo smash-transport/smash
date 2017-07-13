@@ -92,7 +92,7 @@ namespace Smash {
  * A section for the impact parameter (= distance (in fm) of the two
  * straight lines that the center of masses of the nuclei travel on).
  *
- * \li \key Value (double, optional, optional, default = 0.f): fixed value for
+ * \li \key Value (double, optional, optional, default = 0.): fixed value for
  * the impact parameter. No other \key Impact: directive is looked at.
  * \li \key Sample (string, optional, default = \key quadratic): \n
  * if \key uniform, use uniform sampling of the impact parameter
@@ -108,11 +108,11 @@ namespace Smash {
  * Values of the particle yields, corresponding to \key Values. Must be same
  * length as \key Values. Required for \key Sample = "custom".
  *
- * \li \key Range (double, double, optional, default = 0.0f):\n
+ * \li \key Range (double, double, optional, default = 0.):\n
  * A vector of minimal and maximal impact parameters
  * between which b should be chosen. (The order of these is not
  * important.)
- * \li \key Max (double, optional, default = 0.0f):
+ * \li \key Max (double, optional, default = 0.):
  * Like `Range: [0.0, Max]`. Note that if both \key Range and
  * \key Max are specified, \key Max takes precedence.
  *
@@ -413,8 +413,8 @@ void ColliderModus::sample_impact() {
       while (probability_random > probability) {
         b = Random::uniform(imp_min_, imp_max_);
         probability = (*impact_interpolation_)(b) / yield_max_;
-        assert(probability < 1.0f);
-        probability_random = Random::uniform(0.f, 1.f);
+        assert(probability < 1.);
+        probability_random = Random::uniform(0., 1.);
       }
       impact_ = b;
     }

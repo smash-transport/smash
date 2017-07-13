@@ -146,7 +146,7 @@ void ScatterAction::add_all_processes(double elastic_parameter,
                 const double probability_pythia = (sqrt_s()
                 - mix_scatter_type_energy + mix_scatter_type_window_width)
                 / mix_scatter_type_window_width / 2.0;
-        if (probability_pythia > Random::uniform(0.f, 1.f)) {
+        if (probability_pythia > Random::uniform(0., 1.)) {
            // scatterings at the middle energies are through string
            // fragmentation by chance.
            is_pythia = true;
@@ -347,7 +347,7 @@ double ScatterAction::two_to_one_formation(const ParticleType &type_resonance,
   /* Calculate partial in-width. */
   const double partial_width = type_resonance.get_partial_in_width(srts,
                                 incoming_particles_[0], incoming_particles_[1]);
-  if (partial_width <= 0.f) {
+  if (partial_width <= 0.) {
     return 0.;
   }
 
@@ -534,8 +534,8 @@ void ScatterAction::string_excitation() {
         /* K_short and K_long need to be converted to K0
          * since SMASH only knows K0 */
         if (pythia_id == 310 || pythia_id == 130) {
-          const double prob = Random::uniform(0.f, 1.f);
-          if (prob <= 0.5f) {
+          const double prob = Random::uniform(0., 1.);
+          if (prob <= 0.5) {
             pythia_id = 311;
           } else {
             pythia_id = -311;

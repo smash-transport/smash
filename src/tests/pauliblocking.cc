@@ -50,7 +50,7 @@ TEST(phase_space_density) {
   ThreeVector r(1.218, 0.0, 0.0), p(0.0, 0.0, 0.0);
   ParticleList disregard;
   const double f = pb->phasespace_dens(r, p, part, pdg, disregard);
-  const double f_expected = 9.93318f;
+  const double f_expected = 9.93318;
   COMPARE_RELATIVE_ERROR(f, f_expected, 1.e-3) << f << " ?= " << f_expected;
 }
 

@@ -59,7 +59,7 @@ ScatterActionsFinder::ScatterActionsFinder(
     const std::vector<bool> &nucleon_has_interacted, int N_tot, int N_proj,
      int n_fractional_photons = 1)
     : elastic_parameter_(config.take({"Collision_Term",
-                                      "Elastic_Cross_Section"}, -1.0f)),
+                                      "Elastic_Cross_Section"}, -1.)),
       testparticles_(parameters.testparticles),
       isotropic_(config.take({"Collision_Term", "Isotropic"}, false)),
       two_to_one_(parameters.two_to_one),
@@ -71,7 +71,7 @@ ScatterActionsFinder::ScatterActionsFinder(
       N_tot_(N_tot),
       N_proj_(N_proj),
       string_formation_time_(config.take({"Collision_Term",
-                                          "String_Formation_Time"}, 1.0f)),
+                                          "String_Formation_Time"}, 1.)),
       photons_(parameters.photons_switch),
       n_fractional_photons_(n_fractional_photons) {
         if (is_constant_elastic_isotropic()) {
@@ -95,7 +95,7 @@ ScatterActionsFinder::ScatterActionsFinder(
       nucleon_has_interacted_(nucleon_has_interacted),
       N_tot_(0),
       N_proj_(0),
-      string_formation_time_(1.0f),
+      string_formation_time_(1.),
       photons_(false),
       n_fractional_photons_(1) {}
 
@@ -187,7 +187,7 @@ ActionPtr ScatterActionsFinder::check_collision(
   const double time_until_collision = collision_time(data_a, data_b);
 
   /* Check that collision happens in this timestep. */
-  if (time_until_collision < 0.f || time_until_collision >= dt) {
+  if (time_until_collision < 0. || time_until_collision >= dt) {
     return nullptr;
   }
 
@@ -404,7 +404,7 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
 
     std::cout << std::fixed;
     std::cout << std::setprecision(8);
-    constexpr double momentum_step = 0.01f;
+    constexpr double momentum_step = 0.01;
     for (int i = 1; i < n_points; i++) {
       const double momentum = momentum_step * i;
       a_data.set_4momentum(m_a,  momentum, 0.0, 0.0);

@@ -80,9 +80,9 @@ double sample_momenta(const double temperature, const double mass) {
                                      (energy_average + mass);
 
   const double momentum_min = 0.0;
-  const double momentum_max = 50.0f * temperature;
+  const double momentum_max = 50. * temperature;
   /* double the massless peak value to be above maximum of the distribution */
-  const double probability_max = 2.0f * density_integrand(energy_average,
+  const double probability_max = 2. * density_integrand(energy_average,
                                                          momentum_average_sqr,
                                                          temperature);
 
@@ -120,7 +120,7 @@ double sample_momenta_from_thermal(const double temperature,
   log.debug("Sample momenta with mass ", mass, " and T ", temperature);
   double momentum_radial, energy;
   // when temperature/mass
-  if ( temperature > 0.6f*mass ) {
+  if ( temperature > 0.6*mass ) {
     while ( true ) {
       const double a = -std::log(Random::canonical_nonzero());
       const double b = -std::log(Random::canonical_nonzero());

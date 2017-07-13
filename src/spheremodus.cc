@@ -83,8 +83,8 @@ SphereModus::SphereModus(Configuration modus_config,
       start_time_(modus_config.take({"Sphere", "Start_Time"})),
       use_thermal_(
         modus_config.take({"Sphere", "Use_Thermal_Multiplicities"}, false)),
-      mub_(modus_config.take({"Sphere", "Baryon_Chemical_Potential"}, 0.0f)),
-      mus_(modus_config.take({"Sphere", "Strange_Chemical_Potential"}, 0.0f)),
+      mub_(modus_config.take({"Sphere", "Baryon_Chemical_Potential"}, 0.)),
+      mus_(modus_config.take({"Sphere", "Strange_Chemical_Potential"}, 0.)),
       init_multipl_(use_thermal_ ? std::map<PdgCode, int>() :
                     modus_config.take({"Sphere", "Init_Multiplicities"}).
                                         convert_for(init_multipl_)) {

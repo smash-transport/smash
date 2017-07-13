@@ -43,7 +43,7 @@ TEST(woods_saxon_distribution_adaptive_rejection_sampling) {
   double expected_at_radius = R*R*woods_saxon_dist_func(R,
                                                        radius, diffusiveness);
 
-  double probes[9] = {1.0, 5.0, 7.2, 8.0, 8.5, .5f*R, 1.1f*R, 1.2f*R, 1.3f*R};
+  double probes[9] = {1.0, 5.0, 7.2, 8.0, 8.5, .5*R, 1.1*R, 1.2*R, 1.3*R};
   // now do probe these values:
   for (int i = 0; i < 9; ++i) {
     // value we have simulated:
@@ -102,7 +102,7 @@ TEST(juttner_distribution_adaptive_rejection_sampling) {
            temperature, baryon_chemical_potential, fermion_boson_factor);
 
   double probes[9] = {0.1, 0.5, 0.7, 1.0, 1.5,
-    0.0001f*R, 2.0f*R, 2.5f*R, 3.0f*R};
+    0.0001*R, 2.0*R, 2.5*R, 3.0*R};
   // now do probe these values:
   for (int i = 0; i < 9; ++i) {
     // value we have simulated:

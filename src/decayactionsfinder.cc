@@ -40,7 +40,7 @@ ActionList DecayActionsFinder::find_actions_in_cell(
       continue;
     }
 
-    constexpr double one_over_hbarc = 1.f/static_cast<double>(hbarc);
+    constexpr double one_over_hbarc = 1./static_cast<double>(hbarc);
 
     /* The decay_time is sampled from an exponential distribution.
      * Even though it may seem suspicious that it is sampled every
@@ -74,7 +74,7 @@ ActionList DecayActionsFinder::find_final_actions(const Particles &search_list,
     if (p.type().is_stable()) {
       continue;      /* particle doesn't decay */
     }
-    auto act = make_unique<DecayAction>(p, 0.f);
+    auto act = make_unique<DecayAction>(p, 0.);
     act->add_decays(p.type().get_partial_widths(p.effective_mass()));
     actions.emplace_back(std::move(act));
   }

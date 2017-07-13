@@ -38,13 +38,13 @@ TEST(breitwigner) {
 TEST(cauchy) {
   const double m0 = 0.770;
   const double gamma = 0.150;
-  const double peak_value = 1.f/(M_PI*gamma);
+  const double peak_value = 1./(M_PI*gamma);
   // cauchy: half maximum at full width
   FUZZY_COMPARE         (cauchy(m0,       m0, gamma), peak_value);
-  COMPARE_ABSOLUTE_ERROR(cauchy(m0+gamma, m0, gamma), peak_value/2.f, 1e-6);
-  COMPARE_ABSOLUTE_ERROR(cauchy(m0-gamma, m0, gamma), peak_value/2.f, 1e-6);
+  COMPARE_ABSOLUTE_ERROR(cauchy(m0+gamma, m0, gamma), peak_value/2., 1e-6);
+  COMPARE_ABSOLUTE_ERROR(cauchy(m0-gamma, m0, gamma), peak_value/2., 1e-6);
   // breit_wigner_nonrel: half maximum at half width
-  FUZZY_COMPARE         (breit_wigner_nonrel(m0,          m0, gamma), peak_value*2.f);
+  FUZZY_COMPARE         (breit_wigner_nonrel(m0,          m0, gamma), peak_value*2.);
   COMPARE_ABSOLUTE_ERROR(breit_wigner_nonrel(m0+gamma/2., m0, gamma), peak_value, 1e-6);
   COMPARE_ABSOLUTE_ERROR(breit_wigner_nonrel(m0-gamma/2., m0, gamma), peak_value, 1e-6);
 }

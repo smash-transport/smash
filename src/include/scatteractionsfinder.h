@@ -93,7 +93,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
     return ParticleType::list_all().size() == 1 &&
            !two_to_one_ &&
            isotropic_ &&
-           elastic_parameter_ > 0.0f;
+           elastic_parameter_ > 0.;
   }
 
   /**

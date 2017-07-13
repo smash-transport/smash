@@ -80,7 +80,7 @@ class BoxModus : public ModusDefault {
   std::unique_ptr<GrandCanThermalizer> create_grandcan_thermalizer(
                                                Configuration& conf) const {
     const std::array<double, 3> lat_size = {length_, length_, length_};
-    const std::array<double, 3> origin = {0.0f, 0.0f, 0.0f};
+    const std::array<double, 3> origin = {0., 0., 0.};
     const bool periodicity = true;
     return make_unique<GrandCanThermalizer>(conf, lat_size, origin,
         periodicity);
@@ -88,7 +88,7 @@ class BoxModus : public ModusDefault {
 
   /// \copydoc Smash::ModusDefault::max_timestep()
   double max_timestep(double max_transverse_distance_sqr) const {
-    return 0.5f*std::sqrt(length_*length_ - max_transverse_distance_sqr);
+    return 0.5*std::sqrt(length_*length_ - max_transverse_distance_sqr);
   }
 
   double length() const { return length_; }
@@ -100,7 +100,7 @@ class BoxModus : public ModusDefault {
   /// Temperature of the Box in GeV
   const double temperature_;
   /// initial time of the box
-  const double start_time_ = 0.0f;
+  const double start_time_ = 0.;
   /** whether to use a thermal initialization for all particles
    *  instead of specific numbers */
   const bool use_thermal_ = false;
