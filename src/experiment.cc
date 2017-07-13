@@ -578,9 +578,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   // Create lattices
   if (config.has_value({"Lattice"})) {
     // Take lattice properties from config to assign them to all lattices
-    const std::array<float, 3> l = config.take({"Lattice", "Sizes"});
+    const std::array<double, 3> l = config.take({"Lattice", "Sizes"});
     const std::array<int, 3> n = config.take({"Lattice", "Cell_Number"});
-    const std::array<float, 3> origin = config.take({"Lattice", "Origin"});
+    const std::array<double, 3> origin = config.take({"Lattice", "Origin"});
     const bool periodic = config.take({"Lattice", "Periodic"});
     dens_type_lattice_printout_ =
         config.take({"Lattice", "Printout", "Type"}, DensityType::None);

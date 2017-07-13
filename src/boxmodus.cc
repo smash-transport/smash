@@ -63,13 +63,13 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
  * If the value is not 2 then thermal momenta (sampled from a
  * Maxwell-Boltzmann distribution) are taken.
  *
- * \key Length (float, required): \n
+ * \key Length (double, required): \n
  * Length of the cube's edge in fm
  *
- * \key Temperature (float, required): \n
+ * \key Temperature (double, required): \n
  * Temperature in the box in GeV.
  *
- * \key Start_Time (float, required): \n
+ * \key Start_Time (double, required): \n
  * Starting time of the simulation.
  * All particles in the box are initialized with \f$x^0\f$ = Start_Time.
  *
@@ -117,7 +117,7 @@ BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
 }
 
 /* initial_conditions - sets particle data for @particles */
-float BoxModus::initial_conditions(Particles *particles,
+double BoxModus::initial_conditions(Particles *particles,
                                   const ExperimentParameters &parameters) {
   const auto &log = logger<LogArea::Box>();
   double momentum_radial = 0;

@@ -145,9 +145,9 @@ TEST(density_eckart_special_cases) {
 
 TEST(smearing_factor_normalization) {
   // Create density lattice with small lattice spacing
-  const std::array<float, 3> l = {10.0f, 10.0f, 10.0f};
+  const std::array<double, 3> l = {10.0f, 10.0f, 10.0f};
   const std::array<int, 3> n = {50, 60, 70};
-  const std::array<float, 3> origin = {0.0f, 0.0f, 0.0f};
+  const std::array<double, 3> origin = {0.0f, 0.0f, 0.0f};
   bool periodicity = true;
   auto lat = make_unique<DensityLattice>(
              l, n, origin, periodicity, LatticeUpdate::EveryTimestep);

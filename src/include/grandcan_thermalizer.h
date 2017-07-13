@@ -127,17 +127,17 @@ enum class HadronClass {
 class GrandCanThermalizer {
  public:
   /// Create the thermalizer: allocate the lattice
-  GrandCanThermalizer(const std::array<float, 3> lat_sizes,
+  GrandCanThermalizer(const std::array<double, 3> lat_sizes,
                       const std::array<int, 3> n_cells,
-                      const std::array<float, 3> origin,
+                      const std::array<double, 3> origin,
                       bool periodicity,
-                      float e_critical,
-                      float t_start,
-                      float delta_t,
+                      double e_critical,
+                      double t_start,
+                      double delta_t,
                       ThermalizationAlgorithm algo);
   GrandCanThermalizer(Configuration& conf,
-                      const std::array<float, 3> lat_sizes,
-                      const std::array<float, 3> origin,
+                      const std::array<double, 3> lat_sizes,
+                      const std::array<double, 3> origin,
                       bool periodicity) :
     GrandCanThermalizer(lat_sizes,
                         conf.take({"Cell_Number"}),
@@ -150,7 +150,7 @@ class GrandCanThermalizer {
                             ThermalizationAlgorithm::BiasedBF)) {}
   /// Check that the clock is close to n * period of thermalization
   bool is_time_to_thermalize(const Clock& clock) const {
-    const float t = clock.current_time();
+    const double t = clock.current_time();
     const int n = static_cast<int>(std::floor((t - t_start_)/period_));
     return (t > t_start_ &&
             t < t_start_ + n*period_ + clock.timestep_duration());
@@ -295,7 +295,7 @@ class GrandCanThermalizer {
   RectangularLattice<ThermLatticeNode>& lattice() const {
     return *lat_;
   }
-  float e_crit() const { return e_crit_; }
+  double e_crit() const { return e_crit_; }
 
  private:
   ParticleTypePtrList list_eos_particles() const {
@@ -333,10 +333,10 @@ class GrandCanThermalizer {
   std::vector<int> mult_int_;
   std::array<double, 7> mult_classes_;
   double N_total_in_cells_;
-  float cell_volume_;
-  const float e_crit_;
-  const float t_start_;
-  const float period_;
+  double cell_volume_;
+  const double e_crit_;
+  const double t_start_;
+  const double period_;
   const ThermalizationAlgorithm algorithm_;
 };
 

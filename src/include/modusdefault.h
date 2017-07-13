@@ -106,8 +106,8 @@ class ModusDefault {
        If one wants to have a central cell with center at 0,0,0 then
        number of cells should be odd (2k+1) in each direction.
      */
-    const std::array<float, 3> l = conf.take({"Lattice_Sizes"});
-    const std::array<float, 3> origin = {-0.5f*l[0], -0.5f*l[1], -0.5f*l[2]};
+    const std::array<double, 3> l = conf.take({"Lattice_Sizes"});
+    const std::array<double, 3> origin = {-0.5f*l[0], -0.5f*l[1], -0.5f*l[2]};
     const bool periodicity = false;
     return make_unique<GrandCanThermalizer>(conf, l, origin, periodicity);
   }

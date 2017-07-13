@@ -21,13 +21,13 @@
 
 namespace Smash {
 
-GrandCanThermalizer::GrandCanThermalizer(const std::array<float, 3> lat_sizes,
+GrandCanThermalizer::GrandCanThermalizer(const std::array<double, 3> lat_sizes,
                                          const std::array<int, 3> n_cells,
-                                         const std::array<float, 3> origin,
+                                         const std::array<double, 3> origin,
                                          bool periodicity,
-                                         float e_critical,
-                                         float t_start,
-                                         float delta_t,
+                                         double e_critical,
+                                         double t_start,
+                                         double delta_t,
                                          ThermalizationAlgorithm algo) :
   eos_typelist_(list_eos_particles()),
   N_sorts_(eos_typelist_.size()),
@@ -41,7 +41,7 @@ GrandCanThermalizer::GrandCanThermalizer(const std::array<float, 3> lat_sizes,
                                                            origin,
                                                            periodicity,
                                                            upd);
-  const std::array<float, 3> abc = lat_->cell_sizes();
+  const std::array<double, 3> abc = lat_->cell_sizes();
   cell_volume_ = abc[0] * abc[1] * abc[2];
   cells_to_sample_.resize(50000);
   mult_sort_.resize(N_sorts_);

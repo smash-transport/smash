@@ -15,9 +15,9 @@
 using namespace Smash;
 
 static std::unique_ptr<RectangularLattice<FourVector>> create_lattice(bool p) {
-  const std::array<float, 3> l = {10.0f, 6.0f, 2.0f};
+  const std::array<double, 3> l = {10.0f, 6.0f, 2.0f};
   const std::array<int, 3> n = {4, 8, 3};
-  const std::array<float, 3> origin = {0.0f, 0.0f, 0.0f};
+  const std::array<double, 3> origin = {0.0f, 0.0f, 0.0f};
   return make_unique<RectangularLattice<FourVector>>(
       l, n, origin, p, LatticeUpdate::EveryTimestep);
 }
@@ -184,9 +184,9 @@ TEST(iterate_in_radius) {
  */
 TEST(gradient) {
   // Set a lattice with random parameters, but a relatively fine one.
-  const std::array<float, 3> l = {9.0f, 7.0f, 13.0f};
+  const std::array<double, 3> l = {9.0f, 7.0f, 13.0f};
   const std::array<int, 3> n = {50, 60, 70};
-  const std::array<float, 3> origin = {-5.2f, -4.3f, -6.7f};
+  const std::array<double, 3> origin = {-5.2f, -4.3f, -6.7f};
   bool periodicity = false;
   auto lat = make_unique<RectangularLattice<double>>(
              l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
@@ -240,9 +240,9 @@ TEST(gradient) {
    with non-periodic is treatment of derivatives on the edges.
 */
 TEST(gradient_periodic) {
-  const std::array<float, 3> l = {9.0f, 7.0f, 13.0f};
+  const std::array<double, 3> l = {9.0f, 7.0f, 13.0f};
   const std::array<int, 3> n = {50, 60, 70};
-  const std::array<float, 3> origin = {-5.2f, -4.3f, -6.7f};
+  const std::array<double, 3> origin = {-5.2f, -4.3f, -6.7f};
   bool periodicity = true;
   auto lat = make_unique<RectangularLattice<double>>(
              l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
@@ -284,9 +284,9 @@ TEST(gradient_periodic) {
 /* Test gradient for 2x2x2 lattice. The test is that it doesn't segfault.
 */
 TEST(gradient_2x2x2lattice) {
-  const std::array<float, 3> l = {9.0f, 7.0f, 13.0f};
+  const std::array<double, 3> l = {9.0f, 7.0f, 13.0f};
   const std::array<int, 3> n = {2, 2, 2};
-  const std::array<float, 3> origin = {-5.2f, -4.3f, -6.7f};
+  const std::array<double, 3> origin = {-5.2f, -4.3f, -6.7f};
   bool periodicity = false;
   auto lat = make_unique<RectangularLattice<double>>(
              l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
@@ -306,9 +306,9 @@ TEST(gradient_2x2x2lattice) {
 
 // If one of the dimensions is 1, then 3D gradient calculation is impossible
 TEST_CATCH(gradient_impossible_lattice, std::runtime_error) {
-  const std::array<float, 3> l = {9.0f, 7.0f, 13.0f};
+  const std::array<double, 3> l = {9.0f, 7.0f, 13.0f};
   const std::array<int, 3> n = {5, 42, 1};
-  const std::array<float, 3> origin = {-5.2f, -4.3f, -6.7f};
+  const std::array<double, 3> origin = {-5.2f, -4.3f, -6.7f};
   bool periodicity = false;
   auto lat = make_unique<RectangularLattice<double>>(
              l, n, origin, periodicity, LatticeUpdate::EveryTimestep);

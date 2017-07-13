@@ -36,16 +36,16 @@ namespace Smash {
  *
  * Possible Incident Energies, only one can be given:
  *
- * \key Sqrtsnn (float, optional, no default): \n
+ * \key Sqrtsnn (double, optional, no default): \n
  * Defines the energy of the collision as center-of-mass
  * energy in the collision of one participant each from both nuclei
  * (using the average participant mass in the given nucleus).
  *
- * \key E_Kin (float, optional, no default): \n
+ * \key E_Kin (double, optional, no default): \n
  * Defines the energy of the collision by the kinetic energy per nucleon of
  * the projectile nucleus (in AGeV). This assumes the target nucleus is at rest.
  *
- * \key P_Lab (float, optional, no default): \n
+ * \key P_Lab (double, optional, no default): \n
  * Defines the energy of the collision by the initial momentum per nucleon
  * of the projectile nucleus (in AGeV). This assumes the target nucleus is at
  * rest.
@@ -92,7 +92,7 @@ namespace Smash {
  * A section for the impact parameter (= distance (in fm) of the two
  * straight lines that the center of masses of the nuclei travel on).
  *
- * \li \key Value (float, optional, optional, default = 0.f): fixed value for
+ * \li \key Value (double, optional, optional, default = 0.f): fixed value for
  * the impact parameter. No other \key Impact: directive is looked at.
  * \li \key Sample (string, optional, default = \key quadratic): \n
  * if \key uniform, use uniform sampling of the impact parameter
@@ -101,18 +101,18 @@ namespace Smash {
  * area corresponding to that range, \f$dP(b) = b\cdot db\f$). If \key custom,
  * use \key Values and \key Yields to interpolate the impact parameter
  * distribution and use rejection sampling.
- * \li \key Values (floats, optional):
+ * \li \key Values (doubles, optional):
  * Values of the impact parameter, corresponding to \key Yields. Must be same
  * length as \key Yields. Required for \key Sample = "custom".
- * \li \key Yields (floats, optional):
+ * \li \key Yields (doubles, optional):
  * Values of the particle yields, corresponding to \key Values. Must be same
  * length as \key Values. Required for \key Sample = "custom".
  *
- * \li \key Range (float, float, optional, default = 0.0f):\n
+ * \li \key Range (double, double, optional, default = 0.0f):\n
  * A vector of minimal and maximal impact parameters
  * between which b should be chosen. (The order of these is not
  * important.)
- * \li \key Max (float, optional, default = 0.0f):
+ * \li \key Max (double, optional, default = 0.0f):
  * Like `Range: [0.0, Max]`. Note that if both \key Range and
  * \key Max are specified, \key Max takes precedence.
  *
@@ -121,7 +121,7 @@ namespace Smash {
  * x-component of \f$\vec b\f$. The result will be that the projectile
  * and target will have switched position in x.
  *
- * \key Initial_Distance (float, optional, default = 2.0): \n
+ * \key Initial_Distance (double, optional, default = 2.0): \n
  * The initial distance of the two nuclei (in fm). That
  * means \f$z_{\rm min}^{\rm target} - z_{\rm max}^{\rm projectile}\f$.\n
  *
@@ -209,7 +209,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
   /* Option 2: Kinetic energy per nucleon of the projectile nucleus
    * (target at rest).  */
   if (modus_cfg.has_value({"E_Kin"})) {
-    const float e_kin = modus_cfg.take({"E_Kin"});
+    const double e_kin = modus_cfg.take({"E_Kin"});
     // Check that energy is nonnegative.
     if (e_kin < 0) {
       throw ModusDefault::InvalidEnergy(
@@ -224,7 +224,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
   }
   // Option 3: Momentum of the projectile nucleus (target at rest).
   if (modus_cfg.has_value({"P_Lab"})) {
-    const float p_lab = modus_cfg.take({"P_Lab"});
+    const double p_lab = modus_cfg.take({"P_Lab"});
     // Check that p_lab is nonnegative.
     if (p_lab < 0) {
       throw ModusDefault::InvalidEnergy(
@@ -266,15 +266,15 @@ ColliderModus::ColliderModus(Configuration modus_config,
               "sampling. "
               "Please provide Values and Yields.");
         }
-        const std::vector<float> impacts = modus_cfg.take({"Impact", "Values"});
-        const std::vector<float> yields = modus_cfg.take({"Impact", "Yields"});
+        const std::vector<double> impacts = modus_cfg.take({"Impact", "Values"});
+        const std::vector<double> yields = modus_cfg.take({"Impact", "Yields"});
         if (impacts.size() != yields.size()) {
           throw std::domain_error(
               "Input Error: Need as many impact parameter values as yields. "
               "Please make sure that Values and Yields have the same length.");
         }
-        impact_interpolation_ = make_unique<InterpolateDataLinear<float>>(
-            InterpolateDataLinear<float>(impacts, yields));
+        impact_interpolation_ = make_unique<InterpolateDataLinear<double>>(
+            InterpolateDataLinear<double>(impacts, yields));
 
         const auto imp_minmax = std::minmax_element(impacts.begin(),
                                                     impacts.end());
@@ -284,7 +284,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
       }
     }
     if (modus_cfg.has_value({"Impact", "Range"})) {
-      const std::array<float, 2> range = modus_cfg.take({"Impact", "Range"});
+      const std::array<double, 2> range = modus_cfg.take({"Impact", "Range"});
       imp_min_ = range[0];
       imp_max_ = range[1];
     }
@@ -314,7 +314,7 @@ std::ostream &operator<<(std::ostream &out, const ColliderModus &m) {
              << *m.projectile_ << "\nTarget:\n" << *m.target_;
 }
 
-float ColliderModus::initial_conditions(Particles *particles,
+double ColliderModus::initial_conditions(Particles *particles,
                                         const ExperimentParameters &) {
   const auto &log = logger<LogArea::Collider>();
   // Sample impact parameter distribution.
@@ -373,16 +373,16 @@ float ColliderModus::initial_conditions(Particles *particles,
   // Shift the nuclei into starting positions. Contracted spheres with
   // nuclear radii should touch exactly at t=0. Modus starts at negative
   // time corresponding to additinal initial displacement.
-  const float d_a = std::max(0.0f, projectile_->get_diffusiveness());
-  const float d_b = std::max(0.0f, target_->get_diffusiveness());
-  const float r_a = projectile_->get_nuclear_radius();
-  const float r_b = target_->get_nuclear_radius();
-  const float dz = initial_z_displacement_;
+  const double d_a = std::max(0.0f, projectile_->get_diffusiveness());
+  const double d_b = std::max(0.0f, target_->get_diffusiveness());
+  const double r_a = projectile_->get_nuclear_radius();
+  const double r_b = target_->get_nuclear_radius();
+  const double dz = initial_z_displacement_;
 
-  const float simulation_time = -dz / std::abs(v_a);
-  const float proj_z = -dz -
+  const double simulation_time = -dz / std::abs(v_a);
+  const double proj_z = -dz -
                         std::sqrt(1.0 - v_a*v_a) * (r_a + d_a);
-  const float targ_z = +dz * std::abs(v_b/v_a) +
+  const double targ_z = +dz * std::abs(v_b/v_a) +
                         std::sqrt(1.0 - v_b*v_b) * (r_b + d_b);
   projectile_->shift(proj_z, +impact_ / 2.0, simulation_time);
   target_->    shift(targ_z, -impact_ / 2.0, simulation_time);
@@ -407,9 +407,9 @@ void ColliderModus::sample_impact() {
     case Sampling::Custom: {
       // rejection sampling based on given distribution
       assert(impact_interpolation_ != nullptr);
-      float probability_random = 1;
-      float probability = 0;
-      float b;
+      double probability_random = 1;
+      double probability = 0;
+      double b;
       while (probability_random > probability) {
         b = Random::uniform(imp_min_, imp_max_);
         probability = (*impact_interpolation_)(b) / yield_max_;
