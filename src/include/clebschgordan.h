@@ -53,11 +53,11 @@ float isospin_clebsch_gordan_sqr_3to1(const ParticleType &p_a,
  * (doubled in order to be integer), then only contributions with that total
  * isospin will be counted.
  */
-float isospin_clebsch_gordan_sqr_2to2(const ParticleType &t_a,
-                                      const ParticleType &t_b,
-                                      const ParticleType &t_c,
-                                      const ParticleType &t_d,
-                                      const int I = -1);
+double isospin_clebsch_gordan_sqr_2to2(const ParticleType &t_a,
+                                       const ParticleType &t_b,
+                                       const ParticleType &t_c,
+                                       const ParticleType &t_d,
+                                       const int I = -1);
 
 class I_tot_range {
  private:

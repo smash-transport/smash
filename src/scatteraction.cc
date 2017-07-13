@@ -307,7 +307,7 @@ CollisionBranchList ScatterAction::NNbar_creation_cross_section() {
   float xsection = detailed_balance_factor_RR(sqrts, pcm,
           incoming_particles_[0].type(), incoming_particles_[1].type(),
           type_N, type_Nbar) *
-          std::max(0.f, ppbar_total(s) - ppbar_elastic(s));
+          std::max(0., ppbar_total(s) - ppbar_elastic(s));
   log.debug("NNbar reverse cross section is: ", xsection);
   channel_list.push_back(make_unique<CollisionBranch>(type_N, type_Nbar,
                                       xsection, ProcessType::TwoToTwo));
