@@ -50,10 +50,10 @@ TEST(pion_decay) {
   DecayBranchList dil_modes = type_piz.get_partial_widths_dilepton(srts);
   COMPARE(dil_modes.size(), 1u);
   const double piz_width = total_weight<DecayBranch>(type_piz.get_partial_widths(srts));
-  FUZZY_COMPARE(piz_width, 7.7e-9f);
+  FUZZY_COMPARE(piz_width, 7.7e-9);
   DecayBranchPtr &mode = dil_modes[0];
   // π⁰ decay action
-  const auto act = make_unique<DecayActionDilepton>(piz, 0.f,
+  const auto act = make_unique<DecayActionDilepton>(piz, 0.,
                                                     mode->weight()/piz_width);
   act->add_decay(std::move(mode));
 
@@ -70,7 +70,7 @@ TEST(pion_decay) {
   // the result for the π⁰ Dalitz will never match the BR exactly (even with
   // more event), because the analytic result of the formula that we use for the
   // differntial width (s. decaytype.cc) results in 4,7% overshoot of the BR
-  COMPARE_RELATIVE_ERROR(weight_sum / N_samples, 0.01174, 0.05f);
+  COMPARE_RELATIVE_ERROR(weight_sum / N_samples, 0.01174, 0.05);
 }
 
 TEST(eta_decay) {
@@ -85,10 +85,10 @@ TEST(eta_decay) {
   DecayBranchList dil_modes = type_etaz.get_partial_widths_dilepton(srts);
   COMPARE(dil_modes.size(), 1u);
   const double etaz_width = total_weight<DecayBranch>(type_etaz.get_partial_widths(srts));
-  FUZZY_COMPARE(etaz_width, 1.31e-6f);
+  FUZZY_COMPARE(etaz_width, 1.31e-6);
   DecayBranchPtr &mode = dil_modes[0];
   // π⁰ decay action
-  const auto act = make_unique<DecayActionDilepton>(etaz, 0.f,
+  const auto act = make_unique<DecayActionDilepton>(etaz, 0.,
                                                     mode->weight()/etaz_width);
   act->add_decay(std::move(mode));
 
@@ -102,5 +102,5 @@ TEST(eta_decay) {
   }
   // verify that the shining weight for the η Dalitz decay is correct
   // (to an accuracy of five percent)
-  COMPARE_RELATIVE_ERROR(weight_sum / N_samples, 0.0069, 0.05f);
+  COMPARE_RELATIVE_ERROR(weight_sum / N_samples, 0.0069, 0.05);
 }
