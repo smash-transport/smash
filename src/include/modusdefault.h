@@ -42,7 +42,7 @@ class ModusDefault {
   // never needs a virtual destructor
 
   // Missing functions for concrete Modus implementations:
-  // float initial_conditions(Particles *particles);
+  // double initial_conditions(Particles *particles);
 
   /** Enforces sensible positions for the particles.
    *
@@ -74,9 +74,9 @@ class ModusDefault {
    *  modus, just return FermiMotion::Off. */
   FermiMotion fermi_motion() const { return FermiMotion::Off; }
   /// Maximal timestep accepted by this modus. Negative means infinity.
-  float max_timestep(float ) const { return -1.f; }
+  double max_timestep(double ) const { return -1.f; }
 
-  float length() const { return -1.f; }
+  double length() const { return -1.f; }
 
   /**
    * Creates the Grid with normal boundary conditions.
@@ -89,7 +89,7 @@ class ModusDefault {
    * \see Grid::Grid
    */
   Grid<GridOptions::Normal> create_grid(
-      const Particles &particles, float min_cell_length,
+      const Particles &particles, double min_cell_length,
       CellSizeStrategy strategy = CellSizeStrategy::Optimal) const {
     return {particles, min_cell_length, strategy};
   }
