@@ -79,7 +79,7 @@ void update_momenta(Particles *particles, double dt,
          (pot.use_skyrme() ? (UB_grad_lat != nullptr) : true) &&
          (pot.use_symmetry() ? (UI3_grad_lat != nullptr) : true);
   ThreeVector dUB_dr, dUI3_dr;
-  float min_time_scale = std::numeric_limits<float>::infinity();
+  double min_time_scale = std::numeric_limits<double>::infinity();
 
   for (ParticleData &data : *particles) {
     const ThreeVector r = data.position().threevec();
@@ -108,14 +108,14 @@ void update_momenta(Particles *particles, double dt,
     if (dU_dr_abs < really_small) {
       continue;
     }
-    const float time_scale = data.momentum().x0() / dU_dr_abs;
+    const double time_scale = data.momentum().x0() / dU_dr_abs;
     if (time_scale < min_time_scale) {
       min_time_scale = time_scale;
     }
   }
 
   // warn if the time step is too big
-  constexpr float safety_factor = 0.1f;
+  constexpr double safety_factor = 0.1f;
   if (dt > safety_factor * min_time_scale) {
     log.warn() << "The time step size is too large for an accurate propagation "
                << "with potentials. Maximum safe value: "

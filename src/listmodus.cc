@@ -9,7 +9,7 @@
 
 #include "include/listmodus.h"
 
-#include <cfloat>
+//#include <cfloat>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>

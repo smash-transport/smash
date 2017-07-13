@@ -15,7 +15,7 @@
 namespace Smash {
 
 
-float clebsch_gordan(const int j_a, const int j_b, const int j_c,
+double clebsch_gordan(const int j_a, const int j_b, const int j_c,
                      const int m_a, const int m_b, const int m_c) {
   const double wigner_3j =  gsl_sf_coupling_3j(j_a, j_b, j_c, m_a, m_b, -m_c);
   if (std::abs(wigner_3j) < really_small) {
@@ -23,7 +23,7 @@ float clebsch_gordan(const int j_a, const int j_b, const int j_c,
   }
   assert((j_a - j_b + m_c) % 2 == 0);
   const int j = (j_a - j_b + m_c)/2;
-  float result = std::sqrt(j_c + 1) * wigner_3j;
+  double result = std::sqrt(j_c + 1) * wigner_3j;
   result *= (j % 2 == 0) * 2 - 1;  // == (-1)**j
 
 #ifndef NDEBUG
@@ -39,7 +39,7 @@ float clebsch_gordan(const int j_a, const int j_b, const int j_c,
 /* Calculate isospin Clebsch-Gordan coefficient for two particles p_a and p_b
  * coupling to a total isospin (I_tot, I_z).
  */
-static float isospin_clebsch_gordan_2to1(const ParticleType &p_a,
+static double isospin_clebsch_gordan_2to1(const ParticleType &p_a,
                                          const ParticleType &p_b,
                                          const int I_tot, const int I_z) {
   return clebsch_gordan(p_a.isospin(), p_b.isospin(), I_tot,
@@ -47,7 +47,7 @@ static float isospin_clebsch_gordan_2to1(const ParticleType &p_a,
 }
 
 
-float isospin_clebsch_gordan_sqr_3to1(const ParticleType &p_a,
+double isospin_clebsch_gordan_sqr_3to1(const ParticleType &p_a,
                                       const ParticleType &p_b,
                                       const ParticleType &p_c,
                                       const ParticleType &Res) {
@@ -73,7 +73,7 @@ float isospin_clebsch_gordan_sqr_3to1(const ParticleType &p_a,
   const auto I_ab = allowed_I_ab[0];
 
   const int I_abz = p_a.isospin3() + p_b.isospin3();
-  const float cg = clebsch_gordan(I_ab, p_c.isospin(), Res.isospin(),
+  const double cg = clebsch_gordan(I_ab, p_c.isospin(), Res.isospin(),
                                   I_abz, p_c.isospin3(), Res.isospin3())
                   * clebsch_gordan(p_a.isospin(), p_b.isospin(), I_ab,
                                   p_a.isospin3(), p_b.isospin3(), I_abz);

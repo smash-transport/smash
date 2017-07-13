@@ -21,7 +21,7 @@ namespace Smash {
  * Note that the calculation assumes that the spin/isospin values (j/m)
  * have been multiplied by two (in order to be integer).
  */
-float clebsch_gordan(const int j_a, const int j_b, const int j_c,
+double clebsch_gordan(const int j_a, const int j_b, const int j_c,
                      const int m_a, const int m_b, const int m_c);
 
 
@@ -29,10 +29,10 @@ float clebsch_gordan(const int j_a, const int j_b, const int j_c,
  * Calculate the squared isospin Clebsch-Gordan coefficient for two particles
  * p_a and p_b coupling to a resonance Res.
  */
-inline float isospin_clebsch_gordan_sqr_2to1(const ParticleType &p_a,
+inline double isospin_clebsch_gordan_sqr_2to1(const ParticleType &p_a,
                                              const ParticleType &p_b,
                                              const ParticleType &Res) {
-  const float cg = clebsch_gordan(p_a.isospin(), p_b.isospin(), Res.isospin(),
+  const double cg = clebsch_gordan(p_a.isospin(), p_b.isospin(), Res.isospin(),
                                 p_a.isospin3(), p_b.isospin3(), Res.isospin3());
   return cg*cg;
 }
@@ -42,7 +42,7 @@ inline float isospin_clebsch_gordan_sqr_2to1(const ParticleType &p_a,
  * Calculate the squared isospin Clebsch-Gordan coefficient for three particles
  * p_a, p_b and p_c coupling to a resonance Res.
  */
-float isospin_clebsch_gordan_sqr_3to1(const ParticleType &p_a,
+double isospin_clebsch_gordan_sqr_3to1(const ParticleType &p_a,
                                       const ParticleType &p_b,
                                       const ParticleType &p_c,
                                       const ParticleType &Res);
