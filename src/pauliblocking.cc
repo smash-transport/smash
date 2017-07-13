@@ -28,13 +28,13 @@ PauliBlocker::PauliBlocker(Configuration conf,
   /*!\Userguide
    * \page pauliblocker Pauli_Blocking
    *
-   * \key Spatial_Averaging_Radius (float, optional, default = 1.86): \n
+   * \key Spatial_Averaging_Radius (double, optional, default = 1.86): \n
    * Radius [fm] of sphere for averaging in the coordinate space
    *
-   * \key Gaussian_Cutoff (float, optional, default = 2.2): \n
+   * \key Gaussian_Cutoff (double, optional, default = 2.2): \n
    * Radius [fm] at which gaussians used for smoothing are cut
    *
-   * \key Momentum_Averaging_Radius (float, optional, default = 0.08): \n
+   * \key Momentum_Averaging_Radius (double, optional, default = 0.08): \n
    * Radius [GeV/c] of sphere for averaging in the momentum space
    */
 
@@ -58,10 +58,10 @@ PauliBlocker::PauliBlocker(Configuration conf,
 PauliBlocker::~PauliBlocker() {
 }
 
-float PauliBlocker::phasespace_dens(const ThreeVector &r, const ThreeVector &p,
+double PauliBlocker::phasespace_dens(const ThreeVector &r, const ThreeVector &p,
                         const Particles &particles, const PdgCode pdg,
                         const ParticleList& disregard) const {
-  float f = 0.0;
+  double f = 0.0;
 
   // TODO(oliiny): looping over all particles is inefficient,
   // I need only particles within rp_ radius in momentum and
@@ -72,11 +72,11 @@ float PauliBlocker::phasespace_dens(const ThreeVector &r, const ThreeVector &p,
       continue;
     }
     // Only consider momenta in sphere of radius rp_ with center at p
-    const float pdist_sqr = (part.momentum().threevec() - p).sqr();
+    const double pdist_sqr = (part.momentum().threevec() - p).sqr();
     if (pdist_sqr > rp_*rp_) {
       continue;
     }
-    const float rdist_sqr = (part.position().threevec() - r).sqr();
+    const double rdist_sqr = (part.position().threevec() - r).sqr();
     // Only consider coordinates in sphere of radius rr_+rc_ with center at r
     if (rdist_sqr >= (rr_+rc_)*(rr_+rc_)) {
       continue;
@@ -94,9 +94,9 @@ float PauliBlocker::phasespace_dens(const ThreeVector &r, const ThreeVector &p,
       continue;
     }
     // 1st order interpolation using tabulated values
-    const float i_real = std::sqrt(rdist_sqr) / (rr_ + rc_) * weights_.size();
+    const double i_real = std::sqrt(rdist_sqr) / (rr_ + rc_) * weights_.size();
     const size_t i = std::floor(i_real);
-    const float rest = i_real - i;
+    const double rest = i_real - i;
     if (likely(i + 1 < weights_.size())) {
       f += weights_[i] * rest + weights_[i + 1] * (1.f - rest);
     }
@@ -107,39 +107,39 @@ float PauliBlocker::phasespace_dens(const ThreeVector &r, const ThreeVector &p,
 void PauliBlocker::init_weights_analytical() {
   const auto &log = logger<LogArea::PauliBlocking>();
 
-  const float pi = static_cast<float>(M_PI);
-  const float sqrt2 = std::sqrt(2.0f);
-  const float sqrt_2pi = std::sqrt(2.0f * pi);
+  const double pi = static_cast<double>(M_PI);
+  const double sqrt2 = std::sqrt(2.0f);
+  const double sqrt_2pi = std::sqrt(2.0f * pi);
   // Volume of the phase-space area; Factor 2 stands for spin.
-  const float phase_volume = 2 * (4.0f/3.0f*pi*rr_*rr_*rr_) *
+  const double phase_volume = 2 * (4.0f/3.0f*pi*rr_*rr_*rr_) *
                                  (4.0f/3.0f*pi*rp_*rp_*rp_) /
                                  ((2*pi*hbarc)*(2*pi*hbarc)*(2*pi*hbarc));
   // Analytical expression for integral in denominator
-  const float norm = std::erf(rc_/sqrt2/sig_) -
+  const double norm = std::erf(rc_/sqrt2/sig_) -
             rc_* 2 / sqrt_2pi / sig_ * std::exp(-0.5f*rc_*rc_/sig_/sig_);
 
-  float integral;
+  double integral;
   // Step of the table for tabulated integral
-  const float d_pos = (rr_ + rc_) / static_cast<float>(weights_.size());
+  const double d_pos = (rr_ + rc_) / static_cast<double>(weights_.size());
 
   for (size_t k = 0; k < weights_.size(); k++) {
     // rdist = 0 ... rc_ (gauss cut) + rr_ (position cut)
-    const float rj = d_pos * k;
+    const double rj = d_pos * k;
     if (rj < really_small) {
       // Assuming rc_ > rr_
-      const float A = rr_/sqrt2/sig_;
+      const double A = rr_/sqrt2/sig_;
       integral = sqrt_2pi*sig_*std::erf(A) - 2*rr_*std::exp(-A*A);
       integral *= sig_*sig_;
     } else if (rc_ > rj + rr_) {
-      const float A = (rj+rr_)/sqrt2/sig_;
-      const float B = (rj-rr_)/sqrt2/sig_;
+      const double A = (rj+rr_)/sqrt2/sig_;
+      const double B = (rj-rr_)/sqrt2/sig_;
       integral = sig_ / rj * (std::exp(-A*A) - std::exp(-B*B)) +
                  0.5f*sqrt_2pi*(std::erf(A) - std::erf(B));
       integral *= sig_*sig_*sig_;
     } else {
-      const float A = rc_/sqrt2/sig_;
-      const float B = (rj-rr_)/sqrt2/sig_;
-      const float C = (rc_-rj)*(rc_-rj) - rr_*rr_ + 2*sig_*sig_;
+      const double A = rc_/sqrt2/sig_;
+      const double B = (rj-rr_)/sqrt2/sig_;
+      const double C = (rc_-rj)*(rc_-rj) - rr_*rr_ + 2*sig_*sig_;
       integral = (0.5f*std::exp(-A*A)*C - sig_*sig_*std::exp(-B*B)) / rj +
                  0.5f*sqrt_2pi*sig_*(std::erf(A) - std::erf(B));
       integral *= sig_*sig_;

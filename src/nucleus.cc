@@ -208,22 +208,22 @@ ThreeVector Nucleus::distribute_nucleon() const {
   Angles dir;
   dir.distribute_isotropically();
   // diffusiveness_ zero or negative? Use hard sphere.
-  if (almost_equal(diffusiveness_, 0.f)) {
+  if (almost_equal(diffusiveness_, 0.)) {
     return dir.threevec() * nuclear_radius_ * std::cbrt(Random::canonical());
   }
-  if (almost_equal(nuclear_radius_, 0.f)) {
+  if (almost_equal(nuclear_radius_, 0.)) {
     return Smash::ThreeVector();
   }
-  float radius_scaled = nuclear_radius_/diffusiveness_;
-  float prob_range1 = 1.0;
-  float prob_range2 = 3. / radius_scaled;
-  float prob_range3 = 2. * prob_range2 / radius_scaled;
-  float prob_range4 = 1. * prob_range3 / radius_scaled;
-  float ranges234 = prob_range2 + prob_range3 + prob_range4;
-  float t;
+  double radius_scaled = nuclear_radius_/diffusiveness_;
+  double prob_range1 = 1.0;
+  double prob_range2 = 3. / radius_scaled;
+  double prob_range3 = 2. * prob_range2 / radius_scaled;
+  double prob_range4 = 1. * prob_range3 / radius_scaled;
+  double ranges234 = prob_range2 + prob_range3 + prob_range4;
+  double t;
   /// \li Decide which branch \f$\tilde p^{({\rm I - IV})}\f$ to go into
   do {
-    float which_range = Random::uniform(-prob_range1, ranges234);
+    double which_range = Random::uniform(-prob_range1, ranges234);
     if (which_range < 0.0) {
       t = radius_scaled * (std::cbrt(Random::canonical()) - 1.);
     } else {
@@ -243,12 +243,12 @@ ThreeVector Nucleus::distribute_nucleon() const {
      **/
   } while (Random::canonical() > 1. / (1. + std::exp(-std::abs(t))));
   /// \li shift and rescale \f$t\f$ to \f$r = d\cdot t + r_0\f$
-  float position_scaled = t + radius_scaled;
-  float position = position_scaled * diffusiveness_;
+  double position_scaled = t + radius_scaled;
+  double position = position_scaled * diffusiveness_;
   return dir.threevec() * position;
 }
 
-float Nucleus::woods_saxon(float r) {
+double Nucleus::woods_saxon(double r) {
   return r * r / (std::exp((r - nuclear_radius_) / diffusiveness_) + 1);
 }
 
@@ -319,11 +319,11 @@ void Nucleus::set_parameters_automatic() {
 void Nucleus::set_parameters_from_config(Configuration &config) {
   // Diffusiveness
   if (config.has_value({"Diffusiveness"})) {
-    set_diffusiveness(static_cast<float>(config.take({"Diffusiveness"})));
+    set_diffusiveness(static_cast<double>(config.take({"Diffusiveness"})));
   }
   // Radius
   if (config.has_value({"Radius"})) {
-    set_nuclear_radius(static_cast<float>(config.take({"Radius"})));
+    set_nuclear_radius(static_cast<double>(config.take({"Radius"})));
   } else {
     set_nuclear_radius(default_nuclear_radius());
   }
@@ -423,7 +423,7 @@ void Nucleus::fill_from_list(const std::map<PdgCode, int>& particle_list,
   testparticles_ = testparticles;
   for (auto n = particle_list.cbegin(); n != particle_list.cend(); ++n) {
     const ParticleType &current_type = ParticleType::find(n->first);
-    float current_mass = current_type.mass();
+    double current_mass = current_type.mass();
     for (unsigned int i = 0; i < n->second*testparticles_; i++) {
       // append particle to list and set its PDG code.
       particles_.emplace_back(current_type);
@@ -433,7 +433,7 @@ void Nucleus::fill_from_list(const std::map<PdgCode, int>& particle_list,
 }
 
 void Nucleus::shift(double z_offset,
-                    double x_offset, float simulation_time) {
+                    double x_offset, double simulation_time) {
   // Move the nucleus in z and x directions, and set the time.
   for (auto i = begin(); i != end(); i++) {
     FourVector this_position = i->position();

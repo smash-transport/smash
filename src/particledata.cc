@@ -29,7 +29,7 @@ double ParticleData::effective_mass() const {
 }
 
 void ParticleData::set_history(int ncoll, uint32_t pid, ProcessType pt,
-                               float time_of_or, const ParticleList& plist) {
+                               double time_of_or, const ParticleList& plist) {
   if (pt != ProcessType::Wall) {
     history_.time_of_origin = time_of_or;
     history_.collisions_per_particle = ncoll;

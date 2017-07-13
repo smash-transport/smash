@@ -28,7 +28,7 @@ struct HistoryData {
   // type of the last action
   ProcessType process_type = ProcessType::None;
   // time of the last action (excluding walls)
-  float time_of_origin = 0.0;
+  double time_of_origin = 0.0;
   // PdgCodes of the parent particles
   PdgCode p1 = 0x0, p2 = 0x0;
 };
@@ -69,7 +69,7 @@ class ParticleData {
   bool is_baryon() const { return pdgcode().is_baryon(); }
 
   /** Returns the particle's pole mass ("on-shell"). */
-  float pole_mass() const { return type_->mass(); }
+  double pole_mass() const { return type_->mass(); }
   /** Returns the particle's effective mass
    * (as determined from the 4-momentum, possibly "off-shell"). */
   double effective_mass() const;
@@ -84,7 +84,7 @@ class ParticleData {
   HistoryData get_history() const { return history_; }
   /** Store history information, i.e. the type of process and possibly the
    * PdgCodes of the parent particles (\p plist). */
-  void set_history(int ncoll, uint32_t pid, ProcessType pt, float time_of_or,
+  void set_history(int ncoll, uint32_t pid, ProcessType pt, double time_of_or,
                    const ParticleList& plist);
 
   /// return the particle's 4-momentum
@@ -155,11 +155,11 @@ class ParticleData {
   }
 
   /// Return cross section scaling factor
-  const float &cross_section_scaling_factor() const {
+  const double &cross_section_scaling_factor() const {
     return cross_section_scaling_factor_;
   }
   /// Set the cross_section_scaling_factor
-  void set_cross_section_scaling_factor(const float &xsec_scal) {
+  void set_cross_section_scaling_factor(const double &xsec_scal) {
     cross_section_scaling_factor_ = xsec_scal;
   }
 
@@ -280,7 +280,7 @@ class ParticleData {
    */
   double formation_time_ = 0.0;
   /// cross section scaling factor for unformed particles
-  float cross_section_scaling_factor_ = 1.0;
+  double cross_section_scaling_factor_ = 1.0;
   // history information
   HistoryData history_;
 };

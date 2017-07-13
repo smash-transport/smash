@@ -373,8 +373,8 @@ double ColliderModus::initial_conditions(Particles *particles,
   // Shift the nuclei into starting positions. Contracted spheres with
   // nuclear radii should touch exactly at t=0. Modus starts at negative
   // time corresponding to additinal initial displacement.
-  const double d_a = std::max(0.0f, projectile_->get_diffusiveness());
-  const double d_b = std::max(0.0f, target_->get_diffusiveness());
+  const double d_a = std::max(0., projectile_->get_diffusiveness());
+  const double d_b = std::max(0., target_->get_diffusiveness());
   const double r_a = projectile_->get_nuclear_radius();
   const double r_b = target_->get_nuclear_radius();
   const double dz = initial_z_displacement_;

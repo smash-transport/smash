@@ -41,7 +41,7 @@ static inline ostream &operator<<(ostream &s, const unordered_set<T> &data) {
 }
 }  // namespace std
 
-static inline float minimal_cell_length(int testparticles) {
+static inline double minimal_cell_length(int testparticles) {
   // In SMASH itself the minimal cell length is calculated by the function
   // ScatterActionsFinder::min_cell_length(). It uses the maximum cross section
   // of 200mb and the time step size to calculate the cell length. This test was
@@ -52,7 +52,7 @@ static inline float minimal_cell_length(int testparticles) {
   // To make the test work with ScatterActionsFinder::min_cell_length() the
   // placements of the particles would need to be adapted to the different
   // minimal cell size.
-  return 2.5f / std::sqrt(static_cast<float>(testparticles));
+  return 2.5f / std::sqrt(static_cast<double>(testparticles));
 }
 
 TEST(init) {
@@ -193,7 +193,7 @@ TEST(periodic_grid) {
   for (const int testparticles : {1, 5}) {
     for (const int nparticles : {1, 5, 20, 75, 124, 125}) {
       const double min_cell_length = minimal_cell_length(testparticles);
-      constexpr float length = 10;
+      constexpr double length = 10;
       Particles list;
       auto random_value = Random::make_uniform_distribution(0., 9.99);
       for (auto n = nparticles; n; --n) {
@@ -204,8 +204,8 @@ TEST(periodic_grid) {
             n));
       }
       Grid<GridOptions::PeriodicBoundaries> grid(
-          make_pair(std::array<float, 3>{0, 0, 0},
-                    std::array<float, 3>{length, length, length}),
+          make_pair(std::array<double, 3>{0, 0, 0},
+                    std::array<double, 3>{length, length, length}),
           list, min_cell_length);
 
       // stores the neighbor pairs found via the grid:
@@ -247,14 +247,14 @@ TEST(periodic_grid) {
               COMPARE(it->id(), p.id());
               COMPARE(it->position(), p.position());
             }
-            auto &&compareDiff = [length](float d) {
-              if (d < -0.1f * length) {
+            auto &&compareDiff = [length](double d) {
+              if (d < -0.1 * length) {
                 FUZZY_COMPARE(d, -length);
-              } else if (d > 0.1f * length) {
+              } else if (d > 0.1 * length) {
                 FUZZY_COMPARE(d, length);
               } else {
                 COMPARE_ABSOLUTE_ERROR(
-                    d, 0.f, length * std::numeric_limits<double>::epsilon());
+                    d, 0., length * std::numeric_limits<double>::epsilon());
               }
             };
             // for each particle in search, find the same particle in list
