@@ -21,22 +21,22 @@ TEST(init_particle_types) {
 }
 
 TEST(assign_default) {
-  CollisionBranch branch(0.f, ProcessType::String);
-  FUZZY_COMPARE(branch.weight(), 0.f);
+  CollisionBranch branch(0., ProcessType::String);
+  FUZZY_COMPARE(branch.weight(), 0.);
   COMPARE(branch.get_type(), ProcessType::String);
 }
 TEST(assign_1_particle) {
   PdgCode smashon("9876542");
-  CollisionBranch branch(ParticleType::find(smashon), 1.234f,
+  CollisionBranch branch(ParticleType::find(smashon), 1.234,
                          ProcessType::Elastic);
-  FUZZY_COMPARE(branch.weight(), 1.234f);
+  FUZZY_COMPARE(branch.weight(), 1.234);
 }
 TEST(assign_2_particle) {
   PdgCode smashon("9876542");
   CollisionBranch branch(ParticleType::find(smashon),
                          ParticleType::find(smashon),
                          2.345, ProcessType::Elastic);
-  FUZZY_COMPARE(branch.weight(), 2.345f);
+  FUZZY_COMPARE(branch.weight(), 2.345);
 }
 
 TEST(lists) {

@@ -37,9 +37,9 @@ double ProcessBranch::threshold() const {
     /* This may round up or down. Up is good. If down
      * we must add one ULP via 'nextafter'.
      */
-    const float rounded = thr;
+    const double rounded = thr;
     threshold_ =  rounded < thr
-                  ? std::nextafter(rounded, std::numeric_limits<float>::max())
+                  ? std::nextafter(rounded, std::numeric_limits<double>::max())
                   : rounded;
   }
   return threshold_;

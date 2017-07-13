@@ -33,21 +33,21 @@ ActionList DecayActionsFinder::find_actions_in_cell(
     DecayBranchList processes =
                       p.type().get_partial_widths_hadronic(p.effective_mass());
     // total decay width (mass-dependent)
-    const float width = total_weight<DecayBranch>(processes);
+    const double width = total_weight<DecayBranch>(processes);
 
     // check if there are any (hadronic) decays
     if (!(width > 0.0)) {
       continue;
     }
 
-    constexpr float one_over_hbarc = 1.f/static_cast<float>(hbarc);
+    constexpr double one_over_hbarc = 1.f/static_cast<double>(hbarc);
 
     /* The decay_time is sampled from an exponential distribution.
      * Even though it may seem suspicious that it is sampled every
      * timestep, it can be proven that this still overall obeys
      * the exponential decay law.
      */
-    const float decay_time = Random::exponential<float>(
+    const double decay_time = Random::exponential<double>(
         one_over_hbarc *
         p.inverse_gamma()  // The clock goes slower in the rest frame of the
                            // resonance
