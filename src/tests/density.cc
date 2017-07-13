@@ -153,7 +153,7 @@ TEST(smearing_factor_normalization) {
              l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
   // Create box with 1 proton
   const int N = 1;
-  const float L = 10.0f;
+  const double L = 10.;
   auto conf = Test::configuration();
   conf["Modus"] = "Box";
   conf.take({"Modi", "Box", "Init_Multiplicities"});
@@ -352,7 +352,7 @@ ParticleType::create_type_list(
     "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
     "proton 0.938 0.0 2212\n");
 const int Ntest = 1000;
-const float L = 10.0f;
+const double L = 10.0;
 Configuration conf(TEST_CONFIG_PATH);
 conf["Modus"] = "Box";
 conf.take({"Modi", "Box", "Init_Multiplicities"});

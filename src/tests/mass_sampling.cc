@@ -48,7 +48,7 @@ TEST(omega_decay) {
   const auto srts = omega.effective_mass();
   act->add_decays(type_omega.get_partial_widths_hadronic(srts));
 
-  const float dm = 0.001;        // bin size
+  const double dm = 0.001;        // bin size
   Histogram1d hist_charged(dm);  // histogram for charged rhos
   Histogram1d hist_neutral(dm);  // histogram for neutral rhos
 
@@ -67,7 +67,7 @@ TEST(omega_decay) {
     } else if (!fs[0].type().pdgcode().is_pion()) {
       rho = &fs[0];
     }
-    float m = rho->effective_mass();
+    double m = rho->effective_mass();
     if (rho->type().charge() == 0) {
       hist_neutral.add(m);
     } else {

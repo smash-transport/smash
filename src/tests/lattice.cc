@@ -74,12 +74,10 @@ TEST(cell_center) {
   auto lattice = create_lattice(true);
   COMPARE(lattice->cell_center(0, 0, 0).x1(), 1.25);
   COMPARE(lattice->cell_center(0, 0, 0).x2(), 0.375);
-  // cell center is calculated from float, though ThreeVector contains doubles
-  // so accuracy is not better then the float one
-  FUZZY_COMPARE(float(lattice->cell_center(0, 0, 0).x3()), 1.0f / 3.0f);
+  FUZZY_COMPARE(lattice->cell_center(0, 0, 0).x3(), 1.0 / 3.0);
   COMPARE(lattice->cell_center(1, 1, 1).x1(), 3.75);
   COMPARE(lattice->cell_center(1, 1, 1).x2(), 0.375 * 3);
-  FUZZY_COMPARE(float(lattice->cell_center(1, 1, 1).x3()), 1.0f);
+  FUZZY_COMPARE(lattice->cell_center(1, 1, 1).x3(), 1.0);
   // Cell center from 1d index
   auto dims = lattice->dimensions();
   const ThreeVector r1 = lattice->cell_center(1, 3, 2);

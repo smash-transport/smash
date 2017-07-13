@@ -22,7 +22,7 @@ constexpr double hbarc = 0.197327053;
 /**
  * mb <-> fm^2 conversion factor
  */
-constexpr float fm2_mb = 0.1;
+constexpr double fm2_mb = 0.1;
 /**
  * Numerical error tolerance
  */
@@ -36,12 +36,12 @@ constexpr double twopi = 2. * M_PI;
 /**
  * Ground state density of symmetric nuclear matter, fm^-3
  */
-constexpr float nuclear_density = 0.168;
+constexpr double nuclear_density = 0.168;
 /**
  * Physical error tolerance
  *
  */
-constexpr float small_number = 1.0e-4;
+constexpr double small_number = 1.0e-4;
 /**
  * nucleon mass in GeV
  *
@@ -83,7 +83,7 @@ constexpr double alpha = 7.2973525698e-3;
  * The only exception of physical cross sections going above 200 mb are the
  * elastic NN cross sections, which diverge at threshold.
  */
-constexpr float maximum_cross_section = 200.f;  // mb
+constexpr double maximum_cross_section = 200.f;  // mb
 
 /**
  * Process ID for any photon process.

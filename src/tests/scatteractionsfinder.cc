@@ -63,8 +63,8 @@ TEST(collision_order) {
   particles.insert(particle_e);
 
   // prepare scatteractionsfinder
-  const float radius = 0.11; // in fm
-  const float elastic_parameter = radius*radius*M_PI/fm2_mb; // in mb
+  const double radius = 0.11; // in fm
+  const double elastic_parameter = radius*radius*M_PI/fm2_mb; // in mb
   const int testparticles = 1;
   const std::vector<bool> has_interacted = {};
   ScatterActionsFinder finder(elastic_parameter, testparticles, has_interacted);
@@ -135,8 +135,8 @@ TEST(scatter_particle_pair_only_once) {
                          Test::Position{0., 1., 1.1, 1.}));
 
   // prepare scatteractionsfinder
-  const float radius = 0.11;                                        // in fm
-  const float elastic_parameter = radius * radius * M_PI / fm2_mb;  // in mb
+  const double radius = 0.11;                                        // in fm
+  const double elastic_parameter = radius * radius * M_PI / fm2_mb;  // in mb
   const int testparticles = 1;
   const std::vector<bool> has_interacted = {};
   ScatterActionsFinder finder(elastic_parameter, testparticles, has_interacted);
@@ -194,8 +194,8 @@ TEST(find_next_action) {
 
 
   // prepare scatteractionsfinder
-  constexpr float radius = 0.11;                                        // in fm
-  constexpr float elastic_parameter = radius * radius * M_PI / fm2_mb;  // in mb
+  constexpr double radius = 0.11;                                        // in fm
+  constexpr double elastic_parameter = radius * radius * M_PI / fm2_mb;  // in mb
   constexpr int testparticles = 1;
   const std::vector<bool> has_interacted = {};
   ScatterActionsFinder finder(elastic_parameter, testparticles, has_interacted);

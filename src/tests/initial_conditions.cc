@@ -146,7 +146,7 @@ TEST(initialize_sphere) {
   // position less than radius?
   for (auto p : P) {
     momentum += p.momentum();
-    const float radius =
+    const double radius =
              sqrt(p.position().x1() * p.position().x1() +
                   p.position().x2() * p.position().x2() +
                   p.position().x3() * p.position().x3());

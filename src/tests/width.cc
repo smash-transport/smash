@@ -25,8 +25,8 @@ TEST(init_particle_types) {
 TEST(width_Delta) {
   const ParticleType &t = ParticleType::find(0x2214);
   for (int i = 0; i < 100; i++) {
-    float m = 1. + i*0.01;
-    float w = t.total_width (m);
+    double m = 1. + i*0.01;
+    double w = t.total_width (m);
     printf("%7.3f %7.3f \n", m, w);
   }
 }
@@ -36,8 +36,8 @@ TEST(width_Roper) {
   printf("%7.4f \n",t.min_mass_kinematic());
   const int nModes = t.decay_modes().decay_mode_list().size();
   for (int i = 0; i < 100; i++) {
-    float m = 1. + i*0.01;
-    float wtot = t.total_width (m);
+    double m = 1. + i*0.01;
+    double wtot = t.total_width (m);
     printf("%7.4f %7.4f ", m, wtot);
     /* Print all partial widths. */
     ProcessBranchList<DecayBranch> partial = t.get_partial_widths(m);
@@ -58,7 +58,7 @@ TEST(width_Roper) {
  * for a given resonance type, decay branch and resonance mass. */
 static void compare_in_vs_out_width(const ParticleType &t,
                                     const DecayBranch &the_branch,
-                                    const float m_R) {
+                                    const double m_R) {
   // calculate out-width
   const double Gam_out = t.partial_width(m_R, &the_branch);
 
@@ -69,7 +69,7 @@ static void compare_in_vs_out_width(const ParticleType &t,
   ParticleData p1 = ParticleData(*pt[1]);
   Integrator integrate;
   const double Gam_in = integrate(pt[1]->min_mass_kinematic(), m_R - pt[0]->mass(),
-                                  [&](float m) {
+                                  [&](double m) {
                                     p1.set_4momentum(m, 0., 0., 0.);
                                     return t.get_partial_in_width(m_R, p0, p1)
                                             * pt[1]->spectral_function(m);
@@ -119,7 +119,7 @@ TEST(photon_widths) {
   const ParticleType &omega = ParticleType::find(0x223);
   const ParticleType &phi = ParticleType::find(0x333);
 
-  const float err = 1E-10;
+  const double err = 1E-10;
 
   COMPARE_ABSOLUTE_ERROR( pi0.get_partial_width( pi0.mass(), photon, photon), 7.699999749e-09, err);
   COMPARE_ABSOLUTE_ERROR( eta.get_partial_width( eta.mass(), photon, photon), 5.189818921e-07, err);

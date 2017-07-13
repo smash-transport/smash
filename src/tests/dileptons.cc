@@ -49,7 +49,7 @@ TEST(pion_decay) {
   // Dalitz decay π⁰ -> e⁺ e⁻ γ
   DecayBranchList dil_modes = type_piz.get_partial_widths_dilepton(srts);
   COMPARE(dil_modes.size(), 1u);
-  const float piz_width = total_weight<DecayBranch>(type_piz.get_partial_widths(srts));
+  const double piz_width = total_weight<DecayBranch>(type_piz.get_partial_widths(srts));
   FUZZY_COMPARE(piz_width, 7.7e-9f);
   DecayBranchPtr &mode = dil_modes[0];
   // π⁰ decay action
@@ -84,7 +84,7 @@ TEST(eta_decay) {
   // Dalitz decay η -> e⁺ e⁻ γ
   DecayBranchList dil_modes = type_etaz.get_partial_widths_dilepton(srts);
   COMPARE(dil_modes.size(), 1u);
-  const float etaz_width = total_weight<DecayBranch>(type_etaz.get_partial_widths(srts));
+  const double etaz_width = total_weight<DecayBranch>(type_etaz.get_partial_widths(srts));
   FUZZY_COMPARE(etaz_width, 1.31e-6f);
   DecayBranchPtr &mode = dil_modes[0];
   // π⁰ decay action

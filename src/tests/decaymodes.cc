@@ -65,7 +65,7 @@ TEST_CATCH(load_decaymodes_duplicate, DecayModes::LoadFailure) {
 }
 
 
-const float tolerance = 2.0e-7;
+const double tolerance = 2.0e-7;
 
   const std::string decays_input(
       " ρ\t# rho\n"

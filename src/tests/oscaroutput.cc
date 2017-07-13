@@ -26,7 +26,7 @@
 
 using namespace Smash;
 
-static const float accuracy = 1.0e-4;
+static const double accuracy = 1.0e-4;
 static const bf::path testoutputpath = bf::absolute(SMASH_TEST_OUTPUT_PATH);
 static auto random_value = Random::make_uniform_distribution(-15.0, +15.0);
 
@@ -57,7 +57,7 @@ static void compare_particledata(const std::array<std::string, 12> &datastring,
     momentum_string.at(i) = datastring.at(i + 3);
   }
   compare_fourvector(momentum_string, particle.momentum());
-  COMPARE(float(std::atof(datastring.at(7).c_str())), Test::smashon_mass);
+  COMPARE(double(std::atof(datastring.at(7).c_str())), Test::smashon_mass);
   std::array<std::string, 4> position_string;
   for (int i = 0; i < 4; i++) {
     position_string.at(i) = datastring.at(i + 8);

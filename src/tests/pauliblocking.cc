@@ -49,8 +49,8 @@ TEST(phase_space_density) {
   COMPARE(part.size(), 1u);
   ThreeVector r(1.218, 0.0, 0.0), p(0.0, 0.0, 0.0);
   ParticleList disregard;
-  const float f = pb->phasespace_dens(r, p, part, pdg, disregard);
-  const float f_expected = 9.93318f;
+  const double f = pb->phasespace_dens(r, p, part, pdg, disregard);
+  const double f_expected = 9.93318f;
   COMPARE_RELATIVE_ERROR(f, f_expected, 1.e-3) << f << " ?= " << f_expected;
 }
 
@@ -77,7 +77,7 @@ TEST(phase_space_density) {
   ParticleList disregard;
   for (int i = 1; i < 100; i++) {
     const ThreeVector p = ThreeVector(0.0, 0.0, 5.0/100*i);
-    const float f = pb->phasespace_dens(r, p, Pbox, pdg, disregard);
+    const double f = pb->phasespace_dens(r, p, Pbox, pdg, disregard);
    // std::cout << 5.0/100*i << "  " << f << std::endl;
   }
 }*/
@@ -108,7 +108,7 @@ TEST(phase_space_density_nucleus) {
   ParticleList disregard;
   for (int i = 1; i < 100; i++) {
     p = ThreeVector(0.0, 0.0, 0.5/100*i);
-    const float f = pb->phasespace_dens(r, p, part_Au, pdg, disregard);
+    const double f = pb->phasespace_dens(r, p, part_Au, pdg, disregard);
     std::cout << 0.5/100*i << "  " << f << std::endl;
   }
 }

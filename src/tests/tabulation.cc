@@ -59,7 +59,7 @@ TEST(linear) {
 TEST(quadratic) {
   // tabulate a quadratic function
   const Tabulation tab(-2., 4., 20, [](double x) { return x*x; });
-  const float error = 1E-5f;
+  const double error = 1E-5;
   // check closest-point values
   FUZZY_COMPARE(tab.get_value_step(-3.), 0.);
   FUZZY_COMPARE(tab.get_value_step(-2.), 4.);

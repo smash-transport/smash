@@ -38,7 +38,7 @@ class WallcrossingAction : public Action {
 
 class WallCrossActionsFinder : public ActionFinderInterface {
  public:
-  explicit WallCrossActionsFinder(float l) : l_{l, l, l} {};
+  explicit WallCrossActionsFinder(double l) : l_{l, l, l} {};
 
   /// Find the next wall crossings for every particle before time t_max
   ActionList find_actions_in_cell(const ParticleList &plist,
@@ -64,7 +64,7 @@ class WallCrossActionsFinder : public ActionFinderInterface {
 
  private:
   /// Periods in x,y,z directions in fm.
-  const std::array<float, 3> l_;
+  const std::array<double, 3> l_;
 };
 
 }  // namespace Smash

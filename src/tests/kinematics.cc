@@ -14,33 +14,33 @@
 using namespace Smash;
 
 TEST(center_of_velocity_v) {
-  const float s = 2.9f*2.9f;
-  const float ma = 0.6f;
-  const float mb = 1.2f;
+  const double s = 2.9f*2.9f;
+  const double ma = 0.6f;
+  const double mb = 1.2f;
   const double v = center_of_velocity_v(s, ma, mb);
   const double gamma = 1.0 / std::sqrt(1.0 - v*v);
-  const float E = gamma * (ma + mb);
-  const float p = gamma * v * (ma - mb);
+  const double E = gamma * (ma + mb);
+  const double p = gamma * v * (ma - mb);
   FUZZY_COMPARE(s, E*E -p*p);
 }
 
 TEST(fixed_target_projectile_v) {
-  const float s = 2.9f*2.9f;
-  const float ma = 0.6f;
-  const float mb = 1.2f;
+  const double s = 2.9f*2.9f;
+  const double ma = 0.6f;
+  const double mb = 1.2f;
   const double v = fixed_target_projectile_v(s, ma, mb);
   const double gamma = 1.0 / std::sqrt(1.0 - v*v);
-  const float E = gamma*ma + mb;
-  const float p = gamma*v*ma;
+  const double E = gamma*ma + mb;
+  const double p = gamma*v*ma;
   FUZZY_COMPARE(s, E*E - p*p);
 }
 
 TEST(pCM) {
-  const float srts = 2.9f;
-  const float ma = 0.6f;
-  const float mb = 1.2f;
-  const float pcm_sqr = pCM_sqr(srts, ma, mb);
-  const float pcm = pCM(srts, ma, mb);
+  const double srts = 2.9f;
+  const double ma = 0.6f;
+  const double mb = 1.2f;
+  const double pcm_sqr = pCM_sqr(srts, ma, mb);
+  const double pcm = pCM(srts, ma, mb);
   FUZZY_COMPARE(std::sqrt(pcm_sqr + ma*ma) +
                 std::sqrt(pcm_sqr + mb*mb), srts);
   COMPARE(pcm*pcm, pcm_sqr);

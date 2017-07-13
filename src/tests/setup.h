@@ -54,9 +54,9 @@ inline void create_actual_decaymodes() {
 
 
 /// The mass of the smashon particle.
-static constexpr float smashon_mass = 0.123f;
+static constexpr double smashon_mass = 0.123f;
 /// The decay width of the smashon particle.
-static constexpr float smashon_width = 1.2f;
+static constexpr double smashon_width = 1.2f;
 static constexpr const char smashon_pdg_string[] = "661";
 
 /**
@@ -233,7 +233,7 @@ inline ParticlesPtr create_particles(
  * If needed you can set the testparticles parameter to a different value than
  * 1.
  */
-inline ExperimentParameters default_parameters(int testparticles = 1, float dt = 0.1f) {
+inline ExperimentParameters default_parameters(int testparticles = 1, double dt = 0.1f) {
   return ExperimentParameters{{0.f, dt}, {0.f, 1.f}, testparticles, 1.0, 4.0,
                               true, true, false, NNbarTreatment::NoAnnihilation, false, 0.};
 }
