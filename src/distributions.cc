@@ -20,19 +20,19 @@
 namespace Smash {
 
 /* relativistic Breit-Wigner distribution */
-float breit_wigner(const float m, const float pole, const float width) {
-  const float msqr = m*m;
-  const float dmsqr = msqr - pole*pole;
+double breit_wigner(const double m, const double pole, const double width) {
+  const double msqr = m*m;
+  const double dmsqr = msqr - pole*pole;
   return 2.*msqr*width / (M_PI * (dmsqr*dmsqr + msqr*width*width));
 }
 
 /* non-relativistic Breit-Wigner distribution */
-float breit_wigner_nonrel(float m, float pole, float width) {
+double breit_wigner_nonrel(double m, double pole, double width) {
   return cauchy(m, pole, width/2.);
 }
 
-float cauchy(float x, float pole, float width) {
-  const float dm = x - pole;
+double cauchy(double x, double pole, double width) {
+  const double dm = x - pole;
   return width / (M_PI * (dm*dm + width*width));
 }
 
@@ -65,10 +65,10 @@ double sample_momenta(const double temperature, const double mass) {
   const auto &log = logger<LogArea::Distributions>();
   log.debug("Sample momenta with mass ", mass, " and T ", temperature);
   /* Maxwell-Boltzmann average E <E>=3T + m * K_1(m/T) / K_2(m/T) */
-  float energy_average;
+  double energy_average;
   if (mass > 0.) {
     // massive particles
-    const float m_over_T = mass / temperature;
+    const double m_over_T = mass / temperature;
     energy_average = 3 * temperature
                      + mass * gsl_sf_bessel_K1(m_over_T)
                             / gsl_sf_bessel_Kn(2, m_over_T);
@@ -76,25 +76,25 @@ double sample_momenta(const double temperature, const double mass) {
     // massless particles
     energy_average = 3 * temperature;
   }
-  const float momentum_average_sqr = (energy_average - mass) *
+  const double momentum_average_sqr = (energy_average - mass) *
                                      (energy_average + mass);
 
-  const float momentum_min = 0.0;
-  const float momentum_max = 50.0f * temperature;
+  const double momentum_min = 0.0;
+  const double momentum_max = 50.0f * temperature;
   /* double the massless peak value to be above maximum of the distribution */
-  const float probability_max = 2.0f * density_integrand(energy_average,
+  const double probability_max = 2.0f * density_integrand(energy_average,
                                                          momentum_average_sqr,
                                                          temperature);
 
   /* sample by rejection method: (see numerical recipes for more efficient)
    * random momenta and random probability need to be below the distribution */
-  float momentum_radial_sqr, probability;
+  double momentum_radial_sqr, probability;
   do {
-    float momentum = Random::uniform(momentum_min, momentum_max);
+    double momentum = Random::uniform(momentum_min, momentum_max);
     momentum_radial_sqr = momentum*momentum;
-    float energy = std::sqrt(momentum_radial_sqr + mass*mass);
+    double energy = std::sqrt(momentum_radial_sqr + mass*mass);
     probability = density_integrand(energy, momentum_radial_sqr, temperature);
-  } while (Random::uniform(0.f, probability_max) > probability);
+  } while (Random::uniform(0., probability_max) > probability);
 
   return std::sqrt(momentum_radial_sqr);
 }
@@ -118,13 +118,13 @@ double sample_momenta_from_thermal(const double temperature,
                                    const double mass) {
   const auto &log = logger<LogArea::Distributions>();
   log.debug("Sample momenta with mass ", mass, " and T ", temperature);
-  float momentum_radial, energy;
+  double momentum_radial, energy;
   // when temperature/mass
   if ( temperature > 0.6f*mass ) {
     while ( true ) {
-      const float a = -std::log(Random::canonical_nonzero());
-      const float b = -std::log(Random::canonical_nonzero());
-      const float c = -std::log(Random::canonical_nonzero());
+      const double a = -std::log(Random::canonical_nonzero());
+      const double b = -std::log(Random::canonical_nonzero());
+      const double c = -std::log(Random::canonical_nonzero());
       momentum_radial = temperature * (a + b + c);
       energy = sqrt(momentum_radial * momentum_radial + mass * mass);
       if (Random::canonical() < exp((momentum_radial-energy)/temperature)) {
@@ -133,23 +133,23 @@ double sample_momenta_from_thermal(const double temperature,
     }
   } else {
     while ( true ) {
-      const float r0 = Random::canonical();
-      const float I1 = mass*mass;
-      const float I2 = 2.0*mass*temperature;
-      const float I3 = 2.0*temperature*temperature;
-      const float Itot = I1 + I2 + I3;
-      float K;
+      const double r0 = Random::canonical();
+      const double I1 = mass*mass;
+      const double I2 = 2.0*mass*temperature;
+      const double I3 = 2.0*temperature*temperature;
+      const double Itot = I1 + I2 + I3;
+      double K;
       if ( r0 < I1/Itot ) {
-        const float r1 = Random::canonical_nonzero();
+        const double r1 = Random::canonical_nonzero();
         K = -temperature*std::log(r1);
       } else if ( r0 < (I1+I2)/Itot ) {
-        const float r1 = Random::canonical_nonzero();
-        const float r2 = Random::canonical_nonzero();
+        const double r1 = Random::canonical_nonzero();
+        const double r2 = Random::canonical_nonzero();
         K = -temperature*std::log(r1*r2);
       } else {
-        const float r1 = Random::canonical_nonzero();
-        const float r2 = Random::canonical_nonzero();
-        const float r3 = Random::canonical_nonzero();
+        const double r1 = Random::canonical_nonzero();
+        const double r2 = Random::canonical_nonzero();
+        const double r3 = Random::canonical_nonzero();
         K = -temperature*std::log(r1*r2*r3);
       }
       energy = K + mass;

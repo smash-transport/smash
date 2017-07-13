@@ -19,7 +19,7 @@ namespace Smash {
  *
  * \return \f$ \frac{2}{\pi} \frac{m^2\Gamma}{(m^2-m_0^2)^2 + m^2\Gamma^2} \f$
  */
-float breit_wigner(float m, float pole, float width);
+double breit_wigner(double m, double pole, double width);
 
 /**
  * Returns a non-relativistic Breit-Wigner distribution, which is essentially
@@ -31,7 +31,7 @@ float breit_wigner(float m, float pole, float width);
  *
  * \return \f$ \frac{\Gamma/2}{\pi ((m-m_0)^2+\Gamma^2/4)}\f$
  */
-float breit_wigner_nonrel(float m, float pole, float width);
+double breit_wigner_nonrel(double m, double pole, double width);
 
 /**
  * Returns a Cauchy distribution (sometimes also called Lorentz or
@@ -44,7 +44,7 @@ float breit_wigner_nonrel(float m, float pole, float width);
  *
  * \return \f$ \frac{\Gamma}{\pi ((m-m_0)^2+\Gamma^2)}\f$
  */
-float cauchy(float x, float pole, float width);
+double cauchy(double x, double pole, double width);
 
 /** Returns the Maxwell-Boltzmann distribution
  *

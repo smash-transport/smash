@@ -46,9 +46,9 @@ namespace std {
 template <typename T, typename Ratio>
 static ostream &operator<<(ostream &out,
                            const chrono::duration<T, Ratio> &seconds) {
-  using Seconds = chrono::duration<float>;
-  using Minutes = chrono::duration<float, std::ratio<60>>;
-  using Hours = chrono::duration<float, std::ratio<60 * 60>>;
+  using Seconds = chrono::duration<double>;
+  using Minutes = chrono::duration<double, std::ratio<60>>;
+  using Hours = chrono::duration<double, std::ratio<60 * 60>>;
   constexpr Minutes threshold_for_minutes{10};
   constexpr Hours threshold_for_hours{3};
   if (seconds < threshold_for_minutes) {
@@ -115,21 +115,21 @@ ExperimentPtr ExperimentBase::create(Configuration config,
 namespace {
 /*!\Userguide
  * \page input_general_ General
- * \key Delta_Time (float, required): \n
+ * \key Delta_Time (double, required): \n
  * Time step for the calculation, in fm/c.
  * Not required for timestepless mode.
  *
  * \key Testparticles (int, optional, default = 1): \n
  * How many test particles per real particles should be simulated.
  *
- * \key Gaussian_Sigma (float, optional, default 1.0): \n
+ * \key Gaussian_Sigma (double, optional, default 1.0): \n
  * Width [fm] of gaussians that represent Wigner density of particles.
  *
- * \key Gauss_Cutoff_In_Sigma (float, optional, default 4.0)
+ * \key Gauss_Cutoff_In_Sigma (double, optional, default 4.0)
  * Distance in sigma at which gaussian is considered 0.
  *
  * \page input_output_options_ Output
- * \key Output_Interval (float, required): \n
+ * \key Output_Interval (double, required): \n
  * Defines the period of intermediate output of the status of the simulated
  * system in Standard Output and other output formats which support this
  * functionality.
@@ -257,7 +257,7 @@ void Experiment<Modus>::create_output(const char * name,
 
 /*!\Userguide
  * \page input_general_
- * \key End_Time (float, required): \n
+ * \key End_Time (double, required): \n
  * The time after which the evolution is stopped. Note
  * that the starting time depends on the chosen Modus.
  *
@@ -336,7 +336,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   } else {
     max_transverse_distance_sqr_ = maximum_cross_section / M_PI * fm2_mb;
   }
-  const float modus_l = modus_.length();
+  const double modus_l = modus_.length();
   if (modus_l > 0.f) {
     action_finders_.emplace_back(make_unique<WallCrossActionsFinder>(modus_l));
   }
@@ -355,13 +355,13 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * \page input_general_adaptive_ Adaptive_Time_Step
    * Additional parameters for the adaptive time step mode.
    *
-   * \key Smoothing_Factor (float, optional, default = 0.1) \n
+   * \key Smoothing_Factor (double, optional, default = 0.1) \n
    * Parameter of the exponential smoothing of the rate estimate.
    *
-   * \key Target_Missed_Actions (float, optional, default = 0.01) \n
+   * \key Target_Missed_Actions (double, optional, default = 0.01) \n
    * The fraction of missed actions that is targeted by the algorithm.
    *
-   * \key Allowed_Deviation (float, optional, default = 2.5) \n
+   * \key Allowed_Deviation (double, optional, default = 2.5) \n
    * Limit by how much the target can be exceeded before the time step is
    * aborted.
    *
@@ -536,13 +536,13 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   /*!\Userguide
    * \page input_lattice_ Lattice
    *
-   * \key Sizes (array<float,3>, required): \n
+   * \key Sizes (array<double,3>, required): \n
    *      Sizes of lattice in x, y, z directions in fm.
    *
    * \key Cell_Number (array<int,3>, required): \n
    *      Number of cells in x, y, z directions.
    *
-   * \key Origin (array<float,3>, required): \n
+   * \key Origin (array<double,3>, required): \n
    *      Coordinates of the left, down, near corner of the lattice in fm.
    *
    * \key Periodic (bool, required): \n
@@ -846,7 +846,7 @@ void Experiment<Modus>::run_time_evolution() {
     }
 
     /* (1.a) Create grid. */
-    float min_cell_length = compute_min_cell_length(dt);
+    double min_cell_length = compute_min_cell_length(dt);
     log.debug("Creating grid with minimal cell length ", min_cell_length);
     const auto &grid = use_grid_
                            ? modus_.create_grid(particles_, min_cell_length)
