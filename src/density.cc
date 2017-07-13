@@ -14,12 +14,12 @@
 
 namespace Smash {
 
-float density_factor(const ParticleType &type, DensityType dens_type) {
+double density_factor(const ParticleType &type, DensityType dens_type) {
   switch (dens_type) {
     case DensityType::Hadron:
       return type.is_hadron() ? 1.f : 0.f;
     case DensityType::Baryon:
-      return static_cast<float>(type.baryon_number());
+      return static_cast<double>(type.baryon_number());
     case DensityType::BaryonicIsospin:
       return type.is_baryon() ? type.isospin3_rel() : 0.f;
     case DensityType::Pion:
@@ -74,7 +74,7 @@ std::pair<double, ThreeVector> rho_eckart_impl(const ThreeVector &r,
   std::array<FourVector, 4> jmu_pos, jmu_neg;
 
   for (const auto &p : plist) {
-    const float dens_factor = density_factor(p.type(), dens_type);
+    const double dens_factor = density_factor(p.type(), dens_type);
     if (std::abs(dens_factor) < really_small) {
       continue;
     }

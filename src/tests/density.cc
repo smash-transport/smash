@@ -177,8 +177,8 @@ TEST(smearing_factor_normalization) {
 }
 
 TEST(smearing_factor_rcut_correction) {
-  FUZZY_COMPARE(smearing_factor_rcut_correction(3.0), 0.970709f);
-  FUZZY_COMPARE(smearing_factor_rcut_correction(4.0), 0.998866f);
+  FUZZY_COMPARE(smearing_factor_rcut_correction(3.0), 0.970709);
+  FUZZY_COMPARE(smearing_factor_rcut_correction(4.0), 0.998866);
 }
 
 // check that analytical and numerical results for gradient of density coincide

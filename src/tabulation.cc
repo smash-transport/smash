@@ -9,21 +9,21 @@
 
 namespace Smash {
 
-Tabulation::Tabulation(float x_min, float range, int num,
-                       std::function<float(float)> f)
+Tabulation::Tabulation(double x_min, double range, int num,
+                       std::function<double(double)> f)
                       : x_min_(x_min), inv_dx_(num/range) {
   values_.resize(num+1);
-  const float dx = range/num;
+  const double dx = range/num;
   for (int i = 0; i <= num; i++) {
     values_[i] = f(x_min_ + i*dx);
   }
 }
 
-float Tabulation::get_value_step(float x) const {
+double Tabulation::get_value_step(double x) const {
   if (x < x_min_) {
     return 0.;
   }
-  // this rounds correctly because float -> int conversion truncates
+  // this rounds correctly because double -> int conversion truncates
   const unsigned int n = (x - x_min_) * inv_dx_ + 0.5f;
   if (n >= values_.size()) {
     return values_.back();
@@ -32,15 +32,15 @@ float Tabulation::get_value_step(float x) const {
   }
 }
 
-float Tabulation::get_value_linear(float x) const {
+double Tabulation::get_value_linear(double x) const {
   if (x < x_min_) {
     return 0.;
   }
-  const float index_float = (x - x_min_) * inv_dx_;
+  const double index_double = (x - x_min_) * inv_dx_;
   // here n is the lower index
-  const size_t n = std::min(static_cast<size_t>(index_float),
+  const size_t n = std::min(static_cast<size_t>(index_double),
                             values_.size() - 2);
-  const float r = index_float - n;
+  const double r = index_double - n;
   return values_[n] + (values_[n + 1] - values_[n]) * r;
 }
 
