@@ -60,7 +60,7 @@ static void compare_in_vs_out_width(const ParticleType &t,
                                     const DecayBranch &the_branch,
                                     const float m_R) {
   // calculate out-width
-  const float Gam_out = t.partial_width(m_R, &the_branch);
+  const double Gam_out = t.partial_width(m_R, &the_branch);
 
   // integrate in-width
   const ParticleTypePtrList pt = the_branch.particle_types();
@@ -68,7 +68,7 @@ static void compare_in_vs_out_width(const ParticleType &t,
   p0.set_4momentum(pt[0]->mass(), 0., 0., 0.);
   ParticleData p1 = ParticleData(*pt[1]);
   Integrator integrate;
-  const float Gam_in = integrate(pt[1]->min_mass_kinematic(), m_R - pt[0]->mass(),
+  const double Gam_in = integrate(pt[1]->min_mass_kinematic(), m_R - pt[0]->mass(),
                                   [&](float m) {
                                     p1.set_4momentum(m, 0., 0., 0.);
                                     return t.get_partial_in_width(m_R, p0, p1)
@@ -121,10 +121,10 @@ TEST(photon_widths) {
 
   const float err = 1E-10;
 
-  COMPARE_ABSOLUTE_ERROR( pi0.get_partial_width( pi0.mass(), photon, photon), 7.699999749e-09f, err);
-  COMPARE_ABSOLUTE_ERROR( eta.get_partial_width( eta.mass(), photon, photon), 5.189818921e-07f, err);
-  COMPARE_ABSOLUTE_ERROR(etap.get_partial_width(etap.mass(), photon, photon), 4.393343261e-06f, err);
+  COMPARE_ABSOLUTE_ERROR( pi0.get_partial_width( pi0.mass(), photon, photon), 7.699999749e-09, err);
+  COMPARE_ABSOLUTE_ERROR( eta.get_partial_width( eta.mass(), photon, photon), 5.189818921e-07, err);
+  COMPARE_ABSOLUTE_ERROR(etap.get_partial_width(etap.mass(), photon, photon), 4.393343261e-06, err);
 
-  COMPARE_ABSOLUTE_ERROR(omega.get_partial_width(omega.mass(), pi0, photon), 0.0007100010407f, err);
-  COMPARE_ABSOLUTE_ERROR(  phi.get_partial_width(  phi.mass(), pi0, photon), 5.432298167e-06f, err);
+  COMPARE_ABSOLUTE_ERROR(omega.get_partial_width(omega.mass(), pi0, photon), 0.0007100010407, err);
+  COMPARE_ABSOLUTE_ERROR(  phi.get_partial_width(  phi.mass(), pi0, photon), 5.432298167e-06, err);
 }

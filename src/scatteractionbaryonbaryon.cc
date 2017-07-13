@@ -18,7 +18,7 @@
 namespace Smash {
 
 
-float ScatterActionBaryonBaryon::high_energy_cross_section() const {
+double ScatterActionBaryonBaryon::high_energy_cross_section() const {
   const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
   const double s = mandelstam_s();
@@ -84,7 +84,7 @@ CollisionBranchList ScatterActionBaryonBaryon::bar_bar_to_nuc_nuc(
       }
       // loop over total isospin
       for (const int twoI : I_tot_range(*nuc_a, *nuc_b)) {
-        const float isospin_factor = isospin_clebsch_gordan_sqr_2to2(type_a,
+        const double isospin_factor = isospin_clebsch_gordan_sqr_2to2(type_a,
                                                   type_b, *nuc_a, *nuc_b, twoI);
         /* If Clebsch-Gordan coefficient is zero, don't bother with the rest */
         if (std::abs(isospin_factor) < really_small) {
@@ -92,7 +92,7 @@ CollisionBranchList ScatterActionBaryonBaryon::bar_bar_to_nuc_nuc(
         }
 
         /* Calculate matrix element for inverse process. */
-        const float matrix_element =
+        const double matrix_element =
             nn_to_resonance_matrix_element(sqrts, type_a, type_b, twoI);
         if (matrix_element <= 0.) {
           continue;
@@ -102,12 +102,12 @@ CollisionBranchList ScatterActionBaryonBaryon::bar_bar_to_nuc_nuc(
          * balance from the inverse reaction.
          * See eqs. (B.6), (B.9) and (181) in \iref{Buss:2011mx}.
          * There are factors for spin, isospin and symmetry involved. */
-        const float spin_factor = (nuc_a->spin() + 1) * (nuc_b->spin() + 1);
+        const double spin_factor = (nuc_a->spin() + 1) * (nuc_b->spin() + 1);
         const int sym_fac_in =
                     (type_a.iso_multiplet() == type_b.iso_multiplet()) ? 2 : 1;
         const int sym_fac_out =
                     (nuc_a->iso_multiplet() == nuc_b->iso_multiplet()) ? 2 : 1;
-        const float xsection = isospin_factor * spin_factor
+        const double xsection = isospin_factor * spin_factor
                               * sym_fac_in / sym_fac_out
                               * p_cm_final * matrix_element / (s*cm_momentum());
 
@@ -126,17 +126,17 @@ CollisionBranchList ScatterActionBaryonBaryon::bar_bar_to_nuc_nuc(
 }
 
 
-float ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(double sqrts,
+double ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(double sqrts,
       const ParticleType &type_a, const ParticleType &type_b, const int twoI) {
-  const float m_a = type_a.mass();
-  const float m_b = type_b.mass();
-  const float msqr = 2. * (m_a*m_a + m_b*m_b);
+  const double m_a = type_a.mass();
+  const double m_b = type_b.mass();
+  const double msqr = 2. * (m_a*m_a + m_b*m_b);
   /* If the c.m. energy is larger than the sum of the pole masses of the
    * outgoing particles plus three times of the sum of the widths plus 3 GeV,
    * the collision will be neglected.*/
-  const float w_a = type_a.width_at_pole();
-  const float w_b = type_b.width_at_pole();
-  const float uplmt = m_a + m_b + 3.0 * (w_a + w_b) + 3.0;
+  const double w_a = type_a.width_at_pole();
+  const double w_b = type_b.width_at_pole();
+  const double uplmt = m_a + m_b + 3.0 * (w_a + w_b) + 3.0;
   if (sqrts > uplmt) {
      return 0.;
   }
@@ -154,7 +154,7 @@ float ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(double sqrts,
     if (twoI == 2) {
       return 7. / msqr;
     } else if (twoI == 0) {
-      const float parametrization = 14. / msqr;
+      const double parametrization = 14. / msqr;
       /* pn → pnη cross section is known to be larger than the corresponding
        * pp → ppη cross section by a factor of 6.5 [\iref{Calen:1998vh}].
        * Since the eta is mainly produced by an intermediate N*(1535) we

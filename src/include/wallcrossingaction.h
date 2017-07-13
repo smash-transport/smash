@@ -26,7 +26,7 @@ class WallcrossingAction : public Action {
   WallcrossingAction(const ParticleData &in_part, const ParticleData &out_part,
                      const double time_until = 0.0)
                  : Action(in_part, out_part, time_until, ProcessType::Wall) {}
-  float raw_weight_value() const override { return 1; };
+  double raw_weight_value() const override { return 1; };
   void generate_final_state() override {};
   double sqrt_s() const override {
     return incoming_particles_[0].momentum().abs();

@@ -24,8 +24,8 @@ ParticleList ProcessBranch::particle_list() const {
   return l;
 }
 
-float ProcessBranch::threshold() const {
-  if (threshold_ < 0.f) {
+double ProcessBranch::threshold() const {
+  if (threshold_ < 0.) {
     /* Sum up the (minimum) masses of all final-state particles
      * this requires double-precision to ensure that the sum is never
      * smaller than the real sum would be without rounding

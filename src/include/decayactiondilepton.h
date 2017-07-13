@@ -19,7 +19,7 @@ class DecayActionDilepton : public DecayAction {
   DecayActionDilepton(const ParticleData &p, float time_of_execution,
                       float shining_weight);
 
-  float raw_weight_value() const override {
+  double raw_weight_value() const override {
     return shining_weight_ * branching_;
   }
 

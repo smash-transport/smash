@@ -18,8 +18,8 @@
 
 namespace Smash {
 
-float ParticleData::effective_mass() const {
-  const float m_pole = pole_mass();
+double ParticleData::effective_mass() const {
+  const double m_pole = pole_mass();
   if (m_pole < really_small) {
     // prevent numerical problems with massless or very light particles
     return m_pole;

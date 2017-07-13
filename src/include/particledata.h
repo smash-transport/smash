@@ -72,7 +72,7 @@ class ParticleData {
   float pole_mass() const { return type_->mass(); }
   /** Returns the particle's effective mass
    * (as determined from the 4-momentum, possibly "off-shell"). */
-  float effective_mass() const;
+  double effective_mass() const;
   /**
    * Return the ParticleType object associated to this particle.
    */

@@ -18,7 +18,7 @@ void ScatterActionBaryonMeson::format_debug_output(std::ostream &out) const {
   ScatterAction::format_debug_output(out);
 }
 
-float ScatterActionBaryonMeson::high_energy_cross_section() const {
+double ScatterActionBaryonMeson::high_energy_cross_section() const {
   const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
   const double s = mandelstam_s();

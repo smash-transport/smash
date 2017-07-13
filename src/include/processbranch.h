@@ -104,7 +104,7 @@ class ProcessBranch {
    * Determine the threshold for this branch, i.e. the minimum energy that is
    * required to produce all final-state particles.
    */
-  float threshold() const;
+  double threshold() const;
 
   virtual unsigned int particle_number() const = 0;
 

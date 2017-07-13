@@ -118,7 +118,7 @@ bool ParticleType::exists(const std::string& name) {
   return true;
 }
 
-ParticleType::ParticleType(std::string n, float m, float w, PdgCode id)
+ParticleType::ParticleType(std::string n, double m, double w, PdgCode id)
     : name_(n),
       mass_(m),
       width_(w),
@@ -189,7 +189,7 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
   for (const Line &line : line_parser(input)) {
     std::istringstream lineinput(line.text);
     std::string name;
-    float mass, width;
+    double mass, width;
     std::array<PdgCode, 4> pdgcode;
     lineinput >> name >> mass >> width >> pdgcode[0];
     if (lineinput.fail()) {
@@ -300,7 +300,7 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
 }/*}}}*/
 
 
-float ParticleType::min_mass_kinematic() const {
+double ParticleType::min_mass_kinematic() const {
   if (unlikely(min_mass_kinematic_ < 0.f)) {
     /* If the particle is stable, min. mass is just the mass. */
     min_mass_kinematic_ = mass_;
@@ -314,7 +314,7 @@ float ParticleType::min_mass_kinematic() const {
   return min_mass_kinematic_;
 }
 
-float ParticleType::min_mass_spectral() const {
+double ParticleType::min_mass_spectral() const {
   if (unlikely(min_mass_spectral_ < 0.f)) {
     /* If the particle is stable or it has a non-zero spectral function value at
      * the minimum mass that is allowed by kinematics, min_mass_spectral is just
@@ -325,8 +325,8 @@ float ParticleType::min_mass_spectral() const {
     if (!is_stable() &&
         this->spectral_function(min_mass_kinematic()) < really_small) {
       // find a right bound that has non-zero spectral function for bisection
-      const float m_step = 0.01;
-      float right_bound_bis;
+      const double m_step = 0.01;
+      double right_bound_bis;
       for (unsigned int i = 0; ; i++) {
         right_bound_bis = min_mass_kinematic() + m_step*i;
         if (this->spectral_function(right_bound_bis) > really_small) {
@@ -334,10 +334,10 @@ float ParticleType::min_mass_spectral() const {
         }
       }
       // bisection
-      const float precision = 1E-6;
-      float left_bound_bis = right_bound_bis - m_step;
+      const double precision = 1E-6;
+      double left_bound_bis = right_bound_bis - m_step;
       while (right_bound_bis - left_bound_bis >  precision)  {
-        const float mid = (left_bound_bis + right_bound_bis) / 2.0;
+        const double mid = (left_bound_bis + right_bound_bis) / 2.0;
         if (this->spectral_function(mid) > really_small) {
           right_bound_bis = mid;
         } else {
@@ -358,12 +358,12 @@ int ParticleType::isospin() const {
   return isospin_;
 }
 
-float ParticleType::partial_width(const float m,
+double ParticleType::partial_width(const double m,
                                   const DecayBranch *mode) const {
   if (m < mode->threshold()) {
     return 0.;
   }
-  float partial_width_at_pole = width_at_pole()*mode->weight();
+  double partial_width_at_pole = width_at_pole()*mode->weight();
   return mode->type().width(mass(), partial_width_at_pole, m);
 }
 
@@ -374,8 +374,8 @@ const DecayModes &ParticleType::decay_modes() const {
   return modes;
 }
 
-float ParticleType::total_width(const float m) const {
-  float w = 0.;
+double ParticleType::total_width(const double m) const {
+  double w = 0.;
   if (is_stable()) {
     return w;
   }
@@ -399,7 +399,7 @@ void ParticleType::check_consistency() {
   }
 }
 
-DecayBranchList ParticleType::get_partial_widths(const float m) const {
+DecayBranchList ParticleType::get_partial_widths(const double m) const {
   const auto &decay_mode_list = decay_modes().decay_mode_list();
   if (decay_mode_list.size() == 0) {
     return {};
@@ -409,7 +409,7 @@ DecayBranchList ParticleType::get_partial_widths(const float m) const {
   DecayBranchList partial;
   partial.reserve(decay_mode_list.size());
   for (unsigned int i = 0; i < decay_mode_list.size(); i++) {
-    const float w = partial_width(m, decay_mode_list[i].get());
+    const double w = partial_width(m, decay_mode_list[i].get());
     if (w > 0.) {
       partial.push_back(
           make_unique<DecayBranch>(decay_mode_list[i]->type(), w));
@@ -418,7 +418,7 @@ DecayBranchList ParticleType::get_partial_widths(const float m) const {
   return partial;
 }
 
-DecayBranchList ParticleType::get_partial_widths_hadronic(const float m) const {
+DecayBranchList ParticleType::get_partial_widths_hadronic(const double m) const {
   if (is_stable()) {
     return {};
   }
@@ -432,7 +432,7 @@ DecayBranchList ParticleType::get_partial_widths_hadronic(const float m) const {
         if (!(is_dilepton(
                   decay_mode_list[i]->type().particle_types()[0]->pdgcode(),
                   decay_mode_list[i]->type().particle_types()[1]->pdgcode()))) {
-          const float w = partial_width(m, decay_mode_list[i].get());
+          const double w = partial_width(m, decay_mode_list[i].get());
           if (w > 0.) {
              partial.push_back(
                  make_unique<DecayBranch>(decay_mode_list[i]->type(), w));
@@ -445,7 +445,7 @@ DecayBranchList ParticleType::get_partial_widths_hadronic(const float m) const {
                   decay_mode_list[i]->type().particle_types()[0]->pdgcode(),
                   decay_mode_list[i]->type().particle_types()[1]->pdgcode(),
                   decay_mode_list[i]->type().particle_types()[2]->pdgcode()))) {
-          const float w = partial_width(m, decay_mode_list[i].get());
+          const double w = partial_width(m, decay_mode_list[i].get());
           if (w > 0.) {
               partial.push_back(
                   make_unique<DecayBranch>(decay_mode_list[i]->type(), w));
@@ -460,7 +460,7 @@ DecayBranchList ParticleType::get_partial_widths_hadronic(const float m) const {
   return partial;
 }
 
-DecayBranchList ParticleType::get_partial_widths_dilepton(const float m) const {
+DecayBranchList ParticleType::get_partial_widths_dilepton(const double m) const {
   const auto &decay_mode_list = decay_modes().decay_mode_list();
   if (decay_mode_list.size() == 0) {
     return {};
@@ -474,7 +474,7 @@ DecayBranchList ParticleType::get_partial_widths_dilepton(const float m) const {
         if (is_dilepton(
                   decay_mode_list[i]->type().particle_types()[0]->pdgcode(),
                   decay_mode_list[i]->type().particle_types()[1]->pdgcode())) {
-          const float w = partial_width(m, decay_mode_list[i].get());
+          const double w = partial_width(m, decay_mode_list[i].get());
           if (w > 0.) {
              partial.push_back(
                  make_unique<DecayBranch>(decay_mode_list[i]->type(), w));
@@ -487,7 +487,7 @@ DecayBranchList ParticleType::get_partial_widths_dilepton(const float m) const {
                   decay_mode_list[i]->type().particle_types()[0]->pdgcode(),
                   decay_mode_list[i]->type().particle_types()[1]->pdgcode(),
                   decay_mode_list[i]->type().particle_types()[2]->pdgcode())) {
-          const float w = partial_width(m, decay_mode_list[i].get());
+          const double w = partial_width(m, decay_mode_list[i].get());
           if (w > 0.) {
               partial.push_back(
                   make_unique<DecayBranch>(decay_mode_list[i]->type(), w));
@@ -502,16 +502,16 @@ DecayBranchList ParticleType::get_partial_widths_dilepton(const float m) const {
   return partial;
 }
 
-float ParticleType::get_partial_width(const float m,
+double ParticleType::get_partial_width(const double m,
                                       const ParticleType &t_a,
                                       const ParticleType &t_b) const {
   /* Get all decay modes. */
   const auto &decaymodes = decay_modes().decay_mode_list();
 
   /* Find the right one(s) and add up corresponding widths. */
-  float w = 0.;
+  double w = 0.;
   for (const auto &mode : decaymodes) {
-    float partial_width_at_pole = width_at_pole()*mode->weight();
+    double partial_width_at_pole = width_at_pole()*mode->weight();
     const ParticleTypePtrList l = {&t_a, &t_b};
     if (mode->type().has_particles(l)) {
       w += mode->type().width(mass(), partial_width_at_pole, m);
@@ -520,16 +520,16 @@ float ParticleType::get_partial_width(const float m,
   return w;
 }
 
-float ParticleType::get_partial_in_width(const float m,
+double ParticleType::get_partial_in_width(const double m,
                                          const ParticleData &p_a,
                                          const ParticleData &p_b) const {
   /* Get all decay modes. */
   const auto &decaymodes = decay_modes().decay_mode_list();
 
   /* Find the right one(s) and add up corresponding widths. */
-  float w = 0.;
+  double w = 0.;
   for (const auto &mode : decaymodes) {
-    float partial_width_at_pole = width_at_pole()*mode->weight();
+    double partial_width_at_pole = width_at_pole()*mode->weight();
     const ParticleTypePtrList l = {&p_a.type(), &p_b.type()};
     if (mode->type().has_particles(l)) {
       w += mode->type().in_width(mass(), partial_width_at_pole, m,
@@ -540,7 +540,7 @@ float ParticleType::get_partial_in_width(const float m,
 }
 
 
-float ParticleType::spectral_function(float m) const {
+double ParticleType::spectral_function(double m) const {
   if (norm_factor_ < 0.) {
     /* Initialize the normalization factor
      * by integrating over the unnormalized spectral function. */
@@ -559,66 +559,66 @@ float ParticleType::spectral_function(float m) const {
   return norm_factor_ * spectral_function_no_norm(m);
 }
 
-float ParticleType::spectral_function_no_norm(float m) const {
+double ParticleType::spectral_function_no_norm(double m) const {
   /* The spectral function is a relativistic Breit-Wigner function
    * with mass-dependent width. Here: without normalization factor. */
-  const float resonance_width = total_width(m);
+  const double resonance_width = total_width(m);
   if (resonance_width < ParticleType::width_cutoff) {
     return 0.;
   }
   return breit_wigner(m, mass(), resonance_width);
 }
 
-float ParticleType::spectral_function_const_width(float m) const {
+double ParticleType::spectral_function_const_width(double m) const {
   /* The spectral function is a relativistic Breit-Wigner function.
    * This variant is using a constant width (evaluated at the pole mass). */
-  const float resonance_width = width_at_pole();
+  const double resonance_width = width_at_pole();
   if (resonance_width < ParticleType::width_cutoff) {
     return 0.;
   }
   return breit_wigner(m, mass(), resonance_width);
 }
 
-float ParticleType::spectral_function_simple(float m) const {
+double ParticleType::spectral_function_simple(double m) const {
   return breit_wigner_nonrel(m, mass(), width_at_pole());
 }
 
 
 /* Resonance mass sampling for 2-particle final state */
-float ParticleType::sample_resonance_mass(const float mass_stable,
-                                          const float cms_energy, int L) const {
+double ParticleType::sample_resonance_mass(const double mass_stable,
+                                          const double cms_energy, int L) const {
   /* largest possible mass: Use 'nextafter' to make sure it is not above the
    * physical limit by numerical error. */
-  const float max_mass = std::nextafter(cms_energy - mass_stable, 0.f);
+  const double max_mass = std::nextafter(cms_energy - mass_stable, 0.);
   // largest possible cm momentum (from smallest mass)
-  const float pcm_max = pCM(cms_energy, mass_stable, this->min_mass_spectral());
-  const float blw_max = pcm_max * blatt_weisskopf_sqr(pcm_max, L);
+  const double pcm_max = pCM(cms_energy, mass_stable, this->min_mass_spectral());
+  const double blw_max = pcm_max * blatt_weisskopf_sqr(pcm_max, L);
   /* The maximum of the spectral-function ratio 'usually' happens at the
    * largest mass. However, this is not always the case, therefore we need
    * and additional fudge factor (determined automatically). Additionally,
    * a heuristic knowledge is used that usually such mass exist that
    * spectral_function(m) > spectral_function_simple(m). */
-  const float sf_ratio_max = std::max(1.f, this->spectral_function(max_mass)
+  const double sf_ratio_max = std::max(1., this->spectral_function(max_mass)
                                   / this->spectral_function_simple(max_mass));
 
-  float mass_res, val;
+  double mass_res, val;
   // outer loop: repeat if maximum is too small
   do {
-    const float q_max = sf_ratio_max * this->max_factor1_;
-    const float max = blw_max * q_max;  // maximum value for rejection sampling
+    const double q_max = sf_ratio_max * this->max_factor1_;
+    const double max = blw_max * q_max;  // maximum value for rejection sampling
     // inner loop: rejection sampling
     do {
       // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
       mass_res = Random::cauchy(this->mass(), this->width_at_pole()/2.f,
                                 this->min_mass_spectral(), max_mass);
       // determine cm momentum for this case
-      const float pcm = pCM(cms_energy, mass_stable, mass_res);
-      const float blw = pcm * blatt_weisskopf_sqr(pcm, L);
+      const double pcm = pCM(cms_energy, mass_stable, mass_res);
+      const double blw = pcm * blatt_weisskopf_sqr(pcm, L);
       // determine ratio of full to simple spectral function
-      const float q = this->spectral_function(mass_res)
+      const double q = this->spectral_function(mass_res)
                     / this->spectral_function_simple(mass_res);
       val = q * blw;
-    } while (val < Random::uniform(0.f, max));
+    } while (val < Random::uniform(0., max));
 
     // check that we are using the proper maximum value
     if (val > max) {
@@ -637,25 +637,25 @@ float ParticleType::sample_resonance_mass(const float mass_stable,
 
 
 /* Resonance mass sampling for 2-particle final state with two resonances. */
-std::pair<float, float> ParticleType::sample_resonance_masses(
-                  const ParticleType &t2, const float cms_energy, int L) const {
+std::pair<double, double> ParticleType::sample_resonance_masses(
+                  const ParticleType &t2, const double cms_energy, int L) const {
   const ParticleType &t1 = *this;
   /* Sample resonance mass from the distribution
    * used for calculating the cross section. */
-  const float max_mass_1 = std::nextafter(cms_energy - t2.min_mass_spectral(),
+  const double max_mass_1 = std::nextafter(cms_energy - t2.min_mass_spectral(),
                                                                            0.f);
-  const float max_mass_2 = std::nextafter(cms_energy - t1.min_mass_spectral(),
+  const double max_mass_2 = std::nextafter(cms_energy - t1.min_mass_spectral(),
                                                                            0.f);
   // largest possible cm momentum (from smallest mass)
-  const float pcm_max = pCM(cms_energy, t1.min_mass_spectral(),
+  const double pcm_max = pCM(cms_energy, t1.min_mass_spectral(),
                                                         t2.min_mass_spectral());
-  const float blw_max = pcm_max * blatt_weisskopf_sqr(pcm_max, L);
+  const double blw_max = pcm_max * blatt_weisskopf_sqr(pcm_max, L);
 
-  float mass_1, mass_2, val;
+  double mass_1, mass_2, val;
   // outer loop: repeat if maximum is too small
   do {
     // maximum value for rejection sampling (determined automatically)
-    const float max = blw_max * t1.max_factor2_;
+    const double max = blw_max * t1.max_factor2_;
     // inner loop: rejection sampling
     do {
       // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
@@ -664,15 +664,15 @@ std::pair<float, float> ParticleType::sample_resonance_masses(
       mass_2 = Random::cauchy(t2.mass(), t2.width_at_pole()/2.f,
                               t2.min_mass_spectral(), max_mass_2);
       // determine cm momentum for this case
-      const float pcm = pCM(cms_energy, mass_1, mass_2);
-      const float blw = pcm * blatt_weisskopf_sqr(pcm, L);
+      const double pcm = pCM(cms_energy, mass_1, mass_2);
+      const double blw = pcm * blatt_weisskopf_sqr(pcm, L);
       // determine ratios of full to simple spectral function
-      const float q1 = t1.spectral_function(mass_1)
+      const double q1 = t1.spectral_function(mass_1)
                     / t1.spectral_function_simple(mass_1);
-      const float q2 = t2.spectral_function(mass_2)
+      const double q2 = t2.spectral_function(mass_2)
                     / t2.spectral_function_simple(mass_2);
       val = q1 * q2 * blw;
-    } while (val < Random::uniform(0.f, max));
+    } while (val < Random::uniform(0., max));
 
     if (val > max) {
       const auto &log = logger<LogArea::Resonances>();
