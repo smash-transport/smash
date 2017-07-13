@@ -35,7 +35,7 @@
 namespace Smash {
 /*!\Userguide
 * \page input_collision_term_ Collision_Term
-* \key Elastic_Cross_Section (float, optional, default = -1.0 [mb]) \n
+* \key Elastic_Cross_Section (double, optional, default = -1.0 [mb]) \n
 * If a non-negative value is given, it will override the parametrized
 * elastic cross sections (which are energy-dependent) with a constant value.
 * This constant elastic cross section is used for all collisions.
@@ -45,7 +45,7 @@ namespace Smash {
 * \key Strings (bool, optional, default = false): \n
 * true - string excitation is enabled\n
 * false - string excitation is disabled
-* \key String_Formation_Time (float, optional, default = 1.0) \n
+* \key String_Formation_Time (double, optional, default = 1.0) \n
 * Parameter for formation time in string fragmentation in fm/c
 * \key low_snn_cut (double) in GeV \n
 * The elastic collisions betwen two nucleons with sqrt_s below
@@ -82,7 +82,7 @@ ScatterActionsFinder::ScatterActionsFinder(
       }
 
 ScatterActionsFinder::ScatterActionsFinder(
-    float elastic_parameter, int testparticles,
+    double elastic_parameter, int testparticles,
     const std::vector<bool> &nucleon_has_interacted, bool two_to_one)
     : elastic_parameter_(elastic_parameter),
       testparticles_(testparticles),
@@ -217,9 +217,9 @@ ActionPtr ScatterActionsFinder::check_collision(
         photon_cross_section = photon_act.cross_section();
   }
   /* Cross section for collision criterion */
-  float cross_section_criterion = (act->cross_section() + photon_cross_section)
+  double cross_section_criterion = (act->cross_section() + photon_cross_section)
                                   * fm2_mb * M_1_PI
-                                  / static_cast<float>(testparticles_);
+                                  / static_cast<double>(testparticles_);
   /* Consider cross section scaling factors only if the particles
    * are not formed yet at the prospective time of the interaction */
   if (data_a.formation_time() > data_a.position().x0() + time_until_collision) {
@@ -331,7 +331,7 @@ void ScatterActionsFinder::dump_reactions() const {
             act->add_all_processes(elastic_parameter_, two_to_one_,
                                    two_to_two_, low_snn_cut_, strings_switch_,
                                    nnbar_treatment_);
-            const float total_cs = act->cross_section();
+            const double total_cs = act->cross_section();
             if (total_cs <= 0.0) {
               continue;
             }
@@ -377,8 +377,8 @@ void ScatterActionsFinder::dump_reactions() const {
 
 void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
                                                const ParticleType &b,
-                                               float m_a,
-                                               float m_b) const {
+                                               double m_a,
+                                               double m_b) const {
   const ParticleTypePtrList incoming_list = {&a, &b};
   std::vector<ParticleTypePtr> ab_products;
 
@@ -404,13 +404,13 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
 
     std::cout << std::fixed;
     std::cout << std::setprecision(8);
-    constexpr float momentum_step = 0.01f;
+    constexpr double momentum_step = 0.01f;
     for (int i = 1; i < n_points; i++) {
       const double momentum = momentum_step * i;
       a_data.set_4momentum(m_a,  momentum, 0.0, 0.0);
       b_data.set_4momentum(m_b, -momentum, 0.0, 0.0);
       ScatterAction act(a_data, b_data, 0.0, false, 0.0);
-      const float sqrts = act.sqrt_s();
+      const double sqrts = act.sqrt_s();
       std::cout << sqrts << " ";
       for (const ParticleTypePtr resonance : ab_products) {
         const double p_cm_sqr = pCM_sqr(sqrts, m_a, m_b);
