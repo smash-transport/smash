@@ -5,4 +5,5 @@ include_directories(
 
 add_library(divonne STATIC
     Divonne.c
+    ${COMMON_DEPS}
 )

@@ -66,6 +66,7 @@ set(SMASH_LIBRARIES ${SMASH_LIBRARIES}
    yaml-cpp
    pythia
    -ldl  # required by pythia
+   cuhre suave divonne vegas  # Cuba multidimensional integration
    )
 
 # list the source files

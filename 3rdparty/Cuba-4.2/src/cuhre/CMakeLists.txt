@@ -5,4 +5,5 @@ include_directories(
 
 add_library(cuhre STATIC
     Cuhre.c
+    ${COMMON_DEPS}
 )

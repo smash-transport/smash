@@ -5,4 +5,5 @@ include_directories(
 
 add_library(suave STATIC
     Suave.c
+    ${COMMON_DEPS}
 )

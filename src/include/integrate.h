@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_INTEGRATE_H_
 #define SRC_INCLUDE_INTEGRATE_H_
 
+#include <cuba.h>
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_monte_plain.h>
 #include <gsl/gsl_monte_vegas.h>
@@ -23,6 +24,15 @@
 #include "cxx14compat.h"
 #include "fpenvironment.h"
 #include "random.h"
+
+//void Cuhre(const int ndim, const int ncomp,
+//  integrand_t integrand, void *userdata, const int nvec,
+//  const cubareal epsrel, const cubareal epsabs,
+//  const int flags, const int mineval, const int maxeval,
+//  const int key,
+//  const char *statefile, void *spin,
+//  int *nregions, int *neval, int *fail,
+//  cubareal integral[], cubareal error[], cubareal prob[]);
 
 namespace Smash {
 
@@ -352,6 +362,133 @@ class Integrator2d {
 
   /// number of calls to the integrand
   const std::size_t number_of_calls_;
+};
+
+/**
+ * A C++ interface for numerical integration in two dimensions
+ * with the Cuba Cuhre integration function.
+ *
+ * Example:
+ * \code
+ * Integrator integrate;
+ * const auto result = integrate(0.1, 0.9, 0., 0.5,
+ *                               [](double x, double y) { return x * y; });
+ * \endcode
+ */
+class Integrator2dCuhre {
+ public:
+  /**
+   * Construct an integration functor.
+   *
+   * \param num_calls The desired number of calls to the integrand function
+   *                  (defaults to 1E6 if omitted), i.e. how often the integrand
+   *                  is sampled in the integration. Larger numbers lead to a
+   *                  more precise result, but also to increased runtime.
+   * \param epsrel    The desired relative accuracy.
+   * \param epsabs    The desired absolute accuracy.
+   */
+  explicit Integrator2dCuhre(int num_calls = 1e6,
+                        double epsrel = 1e-3, double epsabs = 1e-3)
+      : maxeval_(num_calls), epsrel_(epsrel), epsabs_(epsabs) {
+  }
+
+  /**
+   * The function call operator implements the integration functionality.
+   *
+   * \param min1 The lower limit in the first dimension.
+   * \param max1 The upper limit in the first dimension.
+   * \param min2 The lower limit in the second dimension.
+   * \param max2 The upper limit in the second dimension.
+   * \param fun The callable to integrate over. This callable may be a function
+   *            pointer, lambda, or a functor object. In any case, the callable
+   *            must return a `double` and take two `double` arguments. If you
+   *            want to pass additional data to the callable you can e.g. use
+   *            lambda captures.
+   */
+  template <typename F>
+  Result operator()(double min1, double max1, double min2, double max2,
+                    F fun) {
+                    //F &&fun) {
+    Result result = {0., 0.};
+
+    /*
+    const double lower[2] = {min1, min2};
+    const double upper[2] = {max1, max2};
+
+    if (max1 <= min1 || max2 <= min2)
+      return result;
+    */
+
+    /*
+    const gsl_monte_function monte_fun{
+        // trick: pass integrand function as 'params'
+        [](double *x, size_t dim, void *params) -> double {
+          auto &&f = *static_cast<F *>(params);
+          return f(x[0], x[1]);
+        },
+        2, &fun};
+    */
+
+    // TODO transform integrand to unit cube
+
+    const integrand_t cuhre_fun {
+        [](const int* ndim, const cubareal xx[], const int* ncomp,
+           cubareal ff[], void* userdata) -> int {
+          auto &&f = *static_cast<F *>(userdata);
+          ff[0] = f(xx[0], xx[1]);
+          return 0;
+        } };
+    //gsl_monte_plain_integrate(&monte_fun, lower, upper, 2, number_of_calls_,
+    //                          rng_, state_, &result.first, &result.second);
+
+    //void Cuhre(const int ndim, const int ncomp,
+    //  integrand_t integrand, void *userdata, const int nvec,
+    //  const cubareal epsrel, const cubareal epsabs,
+    //  const int flags, const int mineval, const int maxeval,
+    //  const int key,
+    //  const char *statefile, void *spin,
+    //  int *nregions, int *neval, int *fail,
+    //  cubareal integral[], cubareal error[], cubareal prob[]);
+    //    return result;
+    //  }
+
+    const int ndim = 2;
+    const int ncomp = 1;
+    void* userdata = &fun;
+    const int nvec = 1;
+    const int flags = 0;  // Use the defaults.
+    const int mineval = 0;
+    const int maxeval = maxeval_;
+    const int key = -1;  // Use the default.
+    const char* statefile = nullptr;
+    void* spin = nullptr;
+    Cuhre(ndim, ncomp, cuhre_fun, userdata, nvec, epsrel_, epsabs_, flags,
+          mineval, maxeval, key, statefile, spin,
+          &nregions_, &neval_, &fail_,
+          &result.first, &result.second, &prob_);
+    return result;
+  };
+
+ private:
+  /// The (approximate) maximum number of integrand evaluations allowed.
+  int maxeval_;
+  /// Requested relative accuracy.
+  double epsrel_;
+  /// Requested absolute accuracy.
+  double epsabs_;
+  /// Actual number of subregions needed.
+  int nregions_;
+  /// Actual number of integrand evaluations needed.
+  int neval_;
+  /// An error flag.
+  ///
+  /// 0 if the desired accuracy was reached, -1 if the dimension is out of
+  /// range, larger than 0 if the accuracy goal was not met within the maximum
+  /// number of evaluations.
+  int fail_;
+  /// The chi^2 probability that the error is not a reliable estimate of the
+  /// true integration error.
+  double prob_;
 };
 
 }  // namespace Smash

@@ -5,4 +5,5 @@ include_directories(
 
 add_library(vegas STATIC
     Vegas.c
+    ${COMMON_DEPS}
 )
