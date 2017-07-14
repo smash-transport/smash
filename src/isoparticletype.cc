@@ -179,7 +179,7 @@ double IsoParticleType::get_integral_RK(double sqrts) {
   return XS_RK_tabulation_->get_value_linear(sqrts);
 }
 
-static thread_local Integrator2d integrate2d(1E4);
+static thread_local Integrator2dCuhre integrate2d(1E4);
 
 double IsoParticleType::get_integral_RR(const ParticleType &type_res_2,
                                         double sqrts) {

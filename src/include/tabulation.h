@@ -127,7 +127,7 @@ inline std::unique_ptr<Tabulation> spectral_integral_semistable(
 
 /// Create a table for the spectral integral of two resonances.
 inline std::unique_ptr<Tabulation> spectral_integral_unstable(
-    Integrator2d& integrate2d,
+    Integrator2dCuhre& integrate2d,
     const ParticleType& res1,
     const ParticleType& res2,
     float range) {

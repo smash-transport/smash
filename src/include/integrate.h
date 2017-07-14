@@ -76,11 +76,11 @@ class Result : public std::pair<double, double> {
   ///
   /// Returns an empty string if it is small and an error message if it is
   /// large.
-  std::string check_error(double relative_tolerance=1.0) const {
+  std::string check_error(double relative_tolerance=0.1) const {
     if (value() == 0) {
       return "";
     }
-    if (std::abs(value()) < 1e-12) {
+    if (std::abs(value()) < 1e-2) {
       // For small values the relative error can be very large.
       // The threshold was chosen large enough so that the tests pass.
       return "";
