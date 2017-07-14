@@ -94,6 +94,7 @@ const double tolerance = 2.0e-7;
 TEST(load_decay_modes) {
   DecayModes::load_decaymodes(decays_input);
 
+  UnitTest::setFuzzyness<double>(2);
   // check that the decays of the rho and omega are generated correctly
   {
     const auto &rho_0 = ParticleType::find(0x113).decay_modes();
@@ -169,7 +170,7 @@ TEST(load_decay_modes) {
     COMPARE(modelist[0]->particle_number(), 2u);
     COMPARE(modelist[0]->particle_types()[0]->pdgcode(), -0x2112);
     COMPARE(modelist[0]->particle_types()[1]->pdgcode(),  -0x211);
-    COMPARE(modelist[1]->weight(), 2./3.);
+    FUZZY_COMPARE(modelist[1]->weight(), 2./3.);
     COMPARE(modelist[1]->particle_number(), 2u);
     COMPARE(modelist[1]->particle_types()[0]->pdgcode(), -0x2212);
     COMPARE(modelist[1]->particle_types()[1]->pdgcode(),   0x111);
@@ -180,7 +181,7 @@ TEST(load_decay_modes) {
     VERIFY(!Delta.is_empty());
     const auto &modelist = Delta.decay_mode_list();
     COMPARE(modelist.size(), 2u);
-    COMPARE(modelist[0]->weight(), 2./3.);
+    FUZZY_COMPARE(modelist[0]->weight(), 2./3.);
     COMPARE(modelist[0]->particle_number(), 2u);
     COMPARE(modelist[0]->particle_types()[0]->pdgcode(), -0x2112);
     COMPARE(modelist[0]->particle_types()[1]->pdgcode(),   0x111);

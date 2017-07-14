@@ -308,7 +308,8 @@ double ThreeBodyDecay::width(double, double G0, double) const {
   return G0;  // use on-shell width
 }
 
-double ThreeBodyDecay::in_width(double, double G0, double, double, double) const {
+double ThreeBodyDecay::in_width(double, double G0, double, double, double)
+  const {
   return G0;  // use on-shell width
 }
 
@@ -376,7 +377,8 @@ double ThreeBodyDecayDilepton::diff_width(double m_par, double m_dil,
     case 2: /* vectors: ω, φ */ {
       // width for decay into π⁰γ
       const double gamma_pig = t->get_partial_width(m_par, pi0, photon);
-      double ff_sqr = em_form_factor_sqr_vec(pdg, m_dil);  // form factor squared
+      double ff_sqr =
+             em_form_factor_sqr_vec(pdg, m_dil);  // form factor squared
       /// see \iref{Landsberg:1986fd}, equation (3.4)
       const double n1 = m_par_sqr - m_other_sqr;
       const double rad = pow_int(1. + m_dil_sqr/n1, 2)

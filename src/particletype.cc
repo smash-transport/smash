@@ -418,7 +418,8 @@ DecayBranchList ParticleType::get_partial_widths(const double m) const {
   return partial;
 }
 
-DecayBranchList ParticleType::get_partial_widths_hadronic(const double m) const {
+DecayBranchList ParticleType::get_partial_widths_hadronic(const double m)
+  const {
   if (is_stable()) {
     return {};
   }
@@ -460,7 +461,8 @@ DecayBranchList ParticleType::get_partial_widths_hadronic(const double m) const 
   return partial;
 }
 
-DecayBranchList ParticleType::get_partial_widths_dilepton(const double m) const {
+DecayBranchList ParticleType::get_partial_widths_dilepton(const double m)
+  const {
   const auto &decay_mode_list = decay_modes().decay_mode_list();
   if (decay_mode_list.size() == 0) {
     return {};
@@ -586,12 +588,13 @@ double ParticleType::spectral_function_simple(double m) const {
 
 /* Resonance mass sampling for 2-particle final state */
 double ParticleType::sample_resonance_mass(const double mass_stable,
-                                          const double cms_energy, int L) const {
+                                       const double cms_energy, int L) const {
   /* largest possible mass: Use 'nextafter' to make sure it is not above the
    * physical limit by numerical error. */
   const double max_mass = std::nextafter(cms_energy - mass_stable, 0.);
   // largest possible cm momentum (from smallest mass)
-  const double pcm_max = pCM(cms_energy, mass_stable, this->min_mass_spectral());
+  const double pcm_max = pCM(cms_energy, mass_stable,
+                             this->min_mass_spectral());
   const double blw_max = pcm_max * blatt_weisskopf_sqr(pcm_max, L);
   /* The maximum of the spectral-function ratio 'usually' happens at the
    * largest mass. However, this is not always the case, therefore we need
@@ -638,7 +641,7 @@ double ParticleType::sample_resonance_mass(const double mass_stable,
 
 /* Resonance mass sampling for 2-particle final state with two resonances. */
 std::pair<double, double> ParticleType::sample_resonance_masses(
-                  const ParticleType &t2, const double cms_energy, int L) const {
+              const ParticleType &t2, const double cms_energy, int L) const {
   const ParticleType &t1 = *this;
   /* Sample resonance mass from the distribution
    * used for calculating the cross section. */

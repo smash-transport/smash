@@ -100,7 +100,8 @@ GridBase::find_min_and_length(const Particles &particles) {
 
 template <GridOptions O>
 Grid<O>::Grid(
-    const std::pair<std::array<double, 3>, std::array<double, 3>> &min_and_length,
+    const std::pair<std::array<double, 3>,
+    std::array<double, 3>> &min_and_length,
     const Particles &particles, double max_interaction_length,
     CellSizeStrategy strategy)
     : length_(min_and_length.second) {
@@ -434,11 +435,13 @@ void Grid<GridOptions::PeriodicBoundaries>::iterate_cells(
 }
 
 template Grid<GridOptions::Normal>::Grid(
-    const std::pair<std::array<double, 3>, std::array<double, 3>> &min_and_length,
+    const std::pair<std::array<double, 3>,
+    std::array<double, 3>> &min_and_length,
     const Particles &particles, double max_interaction_length,
     CellSizeStrategy strategy);
 template Grid<GridOptions::PeriodicBoundaries>::Grid(
-    const std::pair<std::array<double, 3>, std::array<double, 3>> &min_and_length,
+    const std::pair<std::array<double, 3>,
+    std::array<double, 3>> &min_and_length,
     const Particles &particles, double max_interaction_length,
     CellSizeStrategy strategy);
 }  // namespace Smash

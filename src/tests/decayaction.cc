@@ -55,7 +55,8 @@ TEST(create_decayaction) {
   COMPARE(m_H, 4.0);
   COMPARE(m0_A1, 0.4);
   // Check consistency for width at pole
-  COMPARE(H.type().total_width(m0_H), G0_H);
+  UnitTest::setFuzzyness<double>(2);
+  FUZZY_COMPARE(H.type().total_width(m0_H), G0_H);
 
   // Initialize decays of H and check their properties
   DecayBranchList H_decays = H.type().get_partial_widths(m_H);

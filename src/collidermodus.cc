@@ -266,7 +266,8 @@ ColliderModus::ColliderModus(Configuration modus_config,
               "sampling. "
               "Please provide Values and Yields.");
         }
-        const std::vector<double> impacts = modus_cfg.take({"Impact", "Values"});
+        const std::vector<double> impacts =
+                                           modus_cfg.take({"Impact", "Values"});
         const std::vector<double> yields = modus_cfg.take({"Impact", "Yields"});
         if (impacts.size() != yields.size()) {
           throw std::domain_error(

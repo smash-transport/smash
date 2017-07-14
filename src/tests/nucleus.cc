@@ -231,6 +231,7 @@ TEST(Fermi_motion) {
       COMPARE(mom3.x2(), 0.0);
       COMPARE(mom3.x3(), 0.0);
     }
+    UnitTest::setFuzzyness<double>(2);
     FUZZY_COMPARE(static_cast<double>(p.momentum().sqr()),
                   p.pole_mass()*p.pole_mass());
   }

@@ -124,7 +124,8 @@ class ColliderModus : public ModusDefault {
   /// Maximum value of yield. Needed for custom impact parameter sampling.
   double yield_max_ = 0.0;
   /// Pointer to the impact parameter interpolation.
-  std::unique_ptr<InterpolateDataLinear<double>> impact_interpolation_ = nullptr;
+  std::unique_ptr<InterpolateDataLinear<double>> impact_interpolation_ =
+      nullptr;
   /** Sample impact parameter.
    *
    * Samples the impact parameter from values between imp_min_ and imp_max_, if

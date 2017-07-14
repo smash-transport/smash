@@ -35,7 +35,7 @@ TEST(coefficient) {
   spinz[0][0] = 1;
   spinz[0][1] = 1;
   spinz[0][2] = 2;
-  correct_coefficient[0] = 1.0;
+  correct_coefficient[0] = 1.;
 
   spin[1][0] = 1;
   spin[1][1] = 1;
@@ -43,7 +43,7 @@ TEST(coefficient) {
   spinz[1][0] = 1;
   spinz[1][1] = -1;
   spinz[1][2] = 0;
-  correct_coefficient[1] = 1 / sqrt(2.0);
+  correct_coefficient[1] = 1 / sqrt(2.);
 
   spin[2][0] = 2;
   spin[2][1] = 1;
@@ -51,7 +51,7 @@ TEST(coefficient) {
   spinz[2][0] = 2;
   spinz[2][1] = -1;
   spinz[2][2] = 1;
-  correct_coefficient[2] = sqrt(2.0 / 3.0);
+  correct_coefficient[2] = sqrt(2. / 3.);
 
   spin[3][0] = 2;
   spin[3][1] = 1;
@@ -59,7 +59,7 @@ TEST(coefficient) {
   spinz[3][0] = -2;
   spinz[3][1] = 1;
   spinz[3][2] = -1;
-  correct_coefficient[3] = sqrt(1.0 / 3.0);
+  correct_coefficient[3] = sqrt(1. / 3.);
 
   spin[4][0] = 2;
   spin[4][1] = 2;
@@ -67,7 +67,7 @@ TEST(coefficient) {
   spinz[4][0] = 0;
   spinz[4][1] = 2;
   spinz[4][2] = 2;
-  correct_coefficient[4] = -1 / sqrt(2.0);
+  correct_coefficient[4] = -1 / sqrt(2.);
 
   spin[5][0] = 2;
   spin[5][1] = 2;
@@ -75,7 +75,7 @@ TEST(coefficient) {
   spinz[5][0] = 0;
   spinz[5][1] = 0;
   spinz[5][2] = 0;
-  correct_coefficient[5] = 0.0;
+  correct_coefficient[5] = 0.;
 
   spin[6][0] = 2;
   spin[6][1] = 2;
@@ -83,11 +83,11 @@ TEST(coefficient) {
   spinz[6][0] = 2;
   spinz[6][1] = -2;
   spinz[6][2] = 0;
-  correct_coefficient[6] = 1 / sqrt(6.0);
+  correct_coefficient[6] = 1 / sqrt(6.);
   for (int i = 0; i < 7; i++) {
     double cg = clebsch_gordan(spin[i][0], spin[i][1], spin[i][2],
                               spinz[i][0], spinz[i][1], spinz[i][2]);
-    COMPARE(cg, correct_coefficient[i])
+    FUZZY_COMPARE(cg, correct_coefficient[i])
       << '\n' // Using double quotes here produces an error(?!)
       << "J1: " << spin[i][0] << " Jz1: " << spinz[i][0] << "\n"
       << "J2: " << spin[i][1] << " Jz2: " << spinz[i][1] << "\n"
