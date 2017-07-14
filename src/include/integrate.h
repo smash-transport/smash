@@ -428,12 +428,13 @@ class Integrator2dCuhre {
     Integrand2d<F> f_with_limits = {min1, max1 - min1, min2, max2 - min2, fun};
 
     const integrand_t cuhre_fun {
-        [](const int* ndim, const cubareal xx[], const int* ncomp,
+        [](const int* /* ndim */, const cubareal xx[], const int* /* ncomp */,
            cubareal ff[], void* userdata) -> int {
-          auto i = static_cast<Integrand<F>*>(userdata);
+          auto i = static_cast<Integrand2d<F>*>(userdata);
           // We have to transform the integrand to the unit cube.
           // This is what Cuba expects.
-          ff[0] = (i->f)(i->min1 + i->diff1 * xx[0], i->min2 + i->diff2 * xx[1]);
+          ff[0] = (i->f)(i->min1 + i->diff1 * xx[0], i->min2 + i->diff2 * xx[1])
+                  * i->diff1 * i->diff2;
           return 0;
         } };
 

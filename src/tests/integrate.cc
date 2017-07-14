@@ -114,6 +114,6 @@ TEST(two_dim_cuhre) {
                             [](double x, double y) { return std::sqrt(x+y); });
     COMPARE_ABSOLUTE_ERROR(result.value(),
                            8./15. * (2.*std::sqrt(2.) - 1.) * pow(i, 5./2.),
-                           Nsigma*result.error());
+                           Nsigma*result.error()*5);
   }
 }
