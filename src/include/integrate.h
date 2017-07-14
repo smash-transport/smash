@@ -364,6 +364,17 @@ class Integrator2d {
   const std::size_t number_of_calls_;
 };
 
+/// This is a wrapper for the integrand, so we can pass the limits as well for
+/// renormalizing to the unit cube.
+template <typename F>
+struct Integrand2d {
+    double min1;
+    double diff1;
+    double min2;
+    double diff2;
+    F f;
+};
+
 /**
  * A C++ interface for numerical integration in two dimensions
  * with the Cuba Cuhre integration function.
@@ -411,50 +422,24 @@ class Integrator2dCuhre {
                     //F &&fun) {
     Result result = {0., 0.};
 
-    /*
-    const double lower[2] = {min1, min2};
-    const double upper[2] = {max1, max2};
-
     if (max1 <= min1 || max2 <= min2)
       return result;
-    */
 
-    /*
-    const gsl_monte_function monte_fun{
-        // trick: pass integrand function as 'params'
-        [](double *x, size_t dim, void *params) -> double {
-          auto &&f = *static_cast<F *>(params);
-          return f(x[0], x[1]);
-        },
-        2, &fun};
-    */
-
-    // TODO transform integrand to unit cube
+    Integrand2d<F> f_with_limits = {min1, max1 - min1, min2, max2 - min2, fun};
 
     const integrand_t cuhre_fun {
         [](const int* ndim, const cubareal xx[], const int* ncomp,
            cubareal ff[], void* userdata) -> int {
-          auto &&f = *static_cast<F *>(userdata);
-          ff[0] = f(xx[0], xx[1]);
+          auto i = static_cast<Integrand<F>*>(userdata);
+          // We have to transform the integrand to the unit cube.
+          // This is what Cuba expects.
+          ff[0] = (i->f)(i->min1 + i->diff1 * xx[0], i->min2 + i->diff2 * xx[1]);
           return 0;
         } };
-    //gsl_monte_plain_integrate(&monte_fun, lower, upper, 2, number_of_calls_,
-    //                          rng_, state_, &result.first, &result.second);
-
-    //void Cuhre(const int ndim, const int ncomp,
-    //  integrand_t integrand, void *userdata, const int nvec,
-    //  const cubareal epsrel, const cubareal epsabs,
-    //  const int flags, const int mineval, const int maxeval,
-    //  const int key,
-    //  const char *statefile, void *spin,
-    //  int *nregions, int *neval, int *fail,
-    //  cubareal integral[], cubareal error[], cubareal prob[]);
-    //    return result;
-    //  }
 
     const int ndim = 2;
     const int ncomp = 1;
-    void* userdata = &fun;
+    void* userdata = &f_with_limits;
     const int nvec = 1;
     const int flags = 0;  // Use the defaults.
     const int mineval = 0;
