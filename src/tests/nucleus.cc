@@ -60,8 +60,7 @@ TEST_CATCH(initialize_testparticles_wrong, Nucleus::TestparticleConfusion) {
 
 TEST(nuclear_radius) {
   Nucleus lead(list, 1);
-  FUZZY_COMPARE(lead.default_nuclear_radius(),
-                static_cast<double>(1.2 * std::pow(208, 1. / 3.)));
+  FUZZY_COMPARE(lead.default_nuclear_radius(), 1.2 * std::pow(208., 1. / 3.));
 }
 
 // check that center is at (0/0/0):
@@ -232,8 +231,7 @@ TEST(Fermi_motion) {
       COMPARE(mom3.x3(), 0.0);
     }
     UnitTest::setFuzzyness<double>(2);
-    FUZZY_COMPARE(static_cast<double>(p.momentum().sqr()),
-                  p.pole_mass()*p.pole_mass());
+    FUZZY_COMPARE(p.momentum().sqr(), p.pole_mass()*p.pole_mass());
   }
   COMPARE_ABSOLUTE_ERROR(ptot.x1(), 0.0, 1.0e-15) << ptot.x1();
   COMPARE_ABSOLUTE_ERROR(ptot.x2(), 0.0, 1.0e-15) << ptot.x2();

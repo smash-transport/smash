@@ -40,7 +40,7 @@ ActionList DecayActionsFinder::find_actions_in_cell(
       continue;
     }
 
-    constexpr double one_over_hbarc = 1./static_cast<double>(hbarc);
+    constexpr double one_over_hbarc = 1./hbarc;
 
     /* The decay_time is sampled from an exponential distribution.
      * Even though it may seem suspicious that it is sampled every

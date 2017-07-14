@@ -271,8 +271,8 @@ class Clock {
   bool operator>(double time) const { return current_time() > time; }
 
  private:
-  static constexpr double to_double = static_cast<double>(resolution);
-  static constexpr double from_double = static_cast<double>(1. / resolution);
+  static constexpr double to_double = resolution;
+  static constexpr double from_double = 1. / resolution;
 
   /// convert a double value into the internal int representation
   static Representation convert(double x) {

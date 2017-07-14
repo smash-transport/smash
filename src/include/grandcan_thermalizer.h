@@ -265,7 +265,7 @@ class GrandCanThermalizer {
 
     ParticleData particle(*type_to_sample);
     // Note: it's pole mass for resonances!
-    const double m = static_cast<double>(type_to_sample->mass());
+    const double m = type_to_sample->mass();
     // Position
     particle.set_4position(FourVector(time, cell_center + uniform_in_cell()));
     // Momentum

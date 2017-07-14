@@ -107,7 +107,7 @@ double PauliBlocker::phasespace_dens(const ThreeVector &r, const ThreeVector &p,
 void PauliBlocker::init_weights_analytical() {
   const auto &log = logger<LogArea::PauliBlocking>();
 
-  const double pi = static_cast<double>(M_PI);
+  const double pi = M_PI;
   const double sqrt2 = std::sqrt(2.);
   const double sqrt_2pi = std::sqrt(2. * pi);
   // Volume of the phase-space area; Factor 2 stands for spin.

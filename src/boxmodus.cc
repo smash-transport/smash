@@ -123,8 +123,7 @@ double BoxModus::initial_conditions(Particles *particles,
   double momentum_radial = 0;
   Angles phitheta;
   FourVector momentum_total(0, 0, 0, 0);
-  auto uniform_length = Random::make_uniform_distribution(0.0,
-                                         static_cast<double>(this->length_));
+  auto uniform_length = Random::make_uniform_distribution(0.0, this->length_);
 
   /* Create NUMBER OF PARTICLES according to configuration, or thermal case */
   if (use_thermal_) {

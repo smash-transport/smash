@@ -76,18 +76,18 @@ GridBase::find_min_and_length(const Particles &particles) {
   // intialize min and max position arrays with the position of the first
   // particle in the list
   const auto &first_position = particles.front().position();
-  min_position = {{static_cast<double>(first_position[1]),
-                   static_cast<double>(first_position[2]),
-                   static_cast<double>(first_position[3])}};
+  min_position = {{first_position[1],
+                   first_position[2],
+                   first_position[3]}};
   auto max_position = min_position;
   for (const auto &p : particles) {
     const auto &pos = p.position();
-    min_position[0] = std::min(min_position[0], static_cast<double>(pos[1]));
-    min_position[1] = std::min(min_position[1], static_cast<double>(pos[2]));
-    min_position[2] = std::min(min_position[2], static_cast<double>(pos[3]));
-    max_position[0] = std::max(max_position[0], static_cast<double>(pos[1]));
-    max_position[1] = std::max(max_position[1], static_cast<double>(pos[2]));
-    max_position[2] = std::max(max_position[2], static_cast<double>(pos[3]));
+    min_position[0] = std::min(min_position[0], pos[1]);
+    min_position[1] = std::min(min_position[1], pos[2]);
+    min_position[2] = std::min(min_position[2], pos[3]);
+    max_position[0] = std::max(max_position[0], pos[1]);
+    max_position[1] = std::max(max_position[1], pos[2]);
+    max_position[2] = std::max(max_position[2], pos[3]);
   }
   length[0] = max_position[0] - min_position[0];
   length[1] = max_position[1] - min_position[1];
@@ -213,12 +213,9 @@ Grid<O>::Grid(
     // with index_factor to determine the 3 x,y,z indexes to pass to make_index.
     auto &&cell_index_for = [&](const ParticleData &p) {
       return make_index(
-          std::floor((static_cast<double>(p.position()[1]) - min_position[0]) *
-                     index_factor[0]),
-          std::floor((static_cast<double>(p.position()[2]) - min_position[1]) *
-                     index_factor[1]),
-          std::floor((static_cast<double>(p.position()[3]) - min_position[2]) *
-                     index_factor[2]));
+          std::floor((p.position()[1] - min_position[0]) * index_factor[0]),
+          std::floor((p.position()[2] - min_position[1]) * index_factor[1]),
+          std::floor((p.position()[3] - min_position[2]) * index_factor[2]));
     };
 
     for (const auto &p : particles) {
