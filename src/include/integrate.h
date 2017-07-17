@@ -443,7 +443,7 @@ class Integrator2dCuhre {
           &nregions_, &neval_, &fail_,
           &result.first, &result.second, &prob_);
     return result;
-  };
+  }
 
  private:
   /// The (approximate) maximum number of integrand evaluations allowed.
