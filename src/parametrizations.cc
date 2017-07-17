@@ -79,27 +79,29 @@ float piminusp_high_energy(double mandelstam_s) {
  * the parametrization at p_lab = 8 GeV, which correspons to square
  * root of s equal to 4 GeV. */
 float piplusp_elastic(double mandelstam_s) {
-  double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
-  if (p_lab < 8.0 /*1.45*/) {
-    return really_small;
-//} else if (p_lab < 2.0) {
-//    return 16.0 - (p_lab - 1.45) * 7.5 / 0.55;
-  } else {
-    const auto logp = std::log(p_lab);
-    return 11.4 * std::pow(p_lab, -0.4) + 0.079 * logp * logp;
-  }
+//  double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
+//  if (p_lab < 8.0 /*1.45*/) {
+//    return really_small;
+////} else if (p_lab < 2.0) {
+////    return 16.0 - (p_lab - 1.45) * 7.5 / 0.55;
+//  } else {
+//    const auto logp = std::log(p_lab);
+//    return 11.4 * std::pow(p_lab, -0.4) + 0.079 * logp * logp;
+//  }
+    return 0;
 }
 
 /** pi-p elastic cross section parametrization.
  * Source: GiBUU:parametrizationBarMes_HighEnergy.f90 */
 float piminusp_elastic(double mandelstam_s) {
-  double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
-  const auto logp = std::log(p_lab);
-  if (p_lab < 8.0/*2.0*/) {
-    return really_small;
-  } else {
-    return 1.76 + 11.2 * std::pow(p_lab, -0.64) + 0.043 * logp * logp;
-  }
+//  double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
+//  const auto logp = std::log(p_lab);
+//  if (p_lab < 8.0/*2.0*/) {
+//    return really_small;
+//  } else {
+//    return 1.76 + 11.2 * std::pow(p_lab, -0.64) + 0.043 * logp * logp;
+//  }
+    return 0;
 }
 
 /** pp elastic cross section parametrization.
