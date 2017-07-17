@@ -25,15 +25,6 @@
 #include "fpenvironment.h"
 #include "random.h"
 
-//void Cuhre(const int ndim, const int ncomp,
-//  integrand_t integrand, void *userdata, const int nvec,
-//  const cubareal epsrel, const cubareal epsabs,
-//  const int flags, const int mineval, const int maxeval,
-//  const int key,
-//  const char *statefile, void *spin,
-//  int *nregions, int *neval, int *fail,
-//  cubareal integral[], cubareal error[], cubareal prob[]);
-
 namespace Smash {
 
 /**
@@ -419,7 +410,6 @@ class Integrator2dCuhre {
   template <typename F>
   Result operator()(double min1, double max1, double min2, double max2,
                     F fun) {
-                    //F &&fun) {
     Result result = {0., 0.};
 
     if (max1 <= min1 || max2 <= min2)
