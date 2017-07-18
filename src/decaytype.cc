@@ -203,7 +203,7 @@ float TwoBodyDecayUnstable::get_Lambda() {
   return 0.6;
 }
 
-static thread_local Integrator2dCuhre integrate2d(1E4);
+static thread_local Integrator2dCuhre integrate2d(1E7);
 
 float TwoBodyDecayUnstable::rho(float mass) const {
   if (tabulation_ == nullptr) {
