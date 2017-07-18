@@ -281,7 +281,7 @@ class Integrator2d {
    *                  (defaults to 1E6 if omitted), i.e. how often the integrand
    *                  is sampled in the Monte-Carlo integration. Larger numbers
    *                  lead to a more precise result, but also to increased
-   * runtime.
+   *                  runtime.
    *
    * \note Since the workspace is allocated in the constructor and deallocated
    * on destruction, you should not recreate Integrator objects unless required.
@@ -367,12 +367,15 @@ struct Integrand2d {
 };
 
 /**
- * A C++ interface for numerical integration in two dimensions
- * with the Cuba Cuhre integration function.
+ * A C++ interface for numerical integration in two dimensions with the Cuba
+ * Cuhre integration function.
+ *
+ * The algorithm is deterministic and well-suited for low dimensions, where it
+ * can reach good accuracy.
  *
  * Example:
  * \code
- * Integrator integrate;
+ * Integrator2dCuhre integrate;
  * const auto result = integrate(0.1, 0.9, 0., 0.5,
  *                               [](double x, double y) { return x * y; });
  * \endcode
@@ -382,12 +385,12 @@ class Integrator2dCuhre {
   /**
    * Construct an integration functor.
    *
-   * \param num_calls The desired number of calls to the integrand function
+   * \param num_calls The maximum number of calls to the integrand function
    *                  (defaults to 1E6 if omitted), i.e. how often the integrand
-   *                  is sampled in the integration. Larger numbers lead to a
-   *                  more precise result, but also to increased runtime.
-   * \param epsrel    The desired relative accuracy.
-   * \param epsabs    The desired absolute accuracy.
+   *                  can be sampled in the integration. Larger numbers lead to a
+   *                  more precise result, but possibly to increased runtime.
+   * \param epsrel    The desired relative accuracy (1E-3 by default).
+   * \param epsabs    The desired absolute accuracy (1E-3 by default).
    */
   explicit Integrator2dCuhre(int num_calls = 1e6,
                         double epsrel = 1e-3, double epsabs = 1e-3)
