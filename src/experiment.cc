@@ -98,13 +98,13 @@ ExperimentPtr ExperimentBase::create(Configuration config,
   // remove config maps of unused Modi
   config["Modi"].remove_all_but(modus_chooser);
 
-  if (modus_chooser.compare("Box") == 0) {
+  if (modus_chooser == "Box") {
     return make_unique<Experiment<BoxModus>>(config, output_path);
-  } else if (modus_chooser.compare("List") == 0) {
+  } else if (modus_chooser == "List") {
     return make_unique<Experiment<ListModus>>(config, output_path);
-  } else if (modus_chooser.compare("Collider") == 0) {
+  } else if (modus_chooser == "Collider") {
     return make_unique<Experiment<ColliderModus>>(config, output_path);
-  } else if (modus_chooser.compare("Sphere") == 0) {
+  } else if (modus_chooser == "Sphere") {
     return make_unique<Experiment<SphereModus>>(config, output_path);
   } else {
     throw InvalidModusRequest("Invalid Modus (" + modus_chooser +
