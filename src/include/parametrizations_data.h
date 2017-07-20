@@ -337,6 +337,67 @@ const std::initializer_list<double> KPLUSP_TOT_SIG = {
 static std::unique_ptr<InterpolateDataLinear<double>>
     kplusp_total_interpolation = nullptr;
 
+/// Square root of Mandelstam s
+const std::initializer_list<double> PIMINUSP_RES_SQRTS = {
+  1.08,  1.13,  1.18,  1.23,  1.28,  1.33,  1.38,  1.43,  1.48,  1.53,
+  1.58,  1.63,  1.68,  1.73,  1.78,  1.83,  1.88,  1.93,  1.98,  2.03,
+  2.08,  2.13,  2.18,  2.23,  2.28,  2.33,  2.38,  2.43,  2.48,  2.53,
+  2.58,  2.63,  2.68,  2.73,  2.78,  2.83,  2.88,  2.93,  2.98,  3.03,
+  3.08,  3.13,  3.18,  3.23,  3.28,  3.33,  3.38,  3.43,  3.48,  3.53,
+  3.58,  3.63,  3.68,  3.73,  3.78,  3.83,  3.88,  3.93,  3.98,  4.03,
+  4.08
+};
+/// Elastic pi⁻ N⁺ cross section contributions from decays.
+///
+/// These need to be subtracted from the interpolation of the PDG data on
+/// elastic cross sections. This data was generated using the SMASH analysis
+/// suite and should be updated when resonances are changed or added.
+const std::initializer_list<double> PIMINUSP_RES_SIG = {
+  0.16127011,  1.92318834,  10.79241131,  20.78907267,  12.55255320,
+  11.14553618,  12.25937309,  12.52632942,  16.38105121,  14.60181917,
+  11.77643059,  15.49224140,  18.42392154,  11.38763591,  7.05641231,
+  5.98466487,  6.41483401,  6.14129487,  5.97209051,  5.53678940,  5.50772543,
+  4.99690897,  4.44875493,  4.00408398,  3.62704234,  3.02516666,  2.46229081,
+  2.25099659,  1.90477650,  1.69632397,  1.43735619,  1.27926786,  1.10200034,
+  0.94152813,  0.90057758,  0.80130679,  0.69196440,  0.58051168,  0.56632217,
+  0.53465007,  0.49142545,  0.40675797,  0.35264619,  0.36373291,  0.33372845,
+  0.27906122,  0.28672483,  0.23221690,  0.23001964,  0.22511165,  0.20275356,
+  0.17194917,  0.18497450,  0.16739908,  0.15072530,  0.13230744,  0.14920895,
+  0.12498387,  0.11471685,  0.11225359,  0.11156072
+};
+static std::unique_ptr<InterpolateDataSpline> piminusp_elastic_res_interpolation
+    = nullptr;
+
+/// Square root of Mandelstam s
+const std::initializer_list<double> PIPLUSP_RES_SQRTS = {
+  1.08,  1.13,  1.18,  1.23,  1.28,  1.33,  1.38,  1.43,  1.48,  1.53,
+  1.58,  1.63,  1.68,  1.73,  1.78,  1.83,  1.88,  1.93,  1.98,  2.03,
+  2.08,  2.13,  2.18,  2.23,  2.28,  2.33,  2.38,  2.43,  2.48,  2.53,
+  2.58,  2.63,  2.68,  2.73,  2.78,  2.83,  2.88,  2.93,  2.98,  3.03,
+  3.08,  3.13,  3.18,  3.23,  3.28,  3.33,  3.38,  3.43,  3.48,  3.53,
+  3.58,  3.63,  3.68,  3.73,  3.78,  3.83,  3.88,  3.93,  3.98,  4.03,
+  4.08
+};
+/// Elastic pi⁺  N⁺ cross section contributions from decays.
+///
+/// These need to be subtracted from the interpolation of the PDG data on
+/// elastic cross sections. This data was generated using the SMASH analysis
+/// suite and should be updated when resonances are changed or added.
+const std::initializer_list<double> PIPLUSP_RES_SIG = {
+  0.08651161,  13.39770650,  89.24360660,  166.58105183,  84.50578550,
+  43.16170292,  25.80898394,  17.15810594,  12.70918054,  10.18076743,
+  9.51588440,  9.43239795,  8.03156313,  8.17607650,  10.13819931,
+  12.93469545,  16.72242540,  16.32394423,  14.32282392,  10.94560680,
+  8.73103486,  6.19870376,  5.05715663,  4.21019055,  3.29222641,  2.83979046,
+  2.43892122,  2.04909633,  1.76630280,  1.59449203,  1.44340730,  1.24480251,
+  1.05465967,  1.03581681,  0.89514387,  0.87905887,  0.78010136,  0.72438436,
+  0.68730736,  0.59400644,  0.54082911,  0.51928126,  0.47259832,  0.43697628,
+  0.39411267,  0.38242315,  0.33373103,  0.31162962,  0.29041016,  0.28794361,
+  0.27451748,  0.24955259,  0.23643188,  0.23312245,  0.21010074,  0.19009854,
+  0.18457577,  0.17076942,  0.16998069,  0.15695022,  0.15417337
+};
+static std::unique_ptr<InterpolateDataSpline> piplusp_elastic_res_interpolation
+    = nullptr;
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_PARAMETRIZATIONS_DATA_H_

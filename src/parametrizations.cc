@@ -47,27 +47,27 @@ float xs_high_energy(double mandelstam_s, bool is_opposite_charge,
 }
 
 float pp_high_energy(double mandelstam_s) {
-  return xs_high_energy(mandelstam_s, false, 0.939, 0.939, 34.41, 13.07, 7.394);
+  return xs_high_energy(mandelstam_s, false, nucleon_mass, nucleon_mass, 34.41, 13.07, 7.394);
 }
 
 float ppbar_high_energy(double mandelstam_s) {
-  return xs_high_energy(mandelstam_s, true, 0.939, 0.939, 34.41, 13.07, 7.394);
+  return xs_high_energy(mandelstam_s, true, nucleon_mass, nucleon_mass, 34.41, 13.07, 7.394);
 }
 
 float np_high_energy(double mandelstam_s) {
-  return xs_high_energy(mandelstam_s, false, 0.939, 0.939, 34.41, 12.52, 6.66);
+  return xs_high_energy(mandelstam_s, false, nucleon_mass, nucleon_mass, 34.41, 12.52, 6.66);
 }
 
 float npbar_high_energy(double mandelstam_s) {
-  return xs_high_energy(mandelstam_s, true, 0.939, 0.939, 34.41, 12.52, 6.66);
+  return xs_high_energy(mandelstam_s, true, nucleon_mass, nucleon_mass, 34.41, 12.52, 6.66);
 }
 
 float piplusp_high_energy(double mandelstam_s) {
-  return xs_high_energy(mandelstam_s, false, 0.939, 0.138, 18.75, 9.56, 1.767);
+  return xs_high_energy(mandelstam_s, false, nucleon_mass, pion_mass, 18.75, 9.56, 1.767);
 }
 
 float piminusp_high_energy(double mandelstam_s) {
-  return xs_high_energy(mandelstam_s, true, 0.939, 0.138, 18.75, 9.56, 1.767);
+  return xs_high_energy(mandelstam_s, true, nucleon_mass, pion_mass, 18.75, 9.56, 1.767);
 }
 
 /** pi+p elastic cross section parametrization.
@@ -79,29 +79,59 @@ float piminusp_high_energy(double mandelstam_s) {
  * the parametrization at p_lab = 8 GeV, which correspons to square
  * root of s equal to 4 GeV. */
 float piplusp_elastic(double mandelstam_s) {
-//  double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
-//  if (p_lab < 8.0 /*1.45*/) {
-//    return really_small;
-////} else if (p_lab < 2.0) {
-////    return 16.0 - (p_lab - 1.45) * 7.5 / 0.55;
-//  } else {
-//    const auto logp = std::log(p_lab);
-//    return 11.4 * std::pow(p_lab, -0.4) + 0.079 * logp * logp;
-//  }
-    return 0;
+  double sigma;
+  double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
+  if (p_lab < 1.45) {
+    sigma = really_small;
+  } else if (p_lab < 2.0) {
+      sigma = 16.0 - (p_lab - 1.45) * 7.5 / 0.55;
+  } else {
+    const auto logp = std::log(p_lab);
+    sigma = 11.4 * std::pow(p_lab, -0.4) + 0.079 * logp * logp;
+  }
+  // The elastic contributions from decays still need to be subtracted.
+  if (piplusp_elastic_res_interpolation == nullptr) {
+    std::vector<double> x = PIPLUSP_RES_SQRTS;
+    for (auto& i : x) {
+      i = plab_from_s(i * i, pion_mass, nucleon_mass);
+    }
+    std::vector<double> y = PIPLUSP_RES_SIG;
+    piplusp_elastic_res_interpolation =
+        make_unique<InterpolateDataSpline>(x, y);
+  }
+  sigma -= (*piplusp_elastic_res_interpolation)(p_lab);
+  if (sigma < 0) {
+     sigma = really_small;
+  }
+  return sigma;
 }
 
 /** pi-p elastic cross section parametrization.
  * Source: GiBUU:parametrizationBarMes_HighEnergy.f90 */
 float piminusp_elastic(double mandelstam_s) {
-//  double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
-//  const auto logp = std::log(p_lab);
-//  if (p_lab < 8.0/*2.0*/) {
-//    return really_small;
-//  } else {
-//    return 1.76 + 11.2 * std::pow(p_lab, -0.64) + 0.043 * logp * logp;
-//  }
-    return 0;
+  double sigma;
+  double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
+  const auto logp = std::log(p_lab);
+  if (p_lab < 2.0) {
+    sigma = really_small;
+  } else {
+    sigma = 1.76 + 11.2 * std::pow(p_lab, -0.64) + 0.043 * logp * logp;
+  }
+  // The elastic contributions from decays still need to be subtracted.
+  if (piminusp_elastic_res_interpolation == nullptr) {
+    std::vector<double> x = PIMINUSP_RES_SQRTS;
+    for (auto& i : x) {
+      i = plab_from_s(i * i, pion_mass, nucleon_mass);
+    }
+    std::vector<double> y = PIMINUSP_RES_SIG;
+    piminusp_elastic_res_interpolation =
+        make_unique<InterpolateDataSpline>(x, y);
+  }
+  sigma -= (*piminusp_elastic_res_interpolation)(p_lab);
+  if (sigma < 0) {
+     sigma = really_small;
+  }
+  return sigma;
 }
 
 /** pp elastic cross section parametrization.
