@@ -392,6 +392,7 @@ class Configuration {
           "The value for key \"" + std::string(key_) +
           "\" should be \"thermal momenta\", \"IC_ES\", " +
           "\"IC_1M\", \"IC_2M\" or" + "\"IC_Massive\".");
+      }
 
     operator NNbarTreatment() const {
       const std::string s = operator std::string();

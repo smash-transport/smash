@@ -160,6 +160,7 @@ enum class ExpansionMode {
   MasslessFRW,
   MassiveFRW,
   Exponential,
+};
 
 enum class NNbarTreatment {
   NoAnnihilation,
