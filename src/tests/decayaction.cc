@@ -52,14 +52,14 @@ TEST(create_decayaction) {
   const float m_H = H.effective_mass();
   COMPARE(m0_H, 3.0f);
   COMPARE(G0_H, 0.3f);
-  COMPARE(m_H,  4.0f);
+  COMPARE(m_H, 4.0f);
   COMPARE(m0_A1, 0.4f);
   // Check consistency for width at pole
   COMPARE(H.type().total_width(m0_H), G0_H);
 
   // Initialize decays of H and check their properties
   DecayBranchList H_decays = H.type().get_partial_widths(m_H);
-  VERIFY(H_decays.size() == 3);
+  COMPARE(H_decays.size(), 3u);
   float tmp1, tmp2, width_expected;
 
   int decaymodes_counter = 0;
@@ -71,7 +71,7 @@ TEST(create_decayaction) {
                  typeid(type).name() << ", " <<
                  "angular momentum: " << ang_mom <<
                  ", width: " << width << std::endl;
-    VERIFY(ang_mom == 0);
+    COMPARE(ang_mom, 0);
     // Check if mass-dependent width behaves as expected
     switch (decaymodes_counter) {
       // Semistable two-body decay H -> A3 + A2
@@ -109,11 +109,11 @@ TEST(create_decayaction) {
         COMPARE_RELATIVE_ERROR(width, G0_H / 2.f, 1.e-7);
         break;
       // Should never get here
-      default: VERIFY(0 == 1);
+      default: VERIFY(false);
     }
     decaymodes_counter++;
   }
-  VERIFY(decaymodes_counter == 3);
+  COMPARE(decaymodes_counter, 3);
 
   const float time_of_execution = 4.5f;
   const auto act = make_unique<DecayAction>(H, time_of_execution);

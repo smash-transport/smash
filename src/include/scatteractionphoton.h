@@ -28,11 +28,7 @@ class ScatterActionPhoton : public ScatterAction {
   float raw_weight_value() const override { return weight_; }
 
   float cross_section() const override {
-    if (cross_section_photons_ < really_small) {
-      return cross_section_photons_;
-    } else {
-      return total_cross_section_ + cross_section_photons_;
-    }
+    return total_cross_section_ + cross_section_photons_;
   }
 
   /** Overridden to effectively return the reaction channel. */

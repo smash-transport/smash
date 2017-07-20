@@ -77,6 +77,11 @@ template <typename T> T uniform_int(T min, T max) {
 }
 
 /** returns a uniformly distributed random number \f$\chi \in [0,1)\f$
+ *
+ * Not that the popular implementations in GCC and clang may return 1:
+ *
+ * https://gcc.gnu.org/bugzilla/show_bug.cgi?id=64351
+ * https://llvm.org/bugs/show_bug.cgi?id=18767
  */
 template <typename T = double> T canonical() {
   return std::generate_canonical<T, std::numeric_limits<double>::digits>(
@@ -162,6 +167,15 @@ template <typename T = double> T power(T n, T xMin, T xMax) {
 template <typename T> int poisson(const T & lam ) {
   return std::poisson_distribution<int>(lam)(engine);
 }
+
+template <typename T> int binomial(const int N, const T & p) {
+  return std::binomial_distribution<int>(N, p)(engine);
+}
+
+template <typename T> double normal(const T & mean, const T & sigma) {
+  return std::normal_distribution<double>(mean, sigma)(engine);
+}
+
 
 /** \return: one integer number sampled from discrete distribution
 * whose weight given by probability vector

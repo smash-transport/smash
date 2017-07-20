@@ -160,7 +160,7 @@ CollisionBranchList ScatterActionNucleonNucleon::find_xsection_from_type(
         }
 
         /* Integration limits. */
-        const double lower_limit = type_res_1->minimum_mass();
+        const double lower_limit = type_res_1->min_mass_kinematic();
         const double upper_limit = sqrts - type_res_2->mass();
         /* Check the available energy (requiring it to be a little above the
          * threshold, because the integration will not work if it's too close). */
@@ -220,6 +220,7 @@ void ScatterActionNucleonNucleon::sample_angles(
   const double mass_a = masses.first;
   const double mass_b = masses.second;
 
+
   const double cms_energy = sqrt_s();
 
   const std::array<double, 2> t_range
@@ -267,7 +268,12 @@ void ScatterActionNucleonNucleon::sample_angles(
     /** NN → NR: Fit to HADES data, see \iref{Agakishiev:2014wqa}. */
     const std::array<float, 4> p { 1.46434, 5.80311, -6.89358, 1.94302 };
     const double a = p[0] + mass_a * (p[1] + mass_a * (p[2] + mass_a * p[3]));
-    double t = Random::power(-a, t_range[0], t_range[1]);
+    /*  If the resonance is so heavy that the index "a" exceeds 30,
+     *  the power function turns out to be too sharp. Take t directly to be
+     *  t_0 in such a case. */
+    double t = t_range[0];
+    if (a < 30) {
+      t = Random::power(-a, t_range[0], t_range[1]);}
     if (Random::canonical() > 0.5) {
       t = t_range[0] + t_range[1] - t;  // symmetrize
     }
@@ -282,7 +288,7 @@ void ScatterActionNucleonNucleon::sample_angles(
   // 3-momentum of first incoming particle in center-of-mass frame
   ThreeVector pcm = incoming_particles_[0].momentum().
                     LorentzBoost(beta_cm()).threevec();
-  pscatt.rotate_to(pcm);
+  pscatt.rotate_z_axis_to(pcm);
 
   // final-state CM momentum
   const double p_f = pCM(cms_energy, mass_a, mass_b);

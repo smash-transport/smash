@@ -176,6 +176,9 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
   const bool two_to_two = config.take({"Collision_Term", "Two_to_Two"}, true);
   const bool strings_switch = config.take({"Collision_Term", "Strings"}, false);
+  const NNbarTreatment nnbar_treatment = config.take(
+                         {"Collision_Term", "NNbar_Treatment"},
+                         NNbarTreatment::NoAnnihilation);
   const bool photons_switch = config.has_value({"Output", "Photons"}) ?
                     config.take({"Output", "Photons", "Enable"}, true) :
                     false;
@@ -197,6 +200,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
           two_to_one,
           two_to_two,
           strings_switch,
+          nnbar_treatment,
           photons_switch,
           low_snn_cut};
 }
@@ -343,6 +347,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     max_transverse_distance_sqr_ = scat_finder->max_transverse_distance_sqr(
                                                   parameters_.testparticles);
     action_finders_.emplace_back(std::move(scat_finder));
+  } else {
+    max_transverse_distance_sqr_ = maximum_cross_section / M_PI * fm2_mb;
   }
   const float modus_l = modus_.length();
   if (modus_l > 0.f) {
@@ -479,7 +485,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       dilepton_output_ = create_dilepton_output(output_path);
     } else if (format == "Binary") {
       dilepton_output_ =
-          make_unique<BinaryOutputCollisions>(output_path, "DileptonOutput");
+          make_unique<BinaryOutputCollisions>(output_path, "DileptonOutput",
+                                              true);
     } else if (format == "Root") {
 #ifdef SMASH_USE_ROOT
       dilepton_output_ = make_unique<RootOutput>(output_path, "DileptonOutput");
@@ -500,7 +507,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       photon_output_ = create_photon_output(output_path);
     } else if (format == "Binary") {
       photon_output_ =
-          make_unique<BinaryOutputCollisions>(output_path, "PhotonOutput");
+          make_unique<BinaryOutputCollisions>(output_path, "PhotonOutput",
+                                              false);
     } else if (format == "Root") {
 #ifdef SMASH_USE_ROOT
       photon_output_ = make_unique<RootOutput>(output_path, "PhotonOutput");
@@ -637,6 +645,12 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       jmu_custom_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
                                                     LatticeUpdate::AtOutput);
     }
+  }
+
+  // Create forced thermalizer
+  if (config.has_value({"Forced_Thermalization"})) {
+    Configuration&& th_conf = config["Forced_Thermalization"];
+    thermalizer_ = modus_.create_grandcan_thermalizer(th_conf);
   }
 }
 
@@ -834,6 +848,17 @@ void Experiment<Modus>::run_time_evolution() {
                               end_time_ - t);
     log.debug("Timestepless propagation for next ", dt, " fm/c.");
 
+    /* Perform forced thermalization if required */
+    if (thermalizer_ &&
+        thermalizer_->is_time_to_thermalize(parameters_.labclock)) {
+      const bool ignore_cells_under_treshold = true;
+      thermalizer_->update_lattice(particles_, density_param_,
+                                      ignore_cells_under_treshold);
+      thermalizer_->thermalize(particles_,
+                                  parameters_.labclock.current_time(),
+                                  parameters_.testparticles);
+    }
+
     /* (1.a) Create grid. */
     float min_cell_length = compute_min_cell_length(dt);
     log.debug("Creating grid with minimal cell length ", min_cell_length);
@@ -1016,6 +1041,10 @@ void Experiment<Modus>::intermediate_output() {
       particles_, interactions_total_, interactions_this_interval,
       conserved_initial_, time_start_, parameters_.outputclock.current_time());
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
+  /*if (thermalizer_) {
+    thermalizer_->update_lattice(particles_, density_param_);
+    thermalizer_->print_statistics(parameters_.labclock);
+  }*/
   /* save evolution data */
   for (const auto &output : outputs_) {
     output->at_intermediate_time(particles_, parameters_.outputclock,
@@ -1062,6 +1091,10 @@ void Experiment<Modus>::intermediate_output() {
         output->thermodynamics_output(ThermodynamicQuantity::LandauVelocity,
                                       dens_type_lattice_printout_, *Tmn_);
       }
+    }
+
+    if (thermalizer_) {
+      output->thermodynamics_output(*thermalizer_);
     }
   }
 }

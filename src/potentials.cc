@@ -27,6 +27,14 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
    * section, to switch on only Skyrme or Symmetry potentials uncomment
    * only the part you want to switch on.
    *
+   *
+   * Currently potentials are just added without re-adjusting the energy
+   * and momenta of colliding nucleons. This can be done, because the
+   * binding energy of nucleons is from 0 to 8 MeV per nucleon and
+   * kinetic energies, at which SMASH operates are at least 400 MeV per
+   * nucleon, so the binding energy can be neglected compared to the
+   * kinetic energy.
+   *
    * \li \subpage potentials_skyrme_
    * \li \subpage potentials_sym_
    *

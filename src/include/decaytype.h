@@ -81,8 +81,8 @@ class TwoBodyDecay : public DecayType {
   unsigned int particle_number() const override;
   bool has_particles(ParticleTypePtrList list) const override;
   float threshold() const {
-    return particle_types_[0]->minimum_mass() +
-           particle_types_[1]->minimum_mass();
+    return particle_types_[0]->min_mass_kinematic() +
+           particle_types_[1]->min_mass_kinematic();
   }
 
  protected:

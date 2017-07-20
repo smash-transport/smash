@@ -231,9 +231,9 @@ TEST(periodic_grid) {
                   const auto pair = p.id() < q.id() ? std::make_pair(p, q)
                                                     : std::make_pair(q, p);
                   const auto it = find(neighbor_pairs, pair);
-                  VERIFY(it == neighbor_pairs.end()) << "\np: " << p
-                                                     << "\nq: " << q << '\n'
-                                                     << detailed(search);
+                  COMPARE(it, neighbor_pairs.end()) << "\np: " << p
+                                                    << "\nq: " << q << '\n'
+                                                    << detailed(search);
                   neighbor_pairs.emplace_back(std::move(pair));
                 }
               }
@@ -285,7 +285,7 @@ TEST(periodic_grid) {
                   auto pair = p.id() < q.id() ? std::make_pair(p, q)
                                               : std::make_pair(q, p);
                   const auto it = find(neighbor_pairs, pair);
-                  VERIFY(it == neighbor_pairs.end())
+                  COMPARE(it, neighbor_pairs.end())
                       << "\np: " << p << "\nq: " << q << '\n' << neighbor_pairs;
                   neighbor_pairs.emplace_back(std::move(pair));
                 }

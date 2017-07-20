@@ -8,6 +8,8 @@
 #define SRC_INCLUDE_CONSTANTS_H_
 
 #include <cmath>
+#include <cstdint>
+#include <limits>
 
 namespace Smash {
 
@@ -47,6 +49,12 @@ constexpr float small_number = 1.0e-4;
  */
 constexpr float nucleon_mass = 0.938;
 /**
+ * pion mass in GeV
+ *
+ * Note that this should be the same as in particles.txt.
+ */
+constexpr float pion_mass = 0.138;
+/**
  * kaon mass in GeV
  *
  * Note that this should be the same as in particles.txt.
@@ -76,6 +84,14 @@ constexpr double alpha = 7.2973525698e-3;
  * elastic NN cross sections, which diverge at threshold.
  */
 constexpr float maximum_cross_section = 200.f;  // mb
+
+/**
+ * Process ID for any photon process.
+ *
+ * It is chosen such that it will not conflict with any other process.
+ */
+constexpr std::uint32_t ID_PROCESS_PHOTON
+    = std::numeric_limits<std::uint32_t>::max();
 
 }  // namespace Smash
 

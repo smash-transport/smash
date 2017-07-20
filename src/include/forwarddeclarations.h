@@ -160,6 +160,11 @@ enum class ExpansionMode {
   MasslessFRW,
   MassiveFRW,
   Exponential,
+
+enum class NNbarTreatment {
+  NoAnnihilation,
+  Resonances,
+  Strings,
 };
 
 /// Represents thermodynamic quantities that can be printed out
@@ -169,6 +174,23 @@ enum class ThermodynamicQuantity : char {
   TmnLandau,
   LandauVelocity,
 };
+
+/**
+ * Defines the algorithm used for the forced thermalization.
+ *  For the description of algorithms see \iref{Oliinychenko:2016vkg}.
+ *  All of them intend to conserve the net baryon number, strangeness
+ *  and electric charge, as well as energy. Mode sampling is the fastest,
+ *  but least theoretically robust, unbiased BF is the slowest
+ *  (even hangs completely from time to time), but it is also the most
+ *  theoretically robust.
+ */
+enum class ThermalizationAlgorithm {
+  ModeSampling,
+  BiasedBF,
+  UnbiasedBF,
+};
+
+
 
 using ActionPtr = build_unique_ptr_<Action>;
 using ScatterActionPtr = build_unique_ptr_<ScatterAction>;

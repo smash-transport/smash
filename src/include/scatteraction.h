@@ -56,6 +56,27 @@ inline float detailed_balance_factor_RK(float sqrts, float pcm,
 }
 
 /**
+ * Calculate the detailed balance factor R such that
+ * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
+ * where $A$ and $B$ are unstable, and $C$ and $D$ are stable.
+ */
+inline float detailed_balance_factor_RR(float sqrts, float pcm,
+               const ParticleType& particle_a, const ParticleType& particle_b,
+               const ParticleType& particle_c, const ParticleType& particle_d) {
+    assert(!particle_a.is_stable());
+    assert(!particle_b.is_stable());
+    float spin_factor = (particle_c.spin() + 1)*(particle_d.spin() + 1);
+    spin_factor /= (particle_a.spin() + 1)*(particle_b.spin() + 1);
+    float symmetry_factor = (1 + (particle_a == particle_b));
+    symmetry_factor /= (1 + (particle_c == particle_d));
+    const float momentum_factor = pCM_sqr(
+        sqrts, particle_c.mass(), particle_d.mass()) /
+        (pcm * particle_a.iso_multiplet()->get_integral_RR(particle_b, sqrts));
+    return spin_factor * symmetry_factor * momentum_factor;
+}
+
+
+/**
  * Add a 2-to-2 channel to a collision branch list given a cross section.
  *
  * The cross section is only calculated if there is enough energy
@@ -65,7 +86,8 @@ template <typename F>
 inline void add_channel(CollisionBranchList &process_list, F get_xsection,
                         float sqrts, const ParticleType &type_a,
                                      const ParticleType &type_b) {
-  const float sqrt_s_min = type_a.minimum_mass() + type_b.minimum_mass();
+  const float sqrt_s_min = type_a.min_mass_spectral() +
+                                                     type_b.min_mass_spectral();
   if (sqrts <= sqrt_s_min) {
       return;
   }
@@ -90,10 +112,11 @@ class ScatterAction : public Action {
    * \param[in] in_part2 second scattering partner
    * \param[in] time Time at which the action is supposed to take place
    * \param[in] isotropic if true, do the collision isotropically
+   * \param[in] string_formation_time the time a string takes to form
    */
   ScatterAction(const ParticleData &in_part1, const ParticleData &in_part2,
                 double time, bool isotropic = false,
-                float formation_time = 1.0f);
+                float string_formation_time = 1.0f);
 
   /** Add a new collision channel. */
   void add_collision(CollisionBranchPtr p);
@@ -122,13 +145,20 @@ class ScatterAction : public Action {
 
   /** Add all possible subprocesses for this action object. */
   virtual void add_all_processes(float elastic_parameter,
-    bool two_to_one, bool two_to_two, double low_snn_cut, bool strings_switch);
+    bool two_to_one, bool two_to_two, double low_snn_cut,
+    bool strings_switch, NNbarTreatment nnbar_treatment);
 
   /**
    * Determine the (parametrized) total cross section for this collision. This
    * is currently only used for calculating the string excitation cross section.
    */
   virtual float total_cross_section() const { return 0.; }
+
+  /**
+   * Determine the (parametrized) total cross section at high energies for this collision.
+   * This is currently only used for calculating the string excitation cross section.
+   */
+  virtual float high_energy_cross_section() const { return 0.; }
 
   /**
    * Determine the (parametrized) elastic cross section for this collision.
@@ -153,6 +183,21 @@ class ScatterAction : public Action {
    * final-state IDs.
    */
   CollisionBranchPtr elastic_cross_section(float elast_par);
+
+  /**
+   * Determine the cross section for NNbar annihilation, which is given by the
+   * difference between the parametrized total cross section and all the
+   * explicitly implemented channels at low energy (in this case only elastic).
+   * This method has to be called after all other processes
+   * have been added to the Action object.
+   */
+  CollisionBranchPtr NNbar_annihilation_cross_section();
+
+  /**
+   * Determine the cross section for NNbar annihilation, which is given by
+   * detailed balance from the reverse reaction. See NNbar_annihilation_cross_section
+   */
+  CollisionBranchList NNbar_creation_cross_section();
 
   /**
    * Determine the cross section for string excitations, which is given by the
@@ -237,6 +282,9 @@ class ScatterAction : public Action {
   /** Perform an elastic two-body scattering, i.e. just exchange momentum. */
   void elastic_scattering();
 
+  /** Perform an inelastic two-body scattering, i.e. new particles are formed*/
+  void inelastic_scattering();
+
   /** Perform the string excitation and decay via Pythia. */
   void string_excitation();
 
@@ -256,7 +304,7 @@ class ScatterAction : public Action {
   bool isotropic_ = false;
 
   /** Formation time parameter for string fragmentation*/
-  float formation_time_ = 1.0f;
+  float string_formation_time_ = 1.0f;
 
  private:
   /** Check if the scattering is elastic. */

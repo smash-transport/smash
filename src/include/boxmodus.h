@@ -8,6 +8,7 @@
 #define SRC_INCLUDE_BOXMODUS_H_
 
 #include <map>
+#include <memory>
 
 #include "forwarddeclarations.h"
 #include "modusdefault.h"
@@ -75,6 +76,16 @@ class BoxModus : public ModusDefault {
             particles,
             min_cell_length,
             strategy};
+  }
+
+  /// \copydoc Smash::ModusDefault::create_grandcan_thermalizer
+  std::unique_ptr<GrandCanThermalizer> create_grandcan_thermalizer(
+                                               Configuration& conf) const {
+    const std::array<float, 3> lat_size = {length_, length_, length_};
+    const std::array<float, 3> origin = {0.0f, 0.0f, 0.0f};
+    const bool periodicity = true;
+    return make_unique<GrandCanThermalizer>(conf, lat_size, origin,
+        periodicity);
   }
 
   /// \copydoc Smash::ModusDefault::max_timestep()

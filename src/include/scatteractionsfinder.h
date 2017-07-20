@@ -68,13 +68,13 @@ class ScatterActionsFinder : public ActionFinderInterface {
   /** Check the whole particle list for collisions
    * and return a list with the corrsponding Action objects. */
   ActionList find_actions_in_cell(const ParticleList &search_list,
-                                  float dt) const override;
+                                  double dt) const override;
   ActionList find_actions_with_neighbors(const ParticleList &search_list,
                                          const ParticleList &neighbors_list,
-                                         float dt) const override;
+                                         double dt) const override;
   ActionList find_actions_with_surrounding_particles(
       const ParticleList &search_list, const Particles &surrounding_list,
-      float dt) const override;
+      double dt) const override;
   /** Find some final collisions at the end of the simulation.
    * Currently does nothing. */
   ActionList find_final_actions(const Particles & /*search_list*/,
@@ -145,6 +145,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const double low_snn_cut_;
   /** Switch to turn off string excitation. */
   const bool strings_switch_;
+  /** Switch for NNbar reactions */
+  const NNbarTreatment nnbar_treatment_;
   /** Parameter to record whether the nucleon
    *  has experienced a collision or not*/
   const std::vector<bool> &nucleon_has_interacted_;
@@ -153,7 +155,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
   /** Record the number of the nucleons in the projectile */
   const int N_proj_;
   /** Parameter for formation time */
-  const float formation_time_;
+  const float string_formation_time_;
   /** Photons switch */
   const bool photons_;
   /** Number of fractional photons */

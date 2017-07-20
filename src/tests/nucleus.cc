@@ -208,7 +208,7 @@ TEST(Fermi_motion) {
                                         {0x3122, 1},  // Lambda
                                          {0x13, 1}};  // muon
   Nucleus myfunnynucleus(myfunnylist, 1);
-  VERIFY(myfunnynucleus.size() == 22+35+5+1+1);
+  COMPARE(myfunnynucleus.size(), 22u + 35u + 5u + 1u + 1u);
   // Set some arbitrary radius and diffusiveness
   myfunnynucleus.set_nuclear_radius(3.0f);
   myfunnynucleus.set_diffusiveness(0.5f);
@@ -227,9 +227,9 @@ TEST(Fermi_motion) {
     const ThreeVector mom3 = p.momentum().threevec();
     ptot += mom3;
     if (p.pdgcode() != 0x2212 && p.pdgcode() != 0x2112) {
-      VERIFY(mom3.x1() == 0.0);
-      VERIFY(mom3.x2() == 0.0);
-      VERIFY(mom3.x3() == 0.0);
+      COMPARE(mom3.x1(), 0.0);
+      COMPARE(mom3.x2(), 0.0);
+      COMPARE(mom3.x3(), 0.0);
     }
     FUZZY_COMPARE(static_cast<float>(p.momentum().sqr()),
                   p.pole_mass()*p.pole_mass());

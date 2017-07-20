@@ -47,11 +47,14 @@ double calc_hubble(double time, const ExpansionProperties &metric) {
 double propagate_straight_line(Particles *particles, double to_time,
       const std::vector<FourVector> &beam_momentum) {
   const auto &log = logger<LogArea::Propagation>();
+  bool negative_dt_error = false;
   double dt = 0.0;
   for (ParticleData &data : *particles) {
     const double t0 = data.position().x0();
     dt = to_time - t0;
-    if (dt < 0.0) {
+    if (dt < 0.0 && !negative_dt_error) {
+      // Print error message once, not for every particle
+      negative_dt_error = true;
       log.error("propagate_straight_line - negative dt = ", dt);
     }
     assert(dt >= 0.0);
@@ -63,7 +66,7 @@ double propagate_straight_line(Particles *particles, double to_time,
     // beam_momentum, which is by default zero except for the collider modus
     // with the fermi motion == frozen.
     // todo(m. mayer): improve this condition (see comment #11 issue #4213)
-    assert(data.id() > 0);
+    assert(data.id() >= 0);
     const bool avoid_fermi_motion =
       (static_cast<uint64_t>(data.id())
        < static_cast<uint64_t>(beam_momentum.size()))

@@ -148,9 +148,9 @@ class ParticleData {
   }
 
   /// Return formation time of the particle
-  const float &formation_time() const { return formation_time_; }
+  double formation_time() const { return formation_time_; }
   /// Set the formation time
-  void set_formation_time(const float &form_time) {
+  void set_formation_time(const double &form_time) {
     formation_time_ = form_time;
   }
 
@@ -278,7 +278,7 @@ class ParticleData {
   /** Formation time at which the particle is fully formed
    *  given as an absolute value in the computational frame
    */
-  float formation_time_ = 0.0;
+  double formation_time_ = 0.0;
   /// cross section scaling factor for unformed particles
   float cross_section_scaling_factor_ = 1.0;
   // history information

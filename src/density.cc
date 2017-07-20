@@ -140,49 +140,6 @@ std::pair<double, ThreeVector> rho_eckart(const ThreeVector &r,
   return rho_eckart_impl(r, plist, par, dens_type, compute_gradient);
 }
 
-template <typename /*LatticeType*/ T>
-void update_general_lattice(RectangularLattice<T>* lat,
-                            const LatticeUpdate update,
-                            const DensityType dens_type,
-                            const DensityParameters &par,
-                            const Particles &particles) {
-  // Do not proceed if lattice does not exists/update not required
-  if (lat == nullptr || lat->when_update() != update) {
-    return;
-  }
-  lat->reset();
-  const double norm_factor = par.norm_factor_sf();
-  for (const auto &part : particles) {
-    const float dens_factor = density_factor(part.type(), dens_type);
-    if (std::abs(dens_factor) < really_small) {
-      continue;
-    }
-    const FourVector p = part.momentum();
-    const double m = p.abs();
-    if (unlikely(m < really_small)) {
-      const auto &log = logger<LogArea::Density>();
-      log.warn("Gaussian smearing is undefined for momentum ", p);
-      continue;
-    }
-    const double m_inv = 1.0 / m;
-
-    const ThreeVector pos = part.position().threevec();
-    lat->iterate_in_radius(pos, par.r_cut(),
-      [&](T &node, int ix, int iy, int iz){
-        const ThreeVector r = lat->cell_center(ix, iy, iz);
-        const double sf = norm_factor * unnormalized_smearing_factor(
-                                              pos - r, p, m_inv, par).first;
-        if (sf > really_small) {
-          /*std::cout << "Adding particle " << part << " to lattice with"
-                    << " smearing factor " << sf <<
-                    " and density factor " << dens_factor << std::endl;*/
-          node.add_particle(part, sf * dens_factor);
-        }
-      });
-  }
-}
-
-
 void update_density_lattice(RectangularLattice<DensityOnLattice>* lat,
                             const LatticeUpdate update,
                             const DensityType dens_type,

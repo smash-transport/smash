@@ -40,7 +40,12 @@ double calc_hubble(double time, const ExpansionProperties &metric);
   *
   * \param[in,out] particles The particle list in the event
   * \param[in] to_time final time
-  * \param[out] dt time interval of propagation
+  * \param[in] beam_momentum This vector of 4-momenta should have
+  *            non-zero size only if "frozen Fermi motion" is on.
+  *            The the Fermi momenta are only used for collisions,
+  *            but not for propagation. In this case beam_momentum
+  *            is used for propagation.
+  * \return dt time interval of propagation
   */
 double propagate_straight_line(Particles *particles, double to_time,
                        const std::vector<FourVector> &beam_momentum);

@@ -30,6 +30,78 @@
 
 namespace Smash {
 
+/** total hadronic cross sections at high energies parametrized in the 2016 PDG
+ *  book(http://pdg.lbl.gov/2016/reviews/rpp2016-rev-cross-section-plots.pdf) */
+float xs_high_energy(double mandelstam_s, bool is_opposite_charge,
+                     float ma, float mb, float P, float R1, float R2) {
+  const float M = 2.1206;
+  const float H = 0.272;
+  const float eta1 = 0.4473;
+  const float eta2 = 0.5486;
+  const float s_sab = mandelstam_s / (ma + mb + M) / (ma + mb + M);
+  float xs = H * std::log(s_sab) * std::log(s_sab) + P
+             + R1 * std::pow(s_sab, -eta1);
+  xs = is_opposite_charge ? xs + R2 * pow(s_sab, -eta2)
+             : xs - R2 * pow(s_sab, -eta2);
+  return xs;
+}
+
+float pp_high_energy(double mandelstam_s) {
+  return xs_high_energy(mandelstam_s, false, 0.939, 0.939, 34.41, 13.07, 7.394);
+}
+
+float ppbar_high_energy(double mandelstam_s) {
+  return xs_high_energy(mandelstam_s, true, 0.939, 0.939, 34.41, 13.07, 7.394);
+}
+
+float np_high_energy(double mandelstam_s) {
+  return xs_high_energy(mandelstam_s, false, 0.939, 0.939, 34.41, 12.52, 6.66);
+}
+
+float npbar_high_energy(double mandelstam_s) {
+  return xs_high_energy(mandelstam_s, true, 0.939, 0.939, 34.41, 12.52, 6.66);
+}
+
+float piplusp_high_energy(double mandelstam_s) {
+  return xs_high_energy(mandelstam_s, false, 0.939, 0.138, 18.75, 9.56, 1.767);
+}
+
+float piminusp_high_energy(double mandelstam_s) {
+  return xs_high_energy(mandelstam_s, true, 0.939, 0.138, 18.75, 9.56, 1.767);
+}
+
+/** pi+p elastic cross section parametrization.
+ * Source: GiBUU:parametrizationBarMes_HighEnergy.f90
+ * The parametrizations of the elastic pion+nucleon cross sections
+ * are still under tuning. The parametrizaton is employed to give a
+ * non-zero cross section at high energies. To make sure it
+ * doesn't affect the cross section at the low energies, I truncate
+ * the parametrization at p_lab = 8 GeV, which correspons to square
+ * root of s equal to 4 GeV. */
+float piplusp_elastic(double mandelstam_s) {
+  double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
+  if (p_lab < 8.0 /*1.45*/) {
+    return really_small;
+//} else if (p_lab < 2.0) {
+//    return 16.0 - (p_lab - 1.45) * 7.5 / 0.55;
+  } else {
+    const auto logp = std::log(p_lab);
+    return 11.4 * std::pow(p_lab, -0.4) + 0.079 * logp * logp;
+  }
+}
+
+/** pi-p elastic cross section parametrization.
+ * Source: GiBUU:parametrizationBarMes_HighEnergy.f90 */
+float piminusp_elastic(double mandelstam_s) {
+  double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
+  const auto logp = std::log(p_lab);
+  if (p_lab < 8.0/*2.0*/) {
+    return really_small;
+  } else {
+    return 1.76 + 11.2 * std::pow(p_lab, -0.64) + 0.043 * logp * logp;
+  }
+}
+
 /** pp elastic cross section parametrization.
  * Source: \iref{Weil:2013mya}, eq. (44) */
 float pp_elastic(double mandelstam_s) {
