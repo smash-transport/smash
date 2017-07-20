@@ -73,27 +73,35 @@ double density_integrand_2M_IC(const double energy, const double momentum_sqr,
 
 
 
-/** samples a momentum from the Maxwell-Boltzmann distribution
+/** samples a momentum from the non-equilibrium distribution
+ * \f[f=pe^{-\frac{\sqrt{m^2+p^2}}{T_0}}\f]
  *
- * \todo rename this function to make clear what it is
- *
- * \see density_integrand
+ * \see density_integrand_mass
  * \param[in] temperature Temperature \f$T\f$
  * \param[in] mass Mass of the particle: \f$m = \sqrt{E^2 - p^2}\f$
  *
  * \return one possible momentum between mass and 50 GeV
- *
- * \fpPrecision Why \c double?
  */
-double sample_momenta(const double temperature, const double mass);
-/* Similar to sample_momenta, but returns non-equilibrium distribution
- * \f[f=pe^{-\frac{\sqrt{m^2+p^2}}{T_0}}\f] */
 double sample_momenta_non_eq_mass(const double temperature, const double mass);
-/* Similar to sample_momenta, but returns non-equilibrium distribution
- * IC_1M from \iref{Bazow:2016oky} */
+/** samples a momentum from the non-equilibrium distribution
+ * IC_1M from \iref{Bazow:2016oky}
+ *
+ * \see density_integrand_mass
+ * \param[in] temperature Temperature \f$T\f$
+ * \param[in] mass Mass of the particle: \f$m = \sqrt{E^2 - p^2}\f$
+ *
+ * \return one possible momentum between mass and 50 GeV
+ */
 double sample_momenta_IC_1M(const double temperature, const double mass);
-/* Similar to sample_momenta, but returns non-equilibrium distribution
- * IC_2M from \iref{Bazow:2016oky} */
+/** samples a momentum from the non-equilibrium distribution
+ * IC_2M from \iref{Bazow:2016oky}
+ *
+ * \see density_integrand_mass
+ * \param[in] temperature Temperature \f$T\f$
+ * \param[in] mass Mass of the particle: \f$m = \sqrt{E^2 - p^2}\f$
+ *
+ * \return one possible momentum between mass and 50 GeV
+ */
 double sample_momenta_IC_2M(const double temperature, const double mass);
 
 

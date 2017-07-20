@@ -93,10 +93,10 @@ void expand_space_time(Particles *particles,
                        const ExperimentParameters &parameters,
                        const ExpansionProperties &metric) {
   const auto &log = logger<LogArea::Propagation>();
-  double dt = parameters.labclock.timestep_duration();
+  const double dt = parameters.labclock.timestep_duration();
   for (ParticleData &data : *particles) {
     // Momentum and position modification to ensure appropriate expansion
-    double h = calc_hubble(parameters.labclock.current_time(), metric);
+    const double h = calc_hubble(parameters.labclock.current_time(), metric);
     FourVector delta_mom = FourVector(0.0, h*data.momentum().threevec()*dt);
     FourVector expan_dist = FourVector(0.0, h*data.position().threevec()*dt);
 

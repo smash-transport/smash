@@ -125,7 +125,7 @@ float SphereModus::initial_conditions(Particles *particles,
     Angles phitheta;
     /* thermal momentum according Maxwell-Boltzmann distribution */
     double momentum_radial;
-    /*assign momentum_radial according to requested distribution*/
+    /* assign momentum_radial according to requested distribution */
     switch (init_distr_) {
       case (SphereInitialCondition::ThermalMomenta):
         momentum_radial = sample_momenta_from_thermal(this->sphere_temperature_,
@@ -151,8 +151,6 @@ float SphereModus::initial_conditions(Particles *particles,
                                                       data.pole_mass());
         break;
     }
-    momentum_radial = sample_momenta_from_thermal(this->sphere_temperature_,
-                                                data.pole_mass());
     phitheta.distribute_isotropically();
     log.debug("Particle ", data.id(), " radial momenta ", momentum_radial, ' ',
               phitheta);

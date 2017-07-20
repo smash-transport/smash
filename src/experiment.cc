@@ -292,7 +292,7 @@ void Experiment<Modus>::create_output(const char * name,
  * Exponential - FRW expansion going as e^(t/2)
  *
  * \key Expansion_Rate (double, optional, default = 0.1) \n
- * Corresponds to the speed of expansion of the universe in non minkovski metrics \n
+ * Corresponds to the speed of expansion of the universe in non minkowski metrics \n
  * This value is useless if NoExpansion is selected; it corresponds to \n
  * \f$b_r/l_0\f$ if the metric type is MasslessFRW or MassiveFRW, and to \n
  * the parameter b in the Exponential expansion where \f$a(t) ~ e^{bt/2}\f$
@@ -879,7 +879,7 @@ void Experiment<Modus>::run_time_evolution() {
                      *potentials_, dUB_dr_lat_.get(), dUI3_dr_lat_.get());
     }
 
-    /* (5) Expand universe if non-minkovskian metric; updates
+    /* (5) Expand universe if non-minkowskian metric; updates
            positions and momenta according to the selected expansion */
     if (metric_.mode_ != ExpansionMode::NoExpansion) {
       expand_space_time(&particles_, parameters_, metric_);
