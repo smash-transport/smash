@@ -499,6 +499,11 @@ void ScatterAction::string_excitation() {
    * SMASH, since every call of pythia.init should produce
    * different events. */
   pythia.readString("Random:setSeed = on");
+  /* manually set the parton distribution function */
+  pythia.readString("PDF:pSet = 13");
+  pythia.readString("PDF:pSetB = 13");
+  pythia.readString("PDF:piSet = 1");
+  pythia.readString("PDF:piSetB = 13");
   std::stringstream buffer1;
   buffer1 << "Random:seed = " << Random::canonical();
   pythia.readString(buffer1.str());
