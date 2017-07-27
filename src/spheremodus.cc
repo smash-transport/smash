@@ -73,6 +73,12 @@ namespace Smash {
  * \key Strange_Chemical_Potential (double, optional, default = 0.0): \n
  * Strangeness chemical potential \f$ \mu_S \f$ used in case if
  * Use_Thermal_Multiplicities is true to compute thermal densities \f$ n_i \f$.
+ *
+ * \key Initial_Condition (SphereInitialCondition, default =
+ * SphereInitialCondition::ThermalMomenta) \n
+ * Initial distribution to use for momenta of particles. Mainly used in the
+ * expanding universe scenario, options are "thermal momenta", "IC_ES", "IC_1M"
+ * "IC_2M" and "IC_Massive"; see \iref{Bazow:2016oky} and \iref{Tindall:2016try}
  */
 
 
