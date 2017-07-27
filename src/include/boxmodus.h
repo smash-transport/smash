@@ -24,6 +24,7 @@ namespace Smash {
  * (not implemented now) or inserted on opposite positions.
  *
  * To use this modus, chose
+    Modus:         Box
  * \code
  * General:
  *      MODUS: Box
@@ -63,6 +64,7 @@ class BoxModus : public ModusDefault {
    * inserted from the opposite side. Wall crossings are written to
    * collision output: this is where OutputsList is used.
    */
+
   int impose_boundary_conditions(Particles *particles,
                          const OutputsList &output_list = {});
 
@@ -96,7 +98,7 @@ class BoxModus : public ModusDefault {
  private:
   const BoxInitialCondition initial_condition_;
   /// length of the cube's edge in fm/c
-  const float length_;
+  float length_;
   /// Temperature of the Box in GeV
   const float temperature_;
   /// initial time of the box

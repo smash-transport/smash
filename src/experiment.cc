@@ -17,7 +17,6 @@
 #include "include/decayactionsfinderdilepton.h"
 #include "include/fourvector.h"
 #include "include/listmodus.h"
-#include "include/propagation.h"
 #include "include/scatteractionphoton.h"
 #include "include/scatteractionsfinder.h"
 #include "include/spheremodus.h"
@@ -290,6 +289,17 @@ void Experiment<Modus>::create_output(const char * name,
  * true - force all resonances to decay after last timestep \n
  * false - don't force decays (final output can contain resonances)
  *
+ * \key Metric_Type (ExpansionMode, optional, default = NoExpansion): \n
+ * NoExpansion - default SMASH run, with Minkowski metric \n
+ * MasslessFRW - FRW expansion going as t^(1/2)
+ * MassiveFRW - FRW expansion going as t^(2/3)
+ * Exponential - FRW expansion going as e^(t/2)
+ *
+ * \key Expansion_Rate (double, optional, default = 0.1) \n
+ * Corresponds to the speed of expansion of the universe in non minkowski metrics \n
+ * This value is useless if NoExpansion is selected; it corresponds to \n
+ * \f$b_r/l_0\f$ if the metric type is MasslessFRW or MassiveFRW, and to \n
+ * the parameter b in the Exponential expansion where \f$a(t) ~ e^{bt/2}\f$
  * \subpage pauliblocker
  */
 template <typename Modus>
@@ -304,6 +314,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       force_decays_(
           config.take({"Collision_Term", "Force_Decays_At_End"}, true)),
       use_grid_(config.take({"General", "Use_Grid"}, true)),
+      metric_(config.take({"General", "Metric_Type"},
+          ExpansionMode::NoExpansion),
+          config.take({"General", "Expansion_Rate"}, 0.1)),
+      strings_switch_(config.take({"Collision_Term", "Strings"}, false)),
       dileptons_switch_(config.has_value({"Output", "Dileptons"}) ?
                     config.take({"Output", "Dileptons", "Enable"}, true) :
                     false),
@@ -896,6 +910,12 @@ void Experiment<Modus>::run_time_evolution() {
                      *potentials_, dUB_dr_lat_.get(), dUI3_dr_lat_.get());
     }
 
+    /* (5) Expand universe if non-minkowskian metric; updates
+           positions and momenta according to the selected expansion */
+    if (metric_.mode_ != ExpansionMode::NoExpansion) {
+      expand_space_time(&particles_, parameters_, metric_);
+    }
+
     ++parameters_.labclock;
 
     /* (5) Check conservation laws. */
@@ -904,7 +924,8 @@ void Experiment<Modus>::run_time_evolution() {
     // fragmentation are off.  If potentials are on then momentum is conserved
     // only in average.  If string fragmentation is on, then energy and
     // momentum are only very roughly conserved in high-energy collisions.
-    if (!potentials_ && !parameters_.strings_switch) {
+    if (!potentials_ && !strings_switch_ &&
+        metric_.mode_ == ExpansionMode::NoExpansion) {
       std::string err_msg = conserved_initial_.report_deviations(particles_);
       if (!err_msg.empty()) {
         log.error() << err_msg;

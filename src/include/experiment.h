@@ -20,6 +20,7 @@
 #include "grandcan_thermalizer.h"
 #include "pauliblocking.h"
 #include "potentials.h"
+#include "propagation.h"
 #include "quantumnumbers.h"
 
 namespace Smash {
@@ -339,6 +340,16 @@ class Experiment : public ExperimentBase {
    * This indicates whether to use the grid.
    */
   const bool use_grid_;
+
+  /**
+   * This struct contains information on the metric to be used
+   */
+  const ExpansionProperties metric_;
+
+  /**
+   * This indicates whether string fragmentation is switched on.
+   */
+  const bool strings_switch_;
 
   /**
    * This indicates whether dileptons are switched on.
