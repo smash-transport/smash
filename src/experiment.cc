@@ -17,7 +17,6 @@
 #include "include/decayactionsfinderdilepton.h"
 #include "include/fourvector.h"
 #include "include/listmodus.h"
-#include "include/propagation.h"
 #include "include/scatteractionphoton.h"
 #include "include/scatteractionsfinder.h"
 #include "include/spheremodus.h"
@@ -98,13 +97,13 @@ ExperimentPtr ExperimentBase::create(Configuration config,
   // remove config maps of unused Modi
   config["Modi"].remove_all_but(modus_chooser);
 
-  if (modus_chooser.compare("Box") == 0) {
+  if (modus_chooser == "Box") {
     return make_unique<Experiment<BoxModus>>(config, output_path);
-  } else if (modus_chooser.compare("List") == 0) {
+  } else if (modus_chooser == "List") {
     return make_unique<Experiment<ListModus>>(config, output_path);
-  } else if (modus_chooser.compare("Collider") == 0) {
+  } else if (modus_chooser == "Collider") {
     return make_unique<Experiment<ColliderModus>>(config, output_path);
-  } else if (modus_chooser.compare("Sphere") == 0) {
+  } else if (modus_chooser == "Sphere") {
     return make_unique<Experiment<SphereModus>>(config, output_path);
   } else {
     throw InvalidModusRequest("Invalid Modus (" + modus_chooser +
@@ -290,6 +289,17 @@ void Experiment<Modus>::create_output(const char * name,
  * true - force all resonances to decay after last timestep \n
  * false - don't force decays (final output can contain resonances)
  *
+ * \key Metric_Type (ExpansionMode, optional, default = NoExpansion): \n
+ * NoExpansion - default SMASH run, with Minkowski metric \n
+ * MasslessFRW - FRW expansion going as t^(1/2)
+ * MassiveFRW - FRW expansion going as t^(2/3)
+ * Exponential - FRW expansion going as e^(t/2)
+ *
+ * \key Expansion_Rate (double, optional, default = 0.1) \n
+ * Corresponds to the speed of expansion of the universe in non minkowski metrics \n
+ * This value is useless if NoExpansion is selected; it corresponds to \n
+ * \f$b_r/l_0\f$ if the metric type is MasslessFRW or MassiveFRW, and to \n
+ * the parameter b in the Exponential expansion where \f$a(t) ~ e^{bt/2}\f$
  * \subpage pauliblocker
  */
 template <typename Modus>
@@ -304,6 +314,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       force_decays_(
           config.take({"Collision_Term", "Force_Decays_At_End"}, true)),
       use_grid_(config.take({"General", "Use_Grid"}, true)),
+      metric_(config.take({"General", "Metric_Type"},
+          ExpansionMode::NoExpansion),
+          config.take({"General", "Expansion_Rate"}, 0.1)),
+      strings_switch_(config.take({"Collision_Term", "Strings"}, false)),
       dileptons_switch_(config.has_value({"Output", "Dileptons"}) ?
                     config.take({"Output", "Dileptons", "Enable"}, true) :
                     false),
@@ -690,6 +704,8 @@ void Experiment<Modus>::initialize_new_event() {
   /* Save the initial conserved quantum numbers and total momentum in
    * the system for conservation checks */
   conserved_initial_ = QuantumNumbers(particles_);
+  wall_actions_total_ = 0;
+  previous_wall_actions_total_ = 0;
   interactions_total_ = 0;
   previous_interactions_total_ = 0;
   total_pauli_blocked_ = 0;
@@ -754,6 +770,9 @@ bool Experiment<Modus>::perform_action(Action &action,
   const auto id_process = static_cast<uint32_t>(interactions_total_ + 1);
   action.perform(&particles_, id_process);
   interactions_total_++;
+  if (action.get_type() == ProcessType::Wall) {
+    wall_actions_total_++;
+  }
   // Calculate Eckart rest frame density at the interaction point
   double rho = 0.0;
   if (dens_type_ != DensityType::None) {
@@ -824,7 +843,8 @@ void Experiment<Modus>::run_time_evolution() {
   const auto &log = logger<LogArea::Experiment>();
   const auto &log_ad_ts = logger<LogArea::AdaptiveTS>();
 
-  log.info() << format_measurements(particles_, interactions_total_, 0u,
+  log.info() << format_measurements(particles_, interactions_total_ -
+                                    wall_actions_total_, 0u,
                                     conserved_initial_, time_start_,
                                     parameters_.labclock.current_time());
 
@@ -890,6 +910,12 @@ void Experiment<Modus>::run_time_evolution() {
                      *potentials_, dUB_dr_lat_.get(), dUI3_dr_lat_.get());
     }
 
+    /* (5) Expand universe if non-minkowskian metric; updates
+           positions and momenta according to the selected expansion */
+    if (metric_.mode_ != ExpansionMode::NoExpansion) {
+      expand_space_time(&particles_, parameters_, metric_);
+    }
+
     ++parameters_.labclock;
 
     /* (5) Check conservation laws. */
@@ -898,7 +924,8 @@ void Experiment<Modus>::run_time_evolution() {
     // fragmentation are off.  If potentials are on then momentum is conserved
     // only in average.  If string fragmentation is on, then energy and
     // momentum are only very roughly conserved in high-energy collisions.
-    if (!potentials_ && !parameters_.strings_switch) {
+    if (!potentials_ && !strings_switch_ &&
+        metric_.mode_ == ExpansionMode::NoExpansion) {
       std::string err_msg = conserved_initial_.report_deviations(particles_);
       if (!err_msg.empty()) {
         log.error() << err_msg;
@@ -909,7 +936,7 @@ void Experiment<Modus>::run_time_evolution() {
 
   if (pauli_blocker_) {
     log.info("Interactions: Pauli-blocked/performed = ", total_pauli_blocked_,
-             "/", interactions_total_);
+             "/", interactions_total_ - wall_actions_total_);
   }
 }
 
@@ -1013,12 +1040,17 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions& actions) {
 template <typename Modus>
 void Experiment<Modus>::intermediate_output() {
   const auto &log = logger<LogArea::Experiment>();
+  const uint64_t wall_actions_this_interval =
+      wall_actions_total_ - previous_wall_actions_total_;
+  previous_wall_actions_total_ = wall_actions_total_;
   const uint64_t interactions_this_interval =
-      interactions_total_ - previous_interactions_total_;
+      interactions_total_ - previous_interactions_total_
+                          - wall_actions_this_interval;
   previous_interactions_total_ = interactions_total_;
   log.info() << format_measurements(
-      particles_, interactions_total_, interactions_this_interval,
-      conserved_initial_, time_start_, parameters_.outputclock.current_time());
+      particles_, interactions_total_ - wall_actions_total_,
+      interactions_this_interval, conserved_initial_, time_start_,
+      parameters_.outputclock.current_time());
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
   /*if (thermalizer_) {
     thermalizer_->update_lattice(particles_, density_param_);
@@ -1142,20 +1174,26 @@ void Experiment<Modus>::final_output(const int evt_num) {
   // to the start time, but we don't know that. Therefore, we check that
   // the time is positive, which should heuristically be the same).
   if (likely(parameters_.labclock > 0)) {
+    const uint64_t wall_actions_this_interval =
+        wall_actions_total_ - previous_wall_actions_total_;
     const uint64_t interactions_this_interval =
-        interactions_total_ - previous_interactions_total_;
+        interactions_total_ - previous_interactions_total_
+                            - wall_actions_this_interval;
     log.info() << format_measurements(
-      particles_, interactions_total_, interactions_this_interval,
-      conserved_initial_, time_start_, parameters_.outputclock.current_time());
+      particles_, interactions_total_ - wall_actions_total_,
+      interactions_this_interval, conserved_initial_, time_start_,
+      parameters_.outputclock.current_time());
     log.info() << hline;
     log.info() << "Time real: " << SystemClock::now() - time_start_;
     /* if there are no particles no interactions happened */
     log.info() << "Final scattering rate: "
-               << (particles_.is_empty() ? 0 : (2.0 * interactions_total_ /
+               << (particles_.is_empty() ? 0 : (2.0 * (interactions_total_ -
+                                                wall_actions_total_) /
                                                 particles_.time() /
                                                 particles_.size()))
                << " [fm-1]";
-    log.info() << "Final interaction number: " << interactions_total_;
+    log.info() << "Final interaction number: " << interactions_total_
+                                                - wall_actions_total_;
   }
 
   for (const auto &output : outputs_) {

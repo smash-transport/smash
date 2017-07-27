@@ -50,6 +50,11 @@ General:
     # reduce the combinatorics by placing the particles in a grid structure
     Use_Grid: True
 
+    # Select which kind of expansion the metric should have (only use with sphere modus)
+    Metric_Type: "NoExpansion"
+
+    # Expansion rate of the metric, if any expansion was selected
+    Expansion_Rate: 0.1
 
 Output:
     # how much time before recording measurables
@@ -179,6 +184,11 @@ Modi:
             -211:   100
             2212:   50
             2112:   50
+        # Initial condition for the momenta in the sphere; mainly used in the
+        # expanding universe setup. Options are "thermal momenta", "IC_ES",
+        # "IC_1M", "IC_2M" (see Bazow et al. 2016 on FLRW solution of the
+        # Boltzmann equation) and "IC_Massive" (generalization of IC_ES)
+        Initial_Condition: "thermal momenta"
 
     Collider:
         # Definitions for the projectile:

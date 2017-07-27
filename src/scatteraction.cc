@@ -606,10 +606,9 @@ void ScatterAction::string_excitation() {
                          incoming_particles_[1].cross_section_scaling_factor();
       for (size_t i = 0; i < outgoing_particles_.size(); i++) {
         const double tform_out = outgoing_particles_[i].formation_time();
-        const double fout = outgoing_particles_[i]
-            .cross_section_scaling_factor();
-        outgoing_particles_[i]
-            .set_cross_section_scaling_factor(fin * fout);
+        const double fout = outgoing_particles_[i].
+                            cross_section_scaling_factor();
+        outgoing_particles_[i].set_cross_section_scaling_factor(fin * fout);
         /* If the unformed incoming particles' formation time is larger than
          * the current outgoing particle's formation time, then the latter
          * is overwritten by the former*/

@@ -73,6 +73,12 @@ namespace Smash {
  * \key Strange_Chemical_Potential (double, optional, default = 0.0): \n
  * Strangeness chemical potential \f$ \mu_S \f$ used in case if
  * Use_Thermal_Multiplicities is true to compute thermal densities \f$ n_i \f$.
+ *
+ * \key Initial_Condition (SphereInitialCondition, default =
+ * SphereInitialCondition::ThermalMomenta) \n
+ * Initial distribution to use for momenta of particles. Mainly used in the
+ * expanding universe scenario, options are "thermal momenta", "IC_ES", "IC_1M"
+ * "IC_2M" and "IC_Massive"; see \iref{Bazow:2016oky} and \iref{Tindall:2016try}
  */
 
 
@@ -87,7 +93,9 @@ SphereModus::SphereModus(Configuration modus_config,
       mus_(modus_config.take({"Sphere", "Strange_Chemical_Potential"}, 0.)),
       init_multipl_(use_thermal_ ? std::map<PdgCode, int>() :
                     modus_config.take({"Sphere", "Init_Multiplicities"}).
-                                        convert_for(init_multipl_)) {
+                    convert_for(init_multipl_)),
+      init_distr_(modus_config.take({"Sphere", "Initial_Condition"},
+                    SphereInitialCondition::ThermalMomenta)) {
 }
 
 /* console output on startup of sphere specific parameters */
@@ -105,7 +113,6 @@ std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
   }
   return out;
 }
-
 
 /* initial_conditions - sets particle data for @particles */
 double SphereModus::initial_conditions(Particles *particles,
@@ -142,8 +149,32 @@ double SphereModus::initial_conditions(Particles *particles,
     Angles phitheta;
     /* thermal momentum according Maxwell-Boltzmann distribution */
     double momentum_radial;
-    momentum_radial = sample_momenta_from_thermal(this->sphere_temperature_,
-                                                  data.pole_mass());
+    /* assign momentum_radial according to requested distribution */
+    switch (init_distr_) {
+      case (SphereInitialCondition::ThermalMomenta):
+        momentum_radial = sample_momenta_from_thermal(this->sphere_temperature_,
+                                                      data.pole_mass());
+        break;
+      case (SphereInitialCondition::IC_ES):
+        momentum_radial = sample_momenta_IC_ES(this->sphere_temperature_);
+        break;
+      case (SphereInitialCondition::IC_1M):
+        momentum_radial = sample_momenta_IC_1M(this->sphere_temperature_,
+                                                      data.pole_mass());
+        break;
+      case (SphereInitialCondition::IC_2M):
+        momentum_radial = sample_momenta_IC_2M(this->sphere_temperature_,
+                                                      data.pole_mass());
+        break;
+      case (SphereInitialCondition::IC_Massive):
+        momentum_radial = sample_momenta_non_eq_mass(this->sphere_temperature_,
+                                                      data.pole_mass());
+        break;
+      default:
+        momentum_radial = sample_momenta_from_thermal(this->sphere_temperature_,
+                                                      data.pole_mass());
+        break;
+    }
     phitheta.distribute_isotropically();
     log.debug("Particle ", data.id(), " radial momenta ", momentum_radial, ' ',
               phitheta);

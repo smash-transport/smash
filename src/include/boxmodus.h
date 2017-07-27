@@ -24,6 +24,7 @@ namespace Smash {
  * (not implemented now) or inserted on opposite positions.
  *
  * To use this modus, chose
+    Modus:         Box
  * \code
  * General:
  *      MODUS: Box
@@ -63,6 +64,7 @@ class BoxModus : public ModusDefault {
    * inserted from the opposite side. Wall crossings are written to
    * collision output: this is where OutputsList is used.
    */
+
   int impose_boundary_conditions(Particles *particles,
                          const OutputsList &output_list = {});
 

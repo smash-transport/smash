@@ -16,6 +16,20 @@
 
 namespace Smash {
 
+struct ExpansionProperties {
+  // Defines the metric to be used
+  ExpansionMode mode_;
+  // Defines the expansion parameter (faster expansion for larger values)
+  double b_;
+
+  ExpansionProperties(ExpansionMode mode, double b) :
+    mode_(mode),
+    b_(b)
+  {}
+};
+
+double calc_hubble(double time, const ExpansionProperties &metric);
+
 /** Propagates the positions of all particles on a straight line
   * through the current time step.
   *
@@ -35,6 +49,13 @@ namespace Smash {
   */
 double propagate_straight_line(Particles *particles, double to_time,
                        const std::vector<FourVector> &beam_momentum);
+
+/** Modifies positions and momentum of all particles to account for
+  * space-time deformation.
+  */
+void expand_space_time(Particles *particles,
+                             const ExperimentParameters &parameters,
+                             const ExpansionProperties &metric);
 
 /**
  * Updates the momenta of all particles at the current
