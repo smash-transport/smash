@@ -367,19 +367,19 @@
  * \p reference to determine the magnitude of 1 ulp.
  *
  * Example:
- * The value `1.f` is `0x3f800000` in binary. The value
- * `1.00000011920928955078125f` with binary representation `0x3f800001`
+ * The value `1.` is `0x3f800000` in binary. The value
+ * `1.00000011920928955078125` with binary representation `0x3f800001`
  * therefore has a distance of 1 ulp.
  * A positive distance means the \p test_value is larger than the \p reference.
  * A negative distance means the \p test_value is smaller than the \p reference.
- * * `FUZZY_COMPARE(1.00000011920928955078125f, 1.f)` will show a distance of 1
- * * `FUZZY_COMPARE(1.f, 1.00000011920928955078125f)` will show a distance of -1
+ * * `FUZZY_COMPARE(1.00000011920928955078125, 1.)` will show a distance of 1
+ * * `FUZZY_COMPARE(1., 1.00000011920928955078125)` will show a distance of -1
  *
- * The value `0.999999940395355224609375f` with binary representation
- * `0x3f7fffff` has a smaller exponent than `1.f`:
- * * `FUZZY_COMPARE(0.999999940395355224609375f, 1.f)` will show a distance of
+ * The value `0.999999940395355224609375` with binary representation
+ * `0x3f7fffff` has a smaller exponent than `1.`:
+ * * `FUZZY_COMPARE(0.999999940395355224609375, 1.)` will show a distance of
  * -0.5
- * * `FUZZY_COMPARE(1.f, 0.999999940395355224609375f)` will show a distance of 1
+ * * `FUZZY_COMPARE(1., 0.999999940395355224609375)` will show a distance of 1
  *
  * ### Comparing to 0
  * Distance to 0 is implemented as comparing to <tt>std::numeric_limits<T>::min()</tt>

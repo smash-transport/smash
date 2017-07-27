@@ -29,7 +29,6 @@ class BinaryOutputBase : public OutputInterface {
  protected:
   explicit BinaryOutputBase(FILE *f, bool extended_format);
   void write(const std::string &s);
-  void write(const float x);
   void write(const double x);
   void write(const FourVector &v);
   void write(const std::int32_t x) {
@@ -53,7 +52,7 @@ class BinaryOutputBase : public OutputInterface {
 
  private:
   /// file format version number
-  uint16_t format_version_ = 4;
+  uint16_t format_version_ = 5;
   /// Option for extended output
   bool extended_;
 };

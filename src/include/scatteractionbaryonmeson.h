@@ -26,7 +26,7 @@ class ScatterActionBaryonMeson : public ScatterAction {
   using ScatterAction::ScatterAction;
   /** Determine the parametrized total cross section at high energies
    * for a baryon-meson collision. */
-  float high_energy_cross_section() const override;
+  double high_energy_cross_section() const override;
  protected:
   /**
    * \ingroup logging

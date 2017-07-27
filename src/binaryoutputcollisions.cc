@@ -138,10 +138,6 @@ void BinaryOutputBase::write(const std::string &s) {
   std::fwrite(s.c_str(), s.size(), 1, file_.get());
 }
 
-void BinaryOutputBase::write(const float x) {
-  std::fwrite(&x, sizeof(x), 1, file_.get());
-}
-
 void BinaryOutputBase::write(const double x) {
   std::fwrite(&x, sizeof(x), 1, file_.get());
 }

@@ -35,14 +35,14 @@ TEST(pi_rho0_pi_gamma) {
   const int number_of_photons = 10000;
   ParticleList in{pi, rho0};
   const auto act = make_unique<ScatterActionPhoton>(
-                     in, 0.05f, number_of_photons);
+                     in, 0.05, number_of_photons);
   act-> add_single_channel();
-  float tot_weight = 0.0;
+  double tot_weight = 0.0;
   for (int i = 0; i < number_of_photons; i++) {
     act->generate_final_state();
     tot_weight += act->raw_weight_value();
   }
-  COMPARE_RELATIVE_ERROR(tot_weight, 1.0f, 0.08f);
+  COMPARE_RELATIVE_ERROR(tot_weight, 1.0, 0.08);
 }
 
 TEST(is_photon_reaction_function) {

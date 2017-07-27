@@ -36,7 +36,7 @@ TEST(directory_is_created) {
 
 TEST(init_particletypes) { Test::create_smashon_particletypes(); }
 
-static const int current_format_version = 4;
+static const int current_format_version = 5;
 
 /* A set of convenient functions to read binary */
 
@@ -141,7 +141,7 @@ TEST(fullhistory_format) {
   bin_output->at_eventstart(particles, event_id);
 
   /* Create elastic interaction (smashon + smashon). */
-  ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.f);
+  ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_processes(10., true, true, 0., true,
                             NNbarTreatment::NoAnnihilation);
   action->generate_final_state();

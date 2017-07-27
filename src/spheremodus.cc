@@ -35,13 +35,13 @@ namespace Smash {
 /*!\Userguide
  * \page input_modi_sphere_ Sphere
  *
- * \key Radius (float, required): \n
+ * \key Radius (double, required): \n
  * Radius of the Sphere.
  *
- * \key Sphere_Temperature (float, required):\n
+ * \key Sphere_Temperature (double, required):\n
  * Temperature for the momentum sampling in the sphere in GeV.
  *
- * \key Start_Time (float, required):\n
+ * \key Start_Time (double, required):\n
  * Starting time of Sphere calculation.
  *
  * \key Init_Multiplicities (int int, required):\n
@@ -89,8 +89,8 @@ SphereModus::SphereModus(Configuration modus_config,
       start_time_(modus_config.take({"Sphere", "Start_Time"})),
       use_thermal_(
         modus_config.take({"Sphere", "Use_Thermal_Multiplicities"}, false)),
-      mub_(modus_config.take({"Sphere", "Baryon_Chemical_Potential"}, 0.0f)),
-      mus_(modus_config.take({"Sphere", "Strange_Chemical_Potential"}, 0.0f)),
+      mub_(modus_config.take({"Sphere", "Baryon_Chemical_Potential"}, 0.)),
+      mus_(modus_config.take({"Sphere", "Strange_Chemical_Potential"}, 0.)),
       init_multipl_(use_thermal_ ? std::map<PdgCode, int>() :
                     modus_config.take({"Sphere", "Init_Multiplicities"}).
                     convert_for(init_multipl_)),
@@ -115,7 +115,7 @@ std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
 }
 
 /* initial_conditions - sets particle data for @particles */
-float SphereModus::initial_conditions(Particles *particles,
+double SphereModus::initial_conditions(Particles *particles,
   const ExperimentParameters &parameters) {
   const auto &log = logger<LogArea::Sphere>();
   FourVector momentum_total(0, 0, 0, 0);

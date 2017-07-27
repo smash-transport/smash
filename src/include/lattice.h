@@ -47,9 +47,9 @@ class RectangularLattice {
     * i,j,k comprises volume ((i,i+1)lx/nx; (j,j+1)ly/ny; (k,k+1)lz/nz),
     * i: 0,nx-1; j: 0, ny-1; k: 0, nz-1;
     */
-  RectangularLattice(const std::array<float, 3> &l,
+  RectangularLattice(const std::array<double, 3> &l,
                      const std::array<int, 3> &n,
-                     const std::array<float, 3> &orig, bool per,
+                     const std::array<double, 3> &orig, bool per,
                      const LatticeUpdate upd)
   : lattice_sizes_(l),
     n_cells_(n),
@@ -93,9 +93,9 @@ class RectangularLattice {
 
   /// Returns coordinate of cell center given its index
   inline ThreeVector cell_center(int ix, int iy, int iz) const {
-    return ThreeVector(origin_[0] + cell_sizes_[0] * (ix + 0.5f),
-                       origin_[1] + cell_sizes_[1] * (iy + 0.5f),
-                       origin_[2] + cell_sizes_[2] * (iz + 0.5f));
+    return ThreeVector(origin_[0] + cell_sizes_[0] * (ix + 0.5),
+                       origin_[1] + cell_sizes_[1] * (iy + 0.5),
+                       origin_[2] + cell_sizes_[2] * (iz + 0.5));
   }
 
   /// Returns coordinate of cell center given the 1d index of the cell
@@ -108,16 +108,16 @@ class RectangularLattice {
   }
 
   /// Returns lengths of the lattice in x,y,z directions
-  const std::array<float, 3>& lattice_sizes() const { return lattice_sizes_; }
+  const std::array<double, 3>& lattice_sizes() const { return lattice_sizes_; }
 
   /// Returns number of cells in x,y,z directions
   const std::array<int, 3>& dimensions() const { return n_cells_; }
 
   /// Returns lengths of one cell in x,y,z directions
-  const std::array<float, 3>& cell_sizes() const { return cell_sizes_; }
+  const std::array<double, 3>& cell_sizes() const { return cell_sizes_; }
 
   /// Returns lattice origin: left, down, near corner coordinates
-  const std::array<float, 3>& origin() const { return origin_; }
+  const std::array<double, 3>& origin() const { return origin_; }
 
   /// Returns if lattice is periodic or not
   bool periodic() const { return periodic_; }
@@ -217,9 +217,9 @@ class RectangularLattice {
     // (r-r_cut)*csize - 0.5 < i < (r+r_cut)*csize - 0.5, r = r_center - r_0
     for (int i = 0; i < 3; i++) {
       l_bounds[i] = std::ceil((point[i] - origin_[i] - r_cut) / cell_sizes_[i]
-                               - 0.5f);
+                               - 0.5);
       u_bounds[i] = std::ceil((point[i] - origin_[i] + r_cut) / cell_sizes_[i]
-                               - 0.5f);
+                               - 0.5);
     }
 
     if (!periodic_) {
@@ -265,9 +265,9 @@ class RectangularLattice {
       throw std::invalid_argument("Lattice for gradient should have the"
                   " same origin/dims/periodicity that the original one.");
     }
-    const float inv_2dx = 0.5f / cell_sizes_[0];
-    const float inv_2dy = 0.5f / cell_sizes_[1];
-    const float inv_2dz = 0.5f / cell_sizes_[2];
+    const double inv_2dx = 0.5 / cell_sizes_[0];
+    const double inv_2dy = 0.5 / cell_sizes_[1];
+    const double inv_2dz = 0.5 / cell_sizes_[2];
     const int dix = 1;
     const int diy = n_cells_[0];
     const int diz = n_cells_[0]*n_cells_[1];
@@ -326,13 +326,13 @@ class RectangularLattice {
   /// The lattice itself, array containing physical quantities
   std::vector<T> lattice_;
   /// Lattice sizes in x,y,z directions
-  const std::array<float, 3> lattice_sizes_;
+  const std::array<double, 3> lattice_sizes_;
   /// Number of cells in x,y,z directions
   const std::array<int, 3> n_cells_;
   /// Cell sizes in x,y,z directions
-  const std::array<float, 3> cell_sizes_;
+  const std::array<double, 3> cell_sizes_;
   /// Coordinates of the left down nearer corner
-  const std::array<float, 3> origin_;
+  const std::array<double, 3> origin_;
   /// Periodicity
   const bool periodic_;
   /// when lattice should be recalculated

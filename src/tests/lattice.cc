@@ -15,24 +15,24 @@
 using namespace Smash;
 
 static std::unique_ptr<RectangularLattice<FourVector>> create_lattice(bool p) {
-  const std::array<float, 3> l = {10.0f, 6.0f, 2.0f};
+  const std::array<double, 3> l = {10., 6., 2.};
   const std::array<int, 3> n = {4, 8, 3};
-  const std::array<float, 3> origin = {0.0f, 0.0f, 0.0f};
+  const std::array<double, 3> origin = {0., 0., 0.};
   return make_unique<RectangularLattice<FourVector>>(
       l, n, origin, p, LatticeUpdate::EveryTimestep);
 }
 
 TEST(getters) {
   auto lattice = create_lattice(true);
-  COMPARE(lattice->lattice_sizes()[0], 10.0f);
-  COMPARE(lattice->lattice_sizes()[1], 6.0f);
-  COMPARE(lattice->lattice_sizes()[2], 2.0f);
+  COMPARE(lattice->lattice_sizes()[0], 10.);
+  COMPARE(lattice->lattice_sizes()[1], 6.);
+  COMPARE(lattice->lattice_sizes()[2], 2.);
   COMPARE(lattice->dimensions()[0], 4);
   COMPARE(lattice->dimensions()[1], 8);
   COMPARE(lattice->dimensions()[2], 3);
-  COMPARE(lattice->cell_sizes()[0], 2.5f);
-  COMPARE(lattice->cell_sizes()[1], 0.75f);
-  COMPARE(lattice->cell_sizes()[2], 2.0f / 3.0f);
+  COMPARE(lattice->cell_sizes()[0], 2.5);
+  COMPARE(lattice->cell_sizes()[1], 0.75);
+  COMPARE(lattice->cell_sizes()[2], 2. / 3.);
   VERIFY(lattice->periodic());
 }
 
@@ -74,12 +74,10 @@ TEST(cell_center) {
   auto lattice = create_lattice(true);
   COMPARE(lattice->cell_center(0, 0, 0).x1(), 1.25);
   COMPARE(lattice->cell_center(0, 0, 0).x2(), 0.375);
-  // cell center is calculated from float, though ThreeVector contains doubles
-  // so accuracy is not better then the float one
-  FUZZY_COMPARE(float(lattice->cell_center(0, 0, 0).x3()), 1.0f / 3.0f);
+  FUZZY_COMPARE(lattice->cell_center(0, 0, 0).x3(), 1.0 / 3.0);
   COMPARE(lattice->cell_center(1, 1, 1).x1(), 3.75);
   COMPARE(lattice->cell_center(1, 1, 1).x2(), 0.375 * 3);
-  FUZZY_COMPARE(float(lattice->cell_center(1, 1, 1).x3()), 1.0f);
+  FUZZY_COMPARE(lattice->cell_center(1, 1, 1).x3(), 1.0);
   // Cell center from 1d index
   auto dims = lattice->dimensions();
   const ThreeVector r1 = lattice->cell_center(1, 3, 2);
@@ -184,9 +182,9 @@ TEST(iterate_in_radius) {
  */
 TEST(gradient) {
   // Set a lattice with random parameters, but a relatively fine one.
-  const std::array<float, 3> l = {9.0f, 7.0f, 13.0f};
+  const std::array<double, 3> l = {9., 7., 13.};
   const std::array<int, 3> n = {50, 60, 70};
-  const std::array<float, 3> origin = {-5.2f, -4.3f, -6.7f};
+  const std::array<double, 3> origin = {-5.2, -4.3, -6.7};
   bool periodicity = false;
   auto lat = make_unique<RectangularLattice<double>>(
              l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
@@ -240,9 +238,9 @@ TEST(gradient) {
    with non-periodic is treatment of derivatives on the edges.
 */
 TEST(gradient_periodic) {
-  const std::array<float, 3> l = {9.0f, 7.0f, 13.0f};
+  const std::array<double, 3> l = {9., 7., 13.};
   const std::array<int, 3> n = {50, 60, 70};
-  const std::array<float, 3> origin = {-5.2f, -4.3f, -6.7f};
+  const std::array<double, 3> origin = {-5.2, -4.3, -6.7};
   bool periodicity = true;
   auto lat = make_unique<RectangularLattice<double>>(
              l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
@@ -284,9 +282,9 @@ TEST(gradient_periodic) {
 /* Test gradient for 2x2x2 lattice. The test is that it doesn't segfault.
 */
 TEST(gradient_2x2x2lattice) {
-  const std::array<float, 3> l = {9.0f, 7.0f, 13.0f};
+  const std::array<double, 3> l = {9., 7., 13.};
   const std::array<int, 3> n = {2, 2, 2};
-  const std::array<float, 3> origin = {-5.2f, -4.3f, -6.7f};
+  const std::array<double, 3> origin = {-5.2, -4.3, -6.7};
   bool periodicity = false;
   auto lat = make_unique<RectangularLattice<double>>(
              l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
@@ -306,9 +304,9 @@ TEST(gradient_2x2x2lattice) {
 
 // If one of the dimensions is 1, then 3D gradient calculation is impossible
 TEST_CATCH(gradient_impossible_lattice, std::runtime_error) {
-  const std::array<float, 3> l = {9.0f, 7.0f, 13.0f};
+  const std::array<double, 3> l = {9., 7., 13.};
   const std::array<int, 3> n = {5, 42, 1};
-  const std::array<float, 3> origin = {-5.2f, -4.3f, -6.7f};
+  const std::array<double, 3> origin = {-5.2, -4.3, -6.7};
   bool periodicity = false;
   auto lat = make_unique<RectangularLattice<double>>(
              l, n, origin, periodicity, LatticeUpdate::EveryTimestep);

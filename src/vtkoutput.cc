@@ -119,12 +119,12 @@ void VtkOutput::write(const Particles &particles) {
   }
   std::fprintf(file_.get(), "SCALARS is_formed int 1\n");
   std::fprintf(file_.get(), "LOOKUP_TABLE default\n");
-  float current_time = particles.time();
+  double current_time = particles.time();
   for (const auto &p : particles) {
     std::fprintf(file_.get(), "%s\n",
                  (p.formation_time() > current_time) ? "0" : "1");
   }
-  std::fprintf(file_.get(), "SCALARS cross_section_scaling_factor float 1\n");
+  std::fprintf(file_.get(), "SCALARS cross_section_scaling_factor double 1\n");
   std::fprintf(file_.get(), "LOOKUP_TABLE default\n");
   for (const auto &p : particles) {
     std::fprintf(file_.get(), "%g\n", p.cross_section_scaling_factor());
@@ -167,14 +167,14 @@ void VtkOutput::write_vtk_scalar(std::ofstream &file,
                                  RectangularLattice<T> &lattice,
                                  const std::string &varname,
                                  F &&get_quantity) {
-  file << "SCALARS " << varname << " float 1\n"
+  file << "SCALARS " << varname << " double 1\n"
        << "LOOKUP_TABLE default\n";
   file << std::setprecision(3);
   file << std::fixed;
   const auto dim = lattice.dimensions();
   lattice.iterate_sublattice({0, 0, 0}, dim,
                              [&](T &node, int ix, int, int) {
-    const float f_from_node = get_quantity(node);
+    const double f_from_node = get_quantity(node);
     file << f_from_node << " ";
     if (ix == dim[0] - 1) {
       file << "\n";
@@ -187,7 +187,7 @@ void VtkOutput::write_vtk_vector(std::ofstream &file,
                                  RectangularLattice<T> &lattice,
                                  const std::string &varname,
                                  F &&get_quantity) {
-  file << "VECTORS " << varname << " float\n";
+  file << "VECTORS " << varname << " double\n";
   file << std::setprecision(3);
   file << std::fixed;
   const auto dim = lattice.dimensions();

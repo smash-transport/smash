@@ -67,27 +67,27 @@ namespace Smash {
 ////////////////////////////////////////////////////////////////////////////////
 // GridBase
 
-std::pair<std::array<float, 3>, std::array<float, 3>>
+std::pair<std::array<double, 3>, std::array<double, 3>>
 GridBase::find_min_and_length(const Particles &particles) {
-  std::pair<std::array<float, 3>, std::array<float, 3>> r;
+  std::pair<std::array<double, 3>, std::array<double, 3>> r;
   auto &min_position = r.first;
   auto &length = r.second;
 
   // intialize min and max position arrays with the position of the first
   // particle in the list
   const auto &first_position = particles.front().position();
-  min_position = {{static_cast<float>(first_position[1]),
-                   static_cast<float>(first_position[2]),
-                   static_cast<float>(first_position[3])}};
+  min_position = {{first_position[1],
+                   first_position[2],
+                   first_position[3]}};
   auto max_position = min_position;
   for (const auto &p : particles) {
     const auto &pos = p.position();
-    min_position[0] = std::min(min_position[0], static_cast<float>(pos[1]));
-    min_position[1] = std::min(min_position[1], static_cast<float>(pos[2]));
-    min_position[2] = std::min(min_position[2], static_cast<float>(pos[3]));
-    max_position[0] = std::max(max_position[0], static_cast<float>(pos[1]));
-    max_position[1] = std::max(max_position[1], static_cast<float>(pos[2]));
-    max_position[2] = std::max(max_position[2], static_cast<float>(pos[3]));
+    min_position[0] = std::min(min_position[0], pos[1]);
+    min_position[1] = std::min(min_position[1], pos[2]);
+    min_position[2] = std::min(min_position[2], pos[3]);
+    max_position[0] = std::max(max_position[0], pos[1]);
+    max_position[1] = std::max(max_position[1], pos[2]);
+    max_position[2] = std::max(max_position[2], pos[3]);
   }
   length[0] = max_position[0] - min_position[0];
   length[1] = max_position[1] - min_position[1];
@@ -100,8 +100,9 @@ GridBase::find_min_and_length(const Particles &particles) {
 
 template <GridOptions O>
 Grid<O>::Grid(
-    const std::pair<std::array<float, 3>, std::array<float, 3>> &min_and_length,
-    const Particles &particles, float max_interaction_length,
+    const std::pair<std::array<double, 3>,
+    std::array<double, 3>> &min_and_length,
+    const Particles &particles, double max_interaction_length,
     CellSizeStrategy strategy)
     : length_(min_and_length.second) {
   const auto min_position = min_and_length.first;
@@ -136,9 +137,9 @@ Grid<O>::Grid(
 
   // This normally equals 1/max_interaction_length, but if the number of cells
   // is reduced (because of low density) then this value is smaller.
-  std::array<float, 3> index_factor = {1.f / max_interaction_length,
-                                       1.f / max_interaction_length,
-                                       1.f / max_interaction_length};
+  std::array<double, 3> index_factor = {1. / max_interaction_length,
+                                       1. / max_interaction_length,
+                                       1. / max_interaction_length};
   for (std::size_t i = 0; i < number_of_cells_.size(); ++i) {
     number_of_cells_[i] =
         (strategy == CellSizeStrategy::Largest)
@@ -162,7 +163,7 @@ Grid<O>::Grid(
       number_of_cells_[i] = max_cells;
       index_factor[i] = number_of_cells_[i] / length_[i];
       while (index_factor[i] * length_[i] >= number_of_cells_[i]) {
-        index_factor[i] = std::nextafter(index_factor[i], 0.f);
+        index_factor[i] = std::nextafter(index_factor[i], 0.);
       }
       assert(index_factor[i] * length_[i] < number_of_cells_[i]);
     } else if (O == GridOptions::PeriodicBoundaries) {
@@ -171,7 +172,7 @@ Grid<O>::Grid(
       }
       index_factor[i] = number_of_cells_[i] / length_[i];
       while (index_factor[i] * length_[i] >= number_of_cells_[i]) {
-        index_factor[i] = std::nextafter(index_factor[i], 0.f);
+        index_factor[i] = std::nextafter(index_factor[i], 0.);
       }
       assert(index_factor[i] * length_[i] < number_of_cells_[i]);
     }
@@ -212,12 +213,9 @@ Grid<O>::Grid(
     // with index_factor to determine the 3 x,y,z indexes to pass to make_index.
     auto &&cell_index_for = [&](const ParticleData &p) {
       return make_index(
-          std::floor((static_cast<float>(p.position()[1]) - min_position[0]) *
-                     index_factor[0]),
-          std::floor((static_cast<float>(p.position()[2]) - min_position[1]) *
-                     index_factor[1]),
-          std::floor((static_cast<float>(p.position()[3]) - min_position[2]) *
-                     index_factor[2]));
+          std::floor((p.position()[1] - min_position[0]) * index_factor[0]),
+          std::floor((p.position()[2] - min_position[1]) * index_factor[1]),
+          std::floor((p.position()[3] - min_position[2]) * index_factor[2]));
     };
 
     for (const auto &p : particles) {
@@ -434,11 +432,13 @@ void Grid<GridOptions::PeriodicBoundaries>::iterate_cells(
 }
 
 template Grid<GridOptions::Normal>::Grid(
-    const std::pair<std::array<float, 3>, std::array<float, 3>> &min_and_length,
-    const Particles &particles, float max_interaction_length,
+    const std::pair<std::array<double, 3>,
+    std::array<double, 3>> &min_and_length,
+    const Particles &particles, double max_interaction_length,
     CellSizeStrategy strategy);
 template Grid<GridOptions::PeriodicBoundaries>::Grid(
-    const std::pair<std::array<float, 3>, std::array<float, 3>> &min_and_length,
-    const Particles &particles, float max_interaction_length,
+    const std::pair<std::array<double, 3>,
+    std::array<double, 3>> &min_and_length,
+    const Particles &particles, double max_interaction_length,
     CellSizeStrategy strategy);
 }  // namespace Smash

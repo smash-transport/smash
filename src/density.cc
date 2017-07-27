@@ -14,18 +14,18 @@
 
 namespace Smash {
 
-float density_factor(const ParticleType &type, DensityType dens_type) {
+double density_factor(const ParticleType &type, DensityType dens_type) {
   switch (dens_type) {
     case DensityType::Hadron:
-      return type.is_hadron() ? 1.f : 0.f;
+      return type.is_hadron() ? 1. : 0.;
     case DensityType::Baryon:
-      return static_cast<float>(type.baryon_number());
+      return static_cast<double>(type.baryon_number());
     case DensityType::BaryonicIsospin:
-      return type.is_baryon() ? type.isospin3_rel() : 0.f;
+      return type.is_baryon() ? type.isospin3_rel() : 0.;
     case DensityType::Pion:
-      return type.pdgcode().is_pion() ? 1.f : 0.f;
+      return type.pdgcode().is_pion() ? 1. : 0.;
     default:
-      return 0.f;
+      return 0.;
   }
 }
 
@@ -74,7 +74,7 @@ std::pair<double, ThreeVector> rho_eckart_impl(const ThreeVector &r,
   std::array<FourVector, 4> jmu_pos, jmu_neg;
 
   for (const auto &p : plist) {
-    const float dens_factor = density_factor(p.type(), dens_type);
+    const double dens_factor = density_factor(p.type(), dens_type);
     if (std::abs(dens_factor) < really_small) {
       continue;
     }
@@ -93,7 +93,7 @@ std::pair<double, ThreeVector> rho_eckart_impl(const ThreeVector &r,
       continue;
     }
     const FourVector tmp = mom * (dens_factor / mom.x0());
-    if (dens_factor > 0.f) {
+    if (dens_factor > 0.) {
       jmu_pos[0] += tmp * sf_and_grad.first;
       if (compute_gradient) {
         for (int k = 1; k <= 3; k++) {

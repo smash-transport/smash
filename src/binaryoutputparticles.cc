@@ -101,9 +101,9 @@ BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
    * \code
    *     9*double             int int int     double
    * t x y z mass p0 px py pz pdg ID Ncoll formation_time
-   *        float                    uint32_t            uint32_t
+   *        double                    uint32_t            uint32_t
    * cross_section_scaling_factor process_ID_origin process_type_origin
-   *        float        int         int
+   *        double        int         int
    * time_of_origin PDG_mother1 PDG_mother2
    * \endcode
    *

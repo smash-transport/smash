@@ -39,7 +39,7 @@ class PauliBlocker {
   ~PauliBlocker();
 
   // Returns phase-space densityof particle pdg at the point (r,p)
-  float phasespace_dens(const ThreeVector &r, const ThreeVector &p,
+  double phasespace_dens(const ThreeVector &r, const ThreeVector &p,
                         const Particles &particles, const PdgCode pdg,
                         const ParticleList &disregard) const;
 
@@ -51,22 +51,22 @@ class PauliBlocker {
   void init_weights_analytical();
 
   // Sigma of the gaussian used for smearing
-  float sig_;
+  double sig_;
 
   // Radius, after which gaussians (used for averaging) are cut, fm
-  float rc_;
+  double rc_;
 
   // Radius of averaging in coordinate space, fm
-  float rr_;
+  double rr_;
 
   // Radius of averaging in momentum space, GeV/c
-  float rp_;
+  double rp_;
 
   // Testparticles number
   int ntest_;
 
   // Weights: tabulated results of numerical integration
-  std::array<float, 30> weights_;
+  std::array<double, 30> weights_;
 };
 }  // namespace Smash
 

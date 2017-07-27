@@ -51,7 +51,7 @@ bool Action::is_pauli_blocked(const Particles & particles,
                                            p.momentum().threevec(),
                                            particles, p.pdgcode(),
                                            incoming_particles_);
-      if (f >  Random::uniform(0.f, 1.f)) {
+      if (f >  Random::uniform(0., 1.)) {
         log.debug("Action ", *this, " is pauli-blocked with f = ", f);
         return true;
       }

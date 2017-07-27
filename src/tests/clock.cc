@@ -180,11 +180,11 @@ TEST(next_multiple) {
   double interval = 1.3;
   COMPARE(labtime.next_multiple(interval), -interval) << labtime.current_time();
   ++labtime;  // t = -1.0
-  COMPARE(labtime.next_multiple(interval), 0.f) << labtime.current_time();
+  COMPARE(labtime.next_multiple(interval), 0.) << labtime.current_time();
   ++labtime;  // t = -0.6
-  COMPARE(labtime.next_multiple(interval), 0.f) << labtime.current_time();
+  COMPARE(labtime.next_multiple(interval), 0.) << labtime.current_time();
   ++labtime;  // t = -0.2
-  COMPARE(labtime.next_multiple(interval), 0.f) << labtime.current_time();
+  COMPARE(labtime.next_multiple(interval), 0.) << labtime.current_time();
   ++labtime;  // t = +0.2
   COMPARE(labtime.next_multiple(interval), interval) << labtime.current_time();
   ++labtime;  // t = +0.6

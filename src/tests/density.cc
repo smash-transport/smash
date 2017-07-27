@@ -60,24 +60,24 @@ TEST(density_type) {
   const ParticleType &proton = ParticleType::find(0x2212);
 
   // verify that pions are recognized as pions
-  COMPARE(density_factor(pi_zero,  DensityType::Pion), 1.f);
-  COMPARE(density_factor(pi_plus,  DensityType::Pion), 1.f);
-  COMPARE(density_factor(pi_minus, DensityType::Pion), 1.f);
+  COMPARE(density_factor(pi_zero,  DensityType::Pion), 1.);
+  COMPARE(density_factor(pi_plus,  DensityType::Pion), 1.);
+  COMPARE(density_factor(pi_minus, DensityType::Pion), 1.);
 
   // verify that pions are not recognized as baryons
-  COMPARE(density_factor(pi_zero, DensityType::Baryon), 0.f);
+  COMPARE(density_factor(pi_zero, DensityType::Baryon), 0.);
 
   // verify that protons are recognized as baryons
-  COMPARE(density_factor(proton, DensityType::Baryon), 1.f);
+  COMPARE(density_factor(proton, DensityType::Baryon), 1.);
 
   // verify that protons are not recognized as pions
-  COMPARE(density_factor(proton, DensityType::Pion), 0.f);
+  COMPARE(density_factor(proton, DensityType::Pion), 0.);
 
   // verify that all are recognized as particles
-  COMPARE(density_factor(proton,   DensityType::Hadron), 1.f);
-  COMPARE(density_factor(pi_zero,  DensityType::Hadron), 1.f);
-  COMPARE(density_factor(pi_plus,  DensityType::Hadron), 1.f);
-  COMPARE(density_factor(pi_minus, DensityType::Hadron), 1.f);
+  COMPARE(density_factor(proton,   DensityType::Hadron), 1.);
+  COMPARE(density_factor(pi_zero,  DensityType::Hadron), 1.);
+  COMPARE(density_factor(pi_plus,  DensityType::Hadron), 1.);
+  COMPARE(density_factor(pi_minus, DensityType::Hadron), 1.);
 }
 
 // create one particle moving along x axis and check density in comp. frame
@@ -145,15 +145,15 @@ TEST(density_eckart_special_cases) {
 
 TEST(smearing_factor_normalization) {
   // Create density lattice with small lattice spacing
-  const std::array<float, 3> l = {10.0f, 10.0f, 10.0f};
+  const std::array<double, 3> l = {10., 10., 10.};
   const std::array<int, 3> n = {50, 60, 70};
-  const std::array<float, 3> origin = {0.0f, 0.0f, 0.0f};
+  const std::array<double, 3> origin = {0., 0., 0.};
   bool periodicity = true;
   auto lat = make_unique<DensityLattice>(
              l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
   // Create box with 1 proton
   const int N = 1;
-  const float L = 10.0f;
+  const double L = 10.;
   auto conf = Test::configuration();
   conf["Modus"] = "Box";
   conf.take({"Modi", "Box", "Init_Multiplicities"});
@@ -177,8 +177,8 @@ TEST(smearing_factor_normalization) {
 }
 
 TEST(smearing_factor_rcut_correction) {
-  FUZZY_COMPARE(smearing_factor_rcut_correction(3.0), 0.970709f);
-  FUZZY_COMPARE(smearing_factor_rcut_correction(4.0), 0.998866f);
+  FUZZY_COMPARE(smearing_factor_rcut_correction(3.0), 0.97070911346511177);
+  FUZZY_COMPARE(smearing_factor_rcut_correction(4.0), 0.99886601571021467);
 }
 
 // check that analytical and numerical results for gradient of density coincide
@@ -352,7 +352,7 @@ ParticleType::create_type_list(
     "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
     "proton 0.938 0.0 2212\n");
 const int Ntest = 1000;
-const float L = 10.0f;
+const double L = 10.0;
 Configuration conf(TEST_CONFIG_PATH);
 conf["Modus"] = "Box";
 conf.take({"Modi", "Box", "Init_Multiplicities"});

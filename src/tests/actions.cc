@@ -21,14 +21,14 @@ TEST(construct_and_insert) {
   Test::create_smashon_particletypes();
 
   // use different times for different actions
-  constexpr float time_1 = 1.f;
-  constexpr float time_2 = 2.f;
-  constexpr float time_3 = 3.f;
-  constexpr float time_4 = 4.f;
-  constexpr float time_5 = 5.f;
-  constexpr float time_6 = 6.f;
+  constexpr double time_1 = 1.;
+  constexpr double time_2 = 2.;
+  constexpr double time_3 = 3.;
+  constexpr double time_4 = 4.;
+  constexpr double time_5 = 5.;
+  constexpr double time_6 = 6.;
 
-  constexpr float current_time = 10.5f;
+  constexpr double current_time = 10.5;
 
   // create arbitrary particle
   ParticleData testparticle = Test::smashon(Test::Momentum{0.2, 0., .1, 0.},

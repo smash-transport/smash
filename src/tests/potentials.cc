@@ -131,7 +131,7 @@ TEST(nucleus_potential_profile) {
   const ParticleType &proton = ParticleType::find(0x2212);
 
   std::ofstream a_file;
-  const float timestep = param.labclock.timestep_duration();
+  const double timestep = param.labclock.timestep_duration();
   for (auto it = 0; it < 20; it++) {
     a_file.open(("Nucleus_U_xy.vtk." + std::to_string(it)).c_str(),
                                                      std::ios::out);
@@ -144,7 +144,7 @@ TEST(nucleus_potential_profile) {
               "SPACING 1 1 1\n" <<
               "ORIGIN " << -nx << " " << -ny << " 0\n" <<
               "POINT_DATA " << (2*nx+1)*(2*ny+1) << "\n" <<
-              "SCALARS potential float 1\n" <<
+              "SCALARS potential double 1\n" <<
               "LOOKUP_TABLE default\n";
 
     a_file << std::setprecision(8);
@@ -159,7 +159,7 @@ TEST(nucleus_potential_profile) {
     }
     a_file.close();
     for (auto i = 0; i < 50; i++) {
-      const float time_to = 5.0*it + i*timestep;
+      const double time_to = 5.0*it + i*timestep;
       const double dt = propagate_straight_line(&P, time_to, {});
       update_momenta(&P, dt, *pot, nullptr, nullptr);
     }
@@ -219,7 +219,7 @@ TEST(propagation_in_test_potential) {
   COMPARE(P.back().id(), 0);
 
   // Propagate, until particle is at x>>d, where d is parameter of potential
-  const float timestep = param.labclock.timestep_duration();
+  const double timestep = param.labclock.timestep_duration();
   double time_to = 0.0;
   while (P.front().position().x1() < 20*d) {
     time_to += timestep;

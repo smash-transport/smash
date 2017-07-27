@@ -49,23 +49,23 @@ class SphereModus : public ModusDefault {
 
   /** creates initial conditions for the particles.
    */
-  float initial_conditions(Particles *particles,
+  double initial_conditions(Particles *particles,
                           const ExperimentParameters &parameters);
 
  private:
   /// Sphere radius length
-  float radius_;
+  double radius_;
   /// Temperature for momentum distribution
-  float sphere_temperature_;
+  double sphere_temperature_;
   /// Starting time for the Sphere
-  const float start_time_ = 0.0f;
+  const double start_time_ = 0.;
   /** whether to use a thermal initialization for all particles
    *  instead of specific numbers */
   const bool use_thermal_ = false;
   /// baryon chemical potential for thermal box
-  const float mub_;
+  const double mub_;
   /// strange chemical potential for thermal box
-  const float mus_;
+  const double mus_;
   /// particle multiplicities at initialization
   const std::map<PdgCode, int> init_multipl_;
   /** Initialization scheme for momenta in the sphere;

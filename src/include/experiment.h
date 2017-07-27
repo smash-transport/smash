@@ -205,7 +205,7 @@ class Experiment : public ExperimentBase {
    * \param dt The current time step size
    * \return The minimal required size of cells
    */
-  float compute_min_cell_length(float dt) const {
+  double compute_min_cell_length(double dt) const {
     return std::sqrt(4 * dt * dt + max_transverse_distance_sqr_);
   }
 
@@ -369,7 +369,7 @@ class Experiment : public ExperimentBase {
   /**
    * Maximal distance at which particles can interact, squared
    */
-  float max_transverse_distance_sqr_ = std::numeric_limits<float>::max();
+  double max_transverse_distance_sqr_ = std::numeric_limits<double>::max();
 
   /** The conserved quantities of the system.
    *
