@@ -85,7 +85,8 @@ TEST(unusual_set_theta_odd) {
 
 TEST(catch_invalid_cosine) {
   for (double newcos = -8.0; newcos < 8.0; newcos += .2) {
-    bool invalid_input = (newcos < -1 || newcos > 1);
+    bool invalid_input = (newcos < -1 - really_small ||
+                          newcos > 1 + really_small);
     // Did I catch an exception?
     bool caught = false;
     // this should not work:
