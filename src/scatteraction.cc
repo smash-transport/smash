@@ -481,6 +481,7 @@ void ScatterAction::string_excitation() {
   const auto &log = logger<LogArea::Pythia>();
   // Disable doubleing point exception trap for Pythia
   {
+  bool isnext = false;
   DisableFloatTraps guard;
   /* set all necessary parameters for Pythia
    * Create Pythia object */
@@ -529,7 +530,9 @@ void ScatterAction::string_excitation() {
   pythia.init();
   /* Short notation for Pythia event */
   Pythia8::Event &event = pythia.event;
-  pythia.next();
+  while( isnext == false ){
+    isnext = pythia.next();
+  }
   ParticleList new_intermediate_particles;
   for (int i = 0; i < event.size(); i++) {
     if (event[i].isFinal()) {
