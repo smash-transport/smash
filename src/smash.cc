@@ -24,6 +24,11 @@
 /* build dependent variables */
 #include "include/config.h"
 
+#include "Pythia8/Pythia.h"
+
+using namespace Pythia8;
+extern Pythia *pythia;
+
 namespace Smash {
 
 namespace {
@@ -435,9 +440,13 @@ int main(int argc, char *argv[]) {
                  << report;
     }
 
+    pythia = new Pythia(PYTHIA_XML_DIR, false);
+
     // run the experiment
     log.trace(source_location, " run the Experiment");
     experiment->run();
+
+    delete pythia;
   } catch (std::exception &e) {
     log.fatal() << "SMASH failed with the following error:\n" << e.what();
     return EXIT_FAILURE;
