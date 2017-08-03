@@ -2105,14 +2105,15 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
                       delta*(-2.*pow(mpion,4) - 1.*pow(mrho,2)*s - 2.*pow(s,2) + pow(mpion,2)*(-3.*pow(mrho,2) - 2.*C4*pow(mrho,4) + 4.*s) +
                          pow(mrho,4)*(1. + 2.*C4*s)))*log(fabs(-2.*pow(mpion,2) + s + t1)))/pow(mrho,2)))/(16.*Pi*s*(-4*pow(mpion,2) + s)) );
 
-          /* omega: xsection = to_mb*1/3.0*(0.0024867959858108648*pow(Const,2)*pow(g_POR,4)*(pow(mpion,8)*(t2 - t1) + pow(mpion,6)*pow(mrho,2)*(-2.*t2 + 2.*t1) +
+          //omega:
+          /*xsection = to_mb*1/3.0*(0.0024867959858108648*pow(Const,2)*pow(g_POR,4)*(pow(mpion,8)*(t2 - t1) + pow(mpion,6)*pow(mrho,2)*(-2.*t2 + 2.*t1) +
                pow(mpion,4)*(pow(mrho,4)*(t2 - t1) + s*(4.*s*t2 - pow(t2,2) - 4.*s*t1 + pow(t1,2))) +
                pow(s,2)*(pow(s,2)*t2 + s*pow(t2,2) + 0.6666666666666666*pow(t2,3) + pow(mrho,4)*(t2 - t1) -
                   pow(s,2)*t1 - s*pow(t1,2) - 0.6666666666666666*pow(t1,3) +
                   pow(mrho,2)*(-2.*s*t2 - pow(t2,2) + 2.*s*t1 + pow(t1,2))) +
                pow(mpion,2)*s*(pow(mrho,4)*(-2.*t2 + 2.*t1) + pow(mrho,2)*(4.*s*t2 + pow(t2,2) - 4.*s*t1 - pow(t1,2)) +
                   s*(-4.*s*t2 - 2.*pow(t2,2) + 4.*s*t1 + 2.*pow(t1,2)))))/
-           (pow(pow(momega,2) - s,2)*(pow(mpion,4) + pow(mrho,4) + pow(mpion,2)*(-2.*pow(mrho,2) - 2.*s) - 2.*pow(mrho,2)*s + pow(s,2)));*/
+           (pow(pow(momega,2) - s,2)*(pow(mpion,4) + pow(mrho,4) + pow(mpion,2)*(-2.*pow(mrho,2) - 2.*s) - 2.*pow(mrho,2)*s + pow(s,2))); */
 
           process_list.push_back(make_unique<CollisionBranch>(
               *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
@@ -2405,7 +2406,8 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
                       delta*(-2.*pow(mpion,4) + 1.*pow(mrho,2)*s - 2.*pow(s,2) + pow(mpion,2)*(-5.*pow(mrho,2) + 2.*C4*pow(mrho,4) + 4.*s) +
                          pow(mrho,4)*(1. - 2.*C4*s)))*log(fabs(-2.*pow(mpion,2) + s + t1)))/pow(mrho,2)))/(16.*Pi*s*(-4*pow(mpion,2) + s)));
 
-          /* omega: xsection = to_mb*1/3.0*(0.0024868*pow(Const,2)*pow(g_POR,4)*((pow(momega,8) + pow(mpion,4)*pow(pow(mpion,2) - pow(mrho,2),2) -
+          //omega:
+         /*xsection = to_mb*1/3.0*(0.0024868*pow(Const,2)*pow(g_POR,4)*((pow(momega,8) + pow(mpion,4)*pow(pow(mpion,2) - pow(mrho,2),2) -
               2*pow(momega,6)*(2*pow(mpion,2) + pow(mrho,2) - s) -
               2*pow(momega,2)*pow(mpion,2)*(pow(mrho,4) + pow(mpion,2)*s - pow(mrho,2)*s) +
               pow(momega,4)*(4*pow(mpion,4) + pow(mrho,4) + 4*pow(mpion,2)*(pow(mrho,2) - s) - 2*pow(mrho,2)*s + 2*pow(s,2)))/
@@ -2427,6 +2429,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
               pow(mpion,2)*(pow(mrho,4) + pow(mpion,2)*s - pow(mrho,2)*s) +
               pow(momega,2)*(4*pow(mpion,4) + pow(mrho,4) + 4*pow(mpion,2)*(pow(mrho,2) - s) - 2*pow(mrho,2)*s + 2*pow(s,2)))*
             log(fabs(-pow(momega,2) + t1))))/(pow(mpion,4) + pow(pow(mrho,2) - s,2) - 2*pow(mpion,2)*(pow(mrho,2) + s)); */
+
           process_list.push_back(make_unique<CollisionBranch>(
               *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
           break;
@@ -2836,7 +2839,8 @@ float ScatterActionPhoton::diff_cross_section(float t, float m3, float t2, float
                          2*pow(mpion,2)*(delta*(s + t)*(s + 5*t) - pow(mrho,2)*(-2*s + 5*delta*s - 6*t + 9*delta*t + 16*C4*t*(s + t)) +
                             2*pow(mrho,4)*(-2 + delta + 4*C4*(s + 2*t))))))/(pow(mrho,2)*(-pow(ma1,2) + t))))/(16.*Pi*s*(-4*pow(mpion,2) + s));
 
-      /* omega: diff_xsection = (0.0024867959858108648*pow(Const,2)*pow(g_POR,4)*(pow(mpion,8) - 2*pow(mpion,6)*pow(mrho,2) +
+      // omega:
+      /*diff_xsection = 1/3.0*(0.0024867959858108648*pow(Const,2)*pow(g_POR,4)*(pow(mpion,8) - 2*pow(mpion,6)*pow(mrho,2) +
         pow(mpion,4)*(pow(mrho,4) + 4*pow(s,2) - 2*s*t) +
         pow(s,2)*(pow(mrho,4) + pow(s,2) + 2*s*t + 2*pow(t,2) - 2*pow(mrho,2)*(s + t)) -
         2*pow(mpion,2)*s*(pow(mrho,4) + 2*s*(s + t) - pow(mrho,2)*(2*s + t))))/(pow(pow(momega,2) - s,2)*(pow(mpion,4) + pow(pow(mrho,2) - s,2) - 2*pow(mpion,2)*(pow(mrho,2) + s))); */
@@ -2911,11 +2915,12 @@ float ScatterActionPhoton::diff_cross_section(float t, float m3, float t2, float
                           pow(mpion,2)*(4*C4*pow(mrho,4) + s - 2*pow(mrho,2)*(1 + 4*C4*s) + t) + pow(mrho,2)*(t + s*(1 - 4*C4*(s + 2*t))))))/
                    (-pow(mpion,2) + s)))/pow(mrho,4)))/(16.*Pi*s*(-4*pow(mpion,2) + s));
 
-      /* omega: diff_xsection = (0.0024867959858108648*pow(Const,2)*pow(g_POR,4)*(pow(mpion,8) - 2*pow(mpion,6)*pow(mrho,2) +
+      // omega:
+      /*diff_xsection = 1/3.0*(0.0024867959858108648*pow(Const,2)*pow(g_POR,4)*(pow(mpion,8) - 2*pow(mpion,6)*pow(mrho,2) +
        pow(mpion,4)*(pow(mrho,4) - 2*(s - 2*t)*t) + pow(t,2)*(pow(mrho,4) + 2*pow(s,2) + 2*s*t + pow(t,2) - 2*pow(mrho,2)*(s + t)) -
        2*pow(mpion,2)*t*(pow(mrho,4) + 2*t*(s + t) - pow(mrho,2)*(s + 2*t))))/
-       ((pow(mpion,4) + pow(pow(mrho,2) - s,2) - 2*pow(mpion,2)*(pow(mrho,2) + s))*pow(pow(momega,2) - t,2)); */
-      break; 
+       ((pow(mpion,4) + pow(pow(mrho,2) - s,2) - 2*pow(mpion,2)*(pow(mrho,2) + s))*pow(pow(momega,2) - t,2));*/
+      break;
     /*case ReactionType::pi_eta:
       diff_xsection = to_be_determined;
       break;*/
