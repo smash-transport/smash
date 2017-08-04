@@ -536,6 +536,34 @@ void ScatterAction::string_excitation() {
   Pythia8::Event &event = pythia->event;
   while( ( isinit == true ) && ( isnext == false ) ){
     isnext = pythia->next();
+
+    if ( isnext == true ) {
+    /* energy-momentum conservation check */
+    double Efin = 0.;
+    double pxfin = 0.;
+    double pyfin = 0.;
+    double pzfin = 0.;
+    for (int i = 0; i < event.size(); i++) {
+      if (event[i].isFinal()) { if (event[i].isHadron()) {
+        Efin = Efin + event[i].e();
+        pxfin = pxfin + event[i].px();
+        pyfin = pyfin + event[i].py();
+        pzfin = pzfin + event[i].pz();
+    } } }
+    if ( fabs( Efin - sqrts ) > 1e-8*sqrts ) {
+      isnext = false;
+    }
+    if ( fabs( pxfin ) > 1e-8*sqrts ) {
+      isnext = false;
+    }
+    if ( fabs( pyfin ) > 1e-8*sqrts ) {
+      isnext = false;
+    }
+    if ( fabs( pzfin ) > 1e-8*sqrts ) {
+      isnext = false;
+    }
+    /* if conservation is violated, try again */
+    }
   }
   ParticleList new_intermediate_particles;
   for (int i = 0; i < event.size(); i++) {
