@@ -93,13 +93,16 @@ float piplusp_elastic(double mandelstam_s) {
   if (piplusp_elastic_res_interpolation == nullptr) {
     std::vector<double> x = PIPLUSP_RES_SQRTS;
     for (auto& i : x) {
-      i = plab_from_s(i * i, pion_mass, nucleon_mass);
+      i = i * i;  //plab_from_s(i * i, pion_mass, nucleon_mass);
     }
     std::vector<double> y = PIPLUSP_RES_SIG;
     piplusp_elastic_res_interpolation =
         make_unique<InterpolateDataSpline>(x, y);
   }
-  sigma -= (*piplusp_elastic_res_interpolation)(p_lab);
+  // Interpolation may not be good if sqrts is beyond 4 GeV
+  if (mandelstam_s < 17) {
+     sigma -= (*piplusp_elastic_res_interpolation)(mandelstam_s);
+  }
   if (sigma < 0) {
      sigma = really_small;
   }
@@ -121,13 +124,16 @@ float piminusp_elastic(double mandelstam_s) {
   if (piminusp_elastic_res_interpolation == nullptr) {
     std::vector<double> x = PIMINUSP_RES_SQRTS;
     for (auto& i : x) {
-      i = plab_from_s(i * i, pion_mass, nucleon_mass);
+      i = i * i;//plab_from_s(i * i, pion_mass, nucleon_mass);
     }
     std::vector<double> y = PIMINUSP_RES_SIG;
     piminusp_elastic_res_interpolation =
         make_unique<InterpolateDataSpline>(x, y);
   }
-  sigma -= (*piminusp_elastic_res_interpolation)(p_lab);
+  // Interpolation may not be good if sqrts is beyond 4 GeV
+  if (mandelstam_s < 17) {
+     sigma -= (*piminusp_elastic_res_interpolation)(mandelstam_s);
+  }
   if (sigma < 0) {
      sigma = really_small;
   }

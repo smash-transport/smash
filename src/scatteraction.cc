@@ -11,6 +11,8 @@
 
 #include "Pythia8/Pythia.h"
 
+#include <cmath>
+
 #include "include/constants.h"
 #include "include/cxx14compat.h"
 #include "include/fpenvironment.h"
@@ -126,8 +128,8 @@ void ScatterAction::add_all_processes(float elastic_parameter,
   } else if ((t1.pdgcode().is_pion() && t2.is_nucleon()) ||
               (t1.is_nucleon() && t2.pdgcode().is_pion())) {
   // The energy region of the mixed scattering type for pion-nucleon collision
-  // is 2.3 - 3.1 GeV.
-      mix_scatter_type_energy = 2.7;
+  // is 2.2 - 3.0 GeV.
+      mix_scatter_type_energy = 2.6;
       mix_scatter_type_window_width = 0.4;
   // pion-nucleon collisions are included in pythia.
       include_pythia = true;
@@ -146,7 +148,7 @@ void ScatterAction::add_all_processes(float elastic_parameter,
                 const float probability_pythia = (sqrt_s()
                 - mix_scatter_type_energy + mix_scatter_type_window_width)
                 / mix_scatter_type_window_width / 2.0;
-        if (probability_pythia > Random::uniform(0.f, 1.f)) {
+        if (probability_pythia > pow(Random::uniform(0.f, 1.f), 2.0)) {
            // scatterings at the middle energies are through string
            // fragmentation by chance.
            is_pythia = true;
