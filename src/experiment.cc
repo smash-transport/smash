@@ -1193,6 +1193,17 @@ void Experiment<Modus>::final_output(const int evt_num) {
                << " [fm-1]";
     log.info() << "Final interaction number: "
                << interactions_total_ - wall_actions_total_;
+    // Check if there are unformed particles
+    int unformed_particles_count = 0;
+    for (const auto & particle : particles_) {
+      if (particle.formation_time() > end_time_ ) {
+        unformed_particles_count++;
+      }
+    }
+    if (unformed_particles_count > 0) {
+      log.warn("End time might be too small. ", unformed_particles_count,
+               " unformed particles were found at the end of the evolution.");
+    }
   }
 
   for (const auto &output : outputs_) {
