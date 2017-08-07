@@ -34,7 +34,7 @@ class DecayAction : public Action {
    * \param[in] p The particle that should decay if the action is performed.
    * \param[in] time Time at which the action is supposed to take place
    */
-  DecayAction(const ParticleData &p, float time);
+  DecayAction(const ParticleData &p, double time);
 
   /** Add several new decays at once. */
   void add_decays(DecayBranchList pv);
@@ -51,11 +51,11 @@ class DecayAction : public Action {
 
   std::pair<double, double> sample_masses() const override;
 
-  float raw_weight_value() const override {
+  double raw_weight_value() const override {
     return total_width_;
   }
 
-  float total_width() const {
+  double total_width() const {
     return total_width_;
   }
 
@@ -82,7 +82,7 @@ class DecayAction : public Action {
   DecayBranchList decay_channels_;
 
   /** total decay width */
-  float total_width_;
+  double total_width_;
 
   /** angular momentum of the decay */
   int L_ = 0;

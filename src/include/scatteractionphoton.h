@@ -19,15 +19,15 @@ namespace Smash {
 
 class ScatterActionPhoton : public ScatterAction {
  public:
-  ScatterActionPhoton(const ParticleList &in, float time, int nofp)
+  ScatterActionPhoton(const ParticleList &in, double time, int nofp)
       : ScatterAction(in[0], in[1], time),
         number_of_fractional_photons_(nofp) {}
 
   void generate_final_state() override;
 
-  float raw_weight_value() const override { return weight_; }
+  double raw_weight_value() const override { return weight_; }
 
-  float cross_section() const override {
+  double cross_section() const override {
     return total_cross_section_ + cross_section_photons_;
   }
 
@@ -41,7 +41,7 @@ class ScatterActionPhoton : public ScatterAction {
    * without recomputing it. The photon action is never performed, so
    * this channel itself will never play any role. Only its cross-section will.
    */
-  void add_dummy_hadronic_channels(float reaction_cross_section);
+  void add_dummy_hadronic_channels(double reaction_cross_section);
 
   /** To add only one reaction for testing purposes */
   void add_single_channel() {
@@ -70,20 +70,20 @@ class ScatterActionPhoton : public ScatterAction {
 
   int const number_of_fractional_photons_;
 
-  float weight_ = 0.0;
+  double weight_ = 0.0;
 
   /** List of possible collisions producing photons */
   CollisionBranchList collision_channels_photons_;
 
-  float cross_section_photons_ = 0.0;
+  double cross_section_photons_ = 0.0;
 
   const int num_tab_pts_ = 200;
 
-  float pi_pi_rho0(const float M, const float s) const;
+  double pi_pi_rho0(const double M, const double s) const;
 
-  float pi_pi0_rho(const float M, const float s) const;
+  double pi_pi0_rho(const double M, const double s) const;
 
-  float diff_cross_section(float t, float m3) const;
+  double diff_cross_section(double t, double m3) const;
 };
 
 }  // namespace Smash

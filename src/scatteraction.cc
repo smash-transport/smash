@@ -25,7 +25,7 @@ namespace Smash {
 ScatterAction::ScatterAction(const ParticleData &in_part_a,
                              const ParticleData &in_part_b,
                              double time, bool isotropic,
-                             float string_formation_time)
+                             double string_formation_time)
     : Action({in_part_a, in_part_b}, time),
       total_cross_section_(0.), isotropic_(isotropic),
       string_formation_time_(string_formation_time) {}
@@ -93,7 +93,7 @@ void ScatterAction::generate_final_state() {
 }
 
 
-void ScatterAction::add_all_processes(float elastic_parameter,
+void ScatterAction::add_all_processes(double elastic_parameter,
                                       bool two_to_one, bool two_to_two,
                                       double low_snn_cut,
                                       bool strings_switch,
@@ -114,8 +114,8 @@ void ScatterAction::add_all_processes(float elastic_parameter,
   const ParticleType& t2 = incoming_particles_[1].type();
   const bool both_are_nucleons = t1.is_nucleon() && t2.is_nucleon();
   bool include_pythia = false;
-  float mix_scatter_type_energy;
-  float mix_scatter_type_window_width;
+  double mix_scatter_type_energy;
+  double mix_scatter_type_window_width;
   if (both_are_nucleons) {
   // The energy region of the mixed scattering type for nucleon-nucleon
   // collision is 4.0 - 5.0 GeV.
@@ -143,10 +143,10 @@ void ScatterAction::add_all_processes(float elastic_parameter,
         is_pythia = true;
      } else if (sqrt_s() > mix_scatter_type_energy
                 - mix_scatter_type_window_width) {
-                const float probability_pythia = (sqrt_s()
+                const double probability_pythia = (sqrt_s()
                 - mix_scatter_type_energy + mix_scatter_type_window_width)
                 / mix_scatter_type_window_width / 2.0;
-        if (probability_pythia > Random::uniform(0.f, 1.f)) {
+        if (probability_pythia > Random::uniform(0., 1.)) {
            // scatterings at the middle energies are through string
            // fragmentation by chance.
            is_pythia = true;
@@ -190,7 +190,7 @@ void ScatterAction::add_all_processes(float elastic_parameter,
   }
 }
 
-float ScatterAction::raw_weight_value() const {
+double ScatterAction::raw_weight_value() const {
   return total_cross_section_;
 }
 
@@ -262,8 +262,8 @@ double ScatterAction::transverse_distance_sqr() const {
   return dr2 - dpdr*dpdr/dp2;
 }
 
-CollisionBranchPtr ScatterAction::elastic_cross_section(float elast_par) {
-  float elastic_xs;
+CollisionBranchPtr ScatterAction::elastic_cross_section(double elast_par) {
+  double elastic_xs;
   if (elast_par >= 0.) {
     // use constant elastic cross section from config file
     elastic_xs = elast_par;
@@ -280,7 +280,7 @@ CollisionBranchPtr ScatterAction::NNbar_annihilation_cross_section() {
   const auto &log = logger<LogArea::ScatterAction>();
   /* Calculate NNbar cross section:
    * Parametrized total minus all other present channels.*/
-  float nnbar_xsec = std::max(0.f, total_cross_section() - cross_section());
+  double nnbar_xsec = std::max(0., total_cross_section() - cross_section());
   log.debug("NNbar cross section is: ", nnbar_xsec);
   // Make collision channel NNbar -> ρh₁(1170); eventually decays into 5π
   return make_unique<CollisionBranch>(ParticleType::find(pdg::h1),
@@ -304,10 +304,10 @@ CollisionBranchList ScatterAction::NNbar_creation_cross_section() {
     return channel_list;
   }
 
-  float xsection = detailed_balance_factor_RR(sqrts, pcm,
+  double xsection = detailed_balance_factor_RR(sqrts, pcm,
           incoming_particles_[0].type(), incoming_particles_[1].type(),
           type_N, type_Nbar) *
-          std::max(0.f, ppbar_total(s) - ppbar_elastic(s));
+          std::max(0., ppbar_total(s) - ppbar_elastic(s));
   log.debug("NNbar reverse cross section is: ", xsection);
   channel_list.push_back(make_unique<CollisionBranch>(type_N, type_Nbar,
                                       xsection, ProcessType::TwoToTwo));
@@ -321,7 +321,7 @@ CollisionBranchPtr ScatterAction::string_excitation_cross_section() {
   const auto &log = logger<LogArea::ScatterAction>();
   /* Calculate string-excitation cross section:
    * Parametrized total minus all other present channels. */
-  float sig_string = std::max(0.f, high_energy_cross_section() -
+  double sig_string = std::max(0., high_energy_cross_section() -
                               elastic_parametrization());
   log.debug("String cross section is: ", sig_string);
   return make_unique<CollisionBranch>(sig_string, ProcessType::String);
@@ -345,9 +345,9 @@ double ScatterAction::two_to_one_formation(const ParticleType &type_resonance,
   }
 
   /* Calculate partial in-width. */
-  const float partial_width = type_resonance.get_partial_in_width(srts,
+  const double partial_width = type_resonance.get_partial_in_width(srts,
                                 incoming_particles_[0], incoming_particles_[1]);
-  if (partial_width <= 0.f) {
+  if (partial_width <= 0.) {
     return 0.;
   }
 
@@ -389,7 +389,7 @@ CollisionBranchList ScatterAction::resonance_cross_sections() {
       continue;
     }
 
-    float resonance_xsection = two_to_one_formation(type_resonance,
+    double resonance_xsection = two_to_one_formation(type_resonance,
                                                     srts, p_cm_sqr);
 
     /* If cross section is non-negligible, add resonance to the list */
@@ -421,11 +421,11 @@ void ScatterAction::inelastic_scattering() {
   /* Set the formation time of the 2 particles to the larger formation time of the
    * incoming particles, if it is larger than the execution time; execution time
    * is otherwise taken to be the formation time */
-  const float t0 = incoming_particles_[0].formation_time();
-  const float t1 = incoming_particles_[1].formation_time();
+  const double t0 = incoming_particles_[0].formation_time();
+  const double t1 = incoming_particles_[1].formation_time();
 
   const size_t index_tmax = (t0 > t1) ? 0 : 1;
-  const float sc = incoming_particles_[index_tmax]
+  const double sc = incoming_particles_[index_tmax]
       .cross_section_scaling_factor();
   if (t0 > time_of_execution_ || t1 > time_of_execution_) {
     outgoing_particles_[0].set_formation_time(std::max(t0, t1));
@@ -458,11 +458,11 @@ void ScatterAction::resonance_formation() {
   /* Set the formation time of the resonance to the larger formation time of the
    * incoming particles, if it is larger than the execution time; execution time
    * is otherwise taken to be the formation time */
-  const float t0 = incoming_particles_[0].formation_time();
-  const float t1 = incoming_particles_[1].formation_time();
+  const double t0 = incoming_particles_[0].formation_time();
+  const double t1 = incoming_particles_[1].formation_time();
 
   const size_t index_tmax = (t0 > t1) ? 0 : 1;
-  const float sc =
+  const double sc =
     incoming_particles_[index_tmax].cross_section_scaling_factor();
   if (t0 > time_of_execution_ || t1 > time_of_execution_) {
     outgoing_particles_[0].set_formation_time(std::max(t0, t1));
@@ -479,7 +479,7 @@ void ScatterAction::resonance_formation() {
 void ScatterAction::string_excitation() {
   assert(incoming_particles_.size() == 2);
   const auto &log = logger<LogArea::Pythia>();
-  // Disable floating point exception trap for Pythia
+  // Disable doubleing point exception trap for Pythia
   {
   DisableFloatTraps guard;
   /* set all necessary parameters for Pythia
@@ -534,8 +534,8 @@ void ScatterAction::string_excitation() {
         /* K_short and K_long need to be converted to K0
          * since SMASH only knows K0 */
         if (pythia_id == 310 || pythia_id == 130) {
-          const float prob = Random::uniform(0.f, 1.f);
-          if (prob <= 0.5f) {
+          const double prob = Random::uniform(0., 1.);
+          if (prob <= 0.5) {
             pythia_id = 311;
           } else {
             pythia_id = -311;
@@ -572,7 +572,7 @@ void ScatterAction::string_excitation() {
       log.debug("The formation time is: ", string_formation_time_, "fm/c.");
       /* Additional suppression factor to mimic coherence taken as 0.7
        * from UrQMD (CTParam(59) */
-      const float suppression_factor = 0.7;
+      const double suppression_factor = 0.7;
       if (incoming_particles_[0].is_baryon() ||
           incoming_particles_[1].is_baryon()) {
         if (data == 0) {
@@ -597,19 +597,18 @@ void ScatterAction::string_excitation() {
     }
     /* If the incoming particles already were unformed, the formation
      * times and cross section scaling factors need to be adjusted */
-    const float tform_in = std::max(incoming_particles_[0].formation_time(),
+    const double tform_in = std::max(incoming_particles_[0].formation_time(),
                                     incoming_particles_[1].formation_time());
     if (tform_in > time_of_execution_) {
-      const float fin = (incoming_particles_[0].formation_time() >
+      const double fin = (incoming_particles_[0].formation_time() >
                          incoming_particles_[1].formation_time()) ?
                          incoming_particles_[0].cross_section_scaling_factor() :
                          incoming_particles_[1].cross_section_scaling_factor();
       for (size_t i = 0; i < outgoing_particles_.size(); i++) {
-        const float tform_out = outgoing_particles_[i].formation_time();
-        const float fout = outgoing_particles_[i]
-            .cross_section_scaling_factor();
-        outgoing_particles_[i]
-            .set_cross_section_scaling_factor(fin * fout);
+        const double tform_out = outgoing_particles_[i].formation_time();
+        const double fout = outgoing_particles_[i].
+                            cross_section_scaling_factor();
+        outgoing_particles_[i].set_cross_section_scaling_factor(fin * fout);
         /* If the unformed incoming particles' formation time is larger than
          * the current outgoing particle's formation time, then the latter
          * is overwritten by the former*/

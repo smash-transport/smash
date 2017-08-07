@@ -20,6 +20,7 @@
 #include "grandcan_thermalizer.h"
 #include "pauliblocking.h"
 #include "potentials.h"
+#include "propagation.h"
 #include "quantumnumbers.h"
 
 namespace Smash {
@@ -204,7 +205,7 @@ class Experiment : public ExperimentBase {
    * \param dt The current time step size
    * \return The minimal required size of cells
    */
-  float compute_min_cell_length(float dt) const {
+  double compute_min_cell_length(double dt) const {
     return std::sqrt(4 * dt * dt + max_transverse_distance_sqr_);
   }
 
@@ -341,6 +342,16 @@ class Experiment : public ExperimentBase {
   const bool use_grid_;
 
   /**
+   * This struct contains information on the metric to be used
+   */
+  const ExpansionProperties metric_;
+
+  /**
+   * This indicates whether string fragmentation is switched on.
+   */
+  const bool strings_switch_;
+
+  /**
    * This indicates whether dileptons are switched on.
    */
   const bool dileptons_switch_;
@@ -358,7 +369,7 @@ class Experiment : public ExperimentBase {
   /**
    * Maximal distance at which particles can interact, squared
    */
-  float max_transverse_distance_sqr_ = std::numeric_limits<float>::max();
+  double max_transverse_distance_sqr_ = std::numeric_limits<double>::max();
 
   /** The conserved quantities of the system.
    *
@@ -380,10 +391,12 @@ class Experiment : public ExperimentBase {
   std::unique_ptr<AdaptiveParameters> adaptive_parameters_ = nullptr;
 
   /**
-   *  Total number of interactions for current and for previous timestep.
+   *  Total number of actions and interactions for current and for previous
+   *  timestep. Actions include wall-crossings, interactions don't.
    *  For timestepless mode the whole run time is considered as one timestep.
    */
   uint64_t interactions_total_ = 0, previous_interactions_total_ = 0,
+           wall_actions_total_ = 0, previous_wall_actions_total_ = 0,
            total_pauli_blocked_ = 0;
 
   /**\ingroup logging

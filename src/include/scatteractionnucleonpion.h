@@ -29,7 +29,7 @@ class ScatterActionNucleonPion : public ScatterActionBaryonMeson {
    * Determine the elastic cross section for a nucleon-pion collision.
    * It is given by a parametrization of experimental data.
    */
-  float elastic_parametrization() override;
+  double elastic_parametrization() override;
 
  protected:
   /**

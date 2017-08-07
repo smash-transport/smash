@@ -32,41 +32,41 @@ namespace Smash {
 
 /** total hadronic cross sections at high energies parametrized in the 2016 PDG
  *  book(http://pdg.lbl.gov/2016/reviews/rpp2016-rev-cross-section-plots.pdf) */
-float xs_high_energy(double mandelstam_s, bool is_opposite_charge,
-                     float ma, float mb, float P, float R1, float R2) {
-  const float M = 2.1206;
-  const float H = 0.272;
-  const float eta1 = 0.4473;
-  const float eta2 = 0.5486;
-  const float s_sab = mandelstam_s / (ma + mb + M) / (ma + mb + M);
-  float xs = H * std::log(s_sab) * std::log(s_sab) + P
+double xs_high_energy(double mandelstam_s, bool is_opposite_charge,
+                     double ma, double mb, double P, double R1, double R2) {
+  const double M = 2.1206;
+  const double H = 0.272;
+  const double eta1 = 0.4473;
+  const double eta2 = 0.5486;
+  const double s_sab = mandelstam_s / (ma + mb + M) / (ma + mb + M);
+  double xs = H * std::log(s_sab) * std::log(s_sab) + P
              + R1 * std::pow(s_sab, -eta1);
   xs = is_opposite_charge ? xs + R2 * pow(s_sab, -eta2)
              : xs - R2 * pow(s_sab, -eta2);
   return xs;
 }
 
-float pp_high_energy(double mandelstam_s) {
+double pp_high_energy(double mandelstam_s) {
   return xs_high_energy(mandelstam_s, false, 0.939, 0.939, 34.41, 13.07, 7.394);
 }
 
-float ppbar_high_energy(double mandelstam_s) {
+double ppbar_high_energy(double mandelstam_s) {
   return xs_high_energy(mandelstam_s, true, 0.939, 0.939, 34.41, 13.07, 7.394);
 }
 
-float np_high_energy(double mandelstam_s) {
+double np_high_energy(double mandelstam_s) {
   return xs_high_energy(mandelstam_s, false, 0.939, 0.939, 34.41, 12.52, 6.66);
 }
 
-float npbar_high_energy(double mandelstam_s) {
+double npbar_high_energy(double mandelstam_s) {
   return xs_high_energy(mandelstam_s, true, 0.939, 0.939, 34.41, 12.52, 6.66);
 }
 
-float piplusp_high_energy(double mandelstam_s) {
+double piplusp_high_energy(double mandelstam_s) {
   return xs_high_energy(mandelstam_s, false, 0.939, 0.138, 18.75, 9.56, 1.767);
 }
 
-float piminusp_high_energy(double mandelstam_s) {
+double piminusp_high_energy(double mandelstam_s) {
   return xs_high_energy(mandelstam_s, true, 0.939, 0.138, 18.75, 9.56, 1.767);
 }
 
@@ -78,7 +78,7 @@ float piminusp_high_energy(double mandelstam_s) {
  * doesn't affect the cross section at the low energies, I truncate
  * the parametrization at p_lab = 8 GeV, which correspons to square
  * root of s equal to 4 GeV. */
-float piplusp_elastic(double mandelstam_s) {
+double piplusp_elastic(double mandelstam_s) {
   double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
   if (p_lab < 8.0 /*1.45*/) {
     return really_small;
@@ -92,7 +92,7 @@ float piplusp_elastic(double mandelstam_s) {
 
 /** pi-p elastic cross section parametrization.
  * Source: GiBUU:parametrizationBarMes_HighEnergy.f90 */
-float piminusp_elastic(double mandelstam_s) {
+double piminusp_elastic(double mandelstam_s) {
   double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
   const auto logp = std::log(p_lab);
   if (p_lab < 8.0/*2.0*/) {
@@ -104,7 +104,7 @@ float piminusp_elastic(double mandelstam_s) {
 
 /** pp elastic cross section parametrization.
  * Source: \iref{Weil:2013mya}, eq. (44) */
-float pp_elastic(double mandelstam_s) {
+double pp_elastic(double mandelstam_s) {
   double p_lab = plab_from_s(mandelstam_s);
   if (p_lab < 0.435) {
     return 5.12 * nucleon_mass
@@ -128,7 +128,7 @@ float pp_elastic(double mandelstam_s) {
  * low-p: \iref{Cugnon:1996kh}
  * highest-p: \iref{Buss:2011mx}
  */
-float pp_total(double mandelstam_s) {
+double pp_total(double mandelstam_s) {
   double p_lab = plab_from_s(mandelstam_s);
   if (p_lab < 0.4) {
     return 34 * std::pow(p_lab / 0.4, -2.104);
@@ -147,7 +147,7 @@ float pp_total(double mandelstam_s) {
 
 /** np elastic cross section parametrization.
  * Source: \iref{Weil:2013mya}, eq. (45) */
-float np_elastic(double mandelstam_s) {
+double np_elastic(double mandelstam_s) {
   double p_lab = plab_from_s(mandelstam_s);
   if (p_lab < 0.525) {
     return 17.05 * nucleon_mass
@@ -170,7 +170,7 @@ float np_elastic(double mandelstam_s) {
  * low-p: \iref{Cugnon:1996kh}
  * highest-p: \iref{Buss:2011mx}
  */
-float np_total(double mandelstam_s) {
+double np_total(double mandelstam_s) {
   double p_lab = plab_from_s(mandelstam_s);
   const auto logp = std::log(p_lab);
   if (p_lab < 0.4) {
@@ -188,7 +188,7 @@ float np_total(double mandelstam_s) {
 
 /** ppbar elastic cross section parametrization.
  * Source: \iref{Bass:1998ca} */
-float ppbar_elastic(double mandelstam_s) {
+double ppbar_elastic(double mandelstam_s) {
   double p_lab = plab_from_s(mandelstam_s);
   if (p_lab < 0.3) {
     return 78.6;
@@ -203,7 +203,7 @@ float ppbar_elastic(double mandelstam_s) {
 
 /** ppbar total cross section parametrization.
  * Source: \iref{Bass:1998ca} */
-float ppbar_total(double mandelstam_s) {
+double ppbar_total(double mandelstam_s) {
   double p_lab = plab_from_s(mandelstam_s);
   if (p_lab < 0.3) {
     return 271.6 * std::exp(-1.1 * p_lab * p_lab);
@@ -219,7 +219,7 @@ float ppbar_total(double mandelstam_s) {
 /** K+ p elastic cross section parametrization.
  * sigma(K+n->K+n) = sigma(K+n->K0p) = 0.5 * sigma(K+p->K+p)
  * Source: \iref{Buss:2011mx}, B.3.8 */
-float kplusp_elastic(double mandelstam_s) {
+double kplusp_elastic(double mandelstam_s) {
   constexpr double a0 = 10.508;  // mb
   constexpr double a1 = -3.716;  // mb/GeV
   constexpr double a2 = 1.845;  // mb/GeV^2
@@ -235,7 +235,7 @@ float kplusp_elastic(double mandelstam_s) {
 /** K+ n elastic cross section parametrization.
  * sigma(K+n->K+n) = sigma(K+n->K0p) = 0.5 * sigma(K+p->K+p)
  * Source: \iref{Buss:2011mx}, B.3.8 */
-float kplusn_elastic(double mandelstam_s) {
+double kplusn_elastic(double mandelstam_s) {
   return 0.5 * kplusp_elastic(mandelstam_s);
 }
 
@@ -245,7 +245,7 @@ float kplusn_elastic(double mandelstam_s) {
  * cross section was given for one p_lab value, the corresponding cross sections
  * are averaged.
  */
-static float kminusp_elastic_pdg(double mandelstam_s) {
+static double kminusp_elastic_pdg(double mandelstam_s) {
   if (kminusp_elastic_interpolation == nullptr) {
     std::vector<double> x = KMINUSP_ELASTIC_P_LAB;
     std::vector<double> y = KMINUSP_ELASTIC_SIG;
@@ -275,7 +275,7 @@ static float kminusp_elastic_pdg(double mandelstam_s) {
 
 /** K- p elastic cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.9 */
-float kminusp_elastic(double mandelstam_s) {
+double kminusp_elastic(double mandelstam_s) {
   const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
   double sigma;
   if (std::sqrt(mandelstam_s) < 1.68) {
@@ -321,39 +321,39 @@ float kminusp_elastic(double mandelstam_s) {
 
 /** K- n elastic cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.9 */
-float kminusn_elastic(double) { return 4.0; }
+double kminusn_elastic(double) { return 4.0; }
 
 /** K0 p elastic cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.9 */
-float k0p_elastic(double mandelstam_s) {
+double k0p_elastic(double mandelstam_s) {
   // by isospin symmetry
   return kplusn_elastic(mandelstam_s);
 }
 
 /** K0 n elastic cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.9 */
-float k0n_elastic(double mandelstam_s) {
+double k0n_elastic(double mandelstam_s) {
   // by isospin symmetry
   return kplusp_elastic(mandelstam_s);
 }
 
 /** Kbar0 p elastic cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.9 */
-float kbar0p_elastic(double mandelstam_s) {
+double kbar0p_elastic(double mandelstam_s) {
   // by isospin symmetry
   return kminusn_elastic(mandelstam_s);
 }
 
 /** Kbar0 n elastic cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.9 */
-float kbar0n_elastic(double mandelstam_s) {
+double kbar0n_elastic(double mandelstam_s) {
   // by isospin symmetry
   return kminusp_elastic(mandelstam_s);
 }
 
 /** K+ p inelastic cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.8 */
-float kplusp_inelastic(double mandelstam_s) {
+double kplusp_inelastic(double mandelstam_s) {
   if (kplusp_total_interpolation == nullptr) {
     std::vector<double> x = KPLUSP_TOT_PLAB;
     std::vector<double> y = KPLUSP_TOT_SIG;
@@ -371,7 +371,7 @@ float kplusp_inelastic(double mandelstam_s) {
 
 /** K+ n inelastic cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.8 */
-float kplusn_inelastic(double mandelstam_s) {
+double kplusn_inelastic(double mandelstam_s) {
   if (kplusn_total_interpolation == nullptr) {
     std::vector<double> x = KPLUSN_TOT_PLAB;
     std::vector<double> y = KPLUSN_TOT_SIG;
@@ -390,7 +390,7 @@ float kplusn_inelastic(double mandelstam_s) {
 
 /// Calculate and store all isospin ratios for K+ N reactions.
 static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>,
-    float, pair_hash>& ratios) {
+    double, pair_hash>& ratios) {
   const auto& type_p = ParticleType::find(pdg::p);
   const auto& type_n = ParticleType::find(pdg::n);
   const auto& type_K_p = ParticleType::find(pdg::K_p);
@@ -402,13 +402,13 @@ static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>,
 
   auto add_to_ratios = [&] (const ParticleType& a, const ParticleType& b,
                             const ParticleType& c, const ParticleType& d,
-                            float weight_numerator, float weight_other) {
+                            double weight_numerator, double weight_other) {
       assert(weight_numerator + weight_other != 0);
       const auto key = std::make_pair(pack(a.pdgcode().code(),
                                            b.pdgcode().code()),
                                       pack(c.pdgcode().code(),
                                            d.pdgcode().code()));
-      const float ratio = weight_numerator / (weight_numerator + weight_other);
+      const double ratio = weight_numerator / (weight_numerator + weight_other);
       ratios[key] = ratio;
   };
 
@@ -464,7 +464,7 @@ static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>,
 }
 
 /// Return the isospin ratio of the given K+ N reaction's cross section.
-float KplusNRatios::get_ratio(const ParticleType& a,
+double KplusNRatios::get_ratio(const ParticleType& a,
                               const ParticleType& b,
                               const ParticleType& c,
                               const ParticleType& d) const {
@@ -495,9 +495,9 @@ thread_local KplusNRatios kplusn_ratios;
 
 /** K- p -> Kbar0 n cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.9 */
-float kminusp_kbar0n(double mandelstam_s) {
-  constexpr float a0 = 100;  // mb GeV^2
-  constexpr float a1 = 0.15;  // GeV
+double kminusp_kbar0n(double mandelstam_s) {
+  constexpr double a0 = 100;  // mb GeV^2
+  constexpr double a1 = 0.15;  // GeV
   constexpr unsigned a2 = 2;
 
   const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
@@ -513,34 +513,34 @@ float kminusp_kbar0n(double mandelstam_s) {
  * Taken from UrQMD (\iref{Graef:2014mra}).
  */
 
-float kminusp_piminussigmaplus(double sqrts) {
+double kminusp_piminussigmaplus(double sqrts) {
   return 0.0788265 / Smash::square(sqrts - 1.38841);
 }
 
-float kminusp_piplussigmaminus(double sqrts) {
+double kminusp_piplussigmaminus(double sqrts) {
   return 0.0196741 / Smash::square(sqrts - 1.42318);
 }
 
-float kminusp_pi0sigma0(double sqrts) {
+double kminusp_pi0sigma0(double sqrts) {
   return 0.55 * 0.0508208 / Smash::square(sqrts - 1.38837);
 }
 
-float kminusp_pi0lambda(double sqrts) {
+double kminusp_pi0lambda(double sqrts) {
   return 0.45 * 0.0508208 / Smash::square(sqrts - 1.38837);
 }
 
 // The other channels follow from the paramatriziation with the same strange
 // product via isospin symmetry.
 
-float kminusn_piminussigma0(double sqrts) {
+double kminusn_piminussigma0(double sqrts) {
   return 1./6 * 2 * kminusp_pi0sigma0(sqrts);
 }
 
-float kminusn_pi0sigmaminus(double sqrts) {
+double kminusn_pi0sigmaminus(double sqrts) {
   return (0.25 + 1./6) * 2 * kminusp_piplussigmaminus(sqrts);
 }
 
-float kminusn_piminuslambda(double sqrts) {
+double kminusn_piminuslambda(double sqrts) {
   return 0.5 * kminusp_pi0lambda(sqrts);
 }
 
@@ -549,26 +549,26 @@ float kminusn_piminuslambda(double sqrts) {
 // Two hyperon exchange, based on effective model by Feng Li,
 // as in UrQMD (\iref{Graef:2014mra}).
 
-float lambdalambda_ximinusp(double sqrts_sqrts0, double p_N, double p_lambda) {
+double lambdalambda_ximinusp(double sqrts_sqrts0, double p_N, double p_lambda) {
   assert(p_lambda != 0);
   assert(sqrts_sqrts0 >= 0);
   return 37.15 / 2 * p_N / p_lambda * std::pow(sqrts_sqrts0, -0.16);
 }
 
-float lambdalambda_xi0n(double sqrts_sqrts0, double p_N, double p_lambda) {
+double lambdalambda_xi0n(double sqrts_sqrts0, double p_N, double p_lambda) {
   return lambdalambda_ximinusp(sqrts_sqrts0, p_N, p_lambda);
 }
 
-float lambdasigmaplus_xi0p(double sqrts_sqrts0) {
+double lambdasigmaplus_xi0p(double sqrts_sqrts0) {
   assert(sqrts_sqrts0 >= 0);
   return 24.3781 * std::pow(sqrts_sqrts0, -0.479);
 }
 
-float lambdasigmaminus_ximinusn(double sqrts_sqrts0) {
+double lambdasigmaminus_ximinusn(double sqrts_sqrts0) {
   return lambdasigmaplus_xi0p(sqrts_sqrts0);
 }
 
-float lambdasigma0_ximinusp(double sqrts_sqrts0) {
+double lambdasigma0_ximinusp(double sqrts_sqrts0) {
   assert(sqrts_sqrts0 >= 0);
   if (sqrts_sqrts0 < 0.03336) {
     return 6.475 * std::pow(sqrts_sqrts0, -0.4167);
@@ -577,11 +577,11 @@ float lambdasigma0_ximinusp(double sqrts_sqrts0) {
   }
 }
 
-float lambdasigma0_xi0n(double sqrts_sqrts0) {
+double lambdasigma0_xi0n(double sqrts_sqrts0) {
   return lambdasigma0_ximinusp(sqrts_sqrts0);
 }
 
-float sigma0sigma0_ximinusp(double sqrts_sqrts0) {
+double sigma0sigma0_ximinusp(double sqrts_sqrts0) {
   assert(sqrts_sqrts0 >= 0);
   if (sqrts_sqrts0 < 0.09047) {
     return 5.625 * std::pow(sqrts_sqrts0, -0.318);
@@ -592,23 +592,23 @@ float sigma0sigma0_ximinusp(double sqrts_sqrts0) {
 
 // Note that there is a typo in the paper in equation (6):
 // "Lambda Sigma0 -> Xi0 n" should be "Sigma0 Sigma0 -> Xi0 n".
-float sigma0sigma0_xi0n(double sqrts_sqrts0) {
+double sigma0sigma0_xi0n(double sqrts_sqrts0) {
   return sigma0sigma0_ximinusp(sqrts_sqrts0);
 }
 
-float sigmaplussigmaminus_xi0p(double sqrts_sqrts0) {
+double sigmaplussigmaminus_xi0p(double sqrts_sqrts0) {
   return 4 * sigma0sigma0_ximinusp(sqrts_sqrts0);
 }
 
-float sigma0sigmaminus_ximinusn(double sqrts_sqrts0) {
+double sigma0sigmaminus_ximinusn(double sqrts_sqrts0) {
   return 4 * sigma0sigma0_ximinusp(sqrts_sqrts0);
 }
 
-float sigmaplussigmaminus_ximinusp(double sqrts_sqrts0) {
+double sigmaplussigmaminus_ximinusp(double sqrts_sqrts0) {
   return 14.194 * std::pow(sqrts_sqrts0, -0.442);
 }
 
-float sigmaplussigmaminus_xi0n(double sqrts_sqrts0) {
+double sigmaplussigmaminus_xi0n(double sqrts_sqrts0) {
   return sigmaplussigmaminus_ximinusp(sqrts_sqrts0);
 }
 

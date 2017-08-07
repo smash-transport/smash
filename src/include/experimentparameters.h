@@ -26,9 +26,9 @@ struct ExperimentParameters {
   /// number of test particle
   int testparticles;
   /// width of gaussian Wigner density of particles
-  float gaussian_sigma;
+  double gaussian_sigma;
   /// distance at which gaussian is cut, i.e. set to zero, IN SIGMA (not fm)
-  float gauss_cutoff_in_sigma;
+  double gauss_cutoff_in_sigma;
   /**
   * This indicates whether two to one reaction is switched on.
   */

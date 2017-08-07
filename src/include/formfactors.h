@@ -27,27 +27,27 @@ namespace Smash {
  * the Blatt-Weisskopf functions approach one for large p_ab and behave like
  * p_ab**L for small p_ab. They are increasing monotonically with p_ab.
  */
-inline float blatt_weisskopf_sqr(const float p_ab, const int L)
+inline double blatt_weisskopf_sqr(const double p_ab, const int L)
 #ifdef NDEBUG
     noexcept
 #endif
 {
-  const float R = 1. / hbarc;  /* interaction radius = 1 fm */
+  const double R = 1. / hbarc;  /* interaction radius = 1 fm */
   const auto x = p_ab * R;
   const auto x2 = x * x;
   const auto x4 = x2 * x2;
   switch (L) {
     case 0:
-      return 1.f;
+      return 1.;
     case 1:
-      return x2 / (1.f + x2);
+      return x2 / (1. + x2);
     case 2:
-      return x4 / (9.f + 3.f * x2 + x4);
+      return x4 / (9. + 3. * x2 + x4);
     case 3:
-      return x4 * x2 / (225.f + 45.f * x2 + 6.f * x4 + x4 * x2);
+      return x4 * x2 / (225. + 45. * x2 + 6. * x4 + x4 * x2);
     case 4:
       return x4 * x4 /
-             (11025.f + 1575.f * x2 + 135.f * x4 + 10.f * x2 * x4 + x4 * x4);
+             (11025. + 1575. * x2 + 135. * x4 + 10. * x2 * x4 + x4 * x4);
       // See also input sanitization in load_decaymodes in decaymodes.cc.
 #ifndef NDEBUG
     default:
@@ -56,7 +56,7 @@ inline float blatt_weisskopf_sqr(const float p_ab, const int L)
           std::to_string(L));
 #endif
   }
-  return 0.f;
+  return 0.;
 }
 
 
@@ -78,7 +78,7 @@ inline float blatt_weisskopf_sqr(const float p_ab, const int L)
  * of the high-mass tail (m > M0) and a corresponding enhancement of the
  * low-mass tail (m < M0).
  */
-inline float post_ff_sqr(float m, float M0, float srts0, float L) {
+inline double post_ff_sqr(double m, double M0, double srts0, double L) {
   const auto L4 = L*L*L*L;
   const auto M2 = M0*M0;
   const auto s0 = srts0*srts0;
@@ -95,13 +95,13 @@ inline float post_ff_sqr(float m, float M0, float srts0, float L) {
  * pseudoscalar meson P = π⁰,η,η', as a function of the dilepton mass.
  * For the π⁰ see \iref{Landsberg:1986fd}. For the η the Lambda parameter is
  * fitted to NA60 data, see \iref{Arnaldi:2009aa}. */
-inline float em_form_factor_ps(PdgCode pdg, float mass) {
+inline double em_form_factor_ps(PdgCode pdg, double mass) {
   switch (pdg.code()) {
   case pdg::pi_z:
     return 1. + 5.5*mass*mass;
   case pdg::eta: {
-    const float lambda_eta = 0.716;
-    const float m_over_eta = mass / lambda_eta;
+    const double lambda_eta = 0.716;
+    const double m_over_eta = mass / lambda_eta;
     return 1. / (1. - m_over_eta*m_over_eta);
   }
   default:  /* η' etc */
@@ -112,15 +112,15 @@ inline float em_form_factor_ps(PdgCode pdg, float mass) {
 /** Squared electromagnetic transition form factor for V → π⁰ e⁺ e⁻, with a
  * vector meson V = ω,φ, as a function of the dilepton mass.
  * For the ω see \iref{Bratkovskaya:1996qe}. */
-inline float em_form_factor_sqr_vec(PdgCode pdg, float mass) {
+inline double em_form_factor_sqr_vec(PdgCode pdg, double mass) {
   switch (pdg.code()) {
   case pdg::omega: {
-    constexpr float lambda = 0.65;
-    constexpr float gamma = 0.075;
-    constexpr float lambda_sqr = lambda * lambda;
-    constexpr float gamma_sqr = gamma * gamma;
-    const float tmp = lambda_sqr - mass*mass;
-    const float denom = tmp*tmp + lambda_sqr*gamma_sqr;
+    constexpr double lambda = 0.65;
+    constexpr double gamma = 0.075;
+    constexpr double lambda_sqr = lambda * lambda;
+    constexpr double gamma_sqr = gamma * gamma;
+    const double tmp = lambda_sqr - mass*mass;
+    const double denom = tmp*tmp + lambda_sqr*gamma_sqr;
     return lambda_sqr * lambda_sqr / denom;
   }
   default:  /* φ etc */
@@ -131,7 +131,7 @@ inline float em_form_factor_sqr_vec(PdgCode pdg, float mass) {
 /** Electromagnetic transition form factor for Delta -> N e+ e-
  * as a function of the dilepton mass. Currently assumed to be constant,
  * normalized at the real-photon point. */
-inline float form_factor_delta(float) {
+inline double form_factor_delta(double) {
   return 3.12;
 }
 

@@ -21,16 +21,16 @@ namespace Smash {
 void DecayActionsFinderDilepton::shine(
       const Particles &search_list,
       OutputInterface* output,
-      float dt) const {
+      double dt) const {
   for (const auto &p : search_list) {
     // effective mass of decaying particle
-    const float m_eff = p.effective_mass();
+    const double m_eff = p.effective_mass();
     const auto n_all_modes = p.type().get_partial_widths(m_eff).size();
     if (n_all_modes == 0) {
       continue;
     }
 
-    const float inv_gamma = p.inverse_gamma();
+    const double inv_gamma = p.inverse_gamma();
     DecayBranchList dil_modes = p.type().get_partial_widths_dilepton(m_eff);
 
     // if particle can only decay into dileptons or is stable, use shining only
@@ -43,10 +43,10 @@ void DecayActionsFinderDilepton::shine(
 
     for (DecayBranchPtr & mode : dil_modes) {
       // SHINING as described in \iref{Schmidt:2008hm}, chapter 2D
-      const float shining_weight = dt * inv_gamma * mode->weight() / hbarc;
+      const double shining_weight = dt * inv_gamma * mode->weight() / hbarc;
 
       if (shining_weight > 0.0) {  // decays that can happen
-        DecayActionDilepton act(p, 0.f, shining_weight);
+        DecayActionDilepton act(p, 0., shining_weight);
         act.add_decay(std::move(mode));
         act.generate_final_state();
         output->at_interaction(act, 0.0);
@@ -68,18 +68,18 @@ void DecayActionsFinderDilepton::shine_final(
     }
 
     // effective mass of decaying particle
-    const float m_eff = p.effective_mass();
+    const double m_eff = p.effective_mass();
     DecayBranchList dil_modes = t.get_partial_widths_dilepton(m_eff);
 
     // total decay width, also hadronic decays
-    const float width_tot = total_weight<DecayBranch>(
+    const double width_tot = total_weight<DecayBranch>(
                                                   t.get_partial_widths(m_eff));
 
     for (DecayBranchPtr & mode : dil_modes) {
-      const float shining_weight = mode->weight() / width_tot;
+      const double shining_weight = mode->weight() / width_tot;
 
       if (shining_weight > 0.0) {  // decays that can happen
-        DecayActionDilepton act(p, 0.f, shining_weight);
+        DecayActionDilepton act(p, 0., shining_weight);
         act.add_decay(std::move(mode));
         act.generate_final_state();
         output->at_interaction(act, 0.0);

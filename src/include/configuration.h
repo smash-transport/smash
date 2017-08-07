@@ -322,6 +322,26 @@ class Configuration {
                                       "or \"none\".");
     }
 
+    operator ExpansionMode() const {
+      const std::string s = operator std::string();
+      if (s == "NoExpansion") {
+        return ExpansionMode::NoExpansion;
+      }
+      if (s == "MasslessFRW") {
+        return ExpansionMode::MasslessFRW;
+      }
+      if (s == "MassiveFRW") {
+        return ExpansionMode::MassiveFRW;
+      }
+      if (s == "Exponential") {
+        return ExpansionMode::Exponential;
+      }
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) +
+          "\" should be \"NoExpansion\", \"MasslessFRW\"," +
+          "\"MassiveFRW\" or \"Exponential\".");
+    }
+
     operator TimeStepMode() const {
       const std::string s = operator std::string();
       if (s == "None") {
@@ -350,6 +370,29 @@ class Configuration {
           "The value for key \"" + std::string(key_) +
           "\" should be \"thermal momenta\" or \"peaked momenta\".");
     }
+
+    operator SphereInitialCondition() const {
+      const std::string s = operator std::string();
+      if (s == "thermal momenta") {
+        return SphereInitialCondition::ThermalMomenta;
+      }
+      if (s == "IC_ES") {
+        return SphereInitialCondition::IC_ES;
+      }
+      if (s == "IC_1M") {
+        return SphereInitialCondition::IC_1M;
+      }
+      if (s == "IC_2M") {
+        return SphereInitialCondition::IC_2M;
+      }
+      if (s == "IC_Massive") {
+        return SphereInitialCondition::IC_Massive;
+      }
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) +
+          "\" should be \"thermal momenta\", \"IC_ES\", " +
+          "\"IC_1M\", \"IC_2M\" or" + "\"IC_Massive\".");
+      }
 
     operator NNbarTreatment() const {
       const std::string s = operator std::string();

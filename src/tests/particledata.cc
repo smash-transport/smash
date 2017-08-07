@@ -57,11 +57,11 @@ TEST(set_get) {
   p.set_history(3, 5, ProcessType::None, 1.2, ParticleList{});
   COMPARE(p.id_process(), 5u);
   COMPARE(p.get_history().collisions_per_particle, 3);
-  COMPARE(p.get_history().time_of_origin, 1.2f);
+  COMPARE(p.get_history().time_of_origin, 1.2);
   p.set_history(4, 6, ProcessType::None, 2.5, ParticleList{});
   COMPARE(p.id_process(), 6u);
   COMPARE(p.get_history().collisions_per_particle, 4);
-  COMPARE(p.get_history().time_of_origin, 2.5f);
+  COMPARE(p.get_history().time_of_origin, 2.5);
   FourVector m(1.0, 1.2, 1.4, 1.6);
   p.set_4momentum(m);
   COMPARE(p.momentum(), FourVector(1.0, 1.2, 1.4, 1.6));

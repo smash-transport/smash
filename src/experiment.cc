@@ -17,7 +17,6 @@
 #include "include/decayactionsfinderdilepton.h"
 #include "include/fourvector.h"
 #include "include/listmodus.h"
-#include "include/propagation.h"
 #include "include/scatteractionphoton.h"
 #include "include/scatteractionsfinder.h"
 #include "include/spheremodus.h"
@@ -46,9 +45,9 @@ namespace std {
 template <typename T, typename Ratio>
 static ostream &operator<<(ostream &out,
                            const chrono::duration<T, Ratio> &seconds) {
-  using Seconds = chrono::duration<float>;
-  using Minutes = chrono::duration<float, std::ratio<60>>;
-  using Hours = chrono::duration<float, std::ratio<60 * 60>>;
+  using Seconds = chrono::duration<double>;
+  using Minutes = chrono::duration<double, std::ratio<60>>;
+  using Hours = chrono::duration<double, std::ratio<60 * 60>>;
   constexpr Minutes threshold_for_minutes{10};
   constexpr Hours threshold_for_hours{3};
   if (seconds < threshold_for_minutes) {
@@ -98,13 +97,13 @@ ExperimentPtr ExperimentBase::create(Configuration config,
   // remove config maps of unused Modi
   config["Modi"].remove_all_but(modus_chooser);
 
-  if (modus_chooser.compare("Box") == 0) {
+  if (modus_chooser == "Box") {
     return make_unique<Experiment<BoxModus>>(config, output_path);
-  } else if (modus_chooser.compare("List") == 0) {
+  } else if (modus_chooser == "List") {
     return make_unique<Experiment<ListModus>>(config, output_path);
-  } else if (modus_chooser.compare("Collider") == 0) {
+  } else if (modus_chooser == "Collider") {
     return make_unique<Experiment<ColliderModus>>(config, output_path);
-  } else if (modus_chooser.compare("Sphere") == 0) {
+  } else if (modus_chooser == "Sphere") {
     return make_unique<Experiment<SphereModus>>(config, output_path);
   } else {
     throw InvalidModusRequest("Invalid Modus (" + modus_chooser +
@@ -115,21 +114,21 @@ ExperimentPtr ExperimentBase::create(Configuration config,
 namespace {
 /*!\Userguide
  * \page input_general_ General
- * \key Delta_Time (float, required): \n
+ * \key Delta_Time (double, required): \n
  * Time step for the calculation, in fm/c.
  * Not required for timestepless mode.
  *
  * \key Testparticles (int, optional, default = 1): \n
  * How many test particles per real particles should be simulated.
  *
- * \key Gaussian_Sigma (float, optional, default 1.0): \n
+ * \key Gaussian_Sigma (double, optional, default 1.0): \n
  * Width [fm] of gaussians that represent Wigner density of particles.
  *
- * \key Gauss_Cutoff_In_Sigma (float, optional, default 4.0)
+ * \key Gauss_Cutoff_In_Sigma (double, optional, default 4.0)
  * Distance in sigma at which gaussian is considered 0.
  *
  * \page input_output_options_ Output
- * \key Output_Interval (float, required): \n
+ * \key Output_Interval (double, required): \n
  * Defines the period of intermediate output of the status of the simulated
  * system in Standard Output and other output formats which support this
  * functionality.
@@ -172,7 +171,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
 
   // If this Delta_Time option is absent (this can be for timestepless mode)
   // just assign 1.0 fm/c, reasonable value will be set at event initialization
-  const double dt = config.take({"General", "Delta_Time"}, 1.0f);
+  const double dt = config.take({"General", "Delta_Time"}, 1.);
   const double output_dt = config.take({"Output", "Output_Interval"});
   const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
   const bool two_to_two = config.take({"Collision_Term", "Two_to_Two"}, true);
@@ -194,10 +193,10 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
     log.warn("The cut-off should be below the threshold energy",
              " of the process: NN to NNpi");
   }
-  return {{0.0f, dt}, {0.0, output_dt},
+  return {{0., dt}, {0.0, output_dt},
           ntest,
-          config.take({"General", "Gaussian_Sigma"}, 1.0f),
-          config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.0f),
+          config.take({"General", "Gaussian_Sigma"}, 1.),
+          config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.),
           two_to_one,
           two_to_two,
           strings_switch,
@@ -257,7 +256,7 @@ void Experiment<Modus>::create_output(const char * name,
 
 /*!\Userguide
  * \page input_general_
- * \key End_Time (float, required): \n
+ * \key End_Time (double, required): \n
  * The time after which the evolution is stopped. Note
  * that the starting time depends on the chosen Modus.
  *
@@ -290,6 +289,17 @@ void Experiment<Modus>::create_output(const char * name,
  * true - force all resonances to decay after last timestep \n
  * false - don't force decays (final output can contain resonances)
  *
+ * \key Metric_Type (ExpansionMode, optional, default = NoExpansion): \n
+ * NoExpansion - default SMASH run, with Minkowski metric \n
+ * MasslessFRW - FRW expansion going as t^(1/2)
+ * MassiveFRW - FRW expansion going as t^(2/3)
+ * Exponential - FRW expansion going as e^(t/2)
+ *
+ * \key Expansion_Rate (double, optional, default = 0.1) \n
+ * Corresponds to the speed of expansion of the universe in non minkowski metrics \n
+ * This value is useless if NoExpansion is selected; it corresponds to \n
+ * \f$b_r/l_0\f$ if the metric type is MasslessFRW or MassiveFRW, and to \n
+ * the parameter b in the Exponential expansion where \f$a(t) ~ e^{bt/2}\f$
  * \subpage pauliblocker
  */
 template <typename Modus>
@@ -304,6 +314,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       force_decays_(
           config.take({"Collision_Term", "Force_Decays_At_End"}, true)),
       use_grid_(config.take({"General", "Use_Grid"}, true)),
+      metric_(config.take({"General", "Metric_Type"},
+          ExpansionMode::NoExpansion),
+          config.take({"General", "Expansion_Rate"}, 0.1)),
+      strings_switch_(config.take({"Collision_Term", "Strings"}, false)),
       dileptons_switch_(config.has_value({"Output", "Dileptons"}) ?
                     config.take({"Output", "Dileptons", "Enable"}, true) :
                     false),
@@ -336,8 +350,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   } else {
     max_transverse_distance_sqr_ = maximum_cross_section / M_PI * fm2_mb;
   }
-  const float modus_l = modus_.length();
-  if (modus_l > 0.f) {
+  const double modus_l = modus_.length();
+  if (modus_l > 0.) {
     action_finders_.emplace_back(make_unique<WallCrossActionsFinder>(modus_l));
   }
 
@@ -355,13 +369,13 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * \page input_general_adaptive_ Adaptive_Time_Step
    * Additional parameters for the adaptive time step mode.
    *
-   * \key Smoothing_Factor (float, optional, default = 0.1) \n
+   * \key Smoothing_Factor (double, optional, default = 0.1) \n
    * Parameter of the exponential smoothing of the rate estimate.
    *
-   * \key Target_Missed_Actions (float, optional, default = 0.01) \n
+   * \key Target_Missed_Actions (double, optional, default = 0.01) \n
    * The fraction of missed actions that is targeted by the algorithm.
    *
-   * \key Allowed_Deviation (float, optional, default = 2.5) \n
+   * \key Allowed_Deviation (double, optional, default = 2.5) \n
    * Limit by how much the target can be exceeded before the time step is
    * aborted.
    *
@@ -536,13 +550,13 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   /*!\Userguide
    * \page input_lattice_ Lattice
    *
-   * \key Sizes (array<float,3>, required): \n
+   * \key Sizes (array<double,3>, required): \n
    *      Sizes of lattice in x, y, z directions in fm.
    *
    * \key Cell_Number (array<int,3>, required): \n
    *      Number of cells in x, y, z directions.
    *
-   * \key Origin (array<float,3>, required): \n
+   * \key Origin (array<double,3>, required): \n
    *      Coordinates of the left, down, near corner of the lattice in fm.
    *
    * \key Periodic (bool, required): \n
@@ -578,9 +592,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   // Create lattices
   if (config.has_value({"Lattice"})) {
     // Take lattice properties from config to assign them to all lattices
-    const std::array<float, 3> l = config.take({"Lattice", "Sizes"});
+    const std::array<double, 3> l = config.take({"Lattice", "Sizes"});
     const std::array<int, 3> n = config.take({"Lattice", "Cell_Number"});
-    const std::array<float, 3> origin = config.take({"Lattice", "Origin"});
+    const std::array<double, 3> origin = config.take({"Lattice", "Origin"});
     const bool periodic = config.take({"Lattice", "Periodic"});
     dens_type_lattice_printout_ =
         config.take({"Lattice", "Printout", "Type"}, DensityType::None);
@@ -668,7 +682,7 @@ void Experiment<Modus>::initialize_new_event() {
       timestep = end_time_ - start_time;
       // Take care of the box modus + timestepless propagation
       const double max_dt = modus_.max_timestep(max_transverse_distance_sqr_);
-      if (max_dt > 0.f && max_dt < timestep) {
+      if (max_dt > 0. && max_dt < timestep) {
         timestep = max_dt;
       }
       break;
@@ -690,6 +704,8 @@ void Experiment<Modus>::initialize_new_event() {
   /* Save the initial conserved quantum numbers and total momentum in
    * the system for conservation checks */
   conserved_initial_ = QuantumNumbers(particles_);
+  wall_actions_total_ = 0;
+  previous_wall_actions_total_ = 0;
   interactions_total_ = 0;
   previous_interactions_total_ = 0;
   total_pauli_blocked_ = 0;
@@ -754,6 +770,9 @@ bool Experiment<Modus>::perform_action(Action &action,
   const auto id_process = static_cast<uint32_t>(interactions_total_ + 1);
   action.perform(&particles_, id_process);
   interactions_total_++;
+  if (action.get_type() == ProcessType::Wall) {
+    wall_actions_total_++;
+  }
   // Calculate Eckart rest frame density at the interaction point
   double rho = 0.0;
   if (dens_type_ != DensityType::None) {
@@ -788,7 +807,7 @@ bool Experiment<Modus>::perform_action(Action &action,
       != ScatterActionPhoton::ReactionType::no_reaction)) {
         // Time in the action constructor is relative to
         // current time of incoming
-        constexpr double action_time = 0.f;
+        constexpr double action_time = 0.;
         ScatterActionPhoton photon_act(action.incoming_particles(),
                                        action_time, n_fractional_photons_);
         // Add a completely dummy process to photon action.  The only important
@@ -824,7 +843,8 @@ void Experiment<Modus>::run_time_evolution() {
   const auto &log = logger<LogArea::Experiment>();
   const auto &log_ad_ts = logger<LogArea::AdaptiveTS>();
 
-  log.info() << format_measurements(particles_, interactions_total_, 0u,
+  log.info() << format_measurements(particles_, interactions_total_ -
+                                    wall_actions_total_, 0u,
                                     conserved_initial_, time_start_,
                                     parameters_.labclock.current_time());
 
@@ -846,7 +866,7 @@ void Experiment<Modus>::run_time_evolution() {
     }
 
     /* (1.a) Create grid. */
-    float min_cell_length = compute_min_cell_length(dt);
+    double min_cell_length = compute_min_cell_length(dt);
     log.debug("Creating grid with minimal cell length ", min_cell_length);
     const auto &grid = use_grid_
                            ? modus_.create_grid(particles_, min_cell_length)
@@ -890,6 +910,12 @@ void Experiment<Modus>::run_time_evolution() {
                      *potentials_, dUB_dr_lat_.get(), dUI3_dr_lat_.get());
     }
 
+    /* (5) Expand universe if non-minkowskian metric; updates
+           positions and momenta according to the selected expansion */
+    if (metric_.mode_ != ExpansionMode::NoExpansion) {
+      expand_space_time(&particles_, parameters_, metric_);
+    }
+
     ++parameters_.labclock;
 
     /* (5) Check conservation laws. */
@@ -898,7 +924,8 @@ void Experiment<Modus>::run_time_evolution() {
     // fragmentation are off.  If potentials are on then momentum is conserved
     // only in average.  If string fragmentation is on, then energy and
     // momentum are only very roughly conserved in high-energy collisions.
-    if (!potentials_ && !parameters_.strings_switch) {
+    if (!potentials_ && !strings_switch_ &&
+        metric_.mode_ == ExpansionMode::NoExpansion) {
       std::string err_msg = conserved_initial_.report_deviations(particles_);
       if (!err_msg.empty()) {
         log.error() << err_msg;
@@ -909,7 +936,7 @@ void Experiment<Modus>::run_time_evolution() {
 
   if (pauli_blocker_) {
     log.info("Interactions: Pauli-blocked/performed = ", total_pauli_blocked_,
-             "/", interactions_total_);
+             "/", interactions_total_ - wall_actions_total_);
   }
 }
 
@@ -1013,12 +1040,17 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions& actions) {
 template <typename Modus>
 void Experiment<Modus>::intermediate_output() {
   const auto &log = logger<LogArea::Experiment>();
+  const uint64_t wall_actions_this_interval =
+      wall_actions_total_ - previous_wall_actions_total_;
+  previous_wall_actions_total_ = wall_actions_total_;
   const uint64_t interactions_this_interval =
-      interactions_total_ - previous_interactions_total_;
+      interactions_total_ - previous_interactions_total_
+                          - wall_actions_this_interval;
   previous_interactions_total_ = interactions_total_;
   log.info() << format_measurements(
-      particles_, interactions_total_, interactions_this_interval,
-      conserved_initial_, time_start_, parameters_.outputclock.current_time());
+      particles_, interactions_total_ - wall_actions_total_,
+      interactions_this_interval, conserved_initial_, time_start_,
+      parameters_.outputclock.current_time());
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
   /*if (thermalizer_) {
     thermalizer_->update_lattice(particles_, density_param_);
@@ -1142,20 +1174,26 @@ void Experiment<Modus>::final_output(const int evt_num) {
   // to the start time, but we don't know that. Therefore, we check that
   // the time is positive, which should heuristically be the same).
   if (likely(parameters_.labclock > 0)) {
+    const uint64_t wall_actions_this_interval =
+        wall_actions_total_ - previous_wall_actions_total_;
     const uint64_t interactions_this_interval =
-        interactions_total_ - previous_interactions_total_;
+        interactions_total_ - previous_interactions_total_
+                            - wall_actions_this_interval;
     log.info() << format_measurements(
-      particles_, interactions_total_, interactions_this_interval,
-      conserved_initial_, time_start_, parameters_.outputclock.current_time());
+      particles_, interactions_total_ - wall_actions_total_,
+      interactions_this_interval, conserved_initial_, time_start_,
+      parameters_.outputclock.current_time());
     log.info() << hline;
     log.info() << "Time real: " << SystemClock::now() - time_start_;
     /* if there are no particles no interactions happened */
     log.info() << "Final scattering rate: "
-               << (particles_.is_empty() ? 0 : (2.0 * interactions_total_ /
+               << (particles_.is_empty() ? 0 : (2.0 * (interactions_total_ -
+                                                wall_actions_total_) /
                                                 particles_.time() /
                                                 particles_.size()))
                << " [fm-1]";
-    log.info() << "Final interaction number: " << interactions_total_;
+    log.info() << "Final interaction number: " << interactions_total_
+                                                - wall_actions_total_;
   }
 
   for (const auto &output : outputs_) {

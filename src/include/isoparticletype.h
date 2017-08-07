@@ -33,7 +33,7 @@ class IsoParticleType {
    * \param w The (average) width of the multiplet.
    * \param s Twice the spin of the multiplet.
    */
-  IsoParticleType(const std::string &n, float m, float w, unsigned int s);
+  IsoParticleType(const std::string &n, double m, double w, unsigned int s);
 
   /**
    * Copies are not allowed as they break intended use. Instead use a const-ref
@@ -59,10 +59,10 @@ class IsoParticleType {
   const std::string &name() const { return name_; }
 
   /// Returns the (average) multiplet mass.
-  float mass() const { return mass_; }
+  double mass() const { return mass_; }
 
   /// Returns the (average) multiplet width.
-  float width() const { return width_; }
+  double width() const { return width_; }
 
   /// Returns twice the total isospin of the multiplet
   int isospin() const { return states_.size() - 1; }
@@ -155,9 +155,9 @@ class IsoParticleType {
   /// name of the multiplet
   std::string name_;
   /// (average) mass of the multiplet
-  float mass_;
+  double mass_;
   /// (average) width of the multiplet
-  float width_;
+  double width_;
   /// twice the spin of the multiplet
   unsigned int spin_;
   /// list of states that are contained in the multiplet

@@ -17,7 +17,7 @@
 
 namespace Smash {
 
-DecayAction::DecayAction(const ParticleData &p, float time)
+DecayAction::DecayAction(const ParticleData &p, double time)
     : Action({p}, time),
       total_width_(0.) {}
 
