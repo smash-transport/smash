@@ -3007,7 +3007,7 @@ float ScatterActionPhoton::diff_cross_section(float t, float m3, float t2, float
 
       break;
     case ReactionType::pi_rho:
-      diff_xsection = 1/3.0*((pow(Const,2)*pow(ghat,4)*((-0.25*pow(-2 + delta,2)*pow(mpion,2)*
+      /*diff_xsection = 1/3.0*((pow(Const,2)*pow(ghat,4)*((-0.25*pow(-2 + delta,2)*pow(mpion,2)*
                   (pow(mpion,4) + pow(pow(mrho,2) - t,2) - 2*pow(mpion,2)*(pow(mrho,2) + t)))/
                 (pow(mrho,2)*pow(pow(mpion,2) - t,2)) -
                (0.0625*(eta1 - eta2)*(2*pow(mrho,2) + delta*(-2*pow(mpion,2) - pow(mrho,2) + s + t))*
@@ -3090,16 +3090,17 @@ float ScatterActionPhoton::diff_cross_section(float t, float m3, float t2, float
                        2*pow(mpion,2)*(delta*(s + t)*(s + 5*t) -
                           pow(mrho,2)*(-2*s + 5*delta*s - 6*t + 9*delta*t + 16*C4*t*(s + t)) +
                           2*pow(mrho,4)*(-2 + delta + 4*C4*(s + 2*t))))))/(pow(mrho,2)*(-pow(ma1,2) + t))))/
-           (16.*Pi*(0.3400429294240001 - 1.24244*s + pow(s,2))));
+           (16.*Pi*(0.3400429294240001 - 1.24244*s + pow(s,2)))); */
 
       // omega:
-      /*diff_xsection = 1/3.0*(0.0024867959858108648*pow(Const,2)*pow(g_POR,4)*(pow(mpion,8) - 2*pow(mpion,6)*pow(mrho,2) +
+      diff_xsection = 1/3.0*(0.0024867959858108648*pow(Const,2)*pow(g_POR,4)*(pow(mpion,8) - 2*pow(mpion,6)*pow(mrho,2) +
         pow(mpion,4)*(pow(mrho,4) + 4*pow(s,2) - 2*s*t) +
         pow(s,2)*(pow(mrho,4) + pow(s,2) + 2*s*t + 2*pow(t,2) - 2*pow(mrho,2)*(s + t)) -
-        2*pow(mpion,2)*s*(pow(mrho,4) + 2*s*(s + t) - pow(mrho,2)*(2*s + t))))/(pow(pow(momega,2) - s,2)*(pow(mpion,4) + pow(pow(mrho,2) - s,2) - 2*pow(mpion,2)*(pow(mrho,2) + s))); */
+        2*pow(mpion,2)*s*(pow(mrho,4) + 2*s*(s + t) - pow(mrho,2)*(2*s + t))))/(pow(pow(momega,2) - s,2)*(pow(mpion,4)
+        + pow(pow(mrho,2) - s,2) - 2*pow(mpion,2)*(pow(mrho,2) + s)));
       break;
     case ReactionType::pi0_rho:
-      diff_xsection = 1/3.0*((pow(Const,2)*pow(ghat,4)*((-0.25*pow(-2 + delta,2)*pow(mpion,2)*
+      /*diff_xsection = 1/3.0*((pow(Const,2)*pow(ghat,4)*((-0.25*pow(-2 + delta,2)*pow(mpion,2)*
                     (pow(mpion,4) + pow(pow(mrho,2) - s,2) - 2*pow(mpion,2)*(pow(mrho,2) + s)))/
                   (pow(mrho,2)*pow(pow(mpion,2) - s,2)) -
                  (0.0625*(eta1 - eta2)*(-pow(ma1,2) + s)*
@@ -3183,13 +3184,13 @@ float ScatterActionPhoton::diff_cross_section(float t, float m3, float t2, float
                            2*pow(mrho,2)*(pow(mpion,4)*(1 + 4*C4*pow(mrho,2)) + pow(mrho,4)*(-1 + 4*C4*s) + s*t -
                               pow(mpion,2)*(4*C4*pow(mrho,4) + s - 2*pow(mrho,2)*(1 + 4*C4*s) + t) +
                               pow(mrho,2)*(t + s*(1 - 4*C4*(s + 2*t))))))/(-pow(mpion,2) + s)))/pow(mrho,4)))/
-             (16.*Pi*(0.3400429294240001 - 1.24244*s + pow(s,2))));
+             (16.*Pi*(0.3400429294240001 - 1.24244*s + pow(s,2)))); */
 
       // omega:
-      /*diff_xsection = 1/3.0*(0.0024867959858108648*pow(Const,2)*pow(g_POR,4)*(pow(mpion,8) - 2*pow(mpion,6)*pow(mrho,2) +
+      diff_xsection = 1/3.0*(0.0024867959858108648*pow(Const,2)*pow(g_POR,4)*(pow(mpion,8) - 2*pow(mpion,6)*pow(mrho,2) +
        pow(mpion,4)*(pow(mrho,4) - 2*(s - 2*t)*t) + pow(t,2)*(pow(mrho,4) + 2*pow(s,2) + 2*s*t + pow(t,2) - 2*pow(mrho,2)*(s + t)) -
        2*pow(mpion,2)*t*(pow(mrho,4) + 2*t*(s + t) - pow(mrho,2)*(s + 2*t))))/
-       ((pow(mpion,4) + pow(pow(mrho,2) - s,2) - 2*pow(mpion,2)*(pow(mrho,2) + s))*pow(pow(momega,2) - t,2));*/
+       ((pow(mpion,4) + pow(pow(mrho,2) - s,2) - 2*pow(mpion,2)*(pow(mrho,2) + s))*pow(pow(momega,2) - t,2));
       break;
     /*case ReactionType::pi_eta:
       diff_xsection = to_be_determined;
@@ -3231,12 +3232,14 @@ float ScatterActionPhoton::form_factor(float E_photon) {
     case ReactionType::pi_pi:
     case ReactionType::pi0_pi:
     case ReactionType::pi_rho0:
-    case ReactionType::pi_rho:
-    case ReactionType::pi0_rho:
+    //case ReactionType::pi_rho:
+    // case ReactionType::pi0_rho:
       t_ff = 34.5096*pow(E_photon,0.737) - 67.557*pow(E_photon,0.7584)
           + 32.858*pow(E_photon,0.7806);
       break;
     // lightest exchange particle: omega
+    case ReactionType::pi_rho:      // for omega
+    case ReactionType::pi0_rho:     // for omega
     case ReactionType::pi0_rho0:
       t_ff = -61.595*pow(E_photon,0.9979) + 28.592*pow(E_photon,1.1579)
                     + 37.738*pow(E_photon,0.9317) - 5.282*pow(E_photon,1.3686);
