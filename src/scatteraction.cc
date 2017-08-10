@@ -679,6 +679,7 @@ void ScatterAction::string_excitation_inter() {
   const auto &log = logger<LogArea::Pythia>();
   // Disable doubleing point exception trap for Pythia
   {
+  bool isinit = false;
   bool isnext = false;
   DisableFloatTraps guard;
 
@@ -714,9 +715,9 @@ void ScatterAction::string_excitation_inter() {
   /* initialize the spmerge object */
   spmerge->set_sigmaQperp(sigQperp);
   spmerge->set_pLightConeMin(0.001);
-  spmerge->init_com(idAin, idBin, massAin, massBin, sqrts);
+  isinit = spmerge->init_lab(idAin, idBin, massAin, massBin, phadAin, phadBin);
   /* implement collision */
-  while( isnext == false ){
+  while( ( isinit == true ) && ( isnext == false ) ){
     isnext = spmerge->next_Inel();
   }
   int npart = spmerge->final_PDGid[0].size();

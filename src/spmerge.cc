@@ -671,7 +671,8 @@ bool SPmerge::check_conservation(){
 	return ret;
 }
 
-void SPmerge::init_lab(int idAIn, int idBIn, double massAIn, double massBIn, Vec4 plabAIn, Vec4 plabBIn){
+bool SPmerge::init_lab(int idAIn, int idBIn, double massAIn, double massBIn, Vec4 plabAIn, Vec4 plabBIn){
+	bool ret;
 	int imu, inu;
 
 	double E, px, py, pz;
@@ -708,7 +709,7 @@ void SPmerge::init_lab(int idAIn, int idBIn, double massAIn, double massBIn, Vec
 	lorentz->Boost1_LabToRest(3, ucomAB, plabA, pcomA);
 	lorentz->Boost1_LabToRest(3, ucomAB, plabB, pcomB);
 
-	if( fabs(pcomA[3]) < pabscomAB ){
+	if( fabs(pcomA[3]) < (1. - 1.0e-8)*pabscomAB ){
 		for(imu = 1; imu <= 3; imu++){
 			evecBasisAB[3][imu] = pcomA[imu]/pabscomAB;
 		}
@@ -733,15 +734,30 @@ void SPmerge::init_lab(int idAIn, int idBIn, double massAIn, double massBIn, Vec
 		evecBasisAB[2][3] = 0.;
 	}
 	else{
-		for(imu = 1; imu <= 3; imu++){
-			for(inu = 1; inu <= 3; inu++){
-				if( imu == inu){
-					evecBasisAB[imu][inu] = 1.;
-				}
-				else{
-					evecBasisAB[imu][inu] = 0.;
+		if( pcomA[3] > 0. ){
+			for(imu = 1; imu <= 3; imu++){
+				for(inu = 1; inu <= 3; inu++){
+					if( imu == inu){
+						evecBasisAB[imu][inu] = 1.;
+					}
+					else{
+						evecBasisAB[imu][inu] = 0.;
+					}
 				}
 			}
+		}
+		else {
+			evecBasisAB[1][1] = 0.;
+			evecBasisAB[1][2] = 1.;
+			evecBasisAB[1][3] = 0.;
+
+			evecBasisAB[2][1] = 1.;
+			evecBasisAB[2][2] = 0.;
+			evecBasisAB[2][3] = 0.;
+
+			evecBasisAB[3][1] = 0.;
+			evecBasisAB[3][2] = 0.;
+			evecBasisAB[3][3] = -1.;
 		}
 	}
 
@@ -767,7 +783,7 @@ void SPmerge::init_lab(int idAIn, int idBIn, double massAIn, double massBIn, Vec
 	pyINI = plabA[2] + plabB[2];
 	pzINI = plabA[3] + plabB[3];
 
-	sigmaTot.calc(PDGidA, PDGidB, sqrtsAB);
+	ret = sigmaTot.calc(PDGidA, PDGidB, sqrtsAB);
 	XSecTot = sigmaTot.sigmaTot();
 	XSecEl = sigmaTot.sigmaEl();
 	XSecAX = sigmaTot.sigmaAX();
@@ -782,9 +798,12 @@ void SPmerge::init_lab(int idAIn, int idBIn, double massAIn, double massBIn, Vec
 	XSecSummed[2] = XSecSummed[1] + XSecXB;
 	XSecSummed[3] = XSecSummed[2] + XSecXX;
 	XSecSummed[4] = XSecSummed[3] + XSecND;
+
+	return ret;
 }
 
-void SPmerge::init_com(int idAIn, int idBIn, double massAIn, double massBIn, double sqrtsABIn){
+bool SPmerge::init_com(int idAIn, int idBIn, double massAIn, double massBIn, double sqrtsABIn){
+	bool ret;
 	int imu, inu;
 
 	double E, px, py, pz;
@@ -853,7 +872,7 @@ void SPmerge::init_com(int idAIn, int idBIn, double massAIn, double massBIn, dou
 	pyINI = plabA[2] + plabB[2];
 	pzINI = plabA[3] + plabB[3];
 
-	sigmaTot.calc(PDGidA, PDGidB, sqrtsAB);
+	ret = sigmaTot.calc(PDGidA, PDGidB, sqrtsAB);
 	XSecTot = sigmaTot.sigmaTot();
 	XSecEl = sigmaTot.sigmaEl();
 	XSecAX = sigmaTot.sigmaAX();
@@ -868,6 +887,8 @@ void SPmerge::init_com(int idAIn, int idBIn, double massAIn, double massBIn, dou
 	XSecSummed[2] = XSecSummed[1] + XSecXB;
 	XSecSummed[3] = XSecSummed[2] + XSecXX;
 	XSecSummed[4] = XSecSummed[3] + XSecND;
+
+	return ret;
 }
 
 bool SPmerge::next_Inel(){
