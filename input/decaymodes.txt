@@ -444,11 +444,11 @@ N(1900)
 
 N(1990)
 0.12   3  N π
-0.43   3  N ρ
+0.20   3  N ρ  # BR lowered to improve pp --> pp ρ cross section, shifted to N σ
 0.14   3  Δ π
 0.05   3  N(1440) π
 0.03   3  Λ K
-0.23   4  N σ  # σ and ππ combined
+0.46   4  N σ  # σ and ππ combined
 # From UrQMD
 # FIXME The UrQMD papers are ambigious whether this state produces φ
 
