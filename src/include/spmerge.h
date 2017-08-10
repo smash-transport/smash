@@ -113,7 +113,8 @@ class SPmerge{
 
 	void set_kappaString(double kappaStringIn){kappaString = kappaStringIn;}
 
-	void init(int idAIn, int idBIn, double massAIn, double massBIn, Vec4 pvecAIn, Vec4 pvecBIn);
+	void init_lab(int idAIn, int idBIn, double massAIn, double massBIn, Vec4 pvecAIn, Vec4 pvecBIn);
+	void init_com(int idAIn, int idBIn, double massAIn, double massBIn, double sqrtsABIn);
 
 	bool next_Inel();
 	bool next_SDiff_AX(); // single-diffractive : A + B -> A + X

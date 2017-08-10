@@ -671,7 +671,7 @@ bool SPmerge::check_conservation(){
 	return ret;
 }
 
-void SPmerge::init(int idAIn, int idBIn, double massAIn, double massBIn, Vec4 plabAIn, Vec4 plabBIn){
+void SPmerge::init_lab(int idAIn, int idBIn, double massAIn, double massBIn, Vec4 plabAIn, Vec4 plabBIn){
 	int imu, inu;
 
 	double E, px, py, pz;
@@ -741,6 +741,92 @@ void SPmerge::init(int idAIn, int idBIn, double massAIn, double massBIn, Vec4 pl
 				else{
 					evecBasisAB[imu][inu] = 0.;
 				}
+			}
+		}
+	}
+
+	//fprintf(stderr,"  SPmerge::init : evecBasisAB1 = (%e, %e, %e)\n",
+	//	evecBasisAB[1][1], evecBasisAB[1][2], evecBasisAB[1][3]);
+	//fprintf(stderr,"  SPmerge::init : evecBasisAB2 = (%e, %e, %e)\n",
+	//	evecBasisAB[2][1], evecBasisAB[2][2], evecBasisAB[2][3]);
+	//fprintf(stderr,"  SPmerge::init : evecBasisAB3 = (%e, %e, %e)\n",
+	//	evecBasisAB[3][1], evecBasisAB[3][2], evecBasisAB[3][3]);
+
+	baryonA = pythia->particleData.baryonNumberType(PDGidA);
+	baryonB = pythia->particleData.baryonNumberType(PDGidB);
+
+	PDGid2idqset(PDGidA, idqsetA);
+	PDGid2idqset(PDGidB, idqsetB);
+
+	xfracMin = pLightConeMin/sqrtsAB;
+
+	CINI = pythia->particleData.chargeType(PDGidA) + pythia->particleData.chargeType(PDGidB);
+	BINI = baryonA + baryonB;
+	EINI = plabA[0] + plabB[0];
+	pxINI = plabA[1] + plabB[1];
+	pyINI = plabA[2] + plabB[2];
+	pzINI = plabA[3] + plabB[3];
+
+	sigmaTot.calc(PDGidA, PDGidB, sqrtsAB);
+	XSecTot = sigmaTot.sigmaTot();
+	XSecEl = sigmaTot.sigmaEl();
+	XSecAX = sigmaTot.sigmaAX();
+	XSecXB = sigmaTot.sigmaXB();
+	XSecXX = sigmaTot.sigmaXX();
+	XSecAXB = sigmaTot.sigmaAXB();
+	XSecInel = XSecTot - XSecEl;
+	XSecND = XSecInel - XSecAX - XSecXB - XSecXX;
+
+	XSecSummed[0] = 0.;
+	XSecSummed[1] = XSecAX;
+	XSecSummed[2] = XSecSummed[1] + XSecXB;
+	XSecSummed[3] = XSecSummed[2] + XSecXX;
+	XSecSummed[4] = XSecSummed[3] + XSecND;
+}
+
+void SPmerge::init_com(int idAIn, int idBIn, double massAIn, double massBIn, double sqrtsABIn){
+	int imu, inu;
+
+	double E, px, py, pz;
+
+	PDGidA = idAIn;
+	PDGidB = idBIn;
+	massA = massAIn;
+	massB = massBIn;
+	sqrtsAB = sqrtsABIn;
+	pabscomAB = sqrt( ( pow(fabs(sqrtsAB),2.) - pow(fabs(massA + massB),2.)
+		)*( pow(fabs(sqrtsAB),2.) - pow(fabs(massA - massB),2.) ) )/(2.*sqrtsAB);
+
+	plabA[0] = sqrt( pow(fabs(massA),2.) + pow(fabs(pabscomAB),2.) );
+	plabA[1] = 0.;
+	plabA[2] = 0.;
+	plabA[3] = pabscomAB;
+
+	plabB[0] = sqrt( pow(fabs(massB),2.) + pow(fabs(pabscomAB),2.) );
+	plabB[1] = 0.;
+	plabB[2] = 0.;
+	plabB[3] = -pabscomAB;
+
+	E = sqrtsAB;
+	px = 0.;
+	py = 0.;
+	pz = 0.;
+
+	ucomAB[0] = E/sqrtsAB;
+	ucomAB[1] = px/sqrtsAB;
+	ucomAB[2] = py/sqrtsAB;
+	ucomAB[3] = pz/sqrtsAB;
+
+	lorentz->Boost1_LabToRest(3, ucomAB, plabA, pcomA);
+	lorentz->Boost1_LabToRest(3, ucomAB, plabB, pcomB);
+
+	for(imu = 1; imu <= 3; imu++){
+		for(inu = 1; inu <= 3; inu++){
+			if( imu == inu){
+				evecBasisAB[imu][inu] = 1.;
+			}
+			else{
+				evecBasisAB[imu][inu] = 0.;
 			}
 		}
 	}
@@ -924,7 +1010,14 @@ bool SPmerge::next_SDiff_AX(){
 		}
 		//fprintf(stderr,"  SPmerge::next_SDiff_AX : evec = (%e, %e, %e)\n", evec[1], evec[2], evec[3]);
 		nfrag = fragmentString(idqX1, idqX2, massX, evec, false);
-		NpartString1 = append_finalArray(ustrXlab, evec);
+		if( nfrag > 0 ){
+			NpartString1 = append_finalArray(ustrXlab, evec);
+		}
+		else{
+			nfrag = 0;
+			NpartString1 = 0;
+			ret = false;
+		}
 
 		NpartString2 = 1;
 		final_PDGid[0].push_back(PDGidA);
@@ -957,8 +1050,10 @@ bool SPmerge::next_SDiff_AX(){
 	free(ustrXcom);
 	free(ustrXlab);
 
-	conserved = check_conservation();
-	ret = ret && conserved;
+	if( ret == true ){
+		conserved = check_conservation();
+		ret = ret && conserved;
+	}
 	return ret;
 }
 
@@ -1078,7 +1173,14 @@ bool SPmerge::next_SDiff_XB(){
 		}
 		//fprintf(stderr,"  SPmerge::next_SDiff_XB : evec = (%e, %e, %e)\n", evec[1], evec[2], evec[3]);
 		nfrag = fragmentString(idqX1, idqX2, massX, evec, false);
-		NpartString1 = append_finalArray(ustrXlab, evec);
+		if( nfrag > 0 ){
+			NpartString1 = append_finalArray(ustrXlab, evec);
+		}
+		else{
+			nfrag = 0;
+			NpartString1 = 0;
+			ret = false;
+		}
 
 		NpartString2 = 1;
 		final_PDGid[0].push_back(PDGidB);
@@ -1111,8 +1213,10 @@ bool SPmerge::next_SDiff_XB(){
 	free(ustrXcom);
 	free(ustrXlab);
 
-	conserved = check_conservation();
-	ret = ret && conserved;
+	if( ret == true ){
+		conserved = check_conservation();
+		ret = ret && conserved;
+	}
 	return ret;
 }
 
@@ -1263,7 +1367,14 @@ bool SPmerge::next_DDiff_XX(){
 		}
 		//fprintf(stderr,"  SPmerge::next_DDiff : evec = (%e, %e, %e)\n", evec[1], evec[2], evec[3]);
 		nfrag1 = fragmentString(idq11, idq12, mstr1, evec, false);
-		NpartString1 = append_finalArray(ustr1lab, evec);
+		if( nfrag1 > 0 ){
+			NpartString1 = append_finalArray(ustr1lab, evec);
+		}
+		else{
+			nfrag1 = 0;
+			NpartString1 = 0;
+			ret = false;
+		}
 
 		for(imu = 1; imu < 4; imu++){
 			pnull[imu] = pstr2com[imu];
@@ -1277,7 +1388,14 @@ bool SPmerge::next_DDiff_XX(){
 		}
 		//fprintf(stderr,"  SPmerge::next_DDiff : evec = (%e, %e, %e)\n", evec[1], evec[2], evec[3]);
 		nfrag2 = fragmentString(idq21, idq22, mstr2, evec, false);
-		NpartString2 = append_finalArray(ustr2lab, evec);
+		if( nfrag2 > 0 ){
+			NpartString2 = append_finalArray(ustr2lab, evec);
+		}
+		else{
+			nfrag2 = 0;
+			NpartString2 = 0;
+			ret = false;
+		}
 
 		if( ( NpartString1 > 0 ) && ( NpartString2 > 0 )
 			&& ( nfrag1 == NpartString1 ) && ( nfrag2 == NpartString2 ) ){
@@ -1300,8 +1418,10 @@ bool SPmerge::next_DDiff_XX(){
 	free(ustr2com);
 	free(ustr2lab);
 
-	conserved = check_conservation();
-	ret = ret && conserved;
+	if( ret == true ){
+		conserved = check_conservation();
+		ret = ret && conserved;
+	}
 	return ret;
 }
 
@@ -1523,7 +1643,14 @@ bool SPmerge::next_NDiff(){
 		}
 		//fprintf(stderr,"  SPmerge::next_NDiff : evec = (%e, %e, %e)\n", evec[1], evec[2], evec[3]);
 		nfrag1 = fragmentString(idq11, idq12, mstr1, evec, false);
-		NpartString1 = append_finalArray(ustr1lab, evec);
+		if( nfrag1 > 0 ){
+			NpartString1 = append_finalArray(ustr1lab, evec);
+		}
+		else{
+			nfrag1 = 0;
+			NpartString1 = 0;
+			ret = false;
+		}
 
 		for(imu = 1; imu < 4; imu++){
 			pnull[imu] = pstr2com[imu];
@@ -1537,7 +1664,14 @@ bool SPmerge::next_NDiff(){
 		}
 		//fprintf(stderr,"  SPmerge::next_NDiff : evec = (%e, %e, %e)\n", evec[1], evec[2], evec[3]);
 		nfrag2 = fragmentString(idq21, idq22, mstr2, evec, false);
-		NpartString2 = append_finalArray(ustr2lab, evec);
+		if( nfrag2 > 0 ){
+			NpartString2 = append_finalArray(ustr2lab, evec);
+		}
+		else{
+			nfrag2 = 0;
+			NpartString2 = 0;
+			ret = false;
+		}
 
 		if( ( NpartString1 > 0 ) && ( NpartString2 > 0 )
 			&& ( nfrag1 == NpartString1 ) && ( nfrag2 == NpartString2 ) ){
@@ -1560,8 +1694,10 @@ bool SPmerge::next_NDiff(){
 	free(ustr2com);
 	free(ustr2lab);
 
-	conserved = check_conservation();
-	ret = ret && conserved;
+	if( ret == true ){
+		conserved = check_conservation();
+		ret = ret && conserved;
+	}
 	return ret;
 }
 
@@ -1614,8 +1750,10 @@ bool SPmerge::next_BBarAnn(){
 	}
 	// endif baryon-antibaryon pair
 
-	conserved = check_conservation();
-	ret = ret && conserved;
+	if( ret == true ){
+		conserved = check_conservation();
+		ret = ret && conserved;
+	}
 	return ret;
 }
 */

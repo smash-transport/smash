@@ -288,6 +288,9 @@ class ScatterAction : public Action {
   /** Perform the string excitation and decay via Pythia. */
   void string_excitation();
 
+  /** Perform the UrQMD-based string excitation and decay */
+  void string_excitation_inter();
+
   /**
    * \ingroup logging
    * Writes information about this scatter action to the \p out stream.

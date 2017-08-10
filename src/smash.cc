@@ -24,10 +24,12 @@
 /* build dependent variables */
 #include "include/config.h"
 
+#include "include/spmerge.h"
 #include "Pythia8/Pythia.h"
 
 using namespace Pythia8;
 extern Pythia *pythia;
+extern SPmerge *spmerge;
 
 namespace Smash {
 
@@ -431,6 +433,38 @@ int main(int argc, char *argv[]) {
     DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
     ParticleType::check_consistency();
 
+    // create Pythia and SPmerge (UrQMD-based string excitation) objects
+    const gsl_rng_type *Type;
+    gsl_rng *rng;
+    pythia = new Pythia(PYTHIA_XML_DIR, false);
+    spmerge = new SPmerge();
+    // setup and initialize pythia for spmerge
+    /* select only inelastic events: */
+    pythia->readString("SoftQCD:inelastic = on");
+    /* suppress unnecessary output */
+    pythia->readString("Print:quiet = on");
+    /* No resonance decays, since the resonances will be handled by SMASH */
+    pythia->readString("HadronLevel:Decay = off");
+    /* transverse momentum spread in string fragmentation */
+    pythia->readString("StringPT:sigma = 0.25");
+    /* manually set the parton distribution function */
+    pythia->readString("PDF:pSet = 13");
+    pythia->readString("PDF:pSetB = 13");
+    pythia->readString("PDF:piSet = 1");
+    pythia->readString("PDF:piSetB = 1");
+    pythia->readString("Beams:idA = 2212");
+    pythia->readString("Beams:idB = 2212");
+    pythia->readString("Beams:eCM = 10.");
+    pythia->init();
+    // setup spmerge
+    gsl_rng_env_setup();
+    Type = gsl_rng_default;
+    rng = gsl_rng_alloc(Type);
+    gsl_rng_set(rng, seed);
+    spmerge->set_gsl_rng_type(Type);
+    spmerge->set_gsl_rng(rng);
+    spmerge->set_pythia(pythia);
+
     // create an experiment
     log.trace(source_location, " create Experiment");
     auto experiment = ExperimentBase::create(configuration, output_path);
@@ -440,13 +474,12 @@ int main(int argc, char *argv[]) {
                  << report;
     }
 
-    pythia = new Pythia(PYTHIA_XML_DIR, false);
-
     // run the experiment
     log.trace(source_location, " run the Experiment");
     experiment->run();
 
     delete pythia;
+    delete spmerge;
   } catch (std::exception &e) {
     log.fatal() << "SMASH failed with the following error:\n" << e.what();
     return EXIT_FAILURE;
