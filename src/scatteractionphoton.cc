@@ -90,11 +90,31 @@ void ScatterActionPhoton::generate_final_state() {
   } else {
     weight_ = proc->weight() / cross_section();
   }
+
   /* Set positions & boost to computational frame. */
   for (ParticleData &new_particle : outgoing_particles_) {
     new_particle.set_4position(middle_point);
     new_particle.boost_momentum(-beta_cm());
   }
+
+  /* Inlcusion of form factors:
+  Usual procedure would be the multplication of the photon cross section
+  with the corresponding form factor. This form factor is however energy
+  dependent, such that the energy of the generated photon in the computational frame
+  is a necessary to determine FF. Yet this is not directly accessible in
+  ScatterActionPhoton::photon_cross_section().
+  The alternative solution is to multiply the weighting factor (proportional to
+  cross section) by the form factor, which is equivalent to multiplying the
+  cross section directly.
+
+  The modification is as follows:
+  weight_FF = weight_noFF * FF^4
+  The actual value of the form factor is determined in
+  ScatterActionPhoton::form_factor */
+
+  float E_Photon_Comp = outgoing_particles_[1].momentum()[0];
+
+  weight_ *= pow(form_factor(E_Photon_Comp),4);
 }
 
 void ScatterActionPhoton::add_dummy_hadronic_channels(
@@ -164,6 +184,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
 
   const float to_mb = 0.3894;
   const float Const = 0.059;
+  // no form factor: const float g_POR = 11.93;
   const float g_POR = 11.93;
   const float ma1 = 1.26;
   const float ghat = 6.4483;
@@ -171,6 +192,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
   const float eta2 = 1.9430;
   const float delta = -0.6426;
   const float C4 = -0.14095;
+  // no form factor: const float Gammaa1 = 0.4; form factor: 0.033
   const float Gammaa1 = 0.4;
   const float Pi = M_PI;
   float m_omega = 0.783;
@@ -2718,6 +2740,7 @@ float ScatterActionPhoton::diff_cross_section(float t, float m3, float t2, float
   float diff_xsection = 0.0;
 
   const float Const = 0.059;
+  // no form factor: const float g_POR = 11.93;
   const float g_POR = 11.93;
   const float ma1 = 1.26;
   const float ghat = 6.4483;
@@ -2725,6 +2748,7 @@ float ScatterActionPhoton::diff_cross_section(float t, float m3, float t2, float
   const float eta2 = 1.9430;
   const float delta = -0.6426;
   const float C4 = -0.14095;
+  // no form factor: const float Gammaa1 = 0.4;, form factor: 0.033
   const float Gammaa1 = 0.4;
   const float Pi = M_PI;
   float m_omega = 0.783;
@@ -3190,6 +3214,40 @@ float ScatterActionPhoton::diff_cross_section(float t, float m3, float t2, float
       break;
   }
   return diff_xsection*to_mb;
+}
+
+float ScatterActionPhoton::form_factor(float E_photon) {
+  float form_factor = 1.0;
+  float t_ff = 0.0;
+  float Lambda = 1.0;
+  switch(reac){
+
+    /* The form factor is assumed to be a hadronic dipole form factor which
+    takes the shape of: FF = (2*Lambda^2/(2*Lambda^2 - t))^2 with
+    Lambda = 1.0 GeV. t depends on the lightest possible exchange particle in
+    the different channels. This could either be a pion or an omega meson. For
+    the computation the parametrizations given in REF! are used. */
+
+    case ReactionType::pi_pi:
+    case ReactionType::pi0_pi:
+    case ReactionType::pi_rho0:
+    case ReactionType::pi_rho:
+    case ReactionType::pi0_rho:
+      t_ff = 34.5096*pow(E_photon,0.737) - 67.557*pow(E_photon,0.7584)
+          + 32.858*pow(E_photon,0.7806);
+      break;
+    // lightest exchange particle: omega
+    case ReactionType::pi0_rho0:
+      t_ff = -61.595*pow(E_photon,0.9979) + 28.592*pow(E_photon,1.1579)
+                    + 37.738*pow(E_photon,0.9317) - 5.282*pow(E_photon,1.3686);
+      break;
+
+    case ReactionType::no_reaction:
+      // never reached
+      break;
+  }
+  form_factor = pow(2.0*pow(Lambda,2)/(2.0*pow(Lambda,2)-t_ff),2);
+  return form_factor;
 }
 
 }  // namespace Smash

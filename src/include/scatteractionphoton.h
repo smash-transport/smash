@@ -85,6 +85,8 @@ class ScatterActionPhoton : public ScatterAction {
   float pi_pi0_rho(const float M, const float s) const;
 
   float diff_cross_section(float t, float m3, float t2, float t1) const;
+
+  float form_factor(float E_photon);
 };
 
 }  // namespace Smash
