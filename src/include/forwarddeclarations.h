@@ -176,6 +176,15 @@ enum class ThermodynamicQuantity : char {
   LandauVelocity,
 };
 
+///The different groups of 2 to 2 reactions that one can include
+enum class IncludedReactions {
+  All,
+  NN_to_NN,
+  NN_to_NR,
+  KN_to_KDelta,
+  Strangeness_exchange,
+};
+
 /**
  * Defines the algorithm used for the forced thermalization.
  *  For the description of algorithms see \iref{Oliinychenko:2016vkg}.

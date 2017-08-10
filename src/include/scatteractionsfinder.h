@@ -138,8 +138,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const bool isotropic_;
   /** Enable 2->1 processes. */
   const bool two_to_one_;
-  /** Enable 2->2 processes. */
-  const bool two_to_two_;
+  /** List of included 2<->2 reactions */
+  const std::set<IncludedReactions> incl_set_;
   /** Elastic collsions between two nucleons with
    ** sqrt_s below low_snn_cut_ are excluded. */
   const double low_snn_cut_;

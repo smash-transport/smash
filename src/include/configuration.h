@@ -243,6 +243,28 @@ class Configuration {
       return arr;
     }
 
+    operator std::set<IncludedReactions>() const {
+      const std::vector<std::string> v = operator std::vector<std::string>();
+      std::set<IncludedReactions> s;
+      for (const auto &x : v) {
+          if (x == "NN_to_NN") {
+            s.insert(IncludedReactions::NN_to_NN);
+          } else if (x == "NN_to_NR") {
+            s.insert(IncludedReactions::NN_to_NR);
+          } else if (x == "KN_to_KDelta") {
+            s.insert(IncludedReactions::KN_to_KDelta);
+          } else if (x == "strangeness_exchange") {
+            s.insert(IncludedReactions::Strangeness_exchange);
+          } else {
+            throw IncorrectTypeInAssignment(
+              "The value for key \"" + std::string(key_) +
+              "\" should be \"NN_to_NN\", \"NN_to_NR\""
+              ", \"KN_to_KDelta\" or \"strangeness_exchange\".");
+          }
+      }
+      return s;
+    }
+
     operator std::set<ThermodynamicQuantity>() const {
       const std::vector<std::string> v = operator std::vector<std::string>();
       std::set<ThermodynamicQuantity> s;
