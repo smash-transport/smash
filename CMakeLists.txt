@@ -38,7 +38,7 @@ endif(NOT CMAKE_BUILD_TYPE)
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/Cuba-4.2")
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/einhard")
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/yaml-cpp-0.5.3/include")
-include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/pythia8223/include")
+include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/pythia8226/include")
 add_subdirectory(3rdparty)
 
 # RelWithDebInfo is just like Release, it only adds -g to add debug symbols

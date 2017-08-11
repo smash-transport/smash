@@ -346,7 +346,7 @@ void Nucleus::generate_fermi_momenta() {
     // Only protons and neutrons get Fermi momenta
     if (i->pdgcode() != pdg::p && i->pdgcode() != pdg::n) {
       if (i->is_baryon()) {
-        log.error() << "No rule to calculate Fermi momentum " <<
+        log.warn() << "No rule to calculate Fermi momentum " <<
                        "for particle " << i->pdgcode();
       }
       continue;
