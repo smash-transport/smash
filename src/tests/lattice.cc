@@ -15,24 +15,24 @@
 using namespace Smash;
 
 static std::unique_ptr<RectangularLattice<FourVector>> create_lattice(bool p) {
-  const std::array<float, 3> l = {10.0f, 6.0f, 2.0f};
+  const std::array<double, 3> l = {10., 6., 2.};
   const std::array<int, 3> n = {4, 8, 3};
-  const std::array<float, 3> origin = {0.0f, 0.0f, 0.0f};
+  const std::array<double, 3> origin = {0., 0., 0.};
   return make_unique<RectangularLattice<FourVector>>(
       l, n, origin, p, LatticeUpdate::EveryTimestep);
 }
 
 TEST(getters) {
   auto lattice = create_lattice(true);
-  VERIFY(lattice->lattice_sizes()[0] == 10.0f);
-  VERIFY(lattice->lattice_sizes()[1] == 6.0f);
-  VERIFY(lattice->lattice_sizes()[2] == 2.0f);
-  VERIFY(lattice->dimensions()[0] == 4);
-  VERIFY(lattice->dimensions()[1] == 8);
-  VERIFY(lattice->dimensions()[2] == 3);
-  VERIFY(lattice->cell_sizes()[0] == 2.5f);
-  VERIFY(lattice->cell_sizes()[1] == 0.75f);
-  VERIFY(lattice->cell_sizes()[2] == 2.0f / 3.0f);
+  COMPARE(lattice->lattice_sizes()[0], 10.);
+  COMPARE(lattice->lattice_sizes()[1], 6.);
+  COMPARE(lattice->lattice_sizes()[2], 2.);
+  COMPARE(lattice->dimensions()[0], 4);
+  COMPARE(lattice->dimensions()[1], 8);
+  COMPARE(lattice->dimensions()[2], 3);
+  COMPARE(lattice->cell_sizes()[0], 2.5);
+  COMPARE(lattice->cell_sizes()[1], 0.75);
+  COMPARE(lattice->cell_sizes()[2], 2. / 3.);
   VERIFY(lattice->periodic());
 }
 
@@ -45,7 +45,7 @@ TEST(reset) {
   }
   lattice->reset();
   for (const auto &node : *lattice) {
-    VERIFY(node == FourVector());
+    COMPARE(node, FourVector());
   }
 }
 
@@ -72,23 +72,26 @@ TEST(out_of_bounds) {
 
 TEST(cell_center) {
   auto lattice = create_lattice(true);
-  VERIFY(lattice->cell_center(0, 0, 0).x1() == 1.25);
-  VERIFY(lattice->cell_center(0, 0, 0).x2() == 0.375);
-  // cell center is calculated from float, though ThreeVector contains doubles
-  // so accuracy is not better then the float one
-  FUZZY_COMPARE(float(lattice->cell_center(0, 0, 0).x3()), 1.0f / 3.0f);
-  VERIFY(lattice->cell_center(1, 1, 1).x1() == 3.75);
-  VERIFY(lattice->cell_center(1, 1, 1).x2() == 0.375 * 3);
-  FUZZY_COMPARE(float(lattice->cell_center(1, 1, 1).x3()), 1.0f);
+  COMPARE(lattice->cell_center(0, 0, 0).x1(), 1.25);
+  COMPARE(lattice->cell_center(0, 0, 0).x2(), 0.375);
+  FUZZY_COMPARE(lattice->cell_center(0, 0, 0).x3(), 1.0 / 3.0);
+  COMPARE(lattice->cell_center(1, 1, 1).x1(), 3.75);
+  COMPARE(lattice->cell_center(1, 1, 1).x2(), 0.375 * 3);
+  FUZZY_COMPARE(lattice->cell_center(1, 1, 1).x3(), 1.0);
+  // Cell center from 1d index
+  auto dims = lattice->dimensions();
+  const ThreeVector r1 = lattice->cell_center(1, 3, 2);
+  const ThreeVector r2 = lattice->cell_center(1 + dims[0]*(3 + dims[1]*2));
+  VERIFY(r1 == r2);
 }
 
 TEST(iterators) {
   auto lattice = create_lattice(false);
   // 1) Check that lattice size is as expected
-  VERIFY(lattice->size() == 4 * 8 * 3);
+  COMPARE(lattice->size(), 4u * 8u * 3u);
   // Check node and index accessors
   lattice->node(1, 3, 2) = FourVector(1., 2., 3., 4.);
-  VERIFY((*lattice)[8 * 4 * 2 + 4 * 3 + 1] == FourVector(1., 2., 3., 4.));
+  COMPARE((*lattice)[8 * 4 * 2 + 4 * 3 + 1], FourVector(1., 2., 3., 4.));
 
   // 2) Iterate lattice around a point, but take radius so big, that all
   //    the lattice is iterated. Check if really all the lattice was iterated
@@ -98,7 +101,7 @@ TEST(iterators) {
   int count_nodes = 0;
   lattice->iterate_in_radius(
       r, r_cut, [&](FourVector &, int, int, int) { count_nodes++; });
-  VERIFY(count_nodes == 4 * 8 * 3);
+  COMPARE(count_nodes, 4 * 8 * 3);
 
   // 3) Iterate around a point, but take r_cut small enough that only one cell
   // is iterated.
@@ -107,7 +110,7 @@ TEST(iterators) {
   count_nodes = 0;
   lattice->iterate_in_radius(
       r, r_cut, [&](FourVector &, int, int, int) { count_nodes++; });
-  VERIFY(count_nodes == 1);
+  COMPARE(count_nodes, 1);
 
   // 4) Make lattice periodic and repeat 2). Now no node is out of lattice,
   //  because lattice is periodically continued. So expected number of nodes is
@@ -122,7 +125,7 @@ TEST(iterators) {
       8 * static_cast<int>(std::ceil(r_cut / lattice->cell_sizes()[0] - 0.5) *
                            std::ceil(r_cut / lattice->cell_sizes()[1] - 0.5) *
                            std::ceil(r_cut / lattice->cell_sizes()[2] - 0.5));
-  VERIFY(count_nodes == nodes_expect) << count_nodes << " " << nodes_expect;
+  COMPARE(count_nodes, nodes_expect) << count_nodes << " " << nodes_expect;
 }
 
 TEST(iterate_in_radius) {
@@ -143,9 +146,9 @@ TEST(iterate_in_radius) {
     if (std::abs(r[0] - r0[0]) <= r_cut &&
         std::abs(r[1] - r0[1]) <= r_cut &&
         std::abs(r[2] - r0[2]) <= r_cut) {
-      VERIFY(node == mark) << ix << " " << iy << " " << iz;
+      COMPARE(node, mark) << ix << " " << iy << " " << iz;
     } else {
-      VERIFY(node == FourVector()) << ix << " " << iy << " " << iz;
+      COMPARE(node, FourVector()) << ix << " " << iy << " " << iz;
     }
   });
 
@@ -167,9 +170,9 @@ TEST(iterate_in_radius) {
       d[i] = std::abs(d[i]);
     }
     if (d[0] <= r_cut && d[1] <= r_cut && d[2] <= r_cut) {
-      VERIFY(node == mark) << ix << " " << iy << " " << iz;
+      COMPARE(node, mark) << ix << " " << iy << " " << iz;
     } else {
-      VERIFY(node == FourVector()) << ix << " " << iy << " " << iz;
+      COMPARE(node, FourVector()) << ix << " " << iy << " " << iz;
     }
   });
 }
@@ -179,9 +182,9 @@ TEST(iterate_in_radius) {
  */
 TEST(gradient) {
   // Set a lattice with random parameters, but a relatively fine one.
-  const std::array<float, 3> l = {9.0f, 7.0f, 13.0f};
+  const std::array<double, 3> l = {9., 7., 13.};
   const std::array<int, 3> n = {50, 60, 70};
-  const std::array<float, 3> origin = {-5.2f, -4.3f, -6.7f};
+  const std::array<double, 3> origin = {-5.2, -4.3, -6.7};
   bool periodicity = false;
   auto lat = make_unique<RectangularLattice<double>>(
              l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
@@ -235,9 +238,9 @@ TEST(gradient) {
    with non-periodic is treatment of derivatives on the edges.
 */
 TEST(gradient_periodic) {
-  const std::array<float, 3> l = {9.0f, 7.0f, 13.0f};
+  const std::array<double, 3> l = {9., 7., 13.};
   const std::array<int, 3> n = {50, 60, 70};
-  const std::array<float, 3> origin = {-5.2f, -4.3f, -6.7f};
+  const std::array<double, 3> origin = {-5.2, -4.3, -6.7};
   bool periodicity = true;
   auto lat = make_unique<RectangularLattice<double>>(
              l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
@@ -279,9 +282,9 @@ TEST(gradient_periodic) {
 /* Test gradient for 2x2x2 lattice. The test is that it doesn't segfault.
 */
 TEST(gradient_2x2x2lattice) {
-  const std::array<float, 3> l = {9.0f, 7.0f, 13.0f};
+  const std::array<double, 3> l = {9., 7., 13.};
   const std::array<int, 3> n = {2, 2, 2};
-  const std::array<float, 3> origin = {-5.2f, -4.3f, -6.7f};
+  const std::array<double, 3> origin = {-5.2, -4.3, -6.7};
   bool periodicity = false;
   auto lat = make_unique<RectangularLattice<double>>(
              l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
@@ -301,9 +304,9 @@ TEST(gradient_2x2x2lattice) {
 
 // If one of the dimensions is 1, then 3D gradient calculation is impossible
 TEST_CATCH(gradient_impossible_lattice, std::runtime_error) {
-  const std::array<float, 3> l = {9.0f, 7.0f, 13.0f};
+  const std::array<double, 3> l = {9., 7., 13.};
   const std::array<int, 3> n = {5, 42, 1};
-  const std::array<float, 3> origin = {-5.2f, -4.3f, -6.7f};
+  const std::array<double, 3> origin = {-5.2, -4.3, -6.7};
   bool periodicity = false;
   auto lat = make_unique<RectangularLattice<double>>(
              l, n, origin, periodicity, LatticeUpdate::EveryTimestep);

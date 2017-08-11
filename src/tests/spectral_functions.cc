@@ -40,7 +40,7 @@ TEST(spectral_functions) {
      * definite and to avoid numerical problems. */
     const auto result_no_norm = integrate(0., 1.,
                           [&](double t) {
-                            return type.spectral_function_no_norm(type.minimum_mass() + (1 - t)/t) / (t*t);
+                            return type.spectral_function_no_norm(type.min_mass_kinematic() + (1 - t)/t) / (t*t);
                           });
     const auto result_const = integrate(0., 1.,
                           [&](double t) {
@@ -48,7 +48,7 @@ TEST(spectral_functions) {
                           });
     const auto result = integrate(0., 1.,
                           [&](double t) {
-                            return type.spectral_function(type.minimum_mass() + (1 - t)/t) / (t*t);
+                            return type.spectral_function(type.min_mass_kinematic() + (1 - t)/t) / (t*t);
                           });
     if (result_no_norm.value() > 1 + warning_level) {
       std::cout << AnsiColor::blue;

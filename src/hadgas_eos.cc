@@ -89,23 +89,22 @@ void EosTable::compile_table(HadronGasEos &eos,
     const double ns = 0.0;
     for (size_t ie = 0; ie < n_e_; ie++) {
       const double e = de_ * ie;
-      std::array<double, 3> init_approx = {0.1, 0.0, 0.0};
       for (size_t inb = 0; inb < n_nb_; inb++) {
         const double nb = dnb_ * inb;
         // It is physically impossible to have energy density > nucleon mass*nb,
         // therefore eqns have no solutions.
-        if (nb*nucleon_mass >= e) {
+        if (nb >= e) {
           table_[index(ie, inb)] = {0.0, 0.0, 0.0, 0.0};
           continue;
         }
-        // Take extrapolated (T, mub, mus) as initial approximation, but not
-        // for cases close to unphysical region
-        if (nb > e) {
-          init_approx = {0.1, 0.7, 0.0};
-        } else if (inb >= 2) {
+        // Take extrapolated (T, mub, mus) as initial approximation
+        std::array<double, 3> init_approx;
+        if (inb >= 2) {
           const table_element y = table_[index(ie, inb - 2)];
           const table_element x = table_[index(ie, inb - 1)];
           init_approx = {2.0*x.T - y.T, 2.0*x.mub - y.mub, 2.0*x.mus - y.mus};
+        } else {
+          init_approx = eos.solve_eos_initial_approximation(e, nb);
         }
         const std::array<double, 3> res = eos.solve_eos(e, nb, ns, init_approx);
         const double T   = res[0];
@@ -161,7 +160,7 @@ HadronGasEos::HadronGasEos(const bool tabulate) :
   x_(gsl_vector_alloc(n_equations_)),
   tabulate_(tabulate) {
   const gsl_multiroot_fsolver_type *solver_type;
-  solver_type = gsl_multiroot_fsolver_dnewton;
+  solver_type = gsl_multiroot_fsolver_hybrid;
   solver_ = gsl_multiroot_fsolver_alloc(solver_type, n_equations_);
   if (tabulate_) {
     eos_table_.compile_table(*this);
@@ -179,12 +178,18 @@ double HadronGasEos::scaled_partial_density(const ParticleType& ptype,
   double x = beta*(ptype.baryon_number()*mub +
                    ptype.strangeness()*mus -
                    ptype.mass());
-  const size_t g = ptype.spin() + 1;
-  x = (x < -700.0) ? 0.0 : std::exp(x);
+  const unsigned int g = ptype.spin() + 1;
+  /*if (x < -600.0) {
+    std::cout << x << " " << z << " " << g << std::endl;
+  }*/
+  if (x < -500.0) {
+    return 0.0;
+  }
+  x = std::exp(x);
   // The case of small mass: K_n(z) -> (n-1)!/2 *(2/z)^n, z -> 0
   // z*z*K_2(z) -> 2
   return (z < really_small) ? 2.0*g*x :
-           z*z * g*x * gsl_sf_bessel_Kn_scaled(2, z);
+          z*z * g*x * gsl_sf_bessel_Kn_scaled(2, z);
 }
 
 double HadronGasEos::partial_density(const ParticleType& ptype,
@@ -209,7 +214,10 @@ double HadronGasEos::energy_density(double T, double mub, double mus) {
     double x = beta * (mub*ptype.baryon_number() +
                        mus*ptype.strangeness() -
                        ptype.mass());
-    x = (x < -700.0) ? 0.0 : std::exp(x);
+    if (x < -500.0) {
+      return 0.0;
+    }
+    x = std::exp(x);
     const size_t g = ptype.spin() + 1;
     // Small mass case, z*z*K_2(z) -> 2, z*z*z*K_1(z) -> 0 at z->0
     e += (z < really_small) ? 3.0*g*x :
@@ -276,8 +284,8 @@ double HadronGasEos::mus_net_strangeness0(double T, double mub) {
   double mus_l = 0.0;
   double mus, rhos;
   size_t iteration = 0;
-  // 30 iterations should give precision 2^-30 ~ 10^-9
-  const size_t max_iteration = 30;
+  // 50 iterations should give precision 2^-50 ~ 10^-15
+  const size_t max_iteration = 50;
   do {
     mus = 0.5 * (mus_u + mus_l);
     rhos = net_strange_density(T, mub, mus);
@@ -311,9 +319,77 @@ int HadronGasEos::set_eos_solver_equations(const gsl_vector* x,
   return GSL_SUCCESS;
 }
 
+double HadronGasEos::e_equation(double T, void *params) {
+    const double edens = reinterpret_cast<struct eparams*>(params)->edens;
+    return edens - energy_density(T, 0.0, 0.0);
+}
+
+std::array<double, 3> HadronGasEos::solve_eos_initial_approximation(
+                       double e, double nb) {
+  assert(e >= 0.0);
+  // 1. Get temperature from energy density assuming zero chemical potentials
+  int degeneracies_sum = 0.0;
+  for (const ParticleType &ptype : ParticleType::list_all()) {
+    if (is_eos_particle(ptype)) {
+      degeneracies_sum += ptype.spin() + 1;
+    }
+  }
+  // Temperature in case of massless gas. For massive it should be larger.
+  const double T_min = std::pow(e/prefactor_/6/degeneracies_sum, 1./4.);
+  // Simply assume that the temperature is not higher than 2 GeV.
+  const double T_max = 2.0;
+
+  struct eparams parameters = {e};
+  gsl_function F = {&e_equation, &parameters};
+  const gsl_root_fsolver_type *T = gsl_root_fsolver_brent;
+  gsl_root_fsolver *e_solver;
+  e_solver = gsl_root_fsolver_alloc(T);
+  gsl_root_fsolver_set(e_solver, &F, T_min, T_max);
+
+  int iter = 0, status, max_iter = 100;
+  double T_init = 0.0;
+
+  do {
+    iter++;
+    status = gsl_root_fsolver_iterate(e_solver);
+    if (status != GSL_SUCCESS) {
+        break;
+    }
+    T_init = gsl_root_fsolver_root(e_solver);
+    double x_lo = gsl_root_fsolver_x_lower(e_solver);
+    double x_hi = gsl_root_fsolver_x_upper(e_solver);
+    status = gsl_root_test_interval(x_lo, x_hi, 0.0, 0.001);
+  } while (status == GSL_CONTINUE && iter < max_iter);
+
+  if (status != GSL_SUCCESS) {
+    std::stringstream err_msg;
+    err_msg << "Solver of equation for temperature with e = " << e <<
+               " failed to converge. Maybe Tmax = " << T_max <<
+               " is too small?" << std::endl;
+    throw std::runtime_error(gsl_strerror(status) + err_msg.str());
+  }
+
+  gsl_root_fsolver_free(e_solver);
+
+  // 2. Get the baryon chemical potential for mus = 0 and previously obtained T
+  double n_only_baryons = 0.0;
+  for (const ParticleType &ptype : ParticleType::list_all()) {
+    if (is_eos_particle(ptype) && ptype.baryon_number() == 1) {
+      n_only_baryons += scaled_partial_density(ptype, 1.0/T_init, 0.0, 0.0);
+    }
+  }
+  const double nb_scaled = nb/prefactor_/(T_init*T_init*T_init);
+  double mub_init = T_init * std::asinh(nb_scaled/n_only_baryons/2.0);
+
+  // 3. mus = 0 is typically a good initial approximation
+
+  std::array<double, 3> initial_approximation = {T_init, mub_init, 0.0};
+  return initial_approximation;
+}
+
 std::array<double, 3> HadronGasEos::solve_eos(double e, double nb, double ns,
                                  std::array<double, 3> initial_approximation) {
-  int status;
+  int residual_status = GSL_SUCCESS;
   size_t iter = 0;
 
   struct rparams p = {e, nb, ns};
@@ -327,39 +403,51 @@ std::array<double, 3> HadronGasEos::solve_eos(double e, double nb, double ns,
   gsl_multiroot_fsolver_set(solver_, &f, x_);
   do {
     iter++;
-    status = gsl_multiroot_fsolver_iterate(solver_);
+    const auto iterate_status = gsl_multiroot_fsolver_iterate(solver_);
 
-    // print_solver_state(iter);
+    // std::cout << print_solver_state(iter);
     // Avoiding too low temperature
     if (gsl_vector_get(solver_->x, 0) < 0.015) {
       return {0.0, 0.0, 0.0};
     }
 
     // check if solver is stuck
-    if (status) {
+    if (iterate_status) {
         break;
     }
-    status = gsl_multiroot_test_residual(solver_->f, tolerance_);
-  } while (status == GSL_CONTINUE && iter < 1000);
+    residual_status = gsl_multiroot_test_residual(solver_->f, tolerance_);
+  } while (residual_status == GSL_CONTINUE && iter < 1000);
 
-  if (status != GSL_SUCCESS) {
-    print_solver_state(iter);
-    throw std::runtime_error(gsl_strerror(status));
+  if (residual_status != GSL_SUCCESS) {
+    std::stringstream solver_parameters;
+    solver_parameters << "Solver run with "
+                      << "e = " << e
+                      << ", nb = " << nb
+                      << ", ns = " << ns
+                      << ", init. approx.: "
+                      << initial_approximation[0] << " "
+                      << initial_approximation[1] << " "
+                      << initial_approximation[2] << std::endl;
+    throw std::runtime_error(gsl_strerror(residual_status) +
+                             solver_parameters.str() +
+                             print_solver_state(iter));
   }
+
   return {gsl_vector_get(solver_->x, 0),
           gsl_vector_get(solver_->x, 1),
           gsl_vector_get(solver_->x, 2)};
 }
 
-void HadronGasEos::print_solver_state(size_t iter) const {
-  std::cout <<
-          "iter = " << iter << "," <<
-          " x = "   << gsl_vector_get(solver_->x, 0) << " " <<
-                       gsl_vector_get(solver_->x, 1) << " " <<
-                       gsl_vector_get(solver_->x, 2) << ", " <<
-          "f(x) = " << gsl_vector_get(solver_->f, 0) << " " <<
-                       gsl_vector_get(solver_->f, 1) << " " <<
-                       gsl_vector_get(solver_->f, 2) << std::endl;
+std::string HadronGasEos::print_solver_state(size_t iter) const {
+  std::stringstream s;
+  s << "iter = " << iter << "," <<
+       " x = "   << gsl_vector_get(solver_->x, 0) << " " <<
+                    gsl_vector_get(solver_->x, 1) << " " <<
+                    gsl_vector_get(solver_->x, 2) << ", " <<
+       "f(x) = " << gsl_vector_get(solver_->f, 0) << " " <<
+                    gsl_vector_get(solver_->f, 1) << " " <<
+                    gsl_vector_get(solver_->f, 2) << std::endl;
+  return s.str();
 }
 
 

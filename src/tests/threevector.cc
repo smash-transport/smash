@@ -160,10 +160,10 @@ TEST(rotations) {
   COMPARE_ABSOLUTE_ERROR(B.x1(),  1., 1.e-15);
   COMPARE_ABSOLUTE_ERROR(B.x2(),  0., 1.e-15);
   COMPARE_ABSOLUTE_ERROR(B.x3(),  0., 1.e-15);
-  // rotate_to
+  // rotate_z_axis_to
   ThreeVector C(0., 0., 1.);
   ThreeVector R(1., 1., 1.);
-  C.rotate_to(R);
+  C.rotate_z_axis_to(R);
   COMPARE_ABSOLUTE_ERROR(C.x1(), R.x1()/R.abs(), 1.e-15);
   COMPARE_ABSOLUTE_ERROR(C.x2(), R.x2()/R.abs(), 1.e-15);
   COMPARE_ABSOLUTE_ERROR(C.x3(), R.x3()/R.abs(), 1.e-15);

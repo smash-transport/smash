@@ -36,7 +36,7 @@ class DecayActionsFinderDilepton {
   /// Check the whole particles list and print out possible dilepton decays
   void shine(const Particles &search_list,
              OutputInterface* output,
-             float dt) const;
+             double dt) const;
 
   /** Shine dileptons from resonances at the end of the simulation. This is
    * special, because the shining time is now until resonance decays and not

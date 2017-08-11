@@ -13,6 +13,7 @@
 #include "include/scatteractionphoton.h"
 
 #include "include/angles.h"
+#include "include/constants.h"
 #include "include/cxx14compat.h"
 #include "include/integrate.h"
 #include "include/kinematics.h"
@@ -58,20 +59,20 @@ void ScatterActionPhoton::generate_final_state() {
   assert(t1 < t2);
   const double stepsize = (t2-t1)/100.0;
   for (double t = t1; t < t2; t += stepsize) {
-    float diff_xsection_max = std::max(diff_cross_section(t, m3,t2,t1),
-                                       diff_xsection_max);
+    double diff_xsection_max = std::max(diff_cross_section(t, m3, t2, t1),
+                                              diff_xsection_max);
   }
 
-  float t = Random::uniform(t1, t2);
-  float diff_xsection_max = 0;
+  double t = Random::uniform(t1, t2);
+  double diff_xsection_max = 0;
   int iteration_number = 0;
   do {
     t = Random::uniform(t1, t2);
     iteration_number++;
-  } while (diff_cross_section(t, m3,t2,t1) < Random::uniform(0.f, diff_xsection_max)
+  } while (diff_cross_section(t, m3, t2, t1) < Random::uniform(0., diff_xsection_max)
            && iteration_number < 100);
 
-  // todo: this should move to kinematics.h and tested
+  // TODO(schaefer): this should be moved to kinematics.h and tested
   double costheta =
       (t - pow_int(m2, 2) +
        0.5 * (s + pow_int(m2, 2) - pow_int(m1, 2)) * (s - pow_int(m3, 2)) / s) /
@@ -112,13 +113,19 @@ void ScatterActionPhoton::generate_final_state() {
   The actual value of the form factor is determined in
   ScatterActionPhoton::form_factor */
 
-  float E_Photon_Comp = outgoing_particles_[1].momentum()[0];
+  double E_Photon_Comp = outgoing_particles_[1].momentum()[0];
 
   weight_ *= pow(form_factor(E_Photon_Comp),4);
+
+  // Photons are not really part of the normal processes, so we have to set a
+  // constant arbitrary number.
+  const auto id_process = ID_PROCESS_PHOTON;
+  Action::check_conservation(id_process);
+
 }
 
 void ScatterActionPhoton::add_dummy_hadronic_channels(
-                            float reaction_cross_section) {
+                            double reaction_cross_section) {
   CollisionBranchPtr dummy_process = make_unique<CollisionBranch>(
     incoming_particles_[0].type(),
     incoming_particles_[1].type(),
@@ -179,26 +186,24 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
   ParticleTypePtr pi_plus_particle = &ParticleType::find(pdg::pi_p);
   ParticleTypePtr pi_minus_particle = &ParticleType::find(pdg::pi_m);
   ParticleTypePtr photon_particle = &ParticleType::find(pdg::photon);
-  const float m_rho = rho0_particle->mass();
-  const float m_pi = pi0_particle->mass();
+  const double m_rho = rho0_particle->mass();
+  const double m_pi = pi0_particle->mass();
 
-  const float to_mb = 0.3894;
-  const float Const = 0.059;
-  // no form factor: const float g_POR = 11.93;
-  const float g_POR = 11.93;
-  const float ma1 = 1.26;
-  const float ghat = 6.4483;
-  const float eta1 = 2.3920;
-  const float eta2 = 1.9430;
-  const float delta = -0.6426;
-  const float C4 = -0.14095;
-  // no form factor: const float Gammaa1 = 0.4; form factor: 0.033
-  const float Gammaa1 = 0.4;
-  const float Pi = M_PI;
-  float m_omega = 0.783;
-  float momega = m_omega;
-  float mrho = m_rho;
-  float mpion = m_pi;
+  const double to_mb = 0.3894;
+  const double Const = 0.059;
+  const double g_POR = 11.93;
+  const double ma1 = 1.26;
+  const double ghat = 6.4483;
+  const double eta1 = 2.3920;
+  const double eta2 = 1.9430;
+  const double delta = -0.6426;
+  const double C4 = -0.14095;
+  const double Gammaa1 = 0.4;
+  const double Pi = M_PI;
+  double m_omega = 0.783;
+  double momega = m_omega;
+  double mrho = m_rho;
+  double mpion = m_pi;
 
   ParticleData part_a = incoming_particles_[0];
   ParticleData part_b = incoming_particles_[1];
@@ -237,7 +242,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
       std::array<double, 2> mandelstam_t = get_t_range(sqrts, m1, m2, m3, 0.0);
       double t1;
       double t2;
-      float xsection = 0.0;
+      double xsection = 0.0;
 
       switch (reac) {
          case ReactionType::pi_pi:
@@ -2732,29 +2737,27 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
   return process_list;
 }
 
-float ScatterActionPhoton::diff_cross_section(float t, float m3, float t2, float t1) const {
-  const float to_mb = 0.3894;
+double ScatterActionPhoton::diff_cross_section(double t, double m3, double t2, double t1) const {
+  const double to_mb = 0.3894;
   const float m_rho = ParticleType::find(pdg::rho_z).mass();
   const float m_pi = ParticleType::find(pdg::pi_z).mass();
   float s = mandelstam_s();
   float diff_xsection = 0.0;
 
-  const float Const = 0.059;
-  // no form factor: const float g_POR = 11.93;
-  const float g_POR = 11.93;
-  const float ma1 = 1.26;
-  const float ghat = 6.4483;
-  const float eta1 = 2.3920;
-  const float eta2 = 1.9430;
-  const float delta = -0.6426;
-  const float C4 = -0.14095;
-  // no form factor: const float Gammaa1 = 0.4;, form factor: 0.033
-  const float Gammaa1 = 0.4;
-  const float Pi = M_PI;
-  float m_omega = 0.783;
-  float momega = m_omega;
-  float mrho = m_rho;
-  float mpion = m_pi;
+  const double Const = 0.059;
+  const double g_POR = 11.93;
+  const double ma1 = 1.26;
+  const double ghat = 6.4483;
+  const double eta1 = 2.3920;
+  const double eta2 = 1.9430;
+  const double delta = -0.6426;
+  const double C4 = -0.14095;
+  const double Gammaa1 = 0.4;
+  const double Pi = M_PI;
+  double m_omega = 0.783;
+  double momega = m_omega;
+  double mrho = m_rho;
+  double mpion = m_pi;
 
   switch (reac) {
     case ReactionType::pi_pi:
@@ -3216,10 +3219,10 @@ float ScatterActionPhoton::diff_cross_section(float t, float m3, float t2, float
   return diff_xsection*to_mb;
 }
 
-float ScatterActionPhoton::form_factor(float E_photon) {
-  float form_factor = 1.0;
-  float t_ff = 0.0;
-  float Lambda = 1.0;
+double ScatterActionPhoton::form_factor(double E_photon) {
+  double form_factor = 1.0;
+  double t_ff = 0.0;
+  double Lambda = 1.0;
   switch(reac){
 
     /* The form factor is assumed to be a hadronic dipole form factor which

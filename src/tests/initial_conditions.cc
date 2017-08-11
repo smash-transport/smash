@@ -33,7 +33,7 @@ TEST(initialize_box) {
 
   Particles P;
   // should return START_TIME and set P:
-  COMPARE(b.initial_conditions(&P, Test::default_parameters()), 0.2f);
+  COMPARE(b.initial_conditions(&P, Test::default_parameters()), 0.2);
   COMPARE(P.size(), 724u);
   for (const auto &pd : P) {
     COMPARE(pd.pdgcode(), 0x661);
@@ -68,7 +68,7 @@ TEST(initialize_collider_normal) {
                    "    Value: 0\n"),
                   Test::default_parameters());
   Particles P;
-  COMPARE(n.initial_conditions(&P, Test::default_parameters()), 0.f);
+  COMPARE(n.initial_conditions(&P, Test::default_parameters()), 0.);
   COMPARE(P.size(), 9u);
   for (auto p : P) {
     // velocity should be +- sqrt(3/4)
@@ -136,7 +136,7 @@ TEST(initialize_sphere) {
                 Test::default_parameters());
   Particles P;
   // Is the correct number of particles in the map?
-  COMPARE(s.initial_conditions(&P, Test::default_parameters()), 0.0f);
+  COMPARE(s.initial_conditions(&P, Test::default_parameters()), 0.);
   COMPARE(P.size(), 500u);
   for (const auto &pd : P) {
     COMPARE(pd.pdgcode(), 0x661);
@@ -146,7 +146,7 @@ TEST(initialize_sphere) {
   // position less than radius?
   for (auto p : P) {
     momentum += p.momentum();
-    const float radius =
+    const double radius =
              sqrt(p.position().x1() * p.position().x1() +
                   p.position().x2() * p.position().x2() +
                   p.position().x3() * p.position().x3());

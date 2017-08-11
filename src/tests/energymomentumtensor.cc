@@ -55,19 +55,19 @@ TEST(arithmetic) {
 
 TEST(indices) {
   using se = Smash::EnergyMomentumTensor;
-  VERIFY(se::tmn_index(0,0) == 0);
-  VERIFY(se::tmn_index(0,1) == 1);
-  VERIFY(se::tmn_index(0,2) == 2);
-  VERIFY(se::tmn_index(0,3) == 3);
-  VERIFY(se::tmn_index(1,1) == 4);
-  VERIFY(se::tmn_index(1,2) == 5);
-  VERIFY(se::tmn_index(1,3) == 6);
-  VERIFY(se::tmn_index(2,2) == 7);
-  VERIFY(se::tmn_index(2,3) == 8);
-  VERIFY(se::tmn_index(3,3) == 9);
+  COMPARE(se::tmn_index(0,0), 0);
+  COMPARE(se::tmn_index(0,1), 1);
+  COMPARE(se::tmn_index(0,2), 2);
+  COMPARE(se::tmn_index(0,3), 3);
+  COMPARE(se::tmn_index(1,1), 4);
+  COMPARE(se::tmn_index(1,2), 5);
+  COMPARE(se::tmn_index(1,3), 6);
+  COMPARE(se::tmn_index(2,2), 7);
+  COMPARE(se::tmn_index(2,3), 8);
+  COMPARE(se::tmn_index(3,3), 9);
   for (std::int8_t i = 0; i < 4; i++) {
     for (std::int8_t j = 0; j < i; j++) {
-      VERIFY(se::tmn_index(i,j) == se::tmn_index(j,i));
+      COMPARE(se::tmn_index(i, j), se::tmn_index(j, i));
     }
   }
 }
@@ -94,7 +94,7 @@ TEST(add_particle) {
   T.add_particle(p);
   for (std::int8_t i = 0; i < 4; i++) {
     for (std::int8_t j = 0; j < 4; j++) {
-      VERIFY(T[se::tmn_index(i,j)] == p[i]*p[j]/p[0]);
+      COMPARE(T[se::tmn_index(i,j)], p[i]*p[j]/p[0]);
     }
   }
 }

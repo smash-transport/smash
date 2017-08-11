@@ -32,7 +32,7 @@ TEST(woods_saxon) {
   std::map<int, int> hist_centerd[4] {};
   char name[4] = {'x','y','z','r'};
   // binning width for the distribution:
-  constexpr float dx = 0.05;
+  constexpr double dx = 0.05;
   // this is the number of nuclei we create.
   constexpr int N_TEST = 10000;
   for (int i = 0; i < N_TEST; i++) {
