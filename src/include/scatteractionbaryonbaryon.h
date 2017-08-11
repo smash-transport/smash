@@ -24,9 +24,9 @@ class ScatterActionBaryonBaryon : public ScatterAction {
  public:
   /* Inherit constructor. */
   using ScatterAction::ScatterAction;
-  /** Determine the parametrized total cross section
+  /** Determine the parametrized total cross section at high energies
    * for a baryon-baryon collision. */
-  float total_cross_section() const override;
+  double high_energy_cross_section() const override;
   /* There is no resonance formation out of two baryons: Return empty list. */
   CollisionBranchList resonance_cross_sections() override {
     return CollisionBranchList();
@@ -60,7 +60,7 @@ class ScatterActionBaryonBaryon : public ScatterAction {
    *
    * \return Matrix amplitude squared \f$ |\mathcal{M}(\sqrt{s})|^2/16\pi \f$.
    */
-  static float nn_to_resonance_matrix_element(const double srts,
+  static double nn_to_resonance_matrix_element(const double srts,
                                               const ParticleType &type_a,
                                               const ParticleType &type_b,
                                               const int twoI);

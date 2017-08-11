@@ -24,7 +24,7 @@
 
 using namespace Smash;
 
-static const float accuracy = 1.0e-4;
+static const double accuracy = 1.0e-4;
 static const bf::path testoutputpath = bf::absolute(SMASH_TEST_OUTPUT_PATH);
 static auto random_value = Random::make_uniform_distribution(-15.0, +15.0);
 
@@ -176,7 +176,7 @@ TEST(vtkoutputfile) {
     outputfile >> item;
     COMPARE(item, "cross_section_scaling_factor");
     outputfile >> item;
-    COMPARE(item, "float");
+    COMPARE(item, "double");
     outputfile >> item;
     COMPARE(item, "1");
     outputfile >> item;

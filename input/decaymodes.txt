@@ -430,6 +430,7 @@ N(1990)
 0.03   3  Λ K
 0.23   4  N σ  # σ and ππ combined
 # From UrQMD
+# FIXME The UrQMD papers are ambigious whether this state produces φ
 
 N(2080)
 0.42   2  N π
@@ -439,6 +440,7 @@ N(2080)
 0.05   3  N σ
 0.10   0  Δ π
 0.12   2  Λ K
+0.002  0  N φ  # FIXME: correct L?
 # From UrQMD
 
 N(2190)
@@ -449,6 +451,7 @@ N(2190)
 0.10   4  N σ
 0.15   2  Δ π
 0.05   4  N(1440) π
+0.002  0  N φ  # FIXME: correct L?
 # From UrQMD
 
 N(2220)
@@ -457,6 +460,7 @@ N(2220)
 0.17   4  N σ
 0.20   4  Δ π
 0.12   3  Λ K  # FIXME: should be 5
+0.002  1  N φ  # FIXME: correct L?
 # From UrQMD
 
 N(2250)
@@ -466,6 +470,7 @@ N(2250)
 0.20   4  Δ π
 0.05   4  N(1440) π
 0.12   4  Λ K
+0.002  0  N φ  # FIXME: correct L?
 # From UrQMD
 
 #################### Δ baryons ####################

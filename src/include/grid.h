@@ -57,7 +57,7 @@ class GridBase {
    * Returns the minimum x,y,z coordinates and the largest dx,dy,dz distances of
    * the particles in \p particles.
    */
-  static std::pair<std::array<float, 3>, std::array<float, 3>>
+  static std::pair<std::array<double, 3>, std::array<double, 3>>
   find_min_and_length(const Particles &particles);
 };
 
@@ -85,7 +85,7 @@ class Grid : public GridBase {
    * \param min_cell_length The minimal length a cell must have.
    * \param strategy The strategy for determining the cell size
    */
-  Grid(const Particles &particles, float min_cell_length,
+  Grid(const Particles &particles, double min_cell_length,
        CellSizeStrategy strategy = CellSizeStrategy::Optimal)
       : Grid{find_min_and_length(particles), std::move(particles),
              min_cell_length, strategy} {}
@@ -101,9 +101,9 @@ class Grid : public GridBase {
    * \param min_cell_length The minimal length a cell must have.
    * \param strategy The strategy for determining the cell size
    */
-  Grid(const std::pair<std::array<float, 3>, std::array<float, 3>> &
+  Grid(const std::pair<std::array<double, 3>, std::array<double, 3>> &
            min_and_length,
-       const Particles &particles, float min_cell_length,
+       const Particles &particles, double min_cell_length,
        CellSizeStrategy strategy = CellSizeStrategy::Optimal);
 
   /**
@@ -143,7 +143,7 @@ class Grid : public GridBase {
   }
 
   /// The 3 lengths of the complete grid. Used for periodic boundary wrapping.
-  const std::array<float, 3> length_;
+  const std::array<double, 3> length_;
 
   /// The number of cells in x, y, and z direction.
   std::array<int, 3> number_of_cells_;

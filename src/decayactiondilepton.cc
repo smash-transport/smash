@@ -16,8 +16,8 @@
 namespace Smash {
 
 DecayActionDilepton::DecayActionDilepton(const ParticleData &p,
-                                         float time,
-                                         float shining_weight)
+                                         double time,
+                                         double shining_weight)
   : DecayAction({p}, time), shining_weight_(shining_weight) {}
 
 
@@ -48,9 +48,9 @@ void DecayActionDilepton::one_to_three() {
   // randomly select a dilepton mass
   const double dil_mass = Random::uniform(mass_l1 + mass_l2,
                                           cms_energy - mass_nl);
-  const float delta_m = cms_energy - mass_nl - mass_l1 - mass_l2;
+  const double delta_m = cms_energy - mass_nl - mass_l1 - mass_l2;
 
-  const float diff_width = ThreeBodyDecayDilepton::diff_width(cms_energy,
+  const double diff_width = ThreeBodyDecayDilepton::diff_width(cms_energy,
                                                 dil_mass, mass_nl,
                                                 &incoming_particles_[0].type());
 

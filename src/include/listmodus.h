@@ -69,7 +69,7 @@ class ListModus : public ModusDefault {
   std::string particle_list_file_prefix_;
 
   /// Starting time for the List; changed to the earliest formation time
-  double start_time_ = 0.0f;
+  double start_time_ = 0.;
 
   /// shift_id is the start number of event_id
   const int shift_id_;

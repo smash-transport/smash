@@ -22,27 +22,27 @@ namespace Smash {
 
 // auxiliary functions
 
-static float integrand_rho_Manley_1res(float sqrts, float mass,
-                              float stable_mass, ParticleTypePtr type, int L) {
+static double integrand_rho_Manley_1res(double sqrts, double mass,
+                              double stable_mass, ParticleTypePtr type, int L) {
   if (sqrts <= mass + stable_mass) {
     return 0.;
   }
 
   /* center-of-mass momentum of final state particles */
-  const float p_f = pCM(sqrts, stable_mass, mass);
+  const double p_f = pCM(sqrts, stable_mass, mass);
 
   return p_f/sqrts * blatt_weisskopf_sqr(p_f, L)
          * type->spectral_function(mass);
 }
 
-static float integrand_rho_Manley_2res(float sqrts, float m1, float m2,
+static double integrand_rho_Manley_2res(double sqrts, double m1, double m2,
                                 ParticleTypePtr t1, ParticleTypePtr t2, int L) {
   if (sqrts <= m1 + m2) {
     return 0.;
   }
 
   /* center-of-mass momentum of final state particles */
-  const float p_f = pCM(sqrts, m1, m2);
+  const double p_f = pCM(sqrts, m1, m2);
 
   return p_f/sqrts * blatt_weisskopf_sqr(p_f, L)
          * t1->spectral_function(m1) * t2->spectral_function(m2);
@@ -84,22 +84,22 @@ TwoBodyDecayStable::TwoBodyDecayStable(ParticleTypePtrList part_types, int l)
   }
 }
 
-float TwoBodyDecayStable::rho(float m) const {
+double TwoBodyDecayStable::rho(double m) const {
   // Determine momentum of outgoing particles in rest frame of resonance
-  const float p_ab = pCM(m, particle_types_[0]->mass(),
+  const double p_ab = pCM(m, particle_types_[0]->mass(),
                             particle_types_[1]->mass());
   // determine rho(m)
   return p_ab / m * blatt_weisskopf_sqr(p_ab, L_);
 }
 
-float TwoBodyDecayStable::width(float m0, float G0, float m) const {
+double TwoBodyDecayStable::width(double m0, double G0, double m) const {
   assert(rho(m0) != 0);
-  return (m <= threshold()) ? 0.f :
+  return (m <= threshold()) ? 0. :
          G0 * rho(m) / rho(m0);
 }
 
-float TwoBodyDecayStable::in_width(float m0, float G0, float m,
-                                   float, float) const {
+double TwoBodyDecayStable::in_width(double m0, double G0, double m,
+                                   double, double) const {
   // in-width = out-width
   return width(m0, G0, m);
 }
@@ -130,7 +130,7 @@ TwoBodyDecaySemistable::TwoBodyDecaySemistable(ParticleTypePtrList part_types,
                                 tabulation_(nullptr)
 {}
 
-float TwoBodyDecaySemistable::get_Lambda() {
+double TwoBodyDecaySemistable::get_Lambda() {
   // "semi-stable" decays (first daughter is stable and second one unstable)
   if (particle_types_[1]->baryon_number() != 0) {
     return 2.;  // unstable baryons
@@ -146,19 +146,19 @@ float TwoBodyDecaySemistable::get_Lambda() {
 constexpr int num_tab_pts = 200;
 static thread_local Integrator integrate;
 
-float TwoBodyDecaySemistable::rho(float mass) const {
+double TwoBodyDecaySemistable::rho(double mass) const {
   if (tabulation_ == nullptr) {
     /* TODO(weil): Move this lazy init to a global initialization function,
       * in order to avoid race conditions in multi-threading. */
-    const float tabulation_interval =
-      std::max(2.f, 10.f*particle_types_[1]->width_at_pole());
+    const double tabulation_interval =
+      std::max(2., 10.*particle_types_[1]->width_at_pole());
     tabulation_ = make_unique<Tabulation>(
                 threshold(),
                 tabulation_interval, num_tab_pts,
-                [&](float sqrts) {
-                  return integrate(particle_types_[1]->minimum_mass(),
+                [&](double sqrts) {
+                  return integrate(particle_types_[1]->min_mass_kinematic(),
                                     sqrts - particle_types_[0]->mass(),
-                                    [&](float m) {
+                                    [&](double m) {
                                       return integrand_rho_Manley_1res(sqrts, m,
                                                   particle_types_[0]->mass(),
                                                   particle_types_[1], L_);
@@ -168,15 +168,15 @@ float TwoBodyDecaySemistable::rho(float mass) const {
   return tabulation_->get_value_linear(mass);
 }
 
-float TwoBodyDecaySemistable::width(float m0, float G0, float m) const {
+double TwoBodyDecaySemistable::width(double m0, double G0, double m) const {
   assert(rho(m0) != 0);
   return G0 * rho(m) / rho(m0) * post_ff_sqr(m, m0, threshold(), Lambda_);
 }
 
-float TwoBodyDecaySemistable::in_width(float m0, float G0, float m,
-                                       float m1, float m2) const {
+double TwoBodyDecaySemistable::in_width(double m0, double G0, double m,
+                                       double m1, double m2) const {
   assert(rho(m0) != 0);
-  const float p_f = pCM(m, m1, m2);
+  const double p_f = pCM(m, m1, m2);
 
   return G0 * p_f * blatt_weisskopf_sqr(p_f, L_)
          * post_ff_sqr(m, m0, threshold(), Lambda_) / (m * rho(m0));
@@ -198,43 +198,49 @@ TwoBodyDecayUnstable::TwoBodyDecayUnstable(ParticleTypePtrList part_types,
   }
 }
 
-float TwoBodyDecayUnstable::get_Lambda() {
+double TwoBodyDecayUnstable::get_Lambda() {
   // for now: use the same value for all unstable decays (fixed on f₂ → ρ ρ)
   return 0.6;
 }
 
 static thread_local Integrator2d integrate2d(1E4);
 
-float TwoBodyDecayUnstable::rho(float mass) const {
+double TwoBodyDecayUnstable::rho(double mass) const {
   if (tabulation_ == nullptr) {
     /* TODO(weil): Move this lazy init to a global initialization function,
       * in order to avoid race conditions in multi-threading. */
-    const float m1_min = particle_types_[0]->minimum_mass();
-    const float m2_min = particle_types_[1]->minimum_mass();
-    const float sum_gamma = particle_types_[0]->width_at_pole()
+    const double m1_min = particle_types_[0]->min_mass_kinematic();
+    const double m2_min = particle_types_[1]->min_mass_kinematic();
+    const double sum_gamma = particle_types_[0]->width_at_pole()
                           + particle_types_[1]->width_at_pole();
-    const float tab_interval = std::max(2.f, 10.f*sum_gamma);
+    const double tab_interval = std::max(2., 10.*sum_gamma);
     tabulation_
           = make_unique<Tabulation>(m1_min + m2_min, tab_interval, num_tab_pts,
-            [&](float sqrts) {
-              return integrate2d(m1_min, sqrts - m2_min, m2_min, sqrts - m1_min,
-                                [&](float m1, float m2) {
-                                  return integrand_rho_Manley_2res(sqrts,
-                                                    m1, m2, particle_types_[0],
-                                                    particle_types_[1], L_);
-                                });
+            [&](double sqrts) {
+              const auto result = integrate2d(m1_min, sqrts - m2_min,
+                m2_min, sqrts - m1_min,
+                [&](double m1, double m2) {
+                  return integrand_rho_Manley_2res(sqrts,
+                                    m1, m2, particle_types_[0],
+                                    particle_types_[1], L_);
+                });
+              const auto error_msg = result.check_error();
+              if (error_msg != "") {
+                throw std::runtime_error(error_msg);
+              }
+              return result.value();
             });
   }
   return tabulation_->get_value_linear(mass);
 }
 
-float TwoBodyDecayUnstable::width(float m0, float G0, float m) const {
+double TwoBodyDecayUnstable::width(double m0, double G0, double m) const {
   return G0 * rho(m) / rho(m0) * post_ff_sqr(m, m0, threshold(), Lambda_);
 }
 
-float TwoBodyDecayUnstable::in_width(float m0, float G0, float m,
-                                     float m1, float m2) const {
-  const float p_f = pCM(m, m1, m2);
+double TwoBodyDecayUnstable::in_width(double m0, double G0, double m,
+                                     double m1, double m2) const {
+  const double p_f = pCM(m, m1, m2);
 
   return G0 * p_f * blatt_weisskopf_sqr(p_f, L_)
          * post_ff_sqr(m, m0, threshold(), Lambda_) / (m * rho(m0));
@@ -254,16 +260,16 @@ TwoBodyDecayDilepton::TwoBodyDecayDilepton(ParticleTypePtrList part_types,
   }
 }
 
-float TwoBodyDecayDilepton::width(float m0, float G0, float m) const {
+double TwoBodyDecayDilepton::width(double m0, double G0, double m) const {
   if (m <= threshold()) {
     return 0;
   } else {
     /// dilepton decays: use width from \iref{Li:1996mi}, equation (19)
-    const float ml = particle_types_[0]->mass();  // lepton mass
-    const float ml_to_m_sqr = (ml/m) * (ml/m);
-    const float m0_to_m_cubed = (m0/m) * (m0/m) * (m0/m);
-    return G0 * m0_to_m_cubed * std::sqrt(1.0f - 4.0f * ml_to_m_sqr) *
-           (1.0f + 2.0f * ml_to_m_sqr);
+    const double ml = particle_types_[0]->mass();  // lepton mass
+    const double ml_to_m_sqr = (ml/m) * (ml/m);
+    const double m0_to_m_cubed = (m0/m) * (m0/m) * (m0/m);
+    return G0 * m0_to_m_cubed * std::sqrt(1. - 4. * ml_to_m_sqr) *
+           (1. + 2. * ml_to_m_sqr);
   }
 }
 
@@ -298,11 +304,12 @@ bool ThreeBodyDecay::has_particles(ParticleTypePtrList list) const {
          particle_types_[2] == list[2];
 }
 
-float ThreeBodyDecay::width(float, float G0, float) const {
+double ThreeBodyDecay::width(double, double G0, double) const {
   return G0;  // use on-shell width
 }
 
-float ThreeBodyDecay::in_width(float, float G0, float, float, float) const {
+double ThreeBodyDecay::in_width(double, double G0, double, double, double)
+  const {
   return G0;  // use on-shell width
 }
 
@@ -340,18 +347,18 @@ bool ThreeBodyDecayDilepton::has_mother(ParticleTypePtr mother) const {
   return mother == mother_;
 }
 
-float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
-                                         float m_other, ParticleTypePtr t) {
+double ThreeBodyDecayDilepton::diff_width(double m_par, double m_dil,
+                                         double m_other, ParticleTypePtr t) {
   // check threshold
   if (m_par < m_dil + m_other) {
     return 0;
   }
 
   // abbreviations
-  const float m_dil_sqr = m_dil * m_dil;
-  const float m_par_sqr = m_par * m_par;
-  const float m_par_cubed = m_par * m_par*m_par;
-  const float m_other_sqr = m_other*m_other;
+  const double m_dil_sqr = m_dil * m_dil;
+  const double m_par_sqr = m_par * m_par;
+  const double m_par_cubed = m_par * m_par*m_par;
+  const double m_other_sqr = m_other*m_other;
 
   PdgCode pdg = t->pdgcode();
   if (pdg.is_meson()) {
@@ -360,8 +367,8 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
     switch (pdg.spin()) {
     case 0:  /* pseudoscalars: π⁰, η, η' */ {
       // width for decay into 2γ
-      const float gamma_2g = t->get_partial_width(m_par, photon, photon);
-      float ff = em_form_factor_ps(pdg, m_dil);  // form factor
+      const double gamma_2g = t->get_partial_width(m_par, photon, photon);
+      double ff = em_form_factor_ps(pdg, m_dil);  // form factor
       /// see \iref{Landsberg:1986fd}, equation (3.8)
       return (4.*alpha/(3.*M_PI)) * gamma_2g/m_dil
                                   * pow_int(1.-m_dil/m_par*m_dil/m_par, 3)
@@ -369,11 +376,12 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
     }
     case 2: /* vectors: ω, φ */ {
       // width for decay into π⁰γ
-      const float gamma_pig = t->get_partial_width(m_par, pi0, photon);
-      float ff_sqr = em_form_factor_sqr_vec(pdg, m_dil);  // form factor squared
+      const double gamma_pig = t->get_partial_width(m_par, pi0, photon);
+      double ff_sqr =
+             em_form_factor_sqr_vec(pdg, m_dil);  // form factor squared
       /// see \iref{Landsberg:1986fd}, equation (3.4)
-      const float n1 = m_par_sqr - m_other_sqr;
-      const float rad = pow_int(1. + m_dil_sqr/n1, 2)
+      const double n1 = m_par_sqr - m_other_sqr;
+      const double rad = pow_int(1. + m_dil_sqr/n1, 2)
                         - 4.*m_par_sqr*m_dil_sqr/(n1*n1);
       if (rad < 0.) {
         assert(rad > -1E-5);
@@ -392,8 +400,8 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
       case pdg::Delta_p: case -pdg::Delta_p:
       case pdg::Delta_z: case -pdg::Delta_z:  /* Δ⁺, Δ⁰ (and antiparticles) */ {
       /// see \iref{Krivoruchenko:2001hs}
-      const float rad1 = (m_par+m_other)*(m_par+m_other) - m_dil_sqr;
-      const float rad2 = (m_par-m_other)*(m_par-m_other) - m_dil_sqr;
+      const double rad1 = (m_par+m_other)*(m_par+m_other) - m_dil_sqr;
+      const double rad2 = (m_par-m_other)*(m_par-m_other) - m_dil_sqr;
       if (rad1 < 0.) {
         assert(rad1 > -1E-5);
         return 0.;
@@ -401,12 +409,12 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
         assert(rad2 > -1E-5);
         return 0.;
       } else {
-        const float t1 = alpha/16. *
+        const double t1 = alpha/16. *
                     (m_par+m_other)*(m_par+m_other)/(m_par_cubed*m_other_sqr) *
                     std::sqrt(rad1);
-        const float t2 = pow_int(std::sqrt(rad2), 3);
-        const float ff = form_factor_delta(m_dil);
-        const float gamma_vi = t1 * t2 * ff*ff;
+        const double t2 = pow_int(std::sqrt(rad2), 3);
+        const double ff = form_factor_delta(m_dil);
+        const double gamma_vi = t1 * t2 * ff*ff;
         return 2.*alpha/(3.*M_PI) * gamma_vi/m_dil;
       }
     }
@@ -421,7 +429,7 @@ float ThreeBodyDecayDilepton::diff_width(float m_par, float m_dil,
 }
 
 
-float ThreeBodyDecayDilepton::width(float, float G0, float m) const {
+double ThreeBodyDecayDilepton::width(double, double G0, double m) const {
   if (mother_->is_stable()) {
     return G0;
   }
@@ -435,23 +443,23 @@ float ThreeBodyDecayDilepton::width(float, float G0, float m) const {
       }
     }
     // lepton mass
-    const float m_l = particle_types_[(non_lepton_position+1)%3]->mass();
+    const double m_l = particle_types_[(non_lepton_position+1)%3]->mass();
     // mass of non-leptonic particle in final state
-    const float m_other = particle_types_[non_lepton_position]->mass();
+    const double m_other = particle_types_[non_lepton_position]->mass();
 
     // integrate differential width to obtain partial width
-    float M0 = mother_->mass();
-    float G0tot = mother_->width_at_pole();
+    double M0 = mother_->mass();
+    double G0tot = mother_->width_at_pole();
     tabulation_
           = make_unique<Tabulation>(m_other+2*m_l, M0 + 10*G0tot, num_tab_pts,
-              [&](float m_parent) {
-                const float bottom = 2*m_l;
-                const float top = m_parent-m_other;
+              [&](double m_parent) {
+                const double bottom = 2*m_l;
+                const double top = m_parent-m_other;
                 if (top < bottom) {  // numerical problems at lower bound
                   return 0.;
                 }
                 return integrate(bottom, top,
-                                 [&](float m_dil) {
+                                 [&](double m_dil) {
                                     return diff_width(m_parent, m_dil, m_other,
                                                       mother_);
                                  }).value();

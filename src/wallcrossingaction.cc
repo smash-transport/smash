@@ -13,7 +13,7 @@ namespace Smash {
 
 ActionList WallCrossActionsFinder::find_actions_in_cell(
                    const ParticleList &plist,
-                   float t_max) const {
+                   double t_max) const {
   std::vector<ActionPtr> actions;
   for (const ParticleData &p : plist) {
     const ThreeVector& r = p.position().threevec();
@@ -21,7 +21,7 @@ ActionList WallCrossActionsFinder::find_actions_in_cell(
     double time_until_crossing = t_max;
     int i_cross = -1;
     for (int i = 0; i < 3; i++) {
-      double t = t_max + 1.0f;
+      double t = t_max + 1.;
       if (v[i] > really_small) {
         t = (l_[i] - r[i])/v[i];
       } else if (v[i] < -really_small) {

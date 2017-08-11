@@ -92,6 +92,7 @@ set(smash_src
         filelock.cc
         fourvector.cc
         fpenvironment.cc
+        grandcan_thermalizer.cc
         grid.cc
         hadgas_eos.cc
         inputfunctions.cc
@@ -117,6 +118,7 @@ set(smash_src
         scatteractionbaryonmeson.cc
         scatteractiondeltakaon.cc
         scatteractionmesonmeson.cc
+        scatteractionnucleonpion.cc
         scatteractionnucleonkaon.cc
         scatteractionnucleonnucleon.cc
         scatteractionhyperonpion.cc

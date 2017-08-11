@@ -40,7 +40,7 @@ class ParticleType {
    * We currently regard a particle type as stable if its on-shell width is less
    * than 200 keV. The cutoff is chosen such that the η and the η' are stable.
    */
-  static constexpr float width_cutoff = 1e-5f;
+  static constexpr double width_cutoff = 1e-5;
 
   /**
    * Creates a fully initialized ParticleType object.
@@ -54,7 +54,7 @@ class ParticleType {
    *       PDG code and therefore cannot be set explicitly (this avoids the
    *       chance of introducing inconsistencies).
    */
-  ParticleType(std::string n, float m, float w, PdgCode id);
+  ParticleType(std::string n, double m, double w, PdgCode id);
 
   /**
    * Copies are not allowed as they break intended use. Instead use a const-ref
@@ -75,13 +75,13 @@ class ParticleType {
   const std::string &name() const { return name_; }
 
   /// Returns the particle pole mass.
-  float mass() const { return mass_; }
+  double mass() const { return mass_; }
 
   /// Returns the squared particle mass.
-  float mass_sqr() const { return mass_*mass_; }
+  double mass_sqr() const { return mass_*mass_; }
 
   /// Returns the particle width (at the mass pole).
-  float width_at_pole() const { return width_; }
+  double width_at_pole() const { return width_; }
 
   /// Returns the PDG code of the particle.
   PdgCode pdgcode() const { return pdgcode_; }
@@ -106,9 +106,9 @@ class ParticleType {
   int isospin3() const { return I3_; }
 
   /// Returns the isospin-3 component relative to the total isospin.
-  float isospin3_rel() const {
+  double isospin3_rel() const {
     unsigned int I = isospin();
-    return (I == 0) ? 0 : static_cast<float>(isospin3())/I;
+    return (I == 0) ? 0 : static_cast<double>(isospin3())/I;
   }
 
   /**
@@ -172,15 +172,30 @@ class ParticleType {
   }
 
   /**
-   * The minimum mass of the resonance.
+   * The minimum mass of the resonance that is kinematically allowed.
    *
    * Calculate the minimum rest energy the resonance must have
    * for any decay channel to be kinematically available.
    * (In other words, find the smallest sum of final-state particle masses.)
    *
-   * \return The minimum mass that a particle of this type can assume.
+   * \return The minimum mass that a particle of this type can assume, where at
+   * least one decay is possible.
    */
-  float minimum_mass() const;
+  double min_mass_kinematic() const;
+
+  /**
+   * The minimum mass of the resonance, where the spectral function is non-zero.
+   *
+   * Calculate the the smallest mass where the spectral function still has a
+   * contribution.
+   * This value can be different from min_mass_kinematic, if the spectral function
+   * becomes zero at masses higher than min_mass_kinematic.
+   *
+   * \return The minimum mass that a particle of this type can assume, where the
+   * spectral function still has a non-zero value.
+   */
+  double min_mass_spectral() const;
+
 
   /**
    * Get the mass-dependent partial decay width of a particle with mass m
@@ -189,14 +204,14 @@ class ParticleType {
    * \param m Invariant mass of the decaying particle.
    * \param mode Decay mode to consider.
    */
-  float partial_width(const float m, const DecayBranch *mode) const;
+  double partial_width(const double m, const DecayBranch *mode) const;
 
   /**
    * Get the mass-dependent total width of a particle with mass m.
    *
    * \param m Invariant mass of the decaying particle.
    */
-  float total_width(const float m) const;
+  double total_width(const double m) const;
 
   /**
    * Get the mass-dependent partial decay widths of a particle with mass m.
@@ -205,7 +220,7 @@ class ParticleType {
    *
    * \param m Invariant mass of the decaying particle.
    */
-  DecayBranchList get_partial_widths(const float m) const;
+  DecayBranchList get_partial_widths(const double m) const;
 
   /**
   * Get the mass-dependent partial decay widths of a particle with mass m.
@@ -214,7 +229,7 @@ class ParticleType {
   *
   * \param m Invariant mass of the decaying particle.
   */
-  DecayBranchList get_partial_widths_hadronic(const float m) const;
+  DecayBranchList get_partial_widths_hadronic(const double m) const;
 
   /**
   * Get the mass-dependent partial decay widths of a particle with mass m.
@@ -223,7 +238,7 @@ class ParticleType {
   *
   * \param m Invariant mass of the decaying particle.
   */
-  DecayBranchList get_partial_widths_dilepton(const float m) const;
+  DecayBranchList get_partial_widths_dilepton(const double m) const;
 
   /**
    * Get the mass-dependent partial width of a resonance with mass m,
@@ -233,7 +248,7 @@ class ParticleType {
    * \param t_a Type of first daughter particle.
    * \param t_b Type of second daughter particle.
    */
-  float get_partial_width(const float m, const ParticleType &t_a,
+  double get_partial_width(const double m, const ParticleType &t_a,
                                          const ParticleType &t_b) const;
 
   /**
@@ -246,7 +261,7 @@ class ParticleType {
    * \param p_a First daughter particle.
    * \param p_b Second daughter particle.
    */
-  float get_partial_in_width(const float m, const ParticleData &p_a,
+  double get_partial_in_width(const double m, const ParticleData &p_a,
                                             const ParticleData &p_b) const;
 
   /**
@@ -259,16 +274,16 @@ class ParticleType {
    * \note The normalization factor N ensures that the spectral function is
    *       normalized to unity.
    */
-  float spectral_function(float m) const;
+  double spectral_function(double m) const;
 
   /**
    * Full spectral function without normalization factor. */
-  float spectral_function_no_norm(float m) const;
+  double spectral_function_no_norm(double m) const;
 
   /**
    * The spectral function with a constant width (= width at pole).
    * It is guaranteed to be normalized to 1, when integrated from 0 to inf. */
-  float spectral_function_const_width(float m) const;
+  double spectral_function_const_width(double m) const;
 
   /**
    * This one is the most simple form of the spectral function, using a
@@ -276,7 +291,7 @@ class ParticleType {
    * It can be integrated analytically, and is normalized to 1 when integrated
    * from -inf to inf.
    */
-  float spectral_function_simple(float m) const;
+  double spectral_function_simple(double m) const;
 
   /**
   * Resonance mass sampling for 2-particle final state with one resonance
@@ -288,8 +303,8 @@ class ParticleType {
   *
   * \return The mass of the resonance particle.
   */
-  float sample_resonance_mass(const float mass_stable,
-                              const float cms_energy, int L = 0) const;
+  double sample_resonance_mass(const double mass_stable,
+                              const double cms_energy, int L = 0) const;
 
   /**
   * Resonance mass sampling for 2-particle final state with two resonances.
@@ -301,8 +316,8 @@ class ParticleType {
   *
   * \return The masses of the resonance particles.
   */
-  std::pair<float, float> sample_resonance_masses(const ParticleType &t2,
-                                                  const float cms_energy,
+  std::pair<double, double> sample_resonance_masses(const ParticleType &t2,
+                                                  const double cms_energy,
                                                   int L = 0) const;
 
   /**
@@ -452,19 +467,21 @@ class ParticleType {
   /// name of the particle
   std::string name_;
   /// pole mass of the particle
-  float mass_;
+  double mass_;
   /// width of the particle
-  float width_;
+  double width_;
   /// PDG Code of the particle
   PdgCode pdgcode_;
-  /// minimum mass of the particle
+  /// minimum kinematically allowed mass of the particle
   /* Mutable, because it is initialized at first call of minimum mass function,
      so it's logically const, but not physically const, which is a classical
      case for using mutable. */
-  mutable float minimum_mass_;
+  mutable double min_mass_kinematic_;
+  /// minimum mass, where the spectral function is non-zero
+  mutable double min_mass_spectral_;
   /** This normalization factor ensures that the spectral function is normalized
    * to unity, when integrated over its full domain. */
-  mutable float norm_factor_ = -1.;
+  mutable double norm_factor_ = -1.;
   /** charge, isospin and isospin projection of the particle
    *
    * This is filled automatically from pdgcode_.
@@ -476,9 +493,9 @@ class ParticleType {
   IsoParticleType *iso_multiplet_ = nullptr;
 
   // Maximum factor for single-res mass sampling, cf. sample_resonance_mass.
-  mutable float max_factor1_ = 1.;
+  mutable double max_factor1_ = 1.;
   // Maximum factor for double-res mass sampling, cf. sample_resonance_masses.
-  mutable float max_factor2_ = 1.;
+  mutable double max_factor2_ = 1.;
 
   /**\ingroup logging
    * Writes all information about the particle type to the output stream.

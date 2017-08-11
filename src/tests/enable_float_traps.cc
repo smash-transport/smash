@@ -14,8 +14,8 @@
 #include <csignal>
 #include <csetjmp>
 
-float blackhole = 0.f;
-float divisor = 0.f;
+double blackhole = 0.;
+double divisor = 0.;
 
 std::jmp_buf jump_buffer;
 
@@ -29,7 +29,7 @@ static void handle_fpe(int s) {
   }
 }
 
-static void do_division(float x) {
+static void do_division(double x) {
   if (setjmp(jump_buffer) == 0) {
     // normally goes here
     blackhole = x / divisor;
@@ -52,7 +52,7 @@ TEST(enable_float_traps) {
 
   bool got_exception = false;
   try {
-    do_division(3.f);  // traps must be enabled now
+    do_division(3.);  // traps must be enabled now
     FAIL() << "may never be reached";
   } catch (fpe_exception &) {  // the signal handler produces an exception via
                                // longjmp

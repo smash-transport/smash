@@ -24,14 +24,14 @@ namespace Smash {
  * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
  * where $A, B, C, D$ are stable.
  */
-inline float detailed_balance_factor_stable(float s,
+inline double detailed_balance_factor_stable(double s,
                const ParticleType& a, const ParticleType& b,
                const ParticleType& c, const ParticleType& d) {
-    float spin_factor = (c.spin() + 1)*(d.spin() + 1);
+    double spin_factor = (c.spin() + 1)*(d.spin() + 1);
     spin_factor /= (a.spin() + 1)*(b.spin() + 1);
-    float symmetry_factor = (1 + (a == b));
+    double symmetry_factor = (1 + (a == b));
     symmetry_factor /= (1 + (c == d));
-    const float momentum_factor = pCM_sqr_from_s(s, c.mass(), d.mass())
+    const double momentum_factor = pCM_sqr_from_s(s, c.mass(), d.mass())
                                 / pCM_sqr_from_s(s, a.mass(), b.mass());
     return spin_factor * symmetry_factor * momentum_factor;
 }
@@ -41,16 +41,16 @@ inline float detailed_balance_factor_stable(float s,
  * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
  * where $A$ is unstable, $B$ is a kaon and $C, D$ are stable.
  */
-inline float detailed_balance_factor_RK(float sqrts, float pcm,
+inline double detailed_balance_factor_RK(double sqrts, double pcm,
                const ParticleType& a, const ParticleType& b,
                const ParticleType& c, const ParticleType& d) {
     assert(!a.is_stable());
     assert(b.pdgcode().is_kaon());
-    float spin_factor = (c.spin() + 1)*(d.spin() + 1);
+    double spin_factor = (c.spin() + 1)*(d.spin() + 1);
     spin_factor /= (a.spin() + 1)*(b.spin() + 1);
-    float symmetry_factor = (1 + (a == b));
+    double symmetry_factor = (1 + (a == b));
     symmetry_factor /= (1 + (c == d));
-    const float momentum_factor = pCM_sqr(sqrts, c.mass(), d.mass())
+    const double momentum_factor = pCM_sqr(sqrts, c.mass(), d.mass())
         / (pcm * a.iso_multiplet()->get_integral_RK(sqrts));
     return spin_factor * symmetry_factor * momentum_factor;
 }
@@ -60,16 +60,16 @@ inline float detailed_balance_factor_RK(float sqrts, float pcm,
  * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
  * where $A$ and $B$ are unstable, and $C$ and $D$ are stable.
  */
-inline float detailed_balance_factor_RR(float sqrts, float pcm,
+inline double detailed_balance_factor_RR(double sqrts, double pcm,
                const ParticleType& particle_a, const ParticleType& particle_b,
                const ParticleType& particle_c, const ParticleType& particle_d) {
     assert(!particle_a.is_stable());
     assert(!particle_b.is_stable());
-    float spin_factor = (particle_c.spin() + 1)*(particle_d.spin() + 1);
+    double spin_factor = (particle_c.spin() + 1)*(particle_d.spin() + 1);
     spin_factor /= (particle_a.spin() + 1)*(particle_b.spin() + 1);
-    float symmetry_factor = (1 + (particle_a == particle_b));
+    double symmetry_factor = (1 + (particle_a == particle_b));
     symmetry_factor /= (1 + (particle_c == particle_d));
-    const float momentum_factor = pCM_sqr(
+    const double momentum_factor = pCM_sqr(
         sqrts, particle_c.mass(), particle_d.mass()) /
         (pcm * particle_a.iso_multiplet()->get_integral_RR(particle_b, sqrts));
     return spin_factor * symmetry_factor * momentum_factor;
@@ -84,9 +84,10 @@ inline float detailed_balance_factor_RR(float sqrts, float pcm,
  */
 template <typename F>
 inline void add_channel(CollisionBranchList &process_list, F get_xsection,
-                        float sqrts, const ParticleType &type_a,
+                        double sqrts, const ParticleType &type_a,
                                      const ParticleType &type_b) {
-  const float sqrt_s_min = type_a.minimum_mass() + type_b.minimum_mass();
+  const double sqrt_s_min = type_a.min_mass_spectral() +
+                                                     type_b.min_mass_spectral();
   if (sqrts <= sqrt_s_min) {
       return;
   }
@@ -111,10 +112,11 @@ class ScatterAction : public Action {
    * \param[in] in_part2 second scattering partner
    * \param[in] time Time at which the action is supposed to take place
    * \param[in] isotropic if true, do the collision isotropically
+   * \param[in] string_formation_time the time a string takes to form
    */
   ScatterAction(const ParticleData &in_part1, const ParticleData &in_part2,
                 double time, bool isotropic = false,
-                float formation_time = 1.0f);
+                double string_formation_time = 1.0);
 
   /** Add a new collision channel. */
   void add_collision(CollisionBranchPtr p);
@@ -139,10 +141,10 @@ class ScatterAction : public Action {
    */
   void generate_final_state() override;
 
-  float raw_weight_value() const override;
+  double raw_weight_value() const override;
 
   /** Add all possible subprocesses for this action object. */
-  virtual void add_all_processes(float elastic_parameter,
+  virtual void add_all_processes(double elastic_parameter,
     bool two_to_one, bool two_to_two, double low_snn_cut,
     bool strings_switch, NNbarTreatment nnbar_treatment);
 
@@ -150,13 +152,19 @@ class ScatterAction : public Action {
    * Determine the (parametrized) total cross section for this collision. This
    * is currently only used for calculating the string excitation cross section.
    */
-  virtual float total_cross_section() const { return 0.; }
+  virtual double total_cross_section() const { return 0.; }
+
+  /**
+   * Determine the (parametrized) total cross section at high energies for this collision.
+   * This is currently only used for calculating the string excitation cross section.
+   */
+  virtual double high_energy_cross_section() const { return 0.; }
 
   /**
    * Determine the (parametrized) elastic cross section for this collision.
    * It is zero by default, but can be overridden in the child classes.
    */
-  virtual float elastic_parametrization() { return 0.; }
+  virtual double elastic_parametrization() { return 0.; }
 
   /// Returns list of possible collision channels
   const CollisionBranchList& collision_channels() {
@@ -174,7 +182,7 @@ class ScatterAction : public Action {
    * \return A ProcessBranch object containing the cross section and
    * final-state IDs.
    */
-  CollisionBranchPtr elastic_cross_section(float elast_par);
+  CollisionBranchPtr elastic_cross_section(double elast_par);
 
   /**
    * Determine the cross section for NNbar annihilation, which is given by the
@@ -247,7 +255,7 @@ class ScatterAction : public Action {
     using std::invalid_argument::invalid_argument;
   };
 
-  virtual float cross_section() const { return total_cross_section_; }
+  virtual double cross_section() const { return total_cross_section_; }
 
  protected:
   /** Determine the Mandelstam s variable,
@@ -290,13 +298,13 @@ class ScatterAction : public Action {
   CollisionBranchList collision_channels_;
 
   /** Total cross section */
-  float total_cross_section_;
+  double total_cross_section_;
 
   /** Do this collision isotropically. */
   bool isotropic_ = false;
 
   /** Formation time parameter for string fragmentation*/
-  float formation_time_ = 1.0f;
+  double string_formation_time_ = 1.0;
 
  private:
   /** Check if the scattering is elastic. */

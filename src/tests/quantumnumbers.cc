@@ -90,7 +90,7 @@ TEST(difference) {
   QuantumNumbers A(P, 5, 6, 7, 8, 9, 0);
   QuantumNumbers H(Q, 5, 6, 1, -8, 12358, -15);
   QuantumNumbers diff(P-Q, 0, 0, 6, 16, -12349, 15);
-  VERIFY(diff == A - H);
+  COMPARE(diff, A - H);
 }
 
 TEST(report_deviations) {
@@ -138,7 +138,7 @@ TEST(count_from_particles) {
   QuantumNumbers check1(P, 1, 2, 0, 0, 0, 0);
   // won't print anything if the following VERIFY succeeds
   std::printf("%s", check1.report_deviations(onlyone).c_str());
-  VERIFY(onlyone == check1);
+  COMPARE(onlyone, check1);
 
   ParticleData particleQ(ParticleType::find(PdgCode("123")));
   FourVector Q(2,3,4,5);
@@ -148,7 +148,7 @@ TEST(count_from_particles) {
   QuantumNumbers two(list);
   QuantumNumbers check2(P + Q, 2, 4, 0, 0, 0, 0);
   std::printf("%s", check2.report_deviations(two).c_str());
-  VERIFY(two == check2);
+  COMPARE(two, check2);
 
   ParticleData particleR(ParticleType::find(PdgCode("2346")));
   FourVector R(3,4,5,6);
@@ -158,7 +158,7 @@ TEST(count_from_particles) {
   QuantumNumbers three(list);
   QuantumNumbers check3(P + Q + R, 3, 5, -1, 1, 0, 1);
   std::printf("%s", check3.report_deviations(three).c_str());
-  VERIFY(three == check3);
+  COMPARE(three, check3);
 
   ParticleData particleS(ParticleType::find(PdgCode("-1234568")));
   FourVector S(-6,-9,-12,-15);
@@ -168,7 +168,7 @@ TEST(count_from_particles) {
   QuantumNumbers four(list);
   QuantumNumbers check4(P + Q + R + S, 2, 5, -1, 0, 1, 0);
   std::printf("%s", check4.report_deviations(four).c_str());
-  VERIFY(four == check4);
+  COMPARE(four, check4);
 
   //
   COMPARE(three.report_deviations(list),

@@ -18,8 +18,8 @@
 
 namespace Smash {
 
-float ParticleData::effective_mass() const {
-  const float m_pole = pole_mass();
+double ParticleData::effective_mass() const {
+  const double m_pole = pole_mass();
   if (m_pole < really_small) {
     // prevent numerical problems with massless or very light particles
     return m_pole;
@@ -29,7 +29,7 @@ float ParticleData::effective_mass() const {
 }
 
 void ParticleData::set_history(int ncoll, uint32_t pid, ProcessType pt,
-                               float time_of_or, const ParticleList& plist) {
+                               double time_of_or, const ParticleList& plist) {
   if (pt != ProcessType::Wall) {
     history_.time_of_origin = time_of_or;
     history_.collisions_per_particle = ncoll;

@@ -66,6 +66,7 @@ void VtkOutput::at_eventstart(const Particles &particles,
   vtk_tmn_output_counter_ = 0;
   vtk_tmn_landau_output_counter_ = 0;
   vtk_v_landau_output_counter_ = 0;
+  vtk_fluidization_counter_ = 0;
 
   current_event_ = event_number;
   write(particles);
@@ -118,12 +119,12 @@ void VtkOutput::write(const Particles &particles) {
   }
   std::fprintf(file_.get(), "SCALARS is_formed int 1\n");
   std::fprintf(file_.get(), "LOOKUP_TABLE default\n");
-  float current_time = particles.time();
+  double current_time = particles.time();
   for (const auto &p : particles) {
     std::fprintf(file_.get(), "%s\n",
                  (p.formation_time() > current_time) ? "0" : "1");
   }
-  std::fprintf(file_.get(), "SCALARS cross_section_scaling_factor float 1\n");
+  std::fprintf(file_.get(), "SCALARS cross_section_scaling_factor double 1\n");
   std::fprintf(file_.get(), "LOOKUP_TABLE default\n");
   for (const auto &p : particles) {
     std::fprintf(file_.get(), "%g\n", p.cross_section_scaling_factor());
@@ -145,40 +146,80 @@ void VtkOutput::write(const Particles &particles) {
  * Files can be opened directly with ParaView (http://paraview.org).
  */
 
-void VtkOutput::thermodynamics_output(
-    const ThermodynamicQuantity tq, const DensityType dens_type,
-    RectangularLattice<DensityOnLattice> &lattice) {
-  std::ofstream file;
-  char suffix[22];
-  snprintf(suffix, sizeof(suffix), "_%05i_tstep%05i.vtk", current_event_,
-           vtk_density_output_counter_);
+template<typename T>
+void VtkOutput::write_vtk_header(std::ofstream &file,
+                                 RectangularLattice<T>& lattice,
+                                 const std::string &description) {
   const auto dim = lattice.dimensions();
   const auto cs = lattice.cell_sizes();
   const auto orig = lattice.origin();
-  const std::string varname = std::string(to_string(dens_type)) +
-                              std::string("_") + std::string(to_string(tq));
-
-  file.open(
-      base_path_.string() + std::string("/") + varname + std::string(suffix),
-      std::ios::out);
-  file << "# vtk DataFile Version 2.0\n" << varname << "\n"
+  file << "# vtk DataFile Version 2.0\n" << description << "\n"
        << "ASCII\n"
        << "DATASET STRUCTURED_POINTS\n"
-          "DIMENSIONS " << dim[0] << " " << dim[1] << " " << dim[2] << "\n"
-       << "SPACING " << cs[0] << " " << cs[1] << " " << cs[2] << "\n"
-       << "ORIGIN " << orig[0] << " " << orig[1] << " " << orig[2] << "\n"
-       << "POINT_DATA " << lattice.size() << "\n"
-       << "SCALARS " << varname << " float 1\n"
+       << "DIMENSIONS " <<  dim[0] << " " <<  dim[1] << " " <<  dim[2] << "\n"
+       << "SPACING "    <<   cs[0] << " " <<   cs[1] << " " <<   cs[2] << "\n"
+       << "ORIGIN "     << orig[0] << " " << orig[1] << " " << orig[2] << "\n"
+       << "POINT_DATA " << lattice.size() << "\n";
+}
+
+template<typename T, typename F>
+void VtkOutput::write_vtk_scalar(std::ofstream &file,
+                                 RectangularLattice<T> &lattice,
+                                 const std::string &varname,
+                                 F &&get_quantity) {
+  file << "SCALARS " << varname << " double 1\n"
        << "LOOKUP_TABLE default\n";
   file << std::setprecision(3);
   file << std::fixed;
+  const auto dim = lattice.dimensions();
   lattice.iterate_sublattice({0, 0, 0}, dim,
-                             [&](DensityOnLattice &node, int ix, int, int) {
-    file << node.density() << " ";
+                             [&](T &node, int ix, int, int) {
+    const double f_from_node = get_quantity(node);
+    file << f_from_node << " ";
     if (ix == dim[0] - 1) {
       file << "\n";
     }
   });
+}
+
+template<typename T, typename F>
+void VtkOutput::write_vtk_vector(std::ofstream &file,
+                                 RectangularLattice<T> &lattice,
+                                 const std::string &varname,
+                                 F &&get_quantity) {
+  file << "VECTORS " << varname << " double\n";
+  file << std::setprecision(3);
+  file << std::fixed;
+  const auto dim = lattice.dimensions();
+  lattice.iterate_sublattice(
+    {0, 0, 0}, dim, [&](T &node, int, int, int) {
+    const ThreeVector v = get_quantity(node);
+    file << v.x1() << " " << v.x2() << " " << v.x3() << "\n";
+  });
+}
+
+std::string VtkOutput::make_filename(const std::string &descr, int counter) {
+  char suffix[22];
+  snprintf(suffix, sizeof(suffix),
+           "_%05i_tstep%05i.vtk", current_event_, counter);
+  return base_path_.string() + std::string("/") + descr + std::string(suffix);
+}
+
+std::string VtkOutput::make_varname(const ThermodynamicQuantity tq,
+                                    const DensityType dens_type) {
+  return std::string(to_string(dens_type)) + std::string("_") +
+         std::string(to_string(tq));
+}
+
+void VtkOutput::thermodynamics_output(
+    const ThermodynamicQuantity tq, const DensityType dens_type,
+    RectangularLattice<DensityOnLattice> &lattice) {
+  std::ofstream file;
+  const std::string varname = make_varname(tq, dens_type);
+  file.open(make_filename(varname, vtk_density_output_counter_), std::ios::out);
+  write_vtk_header(file, lattice, varname);
+  write_vtk_scalar(file, lattice, varname,
+                  [&](DensityOnLattice &node){ return node.density(); });
   file.close();
   vtk_density_output_counter_++;
 }
@@ -200,59 +241,65 @@ void VtkOutput::thermodynamics_output(
     const ThermodynamicQuantity tq, const DensityType dens_type,
     RectangularLattice<EnergyMomentumTensor> &Tmn_lattice) {
   std::ofstream file;
-  char suffix[22];
-  const auto dim = Tmn_lattice.dimensions();
-  const auto cs = Tmn_lattice.cell_sizes();
-  const auto orig = Tmn_lattice.origin();
-  const std::string varname = std::string(to_string(dens_type)) +
-                              std::string("_") + std::string(to_string(tq));
+  const std::string varname = make_varname(tq, dens_type);
 
-  snprintf(suffix, sizeof(suffix), "_%05i_tstep%05i.vtk", current_event_,
-           (tq == ThermodynamicQuantity::Tmn)
-               ? vtk_tmn_output_counter_++
-               : (tq == ThermodynamicQuantity::TmnLandau)
-                     ? vtk_tmn_landau_output_counter_++
-                     : vtk_v_landau_output_counter_++);
-
-  file.open(
-      base_path_.string() + std::string("/") + varname + std::string(suffix),
-      std::ios::out);
-  file << "# vtk DataFile Version 2.0\n" << varname << "\n"
-       << "ASCII\n"
-       << "DATASET STRUCTURED_POINTS\n"
-          "DIMENSIONS " << dim[0] << " " << dim[1] << " " << dim[2] << "\n"
-       << "SPACING " << cs[0] << " " << cs[1] << " " << cs[2] << "\n"
-       << "ORIGIN " << orig[0] << " " << orig[1] << " " << orig[2] << "\n"
-       << "POINT_DATA " << Tmn_lattice.size() << "\n";
-  file << std::setprecision(3);
-  file << std::fixed;
-  if (tq == ThermodynamicQuantity::Tmn ||
-      tq == ThermodynamicQuantity::TmnLandau) {
+  if (tq == ThermodynamicQuantity::Tmn) {
+    file.open(make_filename(varname, vtk_tmn_output_counter_++), std::ios::out);
+    write_vtk_header(file, Tmn_lattice, varname);
     for (int i = 0; i < 4; i++) {
       for (int j = i; j < 4; j++) {
-        file << "SCALARS " << varname << i << j << " float 1\n"
-             << "LOOKUP_TABLE default\n";
-        Tmn_lattice.iterate_sublattice(
-            {0, 0, 0}, dim, [&](EnergyMomentumTensor &node, int, int, int) {
-              const FourVector u = node.landau_frame_4velocity();
-              const EnergyMomentumTensor Tmn_L = node.boosted(u);
-              file << (tq == ThermodynamicQuantity::Tmn
-                           ? node[EnergyMomentumTensor::tmn_index(i, j)]
-                           : Tmn_L[EnergyMomentumTensor::tmn_index(i, j)])
-                   << "\n";
-            });
+        write_vtk_scalar(file, Tmn_lattice, varname + std::to_string(i) +
+                                                      std::to_string(j),
+                         [&](EnergyMomentumTensor &node) {
+          return node[EnergyMomentumTensor::tmn_index(i, j)];
+        });
+      }
+    }
+  } else if (tq == ThermodynamicQuantity::TmnLandau) {
+    file.open(make_filename(varname, vtk_tmn_landau_output_counter_++),
+        std::ios::out);
+    write_vtk_header(file, Tmn_lattice, varname);
+    for (int i = 0; i < 4; i++) {
+      for (int j = i; j < 4; j++) {
+        write_vtk_scalar(file, Tmn_lattice, varname + std::to_string(i) +
+                                                      std::to_string(j),
+                         [&](EnergyMomentumTensor &node) {
+          const FourVector u = node.landau_frame_4velocity();
+          const EnergyMomentumTensor Tmn_L = node.boosted(u);
+          return Tmn_L[EnergyMomentumTensor::tmn_index(i, j)];
+        });
       }
     }
   } else {
-    file << "VECTORS " << varname << " float\n";
-    Tmn_lattice.iterate_sublattice(
-        {0, 0, 0}, dim, [&](EnergyMomentumTensor &node, int, int, int) {
-          const FourVector u = node.landau_frame_4velocity();
-          file << -u[1] / u[0] << " " << -u[2] / u[0] << " " << -u[3] / u[0]
-               << "\n";
-        });
+    file.open(make_filename(varname, vtk_v_landau_output_counter_++),
+        std::ios::out);
+    write_vtk_header(file, Tmn_lattice, varname);
+    write_vtk_vector(file, Tmn_lattice, varname,
+      [&](EnergyMomentumTensor &node) {
+        const FourVector u = node.landau_frame_4velocity();
+        return -u.threevec();
+    });
   }
   file.close();
+}
+
+void VtkOutput::thermodynamics_output(const GrandCanThermalizer& gct) {
+  std::ofstream file;
+  file.open(make_filename("fluidization_td", vtk_fluidization_counter_++),
+    std::ios::out);
+  write_vtk_header(file, gct.lattice(), "fluidization_td");
+  write_vtk_scalar(file, gct.lattice(), "e",
+                   [&](ThermLatticeNode &node) { return node.e(); });
+  write_vtk_scalar(file, gct.lattice(), "p",
+                   [&](ThermLatticeNode &node) { return node.p(); });
+  write_vtk_vector(file, gct.lattice(), "v",
+                   [&](ThermLatticeNode &node) { return node.v(); });
+  write_vtk_scalar(file, gct.lattice(), "T",
+                   [&](ThermLatticeNode &node) { return node.T(); });
+  write_vtk_scalar(file, gct.lattice(), "mub",
+                   [&](ThermLatticeNode &node) { return node.mub(); });
+  write_vtk_scalar(file, gct.lattice(), "mus",
+                   [&](ThermLatticeNode &node) { return node.mus(); });
 }
 
 }  // namespace Smash

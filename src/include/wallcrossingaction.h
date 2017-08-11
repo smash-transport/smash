@@ -26,7 +26,7 @@ class WallcrossingAction : public Action {
   WallcrossingAction(const ParticleData &in_part, const ParticleData &out_part,
                      const double time_until = 0.0)
                  : Action(in_part, out_part, time_until, ProcessType::Wall) {}
-  float raw_weight_value() const override { return 1; };
+  double raw_weight_value() const override { return 1; };
   void generate_final_state() override {};
   double sqrt_s() const override {
     return incoming_particles_[0].momentum().abs();
@@ -38,22 +38,22 @@ class WallcrossingAction : public Action {
 
 class WallCrossActionsFinder : public ActionFinderInterface {
  public:
-  explicit WallCrossActionsFinder(float l) : l_{l, l, l} {};
+  explicit WallCrossActionsFinder(double l) : l_{l, l, l} {};
 
   /// Find the next wall crossings for every particle before time t_max
   ActionList find_actions_in_cell(const ParticleList &plist,
-                                  float t_max) const override;
+                                  double t_max) const override;
 
   /// Ignore the neighbor searches for wall crossing
   ActionList find_actions_with_neighbors(const ParticleList &,
                                          const ParticleList &,
-                                         float) const override {
+                                         double) const override {
     return {};
   }
   /// Ignore the surrounding searches for wall crossing
   ActionList find_actions_with_surrounding_particles(const ParticleList &,
                                                      const Particles &,
-                                                     float) const override {
+                                                     double) const override {
     return {};
   }
 
@@ -64,7 +64,7 @@ class WallCrossActionsFinder : public ActionFinderInterface {
 
  private:
   /// Periods in x,y,z directions in fm.
-  const std::array<float, 3> l_;
+  const std::array<double, 3> l_;
 };
 
 }  // namespace Smash
