@@ -15,6 +15,8 @@
 #include <gsl/gsl_monte_plain.h>
 #include <gsl/gsl_monte_vegas.h>
 
+#include <algorithm>
+#include <iostream>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -63,30 +65,22 @@ class Result : public std::pair<double, double> {
   /// access the second entry in the pair as the absolute error
   double error() const { return Base::second; }
 
-  /// check whether the relative error is small
-  ///
-  /// Returns an empty string if it is small and an error message if it is
-  /// large.
-  std::string check_error(double relative_tolerance=0.1) const {
-    if (value() == 0) {
-      return "";
-    }
-    if (std::abs(value()) < 1e-2) {
-      // For small values the relative error can be very large.
-      // The threshold was chosen large enough so that the tests pass.
-      return "";
-    }
-    const auto relative_error = std::abs(error() / value());
-    if (relative_error < relative_tolerance) {
-      return "";
-    } else {
+  /// Check whether the error is small and alert if it is not
+  void check_error(const std::string& integration_name,
+                   double relative_tolerance= 5e-4,
+                   double absolute_tolerance = 1e-9) const {
+    const double allowed_error = std::max(absolute_tolerance,
+                                          value() * relative_tolerance);
+    if (error() > allowed_error) {
       std::stringstream error_msg;
-      error_msg << "Integration error = " << relative_error*100
-                << "% > " << relative_tolerance*100 << "%: "
-                << value() << " +- " << error();
-      return error_msg.str();
+      error_msg << integration_name << " resulted in I = " << value() << " ± " << error()
+                << ", but the required precision is either absolute error < "
+                << absolute_tolerance << " or relative error < "
+                << relative_tolerance << std::endl;
+      throw std::runtime_error(error_msg.str());
     }
   }
+
 };
 
 /**
@@ -115,11 +109,8 @@ class Integrator {
    *                       It also determines the maximum number of subintervals
    *                       the integration algorithm will use.
    */
-  explicit Integrator(size_t workspace_size)
+  explicit Integrator(size_t workspace_size = 1000)
       : workspace_(gsl_integration_cquad_workspace_alloc(workspace_size)) {}
-
-  /// Convenience overload of the above with a workspace size of 1000.
-  Integrator() : Integrator(1000) {}
 
   /**
    * The function call operator implements the integration functionality.
@@ -152,9 +143,11 @@ class Integrator {
                           nullptr /* Don't store the number of evaluations */);
     if (error_code) {
       std::stringstream err;
-      err << "GSL integration: " << gsl_strerror(error_code);
+      err << "GSL 1D deterministic integration: " << gsl_strerror(error_code);
       throw std::runtime_error(err.str());
     }
+    result.check_error("GSL 1D deterministic integration",
+                       accuracy_relative_, accuracy_absolute_);
     return result;
   }
 
@@ -164,7 +157,7 @@ class Integrator {
                   GslWorkspaceDeleter> workspace_;
 
   /// Parameter to the GSL integration function: desired absolute error limit
-  const double accuracy_absolute_ = 1.0e-5;
+  const double accuracy_absolute_ = 1.0e-9;
 
   /// Parameter to the GSL integration function: desired relative error limit
   const double accuracy_relative_ = 5.0e-4;
@@ -244,8 +237,16 @@ class Integrator1dMonte {
         },
         1, &fun};
 
-    gsl_monte_plain_integrate(&monte_fun, lower, upper, 1, number_of_calls_,
+    const int error_code = gsl_monte_plain_integrate(&monte_fun,
+                              lower, upper, 1, number_of_calls_,
                               rng_, state_, &result.first, &result.second);
+    if (error_code) {
+      std::stringstream err;
+      err << "GSL 1D Monte-Carlo integration: " << gsl_strerror(error_code);
+      throw std::runtime_error(err.str());
+    }
+
+    result.check_error("GSL 1D Monte-Carlo integration");
 
     return result;
   }
@@ -393,7 +394,7 @@ class Integrator2dCuhre {
    * \param epsabs    The desired absolute accuracy (1E-3 by default).
    */
   explicit Integrator2dCuhre(int num_calls = 1e6,
-                        double epsrel = 1e-3, double epsabs = 1e-3)
+                        double epsrel = 5e-4, double epsabs = 1e-9)
       : maxeval_(num_calls), epsrel_(epsrel), epsabs_(epsabs) {
   }
 
@@ -415,8 +416,13 @@ class Integrator2dCuhre {
                     F fun) {
     Result result = {0., 0.};
 
-    if (max1 <= min1 || max2 <= min2)
-      return result;
+    if (max1 < min1 || max2 < min2) {
+      std::stringstream err;
+      err << "Integrator2dCuhre got wrong integration limits: ["
+          << min1 << ", " << max1 << "], ["
+          << min2 << ", " << max2 << "]";
+      throw std::invalid_argument(err.str());
+    }
 
     Integrand2d<F> f_with_limits = {min1, max1 - min1, min2, max2 - min2, fun};
 
@@ -441,10 +447,20 @@ class Integrator2dCuhre {
     const int key = -1;  // Use the default.
     const char* statefile = nullptr;
     void* spin = nullptr;
+
     Cuhre(ndim, ncomp, cuhre_fun, userdata, nvec, epsrel_, epsabs_, flags,
           mineval, maxeval, key, statefile, spin,
           &nregions_, &neval_, &fail_,
           &result.first, &result.second, &prob_);
+
+    if (fail_) {
+      std::stringstream err;
+      err << "After " << neval_ << " evaluations "
+          << "Cuhre integration from Cuba reports error code " << fail_;
+      throw std::runtime_error(err.str());
+    }
+    result.check_error("Cuba integration ", epsrel_, epsabs_);
+
     return result;
   }
 

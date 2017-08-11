@@ -179,7 +179,7 @@ double IsoParticleType::get_integral_RK(double sqrts) {
   return XS_RK_tabulation_->get_value_linear(sqrts);
 }
 
-static /*thread_local*/ Integrator2dCuhre integrate2d(1E7);
+static /*thread_local*/ Integrator2dCuhre integrate2d;
 
 double IsoParticleType::get_integral_RR(const ParticleType &type_res_2,
                                         double sqrts) {
@@ -208,10 +208,6 @@ TabulationPtr IsoParticleType::integrate_RR(ParticleTypePtr &type_res_2) {
                                   return spec_func_integrand_2res(srts, m1, m2,
                                                       *type_res_1, *type_res_2);
                                });
-            const auto error_msg = result.check_error();
-            if (error_msg != "") {
-              throw std::runtime_error(error_msg);
-            }
             return result.value();
          });
 }

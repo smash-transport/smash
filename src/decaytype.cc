@@ -224,10 +224,6 @@ double TwoBodyDecayUnstable::rho(double mass) const {
                                     m1, m2, particle_types_[0],
                                     particle_types_[1], L_);
                 });
-              const auto error_msg = result.check_error();
-              if (error_msg != "") {
-                throw std::runtime_error(error_msg);
-              }
               return result.value();
             });
   }
