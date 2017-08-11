@@ -73,14 +73,14 @@ class Result : public std::pair<double, double> {
                                           value() * relative_tolerance);
     if (error() > allowed_error) {
       std::stringstream error_msg;
-      error_msg << integration_name << " resulted in I = " << value() << " ± " << error()
+      error_msg << integration_name << " resulted in I = "
+                << value() << " ± " << error()
                 << ", but the required precision is either absolute error < "
                 << absolute_tolerance << " or relative error < "
                 << relative_tolerance << std::endl;
       throw std::runtime_error(error_msg.str());
     }
   }
-
 };
 
 /**
