@@ -144,7 +144,7 @@ double TwoBodyDecaySemistable::get_Lambda() {
 
 // number of tabulation points
 constexpr int num_tab_pts = 200;
-static thread_local Integrator integrate;
+static /*thread_local*/ Integrator integrate;
 
 double TwoBodyDecaySemistable::rho(double mass) const {
   if (tabulation_ == nullptr) {
@@ -203,7 +203,7 @@ double TwoBodyDecayUnstable::get_Lambda() {
   return 0.6;
 }
 
-static thread_local Integrator2dCuhre integrate2d(1E7);
+static /*thread_local*/ Integrator2dCuhre integrate2d(1E7);
 
 double TwoBodyDecayUnstable::rho(double mass) const {
   if (tabulation_ == nullptr) {

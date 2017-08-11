@@ -546,7 +546,7 @@ double ParticleType::spectral_function(double m) const {
   if (norm_factor_ < 0.) {
     /* Initialize the normalization factor
      * by integrating over the unnormalized spectral function. */
-    static thread_local Integrator integrate;
+    static /*thread_local*/ Integrator integrate;
     const auto width = width_at_pole();
     // We transform the integral using m = m_min + width_pole * tan(x), to
     // make it definite and to avoid numerical issues.

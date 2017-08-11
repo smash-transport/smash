@@ -490,7 +490,7 @@ double KplusNRatios::get_ratio(const ParticleType& a,
   return ratios_.at(key);
 }
 
-thread_local KplusNRatios kplusn_ratios;
+/*thread_local*/ KplusNRatios kplusn_ratios;
 
 
 /** K- p -> Kbar0 n cross section parametrization.
