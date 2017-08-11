@@ -54,7 +54,7 @@ class Nucleus {
    * @param x the position at which to evaluate the function
    * @return un-normalized woods-saxon probability for @param x
    **/
-  float woods_saxon(float x);
+  double woods_saxon(double x);
 
   /// sets the positions of the nuclei inside nucleus A.
   void arrange_nucleons();
@@ -128,7 +128,7 @@ class Nucleus {
    * \fpPrecision Why \c double?
    **/
   void shift(double z_offset,
-             double x_offset, float simulation_time);
+             double x_offset, double simulation_time);
 
   /** Rotates the nucleus. (Spherical symmetry of nondeformed nuclei
    * means there is nothing to do.)
@@ -185,16 +185,16 @@ class Nucleus {
   /** diffusiveness of Woods-Saxon-distribution in this nucleus in fm
    * (for diffusiveness_ == 0, we obtain a hard sphere.
    **/
-  float diffusiveness_ = .545f;
+  double diffusiveness_ = .545;
   /// Saturation density of this nucleus.
-  float saturation_density_ = nuclear_density;
+  double saturation_density_ = nuclear_density;
   /// Nuclear radius of this nucleus
-  float nuclear_radius_;
+  double nuclear_radius_;
   /** single-proton-radius
    *
    * \see default_nuclear_radius
    * */
-  float proton_radius_ = 1.2f;
+  double proton_radius_ = 1.2;
   /// Number of testparticles per physical particle
   size_t testparticles_ = 1;
   /// particles associated with this nucleus.
@@ -220,25 +220,25 @@ class Nucleus {
   /// sets the diffusiveness of the nucleus
   ///
   /// \see diffusiveness_
-  inline void set_diffusiveness(float diffuse) {
+  inline void set_diffusiveness(double diffuse) {
     diffusiveness_ = diffuse;
   }
   /// gets the diffusiveness of the nucleus
   ///
   /// \see diffusiveness_
-  inline float get_diffusiveness() const {
+  inline double get_diffusiveness() const {
     return diffusiveness_;
   }
   /// sets the saturation density of the nucleus
   ///
   /// \see saturation_density_
-  inline void set_saturation_density(float density) {
+  inline void set_saturation_density(double density) {
     saturation_density_ = density;
   }
   /// gets the saturation density of the nucleus
   ///
   /// \see saturation_density_
-  inline float get_saturation_density() const {
+  inline double get_saturation_density() const {
     return saturation_density_;
   }
   /** returns a default radius for the nucleus
@@ -246,19 +246,19 @@ class Nucleus {
    * Nuclear radius is calculated with the proton radius times the third
    * root of the number of nucleons.
    **/
-  inline float default_nuclear_radius() {
+  inline double default_nuclear_radius() {
     return proton_radius_ * std::pow(number_of_particles(), 1. / 3.);
   }
   /// sets the nuclear radius
   ///
   /// \see nuclear_radius
-  inline void set_nuclear_radius(float rad) {
+  inline void set_nuclear_radius(double rad) {
     nuclear_radius_ = rad;
   }
   /// gets the nuclear radius
   ///
   /// \see nuclear_radius
-  inline float get_nuclear_radius() const {
+  inline double get_nuclear_radius() const {
     return nuclear_radius_;
   }
 

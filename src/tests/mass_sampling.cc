@@ -44,11 +44,11 @@ TEST(omega_decay) {
   ParticleData omega{type_omega};
   omega.set_4momentum(0.782,                     // pole mass
                       ThreeVector(0., 0., 0.));  // at rest
-  const auto act = make_unique<DecayAction>(omega, 0.f);
+  const auto act = make_unique<DecayAction>(omega, 0.);
   const auto srts = omega.effective_mass();
   act->add_decays(type_omega.get_partial_widths_hadronic(srts));
 
-  const float dm = 0.001;        // bin size
+  const double dm = 0.001;        // bin size
   Histogram1d hist_charged(dm);  // histogram for charged rhos
   Histogram1d hist_neutral(dm);  // histogram for neutral rhos
 
@@ -67,8 +67,8 @@ TEST(omega_decay) {
     } else if (!fs[0].type().pdgcode().is_pion()) {
       rho = &fs[0];
     }
-    float m = rho->effective_mass();
-    if (rho->type().charge()==0) {
+    double m = rho->effective_mass();
+    if (rho->type().charge() == 0) {
       hist_neutral.add(m);
     } else {
       hist_charged.add(m);
@@ -83,8 +83,8 @@ TEST(omega_decay) {
 
   printf("testing ρ⁰ distribution ...\n");
   hist_neutral.test(
-    [&](float m) {
-      float pcm = pCM(srts, mass_stable, m);
+    [&](double m) {
+      double pcm = pCM(srts, mass_stable, m);
       return type_rho_zero.spectral_function(m)
                     * pcm * blatt_weisskopf_sqr(pcm, 1); }
     //,"masses_rho_neutral.dat"
@@ -92,8 +92,8 @@ TEST(omega_decay) {
 
   printf("testing ρ⁺ distribution ...\n");
   hist_charged.test(
-    [&](float m) {
-      float pcm = pCM(srts, mass_stable, m);
+    [&](double m) {
+      double pcm = pCM(srts, mass_stable, m);
       return type_rho_plus.spectral_function(m)
                     * pcm * blatt_weisskopf_sqr(pcm, 1); }
     //,"masses_rho_charged.dat"

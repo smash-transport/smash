@@ -128,6 +128,40 @@ enum class BoxInitialCondition {
   PeakedMomenta,
 };
 
+/** Initial condition for a particle in a sphere
+ * 
+ * IC_ES, IC_1M and IC_2M are off-equilibrium distributions used in massless
+ * comparisons of SMASH to the extended universe metric. They are described in
+ * some detail in iref \iref{Bazow:2016oky}
+ *
+ * IC_Massive is a generalization of IC_ES for the non-zero mass case; note that
+ * there is currently no analytical comparison possible with this distribution.
+ *
+ * The default value, ThermalMomenta, samples momenta from a Maxwell-Boltzmann
+ * distribution and thus generates a thermal ensemble.
+ */
+enum class SphereInitialCondition {
+  ThermalMomenta,
+  IC_ES,
+  IC_1M,
+  IC_2M,
+  IC_Massive,
+};
+
+/** Defines properties of expansion for the metric (e.g. FRW)
+ *
+ *  If anything else than NoExpansion is used, then a non-zero
+ *  Hubble parameter is computed and corrections are brought to the
+ *  propagation of all particles according to selected expanding
+ *  metric.
+ */
+enum class ExpansionMode {
+  NoExpansion,
+  MasslessFRW,
+  MassiveFRW,
+  Exponential,
+};
+
 enum class NNbarTreatment {
   NoAnnihilation,
   Resonances,
@@ -141,6 +175,23 @@ enum class ThermodynamicQuantity : char {
   TmnLandau,
   LandauVelocity,
 };
+
+/**
+ * Defines the algorithm used for the forced thermalization.
+ *  For the description of algorithms see \iref{Oliinychenko:2016vkg}.
+ *  All of them intend to conserve the net baryon number, strangeness
+ *  and electric charge, as well as energy. Mode sampling is the fastest,
+ *  but least theoretically robust, unbiased BF is the slowest
+ *  (even hangs completely from time to time), but it is also the most
+ *  theoretically robust.
+ */
+enum class ThermalizationAlgorithm {
+  ModeSampling,
+  BiasedBF,
+  UnbiasedBF,
+};
+
+
 
 using ActionPtr = build_unique_ptr_<Action>;
 using ScatterActionPtr = build_unique_ptr_<ScatterAction>;

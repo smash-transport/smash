@@ -14,18 +14,18 @@
 
 namespace Smash {
 
-float density_factor(const ParticleType &type, DensityType dens_type) {
+double density_factor(const ParticleType &type, DensityType dens_type) {
   switch (dens_type) {
     case DensityType::Hadron:
-      return type.is_hadron() ? 1.f : 0.f;
+      return type.is_hadron() ? 1. : 0.;
     case DensityType::Baryon:
-      return static_cast<float>(type.baryon_number());
+      return static_cast<double>(type.baryon_number());
     case DensityType::BaryonicIsospin:
-      return type.is_baryon() ? type.isospin3_rel() : 0.f;
+      return type.is_baryon() ? type.isospin3_rel() : 0.;
     case DensityType::Pion:
-      return type.pdgcode().is_pion() ? 1.f : 0.f;
+      return type.pdgcode().is_pion() ? 1. : 0.;
     default:
-      return 0.f;
+      return 0.;
   }
 }
 
@@ -74,7 +74,7 @@ std::pair<double, ThreeVector> rho_eckart_impl(const ThreeVector &r,
   std::array<FourVector, 4> jmu_pos, jmu_neg;
 
   for (const auto &p : plist) {
-    const float dens_factor = density_factor(p.type(), dens_type);
+    const double dens_factor = density_factor(p.type(), dens_type);
     if (std::abs(dens_factor) < really_small) {
       continue;
     }
@@ -93,7 +93,7 @@ std::pair<double, ThreeVector> rho_eckart_impl(const ThreeVector &r,
       continue;
     }
     const FourVector tmp = mom * (dens_factor / mom.x0());
-    if (dens_factor > 0.f) {
+    if (dens_factor > 0.) {
       jmu_pos[0] += tmp * sf_and_grad.first;
       if (compute_gradient) {
         for (int k = 1; k <= 3; k++) {
@@ -139,49 +139,6 @@ std::pair<double, ThreeVector> rho_eckart(const ThreeVector &r,
                DensityType dens_type, bool compute_gradient) {
   return rho_eckart_impl(r, plist, par, dens_type, compute_gradient);
 }
-
-template <typename /*LatticeType*/ T>
-void update_general_lattice(RectangularLattice<T>* lat,
-                            const LatticeUpdate update,
-                            const DensityType dens_type,
-                            const DensityParameters &par,
-                            const Particles &particles) {
-  // Do not proceed if lattice does not exists/update not required
-  if (lat == nullptr || lat->when_update() != update) {
-    return;
-  }
-  lat->reset();
-  const double norm_factor = par.norm_factor_sf();
-  for (const auto &part : particles) {
-    const float dens_factor = density_factor(part.type(), dens_type);
-    if (std::abs(dens_factor) < really_small) {
-      continue;
-    }
-    const FourVector p = part.momentum();
-    const double m = p.abs();
-    if (unlikely(m < really_small)) {
-      const auto &log = logger<LogArea::Density>();
-      log.warn("Gaussian smearing is undefined for momentum ", p);
-      continue;
-    }
-    const double m_inv = 1.0 / m;
-
-    const ThreeVector pos = part.position().threevec();
-    lat->iterate_in_radius(pos, par.r_cut(),
-      [&](T &node, int ix, int iy, int iz){
-        const ThreeVector r = lat->cell_center(ix, iy, iz);
-        const double sf = norm_factor * unnormalized_smearing_factor(
-                                              pos - r, p, m_inv, par).first;
-        if (sf > really_small) {
-          /*std::cout << "Adding particle " << part << " to lattice with"
-                    << " smearing factor " << sf <<
-                    " and density factor " << dens_factor << std::endl;*/
-          node.add_particle(part, sf * dens_factor);
-        }
-      });
-  }
-}
-
 
 void update_density_lattice(RectangularLattice<DensityOnLattice>* lat,
                             const LatticeUpdate update,

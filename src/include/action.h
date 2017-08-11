@@ -65,7 +65,7 @@ class Action {
    *
    * Prefer to use a more specific function.
    */
-  virtual float raw_weight_value() const = 0;
+  virtual double raw_weight_value() const = 0;
 
   /** Return the process type. */
   virtual ProcessType get_type() const {
@@ -76,7 +76,7 @@ class Action {
   template<typename Branch>
   void add_process(ProcessBranchPtr<Branch> &p,
                    ProcessBranchList<Branch>& subprocesses,
-                   float& total_weight) {
+                   double& total_weight) {
     if (p->weight() > 0) {
       total_weight += p->weight();
       subprocesses.emplace_back(std::move(p));
@@ -85,7 +85,7 @@ class Action {
   /** Add several new subprocesses at once.  */
   template<typename Branch>
   void add_processes(ProcessBranchList<Branch> pv,
-      ProcessBranchList<Branch>& subprocesses, float& total_weight) {
+      ProcessBranchList<Branch>& subprocesses, double& total_weight) {
     subprocesses.reserve(subprocesses.size() + pv.size());
     for (auto &proc : pv) {
       if (proc->weight() > 0) {
@@ -203,10 +203,10 @@ class Action {
    */
   template<typename Branch>
   const Branch* choose_channel(
-      const ProcessBranchList<Branch>& subprocesses, float total_weight) {
+      const ProcessBranchList<Branch>& subprocesses, double total_weight) {
     const auto &log = logger<LogArea::Action>();
-    float random_weight = Random::uniform(0.f, total_weight);
-    float weight_sum = 0.;
+    double random_weight = Random::uniform(0., total_weight);
+    double weight_sum = 0.;
     /* Loop through all subprocesses and select one by Monte Carlo, based on
      * their weights.  */
     for (const auto &proc : subprocesses) {

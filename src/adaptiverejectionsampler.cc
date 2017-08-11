@@ -29,12 +29,12 @@ std::ostream &operator<<(std::ostream &out, const Line &l) {
   return out;
 }
 
-auto ran = Random::uniform_dist<float>(0.0, 1.0);
+auto ran = Random::uniform_dist<double>(0.0, 1.0);
 /** contrustructor for AdaptiveRejectionSampler
  * param: func distribution function f_(x)
  */
 AdaptiveRejectionSampler::AdaptiveRejectionSampler(
-    std::function<float(float)> func, float xmin, float xmax):
+    std::function<double(double)> func, double xmin, double xmax):
     f_(func), xmin_(xmin), xmax_(xmax) {
   const auto &log = logger<LogArea::Sampling>();
   /** judge if f_(xmin_)<FLT_MIN or f_(xmax_)<FLT_MIN,
@@ -42,13 +42,13 @@ AdaptiveRejectionSampler::AdaptiveRejectionSampler(
    * in ARS since we need log(f_(x))*/
 
   {
-    /** disable float traps here since probability can goes to
+    /** disable double traps here since probability can goes to
      * really small as we expected; we need to judge it and
      * shrink the range (xmin, xmax) to get ride of it */
     DisableFloatTraps guard(FE_DIVBYZERO | FE_INVALID);
 
     int nloop = 1;
-    while ( f_(xmin_) < std::numeric_limits<float>::min() ) {
+    while ( f_(xmin_) < std::numeric_limits<double>::min() ) {
       xmin_ += nloop*really_small;
       nloop *= 2;
       log.debug() << "xmin_ is changed to " << xmin_ << std::endl;
@@ -60,7 +60,7 @@ AdaptiveRejectionSampler::AdaptiveRejectionSampler(
     }
 
     nloop = 1;
-    while ( f_(xmax_) < std::numeric_limits<float>::min() ) {
+    while ( f_(xmax_) < std::numeric_limits<double>::min() ) {
       xmax_ -= nloop*really_small;
       nloop *= 2;
       log.debug() << "xmax_ is changed to " << xmax_ << std::endl;
@@ -70,9 +70,9 @@ AdaptiveRejectionSampler::AdaptiveRejectionSampler(
             "Error: xmin_ > xmax_ in ARS during shrinking range");
       }
     }
-  }  // only disable underflow float traps inside the brackets
+  }  // only disable underflow double traps inside the brackets
 
-  float dx = (xmax_ - xmin_)/static_cast<float>(init_npoint_-1);
+  double dx = (xmax_ - xmin_)/static_cast<double>(init_npoint_-1);
 
   Point p;
   for ( int i = 0; i < init_npoint_; i++ ) {
@@ -188,11 +188,11 @@ void AdaptiveRejectionSampler::update_area() {
   int j = 0;
 
   // Aj: The area under the jth piece exponential function
-  float Aj;
+  double Aj;
 
   for (; it0 != std::prev(inters_.end(), 1); it0++, it1++) {
     // (left) intersection--->(right) point
-    if ( std::abs(upper(j).m) > std::numeric_limits<float>::min() ) {
+    if ( std::abs(upper(j).m) > std::numeric_limits<double>::min() ) {
       Aj = ((*it1).expy-(*it0).expy)/upper(j).m;
     } else {
       // if it happens in really tiny opportunity that the slope == 0
@@ -203,7 +203,7 @@ void AdaptiveRejectionSampler::update_area() {
 
     j++;
     // (left) point--->(right) intersection
-    if ( std::abs(upper(j).m) > std::numeric_limits<float>::min() ) {
+    if ( std::abs(upper(j).m) > std::numeric_limits<double>::min() ) {
       Aj = ((*std::next(it0, 1)).expy-(*it1).expy)/upper(j).m;
     } else {
       // if it happens in really tiny opportunity that the slope == 0
@@ -323,47 +323,47 @@ inline int AdaptiveRejectionSampler::sample_j() {
 }
 
 /** sampler x in range [xj, xj+1) */
-inline float AdaptiveRejectionSampler::sample_x(int j) {
-  float r = Random::canonical<float>();
-  float m = upper_bounds_.at(j).piecewise_linear_line.m;
+inline double AdaptiveRejectionSampler::sample_x(int j) {
+  double r = Random::canonical<double>();
+  double m = upper_bounds_.at(j).piecewise_linear_line.m;
   // m != 0, sample from piecewise exponential distribution
-  if ( m > std::numeric_limits<float>::min() ) {
+  if ( m > std::numeric_limits<double>::min() ) {
     return std::log(r*std::exp(m*upper_bounds_.at(j).right_point.x)+
-                    (1.0f-r)*std::exp(m*upper_bounds_.at(j).left_point.x))/m;
+                    (1.-r)*std::exp(m*upper_bounds_.at(j).left_point.x))/m;
   } else {
     // if it happens in really tiny opportunity that the slope m == 0
     // sample from unifrom distribution
     return r*upper_bounds_.at(j).right_point.x +
-        (1.0f-r)*upper_bounds_.at(j).left_point.x;
+        (1.-r)*upper_bounds_.at(j).left_point.x;
   }
 }
 
 
 /** if squeezing_test==true, do not need rejection_test (time save) */
-inline bool AdaptiveRejectionSampler::squeezing_test(const float & x,
-                                            const int & j, const float & rand) {
+inline bool AdaptiveRejectionSampler::squeezing_test(const double & x,
+                                      const int & j, const double & rand) {
   return rand <= std::exp(lower(j).eval(x) -
                           upper_bounds_.at(j).piecewise_linear_line.eval(x));
 }
 
 /** if squeezing_test==false, do rejection_test
  * if rejection_test=true, keep the sampling*/
-inline bool AdaptiveRejectionSampler::rejection_test(const float & x,
-                                            const int & j, const float & rand) {
+inline bool AdaptiveRejectionSampler::rejection_test(const double & x,
+                                      const int & j, const double & rand) {
   return rand*std::exp(upper_bounds_.at(j).piecewise_linear_line.eval(x))
       <= f_(x);
 }
 
 
 /** get one x from distribution function f_(x)*/
-float AdaptiveRejectionSampler::get_one_sample() {
+double AdaptiveRejectionSampler::get_one_sample() {
   const auto & log = logger<LogArea::Sampling>();
 
   int rejections = 0;
   while ( true ) {
     const int j = sample_j();
-    const float x = sample_x(j);
-    const float rand = Random::canonical<float>();
+    const double x = sample_x(j);
+    const double rand = Random::canonical<double>();
     if ( squeezing_test(x, j, rand) ) {
       return x;
     } else if ( rejection_test(x, j, rand) ) {

@@ -74,6 +74,10 @@ if(CPPLINT)
                      COMMAND ${CPPLINT} ${CPPLINT_ARGS} ${CPPLINT_FILES}
                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
                      COMMENT "Executing test cpplint")
+   # make sure we always run cpplint as a test
+   add_test(NAME cpplint
+            COMMAND ${CPPLINT} ${CPPLINT_ARGS} ${CPPLINT_FILES}
+            WORKINNG_DIRECTORY ${PROJECT_SOURCE_DIR})
    add_custom_target(cpplint_build
                      COMMAND ${CPPLINT} ${CPPLINT_ARGS} --filter=-build/c++11,-build/include,-readability,-runtime,-whitespace ${CPPLINT_FILES}
                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
@@ -194,6 +198,7 @@ smash_add_unittest(energymomentumtensor)
 smash_add_unittest(experiment)
 smash_add_unittest(filelock)
 smash_add_unittest(fourvector)
+smash_add_unittest(grandcan_thermalizer)
 smash_add_unittest(grid)
 smash_add_unittest(hadgas_eos)
 smash_add_unittest(initial_conditions)

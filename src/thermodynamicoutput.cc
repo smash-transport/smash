@@ -86,7 +86,7 @@ void ThermodynamicOutput::at_intermediate_time(const Particles &particles,
       td_set_.count(ThermodynamicQuantity::LandauVelocity) > 0) {
     EnergyMomentumTensor Tmn;
     for (const auto &p : particles) {
-      const float dens_factor = density_factor(p.type(), dens_type_);
+      const double dens_factor = density_factor(p.type(), dens_type_);
       if (std::abs(dens_factor) < really_small) {
         continue;
       }

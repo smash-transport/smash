@@ -25,7 +25,7 @@ std::vector<DecayModes> *DecayModes::all_decay_modes = nullptr;
 
 std::vector<DecayTypePtr> *all_decay_types = nullptr;
 
-void DecayModes::add_mode(ParticleTypePtr mother, float ratio, int L,
+void DecayModes::add_mode(ParticleTypePtr mother, double ratio, int L,
                           ParticleTypePtrList particle_types) {
   DecayType *type = get_decay_type(mother, particle_types, L);
   // Check if mode already exists: if yes, add weight.
@@ -97,7 +97,7 @@ DecayType* DecayModes::get_decay_type(ParticleTypePtr mother,
 
 void DecayModes::renormalize(std::string name) {
   const auto &log = logger<LogArea::DecayModes>();
-  float sum = 0.;
+  double sum = 0.;
   for (auto &mode : decay_modes_) {
     sum += mode->weight();
   }
@@ -111,7 +111,7 @@ void DecayModes::renormalize(std::string name) {
     } else {
       log.warn("Particle ", name, ": Renormalizing decay modes with ", sum);
     }
-    float new_sum = 0.0;
+    double new_sum = 0.0;
     for (auto &mode : decay_modes_) {
       mode->set_weight(mode->weight() / sum);
       new_sum += mode->weight();
@@ -213,7 +213,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
       std::istringstream lineinput(line.text);
       std::vector<std::string> decay_particles;
       decay_particles.reserve(3);
-      float ratio;
+      double ratio;
       lineinput >> ratio;
 
       int L;
@@ -259,7 +259,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
               for (const auto &daughter1 : isotype_daughter_1.get_states()) {
                 for (const auto &daughter2 : isotype_daughter_2.get_states()) {
                   // calculate Clebsch-Gordan factor
-                  const float cg_sqr = isospin_clebsch_gordan_sqr_2to1(
+                  const double cg_sqr = isospin_clebsch_gordan_sqr_2to1(
                                     *daughter1, *daughter2, *mother_states[m]);
                   if (cg_sqr > 0.) {
                     // add mode
@@ -299,7 +299,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
                 for (const auto &daughter2 : isotype_daughter_2.get_states()) {
                   for (const auto &daughter3 :
                        isotype_daughter_3.get_states()) {
-                    const float cg_sqr = isospin_clebsch_gordan_sqr_3to1(
+                    const double cg_sqr = isospin_clebsch_gordan_sqr_3to1(
                         *daughter1, *daughter2, *daughter3, *mother_states[m]);
                     if (cg_sqr > 0.) {
                       // add mode

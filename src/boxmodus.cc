@@ -26,6 +26,7 @@
 #include "include/outputinterface.h"
 #include "include/particles.h"
 #include "include/processbranch.h"
+#include "include/quantumnumbers.h"
 #include "include/random.h"
 #include "include/threevector.h"
 #include "include/wallcrossingaction.h"
@@ -62,13 +63,13 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
  * If the value is not 2 then thermal momenta (sampled from a
  * Maxwell-Boltzmann distribution) are taken.
  *
- * \key Length (float, required): \n
+ * \key Length (double, required): \n
  * Length of the cube's edge in fm
  *
- * \key Temperature (float, required): \n
+ * \key Temperature (double, required): \n
  * Temperature in the box in GeV.
  *
- * \key Start_Time (float, required): \n
+ * \key Start_Time (double, required): \n
  * Starting time of the simulation.
  * All particles in the box are initialized with \f$x^0\f$ = Start_Time.
  *
@@ -82,6 +83,24 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
        -2112: 100
    \endverbatim
  * It means that 200 neutrons and 100 antineutrons will be initialized.
+ *
+ * \key Use_Thermal_Multiplicities (bool, optional, default = false): \n
+ * If this option is set to true then Init_Multiplicities are ignored and the
+ * box is initialized with all particle species of the particle table that
+ * belong to the hadron gas equation of state, see
+ * HadronGasEos::is_eos_particle(). The multiplicities are sampled from
+ * Poisson distributions \f$ Poi(n_i V) \f$, where \f$ n_i \f$ are the
+ * grand-canonical thermal densities of the corresponding species and \f$ V \f$
+ * is the box volume. This option simulates the grand-canonical ensemble, where
+ * the number of particles is not fixed from event to event.
+ *
+ * \key Baryon_Chemical_Potential (double, optional, default = 0.0): \n
+ * Baryon chemical potential \f$ \mu_B \f$ used in case if
+ * Use_Thermal_Multiplicities is true to compute thermal densities \f$ n_i \f$.
+ *
+ * \key Strange_Chemical_Potential (double, optional, default = 0.0): \n
+ * Strangeness chemical potential \f$ \mu_S \f$ used in case if
+ * Use_Thermal_Multiplicities is true to compute thermal densities \f$ n_i \f$.
  */
 BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
     : initial_condition_(modus_config.take({"Box", "Initial_Condition"})),
@@ -90,22 +109,21 @@ BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
         start_time_(modus_config.take({"Box", "Start_Time"})),
         use_thermal_(
           modus_config.take({"Box", "Use_Thermal_Multiplicities"}, false)),
-        mub_(modus_config.take({"Box", "Baryon_Chemical_Potential"}, 0.0f)),
-        mus_(modus_config.take({"Box", "Strange_Chemical_Potential"}, 0.0f)),
+        mub_(modus_config.take({"Box", "Baryon_Chemical_Potential"}, 0.)),
+        mus_(modus_config.take({"Box", "Strange_Chemical_Potential"}, 0.)),
         init_multipl_(use_thermal_ ? std::map<PdgCode, int>() :
                       modus_config.take({"Box", "Init_Multiplicities"}).
                                                 convert_for(init_multipl_)) {
 }
 
 /* initial_conditions - sets particle data for @particles */
-float BoxModus::initial_conditions(Particles *particles,
+double BoxModus::initial_conditions(Particles *particles,
                                   const ExperimentParameters &parameters) {
   const auto &log = logger<LogArea::Box>();
   double momentum_radial = 0;
   Angles phitheta;
   FourVector momentum_total(0, 0, 0, 0);
-  auto uniform_length = Random::make_uniform_distribution(0.0,
-                                         static_cast<double>(this->length_));
+  auto uniform_length = Random::make_uniform_distribution(0.0, this->length_);
 
   /* Create NUMBER OF PARTICLES according to configuration, or thermal case */
   if (use_thermal_) {
@@ -121,9 +139,9 @@ float BoxModus::initial_conditions(Particles *particles,
         log.debug(ptype.name(), " initial multiplicity ", thermal_mult_int);
       }
     }
-    log.info() << "Initial baryon density "
+    log.info() << "Initial hadron gas baryon density "
                << HadronGasEos::net_baryon_density(temperature_, mub_, mus_);
-    log.info() << "Initial strange density "
+    log.info() << "Initial hadron gas strange density "
                << HadronGasEos::net_strange_density(temperature_, mub_, mus_);
   } else {
     for (const auto &p : init_multipl_) {

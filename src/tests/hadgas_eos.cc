@@ -56,7 +56,7 @@ TEST(solve_EoS_substitute) {
 TEST(EoS_table) {
   // make a small table of EoS
   HadronGasEos eos = HadronGasEos(false);
-  EosTable table = EosTable(0.2, 0.05, 5, 5);
+  EosTable table = EosTable(0.1, 0.05, 5, 5);
   table.compile_table(eos, "small_test_table_fakegas_eos.dat");
   EosTable::table_element x;
   const double my_e = 0.39, my_nb = 0.09;

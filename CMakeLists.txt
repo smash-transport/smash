@@ -37,7 +37,7 @@ endif(NOT CMAKE_BUILD_TYPE)
 # add 3rd-party libraries (before setting compiler flags etc)
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/einhard")
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/yaml-cpp-0.5.3/include")
-include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/pythia8223/include")
+include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/pythia8226/include")
 add_subdirectory(3rdparty)
 
 # RelWithDebInfo is just like Release, it only adds -g to add debug symbols
@@ -55,7 +55,7 @@ mark_as_advanced(CMAKE_CXX_FLAGS_PROFILING CMAKE_C_FLAGS_PROFILING CMAKE_EXE_LIN
 
 # Set the relevant generic compiler flags (optimisation + warnings)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Wmissing-declarations -Wpointer-arith -Wshadow -Wuninitialized -Winit-self -Wfloat-equal -Wundef -Wcast-align -Wformat=2 -Wold-style-cast -Werror=switch -std=c++11 -mfpmath=sse")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Wmissing-declarations -Wpointer-arith -Wshadow -Wuninitialized -Winit-self -Wundef -Wcast-align -Wformat=2 -Wold-style-cast -Werror=switch -std=c++11 -mfpmath=sse")
 
 # Tell the compiler to ignore errno setting of math functions. This can help the compiler
 # considerably in optimizing mathematical expressions.

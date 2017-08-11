@@ -34,7 +34,7 @@ class ActionFinderInterface {
    *         could possibly be executed in this time step.
    */
   virtual ActionList find_actions_in_cell(const ParticleList &search_list,
-                                          float dt) const = 0;
+                                          double dt) const = 0;
   /**
    * Abstract function for finding actions, given two lists of particles,
    * a search list and a neighbors list.
@@ -49,7 +49,7 @@ class ActionFinderInterface {
    */
   virtual ActionList find_actions_with_neighbors(
       const ParticleList &search_list, const ParticleList &neighbors_list,
-      float dt) const = 0;
+      double dt) const = 0;
 
   /**
    * Abstract function for finding actions between a list of particles and
@@ -68,7 +68,7 @@ class ActionFinderInterface {
    */
   virtual ActionList find_actions_with_surrounding_particles(
       const ParticleList &search_list, const Particles &surrounding_list,
-      float dt) const = 0;
+      double dt) const = 0;
 
   /**
    * This abstract function finds 'final' actions (for cleaning up at the end

@@ -50,7 +50,7 @@ class DecayType {
    * \param G0 Partial width at the pole mass [GeV].
    * \param m Actual mass of the decaying particle [GeV].
    */
-  virtual float width(float m0, float G0, float m) const = 0;
+  virtual double width(double m0, double G0, double m) const = 0;
   /**
    * Get the mass-dependent in-width for a resonance formation process.
    *
@@ -60,8 +60,8 @@ class DecayType {
    * \param m1 Actual mass of the first incoming particle [GeV].
    * \param m2 Actual mass of the second incoming particle [GeV].
    */
-  virtual float in_width(float m0, float G0, float m,
-                         float m1, float m2) const = 0;
+  virtual double in_width(double m0, double G0, double m,
+                         double m1, double m2) const = 0;
 
 
  protected:
@@ -80,9 +80,9 @@ class TwoBodyDecay : public DecayType {
   TwoBodyDecay(ParticleTypePtrList part_types, int l);
   unsigned int particle_number() const override;
   bool has_particles(ParticleTypePtrList list) const override;
-  float threshold() const {
-    return particle_types_[0]->minimum_mass() +
-           particle_types_[1]->minimum_mass();
+  double threshold() const {
+    return particle_types_[0]->min_mass_kinematic() +
+           particle_types_[1]->min_mass_kinematic();
   }
 
  protected:
@@ -90,7 +90,7 @@ class TwoBodyDecay : public DecayType {
    * Gamma(m) = Gamma_0 * rho(m) / rho(m_0). This ensures that the width is
    * properly normalized at the pole mass to Gamma(m_0) = Gamma_0.
    * By default rho simply equals one, which corresponds to a constant width. */
-  virtual float rho(float) const { return 1.; }
+  virtual double rho(double) const { return 1.; }
 };
 
 
@@ -108,11 +108,11 @@ class TwoBodyDecayStable : public TwoBodyDecay {
    * \param G0 Partial width at the pole mass [GeV].
    * \param m Actual mass of the decaying particle [GeV].
    */
-  float width(float m0, float G0, float m) const override;
-  float in_width(float m0, float G0, float m,
-                 float m1, float m2) const override;
+  double width(double m0, double G0, double m) const override;
+  double in_width(double m0, double G0, double m,
+                 double m1, double m2) const override;
  protected:
-  float rho(float m) const override;
+  double rho(double m) const override;
 };
 
 
@@ -131,7 +131,7 @@ class TwoBodyDecaySemistable : public TwoBodyDecay {
    * \param G0 Partial width at the pole mass [GeV].
    * \param m Actual mass of the decaying particle [GeV].
    */
-  float width(float m0, float G0, float m) const override;
+  double width(double m0, double G0, double m) const override;
   /**
    * Get the mass-dependent in-width for a resonance formation process from one
    * stable and one unstable particle according to \iref{Manley:1992yb},
@@ -143,11 +143,11 @@ class TwoBodyDecaySemistable : public TwoBodyDecay {
    * \param m1 Actual mass of the first incoming particle [GeV].
    * \param m2 Actual mass of the second incoming particle [GeV].
    */
-  float in_width(float m0, float G0, float m,
-                 float m1, float m2) const override;
+  double in_width(double m0, double G0, double m,
+                 double m1, double m2) const override;
 
  protected:
-  float rho(float m) const override;
+  double rho(double m) const override;
   /**
    * Determine the cutoff parameter Λ for semi-stable decays,
    * given the types of the daughter particles.
@@ -160,8 +160,8 @@ class TwoBodyDecaySemistable : public TwoBodyDecay {
    * achieve a better normalization. In contrast to Smash, GiBUU does not have
    * an ω → ρ π decay.
    */
-  float get_Lambda();
-  float Lambda_;
+  double get_Lambda();
+  double Lambda_;
   mutable std::unique_ptr<Tabulation> tabulation_;
 };
 
@@ -172,17 +172,17 @@ class TwoBodyDecaySemistable : public TwoBodyDecay {
 class TwoBodyDecayUnstable : public TwoBodyDecay {
  public:
   TwoBodyDecayUnstable(ParticleTypePtrList part_types, int l);
-  float width(float m0, float G0, float m) const override;
-  float in_width(float m0, float G0, float m,
-                 float m1, float m2) const override;
+  double width(double m0, double G0, double m) const override;
+  double in_width(double m0, double G0, double m,
+                 double m1, double m2) const override;
  protected:
-  float rho(float m) const override;
+  double rho(double m) const override;
   /**
    * Determine the cutoff parameter Λ for unstable decays,
    * given the types of the daughter particles.
    */
-  float get_Lambda();
-  float Lambda_;
+  double get_Lambda();
+  double Lambda_;
   mutable std::unique_ptr<Tabulation> tabulation_;
 };
 
@@ -193,7 +193,7 @@ class TwoBodyDecayUnstable : public TwoBodyDecay {
 class TwoBodyDecayDilepton : public TwoBodyDecayStable {
  public:
   TwoBodyDecayDilepton(ParticleTypePtrList part_types, int l);
-  float width(float m0, float G0, float m) const override;
+  double width(double m0, double G0, double m) const override;
 };
 
 /**
@@ -204,9 +204,9 @@ class ThreeBodyDecay : public DecayType {
   ThreeBodyDecay(ParticleTypePtrList part_types, int l);
   unsigned int particle_number() const override;
   bool has_particles(ParticleTypePtrList list) const override;
-  float width(float m0, float G0, float m) const override;
-  float in_width(float m0, float G0, float m,
-                 float m1, float m2) const override;
+  double width(double m0, double G0, double m) const override;
+  double in_width(double m0, double G0, double m,
+                 double m1, double m2) const override;
 };
 
 /**
@@ -224,9 +224,9 @@ class ThreeBodyDecayDilepton : public ThreeBodyDecay {
    * This differential width is used directly for the dilepton shining weights.
    * It is calculated according to \iref{Weil:2013mya}, eq. (30)-(36).
    */
-  static float diff_width(float m_parent, float m_dil, float m_other,
+  static double diff_width(double m_parent, double m_dil, double m_other,
                           ParticleTypePtr t);
-  float width(float m0, float G0, float m) const override;
+  double width(double m0, double G0, double m) const override;
  protected:
   mutable std::unique_ptr<Tabulation> tabulation_;
   ParticleTypePtr mother_;

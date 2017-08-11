@@ -21,16 +21,16 @@ namespace Smash {
 namespace Rejection {
 /*x, expy=f(x), y=log(f(x)) coordinates used in AdaptiveRejectionSampler*/
 typedef struct point {
-  float x, y;
-  float expy;
+  double x, y;
+  double expy;
 }Point;
 
 std::ostream &operator<<(std::ostream &out, const Point &p);
 
 /*lines used to define the upper bounds and lower bounds*/
 typedef struct line {
-  float m, b;                // f(x) = m*x+b
-  float eval(float x) {
+  double m, b;                // f(x) = m*x+b
+  double eval(double x) {
     return m*x + b;
   }
 }Line;
@@ -51,22 +51,22 @@ std::ostream &operator<<(std::ostream &out, const Line &l);
  *Here is an example of AdaptiveRejectionSampler usage:
  *\code
  *
- *float woods_saxon_dist(float r, float radius, float diffusion)
+ *double woods_saxon_dist(double r, double radius, double diffusion)
  *{
  *    return r*r/(exp((r-radius)/diffusion)+1.0);
  *}
  *
  *int main() {
  *    using namespace rejection;
- *    float radius = 6.4;
- *    float diffusion = 0.54;
- *    float xmin = 0.0;
- *    float xmax = 15.0;
- *    AdaptiveRejectionSampler sampler([&](float x) {
+ *    double radius = 6.4;
+ *    double diffusion = 0.54;
+ *    double xmin = 0.0;
+ *    double xmax = 15.0;
+ *    AdaptiveRejectionSampler sampler([&](double x) {
  *        return woods_saxon_dist(x, radius, diffusion);}
  *        ,xmin, xmax);
  *
- *    float x = sampler.get_one_sample();
+ *    double x = sampler.get_one_sample();
  *    return 0;
  *}
  *\endcode
@@ -77,13 +77,13 @@ class AdaptiveRejectionSampler {
   /* distribution function f(x) for sampling
    * (arguments are hiden by lambda functions)
    */
-  std::function<float(float)> f_;
+  std::function<double(double)> f_;
 
   /* The left end of the range */
-  float xmin_ = 0.0;
+  double xmin_ = 0.0;
 
   /* The right end of the range */
-  float xmax_ = 15.0;
+  double xmax_ = 15.0;
 
   /* Maximum refine loops to avoid further adaptive updates.*/
   int max_refine_loops_ = 40;
@@ -104,10 +104,10 @@ class AdaptiveRejectionSampler {
   std::vector<Envelope> upper_bounds_;
 
   /* areas below each piece of upper bound*/
-  std::vector<float> areas_;
+  std::vector<double> areas_;
 
   /* areas_ list as weight for the discrete_distribution_ */
-  Random::discrete_dist<float> discrete_distribution_;
+  Random::discrete_dist<double> discrete_distribution_;
 
   AdaptiveRejectionSampler() = default;
 
@@ -117,14 +117,14 @@ class AdaptiveRejectionSampler {
    *\param xmin: minimum x in sampling f(x)
    *\param xmax: maximum x in sampling f(x)
    */
-  AdaptiveRejectionSampler(std::function<float(float)> func,
-                           float xmin, float xmax);
+  AdaptiveRejectionSampler(std::function<double(double)> func,
+                           double xmin, double xmax);
 
   /*reset max refine loops for AdaptiveRejectionSampler*/
 //   void reset_max_refine_loops(const int new_max_refine_loops);
 
   /*sample one x from distribution function f(x) */
-  float get_one_sample();
+  double get_one_sample();
 
  private:
   /*initialize scants with 10 points between xmin and xmax by
@@ -148,15 +148,15 @@ class AdaptiveRejectionSampler {
   inline Line lower(int j);
 
   // sample x in the j'th piece
-  float sample_x(int j);
+  double sample_x(int j);
 
   // r<exp(lower-upper)
-  inline bool squeezing_test(const float & x, const int & j,
-                             const float & rand);
+  inline bool squeezing_test(const double & x, const int & j,
+                             const double & rand);
 
   // r<func/exp(upper)
-  inline bool rejection_test(const float & x, const int & j,
-                             const float & rand);
+  inline bool rejection_test(const double & x, const int & j,
+                             const double & rand);
 
   /// calc line from 2 points
   inline Line create_line(Point p0, Point p1);

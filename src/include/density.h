@@ -19,6 +19,7 @@
 #include "fourvector.h"
 #include "lattice.h"
 #include "particledata.h"
+#include "particles.h"
 #include "pdgcode.h"
 #include "threevector.h"
 
@@ -50,7 +51,7 @@ enum class DensityType {
    *  \return The corresponding factor (0 if the particle doesn't
    *          contribute at all).
    */
-  float density_factor(const ParticleType &type, DensityType dens_type);
+  double density_factor(const ParticleType &type, DensityType dens_type);
 
   /**
    * Norm of the smearing function, \f$ (2 \pi \sigma^2)^{3/2}\f$
@@ -58,8 +59,8 @@ enum class DensityType {
    * \param[in] two_sigma_sqr \f$2 \sigma^2 \f$,
    *            \f$ \sigma \f$ - width of gaussian smearing
    */
-  inline float smearing_factor_norm(const float two_sigma_sqr) {
-    const float tmp = two_sigma_sqr * M_PI;
+  inline double smearing_factor_norm(const double two_sigma_sqr) {
+    const double tmp = two_sigma_sqr * M_PI;
     return tmp * std::sqrt(tmp);
   }
 
@@ -70,8 +71,8 @@ enum class DensityType {
    * \param[in] two_sigma_sqr \f$2 \sigma^2 \f$,
    *            \f$ \sigma \f$ - width of gaussian smearing
    */
-  inline float smearing_factor_grad_norm(const float two_sigma_sqr) {
-    const float tmp = two_sigma_sqr * M_PI;
+  inline double smearing_factor_grad_norm(const double two_sigma_sqr) {
+    const double tmp = two_sigma_sqr * M_PI;
     return tmp * std::sqrt(tmp) * 0.5 * two_sigma_sqr;
   }
 
@@ -92,8 +93,8 @@ enum class DensityType {
    * \param[in] rcut_in_sigma \f$ a = r_{cut} / \sigma\f$
    * \return \f$ g(a) \f$
    */
-  inline float smearing_factor_rcut_correction(const float rcut_in_sigma) {
-    const float x = rcut_in_sigma / std::sqrt(2.0);
+  inline double smearing_factor_rcut_correction(const double rcut_in_sigma) {
+    const double x = rcut_in_sigma / std::sqrt(2.0);
     return - 2.0 /std::sqrt(M_PI) * x * std::exp(-x*x) + std::erf(x);
   }
 
@@ -107,38 +108,38 @@ class DensityParameters {
       r_cut_(par.gauss_cutoff_in_sigma * par.gaussian_sigma),
       ntest_(par.testparticles) {
     r_cut_sqr_ = r_cut_ * r_cut_;
-    const float two_sig_sqr = 2 * sig_ * sig_;
-    two_sig_sqr_inv_ = 1.f / two_sig_sqr;
-    const float norm1 = smearing_factor_norm(two_sig_sqr);
-    const float norm2 = smearing_factor_grad_norm(two_sig_sqr);
-    const float corr_factor = smearing_factor_rcut_correction(
+    const double two_sig_sqr = 2 * sig_ * sig_;
+    two_sig_sqr_inv_ = 1. / two_sig_sqr;
+    const double norm1 = smearing_factor_norm(two_sig_sqr);
+    const double norm2 = smearing_factor_grad_norm(two_sig_sqr);
+    const double corr_factor = smearing_factor_rcut_correction(
                                                par.gauss_cutoff_in_sigma);
-    norm_factor_sf_ = 1.f / (norm1 * ntest_ * corr_factor);
-    norm_factor_sf_grad_ = 1.f / (norm2 * ntest_ * corr_factor);
+    norm_factor_sf_ = 1. / (norm1 * ntest_ * corr_factor);
+    norm_factor_sf_grad_ = 1. / (norm2 * ntest_ * corr_factor);
   }
   /// Testparticle number
   int ntest() const { return ntest_; }
   /// Cutting radius [fm]
-  float r_cut() const { return r_cut_; }
+  double r_cut() const { return r_cut_; }
   /// Squared cutting radius [fm^2]
-  float r_cut_sqr() const { return r_cut_sqr_; }
+  double r_cut_sqr() const { return r_cut_sqr_; }
   /// \f$ (2 \sigma^2)^{-1} \f$
-  float two_sig_sqr_inv() const { return two_sig_sqr_inv_; }
+  double two_sig_sqr_inv() const { return two_sig_sqr_inv_; }
   /** Normalization for smearing factor. Unnormalized smearing factor
    * \f$ sf(\vec{r}) \f$ has to be multiplied by this to have
    *  \f$ \int d^3r \, sf(\vec{r}) = 1 \f$.
    */
-  float norm_factor_sf() const { return norm_factor_sf_; }
+  double norm_factor_sf() const { return norm_factor_sf_; }
   /// Normalization for smearing factor gradient
-  float norm_factor_sf_grad() const { return norm_factor_sf_grad_; }
+  double norm_factor_sf_grad() const { return norm_factor_sf_grad_; }
 
  private:
-  const float sig_;
-  const float r_cut_;
-  float r_cut_sqr_;
-  float two_sig_sqr_inv_;
-  float norm_factor_sf_;
-  float norm_factor_sf_grad_;
+  const double sig_;
+  const double r_cut_;
+  double r_cut_sqr_;
+  double two_sig_sqr_inv_;
+  double norm_factor_sf_;
+  double norm_factor_sf_grad_;
   const int ntest_;
 };
 
@@ -264,6 +265,48 @@ class DensityOnLattice {
 
   /// Conveniency typedef for lattice of density
   typedef RectangularLattice<DensityOnLattice> DensityLattice;
+
+  template <typename /*LatticeType*/ T>
+  void update_general_lattice(RectangularLattice<T>* lat,
+                              const LatticeUpdate update,
+                              const DensityType dens_type,
+                              const DensityParameters &par,
+                              const Particles &particles) {
+    // Do not proceed if lattice does not exists/update not required
+    if (lat == nullptr || lat->when_update() != update) {
+      return;
+    }
+    lat->reset();
+    const double norm_factor = par.norm_factor_sf();
+    for (const auto &part : particles) {
+      const double dens_factor = density_factor(part.type(), dens_type);
+      if (std::abs(dens_factor) < really_small) {
+        continue;
+      }
+      const FourVector p = part.momentum();
+      const double m = p.abs();
+      if (unlikely(m < really_small)) {
+        const auto &log = logger<LogArea::Density>();
+        log.warn("Gaussian smearing is undefined for momentum ", p);
+        continue;
+      }
+      const double m_inv = 1.0 / m;
+
+      const ThreeVector pos = part.position().threevec();
+      lat->iterate_in_radius(pos, par.r_cut(),
+        [&](T &node, int ix, int iy, int iz){
+          const ThreeVector r = lat->cell_center(ix, iy, iz);
+          const double sf = norm_factor * unnormalized_smearing_factor(
+                                                pos - r, p, m_inv, par).first;
+          if (sf > really_small) {
+            /*std::cout << "Adding particle " << part << " to lattice with"
+                      << " smearing factor " << sf <<
+                      " and density factor " << dens_factor << std::endl;*/
+            node.add_particle(part, sf * dens_factor);
+          }
+        });
+    }
+  }
 
   /** Calculates density on the lattice in an time-efficient way.
    *  \param lat pointer to the lattice

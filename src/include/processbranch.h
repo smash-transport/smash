@@ -69,7 +69,7 @@ class ProcessBranch {
  public:
   /// Create a ProcessBranch without final states
   ProcessBranch() : branch_weight_(0.) {}
-  explicit ProcessBranch(float w) : branch_weight_(w) {}
+  explicit ProcessBranch(double w) : branch_weight_(w) {}
 
   /// Copying is disabled. Use std::move or create a new object.
   ProcessBranch(const ProcessBranch &) = delete;
@@ -84,7 +84,7 @@ class ProcessBranch {
    * In other words, how probable this branch is
    * compared to other branches
    */
-  inline void set_weight(float process_weight);
+  inline void set_weight(double process_weight);
   /// Return the process type
   virtual ProcessType get_type() const = 0;
 
@@ -98,21 +98,21 @@ class ProcessBranch {
   ParticleList particle_list() const;
 
   /// Return the branch weight
-  inline float weight() const;
+  inline double weight() const;
 
   /**
    * Determine the threshold for this branch, i.e. the minimum energy that is
    * required to produce all final-state particles.
    */
-  float threshold() const;
+  double threshold() const;
 
   virtual unsigned int particle_number() const = 0;
 
  protected:
   /// Weight of the branch, typically a cross section or a branching ratio
-  float branch_weight_;
+  double branch_weight_;
   /// Threshold of the branch
-  mutable float threshold_ = -1.0f;
+  mutable double threshold_ = -1.;
 };
 
 /**
@@ -120,12 +120,12 @@ class ProcessBranch {
  * In other words, how probable this branch is
  * compared to other branches
  */
-inline void ProcessBranch::set_weight(float process_weight) {
+inline void ProcessBranch::set_weight(double process_weight) {
   branch_weight_ = process_weight;
 }
 
 /// Return the branch weight
-inline float ProcessBranch::weight() const {
+inline double ProcessBranch::weight() const {
   return branch_weight_;
 }
 
@@ -134,8 +134,8 @@ inline float ProcessBranch::weight() const {
  * objects in the list \p l.
  */
 template<typename Branch>
-inline float total_weight(const ProcessBranchList<Branch>& l) {
-  float sum = 0.f;
+inline double total_weight(const ProcessBranchList<Branch>& l) {
+  double sum = 0.;
   for (const auto &p : l) {
     sum += p->weight();
   }
@@ -151,24 +151,24 @@ inline float total_weight(const ProcessBranchList<Branch>& l) {
  */
 class CollisionBranch : public ProcessBranch {
  public:
-  CollisionBranch(float w, ProcessType p_type) : ProcessBranch(w),
+  CollisionBranch(double w, ProcessType p_type) : ProcessBranch(w),
                                                  process_type_(p_type) {}
   /// Constructor with 1 particle
-  CollisionBranch(const ParticleType &type, float w, ProcessType p_type)
+  CollisionBranch(const ParticleType &type, double w, ProcessType p_type)
                  : ProcessBranch(w), process_type_(p_type) {
     particle_types_.reserve(1);
     particle_types_.push_back(&type);
   }
   /// Constructor with 2 particles
   CollisionBranch(const ParticleType &type_a, const ParticleType &type_b,
-                  float w, ProcessType p_type)
+                  double w, ProcessType p_type)
       : ProcessBranch(w), process_type_(p_type) {
     particle_types_.reserve(2);
     particle_types_.push_back(&type_a);
     particle_types_.push_back(&type_b);
   }
   /// Constructor with a list of particles
-  CollisionBranch(ParticleTypePtrList new_types, float w, ProcessType p_type)
+  CollisionBranch(ParticleTypePtrList new_types, double w, ProcessType p_type)
       : ProcessBranch(w), particle_types_(std::move(new_types)),
         process_type_(p_type) {}
   /// The move constructor efficiently moves the particle-type list member.
@@ -219,7 +219,7 @@ class CollisionBranch : public ProcessBranch {
  */
 class DecayBranch : public ProcessBranch {
  public:
-  DecayBranch(const DecayType &t, float w) : ProcessBranch(w), type_(t) {}
+  DecayBranch(const DecayType &t, double w) : ProcessBranch(w), type_(t) {}
   /// The move constructor efficiently moves the particle-type list member.
   DecayBranch(DecayBranch &&rhs) : ProcessBranch(rhs.branch_weight_),
                                    type_(rhs.type_) {}

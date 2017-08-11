@@ -28,7 +28,7 @@ class ScatterActionNucleonNucleon : public ScatterActionBaryonBaryon {
   using ScatterActionBaryonBaryon::ScatterActionBaryonBaryon;
   /** Determine the (parametrized) elastic cross section for a
    * nucleon-nucleon collision. */
-  float elastic_parametrization() override;
+  double elastic_parametrization() override;
   /** Find all inelastic 2->2 processes for this reaction.
    * Calculate cross sections for resonance production from
    * nucleon-nucleon collisions (i.e. N N -> N R, N N -> Delta R).
