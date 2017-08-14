@@ -1830,6 +1830,7 @@ void SPmerge::makeStringEnds(int *idqset, int *idq1, int *idq2){
 	int *idqtmp;
 
 	double rspin;
+	double rflip;
 
 	idqtmp = static_cast<int *>( malloc(3*sizeof(int)) );
 
@@ -1883,6 +1884,16 @@ void SPmerge::makeStringEnds(int *idqset, int *idq1, int *idq2){
 	else{
 		*idq1 = idq2tmp;
 		*idq2 = idq1tmp;
+	}
+
+	/* some mesons with PDG id 11X are actually mixed state of uubar and ddbar.
+	 * have a random selection whether we have uubar or ddbar in this case. */
+	if( ( idqset[3] == 0 ) && ( *idq1 == 1 ) && ( *idq2 == -1 ) ){
+		rflip = gsl_rng_uniform(rng);
+		if( rflip > 0.5 ){
+			*idq1 = 2;
+			*idq2 = -2;
+		}
 	}
 
 	//fprintf(stderr,"  SPmerge::makeStringEnds : %d/%d/%d/%d decomposed into %d and %d\n",
