@@ -11,7 +11,9 @@ namespace Smash {
 
 Tabulation::Tabulation(double x_min, double range, int num,
                        std::function<double(double)> f)
-                      : x_min_(x_min), inv_dx_(num/range) {
+                      : x_min_(x_min),
+                        x_max_(x_min + range),
+                        inv_dx_(num/range) {
   values_.resize(num+1);
   const double dx = range/num;
   for (int i = 0; i <= num; i++) {
@@ -32,9 +34,15 @@ double Tabulation::get_value_step(double x) const {
   }
 }
 
-double Tabulation::get_value_linear(double x) const {
+double Tabulation::get_value_linear(double x, Extrapolation extrapol) const {
   if (x < x_min_) {
     return 0.;
+  }
+  if (extrapol == Extrapolation::Zero && x > x_max_) {
+    return 0.0;
+  }
+  if (extrapol == Extrapolation::Const && x > x_max_) {
+    return values_.back();
   }
   const double index_double = (x - x_min_) * inv_dx_;
   // here n is the lower index

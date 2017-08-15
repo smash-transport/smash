@@ -20,6 +20,12 @@
 
 namespace Smash {
 
+enum class Extrapolation {
+  Zero = 0,
+  Const = 1,
+  Linear = 2,
+};
+
 /**
  * A class for storing a one-dimensional lookup table of doubleing-point values.
  */
@@ -41,13 +47,14 @@ class Tabulation {
   /** Look up a value from the tabulation using linear interpolation.
    * If x is above the upper bound, we use linear extrapolation of the two
    * highest tabulated points. */
-  double get_value_linear(double x) const;
+  double get_value_linear(double x,
+    Extrapolation extrapolation = Extrapolation::Linear) const;
 
  protected:
   // vector for storing tabulated values
   std::vector<double> values_;
   // lower bound and inverse step size 1/dx for tabulation
-  const double x_min_, inv_dx_;
+  const double x_min_, x_max_, inv_dx_;
 };
 
 /**

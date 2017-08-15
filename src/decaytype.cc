@@ -462,7 +462,7 @@ double ThreeBodyDecayDilepton::width(double, double G0, double m) const {
                 });
   }
 
-  return tabulation_->get_value_linear(m);
+  return tabulation_->get_value_linear(m, Extrapolation::Const);
 }
 
 }  // namespace Smash
