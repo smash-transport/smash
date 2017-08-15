@@ -189,7 +189,7 @@ class KplusNRatios {
                   const ParticleType& c, const ParticleType& d) const;
 };
 
-extern /*thread_local*/ KplusNRatios kplusn_ratios;
+extern /*thread_local (see #3075)*/ KplusNRatios kplusn_ratios;
 
 /** K- p <-> Kbar0 n cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.9 */

@@ -151,7 +151,7 @@ void IsoParticleType::create_multiplet(const ParticleType &type) {
 
 
 
-static /*thread_local*/ Integrator integrate;
+static /*thread_local (see #3075)*/ Integrator integrate;
 
 double IsoParticleType::get_integral_NR(double sqrts) {
   if (XS_NR_tabulation_ == nullptr) {
@@ -179,7 +179,7 @@ double IsoParticleType::get_integral_RK(double sqrts) {
   return XS_RK_tabulation_->get_value_linear(sqrts);
 }
 
-static /*thread_local*/ Integrator2dCuhre integrate2d;
+static /*thread_local (see #3075)*/ Integrator2dCuhre integrate2d;
 
 double IsoParticleType::get_integral_RR(const ParticleType &type_res_2,
                                         double sqrts) {
