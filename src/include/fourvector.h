@@ -49,11 +49,11 @@ class FourVector {
 
   /// copy constructor
   FourVector(double y0, double y1, double y2, double y3)
-            : x_({y0, y1, y2, y3}) {}
+      : x_({y0, y1, y2, y3}) {}
 
   /// construct from time-like component and a ThreeVector.
   FourVector(double y0, ThreeVector vec)
-            : x_({y0, vec.x1(), vec.x2(), vec.x3()}) {}
+      : x_({y0, vec.x1(), vec.x2(), vec.x3()}) {}
 
   /// access the component at offset \p i.
   double &operator[](std::size_t i) { return x_[i]; }
@@ -187,45 +187,27 @@ class FourVector {
   std::array<double, 4> x_;
 };
 
-double inline FourVector::x0(void) const {
-  return x_[0];
-}
+double inline FourVector::x0(void) const { return x_[0]; }
 
-void inline FourVector::set_x0(const double t) {
-  x_[0] = t;
-}
+void inline FourVector::set_x0(const double t) { x_[0] = t; }
 
-double inline FourVector::x1() const {
-  return x_[1];
-}
+double inline FourVector::x1() const { return x_[1]; }
 
-void inline FourVector::set_x1(const double x) {
-  x_[1] = x;
-}
+void inline FourVector::set_x1(const double x) { x_[1] = x; }
 
-double inline FourVector::x2() const {
-  return x_[2];
-}
+double inline FourVector::x2() const { return x_[2]; }
 
-void inline FourVector::set_x2(const double y) {
-  x_[2] = y;
-}
+void inline FourVector::set_x2(const double y) { x_[2] = y; }
 
-double inline FourVector::x3() const {
-  return x_[3];
-}
+double inline FourVector::x3() const { return x_[3]; }
 
-void inline FourVector::set_x3(const double z) {
-  x_[3] = z;
-}
+void inline FourVector::set_x3(const double z) { x_[3] = z; }
 
 ThreeVector inline FourVector::threevec() const {
   return ThreeVector(x_[1], x_[2], x_[3]);
 }
 
-ThreeVector inline FourVector::velocity() const {
-  return threevec() / x0();
-}
+ThreeVector inline FourVector::velocity() const { return threevec() / x0(); }
 
 // use == operator for the inverse != check
 bool inline FourVector::operator!=(const FourVector &a) const {
@@ -234,8 +216,8 @@ bool inline FourVector::operator!=(const FourVector &a) const {
 
 // all four vector components are below comparison vector
 bool inline FourVector::operator<(const FourVector &a) const {
-  return (x_[0] < a.x_[0]) && (x_[1] < a.x_[1]) &&
-         (x_[2] < a.x_[2]) && (x_[3] < a.x_[3]);
+  return (x_[0] < a.x_[0]) && (x_[1] < a.x_[1]) && (x_[2] < a.x_[2]) &&
+         (x_[3] < a.x_[3]);
 }
 
 // use < operator for the inverse by switching arguments
@@ -372,17 +354,11 @@ double inline FourVector::sqr() const {
   return x_[0] * x_[0] - x_[1] * x_[1] - x_[2] * x_[2] - x_[3] * x_[3];
 }
 
-double inline FourVector::abs() const {
-  return std::sqrt(this->sqr());
-}
+double inline FourVector::abs() const { return std::sqrt(this->sqr()); }
 
-double inline FourVector::sqr3() const {
-  return this->threevec().sqr();
-}
+double inline FourVector::sqr3() const { return this->threevec().sqr(); }
 
-double inline FourVector::abs3() const {
-  return this->threevec().abs();
-}
+double inline FourVector::abs3() const { return this->threevec().abs(); }
 
 /**\ingroup logging
  * Writes the four components of the vector to the output stream.

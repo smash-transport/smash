@@ -155,9 +155,8 @@ class Experiment : public ExperimentBase {
                       const Container &particles_before_actions);
 
   template <typename TOutput>
-  void create_output(const char * output_name,
-                     const bf::path &output_path,
-                     Configuration&& conf);
+  void create_output(const char *output_name, const bf::path &output_path,
+                     Configuration &&conf);
 
   /** Propagate all particles until time to_time without any interactions
    *  and shine dileptons.
@@ -176,7 +175,7 @@ class Experiment : public ExperimentBase {
    * Here, all actions are looped over, collisions and decays are
    * carried out and particles are propagated.
    */
-  void run_time_evolution_timestepless(Actions& actions);
+  void run_time_evolution_timestepless(Actions &actions);
 
   /** Performs the final decays of an event
    */
@@ -332,7 +331,8 @@ class Experiment : public ExperimentBase {
   const double delta_time_startup_;
 
   /**
-   * This indicates whether we force all resonances to decay in the last timestep.
+   * This indicates whether we force all resonances to decay in the last
+   * timestep.
    */
   const bool force_decays_;
 
@@ -403,7 +403,7 @@ class Experiment : public ExperimentBase {
    * Writes the initial state for the Experiment to the output stream.
    * It automatically appends the output of the current Modus.
    */
-  friend std::ostream &operator<< <>(std::ostream &out, const Experiment &e);
+  friend std::ostream &operator<<<>(std::ostream &out, const Experiment &e);
 };
 }  // namespace Smash
 

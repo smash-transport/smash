@@ -37,12 +37,10 @@ class EnergyMomentumTensor {
  public:
   typedef std::array<double, 10> tmn_type;
   /// default constructor (nulls all components)
-  EnergyMomentumTensor() {
-    Tmn_.fill(0.);
-  }
+  EnergyMomentumTensor() { Tmn_.fill(0.); }
 
   /// copy constructor
-  explicit EnergyMomentumTensor(const tmn_type& Tmn) {
+  explicit EnergyMomentumTensor(const tmn_type &Tmn) {
     for (size_t i = 0; i < 10; i++) {
       Tmn_[i] = Tmn[i];
     }
@@ -53,15 +51,13 @@ class EnergyMomentumTensor {
 
   /// access the index of component \f$ (\mu, \nu) \f$.
   static std::int8_t tmn_index(std::int8_t mu, std::int8_t nu) {
-    constexpr std::array<std::int8_t, 16> indices = {0, 1, 2, 3,
-                                                     1, 4, 5, 6,
-                                                     2, 5, 7, 8,
-                                                     3, 6, 8, 9};
+    constexpr std::array<std::int8_t, 16> indices = {0, 1, 2, 3, 1, 4, 5, 6,
+                                                     2, 5, 7, 8, 3, 6, 8, 9};
     if (mu < 4 && nu < 4 && mu >= 0 && nu >= 0) {
-      return indices[mu + 4*nu];
+      return indices[mu + 4 * nu];
     } else {
-      throw std::invalid_argument("Invalid indices: " +
-                         std::to_string(mu) + ", " + std::to_string(nu));
+      throw std::invalid_argument("Invalid indices: " + std::to_string(mu) +
+                                  ", " + std::to_string(nu));
     }
     /* Another possibility (by lpang):
        inline inx(int i, int j){
@@ -71,13 +67,13 @@ class EnergyMomentumTensor {
   }
 
   /// increase this tensor by \f$T^{\mu \nu}_0\f$
-  EnergyMomentumTensor inline operator+= (const EnergyMomentumTensor &Tmn0);
+  EnergyMomentumTensor inline operator+=(const EnergyMomentumTensor &Tmn0);
   /// decrease this tensor by \f$T^{\mu \nu}_0\f$
-  EnergyMomentumTensor inline operator-= (const EnergyMomentumTensor &Tmn0);
+  EnergyMomentumTensor inline operator-=(const EnergyMomentumTensor &Tmn0);
   /// scale this tensor by scalar \f$a\f$
-  EnergyMomentumTensor inline operator*= (double a);
+  EnergyMomentumTensor inline operator*=(double a);
   /// divide this tensor by scalar \f$a\f$
-  EnergyMomentumTensor inline operator/= (double a);
+  EnergyMomentumTensor inline operator/=(double a);
 
   /// iterates over the components
   using iterator = tmn_type::iterator;
@@ -94,16 +90,16 @@ class EnergyMomentumTensor {
    * Boost to a given 4-velocity.
    * IMPORTANT: boost 4-velocity is fourvector with LOWER index
    */
-  EnergyMomentumTensor boosted(const FourVector& u) const;
+  EnergyMomentumTensor boosted(const FourVector &u) const;
 
   /**
     * Given momentum p of the particle adds \f$ p^{\mu}p^{\mu}/p^0\f$
     * to the energy momentum tensor.
     * Input momentum is fourvector with upper index, as all 4-momenta in SMASH
     */
-  void add_particle(const FourVector& mom);
+  void add_particle(const FourVector &mom);
   /// Same, but \f$ p^{\mu}p^{\mu}/p^0\f$ times factor is added.
-  void add_particle(const ParticleData& p, double factor);
+  void add_particle(const ParticleData &p, double factor);
 
   /**
    * Returns an iterator starting at the (0,0)th component.
@@ -141,64 +137,59 @@ class EnergyMomentumTensor {
  */
 std::ostream &operator<<(std::ostream &, const EnergyMomentumTensor &);
 
-EnergyMomentumTensor inline EnergyMomentumTensor::operator+= (
-                                const EnergyMomentumTensor &Tmn0) {
+EnergyMomentumTensor inline EnergyMomentumTensor::operator+=(
+    const EnergyMomentumTensor &Tmn0) {
   for (size_t i = 0; i < 10; i++) {
     Tmn_[i] += Tmn0[i];
   }
   return *this;
 }
 
-EnergyMomentumTensor inline operator+ (EnergyMomentumTensor a,
-                                 const EnergyMomentumTensor &b) {
+EnergyMomentumTensor inline operator+(EnergyMomentumTensor a,
+                                      const EnergyMomentumTensor &b) {
   a += b;
   return a;
 }
 
-EnergyMomentumTensor inline EnergyMomentumTensor::operator-= (
-                                const EnergyMomentumTensor &Tmn0) {
+EnergyMomentumTensor inline EnergyMomentumTensor::operator-=(
+    const EnergyMomentumTensor &Tmn0) {
   for (size_t i = 0; i < 10; i++) {
     Tmn_[i] -= Tmn0[i];
   }
   return *this;
 }
 
-EnergyMomentumTensor inline operator- (EnergyMomentumTensor a,
-                                 const EnergyMomentumTensor &b) {
+EnergyMomentumTensor inline operator-(EnergyMomentumTensor a,
+                                      const EnergyMomentumTensor &b) {
   a -= b;
   return a;
 }
 
-EnergyMomentumTensor inline EnergyMomentumTensor::operator*= (
-                                               const double a) {
+EnergyMomentumTensor inline EnergyMomentumTensor::operator*=(const double a) {
   for (size_t i = 0; i < 10; i++) {
     Tmn_[i] *= a;
   }
   return *this;
 }
 
-inline EnergyMomentumTensor operator* (EnergyMomentumTensor a,
-                                               const double b) {
+inline EnergyMomentumTensor operator*(EnergyMomentumTensor a, const double b) {
   a *= b;
   return a;
 }
 
-inline EnergyMomentumTensor operator* (const double a,
-                                         EnergyMomentumTensor b) {
+inline EnergyMomentumTensor operator*(const double a, EnergyMomentumTensor b) {
   b *= a;
   return b;
 }
 
-EnergyMomentumTensor inline EnergyMomentumTensor::operator/= (
-                                                const double a) {
+EnergyMomentumTensor inline EnergyMomentumTensor::operator/=(const double a) {
   for (size_t i = 0; i < 10; i++) {
     Tmn_[i] /= a;
   }
   return *this;
 }
 
-EnergyMomentumTensor inline operator/ (EnergyMomentumTensor a,
-                                                const double b) {
+EnergyMomentumTensor inline operator/(EnergyMomentumTensor a, const double b) {
   a /= b;
   return a;
 }

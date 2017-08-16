@@ -23,10 +23,10 @@ namespace Smash {
 
 class AdaptiveParameters {
  public:
-  explicit AdaptiveParameters(Configuration conf, double dt) :
-    smoothing_factor_(conf.take({"Smoothing_Factor"}, 0.1)),
-    target_missed_actions_(conf.take({"Target_Missed_Actions"}, 0.01)),
-    deviation_factor_(conf.take({"Allowed_Deviation"}, 2.5)) {
+  explicit AdaptiveParameters(Configuration conf, double dt)
+      : smoothing_factor_(conf.take({"Smoothing_Factor"}, 0.1)),
+        target_missed_actions_(conf.take({"Target_Missed_Actions"}, 0.01)),
+        deviation_factor_(conf.take({"Allowed_Deviation"}, 2.5)) {
     initialize(dt);
   }
 
@@ -43,7 +43,7 @@ class AdaptiveParameters {
    * \param[in,out] dt timestep, which can be updated
    * \return if timestep was changed or not.
    */
-  bool update_timestep(const Actions &actions, size_t N_particles, double* dt) {
+  bool update_timestep(const Actions &actions, size_t N_particles, double *dt) {
     const auto &log = logger<LogArea::AdaptiveTS>();
     bool changed_timestep = false;
 
@@ -55,14 +55,14 @@ class AdaptiveParameters {
     const double f_inc =
         (N_inc == 0u) ? 0. : static_cast<double>(N_inc) / actions.size();
     const double fraction_missed = 0.5 * N_inc * f_inc / N_particles;
-    const double allowed_deviation = deviation_factor_ * rate_ *
+    const double allowed_deviation =
+        deviation_factor_ * rate_ *
         std::sqrt(0.5 * f_inc / target_missed_actions_ / N_particles);
     const double current_rate = fraction_missed / (*dt);
     const double rate_deviation = current_rate - rate_;
     log.debug("Factor for the incoming particles: ", f_inc,
               ", fraction of missed actions: ", fraction_missed,
-              ", rate estimate: ", rate_,
-              ", rate deviation = ", rate_deviation,
+              ", rate estimate: ", rate_, ", rate deviation = ", rate_deviation,
               ", allowed = ", allowed_deviation);
     if (rate_deviation > allowed_deviation) {
       changed_timestep = true;
@@ -105,12 +105,12 @@ class AdaptiveParameters {
   double rate_;
 };
 
-inline std::ostream& operator << (std::ostream &o,
-                                  const AdaptiveParameters &a) {
-  return o << "Adaptive time step:\n" <<
-       "  Smoothing factor: " << a.smoothing_factor_ << "\n" <<
-       "  Target missed actions: " << 100 * a.target_missed_actions_ << "%\n" <<
-       "  Allowed deviation: " << a.deviation_factor_ << "\n";
+inline std::ostream &operator<<(std::ostream &o, const AdaptiveParameters &a) {
+  return o << "Adaptive time step:\n"
+           << "  Smoothing factor: " << a.smoothing_factor_ << "\n"
+           << "  Target missed actions: " << 100 * a.target_missed_actions_
+           << "%\n"
+           << "  Allowed deviation: " << a.deviation_factor_ << "\n";
 }
 
 }  // namespace Smash

@@ -16,7 +16,6 @@
 
 namespace Smash {
 
-
 /**
  * \ingroup action
  * DecayAction is a special action which takes one single particle in the
@@ -51,13 +50,9 @@ class DecayAction : public Action {
 
   std::pair<double, double> sample_masses() const override;
 
-  double raw_weight_value() const override {
-    return total_width_;
-  }
+  double raw_weight_value() const override { return total_width_; }
 
-  double total_width() const {
-    return total_width_;
-  }
+  double total_width() const { return total_width_; }
 
   /**
    * \ingroup exception
@@ -96,7 +91,6 @@ class DecayAction : public Action {
    */
   virtual void one_to_three();
 };
-
 
 }  // namespace Smash
 

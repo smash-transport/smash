@@ -66,7 +66,7 @@ class Result : public std::pair<double, double> {
   ///
   /// Returns an empty string if it is small and an error message if it is
   /// large.
-  std::string check_error(double relative_tolerance=1.0) const {
+  std::string check_error(double relative_tolerance = 1.0) const {
     if (value() == 0) {
       return "";
     }
@@ -80,9 +80,9 @@ class Result : public std::pair<double, double> {
       return "";
     } else {
       std::stringstream error_msg;
-      error_msg << "Integration error = " << relative_error*100
-                << "% > " << relative_tolerance*100 << "%: "
-                << value() << " +- " << error();
+      error_msg << "Integration error = " << relative_error * 100 << "% > "
+                << relative_tolerance * 100 << "%: " << value() << " +- "
+                << error();
       return error_msg.str();
     }
   }
@@ -144,11 +144,10 @@ class Integrator {
         &fun};
     // We disable float traps when calling GSL code we cannot control.
     DisableFloatTraps guard;
-    const int error_code = gsl_integration_cquad(&gslfun, a, b,
-                          accuracy_absolute_, accuracy_relative_,
-                          workspace_.get(),
-                          &result.first, &result.second,
-                          nullptr /* Don't store the number of evaluations */);
+    const int error_code = gsl_integration_cquad(
+        &gslfun, a, b, accuracy_absolute_, accuracy_relative_, workspace_.get(),
+        &result.first, &result.second,
+        nullptr /* Don't store the number of evaluations */);
     if (error_code) {
       std::stringstream err;
       err << "GSL integration: " << gsl_strerror(error_code);
@@ -159,8 +158,8 @@ class Integrator {
 
  private:
   /// Holds the workspace pointer.
-  std::unique_ptr<gsl_integration_cquad_workspace,
-                  GslWorkspaceDeleter> workspace_;
+  std::unique_ptr<gsl_integration_cquad_workspace, GslWorkspaceDeleter>
+      workspace_;
 
   /// Parameter to the GSL integration function: desired absolute error limit
   const double accuracy_absolute_ = 1.0e-5;

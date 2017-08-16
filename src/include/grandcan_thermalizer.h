@@ -59,10 +59,10 @@ class ThermLatticeNode {
   FourVector Tmu0() const { return Tmu0_; }
   double nb() const { return nb_; }
   double ns() const { return ns_; }
-  double e()  const { return e_; }
-  double p()  const { return p_; }
-  ThreeVector v()  const { return v_; }
-  double T()   const { return T_; }
+  double e() const { return e_; }
+  double p() const { return p_; }
+  ThreeVector v() const { return v_; }
+  double T() const { return T_; }
   double mub() const { return mub_; }
   double mus() const { return mus_; }
 
@@ -87,7 +87,7 @@ class ThermLatticeNode {
   double mus_;
 };
 
-std::ostream &operator<<(std::ostream &s, const ThermLatticeNode &node);
+std::ostream& operator<<(std::ostream& s, const ThermLatticeNode& node);
 
 enum class HadronClass {
   /// All baryons
@@ -105,7 +105,6 @@ enum class HadronClass {
   /// Neutral non-strange mesons
   ZeroQZeroSMeson = 6,
 };
-
 
 /** The GrandCanThermalizer class implements the following functionality:
  *  1. Create a lattice and find the local rest frame energy density in each
@@ -129,35 +128,26 @@ class GrandCanThermalizer {
   /// Create the thermalizer: allocate the lattice
   GrandCanThermalizer(const std::array<double, 3> lat_sizes,
                       const std::array<int, 3> n_cells,
-                      const std::array<double, 3> origin,
-                      bool periodicity,
-                      double e_critical,
-                      double t_start,
-                      double delta_t,
+                      const std::array<double, 3> origin, bool periodicity,
+                      double e_critical, double t_start, double delta_t,
                       ThermalizationAlgorithm algo);
   GrandCanThermalizer(Configuration& conf,
                       const std::array<double, 3> lat_sizes,
-                      const std::array<double, 3> origin,
-                      bool periodicity) :
-    GrandCanThermalizer(lat_sizes,
-                        conf.take({"Cell_Number"}),
-                        origin,
-                        periodicity,
-                        conf.take({"Critical_Edens"}),
-                        conf.take({"Start_Time"}),
-                        conf.take({"Timestep"}),
-                        conf.take({"Algorithm"},
-                            ThermalizationAlgorithm::BiasedBF)) {}
+                      const std::array<double, 3> origin, bool periodicity)
+      : GrandCanThermalizer(
+            lat_sizes, conf.take({"Cell_Number"}), origin, periodicity,
+            conf.take({"Critical_Edens"}), conf.take({"Start_Time"}),
+            conf.take({"Timestep"}),
+            conf.take({"Algorithm"}, ThermalizationAlgorithm::BiasedBF)) {}
   /// Check that the clock is close to n * period of thermalization
   bool is_time_to_thermalize(const Clock& clock) const {
     const double t = clock.current_time();
-    const int n = static_cast<int>(std::floor((t - t_start_)/period_));
+    const int n = static_cast<int>(std::floor((t - t_start_) / period_));
     return (t > t_start_ &&
-            t < t_start_ + n*period_ + clock.timestep_duration());
+            t < t_start_ + n * period_ + clock.timestep_duration());
   }
   /// Compute all the thermodynamical quantities on the lattice from particles.
-  void update_lattice(const Particles& particles,
-                      const DensityParameters& par,
+  void update_lattice(const Particles& particles, const DensityParameters& par,
                       bool ignore_cells_under_treshold = true);
   /// Simply returns a vector uniformly sampled from the rectangular cell.
   ThreeVector uniform_in_cell() const;
@@ -166,7 +156,7 @@ class GrandCanThermalizer {
    *  \iref{Oliinychenko:2016vkg}.
    */
   void renormalize_momenta(ParticleList& plist,
-           const FourVector required_total_momentum);
+                           const FourVector required_total_momentum);
 
   // Functions for BF-sampling algorithm
 
@@ -188,8 +178,7 @@ class GrandCanThermalizer {
    * the cell to sample, picks up momentum and coordinate from the
    * corresponding distributions.
    */
-  void sample_in_random_cell_BF_algo(ParticleList& plist,
-                                     const double time,
+  void sample_in_random_cell_BF_algo(ParticleList& plist, const double time,
                                      size_t type_index);
   /**
    * Samples particles to the sampled_list according to the BF algorithm.
@@ -197,14 +186,14 @@ class GrandCanThermalizer {
    * conserved_initial.
    */
   void thermalize_BF_algo(ParticleList& sampled_list,
-                          QuantumNumbers& conserved_initial,
-                          double time, int ntest);
+                          QuantumNumbers& conserved_initial, double time,
+                          int ntest);
 
   // Functions for mode-sampling algorithm
 
   /// Computes average number of particles in each cell.
   template <typename F>
-  void compute_N_in_cells_mode_algo(F &&condition) {
+  void compute_N_in_cells_mode_algo(F&& condition) {
     N_in_cells_.clear();
     N_total_in_cells_ = 0.0;
     for (auto cell_index : cells_to_sample_) {
@@ -214,8 +203,9 @@ class GrandCanThermalizer {
       for (ParticleTypePtr i : eos_typelist_) {
         if (condition(i->strangeness(), i->baryon_number(), i->charge())) {
           // N_i = n u^mu dsigma_mu = (isochronous hypersurface) n * V * gamma
-          N_tot += cell_volume_ * gamma *
-            HadronGasEos::partial_density(*i, cell.T(), cell.mub(), cell.mus());
+          N_tot +=
+              cell_volume_ * gamma * HadronGasEos::partial_density(
+                                         *i, cell.T(), cell.mub(), cell.mus());
         }
       }
       N_in_cells_.push_back(N_tot);
@@ -232,7 +222,7 @@ class GrandCanThermalizer {
    */
   template <typename F>
   ParticleData sample_in_random_cell_mode_algo(const double time,
-                                               F &&condition) {
+                                               F&& condition) {
     // Choose random cell, probability = N_in_cell/N_total
     double r = Random::uniform(0.0, N_total_in_cells_);
     double partial_sum = 0.0;
@@ -255,8 +245,8 @@ class GrandCanThermalizer {
       if (!condition(i->strangeness(), i->baryon_number(), i->charge())) {
         continue;
       }
-      N_sum += cell_volume_ * gamma *
-        HadronGasEos::partial_density(*i, cell.T(), cell.mub(), cell.mus());
+      N_sum += cell_volume_ * gamma * HadronGasEos::partial_density(
+                                          *i, cell.T(), cell.mub(), cell.mus());
       if (N_sum >= r) {
         type_to_sample = i;
         break;
@@ -284,23 +274,20 @@ class GrandCanThermalizer {
    * conserved_initial.
    */
   void thermalize_mode_algo(ParticleList& sampled_list,
-                            QuantumNumbers& conserved_initial,
-                            double time);
+                            QuantumNumbers& conserved_initial, double time);
 
   /// Main thermalize function, that chooses algorithm
   void thermalize(Particles& particles, double time, int ntest);
 
   void print_statistics(const Clock& clock) const;
 
-  RectangularLattice<ThermLatticeNode>& lattice() const {
-    return *lat_;
-  }
+  RectangularLattice<ThermLatticeNode>& lattice() const { return *lat_; }
   double e_crit() const { return e_crit_; }
 
  private:
   ParticleTypePtrList list_eos_particles() const {
     ParticleTypePtrList res;
-    for (const ParticleType &ptype : ParticleType::list_all()) {
+    for (const ParticleType& ptype : ParticleType::list_all()) {
       if (HadronGasEos::is_eos_particle(ptype)) {
         res.push_back(&ptype);
       }
@@ -311,13 +298,19 @@ class GrandCanThermalizer {
     const int B = eos_typelist_[typelist_index]->baryon_number();
     const int S = eos_typelist_[typelist_index]->strangeness();
     const int ch = eos_typelist_[typelist_index]->charge();
-    return (B > 0) ? HadronClass::Baryon :
-           (B < 0) ? HadronClass::Antibaryon :
-           (S > 0) ? HadronClass::PositiveSMeson :
-           (S < 0) ? HadronClass::NegativeSMeson :
-           (ch > 0) ? HadronClass::PositiveQZeroSMeson :
-           (ch < 0) ? HadronClass::NegativeQZeroSMeson :
-                      HadronClass::ZeroQZeroSMeson;
+    return (B > 0)
+               ? HadronClass::Baryon
+               : (B < 0)
+                     ? HadronClass::Antibaryon
+                     : (S > 0)
+                           ? HadronClass::PositiveSMeson
+                           : (S < 0)
+                                 ? HadronClass::NegativeSMeson
+                                 : (ch > 0)
+                                       ? HadronClass::PositiveQZeroSMeson
+                                       : (ch < 0)
+                                             ? HadronClass::NegativeQZeroSMeson
+                                             : HadronClass::ZeroQZeroSMeson;
   }
   /// Returns multiplicity of the hadron class cl
   double mult_class(const HadronClass cl) const {

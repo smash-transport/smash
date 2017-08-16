@@ -189,7 +189,7 @@ void inline Angles::distribute_isotropically() {
 
 void inline Angles::set_phi(const double newphi) {
   /* Make sure that phi is in the range [0,2pi).  */
-    phi_ = newphi;
+  phi_ = newphi;
   if (newphi < 0 || newphi >= twopi) {
     phi_ -= twopi * std::floor(newphi / twopi);
   }
@@ -234,12 +234,12 @@ bool inline Angles::add_to_theta(const double delta) {
     /* set_phi takes care that phi_ is in [0 .. 2*M_PI] */
     set_phi(phi() + M_PI);
     return true;  // meaning "we did change phi"
-  /* "lower" overflow: theta + delta switches sign */
+    /* "lower" overflow: theta + delta switches sign */
   } else if (theta_plus_delta < 0) {
     set_theta(-theta_plus_delta);
     set_phi(phi() + M_PI);
     return true;  // meaning "we did change phi"
-  /* no overflow: set theta, do not touch phi: */
+    /* no overflow: set theta, do not touch phi: */
   } else {
     set_theta(theta_plus_delta);
   }
@@ -247,7 +247,7 @@ bool inline Angles::add_to_theta(const double delta) {
 }
 bool inline Angles::add_to_theta(const double delta, const bool reverse) {
   double plusminus_one = reverse ? -1.0 : +1.0;
-  bool this_reverse = add_to_theta(plusminus_one*delta);
+  bool this_reverse = add_to_theta(plusminus_one * delta);
   /* if we had to reverse first time and now reverse again OR if we
    * didn't reverse in either part, we do not reverse in total.
    * else: if we reverse in one, but not the other part, we reverse in
@@ -259,10 +259,10 @@ bool inline Angles::add_to_theta(const double delta, const bool reverse) {
 double inline Angles::costheta() const { return costheta_; }
 double inline Angles::phi() const { return phi_; }
 double inline Angles::sintheta() const {
-  return std::sqrt(1.0 - costheta_*costheta_);
+  return std::sqrt(1.0 - costheta_ * costheta_);
 }
-double inline Angles::x() const { return sintheta()*std::cos(phi_); }
-double inline Angles::y() const { return sintheta()*std::sin(phi_); }
+double inline Angles::x() const { return sintheta() * std::cos(phi_); }
+double inline Angles::y() const { return sintheta() * std::sin(phi_); }
 double inline Angles::z() const { return costheta_; }
 
 ThreeVector inline Angles::threevec() const {

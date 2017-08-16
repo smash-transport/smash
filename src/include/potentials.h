@@ -57,7 +57,7 @@ class Potentials {
    **/
   VIRTUAL_FOR_TESTS
   double potential(const ThreeVector &r, const ParticleList &plist,
-                                         const ParticleType &acts_on) const;
+                   const ParticleType &acts_on) const;
 
   /** Evaluates potential gradient at point r. Potential is always taken in
    * the local Eckart rest frame, but point r is in the computational frame.

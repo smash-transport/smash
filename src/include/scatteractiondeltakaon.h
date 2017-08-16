@@ -15,10 +15,10 @@
 
 namespace Smash {
 
-
 /**
  * \ingroup action
- * ScatterActionDeltaKaon is a special ScatterActionBaryonMeson which represents the
+ * ScatterActionDeltaKaon is a special ScatterActionBaryonMeson which represents
+ * the
  * scattering of a Delta and a kaon.
  */
 class ScatterActionDeltaKaon : public ScatterActionBaryonMeson {

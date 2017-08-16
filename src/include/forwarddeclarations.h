@@ -77,9 +77,9 @@ class ExperimentBase;
 struct ExperimentParameters;
 
 enum class CalculationFrame {
-    CenterOfVelocity,
-    CenterOfMass,
-    FixedTarget,
+  CenterOfVelocity,
+  CenterOfMass,
+  FixedTarget,
 };
 
 /// Option to use Fermi Motion
@@ -129,7 +129,7 @@ enum class BoxInitialCondition {
 };
 
 /** Initial condition for a particle in a sphere
- * 
+ *
  * IC_ES, IC_1M and IC_2M are off-equilibrium distributions used in massless
  * comparisons of SMASH to the extended universe metric. They are described in
  * some detail in iref \iref{Bazow:2016oky}
@@ -191,8 +191,6 @@ enum class ThermalizationAlgorithm {
   UnbiasedBF,
 };
 
-
-
 using ActionPtr = build_unique_ptr_<Action>;
 using ScatterActionPtr = build_unique_ptr_<ScatterAction>;
 using ActionList = build_vector_<ActionPtr>;
@@ -205,9 +203,9 @@ using ParticleTypeList = build_vector_<ParticleType>;
 using ParticleTypePtrList = build_vector_<ParticleTypePtr>;
 using IsoParticleTypeList = build_vector_<IsoParticleType>;
 
-template<typename T>
+template <typename T>
 using ProcessBranchPtr = build_unique_ptr_<T>;
-template<typename T>
+template <typename T>
 using ProcessBranchList = build_vector_<ProcessBranchPtr<T>>;
 using DecayBranchPtr = build_unique_ptr_<DecayBranch>;
 using DecayBranchList = build_vector_<DecayBranchPtr>;
@@ -219,7 +217,6 @@ using ExperimentPtr = build_unique_ptr_<ExperimentBase>;
 using DecayTypePtr = build_unique_ptr_<DecayType>;
 
 namespace bf = boost::filesystem;
-
 
 }  // namespace Smash
 
