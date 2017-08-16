@@ -23,6 +23,7 @@ Further tools that can be helpful (mainly for development):
 - valgrind
 - cpplint
 - cppcheck
+- codespell
 
 Support for ROOT output is only enabled if a suitable version of ROOT is found
 on the system.
@@ -136,6 +137,42 @@ binary you need. For example:
 
 After this, you can just copy executable files to `~/bin` to install them. This
 also works for other exectuables like cpplint.
+
+
+Installing cpplint
+------------------
+
+We use cpplint to enforce some of our style guide lines as part of our tests.
+You can install it like this:
+
+    pip install --user cpplint
+
+Similar to clang-format above, you might have to add `~/.local/bin` to your
+`$PATH`.
+
+
+Installing cppcheck
+-------------------
+
+You can use cppcheck to find some problems in the code, it has quite a few
+false positives though. Download and compile the latest version:
+
+    git clone git://github.com/danmar/cppcheck.git
+    cd cppcheck
+    make
+
+You can then copy it to your local binary folder as for clang-format.
+
+
+Installing codespell
+--------------------
+
+If you want to check the spelling in comments, try codespell. You can install
+it like this:
+
+    pip install --user codespell
+
+It is the same as installing cpplint.
 
 
 Including Eigen header files from custom location
