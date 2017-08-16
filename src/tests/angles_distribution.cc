@@ -37,21 +37,19 @@ int main() {
   printf("#%7s %8s %8s\n", "angle", "dN/dphi", "dN/dtheta");
 
   for (int p = 0; p < 180; p++) {
-    printf("%3d %8.6f %5.2f %8.5f %8.5f %8.5f\n",
-           p, p * dangle, p * dcosine - 1.0,
-           (phi_histo[p] + 0.0) / dangle  / (NUMBER + 0.0),
+    printf("%3d %8.6f %5.2f %8.5f %8.5f %8.5f\n", p, p * dangle,
+           p * dcosine - 1.0, (phi_histo[p] + 0.0) / dangle / (NUMBER + 0.0),
            (cos_histo[p] + 0.0) / dcosine / (NUMBER + 0.0),
-           (theta_histo[p] + 0.0) / dangle  / (NUMBER + 0.0));
+           (theta_histo[p] + 0.0) / dangle / (NUMBER + 0.0));
   }
   for (int p = 180; p < 200; p++) {
-    printf("%3d %8.6f %5.2f %8.5f %8.5f\n",
-           p, p * dangle, p * dcosine - 1.0,
-           (phi_histo[p] + 0.0) / dangle  / (NUMBER + 0.0),
+    printf("%3d %8.6f %5.2f %8.5f %8.5f\n", p, p * dangle, p * dcosine - 1.0,
+           (phi_histo[p] + 0.0) / dangle / (NUMBER + 0.0),
            (cos_histo[p] + 0.0) / dcosine / (NUMBER + 0.0));
   }
   for (int p = 200; p < 360; p++) {
     printf("%3d %8.6f  0.00 %8.5f\n", p, p * dangle,
-                  (phi_histo[p] + 0.0) / dangle  / (NUMBER + 0.0));
+           (phi_histo[p] + 0.0) / dangle / (NUMBER + 0.0));
   }
 
   return 0;

@@ -81,22 +81,21 @@ namespace Smash {
  * "IC_2M" and "IC_Massive"; see \iref{Bazow:2016oky} and \iref{Tindall:2016try}
  */
 
-
 SphereModus::SphereModus(Configuration modus_config,
                          const ExperimentParameters &)
     : radius_(modus_config.take({"Sphere", "Radius"})),
       sphere_temperature_(modus_config.take({"Sphere", "Sphere_Temperature"})),
       start_time_(modus_config.take({"Sphere", "Start_Time"})),
       use_thermal_(
-        modus_config.take({"Sphere", "Use_Thermal_Multiplicities"}, false)),
+          modus_config.take({"Sphere", "Use_Thermal_Multiplicities"}, false)),
       mub_(modus_config.take({"Sphere", "Baryon_Chemical_Potential"}, 0.)),
       mus_(modus_config.take({"Sphere", "Strange_Chemical_Potential"}, 0.)),
-      init_multipl_(use_thermal_ ? std::map<PdgCode, int>() :
-                    modus_config.take({"Sphere", "Init_Multiplicities"}).
-                    convert_for(init_multipl_)),
+      init_multipl_(use_thermal_
+                        ? std::map<PdgCode, int>()
+                        : modus_config.take({"Sphere", "Init_Multiplicities"})
+                              .convert_for(init_multipl_)),
       init_distr_(modus_config.take({"Sphere", "Initial_Condition"},
-                    SphereInitialCondition::ThermalMomenta)) {
-}
+                                    SphereInitialCondition::ThermalMomenta)) {}
 
 /* console output on startup of sphere specific parameters */
 std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
@@ -107,8 +106,8 @@ std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
     out << "Thermal multiplicities\n";
   } else {
     for (const auto &p : m.init_multipl_) {
-      out << "Particle " << p.first << " initial multiplicity "
-                         << p.second << '\n';
+      out << "Particle " << p.first << " initial multiplicity " << p.second
+          << '\n';
     }
   }
   return out;
@@ -116,17 +115,17 @@ std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
 
 /* initial_conditions - sets particle data for @particles */
 double SphereModus::initial_conditions(Particles *particles,
-  const ExperimentParameters &parameters) {
+                                       const ExperimentParameters &parameters) {
   const auto &log = logger<LogArea::Sphere>();
   FourVector momentum_total(0, 0, 0, 0);
   /* Create NUMBER OF PARTICLES according to configuration */
   if (use_thermal_) {
     const double T = sphere_temperature_;
-    const double V = 4.0/3.0 * M_PI * radius_*radius_*radius_;
+    const double V = 4.0 / 3.0 * M_PI * radius_ * radius_ * radius_;
     for (const ParticleType &ptype : ParticleType::list_all()) {
       if (HadronGasEos::is_eos_particle(ptype)) {
         const double n = HadronGasEos::partial_density(ptype, T, mub_, mus_);
-        const double thermal_mult = n*V*parameters.testparticles;
+        const double thermal_mult = n * V * parameters.testparticles;
         assert(thermal_mult > 0.0);
         const int thermal_mult_int = Random::poisson(thermal_mult);
         particles->create(thermal_mult_int, ptype.pdgcode());
@@ -139,9 +138,9 @@ double SphereModus::initial_conditions(Particles *particles,
                << HadronGasEos::net_strange_density(T, mub_, mus_);
   } else {
     for (const auto &p : init_multipl_) {
-      particles->create(p.second*parameters.testparticles, p.first);
-      log.debug() << "Particle " << p.first
-                  << " initial multiplicity " << p.second;
+      particles->create(p.second * parameters.testparticles, p.first);
+      log.debug() << "Particle " << p.first << " initial multiplicity "
+                  << p.second;
     }
   }
   /* loop over particle data to fill in momentum and position information */
@@ -159,16 +158,16 @@ double SphereModus::initial_conditions(Particles *particles,
         momentum_radial = sample_momenta_IC_ES(this->sphere_temperature_);
         break;
       case (SphereInitialCondition::IC_1M):
-        momentum_radial = sample_momenta_IC_1M(this->sphere_temperature_,
-                                                      data.pole_mass());
+        momentum_radial =
+            sample_momenta_IC_1M(this->sphere_temperature_, data.pole_mass());
         break;
       case (SphereInitialCondition::IC_2M):
-        momentum_radial = sample_momenta_IC_2M(this->sphere_temperature_,
-                                                      data.pole_mass());
+        momentum_radial =
+            sample_momenta_IC_2M(this->sphere_temperature_, data.pole_mass());
         break;
       case (SphereInitialCondition::IC_Massive):
         momentum_radial = sample_momenta_non_eq_mass(this->sphere_temperature_,
-                                                      data.pole_mass());
+                                                     data.pole_mass());
         break;
       default:
         momentum_radial = sample_momenta_from_thermal(this->sphere_temperature_,
@@ -185,14 +184,15 @@ double SphereModus::initial_conditions(Particles *particles,
     position_radial = std::cbrt(Random::canonical()) * radius_;
     Angles pos_phitheta;
     pos_phitheta.distribute_isotropically();
-    data.set_4position(FourVector(start_time_,
-                                  pos_phitheta.threevec() * position_radial));
+    data.set_4position(
+        FourVector(start_time_, pos_phitheta.threevec() * position_radial));
     data.set_formation_time(start_time_);
   }
   /* Make total 3-momentum 0 */
   for (ParticleData &data : *particles) {
-    data.set_4momentum(data.pole_mass(), data.momentum().threevec() -
-                       momentum_total.threevec()/particles->size());
+    data.set_4momentum(data.pole_mass(),
+                       data.momentum().threevec() -
+                           momentum_total.threevec() / particles->size());
   }
 
   /* Recalculate total momentum */
@@ -203,8 +203,7 @@ double SphereModus::initial_conditions(Particles *particles,
     log.debug() << data;
   }
   /* allows to check energy conservation */
-  log.info() << "Sphere initial total 4-momentum [GeV]: "
-             << momentum_total;
+  log.info() << "Sphere initial total 4-momentum [GeV]: " << momentum_total;
   return start_time_;
 }
 }  // namespace Smash

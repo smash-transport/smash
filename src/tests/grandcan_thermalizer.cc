@@ -7,10 +7,10 @@
  *
  */
 
-#include "unittest.h"
-#include "setup.h"
-#include "../include/boxmodus.h"
 #include "../include/grandcan_thermalizer.h"
+#include "../include/boxmodus.h"
+#include "setup.h"
+#include "unittest.h"
 
 using namespace Smash;
 
@@ -21,9 +21,9 @@ TEST(create_part_list) {
      the system to be solved.
    */
   ParticleType::create_type_list(
-    "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-    "N⁺ 0.938 0.0       2212\n"
-    "K⁰ 0.494 0.0        311\n");
+      "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
+      "N⁺ 0.938 0.0       2212\n"
+      "K⁰ 0.494 0.0        311\n");
 }
 
 TEST(rest_frame_transformation) {
@@ -53,27 +53,27 @@ TEST(rest_frame_transformation) {
   ThermLatticeNode node = ThermLatticeNode();
   for (auto &part : P) {
     part.boost(v_boost);
-    node.add_particle(part, std::sqrt(1.0 - v_boost.sqr())/(L*L*L));
+    node.add_particle(part, std::sqrt(1.0 - v_boost.sqr()) / (L * L * L));
   }
   node.compute_rest_frame_quantities(eos);
 
   // Tmu0 should satisfy ideal hydro form
-  const double ep_gamm_sqr = (node.e()+node.p())/(1.0 - node.v().sqr());
+  const double ep_gamm_sqr = (node.e() + node.p()) / (1.0 - node.v().sqr());
   COMPARE_ABSOLUTE_ERROR(node.Tmu0().x0(), ep_gamm_sqr - node.p(), 1.e-8);
-  COMPARE_ABSOLUTE_ERROR(node.Tmu0().x1(), ep_gamm_sqr*node.v().x1(), 1.e-8);
-  COMPARE_ABSOLUTE_ERROR(node.Tmu0().x2(), ep_gamm_sqr*node.v().x2(), 1.e-8);
-  COMPARE_ABSOLUTE_ERROR(node.Tmu0().x3(), ep_gamm_sqr*node.v().x3(), 1.e-8);
+  COMPARE_ABSOLUTE_ERROR(node.Tmu0().x1(), ep_gamm_sqr * node.v().x1(), 1.e-8);
+  COMPARE_ABSOLUTE_ERROR(node.Tmu0().x2(), ep_gamm_sqr * node.v().x2(), 1.e-8);
+  COMPARE_ABSOLUTE_ERROR(node.Tmu0().x3(), ep_gamm_sqr * node.v().x3(), 1.e-8);
 
   // EoS should be satisfied
   const double T = node.T();
   const double mub = node.mub();
   const double mus = node.mus();
-  const double gamma = 1.0/std::sqrt(1.0 - node.v().sqr());
+  const double gamma = 1.0 / std::sqrt(1.0 - node.v().sqr());
   const double tolerance = 5.e-4;
   COMPARE_ABSOLUTE_ERROR(node.p(), eos.pressure(T, mub, mus), tolerance);
   COMPARE_ABSOLUTE_ERROR(node.e(), eos.energy_density(T, mub, mus), tolerance);
-  COMPARE_ABSOLUTE_ERROR(node.nb(), eos.net_baryon_density(T, mub, mus)*gamma, tolerance);
-  COMPARE_ABSOLUTE_ERROR(node.ns(), eos.net_strange_density(T, mub, mus)*gamma, tolerance);
+  COMPARE_ABSOLUTE_ERROR(node.nb(), eos.net_baryon_density(T, mub, mus) * gamma,
+                         tolerance);
+  COMPARE_ABSOLUTE_ERROR(
+      node.ns(), eos.net_strange_density(T, mub, mus) * gamma, tolerance);
 }
-
-

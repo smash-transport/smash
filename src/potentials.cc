@@ -75,22 +75,20 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
   }
 }
 
-Potentials::~Potentials() {
-}
+Potentials::~Potentials() {}
 
 double Potentials::skyrme_pot(const double baryon_density) const {
-  const double tmp = baryon_density/nuclear_density;
+  const double tmp = baryon_density / nuclear_density;
   // Return in GeV
-  return 1.0e-3 * (skyrme_a_*tmp + skyrme_b_*std::pow(tmp, skyrme_tau_));
+  return 1.0e-3 * (skyrme_a_ * tmp + skyrme_b_ * std::pow(tmp, skyrme_tau_));
 }
 
 double Potentials::symmetry_pot(const double baryon_isospin_density) const {
   // Return in GeV -> 10^-3 coefficient
-  return 1.0e-3 * 2.*symmetry_s_ * baryon_isospin_density/nuclear_density;
+  return 1.0e-3 * 2. * symmetry_s_ * baryon_isospin_density / nuclear_density;
 }
 
-double Potentials::potential(const ThreeVector &r,
-                             const ParticleList &plist,
+double Potentials::potential(const ThreeVector &r, const ParticleList &plist,
                              const ParticleType &acts_on) const {
   double total_potential = 0.0;
   const bool compute_gradient = false;
@@ -100,15 +98,17 @@ double Potentials::potential(const ThreeVector &r,
   }
 
   if (use_skyrme_) {
-    const double rho_eck = rho_eckart(r, plist, param_, DensityType::Baryon,
-                                      compute_gradient).first;
+    const double rho_eck =
+        rho_eckart(r, plist, param_, DensityType::Baryon, compute_gradient)
+            .first;
     total_potential += skyrme_pot(rho_eck);
   }
   if (use_symmetry_) {
     // use isospin density
-    const double rho_iso = rho_eckart(r, plist, param_,
-                                      DensityType::BaryonicIsospin,
-                                      compute_gradient).first;
+    const double rho_iso =
+        rho_eckart(r, plist, param_, DensityType::BaryonicIsospin,
+                   compute_gradient)
+            .first;
     const double sym_pot = symmetry_pot(rho_iso) * acts_on.isospin3_rel();
     total_potential += sym_pot;
   }
@@ -126,29 +126,28 @@ ThreeVector Potentials::potential_gradient(const ThreeVector &r,
 
   const bool compute_gradient = true;
   if (use_skyrme_) {
-    const auto density_and_gradient = rho_eckart(r, plist, param_,
-                           DensityType::Baryon, compute_gradient);
+    const auto density_and_gradient =
+        rho_eckart(r, plist, param_, DensityType::Baryon, compute_gradient);
     const double rho = density_and_gradient.first;
     const ThreeVector drho_dr = density_and_gradient.second;
 
     // Derivative of potential with respect to density
-    double tmp = skyrme_tau_ * std::pow(rho/nuclear_density, skyrme_tau_ - 1);
-    total_gradient += drho_dr * (skyrme_a_ + skyrme_b_*tmp) / nuclear_density;
+    double tmp = skyrme_tau_ * std::pow(rho / nuclear_density, skyrme_tau_ - 1);
+    total_gradient += drho_dr * (skyrme_a_ + skyrme_b_ * tmp) / nuclear_density;
   }
 
   if (use_symmetry_) {
     // use isospin density
-    const ThreeVector p_iso = rho_eckart(r, plist, param_,
-                                         DensityType::BaryonicIsospin,
-                                         compute_gradient).second;
-    const ThreeVector dUsym_dr = 2.*symmetry_s_ * p_iso/nuclear_density
-                                 * acts_on.isospin3_rel();
+    const ThreeVector p_iso =
+        rho_eckart(r, plist, param_, DensityType::BaryonicIsospin,
+                   compute_gradient)
+            .second;
+    const ThreeVector dUsym_dr =
+        2. * symmetry_s_ * p_iso / nuclear_density * acts_on.isospin3_rel();
     total_gradient += dUsym_dr;
   }
   // Return in GeV
   return total_gradient * 1.0e-3;
 }
-
-
 
 }  // namespace Smash

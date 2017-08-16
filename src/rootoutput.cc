@@ -7,14 +7,14 @@
  *
  */
 
+#include "include/rootoutput.h"
+#include "TFile.h"
+#include "TTree.h"
 #include "include/action.h"
 #include "include/clock.h"
 #include "include/forwarddeclarations.h"
 #include "include/inputfunctions.h"
 #include "include/particles.h"
-#include "include/rootoutput.h"
-#include "TFile.h"
-#include "TTree.h"
 
 namespace Smash {
 
@@ -22,7 +22,8 @@ RootOutput::RootOutput(const bf::path &path, const std::string &name)
     : base_path_(std::move(path)),
       root_out_file_(
           new TFile((base_path_ / (name + ".root")).native().c_str(), "NEW")),
-      write_collisions_(true), write_particles_(false),
+      write_collisions_(true),
+      write_particles_(false),
       autosave_frequency_(1000) {
   init_trees();
 }
@@ -30,7 +31,7 @@ RootOutput::RootOutput(const bf::path &path, const std::string &name)
 /**
  * RootOuput constructor. Creates file smash_run.root in the output directory.
  */
-RootOutput::RootOutput(const bf::path &path, Configuration&& conf)
+RootOutput::RootOutput(const bf::path &path, Configuration &&conf)
     : base_path_(std::move(path)),
       root_out_file_(
           new TFile((base_path_ / "smash_run.root").native().c_str(), "NEW")),
@@ -94,7 +95,8 @@ RootOutput::RootOutput(const bf::path &path, Configuration&& conf)
    * Every physical quantity is in a separate TBranch.
    * One entry in the \c particles TTree is:
    * \code
-   * ev tcounter npart pdgcode[npart] t[npart] x[npart] y[npart] z[npart] p0[npart] px[npart] py[npart] pz[npart]
+   * ev tcounter npart pdgcode[npart] t[npart] x[npart] y[npart] z[npart]
+   *p0[npart] px[npart] py[npart] pz[npart]
    * \endcode
    * One tree entry is analogous to an OSCAR output block, but the maximal
    * number of particles in one entry is limited to 10000. This is done to limit
@@ -103,7 +105,8 @@ RootOutput::RootOutput(const bf::path &path, Configuration&& conf)
    * \c tcounter and \c ev. The fields have the following meaning:
    *
    * \li \c ev is event number
-   * \li \c tcounter is number of output block in a given event in terms of OSCAR
+   * \li \c tcounter is number of output block in a given event in terms of
+   *OSCAR
    * \li \c npart is number of particles in the block
    * \li \c pdgcode is PDG id array
    * \li \c t, \c x, \c y, \c z are position arrays
@@ -171,7 +174,8 @@ void RootOutput::init_trees() {
 }
 
 /**
- * RootOutput destructor. Writes root objects (here TTrees) to file and closes it.
+ * RootOutput destructor. Writes root objects (here TTrees) to file and closes
+ * it.
  */
 RootOutput::~RootOutput() {
   // kOverwrite option prevents from writing extra TKey objects into root file
@@ -208,11 +212,11 @@ void RootOutput::at_intermediate_time(const Particles &particles, const Clock &,
 /**
  * Writes to tree "at_eventend".
  */
-void RootOutput::at_eventend(const Particles &/*particles*/,
+void RootOutput::at_eventend(const Particles & /*particles*/,
                              const int /*event_number*/) {
   // Forced regular dump from operational memory to disk. Very demanding!
   // If program crashes written data will NOT be lost
-  if (current_event_ > 0  && current_event_ % autosave_frequency_ == 0) {
+  if (current_event_ > 0 && current_event_ % autosave_frequency_ == 0) {
     if (write_particles_) {
       particles_tree_->AutoSave("SaveSelf");
     }
@@ -228,8 +232,7 @@ void RootOutput::at_eventend(const Particles &/*particles*/,
 void RootOutput::at_interaction(const Action &action,
                                 const double /*density*/) {
   if (write_collisions_) {
-    collisions_to_tree(action.incoming_particles(),
-                       action.outgoing_particles(),
+    collisions_to_tree(action.incoming_particles(), action.outgoing_particles(),
                        action.raw_weight_value());
   }
 }

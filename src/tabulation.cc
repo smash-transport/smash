@@ -11,11 +11,11 @@ namespace Smash {
 
 Tabulation::Tabulation(double x_min, double range, int num,
                        std::function<double(double)> f)
-                      : x_min_(x_min), inv_dx_(num/range) {
-  values_.resize(num+1);
-  const double dx = range/num;
+    : x_min_(x_min), inv_dx_(num / range) {
+  values_.resize(num + 1);
+  const double dx = range / num;
   for (int i = 0; i <= num; i++) {
-    values_[i] = f(x_min_ + i*dx);
+    values_[i] = f(x_min_ + i * dx);
   }
 }
 
@@ -38,8 +38,8 @@ double Tabulation::get_value_linear(double x) const {
   }
   const double index_double = (x - x_min_) * inv_dx_;
   // here n is the lower index
-  const size_t n = std::min(static_cast<size_t>(index_double),
-                            values_.size() - 2);
+  const size_t n =
+      std::min(static_cast<size_t>(index_double), values_.size() - 2);
   const double r = index_double - n;
   return values_[n] + (values_[n + 1] - values_[n]) * r;
 }

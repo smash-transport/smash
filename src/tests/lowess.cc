@@ -7,8 +7,8 @@
  *
  */
 
-#include "unittest.h"
 #include "../include/lowess.h"
+#include "unittest.h"
 
 #include <numeric>
 

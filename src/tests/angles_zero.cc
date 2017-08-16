@@ -25,8 +25,7 @@ int main() {
     sumy += dir.y();
     sumz += dir.z();
   }
-  printf("%g %g %g\n", sumx/(NUMBER+0.0),
-                       sumy/(NUMBER+0.0),
-                       sumz/(NUMBER+0.0));
+  printf("%g %g %g\n", sumx / (NUMBER + 0.0), sumy / (NUMBER + 0.0),
+         sumz / (NUMBER + 0.0));
   return 0;
 }

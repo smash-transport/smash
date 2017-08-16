@@ -7,18 +7,18 @@
  *
  */
 
-#include "unittest.h"
-#include "setup.h"
+#include <include/config.h>
 #include <array>
-#include <string>
-#include <vector>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
-#include <include/config.h>
+#include <string>
+#include <vector>
+#include "setup.h"
+#include "unittest.h"
 
 #include "../include/configuration.h"
-#include "../include/outputinterface.h"
 #include "../include/oscaroutput.h"
+#include "../include/outputinterface.h"
 #include "../include/particles.h"
 #include "../include/processbranch.h"
 #include "../include/random.h"

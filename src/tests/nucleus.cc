@@ -10,9 +10,9 @@
 
 #include <map>
 #include "../include/nucleus.h"
+#include "../include/particles.h"
 #include "../include/pdgcode.h"
 #include "../include/threevector.h"
-#include "../include/particles.h"
 
 namespace particles_txt {
 #include <particles.txt.h>
@@ -87,9 +87,15 @@ TEST(center) {
    *  \code
    **/
   double threesigma = 3 * 5.86817 / std::sqrt(N_TEST);
-  VERIFY(std::abs(middle.x1()) < threesigma) << " x=" << middle.x1() << " vs. 3σ=" << threesigma << " (chance 1 in 370)";
-  VERIFY(std::abs(middle.x2()) < threesigma) << " x=" << middle.x2() << " vs. 3σ=" << threesigma << " (chance 1 in 370)";
-  VERIFY(std::abs(middle.x3()) < threesigma) << " x=" << middle.x3() << " vs. 3σ=" << threesigma << " (chance 1 in 370)";
+  VERIFY(std::abs(middle.x1()) < threesigma)
+      << " x=" << middle.x1() << " vs. 3σ=" << threesigma
+      << " (chance 1 in 370)";
+  VERIFY(std::abs(middle.x2()) < threesigma)
+      << " x=" << middle.x2() << " vs. 3σ=" << threesigma
+      << " (chance 1 in 370)";
+  VERIFY(std::abs(middle.x3()) < threesigma)
+      << " x=" << middle.x3() << " vs. 3σ=" << threesigma
+      << " (chance 1 in 370)";
 }
 
 TEST(center_hard_sphere) {
@@ -105,9 +111,15 @@ TEST(center_hard_sphere) {
    **/
   double threesigma =
       3 * lead.default_nuclear_radius() * std::sqrt(0.6) / std::sqrt(N_TEST);
-  VERIFY(std::abs(middle.x1()) < threesigma) << " x=" << middle.x1() << " vs. 3σ=" << threesigma << " (chance 1 in 370)";
-  VERIFY(std::abs(middle.x2()) < threesigma) << " x=" << middle.x2() << " vs. 3σ=" << threesigma << " (chance 1 in 370)";
-  VERIFY(std::abs(middle.x3()) < threesigma) << " x=" << middle.x3() << " vs. 3σ=" << threesigma << " (chance 1 in 370)";
+  VERIFY(std::abs(middle.x1()) < threesigma)
+      << " x=" << middle.x1() << " vs. 3σ=" << threesigma
+      << " (chance 1 in 370)";
+  VERIFY(std::abs(middle.x2()) < threesigma)
+      << " x=" << middle.x2() << " vs. 3σ=" << threesigma
+      << " (chance 1 in 370)";
+  VERIFY(std::abs(middle.x3()) < threesigma)
+      << " x=" << middle.x3() << " vs. 3σ=" << threesigma
+      << " (chance 1 in 370)";
 }
 
 // shift tests: here, in z direction the shift always depends on the
@@ -140,7 +152,7 @@ TEST(shift_x) {
   lead.shift(0, 4.0, 0.0);
   FourVector postcenter = lead.center();
   UnitTest::setFuzzyness<double>(30);
-  FUZZY_COMPARE(postcenter.x1(), precenter.x1()+4.0);
+  FUZZY_COMPARE(postcenter.x1(), precenter.x1() + 4.0);
   FUZZY_COMPARE(postcenter.x2(), precenter.x2());
   FUZZY_COMPARE(postcenter.x3(), precenter.x3());
 }
@@ -162,7 +174,7 @@ TEST(shift_z) {
 // test the woods-saxon distribution at various discrete points:
 TEST(woods_saxon) {
   // this is where we store the distribution.
-  std::map<int, int> histogram {};
+  std::map<int, int> histogram{};
   // binning width for the distribution:
   constexpr double dx = 0.01;
   // the nucleus. Fill it from list with 1 testparticle.
@@ -174,38 +186,38 @@ TEST(woods_saxon) {
   // fill the histogram
   for (int i = 0; i < N_TEST; i++) {
     ThreeVector pos = projectile.distribute_nucleon();
-    int bin = pos.abs()/dx;
+    int bin = pos.abs() / dx;
     ++histogram[bin];
   }
   // We'll compare to relative values (I don't know what the integral
   // is)
-  double value_at_radius = histogram.at(R/dx);
-  double expected_at_radius =
-                           projectile.woods_saxon(R);
+  double value_at_radius = histogram.at(R / dx);
+  double expected_at_radius = projectile.woods_saxon(R);
   // we'll probe at these values:
-  double probes[9] = { 1.0, 5.0, 7.2, 8.0, 8.5, .5*R, 1.1*R, 1.2*R, 1.3*R };
+  double probes[9] = {1.0,    5.0,     7.2,     8.0,    8.5,
+                      .5 * R, 1.1 * R, 1.2 * R, 1.3 * R};
   // now do probe these values:
   for (int i = 0; i < 9; ++i) {
     // value we have simulated:
-    double value = histogram.at(probes[i]/dx)/value_at_radius;
+    double value = histogram.at(probes[i] / dx) / value_at_radius;
     // value we have expected:
-    double expec = projectile.woods_saxon(probes[i])/expected_at_radius;
+    double expec = projectile.woods_saxon(probes[i]) / expected_at_radius;
     // standard error we expect the histogram to have is 1/sqrt(N); we
     // give 3 sigma "space".
     double margin = 3. / std::sqrt(value);
-    VERIFY(std::abs(value - expec) < margin) << " x = " << probes[i]
-            << ": simulated: " << value
-            << " vs. calculated: " << expec
-            << " (allowed distance: " << margin << ")";
+    VERIFY(std::abs(value - expec) < margin)
+        << " x = " << probes[i] << ": simulated: " << value
+        << " vs. calculated: " << expec << " (allowed distance: " << margin
+        << ")";
   }
 }
 
 TEST(Fermi_motion) {
-  std::map<PdgCode, int> myfunnylist = {{0x2212, 22}, // protons
-                                        {0x2112, 35}, // neutrons
-                                         {0x111, 5},  // pions
-                                        {0x3122, 1},  // Lambda
-                                         {0x13, 1}};  // muon
+  std::map<PdgCode, int> myfunnylist = {{0x2212, 22},  // protons
+                                        {0x2112, 35},  // neutrons
+                                        {0x111, 5},    // pions
+                                        {0x3122, 1},   // Lambda
+                                        {0x13, 1}};    // muon
   Nucleus myfunnynucleus(myfunnylist, 1);
   COMPARE(myfunnynucleus.size(), 22u + 35u + 5u + 1u + 1u);
   // Set some arbitrary radius and diffusiveness
@@ -231,7 +243,7 @@ TEST(Fermi_motion) {
       COMPARE(mom3.x3(), 0.0);
     }
     UnitTest::setFuzzyness<double>(2);
-    FUZZY_COMPARE(p.momentum().sqr(), p.pole_mass()*p.pole_mass());
+    FUZZY_COMPARE(p.momentum().sqr(), p.pole_mass() * p.pole_mass());
   }
   COMPARE_ABSOLUTE_ERROR(ptot.x1(), 0.0, 1.0e-15) << ptot.x1();
   COMPARE_ABSOLUTE_ERROR(ptot.x2(), 0.0, 1.0e-15) << ptot.x2();

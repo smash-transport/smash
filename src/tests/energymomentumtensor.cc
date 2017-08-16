@@ -19,7 +19,8 @@ TEST(assign) {
     COMPARE(Tmn[i], 0.0);
   }
   // exact assignment with binary-representable numbers
-  EnergyMomentumTensor T({0.25, -37.5, 0.0125, 1.0, 2.0, 3.3, 4.5, 6.9, 10.0, 1.e6});
+  EnergyMomentumTensor T(
+      {0.25, -37.5, 0.0125, 1.0, 2.0, 3.3, 4.5, 6.9, 10.0, 1.e6});
   COMPARE(T[0], 0.25);
   COMPARE(T[1], -37.5);
   COMPARE(T[2], 0.0125);
@@ -28,8 +29,10 @@ TEST(assign) {
 }
 
 TEST(arithmetic) {
-  EnergyMomentumTensor A({0.25, -37.5, 0.0125, 1.0, 2.0, 3.3, 4.5, 6.9, 10.0, 1.e6});
-  EnergyMomentumTensor B({1.25, -36.5, 1.0125, 2.0, 3.0, 4.3, 5.5, 7.9, 11.0, 999999.0});
+  EnergyMomentumTensor A(
+      {0.25, -37.5, 0.0125, 1.0, 2.0, 3.3, 4.5, 6.9, 10.0, 1.e6});
+  EnergyMomentumTensor B(
+      {1.25, -36.5, 1.0125, 2.0, 3.0, 4.3, 5.5, 7.9, 11.0, 999999.0});
   EnergyMomentumTensor C = A - B;
   FUZZY_COMPARE(C[0], -1.0);
   FUZZY_COMPARE(C[1], -1.0);
@@ -55,16 +58,16 @@ TEST(arithmetic) {
 
 TEST(indices) {
   using se = Smash::EnergyMomentumTensor;
-  COMPARE(se::tmn_index(0,0), 0);
-  COMPARE(se::tmn_index(0,1), 1);
-  COMPARE(se::tmn_index(0,2), 2);
-  COMPARE(se::tmn_index(0,3), 3);
-  COMPARE(se::tmn_index(1,1), 4);
-  COMPARE(se::tmn_index(1,2), 5);
-  COMPARE(se::tmn_index(1,3), 6);
-  COMPARE(se::tmn_index(2,2), 7);
-  COMPARE(se::tmn_index(2,3), 8);
-  COMPARE(se::tmn_index(3,3), 9);
+  COMPARE(se::tmn_index(0, 0), 0);
+  COMPARE(se::tmn_index(0, 1), 1);
+  COMPARE(se::tmn_index(0, 2), 2);
+  COMPARE(se::tmn_index(0, 3), 3);
+  COMPARE(se::tmn_index(1, 1), 4);
+  COMPARE(se::tmn_index(1, 2), 5);
+  COMPARE(se::tmn_index(1, 3), 6);
+  COMPARE(se::tmn_index(2, 2), 7);
+  COMPARE(se::tmn_index(2, 3), 8);
+  COMPARE(se::tmn_index(3, 3), 9);
   for (std::int8_t i = 0; i < 4; i++) {
     for (std::int8_t j = 0; j < i; j++) {
       COMPARE(se::tmn_index(i, j), se::tmn_index(j, i));
@@ -74,12 +77,12 @@ TEST(indices) {
 
 TEST_CATCH(invalid_index1, std::invalid_argument) {
   using se = Smash::EnergyMomentumTensor;
-  se::tmn_index(4,0);
+  se::tmn_index(4, 0);
 }
 
 TEST_CATCH(invalid_index2, std::invalid_argument) {
   using se = Smash::EnergyMomentumTensor;
-  se::tmn_index(0,4);
+  se::tmn_index(0, 4);
 }
 
 TEST_CATCH(invalid_index3, std::invalid_argument) {
@@ -94,7 +97,7 @@ TEST(add_particle) {
   T.add_particle(p);
   for (std::int8_t i = 0; i < 4; i++) {
     for (std::int8_t j = 0; j < 4; j++) {
-      COMPARE(T[se::tmn_index(i,j)], p[i]*p[j]/p[0]);
+      COMPARE(T[se::tmn_index(i, j)], p[i] * p[j] / p[0]);
     }
   }
 }
@@ -111,7 +114,7 @@ TEST(Landau_frame) {
   // One particle: is u ~ momentum?
   FourVector u = T1.landau_frame_4velocity();
   for (size_t i = 1; i < 4; i++) {
-    COMPARE_RELATIVE_ERROR(u[0]/p1[0], -u[i]/p1[i], 1.e-15);
+    COMPARE_RELATIVE_ERROR(u[0] / p1[0], -u[i] / p1[i], 1.e-15);
   }
 
   // Three particles: check if boost to Landau frame gives T^{0i} = 0
@@ -123,7 +126,8 @@ TEST(Landau_frame) {
 }
 
 TEST(Landau_frame_values) {
-  EnergyMomentumTensor T({100., 1.0, 10., 3.3, 30.0, 4.3, 5.5, 29.9, 11.0, 40.0});
+  EnergyMomentumTensor T(
+      {100., 1.0, 10., 3.3, 30.0, 4.3, 5.5, 29.9, 11.0, 40.0});
   /* Executing this mathematica code:
 
      T = SetPrecision[{{100., 1.0, 10., 3.3}, {1.0, 30.0, 4.3, 5.5},
@@ -139,9 +143,9 @@ TEST(Landau_frame_values) {
   // Allow 8ulp, seen to fail for 3 ulp
   UnitTest::setFuzzyness<double>(8);
   FUZZY_COMPARE(u[0], 1.0030526944248855612);
-  FUZZY_COMPARE(u[1],-0.004483908837502199607);
-  FUZZY_COMPARE(u[2],-0.07605947885039531450);
-  FUZZY_COMPARE(u[3],-0.017594261324820867270);
+  FUZZY_COMPARE(u[1], -0.004483908837502199607);
+  FUZZY_COMPARE(u[2], -0.07605947885039531450);
+  FUZZY_COMPARE(u[3], -0.017594261324820867270);
 
   /* Executing further mathematica code:
 

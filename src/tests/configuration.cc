@@ -7,8 +7,8 @@
  *
  */
 
-#include "unittest.h"
 #include "setup.h"
+#include "unittest.h"
 
 #include "../include/configuration.h"
 #include "../include/forwarddeclarations.h"
@@ -23,29 +23,27 @@ static Configuration make_test_configuration() {
                        "test_config.yaml"};
 }
 
-TEST(create_object) {
-  Configuration conf = Test::configuration();
-}
+TEST(create_object) { Configuration conf = Test::configuration(); }
 
 TEST(check_config_general_contents) {
   Configuration conf = make_test_configuration();
 
-  std::string modus = conf.read({"fireballs", "extorting"        });
+  std::string modus = conf.read({"fireballs", "extorting"});
   COMPARE(modus, "feathered");
-  COMPARE(double(conf.read({"fireballs", "infection"          })), 0.01);
-  COMPARE(int   (conf.read({"fireballs", "arena"        })), 1000);
-  COMPARE(int   (conf.read({"fireballs", "pendulous"       })), 10);
-  COMPARE(int   (conf.read({"fireballs", "scudded"   })), 1);
-  COMPARE(double(conf.read({"fireballs", "firebrands"        })), 10.0);
-  COMPARE(int   (conf.read({"fireballs", "joker"})), 1);
-  COMPARE(int   (conf.read({"fireballs", "classify"      })), 1);
+  COMPARE(double(conf.read({"fireballs", "infection"})), 0.01);
+  COMPARE(int(conf.read({"fireballs", "arena"})), 1000);
+  COMPARE(int(conf.read({"fireballs", "pendulous"})), 10);
+  COMPARE(int(conf.read({"fireballs", "scudded"})), 1);
+  COMPARE(double(conf.read({"fireballs", "firebrands"})), 10.0);
+  COMPARE(int(conf.read({"fireballs", "joker"})), 1);
+  COMPARE(int(conf.read({"fireballs", "classify"})), 1);
 }
 
 TEST(check_config_collider_contents) {
   Configuration conf = make_test_configuration();
-  COMPARE(int   (conf.read({"tamer", "schmoozed", "warbler"})), 211);
-  COMPARE(int   (conf.read({"tamer", "schmoozed", "neglects"    })), -211);
-  COMPARE(double(conf.read({"tamer", "schmoozed", "reedier"     })), 1.0);
+  COMPARE(int(conf.read({"tamer", "schmoozed", "warbler"})), 211);
+  COMPARE(int(conf.read({"tamer", "schmoozed", "neglects"})), -211);
+  COMPARE(double(conf.read({"tamer", "schmoozed", "reedier"})), 1.0);
 }
 
 TEST(test_take) {
@@ -107,7 +105,8 @@ static ostream &operator<<(ostream &s, const vector<string> &v) {
 }
 }  // namespace std
 
-static void expect_lines(std::vector<std::string> expected, std::istream &stream) {
+static void expect_lines(std::vector<std::string> expected,
+                         std::istream &stream) {
   std::string line;
   while (!expected.empty()) {
     getline(stream, line);
@@ -239,10 +238,10 @@ TEST(check_setting_new_value) {
 
 TEST(merge_override) {
   Configuration conf = make_test_configuration();
-  COMPARE(int(conf.read({"fireballs", "arena"  })), 1000);
+  COMPARE(int(conf.read({"fireballs", "arena"})), 1000);
   COMPARE(int(conf.read({"fireballs", "classify"})), 1);
   conf.merge_yaml("fireballs: { classify: 2 }");
-  COMPARE(int(conf.read({"fireballs", "arena"  })), 1000);
+  COMPARE(int(conf.read({"fireballs", "arena"})), 1000);
   COMPARE(int(conf.read({"fireballs", "classify"})), 2);
 }
 
@@ -254,7 +253,8 @@ TEST(remove_all_but) {
   COMPARE(conf.to_string(), "tamer:\n  pipit:\n    bushelling: 5.0");
 }
 
-TEST_CATCH(failed_sequence_conversion, Configuration::IncorrectTypeInAssignment) {
+TEST_CATCH(failed_sequence_conversion,
+           Configuration::IncorrectTypeInAssignment) {
   Configuration conf = make_test_configuration();
   conf.merge_yaml("{test: [123 456]}");
   std::vector<int> x = conf.read({"test"});
