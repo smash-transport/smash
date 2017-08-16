@@ -26,8 +26,11 @@ namespace Smash {
  */
 
 /// Selector for the output format of OscarOutput
-enum OscarOutputFormat { OscarFormat2013, OscarFormat2013Extended,
-                         OscarFormat1999 };
+enum OscarOutputFormat {
+  OscarFormat2013,
+  OscarFormat2013Extended,
+  OscarFormat1999
+};
 
 /**
  * \brief Flags for the \p Contents template parameter of OscarOutput.

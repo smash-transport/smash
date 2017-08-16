@@ -7,8 +7,8 @@
  *
  */
 
-#include "unittest.h"
 #include "setup.h"
+#include "unittest.h"
 
 #include <algorithm>
 
@@ -31,8 +31,9 @@ TEST(construct_and_insert) {
   constexpr double current_time = 10.5;
 
   // create arbitrary particle
-  ParticleData testparticle = Test::smashon(Test::Momentum{0.2, 0., .1, 0.},
-                                            Test::Position{current_time, 1., .9, 1.});
+  ParticleData testparticle =
+      Test::smashon(Test::Momentum{0.2, 0., .1, 0.},
+                    Test::Position{current_time, 1., .9, 1.});
 
   // add actions to list
   ActionList action_vec;

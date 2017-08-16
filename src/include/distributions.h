@@ -36,11 +36,14 @@ double breit_wigner_nonrel(double m, double pole, double width);
 /**
  * Returns a Cauchy distribution (sometimes also called Lorentz or
  * non-relativistic Breit-Wigner distribution) with the given parameters.
- * The normalization is such that integrating over x from -inf to inf yields one.
+ * The normalization is such that integrating over x from -inf to inf yields
+ * one.
  *
  * \param x Argument of the Cauchy function.
- * \param pole Pole parameter \f$ m_0 \f$ of the Cauchy function, i.e. location of the peak.
- * \param width Width parameter \f$ \Gamma \f$ of the Cauchy function, determining the sharpness of the peak.
+ * \param pole Pole parameter \f$ m_0 \f$ of the Cauchy function, i.e. location
+ * of the peak.
+ * \param width Width parameter \f$ \Gamma \f$ of the Cauchy function,
+ * determining the sharpness of the peak.
  *
  * \return \f$ \frac{\Gamma}{\pi ((m-m_0)^2+\Gamma^2)}\f$
  */
@@ -62,16 +65,13 @@ double density_integrand(const double energy, const double momentum_sqr,
                          const double temperature);
 
 double density_integrand_mass(const double energy, const double momentum_sqr,
-                         const double temperature);
-
+                              const double temperature);
 
 double density_integrand_1M_IC(const double energy, const double momentum_sqr,
-                         const double temperature);
+                               const double temperature);
 
 double density_integrand_2M_IC(const double energy, const double momentum_sqr,
-                         const double temperature);
-
-
+                               const double temperature);
 
 /** samples a momentum from the non-equilibrium distribution
  * \f[f=pe^{-\frac{\sqrt{m^2+p^2}}{T_0}}\f]
@@ -104,8 +104,6 @@ double sample_momenta_IC_1M(const double temperature, const double mass);
  */
 double sample_momenta_IC_2M(const double temperature, const double mass);
 
-
-
 /** samples a momentum from the Maxwell-Boltzmann (thermal) distribution
  * in a faster way, given by Pratt Scott
  *
@@ -117,8 +115,6 @@ double sample_momenta_IC_2M(const double temperature, const double mass);
  * \fpPrecision Why \c double?
  */
 double sample_momenta_from_thermal(const double temperature, const double mass);
-
-
 
 /** Relativistic Juttner distribution function
  * \param[in] momentum_radial \f$|\vec{p}|\f$ in units of [GeV]
@@ -132,10 +128,9 @@ double sample_momenta_from_thermal(const double temperature, const double mass);
  * \return Unnormalized probability of relativistic juttner distribution
  */
 double juttner_distribution_func(const double momentum_radial,
-        const double mass, const double temperature, const double
-        baryon_chemical_potential, const double lam);
-
-
+                                 const double mass, const double temperature,
+                                 const double baryon_chemical_potential,
+                                 const double lam);
 
 /** 1D woods-saxon distribution function
  * \param[in] r Radial coordinates in the nucleus in units of [fm]
@@ -143,8 +138,8 @@ double juttner_distribution_func(const double momentum_radial,
  * \param[in] diffusion Diffusiveness parameter of the nucleus in units of [fm]
  * \return Unnormalized nucleon density in units [fm^{-3}]
  * in the nucleus at r  */
-double woods_saxon_dist_func(const double r,  const double radius,
-        const double diffusion);
+double woods_saxon_dist_func(const double r, const double radius,
+                             const double diffusion);
 
 double sample_momenta_IC_ES(const double temperature);
 }  // namespace Smash

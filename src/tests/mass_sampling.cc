@@ -5,9 +5,9 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#include "unittest.h"
-#include "setup.h"
 #include "histogram.h"
+#include "setup.h"
+#include "unittest.h"
 
 #include "../include/decayaction.h"
 #include "../include/decaymodes.h"
@@ -48,7 +48,7 @@ TEST(omega_decay) {
   const auto srts = omega.effective_mass();
   act->add_decays(type_omega.get_partial_widths_hadronic(srts));
 
-  const double dm = 0.001;        // bin size
+  const double dm = 0.001;       // bin size
   Histogram1d hist_charged(dm);  // histogram for charged rhos
   Histogram1d hist_neutral(dm);  // histogram for neutral rhos
 
@@ -78,25 +78,24 @@ TEST(omega_decay) {
   // test with the analytical function
   const ParticleType &type_rho_zero = ParticleType::find(0x113);  // rho0
   const ParticleType &type_rho_plus = ParticleType::find(0x213);  // rho+
-  const ParticleType &type_pi       = ParticleType::find(0x111);  // pi0
+  const ParticleType &type_pi = ParticleType::find(0x111);        // pi0
   const auto mass_stable = type_pi.mass();
 
   printf("testing ρ⁰ distribution ...\n");
-  hist_neutral.test(
-    [&](double m) {
-      double pcm = pCM(srts, mass_stable, m);
-      return type_rho_zero.spectral_function(m)
-                    * pcm * blatt_weisskopf_sqr(pcm, 1); }
-    //,"masses_rho_neutral.dat"
-  );
+  hist_neutral.test([&](double m) {
+    double pcm = pCM(srts, mass_stable, m);
+    return type_rho_zero.spectral_function(m) * pcm *
+           blatt_weisskopf_sqr(pcm, 1);
+  }
+                    //,"masses_rho_neutral.dat"
+                    );
 
   printf("testing ρ⁺ distribution ...\n");
-  hist_charged.test(
-    [&](double m) {
-      double pcm = pCM(srts, mass_stable, m);
-      return type_rho_plus.spectral_function(m)
-                    * pcm * blatt_weisskopf_sqr(pcm, 1); }
-    //,"masses_rho_charged.dat"
-  );
-
+  hist_charged.test([&](double m) {
+    double pcm = pCM(srts, mass_stable, m);
+    return type_rho_plus.spectral_function(m) * pcm *
+           blatt_weisskopf_sqr(pcm, 1);
+  }
+                    //,"masses_rho_charged.dat"
+                    );
 }

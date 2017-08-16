@@ -328,8 +328,8 @@ int main(int argc, char *argv[]) {
       ParticleType::create_type_list(configuration.take({"particles"}));
       DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
       std::vector<bool> nucleon_has_interacted = {};
-      auto scat_finder = make_unique<ScatterActionsFinder>(elastic_parameter,
-                                     ntest, nucleon_has_interacted, two_to_one);
+      auto scat_finder = make_unique<ScatterActionsFinder>(
+          elastic_parameter, ntest, nucleon_has_interacted, two_to_one);
       scat_finder->dump_reactions();
       std::exit(EXIT_SUCCESS);
     }
@@ -361,7 +361,7 @@ int main(int argc, char *argv[]) {
       if (a.is_stable() && args[2] != "") {
         ma = a.mass();
         std::cout << "Warning: pole mass is used for stable particle "
-                  <<  a.name() << " instead of " << args[2] << std::endl;
+                  << a.name() << " instead of " << args[2] << std::endl;
       }
       if (b.is_stable() && args[3] != "") {
         mb = b.mass();
@@ -369,8 +369,8 @@ int main(int argc, char *argv[]) {
                   << b.name() << " instead of " << args[3] << std::endl;
       }
       std::vector<bool> nucleon_has_interacted = {};
-      auto scat_finder = make_unique<ScatterActionsFinder>(-1., 1,
-                                               nucleon_has_interacted, true);
+      auto scat_finder = make_unique<ScatterActionsFinder>(
+          -1., 1, nucleon_has_interacted, true);
       scat_finder->dump_cross_sections(a, b, ma, mb);
       std::exit(EXIT_SUCCESS);
     }
@@ -413,8 +413,8 @@ int main(int argc, char *argv[]) {
     }
 
     // keep a copy of the configuration that was used in the output directory
-    bf::ofstream(output_path / "config.yaml") << configuration.to_string()
-                                              << '\n';
+    bf::ofstream(output_path / "config.yaml")
+        << configuration.to_string() << '\n';
 
     // take the seed setting only after the configuration was stored to file
     seed = configuration.take({"General", "Randomseed"});

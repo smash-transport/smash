@@ -17,7 +17,6 @@
 
 namespace Smash {
 
-
 /* A structure to hold information about the history of the particle,
  * e.g. the last interaction etc. */
 struct HistoryData {
@@ -32,7 +31,6 @@ struct HistoryData {
   // PdgCodes of the parent particles
   PdgCode p1 = 0x0, p2 = 0x0;
 };
-
 
 /**
  * \ingroup data
@@ -85,7 +83,7 @@ class ParticleData {
   /** Store history information, i.e. the type of process and possibly the
    * PdgCodes of the parent particles (\p plist). */
   void set_history(int ncoll, uint32_t pid, ProcessType pt, double time_of_or,
-                   const ParticleList& plist);
+                   const ParticleList &plist);
 
   /// return the particle's 4-momentum
   const FourVector &momentum() const { return momentum_; }
@@ -166,7 +164,6 @@ class ParticleData {
   /// get the velocity 3-vector
   ThreeVector velocity() const { return momentum_.velocity(); }
 
-
   /**
    * Returns the inverse of the gamma factor from the current velocity of the
    * particle.
@@ -182,7 +179,7 @@ class ParticleData {
    * zero and thus exhibits catastrophic cancellation.
    */
   double inverse_gamma() const {
-    return std::sqrt(1. - momentum_.sqr3() / (momentum_.x0()*momentum_.x0()));
+    return std::sqrt(1. - momentum_.sqr3() / (momentum_.x0() * momentum_.x0()));
   }
 
   /// Apply a full Lorentz boost of momentum and position
@@ -312,7 +309,8 @@ inline PrintParticleListDetailed detailed(const ParticleList &list) {
 }
 
 /** \ingroup logging
- * Writes a detailed overview over the particles in the \p particle_list argument
+ * Writes a detailed overview over the particles in the \p particle_list
+ * argument
  * to the stream. This overload is selected via the function \ref detailed.
  */
 std::ostream &operator<<(std::ostream &out,

@@ -45,8 +45,8 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
         << "Strange chemical potential: " << m.mus_ << "\n";
   } else {
     for (const auto &p : m.init_multipl_) {
-      out << "Particle " << p.first << " initial multiplicity "
-                         << p.second << '\n';
+      out << "Particle " << p.first << " initial multiplicity " << p.second
+          << '\n';
     }
   }
   return out;
@@ -104,21 +104,21 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
  */
 BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
     : initial_condition_(modus_config.take({"Box", "Initial_Condition"})),
-        length_(modus_config.take({"Box", "Length"})),
-        temperature_(modus_config.take({"Box", "Temperature"})),
-        start_time_(modus_config.take({"Box", "Start_Time"})),
-        use_thermal_(
+      length_(modus_config.take({"Box", "Length"})),
+      temperature_(modus_config.take({"Box", "Temperature"})),
+      start_time_(modus_config.take({"Box", "Start_Time"})),
+      use_thermal_(
           modus_config.take({"Box", "Use_Thermal_Multiplicities"}, false)),
-        mub_(modus_config.take({"Box", "Baryon_Chemical_Potential"}, 0.)),
-        mus_(modus_config.take({"Box", "Strange_Chemical_Potential"}, 0.)),
-        init_multipl_(use_thermal_ ? std::map<PdgCode, int>() :
-                      modus_config.take({"Box", "Init_Multiplicities"}).
-                                                convert_for(init_multipl_)) {
-}
+      mub_(modus_config.take({"Box", "Baryon_Chemical_Potential"}, 0.)),
+      mus_(modus_config.take({"Box", "Strange_Chemical_Potential"}, 0.)),
+      init_multipl_(use_thermal_
+                        ? std::map<PdgCode, int>()
+                        : modus_config.take({"Box", "Init_Multiplicities"})
+                              .convert_for(init_multipl_)) {}
 
 /* initial_conditions - sets particle data for @particles */
 double BoxModus::initial_conditions(Particles *particles,
-                                  const ExperimentParameters &parameters) {
+                                    const ExperimentParameters &parameters) {
   const auto &log = logger<LogArea::Box>();
   double momentum_radial = 0;
   Angles phitheta;
@@ -127,12 +127,12 @@ double BoxModus::initial_conditions(Particles *particles,
 
   /* Create NUMBER OF PARTICLES according to configuration, or thermal case */
   if (use_thermal_) {
-    const double V = length_*length_*length_;
+    const double V = length_ * length_ * length_;
     for (const ParticleType &ptype : ParticleType::list_all()) {
       if (HadronGasEos::is_eos_particle(ptype)) {
-        const double n = HadronGasEos::partial_density(ptype, temperature_,
-                                                       mub_, mus_);
-        const double thermal_mult = n*V*parameters.testparticles;
+        const double n =
+            HadronGasEos::partial_density(ptype, temperature_, mub_, mus_);
+        const double thermal_mult = n * V * parameters.testparticles;
         assert(thermal_mult > 0.0);
         const int thermal_mult_int = Random::poisson(thermal_mult);
         particles->create(thermal_mult_int, ptype.pdgcode());
@@ -145,9 +145,9 @@ double BoxModus::initial_conditions(Particles *particles,
                << HadronGasEos::net_strange_density(temperature_, mub_, mus_);
   } else {
     for (const auto &p : init_multipl_) {
-      particles->create(p.second*parameters.testparticles, p.first);
-      log.debug() << "Particle " << p.first
-                  << " initial multiplicity " << p.second;
+      particles->create(p.second * parameters.testparticles, p.first);
+      log.debug() << "Particle " << p.first << " initial multiplicity "
+                  << p.second;
     }
   }
 
@@ -158,8 +158,8 @@ double BoxModus::initial_conditions(Particles *particles,
       momentum_radial = 3.0 * this->temperature_;
     } else {
       /* thermal momentum according Maxwell-Boltzmann distribution */
-      momentum_radial = sample_momenta_from_thermal(this->temperature_,
-                                                    data.pole_mass());
+      momentum_radial =
+          sample_momenta_from_thermal(this->temperature_, data.pole_mass());
     }
     phitheta.distribute_isotropically();
     log.debug() << data << ", radial momentum:" << field << momentum_radial
@@ -176,8 +176,9 @@ double BoxModus::initial_conditions(Particles *particles,
 
   /* Make total 3-momentum 0 */
   for (ParticleData &data : *particles) {
-    data.set_4momentum(data.pole_mass(), data.momentum().threevec() -
-                       momentum_total.threevec()/particles->size());
+    data.set_4momentum(data.pole_mass(),
+                       data.momentum().threevec() -
+                           momentum_total.threevec() / particles->size());
   }
 
   /* Recalculate total momentum */
@@ -188,14 +189,13 @@ double BoxModus::initial_conditions(Particles *particles,
     log.debug() << data;
   }
   /* allows to check energy conservation */
-  log.info() << "Initial total 4-momentum [GeV]: "
-             << momentum_total;
+  log.info() << "Initial total 4-momentum [GeV]: " << momentum_total;
   return start_time_;
 }
 
 /* Enforce periodic boundaries and output wall hits to collision files */
 int BoxModus::impose_boundary_conditions(Particles *particles,
-                         const OutputsList &output_list) {
+                                         const OutputsList &output_list) {
   const auto &log = logger<LogArea::Box>();
   int wraps = 0;
 
@@ -207,8 +207,8 @@ int BoxModus::impose_boundary_conditions(Particles *particles,
       const ParticleData incoming_particle(data);
       data.set_4position(position);
       ++wraps;
-      ActionPtr action = make_unique<WallcrossingAction>(incoming_particle,
-                                                         data);
+      ActionPtr action =
+          make_unique<WallcrossingAction>(incoming_particle, data);
       for (const auto &output : output_list) {
         output->at_interaction(*action, 0.);
       }

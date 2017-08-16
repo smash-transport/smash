@@ -7,18 +7,18 @@
  *
  */
 
-#include "unittest.h"
-#include "setup.h"
+#include <include/config.h>
 #include <array>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 #include <map>
 #include <string>
 #include <vector>
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
-#include <include/config.h>
+#include "setup.h"
+#include "unittest.h"
 
-#include "../include/outputinterface.h"
 #include "../include/oscaroutput.h"
+#include "../include/outputinterface.h"
 #include "../include/particles.h"
 #include "../include/processbranch.h"
 #include "../include/random.h"
@@ -117,14 +117,12 @@ TEST(full2013_format) {
     COMPARE(line,
             "#!OSCAR2013 full_event_history t x y z mass p0 px py pz pdg ID");
     std::getline(outputfile, line);
-    COMPARE(line,
-            "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none");
+    COMPARE(line, "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none");
     std::getline(outputfile, line);
-    COMPARE(line,
-            "# " VERSION_MAJOR);
+    COMPARE(line, "# " VERSION_MAJOR);
     /* Check initial particle list description line */
-    std::string initial_line = "# event " + std::to_string(event_id + 1) +
-                               " in " + std::to_string(2);
+    std::string initial_line =
+        "# event " + std::to_string(event_id + 1) + " in " + std::to_string(2);
     std::getline(outputfile, line);
     COMPARE(line, initial_line);
     /* Check initial particle data lines item by item */
@@ -139,9 +137,9 @@ TEST(full2013_format) {
     outputfile.get();
     /* Check interaction block */
     std::getline(outputfile, line);
-    std::string interaction_line =
-        "# interaction in " + std::to_string(2) +
-        " out " + std::to_string(final_particles.size());
+    std::string interaction_line = "# interaction in " + std::to_string(2) +
+                                   " out " +
+                                   std::to_string(final_particles.size());
     // Allow additional fields
     COMPARE(line.substr(0, interaction_line.size()), interaction_line);
     for (const ParticleData &data : action->incoming_particles()) {
@@ -226,7 +224,6 @@ TEST(final2013_format) {
   action->perform(&particles, 1);
   osc2013final->at_eventend(particles, event_id);
   COMPARE(action->outgoing_particles(), particles.copy_to_vector());
-
 
   bf::fstream outputfile;
   outputfile.open(outputfilepath, std::ios_base::in);

@@ -40,9 +40,7 @@ class BinaryOutputBase : public OutputInterface {
   void write(const std::uint16_t x) {
     std::fwrite(&x, sizeof(x), 1, file_.get());
   }
-  void write(const size_t x) {
-    write(boost::numeric_cast<uint32_t>(x));
-  }
+  void write(const size_t x) { write(boost::numeric_cast<uint32_t>(x)); }
   void write(const Particles &particles);
   void write(const ParticleList &particles);
   void write_particledata(const ParticleData &p);
@@ -73,7 +71,7 @@ class BinaryOutputCollisions : public BinaryOutputBase {
  public:
   BinaryOutputCollisions(const bf::path &path, const std::string &name,
                          bool extended_format);
-  BinaryOutputCollisions(const bf::path &path, Configuration&& config);
+  BinaryOutputCollisions(const bf::path &path, Configuration &&config);
 
   /// writes the initial particle information of an event
   void at_eventstart(const Particles &particles,
@@ -88,7 +86,6 @@ class BinaryOutputCollisions : public BinaryOutputBase {
   /// Option: print initial and final particles or not
   bool print_start_end_;
 };
-
 
 }  // namespace Smash
 

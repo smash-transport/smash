@@ -136,11 +136,10 @@ class Integrator {
         &fun};
     // We disable float traps when calling GSL code we cannot control.
     DisableFloatTraps guard;
-    const int error_code = gsl_integration_cquad(&gslfun, a, b,
-                          accuracy_absolute_, accuracy_relative_,
-                          workspace_.get(),
-                          &result.first, &result.second,
-                          nullptr /* Don't store the number of evaluations */);
+    const int error_code = gsl_integration_cquad(
+        &gslfun, a, b, accuracy_absolute_, accuracy_relative_, workspace_.get(),
+        &result.first, &result.second,
+        nullptr /* Don't store the number of evaluations */);
     if (error_code) {
       std::stringstream err;
       err << "GSL 1D deterministic integration: " << gsl_strerror(error_code);
@@ -153,8 +152,8 @@ class Integrator {
 
  private:
   /// Holds the workspace pointer.
-  std::unique_ptr<gsl_integration_cquad_workspace,
-                  GslWorkspaceDeleter> workspace_;
+  std::unique_ptr<gsl_integration_cquad_workspace, GslWorkspaceDeleter>
+      workspace_;
 
   /// Parameter to the GSL integration function: desired absolute error limit
   const double accuracy_absolute_ = 1.0e-9;

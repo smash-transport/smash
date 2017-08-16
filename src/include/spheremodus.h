@@ -50,7 +50,7 @@ class SphereModus : public ModusDefault {
   /** creates initial conditions for the particles.
    */
   double initial_conditions(Particles *particles,
-                          const ExperimentParameters &parameters);
+                            const ExperimentParameters &parameters);
 
  private:
   /// Sphere radius length

@@ -22,9 +22,7 @@ namespace Smash {
  */
 #if defined _GNU_SOURCE
 // glibc specific implementation
-inline bool enable_float_traps(int mask) {
-  return -1 != feenableexcept(mask);
-}
+inline bool enable_float_traps(int mask) { return -1 != feenableexcept(mask); }
 #elif defined __SSE__
 // directly program the trap on the SSE unit
 bool enable_float_traps(int femask);

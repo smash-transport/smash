@@ -23,9 +23,9 @@ TEST(equality_different) {
 
 /* check equality - the vectors Are the same */
 TEST(equality_equal) {
-  VERIFY(  A == A2);
+  VERIFY(A == A2);
   VERIFY(!(A != A2));
-  VERIFY(  B == B2);
+  VERIFY(B == B2);
   VERIFY(!(B != B2));
 }
 

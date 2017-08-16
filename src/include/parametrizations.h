@@ -18,8 +18,8 @@ namespace Smash {
 
 /** total hadronic cross sections at high energies parametrized in the 2016 PDG
  *  book(http://pdg.lbl.gov/2016/reviews/rpp2016-rev-cross-section-plots.pdf) */
-double xs_high_energy(double mandelstam_s, bool is_opposite_charge,
-                     double ma, double mb, double P, double R1, double R2);
+double xs_high_energy(double mandelstam_s, bool is_opposite_charge, double ma,
+                      double mb, double P, double R1, double R2);
 
 /** pp total cross section at high energies */
 double pp_high_energy(double mandelstam_s);
@@ -74,7 +74,6 @@ double np_elastic(double mandelstam_s);
  * \fpPrecision Why \c double?
  */
 double np_total(double mandelstam_s);
-
 
 /** ppbar elastic cross section parametrization
  *
@@ -159,25 +158,26 @@ double kplusn_inelastic(double mandelstam_s);
  * implementation.
  */
 struct pair_hash {
-    std::size_t operator () (const std::pair<uint64_t, uint64_t> &p) const {
-        auto h1 = std::hash<uint64_t>{}(p.first);
-        auto h2 = std::hash<uint64_t>{}(p.second);
+  std::size_t operator()(const std::pair<uint64_t, uint64_t>& p) const {
+    auto h1 = std::hash<uint64_t>{}(p.first);
+    auto h2 = std::hash<uint64_t>{}(p.second);
 
-        // In our case the integers are PDG codes. We know they are different
-        // and their order is defined, so we can simply combine the hashes
-        // using XOR. Note that this yields 0 for h1 == h2. Also,
-        // std::swap(h1, h2) does not not change the final hash.
-        assert(h1 != h2);
-        return h1 ^ h2;
-    }
+    // In our case the integers are PDG codes. We know they are different
+    // and their order is defined, so we can simply combine the hashes
+    // using XOR. Note that this yields 0 for h1 == h2. Also,
+    // std::swap(h1, h2) does not not change the final hash.
+    assert(h1 != h2);
+    return h1 ^ h2;
+  }
 };
 
 /** Isospin weights for inelastic K+ N channels.
  */
 class KplusNRatios {
  private:
-  mutable std::unordered_map<std::pair<uint64_t, uint64_t>,
-                             double, pair_hash> ratios_;
+  mutable std::unordered_map<std::pair<uint64_t, uint64_t>, double, pair_hash>
+      ratios_;
+
  public:
   /// Create an empty K+ N isospin ratio storage.
   KplusNRatios() : ratios_({}) {}
@@ -186,7 +186,7 @@ class KplusNRatios {
   ///
   /// On the first call all ratios are calculated.
   double get_ratio(const ParticleType& a, const ParticleType& b,
-                  const ParticleType& c, const ParticleType& d) const;
+                   const ParticleType& c, const ParticleType& d) const;
 };
 
 extern /*thread_local (see #3075)*/ KplusNRatios kplusn_ratios;

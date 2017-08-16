@@ -89,13 +89,12 @@ class Particles;
 class RootOutput : public OutputInterface {
  public:
   RootOutput(const bf::path &path, const std::string &name);
-  RootOutput(const bf::path &path, Configuration&& conf);
+  RootOutput(const bf::path &path, Configuration &&conf);
   ~RootOutput();
 
   void at_eventstart(const Particles &particles,
                      const int event_number) override;
-  void at_eventend(const Particles &particles,
-                   const int event_number) override;
+  void at_eventend(const Particles &particles, const int event_number) override;
   void at_intermediate_time(const Particles &particles, const Clock &clock,
                             const DensityParameters &dens_param) override;
   void at_interaction(const Action &action, const double density) override;
@@ -105,8 +104,8 @@ class RootOutput : public OutputInterface {
   std::unique_ptr<TFile> root_out_file_;
   // TFile takes ownership of all TTrees.
   // That's why TTree is not a unique pointer.
-  TTree* particles_tree_;
-  TTree* collisions_tree_;
+  TTree *particles_tree_;
+  TTree *collisions_tree_;
   void particles_to_tree(const Particles &particles);
   void collisions_to_tree(const ParticleList &incoming,
                           const ParticleList &outgoing, const double weight);
@@ -117,7 +116,7 @@ class RootOutput : public OutputInterface {
   static const int max_buffer_size_ = 10000;
   // Variables that serve as buffer for filling TTree
   std::array<double, max_buffer_size_> p0, px, py, pz, t, x, y, z;
-  std::array<int, max_buffer_size_>    pdgcode;
+  std::array<int, max_buffer_size_> pdgcode;
   int npart, tcounter, ev, nin, nout;
   double wgt;
 

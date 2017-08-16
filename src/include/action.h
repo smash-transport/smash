@@ -39,12 +39,12 @@ class Action {
    */
   Action(const ParticleList &in_part, double time);
 
-  Action(const ParticleData &in_part, const ParticleData &out_part,
-         double time, ProcessType type)
-        : incoming_particles_({in_part}),
-          outgoing_particles_({out_part}),
-          time_of_execution_(time+in_part.position().x0()),
-          process_type_(type) {}
+  Action(const ParticleData &in_part, const ParticleData &out_part, double time,
+         ProcessType type)
+      : incoming_particles_({in_part}),
+        outgoing_particles_({out_part}),
+        time_of_execution_(time + in_part.position().x0()),
+        process_type_(type) {}
 
   /** Copying is disabled. Use pointers or create a new Action. */
   Action(const Action &) = delete;
@@ -68,24 +68,23 @@ class Action {
   virtual double raw_weight_value() const = 0;
 
   /** Return the process type. */
-  virtual ProcessType get_type() const {
-    return process_type_;
-  }
+  virtual ProcessType get_type() const { return process_type_; }
 
   /** Add a new subprocess.  */
-  template<typename Branch>
+  template <typename Branch>
   void add_process(ProcessBranchPtr<Branch> &p,
-                   ProcessBranchList<Branch>& subprocesses,
-                   double& total_weight) {
+                   ProcessBranchList<Branch> &subprocesses,
+                   double &total_weight) {
     if (p->weight() > 0) {
       total_weight += p->weight();
       subprocesses.emplace_back(std::move(p));
     }
   }
   /** Add several new subprocesses at once.  */
-  template<typename Branch>
+  template <typename Branch>
   void add_processes(ProcessBranchList<Branch> pv,
-      ProcessBranchList<Branch>& subprocesses, double& total_weight) {
+                     ProcessBranchList<Branch> &subprocesses,
+                     double &total_weight) {
     subprocesses.reserve(subprocesses.size() + pv.size());
     for (auto &proc : pv) {
       if (proc->weight() > 0) {
@@ -139,7 +138,7 @@ class Action {
   /**
    * Return the list of particles that go into the interaction.
    */
-  const ParticleList& incoming_particles() const;
+  const ParticleList &incoming_particles() const;
 
   /**
    * Update the incoming particles that are stored in this action to the state
@@ -201,9 +200,9 @@ class Action {
    * Decide for a particular final-state channel via Monte-Carlo
    * and return it as a ProcessBranch
    */
-  template<typename Branch>
-  const Branch* choose_channel(
-      const ProcessBranchList<Branch>& subprocesses, double total_weight) {
+  template <typename Branch>
+  const Branch *choose_channel(const ProcessBranchList<Branch> &subprocesses,
+                               double total_weight) {
     const auto &log = logger<LogArea::Action>();
     double random_weight = Random::uniform(0., total_weight);
     double weight_sum = 0.;
@@ -212,20 +211,21 @@ class Action {
     for (const auto &proc : subprocesses) {
       /* All processes apart from strings should have
        * a well-defined final state. */
-      if (proc->particle_number() < 1
-          && proc->get_type() != ProcessType::String) {
+      if (proc->particle_number() < 1 &&
+          proc->get_type() != ProcessType::String) {
         continue;
       }
       weight_sum += proc->weight();
       if (random_weight <= weight_sum) {
         /* Return the full process information. */
-         return proc.get();
+        return proc.get();
       }
     }
     /* Should never get here. */
-    log.fatal(source_location, "Problem in choose_channel: ",
-              subprocesses.size(), " ", weight_sum, " ", total_weight, " ",
-    //          random_weight, "\n", *this);
+    log.fatal(source_location,
+              "Problem in choose_channel: ", subprocesses.size(), " ",
+              weight_sum, " ", total_weight, " ",
+              //          random_weight, "\n", *this);
               random_weight, "\n");
     throw std::runtime_error("problem in choose_channel");
   }
@@ -265,7 +265,6 @@ class Action {
     return out;
   }
 };
-
 
 inline std::vector<ActionPtr> &operator+=(std::vector<ActionPtr> &lhs,
                                           std::vector<ActionPtr> &&rhs) {

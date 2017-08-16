@@ -37,7 +37,7 @@ enum class ProcessType {
   Wall = 6
 };
 
-std::ostream& operator<< (std::ostream& os, ProcessType process_type);
+std::ostream &operator<<(std::ostream &os, ProcessType process_type);
 
 /**
  * \ingroup data
@@ -125,23 +125,20 @@ inline void ProcessBranch::set_weight(double process_weight) {
 }
 
 /// Return the branch weight
-inline double ProcessBranch::weight() const {
-  return branch_weight_;
-}
+inline double ProcessBranch::weight() const { return branch_weight_; }
 
 /** \relates ProcessBranch
  * Calculates the total weight by summing all weights of the ProcessBranch
  * objects in the list \p l.
  */
-template<typename Branch>
-inline double total_weight(const ProcessBranchList<Branch>& l) {
+template <typename Branch>
+inline double total_weight(const ProcessBranchList<Branch> &l) {
   double sum = 0.;
   for (const auto &p : l) {
     sum += p->weight();
   }
   return sum;
 }
-
 
 /**
  * \ingroup data
@@ -151,11 +148,11 @@ inline double total_weight(const ProcessBranchList<Branch>& l) {
  */
 class CollisionBranch : public ProcessBranch {
  public:
-  CollisionBranch(double w, ProcessType p_type) : ProcessBranch(w),
-                                                 process_type_(p_type) {}
+  CollisionBranch(double w, ProcessType p_type)
+      : ProcessBranch(w), process_type_(p_type) {}
   /// Constructor with 1 particle
   CollisionBranch(const ParticleType &type, double w, ProcessType p_type)
-                 : ProcessBranch(w), process_type_(p_type) {
+      : ProcessBranch(w), process_type_(p_type) {
     particle_types_.reserve(1);
     particle_types_.push_back(&type);
   }
@@ -169,7 +166,8 @@ class CollisionBranch : public ProcessBranch {
   }
   /// Constructor with a list of particles
   CollisionBranch(ParticleTypePtrList new_types, double w, ProcessType p_type)
-      : ProcessBranch(w), particle_types_(std::move(new_types)),
+      : ProcessBranch(w),
+        particle_types_(std::move(new_types)),
         process_type_(p_type) {}
   /// The move constructor efficiently moves the particle-type list member.
   CollisionBranch(CollisionBranch &&rhs)
@@ -181,13 +179,9 @@ class CollisionBranch : public ProcessBranch {
     return particle_types_;
   }
   /// Set the process type
-  inline void set_type(ProcessType p_type) {
-    process_type_ = p_type;
-  }
+  inline void set_type(ProcessType p_type) { process_type_ = p_type; }
   /// Return the process type
-  inline ProcessType get_type() const override {
-    return process_type_;
-  }
+  inline ProcessType get_type() const override { return process_type_; }
   unsigned int particle_number() const override {
     return particle_types_.size();
   }
@@ -209,7 +203,6 @@ class CollisionBranch : public ProcessBranch {
   ProcessType process_type_;
 };
 
-
 /**
  * \ingroup data
  *
@@ -221,12 +214,10 @@ class DecayBranch : public ProcessBranch {
  public:
   DecayBranch(const DecayType &t, double w) : ProcessBranch(w), type_(t) {}
   /// The move constructor efficiently moves the particle-type list member.
-  DecayBranch(DecayBranch &&rhs) : ProcessBranch(rhs.branch_weight_),
-                                   type_(rhs.type_) {}
+  DecayBranch(DecayBranch &&rhs)
+      : ProcessBranch(rhs.branch_weight_), type_(rhs.type_) {}
   /// Get the angular momentum of this branch.
-  inline int angular_momentum() const {
-    return type_.angular_momentum();
-  }
+  inline int angular_momentum() const { return type_.angular_momentum(); }
   /// Return the particle types associated with this branch.
   const ParticleTypePtrList &particle_types() const override {
     return type_.particle_types();
@@ -234,13 +225,9 @@ class DecayBranch : public ProcessBranch {
   unsigned int particle_number() const override {
     return type_.particle_number();
   }
-  inline const DecayType& type() const {
-    return type_;
-  }
+  inline const DecayType &type() const { return type_; }
   /// Return the process type
-  inline ProcessType get_type() const override {
-    return ProcessType::Decay;
-  }
+  inline ProcessType get_type() const override { return ProcessType::Decay; }
 
  private:
   // decay type (including final-state particles and angular momentum

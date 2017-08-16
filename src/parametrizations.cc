@@ -32,17 +32,17 @@ namespace Smash {
 
 /** total hadronic cross sections at high energies parametrized in the 2016 PDG
  *  book(http://pdg.lbl.gov/2016/reviews/rpp2016-rev-cross-section-plots.pdf) */
-double xs_high_energy(double mandelstam_s, bool is_opposite_charge,
-                     double ma, double mb, double P, double R1, double R2) {
+double xs_high_energy(double mandelstam_s, bool is_opposite_charge, double ma,
+                      double mb, double P, double R1, double R2) {
   const double M = 2.1206;
   const double H = 0.272;
   const double eta1 = 0.4473;
   const double eta2 = 0.5486;
   const double s_sab = mandelstam_s / (ma + mb + M) / (ma + mb + M);
-  double xs = H * std::log(s_sab) * std::log(s_sab) + P
-             + R1 * std::pow(s_sab, -eta1);
+  double xs =
+      H * std::log(s_sab) * std::log(s_sab) + P + R1 * std::pow(s_sab, -eta1);
   xs = is_opposite_charge ? xs + R2 * pow(s_sab, -eta2)
-             : xs - R2 * pow(s_sab, -eta2);
+                          : xs - R2 * pow(s_sab, -eta2);
   return xs;
 }
 
@@ -82,8 +82,8 @@ double piplusp_elastic(double mandelstam_s) {
   double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
   if (p_lab < 8.0 /*1.45*/) {
     return really_small;
-//} else if (p_lab < 2.0) {
-//    return 16.0 - (p_lab - 1.45) * 7.5 / 0.55;
+    //} else if (p_lab < 2.0) {
+    //    return 16.0 - (p_lab - 1.45) * 7.5 / 0.55;
   } else {
     const auto logp = std::log(p_lab);
     return 11.4 * std::pow(p_lab, -0.4) + 0.079 * logp * logp;
@@ -95,7 +95,7 @@ double piplusp_elastic(double mandelstam_s) {
 double piminusp_elastic(double mandelstam_s) {
   double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
   const auto logp = std::log(p_lab);
-  if (p_lab < 8.0/*2.0*/) {
+  if (p_lab < 8.0 /*2.0*/) {
     return really_small;
   } else {
     return 1.76 + 11.2 * std::pow(p_lab, -0.64) + 0.043 * logp * logp;
@@ -107,19 +107,20 @@ double piminusp_elastic(double mandelstam_s) {
 double pp_elastic(double mandelstam_s) {
   double p_lab = plab_from_s(mandelstam_s);
   if (p_lab < 0.435) {
-    return 5.12 * nucleon_mass
-        / (mandelstam_s - 4 * nucleon_mass * nucleon_mass) + 1.67;
+    return 5.12 * nucleon_mass /
+               (mandelstam_s - 4 * nucleon_mass * nucleon_mass) +
+           1.67;
   } else if (p_lab < 0.8) {
-    return 23.5 + 1000 * (p_lab - 0.7) * (p_lab - 0.7)
-      * (p_lab - 0.7) *(p_lab - 0.7);
+    return 23.5 +
+           1000 * (p_lab - 0.7) * (p_lab - 0.7) * (p_lab - 0.7) * (p_lab - 0.7);
   } else if (p_lab < 2.0) {
     return 1250 / (p_lab + 50) - 4 * (p_lab - 1.3) * (p_lab - 1.3);
   } else if (p_lab < 2.776) {
     return 77 / (p_lab + 1.5);
   } else {
     const auto logp = std::log(p_lab);
-    return 11.9 + 26.9 * std::pow(p_lab, -1.21) + 0.169 * logp * logp
-           - 1.85 * logp;
+    return 11.9 + 26.9 * std::pow(p_lab, -1.21) + 0.169 * logp * logp -
+           1.85 * logp;
   }
 }
 
@@ -133,8 +134,8 @@ double pp_total(double mandelstam_s) {
   if (p_lab < 0.4) {
     return 34 * std::pow(p_lab / 0.4, -2.104);
   } else if (p_lab < 0.8) {
-    return 23.5 + 1000 * (p_lab - 0.7) * (p_lab - 0.7)
-      * (p_lab - 0.7) *(p_lab - 0.7);
+    return 23.5 +
+           1000 * (p_lab - 0.7) * (p_lab - 0.7) * (p_lab - 0.7) * (p_lab - 0.7);
   } else if (p_lab < 1.5) {
     return 23.5 + 24.6 / (1 + std::exp(-(p_lab - 1.2) / 0.1));
   } else if (p_lab < 5.0) {
@@ -150,8 +151,9 @@ double pp_total(double mandelstam_s) {
 double np_elastic(double mandelstam_s) {
   double p_lab = plab_from_s(mandelstam_s);
   if (p_lab < 0.525) {
-    return 17.05 * nucleon_mass
-        / (mandelstam_s - 4 * nucleon_mass * nucleon_mass) - 6.83;
+    return 17.05 * nucleon_mass /
+               (mandelstam_s - 4 * nucleon_mass * nucleon_mass) -
+           6.83;
   } else if (p_lab < 0.8) {
     return 33 + 196 * std::pow(std::abs(p_lab - 0.95), 2.5);
   } else if (p_lab < 2.0) {
@@ -160,8 +162,8 @@ double np_elastic(double mandelstam_s) {
     return 77 / (p_lab + 1.5);
   } else {
     const auto logp = std::log(p_lab);
-    return 11.9 + 26.9 * std::pow(p_lab, -1.21) + 0.169 * logp * logp
-           - 1.85 * logp;
+    return 11.9 + 26.9 * std::pow(p_lab, -1.21) + 0.169 * logp * logp -
+           1.85 * logp;
   }
 }
 
@@ -196,8 +198,8 @@ double ppbar_elastic(double mandelstam_s) {
     return 31.6 + 18.3 / p_lab - 1.1 / (p_lab * p_lab) - 3.8 * p_lab;
   } else {
     const auto logp = std::log(p_lab);
-    return 10.2 + 52.7 * std::pow(p_lab, -1.16) + 0.125 * logp * logp
-           - 1.28 * logp;
+    return 10.2 + 52.7 * std::pow(p_lab, -1.16) + 0.125 * logp * logp -
+           1.28 * logp;
   }
 }
 
@@ -211,8 +213,8 @@ double ppbar_total(double mandelstam_s) {
     return 75.0 + 43.1 / p_lab + 2.6 / (p_lab * p_lab) - 3.9 * p_lab;
   } else {
     const auto logp = std::log(p_lab);
-    return 38.4 + 77.6 * std::pow(p_lab, -0.64) + 0.26 * logp * logp
-           - 1.2 * logp;
+    return 38.4 + 77.6 * std::pow(p_lab, -0.64) + 0.26 * logp * logp -
+           1.2 * logp;
   }
 }
 
@@ -222,14 +224,14 @@ double ppbar_total(double mandelstam_s) {
 double kplusp_elastic(double mandelstam_s) {
   constexpr double a0 = 10.508;  // mb
   constexpr double a1 = -3.716;  // mb/GeV
-  constexpr double a2 = 1.845;  // mb/GeV^2
+  constexpr double a2 = 1.845;   // mb/GeV^2
   constexpr double a3 = -0.764;  // GeV^-1
-  constexpr double a4 = 0.508;  // GeV^-2
+  constexpr double a4 = 0.508;   // GeV^-2
 
   const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
-  const double p_lab2 = p_lab*p_lab;
+  const double p_lab2 = p_lab * p_lab;
 
-  return (a0 + a1*p_lab + a2*p_lab2) / (1 + a3*p_lab + a4*p_lab2);
+  return (a0 + a1 * p_lab + a2 * p_lab2) / (1 + a3 * p_lab + a4 * p_lab2);
 }
 
 /** K+ n elastic cross section parametrization.
@@ -285,13 +287,13 @@ double kminusp_elastic(double mandelstam_s) {
     // The values of the parameters are *not* taken from the source above,
     // they come from a fit to PDG data.
     constexpr double a0 = 186.03567644;  // mb GeV^2
-    constexpr double a1 = 0.22002795;  // Gev
+    constexpr double a1 = 0.22002795;    // Gev
     constexpr double a2 = 0.64907116;
 
     const double p_i = p_lab;
     const double p_f = p_lab;
 
-    const double ratio = a1*a1 / (a1*a1 + p_f*p_f);
+    const double ratio = a1 * a1 / (a1 * a1 + p_f * p_f);
     sigma = a0 * p_f / (p_i * mandelstam_s) * std::pow(ratio, a2);
   } else {
     sigma = kminusp_elastic_pdg(mandelstam_s);
@@ -365,8 +367,7 @@ double kplusp_inelastic(double mandelstam_s) {
         make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
   const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
-  return (*kplusp_total_interpolation)(p_lab)
-         - kplusp_elastic(mandelstam_s);
+  return (*kplusp_total_interpolation)(p_lab)-kplusp_elastic(mandelstam_s);
 }
 
 /** K+ n inelastic cross section parametrization.
@@ -383,14 +384,12 @@ double kplusn_inelastic(double mandelstam_s) {
         make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
   const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
-  return (*kplusn_total_interpolation)(p_lab)
-         - kplusn_elastic(mandelstam_s);
+  return (*kplusn_total_interpolation)(p_lab)-kplusn_elastic(mandelstam_s);
 }
 
-
 /// Calculate and store all isospin ratios for K+ N reactions.
-static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>,
-    double, pair_hash>& ratios) {
+static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>, double,
+                                          pair_hash>& ratios) {
   const auto& type_p = ParticleType::find(pdg::p);
   const auto& type_n = ParticleType::find(pdg::n);
   const auto& type_K_p = ParticleType::find(pdg::K_p);
@@ -400,75 +399,66 @@ static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>,
   const auto& type_Delta_z = ParticleType::find(pdg::Delta_z);
   const auto& type_Delta_m = ParticleType::find(pdg::Delta_m);
 
-  auto add_to_ratios = [&] (const ParticleType& a, const ParticleType& b,
-                            const ParticleType& c, const ParticleType& d,
-                            double weight_numerator, double weight_other) {
-      assert(weight_numerator + weight_other != 0);
-      const auto key = std::make_pair(pack(a.pdgcode().code(),
-                                           b.pdgcode().code()),
-                                      pack(c.pdgcode().code(),
-                                           d.pdgcode().code()));
-      const double ratio = weight_numerator / (weight_numerator + weight_other);
-      ratios[key] = ratio;
+  auto add_to_ratios = [&](const ParticleType& a, const ParticleType& b,
+                           const ParticleType& c, const ParticleType& d,
+                           double weight_numerator, double weight_other) {
+    assert(weight_numerator + weight_other != 0);
+    const auto key =
+        std::make_pair(pack(a.pdgcode().code(), b.pdgcode().code()),
+                       pack(c.pdgcode().code(), d.pdgcode().code()));
+    const double ratio = weight_numerator / (weight_numerator + weight_other);
+    ratios[key] = ratio;
   };
 
   // All inelastic channels are K+ N -> K Delta -> K pi N, with identical
   // cross section, weighted by the isospin factor.
   {
     const auto weight1 = isospin_clebsch_gordan_sqr_2to2(
-      type_p, type_K_p, type_K_z, type_Delta_pp);
+        type_p, type_K_p, type_K_z, type_Delta_pp);
     const auto weight2 = isospin_clebsch_gordan_sqr_2to2(
-      type_p, type_K_p, type_K_p, type_Delta_p);
+        type_p, type_K_p, type_K_p, type_Delta_p);
 
-    add_to_ratios(type_p, type_K_p, type_K_z, type_Delta_pp,
-                  weight1, weight2);
-    add_to_ratios(type_p, type_K_p, type_K_p, type_Delta_p,
-                  weight2, weight1);
+    add_to_ratios(type_p, type_K_p, type_K_z, type_Delta_pp, weight1, weight2);
+    add_to_ratios(type_p, type_K_p, type_K_p, type_Delta_p, weight2, weight1);
   }
   {
     const auto weight1 = isospin_clebsch_gordan_sqr_2to2(
-      type_n, type_K_p, type_K_z, type_Delta_p);
+        type_n, type_K_p, type_K_z, type_Delta_p);
     const auto weight2 = isospin_clebsch_gordan_sqr_2to2(
-      type_n, type_K_p, type_K_p, type_Delta_z);
+        type_n, type_K_p, type_K_p, type_Delta_z);
 
-    add_to_ratios(type_n, type_K_p, type_K_z, type_Delta_p,
-                  weight1, weight2);
-    add_to_ratios(type_n, type_K_p, type_K_p, type_Delta_z,
-                  weight2, weight1);
+    add_to_ratios(type_n, type_K_p, type_K_z, type_Delta_p, weight1, weight2);
+    add_to_ratios(type_n, type_K_p, type_K_p, type_Delta_z, weight2, weight1);
   }
 
   // K+ and K0 have the same isospin projection, they are assumed to have
   // the same cross section here.
   {
     const auto weight1 = isospin_clebsch_gordan_sqr_2to2(
-      type_p, type_K_z, type_K_z, type_Delta_p);
+        type_p, type_K_z, type_K_z, type_Delta_p);
     const auto weight2 = isospin_clebsch_gordan_sqr_2to2(
-      type_p, type_K_z, type_K_p, type_Delta_z);
+        type_p, type_K_z, type_K_p, type_Delta_z);
 
-    add_to_ratios(type_p, type_K_z, type_K_z, type_Delta_p,
-                  weight1, weight2);
-    add_to_ratios(type_p, type_K_z, type_K_p, type_Delta_z,
-                  weight2, weight1);
+    add_to_ratios(type_p, type_K_z, type_K_z, type_Delta_p, weight1, weight2);
+    add_to_ratios(type_p, type_K_z, type_K_p, type_Delta_z, weight2, weight1);
   }
   {
     const auto weight1 = isospin_clebsch_gordan_sqr_2to2(
-      type_n, type_K_z, type_K_z, type_Delta_z);
+        type_n, type_K_z, type_K_z, type_Delta_z);
     const auto weight2 = isospin_clebsch_gordan_sqr_2to2(
-      type_n, type_K_z, type_K_p, type_Delta_m);
+        type_n, type_K_z, type_K_p, type_Delta_m);
 
-    add_to_ratios(type_n, type_K_z, type_K_z, type_Delta_z,
-                  weight1, weight2);
-    add_to_ratios(type_n, type_K_z, type_K_p, type_Delta_m,
-                  weight2, weight1);
+    add_to_ratios(type_n, type_K_z, type_K_z, type_Delta_z, weight1, weight2);
+    add_to_ratios(type_n, type_K_z, type_K_p, type_Delta_m, weight2, weight1);
   }
 }
 
 /// Return the isospin ratio of the given K+ N reaction's cross section.
-double KplusNRatios::get_ratio(const ParticleType& a,
-                              const ParticleType& b,
-                              const ParticleType& c,
-                              const ParticleType& d) const {
-  /* If this method is called with anti-nucleons, flip all particles to anti-particles;
+double KplusNRatios::get_ratio(const ParticleType& a, const ParticleType& b,
+                               const ParticleType& c,
+                               const ParticleType& d) const {
+  /* If this method is called with anti-nucleons, flip all particles to
+   * anti-particles;
    * the ratio is equal */
   int flip = 0;
   for (const auto& p : {&a, &b, &c, &d}) {
@@ -480,10 +470,9 @@ double KplusNRatios::get_ratio(const ParticleType& a,
       }
     }
   }
-  const auto key = std::make_pair(pack(a.pdgcode().code()*flip,
-                                       b.pdgcode().code()*flip),
-                                  pack(c.pdgcode().code()*flip,
-                                       d.pdgcode().code()*flip));
+  const auto key = std::make_pair(
+      pack(a.pdgcode().code() * flip, b.pdgcode().code() * flip),
+      pack(c.pdgcode().code() * flip, d.pdgcode().code() * flip));
   if (ratios_.empty()) {
     initialize(ratios_);
   }
@@ -492,11 +481,10 @@ double KplusNRatios::get_ratio(const ParticleType& a,
 
 /*thread_local (see #3075)*/ KplusNRatios kplusn_ratios;
 
-
 /** K- p -> Kbar0 n cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.9 */
 double kminusp_kbar0n(double mandelstam_s) {
-  constexpr double a0 = 100;  // mb GeV^2
+  constexpr double a0 = 100;   // mb GeV^2
   constexpr double a1 = 0.15;  // GeV
   constexpr unsigned a2 = 2;
 
@@ -504,9 +492,9 @@ double kminusp_kbar0n(double mandelstam_s) {
   const double p_i = p_lab;
   const double p_f = p_lab;
 
-  return a0 * p_f/(p_i * mandelstam_s) * pow_int(a1*a1 / (a1*a1 + p_f*p_f), a2);
+  return a0 * p_f / (p_i * mandelstam_s) *
+         pow_int(a1 * a1 / (a1 * a1 + p_f * p_f), a2);
 }
-
 
 /* Parametrizations of strangeness exchange channels
  *
@@ -533,11 +521,11 @@ double kminusp_pi0lambda(double sqrts) {
 // product via isospin symmetry.
 
 double kminusn_piminussigma0(double sqrts) {
-  return 1./6 * 2 * kminusp_pi0sigma0(sqrts);
+  return 1. / 6 * 2 * kminusp_pi0sigma0(sqrts);
 }
 
 double kminusn_pi0sigmaminus(double sqrts) {
-  return (0.25 + 1./6) * 2 * kminusp_piplussigmaminus(sqrts);
+  return (0.25 + 1. / 6) * 2 * kminusp_piplussigmaminus(sqrts);
 }
 
 double kminusn_piminuslambda(double sqrts) {
