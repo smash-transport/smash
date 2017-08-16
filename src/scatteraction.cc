@@ -705,12 +705,16 @@ void ScatterAction::string_excitation_inter() {
                   incoming_particles_[1].momentum()).abs();
   /* transverse momentum transferred to strings */
   double sigQperp;
+  /* parametrization to fit the experimental data */
   if( sqrts < 4. ){
     sigQperp = 0.5;
   }
-  else{
-    /* parametrization to fit the experimental data */
+  else if( ( sqrts >= 4. ) && ( sqrts < 100. ) ){
     sigQperp = 0.5 + 0.2*std::log( sqrts/4. )/std::log( 5. );
+  }
+  else{
+    sigQperp = 0.5 + 0.2*std::log( 25. )/std::log( 5. )
+          + 0.4*std::log( sqrts/100. )/std::log( 5. );
   }
   /* initialize the spmerge object */
   spmerge->set_sigmaQperp(sigQperp);

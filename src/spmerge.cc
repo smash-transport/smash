@@ -256,12 +256,10 @@ SPmerge::SPmerge(){
 		XSecSummed[iproc] = 0.;
 	}
 
-	PDGidA = 0;
-	PDGidB = 0;
-	baryonA = 0;
-	baryonB = 0;
-	massA = 0.;
-	massB = 0.;
+	PDGidA = PDGidB = 0;
+	baryonA = baryonB = 0;
+	chargeA = chargeB = 0;
+	massA = massB = 0.;
 	sqrtsAB = 0.;
 	pabscomAB = 0.;
 
@@ -274,6 +272,8 @@ SPmerge::SPmerge(){
 	sigmaQperp = 1.2;
 	kappaString = 1.;
 
+	BINI = BFIN = 0;
+	CINI = CFIN = 0;
 	EINI = 0.;
 	EFIN = 0.;
 
@@ -768,16 +768,28 @@ bool SPmerge::init_lab(int idAIn, int idBIn, double massAIn, double massBIn, Vec
 	//fprintf(stderr,"  SPmerge::init : evecBasisAB3 = (%e, %e, %e)\n",
 	//	evecBasisAB[3][1], evecBasisAB[3][2], evecBasisAB[3][3]);
 
-	baryonA = pythia->particleData.baryonNumberType(PDGidA);
-	baryonB = pythia->particleData.baryonNumberType(PDGidB);
-
 	PDGid2idqset(PDGidA, idqsetA);
 	PDGid2idqset(PDGidB, idqsetB);
 
 	xfracMin = pLightConeMin/sqrtsAB;
 
-	CINI = pythia->particleData.chargeType(PDGidA) + pythia->particleData.chargeType(PDGidB);
+	// quantum numbers of hadron A
+	baryonA = pythia->particleData.baryonNumberType(idqsetA[1]) + pythia->particleData.baryonNumberType(idqsetA[2]);
+	chargeA = pythia->particleData.chargeType(idqsetA[1]) + pythia->particleData.chargeType(idqsetA[2]);
+	if( idqsetA[3] != 0 ){
+		baryonA = baryonA + pythia->particleData.baryonNumberType(idqsetA[3]);
+		chargeA = chargeA + pythia->particleData.chargeType(idqsetA[3]);
+	}
+	// quantum numbers of hadron B
+	baryonB = pythia->particleData.baryonNumberType(idqsetB[1]) + pythia->particleData.baryonNumberType(idqsetB[2]);
+	chargeB = pythia->particleData.chargeType(idqsetB[1]) + pythia->particleData.chargeType(idqsetB[2]);
+	if( idqsetB[3] != 0 ){
+		baryonB = baryonB + pythia->particleData.baryonNumberType(idqsetB[3]);
+		chargeB = chargeB + pythia->particleData.chargeType(idqsetB[3]);
+	}
+
 	BINI = baryonA + baryonB;
+	CINI = chargeA + chargeB;
 	EINI = plabA[0] + plabB[0];
 	pxINI = plabA[1] + plabB[1];
 	pyINI = plabA[2] + plabB[2];
@@ -857,16 +869,28 @@ bool SPmerge::init_com(int idAIn, int idBIn, double massAIn, double massBIn, dou
 	//fprintf(stderr,"  SPmerge::init : evecBasisAB3 = (%e, %e, %e)\n",
 	//	evecBasisAB[3][1], evecBasisAB[3][2], evecBasisAB[3][3]);
 
-	baryonA = pythia->particleData.baryonNumberType(PDGidA);
-	baryonB = pythia->particleData.baryonNumberType(PDGidB);
-
 	PDGid2idqset(PDGidA, idqsetA);
 	PDGid2idqset(PDGidB, idqsetB);
 
 	xfracMin = pLightConeMin/sqrtsAB;
 
-	CINI = pythia->particleData.chargeType(PDGidA) + pythia->particleData.chargeType(PDGidB);
+	// quantum numbers of hadron A
+	baryonA = pythia->particleData.baryonNumberType(idqsetA[1]) + pythia->particleData.baryonNumberType(idqsetA[2]);
+	chargeA = pythia->particleData.chargeType(idqsetA[1]) + pythia->particleData.chargeType(idqsetA[2]);
+	if( idqsetA[3] != 0 ){
+		baryonA = baryonA + pythia->particleData.baryonNumberType(idqsetA[3]);
+		chargeA = chargeA + pythia->particleData.chargeType(idqsetA[3]);
+	}
+	// quantum numbers of hadron B
+	baryonB = pythia->particleData.baryonNumberType(idqsetB[1]) + pythia->particleData.baryonNumberType(idqsetB[2]);
+	chargeB = pythia->particleData.chargeType(idqsetB[1]) + pythia->particleData.chargeType(idqsetB[2]);
+	if( idqsetB[3] != 0 ){
+		baryonB = baryonB + pythia->particleData.baryonNumberType(idqsetB[3]);
+		chargeB = chargeB + pythia->particleData.chargeType(idqsetB[3]);
+	}
+
 	BINI = baryonA + baryonB;
+	CINI = chargeA + chargeB;
 	EINI = plabA[0] + plabB[0];
 	pxINI = plabA[1] + plabB[1];
 	pyINI = plabA[2] + plabB[2];
