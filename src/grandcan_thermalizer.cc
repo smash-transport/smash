@@ -21,13 +21,13 @@
 
 namespace Smash {
 
-GrandCanThermalizer::GrandCanThermalizer(const std::array<float, 3> lat_sizes,
+GrandCanThermalizer::GrandCanThermalizer(const std::array<double, 3> lat_sizes,
                                          const std::array<int, 3> n_cells,
-                                         const std::array<float, 3> origin,
+                                         const std::array<double, 3> origin,
                                          bool periodicity,
-                                         float e_critical,
-                                         float t_start,
-                                         float delta_t,
+                                         double e_critical,
+                                         double t_start,
+                                         double delta_t,
                                          ThermalizationAlgorithm algo) :
   eos_typelist_(list_eos_particles()),
   N_sorts_(eos_typelist_.size()),
@@ -41,7 +41,7 @@ GrandCanThermalizer::GrandCanThermalizer(const std::array<float, 3> lat_sizes,
                                                            origin,
                                                            periodicity,
                                                            upd);
-  const std::array<float, 3> abc = lat_->cell_sizes();
+  const std::array<double, 3> abc = lat_->cell_sizes();
   cell_volume_ = abc[0] * abc[1] * abc[2];
   cells_to_sample_.resize(50000);
   mult_sort_.resize(N_sorts_);
@@ -50,12 +50,12 @@ GrandCanThermalizer::GrandCanThermalizer(const std::array<float, 3> lat_sizes,
 
 ThreeVector GrandCanThermalizer::uniform_in_cell() const {
   return ThreeVector(
-       Random::uniform(-0.5 * static_cast<double>(lat_->cell_sizes()[0]),
-                       +0.5 * static_cast<double>(lat_->cell_sizes()[0])),
-       Random::uniform(-0.5 * static_cast<double>(lat_->cell_sizes()[1]),
-                       +0.5 * static_cast<double>(lat_->cell_sizes()[1])),
-       Random::uniform(-0.5 * static_cast<double>(lat_->cell_sizes()[2]),
-                       +0.5 * static_cast<double>(lat_->cell_sizes()[2])));
+       Random::uniform(-0.5 * lat_->cell_sizes()[0],
+                       +0.5 * lat_->cell_sizes()[0]),
+       Random::uniform(-0.5 * lat_->cell_sizes()[1],
+                       +0.5 * lat_->cell_sizes()[1]),
+       Random::uniform(-0.5 * lat_->cell_sizes()[2],
+                       +0.5 * lat_->cell_sizes()[2]));
 }
 
 
@@ -91,7 +91,7 @@ void GrandCanThermalizer::sample_in_random_cell_BF_algo(
 
     ParticleData particle(*eos_typelist_[type_index]);
     // Note: it's pole mass for resonances!
-    const double m = static_cast<double>(eos_typelist_[type_index]->mass());
+    const double m = eos_typelist_[type_index]->mass();
     // Position
     particle.set_4position(FourVector(time, cell_center + uniform_in_cell()));
     // Momentum

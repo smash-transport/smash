@@ -17,6 +17,32 @@
 
 namespace Smash {
 
+/*Function to calculate the hubble parameter*/
+double calc_hubble(double time, const ExpansionProperties &metric) {
+  double h;  // Hubble parameter
+
+  // No expansion case
+  switch (metric.mode_) {
+    case ExpansionMode::NoExpansion:
+      h = 0.;
+      break;
+    case ExpansionMode::MasslessFRW:
+      h = metric.b_ / (2 * (metric.b_*time + 1));
+      break;
+    case ExpansionMode::MassiveFRW:
+      h = 2 * metric.b_ / (3 * (metric.b_*time + 1));
+      break;
+    case ExpansionMode::Exponential:
+      h = metric.b_ * time;
+      break;
+    default:
+      h = 0.;
+  }
+
+  return h;
+}
+
+
 /* Simple straight line propagation without potentials*/
 double propagate_straight_line(Particles *particles, double to_time,
       const std::vector<FourVector> &beam_momentum) {
@@ -40,7 +66,7 @@ double propagate_straight_line(Particles *particles, double to_time,
     // beam_momentum, which is by default zero except for the collider modus
     // with the fermi motion == frozen.
     // todo(m. mayer): improve this condition (see comment #11 issue #4213)
-    assert(data.id() > 0);
+    assert(data.id() >= 0);
     const bool avoid_fermi_motion =
       (static_cast<uint64_t>(data.id())
        < static_cast<uint64_t>(beam_momentum.size()))
@@ -66,6 +92,29 @@ double propagate_straight_line(Particles *particles, double to_time,
   return dt;
 }
 
+void expand_space_time(Particles *particles,
+                       const ExperimentParameters &parameters,
+                       const ExpansionProperties &metric) {
+  const auto &log = logger<LogArea::Propagation>();
+  const double dt = parameters.labclock.timestep_duration();
+  for (ParticleData &data : *particles) {
+    // Momentum and position modification to ensure appropriate expansion
+    const double h = calc_hubble(parameters.labclock.current_time(), metric);
+    FourVector delta_mom = FourVector(0.0, h*data.momentum().threevec()*dt);
+    FourVector expan_dist = FourVector(0.0, h*data.position().threevec()*dt);
+
+    log.debug("Particle ", data, " expansion motion: ", expan_dist);
+    // New position and momentum
+    FourVector position = data.position() + expan_dist;
+    FourVector momentum = data.momentum() - delta_mom;
+
+    // set the new momentum and position variables
+    data.set_4position(position);
+    data.set_4momentum(momentum);
+    // force the on shell condition to ensure correct energy
+    data.set_4momentum(data.pole_mass(), data.momentum().threevec());
+  }
+}
 
 void update_momenta(Particles *particles, double dt,
                const Potentials &pot,
@@ -79,7 +128,7 @@ void update_momenta(Particles *particles, double dt,
          (pot.use_skyrme() ? (UB_grad_lat != nullptr) : true) &&
          (pot.use_symmetry() ? (UI3_grad_lat != nullptr) : true);
   ThreeVector dUB_dr, dUI3_dr;
-  float min_time_scale = std::numeric_limits<float>::infinity();
+  double min_time_scale = std::numeric_limits<double>::infinity();
 
   for (ParticleData &data : *particles) {
     const ThreeVector r = data.position().threevec();
@@ -108,14 +157,14 @@ void update_momenta(Particles *particles, double dt,
     if (dU_dr_abs < really_small) {
       continue;
     }
-    const float time_scale = data.momentum().x0() / dU_dr_abs;
+    const double time_scale = data.momentum().x0() / dU_dr_abs;
     if (time_scale < min_time_scale) {
       min_time_scale = time_scale;
     }
   }
 
   // warn if the time step is too big
-  constexpr float safety_factor = 0.1f;
+  constexpr double safety_factor = 0.1;
   if (dt > safety_factor * min_time_scale) {
     log.warn() << "The time step size is too large for an accurate propagation "
                << "with potentials. Maximum safe value: "

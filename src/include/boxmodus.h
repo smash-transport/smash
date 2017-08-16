@@ -24,6 +24,7 @@ namespace Smash {
  * (not implemented now) or inserted on opposite positions.
  *
  * To use this modus, chose
+    Modus:         Box
  * \code
  * General:
  *      MODUS: Box
@@ -50,7 +51,7 @@ class BoxModus : public ModusDefault {
 
   /** creates initial conditions from the particles.
    */
-  float initial_conditions(Particles *particles,
+  double initial_conditions(Particles *particles,
                           const ExperimentParameters &parameters);
 
   /** Enforces that all particles are inside the box
@@ -63,12 +64,13 @@ class BoxModus : public ModusDefault {
    * inserted from the opposite side. Wall crossings are written to
    * collision output: this is where OutputsList is used.
    */
+
   int impose_boundary_conditions(Particles *particles,
                          const OutputsList &output_list = {});
 
   /// \copydoc Smash::ModusDefault::create_grid
   Grid<GridOptions::PeriodicBoundaries> create_grid(
-      const Particles &particles, float min_cell_length,
+      const Particles &particles, double min_cell_length,
       CellSizeStrategy strategy = CellSizeStrategy::Optimal) const {
     return {{{0, 0, 0}, {length_, length_, length_}},
             particles,
@@ -79,35 +81,35 @@ class BoxModus : public ModusDefault {
   /// \copydoc Smash::ModusDefault::create_grandcan_thermalizer
   std::unique_ptr<GrandCanThermalizer> create_grandcan_thermalizer(
                                                Configuration& conf) const {
-    const std::array<float, 3> lat_size = {length_, length_, length_};
-    const std::array<float, 3> origin = {0.0f, 0.0f, 0.0f};
+    const std::array<double, 3> lat_size = {length_, length_, length_};
+    const std::array<double, 3> origin = {0., 0., 0.};
     const bool periodicity = true;
     return make_unique<GrandCanThermalizer>(conf, lat_size, origin,
         periodicity);
   }
 
   /// \copydoc Smash::ModusDefault::max_timestep()
-  float max_timestep(float max_transverse_distance_sqr) const {
-    return 0.5f*std::sqrt(length_*length_ - max_transverse_distance_sqr);
+  double max_timestep(double max_transverse_distance_sqr) const {
+    return 0.5*std::sqrt(length_*length_ - max_transverse_distance_sqr);
   }
 
-  float length() const { return length_; }
+  double length() const { return length_; }
 
  private:
   const BoxInitialCondition initial_condition_;
   /// length of the cube's edge in fm/c
-  const float length_;
+  const double length_;
   /// Temperature of the Box in GeV
-  const float temperature_;
+  const double temperature_;
   /// initial time of the box
-  const float start_time_ = 0.0f;
+  const double start_time_ = 0.;
   /** whether to use a thermal initialization for all particles
    *  instead of specific numbers */
   const bool use_thermal_ = false;
   /// baryon chemical potential for thermal box
-  const float mub_;
+  const double mub_;
   /// strange chemical potential for thermal box
-  const float mus_;
+  const double mus_;
   /// particle multiplicities at initialization
   const std::map<PdgCode, int> init_multipl_;
 

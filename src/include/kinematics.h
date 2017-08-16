@@ -39,8 +39,8 @@ inline double center_of_velocity_v(double s, double ma, double mb) {
  * \param ma Mass of the projectile [GeV]
  * \param mb Mass of the target [GeV]
  */
-inline double fixed_target_projectile_v(float s, float ma, float mb) {
-  const float inv_gamma = 2 * ma * mb / (s - ma * ma - mb * mb);
+inline double fixed_target_projectile_v(double s, double ma, double mb) {
+  const double inv_gamma = 2 * ma * mb / (s - ma * ma - mb * mb);
   return std::sqrt(1.0 - inv_gamma*inv_gamma);
 }
 

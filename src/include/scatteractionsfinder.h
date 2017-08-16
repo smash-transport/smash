@@ -34,7 +34,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
                        int N_tot, int N_proj, int n_fractional_photons);
 
   /** Constructor for testing purposes. */
-  ScatterActionsFinder(float elastic_parameter, int testparticles,
+  ScatterActionsFinder(double elastic_parameter, int testparticles,
                        const std::vector<bool> &nucleon_has_interacted,
                        bool two_to_one = true);
 
@@ -93,7 +93,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
     return ParticleType::list_all().size() == 1 &&
            !two_to_one_ &&
            isotropic_ &&
-           elastic_parameter_ > 0.0f;
+           elastic_parameter_ > 0.;
   }
 
   /**
@@ -102,7 +102,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * Particle pairs whose transverse distance is larger then this, are not
    * checked for collisions.
    */
-  float max_transverse_distance_sqr(int testparticles) const {
+  double max_transverse_distance_sqr(int testparticles) const {
     return (is_constant_elastic_isotropic() ? elastic_parameter_ :
             maximum_cross_section) / testparticles * fm2_mb * M_1_PI;
   }
@@ -118,7 +118,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * the collision of a(mass = m_a) and b(mass = m_b).
    */
   void dump_cross_sections(const ParticleType &a, const ParticleType &b,
-                           float m_a, float m_b) const;
+                           double m_a, double m_b) const;
 
  private:
   /* Construct a ScatterAction object,
@@ -131,7 +131,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
   ActionPtr check_collision(const ParticleData &data_a,
                             const ParticleData &data_b, double dt) const;
   /** Elastic cross section parameter (in mb). */
-  const float elastic_parameter_;
+  const double elastic_parameter_;
   /** Number of test particles. */
   const int testparticles_;
   /** Do all collisions isotropically. */
@@ -155,7 +155,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
   /** Record the number of the nucleons in the projectile */
   const int N_proj_;
   /** Parameter for formation time */
-  const float formation_time_;
+  const double string_formation_time_;
   /** Photons switch */
   const bool photons_;
   /** Number of fractional photons */
@@ -167,7 +167,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
  * Sets up a grid and sorts the particles into grid cells. */
 class GridScatterFinder : public ScatterActionsFinder {
  public:
-  explicit GridScatterFinder(float length);
+  explicit GridScatterFinder(double length);
   void find_possible_actions(std::vector<ActionPtr> &actions,
                              Particles *particles,
                              const ExperimentParameters &parameters,
@@ -175,7 +175,7 @@ class GridScatterFinder : public ScatterActionsFinder {
                              const override;
  private:
   /* Cube edge length. */
-  const float length_;
+  const double length_;
 };
 #endif
 

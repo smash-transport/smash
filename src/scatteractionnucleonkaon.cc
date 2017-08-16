@@ -16,7 +16,7 @@
 
 namespace Smash {
 
-float ScatterActionNucleonKaon::elastic_parametrization() {
+double ScatterActionNucleonKaon::elastic_parametrization() {
   const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
 
@@ -26,7 +26,7 @@ float ScatterActionNucleonKaon::elastic_parametrization() {
 
   const double s = mandelstam_s();
 
-  float sig_el = 0.f;
+  double sig_el = 0.;
   switch (nucleon.code()) {
       case pdg::p:
       switch (kaon.code()) {

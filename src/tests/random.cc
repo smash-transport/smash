@@ -18,7 +18,7 @@ TEST(set_random_seed) {
     std::random_device rd;
     int64_t seed = rd();
     Random::set_seed(seed);
-    printf("Random number seed: %lld\n", seed);
+    printf("Random number seed: %ld\n", seed);
 }
 
 int tst_cnt = 0;  // test_counter

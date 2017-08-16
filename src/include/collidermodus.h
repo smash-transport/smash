@@ -53,7 +53,7 @@ class ColliderModus : public ModusDefault {
    *
    * In particular, it initializes the nuclei.
    */
-  float initial_conditions(Particles *particles,
+  double initial_conditions(Particles *particles,
                            const ExperimentParameters &parameters);
   /// return the total test particle number of the initial nucleus
   int total_N_number() const { return target_->size()
@@ -114,17 +114,18 @@ class ColliderModus : public ModusDefault {
    * so that their centers move on antiparallel lines that are this
    * distance apart from each other.
    **/
-  float impact_ = 0.f;
+  double impact_ = 0.;
   /// Method used for sampling of impact parameter.
   Sampling sampling_ = Sampling::Quadratic;
   /// Minimum value of impact parameter.
-  float imp_min_ = 0.0;
+  double imp_min_ = 0.0;
   /// Maximum value of impact parameter.
-  float imp_max_ = 0.0;
+  double imp_max_ = 0.0;
   /// Maximum value of yield. Needed for custom impact parameter sampling.
-  float yield_max_ = 0.0;
+  double yield_max_ = 0.0;
   /// Pointer to the impact parameter interpolation.
-  std::unique_ptr<InterpolateDataLinear<float>> impact_interpolation_ = nullptr;
+  std::unique_ptr<InterpolateDataLinear<double>> impact_interpolation_ =
+      nullptr;
   /** Sample impact parameter.
    *
    * Samples the impact parameter from values between imp_min_ and imp_max_, if
@@ -142,7 +143,7 @@ class ColliderModus : public ModusDefault {
    * and target on +(this value)*v_target/v_projectile. In this way
    * projectile and target touch at t=0 in z=0.
    **/
-  float initial_z_displacement_ = 2.0;
+  double initial_z_displacement_ = 2.0;
   /**
    * Reference frame for the system.
    */

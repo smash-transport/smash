@@ -58,13 +58,13 @@ TEST(interpolate_data_linear_unsorted) {
 }
 
 TEST(find_index) {
-  const std::vector<float> data = { 0.0, 0.2, 0.4, 0.6, 0.8, 1.0 };
-  COMPARE(find_index(data, -1.0f), 0ul);
-  COMPARE(find_index(data, 0.2f), 0ul);
-  COMPARE(find_index(data, 0.3f), 1ul);
-  COMPARE(find_index(data, 0.4f), 1ul);
-  COMPARE(find_index(data, 0.5f), 2ul);
-  COMPARE(find_index(data, 10.0f), 5ul);
+  const std::vector<double> data = { 0.0, 0.2, 0.4, 0.6, 0.8, 1.0 };
+  COMPARE(find_index(data, -1.0), 0ul);
+  COMPARE(find_index(data, 0.2), 0ul);
+  COMPARE(find_index(data, 0.3), 1ul);
+  COMPARE(find_index(data, 0.4), 1ul);
+  COMPARE(find_index(data, 0.5), 2ul);
+  COMPARE(find_index(data, 10.0), 5ul);
 }
 
 TEST(interpolate_data_spline) {

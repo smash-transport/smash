@@ -20,14 +20,14 @@
 namespace Smash {
 
 
-float ScatterActionNucleonNucleon::elastic_parametrization() {
+double ScatterActionNucleonNucleon::elastic_parametrization() {
   const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
 
   const double s = mandelstam_s();
 
   /* Use parametrized cross sections. */
-  float sig_el;
+  double sig_el;
   if (pdg_a == pdg_b) {                          /* pp */
     sig_el = pp_elastic(s);
   } else if (pdg_a.is_antiparticle_of(pdg_b)) {  /* ppbar */
@@ -57,9 +57,9 @@ float ScatterActionNucleonNucleon::elastic_parametrization() {
  * in order to be compatible with high-energy data (up to plab ~ 25 GeV).
  * \param[in] plab Lab momentum in GeV.
  */
-static float Cugnon_bpp(float plab) {
+static double Cugnon_bpp(double plab) {
   if (plab < 2.) {
-    float p8 = pow_int(plab, 8);
+    double p8 = pow_int(plab, 8);
     return 5.5*p8 / (7.7+p8);
   } else {
     return std::min(9.0, 5.334 + 0.67*(plab-2.));
@@ -72,7 +72,7 @@ static float Cugnon_bpp(float plab) {
  * distribution in elastic np scattering, see equation (10) in \iref{Cugnon:1996kh}.
  * \param[in] plab Lab momentum in GeV.
  */
-static float Cugnon_bnp(float plab) {
+static double Cugnon_bnp(double plab) {
   if (plab < 0.225) {
     return 0.;
   } else if (plab < 0.6) {
@@ -151,7 +151,7 @@ CollisionBranchList ScatterActionNucleonNucleon::find_xsection_from_type(
 
       // loop over total isospin
       for (const int twoI : I_tot_range(type_particle_a, type_particle_b)) {
-        const float isospin_factor = isospin_clebsch_gordan_sqr_2to2(
+        const double isospin_factor = isospin_clebsch_gordan_sqr_2to2(
                                           type_particle_a, type_particle_b,
                                           *type_res_1, *type_res_2, twoI);
         /* If Clebsch-Gordan coefficient is zero, don't bother with the rest. */
@@ -169,7 +169,7 @@ CollisionBranchList ScatterActionNucleonNucleon::find_xsection_from_type(
         }
 
         /* Calculate matrix element. */
-        const float matrix_element = nn_to_resonance_matrix_element(sqrts,
+        const double matrix_element = nn_to_resonance_matrix_element(sqrts,
                                      *type_res_1, *type_res_2, twoI);
         if (matrix_element <= 0.) {
           continue;
@@ -183,9 +183,9 @@ CollisionBranchList ScatterActionNucleonNucleon::find_xsection_from_type(
         /** Cross section for 2->2 process with 1/2 resonance(s) in final state.
          * Based on Eq. (46) in \iref{Weil:2013mya} and Eq. (3.29) in
          * \iref{Bass:1998ca} */
-        const float spin_factor = (type_res_1->spin() + 1)
+        const double spin_factor = (type_res_1->spin() + 1)
                                 * (type_res_2->spin() + 1);
-        const float xsection = isospin_factor * spin_factor * matrix_element
+        const double xsection = isospin_factor * spin_factor * matrix_element
                              * resonance_integral / (s * cm_momentum());
 
         if (xsection > really_small) {
@@ -219,6 +219,7 @@ void ScatterActionNucleonNucleon::sample_angles(
 
   const double mass_a = masses.first;
   const double mass_b = masses.second;
+
 
   const double cms_energy = sqrt_s();
 
@@ -265,9 +266,14 @@ void ScatterActionNucleonNucleon::sample_angles(
   } else if (p_b->pdgcode().is_nucleon() && !isotropic_ &&
              (p_a->type().is_Nstar() || p_a->type().is_Deltastar())) {
     /** NN → NR: Fit to HADES data, see \iref{Agakishiev:2014wqa}. */
-    const std::array<float, 4> p { 1.46434, 5.80311, -6.89358, 1.94302 };
+    const std::array<double, 4> p { 1.46434, 5.80311, -6.89358, 1.94302 };
     const double a = p[0] + mass_a * (p[1] + mass_a * (p[2] + mass_a * p[3]));
-    double t = Random::power(-a, t_range[0], t_range[1]);
+    /*  If the resonance is so heavy that the index "a" exceeds 30,
+     *  the power function turns out to be too sharp. Take t directly to be
+     *  t_0 in such a case. */
+    double t = t_range[0];
+    if (a < 30) {
+      t = Random::power(-a, t_range[0], t_range[1]);}
     if (Random::canonical() > 0.5) {
       t = t_range[0] + t_range[1] - t;  // symmetrize
     }
@@ -282,7 +288,7 @@ void ScatterActionNucleonNucleon::sample_angles(
   // 3-momentum of first incoming particle in center-of-mass frame
   ThreeVector pcm = incoming_particles_[0].momentum().
                     LorentzBoost(beta_cm()).threevec();
-  pscatt.rotate_to(pcm);
+  pscatt.rotate_z_axis_to(pcm);
 
   // final-state CM momentum
   const double p_f = pCM(cms_energy, mass_a, mass_b);

@@ -95,7 +95,7 @@ void usage(const int rc, const std::string &progname) {
    *     mass m.
    * <tr><td>`-s <pdg1>,<pdg2>[,mass1,mass2]`
    * <td>`--cross-sections <pdg1>,<pdg2>[,mass1,mass2]`
-   * <td> Dumps the partial 2->1 cross-section of <pdg1> + <pdg2> with
+   * <td> Dumps the partial 2->1 cross-section of pdg1 + pdg2 with
    *     masses mass1 and mass2. Masses are optional, default values are pole
    *     masses.
    * <tr><td>`-f` <td>`--force`
@@ -319,7 +319,7 @@ int main(int argc, char *argv[]) {
     }
     if (list2n_activated) {
       // Do not make all elastic cross-sections a fixed number
-      constexpr float elastic_parameter = -1.0f;
+      constexpr double elastic_parameter = -1.;
       // Does not matter here, just dummy
       constexpr int ntest = 1;
       // Print only 2->n, n > 1. Do not dump decays, which can be found in
@@ -356,8 +356,8 @@ int main(int argc, char *argv[]) {
       for (unsigned int i = 0; i < 4 - n_arg; i++) {
         args.push_back("");
       }
-      float ma = (args[2] == "") ? a.mass() : std::stod(args[2]);
-      float mb = (args[3] == "") ? b.mass() : std::stod(args[3]);
+      double ma = (args[2] == "") ? a.mass() : std::stod(args[2]);
+      double mb = (args[3] == "") ? b.mass() : std::stod(args[3]);
       if (a.is_stable() && args[2] != "") {
         ma = a.mass();
         std::cout << "Warning: pole mass is used for stable particle "
@@ -369,7 +369,7 @@ int main(int argc, char *argv[]) {
                   << b.name() << " instead of " << args[3] << std::endl;
       }
       std::vector<bool> nucleon_has_interacted = {};
-      auto scat_finder = make_unique<ScatterActionsFinder>(-1.f, 1,
+      auto scat_finder = make_unique<ScatterActionsFinder>(-1., 1,
                                                nucleon_has_interacted, true);
       scat_finder->dump_cross_sections(a, b, ma, mb);
       std::exit(EXIT_SUCCESS);

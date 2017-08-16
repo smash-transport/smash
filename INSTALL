@@ -155,17 +155,23 @@ Let's assume Eigen headers will be unpacked in $HOME.
 Including GSL from custom location
 ----------------------------------
 
-Assume that GSL will be installed in $GSL.
+Using a custom GSL build
+----------------------------------
+
+Run the following:
 
     wget ftp://ftp.gnu.org/gnu/gsl/gsl-latest.tar.gz
     tar -zxvf gsl-latest.tar.gz
+
+This creates a folder named "gsl-[version_number]" called $GSL here.
+
     cd $GSL
-    ./configure -prefix $GSL
-    make -j
+    ./configure --prefix $GSL
+    make -jN
     make install
 
-In the .bash_profile write (enter GSL_ROOT_DIR's value $GSL in the first line):
-    GSL_ROOT_DIR=...
-    export PATH=$GSL_ROOT_DIR:$GSL_ROOT_DIR/lib:$PATH
+Here N is the number of cores to use in the "make" command. Run cmake with
 
-*/
+    cmake -DCMAKE_PREFIX_PATH=$GSL ..
+
+Note: In case of problems, make sure to start with a clean build folder.

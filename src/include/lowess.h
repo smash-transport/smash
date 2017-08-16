@@ -199,10 +199,7 @@ void lowess(const T *x, const T *y, size_t n, T *ys, T span, size_t iter,
       for (i = last + 1; i <= n; i++) {
         if (x[i] > cut)
           break;
-        #pragma GCC diagnostic push
-        #pragma GCC diagnostic ignored "-Wfloat-equal"
         if (x[i] == x[last]) {
-        #pragma GCC diagnostic pop
           ys[i] = ys[last];
           last = i;
         }

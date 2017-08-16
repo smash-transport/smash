@@ -26,7 +26,7 @@
 
 using namespace Smash;
 
-static const float accuracy = 1.0e-4;
+static const double accuracy = 1.0e-4;
 static const int data_elements = 11;
 static const bf::path testoutputpath = bf::absolute(SMASH_TEST_OUTPUT_PATH);
 static auto random_value = Random::make_uniform_distribution(-15.0, +15.0);
@@ -56,7 +56,7 @@ static void compare_particledata(
     position_string.at(i) = datastring.at(i);
   }
   compare_fourvector(position_string, particle.position());
-  COMPARE(float(std::atof(datastring.at(4).c_str())), Test::smashon_mass)
+  COMPARE(double(std::atof(datastring.at(4).c_str())), Test::smashon_mass)
       << datastring.at(4);
   std::array<std::string, 4> momentum_string;
   for (int i = 0; i < 4; i++) {
@@ -96,7 +96,7 @@ TEST(full2013_format) {
   osc2013full->at_eventstart(particles, event_id);
 
   /* Create elastic interaction (smashon + smashon). */
-  ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.f);
+  ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_processes(10., true, true, 0., true,
                             NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
@@ -214,7 +214,7 @@ TEST(final2013_format) {
   osc2013final->at_eventstart(particles, event_id);
 
   /* Create interaction ("elastic scattering") */
-  ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.f);
+  ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_processes(10., true, true, 0., true,
                             NNbarTreatment::NoAnnihilation);
   action->generate_final_state();

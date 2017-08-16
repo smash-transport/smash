@@ -61,10 +61,7 @@ class InterpolateDataLinear {
 
 template <typename T>
 InterpolateLinear<T>::InterpolateLinear(T x0, T y0, T x1, T y1) {
-  #pragma GCC diagnostic push
-  #pragma GCC diagnostic ignored "-Wfloat-equal"
   assert(x0 != x1);
-  #pragma GCC diagnostic pop
   slope_ = (y1 - y0) / (x1 - x0);
   yintercept_ = y0 - slope_ * x0;
 }

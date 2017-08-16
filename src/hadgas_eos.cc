@@ -352,6 +352,9 @@ std::array<double, 3> HadronGasEos::solve_eos_initial_approximation(
   do {
     iter++;
     status = gsl_root_fsolver_iterate(e_solver);
+    if (status != GSL_SUCCESS) {
+        break;
+    }
     T_init = gsl_root_fsolver_root(e_solver);
     double x_lo = gsl_root_fsolver_x_lower(e_solver);
     double x_hi = gsl_root_fsolver_x_upper(e_solver);
@@ -386,7 +389,7 @@ std::array<double, 3> HadronGasEos::solve_eos_initial_approximation(
 
 std::array<double, 3> HadronGasEos::solve_eos(double e, double nb, double ns,
                                  std::array<double, 3> initial_approximation) {
-  int iterate_status, residual_status = GSL_SUCCESS;
+  int residual_status = GSL_SUCCESS;
   size_t iter = 0;
 
   struct rparams p = {e, nb, ns};
@@ -400,7 +403,7 @@ std::array<double, 3> HadronGasEos::solve_eos(double e, double nb, double ns,
   gsl_multiroot_fsolver_set(solver_, &f, x_);
   do {
     iter++;
-    iterate_status = gsl_multiroot_fsolver_iterate(solver_);
+    const auto iterate_status = gsl_multiroot_fsolver_iterate(solver_);
 
     // std::cout << print_solver_state(iter);
     // Avoiding too low temperature

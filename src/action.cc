@@ -51,7 +51,7 @@ bool Action::is_pauli_blocked(const Particles & particles,
                                            p.momentum().threevec(),
                                            particles, p.pdgcode(),
                                            incoming_particles_);
-      if (f >  Random::uniform(0.f, 1.f)) {
+      if (f >  Random::uniform(0., 1.)) {
         log.debug("Action ", *this, " is pauli-blocked with f = ", f);
         return true;
       }
@@ -194,8 +194,12 @@ void Action::check_conservation(const uint32_t id_process) const {
     if (process_type_ == ProcessType::String) {
       return;
     }
+    if (id_process == ID_PROCESS_PHOTON) {
+      throw std::runtime_error("Conservation laws violated in photon process");
+    } else {
     throw std::runtime_error("Conservation laws violated in process " +
                              std::to_string(id_process));
+    }
   }
 }
 

@@ -36,28 +36,28 @@ TEST(directory_is_created) {
 
 TEST(init_particletypes) { Test::create_smashon_particletypes(); }
 
-static const int current_format_version = 4;
+static const int current_format_version = 5;
 
 /* A set of convenient functions to read binary */
 
 static void read_binary(std::string &s, FILE *file) {
   std::int32_t size = s.size();
-  COMPARE(std::fread(&size, sizeof(std::int32_t), 1, file), 1);
+  COMPARE(std::fread(&size, sizeof(std::int32_t), 1, file), 1u);
   std::vector<char> buf(size);
   COMPARE(std::fread(&buf[0], 1, size, file), static_cast<size_t>(size));
   s.assign(&buf[0], size);
 }
 
 static void read_binary(FourVector &v, FILE *file) {
-  COMPARE(std::fread(v.begin(), sizeof(*v.begin()), 4, file), 4);
+  COMPARE(std::fread(v.begin(), sizeof(*v.begin()), 4, file), 4u);
 }
 
 static void read_binary(std::int32_t &x, FILE *file) {
-  COMPARE(std::fread(&x, sizeof(x), 1, file), 1);
+  COMPARE(std::fread(&x, sizeof(x), 1, file), 1u);
 }
 
 static void read_binary(double &x, FILE *file) {
-  COMPARE(std::fread(&x, sizeof(x), 1, file), 1);
+  COMPARE(std::fread(&x, sizeof(x), 1, file), 1u);
 }
 
 /* Function to read and compare particle */
@@ -80,7 +80,7 @@ static bool compare_particle(const ParticleData &p, FILE *file) {
 static bool compare_particles_block_header(const int &npart, FILE *file) {
   int npart_read;
   char c_read;
-  COMPARE(std::fread(&c_read, sizeof(char), 1, file), 1);
+  COMPARE(std::fread(&c_read, sizeof(char), 1, file), 1u);
   read_binary(npart_read, file);
   // std::cout << c_read << std::endl;
   // std::cout << npart_read << " " << npart << std::endl;
@@ -95,11 +95,11 @@ static bool compare_interaction_block_header(const int &nin, const int &nout,
   double rho_read, weight_read;
   char c_read;
   int process_type = static_cast<int>(action.get_type());
-  COMPARE(std::fread(&c_read, sizeof(char), 1, file), 1);
+  COMPARE(std::fread(&c_read, sizeof(char), 1, file), 1u);
   read_binary(nin_read, file);
   read_binary(nout_read, file);
-  COMPARE(std::fread(&rho_read, sizeof(double), 1, file), 1);
-  COMPARE(std::fread(&weight_read, sizeof(double), 1, file), 1);
+  COMPARE(std::fread(&rho_read, sizeof(double), 1, file), 1u);
+  COMPARE(std::fread(&weight_read, sizeof(double), 1, file), 1u);
   read_binary(process_type_read, file);
   // std::cout << c_read << std::endl;
   // std::cout << nin_read << " " << nin << std::endl;
@@ -114,7 +114,7 @@ static bool compare_interaction_block_header(const int &nin, const int &nout,
 static bool compare_final_block_header(const int &ev, FILE *file) {
   int ev_read;
   char c_read;
-  COMPARE(std::fread(&c_read, sizeof(char), 1, file), 1);
+  COMPARE(std::fread(&c_read, sizeof(char), 1, file), 1u);
   read_binary(ev_read, file);
   return (c_read == 'f') && (ev_read == ev);
 }
@@ -141,7 +141,7 @@ TEST(fullhistory_format) {
   bin_output->at_eventstart(particles, event_id);
 
   /* Create elastic interaction (smashon + smashon). */
-  ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.f);
+  ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_processes(10., true, true, 0., true,
                             NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
@@ -168,7 +168,7 @@ TEST(fullhistory_format) {
   std::string magic, smash_version;
   int format_version_number;
 
-  COMPARE(std::fread(&buf[0], 1, 4, binF), 4);  // magic number
+  COMPARE(std::fread(&buf[0], 1, 4, binF), 4u);  // magic number
   magic.assign(&buf[0], 4);
   read_binary(format_version_number, binF);  // format version number
   read_binary(smash_version, binF);          // smash version
@@ -247,7 +247,7 @@ TEST(particles_format) {
   std::string magic, smash_version;
   int format_version_number;
 
-  COMPARE(std::fread(&buf[0], 1, 4, binF), 4);  // magic number
+  COMPARE(std::fread(&buf[0], 1, 4, binF), 4u);  // magic number
   magic.assign(&buf[0], 4);
   read_binary(format_version_number, binF);  // format version number
   read_binary(smash_version, binF);          // smash version

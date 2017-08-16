@@ -86,9 +86,9 @@ TEST(NN_NDelta) {
   n.set_4momentum(proton->mass(), 0., 0., ptot);
   act_np = set_up_action (n, p2, proc_list_np);
 
-  COMPARE(proc_list_pp.size(), 2);
-  COMPARE(proc_list_pn.size(), 2);
-  COMPARE(proc_list_np.size(), 2);
+  COMPARE(proc_list_pp.size(), 2u);
+  COMPARE(proc_list_pn.size(), 2u);
+  COMPARE(proc_list_np.size(), 2u);
 
   // check isospin ratios
   FUZZY_COMPARE(3*proc_list_pp[0]->weight(), proc_list_pp[1]->weight()); // ratio 1:3
@@ -136,9 +136,9 @@ TEST(NDelta_NN) {
   // Delta++ n -> N N
   act_DDn = set_up_action (Dpp, n, proc_list_DDn);
 
-  COMPARE(proc_list_Dp.size(), 1);
-  COMPARE(proc_list_Dn.size(), 2);
-  COMPARE(proc_list_DDn.size(), 1);
+  COMPARE(proc_list_Dp.size(), 1u);
+  COMPARE(proc_list_Dn.size(), 2u);
+  COMPARE(proc_list_DDn.size(), 1u);
 
   // check isospin ratios
   FUZZY_COMPARE(proc_list_Dn[0]->weight(), proc_list_Dn[1]->weight());    // ratio 1:1

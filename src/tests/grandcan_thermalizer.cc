@@ -34,8 +34,8 @@ TEST(rest_frame_transformation) {
   //  5. Check that EoS is satisfied
   auto conf = Test::configuration();
   const int N = 300;
-  const float L = 10.0f;
-  const float T_init = 0.2;
+  const double L = 10.;
+  const double T_init = 0.2;
   const ThreeVector v_boost(0.1, 0.2, 0.8);
   conf["Modus"] = "Box";
   conf.take({"Modi", "Box", "Init_Multiplicities"});
