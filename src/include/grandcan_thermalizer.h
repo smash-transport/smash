@@ -298,19 +298,15 @@ class GrandCanThermalizer {
     const int B = eos_typelist_[typelist_index]->baryon_number();
     const int S = eos_typelist_[typelist_index]->strangeness();
     const int ch = eos_typelist_[typelist_index]->charge();
-    return (B > 0)
-               ? HadronClass::Baryon
-               : (B < 0)
-                     ? HadronClass::Antibaryon
-                     : (S > 0)
-                           ? HadronClass::PositiveSMeson
-                           : (S < 0)
-                                 ? HadronClass::NegativeSMeson
-                                 : (ch > 0)
-                                       ? HadronClass::PositiveQZeroSMeson
-                                       : (ch < 0)
-                                             ? HadronClass::NegativeQZeroSMeson
-                                             : HadronClass::ZeroQZeroSMeson;
+    // clang-format off
+    return (B > 0) ? HadronClass::Baryon :
+           (B < 0) ? HadronClass::Antibaryon :
+           (S > 0) ? HadronClass::PositiveSMeson :
+           (S < 0) ? HadronClass::NegativeSMeson :
+           (ch > 0) ? HadronClass::PositiveQZeroSMeson :
+           (ch < 0) ? HadronClass::NegativeQZeroSMeson :
+                      HadronClass::ZeroQZeroSMeson;
+    // clang-format on
   }
   /// Returns multiplicity of the hadron class cl
   double mult_class(const HadronClass cl) const {

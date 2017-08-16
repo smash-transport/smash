@@ -78,8 +78,12 @@ class RectangularLattice {
 
   /// Checks if 3D index is out of lattice bounds
   inline bool out_of_bounds(int ix, int iy, int iz) const {
-    return !periodic_ && (ix < 0 || ix >= n_cells_[0] || iy < 0 ||
-                          iy >= n_cells_[1] || iz < 0 || iz >= n_cells_[2]);
+    // clang-format off
+    return !periodic_ &&
+        (ix < 0 || ix >= n_cells_[0] ||
+         iy < 0 || iy >= n_cells_[1] ||
+         iz < 0 || iz >= n_cells_[2]);
+    // clang-format on
   }
 
   /// Returns coordinate of cell center given its index
