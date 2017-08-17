@@ -9,8 +9,8 @@
 
 #include "unittest.h"  // This include has to be first
 
-#include "../include/deformednucleus.h"
 #include "../include/constants.h"
+#include "../include/deformednucleus.h"
 #include "../include/fourvector.h"
 #include "../include/nucleus.h"
 #include "../include/particledata.h"

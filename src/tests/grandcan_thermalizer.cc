@@ -10,8 +10,8 @@
 
 #include "setup.h"
 
-#include "../include/grandcan_thermalizer.h"
 #include "../include/boxmodus.h"
+#include "../include/grandcan_thermalizer.h"
 
 using namespace Smash;
 

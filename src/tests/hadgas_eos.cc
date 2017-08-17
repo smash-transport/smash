@@ -11,8 +11,8 @@
 
 #include "setup.h"
 
-#include "../include/hadgas_eos.h"
 #include "../include/constants.h"
+#include "../include/hadgas_eos.h"
 
 using namespace Smash;
 
