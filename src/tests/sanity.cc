@@ -7,14 +7,16 @@
  *
  */
 
+#include "unittest.h"  // This include has to be first
+
+#include "setup.h"
+
 #include "../include/boxmodus.h"
 #include "../include/collidermodus.h"
 #include "../include/configuration.h"
 #include "../include/experimentparameters.h"
 #include "../include/modusdefault.h"
 #include "../include/spheremodus.h"
-#include "setup.h"
-#include "unittest.h"
 
 #include <boost/filesystem.hpp>
 

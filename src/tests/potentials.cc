@@ -7,10 +7,12 @@
  *
  */
 
+#include "unittest.h"  // This include has to be first
+
+#include "setup.h"
+
 #include <fstream>
 #include <map>
-#include "setup.h"
-#include "unittest.h"
 
 #include "../include/collidermodus.h"
 #include "../include/configuration.h"

@@ -7,20 +7,23 @@
  *
  */
 
-#include "../include/vtkoutput.h"
+#include "unittest.h"  // This has to be the first include
+
+#include "setup.h"
+
 #include <include/config.h>
 #include <array>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <iostream>
 #include <vector>
+
 #include "../include/clock.h"
 #include "../include/configuration.h"
 #include "../include/outputinterface.h"
 #include "../include/particles.h"
 #include "../include/random.h"
-#include "setup.h"
-#include "unittest.h"
+#include "../include/vtkoutput.h"
 
 using namespace Smash;
 

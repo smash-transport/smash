@@ -7,8 +7,9 @@
  *
  */
 
+#include "unittest.h"  // This include has to be first
+
 #include "../include/integrate.h"
-#include "unittest.h"
 
 // test one-dimensional integration
 

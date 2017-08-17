@@ -7,9 +7,10 @@
  *
  */
 
-#include "../include/processbranch.h"
+#include "unittest.h"  // This include has to be first
+
 #include "../include/particledata.h"
-#include "unittest.h"
+#include "../include/processbranch.h"
 
 using namespace Smash;
 

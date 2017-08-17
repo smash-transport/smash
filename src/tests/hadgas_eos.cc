@@ -7,10 +7,12 @@
  *
  */
 
-#include "../include/hadgas_eos.h"
-#include "../include/constants.h"
+#include "unittest.h"  // This include has to be first
+
 #include "setup.h"
-#include "unittest.h"
+
+#include "../include/constants.h"
+#include "../include/hadgas_eos.h"
 
 using namespace Smash;
 
