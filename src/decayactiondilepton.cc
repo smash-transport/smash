@@ -7,7 +7,6 @@
  *
  */
 
-
 #include "include/decayactiondilepton.h"
 
 #include "include/angles.h"
@@ -15,11 +14,9 @@
 
 namespace Smash {
 
-DecayActionDilepton::DecayActionDilepton(const ParticleData &p,
-                                         double time,
+DecayActionDilepton::DecayActionDilepton(const ParticleData &p, double time,
                                          double shining_weight)
-  : DecayAction({p}, time), shining_weight_(shining_weight) {}
-
+    : DecayAction({p}, time), shining_weight_(shining_weight) {}
 
 void DecayActionDilepton::one_to_three() {
   // find the non-lepton particle position
@@ -36,8 +33,8 @@ void DecayActionDilepton::one_to_three() {
   }
 
   ParticleData &nl = outgoing_particles_[non_lepton_position];
-  ParticleData &l1 = outgoing_particles_[(non_lepton_position+1)%3];
-  ParticleData &l2 = outgoing_particles_[(non_lepton_position+2)%3];
+  ParticleData &l1 = outgoing_particles_[(non_lepton_position + 1) % 3];
+  ParticleData &l2 = outgoing_particles_[(non_lepton_position + 2) % 3];
 
   const double mass_l1 = l1.type().mass();  // mass of first lepton
   const double mass_l2 = l2.type().mass();  // mass of second lepton
@@ -46,20 +43,18 @@ void DecayActionDilepton::one_to_three() {
   const double cms_energy = sqrt_s();
 
   // randomly select a dilepton mass
-  const double dil_mass = Random::uniform(mass_l1 + mass_l2,
-                                          cms_energy - mass_nl);
+  const double dil_mass =
+      Random::uniform(mass_l1 + mass_l2, cms_energy - mass_nl);
   const double delta_m = cms_energy - mass_nl - mass_l1 - mass_l2;
 
-  const double diff_width = ThreeBodyDecayDilepton::diff_width(cms_energy,
-                                                dil_mass, mass_nl,
-                                                &incoming_particles_[0].type());
+  const double diff_width = ThreeBodyDecayDilepton::diff_width(
+      cms_energy, dil_mass, mass_nl, &incoming_particles_[0].type());
 
   /* Branching factor, which corrects the shining weight for the differential
    * width at a particular dilepton mass. We do an implicit Monte-Carlo
    * integration over the dilepton mass here, and delta_m is simply the
    * integration volume. */
   branching_ = delta_m * diff_width / decay_channels_[0]->weight();
-
 
   // perform decay into non-lepton and virtual photon (dilepton)
   const double dil_mom = pCM(cms_energy, dil_mass, mass_nl);
@@ -68,10 +63,9 @@ void DecayActionDilepton::one_to_three() {
   Angles phitheta;
   phitheta.distribute_isotropically();
 
-  FourVector dil_4mom(std::sqrt(dil_mass*dil_mass + dil_mom*dil_mom),
+  FourVector dil_4mom(std::sqrt(dil_mass * dil_mass + dil_mom * dil_mom),
                       phitheta.threevec() * dil_mom);
   nl.set_4momentum(mass_nl, -phitheta.threevec() * dil_mom);
-
 
   // perform decay of virtual photon into two leptons
   const double mom_lep = pCM(dil_mass, mass_l1, mass_l2);
@@ -79,7 +73,7 @@ void DecayActionDilepton::one_to_three() {
   /* Here we assume an isotropic angular distribution. */
   phitheta.distribute_isotropically();
 
-  l1.set_4momentum(mass_l1,  phitheta.threevec() * mom_lep);
+  l1.set_4momentum(mass_l1, phitheta.threevec() * mom_lep);
   l2.set_4momentum(mass_l2, -phitheta.threevec() * mom_lep);
 
   // Boost Dileptons back in parent particle rest frame
@@ -87,6 +81,5 @@ void DecayActionDilepton::one_to_three() {
   l1.boost_momentum(-velocity_CM);
   l2.boost_momentum(-velocity_CM);
 }
-
 
 }  // namespace Smash

@@ -13,8 +13,8 @@
 #include <string>
 #include <vector>
 
-#include <boost/filesystem.hpp>
 #include <yaml-cpp/yaml.h>  // NOLINT(build/include_order)
+#include <boost/filesystem.hpp>
 
 #include "include/forwarddeclarations.h"
 
@@ -71,20 +71,18 @@ namespace decaymodes_txt {
 }  // unnamed namespace
 
 Configuration::Configuration(const bf::path &path)
-    : Configuration(path, "config.yaml") {
-}
+    : Configuration(path, "config.yaml") {}
 
 Configuration::Configuration(const bf::path &path, const bf::path &filename) {
   const auto file_path = path / filename;
   if (!bf::exists(file_path)) {
-    throw FileDoesNotExist("The configuration file was expected at '"
-                           + file_path.native()
-                           + "', but the file does not exist.");
+    throw FileDoesNotExist("The configuration file was expected at '" +
+                           file_path.native() +
+                           "', but the file does not exist.");
   }
   try {
     root_node_ = YAML::LoadFile(file_path.native());
-  }
-  catch (YAML::ParserException &e) {
+  } catch (YAML::ParserException &e) {
     if (e.msg == "illegal map value" || e.msg == "end of map not found") {
       const auto line = std::to_string(e.mark.line + 1);
       throw ParseError("YAML parse error at\n" + file_path.native() + ':' +
@@ -105,8 +103,7 @@ Configuration::Configuration(const bf::path &path, const bf::path &filename) {
 void Configuration::merge_yaml(const std::string &yaml) {
   try {
     root_node_ |= YAML::Load(yaml);
-  }
-  catch (YAML::ParserException &e) {
+  } catch (YAML::ParserException &e) {
     if (e.msg == "illegal map value" || e.msg == "end of map not found") {
       const auto line = std::to_string(e.mark.line + 1);
       throw ParseError("YAML parse error in:\n" + yaml + "\nat line " + line +
@@ -153,7 +150,7 @@ void Configuration::remove_all_but(const std::string &key) {
 }
 
 bool Configuration::has_value_including_empty(
-                    std::initializer_list<const char *> keys) const {
+    std::initializer_list<const char *> keys) const {
   const auto n = find_node_at(root_node_, keys);
   return n.IsDefined();
 }

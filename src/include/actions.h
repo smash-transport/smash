@@ -39,8 +39,7 @@ class Actions {
    * \param action_list The ActionList from which to construct the Actions
    *                    object
    */
-  explicit Actions(ActionList&& action_list)
-      : data_(std::move(action_list)) {
+  explicit Actions(ActionList&& action_list) : data_(std::move(action_list)) {
     sort(data_);
   }
 
@@ -107,16 +106,12 @@ class Actions {
   /**
    * Number of actions.
    */
-  ActionList::size_type size() const {
-    return data_.size();
-  }
+  ActionList::size_type size() const { return data_.size(); }
 
   /**
    * Delete all actions.
    */
-  void clear() {
-    data_.clear();
-  }
+  void clear() { data_.clear(); }
 
   /**
    * Returns an iterator to the earliest action.
@@ -140,7 +135,7 @@ class Actions {
    */
   static void sort(ActionList& action_list) {
     std::sort(action_list.begin(), action_list.end(),
-          [](const ActionPtr &a, const ActionPtr &b) { return *b < *a; });
+              [](const ActionPtr& a, const ActionPtr& b) { return *b < *a; });
   }
 
   /**
@@ -149,11 +144,11 @@ class Actions {
    * \param action_list The concatenation of the two lists.
    * \param separation_index The index of the first element of the second list.
    */
-  static void merge(ActionList &action_list, size_t separation_index) {
+  static void merge(ActionList& action_list, size_t separation_index) {
     std::inplace_merge(
         action_list.begin(), action_list.begin() + separation_index,
         action_list.end(),
-        [](const ActionPtr &a, const ActionPtr &b) { return *b < *a; });
+        [](const ActionPtr& a, const ActionPtr& b) { return *b < *a; });
   }
 
   /**

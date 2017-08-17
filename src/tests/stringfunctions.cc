@@ -1,5 +1,5 @@
-#include "unittest.h"
 #include "../include/stringfunctions.h"
+#include "unittest.h"
 
 using namespace Smash::utf8;
 

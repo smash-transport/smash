@@ -26,16 +26,16 @@ namespace Smash {
 BinaryOutputCollisions::BinaryOutputCollisions(const bf::path &path,
                                                const std::string &name,
                                                bool extended_format)
-    : BinaryOutputBase(std::fopen(
-          (path / (name + ".bin")).native().c_str(), "wb"), extended_format),
-      print_start_end_(false) {
-}
+    : BinaryOutputBase(
+          std::fopen((path / (name + ".bin")).native().c_str(), "wb"),
+          extended_format),
+      print_start_end_(false) {}
 
 BinaryOutputCollisions::BinaryOutputCollisions(const bf::path &path,
                                                Configuration &&config)
-    : BinaryOutputBase(std::fopen(
-          ((path / "collisions_binary.bin")).native().c_str(), "wb"),
-                       config.take({"Extended"}, false)),
+    : BinaryOutputBase(
+          std::fopen(((path / "collisions_binary.bin")).native().c_str(), "wb"),
+          config.take({"Extended"}, false)),
       print_start_end_(config.take({"Print_Start_End"}, false)) {
   /*!\Userguide
    * \page input_binary_collisions Binary_collisions
@@ -61,24 +61,23 @@ BinaryOutputCollisions::BinaryOutputCollisions(const bf::path &path,
    */
 }
 
-  /*!\Userguide
-   * \page format_binary_ Binary format
-   *
-   * Collisions output
-   * -----------------
-   * Written to \c collisions_binary.bin file. Contains interactions
-   * (collisions, decays, box wall crossings) and optionally initial
-   * and final configuration. Interactions are written in comp. frame
-   * time-ordered fashion, in 'i' blocks. Initial and final states
-   * are written as 'p' blocks. For options of this output see
-   * \ref input_general_, \ref input_binary_collisions.
-   *
-   * See also \ref collisions_output_in_box_modus_.
-   **/
-
+/*!\Userguide
+ * \page format_binary_ Binary format
+ *
+ * Collisions output
+ * -----------------
+ * Written to \c collisions_binary.bin file. Contains interactions
+ * (collisions, decays, box wall crossings) and optionally initial
+ * and final configuration. Interactions are written in comp. frame
+ * time-ordered fashion, in 'i' blocks. Initial and final states
+ * are written as 'p' blocks. For options of this output see
+ * \ref input_general_, \ref input_binary_collisions.
+ *
+ * See also \ref collisions_output_in_box_modus_.
+ **/
 
 void BinaryOutputCollisions::at_eventstart(const Particles &particles,
-                                 const int /*event_number*/) {
+                                           const int /*event_number*/) {
   char pchar = 'p';
   if (print_start_end_) {
     std::fwrite(&pchar, sizeof(char), 1, file_.get());
@@ -88,7 +87,7 @@ void BinaryOutputCollisions::at_eventstart(const Particles &particles,
 }
 
 void BinaryOutputCollisions::at_eventend(const Particles &particles,
-                               const int event_number) {
+                                         const int event_number) {
   char pchar = 'p';
   if (print_start_end_) {
     std::fwrite(&pchar, sizeof(char), 1, file_.get());
@@ -120,16 +119,14 @@ void BinaryOutputCollisions::at_interaction(const Action &action,
   write(action.outgoing_particles());
 }
 
-
-BinaryOutputBase::BinaryOutputBase(FILE *f, bool extended) : file_{f},
-    extended_(extended) {
+BinaryOutputBase::BinaryOutputBase(FILE *f, bool extended)
+    : file_{f}, extended_(extended) {
   std::fwrite("SMSH", 4, 1, file_.get());  // magic number
-  write(format_version_);   // file format version number
+  write(format_version_);                  // file format version number
   std::uint16_t format_variant = static_cast<uint16_t>(extended_);
   write(format_variant);
-  write(VERSION_MAJOR);     // SMASH version
+  write(VERSION_MAJOR);  // SMASH version
 }
-
 
 // write functions:
 void BinaryOutputBase::write(const std::string &s) {

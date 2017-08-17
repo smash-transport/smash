@@ -7,9 +7,9 @@
  *
  */
 
-#include "unittest.h"
 #include "../include/processbranch.h"
 #include "../include/particledata.h"
+#include "unittest.h"
 
 using namespace Smash;
 
@@ -34,8 +34,8 @@ TEST(assign_1_particle) {
 TEST(assign_2_particle) {
   PdgCode smashon("9876542");
   CollisionBranch branch(ParticleType::find(smashon),
-                         ParticleType::find(smashon),
-                         2.345, ProcessType::Elastic);
+                         ParticleType::find(smashon), 2.345,
+                         ProcessType::Elastic);
   FUZZY_COMPARE(branch.weight(), 2.345);
 }
 
@@ -73,7 +73,7 @@ TEST(add_particle) {
 }
 
 TEST(weights) {
-  CollisionBranch branch(0.,ProcessType::Elastic);
+  CollisionBranch branch(0., ProcessType::Elastic);
   branch.set_weight(0.34);
   COMPARE(branch.weight(), 0.34);
   // double is intentional here.

@@ -31,44 +31,42 @@
 
 class TimeStampCounter {
  public:
-        void start();
-        void stop();
-        uint64_t cycles() const;
+  void start();
+  void stop();
+  uint64_t cycles() const;
 
  private:
-        union Data {
-            uint64_t a;
-            unsigned int b[2];
-        } m_start, m_end;
+  union Data {
+    uint64_t a;
+    unsigned int b[2];
+  } m_start, m_end;
 };
 
 inline void TimeStampCounter::start() {
 #ifdef VC_IMPL_MIC
-    asm volatile("xor %%eax,%%eax\n\tcpuid\n\trdtsc" : "=a"(m_start.b[0]),
-                 "=d"(m_start.b[1]) :: "ebx", "ecx");
+  asm volatile("xor %%eax,%%eax\n\tcpuid\n\trdtsc"
+               : "=a"(m_start.b[0]), "=d"(m_start.b[1])::"ebx", "ecx");
 #elif defined _MSC_VER
-    unsigned int tmp;
-    m_start.a = __rdtscp(&tmp);
+  unsigned int tmp;
+  m_start.a = __rdtscp(&tmp);
 #else
-    asm volatile("rdtscp" : "=a"(m_start.b[0]), "=d"(m_start.b[1]) :: "ecx");
+  asm volatile("rdtscp" : "=a"(m_start.b[0]), "=d"(m_start.b[1])::"ecx");
 #endif
 }
 
 inline void TimeStampCounter::stop() {
 #ifdef VC_IMPL_MIC
-    asm volatile("xor %%eax,%%eax\n\tcpuid\n\trdtsc" : "=a"(m_end.b[0]),
-                 "=d"(m_end.b[1]) :: "ebx", "ecx");
+  asm volatile("xor %%eax,%%eax\n\tcpuid\n\trdtsc"
+               : "=a"(m_end.b[0]), "=d"(m_end.b[1])::"ebx", "ecx");
 #elif defined _MSC_VER
-    unsigned int tmp;
-    m_end.a = __rdtscp(&tmp);
+  unsigned int tmp;
+  m_end.a = __rdtscp(&tmp);
 #else
-    asm volatile("rdtscp" : "=a"(m_end.b[0]), "=d"(m_end.b[1]) :: "ecx");
+  asm volatile("rdtscp" : "=a"(m_end.b[0]), "=d"(m_end.b[1])::"ecx");
 #endif
 }
 
-inline uint64_t TimeStampCounter::cycles() const {
-    return m_end.a - m_start.a;
-}
+inline uint64_t TimeStampCounter::cycles() const { return m_end.a - m_start.a; }
 
 std::ostream &operator<<(std::ostream &out, const TimeStampCounter &tsc);
 

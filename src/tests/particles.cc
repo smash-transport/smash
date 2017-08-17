@@ -7,11 +7,11 @@
  *
  */
 
-#include "unittest.h"
 #include "setup.h"
+#include "unittest.h"
 
-#include "../include/particles.h"
 #include "../include/particledata.h"
+#include "../include/particles.h"
 #include "../include/pdgcode.h"
 
 using namespace Smash;
@@ -134,13 +134,13 @@ TEST(insert_2) {
   VERIFY(particles.is_valid(particles.back())) << particles.back();
 
   COMPARE(particles.front().id(), particle_a.id());
-  COMPARE(particles.back() .id(), particle_b.id());
+  COMPARE(particles.back().id(), particle_b.id());
   COMPARE(particles.front().pdgcode(), particle_a.pdgcode());
-  COMPARE(particles.back() .pdgcode(), particle_b.pdgcode());
+  COMPARE(particles.back().pdgcode(), particle_b.pdgcode());
   COMPARE(particles.front().momentum(), particle_a.momentum());
-  COMPARE(particles.back() .momentum(), particle_b.momentum());
+  COMPARE(particles.back().momentum(), particle_b.momentum());
   COMPARE(particles.front().position(), particle_a.position());
-  COMPARE(particles.back() .position(), particle_b.position());
+  COMPARE(particles.back().position(), particle_b.position());
 }
 
 TEST(create_multiple) {

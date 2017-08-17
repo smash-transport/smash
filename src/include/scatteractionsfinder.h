@@ -54,16 +54,16 @@ class ScatterActionsFinder : public ActionFinderInterface {
     * t_{coll} = - (r_1 - r_2) . (v_1 - v_2) / (v_1 - v_2)^2 [fm/c]
     */
     const ThreeVector dv_times_e1e2 =
-            p1.momentum().threevec() * p2.momentum().x0() -
-            p2.momentum().threevec() * p1.momentum().x0();
+        p1.momentum().threevec() * p2.momentum().x0() -
+        p2.momentum().threevec() * p1.momentum().x0();
     const double dv_times_e1e2_sqr = dv_times_e1e2.sqr();
     /* Zero relative velocity . particles are not approaching. */
     if (dv_times_e1e2_sqr < really_small) {
       return -1.0;
     }
     const ThreeVector dr = p1.position().threevec() - p2.position().threevec();
-    return -(dr*dv_times_e1e2) *
-             (p1.momentum().x0() * p2.momentum().x0() / dv_times_e1e2_sqr);
+    return -(dr * dv_times_e1e2) *
+           (p1.momentum().x0() * p2.momentum().x0() / dv_times_e1e2_sqr);
   }
   /** Check the whole particle list for collisions
    * and return a list with the corrsponding Action objects. */
@@ -90,9 +90,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * This knowledge can be used for improving performance.
    */
   inline bool is_constant_elastic_isotropic() const {
-    return ParticleType::list_all().size() == 1 &&
-           !two_to_one_ &&
-           isotropic_ &&
+    return ParticleType::list_all().size() == 1 && !two_to_one_ && isotropic_ &&
            elastic_parameter_ > 0.;
   }
 
@@ -103,8 +101,9 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * checked for collisions.
    */
   double max_transverse_distance_sqr(int testparticles) const {
-    return (is_constant_elastic_isotropic() ? elastic_parameter_ :
-            maximum_cross_section) / testparticles * fm2_mb * M_1_PI;
+    return (is_constant_elastic_isotropic() ? elastic_parameter_
+                                            : maximum_cross_section) /
+           testparticles * fm2_mb * M_1_PI;
   }
 
   /**
@@ -123,11 +122,13 @@ class ScatterActionsFinder : public ActionFinderInterface {
  private:
   /* Construct a ScatterAction object,
    * based on the types of the incoming particles. */
-  virtual ScatterActionPtr construct_scatter_action(const ParticleData &data_a,
-                                            const ParticleData &data_b,
-                                            double time_until_collision) const;
-  /** Check for a single pair of particles (id_a, id_b) if a collision will happen
-   * in the next timestep and create a corresponding Action object in that case. */
+  virtual ScatterActionPtr construct_scatter_action(
+      const ParticleData &data_a, const ParticleData &data_b,
+      double time_until_collision) const;
+  /** Check for a single pair of particles (id_a, id_b) if a collision will
+   * happen
+   * in the next timestep and create a corresponding Action object in that case.
+   */
   ActionPtr check_collision(const ParticleData &data_a,
                             const ParticleData &data_b, double dt) const;
   /** Elastic cross section parameter (in mb). */

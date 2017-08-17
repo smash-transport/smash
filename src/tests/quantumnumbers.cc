@@ -7,8 +7,8 @@
  *
  */
 
-#include "unittest.h"
 #include "../include/quantumnumbers.h"
+#include "unittest.h"
 
 using namespace Smash;
 
@@ -19,9 +19,7 @@ TEST(init_particle_types) {
       "σ2 0.245 2.3 2346\n");
 }
 
-TEST(size) {
-  COMPARE(sizeof(QuantumNumbers), 56u);
-}
+TEST(size) { COMPARE(sizeof(QuantumNumbers), 56u); }
 
 TEST(assign_empty) {
   QuantumNumbers emptyset;
@@ -29,29 +27,29 @@ TEST(assign_empty) {
   COMPARE(emptyset.momentum().x1(), 0);
   COMPARE(emptyset.momentum().x2(), 0);
   COMPARE(emptyset.momentum().x3(), 0);
-  COMPARE(emptyset.charge(),        0);
-  COMPARE(emptyset.isospin3(),      0);
-  COMPARE(emptyset.strangeness(),   0);
-  COMPARE(emptyset.charmness(),     0);
-  COMPARE(emptyset.bottomness(),    0);
+  COMPARE(emptyset.charge(), 0);
+  COMPARE(emptyset.isospin3(), 0);
+  COMPARE(emptyset.strangeness(), 0);
+  COMPARE(emptyset.charmness(), 0);
+  COMPARE(emptyset.bottomness(), 0);
   COMPARE(emptyset.baryon_number(), 0);
 }
 
 TEST(assign_full) {
-  FourVector P(1,2,3,4);
+  FourVector P(1, 2, 3, 4);
   QuantumNumbers fullset(P, 5, 6, 7, 8, 9, 0);
-  COMPARE(fullset.momentum(), FourVector(1,2,3,4));
-  COMPARE(fullset.charge(),        5);
-  COMPARE(fullset.isospin3(),      6);
-  COMPARE(fullset.strangeness(),   7);
-  COMPARE(fullset.charmness(),     8);
-  COMPARE(fullset.bottomness(),    9);
+  COMPARE(fullset.momentum(), FourVector(1, 2, 3, 4));
+  COMPARE(fullset.charge(), 5);
+  COMPARE(fullset.isospin3(), 6);
+  COMPARE(fullset.strangeness(), 7);
+  COMPARE(fullset.charmness(), 8);
+  COMPARE(fullset.bottomness(), 9);
   COMPARE(fullset.baryon_number(), 0);
 }
 
 TEST(compare) {
-  FourVector P(1,2,3,4);
-  FourVector Q(2,2,3,4);
+  FourVector P(1, 2, 3, 4);
+  FourVector Q(2, 2, 3, 4);
   QuantumNumbers A(P, 5, 6, 7, 8, 9, 0);
   QuantumNumbers B = A;
   QuantumNumbers C(Q, 5, 6, 7, 8, 9, 0);
@@ -85,17 +83,17 @@ TEST(compare) {
 }
 
 TEST(difference) {
-  FourVector P(1,2,3,4);
-  FourVector Q(2,3,4,4);
+  FourVector P(1, 2, 3, 4);
+  FourVector Q(2, 3, 4, 4);
   QuantumNumbers A(P, 5, 6, 7, 8, 9, 0);
   QuantumNumbers H(Q, 5, 6, 1, -8, 12358, -15);
-  QuantumNumbers diff(P-Q, 0, 0, 6, 16, -12349, 15);
+  QuantumNumbers diff(P - Q, 0, 0, 6, 16, -12349, 15);
   COMPARE(diff, A - H);
 }
 
 TEST(report_deviations) {
-  FourVector P(1,2,3,4);
-  FourVector Q(2,3,4,4);
+  FourVector P(1, 2, 3, 4);
+  FourVector Q(2, 3, 4, 4);
   // FourVector Q(1,2,4,4);
   QuantumNumbers A(P, 5, 6, 7, 8, 9, 0);
   QuantumNumbers H(Q, 5, 6, 1, -8, 12358, -15);
@@ -112,10 +110,9 @@ TEST(report_deviations) {
           "Deviation in Bottomness:\n"
           " 9 vs. 12358\n"
           "Deviation in Baryon Number:\n"
-          " 0 vs. -15\n"
-          );
+          " 0 vs. -15\n");
   // small deviation in FourVector should satisfy ==:
-  FourVector R(2 + 2e-13,3,4,4);
+  FourVector R(2 + 2e-13, 3, 4, 4);
   QuantumNumbers J(R, 5, 6, 1, -8, 12358, -15);
   COMPARE(H.report_deviations(J), "");
 }
@@ -128,7 +125,7 @@ TEST(count_from_particles) {
   // create particle with fake PdgCode (this would be equivalent to a
   // rho^+, but that should be "213").
   ParticleData particle(ParticleType::find(PdgCode("123")));
-  FourVector P(1,2,3,4);
+  FourVector P(1, 2, 3, 4);
   particle.set_4momentum(P);
   // create particle list:
   Particles list;
@@ -141,7 +138,7 @@ TEST(count_from_particles) {
   COMPARE(onlyone, check1);
 
   ParticleData particleQ(ParticleType::find(PdgCode("123")));
-  FourVector Q(2,3,4,5);
+  FourVector Q(2, 3, 4, 5);
   particleQ.set_4momentum(Q);
   list.insert(particleQ);
 
@@ -151,7 +148,7 @@ TEST(count_from_particles) {
   COMPARE(two, check2);
 
   ParticleData particleR(ParticleType::find(PdgCode("2346")));
-  FourVector R(3,4,5,6);
+  FourVector R(3, 4, 5, 6);
   particleR.set_4momentum(R);
   list.insert(particleR);
 
@@ -161,7 +158,7 @@ TEST(count_from_particles) {
   COMPARE(three, check3);
 
   ParticleData particleS(ParticleType::find(PdgCode("-1234568")));
-  FourVector S(-6,-9,-12,-15);
+  FourVector S(-6, -9, -12, -15);
   particleS.set_4momentum(S);
   list.insert(particleS);
 
@@ -172,18 +169,18 @@ TEST(count_from_particles) {
 
   //
   COMPARE(three.report_deviations(list),
-  "Conservation law violations detected (old vs. new)\n"
-  "Deviation in Four-Momentum:\n"
-  " P_0: 6.000000e+00 vs. 0.000000e+00; Δ = 6.000000e+00\n"
-  " P_1: 9.000000e+00 vs. 0.000000e+00; Δ = 9.000000e+00\n"
-  " P_2: 1.200000e+01 vs. 0.000000e+00; Δ = 1.200000e+01\n"
-  " P_3: 1.500000e+01 vs. 0.000000e+00; Δ = 1.500000e+01\n"
-  "Deviation in Charge:\n"
-  " 3 vs. 2\n"
-  "Deviation in Charmness:\n"
-  " 1 vs. 0\n"
-  "Deviation in Bottomness:\n"
-  " 0 vs. 1\n"
-  "Deviation in Baryon Number:\n"
-  " 1 vs. 0\n");
+          "Conservation law violations detected (old vs. new)\n"
+          "Deviation in Four-Momentum:\n"
+          " P_0: 6.000000e+00 vs. 0.000000e+00; Δ = 6.000000e+00\n"
+          " P_1: 9.000000e+00 vs. 0.000000e+00; Δ = 9.000000e+00\n"
+          " P_2: 1.200000e+01 vs. 0.000000e+00; Δ = 1.200000e+01\n"
+          " P_3: 1.500000e+01 vs. 0.000000e+00; Δ = 1.500000e+01\n"
+          "Deviation in Charge:\n"
+          " 3 vs. 2\n"
+          "Deviation in Charmness:\n"
+          " 1 vs. 0\n"
+          "Deviation in Bottomness:\n"
+          " 0 vs. 1\n"
+          "Deviation in Baryon Number:\n"
+          " 1 vs. 0\n");
 }

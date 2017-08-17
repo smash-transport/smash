@@ -47,48 +47,43 @@ class RectangularLattice {
     * i,j,k comprises volume ((i,i+1)lx/nx; (j,j+1)ly/ny; (k,k+1)lz/nz),
     * i: 0,nx-1; j: 0, ny-1; k: 0, nz-1;
     */
-  RectangularLattice(const std::array<double, 3> &l,
-                     const std::array<int, 3> &n,
-                     const std::array<double, 3> &orig, bool per,
+  RectangularLattice(const std::array<double, 3>& l,
+                     const std::array<int, 3>& n,
+                     const std::array<double, 3>& orig, bool per,
                      const LatticeUpdate upd)
-  : lattice_sizes_(l),
-    n_cells_(n),
-    cell_sizes_{l[0]/n[0], l[1]/n[1], l[2]/n[2]},
-    origin_(orig),
-    periodic_(per),
-    when_update_(upd) {
-    lattice_.resize(n_cells_[0]*
-                    n_cells_[1]*
-                    n_cells_[2]);
-    const auto &log = logger<LogArea::Lattice>();
-    log.debug("Rectangular lattice created: sizes[fm] = (",
-             lattice_sizes_[0], ",", lattice_sizes_[1], ",",
-             lattice_sizes_[2], "), dims = (",
-             n_cells_[0], ",", n_cells_[1], ",", n_cells_[2], "), origin = (",
-             origin_[0], ",", origin_[1], ",", origin_[2],
-             "), periodic: ", periodic_);
-    if (n_cells_[0] < 1 ||
-        n_cells_[1] < 1 ||
-        n_cells_[2] < 1 ||
-        lattice_sizes_[0] < 0.0 ||
-        lattice_sizes_[1] < 0.0 ||
+      : lattice_sizes_(l),
+        n_cells_(n),
+        cell_sizes_{l[0] / n[0], l[1] / n[1], l[2] / n[2]},
+        origin_(orig),
+        periodic_(per),
+        when_update_(upd) {
+    lattice_.resize(n_cells_[0] * n_cells_[1] * n_cells_[2]);
+    const auto& log = logger<LogArea::Lattice>();
+    log.debug("Rectangular lattice created: sizes[fm] = (", lattice_sizes_[0],
+              ",", lattice_sizes_[1], ",", lattice_sizes_[2], "), dims = (",
+              n_cells_[0], ",", n_cells_[1], ",", n_cells_[2], "), origin = (",
+              origin_[0], ",", origin_[1], ",", origin_[2],
+              "), periodic: ", periodic_);
+    if (n_cells_[0] < 1 || n_cells_[1] < 1 || n_cells_[2] < 1 ||
+        lattice_sizes_[0] < 0.0 || lattice_sizes_[1] < 0.0 ||
         lattice_sizes_[2] < 0.0) {
-      throw std::invalid_argument("Lattice sizes should be positive, "
-                     "lattice dimensions should be > 0.");
+      throw std::invalid_argument(
+          "Lattice sizes should be positive, "
+          "lattice dimensions should be > 0.");
     }
   }
 
   /// Sets all values on lattice to zeros
-  void reset() {
-    std::fill(lattice_.begin(), lattice_.end(), T());
-  }
+  void reset() { std::fill(lattice_.begin(), lattice_.end(), T()); }
 
   /// Checks if 3D index is out of lattice bounds
   inline bool out_of_bounds(int ix, int iy, int iz) const {
+    // clang-format off
     return !periodic_ &&
-           (ix < 0 || ix >= n_cells_[0] ||
-            iy < 0 || iy >= n_cells_[1] ||
-            iz < 0 || iz >= n_cells_[2]);
+        (ix < 0 || ix >= n_cells_[0] ||
+         iy < 0 || iy >= n_cells_[1] ||
+         iz < 0 || iz >= n_cells_[2]);
+    // clang-format on
   }
 
   /// Returns coordinate of cell center given its index
@@ -132,16 +127,17 @@ class RectangularLattice {
   const_iterator begin() const { return lattice_.begin(); }
   iterator end() { return lattice_.end(); }
   const_iterator end() const { return lattice_.end(); }
-  T &operator[](std::size_t i) { return lattice_[i]; }
+  T& operator[](std::size_t i) { return lattice_[i]; }
   const T& operator[](std::size_t i) const { return lattice_[i]; }
   std::size_t size() const { return lattice_.size(); }
 
   T& node(int ix, int iy, int iz) {
-    return periodic_ ?
-           lattice_[positive_modulo(ix, n_cells_[0]) + n_cells_[0] *
-                      (positive_modulo(iy, n_cells_[1]) + n_cells_[1] *
-                         positive_modulo(iz, n_cells_[2]))] :
-           lattice_[ix + n_cells_[0] * (iy + n_cells_[1] * iz)];
+    return periodic_
+               ? lattice_[positive_modulo(ix, n_cells_[0]) +
+                          n_cells_[0] *
+                              (positive_modulo(iy, n_cells_[1]) +
+                               n_cells_[1] * positive_modulo(iz, n_cells_[2]))]
+               : lattice_[ix + n_cells_[0] * (iy + n_cells_[1] * iz)];
   }
 
   /**
@@ -151,9 +147,9 @@ class RectangularLattice {
    **/
   // TODO(oliiny): maybe 1-order interpolation instead of 0-order?
   bool value_at(const ThreeVector& r, T& value) {
-    const int ix = std::floor((r.x1() - origin_[0])/cell_sizes_[0]);
-    const int iy = std::floor((r.x2() - origin_[1])/cell_sizes_[1]);
-    const int iz = std::floor((r.x3() - origin_[2])/cell_sizes_[2]);
+    const int ix = std::floor((r.x1() - origin_[0]) / cell_sizes_[0]);
+    const int iy = std::floor((r.x2() - origin_[1]) / cell_sizes_[1]);
+    const int iz = std::floor((r.x3() - origin_[2]) / cell_sizes_[2]);
     if (out_of_bounds(ix, iy, iz)) {
       value = T();
       return false;
@@ -168,21 +164,20 @@ class RectangularLattice {
    * Gives index of the node it goes through: ix, iy, iz.
    */
   template <typename F>
-  void iterate_sublattice(const std::array<int, 3> &lower_bounds,
-                          const std::array<int, 3> &upper_bounds,
-                          F &&func) {
-    const auto &log = logger<LogArea::Lattice>();
-    log.debug("Iterating sublattice with lower bound index (",
-              lower_bounds[0], ",", lower_bounds[1], ",", lower_bounds[2],
-              "), upper bound index (",
-              upper_bounds[0], ",", upper_bounds[1], ",", upper_bounds[2], ")");
+  void iterate_sublattice(const std::array<int, 3>& lower_bounds,
+                          const std::array<int, 3>& upper_bounds, F&& func) {
+    const auto& log = logger<LogArea::Lattice>();
+    log.debug("Iterating sublattice with lower bound index (", lower_bounds[0],
+              ",", lower_bounds[1], ",", lower_bounds[2],
+              "), upper bound index (", upper_bounds[0], ",", upper_bounds[1],
+              ",", upper_bounds[2], ")");
 
     if (periodic_) {
       for (int iz = lower_bounds[2]; iz < upper_bounds[2]; iz++) {
         const int z_offset = positive_modulo(iz, n_cells_[2]) * n_cells_[1];
         for (int iy = lower_bounds[1]; iy < upper_bounds[1]; iy++) {
-          const int y_offset = n_cells_[0] *
-                    (positive_modulo(iy, n_cells_[1]) + z_offset);
+          const int y_offset =
+              n_cells_[0] * (positive_modulo(iy, n_cells_[1]) + z_offset);
           for (int ix = lower_bounds[0]; ix < upper_bounds[0]; ix++) {
             const int index = positive_modulo(ix, n_cells_[0]) + y_offset;
             func(lattice_[index], ix, iy, iz);
@@ -209,17 +204,17 @@ class RectangularLattice {
    */
   template <typename F>
   void iterate_in_radius(const ThreeVector& point, const double r_cut,
-                         F &&func) {
+                         F&& func) {
     std::array<int, 3> l_bounds, u_bounds;
 
     // Array holds value at the cell center: r_center = r_0 + (i+0.5)cell_size,
     // where i is index in any direction. Therefore we want cells with condition
     // (r-r_cut)*csize - 0.5 < i < (r+r_cut)*csize - 0.5, r = r_center - r_0
     for (int i = 0; i < 3; i++) {
-      l_bounds[i] = std::ceil((point[i] - origin_[i] - r_cut) / cell_sizes_[i]
-                               - 0.5);
-      u_bounds[i] = std::ceil((point[i] - origin_[i] + r_cut) / cell_sizes_[i]
-                               - 0.5);
+      l_bounds[i] =
+          std::ceil((point[i] - origin_[i] - r_cut) / cell_sizes_[i] - 0.5);
+      u_bounds[i] =
+          std::ceil((point[i] - origin_[i] + r_cut) / cell_sizes_[i] - 0.5);
     }
 
     if (!periodic_) {
@@ -241,36 +236,41 @@ class RectangularLattice {
   /// Checks if lattices of possibly different types have identical structure
   template <typename L>
   bool identical_to_lattice(const L* lat) const {
-    return n_cells_[0] == lat->dimensions()[0]
-        && n_cells_[1] == lat->dimensions()[1]
-        && n_cells_[2] == lat->dimensions()[2]
-        && std::abs(lattice_sizes_[0] - lat->lattice_sizes()[0]) < really_small
-        && std::abs(lattice_sizes_[1] - lat->lattice_sizes()[1]) < really_small
-        && std::abs(lattice_sizes_[2] - lat->lattice_sizes()[2]) < really_small
-        && std::abs(origin_[0] - lat->origin()[0]) < really_small
-        && std::abs(origin_[1] - lat->origin()[1]) < really_small
-        && std::abs(origin_[2] - lat->origin()[2]) < really_small
-        && periodic_ == lat->periodic();
+    return n_cells_[0] == lat->dimensions()[0] &&
+           n_cells_[1] == lat->dimensions()[1] &&
+           n_cells_[2] == lat->dimensions()[2] &&
+           std::abs(lattice_sizes_[0] - lat->lattice_sizes()[0]) <
+               really_small &&
+           std::abs(lattice_sizes_[1] - lat->lattice_sizes()[1]) <
+               really_small &&
+           std::abs(lattice_sizes_[2] - lat->lattice_sizes()[2]) <
+               really_small &&
+           std::abs(origin_[0] - lat->origin()[0]) < really_small &&
+           std::abs(origin_[1] - lat->origin()[1]) < really_small &&
+           std::abs(origin_[2] - lat->origin()[2]) < really_small &&
+           periodic_ == lat->periodic();
   }
 
   void compute_gradient_lattice(
-         RectangularLattice<ThreeVector>* grad_lat) const {
+      RectangularLattice<ThreeVector>* grad_lat) const {
     if (n_cells_[0] < 2 || n_cells_[1] < 2 || n_cells_[2] < 2) {
       // Gradient calculation is impossible
-      throw std::runtime_error("Lattice is too small for gradient calculation"
-                               " (should be at least 2x2x2)");
+      throw std::runtime_error(
+          "Lattice is too small for gradient calculation"
+          " (should be at least 2x2x2)");
     }
     if (!identical_to_lattice(grad_lat)) {
       // Lattice for gradient should have identical origin/dims/periodicity
-      throw std::invalid_argument("Lattice for gradient should have the"
-                  " same origin/dims/periodicity that the original one.");
+      throw std::invalid_argument(
+          "Lattice for gradient should have the"
+          " same origin/dims/periodicity that the original one.");
     }
     const double inv_2dx = 0.5 / cell_sizes_[0];
     const double inv_2dy = 0.5 / cell_sizes_[1];
     const double inv_2dz = 0.5 / cell_sizes_[2];
     const int dix = 1;
     const int diy = n_cells_[0];
-    const int diz = n_cells_[0]*n_cells_[1];
+    const int diz = n_cells_[0] * n_cells_[1];
     const int d = diz * n_cells_[2];
 
     for (int iz = 0; iz < n_cells_[2]; iz++) {
@@ -280,42 +280,54 @@ class RectangularLattice {
         for (int ix = 0; ix < n_cells_[0]; ix++) {
           const int index = ix + y_offset;
           if (unlikely(ix == 0)) {
-            (*grad_lat)[index].set_x1(periodic_ ?
-               (lattice_[index+dix]-lattice_[index+diy-dix]) * inv_2dx :
-               (lattice_[index+dix]-lattice_[index]) * 2 * inv_2dx);
-          } else if (unlikely(ix == n_cells_[0]-1)) {
-            (*grad_lat)[index].set_x1(periodic_ ?
-               (lattice_[index-diy+dix]-lattice_[index-dix]) * inv_2dx :
-               (lattice_[index]-lattice_[index-dix]) * 2 * inv_2dx);
+            (*grad_lat)[index].set_x1(
+                periodic_
+                    ? (lattice_[index + dix] - lattice_[index + diy - dix]) *
+                          inv_2dx
+                    : (lattice_[index + dix] - lattice_[index]) * 2 * inv_2dx);
+          } else if (unlikely(ix == n_cells_[0] - 1)) {
+            (*grad_lat)[index].set_x1(
+                periodic_
+                    ? (lattice_[index - diy + dix] - lattice_[index - dix]) *
+                          inv_2dx
+                    : (lattice_[index] - lattice_[index - dix]) * 2 * inv_2dx);
           } else {
             (*grad_lat)[index].set_x1(
-               (lattice_[index+dix]-lattice_[index-dix]) * inv_2dx);
+                (lattice_[index + dix] - lattice_[index - dix]) * inv_2dx);
           }
 
           if (unlikely(iy == 0)) {
-            (*grad_lat)[index].set_x2(periodic_ ?
-               (lattice_[index+diy]-lattice_[index+diz-diy]) * inv_2dy :
-               (lattice_[index+diy]-lattice_[index]) * 2 * inv_2dy);
-          } else if (unlikely(iy == n_cells_[1]-1)) {
-            (*grad_lat)[index].set_x2(periodic_ ?
-               (lattice_[index-diz+diy]-lattice_[index-diy]) * inv_2dy :
-               (lattice_[index]-lattice_[index-diy]) * 2 * inv_2dy);
+            (*grad_lat)[index].set_x2(
+                periodic_
+                    ? (lattice_[index + diy] - lattice_[index + diz - diy]) *
+                          inv_2dy
+                    : (lattice_[index + diy] - lattice_[index]) * 2 * inv_2dy);
+          } else if (unlikely(iy == n_cells_[1] - 1)) {
+            (*grad_lat)[index].set_x2(
+                periodic_
+                    ? (lattice_[index - diz + diy] - lattice_[index - diy]) *
+                          inv_2dy
+                    : (lattice_[index] - lattice_[index - diy]) * 2 * inv_2dy);
           } else {
             (*grad_lat)[index].set_x2(
-              (lattice_[index+diy]-lattice_[index-diy]) * inv_2dy);
+                (lattice_[index + diy] - lattice_[index - diy]) * inv_2dy);
           }
 
           if (unlikely(iz == 0)) {
-            (*grad_lat)[index].set_x3(periodic_ ?
-               (lattice_[index+diz]-lattice_[index+d-diz]) * inv_2dz :
-               (lattice_[index+diz]-lattice_[index]) * 2 * inv_2dz);
-          } else if (unlikely(iz == n_cells_[2]-1)) {
-            (*grad_lat)[index].set_x3(periodic_ ?
-               (lattice_[index-d+diz]-lattice_[index-diz]) * inv_2dz :
-               (lattice_[index]-lattice_[index-diz]) * 2 * inv_2dz);
+            (*grad_lat)[index].set_x3(
+                periodic_
+                    ? (lattice_[index + diz] - lattice_[index + d - diz]) *
+                          inv_2dz
+                    : (lattice_[index + diz] - lattice_[index]) * 2 * inv_2dz);
+          } else if (unlikely(iz == n_cells_[2] - 1)) {
+            (*grad_lat)[index].set_x3(
+                periodic_
+                    ? (lattice_[index - d + diz] - lattice_[index - diz]) *
+                          inv_2dz
+                    : (lattice_[index] - lattice_[index - diz]) * 2 * inv_2dz);
           } else {
             (*grad_lat)[index].set_x3(
-              (lattice_[index+diz]-lattice_[index-diz]) * inv_2dz);
+                (lattice_[index + diz] - lattice_[index - diz]) * inv_2dz);
           }
         }
       }

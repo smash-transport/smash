@@ -15,13 +15,11 @@
 #include "include/decaymodes.h"
 #include "include/particles.h"
 
-
 namespace Smash {
 
-void DecayActionsFinderDilepton::shine(
-      const Particles &search_list,
-      OutputInterface* output,
-      double dt) const {
+void DecayActionsFinderDilepton::shine(const Particles &search_list,
+                                       OutputInterface *output,
+                                       double dt) const {
   for (const auto &p : search_list) {
     // effective mass of decaying particle
     const double m_eff = p.effective_mass();
@@ -36,12 +34,12 @@ void DecayActionsFinderDilepton::shine(
     // if particle can only decay into dileptons or is stable, use shining only
     // in find_final_actions and ignore them here, also unformed
     // resonances cannot decay
-    if (dil_modes.size() == n_all_modes || p.type().is_stable()
-        || (p.formation_time() > p.position().x0())) {
+    if (dil_modes.size() == n_all_modes || p.type().is_stable() ||
+        (p.formation_time() > p.position().x0())) {
       continue;
     }
 
-    for (DecayBranchPtr & mode : dil_modes) {
+    for (DecayBranchPtr &mode : dil_modes) {
       // SHINING as described in \iref{Schmidt:2008hm}, chapter 2D
       const double shining_weight = dt * inv_gamma * mode->weight() / hbarc;
 
@@ -55,11 +53,9 @@ void DecayActionsFinderDilepton::shine(
   }
 }
 
-
-void DecayActionsFinderDilepton::shine_final(
-                  const Particles &search_list,
-                  OutputInterface* output,
-                  bool only_res) const {
+void DecayActionsFinderDilepton::shine_final(const Particles &search_list,
+                                             OutputInterface *output,
+                                             bool only_res) const {
   for (const auto &p : search_list) {
     const ParticleType &t = p.type();
     if (t.decay_modes().decay_mode_list().empty() ||
@@ -72,10 +68,10 @@ void DecayActionsFinderDilepton::shine_final(
     DecayBranchList dil_modes = t.get_partial_widths_dilepton(m_eff);
 
     // total decay width, also hadronic decays
-    const double width_tot = total_weight<DecayBranch>(
-                                                  t.get_partial_widths(m_eff));
+    const double width_tot =
+        total_weight<DecayBranch>(t.get_partial_widths(m_eff));
 
-    for (DecayBranchPtr & mode : dil_modes) {
+    for (DecayBranchPtr &mode : dil_modes) {
       const double shining_weight = mode->weight() / width_tot;
 
       if (shining_weight > 0.0) {  // decays that can happen

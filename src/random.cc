@@ -7,8 +7,8 @@
  *
  */
 
-#include <random>
 #include "include/random.h"
+#include <random>
 
 namespace Smash {
 /*thread_local*/ Random::Engine Random::engine;

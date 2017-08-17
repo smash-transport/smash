@@ -64,9 +64,8 @@ constexpr int h1 = 0x10223;
 /// Pack two int32_t into an uint64_t.
 /// This is useful for switch statements on pairs.
 constexpr uint64_t pack(int32_t x, int32_t y) {
-  return
-      (static_cast<uint64_t>(static_cast<uint32_t>(x)) << 32)
-      | static_cast<uint64_t>(static_cast<uint32_t>(y));
+  return (static_cast<uint64_t>(static_cast<uint32_t>(x)) << 32) |
+         static_cast<uint64_t>(static_cast<uint32_t>(y));
   //^ Casting to an intermediate 32-bit integer is important!
 }
 

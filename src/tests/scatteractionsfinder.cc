@@ -7,8 +7,8 @@
  *
  */
 
-#include "unittest.h"
 #include "setup.h"
+#include "unittest.h"
 
 #include <cstdio>
 
@@ -20,9 +20,7 @@
 
 using namespace Smash;
 
-TEST(init_particle_types) {
-  Test::create_smashon_particletypes();
-}
+TEST(init_particle_types) { Test::create_smashon_particletypes(); }
 
 static ParticleData create_smashon_particle(int id = -1) {
   return ParticleData{ParticleType::find(0x661), id};
@@ -41,10 +39,10 @@ TEST(collision_order) {
   // particle a is set such that it will miss particles b and c by 0.1 fm
   particle_a.set_4position(FourVector(0., 1., 0.1, 0.));
   particle_b.set_4position(FourVector(0., 0., 1., 0.));
-  particle_c.set_4position(FourVector(0.,-1., 2., 0.));
+  particle_c.set_4position(FourVector(0., -1., 2., 0.));
   // particles d and e will also miss by 0.1 fm
   particle_d.set_4position(FourVector(0., 1.5, 0., 1.));
-  particle_e.set_4position(FourVector(0.,-0.1, 1.5, 1.));
+  particle_e.set_4position(FourVector(0., -0.1, 1.5, 1.));
 
   // set momenta
   // velocity should be very close to speed of light to make calculations easier
@@ -63,8 +61,8 @@ TEST(collision_order) {
   particles.insert(particle_e);
 
   // prepare scatteractionsfinder
-  const double radius = 0.11; // in fm
-  const double elastic_parameter = radius*radius*M_PI/fm2_mb; // in mb
+  const double radius = 0.11;                                        // in fm
+  const double elastic_parameter = radius * radius * M_PI / fm2_mb;  // in mb
   const int testparticles = 1;
   const std::vector<bool> has_interacted = {};
   ScatterActionsFinder finder(elastic_parameter, testparticles, has_interacted);
@@ -94,8 +92,8 @@ TEST(collision_order) {
   // first action
   // verify that first action involves particle b
   const auto action_prtcls_1 = actions_3[0]->incoming_particles();
-  VERIFY(std::find(action_prtcls_1.begin(), action_prtcls_1.end(), particle_b)
-          != action_prtcls_1.end());
+  VERIFY(std::find(action_prtcls_1.begin(), action_prtcls_1.end(),
+                   particle_b) != action_prtcls_1.end());
   // check if action is valid
   VERIFY(actions_3[0]->is_valid(particles))
       << "expected: first interaction is valid";
@@ -112,8 +110,8 @@ TEST(collision_order) {
   // third action
   // verify that third action involves particle d
   const auto action_prtcls_2 = actions_3[2]->incoming_particles();
-  VERIFY(std::find(action_prtcls_2.begin(), action_prtcls_2.end(), particle_d)
-          != action_prtcls_2.end());
+  VERIFY(std::find(action_prtcls_2.begin(), action_prtcls_2.end(),
+                   particle_d) != action_prtcls_2.end());
   // check if action is valid
   VERIFY(actions_3[2]->is_valid(particles))
       << "expected: third interaction is valid";
@@ -189,13 +187,14 @@ TEST(find_next_action) {
   Particles particles;
   particles.insert(Test::smashon(Test::Momentum{energy, energy * v, 0., 0.},
                                  Test::Position{0., x_pos_1, 1., 1.}));
-  particles.insert(Test::smashon(Test::Momentum{energy, -energy*v, 0., 0.},
-                                 Test::Position{0., x_pos_1+delta_x, 1., 1.}));
-
+  particles.insert(
+      Test::smashon(Test::Momentum{energy, -energy * v, 0., 0.},
+                    Test::Position{0., x_pos_1 + delta_x, 1., 1.}));
 
   // prepare scatteractionsfinder
-  constexpr double radius = 0.11;                                        // in fm
-  constexpr double elastic_parameter = radius * radius * M_PI / fm2_mb;  // in mb
+  constexpr double radius = 0.11;  // in fm
+  constexpr double elastic_parameter =
+      radius * radius * M_PI / fm2_mb;  // in mb
   constexpr int testparticles = 1;
   const std::vector<bool> has_interacted = {};
   ScatterActionsFinder finder(elastic_parameter, testparticles, has_interacted);
@@ -215,7 +214,7 @@ TEST(find_next_action) {
   ActionPtr action = std::move(action_list[0]);
 
   // calculate the expected time until the collision
-  constexpr double collision_time = 0.5*delta_x/v;
+  constexpr double collision_time = 0.5 * delta_x / v;
   // compare to what the action finder found
   FUZZY_COMPARE(action->time_of_execution(), collision_time);
 }

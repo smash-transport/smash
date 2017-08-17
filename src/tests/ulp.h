@@ -26,12 +26,8 @@
 
 #ifdef _MSC_VER
 namespace std {
-static inline bool isnan(float x) {
-  return _isnan(x);
-}
-static inline bool isnan(double x) {
-  return _isnan(x);
-}
+static inline bool isnan(float x) { return _isnan(x); }
+static inline bool isnan(double x) { return _isnan(x); }
 }  // namespace std
 #endif
 

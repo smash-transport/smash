@@ -14,7 +14,6 @@
 
 namespace Smash {
 
-
 /**
  * \ingroup action
  * ScatterActionMesonMeson is a special ScatterAction which represents the
@@ -32,7 +31,6 @@ class ScatterActionMesonMeson : public ScatterAction {
    */
   void format_debug_output(std::ostream &out) const override;
 };
-
 
 }  // namespace Smash
 

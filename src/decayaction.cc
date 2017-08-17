@@ -18,8 +18,7 @@
 namespace Smash {
 
 DecayAction::DecayAction(const ParticleData &p, double time)
-    : Action({p}, time),
-      total_width_(0.) {}
+    : Action({p}, time), total_width_(0.) {}
 
 void DecayAction::add_decays(DecayBranchList pv) {
   add_processes<DecayBranch>(std::move(pv), decay_channels_, total_width_);
@@ -32,7 +31,6 @@ void DecayAction::add_decay(DecayBranchPtr p) {
 double DecayAction::sqrt_s() const {
   return incoming_particles_[0].momentum().abs();
 }
-
 
 void DecayAction::one_to_three() {
   const auto &log = logger<LogArea::DecayModes>();
@@ -67,24 +65,24 @@ void DecayAction::one_to_three() {
     s_ab = Random::uniform(s_ab_min, s_ab_max);
     s_bc = Random::uniform(s_bc_min, s_bc_max);
     const double e_b_rest =
-      (s_ab - mass_a * mass_a + mass_b * mass_b) / (2 * std::sqrt(s_ab));
+        (s_ab - mass_a * mass_a + mass_b * mass_b) / (2 * std::sqrt(s_ab));
     const double e_c_rest =
-      (mass_resonance * mass_resonance - s_ab - mass_c * mass_c) /
-      (2 * std::sqrt(s_ab));
+        (mass_resonance * mass_resonance - s_ab - mass_c * mass_c) /
+        (2 * std::sqrt(s_ab));
     dalitz_bc_max = (e_b_rest + e_c_rest) * (e_b_rest + e_c_rest) -
                     (std::sqrt(e_b_rest * e_b_rest - mass_b * mass_b) -
                      std::sqrt(e_c_rest * e_c_rest - mass_c * mass_c)) *
-                     (std::sqrt(e_b_rest * e_b_rest - mass_b * mass_b) -
-                      std::sqrt(e_c_rest * e_c_rest - mass_c * mass_c));
+                        (std::sqrt(e_b_rest * e_b_rest - mass_b * mass_b) -
+                         std::sqrt(e_c_rest * e_c_rest - mass_c * mass_c));
     dalitz_bc_min = (e_b_rest + e_c_rest) * (e_b_rest + e_c_rest) -
                     (std::sqrt(e_b_rest * e_b_rest - mass_b * mass_b) +
                      std::sqrt(e_c_rest * e_c_rest - mass_c * mass_c)) *
-                     (std::sqrt(e_b_rest * e_b_rest - mass_b * mass_b) +
-                      std::sqrt(e_c_rest * e_c_rest - mass_c * mass_c));
+                        (std::sqrt(e_b_rest * e_b_rest - mass_b * mass_b) +
+                         std::sqrt(e_c_rest * e_c_rest - mass_c * mass_c));
   }
 
-  log.debug("s_ab: ", s_ab, " s_bc: ", s_bc, " min: ", dalitz_bc_min, " max: ",
-            dalitz_bc_max);
+  log.debug("s_ab: ", s_ab, " s_bc: ", s_bc, " min: ", dalitz_bc_min,
+            " max: ", dalitz_bc_max);
 
   /* Compute energy and momentum magnitude */
   const double energy_a =
@@ -133,12 +131,12 @@ void DecayAction::one_to_three() {
   outgoing_c.set_4momentum(mass_c, phitheta.threevec() * momentum_c);
 
   /* Momentum check */
-  FourVector ptot = outgoing_a.momentum() + outgoing_b.momentum() +
-                    outgoing_c.momentum();
+  FourVector ptot =
+      outgoing_a.momentum() + outgoing_b.momentum() + outgoing_c.momentum();
 
   if (std::abs(ptot.x0() - total_energy) > really_small) {
-    log.warn("1->3 energy not conserved! Before: ", total_energy, " After: ",
-             ptot.x0());
+    log.warn("1->3 energy not conserved! Before: ", total_energy,
+             " After: ", ptot.x0());
   }
   if (std::abs(ptot.x1()) > really_small ||
       std::abs(ptot.x2()) > really_small ||
@@ -151,7 +149,6 @@ void DecayAction::one_to_three() {
             "\noutgoing_c: ", outgoing_c.momentum());
 }
 
-
 void DecayAction::generate_final_state() {
   const auto &log = logger<LogArea::DecayModes>();
   log.debug("Process: Resonance decay. ");
@@ -162,26 +159,27 @@ void DecayAction::generate_final_state() {
    * according to their relative weights. Then decay the particle
    * by calling function one_to_two or one_to_three.
    */
-  const DecayBranch* proc = choose_channel<DecayBranch>(
-      decay_channels_, total_width_);
+  const DecayBranch *proc =
+      choose_channel<DecayBranch>(decay_channels_, total_width_);
   outgoing_particles_ = proc->particle_list();
   process_type_ = proc->get_type();
   L_ = proc->angular_momentum();
 
   switch (outgoing_particles_.size()) {
-  case 2:
-    sample_2body_phasespace();
-    break;
-  case 3:
-    one_to_three();
-    break;
-  default:
-    throw InvalidDecay(
-        "DecayAction::perform: Only 1->2 or 1->3 processes are supported. "
-        "Decay from 1->" + std::to_string(outgoing_particles_.size()) +
-        " was requested. (PDGcode=" + incoming_particles_[0].pdgcode().string()
-        + ", mass=" + std::to_string(incoming_particles_[0].effective_mass())
-        + ")");
+    case 2:
+      sample_2body_phasespace();
+      break;
+    case 3:
+      one_to_three();
+      break;
+    default:
+      throw InvalidDecay(
+          "DecayAction::perform: Only 1->2 or 1->3 processes are supported. "
+          "Decay from 1->" +
+          std::to_string(outgoing_particles_.size()) +
+          " was requested. (PDGcode=" +
+          incoming_particles_[0].pdgcode().string() + ", mass=" +
+          std::to_string(incoming_particles_[0].effective_mass()) + ")");
   }
 
   /* Set positions and formation time and boost back. */
@@ -190,14 +188,13 @@ void DecayAction::generate_final_state() {
     log.debug("particle momenta in lrf ", p);
     p.boost_momentum(-velocity_CM);
     p.set_4position(incoming_particles_[0].position());
-    p.set_formation_time(std::max(time_of_execution_,
-                                  incoming_particles_[0].formation_time()));
+    p.set_formation_time(
+        std::max(time_of_execution_, incoming_particles_[0].formation_time()));
     p.set_cross_section_scaling_factor(
-      incoming_particles_[0].cross_section_scaling_factor());
+        incoming_particles_[0].cross_section_scaling_factor());
     log.debug("particle momenta in comp ", p);
   }
 }
-
 
 /* This is overridden from the Action class in order to
  * take care of the angular momentum L_. */
@@ -211,12 +208,12 @@ std::pair<double, double> DecayAction::sample_masses() const {
   const double cms_energy = sqrt_s();
 
   if (cms_energy < t_a.min_mass_kinematic() + t_b.min_mass_kinematic()) {
-    const std::string reaction = incoming_particles_[0].type().name() +
-                                 "→" + t_a.name() + t_b.name();
-    throw InvalidResonanceFormation(reaction + ": not enough energy, " +
-      std::to_string(cms_energy) + " < " +
-      std::to_string(t_a.min_mass_kinematic()) + " + " +
-      std::to_string(t_b.min_mass_kinematic()));
+    const std::string reaction =
+        incoming_particles_[0].type().name() + "→" + t_a.name() + t_b.name();
+    throw InvalidResonanceFormation(
+        reaction + ": not enough energy, " + std::to_string(cms_energy) +
+        " < " + std::to_string(t_a.min_mass_kinematic()) + " + " +
+        std::to_string(t_b.min_mass_kinematic()));
   }
 
   /* If one of the particles is a resonance, sample its mass. */
@@ -232,10 +229,9 @@ std::pair<double, double> DecayAction::sample_masses() const {
   return masses;
 }
 
-
 void DecayAction::format_debug_output(std::ostream &out) const {
-  out << "Decay of " << incoming_particles_ << " to " << outgoing_particles_ <<
-  ", sqrt(s)=" << format(sqrt_s(), "GeV", 11, 9);
+  out << "Decay of " << incoming_particles_ << " to " << outgoing_particles_
+      << ", sqrt(s)=" << format(sqrt_s(), "GeV", 11, 9);
 }
 
 }  // namespace Smash

@@ -6,17 +6,17 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
-#include "unittest.h"
 #include "setup.h"
+#include "unittest.h"
 
+#include <include/config.h>
+#include <array>
 #include <cstdio>
 #include <cstring>
-#include <array>
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <vector>
-#include <include/config.h>
 
 #include "../include/binaryoutputcollisions.h"
 #include "../include/binaryoutputparticles.h"
@@ -62,7 +62,7 @@ static void read_binary(double &x, FILE *file) {
 
 /* Function to read and compare particle */
 static bool compare_particle(const ParticleData &p, FILE *file) {
-  int id, pdgcode; 
+  int id, pdgcode;
   double mass;
   FourVector pos, mom;
   read_binary(pos, file);
@@ -89,8 +89,8 @@ static bool compare_particles_block_header(const int &npart, FILE *file) {
 
 /* function to read and compare collision block header */
 static bool compare_interaction_block_header(const int &nin, const int &nout,
-                                             const Action &action,
-                                             double rho, FILE *file) {
+                                             const Action &action, double rho,
+                                             FILE *file) {
   int nin_read, nout_read, process_type_read;
   double rho_read, weight_read;
   char c_read;
