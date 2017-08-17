@@ -51,8 +51,12 @@ class EnergyMomentumTensor {
 
   /// access the index of component \f$ (\mu, \nu) \f$.
   static std::int8_t tmn_index(std::int8_t mu, std::int8_t nu) {
-    constexpr std::array<std::int8_t, 16> indices = {0, 1, 2, 3, 1, 4, 5, 6,
-                                                     2, 5, 7, 8, 3, 6, 8, 9};
+    // clang-format off
+    constexpr std::array<std::int8_t, 16> indices = {0, 1, 2, 3,
+                                                     1, 4, 5, 6,
+                                                     2, 5, 7, 8,
+                                                     3, 6, 8, 9};
+    // clang-format on
     if (mu < 4 && nu < 4 && mu >= 0 && nu >= 0) {
       return indices[mu + 4 * nu];
     } else {

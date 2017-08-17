@@ -168,10 +168,15 @@ class QuantumNumbers {
    *
    */
   bool operator==(const QuantumNumbers& rhs) const {
-    return (momentum_ == rhs.momentum_ && charge_ == rhs.charge_ &&
-            isospin3_ == rhs.isospin3_ && strangeness_ == rhs.strangeness_ &&
-            charmness_ == rhs.charmness_ && bottomness_ == rhs.bottomness_ &&
+    // clang-format off
+    return (momentum_ == rhs.momentum_ &&
+            charge_ == rhs.charge_ &&
+            isospin3_ == rhs.isospin3_ &&
+            strangeness_ == rhs.strangeness_ &&
+            charmness_ == rhs.charmness_ &&
+            bottomness_ == rhs.bottomness_ &&
             baryon_number_ == rhs.baryon_number_);
+    // clang-format on
   }
   /// logical complement of QuantumNumbers::operator==
   bool operator!=(const QuantumNumbers& rhs) const { return !(*this == rhs); }

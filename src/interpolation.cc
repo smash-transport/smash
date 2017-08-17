@@ -14,13 +14,11 @@ InterpolateDataSpline::InterpolateDataSpline(const std::vector<double>& x,
   const auto N = x.size();
   if (y.size() != N) {
     throw std::runtime_error(
-        "Need two vectors of equal length "
-        "for interpolation.");
+        "Need two vectors of equal length for interpolation.");
   }
   if (N < 3) {
     throw std::runtime_error(
-        "Need at least 3 data points "
-        "for cubic spline interpolation.");
+        "Need at least 3 data points for cubic spline interpolation.");
   }
   const auto p = generate_sort_permutation(
       x, [&](double const& a, double const& b) { return a < b; });

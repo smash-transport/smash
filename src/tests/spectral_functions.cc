@@ -65,7 +65,7 @@ TEST(spectral_functions) {
     COMPARE_ABSOLUTE_ERROR(result_const.value(), 1., error_tolerance_const);
     COMPARE_ABSOLUTE_ERROR(result.value(), 1., 5 * result.error());
     //^ We use a bit higher tolerance, because the numerical algorithm might
-    //underestimate
+    // underestimate
     //  the error.
   }
 }

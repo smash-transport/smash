@@ -70,9 +70,7 @@ void EosTable::compile_table(HadronGasEos &eos,
             (x.T > 0.0)) {
           std::cout << "discrepancy: " << de_ * ie << " = " << e_comp << ", "
                     << dnb_ * inb << " = " << nb_comp << ", " << x.p << " = "
-                    << p_comp << ", "
-                    << "0"
-                    << " = " << ns_comp << std::endl;
+                    << p_comp << ", 0 = " << ns_comp << std::endl;
           table_consistency = false;
           goto finish_consistency_check;
         }
@@ -433,13 +431,15 @@ std::array<double, 3> HadronGasEos::solve_eos(
 
 std::string HadronGasEos::print_solver_state(size_t iter) const {
   std::stringstream s;
+  // clang-format off
   s << "iter = " << iter << ","
     << " x = " << gsl_vector_get(solver_->x, 0) << " "
-    << gsl_vector_get(solver_->x, 1) << " " << gsl_vector_get(solver_->x, 2)
-    << ", "
+               << gsl_vector_get(solver_->x, 1) << " "
+               << gsl_vector_get(solver_->x, 2) << ", "
     << "f(x) = " << gsl_vector_get(solver_->f, 0) << " "
-    << gsl_vector_get(solver_->f, 1) << " " << gsl_vector_get(solver_->f, 2)
-    << std::endl;
+                 << gsl_vector_get(solver_->f, 1) << " "
+                 << gsl_vector_get(solver_->f, 2) << std::endl;
+  // clang-format on
   return s.str();
 }
 
