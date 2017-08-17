@@ -46,8 +46,11 @@ class Tabulation {
    * value at the upper bound. */
   double get_value_step(double x) const;
   /** Look up a value from the tabulation using linear interpolation.
-   * If x is above the upper bound, we use linear extrapolation of the two
-   * highest tabulated points. */
+   * If x is above the upper bound, then by default we use linear extrapolation
+   * of the two highest tabulated points. Optionally one can also extrapolate
+   * with rightmost value or zero. Linear extrapolation is not an arbitrary
+   * choice, in fact many functions tabulated in SMASH have a linear
+   * asymptotics, e.g. rho(m) functions. */
   double get_value_linear(double x,
     Extrapolation extrapolation = Extrapolation::Linear) const;
 
