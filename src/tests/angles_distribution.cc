@@ -51,6 +51,7 @@ int main() {
     printf("%3d %8.6f  0.00 %8.5f\n", p, p * dangle,
            (phi_histo[p] + 0.0) / dangle / (NUMBER + 0.0));
   }
+  // FIXME this test does not do anything
 
   return 0;
 }

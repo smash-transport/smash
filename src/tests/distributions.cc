@@ -7,8 +7,9 @@
  *
  */
 
+#include "unittest.h"  // This include has to be first
+
 #include "../include/distributions.h"
-#include "unittest.h"
 
 using namespace Smash;
 

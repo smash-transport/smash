@@ -6,11 +6,12 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
+#include "unittest.h"  // This include has to be first
 
-#include "../include/grandcan_thermalizer.h"
-#include "../include/boxmodus.h"
 #include "setup.h"
-#include "unittest.h"
+
+#include "../include/boxmodus.h"
+#include "../include/grandcan_thermalizer.h"
 
 using namespace Smash;
 

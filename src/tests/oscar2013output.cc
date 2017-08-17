@@ -7,6 +7,10 @@
  *
  */
 
+#include "unittest.h"  // This include has to be first
+
+#include "setup.h"
+
 #include <include/config.h>
 #include <array>
 #include <boost/filesystem.hpp>
@@ -14,8 +18,6 @@
 #include <map>
 #include <string>
 #include <vector>
-#include "setup.h"
-#include "unittest.h"
 
 #include "../include/oscaroutput.h"
 #include "../include/outputinterface.h"
