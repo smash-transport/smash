@@ -12,10 +12,9 @@
 namespace Smash {
 
 ActionList WallCrossActionsFinder::find_actions_in_cell(
-                   const ParticleList &plist,
-                   double t_max) const {
+    const ParticleList& plist, double t_max) const {
   std::vector<ActionPtr> actions;
-  for (const ParticleData &p : plist) {
+  for (const ParticleData& p : plist) {
     const ThreeVector& r = p.position().threevec();
     const ThreeVector& v = p.velocity();
     double time_until_crossing = t_max;
@@ -23,9 +22,9 @@ ActionList WallCrossActionsFinder::find_actions_in_cell(
     for (int i = 0; i < 3; i++) {
       double t = t_max + 1.;
       if (v[i] > really_small) {
-        t = (l_[i] - r[i])/v[i];
+        t = (l_[i] - r[i]) / v[i];
       } else if (v[i] < -really_small) {
-        t = -r[i]/v[i];
+        t = -r[i] / v[i];
       }
       if (t < time_until_crossing) {
         time_until_crossing = t;
@@ -37,7 +36,7 @@ ActionList WallCrossActionsFinder::find_actions_in_cell(
       continue;
     }
     FourVector crossing_point(p.position().x0() + time_until_crossing,
-                              r + v*time_until_crossing);
+                              r + v * time_until_crossing);
     crossing_point[i_cross + 1] = ((v[i_cross] > 0.0) ? 0.0 : l_[i_cross]);
 
     ParticleData outgoing_particle(p);

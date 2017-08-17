@@ -20,17 +20,16 @@
 namespace Smash {
 
 /// Line consists of a line number and the contents of that line
-struct Line {/*{{{*/
+struct Line { /*{{{*/
   /// initialize line with empty string and number
   Line() = default;
   /// initialize a line with line number \p n and text \p t
-  Line(int n, std::string &&t) : number(n), text(std::move(t)) {
-  }
+  Line(int n, std::string &&t) : number(n), text(std::move(t)) {}
   /// line number
   int number;
   /// line content.
   std::string text;
-};/*}}}*/
+}; /*}}}*/
 
 /** builds a meaningful error message
  *
@@ -56,7 +55,7 @@ inline std::string build_error_string(std::string message, const Line &line) {
 build_vector_<Line> line_parser(const std::string &input);
 
 /// makes sure that nothing is left to read from this line.
-inline void ensure_all_read(std::istream &input, const Line &line) {/*{{{*/
+inline void ensure_all_read(std::istream &input, const Line &line) { /*{{{*/
   std::string tmp;
   input >> tmp;
   if (!input.eof()) {
@@ -65,7 +64,7 @@ inline void ensure_all_read(std::istream &input, const Line &line) {/*{{{*/
                                ") at the remainder of the line.",
                            line));
   }
-}/*}}}*/
+} /*}}}*/
 
 /**
  * Utility function to read a complete input stream (e.g. file) into one string.

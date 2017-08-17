@@ -54,7 +54,8 @@ class OutputInterface {
   /**
    * Called whenever an action modified one or more particles.
    *
-   * \param action The action object, containing the initial and final state etc.
+   * \param action The action object, containing the initial and final state
+   * etc.
    * \param density The density at the interaction point.
    *
    * \fpPrecision Why \c double?
@@ -84,29 +85,30 @@ class OutputInterface {
    * \param dt Type of density, i.e. which particles to take into account.
    * \param lattice Lattice of tabulated values.
    */
-  virtual void thermodynamics_output(const ThermodynamicQuantity tq,
-                      const DensityType dt,
-                      RectangularLattice<DensityOnLattice> &lattice) {
+  virtual void thermodynamics_output(
+      const ThermodynamicQuantity tq, const DensityType dt,
+      RectangularLattice<DensityOnLattice> &lattice) {
     SMASH_UNUSED(tq);
     SMASH_UNUSED(dt);
     SMASH_UNUSED(lattice);
   }
 
   /**
-   * Output to write energy-momentum tensor and related quantities from the lattice.
+   * Output to write energy-momentum tensor and related quantities from the
+   * lattice.
    * \param tq Thermodynamic quantity to be written: Tmn, Tmn_Landau, v_Landau
    * \param dt Type of density, i.e. which particles to take into account.
    * \param lattice Lattice of tabulated values.
    */
-  virtual void thermodynamics_output(const ThermodynamicQuantity tq,
-                   const DensityType dt,
-                   RectangularLattice<EnergyMomentumTensor> &lattice) {
+  virtual void thermodynamics_output(
+      const ThermodynamicQuantity tq, const DensityType dt,
+      RectangularLattice<EnergyMomentumTensor> &lattice) {
     SMASH_UNUSED(tq);
     SMASH_UNUSED(dt);
     SMASH_UNUSED(lattice);
   }
 
-  virtual void thermodynamics_output(const GrandCanThermalizer& gct) {
+  virtual void thermodynamics_output(const GrandCanThermalizer &gct) {
     SMASH_UNUSED(gct);
   }
 

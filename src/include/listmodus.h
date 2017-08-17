@@ -22,9 +22,11 @@ namespace Smash {
  * \ingroup modus
  * ListModus: Provides a modus for hydro afterburner calculations
 *
-*Particle-list is given with data format in OSCAR2013, it's the same as the output in build/data/{eventid}/particles.oscar
+*Particle-list is given with data format in OSCAR2013, it's the same as the
+output in build/data/{eventid}/particles.oscar
 *The detailed information is as follows:
-*#!OSCAR2013 particle_lists SMASH-0.50-70-gc203fad t x y z mass p0 px py pz pdg ID
+*#!OSCAR2013 particle_lists SMASH-0.50-70-gc203fad t x y z mass p0 px py pz pdg
+ID
 # Units: fm fm fm fm GeV GeV GeV GeV GeV none none
 * To use this modus, chose
 * \code
@@ -49,12 +51,12 @@ class ListModus : public ModusDefault {
  public:
   /* default constructor with probable values */
   explicit ListModus(Configuration modus_config,
-                       const ExperimentParameters &parameters);
+                     const ExperimentParameters &parameters);
 
   /** creates initial conditions for the particles.
    */
   double initial_conditions(Particles *particles,
-                          const ExperimentParameters &parameters);
+                            const ExperimentParameters &parameters);
 
   /// \ingroup exception
   struct LoadFailure : public std::runtime_error {
@@ -79,8 +81,8 @@ class ListModus : public ModusDefault {
 
   /// check whether anti-freestreaming is needed, if yes return
   /// earliest formation time as start_time_
-  std::pair<bool, double> check_formation_time_(const std::string &
-                                              particle_list);
+  std::pair<bool, double> check_formation_time_(
+      const std::string &particle_list);
 
   /**\ingroup logging
    * Writes the initial state for the List to the output stream.

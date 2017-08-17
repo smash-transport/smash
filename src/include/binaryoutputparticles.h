@@ -54,7 +54,6 @@ class BinaryOutputParticles : public BinaryOutputBase {
   bool only_final_;
 };
 
-
 }  // namespace Smash
 
 #endif  // SRC_INCLUDE_BINARYOUTPUTPARTICLES_H_

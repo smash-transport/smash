@@ -7,22 +7,20 @@
  *
  */
 
-#include "unittest.h"
-#include "setup.h"
 #include "../include/boxmodus.h"
-#include "../include/configuration.h"
 #include "../include/collidermodus.h"
+#include "../include/configuration.h"
 #include "../include/experimentparameters.h"
 #include "../include/modusdefault.h"
 #include "../include/spheremodus.h"
+#include "setup.h"
+#include "unittest.h"
 
 #include <boost/filesystem.hpp>
 
 using namespace Smash;
 
-TEST(init_particle_types) {
-  Test::create_smashon_particletypes();
-}
+TEST(init_particle_types) { Test::create_smashon_particletypes(); }
 
 static ParticleData create_smashon_particle(int id = -1) {
   return ParticleData{ParticleType::find(0x661), id};

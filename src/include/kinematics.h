@@ -22,13 +22,13 @@ namespace Smash {
  * \param s mandelstamm s of the collision [GeV^2]
  * \param ma Mass of the first particle [GeV]
  * \param mb Mass of the second particle [GeV]
- * 
+ *
  * needs to be double to allow for calculations at LHC energies
  */
 inline double center_of_velocity_v(double s, double ma, double mb) {
   const double m_sum = ma + mb;
   const double m_dif = ma - mb;
-  return std::sqrt((s - m_sum*m_sum) / (s - m_dif*m_dif));
+  return std::sqrt((s - m_sum * m_sum) / (s - m_dif * m_dif));
 }
 
 /**
@@ -41,7 +41,7 @@ inline double center_of_velocity_v(double s, double ma, double mb) {
  */
 inline double fixed_target_projectile_v(double s, double ma, double mb) {
   const double inv_gamma = 2 * ma * mb / (s - ma * ma - mb * mb);
-  return std::sqrt(1.0 - inv_gamma*inv_gamma);
+  return std::sqrt(1.0 - inv_gamma * inv_gamma);
 }
 
 /**
@@ -112,33 +112,33 @@ T pCM_sqr(const T sqrts, const T mass_a, const T mass_b) noexcept {
  * with |t_min| < |t_max|, i.e. t_min > t_max.
  */
 template <typename T>
-std::array<T, 2> get_t_range(const T sqrts, const T m1, const T m2,
-                                           const T m3, const T m4) {
+std::array<T, 2> get_t_range(const T sqrts, const T m1, const T m2, const T m3,
+                             const T m4) {
   const T p_i = pCM(sqrts, m1, m2);  // initial-state CM momentum
   const T p_f = pCM(sqrts, m3, m4);  // final-state CM momentum
-  const T sqrt_t0 = (m1*m1 - m2*m2 - m3*m3 + m4*m4) / (2.*sqrts);
+  const T sqrt_t0 = (m1 * m1 - m2 * m2 - m3 * m3 + m4 * m4) / (2. * sqrts);
   const T t0 = sqrt_t0 * sqrt_t0;
-  const T t_min = t0 - (p_i-p_f)*(p_i-p_f),
-          t_max = t0 - (p_i+p_f)*(p_i+p_f);
+  const T t_min = t0 - (p_i - p_f) * (p_i - p_f),
+          t_max = t0 - (p_i + p_f) * (p_i + p_f);
   return {t_min, t_max};
 }
 
 /// Helper function for plab_from_s.
 static inline void check_energy(double mandelstam_s, double m_sum) {
-  if (mandelstam_s < m_sum*m_sum) {
-      std::stringstream err;
-      err << "plab_from_s: s too small: "
-          << mandelstam_s << " < " << m_sum*m_sum;
-      throw std::runtime_error(err.str());
+  if (mandelstam_s < m_sum * m_sum) {
+    std::stringstream err;
+    err << "plab_from_s: s too small: " << mandelstam_s << " < "
+        << m_sum * m_sum;
+    throw std::runtime_error(err.str());
   }
 }
 
 /// Helper function for plab_from_s.
 static inline void check_radicand(double mandelstam_s, double radicand) {
   if (radicand < 0) {
-      std::stringstream err;
-      err << "plab_from_s: negative radicand: " << mandelstam_s;
-      throw std::runtime_error(err.str());
+    std::stringstream err;
+    err << "plab_from_s: negative radicand: " << mandelstam_s;
+    throw std::runtime_error(err.str());
   }
 }
 
@@ -150,7 +150,7 @@ static inline void check_radicand(double mandelstam_s, double radicand) {
 inline double plab_from_s(double mandelstam_s, double mass) {
   const double radicand = mandelstam_s * (mandelstam_s - 4 * mass * mass);
 #ifndef NDEBUG
-  const double m_sum = 2*mass;
+  const double m_sum = 2 * mass;
   check_energy(mandelstam_s, m_sum);
   check_radicand(mandelstam_s, radicand);
 #endif
@@ -169,24 +169,23 @@ inline double plab_from_s(double mandelstam_s) {
  *
  * \fpPrecision Why \c double?
  */
-inline double plab_from_s(double mandelstam_s,
-                          double m_projectile, double m_target) {
+inline double plab_from_s(double mandelstam_s, double m_projectile,
+                          double m_target) {
   const double m_sum = m_projectile + m_target;
   const double m_diff = m_projectile - m_target;
-  const double radicand
-      = (mandelstam_s - m_sum*m_sum) * (mandelstam_s - m_diff*m_diff);
-  /* This is equivalent to:
-  const double radicand
-      = (mandelstam_s - m_a_sq - m_b_sq) * (mandelstam_s - m_a_sq - m_b_sq)
-        - 4 * m_a_sq * m_b_sq;
-  */
+  const double radicand =
+      (mandelstam_s - m_sum * m_sum) * (mandelstam_s - m_diff * m_diff);
+/* This is equivalent to:
+const double radicand
+    = (mandelstam_s - m_a_sq - m_b_sq) * (mandelstam_s - m_a_sq - m_b_sq)
+      - 4 * m_a_sq * m_b_sq;
+*/
 #ifndef NDEBUG
   check_energy(mandelstam_s, m_sum);
   check_radicand(mandelstam_s, radicand);
 #endif
   return std::sqrt(radicand) / (2 * m_target);
 }
-
 
 /**
  * Convert E_kin to mandelstam-s for a fixed-target setup,
@@ -196,9 +195,8 @@ inline double plab_from_s(double mandelstam_s,
  * \fpPrecision Why \c double?
  */
 inline double s_from_Ekin(double e_kin, double m_P, double m_T) {
-  return m_P*m_P + m_T*m_T + 2 * m_T * (m_P + e_kin);
+  return m_P * m_P + m_T * m_T + 2 * m_T * (m_P + e_kin);
 }
-
 
 /**
  * Convert p_lab to mandelstam-s for a fixed-target setup,
@@ -208,7 +206,7 @@ inline double s_from_Ekin(double e_kin, double m_P, double m_T) {
  * \fpPrecision Why \c double?
  */
 inline double s_from_plab(double plab, double m_P, double m_T) {
-  return m_P*m_P + m_T*m_T + 2 * m_T * std::sqrt(m_P*m_P + plab*plab);
+  return m_P * m_P + m_T * m_T + 2 * m_T * std::sqrt(m_P * m_P + plab * plab);
 }
 
 }  // namespace Smash

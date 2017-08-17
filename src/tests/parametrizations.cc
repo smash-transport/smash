@@ -7,17 +7,15 @@
  *
  */
 
-#include "unittest.h"
 #include "setup.h"
+#include "unittest.h"
 
-#include "../include/parametrizations.h"
 #include "../include/clebschgordan.h"
+#include "../include/parametrizations.h"
 
 using namespace Smash;
 
-TEST(init_particle_types) {
-  Test::create_actual_particletypes();
-}
+TEST(init_particle_types) { Test::create_actual_particletypes(); }
 
 constexpr double tolerance = 1.0e-7;
 
@@ -37,22 +35,23 @@ TEST(clebsch_strangeness_exchange) {
   {
     const auto ratio = kminusn_piminussigma0(sqrts) / kminusp_pi0sigma0(sqrts);
     const auto expected_ratio =
-      isospin_clebsch_gordan_sqr_2to2(K_m, proton, pi_z, Sigma_z) /
-      isospin_clebsch_gordan_sqr_2to2(K_m, neutron, pi_m, Sigma_z);
+        isospin_clebsch_gordan_sqr_2to2(K_m, proton, pi_z, Sigma_z) /
+        isospin_clebsch_gordan_sqr_2to2(K_m, neutron, pi_m, Sigma_z);
     COMPARE_ABSOLUTE_ERROR(ratio, expected_ratio, tolerance);
   }
   {
-    const auto ratio = kminusn_pi0sigmaminus(sqrts) / kminusp_piplussigmaminus(sqrts);
+    const auto ratio =
+        kminusn_pi0sigmaminus(sqrts) / kminusp_piplussigmaminus(sqrts);
     const auto expected_ratio =
-      isospin_clebsch_gordan_sqr_2to2(K_m, proton, pi_p, Sigma_m) /
-      isospin_clebsch_gordan_sqr_2to2(K_m, neutron, pi_z, Sigma_m);
+        isospin_clebsch_gordan_sqr_2to2(K_m, proton, pi_p, Sigma_m) /
+        isospin_clebsch_gordan_sqr_2to2(K_m, neutron, pi_z, Sigma_m);
     COMPARE_ABSOLUTE_ERROR(ratio, expected_ratio, tolerance);
   }
   {
     const auto ratio = kminusn_piminuslambda(sqrts) / kminusp_pi0lambda(sqrts);
     const auto expected_ratio =
-      isospin_clebsch_gordan_sqr_2to2(K_m, proton, pi_z, Lambda) /
-      isospin_clebsch_gordan_sqr_2to2(K_m, neutron, pi_m, Lambda);
+        isospin_clebsch_gordan_sqr_2to2(K_m, proton, pi_z, Lambda) /
+        isospin_clebsch_gordan_sqr_2to2(K_m, neutron, pi_m, Lambda);
     COMPARE_ABSOLUTE_ERROR(ratio, expected_ratio, tolerance);
   }
 }

@@ -23,7 +23,6 @@
 #include <utility>
 #include <vector>
 
-
 /*
  * Linear interpolation.
  */
@@ -94,27 +93,25 @@ std::vector<T> apply_permutation(const std::vector<T>& v,
 }
 
 /// Check whether two components have the same value in a sorted vector x.
-template<typename T>
+template <typename T>
 void check_duplicates(const std::vector<T>& x,
                       const std::string& error_position) {
   auto it = std::adjacent_find(x.begin(), x.end());
   if (it != x.end()) {
     std::stringstream error_msg;
-    error_msg << error_position << ": Each x value must be unique. \""
-              << *it << "\" was found twice.";
+    error_msg << error_position << ": Each x value must be unique. \"" << *it
+              << "\" was found twice.";
     throw std::runtime_error(error_msg.str());
   }
 }
 
 template <typename T>
 InterpolateDataLinear<T>::InterpolateDataLinear(const std::vector<T>& x,
-                                    const std::vector<T>& y) {
+                                                const std::vector<T>& y) {
   assert(x.size() == y.size());
   const size_t n = x.size();
   const auto p = generate_sort_permutation(
-      x, [&](T const& a, T const& b) {
-        return a < b;
-      });
+      x, [&](T const& a, T const& b) { return a < b; });
   x_ = apply_permutation(x, p);
   check_duplicates(x_, "InterpolateDataLinear");
   std::vector<T> y_sorted = std::move(apply_permutation(y, p));
@@ -137,7 +134,7 @@ InterpolateDataLinear<T>::InterpolateDataLinear(const std::vector<T>& x,
 /// >>> find_index(x, 3)
 /// 1
 template <typename T>
-size_t find_index(const std::vector<T> &v, T x) {
+size_t find_index(const std::vector<T>& v, T x) {
   const auto it = std::lower_bound(v.begin(), v.end(), x);
   if (it == v.begin()) {
     return 0;
@@ -158,7 +155,6 @@ T InterpolateDataLinear<T>::operator()(T x0) const {
   return f_[i](x0);
 }
 
-
 /*
  * Spline interpolation.
  */
@@ -176,6 +172,7 @@ class InterpolateDataSpline {
                         const std::vector<double>& y);
   ~InterpolateDataSpline();
   double operator()(double x) const;
+
  private:
   double first_x_;
   double last_x_;

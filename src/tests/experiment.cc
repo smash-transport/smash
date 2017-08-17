@@ -7,24 +7,20 @@
  *
  */
 
-#include "unittest.h"
 #include "setup.h"
+#include "unittest.h"
 
 using namespace Smash;
 
 TEST(init_particle_types) { Test::create_actual_particletypes(); }
 
-TEST(create_box) {
-  VERIFY(!!Test::experiment("General: {Modus: Box}"));
-}
+TEST(create_box) { VERIFY(!!Test::experiment("General: {Modus: Box}")); }
 
 TEST(create_collider) {
   VERIFY(!!Test::experiment("General: {Modus: Collider}"));
 }
 
-TEST(create_sphere) {
-  VERIFY(!!Test::experiment("General: {Modus: Sphere}"));
-}
+TEST(create_sphere) { VERIFY(!!Test::experiment("General: {Modus: Sphere}")); }
 
 TEST_CATCH(create_invalid, ExperimentBase::InvalidModusRequest) {
   Test::experiment("General: {Modus: Invalid}");

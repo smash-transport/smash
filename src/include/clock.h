@@ -253,8 +253,8 @@ class Clock {
   }
   /// advances the clock by an arbitrary number of ticks.
   Clock& operator+=(Representation advance_several_timesteps) {
-    if (counter_  >= std::numeric_limits<Representation>::max()
-                     - advance_several_timesteps) {
+    if (counter_ >= std::numeric_limits<Representation>::max() -
+                        advance_several_timesteps) {
       throw std::overflow_error("Too many timesteps, clock overflow imminent");
     }
     counter_ += advance_several_timesteps;

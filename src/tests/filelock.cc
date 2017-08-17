@@ -6,8 +6,8 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
-#include "unittest.h"
 #include "setup.h"
+#include "unittest.h"
 
 #include "../include/filelock.h"
 

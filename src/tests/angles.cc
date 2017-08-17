@@ -7,8 +7,8 @@
  *
  */
 
-#include "unittest.h"
 #include "../include/angles.h"
+#include "unittest.h"
 
 using namespace Smash;
 
@@ -19,7 +19,7 @@ TEST(set_angles) {
   dir.set_phi(.5);
   // this needs to come out exactly:
   FUZZY_COMPARE(dir.phi(), .5);
-  dir.set_phi(4*M_PI);
+  dir.set_phi(4 * M_PI);
   COMPARE_ABSOLUTE_ERROR(dir.phi(), 0., accuracy);
   dir.set_costheta(.3);
   FUZZY_COMPARE(dir.costheta(), 0.3);
@@ -33,13 +33,11 @@ TEST(accessors_and_relations) {
   for (int c = 0; c < NumberOfTries; ++c) {
     dir.distribute_isotropically();
     // sintheta**2 + costheta**2 = 1
-    COMPARE_ABSOLUTE_ERROR(dir.sintheta()*dir.sintheta()
-                         + dir.costheta()*dir.costheta(),
-                           1.0, accuracy);
+    COMPARE_ABSOLUTE_ERROR(
+        dir.sintheta() * dir.sintheta() + dir.costheta() * dir.costheta(), 1.0,
+        accuracy);
     // x**2 + y**2 + z**2 = 1
-    double xyz_one = dir.x()*dir.x()
-                  + dir.y()*dir.y()
-                  + dir.z()*dir.z();
+    double xyz_one = dir.x() * dir.x() + dir.y() * dir.y() + dir.z() * dir.z();
     COMPARE_ABSOLUTE_ERROR(xyz_one, 1.0, accuracy);
 
     ThreeVector direction = dir.threevec();
@@ -47,9 +45,9 @@ TEST(accessors_and_relations) {
 
     // compare cos(theta) and costheta:
     COMPARE_ABSOLUTE_ERROR(std::cos(dir.theta()), dir.costheta(), accuracy)
-                        << " (trial #" << c << " of " << NumberOfTries << ")";
+        << " (trial #" << c << " of " << NumberOfTries << ")";
     COMPARE_RELATIVE_ERROR(dir.theta(), std::acos(dir.costheta()), accuracy)
-                        << " (trial #" << c << " of " << NumberOfTries << ")";
+        << " (trial #" << c << " of " << NumberOfTries << ")";
   }
 }
 
@@ -85,21 +83,21 @@ TEST(unusual_set_theta_odd) {
 
 TEST(catch_invalid_cosine) {
   for (double newcos = -8.0; newcos < 8.0; newcos += .2) {
-    bool invalid_input = (newcos < -1 - really_small ||
-                          newcos > 1 + really_small);
+    bool invalid_input =
+        (newcos < -1 - really_small || newcos > 1 + really_small);
     // Did I catch an exception?
     bool caught = false;
     // this should not work:
     try {
       dir.set_costheta(newcos);
-    } catch(...) {
+    } catch (...) {
       caught = true;
     }
     // check that I caught an exception if I gave an invalid number:
     if (invalid_input) {
       VERIFY(caught) << " (tried to set cos(theta) to " << newcos << ")";
     } else {
-    // check that I did not catch an exception for valid input:
+      // check that I did not catch an exception for valid input:
       VERIFY(!caught) << " (tried to set cos(theta) to " << newcos << ")";
     }
   }
@@ -134,7 +132,7 @@ TEST(setting_phi_does_not_change_z) {
 TEST(add_theta) {
   UnitTest::setFuzzyness<double>(64);
   for (double current_phi = 0.0; current_phi < 2 * M_PI;
-                                 current_phi += M_PI / 180.0) {
+       current_phi += M_PI / 180.0) {
     dir.set_phi(current_phi);
     // we'll start at what I call the north pole:
     dir.set_theta(0.0);
@@ -144,29 +142,28 @@ TEST(add_theta) {
     // the sign shouldn't have changed.
     VERIFY(!sign) << " (phi = " << current_phi << ")";
     // theta, though, should have changed.
-    FUZZY_COMPARE(dir.theta(), M_PI / 2.)
-                                          << " (phi = " << current_phi << ")";
+    FUZZY_COMPARE(dir.theta(), M_PI / 2.) << " (phi = " << current_phi << ")";
     // 90+120 degrees: phi changed, theta is at 150 degrees
     sign = dir.add_to_theta(2.0 * M_PI / 3.0);
     if (current_phi < M_PI) {
-      FUZZY_COMPARE(current_phi, dir.phi() - M_PI) << " (phi = "
-                                                          << current_phi << ")";
+      FUZZY_COMPARE(current_phi, dir.phi() - M_PI)
+          << " (phi = " << current_phi << ")";
     } else {
-      FUZZY_COMPARE(current_phi, dir.phi() + M_PI) << " (phi = "
-                                                          << current_phi << ")";
+      FUZZY_COMPARE(current_phi, dir.phi() + M_PI)
+          << " (phi = " << current_phi << ")";
     }
     VERIFY(sign) << " (phi = " << current_phi << ")";
-    FUZZY_COMPARE(dir.theta(), 5. * M_PI / 6.) << " (phi = " << current_phi
-                                                              << ")";
+    FUZZY_COMPARE(dir.theta(), 5. * M_PI / 6.)
+        << " (phi = " << current_phi << ")";
     // go back over the (south) pole: +60 degrees
     sign = dir.add_to_theta(M_PI / 3.0);
     // phi is back to original;
-    COMPARE_ABSOLUTE_ERROR(current_phi, dir.phi(), accuracy) << " (phi = "
-                                                             << current_phi << ")";
+    COMPARE_ABSOLUTE_ERROR(current_phi, dir.phi(), accuracy)
+        << " (phi = " << current_phi << ")";
     VERIFY(sign) << " (phi = " << current_phi << ")";
     // theta is the same as before (150+60 = 210 equiv 150)
-    FUZZY_COMPARE(dir.theta(), 5. * M_PI / 6.) << " (phi = " << current_phi
-                                                              << ")";
+    FUZZY_COMPARE(dir.theta(), 5. * M_PI / 6.)
+        << " (phi = " << current_phi << ")";
     // go over two poles: +120 + 120 (going over more than 180 degrees
     // in one step is forbidden; we'll check that later)
     // First, over the south pole
@@ -181,16 +178,14 @@ TEST(add_theta) {
     // semi circle between north- and south pole (mind the direction!)
     VERIFY(!sign2) << " (phi = " << current_phi << ")";
     // phi stays the same (two changes)
-    COMPARE_ABSOLUTE_ERROR(current_phi, dir.phi(), accuracy) << " (phi = "
-                                                             << current_phi << ")";
+    COMPARE_ABSOLUTE_ERROR(current_phi, dir.phi(), accuracy)
+        << " (phi = " << current_phi << ")";
     // theta is now 30 degrees:
     FUZZY_COMPARE(dir.theta(), M_PI / 6.) << " (phi = " << current_phi << ")";
   }
 }
 
-TEST_CATCH(set_invalid_theta, Angles::InvalidTheta) {
-  dir.set_costheta(2.);
-}
+TEST_CATCH(set_invalid_theta, Angles::InvalidTheta) { dir.set_costheta(2.); }
 
 TEST_CATCH(set_theta_too_far, Angles::InvalidTheta) {
   dir.add_to_theta(M_PI * 1.1);

@@ -46,8 +46,8 @@ class ScatterActionPhoton : public ScatterAction {
   /** To add only one reaction for testing purposes */
   void add_single_channel() {
     add_processes<CollisionBranch>(photon_cross_sections(),
-                                  collision_channels_photons_,
-                                  cross_section_photons_);
+                                   collision_channels_photons_,
+                                   cross_section_photons_);
   }
 
   enum class ReactionType {

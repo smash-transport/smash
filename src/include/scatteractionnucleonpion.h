@@ -15,10 +15,10 @@
 
 namespace Smash {
 
-
 /**
  * \ingroup action
- * ScatterActionNucleonPion is a special ScatterActionBaryonMeson which represents the
+ * ScatterActionNucleonPion is a special ScatterActionBaryonMeson which
+ * represents the
  * scattering of a nucleon and a pion.
  */
 class ScatterActionNucleonPion : public ScatterActionBaryonMeson {

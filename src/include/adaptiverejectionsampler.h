@@ -23,23 +23,21 @@ namespace Rejection {
 typedef struct point {
   double x, y;
   double expy;
-}Point;
+} Point;
 
 std::ostream &operator<<(std::ostream &out, const Point &p);
 
 /*lines used to define the upper bounds and lower bounds*/
 typedef struct line {
-  double m, b;                // f(x) = m*x+b
-  double eval(double x) {
-    return m*x + b;
-  }
-}Line;
+  double m, b;  // f(x) = m*x+b
+  double eval(double x) { return m * x + b; }
+} Line;
 
 /** Envelope to hold one piece of upper bounds*/
 typedef struct envelope {
   Point left_point, right_point;
-  Line  piecewise_linear_line;
-}Envelope;
+  Line piecewise_linear_line;
+} Envelope;
 
 std::ostream &operator<<(std::ostream &out, const Line &l);
 
@@ -98,7 +96,7 @@ class AdaptiveRejectionSampler {
   std::vector<Point> inters_;
 
   /* scants that connect all the points on distribution function*/
-  std::vector<Line>  scants_;
+  std::vector<Line> scants_;
 
   /* store the upper bounds to make get_one_sample faster */
   std::vector<Envelope> upper_bounds_;
@@ -117,11 +115,11 @@ class AdaptiveRejectionSampler {
    *\param xmin: minimum x in sampling f(x)
    *\param xmax: maximum x in sampling f(x)
    */
-  AdaptiveRejectionSampler(std::function<double(double)> func,
-                           double xmin, double xmax);
+  AdaptiveRejectionSampler(std::function<double(double)> func, double xmin,
+                           double xmax);
 
   /*reset max refine loops for AdaptiveRejectionSampler*/
-//   void reset_max_refine_loops(const int new_max_refine_loops);
+  //   void reset_max_refine_loops(const int new_max_refine_loops);
 
   /*sample one x from distribution function f(x) */
   double get_one_sample();
@@ -151,12 +149,10 @@ class AdaptiveRejectionSampler {
   double sample_x(int j);
 
   // r<exp(lower-upper)
-  inline bool squeezing_test(const double & x, const int & j,
-                             const double & rand);
+  inline bool squeezing_test(const double &x, const int &j, const double &rand);
 
   // r<func/exp(upper)
-  inline bool rejection_test(const double & x, const int & j,
-                             const double & rand);
+  inline bool rejection_test(const double &x, const int &j, const double &rand);
 
   /// calc line from 2 points
   inline Line create_line(Point p0, Point p1);
@@ -169,9 +165,8 @@ class AdaptiveRejectionSampler {
   inline void create_rightend();
 
   // refine scants, intersections, after one rejection
-  void adaptive_update(const int j, const Point & new_rejection);
+  void adaptive_update(const int j, const Point &new_rejection);
 };
-
 
 }  // end namespace Rejection
 

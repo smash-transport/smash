@@ -54,10 +54,9 @@ class ColliderModus : public ModusDefault {
    * In particular, it initializes the nuclei.
    */
   double initial_conditions(Particles *particles,
-                           const ExperimentParameters &parameters);
+                            const ExperimentParameters &parameters);
   /// return the total test particle number of the initial nucleus
-  int total_N_number() const { return target_->size()
-                                    + projectile_->size(); }
+  int total_N_number() const { return target_->size() + projectile_->size(); }
   /// return the test particle number in the projectile nucleus
   int proj_N_number() const { return projectile_->size(); }
   /** return the beam velocity of the projectile, which will be

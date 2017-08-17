@@ -28,7 +28,8 @@ class Tabulation {
   /** Construct a new tabulation object.
    * \param x_min lower bound of tabulation domain
    * \param range range (x_max-x_min) of tabulation domain
-   * \param num number of intervals (the number of tabulated points is actually num+1)
+   * \param num number of intervals (the number of tabulated points is actually
+   * num+1)
    * \param f one-dimensional function f(x) which is supposed to be tabulated
    */
   Tabulation(double x_min, double range, int num,
@@ -64,15 +65,16 @@ class Tabulation {
  * \param[in] type type of the resonance
  */
 inline double spec_func_integrand_1res(double resonance_mass, double sqrts,
-                               double stable_mass, const ParticleType &type) {
+                                       double stable_mass,
+                                       const ParticleType& type) {
   if (sqrts <= stable_mass + resonance_mass) {
     return 0.;
   }
 
   /* Integrand is the spectral function weighted by the CM momentum of the
    * final state. */
-  return type.spectral_function(resonance_mass)
-       * pCM(sqrts, stable_mass, resonance_mass);
+  return type.spectral_function(resonance_mass) *
+         pCM(sqrts, stable_mass, resonance_mass);
 }
 
 /**
@@ -90,18 +92,18 @@ inline double spec_func_integrand_1res(double resonance_mass, double sqrts,
  * \param[in] t1 Type of the first resonance.
  * \param[in] t2 Type of the second resonance.
  */
-inline double spec_func_integrand_2res(double sqrts,
-                              double res_mass_1, double res_mass_2,
-                              const ParticleType &t1, const ParticleType &t2) {
+inline double spec_func_integrand_2res(double sqrts, double res_mass_1,
+                                       double res_mass_2,
+                                       const ParticleType& t1,
+                                       const ParticleType& t2) {
   if (sqrts <= res_mass_1 + res_mass_2) {
     return 0.;
   }
 
   /* Integrand is the product of the spectral function weighted by the
    * CM momentum of the final state. */
-  return t1.spectral_function(res_mass_1)
-       * t2.spectral_function(res_mass_2)
-       * pCM(sqrts, res_mass_1, res_mass_2);
+  return t1.spectral_function(res_mass_1) * t2.spectral_function(res_mass_2) *
+         pCM(sqrts, res_mass_1, res_mass_2);
 }
 
 /**
@@ -109,40 +111,33 @@ inline double spec_func_integrand_2res(double sqrts,
  *  of a resonance and a stable particle.
  */
 inline std::unique_ptr<Tabulation> spectral_integral_semistable(
-    Integrator& integrate,
-    const ParticleType& resonance,
-    const ParticleType& stable,
-    double range) {
-  return make_unique<Tabulation>(
-          resonance.min_mass_kinematic() + stable.mass(), range, 100,
-          [&](double srts) {
-            return integrate(resonance.min_mass_kinematic(),
-                             srts - stable.mass(),
-                             [&](double m) {
-                               return spec_func_integrand_1res(m, srts,
-                                                     stable.mass(), resonance);
-                             });
-          });
+    Integrator& integrate, const ParticleType& resonance,
+    const ParticleType& stable, double range) {
+  return make_unique<Tabulation>(resonance.min_mass_kinematic() + stable.mass(),
+                                 range, 100, [&](double srts) {
+                                   return integrate(
+                                       resonance.min_mass_kinematic(),
+                                       srts - stable.mass(), [&](double m) {
+                                         return spec_func_integrand_1res(
+                                             m, srts, stable.mass(), resonance);
+                                       });
+                                 });
 }
 
 /// Create a table for the spectral integral of two resonances.
 inline std::unique_ptr<Tabulation> spectral_integral_unstable(
-    Integrator2d& integrate2d,
-    const ParticleType& res1,
-    const ParticleType& res2,
-    double range) {
-    return make_unique<Tabulation>(
-          res1.min_mass_kinematic() + res2.min_mass_kinematic(), range, 100,
-          [&](double srts) {
-            return integrate2d(res1.min_mass_kinematic(),
-                               srts - res2.min_mass_kinematic(),
-                               res2.min_mass_kinematic(),
-                               srts - res1.min_mass_kinematic(),
-                               [&](double m1, double m2) {
-                                 return spec_func_integrand_2res(srts, m1, m2,
-                                                            res1, res2);
-                               });
-          });
+    Integrator2d& integrate2d, const ParticleType& res1,
+    const ParticleType& res2, double range) {
+  return make_unique<Tabulation>(
+      res1.min_mass_kinematic() + res2.min_mass_kinematic(), range, 100,
+      [&](double srts) {
+        return integrate2d(
+            res1.min_mass_kinematic(), srts - res2.min_mass_kinematic(),
+            res2.min_mass_kinematic(), srts - res1.min_mass_kinematic(),
+            [&](double m1, double m2) {
+              return spec_func_integrand_2res(srts, m1, m2, res1, res2);
+            });
+      });
 }
 
 }  // namespace Smash

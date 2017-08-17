@@ -27,11 +27,11 @@ ActionList DecayActionsFinder::find_actions_in_cell(
 
   for (const auto &p : search_list) {
     if (p.type().is_stable()) {
-      continue;      /* particle doesn't decay */
+      continue; /* particle doesn't decay */
     }
 
     DecayBranchList processes =
-                      p.type().get_partial_widths_hadronic(p.effective_mass());
+        p.type().get_partial_widths_hadronic(p.effective_mass());
     // total decay width (mass-dependent)
     const double width = total_weight<DecayBranch>(processes);
 
@@ -40,7 +40,7 @@ ActionList DecayActionsFinder::find_actions_in_cell(
       continue;
     }
 
-    constexpr double one_over_hbarc = 1./hbarc;
+    constexpr double one_over_hbarc = 1. / hbarc;
 
     /* The decay_time is sampled from an exponential distribution.
      * Even though it may seem suspicious that it is sampled every
@@ -72,7 +72,7 @@ ActionList DecayActionsFinder::find_final_actions(const Particles &search_list,
 
   for (const auto &p : search_list) {
     if (p.type().is_stable()) {
-      continue;      /* particle doesn't decay */
+      continue; /* particle doesn't decay */
     }
     auto act = make_unique<DecayAction>(p, 0.);
     act->add_decays(p.type().get_partial_widths(p.effective_mass()));

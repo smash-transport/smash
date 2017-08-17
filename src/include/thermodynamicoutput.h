@@ -36,7 +36,7 @@ namespace Smash {
  **/
 class ThermodynamicOutput : public OutputInterface {
  public:
-  ThermodynamicOutput(const bf::path &path, Configuration&& conf);
+  ThermodynamicOutput(const bf::path &path, Configuration &&conf);
   ~ThermodynamicOutput();
 
   /// writes the initial particle information of an event
@@ -53,11 +53,10 @@ class ThermodynamicOutput : public OutputInterface {
   /** Prints density along the specified line. Useful to make 1D plots of
     * density profiles.
    */
-  void density_along_line(const char * file_name, const ParticleList &plist,
-                        const DensityParameters &param,
-                        DensityType dens_type,
-                        const ThreeVector &line_start,
-                        const ThreeVector &line_end, int n_points);
+  void density_along_line(const char *file_name, const ParticleList &plist,
+                          const DensityParameters &param, DensityType dens_type,
+                          const ThreeVector &line_start,
+                          const ThreeVector &line_end, int n_points);
 
  private:
   FilePtr file_;
@@ -71,7 +70,6 @@ class ThermodynamicOutput : public OutputInterface {
       then final result is in GeV instead of GeV/fm3 */
   const bool smearing_;
 };
-
 
 }  // namespace Smash
 

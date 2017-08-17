@@ -38,9 +38,7 @@ class DecayModes {
   bool is_empty() const { return decay_modes_.empty(); }
 
   /* Pass out the decay modes */
-  const DecayBranchList &decay_mode_list() const {
-    return decay_modes_;
-  }
+  const DecayBranchList &decay_mode_list() const { return decay_modes_; }
 
   /**
    * Loads the DecayModes map as described in the \p input string.
@@ -51,7 +49,7 @@ class DecayModes {
   static void load_decaymodes(const std::string &input);
 
   /** Retrieve a decay type. */
-  static DecayType* get_decay_type(ParticleTypePtr mother,
+  static DecayType *get_decay_type(ParticleTypePtr mother,
                                    ParticleTypePtrList particle_types, int L);
 
   /// \ingroup exception
