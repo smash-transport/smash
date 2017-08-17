@@ -6,7 +6,8 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
-#include "unittest.h"
+
+#include "unittest.h"  // This include has to be first
 
 #include "../include/constants.h"
 #include "../include/kinematics.h"

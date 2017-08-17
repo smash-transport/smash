@@ -7,8 +7,9 @@
  *
  */
 
+#include "unittest.h"  // This include has to be first
+
 #include "../include/fpenvironment.h"
-#include "unittest.h"
 
 #include <csetjmp>
 #include <csignal>

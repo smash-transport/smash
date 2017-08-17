@@ -6,13 +6,15 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
+
+#include "unittest.h"  // This include has to be first
+
 #include "../include/deformednucleus.h"
 #include "../include/constants.h"
 #include "../include/fourvector.h"
 #include "../include/nucleus.h"
 #include "../include/particledata.h"
 #include "../include/pdgcode.h"
-#include "unittest.h"
 
 #include <map>
 #include <vector>

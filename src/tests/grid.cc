@@ -7,10 +7,12 @@
  *
  */
 
+#include "unittest.h"  // This include has to be first
+
+#include "setup.h"
+
 #include "../include/grid.h"
 #include "../include/logging.h"
-#include "setup.h"
-#include "unittest.h"
 
 #include <set>
 #include <unordered_set>

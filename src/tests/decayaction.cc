@@ -7,10 +7,11 @@
  *
  */
 
-#include <typeinfo>
+#include "unittest.h"  // This include has to be first
 
 #include "setup.h"
-#include "unittest.h"
+
+#include <typeinfo>
 
 #include "../include/cxx14compat.h"
 #include "../include/decayaction.h"

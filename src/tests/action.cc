@@ -7,8 +7,9 @@
  *
  */
 
+#include "unittest.h"  // This include has to be first
+
 #include "setup.h"
-#include "unittest.h"
 
 #include "../include/scatteraction.h"
 #include "../include/scatteractionsfinder.h"

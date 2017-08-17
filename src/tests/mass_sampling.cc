@@ -5,9 +5,10 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
+#include "unittest.h"  // This include has to be first
+
 #include "histogram.h"
 #include "setup.h"
-#include "unittest.h"
 
 #include "../include/decayaction.h"
 #include "../include/decaymodes.h"

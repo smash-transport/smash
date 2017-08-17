@@ -6,8 +6,10 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
+
+#include "unittest.h"  // This include has to be first
+
 #include "../include/fourvector.h"
-#include "unittest.h"
 
 using namespace Smash;
 

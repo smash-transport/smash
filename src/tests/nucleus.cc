@@ -6,9 +6,11 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
-#include "unittest.h"
+
+#include "unittest.h"  // This include has to be first
 
 #include <map>
+
 #include "../include/nucleus.h"
 #include "../include/particles.h"
 #include "../include/pdgcode.h"

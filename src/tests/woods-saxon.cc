@@ -6,6 +6,7 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
+
 #include "unittest.h"
 
 #include <map>

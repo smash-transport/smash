@@ -7,10 +7,11 @@
  *
  */
 
+#include "unittest.h"  // This include has to be first
+
 #include "../include/particletype.h"
 #include "../include/configuration.h"
 #include "../include/logging.h"
-#include "unittest.h"
 
 using namespace Smash;
 

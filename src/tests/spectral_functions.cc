@@ -7,9 +7,10 @@
  *
  */
 
+#include "unittest.h"  // This include has to be first
+
 #include "histogram.h"
 #include "setup.h"
-#include "unittest.h"
 
 #include "../include/formfactors.h"
 #include "../include/integrate.h"

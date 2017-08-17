@@ -7,13 +7,14 @@
  *
  */
 
+#include "unittest.h"  // This include has to be first
+
 #include <cstdio>
 #include <iostream>
 #include <map>
 
 #include "../include/adaptiverejectionsampler.h"
 #include "../include/distributions.h"
-#include "unittest.h"
 
 using namespace Smash;
 
