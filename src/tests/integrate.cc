@@ -97,29 +97,31 @@ TEST(two_dim_cuhre) {
   constexpr int Nsigma = 4;
   // constant integrand
   for (int i = 0; i < 10; ++i) {
-    const auto result = integrate(0, i, 0, i,
-                                  [](double, double) { return 1.; });
-    COMPARE_ABSOLUTE_ERROR(result.value(), double(i*i), Nsigma*result.error());
+    const auto result =
+        integrate(0, i, 0, i, [](double, double) { return 1.; });
+    COMPARE_ABSOLUTE_ERROR(result.value(), double(i * i),
+                           Nsigma* result.error());
   }
   // linear only in one dim
   for (int i = 0; i < 10; ++i) {
-    const auto result = integrate(0, i, 0, i,
-                                  [](double x, double) { return x; });
-    COMPARE_ABSOLUTE_ERROR(result.value(), i*i*i * 0.5, Nsigma*result.error());
+    const auto result =
+        integrate(0, i, 0, i, [](double x, double) { return x; });
+    COMPARE_ABSOLUTE_ERROR(result.value(), i * i * i * 0.5,
+                           Nsigma * result.error());
   }
   // linear in both dims (factorizable)
   for (int i = 0; i < 10; ++i) {
-    const auto result = integrate(0, i, 0, i,
-                                  [](double x, double y) { return x*y; });
-    COMPARE_ABSOLUTE_ERROR(result.value(), i*i*i*i * 0.25,
-                           Nsigma*result.error());
+    const auto result =
+        integrate(0, i, 0, i, [](double x, double y) { return x * y; });
+    COMPARE_ABSOLUTE_ERROR(result.value(), i * i * i * i * 0.25,
+                           Nsigma * result.error());
   }
   // non-factorizable
   for (int i = 0; i < 10; ++i) {
-    const auto result = integrate(0, i, 0, i,
-                            [](double x, double y) { return std::sqrt(x+y); });
-    COMPARE_ABSOLUTE_ERROR(result.value(),
-                           8./15. * (2.*std::sqrt(2.) - 1.) * pow(i, 5./2.),
-                           Nsigma*result.error()*5);
+    const auto result = integrate(
+        0, i, 0, i, [](double x, double y) { return std::sqrt(x + y); });
+    COMPARE_ABSOLUTE_ERROR(
+        result.value(), 8. / 15. * (2. * std::sqrt(2.) - 1.) * pow(i, 5. / 2.),
+        Nsigma * result.error() * 5);
   }
 }

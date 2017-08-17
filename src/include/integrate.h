@@ -66,15 +66,15 @@ class Result : public std::pair<double, double> {
   double error() const { return Base::second; }
 
   /// Check whether the error is small and alert if it is not
-  void check_error(const std::string& integration_name,
-                   double relative_tolerance= 5e-4,
+  void check_error(const std::string &integration_name,
+                   double relative_tolerance = 5e-4,
                    double absolute_tolerance = 1e-9) const {
-    const double allowed_error = std::max(absolute_tolerance,
-                                          value() * relative_tolerance);
+    const double allowed_error =
+        std::max(absolute_tolerance, value() * relative_tolerance);
     if (error() > allowed_error) {
       std::stringstream error_msg;
-      error_msg << integration_name << " resulted in I = "
-                << value() << " ± " << error()
+      error_msg << integration_name << " resulted in I = " << value() << " ± "
+                << error()
                 << ", but the required precision is either absolute error < "
                 << absolute_tolerance << " or relative error < "
                 << relative_tolerance << std::endl;
@@ -145,8 +145,8 @@ class Integrator {
       err << "GSL 1D deterministic integration: " << gsl_strerror(error_code);
       throw std::runtime_error(err.str());
     }
-    result.check_error("GSL 1D deterministic integration",
-                       accuracy_relative_, accuracy_absolute_);
+    result.check_error("GSL 1D deterministic integration", accuracy_relative_,
+                       accuracy_absolute_);
     return result;
   }
 
@@ -236,9 +236,9 @@ class Integrator1dMonte {
         },
         1, &fun};
 
-    const int error_code = gsl_monte_plain_integrate(&monte_fun,
-                              lower, upper, 1, number_of_calls_,
-                              rng_, state_, &result.first, &result.second);
+    const int error_code =
+        gsl_monte_plain_integrate(&monte_fun, lower, upper, 1, number_of_calls_,
+                                  rng_, state_, &result.first, &result.second);
     if (error_code) {
       std::stringstream err;
       err << "GSL 1D Monte-Carlo integration: " << gsl_strerror(error_code);
@@ -359,11 +359,11 @@ class Integrator2d {
 /// renormalizing to the unit cube.
 template <typename F>
 struct Integrand2d {
-    double min1;
-    double diff1;
-    double min2;
-    double diff2;
-    F f;
+  double min1;
+  double diff1;
+  double min2;
+  double diff2;
+  F f;
 };
 
 /**
@@ -387,15 +387,15 @@ class Integrator2dCuhre {
    *
    * \param num_calls The maximum number of calls to the integrand function
    *                  (defaults to 1E6 if omitted), i.e. how often the integrand
-   *                  can be sampled in the integration. Larger numbers lead to a
+   *                  can be sampled in the integration. Larger numbers lead to
+   * a
    *                  more precise result, but possibly to increased runtime.
    * \param epsrel    The desired relative accuracy (1E-3 by default).
    * \param epsabs    The desired absolute accuracy (1E-3 by default).
    */
-  explicit Integrator2dCuhre(int num_calls = 1e6,
-                        double epsrel = 5e-4, double epsabs = 1e-9)
-      : maxeval_(num_calls), epsrel_(epsrel), epsabs_(epsabs) {
-  }
+  explicit Integrator2dCuhre(int num_calls = 1e6, double epsrel = 5e-4,
+                             double epsabs = 1e-9)
+      : maxeval_(num_calls), epsrel_(epsrel), epsabs_(epsabs) {}
 
   /**
    * The function call operator implements the integration functionality.
@@ -411,45 +411,42 @@ class Integrator2dCuhre {
    *            lambda captures.
    */
   template <typename F>
-  Result operator()(double min1, double max1, double min2, double max2,
-                    F fun) {
+  Result operator()(double min1, double max1, double min2, double max2, F fun) {
     Result result = {0., 0.};
 
     if (max1 < min1 || max2 < min2) {
       std::stringstream err;
-      err << "Integrator2dCuhre got wrong integration limits: ["
-          << min1 << ", " << max1 << "], ["
-          << min2 << ", " << max2 << "]";
+      err << "Integrator2dCuhre got wrong integration limits: [" << min1 << ", "
+          << max1 << "], [" << min2 << ", " << max2 << "]";
       throw std::invalid_argument(err.str());
     }
 
     Integrand2d<F> f_with_limits = {min1, max1 - min1, min2, max2 - min2, fun};
 
-    const integrand_t cuhre_fun {
-        [](const int* /* ndim */, const cubareal xx[], const int* /* ncomp */,
-           cubareal ff[], void* userdata) -> int {
-          auto i = static_cast<Integrand2d<F>*>(userdata);
-          // We have to transform the integrand to the unit cube.
-          // This is what Cuba expects.
-          ff[0] = (i->f)(i->min1 + i->diff1 * xx[0], i->min2 + i->diff2 * xx[1])
-                  * i->diff1 * i->diff2;
-          return 0;
-        } };
+    const integrand_t cuhre_fun{[](const int * /* ndim */, const cubareal xx[],
+                                   const int * /* ncomp */, cubareal ff[],
+                                   void *userdata) -> int {
+      auto i = static_cast<Integrand2d<F> *>(userdata);
+      // We have to transform the integrand to the unit cube.
+      // This is what Cuba expects.
+      ff[0] = (i->f)(i->min1 + i->diff1 * xx[0], i->min2 + i->diff2 * xx[1]) *
+              i->diff1 * i->diff2;
+      return 0;
+    }};
 
     const int ndim = 2;
     const int ncomp = 1;
-    void* userdata = &f_with_limits;
+    void *userdata = &f_with_limits;
     const int nvec = 1;
     const int flags = 0;  // Use the defaults.
     const int mineval = 0;
     const int maxeval = maxeval_;
     const int key = -1;  // Use the default.
-    const char* statefile = nullptr;
-    void* spin = nullptr;
+    const char *statefile = nullptr;
+    void *spin = nullptr;
 
     Cuhre(ndim, ncomp, cuhre_fun, userdata, nvec, epsrel_, epsabs_, flags,
-          mineval, maxeval, key, statefile, spin,
-          &nregions_, &neval_, &fail_,
+          mineval, maxeval, key, statefile, spin, &nregions_, &neval_, &fail_,
           &result.first, &result.second, &prob_);
 
     if (fail_) {

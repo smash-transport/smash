@@ -479,7 +479,8 @@ void ScatterAction::string_excitation() {
     /* set all necessary parameters for Pythia
      * Create Pythia object */
     log.debug("Creating Pythia object.");
-    static /*thread_local (see #3075)*/ Pythia8::Pythia pythia(PYTHIA_XML_DIR, false);
+    static /*thread_local (see #3075)*/ Pythia8::Pythia pythia(PYTHIA_XML_DIR,
+                                                               false);
     /* select only inelastic events: */
     pythia.readString("SoftQCD:inelastic = on");
     /* suppress unnecessary output */

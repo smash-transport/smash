@@ -51,8 +51,8 @@ class Tabulation {
    * with rightmost value or zero. Linear extrapolation is not an arbitrary
    * choice, in fact many functions tabulated in SMASH have a linear
    * asymptotics, e.g. rho(m) functions. */
-  double get_value_linear(double x,
-    Extrapolation extrapolation = Extrapolation::Linear) const;
+  double get_value_linear(
+      double x, Extrapolation extrapolation = Extrapolation::Linear) const;
 
  protected:
   // vector for storing tabulated values

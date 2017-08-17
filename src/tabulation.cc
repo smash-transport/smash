@@ -11,11 +11,9 @@ namespace Smash {
 
 Tabulation::Tabulation(double x_min, double range, int num,
                        std::function<double(double)> f)
-                      : x_min_(x_min),
-                        x_max_(x_min + range),
-                        inv_dx_(num/range) {
-  values_.resize(num+1);
-  const double dx = range/num;
+    : x_min_(x_min), x_max_(x_min + range), inv_dx_(num / range) {
+  values_.resize(num + 1);
+  const double dx = range / num;
   for (int i = 0; i <= num; i++) {
     values_[i] = f(x_min_ + i * dx);
   }
