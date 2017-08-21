@@ -123,31 +123,30 @@ inline double spec_func_integrand_2res(double sqrts, double res_mass_1,
 inline std::unique_ptr<Tabulation> spectral_integral_semistable(
     Integrator& integrate, const ParticleType& resonance,
     const ParticleType& stable, double range) {
-  return make_unique<Tabulation>(resonance.min_mass_kinematic() + stable.mass(),
-                                 range, 100, [&](double srts) {
-                                   return integrate(
-                                       resonance.min_mass_kinematic(),
-                                       srts - stable.mass(), [&](double m) {
-                                         return spec_func_integrand_1res(
-                                             m, srts, stable.mass(), resonance);
-                                       });
-                                 });
+  const double m_min = resonance.min_mass_kinematic();
+  const double m_stable = stable.mass();
+  return make_unique<Tabulation>(
+      m_min + m_stable, range, 100, [&](double srts) {
+        return integrate(m_min, srts - m_stable, [&](double m) {
+          return spec_func_integrand_1res(m, srts, m_stable, resonance);
+        });
+      });
 }
 
 /// Create a table for the spectral integral of two resonances.
 inline std::unique_ptr<Tabulation> spectral_integral_unstable(
     Integrator2dCuhre& integrate2d, const ParticleType& res1,
     const ParticleType& res2, double range) {
-  return make_unique<Tabulation>(
-      res1.min_mass_kinematic() + res2.min_mass_kinematic(), range, 100,
-      [&](double srts) {
-        return integrate2d(
-            res1.min_mass_kinematic(), srts - res2.min_mass_kinematic(),
-            res2.min_mass_kinematic(), srts - res1.min_mass_kinematic(),
-            [&](double m1, double m2) {
-              return spec_func_integrand_2res(srts, m1, m2, res1, res2);
-            });
-      });
+  const double m1_min = res1.min_mass_kinematic();
+  const double m2_min = res2.min_mass_kinematic();
+  return make_unique<Tabulation>(m1_min + m2_min, range, 100, [&](double srts) {
+    const double m1_max = srts - m2_min;
+    const double m2_max = srts - m1_min;
+    return integrate2d(
+        m1_min, m1_max, m2_min, m2_max, [&](double m1, double m2) {
+          return spec_func_integrand_2res(srts, m1, m2, res1, res2);
+        });
+  });
 }
 
 }  // namespace Smash

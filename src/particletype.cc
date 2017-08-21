@@ -543,16 +543,17 @@ double ParticleType::spectral_function(double m) const {
     /* Initialize the normalization factor
      * by integrating over the unnormalized spectral function. */
     static /*thread_local (see #3075)*/ Integrator integrate;
-    const auto width = width_at_pole();
+    const double width = width_at_pole();
+    const double m_pole = mass();
     // We transform the integral using m = m_min + width_pole * tan(x), to
     // make it definite and to avoid numerical issues.
-    norm_factor_ =
-        1. / integrate(std::atan((min_mass_kinematic() - mass()) / width),
-                       M_PI / 2., [&](double x) {
-                         return spectral_function_no_norm(mass() +
-                                                          width * std::tan(x)) *
-                                width * (1 + square(std::tan(x)));
-                       });
+    const double x_min = std::atan((min_mass_kinematic() - m_pole) / width);
+    norm_factor_ = 1. / integrate(x_min, M_PI / 2., [&](double x) {
+                     const double tanx = std::tan(x);
+                     const double m_x = m_pole + width * tanx;
+                     const double jacobian = width * (1.0 + tanx * tanx);
+                     return spectral_function_no_norm(m_x) * jacobian;
+                   });
   }
   return norm_factor_ * spectral_function_no_norm(m);
 }
