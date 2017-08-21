@@ -415,6 +415,10 @@ class Integrator2dCuhre {
     Result result = {0., 0.};
 
     if (max1 < min1 || max2 < min2) {
+      bool tolerable = (max1 - min1 > -1.e-16) && (max2 - min2 > -1.e-16);
+      if (tolerable) {
+        return result;
+      }
       std::stringstream err;
       err << "Integrator2dCuhre got wrong integration limits: [" << min1 << ", "
           << max1 << "], [" << min2 << ", " << max2 << "]";
