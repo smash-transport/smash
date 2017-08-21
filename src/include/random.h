@@ -26,7 +26,7 @@ namespace Random {
 using Engine = std::mt19937_64;
 
 /// The engine that is used commonly by all distributions.
-extern /*thread_local*/ Engine engine;
+extern /*thread_local (see #3075)*/ Engine engine;
 
 /** Provides uniform random numbers on a fixed interval.
  *

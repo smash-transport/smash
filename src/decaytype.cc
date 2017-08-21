@@ -139,7 +139,7 @@ double TwoBodyDecaySemistable::get_Lambda() {
 
 // number of tabulation points
 constexpr int num_tab_pts = 200;
-static thread_local Integrator integrate;
+static /*thread_local (see #3075)*/ Integrator integrate;
 
 double TwoBodyDecaySemistable::rho(double mass) const {
   if (tabulation_ == nullptr) {
@@ -192,7 +192,7 @@ double TwoBodyDecayUnstable::get_Lambda() {
   return 0.6;
 }
 
-static thread_local Integrator2d integrate2d(1E4);
+static /*thread_local*/ Integrator2dCuhre integrate2d(1E7);
 
 double TwoBodyDecayUnstable::rho(double mass) const {
   if (tabulation_ == nullptr) {
@@ -211,10 +211,6 @@ double TwoBodyDecayUnstable::rho(double mass) const {
                 return integrand_rho_Manley_2res(
                     sqrts, m1, m2, particle_types_[0], particle_types_[1], L_);
               });
-          const auto error_msg = result.check_error();
-          if (error_msg != "") {
-            throw std::runtime_error(error_msg);
-          }
           return result.value();
         });
   }
@@ -450,7 +446,7 @@ double ThreeBodyDecayDilepton::width(double, double G0, double m) const {
         });
   }
 
-  return tabulation_->get_value_linear(m);
+  return tabulation_->get_value_linear(m, Extrapolation::Const);
 }
 
 }  // namespace Smash

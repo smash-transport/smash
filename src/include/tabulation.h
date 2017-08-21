@@ -20,6 +20,12 @@
 
 namespace Smash {
 
+enum class Extrapolation {
+  Zero = 0,
+  Const = 1,
+  Linear = 2,
+};
+
 /**
  * A class for storing a one-dimensional lookup table of doubleing-point values.
  */
@@ -40,15 +46,19 @@ class Tabulation {
    * value at the upper bound. */
   double get_value_step(double x) const;
   /** Look up a value from the tabulation using linear interpolation.
-   * If x is above the upper bound, we use linear extrapolation of the two
-   * highest tabulated points. */
-  double get_value_linear(double x) const;
+   * If x is above the upper bound, then by default we use linear extrapolation
+   * of the two highest tabulated points. Optionally one can also extrapolate
+   * with rightmost value or zero. Linear extrapolation is not an arbitrary
+   * choice, in fact many functions tabulated in SMASH have a linear
+   * asymptotics, e.g. rho(m) functions. */
+  double get_value_linear(
+      double x, Extrapolation extrapolation = Extrapolation::Linear) const;
 
  protected:
   // vector for storing tabulated values
   std::vector<double> values_;
   // lower bound and inverse step size 1/dx for tabulation
-  const double x_min_, inv_dx_;
+  const double x_min_, x_max_, inv_dx_;
 };
 
 /**
@@ -126,7 +136,7 @@ inline std::unique_ptr<Tabulation> spectral_integral_semistable(
 
 /// Create a table for the spectral integral of two resonances.
 inline std::unique_ptr<Tabulation> spectral_integral_unstable(
-    Integrator2d& integrate2d, const ParticleType& res1,
+    Integrator2dCuhre& integrate2d, const ParticleType& res1,
     const ParticleType& res2, double range) {
   return make_unique<Tabulation>(
       res1.min_mass_kinematic() + res2.min_mass_kinematic(), range, 100,

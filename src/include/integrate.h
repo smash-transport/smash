@@ -10,10 +10,13 @@
 #ifndef SRC_INCLUDE_INTEGRATE_H_
 #define SRC_INCLUDE_INTEGRATE_H_
 
+#include <cuba.h>
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_monte_plain.h>
 #include <gsl/gsl_monte_vegas.h>
 
+#include <algorithm>
+#include <iostream>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -62,28 +65,20 @@ class Result : public std::pair<double, double> {
   /// access the second entry in the pair as the absolute error
   double error() const { return Base::second; }
 
-  /// check whether the relative error is small
-  ///
-  /// Returns an empty string if it is small and an error message if it is
-  /// large.
-  std::string check_error(double relative_tolerance = 1.0) const {
-    if (value() == 0) {
-      return "";
-    }
-    if (std::abs(value()) < 1e-12) {
-      // For small values the relative error can be very large.
-      // The threshold was chosen large enough so that the tests pass.
-      return "";
-    }
-    const auto relative_error = std::abs(error() / value());
-    if (relative_error < relative_tolerance) {
-      return "";
-    } else {
+  /// Check whether the error is small and alert if it is not
+  void check_error(const std::string &integration_name,
+                   double relative_tolerance = 5e-4,
+                   double absolute_tolerance = 1e-9) const {
+    const double allowed_error =
+        std::max(absolute_tolerance, value() * relative_tolerance);
+    if (error() > allowed_error) {
       std::stringstream error_msg;
-      error_msg << "Integration error = " << relative_error * 100 << "% > "
-                << relative_tolerance * 100 << "%: " << value() << " +- "
-                << error();
-      return error_msg.str();
+      error_msg << integration_name << " resulted in I = " << value() << " ± "
+                << error()
+                << ", but the required precision is either absolute error < "
+                << absolute_tolerance << " or relative error < "
+                << relative_tolerance << std::endl;
+      throw std::runtime_error(error_msg.str());
     }
   }
 };
@@ -114,11 +109,8 @@ class Integrator {
    *                       It also determines the maximum number of subintervals
    *                       the integration algorithm will use.
    */
-  explicit Integrator(size_t workspace_size)
+  explicit Integrator(size_t workspace_size = 1000)
       : workspace_(gsl_integration_cquad_workspace_alloc(workspace_size)) {}
-
-  /// Convenience overload of the above with a workspace size of 1000.
-  Integrator() : Integrator(1000) {}
 
   /**
    * The function call operator implements the integration functionality.
@@ -150,9 +142,11 @@ class Integrator {
         nullptr /* Don't store the number of evaluations */);
     if (error_code) {
       std::stringstream err;
-      err << "GSL integration: " << gsl_strerror(error_code);
+      err << "GSL 1D deterministic integration: " << gsl_strerror(error_code);
       throw std::runtime_error(err.str());
     }
+    result.check_error("GSL 1D deterministic integration", accuracy_relative_,
+                       accuracy_absolute_);
     return result;
   }
 
@@ -162,7 +156,7 @@ class Integrator {
       workspace_;
 
   /// Parameter to the GSL integration function: desired absolute error limit
-  const double accuracy_absolute_ = 1.0e-5;
+  const double accuracy_absolute_ = 1.0e-9;
 
   /// Parameter to the GSL integration function: desired relative error limit
   const double accuracy_relative_ = 5.0e-4;
@@ -242,8 +236,16 @@ class Integrator1dMonte {
         },
         1, &fun};
 
-    gsl_monte_plain_integrate(&monte_fun, lower, upper, 1, number_of_calls_,
-                              rng_, state_, &result.first, &result.second);
+    const int error_code =
+        gsl_monte_plain_integrate(&monte_fun, lower, upper, 1, number_of_calls_,
+                                  rng_, state_, &result.first, &result.second);
+    if (error_code) {
+      std::stringstream err;
+      err << "GSL 1D Monte-Carlo integration: " << gsl_strerror(error_code);
+      throw std::runtime_error(err.str());
+    }
+
+    result.check_error("GSL 1D Monte-Carlo integration");
 
     return result;
   }
@@ -279,7 +281,7 @@ class Integrator2d {
    *                  (defaults to 1E6 if omitted), i.e. how often the integrand
    *                  is sampled in the Monte-Carlo integration. Larger numbers
    *                  lead to a more precise result, but also to increased
-   * runtime.
+   *                  runtime.
    *
    * \note Since the workspace is allocated in the constructor and deallocated
    * on destruction, you should not recreate Integrator objects unless required.
@@ -351,6 +353,137 @@ class Integrator2d {
 
   /// number of calls to the integrand
   const std::size_t number_of_calls_;
+};
+
+/// This is a wrapper for the integrand, so we can pass the limits as well for
+/// renormalizing to the unit cube.
+template <typename F>
+struct Integrand2d {
+  double min1;
+  double diff1;
+  double min2;
+  double diff2;
+  F f;
+};
+
+/**
+ * A C++ interface for numerical integration in two dimensions with the Cuba
+ * Cuhre integration function.
+ *
+ * The algorithm is deterministic and well-suited for low dimensions, where it
+ * can reach good accuracy.
+ *
+ * Example:
+ * \code
+ * Integrator2dCuhre integrate;
+ * const auto result = integrate(0.1, 0.9, 0., 0.5,
+ *                               [](double x, double y) { return x * y; });
+ * \endcode
+ */
+class Integrator2dCuhre {
+ public:
+  /**
+   * Construct an integration functor.
+   *
+   * \param num_calls The maximum number of calls to the integrand function
+   *                  (defaults to 1E6 if omitted), i.e. how often the integrand
+   *                  can be sampled in the integration. Larger numbers lead to
+   * a
+   *                  more precise result, but possibly to increased runtime.
+   * \param epsrel    The desired relative accuracy (1E-3 by default).
+   * \param epsabs    The desired absolute accuracy (1E-3 by default).
+   */
+  explicit Integrator2dCuhre(int num_calls = 1e6, double epsrel = 5e-4,
+                             double epsabs = 1e-9)
+      : maxeval_(num_calls), epsrel_(epsrel), epsabs_(epsabs) {}
+
+  /**
+   * The function call operator implements the integration functionality.
+   *
+   * \param min1 The lower limit in the first dimension.
+   * \param max1 The upper limit in the first dimension.
+   * \param min2 The lower limit in the second dimension.
+   * \param max2 The upper limit in the second dimension.
+   * \param fun The callable to integrate over. This callable may be a function
+   *            pointer, lambda, or a functor object. In any case, the callable
+   *            must return a `double` and take two `double` arguments. If you
+   *            want to pass additional data to the callable you can e.g. use
+   *            lambda captures.
+   */
+  template <typename F>
+  Result operator()(double min1, double max1, double min2, double max2, F fun) {
+    Result result = {0., 0.};
+
+    if (max1 < min1 || max2 < min2) {
+      bool tolerable = (max1 - min1 > -1.e-16) && (max2 - min2 > -1.e-16);
+      if (tolerable) {
+        return result;
+      }
+      std::stringstream err;
+      err << "Integrator2dCuhre got wrong integration limits: [" << min1 << ", "
+          << max1 << "], [" << min2 << ", " << max2 << "]";
+      throw std::invalid_argument(err.str());
+    }
+
+    Integrand2d<F> f_with_limits = {min1, max1 - min1, min2, max2 - min2, fun};
+
+    const integrand_t cuhre_fun{[](const int * /* ndim */, const cubareal xx[],
+                                   const int * /* ncomp */, cubareal ff[],
+                                   void *userdata) -> int {
+      auto i = static_cast<Integrand2d<F> *>(userdata);
+      // We have to transform the integrand to the unit cube.
+      // This is what Cuba expects.
+      ff[0] = (i->f)(i->min1 + i->diff1 * xx[0], i->min2 + i->diff2 * xx[1]) *
+              i->diff1 * i->diff2;
+      return 0;
+    }};
+
+    const int ndim = 2;
+    const int ncomp = 1;
+    void *userdata = &f_with_limits;
+    const int nvec = 1;
+    const int flags = 0;  // Use the defaults.
+    const int mineval = 0;
+    const int maxeval = maxeval_;
+    const int key = -1;  // Use the default.
+    const char *statefile = nullptr;
+    void *spin = nullptr;
+
+    Cuhre(ndim, ncomp, cuhre_fun, userdata, nvec, epsrel_, epsabs_, flags,
+          mineval, maxeval, key, statefile, spin, &nregions_, &neval_, &fail_,
+          &result.first, &result.second, &prob_);
+
+    if (fail_) {
+      std::stringstream err;
+      err << "After " << neval_ << " evaluations "
+          << "Cuhre integration from Cuba reports error code " << fail_;
+      throw std::runtime_error(err.str());
+    }
+    result.check_error("Cuba integration ", epsrel_, epsabs_);
+
+    return result;
+  }
+
+ private:
+  /// The (approximate) maximum number of integrand evaluations allowed.
+  int maxeval_;
+  /// Requested relative accuracy.
+  double epsrel_;
+  /// Requested absolute accuracy.
+  double epsabs_;
+  /// Actual number of subregions needed.
+  int nregions_;
+  /// Actual number of integrand evaluations needed.
+  int neval_;
+  /// An error flag.
+  ///
+  /// 0 if the desired accuracy was reached, -1 if the dimension is out of
+  /// range, larger than 0 if the accuracy goal was not met within the maximum
+  /// number of evaluations.
+  int fail_;
+  /// The chi^2 probability that the error is not a reliable estimate of the
+  /// true integration error.
+  double prob_;
 };
 
 }  // namespace Smash
