@@ -18,26 +18,15 @@
 
 namespace Smash {
 
-RootOutput::RootOutput(const bf::path &path, const std::string &name)
+RootOutput::RootOutput(const bf::path &path, std::string name,
+                       bool collisions)
     : base_path_(std::move(path)),
       root_out_file_(
           new TFile((base_path_ / (name + ".root")).native().c_str(), "NEW")),
-      write_collisions_(true),
-      write_particles_(false),
+      write_collisions_(collisions),
+      write_particles_(!collisions),
       autosave_frequency_(1000) {
-  init_trees();
-}
 
-/**
- * RootOuput constructor. Creates file smash_run.root in the output directory.
- */
-RootOutput::RootOutput(const bf::path &path, Configuration &&conf)
-    : base_path_(std::move(path)),
-      root_out_file_(
-          new TFile((base_path_ / "smash_run.root").native().c_str(), "NEW")),
-      write_collisions_(conf.take({"Write_Collisions"}, false)),
-      write_particles_(conf.take({"Write_Particles"}, true)),
-      autosave_frequency_(conf.take({"Autosave_Frequency"}, 1000)) {
   /*!\Userguide
    * \page input_root ROOT
    * Enables output in a ROOT format. The latter is a structured binary format

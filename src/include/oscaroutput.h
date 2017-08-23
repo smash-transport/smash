@@ -91,8 +91,10 @@ class OscarOutput : public OutputInterface {
  *             placed.
  * \param config A Configuration object that has direct entries for OSCAR.
  */
-std::unique_ptr<OutputInterface> create_oscar_output(const bf::path &path,
-                                                     Configuration config);
+std::unique_ptr<OutputInterface> create_oscar_output(std::string format,
+                                                     std::string content,
+                                                     const bf::path &path,
+                                                     Configuration&& config);
 
 /**
  * Returns a OscarOutput for the dilepton output routine in the
@@ -103,7 +105,7 @@ std::unique_ptr<OutputInterface> create_oscar_output(const bf::path &path,
  *             placed.
  */
 
-std::unique_ptr<OutputInterface> create_dilepton_output(bf::path path);
+std::unique_ptr<OutputInterface> create_dilepton_output(const bf::path &path);
 
 /**
  * Returns a OscarOutput for the photon output routine in the
@@ -113,7 +115,7 @@ std::unique_ptr<OutputInterface> create_dilepton_output(bf::path path);
  *             placed.
  */
 
-std::unique_ptr<OutputInterface> create_photon_output(bf::path path);
+std::unique_ptr<OutputInterface> create_photon_output(const bf::path &path);
 
 // @}
 

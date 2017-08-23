@@ -493,6 +493,8 @@ class Configuration {
    */
   void merge_yaml(const std::string &yaml);
 
+  std::vector<std::string> list_upmost_nodes();
+
   /**
    * The default interface for SMASH to read configuration values.
    *
@@ -539,6 +541,14 @@ class Configuration {
    *         assignment.
    */
   Value read(std::initializer_list<const char *> keys) const;
+
+  template <typename T>
+  T read(std::initializer_list<const char *> keys, T default_value) {
+    if (has_value(keys)) {
+      return read(keys).operator T();
+    }
+    return default_value;
+  }
 
   /**
    * Removes all entries in the map except for \p key.

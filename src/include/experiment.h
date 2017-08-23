@@ -154,9 +154,8 @@ class Experiment : public ExperimentBase {
   bool perform_action(Action &action,
                       const Container &particles_before_actions);
 
-  template <typename TOutput>
-  void create_output(const char *output_name, const bf::path &output_path,
-                     Configuration &&conf);
+  void create_output(std::string format, std::string content,
+                     const bf::path &output_path, Configuration &&conf);
 
   /** Propagate all particles until time to_time without any interactions
    *  and shine dileptons.

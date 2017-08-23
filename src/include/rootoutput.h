@@ -88,8 +88,7 @@ class Particles;
   **/
 class RootOutput : public OutputInterface {
  public:
-  RootOutput(const bf::path &path, const std::string &name);
-  RootOutput(const bf::path &path, Configuration &&conf);
+  RootOutput(const bf::path &path, std::string name, bool collisions);
   ~RootOutput();
 
   void at_eventstart(const Particles &particles,

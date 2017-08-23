@@ -178,10 +178,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   const bool strings_switch = config.take({"Collision_Term", "Strings"}, false);
   const NNbarTreatment nnbar_treatment = config.take(
       {"Collision_Term", "NNbar_Treatment"}, NNbarTreatment::NoAnnihilation);
-  const bool photons_switch =
-      config.has_value({"Output", "Photons"})
-          ? config.take({"Output", "Photons", "Enable"}, true)
-          : false;
+  const bool photons_switch = config.has_value({"Output", "Photons"});
   /// Elastic collisions between the nucleons with the square root s
   //  below low_snn_cut are excluded.
   const double low_snn_cut =
@@ -231,27 +228,63 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
 }
 
 template <typename Modus>
-template <typename TOutput>
-void Experiment<Modus>::create_output(const char *name,
+void Experiment<Modus>::create_output(std::string format,
+                                      std::string content,
                                       const bf::path &output_path,
                                       Configuration &&conf) {
-  const bool exists = conf.has_value_including_empty({name});
-  if (!exists) {
-    return;
+  const auto &log = logger<LogArea::Experiment>();
+  log.info() << "Adding output " << content << " of format " << format << std::endl;
+  auto conf_specific = conf[content.c_str()];
+
+  if (format == "Vtk" && content == "Particles") {
+    outputs_.emplace_back(make_unique<VtkOutput>(output_path, std::move(conf_specific)));
   }
-  if (conf.has_value({name, "Enable"})) {
-    const auto &log = logger<LogArea::Experiment>();
-    log.warn(
-        "Enable option is deprecated."
-        " To disable/enable output comment/uncomment"
-        " it out in the config.yaml.");
+  if (format == "Root") {
+#ifdef SMASH_USE_ROOT
+    if (content == "Particles") {
+      outputs_.emplace_back(make_unique<RootOutput>(output_path, content, false));
+    } else if (content == "Collisions") {
+      outputs_.emplace_back(make_unique<RootOutput>(output_path, content, true));
+    } else if (content == "Dileptons") {
+      dilepton_output_ = make_unique<RootOutput>(output_path, content, true);
+    } else if (content == "Photons") {
+      photon_output_ = make_unique<RootOutput>(output_path, content, true);
+    }
+#else
+    log.error("Root output requested, but Root support not compiled in");
+#endif
   }
-  const bool enable = conf.take({name, "Enable"}, true);
-  if (!enable) {
-    conf.take({name});
-    return;
+
+  if (format == "Binary") {
+    if (content == "Particles") {
+      outputs_.emplace_back(make_unique<BinaryOutputParticles>(output_path, std::move(conf_specific)));
+    } else if (content == "Collisions") {
+      outputs_.emplace_back(make_unique<BinaryOutputCollisions>(output_path, std::move(conf_specific)));
+    } else if (content == "Dileptons") {
+      dilepton_output_ = make_unique<BinaryOutputCollisions>(output_path, content, true);
+    } else if (content == "Photons") {
+      photon_output_ = make_unique<BinaryOutputCollisions>(output_path, content, false);
+    }
   }
-  outputs_.emplace_back(make_unique<TOutput>(output_path, conf[name]));
+
+  if ((format == "Oscar1999" || format == "Oscar2013") &&
+      content != "Dileptons" && content != "Photons") {
+    outputs_.emplace_back(create_oscar_output(format, content, output_path, std::move(conf_specific)));
+  }
+
+  if (format == "Oscar2013" && content == "Dileptons") {
+    dilepton_output_ = create_dilepton_output(output_path);
+  }
+
+  if (format == "Oscar2013" && content == "Photons") {
+    photon_output_ = create_photon_output(output_path);
+  }
+
+  if (content == "Thermodynamics" && format == "ASCII") {
+    outputs_.emplace_back(make_unique<ThermodynamicOutput>(output_path, std::move(conf_specific)));
+  }
+
+  // TODO(oliiny): remove used formats from configuration
 }
 
 /*!\Userguide
@@ -319,13 +352,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
           config.take({"General", "Metric_Type"}, ExpansionMode::NoExpansion),
           config.take({"General", "Expansion_Rate"}, 0.1)),
       strings_switch_(config.take({"Collision_Term", "Strings"}, false)),
-      dileptons_switch_(
-          config.has_value({"Output", "Dileptons"})
-              ? config.take({"Output", "Dileptons", "Enable"}, true)
-              : false),
-      photons_switch_(config.has_value({"Output", "Photons"})
-                          ? config.take({"Output", "Photons", "Enable"}, true)
-                          : false),
+      dileptons_switch_(config.has_value({"Output", "Dileptons"})),
+      photons_switch_(config.has_value({"Output", "Photons"})),
       time_step_mode_(
           config.take({"General", "Time_Step_Mode"}, TimeStepMode::Fixed)) {
   const auto &log = logger<LogArea::Experiment>();
@@ -429,27 +457,6 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     * \li \subpage output_vtk_lattice_
     */
 
-  // loop until all OSCAR outputs are created (create_oscar_output will return
-  // nullptr then).
-  while (OutputPtr oscar = create_oscar_output(output_path, output_conf)) {
-    outputs_.emplace_back(std::move(oscar));
-  }
-  create_output<VtkOutput>("Vtk", output_path, std::move(output_conf));
-  create_output<BinaryOutputCollisions>("Binary_Collisions", output_path,
-                                        std::move(output_conf));
-  create_output<BinaryOutputParticles>("Binary_Particles", output_path,
-                                       std::move(output_conf));
-#ifdef SMASH_USE_ROOT
-  create_output<RootOutput>("Root", output_path, std::move(output_conf));
-#else
-  const bool enable_root = output_conf.take({"Root", "Enable"}, true);
-  if (enable_root && output_conf.has_value_including_empty({"Root"})) {
-    log.error("Root output requested, but Root support not compiled in");
-  }
-#endif
-  create_output<ThermodynamicOutput>("Thermodynamics", output_path,
-                                     std::move(output_conf));
-
   /*!\Userguide
    * \page input_dileptons Dileptons
    * Enables Dilepton Output together with DecayActionsFinderDilepton.
@@ -480,45 +487,16 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * "Root" - The dilepton output is written to the file \c DileptonOutput.root
    * in \ref format_root .\n
    **/
-  if (dileptons_switch_) {
-    // create dilepton output object
-    std::string format = config.take({"Output", "Dileptons", "Format"});
-    if (format == "Oscar") {
-      dilepton_output_ = create_dilepton_output(output_path);
-    } else if (format == "Binary") {
-      dilepton_output_ = make_unique<BinaryOutputCollisions>(
-          output_path, "DileptonOutput", true);
-    } else if (format == "Root") {
-#ifdef SMASH_USE_ROOT
-      dilepton_output_ = make_unique<RootOutput>(output_path, "DileptonOutput");
-#else
-      log.error() << "You requested Root output, but Root support has not been "
-                     "compiled in.";
-      output_conf.take({"Root"});
-#endif
-    } else {
-      throw std::runtime_error("Bad dilepton output format: " + format);
-    }
-  }
 
-  if (parameters_.photons_switch) {
-    // create photon output object
-    std::string format = config.take({"Output", "Photons", "Format"});
-    if (format == "Oscar") {
-      photon_output_ = create_photon_output(output_path);
-    } else if (format == "Binary") {
-      photon_output_ = make_unique<BinaryOutputCollisions>(
-          output_path, "PhotonOutput", false);
-    } else if (format == "Root") {
-#ifdef SMASH_USE_ROOT
-      photon_output_ = make_unique<RootOutput>(output_path, "PhotonOutput");
-#else
-      log.error() << "You requested Root output, but Root support has not been "
-                     "compiled in.";
-      output_conf.take({"Root"});
-#endif
-    } else {
-      throw std::runtime_error("Bad Photon output format: " + format);
+  dens_type_ = config.take({"Output", "Density_Type"}, DensityType::None);
+  log.info() << "Density type written to headers: " << dens_type_;
+
+  std::vector<std::string> output_contents = output_conf.list_upmost_nodes();
+  for (const auto &content : output_contents) {
+    auto this_output_conf = output_conf[content.c_str()];
+    std::vector<std::string> formats = this_output_conf.take({"Format"});
+    for (const auto &format : formats) {
+      create_output(format, content, output_path, std::move(output_conf));
     }
   }
 
@@ -544,9 +522,6 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     // potentials need testparticles and gaussian sigma from parameters_
     potentials_ = make_unique<Potentials>(config["Potentials"], parameters_);
   }
-
-  dens_type_ = config.take({"Output", "Density_Type"}, DensityType::None);
-  log.info() << "Density type written to headers: " << dens_type_;
 
   /*!\Userguide
    * \page input_lattice_ Lattice
@@ -597,10 +572,11 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     const std::array<int, 3> n = config.take({"Lattice", "Cell_Number"});
     const std::array<double, 3> origin = config.take({"Lattice", "Origin"});
     const bool periodic = config.take({"Lattice", "Periodic"});
+
     dens_type_lattice_printout_ =
-        config.take({"Lattice", "Printout", "Type"}, DensityType::None);
+        config.take({"Output", "Thermodynamics", "Type"}, DensityType::None);
     const std::set<ThermodynamicQuantity> td_to_print =
-        config.take({"Lattice", "Printout", "Quantities"});
+        config.take({"Output", "Thermodynamics", "Quantities"});
     printout_tmn_ = (td_to_print.count(ThermodynamicQuantity::Tmn) > 0);
     printout_tmn_landau_ =
         (td_to_print.count(ThermodynamicQuantity::TmnLandau) > 0);

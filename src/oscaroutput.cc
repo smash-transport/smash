@@ -26,6 +26,7 @@ template <OscarOutputFormat Format, int Contents>
 OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
                                            std::string name)
     : file_{std::fopen((path / (name + ".oscar")).native().c_str(), "w")} {
+
   /*!\Userguide
    * \page input_oscar_particlelist Oscar_Particlelist
    * Enables OSCAR particles output.
@@ -477,74 +478,64 @@ void OscarOutput<Format, Contents>::write_particledata(
 
 namespace {
 template <int Contents>
-std::unique_ptr<OutputInterface> create_select_format(const bf::path &path,
-                                                      Configuration config,
+std::unique_ptr<OutputInterface> create_select_format(std::string format,
+                                                      const bf::path &path,
+                                                      Configuration&& config,
                                                       std::string name) {
-  const bool modern_format = config.take({"2013_Format"}, false);
-  const bool extended_format = config.take({"2013_Extended"}, false);
+  const bool modern_format =  (format == "Oscar2013");
+  const bool extended_format = config.read({"Extended"}, false);
   if (modern_format && extended_format) {
     return make_unique<OscarOutput<OscarFormat2013Extended, Contents>>(
-        std::move(path), std::move(name));
+        path, name);
   } else if (modern_format) {
-    return make_unique<OscarOutput<OscarFormat2013, Contents>>(std::move(path),
-                                                               std::move(name));
+    return make_unique<OscarOutput<OscarFormat2013, Contents>>(path, name);
   } else {
-    return make_unique<OscarOutput<OscarFormat1999, Contents>>(std::move(path),
-                                                               std::move(name));
+    return make_unique<OscarOutput<OscarFormat1999, Contents>>(path, name);
   }
 }
 }  // unnamed namespace
 
-std::unique_ptr<OutputInterface> create_oscar_output(const bf::path &path,
-                                                     Configuration config) {
-  if (config.has_value({"Oscar_Particlelist"})) {
-    auto subconfig = config["Oscar_Particlelist"];
-    const bool enabled = subconfig.take({"Enable"}, true);
-    config.take({"Oscar_Particlelist"});
-    if (enabled) {
-      const bool only_final = subconfig.take({"Only_Final"}, true);
+std::unique_ptr<OutputInterface> create_oscar_output(std::string format,
+                                                     std::string content,
+                                                     const bf::path &path,
+                                                     Configuration&& specific_conf) {
+  if (content == "Particles") {
+    const bool only_final = specific_conf.read({"Only_Final"}, true);
       if (only_final) {
         return create_select_format<OscarParticlesAtEventend>(
-            std::move(path), std::move(subconfig), "particle_lists");
+            format, path, std::move(specific_conf), "particle_lists");
       } else {
         return create_select_format<OscarTimesteps | OscarAtEventstart |
                                     OscarParticlesAtEventend>(
-            std::move(path), std::move(subconfig), "particle_lists");
+            format, path, std::move(specific_conf), "particle_lists");
       }
+  }
+  if (content == "Collisions") {
+    const bool print_start_end = specific_conf.read({"Print_Start_End"}, false);
+    if (print_start_end) {
+      return create_select_format<OscarInteractions | OscarAtEventstart |
+                                  OscarParticlesAtEventend>(
+          format, path, std::move(specific_conf), "full_event_history");
+    } else {
+      return create_select_format<OscarInteractions>(
+          format, path, std::move(specific_conf), "full_event_history");
     }
   }
-  if (config.has_value({"Oscar_Collisions"})) {
-    auto subconfig = config["Oscar_Collisions"];
-    const bool enabled = subconfig.take({"Enable"}, true);
-    config.take({"Oscar_Collisions"});
-    if (enabled) {
-      const bool print_start_end = subconfig.take({"Print_Start_End"}, false);
-      if (print_start_end) {
-        return create_select_format<OscarInteractions | OscarAtEventstart |
-                                    OscarParticlesAtEventend>(
-            std::move(path), std::move(subconfig), "full_event_history");
-      } else {
-        return create_select_format<OscarInteractions>(
-            std::move(path), std::move(subconfig), "full_event_history");
-      }
-    }
-  }
-  return {};  // return a nullptr to signify the end of OSCAR outputs in the
-              // config file
+  return {};  // Todo(oliiny): Fix the case of unknown content / format
 }
 
-std::unique_ptr<OutputInterface> create_dilepton_output(bf::path path) {
+std::unique_ptr<OutputInterface> create_dilepton_output(const bf::path &path) {
   /* for now the Oscar Output in the 2013 format is sufficient
    * for dilepton output */
   return make_unique<OscarOutput<OscarFormat2013Extended, OscarInteractions>>(
-      std::move(path), "DileptonOutput");
+      path, "DileptonOutput");
 }
 
-std::unique_ptr<OutputInterface> create_photon_output(bf::path path) {
+std::unique_ptr<OutputInterface> create_photon_output(const bf::path &path) {
   /* for now the Oscar Output in the 2013 format is sufficient
    * for photon output */
   return make_unique<OscarOutput<OscarFormat2013, OscarInteractions>>(
-      std::move(path), "PhotonOutput");
+      path, "PhotonOutput");
 }
 
 }  // namespace Smash

@@ -71,14 +71,12 @@ TEST(fullhistory_format) {
   // Set options
   const bf::path configfilename = "oscar_1999.yaml";
   const bf::path configfilepath = testoutputpath / configfilename;
-  bf::ofstream(configfilepath) << "Oscar_Collisions:\n"
-                                  "    Enable:          True\n"
-                                  "    Print_Start_End: True\n"
-                                  "    2013_Format:     False\n";
+  bf::ofstream(configfilepath) << "    Print_Start_End: True\n";
   VERIFY(bf::exists(configfilepath));
 
   std::unique_ptr<OutputInterface> oscfull = create_oscar_output(
-      testoutputpath, Configuration{testoutputpath, configfilename});
+      "Oscar1999", "Collisions", testoutputpath,
+      Configuration{testoutputpath, configfilename});
   VERIFY(bool(oscfull));
 
   const bf::path outputfilepath = testoutputpath / "full_event_history.oscar";
@@ -194,14 +192,12 @@ TEST(particlelist_format) {
   // Set options
   const bf::path configfilename = "oscar_1999.yaml";
   const bf::path configfilepath = testoutputpath / configfilename;
-  bf::ofstream(configfilepath) << "Oscar_Particlelist:\n"
-                                  "    Enable:          True\n"
-                                  "    Only_Final:      True\n"
-                                  "    2013_Format:     False\n";
+  bf::ofstream(configfilepath) << "    Only_Final:      True\n";
   VERIFY(bf::exists(configfilepath));
 
   std::unique_ptr<OutputInterface> oscfinal = create_oscar_output(
-      testoutputpath, Configuration{testoutputpath, configfilename});
+      "Oscar1999", "Particles", testoutputpath,
+       Configuration{testoutputpath, configfilename});
   VERIFY(bool(oscfinal));
 
   const bf::path outputfilepath = testoutputpath / "particle_lists.oscar";

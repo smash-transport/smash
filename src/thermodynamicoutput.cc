@@ -29,10 +29,10 @@ namespace Smash {
 ThermodynamicOutput::ThermodynamicOutput(const bf::path &path,
                                          Configuration &&config)
     : file_{std::fopen((path / ("thermodynamics.dat")).native().c_str(), "w")},
-      td_set_(config.take({"Quantities"}).convert_for(td_set_)),
-      dens_type_(config.take({"Type"})),
-      smearing_(config.take({"Smearing"}, true)) {
-  const std::array<double, 3> a = config.take({"Position"});
+      td_set_(config.read({"Quantities"}).convert_for(td_set_)),
+      dens_type_(config.read({"Type"})),
+      smearing_(config.read({"Smearing"}, true)) {
+  const std::array<double, 3> a = config.read({"Position"});
   r_ = ThreeVector(a[0], a[1], a[2]);
   std::fprintf(file_.get(), "# %s thermodynamics output\n", VERSION_MAJOR);
   std::fprintf(file_.get(), "# @ point (%6.2f, %6.2f, %6.2f) [fm]\n", r_.x1(),
