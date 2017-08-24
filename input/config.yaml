@@ -97,7 +97,10 @@ Output:
 
 Collision_Term:
     Two_to_One:             True
-    Two_to_Two:             True
+    Included_2to2:          ["All"] # Options are ["All", "Elastic", "NN_to_NR",
+                                    # "NN_to_DR", "KN_to_KN", "KN_to_KDelta",
+                                    # "Strangeness_exchange", "NN_to_NR"]
+                                    # Omitting this field results in no 2 to 2 reactions
     Strings:                False
     NNbar_Treatment:        no annihilation #Options are "no annihilation",
                                             #"resonances", "strings"

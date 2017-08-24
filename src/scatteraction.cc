@@ -24,11 +24,12 @@ namespace Smash {
 
 ScatterAction::ScatterAction(const ParticleData &in_part_a,
                              const ParticleData &in_part_b,
-                             double time, bool isotropic, bool include_2to2,
+                             double time, bool isotropic,
+                             std::set<IncludedReactions> included_2to2,
                              double string_formation_time)
     : Action({in_part_a, in_part_b}, time),
       total_cross_section_(0.), isotropic_(isotropic),
-      include_2to2_(include_2to2),
+      included_2to2_(included_2to2),
       string_formation_time_(string_formation_time) {}
 
 void ScatterAction::add_collision(CollisionBranchPtr p) {
@@ -96,7 +97,6 @@ void ScatterAction::generate_final_state() {
 
 void ScatterAction::add_all_processes(double elastic_parameter,
                                       bool two_to_one,
-                                      std::set<IncludedReactions included_2to2,
                                       double low_snn_cut,
                                       bool strings_switch,
                                       NNbarTreatment nnbar_treatment) {
@@ -160,7 +160,9 @@ void ScatterAction::add_all_processes(double elastic_parameter,
   const bool reject_by_nucleon_elastic_cutoff = both_are_nucleons
                          && t1.antiparticle_sign() == t2.antiparticle_sign()
                          && sqrt_s() < low_snn_cut;
-  if (two_to_two && !reject_by_nucleon_elastic_cutoff) {
+  bool incl_elastic = included_2to2_.count(IncludedReactions::All) > 0 ||
+                      included_2to2_.count(IncludedReactions::Elastic) > 0;
+  if (incl_elastic && !reject_by_nucleon_elastic_cutoff) {
       add_collision(elastic_cross_section(elastic_parameter));
   }
   if (is_pythia) {
@@ -170,7 +172,7 @@ void ScatterAction::add_all_processes(double elastic_parameter,
        /* resonance formation (2->1) */
        add_collisions(resonance_cross_sections());
      }
-     if (two_to_two && !include_2to2_) {
+     if (!included_2to2_.empty()) {
        /* 2->2 (inelastic) */
        add_collisions(two_to_two_cross_sections());
      }

@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_SCATTERACTIONSFINDER_H_
 #define SRC_INCLUDE_SCATTERACTIONSFINDER_H_
 
+#include <set>
 #include <vector>
 
 #include "action.h"

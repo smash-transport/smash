@@ -247,13 +247,19 @@ class Configuration {
       const std::vector<std::string> v = operator std::vector<std::string>();
       std::set<IncludedReactions> s;
       for (const auto &x : v) {
-          if (x == "NN_to_NN") {
-            s.insert(IncludedReactions::NN_to_NN);
+          if (x == "All") {
+            s.insert(IncludedReactions::All);
+          } else if (x == "Elastic") {
+            s.insert(IncludedReactions::Elastic);
           } else if (x == "NN_to_NR") {
             s.insert(IncludedReactions::NN_to_NR);
+          } else if (x == "NN_to_DR") {
+            s.insert(IncludedReactions::NN_to_DR);
+          } else if (x == "KN_to_KN") {
+            s.insert(IncludedReactions::KN_to_KN);
           } else if (x == "KN_to_KDelta") {
             s.insert(IncludedReactions::KN_to_KDelta);
-          } else if (x == "strangeness_exchange") {
+          } else if (x == "Strangeness_exchange") {
             s.insert(IncludedReactions::Strangeness_exchange);
           } else {
             throw IncorrectTypeInAssignment(

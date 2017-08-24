@@ -21,6 +21,12 @@ void ScatterActionDeltaKaon::format_debug_output(std::ostream &out) const {
 }
 
 CollisionBranchList ScatterActionDeltaKaon::two_to_two_cross_sections() {
+  CollisionBranchList process_list;
+  if (included_2to2_.count(IncludedReactions::All) > 0 ||
+      included_2to2_.count(IncludedReactions::KN_to_KDelta) > 0) {
+    return process_list;
+  }
+
   const ParticleType &a = incoming_particles_[0].type();
   const ParticleType &b = incoming_particles_[1].type();
   const ParticleType &type_delta = a.pdgcode().is_Delta() ? a : b;
@@ -33,7 +39,6 @@ CollisionBranchList ScatterActionDeltaKaon::two_to_two_cross_sections() {
   const double sqrts = sqrt_s();
   const double pcm = cm_momentum();
 
-  CollisionBranchList process_list;
   // The cross sections are determined from the backward reactions via
   // detailed balance. The same isospin factors as for the backward reaction
   // are used.

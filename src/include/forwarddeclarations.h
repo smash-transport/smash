@@ -176,11 +176,13 @@ enum class ThermodynamicQuantity : char {
   LandauVelocity,
 };
 
-///The different groups of 2 to 2 reactions that one can include
+/// The different groups of 2 to 2 reactions that one can include
 enum class IncludedReactions {
   All,
-  NN_to_NN,
+  Elastic,
   NN_to_NR,
+  NN_to_DR,
+  KN_to_KN,
   KN_to_KDelta,
   Strangeness_exchange,
 };

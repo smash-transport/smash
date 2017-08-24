@@ -235,7 +235,8 @@ inline ParticlesPtr create_particles(
  */
 inline ExperimentParameters default_parameters(int testparticles = 1, double dt = 0.1) {
   return ExperimentParameters{{0., dt}, {0., 1.}, testparticles, 1.0, 4.0,
-                              true, true, false, NNbarTreatment::NoAnnihilation, false, 0.};
+                              true, {IncludedReactions::All}, false,
+                              NNbarTreatment::NoAnnihilation, false, 0.};
 }
 
 /**

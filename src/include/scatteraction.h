@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_SCATTERACTION_H_
 
 #include <memory>
+#include <set>
 
 #include "action.h"
 #include "cxx14compat.h"
@@ -116,8 +117,9 @@ class ScatterAction : public Action {
    * \param[in] string_formation_time the time a string takes to form
    */
   ScatterAction(const ParticleData &in_part1, const ParticleData &in_part2,
-                double time, bool isotropic = false, bool include_2to2=true,
-                double string_formation_time = 1.0);
+                double time, bool isotropic = false,
+                std::set<IncludedReactions> included_2to2 =
+                {IncludedReactions::All}, double string_formation_time = 1.0);
 
   /** Add a new collision channel. */
   void add_collision(CollisionBranchPtr p);
@@ -145,8 +147,7 @@ class ScatterAction : public Action {
   double raw_weight_value() const override;
 
   /** Add all possible subprocesses for this action object. */
-  virtual void add_all_processes(double elastic_parameter,
-    bool two_to_one, std::set<IncludedReactions included_2to2,
+  virtual void add_all_processes(double elastic_parameter, bool two_to_one,
     double low_snn_cut, bool strings_switch, NNbarTreatment nnbar_treatment);
 
   /**
@@ -304,8 +305,8 @@ class ScatterAction : public Action {
   /** Do this collision isotropically. */
   bool isotropic_ = false;
 
-  /** Include 2 to 2 inelastic channels for this collision. */
-  bool include_2to2_ = true;
+  /** Included 2 to 2 inelastic channels for this collision. */
+  std::set<IncludedReactions> included_2to2_;
 
   /** Formation time parameter for string fragmentation*/
   double string_formation_time_ = 1.0;

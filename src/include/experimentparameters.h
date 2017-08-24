@@ -7,6 +7,8 @@
 #ifndef SRC_INCLUDE_EXPERIMENTPARAMETERS_H_
 #define SRC_INCLUDE_EXPERIMENTPARAMETERS_H_
 
+#include <set>
+
 #include "clock.h"
 
 namespace Smash {
@@ -36,7 +38,7 @@ struct ExperimentParameters {
   /**
   * This indicates which two to two reactions are switched off.
   */
-  std::set<IncludedReactions> included_2to2;
+  const std::set<IncludedReactions> included_2to2;
   /**
   * This indicates whether string fragmentation is switched on.
   */

@@ -40,15 +40,23 @@ CollisionBranchList ScatterActionBaryonBaryon::two_to_two_cross_sections() {
   const ParticleType &type_a = incoming_particles_[0].type();
   const ParticleType &type_b = incoming_particles_[1].type();
 
-  if (type_a.is_nucleon() || type_a.is_Delta() ||
-      type_b.is_nucleon() || type_b.is_Delta()) {
-    if (type_a.antiparticle_sign() == 1 && type_b.antiparticle_sign() == 1) {
-      /* N R → N N, Δ R → N N */
-      process_list = bar_bar_to_nuc_nuc(false);
-    } else if (type_a.antiparticle_sign() == -1
-               && type_b.antiparticle_sign() == -1) {
-      /* N̅ R → N̅ N̅, Δ̅ R → N̅ N̅ */
-      process_list = bar_bar_to_nuc_nuc(true);
+  bool same_sign = type_a.antiparticle_sign() == type_b.antiparticle_sign();
+  if (!same_sign) {
+    return process_list;
+  }
+  bool anti_particles = type_a.antiparticle_sign() == -1;
+
+  if (type_a.is_nucleon() || type_b.is_nucleon()) {
+    /* N R → N N, N̅ R → N̅ N̅ */
+    if (included_2to2_.count(IncludedReactions::All) > 0 ||
+        included_2to2_.count(IncludedReactions::NN_to_NR) > 0) {
+      process_list = bar_bar_to_nuc_nuc(anti_particles);
+    }
+  } else if (type_a.is_Delta() || type_b.is_Delta()) {
+    /* Δ R → N N, Δ̅ R → N̅ N̅ */
+    if (included_2to2_.count(IncludedReactions::All) > 0 ||
+        included_2to2_.count(IncludedReactions::NN_to_DR) > 0) {
+      process_list = bar_bar_to_nuc_nuc(anti_particles);
     }
   }
 
