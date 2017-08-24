@@ -26,8 +26,10 @@ struct HistoryData {
   uint32_t id_process = 0;
   // type of the last action
   ProcessType process_type = ProcessType::None;
-  // time of the last action (excluding walls)
+  // time of the last action (excluding walls and elastic collisions)
   double time_of_origin = 0.0;
+  // time of the last collision (time of kinetic freeze_out)
+  double time_of_last_collision = 0.0;
   // PdgCodes of the parent particles
   PdgCode p1 = 0x0, p2 = 0x0;
 };
