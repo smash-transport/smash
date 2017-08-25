@@ -329,7 +329,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * For the extended version of this output the header is modified to read:\n
  * **Header**
  * \code
- * #!OSCAR2013 particle_lists t x y z mass p0 px py pz pdg ID ncoll form_time
+ * #!OSCAR2013 particle_lists t x y z mass p0 px py pz pdg ID charge ncoll form_time
  xsecfac proc_id_origin proc_type_origin time_last_collision pdg_mother1 pdg_mother2
  * # Units: fm fm fm fm GeV GeV GeV GeV GeV none none none fm none none none fm
  none none
@@ -456,10 +456,10 @@ void OscarOutput<Format, Contents>::write_particledata(
   } else if (Format == OscarFormat2013Extended) {
     std::fprintf(file_.get(),
                  "%g %g %g %g %g %.9g %.9g %.9g"
-                 " %.9g %s %i %i %g %g %i %i %g %s %s\n",
+                 " %.9g %s %i %i %i %g %g %i %i %g %s %s\n",
                  pos.x0(), pos.x1(), pos.x2(), pos.x3(), data.effective_mass(),
                  mom.x0(), mom.x1(), mom.x2(), mom.x3(),
-                 data.pdgcode().string().c_str(), data.id(),
+                 data.pdgcode().string().c_str(), data.id(),data.type().charge(),
                  data.get_history().collisions_per_particle,
                  data.formation_time(), data.cross_section_scaling_factor(),
                  data.get_history().id_process,
