@@ -26,7 +26,12 @@ struct HistoryData {
   uint32_t id_process = 0;
   // type of the last action
   ProcessType process_type = ProcessType::None;
-  // time of the last action (excluding walls), time of kinetic freeze_out
+  /** 
+   * Time of the last action (excluding walls), time of kinetic freeze_out
+   * for HBT analysis this time should be larger or equal to the formation
+   * time of the particle, since only formed particles can freeze out
+   * The full coordinate space 4-vector can be obtained by back-propagation
+   */
   double time_last_collision = 0.0;
   // PdgCodes of the parent particles
   PdgCode p1 = 0x0, p2 = 0x0;

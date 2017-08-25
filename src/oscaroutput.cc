@@ -353,7 +353,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *
  * For the extended version the particle line contains
  * \code
- * t x y z mass p0 px py pz pdg ID Ncoll formation_time
+ * t x y z mass p0 px py pz pdg ID Charge Ncoll formation_time
  cross_section_scaling_factor
  * process_ID_origin process_type_origin time_last_collision PDG_mother1 PDG_mother2
  * \endcode
