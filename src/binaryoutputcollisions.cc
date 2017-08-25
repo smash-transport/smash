@@ -168,7 +168,7 @@ void BinaryOutputBase::write_particledata(const ParticleData &p) {
     write(p.cross_section_scaling_factor());
     write(p.get_history().id_process);
     write(static_cast<uint32_t>((p.get_history().process_type)));
-    write(p.get_history().time_of_origin);
+    write(p.get_history().time_last_collision);
     write(p.get_history().p1.get_decimal());
     write(p.get_history().p2.get_decimal());
   }
