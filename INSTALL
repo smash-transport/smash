@@ -128,6 +128,19 @@ binaries here:
 
     http://releases.llvm.org/download.html
 
+Make sure to pick a pre-built binary for your system. For example, for Ubuntu
+you could run:
+
+    $ lsb_release -a
+    No LSB modules are available.
+    Distributor ID: Ubuntu
+    Description:    Ubuntu 16.04.2 LTS
+    Release:        16.04
+    Codename:       xenial
+
+This tells you to download "Clang for x86_64 Ubuntu 16.04". (You might have to
+look for an older version to get pre-built binaries.)
+
 It is sufficient to unpack the archive with `tar xf` and to copy only the
 binary you need. For example:
 
