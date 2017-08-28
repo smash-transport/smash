@@ -67,8 +67,7 @@ Code formatting
 
 You can run clang-format to automatically format all code in SMASH correctly using the following command:
 
-    find src -iname *.h -o -iname *.cc | xargs clang-format -i
-
+    for i in src/*.cc src/include/*.h src/tests/*.cc src/tests/*.h; do clang-format -i $i; done;
 
 \subsection profiling_perf Perf
 
