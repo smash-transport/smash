@@ -26,7 +26,7 @@ struct HistoryData {
   uint32_t id_process = 0;
   // type of the last action
   ProcessType process_type = ProcessType::None;
-  /** 
+  /**
    * Time of the last action (excluding walls), time of kinetic freeze_out
    * for HBT analysis this time should be larger or equal to the formation
    * time of the particle, since only formed particles can freeze out
