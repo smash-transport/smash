@@ -120,6 +120,23 @@ a multicore machine, e.g. via
 (on a quad-core machine).
 
 
+Installing binaries as a user
+-----------------------------
+
+If you don't have administrator privileges on the machine you are using, you can
+still install software locally. Just copy the binary (in this example
+"clang-format") to a local folder and update your path:
+
+    mkdir ~/bin
+    cp ./clang-format ~/bin
+    echo 'export PATH=$PATH:~/bin' >> ~/.bashrc
+    source ~/.bashrc
+
+After this, you can just copy executable files to `~/bin` to install them. This
+also works for other exectuables like cpplint. You might have to set them to be
+executable with "chmod u+x ~/bin/my-binary".
+
+
 Installing clang-format
 -----------------------
 
@@ -142,15 +159,7 @@ This tells you to download "Clang for x86_64 Ubuntu 16.04". (You might have to
 look for an older version to get pre-built binaries.)
 
 It is sufficient to unpack the archive with `tar xf` and to copy only the
-binary you need. For example:
-
-    mkdir ~/bin
-    cp ./clang-format ~/bin
-    echo 'export PATH=$PATH:~/bin' >> ~/.bashrc
-    source ~/.bashrc
-
-After this, you can just copy executable files to `~/bin` to install them. This
-also works for other exectuables like cpplint.
+binary you need (clang-format), see "Installing binaries as a user" above.
 
 
 Installing cpplint
@@ -161,8 +170,8 @@ You can install it like this:
 
     pip install --user cpplint
 
-Similar to clang-format above, you might have to add `~/.local/bin` to your
-`$PATH`.
+You might have to add `~/.local/bin` to your `$PATH`, see "Installing binaries
+as a user".
 
 
 Installing cppcheck
@@ -175,7 +184,8 @@ false positives though. Download and compile the latest version:
     cd cppcheck
     make
 
-You can then copy it to your local binary folder as for clang-format.
+You can then copy it to your local binary folder, see "Installing binaries
+as a user".
 
 
 Installing codespell
@@ -203,11 +213,8 @@ Let's assume Eigen headers will be unpacked in $HOME.
   cmake -DCMAKE_INSTALL_PREFIX=$HOME/[latest-eigen]/ ..
 
 
-Including GSL from custom location
-----------------------------------
-
 Using a custom GSL build
-----------------------------------
+------------------------
 
 Run the following:
 
@@ -221,7 +228,8 @@ This creates a folder named "gsl-[version_number]" called $GSL here.
     make -jN
     make install
 
-Here N is the number of cores to use in the "make" command. Run cmake with
+Here N is the number of cores to use in the "make" command. When compiling
+SMASH, run cmake with
 
     cmake -DCMAKE_PREFIX_PATH=$GSL ..
 
