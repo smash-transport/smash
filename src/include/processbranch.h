@@ -24,7 +24,7 @@ namespace Smash {
  * (1) elastic (Elastic)
  * (2) resonance formation (2->1) (TwoToOne)
  * (3) 2->2 (inelastic) (TwoToTwo)
- * (4) string excitation (String)
+ * (4) string excitation by PYTHIA (String)
  * (5) resonance decays (Decay)
  * (6) Wall transition (Wall)*/
 enum class ProcessType {
@@ -34,7 +34,11 @@ enum class ProcessType {
   TwoToTwo = 3,
   String = 4,
   Decay = 5,
-  Wall = 6
+  Wall = 6,
+  StringSDiffAX = 41,
+  StringSDiffXB = 42,
+  StringDDiffXX = 43,
+  StringNDiff = 44
 };
 
 std::ostream &operator<<(std::ostream &os, ProcessType process_type);

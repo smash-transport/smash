@@ -24,6 +24,7 @@
 using namespace Pythia8;
 Pythia *pythia;
 SPmerge *spmerge;
+SigmaTotal pythia_sigmaTot;
 
 namespace Smash {
 
@@ -75,9 +76,25 @@ void ScatterAction::generate_final_state() {
       /* Sample the particle momenta in CM system. */
       inelastic_scattering();
       break;
-    case ProcessType::String:
-      /* string excitation */
-      string_excitation_inter();
+    //case ProcessType::String:
+    //  /* string excitation */
+    //  string_excitation();
+    //  break;
+    case ProcessType::StringSDiffAX:
+      /* string excitation single diffractive to AX */
+      string_excitation_inter(1);
+      break;
+    case ProcessType::StringSDiffXB:
+      /* string excitation single diffractive to XB */
+      string_excitation_inter(2);
+      break;
+    case ProcessType::StringDDiffXX:
+      /* string excitation single diffractive to XX */
+      string_excitation_inter(3);
+      break;
+    case ProcessType::StringNDiff:
+      /* string excitation non-diffractive */
+      string_excitation_inter(4);
       break;
     default:
       throw InvalidScatterAction(
@@ -674,7 +691,7 @@ void ScatterAction::string_excitation() {
 /* This function will generate outgoing particles in CM frame
  * from a hard process.
  * The way to excite strings is based on the UrQMD model */
-void ScatterAction::string_excitation_inter() {
+void ScatterAction::string_excitation_inter(int subprocess) {
   assert(incoming_particles_.size() == 2);
   const auto &log = logger<LogArea::Pythia>();
   // Disable doubleing point exception trap for Pythia
@@ -709,11 +726,8 @@ void ScatterAction::string_excitation_inter() {
     /* parametrization to fit the experimental data */
     if (sqrts < 4.) {
       sigQperp = 0.5;
-    } else if ((sqrts >= 4.) && (sqrts < 100.)) {
-      sigQperp = 0.5 + 0.2 * std::log(sqrts / 4.) / std::log(5.);
     } else {
-      sigQperp = 0.5 + 0.2 * std::log(25.) / std::log(5.) +
-                 0.4 * std::log(sqrts / 100.) / std::log(5.);
+      sigQperp = 0.5 + 0.2 * std::log(sqrts / 4.) / std::log(5.);
     }
     /* initialize the spmerge object */
     spmerge->set_sigmaQperp(sigQperp);
@@ -722,7 +736,16 @@ void ScatterAction::string_excitation_inter() {
         spmerge->init_lab(idAin, idBin, massAin, massBin, phadAin, phadBin);
     /* implement collision */
     while ((isinit == true) && (isnext == false)) {
-      isnext = spmerge->next_Inel();
+      if( subprocess == 1 ) {
+        isnext = next_SDiff_AX();
+      } else if( subprocess == 2 ) {
+        isnext = next_SDiff_XB();
+      } else if( subprocess == 3 ) {
+        isnext = next_DDiff_XX();
+      } else if( subprocess == 4 ) {
+        isnext = next_NDiff();
+      } else {
+      }
     }
     int npart = spmerge->final_PDGid[0].size();
     ParticleList new_intermediate_particles;

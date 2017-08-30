@@ -30,6 +30,7 @@
 using namespace Pythia8;
 extern Pythia *pythia;
 extern SPmerge *spmerge;
+extern SigmaTotal pythia_sigmaTot;
 
 namespace Smash {
 
@@ -456,6 +457,7 @@ int main(int argc, char *argv[]) {
     pythia->readString("Beams:idB = 2212");
     pythia->readString("Beams:eCM = 10.");
     pythia->init();
+    pythia_sigmaTot.init(&pythia->info, pythia->settings, &pythia->particleData);
     // setup spmerge
     gsl_rng_env_setup();
     Type = gsl_rng_default;

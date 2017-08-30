@@ -246,10 +246,10 @@ SPmerge::SPmerge() {
     }
   }
 
-  XSecSummed = static_cast<double *>(malloc(5 * sizeof(double)));
-  for (iproc = 0; iproc < 5; iproc++) {
-    XSecSummed[iproc] = 0.;
-  }
+  //XSecSummed = static_cast<double *>(malloc(5 * sizeof(double)));
+  //for (iproc = 0; iproc < 5; iproc++) {
+  //  XSecSummed[iproc] = 0.;
+  //}
 
   PDGidA = PDGidB = 0;
   baryonA = baryonB = 0;
@@ -298,7 +298,7 @@ SPmerge::~SPmerge() {
   }
   free(evecBasisAB);
 
-  free(XSecSummed);
+  //free(XSecSummed);
 
   delete lorentz;
 
@@ -310,7 +310,7 @@ SPmerge::~SPmerge() {
 void SPmerge::set_pythia(Pythia *pythiaIn) {
   pythia = pythiaIn;
 
-  sigmaTot.init(&pythia->info, pythia->settings, &pythia->particleData);
+  //sigmaTot.init(&pythia->info, pythia->settings, &pythia->particleData);
 }
 
 void SPmerge::reset_finalArray() {
@@ -812,22 +812,23 @@ bool SPmerge::init_lab(int idAIn, int idBIn, double massAIn, double massBIn,
   pyINI = plabA[2] + plabB[2];
   pzINI = plabA[3] + plabB[3];
 
-  ret = sigmaTot.calc(PDGidA, PDGidB, sqrtsAB);
-  XSecTot = sigmaTot.sigmaTot();
-  XSecEl = sigmaTot.sigmaEl();
-  XSecAX = sigmaTot.sigmaAX();
-  XSecXB = sigmaTot.sigmaXB();
-  XSecXX = sigmaTot.sigmaXX();
-  XSecAXB = sigmaTot.sigmaAXB();
-  XSecInel = XSecTot - XSecEl;
-  XSecND = XSecInel - XSecAX - XSecXB - XSecXX;
+  //ret = sigmaTot.calc(PDGidA, PDGidB, sqrtsAB);
+  //XSecTot = sigmaTot.sigmaTot();
+  //XSecEl = sigmaTot.sigmaEl();
+  //XSecAX = sigmaTot.sigmaAX();
+  //XSecXB = sigmaTot.sigmaXB();
+  //XSecXX = sigmaTot.sigmaXX();
+  //XSecAXB = sigmaTot.sigmaAXB();
+  //XSecInel = XSecTot - XSecEl;
+  //XSecND = XSecInel - XSecAX - XSecXB - XSecXX;
 
-  XSecSummed[0] = 0.;
-  XSecSummed[1] = XSecAX;
-  XSecSummed[2] = XSecSummed[1] + XSecXB;
-  XSecSummed[3] = XSecSummed[2] + XSecXX;
-  XSecSummed[4] = XSecSummed[3] + XSecND;
+  //XSecSummed[0] = 0.;
+  //XSecSummed[1] = XSecAX;
+  //XSecSummed[2] = XSecSummed[1] + XSecXB;
+  //XSecSummed[3] = XSecSummed[2] + XSecXX;
+  //XSecSummed[4] = XSecSummed[3] + XSecND;
 
+  ret = true;
   return ret;
 }
 
@@ -918,25 +919,27 @@ bool SPmerge::init_com(int idAIn, int idBIn, double massAIn, double massBIn,
   pyINI = plabA[2] + plabB[2];
   pzINI = plabA[3] + plabB[3];
 
-  ret = sigmaTot.calc(PDGidA, PDGidB, sqrtsAB);
-  XSecTot = sigmaTot.sigmaTot();
-  XSecEl = sigmaTot.sigmaEl();
-  XSecAX = sigmaTot.sigmaAX();
-  XSecXB = sigmaTot.sigmaXB();
-  XSecXX = sigmaTot.sigmaXX();
-  XSecAXB = sigmaTot.sigmaAXB();
-  XSecInel = XSecTot - XSecEl;
-  XSecND = XSecInel - XSecAX - XSecXB - XSecXX;
+  //ret = sigmaTot.calc(PDGidA, PDGidB, sqrtsAB);
+  //XSecTot = sigmaTot.sigmaTot();
+  //XSecEl = sigmaTot.sigmaEl();
+  //XSecAX = sigmaTot.sigmaAX();
+  //XSecXB = sigmaTot.sigmaXB();
+  //XSecXX = sigmaTot.sigmaXX();
+  //XSecAXB = sigmaTot.sigmaAXB();
+  //XSecInel = XSecTot - XSecEl;
+  //XSecND = XSecInel - XSecAX - XSecXB - XSecXX;
 
-  XSecSummed[0] = 0.;
-  XSecSummed[1] = XSecAX;
-  XSecSummed[2] = XSecSummed[1] + XSecXB;
-  XSecSummed[3] = XSecSummed[2] + XSecXX;
-  XSecSummed[4] = XSecSummed[3] + XSecND;
+  //XSecSummed[0] = 0.;
+  //XSecSummed[1] = XSecAX;
+  //XSecSummed[2] = XSecSummed[1] + XSecXB;
+  //XSecSummed[3] = XSecSummed[2] + XSecXX;
+  //XSecSummed[4] = XSecSummed[3] + XSecND;
 
+  ret = true;
   return ret;
 }
 
+/*
 bool SPmerge::next_Inel() {
   bool ret;
 
@@ -956,6 +959,7 @@ bool SPmerge::next_Inel() {
 
   return ret;
 }
+*/
 
 // single diffractive AB > AX
 bool SPmerge::next_SDiff_AX() {

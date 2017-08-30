@@ -69,9 +69,9 @@ class SPmerge {
   Lorentz *lorentz;
   Pythia *pythia;
 
-  double XSecTot, XSecEl, XSecInel, XSecAX, XSecXB, XSecXX, XSecAXB, XSecND;
-  double *XSecSummed;
-  SigmaTotal sigmaTot;
+  //double XSecTot, XSecEl, XSecInel, XSecAX, XSecXB, XSecXX, XSecAXB, XSecND;
+  //double *XSecSummed;
+  //SigmaTotal sigmaTot;
 
  public:
   SPmerge();
@@ -113,21 +113,21 @@ class SPmerge {
   bool init_com(int idAIn, int idBIn, double massAIn, double massBIn,
                 double sqrtsABIn);
 
-  bool next_Inel();
+  //bool next_Inel();
   bool next_SDiff_AX();  // single-diffractive : A + B -> A + X
   bool next_SDiff_XB();  // single-diffractive : A + B -> X + B
   bool next_DDiff_XX();  // double-diffractive : A + B -> X + X
   bool next_NDiff();     // non-diffractive
   // bool next_BBbarAnn(); // baryon-antibaryon annihilation
 
-  double get_XSecTot() { return XSecTot; }
-  double get_XSecEl() { return XSecEl; }
-  double get_XSecInel() { return XSecInel; }
-  double get_XSecAX() { return XSecAX; }
-  double get_XSecXB() { return XSecXB; }
-  double get_XSecXX() { return XSecXX; }
-  double get_XSecAXB() { return XSecAXB; }
-  double get_XSecND() { return XSecND; }
+  //double get_XSecTot() { return XSecTot; }
+  //double get_XSecEl() { return XSecEl; }
+  //double get_XSecInel() { return XSecInel; }
+  //double get_XSecAX() { return XSecAX; }
+  //double get_XSecXB() { return XSecXB; }
+  //double get_XSecXX() { return XSecXX; }
+  //double get_XSecAXB() { return XSecAXB; }
+  //double get_XSecND() { return XSecND; }
 
   void reset_finalArray();
   int append_finalArray(double *uString, double *evecLong);

@@ -298,7 +298,7 @@ class ScatterAction : public Action {
   void string_excitation();
 
   /** Perform the UrQMD-based string excitation and decay */
-  void string_excitation_inter();
+  void string_excitation_inter(int subprocess);
 
   /**
    * \ingroup logging
