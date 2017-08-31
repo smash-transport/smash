@@ -214,8 +214,22 @@ class ScatterAction : public Action {
    * explicitly implemented channels at low energy (elastic, resonance
    * excitation, etc). This method has to be called after all other processes
    * have been added to the Action object.
+   *
+   * create a cross section for PYTHIA event generation
    */
   virtual CollisionBranchPtr string_excitation_cross_section();
+
+  /**
+   * Determine the cross section for string excitations, which is given by the
+   * difference between the parametrized total cross section and all the
+   * explicitly implemented channels at low energy (elastic, resonance
+   * excitation, etc). This method has to be called after all other processes
+   * have been added to the Action object.
+   *
+   * create a list of subprocesses (single-diffractive,
+   * double-diffractive and non-diffractive) and their cross sections.
+   */
+  virtual CollisionBranchList string_excitation_cross_sections();
 
   /**
   * Find all resonances that can be produced in a 2->1 collision of the two

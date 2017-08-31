@@ -183,7 +183,8 @@ void ScatterAction::add_all_processes(double elastic_parameter, bool two_to_one,
     add_collision(elastic_cross_section(elastic_parameter));
   }
   if (is_pythia) {
-    add_collision(string_excitation_cross_section());
+    //add_collision(string_excitation_cross_section());
+    add_collisions(string_excitation_cross_sections());
   } else {
     if (two_to_one) {
       /* resonance formation (2->1) */
@@ -342,6 +343,57 @@ CollisionBranchPtr ScatterAction::string_excitation_cross_section() {
       std::max(0., high_energy_cross_section() - elastic_parametrization());
   log.debug("String cross section is: ", sig_string);
   return make_unique<CollisionBranch>(sig_string, ProcessType::String);
+}
+
+CollisionBranchList string_excitation_cross_sections() {
+  const auto &log = logger<LogArea::ScatterAction>();
+  CollisionBranchList channel_list;
+  /* Calculate string-excitation cross section:
+   * Parametrized total minus all other present channels. */
+  double sig_string_all =
+      std::max(0., high_energy_cross_section() - elastic_parametrization());
+  int pdgidA = incoming_particles_[0].type().pdgcode().get_decimal();
+  int pdgidB = incoming_particles_[1].type().pdgcode().get_decimal();
+  if ( pdgidA > 0 ) pdgidA = pdgidA%10000;
+  else pdgidA = - ( std::abs(pdgidA)%10000 );
+  if ( pdgidB > 0 ) pdgidB = pdgidB%10000;
+  else pdgidB = - ( std::abs(pdgidB)%10000 );
+  int idAbsA = std::abs(pdgidA);
+  int idAbsB = std::abs(pdgidB);
+  int idModA = (idAbsA > 1000) ? idAbsA : 10 * (idAbsA/10) + 3;
+  int idModB = (idAbsB > 1000) ? idAbsB : 10 * (idAbsB/10) + 3;
+  double sqrts = sqrt_s();
+  double sqrts_threshold = pythia->particleData.m0(idModA)
+      + pythia->particleData.m0(idModB) + 2.*(1. + 1.0e-6);
+  /* Compute the parametrized cross sections of relevant subprocesses. */
+  double sig_sd_AX, sig_sd_XB, sig_dd_XX, sig_nd;
+  if( sqrts > sqrts_threshold ) pythia_sigmaTot.calc(pdgidA, pdgidB, sqrts);
+  else pythia_sigmaTot.calc(pdgidA, pdgidB, sqrts_threshold);
+  double sig_sd_all = pythia_sigmaTot.sigmaAX() + pythia_sigmaTot.sigmaXB();
+  double sig_diff = sig_sd_all + pythia_sigmaTot.sigmaXX();
+  sig_nd = std::max( 0., sig_string_all - sig_diff );
+  sig_diff = sig_string_all - sig_nd;
+  sig_dd_XX = std::max( 0., sig_diff - sig_sd_all );
+  sig_sd_AX = ( sig_diff - sig_dd_XX )*pythia_sigmaTot.sigmaAX()/sig_sd_all;
+  sig_sd_XB = ( sig_diff - sig_dd_XX )*pythia_sigmaTot.sigmaXB()/sig_sd_all;
+  log.debug("String cross section (single-diffractive AB->AX) is: ", sig_sd_AX);
+  log.debug("String cross section (single-diffractive AB->XB) is: ", sig_sd_XB);
+  log.debug("String cross section (double-diffractive AB->XX) is: ", sig_dd_XX);
+  log.debug("String cross section (non-diffractive) is: ", sig_nd);
+  /* fill the list of process channels */
+  channel_list.push_back(make_unique<CollisionBranch>(
+      incoming_particles_[0].type(), incoming_particles_[1].type(),
+      sig_sd_AX, ProcessType::StringSDiffAX);
+  channel_list.push_back(make_unique<CollisionBranch>(
+      incoming_particles_[0].type(), incoming_particles_[1].type(),
+      sig_sd_XB, ProcessType::StringSDiffXB);
+  channel_list.push_back(make_unique<CollisionBranch>(
+      incoming_particles_[0].type(), incoming_particles_[1].type(),
+      sig_dd_XX, ProcessType::StringDDiffXX);
+  channel_list.push_back(make_unique<CollisionBranch>(
+      incoming_particles_[0].type(), incoming_particles_[1].type(),
+      sig_nd, ProcessType::StringNDiff);
+  return channel_list;
 }
 
 double ScatterAction::two_to_one_formation(const ParticleType &type_resonance,
