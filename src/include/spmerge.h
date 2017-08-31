@@ -118,7 +118,7 @@ class SPmerge {
   bool next_SDiff_XB();  // single-diffractive : A + B -> X + B
   bool next_DDiff_XX();  // double-diffractive : A + B -> X + X
   bool next_NDiff();     // non-diffractive
-  // bool next_BBbarAnn(); // baryon-antibaryon annihilation
+  bool next_BBbarAnn(); // baryon-antibaryon annihilation
 
   //double get_XSecTot() { return XSecTot; }
   //double get_XSecEl() { return XSecEl; }

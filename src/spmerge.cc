@@ -1810,69 +1810,199 @@ bool SPmerge::next_NDiff() {
   return ret;
 }
 
-/*
 // baryon-antibaryon annihilation
-bool SPmerge::next_BBarAnn(){
-        bool ret, conserved;
-        bool ranrot = false;
+bool SPmerge::next_BBbarAnn(){
+	bool ret, conserved;
 
-        int idq11, idq12;
-        int idq21, idq22;
-        double Mstring1, Mstring2;
-        double mstringMin;
+	int imu;
+	int ntry;
+	bool isBBbarpair, isAnnihilating;
 
-        reset_finalArray();
+	int ic, jc;
+	int ijc, ipr, npr;
+	double rflip;
+	vector<int> *indexAnn;
 
-        // if it is baryon-antibaryon pair
-        if( (baryonA == 3) && (baryonB == -3) ){ // if it is
+	int idq11, idq12, idq12prev;
+	int idq21, idq22, idq22prev;
+	int nfrag1, nfrag2;
+	double mstr1, mstr2;
+	double mstr1Min, mstr2Min;
 
-                ret = true;
+	double *ustr1lab;
+	double *ustr2lab;
 
-                //PDGid2idqset(PDGidA, idqsetA);
-                //PDGid2idqset(PDGidB, idqsetB);
+	double pabs;
+	double *evec;
 
-                mstringMin = pythia->particleData.m0(idq11) +
-pythia->particleData.m0(idq12);
-                Mstring1 = 0.5*sqrtsAB;
+	ustr1lab = static_cast<double *>( malloc(4*sizeof(double)) );
+	ustr2lab = static_cast<double *>( malloc(4*sizeof(double)) );
+	for(imu = 0; imu < 4; imu++){
+		ustr1lab[imu] = ucomAB[imu];
+		ustr2lab[imu] = ucomAB[imu];
+	}
 
-                if(Mstring1 < mstringMin){
-                        fprintf(stderr,"  SPmerge::next_BBarAnn failure :
-Mstring1 < mstringMin.\n");
-                        ret = false;
-                }
+	indexAnn = new vector<int>;
+	indexAnn->resize(0);
 
-                mstringMin = pythia->particleData.m0(idq21) +
-pythia->particleData.m0(idq22);
-                Mstring2 = 0.5*sqrtsAB;
+	reset_finalArray();
 
-                if(Mstring2 < mstringMin){
-                        fprintf(stderr,"  SPmerge::next_BBarAnn failure :
-Mstring2 < mstringMin.\n");
-                        ret = false;
-                }
+	isBBbarpair = ( (baryonA == 3) && (baryonB == -3) ) || ( (baryonA == -3) && (baryonB == 3) );
+	isAnnihilating = false;
 
-                if(ret == true){
-                        NpartString1 = fragmentString(idq11, idq12, Mstring1,
-NULL, ranrot);
-                        NpartString2 = fragmentString(idq21, idq22, Mstring2,
-NULL, ranrot);
-                }
+	// if it is baryon-antibaryon pair
+	if( isBBbarpair == true ){ // if it is
 
-        }
-        else{ // if it is not
-                fprintf(stderr,"  SPmerge::next_BBarAnn failure : it is not
-BBbar pair.\n");
-                ret = false;
-        }
-        // endif baryon-antibaryon pair
+		//PDGid2idqset(PDGidA, idqsetA);
+		//PDGid2idqset(PDGidB, idqsetB);
 
-        if( ret == true ){
-                conserved = check_conservation();
-                ret = ret && conserved;
-        }
-        return ret;
+		mstr1 = 0.5*sqrtsAB;
+		mstr2 = 0.5*sqrtsAB;
+
+		for(ic = 1; ic <= 3; ic++){
+			for(jc = 1; jc <= 3; jc++){
+				if( idqsetA[ic] == -idqsetB[jc] ){
+					ijc = ic*10 + jc;
+					indexAnn->push_back( ijc );
+				}
+			}
+		}
+		npr = indexAnn->size();
+		fprintf(stderr,"  SPmerge::next_BBarAnn : %d possible pairs for qqbar annihilation\n", npr);
+		/* if it is a BBbar pair but there is no qqbar pair to annihilate,
+		 * nothing happens */
+		if( npr == 0 ){
+			NpartString1 = 1;
+			final_PDGid[0].push_back(PDGidA);
+			final_PDGid[1].push_back(1);
+			final_pvec[0].push_back(plabA[0]);
+			final_pvec[1].push_back(plabA[1]);
+			final_pvec[2].push_back(plabA[2]);
+			final_pvec[3].push_back(plabA[3]);
+			final_pvec[4].push_back(massA);
+			final_tform[0].push_back(0.);
+			final_tform[1].push_back(1.);
+
+			NpartString2 = 1;
+			final_PDGid[0].push_back(PDGidB);
+			final_PDGid[1].push_back(1);
+			final_pvec[0].push_back(plabB[0]);
+			final_pvec[1].push_back(plabB[1]);
+			final_pvec[2].push_back(plabB[2]);
+			final_pvec[3].push_back(plabB[3]);
+			final_pvec[4].push_back(massB);
+			final_tform[0].push_back(0.);
+			final_tform[1].push_back(1.);
+
+			isAnnihilating = false;
+
+			NpartFinal = NpartString1 + NpartString2;
+			ret = true;
+		}// endif no qqbar pair to annihilate
+
+		ntry = 0;
+		while( ( npr > 0 ) && ( isAnnihilating == false ) && ( ntry < 100 ) ){
+			ntry = ntry + 1;
+
+			// randomly choose a qqbar pair to annihilate
+			ipr = static_cast<int>( floor( gsl_rng_uniform(rng)*static_cast<double>(npr) ) );
+			ijc = indexAnn->at(ipr);
+			ic = ( ijc - (ijc%10) )/10;
+			jc = ijc%10;
+			fprintf(stderr,"  SPmerge::next_BBarAnn : ic = %d, jc = %d chosen\n", ic, jc);
+			// make two qqbar pairs to excite strings
+			if( (baryonA == 3) && (baryonB == -3) ){
+				idq11 = idqsetA[1 + ic%3];
+				idq12 = idqsetB[1 + jc%3];
+				idq21 = idqsetA[1 + (ic + 1)%3];
+				idq22 = idqsetB[1 + (jc + 1)%3];
+			}
+			else if( (baryonA == -3) && (baryonB == 3) ){
+				idq11 = idqsetB[1 + jc%3];
+				idq12 = idqsetA[1 + ic%3];
+				idq21 = idqsetB[1 + (jc + 1)%3];
+				idq22 = idqsetA[1 + (ic + 1)%3];
+			}
+			// randomly choose if we flip the antiquark contents
+			rflip = gsl_rng_uniform(rng);
+			if( rflip > 0.5 ){
+				idq12prev = idq12;
+				idq22prev = idq22;
+				idq12 = idq22prev;
+				idq22 = idq12prev;
+			}
+			fprintf(stderr,"  SPmerge::next_BBarAnn : string 1 with %d, %d\n", idq11, idq12);
+			fprintf(stderr,"  SPmerge::next_BBarAnn : string 2 with %d, %d\n", idq21, idq22);
+
+			mstr1Min = pythia->particleData.m0(idq11) + pythia->particleData.m0(idq12);
+			mstr2Min = pythia->particleData.m0(idq21) + pythia->particleData.m0(idq22);
+			isAnnihilating = ( mstr1 > mstr1Min ) && ( mstr2 > mstr2Min );
+		}
+	}
+	else{ // if it is not
+		fprintf(stderr,"  SPmerge::next_BBarAnn failure : it is not BBbar pair.\n");
+		isAnnihilating = false;
+	}
+	// endif baryon-antibaryon pair
+
+	// implement collision in the case of annihilating BBbar pair
+	if( isAnnihilating == true ){
+		ret = false;
+
+		evec = static_cast<double *>( malloc(4*sizeof(double)) );
+
+		// string 1
+		pabs = sqrt( pow(fabs(pcomA[1]),2.) + pow(fabs(pcomA[2]),2.) + pow(fabs(pcomA[3]),2.) );
+		evec[0] = 0.;
+		for(imu = 1; imu < 4; imu++){
+			evec[imu] = pcomA[imu]/pabs;
+		}
+		nfrag1 = fragmentString(idq11, idq12, mstr1, evec, false);
+		if( nfrag1 > 0 ){
+			NpartString1 = append_finalArray(ustr1lab, evec);
+		}
+		else{
+			nfrag1 = 0;
+			NpartString1 = 0;
+			ret = false;
+		}
+
+		// string 2
+		pabs = sqrt( pow(fabs(pcomB[1]),2.) + pow(fabs(pcomB[2]),2.) + pow(fabs(pcomB[3]),2.) );
+		evec[0] = 0.;
+		for(imu = 1; imu < 4; imu++){
+			evec[imu] = pcomB[imu]/pabs;
+		}
+		nfrag2 = fragmentString(idq21, idq22, mstr2, evec, false);
+		if( nfrag2 > 0 ){
+			NpartString2 = append_finalArray(ustr2lab, evec);
+		}
+		else{
+			nfrag2 = 0;
+			NpartString2 = 0;
+			ret = false;
+		}
+
+		if( ( NpartString1 > 0 ) && ( NpartString2 > 0 )
+			&& ( nfrag1 == NpartString1 ) && ( nfrag2 == NpartString2 ) ){
+			NpartFinal = NpartString1 + NpartString2;
+			ret = true;
+		}
+
+		free(evec);
+	}
+
+	free(ustr1lab);
+	free(ustr2lab);
+
+	delete indexAnn;
+
+	if( ret == true ){
+		conserved = check_conservation();
+		ret = ret && conserved;
+	}
+	return ret;
 }
-*/
 
 void SPmerge::PDGid2idqset(int pdgid, int *idqset) {
   int ic;
