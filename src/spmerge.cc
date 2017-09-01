@@ -220,7 +220,7 @@ void Lorentz::TransRotation2(int dim, double phi, double **Tin, double **Tout) {
 
 // constructor
 SPmerge::SPmerge() {
-  int ic, imu, inu, iproc;
+  int ic, imu, inu;
   idqsetA = static_cast<int *>(malloc(4 * sizeof(int)));
   idqsetB = static_cast<int *>(malloc(4 * sizeof(int)));
   for (ic = 0; ic < 4; ic++) {

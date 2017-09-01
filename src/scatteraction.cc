@@ -345,7 +345,7 @@ CollisionBranchPtr ScatterAction::string_excitation_cross_section() {
   return make_unique<CollisionBranch>(sig_string, ProcessType::String);
 }
 
-CollisionBranchList string_excitation_cross_sections() {
+CollisionBranchList ScatterAction::string_excitation_cross_sections() {
   const auto &log = logger<LogArea::ScatterAction>();
   CollisionBranchList channel_list;
   /* Calculate string-excitation cross section:
@@ -383,16 +383,16 @@ CollisionBranchList string_excitation_cross_sections() {
   /* fill the list of process channels */
   channel_list.push_back(make_unique<CollisionBranch>(
       incoming_particles_[0].type(), incoming_particles_[1].type(),
-      sig_sd_AX, ProcessType::StringSDiffAX);
+      sig_sd_AX, ProcessType::StringSDiffAX));
   channel_list.push_back(make_unique<CollisionBranch>(
       incoming_particles_[0].type(), incoming_particles_[1].type(),
-      sig_sd_XB, ProcessType::StringSDiffXB);
+      sig_sd_XB, ProcessType::StringSDiffXB));
   channel_list.push_back(make_unique<CollisionBranch>(
       incoming_particles_[0].type(), incoming_particles_[1].type(),
-      sig_dd_XX, ProcessType::StringDDiffXX);
+      sig_dd_XX, ProcessType::StringDDiffXX));
   channel_list.push_back(make_unique<CollisionBranch>(
       incoming_particles_[0].type(), incoming_particles_[1].type(),
-      sig_nd, ProcessType::StringNDiff);
+      sig_nd, ProcessType::StringNDiff));
   return channel_list;
 }
 
@@ -789,13 +789,13 @@ void ScatterAction::string_excitation_inter(int subprocess) {
     /* implement collision */
     while ((isinit == true) && (isnext == false)) {
       if( subprocess == 1 ) {
-        isnext = next_SDiff_AX();
+        isnext = spmerge->next_SDiff_AX();
       } else if( subprocess == 2 ) {
-        isnext = next_SDiff_XB();
+        isnext = spmerge->next_SDiff_XB();
       } else if( subprocess == 3 ) {
-        isnext = next_DDiff_XX();
+        isnext = spmerge->next_DDiff_XX();
       } else if( subprocess == 4 ) {
-        isnext = next_NDiff();
+        isnext = spmerge->next_NDiff();
       } else {
       }
     }
