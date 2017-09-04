@@ -6,7 +6,8 @@
 #include <vector>
 #include "Pythia8/Pythia.h"
 
-using namespace Pythia8;
+//using namespace Pythia8;
+using namespace std;
 
 namespace Smash {
 
@@ -67,7 +68,7 @@ class StringProcess {
   double pzINI, pzFIN;
 
   Lorentz *lorentz;
-  Pythia *pythia;
+  Pythia8::Pythia *pythia;
 
   //double XSecTot, XSecEl, XSecInel, XSecAX, XSecXB, XSecXX, XSecAXB, XSecND;
   //double *XSecSummed;
@@ -91,7 +92,7 @@ class StringProcess {
   // final_tform[0] : formation time (fm)
   // final_tform[1] : suppression factor for the cross section (xtotfac)
 
-  void set_pythia(Pythia *pythiaIn);
+  void set_pythia(Pythia8::Pythia *pythiaIn);
 
   void set_pLightConeMin(double pLightConeMinIn) {
     pLightConeMin = pLightConeMinIn;
@@ -107,7 +108,7 @@ class StringProcess {
   void set_kappaString(double kappaStringIn) { kappaString = kappaStringIn; }
 
   bool init_lab(int idAIn, int idBIn, double massAIn, double massBIn,
-                Vec4 pvecAIn, Vec4 pvecBIn);
+                Pythia8::Vec4 pvecAIn, Pythia8::Vec4 pvecBIn);
   bool init_com(int idAIn, int idBIn, double massAIn, double massBIn,
                 double sqrtsABIn);
 

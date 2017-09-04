@@ -21,13 +21,14 @@
 #include "include/pdgcode.h"
 #include "include/random.h"
 
-using namespace Pythia8;
+//using namespace Pythia8;
+
+Pythia8::Pythia *pythia;
+Pythia8::SigmaTotal pythia_sigmaTot;
 
 namespace Smash {
 
-Pythia *pythia;
 StringProcess *string_process;
-SigmaTotal pythia_sigmaTot;
 
 ScatterAction::ScatterAction(const ParticleData &in_part_a,
                              const ParticleData &in_part_b, double time,
@@ -755,7 +756,7 @@ void ScatterAction::string_excitation_inter(int subprocess) {
 
     int idAin, idBin;
     double massAin, massBin;
-    Vec4 phadAin, phadBin;
+    Pythia8::Vec4 phadAin, phadBin;
     /* setup particle A ( incoming[0] ) */
     idAin = incoming_particles_[0].type().pdgcode().get_decimal();
     phadAin.e(incoming_particles_[0].momentum().x0());

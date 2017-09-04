@@ -27,13 +27,14 @@
 #include "Pythia8/Pythia.h"
 #include "include/stringprocess.h"
 
-using namespace Pythia8;
+//using namespace Pythia8;
+
+extern Pythia8::Pythia *pythia;
+extern Pythia8::SigmaTotal pythia_sigmaTot;
 
 namespace Smash {
 
-extern Pythia *pythia;
 extern StringProcess *string_process;
-extern SigmaTotal pythia_sigmaTot;
 
 namespace {
 /** prints usage information and exits the program
@@ -436,7 +437,7 @@ int main(int argc, char *argv[]) {
     ParticleType::check_consistency();
 
     // create Pythia and string_process (UrQMD-based string excitation) objects
-    pythia = new Pythia(PYTHIA_XML_DIR, false);
+    pythia = new Pythia8::Pythia(PYTHIA_XML_DIR, false);
     string_process = new StringProcess();
     // setup and initialize pythia for string_process
     /* select only inelastic events: */

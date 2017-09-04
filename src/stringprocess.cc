@@ -310,7 +310,7 @@ StringProcess::~StringProcess() {
   delete[] final_tform;
 }
 
-void StringProcess::set_pythia(Pythia *pythiaIn) {
+void StringProcess::set_pythia(Pythia8::Pythia *pythiaIn) {
   pythia = pythiaIn;
 
   //sigmaTot.init(&pythia->info, pythia->settings, &pythia->particleData);
@@ -689,7 +689,7 @@ bool StringProcess::check_conservation() {
 }
 
 bool StringProcess::init_lab(int idAIn, int idBIn, double massAIn, double massBIn,
-                       Vec4 plabAIn, Vec4 plabBIn) {
+                       Pythia8::Vec4 plabAIn, Pythia8::Vec4 plabBIn) {
   bool ret;
   int imu, inu;
 
@@ -2134,7 +2134,7 @@ int StringProcess::fragmentString(int idq1, int idq2, double mString,
   double m1, m2;
   double phi, theta;
   double rswap;
-  Vec4 pquark;
+  Pythia8::Vec4 pquark;
 
   double *p3vec;
   double *pvRS;
