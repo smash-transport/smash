@@ -22,11 +22,12 @@
 #include "include/random.h"
 
 using namespace Pythia8;
+
+namespace Smash {
+
 Pythia *pythia;
 StringProcess *string_process;
 SigmaTotal pythia_sigmaTot;
-
-namespace Smash {
 
 ScatterAction::ScatterAction(const ParticleData &in_part_a,
                              const ParticleData &in_part_b, double time,

@@ -28,11 +28,12 @@
 #include "include/stringprocess.h"
 
 using namespace Pythia8;
+
+namespace Smash {
+
 extern Pythia *pythia;
 extern StringProcess *string_process;
 extern SigmaTotal pythia_sigmaTot;
-
-namespace Smash {
 
 namespace {
 /** prints usage information and exits the program
@@ -435,8 +436,6 @@ int main(int argc, char *argv[]) {
     ParticleType::check_consistency();
 
     // create Pythia and string_process (UrQMD-based string excitation) objects
-    const gsl_rng_type *Type;
-    gsl_rng *rng;
     pythia = new Pythia(PYTHIA_XML_DIR, false);
     string_process = new StringProcess();
     // setup and initialize pythia for string_process
@@ -459,12 +458,6 @@ int main(int argc, char *argv[]) {
     pythia->init();
     pythia_sigmaTot.init(&pythia->info, pythia->settings, &pythia->particleData);
     // setup string_process
-    gsl_rng_env_setup();
-    Type = gsl_rng_default;
-    rng = gsl_rng_alloc(Type);
-    gsl_rng_set(rng, seed);
-    string_process->set_gsl_rng_type(Type);
-    string_process->set_gsl_rng(rng);
     string_process->set_pythia(pythia);
 
     // create an experiment

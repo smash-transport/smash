@@ -8,6 +8,8 @@
 
 using namespace Pythia8;
 
+namespace Smash {
+
 class Lorentz {
  private:
   double **Lambda;
@@ -64,8 +66,6 @@ class StringProcess {
   double pyINI, pyFIN;
   double pzINI, pzFIN;
 
-  const gsl_rng_type *Type;
-  gsl_rng *rng;
   Lorentz *lorentz;
   Pythia *pythia;
 
@@ -91,8 +91,6 @@ class StringProcess {
   // final_tform[0] : formation time (fm)
   // final_tform[1] : suppression factor for the cross section (xtotfac)
 
-  void set_gsl_rng_type(const gsl_rng_type *TypeIn) { Type = TypeIn; }
-  void set_gsl_rng(gsl_rng *rngIn) { rng = rngIn; }
   void set_pythia(Pythia *pythiaIn);
 
   void set_pLightConeMin(double pLightConeMinIn) {
@@ -142,5 +140,7 @@ class StringProcess {
   double sample_XVDIS(double xmin, double alpha, double beta);
   double sample_Qperp(double sigQ);
 };
+
+}  // namespace Smash
 
 #endif

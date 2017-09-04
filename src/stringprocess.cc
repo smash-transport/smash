@@ -1,8 +1,11 @@
 #include "include/stringprocess.h"
+#include "include/random.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+namespace Smash {
 
 // constructor
 Lorentz::Lorentz() {}
@@ -944,7 +947,7 @@ bool StringProcess::next_Inel() {
   bool ret;
 
   double rproc;
-  rproc = XSecInel * gsl_rng_uniform(rng);
+  rproc = XSecInel * Random::uniform(0., 1.);
   if ((rproc > XSecSummed[0]) && (rproc <= XSecSummed[1])) {
     ret = next_SDiff_AX();
   } else if ((rproc > XSecSummed[1]) && (rproc <= XSecSummed[2])) {
@@ -1021,11 +1024,11 @@ bool StringProcess::next_SDiff_AX() {
     makeStringEnds(idqsetB, &idqX1, &idqX2);
 
     QTrn = sample_Qperp(sigmaQperp);
-    phiQ = 2. * M_PI * gsl_rng_uniform(rng);
+    phiQ = 2. * M_PI * Random::uniform(0., 1.);
     // fprintf(stderr,"  StringProcess::next_SDiff_AX : QTrn = %e GeV, phiQ = %e\n",
     // QTrn, phiQ);
 
-    rmass = log(mstrMax / mstrMin) * gsl_rng_uniform(rng);
+    rmass = log(mstrMax / mstrMin) * Random::uniform(0., 1.);
     massX = mstrMin * exp(rmass);
     pabscomAX = sqrt((pow(fabs(sqrtsAB), 2.) - pow(fabs(massA + massX), 2.)) *
                      (pow(fabs(sqrtsAB), 2.) - pow(fabs(massA - massX), 2.))) /
@@ -1193,11 +1196,11 @@ bool StringProcess::next_SDiff_XB() {
     makeStringEnds(idqsetA, &idqX1, &idqX2);
 
     QTrn = sample_Qperp(sigmaQperp);
-    phiQ = 2. * M_PI * gsl_rng_uniform(rng);
+    phiQ = 2. * M_PI * Random::uniform(0., 1.);
     // fprintf(stderr,"  StringProcess::next_SDiff_XB : QTrn = %e GeV, phiQ = %e\n",
     // QTrn, phiQ);
 
-    rmass = log(mstrMax / mstrMin) * gsl_rng_uniform(rng);
+    rmass = log(mstrMax / mstrMin) * Random::uniform(0., 1.);
     massX = mstrMin * exp(rmass);
     pabscomXB = sqrt((pow(fabs(sqrtsAB), 2.) - pow(fabs(massB + massX), 2.)) *
                      (pow(fabs(sqrtsAB), 2.) - pow(fabs(massB - massX), 2.))) /
@@ -1377,7 +1380,7 @@ bool StringProcess::next_DDiff_XX() {
     xfracA = sample_XSDIS(xfracMin, betapowS);
     xfracB = sample_XSDIS(xfracMin, betapowS);
     QTrn = sample_Qperp(sigmaQperp);
-    phiQ = 2. * M_PI * gsl_rng_uniform(rng);
+    phiQ = 2. * M_PI * Random::uniform(0., 1.);
     // fprintf(stderr,"  StringProcess::next_DDiff : xfracA = %e, xfracB = %e\n",
     // xfracA, xfracB);
     // fprintf(stderr,"  StringProcess::next_DDiff : QTrn = %e GeV, phiQ = %e\n",
@@ -1659,7 +1662,7 @@ bool StringProcess::next_NDiff() {
     xfracA = sample_XVDIS(xfracMin, alphapowV, betapowV);
     xfracB = sample_XVDIS(xfracMin, alphapowV, betapowV);
     QTrn = sample_Qperp(sigmaQperp);
-    phiQ = 2. * M_PI * gsl_rng_uniform(rng);
+    phiQ = 2. * M_PI * Random::uniform(0., 1.);
     // fprintf(stderr,"  StringProcess::next_NDiff : xfracA = %e, xfracB = %e\n",
     // xfracA, xfracB);
     // fprintf(stderr,"  StringProcess::next_NDiff : QTrn = %e GeV, phiQ = %e\n",
@@ -1905,7 +1908,7 @@ bool StringProcess::next_BBbarAnn(){
 			ntry = ntry + 1;
 
 			// randomly choose a qqbar pair to annihilate
-			ipr = static_cast<int>( floor( gsl_rng_uniform(rng)*static_cast<double>(npr) ) );
+			ipr = static_cast<int>( floor( Random::uniform(0., 1.)*static_cast<double>(npr) ) );
 			ijc = indexAnn->at(ipr);
 			ic = ( ijc - (ijc%10) )/10;
 			jc = ijc%10;
@@ -1924,7 +1927,7 @@ bool StringProcess::next_BBbarAnn(){
 				idq22 = idqsetA[1 + (ic + 1)%3];
 			}
 			// randomly choose if we flip the antiquark contents
-			rflip = gsl_rng_uniform(rng);
+			rflip = Random::uniform(0., 1.);
 			if( rflip > 0.5 ){
 				idq12prev = idq12;
 				idq22prev = idq22;
@@ -2057,13 +2060,13 @@ void StringProcess::makeStringEnds(int *idqset, int *idq1, int *idq2) {
 
   // if it is meson/baryon
   if (idqset[3] == 0) {  // meson
-    ir = static_cast<int>(floor(1. + 2. * gsl_rng_uniform(rng)));
+    ir = static_cast<int>(floor(1. + 2. * Random::uniform(0., 1.)));
 
     idq1tmp = idqset[ir];
     jc = 1 + ir % 2;
     idq2tmp = idqset[jc];
   } else {  // baryon
-    ir = static_cast<int>(floor(1. + 3. * gsl_rng_uniform(rng)));
+    ir = static_cast<int>(floor(1. + 3. * Random::uniform(0., 1.)));
     idqtmp[0] = idqset[0];
 
     idq1tmp = idqset[ir];
@@ -2081,7 +2084,7 @@ void StringProcess::makeStringEnds(int *idqset, int *idq1, int *idq2) {
         idq2tmp = idqtmp[2] * 1000 + idqtmp[1] * 100;
       }
 
-      rspin = gsl_rng_uniform(rng);
+      rspin = Random::uniform(0., 1.);
       if (rspin < 0.25) {
         idq2tmp = idq2tmp + 1;
       } else {
@@ -2105,7 +2108,7 @@ void StringProcess::makeStringEnds(int *idqset, int *idq1, int *idq2) {
   /* some mesons with PDG id 11X are actually mixed state of uubar and ddbar.
    * have a random selection whether we have uubar or ddbar in this case. */
   if ((idqset[3] == 0) && (*idq1 == 1) && (*idq2 == -1)) {
-    rflip = gsl_rng_uniform(rng);
+    rflip = Random::uniform(0., 1.);
     if (rflip > 0.5) {
       *idq1 = 2;
       *idq2 = -2;
@@ -2150,15 +2153,15 @@ int StringProcess::fragmentString(int idq1, int idq2, double mString,
 
   p3vec[0] = 0.;
   if (ranrot == true) {
-    theta = acos(1. - 2. * gsl_rng_uniform(rng));
-    phi = 2. * M_PI * gsl_rng_uniform(rng);
+    theta = acos(1. - 2. * Random::uniform(0., 1.));
+    phi = 2. * M_PI * Random::uniform(0., 1.);
     rswap = 0.;
 
     p3vec[1] = pCM * sin(theta) * cos(phi);
     p3vec[2] = pCM * sin(theta) * sin(phi);
     p3vec[3] = pCM * cos(theta);
   } else {
-    rswap = gsl_rng_uniform(rng);
+    rswap = Random::uniform(0., 1.);
 
     if (evecLong == NULL) {
       p3vec[1] = 0.;
@@ -2256,13 +2259,13 @@ double StringProcess::sample_XSDIS(double xmin, double beta) {
 
   accepted = false;
   while (accepted == false) {
-    rx = log(1. / xmin) * gsl_rng_uniform(rng);
+    rx = log(1. / xmin) * Random::uniform(0., 1.);
     xfrac = xmin * exp(rx);
 
     env = 1. / xfrac;
     pdf = pow(fabs(1. - xfrac), 1. + beta) / xfrac;
 
-    ra = env * gsl_rng_uniform(rng);
+    ra = env * Random::uniform(0., 1.);
     if (ra < pdf) {
       accepted = true;
     }
@@ -2280,13 +2283,13 @@ double StringProcess::sample_XVDIS(double xmin, double alpha, double beta) {
 
   accepted = false;
   while (accepted == false) {
-    rx = (1. - pow(fabs(xmin), alpha)) * gsl_rng_uniform(rng);
+    rx = (1. - pow(fabs(xmin), alpha)) * Random::uniform(0., 1.);
     xfrac = pow(fabs(rx + pow(fabs(xmin), alpha)), 1. / alpha);
 
     env = pow(fabs(xfrac), alpha - 1.) * pow(fabs(1. - xmin), beta - 1.);
     pdf = pow(fabs(xfrac), alpha - 1.) * pow(fabs(1. - xfrac), beta - 1.);
 
-    ra = env * gsl_rng_uniform(rng);
+    ra = env * Random::uniform(0., 1.);
     if (ra < pdf) {
       accepted = true;
     }
@@ -2299,8 +2302,10 @@ double StringProcess::sample_Qperp(double sigQ) {
   double Qperp = 0.;
   double rq;
 
-  rq = gsl_rng_uniform(rng);
+  rq = Random::uniform(0., 1.);
   Qperp = sigQ * sqrt(fabs(log(1. / (1. - rq))));
 
   return Qperp;
 }
+
+}  // namespace Smash
