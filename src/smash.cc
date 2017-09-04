@@ -25,7 +25,7 @@
 #include "include/config.h"
 
 #include "Pythia8/Pythia.h"
-#include "include/spmerge.h"
+#include "include/stringprocess.h"
 
 using namespace Pythia8;
 extern Pythia *pythia;
