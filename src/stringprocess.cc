@@ -1,4 +1,4 @@
-#include "include/spmerge.h"
+#include "include/stringprocess.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
