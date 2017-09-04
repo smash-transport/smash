@@ -126,8 +126,8 @@ set(smash_src
         scatteractionphoton.cc
         scatteractionsfinder.cc
         spheremodus.cc
-        spmerge.cc
         stringfunctions.cc
+        stringprocess.cc
         tabulation.cc
         thermodynamicoutput.cc
         threevector.cc

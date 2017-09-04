@@ -10,7 +10,7 @@
 #include "include/scatteraction.h"
 
 #include "Pythia8/Pythia.h"
-#include "include/spmerge.h"
+#include "include/stringprocess.h"
 
 #include "include/constants.h"
 #include "include/cxx14compat.h"
@@ -23,7 +23,7 @@
 
 using namespace Pythia8;
 Pythia *pythia;
-SPmerge *spmerge;
+StringProcess *string_process;
 SigmaTotal pythia_sigmaTot;
 
 namespace Smash {
@@ -781,28 +781,28 @@ void ScatterAction::string_excitation_inter(int subprocess) {
     } else {
       sigQperp = 0.5 + 0.2 * std::log(sqrts / 4.) / std::log(5.);
     }
-    /* initialize the spmerge object */
-    spmerge->set_sigmaQperp(sigQperp);
-    spmerge->set_pLightConeMin(0.001);
+    /* initialize the string_process object */
+    string_process->set_sigmaQperp(sigQperp);
+    string_process->set_pLightConeMin(0.001);
     isinit =
-        spmerge->init_lab(idAin, idBin, massAin, massBin, phadAin, phadBin);
+        string_process->init_lab(idAin, idBin, massAin, massBin, phadAin, phadBin);
     /* implement collision */
     while ((isinit == true) && (isnext == false)) {
       if( subprocess == 1 ) {
-        isnext = spmerge->next_SDiff_AX();
+        isnext = string_process->next_SDiff_AX();
       } else if( subprocess == 2 ) {
-        isnext = spmerge->next_SDiff_XB();
+        isnext = string_process->next_SDiff_XB();
       } else if( subprocess == 3 ) {
-        isnext = spmerge->next_DDiff_XX();
+        isnext = string_process->next_DDiff_XX();
       } else if( subprocess == 4 ) {
-        isnext = spmerge->next_NDiff();
+        isnext = string_process->next_NDiff();
       } else {
       }
     }
-    int npart = spmerge->final_PDGid[0].size();
+    int npart = string_process->final_PDGid[0].size();
     ParticleList new_intermediate_particles;
     for (int i = 0; i < npart; i++) {
-      int pythia_id = spmerge->final_PDGid[0].at(i);
+      int pythia_id = string_process->final_PDGid[0].at(i);
       log.debug("PDG ID from Pythia:", pythia_id);
       /* K_short and K_long need to be converted to K0
        * since SMASH only knows K0 */
@@ -818,17 +818,17 @@ void ScatterAction::string_excitation_inter(int subprocess) {
       PdgCode pythia_code(s);
       ParticleData new_particle(ParticleType::find(pythia_code));
       FourVector momentum;
-      momentum.set_x0(spmerge->final_pvec[0].at(i));
-      momentum.set_x1(spmerge->final_pvec[1].at(i));
-      momentum.set_x2(spmerge->final_pvec[2].at(i));
-      momentum.set_x3(spmerge->final_pvec[3].at(i));
+      momentum.set_x0(string_process->final_pvec[0].at(i));
+      momentum.set_x1(string_process->final_pvec[1].at(i));
+      momentum.set_x2(string_process->final_pvec[2].at(i));
+      momentum.set_x3(string_process->final_pvec[3].at(i));
       new_particle.set_4momentum(momentum);
       log.debug("4-momentum from Pythia: ", momentum);
       const double suppression_factor = 0.7;
       new_particle.set_cross_section_scaling_factor(
-          suppression_factor * spmerge->final_tform[1].at(i));
+          suppression_factor * string_process->final_tform[1].at(i));
       new_particle.set_formation_time(
-          spmerge->final_tform[0].at(i) * gamma_cm() + time_of_execution_);
+          string_process->final_tform[0].at(i) * gamma_cm() + time_of_execution_);
       outgoing_particles_.push_back(new_particle);
     }
     /* If the incoming particles already were unformed, the formation

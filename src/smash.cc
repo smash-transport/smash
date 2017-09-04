@@ -29,7 +29,7 @@
 
 using namespace Pythia8;
 extern Pythia *pythia;
-extern SPmerge *spmerge;
+extern StringProcess *string_process;
 extern SigmaTotal pythia_sigmaTot;
 
 namespace Smash {
@@ -434,12 +434,12 @@ int main(int argc, char *argv[]) {
     DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
     ParticleType::check_consistency();
 
-    // create Pythia and SPmerge (UrQMD-based string excitation) objects
+    // create Pythia and string_process (UrQMD-based string excitation) objects
     const gsl_rng_type *Type;
     gsl_rng *rng;
     pythia = new Pythia(PYTHIA_XML_DIR, false);
-    spmerge = new SPmerge();
-    // setup and initialize pythia for spmerge
+    string_process = new StringProcess();
+    // setup and initialize pythia for string_process
     /* select only inelastic events: */
     pythia->readString("SoftQCD:inelastic = on");
     /* suppress unnecessary output */
@@ -458,14 +458,14 @@ int main(int argc, char *argv[]) {
     pythia->readString("Beams:eCM = 10.");
     pythia->init();
     pythia_sigmaTot.init(&pythia->info, pythia->settings, &pythia->particleData);
-    // setup spmerge
+    // setup string_process
     gsl_rng_env_setup();
     Type = gsl_rng_default;
     rng = gsl_rng_alloc(Type);
     gsl_rng_set(rng, seed);
-    spmerge->set_gsl_rng_type(Type);
-    spmerge->set_gsl_rng(rng);
-    spmerge->set_pythia(pythia);
+    string_process->set_gsl_rng_type(Type);
+    string_process->set_gsl_rng(rng);
+    string_process->set_pythia(pythia);
 
     // create an experiment
     log.trace(source_location, " create Experiment");
@@ -481,7 +481,7 @@ int main(int argc, char *argv[]) {
     experiment->run();
 
     delete pythia;
-    delete spmerge;
+    delete string_process;
   } catch (std::exception &e) {
     log.fatal() << "SMASH failed with the following error:\n" << e.what();
     return EXIT_FAILURE;
