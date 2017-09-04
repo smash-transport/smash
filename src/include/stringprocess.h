@@ -1,10 +1,11 @@
-#ifndef SPMERGE_H
-#define SPMERGE_H
+#ifndef STRINGPROCESS_H
+#define STRINGPROCESS_H
 
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
 #include <vector>
 #include "Pythia8/Pythia.h"
+#include "include/particledata.h"
 
 //using namespace Pythia8;
 using namespace std;
@@ -107,6 +108,7 @@ class StringProcess {
 
   void set_kappaString(double kappaStringIn) { kappaString = kappaStringIn; }
 
+  bool init(ParticleData &incomingA, ParticleData &incomingB);
   bool init_lab(int idAIn, int idBIn, double massAIn, double massBIn,
                 Pythia8::Vec4 pvecAIn, Pythia8::Vec4 pvecBIn);
   bool init_com(int idAIn, int idBIn, double massAIn, double massBIn,

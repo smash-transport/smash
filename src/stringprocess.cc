@@ -1,5 +1,6 @@
 #include "include/stringprocess.h"
 #include "include/random.h"
+#include "include/kinematics.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -685,6 +686,13 @@ bool StringProcess::check_conservation() {
     ret = false;
   }
 
+  return ret;
+}
+
+bool StringProcess::init(ParticleData &incomingA, ParticleData &incomingB){
+  bool ret;
+
+  ret = true;
   return ret;
 }
 
@@ -2130,7 +2138,7 @@ int StringProcess::fragmentString(int idq1, int idq2, double mString,
   int ipart;
   int status;
   int col, acol;
-  double pCM;
+  double pCMquark;
   double m1, m2;
   double phi, theta;
   double rswap;
@@ -2147,7 +2155,7 @@ int StringProcess::fragmentString(int idq1, int idq2, double mString,
 
   m1 = pythia->particleData.m0(idq1);
   m2 = pythia->particleData.m0(idq2);
-  pCM = sqrt((pow(fabs(mString), 2.) - pow(fabs(m1 + m2), 2.)) *
+  pCMquark = sqrt((pow(fabs(mString), 2.) - pow(fabs(m1 + m2), 2.)) *
              (pow(fabs(mString), 2.) - pow(fabs(m1 - m2), 2.))) /
         (2. * mString);
 
@@ -2157,16 +2165,16 @@ int StringProcess::fragmentString(int idq1, int idq2, double mString,
     phi = 2. * M_PI * Random::uniform(0., 1.);
     rswap = 0.;
 
-    p3vec[1] = pCM * sin(theta) * cos(phi);
-    p3vec[2] = pCM * sin(theta) * sin(phi);
-    p3vec[3] = pCM * cos(theta);
+    p3vec[1] = pCMquark * sin(theta) * cos(phi);
+    p3vec[2] = pCMquark * sin(theta) * sin(phi);
+    p3vec[3] = pCMquark * cos(theta);
   } else {
     rswap = Random::uniform(0., 1.);
 
     if (evecLong == NULL) {
       p3vec[1] = 0.;
       p3vec[2] = 0.;
-      p3vec[3] = pCM;
+      p3vec[3] = pCMquark;
     } else {
       if (rswap < 0.5) {
         evecLong[1] = -evecLong[1];
@@ -2190,12 +2198,12 @@ int StringProcess::fragmentString(int idq1, int idq2, double mString,
         pvRS[2] = -p3vec[2];
         pvRS[3] = -p3vec[3];
       } else {
-        pvRS[1] = -pCM * evecLong[1];
-        pvRS[2] = -pCM * evecLong[2];
-        pvRS[3] = -pCM * evecLong[3];
+        pvRS[1] = -pCMquark * evecLong[1];
+        pvRS[2] = -pCMquark * evecLong[2];
+        pvRS[3] = -pCMquark * evecLong[3];
       }
     }
-    pvRS[0] = sqrt(pow(fabs(m1), 2.) + pow(fabs(pCM), 2.));
+    pvRS[0] = sqrt(pow(fabs(m1), 2.) + pow(fabs(pCMquark), 2.));
 
     pquark.e(pvRS[0]);
     pquark.px(pvRS[1]);
@@ -2217,12 +2225,12 @@ int StringProcess::fragmentString(int idq1, int idq2, double mString,
         pvRS[2] = p3vec[2];
         pvRS[3] = p3vec[3];
       } else {
-        pvRS[1] = pCM * evecLong[1];
-        pvRS[2] = pCM * evecLong[2];
-        pvRS[3] = pCM * evecLong[3];
+        pvRS[1] = pCMquark * evecLong[1];
+        pvRS[2] = pCMquark * evecLong[2];
+        pvRS[3] = pCMquark * evecLong[3];
       }
     }
-    pvRS[0] = sqrt(pow(fabs(m2), 2.) + pow(fabs(pCM), 2.));
+    pvRS[0] = sqrt(pow(fabs(m2), 2.) + pow(fabs(pCMquark), 2.));
 
     pquark.e(pvRS[0]);
     pquark.px(pvRS[1]);
