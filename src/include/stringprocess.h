@@ -123,8 +123,8 @@ class StringProcess {
   int fragmentString(int idq1, int idq2, double mString, ThreeVector &evecLong,
                      bool ranrot);
 
-  double sample_XSDIS(double xmin, double b);
-  double sample_XVDIS(double xmin, double a, double b);
+  //double sample_XSDIS(double xmin, double b);
+  //double sample_XVDIS(double xmin, double a, double b);
   double sample_Qperp(double sigQ);
 };
 

@@ -1542,8 +1542,10 @@ bool StringProcess::next_DDiff_XX() {
     makeStringEnds(idqsetA, &idq11, &idq12);
     makeStringEnds(idqsetB, &idq21, &idq22);
 
-    xfracA = sample_XSDIS(xfracMin, betapowS);
-    xfracB = sample_XSDIS(xfracMin, betapowS);
+    xfracA = Random::beta_a0(xfracMin, betapowS);
+    xfracB = Random::beta_a0(xfracMin, betapowS);
+    //xfracA = sample_XSDIS(xfracMin, betapowS);
+    //xfracB = sample_XSDIS(xfracMin, betapowS);
     QTrn = sample_Qperp(sigmaQperp);
     phiQ = 2. * M_PI * Random::uniform(0., 1.);
     // fprintf(stderr,"  StringProcess::next_DDiff : xfracA = %e, xfracB = %e\n",
@@ -1874,8 +1876,10 @@ bool StringProcess::next_NDiff() {
       exit(1);
     }
 
-    xfracA = sample_XVDIS(0., alphapowV, betapowV);
-    xfracB = sample_XVDIS(0., alphapowV, betapowV);
+    xfracA = Random::beta(alphapowV, betapowV);
+    xfracB = Random::beta(alphapowV, betapowV);
+    //xfracA = sample_XVDIS(0., alphapowV, betapowV);
+    //xfracB = sample_XVDIS(0., alphapowV, betapowV);
     QTrn = sample_Qperp(sigmaQperp);
     phiQ = 2. * M_PI * Random::uniform(0., 1.);
     // fprintf(stderr,"  StringProcess::next_NDiff : xfracA = %e, xfracB = %e\n",
@@ -2524,6 +2528,7 @@ int StringProcess::fragmentString(int idq1, int idq2, double mString,
   return ret;
 }
 
+/*
 double StringProcess::sample_XSDIS(double xmin, double b) {
   bool accepted;
 
@@ -2571,6 +2576,8 @@ double StringProcess::sample_XVDIS(double xmin, double a, double b) {
 
   return xfrac;
 }
+
+*/
 
 double StringProcess::sample_Qperp(double sigQ) {
   double Qperp = 0.;
