@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_PDGCODE_H_
 
 #include <algorithm>
+#include <array>
 #include <cstdlib>
 #include <iosfwd>
 #include <sstream>
@@ -432,6 +433,48 @@ class PdgCode {
       return 0;
     }
     return chunks_.quarks_;
+  }
+
+  /** Returns quark content as an array, useful for interfacing to Pythia.
+   *  The return is always an array of three numbers, which are pdgcodes
+   *  of quarks: 1 - d, 2 - u, 3 - s, 4 - c, 5 - b. Antiquarks get a negative
+   *  sign. For mesons the first number in array is always 0.
+   *
+   *  There is a difficulty with mesons that are a superposition, for example
+   *  \f$ \pi^0 = \frac{1}{\sqrt{2}}(u \bar{u} + d \bar{d}) \f$. Currently for
+   *  \f$ \pi^0 \f$ just {0, 1, -1} is returned.
+   *
+   */
+  std::array<int, 3> quark_content() const {
+    std::array<int, 3> result = { static_cast<int>(digits_.n_q1_),
+                                  static_cast<int>(digits_.n_q2_),
+                                  static_cast<int>(digits_.n_q3_)};
+    if (is_hadron()) {
+      // Antibaryons
+      if (digits_.n_q1_ != 0 && digits_.antiparticle_) {
+        for (size_t i = 0; i < 3; i++) {
+          result[i] = -result[i];
+        }
+      }
+      // Mesons
+      if (digits_.n_q1_ == 0) {
+        // Own antiparticle
+        if (digits_.n_q2_ == digits_.n_q3_) {
+          result[2] = -result[2];
+        } else {
+          // Like pi-
+          if (digits_.antiparticle_) {
+            result[1] = -result[1];
+          // Like pi+
+          } else {
+            result[2] = -result[2];
+          }
+        }
+      }
+    } else {
+      result = {0, 0, 0};
+    }
+    return result;
   }
 
   /****************************************************************************
