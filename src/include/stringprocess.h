@@ -93,9 +93,9 @@ class StringProcess {
   void set_kappaString(double kappaStringIn) { kappaString = kappaStringIn; }
 
   bool init(const ParticleList &incomingList);
-  bool init_lab(int idAIn, int idBIn, double massAIn, double massBIn,
+  bool init_lab(PdgCode &idAIn, PdgCode &idBIn, double massAIn, double massBIn,
                 Pythia8::Vec4 pvecAIn, Pythia8::Vec4 pvecBIn);
-  bool init_com(int idAIn, int idBIn, double massAIn, double massBIn,
+  bool init_com(PdgCode &idAIn, PdgCode &idBIn, double massAIn, double massBIn,
                 double sqrtsABIn);
 
   //bool next_Inel();
@@ -118,7 +118,7 @@ class StringProcess {
   int append_finalArray(FourVector &uString, ThreeVector &evecLong);
   bool check_conservation();
 
-  void PDGid2idqset(int pdgid, int *idqset);
+  //void PDGid2idqset(int pdgid, int *idqset);
   void makeStringEnds(int *idqset, int *idq1, int *idq2);
   int fragmentString(int idq1, int idq2, double mString, ThreeVector &evecLong,
                      bool ranrot);

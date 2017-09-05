@@ -507,6 +507,7 @@ bool StringProcess::init(const ParticleList &incomingList){
   bool ret;
 
   //int imu, inu;
+  array<int, 3> qcontent;
 
   //double E, px, py, pz;
   double ex, ey, et;
@@ -637,8 +638,18 @@ bool StringProcess::init(const ParticleList &incomingList){
   // fprintf(stderr,"  StringProcess::init : evecBasisAB3 = (%e, %e, %e)\n",
   //	evecBasisAB[3][1], evecBasisAB[3][2], evecBasisAB[3][3]);
 
-  PDGid2idqset(PDGidA, idqsetA);
-  PDGid2idqset(PDGidB, idqsetB);
+  qcontent = incomingList[0].pdgcode().quark_content();
+  idqsetA[0] = static_cast<int>( incomingList[0].pdgcode().spin_degeneracy() );
+  idqsetA[3] = qcontent[0];
+  idqsetA[2] = qcontent[1];
+  idqsetA[1] = qcontent[2];
+  //PDGid2idqset(PDGidA, idqsetA);
+  qcontent = incomingList[1].pdgcode().quark_content();
+  idqsetB[0] = static_cast<int>( incomingList[1].pdgcode().spin_degeneracy() );
+  idqsetB[3] = qcontent[0];
+  idqsetB[2] = qcontent[1];
+  idqsetB[1] = qcontent[2];
+  //PDGid2idqset(PDGidB, idqsetB);
 
   xfracMin = pLightConeMin / sqrtsAB;
 
@@ -692,17 +703,18 @@ bool StringProcess::init(const ParticleList &incomingList){
   return ret;
 }
 
-bool StringProcess::init_lab(int idAIn, int idBIn, double massAIn, double massBIn,
+bool StringProcess::init_lab(PdgCode &idAIn, PdgCode &idBIn, double massAIn, double massBIn,
                        Pythia8::Vec4 plabAIn, Pythia8::Vec4 plabBIn) {
   bool ret;
   //int imu, inu;
+  array<int, 3> qcontent;
 
   //double E, px, py, pz;
   double ex, ey, et;
   double theta, phi;
 
-  PDGidA = idAIn;
-  PDGidB = idBIn;
+  PDGidA = idAIn.get_decimal();
+  PDGidB = idBIn.get_decimal();
   massA = massAIn;
   massB = massBIn;
 
@@ -832,8 +844,18 @@ bool StringProcess::init_lab(int idAIn, int idBIn, double massAIn, double massBI
   // fprintf(stderr,"  StringProcess::init : evecBasisAB3 = (%e, %e, %e)\n",
   //	evecBasisAB[3][1], evecBasisAB[3][2], evecBasisAB[3][3]);
 
-  PDGid2idqset(PDGidA, idqsetA);
-  PDGid2idqset(PDGidB, idqsetB);
+  qcontent = idAIn.quark_content();
+  idqsetA[0] = static_cast<int>( idAIn.spin_degeneracy() );
+  idqsetA[3] = qcontent[0];
+  idqsetA[2] = qcontent[1];
+  idqsetA[1] = qcontent[2];
+  //PDGid2idqset(PDGidA, idqsetA);
+  qcontent = idBIn.quark_content();
+  idqsetB[0] = static_cast<int>( idBIn.spin_degeneracy() );
+  idqsetB[3] = qcontent[0];
+  idqsetB[2] = qcontent[1];
+  idqsetB[1] = qcontent[2];
+  //PDGid2idqset(PDGidB, idqsetB);
 
   xfracMin = pLightConeMin / sqrtsAB;
 
@@ -887,15 +909,16 @@ bool StringProcess::init_lab(int idAIn, int idBIn, double massAIn, double massBI
   return ret;
 }
 
-bool StringProcess::init_com(int idAIn, int idBIn, double massAIn, double massBIn,
+bool StringProcess::init_com(PdgCode &idAIn, PdgCode &idBIn, double massAIn, double massBIn,
                        double sqrtsABIn) {
   bool ret;
   //int imu, inu;
+  array<int, 3> qcontent;
 
   //double E, px, py, pz;
 
-  PDGidA = idAIn;
-  PDGidB = idBIn;
+  PDGidA = idAIn.get_decimal();
+  PDGidB = idBIn.get_decimal();
   massA = massAIn;
   massB = massBIn;
   sqrtsAB = sqrtsABIn;
@@ -958,8 +981,18 @@ bool StringProcess::init_com(int idAIn, int idBIn, double massAIn, double massBI
   // fprintf(stderr,"  StringProcess::init : evecBasisAB3 = (%e, %e, %e)\n",
   //	evecBasisAB[3][1], evecBasisAB[3][2], evecBasisAB[3][3]);
 
-  PDGid2idqset(PDGidA, idqsetA);
-  PDGid2idqset(PDGidB, idqsetB);
+  qcontent = idAIn.quark_content();
+  idqsetA[0] = static_cast<int>( idAIn.spin_degeneracy() );
+  idqsetA[3] = qcontent[0];
+  idqsetA[2] = qcontent[1];
+  idqsetA[1] = qcontent[2];
+  //PDGid2idqset(PDGidA, idqsetA);
+  qcontent = idBIn.quark_content();
+  idqsetB[0] = static_cast<int>( idBIn.spin_degeneracy() );
+  idqsetB[3] = qcontent[0];
+  idqsetB[2] = qcontent[1];
+  idqsetB[1] = qcontent[2];
+  //PDGid2idqset(PDGidB, idqsetB);
 
   xfracMin = pLightConeMin / sqrtsAB;
 
@@ -2283,6 +2316,7 @@ bool StringProcess::next_BBbarAnn(){
 	return ret;
 }
 
+/*
 void StringProcess::PDGid2idqset(int pdgid, int *idqset) {
   int ic;
   int pdgidnew;
@@ -2323,6 +2357,7 @@ void StringProcess::PDGid2idqset(int pdgid, int *idqset) {
     }
   }  // endif meson/baryon
 }
+*/
 
 void StringProcess::makeStringEnds(int *idqset, int *idq1, int *idq2) {
   int ir, ic, jc;
