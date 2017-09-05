@@ -12,23 +12,6 @@ using namespace std;
 
 namespace Smash {
 
-class Lorentz {
- private:
-  double **Lambda;
-  double **Mrot;
-
- public:
-  Lorentz();
-  ~Lorentz();
-
-  void Boost1_RestToLab(int dim, double *U, double *Vin, double *Vout);
-  void Boost1_LabToRest(int dim, double *U, double *Vin, double *Vout);
-  void Boost2_RestToLab(int dim, double *U, double **Tin, double **Tout);
-  void Boost2_LabToRest(int dim, double *U, double **Tin, double **Tout);
-  void TransRotation1(int dim, double phi, double *Vin, double *Vout);
-  void TransRotation2(int dim, double phi, double **Tin, double **Tout);
-};
-
 class StringProcess {
  private:
   int PDGidA, PDGidB;
@@ -70,7 +53,6 @@ class StringProcess {
   double pyINI, pyFIN;
   double pzINI, pzFIN;
 
-  Lorentz *lorentz;
   Pythia8::Pythia *pythia;
 
   //double XSecTot, XSecEl, XSecInel, XSecAX, XSecXB, XSecXX, XSecAXB, XSecND;
