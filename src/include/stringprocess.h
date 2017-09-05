@@ -5,7 +5,7 @@
 #include <gsl/gsl_rng.h>
 #include <vector>
 #include "Pythia8/Pythia.h"
-#include "include/particledata.h"
+#include "particledata.h"
 
 //using namespace Pythia8;
 using namespace std;
@@ -110,7 +110,7 @@ class StringProcess {
 
   void set_kappaString(double kappaStringIn) { kappaString = kappaStringIn; }
 
-  bool init(const ParticleDataList &incomingList);
+  bool init(const ParticleList &incomingList);
   bool init_lab(int idAIn, int idBIn, double massAIn, double massBIn,
                 Pythia8::Vec4 pvecAIn, Pythia8::Vec4 pvecBIn);
   bool init_com(int idAIn, int idBIn, double massAIn, double massBIn,
@@ -141,8 +141,8 @@ class StringProcess {
   int fragmentString(int idq1, int idq2, double mString, ThreeVector &evecLong,
                      bool ranrot);
 
-  double sample_XSDIS(double xmin, double beta);
-  double sample_XVDIS(double xmin, double alpha, double beta);
+  double sample_XSDIS(double xmin, double b);
+  double sample_XVDIS(double xmin, double a, double b);
   double sample_Qperp(double sigQ);
 };
 
