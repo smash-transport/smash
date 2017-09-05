@@ -235,6 +235,41 @@ T cauchy(T pole, T width, T min, T max) {
   return pole + width * std::tan(u);
 }
 
+/**
+ * Draws a random number from a beta-distribution, where probability density of
+ * \f$x\f$ is \f$p(x) = frac{\Gamma(a)\Gamma(b)}{Gamma(a+b)}
+ *  x^{a-1} (1-x)^{b-1}\f$. This distribution is necessary for string
+ *  formation. The implementation uses a property connecting beta distribution
+ * to gamma-distribution. Interchanging a and b will not change results.
+ */
+template <typename T = double>
+T beta(T a, T b) {
+  // Otherwise the integral over probability density diverges
+  assert(a > T(0.0) && b > T(0.0));
+  const T x1 = std::gamma_distribution<T>(a)(engine);
+  const T x2 = std::gamma_distribution<T>(b)(engine);
+  return x1 / (x1 + x2);
+}
+
+/**
+ * Draws a random number from a beta-distribution with a = 0. In this case
+ * the probability density is \f$p(x) = 1/x (1-x)^b\f$. The integral from
+ * 0 to 1 over this distribution diverges, so the sampling is performed
+ * in the interval (xmin, 1). This distribution is necessary for string
+ * formation. The implementation uses the following property:
+ * \f$p(x)dx = dx/x (1-x)^b = (1-x)^b d ln(x) = (1 - e^{-y})^b dy\f$, where
+ * \f$ y = - ln(x) \f$.
+ */
+template <typename T = double>
+T beta_a0(T xmin, T b) {
+  assert(xmin > T(0.0) && xmin < T(1.0));
+  T y;
+  do {
+    y = uniform(0.0, -std::log(xmin));
+  } while (std::pow((1.0 - std::exp(-y)), b) < canonical());
+  return std::exp(-y);
+}
+
 }  // namespace Random
 }  // namespace Smash
 
