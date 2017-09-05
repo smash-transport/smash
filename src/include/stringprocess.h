@@ -125,7 +125,7 @@ class StringProcess {
 
   //double sample_XSDIS(double xmin, double b);
   //double sample_XVDIS(double xmin, double a, double b);
-  double sample_Qperp(double sigQ);
+  //double sample_Qperp(double sigQ);
 };
 
 }  // namespace Smash

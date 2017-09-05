@@ -1045,7 +1045,7 @@ bool StringProcess::next_SDiff_AX() {
 
   double mstrMin, mstrMax;
   double pabscomAX, massX, rmass;
-  double QTrn, phiQ;
+  double QTrn, QTrx, QTry;
 
   int nfrag;
   int idqX1, idqX2;
@@ -1106,8 +1106,11 @@ bool StringProcess::next_SDiff_AX() {
 
     makeStringEnds(idqsetB, &idqX1, &idqX2);
 
-    QTrn = sample_Qperp(sigmaQperp);
-    phiQ = 2. * M_PI * Random::uniform(0., 1.);
+    QTrx = Random::normal(0., sigmaQperp/sqrt(2.) );
+    QTry = Random::normal(0., sigmaQperp/sqrt(2.) );
+    QTrn = sqrt( pow(fabs(QTrx),2.) + pow(fabs(QTry),2.) );
+    //QTrn = sample_Qperp(sigmaQperp);
+    //phiQ = 2. * M_PI * Random::uniform(0., 1.);
     // fprintf(stderr,"  StringProcess::next_SDiff_AX : QTrn = %e GeV, phiQ = %e\n",
     // QTrn, phiQ);
 
@@ -1130,14 +1133,14 @@ bool StringProcess::next_SDiff_AX() {
     //pstrHcom[0] = sqrt(pow(fabs(pabscomAX), 2.) + pow(fabs(massA), 2.));
     //pstrXcom[0] = sqrt(pow(fabs(pabscomAX), 2.) + pow(fabs(massX), 2.));
     threeMomentum = evecBasisAB[3] * sqrt(pow(fabs(pabscomAX), 2.) - pow(fabs(QTrn), 2.)) +
-                        evecBasisAB[1] * QTrn * cos(phiQ) +
-                        evecBasisAB[2] * QTrn * sin(phiQ);
+                        evecBasisAB[1] * QTrx +
+                        evecBasisAB[2] * QTry;
     pstrHcom.set_x1( threeMomentum.x1() );
     pstrHcom.set_x2( threeMomentum.x2() );
     pstrHcom.set_x3( threeMomentum.x3() );
     threeMomentum = -evecBasisAB[3] * sqrt(pow(fabs(pabscomAX), 2.) - pow(fabs(QTrn), 2.)) -
-                        evecBasisAB[1] * QTrn * cos(phiQ) -
-                        evecBasisAB[2] * QTrn * sin(phiQ);
+                        evecBasisAB[1] * QTrx -
+                        evecBasisAB[2] * QTry;
     pstrXcom.set_x1( threeMomentum.x1() );
     pstrXcom.set_x2( threeMomentum.x2() );
     pstrXcom.set_x3( threeMomentum.x3() );
@@ -1258,7 +1261,7 @@ bool StringProcess::next_SDiff_XB() {
 
   double mstrMin, mstrMax;
   double pabscomXB, massX, rmass;
-  double QTrn, phiQ;
+  double QTrn, QTrx, QTry;
 
   int nfrag;
   int idqX1, idqX2;
@@ -1319,8 +1322,11 @@ bool StringProcess::next_SDiff_XB() {
 
     makeStringEnds(idqsetA, &idqX1, &idqX2);
 
-    QTrn = sample_Qperp(sigmaQperp);
-    phiQ = 2. * M_PI * Random::uniform(0., 1.);
+    QTrx = Random::normal(0., sigmaQperp/sqrt(2.) );
+    QTry = Random::normal(0., sigmaQperp/sqrt(2.) );
+    QTrn = sqrt( pow(fabs(QTrx),2.) + pow(fabs(QTry),2.) );
+    //QTrn = sample_Qperp(sigmaQperp);
+    //phiQ = 2. * M_PI * Random::uniform(0., 1.);
     // fprintf(stderr,"  StringProcess::next_SDiff_XB : QTrn = %e GeV, phiQ = %e\n",
     // QTrn, phiQ);
 
@@ -1343,14 +1349,14 @@ bool StringProcess::next_SDiff_XB() {
     //pstrHcom[0] = sqrt(pow(fabs(pabscomXB), 2.) + pow(fabs(massB), 2.));
     //pstrXcom[0] = sqrt(pow(fabs(pabscomXB), 2.) + pow(fabs(massX), 2.));
     threeMomentum = -evecBasisAB[3] * sqrt(pow(fabs(pabscomXB), 2.) - pow(fabs(QTrn), 2.)) -
-                        evecBasisAB[1] * QTrn * cos(phiQ) -
-                        evecBasisAB[2] * QTrn * sin(phiQ);
+                        evecBasisAB[1] * QTrx -
+                        evecBasisAB[2] * QTry;
     pstrHcom.set_x1( threeMomentum.x1() );
     pstrHcom.set_x2( threeMomentum.x2() );
     pstrHcom.set_x3( threeMomentum.x3() );
     threeMomentum = evecBasisAB[3] * sqrt(pow(fabs(pabscomXB), 2.) - pow(fabs(QTrn), 2.)) +
-                        evecBasisAB[1] * QTrn * cos(phiQ) +
-                        evecBasisAB[2] * QTrn * sin(phiQ);
+                        evecBasisAB[1] * QTrx +
+                        evecBasisAB[2] * QTry;
     pstrXcom.set_x1( threeMomentum.x1() );
     pstrXcom.set_x2( threeMomentum.x2() );
     pstrXcom.set_x3( threeMomentum.x3() );
@@ -1472,7 +1478,8 @@ bool StringProcess::next_DDiff_XX() {
   double xfracA, xfracB;
   double PPosA, PNegA;
   double PPosB, PNegB;
-  double QPos, QNeg, QTrn, phiQ;
+  double QPos, QNeg;
+  double QTrn, QTrx, QTry;
 
   int nfrag1, nfrag2;
   int idq11, idq12;
@@ -1542,12 +1549,15 @@ bool StringProcess::next_DDiff_XX() {
     makeStringEnds(idqsetA, &idq11, &idq12);
     makeStringEnds(idqsetB, &idq21, &idq22);
 
-    xfracA = Random::beta_a0(xfracMin, betapowS);
-    xfracB = Random::beta_a0(xfracMin, betapowS);
+    xfracA = Random::beta_a0(xfracMin, betapowS + 1.);
+    xfracB = Random::beta_a0(xfracMin, betapowS + 1.);
     //xfracA = sample_XSDIS(xfracMin, betapowS);
     //xfracB = sample_XSDIS(xfracMin, betapowS);
-    QTrn = sample_Qperp(sigmaQperp);
-    phiQ = 2. * M_PI * Random::uniform(0., 1.);
+    QTrx = Random::normal(0., sigmaQperp/sqrt(2.) );
+    QTry = Random::normal(0., sigmaQperp/sqrt(2.) );
+    QTrn = sqrt( pow(fabs(QTrx),2.) + pow(fabs(QTry),2.) );
+    //QTrn = sample_Qperp(sigmaQperp);
+    //phiQ = 2. * M_PI * Random::uniform(0., 1.);
     // fprintf(stderr,"  StringProcess::next_DDiff : xfracA = %e, xfracB = %e\n",
     // xfracA, xfracB);
     // fprintf(stderr,"  StringProcess::next_DDiff : QTrn = %e GeV, phiQ = %e\n",
@@ -1563,14 +1573,12 @@ bool StringProcess::next_DDiff_XX() {
     //mstr1 = pow(fabs(pstr1com[0]), 2.);
     //mstr2 = pow(fabs(pstr2com[0]), 2.);
     threeMomentum = evecBasisAB[3] * (PPosA + QPos - PNegA - QNeg) / sqrt(2.) +
-                        evecBasisAB[1] * QTrn * cos(phiQ) +
-                        evecBasisAB[2] * QTrn * sin(phiQ);
+                        evecBasisAB[1] * QTrx + evecBasisAB[2] * QTry;
     pstr1com.set_x1( threeMomentum.x1() );
     pstr1com.set_x2( threeMomentum.x2() );
     pstr1com.set_x3( threeMomentum.x3() );
     threeMomentum = evecBasisAB[3] * (PPosB - QPos - PNegB + QNeg) / sqrt(2.) -
-                        evecBasisAB[1] * QTrn * cos(phiQ) -
-                        evecBasisAB[2] * QTrn * sin(phiQ);
+                        evecBasisAB[1] * QTrx - evecBasisAB[2] * QTry;
     pstr1com.set_x1( threeMomentum.x1() );
     pstr1com.set_x2( threeMomentum.x2() );
     pstr1com.set_x3( threeMomentum.x3() );
@@ -1744,8 +1752,9 @@ bool StringProcess::next_NDiff() {
   double xfracA, xfracB;
   double PPosA, PNegA;
   double PPosB, PNegB;
-  double QPos, QNeg, QTrn, phiQ;
+  double QPos, QNeg;
   double dPPos, dPNeg;
+  double QTrn, QTrx, QTry;
 
   int nfrag1, nfrag2;
   int idqA1, idqA2;
@@ -1880,8 +1889,11 @@ bool StringProcess::next_NDiff() {
     xfracB = Random::beta(alphapowV, betapowV);
     //xfracA = sample_XVDIS(0., alphapowV, betapowV);
     //xfracB = sample_XVDIS(0., alphapowV, betapowV);
-    QTrn = sample_Qperp(sigmaQperp);
-    phiQ = 2. * M_PI * Random::uniform(0., 1.);
+    QTrx = Random::normal(0., sigmaQperp/sqrt(2.) );
+    QTry = Random::normal(0., sigmaQperp/sqrt(2.) );
+    QTrn = sqrt( pow(fabs(QTrx),2.) + pow(fabs(QTry),2.) );
+    //QTrn = sample_Qperp(sigmaQperp);
+    //phiQ = 2. * M_PI * Random::uniform(0., 1.);
     // fprintf(stderr,"  StringProcess::next_NDiff : xfracA = %e, xfracB = %e\n",
     // xfracA, xfracB);
     // fprintf(stderr,"  StringProcess::next_NDiff : QTrn = %e GeV, phiQ = %e\n",
@@ -1900,14 +1912,12 @@ bool StringProcess::next_NDiff() {
     //mstr1 = pow(fabs(pstr1com[0]), 2.);
     //mstr2 = pow(fabs(pstr2com[0]), 2.);
     threeMomentum = evecBasisAB[3] * (PPosA + dPPos - PNegA - dPNeg) / sqrt(2.) +
-                        evecBasisAB[1] * QTrn * cos(phiQ) +
-                        evecBasisAB[2] * QTrn * sin(phiQ);
+                        evecBasisAB[1] * QTrx + evecBasisAB[2] * QTry;
     pstr1com.set_x1( threeMomentum.x1() );
     pstr1com.set_x2( threeMomentum.x2() );
     pstr1com.set_x3( threeMomentum.x3() );
     threeMomentum = evecBasisAB[3] * (PPosB - dPPos - PNegB + dPNeg) / sqrt(2.) -
-                        evecBasisAB[1] * QTrn * cos(phiQ) -
-                        evecBasisAB[2] * QTrn * sin(phiQ);
+                        evecBasisAB[1] * QTrx - evecBasisAB[2] * QTry;
     pstr1com.set_x1( threeMomentum.x1() );
     pstr1com.set_x2( threeMomentum.x2() );
     pstr1com.set_x3( threeMomentum.x3() );
@@ -2552,7 +2562,9 @@ double StringProcess::sample_XSDIS(double xmin, double b) {
 
   return xfrac;
 }
+*/
 
+/*
 double StringProcess::sample_XVDIS(double xmin, double a, double b) {
   bool accepted;
 
@@ -2576,9 +2588,9 @@ double StringProcess::sample_XVDIS(double xmin, double a, double b) {
 
   return xfrac;
 }
-
 */
 
+/*
 double StringProcess::sample_Qperp(double sigQ) {
   double Qperp = 0.;
   double rq;
@@ -2588,5 +2600,6 @@ double StringProcess::sample_Qperp(double sigQ) {
 
   return Qperp;
 }
+*/
 
 }  // namespace Smash
