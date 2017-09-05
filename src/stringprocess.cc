@@ -232,23 +232,27 @@ StringProcess::StringProcess() {
     idqsetB[ic] = 0;
   }
 
-  plabA = static_cast<double *>(malloc(4 * sizeof(double)));
-  plabB = static_cast<double *>(malloc(4 * sizeof(double)));
-  pcomA = static_cast<double *>(malloc(4 * sizeof(double)));
-  pcomB = static_cast<double *>(malloc(4 * sizeof(double)));
-  ucomAB = static_cast<double *>(malloc(4 * sizeof(double)));
-  evecBasisAB = static_cast<double **>(malloc(4 * sizeof(double *)));
+  //plabA = static_cast<double *>(malloc(4 * sizeof(double)));
+  //plabB = static_cast<double *>(malloc(4 * sizeof(double)));
+  //pcomA = static_cast<double *>(malloc(4 * sizeof(double)));
+  //pcomB = static_cast<double *>(malloc(4 * sizeof(double)));
+  //ucomAB = static_cast<double *>(malloc(4 * sizeof(double)));
+  evecBasisAB = new ThreeVector[4];
+  //evecBasisAB = static_cast<double **>(malloc(4 * sizeof(double *)));
   for (imu = 0; imu < 4; imu++) {
-    plabA[imu] = 0.;
-    plabB[imu] = 0.;
-    pcomA[imu] = 0.;
-    pcomB[imu] = 0.;
-    ucomAB[imu] = 0.;
-    evecBasisAB[imu] = static_cast<double *>(malloc(4 * sizeof(double)));
-    for (inu = 0; inu < 4; inu++) {
-      evecBasisAB[imu][inu] = 0.;
-    }
-  }
+    //plabA[imu] = 0.;
+    //plabB[imu] = 0.;
+    //pcomA[imu] = 0.;
+    //pcomB[imu] = 0.;
+    //ucomAB[imu] = 0.;
+    evecBasisAB[imu].set_x1( 0. );
+    evecBasisAB[imu].set_x2( 0. );
+    evecBasisAB[imu].set_x3( 0. );
+    //evecBasisAB[imu] = static_cast<double *>(malloc(4 * sizeof(double)));
+    //for (inu = 0; inu < 4; inu++) {
+    //  evecBasisAB[imu][inu] = 0.;
+    //}
+  //}
 
   //XSecSummed = static_cast<double *>(malloc(5 * sizeof(double)));
   //for (iproc = 0; iproc < 5; iproc++) {
@@ -292,15 +296,16 @@ StringProcess::~StringProcess() {
   free(idqsetA);
   free(idqsetB);
 
-  free(plabA);
-  free(plabB);
-  free(pcomA);
-  free(pcomB);
-  free(ucomAB);
-  for (imu = 0; imu < 4; imu++) {
-    free(evecBasisAB[imu]);
-  }
-  free(evecBasisAB);
+  //free(plabA);
+  //free(plabB);
+  //free(pcomA);
+  //free(pcomB);
+  //free(ucomAB);
+  delete[] evecBasisAB;
+  //for (imu = 0; imu < 4; imu++) {
+  //  free(evecBasisAB[imu]);
+  //}
+  //free(evecBasisAB);
 
   //free(XSecSummed);
 
@@ -336,7 +341,7 @@ void StringProcess::reset_finalArray() {
 }
 
 // compute the formation time and fill the arrays with final-state particles
-int StringProcess::append_finalArray(double *uString, double *evecLong) {
+int StringProcess::append_finalArray(FourVector &uString, ThreeVector &evecLong) {
   int ret;
 
   int nfrag;
@@ -364,17 +369,22 @@ int StringProcess::append_finalArray(double *uString, double *evecLong) {
   double *XVertexPos;
   double *XVertexNeg;
 
-  double *pvRS;
-  double *pvCM;
+  ThreeVector vstring;
+  FourVector pvRS;
+  FourVector pvCM;
+  //double *pvRS;
+  //double *pvCM;
 
-  double *xfRS;
-  double *xfCM;
+  FourVector xfRS;
+  FourVector xfCM;
+  //double *xfRS;
+  //double *xfCM;
 
-  pvRS = static_cast<double *>(malloc(4 * sizeof(double)));
-  pvCM = static_cast<double *>(malloc(4 * sizeof(double)));
+  //pvRS = static_cast<double *>(malloc(4 * sizeof(double)));
+  //pvCM = static_cast<double *>(malloc(4 * sizeof(double)));
 
-  xfRS = static_cast<double *>(malloc(4 * sizeof(double)));
-  xfCM = static_cast<double *>(malloc(4 * sizeof(double)));
+  //xfRS = static_cast<double *>(malloc(4 * sizeof(double)));
+  //xfCM = static_cast<double *>(malloc(4 * sizeof(double)));
 
   nfrag = 0;
   bstring = 0;
@@ -385,6 +395,8 @@ int StringProcess::append_finalArray(double *uString, double *evecLong) {
       bstring = bstring + pythia->particleData.baryonNumberType(id);
     }
   }
+
+  vstring = uString.velocity();
 
   // fprintf(stderr,"  StringProcess::append_finalArray nfrag = %d\n", nfrag);
 
@@ -413,15 +425,18 @@ int StringProcess::append_finalArray(double *uString, double *evecLong) {
       pzfrag[ipstr] = pythia->event[ipyth].pz();
       mfrag[ipstr] = pythia->event[ipyth].m();
 
-      if (evecLong == NULL) {
-        pparallel[ipstr] = pzfrag[ipstr];
-        // fprintf(stderr,"  StringProcess::append_finalArray : NULL evecLong\n");
-      } else {
-        pparallel[ipstr] = pxfrag[ipstr] * evecLong[1] +
-                           pyfrag[ipstr] * evecLong[2] +
-                           pzfrag[ipstr] * evecLong[3];
-        // fprintf(stderr,"  StringProcess::append_finalArray : non-zero evecLong\n");
-      }
+      pparallel[ipstr] = pxfrag[ipstr] * evecLong.x1() +
+                         pyfrag[ipstr] * evecLong.x2() +
+                         pzfrag[ipstr] * evecLong.x3();
+      //if (evecLong == NULL) {
+      //  pparallel[ipstr] = pzfrag[ipstr];
+      //  // fprintf(stderr,"  StringProcess::append_finalArray : NULL evecLong\n");
+      //} else {
+      //  pparallel[ipstr] = pxfrag[ipstr] * evecLong[1] +
+      //                     pyfrag[ipstr] * evecLong[2] +
+      //                     pzfrag[ipstr] * evecLong[3];
+      //  // fprintf(stderr,"  StringProcess::append_finalArray : non-zero evecLong\n");
+      //}
       Yparallel[ipstr] = 0.5 * log((Efrag[ipstr] + pparallel[ipstr]) /
                                    (Efrag[ipstr] - pparallel[ipstr]));
 
@@ -474,25 +489,31 @@ int StringProcess::append_finalArray(double *uString, double *evecLong) {
 
     id = idfrag[ipstr];
     baryon = pythia->particleData.baryonNumberType(id);
-    pvRS[0] = Efrag[ipstr];
-    pvRS[1] = pxfrag[ipstr];
-    pvRS[2] = pyfrag[ipstr];
-    pvRS[3] = pzfrag[ipstr];
+    pvRS.set_x0( Efrag[ipstr] );
+    pvRS.set_x1( pxfrag[ipstr] );
+    pvRS.set_x2( pyfrag[ipstr] );
+    pvRS.set_x3( pzfrag[ipstr] );
     mass = mfrag[ipstr];
 
-    xfRS[0] = (XVertexPos[kpstr] + XVertexNeg[kpstr + 1]) / sqrt(2.);
-    if (evecLong == NULL) {
-      xfRS[1] = 0.;
-      xfRS[2] = 0.;
-      xfRS[3] = (XVertexPos[kpstr] - XVertexNeg[kpstr + 1]) / sqrt(2.);
-    } else {
-      xfRS[1] =
-          evecLong[1] * (XVertexPos[kpstr] - XVertexNeg[kpstr + 1]) / sqrt(2.);
-      xfRS[2] =
-          evecLong[2] * (XVertexPos[kpstr] - XVertexNeg[kpstr + 1]) / sqrt(2.);
-      xfRS[3] =
-          evecLong[3] * (XVertexPos[kpstr] - XVertexNeg[kpstr + 1]) / sqrt(2.);
-    }
+    xfRS.set_x0( (XVertexPos[kpstr] + XVertexNeg[kpstr + 1]) / sqrt(2.) );
+    xfRS.set_x1(
+        evecLong.x1() * (XVertexPos[kpstr] - XVertexNeg[kpstr + 1]) / sqrt(2.) );
+    xfRS.set_x2(
+        evecLong.x2() * (XVertexPos[kpstr] - XVertexNeg[kpstr + 1]) / sqrt(2.) );
+    xfRS.set_x3(
+        evecLong.x3() * (XVertexPos[kpstr] - XVertexNeg[kpstr + 1]) / sqrt(2.) );
+    //if (evecLong == NULL) {
+    //  xfRS[1] = 0.;
+    //  xfRS[2] = 0.;
+    //  xfRS[3] = (XVertexPos[kpstr] - XVertexNeg[kpstr + 1]) / sqrt(2.);
+    //} else {
+    //  xfRS[1] =
+    //      evecLong[1] * (XVertexPos[kpstr] - XVertexNeg[kpstr + 1]) / sqrt(2.);
+    //  xfRS[2] =
+    //      evecLong[2] * (XVertexPos[kpstr] - XVertexNeg[kpstr + 1]) / sqrt(2.);
+    //  xfRS[3] =
+    //      evecLong[3] * (XVertexPos[kpstr] - XVertexNeg[kpstr + 1]) / sqrt(2.);
+    //}
 
     tProd = (XVertexPos[kpstr] + XVertexNeg[kpstr + 1]) / sqrt(2.);
     // zparallel = (XVertexPos[kpstr] - XVertexNeg[kpstr + 1])/sqrt(2.);
@@ -560,25 +581,32 @@ int StringProcess::append_finalArray(double *uString, double *evecLong) {
     final_PDGid[0].push_back(id);
     final_PDGid[1].push_back(islead);
 
-    if (uString == NULL) {
-      E = pvRS[0];
-      px = pvRS[1];
-      py = pvRS[2];
-      pz = pvRS[3];
+    pvCM = pvRS.LorentzBoost( -vstring );
+    E = pvCM.x0();
+    px = pvCM.x1();
+    py = pvCM.x2();
+    pz = pvCM.x3();
+    xfCM = xfRS.LorentzBoost( -vstring );
+    tProd = xfCM.x0();
+    //if (uString == NULL) {
+    //  E = pvRS[0];
+    //  px = pvRS[1];
+    //  py = pvRS[2];
+    //  pz = pvRS[3];
 
-      tProd = xfRS[0];
-      // fprintf(stderr,"  StringProcess::append_finalArray : NULL uString\n");
-    } else {
-      lorentz->Boost1_RestToLab(3, uString, pvRS, pvCM);
-      E = pvCM[0];
-      px = pvCM[1];
-      py = pvCM[2];
-      pz = pvCM[3];
+    //  tProd = xfRS[0];
+    //  // fprintf(stderr,"  StringProcess::append_finalArray : NULL uString\n");
+    //} else {
+    //  lorentz->Boost1_RestToLab(3, uString, pvRS, pvCM);
+    //  E = pvCM[0];
+    //  px = pvCM[1];
+    //  py = pvCM[2];
+    //  pz = pvCM[3];
 
-      lorentz->Boost1_RestToLab(3, uString, xfRS, xfCM);
-      tProd = xfCM[0];
-      // fprintf(stderr,"  StringProcess::append_finalArray : non-zero uString\n");
-    }
+    //  lorentz->Boost1_RestToLab(3, uString, xfRS, xfCM);
+    //  tProd = xfCM[0];
+    //  // fprintf(stderr,"  StringProcess::append_finalArray : non-zero uString\n");
+    //}
 
     final_pvec[0].push_back(E);
     final_pvec[1].push_back(px);
@@ -605,11 +633,11 @@ int StringProcess::append_finalArray(double *uString, double *evecLong) {
   free(XVertexPos);
   free(XVertexNeg);
 
-  free(pvRS);
-  free(pvCM);
+  //free(pvRS);
+  //free(pvCM);
 
-  free(xfRS);
-  free(xfCM);
+  //free(xfRS);
+  //free(xfCM);
 
   return ret;
 }
@@ -689,62 +717,67 @@ bool StringProcess::check_conservation() {
   return ret;
 }
 
-bool StringProcess::init(ParticleData &incomingA, ParticleData &incomingB){
+bool StringProcess::init(const ParticleDataList &incomingList){
   bool ret;
 
-  ret = true;
-  return ret;
-}
-
-bool StringProcess::init_lab(int idAIn, int idBIn, double massAIn, double massBIn,
-                       Pythia8::Vec4 plabAIn, Pythia8::Vec4 plabBIn) {
-  bool ret;
   int imu, inu;
 
-  double E, px, py, pz;
+  //double E, px, py, pz;
   double ex, ey, et;
   double theta, phi;
 
-  PDGidA = idAIn;
-  PDGidB = idBIn;
-  massA = massAIn;
-  massB = massBIn;
+  PDGidA = incomingList[0].pdgcode().get_decimal();
+  PDGidB = incomingList[1].pdgcode().get_decimal();
+  massA = incomingList[0].effective_mass();
+  massB = incomingList[1].effective_mass();
 
-  plabA[0] = plabAIn.e();
-  plabA[1] = plabAIn.px();
-  plabA[2] = plabAIn.py();
-  plabA[3] = plabAIn.pz();
+  plabA = incomingList[0].momentum();
+  //plabA[0] = incomingList[0].momentum().x0();
+  //plabA[1] = incomingList[0].momentum().x1();
+  //plabA[2] = incomingList[0].momentum().x2();
+  //plabA[3] = incomingList[0].momentum().x3();
 
-  plabB[0] = plabBIn.e();
-  plabB[1] = plabBIn.px();
-  plabB[2] = plabBIn.py();
-  plabB[3] = plabBIn.pz();
+  plabB = incomingList[1].momentum();
+  //plabB[0] = incomingList[1].momentum().x0();
+  //plabB[1] = incomingList[1].momentum().x1();
+  //plabB[2] = incomingList[1].momentum().x2();
+  //plabB[3] = incomingList[1].momentum().x3();
 
-  E = plabA[0] + plabB[0];
-  px = plabA[1] + plabB[1];
-  py = plabA[2] + plabB[2];
-  pz = plabA[3] + plabB[3];
-  sqrtsAB = sqrt(pow(fabs(E), 2.) - pow(fabs(px), 2.) - pow(fabs(py), 2.) -
-                 pow(fabs(pz), 2.));
-  pabscomAB = sqrt((pow(fabs(sqrtsAB), 2.) - pow(fabs(massA + massB), 2.)) *
-                   (pow(fabs(sqrtsAB), 2.) - pow(fabs(massA - massB), 2.))) /
-              (2. * sqrtsAB);
-  ucomAB[0] = E / sqrtsAB;
-  ucomAB[1] = px / sqrtsAB;
-  ucomAB[2] = py / sqrtsAB;
-  ucomAB[3] = pz / sqrtsAB;
+  //E = plabA[0] + plabB[0];
+  //px = plabA[1] + plabB[1];
+  //py = plabA[2] + plabB[2];
+  //pz = plabA[3] + plabB[3];
+  sqrtsAB = ( plabA + plabB ).abs();
+  //sqrtsAB = sqrt(pow(fabs(E), 2.) - pow(fabs(px), 2.) - pow(fabs(py), 2.) -
+  //               pow(fabs(pz), 2.));
+  pabscomAB = pCM(sqrtsAB, massA, massB);
+  //pabscomAB = sqrt((pow(fabs(sqrtsAB), 2.) - pow(fabs(massA + massB), 2.)) *
+  //                 (pow(fabs(sqrtsAB), 2.) - pow(fabs(massA - massB), 2.))) /
+  //            (2. * sqrtsAB);
+  ucomAB = ( plabA + plabB )/sqrtsAB;
+  //ucomAB[0] = E / sqrtsAB;
+  //ucomAB[1] = px / sqrtsAB;
+  //ucomAB[2] = py / sqrtsAB;
+  //ucomAB[3] = pz / sqrtsAB;
+  vcomAB = ucomAB.velocity();
 
-  lorentz->Boost1_LabToRest(3, ucomAB, plabA, pcomA);
-  lorentz->Boost1_LabToRest(3, ucomAB, plabB, pcomB);
+  pcomA = plabA.LorentzBoost(vcomAB);
+  //lorentz->Boost1_LabToRest(3, ucomAB, plabA, pcomA);
+  pcomB = plabB.LorentzBoost(vcomAB);
+  //lorentz->Boost1_LabToRest(3, ucomAB, plabB, pcomB);
 
-  if (fabs(pcomA[3]) < (1. - 1.0e-8) * pabscomAB) {
-    for (imu = 1; imu <= 3; imu++) {
-      evecBasisAB[3][imu] = pcomA[imu] / pabscomAB;
-    }
-    theta = acos(evecBasisAB[3][3]);
+  if (fabs(pcomA.x3()) < (1. - 1.0e-8) * pabscomAB) {
+    evecBasisAB[3] = pcomA.threevec() / pabscomAB;
+    //for (imu = 1; imu <= 3; imu++) {
+    //  evecBasisAB[3][imu] = pcomA[imu] / pabscomAB;
+    //}
+    theta = acos(evecBasisAB[3].x3());
+    //theta = acos(evecBasisAB[3][3]);
 
-    ex = evecBasisAB[3][1];
-    ey = evecBasisAB[3][2];
+    ex = evecBasisAB[3].x1();
+    ey = evecBasisAB[3].x2();
+    //ex = evecBasisAB[3][1];
+    //ey = evecBasisAB[3][2];
     et = sqrt(pow(fabs(ex), 2.) + pow(fabs(ey), 2.));
     if (ey > 0.) {
       phi = acos(ex / et);
@@ -752,36 +785,62 @@ bool StringProcess::init_lab(int idAIn, int idBIn, double massAIn, double massBI
       phi = -acos(ex / et);
     }
 
-    evecBasisAB[1][1] = cos(theta) * cos(phi);
-    evecBasisAB[1][2] = cos(theta) * sin(phi);
-    evecBasisAB[1][3] = -sin(theta);
+    evecBasisAB[1].set_x1( cos(theta) * cos(phi) );
+    evecBasisAB[1].set_x2( cos(theta) * sin(phi) );
+    evecBasisAB[1].set_x3( -sin(theta) );
+    //evecBasisAB[1][1] = cos(theta) * cos(phi);
+    //evecBasisAB[1][2] = cos(theta) * sin(phi);
+    //evecBasisAB[1][3] = -sin(theta);
 
-    evecBasisAB[2][1] = -sin(phi);
-    evecBasisAB[2][2] = cos(phi);
-    evecBasisAB[2][3] = 0.;
+    evecBasisAB[2].set_x1( -sin(phi) );
+    evecBasisAB[2].set_x2( cos(phi) );
+    evecBasisAB[2].set_x3( 0. );
+    //evecBasisAB[2][1] = -sin(phi);
+    //evecBasisAB[2][2] = cos(phi);
+    //evecBasisAB[2][3] = 0.;
   } else {
-    if (pcomA[3] > 0.) {
-      for (imu = 1; imu <= 3; imu++) {
-        for (inu = 1; inu <= 3; inu++) {
-          if (imu == inu) {
-            evecBasisAB[imu][inu] = 1.;
-          } else {
-            evecBasisAB[imu][inu] = 0.;
-          }
-        }
-      }
+    if (pcomA.x3() > 0.) {
+      evecBasisAB[1].set_x1( 1. );
+      evecBasisAB[1].set_x2( 0. );
+      evecBasisAB[1].set_x3( 0. );
+
+      evecBasisAB[2].set_x1( 0. );
+      evecBasisAB[2].set_x2( 1. );
+      evecBasisAB[2].set_x3( 0. );
+
+      evecBasisAB[3].set_x1( 0. );
+      evecBasisAB[3].set_x2( 0. );
+      evecBasisAB[3].set_x3( 1. );
+      //for (imu = 1; imu <= 3; imu++) {
+      //  for (inu = 1; inu <= 3; inu++) {
+      //    if (imu == inu) {
+      //      evecBasisAB[imu][inu] = 1.;
+      //    } else {
+      //      evecBasisAB[imu][inu] = 0.;
+      //    }
+      //  }
+      //}
     } else {
-      evecBasisAB[1][1] = 0.;
-      evecBasisAB[1][2] = 1.;
-      evecBasisAB[1][3] = 0.;
+      evecBasisAB[1].set_x1( 0. );
+      evecBasisAB[1].set_x2( 1. );
+      evecBasisAB[1].set_x3( 0. );
+      //evecBasisAB[1][1] = 0.;
+      //evecBasisAB[1][2] = 1.;
+      //evecBasisAB[1][3] = 0.;
 
-      evecBasisAB[2][1] = 1.;
-      evecBasisAB[2][2] = 0.;
-      evecBasisAB[2][3] = 0.;
+      evecBasisAB[2].set_x1( 1. );
+      evecBasisAB[2].set_x2( 0. );
+      evecBasisAB[2].set_x3( 0. );
+      //evecBasisAB[2][1] = 1.;
+      //evecBasisAB[2][2] = 0.;
+      //evecBasisAB[2][3] = 0.;
 
-      evecBasisAB[3][1] = 0.;
-      evecBasisAB[3][2] = 0.;
-      evecBasisAB[3][3] = -1.;
+      evecBasisAB[3].set_x1( 0. );
+      evecBasisAB[3].set_x2( 0. );
+      evecBasisAB[3].set_x3( -1. );
+      //evecBasisAB[3][1] = 0.;
+      //evecBasisAB[3][2] = 0.;
+      //evecBasisAB[3][3] = -1.;
     }
   }
 
@@ -818,10 +877,209 @@ bool StringProcess::init_lab(int idAIn, int idBIn, double massAIn, double massBI
 
   BINI = baryonA + baryonB;
   CINI = chargeA + chargeB;
-  EINI = plabA[0] + plabB[0];
-  pxINI = plabA[1] + plabB[1];
-  pyINI = plabA[2] + plabB[2];
-  pzINI = plabA[3] + plabB[3];
+  EINI = ( plabA + plabB ).x0();
+  //EINI = plabA[0] + plabB[0];
+  pxINI = ( plabA + plabB ).x1();
+  //pxINI = plabA[1] + plabB[1];
+  pyINI = ( plabA + plabB ).x2();
+  //pyINI = plabA[2] + plabB[2];
+  pzINI = ( plabA + plabB ).x3();
+  //pzINI = plabA[3] + plabB[3];
+
+  //ret = sigmaTot.calc(PDGidA, PDGidB, sqrtsAB);
+  //XSecTot = sigmaTot.sigmaTot();
+  //XSecEl = sigmaTot.sigmaEl();
+  //XSecAX = sigmaTot.sigmaAX();
+  //XSecXB = sigmaTot.sigmaXB();
+  //XSecXX = sigmaTot.sigmaXX();
+  //XSecAXB = sigmaTot.sigmaAXB();
+  //XSecInel = XSecTot - XSecEl;
+  //XSecND = XSecInel - XSecAX - XSecXB - XSecXX;
+
+  //XSecSummed[0] = 0.;
+  //XSecSummed[1] = XSecAX;
+  //XSecSummed[2] = XSecSummed[1] + XSecXB;
+  //XSecSummed[3] = XSecSummed[2] + XSecXX;
+  //XSecSummed[4] = XSecSummed[3] + XSecND;
+
+  ret = true;
+  return ret;
+}
+
+bool StringProcess::init_lab(int idAIn, int idBIn, double massAIn, double massBIn,
+                       Pythia8::Vec4 plabAIn, Pythia8::Vec4 plabBIn) {
+  bool ret;
+  int imu, inu;
+
+  //double E, px, py, pz;
+  double ex, ey, et;
+  double theta, phi;
+
+  PDGidA = idAIn;
+  PDGidB = idBIn;
+  massA = massAIn;
+  massB = massBIn;
+
+  plabA.set_x0( plabAIn.e() );
+  plabA.set_x1( plabAIn.px() );
+  plabA.set_x2( plabAIn.py() );
+  plabA.set_x3( plabAIn.pz() );
+  //plabA[0] = plabAIn.e();
+  //plabA[1] = plabAIn.px();
+  //plabA[2] = plabAIn.py();
+  //plabA[3] = plabAIn.pz();
+
+  plabB.set_x0( plabBIn.e() );
+  plabB.set_x1( plabBIn.px() );
+  plabB.set_x2( plabBIn.py() );
+  plabB.set_x3( plabBIn.pz() );
+  //plabB[0] = plabBIn.e();
+  //plabB[1] = plabBIn.px();
+  //plabB[2] = plabBIn.py();
+  //plabB[3] = plabBIn.pz();
+
+  //E = plabA[0] + plabB[0];
+  //px = plabA[1] + plabB[1];
+  //py = plabA[2] + plabB[2];
+  //pz = plabA[3] + plabB[3];
+  sqrtsAB = ( plabA + plabB ).abs();
+  //sqrtsAB = sqrt(pow(fabs(E), 2.) - pow(fabs(px), 2.) - pow(fabs(py), 2.) -
+  //               pow(fabs(pz), 2.));
+  pabscomAB = pCM(sqrtsAB, massA, massB);
+  //pabscomAB = sqrt((pow(fabs(sqrtsAB), 2.) - pow(fabs(massA + massB), 2.)) *
+  //                 (pow(fabs(sqrtsAB), 2.) - pow(fabs(massA - massB), 2.))) /
+  //            (2. * sqrtsAB);
+  ucomAB = ( plabA + plabB )/sqrtsAB;
+  //ucomAB[0] = E / sqrtsAB;
+  //ucomAB[1] = px / sqrtsAB;
+  //ucomAB[2] = py / sqrtsAB;
+  //ucomAB[3] = pz / sqrtsAB;
+  vcomAB = ucomAB.velocity();
+
+  pcomA = plabA.LorentzBoost(vcomAB);
+  //lorentz->Boost1_LabToRest(3, ucomAB, plabA, pcomA);
+  pcomB = plabB.LorentzBoost(vcomAB);
+  //lorentz->Boost1_LabToRest(3, ucomAB, plabB, pcomB);
+
+  if (fabs(pcomA.x3()) < (1. - 1.0e-8) * pabscomAB) {
+    evecBasisAB[3] = pcomA.threevec() / pabscomAB;
+    //for (imu = 1; imu <= 3; imu++) {
+    //  evecBasisAB[3][imu] = pcomA[imu] / pabscomAB;
+    //}
+    theta = acos(evecBasisAB[3].x3());
+    //theta = acos(evecBasisAB[3][3]);
+
+    ex = evecBasisAB[3].x1();
+    ey = evecBasisAB[3].x2();
+    //ex = evecBasisAB[3][1];
+    //ey = evecBasisAB[3][2];
+    et = sqrt(pow(fabs(ex), 2.) + pow(fabs(ey), 2.));
+    if (ey > 0.) {
+      phi = acos(ex / et);
+    } else {
+      phi = -acos(ex / et);
+    }
+
+    evecBasisAB[1].set_x1( cos(theta) * cos(phi) );
+    evecBasisAB[1].set_x2( cos(theta) * sin(phi) );
+    evecBasisAB[1].set_x3( -sin(theta) );
+    //evecBasisAB[1][1] = cos(theta) * cos(phi);
+    //evecBasisAB[1][2] = cos(theta) * sin(phi);
+    //evecBasisAB[1][3] = -sin(theta);
+
+    evecBasisAB[2].set_x1( -sin(phi) );
+    evecBasisAB[2].set_x2( cos(phi) );
+    evecBasisAB[2].set_x3( 0. );
+    //evecBasisAB[2][1] = -sin(phi);
+    //evecBasisAB[2][2] = cos(phi);
+    //evecBasisAB[2][3] = 0.;
+  } else {
+    if (pcomA.x3() > 0.) {
+      evecBasisAB[1].set_x1( 1. );
+      evecBasisAB[1].set_x2( 0. );
+      evecBasisAB[1].set_x3( 0. );
+
+      evecBasisAB[2].set_x1( 0. );
+      evecBasisAB[2].set_x2( 1. );
+      evecBasisAB[2].set_x3( 0. );
+
+      evecBasisAB[3].set_x1( 0. );
+      evecBasisAB[3].set_x2( 0. );
+      evecBasisAB[3].set_x3( 1. );
+      //for (imu = 1; imu <= 3; imu++) {
+      //  for (inu = 1; inu <= 3; inu++) {
+      //    if (imu == inu) {
+      //      evecBasisAB[imu][inu] = 1.;
+      //    } else {
+      //      evecBasisAB[imu][inu] = 0.;
+      //    }
+      //  }
+      //}
+    } else {
+      evecBasisAB[1].set_x1( 0. );
+      evecBasisAB[1].set_x2( 1. );
+      evecBasisAB[1].set_x3( 0. );
+      //evecBasisAB[1][1] = 0.;
+      //evecBasisAB[1][2] = 1.;
+      //evecBasisAB[1][3] = 0.;
+
+      evecBasisAB[2].set_x1( 1. );
+      evecBasisAB[2].set_x2( 0. );
+      evecBasisAB[2].set_x3( 0. );
+      //evecBasisAB[2][1] = 1.;
+      //evecBasisAB[2][2] = 0.;
+      //evecBasisAB[2][3] = 0.;
+
+      evecBasisAB[3].set_x1( 0. );
+      evecBasisAB[3].set_x2( 0. );
+      evecBasisAB[3].set_x3( -1. );
+      //evecBasisAB[3][1] = 0.;
+      //evecBasisAB[3][2] = 0.;
+      //evecBasisAB[3][3] = -1.;
+    }
+  }
+
+  // fprintf(stderr,"  StringProcess::init : evecBasisAB1 = (%e, %e, %e)\n",
+  //	evecBasisAB[1][1], evecBasisAB[1][2], evecBasisAB[1][3]);
+  // fprintf(stderr,"  StringProcess::init : evecBasisAB2 = (%e, %e, %e)\n",
+  //	evecBasisAB[2][1], evecBasisAB[2][2], evecBasisAB[2][3]);
+  // fprintf(stderr,"  StringProcess::init : evecBasisAB3 = (%e, %e, %e)\n",
+  //	evecBasisAB[3][1], evecBasisAB[3][2], evecBasisAB[3][3]);
+
+  PDGid2idqset(PDGidA, idqsetA);
+  PDGid2idqset(PDGidB, idqsetB);
+
+  xfracMin = pLightConeMin / sqrtsAB;
+
+  // quantum numbers of hadron A
+  baryonA = pythia->particleData.baryonNumberType(idqsetA[1]) +
+            pythia->particleData.baryonNumberType(idqsetA[2]);
+  chargeA = pythia->particleData.chargeType(idqsetA[1]) +
+            pythia->particleData.chargeType(idqsetA[2]);
+  if (idqsetA[3] != 0) {
+    baryonA = baryonA + pythia->particleData.baryonNumberType(idqsetA[3]);
+    chargeA = chargeA + pythia->particleData.chargeType(idqsetA[3]);
+  }
+  // quantum numbers of hadron B
+  baryonB = pythia->particleData.baryonNumberType(idqsetB[1]) +
+            pythia->particleData.baryonNumberType(idqsetB[2]);
+  chargeB = pythia->particleData.chargeType(idqsetB[1]) +
+            pythia->particleData.chargeType(idqsetB[2]);
+  if (idqsetB[3] != 0) {
+    baryonB = baryonB + pythia->particleData.baryonNumberType(idqsetB[3]);
+    chargeB = chargeB + pythia->particleData.chargeType(idqsetB[3]);
+  }
+
+  BINI = baryonA + baryonB;
+  CINI = chargeA + chargeB;
+  EINI = ( plabA + plabB ).x0();
+  //EINI = plabA[0] + plabB[0];
+  pxINI = ( plabA + plabB ).x1();
+  //pxINI = plabA[1] + plabB[1];
+  pyINI = ( plabA + plabB ).x2();
+  //pyINI = plabA[2] + plabB[2];
+  pzINI = ( plabA + plabB ).x3();
+  //pzINI = plabA[3] + plabB[3];
 
   //ret = sigmaTot.calc(PDGidA, PDGidB, sqrtsAB);
   //XSecTot = sigmaTot.sigmaTot();
@@ -848,49 +1106,64 @@ bool StringProcess::init_com(int idAIn, int idBIn, double massAIn, double massBI
   bool ret;
   int imu, inu;
 
-  double E, px, py, pz;
+  //double E, px, py, pz;
 
   PDGidA = idAIn;
   PDGidB = idBIn;
   massA = massAIn;
   massB = massBIn;
   sqrtsAB = sqrtsABIn;
-  pabscomAB = sqrt((pow(fabs(sqrtsAB), 2.) - pow(fabs(massA + massB), 2.)) *
-                   (pow(fabs(sqrtsAB), 2.) - pow(fabs(massA - massB), 2.))) /
-              (2. * sqrtsAB);
+  pabscomAB = pCM(sqrtsAB, massA, massB);
+  //pabscomAB = sqrt((pow(fabs(sqrtsAB), 2.) - pow(fabs(massA + massB), 2.)) *
+  //                 (pow(fabs(sqrtsAB), 2.) - pow(fabs(massA - massB), 2.))) /
+  //            (2. * sqrtsAB);
 
-  plabA[0] = sqrt(pow(fabs(massA), 2.) + pow(fabs(pabscomAB), 2.));
-  plabA[1] = 0.;
-  plabA[2] = 0.;
-  plabA[3] = pabscomAB;
+  plabA.set_x0( sqrt(pow(fabs(massA), 2.) + pow(fabs(pabscomAB), 2.)) );
+  plabA.set_x1( 0. );
+  plabA.set_x2( 0. );
+  plabA.set_x3( pabscomAB );
 
-  plabB[0] = sqrt(pow(fabs(massB), 2.) + pow(fabs(pabscomAB), 2.));
-  plabB[1] = 0.;
-  plabB[2] = 0.;
-  plabB[3] = -pabscomAB;
+  plabB.set_x0( sqrt(pow(fabs(massB), 2.) + pow(fabs(pabscomAB), 2.)) );
+  plabB.set_x1( 0. );
+  plabB.set_x2( 0. );
+  plabB.set_x3( -pabscomAB );
 
-  E = sqrtsAB;
-  px = 0.;
-  py = 0.;
-  pz = 0.;
+  //E = plabA[0] + plabB[0];
+  //px = plabA[1] + plabB[1];
+  //py = plabA[2] + plabB[2];
+  //pz = plabA[3] + plabB[3];
+  ucomAB = ( plabA + plabB )/sqrtsAB;
+  //ucomAB[0] = E / sqrtsAB;
+  //ucomAB[1] = px / sqrtsAB;
+  //ucomAB[2] = py / sqrtsAB;
+  //ucomAB[3] = pz / sqrtsAB;
+  vcomAB = ucomAB.velocity();
 
-  ucomAB[0] = E / sqrtsAB;
-  ucomAB[1] = px / sqrtsAB;
-  ucomAB[2] = py / sqrtsAB;
-  ucomAB[3] = pz / sqrtsAB;
+  pcomA = plabA.LorentzBoost(vcomAB);
+  //lorentz->Boost1_LabToRest(3, ucomAB, plabA, pcomA);
+  pcomB = plabB.LorentzBoost(vcomAB);
+  //lorentz->Boost1_LabToRest(3, ucomAB, plabB, pcomB);
 
-  lorentz->Boost1_LabToRest(3, ucomAB, plabA, pcomA);
-  lorentz->Boost1_LabToRest(3, ucomAB, plabB, pcomB);
+  evecBasisAB[1].set_x1( 1. );
+  evecBasisAB[1].set_x2( 0. );
+  evecBasisAB[1].set_x3( 0. );
 
-  for (imu = 1; imu <= 3; imu++) {
-    for (inu = 1; inu <= 3; inu++) {
-      if (imu == inu) {
-        evecBasisAB[imu][inu] = 1.;
-      } else {
-        evecBasisAB[imu][inu] = 0.;
-      }
-    }
-  }
+  evecBasisAB[2].set_x1( 0. );
+  evecBasisAB[2].set_x2( 1. );
+  evecBasisAB[2].set_x3( 0. );
+ 
+  evecBasisAB[3].set_x1( 0. );
+  evecBasisAB[3].set_x2( 0. );
+  evecBasisAB[3].set_x3( 1. );
+  //for (imu = 1; imu <= 3; imu++) {
+  //  for (inu = 1; inu <= 3; inu++) {
+  //    if (imu == inu) {
+  //      evecBasisAB[imu][inu] = 1.;
+  //    } else {
+  //      evecBasisAB[imu][inu] = 0.;
+  //    }
+  //  }
+  //}
 
   // fprintf(stderr,"  StringProcess::init : evecBasisAB1 = (%e, %e, %e)\n",
   //	evecBasisAB[1][1], evecBasisAB[1][2], evecBasisAB[1][3]);
@@ -925,10 +1198,14 @@ bool StringProcess::init_com(int idAIn, int idBIn, double massAIn, double massBI
 
   BINI = baryonA + baryonB;
   CINI = chargeA + chargeB;
-  EINI = plabA[0] + plabB[0];
-  pxINI = plabA[1] + plabB[1];
-  pyINI = plabA[2] + plabB[2];
-  pzINI = plabA[3] + plabB[3];
+  EINI = ( plabA + plabB ).x0();
+  //EINI = plabA[0] + plabB[0];
+  pxINI = ( plabA + plabB ).x1();
+  //pxINI = plabA[1] + plabB[1];
+  pyINI = ( plabA + plabB ).x2();
+  //pyINI = plabA[2] + plabB[2];
+  pzINI = ( plabA + plabB ).x3();
+  //pzINI = plabA[3] + plabB[3];
 
   //ret = sigmaTot.calc(PDGidA, PDGidB, sqrtsAB);
   //XSecTot = sigmaTot.sigmaTot();
@@ -987,30 +1264,42 @@ bool StringProcess::next_SDiff_AX() {
   int nfrag;
   int idqX1, idqX2;
 
-  double *pstrHcom;
-  double *pstrHlab;
-  double *pstrXcom;
-  double *pstrXlab;
+  FourVector pstrHcom;
+  FourVector pstrHlab;
+  FourVector pstrXcom;
+  FourVector pstrXlab;
+  //double *pstrHcom;
+  //double *pstrHlab;
+  //double *pstrXcom;
+  //double *pstrXlab;
+  ThreeVector threeMomentum;
 
-  double *ustrHcom;
-  double *ustrHlab;
-  double *ustrXcom;
-  double *ustrXlab;
+  FourVector ustrHcom;
+  FourVector ustrHlab;
+  FourVector ustrXcom;
+  FourVector ustrXlab;
+  //double *ustrHcom;
+  //double *ustrHlab;
+  //double *ustrXcom;
+  //double *ustrXlab;
 
   double pabs;
-  double *pnull;
-  double *prs;
-  double *evec;
+  FourVector pnull;
+  //double *pnull;
+  FourVector prs;
+  //double *prs;
+  ThreeVector evec;
+  //double *evec;
 
-  pstrHcom = static_cast<double *>(malloc(4 * sizeof(double)));
-  pstrHlab = static_cast<double *>(malloc(4 * sizeof(double)));
-  pstrXcom = static_cast<double *>(malloc(4 * sizeof(double)));
-  pstrXlab = static_cast<double *>(malloc(4 * sizeof(double)));
+  //pstrHcom = static_cast<double *>(malloc(4 * sizeof(double)));
+  //pstrHlab = static_cast<double *>(malloc(4 * sizeof(double)));
+  //pstrXcom = static_cast<double *>(malloc(4 * sizeof(double)));
+  //pstrXlab = static_cast<double *>(malloc(4 * sizeof(double)));
 
-  ustrHcom = static_cast<double *>(malloc(4 * sizeof(double)));
-  ustrHlab = static_cast<double *>(malloc(4 * sizeof(double)));
-  ustrXcom = static_cast<double *>(malloc(4 * sizeof(double)));
-  ustrXlab = static_cast<double *>(malloc(4 * sizeof(double)));
+  //ustrHcom = static_cast<double *>(malloc(4 * sizeof(double)));
+  //ustrHlab = static_cast<double *>(malloc(4 * sizeof(double)));
+  //ustrXcom = static_cast<double *>(malloc(4 * sizeof(double)));
+  //ustrXlab = static_cast<double *>(malloc(4 * sizeof(double)));
 
   reset_finalArray();
 
@@ -1038,9 +1327,10 @@ bool StringProcess::next_SDiff_AX() {
 
     rmass = log(mstrMax / mstrMin) * Random::uniform(0., 1.);
     massX = mstrMin * exp(rmass);
-    pabscomAX = sqrt((pow(fabs(sqrtsAB), 2.) - pow(fabs(massA + massX), 2.)) *
-                     (pow(fabs(sqrtsAB), 2.) - pow(fabs(massA - massX), 2.))) /
-                (2. * sqrtsAB);
+    pabscomAX = pCM( sqrtsAB, massA, massX );
+    //pabscomAX = sqrt((pow(fabs(sqrtsAB), 2.) - pow(fabs(massA + massX), 2.)) *
+    //                 (pow(fabs(sqrtsAB), 2.) - pow(fabs(massA - massX), 2.))) /
+    //            (2. * sqrtsAB);
 
     foundPabsX = pabscomAX > QTrn;
     foundMassX = massX > (pythia->particleData.m0(idqX1) +
@@ -1049,18 +1339,32 @@ bool StringProcess::next_SDiff_AX() {
 
   ret = false;
   if ((foundPabsX == true) && (foundMassX == true)) {
-    pstrHcom[0] = sqrt(pow(fabs(pabscomAX), 2.) + pow(fabs(massA), 2.));
-    pstrXcom[0] = sqrt(pow(fabs(pabscomAX), 2.) + pow(fabs(massX), 2.));
-    for (imu = 1; imu < 4; imu++) {
-      pstrHcom[imu] = evecBasisAB[3][imu] *
-                          sqrt(pow(fabs(pabscomAX), 2.) - pow(fabs(QTrn), 2.)) +
-                      evecBasisAB[1][imu] * QTrn * cos(phiQ) +
-                      evecBasisAB[2][imu] * QTrn * sin(phiQ);
-      pstrXcom[imu] = -evecBasisAB[3][imu] *
-                          sqrt(pow(fabs(pabscomAX), 2.) - pow(fabs(QTrn), 2.)) -
-                      evecBasisAB[1][imu] * QTrn * cos(phiQ) -
-                      evecBasisAB[2][imu] * QTrn * sin(phiQ);
-    }
+    pstrHcom.set_x0( sqrt(pow(fabs(pabscomAX), 2.) + pow(fabs(massA), 2.)) );
+    pstrXcom.set_x0( sqrt(pow(fabs(pabscomAX), 2.) + pow(fabs(massX), 2.)) );
+    //pstrHcom[0] = sqrt(pow(fabs(pabscomAX), 2.) + pow(fabs(massA), 2.));
+    //pstrXcom[0] = sqrt(pow(fabs(pabscomAX), 2.) + pow(fabs(massX), 2.));
+    threeMomentum = evecBasisAB[3] * sqrt(pow(fabs(pabscomAX), 2.) - pow(fabs(QTrn), 2.)) +
+                        evecBasisAB[1] * QTrn * cos(phiQ) +
+                        evecBasisAB[2] * QTrn * sin(phiQ);
+    pstrHcom.set_x1( threeMomentum.x1() );
+    pstrHcom.set_x2( threeMomentum.x2() );
+    pstrHcom.set_x3( threeMomentum.x3() );
+    threeMomentum = -evecBasisAB[3] * sqrt(pow(fabs(pabscomAX), 2.) - pow(fabs(QTrn), 2.)) -
+                        evecBasisAB[1] * QTrn * cos(phiQ) -
+                        evecBasisAB[2] * QTrn * sin(phiQ);
+    pstrXcom.set_x1( threeMomentum.x1() );
+    pstrXcom.set_x2( threeMomentum.x2() );
+    pstrXcom.set_x3( threeMomentum.x3() );
+    //for (imu = 1; imu < 4; imu++) {
+    //  pstrHcom[imu] = evecBasisAB[3][imu] *
+    //                      sqrt(pow(fabs(pabscomAX), 2.) - pow(fabs(QTrn), 2.)) +
+    //                  evecBasisAB[1][imu] * QTrn * cos(phiQ) +
+    //                  evecBasisAB[2][imu] * QTrn * sin(phiQ);
+    //  pstrXcom[imu] = -evecBasisAB[3][imu] *
+    //                      sqrt(pow(fabs(pabscomAX), 2.) - pow(fabs(QTrn), 2.)) -
+    //                  evecBasisAB[1][imu] * QTrn * cos(phiQ) -
+    //                  evecBasisAB[2][imu] * QTrn * sin(phiQ);
+    //}
     // fprintf(stderr,"  StringProcess::next_SDiff_AX : pstrXcom = (%e, %e, %e, %e)
     // GeV\n",
     //	pstrXcom[0], pstrXcom[1], pstrXcom[2], pstrXcom[3]);
@@ -1069,32 +1373,46 @@ bool StringProcess::next_SDiff_AX() {
     // idqX1, idqX2);
     // fprintf(stderr,"  StringProcess::next_SDiff_AX : massX = %e GeV\n", massX);
 
-    pnull = static_cast<double *>(malloc(4 * sizeof(double)));
-    prs = static_cast<double *>(malloc(4 * sizeof(double)));
-    evec = static_cast<double *>(malloc(4 * sizeof(double)));
+    //pnull = static_cast<double *>(malloc(4 * sizeof(double)));
+    //prs = static_cast<double *>(malloc(4 * sizeof(double)));
+    //evec = static_cast<double *>(malloc(4 * sizeof(double)));
 
-    lorentz->Boost1_RestToLab(3, ucomAB, pstrHcom, pstrHlab);
-    lorentz->Boost1_RestToLab(3, ucomAB, pstrXcom, pstrXlab);
-    for (imu = 0; imu < 4; imu++) {
-      ustrHcom[imu] = pstrHcom[imu] / massA;
-      ustrXcom[imu] = pstrXcom[imu] / massX;
+    pstrHlab = pstrHcom.LorentzBoost( -vcomAB );
+    pstrXlab = pstrXcom.LorentzBoost( -vcomAB );
+    //lorentz->Boost1_RestToLab(3, ucomAB, pstrHcom, pstrHlab);
+    //lorentz->Boost1_RestToLab(3, ucomAB, pstrXcom, pstrXlab);
+    ustrHcom = pstrHcom / massA;
+    ustrXcom = pstrXcom / massX;
+    ustrHlab = pstrHlab / massA;
+    ustrXlab = pstrXlab / massX;
+    //for (imu = 0; imu < 4; imu++) {
+    //  ustrHcom[imu] = pstrHcom[imu] / massA;
+    //  ustrXcom[imu] = pstrXcom[imu] / massX;
 
-      ustrHlab[imu] = pstrHlab[imu] / massA;
-      ustrXlab[imu] = pstrXlab[imu] / massX;
-    }
+    //  ustrHlab[imu] = pstrHlab[imu] / massA;
+    //  ustrXlab[imu] = pstrXlab[imu] / massX;
+    //}
 
-    for (imu = 1; imu < 4; imu++) {
-      pnull[imu] = pstrXcom[imu];
-    }
-    pnull[0] = sqrt(pow(fabs(pnull[1]), 2.) + pow(fabs(pnull[2]), 2.) +
-                    pow(fabs(pnull[3]), 2.));
-    lorentz->Boost1_LabToRest(3, ustrXcom, pnull, prs);
-    pabs = sqrt(pow(fabs(prs[1]), 2.) + pow(fabs(prs[2]), 2.) +
-                pow(fabs(prs[3]), 2.));
-    evec[0] = 0.;
-    for (imu = 1; imu < 4; imu++) {
-      evec[imu] = prs[imu] / pabs;
-    }
+    threeMomentum = pstrXcom.threevec();
+    pnull.set_x0( threeMomentum.abs() );
+    pnull.set_x1( threeMomentum.x1() );
+    pnull.set_x2( threeMomentum.x2() );
+    pnull.set_x3( threeMomentum.x3() );
+    //for (imu = 1; imu < 4; imu++) {
+    //  pnull[imu] = pstrXcom[imu];
+    //}
+    //pnull[0] = sqrt(pow(fabs(pnull[1]), 2.) + pow(fabs(pnull[2]), 2.) +
+    //                pow(fabs(pnull[3]), 2.));
+    prs = pnull.LorentzBoost( ustrXcom.velocity() );
+    pabs = prs.threevec().abs();
+    //lorentz->Boost1_LabToRest(3, ustrXcom, pnull, prs);
+    //pabs = sqrt(pow(fabs(prs[1]), 2.) + pow(fabs(prs[2]), 2.) +
+    //            pow(fabs(prs[3]), 2.));
+    evec = prs.threevec() / pabs;
+    //evec[0] = 0.;
+    //for (imu = 1; imu < 4; imu++) {
+    //  evec[imu] = prs[imu] / pabs;
+    //}
     // fprintf(stderr,"  StringProcess::next_SDiff_AX : evec = (%e, %e, %e)\n",
     // evec[1], evec[2], evec[3]);
     nfrag = fragmentString(idqX1, idqX2, massX, evec, false);
@@ -1109,10 +1427,10 @@ bool StringProcess::next_SDiff_AX() {
     NpartString2 = 1;
     final_PDGid[0].push_back(PDGidA);
     final_PDGid[1].push_back(1);
-    final_pvec[0].push_back(pstrHlab[0]);
-    final_pvec[1].push_back(pstrHlab[1]);
-    final_pvec[2].push_back(pstrHlab[2]);
-    final_pvec[3].push_back(pstrHlab[3]);
+    final_pvec[0].push_back(pstrHlab.x0());
+    final_pvec[1].push_back(pstrHlab.x1());
+    final_pvec[2].push_back(pstrHlab.x2());
+    final_pvec[3].push_back(pstrHlab.x3());
     final_pvec[4].push_back(massA);
     final_tform[0].push_back(0.);
     final_tform[1].push_back(1.);
@@ -1122,20 +1440,20 @@ bool StringProcess::next_SDiff_AX() {
       ret = true;
     }
 
-    free(pnull);
-    free(prs);
-    free(evec);
+    //free(pnull);
+    //free(prs);
+    //free(evec);
   }
 
-  free(pstrHcom);
-  free(pstrHlab);
-  free(pstrXcom);
-  free(pstrXlab);
+  //free(pstrHcom);
+  //free(pstrHlab);
+  //free(pstrXcom);
+  //free(pstrXlab);
 
-  free(ustrHcom);
-  free(ustrHlab);
-  free(ustrXcom);
-  free(ustrXlab);
+  //free(ustrHcom);
+  //free(ustrHlab);
+  //free(ustrXcom);
+  //free(ustrXlab);
 
   if (ret == true) {
     conserved = check_conservation();
@@ -1159,30 +1477,42 @@ bool StringProcess::next_SDiff_XB() {
   int nfrag;
   int idqX1, idqX2;
 
-  double *pstrHcom;
-  double *pstrHlab;
-  double *pstrXcom;
-  double *pstrXlab;
+  FourVector pstrHcom;
+  FourVector pstrHlab;
+  FourVector pstrXcom;
+  FourVector pstrXlab;
+  //double *pstrHcom;
+  //double *pstrHlab;
+  //double *pstrXcom;
+  //double *pstrXlab;
+  ThreeVector threeMomentum;
 
-  double *ustrHcom;
-  double *ustrHlab;
-  double *ustrXcom;
-  double *ustrXlab;
+  FourVector ustrHcom;
+  FourVector ustrHlab;
+  FourVector ustrXcom;
+  FourVector ustrXlab;
+  //double *ustrHcom;
+  //double *ustrHlab;
+  //double *ustrXcom;
+  //double *ustrXlab;
 
   double pabs;
-  double *pnull;
-  double *prs;
-  double *evec;
+  FourVector pnull;
+  //double *pnull;
+  FourVector prs;
+  //double *prs;
+  ThreeVector evec;
+  //double *evec;
 
-  pstrHcom = static_cast<double *>(malloc(4 * sizeof(double)));
-  pstrHlab = static_cast<double *>(malloc(4 * sizeof(double)));
-  pstrXcom = static_cast<double *>(malloc(4 * sizeof(double)));
-  pstrXlab = static_cast<double *>(malloc(4 * sizeof(double)));
+  //pstrHcom = static_cast<double *>(malloc(4 * sizeof(double)));
+  //pstrHlab = static_cast<double *>(malloc(4 * sizeof(double)));
+  //pstrXcom = static_cast<double *>(malloc(4 * sizeof(double)));
+  //pstrXlab = static_cast<double *>(malloc(4 * sizeof(double)));
 
-  ustrHcom = static_cast<double *>(malloc(4 * sizeof(double)));
-  ustrHlab = static_cast<double *>(malloc(4 * sizeof(double)));
-  ustrXcom = static_cast<double *>(malloc(4 * sizeof(double)));
-  ustrXlab = static_cast<double *>(malloc(4 * sizeof(double)));
+  //ustrHcom = static_cast<double *>(malloc(4 * sizeof(double)));
+  //ustrHlab = static_cast<double *>(malloc(4 * sizeof(double)));
+  //ustrXcom = static_cast<double *>(malloc(4 * sizeof(double)));
+  //ustrXlab = static_cast<double *>(malloc(4 * sizeof(double)));
 
   reset_finalArray();
 
@@ -1210,9 +1540,10 @@ bool StringProcess::next_SDiff_XB() {
 
     rmass = log(mstrMax / mstrMin) * Random::uniform(0., 1.);
     massX = mstrMin * exp(rmass);
-    pabscomXB = sqrt((pow(fabs(sqrtsAB), 2.) - pow(fabs(massB + massX), 2.)) *
-                     (pow(fabs(sqrtsAB), 2.) - pow(fabs(massB - massX), 2.))) /
-                (2. * sqrtsAB);
+    pabscomXB = pCM( sqrtsAB, massX, massB );
+    //pabscomXB = sqrt((pow(fabs(sqrtsAB), 2.) - pow(fabs(massB + massX), 2.)) *
+    //                 (pow(fabs(sqrtsAB), 2.) - pow(fabs(massB - massX), 2.))) /
+    //            (2. * sqrtsAB);
 
     foundPabsX = pabscomXB > QTrn;
     foundMassX = massX > (pythia->particleData.m0(idqX1) +
@@ -1221,18 +1552,32 @@ bool StringProcess::next_SDiff_XB() {
 
   ret = false;
   if ((foundPabsX == true) && (foundMassX == true)) {
-    pstrHcom[0] = sqrt(pow(fabs(pabscomXB), 2.) + pow(fabs(massB), 2.));
-    pstrXcom[0] = sqrt(pow(fabs(pabscomXB), 2.) + pow(fabs(massX), 2.));
-    for (imu = 1; imu < 4; imu++) {
-      pstrHcom[imu] = -evecBasisAB[3][imu] *
-                          sqrt(pow(fabs(pabscomXB), 2.) - pow(fabs(QTrn), 2.)) -
-                      evecBasisAB[1][imu] * QTrn * cos(phiQ) -
-                      evecBasisAB[2][imu] * QTrn * sin(phiQ);
-      pstrXcom[imu] = evecBasisAB[3][imu] *
-                          sqrt(pow(fabs(pabscomXB), 2.) - pow(fabs(QTrn), 2.)) +
-                      evecBasisAB[1][imu] * QTrn * cos(phiQ) +
-                      evecBasisAB[2][imu] * QTrn * sin(phiQ);
-    }
+    pstrHcom.set_x0( sqrt(pow(fabs(pabscomXB), 2.) + pow(fabs(massB), 2.)) );
+    pstrXcom.set_x0( sqrt(pow(fabs(pabscomXB), 2.) + pow(fabs(massX), 2.)) );
+    //pstrHcom[0] = sqrt(pow(fabs(pabscomXB), 2.) + pow(fabs(massB), 2.));
+    //pstrXcom[0] = sqrt(pow(fabs(pabscomXB), 2.) + pow(fabs(massX), 2.));
+    threeMomentum = -evecBasisAB[3] * sqrt(pow(fabs(pabscomAX), 2.) - pow(fabs(QTrn), 2.)) -
+                        evecBasisAB[1] * QTrn * cos(phiQ) -
+                        evecBasisAB[2] * QTrn * sin(phiQ);
+    pstrHcom.set_x1( threeMomentum.x1() );
+    pstrHcom.set_x2( threeMomentum.x2() );
+    pstrHcom.set_x3( threeMomentum.x3() );
+    threeMomentum = evecBasisAB[3] * sqrt(pow(fabs(pabscomAX), 2.) - pow(fabs(QTrn), 2.)) +
+                        evecBasisAB[1] * QTrn * cos(phiQ) +
+                        evecBasisAB[2] * QTrn * sin(phiQ);
+    pstrXcom.set_x1( threeMomentum.x1() );
+    pstrXcom.set_x2( threeMomentum.x2() );
+    pstrXcom.set_x3( threeMomentum.x3() );
+    //for (imu = 1; imu < 4; imu++) {
+    //  pstrHcom[imu] = -evecBasisAB[3][imu] *
+    //                      sqrt(pow(fabs(pabscomXB), 2.) - pow(fabs(QTrn), 2.)) -
+    //                  evecBasisAB[1][imu] * QTrn * cos(phiQ) -
+    //                  evecBasisAB[2][imu] * QTrn * sin(phiQ);
+    //  pstrXcom[imu] = evecBasisAB[3][imu] *
+    //                      sqrt(pow(fabs(pabscomXB), 2.) - pow(fabs(QTrn), 2.)) +
+    //                  evecBasisAB[1][imu] * QTrn * cos(phiQ) +
+    //                  evecBasisAB[2][imu] * QTrn * sin(phiQ);
+    //}
     // fprintf(stderr,"  StringProcess::next_SDiff_XB : pstrXcom = (%e, %e, %e, %e)
     // GeV\n",
     //	pstrXcom[0], pstrXcom[1], pstrXcom[2], pstrXcom[3]);
@@ -1241,32 +1586,46 @@ bool StringProcess::next_SDiff_XB() {
     // idqX1, idqX2);
     // fprintf(stderr,"  StringProcess::next_SDiff_XB : massX = %e GeV\n", massX);
 
-    pnull = static_cast<double *>(malloc(4 * sizeof(double)));
-    prs = static_cast<double *>(malloc(4 * sizeof(double)));
-    evec = static_cast<double *>(malloc(4 * sizeof(double)));
+    //pnull = static_cast<double *>(malloc(4 * sizeof(double)));
+    //prs = static_cast<double *>(malloc(4 * sizeof(double)));
+    //evec = static_cast<double *>(malloc(4 * sizeof(double)));
 
-    lorentz->Boost1_RestToLab(3, ucomAB, pstrHcom, pstrHlab);
-    lorentz->Boost1_RestToLab(3, ucomAB, pstrXcom, pstrXlab);
-    for (imu = 0; imu < 4; imu++) {
-      ustrHcom[imu] = pstrHcom[imu] / massB;
-      ustrXcom[imu] = pstrXcom[imu] / massX;
+    pstrHlab = pstrHcom.LorentzBoost( -vcomAB );
+    pstrXlab = pstrXcom.LorentzBoost( -vcomAB );
+    //lorentz->Boost1_RestToLab(3, ucomAB, pstrHcom, pstrHlab);
+    //lorentz->Boost1_RestToLab(3, ucomAB, pstrXcom, pstrXlab);
+    ustrHcom = pstrHcom / massB;
+    ustrXcom = pstrXcom / massX;
+    ustrHlab = pstrHlab / massB;
+    ustrXlab = pstrXlab / massX;
+    //for (imu = 0; imu < 4; imu++) {
+    //  ustrHcom[imu] = pstrHcom[imu] / massB;
+    //  ustrXcom[imu] = pstrXcom[imu] / massX;
 
-      ustrHlab[imu] = pstrHlab[imu] / massB;
-      ustrXlab[imu] = pstrXlab[imu] / massX;
-    }
+    //  ustrHlab[imu] = pstrHlab[imu] / massB;
+    //  ustrXlab[imu] = pstrXlab[imu] / massX;
+    //}
 
-    for (imu = 1; imu < 4; imu++) {
-      pnull[imu] = pstrXcom[imu];
-    }
-    pnull[0] = sqrt(pow(fabs(pnull[1]), 2.) + pow(fabs(pnull[2]), 2.) +
-                    pow(fabs(pnull[3]), 2.));
-    lorentz->Boost1_LabToRest(3, ustrXcom, pnull, prs);
-    pabs = sqrt(pow(fabs(prs[1]), 2.) + pow(fabs(prs[2]), 2.) +
-                pow(fabs(prs[3]), 2.));
-    evec[0] = 0.;
-    for (imu = 1; imu < 4; imu++) {
-      evec[imu] = prs[imu] / pabs;
-    }
+    threeMomentum = pstrXcom.threevec();
+    pnull.set_x0( threeMomentum.abs() );
+    pnull.set_x1( threeMomentum.x1() );
+    pnull.set_x2( threeMomentum.x2() );
+    pnull.set_x3( threeMomentum.x3() );
+    //for (imu = 1; imu < 4; imu++) {
+    //  pnull[imu] = pstrXcom[imu];
+    //}
+    //pnull[0] = sqrt(pow(fabs(pnull[1]), 2.) + pow(fabs(pnull[2]), 2.) +
+    //                pow(fabs(pnull[3]), 2.));
+    prs = pnull.LorentzBoost( ustrXcom.velocity() );
+    pabs = prs.threevec().abs();
+    //lorentz->Boost1_LabToRest(3, ustrXcom, pnull, prs);
+    //pabs = sqrt(pow(fabs(prs[1]), 2.) + pow(fabs(prs[2]), 2.) +
+    //            pow(fabs(prs[3]), 2.));
+    evec = prs.threevec() / pabs;
+    //evec[0] = 0.;
+    //for (imu = 1; imu < 4; imu++) {
+    //  evec[imu] = prs[imu] / pabs;
+    //}
     // fprintf(stderr,"  StringProcess::next_SDiff_XB : evec = (%e, %e, %e)\n",
     // evec[1], evec[2], evec[3]);
     nfrag = fragmentString(idqX1, idqX2, massX, evec, false);
@@ -1281,10 +1640,10 @@ bool StringProcess::next_SDiff_XB() {
     NpartString2 = 1;
     final_PDGid[0].push_back(PDGidB);
     final_PDGid[1].push_back(1);
-    final_pvec[0].push_back(pstrHlab[0]);
-    final_pvec[1].push_back(pstrHlab[1]);
-    final_pvec[2].push_back(pstrHlab[2]);
-    final_pvec[3].push_back(pstrHlab[3]);
+    final_pvec[0].push_back(pstrHlab.x0());
+    final_pvec[1].push_back(pstrHlab.x1());
+    final_pvec[2].push_back(pstrHlab.x2());
+    final_pvec[3].push_back(pstrHlab.x3());
     final_pvec[4].push_back(massB);
     final_tform[0].push_back(0.);
     final_tform[1].push_back(1.);
@@ -1294,20 +1653,20 @@ bool StringProcess::next_SDiff_XB() {
       ret = true;
     }
 
-    free(pnull);
-    free(prs);
-    free(evec);
+    //free(pnull);
+    //free(prs);
+    //free(evec);
   }
 
-  free(pstrHcom);
-  free(pstrHlab);
-  free(pstrXcom);
-  free(pstrXlab);
+  //free(pstrHcom);
+  //free(pstrHlab);
+  //free(pstrXcom);
+  //free(pstrXlab);
 
-  free(ustrHcom);
-  free(ustrHlab);
-  free(ustrXcom);
-  free(ustrXlab);
+  //free(ustrHcom);
+  //free(ustrHlab);
+  //free(ustrXcom);
+  //free(ustrXlab);
 
   if (ret == true) {
     conserved = check_conservation();
@@ -1363,17 +1722,17 @@ bool StringProcess::next_DDiff_XX() {
 
   // PDGid2idqset(PDGidA, idqsetA);
   // PDGid2idqset(PDGidB, idqsetB);
-  PPosA = (pcomA[0] + evecBasisAB[3][1] * pcomA[1] +
-           evecBasisAB[3][2] * pcomA[2] + evecBasisAB[3][3] * pcomA[3]) /
+  PPosA = (pcomA.x0() + evecBasisAB[3][1] * pcomA.x1() +
+           evecBasisAB[3][2] * pcomA.x2() + evecBasisAB[3][3] * pcomA.x3()) /
           sqrt(2.);
-  PNegA = (pcomA[0] - evecBasisAB[3][1] * pcomA[1] -
-           evecBasisAB[3][2] * pcomA[2] - evecBasisAB[3][3] * pcomA[3]) /
+  PNegA = (pcomA.x0() - evecBasisAB[3][1] * pcomA.x1() -
+           evecBasisAB[3][2] * pcomA.x2() - evecBasisAB[3][3] * pcomA.x3()) /
           sqrt(2.);
-  PPosB = (pcomB[0] + evecBasisAB[3][1] * pcomB[1] +
-           evecBasisAB[3][2] * pcomB[2] + evecBasisAB[3][3] * pcomB[3]) /
+  PPosB = (pcomB.x0() + evecBasisAB[3][1] * pcomB.x1() +
+           evecBasisAB[3][2] * pcomB.x2() + evecBasisAB[3][3] * pcomB.x3()) /
           sqrt(2.);
-  PNegB = (pcomB[0] - evecBasisAB[3][1] * pcomB[1] -
-           evecBasisAB[3][2] * pcomB[2] - evecBasisAB[3][3] * pcomB[3]) /
+  PNegB = (pcomB.x0() - evecBasisAB[3][1] * pcomB.x1() -
+           evecBasisAB[3][2] * pcomB.x2() - evecBasisAB[3][3] * pcomB.x3()) /
           sqrt(2.);
 
   ntry = 0;
@@ -1586,17 +1945,17 @@ bool StringProcess::next_NDiff() {
 
   // PDGid2idqset(PDGidA, idqsetA);
   // PDGid2idqset(PDGidB, idqsetB);
-  PPosA = (pcomA[0] + evecBasisAB[3][1] * pcomA[1] +
-           evecBasisAB[3][2] * pcomA[2] + evecBasisAB[3][3] * pcomA[3]) /
+  PPosA = (pcomA.x0() + evecBasisAB[3][1] * pcomA.x1() +
+           evecBasisAB[3][2] * pcomA.x2() + evecBasisAB[3][3] * pcomA.x3()) /
           sqrt(2.);
-  PNegA = (pcomA[0] - evecBasisAB[3][1] * pcomA[1] -
-           evecBasisAB[3][2] * pcomA[2] - evecBasisAB[3][3] * pcomA[3]) /
+  PNegA = (pcomA.x0() - evecBasisAB[3][1] * pcomA.x1() -
+           evecBasisAB[3][2] * pcomA.x2() - evecBasisAB[3][3] * pcomA.x3()) /
           sqrt(2.);
-  PPosB = (pcomB[0] + evecBasisAB[3][1] * pcomB[1] +
-           evecBasisAB[3][2] * pcomB[2] + evecBasisAB[3][3] * pcomB[3]) /
+  PPosB = (pcomB.x0() + evecBasisAB[3][1] * pcomB.x1() +
+           evecBasisAB[3][2] * pcomB.x2() + evecBasisAB[3][3] * pcomB.x3()) /
           sqrt(2.);
-  PNegB = (pcomB[0] - evecBasisAB[3][1] * pcomB[1] -
-           evecBasisAB[3][2] * pcomB[2] - evecBasisAB[3][3] * pcomB[3]) /
+  PNegB = (pcomB.x0() - evecBasisAB[3][1] * pcomB.x1() -
+           evecBasisAB[3][2] * pcomB.x2() - evecBasisAB[3][3] * pcomB.x3()) /
           sqrt(2.);
 
   ntry = 0;
@@ -1886,10 +2245,10 @@ bool StringProcess::next_BBbarAnn(){
 			NpartString1 = 1;
 			final_PDGid[0].push_back(PDGidA);
 			final_PDGid[1].push_back(1);
-			final_pvec[0].push_back(plabA[0]);
-			final_pvec[1].push_back(plabA[1]);
-			final_pvec[2].push_back(plabA[2]);
-			final_pvec[3].push_back(plabA[3]);
+			final_pvec[0].push_back(plabA.x0());
+			final_pvec[1].push_back(plabA.x1());
+			final_pvec[2].push_back(plabA.x2());
+			final_pvec[3].push_back(plabA.x3());
 			final_pvec[4].push_back(massA);
 			final_tform[0].push_back(0.);
 			final_tform[1].push_back(1.);
@@ -1897,10 +2256,10 @@ bool StringProcess::next_BBbarAnn(){
 			NpartString2 = 1;
 			final_PDGid[0].push_back(PDGidB);
 			final_PDGid[1].push_back(1);
-			final_pvec[0].push_back(plabB[0]);
-			final_pvec[1].push_back(plabB[1]);
-			final_pvec[2].push_back(plabB[2]);
-			final_pvec[3].push_back(plabB[3]);
+			final_pvec[0].push_back(plabB.x0());
+			final_pvec[1].push_back(plabB.x1());
+			final_pvec[2].push_back(plabB.x2());
+			final_pvec[3].push_back(plabB.x3());
 			final_pvec[4].push_back(massB);
 			final_tform[0].push_back(0.);
 			final_tform[1].push_back(1.);
@@ -2131,7 +2490,7 @@ void StringProcess::makeStringEnds(int *idqset, int *idq1, int *idq2) {
 }
 
 int StringProcess::fragmentString(int idq1, int idq2, double mString,
-                            double *evecLong, bool ranrot) {
+                            ThreeVector &evecLong, bool ranrot) {
   int ret;
   bool Hforced;
 
@@ -2155,9 +2514,10 @@ int StringProcess::fragmentString(int idq1, int idq2, double mString,
 
   m1 = pythia->particleData.m0(idq1);
   m2 = pythia->particleData.m0(idq2);
-  pCMquark = sqrt((pow(fabs(mString), 2.) - pow(fabs(m1 + m2), 2.)) *
-             (pow(fabs(mString), 2.) - pow(fabs(m1 - m2), 2.))) /
-        (2. * mString);
+  pCMquark = pCM( mString, m1, m2 );
+  //pCMquark = sqrt((pow(fabs(mString), 2.) - pow(fabs(m1 + m2), 2.)) *
+  //           (pow(fabs(mString), 2.) - pow(fabs(m1 - m2), 2.))) /
+  //      (2. * mString);
 
   p3vec[0] = 0.;
   if (ranrot == true) {
@@ -2170,18 +2530,23 @@ int StringProcess::fragmentString(int idq1, int idq2, double mString,
     p3vec[3] = pCMquark * cos(theta);
   } else {
     rswap = Random::uniform(0., 1.);
-
-    if (evecLong == NULL) {
-      p3vec[1] = 0.;
-      p3vec[2] = 0.;
-      p3vec[3] = pCMquark;
-    } else {
-      if (rswap < 0.5) {
-        evecLong[1] = -evecLong[1];
-        evecLong[2] = -evecLong[2];
-        evecLong[3] = -evecLong[3];
-      }
+    if (rswap < 0.5) {
+      evecLong.set_x1( -evecLong.x1() );
+      evecLong.set_x2( -evecLong.x2() );
+      evecLong.set_x3( -evecLong.x3() );
     }
+
+    //if (evecLong == NULL) {
+    //  p3vec[1] = 0.;
+    //  p3vec[2] = 0.;
+    //  p3vec[3] = pCMquark;
+    //} else {
+    //  if (rswap < 0.5) {
+    //    evecLong[1] = -evecLong[1];
+    //    evecLong[2] = -evecLong[2];
+    //    evecLong[3] = -evecLong[3];
+    //  }
+    //}
   }
 
   if (m1 + m2 < mString) {
@@ -2193,15 +2558,18 @@ int StringProcess::fragmentString(int idq1, int idq2, double mString,
       pvRS[2] = -p3vec[2];
       pvRS[3] = -p3vec[3];
     } else {
-      if (evecLong == NULL) {
-        pvRS[1] = -p3vec[1];
-        pvRS[2] = -p3vec[2];
-        pvRS[3] = -p3vec[3];
-      } else {
-        pvRS[1] = -pCMquark * evecLong[1];
-        pvRS[2] = -pCMquark * evecLong[2];
-        pvRS[3] = -pCMquark * evecLong[3];
-      }
+      pvRS[1] = -pCMquark * evecLong.x1();
+      pvRS[2] = -pCMquark * evecLong.x2();
+      pvRS[3] = -pCMquark * evecLong.x3();
+      //if (evecLong == NULL) {
+      //  pvRS[1] = -p3vec[1];
+      //  pvRS[2] = -p3vec[2];
+      //  pvRS[3] = -p3vec[3];
+      //} else {
+      //  pvRS[1] = -pCMquark * evecLong[1];
+      //  pvRS[2] = -pCMquark * evecLong[2];
+      //  pvRS[3] = -pCMquark * evecLong[3];
+      //}
     }
     pvRS[0] = sqrt(pow(fabs(m1), 2.) + pow(fabs(pCMquark), 2.));
 
@@ -2220,15 +2588,18 @@ int StringProcess::fragmentString(int idq1, int idq2, double mString,
       pvRS[2] = p3vec[2];
       pvRS[3] = p3vec[3];
     } else {
-      if (evecLong == NULL) {
-        pvRS[1] = p3vec[1];
-        pvRS[2] = p3vec[2];
-        pvRS[3] = p3vec[3];
-      } else {
-        pvRS[1] = pCMquark * evecLong[1];
-        pvRS[2] = pCMquark * evecLong[2];
-        pvRS[3] = pCMquark * evecLong[3];
-      }
+      pvRS[1] = pCMquark * evecLong.x1();
+      pvRS[2] = pCMquark * evecLong.x2();
+      pvRS[3] = pCMquark * evecLong.x3();
+      //if (evecLong == NULL) {
+      //  pvRS[1] = p3vec[1];
+      //  pvRS[2] = p3vec[2];
+      //  pvRS[3] = p3vec[3];
+      //} else {
+      //  pvRS[1] = pCMquark * evecLong[1];
+      //  pvRS[2] = pCMquark * evecLong[2];
+      //  pvRS[3] = pCMquark * evecLong[3];
+      //}
     }
     pvRS[0] = sqrt(pow(fabs(m2), 2.) + pow(fabs(pCMquark), 2.));
 

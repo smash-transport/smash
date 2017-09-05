@@ -38,12 +38,14 @@ class StringProcess {
   int *idqsetB;
   double massA, massB;
   double sqrtsAB, pabscomAB;
-  double *plabA;
-  double *plabB;
-  double *pcomA;
-  double *pcomB;
-  double *ucomAB;
-  double **evecBasisAB;
+  FourVector plabA;
+  FourVector plabB;
+  FourVector pcomA;
+  FourVector pcomB;
+  FourVector ucomAB;
+  ThreeVector vcomAB;
+  ThreeVector *evecBasisAB;
+  //double **evecBasisAB;
 
   int NpartFinal;
   int NpartString1;
@@ -108,7 +110,7 @@ class StringProcess {
 
   void set_kappaString(double kappaStringIn) { kappaString = kappaStringIn; }
 
-  bool init(ParticleData &incomingA, ParticleData &incomingB);
+  bool init(const ParticleDataList &incomingList);
   bool init_lab(int idAIn, int idBIn, double massAIn, double massBIn,
                 Pythia8::Vec4 pvecAIn, Pythia8::Vec4 pvecBIn);
   bool init_com(int idAIn, int idBIn, double massAIn, double massBIn,
@@ -131,12 +133,12 @@ class StringProcess {
   //double get_XSecND() { return XSecND; }
 
   void reset_finalArray();
-  int append_finalArray(double *uString, double *evecLong);
+  int append_finalArray(FourVector &uString, ThreeVector &evecLong);
   bool check_conservation();
 
   void PDGid2idqset(int pdgid, int *idqset);
   void makeStringEnds(int *idqset, int *idq1, int *idq2);
-  int fragmentString(int idq1, int idq2, double mString, double *evecLong,
+  int fragmentString(int idq1, int idq2, double mString, ThreeVector &evecLong,
                      bool ranrot);
 
   double sample_XSDIS(double xmin, double beta);
