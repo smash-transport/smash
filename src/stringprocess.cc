@@ -48,7 +48,7 @@ StringProcess::StringProcess() {
 
   PDGidA = PDGidB = 0;
   baryonA = baryonB = 0;
-  chargeA = chargeB = 0;
+  //chargeA = chargeB = 0;
   PPosA = 0.;
   PNegA = 0.;
   PPosB = 0.;
@@ -65,11 +65,6 @@ StringProcess::StringProcess() {
 
   sigmaQperp = 1.2;
   kappaString = 1.;
-
-  BINI = BFIN = 0;
-  CINI = CFIN = 0;
-  EINI = 0.;
-  EFIN = 0.;
 
   //lorentz = new Lorentz();
   //final_PDGid = new vector<int>[2];
@@ -454,6 +449,7 @@ int StringProcess::append_finalArray(FourVector &uString, ThreeVector &evecLong)
 }
 
 // energy and charge conservation check
+/*
 bool StringProcess::check_conservation() {
   bool ret;
 
@@ -527,6 +523,7 @@ bool StringProcess::check_conservation() {
 
   return ret;
 }
+*/
 
 bool StringProcess::init(const ParticleList &incomingList){
   bool ret;
@@ -691,22 +688,23 @@ bool StringProcess::init(const ParticleList &incomingList){
   // quantum numbers of hadron A
   baryonA = pythia->particleData.baryonNumberType(idqsetA[1]) +
             pythia->particleData.baryonNumberType(idqsetA[2]);
-  chargeA = pythia->particleData.chargeType(idqsetA[1]) +
-            pythia->particleData.chargeType(idqsetA[2]);
+  //chargeA = pythia->particleData.chargeType(idqsetA[1]) +
+  //          pythia->particleData.chargeType(idqsetA[2]);
   if (idqsetA[3] != 0) {
     baryonA = baryonA + pythia->particleData.baryonNumberType(idqsetA[3]);
-    chargeA = chargeA + pythia->particleData.chargeType(idqsetA[3]);
+    //chargeA = chargeA + pythia->particleData.chargeType(idqsetA[3]);
   }
   // quantum numbers of hadron B
   baryonB = pythia->particleData.baryonNumberType(idqsetB[1]) +
             pythia->particleData.baryonNumberType(idqsetB[2]);
-  chargeB = pythia->particleData.chargeType(idqsetB[1]) +
-            pythia->particleData.chargeType(idqsetB[2]);
+  //chargeB = pythia->particleData.chargeType(idqsetB[1]) +
+  //          pythia->particleData.chargeType(idqsetB[2]);
   if (idqsetB[3] != 0) {
     baryonB = baryonB + pythia->particleData.baryonNumberType(idqsetB[3]);
-    chargeB = chargeB + pythia->particleData.chargeType(idqsetB[3]);
+    //chargeB = chargeB + pythia->particleData.chargeType(idqsetB[3]);
   }
 
+  /*
   BINI = baryonA + baryonB;
   CINI = chargeA + chargeB;
   EINI = ( plabA + plabB ).x0();
@@ -717,6 +715,7 @@ bool StringProcess::init(const ParticleList &incomingList){
   //pyINI = plabA[2] + plabB[2];
   pzINI = ( plabA + plabB ).x3();
   //pzINI = plabA[3] + plabB[3];
+  */
 
   //ret = sigmaTot.calc(PDGidA, PDGidB, sqrtsAB);
   //XSecTot = sigmaTot.sigmaTot();
@@ -908,22 +907,23 @@ bool StringProcess::init_lab(PdgCode &idAIn, PdgCode &idBIn, double massAIn, dou
   // quantum numbers of hadron A
   baryonA = pythia->particleData.baryonNumberType(idqsetA[1]) +
             pythia->particleData.baryonNumberType(idqsetA[2]);
-  chargeA = pythia->particleData.chargeType(idqsetA[1]) +
-            pythia->particleData.chargeType(idqsetA[2]);
+  //chargeA = pythia->particleData.chargeType(idqsetA[1]) +
+  //          pythia->particleData.chargeType(idqsetA[2]);
   if (idqsetA[3] != 0) {
     baryonA = baryonA + pythia->particleData.baryonNumberType(idqsetA[3]);
-    chargeA = chargeA + pythia->particleData.chargeType(idqsetA[3]);
+    //chargeA = chargeA + pythia->particleData.chargeType(idqsetA[3]);
   }
   // quantum numbers of hadron B
   baryonB = pythia->particleData.baryonNumberType(idqsetB[1]) +
             pythia->particleData.baryonNumberType(idqsetB[2]);
-  chargeB = pythia->particleData.chargeType(idqsetB[1]) +
-            pythia->particleData.chargeType(idqsetB[2]);
+  //chargeB = pythia->particleData.chargeType(idqsetB[1]) +
+  //          pythia->particleData.chargeType(idqsetB[2]);
   if (idqsetB[3] != 0) {
     baryonB = baryonB + pythia->particleData.baryonNumberType(idqsetB[3]);
-    chargeB = chargeB + pythia->particleData.chargeType(idqsetB[3]);
+    //chargeB = chargeB + pythia->particleData.chargeType(idqsetB[3]);
   }
 
+  /*
   BINI = baryonA + baryonB;
   CINI = chargeA + chargeB;
   EINI = ( plabA + plabB ).x0();
@@ -934,6 +934,7 @@ bool StringProcess::init_lab(PdgCode &idAIn, PdgCode &idBIn, double massAIn, dou
   //pyINI = plabA[2] + plabB[2];
   pzINI = ( plabA + plabB ).x3();
   //pzINI = plabA[3] + plabB[3];
+  */
 
   //ret = sigmaTot.calc(PDGidA, PDGidB, sqrtsAB);
   //XSecTot = sigmaTot.sigmaTot();
@@ -1054,22 +1055,23 @@ bool StringProcess::init_com(PdgCode &idAIn, PdgCode &idBIn, double massAIn, dou
   // quantum numbers of hadron A
   baryonA = pythia->particleData.baryonNumberType(idqsetA[1]) +
             pythia->particleData.baryonNumberType(idqsetA[2]);
-  chargeA = pythia->particleData.chargeType(idqsetA[1]) +
-            pythia->particleData.chargeType(idqsetA[2]);
+  //chargeA = pythia->particleData.chargeType(idqsetA[1]) +
+  //          pythia->particleData.chargeType(idqsetA[2]);
   if (idqsetA[3] != 0) {
     baryonA = baryonA + pythia->particleData.baryonNumberType(idqsetA[3]);
-    chargeA = chargeA + pythia->particleData.chargeType(idqsetA[3]);
+    //chargeA = chargeA + pythia->particleData.chargeType(idqsetA[3]);
   }
   // quantum numbers of hadron B
   baryonB = pythia->particleData.baryonNumberType(idqsetB[1]) +
             pythia->particleData.baryonNumberType(idqsetB[2]);
-  chargeB = pythia->particleData.chargeType(idqsetB[1]) +
-            pythia->particleData.chargeType(idqsetB[2]);
+  //chargeB = pythia->particleData.chargeType(idqsetB[1]) +
+  //          pythia->particleData.chargeType(idqsetB[2]);
   if (idqsetB[3] != 0) {
     baryonB = baryonB + pythia->particleData.baryonNumberType(idqsetB[3]);
-    chargeB = chargeB + pythia->particleData.chargeType(idqsetB[3]);
+    //chargeB = chargeB + pythia->particleData.chargeType(idqsetB[3]);
   }
 
+  /*
   BINI = baryonA + baryonB;
   CINI = chargeA + chargeB;
   EINI = ( plabA + plabB ).x0();
@@ -1080,6 +1082,7 @@ bool StringProcess::init_com(PdgCode &idAIn, PdgCode &idBIn, double massAIn, dou
   //pyINI = plabA[2] + plabB[2];
   pzINI = ( plabA + plabB ).x3();
   //pzINI = plabA[3] + plabB[3];
+  */
 
   //ret = sigmaTot.calc(PDGidA, PDGidB, sqrtsAB);
   //XSecTot = sigmaTot.sigmaTot();
@@ -1125,7 +1128,8 @@ bool StringProcess::next_Inel() {
 
 // single diffractive AB > AX
 bool StringProcess::next_SDiff_AX() {
-  bool ret, conserved;
+  bool ret;
+  //bool conserved;
 
   //int imu;
   int ntry;
@@ -1335,16 +1339,17 @@ bool StringProcess::next_SDiff_AX() {
   //free(ustrXcom);
   //free(ustrXlab);
 
-  if (ret == true) {
-    conserved = check_conservation();
-    ret = ret && conserved;
-  }
+  //if (ret == true) {
+  //  conserved = check_conservation();
+  //  ret = ret && conserved;
+  //}
   return ret;
 }
 
 // single diffractive AB > XB
 bool StringProcess::next_SDiff_XB() {
-  bool ret, conserved;
+  bool ret;
+  //bool conserved;
 
   //int imu;
   int ntry;
@@ -1554,16 +1559,17 @@ bool StringProcess::next_SDiff_XB() {
   //free(ustrXcom);
   //free(ustrXlab);
 
-  if (ret == true) {
-    conserved = check_conservation();
-    ret = ret && conserved;
-  }
+  //if (ret == true) {
+  //  conserved = check_conservation();
+  //  ret = ret && conserved;
+  //}
   return ret;
 }
 
 // double diffractive AB > XX
 bool StringProcess::next_DDiff_XX() {
-  bool ret, conserved;
+  bool ret;
+  //bool conserved;
 
   //int imu;
   int ntry;
@@ -1833,16 +1839,17 @@ bool StringProcess::next_DDiff_XX() {
   //free(ustr2com);
   //free(ustr2lab);
 
-  if (ret == true) {
-    conserved = check_conservation();
-    ret = ret && conserved;
-  }
+  //if (ret == true) {
+  //  conserved = check_conservation();
+  //  ret = ret && conserved;
+  //}
   return ret;
 }
 
 // non-diffractive
 bool StringProcess::next_NDiff() {
-  bool ret, conserved;
+  bool ret;
+  //bool conserved;
 
   //int imu;
   int ntry;
@@ -2177,16 +2184,17 @@ bool StringProcess::next_NDiff() {
   //free(ustr2com);
   //free(ustr2lab);
 
-  if (ret == true) {
-    conserved = check_conservation();
-    ret = ret && conserved;
-  }
+  //if (ret == true) {
+  //  conserved = check_conservation();
+  //  ret = ret && conserved;
+  //}
   return ret;
 }
 
 // baryon-antibaryon annihilation
 bool StringProcess::next_BBbarAnn(){
-	bool ret, conserved;
+	bool ret;
+	//bool conserved;
 
 	//int imu;
 	int ntry;
@@ -2380,10 +2388,10 @@ bool StringProcess::next_BBbarAnn(){
 
 	//delete indexAnn;
 
-	if( ret == true ){
-		conserved = check_conservation();
-		ret = ret && conserved;
-	}
+	//if( ret == true ){
+	//	conserved = check_conservation();
+	//	ret = ret && conserved;
+	//}
 	return ret;
 }
 

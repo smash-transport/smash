@@ -16,7 +16,7 @@ class StringProcess {
  private:
   int PDGidA, PDGidB;
   int baryonA, baryonB;
-  int chargeA, chargeB;
+  //int chargeA, chargeB;
   std::array<int,4> idqsetA;
   //int *idqsetA;
   std::array<int,4> idqsetB;
@@ -50,12 +50,12 @@ class StringProcess {
 
   double kappaString;
 
-  int CINI, CFIN;
-  int BINI, BFIN;
-  double EINI, EFIN;
-  double pxINI, pxFIN;
-  double pyINI, pyFIN;
-  double pzINI, pzFIN;
+  //int CINI, CFIN;
+  //int BINI, BFIN;
+  //double EINI, EFIN;
+  //double pxINI, pxFIN;
+  //double pyINI, pyFIN;
+  //double pzINI, pzFIN;
 
   Pythia8::Pythia *pythia;
 
