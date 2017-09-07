@@ -20,6 +20,9 @@ namespace Smash {
 void DecayActionsFinderDilepton::shine(const Particles &search_list,
                                        OutputInterface *output,
                                        double dt) const {
+  if (!output->is_dilepton_output()) {
+    return;
+  }
   for (const auto &p : search_list) {
     // effective mass of decaying particle
     const double m_eff = p.effective_mass();
@@ -56,6 +59,9 @@ void DecayActionsFinderDilepton::shine(const Particles &search_list,
 void DecayActionsFinderDilepton::shine_final(const Particles &search_list,
                                              OutputInterface *output,
                                              bool only_res) const {
+  if (!output->is_dilepton_output()) {
+    return;
+  }
   for (const auto &p : search_list) {
     const ParticleType &t = p.type();
     if (t.decay_modes().decay_mode_list().empty() ||

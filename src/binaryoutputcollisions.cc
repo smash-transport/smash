@@ -25,11 +25,15 @@ namespace Smash {
 
 BinaryOutputCollisions::BinaryOutputCollisions(const bf::path &path,
                                                const std::string &name,
-                                               bool extended_format)
+                                               bool extended_format,
+                                               bool is_dilepton,
+                                               bool is_photon)
     : BinaryOutputBase(
           std::fopen((path / (name + ".bin")).native().c_str(), "wb"),
           extended_format),
-      print_start_end_(false) {}
+      print_start_end_(false),
+      is_dilepton_output_(is_dilepton),
+      is_photon_output_(is_photon) {}
 
 BinaryOutputCollisions::BinaryOutputCollisions(const bf::path &path,
                                                Configuration &&config)
@@ -106,6 +110,10 @@ void BinaryOutputCollisions::at_eventend(const Particles &particles,
 
 void BinaryOutputCollisions::at_interaction(const Action &action,
                                             const double density) {
+  if (is_dilepton_output_ || is_photon_output_) {
+    // No output of dileptons / photons at hadronic interaction
+    return;
+  }
   char ichar = 'i';
   std::fwrite(&ichar, sizeof(char), 1, file_.get());
   write(action.incoming_particles().size());

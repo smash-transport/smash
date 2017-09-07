@@ -58,6 +58,9 @@ class ThermodynamicOutput : public OutputInterface {
                           const ThreeVector &line_start,
                           const ThreeVector &line_end, int n_points);
 
+  bool is_dilepton_output() const override { return false; }
+  bool is_photon_output() const override { return false; }
+
  private:
   FilePtr file_;
   /// Set of quantities to be computed

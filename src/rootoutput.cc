@@ -19,13 +19,15 @@
 namespace Smash {
 
 RootOutput::RootOutput(const bf::path &path, std::string name,
-                       bool collisions)
+                       bool collisions, bool is_dilepton, bool is_photon)
     : base_path_(std::move(path)),
       root_out_file_(
           new TFile((base_path_ / (name + ".root")).native().c_str(), "NEW")),
       write_collisions_(collisions),
       write_particles_(!collisions),
-      autosave_frequency_(1000) {
+      autosave_frequency_(1000),
+      is_dilepton_output_(is_dilepton),
+      is_photon_output_(is_photon) {
 
   /*!\Userguide
    * \page input_root ROOT

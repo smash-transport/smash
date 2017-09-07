@@ -70,7 +70,8 @@ class BinaryOutputBase : public OutputInterface {
 class BinaryOutputCollisions : public BinaryOutputBase {
  public:
   BinaryOutputCollisions(const bf::path &path, const std::string &name,
-                         bool extended_format);
+                         bool extended_format, bool is_dilepton,
+                         bool is_photon);
   BinaryOutputCollisions(const bf::path &path, Configuration &&config);
 
   /// writes the initial particle information of an event
@@ -82,9 +83,14 @@ class BinaryOutputCollisions : public BinaryOutputBase {
 
   void at_interaction(const Action &action, const double density) override;
 
+  bool is_dilepton_output() const override { return is_dilepton_output_; }
+  bool is_photon_output() const override { return is_photon_output_; }
+
  private:
   /// Option: print initial and final particles or not
   bool print_start_end_;
+  bool is_dilepton_output_ = false;
+  bool is_photon_output_ = false;
 };
 
 }  // namespace Smash

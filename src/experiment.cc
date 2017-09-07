@@ -241,15 +241,8 @@ void Experiment<Modus>::create_output(std::string format,
   }
   if (format == "Root") {
 #ifdef SMASH_USE_ROOT
-    if (content == "Particles") {
-      outputs_.emplace_back(make_unique<RootOutput>(output_path, content, false));
-    } else if (content == "Collisions") {
-      outputs_.emplace_back(make_unique<RootOutput>(output_path, content, true));
-    } else if (content == "Dileptons") {
-      dilepton_output_ = make_unique<RootOutput>(output_path, content, true);
-    } else if (content == "Photons") {
-      photon_output_ = make_unique<RootOutput>(output_path, content, true);
-    }
+    outputs_.emplace_back(make_unique<RootOutput>(output_path, content,
+      !(content == "Particles"), content == "Dileptons", content == "Photons"));
 #else
     log.error("Root output requested, but Root support not compiled in");
 #endif
@@ -261,23 +254,14 @@ void Experiment<Modus>::create_output(std::string format,
     } else if (content == "Collisions") {
       outputs_.emplace_back(make_unique<BinaryOutputCollisions>(output_path, std::move(conf_specific)));
     } else if (content == "Dileptons") {
-      dilepton_output_ = make_unique<BinaryOutputCollisions>(output_path, content, true);
+      outputs_.emplace_back(make_unique<BinaryOutputCollisions>(output_path, content, true, true, false));
     } else if (content == "Photons") {
-      photon_output_ = make_unique<BinaryOutputCollisions>(output_path, content, false);
+      outputs_.emplace_back(make_unique<BinaryOutputCollisions>(output_path, content, false, false, true));
     }
   }
 
-  if ((format == "Oscar1999" || format == "Oscar2013") &&
-      content != "Dileptons" && content != "Photons") {
+  if (format == "Oscar1999" || format == "Oscar2013") {
     outputs_.emplace_back(create_oscar_output(format, content, output_path, std::move(conf_specific)));
-  }
-
-  if (format == "Oscar2013" && content == "Dileptons") {
-    dilepton_output_ = create_dilepton_output(output_path);
-  }
-
-  if (format == "Oscar2013" && content == "Photons") {
-    photon_output_ = create_photon_output(output_path);
   }
 
   if (content == "Thermodynamics" && format == "ASCII") {
@@ -776,7 +760,9 @@ bool Experiment<Modus>::perform_action(
    * position could be either at 10 fm or at 5 fm.
    */
   for (const auto &output : outputs_) {
-    output->at_interaction(action, rho);
+    if (!output->is_dilepton_output() && !output->is_photon_output()) {
+      output->at_interaction(action, rho);
+    }
   }
 
   // At every collision photons can be produced.
@@ -797,7 +783,11 @@ bool Experiment<Modus>::perform_action(
     photon_act.add_single_channel();
     for (int i = 0; i < n_fractional_photons_; i++) {
       photon_act.generate_final_state();
-      photon_output_->at_interaction(photon_act, rho);
+      for (const auto &output : outputs_) {
+        if (output->is_photon_output()) {
+          output->at_interaction(photon_act, rho);
+        }
+      }
     }
   }
   log.debug(~einhard::Green(), "✔ ", action);
@@ -920,7 +910,9 @@ void Experiment<Modus>::propagate_and_shine(double to_time) {
   const double dt =
       propagate_straight_line(&particles_, to_time, beam_momentum_);
   if (dilepton_finder_ != nullptr) {
-    dilepton_finder_->shine(particles_, dilepton_output_.get(), dt);
+    for (const auto &output : outputs_) {
+      dilepton_finder_->shine(particles_, output.get(), dt);
+    }
   }
 }
 
@@ -1033,6 +1025,9 @@ void Experiment<Modus>::intermediate_output() {
   }*/
   /* save evolution data */
   for (const auto &output : outputs_) {
+    if (output->is_dilepton_output() || output->is_photon_output()) {
+      continue;
+    }
     output->at_intermediate_time(particles_, parameters_.outputclock,
                                  density_param_);
 
@@ -1123,7 +1118,9 @@ void Experiment<Modus>::do_final_decays() {
 
     /* Dileptons: shining of remaining resonances */
     if (dilepton_finder_ != nullptr) {
-      dilepton_finder_->shine_final(particles_, dilepton_output_.get(), true);
+      for (const auto &output : outputs_) {
+        dilepton_finder_->shine_final(particles_, output.get(), true);
+      }
     }
     /* Find actions. */
     for (const auto &finder : action_finders_) {
@@ -1138,7 +1135,9 @@ void Experiment<Modus>::do_final_decays() {
 
   /* Dileptons: shining of stable particles at the end */
   if (dilepton_finder_ != nullptr) {
-    dilepton_finder_->shine_final(particles_, dilepton_output_.get(), false);
+    for (const auto &output : outputs_) {
+      dilepton_finder_->shine_final(particles_, output.get(), false);
+    }
   }
 }
 
@@ -1173,12 +1172,6 @@ void Experiment<Modus>::final_output(const int evt_num) {
 
   for (const auto &output : outputs_) {
     output->at_eventend(particles_, evt_num);
-  }
-  if (dilepton_output_ != nullptr) {
-    dilepton_output_->at_eventend(particles_, evt_num);
-  }
-  if (photon_output_ != nullptr) {
-    photon_output_->at_eventend(particles_, evt_num);
   }
 }
 
@@ -1218,12 +1211,6 @@ void Experiment<Modus>::run() {
     /* Output at event start */
     for (const auto &output : outputs_) {
       output->at_eventstart(particles_, j);
-    }
-    if (dilepton_output_ != nullptr) {
-      dilepton_output_->at_eventstart(particles_, j);
-    }
-    if (photon_output_ != nullptr) {
-      photon_output_->at_eventstart(particles_, j);
     }
 
     run_time_evolution();

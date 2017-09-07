@@ -112,6 +112,9 @@ class OutputInterface {
     SMASH_UNUSED(gct);
   }
 
+  virtual bool is_dilepton_output() const = 0;
+  virtual bool is_photon_output() const = 0;
+
   const char *to_string(const ThermodynamicQuantity tq) {
     switch (tq) {
       case ThermodynamicQuantity::EckartDensity:

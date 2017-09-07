@@ -60,7 +60,8 @@ enum OscarOutputContents {
 template <OscarOutputFormat Format, int Contents>
 class OscarOutput : public OutputInterface {
  public:
-  OscarOutput(const bf::path &path, std::string name);
+  OscarOutput(const bf::path &path, std::string name,
+              bool is_photon_output, bool is_dilepton_output);
 
   /// writes the initial particle information of an event
   void at_eventstart(const Particles &particles,
@@ -75,10 +76,15 @@ class OscarOutput : public OutputInterface {
   void at_intermediate_time(const Particles &particle, const Clock &clock,
                             const DensityParameters &dens_param) override;
 
+  bool is_dilepton_output() const override { return is_dilepton_output_; }
+  bool is_photon_output() const override { return is_photon_output_; }
+
  private:
   void write_particledata(const ParticleData &data);
   void write(const Particles &particles);
 
+  const bool is_dilepton_output_;
+  const bool is_photon_output_;
   int current_event_ = 0;
   FilePtr file_;
 };
@@ -95,27 +101,6 @@ std::unique_ptr<OutputInterface> create_oscar_output(std::string format,
                                                      std::string content,
                                                      const bf::path &path,
                                                      Configuration&& config);
-
-/**
- * Returns a OscarOutput for the dilepton output routine in the
- * DecayActionsFinderDilepton. The Format is always 2013 and OscarInterations.
- * This function is basically a workaround for linking issues with clang.
- *
- * \param path The path to the output directory where the file(s) will be
- *             placed.
- */
-
-std::unique_ptr<OutputInterface> create_dilepton_output(const bf::path &path);
-
-/**
- * Returns a OscarOutput for the photon output routine in the
- * ScatterActionsFinderPhoton. The Format is always 2013 and OscarInterations.
- *
- * \param path The path to the output directory where the file(s) will be
- *             placed.
- */
-
-std::unique_ptr<OutputInterface> create_photon_output(const bf::path &path);
 
 // @}
 

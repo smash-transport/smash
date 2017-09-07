@@ -49,6 +49,9 @@ class BinaryOutputParticles : public BinaryOutputBase {
   void at_intermediate_time(const Particles &particles, const Clock &clock,
                             const DensityParameters &dens_param) override;
 
+  bool is_dilepton_output() const override { return false; }
+  bool is_photon_output() const override { return false; }
+
  private:
   /// Option: print initial and final particles or not
   bool only_final_;

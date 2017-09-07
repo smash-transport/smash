@@ -24,8 +24,12 @@ namespace Smash {
 
 template <OscarOutputFormat Format, int Contents>
 OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
-                                           std::string name)
-    : file_{std::fopen((path / (name + ".oscar")).native().c_str(), "w")} {
+                                           std::string name,
+                                           bool is_dilepton,
+                                           bool is_photon)
+    : is_dilepton_output_(is_dilepton),
+      is_photon_output_(is_photon),
+      file_{std::fopen((path / (name + ".oscar")).native().c_str(), "w")} {
 
   /*!\Userguide
    * \page input_oscar_particlelist Oscar_Particlelist
@@ -244,6 +248,7 @@ void OscarOutput<Format, Contents>::at_interaction(const Action &action,
     }
   }
 }
+
 
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::at_intermediate_time(
@@ -481,16 +486,20 @@ template <int Contents>
 std::unique_ptr<OutputInterface> create_select_format(std::string format,
                                                       const bf::path &path,
                                                       Configuration&& config,
-                                                      std::string name) {
+                                                      std::string name,
+                                                      bool is_dilepton,
+                                                      bool is_photon) {
   const bool modern_format =  (format == "Oscar2013");
   const bool extended_format = config.read({"Extended"}, false);
   if (modern_format && extended_format) {
     return make_unique<OscarOutput<OscarFormat2013Extended, Contents>>(
-        path, name);
+        path, name, is_dilepton, is_photon);
   } else if (modern_format) {
-    return make_unique<OscarOutput<OscarFormat2013, Contents>>(path, name);
+    return make_unique<OscarOutput<OscarFormat2013, Contents>>(
+        path, name, is_dilepton, is_photon);
   } else {
-    return make_unique<OscarOutput<OscarFormat1999, Contents>>(path, name);
+    return make_unique<OscarOutput<OscarFormat1999, Contents>>(
+        path, name, is_dilepton, is_photon);
   }
 }
 }  // unnamed namespace
@@ -503,39 +512,36 @@ std::unique_ptr<OutputInterface> create_oscar_output(std::string format,
     const bool only_final = specific_conf.read({"Only_Final"}, true);
       if (only_final) {
         return create_select_format<OscarParticlesAtEventend>(
-            format, path, std::move(specific_conf), "particle_lists");
+            format, path, std::move(specific_conf), "particle_lists",
+            false, false);
       } else {
         return create_select_format<OscarTimesteps | OscarAtEventstart |
                                     OscarParticlesAtEventend>(
-            format, path, std::move(specific_conf), "particle_lists");
+            format, path, std::move(specific_conf), "particle_lists",
+            false, false);
       }
-  }
-  if (content == "Collisions") {
+  } else if (content == "Collisions") {
     const bool print_start_end = specific_conf.read({"Print_Start_End"}, false);
     if (print_start_end) {
       return create_select_format<OscarInteractions | OscarAtEventstart |
                                   OscarParticlesAtEventend>(
-          format, path, std::move(specific_conf), "full_event_history");
+          format, path, std::move(specific_conf), "full_event_history",
+          false, false);
     } else {
       return create_select_format<OscarInteractions>(
-          format, path, std::move(specific_conf), "full_event_history");
+          format, path, std::move(specific_conf), "full_event_history",
+          false, false);
     }
+  } else if (content == "Dileptons") {
+    return make_unique<OscarOutput<OscarFormat2013Extended, OscarInteractions>>(
+    path, "DileptonOutput", true, false);
+  } else if (content == "Photons") {
+    return make_unique<OscarOutput<OscarFormat2013, OscarInteractions>>(
+      path, "PhotonOutput", false, true);
+
   }
-  return {};  // Todo(oliiny): Fix the case of unknown content / format
-}
 
-std::unique_ptr<OutputInterface> create_dilepton_output(const bf::path &path) {
-  /* for now the Oscar Output in the 2013 format is sufficient
-   * for dilepton output */
-  return make_unique<OscarOutput<OscarFormat2013Extended, OscarInteractions>>(
-      path, "DileptonOutput");
-}
-
-std::unique_ptr<OutputInterface> create_photon_output(const bf::path &path) {
-  /* for now the Oscar Output in the 2013 format is sufficient
-   * for photon output */
-  return make_unique<OscarOutput<OscarFormat2013, OscarInteractions>>(
-      path, "PhotonOutput");
+  throw std::invalid_argument("Create_oscar_output got unknown content.");
 }
 
 }  // namespace Smash
