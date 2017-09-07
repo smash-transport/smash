@@ -212,7 +212,11 @@ class Action {
       /* All processes apart from strings should have
        * a well-defined final state. */
       if (proc->particle_number() < 1 &&
-          proc->get_type() != ProcessType::String) {
+          proc->get_type() != ProcessType::String &&
+          proc->get_type() != ProcessType::StringSDiffAX &&
+          proc->get_type() != ProcessType::StringSDiffXB &&
+          proc->get_type() != ProcessType::StringDDiffXX &&
+          proc->get_type() != ProcessType::StringNDiff) {
         continue;
       }
       weight_sum += proc->weight();

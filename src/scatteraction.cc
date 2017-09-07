@@ -383,18 +383,14 @@ CollisionBranchList ScatterAction::string_excitation_cross_sections() {
   log.debug("String cross section (double-diffractive AB->XX) is: ", sig_dd_XX);
   log.debug("String cross section (non-diffractive) is: ", sig_nd);
   /* fill the list of process channels */
-  channel_list.push_back(make_unique<CollisionBranch>(
-      incoming_particles_[0].type(), incoming_particles_[1].type(),
-      sig_sd_AX, ProcessType::StringSDiffAX));
-  channel_list.push_back(make_unique<CollisionBranch>(
-      incoming_particles_[0].type(), incoming_particles_[1].type(),
-      sig_sd_XB, ProcessType::StringSDiffXB));
-  channel_list.push_back(make_unique<CollisionBranch>(
-      incoming_particles_[0].type(), incoming_particles_[1].type(),
-      sig_dd_XX, ProcessType::StringDDiffXX));
-  channel_list.push_back(make_unique<CollisionBranch>(
-      incoming_particles_[0].type(), incoming_particles_[1].type(),
-      sig_nd, ProcessType::StringNDiff));
+  channel_list.push_back(make_unique<CollisionBranch>( sig_sd_AX,
+      ProcessType::StringSDiffAX) );
+  channel_list.push_back(make_unique<CollisionBranch>( sig_sd_XB,
+      ProcessType::StringSDiffXB) );
+  channel_list.push_back(make_unique<CollisionBranch>( sig_dd_XX,
+      ProcessType::StringDDiffXX) );
+  channel_list.push_back(make_unique<CollisionBranch>( sig_nd,
+      ProcessType::StringNDiff) );
   return channel_list;
 }
 
