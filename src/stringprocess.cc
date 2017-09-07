@@ -532,7 +532,7 @@ bool StringProcess::init(const ParticleList &incomingList){
   bool ret;
 
   //int imu, inu;
-  array<int, 3> qcontent;
+  std::array<int, 3> qcontent;
 
   //double E, px, py, pz;
   //double ex, ey, et;
@@ -742,7 +742,7 @@ bool StringProcess::init_lab(PdgCode &idAIn, PdgCode &idBIn, double massAIn, dou
                        Pythia8::Vec4 plabAIn, Pythia8::Vec4 plabBIn) {
   bool ret;
   //int imu, inu;
-  array<int, 3> qcontent;
+  std::array<int, 3> qcontent;
 
   //double E, px, py, pz;
   //double ex, ey, et;
@@ -959,7 +959,7 @@ bool StringProcess::init_com(PdgCode &idAIn, PdgCode &idBIn, double massAIn, dou
                        double sqrtsABIn) {
   bool ret;
   //int imu, inu;
-  array<int, 3> qcontent;
+  std::array<int, 3> qcontent;
 
   //double E, px, py, pz;
 
