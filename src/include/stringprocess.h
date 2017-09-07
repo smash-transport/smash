@@ -8,7 +8,7 @@
 #include "particledata.h"
 
 //using namespace Pythia8;
-using namespace std;
+//using namespace std;
 
 namespace Smash {
 
@@ -17,8 +17,11 @@ class StringProcess {
   int PDGidA, PDGidB;
   int baryonA, baryonB;
   int chargeA, chargeB;
-  int *idqsetA;
-  int *idqsetB;
+  std::array<int,4> idqsetA;
+  //int *idqsetA;
+  std::array<int,4> idqsetB;
+  //int *idqsetB;
+  double PPosA, PNegA, PPosB, PNegB;
   double massA, massB;
   double sqrtsAB, pabscomAB;
   FourVector plabA;
@@ -27,7 +30,8 @@ class StringProcess {
   FourVector pcomB;
   FourVector ucomAB;
   ThreeVector vcomAB;
-  ThreeVector *evecBasisAB;
+  std::array<ThreeVector,4> evecBasisAB;
+  //ThreeVector *evecBasisAB;
   //double **evecBasisAB;
 
   int NpartFinal;
@@ -64,16 +68,19 @@ class StringProcess {
   ~StringProcess();
 
   // final state array
-  vector<int> *final_PDGid;
+  std::array<std::vector<int>,2> final_PDGid;
+  //vector<int> *final_PDGid;
   // final_PDGid[0] : PDGid
   // final_PDGid[1] : if it is leading hadron (1 = Yes, 0 = No)
-  vector<double> *final_pvec;
+  std::array<std::vector<double>,5> final_pvec;
+  //vector<double> *final_pvec;
   // final_pvec[0] : energy
   // final_pvec[1] : px
   // final_pvec[2] : py
   // final_pvec[3] : pz
   // final_pvec[4] : mass
-  vector<double> *final_tform;
+  std::array<std::vector<double>,2> final_tform;
+  //vector<double> *final_tform;
   // final_tform[0] : formation time (fm)
   // final_tform[1] : suppression factor for the cross section (xtotfac)
 
@@ -98,6 +105,9 @@ class StringProcess {
   bool init_com(PdgCode &idAIn, PdgCode &idBIn, double massAIn, double massBIn,
                 double sqrtsABIn);
 
+  void make_orthonormal_basis();
+  void compute_incoming_lightcone_momenta();
+
   //bool next_Inel();
   bool next_SDiff_AX();  // single-diffractive : A + B -> A + X
   bool next_SDiff_XB();  // single-diffractive : A + B -> X + B
@@ -119,7 +129,7 @@ class StringProcess {
   bool check_conservation();
 
   //void PDGid2idqset(int pdgid, int *idqset);
-  void makeStringEnds(int *idqset, int *idq1, int *idq2);
+  void makeStringEnds(std::array<int,4> &idqset, int *idq1, int *idq2);
   int fragmentString(int idq1, int idq2, double mString, ThreeVector &evecLong,
                      bool ranrot);
 

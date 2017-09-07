@@ -11,8 +11,8 @@ namespace Smash {
 // constructor
 StringProcess::StringProcess() {
   int ic, imu;
-  idqsetA = static_cast<int *>(malloc(4 * sizeof(int)));
-  idqsetB = static_cast<int *>(malloc(4 * sizeof(int)));
+  //idqsetA = static_cast<int *>(malloc(4 * sizeof(int)));
+  //idqsetB = static_cast<int *>(malloc(4 * sizeof(int)));
   for (ic = 0; ic < 4; ic++) {
     idqsetA[ic] = 0;
     idqsetB[ic] = 0;
@@ -23,7 +23,7 @@ StringProcess::StringProcess() {
   //pcomA = static_cast<double *>(malloc(4 * sizeof(double)));
   //pcomB = static_cast<double *>(malloc(4 * sizeof(double)));
   //ucomAB = static_cast<double *>(malloc(4 * sizeof(double)));
-  evecBasisAB = new ThreeVector[4];
+  //evecBasisAB = new ThreeVector[4];
   //evecBasisAB = static_cast<double **>(malloc(4 * sizeof(double *)));
   for (imu = 0; imu < 4; imu++) {
     //plabA[imu] = 0.;
@@ -31,9 +31,10 @@ StringProcess::StringProcess() {
     //pcomA[imu] = 0.;
     //pcomB[imu] = 0.;
     //ucomAB[imu] = 0.;
-    evecBasisAB[imu].set_x1( 0. );
-    evecBasisAB[imu].set_x2( 0. );
-    evecBasisAB[imu].set_x3( 0. );
+    evecBasisAB[imu] = ThreeVector(0., 0., 0.);
+    //evecBasisAB[imu].set_x1( 0. );
+    //evecBasisAB[imu].set_x2( 0. );
+    //evecBasisAB[imu].set_x3( 0. );
     //evecBasisAB[imu] = static_cast<double *>(malloc(4 * sizeof(double)));
     //for (inu = 0; inu < 4; inu++) {
     //  evecBasisAB[imu][inu] = 0.;
@@ -48,6 +49,10 @@ StringProcess::StringProcess() {
   PDGidA = PDGidB = 0;
   baryonA = baryonB = 0;
   chargeA = chargeB = 0;
+  PPosA = 0.;
+  PNegA = 0.;
+  PPosB = 0.;
+  PNegB = 0.;
   massA = massB = 0.;
   sqrtsAB = 0.;
   pabscomAB = 0.;
@@ -67,11 +72,9 @@ StringProcess::StringProcess() {
   EFIN = 0.;
 
   //lorentz = new Lorentz();
-
-  final_PDGid = new vector<int>[2];
-  final_pvec = new vector<double>[5];
-  final_tform = new vector<double>[2];
-
+  //final_PDGid = new vector<int>[2];
+  //final_pvec = new vector<double>[5];
+  //final_tform = new vector<double>[2];
   reset_finalArray();
 }
 
@@ -79,15 +82,15 @@ StringProcess::StringProcess() {
 StringProcess::~StringProcess() {
   //int imu;
 
-  free(idqsetA);
-  free(idqsetB);
+  //free(idqsetA);
+  //free(idqsetB);
 
   //free(plabA);
   //free(plabB);
   //free(pcomA);
   //free(pcomB);
   //free(ucomAB);
-  delete[] evecBasisAB;
+  //delete[] evecBasisAB;
   //for (imu = 0; imu < 4; imu++) {
   //  free(evecBasisAB[imu]);
   //}
@@ -97,9 +100,9 @@ StringProcess::~StringProcess() {
 
   //delete lorentz;
 
-  delete[] final_PDGid;
-  delete[] final_pvec;
-  delete[] final_tform;
+  //delete[] final_PDGid;
+  //delete[] final_pvec;
+  //delete[] final_tform;
 }
 
 void StringProcess::set_pythia(Pythia8::Pythia *pythiaIn) {
@@ -141,19 +144,30 @@ int StringProcess::append_finalArray(FourVector &uString, ThreeVector &evecLong)
   bool foundFW;
   bool foundBW;
 
-  int *idfrag;
-  double *Efrag;
-  double *pxfrag;
-  double *pyfrag;
-  double *pzfrag;
-  double *mfrag;
+  std::vector<int> idfrag;
+  std::vector<double> Efrag;
+  std::vector<double> pxfrag;
+  std::vector<double> pyfrag;
+  std::vector<double> pzfrag;
+  std::vector<double> mfrag;
+  //int *idfrag;
+  //double *Efrag;
+  //double *pxfrag;
+  //double *pyfrag;
+  //double *pzfrag;
+  //double *mfrag;
 
-  int *indY;
+  std::vector<int> indY;
+  std::vector<double> pparallel;
+  std::vector<double> Yparallel;
+  std::vector<double> XVertexPos;
+  std::vector<double> XVertexNeg;
+  //int *indY;
   // double zparallel;
-  double *pparallel;
-  double *Yparallel;
-  double *XVertexPos;
-  double *XVertexNeg;
+  //double *pparallel;
+  //double *Yparallel;
+  //double *XVertexPos;
+  //double *XVertexNeg;
 
   ThreeVector vstring;
   FourVector pvRS;
@@ -186,18 +200,29 @@ int StringProcess::append_finalArray(FourVector &uString, ThreeVector &evecLong)
 
   // fprintf(stderr,"  StringProcess::append_finalArray nfrag = %d\n", nfrag);
 
-  idfrag = static_cast<int *>(malloc(nfrag * sizeof(int)));
-  Efrag = static_cast<double *>(malloc(nfrag * sizeof(double)));
-  pxfrag = static_cast<double *>(malloc(nfrag * sizeof(double)));
-  pyfrag = static_cast<double *>(malloc(nfrag * sizeof(double)));
-  pzfrag = static_cast<double *>(malloc(nfrag * sizeof(double)));
-  mfrag = static_cast<double *>(malloc(nfrag * sizeof(double)));
+  idfrag.resize(nfrag);
+  Efrag.resize(nfrag);
+  pxfrag.resize(nfrag);
+  pyfrag.resize(nfrag);
+  pzfrag.resize(nfrag);
+  mfrag.resize(nfrag);
+  //idfrag = static_cast<int *>(malloc(nfrag * sizeof(int)));
+  //Efrag = static_cast<double *>(malloc(nfrag * sizeof(double)));
+  //pxfrag = static_cast<double *>(malloc(nfrag * sizeof(double)));
+  //pyfrag = static_cast<double *>(malloc(nfrag * sizeof(double)));
+  //pzfrag = static_cast<double *>(malloc(nfrag * sizeof(double)));
+  //mfrag = static_cast<double *>(malloc(nfrag * sizeof(double)));
 
-  indY = static_cast<int *>(malloc(nfrag * sizeof(int)));
-  pparallel = static_cast<double *>(malloc(nfrag * sizeof(double)));
-  Yparallel = static_cast<double *>(malloc(nfrag * sizeof(double)));
-  XVertexPos = static_cast<double *>(malloc((nfrag + 1) * sizeof(double)));
-  XVertexNeg = static_cast<double *>(malloc((nfrag + 1) * sizeof(double)));
+  indY.resize(nfrag);
+  pparallel.resize(nfrag);
+  Yparallel.resize(nfrag);
+  XVertexPos.resize(nfrag + 1);
+  XVertexNeg.resize(nfrag + 1);
+  //indY = static_cast<int *>(malloc(nfrag * sizeof(int)));
+  //pparallel = static_cast<double *>(malloc(nfrag * sizeof(double)));
+  //Yparallel = static_cast<double *>(malloc(nfrag * sizeof(double)));
+  //XVertexPos = static_cast<double *>(malloc((nfrag + 1) * sizeof(double)));
+  //XVertexNeg = static_cast<double *>(malloc((nfrag + 1) * sizeof(double)));
 
   pPosTot = 0.;
   pNegTot = 0.;
@@ -223,11 +248,11 @@ int StringProcess::append_finalArray(FourVector &uString, ThreeVector &evecLong)
       //                     pzfrag[ipstr] * evecLong[3];
       //  // fprintf(stderr,"  StringProcess::append_finalArray : non-zero evecLong\n");
       //}
-      Yparallel[ipstr] = 0.5 * log((Efrag[ipstr] + pparallel[ipstr]) /
+      Yparallel[ipstr] = 0.5 * std::log((Efrag[ipstr] + pparallel[ipstr]) /
                                    (Efrag[ipstr] - pparallel[ipstr]));
 
-      pPosTot = pPosTot + (Efrag[ipstr] + pparallel[ipstr]) / sqrt(2.);
-      pNegTot = pNegTot + (Efrag[ipstr] - pparallel[ipstr]) / sqrt(2.);
+      pPosTot = pPosTot + (Efrag[ipstr] + pparallel[ipstr]) / std::sqrt(2.);
+      pNegTot = pNegTot + (Efrag[ipstr] - pparallel[ipstr]) / std::sqrt(2.);
 
       ipstr = ipstr + 1;
     }
@@ -251,7 +276,7 @@ int StringProcess::append_finalArray(FourVector &uString, ThreeVector &evecLong)
 
     XVertexPos[kpstr + 1] =
         XVertexPos[kpstr] -
-        (Efrag[ipstr] + pparallel[ipstr]) / (kappaString * sqrt(2.));
+        (Efrag[ipstr] + pparallel[ipstr]) / (kappaString * std::sqrt(2.));
   }
   // fprintf(stderr,"  StringProcess::append_finalArray XVertexPos[nfrag] = %e\n",
   // XVertexPos[nfrag]);
@@ -262,7 +287,7 @@ int StringProcess::append_finalArray(FourVector &uString, ThreeVector &evecLong)
 
     XVertexNeg[kpstr] =
         XVertexNeg[kpstr + 1] -
-        (Efrag[ipstr] - pparallel[ipstr]) / (kappaString * sqrt(2.));
+        (Efrag[ipstr] - pparallel[ipstr]) / (kappaString * std::sqrt(2.));
   }
   // fprintf(stderr,"  StringProcess::append_finalArray XVertexNeg[0] = %e\n",
   // XVertexNeg[0]);
@@ -281,13 +306,13 @@ int StringProcess::append_finalArray(FourVector &uString, ThreeVector &evecLong)
     pvRS.set_x3( pzfrag[ipstr] );
     mass = mfrag[ipstr];
 
-    xfRS.set_x0( (XVertexPos[kpstr] + XVertexNeg[kpstr + 1]) / sqrt(2.) );
+    xfRS.set_x0( (XVertexPos[kpstr] + XVertexNeg[kpstr + 1]) / std::sqrt(2.) );
     xfRS.set_x1(
-        evecLong.x1() * (XVertexPos[kpstr] - XVertexNeg[kpstr + 1]) / sqrt(2.) );
+        evecLong.x1() * (XVertexPos[kpstr] - XVertexNeg[kpstr + 1]) / std::sqrt(2.) );
     xfRS.set_x2(
-        evecLong.x2() * (XVertexPos[kpstr] - XVertexNeg[kpstr + 1]) / sqrt(2.) );
+        evecLong.x2() * (XVertexPos[kpstr] - XVertexNeg[kpstr + 1]) / std::sqrt(2.) );
     xfRS.set_x3(
-        evecLong.x3() * (XVertexPos[kpstr] - XVertexNeg[kpstr + 1]) / sqrt(2.) );
+        evecLong.x3() * (XVertexPos[kpstr] - XVertexNeg[kpstr + 1]) / std::sqrt(2.) );
     //if (evecLong == NULL) {
     //  xfRS[1] = 0.;
     //  xfRS[2] = 0.;
@@ -301,7 +326,7 @@ int StringProcess::append_finalArray(FourVector &uString, ThreeVector &evecLong)
     //      evecLong[3] * (XVertexPos[kpstr] - XVertexNeg[kpstr + 1]) / sqrt(2.);
     //}
 
-    tProd = (XVertexPos[kpstr] + XVertexNeg[kpstr + 1]) / sqrt(2.);
+    tProd = (XVertexPos[kpstr] + XVertexNeg[kpstr + 1]) / std::sqrt(2.);
     // zparallel = (XVertexPos[kpstr] - XVertexNeg[kpstr + 1])/sqrt(2.);
     // fprintf(stderr,"  StringProcess::append_finalArray tProd[kpstr = %d] = %e\n",
     // kpstr, tProd);
@@ -406,18 +431,18 @@ int StringProcess::append_finalArray(FourVector &uString, ThreeVector &evecLong)
     ret = ret + 1;
   }
 
-  free(idfrag);
-  free(Efrag);
-  free(pxfrag);
-  free(pyfrag);
-  free(pzfrag);
-  free(mfrag);
+  //free(idfrag);
+  //free(Efrag);
+  //free(pxfrag);
+  //free(pyfrag);
+  //free(pzfrag);
+  //free(mfrag);
 
-  free(indY);
-  free(pparallel);
-  free(Yparallel);
-  free(XVertexPos);
-  free(XVertexNeg);
+  //free(indY);
+  //free(pparallel);
+  //free(Yparallel);
+  //free(XVertexPos);
+  //free(XVertexNeg);
 
   //free(pvRS);
   //free(pvCM);
@@ -510,8 +535,8 @@ bool StringProcess::init(const ParticleList &incomingList){
   array<int, 3> qcontent;
 
   //double E, px, py, pz;
-  double ex, ey, et;
-  double theta, phi;
+  //double ex, ey, et;
+  //double theta, phi;
 
   PDGidA = incomingList[0].pdgcode().get_decimal();
   PDGidB = incomingList[1].pdgcode().get_decimal();
@@ -553,6 +578,8 @@ bool StringProcess::init(const ParticleList &incomingList){
   pcomB = plabB.LorentzBoost(vcomAB);
   //lorentz->Boost1_LabToRest(3, ucomAB, plabB, pcomB);
 
+  make_orthonormal_basis();
+  /*
   if (fabs(pcomA.x3()) < (1. - 1.0e-8) * pabscomAB) {
     evecBasisAB[3] = pcomA.threevec() / pabscomAB;
     //for (imu = 1; imu <= 3; imu++) {
@@ -565,7 +592,7 @@ bool StringProcess::init(const ParticleList &incomingList){
     ey = evecBasisAB[3].x2();
     //ex = evecBasisAB[3][1];
     //ey = evecBasisAB[3][2];
-    et = sqrt(pow(fabs(ex), 2.) + pow(fabs(ey), 2.));
+    et = std::sqrt(ex*ex + ey*ey);
     if (ey > 0.) {
       phi = acos(ex / et);
     } else {
@@ -587,17 +614,20 @@ bool StringProcess::init(const ParticleList &incomingList){
     //evecBasisAB[2][3] = 0.;
   } else {
     if (pcomA.x3() > 0.) {
-      evecBasisAB[1].set_x1( 1. );
-      evecBasisAB[1].set_x2( 0. );
-      evecBasisAB[1].set_x3( 0. );
+      evecBasisAB[1] = ThreeVector(1., 0., 0.);
+      //evecBasisAB[1].set_x1( 1. );
+      //evecBasisAB[1].set_x2( 0. );
+      //evecBasisAB[1].set_x3( 0. );
 
-      evecBasisAB[2].set_x1( 0. );
-      evecBasisAB[2].set_x2( 1. );
-      evecBasisAB[2].set_x3( 0. );
+      evecBasisAB[2] = ThreeVector(0., 1., 0.);
+      //evecBasisAB[2].set_x1( 0. );
+      //evecBasisAB[2].set_x2( 1. );
+      //evecBasisAB[2].set_x3( 0. );
 
-      evecBasisAB[3].set_x1( 0. );
-      evecBasisAB[3].set_x2( 0. );
-      evecBasisAB[3].set_x3( 1. );
+      evecBasisAB[3] = ThreeVector(0., 0., 1.);
+      //evecBasisAB[3].set_x1( 0. );
+      //evecBasisAB[3].set_x2( 0. );
+      //evecBasisAB[3].set_x3( 1. );
       //for (imu = 1; imu <= 3; imu++) {
       //  for (inu = 1; inu <= 3; inu++) {
       //    if (imu == inu) {
@@ -608,28 +638,33 @@ bool StringProcess::init(const ParticleList &incomingList){
       //  }
       //}
     } else {
-      evecBasisAB[1].set_x1( 0. );
-      evecBasisAB[1].set_x2( 1. );
-      evecBasisAB[1].set_x3( 0. );
+      evecBasisAB[1] = ThreeVector(0., 1., 0.);
+      //evecBasisAB[1].set_x1( 0. );
+      //evecBasisAB[1].set_x2( 1. );
+      //evecBasisAB[1].set_x3( 0. );
       //evecBasisAB[1][1] = 0.;
       //evecBasisAB[1][2] = 1.;
       //evecBasisAB[1][3] = 0.;
 
-      evecBasisAB[2].set_x1( 1. );
-      evecBasisAB[2].set_x2( 0. );
-      evecBasisAB[2].set_x3( 0. );
+      evecBasisAB[2] = ThreeVector(1., 0., 0.);
+      //evecBasisAB[2].set_x1( 1. );
+      //evecBasisAB[2].set_x2( 0. );
+      //evecBasisAB[2].set_x3( 0. );
       //evecBasisAB[2][1] = 1.;
       //evecBasisAB[2][2] = 0.;
       //evecBasisAB[2][3] = 0.;
 
-      evecBasisAB[3].set_x1( 0. );
-      evecBasisAB[3].set_x2( 0. );
-      evecBasisAB[3].set_x3( -1. );
+      evecBasisAB[3] = ThreeVector(0., 0., -1.);
+      //evecBasisAB[3].set_x1( 0. );
+      //evecBasisAB[3].set_x2( 0. );
+      //evecBasisAB[3].set_x3( -1. );
       //evecBasisAB[3][1] = 0.;
       //evecBasisAB[3][2] = 0.;
       //evecBasisAB[3][3] = -1.;
     }
   }
+  */
+  compute_incoming_lightcone_momenta();
 
   // fprintf(stderr,"  StringProcess::init : evecBasisAB1 = (%e, %e, %e)\n",
   //	evecBasisAB[1][1], evecBasisAB[1][2], evecBasisAB[1][3]);
@@ -710,8 +745,8 @@ bool StringProcess::init_lab(PdgCode &idAIn, PdgCode &idBIn, double massAIn, dou
   array<int, 3> qcontent;
 
   //double E, px, py, pz;
-  double ex, ey, et;
-  double theta, phi;
+  //double ex, ey, et;
+  //double theta, phi;
 
   PDGidA = idAIn.get_decimal();
   PDGidB = idBIn.get_decimal();
@@ -727,6 +762,7 @@ bool StringProcess::init_lab(PdgCode &idAIn, PdgCode &idBIn, double massAIn, dou
   //plabA[2] = plabAIn.py();
   //plabA[3] = plabAIn.pz();
 
+  plabB = FourVector(plabBIn.e(), plabBIn.px(), plabBIn.py(), plabBIn.pz());
   plabB.set_x0( plabBIn.e() );
   plabB.set_x1( plabBIn.px() );
   plabB.set_x2( plabBIn.py() );
@@ -759,6 +795,8 @@ bool StringProcess::init_lab(PdgCode &idAIn, PdgCode &idBIn, double massAIn, dou
   pcomB = plabB.LorentzBoost(vcomAB);
   //lorentz->Boost1_LabToRest(3, ucomAB, plabB, pcomB);
 
+  make_orthonormal_basis();
+  /*
   if (fabs(pcomA.x3()) < (1. - 1.0e-8) * pabscomAB) {
     evecBasisAB[3] = pcomA.threevec() / pabscomAB;
     //for (imu = 1; imu <= 3; imu++) {
@@ -771,7 +809,7 @@ bool StringProcess::init_lab(PdgCode &idAIn, PdgCode &idBIn, double massAIn, dou
     ey = evecBasisAB[3].x2();
     //ex = evecBasisAB[3][1];
     //ey = evecBasisAB[3][2];
-    et = sqrt(pow(fabs(ex), 2.) + pow(fabs(ey), 2.));
+    et = std::sqrt(ex*ex + ey*ey);
     if (ey > 0.) {
       phi = acos(ex / et);
     } else {
@@ -793,17 +831,20 @@ bool StringProcess::init_lab(PdgCode &idAIn, PdgCode &idBIn, double massAIn, dou
     //evecBasisAB[2][3] = 0.;
   } else {
     if (pcomA.x3() > 0.) {
-      evecBasisAB[1].set_x1( 1. );
-      evecBasisAB[1].set_x2( 0. );
-      evecBasisAB[1].set_x3( 0. );
+      evecBasisAB[1] = ThreeVector(1., 0., 0.);
+      //evecBasisAB[1].set_x1( 1. );
+      //evecBasisAB[1].set_x2( 0. );
+      //evecBasisAB[1].set_x3( 0. );
 
-      evecBasisAB[2].set_x1( 0. );
-      evecBasisAB[2].set_x2( 1. );
-      evecBasisAB[2].set_x3( 0. );
+      evecBasisAB[2] = ThreeVector(0., 1., 0.);
+      //evecBasisAB[2].set_x1( 0. );
+      //evecBasisAB[2].set_x2( 1. );
+      //evecBasisAB[2].set_x3( 0. );
 
-      evecBasisAB[3].set_x1( 0. );
-      evecBasisAB[3].set_x2( 0. );
-      evecBasisAB[3].set_x3( 1. );
+      evecBasisAB[3] = ThreeVector(0., 0., 1.);
+      //evecBasisAB[3].set_x1( 0. );
+      //evecBasisAB[3].set_x2( 0. );
+      //evecBasisAB[3].set_x3( 1. );
       //for (imu = 1; imu <= 3; imu++) {
       //  for (inu = 1; inu <= 3; inu++) {
       //    if (imu == inu) {
@@ -814,28 +855,33 @@ bool StringProcess::init_lab(PdgCode &idAIn, PdgCode &idBIn, double massAIn, dou
       //  }
       //}
     } else {
-      evecBasisAB[1].set_x1( 0. );
-      evecBasisAB[1].set_x2( 1. );
-      evecBasisAB[1].set_x3( 0. );
+      evecBasisAB[1] = ThreeVector(0., 1., 0.);
+      //evecBasisAB[1].set_x1( 0. );
+      //evecBasisAB[1].set_x2( 1. );
+      //evecBasisAB[1].set_x3( 0. );
       //evecBasisAB[1][1] = 0.;
       //evecBasisAB[1][2] = 1.;
       //evecBasisAB[1][3] = 0.;
 
-      evecBasisAB[2].set_x1( 1. );
-      evecBasisAB[2].set_x2( 0. );
-      evecBasisAB[2].set_x3( 0. );
+      evecBasisAB[2] = ThreeVector(1., 0., 0.);
+      //evecBasisAB[2].set_x1( 1. );
+      //evecBasisAB[2].set_x2( 0. );
+      //evecBasisAB[2].set_x3( 0. );
       //evecBasisAB[2][1] = 1.;
       //evecBasisAB[2][2] = 0.;
       //evecBasisAB[2][3] = 0.;
 
-      evecBasisAB[3].set_x1( 0. );
-      evecBasisAB[3].set_x2( 0. );
-      evecBasisAB[3].set_x3( -1. );
+      evecBasisAB[3] = ThreeVector(0., 0., -1.);
+      //evecBasisAB[3].set_x1( 0. );
+      //evecBasisAB[3].set_x2( 0. );
+      //evecBasisAB[3].set_x3( -1. );
       //evecBasisAB[3][1] = 0.;
       //evecBasisAB[3][2] = 0.;
       //evecBasisAB[3][3] = -1.;
     }
   }
+  */
+  compute_incoming_lightcone_momenta();
 
   // fprintf(stderr,"  StringProcess::init : evecBasisAB1 = (%e, %e, %e)\n",
   //	evecBasisAB[1][1], evecBasisAB[1][2], evecBasisAB[1][3]);
@@ -927,15 +973,17 @@ bool StringProcess::init_com(PdgCode &idAIn, PdgCode &idBIn, double massAIn, dou
   //                 (pow(fabs(sqrtsAB), 2.) - pow(fabs(massA - massB), 2.))) /
   //            (2. * sqrtsAB);
 
-  plabA.set_x0( sqrt(pow(fabs(massA), 2.) + pow(fabs(pabscomAB), 2.)) );
-  plabA.set_x1( 0. );
-  plabA.set_x2( 0. );
-  plabA.set_x3( pabscomAB );
+  plabA = FourVector( std::sqrt(massA*massA + pabscomAB*pabscomAB), 0., 0., pabscomAB );
+  //plabA.set_x0( sqrt(massA*massA + pabscomAB*pabscomAB) );
+  //plabA.set_x1( 0. );
+  //plabA.set_x2( 0. );
+  //plabA.set_x3( pabscomAB );
 
-  plabB.set_x0( sqrt(pow(fabs(massB), 2.) + pow(fabs(pabscomAB), 2.)) );
-  plabB.set_x1( 0. );
-  plabB.set_x2( 0. );
-  plabB.set_x3( -pabscomAB );
+  plabB = FourVector( std::sqrt(massB*massB + pabscomAB*pabscomAB), 0., 0., -pabscomAB );
+  //plabB.set_x0( sqrt(massB*massB + pabscomAB*pabscomAB) );
+  //plabB.set_x1( 0. );
+  //plabB.set_x2( 0. );
+  //plabB.set_x3( -pabscomAB );
 
   //E = plabA[0] + plabB[0];
   //px = plabA[1] + plabB[1];
@@ -953,17 +1001,22 @@ bool StringProcess::init_com(PdgCode &idAIn, PdgCode &idBIn, double massAIn, dou
   pcomB = plabB.LorentzBoost(vcomAB);
   //lorentz->Boost1_LabToRest(3, ucomAB, plabB, pcomB);
 
-  evecBasisAB[1].set_x1( 1. );
-  evecBasisAB[1].set_x2( 0. );
-  evecBasisAB[1].set_x3( 0. );
+  make_orthonormal_basis();
+  /*
+  evecBasisAB[1] = ThreeVector(1., 0., 0.);
+  //evecBasisAB[1].set_x1( 1. );
+  //evecBasisAB[1].set_x2( 0. );
+  //evecBasisAB[1].set_x3( 0. );
 
-  evecBasisAB[2].set_x1( 0. );
-  evecBasisAB[2].set_x2( 1. );
-  evecBasisAB[2].set_x3( 0. );
- 
-  evecBasisAB[3].set_x1( 0. );
-  evecBasisAB[3].set_x2( 0. );
-  evecBasisAB[3].set_x3( 1. );
+  evecBasisAB[2] = ThreeVector(0., 1., 0.);
+  //evecBasisAB[2].set_x1( 0. );
+  //evecBasisAB[2].set_x2( 1. );
+  //evecBasisAB[2].set_x3( 0. );
+
+  evecBasisAB[3] = ThreeVector(0., 0., 1.);
+  //evecBasisAB[3].set_x1( 0. );
+  //evecBasisAB[3].set_x2( 0. );
+  //evecBasisAB[3].set_x3( 1. );
   //for (imu = 1; imu <= 3; imu++) {
   //  for (inu = 1; inu <= 3; inu++) {
   //    if (imu == inu) {
@@ -973,6 +1026,8 @@ bool StringProcess::init_com(PdgCode &idAIn, PdgCode &idBIn, double massAIn, dou
   //    }
   //  }
   //}
+  */
+  compute_incoming_lightcone_momenta();
 
   // fprintf(stderr,"  StringProcess::init : evecBasisAB1 = (%e, %e, %e)\n",
   //	evecBasisAB[1][1], evecBasisAB[1][2], evecBasisAB[1][3]);
@@ -1139,15 +1194,15 @@ bool StringProcess::next_SDiff_AX() {
 
     makeStringEnds(idqsetB, &idqX1, &idqX2);
 
-    QTrx = Random::normal(0., sigmaQperp/sqrt(2.) );
-    QTry = Random::normal(0., sigmaQperp/sqrt(2.) );
-    QTrn = sqrt( pow(fabs(QTrx),2.) + pow(fabs(QTry),2.) );
+    QTrx = Random::normal(0., sigmaQperp/std::sqrt(2.) );
+    QTry = Random::normal(0., sigmaQperp/std::sqrt(2.) );
+    QTrn = std::sqrt(QTrx*QTrx + QTry*QTry);
     //QTrn = sample_Qperp(sigmaQperp);
     //phiQ = 2. * M_PI * Random::uniform(0., 1.);
     // fprintf(stderr,"  StringProcess::next_SDiff_AX : QTrn = %e GeV, phiQ = %e\n",
     // QTrn, phiQ);
 
-    rmass = log(mstrMax / mstrMin) * Random::uniform(0., 1.);
+    rmass = std::log(mstrMax / mstrMin) * Random::uniform(0., 1.);
     massX = mstrMin * exp(rmass);
     pabscomAX = pCM( sqrtsAB, massA, massX );
     //pabscomAX = sqrt((pow(fabs(sqrtsAB), 2.) - pow(fabs(massA + massX), 2.)) *
@@ -1161,22 +1216,24 @@ bool StringProcess::next_SDiff_AX() {
 
   ret = false;
   if ((foundPabsX == true) && (foundMassX == true)) {
-    pstrHcom.set_x0( sqrt(pow(fabs(pabscomAX), 2.) + pow(fabs(massA), 2.)) );
-    pstrXcom.set_x0( sqrt(pow(fabs(pabscomAX), 2.) + pow(fabs(massX), 2.)) );
     //pstrHcom[0] = sqrt(pow(fabs(pabscomAX), 2.) + pow(fabs(massA), 2.));
     //pstrXcom[0] = sqrt(pow(fabs(pabscomAX), 2.) + pow(fabs(massX), 2.));
-    threeMomentum = evecBasisAB[3] * sqrt(pow(fabs(pabscomAX), 2.) - pow(fabs(QTrn), 2.)) +
+    threeMomentum = evecBasisAB[3] * std::sqrt(pabscomAX*pabscomAX - QTrn*QTrn) +
                         evecBasisAB[1] * QTrx +
                         evecBasisAB[2] * QTry;
-    pstrHcom.set_x1( threeMomentum.x1() );
-    pstrHcom.set_x2( threeMomentum.x2() );
-    pstrHcom.set_x3( threeMomentum.x3() );
-    threeMomentum = -evecBasisAB[3] * sqrt(pow(fabs(pabscomAX), 2.) - pow(fabs(QTrn), 2.)) -
+    pstrHcom = FourVector( std::sqrt(pabscomAX*pabscomAX + massA*massA), threeMomentum );
+    //pstrHcom.set_x0( std::sqrt(pabscomAX*pabscomAX + massA*massA) );
+    //pstrHcom.set_x1( threeMomentum.x1() );
+    //pstrHcom.set_x2( threeMomentum.x2() );
+    //pstrHcom.set_x3( threeMomentum.x3() );
+    threeMomentum = -evecBasisAB[3] * std::sqrt(pabscomAX*pabscomAX - QTrn*QTrn) -
                         evecBasisAB[1] * QTrx -
                         evecBasisAB[2] * QTry;
-    pstrXcom.set_x1( threeMomentum.x1() );
-    pstrXcom.set_x2( threeMomentum.x2() );
-    pstrXcom.set_x3( threeMomentum.x3() );
+    pstrXcom = FourVector( std::sqrt(pabscomAX*pabscomAX + massX*massX), threeMomentum );
+    //pstrXcom.set_x0( std::sqrt(pabscomAX*pabscomAX + massX*massX) );
+    //pstrXcom.set_x1( threeMomentum.x1() );
+    //pstrXcom.set_x2( threeMomentum.x2() );
+    //pstrXcom.set_x3( threeMomentum.x3() );
     //for (imu = 1; imu < 4; imu++) {
     //  pstrHcom[imu] = evecBasisAB[3][imu] *
     //                      sqrt(pow(fabs(pabscomAX), 2.) - pow(fabs(QTrn), 2.)) +
@@ -1216,10 +1273,11 @@ bool StringProcess::next_SDiff_AX() {
     //}
 
     threeMomentum = pstrXcom.threevec();
-    pnull.set_x0( threeMomentum.abs() );
-    pnull.set_x1( threeMomentum.x1() );
-    pnull.set_x2( threeMomentum.x2() );
-    pnull.set_x3( threeMomentum.x3() );
+    pnull = FourVector( threeMomentum.abs(), threeMomentum );
+    //pnull.set_x0( threeMomentum.abs() );
+    //pnull.set_x1( threeMomentum.x1() );
+    //pnull.set_x2( threeMomentum.x2() );
+    //pnull.set_x3( threeMomentum.x3() );
     //for (imu = 1; imu < 4; imu++) {
     //  pnull[imu] = pstrXcom[imu];
     //}
@@ -1355,9 +1413,9 @@ bool StringProcess::next_SDiff_XB() {
 
     makeStringEnds(idqsetA, &idqX1, &idqX2);
 
-    QTrx = Random::normal(0., sigmaQperp/sqrt(2.) );
-    QTry = Random::normal(0., sigmaQperp/sqrt(2.) );
-    QTrn = sqrt( pow(fabs(QTrx),2.) + pow(fabs(QTry),2.) );
+    QTrx = Random::normal(0., sigmaQperp/std::sqrt(2.) );
+    QTry = Random::normal(0., sigmaQperp/std::sqrt(2.) );
+    QTrn = std::sqrt(QTrx*QTrx + QTry*QTry);
     //QTrn = sample_Qperp(sigmaQperp);
     //phiQ = 2. * M_PI * Random::uniform(0., 1.);
     // fprintf(stderr,"  StringProcess::next_SDiff_XB : QTrn = %e GeV, phiQ = %e\n",
@@ -1377,22 +1435,24 @@ bool StringProcess::next_SDiff_XB() {
 
   ret = false;
   if ((foundPabsX == true) && (foundMassX == true)) {
-    pstrHcom.set_x0( sqrt(pow(fabs(pabscomXB), 2.) + pow(fabs(massB), 2.)) );
-    pstrXcom.set_x0( sqrt(pow(fabs(pabscomXB), 2.) + pow(fabs(massX), 2.)) );
     //pstrHcom[0] = sqrt(pow(fabs(pabscomXB), 2.) + pow(fabs(massB), 2.));
     //pstrXcom[0] = sqrt(pow(fabs(pabscomXB), 2.) + pow(fabs(massX), 2.));
-    threeMomentum = -evecBasisAB[3] * sqrt(pow(fabs(pabscomXB), 2.) - pow(fabs(QTrn), 2.)) -
+    threeMomentum = -evecBasisAB[3] * std::sqrt(pabscomXB*pabscomXB - QTrn*QTrn) -
                         evecBasisAB[1] * QTrx -
                         evecBasisAB[2] * QTry;
-    pstrHcom.set_x1( threeMomentum.x1() );
-    pstrHcom.set_x2( threeMomentum.x2() );
-    pstrHcom.set_x3( threeMomentum.x3() );
-    threeMomentum = evecBasisAB[3] * sqrt(pow(fabs(pabscomXB), 2.) - pow(fabs(QTrn), 2.)) +
+    pstrHcom = FourVector( std::sqrt(pabscomXB*pabscomXB + massB*massB), threeMomentum );
+    //pstrHcom.set_x0( std::sqrt(pabscomXB*pabscomXB + massB*massB) );
+    //pstrHcom.set_x1( threeMomentum.x1() );
+    //pstrHcom.set_x2( threeMomentum.x2() );
+    //pstrHcom.set_x3( threeMomentum.x3() );
+    threeMomentum = evecBasisAB[3] * std::sqrt(pabscomXB*pabscomXB - QTrn*QTrn) +
                         evecBasisAB[1] * QTrx +
                         evecBasisAB[2] * QTry;
-    pstrXcom.set_x1( threeMomentum.x1() );
-    pstrXcom.set_x2( threeMomentum.x2() );
-    pstrXcom.set_x3( threeMomentum.x3() );
+    pstrXcom = FourVector( std::sqrt(pabscomXB*pabscomXB + massX*massX), threeMomentum );
+    //pstrXcom.set_x0( std::sqrt(pabscomXB*pabscomXB + massX*massX) );
+    //pstrXcom.set_x1( threeMomentum.x1() );
+    //pstrXcom.set_x2( threeMomentum.x2() );
+    //pstrXcom.set_x3( threeMomentum.x3() );
     //for (imu = 1; imu < 4; imu++) {
     //  pstrHcom[imu] = -evecBasisAB[3][imu] *
     //                      sqrt(pow(fabs(pabscomXB), 2.) - pow(fabs(QTrn), 2.)) -
@@ -1432,10 +1492,11 @@ bool StringProcess::next_SDiff_XB() {
     //}
 
     threeMomentum = pstrXcom.threevec();
-    pnull.set_x0( threeMomentum.abs() );
-    pnull.set_x1( threeMomentum.x1() );
-    pnull.set_x2( threeMomentum.x2() );
-    pnull.set_x3( threeMomentum.x3() );
+    pnull = FourVector( threeMomentum.abs(), threeMomentum );
+    //pnull.set_x0( threeMomentum.abs() );
+    //pnull.set_x1( threeMomentum.x1() );
+    //pnull.set_x2( threeMomentum.x2() );
+    //pnull.set_x3( threeMomentum.x3() );
     //for (imu = 1; imu < 4; imu++) {
     //  pnull[imu] = pstrXcom[imu];
     //}
@@ -1509,8 +1570,6 @@ bool StringProcess::next_DDiff_XX() {
   bool foundMass1, foundMass2;
 
   double xfracA, xfracB;
-  double PPosA, PNegA;
-  double PPosB, PNegB;
   double QPos, QNeg;
   double QTrn, QTrx, QTry;
 
@@ -1560,18 +1619,19 @@ bool StringProcess::next_DDiff_XX() {
 
   // PDGid2idqset(PDGidA, idqsetA);
   // PDGid2idqset(PDGidB, idqsetB);
-  PPosA = (pcomA.x0() + evecBasisAB[3].x1() * pcomA.x1() +
-           evecBasisAB[3].x2() * pcomA.x2() + evecBasisAB[3].x3() * pcomA.x3()) /
-          sqrt(2.);
-  PNegA = (pcomA.x0() - evecBasisAB[3].x1() * pcomA.x1() -
-           evecBasisAB[3].x2() * pcomA.x2() - evecBasisAB[3].x3() * pcomA.x3()) /
-          sqrt(2.);
-  PPosB = (pcomB.x0() + evecBasisAB[3].x1() * pcomB.x1() +
-           evecBasisAB[3].x2() * pcomB.x2() + evecBasisAB[3].x3() * pcomB.x3()) /
-          sqrt(2.);
-  PNegB = (pcomB.x0() - evecBasisAB[3].x1() * pcomB.x1() -
-           evecBasisAB[3].x2() * pcomB.x2() - evecBasisAB[3].x3() * pcomB.x3()) /
-          sqrt(2.);
+  //compute_incoming_lightcone_momenta();
+  //PPosA = (pcomA.x0() + evecBasisAB[3].x1() * pcomA.x1() +
+  //         evecBasisAB[3].x2() * pcomA.x2() + evecBasisAB[3].x3() * pcomA.x3()) /
+  //        std::sqrt(2.);
+  //PNegA = (pcomA.x0() - evecBasisAB[3].x1() * pcomA.x1() -
+  //         evecBasisAB[3].x2() * pcomA.x2() - evecBasisAB[3].x3() * pcomA.x3()) /
+  //        std::sqrt(2.);
+  //PPosB = (pcomB.x0() + evecBasisAB[3].x1() * pcomB.x1() +
+  //         evecBasisAB[3].x2() * pcomB.x2() + evecBasisAB[3].x3() * pcomB.x3()) /
+  //        std::sqrt(2.);
+  //PNegB = (pcomB.x0() - evecBasisAB[3].x1() * pcomB.x1() -
+  //         evecBasisAB[3].x2() * pcomB.x2() - evecBasisAB[3].x3() * pcomB.x3()) /
+  //        std::sqrt(2.);
 
   ntry = 0;
   foundMass1 = false;
@@ -1586,9 +1646,9 @@ bool StringProcess::next_DDiff_XX() {
     xfracB = Random::beta_a0(xfracMin, betapowS + 1.);
     //xfracA = sample_XSDIS(xfracMin, betapowS);
     //xfracB = sample_XSDIS(xfracMin, betapowS);
-    QTrx = Random::normal(0., sigmaQperp/sqrt(2.) );
-    QTry = Random::normal(0., sigmaQperp/sqrt(2.) );
-    QTrn = sqrt( pow(fabs(QTrx),2.) + pow(fabs(QTry),2.) );
+    QTrx = Random::normal(0., sigmaQperp/std::sqrt(2.) );
+    QTry = Random::normal(0., sigmaQperp/std::sqrt(2.) );
+    QTrn = std::sqrt(QTrx*QTrx + QTry*QTry);
     //QTrn = sample_Qperp(sigmaQperp);
     //phiQ = 2. * M_PI * Random::uniform(0., 1.);
     // fprintf(stderr,"  StringProcess::next_DDiff : xfracA = %e, xfracB = %e\n",
@@ -1599,23 +1659,25 @@ bool StringProcess::next_DDiff_XX() {
     QPos = -pow(fabs(QTrn), 2.) / (2. * xfracB * PNegB);
     QNeg = pow(fabs(QTrn), 2.) / (2. * xfracA * PPosA);
 
-    pstr1com.set_x0( (PPosA + QPos + PNegA + QNeg) / sqrt(2.) );
-    pstr2com.set_x0( (PPosB - QPos + PNegB - QNeg) / sqrt(2.) );
     //pstr1com[0] = (PPosA + QPos + PNegA + QNeg) / sqrt(2.);
     //pstr2com[0] = (PPosB - QPos + PNegB - QNeg) / sqrt(2.);
     //mstr1 = pow(fabs(pstr1com[0]), 2.);
     //mstr2 = pow(fabs(pstr2com[0]), 2.);
-    threeMomentum = evecBasisAB[3] * (PPosA + QPos - PNegA - QNeg) / sqrt(2.) +
+    threeMomentum = evecBasisAB[3] * (PPosA + QPos - PNegA - QNeg) / std::sqrt(2.) +
                         evecBasisAB[1] * QTrx + evecBasisAB[2] * QTry;
-    pstr1com.set_x1( threeMomentum.x1() );
-    pstr1com.set_x2( threeMomentum.x2() );
-    pstr1com.set_x3( threeMomentum.x3() );
-    threeMomentum = evecBasisAB[3] * (PPosB - QPos - PNegB + QNeg) / sqrt(2.) -
-                        evecBasisAB[1] * QTrx - evecBasisAB[2] * QTry;
-    pstr1com.set_x1( threeMomentum.x1() );
-    pstr1com.set_x2( threeMomentum.x2() );
-    pstr1com.set_x3( threeMomentum.x3() );
+    pstr1com = FourVector( (PPosA + QPos + PNegA + QNeg) / std::sqrt(2.), threeMomentum );
+    //pstr1com.set_x0( (PPosA + QPos + PNegA + QNeg) / std::sqrt(2.) );
+    //pstr1com.set_x1( threeMomentum.x1() );
+    //pstr1com.set_x2( threeMomentum.x2() );
+    //pstr1com.set_x3( threeMomentum.x3() );
     mstr1 = pstr1com.sqr();
+    threeMomentum = evecBasisAB[3] * (PPosB - QPos - PNegB + QNeg) / std::sqrt(2.) -
+                        evecBasisAB[1] * QTrx - evecBasisAB[2] * QTry;
+    pstr2com = FourVector( (PPosB - QPos + PNegB - QNeg) / std::sqrt(2.), threeMomentum );
+    //pstr2com.set_x0( (PPosB - QPos + PNegB - QNeg) / std::sqrt(2.) );
+    //pstr2com.set_x1( threeMomentum.x1() );
+    //pstr2com.set_x2( threeMomentum.x2() );
+    //pstr2com.set_x3( threeMomentum.x3() );
     mstr2 = pstr2com.sqr();
     //for (imu = 1; imu < 4; imu++) {
     //  pstr1com[imu] =
@@ -1636,26 +1698,28 @@ bool StringProcess::next_DDiff_XX() {
     // GeV\n",
     //	pstr2com[0], pstr2com[1], pstr2com[2], pstr2com[3]);
 
-    if (mstr1 > 0.) {
-      mstr1 = sqrt(mstr1);
-    } else {
-      mstr1 = 0.;
-    }
-
-    if (mstr2 > 0.) {
-      mstr2 = sqrt(mstr2);
-    } else {
-      mstr2 = 0.;
-    }
-
+    mstr1 = (mstr1 > 0.) ? std::sqrt(mstr1) : 0.;
+    //if (mstr1 > 0.) {
+    //  mstr1 = std::sqrt(mstr1);
+    //} else {
+    //  mstr1 = 0.;
+    //}
     foundMass1 = mstr1 > (pythia->particleData.m0(idq11) +
                           pythia->particleData.m0(idq12));
+
+    mstr2 = (mstr2 > 0.) ? std::sqrt(mstr2) : 0.;
+    //if (mstr2 > 0.) {
+    //  mstr2 = std::sqrt(mstr2);
+    //} else {
+    //  mstr2 = 0.;
+    //}
     foundMass2 = mstr2 > (pythia->particleData.m0(idq21) +
                           pythia->particleData.m0(idq22));
   }
 
   ret = false;
-  if ((foundMass1 == true) && (foundMass2 == true)) {
+  bool both_masses_above_pythia_threshold = foundMass1 && foundMass2;
+  if ( both_masses_above_pythia_threshold ) {
     // fprintf(stderr,"  StringProcess::next_DDiff : idq11 = %d, idq12 = %d\n", idq11,
     // idq12);
     // fprintf(stderr,"  StringProcess::next_DDiff : mstr1 = %e GeV\n", mstr1);
@@ -1685,10 +1749,11 @@ bool StringProcess::next_DDiff_XX() {
     //}
 
     threeMomentum = pstr1com.threevec();
-    pnull.set_x0( threeMomentum.abs() );
-    pnull.set_x1( threeMomentum.x1() );
-    pnull.set_x2( threeMomentum.x2() );
-    pnull.set_x3( threeMomentum.x3() );
+    pnull = FourVector( threeMomentum.abs(), threeMomentum );
+    //pnull.set_x0( threeMomentum.abs() );
+    //pnull.set_x1( threeMomentum.x1() );
+    //pnull.set_x2( threeMomentum.x2() );
+    //pnull.set_x3( threeMomentum.x3() );
     //for (imu = 1; imu < 4; imu++) {
     //  pnull[imu] = pstr1com[imu];
     //}
@@ -1716,10 +1781,11 @@ bool StringProcess::next_DDiff_XX() {
     }
 
     threeMomentum = pstr2com.threevec();
-    pnull.set_x0( threeMomentum.abs() );
-    pnull.set_x1( threeMomentum.x1() );
-    pnull.set_x2( threeMomentum.x2() );
-    pnull.set_x3( threeMomentum.x3() );
+    pnull = FourVector( threeMomentum.abs(), threeMomentum );
+    //pnull.set_x0( threeMomentum.abs() );
+    //pnull.set_x1( threeMomentum.x1() );
+    //pnull.set_x2( threeMomentum.x2() );
+    //pnull.set_x3( threeMomentum.x3() );
     //for (imu = 1; imu < 4; imu++) {
     //  pnull[imu] = pstr2com[imu];
     //}
@@ -1783,8 +1849,6 @@ bool StringProcess::next_NDiff() {
   bool foundMass1, foundMass2;
 
   double xfracA, xfracB;
-  double PPosA, PNegA;
-  double PPosB, PNegB;
   double QPos, QNeg;
   double dPPos, dPNeg;
   double QTrn, QTrx, QTry;
@@ -1837,18 +1901,19 @@ bool StringProcess::next_NDiff() {
 
   // PDGid2idqset(PDGidA, idqsetA);
   // PDGid2idqset(PDGidB, idqsetB);
-  PPosA = (pcomA.x0() + evecBasisAB[3].x1() * pcomA.x1() +
-           evecBasisAB[3].x2() * pcomA.x2() + evecBasisAB[3].x3() * pcomA.x3()) /
-          sqrt(2.);
-  PNegA = (pcomA.x0() - evecBasisAB[3].x1() * pcomA.x1() -
-           evecBasisAB[3].x2() * pcomA.x2() - evecBasisAB[3].x3() * pcomA.x3()) /
-          sqrt(2.);
-  PPosB = (pcomB.x0() + evecBasisAB[3].x1() * pcomB.x1() +
-           evecBasisAB[3].x2() * pcomB.x2() + evecBasisAB[3].x3() * pcomB.x3()) /
-          sqrt(2.);
-  PNegB = (pcomB.x0() - evecBasisAB[3].x1() * pcomB.x1() -
-           evecBasisAB[3].x2() * pcomB.x2() - evecBasisAB[3].x3() * pcomB.x3()) /
-          sqrt(2.);
+  //compute_incoming_lightcone_momenta();
+  //PPosA = (pcomA.x0() + evecBasisAB[3].x1() * pcomA.x1() +
+  //         evecBasisAB[3].x2() * pcomA.x2() + evecBasisAB[3].x3() * pcomA.x3()) /
+  //        std::sqrt(2.);
+  //PNegA = (pcomA.x0() - evecBasisAB[3].x1() * pcomA.x1() -
+  //         evecBasisAB[3].x2() * pcomA.x2() - evecBasisAB[3].x3() * pcomA.x3()) /
+  //        std::sqrt(2.);
+  //PPosB = (pcomB.x0() + evecBasisAB[3].x1() * pcomB.x1() +
+  //         evecBasisAB[3].x2() * pcomB.x2() + evecBasisAB[3].x3() * pcomB.x3()) /
+  //        std::sqrt(2.);
+  //PNegB = (pcomB.x0() - evecBasisAB[3].x1() * pcomB.x1() -
+  //         evecBasisAB[3].x2() * pcomB.x2() - evecBasisAB[3].x3() * pcomB.x3()) /
+  //        std::sqrt(2.);
 
   ntry = 0;
   foundMass1 = false;
@@ -1922,9 +1987,9 @@ bool StringProcess::next_NDiff() {
     xfracB = Random::beta(alphapowV, betapowV);
     //xfracA = sample_XVDIS(0., alphapowV, betapowV);
     //xfracB = sample_XVDIS(0., alphapowV, betapowV);
-    QTrx = Random::normal(0., sigmaQperp/sqrt(2.) );
-    QTry = Random::normal(0., sigmaQperp/sqrt(2.) );
-    QTrn = sqrt( pow(fabs(QTrx),2.) + pow(fabs(QTry),2.) );
+    QTrx = Random::normal(0., sigmaQperp/std::sqrt(2.) );
+    QTry = Random::normal(0., sigmaQperp/std::sqrt(2.) );
+    QTrn = std::sqrt(QTrx*QTrx + QTry*QTry);
     //QTrn = sample_Qperp(sigmaQperp);
     //phiQ = 2. * M_PI * Random::uniform(0., 1.);
     // fprintf(stderr,"  StringProcess::next_NDiff : xfracA = %e, xfracB = %e\n",
@@ -1938,31 +2003,33 @@ bool StringProcess::next_NDiff() {
     dPPos = -xfracA * PPosA - QPos;
     dPNeg = xfracB * PNegB - QNeg;
 
-    pstr1com.set_x0( (PPosA + dPPos + PNegA + dPNeg) / sqrt(2.) );
-    pstr2com.set_x0( (PPosB - dPPos + PNegB - dPNeg) / sqrt(2.) );
     //pstr1com[0] = (PPosA + dPPos + PNegA + dPNeg) / sqrt(2.);
     //pstr2com[0] = (PPosB - dPPos + PNegB - dPNeg) / sqrt(2.);
     //mstr1 = pow(fabs(pstr1com[0]), 2.);
     //mstr2 = pow(fabs(pstr2com[0]), 2.);
-    threeMomentum = evecBasisAB[3] * (PPosA + dPPos - PNegA - dPNeg) / sqrt(2.) +
+    threeMomentum = evecBasisAB[3] * (PPosA + dPPos - PNegA - dPNeg) / std::sqrt(2.) +
                         evecBasisAB[1] * QTrx + evecBasisAB[2] * QTry;
-    pstr1com.set_x1( threeMomentum.x1() );
-    pstr1com.set_x2( threeMomentum.x2() );
-    pstr1com.set_x3( threeMomentum.x3() );
-    threeMomentum = evecBasisAB[3] * (PPosB - dPPos - PNegB + dPNeg) / sqrt(2.) -
-                        evecBasisAB[1] * QTrx - evecBasisAB[2] * QTry;
-    pstr1com.set_x1( threeMomentum.x1() );
-    pstr1com.set_x2( threeMomentum.x2() );
-    pstr1com.set_x3( threeMomentum.x3() );
+    pstr1com = FourVector( (PPosA + dPPos + PNegA + dPNeg) / std::sqrt(2.), threeMomentum );
+    //pstr1com.set_x0( (PPosA + dPPos + PNegA + dPNeg) / std::sqrt(2.) );
+    //pstr1com.set_x1( threeMomentum.x1() );
+    //pstr1com.set_x2( threeMomentum.x2() );
+    //pstr1com.set_x3( threeMomentum.x3() );
     mstr1 = pstr1com.sqr();
+    threeMomentum = evecBasisAB[3] * (PPosB - dPPos - PNegB + dPNeg) / std::sqrt(2.) -
+                        evecBasisAB[1] * QTrx - evecBasisAB[2] * QTry;
+    pstr2com = FourVector( (PPosB - dPPos + PNegB - dPNeg) / std::sqrt(2.), threeMomentum );
+    //pstr2com.set_x0( (PPosB - dPPos + PNegB - dPNeg) / std::sqrt(2.) );
+    //pstr2com.set_x1( threeMomentum.x1() );
+    //pstr2com.set_x2( threeMomentum.x2() );
+    //pstr2com.set_x3( threeMomentum.x3() );
     mstr2 = pstr2com.sqr();
     //for (imu = 1; imu < 4; imu++) {
     //  pstr1com[imu] =
-    //      evecBasisAB[3][imu] * (PPosA + QPos - PNegA - QNeg) / sqrt(2.) +
+    //      evecBasisAB[3][imu] * (PPosA + dPPos - PNegA - dPNeg) / sqrt(2.) +
     //      evecBasisAB[1][imu] * QTrn * cos(phiQ) +
     //      evecBasisAB[2][imu] * QTrn * sin(phiQ);
     //  pstr2com[imu] =
-    //      evecBasisAB[3][imu] * (PPosB - QPos - PNegB + QNeg) / sqrt(2.) -
+    //      evecBasisAB[3][imu] * (PPosB - dPPos - PNegB + dPNeg) / sqrt(2.) -
     //      evecBasisAB[1][imu] * QTrn * cos(phiQ) -
     //      evecBasisAB[2][imu] * QTrn * sin(phiQ);
     //  mstr1 = mstr1 - pow(fabs(pstr1com[imu]), 2.);
@@ -1975,26 +2042,28 @@ bool StringProcess::next_NDiff() {
     // GeV\n",
     //	pstr2com[0], pstr2com[1], pstr2com[2], pstr2com[3]);
 
-    if (mstr1 > 0.) {
-      mstr1 = sqrt(mstr1);
-    } else {
-      mstr1 = 0.;
-    }
-
-    if (mstr2 > 0.) {
-      mstr2 = sqrt(mstr2);
-    } else {
-      mstr2 = 0.;
-    }
-
+    mstr1 = (mstr1 > 0.) ? std::sqrt(mstr1) : 0.;
+    //if (mstr1 > 0.) {
+    //  mstr1 = sqrt(mstr1);
+    //} else {
+    //  mstr1 = 0.;
+    //}
     foundMass1 = mstr1 > (pythia->particleData.m0(idq11) +
                           pythia->particleData.m0(idq12));
+
+    mstr2 = (mstr2 > 0.) ? std::sqrt(mstr2) : 0.;
+    //if (mstr2 > 0.) {
+    //  mstr2 = sqrt(mstr2);
+    //} else {
+    //  mstr2 = 0.;
+    //}
     foundMass2 = mstr2 > (pythia->particleData.m0(idq21) +
                           pythia->particleData.m0(idq22));
   }
 
   ret = false;
-  if ((foundMass1 == true) && (foundMass2 == true)) {
+  bool both_masses_above_pythia_threshold = foundMass1 && foundMass2;
+  if ( both_masses_above_pythia_threshold ) {
     // fprintf(stderr,"  StringProcess::next_NDiff : idq11 = %d, idq12 = %d\n", idq11,
     // idq12);
     // fprintf(stderr,"  StringProcess::next_NDiff : mstr1 = %e GeV\n", mstr1);
@@ -2024,10 +2093,11 @@ bool StringProcess::next_NDiff() {
     //}
 
     threeMomentum = pstr1com.threevec();
-    pnull.set_x0( threeMomentum.abs() );
-    pnull.set_x1( threeMomentum.x1() );
-    pnull.set_x2( threeMomentum.x2() );
-    pnull.set_x3( threeMomentum.x3() );
+    pnull = FourVector( threeMomentum.abs(), threeMomentum );
+    //pnull.set_x0( threeMomentum.abs() );
+    //pnull.set_x1( threeMomentum.x1() );
+    //pnull.set_x2( threeMomentum.x2() );
+    //pnull.set_x3( threeMomentum.x3() );
     //for (imu = 1; imu < 4; imu++) {
     //  pnull[imu] = pstr1com[imu];
     //}
@@ -2055,10 +2125,11 @@ bool StringProcess::next_NDiff() {
     }
 
     threeMomentum = pstr2com.threevec();
-    pnull.set_x0( threeMomentum.abs() );
-    pnull.set_x1( threeMomentum.x1() );
-    pnull.set_x2( threeMomentum.x2() );
-    pnull.set_x3( threeMomentum.x3() );
+    pnull = FourVector( threeMomentum.abs(), threeMomentum );
+    //pnull.set_x0( threeMomentum.abs() );
+    //pnull.set_x1( threeMomentum.x1() );
+    //pnull.set_x2( threeMomentum.x2() );
+    //pnull.set_x3( threeMomentum.x3() );
     //for (imu = 1; imu < 4; imu++) {
     //  pnull[imu] = pstr2com[imu];
     //}
@@ -2124,7 +2195,7 @@ bool StringProcess::next_BBbarAnn(){
 	int ic, jc;
 	int ijc, ipr, npr;
 	double rflip;
-	vector<int> *indexAnn;
+	std::vector<int> indexAnn;
 
 	int idq11, idq12, idq12prev;
 	int idq21, idq22, idq22prev;
@@ -2150,8 +2221,8 @@ bool StringProcess::next_BBbarAnn(){
 	//	ustr2lab[imu] = ucomAB[imu];
 	//}
 
-	indexAnn = new vector<int>;
-	indexAnn->resize(0);
+	//indexAnn = new vector<int>;
+	indexAnn.resize(0);
 
 	reset_finalArray();
 
@@ -2171,11 +2242,11 @@ bool StringProcess::next_BBbarAnn(){
 			for(jc = 1; jc <= 3; jc++){
 				if( idqsetA[ic] == -idqsetB[jc] ){
 					ijc = ic*10 + jc;
-					indexAnn->push_back( ijc );
+					indexAnn.push_back( ijc );
 				}
 			}
 		}
-		npr = indexAnn->size();
+		npr = indexAnn.size();
 		fprintf(stderr,"  StringProcess::next_BBarAnn : %d possible pairs for qqbar annihilation\n", npr);
 		/* if it is a BBbar pair but there is no qqbar pair to annihilate,
 		 * nothing happens */
@@ -2214,7 +2285,7 @@ bool StringProcess::next_BBbarAnn(){
 
 			// randomly choose a qqbar pair to annihilate
 			ipr = static_cast<int>( floor( Random::uniform(0., 1.)*static_cast<double>(npr) ) );
-			ijc = indexAnn->at(ipr);
+			ijc = indexAnn.at(ipr);
 			ic = ( ijc - (ijc%10) )/10;
 			jc = ijc%10;
 			fprintf(stderr,"  StringProcess::next_BBarAnn : ic = %d, jc = %d chosen\n", ic, jc);
@@ -2307,7 +2378,7 @@ bool StringProcess::next_BBbarAnn(){
 	//free(ustr1lab);
 	//free(ustr2lab);
 
-	delete indexAnn;
+	//delete indexAnn;
 
 	if( ret == true ){
 		conserved = check_conservation();
@@ -2359,15 +2430,124 @@ void StringProcess::PDGid2idqset(int pdgid, int *idqset) {
 }
 */
 
-void StringProcess::makeStringEnds(int *idqset, int *idq1, int *idq2) {
+void StringProcess::make_orthonormal_basis(){
+  if (fabs(pcomA.x3()) < (1. - 1.0e-8) * pabscomAB) {
+    double ex, ey, et;
+    double theta, phi;
+
+    evecBasisAB[3] = pcomA.threevec() / pabscomAB;
+    //for (imu = 1; imu <= 3; imu++) {
+    //  evecBasisAB[3][imu] = pcomA[imu] / pabscomAB;
+    //}
+    theta = acos(evecBasisAB[3].x3());
+    //theta = acos(evecBasisAB[3][3]);
+
+    ex = evecBasisAB[3].x1();
+    ey = evecBasisAB[3].x2();
+    //ex = evecBasisAB[3][1];
+    //ey = evecBasisAB[3][2];
+    et = std::sqrt(ex*ex + ey*ey);
+    if (ey > 0.) {
+      phi = acos(ex / et);
+    } else {
+      phi = -acos(ex / et);
+    }
+
+    evecBasisAB[1].set_x1( cos(theta) * cos(phi) );
+    evecBasisAB[1].set_x2( cos(theta) * sin(phi) );
+    evecBasisAB[1].set_x3( -sin(theta) );
+    //evecBasisAB[1][1] = cos(theta) * cos(phi);
+    //evecBasisAB[1][2] = cos(theta) * sin(phi);
+    //evecBasisAB[1][3] = -sin(theta);
+
+    evecBasisAB[2].set_x1( -sin(phi) );
+    evecBasisAB[2].set_x2( cos(phi) );
+    evecBasisAB[2].set_x3( 0. );
+    //evecBasisAB[2][1] = -sin(phi);
+    //evecBasisAB[2][2] = cos(phi);
+    //evecBasisAB[2][3] = 0.;
+  } else {
+    if (pcomA.x3() > 0.) {
+      evecBasisAB[1] = ThreeVector(1., 0., 0.);
+      //evecBasisAB[1].set_x1( 1. );
+      //evecBasisAB[1].set_x2( 0. );
+      //evecBasisAB[1].set_x3( 0. );
+
+      evecBasisAB[2] = ThreeVector(0., 1., 0.);
+      //evecBasisAB[2].set_x1( 0. );
+      //evecBasisAB[2].set_x2( 1. );
+      //evecBasisAB[2].set_x3( 0. );
+
+      evecBasisAB[3] = ThreeVector(0., 0., 1.);
+      //evecBasisAB[3].set_x1( 0. );
+      //evecBasisAB[3].set_x2( 0. );
+      //evecBasisAB[3].set_x3( 1. );
+      //for (imu = 1; imu <= 3; imu++) {
+      //  for (inu = 1; inu <= 3; inu++) {
+      //    if (imu == inu) {
+      //      evecBasisAB[imu][inu] = 1.;
+      //    } else {
+      //      evecBasisAB[imu][inu] = 0.;
+      //    }
+      //  }
+      //}
+    } else {
+      evecBasisAB[1] = ThreeVector(0., 1., 0.);
+      //evecBasisAB[1].set_x1( 0. );
+      //evecBasisAB[1].set_x2( 1. );
+      //evecBasisAB[1].set_x3( 0. );
+      //evecBasisAB[1][1] = 0.;
+      //evecBasisAB[1][2] = 1.;
+      //evecBasisAB[1][3] = 0.;
+
+      evecBasisAB[2] = ThreeVector(1., 0., 0.);
+      //evecBasisAB[2].set_x1( 1. );
+      //evecBasisAB[2].set_x2( 0. );
+      //evecBasisAB[2].set_x3( 0. );
+      //evecBasisAB[2][1] = 1.;
+      //evecBasisAB[2][2] = 0.;
+      //evecBasisAB[2][3] = 0.;
+
+      evecBasisAB[3] = ThreeVector(0., 0., -1.);
+      //evecBasisAB[3].set_x1( 0. );
+      //evecBasisAB[3].set_x2( 0. );
+      //evecBasisAB[3].set_x3( -1. );
+      //evecBasisAB[3][1] = 0.;
+      //evecBasisAB[3][2] = 0.;
+      //evecBasisAB[3][3] = -1.;
+    }
+  }
+}
+
+void StringProcess::compute_incoming_lightcone_momenta(){
+  PPosA = ( pcomA.x0() + evecBasisAB[3] * pcomA.threevec() ) / std::sqrt(2.);
+  //PPosA = (pcomA.x0() + evecBasisAB[3].x1() * pcomA.x1() +
+  //         evecBasisAB[3].x2() * pcomA.x2() + evecBasisAB[3].x3() * pcomA.x3()) /
+  //        std::sqrt(2.);
+  PNegA = ( pcomA.x0() - evecBasisAB[3] * pcomA.threevec() ) / std::sqrt(2.);
+  //PNegA = (pcomA.x0() - evecBasisAB[3].x1() * pcomA.x1() -
+  //         evecBasisAB[3].x2() * pcomA.x2() - evecBasisAB[3].x3() * pcomA.x3()) /
+  //        std::sqrt(2.);
+  PPosB = ( pcomB.x0() + evecBasisAB[3] * pcomB.threevec() ) / std::sqrt(2.);
+  //PPosB = (pcomB.x0() + evecBasisAB[3].x1() * pcomB.x1() +
+  //         evecBasisAB[3].x2() * pcomB.x2() + evecBasisAB[3].x3() * pcomB.x3()) /
+  //        std::sqrt(2.);
+  PNegB = ( pcomB.x0() - evecBasisAB[3] * pcomB.threevec() ) / std::sqrt(2.);
+  //PNegB = (pcomB.x0() - evecBasisAB[3].x1() * pcomB.x1() -
+  //         evecBasisAB[3].x2() * pcomB.x2() - evecBasisAB[3].x3() * pcomB.x3()) /
+  //        std::sqrt(2.);
+}
+
+void StringProcess::makeStringEnds(std::array<int,4> &idqset, int *idq1, int *idq2) {
   int ir, ic, jc;
   int idq1tmp, idq2tmp;
-  int *idqtmp;
+  std::array<int,3> idqtmp;
+  //int *idqtmp;
 
   double rspin;
   double rflip;
 
-  idqtmp = static_cast<int *>(malloc(3 * sizeof(int)));
+  //idqtmp = static_cast<int *>(malloc(3 * sizeof(int)));
 
   // if it is meson/baryon
   if (idqset[3] == 0) {  // meson
@@ -2430,7 +2610,7 @@ void StringProcess::makeStringEnds(int *idqset, int *idq1, int *idq2) {
   // and %d\n",
   //	idqset[3], idqset[2], idqset[1], idqset[0], *idq1, *idq2);
 
-  free(idqtmp);
+  //free(idqtmp);
 }
 
 int StringProcess::fragmentString(int idq1, int idq2, double mString,
@@ -2447,11 +2627,13 @@ int StringProcess::fragmentString(int idq1, int idq2, double mString,
   double rswap;
   Pythia8::Vec4 pquark;
 
-  double *p3vec;
-  double *pvRS;
+  ThreeVector p3vec;
+  FourVector pvRS;
+  //double *p3vec;
+  //double *pvRS;
 
-  p3vec = static_cast<double *>(malloc(4 * sizeof(double)));
-  pvRS = static_cast<double *>(malloc(4 * sizeof(double)));
+  //p3vec = static_cast<double *>(malloc(4 * sizeof(double)));
+  //pvRS = static_cast<double *>(malloc(4 * sizeof(double)));
 
   pythia->event.reset();
   ret = 0;
@@ -2463,15 +2645,18 @@ int StringProcess::fragmentString(int idq1, int idq2, double mString,
   //           (pow(fabs(mString), 2.) - pow(fabs(m1 - m2), 2.))) /
   //      (2. * mString);
 
-  p3vec[0] = 0.;
+  //p3vec[0] = 0.;
   if (ranrot == true) {
     theta = acos(1. - 2. * Random::uniform(0., 1.));
     phi = 2. * M_PI * Random::uniform(0., 1.);
     rswap = 0.;
 
-    p3vec[1] = pCMquark * sin(theta) * cos(phi);
-    p3vec[2] = pCMquark * sin(theta) * sin(phi);
-    p3vec[3] = pCMquark * cos(theta);
+    p3vec.set_x1( pCMquark * sin(theta) * cos(phi) );
+    //p3vec[1] = pCMquark * sin(theta) * cos(phi);
+    p3vec.set_x2( pCMquark * sin(theta) * sin(phi) );
+    //p3vec[2] = pCMquark * sin(theta) * sin(phi);
+    p3vec.set_x3( pCMquark * cos(theta) );
+    //p3vec[3] = pCMquark * cos(theta);
   } else {
     rswap = Random::uniform(0., 1.);
     if (rswap < 0.5) {
@@ -2498,13 +2683,15 @@ int StringProcess::fragmentString(int idq1, int idq2, double mString,
     col = 1;
     acol = 0;
     if (ranrot == true) {
-      pvRS[1] = -p3vec[1];
-      pvRS[2] = -p3vec[2];
-      pvRS[3] = -p3vec[3];
+      pvRS = FourVector(0., -p3vec);
+      //pvRS[1] = -p3vec[1];
+      //pvRS[2] = -p3vec[2];
+      //pvRS[3] = -p3vec[3];
     } else {
-      pvRS[1] = -pCMquark * evecLong.x1();
-      pvRS[2] = -pCMquark * evecLong.x2();
-      pvRS[3] = -pCMquark * evecLong.x3();
+      pvRS = FourVector(0., -pCMquark * evecLong);
+      //pvRS[1] = -pCMquark * evecLong.x1();
+      //pvRS[2] = -pCMquark * evecLong.x2();
+      //pvRS[3] = -pCMquark * evecLong.x3();
       //if (evecLong == NULL) {
       //  pvRS[1] = -p3vec[1];
       //  pvRS[2] = -p3vec[2];
@@ -2515,12 +2702,17 @@ int StringProcess::fragmentString(int idq1, int idq2, double mString,
       //  pvRS[3] = -pCMquark * evecLong[3];
       //}
     }
-    pvRS[0] = sqrt(pow(fabs(m1), 2.) + pow(fabs(pCMquark), 2.));
+    pvRS.set_x0( std::sqrt(m1*m1 + pCMquark*pCMquark) );
+    //pvRS[0] = std::sqrt(pow(fabs(m1), 2.) + pow(fabs(pCMquark), 2.));
 
-    pquark.e(pvRS[0]);
-    pquark.px(pvRS[1]);
-    pquark.py(pvRS[2]);
-    pquark.pz(pvRS[3]);
+    pquark.e( pvRS.x0() );
+    //pquark.e(pvRS[0]);
+    pquark.px( pvRS.x1() );
+    //pquark.px(pvRS[1]);
+    pquark.py( pvRS.x2() );
+    //pquark.py(pvRS[2]);
+    pquark.pz( pvRS.x3() );
+    //pquark.pz(pvRS[3]);
 
     pythia->event.append(idq1, status, col, acol, pquark, m1);
 
@@ -2528,13 +2720,15 @@ int StringProcess::fragmentString(int idq1, int idq2, double mString,
     col = 0;
     acol = 1;
     if (ranrot == true) {
-      pvRS[1] = p3vec[1];
-      pvRS[2] = p3vec[2];
-      pvRS[3] = p3vec[3];
+      pvRS = FourVector(0., p3vec);
+      //pvRS[1] = p3vec[1];
+      //pvRS[2] = p3vec[2];
+      //pvRS[3] = p3vec[3];
     } else {
-      pvRS[1] = pCMquark * evecLong.x1();
-      pvRS[2] = pCMquark * evecLong.x2();
-      pvRS[3] = pCMquark * evecLong.x3();
+      pvRS = FourVector(0., pCMquark * evecLong);
+      //pvRS[1] = pCMquark * evecLong.x1();
+      //pvRS[2] = pCMquark * evecLong.x2();
+      //pvRS[3] = pCMquark * evecLong.x3();
       //if (evecLong == NULL) {
       //  pvRS[1] = p3vec[1];
       //  pvRS[2] = p3vec[2];
@@ -2545,12 +2739,17 @@ int StringProcess::fragmentString(int idq1, int idq2, double mString,
       //  pvRS[3] = pCMquark * evecLong[3];
       //}
     }
-    pvRS[0] = sqrt(pow(fabs(m2), 2.) + pow(fabs(pCMquark), 2.));
+    pvRS.set_x0( std::sqrt(m2*m2 + pCMquark*pCMquark) );
+    //pvRS[0] = std::sqrt(pow(fabs(m2), 2.) + pow(fabs(pCMquark), 2.));
 
-    pquark.e(pvRS[0]);
-    pquark.px(pvRS[1]);
-    pquark.py(pvRS[2]);
-    pquark.pz(pvRS[3]);
+    pquark.e( pvRS.x0() );
+    //pquark.e(pvRS[0]);
+    pquark.px( pvRS.x1() );
+    //pquark.px(pvRS[1]);
+    pquark.py( pvRS.x2() );
+    //pquark.py(pvRS[2]);
+    pquark.pz( pvRS.x3() );
+    //pquark.pz(pvRS[3]);
 
     pythia->event.append(idq2, status, col, acol, pquark, m2);
 
@@ -2567,8 +2766,8 @@ int StringProcess::fragmentString(int idq1, int idq2, double mString,
     fprintf(stderr, "  StringProcess::fragmentString failure : m1 + m2 >= mString\n");
   }
 
-  free(p3vec);
-  free(pvRS);
+  //free(p3vec);
+  //free(pvRS);
 
   return ret;
 }
