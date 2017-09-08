@@ -7,6 +7,8 @@
 #ifndef SRC_INCLUDE_OUTPUTPARAMETERS_H_
 #define SRC_INCLUDE_OUTPUTPARAMETERS_H_
 
+#include <set>
+
 #include "configuration.h"
 #include "density.h"
 #include "forwarddeclarations.h"
@@ -34,7 +36,7 @@ struct OutputParameters {
         coll_printstartend(false) {}
 
   /// Constructor from configuration
-  OutputParameters(Configuration&& conf) : OutputParameters() {
+  explicit OutputParameters(Configuration&& conf) : OutputParameters() {
     const auto& log = logger<LogArea::Experiment>();
     log.trace(source_location);
 

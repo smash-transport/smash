@@ -10,6 +10,8 @@
 #ifndef SRC_INCLUDE_OUTPUTINTERFACE_H_
 #define SRC_INCLUDE_OUTPUTINTERFACE_H_
 
+#include <string>
+
 #include "density.h"
 #include "energymomentumtensor.h"
 #include "forwarddeclarations.h"
@@ -31,7 +33,7 @@ namespace Smash {
  */
 class OutputInterface {
  public:
-  OutputInterface(std::string name)
+  explicit OutputInterface(std::string name)
       : is_dilepton_output_(name == "Dileptons"),
         is_photon_output_(name == "Photons") {}
   virtual ~OutputInterface() = default;
