@@ -91,10 +91,9 @@ class OscarOutput : public OutputInterface {
  *             placed.
  * \param config A Configuration object that has direct entries for OSCAR.
  */
-std::unique_ptr<OutputInterface> create_oscar_output(std::string format,
-                                                     std::string content,
-                                                     const bf::path &path,
-                                                     const OutputParameters &out_par);
+std::unique_ptr<OutputInterface> create_oscar_output(
+    std::string format, std::string content, const bf::path &path,
+    const OutputParameters &out_par);
 
 // @}
 

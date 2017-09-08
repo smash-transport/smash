@@ -24,10 +24,10 @@ BinaryOutputCollisions::BinaryOutputCollisions(const bf::path &path,
                                                std::string name,
                                                const OutputParameters &out_par)
     : BinaryOutputBase(
-          std::fopen((path / ((name == "Collisions" ? "collisions_binary" : name) +
-              ".bin")).native().c_str(), "wb"),
-          name,
-          out_par.coll_extended),
+          std::fopen(
+              (path /
+               ((name == "Collisions" ? "collisions_binary" : name) + ".bin"))
+                  .native().c_str(), "wb"), name, out_par.coll_extended),
       print_start_end_(out_par.coll_printstartend) {
   /*!\Userguide
    * \page input_binary_collisions Binary_collisions

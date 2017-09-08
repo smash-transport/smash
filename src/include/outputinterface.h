@@ -31,9 +31,9 @@ namespace Smash {
  */
 class OutputInterface {
  public:
-  OutputInterface(std::string name) :
-    is_dilepton_output_(name == "Dileptons"),
-    is_photon_output_(name == "Photons") {}
+  OutputInterface(std::string name)
+      : is_dilepton_output_(name == "Dileptons"),
+        is_photon_output_(name == "Photons") {}
   virtual ~OutputInterface() = default;
 
   /**
@@ -149,7 +149,6 @@ class OutputInterface {
   }
 
  protected:
-
   const bool is_dilepton_output_;
   const bool is_photon_output_;
 };

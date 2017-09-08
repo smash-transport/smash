@@ -27,7 +27,6 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
                                            std::string name)
     : OutputInterface(name),
       file_{std::fopen((path / (name + ".oscar")).native().c_str(), "w")} {
-
   /*!\Userguide
    * \page input_oscar_particlelist Oscar_Particlelist
    * Enables OSCAR particles output.
@@ -245,7 +244,6 @@ void OscarOutput<Format, Contents>::at_interaction(const Action &action,
     }
   }
 }
-
 
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::at_intermediate_time(
@@ -480,16 +478,15 @@ void OscarOutput<Format, Contents>::write_particledata(
 
 namespace {
 template <int Contents>
-std::unique_ptr<OutputInterface> create_select_format(std::string format,
-                                                      const bf::path &path,
-                                                      const OutputParameters &out_par,
-                                                      std::string name) {
-  const bool modern_format =  (format == "Oscar2013");
-  bool extended_format = (Contents & OscarInteractions) ?
-      out_par.coll_extended : out_par.part_extended;
+std::unique_ptr<OutputInterface> create_select_format(
+    std::string format, const bf::path &path, const OutputParameters &out_par,
+    std::string name) {
+  const bool modern_format = (format == "Oscar2013");
+  bool extended_format = (Contents & OscarInteractions) ? out_par.coll_extended
+                                                        : out_par.part_extended;
   if (modern_format && extended_format) {
-    return make_unique<OscarOutput<OscarFormat2013Extended, Contents>>(
-        path, name);
+    return make_unique<OscarOutput<OscarFormat2013Extended, Contents>>(path,
+                                                                       name);
   } else if (modern_format) {
     return make_unique<OscarOutput<OscarFormat2013, Contents>>(path, name);
   } else {
@@ -498,10 +495,9 @@ std::unique_ptr<OutputInterface> create_select_format(std::string format,
 }
 }  // unnamed namespace
 
-std::unique_ptr<OutputInterface> create_oscar_output(std::string format,
-                                                     std::string content,
-                                                     const bf::path &path,
-                                                     const OutputParameters &out_par) {
+std::unique_ptr<OutputInterface> create_oscar_output(
+    std::string format, std::string content, const bf::path &path,
+    const OutputParameters &out_par) {
   if (content == "Particles") {
     if (out_par.part_only_final) {
       return create_select_format<OscarParticlesAtEventend>(
@@ -517,16 +513,15 @@ std::unique_ptr<OutputInterface> create_oscar_output(std::string format,
                                   OscarParticlesAtEventend>(
           format, path, out_par, "full_event_history");
     } else {
-      return create_select_format<OscarInteractions>(
-          format, path, out_par, "full_event_history");
+      return create_select_format<OscarInteractions>(format, path, out_par,
+                                                     "full_event_history");
     }
   } else if (content == "Dileptons") {
     return make_unique<OscarOutput<OscarFormat2013Extended, OscarInteractions>>(
-    path, "Dileptons");
+        path, "Dileptons");
   } else if (content == "Photons") {
     return make_unique<OscarOutput<OscarFormat2013, OscarInteractions>>(
-      path, "Photons");
-
+        path, "Photons");
   }
 
   throw std::invalid_argument("Create_oscar_output got unknown content.");

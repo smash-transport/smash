@@ -74,22 +74,25 @@ void ThermodynamicOutput::at_intermediate_time(
   std::fprintf(file_.get(), "%6.2f ", clock.current_time());
   constexpr bool compute_gradient = false;
   if (out_par_.td_rho_eckart) {
-    const double rho = rho_eckart(out_par_.td_position, particles,
-        dens_param, out_par_.td_dens_type, compute_gradient).first;
+    const double rho = rho_eckart(out_par_.td_position, particles, dens_param,
+                                  out_par_.td_dens_type, compute_gradient)
+                           .first;
     std::fprintf(file_.get(), "%7.4f ", rho);
   }
   if (out_par_.td_tmn || out_par_.td_tmn_landau || out_par_.td_v_landau) {
     EnergyMomentumTensor Tmn;
     for (const auto &p : particles) {
-      const double dens_factor = density_factor(p.type(), out_par_.td_dens_type);
+      const double dens_factor =
+          density_factor(p.type(), out_par_.td_dens_type);
       if (std::abs(dens_factor) < really_small) {
         continue;
       }
       if (out_par_.td_smearing) {
         const auto sf =
-            unnormalized_smearing_factor(p.position().threevec() - out_par_.td_position,
-                                         p.momentum(), 1.0 / p.momentum().abs(),
-                                         dens_param, compute_gradient).first;
+            unnormalized_smearing_factor(
+                p.position().threevec() - out_par_.td_position, p.momentum(),
+                1.0 / p.momentum().abs(), dens_param, compute_gradient)
+                .first;
         if (sf < really_small) {
           continue;
         }

@@ -37,7 +37,7 @@ namespace Smash {
 class ThermodynamicOutput : public OutputInterface {
  public:
   ThermodynamicOutput(const bf::path &path, std::string name,
-      const OutputParameters &out_par);
+                      const OutputParameters &out_par);
   ~ThermodynamicOutput();
 
   /// writes the initial particle information of an event

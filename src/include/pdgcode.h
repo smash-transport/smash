@@ -446,9 +446,9 @@ class PdgCode {
    *
    */
   std::array<int, 3> quark_content() const {
-    std::array<int, 3> result = { static_cast<int>(digits_.n_q1_),
-                                  static_cast<int>(digits_.n_q2_),
-                                  static_cast<int>(digits_.n_q3_)};
+    std::array<int, 3> result = {static_cast<int>(digits_.n_q1_),
+                                 static_cast<int>(digits_.n_q2_),
+                                 static_cast<int>(digits_.n_q3_)};
     if (is_hadron()) {
       // Antibaryons
       if (digits_.n_q1_ != 0 && digits_.antiparticle_) {
@@ -465,7 +465,7 @@ class PdgCode {
           // Like pi-
           if (digits_.antiparticle_) {
             result[1] = -result[1];
-          // Like pi+
+            // Like pi+
           } else {
             result[2] = -result[2];
           }

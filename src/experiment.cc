@@ -228,12 +228,12 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
 }
 
 template <typename Modus>
-void Experiment<Modus>::create_output(std::string format,
-                                      std::string content,
+void Experiment<Modus>::create_output(std::string format, std::string content,
                                       const bf::path &output_path,
                                       const OutputParameters &out_par) {
   const auto &log = logger<LogArea::Experiment>();
-  log.info() << "Adding output " << content << " of format " << format << std::endl;
+  log.info() << "Adding output " << content << " of format " << format
+             << std::endl;
 
   if (format == "Vtk" && content == "Particles") {
     outputs_.emplace_back(make_unique<VtkOutput>(output_path, content));
@@ -246,15 +246,15 @@ void Experiment<Modus>::create_output(std::string format,
   } else if (format == "Binary") {
     if (content == "Particles" || content == "Collisions" ||
         content == "Dileptons" || content == "Photons") {
-      outputs_.emplace_back(make_unique<BinaryOutputCollisions>(output_path,
-          content, out_par));
+      outputs_.emplace_back(
+          make_unique<BinaryOutputCollisions>(output_path, content, out_par));
     }
   } else if (format == "Oscar1999" || format == "Oscar2013") {
-    outputs_.emplace_back(create_oscar_output(format, content, output_path,
-        out_par));
+    outputs_.emplace_back(
+        create_oscar_output(format, content, output_path, out_par));
   } else if (content == "Thermodynamics" && format == "ASCII") {
-    outputs_.emplace_back(make_unique<ThermodynamicOutput>(output_path,
-        content, out_par));
+    outputs_.emplace_back(
+        make_unique<ThermodynamicOutput>(output_path, content, out_par));
   } else if (content == "Thermodynamics" && format == "Vtk") {
     // Todo(oliiny): treat this special case
   } else {

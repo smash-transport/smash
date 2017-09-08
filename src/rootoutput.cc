@@ -25,7 +25,6 @@ RootOutput::RootOutput(const bf::path &path, std::string name)
       write_collisions_(name != "Particles"),
       write_particles_(name == "Particles"),
       autosave_frequency_(1000) {
-
   /*!\Userguide
    * \page input_root ROOT
    * Enables output in a ROOT format. The latter is a structured binary format
