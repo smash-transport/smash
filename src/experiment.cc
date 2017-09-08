@@ -231,44 +231,35 @@ template <typename Modus>
 void Experiment<Modus>::create_output(std::string format,
                                       std::string content,
                                       const bf::path &output_path,
-                                      Configuration &&conf) {
+                                      const OutputParameters &out_par) {
   const auto &log = logger<LogArea::Experiment>();
   log.info() << "Adding output " << content << " of format " << format << std::endl;
-  auto conf_specific = conf[content.c_str()];
 
   if (format == "Vtk" && content == "Particles") {
-    outputs_.emplace_back(make_unique<VtkOutput>(output_path, std::move(conf_specific)));
-  }
-  if (format == "Root") {
+    outputs_.emplace_back(make_unique<VtkOutput>(output_path));
+  } else if (format == "Root") {
 #ifdef SMASH_USE_ROOT
     outputs_.emplace_back(make_unique<RootOutput>(output_path, content,
       !(content == "Particles"), content == "Dileptons", content == "Photons"));
 #else
     log.error("Root output requested, but Root support not compiled in");
 #endif
-  }
-
-  if (format == "Binary") {
+  } else if (format == "Binary") {
     if (content == "Particles") {
-      outputs_.emplace_back(make_unique<BinaryOutputParticles>(output_path, std::move(conf_specific)));
-    } else if (content == "Collisions") {
-      outputs_.emplace_back(make_unique<BinaryOutputCollisions>(output_path, std::move(conf_specific)));
-    } else if (content == "Dileptons") {
-      outputs_.emplace_back(make_unique<BinaryOutputCollisions>(output_path, content, true, true, false));
-    } else if (content == "Photons") {
-      outputs_.emplace_back(make_unique<BinaryOutputCollisions>(output_path, content, false, false, true));
+      outputs_.emplace_back(make_unique<BinaryOutputParticles>(output_path, out_par));
+    } else if (content == "Collisions" || content == "Dileptons" || content == "Photons") {
+      outputs_.emplace_back(make_unique<BinaryOutputCollisions>(output_path, content, out_par));
     }
+  } else if (format == "Oscar1999" || format == "Oscar2013") {
+    outputs_.emplace_back(create_oscar_output(format, content, output_path, out_par));
+  } else if (content == "Thermodynamics" && format == "ASCII") {
+    outputs_.emplace_back(make_unique<ThermodynamicOutput>(output_path, out_par));
+  } else if (content == "Thermodynamics" && format == "Vtk") {
+    // Todo(oliiny): treat this special case
+  } else {
+    log.error() << "Unknown combination of format (" << format
+                << ") and content (" << content << "). Fix the config.";
   }
-
-  if (format == "Oscar1999" || format == "Oscar2013") {
-    outputs_.emplace_back(create_oscar_output(format, content, output_path, std::move(conf_specific)));
-  }
-
-  if (content == "Thermodynamics" && format == "ASCII") {
-    outputs_.emplace_back(make_unique<ThermodynamicOutput>(output_path, std::move(conf_specific)));
-  }
-
-  // TODO(oliiny): remove used formats from configuration
 }
 
 /*!\Userguide
@@ -475,12 +466,14 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   dens_type_ = config.take({"Output", "Density_Type"}, DensityType::None);
   log.info() << "Density type written to headers: " << dens_type_;
 
+  const OutputParameters output_parameters(std::move(output_conf));
+
   std::vector<std::string> output_contents = output_conf.list_upmost_nodes();
   for (const auto &content : output_contents) {
     auto this_output_conf = output_conf[content.c_str()];
     std::vector<std::string> formats = this_output_conf.take({"Format"});
     for (const auto &format : formats) {
-      create_output(format, content, output_path, std::move(output_conf));
+      create_output(format, content, output_path, output_parameters);
     }
   }
 

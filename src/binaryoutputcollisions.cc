@@ -16,31 +16,20 @@
 #include "include/action.h"
 #include "include/clock.h"
 #include "include/config.h"
-#include "include/configuration.h"
-#include "include/forwarddeclarations.h"
-#include "include/inputfunctions.h"
 #include "include/particles.h"
 
 namespace Smash {
 
 BinaryOutputCollisions::BinaryOutputCollisions(const bf::path &path,
-                                               const std::string &name,
-                                               bool extended_format,
-                                               bool is_dilepton,
-                                               bool is_photon)
+                                               std::string name,
+                                               const OutputParameters &out_par)
     : BinaryOutputBase(
-          std::fopen((path / (name + ".bin")).native().c_str(), "wb"),
-          extended_format),
-      print_start_end_(false),
-      is_dilepton_output_(is_dilepton),
-      is_photon_output_(is_photon) {}
-
-BinaryOutputCollisions::BinaryOutputCollisions(const bf::path &path,
-                                               Configuration &&config)
-    : BinaryOutputBase(
-          std::fopen(((path / "collisions_binary.bin")).native().c_str(), "wb"),
-          config.take({"Extended"}, false)),
-      print_start_end_(config.take({"Print_Start_End"}, false)) {
+          std::fopen((path / ((name == "Collisions" ? "collisions_binary" : name) +
+              ".bin")).native().c_str(), "wb"),
+          out_par.coll_extended),
+      print_start_end_(out_par.coll_printstartend),
+      is_dilepton_output_(name == "Dileptons"),
+      is_photon_output_(name == "Photons") {
   /*!\Userguide
    * \page input_binary_collisions Binary_collisions
    * Saves information about every collision, decay and box

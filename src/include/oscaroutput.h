@@ -13,10 +13,10 @@
 #include <memory>
 #include <string>
 
-#include "configuration.h"
 #include "filedeleter.h"
 #include "forwarddeclarations.h"
 #include "outputinterface.h"
+#include "outputparameters.h"
 
 namespace Smash {
 
@@ -60,8 +60,7 @@ enum OscarOutputContents {
 template <OscarOutputFormat Format, int Contents>
 class OscarOutput : public OutputInterface {
  public:
-  OscarOutput(const bf::path &path, std::string name,
-              bool is_photon_output, bool is_dilepton_output);
+  OscarOutput(const bf::path &path, std::string name);
 
   /// writes the initial particle information of an event
   void at_eventstart(const Particles &particles,
@@ -100,7 +99,7 @@ class OscarOutput : public OutputInterface {
 std::unique_ptr<OutputInterface> create_oscar_output(std::string format,
                                                      std::string content,
                                                      const bf::path &path,
-                                                     Configuration&& config);
+                                                     const OutputParameters &out_par);
 
 // @}
 

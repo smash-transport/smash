@@ -13,9 +13,9 @@
 #include <string>
 
 #include "binaryoutputcollisions.h"
-#include "configuration.h"
 #include "filedeleter.h"
 #include "forwarddeclarations.h"
+#include "outputparameters.h"
 
 namespace Smash {
 
@@ -36,7 +36,7 @@ namespace Smash {
  **/
 class BinaryOutputParticles : public BinaryOutputBase {
  public:
-  BinaryOutputParticles(const bf::path &path, Configuration &&config);
+  BinaryOutputParticles(const bf::path &path, const OutputParameters &out_par);
 
   /// writes the initial particle information of an event
   void at_eventstart(const Particles &particles,

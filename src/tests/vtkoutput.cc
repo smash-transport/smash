@@ -56,17 +56,8 @@ TEST(vtkoutputfile) {
     particles.insert(Test::smashon_random());
   }
 
-  /* Create config file and object */
-  const bf::path configfilename = "vtkconfig.yaml";
-  const bf::path configfilepath = testoutputpath / configfilename;
-  bf::ofstream cfgfile;
-  cfgfile.open(configfilepath, std::ios::out);
-  cfgfile << "Options: None" << std::endl;
-  cfgfile.close();
-  Configuration &&op{testoutputpath, configfilename};
   /* Create output object */
-  std::unique_ptr<VtkOutput> vtkop =
-      make_unique<VtkOutput>(testoutputpath, std::move(op));
+  std::unique_ptr<VtkOutput> vtkop = make_unique<VtkOutput>(testoutputpath);
   int event_id = 0;
   /* Initial output */
   vtkop->at_eventstart(particles, event_id);
@@ -210,5 +201,4 @@ TEST(vtkoutputfile) {
   outputfile.close();
   VERIFY(bf::remove(outputfilepath));
   VERIFY(bf::remove(outputfile2path));
-  VERIFY(bf::remove(configfilepath));
 }

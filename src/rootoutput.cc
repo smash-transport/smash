@@ -13,7 +13,6 @@
 #include "include/action.h"
 #include "include/clock.h"
 #include "include/forwarddeclarations.h"
-#include "include/inputfunctions.h"
 #include "include/particles.h"
 
 namespace Smash {

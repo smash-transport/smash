@@ -123,12 +123,14 @@ static bool compare_final_block_header(const int &ev, FILE *file) {
 
 TEST(fullhistory_format) {
   /* Set the most verbose option */
-  Configuration &&op{bf::path{TEST_CONFIG_PATH} / "src" / "tests",
-                     "test_binary_collisions.yaml"};
+  OutputParameters output_par = OutputParameters();
+  output_par.coll_printstartend = true;
+  output_par.coll_extended = false;
 
   /* Create an instance of binary output */
   std::unique_ptr<BinaryOutputCollisions> bin_output =
-      make_unique<BinaryOutputCollisions>(testoutputpath, std::move(op));
+      make_unique<BinaryOutputCollisions>(testoutputpath,
+        "Collisions", output_par);
   const bf::path collisionsoutputfilepath =
       testoutputpath / "collisions_binary.bin";
   VERIFY(bf::exists(collisionsoutputfilepath));
@@ -206,12 +208,13 @@ TEST(fullhistory_format) {
 
 TEST(particles_format) {
   /* Set the most verbose option */
-  Configuration &&op{bf::path{TEST_CONFIG_PATH} / "src" / "tests",
-                     "test_binary_particles.yaml"};
+  OutputParameters output_par = OutputParameters();
+  output_par.part_extended = false;
+  output_par.part_only_final = false;
 
   /* Create an instance of binary output */
   std::unique_ptr<BinaryOutputParticles> bin_output =
-      make_unique<BinaryOutputParticles>(testoutputpath, std::move(op));
+      make_unique<BinaryOutputParticles>(testoutputpath, output_par);
   VERIFY(bf::exists(testoutputpath / "particles_binary.bin"));
 
   /* create two smashon particles */

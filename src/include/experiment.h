@@ -18,6 +18,7 @@
 #include "energymomentumtensor.h"
 #include "fourvector.h"
 #include "grandcan_thermalizer.h"
+#include "outputparameters.h"
 #include "pauliblocking.h"
 #include "potentials.h"
 #include "propagation.h"
@@ -155,7 +156,7 @@ class Experiment : public ExperimentBase {
                       const Container &particles_before_actions);
 
   void create_output(std::string format, std::string content,
-                     const bf::path &output_path, Configuration &&conf);
+                     const bf::path &output_path, const OutputParameters &par);
 
   /** Propagate all particles until time to_time without any interactions
    *  and shine dileptons.

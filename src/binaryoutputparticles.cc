@@ -15,20 +15,17 @@
 
 #include "include/clock.h"
 #include "include/config.h"
-#include "include/configuration.h"
 #include "include/forwarddeclarations.h"
-#include "include/inputfunctions.h"
 #include "include/particles.h"
 
 namespace Smash {
 
 BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
-                                             Configuration &&config)
+                                             const OutputParameters &out_par)
     : BinaryOutputBase(
           std::fopen(((path / "particles_binary.bin")).native().c_str(), "wb"),
-          config.take({"Extended"}, false)),
-      only_final_(config.has_value({"Only_Final"}) ? config.take({"Only_Final"})
-                                                   : true) {
+          out_par.part_extended),
+      only_final_(out_par.part_only_final) {
   /*!\Userguide
    * \page input_binary_particles Binary_particles
    * Writes the particle list at fixed times in binary format.

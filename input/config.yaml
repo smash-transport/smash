@@ -72,9 +72,9 @@ Output:
         Print_Start_End: True
     Dileptons:
         Format:          ["Oscar2013", "Binary", "Root"]
-    Photons:
-        Format:          ["Oscar2013", "Binary", "Root"]
-        Fractions:       100
+#    Photons:
+#        Format:          ["Oscar2013", "Binary", "Root"]
+#        Fractions:       100
     Thermodynamics:
         Format:          ["ASCII", "Vtk"]
         # ("hadron", "baryon", "baryonic isospin", "pion"), baryon := net baryon

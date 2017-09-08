@@ -13,12 +13,12 @@
 #include <set>
 #include <string>
 
-#include "configuration.h"
 #include "density.h"
 #include "experimentparameters.h"
 #include "filedeleter.h"
 #include "forwarddeclarations.h"
 #include "outputinterface.h"
+#include "outputparameters.h"
 #include "threevector.h"
 
 namespace Smash {
@@ -36,7 +36,7 @@ namespace Smash {
  **/
 class ThermodynamicOutput : public OutputInterface {
  public:
-  ThermodynamicOutput(const bf::path &path, Configuration &&conf);
+  ThermodynamicOutput(const bf::path &path, const OutputParameters &out_par);
   ~ThermodynamicOutput();
 
   /// writes the initial particle information of an event
@@ -63,15 +63,8 @@ class ThermodynamicOutput : public OutputInterface {
 
  private:
   FilePtr file_;
-  /// Set of quantities to be computed
-  const std::set<ThermodynamicQuantity> td_set_;
-  /// Point, where thermodynamic quantities are calculated
-  ThreeVector r_;
-  /// Type (e.g., baryon/pion/hadron) of thermodynamic quantity
-  const DensityType dens_type_;
-  /** Whether smearing is on or off; WARNING : if smearing is off,
-      then final result is in GeV instead of GeV/fm3 */
-  const bool smearing_;
+  // Structure that holds all the information about what to printout
+  const OutputParameters out_par_;
 };
 
 }  // namespace Smash

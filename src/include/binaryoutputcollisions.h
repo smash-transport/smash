@@ -14,10 +14,10 @@
 
 #include <boost/numeric/conversion/cast.hpp>
 
-#include "configuration.h"
 #include "filedeleter.h"
 #include "forwarddeclarations.h"
 #include "outputinterface.h"
+#include "outputparameters.h"
 
 namespace Smash {
 
@@ -69,10 +69,8 @@ class BinaryOutputBase : public OutputInterface {
  */
 class BinaryOutputCollisions : public BinaryOutputBase {
  public:
-  BinaryOutputCollisions(const bf::path &path, const std::string &name,
-                         bool extended_format, bool is_dilepton,
-                         bool is_photon);
-  BinaryOutputCollisions(const bf::path &path, Configuration &&config);
+  BinaryOutputCollisions(const bf::path &path, std::string name,
+                         const OutputParameters &out_param);
 
   /// writes the initial particle information of an event
   void at_eventstart(const Particles &particles,
