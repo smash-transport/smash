@@ -236,24 +236,25 @@ void Experiment<Modus>::create_output(std::string format,
   log.info() << "Adding output " << content << " of format " << format << std::endl;
 
   if (format == "Vtk" && content == "Particles") {
-    outputs_.emplace_back(make_unique<VtkOutput>(output_path));
+    outputs_.emplace_back(make_unique<VtkOutput>(output_path, content));
   } else if (format == "Root") {
 #ifdef SMASH_USE_ROOT
-    outputs_.emplace_back(make_unique<RootOutput>(output_path, content,
-      !(content == "Particles"), content == "Dileptons", content == "Photons"));
+    outputs_.emplace_back(make_unique<RootOutput>(output_path, content));
 #else
     log.error("Root output requested, but Root support not compiled in");
 #endif
   } else if (format == "Binary") {
-    if (content == "Particles") {
-      outputs_.emplace_back(make_unique<BinaryOutputParticles>(output_path, out_par));
-    } else if (content == "Collisions" || content == "Dileptons" || content == "Photons") {
-      outputs_.emplace_back(make_unique<BinaryOutputCollisions>(output_path, content, out_par));
+    if (content == "Particles" || content == "Collisions" ||
+        content == "Dileptons" || content == "Photons") {
+      outputs_.emplace_back(make_unique<BinaryOutputCollisions>(output_path,
+          content, out_par));
     }
   } else if (format == "Oscar1999" || format == "Oscar2013") {
-    outputs_.emplace_back(create_oscar_output(format, content, output_path, out_par));
+    outputs_.emplace_back(create_oscar_output(format, content, output_path,
+        out_par));
   } else if (content == "Thermodynamics" && format == "ASCII") {
-    outputs_.emplace_back(make_unique<ThermodynamicOutput>(output_path, out_par));
+    outputs_.emplace_back(make_unique<ThermodynamicOutput>(output_path,
+        content, out_par));
   } else if (content == "Thermodynamics" && format == "Vtk") {
     // Todo(oliiny): treat this special case
   } else {

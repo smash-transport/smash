@@ -75,15 +75,10 @@ class OscarOutput : public OutputInterface {
   void at_intermediate_time(const Particles &particle, const Clock &clock,
                             const DensityParameters &dens_param) override;
 
-  bool is_dilepton_output() const override { return is_dilepton_output_; }
-  bool is_photon_output() const override { return is_photon_output_; }
-
  private:
   void write_particledata(const ParticleData &data);
   void write(const Particles &particles);
 
-  const bool is_dilepton_output_;
-  const bool is_photon_output_;
   int current_event_ = 0;
   FilePtr file_;
 };

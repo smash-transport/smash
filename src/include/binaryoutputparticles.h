@@ -36,7 +36,8 @@ namespace Smash {
  **/
 class BinaryOutputParticles : public BinaryOutputBase {
  public:
-  BinaryOutputParticles(const bf::path &path, const OutputParameters &out_par);
+  BinaryOutputParticles(const bf::path &path, std::string name,
+      const OutputParameters &out_par);
 
   /// writes the initial particle information of an event
   void at_eventstart(const Particles &particles,
@@ -48,9 +49,6 @@ class BinaryOutputParticles : public BinaryOutputBase {
   /// writes particles every time interval fixed by option OUTPUT_INTERVAL
   void at_intermediate_time(const Particles &particles, const Clock &clock,
                             const DensityParameters &dens_param) override;
-
-  bool is_dilepton_output() const override { return false; }
-  bool is_photon_output() const override { return false; }
 
  private:
   /// Option: print initial and final particles or not

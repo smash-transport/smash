@@ -27,7 +27,7 @@ namespace Smash {
  */
 class VtkOutput : public OutputInterface {
  public:
-  VtkOutput(const bf::path &path);
+  VtkOutput(const bf::path &path, std::string name);
   ~VtkOutput();
 
   void at_eventstart(const Particles &particles,
@@ -48,9 +48,6 @@ class VtkOutput : public OutputInterface {
 
   /// Printout of the thermodynamic quantities from thethermalizer class
   void thermodynamics_output(const GrandCanThermalizer &gct) override;
-
-  bool is_dilepton_output() const override { return false; }
-  bool is_photon_output() const override { return false; }
 
  private:
   void write(const Particles &particles);

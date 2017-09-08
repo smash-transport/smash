@@ -25,8 +25,7 @@ namespace Smash {
 template <OscarOutputFormat Format, int Contents>
 OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
                                            std::string name)
-    : is_dilepton_output_(name == "Dileptons"),
-      is_photon_output_(name == "Photons"),
+    : OutputInterface(name),
       file_{std::fopen((path / (name + ".oscar")).native().c_str(), "w")} {
 
   /*!\Userguide

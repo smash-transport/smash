@@ -26,10 +26,9 @@ BinaryOutputCollisions::BinaryOutputCollisions(const bf::path &path,
     : BinaryOutputBase(
           std::fopen((path / ((name == "Collisions" ? "collisions_binary" : name) +
               ".bin")).native().c_str(), "wb"),
+          name,
           out_par.coll_extended),
-      print_start_end_(out_par.coll_printstartend),
-      is_dilepton_output_(name == "Dileptons"),
-      is_photon_output_(name == "Photons") {
+      print_start_end_(out_par.coll_printstartend) {
   /*!\Userguide
    * \page input_binary_collisions Binary_collisions
    * Saves information about every collision, decay and box
@@ -116,8 +115,8 @@ void BinaryOutputCollisions::at_interaction(const Action &action,
   write(action.outgoing_particles());
 }
 
-BinaryOutputBase::BinaryOutputBase(FILE *f, bool extended)
-    : file_{f}, extended_(extended) {
+BinaryOutputBase::BinaryOutputBase(FILE *f, std::string name, bool extended)
+    : OutputInterface(name), file_{f}, extended_(extended) {
   std::fwrite("SMSH", 4, 1, file_.get());  // magic number
   write(format_version_);                  // file format version number
   std::uint16_t format_variant = static_cast<uint16_t>(extended_);

@@ -88,8 +88,7 @@ class Particles;
   **/
 class RootOutput : public OutputInterface {
  public:
-  RootOutput(const bf::path &path, std::string name, bool collisions,
-             bool is_dilepton, bool is_photon);
+  RootOutput(const bf::path &path, std::string name);
   ~RootOutput();
 
   void at_eventstart(const Particles &particles,
@@ -98,9 +97,6 @@ class RootOutput : public OutputInterface {
   void at_intermediate_time(const Particles &particles, const Clock &clock,
                             const DensityParameters &dens_param) override;
   void at_interaction(const Action &action, const double density) override;
-  bool is_dilepton_output() const override { return is_dilepton_output_; }
-  bool is_photon_output() const override { return is_photon_output_; }
-
 
  private:
   const bf::path base_path_;
@@ -131,9 +127,6 @@ class RootOutput : public OutputInterface {
 
   // Option, defines how often root-file is "saved"
   int autosave_frequency_;
-
-  bool is_dilepton_output_;
-  bool is_photon_output_;
 
   /* Basic initialization routine, creating the TTree objects
    * for particles and collisions. */

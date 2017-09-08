@@ -31,6 +31,9 @@ namespace Smash {
  */
 class OutputInterface {
  public:
+  OutputInterface(std::string name) :
+    is_dilepton_output_(name == "Dileptons"),
+    is_photon_output_(name == "Photons") {}
   virtual ~OutputInterface() = default;
 
   /**
@@ -112,8 +115,8 @@ class OutputInterface {
     SMASH_UNUSED(gct);
   }
 
-  virtual bool is_dilepton_output() const = 0;
-  virtual bool is_photon_output() const = 0;
+  bool is_dilepton_output() const { return is_dilepton_output_; }
+  bool is_photon_output() const { return is_photon_output_; }
 
   const char *to_string(const ThermodynamicQuantity tq) {
     switch (tq) {
@@ -144,6 +147,11 @@ class OutputInterface {
     }
     throw std::invalid_argument("Unknown density type.");
   }
+
+ protected:
+
+  const bool is_dilepton_output_;
+  const bool is_photon_output_;
 };
 
 }  // namespace Smash

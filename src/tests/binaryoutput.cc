@@ -214,7 +214,8 @@ TEST(particles_format) {
 
   /* Create an instance of binary output */
   std::unique_ptr<BinaryOutputParticles> bin_output =
-      make_unique<BinaryOutputParticles>(testoutputpath, output_par);
+      make_unique<BinaryOutputParticles>(testoutputpath,
+          "Particles", output_par);
   VERIFY(bf::exists(testoutputpath / "particles_binary.bin"));
 
   /* create two smashon particles */

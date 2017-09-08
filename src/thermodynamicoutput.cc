@@ -26,9 +26,10 @@
 
 namespace Smash {
 
-ThermodynamicOutput::ThermodynamicOutput(const bf::path &path,
+ThermodynamicOutput::ThermodynamicOutput(const bf::path &path, std::string name,
                                          const OutputParameters &out_par)
-    : file_{std::fopen((path / ("thermodynamics.dat")).native().c_str(), "w")},
+    : OutputInterface(name),
+      file_{std::fopen((path / ("thermodynamics.dat")).native().c_str(), "w")},
       out_par_(out_par) {
   std::fprintf(file_.get(), "# %s thermodynamics output\n", VERSION_MAJOR);
   const ThreeVector r = out_par.td_position;

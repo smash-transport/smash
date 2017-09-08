@@ -27,7 +27,7 @@ namespace Smash {
  **/
 class BinaryOutputBase : public OutputInterface {
  protected:
-  explicit BinaryOutputBase(FILE *f, bool extended_format);
+  explicit BinaryOutputBase(FILE *f, std::string name, bool extended_format);
   void write(const std::string &s);
   void write(const double x);
   void write(const FourVector &v);
@@ -81,14 +81,9 @@ class BinaryOutputCollisions : public BinaryOutputBase {
 
   void at_interaction(const Action &action, const double density) override;
 
-  bool is_dilepton_output() const override { return is_dilepton_output_; }
-  bool is_photon_output() const override { return is_photon_output_; }
-
  private:
   /// Option: print initial and final particles or not
   bool print_start_end_;
-  bool is_dilepton_output_ = false;
-  bool is_photon_output_ = false;
 };
 
 }  // namespace Smash

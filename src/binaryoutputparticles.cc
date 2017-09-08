@@ -21,10 +21,11 @@
 namespace Smash {
 
 BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
+                                             std::string name,
                                              const OutputParameters &out_par)
     : BinaryOutputBase(
           std::fopen(((path / "particles_binary.bin")).native().c_str(), "wb"),
-          out_par.part_extended),
+          name, out_par.part_extended),
       only_final_(out_par.part_only_final) {
   /*!\Userguide
    * \page input_binary_particles Binary_particles

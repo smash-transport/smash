@@ -19,8 +19,8 @@
 
 namespace Smash {
 
-VtkOutput::VtkOutput(const bf::path &path)
-    : base_path_(std::move(path)) {}
+VtkOutput::VtkOutput(const bf::path &path, std::string name)
+    : OutputInterface(name), base_path_(std::move(path)) {}
 /*!\Userguide
  * \page input_vtk Vtk
  *

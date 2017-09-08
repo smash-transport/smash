@@ -36,7 +36,8 @@ namespace Smash {
  **/
 class ThermodynamicOutput : public OutputInterface {
  public:
-  ThermodynamicOutput(const bf::path &path, const OutputParameters &out_par);
+  ThermodynamicOutput(const bf::path &path, std::string name,
+      const OutputParameters &out_par);
   ~ThermodynamicOutput();
 
   /// writes the initial particle information of an event
@@ -57,9 +58,6 @@ class ThermodynamicOutput : public OutputInterface {
                           const DensityParameters &param, DensityType dens_type,
                           const ThreeVector &line_start,
                           const ThreeVector &line_end, int n_points);
-
-  bool is_dilepton_output() const override { return false; }
-  bool is_photon_output() const override { return false; }
 
  private:
   FilePtr file_;
