@@ -110,7 +110,8 @@ class RootOutput : public OutputInterface {
   TTree *collisions_tree_;
   void particles_to_tree(const Particles &particles);
   void collisions_to_tree(const ParticleList &incoming,
-                          const ParticleList &outgoing, const double weight);
+                          const ParticleList &outgoing,
+                          const double weight, const double partial_weight);
   // Counts number of output in a given event
   int output_counter_ = 0;
   int current_event_ = 0;
@@ -120,7 +121,7 @@ class RootOutput : public OutputInterface {
   std::array<double, max_buffer_size_> p0, px, py, pz, t, x, y, z;
   std::array<int, max_buffer_size_> pdgcode;
   int npart, tcounter, ev, nin, nout;
-  double wgt, impact_b;
+  double wgt, par_wgt, impact_b;
 
   // Option to write collisions tree
   bool write_collisions_;

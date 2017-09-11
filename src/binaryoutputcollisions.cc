@@ -111,6 +111,8 @@ void BinaryOutputCollisions::at_interaction(const Action &action,
   std::fwrite(&density, sizeof(double), 1, file_.get());
   const double weight = action.raw_weight_value();
   std::fwrite(&weight, sizeof(double), 1, file_.get());
+  const double partial_weight = action.partial_weight();
+  std::fwrite(&partial_weight, sizeof(double), 1, file_.get());
   const auto type = static_cast<uint32_t>(action.get_type());
   std::fwrite(&type, sizeof(uint32_t), 1, file_.get());
   write(action.incoming_particles());

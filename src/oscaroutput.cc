@@ -221,10 +221,12 @@ void OscarOutput<Format, Contents>::at_interaction(const Action &action,
     if (Format == OscarFormat2013 || Format == OscarFormat2013Extended) {
       std::fprintf(
           file_.get(),
-          "# interaction in %zu out %zu rho %12.7f weight %12.7g type %5i \n",
+          "# interaction in %zu out %zu rho %12.7f weight %12.7g"
+          " partial %12.7f type %5i\n",
           action.incoming_particles().size(),
           action.outgoing_particles().size(), density,
-          action.raw_weight_value(), static_cast<int>(action.get_type()));
+          action.raw_weight_value(), action.partial_weight(),
+          static_cast<int>(action.get_type()));
     } else {
       /* OSCAR line prefix : initial final
        * particle creation: 0 1
@@ -233,10 +235,11 @@ void OscarOutput<Format, Contents>::at_interaction(const Action &action,
        * resonance decay: 1 2
        * etc.
        */
-      std::fprintf(file_.get(), "%zu %zu %12.7f %12.7f %5i \n",
+      std::fprintf(file_.get(), "%zu %zu %12.7f %12.7f %12.7f %5i\n",
                    action.incoming_particles().size(),
                    action.outgoing_particles().size(), density,
                    action.raw_weight_value(),
+                   action.partial_weight(),
                    static_cast<int>(action.get_type()));
     }
     for (const auto &p : action.incoming_particles()) {

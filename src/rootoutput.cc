@@ -148,6 +148,7 @@ void RootOutput::init_trees() {
     collisions_tree_->Branch("npart", &npart, "npart/I");
     collisions_tree_->Branch("ev", &ev, "ev/I");
     collisions_tree_->Branch("weight", &wgt, "weight/D");
+    collisions_tree_->Branch("partial_weight", &par_wgt, "partial_weight/D");
 
     collisions_tree_->Branch("pdgcode", &pdgcode[0], "pdgcode[npart]/I");
 
@@ -230,7 +231,7 @@ void RootOutput::at_interaction(const Action &action,
                                 const double /*density*/) {
   if (write_collisions_) {
     collisions_to_tree(action.incoming_particles(), action.outgoing_particles(),
-                       action.raw_weight_value());
+                       action.raw_weight_value(), action.partial_weight());
   }
 }
 
@@ -274,12 +275,14 @@ void RootOutput::particles_to_tree(const Particles &particles) {
 
 void RootOutput::collisions_to_tree(const ParticleList &incoming,
                                     const ParticleList &outgoing,
-                                    const double weight) {
+                                    const double weight,
+                                    const double partial_weight) {
   ev = current_event_;
   nin = incoming.size();
   nout = outgoing.size();
   npart = nin + nout;
   wgt = weight;
+  par_wgt = partial_weight;
 
   int i = 0;
 

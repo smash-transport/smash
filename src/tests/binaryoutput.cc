@@ -94,7 +94,7 @@ static bool compare_interaction_block_header(const int &nin, const int &nout,
                                              const Action &action, double rho,
                                              FILE *file) {
   int nin_read, nout_read, process_type_read;
-  double rho_read, weight_read;
+  double rho_read, weight_read, partial_weight_read;
   char c_read;
   int process_type = static_cast<int>(action.get_type());
   COMPARE(std::fread(&c_read, sizeof(char), 1, file), 1u);
@@ -102,6 +102,7 @@ static bool compare_interaction_block_header(const int &nin, const int &nout,
   read_binary(nout_read, file);
   COMPARE(std::fread(&rho_read, sizeof(double), 1, file), 1u);
   COMPARE(std::fread(&weight_read, sizeof(double), 1, file), 1u);
+  COMPARE(std::fread(&partial_weight_read, sizeof(double), 1, file), 1u);
   read_binary(process_type_read, file);
   // std::cout << c_read << std::endl;
   // std::cout << nin_read << " " << nin << std::endl;
@@ -109,6 +110,7 @@ static bool compare_interaction_block_header(const int &nin, const int &nout,
   // std::cout << rho << std::endl;
   return (c_read == 'i') && (nin_read == nin) && (nout_read == nout) &&
          (rho_read == rho) && (weight_read == action.raw_weight_value()) &&
+         (partial_weight_read == action.partial_weight()) &&
          (process_type_read == process_type);
 }
 
