@@ -164,6 +164,7 @@ void DecayAction::generate_final_state() {
   outgoing_particles_ = proc->particle_list();
   process_type_ = proc->get_type();
   L_ = proc->angular_momentum();
+  partial_width_ = proc->weight();
 
   switch (outgoing_particles_.size()) {
     case 2:
