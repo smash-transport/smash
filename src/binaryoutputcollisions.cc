@@ -100,10 +100,6 @@ void BinaryOutputCollisions::at_eventend(const Particles &particles,
 
 void BinaryOutputCollisions::at_interaction(const Action &action,
                                             const double density) {
-  if (is_dilepton_output_ || is_photon_output_) {
-    // No output of dileptons / photons at hadronic interaction
-    return;
-  }
   char ichar = 'i';
   std::fwrite(&ichar, sizeof(char), 1, file_.get());
   write(action.incoming_particles().size());
