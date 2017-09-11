@@ -74,7 +74,8 @@ void VtkOutput::at_eventstart(const Particles &particles,
 }
 
 void VtkOutput::at_eventend(const Particles & /*particles*/,
-                            const int /*event_number*/) {}
+                            const int /*event_number*/,
+                            double /*impact_parameter*/) {}
 
 void VtkOutput::at_intermediate_time(const Particles &particles, const Clock &,
                                      const DensityParameters &) {

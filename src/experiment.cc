@@ -239,7 +239,8 @@ void Experiment<Modus>::create_output(std::string format, std::string content,
     outputs_.emplace_back(make_unique<VtkOutput>(output_path, content));
   } else if (format == "Root") {
 #ifdef SMASH_USE_ROOT
-    outputs_.emplace_back(make_unique<RootOutput>(output_path, content));
+    outputs_.emplace_back(
+        make_unique<RootOutput>(output_path, content, out_par));
 #else
     log.error("Root output requested, but Root support not compiled in");
 #endif
@@ -1165,7 +1166,7 @@ void Experiment<Modus>::final_output(const int evt_num) {
   }
 
   for (const auto &output : outputs_) {
-    output->at_eventend(particles_, evt_num);
+    output->at_eventend(particles_, evt_num, modus_.impact_parameter());
   }
 }
 
@@ -1202,6 +1203,7 @@ void Experiment<Modus>::run() {
                                                gamma * v_beam * mass_beam));
       }
     }
+
     /* Output at event start */
     for (const auto &output : outputs_) {
       output->at_eventstart(particles_, j);

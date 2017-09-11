@@ -103,7 +103,8 @@ TEST(full2013_format) {
 
   /* Final state output */
   action->perform(&particles, 1);
-  osc2013full->at_eventend(particles, event_id);
+  const double impact_parameter = 1.783;
+  osc2013full->at_eventend(particles, event_id, impact_parameter);
 
   bf::fstream outputfile;
   outputfile.open(outputfilepath, std::ios_base::in);
@@ -172,7 +173,8 @@ TEST(full2013_format) {
     outputfile.get();
     /* Check for event end line */
     std::getline(outputfile, line);
-    std::string end_line = "# event " + std::to_string(event_id + 1) + " end 0";
+    std::string end_line = "# event " + std::to_string(event_id + 1) + " end 0"
+                           + " impact   1.783";
     COMPARE(line, end_line);
   }
   outputfile.close();
@@ -220,7 +222,8 @@ TEST(final2013_format) {
 
   /* Final state output; this is the only thing we expect to find in file */
   action->perform(&particles, 1);
-  osc2013final->at_eventend(particles, event_id);
+  const double impact_parameter = 2.34;
+  osc2013final->at_eventend(particles, event_id, impact_parameter);
   COMPARE(action->outgoing_particles(), particles.copy_to_vector());
 
   bf::fstream outputfile;
@@ -251,7 +254,8 @@ TEST(final2013_format) {
     outputfile.get();
     /* Check for event end line */
     std::getline(outputfile, line);
-    std::string end_line = "# event " + std::to_string(event_id + 1) + " end 0";
+    std::string end_line = "# event " + std::to_string(event_id + 1) + " end 0"
+                         + " impact   2.340";
     COMPARE(line, end_line);
   }
   outputfile.close();

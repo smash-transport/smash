@@ -17,13 +17,15 @@
 
 namespace Smash {
 
-RootOutput::RootOutput(const bf::path &path, std::string name)
+RootOutput::RootOutput(const bf::path &path, std::string name,
+                       const OutputParameters& out_par)
     : OutputInterface(name),
       base_path_(std::move(path)),
       root_out_file_(
           new TFile((base_path_ / (name + ".root")).native().c_str(), "NEW")),
       write_collisions_(name != "Particles"),
       write_particles_(name == "Particles"),
+      particles_only_final_(out_par.part_only_final),
       autosave_frequency_(1000) {
   /*!\Userguide
    * \page input_root ROOT
@@ -121,6 +123,7 @@ void RootOutput::init_trees() {
     particles_tree_ = new TTree("particles", "particles");
 
     particles_tree_->Branch("npart", &npart, "npart/I");
+    particles_tree_->Branch("impact_b", &impact_b, "impact_b/D");
     particles_tree_->Branch("ev", &ev, "ev/I");
     particles_tree_->Branch("tcounter", &tcounter, "tcounter/I");
 
@@ -178,8 +181,10 @@ void RootOutput::at_eventstart(const Particles &particles,
   // save event number
   current_event_ = event_number;
 
-  if (write_particles_) {
+  if (write_particles_ && !particles_only_final_) {
     output_counter_ = 0;
+    // This is to have only one output of positive impact parameter per event
+    impact_b = -1.0;
     particles_to_tree(particles);
     output_counter_++;
   }
@@ -190,7 +195,7 @@ void RootOutput::at_eventstart(const Particles &particles,
  */
 void RootOutput::at_intermediate_time(const Particles &particles, const Clock &,
                                       const DensityParameters &) {
-  if (write_particles_) {
+  if (write_particles_ && !particles_only_final_) {
     particles_to_tree(particles);
     output_counter_++;
   }
@@ -199,8 +204,13 @@ void RootOutput::at_intermediate_time(const Particles &particles, const Clock &,
 /**
  * Writes to tree "at_eventend".
  */
-void RootOutput::at_eventend(const Particles & /*particles*/,
-                             const int /*event_number*/) {
+void RootOutput::at_eventend(const Particles &particles,
+                             const int /*event_number*/,
+                             double impact_parameter) {
+  impact_b = impact_parameter;
+  if (write_particles_) {
+    particles_to_tree(particles);
+  }
   // Forced regular dump from operational memory to disk. Very demanding!
   // If program crashes written data will NOT be lost
   if (current_event_ > 0 && current_event_ % autosave_frequency_ == 0) {

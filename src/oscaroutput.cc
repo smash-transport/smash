@@ -185,7 +185,8 @@ void OscarOutput<Format, Contents>::at_eventstart(const Particles &particles,
 
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
-                                                const int event_number) {
+                                                const int event_number,
+                                                double impact_parameter) {
   if (Format == OscarFormat2013 || Format == OscarFormat2013Extended) {
     if (Contents & OscarParticlesAtEventend) {
       std::fprintf(file_.get(), "# event %i out %zu\n", event_number + 1,
@@ -193,7 +194,8 @@ void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
       write(particles);
     }
     // Comment end of an event
-    std::fprintf(file_.get(), "# event %i end 0\n", event_number + 1);
+    std::fprintf(file_.get(), "# event %i end 0 impact %7.3f\n",
+                 event_number + 1, impact_parameter);
   } else {
     // OSCAR line prefix : initial particles; final particles; event id
     // Last block of an event: initial = number of particles, final = 0
@@ -205,7 +207,8 @@ void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
       write(particles);
     }
     // Null interaction marks the end of an event
-    std::fprintf(file_.get(), "%zu %zu %i\n", zero, zero, event_number + 1);
+    std::fprintf(file_.get(), "%zu %zu %i %7.3f\n", zero, zero,
+                 event_number + 1, impact_parameter);
   }
   // Flush to disk
   std::fflush(file_.get());

@@ -77,7 +77,8 @@ class BinaryOutputCollisions : public BinaryOutputBase {
                      const int event_number) override;
 
   /// writes the final particle information of an event
-  void at_eventend(const Particles &particles, const int event_number) override;
+  void at_eventend(const Particles &particles, const int event_number,
+                   double impact_parameter) override;
 
   void at_interaction(const Action &action, const double density) override;
 

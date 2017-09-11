@@ -113,12 +113,16 @@ static bool compare_interaction_block_header(const int &nin, const int &nout,
 }
 
 /* function to read and compare event end line */
-static bool compare_final_block_header(const int &ev, FILE *file) {
+static bool compare_final_block_header(const int &ev,
+                                       const double &impact_parameter,
+                                       FILE *file) {
   int ev_read;
   char c_read;
+  double b_read;
   COMPARE(std::fread(&c_read, sizeof(char), 1, file), 1u);
   read_binary(ev_read, file);
-  return (c_read == 'f') && (ev_read == ev);
+  COMPARE(std::fread(&b_read, sizeof(double), 1, file), 1u);
+  return (c_read == 'f') && (ev_read == ev) && (b_read == impact_parameter);
 }
 
 TEST(fullhistory_format) {
@@ -155,7 +159,8 @@ TEST(fullhistory_format) {
 
   /* Final state output */
   action->perform(&particles, 1);
-  bin_output->at_eventend(particles, event_id);
+  const double impact_parameter = 1.473;
+  bin_output->at_eventend(particles, event_id, impact_parameter);
 
   /*
    * Now we have an artificially generated binary output.
@@ -199,7 +204,7 @@ TEST(fullhistory_format) {
   VERIFY(compare_particle(final_particles[1], binF));
 
   // event end line
-  VERIFY(compare_final_block_header(event_id, binF));
+  VERIFY(compare_final_block_header(event_id, impact_parameter, binF));
 
   // remove file
   VERIFY(!std::fclose(binF));
@@ -237,7 +242,8 @@ TEST(particles_format) {
   bin_output->at_intermediate_time(*particles, clock, dens_par);
 
   /* Final state output */
-  bin_output->at_eventend(*particles, event_id);
+  const double impact_parameter = 4.382;
+  bin_output->at_eventend(*particles, event_id, impact_parameter);
   /*
    * Now we have an artificially generated binary output.
    * Let us try if we can read and understand it.
@@ -277,7 +283,7 @@ TEST(particles_format) {
   // paricles at event end: nothing expected, because only_final option is off
 
   // after end of event
-  VERIFY(compare_final_block_header(event_id, binF));
+  VERIFY(compare_final_block_header(event_id, impact_parameter, binF));
 
   // remove file
   VERIFY(!std::fclose(binF));

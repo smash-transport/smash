@@ -21,6 +21,7 @@
 #include "configuration.h"
 #include "forwarddeclarations.h"
 #include "outputinterface.h"
+#include "outputparameters.h"
 
 namespace Smash {
 class Particles;
@@ -88,12 +89,14 @@ class Particles;
   **/
 class RootOutput : public OutputInterface {
  public:
-  RootOutput(const bf::path &path, std::string name);
+  RootOutput(const bf::path &path, std::string name,
+             const OutputParameters& out_par);
   ~RootOutput();
 
   void at_eventstart(const Particles &particles,
                      const int event_number) override;
-  void at_eventend(const Particles &particles, const int event_number) override;
+  void at_eventend(const Particles &particles, const int event_number,
+                   double impact_parameter) override;
   void at_intermediate_time(const Particles &particles, const Clock &clock,
                             const DensityParameters &dens_param) override;
   void at_interaction(const Action &action, const double density) override;
@@ -117,7 +120,7 @@ class RootOutput : public OutputInterface {
   std::array<double, max_buffer_size_> p0, px, py, pz, t, x, y, z;
   std::array<int, max_buffer_size_> pdgcode;
   int npart, tcounter, ev, nin, nout;
-  double wgt;
+  double wgt, impact_b;
 
   // Option to write collisions tree
   bool write_collisions_;
@@ -125,10 +128,13 @@ class RootOutput : public OutputInterface {
   // Option to write particles tree
   bool write_particles_;
 
+  // Print only final particles in the event, no intermediate output
+  bool particles_only_final_;
+
   // Option, defines how often root-file is "saved"
   int autosave_frequency_;
 
-  /* Basic initialization routine, creating the TTree objects
+ /* Basic initialization routine, creating the TTree objects
    * for particles and collisions. */
   void init_trees();
 };

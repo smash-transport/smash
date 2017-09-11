@@ -32,7 +32,8 @@ class VtkOutput : public OutputInterface {
 
   void at_eventstart(const Particles &particles,
                      const int event_number) override;
-  void at_eventend(const Particles &particles, const int event_number) override;
+  void at_eventend(const Particles &particles, const int event_number,
+                   double impact_parameter) override;
   void at_intermediate_time(const Particles &particles, const Clock &clock,
                             const DensityParameters &dens_param) override;
 

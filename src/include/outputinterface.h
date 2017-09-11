@@ -54,7 +54,8 @@ class OutputInterface {
    * \param event_number Number of the current event.
    */
   virtual void at_eventend(const Particles &particles,
-                           const int event_number) = 0;
+                           const int event_number,
+                           double impact_parameter) = 0;
 
   /**
    * Called whenever an action modified one or more particles.

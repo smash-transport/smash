@@ -45,7 +45,8 @@ class ThermodynamicOutput : public OutputInterface {
                      const int event_number) override;
 
   /// writes the final particle information of an event
-  void at_eventend(const Particles &particles, const int event_number) override;
+  void at_eventend(const Particles &particles, const int event_number,
+                   double impact_parameter) override;
 
   /// writes thermodynamics every time interval fixed by option Output_Interval
   void at_intermediate_time(const Particles &particles, const Clock &clock,

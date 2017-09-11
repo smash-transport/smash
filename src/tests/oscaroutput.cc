@@ -87,6 +87,7 @@ TEST(fullhistory_format) {
   const ParticleData p2 = particles.insert(Test::smashon_random());
 
   int event_id = 0;
+  double impact_parameter = 3.7;
   /* Initial state output */
   oscfull->at_eventstart(particles, event_id);
 
@@ -99,7 +100,7 @@ TEST(fullhistory_format) {
   oscfull->at_interaction(*action, 0.);
 
   /* Final state output */
-  oscfull->at_eventend(particles, event_id);
+  oscfull->at_eventend(particles, event_id, impact_parameter);
 
   // const std::string outputfilename
   //    = (testoutputpath / outputfilename).native();
@@ -181,6 +182,8 @@ TEST(fullhistory_format) {
     COMPARE(std::atoi(item.c_str()), 0);
     outputfile >> item;
     COMPARE(std::atoi(item.c_str()), event_id + 1);
+    outputfile >> item;
+    COMPARE(std::stod(item.c_str()), impact_parameter);
   }
   outputfile.close();
   VERIFY(bf::remove(outputfilepath));
@@ -205,6 +208,7 @@ TEST(particlelist_format) {
   const ParticleData p2 = particles.insert(Test::smashon_random());
 
   int event_id = 0;
+  double impact_parameter = 2.4;
 
   /* Initial state output (note that this should not do anything!) */
   oscfinal->at_eventstart(particles, event_id);
@@ -220,7 +224,7 @@ TEST(particlelist_format) {
 
   /* Final state output; this is the only thing we expect to find in file */
   action->perform(&particles, 1);
-  oscfinal->at_eventend(particles, event_id);
+  oscfinal->at_eventend(particles, event_id, impact_parameter);
 
   bf::fstream outputfile;
   outputfile.open(outputfilepath, std::ios_base::in);
@@ -250,6 +254,7 @@ TEST(particlelist_format) {
     COMPARE(std::atoi(item.c_str()), 0);
     outputfile >> item;
     COMPARE(std::atoi(item.c_str()), event_id + 1);
+
     for (ParticleData &data : particles) {
       std::array<std::string, 12> datastring;
       for (int j = 0; j < 12; j++) {
@@ -264,6 +269,8 @@ TEST(particlelist_format) {
     COMPARE(std::atoi(item.c_str()), 0);
     outputfile >> item;
     COMPARE(std::atoi(item.c_str()), event_id + 1);
+    outputfile >> item;
+    COMPARE(std::stod(item.c_str()), impact_parameter);
   }
   outputfile.close();
   VERIFY(bf::remove(outputfilepath));

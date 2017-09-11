@@ -64,7 +64,8 @@ void ThermodynamicOutput::at_eventstart(const Particles & /*particles*/,
 }
 
 void ThermodynamicOutput::at_eventend(const Particles & /*particles*/,
-                                      const int /*event_number*/) {
+                                      const int /*event_number*/,
+                                      double /*impact_parameter*/) {
   std::fflush(file_.get());
 }
 

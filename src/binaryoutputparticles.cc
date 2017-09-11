@@ -130,7 +130,8 @@ void BinaryOutputParticles::at_eventstart(const Particles &particles,
 }
 
 void BinaryOutputParticles::at_eventend(const Particles &particles,
-                                        const int event_number) {
+                                        const int event_number,
+                                        double impact_parameter) {
   char pchar = 'p';
   if (only_final_) {
     std::fwrite(&pchar, sizeof(char), 1, file_.get());
@@ -142,6 +143,7 @@ void BinaryOutputParticles::at_eventend(const Particles &particles,
   char fchar = 'f';
   std::fwrite(&fchar, sizeof(char), 1, file_.get());
   write(event_number);
+  write(impact_parameter);
 
   /* Flush to disk */
   std::fflush(file_.get());
