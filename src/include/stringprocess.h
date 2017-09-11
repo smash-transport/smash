@@ -94,7 +94,6 @@ class StringProcess {
 
   void reset_finalArray();
   int append_finalArray(FourVector &uString, ThreeVector &evecLong);
-  bool check_conservation();
 
   void makeStringEnds(std::array<int,4> &idqset, int *idq1, int *idq2);
   int fragmentString(int idq1, int idq2, double mString, ThreeVector &evecLong,

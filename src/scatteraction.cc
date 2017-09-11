@@ -749,24 +749,6 @@ void ScatterAction::string_excitation_inter(int subprocess) {
     bool isinit = false;
     bool isnext = false;
     DisableFloatTraps guard;
-
-    //int idAin, idBin;
-    //double massAin, massBin;
-    //Pythia8::Vec4 phadAin, phadBin;
-    /* setup particle A ( incoming[0] ) */
-    //idAin = incoming_particles_[0].type().pdgcode().get_decimal();
-    //phadAin.e(incoming_particles_[0].momentum().x0());
-    //phadAin.px(incoming_particles_[0].momentum().x1());
-    //phadAin.py(incoming_particles_[0].momentum().x2());
-    //phadAin.pz(incoming_particles_[0].momentum().x3());
-    //massAin = phadAin.mCalc();
-    /* setup particle B ( incoming[1] ) */
-    //idBin = incoming_particles_[1].type().pdgcode().get_decimal();
-    //phadBin.e(incoming_particles_[1].momentum().x0());
-    //phadBin.px(incoming_particles_[1].momentum().x1());
-    //phadBin.py(incoming_particles_[1].momentum().x2());
-    //phadBin.pz(incoming_particles_[1].momentum().x3());
-    //massBin = phadBin.mCalc();
     /* compute sqrts */
     double sqrts =
         (incoming_particles_[0].momentum() + incoming_particles_[1].momentum())

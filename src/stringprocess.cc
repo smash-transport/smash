@@ -354,16 +354,8 @@ bool StringProcess::init_lab(PdgCode &idAIn, PdgCode &idBIn, double massAIn, dou
   massA = massAIn;
   massB = massBIn;
 
-  plabA.set_x0( plabAIn.e() );
-  plabA.set_x1( plabAIn.px() );
-  plabA.set_x2( plabAIn.py() );
-  plabA.set_x3( plabAIn.pz() );
-
+  plabA = FourVector(plabAIn.e(), plabAIn.px(), plabAIn.py(), plabAIn.pz());
   plabB = FourVector(plabBIn.e(), plabBIn.px(), plabBIn.py(), plabBIn.pz());
-  plabB.set_x0( plabBIn.e() );
-  plabB.set_x1( plabBIn.px() );
-  plabB.set_x2( plabBIn.py() );
-  plabB.set_x3( plabBIn.pz() );
 
   sqrtsAB = ( plabA + plabB ).abs();
   pabscomAB = pCM(sqrtsAB, massA, massB);
