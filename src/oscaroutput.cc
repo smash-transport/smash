@@ -125,21 +125,21 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
   if (Format == OscarFormat2013) {
     std::fprintf(file_.get(),
                  "#!OSCAR2013 %s t x y z mass "
-                 "p0 px py pz pdg ID\n",
+                 "p0 px py pz pdg ID charge\n",
                  name.c_str());
     std::fprintf(file_.get(),
                  "# Units: fm fm fm fm "
-                 "GeV GeV GeV GeV GeV none none\n");
+                 "GeV GeV GeV GeV GeV none none none\n");
     std::fprintf(file_.get(), "# %s\n", VERSION_MAJOR);
   } else if (Format == OscarFormat2013Extended) {
     std::fprintf(file_.get(),
                  "#!OSCAR2013Extended %s t x y z mass p0 px py pz"
-                 " pdg ID ncoll form_time xsecfac proc_id_origin"
-                 " proc_type_origin time_last_coll pdg_mother1 pdg_mother2 \n",
+                 " pdg ID charge ncoll form_time xsecfac proc_id_origin"
+                 " proc_type_origin time_last_coll pdg_mother1 pdg_mother2\n",
                  name.c_str());
     std::fprintf(file_.get(),
                  "# Units: fm fm fm fm GeV GeV GeV GeV GeV"
-                 " none none none fm none none none fm none none\n");
+                 " none none none none fm none none none fm none none\n");
     std::fprintf(file_.get(), "# %s\n", VERSION_MAJOR);
   } else {
     if (name == "particle_lists") {
@@ -328,8 +328,8 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * standard. Format specifics are the following:\n
  * **Header**
  * \code
- * #!OSCAR2013 particle_lists t x y z mass p0 px py pz pdg ID
- * # Units: fm fm fm fm GeV GeV GeV GeV GeV none none
+ * #!OSCAR2013 particle_lists t x y z mass p0 px py pz pdg ID charge
+ * # Units: fm fm fm fm GeV GeV GeV GeV GeV none none none
  * # SMASH_version
  * \endcode
  *
@@ -424,7 +424,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *  Format specifics are the following:\n
  * **Header**
  * \code
- * #!OSCAR2013 full_event_history t x y z mass p0 px py pz pdg ID
+ * #!OSCAR2013 full_event_history t x y z mass p0 px py pz pdg ID charge
  * # Units: fm fm fm fm GeV GeV GeV GeV GeV none none
  * # SMASH_version
  * \endcode
@@ -445,7 +445,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *
  * **Particle line**
  * \code
- * t x y z mass p0 px py pz pdg ID
+ * t x y z mass p0 px py pz pdg ID charge
  * \endcode
  *
  * **Event end line**
@@ -459,11 +459,13 @@ void OscarOutput<Format, Contents>::write_particledata(
   const FourVector pos = data.position();
   const FourVector mom = data.momentum();
   if (Format == OscarFormat2013) {
-    std::fprintf(file_.get(), "%g %g %g %g %g %.9g %.9g %.9g %.9g %s %i\n",
+    std::fprintf(file_.get(), "%g %g %g %g %g %.9g %.9g %.9g %.9g %s %i %i\n",
                  pos.x0(), pos.x1(), pos.x2(), pos.x3(), data.effective_mass(),
                  mom.x0(), mom.x1(), mom.x2(), mom.x3(),
-                 data.pdgcode().string().c_str(), data.id());
+                 data.pdgcode().string().c_str(), data.id(),
+                 data.type().charge());
   } else if (Format == OscarFormat2013Extended) {
+    const auto h = data.get_history();
     std::fprintf(
         file_.get(),
         "%g %g %g %g %g %.9g %.9g %.9g"
@@ -471,12 +473,10 @@ void OscarOutput<Format, Contents>::write_particledata(
         pos.x0(), pos.x1(), pos.x2(), pos.x3(), data.effective_mass(), mom.x0(),
         mom.x1(), mom.x2(), mom.x3(), data.pdgcode().string().c_str(),
         data.id(), data.type().charge(),
-        data.get_history().collisions_per_particle, data.formation_time(),
-        data.cross_section_scaling_factor(), data.get_history().id_process,
-        static_cast<int>(data.get_history().process_type),
-        data.get_history().time_last_collision,
-        data.get_history().p1.string().c_str(),
-        data.get_history().p2.string().c_str());
+        h.collisions_per_particle, data.formation_time(),
+        data.cross_section_scaling_factor(), h.id_process,
+        static_cast<int>(h.process_type), h.time_last_collision,
+        h.p1.string().c_str(), h.p2.string().c_str());
   } else {
     std::fprintf(file_.get(), "%i %s %i %g %g %g %g %g %g %g %g %g\n",
                  data.id(), data.pdgcode().string().c_str(), 0, mom.x1(),

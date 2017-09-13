@@ -91,14 +91,14 @@ BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
  *
  * **Particle line**
  * \code
- *     9*double             int int
- * t x y z mass p0 px py pz pdg ID
+ *     9*double             int int int
+ * t x y z mass p0 px py pz pdg ID charge
  * \endcode
  *
  * **Extended Particle line**
  * \code
- *     9*double             int int int     double
- * t x y z mass p0 px py pz pdg ID Ncoll formation_time
+ *     9*double             int int int int     double
+ * t x y z mass p0 px py pz pdg ID charge Ncoll formation_time
  *        double                    uint32_t            uint32_t
  * cross_section_scaling_factor process_ID_origin process_type_origin
  *        double        int         int

@@ -157,8 +157,8 @@ void BinaryOutputBase::write_particledata(const ParticleData &p) {
   std::fwrite(&mass, sizeof(mass), 1, file_.get());
   write(p.momentum());
   write(p.pdgcode().get_decimal());
-  write(p.type().charge());
   write(p.id());
+  write(p.type().charge());
   if (extended_) {
     const auto history = p.get_history();
     write(history.collisions_per_particle);
