@@ -88,9 +88,14 @@ class OscarOutput : public OutputInterface {
  * Returns a new OscarOutput object using information from \p config to
  * select the correct implementation.
  *
+ * \param format A string: "Oscar2013" or "Oscar1999"
+ * \param content A string: "Particles", "Collisions", "Photons"
+               or "Dileptons".
  * \param path The path to the output directory where the file(s) will be
  *             placed.
- * \param config A Configuration object that has direct entries for OSCAR.
+ * \param out_par A structure containing parameters of the output, in particular
+ *             if it is extended or not, if printing only final particles
+ *             in event, etc.
  */
 std::unique_ptr<OutputInterface> create_oscar_output(
     std::string format, std::string content, const bf::path &path,

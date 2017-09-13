@@ -52,6 +52,8 @@ class OutputInterface {
    * option.
    * \param particles List of particles.
    * \param event_number Number of the current event.
+   * \param impact_parameter distance between centers of nuclei in this event.
+   *          Only makes sense for collider modus.
    */
   virtual void at_eventend(const Particles &particles,
                            const int event_number,
