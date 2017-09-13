@@ -64,13 +64,14 @@ static void read_binary(double &x, FILE *file) {
 
 /* Function to read and compare particle */
 static bool compare_particle(const ParticleData &p, FILE *file) {
-  int id, pdgcode;
+  int id, pdgcode, charge;
   double mass;
   FourVector pos, mom;
   read_binary(pos, file);
   read_binary(mass, file);
   read_binary(mom, file);
   read_binary(pdgcode, file);
+  read_binary(charge, file);
   read_binary(id, file);
   // std::cout << p.id() << " " << id << std::endl;
   // std::cout << p.pdgcode().get_decimal() << " " << pdgcode << std::endl;

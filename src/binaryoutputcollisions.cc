@@ -160,14 +160,15 @@ void BinaryOutputBase::write_particledata(const ParticleData &p) {
   write(p.type().charge());
   write(p.id());
   if (extended_) {
-    write(p.get_history().collisions_per_particle);
+    const auto history = p.get_history();
+    write(history.collisions_per_particle);
     write(p.formation_time());
     write(p.cross_section_scaling_factor());
-    write(p.get_history().id_process);
-    write(static_cast<uint32_t>((p.get_history().process_type)));
-    write(p.get_history().time_last_collision);
-    write(p.get_history().p1.get_decimal());
-    write(p.get_history().p2.get_decimal());
+    write(history.id_process);
+    write(static_cast<uint32_t>(history.process_type));
+    write(history.time_last_collision);
+    write(history.p1.get_decimal());
+    write(history.p2.get_decimal());
   }
 }
 
