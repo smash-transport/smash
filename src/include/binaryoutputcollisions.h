@@ -50,7 +50,7 @@ class BinaryOutputBase : public OutputInterface {
 
  private:
   /// file format version number
-  uint16_t format_version_ = 5;
+  uint16_t format_version_ = 6;
   /// Option for extended output
   bool extended_;
 };
