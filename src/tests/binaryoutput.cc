@@ -76,7 +76,43 @@ static bool compare_particle(const ParticleData &p, FILE *file) {
   // std::cout << p.id() << " " << id << std::endl;
   // std::cout << p.pdgcode().get_decimal() << " " << pdgcode << std::endl;
   return (p.id() == id) && (p.pdgcode().get_decimal() == pdgcode) &&
-         (pos == p.position()) && (mom == p.momentum());
+         (pos == p.position()) && (mom == p.momentum() &&
+          charge == p.type().charge());
+}
+
+/* Reads and compared particle in case of extended format */
+static bool compare_particle_extended(const ParticleData &p, FILE *file) {
+  VERIFY(compare_particle(p, file));
+  int collisions_per_particle, id_process, process_type, p1pdg, p2pdg;
+  double formation_time, xs_scaling_factor, time_last_collision;
+  const auto h = p.get_history();
+  read_binary(collisions_per_particle, file);
+  read_binary(formation_time, file);
+  read_binary(xs_scaling_factor, file);
+  read_binary(id_process, file);
+  read_binary(process_type, file);
+  read_binary(time_last_collision, file);
+  read_binary(p1pdg, file);
+  read_binary(p2pdg, file);
+  COMPARE(collisions_per_particle, h.collisions_per_particle);
+  COMPARE(formation_time, p.formation_time());
+  COMPARE(xs_scaling_factor, p.cross_section_scaling_factor());
+  COMPARE(id_process, static_cast<int>(h.id_process));
+  COMPARE(process_type, static_cast<int>(h.process_type));
+  COMPARE(time_last_collision, h.time_last_collision);
+  COMPARE(p1pdg, h.p1.get_decimal());
+  COMPARE(p2pdg, h.p2.get_decimal());
+
+  return true;
+
+/*  return (collisions_per_particle == h.collisions_per_particle) &&
+         (formation_time == p.formation_time()) &&
+         (xs_scaling_factor == p.cross_section_scaling_factor()) &&
+         (id_process == static_cast<int>(h.id_process)) &&
+         (process_type == static_cast<int>(h.process_type)) &&
+         (time_last_collision == h.time_last_collision) &&
+         (p1pdg == h.p1.get_decimal()) &&
+         (p2pdg == h.p2.get_decimal());*/
 }
 
 /* function to read and compare particle block header */
@@ -292,3 +328,93 @@ TEST(particles_format) {
   VERIFY(!std::fclose(binF));
   VERIFY(!std::remove(filename.c_str()));
 }
+
+TEST(extended) {
+  /* Set the most verbose option */
+  OutputParameters output_par = OutputParameters();
+  output_par.coll_printstartend = true;
+  output_par.coll_extended = true;
+
+  /* Create an instance of binary output */
+  std::unique_ptr<BinaryOutputCollisions> bin_output =
+      make_unique<BinaryOutputCollisions>(testoutputpath,
+        "Collisions", output_par);
+  const bf::path collisionsoutputfilepath =
+      testoutputpath / "collisions_binary.bin";
+  VERIFY(bf::exists(collisionsoutputfilepath));
+
+  /* create two smashon particles */
+  Particles particles;
+  const ParticleData p1 = particles.insert(Test::smashon_random());
+  const ParticleData p2 = particles.insert(Test::smashon_random());
+
+  int event_id = 0;
+  /* Write initial state output: the two smashons we created */
+  bin_output->at_eventstart(particles, event_id);
+
+  /* Create elastic interaction (smashon + smashon). */
+  ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
+  action->add_all_processes(10., true, true, 0., true,
+                            NNbarTreatment::NoAnnihilation);
+  action->generate_final_state();
+  ParticleList final_particles = action->outgoing_particles();
+  const double rho = 0.123;
+  bin_output->at_interaction(*action, rho);
+
+  /* Final state output */
+  action->perform(&particles, 1);
+  const double impact_parameter = 1.473;
+  bin_output->at_eventend(particles, event_id, impact_parameter);
+
+  /*
+   * Now we have an artificially generated binary output.
+   * Let us try if we can read and understand it.
+   */
+
+  // Open file as a binary
+  FILE *binF;
+  const auto filename = collisionsoutputfilepath.native();
+  binF = fopen(filename.c_str(), "rb");
+  VERIFY(binF);
+  // Header
+  std::vector<char> buf(4);
+  std::string magic, smash_version;
+  uint16_t format_version_number, extended_version;
+
+  COMPARE(std::fread(&buf[0], 1, 4, binF), 4u);  // magic number
+  magic.assign(&buf[0], 4);
+  std::fread(&format_version_number, sizeof(format_version_number), 1, binF);
+  std::fread(&extended_version, sizeof(extended_version), 1, binF);
+  read_binary(smash_version, binF);          // smash version
+
+  COMPARE(magic, "SMSH");
+  COMPARE(static_cast<int>(format_version_number), current_format_version);
+  COMPARE(extended_version, 1);
+  COMPARE(smash_version, VERSION_MAJOR);
+
+  // particles at event atart: expect two smashons
+  VERIFY(compare_particles_block_header(2, binF));
+  VERIFY(compare_particle_extended(p1, binF));
+  VERIFY(compare_particle_extended(p2, binF));
+
+  // interaction: 2 smashons -> 2 smashons
+  VERIFY(compare_interaction_block_header(2, 2, *action, rho, binF));
+  VERIFY(compare_particle_extended(p1, binF));
+  VERIFY(compare_particle_extended(p2, binF));
+  VERIFY(compare_particle_extended(final_particles[0], binF));
+  VERIFY(compare_particle_extended(final_particles[1], binF));
+
+  // paricles at event end: two smashons
+  VERIFY(compare_particles_block_header(2, binF));
+  for (const auto &particle : particles) {
+    VERIFY(compare_particle_extended(particle, binF));
+  }
+
+  // event end line
+  VERIFY(compare_final_block_header(event_id, impact_parameter, binF));
+
+  // remove file
+  VERIFY(!std::fclose(binF));
+  VERIFY(!std::remove(filename.c_str()));
+}
+
