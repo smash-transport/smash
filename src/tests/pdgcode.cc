@@ -580,3 +580,49 @@ TEST(pack_int) {
   const uint64_t expected = 0xfeeddeadbeefface;
   COMPARE(xy, expected);
 }
+
+TEST(quark_content) {
+  PdgCode pip(0x211), pim(-0x211), pi0(0x111),
+          p(0x2212), n(0x2112), ap(-0x2212), an(-0x2112),
+          el(0x11);
+  std::array<int, 3> q;
+  q = pip.quark_content();
+  COMPARE(q[0], 0);
+  COMPARE(q[1], 2);
+  COMPARE(q[2], -1);
+
+  q = pim.quark_content();
+  COMPARE(q[0], 0);
+  COMPARE(q[1], -2);
+  COMPARE(q[2], 1);
+
+  q = pi0.quark_content();
+  COMPARE(q[0], 0);
+  COMPARE(q[1], 1);
+  COMPARE(q[2], -1);
+
+  q = p.quark_content();
+  COMPARE(q[0], 2);
+  COMPARE(q[1], 2);
+  COMPARE(q[2], 1);
+
+  q = n.quark_content();
+  COMPARE(q[0], 2);
+  COMPARE(q[1], 1);
+  COMPARE(q[2], 1);
+
+  q = ap.quark_content();
+  COMPARE(q[0], -2);
+  COMPARE(q[1], -2);
+  COMPARE(q[2], -1);
+
+  q = an.quark_content();
+  COMPARE(q[0], -2);
+  COMPARE(q[1], -1);
+  COMPARE(q[2], -1);
+
+  q = el.quark_content();
+  COMPARE(q[0], 0);
+  COMPARE(q[1], 0);
+  COMPARE(q[2], 0);
+}
