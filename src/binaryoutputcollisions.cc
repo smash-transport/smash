@@ -157,6 +157,7 @@ void BinaryOutputBase::write_particledata(const ParticleData &p) {
   std::fwrite(&mass, sizeof(mass), 1, file_.get());
   write(p.momentum());
   write(p.pdgcode().get_decimal());
+  write(p.type().charge());
   write(p.id());
   if (extended_) {
     write(p.get_history().collisions_per_particle);
@@ -164,7 +165,7 @@ void BinaryOutputBase::write_particledata(const ParticleData &p) {
     write(p.cross_section_scaling_factor());
     write(p.get_history().id_process);
     write(static_cast<uint32_t>((p.get_history().process_type)));
-    write(p.get_history().time_of_origin);
+    write(p.get_history().time_last_collision);
     write(p.get_history().p1.get_decimal());
     write(p.get_history().p2.get_decimal());
   }
