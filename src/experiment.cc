@@ -145,13 +145,31 @@ namespace {
  * The output section has several subsections, relating to different output
  * files. To disable a certain output, comment the corresponding section out:
  *
+ * \li \b Particles  List of particles at regular time intervals in the
+ *                   computational frame or (optionally) only at the event end.
+ * \li \b Collisions List of interactions: collisions, decays, box wall
+ *                   crossings and forced thermalizations. Information about
+ *                   incoming, outgoing particles and the interaction itself
+ *                   is written out.
+ * \li \b Dileptons  Special dilepton output, see \subpage input_dileptons
+ * \li \b Photons    Special photon output, see \subpage input_photons
+ * \li \b Thermodynamics This output allows to print out thermodynamic
+ *                quantities such as density, energy-momentum tensor,
+ *                Landau velocity, etc at one selected point versus time
+ *                and on a spacial lattice versus time.
+ *
+ * Every output can be printed in several formats simulateneously.
+ *
+ * \key Format (list of formats, optional, default = [])
+ * List of formats for writing particular content.
+ *
+ * The formats are described in detail here:
  * \li \subpage input_oscar_particlelist
  * \li \subpage input_oscar_collisions
  * \li \subpage input_vtk
  * \li \subpage input_binary_collisions
  * \li \subpage input_binary_particles
  * \li \subpage input_root
- * \li \subpage input_dileptons
  */
 
 /** Gathers all general Experiment parameters
@@ -463,6 +481,11 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * in \ref format_binary_ .\n
    * "Root" - The dilepton output is written to the file \c DileptonOutput.root
    * in \ref format_root .\n
+   **/
+
+  /*!\Userguide
+   * \page input_photons Photons
+   * Todo(schaefer): document photons
    **/
 
   dens_type_ = config.take({"Output", "Density_Type"}, DensityType::None);
