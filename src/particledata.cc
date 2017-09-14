@@ -51,6 +51,7 @@ void ParticleData::set_history(int ncoll, uint32_t pid, ProcessType pt,
       history_.p1 = plist[0].pdgcode();
       history_.p2 = plist[1].pdgcode();
       break;
+    case ProcessType::Thermalization:
     case ProcessType::None:
       // nullify parents
       history_.p1 = 0x0;

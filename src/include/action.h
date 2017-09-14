@@ -46,6 +46,13 @@ class Action {
         time_of_execution_(time + in_part.position().x0()),
         process_type_(type) {}
 
+  Action(const ParticleList &in_part, const ParticleList &out_part,
+         double absolute_execution_time, ProcessType type)
+      : incoming_particles_(std::move(in_part)),
+        outgoing_particles_(std::move(out_part)),
+        time_of_execution_(absolute_execution_time),
+        process_type_(type) {}
+
   /** Copying is disabled. Use pointers or create a new Action. */
   Action(const Action &) = delete;
 

@@ -22,6 +22,7 @@
 #include "potentials.h"
 #include "propagation.h"
 #include "quantumnumbers.h"
+#include "thermalizationaction.h"
 
 namespace Smash {
 

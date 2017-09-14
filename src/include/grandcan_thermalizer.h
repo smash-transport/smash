@@ -181,12 +181,11 @@ class GrandCanThermalizer {
   void sample_in_random_cell_BF_algo(ParticleList& plist, const double time,
                                      size_t type_index);
   /**
-   * Samples particles to the sampled_list according to the BF algorithm.
+   * Samples particles to the sampled_list_ according to the BF algorithm.
    * Quantum numbers of the sampled particles are required to be as in
    * conserved_initial.
    */
-  void thermalize_BF_algo(ParticleList& sampled_list,
-                          QuantumNumbers& conserved_initial, double time,
+  void thermalize_BF_algo(QuantumNumbers& conserved_initial, double time,
                           int ntest);
 
   // Functions for mode-sampling algorithm
@@ -269,20 +268,22 @@ class GrandCanThermalizer {
   }
 
   /*
-   * Samples particles to the sampled_list according to the mode algorithm.
+   * Samples particles to the sampled_list_ according to the mode algorithm.
    * Quantum numbers of the sampled particles are required to be as in
    * conserved_initial.
    */
-  void thermalize_mode_algo(ParticleList& sampled_list,
-                            QuantumNumbers& conserved_initial, double time);
+  void thermalize_mode_algo(QuantumNumbers& conserved_initial, double time);
 
   /// Main thermalize function, that chooses algorithm
-  void thermalize(Particles& particles, double time, int ntest);
+  void thermalize(const Particles& particles, double time, int ntest);
 
   void print_statistics(const Clock& clock) const;
 
   RectangularLattice<ThermLatticeNode>& lattice() const { return *lat_; }
   double e_crit() const { return e_crit_; }
+
+  ParticleList particles_to_remove() const { return to_remove_; }
+  ParticleList particles_to_insert() const { return sampled_list_; }
 
  private:
   ParticleTypePtrList list_eos_particles() const {
@@ -316,6 +317,8 @@ class GrandCanThermalizer {
   std::vector<size_t> cells_to_sample_;
   HadronGasEos eos_ = HadronGasEos(true);
   std::unique_ptr<RectangularLattice<ThermLatticeNode>> lat_;
+  ParticleList to_remove_;
+  ParticleList sampled_list_;
   const ParticleTypePtrList eos_typelist_;
   const size_t N_sorts_;
   std::vector<double> mult_sort_;

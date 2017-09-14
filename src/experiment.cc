@@ -861,8 +861,12 @@ void Experiment<Modus>::run_time_evolution() {
       const bool ignore_cells_under_treshold = true;
       thermalizer_->update_lattice(particles_, density_param_,
                                    ignore_cells_under_treshold);
-      thermalizer_->thermalize(particles_, parameters_.labclock.current_time(),
+      const double current_t = parameters_.labclock.current_time();
+      thermalizer_->thermalize(particles_, current_t,
                                parameters_.testparticles);
+      std::unique_ptr<ThermalizationAction> th_act =
+        make_unique<ThermalizationAction>(thermalizer_.get(), current_t);
+      perform_action(*th_act, particles_);
     }
 
     /* (1.a) Create grid. */
