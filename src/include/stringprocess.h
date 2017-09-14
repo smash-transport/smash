@@ -12,15 +12,14 @@ class StringProcess {
   int PDGidA, PDGidB;
   int baryonA, baryonB;
   //int chargeA, chargeB;
-  std::array<int,4> idqsetA;
-  std::array<int,4> idqsetB;
+  //std::array<int,4> idqsetA;
+  //std::array<int,4> idqsetB;
   double PPosA, PNegA, PPosB, PNegB;
   double massA, massB;
   double sqrtsAB, pabscomAB;
-  FourVector plabA;
-  FourVector plabB;
-  FourVector pcomA;
-  FourVector pcomB;
+  PdgCode PDGcodeA, PDGcodeB;
+  FourVector plabA, plabB;
+  FourVector pcomA, pcomB;
   FourVector ucomAB;
   ThreeVector vcomAB;
   std::array<ThreeVector,4> evecBasisAB;
@@ -86,18 +85,20 @@ class StringProcess {
   void make_orthonormal_basis();
   void compute_incoming_lightcone_momenta();
 
-  bool next_SDiff_AX();  // single-diffractive : A + B -> A + X
-  bool next_SDiff_XB();  // single-diffractive : A + B -> X + B
-  bool next_DDiff_XX();  // double-diffractive : A + B -> X + X
-  bool next_NDiff();     // non-diffractive
-  bool next_BBbarAnn(); // baryon-antibaryon annihilation
+  bool next_SDiff(int channel);  // single-diffractive : A + B -> A + X or X + B
+  //bool next_SDiff_AX();  // single-diffractive : A + B -> A + X
+  //bool next_SDiff_XB();  // single-diffractive : A + B -> X + B
+  bool next_DDiff();             // double-diffractive : A + B -> X + X
+  bool next_NDiff();             // non-diffractive
+  bool next_BBbarAnn();          // baryon-antibaryon annihilation
 
   void reset_finalArray();
   int append_finalArray(FourVector &uString, ThreeVector &evecLong);
 
-  void makeStringEnds(std::array<int,4> &idqset, int *idq1, int *idq2);
+  void makeStringEnds(PdgCode &pdgcodeIn, int &idq1, int &idq2);
+  //void makeStringEnds(std::array<int,4> &idqset, int &idq1, int &idq2);
   int fragmentString(int idq1, int idq2, double mString, ThreeVector &evecLong,
-                     bool ranrot);
+                     bool random_rotation);
 };
 
 }  // namespace Smash

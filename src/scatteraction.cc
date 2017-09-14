@@ -769,14 +769,15 @@ void ScatterAction::string_excitation_inter(int subprocess) {
     /* implement collision */
     while ((isinit == true) && (isnext == false)) {
       if( subprocess == 1 ) {
-        isnext = string_process->next_SDiff_AX();
+        isnext = string_process->next_SDiff(1);
       } else if( subprocess == 2 ) {
-        isnext = string_process->next_SDiff_XB();
+        isnext = string_process->next_SDiff(2);
       } else if( subprocess == 3 ) {
-        isnext = string_process->next_DDiff_XX();
+        isnext = string_process->next_DDiff();
       } else if( subprocess == 4 ) {
         isnext = string_process->next_NDiff();
       } else {
+        throw std::runtime_error("invalid subprocess for StringProcess");
       }
     }
     int npart = string_process->final_PDGid[0].size();
