@@ -9,7 +9,7 @@ namespace Smash {
 
 class StringProcess {
  private:
-  int PDGidA, PDGidB;
+  //int PDGidA, PDGidB;
   int baryonA, baryonB;
   //int chargeA, chargeB;
   //std::array<int,4> idqsetA;

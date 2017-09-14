@@ -20,7 +20,7 @@ StringProcess::StringProcess() {
     evecBasisAB[imu] = ThreeVector(0., 0., 0.);
   }
 
-  PDGidA = PDGidB = 0;
+  //PDGidA = PDGidB = 0;
   baryonA = baryonB = 0;
   //chargeA = chargeB = 0;
   PPosA = 0.;
@@ -294,8 +294,8 @@ bool StringProcess::init(const ParticleList &incomingList){
 
   PDGcodeA = incomingList[0].pdgcode();
   PDGcodeB = incomingList[1].pdgcode();
-  PDGidA = PDGcodeA.get_decimal();
-  PDGidB = PDGcodeB.get_decimal();
+  //PDGidA = PDGcodeA.get_decimal();
+  //PDGidB = PDGcodeB.get_decimal();
   massA = incomingList[0].effective_mass();
   massB = incomingList[1].effective_mass();
 
@@ -360,8 +360,8 @@ bool StringProcess::init_lab(PdgCode &idAIn, PdgCode &idBIn, double massAIn, dou
 
   PDGcodeA = idAIn;
   PDGcodeB = idBIn;
-  PDGidA = PDGcodeA.get_decimal();
-  PDGidB = PDGcodeB.get_decimal();
+  //PDGidA = PDGcodeA.get_decimal();
+  //PDGidB = PDGcodeB.get_decimal();
   massA = massAIn;
   massB = massBIn;
 
@@ -426,8 +426,8 @@ bool StringProcess::init_com(PdgCode &idAIn, PdgCode &idBIn, double massAIn, dou
 
   PDGcodeA = idAIn;
   PDGcodeB = idBIn;
-  PDGidA = PDGcodeA.get_decimal();
-  PDGidB = PDGcodeB.get_decimal();
+  //PDGidA = PDGcodeA.get_decimal();
+  //PDGidB = PDGcodeB.get_decimal();
   massA = massAIn;
   massB = massBIn;
   sqrtsAB = sqrtsABIn;
@@ -525,12 +525,14 @@ bool StringProcess::next_SDiff(int channel) {
   if( channel == 1 ) { // AB > AX
     mstrMin = massB;
     mstrMax = sqrtsAB - massA;
-    pdgidH = PDGidA;
+    pdgidH = PDGcodeA.get_decimal();
+    //pdgidH = PDGidA;
     massH = massA;
   } else if( channel == 2 ) { // AB > XB
     mstrMin = massA;
     mstrMax = sqrtsAB - massB;
-    pdgidH = PDGidB;
+    pdgidH = PDGcodeB.get_decimal();
+    //pdgidH = PDGidB;
     massH = massB;
   } else {
     throw std::runtime_error("invalid argument for StringProcess::next_SDiff");
@@ -721,7 +723,8 @@ bool StringProcess::next_SDiff_AX() {
     }
 
     NpartString2 = 1;
-    final_PDGid[0].push_back(PDGidA);
+    final_PDGid[0].push_back(PDGcodeA.get_decimal());
+    //final_PDGid[0].push_back(PDGidA);
     final_PDGid[1].push_back(1);
     final_pvec[0].push_back(pstrHlab.x0());
     final_pvec[1].push_back(pstrHlab.x1());
@@ -838,7 +841,8 @@ bool StringProcess::next_SDiff_XB() {
     }
 
     NpartString2 = 1;
-    final_PDGid[0].push_back(PDGidB);
+    final_PDGid[0].push_back(PDGcodeB.get_decimal());
+    //final_PDGid[0].push_back(PDGidB);
     final_PDGid[1].push_back(1);
     final_pvec[0].push_back(pstrHlab.x0());
     final_pvec[1].push_back(pstrHlab.x1());
@@ -1233,7 +1237,8 @@ bool StringProcess::next_BBbarAnn(){
 		 * nothing happens */
 		if( npr == 0 ){
 			NpartString1 = 1;
-			final_PDGid[0].push_back(PDGidA);
+			final_PDGid[0].push_back(PDGcodeA.get_decimal());
+			//final_PDGid[0].push_back(PDGidA);
 			final_PDGid[1].push_back(1);
 			final_pvec[0].push_back(plabA.x0());
 			final_pvec[1].push_back(plabA.x1());
@@ -1244,7 +1249,8 @@ bool StringProcess::next_BBbarAnn(){
 			final_tform[1].push_back(1.);
 
 			NpartString2 = 1;
-			final_PDGid[0].push_back(PDGidB);
+			final_PDGid[0].push_back(PDGcodeB.get_decimal());
+			//final_PDGid[0].push_back(PDGidB);
 			final_PDGid[1].push_back(1);
 			final_pvec[0].push_back(plabB.x0());
 			final_pvec[1].push_back(plabB.x1());
