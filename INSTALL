@@ -1,4 +1,4 @@
-/**
+/*!\Userguide
 \page install Installation
 
 Quick instructions how to build smash.
@@ -234,3 +234,4 @@ SMASH, run cmake with
     cmake -DCMAKE_PREFIX_PATH=$GSL ..
 
 Note: In case of problems, make sure to start with a clean build folder.
+*/
