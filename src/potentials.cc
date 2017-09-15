@@ -124,6 +124,23 @@ ThreeVector Potentials::potential_gradient(const ThreeVector &r,
     return total_gradient;
   }
 
+  /* For Lambda and Sigma, since they carry 2 light (u or d) quarks, they
+  are affected by 2/3 of the Skyrme force. Xi carries 1 light quark, it
+  is affected by 1/3 of the Skyrme force. Omega carries no light quark, so
+  it's not affected by the Skyrme force.*/
+  double skyrme_scale = 1.0;
+  if (acts_on.pdgcode().is_hyperon()) {
+     if (acts_on.pdgcode().is_xi()) {
+        skyrme_scale = 1. / 3.;
+     } else if (acts_on.pdgcode().is_Omega()) {
+        skyrme_scale = 0.;
+     } else {
+        skyrme_scale = 2. / 3.;
+     }
+  }
+  /* Hyperons are not affected by the symmetry force.*/
+  const auto symmetry_scale = acts_on.pdgcode().is_hyperon() ? 0 : 1;
+
   const bool compute_gradient = true;
   if (use_skyrme_) {
     const auto density_and_gradient =
@@ -133,7 +150,8 @@ ThreeVector Potentials::potential_gradient(const ThreeVector &r,
 
     // Derivative of potential with respect to density
     double tmp = skyrme_tau_ * std::pow(rho / nuclear_density, skyrme_tau_ - 1);
-    total_gradient += drho_dr * (skyrme_a_ + skyrme_b_ * tmp) / nuclear_density;
+    total_gradient += skyrme_scale *drho_dr * (skyrme_a_ + skyrme_b_ * tmp)
+                      / nuclear_density;
   }
 
   if (use_symmetry_) {
@@ -144,7 +162,7 @@ ThreeVector Potentials::potential_gradient(const ThreeVector &r,
             .second;
     const ThreeVector dUsym_dr =
         2. * symmetry_s_ * p_iso / nuclear_density * acts_on.isospin3_rel();
-    total_gradient += dUsym_dr;
+    total_gradient += symmetry_scale * dUsym_dr;
   }
   // Return in GeV
   return total_gradient * 1.0e-3;
