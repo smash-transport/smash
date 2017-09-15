@@ -37,9 +37,16 @@ StringProcess::StringProcess() {
   alphapowV = 1.;
   betapowV = 2.5;
 
-  sigmaQperp = 1.2;
+  sigmaQperp = 0.5;
   kappaString = 1.;
 
+  time_collision = 0.;
+  gamma_factor_com = 1.;
+
+  NpartFinal = 0;
+  NpartString1 = 0;
+  NpartString2 = 0;
+  final_state.clear();
   reset_finalArray();
 }
 
@@ -67,6 +74,235 @@ void StringProcess::reset_finalArray() {
 
   final_tform[0].resize(0);
   final_tform[1].resize(0);
+}
+
+// compute the formation time and fill the arrays with final-state particles
+int StringProcess::append_final_state(FourVector &uString, ThreeVector &evecLong) {
+  int ret;
+
+  int nfrag;
+  int ipyth;
+  int ipstr, jpstr, kpstr;
+  int pythia_id, islead, baryon, bstring;
+  double pPosTot, pNegTot;
+  double tProd, xtotfac;
+
+  bool foundFW;
+  bool foundBW;
+
+  std::vector<int> idfrag;
+  std::vector<double> Efrag;
+  std::vector<double> pxfrag;
+  std::vector<double> pyfrag;
+  std::vector<double> pzfrag;
+  std::vector<double> mfrag;
+
+  std::vector<int> indY;
+  std::vector<double> pparallel;
+  std::vector<double> Yparallel;
+  std::vector<double> XVertexPos;
+  std::vector<double> XVertexNeg;
+
+  ThreeVector vstring;
+  FourVector pvRS;
+  FourVector pvCM;
+
+  FourVector xfRS;
+  FourVector xfCM;
+
+  nfrag = 0;
+  bstring = 0;
+  for (ipyth = 0; ipyth < pythia->event.size(); ipyth++) {
+    if (pythia->event[ipyth].isFinal()) {
+      nfrag = nfrag + 1;
+      pythia_id = pythia->event[ipyth].id();
+      bstring = bstring + pythia->particleData.baryonNumberType(pythia_id);
+    }
+  }
+
+  vstring = uString.velocity();
+
+  idfrag.resize(nfrag);
+  Efrag.resize(nfrag);
+  pxfrag.resize(nfrag);
+  pyfrag.resize(nfrag);
+  pzfrag.resize(nfrag);
+  mfrag.resize(nfrag);
+
+  indY.resize(nfrag);
+  pparallel.resize(nfrag);
+  Yparallel.resize(nfrag);
+  XVertexPos.resize(nfrag + 1);
+  XVertexNeg.resize(nfrag + 1);
+
+  pPosTot = 0.;
+  pNegTot = 0.;
+  ipstr = 0;
+  for (ipyth = 0; ipyth < pythia->event.size(); ipyth++) {
+    if (pythia->event[ipyth].isFinal()) {
+      idfrag[ipstr] = pythia->event[ipyth].id();
+      Efrag[ipstr] = pythia->event[ipyth].e();
+      pxfrag[ipstr] = pythia->event[ipyth].px();
+      pyfrag[ipstr] = pythia->event[ipyth].py();
+      pzfrag[ipstr] = pythia->event[ipyth].pz();
+      mfrag[ipstr] = pythia->event[ipyth].m();
+
+      pparallel[ipstr] = pxfrag[ipstr] * evecLong.x1() +
+                         pyfrag[ipstr] * evecLong.x2() +
+                         pzfrag[ipstr] * evecLong.x3();
+      Yparallel[ipstr] = 0.5 * std::log((Efrag[ipstr] + pparallel[ipstr]) /
+                                   (Efrag[ipstr] - pparallel[ipstr]));
+
+      pPosTot = pPosTot + (Efrag[ipstr] + pparallel[ipstr]) / std::sqrt(2.);
+      pNegTot = pNegTot + (Efrag[ipstr] - pparallel[ipstr]) / std::sqrt(2.);
+
+      ipstr = ipstr + 1;
+    }
+  }
+
+  for (ipstr = 0; ipstr < nfrag; ipstr++) {
+    kpstr = 0;
+    for (jpstr = 0; jpstr < nfrag; jpstr++) {
+      if ((ipstr != jpstr) && (Yparallel[ipstr] < Yparallel[jpstr])) {
+        kpstr = kpstr + 1;
+      }
+    }
+    indY[kpstr] = ipstr;
+  }
+
+  XVertexPos[0] = pPosTot / kappaString;
+  for (kpstr = 0; kpstr < nfrag; kpstr++) {
+    ipstr = indY[kpstr];
+
+    XVertexPos[kpstr + 1] =
+        XVertexPos[kpstr] -
+        (Efrag[ipstr] + pparallel[ipstr]) / (kappaString * std::sqrt(2.));
+  }
+
+  XVertexNeg[nfrag] = pNegTot / kappaString;
+  for (kpstr = nfrag - 1; kpstr >= 0; kpstr--) {
+    ipstr = indY[kpstr];
+
+    XVertexNeg[kpstr] =
+        XVertexNeg[kpstr + 1] -
+        (Efrag[ipstr] - pparallel[ipstr]) / (kappaString * std::sqrt(2.));
+  }
+
+  ret = 0;
+  foundFW = false;
+  foundBW = false;
+  for (kpstr = 0; kpstr < nfrag; kpstr++) {
+    ipstr = indY[kpstr];
+
+    pythia_id = idfrag[ipstr];
+    baryon = pythia->particleData.baryonNumberType(pythia_id);
+    pvRS.set_x0( Efrag[ipstr] );
+    pvRS.set_x1( pxfrag[ipstr] );
+    pvRS.set_x2( pyfrag[ipstr] );
+    pvRS.set_x3( pzfrag[ipstr] );
+
+    xfRS.set_x0( (XVertexPos[kpstr] + XVertexNeg[kpstr + 1]) / std::sqrt(2.) );
+    xfRS.set_x1(
+        evecLong.x1() * (XVertexPos[kpstr] - XVertexNeg[kpstr + 1]) / std::sqrt(2.) );
+    xfRS.set_x2(
+        evecLong.x2() * (XVertexPos[kpstr] - XVertexNeg[kpstr + 1]) / std::sqrt(2.) );
+    xfRS.set_x3(
+        evecLong.x3() * (XVertexPos[kpstr] - XVertexNeg[kpstr + 1]) / std::sqrt(2.) );
+
+    tProd = (XVertexPos[kpstr] + XVertexNeg[kpstr + 1]) / std::sqrt(2.);
+
+    islead = 0;
+    xtotfac = 0.;
+    if (abs(bstring) == 0) {  // mesonic string
+      if ((kpstr == 0) && (foundFW == false)) {
+        islead = 1;
+        if (abs(baryon) == 3) {
+          xtotfac = 1. / 3.;
+        } else if (baryon == 0) {
+          xtotfac = 0.5;
+        } else {
+          fprintf(stderr,
+                  "  StringProcess::append_final_state warning : particle is not "
+                  "meson or baryon.\n");
+        }
+        foundFW = true;
+      } else if ((kpstr == (nfrag - 1)) && (foundBW == false)) {
+        islead = 1;
+        if (abs(baryon) == 3) {
+          xtotfac = 1. / 3.;
+        } else if (baryon == 0) {
+          xtotfac = 0.5;
+        } else {
+          fprintf(stderr,
+                  "  StringProcess::append_final_state warning : particle is not "
+                  "meson or baryon.\n");
+        }
+        foundBW = true;
+      } else {
+        islead = 0;
+        xtotfac = 0.;
+      }
+    } else if (abs(bstring) == 3) {  // baryonic string
+      if ((baryon == bstring) && (foundFW == false)) {
+        islead = 1;
+        xtotfac = 2. / 3.;
+        foundFW = true;
+      } else if ((kpstr == (nfrag - 2)) && (baryon == 0) &&
+                 (foundFW == false) && (foundBW == false)) {
+        islead = 1;
+        xtotfac = 0.5;
+        foundBW = true;
+      } else if ((kpstr == (nfrag - 1)) && (baryon == 0) && (foundFW == true) &&
+                 (foundBW == false)) {
+        islead = 1;
+        xtotfac = 0.5;
+        foundBW = true;
+      } else {
+        islead = 0;
+        xtotfac = 0.;
+      }
+    } else {  // otherwise
+      fprintf(stderr,
+              "  StringProcess::append_final_state warning : string is neither "
+              "mesonic nor baryonic.\n");
+    }
+
+    pvCM = pvRS.LorentzBoost( -vstring );
+    xfCM = xfRS.LorentzBoost( -vstring );
+    tProd = xfCM.x0();
+
+    //log.debug("PDG ID from Pythia:", pythia_id);
+    /* K_short and K_long need to be converted to K0
+     * since SMASH only knows K0 */
+    if (pythia_id == 310 || pythia_id == 130) {
+      const double prob = Random::uniform(0., 1.);
+      if (prob <= 0.5) {
+        pythia_id = 311;
+      } else {
+        pythia_id = -311;
+      }
+    }
+    const std::string s = std::to_string(pythia_id);
+    PdgCode pythia_code(s);
+    ParticleData new_particle(ParticleType::find(pythia_code));
+    new_particle.set_4momentum(pvCM);
+    //log.debug("4-momentum from Pythia: ", pvCM);
+    const double suppression_factor = 0.7;
+    if( islead == 0 ){
+      new_particle.set_cross_section_scaling_factor(0.);
+    }
+    else{
+      new_particle.set_cross_section_scaling_factor(
+          suppression_factor * xtotfac);
+    }
+    new_particle.set_formation_time(
+        time_collision + gamma_factor_com * tProd);
+    final_state.push_back(new_particle);
+
+    ret = ret + 1;
+  }
+
+  return ret;
 }
 
 // compute the formation time and fill the arrays with final-state particles
@@ -262,9 +498,6 @@ int StringProcess::append_finalArray(FourVector &uString, ThreeVector &evecLong)
       xtotfac = 0.;
     }
 
-    final_PDGid[0].push_back(id);
-    final_PDGid[1].push_back(islead);
-
     pvCM = pvRS.LorentzBoost( -vstring );
     E = pvCM.x0();
     px = pvCM.x1();
@@ -272,6 +505,9 @@ int StringProcess::append_finalArray(FourVector &uString, ThreeVector &evecLong)
     pz = pvCM.x3();
     xfCM = xfRS.LorentzBoost( -vstring );
     tProd = xfCM.x0();
+
+    final_PDGid[0].push_back(id);
+    final_PDGid[1].push_back(islead);
 
     final_pvec[0].push_back(E);
     final_pvec[1].push_back(px);
@@ -288,7 +524,8 @@ int StringProcess::append_finalArray(FourVector &uString, ThreeVector &evecLong)
   return ret;
 }
 
-bool StringProcess::init(const ParticleList &incomingList){
+bool StringProcess::init(const ParticleList &incomingList,
+                         double tcollIn, double gammaFacIn){
   bool ret;
   //std::array<int, 3> qcontent;
 
@@ -349,12 +586,17 @@ bool StringProcess::init(const ParticleList &incomingList){
   }
   */
 
+  time_collision = tcollIn;
+  gamma_factor_com = gammaFacIn;
+
   ret = true;
   return ret;
 }
 
-bool StringProcess::init_lab(PdgCode &idAIn, PdgCode &idBIn, double massAIn, double massBIn,
-                       Pythia8::Vec4 plabAIn, Pythia8::Vec4 plabBIn) {
+bool StringProcess::init_lab(PdgCode &idAIn, PdgCode &idBIn,
+                             double massAIn, double massBIn,
+                             Pythia8::Vec4 plabAIn, Pythia8::Vec4 plabBIn,
+                             double tcollIn, double gammaFacIn) {
   bool ret;
   //std::array<int, 3> qcontent;
 
@@ -415,12 +657,15 @@ bool StringProcess::init_lab(PdgCode &idAIn, PdgCode &idBIn, double massAIn, dou
   }
   */
 
+  time_collision = tcollIn;
+  gamma_factor_com = gammaFacIn;
+
   ret = true;
   return ret;
 }
 
 bool StringProcess::init_com(PdgCode &idAIn, PdgCode &idBIn, double massAIn, double massBIn,
-                       double sqrtsABIn) {
+                       double sqrtsABIn, double tcollIn, double gammaFacIn) {
   bool ret;
   //std::array<int, 3> qcontent;
 
@@ -480,11 +725,16 @@ bool StringProcess::init_com(PdgCode &idAIn, PdgCode &idBIn, double massAIn, dou
   }
   */
 
+  time_collision = tcollIn;
+  gamma_factor_com = gammaFacIn;
+
   ret = true;
   return ret;
 }
 
-// single diffractive AB > AX or XB
+/* single diffractive
+ * channel = 1 : A + B -> A + X
+ * channel = 2 : A + B -> X + B */
 bool StringProcess::next_SDiff(int channel) {
   bool ret;
 
@@ -516,6 +766,10 @@ bool StringProcess::next_SDiff(int channel) {
   FourVector prs;
   ThreeVector evec;
 
+  NpartFinal = 0;
+  NpartString1 = 0;
+  NpartString2 = 0;
+  final_state.clear();
   reset_finalArray();
 
   ntry = 0;
@@ -597,6 +851,7 @@ bool StringProcess::next_SDiff(int channel) {
 
     nfrag = fragmentString(idqX1, idqX2, massX, evec, false);
     if (nfrag > 0) {
+      NpartString1 = append_final_state(ustrXlab, evec);
       NpartString1 = append_finalArray(ustrXlab, evec);
     } else {
       nfrag = 0;
@@ -605,6 +860,13 @@ bool StringProcess::next_SDiff(int channel) {
     }
 
     NpartString2 = 1;
+    const std::string s = std::to_string(pdgidH);
+    PdgCode hadron_code(s);
+    ParticleData new_particle(ParticleType::find(hadron_code));
+    new_particle.set_4momentum(pstrHlab);
+    new_particle.set_cross_section_scaling_factor(1.);
+    new_particle.set_formation_time(0.);
+    final_state.push_back(new_particle);
     final_PDGid[0].push_back(pdgidH);
     final_PDGid[1].push_back(1);
     final_pvec[0].push_back(pstrHlab.x0());
@@ -655,6 +917,10 @@ bool StringProcess::next_SDiff_AX() {
   FourVector prs;
   ThreeVector evec;
 
+  NpartFinal = 0;
+  NpartString1 = 0;
+  NpartString2 = 0;
+  final_state.clear();
   reset_finalArray();
 
   ntry = 0;
@@ -715,6 +981,7 @@ bool StringProcess::next_SDiff_AX() {
 
     nfrag = fragmentString(idqX1, idqX2, massX, evec, false);
     if (nfrag > 0) {
+      NpartString1 = append_final_state(ustrXlab, evec);
       NpartString1 = append_finalArray(ustrXlab, evec);
     } else {
       nfrag = 0;
@@ -723,6 +990,11 @@ bool StringProcess::next_SDiff_AX() {
     }
 
     NpartString2 = 1;
+    ParticleData new_particle(ParticleType::find(PDGcodeA));
+    new_particle.set_4momentum(pstrHlab);
+    new_particle.set_cross_section_scaling_factor(1.);
+    new_particle.set_formation_time(0.);
+    final_state.push_back(new_particle);
     final_PDGid[0].push_back(PDGcodeA.get_decimal());
     //final_PDGid[0].push_back(PDGidA);
     final_PDGid[1].push_back(1);
@@ -773,6 +1045,10 @@ bool StringProcess::next_SDiff_XB() {
   FourVector prs;
   ThreeVector evec;
 
+  NpartFinal = 0;
+  NpartString1 = 0;
+  NpartString2 = 0;
+  final_state.clear();
   reset_finalArray();
 
   ntry = 0;
@@ -833,6 +1109,7 @@ bool StringProcess::next_SDiff_XB() {
 
     nfrag = fragmentString(idqX1, idqX2, massX, evec, false);
     if (nfrag > 0) {
+      NpartString1 = append_final_state(ustrXlab, evec);
       NpartString1 = append_finalArray(ustrXlab, evec);
     } else {
       nfrag = 0;
@@ -841,6 +1118,11 @@ bool StringProcess::next_SDiff_XB() {
     }
 
     NpartString2 = 1;
+    ParticleData new_particle(ParticleType::find(PDGcodeB));
+    new_particle.set_4momentum(pstrHlab);
+    new_particle.set_cross_section_scaling_factor(1.);
+    new_particle.set_formation_time(0.);
+    final_state.push_back(new_particle);
     final_PDGid[0].push_back(PDGcodeB.get_decimal());
     //final_PDGid[0].push_back(PDGidB);
     final_PDGid[1].push_back(1);
@@ -862,7 +1144,7 @@ bool StringProcess::next_SDiff_XB() {
 }
 */
 
-// double diffractive AB > XX
+/* double-diffractive : A + B -> X + X */
 bool StringProcess::next_DDiff() {
   bool ret;
 
@@ -894,6 +1176,10 @@ bool StringProcess::next_DDiff() {
   FourVector prs;
   ThreeVector evec;
 
+  NpartFinal = 0;
+  NpartString1 = 0;
+  NpartString2 = 0;
+  final_state.clear();
   reset_finalArray();
 
   ntry = 0;
@@ -955,6 +1241,7 @@ bool StringProcess::next_DDiff() {
 
     nfrag1 = fragmentString(idq11, idq12, mstr1, evec, false);
     if (nfrag1 > 0) {
+      NpartString1 = append_final_state(ustr1lab, evec);
       NpartString1 = append_finalArray(ustr1lab, evec);
     } else {
       nfrag1 = 0;
@@ -970,6 +1257,7 @@ bool StringProcess::next_DDiff() {
 
     nfrag2 = fragmentString(idq21, idq22, mstr2, evec, false);
     if (nfrag2 > 0) {
+      NpartString2 = append_final_state(ustr2lab, evec);
       NpartString2 = append_finalArray(ustr2lab, evec);
     } else {
       nfrag2 = 0;
@@ -987,7 +1275,7 @@ bool StringProcess::next_DDiff() {
   return ret;
 }
 
-// non-diffractive
+/* non-diffractive */
 bool StringProcess::next_NDiff() {
   bool ret;
 
@@ -1022,6 +1310,10 @@ bool StringProcess::next_NDiff() {
   FourVector prs;
   ThreeVector evec;
 
+  NpartFinal = 0;
+  NpartString1 = 0;
+  NpartString2 = 0;
+  final_state.clear();
   reset_finalArray();
 
   ntry = 0;
@@ -1140,6 +1432,7 @@ bool StringProcess::next_NDiff() {
 
     nfrag1 = fragmentString(idq11, idq12, mstr1, evec, false);
     if (nfrag1 > 0) {
+      NpartString1 = append_final_state(ustr1lab, evec);
       NpartString1 = append_finalArray(ustr1lab, evec);
     } else {
       nfrag1 = 0;
@@ -1155,6 +1448,7 @@ bool StringProcess::next_NDiff() {
 
     nfrag2 = fragmentString(idq21, idq22, mstr2, evec, false);
     if (nfrag2 > 0) {
+      NpartString2 = append_final_state(ustr2lab, evec);
       NpartString2 = append_finalArray(ustr2lab, evec);
     } else {
       nfrag2 = 0;
@@ -1172,7 +1466,7 @@ bool StringProcess::next_NDiff() {
   return ret;
 }
 
-// baryon-antibaryon annihilation
+/* baryon-antibaryon annihilation */
 bool StringProcess::next_BBbarAnn(){
 	bool ret;
 
@@ -1202,6 +1496,10 @@ bool StringProcess::next_BBbarAnn(){
 
 	indexAnn.resize(0);
 
+	NpartFinal = 0;
+	NpartString1 = 0;
+	NpartString2 = 0;
+	final_state.clear();
 	reset_finalArray();
 
 	quark_content_A = PDGcodeA.quark_content();
@@ -1237,6 +1535,11 @@ bool StringProcess::next_BBbarAnn(){
 		 * nothing happens */
 		if( npr == 0 ){
 			NpartString1 = 1;
+			ParticleData new_particle1(ParticleType::find(PDGcodeA));
+			new_particle1.set_4momentum(plabA);
+			new_particle1.set_cross_section_scaling_factor(1.);
+			new_particle1.set_formation_time(0.);
+			final_state.push_back(new_particle1);
 			final_PDGid[0].push_back(PDGcodeA.get_decimal());
 			//final_PDGid[0].push_back(PDGidA);
 			final_PDGid[1].push_back(1);
@@ -1249,6 +1552,11 @@ bool StringProcess::next_BBbarAnn(){
 			final_tform[1].push_back(1.);
 
 			NpartString2 = 1;
+			ParticleData new_particle2(ParticleType::find(PDGcodeB));
+			new_particle2.set_4momentum(plabB);
+			new_particle2.set_cross_section_scaling_factor(1.);
+			new_particle2.set_formation_time(0.);
+			final_state.push_back(new_particle2);
 			final_PDGid[0].push_back(PDGcodeB.get_decimal());
 			//final_PDGid[0].push_back(PDGidB);
 			final_PDGid[1].push_back(1);
@@ -1277,6 +1585,10 @@ bool StringProcess::next_BBbarAnn(){
 			jc = ijc%10;
 			fprintf(stderr,"  StringProcess::next_BBarAnn : ic = %d, jc = %d chosen\n", ic, jc);
 			// make two qqbar pairs to excite strings
+			idq11 = 0;
+			idq12 = 0;
+			idq21 = 0;
+			idq22 = 0;
 			if( (baryonA == 3) && (baryonB == -3) ){
 				idq11 = quark_content_A[(ic + 1)%3];
 				idq12 = quark_content_B[(jc + 1)%3];
@@ -1328,6 +1640,7 @@ bool StringProcess::next_BBbarAnn(){
 
 		nfrag1 = fragmentString(idq11, idq12, mstr1, evec, false);
 		if( nfrag1 > 0 ){
+			NpartString1 = append_final_state(ustr1lab, evec);
 			NpartString1 = append_finalArray(ustr1lab, evec);
 		}
 		else{
@@ -1342,6 +1655,7 @@ bool StringProcess::next_BBbarAnn(){
 
 		nfrag2 = fragmentString(idq21, idq22, mstr2, evec, false);
 		if( nfrag2 > 0 ){
+			NpartString2 = append_final_state(ustr2lab, evec);
 			NpartString2 = append_finalArray(ustr2lab, evec);
 		}
 		else{

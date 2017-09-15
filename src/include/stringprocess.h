@@ -40,12 +40,18 @@ class StringProcess {
 
   double kappaString;
 
+  double time_collision;
+
+  double gamma_factor_com;
+
   Pythia8::Pythia *pythia;
 
  public:
   StringProcess();
   ~StringProcess();
 
+  // final state array
+  ParticleList final_state;
   // final state array
   std::array<std::vector<int>,2> final_PDGid;
   // final_PDGid[0] : PDGid
@@ -75,23 +81,32 @@ class StringProcess {
 
   void set_kappaString(double kappaStringIn) { kappaString = kappaStringIn; }
 
-  bool init(const ParticleList &incomingList);
+  bool init(const ParticleList &incomingList, double tcollIn, double gammaFacIn);
   bool init_lab(PdgCode &idAIn, PdgCode &idBIn, double massAIn, double massBIn,
-                Pythia8::Vec4 pvecAIn, Pythia8::Vec4 pvecBIn);
+                Pythia8::Vec4 pvecAIn, Pythia8::Vec4 pvecBIn,
+		double tcollIn, double gammaFacIn);
   bool init_com(PdgCode &idAIn, PdgCode &idBIn, double massAIn, double massBIn,
-                double sqrtsABIn);
+                double sqrtsABIn, double tcollIn, double gammaFacIn);
 
   void make_incoming_com_momenta();
   void make_orthonormal_basis();
   void compute_incoming_lightcone_momenta();
+  /* single diffractive
+   * channel = 1 : A + B -> A + X
+   * channel = 2 : A + B -> X + B */
+  bool next_SDiff(int channel);
+  /* single-diffractive : A + B -> A + X */
+  //bool next_SDiff_AX();
+  /* single-diffractive : A + B -> X + B */
+  //bool next_SDiff_XB();
+  /* double-diffractive : A + B -> X + X */
+  bool next_DDiff();
+  /* non-diffractive */
+  bool next_NDiff();
+  /* baryon-antibaryon annihilation */
+  bool next_BBbarAnn();
 
-  bool next_SDiff(int channel);  // single-diffractive : A + B -> A + X or X + B
-  //bool next_SDiff_AX();  // single-diffractive : A + B -> A + X
-  //bool next_SDiff_XB();  // single-diffractive : A + B -> X + B
-  bool next_DDiff();             // double-diffractive : A + B -> X + X
-  bool next_NDiff();             // non-diffractive
-  bool next_BBbarAnn();          // baryon-antibaryon annihilation
-
+  int append_final_state(FourVector &uString, ThreeVector &evecLong);
   void reset_finalArray();
   int append_finalArray(FourVector &uString, ThreeVector &evecLong);
 
