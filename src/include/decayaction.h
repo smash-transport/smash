@@ -64,9 +64,6 @@ class DecayAction : public Action {
   };
 
  protected:
-  /// determine the total energy in the center-of-mass frame
-  double sqrt_s() const override;
-
   /**
    * \ingroup logging
    * Writes information about this decay action to the \p out stream.

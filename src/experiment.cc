@@ -864,9 +864,10 @@ void Experiment<Modus>::run_time_evolution() {
       const double current_t = parameters_.labclock.current_time();
       thermalizer_->thermalize(particles_, current_t,
                                parameters_.testparticles);
-      std::unique_ptr<ThermalizationAction> th_act =
-        make_unique<ThermalizationAction>(thermalizer_.get(), current_t);
-      perform_action(*th_act, particles_);
+      ThermalizationAction th_act(thermalizer_.get(), current_t);
+      if (th_act.any_particles_thermalized()) {
+        perform_action(th_act, particles_);
+      }
     }
 
     /* (1.a) Create grid. */

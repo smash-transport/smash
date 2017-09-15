@@ -189,22 +189,15 @@ void ScatterAction::add_all_processes(double elastic_parameter, bool two_to_one,
 double ScatterAction::raw_weight_value() const { return total_cross_section_; }
 
 ThreeVector ScatterAction::beta_cm() const {
-  return (incoming_particles_[0].momentum() + incoming_particles_[1].momentum())
-      .velocity();
+  return total_momentum().velocity();
 }
 
 double ScatterAction::gamma_cm() const {
-  return (1. / std::sqrt(1 - beta_cm().sqr()));
+  return (1. / std::sqrt(1.0 - beta_cm().sqr()));
 }
 
 double ScatterAction::mandelstam_s() const {
-  return (incoming_particles_[0].momentum() + incoming_particles_[1].momentum())
-      .sqr();
-}
-
-double ScatterAction::sqrt_s() const {
-  return (incoming_particles_[0].momentum() + incoming_particles_[1].momentum())
-      .abs();
+  return total_momentum().sqr();
 }
 
 double ScatterAction::cm_momentum() const {

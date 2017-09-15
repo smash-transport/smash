@@ -253,9 +253,6 @@ class ScatterAction : public Action {
     return CollisionBranchList();
   }
 
-  /** Determine the total energy in the center-of-mass frame,
-   * i.e. sqrt of Mandelstam s.  */
-  double sqrt_s() const override;
   /**
    * \ingroup exception
    * Thrown when ScatterAction is called to perform with unknown ProcessType.

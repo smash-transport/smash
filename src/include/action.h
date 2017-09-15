@@ -169,6 +169,9 @@ class Action {
    * `id_process` is only used for debugging output. */
   void check_conservation(const uint32_t id_process) const;
 
+  /// determine the total energy in the center-of-mass frame
+  double sqrt_s() const { return total_momentum().abs(); }
+
   /** Get the interaction point */
   FourVector get_interaction_point();
 
@@ -199,9 +202,14 @@ class Action {
   /** type of process */
   ProcessType process_type_;
 
-  /// determine the total energy in the center-of-mass frame
-  /// \fpPrecision Why \c double?
-  virtual double sqrt_s() const = 0;
+  /// Sum of 4-momenta of incoming particles
+  FourVector total_momentum() const {
+    FourVector mom(0.0, 0.0, 0.0, 0.0);
+    for (const auto &p : incoming_particles_) {
+      mom += p.momentum();
+    }
+    return mom;
+  }
 
   /**
    * Decide for a particular final-state channel via Monte-Carlo
