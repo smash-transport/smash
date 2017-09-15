@@ -22,19 +22,19 @@ namespace Smash {
  * thermalization - as outgoing.
  */
 class ThermalizationAction : public Action {
-  public:
-   ThermalizationAction(const GrandCanThermalizer* gct,
-                        double absolute_labframe_time);
-   // No need to do anything, because outgoing particles are set in constructor
-   void generate_final_state() {}
-   double raw_weight_value() const { return 0.0; }
-   bool any_particles_thermalized() const {
-     return (incoming_particles_.size() > 0);
-   }
-   void format_debug_output(std::ostream &out) const {
-     out << " Thermalization action of " << incoming_particles_.size() <<
-            " to " << outgoing_particles_.size() << " particles.";
-   }
+ public:
+  ThermalizationAction(const GrandCanThermalizer* gct,
+                       double absolute_labframe_time);
+  // No need to do anything, because outgoing particles are set in constructor
+  void generate_final_state() {}
+  double raw_weight_value() const { return 0.0; }
+  bool any_particles_thermalized() const {
+    return (incoming_particles_.size() > 0);
+  }
+  void format_debug_output(std::ostream& out) const {
+    out << " Thermalization action of " << incoming_particles_.size() << " to "
+        << outgoing_particles_.size() << " particles.";
+  }
 };
 
 }  // namespace Smash
