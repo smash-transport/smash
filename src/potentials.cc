@@ -79,8 +79,12 @@ Potentials::~Potentials() {}
 
 double Potentials::skyrme_pot(const double baryon_density) const {
   const double tmp = baryon_density / nuclear_density;
+  /* U = U(|rho|) * sgn , because the sign of the potential changes
+     under a charge reversal transformation. */
+  const int sgn = tmp > 0 ? 1 : -1;
   // Return in GeV
-  return 1.0e-3 * (skyrme_a_ * tmp + skyrme_b_ * std::pow(tmp, skyrme_tau_));
+  return 1.0e-3 * sgn * (skyrme_a_ * std::abs(tmp)
+         + skyrme_b_ * std::pow(std::abs(tmp), skyrme_tau_));
 }
 
 double Potentials::symmetry_pot(const double baryon_isospin_density) const {
@@ -127,7 +131,9 @@ ThreeVector Potentials::potential_gradient(const ThreeVector &r,
   /* For Lambda and Sigma, since they carry 2 light (u or d) quarks, they
   are affected by 2/3 of the Skyrme force. Xi carries 1 light quark, it
   is affected by 1/3 of the Skyrme force. Omega carries no light quark, so
-  it's not affected by the Skyrme force.*/
+  it's not affected by the Skyrme force. Anti-baryons are affected by the
+  force as large as the force acting on baryons but with an opposite
+  direction.*/
   double skyrme_scale = 1.0;
   if (acts_on.pdgcode().is_hyperon()) {
      if (acts_on.pdgcode().is_xi()) {
@@ -138,8 +144,10 @@ ThreeVector Potentials::potential_gradient(const ThreeVector &r,
         skyrme_scale = 2. / 3.;
      }
   }
+  skyrme_scale = skyrme_scale * acts_on.pdgcode().baryon_number();
   /* Hyperons are not affected by the symmetry force.*/
-  const auto symmetry_scale = acts_on.pdgcode().is_hyperon() ? 0 : 1;
+  const auto symmetry_scale = acts_on.pdgcode().is_hyperon() ? 0
+             : acts_on.pdgcode().baryon_number();
 
   const bool compute_gradient = true;
   if (use_skyrme_) {

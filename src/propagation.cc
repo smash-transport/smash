@@ -135,7 +135,9 @@ void update_momenta(Particles *particles, double dt, const Potentials &pot,
       /* For Lambda and Sigma, since they carry 2 light (u or d) quarks, they
        are affected by 2/3 of the Skyrme force. Xi carries 1 light quark, it
        is affected by 1/3 of the Skyrme force. Omega carries no light quark,
-       so it's not affected by the Skyrme force.*/
+       so it's not affected by the Skyrme force. Anti-baryons are affected by
+       the force as large as the force acting on the baryons but with an
+       opposite direction*/
        double skyrme_scale = 1.0;
        if (data.pdgcode().is_hyperon()) {
           if (data.pdgcode().is_xi()) {
@@ -146,8 +148,10 @@ void update_momenta(Particles *particles, double dt, const Potentials &pot,
              skyrme_scale = 2. / 3.;
          }
        }
+       skyrme_scale = skyrme_scale * data.pdgcode().baryon_number();
        /* Hyperons are not affected by the symmetry force.*/
-       const auto symmetry_scale = data.pdgcode().is_hyperon() ? 0 : 1;
+       const auto symmetry_scale = data.pdgcode().is_hyperon() ? 0
+                  : data.pdgcode().baryon_number();
        const ThreeVector r = data.position().threevec();
        /* Lattices can be used for calculation if 1-2 are fulfilled:
         * 1) Required lattices are not nullptr - possibly_use_lattice
