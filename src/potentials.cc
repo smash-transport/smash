@@ -119,6 +119,30 @@ double Potentials::potential(const ThreeVector &r, const ParticleList &plist,
   return total_potential;
 }
 
+std::pair<double, int> Potentials::force_scale(const ParticleType &data) const {
+  /* For Lambda and Sigma, since they carry 2 light (u or d) quarks, they
+  are affected by 2/3 of the Skyrme force. Xi carries 1 light quark, it
+  is affected by 1/3 of the Skyrme force. Omega carries no light quark, so
+  it's not affected by the Skyrme force. Anti-baryons are affected by the
+  force as large as the force acting on baryons but with an opposite
+  direction.*/
+  double skyrme_scale = 1.0;
+  if (data.pdgcode().is_hyperon()) {
+     if (data.pdgcode().is_xi1321()) {
+        skyrme_scale = 1. / 3.;
+     } else if (data.pdgcode().is_Omega1672()) {
+        skyrme_scale = 0.;
+     } else {
+        skyrme_scale = 2. / 3.;
+     }
+  }
+  skyrme_scale = skyrme_scale * data.pdgcode().baryon_number();
+  /* Hyperons are not affected by the symmetry force.*/
+  const int symmetry_scale = data.pdgcode().is_hyperon() ? 0
+             : data.pdgcode().baryon_number();
+  return std::make_pair(skyrme_scale, symmetry_scale);
+}
+
 ThreeVector Potentials::potential_gradient(const ThreeVector &r,
                                            const ParticleList &plist,
                                            const ParticleType &acts_on) const {
@@ -127,28 +151,7 @@ ThreeVector Potentials::potential_gradient(const ThreeVector &r,
   if (!acts_on.is_baryon()) {
     return total_gradient;
   }
-
-  /* For Lambda and Sigma, since they carry 2 light (u or d) quarks, they
-  are affected by 2/3 of the Skyrme force. Xi carries 1 light quark, it
-  is affected by 1/3 of the Skyrme force. Omega carries no light quark, so
-  it's not affected by the Skyrme force. Anti-baryons are affected by the
-  force as large as the force acting on baryons but with an opposite
-  direction.*/
-  double skyrme_scale = 1.0;
-  if (acts_on.pdgcode().is_hyperon()) {
-     if (acts_on.pdgcode().is_xi()) {
-        skyrme_scale = 1. / 3.;
-     } else if (acts_on.pdgcode().is_Omega()) {
-        skyrme_scale = 0.;
-     } else {
-        skyrme_scale = 2. / 3.;
-     }
-  }
-  skyrme_scale = skyrme_scale * acts_on.pdgcode().baryon_number();
-  /* Hyperons are not affected by the symmetry force.*/
-  const auto symmetry_scale = acts_on.pdgcode().is_hyperon() ? 0
-             : acts_on.pdgcode().baryon_number();
-
+  const auto scale = force_scale(acts_on);
   const bool compute_gradient = true;
   if (use_skyrme_) {
     const auto density_and_gradient =
@@ -158,7 +161,7 @@ ThreeVector Potentials::potential_gradient(const ThreeVector &r,
 
     // Derivative of potential with respect to density
     double tmp = skyrme_tau_ * std::pow(rho / nuclear_density, skyrme_tau_ - 1);
-    total_gradient += skyrme_scale *drho_dr * (skyrme_a_ + skyrme_b_ * tmp)
+    total_gradient += scale.first *drho_dr * (skyrme_a_ + skyrme_b_ * tmp)
                       / nuclear_density;
   }
 
@@ -170,7 +173,7 @@ ThreeVector Potentials::potential_gradient(const ThreeVector &r,
             .second;
     const ThreeVector dUsym_dr =
         2. * symmetry_s_ * p_iso / nuclear_density * acts_on.isospin3_rel();
-    total_gradient += symmetry_scale * dUsym_dr;
+    total_gradient += scale.second * dUsym_dr;
   }
   // Return in GeV
   return total_gradient * 1.0e-3;

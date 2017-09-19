@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_POTENTIALS_H_
 #define SRC_INCLUDE_POTENTIALS_H_
 
+#include <utility>
 #include <vector>
 
 #include "configuration.h"
@@ -58,6 +59,16 @@ class Potentials {
   VIRTUAL_FOR_TESTS
   double potential(const ThreeVector &r, const ParticleList &plist,
                    const ParticleType &acts_on) const;
+
+  /** 
+   * Evaluates the scaling factor of the forces acting on the particles. The
+   * forces are equal to the product of the scaling factor and the gradient of
+   * the potential. The scaling factors are usually less than one for hyperons,
+   * and negative for anti-bayrons. The first component is the scaling factor
+   * of the Skyrme force, and the second component is that of the symmetry
+   * force.
+   **/
+  std::pair<double, int> force_scale(const ParticleType &data) const;
 
   /** Evaluates potential gradient at point r. Potential is always taken in
    * the local Eckart rest frame, but point r is in the computational frame.

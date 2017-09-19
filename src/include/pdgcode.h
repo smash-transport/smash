@@ -310,13 +310,13 @@ class PdgCode {
         return false;
     }
   }
-  /// Is this a Xi?
-  inline bool is_xi() const {
+  /// Is this a Xi(1321)?
+  inline bool is_xi1321() const {
     const auto abs_code = std::abs(code());
     return (abs_code == pdg::Xi_z) || (abs_code == pdg::Xi_m);
   }
-  /// Is this a Omega?
-  inline bool is_Omega() const {
+  /// Is this a Omega(1672)?
+  inline bool is_Omega1672() const {
     const auto abs_code = std::abs(code());
     return (abs_code == pdg::Omega_m);
   }

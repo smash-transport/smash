@@ -131,59 +131,41 @@ void update_momenta(Particles *particles, double dt, const Potentials &pot,
 
   for (ParticleData &data : *particles) {
     // Only baryons will be affected by the potentials
-    if (data.is_baryon()) {
-      /* For Lambda and Sigma, since they carry 2 light (u or d) quarks, they
-       are affected by 2/3 of the Skyrme force. Xi carries 1 light quark, it
-       is affected by 1/3 of the Skyrme force. Omega carries no light quark,
-       so it's not affected by the Skyrme force. Anti-baryons are affected by
-       the force as large as the force acting on the baryons but with an
-       opposite direction*/
-       double skyrme_scale = 1.0;
-       if (data.pdgcode().is_hyperon()) {
-          if (data.pdgcode().is_xi()) {
-             skyrme_scale = 1. / 3.;
-          } else if (data.pdgcode().is_Omega()) {
-             skyrme_scale = 0.;
-          } else {
-             skyrme_scale = 2. / 3.;
-         }
-       }
-       skyrme_scale = skyrme_scale * data.pdgcode().baryon_number();
-       /* Hyperons are not affected by the symmetry force.*/
-       const auto symmetry_scale = data.pdgcode().is_hyperon() ? 0
-                  : data.pdgcode().baryon_number();
-       const ThreeVector r = data.position().threevec();
-       /* Lattices can be used for calculation if 1-2 are fulfilled:
-        * 1) Required lattices are not nullptr - possibly_use_lattice
-        * 2) r is not out of required lattices
-        */
-       const bool use_lattice =
-           possibly_use_lattice &&
-           (pot.use_skyrme() ? UB_grad_lat->value_at(r, dUB_dr) : true) &&
-           (pot.use_symmetry() ? UI3_grad_lat->value_at(r, dUI3_dr) : true);
-       if (!pot.use_skyrme()) {
-         dUB_dr = ThreeVector(0.0, 0.0, 0.0);
-       }
-       if (!pot.use_symmetry()) {
-         dUI3_dr = ThreeVector(0.0, 0.0, 0.0);
-       }
-       // Compute potential gradient from lattice if possible
-       const ThreeVector dU_dr =
-           use_lattice ? (skyrme_scale * dUB_dr + symmetry_scale * dUI3_dr)
-                       : pot.potential_gradient(r, plist, data.type());
-       log.debug("Update momenta: dU/dr [GeV/fm] = ", dU_dr);
-       data.set_4momentum(data.effective_mass(),
-                          data.momentum().threevec() - dU_dr * dt);
+    if (!data.is_baryon()) {
+       continue;
+    }
+    const auto scale = pot.force_scale(data.type());
+    const ThreeVector r = data.position().threevec();
+    /* Lattices can be used for calculation if 1-2 are fulfilled:
+     * 1) Required lattices are not nullptr - possibly_use_lattice
+     * 2) r is not out of required lattices
+     */
+    const bool use_lattice =
+        possibly_use_lattice &&
+        (pot.use_skyrme() ? UB_grad_lat->value_at(r, dUB_dr) : true) &&
+        (pot.use_symmetry() ? UI3_grad_lat->value_at(r, dUI3_dr) : true);
+    if (!pot.use_skyrme()) {
+      dUB_dr = ThreeVector(0.0, 0.0, 0.0);
+    }
+    if (!pot.use_symmetry()) {
+      dUI3_dr = ThreeVector(0.0, 0.0, 0.0);
+    }
+    // Compute potential gradient from lattice if possible
+    const ThreeVector dU_dr =
+        use_lattice ? (scale.first * dUB_dr + scale.second * dUI3_dr)
+                    : pot.potential_gradient(r, plist, data.type());
+    log.debug("Update momenta: dU/dr [GeV/fm] = ", dU_dr);
+    data.set_4momentum(data.effective_mass(),
+                       data.momentum().threevec() - dU_dr * dt);
 
-       // calculate the time scale of the change in momentum
-       const double dU_dr_abs = dU_dr.abs();
-       if (dU_dr_abs < really_small) {
-         continue;
-       }
-       const double time_scale = data.momentum().x0() / dU_dr_abs;
-       if (time_scale < min_time_scale) {
-         min_time_scale = time_scale;
-       }
+    // calculate the time scale of the change in momentum
+    const double dU_dr_abs = dU_dr.abs();
+    if (dU_dr_abs < really_small) {
+      continue;
+    }
+    const double time_scale = data.momentum().x0() / dU_dr_abs;
+    if (time_scale < min_time_scale) {
+      min_time_scale = time_scale;
     }
   }
 
