@@ -263,10 +263,13 @@ void Experiment<Modus>::create_output(std::string format, std::string content,
     log.error("Root output requested, but Root support not compiled in");
 #endif
   } else if (format == "Binary") {
-    if (content == "Particles" || content == "Collisions" ||
+    if (content == "Collisions" ||
         content == "Dileptons" || content == "Photons") {
       outputs_.emplace_back(
           make_unique<BinaryOutputCollisions>(output_path, content, out_par));
+    } else if (content == "Particles") {
+      outputs_.emplace_back(
+          make_unique<BinaryOutputParticles>(output_path, content, out_par));
     }
   } else if (format == "Oscar1999" || format == "Oscar2013") {
     outputs_.emplace_back(
