@@ -80,7 +80,7 @@ static bool compare_particle(const ParticleData &p, FILE *file) {
           charge == p.type().charge());
 }
 
-/* Reads and compared particle in case of extended format */
+/* Reads and compares particle in case of extended format */
 static bool compare_particle_extended(const ParticleData &p, FILE *file) {
   VERIFY(compare_particle(p, file));
   int collisions_per_particle, id_process, process_type, p1pdg, p2pdg;
