@@ -94,10 +94,10 @@ double piplusp_elastic(double mandelstam_s) {
  * Source: GiBUU:parametrizationBarMes_HighEnergy.f90 */
 double piminusp_elastic(double mandelstam_s) {
   double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
-  const auto logp = std::log(p_lab);
   if (p_lab < 8.0 /*2.0*/) {
     return really_small;
   } else {
+    const auto logp = std::log(p_lab);
     return 1.76 + 11.2 * std::pow(p_lab, -0.64) + 0.043 * logp * logp;
   }
 }
