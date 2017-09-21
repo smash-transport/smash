@@ -23,7 +23,8 @@ RootOutput::RootOutput(const bf::path &path, std::string name,
       base_path_(std::move(path)),
       root_out_file_(
           new TFile((base_path_ / (name + ".root")).native().c_str(), "NEW")),
-      write_collisions_(name != "Particles"),
+      write_collisions_(name == "Collisions" || name == "Dileptons" ||
+                        name == "Photons"),
       write_particles_(name == "Particles"),
       particles_only_final_(out_par.part_only_final),
       autosave_frequency_(1000) {
