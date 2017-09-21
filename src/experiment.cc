@@ -128,6 +128,9 @@ namespace {
  * Distance in sigma at which gaussian is considered 0.
  *
  * \page input_output_options_ Output
+ *
+ * Description of options
+ * ---------------------
  * \key Output_Interval (double, required): \n
  * Defines the period of intermediate output of the status of the simulated
  * system in Standard Output and other output formats which support this
@@ -142,34 +145,78 @@ namespace {
  * \li "pion"             - pion density
  * \li "none"             - do not calculate density, print 0.0
  *
- * The output section has several subsections, relating to different output
- * files. To disable a certain output, comment the corresponding section out:
+ * Futher options are defined for every single output \b content
+ * (see \ref output_contents_ "output contents" for the list of
+ * possible contents) in the following way:
+ * \code
+ * Content:
+ *     Format: ["format1", "format2", ...]
+ *     Option1: Value  # Content-specific options
+ *     Option2: Value
+ *     ...
+ * \endcode
  *
- * \li \b Particles  List of particles at regular time intervals in the
- *                   computational frame or (optionally) only at the event end.
- * \li \b Collisions List of interactions: collisions, decays, box wall
- *                   crossings and forced thermalizations. Information about
- *                   incoming, outgoing particles and the interaction itself
- *                   is written out.
- * \li \b Dileptons  Special dilepton output, see \subpage input_dileptons
- * \li \b Photons    Special photon output, see \subpage input_photons
- * \li \b Thermodynamics This output allows to print out thermodynamic
- *                quantities such as density, energy-momentum tensor,
- *                Landau velocity, etc at one selected point versus time
- *                and on a spacial lattice versus time.
- *
- * Every output can be printed in several formats simulateneously.
+ * To disable a certain output content,  remove or comment out the
+ * corresponding section. Every output can be printed in several formats
+ * simulateneously. The following option chooses list of formats:
  *
  * \key Format (list of formats, optional, default = [])
  * List of formats for writing particular content.
+ * Possible formats for every content are listed and described in
+ * \ref output_contents_ "output contents". List of available formats is here:
+ * \ref list_of_output_formats "List of formats"
  *
- * The formats are described in detail here:
- * \li \subpage input_oscar_particlelist
- * \li \subpage input_oscar_collisions
- * \li \subpage input_vtk
- * \li \subpage input_binary_collisions
- * \li \subpage input_binary_particles
- * \li \subpage input_root
+ * ### Content-specific output options
+ * \anchor output_content_specific_options_
+ *
+ * - \b Particles
+ *
+ *   \key Extended (bool, optional, default = false): \n
+ *   true - print extended information for each particle \n
+ *   false - regular output for each particle
+ *
+ *   \key Only_Final (bool, optional, default = true): \n
+ *   true - print only final particle list \n
+ *   false - particle list at output interval including initial time
+ * - \b Collisions
+ *
+ *   \key Extended (bool, optional, default = false): \n
+ *   true - print extended information for each particle \n
+ *   false - regular output for each particle
+ *
+ *   \key Print_Start_End (bool, optional, default = false): \n
+ *   true - initial and final particle list is written out \n
+ *   false - initial and final particle list is not written out
+ * - \b Photons - see \ref input_photons
+ * - \b Thermodynamics - see \subpage input_vtk_lattice_ for lattice output
+ *   and \subpage ascii_thermodynamic_output_ for output at one point versus
+ *   time.
+ *
+ * \anchor configuring_output_
+ * Example configuring SMASH output
+ * --------------
+ * As an example, if one wants to have all of those simultaneosly:
+ * \li particles at the end of event written out in binary and Root formats
+ * \li dileptons written in Oscar2013 format
+ * \li density at point (0, 0, 0) written as a table against time every 1 fm/c
+ * then the output section of configuration will be the following.
+ *
+ * \code
+ * Output:
+ *     Output_Interval:  1.0
+ *     Density_Type:      "none"
+ *     Particles:
+ *         Format:          ["Binary", "Root"]
+ *         Only_Final:      True
+ *     Dileptons:
+ *         Format:          ["Oscar2013"]
+ *     Thermodynamics:
+ *         Format:          ["ASCII"]
+ *         Type:            "none"
+ *         Quantities:      ["rho_eckart"]
+ *         Position:        [0.0, 0.0, 0.0]
+ *         Smearing:        True
+ * \endcode
  */
 
 /** Gathers all general Experiment parameters
@@ -418,41 +465,87 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   auto output_conf = config["Output"];
   /*!\Userguide
-    * \page output_general_ Output formats
-    * Several different output formats are available in SMASH. They are
-    * explained below in more detail. Per default, the selected output files
+    * \page output_general_ Output
+    *
+    * Output directory
+    * ----------------
+    *
+    * Per default, the selected output files
     * will be saved in the directory ./data/\<run_id\>, where \<run_id\> is an
     * integer number starting from 0. At the beginning of a run SMASH checks,
     * if the ./data/0 directory exists. If it does not exist, it is created and
     * all output files are written there. If the directory already exists,
     * SMASH tries for ./data/1, ./data/2 and so on until it finds a free
-    * number. The user can change output directory by a command line option, if
+    * number.
+    *
+    * The user can change output directory by a command line option, if
     * desired:
     * \code smash -o <user_output_dir> \endcode
-    * SMASH supports several kinds of configurable output formats.
-    * They are called OSCAR1999, OSCAR2013, binary OSCAR2013, VTK and ROOT
-    * outputs. Every format can be switched on/off by commenting/uncommenting
-    * the corresponding section in the configuration file config.yaml. For more
-    * information on configuring the output see corresponding pages: \ref
-    * input_oscar_particlelist,
-    * \ref input_oscar_collisions, \ref input_binary_collisions,
-    * \ref input_binary_particles, \ref input_root, \ref input_vtk.
     *
-    * \key Details of output formats are explained here: \n
-    * \li General block structure of OSCAR formats: \n
-    *     \subpage oscar_general_
-    * \li A family of OSCAR ASCII outputs.\n
-    *     \subpage format_oscar_particlelist\n
-    *     \subpage format_oscar_collisions
-    * \li Binary outputs analoguous to OSCAR format\n
-    *     \subpage format_binary_\n
-    * \li Output in vtk format suitable for an easy
-    *     visualization using paraview software:\n \subpage format_vtk
-    * \li Formatted binary output that uses ROOT software
-    *     (http://root.cern.ch).\n Fast to read and write, requires less
-    *     disk space.\n \subpage format_root
-    * \li \subpage collisions_output_in_box_modus_
-    * \li \subpage output_vtk_lattice_
+    * Output content
+    * --------------
+    * \anchor output_contents_
+    * Output in SMASH is distinguished by _content_ and _format_, where content
+    * means the physical information contained in the output (e.g. list of
+    * particles, list of interactions, thermodynamics, etc) and format (e.g.
+    * Oscar, binary or ROOT). The same content can be written out in several
+    * formats _simultaneously_.
+    *
+    * For an example of choosing specific output contents see
+    * \ref configuring_output_ "Configuring SMASH output".
+    *
+    * The list of possible contents follows:
+    *
+    * - \b Particles  List of particles at regular time intervals in the
+    *                   computational frame or (optionally) only at the event end.
+    *   - Available formats: \ref format_oscar_particlelist,
+    *      \ref format_binary_, \ref format_root, \ref format_vtk
+    * - \b Collisions List of interactions: collisions, decays, box wall
+    *                 crossings and forced thermalizations. Information about
+    *                 incoming, outgoing particles and the interaction itself
+    *                 is written out.
+    *   - Available formats: \ref format_oscar_collisions, \ref format_binary_,
+    *                 \ref format_root
+    * - \b Dileptons  Special dilepton output, see \subpage input_dileptons.
+    *   - Available formats: \ref format_oscar_collisions,
+    *                   \ref format_binary_ and \ref format_root
+    * - \b Photons    Special photon output, see \subpage input_photons.
+    *   - Available formats: \ref format_oscar_collisions,
+    *                   \ref format_binary_ and \ref format_root.
+    * - \b Thermodynamics This output allows to print out thermodynamic
+    *          quantities such as density, energy-momentum tensor,
+    *          Landau velocity, etc at one selected point versus time
+    *          (simple ASCII format table \subpage ascii_thermodynamic_output_)
+    *          and on a spatial lattice  versus time (\ref output_vtk_lattice_).
+    * \anchor list_of_output_formats
+    * Output formats
+    * --------------
+    *
+    * For choosing output formats see
+    * \ref configuring_output_ "Configuring SMASH output".
+    * Every output content can be written out in several formats:
+    * - \b "Oscar1999", \b "Oscar2013" - human-readable text output\n
+    *   - For "Particles" content: \subpage format_oscar_particlelist
+    *   - For "Collisions" content: \subpage format_oscar_collisions
+    *   - General block structure of OSCAR formats: \subpage oscar_general_
+    * - \b "Binary" - binary, not human-readable output
+    *   - Faster to read and write than text outputs
+    *   - Saves coordinates and momenta with the full double precision
+    *   - General file structure is similar to \subpage oscar_general_
+    *   - Detailed description: \subpage format_binary_
+    * - \b "Root" - binary output in the format used by ROOT software
+    *     (http://root.cern.ch)
+    *   - Even faster to read and write, requires less disk space
+    *   - Format description: \subpage format_root
+    * - \b "Vtk" - text output suitable for an easy
+    *     visualization using paraview software
+    *   - This output can be opened by paraview to see the visulalization.
+    *   - For "Particles" content \subpage format_vtk
+    *   - For "Thermodynamics" content \subpage output_vtk_lattice_
+    *
+    * \note Output of coordinates for the "Collisions" content in
+    *       the periodic box has a feature:
+    *       \subpage collisions_output_in_box_modus_
     */
 
   /*!\Userguide
@@ -475,15 +568,6 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *
    * \note If you want dilepton decays, you also have to modify decaymodes.txt.
    * Dilepton decays are commented out by default.
-   *
-   * \key Format (string, required):\n
-   * "Oscar" - The dilepton output is written to the file \c
-   *DileptonOutput.oscar
-   * in \ref format_oscar_collisions (OSCAR2013 format) .\n
-   * "Binary" - The dilepton output is written to the file \c DileptonOutput.bin
-   * in \ref format_binary_ .\n
-   * "Root" - The dilepton output is written to the file \c DileptonOutput.root
-   * in \ref format_root .\n
    **/
 
   /*!\Userguide
@@ -544,15 +628,16 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *      Use periodic continuation or not. With periodic continuation
    *      x + i * lx is equivalent to x, same for y, z.
    *
-   * \subpage input_vtk_lattice_
+   * For format of lattice output see \ref output_vtk_lattice_. To configure
+   * output of the quantities on the lattice to vtk files see
+   * \ref input_output_options_.
    *
-   * For format of lattice output see \ref output_vtk_lattice_.
-   *
-   * \page input_vtk_lattice_ Printout
+   * \page input_vtk_lattice_ lattice vtk printout
    *
    * User can print thermodynamical quantities on the lattice to vtk output.
-   * For this one has to use the "Lattice: Printout" section of configuration.
-   * Currently printing of custom density to vtk file is available.
+   * The lattice for the output is regulated by options of lattice
+   * \subpage input_lattice_. The type of thermodynamic quantities is
+   * chosen by the following options of the "Thermodynamic" output.
    *
    * \key Type (string, optional, default = "none"): \n
    * Chooses hadron/baryon/pion/baryonic isospin thermodynamic quantities
@@ -568,7 +653,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *      The velocity is obtained from the energy-momentum tensor
    *      \f$T^{\mu\nu}(t,x,y,z) \f$ by solving the generalized eigenvalue
    *      equation \f$(T^{\mu\nu} - \lambda g^{\mu\nu})u_{\mu}=0 \f$.
-   */
+  */
 
   // Create lattices
   if (config.has_value({"Lattice"})) {

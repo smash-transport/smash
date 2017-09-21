@@ -26,24 +26,7 @@ BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
     : BinaryOutputBase(
           std::fopen(((path / "particles_binary.bin")).native().c_str(), "wb"),
           name, out_par.part_extended),
-      only_final_(out_par.part_only_final) {
-  /*!\Userguide
-   * \page input_binary_particles Binary_particles
-   * Writes the particle list at fixed times in binary format.
-   *
-   * \key Enable (bool, optional, default = false):\n
-   * true - binary particle list output enabled\n
-   * false - no binary particle list output
-   *
-   * \key only_final (bool, optional, default = true): \n
-   * true - only final particle list at the end of each event \n
-   * false - particle list output at every output interval including initial
-   * time
-   *
-   * Detailed specification of the binary format can be found here:
-   * \ref format_binary_
-   */
-}
+      only_final_(out_par.part_only_final) {}
 
 /*!\Userguide
  * \page format_binary_ Binary format
@@ -119,7 +102,7 @@ BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
  * Written to \c particles_binary.bin file. Contains the current particle
  * list at specific moments of time. Every moment of time
  * is written as a 'p' block. For options of this output see
- * \ref input_general_, \ref input_binary_particles.
+ * \ref output_content_specific_options_ "content-specific output options".
  **/
 
 void BinaryOutputParticles::at_eventstart(const Particles &particles,

@@ -28,30 +28,7 @@ BinaryOutputCollisions::BinaryOutputCollisions(const bf::path &path,
               (path /
                ((name == "Collisions" ? "collisions_binary" : name) + ".bin"))
                   .native().c_str(), "wb"), name, out_par.coll_extended),
-      print_start_end_(out_par.coll_printstartend) {
-  /*!\Userguide
-   * \page input_binary_collisions Binary_collisions
-   * Saves information about every collision, decay and box
-   * wall crossing in a binary format. Optionally initial and
-   * final particle configurations can be written out.
-   *
-   * \key Enable (bool, optional, default = false):\n
-   * true - binary collision output enabled\n
-   * false - no binary collision output
-   *
-   * \key Print_Start_End (bool, optional, default = false): \n
-   * false - only information about collisions, decays and
-   * box wall crossings during the whole evolution \n
-   * true - initial and final configuration are written in addition
-   *
-   * \key Extended (bool, optional, default = false): \n
-   * true - additional information is written out for each particle
-   * false - default information for each particle
-   *
-   * Detailed specification of the binary format can be found here:
-   * \ref format_binary_
-   */
-}
+      print_start_end_(out_par.coll_printstartend) {}
 
 /*!\Userguide
  * \page format_binary_ Binary format
@@ -63,7 +40,7 @@ BinaryOutputCollisions::BinaryOutputCollisions(const bf::path &path,
  * and final configuration. Interactions are written in comp. frame
  * time-ordered fashion, in 'i' blocks. Initial and final states
  * are written as 'p' blocks. For options of this output see
- * \ref input_general_, \ref input_binary_collisions.
+ * \ref output_content_specific_options_ "content-specific output options".
  *
  * See also \ref collisions_output_in_box_modus_.
  **/

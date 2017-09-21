@@ -28,35 +28,6 @@ RootOutput::RootOutput(const bf::path &path, std::string name,
       particles_only_final_(out_par.part_only_final),
       autosave_frequency_(1000) {
   /*!\Userguide
-   * \page input_root ROOT
-   * Enables output in a ROOT format. The latter is a structured binary format
-   * invented at CERN. For more details see root.cern.ch. The resulting
-   * output file can optionally contain two TTree's: the one containing
-   * information about the particle list at fixed moments of time and
-   * the other one containing information about the collision history.
-   *
-   * \key Write_Collisions (bool, optional, default = false): \n
-   * true - information about collisions, decays and box wall
-   * crossings will be written out \n
-   * false - collision history information is suppressed
-   *
-   * \key Write_Particles (bool, optional, default = true): \n
-   * true - particle list at output interval is written out \n
-   * false - particle list is not written out
-   *
-   * \key Autosave_Frequency (int, optional, default = 1000): \n
-   * Root file cannot be read if it was not properly closed and finalized.
-   * It can happen that SMASH simulation crashed and root file was not closed.
-   * To save results of simulation in such case, "AutoSave" is
-   * applied every N events. The autosave_frequency option sets
-   * this N (default N = 1000). Note that "AutoSave" operation is very
-   * time-consuming, so the Autosave_Frequency is
-   * always a compromise between safety and speed.
-   *
-   * For details on ROOT output format see \ref format_root
-   */
-
-  /*!\Userguide
    * \page format_root ROOT format
    * SMASH ROOT output has the same functionality as OSCAR output, but ROOT
    * files are faster to read and write and they need less disk space for the
@@ -72,20 +43,20 @@ RootOutput::RootOutput(const bf::path &path, std::string name,
    * Producing ROOT output requires ROOT installed (see http://root.cern.ch).
    *
    * SMASH produces one ROOT file per run: \c smash_run.root. This file contains
-   * a TTree called \c particles and a TTree called \c collisions. Both can be
-   * switched on and off by an option (see \ref input_root). The \c particles
+   * a TTree called \c particles and a TTree called \c collisions, depending
+   * on the required content (see \ref output_general_). The \c particles
    * tree contains the same information as OSCAR particles output and the
    * \c collisions tree contains the same information as OSCAR collision output.
    *
    * In case that the ROOT format is used for dilepton output
-   * (see \ref input_dileptons), the file is called \c DileptonOutput.root and
+   * (see \ref input_dileptons), the file is called \c Dileptons.root and
    * only contains a \c collisions tree with all the dilepton decays.
    *
    * Every physical quantity is in a separate TBranch.
    * One entry in the \c particles TTree is:
    * \code
    * ev tcounter npart pdgcode[npart] t[npart] x[npart] y[npart] z[npart]
-   *p0[npart] px[npart] py[npart] pz[npart]
+   * p0[npart] px[npart] py[npart] pz[npart]
    * \endcode
    * One tree entry is analogous to an OSCAR output block, but the maximal
    * number of particles in one entry is limited to 10000. This is done to limit

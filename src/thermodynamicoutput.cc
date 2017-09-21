@@ -26,6 +26,23 @@
 
 namespace Smash {
 
+/*!\Userguide
+ * \page ascii_thermodynamic_output_ ASCII thermodynamic output
+ *
+ * Prints out thermodynamic quantities at a fixed coordinate against time.
+ * The list of available quantities and the way they are configured are
+ * the same as for \ref input_vtk_lattice_. Addtional options are
+ *
+ * \key Position (list of 3 doubles, optional, default = [0.0, 0.0, 0.0])
+ * Point, at which TD quantities are computed.
+ *
+ * \key Smearing (bool, optional, default = true): \n
+ * Using Gaussian smearing for computing thermodynamic quantities or not.
+ * Normally, if one computes TD quantities at a fixed point, smearing should
+ * be on. However, for calculation of viscosity it was useful to
+ * compute total energy-momentum tensor of all particles in the box with
+ * weights equal to 1, which corresponds to "Smearing: false".
+ */
 ThermodynamicOutput::ThermodynamicOutput(const bf::path &path, std::string name,
                                          const OutputParameters &out_par)
     : OutputInterface(name),

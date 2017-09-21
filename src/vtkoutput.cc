@@ -21,18 +21,6 @@ namespace Smash {
 
 VtkOutput::VtkOutput(const bf::path &path, std::string name)
     : OutputInterface(name), base_path_(std::move(path)) {}
-/*!\Userguide
- * \page input_vtk Vtk
- *
- * Writes the current particle list at a specific time
- * to separate .vtk files. These fixed moments of time are event start,
- * event end and every next time interval \f$\Delta t\f$, where
- * \f$\Delta t\f$ is controlled by an option.
- * Produced output can be opened by paraview
- * and used for an easy visualization of the simulation.
- *
- * For details on VTK output format see \ref format_vtk.
- */
 
 VtkOutput::~VtkOutput() {}
 
@@ -232,6 +220,8 @@ void VtkOutput::thermodynamics_output(
  * \<quantity\>_\<event_number\>_tstep\<number_of_output_moment\>.vtk. Files can
  * be opened
  * directly with ParaView (http://paraview.org).
+ *
+ * For configuring the output see \subpage input_vtk_lattice_.
  */
 
 void VtkOutput::thermodynamics_output(

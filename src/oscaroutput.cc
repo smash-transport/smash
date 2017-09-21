@@ -28,54 +28,6 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
     : OutputInterface(name),
       file_{std::fopen((path / (name + ".oscar")).native().c_str(), "w")} {
   /*!\Userguide
-   * \page input_oscar_particlelist Oscar_Particlelist
-   * Enables OSCAR particles output.
-   * OSCAR particles output provides the particle list at the output intervals.
-   * The text format
-   * is either OSCAR1999 or OSCAR2013, this is controlled by an option.
-   * Fixed moments of output can be: event start, event end, every next
-   * output interval \f$\Delta t \f$.
-   * Writing (or not writing) output at these moments is controlled by options.
-   * Output time interval \f$\Delta t \f$ is also regulated by an option.
-   *
-   * \key 2013_Format (bool, optional, default = false): \n
-   * true - output will be in OSCAR2013 format\n
-   * false - output will be in OSCAR1999 format
-   *
-   * \key 2013_Extended (bool, optional, default = false): \n
-   * true - print extended information for each particle \n
-   * false - regular output for each particle
-   *
-   * \key Only_Final (bool, optional, default = true): \n
-   * true - print only final particle list \n
-   * false - particle list at output interval including initial time
-   *
-   *  Detailed specification of OSCAR particle list format can be found here:
-   * \ref format_oscar_particlelist
-   *
-   * \page input_oscar_collisions Oscar_Collisions
-   * Enables OSCAR collisions output. The latter saves information about
-   * every collision, decay and box wall crossing in OSCAR1999 or OSCAR2013
-   * format.
-   * Optionally initial and final particle configurations can be written out.
-   *
-   * \key 2013_Format (bool, optional, default = false): \n
-   * true - output will be in OSCAR2013 format\n
-   * false - output will be in OSCAR1999 format
-   *
-   * \key 2013_Extended (bool, optional, default = false): \n
-   * true - print extended information for each particle \n
-   * false - regular output for each particle
-   *
-   * \key Print_Start_End (bool, optional, default = false): \n
-   * true - initial and final particle list is written out \n
-   * false - initial and final particle list is not written out
-   *
-   * Detailed specification of OSCAR collisions format can be found here:
-   * \ref format_oscar_collisions
-   */
-
-  /*!\Userguide
    * \page oscar_general_ OSCAR block structure
    * OSCAR outputs are a family of ASCII and binary formats that follow
    * OSCAR format conventions. \n
@@ -118,7 +70,8 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
    * immediately after initialization, at event end (which is reached when
    * time is larger or equal than \c End_Time in configuration file) and
    * periodically during evolution, period is defined by \c Output_Interval
-   * option in configuration file, see \ref input_general_.
+   * option in configuration file, see output_content_specific_options_
+   * "content-specific output options".
    * Collisions output contains all collisions / decays / box wall crossings
    * and optionally initial and final configuration.
    */
@@ -151,7 +104,7 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
     std::fprintf(file_.get(), "# Block format:\n");
     std::fprintf(file_.get(), "# nin nout event_number\n");
     std::fprintf(file_.get(), "# id pdg 0 px py pz p0 mass x y z t\n");
-    std::fprintf(file_.get(), "# End of event: 0 0 event_number\n");
+    std::fprintf(file_.get(), "# End of event: 0 0 event_number impact_parameter\n");
     std::fprintf(file_.get(), "#\n");
   }
 }
@@ -275,7 +228,8 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * https://karman.physics.purdue.edu/OSCAR and
  * http://phy.duke.edu/~jeb65/oscar2013. SMASH OSCAR particles output
  * produces \c particle_lists.oscar file. Format is flexible, options that
- * regulate output can be found at \ref input_oscar_particlelist
+ * regulate output can be found at
+ * \ref output_content_specific_options_ "content-specific output options".
  * and at \ref input_general_. **Particle output always gives
  * the current particle list at a specific time.**
  * Oscar1999
@@ -290,7 +244,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * # Block format:
  * # nin nout event_number
  * # id pdg 0 px py pz p0 mass x y z t
- * # End of event: 0 0 event_number
+ * # End of event: 0 0 event_number impact_parameter
  * #
  * \endcode
  *
@@ -318,7 +272,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *
  * **Event end line**
  * \code
- * 0 0 event_number
+ * 0 0 event_number impact_parameter
  * \endcode
  *
  * Oscar2013
@@ -372,7 +326,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *
  * **Event end line**
  * \code
- * # event ev_num end 0
+ * # event ev_num end 0 impact impact_parameter
  * \endcode
  *
  * \page format_oscar_collisions Oscar collisions format
@@ -382,7 +336,8 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * https://karman.physics.purdue.edu/OSCAR and
  * http://phy.duke.edu/~jeb65/oscar2013. SMASH OSCAR collisions output
  * produces \c full_event_history.oscar file. Format is flexible, options
- * that regulate output can be found at \ref input_oscar_collisions
+ * that regulate output can be found at
+ * \ref output_content_specific_options_ "content-specific output options".
  * and at \ref input_general_. **Collision output always gives
  * a list of collisions/decays/box wall crossings plus optionally
  * initial and final configuration.**
@@ -453,7 +408,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *
  * **Event end line**
  * \code
- * # event ev_num end 0
+ * # event ev_num end 0 impact impact_parameter
  * \endcode
  **/
 template <OscarOutputFormat Format, int Contents>

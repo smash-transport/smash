@@ -132,7 +132,13 @@ class RootOutput : public OutputInterface {
   // Print only final particles in the event, no intermediate output
   bool particles_only_final_;
 
-  // Option, defines how often root-file is "saved"
+  /** Root file cannot be read if it was not properly closed and finalized.
+   * It can happen that SMASH simulation crashed and root file was not closed.
+   * To save results of simulation in such case, "AutoSave" is
+   * applied every N events. The autosave_frequency_ sets
+   * this N (default N = 1000). Note that "AutoSave" operation is very
+   * time-consuming, so the Autosave_Frequency is
+   * always a compromise between safety and speed.*/
   int autosave_frequency_;
 
  /* Basic initialization routine, creating the TTree objects

@@ -118,7 +118,7 @@ TEST(fullhistory_format) {
         "# Block format:\n"
         "# nin nout event_number\n"
         "# id pdg 0 px py pz p0 mass x y z t\n"
-        "# End of event: 0 0 event_number\n"
+        "# End of event: 0 0 event_number impact_parameter\n"
         "#\n";
     do {
       std::getline(outputfile, line);
@@ -240,7 +240,7 @@ TEST(particlelist_format) {
         "# Block format:\n"
         "# nin nout event_number\n"
         "# id pdg 0 px py pz p0 mass x y z t\n"
-        "# End of event: 0 0 event_number\n"
+        "# End of event: 0 0 event_number impact_parameter\n"
         "#\n";
     do {
       std::getline(outputfile, line);
