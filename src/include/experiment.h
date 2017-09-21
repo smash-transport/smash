@@ -302,7 +302,7 @@ class Experiment : public ExperimentBase {
   /// Lattices of energy-momentum tensors for printout
   std::unique_ptr<RectangularLattice<EnergyMomentumTensor>> Tmn_;
   bool printout_tmn_ = false, printout_tmn_landau_ = false,
-       printout_v_landau_ = false;
+       printout_v_landau_ = false, printout_lattice_td_ = false;
 
   /// Instance of class used for forced thermalization
   std::unique_ptr<GrandCanThermalizer> thermalizer_;

@@ -326,7 +326,7 @@ void Experiment<Modus>::create_output(std::string format, std::string content,
     outputs_.emplace_back(
         make_unique<ThermodynamicOutput>(output_path, content, out_par));
   } else if (content == "Thermodynamics" && format == "Vtk") {
-    // Todo(oliiny): treat this special case
+    printout_lattice_td_ = true;
   } else {
     log.error() << "Unknown combination of format (" << format
                 << ") and content (" << content << "). Fix the config.";
@@ -667,15 +667,12 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     const std::array<double, 3> origin = config.take({"Lattice", "Origin"});
     const bool periodic = config.take({"Lattice", "Periodic"});
 
-    dens_type_lattice_printout_ =
-        config.take({"Output", "Thermodynamics", "Type"}, DensityType::None);
-    const std::set<ThermodynamicQuantity> td_to_print =
-        config.take({"Output", "Thermodynamics", "Quantities"});
-    printout_tmn_ = (td_to_print.count(ThermodynamicQuantity::Tmn) > 0);
-    printout_tmn_landau_ =
-        (td_to_print.count(ThermodynamicQuantity::TmnLandau) > 0);
-    printout_v_landau_ =
-        (td_to_print.count(ThermodynamicQuantity::LandauVelocity) > 0);
+    if (printout_lattice_td_) {
+      dens_type_lattice_printout_ = output_parameters.td_dens_type;
+      printout_tmn_ = output_parameters.td_tmn;
+      printout_tmn_landau_ = output_parameters.td_tmn_landau;
+      printout_v_landau_ = output_parameters.td_v_landau;
+    }
     if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
       Tmn_ = make_unique<RectangularLattice<EnergyMomentumTensor>>(
           l, n, origin, periodic, LatticeUpdate::AtOutput);
@@ -716,6 +713,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       jmu_custom_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
                                                     LatticeUpdate::AtOutput);
     }
+  } else if (printout_lattice_td_) {
+    log.error("If you want Thermodynamic Vtk output"
+              ", configure a lattice for it.");
   }
 
   // Create forced thermalizer
