@@ -121,10 +121,10 @@ class StringProcess {
   void set_tension_string(double kappaStringIn) { kappaString = kappaStringIn; }
   /**
    * initialization
-   * feed intial particles, time of collision and gamma factor of the center of momentum.
+   * feed intial particles, time of collision and gamma factor of the center of mass.
    * \param incomingList is the list of initial state particles.
    * \param tcollIn is time of collision.
-   * \param gamma factor of the center of momentum.
+   * \param gamma factor of the center of mass.
    * \return if initialization is successful.
    */
   bool init(const ParticleList &incomingList, double tcollIn, double gammaFacIn);

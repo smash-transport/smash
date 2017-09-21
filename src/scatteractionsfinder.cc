@@ -337,6 +337,11 @@ void ScatterActionsFinder::dump_reactions() const {
               std::string r;
               if (channel->get_type() == ProcessType::String) {
                 r = A_type->name() + B_type->name() + std::string(" → strings");
+              } else if ((channel->get_type() == ProcessType::StringSDiffAX)
+                  || (channel->get_type() == ProcessType::StringSDiffXB)
+                  || (channel->get_type() == ProcessType::StringDDiffXX)
+                  || (channel->get_type() == ProcessType::StringNDiff)) {
+                r = A_type->name() + B_type->name() + std::string(" → strings");
               } else {
                 std::string r_type =
                     (channel->get_type() == ProcessType::Elastic)

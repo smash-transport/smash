@@ -63,6 +63,18 @@ std::ostream& operator<<(std::ostream& os, ProcessType process_type) {
     case ProcessType::String:
       os << "String";
       break;
+    case ProcessType::StringSDiffAX:
+      os << "String";
+      break;
+    case ProcessType::StringSDiffXB:
+      os << "String";
+      break;
+    case ProcessType::StringDDiffXX:
+      os << "String";
+      break;
+    case ProcessType::StringNDiff:
+      os << "String";
+      break;
     case ProcessType::Decay:
       os << "Decay";
       break;
