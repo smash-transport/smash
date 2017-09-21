@@ -732,9 +732,11 @@ bool StringProcess::init_com(PdgCode &idAIn, PdgCode &idBIn, double massAIn, dou
   return ret;
 }
 
-/* single diffractive
+/**
+ * single diffractive
  * channel = 1 : A + B -> A + X
- * channel = 2 : A + B -> X + B */
+ * channel = 2 : A + B -> X + B
+ */
 bool StringProcess::next_SDiff(int channel) {
   bool ret;
 
@@ -1144,7 +1146,7 @@ bool StringProcess::next_SDiff_XB() {
 }
 */
 
-/* double-diffractive : A + B -> X + X */
+/** double-diffractive : A + B -> X + X */
 bool StringProcess::next_DDiff() {
   bool ret;
 
@@ -1275,7 +1277,7 @@ bool StringProcess::next_DDiff() {
   return ret;
 }
 
-/* non-diffractive */
+/** non-diffractive */
 bool StringProcess::next_NDiff() {
   bool ret;
 
@@ -1466,7 +1468,7 @@ bool StringProcess::next_NDiff() {
   return ret;
 }
 
-/* baryon-antibaryon annihilation */
+/** baryon-antibaryon annihilation */
 bool StringProcess::next_BBbarAnn(){
 	bool ret;
 
