@@ -131,7 +131,7 @@ namespace {
  *
  * Description of options
  * ---------------------
- * \key Output_Interval (double, required): \n
+ * \key Output_Interval (double, optional, default = End_Time): \n
  * Defines the period of intermediate output of the status of the simulated
  * system in Standard Output and other output formats which support this
  * functionality.
@@ -160,7 +160,7 @@ namespace {
  * corresponding section. Every output can be printed in several formats
  * simulateneously. The following option chooses list of formats:
  *
- * \key Format (list of formats, optional, default = [])
+ * \key Format (list of formats, optional, default = []):\n
  * List of formats for writing particular content.
  * Possible formats for every content are listed and described in
  * \ref output_contents_ "output contents". List of available formats is here:
@@ -237,7 +237,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   // If this Delta_Time option is absent (this can be for timestepless mode)
   // just assign 1.0 fm/c, reasonable value will be set at event initialization
   const double dt = config.take({"General", "Delta_Time"}, 1.);
-  const double output_dt = config.take({"Output", "Output_Interval"});
+  const double t_end = config.read({"General", "End_Time"});
+  const double output_dt = config.take({"Output", "Output_Interval"}, t_end);
   const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
   const bool two_to_two = config.take({"Collision_Term", "Two_to_Two"}, true);
   const bool strings_switch = config.take({"Collision_Term", "Strings"}, false);
@@ -542,6 +543,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     *   - This output can be opened by paraview to see the visulalization.
     *   - For "Particles" content \subpage format_vtk
     *   - For "Thermodynamics" content \subpage output_vtk_lattice_
+    * - \b "ASCII" - a human-readable text-format table of values
+    *   - Used only for "Thermodynamics", see
+    *     \subpage ascii_thermodynamic_output_
     *
     * \note Output of coordinates for the "Collisions" content in
     *       the periodic box has a feature:
