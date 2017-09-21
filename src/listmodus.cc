@@ -55,13 +55,13 @@ namespace Smash {
  *
  * Example input in particle_lists_in/event{id}
  * \verbatim
-CAR2013 particle_lists t x y z mass p0 px py pz pdg ID
-its: fm fm fm fm GeV GeV GeV GeV GeV none none
-6.42036 1.66473 9.38499 0.138 0.232871 0.116953 -0.115553 0.0903033 111 0
+OSCAR2013 particle_lists t x y z mass p0 px py pz pdg ID
+units: fm fm fm fm GeV GeV GeV GeV GeV none none
+0.1 6.42036 1.66473 9.38499 0.138 0.232871 0.116953 -0.115553 0.0903033 111 0
   \endverbatim
  * It means that one pi^{0} at spatial coordinates (t,x,y,z)=(0.1, 6.42036,
 1.66473, 9.38499) fm
- * and 4-momenta (p0, px. py, pz)=(0.232871, 0.116953, -0.115553, 0.0903033 )
+ * and 4-momenta (p0, px, py, pz)=(0.232871, 0.116953, -0.115553, 0.0903033 )
 GeV,
  * with mass=0.138, pdg=111 and id=0 will be initialized.
  */

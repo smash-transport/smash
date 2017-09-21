@@ -20,14 +20,23 @@ namespace Smash {
 
 /**
  * \ingroup modus
- * ListModus: Provides a modus for hydro afterburner calculations
+ * ListModus: Provides a modus for running SMASH on any external particle list, 
+ * for example afterburner calculations for hybrid codes
 *
 *Particle-list is given with data format in OSCAR2013, it's the same as the
 output in build/data/{eventid}/particles.oscar
 *The detailed information is as follows:
-*#!OSCAR2013 particle_lists SMASH-0.50-70-gc203fad t x y z mass p0 px py pz pdg
+*#!OSCAR2013 particle_lists SMASH-githash t x y z mass p0 px py pz pdg
 ID
 # Units: fm fm fm fm GeV GeV GeV GeV GeV none none
+*
+* Since SMASH is running in time 't' and needs a common time for all particles
+* the particles will be propagated backwards on straight lines
+* ("anti-freestreaming"), if this is not the case in the list provided. 
+* The back-propagated particles receive a formation_time and zero 
+* cross_section_scaling_factor to avoid any
+* unphysical interactions due to to the anti-freestreaming.
+*
 * To use this modus, chose
 * \code
 * General:
