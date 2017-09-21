@@ -109,7 +109,7 @@ int StringProcess::append_final_state(FourVector &uString, ThreeVector &evecLong
 
   FourVector xfRS;
   FourVector xfCM;
-
+  // count number of hadrons fragmented out of string.
   nfrag = 0;
   bstring = 0;
   for (ipyth = 0; ipyth < pythia->event.size(); ipyth++) {
@@ -119,22 +119,22 @@ int StringProcess::append_final_state(FourVector &uString, ThreeVector &evecLong
       bstring = bstring + pythia->particleData.baryonNumberType(pythia_id);
     }
   }
-
+  // extract velocity three-vector to perform Lorentz boost.
   vstring = uString.velocity();
-
+  // resize vectors.
   idfrag.resize(nfrag);
   Efrag.resize(nfrag);
   pxfrag.resize(nfrag);
   pyfrag.resize(nfrag);
   pzfrag.resize(nfrag);
   mfrag.resize(nfrag);
-
   indY.resize(nfrag);
   pparallel.resize(nfrag);
   Yparallel.resize(nfrag);
   XVertexPos.resize(nfrag + 1);
   XVertexNeg.resize(nfrag + 1);
-
+  /* compute the rapidity of each fragmented hadrons
+   * and total lightcone momentum. */
   pPosTot = 0.;
   pNegTot = 0.;
   ipstr = 0;
@@ -146,20 +146,24 @@ int StringProcess::append_final_state(FourVector &uString, ThreeVector &evecLong
       pyfrag[ipstr] = pythia->event[ipyth].py();
       pzfrag[ipstr] = pythia->event[ipyth].pz();
       mfrag[ipstr] = pythia->event[ipyth].m();
-
+      // longitudinal component of momentum
       pparallel[ipstr] = pxfrag[ipstr] * evecLong.x1() +
                          pyfrag[ipstr] * evecLong.x2() +
                          pzfrag[ipstr] * evecLong.x3();
+      // momentum rapidity
       Yparallel[ipstr] = 0.5 * std::log((Efrag[ipstr] + pparallel[ipstr]) /
                                    (Efrag[ipstr] - pparallel[ipstr]));
-
+      // total lightcone momentum
       pPosTot = pPosTot + (Efrag[ipstr] + pparallel[ipstr]) / std::sqrt(2.);
       pNegTot = pNegTot + (Efrag[ipstr] - pparallel[ipstr]) / std::sqrt(2.);
 
       ipstr = ipstr + 1;
     }
   }
-
+  /* sort the particles in descending order of momentum rapidity
+   * such that indY[0] and indY[nfrag-1] are respectively forward and backward ends.
+   * i = indY[k] enables to have the k-th particle in the longitudinal direction
+   * by accessing the i-th particle in the PYTHIA output list. */
   for (ipstr = 0; ipstr < nfrag; ipstr++) {
     kpstr = 0;
     for (jpstr = 0; jpstr < nfrag; jpstr++) {
@@ -169,38 +173,43 @@ int StringProcess::append_final_state(FourVector &uString, ThreeVector &evecLong
     }
     indY[kpstr] = ipstr;
   }
-
+  // x^{+} coordinates of the forward end
   XVertexPos[0] = pPosTot / kappaString;
   for (kpstr = 0; kpstr < nfrag; kpstr++) {
+    // choose the k-th particle in the longitudinal direction.
     ipstr = indY[kpstr];
-
+    // recursively compute x^{+} coordinates of q-qbar formation vertex.
     XVertexPos[kpstr + 1] =
         XVertexPos[kpstr] -
         (Efrag[ipstr] + pparallel[ipstr]) / (kappaString * std::sqrt(2.));
   }
-
+  // x^{-} coordinates of the backward end
   XVertexNeg[nfrag] = pNegTot / kappaString;
   for (kpstr = nfrag - 1; kpstr >= 0; kpstr--) {
+    // choose the k-th particle in the longitudinal direction.
     ipstr = indY[kpstr];
-
+    // recursively compute x^{-} coordinates of q-qbar formation vertex.
     XVertexNeg[kpstr] =
         XVertexNeg[kpstr + 1] -
         (Efrag[ipstr] - pparallel[ipstr]) / (kappaString * std::sqrt(2.));
   }
-
+  /* compute the formation times of hadrons
+   * from the lightcone coordinates of q-qbar formation vertices. */
   ret = 0;
   foundFW = false;
   foundBW = false;
   for (kpstr = 0; kpstr < nfrag; kpstr++) {
+    // choose the k-th particle in the longitudinal direction.
     ipstr = indY[kpstr];
 
     pythia_id = idfrag[ipstr];
     baryon = pythia->particleData.baryonNumberType(pythia_id);
+    // set momentum in the rest frame of string
     pvRS.set_x0( Efrag[ipstr] );
     pvRS.set_x1( pxfrag[ipstr] );
     pvRS.set_x2( pyfrag[ipstr] );
     pvRS.set_x3( pzfrag[ipstr] );
-
+    // set the formation time and position in the rest frame of string
     xfRS.set_x0( (XVertexPos[kpstr] + XVertexNeg[kpstr + 1]) / std::sqrt(2.) );
     xfRS.set_x1(
         evecLong.x1() * (XVertexPos[kpstr] - XVertexNeg[kpstr + 1]) / std::sqrt(2.) );
@@ -210,11 +219,17 @@ int StringProcess::append_final_state(FourVector &uString, ThreeVector &evecLong
         evecLong.x3() * (XVertexPos[kpstr] - XVertexNeg[kpstr + 1]) / std::sqrt(2.) );
 
     tProd = (XVertexPos[kpstr] + XVertexNeg[kpstr + 1]) / std::sqrt(2.);
-
+    /* compute the cross section suppression factor
+     * based on the number of valence quarks. */
     islead = 0;
     xtotfac = 0.;
     if (abs(bstring) == 0) {  // mesonic string
+      /* the forward and backward hadrons are assumed to be leading ones
+       * with nonzero cross section suppression factor.
+       * for baryons and anti-baryons the suppression factor is 1/3.
+       * for mesons the suppression factor is 1/2. */
       if ((kpstr == 0) && (foundFW == false)) {
+        // forward end
         islead = 1;
         if (abs(baryon) == 3) {
           xtotfac = 1. / 3.;
@@ -227,6 +242,7 @@ int StringProcess::append_final_state(FourVector &uString, ThreeVector &evecLong
         }
         foundFW = true;
       } else if ((kpstr == (nfrag - 1)) && (foundBW == false)) {
+        // backward end
         islead = 1;
         if (abs(baryon) == 3) {
           xtotfac = 1. / 3.;
@@ -243,17 +259,24 @@ int StringProcess::append_final_state(FourVector &uString, ThreeVector &evecLong
         xtotfac = 0.;
       }
     } else if (abs(bstring) == 3) {  // baryonic string
+      /* the first baryon in the forward direction is assumed
+       * to be the leading baryon with cross section suppression factor 2/3.
+       * the most backward meson among other particles is another leading hadron
+       * with cross section suppression factor 1/2. */
       if ((baryon == bstring) && (foundFW == false)) {
+        // the first baryon
         islead = 1;
         xtotfac = 2. / 3.;
         foundFW = true;
       } else if ((kpstr == (nfrag - 2)) && (baryon == 0) &&
                  (foundFW == false) && (foundBW == false)) {
+        // the second-last meson
         islead = 1;
         xtotfac = 0.5;
         foundBW = true;
       } else if ((kpstr == (nfrag - 1)) && (baryon == 0) && (foundFW == true) &&
                  (foundBW == false)) {
+        // backward end
         islead = 1;
         xtotfac = 0.5;
         foundBW = true;
@@ -266,9 +289,10 @@ int StringProcess::append_final_state(FourVector &uString, ThreeVector &evecLong
               "  StringProcess::append_final_state warning : string is neither "
               "mesonic nor baryonic.\n");
     }
-
+    // boost into the lab frame.
     pvCM = pvRS.LorentzBoost( -vstring );
     xfCM = xfRS.LorentzBoost( -vstring );
+    // obtain the formation time in the lab frame.
     tProd = xfCM.x0();
 
     //log.debug("PDG ID from Pythia:", pythia_id);
@@ -796,7 +820,7 @@ bool StringProcess::next_SDiff(int channel) {
 
   while (((foundPabsX == false) || (foundMassX == false)) && (ntry < 100)) {
     ntry = ntry + 1;
-
+    // decompose hadron into quarks
     if( channel == 1 ) { // AB > AX
       makeStringEnds(PDGcodeB, idqX1, idqX2);
       //makeStringEnds(idqsetB, idqX1, idqX2);
@@ -804,16 +828,17 @@ bool StringProcess::next_SDiff(int channel) {
       makeStringEnds(PDGcodeA, idqX1, idqX2);
       //makeStringEnds(idqsetA, idqX1, idqX2);
     }
-
+    // sample the transverse momentum transfer
     QTrx = Random::normal(0., sigmaQperp/std::sqrt(2.) );
     QTry = Random::normal(0., sigmaQperp/std::sqrt(2.) );
     QTrn = std::sqrt(QTrx*QTrx + QTry*QTry);
-
+    // sample the string mass and evaluate the three-momenta of hadron and string.
     rmass = std::log(mstrMax / mstrMin) * Random::uniform(0., 1.);
     massX = mstrMin * exp(rmass);
     pabscomHX = pCM( sqrtsAB, massH, massX );
-
+    // magnitude of the three momentum must be larger than the transvers momentum.
     foundPabsX = pabscomHX > QTrn;
+    // string mass must be larger than threshold set by PYTHIA.
     foundMassX = massX > (pythia->particleData.m0(idqX1) +
                           pythia->particleData.m0(idqX2));
   }
@@ -844,13 +869,15 @@ bool StringProcess::next_SDiff(int channel) {
     ustrXcom = pstrXcom / massX;
     ustrHlab = pstrHlab / massH;
     ustrXlab = pstrXlab / massX;
-
+    /* determin direction in which the string is stretched.
+     * this is set to be same with the three-momentum of string
+     * in the center of mass frame. */
     threeMomentum = pstrXcom.threevec();
     pnull = FourVector( threeMomentum.abs(), threeMomentum );
     prs = pnull.LorentzBoost( ustrXcom.velocity() );
     pabs = prs.threevec().abs();
     evec = prs.threevec() / pabs;
-
+    // perform fragmentation and add particles to final_state.
     nfrag = fragmentString(idqX1, idqX2, massX, evec, false);
     if (nfrag > 0) {
       NpartString1 = append_final_state(ustrXlab, evec);
@@ -1194,31 +1221,30 @@ bool StringProcess::next_DDiff() {
     makeStringEnds(PDGcodeB, idq21, idq22);
     //makeStringEnds(idqsetA, idq11, idq12);
     //makeStringEnds(idqsetB, idq21, idq22);
-
+    // sample the lightcone momentum fraction carried by gluons
     xfracA = Random::beta_a0(xfracMin, betapowS + 1.);
     xfracB = Random::beta_a0(xfracMin, betapowS + 1.);
- 
+    // sample the transverse momentum transfer
     QTrx = Random::normal(0., sigmaQperp/std::sqrt(2.) );
     QTry = Random::normal(0., sigmaQperp/std::sqrt(2.) );
     QTrn = std::sqrt(QTrx*QTrx + QTry*QTry);
-
+    // evaluate the lightcone momentum transfer
     QPos = -QTrn*QTrn / (2. * xfracB * PNegB);
     QNeg = QTrn*QTrn / (2. * xfracA * PPosA);
-
+    // compute four-momentum of string 1
     threeMomentum = evecBasisAB[3] * (PPosA + QPos - PNegA - QNeg) / std::sqrt(2.) +
                         evecBasisAB[1] * QTrx + evecBasisAB[2] * QTry;
     pstr1com = FourVector( (PPosA + QPos + PNegA + QNeg) / std::sqrt(2.), threeMomentum );
     mstr1 = pstr1com.sqr();
-
+    // compute four-momentum of string 2
     threeMomentum = evecBasisAB[3] * (PPosB - QPos - PNegB + QNeg) / std::sqrt(2.) -
                         evecBasisAB[1] * QTrx - evecBasisAB[2] * QTry;
     pstr2com = FourVector( (PPosB - QPos + PNegB - QNeg) / std::sqrt(2.), threeMomentum );
     mstr2 = pstr2com.sqr();
-
+    // string mass must be larger than threshold set by PYTHIA.
     mstr1 = (mstr1 > 0.) ? std::sqrt(mstr1) : 0.;
     foundMass1 = mstr1 > (pythia->particleData.m0(idq11) +
                           pythia->particleData.m0(idq12));
-
     mstr2 = (mstr2 > 0.) ? std::sqrt(mstr2) : 0.;
     foundMass2 = mstr2 > (pythia->particleData.m0(idq21) +
                           pythia->particleData.m0(idq22));
@@ -1234,13 +1260,15 @@ bool StringProcess::next_DDiff() {
     ustr2com = pstr2com / mstr2;
     ustr1lab = pstr1lab / mstr1;
     ustr2lab = pstr2lab / mstr2;
-
+    /* determin direction in which string 1 is stretched.
+     * this is set to be same with the three-momentum of string
+     * in the center of mass frame. */
     threeMomentum = pstr1com.threevec();
     pnull = FourVector( threeMomentum.abs(), threeMomentum );
     prs = pnull.LorentzBoost( ustr1com.velocity() );
     pabs = prs.threevec().abs();
     evec = prs.threevec() / pabs;
-
+    // perform fragmentation and add particles to final_state.
     nfrag1 = fragmentString(idq11, idq12, mstr1, evec, false);
     if (nfrag1 > 0) {
       NpartString1 = append_final_state(ustr1lab, evec);
@@ -1250,13 +1278,15 @@ bool StringProcess::next_DDiff() {
       NpartString1 = 0;
       ret = false;
     }
-
+    /* determin direction in which string 2 is stretched.
+     * this is set to be same with the three-momentum of string
+     * in the center of mass frame. */
     threeMomentum = pstr2com.threevec();
     pnull = FourVector( threeMomentum.abs(), threeMomentum );
     prs = pnull.LorentzBoost( ustr2com.velocity() );
     pabs = prs.threevec().abs();
     evec = prs.threevec() / pabs;
-
+    // perform fragmentation and add particles to final_state.
     nfrag2 = fragmentString(idq21, idq22, mstr2, evec, false);
     if (nfrag2 > 0) {
       NpartString2 = append_final_state(ustr2lab, evec);
@@ -1382,34 +1412,32 @@ bool StringProcess::next_NDiff() {
               baryonA, baryonB);
       exit(1);
     }
-
+    // sample the lightcone momentum fraction carried by quarks
     xfracA = Random::beta(alphapowV, betapowV);
     xfracB = Random::beta(alphapowV, betapowV);
-
+    // sample the transverse momentum transfer
     QTrx = Random::normal(0., sigmaQperp/std::sqrt(2.) );
     QTry = Random::normal(0., sigmaQperp/std::sqrt(2.) );
     QTrn = std::sqrt(QTrx*QTrx + QTry*QTry);
-
+    // evaluate the lightcone momentum transfer
     QPos = -QTrn*QTrn / (2. * xfracB * PNegB);
     QNeg = QTrn*QTrn / (2. * xfracA * PPosA);
-
     dPPos = -xfracA * PPosA - QPos;
     dPNeg = xfracB * PNegB - QNeg;
-
+    // compute four-momentum of string 1
     threeMomentum = evecBasisAB[3] * (PPosA + dPPos - PNegA - dPNeg) / std::sqrt(2.) +
                         evecBasisAB[1] * QTrx + evecBasisAB[2] * QTry;
     pstr1com = FourVector( (PPosA + dPPos + PNegA + dPNeg) / std::sqrt(2.), threeMomentum );
     mstr1 = pstr1com.sqr();
-
+    // compute four-momentum of string 2
     threeMomentum = evecBasisAB[3] * (PPosB - dPPos - PNegB + dPNeg) / std::sqrt(2.) -
                         evecBasisAB[1] * QTrx - evecBasisAB[2] * QTry;
     pstr2com = FourVector( (PPosB - dPPos + PNegB - dPNeg) / std::sqrt(2.), threeMomentum );
     mstr2 = pstr2com.sqr();
-
+    // string mass must be larger than threshold set by PYTHIA.
     mstr1 = (mstr1 > 0.) ? std::sqrt(mstr1) : 0.;
     foundMass1 = mstr1 > (pythia->particleData.m0(idq11) +
                           pythia->particleData.m0(idq12));
-
     mstr2 = (mstr2 > 0.) ? std::sqrt(mstr2) : 0.;
     foundMass2 = mstr2 > (pythia->particleData.m0(idq21) +
                           pythia->particleData.m0(idq22));
@@ -1425,13 +1453,15 @@ bool StringProcess::next_NDiff() {
     ustr2com = pstr2com / mstr2;
     ustr1lab = pstr1lab / mstr1;
     ustr2lab = pstr2lab / mstr2;
-
+    /* determin direction in which string 1 is stretched.
+     * this is set to be same with the three-momentum of string
+     * in the center of mass frame. */
     threeMomentum = pstr1com.threevec();
     pnull = FourVector( threeMomentum.abs(), threeMomentum );
     prs = pnull.LorentzBoost( ustr1com.velocity() );
     pabs = prs.threevec().abs();
     evec = prs.threevec() / pabs;
-
+    // perform fragmentation and add particles to final_state.
     nfrag1 = fragmentString(idq11, idq12, mstr1, evec, false);
     if (nfrag1 > 0) {
       NpartString1 = append_final_state(ustr1lab, evec);
@@ -1441,13 +1471,15 @@ bool StringProcess::next_NDiff() {
       NpartString1 = 0;
       ret = false;
     }
-
+    /* determin direction in which string 2 is stretched.
+     * this is set to be same with the three-momentum of string
+     * in the center of mass frame. */
     threeMomentum = pstr2com.threevec();
     pnull = FourVector( threeMomentum.abs(), threeMomentum );
     prs = pnull.LorentzBoost( ustr2com.velocity() );
     pabs = prs.threevec().abs();
     evec = prs.threevec() / pabs;
-
+    // perform fragmentation and add particles to final_state.
     nfrag2 = fragmentString(idq21, idq22, mstr2, evec, false);
     if (nfrag2 > 0) {
       NpartString2 = append_final_state(ustr2lab, evec);
@@ -1877,16 +1909,21 @@ int StringProcess::fragmentString(int idq1, int idq2, double mString,
   FourVector pvRS;
 
   pythia->event.reset();
-
+  // evaluate 3 times total baryon number of the string
   bstring = pythia->particleData.baryonNumberType(idq1) +
             pythia->particleData.baryonNumberType(idq2);
-  if( bstring == -3 ){
+  if( bstring == -3 ){  // anti-baryonic string
+    /* anti-diquark with PDG id idq1 is going in the direction of evecLong.
+     * anti-quark with PDG id idq2 is going in the direction
+     * opposite to evecLong. */
     sign_direction = -1;
   }
   else{
+    /* diquark (anti-quark) with PDG id idq2 is going in the direction of evecLong.
+     * quark with PDG id idq1 is going in the direction opposite to evecLong. */
     sign_direction = 1.;
   }
-
+  // evaluate momenta of quarks.
   m1 = pythia->particleData.m0(idq1);
   m2 = pythia->particleData.m0(idq2);
   pCMquark = pCM( mString, m1, m2 );
@@ -1900,6 +1937,9 @@ int StringProcess::fragmentString(int idq1, int idq2, double mString,
     p3vec.set_x3( pCMquark * phitheta.threevec().x3() );
   } else {
     if ( Random::uniform_int(0, 1) == 0 ) {
+      /* in the case where we flip the string ends,
+       * we need to flip the longitudinal unit vector itself
+       * since it is set to be direction of diquark (anti-quark) or anti-diquark. */
       evecLong.set_x1( -evecLong.x1() );
       evecLong.set_x2( -evecLong.x2() );
       evecLong.set_x3( -evecLong.x3() );
@@ -1909,7 +1949,7 @@ int StringProcess::fragmentString(int idq1, int idq2, double mString,
   if (m1 + m2 > mString) {
     throw std::runtime_error("String fragmentation: m1 + m2 > mString");
   }
-
+  // append quark or anti-diquark with PDG id idq1
   status = 1;
   col = 1;
   acol = 0;
@@ -1919,14 +1959,12 @@ int StringProcess::fragmentString(int idq1, int idq2, double mString,
     pvRS = FourVector(0., -sign_direction * pCMquark * evecLong);
   }
   pvRS.set_x0( std::sqrt(m1*m1 + pCMquark*pCMquark) );
-
   pquark.e( pvRS.x0() );
   pquark.px( pvRS.x1() );
   pquark.py( pvRS.x2() );
   pquark.pz( pvRS.x3() );
-
   pythia->event.append(idq1, status, col, acol, pquark, m1);
-
+  // append diquark or anti-quark with PDG id idq2
   status = 1;
   col = 0;
   acol = 1;
@@ -1936,14 +1974,12 @@ int StringProcess::fragmentString(int idq1, int idq2, double mString,
     pvRS = FourVector(0., sign_direction * pCMquark * evecLong);
   }
   pvRS.set_x0( std::sqrt(m2*m2 + pCMquark*pCMquark) );
-
   pquark.e( pvRS.x0() );
   pquark.px( pvRS.x1() );
   pquark.py( pvRS.x2() );
   pquark.pz( pvRS.x3() );
-
   pythia->event.append(idq2, status, col, acol, pquark, m2);
-
+  // implement PYTHIA fragmentation
   successful_hadronization = pythia->forceHadronLevel();
   number_of_fragments = 0;
   if (successful_hadronization == true) {

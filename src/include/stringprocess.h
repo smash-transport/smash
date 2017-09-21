@@ -210,7 +210,7 @@ class StringProcess {
    * \param idq1 is PDG id of quark or anti-diquark (carrying color index).
    * \param idq2 is PDG id of diquark or anti-quark (carrying anti-color index).
    * \param mString is the string mass.
-   * \param evecLong is unit 3-vector specifying the direction of diquark or anti-quark.
+   * \param evecLong is unit 3-vector specifying the direction of diquark or anti-diquark.
    * \param random_rotation is whether or not we randomly rotate the orientation.
    * \return number of hadrons fragmented out of string.
    */
