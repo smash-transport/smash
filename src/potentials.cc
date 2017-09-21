@@ -7,8 +7,6 @@
  *
 */
 
-#include <utility>
-
 #include "include/potentials.h"
 
 #include "include/constants.h"
