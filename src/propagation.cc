@@ -150,10 +150,13 @@ void update_momenta(Particles *particles, double dt, const Potentials &pot,
     if (!pot.use_symmetry()) {
       dUI3_dr = ThreeVector(0.0, 0.0, 0.0);
     }
-    // Compute potential gradient from lattice if possible
-    const ThreeVector dU_dr =
-        use_lattice ? (scale.first * dUB_dr + scale.second * dUI3_dr)
-                    : pot.potential_gradient(r, plist, data.type());
+    if (!use_lattice) {
+      const auto tmp = pot.potential_gradient(r, plist);
+      dUB_dr = tmp.first;
+      dUI3_dr = tmp.second;
+    }
+    const ThreeVector dU_dr = scale.first * dUB_dr +
+        scale.second * data.type().isospin3_rel() * dUI3_dr;
     log.debug("Update momenta: dU/dr [GeV/fm] = ", dU_dr);
     data.set_4momentum(data.effective_mass(),
                        data.momentum().threevec() - dU_dr * dt);

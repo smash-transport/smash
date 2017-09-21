@@ -60,7 +60,7 @@ class Potentials {
   double potential(const ThreeVector &r, const ParticleList &plist,
                    const ParticleType &acts_on) const;
 
-  /** 
+  /**
    * Evaluates the scaling factor of the forces acting on the particles. The
    * forces are equal to the product of the scaling factor and the gradient of
    * the potential. The scaling factors are usually less than one for hyperons,
@@ -78,12 +78,10 @@ class Potentials {
    *            calculation. If the distance between particle and calculation
    *            point r, \f$ |r-r_i| > r_{cut} \f$ then particle input
    *            to density will be ignored.
-   * \param[in] acts_on Type of particle on which potential is going to act
    **/
   VIRTUAL_FOR_TESTS
-  ThreeVector potential_gradient(const ThreeVector &r,
-                                 const ParticleList &plist,
-                                 const ParticleType &acts_on) const;
+  std::pair<ThreeVector, ThreeVector> potential_gradient(const ThreeVector &r,
+                                 const ParticleList &plist) const;
 
   /// Is Skyrme potential on?
   VIRTUAL_FOR_TESTS

@@ -7,6 +7,8 @@
  *
 */
 
+#include <utility>
+
 #include "include/potentials.h"
 
 #include "include/constants.h"
@@ -143,16 +145,12 @@ std::pair<double, int> Potentials::force_scale(const ParticleType &data) const {
   return std::make_pair(skyrme_scale, symmetry_scale);
 }
 
-ThreeVector Potentials::potential_gradient(const ThreeVector &r,
-                                           const ParticleList &plist,
-                                           const ParticleType &acts_on) const {
-  ThreeVector total_gradient(0.0, 0.0, 0.0);
-
-  if (!acts_on.is_baryon()) {
-    return total_gradient;
-  }
-  const auto scale = force_scale(acts_on);
+std::pair<ThreeVector, ThreeVector> Potentials::potential_gradient(
+                                           const ThreeVector &r,
+                                           const ParticleList &plist) const {
   const bool compute_gradient = true;
+  const double MeV_to_GeV = 1.0e-3;
+  ThreeVector dUB_dr(0.0, 0.0, 0.0);
   if (use_skyrme_) {
     const auto density_and_gradient =
         rho_eckart(r, plist, param_, DensityType::Baryon, compute_gradient);
@@ -161,22 +159,19 @@ ThreeVector Potentials::potential_gradient(const ThreeVector &r,
 
     // Derivative of potential with respect to density
     double tmp = skyrme_tau_ * std::pow(rho / nuclear_density, skyrme_tau_ - 1);
-    total_gradient += scale.first *drho_dr * (skyrme_a_ + skyrme_b_ * tmp)
-                      / nuclear_density;
+    dUB_dr = MeV_to_GeV * drho_dr * (skyrme_a_ + skyrme_b_ * tmp) /
+             nuclear_density;
   }
 
+  ThreeVector dUsym_dr(0.0, 0.0, 0.0);
   if (use_symmetry_) {
     // use isospin density
-    const ThreeVector p_iso =
-        rho_eckart(r, plist, param_, DensityType::BaryonicIsospin,
-                   compute_gradient)
+    const ThreeVector p_iso = rho_eckart(r, plist, param_,
+                   DensityType::BaryonicIsospin, compute_gradient)
             .second;
-    const ThreeVector dUsym_dr =
-        2. * symmetry_s_ * p_iso / nuclear_density * acts_on.isospin3_rel();
-    total_gradient += scale.second * dUsym_dr;
+    dUsym_dr = MeV_to_GeV * 2. * symmetry_s_ * p_iso / nuclear_density;
   }
-  // Return in GeV
-  return total_gradient * 1.0e-3;
+  return std::make_pair(dUB_dr, dUsym_dr);
 }
 
 }  // namespace Smash
