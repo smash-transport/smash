@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2014
+ *    Copyright (c) 2013-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -41,8 +41,8 @@ double xs_high_energy(double mandelstam_s, bool is_opposite_charge, double ma,
   const double s_sab = mandelstam_s / (ma + mb + M) / (ma + mb + M);
   double xs =
       H * std::log(s_sab) * std::log(s_sab) + P + R1 * std::pow(s_sab, -eta1);
-  xs = is_opposite_charge ? xs + R2 * pow(s_sab, -eta2)
-                          : xs - R2 * pow(s_sab, -eta2);
+  xs = is_opposite_charge ? xs + R2 * std::pow(s_sab, -eta2)
+                          : xs - R2 * std::pow(s_sab, -eta2);
   return xs;
 }
 
@@ -94,10 +94,10 @@ double piplusp_elastic(double mandelstam_s) {
  * Source: GiBUU:parametrizationBarMes_HighEnergy.f90 */
 double piminusp_elastic(double mandelstam_s) {
   double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
-  const auto logp = std::log(p_lab);
   if (p_lab < 8.0 /*2.0*/) {
     return really_small;
   } else {
+    const auto logp = std::log(p_lab);
     return 1.76 + 11.2 * std::pow(p_lab, -0.64) + 0.043 * logp * logp;
   }
 }

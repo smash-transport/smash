@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -367,7 +367,7 @@ double ThreeBodyDecayDilepton::diff_width(double m_par, double m_dil,
           return 0.;
         } else {
           return (2. * alpha / (3. * M_PI)) * gamma_pig / m_dil *
-                 pow(rad, 3. / 2.) * ff_sqr;
+                 std::pow(rad, 3. / 2.) * ff_sqr;
         }
       }
       default:
