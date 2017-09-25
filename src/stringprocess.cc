@@ -11,16 +11,10 @@ namespace Smash {
 
 // constructor
 StringProcess::StringProcess() {
-  //for (int ic = 0; ic < 4; ic++) {
-  //  idqsetA[ic] = 0;
-  //  idqsetB[ic] = 0;
-  //}
-
   for (int imu = 0; imu < 4; imu++) {
     evecBasisAB[imu] = ThreeVector(0., 0., 0.);
   }
 
-  //PDGidA = PDGidB = 0;
   baryonA = baryonB = 0;
   //chargeA = chargeB = 0;
   PPosA = 0.;
@@ -31,14 +25,13 @@ StringProcess::StringProcess() {
   sqrtsAB = 0.;
   pabscomAB = 0.;
 
-  pLightConeMin = 0.001;
-  betapowS = 0.5;
-
-  alphapowV = 1.;
-  betapowV = 2.5;
+  pmin_gluon_lightcone = 0.001;
+  pow_fgluon_beta = 0.5;
+  pow_fquark_alpha = 1.;
+  pow_fquark_beta = 2.5;
 
   sigmaQperp = 0.5;
-  kappaString = 1.;
+  kappa_tension_string = 1.;
 
   time_collision = 0.;
   gamma_factor_com = 1.;
@@ -47,7 +40,6 @@ StringProcess::StringProcess() {
   NpartString1 = 0;
   NpartString2 = 0;
   final_state.clear();
-  reset_finalArray();
 }
 
 // destructor
@@ -56,24 +48,6 @@ StringProcess::~StringProcess() {
 
 void StringProcess::set_pythia(Pythia8::Pythia *pythiaIn) {
   pythia = pythiaIn;
-}
-
-void StringProcess::reset_finalArray() {
-  NpartFinal = 0;
-  NpartString1 = 0;
-  NpartString2 = 0;
-
-  final_PDGid[0].resize(0);
-  final_PDGid[1].resize(0);
-
-  final_pvec[0].resize(0);
-  final_pvec[1].resize(0);
-  final_pvec[2].resize(0);
-  final_pvec[3].resize(0);
-  final_pvec[4].resize(0);
-
-  final_tform[0].resize(0);
-  final_tform[1].resize(0);
 }
 
 // compute the formation time and fill the arrays with final-state particles
@@ -174,24 +148,24 @@ int StringProcess::append_final_state(FourVector &uString, ThreeVector &evecLong
     indY[kpstr] = ipstr;
   }
   // x^{+} coordinates of the forward end
-  XVertexPos[0] = pPosTot / kappaString;
+  XVertexPos[0] = pPosTot / kappa_tension_string;
   for (kpstr = 0; kpstr < nfrag; kpstr++) {
     // choose the k-th particle in the longitudinal direction.
     ipstr = indY[kpstr];
     // recursively compute x^{+} coordinates of q-qbar formation vertex.
     XVertexPos[kpstr + 1] =
         XVertexPos[kpstr] -
-        (Efrag[ipstr] + pparallel[ipstr]) / (kappaString * std::sqrt(2.));
+        (Efrag[ipstr] + pparallel[ipstr]) / (kappa_tension_string * std::sqrt(2.));
   }
   // x^{-} coordinates of the backward end
-  XVertexNeg[nfrag] = pNegTot / kappaString;
+  XVertexNeg[nfrag] = pNegTot / kappa_tension_string;
   for (kpstr = nfrag - 1; kpstr >= 0; kpstr--) {
     // choose the k-th particle in the longitudinal direction.
     ipstr = indY[kpstr];
     // recursively compute x^{-} coordinates of q-qbar formation vertex.
     XVertexNeg[kpstr] =
         XVertexNeg[kpstr + 1] -
-        (Efrag[ipstr] - pparallel[ipstr]) / (kappaString * std::sqrt(2.));
+        (Efrag[ipstr] - pparallel[ipstr]) / (kappa_tension_string * std::sqrt(2.));
   }
   /* compute the formation times of hadrons
    * from the lightcone coordinates of q-qbar formation vertices. */
@@ -329,234 +303,12 @@ int StringProcess::append_final_state(FourVector &uString, ThreeVector &evecLong
   return ret;
 }
 
-// compute the formation time and fill the arrays with final-state particles
-int StringProcess::append_finalArray(FourVector &uString, ThreeVector &evecLong) {
-  int ret;
-
-  int nfrag;
-  int ipyth;
-  int ipstr, jpstr, kpstr;
-  int id, islead, baryon, bstring;
-  double E, px, py, pz, mass;
-  double pPosTot, pNegTot;
-  double tProd, xtotfac;
-
-  bool foundFW;
-  bool foundBW;
-
-  std::vector<int> idfrag;
-  std::vector<double> Efrag;
-  std::vector<double> pxfrag;
-  std::vector<double> pyfrag;
-  std::vector<double> pzfrag;
-  std::vector<double> mfrag;
-
-  std::vector<int> indY;
-  std::vector<double> pparallel;
-  std::vector<double> Yparallel;
-  std::vector<double> XVertexPos;
-  std::vector<double> XVertexNeg;
-
-  ThreeVector vstring;
-  FourVector pvRS;
-  FourVector pvCM;
-
-  FourVector xfRS;
-  FourVector xfCM;
-
-  nfrag = 0;
-  bstring = 0;
-  for (ipyth = 0; ipyth < pythia->event.size(); ipyth++) {
-    if (pythia->event[ipyth].isFinal()) {
-      nfrag = nfrag + 1;
-      id = pythia->event[ipyth].id();
-      bstring = bstring + pythia->particleData.baryonNumberType(id);
-    }
-  }
-
-  vstring = uString.velocity();
-
-  idfrag.resize(nfrag);
-  Efrag.resize(nfrag);
-  pxfrag.resize(nfrag);
-  pyfrag.resize(nfrag);
-  pzfrag.resize(nfrag);
-  mfrag.resize(nfrag);
-
-  indY.resize(nfrag);
-  pparallel.resize(nfrag);
-  Yparallel.resize(nfrag);
-  XVertexPos.resize(nfrag + 1);
-  XVertexNeg.resize(nfrag + 1);
-
-  pPosTot = 0.;
-  pNegTot = 0.;
-  ipstr = 0;
-  for (ipyth = 0; ipyth < pythia->event.size(); ipyth++) {
-    if (pythia->event[ipyth].isFinal()) {
-      idfrag[ipstr] = pythia->event[ipyth].id();
-      Efrag[ipstr] = pythia->event[ipyth].e();
-      pxfrag[ipstr] = pythia->event[ipyth].px();
-      pyfrag[ipstr] = pythia->event[ipyth].py();
-      pzfrag[ipstr] = pythia->event[ipyth].pz();
-      mfrag[ipstr] = pythia->event[ipyth].m();
-
-      pparallel[ipstr] = pxfrag[ipstr] * evecLong.x1() +
-                         pyfrag[ipstr] * evecLong.x2() +
-                         pzfrag[ipstr] * evecLong.x3();
-      Yparallel[ipstr] = 0.5 * std::log((Efrag[ipstr] + pparallel[ipstr]) /
-                                   (Efrag[ipstr] - pparallel[ipstr]));
-
-      pPosTot = pPosTot + (Efrag[ipstr] + pparallel[ipstr]) / std::sqrt(2.);
-      pNegTot = pNegTot + (Efrag[ipstr] - pparallel[ipstr]) / std::sqrt(2.);
-
-      ipstr = ipstr + 1;
-    }
-  }
-
-  for (ipstr = 0; ipstr < nfrag; ipstr++) {
-    kpstr = 0;
-    for (jpstr = 0; jpstr < nfrag; jpstr++) {
-      if ((ipstr != jpstr) && (Yparallel[ipstr] < Yparallel[jpstr])) {
-        kpstr = kpstr + 1;
-      }
-    }
-    indY[kpstr] = ipstr;
-  }
-
-  XVertexPos[0] = pPosTot / kappaString;
-  for (kpstr = 0; kpstr < nfrag; kpstr++) {
-    ipstr = indY[kpstr];
-
-    XVertexPos[kpstr + 1] =
-        XVertexPos[kpstr] -
-        (Efrag[ipstr] + pparallel[ipstr]) / (kappaString * std::sqrt(2.));
-  }
-
-  XVertexNeg[nfrag] = pNegTot / kappaString;
-  for (kpstr = nfrag - 1; kpstr >= 0; kpstr--) {
-    ipstr = indY[kpstr];
-
-    XVertexNeg[kpstr] =
-        XVertexNeg[kpstr + 1] -
-        (Efrag[ipstr] - pparallel[ipstr]) / (kappaString * std::sqrt(2.));
-  }
-
-  ret = 0;
-  foundFW = false;
-  foundBW = false;
-  for (kpstr = 0; kpstr < nfrag; kpstr++) {
-    ipstr = indY[kpstr];
-
-    id = idfrag[ipstr];
-    baryon = pythia->particleData.baryonNumberType(id);
-    pvRS.set_x0( Efrag[ipstr] );
-    pvRS.set_x1( pxfrag[ipstr] );
-    pvRS.set_x2( pyfrag[ipstr] );
-    pvRS.set_x3( pzfrag[ipstr] );
-    mass = mfrag[ipstr];
-
-    xfRS.set_x0( (XVertexPos[kpstr] + XVertexNeg[kpstr + 1]) / std::sqrt(2.) );
-    xfRS.set_x1(
-        evecLong.x1() * (XVertexPos[kpstr] - XVertexNeg[kpstr + 1]) / std::sqrt(2.) );
-    xfRS.set_x2(
-        evecLong.x2() * (XVertexPos[kpstr] - XVertexNeg[kpstr + 1]) / std::sqrt(2.) );
-    xfRS.set_x3(
-        evecLong.x3() * (XVertexPos[kpstr] - XVertexNeg[kpstr + 1]) / std::sqrt(2.) );
-
-    tProd = (XVertexPos[kpstr] + XVertexNeg[kpstr + 1]) / std::sqrt(2.);
-
-    if (abs(bstring) == 0) {  // mesonic string
-      if ((kpstr == 0) && (foundFW == false)) {
-        islead = 1;
-        if (abs(baryon) == 3) {
-          xtotfac = 1. / 3.;
-        } else if (baryon == 0) {
-          xtotfac = 0.5;
-        } else {
-          fprintf(stderr,
-                  "  StringProcess::append_finalArray warning : particle is not "
-                  "meson or baryon.\n");
-        }
-        foundFW = true;
-      } else if ((kpstr == (nfrag - 1)) && (foundBW == false)) {
-        islead = 1;
-        if (abs(baryon) == 3) {
-          xtotfac = 1. / 3.;
-        } else if (baryon == 0) {
-          xtotfac = 0.5;
-        } else {
-          fprintf(stderr,
-                  "  StringProcess::append_finalArray warning : particle is not "
-                  "meson or baryon.\n");
-        }
-        foundBW = true;
-      } else {
-        islead = 0;
-        xtotfac = 0.;
-      }
-    } else if (abs(bstring) == 3) {  // baryonic string
-      if ((baryon == bstring) && (foundFW == false)) {
-        islead = 1;
-        xtotfac = 2. / 3.;
-        foundFW = true;
-      } else if ((kpstr == (nfrag - 2)) && (baryon == 0) &&
-                 (foundFW == false) && (foundBW == false)) {
-        islead = 1;
-        xtotfac = 0.5;
-        foundBW = true;
-      } else if ((kpstr == (nfrag - 1)) && (baryon == 0) && (foundFW == true) &&
-                 (foundBW == false)) {
-        islead = 1;
-        xtotfac = 0.5;
-        foundBW = true;
-      } else {
-        islead = 0;
-        xtotfac = 0.;
-      }
-    } else {  // otherwise
-      fprintf(stderr,
-              "  StringProcess::append_finalArray warning : string is neither "
-              "mesonic nor baryonic.\n");
-      islead = 0;
-      xtotfac = 0.;
-    }
-
-    pvCM = pvRS.LorentzBoost( -vstring );
-    E = pvCM.x0();
-    px = pvCM.x1();
-    py = pvCM.x2();
-    pz = pvCM.x3();
-    xfCM = xfRS.LorentzBoost( -vstring );
-    tProd = xfCM.x0();
-
-    final_PDGid[0].push_back(id);
-    final_PDGid[1].push_back(islead);
-
-    final_pvec[0].push_back(E);
-    final_pvec[1].push_back(px);
-    final_pvec[2].push_back(py);
-    final_pvec[3].push_back(pz);
-    final_pvec[4].push_back(mass);
-
-    final_tform[0].push_back(tProd);
-    final_tform[1].push_back(xtotfac);
-
-    ret = ret + 1;
-  }
-
-  return ret;
-}
-
 bool StringProcess::init(const ParticleList &incomingList,
                          double tcollIn, double gammaFacIn){
   bool ret;
-  //std::array<int, 3> qcontent;
 
   PDGcodeA = incomingList[0].pdgcode();
   PDGcodeB = incomingList[1].pdgcode();
-  //PDGidA = PDGcodeA.get_decimal();
-  //PDGidB = PDGcodeB.get_decimal();
   massA = incomingList[0].effective_mass();
   massB = incomingList[1].effective_mass();
 
@@ -570,184 +322,14 @@ bool StringProcess::init(const ParticleList &incomingList,
   make_orthonormal_basis();
   compute_incoming_lightcone_momenta();
 
-  //qcontent = incomingList[0].pdgcode().quark_content();
-  //idqsetA[0] = static_cast<int>( incomingList[0].pdgcode().spin_degeneracy() );
-  //idqsetA[3] = qcontent[0];
-  //idqsetA[2] = qcontent[1];
-  //idqsetA[1] = qcontent[2];
-  //qcontent = incomingList[1].pdgcode().quark_content();
-  //idqsetB[0] = static_cast<int>( incomingList[1].pdgcode().spin_degeneracy() );
-  //idqsetB[3] = qcontent[0];
-  //idqsetB[2] = qcontent[1];
-  //idqsetB[1] = qcontent[2];
-
-  xfracMin = pLightConeMin / sqrtsAB;
+  xmin_gluon_fraction = pmin_gluon_lightcone / sqrtsAB;
 
   // quantum numbers of hadron A
   baryonA = 3*PDGcodeA.baryon_number();
   //chargeA = 3*PDGcodeA.charge();
-  /*
-  baryonA = pythia->particleData.baryonNumberType(idqsetA[1]) +
-            pythia->particleData.baryonNumberType(idqsetA[2]);
-  //chargeA = pythia->particleData.chargeType(idqsetA[1]) +
-  //          pythia->particleData.chargeType(idqsetA[2]);
-  if (idqsetA[3] != 0) {
-    baryonA = baryonA + pythia->particleData.baryonNumberType(idqsetA[3]);
-    //chargeA = chargeA + pythia->particleData.chargeType(idqsetA[3]);
-  }
-  */
   // quantum numbers of hadron B
   baryonB = 3*PDGcodeB.baryon_number();
   //chargeB = 3*PDGcodeB.charge();
-  /*
-  baryonB = pythia->particleData.baryonNumberType(idqsetB[1]) +
-            pythia->particleData.baryonNumberType(idqsetB[2]);
-  //chargeB = pythia->particleData.chargeType(idqsetB[1]) +
-  //          pythia->particleData.chargeType(idqsetB[2]);
-  if (idqsetB[3] != 0) {
-    baryonB = baryonB + pythia->particleData.baryonNumberType(idqsetB[3]);
-    //chargeB = chargeB + pythia->particleData.chargeType(idqsetB[3]);
-  }
-  */
-
-  time_collision = tcollIn;
-  gamma_factor_com = gammaFacIn;
-
-  ret = true;
-  return ret;
-}
-
-bool StringProcess::init_lab(PdgCode &idAIn, PdgCode &idBIn,
-                             double massAIn, double massBIn,
-                             Pythia8::Vec4 plabAIn, Pythia8::Vec4 plabBIn,
-                             double tcollIn, double gammaFacIn) {
-  bool ret;
-  //std::array<int, 3> qcontent;
-
-  PDGcodeA = idAIn;
-  PDGcodeB = idBIn;
-  //PDGidA = PDGcodeA.get_decimal();
-  //PDGidB = PDGcodeB.get_decimal();
-  massA = massAIn;
-  massB = massBIn;
-
-  plabA = FourVector(plabAIn.e(), plabAIn.px(), plabAIn.py(), plabAIn.pz());
-  plabB = FourVector(plabBIn.e(), plabBIn.px(), plabBIn.py(), plabBIn.pz());
-
-  sqrtsAB = ( plabA + plabB ).abs();
-  pabscomAB = pCM(sqrtsAB, massA, massB);
-
-  make_incoming_com_momenta();
-  make_orthonormal_basis();
-  compute_incoming_lightcone_momenta();
-
-  //qcontent = idAIn.quark_content();
-  //idqsetA[0] = static_cast<int>( idAIn.spin_degeneracy() );
-  //idqsetA[3] = qcontent[0];
-  //idqsetA[2] = qcontent[1];
-  //idqsetA[1] = qcontent[2];
-  //qcontent = idBIn.quark_content();
-  //idqsetB[0] = static_cast<int>( idBIn.spin_degeneracy() );
-  //idqsetB[3] = qcontent[0];
-  //idqsetB[2] = qcontent[1];
-  //idqsetB[1] = qcontent[2];
-
-  xfracMin = pLightConeMin / sqrtsAB;
-
-  // quantum numbers of hadron A
-  baryonA = 3*PDGcodeA.baryon_number();
-  //chargeA = 3*PDGcodeA.charge();
-  /*
-  baryonA = pythia->particleData.baryonNumberType(idqsetA[1]) +
-            pythia->particleData.baryonNumberType(idqsetA[2]);
-  //chargeA = pythia->particleData.chargeType(idqsetA[1]) +
-  //          pythia->particleData.chargeType(idqsetA[2]);
-  if (idqsetA[3] != 0) {
-    baryonA = baryonA + pythia->particleData.baryonNumberType(idqsetA[3]);
-    //chargeA = chargeA + pythia->particleData.chargeType(idqsetA[3]);
-  }
-  */
-  // quantum numbers of hadron B
-  baryonB = 3*PDGcodeB.baryon_number();
-  //chargeB = 3*PDGcodeB.charge();
-  /*
-  baryonB = pythia->particleData.baryonNumberType(idqsetB[1]) +
-            pythia->particleData.baryonNumberType(idqsetB[2]);
-  //chargeB = pythia->particleData.chargeType(idqsetB[1]) +
-  //          pythia->particleData.chargeType(idqsetB[2]);
-  if (idqsetB[3] != 0) {
-    baryonB = baryonB + pythia->particleData.baryonNumberType(idqsetB[3]);
-    //chargeB = chargeB + pythia->particleData.chargeType(idqsetB[3]);
-  }
-  */
-
-  time_collision = tcollIn;
-  gamma_factor_com = gammaFacIn;
-
-  ret = true;
-  return ret;
-}
-
-bool StringProcess::init_com(PdgCode &idAIn, PdgCode &idBIn, double massAIn, double massBIn,
-                       double sqrtsABIn, double tcollIn, double gammaFacIn) {
-  bool ret;
-  //std::array<int, 3> qcontent;
-
-  PDGcodeA = idAIn;
-  PDGcodeB = idBIn;
-  //PDGidA = PDGcodeA.get_decimal();
-  //PDGidB = PDGcodeB.get_decimal();
-  massA = massAIn;
-  massB = massBIn;
-  sqrtsAB = sqrtsABIn;
-  pabscomAB = pCM(sqrtsAB, massA, massB);
-
-  plabA = FourVector( std::sqrt(massA*massA + pabscomAB*pabscomAB), 0., 0., pabscomAB );
-  plabB = FourVector( std::sqrt(massB*massB + pabscomAB*pabscomAB), 0., 0., -pabscomAB );
-
-  make_incoming_com_momenta();
-  make_orthonormal_basis();
-  compute_incoming_lightcone_momenta();
-
-  //qcontent = idAIn.quark_content();
-  //idqsetA[0] = static_cast<int>( idAIn.spin_degeneracy() );
-  //idqsetA[3] = qcontent[0];
-  //idqsetA[2] = qcontent[1];
-  //idqsetA[1] = qcontent[2];
-  //qcontent = idBIn.quark_content();
-  //idqsetB[0] = static_cast<int>( idBIn.spin_degeneracy() );
-  //idqsetB[3] = qcontent[0];
-  //idqsetB[2] = qcontent[1];
-  //idqsetB[1] = qcontent[2];
-
-  xfracMin = pLightConeMin / sqrtsAB;
-
-  // quantum numbers of hadron A
-  baryonA = 3*PDGcodeA.baryon_number();
-  //chargeA = 3*PDGcodeA.charge();
-  /*
-  baryonA = pythia->particleData.baryonNumberType(idqsetA[1]) +
-            pythia->particleData.baryonNumberType(idqsetA[2]);
-  //chargeA = pythia->particleData.chargeType(idqsetA[1]) +
-  //          pythia->particleData.chargeType(idqsetA[2]);
-  if (idqsetA[3] != 0) {
-    baryonA = baryonA + pythia->particleData.baryonNumberType(idqsetA[3]);
-    //chargeA = chargeA + pythia->particleData.chargeType(idqsetA[3]);
-  }
-  */
-  // quantum numbers of hadron B
-  baryonB = 3*PDGcodeB.baryon_number();
-  //chargeB = 3*PDGcodeB.charge();
-  /*
-  baryonB = pythia->particleData.baryonNumberType(idqsetB[1]) +
-            pythia->particleData.baryonNumberType(idqsetB[2]);
-  //chargeB = pythia->particleData.chargeType(idqsetB[1]) +
-  //          pythia->particleData.chargeType(idqsetB[2]);
-  if (idqsetB[3] != 0) {
-    baryonB = baryonB + pythia->particleData.baryonNumberType(idqsetB[3]);
-    //chargeB = chargeB + pythia->particleData.chargeType(idqsetB[3]);
-  }
-  */
 
   time_collision = tcollIn;
   gamma_factor_com = gammaFacIn;
@@ -796,7 +378,6 @@ bool StringProcess::next_SDiff(int channel) {
   NpartString1 = 0;
   NpartString2 = 0;
   final_state.clear();
-  reset_finalArray();
 
   ntry = 0;
   foundPabsX = false;
@@ -806,13 +387,11 @@ bool StringProcess::next_SDiff(int channel) {
     mstrMin = massB;
     mstrMax = sqrtsAB - massA;
     pdgidH = PDGcodeA.get_decimal();
-    //pdgidH = PDGidA;
     massH = massA;
   } else if( channel == 2 ) { // AB > XB
     mstrMin = massA;
     mstrMax = sqrtsAB - massB;
     pdgidH = PDGcodeB.get_decimal();
-    //pdgidH = PDGidB;
     massH = massB;
   } else {
     throw std::runtime_error("invalid argument for StringProcess::next_SDiff");
@@ -823,10 +402,8 @@ bool StringProcess::next_SDiff(int channel) {
     // decompose hadron into quarks
     if( channel == 1 ) { // AB > AX
       makeStringEnds(PDGcodeB, idqX1, idqX2);
-      //makeStringEnds(idqsetB, idqX1, idqX2);
     } else if( channel == 2 ) { // AB > XB
       makeStringEnds(PDGcodeA, idqX1, idqX2);
-      //makeStringEnds(idqsetA, idqX1, idqX2);
     }
     // sample the transverse momentum transfer
     QTrx = Random::normal(0., sigmaQperp/std::sqrt(2.) );
@@ -881,7 +458,6 @@ bool StringProcess::next_SDiff(int channel) {
     nfrag = fragmentString(idqX1, idqX2, massX, evec, false);
     if (nfrag > 0) {
       NpartString1 = append_final_state(ustrXlab, evec);
-      NpartString1 = append_finalArray(ustrXlab, evec);
     } else {
       nfrag = 0;
       NpartString1 = 0;
@@ -896,15 +472,6 @@ bool StringProcess::next_SDiff(int channel) {
     new_particle.set_cross_section_scaling_factor(1.);
     new_particle.set_formation_time(0.);
     final_state.push_back(new_particle);
-    final_PDGid[0].push_back(pdgidH);
-    final_PDGid[1].push_back(1);
-    final_pvec[0].push_back(pstrHlab.x0());
-    final_pvec[1].push_back(pstrHlab.x1());
-    final_pvec[2].push_back(pstrHlab.x2());
-    final_pvec[3].push_back(pstrHlab.x3());
-    final_pvec[4].push_back(massH);
-    final_tform[0].push_back(0.);
-    final_tform[1].push_back(1.);
 
     if ((NpartString1 > 0) && (NpartString2 > 0) && (nfrag == NpartString1)) {
       NpartFinal = NpartString1 + NpartString2;
@@ -914,264 +481,6 @@ bool StringProcess::next_SDiff(int channel) {
 
   return ret;
 }
-
-/*
-// single diffractive AB > AX
-bool StringProcess::next_SDiff_AX() {
-  bool ret;
-
-  int ntry;
-  bool foundPabsX, foundMassX;
-
-  double mstrMin, mstrMax;
-  double pabscomAX, massX, rmass;
-  double QTrn, QTrx, QTry;
-
-  int nfrag;
-  int idqX1, idqX2;
-
-  FourVector pstrHcom;
-  FourVector pstrHlab;
-  FourVector pstrXcom;
-  FourVector pstrXlab;
-  ThreeVector threeMomentum;
-
-  FourVector ustrHcom;
-  FourVector ustrHlab;
-  FourVector ustrXcom;
-  FourVector ustrXlab;
-
-  double pabs;
-  FourVector pnull;
-  FourVector prs;
-  ThreeVector evec;
-
-  NpartFinal = 0;
-  NpartString1 = 0;
-  NpartString2 = 0;
-  final_state.clear();
-  reset_finalArray();
-
-  ntry = 0;
-  foundPabsX = false;
-  foundMassX = false;
-  mstrMin = massB;
-  mstrMax = sqrtsAB - massA;
-  if (mstrMin > mstrMax) {
-    fprintf(stderr, "  StringProcess::next_SDiff_AX : mstrMin > mstrMax\n");
-    fprintf(stderr,
-            "  StringProcess::next_SDiff_AX : mstrMin = %e GeV, mstrMax = %e GeV\n",
-            mstrMin, mstrMax);
-    ntry = 100;
-  }
-  while (((foundPabsX == false) || (foundMassX == false)) && (ntry < 100)) {
-    ntry = ntry + 1;
-
-    makeStringEnds(PDGcodeB, idqX1, idqX2);
-    //makeStringEnds(idqsetB, idqX1, idqX2);
-
-    QTrx = Random::normal(0., sigmaQperp/std::sqrt(2.) );
-    QTry = Random::normal(0., sigmaQperp/std::sqrt(2.) );
-    QTrn = std::sqrt(QTrx*QTrx + QTry*QTry);
-
-    rmass = std::log(mstrMax / mstrMin) * Random::uniform(0., 1.);
-    massX = mstrMin * exp(rmass);
-    pabscomAX = pCM( sqrtsAB, massA, massX );
-
-    foundPabsX = pabscomAX > QTrn;
-    foundMassX = massX > (pythia->particleData.m0(idqX1) +
-                          pythia->particleData.m0(idqX2));
-  }
-
-  ret = false;
-  if ((foundPabsX == true) && (foundMassX == true)) {
-    threeMomentum = evecBasisAB[3] * std::sqrt(pabscomAX*pabscomAX - QTrn*QTrn) +
-                        evecBasisAB[1] * QTrx +
-                        evecBasisAB[2] * QTry;
-    pstrHcom = FourVector( std::sqrt(pabscomAX*pabscomAX + massA*massA), threeMomentum );
-    threeMomentum = -evecBasisAB[3] * std::sqrt(pabscomAX*pabscomAX - QTrn*QTrn) -
-                        evecBasisAB[1] * QTrx -
-                        evecBasisAB[2] * QTry;
-    pstrXcom = FourVector( std::sqrt(pabscomAX*pabscomAX + massX*massX), threeMomentum );
-
-    pstrHlab = pstrHcom.LorentzBoost( -vcomAB );
-    pstrXlab = pstrXcom.LorentzBoost( -vcomAB );
-
-    ustrHcom = pstrHcom / massA;
-    ustrXcom = pstrXcom / massX;
-    ustrHlab = pstrHlab / massA;
-    ustrXlab = pstrXlab / massX;
-
-    threeMomentum = pstrXcom.threevec();
-    pnull = FourVector( threeMomentum.abs(), threeMomentum );
-    prs = pnull.LorentzBoost( ustrXcom.velocity() );
-    pabs = prs.threevec().abs();
-    evec = prs.threevec() / pabs;
-
-    nfrag = fragmentString(idqX1, idqX2, massX, evec, false);
-    if (nfrag > 0) {
-      NpartString1 = append_final_state(ustrXlab, evec);
-      NpartString1 = append_finalArray(ustrXlab, evec);
-    } else {
-      nfrag = 0;
-      NpartString1 = 0;
-      ret = false;
-    }
-
-    NpartString2 = 1;
-    ParticleData new_particle(ParticleType::find(PDGcodeA));
-    new_particle.set_4momentum(pstrHlab);
-    new_particle.set_cross_section_scaling_factor(1.);
-    new_particle.set_formation_time(0.);
-    final_state.push_back(new_particle);
-    final_PDGid[0].push_back(PDGcodeA.get_decimal());
-    //final_PDGid[0].push_back(PDGidA);
-    final_PDGid[1].push_back(1);
-    final_pvec[0].push_back(pstrHlab.x0());
-    final_pvec[1].push_back(pstrHlab.x1());
-    final_pvec[2].push_back(pstrHlab.x2());
-    final_pvec[3].push_back(pstrHlab.x3());
-    final_pvec[4].push_back(massA);
-    final_tform[0].push_back(0.);
-    final_tform[1].push_back(1.);
-
-    if ((NpartString1 > 0) && (NpartString2 > 0) && (nfrag == NpartString1)) {
-      NpartFinal = NpartString1 + NpartString2;
-      ret = true;
-    }
-  }
-
-  return ret;
-}
-
-// single diffractive AB > XB
-bool StringProcess::next_SDiff_XB() {
-  bool ret;
-
-  int ntry;
-  bool foundPabsX, foundMassX;
-
-  double mstrMin, mstrMax;
-  double pabscomXB, massX, rmass;
-  double QTrn, QTrx, QTry;
-
-  int nfrag;
-  int idqX1, idqX2;
-
-  FourVector pstrHcom;
-  FourVector pstrHlab;
-  FourVector pstrXcom;
-  FourVector pstrXlab;
-  ThreeVector threeMomentum;
-
-  FourVector ustrHcom;
-  FourVector ustrHlab;
-  FourVector ustrXcom;
-  FourVector ustrXlab;
-
-  double pabs;
-  FourVector pnull;
-  FourVector prs;
-  ThreeVector evec;
-
-  NpartFinal = 0;
-  NpartString1 = 0;
-  NpartString2 = 0;
-  final_state.clear();
-  reset_finalArray();
-
-  ntry = 0;
-  foundPabsX = false;
-  foundMassX = false;
-  mstrMin = massA;
-  mstrMax = sqrtsAB - massB;
-  if (mstrMin > mstrMax) {
-    fprintf(stderr, "  StringProcess::next_SDiff_XB : mstrMin > mstrMax\n");
-    fprintf(stderr,
-            "  StringProcess::next_SDiff_XB : mstrMin = %e GeV, mstrMax = %e GeV\n",
-            mstrMin, mstrMax);
-    ntry = 100;
-  }
-  while (((foundPabsX == false) || (foundMassX == false)) && (ntry < 100)) {
-    ntry = ntry + 1;
-
-    makeStringEnds(PDGcodeA, idqX1, idqX2);
-    //makeStringEnds(idqsetA, idqX1, idqX2);
-
-    QTrx = Random::normal(0., sigmaQperp/std::sqrt(2.) );
-    QTry = Random::normal(0., sigmaQperp/std::sqrt(2.) );
-    QTrn = std::sqrt(QTrx*QTrx + QTry*QTry);
-
-    rmass = log(mstrMax / mstrMin) * Random::uniform(0., 1.);
-    massX = mstrMin * exp(rmass);
-    pabscomXB = pCM( sqrtsAB, massX, massB );
-
-    foundPabsX = pabscomXB > QTrn;
-    foundMassX = massX > (pythia->particleData.m0(idqX1) +
-                          pythia->particleData.m0(idqX2));
-  }
-
-  ret = false;
-  if ((foundPabsX == true) && (foundMassX == true)) {
-    threeMomentum = -evecBasisAB[3] * std::sqrt(pabscomXB*pabscomXB - QTrn*QTrn) -
-                        evecBasisAB[1] * QTrx -
-                        evecBasisAB[2] * QTry;
-    pstrHcom = FourVector( std::sqrt(pabscomXB*pabscomXB + massB*massB), threeMomentum );
-    threeMomentum = evecBasisAB[3] * std::sqrt(pabscomXB*pabscomXB - QTrn*QTrn) +
-                        evecBasisAB[1] * QTrx +
-                        evecBasisAB[2] * QTry;
-    pstrXcom = FourVector( std::sqrt(pabscomXB*pabscomXB + massX*massX), threeMomentum );
-
-    pstrHlab = pstrHcom.LorentzBoost( -vcomAB );
-    pstrXlab = pstrXcom.LorentzBoost( -vcomAB );
-
-    ustrHcom = pstrHcom / massB;
-    ustrXcom = pstrXcom / massX;
-    ustrHlab = pstrHlab / massB;
-    ustrXlab = pstrXlab / massX;
-
-    threeMomentum = pstrXcom.threevec();
-    pnull = FourVector( threeMomentum.abs(), threeMomentum );
-    prs = pnull.LorentzBoost( ustrXcom.velocity() );
-    pabs = prs.threevec().abs();
-    evec = prs.threevec() / pabs;
-
-    nfrag = fragmentString(idqX1, idqX2, massX, evec, false);
-    if (nfrag > 0) {
-      NpartString1 = append_final_state(ustrXlab, evec);
-      NpartString1 = append_finalArray(ustrXlab, evec);
-    } else {
-      nfrag = 0;
-      NpartString1 = 0;
-      ret = false;
-    }
-
-    NpartString2 = 1;
-    ParticleData new_particle(ParticleType::find(PDGcodeB));
-    new_particle.set_4momentum(pstrHlab);
-    new_particle.set_cross_section_scaling_factor(1.);
-    new_particle.set_formation_time(0.);
-    final_state.push_back(new_particle);
-    final_PDGid[0].push_back(PDGcodeB.get_decimal());
-    //final_PDGid[0].push_back(PDGidB);
-    final_PDGid[1].push_back(1);
-    final_pvec[0].push_back(pstrHlab.x0());
-    final_pvec[1].push_back(pstrHlab.x1());
-    final_pvec[2].push_back(pstrHlab.x2());
-    final_pvec[3].push_back(pstrHlab.x3());
-    final_pvec[4].push_back(massB);
-    final_tform[0].push_back(0.);
-    final_tform[1].push_back(1.);
-
-    if ((NpartString1 > 0) && (NpartString2 > 0) && (nfrag == NpartString1)) {
-      NpartFinal = NpartString1 + NpartString2;
-      ret = true;
-    }
-  }
-
-  return ret;
-}
-*/
 
 /** double-diffractive : A + B -> X + X */
 bool StringProcess::next_DDiff() {
@@ -1209,7 +518,6 @@ bool StringProcess::next_DDiff() {
   NpartString1 = 0;
   NpartString2 = 0;
   final_state.clear();
-  reset_finalArray();
 
   ntry = 0;
   foundMass1 = false;
@@ -1219,11 +527,9 @@ bool StringProcess::next_DDiff() {
 
     makeStringEnds(PDGcodeA, idq11, idq12);
     makeStringEnds(PDGcodeB, idq21, idq22);
-    //makeStringEnds(idqsetA, idq11, idq12);
-    //makeStringEnds(idqsetB, idq21, idq22);
     // sample the lightcone momentum fraction carried by gluons
-    xfracA = Random::beta_a0(xfracMin, betapowS + 1.);
-    xfracB = Random::beta_a0(xfracMin, betapowS + 1.);
+    xfracA = Random::beta_a0(xmin_gluon_fraction, pow_fgluon_beta + 1.);
+    xfracB = Random::beta_a0(xmin_gluon_fraction, pow_fgluon_beta + 1.);
     // sample the transverse momentum transfer
     QTrx = Random::normal(0., sigmaQperp/std::sqrt(2.) );
     QTry = Random::normal(0., sigmaQperp/std::sqrt(2.) );
@@ -1272,7 +578,6 @@ bool StringProcess::next_DDiff() {
     nfrag1 = fragmentString(idq11, idq12, mstr1, evec, false);
     if (nfrag1 > 0) {
       NpartString1 = append_final_state(ustr1lab, evec);
-      NpartString1 = append_finalArray(ustr1lab, evec);
     } else {
       nfrag1 = 0;
       NpartString1 = 0;
@@ -1290,7 +595,6 @@ bool StringProcess::next_DDiff() {
     nfrag2 = fragmentString(idq21, idq22, mstr2, evec, false);
     if (nfrag2 > 0) {
       NpartString2 = append_final_state(ustr2lab, evec);
-      NpartString2 = append_finalArray(ustr2lab, evec);
     } else {
       nfrag2 = 0;
       NpartString2 = 0;
@@ -1346,7 +650,6 @@ bool StringProcess::next_NDiff() {
   NpartString1 = 0;
   NpartString2 = 0;
   final_state.clear();
-  reset_finalArray();
 
   ntry = 0;
   foundMass1 = false;
@@ -1356,8 +659,6 @@ bool StringProcess::next_NDiff() {
 
     makeStringEnds(PDGcodeA, idqA1, idqA2);
     makeStringEnds(PDGcodeB, idqB1, idqB2);
-    //makeStringEnds(idqsetA, idqA1, idqA2);
-    //makeStringEnds(idqsetB, idqB1, idqB2);
 
     if ((baryonA == 3) && (baryonB == 3)) {  // baryon-baryon
       idq11 = idqB1;
@@ -1413,8 +714,8 @@ bool StringProcess::next_NDiff() {
       exit(1);
     }
     // sample the lightcone momentum fraction carried by quarks
-    xfracA = Random::beta(alphapowV, betapowV);
-    xfracB = Random::beta(alphapowV, betapowV);
+    xfracA = Random::beta(pow_fquark_alpha, pow_fquark_beta);
+    xfracB = Random::beta(pow_fquark_alpha, pow_fquark_beta);
     // sample the transverse momentum transfer
     QTrx = Random::normal(0., sigmaQperp/std::sqrt(2.) );
     QTry = Random::normal(0., sigmaQperp/std::sqrt(2.) );
@@ -1465,7 +766,6 @@ bool StringProcess::next_NDiff() {
     nfrag1 = fragmentString(idq11, idq12, mstr1, evec, false);
     if (nfrag1 > 0) {
       NpartString1 = append_final_state(ustr1lab, evec);
-      NpartString1 = append_finalArray(ustr1lab, evec);
     } else {
       nfrag1 = 0;
       NpartString1 = 0;
@@ -1483,7 +783,6 @@ bool StringProcess::next_NDiff() {
     nfrag2 = fragmentString(idq21, idq22, mstr2, evec, false);
     if (nfrag2 > 0) {
       NpartString2 = append_final_state(ustr2lab, evec);
-      NpartString2 = append_finalArray(ustr2lab, evec);
     } else {
       nfrag2 = 0;
       NpartString2 = 0;
@@ -1534,7 +833,6 @@ bool StringProcess::next_BBbarAnn(){
 	NpartString1 = 0;
 	NpartString2 = 0;
 	final_state.clear();
-	reset_finalArray();
 
 	quark_content_A = PDGcodeA.quark_content();
 	quark_content_B = PDGcodeB.quark_content();
@@ -1555,14 +853,6 @@ bool StringProcess::next_BBbarAnn(){
 				}
 			}
 		}
-		//for(ic = 1; ic <= 3; ic++){
-		//	for(jc = 1; jc <= 3; jc++){
-		//		if( idqsetA[ic] == -idqsetB[jc] ){
-		//			ijc = ic*10 + jc;
-		//			indexAnn.push_back( ijc );
-		//		}
-		//	}
-		//}
 		npr = indexAnn.size();
 		fprintf(stderr,"  StringProcess::next_BBarAnn : %d possible pairs for qqbar annihilation\n", npr);
 		/* if it is a BBbar pair but there is no qqbar pair to annihilate,
@@ -1574,16 +864,6 @@ bool StringProcess::next_BBbarAnn(){
 			new_particle1.set_cross_section_scaling_factor(1.);
 			new_particle1.set_formation_time(0.);
 			final_state.push_back(new_particle1);
-			final_PDGid[0].push_back(PDGcodeA.get_decimal());
-			//final_PDGid[0].push_back(PDGidA);
-			final_PDGid[1].push_back(1);
-			final_pvec[0].push_back(plabA.x0());
-			final_pvec[1].push_back(plabA.x1());
-			final_pvec[2].push_back(plabA.x2());
-			final_pvec[3].push_back(plabA.x3());
-			final_pvec[4].push_back(massA);
-			final_tform[0].push_back(0.);
-			final_tform[1].push_back(1.);
 
 			NpartString2 = 1;
 			ParticleData new_particle2(ParticleType::find(PDGcodeB));
@@ -1591,16 +871,6 @@ bool StringProcess::next_BBbarAnn(){
 			new_particle2.set_cross_section_scaling_factor(1.);
 			new_particle2.set_formation_time(0.);
 			final_state.push_back(new_particle2);
-			final_PDGid[0].push_back(PDGcodeB.get_decimal());
-			//final_PDGid[0].push_back(PDGidB);
-			final_PDGid[1].push_back(1);
-			final_pvec[0].push_back(plabB.x0());
-			final_pvec[1].push_back(plabB.x1());
-			final_pvec[2].push_back(plabB.x2());
-			final_pvec[3].push_back(plabB.x3());
-			final_pvec[4].push_back(massB);
-			final_tform[0].push_back(0.);
-			final_tform[1].push_back(1.);
 
 			isAnnihilating = false;
 
@@ -1628,20 +898,12 @@ bool StringProcess::next_BBbarAnn(){
 				idq12 = quark_content_B[(jc + 1)%3];
 				idq21 = quark_content_A[(ic + 2)%3];
 				idq22 = quark_content_B[(jc + 2)%3];
-				//idq11 = idqsetA[1 + ic%3];
-				//idq12 = idqsetB[1 + jc%3];
-				//idq21 = idqsetA[1 + (ic + 1)%3];
-				//idq22 = idqsetB[1 + (jc + 1)%3];
 			}
 			else if( (baryonA == -3) && (baryonB == 3) ){
 				idq11 = quark_content_B[(ic + 1)%3];
 				idq12 = quark_content_A[(jc + 1)%3];
 				idq21 = quark_content_B[(ic + 2)%3];
 				idq22 = quark_content_A[(jc + 2)%3];
-				//idq11 = idqsetB[1 + jc%3];
-				//idq12 = idqsetA[1 + ic%3];
-				//idq21 = idqsetB[1 + (jc + 1)%3];
-				//idq22 = idqsetA[1 + (ic + 1)%3];
 			}
 			// randomly choose if we flip the antiquark contents
 			if( Random::uniform_int(0, 1) == 0 ){
@@ -1675,7 +937,6 @@ bool StringProcess::next_BBbarAnn(){
 		nfrag1 = fragmentString(idq11, idq12, mstr1, evec, false);
 		if( nfrag1 > 0 ){
 			NpartString1 = append_final_state(ustr1lab, evec);
-			NpartString1 = append_finalArray(ustr1lab, evec);
 		}
 		else{
 			nfrag1 = 0;
@@ -1690,7 +951,6 @@ bool StringProcess::next_BBbarAnn(){
 		nfrag2 = fragmentString(idq21, idq22, mstr2, evec, false);
 		if( nfrag2 > 0 ){
 			NpartString2 = append_final_state(ustr2lab, evec);
-			NpartString2 = append_finalArray(ustr2lab, evec);
 		}
 		else{
 			nfrag2 = 0;
@@ -1824,72 +1084,6 @@ void StringProcess::makeStringEnds(PdgCode &pdgcodeIn, int &idq1, int &idq2){
     }
   }
 }
-
-/*
-void StringProcess::makeStringEnds(std::array<int,4> &idqset, int &idq1, int &idq2) {
-  int ir, ic, jc;
-  int idq1tmp, idq2tmp;
-  std::array<int,3> idqtmp;
-
-  double rspin;
-
-  // if it is meson/baryon
-  if (idqset[3] == 0) {  // meson
-    ir = 1 + Random::uniform_int(0, 1);
-
-    idq1tmp = idqset[ir];
-    jc = 1 + ir % 2;
-    idq2tmp = idqset[jc];
-  } else {  // baryon
-    ir = 1 + Random::uniform_int(0, 2);
-    idqtmp[0] = idqset[0];
-
-    idq1tmp = idqset[ir];
-    for (ic = 0; ic < 2; ic++) {
-      jc = 1 + (ir + ic) % 3;
-      idqtmp[ic + 1] = std::abs(idqset[jc]);
-    }
-
-    if (idqtmp[1] == idqtmp[2]) {
-      idq2tmp = idqtmp[1] * 1000 + idqtmp[2] * 100 + 3;
-    } else {
-      if (idqtmp[1] > idqtmp[2]) {
-        idq2tmp = idqtmp[1] * 1000 + idqtmp[2] * 100;
-      } else {
-        idq2tmp = idqtmp[2] * 1000 + idqtmp[1] * 100;
-      }
-
-      rspin = Random::uniform(0., 1.);
-      if ( rspin < 0.25 ) {
-        idq2tmp = idq2tmp + 1;
-      } else {
-        idq2tmp = idq2tmp + 3;
-      }
-    }
-
-    if (idq1tmp < 0) {
-      idq2tmp = -idq2tmp;
-    }
-  }  // endif meson/baryon
-
-  if (idq1tmp > 0) {
-    idq1 = idq1tmp;
-    idq2 = idq2tmp;
-  } else {
-    idq1 = idq2tmp;
-    idq2 = idq1tmp;
-  }
-
-  // some mesons with PDG id 11X are actually mixed state of uubar and ddbar.
-  // have a random selection whether we have uubar or ddbar in this case.
-  if ((idqset[3] == 0) && (idq1 == 1) && (idq2 == -1)) {
-    if ( Random::uniform_int(0, 1) == 0 ) {
-      idq1 = 2;
-      idq2 = -2;
-    }
-  }
-}
-*/
 
 int StringProcess::fragmentString(int idq1, int idq2, double mString,
                             ThreeVector &evecLong, bool random_rotation) {

@@ -763,7 +763,7 @@ void ScatterAction::string_excitation_inter(int subprocess) {
     }
     /* initialize the string_process object */
     string_process->set_sigma_Qperp(sigQperp);
-    string_process->set_pLightConeMin(0.001);
+    string_process->set_pmin_gluon_lightcone(0.001);
     isinit =
         string_process->init(incoming_particles_,
                              time_of_execution_, gamma_cm());
@@ -785,38 +785,6 @@ void ScatterAction::string_excitation_inter(int subprocess) {
     for(int ipart = 0; ipart < npart; ipart++){
       outgoing_particles_.push_back( string_process->final_state[ipart] );
     }
-    //int npart = string_process->final_PDGid[0].size();
-    //ParticleList new_intermediate_particles;
-    //for (int i = 0; i < npart; i++) {
-    //  int pythia_id = string_process->final_PDGid[0].at(i);
-    //  log.debug("PDG ID from Pythia:", pythia_id);
-    //  /* K_short and K_long need to be converted to K0
-    //   * since SMASH only knows K0 */
-    //  if (pythia_id == 310 || pythia_id == 130) {
-    //    const double prob = Random::uniform(0., 1.);
-    //    if (prob <= 0.5) {
-    //      pythia_id = 311;
-    //    } else {
-    //      pythia_id = -311;
-    //    }
-    //  }
-    //  const std::string s = std::to_string(pythia_id);
-    //  PdgCode pythia_code(s);
-    //  ParticleData new_particle(ParticleType::find(pythia_code));
-    //  FourVector momentum;
-    //  momentum.set_x0(string_process->final_pvec[0].at(i));
-    //  momentum.set_x1(string_process->final_pvec[1].at(i));
-    //  momentum.set_x2(string_process->final_pvec[2].at(i));
-    //  momentum.set_x3(string_process->final_pvec[3].at(i));
-    //  new_particle.set_4momentum(momentum);
-    //  log.debug("4-momentum from Pythia: ", momentum);
-    //  const double suppression_factor = 0.7;
-    //  new_particle.set_cross_section_scaling_factor(
-    //      suppression_factor * string_process->final_tform[1].at(i));
-    //  new_particle.set_formation_time(
-    //      string_process->final_tform[0].at(i) * gamma_cm() + time_of_execution_);
-    //  outgoing_particles_.push_back(new_particle);
-    //}
     /* If the incoming particles already were unformed, the formation
      * times and cross section scaling factors need to be adjusted */
     const double tform_in = std::max(incoming_particles_[0].formation_time(),

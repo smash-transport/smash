@@ -17,11 +17,7 @@ namespace Smash {
  */
 class StringProcess {
  private:
-  //int PDGidA, PDGidB;
   int baryonA, baryonB;
-  //int chargeA, chargeB;
-  //std::array<int,4> idqsetA;
-  //std::array<int,4> idqsetB;
   double PPosA, PNegA, PPosB, PNegB;
   double massA, massB;
   double sqrtsAB, pabscomAB;
@@ -36,17 +32,17 @@ class StringProcess {
   int NpartString1;
   int NpartString2;
 
-  double pLightConeMin;
-  double xfracMin;
+  double pmin_gluon_lightcone;
+  double xmin_gluon_fraction;
 
-  double betapowS;
+  double pow_fgluon_beta;
 
-  double alphapowV;
-  double betapowV;
+  double pow_fquark_alpha;
+  double pow_fquark_beta;
 
   double sigmaQperp;
 
-  double kappaString;
+  double kappa_tension_string;
 
   double time_collision;
 
@@ -64,19 +60,6 @@ class StringProcess {
    * which must be accessed after the collision
    */
   ParticleList final_state;
-  // final state array
-  std::array<std::vector<int>,2> final_PDGid;
-  // final_PDGid[0] : PDGid
-  // final_PDGid[1] : if it is leading hadron (1 = Yes, 0 = No)
-  std::array<std::vector<double>,5> final_pvec;
-  // final_pvec[0] : energy
-  // final_pvec[1] : px
-  // final_pvec[2] : py
-  // final_pvec[3] : pz
-  // final_pvec[4] : mass
-  std::array<std::vector<double>,2> final_tform;
-  // final_tform[0] : formation time (fm)
-  // final_tform[1] : suppression factor for the cross section (xtotfac)
   /**
    * set the pointer of PYTHIA object
    * \param pythiaIn is a pointer of object created and initialized in somewhere else.
@@ -85,29 +68,29 @@ class StringProcess {
   /**
    * set the minimum lightcone momentum scale carried by gluon.
    * This is relevant for the double-diffractive process.
-   * The minimum lightcone momentum fraction is set to be pLightConeMin/sqrtsAB.
-   * \param pLightConeMinIn is a value that we want to use for pLightConeMin.
+   * The minimum lightcone momentum fraction is set to be pmin_gluon_lightcone/sqrtsAB.
+   * \param pLightConeMinIn is a value that we want to use for pmin_gluon_lightcone.
    */
-  void set_pLightConeMin(double pLightConeMinIn) {
-    pLightConeMin = pLightConeMinIn;
+  void set_pmin_gluon_lightcone(double pLightConeMinIn) {
+    pmin_gluon_lightcone = pLightConeMinIn;
   }
   /**
    * lightcone momentum fraction of gluon is sampled
    * according to probability distribution P(x) = 1/x * (1 - x)^{1 + betapowS}
    * in double-diffractive processes.
-   * \param betapowSIn is a value that we want to use for betapowS.
+   * \param betapowSIn is a value that we want to use for pow_fgluon_beta.
    */
-  void set_pow_fgluon(double betapowSIn) { betapowS = betapowSIn; }
+  void set_pow_fgluon(double betapowSIn) { pow_fgluon_beta = betapowSIn; }
   /**
    * lightcone momentum fraction of quark is sampled
    * according to probability distribution P(x) = x^{alphapowV - 1} * (1 - x)^{betapowV - 1}
    * in non-diffractive processes.
-   * \param alphapowVIn is a value that we want to use for alphapowV.
-   * \param betapowVIn is a value that we want to use for betapowV.
+   * \param alphapowVIn is a value that we want to use for pow_fquark_alpha.
+   * \param betapowVIn is a value that we want to use for pow_fquark_beta.
    */
   void set_pow_fquark(double alphapowVIn, double betapowVIn){
-    alphapowV = alphapowVIn;
-    betapowV = betapowVIn;
+    pow_fquark_alpha = alphapowVIn;
+    pow_fquark_beta = betapowVIn;
   }
   /**
    * set the average amount of transverse momentum transfer sigmaQperp.
@@ -118,7 +101,7 @@ class StringProcess {
    * set the string tension kappaString which is used in append_final_state.
    * \param kappaStringIn is a value that we want to use for kappaString.
    */
-  void set_tension_string(double kappaStringIn) { kappaString = kappaStringIn; }
+  void set_tension_string(double kappaStringIn) { kappa_tension_string = kappaStringIn; }
   /**
    * initialization
    * feed intial particles, time of collision and gamma factor of the center of mass.
@@ -128,11 +111,6 @@ class StringProcess {
    * \return if initialization is successful.
    */
   bool init(const ParticleList &incomingList, double tcollIn, double gammaFacIn);
-  bool init_lab(PdgCode &idAIn, PdgCode &idBIn, double massAIn, double massBIn,
-                Pythia8::Vec4 pvecAIn, Pythia8::Vec4 pvecBIn,
-		double tcollIn, double gammaFacIn);
-  bool init_com(PdgCode &idAIn, PdgCode &idBIn, double massAIn, double massBIn,
-                double sqrtsABIn, double tcollIn, double gammaFacIn);
   /** boost the momenta of incoming particles into the center of mass frame. */
   void make_incoming_com_momenta();
   /**
@@ -155,10 +133,6 @@ class StringProcess {
    * \return whether the process is successfully implemented.
    */
   bool next_SDiff(int channel);
-  /* single-diffractive : A + B -> A + X */
-  //bool next_SDiff_AX();
-  /* single-diffractive : A + B -> X + B */
-  //bool next_SDiff_XB();
   /**
    * Double-diffractive process ( A + B -> X + X )
    * is similar to the single-diffractive process,
@@ -194,8 +168,6 @@ class StringProcess {
    * \return number of hadrons fragmented out of string.
    */
   int append_final_state(FourVector &uString, ThreeVector &evecLong);
-  void reset_finalArray();
-  int append_finalArray(FourVector &uString, ThreeVector &evecLong);
   /**
    * make a random selection to determine partonic contents at the string ends.
    * \param pdgcodeIn is PdgCode of hadron which transforms into a string.
