@@ -199,6 +199,7 @@ namespace {
  * \li particles at the end of event written out in binary and Root formats
  * \li dileptons written in Oscar2013 format
  * \li density at point (0, 0, 0) written as a table against time every 1 fm/c
+ *
  * then the output section of configuration will be the following.
  *
  * \code
@@ -563,10 +564,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * \li Dileptons are treated via the time integration method, also called
    * 'shining', as described in \iref{Schmidt:2008hm}, chapter 2D.
    * This means that, because dilepton decays are so rare, possible decays are
-   * written in the ouput in every single timestep without ever performing
-   * them.  The are weighted with a "shining weight" to compensate for the
+   * written in the output at every hadron propagation without ever performing
+   * them. The are weighted with a "shining weight" to compensate for the
    * over-production.
-   * \li The shining weight can be found in the weight element of the ouput.
+   * \li The shining weight can be found in the weight element of the output.
    * \li The shining method is implemented in the DecayActionsFinderDilepton,
    * which is enabled together with the dilepton output.
    *
