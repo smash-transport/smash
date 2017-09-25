@@ -456,6 +456,18 @@ int main(int argc, char *argv[]) {
     pythia->readString("Beams:idA = 2212");
     pythia->readString("Beams:idB = 2212");
     pythia->readString("Beams:eCM = 10.");
+    /* set particle masses and widths in PYTHIA to be same with those in SMASH */
+    for (auto &ptype : ParticleType::list_all()){
+      int pdgid = ptype.pdgcode().get_decimal();
+      double mass_pole = ptype.mass();
+      double width_pole = ptype.width_at_pole();
+      /* check if the particle specie is in PYTHIA */
+      if (pythia->particleData.isParticle(pdgid)){
+        /* set mass and width in PYTHIA */
+        pythia->particleData.m0(pdgid, mass_pole);
+        pythia->particleData.mWidth(pdgid, width_pole);
+      }
+    }
     pythia->init();
     pythia_sigmaTot.init(&pythia->info, pythia->settings, &pythia->particleData);
     // setup string_process

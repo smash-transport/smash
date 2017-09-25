@@ -124,7 +124,7 @@ class StringProcess {
    * feed intial particles, time of collision and gamma factor of the center of mass.
    * \param incomingList is the list of initial state particles.
    * \param tcollIn is time of collision.
-   * \param gamma factor of the center of mass.
+   * \param gammaFacIn gamma factor of the center of mass.
    * \return if initialization is successful.
    */
   bool init(const ParticleList &incomingList, double tcollIn, double gammaFacIn);
