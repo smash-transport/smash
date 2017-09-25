@@ -9,9 +9,9 @@
 
 namespace Smash {
 
-  ThermalizationAction::ThermalizationAction(const GrandCanThermalizer *gct,
+  ThermalizationAction::ThermalizationAction(const GrandCanThermalizer &gct,
                                              double absolute_execution_time) :
-    Action(gct->particles_to_remove(),
-           gct->particles_to_insert(),
+    Action(gct.particles_to_remove(),
+           gct.particles_to_insert(),
            absolute_execution_time, ProcessType::Thermalization) {}
 }  // namespace Smash

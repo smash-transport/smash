@@ -23,7 +23,7 @@ namespace Smash {
  */
 class ThermalizationAction : public Action {
  public:
-  ThermalizationAction(const GrandCanThermalizer* gct,
+  ThermalizationAction(const GrandCanThermalizer& gct,
                        double absolute_labframe_time);
   // No need to do anything, because outgoing particles are set in constructor
   void generate_final_state() {}

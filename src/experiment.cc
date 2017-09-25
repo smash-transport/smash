@@ -864,7 +864,7 @@ void Experiment<Modus>::run_time_evolution() {
       const double current_t = parameters_.labclock.current_time();
       thermalizer_->thermalize(particles_, current_t,
                                parameters_.testparticles);
-      ThermalizationAction th_act(thermalizer_.get(), current_t);
+      ThermalizationAction th_act(*thermalizer_, current_t);
       if (th_act.any_particles_thermalized()) {
         perform_action(th_act, particles_);
       }
