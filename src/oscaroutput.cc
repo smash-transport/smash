@@ -448,9 +448,8 @@ void OscarOutput<Format, Contents>::write_particledata(
 namespace {
 template <int Contents>
 std::unique_ptr<OutputInterface> create_select_format(
-    std::string format, const bf::path &path, const OutputParameters &out_par,
+    bool modern_format, const bf::path &path, const OutputParameters &out_par,
     std::string name) {
-  const bool modern_format = (format == "Oscar2013");
   bool extended_format = (Contents & OscarInteractions) ? out_par.coll_extended
                                                         : out_par.part_extended;
   if (modern_format && extended_format) {
@@ -467,30 +466,39 @@ std::unique_ptr<OutputInterface> create_select_format(
 std::unique_ptr<OutputInterface> create_oscar_output(
     std::string format, std::string content, const bf::path &path,
     const OutputParameters &out_par) {
+  if (format != "Oscar2013" && format != "Oscar1999") {
+    throw std::invalid_argument("Creating Oscar output: unknown format");
+  }
+  const bool modern_format = (format == "Oscar2013");
   if (content == "Particles") {
     if (out_par.part_only_final) {
       return create_select_format<OscarParticlesAtEventend>(
-          format, path, out_par, "particle_lists");
+          modern_format, path, out_par, "particle_lists");
     } else {
       return create_select_format<OscarTimesteps | OscarAtEventstart |
                                   OscarParticlesAtEventend>(
-          format, path, out_par, "particle_lists");
+          modern_format, path, out_par, "particle_lists");
     }
   } else if (content == "Collisions") {
     if (out_par.coll_printstartend) {
       return create_select_format<OscarInteractions | OscarAtEventstart |
                                   OscarParticlesAtEventend>(
-          format, path, out_par, "full_event_history");
+          modern_format, path, out_par, "full_event_history");
     } else {
-      return create_select_format<OscarInteractions>(format, path, out_par,
-                                                     "full_event_history");
+      return create_select_format<OscarInteractions>(
+          modern_format, path, out_par, "full_event_history");
     }
   } else if (content == "Dileptons") {
     return make_unique<OscarOutput<OscarFormat2013Extended, OscarInteractions>>(
         path, "Dileptons");
   } else if (content == "Photons") {
-    return make_unique<OscarOutput<OscarFormat2013, OscarInteractions>>(
-        path, "Photons");
+    if (modern_format) {
+      return make_unique<OscarOutput<OscarFormat2013, OscarInteractions>>(
+          path, "Photons");
+    } else {
+      return make_unique<OscarOutput<OscarFormat1999, OscarInteractions>>(
+          path, "Photons");
+    }
   }
 
   throw std::invalid_argument("Create_oscar_output got unknown content.");

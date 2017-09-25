@@ -73,7 +73,7 @@ Output:
     Dileptons:
         Format:          ["Oscar2013", "Binary", "Root"]
 #    Photons:
-#        Format:          ["Oscar2013", "Binary", "Root"]
+#        Format:          ["Oscar2013", "Oscar1999", "Binary", "Root"]
 #        Fractions:       100
     Thermodynamics:
         Format:          ["ASCII", "Vtk"]
