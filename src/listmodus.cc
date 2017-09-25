@@ -171,7 +171,7 @@ double ListModus::initial_conditions(Particles *particles,
     try {
       ParticleData &particle = particles->create(pdgcode);
       if (pdgcode.charge() != charge) {
-        log.error() << "Charge of pdg = " << pdgcode << " != " << change;
+        log.error() << "Charge of pdg = " << pdgcode << " != " << charge;
         throw std::invalid_argument("Inconsistent input (charge).");
       }
       particle.set_4momentum(FourVector(E, px, py, pz));

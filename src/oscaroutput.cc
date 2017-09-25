@@ -104,7 +104,8 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
     std::fprintf(file_.get(), "# Block format:\n");
     std::fprintf(file_.get(), "# nin nout event_number\n");
     std::fprintf(file_.get(), "# id pdg 0 px py pz p0 mass x y z t\n");
-    std::fprintf(file_.get(), "# End of event: 0 0 event_number impact_parameter\n");
+    std::fprintf(file_.get(), "# End of event: 0 0 event_number"
+                              " impact_parameter\n");
     std::fprintf(file_.get(), "#\n");
   }
 }
