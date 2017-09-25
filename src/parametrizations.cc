@@ -41,8 +41,8 @@ double xs_high_energy(double mandelstam_s, bool is_opposite_charge, double ma,
   const double s_sab = mandelstam_s / (ma + mb + M) / (ma + mb + M);
   double xs =
       H * std::log(s_sab) * std::log(s_sab) + P + R1 * std::pow(s_sab, -eta1);
-  xs = is_opposite_charge ? xs + R2 * pow(s_sab, -eta2)
-                          : xs - R2 * pow(s_sab, -eta2);
+  xs = is_opposite_charge ? xs + R2 * std::pow(s_sab, -eta2)
+                          : xs - R2 * std::pow(s_sab, -eta2);
   return xs;
 }
 
