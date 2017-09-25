@@ -383,8 +383,10 @@ TEST(extended) {
 
   COMPARE(std::fread(&buf[0], 1, 4, binF), 4u);  // magic number
   magic.assign(&buf[0], 4);
-  std::fread(&format_version_number, sizeof(format_version_number), 1, binF);
-  std::fread(&extended_version, sizeof(extended_version), 1, binF);
+  VERIFY(std::fread(&format_version_number,
+           sizeof(format_version_number), 1, binF) == 1);
+  VERIFY(std::fread(&extended_version,
+           sizeof(extended_version), 1, binF) == 1);
   read_binary(smash_version, binF);          // smash version
 
   COMPARE(magic, "SMSH");

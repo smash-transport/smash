@@ -88,7 +88,8 @@ static void compare_extended_particledata(
   COMPARE(std::atoi(datastring.at(13).c_str()), particle.formation_time());
   COMPARE(std::atoi(datastring.at(14).c_str()),
     particle.cross_section_scaling_factor());
-  COMPARE(std::atoi(datastring.at(15).c_str()), h.id_process);
+  COMPARE(std::atoi(datastring.at(15).c_str()),
+    static_cast<int>(h.id_process));
   COMPARE(std::atoi(datastring.at(16).c_str()),
           static_cast<int>(h.process_type));
   COMPARE_ABSOLUTE_ERROR(std::atof(datastring.at(17).c_str()),
