@@ -41,6 +41,20 @@ namespace Smash {
 /*!\Userguide
  * \page input_modi_list_ List
  *
+ * <b> Purpose: Provides a modus for hydro afterburner calculations </b>
+ *
+ * Takes files with list of particles in
+ * \ref oscar2013_format "Oscar 2013 format" as an input. These
+ * particles are treated as a starting setup.
+ *
+ * To select the List modus:
+ * \code
+ * General:
+ *     Modus:  List
+ * \endcode
+ *
+ * ### Input options:
+ *
  * \key File_Directory (string, required):\n
  * Directory for the external particle lists
  *
@@ -53,7 +67,22 @@ namespace Smash {
  * \key Shift_Id (int, required):\n
  * Starting id for event_id_
  *
- * Example input in particle_lists_in/event{id}
+ * ### Example of configuration:
+ *
+ * \code
+ *  List:
+ *      # path of external particle list == File_Directory/File_Prefix{eventid}
+ *      File_Directory: "particle_lists_in"
+ *      File_Prefix: "event"
+ *
+ *      # starting number of event_id in event-by-event simulation
+ *      Shift_Id: 0
+ *
+ *      # start time of simulation
+ *      Start_Time: 0.0
+ * \endcode
+ *
+ * ### Example of input in particle_lists_in/event{id}
  * <div class="fragment">
  * <div class="line"><span class="preprocessor">#!OSCAR2013 particle_lists
  * t x y z mass p0 px py pz pdg ID charge</span></div>
@@ -62,10 +91,10 @@ namespace Smash {
  * <div class="line"><span class="preprocessor">0.1 6.42036 1.66473 9.38499
  * 0.138 0.232871 0.116953 -0.115553 0.090303 111 0 0</span></div>
  * </div>
- * It means that one pi^{0} at spatial coordinates (t,x,y,z) =
- * (0.1, 6.42036, 1.66473, 9.38499) fm
- * and 4-momenta (p0, px. py, pz) =
- * (0.232871, 0.116953, -0.115553, 0.090303) GeV,
+ * It means that one \f$ \pi^0 \f$ with spatial coordinates\n
+ * (t, x, y, z) = (0.1, 6.42036, 1.66473, 9.38499) fm and\n
+ * and 4-momenta (p0, px, py, pz) =
+ * (0.232871, 0.116953, -0.115553, 0.090303) GeV,\n
  * with mass = 0.138 GeV, pdg = 111, id = 0 and charge 0 will be initialized.
  */
 

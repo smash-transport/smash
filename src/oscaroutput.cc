@@ -276,6 +276,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * 0 0 event_number impact_parameter
  * \endcode
  *
+ * \anchor oscar2013_format
  * Oscar2013
  * ---------
  *

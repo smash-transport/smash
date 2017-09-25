@@ -21,32 +21,9 @@ namespace Smash {
 /**
  * \ingroup modus
  * ListModus: Provides a modus for hydro afterburner calculations
-*
-*Particle-list is given with data format in OSCAR2013, it's the same as the
-output in build/data/{eventid}/particles.oscar
-*The detailed information is as follows:
-*#!OSCAR2013 particle_lists SMASH-0.50-70-gc203fad t x y z mass p0 px py pz pdg
-ID
-# Units: fm fm fm fm GeV GeV GeV GeV GeV none none
-* To use this modus, chose
-* \code
-* General:
-*      MODUS: List
-* \endcode
-* in the configuration file.
-*
-* Options for ListModus go in the "Modi"→"List" section of the
-* configuration:
-*
-* \code
-* Modi:
-*      List:
-*              # definitions here
-* \endcode
-*
-* The following configuration options are understood:
-* \ref input_modi_list_
-*/
+ *
+ * For configuring see \ref input_modi_list_.
+ */
 class ListModus : public ModusDefault {
  public:
   /* default constructor with probable values */
