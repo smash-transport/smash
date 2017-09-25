@@ -81,7 +81,7 @@ static bool compare_particle(const ParticleData &p, FILE *file) {
 }
 
 /* Reads and compares particle in case of extended format */
-static bool compare_particle_extended(const ParticleData &p, FILE *file) {
+static void compare_particle_extended(const ParticleData &p, FILE *file) {
   VERIFY(compare_particle(p, file));
   int collisions_per_particle, id_process, process_type, p1pdg, p2pdg;
   double formation_time, xs_scaling_factor, time_last_collision;
@@ -102,17 +102,6 @@ static bool compare_particle_extended(const ParticleData &p, FILE *file) {
   COMPARE(time_last_collision, h.time_last_collision);
   COMPARE(p1pdg, h.p1.get_decimal());
   COMPARE(p2pdg, h.p2.get_decimal());
-
-  return true;
-
-/*  return (collisions_per_particle == h.collisions_per_particle) &&
-         (formation_time == p.formation_time()) &&
-         (xs_scaling_factor == p.cross_section_scaling_factor()) &&
-         (id_process == static_cast<int>(h.id_process)) &&
-         (process_type == static_cast<int>(h.process_type)) &&
-         (time_last_collision == h.time_last_collision) &&
-         (p1pdg == h.p1.get_decimal()) &&
-         (p2pdg == h.p2.get_decimal());*/
 }
 
 /* function to read and compare particle block header */
@@ -330,7 +319,6 @@ TEST(particles_format) {
 }
 
 TEST(extended) {
-  /* Set the most verbose option */
   OutputParameters output_par = OutputParameters();
   output_par.coll_printstartend = true;
   output_par.coll_extended = true;
@@ -396,20 +384,20 @@ TEST(extended) {
 
   // particles at event atart: expect two smashons
   VERIFY(compare_particles_block_header(2, binF));
-  VERIFY(compare_particle_extended(p1, binF));
-  VERIFY(compare_particle_extended(p2, binF));
+  compare_particle_extended(p1, binF);
+  compare_particle_extended(p2, binF);
 
   // interaction: 2 smashons -> 2 smashons
   VERIFY(compare_interaction_block_header(2, 2, *action, rho, binF));
-  VERIFY(compare_particle_extended(p1, binF));
-  VERIFY(compare_particle_extended(p2, binF));
-  VERIFY(compare_particle_extended(final_particles[0], binF));
-  VERIFY(compare_particle_extended(final_particles[1], binF));
+  compare_particle_extended(p1, binF);
+  compare_particle_extended(p2, binF);
+  compare_particle_extended(final_particles[0], binF);
+  compare_particle_extended(final_particles[1], binF);
 
   // paricles at event end: two smashons
   VERIFY(compare_particles_block_header(2, binF));
   for (const auto &particle : particles) {
-    VERIFY(compare_particle_extended(particle, binF));
+    compare_particle_extended(particle, binF);
   }
 
   // event end line
