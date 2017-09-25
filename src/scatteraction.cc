@@ -550,7 +550,8 @@ void ScatterAction::string_excitation() {
     std::sort(new_intermediate_particles.begin(),
               new_intermediate_particles.end(),
               [&](ParticleData i, ParticleData j) {
-                return std::fabs(i.momentum().x3()) > std::fabs(j.momentum().x3());
+                return std::abs(i.momentum().x3()) >
+                       std::abs(j.momentum().x3());
               });
     for (ParticleData data : new_intermediate_particles) {
       log.debug("Particle momenta after sorting: ", data.momentum());
