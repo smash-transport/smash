@@ -96,6 +96,20 @@ TEST(list_from_oscar2013_output) {
     std::cout << p << std::endl;
   }
 
+  // Scroll particles back to the earliest time, as list modus is supposed to do
+  double earliest_t = 1.e8;
+  for (const auto &particle : particles) {
+    if (particle.position().x0() < earliest_t) {
+      earliest_t = particle.position().x0();
+    }
+  }
+  for (auto &particle : particles) {
+    const double t = particle.position().x0();
+    const FourVector u(1.0, particle.velocity());
+    particle.set_formation_time(t);
+    particle.set_4position(particle.position() + u * (earliest_t - t));
+  }
+
   COMPARE(particles_read.size(), particles.size());
   ParticleList p_init = particles.copy_to_vector();
   ParticleList p_fin  = particles_read.copy_to_vector();
@@ -105,5 +119,9 @@ TEST(list_from_oscar2013_output) {
     p_init.pop_back();
     p_fin.pop_back();
     compare_fourvector(a.momentum(), b.momentum());
+    compare_fourvector(a.position(), b.position());
+    COMPARE(a.id(), b.id());
+    COMPARE_ABSOLUTE_ERROR(a.formation_time(), b.formation_time(), accuracy);
+    COMPARE(a.pdgcode(), b.pdgcode());
   }
 }
