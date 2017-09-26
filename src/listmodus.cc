@@ -169,7 +169,7 @@ double ListModus::initial_conditions(Particles *particles,
                 << "2. Particles info: t x y z mass p0 px py pz"
                 << " pdg ID charge\n"
                 << "in units of: fm fm fm fm GeV GeV GeV GeV GeV"
-                << "none none none\n";
+                << " none none none\n";
     throw std::runtime_error("External particle list does not exist!");
   }
 
