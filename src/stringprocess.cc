@@ -106,7 +106,7 @@ int StringProcess::append_final_state(const FourVector &uString,
   for (int i = 0; i < nfrag; i++) {
     // recursively compute x^{+} coordinates of q-qbar formation vertex
     xvertex_pos[i + 1] = xvertex_pos[i] -
-        (fragments[i].momentum.x0() - fragments[i].pparallel) /
+        (fragments[i].momentum.x0() + fragments[i].pparallel) /
         (kappa_tension_string * std::sqrt(2.));
   }
   // x^{-} coordinates of the backward end
@@ -158,7 +158,6 @@ int StringProcess::append_final_state(const FourVector &uString,
 
     ParticleData new_particle(ParticleType::find(fragments[i].pdg));
     new_particle.set_4momentum(fragments[i].momentum);
-    new_particle.set_4position(fragment_position);
 
     constexpr double suppression_factor = 0.7;
     new_particle.set_cross_section_scaling_factor(fragments[i].is_leading ?
