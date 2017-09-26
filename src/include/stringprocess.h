@@ -17,38 +17,51 @@ namespace Smash {
  */
 class StringProcess {
  private:
-  int baryonA, baryonB;
-  double PPosA, PNegA, PPosB, PNegB;
-  double massA, massB;
-  double sqrtsAB, pabscomAB;
-  PdgCode PDGcodeA, PDGcodeB;
-  FourVector plabA, plabB;
-  FourVector pcomA, pcomB;
-  FourVector ucomAB;
-  ThreeVector vcomAB;
-  std::array<ThreeVector,4> evecBasisAB;
-
-  int NpartFinal;
-  int NpartString1;
-  int NpartString2;
-
-  double pmin_gluon_lightcone;
-  double xmin_gluon_fraction;
-
-  double pow_fgluon_beta;
-
-  double pow_fquark_alpha;
-  double pow_fquark_beta;
-
-  double sigmaQperp;
-
-  double kappa_tension_string;
-
-  double time_collision;
-
-  double gamma_factor_com;
-
-  Pythia8::Pythia *pythia;
+  int baryonA; //!< 3 times baryon number of incoming particle A
+  int baryonB; //!< 3 times baryon number of incoming particle B
+  double PPosA; //!< forward lightcone momentum p^{+} of incoming particle A
+                //!< in the center of mass frame
+  double PPosB; //!< forward lightcone momentum p^{+} of incoming particle B
+                //!< in the center of mass frame
+  double PNegA; //!< backward lightcone momentum p^{-} of incoming particle A
+                //!< in the center of mass frame
+  double PNegB; //!< backward lightcone momentum p^{-} of incoming particle B
+                //!< in the center of mass frame
+  double massA; //!< mass of incoming particle A
+  double massB; //!< mass of incoming particle A
+  double sqrtsAB; //!< sqrt of Mandelstam variable s
+  double pabscomAB; //!< magnitude of three momentum of incoming particles
+                    //!< in the center of mass frame
+  PdgCode PDGcodeA; //!< PdgCode of incoming particle A
+  PdgCode PDGcodeB; //!< PdgCode of incoming particle B
+  FourVector plabA; //!< momentum of incoming particle A in the lab frame
+  FourVector plabB; //!< momentum of incoming particle B in the lab frame
+  FourVector pcomA; //!< momentum of incoming particle A in the center of mass frame
+  FourVector pcomB; //!< momentum of incoming particle B in the center of mass frame
+  FourVector ucomAB; //!< velocity four vector of the center of mass in the lab frame
+  ThreeVector vcomAB; //!< velocity three vector of the center of mass in the lab frame
+  std::array<ThreeVector,4> evecBasisAB; //!< orthonormal basis vectors in the center of mass frame
+                                         //!< where the 3rd one is parallel to momtentum
+                                         //!< of incoming particle A
+  int NpartFinal; //!< total number of final state particles
+  int NpartString1; //!< number of particles fragmented from string 1
+  int NpartString2; //!< number of particles fragmented from string 2
+  double pmin_gluon_lightcone; //!< the minimum lightcone momentum scale carried by gluon
+  double xmin_gluon_fraction; //!< the minimum lightcone momentum fraction carried by gluon
+  double pow_fgluon_beta; //!< parameter for the gluon distribution function
+                          //!< P(x) = 1/x * (1 - x)^{1 + pow_fgluon_beta}
+  double pow_fquark_alpha; //!< parameter for the quark distribution function
+                          //!< P(x) = x^{pow_fquark_alpha - 1} * (1 - x)^{pow_fquark_beta - 1}
+  double pow_fquark_beta; //!< parameter for the quark distribution function
+                          //!< P(x) = x^{pow_fquark_alpha - 1} * (1 - x)^{pow_fquark_beta - 1}
+  double sigma_qperp; //!< transverse momentum spread of the excited strings
+                      //!< transverse momenta of strings are sampled
+                      //!< according to gaussian distribution with width sigma_qperp
+  double kappa_tension_string; //!< string tension
+  double time_collision; //!< time of collision in the computational frame
+  double gamma_factor_com; //!< Lorentz gamma factor of center of mass
+                           //!< in the computational frame
+  Pythia8::Pythia *pythia; //!< pointer of the PYTHIA object used in fragmentation
 
  public:
   /** constructor */
@@ -76,14 +89,14 @@ class StringProcess {
   }
   /**
    * lightcone momentum fraction of gluon is sampled
-   * according to probability distribution P(x) = 1/x * (1 - x)^{1 + betapowS}
+   * according to probability distribution P(x) = 1/x * (1 - x)^{1 + pow_fgluon_beta}
    * in double-diffractive processes.
    * \param betapowSIn is a value that we want to use for pow_fgluon_beta.
    */
   void set_pow_fgluon(double betapowSIn) { pow_fgluon_beta = betapowSIn; }
   /**
    * lightcone momentum fraction of quark is sampled
-   * according to probability distribution P(x) = x^{alphapowV - 1} * (1 - x)^{betapowV - 1}
+   * according to probability distribution P(x) = x^{pow_fquark_alpha - 1} * (1 - x)^{pow_fquark_beta - 1}
    * in non-diffractive processes.
    * \param alphapowVIn is a value that we want to use for pow_fquark_alpha.
    * \param betapowVIn is a value that we want to use for pow_fquark_beta.
@@ -93,10 +106,10 @@ class StringProcess {
     pow_fquark_beta = betapowVIn;
   }
   /**
-   * set the average amount of transverse momentum transfer sigmaQperp.
-   * \param sigmaQperpIn is a value that we want to use for sigmaQperp.
+   * set the average amount of transverse momentum transfer sigma_qperp.
+   * \param sigmaQperpIn is a value that we want to use for sigma_qperp.
    */
-  void set_sigma_Qperp(double sigmaQperpIn) { sigmaQperp = sigmaQperpIn; }
+  void set_sigma_qperp(double sigmaQperpIn) { sigma_qperp = sigmaQperpIn; }
   /**
    * set the string tension kappaString which is used in append_final_state.
    * \param kappaStringIn is a value that we want to use for kappaString.

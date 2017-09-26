@@ -762,7 +762,7 @@ void ScatterAction::string_excitation_inter(int subprocess) {
       sigQperp = 0.5 + 0.2 * std::log(sqrts / 4.) / std::log(5.);
     }
     /* initialize the string_process object */
-    string_process->set_sigma_Qperp(sigQperp);
+    string_process->set_sigma_qperp(sigQperp);
     string_process->set_pmin_gluon_lightcone(0.001);
     isinit =
         string_process->init(incoming_particles_,

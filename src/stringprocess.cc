@@ -30,7 +30,7 @@ StringProcess::StringProcess() {
   pow_fquark_alpha = 1.;
   pow_fquark_beta = 2.5;
 
-  sigmaQperp = 0.5;
+  sigma_qperp = 0.5;
   kappa_tension_string = 1.;
 
   time_collision = 0.;
@@ -406,8 +406,8 @@ bool StringProcess::next_SDiff(int channel) {
       makeStringEnds(PDGcodeA, idqX1, idqX2);
     }
     // sample the transverse momentum transfer
-    QTrx = Random::normal(0., sigmaQperp/std::sqrt(2.) );
-    QTry = Random::normal(0., sigmaQperp/std::sqrt(2.) );
+    QTrx = Random::normal(0., sigma_qperp/std::sqrt(2.) );
+    QTry = Random::normal(0., sigma_qperp/std::sqrt(2.) );
     QTrn = std::sqrt(QTrx*QTrx + QTry*QTry);
     // sample the string mass and evaluate the three-momenta of hadron and string.
     rmass = std::log(mstrMax / mstrMin) * Random::uniform(0., 1.);
@@ -531,8 +531,8 @@ bool StringProcess::next_DDiff() {
     xfracA = Random::beta_a0(xmin_gluon_fraction, pow_fgluon_beta + 1.);
     xfracB = Random::beta_a0(xmin_gluon_fraction, pow_fgluon_beta + 1.);
     // sample the transverse momentum transfer
-    QTrx = Random::normal(0., sigmaQperp/std::sqrt(2.) );
-    QTry = Random::normal(0., sigmaQperp/std::sqrt(2.) );
+    QTrx = Random::normal(0., sigma_qperp/std::sqrt(2.) );
+    QTry = Random::normal(0., sigma_qperp/std::sqrt(2.) );
     QTrn = std::sqrt(QTrx*QTrx + QTry*QTry);
     // evaluate the lightcone momentum transfer
     QPos = -QTrn*QTrn / (2. * xfracB * PNegB);
@@ -717,8 +717,8 @@ bool StringProcess::next_NDiff() {
     xfracA = Random::beta(pow_fquark_alpha, pow_fquark_beta);
     xfracB = Random::beta(pow_fquark_alpha, pow_fquark_beta);
     // sample the transverse momentum transfer
-    QTrx = Random::normal(0., sigmaQperp/std::sqrt(2.) );
-    QTry = Random::normal(0., sigmaQperp/std::sqrt(2.) );
+    QTrx = Random::normal(0., sigma_qperp/std::sqrt(2.) );
+    QTry = Random::normal(0., sigma_qperp/std::sqrt(2.) );
     QTrn = std::sqrt(QTrx*QTrx + QTry*QTry);
     // evaluate the lightcone momentum transfer
     QPos = -QTrn*QTrn / (2. * xfracB * PNegB);
