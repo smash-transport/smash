@@ -51,262 +51,128 @@ void StringProcess::set_pythia(Pythia8::Pythia *pythiaIn) {
 }
 
 // compute the formation time and fill the arrays with final-state particles
-int StringProcess::append_final_state(FourVector &uString, ThreeVector &evecLong) {
-  int ret;
+int StringProcess::append_final_state(const FourVector &uString,
+                                      const ThreeVector &evecLong) {
+  struct fragment_type {
+    FourVector momentum;
+    double pparallel;  // longitudinal component of momentum
+    double y;          // momentum rapidity
+    double xtotfac;    // cross-section scaling factor
+    PdgCode pdg;
+    bool is_leading;   // is leading hadron or not
+  };
 
-  int nfrag;
-  int ipyth;
-  int ipstr, jpstr, kpstr;
-  int pythia_id, islead, baryon, bstring;
-  double pPosTot, pNegTot;
-  double tProd, xtotfac;
+  std::vector<fragment_type> fragments;
+  double p_pos_tot = 0.0, p_neg_tot = 0.0;
+  int bstring = 0;
 
-  bool foundFW;
-  bool foundBW;
-
-  std::vector<int> idfrag;
-  std::vector<double> Efrag;
-  std::vector<double> pxfrag;
-  std::vector<double> pyfrag;
-  std::vector<double> pzfrag;
-  std::vector<double> mfrag;
-
-  std::vector<int> indY;
-  std::vector<double> pparallel;
-  std::vector<double> Yparallel;
-  std::vector<double> XVertexPos;
-  std::vector<double> XVertexNeg;
-
-  ThreeVector vstring;
-  FourVector pvRS;
-  FourVector pvCM;
-
-  FourVector xfRS;
-  FourVector xfCM;
-  // count number of hadrons fragmented out of string.
-  nfrag = 0;
-  bstring = 0;
-  for (ipyth = 0; ipyth < pythia->event.size(); ipyth++) {
-    if (pythia->event[ipyth].isFinal()) {
-      nfrag = nfrag + 1;
-      pythia_id = pythia->event[ipyth].id();
-      bstring = bstring + pythia->particleData.baryonNumberType(pythia_id);
+  for (int ipyth = 0; ipyth < pythia->event.size(); ipyth++) {
+    if (!pythia->event[ipyth].isFinal()) {
+      continue;
     }
+    int pythia_id = pythia->event[ipyth].id();
+    /* K_short and K_long need are converted to K0 since SMASH only knows K0 */
+    if (pythia_id == 310 || pythia_id == 130) {
+      pythia_id = (Random::uniform_int(0, 1) == 0) ? 311 : -311;
+    }
+    PdgCode pdg = PdgCode::from_decimal(pythia_id);
+    if (!fragments[ipyth].pdg.is_hadron()) {
+      throw std::invalid_argument("StringProcess::append_final_state warning :"
+             " particle is not meson or baryon.");
+    }
+    FourVector mom(pythia->event[ipyth].e(),
+                   pythia->event[ipyth].px(),
+                   pythia->event[ipyth].py(),
+                   pythia->event[ipyth].pz());
+    double pparallel = mom.threevec() * evecLong;
+    double y = 0.5 * std::log((mom.x0() + pparallel) / (mom.x0() - pparallel));
+    fragments.push_back({mom, pparallel, y, 0.0, pdg, false});
+    // total lightcone momentum
+    p_pos_tot += (mom.x0() + pparallel) / std::sqrt(2.);
+    p_neg_tot += (mom.x0() - pparallel) / std::sqrt(2.);
+    bstring += pythia->particleData.baryonNumberType(pythia_id);
   }
-  // extract velocity three-vector to perform Lorentz boost.
-  vstring = uString.velocity();
-  // resize vectors.
-  idfrag.resize(nfrag);
-  Efrag.resize(nfrag);
-  pxfrag.resize(nfrag);
-  pyfrag.resize(nfrag);
-  pzfrag.resize(nfrag);
-  mfrag.resize(nfrag);
-  indY.resize(nfrag);
-  pparallel.resize(nfrag);
-  Yparallel.resize(nfrag);
-  XVertexPos.resize(nfrag + 1);
-  XVertexNeg.resize(nfrag + 1);
-  /* compute the rapidity of each fragmented hadrons
-   * and total lightcone momentum. */
-  pPosTot = 0.;
-  pNegTot = 0.;
-  ipstr = 0;
-  for (ipyth = 0; ipyth < pythia->event.size(); ipyth++) {
-    if (pythia->event[ipyth].isFinal()) {
-      idfrag[ipstr] = pythia->event[ipyth].id();
-      Efrag[ipstr] = pythia->event[ipyth].e();
-      pxfrag[ipstr] = pythia->event[ipyth].px();
-      pyfrag[ipstr] = pythia->event[ipyth].py();
-      pzfrag[ipstr] = pythia->event[ipyth].pz();
-      mfrag[ipstr] = pythia->event[ipyth].m();
-      // longitudinal component of momentum
-      pparallel[ipstr] = pxfrag[ipstr] * evecLong.x1() +
-                         pyfrag[ipstr] * evecLong.x2() +
-                         pzfrag[ipstr] * evecLong.x3();
-      // momentum rapidity
-      Yparallel[ipstr] = 0.5 * std::log((Efrag[ipstr] + pparallel[ipstr]) /
-                                   (Efrag[ipstr] - pparallel[ipstr]));
-      // total lightcone momentum
-      pPosTot = pPosTot + (Efrag[ipstr] + pparallel[ipstr]) / std::sqrt(2.);
-      pNegTot = pNegTot + (Efrag[ipstr] - pparallel[ipstr]) / std::sqrt(2.);
+  const int nfrag = fragments.size();
+  assert(nfrag > 0);
+  // Sort the particles in descending order of momentum rapidity
+  std::sort(fragments.begin(), fragments.end(),
+            [&](fragment_type i, fragment_type j) { return i.y > j.y; });
 
-      ipstr = ipstr + 1;
-    }
-  }
-  /* sort the particles in descending order of momentum rapidity
-   * such that indY[0] and indY[nfrag-1] are respectively forward and backward ends.
-   * i = indY[k] enables to have the k-th particle in the longitudinal direction
-   * by accessing the i-th particle in the PYTHIA output list. */
-  for (ipstr = 0; ipstr < nfrag; ipstr++) {
-    kpstr = 0;
-    for (jpstr = 0; jpstr < nfrag; jpstr++) {
-      if ((ipstr != jpstr) && (Yparallel[ipstr] < Yparallel[jpstr])) {
-        kpstr = kpstr + 1;
-      }
-    }
-    indY[kpstr] = ipstr;
-  }
+  std::vector<double> xvertex_pos, xvertex_neg;
+  xvertex_pos.resize(nfrag + 1);
+  xvertex_neg.resize(nfrag + 1);
   // x^{+} coordinates of the forward end
-  XVertexPos[0] = pPosTot / kappa_tension_string;
-  for (kpstr = 0; kpstr < nfrag; kpstr++) {
-    // choose the k-th particle in the longitudinal direction.
-    ipstr = indY[kpstr];
-    // recursively compute x^{+} coordinates of q-qbar formation vertex.
-    XVertexPos[kpstr + 1] =
-        XVertexPos[kpstr] -
-        (Efrag[ipstr] + pparallel[ipstr]) / (kappa_tension_string * std::sqrt(2.));
+  xvertex_pos[0] = p_pos_tot / kappa_tension_string;
+  for (int i = 0; i < nfrag; i++) {
+    // recursively compute x^{+} coordinates of q-qbar formation vertex
+    xvertex_pos[i + 1] = xvertex_pos[i] -
+        (fragments[i].momentum.x0() - fragments[i].pparallel) /
+        (kappa_tension_string * std::sqrt(2.));
   }
   // x^{-} coordinates of the backward end
-  XVertexNeg[nfrag] = pNegTot / kappa_tension_string;
-  for (kpstr = nfrag - 1; kpstr >= 0; kpstr--) {
-    // choose the k-th particle in the longitudinal direction.
-    ipstr = indY[kpstr];
-    // recursively compute x^{-} coordinates of q-qbar formation vertex.
-    XVertexNeg[kpstr] =
-        XVertexNeg[kpstr + 1] -
-        (Efrag[ipstr] - pparallel[ipstr]) / (kappa_tension_string * std::sqrt(2.));
+  xvertex_neg[nfrag] = p_neg_tot / kappa_tension_string;
+  for (int i = nfrag - 1; i >= 0; i--) {
+    // recursively compute x^{-} coordinates of q-qbar formation vertex
+    xvertex_neg[i] = xvertex_neg[i + 1] -
+        (fragments[i].momentum.x0() - fragments[i].pparallel) /
+        (kappa_tension_string * std::sqrt(2.));
   }
+
+  /* compute the cross section suppression factor for leading hadrons
+   * based on the number of valence quarks. */
+  if (bstring == 0) {  // mesonic string
+    for (int i : {0, nfrag - 1}) {
+      fragments[i].xtotfac = fragments[i].pdg.is_baryon() ? 1. / 3. : 0.5;
+      fragments[i].is_leading = true;
+    }
+  } else if (bstring == 3 || bstring == -3) {  // baryonic string
+    // The first baryon in forward direction
+    int i = 0;
+    while (i < nfrag && fragments[i].pdg.is_meson()) { i++; }
+    fragments[i].xtotfac = 2. /  3.;
+    fragments[i].is_leading = true;
+    // The most backward meson
+    i = nfrag - 1;
+    while (i >= 0 && fragments[i].pdg.is_baryon()) { i--; }
+    fragments[i].xtotfac = 0.5;
+    fragments[i].is_leading = true;
+  } else {
+    throw std::invalid_argument("StringProcess::append_final_state"
+        " encountered bstring != 0, 3, -3");
+  }
+
+  // Velocity three-vector to perform Lorentz boost.
+  const ThreeVector vstring = uString.velocity();
+
   /* compute the formation times of hadrons
    * from the lightcone coordinates of q-qbar formation vertices. */
-  ret = 0;
-  foundFW = false;
-  foundBW = false;
-  for (kpstr = 0; kpstr < nfrag; kpstr++) {
-    // choose the k-th particle in the longitudinal direction.
-    ipstr = indY[kpstr];
-
-    pythia_id = idfrag[ipstr];
-    baryon = pythia->particleData.baryonNumberType(pythia_id);
-    // set momentum in the rest frame of string
-    pvRS.set_x0( Efrag[ipstr] );
-    pvRS.set_x1( pxfrag[ipstr] );
-    pvRS.set_x2( pyfrag[ipstr] );
-    pvRS.set_x3( pzfrag[ipstr] );
+  for (int i = 0; i < nfrag; i++) {
     // set the formation time and position in the rest frame of string
-    xfRS.set_x0( (XVertexPos[kpstr] + XVertexNeg[kpstr + 1]) / std::sqrt(2.) );
-    xfRS.set_x1(
-        evecLong.x1() * (XVertexPos[kpstr] - XVertexNeg[kpstr + 1]) / std::sqrt(2.) );
-    xfRS.set_x2(
-        evecLong.x2() * (XVertexPos[kpstr] - XVertexNeg[kpstr + 1]) / std::sqrt(2.) );
-    xfRS.set_x3(
-        evecLong.x3() * (XVertexPos[kpstr] - XVertexNeg[kpstr + 1]) / std::sqrt(2.) );
+    double t_prod = (xvertex_pos[i] + xvertex_neg[i + 1]) / std::sqrt(2.);
+    FourVector fragment_position = FourVector(t_prod, evecLong *
+            (xvertex_pos[i] - xvertex_neg[i + 1]) / std::sqrt(2.));
+    // boost into the lab frame
+    fragments[i].momentum = fragments[i].momentum.LorentzBoost(  -vstring );
+    fragment_position = fragment_position.LorentzBoost(-vstring );
+    t_prod = fragment_position.x0();
 
-    tProd = (XVertexPos[kpstr] + XVertexNeg[kpstr + 1]) / std::sqrt(2.);
-    /* compute the cross section suppression factor
-     * based on the number of valence quarks. */
-    islead = 0;
-    xtotfac = 0.;
-    if (abs(bstring) == 0) {  // mesonic string
-      /* the forward and backward hadrons are assumed to be leading ones
-       * with nonzero cross section suppression factor.
-       * for baryons and anti-baryons the suppression factor is 1/3.
-       * for mesons the suppression factor is 1/2. */
-      if ((kpstr == 0) && (foundFW == false)) {
-        // forward end
-        islead = 1;
-        if (abs(baryon) == 3) {
-          xtotfac = 1. / 3.;
-        } else if (baryon == 0) {
-          xtotfac = 0.5;
-        } else {
-          fprintf(stderr,
-                  "  StringProcess::append_final_state warning : particle is not "
-                  "meson or baryon.\n");
-        }
-        foundFW = true;
-      } else if ((kpstr == (nfrag - 1)) && (foundBW == false)) {
-        // backward end
-        islead = 1;
-        if (abs(baryon) == 3) {
-          xtotfac = 1. / 3.;
-        } else if (baryon == 0) {
-          xtotfac = 0.5;
-        } else {
-          fprintf(stderr,
-                  "  StringProcess::append_final_state warning : particle is not "
-                  "meson or baryon.\n");
-        }
-        foundBW = true;
-      } else {
-        islead = 0;
-        xtotfac = 0.;
-      }
-    } else if (abs(bstring) == 3) {  // baryonic string
-      /* the first baryon in the forward direction is assumed
-       * to be the leading baryon with cross section suppression factor 2/3.
-       * the most backward meson among other particles is another leading hadron
-       * with cross section suppression factor 1/2. */
-      if ((baryon == bstring) && (foundFW == false)) {
-        // the first baryon
-        islead = 1;
-        xtotfac = 2. / 3.;
-        foundFW = true;
-      } else if ((kpstr == (nfrag - 2)) && (baryon == 0) &&
-                 (foundFW == false) && (foundBW == false)) {
-        // the second-last meson
-        islead = 1;
-        xtotfac = 0.5;
-        foundBW = true;
-      } else if ((kpstr == (nfrag - 1)) && (baryon == 0) && (foundFW == true) &&
-                 (foundBW == false)) {
-        // backward end
-        islead = 1;
-        xtotfac = 0.5;
-        foundBW = true;
-      } else {
-        islead = 0;
-        xtotfac = 0.;
-      }
-    } else {  // otherwise
-      fprintf(stderr,
-              "  StringProcess::append_final_state warning : string is neither "
-              "mesonic nor baryonic.\n");
-    }
-    // boost into the lab frame.
-    pvCM = pvRS.LorentzBoost( -vstring );
-    xfCM = xfRS.LorentzBoost( -vstring );
-    // obtain the formation time in the lab frame.
-    tProd = xfCM.x0();
+    ParticleData new_particle(ParticleType::find(fragments[i].pdg));
+    new_particle.set_4momentum(fragments[i].momentum);
+    new_particle.set_4position(fragment_position);
 
-    //log.debug("PDG ID from Pythia:", pythia_id);
-    /* K_short and K_long need to be converted to K0
-     * since SMASH only knows K0 */
-    if (pythia_id == 310 || pythia_id == 130) {
-      const double prob = Random::uniform(0., 1.);
-      if (prob <= 0.5) {
-        pythia_id = 311;
-      } else {
-        pythia_id = -311;
-      }
-    }
-    const std::string s = std::to_string(pythia_id);
-    PdgCode pythia_code(s);
-    ParticleData new_particle(ParticleType::find(pythia_code));
-    new_particle.set_4momentum(pvCM);
-    //log.debug("4-momentum from Pythia: ", pvCM);
-    const double suppression_factor = 0.7;
-    if( islead == 0 ){
-      new_particle.set_cross_section_scaling_factor(0.);
-    }
-    else{
-      new_particle.set_cross_section_scaling_factor(
-          suppression_factor * xtotfac);
-    }
-    new_particle.set_formation_time(
-        time_collision + gamma_factor_com * tProd);
+    constexpr double suppression_factor = 0.7;
+    new_particle.set_cross_section_scaling_factor(fragments[i].is_leading ?
+        suppression_factor * fragments[i].xtotfac : 0.);
+    new_particle.set_formation_time(time_collision +
+                                    gamma_factor_com * t_prod);
     final_state.push_back(new_particle);
-
-    ret = ret + 1;
   }
 
-  return ret;
+  return nfrag;
 }
 
 bool StringProcess::init(const ParticleList &incomingList,
                          double tcollIn, double gammaFacIn){
-  bool ret;
-
   PDGcodeA = incomingList[0].pdgcode();
   PDGcodeB = incomingList[1].pdgcode();
   massA = incomingList[0].effective_mass();
@@ -334,8 +200,7 @@ bool StringProcess::init(const ParticleList &incomingList,
   time_collision = tcollIn;
   gamma_factor_com = gammaFacIn;
 
-  ret = true;
-  return ret;
+  return true;
 }
 
 /**

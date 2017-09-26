@@ -180,7 +180,8 @@ class StringProcess {
    * \param evecLong is unit 3-vector in which string is stretched.
    * \return number of hadrons fragmented out of string.
    */
-  int append_final_state(FourVector &uString, ThreeVector &evecLong);
+  int append_final_state(const FourVector &uString,
+                         const ThreeVector &evecLong);
   /**
    * make a random selection to determine partonic contents at the string ends.
    * \param pdgcodeIn is PdgCode of hadron which transforms into a string.
