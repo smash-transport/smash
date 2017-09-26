@@ -187,8 +187,7 @@ class StringProcess {
    * \param idq1 is PDG id of quark or anti-diquark.
    * \param idq2 is PDG id of anti-quark or diquark.
    */
-  void makeStringEnds(PdgCode &pdgcodeIn, int &idq1, int &idq2);
-  //void makeStringEnds(std::array<int,4> &idqset, int &idq1, int &idq2);
+  void make_string_ends(PdgCode &pdgcodeIn, int &idq1, int &idq2);
   /**
    * perform string fragmentation to determine species and momenta of hadrons
    * by implementing PYTHIA 8.2 \iref{Andersson:1983ia,Sjostrand:2014zea}.
@@ -199,7 +198,7 @@ class StringProcess {
    * \param random_rotation is whether or not we randomly rotate the orientation.
    * \return number of hadrons fragmented out of string.
    */
-  int fragmentString(int idq1, int idq2, double mString, ThreeVector &evecLong,
+  int fragment_string(int idq1, int idq2, double mString, ThreeVector &evecLong,
                      bool random_rotation);
 };
 

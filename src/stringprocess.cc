@@ -401,9 +401,9 @@ bool StringProcess::next_SDiff(int channel) {
     ntry = ntry + 1;
     // decompose hadron into quarks
     if( channel == 1 ) { // AB > AX
-      makeStringEnds(PDGcodeB, idqX1, idqX2);
+      make_string_ends(PDGcodeB, idqX1, idqX2);
     } else if( channel == 2 ) { // AB > XB
-      makeStringEnds(PDGcodeA, idqX1, idqX2);
+      make_string_ends(PDGcodeA, idqX1, idqX2);
     }
     // sample the transverse momentum transfer
     QTrx = Random::normal(0., sigma_qperp/std::sqrt(2.) );
@@ -455,7 +455,7 @@ bool StringProcess::next_SDiff(int channel) {
     pabs = prs.threevec().abs();
     evec = prs.threevec() / pabs;
     // perform fragmentation and add particles to final_state.
-    nfrag = fragmentString(idqX1, idqX2, massX, evec, false);
+    nfrag = fragment_string(idqX1, idqX2, massX, evec, false);
     if (nfrag > 0) {
       NpartString1 = append_final_state(ustrXlab, evec);
     } else {
@@ -525,8 +525,8 @@ bool StringProcess::next_DDiff() {
   while (((foundMass1 == false) || (foundMass2 == false)) && (ntry < 100)) {
     ntry = ntry + 1;
 
-    makeStringEnds(PDGcodeA, idq11, idq12);
-    makeStringEnds(PDGcodeB, idq21, idq22);
+    make_string_ends(PDGcodeA, idq11, idq12);
+    make_string_ends(PDGcodeB, idq21, idq22);
     // sample the lightcone momentum fraction carried by gluons
     xfracA = Random::beta_a0(xmin_gluon_fraction, pow_fgluon_beta + 1.);
     xfracB = Random::beta_a0(xmin_gluon_fraction, pow_fgluon_beta + 1.);
@@ -575,7 +575,7 @@ bool StringProcess::next_DDiff() {
     pabs = prs.threevec().abs();
     evec = prs.threevec() / pabs;
     // perform fragmentation and add particles to final_state.
-    nfrag1 = fragmentString(idq11, idq12, mstr1, evec, false);
+    nfrag1 = fragment_string(idq11, idq12, mstr1, evec, false);
     if (nfrag1 > 0) {
       NpartString1 = append_final_state(ustr1lab, evec);
     } else {
@@ -592,7 +592,7 @@ bool StringProcess::next_DDiff() {
     pabs = prs.threevec().abs();
     evec = prs.threevec() / pabs;
     // perform fragmentation and add particles to final_state.
-    nfrag2 = fragmentString(idq21, idq22, mstr2, evec, false);
+    nfrag2 = fragment_string(idq21, idq22, mstr2, evec, false);
     if (nfrag2 > 0) {
       NpartString2 = append_final_state(ustr2lab, evec);
     } else {
@@ -657,8 +657,8 @@ bool StringProcess::next_NDiff() {
   while (((foundMass1 == false) || (foundMass2 == false)) && (ntry < 100)) {
     ntry = ntry + 1;
 
-    makeStringEnds(PDGcodeA, idqA1, idqA2);
-    makeStringEnds(PDGcodeB, idqB1, idqB2);
+    make_string_ends(PDGcodeA, idqA1, idqA2);
+    make_string_ends(PDGcodeB, idqB1, idqB2);
 
     if ((baryonA == 3) && (baryonB == 3)) {  // baryon-baryon
       idq11 = idqB1;
@@ -763,7 +763,7 @@ bool StringProcess::next_NDiff() {
     pabs = prs.threevec().abs();
     evec = prs.threevec() / pabs;
     // perform fragmentation and add particles to final_state.
-    nfrag1 = fragmentString(idq11, idq12, mstr1, evec, false);
+    nfrag1 = fragment_string(idq11, idq12, mstr1, evec, false);
     if (nfrag1 > 0) {
       NpartString1 = append_final_state(ustr1lab, evec);
     } else {
@@ -780,7 +780,7 @@ bool StringProcess::next_NDiff() {
     pabs = prs.threevec().abs();
     evec = prs.threevec() / pabs;
     // perform fragmentation and add particles to final_state.
-    nfrag2 = fragmentString(idq21, idq22, mstr2, evec, false);
+    nfrag2 = fragment_string(idq21, idq22, mstr2, evec, false);
     if (nfrag2 > 0) {
       NpartString2 = append_final_state(ustr2lab, evec);
     } else {
@@ -934,7 +934,7 @@ bool StringProcess::next_BBbarAnn(){
 		pabs = pcomA.threevec().abs();
 		evec = pcomA.threevec() / pabs;
 
-		nfrag1 = fragmentString(idq11, idq12, mstr1, evec, false);
+		nfrag1 = fragment_string(idq11, idq12, mstr1, evec, false);
 		if( nfrag1 > 0 ){
 			NpartString1 = append_final_state(ustr1lab, evec);
 		}
@@ -948,7 +948,7 @@ bool StringProcess::next_BBbarAnn(){
 		pabs = pcomB.threevec().abs();
 		evec = pcomB.threevec() / pabs;
 
-		nfrag2 = fragmentString(idq21, idq22, mstr2, evec, false);
+		nfrag2 = fragment_string(idq21, idq22, mstr2, evec, false);
 		if( nfrag2 > 0 ){
 			NpartString2 = append_final_state(ustr2lab, evec);
 		}
@@ -1021,7 +1021,7 @@ void StringProcess::compute_incoming_lightcone_momenta(){
   PNegB = ( pcomB.x0() - evecBasisAB[3] * pcomB.threevec() ) / std::sqrt(2.);
 }
 
-void StringProcess::makeStringEnds(PdgCode &pdgcodeIn, int &idq1, int &idq2){
+void StringProcess::make_string_ends(PdgCode &pdgcodeIn, int &idq1, int &idq2){
   int ir, ic, jc;
   int idq1tmp, idq2tmp;
   std::array<int,3> qcontent;
@@ -1085,7 +1085,7 @@ void StringProcess::makeStringEnds(PdgCode &pdgcodeIn, int &idq1, int &idq2){
   }
 }
 
-int StringProcess::fragmentString(int idq1, int idq2, double mString,
+int StringProcess::fragment_string(int idq1, int idq2, double mString,
                             ThreeVector &evecLong, bool random_rotation) {
   int number_of_fragments;
   bool successful_hadronization;
