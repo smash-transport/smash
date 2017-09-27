@@ -701,7 +701,6 @@ bool StringProcess::next_BBbarAnn(){
   /* if it is a BBbar pair but there is no qqbar pair to annihilate,
    * nothing happens */
   if (no_combinations) {
-    // Todo(ryu, oliiny): shouldn't annihilation xs be 0 in this case?
     for (int i = 0; i < 2; i++) {
       NpartString[i] = 1;
       ParticleData new_particle(ParticleType::find(PDGcodes_[i]));
@@ -716,49 +715,58 @@ bool StringProcess::next_BBbarAnn(){
 
   // Select qqbar pair to annihilate and remove it away
   auto discrete_distr = Random::discrete_dist<int>(n_combinations);
-  const int qqbar_index = discrete_distr();
-  qcount_bar[qqbar_index]--;
-  qcount_antibar[qqbar_index]--;
+  const int q_annihilate = discrete_distr() + 1;
+  qcount_bar[q_annihilate - 1]--;
+  qcount_antibar[q_annihilate - 1]--;
+
+  // Get the remaining quarks and antiquarks
+  std::vector<int> remaining_quarks, remaining_antiquarks;
+  for (int i = 0; i < n_q_types; i++) {
+    for (int j = 0; j < qcount_bar[i]; j++) {
+      remaining_quarks.push_back(i + 1);
+    }
+    for (int j = 0; j < qcount_antibar[i]; j++) {
+      remaining_antiquarks.push_back(-(i + 1));
+    }
+  }
+  assert(remaining_quarks.size() == 2);
+  assert(remaining_antiquarks.size() == 2);
 
   const int max_ntry = 100;
   const std::array<double,2> mstr = {0.5*sqrtsAB, 0.5*sqrtsAB};
   for (int ntry = 0; ntry < max_ntry; ntry++) {
     // Randomly select two quark-antiquark pairs
-    std::array<int, 2> iquark, iantiquark;
-    for (int i = 0; i < 2; i++) {
-      discrete_distr.reset_weights(qcount_bar);
-      iquark[i] = discrete_distr();
-      qcount_bar[iquark[i]]--;
-      discrete_distr.reset_weights(qcount_antibar);
-      iantiquark[i] = discrete_distr();
-      qcount_antibar[iantiquark[i]]--;
+    if (Random::uniform_int(0, 1) == 0) {
+      std::swap(remaining_quarks[0], remaining_quarks[1]);
+    }
+    if (Random::uniform_int(0, 1) == 0) {
+      std::swap(remaining_antiquarks[0], remaining_antiquarks[1]);
     }
     // Make sure it satisfies kinematical threshold constraint
-    bool success = true;
+    bool kin_threshold_satisfied = true;
     for (int i = 0; i < 2; i++) {
-      const double mstr_min = pythia->particleData.m0(iquark[i]) +
-                              pythia->particleData.m0(iantiquark[i]);
+      const double mstr_min = pythia->particleData.m0(remaining_quarks[i]) +
+                              pythia->particleData.m0(remaining_antiquarks[i]);
       if (mstr_min > mstr[i]) {
-        success = false;
+        kin_threshold_satisfied = false;
       }
+    }
+    if (!kin_threshold_satisfied) {
+      continue;
     }
     // Fragment two strings
-    if (success) {
-      const std::array<ThreeVector, 2> pcom = {pcomA.threevec(),
-                                               pcomB.threevec()};
-      for (int i = 0; i < 2; i++) {
-        ThreeVector evec = pcom[i] / pcom[i].abs();
-        const int nfrag = fragment_string(iquark[i], iantiquark[i],
-                                          mstr[i], evec, false);
-        if (nfrag <= 0) {
-          NpartString[i] = 0;
-          return false;
-        }
-        NpartString[i] = append_final_state(ustrlab[i], evec);
+    for (int i = 0; i < 2; i++) {
+      ThreeVector evec = pcom_[i].threevec() / pcom_[i].threevec().abs();
+      const int nfrag = fragment_string(remaining_quarks[i],
+                            remaining_antiquarks[i], mstr[i], evec, false);
+      if (nfrag <= 0) {
+        NpartString[i] = 0;
+        return false;
       }
-      NpartFinal = NpartString[0] + NpartString[1];
-      return true;
+      NpartString[i] = append_final_state(ustrlab[i], evec);
     }
+    NpartFinal = NpartString[0] + NpartString[1];
+    return true;
   }
 
   return false;
@@ -768,16 +776,16 @@ void StringProcess::make_incoming_com_momenta(){
   ucomAB = ( plab_[0] + plab_[1] )/sqrtsAB;
   vcomAB = ucomAB.velocity();
 
-  pcomA = plab_[0].LorentzBoost(vcomAB);
-  pcomB = plab_[1].LorentzBoost(vcomAB);
+  pcom_[0] = plab_[0].LorentzBoost(vcomAB);
+  pcom_[1] = plab_[1].LorentzBoost(vcomAB);
 }
 
 void StringProcess::make_orthonormal_basis(){
-  if (std::abs(pcomA.x3()) < (1. - 1.0e-8) * pabscomAB) {
+  if (std::abs(pcom_[0].x3()) < (1. - 1.0e-8) * pabscomAB) {
     double ex, ey, et;
     double theta, phi;
 
-    evecBasisAB[3] = pcomA.threevec() / pabscomAB;
+    evecBasisAB[3] = pcom_[0].threevec() / pabscomAB;
 
     theta = std::acos(evecBasisAB[3].x3());
 
@@ -798,7 +806,7 @@ void StringProcess::make_orthonormal_basis(){
     evecBasisAB[2].set_x2( cos(phi) );
     evecBasisAB[2].set_x3( 0. );
   } else {
-    if (pcomA.x3() > 0.) {
+    if (pcom_[0].x3() > 0.) {
       evecBasisAB[1] = ThreeVector(1., 0., 0.);
       evecBasisAB[2] = ThreeVector(0., 1., 0.);
       evecBasisAB[3] = ThreeVector(0., 0., 1.);
@@ -811,10 +819,10 @@ void StringProcess::make_orthonormal_basis(){
 }
 
 void StringProcess::compute_incoming_lightcone_momenta(){
-  PPosA = ( pcomA.x0() + evecBasisAB[3] * pcomA.threevec() ) / std::sqrt(2.);
-  PNegA = ( pcomA.x0() - evecBasisAB[3] * pcomA.threevec() ) / std::sqrt(2.);
-  PPosB = ( pcomB.x0() + evecBasisAB[3] * pcomB.threevec() ) / std::sqrt(2.);
-  PNegB = ( pcomB.x0() - evecBasisAB[3] * pcomB.threevec() ) / std::sqrt(2.);
+  PPosA = ( pcom_[0].x0() + evecBasisAB[3] * pcom_[0].threevec() ) / std::sqrt(2.);
+  PNegA = ( pcom_[0].x0() - evecBasisAB[3] * pcom_[0].threevec() ) / std::sqrt(2.);
+  PPosB = ( pcom_[1].x0() + evecBasisAB[3] * pcom_[1].threevec() ) / std::sqrt(2.);
+  PNegB = ( pcom_[1].x0() - evecBasisAB[3] * pcom_[1].threevec() ) / std::sqrt(2.);
 }
 
 int StringProcess::diquark_from_quarks(int q1, int q2) {
@@ -851,7 +859,7 @@ void StringProcess::make_string_ends(const PdgCode &pdg,
     idq2 = diquark_from_quarks(quarks[1], quarks[2]);
   }
   // Fulfil the convention: idq1 should be quark or anti-diquark
-  if (idg1 < 0) {
+  if (idq1 < 0) {
     std::swap(idq1, idq2);
   }
 }

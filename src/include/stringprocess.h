@@ -34,8 +34,7 @@ class StringProcess {
                     //!< in the center of mass frame
   std::array<PdgCode, 2> PDGcodes_; //!< PdgCodes of incoming particles
   std::array<FourVector, 2> plab_; //!< momenta of incoming particles in the lab frame
-  FourVector pcomA; //!< momentum of incoming particle A in the center of mass frame
-  FourVector pcomB; //!< momentum of incoming particle B in the center of mass frame
+  std::array<FourVector, 2> pcom_; //!< momentum of incoming particles in the center of mass frame
   FourVector ucomAB; //!< velocity four vector of the center of mass in the lab frame
   ThreeVector vcomAB; //!< velocity three vector of the center of mass in the lab frame
   std::array<ThreeVector,4> evecBasisAB; //!< orthonormal basis vectors in the center of mass frame
