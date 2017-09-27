@@ -198,14 +198,14 @@ namespace {
  * As an example, if one wants to have all of the following simultaneously:
  * \li particles at the end of event printed out in binary and Root formats
  * \li dileptons printed in Oscar2013 format
- * \li density at point (0, 0, 0) printed as a table against time every 1 fm/c
+ * \li net baryon density at point (0, 0, 0) printed as a table
+ *     against time every 1 fm/c
  *
  * then the output section of configuration will be the following.
  *
  * \code
  * Output:
  *     Output_Interval:  1.0
- *     Density_Type:      "none"
  *     Particles:
  *         Format:          ["Binary", "Root"]
  *         Only_Final:      True
@@ -213,7 +213,7 @@ namespace {
  *         Format:          ["Oscar2013"]
  *     Thermodynamics:
  *         Format:          ["ASCII"]
- *         Type:            "none"
+ *         Type:            "baryon"
  *         Quantities:      ["rho_eckart"]
  *         Position:        [0.0, 0.0, 0.0]
  *         Smearing:        True
