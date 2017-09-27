@@ -918,6 +918,10 @@ void StringProcess::make_string_ends(const PdgCode &pdg,
     idq1 = quarks[0];
     idq2 = diquark_from_quarks(quarks[1], quarks[2]);
   }
+  // Fulfil the convention: idq1 should be quark or anti-diquark
+  if (idg1 < 0) {
+    std::swap(idq1, idq2);
+  }
 }
 
 int StringProcess::fragment_string(int idq1, int idq2, double mString,
