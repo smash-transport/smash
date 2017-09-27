@@ -458,7 +458,9 @@ std::unique_ptr<OutputInterface> create_select_format(
   } else if (modern_format) {
     return make_unique<OscarOutput<OscarFormat2013, Contents>>(path, name);
   } else {
-    return make_unique<OscarOutput<OscarFormat1999, Contents>>(path, name);
+    std::cout << "Really making Oscar1999" << std::endl;
+    return make_unique<OscarOutput<OscarFormat1999, Contents>>(path, name +
+        "_1999");
   }
 }
 }  // unnamed namespace
