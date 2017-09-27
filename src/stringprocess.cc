@@ -885,7 +885,7 @@ void StringProcess::compute_incoming_lightcone_momenta(){
   PNegB = ( pcomB.x0() - evecBasisAB[3] * pcomB.threevec() ) / std::sqrt(2.);
 }
 
-int diquark_from_quarks(int q1, int q2) {
+int StringProcess::diquark_from_quarks(int q1, int q2) {
   assert((q1 > 0 && q2 > 0) || (q1 < 0 && q2 < 0));
   if (std::abs(q1) < std::abs(q2)) {
     std::swap(q1, q2);
@@ -898,8 +898,8 @@ int diquark_from_quarks(int q1, int q2) {
   return (q1 < 0) ? -diquark : diquark;
 }
 
-void make_string_ends(const PdgCode pdg, int &idq1, int &idq2) {
-  const PdgCode pdg = hadron_to_split->pdgcode();
+void StringProcess::make_string_ends(const PdgCode &pdg,
+                                     int &idq1, int &idq2) {
   std::array<int, 3> quarks = pdg.quark_content();
 
   if (pdg.is_meson()) {
