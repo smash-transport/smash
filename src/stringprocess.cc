@@ -665,171 +665,171 @@ bool StringProcess::next_NDiff() {
 
 /** baryon-antibaryon annihilation */
 bool StringProcess::next_BBbarAnn(){
-	bool ret;
+  bool ret;
 
-	int ntry;
-	bool isBBbarpair, isAnnihilating;
+  int ntry;
+  bool isBBbarpair, isAnnihilating;
 
-	int ic, jc;
-	int ijc, ipr, npr;
-	std::array<int,3> quark_content_A;
-	std::array<int,3> quark_content_B;
-	std::vector<int> indexAnn;
+  int ic, jc;
+  int ijc, ipr, npr;
+  std::array<int,3> quark_content_A;
+  std::array<int,3> quark_content_B;
+  std::vector<int> indexAnn;
 
-	int idq11, idq12, idq12prev;
-	int idq21, idq22, idq22prev;
-	int nfrag1, nfrag2;
-	double mstr1, mstr2;
-	double mstr1Min, mstr2Min;
+  int idq11, idq12, idq12prev;
+  int idq21, idq22, idq22prev;
+  int nfrag1, nfrag2;
+  double mstr1, mstr2;
+  double mstr1Min, mstr2Min;
 
-	FourVector ustr1lab;
-	FourVector ustr2lab;
+  FourVector ustr1lab;
+  FourVector ustr2lab;
 
-	double pabs;
-	ThreeVector evec;
+  double pabs;
+  ThreeVector evec;
 
-	ustr1lab = ucomAB;
-	ustr2lab = ucomAB;
+  ustr1lab = ucomAB;
+  ustr2lab = ucomAB;
 
-	indexAnn.resize(0);
+  indexAnn.resize(0);
 
-	NpartFinal = 0;
-	NpartString1 = 0;
-	NpartString2 = 0;
-	final_state.clear();
+  NpartFinal = 0;
+  NpartString1 = 0;
+  NpartString2 = 0;
+  final_state.clear();
 
-	quark_content_A = PDGcodeA.quark_content();
-	quark_content_B = PDGcodeB.quark_content();
+  quark_content_A = PDGcodeA.quark_content();
+  quark_content_B = PDGcodeB.quark_content();
 
-	isBBbarpair = ( (baryonA == 3) && (baryonB == -3) ) || ( (baryonA == -3) && (baryonB == 3) );
-	isAnnihilating = false;
+  isBBbarpair = ( (baryonA == 3) && (baryonB == -3) ) || ( (baryonA == -3) && (baryonB == 3) );
+  isAnnihilating = false;
 
-	// if it is baryon-antibaryon pair
-	if( isBBbarpair == true ){ // if it is
-		mstr1 = 0.5*sqrtsAB;
-		mstr2 = 0.5*sqrtsAB;
+  // if it is baryon-antibaryon pair
+  if( isBBbarpair == true ){ // if it is
+    mstr1 = 0.5*sqrtsAB;
+    mstr2 = 0.5*sqrtsAB;
 
-		for(ic = 0; ic < 3; ic++){
-			for(jc = 0; jc < 3; jc++){
-				if( quark_content_A[ic] == -quark_content_B[jc] ){
-					ijc = ic*10 + jc;
-					indexAnn.push_back( ijc );
-				}
-			}
-		}
-		npr = indexAnn.size();
-		fprintf(stderr,"  StringProcess::next_BBarAnn : %d possible pairs for qqbar annihilation\n", npr);
-		/* if it is a BBbar pair but there is no qqbar pair to annihilate,
-		 * nothing happens */
-		if( npr == 0 ){
-			NpartString1 = 1;
-			ParticleData new_particle1(ParticleType::find(PDGcodeA));
-			new_particle1.set_4momentum(plabA);
-			new_particle1.set_cross_section_scaling_factor(1.);
-			new_particle1.set_formation_time(0.);
-			final_state.push_back(new_particle1);
+    for(ic = 0; ic < 3; ic++){
+      for(jc = 0; jc < 3; jc++){
+        if( quark_content_A[ic] == -quark_content_B[jc] ){
+          ijc = ic*10 + jc;
+          indexAnn.push_back( ijc );
+        }
+      }
+    }
+    npr = indexAnn.size();
+    fprintf(stderr,"  StringProcess::next_BBarAnn : %d possible pairs for qqbar annihilation\n", npr);
+    /* if it is a BBbar pair but there is no qqbar pair to annihilate,
+     * nothing happens */
+    if( npr == 0 ){
+      NpartString1 = 1;
+      ParticleData new_particle1(ParticleType::find(PDGcodeA));
+      new_particle1.set_4momentum(plabA);
+      new_particle1.set_cross_section_scaling_factor(1.);
+      new_particle1.set_formation_time(0.);
+      final_state.push_back(new_particle1);
 
-			NpartString2 = 1;
-			ParticleData new_particle2(ParticleType::find(PDGcodeB));
-			new_particle2.set_4momentum(plabB);
-			new_particle2.set_cross_section_scaling_factor(1.);
-			new_particle2.set_formation_time(0.);
-			final_state.push_back(new_particle2);
+      NpartString2 = 1;
+      ParticleData new_particle2(ParticleType::find(PDGcodeB));
+      new_particle2.set_4momentum(plabB);
+      new_particle2.set_cross_section_scaling_factor(1.);
+      new_particle2.set_formation_time(0.);
+      final_state.push_back(new_particle2);
 
-			isAnnihilating = false;
+      isAnnihilating = false;
 
-			NpartFinal = NpartString1 + NpartString2;
-			ret = true;
-		}// endif no qqbar pair to annihilate
+      NpartFinal = NpartString1 + NpartString2;
+      ret = true;
+    }// endif no qqbar pair to annihilate
 
-		ntry = 0;
-		while( ( npr > 0 ) && ( isAnnihilating == false ) && ( ntry < 100 ) ){
-			ntry = ntry + 1;
+    ntry = 0;
+    while( ( npr > 0 ) && ( isAnnihilating == false ) && ( ntry < 100 ) ){
+      ntry = ntry + 1;
 
-			// randomly choose a qqbar pair to annihilate
-			ipr = Random::uniform_int(0, npr - 1);
-			ijc = indexAnn.at(ipr);
-			ic = ( ijc - (ijc%10) )/10;
-			jc = ijc%10;
-			fprintf(stderr,"  StringProcess::next_BBarAnn : ic = %d, jc = %d chosen\n", ic, jc);
-			// make two qqbar pairs to excite strings
-			idq11 = 0;
-			idq12 = 0;
-			idq21 = 0;
-			idq22 = 0;
-			if( (baryonA == 3) && (baryonB == -3) ){
-				idq11 = quark_content_A[(ic + 1)%3];
-				idq12 = quark_content_B[(jc + 1)%3];
-				idq21 = quark_content_A[(ic + 2)%3];
-				idq22 = quark_content_B[(jc + 2)%3];
-			}
-			else if( (baryonA == -3) && (baryonB == 3) ){
-				idq11 = quark_content_B[(ic + 1)%3];
-				idq12 = quark_content_A[(jc + 1)%3];
-				idq21 = quark_content_B[(ic + 2)%3];
-				idq22 = quark_content_A[(jc + 2)%3];
-			}
-			// randomly choose if we flip the antiquark contents
-			if( Random::uniform_int(0, 1) == 0 ){
-				idq12prev = idq12;
-				idq22prev = idq22;
-				idq12 = idq22prev;
-				idq22 = idq12prev;
-			}
-			fprintf(stderr,"  StringProcess::next_BBarAnn : string 1 with %d, %d\n", idq11, idq12);
-			fprintf(stderr,"  StringProcess::next_BBarAnn : string 2 with %d, %d\n", idq21, idq22);
+      // randomly choose a qqbar pair to annihilate
+      ipr = Random::uniform_int(0, npr - 1);
+      ijc = indexAnn.at(ipr);
+      ic = ( ijc - (ijc%10) )/10;
+      jc = ijc%10;
+      fprintf(stderr,"  StringProcess::next_BBarAnn : ic = %d, jc = %d chosen\n", ic, jc);
+      // make two qqbar pairs to excite strings
+      idq11 = 0;
+      idq12 = 0;
+      idq21 = 0;
+      idq22 = 0;
+      if( (baryonA == 3) && (baryonB == -3) ){
+        idq11 = quark_content_A[(ic + 1)%3];
+        idq12 = quark_content_B[(jc + 1)%3];
+        idq21 = quark_content_A[(ic + 2)%3];
+        idq22 = quark_content_B[(jc + 2)%3];
+      }
+      else if( (baryonA == -3) && (baryonB == 3) ){
+        idq11 = quark_content_B[(ic + 1)%3];
+        idq12 = quark_content_A[(jc + 1)%3];
+        idq21 = quark_content_B[(ic + 2)%3];
+        idq22 = quark_content_A[(jc + 2)%3];
+      }
+      // randomly choose if we flip the antiquark contents
+      if( Random::uniform_int(0, 1) == 0 ){
+        idq12prev = idq12;
+        idq22prev = idq22;
+        idq12 = idq22prev;
+        idq22 = idq12prev;
+      }
+      fprintf(stderr,"  StringProcess::next_BBarAnn : string 1 with %d, %d\n", idq11, idq12);
+      fprintf(stderr,"  StringProcess::next_BBarAnn : string 2 with %d, %d\n", idq21, idq22);
 
-			mstr1Min = pythia->particleData.m0(idq11) + pythia->particleData.m0(idq12);
-			mstr2Min = pythia->particleData.m0(idq21) + pythia->particleData.m0(idq22);
-			isAnnihilating = ( mstr1 > mstr1Min ) && ( mstr2 > mstr2Min );
-		}
-	}
-	else{ // if it is not
-		fprintf(stderr,"  StringProcess::next_BBarAnn failure : it is not BBbar pair.\n");
-		isAnnihilating = false;
-	}
-	// endif baryon-antibaryon pair
+      mstr1Min = pythia->particleData.m0(idq11) + pythia->particleData.m0(idq12);
+      mstr2Min = pythia->particleData.m0(idq21) + pythia->particleData.m0(idq22);
+      isAnnihilating = ( mstr1 > mstr1Min ) && ( mstr2 > mstr2Min );
+    }
+  }
+  else{ // if it is not
+    fprintf(stderr,"  StringProcess::next_BBarAnn failure : it is not BBbar pair.\n");
+    isAnnihilating = false;
+  }
+  // endif baryon-antibaryon pair
 
-	// implement collision in the case of annihilating BBbar pair
-	if( isAnnihilating == true ){
-		ret = false;
+  // implement collision in the case of annihilating BBbar pair
+  if( isAnnihilating == true ){
+    ret = false;
 
-		// string 1
-		pabs = pcomA.threevec().abs();
-		evec = pcomA.threevec() / pabs;
+    // string 1
+    pabs = pcomA.threevec().abs();
+    evec = pcomA.threevec() / pabs;
 
-		nfrag1 = fragment_string(idq11, idq12, mstr1, evec, false);
-		if( nfrag1 > 0 ){
-			NpartString1 = append_final_state(ustr1lab, evec);
-		}
-		else{
-			nfrag1 = 0;
-			NpartString1 = 0;
-			ret = false;
-		}
+    nfrag1 = fragment_string(idq11, idq12, mstr1, evec, false);
+    if( nfrag1 > 0 ){
+      NpartString1 = append_final_state(ustr1lab, evec);
+    }
+    else{
+      nfrag1 = 0;
+      NpartString1 = 0;
+      ret = false;
+    }
 
-		// string 2
-		pabs = pcomB.threevec().abs();
-		evec = pcomB.threevec() / pabs;
+    // string 2
+    pabs = pcomB.threevec().abs();
+    evec = pcomB.threevec() / pabs;
 
-		nfrag2 = fragment_string(idq21, idq22, mstr2, evec, false);
-		if( nfrag2 > 0 ){
-			NpartString2 = append_final_state(ustr2lab, evec);
-		}
-		else{
-			nfrag2 = 0;
-			NpartString2 = 0;
-			ret = false;
-		}
+    nfrag2 = fragment_string(idq21, idq22, mstr2, evec, false);
+    if( nfrag2 > 0 ){
+      NpartString2 = append_final_state(ustr2lab, evec);
+    }
+    else{
+      nfrag2 = 0;
+      NpartString2 = 0;
+      ret = false;
+    }
 
-		if( ( NpartString1 > 0 ) && ( NpartString2 > 0 )
-			&& ( nfrag1 == NpartString1 ) && ( nfrag2 == NpartString2 ) ){
-			NpartFinal = NpartString1 + NpartString2;
-			ret = true;
-		}
-	}
+    if( ( NpartString1 > 0 ) && ( NpartString2 > 0 )
+      && ( nfrag1 == NpartString1 ) && ( nfrag2 == NpartString2 ) ){
+      NpartFinal = NpartString1 + NpartString2;
+      ret = true;
+    }
+  }
 
-	return ret;
+  return ret;
 }
 
 void StringProcess::make_incoming_com_momenta(){
