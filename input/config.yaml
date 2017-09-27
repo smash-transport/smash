@@ -63,7 +63,7 @@ Output:
     # ("hadron", "baryon", "baryonic isospin", "pion", "none")
     Density_Type:      "none"
     Particles:
-        Format:          ["Oscar2013", "Oscar1999", "Binary", "Vtk", "Root"]
+        Format:          ["Oscar2013", "Oscar1999", "Binary", "VTK", "Root"]
         Extended:        True
         Only_Final:      True
     Collisions:
@@ -76,7 +76,7 @@ Output:
 #        Format:          ["Oscar2013", "Oscar1999", "Binary", "Root"]
 #        Fractions:       100
     Thermodynamics:
-        Format:          ["ASCII", "Vtk"]
+        Format:          ["ASCII", "VTK"]
         # ("hadron", "baryon", "baryonic isospin", "pion"), baryon := net baryon
         Type:            "none"
         Quantities:      ["rho_eckart", "tmn", "tmn_landau", "landau_velocity"]

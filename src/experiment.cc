@@ -137,7 +137,7 @@ namespace {
  * functionality.
  *
  * \key Density_Type (string, optional, default = "none"): \n
- * Determines which kind of density is written into the collision files.
+ * Determines which kind of density is printed into the collision files.
  * Possible values:\n
  * \li "hadron"           - total hadronic density
  * \li "baryon"           - net baryon density
@@ -158,13 +158,13 @@ namespace {
  *
  * To disable a certain output content,  remove or comment out the
  * corresponding section. Every output can be printed in several formats
- * simulateneously. The following option chooses list of formats:
+ * simultaneously. The following option chooses list of formats:
  *
  * \key Format (list of formats, optional, default = []):\n
  * List of formats for writing particular content.
  * Possible formats for every content are listed and described in
- * \ref output_contents_ "output contents". List of available formats is here:
- * \ref list_of_output_formats "List of formats"
+ * \ref output_contents_ "output contents". List of available formats is
+ * \ref list_of_output_formats "here".
  *
  * ### Content-specific output options
  * \anchor output_content_specific_options_
@@ -185,20 +185,20 @@ namespace {
  *   false - regular output for each particle
  *
  *   \key Print_Start_End (bool, optional, default = false): \n
- *   true - initial and final particle list is written out \n
- *   false - initial and final particle list is not written out
+ *   true - initial and final particle list is printed out \n
+ *   false - initial and final particle list is not printed out
  * - \b Photons - see \ref input_photons
- * - \b Thermodynamics - see \subpage input_vtk_lattice_ for lattice output
- *   and \subpage ascii_thermodynamic_output_ for output at one point versus
- *   time.
+ * - \b Thermodynamics - see \subpage input_vtk_lattice_ for full spatial
+ *   lattice output and \subpage ascii_thermodynamic_output_ for output at one
+ *   point versus time.
  *
  * \anchor configuring_output_
  * Example configuring SMASH output
  * --------------
- * As an example, if one wants to have all of those simultaneosly:
- * \li particles at the end of event written out in binary and Root formats
- * \li dileptons written in Oscar2013 format
- * \li density at point (0, 0, 0) written as a table against time every 1 fm/c
+ * As an example, if one wants to have all of the following simultaneously:
+ * \li particles at the end of event printed out in binary and Root formats
+ * \li dileptons printed in Oscar2013 format
+ * \li density at point (0, 0, 0) printed as a table against time every 1 fm/c
  *
  * then the output section of configuration will be the following.
  *
@@ -302,7 +302,7 @@ void Experiment<Modus>::create_output(std::string format, std::string content,
   log.info() << "Adding output " << content << " of format " << format
              << std::endl;
 
-  if (format == "Vtk" && content == "Particles") {
+  if (format == "VTK" && content == "Particles") {
     outputs_.emplace_back(make_unique<VtkOutput>(output_path, content));
   } else if (format == "Root") {
 #ifdef SMASH_USE_ROOT
@@ -326,7 +326,7 @@ void Experiment<Modus>::create_output(std::string format, std::string content,
   } else if (content == "Thermodynamics" && format == "ASCII") {
     outputs_.emplace_back(
         make_unique<ThermodynamicOutput>(output_path, content, out_par));
-  } else if (content == "Thermodynamics" && format == "Vtk") {
+  } else if (content == "Thermodynamics" && format == "VTK") {
     printout_lattice_td_ = true;
   } else {
     log.error() << "Unknown combination of format (" << format
@@ -490,7 +490,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     * Output in SMASH is distinguished by _content_ and _format_, where content
     * means the physical information contained in the output (e.g. list of
     * particles, list of interactions, thermodynamics, etc) and format (e.g.
-    * Oscar, binary or ROOT). The same content can be written out in several
+    * Oscar, binary or ROOT). The same content can be printed out in several
     * formats _simultaneously_.
     *
     * For an example of choosing specific output contents see
@@ -505,7 +505,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     * - \b Collisions List of interactions: collisions, decays, box wall
     *                 crossings and forced thermalizations. Information about
     *                 incoming, outgoing particles and the interaction itself
-    *                 is written out.
+    *                 is printed out.
     *   - Available formats: \ref format_oscar_collisions, \ref format_binary_,
     *                 \ref format_root
     * - \b Dileptons  Special dilepton output, see \subpage input_dileptons.
@@ -525,7 +525,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     *
     * For choosing output formats see
     * \ref configuring_output_ "Configuring SMASH output".
-    * Every output content can be written out in several formats:
+    * Every output content can be printed out in several formats:
     * - \b "Oscar1999", \b "Oscar2013" - human-readable text output\n
     *   - For "Particles" content: \subpage format_oscar_particlelist
     *   - For "Collisions" content: \subpage format_oscar_collisions
@@ -539,7 +539,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     *     (http://root.cern.ch)
     *   - Even faster to read and write, requires less disk space
     *   - Format description: \subpage format_root
-    * - \b "Vtk" - text output suitable for an easy
+    * - \b "VTK" - text output suitable for an easy
     *     visualization using paraview software
     *   - This output can be opened by paraview to see the visulalization.
     *   - For "Particles" content \subpage format_vtk
@@ -581,7 +581,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    **/
 
   dens_type_ = config.take({"Output", "Density_Type"}, DensityType::None);
-  log.info() << "Density type written to headers: " << dens_type_;
+  log.info() << "Density type printed to headers: " << dens_type_;
 
   const OutputParameters output_parameters(std::move(output_conf));
 
@@ -637,9 +637,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * output of the quantities on the lattice to vtk files see
    * \ref input_output_options_.
    *
-   * \page input_vtk_lattice_ lattice vtk printout
+   * \page input_vtk_lattice_ lattice vtk output
    *
-   * User can print thermodynamical quantities on the lattice to vtk output.
+   * User can print thermodynamical quantities on the spatial lattice
+   * to vtk output.
    * The lattice for the output is regulated by options of lattice
    * \subpage input_lattice_. The type of thermodynamic quantities is
    * chosen by the following options of the "Thermodynamic" output.
@@ -715,7 +716,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
                                                     LatticeUpdate::AtOutput);
     }
   } else if (printout_lattice_td_) {
-    log.error("If you want Thermodynamic Vtk output"
+    log.error("If you want Thermodynamic VTK output"
               ", configure a lattice for it.");
   }
 
