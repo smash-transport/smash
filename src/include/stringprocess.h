@@ -32,20 +32,16 @@ class StringProcess {
   double sqrtsAB; //!< sqrt of Mandelstam variable s
   double pabscomAB; //!< magnitude of three momentum of incoming particles
                     //!< in the center of mass frame
-  PdgCode PDGcodeA; //!< PdgCode of incoming particle A
-  PdgCode PDGcodeB; //!< PdgCode of incoming particle B
-  FourVector plabA; //!< momentum of incoming particle A in the lab frame
-  FourVector plabB; //!< momentum of incoming particle B in the lab frame
-  FourVector pcomA; //!< momentum of incoming particle A in the center of mass frame
-  FourVector pcomB; //!< momentum of incoming particle B in the center of mass frame
+  std::array<PdgCode, 2> PDGcodes_; //!< PdgCodes of incoming particles
+  std::array<FourVector, 2> plab_; //!< momenta of incoming particles in the lab frame
+  std::array<FourVector, 2> pcom_; //!< momentum of incoming particles in the center of mass frame
   FourVector ucomAB; //!< velocity four vector of the center of mass in the lab frame
   ThreeVector vcomAB; //!< velocity three vector of the center of mass in the lab frame
   std::array<ThreeVector,4> evecBasisAB; //!< orthonormal basis vectors in the center of mass frame
                                          //!< where the 3rd one is parallel to momtentum
                                          //!< of incoming particle A
   int NpartFinal; //!< total number of final state particles
-  int NpartString1; //!< number of particles fragmented from string 1
-  int NpartString2; //!< number of particles fragmented from string 2
+  std::array<int, 2> NpartString; //!< number of particles fragmented from strings
   double pmin_gluon_lightcone; //!< the minimum lightcone momentum scale carried by gluon
   double xmin_gluon_fraction; //!< the minimum lightcone momentum fraction carried by gluon
   double pow_fgluon_beta; //!< parameter for the gluon distribution function
