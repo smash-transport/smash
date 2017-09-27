@@ -62,26 +62,26 @@ Output:
     # Which density is written to collision headers:
     # ("hadron", "baryon", "baryonic isospin", "pion", "none")
     Density_Type:      "none"
-    Particles:
-        Format:          ["Oscar2013", "Oscar1999", "Binary", "VTK", "Root"]
-        Extended:        True
-        Only_Final:      True
-    Collisions:
-        Format:          ["Oscar2013", "Oscar1999", "Binary", "Root"]
-        Extended:        True
-        Print_Start_End: True
-    Dileptons:
-        Format:          ["Oscar2013", "Binary", "Root"]
+#    Particles:
+#        Format:          ["Oscar2013", "Oscar1999", "Binary", "VTK", "Root"]
+#        Extended:        True
+#        Only_Final:      True
+#    Collisions:
+#        Format:          ["Oscar2013", "Oscar1999", "Binary", "Root"]
+#        Extended:        True
+#        Print_Start_End: True
+#    Dileptons:
+#        Format:          ["Oscar2013", "Binary", "Root"]
 #    Photons:
 #        Format:          ["Oscar2013", "Oscar1999", "Binary", "Root"]
 #        Fractions:       100
-    Thermodynamics:
-        Format:          ["ASCII", "VTK"]
-        # ("hadron", "baryon", "baryonic isospin", "pion"), baryon := net baryon
-        Type:            "none"
-        Quantities:      ["rho_eckart", "tmn", "tmn_landau", "landau_velocity"]
-        Position:        [0.0, 0.0, 0.0]
-        Smearing:        True
+#    Thermodynamics:
+#        Format:          ["ASCII", "VTK"]
+#        # ("hadron", "baryon", "baryonic isospin", "pion"), baryon := net baryon
+#        Type:            "none"
+#        Quantities:      ["rho_eckart", "tmn", "tmn_landau", "landau_velocity"]
+#        Position:        [0.0, 0.0, 0.0]
+#        Smearing:        True
 
 
 Collision_Term:
