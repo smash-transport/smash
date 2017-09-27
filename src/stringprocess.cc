@@ -885,163 +885,95 @@ void StringProcess::compute_incoming_lightcone_momenta(){
   PNegB = ( pcomB.x0() - evecBasisAB[3] * pcomB.threevec() ) / std::sqrt(2.);
 }
 
-void StringProcess::make_string_ends(PdgCode &pdgcodeIn, int &idq1, int &idq2){
-  int ir, ic, jc;
-  int idq1tmp, idq2tmp;
-  std::array<int,3> qcontent;
-  std::array<int,2> idqtmp;
-
-  qcontent = pdgcodeIn.quark_content();
-
-  // if it is meson/baryon
-  if (qcontent[0] == 0) {  // meson
-    ir = 1 + Random::uniform_int(0, 1);
-
-    idq1tmp = qcontent[ir];
-    jc = 1 + ir % 2;
-    idq2tmp = qcontent[jc];
-  } else {  // baryon
-    ir = Random::uniform_int(0, 2);
-
-    idq1tmp = qcontent[ir];
-    for (ic = 0; ic < 2; ic++) {
-      jc = (ir + ic + 1) % 3;
-      idqtmp[ic] = std::abs(qcontent[jc]);
-    }
-
-    if (idqtmp[0] == idqtmp[1]) {
-      idq2tmp = idqtmp[0] * 1000 + idqtmp[1] * 100 + 3;
-    } else {
-      if (idqtmp[0] > idqtmp[1]) {
-        idq2tmp = idqtmp[0] * 1000 + idqtmp[1] * 100;
-      } else {
-        idq2tmp = idqtmp[1] * 1000 + idqtmp[0] * 100;
-      }
-
-      double rspin = Random::uniform(0., 1.);
-      if ( rspin < 0.25 ) {
-        idq2tmp = idq2tmp + 1;
-      } else {
-        idq2tmp = idq2tmp + 3;
-      }
-    }
-
-    if (idq1tmp < 0) {
-      idq2tmp = -idq2tmp;
-    }
-  }  // endif meson/baryon
-
-  if (idq1tmp > 0) {
-    idq1 = idq1tmp;
-    idq2 = idq2tmp;
-  } else {
-    idq1 = idq2tmp;
-    idq2 = idq1tmp;
+int diquark_from_quarks(int q1, int q2) {
+  assert((q1 > 0 && q2 > 0) || (q1 < 0 && q2 < 0));
+  if (std::abs(q1) < std::abs(q2)) {
+    std::swap(q1, q2);
   }
+  int diquark = std::abs(q1 * 1000 + q2 * 100);
+  /* Adding spin degeneracy = 2S+1. For identical quarks spin cannot be 0
+   * because of Pauli exclusion principle, so spin 1 is assumed. Otherwise
+   * S = 0 with probability 1/4 and S = 1 with probability 3/4. */
+  diquark += (q1 != q2 && Random::uniform_int(0, 3) == 0) ? 1 : 3;
+  return (q1 < 0) ? -diquark : diquark;
+}
 
-  /* some mesons with PDG id 11X are actually mixed state of uubar and ddbar.
-   * have a random selection whether we have uubar or ddbar in this case. */
-  if ( (qcontent[0] == 0) && (idq1 == 1) && (idq2 == -1) ) {
-    if ( Random::uniform_int(0, 1) == 0 ) {
-      idq1 = 2;
+void make_string_ends(const PdgCode pdg, int &idq1, int &idq2) {
+  const PdgCode pdg = hadron_to_split->pdgcode();
+  std::array<int, 3> quarks = pdg.quark_content();
+
+  if (pdg.is_meson()) {
+    idq1 = quarks[1];
+    idq2 = quarks[2];
+    /* Some mesons with PDG id 11X are actually mixed state of uubar and ddbar.
+     * have a random selection whether we have uubar or ddbar in this case. */
+    if (idq1 == 1 && idq2 == -1 && Random::uniform_int(0, 1) == 0) {
+      idq1 =  2;
       idq2 = -2;
     }
+  } else {
+    assert(pdg.is_baryon());
+    // Get random quark to position 0
+    std::swap(quarks[Random::uniform_int(0, 2)], quarks[0]);
+    idq1 = quarks[0];
+    idq2 = diquark_from_quarks(quarks[1], quarks[2]);
   }
 }
 
 int StringProcess::fragment_string(int idq1, int idq2, double mString,
                             ThreeVector &evecLong, bool random_rotation) {
-  int number_of_fragments;
-  bool successful_hadronization;
-
-  int bstring;
-  int ipart;
-  int status;
-  int col, acol;
-  double sign_direction;
-  double pCMquark;
-  double m1, m2;
-  Pythia8::Vec4 pquark;
-
-  ThreeVector p3vec;
-  FourVector pvRS;
-
   pythia->event.reset();
   // evaluate 3 times total baryon number of the string
-  bstring = pythia->particleData.baryonNumberType(idq1) +
-            pythia->particleData.baryonNumberType(idq2);
-  if( bstring == -3 ){  // anti-baryonic string
+  const int bstring = pythia->particleData.baryonNumberType(idq1) +
+                      pythia->particleData.baryonNumberType(idq2);
+  /* diquark (anti-quark) with PDG id idq2 is going in the direction of evecLong.
+   * quark with PDG id idq1 is going in the direction opposite to evecLong. */
+  double sign_direction = 1.;
+  if (bstring == -3) {  // anti-baryonic string
     /* anti-diquark with PDG id idq1 is going in the direction of evecLong.
      * anti-quark with PDG id idq2 is going in the direction
      * opposite to evecLong. */
     sign_direction = -1;
   }
-  else{
-    /* diquark (anti-quark) with PDG id idq2 is going in the direction of evecLong.
-     * quark with PDG id idq1 is going in the direction opposite to evecLong. */
-    sign_direction = 1.;
-  }
-  // evaluate momenta of quarks.
-  m1 = pythia->particleData.m0(idq1);
-  m2 = pythia->particleData.m0(idq2);
-  pCMquark = pCM( mString, m1, m2 );
 
-  if (random_rotation == true) {
-    Angles phitheta;
-    phitheta.distribute_isotropically();
-
-    p3vec.set_x1( pCMquark * phitheta.threevec().x1() );
-    p3vec.set_x2( pCMquark * phitheta.threevec().x2() );
-    p3vec.set_x3( pCMquark * phitheta.threevec().x3() );
-  } else {
-    if ( Random::uniform_int(0, 1) == 0 ) {
-      /* in the case where we flip the string ends,
-       * we need to flip the longitudinal unit vector itself
-       * since it is set to be direction of diquark (anti-quark) or anti-diquark. */
-      evecLong.set_x1( -evecLong.x1() );
-      evecLong.set_x2( -evecLong.x2() );
-      evecLong.set_x3( -evecLong.x3() );
-    }
-  }
-
+  const double m1 = pythia->particleData.m0(idq1);
+  const double m2 = pythia->particleData.m0(idq2);
   if (m1 + m2 > mString) {
     throw std::runtime_error("String fragmentation: m1 + m2 > mString");
   }
-  // append quark or anti-diquark with PDG id idq1
-  status = 1;
-  col = 1;
-  acol = 0;
-  if (random_rotation == true) {
-    pvRS = FourVector(0., -p3vec);
-  } else {
-    pvRS = FourVector(0., -sign_direction * pCMquark * evecLong);
+
+  // evaluate momenta of quarks
+  const double pCMquark = pCM(mString, m1, m2);
+  const double E1 = std::sqrt(m1*m1 + pCMquark*pCMquark);
+  const double E2 = std::sqrt(m2*m2 + pCMquark*pCMquark);
+
+  ThreeVector direction;
+  if (random_rotation) {
+    Angles phitheta;
+    phitheta.distribute_isotropically();
+    direction = phitheta.threevec();
+  } else if (Random::uniform_int(0, 1) == 0) {
+    /* in the case where we flip the string ends,
+     * we need to flip the longitudinal unit vector itself
+     * since it is set to be direction of diquark (anti-quark) or anti-diquark. */
+    evecLong = -evecLong;
+    direction = sign_direction * evecLong;
   }
-  pvRS.set_x0( std::sqrt(m1*m1 + pCMquark*pCMquark) );
-  pquark.e( pvRS.x0() );
-  pquark.px( pvRS.x1() );
-  pquark.py( pvRS.x2() );
-  pquark.pz( pvRS.x3() );
-  pythia->event.append(idq1, status, col, acol, pquark, m1);
-  // append diquark or anti-quark with PDG id idq2
-  status = 1;
-  col = 0;
-  acol = 1;
-  if (random_rotation == true) {
-    pvRS = FourVector(0., p3vec);
-  } else {
-    pvRS = FourVector(0., sign_direction * pCMquark * evecLong);
-  }
-  pvRS.set_x0( std::sqrt(m2*m2 + pCMquark*pCMquark) );
-  pquark.e( pvRS.x0() );
-  pquark.px( pvRS.x1() );
-  pquark.py( pvRS.x2() );
-  pquark.pz( pvRS.x3() );
-  pythia->event.append(idq2, status, col, acol, pquark, m2);
+
+  // For status and (anti)color see \iref{Sjostrand:2007gs}.
+  const int status1 = 1, color1 = 1, anticolor1 = 0;
+  Pythia8::Vec4 pquark = set_Vec4(E1, -direction * pCMquark);
+  pythia->event.append(idq1, status1, color1, anticolor1, pquark, m1);
+
+  const int status2 = 1, color2 = 0, anticolor2 = 1;
+  pquark = set_Vec4(E2, direction * pCMquark);
+  pythia->event.append(idq2, status2, color2, anticolor2, pquark, m2);
+
   // implement PYTHIA fragmentation
-  successful_hadronization = pythia->forceHadronLevel();
-  number_of_fragments = 0;
-  if (successful_hadronization == true) {
-    for (ipart = 0; ipart < pythia->event.size(); ipart++) {
+  const bool successful_hadronization = pythia->forceHadronLevel();
+  int number_of_fragments = 0;
+  if (successful_hadronization) {
+    for (int ipart = 0; ipart < pythia->event.size(); ipart++) {
       if (pythia->event[ipart].isFinal()) {
         number_of_fragments++;
       }

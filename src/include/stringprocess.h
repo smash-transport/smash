@@ -173,6 +173,7 @@ class StringProcess {
    * \return whether the process is successfully implemented.
    */
   bool next_BBbarAnn();
+
   /**
    * compute the formation time and fill the arrays with final-state particles
    * as described in \iref{Andersson:1983ia}.
@@ -183,12 +184,26 @@ class StringProcess {
   int append_final_state(const FourVector &uString,
                          const ThreeVector &evecLong);
   /**
+   * Construct diquark from two quarks. Order does not matter.
+   * \param q1 PDG code of quark 1
+   * \param q2 PDG code of quark 2
+   * \return PDG code of diquark composed of q1 and q2
+   */
+  int diquark_from_quarks(int q1, int q2);
+
+  /**
    * make a random selection to determine partonic contents at the string ends.
-   * \param pdgcodeIn is PdgCode of hadron which transforms into a string.
+   * \param pdgcode_in is PdgCode of hadron which transforms into a string.
    * \param idq1 is PDG id of quark or anti-diquark.
    * \param idq2 is PDG id of anti-quark or diquark.
    */
-  void make_string_ends(PdgCode &pdgcodeIn, int &idq1, int &idq2);
+  void make_string_ends(const PdgCode &pdgcode_in, int &idq1, int &idq2);
+
+  /// Easy setter of Pythia Vec4 from SMASH
+  Pythia8::Vec4 set_Vec4(double energy, const ThreeVector &mom) {
+    return Pythia8::Vec4(energy, mom.x1(), mom.x2(), mom.x3());
+  }
+
   /**
    * perform string fragmentation to determine species and momenta of hadrons
    * by implementing PYTHIA 8.2 \iref{Andersson:1983ia,Sjostrand:2014zea}.
