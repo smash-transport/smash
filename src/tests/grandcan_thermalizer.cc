@@ -12,8 +12,14 @@
 
 #include "../include/boxmodus.h"
 #include "../include/grandcan_thermalizer.h"
+#include "../include/logging.h"
+#include "../include/thermalizationaction.h"
 
 using namespace Smash;
+
+TEST(init) {
+  set_default_loglevel(einhard::INFO);
+}
 
 TEST(create_part_list) {
   // Note that antiparticles are also created!
@@ -27,17 +33,11 @@ TEST(create_part_list) {
       "K⁰ 0.494 0.0        311\n");
 }
 
-TEST(rest_frame_transformation) {
-  //  1. Generate a box of particles
-  //  2. Construct ThermLatticeNode from these particles
-  //  3. Go to the rest frame
-  //  4. Check Tmu0 = (e+p)umu unu - p gmunu
-  //  5. Check that EoS is satisfied
+static BoxModus create_box_for_tests() {
   auto conf = Test::configuration();
-  const int N = 300;
+  const int N = 30;
   const double L = 10.;
   const double T_init = 0.2;
-  const ThreeVector v_boost(0.1, 0.2, 0.8);
   conf["Modus"] = "Box";
   conf.take({"Modi", "Box", "Init_Multiplicities"});
   conf["Modi"]["Box"]["Init_Multiplicities"]["2212"] = N;
@@ -45,13 +45,24 @@ TEST(rest_frame_transformation) {
   conf["Modi"]["Box"]["Length"] = L;
   conf["Modi"]["Box"]["Temperature"] = T_init;
   const ExperimentParameters par = Smash::Test::default_parameters();
-  std::unique_ptr<BoxModus> b = make_unique<BoxModus>(conf["Modi"], par);
+  return BoxModus(conf["Modi"], par);
+}
 
+TEST(rest_frame_transformation) {
+  //  1. Generate a box of particles
+  //  2. Construct ThermLatticeNode from these particles
+  //  3. Go to the rest frame
+  //  4. Check Tmu0 = (e+p)umu unu - p gmunu
+  //  5. Check that EoS is satisfied
   Particles P;
-  b->initial_conditions(&P, par);
+  const ExperimentParameters par = Smash::Test::default_parameters();
+  BoxModus b = create_box_for_tests();
+  b.initial_conditions(&P, par);
 
   HadronGasEos eos = HadronGasEos(false);
   ThermLatticeNode node = ThermLatticeNode();
+  const ThreeVector v_boost(0.1, 0.2, 0.8);
+  const double L = b.length();
   for (auto &part : P) {
     part.boost(v_boost);
     node.add_particle(part, std::sqrt(1.0 - v_boost.sqr()) / (L * L * L));
@@ -77,4 +88,28 @@ TEST(rest_frame_transformation) {
                          tolerance);
   COMPARE_ABSOLUTE_ERROR(
       node.ns(), eos.net_strange_density(T, mub, mus) * gamma, tolerance);
+}
+
+TEST(thermalization_action) {
+  Particles P;
+  BoxModus b = create_box_for_tests();
+  const ExperimentParameters par = Smash::Test::default_parameters();
+  b.initial_conditions(&P, par);
+
+  Configuration th_conf = Test::configuration();
+  std::vector<int> cell_n = {1, 1, 1};
+  th_conf["Cell_Number"] = cell_n;
+  th_conf["Critical_Edens"] = 0.01;
+  th_conf["Algorithm"] = "biased BF";
+  th_conf["Start_Time"] = 0.0;
+  th_conf["Timestep"] = 1.0;
+  auto thermalizer = b.create_grandcan_thermalizer(th_conf);
+
+  const DensityParameters dens_par = DensityParameters(par);
+  std::cout << "Updating lattice" << std::endl;
+  thermalizer->update_lattice(P, dens_par, true);
+  std::cout << "Thermalizing" << std::endl;
+  thermalizer->thermalize(P, 0.0, par.testparticles);
+  ThermalizationAction th_act(*thermalizer, 0.0);
+  // If all this did not crash - the test is passed.
 }

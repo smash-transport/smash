@@ -29,10 +29,11 @@ double ParticleData::effective_mass() const {
 }
 
 void ParticleData::set_history(int ncoll, uint32_t pid, ProcessType pt,
-                               double time_of_or, const ParticleList &plist) {
+                               double time_last_coll,
+                               const ParticleList &plist) {
   if (pt != ProcessType::Wall) {
-    history_.time_of_origin = time_of_or;
     history_.collisions_per_particle = ncoll;
+    history_.time_last_collision = time_last_coll;
   }
   history_.id_process = pid;
   history_.process_type = pt;
@@ -51,6 +52,7 @@ void ParticleData::set_history(int ncoll, uint32_t pid, ProcessType pt,
       history_.p1 = plist[0].pdgcode();
       history_.p2 = plist[1].pdgcode();
       break;
+    case ProcessType::Thermalization:
     case ProcessType::None:
       // nullify parents
       history_.p1 = 0x0;

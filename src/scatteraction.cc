@@ -49,6 +49,7 @@ void ScatterAction::generate_final_state() {
       collision_channels_, total_cross_section_);
   process_type_ = proc->get_type();
   outgoing_particles_ = proc->particle_list();
+  partial_cross_section_ = proc->weight();
 
   log.debug("Chosen channel: ", process_type_, outgoing_particles_);
 
@@ -188,23 +189,18 @@ void ScatterAction::add_all_processes(double elastic_parameter, bool two_to_one,
 
 double ScatterAction::raw_weight_value() const { return total_cross_section_; }
 
+double ScatterAction::partial_weight() const { return partial_cross_section_; }
+
 ThreeVector ScatterAction::beta_cm() const {
-  return (incoming_particles_[0].momentum() + incoming_particles_[1].momentum())
-      .velocity();
+  return total_momentum().velocity();
 }
 
 double ScatterAction::gamma_cm() const {
-  return (1. / std::sqrt(1 - beta_cm().sqr()));
+  return (1. / std::sqrt(1.0 - beta_cm().sqr()));
 }
 
 double ScatterAction::mandelstam_s() const {
-  return (incoming_particles_[0].momentum() + incoming_particles_[1].momentum())
-      .sqr();
-}
-
-double ScatterAction::sqrt_s() const {
-  return (incoming_particles_[0].momentum() + incoming_particles_[1].momentum())
-      .abs();
+  return total_momentum().sqr();
 }
 
 double ScatterAction::cm_momentum() const {
@@ -557,7 +553,8 @@ void ScatterAction::string_excitation() {
     std::sort(new_intermediate_particles.begin(),
               new_intermediate_particles.end(),
               [&](ParticleData i, ParticleData j) {
-                return std::fabs(i.momentum().x3()) > std::fabs(j.momentum().x3());
+                return std::abs(i.momentum().x3()) >
+                       std::abs(j.momentum().x3());
               });
     for (ParticleData data : new_intermediate_particles) {
       log.debug("Particle momenta after sorting: ", data.momentum());

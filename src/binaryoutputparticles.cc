@@ -15,37 +15,18 @@
 
 #include "include/clock.h"
 #include "include/config.h"
-#include "include/configuration.h"
 #include "include/forwarddeclarations.h"
-#include "include/inputfunctions.h"
 #include "include/particles.h"
 
 namespace Smash {
 
 BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
-                                             Configuration &&config)
+                                             std::string name,
+                                             const OutputParameters &out_par)
     : BinaryOutputBase(
           std::fopen(((path / "particles_binary.bin")).native().c_str(), "wb"),
-          config.take({"Extended"}, false)),
-      only_final_(config.has_value({"Only_Final"}) ? config.take({"Only_Final"})
-                                                   : true) {
-  /*!\Userguide
-   * \page input_binary_particles Binary_particles
-   * Writes the particle list at fixed times in binary format.
-   *
-   * \key Enable (bool, optional, default = false):\n
-   * true - binary particle list output enabled\n
-   * false - no binary particle list output
-   *
-   * \key only_final (bool, optional, default = true): \n
-   * true - only final particle list at the end of each event \n
-   * false - particle list output at every output interval including initial
-   * time
-   *
-   * Detailed specification of the binary format can be found here:
-   * \ref format_binary_
-   */
-}
+          name, out_par.part_extended),
+      only_final_(out_par.part_only_final) {}
 
 /*!\Userguide
  * \page format_binary_ Binary format
@@ -93,19 +74,22 @@ BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
  *
  * **Particle line**
  * \code
- *     9*double             int int
- * t x y z mass p0 px py pz pdg ID
+ *     9*double             int int int
+ * t x y z mass p0 px py pz pdg ID charge
  * \endcode
  *
  * **Extended Particle line**
- * \code
- *     9*double             int int int     double
- * t x y z mass p0 px py pz pdg ID Ncoll formation_time
- *        double                    uint32_t            uint32_t
- * cross_section_scaling_factor process_ID_origin process_type_origin
- *        double        int         int
+ * <div class="fragment">
+ * <div class="line">
+ *   9*double        int int int int     double
+ *     double                    uint32_t            uint32_t
+ *     double        int         int
+ * </div>
+ * <div class="line">
+ * t x y z mass p0 px py pz pdg ID charge Ncoll formation_time
+ * xs_scaling_factor process_ID_origin process_type_origin
  * time_of_origin PDG_mother1 PDG_mother2
- * \endcode
+ * </div></div>
  *
  * **Event end line**
  * \code
@@ -118,7 +102,7 @@ BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
  * Written to \c particles_binary.bin file. Contains the current particle
  * list at specific moments of time. Every moment of time
  * is written as a 'p' block. For options of this output see
- * \ref input_general_, \ref input_binary_particles.
+ * \ref output_content_specific_options_ "content-specific output options".
  **/
 
 void BinaryOutputParticles::at_eventstart(const Particles &particles,
@@ -132,7 +116,8 @@ void BinaryOutputParticles::at_eventstart(const Particles &particles,
 }
 
 void BinaryOutputParticles::at_eventend(const Particles &particles,
-                                        const int event_number) {
+                                        const int event_number,
+                                        double impact_parameter) {
   char pchar = 'p';
   if (only_final_) {
     std::fwrite(&pchar, sizeof(char), 1, file_.get());
@@ -144,6 +129,7 @@ void BinaryOutputParticles::at_eventend(const Particles &particles,
   char fchar = 'f';
   std::fwrite(&fchar, sizeof(char), 1, file_.get());
   write(event_number);
+  write(impact_parameter);
 
   /* Flush to disk */
   std::fflush(file_.get());

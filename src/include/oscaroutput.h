@@ -13,10 +13,10 @@
 #include <memory>
 #include <string>
 
-#include "configuration.h"
 #include "filedeleter.h"
 #include "forwarddeclarations.h"
 #include "outputinterface.h"
+#include "outputparameters.h"
 
 namespace Smash {
 
@@ -67,7 +67,8 @@ class OscarOutput : public OutputInterface {
                      const int event_number) override;
 
   /// writes the final particle information of an event
-  void at_eventend(const Particles &particles, const int event_number) override;
+  void at_eventend(const Particles &particles, const int event_number,
+                   double impact_parameter) override;
 
   /// Write a prefix line and a line per particle to OSCAR output.
   void at_interaction(const Action &action, const double density) override;
@@ -87,33 +88,18 @@ class OscarOutput : public OutputInterface {
  * Returns a new OscarOutput object using information from \p config to
  * select the correct implementation.
  *
+ * \param format A string: "Oscar2013" or "Oscar1999"
+ * \param content A string: "Particles", "Collisions", "Photons"
+               or "Dileptons".
  * \param path The path to the output directory where the file(s) will be
  *             placed.
- * \param config A Configuration object that has direct entries for OSCAR.
+ * \param out_par A structure containing parameters of the output, in particular
+ *             if it is extended or not, if printing only final particles
+ *             in event, etc.
  */
-std::unique_ptr<OutputInterface> create_oscar_output(const bf::path &path,
-                                                     Configuration config);
-
-/**
- * Returns a OscarOutput for the dilepton output routine in the
- * DecayActionsFinderDilepton. The Format is always 2013 and OscarInterations.
- * This function is basically a workaround for linking issues with clang.
- *
- * \param path The path to the output directory where the file(s) will be
- *             placed.
- */
-
-std::unique_ptr<OutputInterface> create_dilepton_output(bf::path path);
-
-/**
- * Returns a OscarOutput for the photon output routine in the
- * ScatterActionsFinderPhoton. The Format is always 2013 and OscarInterations.
- *
- * \param path The path to the output directory where the file(s) will be
- *             placed.
- */
-
-std::unique_ptr<OutputInterface> create_photon_output(bf::path path);
+std::unique_ptr<OutputInterface> create_oscar_output(
+    std::string format, std::string content, const bf::path &path,
+    const OutputParameters &out_par);
 
 // @}
 

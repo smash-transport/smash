@@ -77,6 +77,8 @@ class ColliderModus : public ModusDefault {
   FermiMotion fermi_motion() { return fermi_motion_; }
   /// return whether the modus is collider modus
   bool is_collider() const { return true; }
+  /// return impact parameter of the collision
+  double impact_parameter() const { return impact_; }
   /// \ingroup exception
   /// Thrown when either \a projectile_ or \a target_ nuclei are empty.
   struct ColliderEmpty : public ModusDefault::BadInput {
