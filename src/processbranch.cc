@@ -61,19 +61,19 @@ std::ostream& operator<<(std::ostream& os, ProcessType process_type) {
       os << "TwoToTwo";
       break;
     case ProcessType::String:
-      os << "String";
+      os << "String via Pythia";
       break;
     case ProcessType::StringSDiffAX:
-      os << "String";
+      os << "String single diffr. AB->AX";
       break;
     case ProcessType::StringSDiffXB:
-      os << "String";
+      os << "String single diffr. AB->XB";
       break;
     case ProcessType::StringDDiffXX:
-      os << "String";
+      os << "String double diffractive";
       break;
     case ProcessType::StringNDiff:
-      os << "String";
+      os << "String non-diffractive";
       break;
     case ProcessType::Decay:
       os << "Decay";
