@@ -69,19 +69,16 @@ static void compare_particledata(const std::array<std::string, 12> &datastring,
 
 TEST(fullhistory_format) {
   // Set options
-  const bf::path configfilename = "oscar_1999.yaml";
-  const bf::path configfilepath = testoutputpath / configfilename;
-  bf::ofstream(configfilepath) << "Oscar_Collisions:\n"
-                                  "    Enable:          True\n"
-                                  "    Print_Start_End: True\n"
-                                  "    2013_Format:     False\n";
-  VERIFY(bf::exists(configfilepath));
+  OutputParameters out_par = OutputParameters();
+  out_par.coll_printstartend = true;
+  out_par.coll_extended = false;
 
   std::unique_ptr<OutputInterface> oscfull = create_oscar_output(
-      testoutputpath, Configuration{testoutputpath, configfilename});
+      "Oscar1999", "Collisions", testoutputpath, out_par);
   VERIFY(bool(oscfull));
 
-  const bf::path outputfilepath = testoutputpath / "full_event_history.oscar";
+  const bf::path outputfilepath = testoutputpath /
+      "full_event_history.oscar1999";
   VERIFY(bf::exists(outputfilepath));
 
   Test::create_smashon_particletypes();
@@ -91,6 +88,7 @@ TEST(fullhistory_format) {
   const ParticleData p2 = particles.insert(Test::smashon_random());
 
   int event_id = 0;
+  double impact_parameter = 3.7;
   /* Initial state output */
   oscfull->at_eventstart(particles, event_id);
 
@@ -103,7 +101,7 @@ TEST(fullhistory_format) {
   oscfull->at_interaction(*action, 0.);
 
   /* Final state output */
-  oscfull->at_eventend(particles, event_id);
+  oscfull->at_eventend(particles, event_id, impact_parameter);
 
   // const std::string outputfilename
   //    = (testoutputpath / outputfilename).native();
@@ -121,7 +119,7 @@ TEST(fullhistory_format) {
         "# Block format:\n"
         "# nin nout event_number\n"
         "# id pdg 0 px py pz p0 mass x y z t\n"
-        "# End of event: 0 0 event_number\n"
+        "# End of event: 0 0 event_number impact_parameter\n"
         "#\n";
     do {
       std::getline(outputfile, line);
@@ -185,6 +183,8 @@ TEST(fullhistory_format) {
     COMPARE(std::atoi(item.c_str()), 0);
     outputfile >> item;
     COMPARE(std::atoi(item.c_str()), event_id + 1);
+    outputfile >> item;
+    COMPARE(std::stod(item.c_str()), impact_parameter);
   }
   outputfile.close();
   VERIFY(bf::remove(outputfilepath));
@@ -192,19 +192,15 @@ TEST(fullhistory_format) {
 
 TEST(particlelist_format) {
   // Set options
-  const bf::path configfilename = "oscar_1999.yaml";
-  const bf::path configfilepath = testoutputpath / configfilename;
-  bf::ofstream(configfilepath) << "Oscar_Particlelist:\n"
-                                  "    Enable:          True\n"
-                                  "    Only_Final:      True\n"
-                                  "    2013_Format:     False\n";
-  VERIFY(bf::exists(configfilepath));
+  OutputParameters out_par = OutputParameters();
+  out_par.part_only_final = true;
+  out_par.part_extended = false;
 
   std::unique_ptr<OutputInterface> oscfinal = create_oscar_output(
-      testoutputpath, Configuration{testoutputpath, configfilename});
+      "Oscar1999", "Particles", testoutputpath, out_par);
   VERIFY(bool(oscfinal));
 
-  const bf::path outputfilepath = testoutputpath / "particle_lists.oscar";
+  const bf::path outputfilepath = testoutputpath / "particle_lists.oscar1999";
   VERIFY(bf::exists(outputfilepath));
 
   Particles particles;
@@ -213,6 +209,7 @@ TEST(particlelist_format) {
   const ParticleData p2 = particles.insert(Test::smashon_random());
 
   int event_id = 0;
+  double impact_parameter = 2.4;
 
   /* Initial state output (note that this should not do anything!) */
   oscfinal->at_eventstart(particles, event_id);
@@ -228,7 +225,7 @@ TEST(particlelist_format) {
 
   /* Final state output; this is the only thing we expect to find in file */
   action->perform(&particles, 1);
-  oscfinal->at_eventend(particles, event_id);
+  oscfinal->at_eventend(particles, event_id, impact_parameter);
 
   bf::fstream outputfile;
   outputfile.open(outputfilepath, std::ios_base::in);
@@ -244,7 +241,7 @@ TEST(particlelist_format) {
         "# Block format:\n"
         "# nin nout event_number\n"
         "# id pdg 0 px py pz p0 mass x y z t\n"
-        "# End of event: 0 0 event_number\n"
+        "# End of event: 0 0 event_number impact_parameter\n"
         "#\n";
     do {
       std::getline(outputfile, line);
@@ -258,6 +255,7 @@ TEST(particlelist_format) {
     COMPARE(std::atoi(item.c_str()), 0);
     outputfile >> item;
     COMPARE(std::atoi(item.c_str()), event_id + 1);
+
     for (ParticleData &data : particles) {
       std::array<std::string, 12> datastring;
       for (int j = 0; j < 12; j++) {
@@ -272,8 +270,9 @@ TEST(particlelist_format) {
     COMPARE(std::atoi(item.c_str()), 0);
     outputfile >> item;
     COMPARE(std::atoi(item.c_str()), event_id + 1);
+    outputfile >> item;
+    COMPARE(std::stod(item.c_str()), impact_parameter);
   }
   outputfile.close();
   VERIFY(bf::remove(outputfilepath));
-  VERIFY(bf::remove(configfilepath));
 }

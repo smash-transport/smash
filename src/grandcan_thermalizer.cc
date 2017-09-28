@@ -138,34 +138,34 @@ void GrandCanThermalizer::sample_multinomial(HadronClass particle_class,
   }
 }
 
-void GrandCanThermalizer::thermalize(Particles &particles, double time,
+void GrandCanThermalizer::thermalize(const Particles &particles, double time,
                                      int ntest) {
   const auto &log = logger<LogArea::GrandcanThermalizer>();
   log.info("Starting forced thermalization, time ", time, " fm/c");
+  to_remove_.clear();
+  sampled_list_.clear();
   // Remove particles from the cells with e > e_crit_,
   // sum up their conserved quantities
   QuantumNumbers conserved_initial = QuantumNumbers();
   ThermLatticeNode node;
-  ParticleList to_remove;
   for (auto &particle : particles) {
     const bool is_on_lattice =
         lat_->value_at(particle.position().threevec(), node);
     if (is_on_lattice && node.e() > e_crit_) {
-      to_remove.push_back(particle);
+      to_remove_.push_back(particle);
     }
   }
   // Do not thermalize too small number of particles: for the number
   // of particles < 30 the algorithm tends to hang or crash too often.
-  if (to_remove.size() > 30) {
-    for (auto &particle : to_remove) {
+  if (to_remove_.size() > 30) {
+    for (auto &particle : to_remove_) {
       conserved_initial.add_values(particle);
-      particles.remove(particle);
     }
   } else {
-    to_remove.clear();
+    to_remove_.clear();
     conserved_initial = QuantumNumbers();
   }
-  log.info("Removed ", to_remove.size(), " particles.");
+  log.info("Removed ", to_remove_.size(), " particles.");
 
   // Exit if there is nothing to thermalize
   if (conserved_initial == QuantumNumbers()) {
@@ -184,32 +184,26 @@ void GrandCanThermalizer::thermalize(Particles &particles, double time,
            cells_to_sample_.size() * cell_volume_, ", in % of lattice: ",
            100.0 * cells_to_sample_.size() / lattice_total_cells);
 
-  ParticleList sampled_list;
   switch (algorithm_) {
     case ThermalizationAlgorithm::BiasedBF:
     case ThermalizationAlgorithm::UnbiasedBF:
-      thermalize_BF_algo(sampled_list, conserved_initial, time, ntest);
+      thermalize_BF_algo(conserved_initial, time, ntest);
       break;
     case ThermalizationAlgorithm::ModeSampling:
-      thermalize_mode_algo(sampled_list, conserved_initial, time);
+      thermalize_mode_algo(conserved_initial, time);
       break;
     default:
       throw std::invalid_argument(
           "This thermalization algorithm is"
           " not yet implemented");
   }
-  log.info("Sampled ", sampled_list.size(), " particles.");
+  log.info("Sampled ", sampled_list_.size(), " particles.");
 
   // Adjust momenta
-  renormalize_momenta(sampled_list, conserved_initial.momentum());
-
-  for (auto &particle : sampled_list) {
-    particles.insert(particle);
-  }
+  renormalize_momenta(sampled_list_, conserved_initial.momentum());
 }
 
-void GrandCanThermalizer::thermalize_BF_algo(ParticleList &sampled_list,
-                                             QuantumNumbers &conserved_initial,
+void GrandCanThermalizer::thermalize_BF_algo(QuantumNumbers &conserved_initial,
                                              double time, int ntest) {
   const auto &log = logger<LogArea::GrandcanThermalizer>();
 
@@ -235,7 +229,7 @@ void GrandCanThermalizer::thermalize_BF_algo(ParticleList &sampled_list,
                                  conserved_initial.baryon_number());
 
   while (true) {
-    sampled_list.clear();
+    sampled_list_.clear();
     std::fill(mult_int_.begin(), mult_int_.end(), 0);
     const auto Nbar_antibar = bessel_sampler_B.sample();
 
@@ -297,12 +291,12 @@ void GrandCanThermalizer::thermalize_BF_algo(ParticleList &sampled_list,
         Random::poisson(mult_class(HadronClass::ZeroQZeroSMeson)));
 
     for (size_t itype = 0; itype < N_sorts_; itype++) {
-      sample_in_random_cell_BF_algo(sampled_list, time, itype);
+      sample_in_random_cell_BF_algo(sampled_list_, time, itype);
     }
     double e_tot;
     const double e_init = conserved_initial.momentum().x0();
     e_tot = 0.0;
-    for (auto &particle : sampled_list) {
+    for (auto &particle : sampled_list_) {
       e_tot += particle.momentum().x0();
     }
     if (std::abs(e_tot - e_init) > 0.01 * e_init) {
@@ -380,8 +374,7 @@ void GrandCanThermalizer::renormalize_momenta(
 }
 
 void GrandCanThermalizer::thermalize_mode_algo(
-    ParticleList &sampled_list, QuantumNumbers &conserved_initial,
-    double time) {
+    QuantumNumbers &conserved_initial, double time) {
   double energy = 0.0;
   int S_plus = 0, S_minus = 0, B_plus = 0, B_minus = 0, E_plus = 0, E_minus = 0;
   // Mode 1: sample until energy is conserved, take only strangeness < 0
@@ -392,7 +385,7 @@ void GrandCanThermalizer::thermalize_mode_algo(
     ParticleData p = sample_in_random_cell_mode_algo(time, condition1);
     energy += p.momentum().x0();
     if (p.pdgcode().strangeness() > 0) {
-      sampled_list.push_back(p);
+      sampled_list_.push_back(p);
       S_plus += p.pdgcode().strangeness();
     }
   }
@@ -405,7 +398,7 @@ void GrandCanThermalizer::thermalize_mode_algo(
     const int s_part = p.pdgcode().strangeness();
     // Do not allow particles with S = -2 or -3 spoil the total sum
     if (S_plus + S_minus + s_part >= conserved_initial.strangeness()) {
-      sampled_list.push_back(p);
+      sampled_list_.push_back(p);
       S_minus += s_part;
     }
   }
@@ -413,7 +406,7 @@ void GrandCanThermalizer::thermalize_mode_algo(
   // Mode 3: sample non-strange baryons
   auto condition3 = [](int S, int, int) { return (S == 0); };
   QuantumNumbers conserved_remaining =
-      conserved_initial - QuantumNumbers(sampled_list);
+      conserved_initial - QuantumNumbers(sampled_list_);
   energy = 0.0;
   compute_N_in_cells_mode_algo(condition3);
   while (conserved_remaining.momentum().x0() > energy ||
@@ -421,7 +414,7 @@ void GrandCanThermalizer::thermalize_mode_algo(
     ParticleData p = sample_in_random_cell_mode_algo(time, condition3);
     energy += p.momentum().x0();
     if (p.pdgcode().baryon_number() > 0) {
-      sampled_list.push_back(p);
+      sampled_list_.push_back(p);
       B_plus += p.pdgcode().baryon_number();
     }
   }
@@ -433,14 +426,14 @@ void GrandCanThermalizer::thermalize_mode_algo(
     ParticleData p = sample_in_random_cell_mode_algo(time, condition4);
     const int bar = p.pdgcode().baryon_number();
     if (B_plus + B_minus + bar >= conserved_remaining.baryon_number()) {
-      sampled_list.push_back(p);
+      sampled_list_.push_back(p);
       B_minus += bar;
     }
   }
 
   // Mode 5: sample non_strange mesons, but take only with charge > 0
   auto condition5 = [](int S, int B, int) { return (S == 0) && (B == 0); };
-  conserved_remaining = conserved_initial - QuantumNumbers(sampled_list);
+  conserved_remaining = conserved_initial - QuantumNumbers(sampled_list_);
   energy = 0.0;
   compute_N_in_cells_mode_algo(condition5);
   while (conserved_remaining.momentum().x0() > energy ||
@@ -448,7 +441,7 @@ void GrandCanThermalizer::thermalize_mode_algo(
     ParticleData p = sample_in_random_cell_mode_algo(time, condition5);
     energy += p.momentum().x0();
     if (p.pdgcode().charge() > 0) {
-      sampled_list.push_back(p);
+      sampled_list_.push_back(p);
       E_plus += p.pdgcode().charge();
     }
   }
@@ -462,7 +455,7 @@ void GrandCanThermalizer::thermalize_mode_algo(
     ParticleData p = sample_in_random_cell_mode_algo(time, condition6);
     const int charge = p.pdgcode().charge();
     if (E_plus + E_minus + charge >= conserved_remaining.charge()) {
-      sampled_list.push_back(p);
+      sampled_list_.push_back(p);
       E_minus += charge;
     }
   }
@@ -471,12 +464,12 @@ void GrandCanThermalizer::thermalize_mode_algo(
   auto condition7 = [](int S, int B, int C) {
     return (S == 0) && (B == 0) && (C == 0);
   };
-  conserved_remaining = conserved_initial - QuantumNumbers(sampled_list);
+  conserved_remaining = conserved_initial - QuantumNumbers(sampled_list_);
   energy = 0.0;
   compute_N_in_cells_mode_algo(condition7);
   while (conserved_remaining.momentum().x0() > energy) {
     ParticleData p = sample_in_random_cell_mode_algo(time, condition7);
-    sampled_list.push_back(p);
+    sampled_list_.push_back(p);
     energy += p.momentum().x0();
   }
 }

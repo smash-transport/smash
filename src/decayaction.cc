@@ -28,10 +28,6 @@ void DecayAction::add_decay(DecayBranchPtr p) {
   add_process<DecayBranch>(p, decay_channels_, total_width_);
 }
 
-double DecayAction::sqrt_s() const {
-  return incoming_particles_[0].momentum().abs();
-}
-
 void DecayAction::one_to_three() {
   const auto &log = logger<LogArea::DecayModes>();
   ParticleData &outgoing_a = outgoing_particles_[0];
@@ -164,6 +160,7 @@ void DecayAction::generate_final_state() {
   outgoing_particles_ = proc->particle_list();
   process_type_ = proc->get_type();
   L_ = proc->angular_momentum();
+  partial_width_ = proc->weight();
 
   switch (outgoing_particles_.size()) {
     case 2:

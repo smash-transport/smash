@@ -128,13 +128,16 @@ namespace {
  * Distance in sigma at which gaussian is considered 0.
  *
  * \page input_output_options_ Output
- * \key Output_Interval (double, required): \n
+ *
+ * Description of options
+ * ---------------------
+ * \key Output_Interval (double, optional, default = End_Time): \n
  * Defines the period of intermediate output of the status of the simulated
  * system in Standard Output and other output formats which support this
  * functionality.
  *
  * \key Density_Type (string, optional, default = "none"): \n
- * Determines which kind of density is written into the collision files.
+ * Determines which kind of density is printed into the collision files.
  * Possible values:\n
  * \li "hadron"           - total hadronic density
  * \li "baryon"           - net baryon density
@@ -142,16 +145,79 @@ namespace {
  * \li "pion"             - pion density
  * \li "none"             - do not calculate density, print 0.0
  *
- * The output section has several subsections, relating to different output
- * files. To disable a certain output, comment the corresponding section out:
+ * Futher options are defined for every single output \b content
+ * (see \ref output_contents_ "output contents" for the list of
+ * possible contents) in the following way:
+ * \code
+ * Content:
+ *     Format: ["format1", "format2", ...]
+ *     Option1: Value  # Content-specific options
+ *     Option2: Value
+ *     ...
+ * \endcode
  *
- * \li \subpage input_oscar_particlelist
- * \li \subpage input_oscar_collisions
- * \li \subpage input_vtk
- * \li \subpage input_binary_collisions
- * \li \subpage input_binary_particles
- * \li \subpage input_root
- * \li \subpage input_dileptons
+ * To disable a certain output content,  remove or comment out the
+ * corresponding section. Every output can be printed in several formats
+ * simultaneously. The following option chooses list of formats:
+ *
+ * \key Format (list of formats, optional, default = []):\n
+ * List of formats for writing particular content.
+ * Possible formats for every content are listed and described in
+ * \ref output_contents_ "output contents". List of available formats is
+ * \ref list_of_output_formats "here".
+ *
+ * ### Content-specific output options
+ * \anchor output_content_specific_options_
+ *
+ * - \b Particles
+ *
+ *   \key Extended (bool, optional, default = false): \n
+ *   true - print extended information for each particle \n
+ *   false - regular output for each particle
+ *
+ *   \key Only_Final (bool, optional, default = true): \n
+ *   true - print only final particle list \n
+ *   false - particle list at output interval including initial time
+ * - \b Collisions
+ *
+ *   \key Extended (bool, optional, default = false): \n
+ *   true - print extended information for each particle \n
+ *   false - regular output for each particle
+ *
+ *   \key Print_Start_End (bool, optional, default = false): \n
+ *   true - initial and final particle list is printed out \n
+ *   false - initial and final particle list is not printed out
+ * - \b Photons - see \ref input_photons
+ * - \b Thermodynamics - see \subpage input_vtk_lattice_ for full spatial
+ *   lattice output and \subpage ascii_thermodynamic_output_ for output at one
+ *   point versus time.
+ *
+ * \anchor configuring_output_
+ * Example configuring SMASH output
+ * --------------
+ * As an example, if one wants to have all of the following simultaneously:
+ * \li particles at the end of event printed out in binary and Root formats
+ * \li dileptons printed in Oscar2013 format
+ * \li net baryon density at point (0, 0, 0) printed as a table
+ *     against time every 1 fm/c
+ *
+ * then the output section of configuration will be the following.
+ *
+ * \code
+ * Output:
+ *     Output_Interval:  1.0
+ *     Particles:
+ *         Format:          ["Binary", "Root"]
+ *         Only_Final:      True
+ *     Dileptons:
+ *         Format:          ["Oscar2013"]
+ *     Thermodynamics:
+ *         Format:          ["ASCII"]
+ *         Type:            "baryon"
+ *         Quantities:      ["rho_eckart"]
+ *         Position:        [0.0, 0.0, 0.0]
+ *         Smearing:        True
+ * \endcode
  */
 
 /** Gathers all general Experiment parameters
@@ -172,16 +238,14 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   // If this Delta_Time option is absent (this can be for timestepless mode)
   // just assign 1.0 fm/c, reasonable value will be set at event initialization
   const double dt = config.take({"General", "Delta_Time"}, 1.);
-  const double output_dt = config.take({"Output", "Output_Interval"});
+  const double t_end = config.read({"General", "End_Time"});
+  const double output_dt = config.take({"Output", "Output_Interval"}, t_end);
   const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
   const bool two_to_two = config.take({"Collision_Term", "Two_to_Two"}, true);
   const bool strings_switch = config.take({"Collision_Term", "Strings"}, false);
   const NNbarTreatment nnbar_treatment = config.take(
       {"Collision_Term", "NNbar_Treatment"}, NNbarTreatment::NoAnnihilation);
-  const bool photons_switch =
-      config.has_value({"Output", "Photons"})
-          ? config.take({"Output", "Photons", "Enable"}, true)
-          : false;
+  const bool photons_switch = config.has_value({"Output", "Photons"});
   /// Elastic collisions between the nucleons with the square root s
   //  below low_snn_cut are excluded.
   const double low_snn_cut =
@@ -231,27 +295,43 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
 }
 
 template <typename Modus>
-template <typename TOutput>
-void Experiment<Modus>::create_output(const char *name,
+void Experiment<Modus>::create_output(std::string format, std::string content,
                                       const bf::path &output_path,
-                                      Configuration &&conf) {
-  const bool exists = conf.has_value_including_empty({name});
-  if (!exists) {
-    return;
+                                      const OutputParameters &out_par) {
+  const auto &log = logger<LogArea::Experiment>();
+  log.info() << "Adding output " << content << " of format " << format
+             << std::endl;
+
+  if (format == "VTK" && content == "Particles") {
+    outputs_.emplace_back(make_unique<VtkOutput>(output_path, content));
+  } else if (format == "Root") {
+#ifdef SMASH_USE_ROOT
+    outputs_.emplace_back(
+        make_unique<RootOutput>(output_path, content, out_par));
+#else
+    log.error("Root output requested, but Root support not compiled in");
+#endif
+  } else if (format == "Binary") {
+    if (content == "Collisions" ||
+        content == "Dileptons" || content == "Photons") {
+      outputs_.emplace_back(
+          make_unique<BinaryOutputCollisions>(output_path, content, out_par));
+    } else if (content == "Particles") {
+      outputs_.emplace_back(
+          make_unique<BinaryOutputParticles>(output_path, content, out_par));
+    }
+  } else if (format == "Oscar1999" || format == "Oscar2013") {
+    outputs_.emplace_back(
+        create_oscar_output(format, content, output_path, out_par));
+  } else if (content == "Thermodynamics" && format == "ASCII") {
+    outputs_.emplace_back(
+        make_unique<ThermodynamicOutput>(output_path, content, out_par));
+  } else if (content == "Thermodynamics" && format == "VTK") {
+    printout_lattice_td_ = true;
+  } else {
+    log.error() << "Unknown combination of format (" << format
+                << ") and content (" << content << "). Fix the config.";
   }
-  if (conf.has_value({name, "Enable"})) {
-    const auto &log = logger<LogArea::Experiment>();
-    log.warn(
-        "Enable option is deprecated."
-        " To disable/enable output comment/uncomment"
-        " it out in the config.yaml.");
-  }
-  const bool enable = conf.take({name, "Enable"}, true);
-  if (!enable) {
-    conf.take({name});
-    return;
-  }
-  outputs_.emplace_back(make_unique<TOutput>(output_path, conf[name]));
 }
 
 /*!\Userguide
@@ -319,13 +399,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
           config.take({"General", "Metric_Type"}, ExpansionMode::NoExpansion),
           config.take({"General", "Expansion_Rate"}, 0.1)),
       strings_switch_(config.take({"Collision_Term", "Strings"}, false)),
-      dileptons_switch_(
-          config.has_value({"Output", "Dileptons"})
-              ? config.take({"Output", "Dileptons", "Enable"}, true)
-              : false),
-      photons_switch_(config.has_value({"Output", "Photons"})
-                          ? config.take({"Output", "Photons", "Enable"}, true)
-                          : false),
+      dileptons_switch_(config.has_value({"Output", "Dileptons"})),
+      photons_switch_(config.has_value({"Output", "Photons"})),
       time_step_mode_(
           config.take({"General", "Time_Step_Mode"}, TimeStepMode::Fixed)) {
   const auto &log = logger<LogArea::Experiment>();
@@ -392,63 +467,91 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   auto output_conf = config["Output"];
   /*!\Userguide
-    * \page output_general_ Output formats
-    * Several different output formats are available in SMASH. They are
-    * explained below in more detail. Per default, the selected output files
+    * \page output_general_ Output
+    *
+    * Output directory
+    * ----------------
+    *
+    * Per default, the selected output files
     * will be saved in the directory ./data/\<run_id\>, where \<run_id\> is an
     * integer number starting from 0. At the beginning of a run SMASH checks,
     * if the ./data/0 directory exists. If it does not exist, it is created and
     * all output files are written there. If the directory already exists,
     * SMASH tries for ./data/1, ./data/2 and so on until it finds a free
-    * number. The user can change output directory by a command line option, if
+    * number.
+    *
+    * The user can change output directory by a command line option, if
     * desired:
     * \code smash -o <user_output_dir> \endcode
-    * SMASH supports several kinds of configurable output formats.
-    * They are called OSCAR1999, OSCAR2013, binary OSCAR2013, VTK and ROOT
-    * outputs. Every format can be switched on/off by commenting/uncommenting
-    * the corresponding section in the configuration file config.yaml. For more
-    * information on configuring the output see corresponding pages: \ref
-    * input_oscar_particlelist,
-    * \ref input_oscar_collisions, \ref input_binary_collisions,
-    * \ref input_binary_particles, \ref input_root, \ref input_vtk.
     *
-    * \key Details of output formats are explained here: \n
-    * \li General block structure of OSCAR formats: \n
-    *     \subpage oscar_general_
-    * \li A family of OSCAR ASCII outputs.\n
-    *     \subpage format_oscar_particlelist\n
-    *     \subpage format_oscar_collisions
-    * \li Binary outputs analoguous to OSCAR format\n
-    *     \subpage format_binary_\n
-    * \li Output in vtk format suitable for an easy
-    *     visualization using paraview software:\n \subpage format_vtk
-    * \li Formatted binary output that uses ROOT software
-    *     (http://root.cern.ch).\n Fast to read and write, requires less
-    *     disk space.\n \subpage format_root
-    * \li \subpage collisions_output_in_box_modus_
-    * \li \subpage output_vtk_lattice_
+    * Output content
+    * --------------
+    * \anchor output_contents_
+    * Output in SMASH is distinguished by _content_ and _format_, where content
+    * means the physical information contained in the output (e.g. list of
+    * particles, list of interactions, thermodynamics, etc) and format (e.g.
+    * Oscar, binary or ROOT). The same content can be printed out in several
+    * formats _simultaneously_.
+    *
+    * For an example of choosing specific output contents see
+    * \ref configuring_output_ "Configuring SMASH output".
+    *
+    * The list of possible contents follows:
+    *
+    * - \b Particles  List of particles at regular time intervals in the
+    *                   computational frame or (optionally) only at the event end.
+    *   - Available formats: \ref format_oscar_particlelist,
+    *      \ref format_binary_, \ref format_root, \ref format_vtk
+    * - \b Collisions List of interactions: collisions, decays, box wall
+    *                 crossings and forced thermalizations. Information about
+    *                 incoming, outgoing particles and the interaction itself
+    *                 is printed out.
+    *   - Available formats: \ref format_oscar_collisions, \ref format_binary_,
+    *                 \ref format_root
+    * - \b Dileptons  Special dilepton output, see \subpage input_dileptons.
+    *   - Available formats: \ref format_oscar_collisions,
+    *                   \ref format_binary_ and \ref format_root
+    * - \b Photons    Special photon output, see \subpage input_photons.
+    *   - Available formats: \ref format_oscar_collisions,
+    *                   \ref format_binary_ and \ref format_root.
+    * - \b Thermodynamics This output allows to print out thermodynamic
+    *          quantities such as density, energy-momentum tensor,
+    *          Landau velocity, etc at one selected point versus time
+    *          (simple ASCII format table \subpage ascii_thermodynamic_output_)
+    *          and on a spatial lattice  versus time (\ref output_vtk_lattice_).
+    * \anchor list_of_output_formats
+    * Output formats
+    * --------------
+    *
+    * For choosing output formats see
+    * \ref configuring_output_ "Configuring SMASH output".
+    * Every output content can be printed out in several formats:
+    * - \b "Oscar1999", \b "Oscar2013" - human-readable text output\n
+    *   - For "Particles" content: \subpage format_oscar_particlelist
+    *   - For "Collisions" content: \subpage format_oscar_collisions
+    *   - General block structure of OSCAR formats: \subpage oscar_general_
+    * - \b "Binary" - binary, not human-readable output
+    *   - Faster to read and write than text outputs
+    *   - Saves coordinates and momenta with the full double precision
+    *   - General file structure is similar to \subpage oscar_general_
+    *   - Detailed description: \subpage format_binary_
+    * - \b "Root" - binary output in the format used by ROOT software
+    *     (http://root.cern.ch)
+    *   - Even faster to read and write, requires less disk space
+    *   - Format description: \subpage format_root
+    * - \b "VTK" - text output suitable for an easy
+    *     visualization using paraview software
+    *   - This output can be opened by paraview to see the visulalization.
+    *   - For "Particles" content \subpage format_vtk
+    *   - For "Thermodynamics" content \subpage output_vtk_lattice_
+    * - \b "ASCII" - a human-readable text-format table of values
+    *   - Used only for "Thermodynamics", see
+    *     \subpage ascii_thermodynamic_output_
+    *
+    * \note Output of coordinates for the "Collisions" content in
+    *       the periodic box has a feature:
+    *       \subpage collisions_output_in_box_modus_
     */
-
-  // loop until all OSCAR outputs are created (create_oscar_output will return
-  // nullptr then).
-  while (OutputPtr oscar = create_oscar_output(output_path, output_conf)) {
-    outputs_.emplace_back(std::move(oscar));
-  }
-  create_output<VtkOutput>("Vtk", output_path, std::move(output_conf));
-  create_output<BinaryOutputCollisions>("Binary_Collisions", output_path,
-                                        std::move(output_conf));
-  create_output<BinaryOutputParticles>("Binary_Particles", output_path,
-                                       std::move(output_conf));
-#ifdef SMASH_USE_ROOT
-  create_output<RootOutput>("Root", output_path, std::move(output_conf));
-#else
-  const bool enable_root = output_conf.take({"Root", "Enable"}, true);
-  if (enable_root && output_conf.has_value_including_empty({"Root"})) {
-    log.error("Root output requested, but Root support not compiled in");
-  }
-#endif
-  create_output<ThermodynamicOutput>("Thermodynamics", output_path,
-                                     std::move(output_conf));
 
   /*!\Userguide
    * \page input_dileptons Dileptons
@@ -461,64 +564,33 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * \li Dileptons are treated via the time integration method, also called
    * 'shining', as described in \iref{Schmidt:2008hm}, chapter 2D.
    * This means that, because dilepton decays are so rare, possible decays are
-   * written in the ouput in every single timestep without ever performing
-   * them.  The are weighted with a "shining weight" to compensate for the
+   * written in the output at every hadron propagation without ever performing
+   * them. The are weighted with a "shining weight" to compensate for the
    * over-production.
-   * \li The shining weight can be found in the weight element of the ouput.
+   * \li The shining weight can be found in the weight element of the output.
    * \li The shining method is implemented in the DecayActionsFinderDilepton,
    * which is enabled together with the dilepton output.
    *
    * \note If you want dilepton decays, you also have to modify decaymodes.txt.
    * Dilepton decays are commented out by default.
-   *
-   * \key Format (string, required):\n
-   * "Oscar" - The dilepton output is written to the file \c
-   *DileptonOutput.oscar
-   * in \ref format_oscar_collisions (OSCAR2013 format) .\n
-   * "Binary" - The dilepton output is written to the file \c DileptonOutput.bin
-   * in \ref format_binary_ .\n
-   * "Root" - The dilepton output is written to the file \c DileptonOutput.root
-   * in \ref format_root .\n
    **/
-  if (dileptons_switch_) {
-    // create dilepton output object
-    std::string format = config.take({"Output", "Dileptons", "Format"});
-    if (format == "Oscar") {
-      dilepton_output_ = create_dilepton_output(output_path);
-    } else if (format == "Binary") {
-      dilepton_output_ = make_unique<BinaryOutputCollisions>(
-          output_path, "DileptonOutput", true);
-    } else if (format == "Root") {
-#ifdef SMASH_USE_ROOT
-      dilepton_output_ = make_unique<RootOutput>(output_path, "DileptonOutput");
-#else
-      log.error() << "You requested Root output, but Root support has not been "
-                     "compiled in.";
-      output_conf.take({"Root"});
-#endif
-    } else {
-      throw std::runtime_error("Bad dilepton output format: " + format);
-    }
-  }
 
-  if (parameters_.photons_switch) {
-    // create photon output object
-    std::string format = config.take({"Output", "Photons", "Format"});
-    if (format == "Oscar") {
-      photon_output_ = create_photon_output(output_path);
-    } else if (format == "Binary") {
-      photon_output_ = make_unique<BinaryOutputCollisions>(
-          output_path, "PhotonOutput", false);
-    } else if (format == "Root") {
-#ifdef SMASH_USE_ROOT
-      photon_output_ = make_unique<RootOutput>(output_path, "PhotonOutput");
-#else
-      log.error() << "You requested Root output, but Root support has not been "
-                     "compiled in.";
-      output_conf.take({"Root"});
-#endif
-    } else {
-      throw std::runtime_error("Bad Photon output format: " + format);
+  /*!\Userguide
+   * \page input_photons Photons
+   * Todo(schaefer): document photons
+   **/
+
+  dens_type_ = config.take({"Output", "Density_Type"}, DensityType::None);
+  log.info() << "Density type printed to headers: " << dens_type_;
+
+  const OutputParameters output_parameters(std::move(output_conf));
+
+  std::vector<std::string> output_contents = output_conf.list_upmost_nodes();
+  for (const auto &content : output_contents) {
+    auto this_output_conf = output_conf[content.c_str()];
+    std::vector<std::string> formats = this_output_conf.take({"Format"});
+    for (const auto &format : formats) {
+      create_output(format, content, output_path, output_parameters);
     }
   }
 
@@ -545,9 +617,6 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     potentials_ = make_unique<Potentials>(config["Potentials"], parameters_);
   }
 
-  dens_type_ = config.take({"Output", "Density_Type"}, DensityType::None);
-  log.info() << "Density type written to headers: " << dens_type_;
-
   /*!\Userguide
    * \page input_lattice_ Lattice
    *
@@ -564,15 +633,17 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *      Use periodic continuation or not. With periodic continuation
    *      x + i * lx is equivalent to x, same for y, z.
    *
-   * \subpage input_vtk_lattice_
+   * For format of lattice output see \ref output_vtk_lattice_. To configure
+   * output of the quantities on the lattice to vtk files see
+   * \ref input_output_options_.
    *
-   * For format of lattice output see \ref output_vtk_lattice_.
+   * \page input_vtk_lattice_ lattice vtk output
    *
-   * \page input_vtk_lattice_ Printout
-   *
-   * User can print thermodynamical quantities on the lattice to vtk output.
-   * For this one has to use the "Lattice: Printout" section of configuration.
-   * Currently printing of custom density to vtk file is available.
+   * User can print thermodynamical quantities on the spatial lattice
+   * to vtk output.
+   * The lattice for the output is regulated by options of lattice
+   * \subpage input_lattice_. The type of thermodynamic quantities is
+   * chosen by the following options of the "Thermodynamic" output.
    *
    * \key Type (string, optional, default = "none"): \n
    * Chooses hadron/baryon/pion/baryonic isospin thermodynamic quantities
@@ -588,7 +659,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *      The velocity is obtained from the energy-momentum tensor
    *      \f$T^{\mu\nu}(t,x,y,z) \f$ by solving the generalized eigenvalue
    *      equation \f$(T^{\mu\nu} - \lambda g^{\mu\nu})u_{\mu}=0 \f$.
-   */
+  */
 
   // Create lattices
   if (config.has_value({"Lattice"})) {
@@ -597,15 +668,13 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     const std::array<int, 3> n = config.take({"Lattice", "Cell_Number"});
     const std::array<double, 3> origin = config.take({"Lattice", "Origin"});
     const bool periodic = config.take({"Lattice", "Periodic"});
-    dens_type_lattice_printout_ =
-        config.take({"Lattice", "Printout", "Type"}, DensityType::None);
-    const std::set<ThermodynamicQuantity> td_to_print =
-        config.take({"Lattice", "Printout", "Quantities"});
-    printout_tmn_ = (td_to_print.count(ThermodynamicQuantity::Tmn) > 0);
-    printout_tmn_landau_ =
-        (td_to_print.count(ThermodynamicQuantity::TmnLandau) > 0);
-    printout_v_landau_ =
-        (td_to_print.count(ThermodynamicQuantity::LandauVelocity) > 0);
+
+    if (printout_lattice_td_) {
+      dens_type_lattice_printout_ = output_parameters.td_dens_type;
+      printout_tmn_ = output_parameters.td_tmn;
+      printout_tmn_landau_ = output_parameters.td_tmn_landau;
+      printout_v_landau_ = output_parameters.td_v_landau;
+    }
     if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
       Tmn_ = make_unique<RectangularLattice<EnergyMomentumTensor>>(
           l, n, origin, periodic, LatticeUpdate::AtOutput);
@@ -646,6 +715,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       jmu_custom_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
                                                     LatticeUpdate::AtOutput);
     }
+  } else if (printout_lattice_td_) {
+    log.error("If you want Thermodynamic VTK output"
+              ", configure a lattice for it.");
   }
 
   // Create forced thermalizer
@@ -800,7 +872,9 @@ bool Experiment<Modus>::perform_action(
    * position could be either at 10 fm or at 5 fm.
    */
   for (const auto &output : outputs_) {
-    output->at_interaction(action, rho);
+    if (!output->is_dilepton_output() && !output->is_photon_output()) {
+      output->at_interaction(action, rho);
+    }
   }
 
   // At every collision photons can be produced.
@@ -821,7 +895,11 @@ bool Experiment<Modus>::perform_action(
     photon_act.add_single_channel();
     for (int i = 0; i < n_fractional_photons_; i++) {
       photon_act.generate_final_state();
-      photon_output_->at_interaction(photon_act, rho);
+      for (const auto &output : outputs_) {
+        if (output->is_photon_output()) {
+          output->at_interaction(photon_act, rho);
+        }
+      }
     }
   }
   log.debug(~einhard::Green(), "✔ ", action);
@@ -861,8 +939,13 @@ void Experiment<Modus>::run_time_evolution() {
       const bool ignore_cells_under_treshold = true;
       thermalizer_->update_lattice(particles_, density_param_,
                                    ignore_cells_under_treshold);
-      thermalizer_->thermalize(particles_, parameters_.labclock.current_time(),
+      const double current_t = parameters_.labclock.current_time();
+      thermalizer_->thermalize(particles_, current_t,
                                parameters_.testparticles);
+      ThermalizationAction th_act(*thermalizer_, current_t);
+      if (th_act.any_particles_thermalized()) {
+        perform_action(th_act, particles_);
+      }
     }
 
     /* (1.a) Create grid. */
@@ -944,7 +1027,9 @@ void Experiment<Modus>::propagate_and_shine(double to_time) {
   const double dt =
       propagate_straight_line(&particles_, to_time, beam_momentum_);
   if (dilepton_finder_ != nullptr) {
-    dilepton_finder_->shine(particles_, dilepton_output_.get(), dt);
+    for (const auto &output : outputs_) {
+      dilepton_finder_->shine(particles_, output.get(), dt);
+    }
   }
 }
 
@@ -1057,6 +1142,9 @@ void Experiment<Modus>::intermediate_output() {
   }*/
   /* save evolution data */
   for (const auto &output : outputs_) {
+    if (output->is_dilepton_output() || output->is_photon_output()) {
+      continue;
+    }
     output->at_intermediate_time(particles_, parameters_.outputclock,
                                  density_param_);
 
@@ -1147,7 +1235,9 @@ void Experiment<Modus>::do_final_decays() {
 
     /* Dileptons: shining of remaining resonances */
     if (dilepton_finder_ != nullptr) {
-      dilepton_finder_->shine_final(particles_, dilepton_output_.get(), true);
+      for (const auto &output : outputs_) {
+        dilepton_finder_->shine_final(particles_, output.get(), true);
+      }
     }
     /* Find actions. */
     for (const auto &finder : action_finders_) {
@@ -1162,7 +1252,9 @@ void Experiment<Modus>::do_final_decays() {
 
   /* Dileptons: shining of stable particles at the end */
   if (dilepton_finder_ != nullptr) {
-    dilepton_finder_->shine_final(particles_, dilepton_output_.get(), false);
+    for (const auto &output : outputs_) {
+      dilepton_finder_->shine_final(particles_, output.get(), false);
+    }
   }
 }
 
@@ -1193,16 +1285,21 @@ void Experiment<Modus>::final_output(const int evt_num) {
                << " [fm-1]";
     log.info() << "Final interaction number: "
                << interactions_total_ - wall_actions_total_;
+    // Check if there are unformed particles
+    int unformed_particles_count = 0;
+    for (const auto & particle : particles_) {
+      if (particle.formation_time() > end_time_) {
+        unformed_particles_count++;
+      }
+    }
+    if (unformed_particles_count > 0) {
+      log.warn("End time might be too small. ", unformed_particles_count,
+               " unformed particles were found at the end of the evolution.");
+    }
   }
 
   for (const auto &output : outputs_) {
-    output->at_eventend(particles_, evt_num);
-  }
-  if (dilepton_output_ != nullptr) {
-    dilepton_output_->at_eventend(particles_, evt_num);
-  }
-  if (photon_output_ != nullptr) {
-    photon_output_->at_eventend(particles_, evt_num);
+    output->at_eventend(particles_, evt_num, modus_.impact_parameter());
   }
 }
 
@@ -1239,15 +1336,10 @@ void Experiment<Modus>::run() {
                                                gamma * v_beam * mass_beam));
       }
     }
+
     /* Output at event start */
     for (const auto &output : outputs_) {
       output->at_eventstart(particles_, j);
-    }
-    if (dilepton_output_ != nullptr) {
-      dilepton_output_->at_eventstart(particles_, j);
-    }
-    if (photon_output_ != nullptr) {
-      photon_output_->at_eventstart(particles_, j);
     }
 
     run_time_evolution();

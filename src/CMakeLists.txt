@@ -129,6 +129,7 @@ set(smash_src
         stringfunctions.cc
         stringprocess.cc
         tabulation.cc
+        thermalizationaction.cc
         thermodynamicoutput.cc
         threevector.cc
         tsc.cc

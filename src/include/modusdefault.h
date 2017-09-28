@@ -65,6 +65,7 @@ class ModusDefault {
   int proj_N_number() const { return 0; }
   bool cll_in_nucleus() const { return true; }
   bool is_collider() const { return false; }
+  double impact_parameter() const { return 0.0; }
   /** The beam velocity of the projectile required in the Collider modus.
    *   In the other modus, return zero. */
   double velocity_projectile() const { return 0.0; }

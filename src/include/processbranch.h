@@ -35,6 +35,7 @@ enum class ProcessType {
   String = 4,
   Decay = 5,
   Wall = 6,
+  Thermalization = 7,
   StringSDiffAX = 41,
   StringSDiffXB = 42,
   StringDDiffXX = 43,

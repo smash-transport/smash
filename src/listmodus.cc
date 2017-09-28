@@ -41,6 +41,20 @@ namespace Smash {
 /*!\Userguide
  * \page input_modi_list_ List
  *
+ * <b> Purpose: Provides a modus for hydro afterburner calculations </b>
+ *
+ * Takes files with list of particles in
+ * \ref oscar2013_format "Oscar 2013 format" as an input. These
+ * particles are treated as a starting setup.
+ *
+ * To select the List modus:
+ * \code
+ * General:
+ *     Modus:  List
+ * \endcode
+ *
+ * ### Input options:
+ *
  * \key File_Directory (string, required):\n
  * Directory for the external particle lists
  *
@@ -53,17 +67,35 @@ namespace Smash {
  * \key Shift_Id (int, required):\n
  * Starting id for event_id_
  *
- * Example input in particle_lists_in/event{id}
- * \verbatim
-CAR2013 particle_lists t x y z mass p0 px py pz pdg ID
-its: fm fm fm fm GeV GeV GeV GeV GeV none none
-6.42036 1.66473 9.38499 0.138 0.232871 0.116953 -0.115553 0.0903033 111 0
-  \endverbatim
- * It means that one pi^{0} at spatial coordinates (t,x,y,z)=(0.1, 6.42036,
-1.66473, 9.38499) fm
- * and 4-momenta (p0, px. py, pz)=(0.232871, 0.116953, -0.115553, 0.0903033 )
-GeV,
- * with mass=0.138, pdg=111 and id=0 will be initialized.
+ * ### Example of configuration:
+ *
+ * \code
+ *  List:
+ *      # path of external particle list == File_Directory/File_Prefix{eventid}
+ *      File_Directory: "particle_lists_in"
+ *      File_Prefix: "event"
+ *
+ *      # starting number of event_id in event-by-event simulation
+ *      Shift_Id: 0
+ *
+ *      # start time of simulation
+ *      Start_Time: 0.0
+ * \endcode
+ *
+ * ### Example of input in particle_lists_in/event{id}
+ * <div class="fragment">
+ * <div class="line"><span class="preprocessor">#!OSCAR2013 particle_lists
+ * t x y z mass p0 px py pz pdg ID charge</span></div>
+ * <div class="line"><span class="preprocessor">\# Units: fm fm fm fm
+ * GeV GeV GeV GeV GeV none none none</span></div>
+ * <div class="line"><span class="preprocessor">0.1 6.42036 1.66473 9.38499
+ * 0.138 0.232871 0.116953 -0.115553 0.090303 111 0 0</span></div>
+ * </div>
+ * It means that one \f$ \pi^0 \f$ with spatial coordinates\n
+ * (t, x, y, z) = (0.1, 6.42036, 1.66473, 9.38499) fm and\n
+ * and 4-momenta (p0, px, py, pz) =
+ * (0.232871, 0.116953, -0.115553, 0.090303) GeV,\n
+ * with mass = 0.138 GeV, pdg = 111, id = 0 and charge 0 will be initialized.
  */
 
 ListModus::ListModus(Configuration modus_config, const ExperimentParameters &)
@@ -134,8 +166,10 @@ double ListModus::initial_conditions(Particles *particles,
                 << "1. Put the external particle lists in file \n"
                 << "File_Directory/File_Prefix{id} where {id} "
                 << "traversal [Shift_Id, Nevent-1]\n"
-                << "2. Particles info: t x y z mass p0 px py pz pdg ID \n"
-                << "in units of: fm fm fm fm GeV GeV GeV GeV GeV none none \n";
+                << "2. Particles info: t x y z mass p0 px py pz"
+                << " pdg ID charge\n"
+                << "in units of: fm fm fm fm GeV GeV GeV GeV GeV"
+                << " none none none\n";
     throw std::runtime_error("External particle list does not exist!");
   }
 
@@ -148,10 +182,10 @@ double ListModus::initial_conditions(Particles *particles,
   for (const Line &line : line_parser(particle_lists)) {
     std::istringstream lineinput(line.text);
     double t, x, y, z, mass, E, px, py, pz;
-    int id;
+    int id, charge;
     PdgCode pdgcode;
     lineinput >> t >> x >> y >> z >> mass >> E >> px >> py >> pz >> pdgcode >>
-        id;
+        id >> charge;
 
     if (lineinput.fail()) {
       throw LoadFailure(
@@ -161,15 +195,17 @@ double ListModus::initial_conditions(Particles *particles,
                              line));
     }
 
-    log.debug() << "Particle " << pdgcode << " (x,y,z)= "
-                << "( ";
-    log.debug() << x << "," << y << "," << z << ")\n";
+    log.debug("Particle ", pdgcode, " (x,y,z)= (", x, ", ", y, ", ", z, ")");
 
     try {
       ParticleData &particle = particles->create(pdgcode);
+      if (pdgcode.charge() != charge) {
+        log.error() << "Charge of pdg = " << pdgcode << " != " << charge;
+        throw std::invalid_argument("Inconsistent input (charge).");
+      }
       particle.set_4momentum(FourVector(E, px, py, pz));
       if (anti_streaming_needed) {
-        /* for hydro output where formation time is different*/
+        /* for hydro output where formation time is different */
         double delta_t = t - start_time_;
         FourVector start_timespace =
             FourVector(t, x, y, z) - delta_t * FourVector(E, px, py, pz) / E;
@@ -177,7 +213,7 @@ double ListModus::initial_conditions(Particles *particles,
         particle.set_formation_time(t);
         particle.set_cross_section_scaling_factor(0.0);
       } else {
-        /* for smash output where formation time is the same*/
+        /* for smash output where formation time is the same */
         particle.set_4position(FourVector(t, x, y, z));
         particle.set_formation_time(t);
         particle.set_cross_section_scaling_factor(1.0);

@@ -46,6 +46,13 @@ class Action {
         time_of_execution_(time + in_part.position().x0()),
         process_type_(type) {}
 
+  Action(const ParticleList &in_part, const ParticleList &out_part,
+         double absolute_execution_time, ProcessType type)
+      : incoming_particles_(std::move(in_part)),
+        outgoing_particles_(std::move(out_part)),
+        time_of_execution_(absolute_execution_time),
+        process_type_(type) {}
+
   /** Copying is disabled. Use pointers or create a new Action. */
   Action(const Action &) = delete;
 
@@ -66,6 +73,12 @@ class Action {
    * Prefer to use a more specific function.
    */
   virtual double raw_weight_value() const = 0;
+
+  /** Return the specific weight for the chosen outgoing channel.
+   *  For scatterings it will be partial cross-section, for
+   *  decays - partial width, for dileptons - shining weight*branching.
+   */
+  virtual double partial_weight() const = 0;
 
   /** Return the process type. */
   virtual ProcessType get_type() const { return process_type_; }
@@ -162,6 +175,9 @@ class Action {
    * `id_process` is only used for debugging output. */
   void check_conservation(const uint32_t id_process) const;
 
+  /// determine the total energy in the center-of-mass frame
+  double sqrt_s() const { return total_momentum().abs(); }
+
   /** Get the interaction point */
   FourVector get_interaction_point();
 
@@ -192,9 +208,14 @@ class Action {
   /** type of process */
   ProcessType process_type_;
 
-  /// determine the total energy in the center-of-mass frame
-  /// \fpPrecision Why \c double?
-  virtual double sqrt_s() const = 0;
+  /// Sum of 4-momenta of incoming particles
+  FourVector total_momentum() const {
+    FourVector mom(0.0, 0.0, 0.0, 0.0);
+    for (const auto &p : incoming_particles_) {
+      mom += p.momentum();
+    }
+    return mom;
+  }
 
   /**
    * Decide for a particular final-state channel via Monte-Carlo
