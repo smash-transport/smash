@@ -77,7 +77,8 @@ TEST(fullhistory_format) {
       "Oscar1999", "Collisions", testoutputpath, out_par);
   VERIFY(bool(oscfull));
 
-  const bf::path outputfilepath = testoutputpath / "full_event_history.oscar";
+  const bf::path outputfilepath = testoutputpath /
+      "full_event_history.oscar1999";
   VERIFY(bf::exists(outputfilepath));
 
   Test::create_smashon_particletypes();
@@ -199,7 +200,7 @@ TEST(particlelist_format) {
       "Oscar1999", "Particles", testoutputpath, out_par);
   VERIFY(bool(oscfinal));
 
-  const bf::path outputfilepath = testoutputpath / "particle_lists.oscar";
+  const bf::path outputfilepath = testoutputpath / "particle_lists.oscar1999";
   VERIFY(bf::exists(outputfilepath));
 
   Particles particles;

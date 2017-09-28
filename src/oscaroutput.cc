@@ -26,7 +26,9 @@ template <OscarOutputFormat Format, int Contents>
 OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
                                            std::string name)
     : OutputInterface(name),
-      file_{std::fopen((path / (name + ".oscar")).native().c_str(), "w")} {
+      file_{std::fopen((path / (name + ".oscar" +
+                       ((Format == OscarFormat1999) ? "1999" : "")))
+            .native().c_str(), "w")} {
   /*!\Userguide
    * \page oscar_general_ OSCAR block structure
    * OSCAR outputs are a family of ASCII and binary formats that follow
@@ -458,8 +460,7 @@ std::unique_ptr<OutputInterface> create_select_format(
   } else if (modern_format) {
     return make_unique<OscarOutput<OscarFormat2013, Contents>>(path, name);
   } else {
-    return make_unique<OscarOutput<OscarFormat1999, Contents>>(path, name +
-        "_1999");
+    return make_unique<OscarOutput<OscarFormat1999, Contents>>(path, name);
   }
 }
 }  // unnamed namespace
