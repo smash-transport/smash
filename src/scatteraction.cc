@@ -345,48 +345,62 @@ CollisionBranchPtr ScatterAction::string_excitation_cross_section() {
 
 CollisionBranchList ScatterAction::string_excitation_cross_sections() {
   const auto &log = logger<LogArea::ScatterAction>();
-  CollisionBranchList channel_list;
   /* Calculate string-excitation cross section:
    * Parametrized total minus all other present channels. */
   double sig_string_all =
       std::max(0., high_energy_cross_section() - elastic_parametrization());
-  int pdgidA = incoming_particles_[0].type().pdgcode().get_decimal();
-  int pdgidB = incoming_particles_[1].type().pdgcode().get_decimal();
-  if ( pdgidA > 0 ) pdgidA = pdgidA%10000;
-  else pdgidA = - ( std::abs(pdgidA)%10000 );
-  if ( pdgidB > 0 ) pdgidB = pdgidB%10000;
-  else pdgidB = - ( std::abs(pdgidB)%10000 );
-  int idAbsA = std::abs(pdgidA);
-  int idAbsB = std::abs(pdgidB);
-  int idModA = (idAbsA > 1000) ? idAbsA : 10 * (idAbsA/10) + 3;
-  int idModB = (idAbsB > 1000) ? idAbsB : 10 * (idAbsB/10) + 3;
-  double sqrts = sqrt_s();
-  double sqrts_threshold = pythia->particleData.m0(idModA)
-      + pythia->particleData.m0(idModB) + 2.*(1. + 1.0e-6);
+
+  double sqrts_threshold = 2. * (1. + 1.0e-6);
+  std::array<int, 2> pdgid;
+  for (int i = 0; i < 2; i++) {
+    PdgCode pdg = incoming_particles_[i].type().pdgcode();
+    // Todo(ryu, oliiny): make sure this deexcite does what you really want
+    pdg.deexcite();
+    pdgid[i] = pdg.get_decimal();
+    // Todo(ryu, oliiny): why?
+    const int abs_pdg = pdg.is_baryon() ? pdgid[i] :  10 * (pdgid[i] / 10) + 3;
+    sqrts_threshold += pythia->particleData.m0(abs_pdg);
+  }
+
   /* Compute the parametrized cross sections of relevant subprocesses. */
-  double sig_sd_AX, sig_sd_XB, sig_dd_XX, sig_nd;
-  if( sqrts > sqrts_threshold ) pythia_sigmaTot.calc(pdgidA, pdgidB, sqrts);
-  else pythia_sigmaTot.calc(pdgidA, pdgidB, sqrts_threshold);
-  double sig_sd_all = pythia_sigmaTot.sigmaAX() + pythia_sigmaTot.sigmaXB();
+  pythia_sigmaTot.calc(pdgid[0], pdgid[1],
+                       std::max(sqrt_s(), sqrts_threshold));
+
+  // Todo(ryu, oliiny): why so? why not renormalize?
+  /* Total parametrized cross-section (I) and pythia-produced total
+   * cross-section (II) do not necessarily coincide. If I > II then
+   * non-diffractive cross-section is reinforced to get I == II.
+   * If I < II then partial cross-sections are drained one-by-one
+   * to reduce II until I == II:
+   * first non-diffractive, then double-diffractive, then
+   * single-diffractive AB->AX and AB->XB in equal propotion. */
+  const double sig_sd_all = pythia_sigmaTot.sigmaAX() +
+                            pythia_sigmaTot.sigmaXB();
   double sig_diff = sig_sd_all + pythia_sigmaTot.sigmaXX();
-  sig_nd = std::max( 0., sig_string_all - sig_diff );
+  const double sig_nd = std::max(0., sig_string_all - sig_diff);
   sig_diff = sig_string_all - sig_nd;
-  sig_dd_XX = std::max( 0., sig_diff - sig_sd_all );
-  sig_sd_AX = ( sig_diff - sig_dd_XX )*pythia_sigmaTot.sigmaAX()/sig_sd_all;
-  sig_sd_XB = ( sig_diff - sig_dd_XX )*pythia_sigmaTot.sigmaXB()/sig_sd_all;
+  const double sig_dd_XX = std::max(0., sig_diff - sig_sd_all);
+  const double a = (sig_diff - sig_dd_XX) / sig_sd_all;
+  const double sig_sd_AX = a * pythia_sigmaTot.sigmaAX();
+  const double sig_sd_XB = a * pythia_sigmaTot.sigmaXB();
+  assert(std::abs(sig_sd_AX + sig_sd_XB + sig_dd_XX + sig_nd
+                  - sig_string_all) < 1.e-6);
+
   log.debug("String cross section (single-diffractive AB->AX) is: ", sig_sd_AX);
   log.debug("String cross section (single-diffractive AB->XB) is: ", sig_sd_XB);
   log.debug("String cross section (double-diffractive AB->XX) is: ", sig_dd_XX);
   log.debug("String cross section (non-diffractive) is: ", sig_nd);
+
   /* fill the list of process channels */
-  channel_list.push_back(make_unique<CollisionBranch>( sig_sd_AX,
-      ProcessType::StringSDiffAX) );
-  channel_list.push_back(make_unique<CollisionBranch>( sig_sd_XB,
-      ProcessType::StringSDiffXB) );
-  channel_list.push_back(make_unique<CollisionBranch>( sig_dd_XX,
-      ProcessType::StringDDiffXX) );
-  channel_list.push_back(make_unique<CollisionBranch>( sig_nd,
-      ProcessType::StringNDiff) );
+  CollisionBranchList channel_list;
+  channel_list.push_back(make_unique<CollisionBranch>(sig_sd_AX,
+      ProcessType::StringSDiffAX));
+  channel_list.push_back(make_unique<CollisionBranch>(sig_sd_XB,
+      ProcessType::StringSDiffXB));
+  channel_list.push_back(make_unique<CollisionBranch>(sig_dd_XX,
+      ProcessType::StringDDiffXX));
+  channel_list.push_back(make_unique<CollisionBranch>(sig_nd,
+      ProcessType::StringNDiff));
   return channel_list;
 }
 

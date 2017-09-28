@@ -532,6 +532,10 @@ class PdgCode {
             digits_.n_q1_ * 1000 + digits_.n_L_ * 10000 +
             digits_.n_R_ * 100000 + digits_.n_ * 1000000);
   }
+
+  /// Remove all excitation, except spin. Sign and quark content remains.
+  void deexcite() { chunks_.excitation_ = 0; }
+
   /** returns the net number of quarks with given flavour number
    *
    * \param quark PDG Code of quark: (1..6) = (d,u,s,c,b,t)
