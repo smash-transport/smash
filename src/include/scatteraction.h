@@ -310,7 +310,8 @@ class ScatterAction : public Action {
   /** Perform the string excitation and decay via Pythia. */
   void string_excitation();
 
-  /** Perform the UrQMD-based string excitation and decay */
+  /** Todo(ryu): document better - it is not really UrQMD-based, isn't it?
+   *  Perform the UrQMD-based string excitation and decay */
   void string_excitation_inter(int subprocess);
 
   /**
