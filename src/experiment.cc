@@ -1288,7 +1288,7 @@ void Experiment<Modus>::final_output(const int evt_num) {
     // Check if there are unformed particles
     int unformed_particles_count = 0;
     for (const auto & particle : particles_) {
-      if (particle.formation_time() > end_time_ ) {
+      if (particle.formation_time() > end_time_) {
         unformed_particles_count++;
       }
     }
