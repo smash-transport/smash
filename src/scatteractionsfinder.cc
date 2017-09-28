@@ -334,17 +334,16 @@ void ScatterActionsFinder::dump_reactions() const {
             }
             any_nonzero_cs = true;
             for (const auto &channel : act->collision_channels()) {
+              const auto type = channel->get_type();
               std::string r;
-              if (channel->get_type() == ProcessType::String) {
-                r = A_type->name() + B_type->name() + std::string(" → strings");
-              } else if ((channel->get_type() == ProcessType::StringSDiffAX)
-                  || (channel->get_type() == ProcessType::StringSDiffXB)
-                  || (channel->get_type() == ProcessType::StringDDiffXX)
-                  || (channel->get_type() == ProcessType::StringNDiff)) {
+              if ((type == ProcessType::String)
+                  || (type == ProcessType::StringSDiffXB)
+                  || (type == ProcessType::StringDDiffXX)
+                  || (type == ProcessType::StringNDiff)) {
                 r = A_type->name() + B_type->name() + std::string(" → strings");
               } else {
                 std::string r_type =
-                    (channel->get_type() == ProcessType::Elastic)
+                    (type == ProcessType::Elastic)
                         ? std::string(" (el)")
                         : (channel->get_type() == ProcessType::TwoToTwo)
                               ? std::string(" (inel)")
