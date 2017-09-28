@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -560,7 +560,7 @@ void ScatterAction::string_excitation() {
     std::sort(new_intermediate_particles.begin(),
               new_intermediate_particles.end(),
               [&](ParticleData i, ParticleData j) {
-                return fabs(i.momentum().x3()) > fabs(j.momentum().x3());
+                return std::fabs(i.momentum().x3()) > std::fabs(j.momentum().x3());
               });
     for (ParticleData data : new_intermediate_particles) {
       log.debug("Particle momenta after sorting: ", data.momentum());
