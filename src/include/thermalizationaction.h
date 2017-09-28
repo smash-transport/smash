@@ -28,6 +28,7 @@ class ThermalizationAction : public Action {
   // No need to do anything, because outgoing particles are set in constructor
   void generate_final_state() {}
   double raw_weight_value() const { return 0.0; }
+  double partial_weight() const { return 0.0; }
   bool any_particles_thermalized() const {
     return (incoming_particles_.size() > 0);
   }

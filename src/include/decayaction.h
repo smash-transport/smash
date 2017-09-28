@@ -52,6 +52,8 @@ class DecayAction : public Action {
 
   double raw_weight_value() const override { return total_width_; }
 
+  double partial_weight() const override { return partial_width_; }
+
   double total_width() const { return total_width_; }
 
   /**
@@ -75,6 +77,9 @@ class DecayAction : public Action {
 
   /** total decay width */
   double total_width_;
+
+  /** partial decay width to the chosen outgoing channel */
+  double partial_width_;
 
   /** angular momentum of the decay */
   int L_ = 0;

@@ -49,6 +49,7 @@ void ScatterAction::generate_final_state() {
       collision_channels_, total_cross_section_);
   process_type_ = proc->get_type();
   outgoing_particles_ = proc->particle_list();
+  partial_cross_section_ = proc->weight();
 
   log.debug("Chosen channel: ", process_type_, outgoing_particles_);
 
@@ -187,6 +188,8 @@ void ScatterAction::add_all_processes(double elastic_parameter, bool two_to_one,
 }
 
 double ScatterAction::raw_weight_value() const { return total_cross_section_; }
+
+double ScatterAction::partial_weight() const { return partial_cross_section_; }
 
 ThreeVector ScatterAction::beta_cm() const {
   return total_momentum().velocity();

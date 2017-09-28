@@ -114,6 +114,14 @@ void Configuration::merge_yaml(const std::string &yaml) {
   }
 }
 
+std::vector<std::string> Configuration::list_upmost_nodes() {
+  std::vector<std::string> r;
+  for (auto i : root_node_) {
+    r.emplace_back(i.first.Scalar());
+  }
+  return r;
+}
+
 Configuration::Value Configuration::take(
     std::initializer_list<const char *> keys) {
   assert(keys.size() > 0);

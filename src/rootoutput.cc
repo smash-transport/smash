@@ -13,60 +13,21 @@
 #include "include/action.h"
 #include "include/clock.h"
 #include "include/forwarddeclarations.h"
-#include "include/inputfunctions.h"
 #include "include/particles.h"
 
 namespace Smash {
 
-RootOutput::RootOutput(const bf::path &path, const std::string &name)
-    : base_path_(std::move(path)),
+RootOutput::RootOutput(const bf::path &path, std::string name,
+                       const OutputParameters& out_par)
+    : OutputInterface(name),
+      base_path_(std::move(path)),
       root_out_file_(
           new TFile((base_path_ / (name + ".root")).native().c_str(), "NEW")),
-      write_collisions_(true),
-      write_particles_(false),
+      write_collisions_(name == "Collisions" || name == "Dileptons" ||
+                        name == "Photons"),
+      write_particles_(name == "Particles"),
+      particles_only_final_(out_par.part_only_final),
       autosave_frequency_(1000) {
-  init_trees();
-}
-
-/**
- * RootOuput constructor. Creates file smash_run.root in the output directory.
- */
-RootOutput::RootOutput(const bf::path &path, Configuration &&conf)
-    : base_path_(std::move(path)),
-      root_out_file_(
-          new TFile((base_path_ / "smash_run.root").native().c_str(), "NEW")),
-      write_collisions_(conf.take({"Write_Collisions"}, false)),
-      write_particles_(conf.take({"Write_Particles"}, true)),
-      autosave_frequency_(conf.take({"Autosave_Frequency"}, 1000)) {
-  /*!\Userguide
-   * \page input_root ROOT
-   * Enables output in a ROOT format. The latter is a structured binary format
-   * invented at CERN. For more details see root.cern.ch. The resulting
-   * output file can optionally contain two TTree's: the one containing
-   * information about the particle list at fixed moments of time and
-   * the other one containing information about the collision history.
-   *
-   * \key Write_Collisions (bool, optional, default = false): \n
-   * true - information about collisions, decays and box wall
-   * crossings will be written out \n
-   * false - collision history information is suppressed
-   *
-   * \key Write_Particles (bool, optional, default = true): \n
-   * true - particle list at output interval is written out \n
-   * false - particle list is not written out
-   *
-   * \key Autosave_Frequency (int, optional, default = 1000): \n
-   * Root file cannot be read if it was not properly closed and finalized.
-   * It can happen that SMASH simulation crashed and root file was not closed.
-   * To save results of simulation in such case, "AutoSave" is
-   * applied every N events. The autosave_frequency option sets
-   * this N (default N = 1000). Note that "AutoSave" operation is very
-   * time-consuming, so the Autosave_Frequency is
-   * always a compromise between safety and speed.
-   *
-   * For details on ROOT output format see \ref format_root
-   */
-
   /*!\Userguide
    * \page format_root ROOT format
    * SMASH ROOT output has the same functionality as OSCAR output, but ROOT
@@ -83,20 +44,20 @@ RootOutput::RootOutput(const bf::path &path, Configuration &&conf)
    * Producing ROOT output requires ROOT installed (see http://root.cern.ch).
    *
    * SMASH produces one ROOT file per run: \c smash_run.root. This file contains
-   * a TTree called \c particles and a TTree called \c collisions. Both can be
-   * switched on and off by an option (see \ref input_root). The \c particles
+   * a TTree called \c particles and a TTree called \c collisions, depending
+   * on the required content (see \ref output_general_). The \c particles
    * tree contains the same information as OSCAR particles output and the
    * \c collisions tree contains the same information as OSCAR collision output.
    *
    * In case that the ROOT format is used for dilepton output
-   * (see \ref input_dileptons), the file is called \c DileptonOutput.root and
+   * (see \ref input_dileptons), the file is called \c Dileptons.root and
    * only contains a \c collisions tree with all the dilepton decays.
    *
    * Every physical quantity is in a separate TBranch.
    * One entry in the \c particles TTree is:
    * \code
    * ev tcounter npart pdgcode[npart] t[npart] x[npart] y[npart] z[npart]
-   *p0[npart] px[npart] py[npart] pz[npart]
+   * p0[npart] px[npart] py[npart] pz[npart]
    * \endcode
    * One tree entry is analogous to an OSCAR output block, but the maximal
    * number of particles in one entry is limited to 10000. This is done to limit
@@ -134,6 +95,7 @@ void RootOutput::init_trees() {
     particles_tree_ = new TTree("particles", "particles");
 
     particles_tree_->Branch("npart", &npart, "npart/I");
+    particles_tree_->Branch("impact_b", &impact_b, "impact_b/D");
     particles_tree_->Branch("ev", &ev, "ev/I");
     particles_tree_->Branch("tcounter", &tcounter, "tcounter/I");
 
@@ -158,6 +120,7 @@ void RootOutput::init_trees() {
     collisions_tree_->Branch("npart", &npart, "npart/I");
     collisions_tree_->Branch("ev", &ev, "ev/I");
     collisions_tree_->Branch("weight", &wgt, "weight/D");
+    collisions_tree_->Branch("partial_weight", &par_wgt, "partial_weight/D");
 
     collisions_tree_->Branch("pdgcode", &pdgcode[0], "pdgcode[npart]/I");
 
@@ -191,8 +154,10 @@ void RootOutput::at_eventstart(const Particles &particles,
   // save event number
   current_event_ = event_number;
 
-  if (write_particles_) {
+  if (write_particles_ && !particles_only_final_) {
     output_counter_ = 0;
+    // This is to have only one output of positive impact parameter per event
+    impact_b = -1.0;
     particles_to_tree(particles);
     output_counter_++;
   }
@@ -203,7 +168,7 @@ void RootOutput::at_eventstart(const Particles &particles,
  */
 void RootOutput::at_intermediate_time(const Particles &particles, const Clock &,
                                       const DensityParameters &) {
-  if (write_particles_) {
+  if (write_particles_ && !particles_only_final_) {
     particles_to_tree(particles);
     output_counter_++;
   }
@@ -212,8 +177,13 @@ void RootOutput::at_intermediate_time(const Particles &particles, const Clock &,
 /**
  * Writes to tree "at_eventend".
  */
-void RootOutput::at_eventend(const Particles & /*particles*/,
-                             const int /*event_number*/) {
+void RootOutput::at_eventend(const Particles &particles,
+                             const int /*event_number*/,
+                             double impact_parameter) {
+  impact_b = impact_parameter;
+  if (write_particles_) {
+    particles_to_tree(particles);
+  }
   // Forced regular dump from operational memory to disk. Very demanding!
   // If program crashes written data will NOT be lost
   if (current_event_ > 0 && current_event_ % autosave_frequency_ == 0) {
@@ -233,7 +203,7 @@ void RootOutput::at_interaction(const Action &action,
                                 const double /*density*/) {
   if (write_collisions_) {
     collisions_to_tree(action.incoming_particles(), action.outgoing_particles(),
-                       action.raw_weight_value());
+                       action.raw_weight_value(), action.partial_weight());
   }
 }
 
@@ -277,12 +247,14 @@ void RootOutput::particles_to_tree(const Particles &particles) {
 
 void RootOutput::collisions_to_tree(const ParticleList &incoming,
                                     const ParticleList &outgoing,
-                                    const double weight) {
+                                    const double weight,
+                                    const double partial_weight) {
   ev = current_event_;
   nin = incoming.size();
   nout = outgoing.size();
   npart = nin + nout;
   wgt = weight;
+  par_wgt = partial_weight;
 
   int i = 0;
 

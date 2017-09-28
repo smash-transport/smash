@@ -26,7 +26,8 @@ class WallcrossingAction : public Action {
                      const double time_until = 0.0)
       : Action(in_part, out_part, time_until, ProcessType::Wall) {}
   double raw_weight_value() const override { return 1; };
-  void generate_final_state() override {};
+  double partial_weight() const override { return 1; };
+  void generate_final_state() override{};
   void format_debug_output(std::ostream &out) const override {
     out << "Wall crossing of " << incoming_particles_;
   }

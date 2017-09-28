@@ -10,6 +10,8 @@
 #ifndef SRC_INCLUDE_OUTPUTINTERFACE_H_
 #define SRC_INCLUDE_OUTPUTINTERFACE_H_
 
+#include <string>
+
 #include "density.h"
 #include "energymomentumtensor.h"
 #include "forwarddeclarations.h"
@@ -31,6 +33,9 @@ namespace Smash {
  */
 class OutputInterface {
  public:
+  explicit OutputInterface(std::string name)
+      : is_dilepton_output_(name == "Dileptons"),
+        is_photon_output_(name == "Photons") {}
   virtual ~OutputInterface() = default;
 
   /**
@@ -47,9 +52,12 @@ class OutputInterface {
    * option.
    * \param particles List of particles.
    * \param event_number Number of the current event.
+   * \param impact_parameter distance between centers of nuclei in this event.
+   *          Only makes sense for collider modus.
    */
   virtual void at_eventend(const Particles &particles,
-                           const int event_number) = 0;
+                           const int event_number,
+                           double impact_parameter) = 0;
 
   /**
    * Called whenever an action modified one or more particles.
@@ -112,6 +120,9 @@ class OutputInterface {
     SMASH_UNUSED(gct);
   }
 
+  bool is_dilepton_output() const { return is_dilepton_output_; }
+  bool is_photon_output() const { return is_photon_output_; }
+
   const char *to_string(const ThermodynamicQuantity tq) {
     switch (tq) {
       case ThermodynamicQuantity::EckartDensity:
@@ -141,6 +152,10 @@ class OutputInterface {
     }
     throw std::invalid_argument("Unknown density type.");
   }
+
+ protected:
+  const bool is_dilepton_output_;
+  const bool is_photon_output_;
 };
 
 }  // namespace Smash

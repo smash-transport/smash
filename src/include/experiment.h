@@ -9,6 +9,7 @@
 
 #include <limits>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "actionfinderfactory.h"
@@ -18,6 +19,7 @@
 #include "energymomentumtensor.h"
 #include "fourvector.h"
 #include "grandcan_thermalizer.h"
+#include "outputparameters.h"
 #include "pauliblocking.h"
 #include "potentials.h"
 #include "propagation.h"
@@ -155,9 +157,8 @@ class Experiment : public ExperimentBase {
   bool perform_action(Action &action,
                       const Container &particles_before_actions);
 
-  template <typename TOutput>
-  void create_output(const char *output_name, const bf::path &output_path,
-                     Configuration &&conf);
+  void create_output(std::string format, std::string content,
+                     const bf::path &output_path, const OutputParameters &par);
 
   /** Propagate all particles until time to_time without any interactions
    *  and shine dileptons.
@@ -302,7 +303,7 @@ class Experiment : public ExperimentBase {
   /// Lattices of energy-momentum tensors for printout
   std::unique_ptr<RectangularLattice<EnergyMomentumTensor>> Tmn_;
   bool printout_tmn_ = false, printout_tmn_landau_ = false,
-       printout_v_landau_ = false;
+       printout_v_landau_ = false, printout_lattice_td_ = false;
 
   /// Instance of class used for forced thermalization
   std::unique_ptr<GrandCanThermalizer> thermalizer_;
