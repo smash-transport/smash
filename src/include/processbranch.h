@@ -19,14 +19,20 @@
 namespace Smash {
 
 /** Process Types are used to identify the type of the process,
- * currently we have 7 of these:
+ * currently we have 12 of these:
  * (0) nothing (None)
  * (1) elastic (Elastic)
  * (2) resonance formation (2->1) (TwoToOne)
  * (3) 2->2 (inelastic) (TwoToTwo)
  * (4) string excitation by PYTHIA (String)
  * (5) resonance decays (Decay)
- * (6) Wall transition (Wall)*/
+ * (6) Wall transition (Wall)
+ * (7) Forces thermalization
+ * (41) Single-diffrective string formation AB->AX
+ * (42) Single-diffrective string formation AB->XB
+ * (43) Double-diffractive string formation
+ * (44) Non-diffractive string formation
+ */
 enum class ProcessType {
   None = 0,
   Elastic = 1,
