@@ -57,13 +57,11 @@ class StringProcess {
   double time_collision; //!< time of collision in the computational frame
   double gamma_factor_com; //!< Lorentz gamma factor of center of mass
                            //!< in the computational frame
-  Pythia8::Pythia *pythia; //!< pointer of the PYTHIA object used in fragmentation
+  Pythia8::Pythia *pythia_; //!< pointer of the PYTHIA object used in fragmentation
 
  public:
   /** constructor */
   StringProcess();
-  /** destructor */
-  ~StringProcess();
   /**
    * final state array
    * which must be accessed after the collision
@@ -71,9 +69,9 @@ class StringProcess {
   ParticleList final_state;
   /**
    * set the pointer of PYTHIA object
-   * \param pythiaIn is a pointer of object created and initialized in somewhere else.
+   * \param pythia_in is a pointer to Pythia created and initialized elsewhere
    */
-  void set_pythia(Pythia8::Pythia *pythiaIn);
+  void set_pythia(Pythia8::Pythia *pythia_in) { pythia_ = pythia_in; };
   /**
    * set the minimum lightcone momentum scale carried by gluon.
    * This is relevant for the double-diffractive process.
