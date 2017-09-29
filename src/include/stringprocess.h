@@ -36,15 +36,13 @@ class StringProcess {
                 //!< in the center of mass frame
   double massA; //!< mass of incoming particle A
   double massB; //!< mass of incoming particle A
-  double sqrtsAB; //!< sqrt of Mandelstam variable s
-  double pabscomAB; //!< magnitude of three momentum of incoming particles
-                    //!< in the center of mass frame
+  double sqrtsAB_; //!< sqrt of Mandelstam variable s
   std::array<PdgCode, 2> PDGcodes_; //!< PdgCodes of incoming particles
   std::array<FourVector, 2> plab_; //!< momenta of incoming particles in the lab frame
   std::array<FourVector, 2> pcom_; //!< momentum of incoming particles in the center of mass frame
-  FourVector ucomAB; //!< velocity four vector of the center of mass in the lab frame
-  ThreeVector vcomAB; //!< velocity three vector of the center of mass in the lab frame
-  std::array<ThreeVector,4> evecBasisAB; //!< orthonormal basis vectors in the center of mass frame
+  FourVector ucomAB_; //!< velocity four vector of the center of mass in the lab frame
+  ThreeVector vcomAB_; //!< velocity three vector of the center of mass in the lab frame
+  std::array<ThreeVector,4> evecBasisAB_; //!< orthonormal basis vectors in the center of mass frame
                                          //!< where the 3rd one is parallel to momtentum
                                          //!< of incoming particle A
   int NpartFinal; //!< total number of final state particles
@@ -60,8 +58,8 @@ class StringProcess {
                       //!< transverse momenta of strings are sampled
                       //!< according to gaussian distribution with width sigma_qperp_
   double kappa_tension_string_; //!< string tension
-  double time_collision; //!< time of collision in the computational frame
-  double gamma_factor_com; //!< Lorentz gamma factor of center of mass
+  double time_collision_; //!< time of collision in the computational frame
+  double gamma_factor_com_; //!< Lorentz gamma factor of center of mass
                            //!< in the computational frame
 
   /// PYTHIA object used in fragmentation
@@ -113,45 +111,46 @@ class StringProcess {
    * The minimum lightcone momentum fraction is set to be pmin_gluon_lightcone_/sqrtsAB.
    * \param pLightConeMinIn is a value that we want to use for pmin_gluon_lightcone_.
    */
-  void set_pmin_gluon_lightcone(double pLightConeMinIn) {
-    pmin_gluon_lightcone_ = pLightConeMinIn;
+  void set_pmin_gluon_lightcone(double p_light_cone_min) {
+    pmin_gluon_lightcone_ = p_light_cone_min;
   }
   /**
    * lightcone momentum fraction of gluon is sampled
    * according to probability distribution P(x) = 1/x * (1 - x)^{1 + pow_fgluon_beta_}
    * in double-diffractive processes.
-   * \param betapowSIn is a value that we want to use for pow_fgluon_beta_.
+   * \param betapow is a value that we want to use for pow_fgluon_beta_.
    */
-  void set_pow_fgluon(double betapowSIn) { pow_fgluon_beta_ = betapowSIn; }
+  void set_pow_fgluon(double betapow) { pow_fgluon_beta_ = betapow; }
   /**
    * lightcone momentum fraction of quark is sampled
-   * according to probability distribution P(x) = x^{pow_fquark_alpha_ - 1} * (1 - x)^{pow_fquark_beta_ - 1}
+   * according to probability distribution
+   * \f$ P(x) = x^{pow_fquark_alpha_ - 1} * (1 - x)^{pow_fquark_beta_ - 1} \f$
    * in non-diffractive processes.
-   * \param alphapowVIn is a value that we want to use for pow_fquark_alpha_.
-   * \param betapowVIn is a value that we want to use for pow_fquark_beta_.
+   * \param alphapow is a value that we want to use for pow_fquark_alpha_.
+   * \param betapow is a value that we want to use for pow_fquark_beta_.
    */
-  void set_pow_fquark(double alphapowVIn, double betapowVIn){
-    pow_fquark_alpha_ = alphapowVIn;
-    pow_fquark_beta_ = betapowVIn;
+  void set_pow_fquark(double alphapow, double betapow){
+    pow_fquark_alpha_ = alphapow;
+    pow_fquark_beta_ = betapow;
   }
   /**
    * set the average amount of transverse momentum transfer sigma_qperp_.
-   * \param sigmaQperpIn is a value that we want to use for sigma_qperp_.
+   * \param sigma_qperp is a value that we want to use for sigma_qperp_.
    */
-  void set_sigma_qperp_(double sigmaQperpIn) { sigma_qperp_ = sigmaQperpIn; }
+  void set_sigma_qperp_(double sigma_qperp) { sigma_qperp_ = sigma_qperp; }
   /**
-   * set the string tension kappaString which is used in append_final_state.
-   * \param kappaStringIn is a value that we want to use for kappaString.
+   * set the string tension, which is used in append_final_state.
+   * \param kappa_string is a value that we want to use for string tension.
    */
-  void set_tension_string(double kappaStringIn) { kappa_tension_string_ = kappaStringIn; }
+  void set_tension_string(double kappa_string) { kappa_tension_string_ = kappa_string; }
   /**
    * initialization
    * feed intial particles, time of collision and gamma factor of the center of mass.
-   * \param incomingList is the list of initial state particles.
-   * \param tcollIn is time of collision.
-   * \param gammaFacIn gamma factor of the center of mass.
+   * \param incoming is the list of initial state particles.
+   * \param tcoll is time of collision.
+   * \param gamma gamma factor of the center of mass.
    */
-  void init(const ParticleList &incomingList, double tcollIn, double gammaFacIn);
+  void init(const ParticleList &incoming, double tcoll, double gamma);
   /** boost the momenta of incoming particles into the center of mass frame. */
   void make_incoming_com_momenta();
   /**

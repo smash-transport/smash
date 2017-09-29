@@ -54,7 +54,7 @@ StringProcess::StringProcess() :
                         &pythia_->particleData);
 
   for (int imu = 0; imu < 4; imu++) {
-    evecBasisAB[imu] = ThreeVector(0., 0., 0.);
+    evecBasisAB_[imu] = ThreeVector(0., 0., 0.);
   }
 
   PPosA = 0.;
@@ -62,10 +62,9 @@ StringProcess::StringProcess() :
   PPosB = 0.;
   PNegB = 0.;
   massA = massB = 0.;
-  sqrtsAB = 0.;
-  pabscomAB = 0.;
-  time_collision = 0.;
-  gamma_factor_com = 1.;
+  sqrtsAB_ = 0.;
+  time_collision_ = 0.;
+  gamma_factor_com_ = 1.;
 
   NpartFinal = 0;
   NpartString[0] = 0;
@@ -185,8 +184,8 @@ int StringProcess::append_final_state(const FourVector &uString,
     constexpr double suppression_factor = 0.7;
     new_particle.set_cross_section_scaling_factor(fragments[i].is_leading ?
         suppression_factor * fragments[i].xtotfac : 0.);
-    new_particle.set_formation_time(time_collision +
-                                    gamma_factor_com * t_prod);
+    new_particle.set_formation_time(time_collision_ +
+                                    gamma_factor_com_ * t_prod);
     final_state.push_back(new_particle);
   }
 
@@ -194,7 +193,7 @@ int StringProcess::append_final_state(const FourVector &uString,
 }
 
 void StringProcess::init(const ParticleList &incoming,
-                         double tcollIn, double gammaFacIn){
+                         double tcoll, double gamma){
   PDGcodes_[0] = incoming[0].pdgcode();
   PDGcodes_[1] = incoming[1].pdgcode();
   massA = incoming[0].effective_mass();
@@ -203,19 +202,23 @@ void StringProcess::init(const ParticleList &incoming,
   plab_[0] = incoming[0].momentum();
   plab_[1] = incoming[1].momentum();
 
-  sqrtsAB = ( plab_[0] + plab_[1] ).abs();
-  pabscomAB = pCM(sqrtsAB, massA, massB);
+  sqrtsAB_ = ( plab_[0] + plab_[1] ).abs();
   /* Transverse momentum transferred to strings,
      parametrization to fit the experimental data */
-  sigma_qperp_ = (sqrtsAB < 4.) ? 0.5 :
-    0.5 + 0.2 * std::log(sqrtsAB / 4.) / std::log(5.);
+  sigma_qperp_ = (sqrtsAB_ < 4.) ? 0.5 :
+    0.5 + 0.2 * std::log(sqrtsAB_ / 4.) / std::log(5.);
 
-  make_incoming_com_momenta();
+  ucomAB_ = (plab_[0] + plab_[1])/sqrtsAB_;
+  vcomAB_ = ucomAB_.velocity();
+
+  pcom_[0] = plab_[0].LorentzBoost(vcomAB_);
+  pcom_[1] = plab_[1].LorentzBoost(vcomAB_);
+
   make_orthonormal_basis();
   compute_incoming_lightcone_momenta();
 
-  time_collision = tcollIn;
-  gamma_factor_com = gammaFacIn;
+  time_collision_ = tcoll;
+  gamma_factor_com_ = gamma;
 
 }
 
@@ -266,12 +269,12 @@ bool StringProcess::next_SDiff(int channel) {
 
   if( channel == 1 ) { // AB > AX
     mstrMin = massB;
-    mstrMax = sqrtsAB - massA;
+    mstrMax = sqrtsAB_ - massA;
     pdgidH = PDGcodes_[0].get_decimal();
     massH = massA;
   } else if( channel == 2 ) { // AB > XB
     mstrMin = massA;
-    mstrMax = sqrtsAB - massB;
+    mstrMax = sqrtsAB_ - massB;
     pdgidH = PDGcodes_[1].get_decimal();
     massH = massB;
   } else {
@@ -293,7 +296,7 @@ bool StringProcess::next_SDiff(int channel) {
     // sample the string mass and evaluate the three-momenta of hadron and string.
     rmass = std::log(mstrMax / mstrMin) * Random::uniform(0., 1.);
     massX = mstrMin * exp(rmass);
-    pabscomHX = pCM( sqrtsAB, massH, massX );
+    pabscomHX = pCM( sqrtsAB_, massH, massX );
     // magnitude of the three momentum must be larger than the transvers momentum.
     foundPabsX = pabscomHX > QTrn;
     // string mass must be larger than threshold set by PYTHIA.
@@ -310,18 +313,18 @@ bool StringProcess::next_SDiff(int channel) {
       sign_direction = -1.;
     }
     threeMomentum = sign_direction * (
-                        evecBasisAB[3] * std::sqrt(pabscomHX*pabscomHX - QTrn*QTrn) +
-                        evecBasisAB[1] * QTrx +
-                        evecBasisAB[2] * QTry );
+                        evecBasisAB_[3] * std::sqrt(pabscomHX*pabscomHX - QTrn*QTrn) +
+                        evecBasisAB_[1] * QTrx +
+                        evecBasisAB_[2] * QTry );
     pstrHcom = FourVector( std::sqrt(pabscomHX*pabscomHX + massH*massH), threeMomentum );
     threeMomentum = -sign_direction * (
-                        evecBasisAB[3] * std::sqrt(pabscomHX*pabscomHX - QTrn*QTrn) +
-                        evecBasisAB[1] * QTrx +
-                        evecBasisAB[2] * QTry );
+                        evecBasisAB_[3] * std::sqrt(pabscomHX*pabscomHX - QTrn*QTrn) +
+                        evecBasisAB_[1] * QTrx +
+                        evecBasisAB_[2] * QTry );
     pstrXcom = FourVector( std::sqrt(pabscomHX*pabscomHX + massX*massX), threeMomentum );
 
-    pstrHlab = pstrHcom.LorentzBoost( -vcomAB );
-    pstrXlab = pstrXcom.LorentzBoost( -vcomAB );
+    pstrHlab = pstrHcom.LorentzBoost( -vcomAB_ );
+    pstrXlab = pstrXcom.LorentzBoost( -vcomAB_ );
 
     ustrHcom = pstrHcom / massH;
     ustrXcom = pstrXcom / massX;
@@ -409,7 +412,7 @@ bool StringProcess::next_DDiff() {
     make_string_ends(PDGcodes_[0], idq11, idq12);
     make_string_ends(PDGcodes_[1], idq21, idq22);
     // sample the lightcone momentum fraction carried by gluons
-    const double xmin_gluon_fraction = pmin_gluon_lightcone_ / sqrtsAB;
+    const double xmin_gluon_fraction = pmin_gluon_lightcone_ / sqrtsAB_;
     xfracA = Random::beta_a0(xmin_gluon_fraction, pow_fgluon_beta_ + 1.);
     xfracB = Random::beta_a0(xmin_gluon_fraction, pow_fgluon_beta_ + 1.);
     // sample the transverse momentum transfer
@@ -420,13 +423,13 @@ bool StringProcess::next_DDiff() {
     QPos = -QTrn*QTrn / (2. * xfracB * PNegB);
     QNeg = QTrn*QTrn / (2. * xfracA * PPosA);
     // compute four-momentum of string 1
-    threeMomentum = evecBasisAB[3] * (PPosA + QPos - PNegA - QNeg) / std::sqrt(2.) +
-                        evecBasisAB[1] * QTrx + evecBasisAB[2] * QTry;
+    threeMomentum = evecBasisAB_[3] * (PPosA + QPos - PNegA - QNeg) / std::sqrt(2.) +
+                        evecBasisAB_[1] * QTrx + evecBasisAB_[2] * QTry;
     pstr1com = FourVector( (PPosA + QPos + PNegA + QNeg) / std::sqrt(2.), threeMomentum );
     mstr1 = pstr1com.sqr();
     // compute four-momentum of string 2
-    threeMomentum = evecBasisAB[3] * (PPosB - QPos - PNegB + QNeg) / std::sqrt(2.) -
-                        evecBasisAB[1] * QTrx - evecBasisAB[2] * QTry;
+    threeMomentum = evecBasisAB_[3] * (PPosB - QPos - PNegB + QNeg) / std::sqrt(2.) -
+                        evecBasisAB_[1] * QTrx - evecBasisAB_[2] * QTry;
     pstr2com = FourVector( (PPosB - QPos + PNegB - QNeg) / std::sqrt(2.), threeMomentum );
     mstr2 = pstr2com.sqr();
     // string mass must be larger than threshold set by PYTHIA.
@@ -441,8 +444,8 @@ bool StringProcess::next_DDiff() {
   ret = false;
   bool both_masses_above_pythia_threshold = foundMass1 && foundMass2;
   if ( both_masses_above_pythia_threshold ) {
-    pstr1lab = pstr1com.LorentzBoost( -vcomAB );
-    pstr2lab = pstr2com.LorentzBoost( -vcomAB );
+    pstr1lab = pstr1com.LorentzBoost( -vcomAB_ );
+    pstr2lab = pstr2com.LorentzBoost( -vcomAB_ );
 
     ustr1com = pstr1com / mstr1;
     ustr2com = pstr2com / mstr2;
@@ -610,13 +613,13 @@ bool StringProcess::next_NDiff() {
     dPPos = -xfracA * PPosA - QPos;
     dPNeg = xfracB * PNegB - QNeg;
     // compute four-momentum of string 1
-    threeMomentum = evecBasisAB[3] * (PPosA + dPPos - PNegA - dPNeg) / std::sqrt(2.) +
-                        evecBasisAB[1] * QTrx + evecBasisAB[2] * QTry;
+    threeMomentum = evecBasisAB_[3] * (PPosA + dPPos - PNegA - dPNeg) / std::sqrt(2.) +
+                        evecBasisAB_[1] * QTrx + evecBasisAB_[2] * QTry;
     pstr1com = FourVector( (PPosA + dPPos + PNegA + dPNeg) / std::sqrt(2.), threeMomentum );
     mstr1 = pstr1com.sqr();
     // compute four-momentum of string 2
-    threeMomentum = evecBasisAB[3] * (PPosB - dPPos - PNegB + dPNeg) / std::sqrt(2.) -
-                        evecBasisAB[1] * QTrx - evecBasisAB[2] * QTry;
+    threeMomentum = evecBasisAB_[3] * (PPosB - dPPos - PNegB + dPNeg) / std::sqrt(2.) -
+                        evecBasisAB_[1] * QTrx - evecBasisAB_[2] * QTry;
     pstr2com = FourVector( (PPosB - dPPos + PNegB - dPNeg) / std::sqrt(2.), threeMomentum );
     mstr2 = pstr2com.sqr();
     // string mass must be larger than threshold set by PYTHIA.
@@ -631,8 +634,8 @@ bool StringProcess::next_NDiff() {
   ret = false;
   bool both_masses_above_pythia_threshold = foundMass1 && foundMass2;
   if ( both_masses_above_pythia_threshold ) {
-    pstr1lab = pstr1com.LorentzBoost( -vcomAB );
-    pstr2lab = pstr2com.LorentzBoost( -vcomAB );
+    pstr1lab = pstr1com.LorentzBoost( -vcomAB_ );
+    pstr2lab = pstr2com.LorentzBoost( -vcomAB_ );
 
     ustr1com = pstr1com / mstr1;
     ustr2com = pstr2com / mstr2;
@@ -685,7 +688,7 @@ bool StringProcess::next_NDiff() {
 
 /** baryon-antibaryon annihilation */
 bool StringProcess::next_BBbarAnn() {
-  const std::array<FourVector, 2> ustrlab = {ucomAB, ucomAB};
+  const std::array<FourVector, 2> ustrlab = {ucomAB_, ucomAB_};
 
   NpartFinal = 0;
   NpartString[0] = 0;
@@ -750,7 +753,7 @@ bool StringProcess::next_BBbarAnn() {
   assert(remaining_antiquarks.size() == 2);
 
   const int max_ntry = 100;
-  const std::array<double,2> mstr = {0.5*sqrtsAB, 0.5*sqrtsAB};
+  const std::array<double,2> mstr = {0.5*sqrtsAB_, 0.5*sqrtsAB_};
   for (int ntry = 0; ntry < max_ntry; ntry++) {
     // Randomly select two quark-antiquark pairs
     if (Random::uniform_int(0, 1) == 0) {
@@ -790,24 +793,20 @@ bool StringProcess::next_BBbarAnn() {
 }
 
 void StringProcess::make_incoming_com_momenta(){
-  ucomAB = ( plab_[0] + plab_[1] )/sqrtsAB;
-  vcomAB = ucomAB.velocity();
-
-  pcom_[0] = plab_[0].LorentzBoost(vcomAB);
-  pcom_[1] = plab_[1].LorentzBoost(vcomAB);
 }
 
 void StringProcess::make_orthonormal_basis(){
+  const double pabscomAB = pCM(sqrtsAB_, massA, massB);
   if (std::abs(pcom_[0].x3()) < (1. - 1.0e-8) * pabscomAB) {
     double ex, ey, et;
     double theta, phi;
 
-    evecBasisAB[3] = pcom_[0].threevec() / pabscomAB;
+    evecBasisAB_[3] = pcom_[0].threevec() / pabscomAB;
 
-    theta = std::acos(evecBasisAB[3].x3());
+    theta = std::acos(evecBasisAB_[3].x3());
 
-    ex = evecBasisAB[3].x1();
-    ey = evecBasisAB[3].x2();
+    ex = evecBasisAB_[3].x1();
+    ey = evecBasisAB_[3].x2();
     et = std::sqrt(ex*ex + ey*ey);
     if (ey > 0.) {
       phi = std::acos(ex / et);
@@ -815,31 +814,31 @@ void StringProcess::make_orthonormal_basis(){
       phi = -std::acos(ex / et);
     }
 
-    evecBasisAB[1].set_x1( cos(theta) * cos(phi) );
-    evecBasisAB[1].set_x2( cos(theta) * sin(phi) );
-    evecBasisAB[1].set_x3( -sin(theta) );
+    evecBasisAB_[1].set_x1( cos(theta) * cos(phi) );
+    evecBasisAB_[1].set_x2( cos(theta) * sin(phi) );
+    evecBasisAB_[1].set_x3( -sin(theta) );
 
-    evecBasisAB[2].set_x1( -sin(phi) );
-    evecBasisAB[2].set_x2( cos(phi) );
-    evecBasisAB[2].set_x3( 0. );
+    evecBasisAB_[2].set_x1( -sin(phi) );
+    evecBasisAB_[2].set_x2( cos(phi) );
+    evecBasisAB_[2].set_x3( 0. );
   } else {
     if (pcom_[0].x3() > 0.) {
-      evecBasisAB[1] = ThreeVector(1., 0., 0.);
-      evecBasisAB[2] = ThreeVector(0., 1., 0.);
-      evecBasisAB[3] = ThreeVector(0., 0., 1.);
+      evecBasisAB_[1] = ThreeVector(1., 0., 0.);
+      evecBasisAB_[2] = ThreeVector(0., 1., 0.);
+      evecBasisAB_[3] = ThreeVector(0., 0., 1.);
     } else {
-      evecBasisAB[1] = ThreeVector(0., 1., 0.);
-      evecBasisAB[2] = ThreeVector(1., 0., 0.);
-      evecBasisAB[3] = ThreeVector(0., 0., -1.);
+      evecBasisAB_[1] = ThreeVector(0., 1., 0.);
+      evecBasisAB_[2] = ThreeVector(1., 0., 0.);
+      evecBasisAB_[3] = ThreeVector(0., 0., -1.);
     }
   }
 }
 
 void StringProcess::compute_incoming_lightcone_momenta(){
-  PPosA = ( pcom_[0].x0() + evecBasisAB[3] * pcom_[0].threevec() ) / std::sqrt(2.);
-  PNegA = ( pcom_[0].x0() - evecBasisAB[3] * pcom_[0].threevec() ) / std::sqrt(2.);
-  PPosB = ( pcom_[1].x0() + evecBasisAB[3] * pcom_[1].threevec() ) / std::sqrt(2.);
-  PNegB = ( pcom_[1].x0() - evecBasisAB[3] * pcom_[1].threevec() ) / std::sqrt(2.);
+  PPosA = ( pcom_[0].x0() + evecBasisAB_[3] * pcom_[0].threevec() ) / std::sqrt(2.);
+  PNegA = ( pcom_[0].x0() - evecBasisAB_[3] * pcom_[0].threevec() ) / std::sqrt(2.);
+  PPosB = ( pcom_[1].x0() + evecBasisAB_[3] * pcom_[1].threevec() ) / std::sqrt(2.);
+  PNegB = ( pcom_[1].x0() - evecBasisAB_[3] * pcom_[1].threevec() ) / std::sqrt(2.);
 }
 
 int StringProcess::diquark_from_quarks(int q1, int q2) {
