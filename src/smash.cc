@@ -24,11 +24,7 @@
 /* build dependent variables */
 #include "include/config.h"
 
-#include "include/stringprocess.h"
-
 namespace Smash {
-
-extern StringProcess *string_process;
 
 namespace {
 /** prints usage information and exits the program
@@ -430,9 +426,6 @@ int main(int argc, char *argv[]) {
     DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
     ParticleType::check_consistency();
 
-    // create string_process (UrQMD-based string excitation) objects
-    string_process = new StringProcess();
-
     // create an experiment
     log.trace(source_location, " create Experiment");
     auto experiment = ExperimentBase::create(configuration, output_path);
@@ -445,8 +438,6 @@ int main(int argc, char *argv[]) {
     // run the experiment
     log.trace(source_location, " run the Experiment");
     experiment->run();
-
-    delete string_process;
   } catch (std::exception &e) {
     log.fatal() << "SMASH failed with the following error:\n" << e.what();
     return EXIT_FAILURE;

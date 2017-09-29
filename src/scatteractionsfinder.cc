@@ -80,6 +80,9 @@ ScatterActionsFinder::ScatterActionsFinder(
     log.info("Constant elastic isotropic cross-section mode:", " using ",
              elastic_parameter_, " mb as maximal cross-section.");
   }
+  if (strings_switch_) {
+    string_process_interface_ = make_unique<StringProcess>();
+  }
 }
 
 ScatterActionsFinder::ScatterActionsFinder(
@@ -148,6 +151,7 @@ ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
                                                time_until_collision, isotropic_,
                                                string_formation_time_);
   }
+  act->set_string_interface(string_process_interface_.get());
   return act;
 }
 

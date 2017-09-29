@@ -126,11 +126,13 @@ class ScatterActionsFinder : public ActionFinderInterface {
       const ParticleData &data_a, const ParticleData &data_b,
       double time_until_collision) const;
   /** Check for a single pair of particles (id_a, id_b) if a collision will
-   * happen
-   * in the next timestep and create a corresponding Action object in that case.
+   * happen in the next timestep and create a corresponding Action object
+   * in that case.
    */
   ActionPtr check_collision(const ParticleData &data_a,
                             const ParticleData &data_b, double dt) const;
+  /** Class that deals with strings, interfacing Pythia. */
+  std::unique_ptr<StringProcess> string_process_interface_;
   /** Elastic cross section parameter (in mb). */
   const double elastic_parameter_;
   /** Number of test particles. */

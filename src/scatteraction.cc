@@ -23,8 +23,6 @@
 
 namespace Smash {
 
-StringProcess *string_process;
-
 ScatterAction::ScatterAction(const ParticleData &in_part_a,
                              const ParticleData &in_part_b, double time,
                              bool isotropic, double string_formation_time)
@@ -356,7 +354,7 @@ CollisionBranchList ScatterAction::string_excitation_cross_sections() {
    * The way it is done here is not unique. I think that at high energy
    * collision this is not an issue, but at sqrt_s < 10 GeV it may
    * matter. */
-  std::array<double, 3> xs = string_process->cross_sections(pdgid[0], pdgid[1],
+  std::array<double, 3> xs = string_process_->cross_sections(pdgid[0], pdgid[1],
                                                             sqrt_s());
   double single_diffr_AX = xs[0],
          single_diffr_XB = xs[1],
@@ -741,29 +739,29 @@ void ScatterAction::string_excitation_inter() {
   // Disable doubleing point exception trap for Pythia
   {
     DisableFloatTraps guard;
-    /* initialize the string_process object for this particular collision */
-    string_process->init(incoming_particles_, time_of_execution_, gamma_cm());
+    /* initialize the string_process_ object for this particular collision */
+    string_process_->init(incoming_particles_, time_of_execution_, gamma_cm());
     /* implement collision */
     bool isnext = false;
     while (!isnext) {
       switch (process_type_) {
         case ProcessType::StringSDiffAX:
-          isnext = string_process->next_SDiff(1);
+          isnext = string_process_->next_SDiff(1);
           break;
         case ProcessType::StringSDiffXB:
-          isnext = string_process->next_SDiff(2);
+          isnext = string_process_->next_SDiff(2);
           break;
         case ProcessType::StringDDiffXX:
-          isnext = string_process->next_DDiff();
+          isnext = string_process_->next_DDiff();
           break;
         case ProcessType::StringNDiff:
-          isnext = string_process->next_NDiff();
+          isnext = string_process_->next_NDiff();
           break;
         default:
           throw std::runtime_error("invalid subprocess of StringProcess");
       }
     }
-    outgoing_particles_ = string_process->final_state;
+    outgoing_particles_ = string_process_->final_state;
     /* If the incoming particles already were unformed, the formation
      * times and cross section scaling factors need to be adjusted */
     const double tform_in = std::max(incoming_particles_[0].formation_time(),

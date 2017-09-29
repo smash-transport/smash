@@ -16,6 +16,7 @@
 #include "cxx14compat.h"
 #include "isoparticletype.h"
 #include "kinematics.h"
+#include "stringprocess.h"
 
 namespace Smash {
 
@@ -277,6 +278,10 @@ class ScatterAction : public Action {
     using std::invalid_argument::invalid_argument;
   };
 
+  void set_string_interface(StringProcess *str_proc) {
+     string_process_ = str_proc;
+  }
+
   virtual double cross_section() const { return total_cross_section_; }
 
  protected:
@@ -341,6 +346,9 @@ class ScatterAction : public Action {
 
   /** Perform a 2->1 resonance-formation process. */
   void resonance_formation();
+
+  /** Pointer to interface class for strings */
+  StringProcess* string_process_ = nullptr; 
 };
 
 }  // namespace Smash

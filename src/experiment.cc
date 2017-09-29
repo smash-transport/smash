@@ -416,7 +416,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   if (parameters_.two_to_one) {
     action_finders_.emplace_back(make_unique<DecayActionsFinder>());
   }
-  if (parameters_.two_to_one || parameters_.two_to_two) {
+  if (parameters_.two_to_one || parameters_.two_to_two || strings_switch_) {
     auto scat_finder = make_unique<ScatterActionsFinder>(
         config, parameters_, nucleon_has_interacted_, modus_.total_N_number(),
         modus_.proj_N_number(), n_fractional_photons_);
