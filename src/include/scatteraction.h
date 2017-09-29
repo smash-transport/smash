@@ -312,7 +312,7 @@ class ScatterAction : public Action {
 
   /** Todo(ryu): document better - it is not really UrQMD-based, isn't it?
    *  Perform the UrQMD-based string excitation and decay */
-  void string_excitation_inter(int subprocess);
+  void string_excitation_inter();
 
   /**
    * \ingroup logging

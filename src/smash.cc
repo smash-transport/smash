@@ -24,13 +24,7 @@
 /* build dependent variables */
 #include "include/config.h"
 
-#include "Pythia8/Pythia.h"
 #include "include/stringprocess.h"
-
-//using namespace Pythia8;
-
-extern Pythia8::Pythia *pythia;
-extern Pythia8::SigmaTotal pythia_sigmaTot;
 
 namespace Smash {
 
@@ -436,42 +430,8 @@ int main(int argc, char *argv[]) {
     DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
     ParticleType::check_consistency();
 
-    // create Pythia and string_process (UrQMD-based string excitation) objects
-    pythia = new Pythia8::Pythia(PYTHIA_XML_DIR, false);
+    // create string_process (UrQMD-based string excitation) objects
     string_process = new StringProcess();
-    // setup and initialize pythia for string_process
-    /* select only inelastic events: */
-    pythia->readString("SoftQCD:inelastic = on");
-    /* suppress unnecessary output */
-    pythia->readString("Print:quiet = on");
-    /* No resonance decays, since the resonances will be handled by SMASH */
-    pythia->readString("HadronLevel:Decay = off");
-    /* transverse momentum spread in string fragmentation */
-    pythia->readString("StringPT:sigma = 0.25");
-    /* manually set the parton distribution function */
-    pythia->readString("PDF:pSet = 13");
-    pythia->readString("PDF:pSetB = 13");
-    pythia->readString("PDF:piSet = 1");
-    pythia->readString("PDF:piSetB = 1");
-    pythia->readString("Beams:idA = 2212");
-    pythia->readString("Beams:idB = 2212");
-    pythia->readString("Beams:eCM = 10.");
-    /* set particle masses and widths in PYTHIA to be same with those in SMASH */
-    for (auto &ptype : ParticleType::list_all()){
-      int pdgid = ptype.pdgcode().get_decimal();
-      double mass_pole = ptype.mass();
-      double width_pole = ptype.width_at_pole();
-      /* check if the particle specie is in PYTHIA */
-      if (pythia->particleData.isParticle(pdgid)){
-        /* set mass and width in PYTHIA */
-        pythia->particleData.m0(pdgid, mass_pole);
-        pythia->particleData.mWidth(pdgid, width_pole);
-      }
-    }
-    pythia->init();
-    pythia_sigmaTot.init(&pythia->info, pythia->settings, &pythia->particleData);
-    // setup string_process
-    string_process->set_pythia(pythia);
 
     // create an experiment
     log.trace(source_location, " create Experiment");
@@ -486,7 +446,6 @@ int main(int argc, char *argv[]) {
     log.trace(source_location, " run the Experiment");
     experiment->run();
 
-    delete pythia;
     delete string_process;
   } catch (std::exception &e) {
     log.fatal() << "SMASH failed with the following error:\n" << e.what();

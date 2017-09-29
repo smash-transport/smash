@@ -21,11 +21,6 @@
 #include "include/pdgcode.h"
 #include "include/random.h"
 
-//using namespace Pythia8;
-
-Pythia8::Pythia *pythia;
-Pythia8::SigmaTotal pythia_sigmaTot;
-
 namespace Smash {
 
 StringProcess *string_process;
@@ -79,25 +74,19 @@ void ScatterAction::generate_final_state() {
       /* Sample the particle momenta in CM system. */
       inelastic_scattering();
       break;
-    //case ProcessType::String:
-    //  /* string excitation */
-    //  string_excitation();
-    //  break;
+    case ProcessType::String:
+      /* string excitation */
+      string_excitation();
+      break;
     case ProcessType::StringSDiffAX:
       /* string excitation single diffractive to AX */
-      string_excitation_inter(1);
-      break;
     case ProcessType::StringSDiffXB:
       /* string excitation single diffractive to XB */
-      string_excitation_inter(2);
-      break;
     case ProcessType::StringDDiffXX:
       /* string excitation single diffractive to XX */
-      string_excitation_inter(3);
-      break;
     case ProcessType::StringNDiff:
       /* string excitation non-diffractive */
-      string_excitation_inter(4);
+      string_excitation_inter();
       break;
     default:
       throw InvalidScatterAction(
@@ -350,56 +339,54 @@ CollisionBranchList ScatterAction::string_excitation_cross_sections() {
   double sig_string_all =
       std::max(0., high_energy_cross_section() - elastic_parametrization());
 
-  double sqrts_threshold = 2. * (1. + 1.0e-6);
   std::array<int, 2> pdgid;
   for (int i = 0; i < 2; i++) {
     PdgCode pdg = incoming_particles_[i].type().pdgcode();
-    // Todo(ryu, oliiny): make sure this deexcite does what you really want
     pdg.deexcite();
     pdgid[i] = pdg.get_decimal();
-    // Todo(ryu, oliiny): why?
-    const int abs_pdg = pdg.is_baryon() ? pdgid[i] :  10 * (pdgid[i] / 10) + 3;
-    sqrts_threshold += pythia->particleData.m0(abs_pdg);
   }
 
-  /* Compute the parametrized cross sections of relevant subprocesses. */
-  pythia_sigmaTot.calc(pdgid[0], pdgid[1],
-                       std::max(sqrt_s(), sqrts_threshold));
-
-  // Todo(ryu, oliiny): why so? why not renormalize?
   /* Total parametrized cross-section (I) and pythia-produced total
    * cross-section (II) do not necessarily coincide. If I > II then
    * non-diffractive cross-section is reinforced to get I == II.
    * If I < II then partial cross-sections are drained one-by-one
    * to reduce II until I == II:
    * first non-diffractive, then double-diffractive, then
-   * single-diffractive AB->AX and AB->XB in equal propotion. */
-  const double sig_sd_all = pythia_sigmaTot.sigmaAX() +
-                            pythia_sigmaTot.sigmaXB();
-  double sig_diff = sig_sd_all + pythia_sigmaTot.sigmaXX();
-  const double sig_nd = std::max(0., sig_string_all - sig_diff);
-  sig_diff = sig_string_all - sig_nd;
-  const double sig_dd_XX = std::max(0., sig_diff - sig_sd_all);
-  const double a = (sig_diff - sig_dd_XX) / sig_sd_all;
-  const double sig_sd_AX = a * pythia_sigmaTot.sigmaAX();
-  const double sig_sd_XB = a * pythia_sigmaTot.sigmaXB();
-  assert(std::abs(sig_sd_AX + sig_sd_XB + sig_dd_XX + sig_nd
-                  - sig_string_all) < 1.e-6);
+   * single-diffractive AB->AX and AB->XB in equal proportion.
+   * The way it is done here is not unique. I think that at high energy
+   * collision this is not an issue, but at sqrt_s < 10 GeV it may
+   * matter. */
+  std::array<double, 3> xs = string_process->cross_sections(pdgid[0], pdgid[1],
+                                                            sqrt_s());
+  double single_diffr_AX = xs[0],
+         single_diffr_XB = xs[1],
+         double_diffr = xs[2];
+  double single_diffr = single_diffr_AX + single_diffr_XB;
+  double diffractive = single_diffr + double_diffr;
+  double nondiffractive = std::max(0., sig_string_all - diffractive);
+  diffractive = sig_string_all - nondiffractive;
+  double_diffr = std::max(0., diffractive - single_diffr);
+  const double a = (diffractive - double_diffr) / single_diffr;
+  single_diffr_AX *= a;
+  single_diffr_XB *= a;
+  assert(std::abs(single_diffr_AX + single_diffr_XB + double_diffr +
+                  nondiffractive - sig_string_all) < 1.e-6);
 
-  log.debug("String cross section (single-diffractive AB->AX) is: ", sig_sd_AX);
-  log.debug("String cross section (single-diffractive AB->XB) is: ", sig_sd_XB);
-  log.debug("String cross section (double-diffractive AB->XX) is: ", sig_dd_XX);
-  log.debug("String cross section (non-diffractive) is: ", sig_nd);
+  log.debug("String cross sections [mb] are");
+  log.debug("Single-diffractive AB->AX: ", single_diffr_AX);
+  log.debug("Single-diffractive AB->XB: ", single_diffr_XB);
+  log.debug("Double-diffractive AB->XX: ", double_diffr);
+  log.debug("Non-diffractive: ", nondiffractive);
 
   /* fill the list of process channels */
   CollisionBranchList channel_list;
-  channel_list.push_back(make_unique<CollisionBranch>(sig_sd_AX,
+  channel_list.push_back(make_unique<CollisionBranch>(single_diffr_AX,
       ProcessType::StringSDiffAX));
-  channel_list.push_back(make_unique<CollisionBranch>(sig_sd_XB,
+  channel_list.push_back(make_unique<CollisionBranch>(single_diffr_XB,
       ProcessType::StringSDiffXB));
-  channel_list.push_back(make_unique<CollisionBranch>(sig_dd_XX,
+  channel_list.push_back(make_unique<CollisionBranch>(double_diffr,
       ProcessType::StringDDiffXX));
-  channel_list.push_back(make_unique<CollisionBranch>(sig_nd,
+  channel_list.push_back(make_unique<CollisionBranch>(nondiffractive,
       ProcessType::StringNDiff));
   return channel_list;
 }
@@ -563,54 +550,52 @@ void ScatterAction::string_excitation() {
     /* set all necessary parameters for Pythia
      * Create Pythia object */
     log.debug("Creating Pythia object.");
-    //static /*thread_local (see #3075)*/ Pythia8::Pythia pythia(PYTHIA_XML_DIR,
-    //                                                           false);
+    static /*thread_local (see #3075)*/ Pythia8::Pythia pythia(PYTHIA_XML_DIR,
+                                                               false);
     /* select only inelastic events: */
-    pythia->readString("SoftQCD:inelastic = on");
+    pythia.readString("SoftQCD:inelastic = on");
     /* suppress unnecessary output */
-    pythia->readString("Print:quiet = on");
+    pythia.readString("Print:quiet = on");
     /* Create output of the Pythia particle list */
     // pythia.readString("Init:showAllParticleData = on");
     /* No resonance decays, since the resonances will be handled by SMASH */
-    pythia->readString("HadronLevel:Decay = off");
+    pythia.readString("HadronLevel:Decay = off");
     /* manually set the parton distribution function */
-    pythia->readString("PDF:pSet = 13");
-    pythia->readString("PDF:pSetB = 13");
-    pythia->readString("PDF:piSet = 1");
-    pythia->readString("PDF:piSetB = 1");
+    pythia.readString("PDF:pSet = 13");
+    pythia.readString("PDF:pSetB = 13");
+    pythia.readString("PDF:piSet = 1");
+    pythia.readString("PDF:piSetB = 1");
     /* Set the random seed of the Pythia Random Number Generator.
      * Please note: Here we use a random number generated by the
      * SMASH, since every call of pythia.init should produce
      * different events. */
-    pythia->readString("Random:setSeed = on");
+    pythia.readString("Random:setSeed = on");
     std::stringstream buffer1;
     buffer1 << "Random:seed = " << Random::canonical();
-    pythia->readString(buffer1.str());
+    pythia.readString(buffer1.str());
     /* set the incoming particles */
     std::stringstream buffer2;
     buffer2 << "Beams:idA = " << incoming_particles_[0].type().pdgcode();
-    pythia->readString(buffer2.str());
+    pythia.readString(buffer2.str());
     log.debug("First particle in string excitation: ",
               incoming_particles_[0].type().pdgcode());
     std::stringstream buffer3;
     buffer3 << "Beams:idB = " << incoming_particles_[1].type().pdgcode();
     log.debug("Second particle in string excitation: ",
               incoming_particles_[1].type().pdgcode());
-    pythia->readString(buffer3.str());
+    pythia.readString(buffer3.str());
     /* Calculate the center-of-mass energy of this collision */
-    double sqrts =
-        (incoming_particles_[0].momentum() + incoming_particles_[1].momentum())
-            .abs();
+    const double sqrts = sqrt_s();
     std::stringstream buffer4;
     buffer4 << "Beams:eCM = " << sqrts;
-    pythia->readString(buffer4.str());
+    pythia.readString(buffer4.str());
     log.debug("Pythia call with eCM = ", buffer4.str());
     /* Initialize. */
-    isinit = pythia->init();
+    isinit = pythia.init();
     /* Short notation for Pythia event */
-    Pythia8::Event &event = pythia->event;
+    Pythia8::Event &event = pythia.event;
     while ((isinit == true) && (isnext == false)) {
-      isnext = pythia->next();
+      isnext = pythia.next();
 
       if (isnext == true) {
         /* energy-momentum conservation check */
@@ -738,13 +723,11 @@ void ScatterAction::string_excitation() {
       }
     }
     /* Check momentum difference for debugging */
-    FourVector in_mom =
-        incoming_particles_[0].momentum() + incoming_particles_[1].momentum();
     FourVector out_mom;
     for (ParticleData data : outgoing_particles_) {
-      out_mom = out_mom + data.momentum();
+      out_mom += data.momentum();
     }
-    log.debug("Incoming momenta string:", in_mom);
+    log.debug("Incoming momenta string:", total_momentum());
     log.debug("Outgoing momenta string:", out_mom);
   }
 }
@@ -752,50 +735,35 @@ void ScatterAction::string_excitation() {
 /* This function will generate outgoing particles in CM frame
  * from a hard process.
  * The way to excite strings is based on the UrQMD model */
-void ScatterAction::string_excitation_inter(int subprocess) {
+void ScatterAction::string_excitation_inter() {
   assert(incoming_particles_.size() == 2);
   const auto &log = logger<LogArea::Pythia>();
   // Disable doubleing point exception trap for Pythia
   {
-    bool isinit = false;
-    bool isnext = false;
     DisableFloatTraps guard;
-    /* compute sqrts */
-    double sqrts =
-        (incoming_particles_[0].momentum() + incoming_particles_[1].momentum())
-            .abs();
-    /* transverse momentum transferred to strings */
-    double sigQperp;
-    /* parametrization to fit the experimental data */
-    if (sqrts < 4.) {
-      sigQperp = 0.5;
-    } else {
-      sigQperp = 0.5 + 0.2 * std::log(sqrts / 4.) / std::log(5.);
-    }
-    /* initialize the string_process object */
-    string_process->set_sigma_qperp(sigQperp);
-    string_process->set_pmin_gluon_lightcone(0.001);
-    isinit =
-        string_process->init(incoming_particles_,
-                             time_of_execution_, gamma_cm());
+    /* initialize the string_process object for this particular collision */
+    string_process->init(incoming_particles_, time_of_execution_, gamma_cm());
     /* implement collision */
-    while ((isinit == true) && (isnext == false)) {
-      if( subprocess == 1 ) {
-        isnext = string_process->next_SDiff(1);
-      } else if( subprocess == 2 ) {
-        isnext = string_process->next_SDiff(2);
-      } else if( subprocess == 3 ) {
-        isnext = string_process->next_DDiff();
-      } else if( subprocess == 4 ) {
-        isnext = string_process->next_NDiff();
-      } else {
-        throw std::runtime_error("invalid subprocess of StringProcess");
+    bool isnext = false;
+    while (!isnext) {
+      switch (process_type_) {
+        case ProcessType::StringSDiffAX:
+          isnext = string_process->next_SDiff(1);
+          break;
+        case ProcessType::StringSDiffXB:
+          isnext = string_process->next_SDiff(2);
+          break;
+        case ProcessType::StringDDiffXX:
+          isnext = string_process->next_DDiff();
+          break;
+        case ProcessType::StringNDiff:
+          isnext = string_process->next_NDiff();
+          break;
+        default:
+          throw std::runtime_error("invalid subprocess of StringProcess");
       }
     }
-    int npart = string_process->final_state.size();
-    for(int ipart = 0; ipart < npart; ipart++){
-      outgoing_particles_.push_back( string_process->final_state[ipart] );
-    }
+    outgoing_particles_ = string_process->final_state;
     /* If the incoming particles already were unformed, the formation
      * times and cross section scaling factors need to be adjusted */
     const double tform_in = std::max(incoming_particles_[0].formation_time(),
@@ -820,13 +788,11 @@ void ScatterAction::string_excitation_inter(int subprocess) {
       }
     }
     /* Check momentum difference for debugging */
-    FourVector in_mom =
-        incoming_particles_[0].momentum() + incoming_particles_[1].momentum();
     FourVector out_mom;
     for (ParticleData data : outgoing_particles_) {
-      out_mom = out_mom + data.momentum();
+      out_mom += data.momentum();
     }
-    log.debug("Incoming momenta string:", in_mom);
+    log.debug("Incoming momenta string:", total_momentum());
     log.debug("Outgoing momenta string:", out_mom);
   }
 }

@@ -9,16 +9,23 @@ namespace Smash {
 
 /**
  * \brief String excitation processes used in SMASH
+ *
+ * Only one instance of this class should be created.
+ *
  * This class implements string excitation processes based on the UrQMD model
  * \iref{Bass:1998ca,Bleicher:1999xi} and subsequent fragmentation
- * according to the LUND/PYTHIA fragmentation scheme \iref{Andersson:1983ia,Sjostrand:2014zea}.
- * There are single and double diffractive and non-diffractive excitation subprocesses
- * as described in SMASH wiki.
+ * according to the LUND/PYTHIA fragmentation scheme
+ * \iref{Andersson:1983ia,Sjostrand:2014zea}.
+ *
+ * The class implemets the following functionality:
+ * - given two colliding initial state particles it provides hadronic final
+ *   state after single diffractive, double diffractive and non-diffractive
+ *   string excitation
+ * - owns a Pythia8::SigmaTotal object to compute corresponding cross-sections
+ * - owns a Pythia object, that allows to fragment strings
  */
 class StringProcess {
  private:
-  int baryonA; //!< 3 times baryon number of incoming particle A
-  int baryonB; //!< 3 times baryon number of incoming particle B
   double PPosA; //!< forward lightcone momentum p^{+} of incoming particle A
                 //!< in the center of mass frame
   double PPosB; //!< forward lightcone momentum p^{+} of incoming particle B
@@ -42,82 +49,109 @@ class StringProcess {
                                          //!< of incoming particle A
   int NpartFinal; //!< total number of final state particles
   std::array<int, 2> NpartString; //!< number of particles fragmented from strings
-  double pmin_gluon_lightcone; //!< the minimum lightcone momentum scale carried by gluon
-  double xmin_gluon_fraction; //!< the minimum lightcone momentum fraction carried by gluon
-  double pow_fgluon_beta; //!< parameter for the gluon distribution function
-                          //!< P(x) = 1/x * (1 - x)^{1 + pow_fgluon_beta}
-  double pow_fquark_alpha; //!< parameter for the quark distribution function
-                          //!< P(x) = x^{pow_fquark_alpha - 1} * (1 - x)^{pow_fquark_beta - 1}
-  double pow_fquark_beta; //!< parameter for the quark distribution function
-                          //!< P(x) = x^{pow_fquark_alpha - 1} * (1 - x)^{pow_fquark_beta - 1}
-  double sigma_qperp; //!< transverse momentum spread of the excited strings
+  double pmin_gluon_lightcone_; //!< the minimum lightcone momentum scale carried by gluon
+  double pow_fgluon_beta_; //!< parameter for the gluon distribution function
+                          //!< P(x) = 1/x * (1 - x)^{1 + pow_fgluon_beta_}
+  double pow_fquark_alpha_; //!< parameter for the quark distribution function
+                          //!< P(x) = x^{pow_fquark_alpha_ - 1} * (1 - x)^{pow_fquark_beta_ - 1}
+  double pow_fquark_beta_; //!< parameter for the quark distribution function
+                          //!< P(x) = x^{pow_fquark_alpha_ - 1} * (1 - x)^{pow_fquark_beta_ - 1}
+  double sigma_qperp_; //!< transverse momentum spread of the excited strings
                       //!< transverse momenta of strings are sampled
-                      //!< according to gaussian distribution with width sigma_qperp
-  double kappa_tension_string; //!< string tension
+                      //!< according to gaussian distribution with width sigma_qperp_
+  double kappa_tension_string_; //!< string tension
   double time_collision; //!< time of collision in the computational frame
   double gamma_factor_com; //!< Lorentz gamma factor of center of mass
                            //!< in the computational frame
-  Pythia8::Pythia *pythia_; //!< pointer of the PYTHIA object used in fragmentation
+
+  /// PYTHIA object used in fragmentation
+  std::unique_ptr<Pythia8::Pythia> pythia_;
+
+  /// An object to compute cross-sections
+  Pythia8::SigmaTotal pythia_sigmatot_;
 
  public:
-  /** constructor */
+  /** Constructor, initializes pythia. Should only be called once. */
   StringProcess();
+
+  /**
+   * Interface to pythia_sigmatot_ to compute cross-sections of A+B->
+   * different final states.
+   * \param pdg_a pdg code of incoming particle A
+   * \param pdg_b pdg code of incoming particle B
+   * \param sqrt_s collision energy in the center of mass frame [GeV]
+   * \return array with single diffractive cross-sections AB->AX, AB->XB and
+   * double diffractive AB->XX.
+   */
+  std::array<double, 3> cross_sections(int pdg_a, int pdg_b, double sqrt_s) {
+    // This threshold magic is following Pythia. Todo(ryu): take care of this.
+    double sqrts_threshold = 2. * (1. + 1.0e-6);
+    pdg_a = std::abs(pdg_a);
+    pdg_b = std::abs(pdg_b);
+    pdg_a = (pdg_a > 1000) ? pdg_a : 10 * (pdg_a / 10) + 3;
+    pdg_b = (pdg_b > 1000) ? pdg_b : 10 * (pdg_b / 10) + 3;
+    sqrts_threshold += pythia_->particleData.m0(pdg_a) +
+                       pythia_->particleData.m0(pdg_b);
+    // Constant cross-section for sub-processes below threshold equal to
+    // cross-section at the threshold.
+    if (sqrt_s < sqrts_threshold) {
+      sqrt_s = sqrts_threshold;
+    }
+    pythia_sigmatot_.calc(pdg_a, pdg_b, sqrt_s);
+    return {pythia_sigmatot_.sigmaAX(),
+            pythia_sigmatot_.sigmaXB(),
+            pythia_sigmatot_.sigmaXX()};
+  }
   /**
    * final state array
    * which must be accessed after the collision
    */
   ParticleList final_state;
   /**
-   * set the pointer of PYTHIA object
-   * \param pythia_in is a pointer to Pythia created and initialized elsewhere
-   */
-  void set_pythia(Pythia8::Pythia *pythia_in) { pythia_ = pythia_in; };
-  /**
    * set the minimum lightcone momentum scale carried by gluon.
    * This is relevant for the double-diffractive process.
-   * The minimum lightcone momentum fraction is set to be pmin_gluon_lightcone/sqrtsAB.
-   * \param pLightConeMinIn is a value that we want to use for pmin_gluon_lightcone.
+   * The minimum lightcone momentum fraction is set to be pmin_gluon_lightcone_/sqrtsAB.
+   * \param pLightConeMinIn is a value that we want to use for pmin_gluon_lightcone_.
    */
   void set_pmin_gluon_lightcone(double pLightConeMinIn) {
-    pmin_gluon_lightcone = pLightConeMinIn;
+    pmin_gluon_lightcone_ = pLightConeMinIn;
   }
   /**
    * lightcone momentum fraction of gluon is sampled
-   * according to probability distribution P(x) = 1/x * (1 - x)^{1 + pow_fgluon_beta}
+   * according to probability distribution P(x) = 1/x * (1 - x)^{1 + pow_fgluon_beta_}
    * in double-diffractive processes.
-   * \param betapowSIn is a value that we want to use for pow_fgluon_beta.
+   * \param betapowSIn is a value that we want to use for pow_fgluon_beta_.
    */
-  void set_pow_fgluon(double betapowSIn) { pow_fgluon_beta = betapowSIn; }
+  void set_pow_fgluon(double betapowSIn) { pow_fgluon_beta_ = betapowSIn; }
   /**
    * lightcone momentum fraction of quark is sampled
-   * according to probability distribution P(x) = x^{pow_fquark_alpha - 1} * (1 - x)^{pow_fquark_beta - 1}
+   * according to probability distribution P(x) = x^{pow_fquark_alpha_ - 1} * (1 - x)^{pow_fquark_beta_ - 1}
    * in non-diffractive processes.
-   * \param alphapowVIn is a value that we want to use for pow_fquark_alpha.
-   * \param betapowVIn is a value that we want to use for pow_fquark_beta.
+   * \param alphapowVIn is a value that we want to use for pow_fquark_alpha_.
+   * \param betapowVIn is a value that we want to use for pow_fquark_beta_.
    */
   void set_pow_fquark(double alphapowVIn, double betapowVIn){
-    pow_fquark_alpha = alphapowVIn;
-    pow_fquark_beta = betapowVIn;
+    pow_fquark_alpha_ = alphapowVIn;
+    pow_fquark_beta_ = betapowVIn;
   }
   /**
-   * set the average amount of transverse momentum transfer sigma_qperp.
-   * \param sigmaQperpIn is a value that we want to use for sigma_qperp.
+   * set the average amount of transverse momentum transfer sigma_qperp_.
+   * \param sigmaQperpIn is a value that we want to use for sigma_qperp_.
    */
-  void set_sigma_qperp(double sigmaQperpIn) { sigma_qperp = sigmaQperpIn; }
+  void set_sigma_qperp_(double sigmaQperpIn) { sigma_qperp_ = sigmaQperpIn; }
   /**
    * set the string tension kappaString which is used in append_final_state.
    * \param kappaStringIn is a value that we want to use for kappaString.
    */
-  void set_tension_string(double kappaStringIn) { kappa_tension_string = kappaStringIn; }
+  void set_tension_string(double kappaStringIn) { kappa_tension_string_ = kappaStringIn; }
   /**
    * initialization
    * feed intial particles, time of collision and gamma factor of the center of mass.
    * \param incomingList is the list of initial state particles.
    * \param tcollIn is time of collision.
    * \param gammaFacIn gamma factor of the center of mass.
-   * \return if initialization is successful.
    */
-  bool init(const ParticleList &incomingList, double tcollIn, double gammaFacIn);
+  void init(const ParticleList &incomingList, double tcollIn, double gammaFacIn);
   /** boost the momenta of incoming particles into the center of mass frame. */
   void make_incoming_com_momenta();
   /**

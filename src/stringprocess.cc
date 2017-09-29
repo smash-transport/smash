@@ -11,14 +11,52 @@
 
 namespace Smash {
 
-// constructor
-StringProcess::StringProcess() {
+StringProcess::StringProcess() :
+  pmin_gluon_lightcone_(0.001),
+  pow_fgluon_beta_(0.5),
+  pow_fquark_alpha_(1.),
+  pow_fquark_beta_(2.5),
+  sigma_qperp_(0.5),
+  kappa_tension_string_(1.0) {
+
+ // setup and initialize pythia
+  pythia_ = make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
+  /* select only inelastic events: */
+  pythia_->readString("SoftQCD:inelastic = on");
+  /* suppress unnecessary output */
+  pythia_->readString("Print:quiet = on");
+  /* No resonance decays, since the resonances will be handled by SMASH */
+  pythia_->readString("HadronLevel:Decay = off");
+  /* transverse momentum spread in string fragmentation */
+  pythia_->readString("StringPT:sigma = 0.25");
+  /* manually set the parton distribution function */
+  pythia_->readString("PDF:pSet = 13");
+  pythia_->readString("PDF:pSetB = 13");
+  pythia_->readString("PDF:piSet = 1");
+  pythia_->readString("PDF:piSetB = 1");
+  pythia_->readString("Beams:idA = 2212");
+  pythia_->readString("Beams:idB = 2212");
+  pythia_->readString("Beams:eCM = 10.");
+  /* set particle masses and widths in PYTHIA to be same with those in SMASH */
+  for (auto &ptype : ParticleType::list_all()){
+    int pdgid = ptype.pdgcode().get_decimal();
+    double mass_pole = ptype.mass();
+    double width_pole = ptype.width_at_pole();
+    /* check if the particle specie is in PYTHIA */
+    if (pythia_->particleData.isParticle(pdgid)){
+      /* set mass and width in PYTHIA */
+      pythia_->particleData.m0(pdgid, mass_pole);
+      pythia_->particleData.mWidth(pdgid, width_pole);
+    }
+  }
+  pythia_->init();
+  pythia_sigmatot_.init(&pythia_->info, pythia_->settings,
+                        &pythia_->particleData);
+
   for (int imu = 0; imu < 4; imu++) {
     evecBasisAB[imu] = ThreeVector(0., 0., 0.);
   }
 
-  baryonA = baryonB = 0;
-  //chargeA = chargeB = 0;
   PPosA = 0.;
   PNegA = 0.;
   PPosB = 0.;
@@ -26,15 +64,6 @@ StringProcess::StringProcess() {
   massA = massB = 0.;
   sqrtsAB = 0.;
   pabscomAB = 0.;
-
-  pmin_gluon_lightcone = 0.001;
-  pow_fgluon_beta = 0.5;
-  pow_fquark_alpha = 1.;
-  pow_fquark_beta = 2.5;
-
-  sigma_qperp = 0.5;
-  kappa_tension_string = 1.;
-
   time_collision = 0.;
   gamma_factor_com = 1.;
 
@@ -96,20 +125,20 @@ int StringProcess::append_final_state(const FourVector &uString,
   xvertex_pos.resize(nfrag + 1);
   xvertex_neg.resize(nfrag + 1);
   // x^{+} coordinates of the forward end
-  xvertex_pos[0] = p_pos_tot / kappa_tension_string;
+  xvertex_pos[0] = p_pos_tot / kappa_tension_string_;
   for (int i = 0; i < nfrag; i++) {
     // recursively compute x^{+} coordinates of q-qbar formation vertex
     xvertex_pos[i + 1] = xvertex_pos[i] -
         (fragments[i].momentum.x0() + fragments[i].pparallel) /
-        (kappa_tension_string * std::sqrt(2.));
+        (kappa_tension_string_ * std::sqrt(2.));
   }
   // x^{-} coordinates of the backward end
-  xvertex_neg[nfrag] = p_neg_tot / kappa_tension_string;
+  xvertex_neg[nfrag] = p_neg_tot / kappa_tension_string_;
   for (int i = nfrag - 1; i >= 0; i--) {
     // recursively compute x^{-} coordinates of q-qbar formation vertex
     xvertex_neg[i] = xvertex_neg[i + 1] -
         (fragments[i].momentum.x0() - fragments[i].pparallel) /
-        (kappa_tension_string * std::sqrt(2.));
+        (kappa_tension_string_ * std::sqrt(2.));
   }
 
   /* compute the cross section suppression factor for leading hadrons
@@ -164,36 +193,30 @@ int StringProcess::append_final_state(const FourVector &uString,
   return nfrag;
 }
 
-bool StringProcess::init(const ParticleList &incomingList,
+void StringProcess::init(const ParticleList &incoming,
                          double tcollIn, double gammaFacIn){
-  PDGcodes_[0] = incomingList[0].pdgcode();
-  PDGcodes_[1] = incomingList[1].pdgcode();
-  massA = incomingList[0].effective_mass();
-  massB = incomingList[1].effective_mass();
+  PDGcodes_[0] = incoming[0].pdgcode();
+  PDGcodes_[1] = incoming[1].pdgcode();
+  massA = incoming[0].effective_mass();
+  massB = incoming[1].effective_mass();
 
-  plab_[0] = incomingList[0].momentum();
-  plab_[1] = incomingList[1].momentum();
+  plab_[0] = incoming[0].momentum();
+  plab_[1] = incoming[1].momentum();
 
   sqrtsAB = ( plab_[0] + plab_[1] ).abs();
   pabscomAB = pCM(sqrtsAB, massA, massB);
+  /* Transverse momentum transferred to strings,
+     parametrization to fit the experimental data */
+  sigma_qperp_ = (sqrtsAB < 4.) ? 0.5 :
+    0.5 + 0.2 * std::log(sqrtsAB / 4.) / std::log(5.);
 
   make_incoming_com_momenta();
   make_orthonormal_basis();
   compute_incoming_lightcone_momenta();
 
-  xmin_gluon_fraction = pmin_gluon_lightcone / sqrtsAB;
-
-  // quantum numbers of hadron A
-  baryonA = 3*PDGcodes_[0].baryon_number();
-  //chargeA = 3*PDGcodes_[0].charge();
-  // quantum numbers of hadron B
-  baryonB = 3*PDGcodes_[1].baryon_number();
-  //chargeB = 3*PDGcodes_[1].charge();
-
   time_collision = tcollIn;
   gamma_factor_com = gammaFacIn;
 
-  return true;
 }
 
 /**
@@ -264,8 +287,8 @@ bool StringProcess::next_SDiff(int channel) {
       make_string_ends(PDGcodes_[0], idqX1, idqX2);
     }
     // sample the transverse momentum transfer
-    QTrx = Random::normal(0., sigma_qperp/std::sqrt(2.) );
-    QTry = Random::normal(0., sigma_qperp/std::sqrt(2.) );
+    QTrx = Random::normal(0., sigma_qperp_/std::sqrt(2.) );
+    QTry = Random::normal(0., sigma_qperp_/std::sqrt(2.) );
     QTrn = std::sqrt(QTrx*QTrx + QTry*QTry);
     // sample the string mass and evaluate the three-momenta of hadron and string.
     rmass = std::log(mstrMax / mstrMin) * Random::uniform(0., 1.);
@@ -386,11 +409,12 @@ bool StringProcess::next_DDiff() {
     make_string_ends(PDGcodes_[0], idq11, idq12);
     make_string_ends(PDGcodes_[1], idq21, idq22);
     // sample the lightcone momentum fraction carried by gluons
-    xfracA = Random::beta_a0(xmin_gluon_fraction, pow_fgluon_beta + 1.);
-    xfracB = Random::beta_a0(xmin_gluon_fraction, pow_fgluon_beta + 1.);
+    const double xmin_gluon_fraction = pmin_gluon_lightcone_ / sqrtsAB;
+    xfracA = Random::beta_a0(xmin_gluon_fraction, pow_fgluon_beta_ + 1.);
+    xfracB = Random::beta_a0(xmin_gluon_fraction, pow_fgluon_beta_ + 1.);
     // sample the transverse momentum transfer
-    QTrx = Random::normal(0., sigma_qperp/std::sqrt(2.) );
-    QTry = Random::normal(0., sigma_qperp/std::sqrt(2.) );
+    QTrx = Random::normal(0., sigma_qperp_/std::sqrt(2.) );
+    QTry = Random::normal(0., sigma_qperp_/std::sqrt(2.) );
     QTrn = std::sqrt(QTrx*QTrx + QTry*QTry);
     // evaluate the lightcone momentum transfer
     QPos = -QTrn*QTrn / (2. * xfracB * PNegB);
@@ -518,6 +542,8 @@ bool StringProcess::next_NDiff() {
     make_string_ends(PDGcodes_[0], idqA1, idqA2);
     make_string_ends(PDGcodes_[1], idqB1, idqB2);
 
+    const int baryonA = 3*PDGcodes_[0].baryon_number();
+    const int baryonB = 3*PDGcodes_[1].baryon_number();
     if ((baryonA == 3) && (baryonB == 3)) {  // baryon-baryon
       idq11 = idqB1;
       idq12 = idqA2;
@@ -572,11 +598,11 @@ bool StringProcess::next_NDiff() {
       exit(1);
     }
     // sample the lightcone momentum fraction carried by quarks
-    xfracA = Random::beta(pow_fquark_alpha, pow_fquark_beta);
-    xfracB = Random::beta(pow_fquark_alpha, pow_fquark_beta);
+    xfracA = Random::beta(pow_fquark_alpha_, pow_fquark_beta_);
+    xfracB = Random::beta(pow_fquark_alpha_, pow_fquark_beta_);
     // sample the transverse momentum transfer
-    QTrx = Random::normal(0., sigma_qperp/std::sqrt(2.) );
-    QTry = Random::normal(0., sigma_qperp/std::sqrt(2.) );
+    QTrx = Random::normal(0., sigma_qperp_/std::sqrt(2.) );
+    QTry = Random::normal(0., sigma_qperp_/std::sqrt(2.) );
     QTrn = std::sqrt(QTrx*QTrx + QTry*QTry);
     // evaluate the lightcone momentum transfer
     QPos = -QTrn*QTrn / (2. * xfracB * PNegB);
