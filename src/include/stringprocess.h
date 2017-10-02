@@ -26,41 +26,48 @@ namespace Smash {
  */
 class StringProcess {
  private:
-  double PPosA; //!< forward lightcone momentum p^{+} of incoming particle A
-                //!< in the center of mass frame
-  double PPosB; //!< forward lightcone momentum p^{+} of incoming particle B
-                //!< in the center of mass frame
-  double PNegA; //!< backward lightcone momentum p^{-} of incoming particle A
-                //!< in the center of mass frame
-  double PNegB; //!< backward lightcone momentum p^{-} of incoming particle B
-                //!< in the center of mass frame
-  double massA; //!< mass of incoming particle A
-  double massB; //!< mass of incoming particle A
-  double sqrtsAB_; //!< sqrt of Mandelstam variable s
-  std::array<PdgCode, 2> PDGcodes_; //!< PdgCodes of incoming particles
-  std::array<FourVector, 2> plab_; //!< momenta of incoming particles in the lab frame
-  std::array<FourVector, 2> pcom_; //!< momentum of incoming particles in the center of mass frame
-  FourVector ucomAB_; //!< velocity four vector of the center of mass in the lab frame
-  ThreeVector vcomAB_; //!< velocity three vector of the center of mass in the lab frame
-  std::array<ThreeVector,4> evecBasisAB_; //!< orthonormal basis vectors in the center of mass frame
-                                         //!< where the 3rd one is parallel to momtentum
-                                         //!< of incoming particle A
-  int NpartFinal; //!< total number of final state particles
-  std::array<int, 2> NpartString; //!< number of particles fragmented from strings
-  double pmin_gluon_lightcone_; //!< the minimum lightcone momentum scale carried by gluon
-  double pow_fgluon_beta_; //!< parameter for the gluon distribution function
-                          //!< P(x) = 1/x * (1 - x)^{1 + pow_fgluon_beta_}
-  double pow_fquark_alpha_; //!< parameter for the quark distribution function
-                          //!< P(x) = x^{pow_fquark_alpha_ - 1} * (1 - x)^{pow_fquark_beta_ - 1}
-  double pow_fquark_beta_; //!< parameter for the quark distribution function
-                          //!< P(x) = x^{pow_fquark_alpha_ - 1} * (1 - x)^{pow_fquark_beta_ - 1}
-  double sigma_qperp_; //!< transverse momentum spread of the excited strings
-                      //!< transverse momenta of strings are sampled
-                      //!< according to gaussian distribution with width sigma_qperp_
-  double kappa_tension_string_; //!< string tension
-  double time_collision_; //!< time of collision in the computational frame
-  double gamma_factor_com_; //!< Lorentz gamma factor of center of mass
-                           //!< in the computational frame
+  double PPosA;  //!< forward lightcone momentum p^{+} of incoming particle A
+                 //!< in the center of mass frame
+  double PPosB;  //!< forward lightcone momentum p^{+} of incoming particle B
+                 //!< in the center of mass frame
+  double PNegA;  //!< backward lightcone momentum p^{-} of incoming particle A
+                 //!< in the center of mass frame
+  double PNegB;  //!< backward lightcone momentum p^{-} of incoming particle B
+                 //!< in the center of mass frame
+  double massA;  //!< mass of incoming particle A
+  double massB;  //!< mass of incoming particle A
+  double sqrtsAB_;                   //!< sqrt of Mandelstam variable s
+  std::array<PdgCode, 2> PDGcodes_;  //!< PdgCodes of incoming particles
+  std::array<FourVector, 2>
+      plab_;  //!< momenta of incoming particles in the lab frame
+  std::array<FourVector, 2>
+      pcom_;  //!< momentum of incoming particles in the center of mass frame
+  FourVector
+      ucomAB_;  //!< velocity four vector of the center of mass in the lab frame
+  ThreeVector vcomAB_;  //!< velocity three vector of the center of mass in the
+                        //!lab frame
+  std::array<ThreeVector, 4>
+      evecBasisAB_;  //!< orthonormal basis vectors in the center of mass frame
+                     //!< where the 3rd one is parallel to momtentum
+                     //!< of incoming particle A
+  int NpartFinal;    //!< total number of final state particles
+  std::array<int, 2>
+      NpartString;  //!< number of particles fragmented from strings
+  double pmin_gluon_lightcone_;  //!< the minimum lightcone momentum scale
+                                 //!carried by gluon
+  double pow_fgluon_beta_;   //!< parameter for the gluon distribution function
+                             //!< P(x) = 1/x * (1 - x)^{1 + pow_fgluon_beta_}
+  double pow_fquark_alpha_;  //!< parameter for the quark distribution function
+  //!< P(x) = x^{pow_fquark_alpha_ - 1} * (1 - x)^{pow_fquark_beta_ - 1}
+  double pow_fquark_beta_;  //!< parameter for the quark distribution function
+  //!< P(x) = x^{pow_fquark_alpha_ - 1} * (1 - x)^{pow_fquark_beta_ - 1}
+  double sigma_qperp_;  //!< transverse momentum spread of the excited strings
+                        //!< transverse momenta of strings are sampled
+  //!< according to gaussian distribution with width sigma_qperp_
+  double kappa_tension_string_;  //!< string tension
+  double time_collision_;    //!< time of collision in the computational frame
+  double gamma_factor_com_;  //!< Lorentz gamma factor of center of mass
+                             //!< in the computational frame
 
   /// PYTHIA object used in fragmentation
   std::unique_ptr<Pythia8::Pythia> pythia_;
@@ -88,16 +95,15 @@ class StringProcess {
     pdg_b = std::abs(pdg_b);
     pdg_a = (pdg_a > 1000) ? pdg_a : 10 * (pdg_a / 10) + 3;
     pdg_b = (pdg_b > 1000) ? pdg_b : 10 * (pdg_b / 10) + 3;
-    sqrts_threshold += pythia_->particleData.m0(pdg_a) +
-                       pythia_->particleData.m0(pdg_b);
+    sqrts_threshold +=
+        pythia_->particleData.m0(pdg_a) + pythia_->particleData.m0(pdg_b);
     // Constant cross-section for sub-processes below threshold equal to
     // cross-section at the threshold.
     if (sqrt_s < sqrts_threshold) {
       sqrt_s = sqrts_threshold;
     }
     pythia_sigmatot_.calc(pdg_a, pdg_b, sqrt_s);
-    return {pythia_sigmatot_.sigmaAX(),
-            pythia_sigmatot_.sigmaXB(),
+    return {pythia_sigmatot_.sigmaAX(), pythia_sigmatot_.sigmaXB(),
             pythia_sigmatot_.sigmaXX()};
   }
   /**
@@ -108,15 +114,18 @@ class StringProcess {
   /**
    * set the minimum lightcone momentum scale carried by gluon.
    * This is relevant for the double-diffractive process.
-   * The minimum lightcone momentum fraction is set to be pmin_gluon_lightcone_/sqrtsAB.
-   * \param pLightConeMinIn is a value that we want to use for pmin_gluon_lightcone_.
+   * The minimum lightcone momentum fraction is set to be
+   * pmin_gluon_lightcone_/sqrtsAB.
+   * \param pLightConeMinIn is a value that we want to use for
+   * pmin_gluon_lightcone_.
    */
   void set_pmin_gluon_lightcone(double p_light_cone_min) {
     pmin_gluon_lightcone_ = p_light_cone_min;
   }
   /**
    * lightcone momentum fraction of gluon is sampled
-   * according to probability distribution P(x) = 1/x * (1 - x)^{1 + pow_fgluon_beta_}
+   * according to probability distribution P(x) = 1/x * (1 - x)^{1 +
+   * pow_fgluon_beta_}
    * in double-diffractive processes.
    * \param betapow is a value that we want to use for pow_fgluon_beta_.
    */
@@ -129,7 +138,7 @@ class StringProcess {
    * \param alphapow is a value that we want to use for pow_fquark_alpha_.
    * \param betapow is a value that we want to use for pow_fquark_beta_.
    */
-  void set_pow_fquark(double alphapow, double betapow){
+  void set_pow_fquark(double alphapow, double betapow) {
     pow_fquark_alpha_ = alphapow;
     pow_fquark_beta_ = betapow;
   }
@@ -142,10 +151,13 @@ class StringProcess {
    * set the string tension, which is used in append_final_state.
    * \param kappa_string is a value that we want to use for string tension.
    */
-  void set_tension_string(double kappa_string) { kappa_tension_string_ = kappa_string; }
+  void set_tension_string(double kappa_string) {
+    kappa_tension_string_ = kappa_string;
+  }
   /**
    * initialization
-   * feed intial particles, time of collision and gamma factor of the center of mass.
+   * feed intial particles, time of collision and gamma factor of the center of
+   * mass.
    * \param incoming is the list of initial state particles.
    * \param tcoll is time of collision.
    * \param gamma gamma factor of the center of mass.
@@ -170,9 +182,9 @@ class StringProcess {
    * \return whether fragmentations and final state creation was successful
    */
   bool make_final_state_2strings(
-     const std::array<std::array<int, 2>, 2> &quarks,
-     const std::array<FourVector, 2>  &pstr_com,
-     const std::array<double, 2> &m_str);
+      const std::array<std::array<int, 2>, 2> &quarks,
+      const std::array<FourVector, 2> &pstr_com,
+      const std::array<double, 2> &m_str);
   /**
    * Single-diffractive process
    * is based on single pomeron exchange described in \iref{Ingelman:1984ns}.
@@ -194,10 +206,12 @@ class StringProcess {
   bool next_DDiff();
   /**
    * Non-diffractive process
-   * is modelled in accordance with dual-topological approach \iref{Capella:1978ig}.
+   * is modelled in accordance with dual-topological approach
+   * \iref{Capella:1978ig}.
    * This involves a parton exchange in conjunction with momentum transfer.
    * Probability distribution function of the lightcone momentum fraction
-   * carried by quark is based on the UrQMD model \iref{Bass:1998ca,Bleicher:1999xi}.
+   * carried by quark is based on the UrQMD model
+   * \iref{Bass:1998ca,Bleicher:1999xi}.
    * \return whether the process is successfully implemented.
    */
   bool next_NDiff();
@@ -246,12 +260,14 @@ class StringProcess {
    * \param idq1 is PDG id of quark or anti-diquark (carrying color index).
    * \param idq2 is PDG id of diquark or anti-quark (carrying anti-color index).
    * \param mString is the string mass.
-   * \param evecLong is unit 3-vector specifying the direction of diquark or anti-diquark.
-   * \param random_rotation is whether or not we randomly rotate the orientation.
+   * \param evecLong is unit 3-vector specifying the direction of diquark or
+   * anti-diquark.
+   * \param random_rotation is whether or not we randomly rotate the
+   * orientation.
    * \return number of hadrons fragmented out of string.
    */
   int fragment_string(int idq1, int idq2, double mString, ThreeVector &evecLong,
-                     bool random_rotation);
+                      bool random_rotation);
 };
 
 }  // namespace Smash
