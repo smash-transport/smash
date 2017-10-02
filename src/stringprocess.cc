@@ -400,6 +400,8 @@ bool StringProcess::next_DDiff() {
         evecBasisAB_[1] * QTrx - evecBasisAB_[2] * QTry;
     pstr_com[1] = FourVector((PPosB_ - QPos + PNegB_ - QNeg) / std::sqrt(2.),
                              threeMomentum);
+    found_mass[0] = false;
+    found_mass[1] = false;
     for (int i = 0; i < 2; i++) {
       m_str[i] = pstr_com[i].sqr();
       m_str[i] = (m_str[i] > 0.) ? std::sqrt(m_str[i]) : 0.;
@@ -485,6 +487,9 @@ bool StringProcess::next_NDiff() {
         evecBasisAB_[1] * QTrx - evecBasisAB_[2] * QTry;
     pstr_com[1] = FourVector((PPosB_ - dPPos + PNegB_ - dPNeg) / std::sqrt(2.),
                              threeMomentum);
+
+    found_mass[0] = false;
+    found_mass[1] = false;
     for (int i = 0; i < 2; i++) {
       m_str[i] = pstr_com[i].sqr();
       m_str[i] = (m_str[i] > 0.) ? std::sqrt(m_str[i]) : 0.;
