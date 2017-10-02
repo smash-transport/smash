@@ -10,7 +10,6 @@
 #include "include/scatteraction.h"
 
 #include "Pythia8/Pythia.h"
-#include "include/stringprocess.h"
 
 #include "include/constants.h"
 #include "include/cxx14compat.h"
@@ -20,6 +19,7 @@
 #include "include/parametrizations.h"
 #include "include/pdgcode.h"
 #include "include/random.h"
+#include "include/stringprocess.h"
 
 namespace Smash {
 
@@ -173,7 +173,7 @@ void ScatterAction::add_all_processes(double elastic_parameter, bool two_to_one,
     add_collision(elastic_cross_section(elastic_parameter));
   }
   if (is_pythia) {
-    //add_collision(string_excitation_cross_section());
+    // add_collision(string_excitation_cross_section());
     add_collisions(string_excitation_cross_sections());
   } else {
     if (two_to_one) {
@@ -354,6 +354,9 @@ CollisionBranchList ScatterAction::string_excitation_cross_sections() {
    * The way it is done here is not unique. I think that at high energy
    * collision this is not an issue, but at sqrt_s < 10 GeV it may
    * matter. */
+  if (!string_process_) {
+    throw std::runtime_error("string_process_ should be initialized.");
+  }
   std::array<double, 3> xs = string_process_->cross_sections(pdgid[0], pdgid[1],
                                                             sqrt_s());
   double single_diffr_AX = xs[0],

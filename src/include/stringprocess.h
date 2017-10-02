@@ -1,8 +1,19 @@
-#ifndef STRINGPROCESS_H
-#define STRINGPROCESS_H
+/*
+ *
+ *    Copyright (c) 2017-
+ *      SMASH Team
+ *
+ *    GNU General Public License (GPLv3 or later)
+ *
+ */
 
+#ifndef SRC_INCLUDE_STRINGPROCESS_H_
+#define SRC_INCLUDE_STRINGPROCESS_H_
+
+#include <memory>
 #include <vector>
 #include "Pythia8/Pythia.h"
+
 #include "particledata.h"
 
 namespace Smash {
@@ -26,48 +37,63 @@ namespace Smash {
  */
 class StringProcess {
  private:
-  double PPosA;  //!< forward lightcone momentum p^{+} of incoming particle A
-                 //!< in the center of mass frame
-  double PPosB;  //!< forward lightcone momentum p^{+} of incoming particle B
-                 //!< in the center of mass frame
-  double PNegA;  //!< backward lightcone momentum p^{-} of incoming particle A
-                 //!< in the center of mass frame
-  double PNegB;  //!< backward lightcone momentum p^{-} of incoming particle B
-                 //!< in the center of mass frame
-  double massA;  //!< mass of incoming particle A
-  double massB;  //!< mass of incoming particle A
-  double sqrtsAB_;                   //!< sqrt of Mandelstam variable s
-  std::array<PdgCode, 2> PDGcodes_;  //!< PdgCodes of incoming particles
-  std::array<FourVector, 2>
-      plab_;  //!< momenta of incoming particles in the lab frame
-  std::array<FourVector, 2>
-      pcom_;  //!< momentum of incoming particles in the center of mass frame
-  FourVector
-      ucomAB_;  //!< velocity four vector of the center of mass in the lab frame
-  ThreeVector vcomAB_;  //!< velocity three vector of the center of mass in the
-                        //!lab frame
-  std::array<ThreeVector, 4>
-      evecBasisAB_;  //!< orthonormal basis vectors in the center of mass frame
-                     //!< where the 3rd one is parallel to momtentum
-                     //!< of incoming particle A
-  int NpartFinal;    //!< total number of final state particles
-  std::array<int, 2>
-      NpartString;  //!< number of particles fragmented from strings
-  double pmin_gluon_lightcone_;  //!< the minimum lightcone momentum scale
-                                 //!carried by gluon
-  double pow_fgluon_beta_;   //!< parameter for the gluon distribution function
-                             //!< P(x) = 1/x * (1 - x)^{1 + pow_fgluon_beta_}
-  double pow_fquark_alpha_;  //!< parameter for the quark distribution function
-  //!< P(x) = x^{pow_fquark_alpha_ - 1} * (1 - x)^{pow_fquark_beta_ - 1}
-  double pow_fquark_beta_;  //!< parameter for the quark distribution function
-  //!< P(x) = x^{pow_fquark_alpha_ - 1} * (1 - x)^{pow_fquark_beta_ - 1}
-  double sigma_qperp_;  //!< transverse momentum spread of the excited strings
-                        //!< transverse momenta of strings are sampled
-  //!< according to gaussian distribution with width sigma_qperp_
-  double kappa_tension_string_;  //!< string tension
-  double time_collision_;    //!< time of collision in the computational frame
-  double gamma_factor_com_;  //!< Lorentz gamma factor of center of mass
-                             //!< in the computational frame
+  // The following 4 variables are in the center of mass frame
+  /// forward lightcone momentum p^{+} of incoming particle A
+  double PPosA_;
+  /// forward lightcone momentum p^{+} of incoming particle B
+  double PPosB_;
+  /// backward lightcone momentum p^{-} of incoming particle A
+  double PNegA_;
+  /// backward lightcone momentum p^{-} of incoming particle B
+  double PNegB_;
+  /// masses of incoming particles
+  double massA_, massB_;
+  /// sqrt of Mandelstam variable s of collision
+  double sqrtsAB_;
+  /// PdgCodes of incoming particles
+  std::array<PdgCode, 2> PDGcodes_;
+  /// momenta of incoming particles in the lab frame
+  std::array<FourVector, 2> plab_;
+  /// momenta of incoming particles in the center of mass frame
+  std::array<FourVector, 2> pcom_;
+  /// velocity four vector of the center of mass in the lab frame
+  FourVector ucomAB_;
+  /// velocity three vector of the center of mass in the lab frame
+  ThreeVector vcomAB_;
+  /**
+   * Orthonormal basis vectors in the center of mass frame,
+   * where the 3rd one is parallel to momentum of incoming particle A
+   */
+  std::array<ThreeVector, 4> evecBasisAB_;
+  /// total number of final state particles
+  int NpartFinal_;
+  /// number of particles fragmented from strings
+  std::array<int, 2> NpartString_;
+  /// the minimum lightcone momentum scale carried by gluon
+  double pmin_gluon_lightcone_;
+  /** parameter for the gluon distribution function
+   *  P(x) = 1/x * (1 - x)^{1 + pow_fgluon_beta_}
+   */
+  double pow_fgluon_beta_;
+  /** parameter for the quark distribution function
+   * P(x) = x^{pow_fquark_alpha_ - 1} * (1 - x)^{pow_fquark_beta_ - 1}
+   */
+  double pow_fquark_alpha_;
+  /** parameter for the quark distribution function
+   * P(x) = x^{pow_fquark_alpha_ - 1} * (1 - x)^{pow_fquark_beta_ - 1}
+   */
+  double pow_fquark_beta_;
+  /** Transverse momentum spread of the excited strings.
+   * Transverse momenta of strings are sampled according to gaussian
+   *  distribution with width sigma_qperp_
+   */
+  double sigma_qperp_;
+  /// string tension
+  double kappa_tension_string_;
+  /// time of collision in the computational frame
+  double time_collision_;
+  /// Lorentz gamma factor of center of mass in the computational frame
+  double gamma_factor_com_;
 
   /// PYTHIA object used in fragmentation
   std::unique_ptr<Pythia8::Pythia> pythia_;
@@ -272,4 +298,4 @@ class StringProcess {
 
 }  // namespace Smash
 
-#endif
+#endif  // SRC_INCLUDE_STRINGPROCESS_H_

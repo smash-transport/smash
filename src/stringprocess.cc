@@ -1,9 +1,19 @@
+/*
+ *
+ *    Copyright (c) 2017-
+ *      SMASH Team
+ *
+ *    GNU General Public License (GPLv3 or later)
+ *
+ */
+
 #include <array>
 
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+// #include <math.h>
+// #include <stdio.h>
+// #include <stdlib.h>
+// #include <string.h>
+
 #include "include/angles.h"
 #include "include/kinematics.h"
 #include "include/random.h"
@@ -56,18 +66,18 @@ StringProcess::StringProcess()
     evecBasisAB_[imu] = ThreeVector(0., 0., 0.);
   }
 
-  PPosA = 0.;
-  PNegA = 0.;
-  PPosB = 0.;
-  PNegB = 0.;
-  massA = massB = 0.;
+  PPosA_ = 0.;
+  PNegA_ = 0.;
+  PPosB_ = 0.;
+  PNegB_ = 0.;
+  massA_ = massB_ = 0.;
   sqrtsAB_ = 0.;
   time_collision_ = 0.;
   gamma_factor_com_ = 1.;
 
-  NpartFinal = 0;
-  NpartString[0] = 0;
-  NpartString[1] = 0;
+  NpartFinal_ = 0;
+  NpartString_[0] = 0;
+  NpartString_[1] = 0;
   final_state.clear();
 }
 
@@ -201,8 +211,8 @@ void StringProcess::init(const ParticleList &incoming, double tcoll,
                          double gamma) {
   PDGcodes_[0] = incoming[0].pdgcode();
   PDGcodes_[1] = incoming[1].pdgcode();
-  massA = incoming[0].effective_mass();
-  massB = incoming[1].effective_mass();
+  massA_ = incoming[0].effective_mass();
+  massB_ = incoming[1].effective_mass();
 
   plab_[0] = incoming[0].momentum();
   plab_[1] = incoming[1].momentum();
@@ -233,13 +243,13 @@ void StringProcess::init(const ParticleList &incoming, double tcoll,
  * channel = 2 : A + B -> X + B
  */
 bool StringProcess::next_SDiff(bool is_AB_to_AX) {
-  NpartFinal = 0;
-  NpartString[0] = 0;
-  NpartString[1] = 0;
+  NpartFinal_ = 0;
+  NpartString_[0] = 0;
+  NpartString_[1] = 0;
   final_state.clear();
 
-  double massH = is_AB_to_AX ? massA : massB;
-  double mstrMin = is_AB_to_AX ? massB : massA;
+  double massH = is_AB_to_AX ? massA_ : massB_;
+  double mstrMin = is_AB_to_AX ? massB_ : massA_;
   double mstrMax = sqrtsAB_ - massH;
 
   bool foundPabsX = false, foundMassX = false;
@@ -295,12 +305,12 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   // perform fragmentation and add particles to final_state.
   int nfrag = fragment_string(idqX1, idqX2, massX, evec, false);
   if (nfrag < 1) {
-    NpartString[0] = 0;
+    NpartString_[0] = 0;
     return false;
   }
-  NpartString[0] = append_final_state(ustrXlab, evec);
+  NpartString_[0] = append_final_state(ustrXlab, evec);
 
-  NpartString[1] = 1;
+  NpartString_[1] = 1;
   PdgCode hadron_code = is_AB_to_AX ? PDGcodes_[0] : PDGcodes_[1];
   ParticleData new_particle(ParticleType::find(hadron_code));
   new_particle.set_4momentum(pstrHlab);
@@ -308,7 +318,7 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   new_particle.set_formation_time(0.);
   final_state.push_back(new_particle);
 
-  NpartFinal = NpartString[0] + NpartString[1];
+  NpartFinal_ = NpartString_[0] + NpartString_[1];
   return true;
 }
 
@@ -334,14 +344,14 @@ bool StringProcess::make_final_state_2strings(
     int nfrag =
         fragment_string(quarks[i][0], quarks[i][1], m_str[i], evec, false);
     if (nfrag <= 0) {
-      NpartString[i] = 0;
+      NpartString_[i] = 0;
       return false;
     }
-    NpartString[i] = append_final_state(ustr_lab[i], evec);
-    assert(nfrag == NpartString[i]);
+    NpartString_[i] = append_final_state(ustr_lab[i], evec);
+    assert(nfrag == NpartString_[i]);
   }
-  if ((NpartString[0] > 0) && (NpartString[1] > 0)) {
-    NpartFinal = NpartString[0] + NpartString[1];
+  if ((NpartString_[0] > 0) && (NpartString_[1] > 0)) {
+    NpartFinal_ = NpartString_[0] + NpartString_[1];
     return true;
   }
   return false;
@@ -349,9 +359,9 @@ bool StringProcess::make_final_state_2strings(
 
 /** double-diffractive : A + B -> X + X */
 bool StringProcess::next_DDiff() {
-  NpartFinal = 0;
-  NpartString[0] = 0;
-  NpartString[1] = 0;
+  NpartFinal_ = 0;
+  NpartString_[0] = 0;
+  NpartString_[1] = 0;
   final_state.clear();
 
   int ntry = 0;
@@ -376,19 +386,19 @@ bool StringProcess::next_DDiff() {
     const double QTry = Random::normal(0., sigma_qperp_ / std::sqrt(2.));
     const double QTrn = std::sqrt(QTrx * QTrx + QTry * QTry);
     // evaluate the lightcone momentum transfer
-    const double QPos = -QTrn * QTrn / (2. * xfracB * PNegB);
-    const double QNeg = QTrn * QTrn / (2. * xfracA * PPosA);
+    const double QPos = -QTrn * QTrn / (2. * xfracB * PNegB_);
+    const double QNeg = QTrn * QTrn / (2. * xfracA * PPosA_);
     // compute four-momentum of string 1
     threeMomentum =
-        evecBasisAB_[3] * (PPosA + QPos - PNegA - QNeg) / std::sqrt(2.) +
+        evecBasisAB_[3] * (PPosA_ + QPos - PNegA_ - QNeg) / std::sqrt(2.) +
         evecBasisAB_[1] * QTrx + evecBasisAB_[2] * QTry;
-    pstr_com[0] = FourVector((PPosA + QPos + PNegA + QNeg) / std::sqrt(2.),
+    pstr_com[0] = FourVector((PPosA_ + QPos + PNegA_ + QNeg) / std::sqrt(2.),
                              threeMomentum);
     // compute four-momentum of string 2
     threeMomentum =
-        evecBasisAB_[3] * (PPosB - QPos - PNegB + QNeg) / std::sqrt(2.) -
+        evecBasisAB_[3] * (PPosB_ - QPos - PNegB_ + QNeg) / std::sqrt(2.) -
         evecBasisAB_[1] * QTrx - evecBasisAB_[2] * QTry;
-    pstr_com[1] = FourVector((PPosB - QPos + PNegB - QNeg) / std::sqrt(2.),
+    pstr_com[1] = FourVector((PPosB_ - QPos + PNegB_ - QNeg) / std::sqrt(2.),
                              threeMomentum);
     for (int i = 0; i < 2; i++) {
       m_str[i] = pstr_com[i].sqr();
@@ -411,9 +421,9 @@ bool StringProcess::next_DDiff() {
 
 /** non-diffractive */
 bool StringProcess::next_NDiff() {
-  NpartFinal = 0;
-  NpartString[0] = 0;
-  NpartString[1] = 0;
+  NpartFinal_ = 0;
+  NpartString_[0] = 0;
+  NpartString_[1] = 0;
   final_state.clear();
 
   int ntry = 0;
@@ -445,10 +455,10 @@ bool StringProcess::next_NDiff() {
       quarks[1][0] = idqB1;
       quarks[1][1] = idqA2;
     } else {
-      fprintf(stderr,
-              "  StringProcess::next_NDiff : baryonA = %d, baryonB = %d\n",
-              bar_a, bar_b);
-      exit(1);
+      std::stringstream ss;
+      ss << "  StringProcess::next_NDiff : baryonA = " << bar_a <<
+            ", baryonB = " << bar_b;
+      throw std::runtime_error(ss.str());
     }
     // sample the lightcone momentum fraction carried by quarks
     const double xfracA = Random::beta(pow_fquark_alpha_, pow_fquark_beta_);
@@ -458,22 +468,22 @@ bool StringProcess::next_NDiff() {
     const double QTry = Random::normal(0., sigma_qperp_ / std::sqrt(2.));
     const double QTrn = std::sqrt(QTrx * QTrx + QTry * QTry);
     // evaluate the lightcone momentum transfer
-    const double QPos = -QTrn * QTrn / (2. * xfracB * PNegB);
-    const double QNeg = QTrn * QTrn / (2. * xfracA * PPosA);
-    const double dPPos = -xfracA * PPosA - QPos;
-    const double dPNeg = xfracB * PNegB - QNeg;
+    const double QPos = -QTrn * QTrn / (2. * xfracB * PNegB_);
+    const double QNeg = QTrn * QTrn / (2. * xfracA * PPosA_);
+    const double dPPos = -xfracA * PPosA_ - QPos;
+    const double dPNeg = xfracB * PNegB_ - QNeg;
     // compute four-momentum of string 1
     ThreeVector threeMomentum =
-        evecBasisAB_[3] * (PPosA + dPPos - PNegA - dPNeg) / std::sqrt(2.) +
+        evecBasisAB_[3] * (PPosA_ + dPPos - PNegA_ - dPNeg) / std::sqrt(2.) +
         evecBasisAB_[1] * QTrx + evecBasisAB_[2] * QTry;
-    pstr_com[0] = FourVector((PPosA + dPPos + PNegA + dPNeg) / std::sqrt(2.),
+    pstr_com[0] = FourVector((PPosA_ + dPPos + PNegA_ + dPNeg) / std::sqrt(2.),
                              threeMomentum);
     m_str[0] = pstr_com[0].sqr();
     // compute four-momentum of string 2
     threeMomentum =
-        evecBasisAB_[3] * (PPosB - dPPos - PNegB + dPNeg) / std::sqrt(2.) -
+        evecBasisAB_[3] * (PPosB_ - dPPos - PNegB_ + dPNeg) / std::sqrt(2.) -
         evecBasisAB_[1] * QTrx - evecBasisAB_[2] * QTry;
-    pstr_com[1] = FourVector((PPosB - dPPos + PNegB - dPNeg) / std::sqrt(2.),
+    pstr_com[1] = FourVector((PPosB_ - dPPos + PNegB_ - dPNeg) / std::sqrt(2.),
                              threeMomentum);
     for (int i = 0; i < 2; i++) {
       m_str[i] = pstr_com[i].sqr();
@@ -498,9 +508,9 @@ bool StringProcess::next_NDiff() {
 bool StringProcess::next_BBbarAnn() {
   const std::array<FourVector, 2> ustrlab = {ucomAB_, ucomAB_};
 
-  NpartFinal = 0;
-  NpartString[0] = 0;
-  NpartString[1] = 0;
+  NpartFinal_ = 0;
+  NpartString_[0] = 0;
+  NpartString_[1] = 0;
   final_state.clear();
 
   PdgCode baryon = PDGcodes_[0], antibaryon = PDGcodes_[1];
@@ -530,14 +540,14 @@ bool StringProcess::next_BBbarAnn() {
    * nothing happens */
   if (no_combinations) {
     for (int i = 0; i < 2; i++) {
-      NpartString[i] = 1;
+      NpartString_[i] = 1;
       ParticleData new_particle(ParticleType::find(PDGcodes_[i]));
       new_particle.set_4momentum(plab_[i]);
       new_particle.set_cross_section_scaling_factor(1.);
       new_particle.set_formation_time(0.);
       final_state.push_back(new_particle);
     }
-    NpartFinal = NpartString[0] + NpartString[1];
+    NpartFinal_ = NpartString_[0] + NpartString_[1];
     return true;
   }
 
@@ -588,12 +598,12 @@ bool StringProcess::next_BBbarAnn() {
       const int nfrag = fragment_string(
           remaining_quarks[i], remaining_antiquarks[i], mstr[i], evec, false);
       if (nfrag <= 0) {
-        NpartString[i] = 0;
+        NpartString_[i] = 0;
         return false;
       }
-      NpartString[i] = append_final_state(ustrlab[i], evec);
+      NpartString_[i] = append_final_state(ustrlab[i], evec);
     }
-    NpartFinal = NpartString[0] + NpartString[1];
+    NpartFinal_ = NpartString_[0] + NpartString_[1];
     return true;
   }
 
@@ -601,7 +611,7 @@ bool StringProcess::next_BBbarAnn() {
 }
 
 void StringProcess::make_orthonormal_basis() {
-  const double pabscomAB = pCM(sqrtsAB_, massA, massB);
+  const double pabscomAB = pCM(sqrtsAB_, massA_, massB_);
   if (std::abs(pcom_[0].x3()) < (1. - 1.0e-8) * pabscomAB) {
     double ex, ey, et;
     double theta, phi;
@@ -640,13 +650,13 @@ void StringProcess::make_orthonormal_basis() {
 }
 
 void StringProcess::compute_incoming_lightcone_momenta() {
-  PPosA =
+  PPosA_ =
       (pcom_[0].x0() + evecBasisAB_[3] * pcom_[0].threevec()) / std::sqrt(2.);
-  PNegA =
+  PNegA_ =
       (pcom_[0].x0() - evecBasisAB_[3] * pcom_[0].threevec()) / std::sqrt(2.);
-  PPosB =
+  PPosB_ =
       (pcom_[1].x0() + evecBasisAB_[3] * pcom_[1].threevec()) / std::sqrt(2.);
-  PNegB =
+  PNegB_ =
       (pcom_[1].x0() - evecBasisAB_[3] * pcom_[1].threevec()) / std::sqrt(2.);
 }
 

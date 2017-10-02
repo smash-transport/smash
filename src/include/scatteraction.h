@@ -348,7 +348,7 @@ class ScatterAction : public Action {
   void resonance_formation();
 
   /** Pointer to interface class for strings */
-  StringProcess* string_process_ = nullptr; 
+  StringProcess* string_process_ = nullptr;
 };
 
 }  // namespace Smash

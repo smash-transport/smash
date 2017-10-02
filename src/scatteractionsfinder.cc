@@ -151,7 +151,9 @@ ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
                                                time_until_collision, isotropic_,
                                                string_formation_time_);
   }
-  act->set_string_interface(string_process_interface_.get());
+  if (strings_switch_) {
+    act->set_string_interface(string_process_interface_.get());
+  }
   return act;
 }
 
