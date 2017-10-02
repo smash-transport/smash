@@ -303,6 +303,40 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   return true;
 }
 
+bool StringProcess::make_final_state_2strings(
+                           const std::array<std::array<int, 2>, 2> &quarks,
+                           const std::array<FourVector, 2>  &pstr_com,
+                           const std::array<double, 2> &m_str) {
+  const FourVector pstr1lab = pstr_com[0].LorentzBoost(-vcomAB_);
+  const FourVector pstr2lab = pstr_com[1].LorentzBoost(-vcomAB_);
+  const std::array<FourVector, 2> ustr_com = {pstr_com[0] / m_str[0],
+                                              pstr_com[1] / m_str[1]},
+                                  ustr_lab = {pstr1lab / m_str[0],
+                                              pstr2lab / m_str[1]};
+  for (int i = 0; i < 2; i++) {
+    /* determine direction in which string 1 is stretched.
+     * this is set to be same with the three-momentum of string
+     * in the center of mass frame. */
+    const ThreeVector mom = pstr_com[i].threevec();
+    const FourVector  pnull(mom.abs(), mom);
+    const FourVector prs = pnull.LorentzBoost(ustr_com[i].velocity());
+    ThreeVector evec = prs.threevec() / prs.threevec().abs();
+    // perform fragmentation and add particles to final_state.
+    int nfrag = fragment_string(quarks[i][0], quarks[i][1], m_str[i], evec, false);
+    if (nfrag <=0) {
+      NpartString[i] = 0;
+      return false;
+    }
+    NpartString[i] = append_final_state(ustr_lab[i], evec);
+    assert(nfrag == NpartString[i]);
+  }
+  if ((NpartString[0] > 0) && (NpartString[1] > 0)) {
+    NpartFinal = NpartString[0] + NpartString[1];
+    return true;
+  }
+  return false;
+}
+
 /** double-diffractive : A + B -> X + X */
 bool StringProcess::next_DDiff() {
   NpartFinal = 0;
@@ -355,37 +389,8 @@ bool StringProcess::next_DDiff() {
   if (!found_mass[0] || !found_mass[1]) {
     return false;
   }
-  const FourVector pstr1lab = pstr_com[0].LorentzBoost(-vcomAB_);
-  const FourVector pstr2lab = pstr_com[1].LorentzBoost(-vcomAB_);
-
-  const std::array<FourVector, 2> ustr_com = {pstr_com[0] / m_str[0],
-                                              pstr_com[1] / m_str[1]},
-                                  ustr_lab = {pstr1lab / m_str[0],
-                                              pstr2lab / m_str[1]};
-  for (int i = 0; i < 2; i++) {
-    /* determine direction in which string 1 is stretched.
-     * this is set to be same with the three-momentum of string
-     * in the center of mass frame. */
-    const ThreeVector mom = pstr_com[i].threevec();
-    const FourVector pnull(mom.abs(), mom);
-    const FourVector prs = pnull.LorentzBoost(ustr_com[i].velocity());
-    ThreeVector evec = prs.threevec() / prs.threevec().abs();
-    // perform fragmentation and add particles to final_state
-    int nfrag = fragment_string(quarks[i][0], quarks[i][1], m_str[i], evec, false);
-    if (nfrag <= 0) {
-      NpartString[i] = 0;
-      return false;
-    }
-    NpartString[i] = append_final_state(ustr_lab[i], evec);
-    assert(nfrag == NpartString[i]);
-  }
-
-  if ((NpartString[0] > 0) && (NpartString[1] > 0)) {
-    NpartFinal = NpartString[0] + NpartString[1];
-    return true;
-  }
-
-  return false;
+  const bool success = make_final_state_2strings(quarks, pstr_com, m_str);
+  return success;
 }
 
 /** non-diffractive */
@@ -463,36 +468,8 @@ bool StringProcess::next_NDiff() {
   if (!found_mass[0] || !found_mass[1]) {
     return false;
   }
-  const FourVector pstr1lab = pstr_com[0].LorentzBoost(-vcomAB_);
-  const FourVector pstr2lab = pstr_com[1].LorentzBoost(-vcomAB_);
-  const std::array<FourVector, 2> ustr_com = {pstr_com[0] / m_str[0],
-                                              pstr_com[1] / m_str[1]},
-                                  ustr_lab = {pstr1lab / m_str[0],
-                                              pstr2lab / m_str[1]};
-  for (int i = 0; i < 2; i++) {
-    /* determine direction in which string 1 is stretched.
-     * this is set to be same with the three-momentum of string
-     * in the center of mass frame. */
-    const ThreeVector mom = pstr_com[i].threevec();
-    const FourVector  pnull(mom.abs(), mom);
-    const FourVector prs = pnull.LorentzBoost(ustr_com[i].velocity());
-    ThreeVector evec = prs.threevec() / prs.threevec().abs();
-    // perform fragmentation and add particles to final_state.
-    int nfrag = fragment_string(quarks[i][0], quarks[i][1], m_str[i], evec, false);
-    if (nfrag <=0) {
-      NpartString[i] = 0;
-      return false;
-    }
-    NpartString[i] = append_final_state(ustr_lab[i], evec);
-    assert(nfrag == NpartString[i]);
-  }
-
-  if ((NpartString[0] > 0) && (NpartString[1] > 0)) {
-    NpartFinal = NpartString[0] + NpartString[1];
-    return true;
-  }
-
-  return false;
+  const bool success = make_final_state_2strings(quarks, pstr_com, m_str);
+  return success;
 }
 
 /** baryon-antibaryon annihilation */
@@ -599,9 +576,6 @@ bool StringProcess::next_BBbarAnn() {
   }
 
   return false;
-}
-
-void StringProcess::make_incoming_com_momenta(){
 }
 
 void StringProcess::make_orthonormal_basis(){

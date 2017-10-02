@@ -151,8 +151,6 @@ class StringProcess {
    * \param gamma gamma factor of the center of mass.
    */
   void init(const ParticleList &incoming, double tcoll, double gamma);
-  /** boost the momenta of incoming particles into the center of mass frame. */
-  void make_incoming_com_momenta();
   /**
    * compute three orthonormal basis vectors in the center of mass frame
    * such that one vector is along with the three-momentum of particle A.
@@ -164,6 +162,17 @@ class StringProcess {
    * as that of the three-momentum of particle A.
    */
   void compute_incoming_lightcone_momenta();
+  /**
+   * Prepare kinematics of two strings, fragment them and append to final_state
+   * \param quarks pdg ids of string ends
+   * \param pstr_com 4-momenta of strings in the C.o.m. frame
+   * \param m_str masses of strings
+   * \return whether fragmentations and final state creation was successful
+   */
+  bool make_final_state_2strings(
+     const std::array<std::array<int, 2>, 2> &quarks,
+     const std::array<FourVector, 2>  &pstr_com,
+     const std::array<double, 2> &m_str);
   /**
    * Single-diffractive process
    * is based on single pomeron exchange described in \iref{Ingelman:1984ns}.
