@@ -167,12 +167,12 @@ class StringProcess {
   /**
    * Single-diffractive process
    * is based on single pomeron exchange described in \iref{Ingelman:1984ns}.
-   * \param channel specifies which hadron to excite into a string.
-   * channel = 1 : A + B -> A + X
-   * channel = 2 : A + B -> X + B
+   * \param is_AB_to_AX specifies which hadron to excite into a string.
+   * true : A + B -> A + X
+   * false : A + B -> X + B
    * \return whether the process is successfully implemented.
    */
-  bool next_SDiff(int channel);
+  bool next_SDiff(bool is_AB_to_AX);
   /**
    * Double-diffractive process ( A + B -> X + X )
    * is similar to the single-diffractive process,
