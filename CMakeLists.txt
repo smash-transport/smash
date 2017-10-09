@@ -56,7 +56,12 @@ mark_as_advanced(CMAKE_CXX_FLAGS_PROFILING CMAKE_C_FLAGS_PROFILING CMAKE_EXE_LIN
 
 # Set the relevant generic compiler flags (optimisation + warnings)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Wmissing-declarations -Wpointer-arith -Wshadow -Wuninitialized -Winit-self -Wundef -Wcast-align -Wformat=2 -Wold-style-cast -Werror=switch -std=c++11 -mfpmath=sse")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Wmissing-declarations -Wpointer-arith -Wshadow -Wuninitialized -Winit-self -Wundef -Wcast-align -Wformat=2 -Wold-style-cast -Werror=switch -Wlogical-op -std=c++11 -mfpmath=sse")
+# Other interesting warnings:
+# -Wnull-dereference (GCC 6)
+# -Wrestrict (GCC 7)
+# -Wduplicated-branches (GCC 7)
+# -Wduplicated-cond (GCC 6)
 
 # Tell the compiler to ignore errno setting of math functions. This can help the compiler
 # considerably in optimizing mathematical expressions.
