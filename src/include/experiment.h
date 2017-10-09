@@ -349,11 +349,6 @@ class Experiment : public ExperimentBase {
   const ExpansionProperties metric_;
 
   /**
-   * This indicates whether string fragmentation is switched on.
-   */
-  const bool strings_switch_;
-
-  /**
    * This indicates whether dileptons are switched on.
    */
   const bool dileptons_switch_;
