@@ -792,9 +792,6 @@ bool StringProcess::next_BBbarAnn() {
   return false;
 }
 
-void StringProcess::make_incoming_com_momenta(){
-}
-
 void StringProcess::make_orthonormal_basis(){
   const double pabscomAB = pCM(sqrtsAB_, massA, massB);
   if (std::abs(pcom_[0].x3()) < (1. - 1.0e-8) * pabscomAB) {

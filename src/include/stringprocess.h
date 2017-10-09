@@ -151,8 +151,6 @@ class StringProcess {
    * \param gamma gamma factor of the center of mass.
    */
   void init(const ParticleList &incoming, double tcoll, double gamma);
-  /** boost the momenta of incoming particles into the center of mass frame. */
-  void make_incoming_com_momenta();
   /**
    * compute three orthonormal basis vectors in the center of mass frame
    * such that one vector is along with the three-momentum of particle A.
