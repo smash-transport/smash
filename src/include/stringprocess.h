@@ -277,7 +277,7 @@ class StringProcess {
 
   /// Easy setter of Pythia Vec4 from SMASH
   Pythia8::Vec4 set_Vec4(double energy, const ThreeVector &mom) {
-    return Pythia8::Vec4(energy, mom.x1(), mom.x2(), mom.x3());
+    return Pythia8::Vec4(mom.x1(), mom.x2(), mom.x3(), energy);
   }
 
   /**
