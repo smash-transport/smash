@@ -145,16 +145,17 @@ double TwoBodyDecaySemistable::rho(double mass) const {
   if (tabulation_ == nullptr) {
     /* TODO(weil): Move this lazy init to a global initialization function,
       * in order to avoid race conditions in multi-threading. */
-    const double tabulation_interval =
-        std::max(2., 10. * particle_types_[1]->width_at_pole());
+    const ParticleTypePtr res = particle_types_[1];
+    const double tabulation_interval = std::max(2., 10. * res->width_at_pole());
+    const double m_stable = particle_types_[0]->mass();
+    const double mres_min = res->min_mass_kinematic();
+
     tabulation_ = make_unique<Tabulation>(
         threshold(), tabulation_interval, num_tab_pts, [&](double sqrts) {
-          return integrate(particle_types_[1]->min_mass_kinematic(),
-                           sqrts - particle_types_[0]->mass(), [&](double m) {
-                             return integrand_rho_Manley_1res(
-                                 sqrts, m, particle_types_[0]->mass(),
-                                 particle_types_[1], L_);
-                           });
+          const double mres_max = sqrts - m_stable;
+          return integrate(mres_min, mres_max, [&](double m) {
+            return integrand_rho_Manley_1res(sqrts, m, m_stable, res, L_);
+          });
         });
   }
   return tabulation_->get_value_linear(mass);
@@ -198,20 +199,24 @@ double TwoBodyDecayUnstable::rho(double mass) const {
   if (tabulation_ == nullptr) {
     /* TODO(weil): Move this lazy init to a global initialization function,
       * in order to avoid race conditions in multi-threading. */
-    const double m1_min = particle_types_[0]->min_mass_kinematic();
-    const double m2_min = particle_types_[1]->min_mass_kinematic();
-    const double sum_gamma = particle_types_[0]->width_at_pole() +
-                             particle_types_[1]->width_at_pole();
+    const ParticleTypePtr r1 = particle_types_[0];
+    const ParticleTypePtr r2 = particle_types_[1];
+    const double m1_min = r1->min_mass_kinematic();
+    const double m2_min = r2->min_mass_kinematic();
+    const double sum_gamma = r1->width_at_pole() + r2->width_at_pole();
     const double tab_interval = std::max(2., 10. * sum_gamma);
+
     tabulation_ = make_unique<Tabulation>(
         m1_min + m2_min, tab_interval, num_tab_pts, [&](double sqrts) {
-          const auto result = integrate2d(
-              m1_min, sqrts - m2_min, m2_min, sqrts - m1_min,
-              [&](double m1, double m2) {
-                return integrand_rho_Manley_2res(
-                    sqrts, m1, m2, particle_types_[0], particle_types_[1], L_);
-              });
-          return result.value();
+          const double m1_max = sqrts - m2_min;
+          const double m2_max = sqrts - m1_min;
+
+          const double result =
+              integrate2d(m1_min, m1_max, m2_min, m2_max, [&](double m1,
+                                                              double m2) {
+                return integrand_rho_Manley_2res(sqrts, m1, m2, r1, r2, L_);
+              }).value();
+          return result;
         });
   }
   return tabulation_->get_value_linear(mass);
