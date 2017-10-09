@@ -107,7 +107,7 @@ int StringProcess::append_final_state(const FourVector &uString,
       pythia_id = (Random::uniform_int(0, 1) == 0) ? 311 : -311;
     }
     PdgCode pdg = PdgCode::from_decimal(pythia_id);
-    if (!fragments[ipyth].pdg.is_hadron()) {
+    if (!pdg.is_hadron()) {
       throw std::invalid_argument(
           "StringProcess::append_final_state warning :"
           " particle is not meson or baryon.");
@@ -732,7 +732,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
   const double E1 = std::sqrt(m1 * m1 + pCMquark * pCMquark);
   const double E2 = std::sqrt(m2 * m2 + pCMquark * pCMquark);
 
-  ThreeVector direction;
+  ThreeVector direction = sign_direction * evecLong;
   if (random_rotation) {
     Angles phitheta;
     phitheta.distribute_isotropically();
