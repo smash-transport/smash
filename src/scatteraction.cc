@@ -749,10 +749,10 @@ void ScatterAction::string_excitation_inter() {
     while (!isnext) {
       switch (process_type_) {
         case ProcessType::StringSDiffAX:
-          isnext = string_process_->next_SDiff(1);
+          isnext = string_process_->next_SDiff(true);
           break;
         case ProcessType::StringSDiffXB:
-          isnext = string_process_->next_SDiff(2);
+          isnext = string_process_->next_SDiff(false);
           break;
         case ProcessType::StringDDiffXX:
           isnext = string_process_->next_DDiff();

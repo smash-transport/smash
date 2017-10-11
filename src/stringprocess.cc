@@ -158,17 +158,17 @@ int StringProcess::append_final_state(const FourVector &uString,
   } else if (bstring == 3 || bstring == -3) {  // baryonic string
     // The first baryon in forward direction
     int i = 0;
-    while (i < nfrag && fragments[i].pdg.is_meson()) {
+    while (i < nfrag && 3 * fragments[i].pdg.baryon_number() != bstring) {
       i++;
     }
     fragments[i].xtotfac = 2. / 3.;
     fragments[i].is_leading = true;
     // The most backward meson
     i = nfrag - 1;
-    while (i >= 0 && fragments[i].pdg.is_baryon()) {
+    while (i >= 0 && 3 * fragments[i].pdg.baryon_number() == bstring) {
       i--;
     }
-    fragments[i].xtotfac = 0.5;
+    fragments[i].xtotfac = fragments[i].pdg.is_baryon() ? 1. / 3. : 0.5;
     fragments[i].is_leading = true;
   } else {
     throw std::invalid_argument(
