@@ -99,7 +99,12 @@ void ScatterAction::generate_final_state() {
     if (proc->get_type() != ProcessType::Elastic) {
       new_particle.set_4position(middle_point);
     }
-    new_particle.boost_momentum(-beta_cm());
+    if ((proc->get_type() != ProcessType::StringSDiffAX) &&
+        (proc->get_type() != ProcessType::StringSDiffXB) &&
+        (proc->get_type() != ProcessType::StringDDiffXX) &&
+        (proc->get_type() != ProcessType::StringNDiff)) {
+      new_particle.boost_momentum(-beta_cm());
+    }
   }
 }
 
