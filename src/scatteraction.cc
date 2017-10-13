@@ -74,7 +74,7 @@ void ScatterAction::generate_final_state() {
       break;
     case ProcessType::String:
       /* string excitation */
-      string_excitation();
+      string_excitation_pythia();
       break;
     case ProcessType::StringSDiffAX:
       /* string excitation single diffractive to AX */
@@ -84,7 +84,7 @@ void ScatterAction::generate_final_state() {
       /* string excitation single diffractive to XX */
     case ProcessType::StringNDiff:
       /* string excitation non-diffractive */
-      string_excitation_inter();
+      string_excitation_urqmd();
       break;
     default:
       throw InvalidScatterAction(
@@ -99,12 +99,7 @@ void ScatterAction::generate_final_state() {
     if (proc->get_type() != ProcessType::Elastic) {
       new_particle.set_4position(middle_point);
     }
-    if ((proc->get_type() != ProcessType::StringSDiffAX) &&
-        (proc->get_type() != ProcessType::StringSDiffXB) &&
-        (proc->get_type() != ProcessType::StringDDiffXX) &&
-        (proc->get_type() != ProcessType::StringNDiff)) {
-      new_particle.boost_momentum(-beta_cm());
-    }
+    new_particle.boost_momentum(-beta_cm());
   }
 }
 
@@ -545,7 +540,7 @@ void ScatterAction::resonance_formation() {
 
 /* This function will generate outgoing particles in CM frame
  * from a hard process. */
-void ScatterAction::string_excitation() {
+void ScatterAction::string_excitation_pythia() {
   assert(incoming_particles_.size() == 2);
   const auto &log = logger<LogArea::Pythia>();
   // Disable doubleing point exception trap for Pythia
@@ -741,7 +736,7 @@ void ScatterAction::string_excitation() {
 /* This function will generate outgoing particles in CM frame
  * from a hard process.
  * The way to excite strings is based on the UrQMD model */
-void ScatterAction::string_excitation_inter() {
+void ScatterAction::string_excitation_urqmd() {
   assert(incoming_particles_.size() == 2);
   const auto &log = logger<LogArea::Pythia>();
   // Disable doubleing point exception trap for Pythia

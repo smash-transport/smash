@@ -290,11 +290,11 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   const FourVector pstrXcom(std::sqrt(pabscomHX_sqr + massX * massX),
                             -cm_momentum);
 
-  const FourVector pstrHlab = pstrHcom.LorentzBoost(-vcomAB_);
-  const FourVector pstrXlab = pstrXcom.LorentzBoost(-vcomAB_);
+  //const FourVector pstrHlab = pstrHcom.LorentzBoost(-vcomAB_);
+  //const FourVector pstrXlab = pstrXcom.LorentzBoost(-vcomAB_);
 
   const FourVector ustrXcom = pstrXcom / massX;
-  const FourVector ustrXlab = pstrXlab / massX;
+  //const FourVector ustrXlab = pstrXlab / massX;
   /* determine direction in which the string is stretched.
    * this is set to be same with the three-momentum of string
    * in the center of mass frame. */
@@ -308,12 +308,12 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
     NpartString_[0] = 0;
     return false;
   }
-  NpartString_[0] = append_final_state(ustrXlab, evec);
+  NpartString_[0] = append_final_state(ustrXcom, evec);
 
   NpartString_[1] = 1;
   PdgCode hadron_code = is_AB_to_AX ? PDGcodes_[0] : PDGcodes_[1];
   ParticleData new_particle(ParticleType::find(hadron_code));
-  new_particle.set_4momentum(pstrHlab);
+  new_particle.set_4momentum(pstrHcom);
   new_particle.set_cross_section_scaling_factor(1.);
   new_particle.set_formation_time(0.);
   final_state.push_back(new_particle);
@@ -326,12 +326,12 @@ bool StringProcess::make_final_state_2strings(
     const std::array<std::array<int, 2>, 2> &quarks,
     const std::array<FourVector, 2> &pstr_com,
     const std::array<double, 2> &m_str) {
-  const FourVector pstr1lab = pstr_com[0].LorentzBoost(-vcomAB_);
-  const FourVector pstr2lab = pstr_com[1].LorentzBoost(-vcomAB_);
+  //const FourVector pstr1lab = pstr_com[0].LorentzBoost(-vcomAB_);
+  //const FourVector pstr2lab = pstr_com[1].LorentzBoost(-vcomAB_);
   const std::array<FourVector, 2> ustr_com = {pstr_com[0] / m_str[0],
-                                              pstr_com[1] / m_str[1]},
-                                  ustr_lab = {pstr1lab / m_str[0],
-                                              pstr2lab / m_str[1]};
+                                              pstr_com[1] / m_str[1]};
+  //const std::array<FourVector, 2> ustr_lab = {pstr1lab / m_str[0],
+  //                                            pstr2lab / m_str[1]};
   for (int i = 0; i < 2; i++) {
     /* determine direction in which string 1 is stretched.
      * this is set to be same with the three-momentum of string
@@ -347,7 +347,7 @@ bool StringProcess::make_final_state_2strings(
       NpartString_[i] = 0;
       return false;
     }
-    NpartString_[i] = append_final_state(ustr_lab[i], evec);
+    NpartString_[i] = append_final_state(ustr_com[i], evec);
     assert(nfrag == NpartString_[i]);
   }
   if ((NpartString_[0] > 0) && (NpartString_[1] > 0)) {
@@ -511,7 +511,9 @@ bool StringProcess::next_NDiff() {
 
 /** baryon-antibaryon annihilation */
 bool StringProcess::next_BBbarAnn() {
-  const std::array<FourVector, 2> ustrlab = {ucomAB_, ucomAB_};
+  //const std::array<FourVector, 2> ustrlab = {ucomAB_, ucomAB_};
+  const std::array<FourVector, 2> ustrcom = {FourVector(1.,0.,0.,0.),
+                                             FourVector(1.,0.,0.,0.)};
 
   NpartFinal_ = 0;
   NpartString_[0] = 0;
@@ -547,7 +549,7 @@ bool StringProcess::next_BBbarAnn() {
     for (int i = 0; i < 2; i++) {
       NpartString_[i] = 1;
       ParticleData new_particle(ParticleType::find(PDGcodes_[i]));
-      new_particle.set_4momentum(plab_[i]);
+      new_particle.set_4momentum(pcom_[i]);
       new_particle.set_cross_section_scaling_factor(1.);
       new_particle.set_formation_time(0.);
       final_state.push_back(new_particle);
@@ -606,7 +608,7 @@ bool StringProcess::next_BBbarAnn() {
         NpartString_[i] = 0;
         return false;
       }
-      NpartString_[i] = append_final_state(ustrlab[i], evec);
+      NpartString_[i] = append_final_state(ustrcom[i], evec);
     }
     NpartFinal_ = NpartString_[0] + NpartString_[1];
     return true;

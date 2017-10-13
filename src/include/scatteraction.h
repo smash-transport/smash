@@ -313,11 +313,11 @@ class ScatterAction : public Action {
   void inelastic_scattering();
 
   /** Perform the string excitation and decay via Pythia. */
-  void string_excitation();
+  void string_excitation_pythia();
 
   /** Todo(ryu): document better - it is not really UrQMD-based, isn't it?
    *  Perform the UrQMD-based string excitation and decay */
-  void string_excitation_inter();
+  void string_excitation_urqmd();
 
   /**
    * \ingroup logging
