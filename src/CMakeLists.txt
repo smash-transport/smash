@@ -108,6 +108,7 @@ set(smash_src
         particles.cc
         particletype.cc
         pdgcode.cc
+        photoncrosssections.cc
         potentials.cc
         processbranch.cc
         propagation.cc
