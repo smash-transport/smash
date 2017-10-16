@@ -22,14 +22,10 @@ namespace Smash {
  * \ingroup modus
  * ListModus: Provides a modus for running SMASH on any external particle list,
  * for example as an afterburner calculations for hybrid codes
-*
-*Particle-list is given with data format in OSCAR2013, it's the same as the
-output in build/data/{eventid}/particles.oscar
-*The detailed information is as follows:
+ *
+ * For configuring see \ref input_modi_list_.
 *
 *#!OSCAR2013 particle_lists SMASH-githash t x y z mass p0 px py pz pdg
-ID
-# Units: fm fm fm fm GeV GeV GeV GeV GeV none none
 *
 * Since SMASH is searching for collisions in computational frame time 't',
 * all particles need to be at the same time. If this is not the case in
@@ -40,25 +36,7 @@ ID
 * are set to zero during the time, where the particle will just propagate
 * on a straight line again to appear at the formation_time into the system.  
 *
-* To use this modus, chose
-* \code
-* General:
-*      MODUS: List
-* \endcode
-* in the configuration file.
-*
-* Options for ListModus go in the "Modi"→"List" section of the
-* configuration:
-*
-* \code
-* Modi:
-*      List:
-*              # definitions here
-* \endcode
-*
-* The following configuration options are understood:
-* \ref input_modi_list_
-*/
+ */
 class ListModus : public ModusDefault {
  public:
   /* default constructor with probable values */

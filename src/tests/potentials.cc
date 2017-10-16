@@ -80,7 +80,9 @@ TEST(potential_gradient) {
 
   // analytical gradient
   const ParticleType &proton = ParticleType::find(0x2212);
-  analit_grad = pot->potential_gradient(r, P, proton);
+  auto tmp = pot->potential_gradient(r, P);
+  std::cout << "Grads:" << tmp.first << " " << tmp.second << std::endl;
+  analit_grad = tmp.first + tmp.second;
   // numerical gradient
   const double U = pot->potential(r, P, proton);
   dr = ThreeVector(1.e-4, 0.0, 0.0);
@@ -189,12 +191,12 @@ TEST(propagation_in_test_potential) {
       return U0_ / (1.0 + std::exp(r.x1() / d_));
     }
 
-    ThreeVector potential_gradient(
-        const ThreeVector &r, const ParticleList & /*plist*/,
-        const ParticleType & /*acts_on*/) const override {
+    std::pair<ThreeVector, ThreeVector> potential_gradient(
+        const ThreeVector &r, const ParticleList &) const override {
       const double tmp = std::exp(r.x1() / d_);
-      return ThreeVector(-U0_ / d_ * tmp / ((1.0 + tmp) * (1.0 + tmp)), 0.0,
-                         0.0);
+      return std::make_pair(
+        ThreeVector(-U0_ / d_ * tmp / ((1.0 + tmp) * (1.0 + tmp)), 0.0, 0.0),
+        ThreeVector(0.0, 0.0, 0.0));
     }
 
     bool use_skyrme() const override { return true; }

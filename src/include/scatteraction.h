@@ -148,6 +148,8 @@ class ScatterAction : public Action {
 
   double raw_weight_value() const override;
 
+  double partial_weight() const override;
+
   /** Add all possible subprocesses for this action object. */
   virtual void add_all_processes(double elastic_parameter, bool two_to_one,
                                  bool two_to_two, double low_snn_cut,
@@ -253,9 +255,6 @@ class ScatterAction : public Action {
     return CollisionBranchList();
   }
 
-  /** Determine the total energy in the center-of-mass frame,
-   * i.e. sqrt of Mandelstam s.  */
-  double sqrt_s() const override;
   /**
    * \ingroup exception
    * Thrown when ScatterAction is called to perform with unknown ProcessType.
@@ -308,6 +307,9 @@ class ScatterAction : public Action {
 
   /** Total cross section */
   double total_cross_section_;
+
+  /** Partial cross-section to the chosen outgoing channel */
+  double partial_cross_section_;
 
   /** Do this collision isotropically. */
   bool isotropic_ = false;

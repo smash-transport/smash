@@ -14,7 +14,6 @@
 
 #include <boost/filesystem.hpp>
 
-#include "configuration.h"
 #include "density.h"
 #include "forwarddeclarations.h"
 #include "outputinterface.h"
@@ -28,12 +27,13 @@ namespace Smash {
  */
 class VtkOutput : public OutputInterface {
  public:
-  VtkOutput(const bf::path &path, Configuration &&conf);
+  VtkOutput(const bf::path &path, std::string name);
   ~VtkOutput();
 
   void at_eventstart(const Particles &particles,
                      const int event_number) override;
-  void at_eventend(const Particles &particles, const int event_number) override;
+  void at_eventend(const Particles &particles, const int event_number,
+                   double impact_parameter) override;
   void at_intermediate_time(const Particles &particles, const Clock &clock,
                             const DensityParameters &dens_param) override;
 

@@ -310,6 +310,16 @@ class PdgCode {
         return false;
     }
   }
+  /// Is this a Xi(1321)?
+  inline bool is_xi1321() const {
+    const auto abs_code = std::abs(code());
+    return (abs_code == pdg::Xi_z) || (abs_code == pdg::Xi_m);
+  }
+  /// Is this a Omega(1672)?
+  inline bool is_Omega1672() const {
+    const auto abs_code = std::abs(code());
+    return (abs_code == pdg::Omega_m);
+  }
   /// Is this a kaon (K+, K-, K0, Kbar0)?
   inline bool is_kaon() const {
     const auto abs_code = std::abs(code());
@@ -446,9 +456,9 @@ class PdgCode {
    *
    */
   std::array<int, 3> quark_content() const {
-    std::array<int, 3> result = { static_cast<int>(digits_.n_q1_),
-                                  static_cast<int>(digits_.n_q2_),
-                                  static_cast<int>(digits_.n_q3_)};
+    std::array<int, 3> result = {static_cast<int>(digits_.n_q1_),
+                                 static_cast<int>(digits_.n_q2_),
+                                 static_cast<int>(digits_.n_q3_)};
     if (is_hadron()) {
       // Antibaryons
       if (digits_.n_q1_ != 0 && digits_.antiparticle_) {
@@ -465,7 +475,7 @@ class PdgCode {
           // Like pi-
           if (digits_.antiparticle_) {
             result[1] = -result[1];
-          // Like pi+
+            // Like pi+
           } else {
             result[2] = -result[2];
           }
