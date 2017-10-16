@@ -21,7 +21,7 @@ namespace Smash {
 /**
  * \ingroup modus
  * ListModus: Provides a modus for running SMASH on any external particle list,
- * for example afterburner calculations for hybrid codes
+ * for example as an afterburner calculations for hybrid codes
 *
 *Particle-list is given with data format in OSCAR2013, it's the same as the
 output in build/data/{eventid}/particles.oscar
@@ -36,7 +36,9 @@ ID
 * the list provided, the particles will be propagated backwards on
 * straight lines ("anti-freestreaming"). To avoid unphysical interactions
 * of these particles, the back-propagated particles receive a
-* formation_time and zero cross_section_scaling_factor.
+* formation_time and zero cross_section_scaling_factor. The cross-sections 
+* are set to zero during the time, where the particle will just propagate
+* on a straight line again to appear at the formation_time into the system.  
 *
 * To use this modus, chose
 * \code
