@@ -312,8 +312,8 @@ void Experiment<Modus>::create_output(std::string format, std::string content,
     log.error("Root output requested, but Root support not compiled in");
 #endif
   } else if (format == "Binary") {
-    if (content == "Collisions" ||
-        content == "Dileptons" || content == "Photons") {
+    if (content == "Collisions" || content == "Dileptons" ||
+        content == "Photons") {
       outputs_.emplace_back(
           make_unique<BinaryOutputCollisions>(output_path, content, out_par));
     } else if (content == "Particles") {
@@ -499,7 +499,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     * The list of possible contents follows:
     *
     * - \b Particles  List of particles at regular time intervals in the
-    *                   computational frame or (optionally) only at the event end.
+    *                 computational frame or (optionally) only at the event end.
     *   - Available formats: \ref format_oscar_particlelist,
     *      \ref format_binary_, \ref format_root, \ref format_vtk
     * - \b Collisions List of interactions: collisions, decays, box wall
@@ -716,8 +716,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
                                                     LatticeUpdate::AtOutput);
     }
   } else if (printout_lattice_td_) {
-    log.error("If you want Thermodynamic VTK output"
-              ", configure a lattice for it.");
+    log.error(
+        "If you want Thermodynamic VTK output, configure a lattice for it.");
   }
 
   // Create forced thermalizer
@@ -1287,7 +1287,7 @@ void Experiment<Modus>::final_output(const int evt_num) {
                << interactions_total_ - wall_actions_total_;
     // Check if there are unformed particles
     int unformed_particles_count = 0;
-    for (const auto & particle : particles_) {
+    for (const auto &particle : particles_) {
       if (particle.formation_time() > end_time_) {
         unformed_particles_count++;
       }

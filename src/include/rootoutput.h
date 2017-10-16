@@ -90,7 +90,7 @@ class Particles;
 class RootOutput : public OutputInterface {
  public:
   RootOutput(const bf::path &path, std::string name,
-             const OutputParameters& out_par);
+             const OutputParameters &out_par);
   ~RootOutput();
 
   void at_eventstart(const Particles &particles,
@@ -110,8 +110,8 @@ class RootOutput : public OutputInterface {
   TTree *collisions_tree_;
   void particles_to_tree(const Particles &particles);
   void collisions_to_tree(const ParticleList &incoming,
-                          const ParticleList &outgoing,
-                          const double weight, const double partial_weight);
+                          const ParticleList &outgoing, const double weight,
+                          const double partial_weight);
   // Counts number of output in a given event
   int output_counter_ = 0;
   int current_event_ = 0;
@@ -141,8 +141,8 @@ class RootOutput : public OutputInterface {
    * always a compromise between safety and speed.*/
   int autosave_frequency_;
 
- /* Basic initialization routine, creating the TTree objects
-   * for particles and collisions. */
+  /* Basic initialization routine, creating the TTree objects
+    * for particles and collisions. */
   void init_trees();
 };
 

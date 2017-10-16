@@ -199,9 +199,7 @@ double ScatterAction::gamma_cm() const {
   return (1. / std::sqrt(1.0 - beta_cm().sqr()));
 }
 
-double ScatterAction::mandelstam_s() const {
-  return total_momentum().sqr();
-}
+double ScatterAction::mandelstam_s() const { return total_momentum().sqr(); }
 
 double ScatterAction::cm_momentum() const {
   const double m1 = incoming_particles_[0].effective_mass();
@@ -550,12 +548,11 @@ void ScatterAction::string_excitation() {
     /*
      * sort new_intermediate_particles according to z-Momentum
      */
-    std::sort(new_intermediate_particles.begin(),
-              new_intermediate_particles.end(),
-              [&](ParticleData i, ParticleData j) {
-                return std::abs(i.momentum().x3()) >
-                       std::abs(j.momentum().x3());
-              });
+    std::sort(
+        new_intermediate_particles.begin(), new_intermediate_particles.end(),
+        [&](ParticleData i, ParticleData j) {
+          return std::abs(i.momentum().x3()) > std::abs(j.momentum().x3());
+        });
     for (ParticleData data : new_intermediate_particles) {
       log.debug("Particle momenta after sorting: ", data.momentum());
       /* The hadrons are not immediately formed, currently a formation time of

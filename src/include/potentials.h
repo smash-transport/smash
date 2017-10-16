@@ -80,8 +80,8 @@ class Potentials {
    *            to density will be ignored.
    **/
   VIRTUAL_FOR_TESTS
-  std::pair<ThreeVector, ThreeVector> potential_gradient(const ThreeVector &r,
-                                 const ParticleList &plist) const;
+  std::pair<ThreeVector, ThreeVector> potential_gradient(
+      const ThreeVector &r, const ParticleList &plist) const;
 
   /// Is Skyrme potential on?
   VIRTUAL_FOR_TESTS

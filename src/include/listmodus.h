@@ -32,9 +32,9 @@ namespace Smash {
 * the list provided, the particles will be propagated backwards on
 * straight lines ("anti-freestreaming"). To avoid unphysical interactions
 * of these particles, the back-propagated particles receive a
-* formation_time and zero cross_section_scaling_factor. The cross-sections 
+* formation_time and zero cross_section_scaling_factor. The cross-sections
 * are set to zero during the time, where the particle will just propagate
-* on a straight line again to appear at the formation_time into the system.  
+* on a straight line again to appear at the formation_time into the system.
 *
  */
 class ListModus : public ModusDefault {

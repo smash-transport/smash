@@ -132,7 +132,7 @@ void update_momenta(Particles *particles, double dt, const Potentials &pot,
   for (ParticleData &data : *particles) {
     // Only baryons will be affected by the potentials
     if (!data.is_baryon()) {
-       continue;
+      continue;
     }
     const auto scale = pot.force_scale(data.type());
     const ThreeVector r = data.position().threevec();
@@ -155,7 +155,8 @@ void update_momenta(Particles *particles, double dt, const Potentials &pot,
       dUB_dr = tmp.first;
       dUI3_dr = tmp.second;
     }
-    const ThreeVector dU_dr = scale.first * dUB_dr +
+    const ThreeVector dU_dr =
+        scale.first * dUB_dr +
         scale.second * data.type().isospin3_rel() * dUI3_dr;
     log.debug("Update momenta: dU/dr [GeV/fm] = ", dU_dr);
     data.set_4momentum(data.effective_mass(),

@@ -55,8 +55,7 @@ class OutputInterface {
    * \param impact_parameter distance between centers of nuclei in this event.
    *          Only makes sense for collider modus.
    */
-  virtual void at_eventend(const Particles &particles,
-                           const int event_number,
+  virtual void at_eventend(const Particles &particles, const int event_number,
                            double impact_parameter) = 0;
 
   /**

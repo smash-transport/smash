@@ -27,8 +27,10 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
                                            std::string name)
     : OutputInterface(name),
       file_{std::fopen((path / (name + ".oscar" +
-                       ((Format == OscarFormat1999) ? "1999" : "")))
-            .native().c_str(), "w")} {
+                                ((Format == OscarFormat1999) ? "1999" : "")))
+                           .native()
+                           .c_str(),
+                       "w")} {
   /*!\Userguide
    * \page oscar_general_ OSCAR block structure
    * OSCAR outputs are a family of ASCII and binary formats that follow
@@ -106,8 +108,9 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
     std::fprintf(file_.get(), "# Block format:\n");
     std::fprintf(file_.get(), "# nin nout event_number\n");
     std::fprintf(file_.get(), "# id pdg 0 px py pz p0 mass x y z t\n");
-    std::fprintf(file_.get(), "# End of event: 0 0 event_number"
-                              " impact_parameter\n");
+    std::fprintf(file_.get(),
+                 "# End of event: 0 0 event_number"
+                 " impact_parameter\n");
     std::fprintf(file_.get(), "#\n");
   }
 }
@@ -175,14 +178,13 @@ void OscarOutput<Format, Contents>::at_interaction(const Action &action,
                                                    const double density) {
   if (Contents & OscarInteractions) {
     if (Format == OscarFormat2013 || Format == OscarFormat2013Extended) {
-      std::fprintf(
-          file_.get(),
-          "# interaction in %zu out %zu rho %12.7f weight %12.7g"
-          " partial %12.7f type %5i\n",
-          action.incoming_particles().size(),
-          action.outgoing_particles().size(), density,
-          action.raw_weight_value(), action.partial_weight(),
-          static_cast<int>(action.get_type()));
+      std::fprintf(file_.get(),
+                   "# interaction in %zu out %zu rho %12.7f weight %12.7g"
+                   " partial %12.7f type %5i\n",
+                   action.incoming_particles().size(),
+                   action.outgoing_particles().size(), density,
+                   action.raw_weight_value(), action.partial_weight(),
+                   static_cast<int>(action.get_type()));
     } else {
       /* OSCAR line prefix : initial final
        * particle creation: 0 1
@@ -194,8 +196,7 @@ void OscarOutput<Format, Contents>::at_interaction(const Action &action,
       std::fprintf(file_.get(), "%zu %zu %12.7f %12.7f %12.7f %5i\n",
                    action.incoming_particles().size(),
                    action.outgoing_particles().size(), density,
-                   action.raw_weight_value(),
-                   action.partial_weight(),
+                   action.raw_weight_value(), action.partial_weight(),
                    static_cast<int>(action.get_type()));
     }
     for (const auto &p : action.incoming_particles()) {
@@ -434,10 +435,9 @@ void OscarOutput<Format, Contents>::write_particledata(
         " %.9g %s %i %i %i %g %g %i %i %g %s %s\n",
         pos.x0(), pos.x1(), pos.x2(), pos.x3(), data.effective_mass(), mom.x0(),
         mom.x1(), mom.x2(), mom.x3(), data.pdgcode().string().c_str(),
-        data.id(), data.type().charge(),
-        h.collisions_per_particle, data.formation_time(),
-        data.cross_section_scaling_factor(), h.id_process,
-        static_cast<int>(h.process_type), h.time_last_collision,
+        data.id(), data.type().charge(), h.collisions_per_particle,
+        data.formation_time(), data.cross_section_scaling_factor(),
+        h.id_process, static_cast<int>(h.process_type), h.time_last_collision,
         h.p1.string().c_str(), h.p2.string().c_str());
   } else {
     std::fprintf(file_.get(), "%i %s %i %g %g %g %g %g %g %g %g %g\n",
