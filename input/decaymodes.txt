@@ -460,7 +460,8 @@ N(2080)
 0.05   3  N σ
 0.10   0  Δ π
 0.005  2  Λ K  # tuned for Nπ->ΛK
-0.002  0  N φ  # FIXME: correct L?
+0.005  0  N φ  # tuned for p Nb dileptons and pp -> ppKK
+0.001  1  N f₀(980)  # tuned for pp -> ppKK
 # From UrQMD
 
 N(2190)
@@ -471,7 +472,8 @@ N(2190)
 0.09   4  N σ        #  3 - 9 %
 0.34   2  Δ π        # 19 - 31 %
 0.05   4  N(1440) π  # 0
-0.002  0  N φ  # FIXME: correct L?
+0.005  0  N φ  # tuned for p Nb dileptons and pp -> ppKK
+0.001  1  N f₀(980)  # tuned for pp -> ppKK
 # From UrQMD
 
 N(2220)
@@ -480,7 +482,8 @@ N(2220)
 0.17   4  N σ
 0.20   4  Δ π
 #0.000  3  Λ K  # tuned for Nπ->ΛK, FIXME: should be 5
-0.002  1  N φ  # FIXME: correct L?
+0.005  1  N φ  # tuned for p Nb dileptons and pp -> ppKK
+0.001  0  N f₀(980)  # tuned for pp -> ppKK
 # From UrQMD
 
 N(2250)
@@ -490,7 +493,8 @@ N(2250)
 0.20   4  Δ π
 0.05   4  N(1440) π
 0.005  4  Λ K  # tuned for Nπ->ΛK
-0.002  0  N φ  # FIXME: correct L?
+0.005  0  N φ  # tuned for p Nb dileptons and pp -> ppKK
+0.001  1  N f₀(980)  # tuned for pp -> ppKK
 # From UrQMD
 
 #N(2600)
