@@ -128,6 +128,7 @@ set(smash_src
         spheremodus.cc
         stringfunctions.cc
         tabulation.cc
+        tabulationnd.cc
         thermodynamicoutput.cc
         threevector.cc
         tsc.cc
