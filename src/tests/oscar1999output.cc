@@ -73,12 +73,12 @@ TEST(fullhistory_format) {
   out_par.coll_printstartend = true;
   out_par.coll_extended = false;
 
-  std::unique_ptr<OutputInterface> oscfull = create_oscar_output(
-      "Oscar1999", "Collisions", testoutputpath, out_par);
+  std::unique_ptr<OutputInterface> oscfull =
+      create_oscar_output("Oscar1999", "Collisions", testoutputpath, out_par);
   VERIFY(bool(oscfull));
 
-  const bf::path outputfilepath = testoutputpath /
-      "full_event_history.oscar1999";
+  const bf::path outputfilepath =
+      testoutputpath / "full_event_history.oscar1999";
   VERIFY(bf::exists(outputfilepath));
 
   Test::create_smashon_particletypes();
@@ -196,8 +196,8 @@ TEST(particlelist_format) {
   out_par.part_only_final = true;
   out_par.part_extended = false;
 
-  std::unique_ptr<OutputInterface> oscfinal = create_oscar_output(
-      "Oscar1999", "Particles", testoutputpath, out_par);
+  std::unique_ptr<OutputInterface> oscfinal =
+      create_oscar_output("Oscar1999", "Particles", testoutputpath, out_par);
   VERIFY(bool(oscfinal));
 
   const bf::path outputfilepath = testoutputpath / "particle_lists.oscar1999";

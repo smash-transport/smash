@@ -76,8 +76,8 @@ static bool compare_particle(const ParticleData &p, FILE *file) {
   // std::cout << p.id() << " " << id << std::endl;
   // std::cout << p.pdgcode().get_decimal() << " " << pdgcode << std::endl;
   return (p.id() == id) && (p.pdgcode().get_decimal() == pdgcode) &&
-         (pos == p.position()) && (mom == p.momentum() &&
-          charge == p.type().charge());
+         (pos == p.position()) &&
+         (mom == p.momentum() && charge == p.type().charge());
 }
 
 /* Reads and compares particle in case of extended format */
@@ -161,8 +161,8 @@ TEST(fullhistory_format) {
 
   /* Create an instance of binary output */
   std::unique_ptr<BinaryOutputCollisions> bin_output =
-      make_unique<BinaryOutputCollisions>(testoutputpath,
-        "Collisions", output_par);
+      make_unique<BinaryOutputCollisions>(testoutputpath, "Collisions",
+                                          output_par);
   const bf::path collisionsoutputfilepath =
       testoutputpath / "collisions_binary.bin";
   VERIFY(bf::exists(collisionsoutputfilepath));
@@ -247,8 +247,8 @@ TEST(particles_format) {
 
   /* Create an instance of binary output */
   std::unique_ptr<BinaryOutputParticles> bin_output =
-      make_unique<BinaryOutputParticles>(testoutputpath,
-          "Particles", output_par);
+      make_unique<BinaryOutputParticles>(testoutputpath, "Particles",
+                                         output_par);
   VERIFY(bf::exists(testoutputpath / "particles_binary.bin"));
 
   /* create two smashon particles */
@@ -325,8 +325,8 @@ TEST(extended) {
 
   /* Create an instance of binary output */
   std::unique_ptr<BinaryOutputCollisions> bin_output =
-      make_unique<BinaryOutputCollisions>(testoutputpath,
-        "Collisions", output_par);
+      make_unique<BinaryOutputCollisions>(testoutputpath, "Collisions",
+                                          output_par);
   const bf::path collisionsoutputfilepath =
       testoutputpath / "collisions_binary.bin";
   VERIFY(bf::exists(collisionsoutputfilepath));
@@ -371,11 +371,10 @@ TEST(extended) {
 
   COMPARE(std::fread(&buf[0], 1, 4, binF), 4u);  // magic number
   magic.assign(&buf[0], 4);
-  VERIFY(std::fread(&format_version_number,
-           sizeof(format_version_number), 1, binF) == 1);
-  VERIFY(std::fread(&extended_version,
-           sizeof(extended_version), 1, binF) == 1);
-  read_binary(smash_version, binF);          // smash version
+  VERIFY(std::fread(&format_version_number, sizeof(format_version_number), 1,
+                    binF) == 1);
+  VERIFY(std::fread(&extended_version, sizeof(extended_version), 1, binF) == 1);
+  read_binary(smash_version, binF);  // smash version
 
   COMPARE(magic, "SMSH");
   COMPARE(static_cast<int>(format_version_number), current_format_version);
@@ -407,4 +406,3 @@ TEST(extended) {
   VERIFY(!std::fclose(binF));
   VERIFY(!std::remove(filename.c_str()));
 }
-

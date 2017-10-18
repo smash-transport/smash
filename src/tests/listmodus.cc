@@ -15,9 +15,9 @@
 #include <boost/filesystem/fstream.hpp>
 #include <string>
 
+#include "../include/listmodus.h"
 #include "../include/oscaroutput.h"
 #include "../include/particles.h"
-#include "../include/listmodus.h"
 
 using namespace Smash;
 static const double accuracy = 5.e-5;
@@ -28,12 +28,9 @@ TEST(directory_is_created) {
   VERIFY(bf::exists(testoutputpath));
 }
 
-TEST(create_particle_types) {
-  Test::create_smashon_particletypes();
-}
+TEST(create_particle_types) { Test::create_smashon_particletypes(); }
 
-static void compare_fourvector(const FourVector &a,
-                               const FourVector &b) {
+static void compare_fourvector(const FourVector &a, const FourVector &b) {
   COMPARE_ABSOLUTE_ERROR(a.x0(), b.x0(), accuracy);
   COMPARE_ABSOLUTE_ERROR(a.x1(), b.x1(), accuracy);
   COMPARE_ABSOLUTE_ERROR(a.x2(), b.x2(), accuracy);
@@ -46,8 +43,8 @@ TEST(list_from_oscar2013_output) {
   out_par.part_only_final = true;
   out_par.part_extended = false;
 
-  std::unique_ptr<OutputInterface> osc2013final = create_oscar_output(
-      "Oscar2013", "Particles", testoutputpath, out_par);
+  std::unique_ptr<OutputInterface> osc2013final =
+      create_oscar_output("Oscar2013", "Particles", testoutputpath, out_par);
   VERIFY(bool(osc2013final));
 
   const bf::path outputfilename = "particle_lists.oscar";
@@ -62,7 +59,7 @@ TEST(list_from_oscar2013_output) {
   }
 
   std::cout << "Initial particles:" << std::endl;
-  for(const auto &p : particles) {
+  for (const auto &p : particles) {
     std::cout << p << std::endl;
   }
 
@@ -92,7 +89,7 @@ TEST(list_from_oscar2013_output) {
   list_modus.initial_conditions(&particles_read, par);
 
   std::cout << "Particles from list modus:" << std::endl;
-  for(const auto &p : particles_read) {
+  for (const auto &p : particles_read) {
     std::cout << p << std::endl;
   }
 
@@ -112,7 +109,7 @@ TEST(list_from_oscar2013_output) {
 
   COMPARE(particles_read.size(), particles.size());
   ParticleList p_init = particles.copy_to_vector();
-  ParticleList p_fin  = particles_read.copy_to_vector();
+  ParticleList p_fin = particles_read.copy_to_vector();
   for (size_t i = 0; i < N; i++) {
     ParticleData a = p_init.back();
     ParticleData b = p_fin.back();

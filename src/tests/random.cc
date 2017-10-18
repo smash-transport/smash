@@ -105,16 +105,15 @@ TEST(cauchy) {
 TEST(beta) {
   const double a = 1.1;
   const double b = 2.3;
-  test_distribution(
-      N_TEST, 0.001, [&]() { return Random::beta(a, b); },
-      [&](double x) { return std::pow(x, a - 1.0) *
-                             std::pow(1.0 - x, b - 1.0); });
+  test_distribution(N_TEST, 0.001, [&]() { return Random::beta(a, b); },
+                    [&](double x) {
+                      return std::pow(x, a - 1.0) * std::pow(1.0 - x, b - 1.0);
+                    });
 }
 
 TEST(beta_a0) {
   const double xmin = 0.01;
   const double b = 0.5;
-  test_distribution(
-      N_TEST, 0.001, [&]() { return Random::beta_a0(xmin, b); },
-      [&](double x) { return std::pow(1.0 - x, b) / x; });
+  test_distribution(N_TEST, 0.001, [&]() { return Random::beta_a0(xmin, b); },
+                    [&](double x) { return std::pow(1.0 - x, b) / x; });
 }
