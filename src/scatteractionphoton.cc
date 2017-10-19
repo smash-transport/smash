@@ -274,7 +274,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
             t1 = mandelstam_t[1];
             t2 = mandelstam_t[0];
 
-            xsection = xs_object.xs_pi_pi_rho0(m1, m2, m3, t1, t2, s, mpion, mrho);
+            xsection = xs_object.xs_pi_pi_rho0(s);
            
             process_list.push_back(make_unique<CollisionBranch>(
                 *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
@@ -307,7 +307,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
            t1 = mandelstam_t[1];
            t2 = mandelstam_t[0];
 
-           xsection = xs_object.xs_pi0_pi_rho(m1, m2, m3, t1, t2, s, mpion, mrho);
+           //xsection = xs_object.xs_pi0_pi_rho(m1, m2, m3, t1, t2, s, mpion, mrho);
 
              process_list.push_back(make_unique<CollisionBranch>(
                 *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
@@ -1141,7 +1141,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
           t1 = mandelstam_t[1];
           t2 = mandelstam_t[0];
 
-          xsection = xs_object.xs_pi0_rho0_pi0(m1, m2, m3, t1, t2, s, mpion, mrho);
+          //xsection = xs_object.xs_pi0_rho0_pi0(m1, m2, m3, t1, t2, s, mpion, mrho);
 
           process_list.push_back(make_unique<CollisionBranch>(
           *part_out, *photon_out, xsection, ProcessType::TwoToTwo));

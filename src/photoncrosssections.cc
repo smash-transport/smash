@@ -9,16 +9,22 @@
 
 #include "include/photoncrosssections.h"
 
-// using float_t = float;
+// using double = float;
+using namespace Smash;
 
-float_t PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho0_pi0(
-    const float_t m1, const float_t m2, const float_t m3, const float_t t1,
-    const float_t t2, const float_t s, const float_t mpion,
-    const float_t mrho) {
+double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho0_pi0(
+    const double s) {
   using std::atan;
   using std::pow;
   using std::sqrt;
-  const float_t xs =
+
+  const double mpion = m_pion_, mrho = m_rho_;
+  auto t_mandelstam = get_t_range(sqrt(s), m_pion_, m_rho_, m_pion_, 0.0);
+
+  const double t1 = t_mandelstam[1];
+  const double t2 = t_mandelstam[0];
+
+  const double xs =
       to_mb * 1 / 3.0 *
       (pow(Const, 2) * pow(g_POR, 4) *
        ((pow(pow(m_omega, 2) - s, 2) *
@@ -129,14 +135,13 @@ float_t PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho0_pi0(
   return xs;
 }
 
-float_t PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi(
-    const float_t m1, const float_t m2, const float_t m3, const float_t t1,
-    const float_t t2, const float_t s, const float_t mpion,
-    const float_t mrho) {
+double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi(
+    const double m1, const double m2, const double m3, const double t1,
+    const double t2, const double s, const double mpion, const double mrho) {
   using std::atan;
   using std::pow;
   using std::sqrt;
-  const float_t xs =
+  const double xs =
       to_mb * 1 / 3.0 *
       (0.0024868 * pow(Const, 2) * pow(g_POR, 4) *
        ((pow(m_omega, 8) +
@@ -195,14 +200,13 @@ float_t PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi(
   return xs;
 }
 
-float_t PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0(
-    const float_t m1, const float_t m2, const float_t m3, const float_t t1,
-    const float_t t2, const float_t s, const float_t mpion,
-    const float_t mrho) {
+double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0(
+    const double m1, const double m2, const double m3, const double t1,
+    const double t2, const double s, const double mpion, const double mrho) {
   using std::atan;
   using std::pow;
   using std::sqrt;
-  const float_t xs =
+  const double xs =
       to_mb * 1 / 3.0 *
       (0.0024867959858108648 * pow(Const, 2) * pow(g_POR, 4) *
        (pow(mpion, 8) * (t2 - t1) +
@@ -230,16 +234,15 @@ float_t PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0(
   return xs;
 }
 
-float_t PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho0_pi(
-    const float_t m1, const float_t m2, const float_t m3, const float_t t1,
-    const float_t t2, const float_t s, const float_t mpion,
-    const float_t mrho) {
+double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho0_pi(
+    const double m1, const double m2, const double m3, const double t1,
+    const double t2, const double s, const double mpion, const double mrho) {
   using std::atan;
   using std::pow;
   using std::sqrt;
-  const float_t m_pi = mpion;
+  const double m_pi = mpion;
 
-  const float_t xs =
+  const double xs =
       to_mb * 1 / 3.0 *
       (pow(Const, 2) * pow(ghat, 4) *
        ((pow(eta1 - eta2, 2) *
@@ -1383,14 +1386,20 @@ float_t PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho0_pi(
   return xs;
 }
 
-float_t PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi_rho0(
-    const float_t m1, const float_t m2, const float_t m3, const float_t t1,
-    const float_t t2, const float_t s, const float_t mpion,
-    const float_t mrho) {
+double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi_rho0(
+    const double s) {
   using std::atan;
   using std::pow;
   using std::sqrt;
-  const float_t xs =
+  const double s_sqrt = sqrt(s);
+  auto mandelstam_t = get_t_range(s_sqrt, m_pion_, m_pion_, m_rho_, 0.);
+
+  double t1 = mandelstam_t[1];
+  double t2 = mandelstam_t[0];
+
+  const double mpion = m_pion_, mrho = m_rho_;
+
+  const double xs =
       to_mb *
       ((pow(Const, 2) * pow(ghat, 4) *
         ((0.5 * pow(-2. + delta, 2) * pow(mpion, 2) * (0. - 1. * t2)) /
@@ -3707,14 +3716,17 @@ float_t PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi_rho0(
   return xs;
 }
 
-float_t PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_pi_rho(
-    const float_t m1, const float_t m2, const float_t m3, const float_t t1,
-    const float_t t2, const float_t s, const float_t mpion,
-    const float_t mrho) {
+double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_pi_rho(
+    const double s) {
   using std::atan;
   using std::pow;
   using std::sqrt;
-  const float_t xs =
+  const double mpion = m_pion_, mrho = m_rho_;
+  auto t_mandelstam = get_t_range(s, m_pion_, m_pion_, m_rho_, 0.0);
+
+  const double t1 = t_mandelstam[1];
+  const double t2 = t_mandelstam[0];
+  const double xs =
       to_mb *
       (-(pow(Const, 2) * pow(ghat, 4) *
          ((0.03125 * pow(eta1 - 1. * eta2, 2) *

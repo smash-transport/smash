@@ -8,6 +8,9 @@
  */
 
 #include <cmath>
+#include "pdgcode.h"
+#include "particletype.h"
+#include "kinematics.h"
 
 
 // calculation method for the cross sections
@@ -24,46 +27,45 @@ class PhotonCrossSection <ComputationMethod::Analytic>
 {
     
 public: 
-    using float_t = float;
 
-    // could be static 
     // TODO: Clean up parameters. Some are unused. 
-    float_t xs_pi_pi_rho0(const float_t m1, const float_t m2, 
-        const float_t m3, const float_t t1, const float_t t2, const float_t s,
-        const float_t mpion, const float_t mrho);
-    float_t xs_pi0_pi_rho(const float_t m1, const float_t m2, 
-        const float_t m3, const float_t t1, const float_t t2, const float_t s,
-        const float_t mpion, const float_t mrho);
-    float_t xs_pi_rho0_pi(const float_t m1, const float_t m2, 
-        const float_t m3, const float_t t1, const float_t t2, const float_t s,
-        const float_t mpion, const float_t mrho);
-    float_t xs_pi_rho_pi0(const float_t m1, const float_t m2, 
-        const float_t m3, const float_t t1, const float_t t2, const float_t s,
-        const float_t mpion, const float_t mrho);
-    float_t xs_pi0_rho_pi(const float_t m1, const float_t m2, 
-        const float_t m3, const float_t t1, const float_t t2, const float_t s,
-        const float_t mpion, const float_t mrho);
-    float_t xs_pi0_rho0_pi0(const float_t m1, const float_t m2, 
-        const float_t m3, const float_t t1, const float_t t2, const float_t s,
-        const float_t mpion, const float_t mrho);
+    
+
+    static double xs_pi_pi_rho0(const double s);
+        
+    static double xs_pi0_pi_rho(const double s);
+    static double xs_pi0_rho0_pi0(const double s);
+    
+    double xs_pi_rho0_pi(const double m1, const double m2, 
+        const double m3, const double t1, const double t2, const double s,
+        const double mpion, const double mrho);
+    double xs_pi_rho_pi0(const double m1, const double m2, 
+        const double m3, const double t1, const double t2, const double s,
+        const double mpion, const double mrho);
+    double xs_pi0_rho_pi(const double m1, const double m2, 
+        const double m3, const double t1, const double t2, const double s,
+        const double mpion, const double mrho);
     
     
         // and so on
     
 private:
 
-    const float_t to_mb = 0.3894;
-    const float_t Const = 0.059;
-    const float_t g_POR = 11.93;
-    const float_t ma1 = 1.26;
-    const float_t ghat = 6.4483;
-    const float_t eta1 = 2.3920;
-    const float_t eta2 = 1.9430;
-    const float_t delta = -0.6426;
-    const float_t C4 = -0.14095;
-    const float_t Gammaa1 = 0.4;
-    const float_t Pi = M_PI;
-    const float_t m_omega = 0.783;
+    constexpr static double to_mb = 0.3894;
+    constexpr static double Const = 0.059;
+    constexpr static double g_POR = 11.93;
+    constexpr static double ma1 = 1.26;
+    constexpr static double ghat = 6.4483;
+    constexpr static double eta1 = 2.3920;
+    constexpr static double eta2 = 1.9430;
+    constexpr static double delta = -0.6426;
+    constexpr static double C4 = -0.14095;
+    constexpr static double Gammaa1 = 0.4;
+    constexpr static double Pi = M_PI;
+    constexpr static double m_omega = 0.783;
+
+    constexpr static double m_pion_ = 0.139;
+    constexpr static double m_rho_ = 0.775;
     
 
 };
