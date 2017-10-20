@@ -4449,3 +4449,54 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_pi_rho(
 
   return xs;
 }
+
+double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi0_rho0_pi0(
+    const double s, const double t) {
+
+        const double m_pi = m_pion_, m_rho = m_rho_;
+  double diff_xsection =
+      1 / 3.0 *
+      (pow(Const, 2) * pow(g_POR, 4) *
+       (pow(m_omega, 4) * pow(s, 4) + 4 * pow(m_omega, 4) * pow(s, 3) * t -
+        4 * pow(m_omega, 2) * pow(s, 4) * t +
+        10 * pow(m_omega, 4) * pow(s, 2) * pow(t, 2) -
+        16 * pow(m_omega, 2) * pow(s, 3) * pow(t, 2) +
+        5 * pow(s, 4) * pow(t, 2) + 4 * pow(m_omega, 4) * s * pow(t, 3) -
+        16 * pow(m_omega, 2) * pow(s, 2) * pow(t, 3) +
+        10 * pow(s, 3) * pow(t, 3) + pow(m_omega, 4) * pow(t, 4) -
+        4 * pow(m_omega, 2) * s * pow(t, 4) + 5 * pow(s, 2) * pow(t, 4) +
+        pow(m_pi, 8) * pow(-2 * pow(m_omega, 2) + s + t, 2) -
+        2 * pow(m_pi, 6) * pow(m_rho, 2) *
+            (2 * pow(m_omega, 4) + pow(s, 2) + pow(t, 2) -
+             2 * pow(m_omega, 2) * (s + t)) +
+        pow(m_rho, 4) *
+            (2 * pow(s, 2) * pow(t, 2) - 2 * pow(m_omega, 2) * s * t * (s + t) +
+             pow(m_omega, 4) * (pow(s, 2) + pow(t, 2))) -
+        2 * pow(m_rho, 2) *
+            (3 * pow(s, 2) * pow(t, 2) * (s + t) -
+             3 * pow(m_omega, 2) * s * t * pow(s + t, 2) +
+             pow(m_omega, 4) * (pow(s, 3) + 2 * pow(s, 2) * t +
+                                2 * s * pow(t, 2) + pow(t, 3))) +
+        pow(m_pi, 4) *
+            (-2 * pow(m_rho, 2) * (pow(m_omega, 2) - s) *
+                 (pow(m_omega, 2) - t) * (s + t) -
+             8 * pow(m_omega, 2) * s * t * (s + t) +
+             4 * pow(m_omega, 4) * (pow(s, 2) + pow(t, 2)) -
+             2 * s * t * (pow(s, 2) - 6 * s * t + pow(t, 2)) +
+             pow(m_rho, 4) * (2 * pow(m_omega, 4) + pow(s, 2) + pow(t, 2) -
+                              2 * pow(m_omega, 2) * (s + t))) -
+        2 * pow(m_pi, 2) *
+            (2 * (s + t) * pow(-2 * s * t + pow(m_omega, 2) * (s + t), 2) +
+             pow(m_rho, 4) * (-4 * pow(m_omega, 2) * s * t +
+                              pow(m_omega, 4) * (s + t) + s * t * (s + t)) -
+             pow(m_rho, 2) *
+                 (-10 * pow(m_omega, 2) * s * t * (s + t) +
+                  2 * pow(m_omega, 4) * (pow(s, 2) + 3 * s * t + pow(t, 2)) +
+                  s * t * (pow(s, 2) + 8 * s * t + pow(t, 2)))))) /
+      (128. * Pi * pow(pow(m_omega, 2) - s, 2) *
+       (pow(pow(m_pi, 2) - pow(m_rho, 2), 2) -
+        2 * (pow(m_pi, 2) + pow(m_rho, 2)) * s + pow(s, 2)) *
+       pow(pow(m_omega, 2) - t, 2));
+
+  return diff_xsection;
+}

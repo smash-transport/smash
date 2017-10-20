@@ -35,6 +35,8 @@ public:
         
     static double xs_pi0_pi_rho(const double s);
     static double xs_pi0_rho0_pi0(const double s);
+
+    static double xs_diff_pi0_rho0_pi0(const double s, const double t);
     
     double xs_pi_rho0_pi(const double m1, const double m2, 
         const double m3, const double t1, const double t2, const double s,
