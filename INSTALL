@@ -47,18 +47,19 @@ Run it with specific settings:
 
 
 Size of the code
----------------------
+----------------
 
-Please note that after compilation the 'smash' directory (including 'build') 
-has a size of about 4GB. If disk space is restricted, one suggestion is to 
-just run 
+Please note that after compilation the 'smash' directory (including 'build')
+has a size of about 4GB. If disk space is restricted, one suggestion is to
+just run
 
     make smash
-    
+
 which will only compile the main code. As a default the unit tests are also
 compiled which leads to a large portion of the disk space consumption. It is
-still recommended to run the unit tests at least once, when compiling in 
-a new environment to ensure that everything works as expected. 
+still recommended to run the unit tests at least once, when compiling in
+a new environment to ensure that everything works as expected.
+
 
 Changing the compiler
 ---------------------
