@@ -12,7 +12,7 @@ name = args.name
 
 with open(source, 'r') as f:
     reaction = f.readline().lstrip('#initial ').rstrip('\n')
-    for _ in range(2):
+    for _ in range(3):
         f.readline()
     d = np.loadtxt(f)
 
