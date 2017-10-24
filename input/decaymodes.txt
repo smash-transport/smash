@@ -587,21 +587,21 @@ N(2250)
 
 Σ(1670)  # 1(1.5-)
 0.15   0   N K̅  # 0.07-0.13
-0.15   0   Λ π  # 0.05-0.15, tuned for K- n -> Lambda pi- cross section
+0.18   0   Λ π  # 0.05-0.15, tuned for K- n -> Lambda pi- cross section
 0.45   0   Σ π  # 0.3-0.6, tuned for K- n -> Sigma- pi0, K- n -> Lambda pi-, K- p -> Sigma+ pi- cross section
-0.15  0   Σ(1385) π   # not measured
-0.15  1   Λ(1520) π   # not measured
+0.13  0   Σ(1385) π   # not measured
+0.14  1   Λ(1520) π   # not measured
 
 Σ(1750)  # 1(2.5-)
 0.40  0  N K̅       # 0.1-0.4, tuned for K- p cross section
-0.14  0  Λ π       # >0
+0.14  0  Λ π       # >0, tuned for K- n -> Lambda pi- cross section
 0.08  0  Σ π       # <0.08
 0.45  0  Σ η       # 0.15-0.55
 0.10  0  N K̅*(892)  # 0.04-0.12
 
 Σ(1775)  # 1(2.5-)
 0.45   0   N K̅         # 0.37-0.43, tuned for K- p cross section
-0.13   0   Λ π         # 0.14-0.2, tuned for K- n -> Lambda pi- cross section
+0.16   0   Λ π         # 0.14-0.20, tuned for K- n -> Lambda pi-, K- p -> Lambda pi0 cross section
 0.05   0   Σ π         # 0.02-0.05, tuned for K- n -> Sigma- pi0
 0.12   0   Σ(1385) π   # 0.08-0.12
 0.23   1   Λ(1520) π   # 0.17-0.23
@@ -609,10 +609,10 @@ N(2250)
 Σ(1915)  # 1(2.5+)
 0.20   1   N K̅        # 0.05-0.15, tuned for K- n cross section
 0.07   1   Λ π        # >0, tuned for K- n -> Lambda pi- cross section
-0.12   1   Σ π        # >0, tuned for K- n -> Sigma- pi0
+0.09   1   Σ π        # >0, tuned for K- n -> Sigma- pi0, K- n -> Sigma0 pi-
 0.05   1   Σ(1385) π  # <0.05
 #^ We use the similar values as UrQMD here.
-0.56  1   Λ(1520) π   # not measured
+0.59  1   Λ(1520) π   # not measured
 
 Σ(1940)  # 1(1.5-)
 0.20  0   N K̅         # <0.2
@@ -634,9 +634,9 @@ N(2250)
 0.05   1   N K̅*(892)  # <0.05
 
 Σ(2250)  # 1(? ?)
-0.2    1   N K̅        # 0.1, tuned for K-n cross section
-0.4    1   Λ π        # >0
-0.4    1   Σ π        # >0
+0.20   1   N K̅        # 0.1, tuned for K-n cross section
+0.15   1   Λ π        # >0, tuned for K- p -> Lambda pi0 cross section
+0.65   1   Σ π        # >0
 
 #################### Λ baryons ####################
 
@@ -653,7 +653,8 @@ N(2250)
 
 Λ(1600)  # 0(0.5+)
 0.30    1    N K̅  # 0.15-0.30
-0.60    1    Σ π  # 0.1-0.6
+0.10    1    Σ π  # 0.1-0.6, tuned for K- p -> Sigma0 pi0
+0.60    1    N K̅*(892)  # not measured
 
 Λ(1670)  # 0(0.5-)
 0.292   0    N K̅  # 0.2-0.3
@@ -671,15 +672,15 @@ N(2250)
 
 Λ(1800)  # 0(0.5-)
 0.40    0   N K̅        # 0.25-0.40
-0.13    0   Σ π        # >0
-0.13    0   Σ(1385) π  # >0
+0.06    0   Σ π        # >0, tuned for K- p -> Sigma0 pi0
+0.17    0   Σ(1385) π  # >0
 0.11    0   Λ η        # 0.06+-0.05
-0.13    0   N K̅*(892)  # >0
+0.16    0   N K̅*(892)  # >0
 
 Λ(1810)  # 0(0.5+)
 0.34    1   N K̅        # 0.2-0.5
-0.19    1   Σ π        # 0.1-0.3
-0.03    1   Σ(1385) π  # >0
+0.10    1   Σ π        # 0.1-0.3, tuned for K- p -> Sigma0 pi0
+0.12    1   Σ(1385) π  # >0
 0.44    1   N K̅*(892)  # 0.3-0.6
 
 Λ(1820)  # 0(2.5+)
@@ -690,8 +691,8 @@ N(2250)
 
 Λ(1830)  # 0(2.5-)
 0.03    0   N K̅        # 0.03-0.1
-0.35    0   Σ π        # 0.35-0.75
-0.15    0   Σ(1385) π  # >0.15
+0.30    0   Σ π        # 0.35-0.75, tuned for K- p -> Sigma0 pi0
+0.20    0   Σ(1385) π  # >0.15
 0.52    2   Σ(1385) π  # +-6
 
 Λ(1890)  # 0(1.5+)

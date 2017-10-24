@@ -367,7 +367,7 @@ double kplusp_inelastic(double mandelstam_s) {
         make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
   const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
-  return (*kplusp_total_interpolation)(p_lab)-kplusp_elastic(mandelstam_s);
+  return (*kplusp_total_interpolation)(p_lab) - kplusp_elastic(mandelstam_s);
 }
 
 /** K+ n inelastic cross section parametrization.
@@ -384,7 +384,7 @@ double kplusn_inelastic(double mandelstam_s) {
         make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
   const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
-  return (*kplusn_total_interpolation)(p_lab)-kplusn_elastic(mandelstam_s);
+  return (*kplusn_total_interpolation)(p_lab) - kplusn_elastic(mandelstam_s);
 }
 
 /// Calculate and store all isospin ratios for K+ N reactions.
@@ -510,11 +510,13 @@ double kminusp_piplussigmaminus(double sqrts) {
 }
 
 double kminusp_pi0sigma0(double sqrts) {
-  return 0.55 * 0.0508208 / Smash::square(sqrts - 1.38837);
+  // Fit to Landolt-Börnstein instead of UrQMD values
+  return 0.0403364 / Smash::square(sqrts - 1.39830305);
 }
 
 double kminusp_pi0lambda(double sqrts) {
-  return 0.45 * 0.0508208 / Smash::square(sqrts - 1.38837);
+  // Fit to Landolt-Börnstein instead of UrQMD values
+  return 0.05932562 / Smash::square(sqrts - 1.38786692);
 }
 
 // The other channels follow from the paramatriziation with the same strange
