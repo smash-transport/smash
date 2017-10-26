@@ -600,11 +600,11 @@ N(2250)
 0.10  0  N K̅*(892)  # 0.04-0.12
 
 Σ(1775)  # 1(2.5-)
-0.45   0   N K̅         # 0.37-0.43, tuned for K- p cross section
+0.40   0   N K̅         # 0.37-0.43, tuned for K- p cross section
 0.16   0   Λ π         # 0.14-0.20, tuned for K- n -> Lambda pi-, K- p -> Lambda pi0 cross section
 0.05   0   Σ π         # 0.02-0.05, tuned for K- n -> Sigma- pi0
-0.12   0   Σ(1385) π   # 0.08-0.12
-0.23   1   Λ(1520) π   # 0.17-0.23
+0.14   0   Σ(1385) π   # 0.08-0.12
+0.26   1   Λ(1520) π   # 0.17-0.23
 
 Σ(1915)  # 1(2.5+)
 0.20   1   N K̅        # 0.05-0.15, tuned for K- n cross section
@@ -652,9 +652,10 @@ N(2250)
 0.009   0    Λ γ  # 0.0085+-0.0015
 
 Λ(1600)  # 0(0.5+)
-0.30    1    N K̅  # 0.15-0.30
-0.10    1    Σ π  # 0.1-0.6, tuned for K- p -> Sigma0 pi0
-0.60    1    N K̅*(892)  # not measured
+0.15    1    N K̅  # 0.15-0.30, tuned for K- p cross section
+0.10    1    Σ π  # 0.1-0.6, tuned for K- p -> Sigma0 pi0 cross section
+0.45    1    N K̅*(892)  # not measured
+0.30    1    Σ(1385) π  # not measured
 
 Λ(1670)  # 0(0.5-)
 0.292   0    N K̅  # 0.2-0.3

@@ -243,7 +243,7 @@ double kplusn_elastic(double mandelstam_s) {
 
 /** K- p elastic cross section parametrization, PDG data.
  *
- * The PDG data is being interpolated using cubic splines. If more than one
+ * The PDG data is smoothed using the LOWESS algorithm. If more than one
  * cross section was given for one p_lab value, the corresponding cross sections
  * are averaged.
  */
