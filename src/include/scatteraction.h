@@ -133,8 +133,6 @@ class ScatterAction : public Action {
    * local rest frame.
    *
    * Returns the squared distance.
-   *
-   * \fpPrecision Why \c double?
    */
   double transverse_distance_sqr() const;
 
@@ -244,8 +242,6 @@ class ScatterAction : public Action {
    *
    * \return The cross section for the process
    * [initial particle a] + [initial particle b] -> resonance.
-   *
-   * \fpPrecision Why \c double?
    */
   double two_to_one_formation(const ParticleType& type_resonance, double srts,
                               double cm_momentum_sqr);
@@ -268,18 +264,14 @@ class ScatterAction : public Action {
  protected:
   /** Determine the Mandelstam s variable,
    * s = (p_a + p_b)^2 = square of CMS energy.
-   *
-   * \fpPrecision Why \c double?
    */
   double mandelstam_s() const;
   /** Determine the momenta of the incoming particles in the
    * center-of-mass system.
-   * \fpPrecision Why \c double?
    */
   double cm_momentum() const;
   /** Determine the squared momenta of the incoming particles in the
    * center-of-mass system.
-   * \fpPrecision Why \c double?
    */
   double cm_momentum_squared() const;
   /// determine the velocity of the center-of-mass frame in the lab

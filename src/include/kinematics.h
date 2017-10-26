@@ -148,8 +148,6 @@ static inline void check_radicand(double mandelstam_s, double radicand) {
 
 /** Convert mandelstam-s to p_lab in a fixed-target collision.
  * This assumes both particles have the given mass.
- *
- * \fpPrecision Why \c double?
  */
 inline double plab_from_s(double mandelstam_s, double mass) {
   const double radicand = mandelstam_s * (mandelstam_s - 4 * mass * mass);
@@ -162,16 +160,12 @@ inline double plab_from_s(double mandelstam_s, double mass) {
 }
 /** Convert mandelstam-s to p_lab in a fixed-target collision.
  * This assumes both particles have the mass of a nucleon.
- *
- * \fpPrecision Why \c double?
  */
 inline double plab_from_s(double mandelstam_s) {
   return plab_from_s(mandelstam_s, nucleon_mass);
 }
 /** Convert mandelstam-s to p_lab in a fixed-target collision.
  * The mass of the projectile and the mass of the target have to be given.
- *
- * \fpPrecision Why \c double?
  */
 inline double plab_from_s(double mandelstam_s, double m_projectile,
                           double m_target) {
@@ -195,8 +189,6 @@ const double radicand
  * Convert E_kin to mandelstam-s for a fixed-target setup,
  * with a projectile of mass m_P and a kinetic energy e_kin
  * and a target of mass m_T at rest.
- *
- * \fpPrecision Why \c double?
  */
 inline double s_from_Ekin(double e_kin, double m_P, double m_T) {
   return m_P * m_P + m_T * m_T + 2 * m_T * (m_P + e_kin);
@@ -206,8 +198,6 @@ inline double s_from_Ekin(double e_kin, double m_P, double m_T) {
  * Convert p_lab to mandelstam-s for a fixed-target setup,
  * with a projectile of mass m_P and momentum plab
  * and a target of mass m_T at rest.
- *
- * \fpPrecision Why \c double?
  */
 inline double s_from_plab(double plab, double m_P, double m_T) {
   return m_P * m_P + m_T * m_T + 2 * m_T * std::sqrt(m_P * m_P + plab * plab);

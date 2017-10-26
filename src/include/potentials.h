@@ -53,8 +53,6 @@ class Potentials {
    *            point r, \f$ |r-r_i| > r_{cut} \f$ then particle input
    *            to density will be ignored.
    * \param[in] acts_on Type of particle on which potential is going to act
-   *
-   * \fpPrecision Why \c double?
    **/
   VIRTUAL_FOR_TESTS
   double potential(const ThreeVector &r, const ParticleList &plist,
@@ -96,20 +94,16 @@ class Potentials {
    */
   const DensityParameters param_;
 
-  // Skyrme potential on/off
+  /// Skyrme potential on/off
   bool use_skyrme_;
 
-  // Symmetry potential on/off
+  /// Symmetry potential on/off
   bool use_symmetry_;
 
-  /** Parameters of skyrme potentials
-   * \fpPrecision Why \c double?
-   */
+  /** Parameters of skyrme potentials */
   double skyrme_a_, skyrme_b_, skyrme_tau_;
 
-  /** Parameters of symmetry potential
-   * \fpPrecision Why \c double?
-   */
+  /** Parameters of symmetry potential */
   double symmetry_s_;
 };
 

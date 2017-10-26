@@ -89,8 +89,6 @@ class Particles {
    *
    * \note This function may only be called if the list of particles is not
    * empty.
-   *
-   * \fpPrecision Why \c double?
    */
   double time() const {
     assert(!is_empty());

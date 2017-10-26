@@ -39,52 +39,28 @@ double piplusp_high_energy(double mandelstam_s);
 /** pi-p total cross section at high energies */
 double piminusp_high_energy(double mandelstam_s);
 
-/** pi+p elastic cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
+/** pi+p elastic cross section parametrization */
 double piplusp_elastic(double mandelstam_s);
 
-/** pi-p elastic cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
+/** pi-p elastic cross section parametrization */
 double piminusp_elastic(double mandelstam_s);
 
-/** pp elastic cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
+/** pp elastic cross section parametrization */
 double pp_elastic(double mandelstam_s);
 
-/** pp total cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
+/** pp total cross section parametrization */
 double pp_total(double mandelstam_s);
 
-/** np elastic cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
+/** np elastic cross section parametrization */
 double np_elastic(double mandelstam_s);
 
-/** np total cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
+/** np total cross section parametrization */
 double np_total(double mandelstam_s);
 
-/** ppbar elastic cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
+/** ppbar elastic cross section parametrization */
 double ppbar_elastic(double mandelstam_s);
 
-/** ppbar total cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
+/** ppbar total cross section parametrization */
 double ppbar_total(double mandelstam_s);
 
 /** ppbar total cross section parametrization;
@@ -92,67 +68,37 @@ double ppbar_total(double mandelstam_s);
  */
 double ppbar_total(double mandelstam_s, double m_proj, double m_target);
 
-/** K+ p elastic cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
+/** K+ p elastic cross section parametrization */
 double kplusp_elastic(double mandelstam_s);
 
-/** K+ n elastic cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
+/** K+ n elastic cross section parametrization */
 double kplusn_elastic(double mandelstam_s);
 
 /** K+ n charge exchange cross section parametrization. */
 double kplusn_k0p(double mandelstam_s);
 
-/** K- p elastic cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
+/** K- p elastic cross section parametrization */
 double kminusp_elastic(double mandelstam_s);
 
-/** K- n elastic cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
+/** K- n elastic cross section parametrization */
 double kminusn_elastic(double mandelstam_s);
 
-/** K0 p elastic cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
+/** K0 p elastic cross section parametrization */
 double k0p_elastic(double mandelstam_s);
 
-/** K0 n elastic cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
+/** K0 n elastic cross section parametrization */
 double k0n_elastic(double mandelstam_s);
 
-/** Kbar0 p elastic cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
+/** Kbar0 p elastic cross section parametrization */
 double kbar0p_elastic(double mandelstam_s);
 
-/** Kbar0 n elastic cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
+/** Kbar0 n elastic cross section parametrization */
 double kbar0n_elastic(double mandelstam_s);
 
-/** K+ p inelastic cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
+/** K+ p inelastic cross section parametrization */
 double kplusp_inelastic(double mandelstam_s);
 
-/** K+ n inelastic cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
+/** K+ n inelastic cross section parametrization */
 double kplusn_inelastic(double mandelstam_s);
 
 /** Hash a pair of integers.

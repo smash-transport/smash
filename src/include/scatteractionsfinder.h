@@ -40,8 +40,6 @@ class ScatterActionsFinder : public ActionFinderInterface {
 
   /** Determine the collision time of the two particles [fm/c].
    *  Time of the closest approach is taken as collision time.
-   *
-   * \fpPrecision Why \c double?
    */
   static inline double collision_time(const ParticleData &p1,
                                       const ParticleData &p2) {
