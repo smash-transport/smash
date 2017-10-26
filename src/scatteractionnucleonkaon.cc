@@ -207,6 +207,7 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_cross_sections() {
           const auto& type_Kbar_z = ParticleType::find(pdg::Kbar_z);
           const auto& type_Delta_p_bar = ParticleType::find(-pdg::Delta_p);
           const auto& type_Delta_z_bar = ParticleType::find(-pdg::Delta_z);
+          const auto& type_p_bar = ParticleType::find(-pdg::p);
           add_channel(process_list,
                       [&] {
                         return sigma_kplusn *
@@ -223,6 +224,11 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_cross_sections() {
                                                        type_Delta_z_bar);
                       },
                       sqrts, type_K_m, type_Delta_z_bar);
+          add_channel(process_list,
+                      [&] {
+                        return kplusn_k0p(s);
+                      },
+                      sqrts, type_Kbar_z, type_p_bar);
           break;
         }
       }
@@ -256,6 +262,7 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_cross_sections() {
         case pdg::n: {
           const auto& type_K_p = ParticleType::find(pdg::K_p);
           const auto& type_K_z = ParticleType::find(pdg::K_z);
+          const auto& type_p = ParticleType::find(pdg::p);
           const auto& type_Delta_p = ParticleType::find(pdg::Delta_p);
           const auto& type_Delta_z = ParticleType::find(pdg::Delta_z);
           add_channel(process_list,
@@ -272,6 +279,11 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_cross_sections() {
                                                        type_K_p, type_Delta_z);
                       },
                       sqrts, type_K_p, type_Delta_z);
+          add_channel(process_list,
+                      [&] {
+                        return kplusn_k0p(s);
+                      },
+                      sqrts, type_K_z, type_p);
           break;
         }
         case -pdg::p: {
@@ -326,6 +338,7 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_cross_sections() {
         case pdg::p: {
           const auto& type_K_p = ParticleType::find(pdg::K_p);
           const auto& type_K_z = ParticleType::find(pdg::K_z);
+          const auto& type_n = ParticleType::find(pdg::n);
           const auto& type_Delta_p = ParticleType::find(pdg::Delta_p);
           const auto& type_Delta_z = ParticleType::find(pdg::Delta_z);
           add_channel(process_list,
@@ -342,6 +355,13 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_cross_sections() {
                                                        type_K_p, type_Delta_z);
                       },
                       sqrts, type_K_p, type_Delta_z);
+          add_channel(process_list,
+                      [&] {
+                        return kplusn_k0p(s) *
+                               kplusn_ratios.get_ratio(type_nucleon, type_kaon,
+                                                       type_K_p, type_n);
+                      },
+                      sqrts, type_K_p, type_n);
           break;
         }
         case pdg::n: {
@@ -389,6 +409,7 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_cross_sections() {
           const auto& type_Kbar_z = ParticleType::find(pdg::Kbar_z);
           const auto& type_Delta_p_bar = ParticleType::find(-pdg::Delta_p);
           const auto& type_Delta_z_bar = ParticleType::find(-pdg::Delta_z);
+          const auto& type_n_bar = ParticleType::find(-pdg::n);
           add_channel(process_list,
                       [&] {
                         return sigma_kplusp *
@@ -405,6 +426,13 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_cross_sections() {
                                                        type_Delta_z_bar);
                       },
                       sqrts, type_K_m, type_Delta_z_bar);
+          add_channel(process_list,
+                      [&] {
+                        return kplusn_k0p(s) *
+                               kplusn_ratios.get_ratio(type_nucleon, type_kaon,
+                                                       type_K_m, type_n_bar);
+                      },
+                      sqrts, type_K_m, type_n_bar);
           break;
         }
         case -pdg::n: {

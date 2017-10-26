@@ -104,6 +104,9 @@ double kplusp_elastic(double mandelstam_s);
  */
 double kplusn_elastic(double mandelstam_s);
 
+/** K+ n charge exchange cross section parametrization. */
+double kplusn_k0p(double mandelstam_s);
+
 /** K- p elastic cross section parametrization
  *
  * \fpPrecision Why \c double?

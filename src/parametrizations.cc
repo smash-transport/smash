@@ -241,6 +241,13 @@ double kplusn_elastic(double mandelstam_s) {
   return 0.5 * kplusp_elastic(mandelstam_s);
 }
 
+/** K+ n charge exchange cross section parametrization.
+ * sigma(K+n->K+n) = sigma(K+n->K0p) = 0.5 * sigma(K+p->K+p)
+ * Source: \iref{Buss:2011mx}, B.3.8 */
+double kplusn_k0p(double mandelstam_s) {
+  return 0.5 * kplusp_elastic(mandelstam_s);
+}
+
 /** K- p elastic cross section parametrization, PDG data.
  *
  * The PDG data is smoothed using the LOWESS algorithm. If more than one
@@ -384,7 +391,8 @@ double kplusn_inelastic(double mandelstam_s) {
         make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
   const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
-  return (*kplusn_total_interpolation)(p_lab) - kplusn_elastic(mandelstam_s);
+  return (*kplusn_total_interpolation)(p_lab) - kplusn_elastic(mandelstam_s) -
+         kplusn_k0p(mandelstam_s);
 }
 
 /// Calculate and store all isospin ratios for K+ N reactions.
@@ -410,8 +418,8 @@ static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>, double,
     ratios[key] = ratio;
   };
 
-  // All inelastic channels are K+ N -> K Delta -> K pi N, with identical
-  // cross section, weighted by the isospin factor.
+  // All inelastic channels are K+ N -> K Delta -> K pi N or charge exchange,
+  // with identical cross section, weighted by the isospin factor.
   {
     const auto weight1 = isospin_clebsch_gordan_sqr_2to2(
         type_p, type_K_p, type_K_z, type_Delta_pp);
@@ -429,6 +437,15 @@ static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>, double,
 
     add_to_ratios(type_n, type_K_p, type_K_z, type_Delta_p, weight1, weight2);
     add_to_ratios(type_n, type_K_p, type_K_p, type_Delta_z, weight2, weight1);
+  }
+  {
+    const auto weight1 = isospin_clebsch_gordan_sqr_2to2(
+        type_n, type_K_p, type_K_z, type_p);
+    const auto weight2 = isospin_clebsch_gordan_sqr_2to2(
+        type_p, type_K_z, type_K_p, type_n);
+
+    add_to_ratios(type_n, type_K_p, type_K_z, type_p, weight1, weight2);
+    add_to_ratios(type_p, type_K_z, type_K_p, type_n, weight2, weight1);
   }
 
   // K+ and K0 have the same isospin projection, they are assumed to have
