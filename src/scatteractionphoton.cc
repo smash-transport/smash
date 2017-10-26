@@ -67,6 +67,7 @@ void ScatterActionPhoton::generate_final_state() {
   double t = Random::uniform(t1, t2);
   double diff_xsection_max = 0;
   int iteration_number = 0;
+  // Bug: diff_xsection_max set to 0 but then used in comparison
   do {
     t = Random::uniform(t1, t2);
     iteration_number++;
