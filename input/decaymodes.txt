@@ -653,8 +653,8 @@ N(2250)
 
 Λ(1600)  # 0(0.5+)
 0.15    1    N K̅  # 0.15-0.30, tuned for K- p cross section
-0.10    1    Σ π  # 0.1-0.6, tuned for K- p -> Sigma0 pi0 cross section
-0.45    1    N K̅*(892)  # not measured
+0.20    1    Σ π  # 0.1-0.6, tuned for K- p -> Sigma0 pi0, Sigma+ pi- cross section
+0.35    1    N K̅*(892)  # not measured
 0.30    1    Σ(1385) π  # not measured
 
 Λ(1670)  # 0(0.5-)
