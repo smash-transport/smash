@@ -32,7 +32,8 @@ namespace Smash {
 std::unique_ptr<Tabulation> tabulation_pi_pi_rho0 = nullptr;
 std::unique_ptr<Tabulation> tabulation_pi0_pi_rho = nullptr;
 
-void ScatterActionPhoton::generate_final_state() {
+void ScatterActionPhoton::generate_final_state(Particles *particles,
+     const Potentials &pot) {
   /* Decide for a particular final state. */
   const CollisionBranch *proc = choose_channel<CollisionBranch>(
       collision_channels_photons_, cross_section_photons_);
@@ -44,7 +45,7 @@ void ScatterActionPhoton::generate_final_state() {
 
   /* 2->2 inelastic scattering */
   /* Sample the particle momenta in CM system. */
-  const std::pair<double, double> masses = sample_masses();
+  const std::pair<double, double> masses = sample_masses(particles, pot);
   const double m1 = incoming_particles_[0].effective_mass();
   const double m2 = incoming_particles_[1].effective_mass();
   const double m3 = masses.first;

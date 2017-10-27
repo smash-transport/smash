@@ -16,6 +16,7 @@
 
 #include "particles.h"
 #include "pauliblocking.h"
+#include "potentials.h"
 #include "processbranch.h"
 #include "random.h"
 
@@ -113,7 +114,8 @@ class Action {
    * This function selects a subprocess by Monte-Carlo decision and sets up
    * the final-state particles in phase space.
    */
-  virtual void generate_final_state() = 0;
+  virtual void generate_final_state(Particles *particles,
+          const Potentials &pot) = 0;
 
   /**
    * Actually perform the action, e.g. carry out a decay or scattering by
@@ -177,6 +179,12 @@ class Action {
 
   /// determine the total energy in the center-of-mass frame
   double sqrt_s() const { return total_momentum().abs(); }
+
+  /**
+   * Calculate the total kinetic energy of the outgoing particles in
+   * the center of mass frame.
+   */
+  double kinetic_energy_cms(const Particles *particles, const Potentials,pots)
 
   /** Get the interaction point */
   FourVector get_interaction_point();
@@ -257,13 +265,15 @@ class Action {
    *
    * \throws InvalidResonanceFormation
    */
-  virtual std::pair<double, double> sample_masses() const;
+  virtual std::pair<double, double> sample_masses(const Particles *particles,
+          const Potentials &pot) const;
 
   /**
    * Sample final-state angles in general X->2 processes
    * (here: using an isotropical angular distribution).
    */
-  virtual void sample_angles(std::pair<double, double> masses);
+  virtual void sample_angles(std::pair<double, double> masses,
+          Particles *particles, const Potentials &pot);
 
   /**
    * Sample the full 2-body phase-space (masses, momenta, angles)

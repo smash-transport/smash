@@ -102,50 +102,71 @@ void Action::perform(Particles *particles, uint32_t id_process) {
   check_conservation(id_process);
 }
 
-std::pair<double, double> Action::sample_masses() const {
+double Action::kinetic_energy_cms(const Particles *particles,
+       const Potentials &pot) const {
+  // Copy particles before propagation to calculate potentials from them
+  // or scattered inelastically it is gone.
+  const ParticleList plist = particles->copy_to_vector();
+  /* Calculate the potential energies of the incoming and the outgoing
+   * particles. */
+  double potential_incoming = 0.0;
+  for (const auto &p_in : incoming_particles_) {
+       const ThreeVector r = p_in.postion().threevec();
+       potential_incoming += pot.potential(r, plist, p_in);
+  }
+  double potential_outgoing = 0.0;
+  for (const auto &p_out : outgong_particles_) {
+       const ThreeVector r = p_out.postion().threevec();
+       potential_outgoing += pot.potential(r, plist, p_out);
+  }
+  return sqrt_s() + potential_incoming - potential_outgoing;
+}
+
+std::pair<double, double> Action::sample_masses(const Particles *particles,
+     const Potentials &pot) const {
   const ParticleType &t_a = outgoing_particles_[0].type();
   const ParticleType &t_b = outgoing_particles_[1].type();
-
   // start with pole masses
   std::pair<double, double> masses = {t_a.mass(), t_b.mass()};
 
-  const double cms_energy = sqrt_s();
+  const double cms_kin_energy = kinetic_energy_cms(particles, pot);
 
-  if (cms_energy < t_a.min_mass_kinematic() + t_b.min_mass_kinematic()) {
+  if (cms_kin_energy < t_a.min_mass_kinematic() + t_b.min_mass_kinematic()) {
     const std::string reaction = incoming_particles_[0].type().name() +
                                  incoming_particles_[1].type().name() + "→" +
                                  t_a.name() + t_b.name();
     throw InvalidResonanceFormation(
-        reaction + ": not enough energy, " + std::to_string(cms_energy) +
+        reaction + ": not enough energy, " + std::to_string(cms_kin_energy) +
         " < " + std::to_string(t_a.min_mass_kinematic()) + " + " +
         std::to_string(t_b.min_mass_kinematic()));
   }
 
   /* If one of the particles is a resonance, sample its mass. */
   if (!t_a.is_stable() && t_b.is_stable()) {
-    masses.first = t_a.sample_resonance_mass(t_b.mass(), cms_energy);
+    masses.first = t_a.sample_resonance_mass(t_b.mass(), cms_kin_energy);
   } else if (!t_b.is_stable() && t_a.is_stable()) {
-    masses.second = t_b.sample_resonance_mass(t_a.mass(), cms_energy);
+    masses.second = t_b.sample_resonance_mass(t_a.mass(), cms_kin_energy);
   } else if (!t_a.is_stable() && !t_b.is_stable()) {
     // two resonances in final state
-    masses = t_a.sample_resonance_masses(t_b, cms_energy);
+    masses = t_a.sample_resonance_masses(t_b, cms_kin_energy);
   }
 
   return masses;
 }
 
-void Action::sample_angles(std::pair<double, double> masses) {
+void Action::sample_angles(std::pair<double, double> masses,
+     Particle *particles, const Potentials &pot) {
   const auto &log = logger<LogArea::Action>();
 
   ParticleData *p_a = &outgoing_particles_[0];
   ParticleData *p_b = &outgoing_particles_[1];
 
-  const double cms_energy = sqrt_s();
+  const double cms_kin_energy = kinetic_energy_cms(particles, pot);
 
-  const double pcm = pCM(cms_energy, masses.first, masses.second);
+  const double pcm = pCM(cms_kin_energy, masses.first, masses.second);
   if (!(pcm > 0.0)) {
     log.warn("Particle: ", p_a->pdgcode(), " radial momentum: ", pcm);
-    log.warn("Etot: ", cms_energy, " m_a: ", masses.first,
+    log.warn("Ektot: ", cms_kin_energy, " m_a: ", masses.first,
              " m_b: ", masses.second);
   }
   /* Here we assume an isotropic angular distribution. */
@@ -158,13 +179,14 @@ void Action::sample_angles(std::pair<double, double> masses) {
   log.debug("p_a: ", *p_a, "\np_b: ", *p_b);
 }
 
-void Action::sample_2body_phasespace() {
+void Action::sample_2body_phasespace(Particles *particles,
+     const Potentials &pot) {
   /* This function only operates on 2-particle final states. */
   assert(outgoing_particles_.size() == 2);
   // first sample the masses
-  const std::pair<double, double> masses = sample_masses();
+  const std::pair<double, double> masses = sample_masses(particles, pot);
   // after the masses are fixed (and thus also pcm), sample the angles
-  sample_angles(masses);
+  sample_angles(masses, particles, pot);
 }
 
 void Action::check_conservation(const uint32_t id_process) const {
