@@ -136,11 +136,14 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho0_pi0(
 }
 
 double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi(
-    const double m1, const double m2, const double m3, const double t1,
-    const double t2, const double s, const double mpion, const double mrho) {
+   const double s) {
   using std::atan;
   using std::pow;
   using std::sqrt;
+  const double& mpion = m_pion_, &mrho = m_rho_;
+  auto t_mandelstam = get_t_range(sqrt(s), m_pion_, m_rho_, m_pion_, 0.);
+  const double &t1 = t_mandelstam[1];
+  const double &t2 = t_mandelstam[0];
   const double xs =
       to_mb * 1 / 3.0 *
       (0.0024868 * pow(Const, 2) * pow(g_POR, 4) *
@@ -201,11 +204,16 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi(
 }
 
 double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0(
-    const double m1, const double m2, const double m3, const double t1,
-    const double t2, const double s, const double mpion, const double mrho) {
+    const double s) {
   using std::atan;
   using std::pow;
   using std::sqrt;
+
+  const double& mpion = m_pion_, &mrho = m_rho_;
+  auto t_mandelstam = get_t_range(sqrt(s), m_pion_, m_rho_, m_pion_, 0.);
+  const double &t1 = t_mandelstam[1];
+  const double &t2 = t_mandelstam[0];
+
   const double xs =
       to_mb * 1 / 3.0 *
       (0.0024867959858108648 * pow(Const, 2) * pow(g_POR, 4) *
@@ -235,13 +243,15 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0(
 }
 
 double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho0_pi(
-    const double m1, const double m2, const double m3, const double t1,
-    const double t2, const double s, const double mpion, const double mrho) {
+    const double s) {
   using std::atan;
   using std::pow;
   using std::sqrt;
-  const double m_pi = mpion;
-
+  const double m_pi = m_pion_;
+  const double& mpion = m_pion_, &mrho = m_rho_;
+  auto t_mandelstam = get_t_range(sqrt(s), m_pion_, m_rho_, m_pion_, 0.);
+  const double &t1 = t_mandelstam[1];
+  const double &t2 = t_mandelstam[0];
   const double xs =
       to_mb * 1 / 3.0 *
       (pow(Const, 2) * pow(ghat, 4) *
@@ -3716,7 +3726,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi_rho0(
   return xs;
 }
 
-double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_pi_rho(
+double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
     const double s) {
   using std::atan;
   using std::pow;
@@ -4941,3 +4951,6 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi0_rho_pi(
 
        return to_mb * diff_xsection;
 }
+
+TabulationND<1> PhotonCrossSection<ComputationMethod::Lookup>::pi_pi_rho0(0.0, 1.0, 0.1, 
+PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi_rho0);

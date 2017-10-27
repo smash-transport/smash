@@ -11,6 +11,7 @@
 #include "pdgcode.h"
 #include "particletype.h"
 #include "kinematics.h"
+#include "tabulationnd.h"
 
 
 // calculation method for the cross sections
@@ -33,27 +34,19 @@ public:
 
     static double xs_pi_pi_rho0(const double s);
         
-    static double xs_pi0_pi_rho(const double s);
+    static double xs_pi_pi0_rho(const double s);
     static double xs_pi0_rho0_pi0(const double s);
+    static double xs_pi_rho0_pi(const double s);
+    static double xs_pi_rho_pi0(const double s);
+    static double xs_pi0_rho_pi(const double s);
 
     static double xs_diff_pi0_rho0_pi0(const double s, const double t);
     static double xs_diff_pi_pi_rho0(const double s, const double t);
     static double xs_diff_pi_pi0_rho(const double s, const double t);
     static double xs_diff_pi_rho_pi0(const double s, const double t);
     static double xs_diff_pi0_rho_pi(const double s, const double t);
+       
     
-    double xs_pi_rho0_pi(const double m1, const double m2, 
-        const double m3, const double t1, const double t2, const double s,
-        const double mpion, const double mrho);
-    double xs_pi_rho_pi0(const double m1, const double m2, 
-        const double m3, const double t1, const double t2, const double s,
-        const double mpion, const double mrho);
-    double xs_pi0_rho_pi(const double m1, const double m2, 
-        const double m3, const double t1, const double t2, const double s,
-        const double mpion, const double mrho);
-    
-    
-        // and so on
     
 private:
 
@@ -78,7 +71,16 @@ private:
 
 template<>
 class PhotonCrossSection <ComputationMethod::Lookup>
-{};
+{
+
+public:
+    static TabulationND<1> pi_pi_rho0; 
+    static TabulationND<1> pi_pi0_rho; 
+    static TabulationND<1> pi0_rho0_pi0; 
+    static TabulationND<1> pi_rho0_pi; 
+    static TabulationND<1> pi0_rho_pi; 
+    
+};
 
 template<>
 class PhotonCrossSection <ComputationMethod::Parametrized>
