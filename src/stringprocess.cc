@@ -242,7 +242,7 @@ void StringProcess::init(const ParticleList &incoming, double tcoll,
  */
 bool StringProcess::next_string_soft(){
   bool success;
-  int iproc;
+  int iproc = -1;
   double r_xsec = Random::uniform(0., cross_sections_sum_[4]);
   for (int i = 0; i < 4; i++) {
     if(r_xsec >= cross_sections_sum_[i] && r_xsec < cross_sections_sum_[i+1]){

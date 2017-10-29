@@ -214,7 +214,7 @@ TEST(pythia_running) {
   VERIFY(act->is_valid(particles));
   act->generate_final_state();
   VERIFY(act->get_type() != ProcessType::Elastic);
-  VERIFY(act->get_type() == ProcessType::String);
+  VERIFY(act->get_type() == ProcessType::StringSoft);
   const uint32_t id_process = 1;
   act->perform(&particles, id_process);
   COMPARE(id_process, 1u);
