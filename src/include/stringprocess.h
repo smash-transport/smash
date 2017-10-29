@@ -95,6 +95,22 @@ class StringProcess {
   /// Lorentz gamma factor of center of mass in the computational frame
   double gamma_factor_com_;
 
+  /**
+   * cross sections of string excitation process
+   * cross_sections_[0] : single diffractive to A+X
+   * cross_sections_[1] : single diffractive to X+B
+   * cross_sections_[2] : double diffractive
+   * cross_sections_[3] : soft non-diffractive
+   * cross_sections_[4] : hard non-diffractive
+   */
+  std::array<double, 5> cross_sections_;
+  /**
+   * summation of the cross sections
+   * cross_sections_sum_[i+1] is sum of cross_sections_ over 0 to i
+   * added for determination of subprocess
+   */
+  std::array<double, 6> cross_sections_sum_;
+
   /// PYTHIA object used in fragmentation
   std::unique_ptr<Pythia8::Pythia> pythia_;
 
@@ -114,7 +130,8 @@ class StringProcess {
    * \return array with single diffractive cross-sections AB->AX, AB->XB and
    * double diffractive AB->XX.
    */
-  std::array<double, 3> cross_sections(int pdg_a, int pdg_b, double sqrt_s) {
+  std::array<double, 3> cross_sections_diffractive(int pdg_a, int pdg_b,
+                                                   double sqrt_s) {
     // This threshold magic is following Pythia. Todo(ryu): take care of this.
     double sqrts_threshold = 2. * (1. + 1.0e-6);
     pdg_a = std::abs(pdg_a);
@@ -131,6 +148,17 @@ class StringProcess {
     pythia_sigmatot_.calc(pdg_a, pdg_b, sqrt_s);
     return {pythia_sigmatot_.sigmaAX(), pythia_sigmatot_.sigmaXB(),
             pythia_sigmatot_.sigmaXX()};
+  }
+  /**
+   * set cross sections of the subprocesses
+   * \param cross_sections is a set of cross sections to be used.
+   */
+  void set_cross_sections(std::array<double, 5> cross_sections) {
+    cross_sections_sum_[0] = 0.;
+    for (int i = 0; i < 5; i++) {
+      cross_sections_[i] = cross_sections[i];
+      cross_sections_sum_[i+1] = cross_sections_sum_[i] + cross_sections_[i];
+    }
   }
   /**
    * final state array
@@ -212,6 +240,13 @@ class StringProcess {
       const std::array<FourVector, 2> &pstr_com,
       const std::array<double, 2> &m_str);
   /**
+   * Soft string excitation process,
+   * which implements single, double and soft non-diffractive processes
+   * according to the cross sections.
+   * \return whether the process is successfully implemented.
+   */
+  bool next_string_soft();
+  /**
    * Single-diffractive process
    * is based on single pomeron exchange described in \iref{Ingelman:1984ns}.
    * \param is_AB_to_AX specifies which hadron to excite into a string.
@@ -231,7 +266,7 @@ class StringProcess {
    */
   bool next_DDiff();
   /**
-   * Non-diffractive process
+   * Soft Non-diffractive process
    * is modelled in accordance with dual-topological approach
    * \iref{Capella:1978ig}.
    * This involves a parton exchange in conjunction with momentum transfer.
@@ -240,7 +275,7 @@ class StringProcess {
    * \iref{Bass:1998ca,Bleicher:1999xi}.
    * \return whether the process is successfully implemented.
    */
-  bool next_NDiff();
+  bool next_NDiffSoft();
   /**
    * Baryon-antibaryon annihilation process
    * Based on what UrQMD \iref{Bass:1998ca,Bleicher:1999xi} does,

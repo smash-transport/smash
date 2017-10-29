@@ -342,10 +342,8 @@ void ScatterActionsFinder::dump_reactions() const {
             for (const auto &channel : act->collision_channels()) {
               const auto type = channel->get_type();
               std::string r;
-              if ((type == ProcessType::String)
-                  || (type == ProcessType::StringSDiffXB)
-                  || (type == ProcessType::StringDDiffXX)
-                  || (type == ProcessType::StringNDiff)) {
+              if ((type == ProcessType::StringSoft)
+                  || (type == ProcessType::StringHard)) {
                 r = A_type->name() + B_type->name() + std::string(" → strings");
               } else {
                 std::string r_type =

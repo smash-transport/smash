@@ -28,10 +28,8 @@ namespace Smash {
  * (5) resonance decays (Decay)
  * (6) Wall transition (Wall)
  * (7) Forces thermalization
- * (41) Single-diffrective string formation AB->AX
- * (42) Single-diffrective string formation AB->XB
- * (43) Double-diffractive string formation
- * (44) Non-diffractive string formation
+ * (41) Soft string excitation
+ * (42) Hard string process involving 2->2 QCD process
  */
 enum class ProcessType {
   None = 0,
@@ -42,10 +40,8 @@ enum class ProcessType {
   Decay = 5,
   Wall = 6,
   Thermalization = 7,
-  StringSDiffAX = 41,
-  StringSDiffXB = 42,
-  StringDDiffXX = 43,
-  StringNDiff = 44
+  StringSoft = 41,
+  StringHard = 42
 };
 
 std::ostream &operator<<(std::ostream &os, ProcessType process_type);

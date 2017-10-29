@@ -47,11 +47,8 @@ void ParticleData::set_history(int ncoll, uint32_t pid, ProcessType pt,
     case ProcessType::Elastic:
     case ProcessType::TwoToOne:
     case ProcessType::TwoToTwo:
-    case ProcessType::String:
-    case ProcessType::StringSDiffAX:
-    case ProcessType::StringSDiffXB:
-    case ProcessType::StringDDiffXX:
-    case ProcessType::StringNDiff:
+    case ProcessType::StringSoft:
+    case ProcessType::StringHard:
       // store two parent particles
       history_.p1 = plist[0].pdgcode();
       history_.p2 = plist[1].pdgcode();

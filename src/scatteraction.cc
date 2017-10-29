@@ -72,19 +72,13 @@ void ScatterAction::generate_final_state() {
       /* Sample the particle momenta in CM system. */
       inelastic_scattering();
       break;
-    case ProcessType::String:
-      /* string excitation */
-      string_excitation_pythia();
+    case ProcessType::StringSoft:
+      /* soft string excitation */
+      string_excitation_soft();
       break;
-    case ProcessType::StringSDiffAX:
-      /* string excitation single diffractive to AX */
-    case ProcessType::StringSDiffXB:
-      /* string excitation single diffractive to XB */
-    case ProcessType::StringDDiffXX:
-      /* string excitation single diffractive to XX */
-    case ProcessType::StringNDiff:
-      /* string excitation non-diffractive */
-      string_excitation_urqmd();
+    case ProcessType::StringHard:
+      /* hard string excitation */
+      string_excitation_pythia();
       break;
     default:
       throw InvalidScatterAction(
@@ -327,7 +321,7 @@ CollisionBranchPtr ScatterAction::string_excitation_cross_section() {
   double sig_string =
       std::max(0., high_energy_cross_section() - elastic_parametrization());
   log.debug("String cross section is: ", sig_string);
-  return make_unique<CollisionBranch>(sig_string, ProcessType::String);
+  return make_unique<CollisionBranch>(sig_string, ProcessType::StringHard);
 }
 
 CollisionBranchList ScatterAction::string_excitation_cross_sections() {
@@ -337,11 +331,23 @@ CollisionBranchList ScatterAction::string_excitation_cross_sections() {
   double sig_string_all =
       std::max(0., high_energy_cross_section() - elastic_parametrization());
 
+  /* get PDG id for evaluation of the parametrized cross sections
+   * for diffractive processes.
+   * (anti-)proton is used for (anti-)baryons and 
+   * pion is used for mesons.
+   * This must be rescaled according to additive quark model
+   * in the case of exotic hadrons. */
   std::array<int, 2> pdgid;
   for (int i = 0; i < 2; i++) {
     PdgCode pdg = incoming_particles_[i].type().pdgcode();
     pdg.deexcite();
-    pdgid[i] = pdg.get_decimal();
+    if(pdg.baryon_number() == 1) {
+      pdgid[i] = 2212;
+    } else if(pdg.baryon_number() == -1) {
+      pdgid[i] = -2212;
+    } else {
+      pdgid[i] = 211;
+    }
   }
 
   /* Total parametrized cross-section (I) and pythia-produced total
@@ -357,38 +363,45 @@ CollisionBranchList ScatterAction::string_excitation_cross_sections() {
   if (!string_process_) {
     throw std::runtime_error("string_process_ should be initialized.");
   }
-  std::array<double, 3> xs = string_process_->cross_sections(pdgid[0], pdgid[1],
-                                                            sqrt_s());
+  std::array<double, 3> xs =
+      string_process_->cross_sections_diffractive(pdgid[0], pdgid[1], sqrt_s());
   double single_diffr_AX = xs[0],
          single_diffr_XB = xs[1],
          double_diffr = xs[2];
   double single_diffr = single_diffr_AX + single_diffr_XB;
   double diffractive = single_diffr + double_diffr;
-  double nondiffractive = std::max(0., sig_string_all - diffractive);
-  diffractive = sig_string_all - nondiffractive;
+  double nondiffractive_all = std::max(0., sig_string_all - diffractive);
+  diffractive = sig_string_all - nondiffractive_all;
   double_diffr = std::max(0., diffractive - single_diffr);
   const double a = (diffractive - double_diffr) / single_diffr;
   single_diffr_AX *= a;
   single_diffr_XB *= a;
   assert(std::abs(single_diffr_AX + single_diffr_XB + double_diffr +
-                  nondiffractive - sig_string_all) < 1.e-6);
+                  nondiffractive_all - sig_string_all) < 1.e-6);
 
+  /* Hard string process will be added later.
+   * The corresponding cross section is set to be zero right now. */
+  double nondiffractive_hard = 0.;
+  double nondiffractive_soft = nondiffractive_all - nondiffractive_hard;
   log.debug("String cross sections [mb] are");
   log.debug("Single-diffractive AB->AX: ", single_diffr_AX);
   log.debug("Single-diffractive AB->XB: ", single_diffr_XB);
   log.debug("Double-diffractive AB->XX: ", double_diffr);
-  log.debug("Non-diffractive: ", nondiffractive);
+  log.debug("Soft non-diffractive: ", nondiffractive_soft);
+  log.debug("Hard non-diffractive: ", nondiffractive_hard);
+  /* cross section of soft string excitation */
+  double sig_string_soft = single_diffr_AX + single_diffr_XB +
+      double_diffr + nondiffractive_soft;
+  string_process_->set_cross_sections({single_diffr_AX, single_diffr_XB,
+                                       double_diffr, nondiffractive_soft,
+                                       nondiffractive_hard});
 
   /* fill the list of process channels */
   CollisionBranchList channel_list;
-  channel_list.push_back(make_unique<CollisionBranch>(single_diffr_AX,
-      ProcessType::StringSDiffAX));
-  channel_list.push_back(make_unique<CollisionBranch>(single_diffr_XB,
-      ProcessType::StringSDiffXB));
-  channel_list.push_back(make_unique<CollisionBranch>(double_diffr,
-      ProcessType::StringDDiffXX));
-  channel_list.push_back(make_unique<CollisionBranch>(nondiffractive,
-      ProcessType::StringNDiff));
+  channel_list.push_back(make_unique<CollisionBranch>(sig_string_soft,
+      ProcessType::StringSoft));
+  channel_list.push_back(make_unique<CollisionBranch>(nondiffractive_hard,
+      ProcessType::StringHard));
   return channel_list;
 }
 
@@ -736,7 +749,7 @@ void ScatterAction::string_excitation_pythia() {
 /* This function will generate outgoing particles in CM frame
  * from a hard process.
  * The way to excite strings is based on the UrQMD model */
-void ScatterAction::string_excitation_urqmd() {
+void ScatterAction::string_excitation_soft() {
   assert(incoming_particles_.size() == 2);
   const auto &log = logger<LogArea::Pythia>();
   // Disable doubleing point exception trap for Pythia
@@ -745,24 +758,9 @@ void ScatterAction::string_excitation_urqmd() {
     /* initialize the string_process_ object for this particular collision */
     string_process_->init(incoming_particles_, time_of_execution_, gamma_cm());
     /* implement collision */
-    bool isnext = false;
-    while (!isnext) {
-      switch (process_type_) {
-        case ProcessType::StringSDiffAX:
-          isnext = string_process_->next_SDiff(true);
-          break;
-        case ProcessType::StringSDiffXB:
-          isnext = string_process_->next_SDiff(false);
-          break;
-        case ProcessType::StringDDiffXX:
-          isnext = string_process_->next_DDiff();
-          break;
-        case ProcessType::StringNDiff:
-          isnext = string_process_->next_NDiff();
-          break;
-        default:
-          throw std::runtime_error("invalid subprocess of StringProcess");
-      }
+    bool success = false;
+    while (!success) {
+      success = string_process_->next_string_soft();
     }
     outgoing_particles_ = string_process_->final_state;
     /* If the incoming particles already were unformed, the formation

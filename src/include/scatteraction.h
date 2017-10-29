@@ -312,12 +312,12 @@ class ScatterAction : public Action {
   /** Perform an inelastic two-body scattering, i.e. new particles are formed*/
   void inelastic_scattering();
 
-  /** Perform the string excitation and decay via Pythia. */
-  void string_excitation_pythia();
-
   /** Todo(ryu): document better - it is not really UrQMD-based, isn't it?
    *  Perform the UrQMD-based string excitation and decay */
-  void string_excitation_urqmd();
+  void string_excitation_soft();
+
+  /** Perform the string excitation and decay via Pythia. */
+  void string_excitation_pythia();
 
   /**
    * \ingroup logging
