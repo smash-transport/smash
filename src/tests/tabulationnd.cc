@@ -106,7 +106,6 @@ TEST(rand_pi_rho_pi0) {
   }
   fs.close();
 }
-<<<<<<< HEAD
 TEST(uniform_random_pi0_rho0_pi0) {
   // sample N points and interpolate value there
   const int N = 10000;
@@ -283,9 +282,6 @@ TEST(uniform_random_pi_rho_pi0) {
 
   fs.close();
 }
-=======
-
->>>>>>> 3a74533be1c45f4efc5c2a476a0ee4d00ab22ce4
 TEST(pi_rho_pi0) {
   const double s0_sqrt = 0.95, s1_sqrt = 1.1, t0 = -0.22, t1 = -0.02,
                dt = 0.005, ds = 0.01;

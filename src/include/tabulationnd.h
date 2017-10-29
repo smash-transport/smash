@@ -82,6 +82,7 @@ class TabulationND<2> {
 
   double get_linear(const double x, const double y) const;
   double get_closest(const double x, const double y) const;
+  size_t get_size() const { return values_.size(); };
 
  private:
   const double x0_, x1_, y0_, y1_, dx_, dy_, inv_dx_, inv_dy_;
