@@ -582,9 +582,8 @@ TEST(pack_int) {
 }
 
 TEST(quark_content) {
-  PdgCode pip(0x211), pim(-0x211), pi0(0x111),
-          p(0x2212), n(0x2112), ap(-0x2212), an(-0x2112),
-          el(0x11);
+  PdgCode pip(0x211), pim(-0x211), pi0(0x111), p(0x2212), n(0x2112),
+      ap(-0x2212), an(-0x2112), el(0x11);
   std::array<int, 3> q;
   q = pip.quark_content();
   COMPARE(q[0], 0);

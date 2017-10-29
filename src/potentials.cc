@@ -83,8 +83,8 @@ double Potentials::skyrme_pot(const double baryon_density) const {
      under a charge reversal transformation. */
   const int sgn = tmp > 0 ? 1 : -1;
   // Return in GeV
-  return 1.0e-3 * sgn * (skyrme_a_ * std::abs(tmp)
-         + skyrme_b_ * std::pow(std::abs(tmp), skyrme_tau_));
+  return 1.0e-3 * sgn * (skyrme_a_ * std::abs(tmp) +
+                         skyrme_b_ * std::pow(std::abs(tmp), skyrme_tau_));
 }
 
 double Potentials::symmetry_pot(const double baryon_isospin_density) const {
@@ -128,24 +128,23 @@ std::pair<double, int> Potentials::force_scale(const ParticleType &data) const {
   direction.*/
   double skyrme_scale = 1.0;
   if (data.pdgcode().is_hyperon()) {
-     if (data.pdgcode().is_xi1321()) {
-        skyrme_scale = 1. / 3.;
-     } else if (data.pdgcode().is_Omega1672()) {
-        skyrme_scale = 0.;
-     } else {
-        skyrme_scale = 2. / 3.;
-     }
+    if (data.pdgcode().is_xi1321()) {
+      skyrme_scale = 1. / 3.;
+    } else if (data.pdgcode().is_Omega1672()) {
+      skyrme_scale = 0.;
+    } else {
+      skyrme_scale = 2. / 3.;
+    }
   }
   skyrme_scale = skyrme_scale * data.pdgcode().baryon_number();
   /* Hyperons are not affected by the symmetry force.*/
-  const int symmetry_scale = data.pdgcode().is_hyperon() ? 0
-             : data.pdgcode().baryon_number();
+  const int symmetry_scale =
+      data.pdgcode().is_hyperon() ? 0 : data.pdgcode().baryon_number();
   return std::make_pair(skyrme_scale, symmetry_scale);
 }
 
 std::pair<ThreeVector, ThreeVector> Potentials::potential_gradient(
-                                           const ThreeVector &r,
-                                           const ParticleList &plist) const {
+    const ThreeVector &r, const ParticleList &plist) const {
   const bool compute_gradient = true;
   const double MeV_to_GeV = 1.0e-3;
   ThreeVector dUB_dr(0.0, 0.0, 0.0);
@@ -157,15 +156,16 @@ std::pair<ThreeVector, ThreeVector> Potentials::potential_gradient(
 
     // Derivative of potential with respect to density
     double tmp = skyrme_tau_ * std::pow(rho / nuclear_density, skyrme_tau_ - 1);
-    dUB_dr = MeV_to_GeV * drho_dr * (skyrme_a_ + skyrme_b_ * tmp) /
-             nuclear_density;
+    dUB_dr =
+        MeV_to_GeV * drho_dr * (skyrme_a_ + skyrme_b_ * tmp) / nuclear_density;
   }
 
   ThreeVector dUsym_dr(0.0, 0.0, 0.0);
   if (use_symmetry_) {
     // use isospin density
-    const ThreeVector p_iso = rho_eckart(r, plist, param_,
-                   DensityType::BaryonicIsospin, compute_gradient)
+    const ThreeVector p_iso =
+        rho_eckart(r, plist, param_, DensityType::BaryonicIsospin,
+                   compute_gradient)
             .second;
     dUsym_dr = MeV_to_GeV * 2. * symmetry_s_ * p_iso / nuclear_density;
   }

@@ -18,7 +18,7 @@
 namespace Smash {
 
 RootOutput::RootOutput(const bf::path &path, std::string name,
-                       const OutputParameters& out_par)
+                       const OutputParameters &out_par)
     : OutputInterface(name),
       base_path_(std::move(path)),
       root_out_file_(

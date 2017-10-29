@@ -17,9 +17,7 @@
 
 using namespace Smash;
 
-TEST(init) {
-  set_default_loglevel(einhard::INFO);
-}
+TEST(init) { set_default_loglevel(einhard::INFO); }
 
 TEST(create_part_list) {
   // Note that antiparticles are also created!

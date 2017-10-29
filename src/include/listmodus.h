@@ -20,9 +20,22 @@ namespace Smash {
 
 /**
  * \ingroup modus
- * ListModus: Provides a modus for hydro afterburner calculations
+ * ListModus: Provides a modus for running SMASH on any external particle list,
+ * for example as an afterburner calculations for hybrid codes
  *
  * For configuring see \ref input_modi_list_.
+*
+*#!OSCAR2013 particle_lists SMASH-githash t x y z mass p0 px py pz pdg
+*
+* Since SMASH is searching for collisions in computational frame time 't',
+* all particles need to be at the same time. If this is not the case in
+* the list provided, the particles will be propagated backwards on
+* straight lines ("anti-freestreaming"). To avoid unphysical interactions
+* of these particles, the back-propagated particles receive a
+* formation_time and zero cross_section_scaling_factor. The cross-sections
+* are set to zero during the time, where the particle will just propagate
+* on a straight line again to appear at the formation_time into the system.
+*
  */
 class ListModus : public ModusDefault {
  public:

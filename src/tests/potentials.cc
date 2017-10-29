@@ -195,8 +195,8 @@ TEST(propagation_in_test_potential) {
         const ThreeVector &r, const ParticleList &) const override {
       const double tmp = std::exp(r.x1() / d_);
       return std::make_pair(
-        ThreeVector(-U0_ / d_ * tmp / ((1.0 + tmp) * (1.0 + tmp)), 0.0, 0.0),
-        ThreeVector(0.0, 0.0, 0.0));
+          ThreeVector(-U0_ / d_ * tmp / ((1.0 + tmp) * (1.0 + tmp)), 0.0, 0.0),
+          ThreeVector(0.0, 0.0, 0.0));
     }
 
     bool use_skyrme() const override { return true; }
