@@ -398,8 +398,8 @@ CollisionBranchList ScatterAction::string_excitation_cross_sections() {
   CollisionBranchList channel_list;
   channel_list.push_back(make_unique<CollisionBranch>(sig_string_soft,
       ProcessType::StringSoft));
-  channel_list.push_back(make_unique<CollisionBranch>(nondiffractive_hard,
-      ProcessType::StringHard));
+  //channel_list.push_back(make_unique<CollisionBranch>(nondiffractive_hard,
+  //    ProcessType::StringHard));
   return channel_list;
 }
 
