@@ -390,9 +390,18 @@ CollisionBranchList ScatterAction::string_excitation_cross_sections() {
   /* cross section of soft string excitation */
   double sig_string_soft = single_diffr_AX + single_diffr_XB +
       double_diffr + nondiffractive_soft;
-  string_process_->set_cross_sections({single_diffr_AX, single_diffr_XB,
-                                       double_diffr, nondiffractive_soft,
-                                       nondiffractive_hard});
+
+  /* fill cross section arrays */
+  string_sub_cross_sections_[0] = single_diffr_AX;
+  string_sub_cross_sections_[1] = single_diffr_XB;
+  string_sub_cross_sections_[2] = double_diffr;
+  string_sub_cross_sections_[3] = nondiffractive_soft;
+  string_sub_cross_sections_[4] = nondiffractive_hard;
+  string_sub_cross_sections_sum_[0] = 0.;
+  for (int i = 0; i < 5; i++) {
+    string_sub_cross_sections_sum_[i+1] =
+        string_sub_cross_sections_sum_[i] + string_sub_cross_sections_[i];
+  }
 
   /* fill the list of process channels */
   CollisionBranchList channel_list;
@@ -757,7 +766,39 @@ void ScatterAction::string_excitation_soft() {
     /* implement collision */
     bool success = false;
     while (!success) {
-      success = string_process_->next_string_soft();
+      int iproc = -1;
+      double r_xsec = string_sub_cross_sections_sum_[4] *
+          Random::uniform(0., 1.);
+      for (int i = 0; i < 4; i++) {
+        if((r_xsec >= string_sub_cross_sections_sum_[i]) &&
+           (r_xsec < string_sub_cross_sections_sum_[i+1])) {
+          iproc = i;
+          break;
+        }
+      }
+      if(iproc == -1) {
+        throw std::runtime_error("soft string subprocess is not specified.");
+      }
+      switch (iproc) {
+        case 0:
+          /* single diffractive to A+X */
+          success = string_process_->next_SDiff(true);
+          break;
+        case 1:
+          /* single diffractive to X+B */
+          success = string_process_->next_SDiff(false);
+          break;
+         case 2:
+          /* double diffractive */
+          success = string_process_->next_DDiff();
+          break;
+        case 3:
+          /* soft non-diffractive */
+          success = string_process_->next_NDiffSoft();
+          break;
+        default:
+          success = false;
+      }
     }
     outgoing_particles_ = string_process_->final_state;
     /* If the incoming particles already were unformed, the formation

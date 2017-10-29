@@ -347,6 +347,24 @@ class ScatterAction : public Action {
   /** Perform a 2->1 resonance-formation process. */
   void resonance_formation();
 
+  /**
+   * cross sections of string excitation process
+   * string_sub_cross_sections_[0] : single diffractive to A+X
+   * string_sub_cross_sections_[1] : single diffractive to X+B
+   * string_sub_cross_sections_[2] : double diffractive
+   * string_sub_cross_sections_[3] : soft non-diffractive
+   * string_sub_cross_sections_[4] : hard non-diffractive
+   */
+  std::array<double, 5> string_sub_cross_sections_;
+
+  /**
+   * summation of the cross sections
+   * string_sub_cross_sections_sum_[i+1] is
+   * sum of string_sub_cross_sections_ over 0 to i
+   * added for determination of subprocess
+   */
+  std::array<double, 6> string_sub_cross_sections_sum_;
+
   /** Pointer to interface class for strings */
   StringProcess* string_process_ = nullptr;
 };

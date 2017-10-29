@@ -95,22 +95,6 @@ class StringProcess {
   /// Lorentz gamma factor of center of mass in the computational frame
   double gamma_factor_com_;
 
-  /**
-   * cross sections of string excitation process
-   * cross_sections_[0] : single diffractive to A+X
-   * cross_sections_[1] : single diffractive to X+B
-   * cross_sections_[2] : double diffractive
-   * cross_sections_[3] : soft non-diffractive
-   * cross_sections_[4] : hard non-diffractive
-   */
-  std::array<double, 5> cross_sections_;
-  /**
-   * summation of the cross sections
-   * cross_sections_sum_[i+1] is sum of cross_sections_ over 0 to i
-   * added for determination of subprocess
-   */
-  std::array<double, 6> cross_sections_sum_;
-
   /// PYTHIA object used in fragmentation
   std::unique_ptr<Pythia8::Pythia> pythia_;
 
@@ -149,17 +133,7 @@ class StringProcess {
     return {pythia_sigmatot_.sigmaAX(), pythia_sigmatot_.sigmaXB(),
             pythia_sigmatot_.sigmaXX()};
   }
-  /**
-   * set cross sections of the subprocesses
-   * \param cross_sections is a set of cross sections to be used.
-   */
-  void set_cross_sections(std::array<double, 5> cross_sections) {
-    cross_sections_sum_[0] = 0.;
-    for (int i = 0; i < 5; i++) {
-      cross_sections_[i] = cross_sections[i];
-      cross_sections_sum_[i+1] = cross_sections_sum_[i] + cross_sections_[i];
-    }
-  }
+
   /**
    * final state array
    * which must be accessed after the collision
@@ -239,13 +213,7 @@ class StringProcess {
       const std::array<std::array<int, 2>, 2> &quarks,
       const std::array<FourVector, 2> &pstr_com,
       const std::array<double, 2> &m_str);
-  /**
-   * Soft string excitation process,
-   * which implements single, double and soft non-diffractive processes
-   * according to the cross sections.
-   * \return whether the process is successfully implemented.
-   */
-  bool next_string_soft();
+
   /**
    * Single-diffractive process
    * is based on single pomeron exchange described in \iref{Ingelman:1984ns}.

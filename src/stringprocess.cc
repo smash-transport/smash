@@ -238,42 +238,6 @@ void StringProcess::init(const ParticleList &incoming, double tcoll,
 }
 
 /**
- * soft string excitation process
- */
-bool StringProcess::next_string_soft(){
-  bool success;
-  int iproc = -1;
-  double r_xsec = Random::uniform(0., cross_sections_sum_[4]);
-  for (int i = 0; i < 4; i++) {
-    if(r_xsec >= cross_sections_sum_[i] && r_xsec < cross_sections_sum_[i+1]){
-      iproc = i;
-      break;
-    }
-  }
-  switch (iproc) {
-    case 0:
-      /* single diffractive to A+X */
-      success = next_SDiff(true);
-      break;
-    case 1:
-      /* single diffractive to X+B */
-      success = next_SDiff(false);
-      break;
-    case 2:
-      /* double diffractive */
-      success = next_DDiff();
-      break;
-    case 3:
-      /* soft non-diffractive */
-      success = next_NDiffSoft();
-      break;
-    default:
-      success = false;
-  }
-  return success;
-}
-
-/**
  * single diffractive
  * channel = 1 : A + B -> A + X
  * channel = 2 : A + B -> X + B
