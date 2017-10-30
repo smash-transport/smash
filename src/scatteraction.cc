@@ -167,7 +167,7 @@ void ScatterAction::add_all_processes(double elastic_parameter, bool two_to_one,
     add_collision(elastic_cross_section(elastic_parameter));
   }
   if (is_pythia) {
-    // add_collision(string_excitation_cross_section());
+    /* string excitation */
     add_collisions(string_excitation_cross_sections());
   } else {
     if (two_to_one) {
@@ -348,6 +348,8 @@ CollisionBranchList ScatterAction::string_excitation_cross_sections() {
     }
   }
 
+  CollisionBranchList channel_list;
+  if(sig_string_all > 0.) {
   /* Total parametrized cross-section (I) and pythia-produced total
    * cross-section (II) do not necessarily coincide. If I > II then
    * non-diffractive cross-section is reinforced to get I == II.
@@ -355,7 +357,7 @@ CollisionBranchList ScatterAction::string_excitation_cross_sections() {
    * to reduce II until I == II:
    * first non-diffractive, then double-diffractive, then
    * single-diffractive AB->AX and AB->XB in equal proportion.
-   * The way it is done here is not unique. I think that at high energy
+   * The way it is done here is not unique. I (ryu) think that at high energy
    * collision this is not an issue, but at sqrt_s < 10 GeV it may
    * matter. */
   if (!string_process_) {
@@ -388,8 +390,7 @@ CollisionBranchList ScatterAction::string_excitation_cross_sections() {
   log.debug("Soft non-diffractive: ", nondiffractive_soft);
   log.debug("Hard non-diffractive: ", nondiffractive_hard);
   /* cross section of soft string excitation */
-  double sig_string_soft = single_diffr_AX + single_diffr_XB +
-      double_diffr + nondiffractive_soft;
+  double sig_string_soft = sig_string_all - nondiffractive_hard;
 
   /* fill cross section arrays */
   string_sub_cross_sections_[0] = single_diffr_AX;
@@ -404,11 +405,15 @@ CollisionBranchList ScatterAction::string_excitation_cross_sections() {
   }
 
   /* fill the list of process channels */
-  CollisionBranchList channel_list;
-  channel_list.push_back(make_unique<CollisionBranch>(sig_string_soft,
-      ProcessType::StringSoft));
-  //channel_list.push_back(make_unique<CollisionBranch>(nondiffractive_hard,
-  //    ProcessType::StringHard));
+  if(sig_string_soft > 0.) {
+    channel_list.push_back(make_unique<CollisionBranch>(sig_string_soft,
+        ProcessType::StringSoft));
+  }
+  //if(nondiffractive_hard > 0.) {
+  //  channel_list.push_back(make_unique<CollisionBranch>(nondiffractive_hard,
+  //      ProcessType::StringHard));
+  //}
+  }
   return channel_list;
 }
 

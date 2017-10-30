@@ -120,10 +120,13 @@ class StringProcess {
     double sqrts_threshold = 2. * (1. + 1.0e-6);
     pdg_a = std::abs(pdg_a);
     pdg_b = std::abs(pdg_b);
-    pdg_a = (pdg_a > 1000) ? pdg_a : 10 * (pdg_a / 10) + 3;
-    pdg_b = (pdg_b > 1000) ? pdg_b : 10 * (pdg_b / 10) + 3;
+    // In the case of mesons, the corresponding vector meson masses
+    // are used to evaluate the energy threshold.
+    const int pdg_a_mod = (pdg_a > 1000) ? pdg_a : 10 * (pdg_a / 10) + 3;
+    const int pdg_b_mod = (pdg_b > 1000) ? pdg_b : 10 * (pdg_b / 10) + 3;
     sqrts_threshold +=
-        pythia_->particleData.m0(pdg_a) + pythia_->particleData.m0(pdg_b);
+        pythia_->particleData.m0(pdg_a_mod) +
+        pythia_->particleData.m0(pdg_b_mod);
     // Constant cross-section for sub-processes below threshold equal to
     // cross-section at the threshold.
     if (sqrt_s < sqrts_threshold) {
