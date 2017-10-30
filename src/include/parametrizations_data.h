@@ -237,9 +237,11 @@ static std::unique_ptr<InterpolateDataSpline>
     kminusp_elastic_res_interpolation = nullptr;
 
 /// PDG data on K+ n total cross section: momentum in lab frame.
+// One data point is ignored because it is an outlier and messes up the
+// smoothing.
 const std::initializer_list<double> KPLUSN_TOT_PLAB = {
     0.770,   0.888,   0.939,   0.970,   0.989,   1.040,   1.091,   1.141,
-    1.170,   1.191,   1.242,   1.292,   1.300,   1.342,   1.392,   1.440,
+    /*1.170,*/ 1.191,   1.242,   1.292,   1.300,   1.342,   1.392,   1.440,
     1.442,   1.492,   1.550,   1.593,   1.600,   1.643,   1.690,   1.693,
     1.700,   1.743,   1.750,   1.793,   1.800,   1.850,   1.893,   1.900,
     1.950,   1.970,   1.993,   2.000,   2.050,   2.093,   2.100,   2.150,
@@ -253,7 +255,7 @@ const std::initializer_list<double> KPLUSN_TOT_PLAB = {
     240.000, 280.000, 310.000};
 /// PDG data on K+ n total cross section: cross section.
 const std::initializer_list<double> KPLUSN_TOT_SIG = {
-    15.50, 16.85, 17.60, 17.80, 18.53, 18.91, 20.61, 21.25, 18.20, 20.87,
+    15.50, 16.85, 17.60, 17.80, 18.53, 18.91, 20.61, 21.25, /*18.20,*/ 20.87,
     20.26, 19.68, 18.50, 19.32, 19.22, 18.10, 19.07, 18.95, 18.91, 18.79,
     18.89, 18.67, 18.50, 18.69, 18.83, 18.88, 18.86, 18.73, 18.53, 18.66,
     18.50, 18.69, 18.70, 18.60, 18.55, 18.79, 18.54, 18.67, 18.49, 18.43,
