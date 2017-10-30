@@ -8,80 +8,89 @@
  */
 
 #include <cmath>
-#include "pdgcode.h"
-#include "particletype.h"
 #include "kinematics.h"
+#include "particletype.h"
+#include "pdgcode.h"
 #include "tabulationnd.h"
 
-
 // calculation method for the cross sections
-enum class ComputationMethod {Analytic, Lookup, Parametrized};
+enum class ComputationMethod { Analytic, Lookup, Parametrized };
 
-
-// usage would be 
+// usage would be
 // PhotonCrossSection xs<Analytic>; xs.xs_pi_pi_rho(var1, var2...)
 template <ComputationMethod method>
-class PhotonCrossSection; 
+class PhotonCrossSection;
 
-template<>
-class PhotonCrossSection <ComputationMethod::Analytic>
-{
-    
-public: 
+template <>
+class PhotonCrossSection<ComputationMethod::Analytic> {
+ public:
+  // TODO: Clean up parameters. Some are unused.
 
-    // TODO: Clean up parameters. Some are unused. 
-    
+  static double xs_pi_pi_rho0(const double s);
 
-    static double xs_pi_pi_rho0(const double s);
-        
-    static double xs_pi_pi0_rho(const double s);
-    static double xs_pi0_rho0_pi0(const double s);
-    static double xs_pi_rho0_pi(const double s);
-    static double xs_pi_rho_pi0(const double s);
-    static double xs_pi0_rho_pi(const double s);
+  static double xs_pi_pi0_rho(const double s);
+  static double xs_pi0_rho0_pi0(const double s);
+  static double xs_pi_rho0_pi(const double s);
+  static double xs_pi_rho_pi0(const double s);
+  static double xs_pi0_rho_pi(const double s);
 
-    static double xs_diff_pi0_rho0_pi0(const double s, const double t);
-    static double xs_diff_pi_pi_rho0(const double s, const double t);
-    static double xs_diff_pi_pi0_rho(const double s, const double t);
-    static double xs_diff_pi_rho_pi0(const double s, const double t);
-    static double xs_diff_pi0_rho_pi(const double s, const double t);
-       
-    
-    
+  static double xs_diff_pi0_rho0_pi0(const double s, const double t);
+  static double xs_diff_pi_pi_rho0(const double s, const double t);
+  static double xs_diff_pi_pi0_rho(const double s, const double t);
+  static double xs_diff_pi_rho_pi0(const double s, const double t);
+  static double xs_diff_pi0_rho_pi(const double s, const double t);
+
+ private:
+  constexpr static double to_mb = 0.3894;
+  constexpr static double Const = 0.059;
+  constexpr static double g_POR = 11.93;
+  constexpr static double ma1 = 1.26;
+  constexpr static double ghat = 6.4483;
+  constexpr static double eta1 = 2.3920;
+  constexpr static double eta2 = 1.9430;
+  constexpr static double delta = -0.6426;
+  constexpr static double C4 = -0.14095;
+  constexpr static double Gammaa1 = 0.4;
+  constexpr static double Pi = M_PI;
+  constexpr static double m_omega = 0.783;
+
+  constexpr static double m_pion_ = 0.139;
+  constexpr static double m_rho_ = 0.775;
+};
+
+template <>
+class PhotonCrossSection<ComputationMethod::Lookup> {
 private:
+  static TabulationND<1> tab_pi_pi_rho0_;
+  static TabulationND<1> tab_pi_pi0_rho_;
+  static TabulationND<1> tab_pi0_rho0_pi0_;
+  static TabulationND<1> tab_pi_rho0_pi_;
+  static TabulationND<1> tab_pi0_rho_pi_;
 
-    constexpr static double to_mb = 0.3894;
-    constexpr static double Const = 0.059;
-    constexpr static double g_POR = 11.93;
-    constexpr static double ma1 = 1.26;
-    constexpr static double ghat = 6.4483;
-    constexpr static double eta1 = 2.3920;
-    constexpr static double eta2 = 1.9430;
-    constexpr static double delta = -0.6426;
-    constexpr static double C4 = -0.14095;
-    constexpr static double Gammaa1 = 0.4;
-    constexpr static double Pi = M_PI;
-    constexpr static double m_omega = 0.783;
-
-    constexpr static double m_pion_ = 0.139;
-    constexpr static double m_rho_ = 0.775;
-    
-
-};
-
-template<>
-class PhotonCrossSection <ComputationMethod::Lookup>
-{
-
+  static TabulationND<2> tab_pi_pi_rho0_diff_;
+  static TabulationND<2> tab_pi_pi0_rho_diff_;
+  static TabulationND<2> tab_pi0_rho0_pi0_diff_;
+  static TabulationND<2> tab_pi_rho0_pi_diff_;
+  static TabulationND<2> tab_pi0_rho_pi_diff_;
+  static TabulationND<2> tab_pi_rho_pi0_diff_;
 public:
-    static TabulationND<1> pi_pi_rho0; 
-    static TabulationND<1> pi_pi0_rho; 
-    static TabulationND<1> pi0_rho0_pi0; 
-    static TabulationND<1> pi_rho0_pi; 
-    static TabulationND<1> pi0_rho_pi; 
-    
+  double xs_pi_pi_rho0(const double s);
+  double xs_pi_pi0_rho(const double s);
+  double xs_pi0_rho0_pi0(const double s);
+  double xs_pi_rho0_pi(const double s);
+  double xs_pi0_rho_pi(const double s);
+  
+  
+  double xs_diff_pi_pi_rho0(const double s, const double t);
+  double xs_diff_pi_pi0_rho(const double s, const double t);
+  double xs_diff_pi0_rho0_pi0(const double s, const double t);
+  double xs_diff_pi_rho_pi0(const double s, const double t);
+  double xs_diff_pi0_rho_pi(const double s, const double t);
+  
+  
 };
 
-template<>
-class PhotonCrossSection <ComputationMethod::Parametrized>
-{};
+template <>
+class PhotonCrossSection<ComputationMethod::Parametrized> {};
+
+
