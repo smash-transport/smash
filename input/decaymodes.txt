@@ -465,7 +465,7 @@ N(2080)
 # From UrQMD
 
 N(2190)
-0.22   4  N π        # 10 - 20 %
+0.216  4  N π        # 10 - 20 %
 0.05   2  N ω        # 0
 0.24   2  N ρ        # > 0
 0.008  4  Λ K        # 0.2 - 0.8 %
@@ -474,7 +474,7 @@ N(2190)
 0.05   4  N(1440) π  # 0
 0.005  0  N φ  # tuned for p Nb dileptons and pp -> ppKK
 0.001  1  N f₀(980)  # tuned for pp -> ppKK
-# From UrQMD
+# Similar to UrQMD
 
 N(2220)
 0.29   3  N π  # FIXME: should be 5
@@ -600,7 +600,7 @@ N(2250)
 0.40  0  N K̅       # 0.1-0.4, tuned for K- p cross section
 0.14  0  Λ π       # >0, tuned for K- n -> Lambda pi- cross section
 0.08  0  Σ π       # <0.08
-0.45  0  Σ η       # 0.15-0.55
+0.28  0  Σ η       # 0.15-0.55
 0.10  0  N K̅*(892)  # 0.04-0.12
 
 Σ(1775)  # 1(2.5-)
