@@ -78,7 +78,7 @@ StringProcess::StringProcess()
   NpartFinal_ = 0;
   NpartString_[0] = 0;
   NpartString_[1] = 0;
-  final_state.clear();
+  final_state_.clear();
 }
 
 // compute the formation time and fill the arrays with final-state particles
@@ -201,7 +201,7 @@ int StringProcess::append_final_state(const FourVector &uString,
                                 : 0.);
     new_particle.set_formation_time(time_collision_ +
                                     gamma_factor_com_ * t_prod);
-    final_state.push_back(new_particle);
+    final_state_.push_back(new_particle);
   }
 
   return nfrag;
@@ -246,7 +246,7 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   NpartFinal_ = 0;
   NpartString_[0] = 0;
   NpartString_[1] = 0;
-  final_state.clear();
+  final_state_.clear();
 
   double massH = is_AB_to_AX ? massA_ : massB_;
   double mstrMin = is_AB_to_AX ? massB_ : massA_;
@@ -316,7 +316,7 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   new_particle.set_4momentum(pstrHcom);
   new_particle.set_cross_section_scaling_factor(1.);
   new_particle.set_formation_time(0.);
-  final_state.push_back(new_particle);
+  final_state_.push_back(new_particle);
 
   NpartFinal_ = NpartString_[0] + NpartString_[1];
   return true;
@@ -362,7 +362,7 @@ bool StringProcess::next_DDiff() {
   NpartFinal_ = 0;
   NpartString_[0] = 0;
   NpartString_[1] = 0;
-  final_state.clear();
+  final_state_.clear();
 
   int ntry = 0;
   std::array<bool, 2> found_mass = {false, false};
@@ -426,7 +426,7 @@ bool StringProcess::next_NDiffSoft() {
   NpartFinal_ = 0;
   NpartString_[0] = 0;
   NpartString_[1] = 0;
-  final_state.clear();
+  final_state_.clear();
 
   int ntry = 0;
   std::array<bool, 2> found_mass = {false, false};
@@ -518,7 +518,7 @@ bool StringProcess::next_BBbarAnn() {
   NpartFinal_ = 0;
   NpartString_[0] = 0;
   NpartString_[1] = 0;
-  final_state.clear();
+  final_state_.clear();
 
   PdgCode baryon = PDGcodes_[0], antibaryon = PDGcodes_[1];
   if (baryon.baryon_number() == -1) {
@@ -552,7 +552,7 @@ bool StringProcess::next_BBbarAnn() {
       new_particle.set_4momentum(pcom_[i]);
       new_particle.set_cross_section_scaling_factor(1.);
       new_particle.set_formation_time(0.);
-      final_state.push_back(new_particle);
+      final_state_.push_back(new_particle);
     }
     NpartFinal_ = NpartString_[0] + NpartString_[1];
     return true;

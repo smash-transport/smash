@@ -805,7 +805,7 @@ void ScatterAction::string_excitation_soft() {
           success = false;
       }
     }
-    outgoing_particles_ = string_process_->final_state;
+    outgoing_particles_ = string_process_->get_final_state();
     /* If the incoming particles already were unformed, the formation
      * times and cross section scaling factors need to be adjusted */
     const double tform_in = std::max(incoming_particles_[0].formation_time(),

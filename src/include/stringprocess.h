@@ -95,6 +95,12 @@ class StringProcess {
   /// Lorentz gamma factor of center of mass in the computational frame
   double gamma_factor_com_;
 
+  /**
+   * final state array
+   * which must be accessed after the collision
+   */
+  ParticleList final_state_;
+
   /// PYTHIA object used in fragmentation
   std::unique_ptr<Pythia8::Pythia> pythia_;
 
@@ -137,11 +143,6 @@ class StringProcess {
             pythia_sigmatot_.sigmaXX()};
   }
 
-  /**
-   * final state array
-   * which must be accessed after the collision
-   */
-  ParticleList final_state;
   /**
    * set the minimum lightcone momentum scale carried by gluon.
    * This is relevant for the double-diffractive process.
@@ -255,6 +256,13 @@ class StringProcess {
    * \return whether the process is successfully implemented.
    */
   bool next_BBbarAnn();
+
+  /**
+   * a function to get the final state particle list
+   * which is called after the collision
+   * \return ParticleList filled with the final state particles.
+   */
+  ParticleList get_final_state(){return final_state_;}
 
   /**
    * compute the formation time and fill the arrays with final-state particles
