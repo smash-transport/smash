@@ -23,7 +23,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho0_pi0(
   const double t1 = t_mandelstam[1];
   const double t2 = t_mandelstam[0];
 
-      const double xs =
+  const double xs =
       to_mb * 1 / 3.0 *
       (pow(Const, 2) * pow(g_POR, 4) *
        ((pow(pow(m_omega, 2) - s, 2) *
@@ -4951,31 +4951,30 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi0_rho_pi(
 }
 
 // definition of total-xs getters
-double PhotonCrossSection<ComputationMethod::Lookup>::xs_pi_pi_rho0(const double s)
-{
-    return tab_pi_pi_rho0_.get_linear(s);
+double PhotonCrossSection<ComputationMethod::Lookup>::xs_pi_pi_rho0(
+    const double s) {
+  return tab_pi_pi_rho0_.get_linear(s);
 }
 
-double PhotonCrossSection<ComputationMethod::Lookup>::xs_pi_pi0_rho(const double s)
-{
-    return tab_pi_pi0_rho_.get_linear(s);
+double PhotonCrossSection<ComputationMethod::Lookup>::xs_pi_pi0_rho(
+    const double s) {
+  return tab_pi_pi0_rho_.get_linear(s);
 }
 
-double PhotonCrossSection<ComputationMethod::Lookup>::xs_pi0_rho0_pi0(const double s)
-{
-    return tab_pi0_rho0_pi0_.get_linear(s);
+double PhotonCrossSection<ComputationMethod::Lookup>::xs_pi0_rho0_pi0(
+    const double s) {
+  return tab_pi0_rho0_pi0_.get_linear(s);
 }
 
-double PhotonCrossSection<ComputationMethod::Lookup>::xs_pi_rho0_pi(const double s)
-{
-    return tab_pi_rho0_pi_.get_linear(s);
+double PhotonCrossSection<ComputationMethod::Lookup>::xs_pi_rho0_pi(
+    const double s) {
+  return tab_pi_rho0_pi_.get_linear(s);
 }
 
-double PhotonCrossSection<ComputationMethod::Lookup>::xs_pi0_rho_pi(const double s)
-{
-    return tab_pi0_rho_pi_.get_linear(s);
+double PhotonCrossSection<ComputationMethod::Lookup>::xs_pi0_rho_pi(
+    const double s) {
+  return tab_pi0_rho_pi_.get_linear(s);
 }
-
 
 // definition of differential xs-functions
 double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi_pi_rho0(
