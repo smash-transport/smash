@@ -11,6 +11,9 @@
 
 using namespace Smash;
 
+template class PhotonCrossSection<ComputationMethod::Analytic>;
+template class PhotonCrossSection<ComputationMethod::Lookup>;
+
 double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho0_pi0(
     const double s) {
   using std::atan;
@@ -5006,6 +5009,23 @@ double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi0_rho_pi(
 TabulationND<1> PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_pi_rho0_(
     0.0, 1.0, 0.1,
     PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi_rho0);
+
+TabulationND<1> PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_pi0_rho_(
+    0.0, 1.0, 0.1,
+    PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho);
+
+TabulationND<1> PhotonCrossSection<ComputationMethod::Lookup>::tab_pi0_rho0_pi0_(
+    0.0, 1.0, 0.1,
+    PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho0_pi0);
+
+TabulationND<1> PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_rho0_pi_(
+    0.0, 1.0, 0.1,
+    PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho0_pi);
+
+TabulationND<1> PhotonCrossSection<ComputationMethod::Lookup>::tab_pi0_rho_pi_(
+    0.0, 1.0, 0.1,
+    PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi);
+
 
 TabulationND<2>
     PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_pi_rho0_diff_(

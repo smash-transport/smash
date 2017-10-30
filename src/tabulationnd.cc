@@ -8,7 +8,8 @@
  */
 #include "include/tabulationnd.h"
 
-
+template class TabulationND<1>;
+template class TabulationND<2>;
 
 double TabulationND<1>::get_linear(double x) const {
   const double index_double = (x - x0_) * inv_dx_;
