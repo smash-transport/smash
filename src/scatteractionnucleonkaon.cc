@@ -31,64 +31,64 @@ double ScatterActionNucleonKaon::elastic_parametrization() {
     case pdg::p:
       switch (kaon.code()) {
         case pdg::K_p:
-          sig_el = kplusp_elastic(s);
+          sig_el = kplusp_elastic_background(s);
           break;
         case pdg::K_m:
-          sig_el = kminusp_elastic(s);
+          sig_el = kminusp_elastic_background(s);
           break;
         case pdg::K_z:
-          sig_el = k0p_elastic(s);
+          sig_el = k0p_elastic_background(s);
           break;
         case pdg::Kbar_z:
-          sig_el = kbar0p_elastic(s);
+          sig_el = kbar0p_elastic_background(s);
           break;
       }
       break;
     case pdg::n:
       switch (kaon.code()) {
         case pdg::K_p:
-          sig_el = kplusn_elastic(s);
+          sig_el = kplusn_elastic_background(s);
           break;
         case pdg::K_m:
-          sig_el = kminusn_elastic(s);
+          sig_el = kminusn_elastic_background(s);
           break;
         case pdg::K_z:
-          sig_el = k0n_elastic(s);
+          sig_el = k0n_elastic_background(s);
           break;
         case pdg::Kbar_z:
-          sig_el = kbar0n_elastic(s);
+          sig_el = kbar0n_elastic_background(s);
           break;
       }
       break;
     case -pdg::p:
       switch (kaon.code()) {
         case pdg::K_p:
-          sig_el = kminusp_elastic(s);
+          sig_el = kminusp_elastic_background(s);
           break;
         case pdg::K_m:
-          sig_el = kplusp_elastic(s);
+          sig_el = kplusp_elastic_background(s);
           break;
         case pdg::K_z:
-          sig_el = kbar0p_elastic(s);
+          sig_el = kbar0p_elastic_background(s);
           break;
         case pdg::Kbar_z:
-          sig_el = k0p_elastic(s);
+          sig_el = k0p_elastic_background(s);
           break;
       }
       break;
     case -pdg::n:
       switch (kaon.code()) {
         case pdg::K_p:
-          sig_el = kminusn_elastic(s);
+          sig_el = kminusn_elastic_background(s);
           break;
         case pdg::K_m:
-          sig_el = kplusn_elastic(s);
+          sig_el = kplusn_elastic_background(s);
           break;
         case pdg::K_z:
-          sig_el = kbar0n_elastic(s);
+          sig_el = kbar0n_elastic_background(s);
           break;
         case pdg::Kbar_z:
-          sig_el = k0n_elastic(s);
+          sig_el = k0n_elastic_background(s);
           break;
       }
       break;
@@ -129,8 +129,8 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_cross_sections() {
   const double sqrts = sqrt_s();
 
   // Some variable declarations for frequently used quantities
-  const auto sigma_kplusp = kplusp_inelastic(s);
-  const auto sigma_kplusn = kplusn_inelastic(s);
+  const auto sigma_kplusp = kplusp_inelastic_background(s);
+  const auto sigma_kplusn = kplusn_inelastic_background(s);
 
   CollisionBranchList process_list;
   switch (pdg_kaon) {

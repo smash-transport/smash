@@ -68,38 +68,43 @@ double ppbar_total(double mandelstam_s);
  */
 double ppbar_total(double mandelstam_s, double m_proj, double m_target);
 
-/** K+ p elastic cross section parametrization */
-double kplusp_elastic(double mandelstam_s);
+/** K+ p elastic background cross section parametrization */
+double kplusp_elastic_background(double mandelstam_s);
 
-/** K+ n elastic cross section parametrization */
-double kplusn_elastic(double mandelstam_s);
+/** K+ n elastic background cross section parametrization */
+double kplusn_elastic_background(double mandelstam_s);
 
 /** K+ n charge exchange cross section parametrization. */
 double kplusn_k0p(double mandelstam_s);
 
-/** K- p elastic cross section parametrization */
-double kminusp_elastic(double mandelstam_s);
+/** K- p elastic background cross section parametrization */
+double kminusp_elastic_background(double mandelstam_s);
 
-/** K- n elastic cross section parametrization */
-double kminusn_elastic(double mandelstam_s);
+/** K- n elastic background cross section parametrization */
+double kminusn_elastic_background(double mandelstam_s);
 
-/** K0 p elastic cross section parametrization */
-double k0p_elastic(double mandelstam_s);
+/** K0 p elastic background cross section parametrization */
+double k0p_elastic_background(double mandelstam_s);
 
-/** K0 n elastic cross section parametrization */
-double k0n_elastic(double mandelstam_s);
+/** K0 n elastic background cross section parametrization */
+double k0n_elastic_background(double mandelstam_s);
 
-/** Kbar0 p elastic cross section parametrization */
-double kbar0p_elastic(double mandelstam_s);
+/** Kbar0 p elastic background cross section parametrization */
+double kbar0p_elastic_background(double mandelstam_s);
 
-/** Kbar0 n elastic cross section parametrization */
-double kbar0n_elastic(double mandelstam_s);
+/** Kbar0 n elastic background cross section parametrization */
+double kbar0n_elastic_background(double mandelstam_s);
 
-/** K+ p inelastic cross section parametrization */
-double kplusp_inelastic(double mandelstam_s);
+/** K+ p inelastic background cross section parametrization */
+double kplusp_inelastic_background(double mandelstam_s);
 
-/** K+ n inelastic cross section parametrization */
-double kplusn_inelastic(double mandelstam_s);
+/** K+ n inelastic background cross section parametrization
+ *
+ * This interpolates the experimental data of the total cross section and
+ * subtracts the elastic and charge exchange cross section.
+ *
+ */
+double kplusn_inelastic_background(double mandelstam_s);
 
 /** Hash a pair of integers.
  *
