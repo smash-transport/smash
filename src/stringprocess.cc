@@ -55,6 +55,10 @@ StringProcess::StringProcess()
       pythia_->particleData.mWidth(pdgid, width_pole);
     }
   }
+  /* make energy-momentum conservation in PYTHIA more precise */
+  pythia_->readString("Check:epTolErr = 1e-6");
+  pythia_->readString("Check:epTolWarn = 1e-8");
+  /* initialize PYTHIA */
   pythia_->init();
   pythia_sigmatot_.init(&pythia_->info, pythia_->settings,
                         &pythia_->particleData);
