@@ -773,6 +773,7 @@ void ScatterAction::string_excitation_soft() {
     int ntry = 0;
     const int ntry_max = 100;
     while (!success && ntry < ntry_max) {
+      ntry++;
       int iproc = -1;
       double r_xsec = string_sub_cross_sections_sum_[4] *
           Random::uniform(0., 1.);
@@ -806,7 +807,6 @@ void ScatterAction::string_excitation_soft() {
         default:
           success = false;
       }
-      ntry++;
     }
     if (ntry == ntry_max) {
       throw std::runtime_error("too many tries in string_excitation_soft().");

@@ -239,15 +239,22 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   double mstrMin = is_AB_to_AX ? massB_ : massA_;
   double mstrMax = sqrtsAB_ - massH;
 
-  bool foundPabsX = false, foundMassX = false;
+  bool foundPabsX = false;
   int ntry = 0;
   int idqX1, idqX2;
   double QTrn, QTrx, QTry;
   double pabscomHX_sqr, massX;
-  while ((!foundPabsX || !foundMassX) && (ntry < 100)) {
+  while (!foundPabsX && ntry < 100) {
     ntry++;
     // decompose hadron into quarks
     make_string_ends(is_AB_to_AX ? PDGcodes_[1] : PDGcodes_[0], idqX1, idqX2);
+    // string mass must be larger than threshold set by PYTHIA.
+    mstrMin = pythia_->particleData.m0(idqX1) +
+              pythia_->particleData.m0(idqX2);
+    // this threshold cannot be larger than maximum of allowed string mass.
+    if (mstrMin > mstrMax) {
+      continue;
+    }
     // sample the transverse momentum transfer
     QTrx = Random::normal(0., sigma_qperp_ / sqrt2_);
     QTry = Random::normal(0., sigma_qperp_ / sqrt2_);
@@ -259,12 +266,9 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
     // magnitude of the three momentum must be larger than the transverse
     // momentum.
     foundPabsX = pabscomHX_sqr > QTrn * QTrn;
-    // string mass must be larger than threshold set by PYTHIA.
-    foundMassX = massX > (pythia_->particleData.m0(idqX1) +
-                          pythia_->particleData.m0(idqX2));
   }
 
-  if (!foundPabsX || !foundMassX) {
+  if (!foundPabsX) {
     return false;
   }
   double sign_direction = is_AB_to_AX ? 1. : -1.;
