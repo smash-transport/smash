@@ -57,6 +57,8 @@ StringProcess::StringProcess()
   pythia_sigmatot_.init(&pythia_->info, pythia_->settings,
                         &pythia_->particleData);
 
+  sqrt2_ = std::sqrt(2.);
+
   for (int imu = 0; imu < 3; imu++) {
     evecBasisAB_[imu] = ThreeVector(0., 0., 0.);
   }
@@ -113,8 +115,8 @@ int StringProcess::append_final_state(const FourVector &uString,
     double y = 0.5 * std::log((mom.x0() + pparallel) / (mom.x0() - pparallel));
     fragments.push_back({mom, pparallel, y, 0.0, pdg, false});
     // total lightcone momentum
-    p_pos_tot += (mom.x0() + pparallel) / std::sqrt(2.);
-    p_neg_tot += (mom.x0() - pparallel) / std::sqrt(2.);
+    p_pos_tot += (mom.x0() + pparallel) / sqrt2_;
+    p_neg_tot += (mom.x0() - pparallel) / sqrt2_;
     bstring += pythia_->particleData.baryonNumberType(pythia_id);
   }
   const int nfrag = fragments.size();
@@ -132,7 +134,7 @@ int StringProcess::append_final_state(const FourVector &uString,
     // recursively compute x^{+} coordinates of q-qbar formation vertex
     xvertex_pos[i + 1] = xvertex_pos[i] -
                          (fragments[i].momentum.x0() + fragments[i].pparallel) /
-                             (kappa_tension_string_ * std::sqrt(2.));
+                             (kappa_tension_string_ * sqrt2_);
   }
   // x^{-} coordinates of the backward end
   xvertex_neg[nfrag] = p_neg_tot / kappa_tension_string_;
@@ -140,7 +142,7 @@ int StringProcess::append_final_state(const FourVector &uString,
     // recursively compute x^{-} coordinates of q-qbar formation vertex
     xvertex_neg[i] = xvertex_neg[i + 1] -
                      (fragments[i].momentum.x0() - fragments[i].pparallel) /
-                         (kappa_tension_string_ * std::sqrt(2.));
+                         (kappa_tension_string_ * sqrt2_);
   }
 
   /* compute the cross section suppression factor for leading hadrons
@@ -178,11 +180,11 @@ int StringProcess::append_final_state(const FourVector &uString,
    * from the lightcone coordinates of q-qbar formation vertices. */
   for (int i = 0; i < nfrag; i++) {
     // set the formation time and position in the rest frame of string
-    double t_prod = (xvertex_pos[i] + xvertex_neg[i + 1]) / std::sqrt(2.);
+    double t_prod = (xvertex_pos[i] + xvertex_neg[i + 1]) / sqrt2_;
     FourVector fragment_position = FourVector(
         t_prod,
-        evecLong * (xvertex_pos[i] - xvertex_neg[i + 1]) / std::sqrt(2.));
-    // boost into the lab frame
+        evecLong * (xvertex_pos[i] - xvertex_neg[i + 1]) / sqrt2_);
+    // boost into the center of mass frame
     fragments[i].momentum = fragments[i].momentum.LorentzBoost(-vstring);
     fragment_position = fragment_position.LorentzBoost(-vstring);
     t_prod = fragment_position.x0();
@@ -257,8 +259,8 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
     // decompose hadron into quarks
     make_string_ends(is_AB_to_AX ? PDGcodes_[1] : PDGcodes_[0], idqX1, idqX2);
     // sample the transverse momentum transfer
-    QTrx = Random::normal(0., sigma_qperp_ / std::sqrt(2.));
-    QTry = Random::normal(0., sigma_qperp_ / std::sqrt(2.));
+    QTrx = Random::normal(0., sigma_qperp_ / sqrt2_);
+    QTry = Random::normal(0., sigma_qperp_ / sqrt2_);
     QTrn = std::sqrt(QTrx * QTrx + QTry * QTry);
     // sample the string mass and evaluate the three-momenta of hadron and
     // string.
@@ -369,23 +371,23 @@ bool StringProcess::next_DDiff() {
     const double xfracB =
         Random::beta_a0(xmin_gluon_fraction, pow_fgluon_beta_ + 1.);
     // sample the transverse momentum transfer
-    const double QTrx = Random::normal(0., sigma_qperp_ / std::sqrt(2.));
-    const double QTry = Random::normal(0., sigma_qperp_ / std::sqrt(2.));
+    const double QTrx = Random::normal(0., sigma_qperp_ / sqrt2_);
+    const double QTry = Random::normal(0., sigma_qperp_ / sqrt2_);
     const double QTrn = std::sqrt(QTrx * QTrx + QTry * QTry);
     // evaluate the lightcone momentum transfer
     const double QPos = -QTrn * QTrn / (2. * xfracB * PNegB_);
     const double QNeg = QTrn * QTrn / (2. * xfracA * PPosA_);
     // compute four-momentum of string 1
     threeMomentum =
-        evecBasisAB_[0] * (PPosA_ + QPos - PNegA_ - QNeg) / std::sqrt(2.) +
+        evecBasisAB_[0] * (PPosA_ + QPos - PNegA_ - QNeg) / sqrt2_ +
         evecBasisAB_[1] * QTrx + evecBasisAB_[2] * QTry;
-    pstr_com[0] = FourVector((PPosA_ + QPos + PNegA_ + QNeg) / std::sqrt(2.),
+    pstr_com[0] = FourVector((PPosA_ + QPos + PNegA_ + QNeg) / sqrt2_,
                              threeMomentum);
     // compute four-momentum of string 2
     threeMomentum =
-        evecBasisAB_[0] * (PPosB_ - QPos - PNegB_ + QNeg) / std::sqrt(2.) -
+        evecBasisAB_[0] * (PPosB_ - QPos - PNegB_ + QNeg) / sqrt2_ -
         evecBasisAB_[1] * QTrx - evecBasisAB_[2] * QTry;
-    pstr_com[1] = FourVector((PPosB_ - QPos + PNegB_ - QNeg) / std::sqrt(2.),
+    pstr_com[1] = FourVector((PPosB_ - QPos + PNegB_ - QNeg) / sqrt2_,
                              threeMomentum);
     found_mass[0] = false;
     found_mass[1] = false;
@@ -453,8 +455,8 @@ bool StringProcess::next_NDiffSoft() {
     const double xfracA = Random::beta(pow_fquark_alpha_, pow_fquark_beta_);
     const double xfracB = Random::beta(pow_fquark_alpha_, pow_fquark_beta_);
     // sample the transverse momentum transfer
-    const double QTrx = Random::normal(0., sigma_qperp_ / std::sqrt(2.));
-    const double QTry = Random::normal(0., sigma_qperp_ / std::sqrt(2.));
+    const double QTrx = Random::normal(0., sigma_qperp_ / sqrt2_);
+    const double QTry = Random::normal(0., sigma_qperp_ / sqrt2_);
     const double QTrn = std::sqrt(QTrx * QTrx + QTry * QTry);
     // evaluate the lightcone momentum transfer
     const double QPos = -QTrn * QTrn / (2. * xfracB * PNegB_);
@@ -463,16 +465,16 @@ bool StringProcess::next_NDiffSoft() {
     const double dPNeg = xfracB * PNegB_ - QNeg;
     // compute four-momentum of string 1
     ThreeVector threeMomentum =
-        evecBasisAB_[0] * (PPosA_ + dPPos - PNegA_ - dPNeg) / std::sqrt(2.) +
+        evecBasisAB_[0] * (PPosA_ + dPPos - PNegA_ - dPNeg) / sqrt2_ +
         evecBasisAB_[1] * QTrx + evecBasisAB_[2] * QTry;
-    pstr_com[0] = FourVector((PPosA_ + dPPos + PNegA_ + dPNeg) / std::sqrt(2.),
+    pstr_com[0] = FourVector((PPosA_ + dPPos + PNegA_ + dPNeg) / sqrt2_,
                              threeMomentum);
     m_str[0] = pstr_com[0].sqr();
     // compute four-momentum of string 2
     threeMomentum =
-        evecBasisAB_[0] * (PPosB_ - dPPos - PNegB_ + dPNeg) / std::sqrt(2.) -
+        evecBasisAB_[0] * (PPosB_ - dPPos - PNegB_ + dPNeg) / sqrt2_ -
         evecBasisAB_[1] * QTrx - evecBasisAB_[2] * QTry;
-    pstr_com[1] = FourVector((PPosB_ - dPPos + PNegB_ - dPNeg) / std::sqrt(2.),
+    pstr_com[1] = FourVector((PPosB_ - dPPos + PNegB_ - dPNeg) / sqrt2_,
                              threeMomentum);
 
     found_mass[0] = false;
@@ -644,13 +646,13 @@ void StringProcess::make_orthonormal_basis() {
 
 void StringProcess::compute_incoming_lightcone_momenta() {
   PPosA_ =
-      (pcom_[0].x0() + evecBasisAB_[0] * pcom_[0].threevec()) / std::sqrt(2.);
+      (pcom_[0].x0() + evecBasisAB_[0] * pcom_[0].threevec()) / sqrt2_;
   PNegA_ =
-      (pcom_[0].x0() - evecBasisAB_[0] * pcom_[0].threevec()) / std::sqrt(2.);
+      (pcom_[0].x0() - evecBasisAB_[0] * pcom_[0].threevec()) / sqrt2_;
   PPosB_ =
-      (pcom_[1].x0() + evecBasisAB_[0] * pcom_[1].threevec()) / std::sqrt(2.);
+      (pcom_[1].x0() + evecBasisAB_[0] * pcom_[1].threevec()) / sqrt2_;
   PNegB_ =
-      (pcom_[1].x0() - evecBasisAB_[0] * pcom_[1].threevec()) / std::sqrt(2.);
+      (pcom_[1].x0() - evecBasisAB_[0] * pcom_[1].threevec()) / sqrt2_;
 }
 
 int StringProcess::diquark_from_quarks(int q1, int q2) {

@@ -95,6 +95,9 @@ class StringProcess {
   /// Lorentz gamma factor of center of mass in the computational frame
   double gamma_factor_com_;
 
+  /// square root of 2 (sqrt(2))
+  double sqrt2_;
+
   /**
    * final state array
    * which must be accessed after the collision
