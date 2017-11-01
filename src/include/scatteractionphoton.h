@@ -80,6 +80,9 @@ class ScatterActionPhoton : public ScatterAction {
 
   const int num_tab_pts_ = 200;
 
+  // conversion factor to millibarn
+  const double to_mb = 0.3894;
+
   double pi_pi_rho0(const double M, const double s) const;
 
   double pi_pi0_rho(const double M, const double s) const;

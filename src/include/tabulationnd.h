@@ -14,6 +14,7 @@
 #include <functional>
 #include <iostream>
 #include <vector>
+#include <cassert>
 
 template <int dim>
 class TabulationND {};
@@ -67,8 +68,7 @@ class TabulationND<2> {
     ny_ = std::ceil((y1_ - y0_) * inv_dy_ + 1);
     n_ = nx_ * ny_;
 
-    std::cout << "nx, ny " << nx_ << " " << ny_ << "\n";
-
+    
     values_.resize(n_);
     double x, y;
     for (size_t i = 0; i < ny_; i++) {

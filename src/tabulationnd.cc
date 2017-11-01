@@ -12,6 +12,7 @@ template class TabulationND<1>;
 template class TabulationND<2>;
 
 double TabulationND<1>::get_linear(double x) const {
+    assert(x >= x0 && x <= x1);
   const double index_double = (x - x0_) * inv_dx_;
   // cast truncates, gets lower index
   const size_t lower = static_cast<size_t>(index_double);
@@ -23,7 +24,10 @@ double TabulationND<1>::get_linear(double x) const {
 }
 
 double TabulationND<2>::get_linear(const double x, const double y) const {
+    assert(x >= x0 && x <= x1);
+    assert(y >= y0 && y <= y1);
   // lower index
+
   const double x_idx_d = (x - x0_) * inv_dx_;
   const double y_idx_d = (y - y0_) * inv_dy_;
 
