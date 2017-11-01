@@ -770,18 +770,20 @@ void ScatterAction::string_excitation_soft() {
     string_process_->init(incoming_particles_, time_of_execution_, gamma_cm());
     /* implement collision */
     bool success = false;
-    while (!success) {
+    int ntry = 0;
+    const int ntry_max = 100;
+    while (!success && ntry < ntry_max) {
       int iproc = -1;
       double r_xsec = string_sub_cross_sections_sum_[4] *
           Random::uniform(0., 1.);
       for (int i = 0; i < 4; i++) {
-        if((r_xsec >= string_sub_cross_sections_sum_[i]) &&
-           (r_xsec < string_sub_cross_sections_sum_[i+1])) {
+        if ((r_xsec >= string_sub_cross_sections_sum_[i]) &&
+            (r_xsec < string_sub_cross_sections_sum_[i+1])) {
           iproc = i;
           break;
         }
       }
-      if(iproc == -1) {
+      if (iproc == -1) {
         throw std::runtime_error("soft string subprocess is not specified.");
       }
       switch (iproc) {
@@ -804,6 +806,10 @@ void ScatterAction::string_excitation_soft() {
         default:
           success = false;
       }
+      ntry++;
+    }
+    if (ntry == ntry_max) {
+      throw std::runtime_error("too many tries in string_excitation_soft().");
     }
     outgoing_particles_ = string_process_->get_final_state();
     /* If the incoming particles already were unformed, the formation
