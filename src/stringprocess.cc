@@ -9,11 +9,6 @@
 
 #include <array>
 
-// #include <math.h>
-// #include <stdio.h>
-// #include <stdlib.h>
-// #include <string.h>
-
 #include "include/angles.h"
 #include "include/kinematics.h"
 #include "include/random.h"
@@ -62,7 +57,7 @@ StringProcess::StringProcess()
   pythia_sigmatot_.init(&pythia_->info, pythia_->settings,
                         &pythia_->particleData);
 
-  for (int imu = 0; imu < 4; imu++) {
+  for (int imu = 0; imu < 3; imu++) {
     evecBasisAB_[imu] = ThreeVector(0., 0., 0.);
   }
 
@@ -283,18 +278,14 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   double sign_direction = is_AB_to_AX ? 1. : -1.;
   const ThreeVector cm_momentum =
       sign_direction *
-      (evecBasisAB_[3] * std::sqrt(pabscomHX_sqr - QTrn * QTrn) +
+      (evecBasisAB_[0] * std::sqrt(pabscomHX_sqr - QTrn * QTrn) +
        evecBasisAB_[1] * QTrx + evecBasisAB_[2] * QTry);
   const FourVector pstrHcom(std::sqrt(pabscomHX_sqr + massH * massH),
                             cm_momentum);
   const FourVector pstrXcom(std::sqrt(pabscomHX_sqr + massX * massX),
                             -cm_momentum);
 
-  //const FourVector pstrHlab = pstrHcom.LorentzBoost(-vcomAB_);
-  //const FourVector pstrXlab = pstrXcom.LorentzBoost(-vcomAB_);
-
   const FourVector ustrXcom = pstrXcom / massX;
-  //const FourVector ustrXlab = pstrXlab / massX;
   /* determine direction in which the string is stretched.
    * this is set to be same with the three-momentum of string
    * in the center of mass frame. */
@@ -326,14 +317,10 @@ bool StringProcess::make_final_state_2strings(
     const std::array<std::array<int, 2>, 2> &quarks,
     const std::array<FourVector, 2> &pstr_com,
     const std::array<double, 2> &m_str) {
-  //const FourVector pstr1lab = pstr_com[0].LorentzBoost(-vcomAB_);
-  //const FourVector pstr2lab = pstr_com[1].LorentzBoost(-vcomAB_);
   const std::array<FourVector, 2> ustr_com = {pstr_com[0] / m_str[0],
                                               pstr_com[1] / m_str[1]};
-  //const std::array<FourVector, 2> ustr_lab = {pstr1lab / m_str[0],
-  //                                            pstr2lab / m_str[1]};
   for (int i = 0; i < 2; i++) {
-    /* determine direction in which string 1 is stretched.
+    /* determine direction in which string i is stretched.
      * this is set to be same with the three-momentum of string
      * in the center of mass frame. */
     const ThreeVector mom = pstr_com[i].threevec();
@@ -390,13 +377,13 @@ bool StringProcess::next_DDiff() {
     const double QNeg = QTrn * QTrn / (2. * xfracA * PPosA_);
     // compute four-momentum of string 1
     threeMomentum =
-        evecBasisAB_[3] * (PPosA_ + QPos - PNegA_ - QNeg) / std::sqrt(2.) +
+        evecBasisAB_[0] * (PPosA_ + QPos - PNegA_ - QNeg) / std::sqrt(2.) +
         evecBasisAB_[1] * QTrx + evecBasisAB_[2] * QTry;
     pstr_com[0] = FourVector((PPosA_ + QPos + PNegA_ + QNeg) / std::sqrt(2.),
                              threeMomentum);
     // compute four-momentum of string 2
     threeMomentum =
-        evecBasisAB_[3] * (PPosB_ - QPos - PNegB_ + QNeg) / std::sqrt(2.) -
+        evecBasisAB_[0] * (PPosB_ - QPos - PNegB_ + QNeg) / std::sqrt(2.) -
         evecBasisAB_[1] * QTrx - evecBasisAB_[2] * QTry;
     pstr_com[1] = FourVector((PPosB_ - QPos + PNegB_ - QNeg) / std::sqrt(2.),
                              threeMomentum);
@@ -476,14 +463,14 @@ bool StringProcess::next_NDiffSoft() {
     const double dPNeg = xfracB * PNegB_ - QNeg;
     // compute four-momentum of string 1
     ThreeVector threeMomentum =
-        evecBasisAB_[3] * (PPosA_ + dPPos - PNegA_ - dPNeg) / std::sqrt(2.) +
+        evecBasisAB_[0] * (PPosA_ + dPPos - PNegA_ - dPNeg) / std::sqrt(2.) +
         evecBasisAB_[1] * QTrx + evecBasisAB_[2] * QTry;
     pstr_com[0] = FourVector((PPosA_ + dPPos + PNegA_ + dPNeg) / std::sqrt(2.),
                              threeMomentum);
     m_str[0] = pstr_com[0].sqr();
     // compute four-momentum of string 2
     threeMomentum =
-        evecBasisAB_[3] * (PPosB_ - dPPos - PNegB_ + dPNeg) / std::sqrt(2.) -
+        evecBasisAB_[0] * (PPosB_ - dPPos - PNegB_ + dPNeg) / std::sqrt(2.) -
         evecBasisAB_[1] * QTrx - evecBasisAB_[2] * QTry;
     pstr_com[1] = FourVector((PPosB_ - dPPos + PNegB_ - dPNeg) / std::sqrt(2.),
                              threeMomentum);
@@ -511,7 +498,6 @@ bool StringProcess::next_NDiffSoft() {
 
 /** baryon-antibaryon annihilation */
 bool StringProcess::next_BBbarAnn() {
-  //const std::array<FourVector, 2> ustrlab = {ucomAB_, ucomAB_};
   const std::array<FourVector, 2> ustrcom = {FourVector(1.,0.,0.,0.),
                                              FourVector(1.,0.,0.,0.)};
 
@@ -623,12 +609,12 @@ void StringProcess::make_orthonormal_basis() {
     double ex, ey, et;
     double theta, phi;
 
-    evecBasisAB_[3] = pcom_[0].threevec() / pabscomAB;
+    evecBasisAB_[0] = pcom_[0].threevec() / pabscomAB;
 
-    theta = std::acos(evecBasisAB_[3].x3());
+    theta = std::acos(evecBasisAB_[0].x3());
 
-    ex = evecBasisAB_[3].x1();
-    ey = evecBasisAB_[3].x2();
+    ex = evecBasisAB_[0].x1();
+    ey = evecBasisAB_[0].x2();
     et = std::sqrt(ex * ex + ey * ey);
     if (ey > 0.) {
       phi = std::acos(ex / et);
@@ -647,24 +633,24 @@ void StringProcess::make_orthonormal_basis() {
     if (pcom_[0].x3() > 0.) {
       evecBasisAB_[1] = ThreeVector(1., 0., 0.);
       evecBasisAB_[2] = ThreeVector(0., 1., 0.);
-      evecBasisAB_[3] = ThreeVector(0., 0., 1.);
+      evecBasisAB_[0] = ThreeVector(0., 0., 1.);
     } else {
       evecBasisAB_[1] = ThreeVector(0., 1., 0.);
       evecBasisAB_[2] = ThreeVector(1., 0., 0.);
-      evecBasisAB_[3] = ThreeVector(0., 0., -1.);
+      evecBasisAB_[0] = ThreeVector(0., 0., -1.);
     }
   }
 }
 
 void StringProcess::compute_incoming_lightcone_momenta() {
   PPosA_ =
-      (pcom_[0].x0() + evecBasisAB_[3] * pcom_[0].threevec()) / std::sqrt(2.);
+      (pcom_[0].x0() + evecBasisAB_[0] * pcom_[0].threevec()) / std::sqrt(2.);
   PNegA_ =
-      (pcom_[0].x0() - evecBasisAB_[3] * pcom_[0].threevec()) / std::sqrt(2.);
+      (pcom_[0].x0() - evecBasisAB_[0] * pcom_[0].threevec()) / std::sqrt(2.);
   PPosB_ =
-      (pcom_[1].x0() + evecBasisAB_[3] * pcom_[1].threevec()) / std::sqrt(2.);
+      (pcom_[1].x0() + evecBasisAB_[0] * pcom_[1].threevec()) / std::sqrt(2.);
   PNegB_ =
-      (pcom_[1].x0() - evecBasisAB_[3] * pcom_[1].threevec()) / std::sqrt(2.);
+      (pcom_[1].x0() - evecBasisAB_[0] * pcom_[1].threevec()) / std::sqrt(2.);
 }
 
 int StringProcess::diquark_from_quarks(int q1, int q2) {

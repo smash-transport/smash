@@ -64,7 +64,7 @@ class StringProcess {
    * Orthonormal basis vectors in the center of mass frame,
    * where the 3rd one is parallel to momentum of incoming particle A
    */
-  std::array<ThreeVector, 4> evecBasisAB_;
+  std::array<ThreeVector, 3> evecBasisAB_;
   /// total number of final state particles
   int NpartFinal_;
   /// number of particles fragmented from strings
