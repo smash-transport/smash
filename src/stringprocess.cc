@@ -22,7 +22,9 @@ StringProcess::StringProcess()
       pow_fquark_alpha_(1.),
       pow_fquark_beta_(2.5),
       sigma_qperp_(0.5),
-      kappa_tension_string_(1.0) {
+      kappa_tension_string_(1.0),
+      time_collision_(0.),
+      gamma_factor_com_(1.) {
   // setup and initialize pythia
   pythia_ = make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
   /* select only inelastic events: */
@@ -63,18 +65,6 @@ StringProcess::StringProcess()
     evecBasisAB_[imu] = ThreeVector(0., 0., 0.);
   }
 
-  PPosA_ = 0.;
-  PNegA_ = 0.;
-  PPosB_ = 0.;
-  PNegB_ = 0.;
-  massA_ = massB_ = 0.;
-  sqrtsAB_ = 0.;
-  time_collision_ = 0.;
-  gamma_factor_com_ = 1.;
-
-  NpartFinal_ = 0;
-  NpartString_[0] = 0;
-  NpartString_[1] = 0;
   final_state_.clear();
 }
 
