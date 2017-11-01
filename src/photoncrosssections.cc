@@ -11,8 +11,8 @@
 
 using namespace Smash;
 
-template class PhotonCrossSection<ComputationMethod::Analytic>;
-template class PhotonCrossSection<ComputationMethod::Lookup>;
+// template class PhotonCrossSection<ComputationMethod::Analytic>;
+// template class PhotonCrossSection<ComputationMethod::Lookup>;
 
 double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho0_pi0(
     const double s) {
@@ -3738,6 +3738,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
 
   const double t1 = t_mandelstam[1];
   const double t2 = t_mandelstam[0];
+
   const double xs =
       to_mb *
       (-(pow(Const, 2) * pow(ghat, 4) *
@@ -4933,6 +4934,262 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho_pi0(
   return diff_xsection * to_mb;
 }
 
+double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho0_pi(
+    const double s, const double t) {
+  const double mrho = m_rho_;
+  const double m_pi = m_pion_;
+
+  const double diff_xsection =
+      1 / 3.0 *
+      (pow(Const, 2) * pow(ghat, 4) *
+       ((-8 * pow(-2 + delta, 2) * pow(m_pi, 2)) /
+            (pow(mrho, 2) * pow(pow(m_pi, 2) - s, 2)) -
+        (8 * pow(-2 + delta, 2) * pow(m_pi, 2) *
+         (pow(m_pi, 4) + pow(pow(mrho, 2) - t, 2) -
+          2 * pow(m_pi, 2) * (pow(mrho, 2) + t))) /
+            (pow(mrho, 2) *
+             (pow(m_pi, 4) + pow(pow(mrho, 2) - s, 2) -
+              2 * pow(m_pi, 2) * (pow(mrho, 2) + s)) *
+             pow(pow(m_pi, 2) - t, 2)) +
+        (4 * (-2 + delta) * (eta1 - eta2) * (pow(ma1, 2) - s) *
+         (-(eta2 * (pow(m_pi, 2) + s)) + eta1 * (-pow(mrho, 2) + s + t)) *
+         (-pow(m_pi, 4) + pow(m_pi, 2) * (pow(mrho, 2) - 2 * t) +
+          t * (-pow(mrho, 2) + 2 * s + t))) /
+            ((pow(Gammaa1, 2) * pow(ma1, 2) + pow(pow(ma1, 2) - s, 2)) *
+             (pow(m_pi, 4) + pow(pow(mrho, 2) - s, 2) -
+              2 * pow(m_pi, 2) * (pow(mrho, 2) + s)) *
+             (pow(m_pi, 2) - t)) -
+        (8 * (-2 + delta) *
+         (pow(m_pi, 4) * (2 - 3 * delta + 8 * C4 * pow(mrho, 2)) +
+          pow(mrho, 4) * (-2 + delta + 8 * C4 * t) +
+          t * ((2 + 3 * delta) * s + 2 * delta * t) +
+          pow(m_pi, 2) *
+              (-8 * C4 * pow(mrho, 4) + (-2 + delta) * s - (2 + 3 * delta) * t +
+               4 * pow(mrho, 2) * (1 + 4 * C4 * t)) -
+          pow(mrho, 2) * (t * (-2 + 3 * delta + 8 * C4 * t) +
+                          s * (-2 + delta + 16 * C4 * t)))) /
+            (pow(mrho, 2) *
+             (pow(m_pi, 4) + pow(pow(mrho, 2) - s, 2) -
+              2 * pow(m_pi, 2) * (pow(mrho, 2) + s)) *
+             (pow(m_pi, 2) - t)) +
+        (4 * (-2 + delta) * (eta1 - eta2) * (pow(ma1, 2) - s) *
+         (eta2 * (pow(m_pi, 2) + s) *
+              (pow(m_pi, 4) - pow(m_pi, 2) * (pow(mrho, 2) - 2 * s) +
+               s * (pow(mrho, 2) - s - 2 * t)) +
+          eta1 * (-4 * pow(m_pi, 6) +
+                  s * (-pow(mrho, 2) + s) * (-pow(mrho, 2) + s + t) +
+                  pow(m_pi, 4) * (3 * pow(mrho, 2) + s + t) -
+                  pow(m_pi, 2) * (pow(mrho, 4) + 2 * s * (s - t) +
+                                  pow(mrho, 2) * (-s + t))))) /
+            ((pow(Gammaa1, 2) * pow(ma1, 2) + pow(pow(ma1, 2) - s, 2)) *
+             (pow(m_pi, 2) - s) *
+             (pow(m_pi, 4) + pow(pow(mrho, 2) - s, 2) -
+              2 * pow(m_pi, 2) * (pow(mrho, 2) + s))) +
+        (pow(eta1 - eta2, 2) *
+         (pow(eta2, 2) *
+              (pow(m_pi, 8) - 2 * pow(m_pi, 6) * pow(mrho, 2) +
+               pow(m_pi, 4) * (pow(pow(mrho, 2) + 2 * s, 2) - 2 * s * t) +
+               pow(s, 2) * (pow(pow(mrho, 2) + s, 2) +
+                            2 * (-pow(mrho, 2) + s) * t + 2 * pow(t, 2)) -
+               2 * pow(m_pi, 2) * s *
+                   (pow(mrho, 4) + pow(mrho, 2) * (2 * s - t) +
+                    2 * s * (s + t))) +
+          2 * eta1 * eta2 *
+              (-pow(m_pi, 8) +
+               pow(m_pi, 4) * (pow(mrho, 4) + 2 * pow(mrho, 2) * s +
+                               2 * s * (-2 * s + t)) -
+               2 * pow(m_pi, 2) * s *
+                   (pow(mrho, 4) + pow(mrho, 2) * (s + t) - 2 * s * (s + t)) +
+               pow(s, 2) * (pow(mrho, 4) - pow(s, 2) + 2 * pow(mrho, 2) * t -
+                            2 * t * (s + t))) +
+          pow(eta1, 2) *
+              (pow(m_pi, 8) - 2 * pow(m_pi, 6) * pow(mrho, 2) +
+               pow(m_pi, 4) * (3 * pow(mrho, 4) + 2 * s * (2 * s - t) +
+                               2 * pow(mrho, 2) * (-3 * s + t)) -
+               2 * pow(m_pi, 2) * (pow(mrho, 2) - s) *
+                   (-2 * s * (s + t) + pow(mrho, 2) * (2 * s + t)) +
+               s * (-pow(mrho, 2) + s) *
+                   (pow(s, 2) + 2 * s * t + 2 * pow(t, 2) -
+                    pow(mrho, 2) * (s + 2 * t))))) /
+            ((pow(Gammaa1, 2) * pow(ma1, 2) + pow(pow(ma1, 2) - s, 2)) *
+             (pow(m_pi, 4) + pow(pow(mrho, 2) - s, 2) -
+              2 * pow(m_pi, 2) * (pow(mrho, 2) + s))) +
+        (pow(eta1 - eta2, 2) *
+         (-2 * eta1 * eta2 *
+              (pow(m_pi, 8) -
+               pow(m_pi, 4) *
+                   (pow(mrho, 4) + 2 * (pow(mrho, 2) + s) * t - 4 * pow(t, 2)) +
+               pow(t, 2) * (-pow(mrho, 4) - 2 * pow(mrho, 2) * s +
+                            2 * pow(s, 2) + 2 * s * t + pow(t, 2)) +
+               2 * pow(m_pi, 2) * t *
+                   (pow(mrho, 4) + pow(mrho, 2) * (s + t) - 2 * t * (s + t))) +
+          pow(eta2, 2) *
+              (pow(m_pi, 8) - 2 * pow(m_pi, 6) * pow(mrho, 2) +
+               pow(m_pi, 4) *
+                   (pow(mrho, 4) + 4 * pow(mrho, 2) * t - 2 * (s - 2 * t) * t) +
+               pow(t, 2) * (pow(mrho, 4) + 2 * pow(s, 2) + 2 * s * t +
+                            pow(t, 2) + 2 * pow(mrho, 2) * (-s + t)) -
+               2 * pow(m_pi, 2) * t *
+                   (pow(mrho, 4) - pow(mrho, 2) * (s - 2 * t) +
+                    2 * t * (s + t))) +
+          pow(eta1, 2) *
+              (pow(m_pi, 8) - 2 * pow(m_pi, 6) * pow(mrho, 2) +
+               pow(m_pi, 4) *
+                   (3 * pow(mrho, 4) + 2 * pow(mrho, 2) * (s - 3 * t) -
+                    2 * (s - 2 * t) * t) +
+               t * (-pow(mrho, 2) + t) *
+                   (2 * pow(s, 2) + 2 * s * t + pow(t, 2) -
+                    pow(mrho, 2) * (2 * s + t)) -
+               2 * pow(m_pi, 2) * (-pow(mrho, 2) + t) *
+                   (2 * t * (s + t) - pow(mrho, 2) * (s + 2 * t))))) /
+            ((pow(m_pi, 4) + pow(pow(mrho, 2) - s, 2) -
+              2 * pow(m_pi, 2) * (pow(mrho, 2) + s)) *
+             pow(pow(ma1, 2) - t, 2)) +
+        (8 * (-2 + delta) *
+         ((-2 + delta) * pow(mrho, 6) +
+          pow(m_pi, 6) * (-2 + 3 * delta - 8 * C4 * pow(mrho, 2)) +
+          s * t * ((-2 + 3 * delta) * s + 4 * delta * t) +
+          pow(m_pi, 4) *
+              (8 * C4 * pow(mrho, 4) + 4 * delta * s + 2 * t - 3 * delta * t -
+               pow(mrho, 2) * (2 + delta + 16 * C4 * s - 8 * C4 * t)) +
+          pow(mrho, 4) *
+              (-((-2 + delta) * t) + s * (4 - 2 * delta + 8 * C4 * t)) +
+          pow(mrho, 2) * s *
+              (s * (-2 + delta - 8 * C4 * t) - 2 * t * (delta + 8 * C4 * t)) +
+          pow(m_pi, 2) *
+              (s * ((2 - 3 * delta) * s - 8 * delta * t) -
+               pow(mrho, 4) * (-6 + 3 * delta + 8 * C4 * (s + t)) +
+               pow(mrho, 2) * (8 * C4 * pow(s, 2) + 4 * (-1 + delta) * t +
+                               s * (-8 + 6 * delta + 32 * C4 * t))))) /
+            (pow(mrho, 2) * (pow(m_pi, 2) - s) *
+             (pow(m_pi, 4) + pow(pow(mrho, 2) - s, 2) -
+              2 * pow(m_pi, 2) * (pow(mrho, 2) + s)) *
+             (pow(m_pi, 2) - t)) +
+        (2 * pow(eta1 - eta2, 2) * (pow(ma1, 2) - s) *
+         (pow(eta1, 2) * (pow(m_pi, 8) +
+                          pow(m_pi, 4) * (2 * pow(mrho, 4) + 2 * s * t -
+                                          3 * pow(mrho, 2) * (s + t)) +
+                          s * t *
+                              (2 * pow(mrho, 4) + pow(s, 2) + 3 * s * t +
+                               pow(t, 2) - 3 * pow(mrho, 2) * (s + t)) -
+                          2 * pow(m_pi, 2) * (pow(mrho, 2) - s - t) *
+                              (-2 * s * t + pow(mrho, 2) * (s + t))) +
+          pow(eta2, 2) * (pow(m_pi, 8) -
+                          4 * pow(m_pi, 2) * s * t * (pow(mrho, 2) + s + t) +
+                          pow(m_pi, 4) * (2 * s * t + pow(mrho, 2) * (s + t)) +
+                          s * t *
+                              (pow(s, 2) + 3 * s * t + pow(t, 2) +
+                               pow(mrho, 2) * (s + t))) +
+          2 * eta1 * eta2 *
+              (-pow(m_pi, 8) + 2 * pow(m_pi, 6) * pow(mrho, 2) -
+               2 * pow(m_pi, 4) * s * t -
+               s * t *
+                   (pow(s, 2) + 3 * s * t + pow(t, 2) -
+                    2 * pow(mrho, 2) * (s + t)) -
+               pow(m_pi, 2) *
+                   (-4 * s * t * (s + t) +
+                    pow(mrho, 2) * (pow(s, 2) + 4 * s * t + pow(t, 2)))))) /
+            ((pow(Gammaa1, 2) * pow(ma1, 2) + pow(pow(ma1, 2) - s, 2)) *
+             (pow(m_pi, 4) + pow(pow(mrho, 2) - s, 2) -
+              2 * pow(m_pi, 2) * (pow(mrho, 2) + s)) *
+             (pow(ma1, 2) - t)) +
+        (8 *
+         (pow(delta, 2) *
+              (8 * pow(m_pi, 4) + 3 * pow(mrho, 4) -
+               6 * pow(mrho, 2) * (s + t) + 2 * pow(s + t, 2) +
+               4 * pow(m_pi, 2) * (3 * pow(mrho, 2) - 2 * (s + t))) -
+          4 * delta * pow(mrho, 2) *
+              (16 * C4 * pow(m_pi, 4) + pow(mrho, 2) * (3 - 6 * C4 * (s + t)) +
+               (s + t) * (-3 + 4 * C4 * (s + t)) +
+               2 * pow(m_pi, 2) * (3 + C4 * (6 * pow(mrho, 2) - 8 * (s + t)))) +
+          4 * pow(mrho, 4) *
+              (3 + 4 * C4 * (2 * pow(m_pi, 2) - s - t) *
+                       (3 + C4 * (4 * pow(m_pi, 2) - 2 * (s + t)))))) /
+            (pow(mrho, 4) * (pow(m_pi, 4) + pow(pow(mrho, 2) - s, 2) -
+                             2 * pow(m_pi, 2) * (pow(mrho, 2) + s))) +
+        (4 * (eta1 - eta2) * (-pow(ma1, 2) + s) *
+         (eta2 * (-2 * pow(m_pi, 4) * (delta - 4 * C4 * pow(mrho, 2)) *
+                      (pow(mrho, 2) + 4 * s) +
+                  pow(m_pi, 2) *
+                      (-2 * pow(mrho, 4) * (-2 + delta + 8 * C4 * s) +
+                       8 * delta * s * (s + t) -
+                       pow(mrho, 2) * ((-10 + delta) * s - (-2 + delta) * t +
+                                       32 * C4 * s * (s + t))) +
+                  s * (2 * pow(mrho, 4) * (-2 + delta + 4 * C4 * s) -
+                       2 * delta * pow(s + t, 2) +
+                       pow(mrho, 2) * ((-6 + delta) * s + (-2 + delta) * t +
+                                       8 * C4 * pow(s + t, 2)))) +
+          eta1 *
+              (4 * pow(m_pi, 4) *
+                   (6 * C4 * pow(mrho, 4) + 2 * delta * s +
+                    pow(mrho, 2) * (1 - 2 * delta - 8 * C4 * s)) +
+               2 * delta * s * pow(s + t, 2) -
+               pow(mrho, 2) *
+                   ((-6 + 5 * delta) * pow(s, 2) +
+                    2 * (-2 + 3 * delta) * s * t + (-2 + delta) * pow(t, 2) +
+                    8 * C4 * s * pow(s + t, 2)) +
+               pow(mrho, 4) *
+                   ((-2 + delta) * (3 * s + t) + 8 * C4 * s * (s + 2 * t)) -
+               2 * pow(m_pi, 2) *
+                   (4 * delta * s * (s + t) -
+                    pow(mrho, 2) * (-6 * s + 7 * delta * s - 2 * t +
+                                    3 * delta * t + 16 * C4 * s * (s + t)) +
+                    2 * pow(mrho, 4) * (-2 + delta + 4 * C4 * (2 * s + t)))))) /
+            (pow(mrho, 2) *
+             (pow(Gammaa1, 2) * pow(ma1, 2) + pow(pow(ma1, 2) - s, 2)) *
+             (pow(m_pi, 4) + pow(pow(mrho, 2) - s, 2) -
+              2 * pow(m_pi, 2) * (pow(mrho, 2) + s))) +
+        (4 * (eta1 - eta2) *
+         (((-2 + delta) *
+           (pow(m_pi, 4) - pow(m_pi, 2) * (pow(mrho, 2) - 2 * s) +
+            s * (pow(mrho, 2) - s - 2 * t)) *
+           (eta1 * (pow(mrho, 2) - s - t) + eta2 * (pow(m_pi, 2) + t))) /
+              ((pow(m_pi, 2) - s) * (pow(ma1, 2) - t)) +
+          ((-2 + delta) *
+           (eta2 * (pow(m_pi, 2) + t) *
+                (pow(m_pi, 4) - pow(m_pi, 2) * (pow(mrho, 2) - 2 * t) +
+                 (pow(mrho, 2) - 2 * s - t) * t) +
+            eta1 * (-4 * pow(m_pi, 6) +
+                    (pow(mrho, 2) - t) * (pow(mrho, 2) - s - t) * t +
+                    pow(m_pi, 4) * (3 * pow(mrho, 2) + s + t) -
+                    pow(m_pi, 2) * (pow(mrho, 4) + pow(mrho, 2) * (s - t) +
+                                    2 * t * (-s + t))))) /
+              ((-pow(ma1, 2) + t) * (-pow(m_pi, 2) + t)) +
+          (eta2 *
+               (-2 * pow(m_pi, 4) * (delta - 4 * C4 * pow(mrho, 2)) *
+                    (pow(mrho, 2) + 4 * t) +
+                pow(m_pi, 2) *
+                    (8 * delta * t * (s + t) -
+                     2 * pow(mrho, 4) * (-2 + delta + 8 * C4 * t) -
+                     pow(mrho, 2) * (-((-2 + delta) * s) + (-10 + delta) * t +
+                                     32 * C4 * t * (s + t))) +
+                t * (-2 * delta * pow(s + t, 2) +
+                     2 * pow(mrho, 4) * (-2 + delta + 4 * C4 * t) +
+                     pow(mrho, 2) * ((-2 + delta) * s + (-6 + delta) * t +
+                                     8 * C4 * pow(s + t, 2)))) +
+           eta1 *
+               (2 * delta * t * pow(s + t, 2) -
+                pow(mrho, 2) *
+                    ((-2 + delta) * pow(s, 2) + 2 * (-2 + 3 * delta) * s * t +
+                     (-6 + 5 * delta) * pow(t, 2) +
+                     8 * C4 * t * pow(s + t, 2)) +
+                pow(mrho, 4) *
+                    (8 * C4 * t * (2 * s + t) + (-2 + delta) * (s + 3 * t)) +
+                4 * pow(m_pi, 4) *
+                    (6 * C4 * pow(mrho, 4) + 2 * delta * t +
+                     pow(mrho, 2) * (1 - 2 * delta - 8 * C4 * t)) -
+                2 * pow(m_pi, 2) *
+                    (4 * delta * t * (s + t) -
+                     pow(mrho, 2) * (-2 * s + 3 * delta * s - 6 * t +
+                                     7 * delta * t + 16 * C4 * t * (s + t)) +
+                     2 * pow(mrho, 4) * (-2 + delta + 4 * C4 * (s + 2 * t))))) /
+              (pow(mrho, 2) * (-pow(ma1, 2) + t)))) /
+            (pow(m_pi, 4) + pow(pow(mrho, 2) - s, 2) -
+             2 * pow(m_pi, 2) * (pow(mrho, 2) + s)))) /
+      (512. * Pi);
+
+  return to_mb * diff_xsection;
+}
 double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi0_rho_pi(
     const double s, const double t) {
   const double mpion = m_pion_, mrho = m_rho_;
@@ -5005,45 +5262,58 @@ double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi0_rho_pi(
   return tab_pi0_rho_pi_diff_.get_linear(s, t);
 }
 
+double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi_rho0_pi(
+    const double s, const double t) {
+  return tab_pi_rho0_pi_diff_.get_linear(s, t);
+}
+
 // definition of static lookup tables. fine-tuning for parameters needed.
 TabulationND<1> PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_pi_rho0_(
-    0.0, 1.0, 0.1,
+    0.1, 3.0, 0.01,
     PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi_rho0);
 
 TabulationND<1> PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_pi0_rho_(
-    0.0, 1.0, 0.1,
+    0.1, 3.0, 0.01,
     PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho);
 
-TabulationND<1> PhotonCrossSection<ComputationMethod::Lookup>::tab_pi0_rho0_pi0_(
-    0.0, 1.0, 0.1,
-    PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho0_pi0);
+TabulationND<1>
+    PhotonCrossSection<ComputationMethod::Lookup>::tab_pi0_rho0_pi0_(
+        0.1, 3.0, 0.01,
+        PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho0_pi0);
 
 TabulationND<1> PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_rho0_pi_(
-    0.0, 1.0, 0.1,
+    0.1, 3.0, 0.01,
     PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho0_pi);
 
 TabulationND<1> PhotonCrossSection<ComputationMethod::Lookup>::tab_pi0_rho_pi_(
-    0.0, 1.0, 0.1,
+    0.1, 3.0, 0.01,
     PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi);
 
+TabulationND<1> PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_rho_pi0_(
+    0.1, 3.0, 0.01,
+    PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0);
 
 TabulationND<2>
     PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_pi_rho0_diff_(
-        0.0, 1.0, 0.0, 1.0, 0.1, 0.1,
+        0.0, 3.0, -0.3, -0.01, 0.01, 0.01,
         PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi_rho0);
 TabulationND<2>
     PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_pi0_rho_diff_(
-        0.0, 1.0, 0.0, 1.0, 0.1, 0.1,
+        0.0, 3.0, -0.3, -0.01, 0.01, 0.01,
         PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi0_rho);
 TabulationND<2>
     PhotonCrossSection<ComputationMethod::Lookup>::tab_pi0_rho0_pi0_diff_(
-        0.0, 1.0, 0.0, 1.0, 0.1, 0.1,
+        0.0, 3.0, -0.3, -0.01, 0.01, 0.01,
         PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi0_rho0_pi0);
 TabulationND<2>
     PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_rho_pi0_diff_(
-        0.0, 1.0, 0.0, 1.0, 0.1, 0.1,
+        0.0, 3.0, -0.3, -0.01, 0.01, 0.01,
         PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho_pi0);
 TabulationND<2>
     PhotonCrossSection<ComputationMethod::Lookup>::tab_pi0_rho_pi_diff_(
-        0.0, 1.0, 0.0, 1.0, 0.1, 0.1,
+        0.0, 3.0, -0.3, -0.01, 0.01, 0.01,
         PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi0_rho_pi);
+TabulationND<2>
+    PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_rho0_pi_diff_(
+        0.0, 3.0, -0.3, -0.01, 0.01, 0.01,
+        PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho0_pi);
