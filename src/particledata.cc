@@ -16,7 +16,7 @@
 #include "include/constants.h"
 #include "include/iomanipulators.h"
 
-namespace Smash {
+namespace smash {
 
 double ParticleData::effective_mass() const {
   const double m_pole = pole_mass();
@@ -107,4 +107,4 @@ std::ostream &operator<<(std::ostream &out,
   return out << ']';
 }
 
-}  // namespace Smash
+}  // namespace smash

@@ -14,7 +14,7 @@
 
 #include "particletype.h"
 
-namespace Smash {
+namespace smash {
 
 /** total hadronic cross sections at high energies parametrized in the 2016 PDG
  *  book(http://pdg.lbl.gov/2016/reviews/rpp2016-rev-cross-section-plots.pdf) */
@@ -252,6 +252,6 @@ double sigmaplussigmaminus_ximinusp(double sqrts_sqrts0);
 /// Sigma+ Sigma- <-> Xi0 n cross section parametrization
 double sigmaplussigmaminus_xi0n(double sqrts_sqrts0);
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_PARAMETRIZATIONS_H_

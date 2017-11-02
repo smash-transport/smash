@@ -14,7 +14,7 @@
 #include "forwarddeclarations.h"
 #include "logging.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * Helper structure for Experiment to hold output options and parameters.
@@ -93,6 +93,6 @@ struct OutputParameters {
   bool coll_printstartend;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_OUTPUTPARAMETERS_H_

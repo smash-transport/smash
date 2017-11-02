@@ -25,7 +25,7 @@
 #include "../include/random.h"
 #include "../include/vtkoutput.h"
 
-using namespace Smash;
+using namespace smash;
 
 static const double accuracy = 1.0e-4;
 static const bf::path testoutputpath = bf::absolute(SMASH_TEST_OUTPUT_PATH);

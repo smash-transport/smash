@@ -13,7 +13,7 @@
 #include "action.h"
 #include "actionfinderfactory.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup action
@@ -64,6 +64,6 @@ class WallCrossActionsFinder : public ActionFinderInterface {
   const std::array<double, 3> l_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_WALLCROSSINGACTION_H_

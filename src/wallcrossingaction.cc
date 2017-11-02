@@ -9,7 +9,7 @@
 
 #include "include/wallcrossingaction.h"
 
-namespace Smash {
+namespace smash {
 
 ActionList WallCrossActionsFinder::find_actions_in_cell(
     const ParticleList& plist, double t_max) const {
@@ -48,4 +48,4 @@ ActionList WallCrossActionsFinder::find_actions_in_cell(
   return actions;
 }
 
-}  // namespace Smash
+}  // namespace smash

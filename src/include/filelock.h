@@ -14,7 +14,7 @@
 
 #include "forwarddeclarations.h"
 
-namespace Smash {
+namespace smash {
 
 /// Guard to create a file lock.
 ///
@@ -48,6 +48,6 @@ class FileLock {
   bool acquired_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_FILELOCK_H_

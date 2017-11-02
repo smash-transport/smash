@@ -12,7 +12,7 @@
 
 #include <ostream>
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup logging
@@ -31,6 +31,6 @@ inline std::basic_ostream<CharT, Traits> &field(
   return s;
 }
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_IOMANIPULATORS_H_

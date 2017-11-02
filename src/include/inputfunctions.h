@@ -17,7 +17,7 @@
 #include "forwarddeclarations.h"
 #include "particletype.h"
 
-namespace Smash {
+namespace smash {
 
 /// Line consists of a line number and the contents of that line
 struct Line { /*{{{*/
@@ -81,6 +81,6 @@ inline std::string read_all(std::istream &&input) {
           std::istreambuf_iterator<char>{}};
 }
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_INPUTFUNCTIONS_H_

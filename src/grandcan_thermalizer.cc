@@ -19,7 +19,7 @@
 #include "include/quantumnumbers.h"
 #include "include/random.h"
 
-namespace Smash {
+namespace smash {
 
 GrandCanThermalizer::GrandCanThermalizer(const std::array<double, 3> lat_sizes,
                                          const std::array<int, 3> n_cells,
@@ -607,4 +607,4 @@ std::ostream &operator<<(std::ostream &out, const ThermLatticeNode &node) {
              << ", mus: " << node.mus();
 }
 
-}  // namespace Smash
+}  // namespace smash

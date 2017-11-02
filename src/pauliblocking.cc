@@ -11,7 +11,7 @@
 #include "include/constants.h"
 #include "include/logging.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * PauliBlocker constructor. Gets parameters from configuration.
@@ -153,4 +153,4 @@ void PauliBlocker::init_weights_analytical() {
   }
 }
 
-}  // namespace Smash
+}  // namespace smash

@@ -16,7 +16,7 @@
 #include "particletype.h"
 #include "pdgcode.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup data
@@ -410,6 +410,6 @@ class Particles {
   std::vector<unsigned> dirty_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_PARTICLES_H_

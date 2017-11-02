@@ -11,7 +11,7 @@
 
 #include "setup.h"
 
-using namespace Smash;
+using namespace smash;
 
 TEST(init_particle_types) { Test::create_actual_particletypes(); }
 

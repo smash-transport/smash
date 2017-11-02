@@ -13,7 +13,7 @@
 
 #include "include/particledata.h"
 
-namespace Smash {
+namespace smash {
 
 ParticleList ProcessBranch::particle_list() const {
   ParticleList l;
@@ -75,4 +75,4 @@ std::ostream& operator<<(std::ostream& os, ProcessType process_type) {
   return os;
 }
 
-}  // namespace Smash
+}  // namespace smash

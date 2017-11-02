@@ -27,7 +27,7 @@ using std::sqrt;
 using std::pow;
 using std::atan;
 
-namespace Smash {
+namespace smash {
 
 std::unique_ptr<Tabulation> tabulation_pi_pi_rho0 = nullptr;
 std::unique_ptr<Tabulation> tabulation_pi0_pi_rho = nullptr;
@@ -626,4 +626,4 @@ double ScatterActionPhoton::diff_cross_section(double t, double m3) const {
   return diff_xsection * to_mb;
 }
 
-}  // namespace Smash
+}  // namespace smash

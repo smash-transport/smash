@@ -16,7 +16,7 @@
 #include "forwarddeclarations.h"
 #include "particletype.h"
 
-namespace Smash {
+namespace smash {
 
 /** Process Types are used to identify the type of the process,
  * currently we have 7 of these:
@@ -235,6 +235,6 @@ class DecayBranch : public ProcessBranch {
   const DecayType &type_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_PROCESSBRANCH_H_

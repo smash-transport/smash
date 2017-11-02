@@ -18,7 +18,7 @@
 #include "particledata.h"
 #include "threevector.h"
 
-namespace Smash {
+namespace smash {
 
 /** Nucleus: a nucleus is a collection of Particles (ParticleData thingys) that
  * are initialized before the beginning of the simulation and all have
@@ -255,6 +255,6 @@ class Nucleus {
   friend std::ostream &operator<<(std::ostream &, const Nucleus &);
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_NUCLEUS_H_

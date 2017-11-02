@@ -14,7 +14,7 @@
 
 #include "interpolation.h"
 
-namespace Smash {
+namespace smash {
 
 /// PDG data on K- p elastic cross section: momentum in lab frame.
 const std::initializer_list<double> KMINUSP_ELASTIC_P_LAB = {
@@ -318,6 +318,6 @@ const std::initializer_list<double> KPLUSP_TOT_SIG = {
 static std::unique_ptr<InterpolateDataLinear<double>>
     kplusp_total_interpolation = nullptr;
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_PARAMETRIZATIONS_DATA_H_

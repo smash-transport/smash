@@ -37,7 +37,7 @@ struct convert {
 };
 }  // namespace YAML
 
-namespace Smash {
+namespace smash {
 /*!\Userguide
  * \page inputoptions Input file Options
  *
@@ -624,6 +624,6 @@ class Configuration {
   YAML::Node root_node_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_CONFIGURATION_H_

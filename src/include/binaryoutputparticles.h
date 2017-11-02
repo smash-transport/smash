@@ -17,7 +17,7 @@
 #include "forwarddeclarations.h"
 #include "outputparameters.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup output
@@ -56,6 +56,6 @@ class BinaryOutputParticles : public BinaryOutputBase {
   bool only_final_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_BINARYOUTPUTPARTICLES_H_

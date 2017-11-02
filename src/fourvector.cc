@@ -11,7 +11,7 @@
 #include "include/iomanipulators.h"
 #include "include/numerics.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * Algorithmic
@@ -72,4 +72,4 @@ std::ostream& operator<<(std::ostream& out, const FourVector& vec) {
   return out << ')';
 }
 
-}  // namespace Smash
+}  // namespace smash

@@ -17,7 +17,7 @@
 #include "isoparticletype.h"
 #include "kinematics.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * Calculate the detailed balance factor R such that
@@ -325,6 +325,6 @@ class ScatterAction : public Action {
   void resonance_formation();
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_SCATTERACTION_H_

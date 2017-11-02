@@ -26,7 +26,7 @@
 #include "quantumnumbers.h"
 #include "thermalizationaction.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * Non-template interface to Experiment<Modus>.
@@ -407,6 +407,6 @@ class Experiment : public ExperimentBase {
    */
   friend std::ostream &operator<<<>(std::ostream &out, const Experiment &e);
 };
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_EXPERIMENT_H_

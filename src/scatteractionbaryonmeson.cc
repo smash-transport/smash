@@ -10,7 +10,7 @@
 #include "include/scatteractionbaryonmeson.h"
 #include "include/parametrizations.h"
 
-namespace Smash {
+namespace smash {
 
 void ScatterActionBaryonMeson::format_debug_output(std::ostream &out) const {
   out << "Baryon-Meson  ";
@@ -38,4 +38,4 @@ double ScatterActionBaryonMeson::high_energy_cross_section() const {
   }
 }
 
-}  // namespace Smash
+}  // namespace smash

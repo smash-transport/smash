@@ -21,7 +21,7 @@
 #include "include/pdgcode.h"
 #include "include/threevector.h"
 
-namespace Smash {
+namespace smash {
 
 Nucleus::Nucleus(const std::map<PdgCode, int> &particle_list, int nTest) {
   fill_from_list(particle_list, nTest);
@@ -213,7 +213,7 @@ ThreeVector Nucleus::distribute_nucleon() const {
     return dir.threevec() * nuclear_radius_ * std::cbrt(Random::canonical());
   }
   if (almost_equal(nuclear_radius_, 0.)) {
-    return Smash::ThreeVector();
+    return smash::ThreeVector();
   }
   double radius_scaled = nuclear_radius_ / diffusiveness_;
   double prob_range1 = 1.0;
@@ -483,4 +483,4 @@ std::ostream &operator<<(std::ostream &out, const Nucleus &n) {
              << format(n.get_diffusiveness(), nullptr, 20);
 }
 
-}  // namespace Smash
+}  // namespace smash

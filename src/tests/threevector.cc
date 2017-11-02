@@ -11,7 +11,7 @@
 
 #include "../include/threevector.h"
 
-using namespace Smash;
+using namespace smash;
 
 TEST(assign) {
   ThreeVector A;

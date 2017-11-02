@@ -15,7 +15,7 @@
 #include "include/cxx14compat.h"
 #include "include/parametrizations.h"
 
-namespace Smash {
+namespace smash {
 
 double ScatterActionBaryonBaryon::high_energy_cross_section() const {
   const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
@@ -200,4 +200,4 @@ void ScatterActionBaryonBaryon::format_debug_output(std::ostream &out) const {
   ScatterAction::format_debug_output(out);
 }
 
-}  // namespace Smash
+}  // namespace smash

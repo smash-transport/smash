@@ -20,7 +20,7 @@
 
 #include <boost/filesystem.hpp>
 
-namespace Smash {
+namespace smash {
 namespace Test {
 
 /**
@@ -246,6 +246,6 @@ inline ExperimentParameters default_parameters(int testparticles = 1,
  * @}
  */
 }  // namespace Test
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_TESTS_SETUP_H_

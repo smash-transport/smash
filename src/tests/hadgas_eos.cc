@@ -14,7 +14,7 @@
 #include "../include/constants.h"
 #include "../include/hadgas_eos.h"
 
-using namespace Smash;
+using namespace smash;
 
 TEST(td_simple_gas) {
   ParticleType::create_type_list(

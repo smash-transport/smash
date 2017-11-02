@@ -15,7 +15,7 @@
 #include "clock.h"
 #include "forwarddeclarations.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup action
@@ -85,6 +85,6 @@ class ActionFinderInterface {
                                         bool only_res = false) const = 0;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_ACTIONFINDERFACTORY_H_

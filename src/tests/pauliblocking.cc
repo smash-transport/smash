@@ -21,7 +21,7 @@
 
 #include <boost/filesystem.hpp>
 
-using namespace Smash;
+using namespace smash;
 
 TEST(init_particle_types) {
   ParticleType::create_type_list(
@@ -39,7 +39,7 @@ TEST(phase_space_density) {
   conf["Collision_Term"]["Pauli_Blocking"]["Momentum_Averaging_Radius"] = 0.08;
   conf["Collision_Term"]["Pauli_Blocking"]["Gaussian_Cutoff"] = 2.2;
 
-  ExperimentParameters param = Smash::Test::default_parameters();
+  ExperimentParameters param = smash::Test::default_parameters();
   std::unique_ptr<PauliBlocker> pb = make_unique<PauliBlocker>(
       conf["Collision_Term"]["Pauli_Blocking"], param);
   Particles part;
@@ -69,7 +69,7 @@ TEST(phase_space_density) {
   conf["Collision_Term"]["Pauli_Blocking"]["Gaussian_Cutoff"] = 2.2;
   // Number of test-particles
   const size_t ntest = 10;
-  ExperimentParameters param = Smash::Test::default_parameters(ntest);
+  ExperimentParameters param = smash::Test::default_parameters(ntest);
   PauliBlocker *pb = new PauliBlocker(conf["Collision_Term"]["Pauli_Blocking"],
 param);
   BoxModus *b = new BoxModus(conf["Modi"], param);
@@ -102,7 +102,7 @@ TEST(phase_space_density_nucleus) {
   Particles part_Au;
   Au.copy_particles(&part_Au);
 
-  ExperimentParameters param = Smash::Test::default_parameters(Ntest);
+  ExperimentParameters param = smash::Test::default_parameters(Ntest);
   std::unique_ptr<PauliBlocker> pb = make_unique<PauliBlocker>(
       conf["Collision_Term"]["Pauli_Blocking"], param);
 

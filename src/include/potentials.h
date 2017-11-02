@@ -25,7 +25,7 @@
 #define VIRTUAL_FOR_TESTS
 #endif
 
-namespace Smash {
+namespace smash {
 
 /**
  * A class that stores parameters of potentials, calculates
@@ -113,6 +113,6 @@ class Potentials {
   double symmetry_s_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_POTENTIALS_H_

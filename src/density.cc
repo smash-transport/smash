@@ -12,7 +12,7 @@
 #include "include/logging.h"
 #include "include/particles.h"
 
-namespace Smash {
+namespace smash {
 
 double density_factor(const ParticleType &type, DensityType dens_type) {
   switch (dens_type) {
@@ -182,4 +182,4 @@ std::ostream &operator<<(std::ostream &os, DensityType dens_type) {
   return os;
 }
 
-}  // namespace Smash
+}  // namespace smash

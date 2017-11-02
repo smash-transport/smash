@@ -14,7 +14,7 @@
 
 #include "actionfinderfactory.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup action
@@ -48,6 +48,6 @@ class DecayActionsFinder : public ActionFinderInterface {
                                 bool only_res = false) const override;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_DECAYACTIONSFINDER_H_

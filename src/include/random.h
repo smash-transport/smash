@@ -15,7 +15,7 @@
 #include <utility>
 #include <vector>
 
-namespace Smash {
+namespace smash {
 
 /** Namespace Random provides functions for Random Number Generation.
  */
@@ -271,6 +271,6 @@ T beta_a0(T xmin, T b) {
 }
 
 }  // namespace Random
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_RANDOM_H_

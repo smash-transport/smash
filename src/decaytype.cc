@@ -18,7 +18,7 @@
 #include "include/pdgcode_constants.h"
 #include "include/pow.h"
 
-namespace Smash {
+namespace smash {
 
 // auxiliary functions
 
@@ -454,4 +454,4 @@ double ThreeBodyDecayDilepton::width(double, double G0, double m) const {
   return tabulation_->get_value_linear(m, Extrapolation::Const);
 }
 
-}  // namespace Smash
+}  // namespace smash

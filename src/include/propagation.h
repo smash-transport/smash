@@ -14,7 +14,7 @@
 #include "particles.h"
 #include "potentials.h"
 
-namespace Smash {
+namespace smash {
 
 struct ExpansionProperties {
   // Defines the metric to be used
@@ -70,5 +70,5 @@ void update_momenta(Particles *particles, double dt, const Potentials &pot,
                     RectangularLattice<ThreeVector> *UB_grad_lat,
                     RectangularLattice<ThreeVector> *UI3_grad_lat);
 
-}  // namespace Smash
+}  // namespace smash
 #endif  // SRC_INCLUDE_PROPAGATION_H_

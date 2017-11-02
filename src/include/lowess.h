@@ -21,7 +21,7 @@
 #include <utility>
 #include <vector>
 
-namespace Smash {
+namespace smash {
 
 namespace lowess {
 ////////////////////////////////////////////////////////////////////////////////
@@ -292,6 +292,6 @@ std::vector<T> smooth(const std::vector<T> &x, const std::vector<T> &y,
   return std::move(result);
 }
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_LOWESS_H_

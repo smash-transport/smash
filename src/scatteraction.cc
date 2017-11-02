@@ -20,7 +20,7 @@
 #include "include/pdgcode.h"
 #include "include/random.h"
 
-namespace Smash {
+namespace smash {
 
 ScatterAction::ScatterAction(const ParticleData &in_part_a,
                              const ParticleData &in_part_b, double time,
@@ -629,4 +629,4 @@ void ScatterAction::format_debug_output(std::ostream &out) const {
   }
 }
 
-}  // namespace Smash
+}  // namespace smash

@@ -17,12 +17,12 @@
 #include "../include/kinematics.h"
 #include "../include/stringfunctions.h"
 
-using namespace Smash;
+using namespace smash;
 using namespace UnitTest;
 
 TEST(spectral_functions) {
-  Smash::Test::create_actual_particletypes();
-  Smash::Test::create_actual_decaymodes();
+  smash::Test::create_actual_particletypes();
+  smash::Test::create_actual_decaymodes();
 
   Integrator integrate;
   // error tolerance (max. deviation from one)

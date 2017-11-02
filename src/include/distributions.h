@@ -7,7 +7,7 @@
 #ifndef SRC_INCLUDE_DISTRIBUTIONS_H_
 #define SRC_INCLUDE_DISTRIBUTIONS_H_
 
-namespace Smash {
+namespace smash {
 
 /**
  * Returns a relativistic Breit-Wigner distribution. The normalization is such
@@ -142,6 +142,6 @@ double woods_saxon_dist_func(const double r, const double radius,
                              const double diffusion);
 
 double sample_momenta_IC_ES(const double temperature);
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_DISTRIBUTIONS_H_

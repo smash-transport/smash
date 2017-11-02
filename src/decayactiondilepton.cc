@@ -12,7 +12,7 @@
 #include "include/angles.h"
 #include "include/kinematics.h"
 
-namespace Smash {
+namespace smash {
 
 DecayActionDilepton::DecayActionDilepton(const ParticleData &p, double time,
                                          double shining_weight)
@@ -82,4 +82,4 @@ void DecayActionDilepton::one_to_three() {
   l2.boost_momentum(-velocity_CM);
 }
 
-}  // namespace Smash
+}  // namespace smash

@@ -18,7 +18,7 @@
 #include "constants.h"
 #include "scatteraction.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup action
@@ -180,6 +180,6 @@ class GridScatterFinder : public ScatterActionsFinder {
 };
 #endif
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_SCATTERACTIONSFINDER_H_

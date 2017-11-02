@@ -12,7 +12,7 @@
 #include "../include/pdgcode.h"
 #include "../include/pdgcode_constants.h"
 
-using namespace Smash;
+using namespace smash;
 
 // mesons:
 PdgCode pinull(0x111);
