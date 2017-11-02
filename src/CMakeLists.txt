@@ -111,6 +111,7 @@ set(smash_src
         pdgcode.cc
         potentials.cc
         processbranch.cc
+        processstring.cc
         propagation.cc
         quantumnumbers.cc
         random.cc
@@ -127,7 +128,6 @@ set(smash_src
         scatteractionsfinder.cc
         spheremodus.cc
         stringfunctions.cc
-        stringprocess.cc
         tabulation.cc
         thermalizationaction.cc
         thermodynamicoutput.cc

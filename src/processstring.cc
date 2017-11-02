@@ -11,8 +11,8 @@
 
 #include "include/angles.h"
 #include "include/kinematics.h"
+#include "include/processstring.h"
 #include "include/random.h"
-#include "include/stringprocess.h"
 
 namespace Smash {
 

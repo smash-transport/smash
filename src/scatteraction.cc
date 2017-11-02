@@ -18,8 +18,8 @@
 #include "include/logging.h"
 #include "include/parametrizations.h"
 #include "include/pdgcode.h"
+#include "include/processstring.h"
 #include "include/random.h"
-#include "include/stringprocess.h"
 
 namespace Smash {
 
