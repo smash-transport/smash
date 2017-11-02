@@ -294,7 +294,7 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   const FourVector prs = pnull.LorentzBoost(ustrXcom.velocity());
   ThreeVector evec = prs.threevec() / prs.threevec().abs();
   // perform fragmentation and add particles to final_state.
-  int nfrag = fragment_string(idqX1, idqX2, massX, evec, false);
+  int nfrag = fragment_string(idqX1, idqX2, massX, evec);
   if (nfrag < 1) {
     NpartString_[0] = 0;
     return false;
@@ -329,7 +329,7 @@ bool StringProcess::make_final_state_2strings(
     ThreeVector evec = prs.threevec() / prs.threevec().abs();
     // perform fragmentation and add particles to final_state.
     int nfrag =
-        fragment_string(quarks[i][0], quarks[i][1], m_str[i], evec, false);
+        fragment_string(quarks[i][0], quarks[i][1], m_str[i], evec);
     if (nfrag <= 0) {
       NpartString_[i] = 0;
       return false;
@@ -589,7 +589,7 @@ bool StringProcess::next_BBbarAnn() {
     for (int i = 0; i < 2; i++) {
       ThreeVector evec = pcom_[i].threevec() / pcom_[i].threevec().abs();
       const int nfrag = fragment_string(
-          remaining_quarks[i], remaining_antiquarks[i], mstr[i], evec, false);
+          remaining_quarks[i], remaining_antiquarks[i], mstr[i], evec);
       if (nfrag <= 0) {
         NpartString_[i] = 0;
         return false;
@@ -692,8 +692,7 @@ void StringProcess::make_string_ends(const PdgCode &pdg, int &idq1, int &idq2) {
 }
 
 int StringProcess::fragment_string(int idq1, int idq2, double mString,
-                                   ThreeVector &evecLong,
-                                   bool random_rotation) {
+                                   ThreeVector &evecLong) {
   pythia_->event.reset();
   // evaluate 3 times total baryon number of the string
   const int bstring = pythia_->particleData.baryonNumberType(idq1) +
@@ -720,19 +719,14 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
   const double E1 = std::sqrt(m1 * m1 + pCMquark * pCMquark);
   const double E2 = std::sqrt(m2 * m2 + pCMquark * pCMquark);
 
-  ThreeVector direction = sign_direction * evecLong;
-  if (random_rotation) {
-    Angles phitheta;
-    phitheta.distribute_isotropically();
-    direction = phitheta.threevec();
-  } else if (Random::uniform_int(0, 1) == 0) {
+  if (Random::uniform_int(0, 1) == 0) {
     /* in the case where we flip the string ends,
      * we need to flip the longitudinal unit vector itself
      * since it is set to be direction of diquark (anti-quark) or anti-diquark.
      */
     evecLong = -evecLong;
-    direction = sign_direction * evecLong;
   }
+  ThreeVector direction = sign_direction * evecLong;
 
   // For status and (anti)color see \iref{Sjostrand:2007gs}.
   const int status1 = 1, color1 = 1, anticolor1 = 0;

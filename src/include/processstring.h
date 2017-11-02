@@ -305,12 +305,9 @@ class StringProcess {
    * \param mString is the string mass.
    * \param evecLong is unit 3-vector specifying the direction of diquark or
    * anti-diquark.
-   * \param random_rotation is whether or not we randomly rotate the
-   * orientation.
    * \return number of hadrons fragmented out of string.
    */
-  int fragment_string(int idq1, int idq2, double mString, ThreeVector &evecLong,
-                      bool random_rotation);
+  int fragment_string(int idq1, int idq2, double mString, ThreeVector &evecLong);
 };
 
 }  // namespace Smash
