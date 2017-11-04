@@ -190,23 +190,23 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
   const double m_rho = rho0_particle->mass();
   const double m_pi = pi0_particle->mass();
 
-/*
-  const double to_mb = 0.3894;
-  const double Const = 0.059;
-  const double g_POR = 11.93;
-  const double ma1 = 1.26;
-  const double ghat = 6.4483;
-  const double eta1 = 2.3920;
-  const double eta2 = 1.9430;
-  const double delta = -0.6426;
-  const double C4 = -0.14095;
-  const double Gammaa1 = 0.4;
-  const double Pi = M_PI;
-  double m_omega = 0.783;
-  double momega = m_omega;
-  double mrho = m_rho;
-  double mpion = m_pi;
-*/
+  /*
+    const double to_mb = 0.3894;
+    const double Const = 0.059;
+    const double g_POR = 11.93;
+    const double ma1 = 1.26;
+    const double ghat = 6.4483;
+    const double eta1 = 2.3920;
+    const double eta2 = 1.9430;
+    const double delta = -0.6426;
+    const double C4 = -0.14095;
+    const double Gammaa1 = 0.4;
+    const double Pi = M_PI;
+    double m_omega = 0.783;
+    double momega = m_omega;
+    double mrho = m_rho;
+    double mpion = m_pi;
+  */
 
   PhotonCrossSection<ComputationMethod::Analytic> xs_object;
 
@@ -325,31 +325,43 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
           } else {
             part_out = pi_minus_particle;
           }
+
           m3 = part_out->mass();
+          if (sqrts > m3) {
+            mandelstam_t = get_t_range(sqrts, m1, m2, m3, 0.0);
+            t1 = mandelstam_t[1];
+            t2 = mandelstam_t[0];
 
-          mandelstam_t = get_t_range(sqrts, m1, m2, m3, 0.0);
-          t1 = mandelstam_t[1];
-          t2 = mandelstam_t[0];
+            xsection = xs_object.xs_pi_rho0_pi(s);
 
-          xsection = xs_object.xs_pi_rho0_pi(s);
-
-          process_list.push_back(make_unique<CollisionBranch>(
-              *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
+            process_list.push_back(make_unique<CollisionBranch>(
+                *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
+          } else {
+            xsection = 0.0000000000001 * to_mb;
+            process_list.push_back(make_unique<CollisionBranch>(
+                *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
+          }
           break;
 
         case ReactionType::pi_rho:
           part_out = pi0_particle;
+
           m3 = part_out->mass();
+          if (sqrts > m3) {
+            mandelstam_t = get_t_range(sqrts, m1, m2, m3, 0.0);
+            t1 = mandelstam_t[1];
+            t2 = mandelstam_t[0];
 
-          mandelstam_t = get_t_range(sqrts, m1, m2, m3, 0.0);
-          t1 = mandelstam_t[1];
-          t2 = mandelstam_t[0];
+            // omega:
+            xsection = xs_object.xs_pi_rho_pi0(s);
 
-          // omega:
-          xsection = xs_object.xs_pi_rho_pi0(s);
-
-          process_list.push_back(make_unique<CollisionBranch>(
-              *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
+            process_list.push_back(make_unique<CollisionBranch>(
+                *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
+          } else {
+            xsection = 0.0000000000001 * to_mb;
+            process_list.push_back(make_unique<CollisionBranch>(
+                *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
+          }
           break;
 
         case ReactionType::pi0_rho:
@@ -359,30 +371,42 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
             part_out = pi_minus_particle;
           }
           m3 = part_out->mass();
+          if (sqrts > m3) {
+            mandelstam_t = get_t_range(sqrts, m1, m2, m3, 0.0);
+            t1 = mandelstam_t[1];
+            t2 = mandelstam_t[0];
 
-          mandelstam_t = get_t_range(sqrts, m1, m2, m3, 0.0);
-          t1 = mandelstam_t[1];
-          t2 = mandelstam_t[0];
+            // omega:
+            xsection = xs_object.xs_pi0_rho_pi(s);
 
-          // omega:
-          xsection = xs_object.xs_pi0_rho_pi(s);
-
-          process_list.push_back(make_unique<CollisionBranch>(
-              *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
+            process_list.push_back(make_unique<CollisionBranch>(
+                *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
+          } else {
+            xsection = 0.0000000000001 * to_mb;
+            process_list.push_back(make_unique<CollisionBranch>(
+                *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
+          }
           break;
 
         case ReactionType::pi0_rho0:
           part_out = pi0_particle;
+
           m3 = part_out->mass();
+          if (sqrts > m3) {
+            mandelstam_t = get_t_range(sqrts, m1, m2, m3, 0.0);
+            t1 = mandelstam_t[1];
+            t2 = mandelstam_t[0];
 
-          mandelstam_t = get_t_range(sqrts, m1, m2, m3, 0.0);
-          t1 = mandelstam_t[1];
-          t2 = mandelstam_t[0];
+            xsection = xs_object.xs_pi0_rho0_pi0(s);
 
-          xsection = xs_object.xs_pi0_rho0_pi0(s);
+            process_list.push_back(make_unique<CollisionBranch>(
+                *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
+          } else {
+            xsection = 0.0000000000001 * to_mb;
+            process_list.push_back(make_unique<CollisionBranch>(
+                *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
+          }
 
-          process_list.push_back(make_unique<CollisionBranch>(
-              *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
           break;
 
         case ReactionType::no_reaction:
@@ -425,7 +449,6 @@ double ScatterActionPhoton::diff_cross_section(double t, double m3, double t2,
       if (outgoing_particles_[0].type().pdgcode().is_rho()) {
         diff_xsection = xs_object.xs_diff_pi_pi_rho0(s, t);
 
- 
       } else if (outgoing_particles_[0].type().pdgcode() == pdg::photon) {
         diff_xsection = 0.0000000000001 / to_mb / (t2 - t1);
       }
@@ -457,7 +480,7 @@ double ScatterActionPhoton::diff_cross_section(double t, double m3, double t2,
       diff_xsection = xs_object.xs_diff_pi0_rho_pi(s, t);
 
       break;
-   
+
     case ReactionType::pi0_rho0:
       diff_xsection = xs_object.xs_diff_pi0_rho0_pi0(s, t);
 

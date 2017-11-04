@@ -14,6 +14,10 @@ using namespace Smash;
 // template class PhotonCrossSection<ComputationMethod::Analytic>;
 // template class PhotonCrossSection<ComputationMethod::Lookup>;
 
+double PhotonCrossSection<ComputationMethod::Analytic>::m_rho_;
+double PhotonCrossSection<ComputationMethod::Analytic>::m_pi_;
+
+
 double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho0_pi0(
     const double s) {
   using std::atan;
