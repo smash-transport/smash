@@ -47,12 +47,6 @@ namespace Smash {
  * on this never changing, though; the interface user should be totally
  * oblivious to this.
  *
- * \fpPrecision
- * The \c Angles class uses double precision in order to be compatible with the
- * \c ThreeVector class (conversion via \c Angles::threevec).
- * \todo
- * What does it mean "to be compatible with the ThreeVector class"? A conversion
- * from \c float to \c double is just as compatible.
  *
  * Possible future improvements
  * ----------------------------

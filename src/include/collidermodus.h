@@ -172,8 +172,6 @@ class ColliderModus : public ModusDefault {
    * @param m_a The mass of the projectile.
    * @param m_b The mass of the target.
    * @return < v_a, v_b > Velocities of the nuclei.
-   *
-   * \fpPrecision Why \c double?
    **/
   std::pair<double, double> get_velocities(double mandelstam_s, double m_a,
                                            double m_b);
