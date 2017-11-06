@@ -243,34 +243,30 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   double mstrMin = is_AB_to_AX ? massB_ : massA_;
   double mstrMax = sqrtsAB_ - massH;
 
-  bool foundPabsX = false;
-  int ntry = 0;
   int idqX1, idqX2;
   double QTrn, QTrx, QTry;
   double pabscomHX_sqr, massX;
-  while (!foundPabsX && ntry < 100) {
-    ntry++;
-    // decompose hadron into quarks
-    make_string_ends(is_AB_to_AX ? PDGcodes_[1] : PDGcodes_[0], idqX1, idqX2);
-    // string mass must be larger than threshold set by PYTHIA.
-    mstrMin = pythia_->particleData.m0(idqX1) +
-              pythia_->particleData.m0(idqX2);
-    // this threshold cannot be larger than maximum of allowed string mass.
-    if (mstrMin > mstrMax) {
-      continue;
-    }
-    // sample the transverse momentum transfer
-    QTrx = Random::normal(0., sigma_qperp_ / sqrt2_);
-    QTry = Random::normal(0., sigma_qperp_ / sqrt2_);
-    QTrn = std::sqrt(QTrx * QTrx + QTry * QTry);
-    // sample the string mass and evaluate the three-momenta of hadron and
-    // string.
-    massX = Random::power(-1.0, mstrMin, mstrMax);
-    pabscomHX_sqr = pCM_sqr(sqrtsAB_, massH, massX);
-    // magnitude of the three momentum must be larger than the transverse
-    // momentum.
-    foundPabsX = pabscomHX_sqr > QTrn * QTrn;
+
+  // decompose hadron into quarks
+  make_string_ends(is_AB_to_AX ? PDGcodes_[1] : PDGcodes_[0], idqX1, idqX2);
+  // string mass must be larger than threshold set by PYTHIA.
+  mstrMin = pythia_->particleData.m0(idqX1) +
+            pythia_->particleData.m0(idqX2);
+  // this threshold cannot be larger than maximum of allowed string mass.
+  if (mstrMin > mstrMax) {
+    return false;
   }
+  // sample the transverse momentum transfer
+  QTrx = Random::normal(0., sigma_qperp_ / sqrt2_);
+  QTry = Random::normal(0., sigma_qperp_ / sqrt2_);
+  QTrn = std::sqrt(QTrx * QTrx + QTry * QTry);
+  // sample the string mass and evaluate the three-momenta of hadron and
+  // string.
+  massX = Random::power(-1.0, mstrMin, mstrMax);
+  pabscomHX_sqr = pCM_sqr(sqrtsAB_, massH, massX);
+  // magnitude of the three momentum must be larger than the transverse
+  // momentum.
+  const bool foundPabsX = pabscomHX_sqr > QTrn * QTrn;
 
   if (!foundPabsX) {
     return false;
@@ -351,53 +347,50 @@ bool StringProcess::next_DDiff() {
   NpartString_[1] = 0;
   final_state_.clear();
 
-  int ntry = 0;
   std::array<bool, 2> found_mass = {false, false};
   std::array<std::array<int, 2>, 2> quarks;
   std::array<FourVector, 2> pstr_com;
   std::array<double, 2> m_str;
   ThreeVector threeMomentum;
-  while ((!found_mass[0] || !found_mass[1]) && (ntry < 100)) {
-    ntry++;
 
-    make_string_ends(PDGcodes_[0], quarks[0][0], quarks[0][1]);
-    make_string_ends(PDGcodes_[1], quarks[1][0], quarks[1][1]);
-    // sample the lightcone momentum fraction carried by gluons
-    const double xmin_gluon_fraction = pmin_gluon_lightcone_ / sqrtsAB_;
-    const double xfracA =
-        Random::beta_a0(xmin_gluon_fraction, pow_fgluon_beta_ + 1.);
-    const double xfracB =
-        Random::beta_a0(xmin_gluon_fraction, pow_fgluon_beta_ + 1.);
-    // sample the transverse momentum transfer
-    const double QTrx = Random::normal(0., sigma_qperp_ / sqrt2_);
-    const double QTry = Random::normal(0., sigma_qperp_ / sqrt2_);
-    const double QTrn = std::sqrt(QTrx * QTrx + QTry * QTry);
-    // evaluate the lightcone momentum transfer
-    const double QPos = -QTrn * QTrn / (2. * xfracB * PNegB_);
-    const double QNeg = QTrn * QTrn / (2. * xfracA * PPosA_);
-    // compute four-momentum of string 1
-    threeMomentum =
-        evecBasisAB_[0] * (PPosA_ + QPos - PNegA_ - QNeg) / sqrt2_ +
-        evecBasisAB_[1] * QTrx + evecBasisAB_[2] * QTry;
-    pstr_com[0] = FourVector((PPosA_ + QPos + PNegA_ + QNeg) / sqrt2_,
+  // decompose hadron into quark (and diquark) contents
+  make_string_ends(PDGcodes_[0], quarks[0][0], quarks[0][1]);
+  make_string_ends(PDGcodes_[1], quarks[1][0], quarks[1][1]);
+  // sample the lightcone momentum fraction carried by gluons
+  const double xmin_gluon_fraction = pmin_gluon_lightcone_ / sqrtsAB_;
+  const double xfracA =
+      Random::beta_a0(xmin_gluon_fraction, pow_fgluon_beta_ + 1.);
+  const double xfracB =
+      Random::beta_a0(xmin_gluon_fraction, pow_fgluon_beta_ + 1.);
+  // sample the transverse momentum transfer
+  const double QTrx = Random::normal(0., sigma_qperp_ / sqrt2_);
+  const double QTry = Random::normal(0., sigma_qperp_ / sqrt2_);
+  const double QTrn = std::sqrt(QTrx * QTrx + QTry * QTry);
+  // evaluate the lightcone momentum transfer
+  const double QPos = -QTrn * QTrn / (2. * xfracB * PNegB_);
+  const double QNeg = QTrn * QTrn / (2. * xfracA * PPosA_);
+  // compute four-momentum of string 1
+  threeMomentum =
+      evecBasisAB_[0] * (PPosA_ + QPos - PNegA_ - QNeg) / sqrt2_ +
+      evecBasisAB_[1] * QTrx + evecBasisAB_[2] * QTry;
+  pstr_com[0] = FourVector((PPosA_ + QPos + PNegA_ + QNeg) / sqrt2_,
                              threeMomentum);
-    // compute four-momentum of string 2
-    threeMomentum =
-        evecBasisAB_[0] * (PPosB_ - QPos - PNegB_ + QNeg) / sqrt2_ -
-        evecBasisAB_[1] * QTrx - evecBasisAB_[2] * QTry;
-    pstr_com[1] = FourVector((PPosB_ - QPos + PNegB_ - QNeg) / sqrt2_,
-                             threeMomentum);
-    found_mass[0] = false;
-    found_mass[1] = false;
-    for (int i = 0; i < 2; i++) {
-      m_str[i] = pstr_com[i].sqr();
-      m_str[i] = (m_str[i] > 0.) ? std::sqrt(m_str[i]) : 0.;
-      const double threshold = pythia_->particleData.m0(quarks[i][0]) +
-                               pythia_->particleData.m0(quarks[i][1]);
-      // string mass must be larger than threshold set by PYTHIA.
-      if (m_str[i] > threshold) {
-        found_mass[i] = true;
-      }
+  // compute four-momentum of string 2
+  threeMomentum =
+      evecBasisAB_[0] * (PPosB_ - QPos - PNegB_ + QNeg) / sqrt2_ -
+      evecBasisAB_[1] * QTrx - evecBasisAB_[2] * QTry;
+  pstr_com[1] = FourVector((PPosB_ - QPos + PNegB_ - QNeg) / sqrt2_,
+                           threeMomentum);
+  found_mass[0] = false;
+  found_mass[1] = false;
+  for (int i = 0; i < 2; i++) {
+    m_str[i] = pstr_com[i].sqr();
+    m_str[i] = (m_str[i] > 0.) ? std::sqrt(m_str[i]) : 0.;
+    const double threshold = pythia_->particleData.m0(quarks[i][0]) +
+                             pythia_->particleData.m0(quarks[i][1]);
+    // string mass must be larger than threshold set by PYTHIA.
+    if (m_str[i] > threshold) {
+      found_mass[i] = true;
     }
   }
 
@@ -415,77 +408,74 @@ bool StringProcess::next_NDiffSoft() {
   NpartString_[1] = 0;
   final_state_.clear();
 
-  int ntry = 0;
   std::array<bool, 2> found_mass = {false, false};
   std::array<std::array<int, 2>, 2> quarks;
   std::array<FourVector, 2> pstr_com;
   std::array<double, 2> m_str;
-  while ((!found_mass[0] || !found_mass[1]) && (ntry < 100)) {
-    ntry++;
 
-    int idqA1, idqA2, idqB1, idqB2;
-    make_string_ends(PDGcodes_[0], idqA1, idqA2);
-    make_string_ends(PDGcodes_[1], idqB1, idqB2);
+  // decompose hadron into quark (and diquark) contents
+  int idqA1, idqA2, idqB1, idqB2;
+  make_string_ends(PDGcodes_[0], idqA1, idqA2);
+  make_string_ends(PDGcodes_[1], idqB1, idqB2);
 
-    const int bar_a = PDGcodes_[0].baryon_number(),
-              bar_b = PDGcodes_[1].baryon_number();
-    if (bar_a == 1 ||  // baryon-baryon, baryon-meson, baryon-antibaryon
-        (bar_a == 0 && bar_b == 1) ||  // meson-baryon
-        (bar_a == 0 && bar_b == 0)) {  // meson-meson
-      quarks[0][0] = idqB1;
-      quarks[0][1] = idqA2;
-      quarks[1][0] = idqA1;
-      quarks[1][1] = idqB2;
-    } else if (((bar_a == 0) && (bar_b == -1)) ||  // meson-antibaryon
-               (bar_a == -1)) {  // antibaryon-baryon, antibaryon-meson,
+  const int bar_a = PDGcodes_[0].baryon_number(),
+            bar_b = PDGcodes_[1].baryon_number();
+  if (bar_a == 1 ||  // baryon-baryon, baryon-meson, baryon-antibaryon
+      (bar_a == 0 && bar_b == 1) ||  // meson-baryon
+      (bar_a == 0 && bar_b == 0)) {  // meson-meson
+    quarks[0][0] = idqB1;
+    quarks[0][1] = idqA2;
+    quarks[1][0] = idqA1;
+    quarks[1][1] = idqB2;
+  } else if (((bar_a == 0) && (bar_b == -1)) ||  // meson-antibaryon
+             (bar_a == -1)) {  // antibaryon-baryon, antibaryon-meson,
                                  // antibaryon-antibaryon
-      quarks[0][0] = idqA1;
-      quarks[0][1] = idqB2;
-      quarks[1][0] = idqB1;
-      quarks[1][1] = idqA2;
-    } else {
-      std::stringstream ss;
-      ss << "  StringProcess::next_NDiff : baryonA = " << bar_a <<
-            ", baryonB = " << bar_b;
-      throw std::runtime_error(ss.str());
-    }
-    // sample the lightcone momentum fraction carried by quarks
-    const double xfracA = Random::beta(pow_fquark_alpha_, pow_fquark_beta_);
-    const double xfracB = Random::beta(pow_fquark_alpha_, pow_fquark_beta_);
-    // sample the transverse momentum transfer
-    const double QTrx = Random::normal(0., sigma_qperp_ / sqrt2_);
-    const double QTry = Random::normal(0., sigma_qperp_ / sqrt2_);
-    const double QTrn = std::sqrt(QTrx * QTrx + QTry * QTry);
-    // evaluate the lightcone momentum transfer
-    const double QPos = -QTrn * QTrn / (2. * xfracB * PNegB_);
-    const double QNeg = QTrn * QTrn / (2. * xfracA * PPosA_);
-    const double dPPos = -xfracA * PPosA_ - QPos;
-    const double dPNeg = xfracB * PNegB_ - QNeg;
-    // compute four-momentum of string 1
-    ThreeVector threeMomentum =
-        evecBasisAB_[0] * (PPosA_ + dPPos - PNegA_ - dPNeg) / sqrt2_ +
-        evecBasisAB_[1] * QTrx + evecBasisAB_[2] * QTry;
-    pstr_com[0] = FourVector((PPosA_ + dPPos + PNegA_ + dPNeg) / sqrt2_,
-                             threeMomentum);
-    m_str[0] = pstr_com[0].sqr();
-    // compute four-momentum of string 2
-    threeMomentum =
-        evecBasisAB_[0] * (PPosB_ - dPPos - PNegB_ + dPNeg) / sqrt2_ -
-        evecBasisAB_[1] * QTrx - evecBasisAB_[2] * QTry;
-    pstr_com[1] = FourVector((PPosB_ - dPPos + PNegB_ - dPNeg) / sqrt2_,
-                             threeMomentum);
+    quarks[0][0] = idqA1;
+    quarks[0][1] = idqB2;
+    quarks[1][0] = idqB1;
+    quarks[1][1] = idqA2;
+  } else {
+    std::stringstream ss;
+    ss << "  StringProcess::next_NDiff : baryonA = " << bar_a <<
+          ", baryonB = " << bar_b;
+    throw std::runtime_error(ss.str());
+  }
+  // sample the lightcone momentum fraction carried by quarks
+  const double xfracA = Random::beta(pow_fquark_alpha_, pow_fquark_beta_);
+  const double xfracB = Random::beta(pow_fquark_alpha_, pow_fquark_beta_);
+  // sample the transverse momentum transfer
+  const double QTrx = Random::normal(0., sigma_qperp_ / sqrt2_);
+  const double QTry = Random::normal(0., sigma_qperp_ / sqrt2_);
+  const double QTrn = std::sqrt(QTrx * QTrx + QTry * QTry);
+  // evaluate the lightcone momentum transfer
+  const double QPos = -QTrn * QTrn / (2. * xfracB * PNegB_);
+  const double QNeg = QTrn * QTrn / (2. * xfracA * PPosA_);
+  const double dPPos = -xfracA * PPosA_ - QPos;
+  const double dPNeg = xfracB * PNegB_ - QNeg;
+  // compute four-momentum of string 1
+  ThreeVector threeMomentum =
+      evecBasisAB_[0] * (PPosA_ + dPPos - PNegA_ - dPNeg) / sqrt2_ +
+      evecBasisAB_[1] * QTrx + evecBasisAB_[2] * QTry;
+  pstr_com[0] = FourVector((PPosA_ + dPPos + PNegA_ + dPNeg) / sqrt2_,
+                           threeMomentum);
+  m_str[0] = pstr_com[0].sqr();
+  // compute four-momentum of string 2
+  threeMomentum =
+      evecBasisAB_[0] * (PPosB_ - dPPos - PNegB_ + dPNeg) / sqrt2_ -
+      evecBasisAB_[1] * QTrx - evecBasisAB_[2] * QTry;
+  pstr_com[1] = FourVector((PPosB_ - dPPos + PNegB_ - dPNeg) / sqrt2_,
+                           threeMomentum);
 
-    found_mass[0] = false;
-    found_mass[1] = false;
-    for (int i = 0; i < 2; i++) {
-      m_str[i] = pstr_com[i].sqr();
-      m_str[i] = (m_str[i] > 0.) ? std::sqrt(m_str[i]) : 0.;
-      const double threshold = pythia_->particleData.m0(quarks[i][0]) +
-                               pythia_->particleData.m0(quarks[i][1]);
-      // string mass must be larger than threshold set by PYTHIA.
-      if (m_str[i] > threshold) {
-        found_mass[i] = true;
-      }
+  found_mass[0] = false;
+  found_mass[1] = false;
+  for (int i = 0; i < 2; i++) {
+    m_str[i] = pstr_com[i].sqr();
+    m_str[i] = (m_str[i] > 0.) ? std::sqrt(m_str[i]) : 0.;
+    const double threshold = pythia_->particleData.m0(quarks[i][0]) +
+                             pythia_->particleData.m0(quarks[i][1]);
+    // string mass must be larger than threshold set by PYTHIA.
+    if (m_str[i] > threshold) {
+      found_mass[i] = true;
     }
   }
 
@@ -563,44 +553,40 @@ bool StringProcess::next_BBbarAnn() {
   assert(remaining_quarks.size() == 2);
   assert(remaining_antiquarks.size() == 2);
 
-  const int max_ntry = 100;
   const std::array<double, 2> mstr = {0.5 * sqrtsAB_, 0.5 * sqrtsAB_};
-  for (int ntry = 0; ntry < max_ntry; ntry++) {
-    // Randomly select two quark-antiquark pairs
-    if (Random::uniform_int(0, 1) == 0) {
-      std::swap(remaining_quarks[0], remaining_quarks[1]);
-    }
-    if (Random::uniform_int(0, 1) == 0) {
-      std::swap(remaining_antiquarks[0], remaining_antiquarks[1]);
-    }
-    // Make sure it satisfies kinematical threshold constraint
-    bool kin_threshold_satisfied = true;
-    for (int i = 0; i < 2; i++) {
-      const double mstr_min = pythia_->particleData.m0(remaining_quarks[i]) +
-                              pythia_->particleData.m0(remaining_antiquarks[i]);
-      if (mstr_min > mstr[i]) {
-        kin_threshold_satisfied = false;
-      }
-    }
-    if (!kin_threshold_satisfied) {
-      continue;
-    }
-    // Fragment two strings
-    for (int i = 0; i < 2; i++) {
-      ThreeVector evec = pcom_[i].threevec() / pcom_[i].threevec().abs();
-      const int nfrag = fragment_string(
-          remaining_quarks[i], remaining_antiquarks[i], mstr[i], evec);
-      if (nfrag <= 0) {
-        NpartString_[i] = 0;
-        return false;
-      }
-      NpartString_[i] = append_final_state(ustrcom[i], evec);
-    }
-    NpartFinal_ = NpartString_[0] + NpartString_[1];
-    return true;
-  }
 
-  return false;
+  // Randomly select two quark-antiquark pairs
+  if (Random::uniform_int(0, 1) == 0) {
+    std::swap(remaining_quarks[0], remaining_quarks[1]);
+  }
+  if (Random::uniform_int(0, 1) == 0) {
+    std::swap(remaining_antiquarks[0], remaining_antiquarks[1]);
+  }
+  // Make sure it satisfies kinematical threshold constraint
+  bool kin_threshold_satisfied = true;
+  for (int i = 0; i < 2; i++) {
+    const double mstr_min = pythia_->particleData.m0(remaining_quarks[i]) +
+                            pythia_->particleData.m0(remaining_antiquarks[i]);
+    if (mstr_min > mstr[i]) {
+      kin_threshold_satisfied = false;
+    }
+  }
+  if (!kin_threshold_satisfied) {
+    return false;
+  }
+  // Fragment two strings
+  for (int i = 0; i < 2; i++) {
+    ThreeVector evec = pcom_[i].threevec() / pcom_[i].threevec().abs();
+    const int nfrag = fragment_string(
+        remaining_quarks[i], remaining_antiquarks[i], mstr[i], evec);
+    if (nfrag <= 0) {
+      NpartString_[i] = 0;
+      return false;
+    }
+    NpartString_[i] = append_final_state(ustrcom[i], evec);
+  }
+  NpartFinal_ = NpartString_[0] + NpartString_[1];
+  return true;
 }
 
 void StringProcess::make_orthonormal_basis() {
