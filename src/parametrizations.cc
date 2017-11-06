@@ -374,7 +374,8 @@ double kplusp_inelastic_background(double mandelstam_s) {
         make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
   const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
-  return (*kplusp_total_interpolation)(p_lab) - kplusp_elastic_background(mandelstam_s);
+  return (*kplusp_total_interpolation)(p_lab)-kplusp_elastic_background(
+      mandelstam_s);
 }
 
 /** K+ n inelastic background cross section parametrization.
@@ -391,7 +392,8 @@ double kplusn_inelastic_background(double mandelstam_s) {
         make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
   const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
-  return (*kplusn_total_interpolation)(p_lab) - kplusn_elastic_background(mandelstam_s) -
+  return (*kplusn_total_interpolation)(p_lab)-kplusn_elastic_background(
+             mandelstam_s) -
          kplusn_k0p(mandelstam_s);
 }
 
@@ -439,10 +441,10 @@ static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>, double,
     add_to_ratios(type_n, type_K_p, type_K_p, type_Delta_z, weight2, weight1);
   }
   {
-    const auto weight1 = isospin_clebsch_gordan_sqr_2to2(
-        type_n, type_K_p, type_K_z, type_p);
-    const auto weight2 = isospin_clebsch_gordan_sqr_2to2(
-        type_p, type_K_z, type_K_p, type_n);
+    const auto weight1 =
+        isospin_clebsch_gordan_sqr_2to2(type_n, type_K_p, type_K_z, type_p);
+    const auto weight2 =
+        isospin_clebsch_gordan_sqr_2to2(type_p, type_K_z, type_K_p, type_n);
 
     add_to_ratios(type_n, type_K_p, type_K_z, type_p, weight1, weight2);
     add_to_ratios(type_p, type_K_z, type_K_p, type_n, weight2, weight1);
