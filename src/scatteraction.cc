@@ -393,15 +393,16 @@ CollisionBranchList ScatterAction::string_excitation_cross_sections() {
   double sig_string_soft = sig_string_all - nondiffractive_hard;
 
   /* fill cross section arrays */
-  string_sub_cross_sections_[0] = single_diffr_AX;
-  string_sub_cross_sections_[1] = single_diffr_XB;
-  string_sub_cross_sections_[2] = double_diffr;
-  string_sub_cross_sections_[3] = nondiffractive_soft;
-  string_sub_cross_sections_[4] = nondiffractive_hard;
+  std::array<double, 5> string_sub_cross_sections;
+  string_sub_cross_sections[0] = single_diffr_AX;
+  string_sub_cross_sections[1] = single_diffr_XB;
+  string_sub_cross_sections[2] = double_diffr;
+  string_sub_cross_sections[3] = nondiffractive_soft;
+  string_sub_cross_sections[4] = nondiffractive_hard;
   string_sub_cross_sections_sum_[0] = 0.;
   for (int i = 0; i < 5; i++) {
     string_sub_cross_sections_sum_[i+1] =
-        string_sub_cross_sections_sum_[i] + string_sub_cross_sections_[i];
+        string_sub_cross_sections_sum_[i] + string_sub_cross_sections[i];
   }
 
   /* fill the list of process channels */
