@@ -1,13 +1,14 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include "unittest.h"
+#include "unittest.h"  // This include has to be first
+
 #include "../include/lowess.h"
 
 #include <numeric>

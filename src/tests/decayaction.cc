@@ -1,20 +1,21 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include <typeinfo>
+#include "unittest.h"  // This include has to be first
 
-#include "unittest.h"
 #include "setup.h"
 
-#include "../include/decaymodes.h"
-#include "../include/decayaction.h"
+#include <typeinfo>
+
 #include "../include/cxx14compat.h"
+#include "../include/decayaction.h"
+#include "../include/decaymodes.h"
 
 using namespace Smash;
 
@@ -68,10 +69,10 @@ TEST(create_decayaction) {
     const double ang_mom = mode->type().angular_momentum();
     const double width = mode->weight();
     const DecayType &type = mode->type();
-    std::cout << "Decaymode " << decaymodes_counter << ": " <<
-                 typeid(type).name() << ", " <<
-                 "angular momentum: " << ang_mom <<
-                 ", width: " << width << std::endl;
+    std::cout << "Decaymode " << decaymodes_counter << ": "
+              << typeid(type).name() << ", "
+              << "angular momentum: " << ang_mom << ", width: " << width
+              << std::endl;
     COMPARE(ang_mom, 0);
     // Check if mass-dependent width behaves as expected
     switch (decaymodes_counter) {
@@ -80,11 +81,13 @@ TEST(create_decayaction) {
         /* Result obtained with MATHEMATICA code:
            mA2 = 0.9; mA1 = 0.5; m0A3 = 1.0; G0A3 = 0.2; m0H = 3.0; mH = 4.0;
            mA3min = 1.4; G0H = 0.3; L = 1.6; s0 = mA3min + mA2;
-           PostCutoff[m_] := (L^4 + (s0^2 - m0H^2)^2/4)/(L^4 + (m^2 - (s0^2 + m0H^2)/2)^2)
+           PostCutoff[m_] := (L^4 + (s0^2 - m0H^2)^2/4)/(L^4 + (m^2 - (s0^2 +
+           m0H^2)/2)^2)
            PfOverM[m_, m1_, m2_] := Sqrt[(m^2 + m1^2 - m2^2)^2/(4 m^2) - m1^2]/m
            GA3[mA3_] := G0A3*PfOverM[mA3, mA1, mA2]/PfOverM[m0A3, mA1, mA2]
            A[m_] := 2/Pi m^2 GA3[m]/((m^2 - m0A3^2)^2 + (m GA3[m])^2)
-           rho[m_] :=  NIntegrate[A[mA3]*PfOverM[mA3, mA1, mA2], {mA3, mA3min, m - mA2}]
+           rho[m_] :=  NIntegrate[A[mA3]*PfOverM[mA3, mA1, mA2], {mA3, mA3min, m
+           - mA2}]
            rho[mH]/rho[m0H]*PostCutoff[mH]^2*G0H // returns 0.00824107*/
         /* It might seem weird that resulting width is so unphysically
            small. This is because of the Post form-factor, which is intended
@@ -102,7 +105,8 @@ TEST(create_decayaction) {
         */
         tmp1 = 2 * m0_A1 / m_H;
         tmp2 = 2 * m0_A1 / m0_H;
-        width_expected = G0_H / 3. * std::sqrt((1. - tmp1*tmp1)/(1. - tmp2*tmp2));
+        width_expected =
+            G0_H / 3. * std::sqrt((1. - tmp1 * tmp1) / (1. - tmp2 * tmp2));
         COMPARE_RELATIVE_ERROR(width, width_expected, 1.e-6);
         break;
       // three-body decay H -> A2 + A2 + A1
@@ -110,7 +114,8 @@ TEST(create_decayaction) {
         COMPARE_RELATIVE_ERROR(width, G0_H / 2., 1.e-7);
         break;
       // Should never get here
-      default: VERIFY(false);
+      default:
+        VERIFY(false);
     }
     decaymodes_counter++;
   }

@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2014
+ *    Copyright (c) 2013-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -50,7 +50,7 @@ class SphereModus : public ModusDefault {
   /** creates initial conditions for the particles.
    */
   double initial_conditions(Particles *particles,
-                          const ExperimentParameters &parameters);
+                            const ExperimentParameters &parameters);
 
  private:
   /// Sphere radius length

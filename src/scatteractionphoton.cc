@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2016
+ *    Copyright (c) 2016-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -57,7 +57,7 @@ void ScatterActionPhoton::generate_final_state() {
   const double pcm_out = pCM(sqrts, m3, 0.0);
 
   assert(t1 < t2);
-  const double stepsize = (t2-t1)/100.0;
+  const double stepsize = (t2 - t1) / 100.0;
   for (double t = t1; t < t2; t += stepsize) {
     double diff_xsection_max = std::max(diff_cross_section(t, m3, t2, t1),
                                               diff_xsection_max);
@@ -80,7 +80,7 @@ void ScatterActionPhoton::generate_final_state() {
 
   Angles phitheta(Random::uniform(0.0, twopi), costheta);
   outgoing_particles_[0].set_4momentum(masses.first,
-                                        phitheta.threevec() * pcm_out);
+                                       phitheta.threevec() * pcm_out);
   outgoing_particles_[1].set_4momentum(masses.second,
                                        -phitheta.threevec() * pcm_out);
 
@@ -125,20 +125,18 @@ void ScatterActionPhoton::generate_final_state() {
 }
 
 void ScatterActionPhoton::add_dummy_hadronic_channels(
-                            double reaction_cross_section) {
+    double reaction_cross_section) {
   CollisionBranchPtr dummy_process = make_unique<CollisionBranch>(
-    incoming_particles_[0].type(),
-    incoming_particles_[1].type(),
-    reaction_cross_section,
-    ProcessType::TwoToTwo);
+      incoming_particles_[0].type(), incoming_particles_[1].type(),
+      reaction_cross_section, ProcessType::TwoToTwo);
   add_collision(std::move(dummy_process));
 }
 
-ScatterActionPhoton::ReactionType
-  ScatterActionPhoton::is_photon_reaction(const ParticleList &in) {
-    if (in.size() != 2) {
-      return ReactionType::no_reaction;
-    }
+ScatterActionPhoton::ReactionType ScatterActionPhoton::is_photon_reaction(
+    const ParticleList &in) {
+  if (in.size() != 2) {
+    return ReactionType::no_reaction;
+  }
 
   PdgCode a = in[0].pdgcode();
   PdgCode b = in[1].pdgcode();
@@ -150,19 +148,19 @@ ScatterActionPhoton::ReactionType
   }
 
   switch (pack(a.code(), b.code())) {
-    case(pack(pdg::pi_p, pdg::pi_z)):
-    case(pack(pdg::pi_z, pdg::pi_p)):
-    case(pack(pdg::pi_m, pdg::pi_z)):
-    case(pack(pdg::pi_z, pdg::pi_m)):
+    case (pack(pdg::pi_p, pdg::pi_z)):
+    case (pack(pdg::pi_z, pdg::pi_p)):
+    case (pack(pdg::pi_m, pdg::pi_z)):
+    case (pack(pdg::pi_z, pdg::pi_m)):
       return ReactionType::pi0_pi;
-    case(pack(pdg::pi_p, pdg::rho_z)):
-    case(pack(pdg::pi_m, pdg::rho_z)):
+    case (pack(pdg::pi_p, pdg::rho_z)):
+    case (pack(pdg::pi_m, pdg::rho_z)):
       return ReactionType::pi_rho0;
-    case(pack(pdg::pi_m, pdg::rho_p)):
-    case(pack(pdg::pi_p, pdg::rho_m)):
+    case (pack(pdg::pi_m, pdg::rho_p)):
+    case (pack(pdg::pi_p, pdg::rho_m)):
       return ReactionType::pi_rho;
-    case(pack(pdg::pi_z, pdg::rho_p)):
-    case(pack(pdg::pi_z, pdg::rho_m)):
+    case (pack(pdg::pi_z, pdg::rho_p)):
+    case (pack(pdg::pi_z, pdg::rho_m)):
       return ReactionType::pi0_rho;
     /*case(pack(pdg::pi_p, pdg::eta)):
     case(pack(pdg::pi_m, pdg::eta)):
@@ -2643,7 +2641,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
         case ReactionType::no_reaction:
           // never reached
           break;
-       }
+      }
     }
   }
   return process_list;
@@ -3110,7 +3108,7 @@ double ScatterActionPhoton::diff_cross_section(double t, double m3, double t2, d
       // never reached
       break;
   }
-  return diff_xsection*to_mb;
+  return diff_xsection * to_mb;
 }
 
 double ScatterActionPhoton::form_factor(double E_photon) {

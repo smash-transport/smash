@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014
+ * Copyright (c) 2013-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -31,22 +31,22 @@ std::istream& operator>>(std::istream& is, PdgCode& code) {
 int PdgCode::net_quark_number(const int quark) const {
   // input sanitization: Only quark numbers 1 through 8 are allowed.
   if (quark < 1 || quark > 8) {
-    throw std::invalid_argument(std::string("PdgCode::net_quark_number(): ")
-                 + std::string("Quark number must be in [1..8], received ")
-                 + std::to_string(quark));
+    throw std::invalid_argument(
+        std::string("PdgCode::net_quark_number(): ") +
+        std::string("Quark number must be in [1..8], received ") +
+        std::to_string(quark));
   }
   // non-hadrons and those that have none of this quark type: 0.
-  if (!is_hadron() ||
-        (digits_.n_q1_ != quark && digits_.n_q2_ != quark
-                                && digits_.n_q3_ != quark)) {
+  if (!is_hadron() || (digits_.n_q1_ != quark && digits_.n_q2_ != quark &&
+                       digits_.n_q3_ != quark)) {
     return 0;
   }
   // baryons: count quarks.
   if (baryon_number() != 0) {
     // for anti-baryons, the sign changes:
-    return antiparticle_sign()*((digits_.n_q1_ == quark)
-                              + (digits_.n_q2_ == quark)
-                              + (digits_.n_q3_ == quark));
+    return antiparticle_sign() *
+           ((digits_.n_q1_ == quark) + (digits_.n_q2_ == quark) +
+            (digits_.n_q3_ == quark));
   }
   // mesons.
   // quarkonium state? Not open net_quark_number.

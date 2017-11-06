@@ -1,13 +1,14 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include "unittest.h"
+#include "unittest.h"  // This include has to be first
+
 #include "setup.h"
 
 #include "../include/boxmodus.h"
@@ -21,9 +22,7 @@ using namespace Smash;
 using Smash::Test::Position;
 using Smash::Test::Momentum;
 
-TEST(init_particle_types) {
-  Test::create_smashon_particletypes();
-}
+TEST(init_particle_types) { Test::create_smashon_particletypes(); }
 
 // create a particle list with various interesting particles. We will
 // assume a box of 5 fm length and a time step (for propagation) of 1 fm.
@@ -59,20 +58,21 @@ TEST(propagate_default_no_potentials) {
   COMPARE(it->position(), FourVector(1.0, 0.6, 0.7, 0.8));
   ++it;
   COMPARE(it->momentum(), FourVector(sqrt(0.03), 0.1, -.1, 0.0));
-  COMPARE(it->position(), FourVector(1.0, 0.7 + 0.1/std::sqrt(0.03),
-                                                   0.8 - 0.1/std::sqrt(0.03), 0.9));
+  COMPARE(it->position(), FourVector(1.0, 0.7 + 0.1 / std::sqrt(0.03),
+                                     0.8 - 0.1 / std::sqrt(0.03), 0.9));
   ++it;
   COMPARE(it->momentum(), FourVector(sqrt(1.14), 0.1, 0.2, -.3));
-  COMPARE(it->position(), FourVector(1., 0.1 + 0.1 / std::sqrt(1.14),
-                                                  0.2 + 0.2 / std::sqrt(1.14),
-                                                  0.3 - 0.3 / std::sqrt(1.14)));
+  COMPARE(it->position(),
+          FourVector(1., 0.1 + 0.1 / std::sqrt(1.14),
+                     0.2 + 0.2 / std::sqrt(1.14), 0.3 - 0.3 / std::sqrt(1.14)));
   ++it;
   COMPARE(it->momentum(), FourVector(0.11, 0.1, 0.0, 0.0));
-  COMPARE(it->position(), FourVector(1.0, 4.5 + 0.1/0.11, 0.0, 0.0));
+  COMPARE(it->position(), FourVector(1.0, 4.5 + 0.1 / 0.11, 0.0, 0.0));
   ++it;
   COMPARE(it->momentum(), FourVector(0.11, 0.0, -.1, 0.0));
-  COMPARE(it->position(), FourVector(1.0, 0.0, 0.2 - 0.1/0.11, 0.0));
+  COMPARE(it->position(), FourVector(1.0, 0.0, 0.2 - 0.1 / 0.11, 0.0));
   ++it;
   COMPARE(it->momentum(), FourVector(0.51, -.3, 0.0, 0.4));
-  COMPARE(it->position(), FourVector(1.0, 0.2 - 0.3/0.51, 0.0, 4.8 + 0.4/0.51));
+  COMPARE(it->position(),
+          FourVector(1.0, 0.2 - 0.3 / 0.51, 0.0, 4.8 + 0.4 / 0.51));
 }

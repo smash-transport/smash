@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2016
+ *    Copyright (c) 2016-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -15,16 +15,16 @@
 
 namespace Smash {
 
-void ScatterActionHyperonPion::format_debug_output(std::ostream &out) const {
+void ScatterActionHyperonPion::format_debug_output(std::ostream& out) const {
   out << "Hyperon-Pion  ";
   ScatterAction::format_debug_output(out);
 }
 
 CollisionBranchList ScatterActionHyperonPion::two_to_two_cross_sections() {
-  const ParticleType &a = incoming_particles_[0].type();
-  const ParticleType &b = incoming_particles_[1].type();
-  const ParticleType &type_hyperon = a.pdgcode().is_hyperon() ? a : b;
-  const ParticleType &type_pion    = a.pdgcode().is_hyperon() ? b : a;
+  const ParticleType& a = incoming_particles_[0].type();
+  const ParticleType& b = incoming_particles_[1].type();
+  const ParticleType& type_hyperon = a.pdgcode().is_hyperon() ? a : b;
+  const ParticleType& type_pion = a.pdgcode().is_hyperon() ? b : a;
 
   const auto pdg_hyperon = type_hyperon.pdgcode().code();
   const auto pdg_pion = type_pion.pdgcode().code();
@@ -39,9 +39,11 @@ CollisionBranchList ScatterActionHyperonPion::two_to_two_cross_sections() {
       const auto& type_n = ParticleType::find(pdg::n);
       const auto& type_K_m = ParticleType::find(pdg::K_m);
       add_channel(process_list,
-                  [&] { return detailed_balance_factor_stable(s,
-                               type_hyperon, type_pion, type_n, type_K_m)
-                               * kminusn_piminussigma0(sqrts); },
+                  [&] {
+                    return detailed_balance_factor_stable(
+                               s, type_hyperon, type_pion, type_n, type_K_m) *
+                           kminusn_piminussigma0(sqrts);
+                  },
                   sqrts, type_n, type_K_m);
       break;
     }
@@ -49,9 +51,12 @@ CollisionBranchList ScatterActionHyperonPion::two_to_two_cross_sections() {
       const auto& type_n_bar = ParticleType::find(-pdg::n);
       const auto& type_K_p = ParticleType::find(pdg::K_p);
       add_channel(process_list,
-                  [&] { return detailed_balance_factor_stable(s,
-                               type_hyperon, type_pion, type_n_bar, type_K_p)
-                               * kminusn_piminussigma0(sqrts); },
+                  [&] {
+                    return detailed_balance_factor_stable(s, type_hyperon,
+                                                          type_pion, type_n_bar,
+                                                          type_K_p) *
+                           kminusn_piminussigma0(sqrts);
+                  },
                   sqrts, type_n_bar, type_K_p);
       break;
     }
@@ -59,9 +64,11 @@ CollisionBranchList ScatterActionHyperonPion::two_to_two_cross_sections() {
       const auto& type_n = ParticleType::find(pdg::n);
       const auto& type_K_m = ParticleType::find(pdg::K_m);
       add_channel(process_list,
-                  [&] { return detailed_balance_factor_stable(s,
-                               type_hyperon, type_pion, type_n, type_K_m)
-                               * kminusn_pi0sigmaminus(sqrts); },
+                  [&] {
+                    return detailed_balance_factor_stable(
+                               s, type_hyperon, type_pion, type_n, type_K_m) *
+                           kminusn_pi0sigmaminus(sqrts);
+                  },
                   sqrts, type_n, type_K_m);
       break;
     }
@@ -69,9 +76,12 @@ CollisionBranchList ScatterActionHyperonPion::two_to_two_cross_sections() {
       const auto& type_n_bar = ParticleType::find(-pdg::n);
       const auto& type_K_p = ParticleType::find(pdg::K_p);
       add_channel(process_list,
-                  [&] { return detailed_balance_factor_stable(s,
-                               type_hyperon, type_pion, type_n_bar, type_K_p)
-                               * kminusn_pi0sigmaminus(sqrts); },
+                  [&] {
+                    return detailed_balance_factor_stable(s, type_hyperon,
+                                                          type_pion, type_n_bar,
+                                                          type_K_p) *
+                           kminusn_pi0sigmaminus(sqrts);
+                  },
                   sqrts, type_n_bar, type_K_p);
       break;
     }
@@ -79,9 +89,11 @@ CollisionBranchList ScatterActionHyperonPion::two_to_two_cross_sections() {
       const auto& type_n = ParticleType::find(pdg::n);
       const auto& type_K_m = ParticleType::find(pdg::K_m);
       add_channel(process_list,
-                  [&] { return detailed_balance_factor_stable(s,
-                               type_hyperon, type_pion, type_n, type_K_m)
-                               * kminusn_piminuslambda(sqrts); },
+                  [&] {
+                    return detailed_balance_factor_stable(
+                               s, type_hyperon, type_pion, type_n, type_K_m) *
+                           kminusn_piminuslambda(sqrts);
+                  },
                   sqrts, type_n, type_K_m);
       break;
     }
@@ -89,9 +101,12 @@ CollisionBranchList ScatterActionHyperonPion::two_to_two_cross_sections() {
       const auto& type_n_bar = ParticleType::find(-pdg::n);
       const auto& type_K_p = ParticleType::find(pdg::K_p);
       add_channel(process_list,
-                  [&] { return detailed_balance_factor_stable(s,
-                               type_hyperon, type_pion, type_n_bar, type_K_p)
-                               * kminusn_piminuslambda(sqrts); },
+                  [&] {
+                    return detailed_balance_factor_stable(s, type_hyperon,
+                                                          type_pion, type_n_bar,
+                                                          type_K_p) *
+                           kminusn_piminuslambda(sqrts);
+                  },
                   sqrts, type_n_bar, type_K_p);
       break;
     }
@@ -99,9 +114,11 @@ CollisionBranchList ScatterActionHyperonPion::two_to_two_cross_sections() {
       const auto& type_p = ParticleType::find(pdg::p);
       const auto& type_K_m = ParticleType::find(pdg::K_m);
       add_channel(process_list,
-                  [&] { return detailed_balance_factor_stable(s,
-                               type_hyperon, type_pion, type_p, type_K_m)
-                               * kminusp_pi0sigma0(sqrts); },
+                  [&] {
+                    return detailed_balance_factor_stable(
+                               s, type_hyperon, type_pion, type_p, type_K_m) *
+                           kminusp_pi0sigma0(sqrts);
+                  },
                   sqrts, type_p, type_K_m);
       break;
     }
@@ -109,9 +126,12 @@ CollisionBranchList ScatterActionHyperonPion::two_to_two_cross_sections() {
       const auto& type_p_bar = ParticleType::find(-pdg::p);
       const auto& type_K_p = ParticleType::find(pdg::K_p);
       add_channel(process_list,
-                  [&] { return detailed_balance_factor_stable(s,
-                               type_hyperon, type_pion, type_p_bar, type_K_p)
-                               * kminusp_pi0sigma0(sqrts); },
+                  [&] {
+                    return detailed_balance_factor_stable(s, type_hyperon,
+                                                          type_pion, type_p_bar,
+                                                          type_K_p) *
+                           kminusp_pi0sigma0(sqrts);
+                  },
                   sqrts, type_p_bar, type_K_p);
       break;
     }
@@ -119,9 +139,11 @@ CollisionBranchList ScatterActionHyperonPion::two_to_two_cross_sections() {
       const auto& type_p = ParticleType::find(pdg::p);
       const auto& type_K_m = ParticleType::find(pdg::K_m);
       add_channel(process_list,
-                  [&] { return detailed_balance_factor_stable(s,
-                               type_hyperon, type_pion, type_p, type_K_m)
-                               * kminusp_piplussigmaminus(sqrts); },
+                  [&] {
+                    return detailed_balance_factor_stable(
+                               s, type_hyperon, type_pion, type_p, type_K_m) *
+                           kminusp_piplussigmaminus(sqrts);
+                  },
                   sqrts, type_p, type_K_m);
       break;
     }
@@ -129,9 +151,12 @@ CollisionBranchList ScatterActionHyperonPion::two_to_two_cross_sections() {
       const auto& type_p_bar = ParticleType::find(-pdg::p);
       const auto& type_K_p = ParticleType::find(pdg::K_p);
       add_channel(process_list,
-                  [&] { return detailed_balance_factor_stable(s,
-                               type_hyperon, type_pion, type_p_bar, type_K_p)
-                               * kminusp_piplussigmaminus(sqrts); },
+                  [&] {
+                    return detailed_balance_factor_stable(s, type_hyperon,
+                                                          type_pion, type_p_bar,
+                                                          type_K_p) *
+                           kminusp_piplussigmaminus(sqrts);
+                  },
                   sqrts, type_p_bar, type_K_p);
       break;
     }
@@ -139,9 +164,11 @@ CollisionBranchList ScatterActionHyperonPion::two_to_two_cross_sections() {
       const auto& type_p = ParticleType::find(pdg::p);
       const auto& type_K_m = ParticleType::find(pdg::K_m);
       add_channel(process_list,
-                  [&] { return detailed_balance_factor_stable(s,
-                               type_hyperon, type_pion, type_p, type_K_m)
-                               * kminusp_pi0lambda(sqrts); },
+                  [&] {
+                    return detailed_balance_factor_stable(
+                               s, type_hyperon, type_pion, type_p, type_K_m) *
+                           kminusp_pi0lambda(sqrts);
+                  },
                   sqrts, type_p, type_K_m);
       break;
     }
@@ -149,9 +176,12 @@ CollisionBranchList ScatterActionHyperonPion::two_to_two_cross_sections() {
       const auto& type_p_bar = ParticleType::find(-pdg::p);
       const auto& type_K_p = ParticleType::find(pdg::K_p);
       add_channel(process_list,
-                  [&] { return detailed_balance_factor_stable(s,
-                               type_hyperon, type_pion, type_p_bar, type_K_p)
-                               * kminusp_pi0lambda(sqrts); },
+                  [&] {
+                    return detailed_balance_factor_stable(s, type_hyperon,
+                                                          type_pion, type_p_bar,
+                                                          type_K_p) *
+                           kminusp_pi0lambda(sqrts);
+                  },
                   sqrts, type_p_bar, type_K_p);
       break;
     }
@@ -159,9 +189,11 @@ CollisionBranchList ScatterActionHyperonPion::two_to_two_cross_sections() {
       const auto& type_p = ParticleType::find(pdg::p);
       const auto& type_K_m = ParticleType::find(pdg::K_m);
       add_channel(process_list,
-                  [&] { return detailed_balance_factor_stable(s,
-                               type_hyperon, type_pion, type_p, type_K_m)
-                               * kminusp_piminussigmaplus(sqrts); },
+                  [&] {
+                    return detailed_balance_factor_stable(
+                               s, type_hyperon, type_pion, type_p, type_K_m) *
+                           kminusp_piminussigmaplus(sqrts);
+                  },
                   sqrts, type_p, type_K_m);
       break;
     }
@@ -169,9 +201,12 @@ CollisionBranchList ScatterActionHyperonPion::two_to_two_cross_sections() {
       const auto& type_p_bar = ParticleType::find(-pdg::p);
       const auto& type_K_p = ParticleType::find(pdg::K_p);
       add_channel(process_list,
-                  [&] { return detailed_balance_factor_stable(s,
-                               type_hyperon, type_pion, type_p_bar, type_K_p)
-                               * kminusp_piminussigmaplus(sqrts); },
+                  [&] {
+                    return detailed_balance_factor_stable(s, type_hyperon,
+                                                          type_pion, type_p_bar,
+                                                          type_K_p) *
+                           kminusp_piminussigmaplus(sqrts);
+                  },
                   sqrts, type_p_bar, type_K_p);
       break;
     }

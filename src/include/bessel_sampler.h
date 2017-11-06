@@ -37,26 +37,24 @@ namespace Smash {
 
 class BesselSampler {
  public:
-  BesselSampler(const double poisson_mean1,
-                const double poisson_mean2,
+  BesselSampler(const double poisson_mean1, const double poisson_mean2,
                 const int fixed_difference)
-  : a_(2.0*std::sqrt(poisson_mean1*poisson_mean2)),
-    N_(std::abs(fixed_difference)),
-    N_is_positive_(fixed_difference >= 0) {
+      : a_(2.0 * std::sqrt(poisson_mean1 * poisson_mean2)),
+        N_(std::abs(fixed_difference)),
+        N_is_positive_(fixed_difference >= 0) {
     const auto &log = logger<LogArea::GrandcanThermalizer>();
     assert(poisson_mean1 > 0.0);
     assert(poisson_mean2 > 0.0);
-    log.debug("Bessel sampler",
-             ": Poisson mean N1 = ", poisson_mean1,
-             ", Poisson mean N2 = ", poisson_mean2,
-             ", N1 - N2 fixed to ", fixed_difference);
-    m_ = 0.5 * (std::sqrt(a_*a_ + N_*N_) - N_);
+    log.debug("Bessel sampler", ": Poisson mean N1 = ", poisson_mean1,
+              ", Poisson mean N2 = ", poisson_mean2, ", N1 - N2 fixed to ",
+              fixed_difference);
+    m_ = 0.5 * (std::sqrt(a_ * a_ + N_ * N_) - N_);
     if (m_ >= m_switch_method_) {
       mu_ = 0.5 * a_ * r(N_, a_);
-      const double mean_sqr = mu_* (1.0 + 0.5 * a_ * r(N_+1, a_));
-      sigma_ = std::sqrt(mean_sqr - mu_*mu_);
-      log.debug("m = ", m_, " -> using gaussian sampling with mean = ",
-               mu_, ", sigma = ", sigma_);
+      const double mean_sqr = mu_ * (1.0 + 0.5 * a_ * r(N_ + 1, a_));
+      sigma_ = std::sqrt(mean_sqr - mu_ * mu_);
+      log.debug("m = ", m_, " -> using gaussian sampling with mean = ", mu_,
+                ", sigma = ", sigma_);
     } else {
       log.debug("m = ", m_, " -> using direct sampling method");
       std::vector<double> probabilities;
@@ -65,7 +63,7 @@ class BesselSampler {
       do {
         sum += wi;
         probabilities.push_back(wi);
-        wi *= 0.25*a_*a_ / (i + 1) / (N_ + i + 1);
+        wi *= 0.25 * a_ * a_ / (i + 1) / (N_ + i + 1);
         i++;
       } while (wi > negligible_probability_);
       i = 0;
@@ -82,12 +80,11 @@ class BesselSampler {
    *  \return \f$(A, B)\f$
    */
   std::pair<int, int> sample() {
-    const int N_smaller = (m_ >= m_switch_method_) ?
-                          std::round(Random::normal(mu_, sigma_)) :
-                          dist_();
-    return N_is_positive_ ?
-           std::make_pair(N_smaller + N_, N_smaller) :
-           std::make_pair(N_smaller, N_smaller + N_);
+    const int N_smaller = (m_ >= m_switch_method_)
+                              ? std::round(Random::normal(mu_, sigma_))
+                              : dist_();
+    return N_is_positive_ ? std::make_pair(N_smaller + N_, N_smaller)
+                          : std::make_pair(N_smaller, N_smaller + N_);
   }
 
  private:
@@ -95,7 +92,7 @@ class BesselSampler {
    *  using continued fraction representation, see \iref{Yuan2000}.
    */
   static double r(int n, double a) {
-    const double a_inv = 1.0/a;
+    const double a_inv = 1.0 / a;
     double res = 0.0;
     // |x - continued fraction of order n| < 2^(-n+1), see the book
     // "Continued fractions" by Khinchin. For 10^-16 = ~2^-50 precision
@@ -106,8 +103,8 @@ class BesselSampler {
       res = 1.0 / (a_inv * 2 * (n + i) + res);
     }
     // Check the known property of r(n,a) function, see iref{Yuan2000}.
-    assert(a/(std::sqrt(a*a + (n+1)*(n+1)) + n + 1) <= res);
-    assert(res <= a/(std::sqrt(a*a + n*n) + n));
+    assert(a / (std::sqrt(a * a + (n + 1) * (n + 1)) + n + 1) <= res);
+    assert(res <= a / (std::sqrt(a * a + n * n) + n));
     return res;
   }
   /// Vector to store tabulated values of probabilities for small m case

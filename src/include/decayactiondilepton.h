@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -19,7 +19,8 @@ class DecayActionDilepton : public DecayAction {
   DecayActionDilepton(const ParticleData &p, double time_of_execution,
                       double shining_weight);
 
-  double raw_weight_value() const override {
+  double raw_weight_value() const override { return shining_weight_; }
+  double partial_weight() const override {
     return shining_weight_ * branching_;
   }
 

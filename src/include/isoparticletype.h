@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -9,7 +9,7 @@
 #define SRC_INCLUDE_ISOPARTICLETYPE_H_
 
 #include <string>
-#include<unordered_map>
+#include <unordered_map>
 
 #include "particletype.h"
 #include "tabulation.h"
@@ -47,7 +47,7 @@ class IsoParticleType {
   IsoParticleType(IsoParticleType &&) = default;
   IsoParticleType &operator=(IsoParticleType &&) = default;
 
-  /** 
+  /**
    * Returns whether the two IsoParticleType objects have the same PDG code for
    * their first state; if it is, it is the same iso multiplet.
    */
@@ -90,7 +90,7 @@ class IsoParticleType {
   /**
    * Returns a list of all IsoParticleTypes
    */
-  static const IsoParticleTypeList& list_all();
+  static const IsoParticleTypeList &list_all();
 
   /**
    * Returns the IsoParticleType pointer for the given \p name.
@@ -99,21 +99,21 @@ class IsoParticleType {
    *
    * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
    */
-  static const IsoParticleType* try_find(const std::string &name);
+  static const IsoParticleType *try_find(const std::string &name);
 
   /**
    * Returns the IsoParticleType object for the given \p name.
    *
    * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
    */
-  static const IsoParticleType& find(const std::string &name);
+  static const IsoParticleType &find(const std::string &name);
 
   /**
    * Returns the IsoParticleType object for the given \p type.
    *
    * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
    */
-  static IsoParticleType* find(const ParticleType &type);
+  static IsoParticleType *find(const ParticleType &type);
 
   /// \ingroup exception
   struct ParticleNotFoundFailure : public std::runtime_error {
@@ -135,7 +135,8 @@ class IsoParticleType {
 
   /**
    * Add a new multiplet to the global list of IsoParticleTypes, which contains
-   * the type t. If the multiplet exists already, the type t will be added to it.
+   * the type t. If the multiplet exists already, the type t will be added to
+   * it.
    */
   static void create_multiplet(const ParticleType &type);
 
@@ -172,12 +173,12 @@ class IsoParticleType {
    * where R is this multiplet and R' is a baryon resonance, associated
    * with a list of resonances R' for the NN -> RR' cross sections;
    * used to calculate every multiplet spectral function only once*/
-  std::unordered_map<IsoParticleType*, TabulationPtr> XS_RR_tabulations;
+  std::unordered_map<IsoParticleType *, TabulationPtr> XS_RR_tabulations;
 
   /**
    * Private version of the 'find' method that returns a non-const reference.
    */
-  static IsoParticleType& find_private(const std::string &name);
+  static IsoParticleType &find_private(const std::string &name);
 };
 
 }  // namespace Smash

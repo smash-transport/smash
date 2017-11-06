@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2012-2015
+ *    Copyright (c) 2012-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -78,7 +78,7 @@ class ParticleType {
   double mass() const { return mass_; }
 
   /// Returns the squared particle mass.
-  double mass_sqr() const { return mass_*mass_; }
+  double mass_sqr() const { return mass_ * mass_; }
 
   /// Returns the particle width (at the mass pole).
   double width_at_pole() const { return width_; }
@@ -108,15 +108,13 @@ class ParticleType {
   /// Returns the isospin-3 component relative to the total isospin.
   double isospin3_rel() const {
     unsigned int I = isospin();
-    return (I == 0) ? 0 : static_cast<double>(isospin3())/I;
+    return (I == 0) ? 0 : static_cast<double>(isospin3()) / I;
   }
 
   /**
    * Returns a pointer to the Isospin-multiplet of this PDG Code.
    */
-  IsoParticleType* iso_multiplet() const {
-    return iso_multiplet_;
-  }
+  IsoParticleType *iso_multiplet() const { return iso_multiplet_; }
 
   /// \copydoc PdgCode::charge
   int charge() const { return charge_; }
@@ -140,7 +138,7 @@ class ParticleType {
   int baryon_number() const { return pdgcode_.baryon_number(); }
 
   /// \copydoc PdgCode::strangeness
-  int strangeness() const {return pdgcode_.strangeness(); }
+  int strangeness() const { return pdgcode_.strangeness(); }
 
   /// \copydoc PdgCode::is_nucleon
   bool is_nucleon() const { return pdgcode_.is_nucleon(); }
@@ -167,9 +165,7 @@ class ParticleType {
   }
 
   /// Check if the particle is stable
-  inline bool is_stable() const {
-    return width_ < width_cutoff;
-  }
+  inline bool is_stable() const { return width_ < width_cutoff; }
 
   /**
    * The minimum mass of the resonance that is kinematically allowed.
@@ -188,14 +184,14 @@ class ParticleType {
    *
    * Calculate the the smallest mass where the spectral function still has a
    * contribution.
-   * This value can be different from min_mass_kinematic, if the spectral function
+   * This value can be different from min_mass_kinematic, if the spectral
+   * function
    * becomes zero at masses higher than min_mass_kinematic.
    *
    * \return The minimum mass that a particle of this type can assume, where the
    * spectral function still has a non-zero value.
    */
   double min_mass_spectral() const;
-
 
   /**
    * Get the mass-dependent partial decay width of a particle with mass m
@@ -249,7 +245,7 @@ class ParticleType {
    * \param t_b Type of second daughter particle.
    */
   double get_partial_width(const double m, const ParticleType &t_a,
-                                         const ParticleType &t_b) const;
+                           const ParticleType &t_b) const;
 
   /**
    * Get the mass-dependent partial in-width of a resonance with mass m,
@@ -262,11 +258,12 @@ class ParticleType {
    * \param p_b Second daughter particle.
    */
   double get_partial_in_width(const double m, const ParticleData &p_a,
-                                            const ParticleData &p_b) const;
+                              const ParticleData &p_b) const;
 
   /**
    * Full spectral function
-   * \f$ A(m) = \frac{2}{\pi} N \frac{m^2\Gamma(m)}{(m^2-m_0^2)^2+(m\Gamma(m))^2} \f$
+   * \f$ A(m) = \frac{2}{\pi} N
+   * \frac{m^2\Gamma(m)}{(m^2-m_0^2)^2+(m\Gamma(m))^2} \f$
    * of the resonance (relativistic Breit-Wigner distribution with
    * mass-dependent width, where N is a normalization factor).
    * \param m Actual off-shell mass of the resonance, where the
@@ -304,7 +301,7 @@ class ParticleType {
   * \return The mass of the resonance particle.
   */
   double sample_resonance_mass(const double mass_stable,
-                              const double cms_energy, int L = 0) const;
+                               const double cms_energy, int L = 0) const;
 
   /**
   * Resonance mass sampling for 2-particle final state with two resonances.
@@ -317,8 +314,8 @@ class ParticleType {
   * \return The masses of the resonance particles.
   */
   std::pair<double, double> sample_resonance_masses(const ParticleType &t2,
-                                                  const double cms_energy,
-                                                  int L = 0) const;
+                                                    const double cms_energy,
+                                                    int L = 0) const;
 
   /**
    *  Prints out width and spectral function versus mass to the
@@ -376,7 +373,6 @@ class ParticleType {
     using std::runtime_error::runtime_error;
   };
 
-
   /**
    * Returns whether the ParticleType with the given \p pdgcode exists.
    *
@@ -389,7 +385,7 @@ class ParticleType {
    *
    * \note The complexity of the search is \f$\mathcal O(N)\f$.
    */
-  static bool exists(const std::string& name);
+  static bool exists(const std::string &name);
 
   /**
    * Initialize the global ParticleType list (list_all) from the given input
@@ -440,7 +436,8 @@ class ParticleType {
    *
    * \par Pre-condition:
    * The operator expects that the ParticleType object is stored in the vector
-   * returned by ParticleType::list_all. Therefore, never create new ParticleType
+   * returned by ParticleType::list_all. Therefore, never create new
+   * ParticleType
    * objects (that includes copies and moves)!
    *
    * \par Note on distributed execution:
@@ -513,9 +510,7 @@ class ParticleType {
 class ParticleTypePtr {
  public:
   /// Dereferences the pointer and returns the ParticleType object.
-  const ParticleType &operator*() const {
-    return lookup();
-  }
+  const ParticleType &operator*() const { return lookup(); }
 
   /// Dereferences the pointer and returns the ParticleType object.
   const ParticleType *operator->() const {

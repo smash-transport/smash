@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -15,7 +15,6 @@
 #include "action.h"
 
 namespace Smash {
-
 
 /**
  * \ingroup action
@@ -51,13 +50,11 @@ class DecayAction : public Action {
 
   std::pair<double, double> sample_masses() const override;
 
-  double raw_weight_value() const override {
-    return total_width_;
-  }
+  double raw_weight_value() const override { return total_width_; }
 
-  double total_width() const {
-    return total_width_;
-  }
+  double partial_weight() const override { return partial_width_; }
+
+  double total_width() const { return total_width_; }
 
   /**
    * \ingroup exception
@@ -69,9 +66,6 @@ class DecayAction : public Action {
   };
 
  protected:
-  /// determine the total energy in the center-of-mass frame
-  double sqrt_s() const override;
-
   /**
    * \ingroup logging
    * Writes information about this decay action to the \p out stream.
@@ -83,6 +77,9 @@ class DecayAction : public Action {
 
   /** total decay width */
   double total_width_;
+
+  /** partial decay width to the chosen outgoing channel */
+  double partial_width_;
 
   /** angular momentum of the decay */
   int L_ = 0;
@@ -96,7 +93,6 @@ class DecayAction : public Action {
    */
   virtual void one_to_three();
 };
-
 
 }  // namespace Smash
 

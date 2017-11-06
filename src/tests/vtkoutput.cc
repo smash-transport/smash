@@ -1,20 +1,23 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include "unittest.h"
+#include "unittest.h"  // This has to be the first include
+
 #include "setup.h"
+
+#include <include/config.h>
 #include <array>
-#include <iostream>
-#include <vector>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
-#include <include/config.h>
+#include <iostream>
+#include <vector>
+
 #include "../include/clock.h"
 #include "../include/configuration.h"
 #include "../include/outputinterface.h"
@@ -53,17 +56,9 @@ TEST(vtkoutputfile) {
     particles.insert(Test::smashon_random());
   }
 
-  /* Create config file and object */
-  const bf::path configfilename = "vtkconfig.yaml";
-  const bf::path configfilepath = testoutputpath / configfilename;
-  bf::ofstream cfgfile;
-  cfgfile.open(configfilepath, std::ios::out);
-  cfgfile << "Options: None" << std::endl;
-  cfgfile.close();
-  Configuration &&op{testoutputpath, configfilename};
   /* Create output object */
   std::unique_ptr<VtkOutput> vtkop =
-      make_unique<VtkOutput>(testoutputpath, std::move(op));
+      make_unique<VtkOutput>(testoutputpath, "Particles");
   int event_id = 0;
   /* Initial output */
   vtkop->at_eventstart(particles, event_id);
@@ -207,5 +202,4 @@ TEST(vtkoutputfile) {
   outputfile.close();
   VERIFY(bf::remove(outputfilepath));
   VERIFY(bf::remove(outputfile2path));
-  VERIFY(bf::remove(configfilepath));
 }

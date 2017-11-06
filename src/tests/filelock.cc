@@ -1,12 +1,14 @@
 /*
  *
- *    Copyright (c) 2014-2015
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
-#include "unittest.h"
+
+#include "unittest.h"  // This include has to be first
+
 #include "setup.h"
 
 #include "../include/filelock.h"

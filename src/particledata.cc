@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -29,30 +29,35 @@ double ParticleData::effective_mass() const {
 }
 
 void ParticleData::set_history(int ncoll, uint32_t pid, ProcessType pt,
-                               double time_of_or, const ParticleList& plist) {
+                               double time_last_coll,
+                               const ParticleList &plist) {
   if (pt != ProcessType::Wall) {
-    history_.time_of_origin = time_of_or;
     history_.collisions_per_particle = ncoll;
+    history_.time_last_collision = time_last_coll;
   }
   history_.id_process = pid;
   history_.process_type = pt;
   switch (pt) {
-  case ProcessType::Decay: case ProcessType::Wall:
-    // only store one parent
-    history_.p1 = plist[0].pdgcode();
-    history_.p2 = 0x0;
-    break;
-  case ProcessType::Elastic: case ProcessType::TwoToOne:
-  case ProcessType::TwoToTwo: case ProcessType::String:
-    // store two parent particles
-    history_.p1 = plist[0].pdgcode();
-    history_.p2 = plist[1].pdgcode();
-    break;
-  case ProcessType::None:
-    // nullify parents
-    history_.p1 = 0x0;
-    history_.p2 = 0x0;
-    break;
+    case ProcessType::Decay:
+    case ProcessType::Wall:
+      // only store one parent
+      history_.p1 = plist[0].pdgcode();
+      history_.p2 = 0x0;
+      break;
+    case ProcessType::Elastic:
+    case ProcessType::TwoToOne:
+    case ProcessType::TwoToTwo:
+    case ProcessType::String:
+      // store two parent particles
+      history_.p1 = plist[0].pdgcode();
+      history_.p2 = plist[1].pdgcode();
+      break;
+    case ProcessType::Thermalization:
+    case ProcessType::None:
+      // nullify parents
+      history_.p1 = 0x0;
+      history_.p2 = 0x0;
+      break;
   }
 }
 
@@ -69,8 +74,7 @@ std::ostream &operator<<(std::ostream &out, const ParticleData &p) {
          << ", pos [fm]:" << p.position() << ", mom [GeV]:" << p.momentum()
          << ", formation time [fm]:" << p.formation_time()
          << ", cross section scaling factor:"
-         << p.cross_section_scaling_factor()
-         << "}";
+         << p.cross_section_scaling_factor() << "}";
 }
 
 std::ostream &operator<<(std::ostream &out, const ParticleList &particle_list) {
@@ -82,8 +86,8 @@ std::ostream &operator<<(std::ostream &out, const ParticleList &particle_list) {
       column = out.tellp();
       out << ' ';
     }
-    out << std::setw(5) << std::setprecision(3)
-        << p.momentum().abs3() << p.type().name();
+    out << std::setw(5) << std::setprecision(3) << p.momentum().abs3()
+        << p.type().name();
   }
   return out << ']';
 }

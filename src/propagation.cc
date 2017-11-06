@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2015
+ *    Copyright (c) 2013-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -27,10 +27,10 @@ double calc_hubble(double time, const ExpansionProperties &metric) {
       h = 0.;
       break;
     case ExpansionMode::MasslessFRW:
-      h = metric.b_ / (2 * (metric.b_*time + 1));
+      h = metric.b_ / (2 * (metric.b_ * time + 1));
       break;
     case ExpansionMode::MassiveFRW:
-      h = 2 * metric.b_ / (3 * (metric.b_*time + 1));
+      h = 2 * metric.b_ / (3 * (metric.b_ * time + 1));
       break;
     case ExpansionMode::Exponential:
       h = metric.b_ * time;
@@ -42,10 +42,9 @@ double calc_hubble(double time, const ExpansionProperties &metric) {
   return h;
 }
 
-
 /* Simple straight line propagation without potentials*/
 double propagate_straight_line(Particles *particles, double to_time,
-      const std::vector<FourVector> &beam_momentum) {
+                               const std::vector<FourVector> &beam_momentum) {
   const auto &log = logger<LogArea::Propagation>();
   bool negative_dt_error = false;
   double dt = 0.0;
@@ -68,15 +67,15 @@ double propagate_straight_line(Particles *particles, double to_time,
     // todo(m. mayer): improve this condition (see comment #11 issue #4213)
     assert(data.id() >= 0);
     const bool avoid_fermi_motion =
-      (static_cast<uint64_t>(data.id())
-       < static_cast<uint64_t>(beam_momentum.size()))
-      && (data.get_history().collisions_per_particle == 0);
+        (static_cast<uint64_t>(data.id()) <
+         static_cast<uint64_t>(beam_momentum.size())) &&
+        (data.get_history().collisions_per_particle == 0);
     ThreeVector v;
     if (avoid_fermi_motion) {
-        const FourVector vbeam = beam_momentum[data.id()];
-        v = vbeam.velocity();
+      const FourVector vbeam = beam_momentum[data.id()];
+      v = vbeam.velocity();
     } else {
-        v = data.velocity();
+      v = data.velocity();
     }
     const FourVector distance = FourVector(0.0, v * dt);
     log.debug("Particle ", data, " motion: ", distance);
@@ -100,8 +99,9 @@ void expand_space_time(Particles *particles,
   for (ParticleData &data : *particles) {
     // Momentum and position modification to ensure appropriate expansion
     const double h = calc_hubble(parameters.labclock.current_time(), metric);
-    FourVector delta_mom = FourVector(0.0, h*data.momentum().threevec()*dt);
-    FourVector expan_dist = FourVector(0.0, h*data.position().threevec()*dt);
+    FourVector delta_mom = FourVector(0.0, h * data.momentum().threevec() * dt);
+    FourVector expan_dist =
+        FourVector(0.0, h * data.position().threevec() * dt);
 
     log.debug("Particle ", data, " expansion motion: ", expan_dist);
     // New position and momentum
@@ -116,38 +116,48 @@ void expand_space_time(Particles *particles,
   }
 }
 
-void update_momenta(Particles *particles, double dt,
-               const Potentials &pot,
-               RectangularLattice<ThreeVector>* UB_grad_lat,
-               RectangularLattice<ThreeVector>* UI3_grad_lat) {
+void update_momenta(Particles *particles, double dt, const Potentials &pot,
+                    RectangularLattice<ThreeVector> *UB_grad_lat,
+                    RectangularLattice<ThreeVector> *UI3_grad_lat) {
   // Copy particles before propagation to calculate potentials from them
   const ParticleList plist = particles->copy_to_vector();
 
   const auto &log = logger<LogArea::Propagation>();
   bool possibly_use_lattice =
-         (pot.use_skyrme() ? (UB_grad_lat != nullptr) : true) &&
-         (pot.use_symmetry() ? (UI3_grad_lat != nullptr) : true);
+      (pot.use_skyrme() ? (UB_grad_lat != nullptr) : true) &&
+      (pot.use_symmetry() ? (UI3_grad_lat != nullptr) : true);
   ThreeVector dUB_dr, dUI3_dr;
   double min_time_scale = std::numeric_limits<double>::infinity();
 
   for (ParticleData &data : *particles) {
+    // Only baryons will be affected by the potentials
+    if (!data.is_baryon()) {
+      continue;
+    }
+    const auto scale = pot.force_scale(data.type());
     const ThreeVector r = data.position().threevec();
     /* Lattices can be used for calculation if 1-2 are fulfilled:
      * 1) Required lattices are not nullptr - possibly_use_lattice
      * 2) r is not out of required lattices
      */
-    const bool use_lattice = possibly_use_lattice &&
-              (pot.use_skyrme() ? UB_grad_lat->value_at(r, dUB_dr) : true) &&
-              (pot.use_symmetry() ? UI3_grad_lat->value_at(r, dUI3_dr) : true);
+    const bool use_lattice =
+        possibly_use_lattice &&
+        (pot.use_skyrme() ? UB_grad_lat->value_at(r, dUB_dr) : true) &&
+        (pot.use_symmetry() ? UI3_grad_lat->value_at(r, dUI3_dr) : true);
     if (!pot.use_skyrme()) {
       dUB_dr = ThreeVector(0.0, 0.0, 0.0);
     }
     if (!pot.use_symmetry()) {
       dUI3_dr = ThreeVector(0.0, 0.0, 0.0);
     }
-    // Compute potential gradient from lattice if possible
-    const ThreeVector dU_dr = use_lattice ? (dUB_dr + dUI3_dr):
-                              pot.potential_gradient(r, plist, data.type());
+    if (!use_lattice) {
+      const auto tmp = pot.potential_gradient(r, plist);
+      dUB_dr = tmp.first;
+      dUI3_dr = tmp.second;
+    }
+    const ThreeVector dU_dr =
+        scale.first * dUB_dr +
+        scale.second * data.type().isospin3_rel() * dUI3_dr;
     log.debug("Update momenta: dU/dr [GeV/fm] = ", dU_dr);
     data.set_4momentum(data.effective_mass(),
                        data.momentum().threevec() - dU_dr * dt);

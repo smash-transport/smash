@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2014-2015
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -187,8 +187,8 @@ ColliderModus::ColliderModus(Configuration modus_config,
   const double mass_projec = projectile_->mass();
   const double mass_target = target_->mass();
   // average mass of a particle in that nucleus
-  const double mass_a = projectile_->mass() /
-                        projectile_->number_of_particles();
+  const double mass_a =
+      projectile_->mass() / projectile_->number_of_particles();
   const double mass_b = target_->mass() / target_->number_of_particles();
   // Option 1: Center of mass energy.
   if (modus_cfg.has_value({"Sqrtsnn"})) {
@@ -267,7 +267,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
               "Please provide Values and Yields.");
         }
         const std::vector<double> impacts =
-                                           modus_cfg.take({"Impact", "Values"});
+            modus_cfg.take({"Impact", "Values"});
         const std::vector<double> yields = modus_cfg.take({"Impact", "Yields"});
         if (impacts.size() != yields.size()) {
           throw std::domain_error(
@@ -277,8 +277,8 @@ ColliderModus::ColliderModus(Configuration modus_config,
         impact_interpolation_ = make_unique<InterpolateDataLinear<double>>(
             InterpolateDataLinear<double>(impacts, yields));
 
-        const auto imp_minmax = std::minmax_element(impacts.begin(),
-                                                    impacts.end());
+        const auto imp_minmax =
+            std::minmax_element(impacts.begin(), impacts.end());
         imp_min_ = *imp_minmax.first;
         imp_max_ = *imp_minmax.second;
         yield_max_ = *std::max_element(yields.begin(), yields.end());
@@ -308,15 +308,15 @@ std::ostream &operator<<(std::ostream &out, const ColliderModus &m) {
   return out << "-- Collider Modus:\n"
              << "sqrt(S) (nucleus-nucleus) = "
              << format(std::sqrt(m.total_s_), "GeV\n")
-             << "sqrt(S) (nucleon-nucleon) = "
-             << format(m.sqrt_s_NN_, "GeV\n")
+             << "sqrt(S) (nucleon-nucleon) = " << format(m.sqrt_s_NN_, "GeV\n")
              << "Initial distance between nuclei: "
              << format(2 * m.initial_z_displacement_, "fm") << "\nProjectile:\n"
-             << *m.projectile_ << "\nTarget:\n" << *m.target_;
+             << *m.projectile_ << "\nTarget:\n"
+             << *m.target_;
 }
 
 double ColliderModus::initial_conditions(Particles *particles,
-                                        const ExperimentParameters &) {
+                                         const ExperimentParameters &) {
   const auto &log = logger<LogArea::Collider>();
   // Sample impact parameter distribution.
   sample_impact();
@@ -344,8 +344,8 @@ double ColliderModus::initial_conditions(Particles *particles,
   // Calculate the beam velocity of the projectile and the target, which will be
   // used to calculate the beam momenta in experiment.cc
   if (fermi_motion_ == FermiMotion::Frozen) {
-      velocity_projectile_ = v_a;
-      velocity_target_ = v_b;
+    velocity_projectile_ = v_a;
+    velocity_target_ = v_b;
   }
 
   // Generate Fermi momenta if necessary
@@ -381,12 +381,11 @@ double ColliderModus::initial_conditions(Particles *particles,
   const double dz = initial_z_displacement_;
 
   const double simulation_time = -dz / std::abs(v_a);
-  const double proj_z = -dz -
-                        std::sqrt(1.0 - v_a*v_a) * (r_a + d_a);
-  const double targ_z = +dz * std::abs(v_b/v_a) +
-                        std::sqrt(1.0 - v_b*v_b) * (r_b + d_b);
+  const double proj_z = -dz - std::sqrt(1.0 - v_a * v_a) * (r_a + d_a);
+  const double targ_z =
+      +dz * std::abs(v_b / v_a) + std::sqrt(1.0 - v_b * v_b) * (r_b + d_b);
   projectile_->shift(proj_z, +impact_ / 2.0, simulation_time);
-  target_->    shift(targ_z, -impact_ / 2.0, simulation_time);
+  target_->shift(targ_z, -impact_ / 2.0, simulation_time);
 
   // Put the particles in the nuclei into code particles.
   projectile_->copy_particles(particles);
@@ -403,8 +402,7 @@ void ColliderModus::sample_impact() {
       impact_ = std::sqrt(imp_min_ * imp_min_ +
                           Random::canonical() *
                               (imp_max_ * imp_max_ - imp_min_ * imp_min_));
-    }
-    break;
+    } break;
     case Sampling::Custom: {
       // rejection sampling based on given distribution
       assert(impact_interpolation_ != nullptr);
@@ -418,8 +416,7 @@ void ColliderModus::sample_impact() {
         probability_random = Random::uniform(0., 1.);
       }
       impact_ = b;
-    }
-    break;
+    } break;
     case Sampling::Uniform: {
       // linear sampling. Still, min > max works fine.
       impact_ = Random::uniform(imp_min_, imp_max_);
@@ -437,14 +434,12 @@ std::pair<double, double> ColliderModus::get_velocities(double s, double m_a,
       v_a = center_of_velocity_v(s, m_a, m_b);
       v_b = -v_a;
       break;
-    case CalculationFrame::CenterOfMass:
-      {
-        // Compute center of mass momentum.
-        double pCM = pCM_from_s(s, m_a, m_b);
-        v_a = pCM / std::sqrt(m_a*m_a + pCM*pCM);
-        v_b = -pCM / std::sqrt(m_b*m_b + pCM*pCM);
-      }
-      break;
+    case CalculationFrame::CenterOfMass: {
+      // Compute center of mass momentum.
+      double pCM = pCM_from_s(s, m_a, m_b);
+      v_a = pCM / std::sqrt(m_a * m_a + pCM * pCM);
+      v_b = -pCM / std::sqrt(m_b * m_b + pCM * pCM);
+    } break;
     case CalculationFrame::FixedTarget:
       v_a = fixed_target_projectile_v(s, m_a, m_b);
       break;

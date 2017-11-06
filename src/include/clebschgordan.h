@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -22,30 +22,29 @@ namespace Smash {
  * have been multiplied by two (in order to be integer).
  */
 double clebsch_gordan(const int j_a, const int j_b, const int j_c,
-                     const int m_a, const int m_b, const int m_c);
-
+                      const int m_a, const int m_b, const int m_c);
 
 /**
  * Calculate the squared isospin Clebsch-Gordan coefficient for two particles
  * p_a and p_b coupling to a resonance Res.
  */
 inline double isospin_clebsch_gordan_sqr_2to1(const ParticleType &p_a,
-                                             const ParticleType &p_b,
-                                             const ParticleType &Res) {
-  const double cg = clebsch_gordan(p_a.isospin(), p_b.isospin(), Res.isospin(),
-                                p_a.isospin3(), p_b.isospin3(), Res.isospin3());
-  return cg*cg;
+                                              const ParticleType &p_b,
+                                              const ParticleType &Res) {
+  const double cg =
+      clebsch_gordan(p_a.isospin(), p_b.isospin(), Res.isospin(),
+                     p_a.isospin3(), p_b.isospin3(), Res.isospin3());
+  return cg * cg;
 }
-
 
 /**
  * Calculate the squared isospin Clebsch-Gordan coefficient for three particles
  * p_a, p_b and p_c coupling to a resonance Res.
  */
 double isospin_clebsch_gordan_sqr_3to1(const ParticleType &p_a,
-                                      const ParticleType &p_b,
-                                      const ParticleType &p_c,
-                                      const ParticleType &Res);
+                                       const ParticleType &p_b,
+                                       const ParticleType &p_c,
+                                       const ParticleType &Res);
 
 /**
  * Calculate the squared isospin Clebsch-Gordan coefficient for a
@@ -81,14 +80,14 @@ class I_tot_range {
     // Compute total isospin range with given initial and final particles.
     const int I_z = t_a.isospin3() + t_b.isospin3();
     if (I_z != t_c.isospin3() + t_d.isospin3()) {
-        // This reaction is forbidden by isospin conservation.
-        // Set impossible values to make sure an empty range is returned.
-        I_min_ = 1;
-        I_max_ = 0;
-        return;
+      // This reaction is forbidden by isospin conservation.
+      // Set impossible values to make sure an empty range is returned.
+      I_min_ = 1;
+      I_max_ = 0;
+      return;
     }
-    I_max_ = std::min(t_a.isospin() + t_b.isospin(),
-                      t_c.isospin() + t_d.isospin());
+    I_max_ =
+        std::min(t_a.isospin() + t_b.isospin(), t_c.isospin() + t_d.isospin());
     I_min_ = std::max(std::abs(t_a.isospin() - t_b.isospin()),
                       std::abs(t_c.isospin() - t_d.isospin()));
     I_min_ = std::max(I_min_, std::abs(I_z));

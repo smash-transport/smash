@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -14,7 +14,6 @@
 
 #include <boost/filesystem.hpp>
 
-#include "configuration.h"
 #include "density.h"
 #include "forwarddeclarations.h"
 #include "outputinterface.h"
@@ -28,12 +27,13 @@ namespace Smash {
  */
 class VtkOutput : public OutputInterface {
  public:
-  VtkOutput(const bf::path &path, Configuration &&conf);
+  VtkOutput(const bf::path &path, std::string name);
   ~VtkOutput();
 
   void at_eventstart(const Particles &particles,
                      const int event_number) override;
-  void at_eventend(const Particles &particles, const int event_number) override;
+  void at_eventend(const Particles &particles, const int event_number,
+                   double impact_parameter) override;
   void at_intermediate_time(const Particles &particles, const Clock &clock,
                             const DensityParameters &dens_param) override;
 
@@ -48,7 +48,7 @@ class VtkOutput : public OutputInterface {
       RectangularLattice<EnergyMomentumTensor> &lattice) override;
 
   /// Printout of the thermodynamic quantities from thethermalizer class
-  void thermodynamics_output(const GrandCanThermalizer& gct) override;
+  void thermodynamics_output(const GrandCanThermalizer &gct) override;
 
  private:
   void write(const Particles &particles);
@@ -58,23 +58,17 @@ class VtkOutput : public OutputInterface {
   std::string make_varname(const ThermodynamicQuantity tq,
                            const DensityType dens_type);
 
-  template<typename T>
-  void write_vtk_header(std::ofstream &file,
-                        RectangularLattice<T> &lat,
+  template <typename T>
+  void write_vtk_header(std::ofstream &file, RectangularLattice<T> &lat,
                         const std::string &description);
 
-  template<typename T, typename F>
-  void write_vtk_scalar(std::ofstream &file,
-                        RectangularLattice<T> &lat,
-                        const std::string &varname,
-                        F &&function);
+  template <typename T, typename F>
+  void write_vtk_scalar(std::ofstream &file, RectangularLattice<T> &lat,
+                        const std::string &varname, F &&function);
 
-  template<typename T, typename F>
-  void write_vtk_vector(std::ofstream &file,
-                        RectangularLattice<T> &lat,
-                        const std::string &varname,
-                        F &&function);
-
+  template <typename T, typename F>
+  void write_vtk_vector(std::ofstream &file, RectangularLattice<T> &lat,
+                        const std::string &varname, F &&function);
 
   /// filesystem path for output
   const bf::path base_path_;

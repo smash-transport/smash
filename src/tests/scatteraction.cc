@@ -1,17 +1,18 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include "unittest.h"
+#include "unittest.h"  // This include has to be first
+
 #include "setup.h"
 
-#include "../include/scatteractionbaryonmeson.h"
 #include "../include/scatteractionbaryonbaryon.h"
+#include "../include/scatteractionbaryonmeson.h"
 
 using namespace Smash;
 using Smash::Test::Position;
@@ -24,7 +25,7 @@ TEST(init_particle_types) {
 
 constexpr double r_x = 0.1;
 const FourVector pos_a = Position{0., -r_x, 0., 0.};
-const FourVector pos_b = Position{0.,  r_x, 0., 0.};
+const FourVector pos_b = Position{0., r_x, 0., 0.};
 const FourVector middle = (pos_a + pos_b) / 2.;
 
 TEST(sorting) {
@@ -72,8 +73,7 @@ TEST(elastic_collision) {
   constexpr double sigma = 10.0;
   constexpr bool strings_switch = false;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
-  act.add_all_processes(sigma, true, true, 0., strings_switch,
-                        nnbar_treatment);
+  act.add_all_processes(sigma, true, true, 0., strings_switch, nnbar_treatment);
 
   // check cross section
   COMPARE(act.cross_section(), sigma);
@@ -87,8 +87,8 @@ TEST(elastic_collision) {
   // verify that particles didn't change in the collision
   ParticleList in = act.incoming_particles();
   const ParticleList& out = act.outgoing_particles();
-  VERIFY((in[0] == out[0] && in[1] == out[1])
-         || (in[0] == out[1] && in[1] == out[0]));
+  VERIFY((in[0] == out[0] && in[1] == out[1]) ||
+         (in[0] == out[1] && in[1] == out[0]));
 
   // verify that the particles keep their positions after elastic scattering
   COMPARE(out[0].position(), pos_a);
@@ -109,8 +109,8 @@ TEST(elastic_collision) {
   VERIFY(!act_copy.is_valid(particles));
 
   // verify that the particles don't change in the particle list
-  VERIFY((in[0] == particles.front() && in[1] == particles.back())
-         || (in[0] == particles.back() && in[1] == particles.front()));
+  VERIFY((in[0] == particles.front() && in[1] == particles.back()) ||
+         (in[0] == particles.back() && in[1] == particles.front()));
 }
 
 TEST(outgoing_valid) {

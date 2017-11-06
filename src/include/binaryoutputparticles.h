@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -13,9 +13,9 @@
 #include <string>
 
 #include "binaryoutputcollisions.h"
-#include "configuration.h"
 #include "filedeleter.h"
 #include "forwarddeclarations.h"
+#include "outputparameters.h"
 
 namespace Smash {
 
@@ -36,14 +36,16 @@ namespace Smash {
  **/
 class BinaryOutputParticles : public BinaryOutputBase {
  public:
-  BinaryOutputParticles(const bf::path &path, Configuration &&config);
+  BinaryOutputParticles(const bf::path &path, std::string name,
+                        const OutputParameters &out_par);
 
   /// writes the initial particle information of an event
   void at_eventstart(const Particles &particles,
                      const int event_number) override;
 
   /// writes the final particle information of an event
-  void at_eventend(const Particles &particles, const int event_number) override;
+  void at_eventend(const Particles &particles, const int event_number,
+                   double impact_parameter) override;
 
   /// writes particles every time interval fixed by option OUTPUT_INTERVAL
   void at_intermediate_time(const Particles &particles, const Clock &clock,
@@ -53,7 +55,6 @@ class BinaryOutputParticles : public BinaryOutputBase {
   /// Option: print initial and final particles or not
   bool only_final_;
 };
-
 
 }  // namespace Smash
 

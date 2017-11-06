@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -9,6 +9,8 @@
 
 #ifndef SRC_INCLUDE_OUTPUTINTERFACE_H_
 #define SRC_INCLUDE_OUTPUTINTERFACE_H_
+
+#include <string>
 
 #include "density.h"
 #include "energymomentumtensor.h"
@@ -31,6 +33,9 @@ namespace Smash {
  */
 class OutputInterface {
  public:
+  explicit OutputInterface(std::string name)
+      : is_dilepton_output_(name == "Dileptons"),
+        is_photon_output_(name == "Photons") {}
   virtual ~OutputInterface() = default;
 
   /**
@@ -47,14 +52,17 @@ class OutputInterface {
    * option.
    * \param particles List of particles.
    * \param event_number Number of the current event.
+   * \param impact_parameter distance between centers of nuclei in this event.
+   *          Only makes sense for collider modus.
    */
-  virtual void at_eventend(const Particles &particles,
-                           const int event_number) = 0;
+  virtual void at_eventend(const Particles &particles, const int event_number,
+                           double impact_parameter) = 0;
 
   /**
    * Called whenever an action modified one or more particles.
    *
-   * \param action The action object, containing the initial and final state etc.
+   * \param action The action object, containing the initial and final state
+   * etc.
    * \param density The density at the interaction point.
    *
    * \fpPrecision Why \c double?
@@ -84,31 +92,35 @@ class OutputInterface {
    * \param dt Type of density, i.e. which particles to take into account.
    * \param lattice Lattice of tabulated values.
    */
-  virtual void thermodynamics_output(const ThermodynamicQuantity tq,
-                      const DensityType dt,
-                      RectangularLattice<DensityOnLattice> &lattice) {
+  virtual void thermodynamics_output(
+      const ThermodynamicQuantity tq, const DensityType dt,
+      RectangularLattice<DensityOnLattice> &lattice) {
     SMASH_UNUSED(tq);
     SMASH_UNUSED(dt);
     SMASH_UNUSED(lattice);
   }
 
   /**
-   * Output to write energy-momentum tensor and related quantities from the lattice.
+   * Output to write energy-momentum tensor and related quantities from the
+   * lattice.
    * \param tq Thermodynamic quantity to be written: Tmn, Tmn_Landau, v_Landau
    * \param dt Type of density, i.e. which particles to take into account.
    * \param lattice Lattice of tabulated values.
    */
-  virtual void thermodynamics_output(const ThermodynamicQuantity tq,
-                   const DensityType dt,
-                   RectangularLattice<EnergyMomentumTensor> &lattice) {
+  virtual void thermodynamics_output(
+      const ThermodynamicQuantity tq, const DensityType dt,
+      RectangularLattice<EnergyMomentumTensor> &lattice) {
     SMASH_UNUSED(tq);
     SMASH_UNUSED(dt);
     SMASH_UNUSED(lattice);
   }
 
-  virtual void thermodynamics_output(const GrandCanThermalizer& gct) {
+  virtual void thermodynamics_output(const GrandCanThermalizer &gct) {
     SMASH_UNUSED(gct);
   }
+
+  bool is_dilepton_output() const { return is_dilepton_output_; }
+  bool is_photon_output() const { return is_photon_output_; }
 
   const char *to_string(const ThermodynamicQuantity tq) {
     switch (tq) {
@@ -139,6 +151,10 @@ class OutputInterface {
     }
     throw std::invalid_argument("Unknown density type.");
   }
+
+ protected:
+  const bool is_dilepton_output_;
+  const bool is_photon_output_;
 };
 
 }  // namespace Smash

@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -19,7 +19,8 @@ namespace Smash {
 /**
  * \ingroup action
  * A simple decay finder:
- * Just loops through all particles and checks if they can decay during the next timestep.  */
+ * Just loops through all particles and checks if they can decay during the next
+ * timestep.  */
 class DecayActionsFinder : public ActionFinderInterface {
  public:
   /** Initialize the finder */

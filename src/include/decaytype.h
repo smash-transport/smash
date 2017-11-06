@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -23,7 +23,7 @@ namespace Smash {
 class DecayType {
  public:
   DecayType(ParticleTypePtrList part_types, int l)
-           : particle_types_(part_types), L_(l) {}
+      : particle_types_(part_types), L_(l) {}
   /** Virtual Destructor.
    * The declaration of the destructor is necessary to make it virtual.
    */
@@ -36,13 +36,9 @@ class DecayType {
    * (most decays do not depend on the mother type). */
   virtual bool has_mother(ParticleTypePtr) const { return true; }
   /// Return the particle types associated with this branch.
-  const ParticleTypePtrList &particle_types() const {
-    return particle_types_;
-  }
+  const ParticleTypePtrList &particle_types() const { return particle_types_; }
   /// Get the angular momentum of this branch.
-  inline int angular_momentum() const {
-    return L_;
-  }
+  inline int angular_momentum() const { return L_; }
   /**
    * Get the mass-dependent width of the decay.
    *
@@ -60,9 +56,8 @@ class DecayType {
    * \param m1 Actual mass of the first incoming particle [GeV].
    * \param m2 Actual mass of the second incoming particle [GeV].
    */
-  virtual double in_width(double m0, double G0, double m,
-                         double m1, double m2) const = 0;
-
+  virtual double in_width(double m0, double G0, double m, double m1,
+                          double m2) const = 0;
 
  protected:
   /// final-state particles of the decay
@@ -70,7 +65,6 @@ class DecayType {
   /// angular momentum of the decay
   int L_;
 };
-
 
 /**
  * TwoBodyDecay represents a decay type with two final-state particles.
@@ -93,9 +87,9 @@ class TwoBodyDecay : public DecayType {
   virtual double rho(double) const { return 1.; }
 };
 
-
 /**
- * TwoBodyDecayStable represents a decay type with two stable final-state particles.
+ * TwoBodyDecayStable represents a decay type with two stable final-state
+ * particles.
  */
 class TwoBodyDecayStable : public TwoBodyDecay {
  public:
@@ -109,15 +103,16 @@ class TwoBodyDecayStable : public TwoBodyDecay {
    * \param m Actual mass of the decaying particle [GeV].
    */
   double width(double m0, double G0, double m) const override;
-  double in_width(double m0, double G0, double m,
-                 double m1, double m2) const override;
+  double in_width(double m0, double G0, double m, double m1,
+                  double m2) const override;
+
  protected:
   double rho(double m) const override;
 };
 
-
 /**
- * TwoBodyDecaySemistable represents a decay type with two final-state particles,
+ * TwoBodyDecaySemistable represents a decay type with two final-state
+ * particles,
  * one of which is stable and the other is unstable.
  */
 class TwoBodyDecaySemistable : public TwoBodyDecay {
@@ -143,8 +138,8 @@ class TwoBodyDecaySemistable : public TwoBodyDecay {
    * \param m1 Actual mass of the first incoming particle [GeV].
    * \param m2 Actual mass of the second incoming particle [GeV].
    */
-  double in_width(double m0, double G0, double m,
-                 double m1, double m2) const override;
+  double in_width(double m0, double G0, double m, double m1,
+                  double m2) const override;
 
  protected:
   double rho(double m) const override;
@@ -165,16 +160,17 @@ class TwoBodyDecaySemistable : public TwoBodyDecay {
   mutable std::unique_ptr<Tabulation> tabulation_;
 };
 
-
 /**
- * TwoBodyDecayUnstable represents a decay type with two unstable final-state particles.
+ * TwoBodyDecayUnstable represents a decay type with two unstable final-state
+ * particles.
  */
 class TwoBodyDecayUnstable : public TwoBodyDecay {
  public:
   TwoBodyDecayUnstable(ParticleTypePtrList part_types, int l);
   double width(double m0, double G0, double m) const override;
-  double in_width(double m0, double G0, double m,
-                 double m1, double m2) const override;
+  double in_width(double m0, double G0, double m, double m1,
+                  double m2) const override;
+
  protected:
   double rho(double m) const override;
   /**
@@ -205,8 +201,8 @@ class ThreeBodyDecay : public DecayType {
   unsigned int particle_number() const override;
   bool has_particles(ParticleTypePtrList list) const override;
   double width(double m0, double G0, double m) const override;
-  double in_width(double m0, double G0, double m,
-                 double m1, double m2) const override;
+  double in_width(double m0, double G0, double m, double m1,
+                  double m2) const override;
 };
 
 /**
@@ -215,8 +211,8 @@ class ThreeBodyDecay : public DecayType {
  */
 class ThreeBodyDecayDilepton : public ThreeBodyDecay {
  public:
-  ThreeBodyDecayDilepton(ParticleTypePtr mother,
-                         ParticleTypePtrList part_types, int l);
+  ThreeBodyDecayDilepton(ParticleTypePtr mother, ParticleTypePtrList part_types,
+                         int l);
   bool has_mother(ParticleTypePtr mother) const override;
   /**
    * Get the mass-differential width \f$ d\Gamma / dm \f$ for a dilepton Dalitz
@@ -225,13 +221,13 @@ class ThreeBodyDecayDilepton : public ThreeBodyDecay {
    * It is calculated according to \iref{Weil:2013mya}, eq. (30)-(36).
    */
   static double diff_width(double m_parent, double m_dil, double m_other,
-                          ParticleTypePtr t);
+                           ParticleTypePtr t);
   double width(double m0, double G0, double m) const override;
+
  protected:
   mutable std::unique_ptr<Tabulation> tabulation_;
   ParticleTypePtr mother_;
 };
-
 
 }  // namespace Smash
 

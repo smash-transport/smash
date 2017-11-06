@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -13,14 +13,13 @@
 #include <stdexcept>
 #include <tuple>
 
-#include <einhard.hpp>
 #include <yaml-cpp/yaml.h>  // NOLINT(build/include_order)
+#include <einhard.hpp>
 
 #include "macros.h"
 
 namespace Smash {
 class Configuration;
-
 
 /*!\Userguide
  * \page input_logging_ Logging
@@ -53,7 +52,7 @@ class Configuration;
  * \li \key Lattice
  * \li \key AdaptiveTS
  * \li \key Pythia
- * 
+ *
  * Each key can have one of the following values:
  * \li ALL   - Log all messages (default)
  * \li TRACE - The lowest severity for messages describing the program flow
@@ -143,7 +142,7 @@ DECLARE_LOGAREA(12, ScatterAction);
 DECLARE_LOGAREA(13, Distributions);
 DECLARE_LOGAREA(14, Propagation);
 DECLARE_LOGAREA(15, Grid);
-DECLARE_LOGAREA(16, List);    // ListModus
+DECLARE_LOGAREA(16, List);  // ListModus
 DECLARE_LOGAREA(17, Nucleus);
 DECLARE_LOGAREA(18, Density);
 DECLARE_LOGAREA(19, PauliBlocking);
@@ -157,12 +156,12 @@ DECLARE_LOGAREA(26, GrandcanThermalizer);
 
 /// This type collects all existing log areas so they will be created with the
 /// correct log level automatically.
-using AreaTuple = std::tuple<Main, Experiment, Box, Collider, Sphere, Action,
-                             InputParser, ParticleType, FindScatter, Clock,
-                             DecayModes, Resonances, ScatterAction,
-                             Distributions, Propagation, Grid, List, Nucleus,
-                             Density, PauliBlocking, Tmn, Fpe, Lattice,
-                             Sampling, AdaptiveTS, Pythia, GrandcanThermalizer>;
+using AreaTuple =
+    std::tuple<Main, Experiment, Box, Collider, Sphere, Action, InputParser,
+               ParticleType, FindScatter, Clock, DecayModes, Resonances,
+               ScatterAction, Distributions, Propagation, Grid, List, Nucleus,
+               Density, PauliBlocking, Tmn, Fpe, Lattice, Sampling, AdaptiveTS,
+               Pythia, GrandcanThermalizer>;
 }  // namespace LogArea
 
 /**
@@ -229,7 +228,7 @@ struct FormattingHelper {
       out << std::setfill(' ') << std::setw(h.width);
     }
     if (h.precision >= 0) {
-        out << std::setprecision(h.precision);
+      out << std::setprecision(h.precision);
     }
     out << h.value;
     if (h.unit) {
@@ -258,7 +257,8 @@ FormattingHelper<T> format(const T &value, const char *unit, int width = -1,
 
 namespace YAML {
 /** \internal
- * Enables YAML-cpp to auto-convert a YAML Node to and from an einhard::LogLevel.
+ * Enables YAML-cpp to auto-convert a YAML Node to and from an
+ * einhard::LogLevel.
  */
 template <>
 struct convert<einhard::LogLevel> {

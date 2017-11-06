@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -76,9 +76,7 @@ GridBase::find_min_and_length(const Particles &particles) {
   // intialize min and max position arrays with the position of the first
   // particle in the list
   const auto &first_position = particles.front().position();
-  min_position = {{first_position[1],
-                   first_position[2],
-                   first_position[3]}};
+  min_position = {{first_position[1], first_position[2], first_position[3]}};
   auto max_position = min_position;
   for (const auto &p : particles) {
     const auto &pos = p.position();
@@ -99,11 +97,10 @@ GridBase::find_min_and_length(const Particles &particles) {
 // Grid
 
 template <GridOptions O>
-Grid<O>::Grid(
-    const std::pair<std::array<double, 3>,
-    std::array<double, 3>> &min_and_length,
-    const Particles &particles, double max_interaction_length,
-    CellSizeStrategy strategy)
+Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
+                  &min_and_length,
+              const Particles &particles, double max_interaction_length,
+              CellSizeStrategy strategy)
     : length_(min_and_length.second) {
   const auto min_position = min_and_length.first;
   const SizeType particle_count = particles.size();
@@ -131,15 +128,16 @@ Grid<O>::Grid(
   // because the last cell will then store particles in the interval
   // [length, length + max_interaction_length[. The code below achieves this
   // effect by rounding down (floor) and adding 1 afterwards.
-  const int max_cells = (O == GridOptions::Normal)
-                    ? std::cbrt(particle_count)
-                    : std::max(2, static_cast<int>(std::cbrt(particle_count)));
+  const int max_cells =
+      (O == GridOptions::Normal)
+          ? std::cbrt(particle_count)
+          : std::max(2, static_cast<int>(std::cbrt(particle_count)));
 
   // This normally equals 1/max_interaction_length, but if the number of cells
   // is reduced (because of low density) then this value is smaller.
   std::array<double, 3> index_factor = {1. / max_interaction_length,
-                                       1. / max_interaction_length,
-                                       1. / max_interaction_length};
+                                        1. / max_interaction_length,
+                                        1. / max_interaction_length};
   for (std::size_t i = 0; i < number_of_cells_.size(); ++i) {
     number_of_cells_[i] =
         (strategy == CellSizeStrategy::Largest)
@@ -199,8 +197,8 @@ Grid<O>::Grid(
                  });  // filter out the particles that can not interact
   } else {
     // construct a normal grid
-    log.debug("min: ", min_position, "\nlength: ", length_, "\ncells: ",
-              number_of_cells_, "\nindex_factor: ", index_factor);
+    log.debug("min: ", min_position, "\nlength: ", length_,
+              "\ncells: ", number_of_cells_, "\nindex_factor: ", index_factor);
 
     // After the grid parameters are determined, we can start placing the
     // particles in cells.
@@ -223,14 +221,14 @@ Grid<O>::Grid(
         const auto idx = cell_index_for(p);
 #ifndef NDEBUG
         if (idx >= SizeType(cells_.size())) {
-          log.fatal(source_location,
-                    "\nan out-of-bounds access would be necessary for the "
-                    "particle ",
-                    p, "\nfor a grid with the following parameters:\nmin: ",
-                    min_position, "\nlength: ", length_, "\ncells: ",
-                    number_of_cells_, "\nindex_factor: ", index_factor,
-                    "\ncells_.size: ", cells_.size(), "\nrequested index: ",
-                    idx);
+          log.fatal(
+              source_location,
+              "\nan out-of-bounds access would be necessary for the "
+              "particle ",
+              p, "\nfor a grid with the following parameters:\nmin: ",
+              min_position, "\nlength: ", length_,
+              "\ncells: ", number_of_cells_, "\nindex_factor: ", index_factor,
+              "\ncells_.size: ", cells_.size(), "\nrequested index: ", idx);
           throw std::runtime_error("out-of-bounds grid access on construction");
         }
 #endif
@@ -251,8 +249,8 @@ inline typename Grid<Options>::SizeType Grid<Options>::make_index(
 template <>
 void Grid<GridOptions::Normal>::iterate_cells(
     const std::function<void(const ParticleList &)> &search_cell_callback,
-    const std::function<void(const ParticleList &, const ParticleList &)> &
-        neighbor_cell_callback) const {
+    const std::function<void(const ParticleList &, const ParticleList &)>
+        &neighbor_cell_callback) const {
   std::array<SizeType, 3> search_index;
   SizeType &x = search_index[0];
   SizeType &y = search_index[1];
@@ -308,8 +306,8 @@ struct NeighborLookup {
 template <>
 void Grid<GridOptions::PeriodicBoundaries>::iterate_cells(
     const std::function<void(const ParticleList &)> &search_cell_callback,
-    const std::function<void(const ParticleList &, const ParticleList &)> &
-        neighbor_cell_callback) const {
+    const std::function<void(const ParticleList &, const ParticleList &)>
+        &neighbor_cell_callback) const {
   const auto &log = logger<LogArea::Grid>();
 
   std::array<SizeType, 3> search_index;
@@ -432,13 +430,13 @@ void Grid<GridOptions::PeriodicBoundaries>::iterate_cells(
 }
 
 template Grid<GridOptions::Normal>::Grid(
-    const std::pair<std::array<double, 3>,
-    std::array<double, 3>> &min_and_length,
+    const std::pair<std::array<double, 3>, std::array<double, 3>>
+        &min_and_length,
     const Particles &particles, double max_interaction_length,
     CellSizeStrategy strategy);
 template Grid<GridOptions::PeriodicBoundaries>::Grid(
-    const std::pair<std::array<double, 3>,
-    std::array<double, 3>> &min_and_length,
+    const std::pair<std::array<double, 3>, std::array<double, 3>>
+        &min_and_length,
     const Particles &particles, double max_interaction_length,
     CellSizeStrategy strategy);
 }  // namespace Smash

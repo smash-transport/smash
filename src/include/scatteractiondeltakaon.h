@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2016
+ *    Copyright (c) 2016-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -15,10 +15,10 @@
 
 namespace Smash {
 
-
 /**
  * \ingroup action
- * ScatterActionDeltaKaon is a special ScatterActionBaryonMeson which represents the
+ * ScatterActionDeltaKaon is a special ScatterActionBaryonMeson which represents
+ * the
  * scattering of a Delta and a kaon.
  */
 class ScatterActionDeltaKaon : public ScatterActionBaryonMeson {

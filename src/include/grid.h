@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -101,8 +101,8 @@ class Grid : public GridBase {
    * \param min_cell_length The minimal length a cell must have.
    * \param strategy The strategy for determining the cell size
    */
-  Grid(const std::pair<std::array<double, 3>, std::array<double, 3>> &
-           min_and_length,
+  Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
+           &min_and_length,
        const Particles &particles, double min_cell_length,
        CellSizeStrategy strategy = CellSizeStrategy::Optimal);
 
@@ -124,8 +124,8 @@ class Grid : public GridBase {
    */
   void iterate_cells(
       const std::function<void(const ParticleList &)> &search_cell_callback,
-      const std::function<void(const ParticleList &, const ParticleList &)> &
-          neighbor_cell_callback) const;
+      const std::function<void(const ParticleList &, const ParticleList &)>
+          &neighbor_cell_callback) const;
 
  private:
   /**

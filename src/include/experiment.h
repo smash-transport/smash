@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2015
+ *    Copyright (c) 2013-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -9,6 +9,7 @@
 
 #include <limits>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "actionfinderfactory.h"
@@ -18,10 +19,12 @@
 #include "energymomentumtensor.h"
 #include "fourvector.h"
 #include "grandcan_thermalizer.h"
+#include "outputparameters.h"
 #include "pauliblocking.h"
 #include "potentials.h"
 #include "propagation.h"
 #include "quantumnumbers.h"
+#include "thermalizationaction.h"
 
 namespace Smash {
 
@@ -154,10 +157,8 @@ class Experiment : public ExperimentBase {
   bool perform_action(Action &action,
                       const Container &particles_before_actions);
 
-  template <typename TOutput>
-  void create_output(const char * output_name,
-                     const bf::path &output_path,
-                     Configuration&& conf);
+  void create_output(std::string format, std::string content,
+                     const bf::path &output_path, const OutputParameters &par);
 
   /** Propagate all particles until time to_time without any interactions
    *  and shine dileptons.
@@ -176,7 +177,7 @@ class Experiment : public ExperimentBase {
    * Here, all actions are looped over, collisions and decays are
    * carried out and particles are propagated.
    */
-  void run_time_evolution_timestepless(Actions& actions);
+  void run_time_evolution_timestepless(Actions &actions);
 
   /** Performs the final decays of an event
    */
@@ -302,7 +303,7 @@ class Experiment : public ExperimentBase {
   /// Lattices of energy-momentum tensors for printout
   std::unique_ptr<RectangularLattice<EnergyMomentumTensor>> Tmn_;
   bool printout_tmn_ = false, printout_tmn_landau_ = false,
-       printout_v_landau_ = false;
+       printout_v_landau_ = false, printout_lattice_td_ = false;
 
   /// Instance of class used for forced thermalization
   std::unique_ptr<GrandCanThermalizer> thermalizer_;
@@ -332,7 +333,8 @@ class Experiment : public ExperimentBase {
   const double delta_time_startup_;
 
   /**
-   * This indicates whether we force all resonances to decay in the last timestep.
+   * This indicates whether we force all resonances to decay in the last
+   * timestep.
    */
   const bool force_decays_;
 
@@ -403,7 +405,7 @@ class Experiment : public ExperimentBase {
    * Writes the initial state for the Experiment to the output stream.
    * It automatically appends the output of the current Modus.
    */
-  friend std::ostream &operator<< <>(std::ostream &out, const Experiment &e);
+  friend std::ostream &operator<<<>(std::ostream &out, const Experiment &e);
 };
 }  // namespace Smash
 

@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2014-2015
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -23,7 +23,7 @@
 
 namespace Smash {
 
-Nucleus::Nucleus(const std::map<PdgCode, int>& particle_list, int nTest) {
+Nucleus::Nucleus(const std::map<PdgCode, int> &particle_list, int nTest) {
   fill_from_list(particle_list, nTest);
 }
 
@@ -45,7 +45,7 @@ double Nucleus::mass() const {
   for (auto i = cbegin(); i != cend(); i++) {
     total_mass += i->momentum().abs();
   }
-  return total_mass/(testparticles_+0.0);
+  return total_mass / (testparticles_ + 0.0);
 }
 
 /**
@@ -171,7 +171,8 @@ double Nucleus::mass() const {
  *
  * \f[t = -\log{\chi_1} -\log{\chi_2}\f]
  *
- * \f$p^{({\rm III})}\f$ is now the folding of \f$p^{({\rm II})}\f$ with itself[1]:
+ * \f$p^{({\rm III})}\f$ is now the folding of \f$p^{({\rm II})}\f$ with
+ *itself[1]:
  *
  * \f[p^{({\rm III})} = \int_{-\infty}^{\infty} d\tau e^{-\tau} e^{-(t-\tau)}
  * \Theta(\tau) \Theta(t-\tau) = t e^{-t} \mbox{ for } t > 0\f]
@@ -214,7 +215,7 @@ ThreeVector Nucleus::distribute_nucleon() const {
   if (almost_equal(nuclear_radius_, 0.)) {
     return Smash::ThreeVector();
   }
-  double radius_scaled = nuclear_radius_/diffusiveness_;
+  double radius_scaled = nuclear_radius_ / diffusiveness_;
   double prob_range1 = 1.0;
   double prob_range2 = 3. / radius_scaled;
   double prob_range3 = 2. * prob_range2 / radius_scaled;
@@ -311,7 +312,7 @@ void Nucleus::set_parameters_automatic() {
       break;
     default:
       // radius: rough guess for all nuclei not listed explicitly
-      set_nuclear_radius(1.2*std::cbrt(A));
+      set_nuclear_radius(1.2 * std::cbrt(A));
       // diffusiveness and saturation density already have reasonable defaults
   }
 }
@@ -330,10 +331,12 @@ void Nucleus::set_parameters_from_config(Configuration &config) {
 }
 
 void Nucleus::generate_fermi_momenta() {
-  const int N_n = std::count_if(begin(), end(),
-                  [](const ParticleData i) {return i.pdgcode() == pdg::n;});
-  const int N_p = std::count_if(begin(), end(),
-                  [](const ParticleData i) {return i.pdgcode() == pdg::p;});
+  const int N_n = std::count_if(begin(), end(), [](const ParticleData i) {
+    return i.pdgcode() == pdg::n;
+  });
+  const int N_p = std::count_if(begin(), end(), [](const ParticleData i) {
+    return i.pdgcode() == pdg::p;
+  });
   const FourVector nucleus_center = center();
   const int A = N_n + N_p;
   constexpr double pi2_3 = 3.0 * M_PI * M_PI;
@@ -346,31 +349,31 @@ void Nucleus::generate_fermi_momenta() {
     // Only protons and neutrons get Fermi momenta
     if (i->pdgcode() != pdg::p && i->pdgcode() != pdg::n) {
       if (i->is_baryon()) {
-        log.warn() << "No rule to calculate Fermi momentum " <<
-                       "for particle " << i->pdgcode();
+        log.warn() << "No rule to calculate Fermi momentum "
+                   << "for particle " << i->pdgcode();
       }
       continue;
     }
     const double r = (i->position() - nucleus_center).abs3();
-    double rho = nuclear_density
-          / (std::exp((r - nuclear_radius_)/diffusiveness_) + 1.);
+    double rho = nuclear_density /
+                 (std::exp((r - nuclear_radius_) / diffusiveness_) + 1.);
     if (i->pdgcode() == pdg::p) {
       rho = rho * N_p / A;
     }
     if (i->pdgcode() == pdg::n) {
       rho = rho * N_n / A;
     }
-    const double p = hbarc * std::pow(pi2_3 * rho *
-                                      Random::uniform(0.0, 1.0), 1.0/3.0);
+    const double p =
+        hbarc * std::pow(pi2_3 * rho * Random::uniform(0.0, 1.0), 1.0 / 3.0);
     Angles phitheta;
     phitheta.distribute_isotropically();
     const ThreeVector ith_3momentum = phitheta.threevec() * p;
     ptot += ith_3momentum;
     i->set_3momentum(ith_3momentum);
-    log.debug() << "Particle: " << *i <<
-               ", pF[GeV]: " << hbarc * std::pow(pi2_3 * rho, 1.0/3.0) <<
-               " r[fm]: " << r <<
-               " Nuclear radius[fm]: " << nuclear_radius_;
+    log.debug() << "Particle: " << *i
+                << ", pF[GeV]: " << hbarc * std::pow(pi2_3 * rho, 1.0 / 3.0)
+                << " r[fm]: " << r
+                << " Nuclear radius[fm]: " << nuclear_radius_;
   }
   if (A == 0) {
     // No Fermi momenta should be assigned
@@ -378,7 +381,7 @@ void Nucleus::generate_fermi_momenta() {
   } else {
     // Make sure that total momentum is zero - redistribute ptot equally
     // among protons and neutrons
-    const ThreeVector centralizer = ptot/A;
+    const ThreeVector centralizer = ptot / A;
     for (auto i = begin(); i != end(); i++) {
       if (i->pdgcode() == pdg::p || i->pdgcode() == pdg::n) {
         i->set_4momentum(i->pole_mass(),
@@ -391,7 +394,7 @@ void Nucleus::generate_fermi_momenta() {
 void Nucleus::boost(double beta_scalar) {
   double beta_squared = beta_scalar * beta_scalar;
   double one_over_gamma = std::sqrt(1.0 - beta_squared);
-  double gamma = 1.0/one_over_gamma;
+  double gamma = 1.0 / one_over_gamma;
   // We are talking about a /passive/ lorentz transformation here, as
   // far as I can see, so we need to boost in the direction opposite to
   // where we want to go
@@ -414,17 +417,17 @@ void Nucleus::boost(double beta_scalar) {
     // the same binding energy.
     ThreeVector mom_i = i->momentum().threevec();
     i->set_4momentum(i->pole_mass(), mom_i.x1(), mom_i.x2(),
-                     gamma*(beta_scalar*i->pole_mass() + mom_i.x3()));
+                     gamma * (beta_scalar * i->pole_mass() + mom_i.x3()));
   }
 }
 
-void Nucleus::fill_from_list(const std::map<PdgCode, int>& particle_list,
+void Nucleus::fill_from_list(const std::map<PdgCode, int> &particle_list,
                              int testparticles) {
   testparticles_ = testparticles;
   for (auto n = particle_list.cbegin(); n != particle_list.cend(); ++n) {
     const ParticleType &current_type = ParticleType::find(n->first);
     double current_mass = current_type.mass();
-    for (unsigned int i = 0; i < n->second*testparticles_; i++) {
+    for (unsigned int i = 0; i < n->second * testparticles_; i++) {
       // append particle to list and set its PDG code.
       particles_.emplace_back(current_type);
       particles_.back().set_4momentum(current_mass, 0.0, 0.0, 0.0);
@@ -432,8 +435,7 @@ void Nucleus::fill_from_list(const std::map<PdgCode, int>& particle_list,
   }
 }
 
-void Nucleus::shift(double z_offset,
-                    double x_offset, double simulation_time) {
+void Nucleus::shift(double z_offset, double x_offset, double simulation_time) {
   // Move the nucleus in z and x directions, and set the time.
   for (auto i = begin(); i != end(); i++) {
     FourVector this_position = i->position();
@@ -445,7 +447,7 @@ void Nucleus::shift(double z_offset,
   }
 }
 
-void Nucleus::copy_particles(Particles* external_particles) {
+void Nucleus::copy_particles(Particles *external_particles) {
   for (auto p = begin(); p != end(); p++) {
     external_particles->insert(*p);
   }
@@ -476,8 +478,7 @@ std::ostream &operator<<(std::ostream &out, const Nucleus &n) {
   return out << "  #particles   #testparticles   mass [GeV]   "
                 "radius [fm]  diffusiveness [fm]\n"
              << format(n.number_of_particles(), nullptr, 12)
-             << format(n.size(), nullptr, 17)
-             << format(n.mass(), nullptr, 13)
+             << format(n.size(), nullptr, 17) << format(n.mass(), nullptr, 13)
              << format(n.get_nuclear_radius(), nullptr, 14)
              << format(n.get_diffusiveness(), nullptr, 20);
 }

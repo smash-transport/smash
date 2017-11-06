@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -13,7 +13,6 @@
 #include "scatteraction.h"
 
 namespace Smash {
-
 
 /**
  * \ingroup action
@@ -32,7 +31,6 @@ class ScatterActionMesonMeson : public ScatterAction {
    */
   void format_debug_output(std::ostream &out) const override;
 };
-
 
 }  // namespace Smash
 

@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -68,7 +68,7 @@ std::string trim(const std::string &s) {
   return s.substr(begin, end - begin + 1);
 }
 
-void remove_substr(std::string& s, const std::string& p) {
+void remove_substr(std::string &s, const std::string &p) {
   using str = std::string;
   str::size_type n = p.length();
   for (str::size_type i = s.find(p); i != str::npos; i = s.find(p)) {
@@ -76,26 +76,26 @@ void remove_substr(std::string& s, const std::string& p) {
   }
 }
 
-void isoclean(std::string& s) {
+void isoclean(std::string &s) {
   remove_substr(s, "⁺");
   remove_substr(s, "⁻");
   remove_substr(s, "⁰");
 }
 
-template<typename Out>
+template <typename Out>
 void split(const std::string &s, char delim, Out result) {
-    std::stringstream ss;
-    ss.str(s);
-    std::string item;
-    while (std::getline(ss, item, delim)) {
-        *(result++) = item;
-    }
+  std::stringstream ss;
+  ss.str(s);
+  std::string item;
+  while (std::getline(ss, item, delim)) {
+    *(result++) = item;
+  }
 }
 
 std::vector<std::string> split(const std::string &s, char delim) {
-    std::vector<std::string> elems;
-    split(s, delim, std::back_inserter(elems));
-    return elems;
+  std::vector<std::string> elems;
+  split(s, delim, std::back_inserter(elems));
+  return elems;
 }
 
 }  // namespace Smash

@@ -1,17 +1,19 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include "unittest.h"
+#include "unittest.h"  // This include has to be first
+
 #include "setup.h"
+
 #include "../include/boxmodus.h"
-#include "../include/configuration.h"
 #include "../include/collidermodus.h"
+#include "../include/configuration.h"
 #include "../include/experimentparameters.h"
 #include "../include/modusdefault.h"
 #include "../include/spheremodus.h"
@@ -20,9 +22,7 @@
 
 using namespace Smash;
 
-TEST(init_particle_types) {
-  Test::create_smashon_particletypes();
-}
+TEST(init_particle_types) { Test::create_smashon_particletypes(); }
 
 static ParticleData create_smashon_particle(int id = -1) {
   return ParticleData{ParticleType::find(0x661), id};

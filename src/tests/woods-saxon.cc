@@ -1,11 +1,12 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
+
 #include "unittest.h"
 
 #include <map>
@@ -28,9 +29,9 @@ constexpr bool PRINT = false;
 TEST(woods_saxon) {
   // this is where we store the distributions. Components (0,1,2,3) =
   // (x,y,z,r)
-  std::map<int, int> hist_vanilla[4] {};
-  std::map<int, int> hist_centerd[4] {};
-  char name[4] = {'x','y','z','r'};
+  std::map<int, int> hist_vanilla[4]{};
+  std::map<int, int> hist_centerd[4]{};
+  char name[4] = {'x', 'y', 'z', 'r'};
   // binning width for the distribution:
   constexpr double dx = 0.05;
   // this is the number of nuclei we create.
@@ -44,23 +45,24 @@ TEST(woods_saxon) {
     // for all particles in the nucleus, save position in histograms.
     for (auto p : projectile) {
       double r = p.position().abs3();
-      ++hist_vanilla[0][floor(p.position().x1()/dx)];
-      ++hist_vanilla[1][floor(p.position().x2()/dx)];
-      ++hist_vanilla[2][floor(p.position().x3()/dx)];
-      ++hist_vanilla[3][r/dx];
+      ++hist_vanilla[0][floor(p.position().x1() / dx)];
+      ++hist_vanilla[1][floor(p.position().x2() / dx)];
+      ++hist_vanilla[2][floor(p.position().x3() / dx)];
+      ++hist_vanilla[3][r / dx];
       // we'll "center" the nucleus "by hand", i.e., we subtract com by
       // hand instead of doing it in a dedicated function / loop.
       FourVector centered = p.position() - com;
       double R = centered.abs3();
-      ++hist_centerd[0][floor(centered.x1()/dx)];
-      ++hist_centerd[1][floor(centered.x2()/dx)];
-      ++hist_centerd[2][floor(centered.x3()/dx)];
-      ++hist_centerd[3][R/dx];
+      ++hist_centerd[0][floor(centered.x1() / dx)];
+      ++hist_centerd[1][floor(centered.x2() / dx)];
+      ++hist_centerd[2][floor(centered.x3() / dx)];
+      ++hist_centerd[3][R / dx];
     }
   }
   constexpr int sigmabins = 4;
   // these are all a little smaller than erf((i+1)/sqrt(2)).
-  constexpr double allowed[sigmabins] = {.682*.99, .954*.99, .997*.99, 1.0};
+  constexpr double allowed[sigmabins] = {.682 * .99, .954 * .99, .997 * .99,
+                                         1.0};
   // mnemonic: c = component
   for (int c = 0; c < 4; ++c) {
     int diffbad[sigmabins] = {0};
@@ -81,7 +83,7 @@ TEST(woods_saxon) {
       double margin = std::sqrt(vanilla + centerd);
       // we'll make another histogram from the errors divided by the
       // standard deviation (stored in margin).
-      int diffbin = std::abs(vanilla - centerd)/margin;
+      int diffbin = std::abs(vanilla - centerd) / margin;
       // everything with a larger deviation than sigmabins*margin is
       // collected in highest bin.
       diffbin = (diffbin >= sigmabins) ? sigmabins - 1 : diffbin;
@@ -102,11 +104,11 @@ TEST(woods_saxon) {
       for (int unit = 0; unit < sigmabins - 1; ++unit) {
         totalbad += diffbad[unit];
         double fraction = (totalbad + 0.0) / (total + 0.0);
-        VERIFY(fraction > allowed[unit]) << "\ntoo few entries have less than "
-                  << unit+1 << " sigma deviation\n("
-                  << totalbad << "/" << total << "=" << fraction
-                  << ", required minimal fraction: " << allowed[unit]
-                  << ")\nat component " << name[c];
+        VERIFY(fraction > allowed[unit])
+            << "\ntoo few entries have less than " << unit + 1
+            << " sigma deviation\n(" << totalbad << "/" << total << "="
+            << fraction << ", required minimal fraction: " << allowed[unit]
+            << ")\nat component " << name[c];
       }
     }
   }

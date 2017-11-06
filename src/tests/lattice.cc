@@ -1,16 +1,17 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
-#include "unittest.h"
+
+#include "unittest.h"  // This include has to be first
 
 #include "../include/cxx14compat.h"
-#include "../include/lattice.h"
 #include "../include/fourvector.h"
+#include "../include/lattice.h"
 
 using namespace Smash;
 
@@ -81,7 +82,7 @@ TEST(cell_center) {
   // Cell center from 1d index
   auto dims = lattice->dimensions();
   const ThreeVector r1 = lattice->cell_center(1, 3, 2);
-  const ThreeVector r2 = lattice->cell_center(1 + dims[0]*(3 + dims[1]*2));
+  const ThreeVector r2 = lattice->cell_center(1 + dims[0] * (3 + dims[1] * 2));
   VERIFY(r1 == r2);
 }
 
@@ -137,44 +138,46 @@ TEST(iterate_in_radius) {
   ThreeVector r0 = ThreeVector(2.0, 2.0, 1.0), r;
   double r_cut = 1.0;
   lattice->iterate_in_radius(
-    r0, r_cut, [&](FourVector &node, int, int, int) { node = mark; });
+      r0, r_cut, [&](FourVector &node, int, int, int) { node = mark; });
   /* Iterate all the lattice and check that marked nodes are within r_cut cube,
      while not marked nodes are out of r_cut cube */
-  lattice->iterate_sublattice({0, 0, 0}, lattice->dimensions(),
-             [&](FourVector &node, int ix, int iy, int iz){
-    r = lattice->cell_center(ix, iy, iz);
-    if (std::abs(r[0] - r0[0]) <= r_cut &&
-        std::abs(r[1] - r0[1]) <= r_cut &&
-        std::abs(r[2] - r0[2]) <= r_cut) {
-      COMPARE(node, mark) << ix << " " << iy << " " << iz;
-    } else {
-      COMPARE(node, FourVector()) << ix << " " << iy << " " << iz;
-    }
-  });
+  lattice->iterate_sublattice(
+      {0, 0, 0}, lattice->dimensions(),
+      [&](FourVector &node, int ix, int iy, int iz) {
+        r = lattice->cell_center(ix, iy, iz);
+        if (std::abs(r[0] - r0[0]) <= r_cut &&
+            std::abs(r[1] - r0[1]) <= r_cut &&
+            std::abs(r[2] - r0[2]) <= r_cut) {
+          COMPARE(node, mark) << ix << " " << iy << " " << iz;
+        } else {
+          COMPARE(node, FourVector()) << ix << " " << iy << " " << iz;
+        }
+      });
 
   // 2) Lattice is periodic: here d(x1, x2) = |x2 - x1 - int((x2-x1)/l)*l|
   lattice = create_lattice(true);
   lattice->reset();
   r_cut = 2.0;
   lattice->iterate_in_radius(
-    r0, r_cut, [&](FourVector &node, int, int, int) { node = mark; });
+      r0, r_cut, [&](FourVector &node, int, int, int) { node = mark; });
   double l;
   std::array<double, 3> d;
-  lattice->iterate_sublattice({0, 0, 0}, lattice->dimensions(),
-             [&](FourVector &node, int ix, int iy, int iz){
-    r = lattice->cell_center(ix, iy, iz);
-    for (int i = 0; i < 3; i++) {
-      d[i] = r[i] - r0[i];
-      l = lattice->lattice_sizes()[i];
-      d[i] -= static_cast<int>(d[i]/l)*l;
-      d[i] = std::abs(d[i]);
-    }
-    if (d[0] <= r_cut && d[1] <= r_cut && d[2] <= r_cut) {
-      COMPARE(node, mark) << ix << " " << iy << " " << iz;
-    } else {
-      COMPARE(node, FourVector()) << ix << " " << iy << " " << iz;
-    }
-  });
+  lattice->iterate_sublattice(
+      {0, 0, 0}, lattice->dimensions(),
+      [&](FourVector &node, int ix, int iy, int iz) {
+        r = lattice->cell_center(ix, iy, iz);
+        for (int i = 0; i < 3; i++) {
+          d[i] = r[i] - r0[i];
+          l = lattice->lattice_sizes()[i];
+          d[i] -= static_cast<int>(d[i] / l) * l;
+          d[i] = std::abs(d[i]);
+        }
+        if (d[0] <= r_cut && d[1] <= r_cut && d[2] <= r_cut) {
+          COMPARE(node, mark) << ix << " " << iy << " " << iz;
+        } else {
+          COMPARE(node, FourVector()) << ix << " " << iy << " " << iz;
+        }
+      });
 }
 
 /* Create lattice and fill it with 1/r function.
@@ -187,19 +190,19 @@ TEST(gradient) {
   const std::array<double, 3> origin = {-5.2, -4.3, -6.7};
   bool periodicity = false;
   auto lat = make_unique<RectangularLattice<double>>(
-             l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
+      l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
   ThreeVector r;
   double d;
   // Fill lattice with 1/r function.
   lat->iterate_sublattice({0, 0, 0}, lat->dimensions(),
-             [&](double &node, int ix, int iy, int iz){
-      r = lat->cell_center(ix, iy, iz);
-      d = r.abs();
-      node = (d > 0.0) ? (1.0/d) : 0.0;
-    });
+                          [&](double &node, int ix, int iy, int iz) {
+                            r = lat->cell_center(ix, iy, iz);
+                            d = r.abs();
+                            node = (d > 0.0) ? (1.0 / d) : 0.0;
+                          });
   ThreeVector expected_grad;
   auto grad_lat = make_unique<RectangularLattice<ThreeVector>>(
-             l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
+      l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
   lat->compute_gradient_lattice(grad_lat.get());
   /* Error of the derivative calculation is proportional to the
      lattice spacing squared and to the third derivative of the function.
@@ -210,23 +213,24 @@ TEST(gradient) {
      edges of the non-periodic grid is proportional to lattice spacing,
      not to lattice spacing squared.
   */
-  grad_lat->iterate_sublattice({0, 0, 0}, grad_lat->dimensions(),
-                  [&](ThreeVector &node, int ix, int iy, int iz){
-      r = grad_lat->cell_center(ix, iy, iz);
-      d = r.abs();
-      if (d > 2.0) {
-        expected_grad = - r / (d*d*d);
-        COMPARE_RELATIVE_ERROR(node.x1(), expected_grad.x1(), 6.e-2) <<
-                               "node: (" << ix << ", " << iy << ", " << iz <<
-                               "), |r| = " << d;
-        COMPARE_RELATIVE_ERROR(node.x2(), expected_grad.x2(), 6.e-2) <<
-                               "node: (" << ix << ", " << iy << ", " << iz <<
-                               "), |r| = " << d;
-        COMPARE_RELATIVE_ERROR(node.x3(), expected_grad.x3(), 6.e-2) <<
-                               "node: (" << ix << ", " << iy << ", " << iz <<
-                               "), |r| = " << d;
-      }
-    });
+  grad_lat->iterate_sublattice(
+      {0, 0, 0}, grad_lat->dimensions(),
+      [&](ThreeVector &node, int ix, int iy, int iz) {
+        r = grad_lat->cell_center(ix, iy, iz);
+        d = r.abs();
+        if (d > 2.0) {
+          expected_grad = -r / (d * d * d);
+          COMPARE_RELATIVE_ERROR(node.x1(), expected_grad.x1(), 6.e-2)
+              << "node: (" << ix << ", " << iy << ", " << iz
+              << "), |r| = " << d;
+          COMPARE_RELATIVE_ERROR(node.x2(), expected_grad.x2(), 6.e-2)
+              << "node: (" << ix << ", " << iy << ", " << iz
+              << "), |r| = " << d;
+          COMPARE_RELATIVE_ERROR(node.x3(), expected_grad.x3(), 6.e-2)
+              << "node: (" << ix << ", " << iy << ", " << iz
+              << "), |r| = " << d;
+        }
+      });
 }
 
 /* Create periodic lattice and fill it with
@@ -243,40 +247,44 @@ TEST(gradient_periodic) {
   const std::array<double, 3> origin = {-5.2, -4.3, -6.7};
   bool periodicity = true;
   auto lat = make_unique<RectangularLattice<double>>(
-             l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
+      l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
   ThreeVector r;
   // Fill lattice with (2 pi x/lx) cos(2 pi y/ly) cos(2 pi z/lz) function.
   lat->iterate_sublattice({0, 0, 0}, lat->dimensions(),
-             [&](double &node, int ix, int iy, int iz){
-      r = lat->cell_center(ix, iy, iz);
-      node = std::cos(2*M_PI*r.x1()/l[0]) *
-             std::cos(2*M_PI*r.x2()/l[1]) *
-             std::cos(2*M_PI*r.x3()/l[2]);
-    });
+                          [&](double &node, int ix, int iy, int iz) {
+                            r = lat->cell_center(ix, iy, iz);
+                            node = std::cos(2 * M_PI * r.x1() / l[0]) *
+                                   std::cos(2 * M_PI * r.x2() / l[1]) *
+                                   std::cos(2 * M_PI * r.x3() / l[2]);
+                          });
   ThreeVector expected_grad;
   auto grad_lat = make_unique<RectangularLattice<ThreeVector>>(
-             l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
+      l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
   lat->compute_gradient_lattice(grad_lat.get());
-  grad_lat->iterate_sublattice({0, 0, 0}, grad_lat->dimensions(),
-                  [&](ThreeVector &node, int ix, int iy, int iz){
-      r = grad_lat->cell_center(ix, iy, iz);
-      expected_grad.set_x1(-2*M_PI/l[0] * std::sin(2*M_PI*r.x1()/l[0]) *
-                                          std::cos(2*M_PI*r.x2()/l[1]) *
-                                          std::cos(2*M_PI*r.x3()/l[2]));
-      expected_grad.set_x2(-2*M_PI/l[1] * std::cos(2*M_PI*r.x1()/l[0]) *
-                                          std::sin(2*M_PI*r.x2()/l[1]) *
-                                          std::cos(2*M_PI*r.x3()/l[2]));
-      expected_grad.set_x3(-2*M_PI/l[2] * std::cos(2*M_PI*r.x1()/l[0]) *
-                                          std::cos(2*M_PI*r.x2()/l[1]) *
-                                          std::sin(2*M_PI*r.x3()/l[2]));
+  grad_lat->iterate_sublattice(
+      {0, 0, 0}, grad_lat->dimensions(),
+      [&](ThreeVector &node, int ix, int iy, int iz) {
+        r = grad_lat->cell_center(ix, iy, iz);
+        expected_grad.set_x1(-2 * M_PI / l[0] *
+                             std::sin(2 * M_PI * r.x1() / l[0]) *
+                             std::cos(2 * M_PI * r.x2() / l[1]) *
+                             std::cos(2 * M_PI * r.x3() / l[2]));
+        expected_grad.set_x2(-2 * M_PI / l[1] *
+                             std::cos(2 * M_PI * r.x1() / l[0]) *
+                             std::sin(2 * M_PI * r.x2() / l[1]) *
+                             std::cos(2 * M_PI * r.x3() / l[2]));
+        expected_grad.set_x3(-2 * M_PI / l[2] *
+                             std::cos(2 * M_PI * r.x1() / l[0]) *
+                             std::cos(2 * M_PI * r.x2() / l[1]) *
+                             std::sin(2 * M_PI * r.x3() / l[2]));
 
-      COMPARE_RELATIVE_ERROR(node.x1(), expected_grad.x1(), 3.e-3) <<
-                       "node: (" << ix << ", " << iy << ", " << iz << ")";
-      COMPARE_RELATIVE_ERROR(node.x2(), expected_grad.x2(), 3.e-3) <<
-                       "node: (" << ix << ", " << iy << ", " << iz << ")";
-      COMPARE_RELATIVE_ERROR(node.x3(), expected_grad.x3(), 3.e-3) <<
-                       "node: (" << ix << ", " << iy << ", " << iz << ")";
-    });
+        COMPARE_RELATIVE_ERROR(node.x1(), expected_grad.x1(), 3.e-3)
+            << "node: (" << ix << ", " << iy << ", " << iz << ")";
+        COMPARE_RELATIVE_ERROR(node.x2(), expected_grad.x2(), 3.e-3)
+            << "node: (" << ix << ", " << iy << ", " << iz << ")";
+        COMPARE_RELATIVE_ERROR(node.x3(), expected_grad.x3(), 3.e-3)
+            << "node: (" << ix << ", " << iy << ", " << iz << ")";
+      });
 }
 
 /* Test gradient for 2x2x2 lattice. The test is that it doesn't segfault.
@@ -287,18 +295,18 @@ TEST(gradient_2x2x2lattice) {
   const std::array<double, 3> origin = {-5.2, -4.3, -6.7};
   bool periodicity = false;
   auto lat = make_unique<RectangularLattice<double>>(
-             l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
+      l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
   ThreeVector r;
   // Fill lattice with (2 pi x/lx) cos(2 pi y/ly) cos(2 pi z/lz) function.
   lat->iterate_sublattice({0, 0, 0}, lat->dimensions(),
-             [&](double &node, int ix, int iy, int iz){
-      r = lat->cell_center(ix, iy, iz);
-      node = std::cos(2*M_PI*r.x1()/l[0]) *
-             std::cos(2*M_PI*r.x2()/l[1]) *
-             std::cos(2*M_PI*r.x3()/l[2]);
-    });
+                          [&](double &node, int ix, int iy, int iz) {
+                            r = lat->cell_center(ix, iy, iz);
+                            node = std::cos(2 * M_PI * r.x1() / l[0]) *
+                                   std::cos(2 * M_PI * r.x2() / l[1]) *
+                                   std::cos(2 * M_PI * r.x3() / l[2]);
+                          });
   auto grad_lat = make_unique<RectangularLattice<ThreeVector>>(
-             l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
+      l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
   lat->compute_gradient_lattice(grad_lat.get());
 }
 
@@ -309,8 +317,8 @@ TEST_CATCH(gradient_impossible_lattice, std::runtime_error) {
   const std::array<double, 3> origin = {-5.2, -4.3, -6.7};
   bool periodicity = false;
   auto lat = make_unique<RectangularLattice<double>>(
-             l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
+      l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
   auto grad_lat = make_unique<RectangularLattice<ThreeVector>>(
-             l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
+      l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
   lat->compute_gradient_lattice(grad_lat.get());
 }

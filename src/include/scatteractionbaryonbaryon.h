@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -13,7 +13,6 @@
 #include "scatteraction.h"
 
 namespace Smash {
-
 
 /**
  * \ingroup action
@@ -39,7 +38,8 @@ class ScatterActionBaryonBaryon : public ScatterAction {
   * Calculate cross sections for resonance absorption
   * (i.e. NR->NN and ΔR->NN).
   *
-  * \param[in] is_anti_particles Whether the colliding particles are antiparticles
+  * \param[in] is_anti_particles Whether the colliding particles are
+  * antiparticles
   *
   * \return List of possible resonance absorption processes. Each element of the
   * list contains the types of the final-state particles and the cross section
@@ -61,9 +61,9 @@ class ScatterActionBaryonBaryon : public ScatterAction {
    * \return Matrix amplitude squared \f$ |\mathcal{M}(\sqrt{s})|^2/16\pi \f$.
    */
   static double nn_to_resonance_matrix_element(const double srts,
-                                              const ParticleType &type_a,
-                                              const ParticleType &type_b,
-                                              const int twoI);
+                                               const ParticleType &type_a,
+                                               const ParticleType &type_b,
+                                               const int twoI);
 
   /**
    * \ingroup logging
@@ -71,7 +71,6 @@ class ScatterActionBaryonBaryon : public ScatterAction {
    */
   void format_debug_output(std::ostream &out) const override;
 };
-
 
 }  // namespace Smash
 

@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2015
+ *    Copyright (c) 2013-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -16,7 +16,8 @@ namespace Smash {
 /**
  * GeV <-> fm conversion factor
  *
- * \fpPrecision  This is \c double to make sure to always have sufficient precision.
+ * \fpPrecision  This is \c double to make sure to always have sufficient
+ * precision.
  */
 constexpr double hbarc = 0.197327053;
 /**
@@ -30,7 +31,8 @@ constexpr double really_small = 1.0e-6;
 /**
  * \f$ 2\pi \f$
  *
- * \fpPrecision  This is \c double to make sure to always have sufficient precision.
+ * \fpPrecision  This is \c double to make sure to always have sufficient
+ * precision.
  */
 constexpr double twopi = 2. * M_PI;
 /**
@@ -90,8 +92,8 @@ constexpr double maximum_cross_section = 200.;  // mb
  *
  * It is chosen such that it will not conflict with any other process.
  */
-constexpr std::uint32_t ID_PROCESS_PHOTON
-    = std::numeric_limits<std::uint32_t>::max();
+constexpr std::uint32_t ID_PROCESS_PHOTON =
+    std::numeric_limits<std::uint32_t>::max();
 
 }  // namespace Smash
 

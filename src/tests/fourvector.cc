@@ -1,13 +1,15 @@
 /*
  *
- *    Copyright (c) 2013-2014
+ *    Copyright (c) 2013-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
+
+#include "unittest.h"  // This include has to be first
+
 #include "../include/fourvector.h"
-#include "unittest.h"
 
 using namespace Smash;
 
@@ -23,9 +25,9 @@ TEST(equality_different) {
 
 /* check equality - the vectors Are the same */
 TEST(equality_equal) {
-  VERIFY(  A == A2);
+  VERIFY(A == A2);
   VERIFY(!(A != A2));
-  VERIFY(  B == B2);
+  VERIFY(B == B2);
   VERIFY(!(B != B2));
 }
 

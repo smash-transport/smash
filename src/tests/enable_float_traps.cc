@@ -1,18 +1,19 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include "unittest.h"
+#include "unittest.h"  // This include has to be first
+
 #include "../include/fpenvironment.h"
 
-#include <stdexcept>
-#include <csignal>
 #include <csetjmp>
+#include <csignal>
+#include <stdexcept>
 
 double blackhole = 0.;
 double divisor = 0.;
@@ -20,7 +21,9 @@ double divisor = 0.;
 std::jmp_buf jump_buffer;
 
 struct fpe_exception : public std::exception {
-  const char *what() const noexcept override { return "Floating Point Exception"; }
+  const char *what() const noexcept override {
+    return "Floating Point Exception";
+  }
 };
 
 static void handle_fpe(int s) {
@@ -59,6 +62,6 @@ TEST(enable_float_traps) {
     got_exception = true;
   }
   VERIFY(!std::fetestexcept(
-             FE_DIVBYZERO));  // flag must not be set because it trapped
+      FE_DIVBYZERO));  // flag must not be set because it trapped
   VERIFY(got_exception);
 }

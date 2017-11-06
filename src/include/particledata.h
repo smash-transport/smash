@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2012-2015
+ *    Copyright (c) 2012-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -17,7 +17,6 @@
 
 namespace Smash {
 
-
 /* A structure to hold information about the history of the particle,
  * e.g. the last interaction etc. */
 struct HistoryData {
@@ -27,12 +26,16 @@ struct HistoryData {
   uint32_t id_process = 0;
   // type of the last action
   ProcessType process_type = ProcessType::None;
-  // time of the last action (excluding walls)
-  double time_of_origin = 0.0;
+  /**
+   * Time of the last action (excluding walls), time of kinetic freeze_out
+   * for HBT analysis this time should be larger or equal to the formation
+   * time of the particle, since only formed particles can freeze out
+   * The full coordinate space 4-vector can be obtained by back-propagation
+   */
+  double time_last_collision = 0.0;
   // PdgCodes of the parent particles
   PdgCode p1 = 0x0, p2 = 0x0;
 };
-
 
 /**
  * \ingroup data
@@ -85,7 +88,7 @@ class ParticleData {
   /** Store history information, i.e. the type of process and possibly the
    * PdgCodes of the parent particles (\p plist). */
   void set_history(int ncoll, uint32_t pid, ProcessType pt, double time_of_or,
-                   const ParticleList& plist);
+                   const ParticleList &plist);
 
   /// return the particle's 4-momentum
   const FourVector &momentum() const { return momentum_; }
@@ -166,7 +169,6 @@ class ParticleData {
   /// get the velocity 3-vector
   ThreeVector velocity() const { return momentum_.velocity(); }
 
-
   /**
    * Returns the inverse of the gamma factor from the current velocity of the
    * particle.
@@ -182,7 +184,7 @@ class ParticleData {
    * zero and thus exhibits catastrophic cancellation.
    */
   double inverse_gamma() const {
-    return std::sqrt(1. - momentum_.sqr3() / (momentum_.x0()*momentum_.x0()));
+    return std::sqrt(1. - momentum_.sqr3() / (momentum_.x0() * momentum_.x0()));
   }
 
   /// Apply a full Lorentz boost of momentum and position
@@ -312,7 +314,8 @@ inline PrintParticleListDetailed detailed(const ParticleList &list) {
 }
 
 /** \ingroup logging
- * Writes a detailed overview over the particles in the \p particle_list argument
+ * Writes a detailed overview over the particles in the \p particle_list
+ * argument
  * to the stream. This overload is selected via the function \ref detailed.
  */
 std::ostream &operator<<(std::ostream &out,

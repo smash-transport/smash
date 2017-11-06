@@ -1,13 +1,14 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include "unittest.h"
+#include "unittest.h"  // This include has to be first
+
 #include "setup.h"
 
 #include "../include/boxmodus.h"
@@ -39,7 +40,8 @@ TEST(phase_space_density) {
   conf["Collision_Term"]["Pauli_Blocking"]["Gaussian_Cutoff"] = 2.2;
 
   ExperimentParameters param = Smash::Test::default_parameters();
-  std::unique_ptr<PauliBlocker> pb = make_unique<PauliBlocker>(conf["Collision_Term"]["Pauli_Blocking"], param);
+  std::unique_ptr<PauliBlocker> pb = make_unique<PauliBlocker>(
+      conf["Collision_Term"]["Pauli_Blocking"], param);
   Particles part;
   PdgCode pdg = 0x2112;
   ParticleData one_particle{ParticleType::find(pdg)};
@@ -68,7 +70,8 @@ TEST(phase_space_density) {
   // Number of test-particles
   const size_t ntest = 10;
   ExperimentParameters param = Smash::Test::default_parameters(ntest);
-  PauliBlocker *pb = new PauliBlocker(conf["Collision_Term"]["Pauli_Blocking"], param);
+  PauliBlocker *pb = new PauliBlocker(conf["Collision_Term"]["Pauli_Blocking"],
+param);
   BoxModus *b = new BoxModus(conf["Modi"], param);
   Particles Pbox;
   b->initial_conditions(&Pbox, param);
@@ -100,15 +103,16 @@ TEST(phase_space_density_nucleus) {
   Au.copy_particles(&part_Au);
 
   ExperimentParameters param = Smash::Test::default_parameters(Ntest);
-  std::unique_ptr<PauliBlocker> pb = make_unique<PauliBlocker>(conf["Collision_Term"]["Pauli_Blocking"], param);
+  std::unique_ptr<PauliBlocker> pb = make_unique<PauliBlocker>(
+      conf["Collision_Term"]["Pauli_Blocking"], param);
 
   ThreeVector r(0.0, 0.0, 0.0);
   ThreeVector p;
   PdgCode pdg = 0x2212;
   ParticleList disregard;
   for (int i = 1; i < 100; i++) {
-    p = ThreeVector(0.0, 0.0, 0.5/100*i);
+    p = ThreeVector(0.0, 0.0, 0.5 / 100 * i);
     const double f = pb->phasespace_dens(r, p, part_Au, pdg, disregard);
-    std::cout << 0.5/100*i << "  " << f << std::endl;
+    std::cout << 0.5 / 100 * i << "  " << f << std::endl;
   }
 }

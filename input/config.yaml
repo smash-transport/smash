@@ -62,37 +62,26 @@ Output:
     # Which density is written to collision headers:
     # ("hadron", "baryon", "baryonic isospin", "pion", "none")
     Density_Type:      "none"
-    # output formats
-#    Oscar_Collisions:
-#        2013_Format:        True
-#        2013_Extended:      False
-#        Print_Start_End:    False
-#    Oscar_Particlelist:
-#        2013_Format:        True
-#        2013_Extended:      False
-#        Only_Final:         True
-#    Vtk:
-#    Root:
-#        Write_Collisions:   True
-#        Write_Particles:    True
-#        Autosave_Frequency: 1000
-#    Binary_Collisions:
-#        Extended:           False
-#        Print_Start_End:    True
-#    Binary_Particles:
-#        Extended:           False
-#        Only_Final:         False
-#    Thermodynamics:
-#        # ("hadron", "baryon", "baryonic isospin", "pion", "none")
-#        Type:               "baryon"
-#        Quantities:         ["rho_eckart", "tmn", "tmn_landau", "landau_velocity"]
-#        Position:           [0.0, 0.0, 0.0]
+#    Particles:
+#        Format:          ["Oscar2013", "Oscar1999", "Binary", "VTK", "Root"]
+#        Extended:        True
+#        Only_Final:      True
+#    Collisions:
+#        Format:          ["Oscar2013", "Oscar1999", "Binary", "Root"]
+#        Extended:        True
+#        Print_Start_End: True
 #    Dileptons:
-#        Format:             Oscar
+#        Format:          ["Oscar2013", "Binary", "Root"]
 #    Photons:
-#        Format:             Oscar
-#        # number of fractional photons produced per single reaction
-#        Fractions:          100
+#        Format:          ["Oscar2013", "Oscar1999", "Binary", "Root"]
+#        Fractions:       100
+#    Thermodynamics:
+#        Format:          ["ASCII", "VTK"]
+#        # ("hadron", "baryon", "baryonic isospin", "pion"), baryon := net baryon
+#        Type:            "none"
+#        Quantities:      ["rho_eckart", "tmn", "tmn_landau", "landau_velocity"]
+#        Position:        [0.0, 0.0, 0.0]
+#        Smearing:        True
 
 
 Collision_Term:
@@ -136,10 +125,6 @@ Collision_Term:
 #    Sizes:       [10.0, 10.0, 10.0]  # Sizes in x, y, z directions in fm
 #    Cell_Number: [20, 20, 20]        # Number of cells in x, y, z directions
 #    Periodic:    True                # Periodic continuation: x + i * lx is equivalent to x, same for y, z
-#    Printout:
-#        # ("hadron", "baryon", "baryonic isospin", "pion"), baryon := net baryon
-#        Type:       "none"
-#        Quantities: ["rho_eckart", "tmn", "tmn_landau", "landau_velocity"]
 
 Modi:
     Box:

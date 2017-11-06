@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -15,10 +15,10 @@
 
 namespace Smash {
 
-
 /**
  * \ingroup action
- * ScatterActionHyperonPion is a special ScatterActionBaryonMeson which represents the
+ * ScatterActionHyperonPion is a special ScatterActionBaryonMeson which
+ * represents the
  * scattering of a hyperon and a pion.
  */
 class ScatterActionHyperonPion : public ScatterActionBaryonMeson {

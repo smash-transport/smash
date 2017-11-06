@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2012-2015
+ *    Copyright (c) 2012-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -128,13 +128,16 @@ namespace {
  * Distance in sigma at which gaussian is considered 0.
  *
  * \page input_output_options_ Output
- * \key Output_Interval (double, required): \n
+ *
+ * Description of options
+ * ---------------------
+ * \key Output_Interval (double, optional, default = End_Time): \n
  * Defines the period of intermediate output of the status of the simulated
  * system in Standard Output and other output formats which support this
  * functionality.
  *
  * \key Density_Type (string, optional, default = "none"): \n
- * Determines which kind of density is written into the collision files.
+ * Determines which kind of density is printed into the collision files.
  * Possible values:\n
  * \li "hadron"           - total hadronic density
  * \li "baryon"           - net baryon density
@@ -142,16 +145,79 @@ namespace {
  * \li "pion"             - pion density
  * \li "none"             - do not calculate density, print 0.0
  *
- * The output section has several subsections, relating to different output
- * files. To disable a certain output, comment the corresponding section out:
+ * Futher options are defined for every single output \b content
+ * (see \ref output_contents_ "output contents" for the list of
+ * possible contents) in the following way:
+ * \code
+ * Content:
+ *     Format: ["format1", "format2", ...]
+ *     Option1: Value  # Content-specific options
+ *     Option2: Value
+ *     ...
+ * \endcode
  *
- * \li \subpage input_oscar_particlelist
- * \li \subpage input_oscar_collisions
- * \li \subpage input_vtk
- * \li \subpage input_binary_collisions
- * \li \subpage input_binary_particles
- * \li \subpage input_root
- * \li \subpage input_dileptons
+ * To disable a certain output content,  remove or comment out the
+ * corresponding section. Every output can be printed in several formats
+ * simultaneously. The following option chooses list of formats:
+ *
+ * \key Format (list of formats, optional, default = []):\n
+ * List of formats for writing particular content.
+ * Possible formats for every content are listed and described in
+ * \ref output_contents_ "output contents". List of available formats is
+ * \ref list_of_output_formats "here".
+ *
+ * ### Content-specific output options
+ * \anchor output_content_specific_options_
+ *
+ * - \b Particles
+ *
+ *   \key Extended (bool, optional, default = false): \n
+ *   true - print extended information for each particle \n
+ *   false - regular output for each particle
+ *
+ *   \key Only_Final (bool, optional, default = true): \n
+ *   true - print only final particle list \n
+ *   false - particle list at output interval including initial time
+ * - \b Collisions
+ *
+ *   \key Extended (bool, optional, default = false): \n
+ *   true - print extended information for each particle \n
+ *   false - regular output for each particle
+ *
+ *   \key Print_Start_End (bool, optional, default = false): \n
+ *   true - initial and final particle list is printed out \n
+ *   false - initial and final particle list is not printed out
+ * - \b Photons - see \ref input_photons
+ * - \b Thermodynamics - see \subpage input_vtk_lattice_ for full spatial
+ *   lattice output and \subpage ascii_thermodynamic_output_ for output at one
+ *   point versus time.
+ *
+ * \anchor configuring_output_
+ * Example configuring SMASH output
+ * --------------
+ * As an example, if one wants to have all of the following simultaneously:
+ * \li particles at the end of event printed out in binary and Root formats
+ * \li dileptons printed in Oscar2013 format
+ * \li net baryon density at point (0, 0, 0) printed as a table
+ *     against time every 1 fm/c
+ *
+ * then the output section of configuration will be the following.
+ *
+ * \code
+ * Output:
+ *     Output_Interval:  1.0
+ *     Particles:
+ *         Format:          ["Binary", "Root"]
+ *         Only_Final:      True
+ *     Dileptons:
+ *         Format:          ["Oscar2013"]
+ *     Thermodynamics:
+ *         Format:          ["ASCII"]
+ *         Type:            "baryon"
+ *         Quantities:      ["rho_eckart"]
+ *         Position:        [0.0, 0.0, 0.0]
+ *         Smearing:        True
+ * \endcode
  */
 
 /** Gathers all general Experiment parameters
@@ -172,20 +238,18 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   // If this Delta_Time option is absent (this can be for timestepless mode)
   // just assign 1.0 fm/c, reasonable value will be set at event initialization
   const double dt = config.take({"General", "Delta_Time"}, 1.);
-  const double output_dt = config.take({"Output", "Output_Interval"});
+  const double t_end = config.read({"General", "End_Time"});
+  const double output_dt = config.take({"Output", "Output_Interval"}, t_end);
   const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
   const bool two_to_two = config.take({"Collision_Term", "Two_to_Two"}, true);
   const bool strings_switch = config.take({"Collision_Term", "Strings"}, false);
   const NNbarTreatment nnbar_treatment = config.take(
-                         {"Collision_Term", "NNbar_Treatment"},
-                         NNbarTreatment::NoAnnihilation);
-  const bool photons_switch = config.has_value({"Output", "Photons"}) ?
-                    config.take({"Output", "Photons", "Enable"}, true) :
-                    false;
+      {"Collision_Term", "NNbar_Treatment"}, NNbarTreatment::NoAnnihilation);
+  const bool photons_switch = config.has_value({"Output", "Photons"});
   /// Elastic collisions between the nucleons with the square root s
   //  below low_snn_cut are excluded.
-  const double low_snn_cut = config.take({"Collision_Term",
-                                          "Elastic_NN_Cutoff_Sqrts"}, 1.98);
+  const double low_snn_cut =
+      config.take({"Collision_Term", "Elastic_NN_Cutoff_Sqrts"}, 1.98);
   const auto proton = ParticleType::try_find(pdg::p);
   const auto pion = ParticleType::try_find(pdg::pi_z);
   if (proton && pion &&
@@ -193,7 +257,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
     log.warn("The cut-off should be below the threshold energy",
              " of the process: NN to NNpi");
   }
-  return {{0., dt}, {0.0, output_dt},
+  return {{0., dt},
+          {0.0, output_dt},
           ntest,
           config.take({"General", "Gaussian_Sigma"}, 1.),
           config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.),
@@ -217,13 +282,11 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
       break;
     case TimeStepMode::Fixed:
       out << "Using fixed time step size: "
-          << e.parameters_.labclock.timestep_duration()
-          << " fm/c\n";
+          << e.parameters_.labclock.timestep_duration() << " fm/c\n";
       break;
     case TimeStepMode::Adaptive:
       out << "Using adaptive time steps, starting with: "
-          << e.parameters_.labclock.timestep_duration()
-          << " fm/c\n";
+          << e.parameters_.labclock.timestep_duration() << " fm/c\n";
       break;
   }
   out << "End time: " << e.end_time_ << " fm/c\n";
@@ -232,26 +295,43 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
 }
 
 template <typename Modus>
-template <typename TOutput>
-void Experiment<Modus>::create_output(const char * name,
-                   const bf::path &output_path,
-                   Configuration&& conf) {
-  const bool exists = conf.has_value_including_empty({name});
-  if (!exists) {
-    return;
+void Experiment<Modus>::create_output(std::string format, std::string content,
+                                      const bf::path &output_path,
+                                      const OutputParameters &out_par) {
+  const auto &log = logger<LogArea::Experiment>();
+  log.info() << "Adding output " << content << " of format " << format
+             << std::endl;
+
+  if (format == "VTK" && content == "Particles") {
+    outputs_.emplace_back(make_unique<VtkOutput>(output_path, content));
+  } else if (format == "Root") {
+#ifdef SMASH_USE_ROOT
+    outputs_.emplace_back(
+        make_unique<RootOutput>(output_path, content, out_par));
+#else
+    log.error("Root output requested, but Root support not compiled in");
+#endif
+  } else if (format == "Binary") {
+    if (content == "Collisions" || content == "Dileptons" ||
+        content == "Photons") {
+      outputs_.emplace_back(
+          make_unique<BinaryOutputCollisions>(output_path, content, out_par));
+    } else if (content == "Particles") {
+      outputs_.emplace_back(
+          make_unique<BinaryOutputParticles>(output_path, content, out_par));
+    }
+  } else if (format == "Oscar1999" || format == "Oscar2013") {
+    outputs_.emplace_back(
+        create_oscar_output(format, content, output_path, out_par));
+  } else if (content == "Thermodynamics" && format == "ASCII") {
+    outputs_.emplace_back(
+        make_unique<ThermodynamicOutput>(output_path, content, out_par));
+  } else if (content == "Thermodynamics" && format == "VTK") {
+    printout_lattice_td_ = true;
+  } else {
+    log.error() << "Unknown combination of format (" << format
+                << ") and content (" << content << "). Fix the config.";
   }
-  if (conf.has_value({name, "Enable"})) {
-    const auto &log = logger<LogArea::Experiment>();
-    log.warn("Enable option is deprecated."
-             " To disable/enable output comment/uncomment"
-             " it out in the config.yaml.");
-  }
-  const bool enable = conf.take({name, "Enable"}, true);
-  if (!enable) {
-    conf.take({name});
-    return;
-  }
-  outputs_.emplace_back(make_unique<TOutput>(output_path, conf[name]));
 }
 
 /*!\Userguide
@@ -296,7 +376,8 @@ void Experiment<Modus>::create_output(const char * name,
  * Exponential - FRW expansion going as e^(t/2)
  *
  * \key Expansion_Rate (double, optional, default = 0.1) \n
- * Corresponds to the speed of expansion of the universe in non minkowski metrics \n
+ * Corresponds to the speed of expansion of the universe in non minkowski
+ * metrics \n
  * This value is useless if NoExpansion is selected; it corresponds to \n
  * \f$b_r/l_0\f$ if the metric type is MasslessFRW or MassiveFRW, and to \n
  * the parameter b in the Exponential expansion where \f$a(t) ~ e^{bt/2}\f$
@@ -314,16 +395,12 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       force_decays_(
           config.take({"Collision_Term", "Force_Decays_At_End"}, true)),
       use_grid_(config.take({"General", "Use_Grid"}, true)),
-      metric_(config.take({"General", "Metric_Type"},
-          ExpansionMode::NoExpansion),
+      metric_(
+          config.take({"General", "Metric_Type"}, ExpansionMode::NoExpansion),
           config.take({"General", "Expansion_Rate"}, 0.1)),
       strings_switch_(config.take({"Collision_Term", "Strings"}, false)),
-      dileptons_switch_(config.has_value({"Output", "Dileptons"}) ?
-                    config.take({"Output", "Dileptons", "Enable"}, true) :
-                    false),
-      photons_switch_(config.has_value({"Output", "Photons"}) ?
-                    config.take({"Output", "Photons", "Enable"}, true) :
-                    false),
+      dileptons_switch_(config.has_value({"Output", "Dileptons"})),
+      photons_switch_(config.has_value({"Output", "Photons"})),
       time_step_mode_(
           config.take({"General", "Time_Step_Mode"}, TimeStepMode::Fixed)) {
   const auto &log = logger<LogArea::Experiment>();
@@ -340,12 +417,11 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     action_finders_.emplace_back(make_unique<DecayActionsFinder>());
   }
   if (parameters_.two_to_one || parameters_.two_to_two) {
-    auto scat_finder = make_unique<ScatterActionsFinder>(config, parameters_,
-                       nucleon_has_interacted_,
-                       modus_.total_N_number(), modus_.proj_N_number(),
-                       n_fractional_photons_);
-    max_transverse_distance_sqr_ = scat_finder->max_transverse_distance_sqr(
-                                                  parameters_.testparticles);
+    auto scat_finder = make_unique<ScatterActionsFinder>(
+        config, parameters_, nucleon_has_interacted_, modus_.total_N_number(),
+        modus_.proj_N_number(), n_fractional_photons_);
+    max_transverse_distance_sqr_ =
+        scat_finder->max_transverse_distance_sqr(parameters_.testparticles);
     action_finders_.emplace_back(std::move(scat_finder));
   } else {
     max_transverse_distance_sqr_ = maximum_cross_section / M_PI * fm2_mb;
@@ -382,7 +458,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    **/
   if (time_step_mode_ == TimeStepMode::Adaptive) {
     adaptive_parameters_ = make_unique<AdaptiveParameters>(
-      config["General"]["Adaptive_Time_Step"], delta_time_startup_);
+        config["General"]["Adaptive_Time_Step"], delta_time_startup_);
     log.info() << *adaptive_parameters_;
   }
 
@@ -391,63 +467,91 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   auto output_conf = config["Output"];
   /*!\Userguide
-    * \page output_general_ Output formats
-    * Several different output formats are available in SMASH. They are
-    * explained below in more detail. Per default, the selected output files
+    * \page output_general_ Output
+    *
+    * Output directory
+    * ----------------
+    *
+    * Per default, the selected output files
     * will be saved in the directory ./data/\<run_id\>, where \<run_id\> is an
     * integer number starting from 0. At the beginning of a run SMASH checks,
     * if the ./data/0 directory exists. If it does not exist, it is created and
     * all output files are written there. If the directory already exists,
     * SMASH tries for ./data/1, ./data/2 and so on until it finds a free
-    * number. The user can change output directory by a command line option, if
+    * number.
+    *
+    * The user can change output directory by a command line option, if
     * desired:
     * \code smash -o <user_output_dir> \endcode
-    * SMASH supports several kinds of configurable output formats.
-    * They are called OSCAR1999, OSCAR2013, binary OSCAR2013, VTK and ROOT
-    * outputs. Every format can be switched on/off by commenting/uncommenting
-    * the corresponding section in the configuration file config.yaml. For more
-    * information on configuring the output see corresponding pages: \ref
-    * input_oscar_particlelist,
-    * \ref input_oscar_collisions, \ref input_binary_collisions,
-    * \ref input_binary_particles, \ref input_root, \ref input_vtk.
     *
-    * \key Details of output formats are explained here: \n
-    * \li General block structure of OSCAR formats: \n
-    *     \subpage oscar_general_
-    * \li A family of OSCAR ASCII outputs.\n
-    *     \subpage format_oscar_particlelist\n
-    *     \subpage format_oscar_collisions
-    * \li Binary outputs analoguous to OSCAR format\n
-    *     \subpage format_binary_\n
-    * \li Output in vtk format suitable for an easy
-    *     visualization using paraview software:\n \subpage format_vtk
-    * \li Formatted binary output that uses ROOT software
-    *     (http://root.cern.ch).\n Fast to read and write, requires less
-    *     disk space.\n \subpage format_root
-    * \li \subpage collisions_output_in_box_modus_
-    * \li \subpage output_vtk_lattice_
+    * Output content
+    * --------------
+    * \anchor output_contents_
+    * Output in SMASH is distinguished by _content_ and _format_, where content
+    * means the physical information contained in the output (e.g. list of
+    * particles, list of interactions, thermodynamics, etc) and format (e.g.
+    * Oscar, binary or ROOT). The same content can be printed out in several
+    * formats _simultaneously_.
+    *
+    * For an example of choosing specific output contents see
+    * \ref configuring_output_ "Configuring SMASH output".
+    *
+    * The list of possible contents follows:
+    *
+    * - \b Particles  List of particles at regular time intervals in the
+    *                 computational frame or (optionally) only at the event end.
+    *   - Available formats: \ref format_oscar_particlelist,
+    *      \ref format_binary_, \ref format_root, \ref format_vtk
+    * - \b Collisions List of interactions: collisions, decays, box wall
+    *                 crossings and forced thermalizations. Information about
+    *                 incoming, outgoing particles and the interaction itself
+    *                 is printed out.
+    *   - Available formats: \ref format_oscar_collisions, \ref format_binary_,
+    *                 \ref format_root
+    * - \b Dileptons  Special dilepton output, see \subpage input_dileptons.
+    *   - Available formats: \ref format_oscar_collisions,
+    *                   \ref format_binary_ and \ref format_root
+    * - \b Photons    Special photon output, see \subpage input_photons.
+    *   - Available formats: \ref format_oscar_collisions,
+    *                   \ref format_binary_ and \ref format_root.
+    * - \b Thermodynamics This output allows to print out thermodynamic
+    *          quantities such as density, energy-momentum tensor,
+    *          Landau velocity, etc at one selected point versus time
+    *          (simple ASCII format table \subpage ascii_thermodynamic_output_)
+    *          and on a spatial lattice  versus time (\ref output_vtk_lattice_).
+    * \anchor list_of_output_formats
+    * Output formats
+    * --------------
+    *
+    * For choosing output formats see
+    * \ref configuring_output_ "Configuring SMASH output".
+    * Every output content can be printed out in several formats:
+    * - \b "Oscar1999", \b "Oscar2013" - human-readable text output\n
+    *   - For "Particles" content: \subpage format_oscar_particlelist
+    *   - For "Collisions" content: \subpage format_oscar_collisions
+    *   - General block structure of OSCAR formats: \subpage oscar_general_
+    * - \b "Binary" - binary, not human-readable output
+    *   - Faster to read and write than text outputs
+    *   - Saves coordinates and momenta with the full double precision
+    *   - General file structure is similar to \subpage oscar_general_
+    *   - Detailed description: \subpage format_binary_
+    * - \b "Root" - binary output in the format used by ROOT software
+    *     (http://root.cern.ch)
+    *   - Even faster to read and write, requires less disk space
+    *   - Format description: \subpage format_root
+    * - \b "VTK" - text output suitable for an easy
+    *     visualization using paraview software
+    *   - This output can be opened by paraview to see the visulalization.
+    *   - For "Particles" content \subpage format_vtk
+    *   - For "Thermodynamics" content \subpage output_vtk_lattice_
+    * - \b "ASCII" - a human-readable text-format table of values
+    *   - Used only for "Thermodynamics", see
+    *     \subpage ascii_thermodynamic_output_
+    *
+    * \note Output of coordinates for the "Collisions" content in
+    *       the periodic box has a feature:
+    *       \subpage collisions_output_in_box_modus_
     */
-
-  // loop until all OSCAR outputs are created (create_oscar_output will return
-  // nullptr then).
-  while (OutputPtr oscar = create_oscar_output(output_path, output_conf)) {
-    outputs_.emplace_back(std::move(oscar));
-  }
-  create_output<VtkOutput>("Vtk", output_path, std::move(output_conf));
-  create_output<BinaryOutputCollisions>("Binary_Collisions",
-                                        output_path, std::move(output_conf));
-  create_output<BinaryOutputParticles>("Binary_Particles",
-                                        output_path, std::move(output_conf));
-#ifdef SMASH_USE_ROOT
-  create_output<RootOutput>("Root", output_path, std::move(output_conf));
-#else
-  const bool enable_root = output_conf.take({"Root", "Enable"}, true);
-  if (enable_root && output_conf.has_value_including_empty({"Root"})) {
-    log.error("Root output requested, but Root support not compiled in");
-  }
-#endif
-  create_output<ThermodynamicOutput>("Thermodynamics",
-                                     output_path, std::move(output_conf));
 
   /*!\Userguide
    * \page input_dileptons Dileptons
@@ -460,65 +564,33 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * \li Dileptons are treated via the time integration method, also called
    * 'shining', as described in \iref{Schmidt:2008hm}, chapter 2D.
    * This means that, because dilepton decays are so rare, possible decays are
-   * written in the ouput in every single timestep without ever performing
-   * them.  The are weighted with a "shining weight" to compensate for the
+   * written in the output at every hadron propagation without ever performing
+   * them. The are weighted with a "shining weight" to compensate for the
    * over-production.
-   * \li The shining weight can be found in the weight element of the ouput.
+   * \li The shining weight can be found in the weight element of the output.
    * \li The shining method is implemented in the DecayActionsFinderDilepton,
    * which is enabled together with the dilepton output.
    *
    * \note If you want dilepton decays, you also have to modify decaymodes.txt.
    * Dilepton decays are commented out by default.
-   *
-   * \key Format (string, required):\n
-   * "Oscar" - The dilepton output is written to the file \c DileptonOutput.oscar
-   * in \ref format_oscar_collisions (OSCAR2013 format) .\n
-   * "Binary" - The dilepton output is written to the file \c DileptonOutput.bin
-   * in \ref format_binary_ .\n
-   * "Root" - The dilepton output is written to the file \c DileptonOutput.root
-   * in \ref format_root .\n
    **/
-  if (dileptons_switch_) {
-    // create dilepton output object
-    std::string format = config.take({"Output", "Dileptons", "Format"});
-    if (format == "Oscar") {
-      dilepton_output_ = create_dilepton_output(output_path);
-    } else if (format == "Binary") {
-      dilepton_output_ =
-          make_unique<BinaryOutputCollisions>(output_path, "DileptonOutput",
-                                              true);
-    } else if (format == "Root") {
-#ifdef SMASH_USE_ROOT
-      dilepton_output_ = make_unique<RootOutput>(output_path, "DileptonOutput");
-#else
-      log.error() << "You requested Root output, but Root support has not been "
-                     "compiled in.";
-      output_conf.take({"Root"});
-#endif
-    } else {
-      throw std::runtime_error("Bad dilepton output format: " + format);
-    }
-  }
 
-  if (parameters_.photons_switch) {
-    // create photon output object
-    std::string format = config.take({"Output", "Photons", "Format"});
-    if (format == "Oscar") {
-      photon_output_ = create_photon_output(output_path);
-    } else if (format == "Binary") {
-      photon_output_ =
-          make_unique<BinaryOutputCollisions>(output_path, "PhotonOutput",
-                                              false);
-    } else if (format == "Root") {
-#ifdef SMASH_USE_ROOT
-      photon_output_ = make_unique<RootOutput>(output_path, "PhotonOutput");
-#else
-      log.error() << "You requested Root output, but Root support has not been "
-                     "compiled in.";
-      output_conf.take({"Root"});
-#endif
-    } else {
-      throw std::runtime_error("Bad Photon output format: " + format);
+  /*!\Userguide
+   * \page input_photons Photons
+   * Todo(schaefer): document photons
+   **/
+
+  dens_type_ = config.take({"Output", "Density_Type"}, DensityType::None);
+  log.info() << "Density type printed to headers: " << dens_type_;
+
+  const OutputParameters output_parameters(std::move(output_conf));
+
+  std::vector<std::string> output_contents = output_conf.list_upmost_nodes();
+  for (const auto &content : output_contents) {
+    auto this_output_conf = output_conf[content.c_str()];
+    std::vector<std::string> formats = this_output_conf.take({"Format"});
+    for (const auto &format : formats) {
+      create_output(format, content, output_path, output_parameters);
     }
   }
 
@@ -526,8 +598,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   // already initialized. We only need it when potentials are enabled, but we
   // always have to take it, otherwise SMASH will complain about unused
   // options.  We have to provide a default value for modi other than Collider.
-  const FermiMotion motion = config.take({"Modi", "Collider", "Fermi_Motion"},
-                                         FermiMotion::Off);
+  const FermiMotion motion =
+      config.take({"Modi", "Collider", "Fermi_Motion"}, FermiMotion::Off);
   if (config.has_value({"Potentials"})) {
     if (time_step_mode_ == TimeStepMode::None) {
       log.error() << "Potentials only work with time steps!";
@@ -536,16 +608,14 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     if (motion == FermiMotion::Frozen) {
       log.error() << "Potentials don't work with frozen Fermi momenta! "
                      "Use normal Fermi motion instead.";
-      throw std::invalid_argument("Can't use potentials "
-                                  "with frozen Fermi momenta!");
+      throw std::invalid_argument(
+          "Can't use potentials "
+          "with frozen Fermi momenta!");
     }
     log.info() << "Potentials are ON.";
     // potentials need testparticles and gaussian sigma from parameters_
     potentials_ = make_unique<Potentials>(config["Potentials"], parameters_);
   }
-
-  dens_type_ = config.take({"Output", "Density_Type"}, DensityType::None);
-  log.info() << "Density type written to headers: " << dens_type_;
 
   /*!\Userguide
    * \page input_lattice_ Lattice
@@ -563,15 +633,17 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *      Use periodic continuation or not. With periodic continuation
    *      x + i * lx is equivalent to x, same for y, z.
    *
-   * \subpage input_vtk_lattice_
+   * For format of lattice output see \ref output_vtk_lattice_. To configure
+   * output of the quantities on the lattice to vtk files see
+   * \ref input_output_options_.
    *
-   * For format of lattice output see \ref output_vtk_lattice_.
+   * \page input_vtk_lattice_ lattice vtk output
    *
-   * \page input_vtk_lattice_ Printout
-   *
-   * User can print thermodynamical quantities on the lattice to vtk output.
-   * For this one has to use the "Lattice: Printout" section of configuration.
-   * Currently printing of custom density to vtk file is available.
+   * User can print thermodynamical quantities on the spatial lattice
+   * to vtk output.
+   * The lattice for the output is regulated by options of lattice
+   * \subpage input_lattice_. The type of thermodynamic quantities is
+   * chosen by the following options of the "Thermodynamic" output.
    *
    * \key Type (string, optional, default = "none"): \n
    * Chooses hadron/baryon/pion/baryonic isospin thermodynamic quantities
@@ -587,7 +659,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *      The velocity is obtained from the energy-momentum tensor
    *      \f$T^{\mu\nu}(t,x,y,z) \f$ by solving the generalized eigenvalue
    *      equation \f$(T^{\mu\nu} - \lambda g^{\mu\nu})u_{\mu}=0 \f$.
-   */
+  */
 
   // Create lattices
   if (config.has_value({"Lattice"})) {
@@ -596,15 +668,13 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     const std::array<int, 3> n = config.take({"Lattice", "Cell_Number"});
     const std::array<double, 3> origin = config.take({"Lattice", "Origin"});
     const bool periodic = config.take({"Lattice", "Periodic"});
-    dens_type_lattice_printout_ =
-        config.take({"Lattice", "Printout", "Type"}, DensityType::None);
-    const std::set<ThermodynamicQuantity> td_to_print =
-        config.take({"Lattice", "Printout", "Quantities"});
-    printout_tmn_ = (td_to_print.count(ThermodynamicQuantity::Tmn) > 0);
-    printout_tmn_landau_ =
-        (td_to_print.count(ThermodynamicQuantity::TmnLandau) > 0);
-    printout_v_landau_ =
-        (td_to_print.count(ThermodynamicQuantity::LandauVelocity) > 0);
+
+    if (printout_lattice_td_) {
+      dens_type_lattice_printout_ = output_parameters.td_dens_type;
+      printout_tmn_ = output_parameters.td_tmn;
+      printout_tmn_landau_ = output_parameters.td_tmn_landau;
+      printout_v_landau_ = output_parameters.td_v_landau;
+    }
     if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
       Tmn_ = make_unique<RectangularLattice<EnergyMomentumTensor>>(
           l, n, origin, periodic, LatticeUpdate::AtOutput);
@@ -645,11 +715,14 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       jmu_custom_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
                                                     LatticeUpdate::AtOutput);
     }
+  } else if (printout_lattice_td_) {
+    log.error(
+        "If you want Thermodynamic VTK output, configure a lattice for it.");
   }
 
   // Create forced thermalizer
   if (config.has_value({"Forced_Thermalization"})) {
-    Configuration&& th_conf = config["Forced_Thermalization"];
+    Configuration &&th_conf = config["Forced_Thermalization"];
     thermalizer_ = modus_.create_grandcan_thermalizer(th_conf);
   }
 }
@@ -692,14 +765,15 @@ void Experiment<Modus>::initialize_new_event() {
 
   /* Reset the output clock */
   const double dt_output = parameters_.outputclock.timestep_duration();
-  const double zeroth_output_time = std::floor(start_time/dt_output)*dt_output;
+  const double zeroth_output_time =
+      std::floor(start_time / dt_output) * dt_output;
   Clock output_clock(zeroth_output_time, dt_output);
   parameters_.outputclock = std::move(output_clock);
 
   log.debug("Lab clock: t_start = ", parameters_.labclock.current_time(),
-           ", dt = ", parameters_.labclock.timestep_duration());
+            ", dt = ", parameters_.labclock.timestep_duration());
   log.debug("Output clock: t_start = ", parameters_.outputclock.current_time(),
-           ", dt = ", parameters_.outputclock.timestep_duration());
+            ", dt = ", parameters_.outputclock.timestep_duration());
 
   /* Save the initial conserved quantum numbers and total momentum in
    * the system for conservation checks */
@@ -731,8 +805,9 @@ static std::string format_measurements(const Particles &particles,
   ss << field<5> << time << field<12, 3> << difference.momentum().x0()
      << field<12, 3> << difference.momentum().abs3()
      << field<12, 3> << (time > really_small
-                         ? 2.0 * scatterings_total / (particles.size() * time)
-                         : 0.)
+                             ? 2.0 * scatterings_total /
+                                   (particles.size() * time)
+                             : 0.)
      << field<10, 3> << scatterings_this_interval
      << field<12, 3> << particles.size() << field<10, 3> << elapsed_seconds;
   return ss.str();
@@ -740,8 +815,8 @@ static std::string format_measurements(const Particles &particles,
 
 template <typename Modus>
 template <typename Container>
-bool Experiment<Modus>::perform_action(Action &action,
-                                 const Container &particles_before_actions) {
+bool Experiment<Modus>::perform_action(
+    Action &action, const Container &particles_before_actions) {
   const auto &log = logger<LogArea::Experiment>();
   // Make sure to skip invalid and Pauli-blocked actions.
   if (!action.is_valid(particles_)) {
@@ -750,8 +825,7 @@ bool Experiment<Modus>::perform_action(Action &action,
   }
   action.generate_final_state();
   log.debug("Process Type is: ", action.get_type());
-  if (pauli_blocker_ &&
-      action.is_pauli_blocked(particles_, *pauli_blocker_)) {
+  if (pauli_blocker_ && action.is_pauli_blocked(particles_, *pauli_blocker_)) {
     total_pauli_blocked_++;
     return false;
   }
@@ -798,30 +872,36 @@ bool Experiment<Modus>::perform_action(Action &action,
    * position could be either at 10 fm or at 5 fm.
    */
   for (const auto &output : outputs_) {
-    output->at_interaction(action, rho);
+    if (!output->is_dilepton_output() && !output->is_photon_output()) {
+      output->at_interaction(action, rho);
+    }
   }
 
   // At every collision photons can be produced.
   if (photons_switch_ &&
-    (ScatterActionPhoton::is_photon_reaction(action.incoming_particles())
-      != ScatterActionPhoton::ReactionType::no_reaction)) {
-        // Time in the action constructor is relative to
-        // current time of incoming
-        constexpr double action_time = 0.;
-        ScatterActionPhoton photon_act(action.incoming_particles(),
-                                       action_time, n_fractional_photons_);
-        // Add a completely dummy process to photon action.  The only important
-        // thing is that its cross-section is equal to cross-section of action.
-        // This can be done, because photon action is never performed, only
-        // final state is generated and printed to photon output.
-        photon_act.add_dummy_hadronic_channels(action.raw_weight_value());
-        // Now add the actual photon reaction channel
-        photon_act.add_single_channel();
-        for (int i = 0; i < n_fractional_photons_; i++) {
-          photon_act.generate_final_state();
-          photon_output_->at_interaction(photon_act, rho);
+      (ScatterActionPhoton::is_photon_reaction(action.incoming_particles()) !=
+       ScatterActionPhoton::ReactionType::no_reaction)) {
+    // Time in the action constructor is relative to
+    // current time of incoming
+    constexpr double action_time = 0.;
+    ScatterActionPhoton photon_act(action.incoming_particles(), action_time,
+                                   n_fractional_photons_);
+    // Add a completely dummy process to photon action.  The only important
+    // thing is that its cross-section is equal to cross-section of action.
+    // This can be done, because photon action is never performed, only
+    // final state is generated and printed to photon output.
+    photon_act.add_dummy_hadronic_channels(action.raw_weight_value());
+    // Now add the actual photon reaction channel
+    photon_act.add_single_channel();
+    for (int i = 0; i < n_fractional_photons_; i++) {
+      photon_act.generate_final_state();
+      for (const auto &output : outputs_) {
+        if (output->is_photon_output()) {
+          output->at_interaction(photon_act, rho);
         }
+      }
     }
+  }
   log.debug(~einhard::Green(), "✔ ", action);
   return true;
 }
@@ -843,15 +923,14 @@ void Experiment<Modus>::run_time_evolution() {
   const auto &log = logger<LogArea::Experiment>();
   const auto &log_ad_ts = logger<LogArea::AdaptiveTS>();
 
-  log.info() << format_measurements(particles_, interactions_total_ -
-                                    wall_actions_total_, 0u,
-                                    conserved_initial_, time_start_,
-                                    parameters_.labclock.current_time());
+  log.info() << format_measurements(
+      particles_, interactions_total_ - wall_actions_total_, 0u,
+      conserved_initial_, time_start_, parameters_.labclock.current_time());
 
   while (parameters_.labclock.current_time() < end_time_) {
     const double t = parameters_.labclock.current_time();
-    const double dt = std::min(parameters_.labclock.timestep_duration(),
-                              end_time_ - t);
+    const double dt =
+        std::min(parameters_.labclock.timestep_duration(), end_time_ - t);
     log.debug("Timestepless propagation for next ", dt, " fm/c.");
 
     /* Perform forced thermalization if required */
@@ -859,10 +938,14 @@ void Experiment<Modus>::run_time_evolution() {
         thermalizer_->is_time_to_thermalize(parameters_.labclock)) {
       const bool ignore_cells_under_treshold = true;
       thermalizer_->update_lattice(particles_, density_param_,
-                                      ignore_cells_under_treshold);
-      thermalizer_->thermalize(particles_,
-                                  parameters_.labclock.current_time(),
-                                  parameters_.testparticles);
+                                   ignore_cells_under_treshold);
+      const double current_t = parameters_.labclock.current_time();
+      thermalizer_->thermalize(particles_, current_t,
+                               parameters_.testparticles);
+      ThermalizationAction th_act(*thermalizer_, current_t);
+      if (th_act.any_particles_thermalized()) {
+        perform_action(th_act, particles_);
+      }
     }
 
     /* (1.a) Create grid. */
@@ -877,8 +960,7 @@ void Experiment<Modus>::run_time_evolution() {
     grid.iterate_cells(
         [&](const ParticleList &search_list) {
           for (const auto &finder : action_finders_) {
-            actions.insert(finder->find_actions_in_cell(
-                search_list, dt));
+            actions.insert(finder->find_actions_in_cell(search_list, dt));
           }
         },
         [&](const ParticleList &search_list,
@@ -890,10 +972,10 @@ void Experiment<Modus>::run_time_evolution() {
         });
 
     /* (2) In case of adaptive timesteps adapt timestep size */
-    if (time_step_mode_ ==  TimeStepMode::Adaptive && actions.size() > 0u) {
+    if (time_step_mode_ == TimeStepMode::Adaptive && actions.size() > 0u) {
       double new_timestep = parameters_.labclock.timestep_duration();
       if (adaptive_parameters_->update_timestep(actions, particles_.size(),
-          &new_timestep)) {
+                                                &new_timestep)) {
         parameters_.labclock.set_timestep_duration(new_timestep);
         log_ad_ts.info("New timestep is set to ", new_timestep);
       }
@@ -942,23 +1024,24 @@ void Experiment<Modus>::run_time_evolution() {
 
 template <typename Modus>
 void Experiment<Modus>::propagate_and_shine(double to_time) {
-  const double dt = propagate_straight_line(
-      &particles_, to_time, beam_momentum_);
+  const double dt =
+      propagate_straight_line(&particles_, to_time, beam_momentum_);
   if (dilepton_finder_ != nullptr) {
-    dilepton_finder_->shine(particles_, dilepton_output_.get(), dt);
+    for (const auto &output : outputs_) {
+      dilepton_finder_->shine(particles_, output.get(), dt);
+    }
   }
 }
 
 template <typename Modus>
-void Experiment<Modus>::run_time_evolution_timestepless(Actions& actions) {
+void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
   const auto &log = logger<LogArea::Experiment>();
 
   const double start_time = parameters_.labclock.current_time();
   const double end_time = std::min(parameters_.labclock.next_time(), end_time_);
   double time_left = end_time - start_time;
   log.debug("Timestepless propagation: ", "Actions size = ", actions.size(),
-            ", start time = ", start_time,
-            ", end time = ", end_time);
+            ", start time = ", start_time, ", end time = ", end_time);
 
   // iterate over all actions
   while (!actions.is_empty()) {
@@ -970,7 +1053,8 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions& actions) {
     }
     if (act->time_of_execution() > end_time) {
       if (time_step_mode_ == TimeStepMode::Adaptive) {
-        log.debug(~einhard::DRed(), "✘ ", act, " (discarded: adaptive timestep"
+        log.debug(~einhard::DRed(), "✘ ", act,
+                  " (discarded: adaptive timestep"
                   " mode decreased timestep and this action is too late)");
       } else {
         log.error(act, " scheduled later than end time: t_action[fm/c] = ",
@@ -987,8 +1071,8 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions& actions) {
     }
 
     /* (1) Propagate to the next action. */
-    log.debug("Propagating until next action ", act, ", action time = ",
-             act->time_of_execution());
+    log.debug("Propagating until next action ", act,
+              ", action time = ", act->time_of_execution());
     propagate_and_shine(act->time_of_execution());
 
     /* (2) Perform action. */
@@ -1043,9 +1127,9 @@ void Experiment<Modus>::intermediate_output() {
   const uint64_t wall_actions_this_interval =
       wall_actions_total_ - previous_wall_actions_total_;
   previous_wall_actions_total_ = wall_actions_total_;
-  const uint64_t interactions_this_interval =
-      interactions_total_ - previous_interactions_total_
-                          - wall_actions_this_interval;
+  const uint64_t interactions_this_interval = interactions_total_ -
+                                              previous_interactions_total_ -
+                                              wall_actions_this_interval;
   previous_interactions_total_ = interactions_total_;
   log.info() << format_measurements(
       particles_, interactions_total_ - wall_actions_total_,
@@ -1058,6 +1142,9 @@ void Experiment<Modus>::intermediate_output() {
   }*/
   /* save evolution data */
   for (const auto &output : outputs_) {
+    if (output->is_dilepton_output() || output->is_photon_output()) {
+      continue;
+    }
     output->at_intermediate_time(particles_, parameters_.outputclock,
                                  density_param_);
 
@@ -1148,7 +1235,9 @@ void Experiment<Modus>::do_final_decays() {
 
     /* Dileptons: shining of remaining resonances */
     if (dilepton_finder_ != nullptr) {
-      dilepton_finder_->shine_final(particles_, dilepton_output_.get(), true);
+      for (const auto &output : outputs_) {
+        dilepton_finder_->shine_final(particles_, output.get(), true);
+      }
     }
     /* Find actions. */
     for (const auto &finder : action_finders_) {
@@ -1163,7 +1252,9 @@ void Experiment<Modus>::do_final_decays() {
 
   /* Dileptons: shining of stable particles at the end */
   if (dilepton_finder_ != nullptr) {
-    dilepton_finder_->shine_final(particles_, dilepton_output_.get(), false);
+    for (const auto &output : outputs_) {
+      dilepton_finder_->shine_final(particles_, output.get(), false);
+    }
   }
 }
 
@@ -1176,34 +1267,39 @@ void Experiment<Modus>::final_output(const int evt_num) {
   if (likely(parameters_.labclock > 0)) {
     const uint64_t wall_actions_this_interval =
         wall_actions_total_ - previous_wall_actions_total_;
-    const uint64_t interactions_this_interval =
-        interactions_total_ - previous_interactions_total_
-                            - wall_actions_this_interval;
+    const uint64_t interactions_this_interval = interactions_total_ -
+                                                previous_interactions_total_ -
+                                                wall_actions_this_interval;
     log.info() << format_measurements(
-      particles_, interactions_total_ - wall_actions_total_,
-      interactions_this_interval, conserved_initial_, time_start_,
-      parameters_.outputclock.current_time());
+        particles_, interactions_total_ - wall_actions_total_,
+        interactions_this_interval, conserved_initial_, time_start_,
+        parameters_.outputclock.current_time());
     log.info() << hline;
     log.info() << "Time real: " << SystemClock::now() - time_start_;
     /* if there are no particles no interactions happened */
     log.info() << "Final scattering rate: "
-               << (particles_.is_empty() ? 0 : (2.0 * (interactions_total_ -
-                                                wall_actions_total_) /
-                                                particles_.time() /
-                                                particles_.size()))
+               << (particles_.is_empty()
+                       ? 0
+                       : (2.0 * (interactions_total_ - wall_actions_total_) /
+                          particles_.time() / particles_.size()))
                << " [fm-1]";
-    log.info() << "Final interaction number: " << interactions_total_
-                                                - wall_actions_total_;
+    log.info() << "Final interaction number: "
+               << interactions_total_ - wall_actions_total_;
+    // Check if there are unformed particles
+    int unformed_particles_count = 0;
+    for (const auto &particle : particles_) {
+      if (particle.formation_time() > end_time_) {
+        unformed_particles_count++;
+      }
+    }
+    if (unformed_particles_count > 0) {
+      log.warn("End time might be too small. ", unformed_particles_count,
+               " unformed particles were found at the end of the evolution.");
+    }
   }
 
   for (const auto &output : outputs_) {
-    output->at_eventend(particles_, evt_num);
-  }
-  if (dilepton_output_ != nullptr) {
-    dilepton_output_->at_eventend(particles_, evt_num);
-  }
-  if (photon_output_ != nullptr) {
-    photon_output_->at_eventend(particles_, evt_num);
+    output->at_eventend(particles_, evt_num, modus_.impact_parameter());
   }
 }
 
@@ -1216,7 +1312,8 @@ void Experiment<Modus>::run() {
     /* Sample initial particles, start clock, some printout and book-keeping */
     initialize_new_event();
     /* In the ColliderModus, if the first collisions within the same nucleus are
-     * forbidden, then nucleon_has_interacted_ is created to record whether the nucleons inside
+     * forbidden, then nucleon_has_interacted_ is created to record whether the
+     * nucleons inside
      * the colliding nuclei have experienced any collisions or not */
     if (modus_.is_collider()) {
       if (!modus_.cll_in_nucleus()) {
@@ -1225,32 +1322,24 @@ void Experiment<Modus>::run() {
         nucleon_has_interacted_.assign(modus_.total_N_number(), true);
       }
     }
-    /* In the ColliderModus, if Fermi motion is frozen, assign the beam momenta to
+    /* In the ColliderModus, if Fermi motion is frozen, assign the beam momenta
+     * to
      * the nucleons in both the projectile and the target. */
-    if (modus_.is_collider()
-        && modus_.fermi_motion() == FermiMotion::Frozen) {
-        for (int i = 0; i < modus_.total_N_number(); i++) {
-            const auto mass_beam = particles_.copy_to_vector()[i]
-                .effective_mass();
-            const auto v_beam =
-                i < modus_.proj_N_number() ?
-                modus_.velocity_projectile() :
-                modus_.velocity_target();
-            const auto gamma = 1.0 / std::sqrt(1.0 - v_beam * v_beam);
-            beam_momentum_.emplace_back(
-                FourVector(gamma * mass_beam, 0.0, 0.0,
-                           gamma * v_beam * mass_beam));
-        }
+    if (modus_.is_collider() && modus_.fermi_motion() == FermiMotion::Frozen) {
+      for (int i = 0; i < modus_.total_N_number(); i++) {
+        const auto mass_beam = particles_.copy_to_vector()[i].effective_mass();
+        const auto v_beam = i < modus_.proj_N_number()
+                                ? modus_.velocity_projectile()
+                                : modus_.velocity_target();
+        const auto gamma = 1.0 / std::sqrt(1.0 - v_beam * v_beam);
+        beam_momentum_.emplace_back(FourVector(gamma * mass_beam, 0.0, 0.0,
+                                               gamma * v_beam * mass_beam));
+      }
     }
+
     /* Output at event start */
     for (const auto &output : outputs_) {
       output->at_eventstart(particles_, j);
-    }
-    if (dilepton_output_ != nullptr) {
-      dilepton_output_->at_eventstart(particles_, j);
-    }
-    if (photon_output_ != nullptr) {
-      photon_output_->at_eventstart(particles_, j);
     }
 
     run_time_evolution();

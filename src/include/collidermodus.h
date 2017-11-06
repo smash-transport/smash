@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2014-2015
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -54,10 +54,9 @@ class ColliderModus : public ModusDefault {
    * In particular, it initializes the nuclei.
    */
   double initial_conditions(Particles *particles,
-                           const ExperimentParameters &parameters);
+                            const ExperimentParameters &parameters);
   /// return the total test particle number of the initial nucleus
-  int total_N_number() const { return target_->size()
-                                    + projectile_->size(); }
+  int total_N_number() const { return target_->size() + projectile_->size(); }
   /// return the test particle number in the projectile nucleus
   int proj_N_number() const { return projectile_->size(); }
   /** return the beam velocity of the projectile, which will be
@@ -78,6 +77,8 @@ class ColliderModus : public ModusDefault {
   FermiMotion fermi_motion() { return fermi_motion_; }
   /// return whether the modus is collider modus
   bool is_collider() const { return true; }
+  /// return impact parameter of the collision
+  double impact_parameter() const { return impact_; }
   /// \ingroup exception
   /// Thrown when either \a projectile_ or \a target_ nuclei are empty.
   struct ColliderEmpty : public ModusDefault::BadInput {

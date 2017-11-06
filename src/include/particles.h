@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2012-2014
+ *    Copyright (c) 2012-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -69,7 +69,7 @@ class Particles {
    * Particles list. This is a valid copy (i.e. Particles::is_valid returns
    * true).
    */
-  const ParticleData& insert(const ParticleData &p);
+  const ParticleData &insert(const ParticleData &p);
 
   /// Add \p n particles of the same type (\p pdg) to the list.
   void create(size_t n, PdgCode pdg);
@@ -175,7 +175,8 @@ class Particles {
    *
    * The third parameter \p do_replace determines whether the particles are
    * actually replaced (so that they get new IDs etc) or if the old particles
-   * are kept and just updated with new properties (e.g. in an elastic collision).
+   * are kept and just updated with new properties (e.g. in an elastic
+   * collision).
    *
    * This function expects \p old_state to be a valid copy (i.e. is_valid
    * returns \c true). This is enforced in DEBUG builds.
@@ -252,7 +253,8 @@ class Particles {
     }
 
     /**
-     * Advance the iterator to the previous valid (not a hole) entry in Particles.
+     * Advance the iterator to the previous valid (not a hole) entry in
+     * Particles.
      * Holes are identified by the ParticleData::hole_ member and thus the
      * internal pointer is decremented until all holes are skipped. It is
      * irrelevant whether Particles::data_[0] is a hole because the iteration

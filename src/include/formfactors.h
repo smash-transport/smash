@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -14,7 +14,6 @@
 #include "pdgcode_constants.h"
 
 namespace Smash {
-
 
 /**
  * Returns the squared Blatt-Weisskopf functions, which influence the mass
@@ -32,7 +31,7 @@ inline double blatt_weisskopf_sqr(const double p_ab, const int L)
     noexcept
 #endif
 {
-  const double R = 1. / hbarc;  /* interaction radius = 1 fm */
+  const double R = 1. / hbarc; /* interaction radius = 1 fm */
   const auto x = p_ab * R;
   const auto x2 = x * x;
   const auto x4 = x2 * x2;
@@ -48,7 +47,7 @@ inline double blatt_weisskopf_sqr(const double p_ab, const int L)
     case 4:
       return x4 * x4 /
              (11025. + 1575. * x2 + 135. * x4 + 10. * x2 * x4 + x4 * x4);
-      // See also input sanitization in load_decaymodes in decaymodes.cc.
+// See also input sanitization in load_decaymodes in decaymodes.cc.
 #ifndef NDEBUG
     default:
       throw std::invalid_argument(
@@ -58,7 +57,6 @@ inline double blatt_weisskopf_sqr(const double p_ab, const int L)
   }
   return 0.;
 }
-
 
 /**
  * An additional form factor for unstable final states as used in GiBUU,
@@ -79,15 +77,14 @@ inline double blatt_weisskopf_sqr(const double p_ab, const int L)
  * low-mass tail (m < M0).
  */
 inline double post_ff_sqr(double m, double M0, double srts0, double L) {
-  const auto L4 = L*L*L*L;
-  const auto M2 = M0*M0;
-  const auto s0 = srts0*srts0;
-  const auto sminus = (s0-M2)*0.5;
-  const auto splus = m*m - (s0+M2)*0.5;
-  const auto FF = (L4 + sminus*sminus) / (L4 + splus*splus);
-  return FF*FF;
+  const auto L4 = L * L * L * L;
+  const auto M2 = M0 * M0;
+  const auto s0 = srts0 * srts0;
+  const auto sminus = (s0 - M2) * 0.5;
+  const auto splus = m * m - (s0 + M2) * 0.5;
+  const auto FF = (L4 + sminus * sminus) / (L4 + splus * splus);
+  return FF * FF;
 }
-
 
 // electromagnetic transition form factors for the dilepton dalitz decays
 
@@ -97,15 +94,15 @@ inline double post_ff_sqr(double m, double M0, double srts0, double L) {
  * fitted to NA60 data, see \iref{Arnaldi:2009aa}. */
 inline double em_form_factor_ps(PdgCode pdg, double mass) {
   switch (pdg.code()) {
-  case pdg::pi_z:
-    return 1. + 5.5*mass*mass;
-  case pdg::eta: {
-    const double lambda_eta = 0.716;
-    const double m_over_eta = mass / lambda_eta;
-    return 1. / (1. - m_over_eta*m_over_eta);
-  }
-  default:  /* η' etc */
-    return 1.;  // use QED approximation
+    case pdg::pi_z:
+      return 1. + 5.5 * mass * mass;
+    case pdg::eta: {
+      const double lambda_eta = 0.716;
+      const double m_over_eta = mass / lambda_eta;
+      return 1. / (1. - m_over_eta * m_over_eta);
+    }
+    default:      /* η' etc */
+      return 1.;  // use QED approximation
   }
 }
 
@@ -114,27 +111,24 @@ inline double em_form_factor_ps(PdgCode pdg, double mass) {
  * For the ω see \iref{Bratkovskaya:1996qe}. */
 inline double em_form_factor_sqr_vec(PdgCode pdg, double mass) {
   switch (pdg.code()) {
-  case pdg::omega: {
-    constexpr double lambda = 0.65;
-    constexpr double gamma = 0.075;
-    constexpr double lambda_sqr = lambda * lambda;
-    constexpr double gamma_sqr = gamma * gamma;
-    const double tmp = lambda_sqr - mass*mass;
-    const double denom = tmp*tmp + lambda_sqr*gamma_sqr;
-    return lambda_sqr * lambda_sqr / denom;
-  }
-  default:  /* φ etc */
-    return 1.;  // use QED approximation
+    case pdg::omega: {
+      constexpr double lambda = 0.65;
+      constexpr double gamma = 0.075;
+      constexpr double lambda_sqr = lambda * lambda;
+      constexpr double gamma_sqr = gamma * gamma;
+      const double tmp = lambda_sqr - mass * mass;
+      const double denom = tmp * tmp + lambda_sqr * gamma_sqr;
+      return lambda_sqr * lambda_sqr / denom;
+    }
+    default:      /* φ etc */
+      return 1.;  // use QED approximation
   }
 }
 
 /** Electromagnetic transition form factor for Delta -> N e+ e-
  * as a function of the dilepton mass. Currently assumed to be constant,
  * normalized at the real-photon point. */
-inline double form_factor_delta(double) {
-  return 3.12;
-}
-
+inline double form_factor_delta(double) { return 3.12; }
 
 }  // namespace Smash
 

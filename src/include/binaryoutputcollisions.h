@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -14,10 +14,10 @@
 
 #include <boost/numeric/conversion/cast.hpp>
 
-#include "configuration.h"
 #include "filedeleter.h"
 #include "forwarddeclarations.h"
 #include "outputinterface.h"
+#include "outputparameters.h"
 
 namespace Smash {
 
@@ -27,7 +27,7 @@ namespace Smash {
  **/
 class BinaryOutputBase : public OutputInterface {
  protected:
-  explicit BinaryOutputBase(FILE *f, bool extended_format);
+  explicit BinaryOutputBase(FILE *f, std::string name, bool extended_format);
   void write(const std::string &s);
   void write(const double x);
   void write(const FourVector &v);
@@ -40,9 +40,7 @@ class BinaryOutputBase : public OutputInterface {
   void write(const std::uint16_t x) {
     std::fwrite(&x, sizeof(x), 1, file_.get());
   }
-  void write(const size_t x) {
-    write(boost::numeric_cast<uint32_t>(x));
-  }
+  void write(const size_t x) { write(boost::numeric_cast<uint32_t>(x)); }
   void write(const Particles &particles);
   void write(const ParticleList &particles);
   void write_particledata(const ParticleData &p);
@@ -52,7 +50,7 @@ class BinaryOutputBase : public OutputInterface {
 
  private:
   /// file format version number
-  uint16_t format_version_ = 5;
+  uint16_t format_version_ = 6;
   /// Option for extended output
   bool extended_;
 };
@@ -71,16 +69,16 @@ class BinaryOutputBase : public OutputInterface {
  */
 class BinaryOutputCollisions : public BinaryOutputBase {
  public:
-  BinaryOutputCollisions(const bf::path &path, const std::string &name,
-                         bool extended_format);
-  BinaryOutputCollisions(const bf::path &path, Configuration&& config);
+  BinaryOutputCollisions(const bf::path &path, std::string name,
+                         const OutputParameters &out_param);
 
   /// writes the initial particle information of an event
   void at_eventstart(const Particles &particles,
                      const int event_number) override;
 
   /// writes the final particle information of an event
-  void at_eventend(const Particles &particles, const int event_number) override;
+  void at_eventend(const Particles &particles, const int event_number,
+                   double impact_parameter) override;
 
   void at_interaction(const Action &action, const double density) override;
 
@@ -88,7 +86,6 @@ class BinaryOutputCollisions : public BinaryOutputBase {
   /// Option: print initial and final particles or not
   bool print_start_end_;
 };
-
 
 }  // namespace Smash
 

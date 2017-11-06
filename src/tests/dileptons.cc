@@ -1,11 +1,12 @@
 /*
- *    Copyright (c) 2016
+ *    Copyright (c) 2016-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  */
 
-#include "unittest.h"
+#include "unittest.h"  // This include has to be first
+
 #include "setup.h"
 
 #include "../include/decayactiondilepton.h"
@@ -49,12 +50,13 @@ TEST(pion_decay) {
   // Dalitz decay π⁰ -> e⁺ e⁻ γ
   DecayBranchList dil_modes = type_piz.get_partial_widths_dilepton(srts);
   COMPARE(dil_modes.size(), 1u);
-  const double piz_width = total_weight<DecayBranch>(type_piz.get_partial_widths(srts));
+  const double piz_width =
+      total_weight<DecayBranch>(type_piz.get_partial_widths(srts));
   FUZZY_COMPARE(piz_width, 7.7e-9);
   DecayBranchPtr &mode = dil_modes[0];
   // π⁰ decay action
-  const auto act = make_unique<DecayActionDilepton>(piz, 0.,
-                                                    mode->weight()/piz_width);
+  const auto act =
+      make_unique<DecayActionDilepton>(piz, 0., mode->weight() / piz_width);
   act->add_decay(std::move(mode));
 
   // sample the final state and sum up all weights
@@ -77,19 +79,20 @@ TEST(eta_decay) {
   // set up a η at rest
   const ParticleType &type_etaz = ParticleType::find(0x221);
   ParticleData etaz{type_etaz};
-  etaz.set_4momentum(type_etaz.mass(),           // pole mass
-                    ThreeVector(0., 0., 0.));    // at rest
+  etaz.set_4momentum(type_etaz.mass(),          // pole mass
+                     ThreeVector(0., 0., 0.));  // at rest
   const auto srts = etaz.effective_mass();
 
   // Dalitz decay η -> e⁺ e⁻ γ
   DecayBranchList dil_modes = type_etaz.get_partial_widths_dilepton(srts);
   COMPARE(dil_modes.size(), 1u);
-  const double etaz_width = total_weight<DecayBranch>(type_etaz.get_partial_widths(srts));
+  const double etaz_width =
+      total_weight<DecayBranch>(type_etaz.get_partial_widths(srts));
   FUZZY_COMPARE(etaz_width, 1.31e-6);
   DecayBranchPtr &mode = dil_modes[0];
   // π⁰ decay action
-  const auto act = make_unique<DecayActionDilepton>(etaz, 0.,
-                                                    mode->weight()/etaz_width);
+  const auto act =
+      make_unique<DecayActionDilepton>(etaz, 0., mode->weight() / etaz_width);
   act->add_decay(std::move(mode));
 
   // sample the final state and sum up all weights

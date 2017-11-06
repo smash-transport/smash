@@ -1,13 +1,14 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include "unittest.h"
+#include "unittest.h"  // This include has to be first
+
 #include "../include/configuration.h"
 #include "../include/logging.h"
 #include "../include/particletype.h"
@@ -35,7 +36,8 @@ TEST_CATCH(load_from_incorrect_string, ParticleType::LoadFailure) {
   ParticleType::create_type_list("Hallo Welt! (wave)");
 }
 
-TEST_CATCH(load_one_particle_with_incorrect_newline, ParticleType::LoadFailure) {
+TEST_CATCH(load_one_particle_with_incorrect_newline,
+           ParticleType::LoadFailure) {
   const std::string parts("pi0 0.1350\n-1.0 111");
   ParticleType::create_type_list(parts);
 }
@@ -61,12 +63,13 @@ TEST(create_type_list) {
       "N⁰ 0.938 -1.0 2112\n"
       "Δ  1.232 0.117 2224 2214 2114 1114\n"  // full multiplet in one line
       "Λ  1.116 0.0   3122\n"
-      "Σ  1.189 0.0   3222 3212 3112\n"       // full multiplet in one line
+      "Σ  1.189 0.0   3222 3212 3112\n"  // full multiplet in one line
       "e⁻ 0.000511 0.0 11\n"
       "μ⁻ 0.105 0.0 13\n"
       "γ  0.0  0.0  22");
 
-  COMPARE(ParticleType::list_all().size(), 37u);  // 21 given explicitly + 16 antiparticles
+  COMPARE(ParticleType::list_all().size(),
+          37u);  // 21 given explicitly + 16 antiparticles
 
   // pi0
   ParticleTypePtr type = &ParticleType::find(0x111);
@@ -110,7 +113,7 @@ TEST(create_type_list) {
   COMPARE(type->spin(), 3u);
   COMPARE(type->isospin(), 3);
   COMPARE(type->isospin3(), 1);
-  COMPARE(type->isospin3_rel(), 1./3.);
+  COMPARE(type->isospin3_rel(), 1. / 3.);
 
   // anti-Delta-
   type = &ParticleType::find(-0x1114);
@@ -250,5 +253,5 @@ TEST(exists) {
   VERIFY(ParticleType::exists(0x111));   // pi0
   VERIFY(ParticleType::exists(-0x211));  // pi-
 
-  VERIFY(!ParticleType::exists(0x667));   // ttbar
+  VERIFY(!ParticleType::exists(0x667));  // ttbar
 }

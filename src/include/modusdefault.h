@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2015
+ *    Copyright (c) 2013-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -51,9 +51,10 @@ class ModusDefault {
    *
    * \see BoxModus::impose_boundary_conditions
    */
-  int impose_boundary_conditions(Particles * /*p*/,
-                         const OutputsList & /*out_list*/ = {})
-  { return 0;}
+  int impose_boundary_conditions(Particles* /*p*/,
+                                 const OutputsList& /*out_list*/ = {}) {
+    return 0;
+  }
 
   /** The following four parameters tell the number of nucleons in the
    *  colliding nuclei, the number of nucleons in the projectile, whether
@@ -61,9 +62,10 @@ class ModusDefault {
    *  the modus is Collider. They are all needed in the Collider modus. In
    *  the other modus, they take the following default value. */
   int total_N_number() const { return 0; }
-  int proj_N_number() const {return 0; }
+  int proj_N_number() const { return 0; }
   bool cll_in_nucleus() const { return true; }
   bool is_collider() const { return false; }
+  double impact_parameter() const { return 0.0; }
   /** The beam velocity of the projectile required in the Collider modus.
    *   In the other modus, return zero. */
   double velocity_projectile() const { return 0.0; }
@@ -74,7 +76,7 @@ class ModusDefault {
    *  modus, just return FermiMotion::Off. */
   FermiMotion fermi_motion() const { return FermiMotion::Off; }
   /// Maximal timestep accepted by this modus. Negative means infinity.
-  double max_timestep(double ) const { return -1.; }
+  double max_timestep(double) const { return -1.; }
 
   double length() const { return -1.; }
 
@@ -89,7 +91,7 @@ class ModusDefault {
    * \see Grid::Grid
    */
   Grid<GridOptions::Normal> create_grid(
-      const Particles &particles, double min_cell_length,
+      const Particles& particles, double min_cell_length,
       CellSizeStrategy strategy = CellSizeStrategy::Optimal) const {
     return {particles, min_cell_length, strategy};
   }
@@ -101,13 +103,14 @@ class ModusDefault {
    * \return unique pointer to created thermalizer class
    */
   std::unique_ptr<GrandCanThermalizer> create_grandcan_thermalizer(
-                                               Configuration& conf) const {
+      Configuration& conf) const {
     /* Lattice is placed such that the center is 0,0,0.
        If one wants to have a central cell with center at 0,0,0 then
        number of cells should be odd (2k+1) in each direction.
      */
     const std::array<double, 3> l = conf.take({"Lattice_Sizes"});
-    const std::array<double, 3> origin = {-0.5*l[0], -0.5*l[1], -0.5*l[2]};
+    const std::array<double, 3> origin = {-0.5 * l[0], -0.5 * l[1],
+                                          -0.5 * l[2]};
     const bool periodicity = false;
     return make_unique<GrandCanThermalizer>(conf, l, origin, periodicity);
   }

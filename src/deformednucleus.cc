@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2014-2015
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -24,12 +24,14 @@ namespace Smash {
  *
  * \li \key Beta_2 (double, optional, default = 0.0):\n
  * The deformation coefficient for the spherical harmonic Y_2_0 in the
- * beta decomposition of the nuclear radius in the deformed woods-saxon distribution.
+ * beta decomposition of the nuclear radius in the deformed woods-saxon
+ * distribution.
  * \li \key Beta_4 (double, optional, default = 0.0):\n
  * The deformation coefficient for the spherical harmonic Y_4_0.
  * \li \key Saturation_Density (double, optional, default = .168)\n
  * The normalization coefficient in the Woods-Saxon distribution,
- * needed here (and not in nucleus) due to the accept/reject sampling used. Default is
+ * needed here (and not in nucleus) due to the accept/reject sampling used.
+ * Default is
  * given as the infinite nuclear matter value.
  * \li \key Theta (double, optional): \n
  * The polar angle by which to rotate the nucleus.
@@ -37,36 +39,39 @@ namespace Smash {
  * The azimuthal angle by which to rotate the nucleus.
  */
 
-DeformedNucleus::DeformedNucleus(const std::map<PdgCode, int>& particle_list,
-                                 int nTest) : Nucleus(particle_list, nTest) {}
+DeformedNucleus::DeformedNucleus(const std::map<PdgCode, int> &particle_list,
+                                 int nTest)
+    : Nucleus(particle_list, nTest) {}
 
 DeformedNucleus::DeformedNucleus(Configuration &config, int nTest)
-                                : Nucleus(config, nTest) {}
+    : Nucleus(config, nTest) {}
 
 double DeformedNucleus::deformed_woods_saxon(double r, double cosx) const {
   // Return the deformed woods-saxon calculation
   // at the given location for the current system.
   return Nucleus::get_saturation_density() /
-         (1 + std::exp(r - Nucleus::get_nuclear_radius() *
-          (1 + beta2_ * y_l_0(2, cosx) + beta4_ * y_l_0(4, cosx))
-          / Nucleus::get_diffusiveness()));
+         (1 +
+          std::exp(r -
+                   Nucleus::get_nuclear_radius() *
+                       (1 + beta2_ * y_l_0(2, cosx) + beta4_ * y_l_0(4, cosx)) /
+                       Nucleus::get_diffusiveness()));
 }
 
 ThreeVector DeformedNucleus::distribute_nucleon() const {
   double a_radius;
   Angles a_direction;
   // Set a sensible max bound for radial sampling.
-  double radius_max = Nucleus::get_nuclear_radius() /
-                      Nucleus::get_diffusiveness() +
-                      Nucleus::get_nuclear_radius() *
-                      Nucleus::get_diffusiveness();
+  double radius_max =
+      Nucleus::get_nuclear_radius() / Nucleus::get_diffusiveness() +
+      Nucleus::get_nuclear_radius() * Nucleus::get_diffusiveness();
 
   // Sample the distribution.
   do {
     a_direction.distribute_isotropically();
     a_radius = radius_max * std::cbrt(Random::canonical());  // sample r**2 dr
-  } while (Random::canonical() > deformed_woods_saxon(a_radius,
-           a_direction.costheta()) / Nucleus::get_saturation_density());
+  } while (Random::canonical() >
+           deformed_woods_saxon(a_radius, a_direction.costheta()) /
+               Nucleus::get_saturation_density());
 
   // Update (x, y, z).
   return a_direction.threevec() * a_radius;
@@ -99,8 +104,9 @@ void DeformedNucleus::set_parameters_automatic() {
       set_beta_4(-0.006);
       break;
     default:
-      throw std::domain_error("Mass number not listed in"
-                              " DeformedNucleus::set_parameters_automatic.");
+      throw std::domain_error(
+          "Mass number not listed in"
+          " DeformedNucleus::set_parameters_automatic.");
   }
 
   // Set a random nuclear rotation.
@@ -142,26 +148,28 @@ void DeformedNucleus::rotate() {
     // rotation of phi about z, followed by the matrix for a rotation
     // theta about the rotated x axis. The third angle psi is 0 by symmetry.
     ThreeVector three_pos = particle.position().threevec();
-    three_pos.rotate(nuclear_orientation_.phi(),
-                     nuclear_orientation_.theta(), 0.);
+    three_pos.rotate(nuclear_orientation_.phi(), nuclear_orientation_.theta(),
+                     0.);
     particle.set_3position(three_pos);
   }
 }
 
 void DeformedNucleus::generate_fermi_momenta() {
-  throw std::domain_error("Fermi momenta currently not implemented"
-                          " for a deformed nucleus.");
+  throw std::domain_error(
+      "Fermi momenta currently not implemented"
+      " for a deformed nucleus.");
 }
 
 double DeformedNucleus::y_l_0(int l, double cosx) const {
   if (l == 2) {
-    return (1./4) * std::sqrt(5/M_PI) * (3. * (cosx * cosx) - 1);
+    return (1. / 4) * std::sqrt(5 / M_PI) * (3. * (cosx * cosx) - 1);
   } else if (l == 4) {
-    return (3./16) * std::sqrt(1/M_PI) * (35. * (cosx * cosx) * (cosx * cosx) -
-                                          30. * (cosx * cosx) + 3);
+    return (3. / 16) * std::sqrt(1 / M_PI) *
+           (35. * (cosx * cosx) * (cosx * cosx) - 30. * (cosx * cosx) + 3);
   } else {
-    throw std::domain_error("Not a valid angular momentum quantum number in"
-                            "DeformedNucleus::y_l_0.");
+    throw std::domain_error(
+        "Not a valid angular momentum quantum number in"
+        "DeformedNucleus::y_l_0.");
   }
 }
 
