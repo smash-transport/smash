@@ -14,8 +14,8 @@ using namespace Smash;
 // template class PhotonCrossSection<ComputationMethod::Analytic>;
 // template class PhotonCrossSection<ComputationMethod::Lookup>;
 
-double PhotonCrossSection<ComputationMethod::Analytic>::m_rho_;
-double PhotonCrossSection<ComputationMethod::Analytic>::m_pi_;
+constexpr double PhotonCrossSection<ComputationMethod::Analytic>::m_rho_;
+constexpr double PhotonCrossSection<ComputationMethod::Analytic>::m_pion_;
 
 
 double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho0_pi0(
@@ -5240,6 +5240,12 @@ double PhotonCrossSection<ComputationMethod::Lookup>::xs_pi0_rho_pi(
   return tab_pi0_rho_pi_.get_linear(s);
 }
 
+double PhotonCrossSection<ComputationMethod::Lookup>::xs_pi_rho_pi0(const double s)
+{
+    return tab_pi_rho_pi0_.get_linear(s);
+}
+
+
 // definition of differential xs-functions
 double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi_pi_rho0(
     const double s, const double t) {
@@ -5272,29 +5278,29 @@ double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi_rho0_pi(
 }
 
 // definition of static lookup tables. fine-tuning for parameters needed.
-TabulationND<1> PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_pi_rho0_(
-    0.1, 3.0, 0.01,
+Smash::TabulationND<1> PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_pi_rho0_(
+    0.01, 5.0, 0.01,
     PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi_rho0);
 
 TabulationND<1> PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_pi0_rho_(
-    0.1, 3.0, 0.01,
+    0.01, 5.0, 0.01,
     PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho);
 
 TabulationND<1>
     PhotonCrossSection<ComputationMethod::Lookup>::tab_pi0_rho0_pi0_(
-        0.1, 3.0, 0.01,
+        0.01, 5.0, 0.01,
         PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho0_pi0);
 
 TabulationND<1> PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_rho0_pi_(
-    0.1, 3.0, 0.01,
+    0.01, 5.0, 0.01,
     PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho0_pi);
 
 TabulationND<1> PhotonCrossSection<ComputationMethod::Lookup>::tab_pi0_rho_pi_(
-    0.1, 3.0, 0.01,
+    0.01, 5.0, 0.01,
     PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi);
 
 TabulationND<1> PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_rho_pi0_(
-    0.1, 3.0, 0.01,
+    0.01, 5.0, 0.01,
     PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0);
 
 TabulationND<2>

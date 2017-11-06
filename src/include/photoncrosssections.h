@@ -7,11 +7,18 @@
  *
  */
 
+
+#ifndef SRC_INCLUDE_PHOTONCROSSSECTION_H
+#define SRC_INCLUDE_PHOTONCROSSSECTION_H
+
+
 #include <cmath>
 #include "kinematics.h"
 #include "particletype.h"
 #include "pdgcode.h"
 #include "tabulationnd.h"
+
+namespace Smash {
 
 // calculation method for the cross sections
 enum class ComputationMethod { Analytic, Lookup, Parametrized };
@@ -94,3 +101,7 @@ class PhotonCrossSection<ComputationMethod::Lookup> {
 
 template <>
 class PhotonCrossSection<ComputationMethod::Parametrized> {};
+
+}; // namespace Smash
+
+#endif

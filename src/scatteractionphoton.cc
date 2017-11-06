@@ -179,6 +179,7 @@ ScatterActionPhoton::ReactionType ScatterActionPhoton::is_photon_reaction(
 
 CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
   CollisionBranchList process_list;
+  // this is really slow and there should exist a better solution.
   ParticleTypePtr rho0_particle = &ParticleType::find(pdg::rho_z);
   ParticleTypePtr rho_plus_particle = &ParticleType::find(pdg::rho_p);
   ParticleTypePtr rho_minus_particle = &ParticleType::find(pdg::rho_m);
@@ -208,7 +209,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
     double mpion = m_pi;
   */
 
-  PhotonCrossSection<ComputationMethod::Analytic> xs_object;
+  PhotonCrossSection<ComputationMethod::Lookup> xs_object;
 
   ParticleData part_a = incoming_particles_[0];
   ParticleData part_b = incoming_particles_[1];
@@ -442,7 +443,7 @@ double ScatterActionPhoton::diff_cross_section(double t, double m3, double t2,
   double mrho = m_rho;
   double mpion = m_pi;
 */
-  PhotonCrossSection<ComputationMethod::Analytic> xs_object;
+  PhotonCrossSection<ComputationMethod::Lookup> xs_object;
 
   switch (reac) {
     case ReactionType::pi_pi:
