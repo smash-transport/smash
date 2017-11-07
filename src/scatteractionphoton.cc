@@ -179,13 +179,13 @@ ScatterActionPhoton::ReactionType ScatterActionPhoton::is_photon_reaction(
 
 CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
   CollisionBranchList process_list;
-  ParticleTypePtr rho0_particle = &ParticleType::find(pdg::rho_z);
-  ParticleTypePtr rho_plus_particle = &ParticleType::find(pdg::rho_p);
-  ParticleTypePtr rho_minus_particle = &ParticleType::find(pdg::rho_m);
-  ParticleTypePtr pi0_particle = &ParticleType::find(pdg::pi_z);
-  ParticleTypePtr pi_plus_particle = &ParticleType::find(pdg::pi_p);
-  ParticleTypePtr pi_minus_particle = &ParticleType::find(pdg::pi_m);
-  ParticleTypePtr photon_particle = &ParticleType::find(pdg::photon);
+  static ParticleTypePtr rho0_particle = &ParticleType::find(pdg::rho_z);
+  static ParticleTypePtr rho_plus_particle = &ParticleType::find(pdg::rho_p);
+  static ParticleTypePtr rho_minus_particle = &ParticleType::find(pdg::rho_m);
+  static ParticleTypePtr pi0_particle = &ParticleType::find(pdg::pi_z);
+  static ParticleTypePtr pi_plus_particle = &ParticleType::find(pdg::pi_p);
+  static ParticleTypePtr pi_minus_particle = &ParticleType::find(pdg::pi_m);
+  static ParticleTypePtr photon_particle = &ParticleType::find(pdg::photon);
 
   const double m_rho = rho0_particle->mass();
   const double m_pi = pi0_particle->mass();
@@ -421,8 +421,8 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
 double ScatterActionPhoton::diff_cross_section(double t, double m3, double t2,
                                                double t1) const {
   const double to_mb = 0.3894;
-  const float m_rho = ParticleType::find(pdg::rho_z).mass();
-  const float m_pi = ParticleType::find(pdg::pi_z).mass();
+  static const float m_rho = ParticleType::find(pdg::rho_z).mass();
+  static const float m_pi = ParticleType::find(pdg::pi_z).mass();
   double s = mandelstam_s();
   double diff_xsection = 0.0;
 

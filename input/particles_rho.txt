@@ -1,0 +1,14 @@
+# NAME MASS[GEV] WIDTH[GEV] PDG
+
+########## unflavored mesons ##########
+
+π               0.138   7.7e-9      111     211
+ρ               0.776   0.149       113     213
+#ω               0.783   8.49e-3     223
+
+########## non-hadrons (leptons & gauge bosons) ##########
+
+e⁻ 0.000511 0 11
+μ⁻ 0.105    0 13
+γ  0        0 22
+

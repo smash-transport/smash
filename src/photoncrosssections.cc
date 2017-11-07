@@ -14,8 +14,8 @@ using namespace Smash;
 // template class PhotonCrossSection<ComputationMethod::Analytic>;
 // template class PhotonCrossSection<ComputationMethod::Lookup>;
 
-double PhotonCrossSection<ComputationMethod::Analytic>::m_rho_;
-double PhotonCrossSection<ComputationMethod::Analytic>::m_pi_;
+constexpr double PhotonCrossSection<ComputationMethod::Analytic>::m_rho_;
+constexpr double PhotonCrossSection<ComputationMethod::Analytic>::m_pion_;
 
 
 double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho0_pi0(
@@ -5240,7 +5240,7 @@ double PhotonCrossSection<ComputationMethod::Lookup>::xs_pi0_rho_pi(
   return tab_pi0_rho_pi_.get_linear(s);
 }
 
-// definition of differential xs-functions
+// definition of differential xs-getters
 double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi_pi_rho0(
     const double s, const double t) {
   return tab_pi_pi_rho0_diff_.get_linear(s, t);
