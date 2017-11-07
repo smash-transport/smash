@@ -185,8 +185,8 @@ void Action::check_conservation(const uint32_t id_process) const {
     log.error() << particle_names.str() << err_msg;
     // Pythia does not conserve energy and momentum at high energy, so we just
     // print the error and continue.
-    if ((process_type_ == ProcessType::StringSoft)
-      || (process_type_ == ProcessType::StringHard)) {
+    if ((process_type_ == ProcessType::StringSoft) ||
+        (process_type_ == ProcessType::StringHard)) {
       return;
     }
     if (id_process == ID_PROCESS_PHOTON) {

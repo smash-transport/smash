@@ -274,8 +274,8 @@ class ScatterAction : public Action {
     using std::invalid_argument::invalid_argument;
   };
 
-  void set_string_interface(StringProcess *str_proc) {
-     string_process_ = str_proc;
+  void set_string_interface(StringProcess* str_proc) {
+    string_process_ = str_proc;
   }
 
   virtual double cross_section() const { return total_cross_section_; }

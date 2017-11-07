@@ -36,7 +36,7 @@ enum class ProcessType {
   Elastic = 1,
   TwoToOne = 2,
   TwoToTwo = 3,
-  //String = 4,
+  // String = 4,
   Decay = 5,
   Wall = 6,
   Thermalization = 7,

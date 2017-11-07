@@ -133,9 +133,8 @@ class StringProcess {
     // are used to evaluate the energy threshold.
     const int pdg_a_mod = (pdg_a > 1000) ? pdg_a : 10 * (pdg_a / 10) + 3;
     const int pdg_b_mod = (pdg_b > 1000) ? pdg_b : 10 * (pdg_b / 10) + 3;
-    sqrts_threshold +=
-        pythia_->particleData.m0(pdg_a_mod) +
-        pythia_->particleData.m0(pdg_b_mod);
+    sqrts_threshold += pythia_->particleData.m0(pdg_a_mod) +
+                       pythia_->particleData.m0(pdg_b_mod);
     // Constant cross-section for sub-processes below threshold equal to
     // cross-section at the threshold.
     if (sqrt_s < sqrts_threshold) {
@@ -265,7 +264,7 @@ class StringProcess {
    * which is called after the collision
    * \return ParticleList filled with the final state particles.
    */
-  ParticleList get_final_state(){return final_state_;}
+  ParticleList get_final_state() { return final_state_; }
 
   /**
    * compute the formation time and fill the arrays with final-state particles
@@ -307,7 +306,8 @@ class StringProcess {
    * anti-diquark.
    * \return number of hadrons fragmented out of string.
    */
-  int fragment_string(int idq1, int idq2, double mString, ThreeVector &evecLong);
+  int fragment_string(int idq1, int idq2, double mString,
+                      ThreeVector &evecLong);
 };
 
 }  // namespace Smash
