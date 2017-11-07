@@ -23,7 +23,7 @@ template <>
 class TabulationND<1> {
  public:
   TabulationND(double x0, double x1, double dx, std::function<double(double)> f)
-      : x0_{x0}, x1_{x1}, dx_{dx}, inv_dx_{1 / dx} {
+      : x0_{x0}, x1_{x1}, dx_{dx}, inv_dx_{1 / dx}, f_(f) {
     n_ = ceil((x1_ - x0_) * inv_dx_) + 1;
     values_.resize(n_);
     double x = x0;
@@ -46,6 +46,7 @@ class TabulationND<1> {
   const double x0_, x1_, dx_, inv_dx_;
   size_t n_;
   std::vector<double> values_;
+  std::function<double(double)> f_;
 };
 
 
@@ -63,7 +64,8 @@ class TabulationND<2> {
         dx_{dx},
         dy_{dy},
         inv_dx_{1 / dx},
-        inv_dy_{1 / dy} {
+        inv_dy_{1 / dy} ,
+        f_(f) {
     nx_ = std::ceil((x1_ - x0_) * inv_dx_ + 1);
     ny_ = std::ceil((y1_ - y0_) * inv_dy_ + 1);
     n_ = nx_ * ny_;
@@ -88,6 +90,7 @@ class TabulationND<2> {
   const double x0_, x1_, y0_, y1_, dx_, dy_, inv_dx_, inv_dy_;
   size_t n_, nx_, ny_;
   std::vector<double> values_;
+  std::function<double(double,double)> f_;
 };
 
 

@@ -17,6 +17,10 @@ using namespace Smash;
 constexpr double PhotonCrossSection<ComputationMethod::Analytic>::m_rho_;
 constexpr double PhotonCrossSection<ComputationMethod::Analytic>::m_pion_;
 
+double PhotonCrossSection<ComputationMethod::Analytic>::s_min = 10.0;
+double PhotonCrossSection<ComputationMethod::Analytic>::s_max = 0.0;
+double PhotonCrossSection<ComputationMethod::Analytic>::t_min = 0.0;
+double PhotonCrossSection<ComputationMethod::Analytic>::t_max = -5.;
 
 double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho0_pi0(
     const double s) {
@@ -29,6 +33,11 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho0_pi0(
 
   const double t1 = t_mandelstam[1];
   const double t2 = t_mandelstam[0];
+
+  if (s < s_min) s_min = s;
+  if (s > s_max) s_max = s;
+  if (t1 < t_min) t_min = t1;
+  if (t2 > t_max) t_max = t2;
 
   const double xs =
       to_mb * 1 / 3.0 *
@@ -150,6 +159,12 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi(
   auto t_mandelstam = get_t_range(sqrt(s), m_pion_, m_rho_, m_pion_, 0.);
   const double &t1 = t_mandelstam[1];
   const double &t2 = t_mandelstam[0];
+
+
+  if (s < s_min) s_min = s;
+  if (s > s_max) s_max = s;
+  if (t1 < t_min) t_min = t1;
+  if (t2 > t_max) t_max = t2;
   const double xs =
       to_mb * 1 / 3.0 *
       (0.0024868 * pow(Const, 2) * pow(g_POR, 4) *
@@ -220,6 +235,10 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0(
   const double &t1 = t_mandelstam[1];
   const double &t2 = t_mandelstam[0];
 
+  if (s < s_min) s_min = s;
+  if (s > s_max) s_max = s;
+  if (t1 < t_min) t_min = t1;
+  if (t2 > t_max) t_max = t2;
   const double xs =
       to_mb * 1 / 3.0 *
       (0.0024867959858108648 * pow(Const, 2) * pow(g_POR, 4) *
@@ -258,6 +277,12 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho0_pi(
   auto t_mandelstam = get_t_range(sqrt(s), m_pion_, m_rho_, m_pion_, 0.);
   const double &t1 = t_mandelstam[1];
   const double &t2 = t_mandelstam[0];
+
+  if (s < s_min) s_min = s;
+  if (s > s_max) s_max = s;
+  if (t1 < t_min) t_min = t1;
+  if (t2 > t_max) t_max = t2;
+
   const double xs =
       to_mb * 1 / 3.0 *
       (pow(Const, 2) * pow(ghat, 4) *
@@ -1415,6 +1440,10 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi_rho0(
 
   const double mpion = m_pion_, mrho = m_rho_;
 
+  if (s < s_min) s_min = s;
+  if (s > s_max) s_max = s;
+  if (t1 < t_min) t_min = t1;
+  if (t2 > t_max) t_max = t2;
   const double xs =
       to_mb *
       ((pow(Const, 2) * pow(ghat, 4) *
@@ -3743,6 +3772,10 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
   const double t1 = t_mandelstam[1];
   const double t2 = t_mandelstam[0];
 
+  if (s < s_min) s_min = s;
+  if (s > s_max) s_max = s;
+  if (t1 < t_min) t_min = t1;
+  if (t2 > t_max) t_max = t2;
   const double xs =
       to_mb *
       (-(pow(Const, 2) * pow(ghat, 4) *
@@ -5240,6 +5273,11 @@ double PhotonCrossSection<ComputationMethod::Lookup>::xs_pi0_rho_pi(
   return tab_pi0_rho_pi_.get_linear(s);
 }
 
+double PhotonCrossSection<ComputationMethod::Lookup>::xs_pi_rho_pi0(
+    const double s) {
+        return tab_pi_rho_pi0_.get_linear(s);
+    }
+
 // definition of differential xs-getters
 double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi_pi_rho0(
     const double s, const double t) {
@@ -5272,52 +5310,54 @@ double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi_rho0_pi(
 }
 
 // definition of static lookup tables. fine-tuning for parameters needed.
+//
+constexpr double s0 = 0.1, s1 = 18.4, t0 = -10., t1 = -0.001, ds = 0.01, dt = 0.01;
 TabulationND<1> PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_pi_rho0_(
-    0.1, 3.0, 0.01,
+        s0, s1, ds,
     PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi_rho0);
 
 TabulationND<1> PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_pi0_rho_(
-    0.1, 3.0, 0.01,
+        s0, s1, ds,
     PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho);
 
 TabulationND<1>
     PhotonCrossSection<ComputationMethod::Lookup>::tab_pi0_rho0_pi0_(
-        0.1, 3.0, 0.01,
+        s0, s1, ds,
         PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho0_pi0);
 
 TabulationND<1> PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_rho0_pi_(
-    0.1, 3.0, 0.01,
+        s0, s1, ds,
     PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho0_pi);
 
 TabulationND<1> PhotonCrossSection<ComputationMethod::Lookup>::tab_pi0_rho_pi_(
-    0.1, 3.0, 0.01,
+        s0, s1, ds,
     PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi);
 
 TabulationND<1> PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_rho_pi0_(
-    0.1, 3.0, 0.01,
+        s0, s1, ds,
     PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0);
 
 TabulationND<2>
     PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_pi_rho0_diff_(
-        0.0, 3.0, -0.3, -0.01, 0.01, 0.01,
+        s0, s1, t0, t1, ds, dt,
         PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi_rho0);
 TabulationND<2>
     PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_pi0_rho_diff_(
-        0.0, 3.0, -0.3, -0.01, 0.01, 0.01,
+        s0, s1, t0, t1, ds, dt,
         PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi0_rho);
 TabulationND<2>
     PhotonCrossSection<ComputationMethod::Lookup>::tab_pi0_rho0_pi0_diff_(
-        0.0, 3.0, -0.3, -0.01, 0.01, 0.01,
+        s0, s1, t0, t1, ds, dt,
         PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi0_rho0_pi0);
 TabulationND<2>
     PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_rho_pi0_diff_(
-        0.0, 3.0, -0.3, -0.01, 0.01, 0.01,
+        s0, s1, t0, t1, ds, dt,
         PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho_pi0);
 TabulationND<2>
     PhotonCrossSection<ComputationMethod::Lookup>::tab_pi0_rho_pi_diff_(
-        0.0, 3.0, -0.3, -0.01, 0.01, 0.01,
+        s0, s1, t0, t1, ds, dt,
         PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi0_rho_pi);
 TabulationND<2>
     PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_rho0_pi_diff_(
-        0.0, 3.0, -0.3, -0.01, 0.01, 0.01,
+        s0, s1, t0, t1, ds, dt,
         PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho0_pi);

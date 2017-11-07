@@ -38,6 +38,8 @@ class PhotonCrossSection<ComputationMethod::Analytic> {
   static double xs_diff_pi0_rho_pi(const double s, const double t);
   static double xs_diff_pi_rho0_pi(const double s, const double t);
 
+  static double s_min, s_max, t_min, t_max;
+
  private:
 
   // masses are hardcoded. since we use static tabulation objects we

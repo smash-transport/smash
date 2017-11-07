@@ -208,7 +208,10 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
     double mpion = m_pi;
   */
 
-  PhotonCrossSection<ComputationMethod::Analytic> xs_object;
+  PhotonCrossSection<ComputationMethod::Lookup> xs_object;
+
+  //std::cout << xs_object.s_min << " " << xs_object.s_max << " " <<
+  //    xs_object.t_min << " " << xs_object.t_max << std::endl;
 
   ParticleData part_a = incoming_particles_[0];
   ParticleData part_b = incoming_particles_[1];
@@ -442,7 +445,7 @@ double ScatterActionPhoton::diff_cross_section(double t, double m3, double t2,
   double mrho = m_rho;
   double mpion = m_pi;
 */
-  PhotonCrossSection<ComputationMethod::Analytic> xs_object;
+  PhotonCrossSection<ComputationMethod::Lookup> xs_object;
 
   switch (reac) {
     case ReactionType::pi_pi:
