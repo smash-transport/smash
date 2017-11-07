@@ -51,7 +51,6 @@ double TabulationND<2>::get_linear(const double x, const double y) const {
   size_t x_idx = static_cast<size_t>(x_idx_d);
   size_t y_idx = static_cast<size_t>(y_idx_d);
 
-  
   // get fraction of x between x_lower, x_lower + dx etc.
   const double dx = x_idx_d - x_idx;
   const double dy = y_idx_d - y_idx;

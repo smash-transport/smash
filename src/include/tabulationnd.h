@@ -29,8 +29,8 @@ class TabulationND<1> {
     n_ = ceil((x1_ - x0_) * inv_dx_) + 1;
     values_.resize(n_);
     double x = x0;
-    for (size_t i = 0; i < n_; i++, x += dx_) {
-      values_[i] = f(x);
+    for (size_t i = 0; i < n_; i++) {
+      values_[i] = f(x0_ + i*dx_);
     }
   }
 
