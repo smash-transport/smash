@@ -150,26 +150,30 @@ ScatterActionPhoton::ReactionType ScatterActionPhoton::is_photon_reaction(
   switch (pack(a.code(), b.code())) {
     case (pack(pdg::pi_p, pdg::pi_z)):
     case (pack(pdg::pi_z, pdg::pi_p)):
+      return ReactionType::pi_z_pi_p_rho_p;
     case (pack(pdg::pi_m, pdg::pi_z)):
     case (pack(pdg::pi_z, pdg::pi_m)):
-      return ReactionType::pi0_pi;
+      return ReactionType::pi_z_pi_m_rho_m;
     case (pack(pdg::pi_p, pdg::rho_z)):
+      return ReactionType::pi_p_rho_z_pi_p;
     case (pack(pdg::pi_m, pdg::rho_z)):
-      return ReactionType::pi_rho0;
+      return ReactionType::pi_m_rho_z_pi_m;
     case (pack(pdg::pi_m, pdg::rho_p)):
+      return ReactionType::pi_m_rho_p_pi_z;
     case (pack(pdg::pi_p, pdg::rho_m)):
-      return ReactionType::pi_rho;
+      return ReactionType::pi_p_rho_m_pi_z
     case (pack(pdg::pi_z, pdg::rho_p)):
+        return ReactionType::pi_z_rho_p_pi_p;
     case (pack(pdg::pi_z, pdg::rho_m)):
-      return ReactionType::pi0_rho;
+        return ReactionType::pi_z_rho_m_pi_m;
     /*case(pack(pdg::pi_p, pdg::eta)):
     case(pack(pdg::pi_m, pdg::eta)):
       return ReactionType::pi_eta;*/
     case(pack(pdg::pi_p, pdg::pi_m)):
     case(pack(pdg::pi_m, pdg::pi_p)):
-      return ReactionType::pi_pi;
+        return ReactionType::pi_p_pi_m_rho_z;
     case(pack(pdg::pi_z, pdg::rho_z)):
-      return ReactionType::pi0_rho0;
+        return ReactionType::pi_z_rho_z_pi_z;
     default:
       return ReactionType::no_reaction;
   }

@@ -52,13 +52,14 @@ class ScatterActionPhoton : public ScatterAction {
 
   enum class ReactionType {
     no_reaction,
-    pi0_pi,
-    pi_rho0,
-    pi_rho,
-    pi0_rho,
-    //pi_eta,
-    pi_pi,
-    pi0_rho0
+    pi_z_pi_p_rho_p,
+    pi_z_pi_m_rho_m,
+    pi_p_rho_z_pi_p,
+    pi_m_rho_z_pi_m,
+    pi_m_rho_p_pi_z,
+    pi_p_rho_m_pi_z,
+    pi_z_rho_p_pi_p,
+    pi_z_rho_m_pi_m
   };
 
   ReactionType reac = ReactionType::no_reaction;
