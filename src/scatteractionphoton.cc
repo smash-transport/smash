@@ -29,13 +29,118 @@ using std::atan;
 
 namespace Smash {
 
-std::unique_ptr<Tabulation> tabulation_pi_pi_rho0 = nullptr;
-std::unique_ptr<Tabulation> tabulation_pi0_pi_rho = nullptr;
+ScatterActionPhoton::ReactionType ScatterActionPhoton::photon_reaction_type(const ParticleList &in)
+{
+  // ToDo: is this check here necessary?
+  if (in.size() != 2) {
+    return ReactionType::no_reaction;
+  }
 
-ReactionType photon_reaction_type(const ParticleList &in)
+  PdgCode a = in[0].pdgcode();
+  PdgCode b = in[1].pdgcode();
+
+  // swap so that pion should be first and there are less cases to be listed
+
+  if (!a.is_pion()) {
+    std::swap(a, b);
+  }
+  
+  switch (pack(a.code(), b.code())) {
+    case (pack(pdg::pi_p, pdg::pi_z)
+    case (pack(pdg::pi_z, pdg::pi_p)):
+      return ReactionType::pi_z_pi_p_rho_p;
+
+    case (pack(pdg::pi_m, pdg::pi_z)):
+    case (pack(pdg::pi_z, pdg::pi_m)):
+      return ReactionType::pi_z_pi_m_rho_m;
+
+    case (pack(pdg::pi_p, pdg::rho_z)):
+      return ReactionType::pi_p_rho_z_pi_p;
+
+    case (pack(pdg::pi_m, pdg::rho_z)):
+      return ReactionType::pi_m_rho_z_pi_m;
+
+    case (pack(pdg::pi_m, pdg::rho_p)):
+      return ReactionType::pi_m_rho_p_pi_z;
+
+    case (pack(pdg::pi_p, pdg::rho_m)):
+      return ReactionType::pi_p_rho_m_pi_z;
+
+    case (pack(pdg::pi_z, pdg::rho_p)):
+      return ReactionType::pi_z_rho_p_pi_p;
+
+    case (pack(pdg::pi_z, pdg::rho_m)):
+      return ReactionType::pi_z_rho_m_pi_m;
+   
+      case(pack(pdg::pi_p, pdg::pi_m)):
+    case(pack(pdg::pi_m, pdg::pi_p)):
+      return ReactionType::pi_p_pi_m_rho_z;
+
+    case(pack(pdg::pi_z, pdg::rho_z)):
+      return ReactionType::pi_z_rho_z_pi_z;
+    
+      default:
+      return ReactionType::no_reaction;
+  }
+}
+
+ParticletypePtr ScatterActionPhoton::outgoing_hadron(const ParticleList &in)
 {
 
+  // ToDo: not sure how to handle the returning of pointers. i have to think about this
+  const static ParticleTypePtr rho_z_particle_ptr = &ParticleType::find(pdg::rho_z);
+  const static ParticleTypePtr rho_p_particle_ptr = &ParticleType::find(pdg::rho_p);
+  const static ParticleTypePtr rho_m_particle_ptr = &ParticleType::find(pdg::rho_m);
+  const static ParticleTypePtr pi_z_particle_ptr = &ParticleType::find(pdg::pi_z);
+  const static ParticleTypePtr pi_p_particle_ptr = &ParticleType::find(pdg::pi_p);
+  const static ParticleTypePtr pi_m_particle_ptr = &ParticleType::find(pdg::pi_m);
+  //const static ParticleTypePtr photon_particle = &ParticleType::find(pdg::photon);
+
+  auto reac = photon_reaction_type(in);
+
+  switch(reac)
+  {
+    case pi_z_pi_p_rho_p:
+      return rho_p_particle_ptr;
+      break;
+    case pi_z_pi_m_rho_m:
+      return rho_m_particle_ptr;
+      break;
+    case pi_p_pi_m_rho_z:
+      return rho_z_particle_ptr;
+      break;
+
+     case pi_p_rho_z_pi_p:
+     case pi_z_rho_p_pi_p:
+      return pi_p_particle_ptr;
+
+     case pi_m_rho_z_pi_m:
+     case pi_z_rho_m_pi_m:
+      return pi_m_particle_ptr;
+
+     case pi_m_rho_p_pi_z:
+     case pi_p_rho_m_pi_z:
+     case pi_z_rho_z_pi_z:
+      return pi_z_particle_ptr;
+      break;
+    default:
+      // ToDo: Think of something better
+      return nullptr;
+  }
 }
+
+bool ScatterActionPhoton::is_kinematically_possible(const double s, const ParticleList &in)
+{
+  auto hadron = outgoing_hadron(in);
+  if (hadron && hadron.mass() > s)
+  {
+    return true;
+  }
+  else{
+    return false;
+  }
+}
+
 
 void ScatterActionPhoton::generate_final_state() {
   /* Decide for a particular final state. */

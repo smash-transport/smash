@@ -70,10 +70,11 @@ class ScatterActionPhoton : public ScatterAction {
   //static ReactionType is_photon_reaction(const ParticleList &in);
   static ReactionType photon_reaction_type(const ParticleList &in);
 
-  static bool is_photon_reaction(const double s, const ParticleList &in);
+  //static bool is_photon_reaction(const double s, const ParticleList &in);
 
- ParticleTypePtr outgoing_particle(const ParticleList &in) const;
+ ParticleTypePtr outgoing_hadron(const ParticleList &in) const;
 
+  bool is_kinematically_possible(const double s, const ParticleList &in);
 
 
  private:
@@ -87,12 +88,6 @@ class ScatterActionPhoton : public ScatterAction {
   CollisionBranchList collision_channels_photons_;
 
   double cross_section_photons_ = 0.0;
-
-  const int num_tab_pts_ = 200;
-
-  double pi_pi_rho0(const double M, const double s) const;
-
-  double pi_pi0_rho(const double M, const double s) const;
 
   double diff_cross_section(double t, double m3, double t2, double t1) const;
 
