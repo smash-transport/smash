@@ -29,10 +29,6 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho0_pi0(
   const double t1 = t_mandelstam[1];
   const double t2 = t_mandelstam[0];
 
-  if (s < s_min) s_min = s;
-  if (s > s_max) s_max = s;
-  if (t1 < t_min) t_min = t1;
-  if (t2 > t_max) t_max = t2;
 
   const double xs =
       to_mb * 1 / 3.0 *
@@ -156,10 +152,6 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi(
   const double &t2 = t_mandelstam[0];
 
 
-  if (s < s_min) s_min = s;
-  if (s > s_max) s_max = s;
-  if (t1 < t_min) t_min = t1;
-  if (t2 > t_max) t_max = t2;
   const double xs =
       to_mb * 1 / 3.0 *
       (0.0024868 * pow(Const, 2) * pow(g_POR, 4) *
@@ -230,10 +222,6 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0(
   const double &t1 = t_mandelstam[1];
   const double &t2 = t_mandelstam[0];
 
-  if (s < s_min) s_min = s;
-  if (s > s_max) s_max = s;
-  if (t1 < t_min) t_min = t1;
-  if (t2 > t_max) t_max = t2;
   const double xs =
       to_mb * 1 / 3.0 *
       (0.0024867959858108648 * pow(Const, 2) * pow(g_POR, 4) *
@@ -273,10 +261,6 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho0_pi(
   const double &t1 = t_mandelstam[1];
   const double &t2 = t_mandelstam[0];
 
-  if (s < s_min) s_min = s;
-  if (s > s_max) s_max = s;
-  if (t1 < t_min) t_min = t1;
-  if (t2 > t_max) t_max = t2;
 
   const double xs =
       to_mb * 1 / 3.0 *
@@ -1435,10 +1419,6 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi_rho0(
 
   const double mpion = m_pion_, mrho = m_rho_;
 
-  if (s < s_min) s_min = s;
-  if (s > s_max) s_max = s;
-  if (t1 < t_min) t_min = t1;
-  if (t2 > t_max) t_max = t2;
   const double xs =
       to_mb *
       ((pow(Const, 2) * pow(ghat, 4) *
@@ -3767,10 +3747,6 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
   const double t1 = t_mandelstam[1];
   const double t2 = t_mandelstam[0];
 
-  if (s < s_min) s_min = s;
-  if (s > s_max) s_max = s;
-  if (t1 < t_min) t_min = t1;
-  if (t2 > t_max) t_max = t2;
   const double xs =
       to_mb *
       (-(pow(Const, 2) * pow(ghat, 4) *

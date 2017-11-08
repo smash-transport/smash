@@ -72,9 +72,9 @@ class ScatterActionPhoton : public ScatterAction {
 
   //static bool is_photon_reaction(const double s, const ParticleList &in);
 
- ParticleTypePtr outgoing_hadron(const ParticleList &in) const;
+ static ParticleTypePtr outgoing_hadron(const ParticleList &in);
 
-  bool is_kinematically_possible(const double s, const ParticleList &in);
+  static bool is_kinematically_possible(const double s, const ParticleList &in);
 
 
  private:

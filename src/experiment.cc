@@ -880,7 +880,8 @@ bool Experiment<Modus>::perform_action(
   // At every collision photons can be produced.
   if (photons_switch_ &&
       (ScatterActionPhoton::photon_reaction_type(action.incoming_particles()) !=
-       ScatterActionPhoton::ReactionType::no_reaction)) {
+       ScatterActionPhoton::ReactionType::no_reaction)
+      && ScatterActionPhoton::is_kinematically_possible(action.sqrt_s(), action.incoming_particles())) {
     // Time in the action constructor is relative to
     // current time of incoming
     constexpr double action_time = 0.;

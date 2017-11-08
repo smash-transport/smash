@@ -10,6 +10,8 @@
 
 #include <array>
 #include <sstream>
+#include <cassert>
+#include <iostream>
 
 #include "constants.h"
 
@@ -120,7 +122,7 @@ std::array<T, 2> get_t_range(const T sqrts, const T m1, const T m2, const T m3,
   const T t0 = sqrt_t0 * sqrt_t0;
   T t_min = t0 - (p_i - p_f) * (p_i - p_f);
   if (t_min > T(0.0)) {
-    assert(t_min < T(1e-15));
+    //assert(t_min < T(1e-15));
     t_min = T(0.0);
   }
   const T t_max = t0 - (p_i + p_f) * (p_i + p_f);
