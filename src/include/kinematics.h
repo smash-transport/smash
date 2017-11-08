@@ -10,6 +10,7 @@
 
 #include <array>
 #include <sstream>
+#include <cassert>
 
 #include "constants.h"
 
