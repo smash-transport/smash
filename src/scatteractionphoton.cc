@@ -32,6 +32,11 @@ namespace Smash {
 std::unique_ptr<Tabulation> tabulation_pi_pi_rho0 = nullptr;
 std::unique_ptr<Tabulation> tabulation_pi0_pi_rho = nullptr;
 
+ReactionType photon_reaction_type(const ParticleList &in)
+{
+
+}
+
 void ScatterActionPhoton::generate_final_state() {
   /* Decide for a particular final state. */
   const CollisionBranch *proc = choose_channel<CollisionBranch>(
@@ -134,6 +139,7 @@ void ScatterActionPhoton::add_dummy_hadronic_channels(
 
 ScatterActionPhoton::ReactionType ScatterActionPhoton::is_photon_reaction(
     const ParticleList &in) {
+  
   if (in.size() != 2) {
     return ReactionType::no_reaction;
   }
@@ -148,33 +154,40 @@ ScatterActionPhoton::ReactionType ScatterActionPhoton::is_photon_reaction(
   }
 
   switch (pack(a.code(), b.code())) {
-    case (pack(pdg::pi_p, pdg::pi_z)):
+    case (pack(pdg::pi_p, pdg::pi_z)
     case (pack(pdg::pi_z, pdg::pi_p)):
       return ReactionType::pi_z_pi_p_rho_p;
+
     case (pack(pdg::pi_m, pdg::pi_z)):
     case (pack(pdg::pi_z, pdg::pi_m)):
       return ReactionType::pi_z_pi_m_rho_m;
+
     case (pack(pdg::pi_p, pdg::rho_z)):
       return ReactionType::pi_p_rho_z_pi_p;
+
     case (pack(pdg::pi_m, pdg::rho_z)):
       return ReactionType::pi_m_rho_z_pi_m;
+
     case (pack(pdg::pi_m, pdg::rho_p)):
       return ReactionType::pi_m_rho_p_pi_z;
+
     case (pack(pdg::pi_p, pdg::rho_m)):
-      return ReactionType::pi_p_rho_m_pi_z
+      return ReactionType::pi_p_rho_m_pi_z;
+
     case (pack(pdg::pi_z, pdg::rho_p)):
-        return ReactionType::pi_z_rho_p_pi_p;
+      return ReactionType::pi_z_rho_p_pi_p;
+
     case (pack(pdg::pi_z, pdg::rho_m)):
-        return ReactionType::pi_z_rho_m_pi_m;
-    /*case(pack(pdg::pi_p, pdg::eta)):
-    case(pack(pdg::pi_m, pdg::eta)):
-      return ReactionType::pi_eta;*/
-    case(pack(pdg::pi_p, pdg::pi_m)):
+      return ReactionType::pi_z_rho_m_pi_m;
+   
+      case(pack(pdg::pi_p, pdg::pi_m)):
     case(pack(pdg::pi_m, pdg::pi_p)):
-        return ReactionType::pi_p_pi_m_rho_z;
+      return ReactionType::pi_p_pi_m_rho_z;
+
     case(pack(pdg::pi_z, pdg::rho_z)):
-        return ReactionType::pi_z_rho_z_pi_z;
-    default:
+      return ReactionType::pi_z_rho_z_pi_z;
+    
+      default:
       return ReactionType::no_reaction;
   }
 }
