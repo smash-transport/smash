@@ -90,6 +90,10 @@ class ScatterActionPhoton : public ScatterAction {
   double cross_section_photons_ = 0.0;
 
   double diff_cross_section(double t, double t2, double t1) const;
+  const int num_tab_pts_ = 200;
+
+  // conversion factor to millibarn
+  const double to_mb = 0.3894;
 
   double form_factor(double E_photon);
 };

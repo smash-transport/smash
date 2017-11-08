@@ -238,6 +238,9 @@ smash_add_unittest(vtkoutput)
 smash_add_unittest(width)
 smash_add_unittest(without_float_traps)
 smash_add_unittest(yamltest)
+smash_add_unittest(tabulationnd)
+smash_add_unittest(ph_xs_write_out)
+
 
 # verify that the binary has a cli help
 smash_add_runtest(smash_help smash smash -h)

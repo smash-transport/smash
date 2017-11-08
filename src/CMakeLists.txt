@@ -109,6 +109,7 @@ set(smash_src
         particles.cc
         particletype.cc
         pdgcode.cc
+        photoncrosssections.cc
         potentials.cc
         processbranch.cc
         propagation.cc
@@ -129,6 +130,7 @@ set(smash_src
         stringfunctions.cc
         tabulation.cc
         thermalizationaction.cc
+        tabulationnd.cc
         thermodynamicoutput.cc
         threevector.cc
         tsc.cc
