@@ -167,19 +167,19 @@ void ScatterActionPhoton::generate_final_state() {
   const double pcm_out = pCM(sqrts, m3, 0.0);
 
   assert(t1 < t2);
+  double diff_xsection_max = 0.0;
   const double stepsize = (t2 - t1) / 100.0;
   for (double t = t1; t < t2; t += stepsize) {
-    double diff_xsection_max = std::max(diff_cross_section(t, m3, t2, t1),
+    diff_xsection_max = std::max(diff_cross_section(t, t2, t1),
                                               diff_xsection_max);
   }
 
-  double t = Random::uniform(t1, t2);
-  double diff_xsection_max = 0;
+  double t = 0.0;
   int iteration_number = 0;
   do {
     t = Random::uniform(t1, t2);
     iteration_number++;
-  } while (diff_cross_section(t, m3, t2, t1) < Random::uniform(0., diff_xsection_max)
+  } while (diff_cross_section(t, t2, t1) < Random::uniform(0., diff_xsection_max)
            && iteration_number < 100);
 
   // TODO(schaefer): this should be moved to kinematics.h and tested
@@ -196,7 +196,7 @@ void ScatterActionPhoton::generate_final_state() {
 
   /* Weighing of the fractional photons */
   if (number_of_fractional_photons_ > 1) {
-    weight_ = diff_cross_section(t, m3,t2,t1) * (t2 - t1)
+    weight_ = diff_cross_section(t,t2,t1) * (t2 - t1)
           / (number_of_fractional_photons_ * cross_section());
   } else {
     weight_ = proc->weight() / cross_section();
@@ -208,24 +208,24 @@ void ScatterActionPhoton::generate_final_state() {
     new_particle.boost_momentum(-beta_cm());
   }
 
-  /* Inlcusion of form factors:
-  Usual procedure would be the multplication of the photon cross section
-  with the corresponding form factor. This form factor is however energy
-  dependent, such that the energy of the generated photon in the computational frame
-  is a necessary to determine FF. Yet this is not directly accessible in
+  /* Inlcusion of form factors (FF):
+  The usual procedure would be the multplication of the photon cross section
+  by the corresponding form factor. This form factor is however energy
+  dependent, such that the energy of the generated photon in the computational
+  frame is necessary to determine FF. Yet this is not directly accessible in
   ScatterActionPhoton::photon_cross_section().
   The alternative solution is to multiply the weighting factor (proportional to
-  cross section) by the form factor, which is equivalent to multiplying the
-  cross section directly.
+  cross section) by FF. This is equivalent to multiplying the cross section
+  directly.
 
   The modification is as follows:
   weight_FF = weight_noFF * FF^4
   The actual value of the form factor is determined in
-  ScatterActionPhoton::form_factor */
+  ScatterActionPhoton::form_factor(E_photon) */
 
-  double E_Photon_Comp = outgoing_particles_[1].momentum()[0];
+  double E_Photon = outgoing_particles_[1].momentum()[0];
 
-  weight_ *= pow(form_factor(E_Photon_Comp),4);
+  weight_ *= pow(form_factor(E_Photon),4);
 
   // Photons are not really part of the normal processes, so we have to set a
   // constant arbitrary number.
@@ -242,7 +242,7 @@ void ScatterActionPhoton::add_dummy_hadronic_channels(
   add_collision(std::move(dummy_process));
 }
 
-ScatterActionPhoton::ReactionType ScatterActionPhoton::is_photon_reaction(
+ScatterActionPhoton::ReactionType ScatterActionPhoton::photon_reaction_type(
     const ParticleList &in) {
   
   if (in.size() != 2) {
@@ -253,7 +253,6 @@ ScatterActionPhoton::ReactionType ScatterActionPhoton::is_photon_reaction(
   PdgCode b = in[1].pdgcode();
 
   // swap so that pion should be first and there are less cases to be listed
-
   if (!a.is_pion()) {
     std::swap(a, b);
   }
@@ -299,13 +298,13 @@ ScatterActionPhoton::ReactionType ScatterActionPhoton::is_photon_reaction(
 
 CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
   CollisionBranchList process_list;
-  ParticleTypePtr rho0_particle = &ParticleType::find(pdg::rho_z);
-  ParticleTypePtr rho_plus_particle = &ParticleType::find(pdg::rho_p);
-  ParticleTypePtr rho_minus_particle = &ParticleType::find(pdg::rho_m);
-  ParticleTypePtr pi0_particle = &ParticleType::find(pdg::pi_z);
-  ParticleTypePtr pi_plus_particle = &ParticleType::find(pdg::pi_p);
-  ParticleTypePtr pi_minus_particle = &ParticleType::find(pdg::pi_m);
-  ParticleTypePtr photon_particle = &ParticleType::find(pdg::photon);
+  static ParticleTypePtr rho0_particle = &ParticleType::find(pdg::rho_z);
+  static ParticleTypePtr rho_plus_particle = &ParticleType::find(pdg::rho_p);
+  static ParticleTypePtr rho_minus_particle = &ParticleType::find(pdg::rho_m);
+  static ParticleTypePtr pi0_particle = &ParticleType::find(pdg::pi_z);
+  static ParticleTypePtr pi_plus_particle = &ParticleType::find(pdg::pi_p);
+  static ParticleTypePtr pi_minus_particle = &ParticleType::find(pdg::pi_m);
+  static ParticleTypePtr photon_particle = &ParticleType::find(pdg::photon);
   const double m_rho = rho0_particle->mass();
   const double m_pi = pi0_particle->mass();
 
@@ -352,7 +351,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
     ParticleTypePtr part_out = photon_particle;
     ParticleTypePtr photon_out = photon_particle;
 
-    reac = is_photon_reaction(Action::incoming_particles());
+    reac = photon_reaction_type(Action::incoming_particles());
 
     if (sqrts <= m1 + m2) {
       reac = ReactionType::no_reaction;
@@ -367,21 +366,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
       switch (reac) {
          case ReactionType::pi_pi:
         // there are three possible reaction channels
-        // the first possible reaction produces eta
-        /*  part_out = eta_particle;
-          m3 = part_out->mass();
-
-          if (sqrts > m3) {
-            mandelstam_t = get_t_range(sqrts, m1, m2, m3, 0.0);
-            t1 = mandelstam_t[1];
-            t2 = mandelstam_t[0];
-
-            xsection = to_be_determined * to_mb;
-            process_list.push_back(make_unique<CollisionBranch>(
-                *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
-          }*/
-
-          // the second possible reaction (produces rho0)
+        // the first possible reaction (produces rho0)
           part_out = rho0_particle;
           m3 = part_out->mass();
 
@@ -1232,7 +1217,8 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
                 *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
           }
 
-          // the third possible reaction (produces photon)
+          // the second possible reaction (produces photon)
+          // -> only necessary in case of a stable rho meson
           part_out = photon_particle;
           m3 = 0.0;
 
@@ -1510,7 +1496,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
                 *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
           }
 
-          //dummy: just for stable rho
+          //dummy: necessary in case of a stable rho meson
           if (part_a.type().pdgcode() == pdg::pi_p ||
               part_b.type().pdgcode() == pdg::pi_p) {
             part_out = pi_plus_particle;
@@ -2702,23 +2688,6 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
               *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
           break;
 
-        /*case ReactionType::pi_eta:
-          if (part_a.type().pdgcode() == pdg::pi_p) {
-            part_out = pi_plus_particle;
-          } else {
-            part_out = pi_minus_particle;
-          }
-          m3 = part_out->mass();
-
-          mandelstam_t = get_t_range(sqrts, m1, m2, m3, 0.0);
-          t1 = mandelstam_t[1];
-          t2 = mandelstam_t[0];
-
-          xsection = to_be_determined * to_mb;
-          process_list.push_back(make_unique<CollisionBranch>(
-              *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
-          break; */
-
         case ReactionType::pi0_rho0:
           part_out = pi0_particle;
           m3 = part_out->mass();
@@ -2769,7 +2738,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
   return process_list;
 }
 
-double ScatterActionPhoton::diff_cross_section(double t, double m3, double t2, double t1) const {
+double ScatterActionPhoton::diff_cross_section(double t, double t2, double t1) const {
   const double to_mb = 0.3894;
   const float m_rho = ParticleType::find(pdg::rho_z).mass();
   const float m_pi = ParticleType::find(pdg::pi_z).mass();
@@ -2891,8 +2860,6 @@ double ScatterActionPhoton::diff_cross_section(double t, double m3, double t2, d
                           pow(mrho,4)*(delta - 2*(9 + 8*C4*(3*s + t)))))))/
                 (pow(mrho,2)*(pow(Gammaa1,2)*pow(ma1,2) + pow(pow(ma1,2) - 2*pow(mpion,2) - pow(mrho,2) + s + t,2)))))/
            (16.*M_PI*s*(-4*pow(mpion,2) + s));
-    //  } else if (outgoing_particles_[0].type().pdgcode() == pdg::eta) {
-    //    diff_xsection = to_be_determined;
       } else if (outgoing_particles_[0].type().pdgcode() == pdg::photon) {
         diff_xsection = 0.0000000000001/to_mb/(t2-t1);
       }
@@ -3208,9 +3175,6 @@ double ScatterActionPhoton::diff_cross_section(double t, double m3, double t2, d
        2*pow(mpion,2)*t*(pow(mrho,4) + 2*t*(s + t) - pow(mrho,2)*(s + 2*t))))/
        ((pow(mpion,4) + pow(pow(mrho,2) - s,2) - 2*pow(mpion,2)*(pow(mrho,2) + s))*pow(pow(momega,2) - t,2));*/
       break;
-    /*case ReactionType::pi_eta:
-      diff_xsection = to_be_determined;
-      break;*/
     case ReactionType::pi0_rho0:
 
       diff_xsection = 1/3.0*(pow(Const,2)*pow(g_POR,4)*(pow(m_omega,4)*pow(s,4) + 4*pow(m_omega,4)*pow(s,3)*t - 4*pow(m_omega,2)*pow(s,4)*t + 10*pow(m_omega,4)*pow(s,2)*pow(t,2) -
@@ -3240,10 +3204,11 @@ double ScatterActionPhoton::form_factor(double E_photon) {
   switch(reac){
 
     /* The form factor is assumed to be a hadronic dipole form factor which
-    takes the shape of: FF = (2*Lambda^2/(2*Lambda^2 - t))^2 with
+    takes the shape: FF = (2*Lambda^2/(2*Lambda^2 - t))^2 with
     Lambda = 1.0 GeV. t depends on the lightest possible exchange particle in
     the different channels. This could either be a pion or an omega meson. For
-    the computation the parametrizations given in REF! are used. */
+    the computation the parametrizations given in \ref! are used. */
+  // TODO (schaefer): Include reference for FF!
 
     case ReactionType::pi_pi:
     case ReactionType::pi0_pi:

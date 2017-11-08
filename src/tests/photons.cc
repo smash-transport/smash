@@ -44,7 +44,7 @@ TEST(pi_rho0_pi_gamma) {
   COMPARE_RELATIVE_ERROR(tot_weight, 1.0, 0.08);
 }
 
-TEST(is_photon_reaction_function) {
+TEST(photon_reaction_type_function) {
   const ParticleData pip{ParticleType::find(0x211)};
   const ParticleData pim{ParticleType::find(-0x211)};
   const ParticleData piz{ParticleType::find(0x111)};
@@ -56,12 +56,12 @@ TEST(is_photon_reaction_function) {
 
   const ParticleList l1{pip, pim}, l2{rhop, pim}, l3{p, pim}, l4{pip, eta};
 
-  VERIFY(ScatterActionPhoton::is_photon_reaction(l1) !=
+  VERIFY(ScatterActionPhoton::photon_reaction_type(l1) !=
          ScatterActionPhoton::ReactionType::no_reaction);
-  VERIFY(ScatterActionPhoton::is_photon_reaction(l2) !=
+  VERIFY(ScatterActionPhoton::photon_reaction_type(l2) !=
          ScatterActionPhoton::ReactionType::no_reaction);
-  VERIFY(ScatterActionPhoton::is_photon_reaction(l3) ==
+  VERIFY(ScatterActionPhoton::photon_reaction_type(l3) ==
          ScatterActionPhoton::ReactionType::no_reaction);
-  VERIFY(ScatterActionPhoton::is_photon_reaction(l4) !=
+  VERIFY(ScatterActionPhoton::photon_reaction_type(l4) !=
          ScatterActionPhoton::ReactionType::no_reaction);
 }

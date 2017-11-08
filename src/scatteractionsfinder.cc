@@ -207,7 +207,7 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData &data_a,
   /* Add photons to collision finding if necessary */
   double photon_cross_section = 0.0;
   if (photons_ &&
-      (ScatterActionPhoton::is_photon_reaction(act->incoming_particles()) !=
+      (ScatterActionPhoton::photon_reaction_type(act->incoming_particles()) !=
        ScatterActionPhoton::ReactionType::no_reaction)) {
     ScatterActionPhoton photon_act(act->incoming_particles(), 0.0,
                                    n_fractional_photons_);

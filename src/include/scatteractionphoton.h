@@ -89,7 +89,7 @@ class ScatterActionPhoton : public ScatterAction {
 
   double cross_section_photons_ = 0.0;
 
-  double diff_cross_section(double t, double m3, double t2, double t1) const;
+  double diff_cross_section(double t, double t2, double t1) const;
 
   double form_factor(double E_photon);
 };
