@@ -190,28 +190,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
   const double m_rho = rho0_particle->mass();
   const double m_pi = pi0_particle->mass();
 
-  /*
-    const double to_mb = 0.3894;
-    const double Const = 0.059;
-    const double g_POR = 11.93;
-    const double ma1 = 1.26;
-    const double ghat = 6.4483;
-    const double eta1 = 2.3920;
-    const double eta2 = 1.9430;
-    const double delta = -0.6426;
-    const double C4 = -0.14095;
-    const double Gammaa1 = 0.4;
-    const double Pi = M_PI;
-    double m_omega = 0.783;
-    double momega = m_omega;
-    double mrho = m_rho;
-    double mpion = m_pi;
-  */
-
   PhotonCrossSection<ComputationMethod::Lookup> xs_object;
-
-  //std::cout << xs_object.s_min << " " << xs_object.s_max << " " <<
-  //    xs_object.t_min << " " << xs_object.t_max << std::endl;
 
   ParticleData part_a = incoming_particles_[0];
   ParticleData part_b = incoming_particles_[1];

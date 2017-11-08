@@ -17,11 +17,6 @@ using namespace Smash;
 constexpr double PhotonCrossSection<ComputationMethod::Analytic>::m_rho_;
 constexpr double PhotonCrossSection<ComputationMethod::Analytic>::m_pion_;
 
-double PhotonCrossSection<ComputationMethod::Analytic>::s_min = 10.0;
-double PhotonCrossSection<ComputationMethod::Analytic>::s_max = 0.0;
-double PhotonCrossSection<ComputationMethod::Analytic>::t_min = 0.0;
-double PhotonCrossSection<ComputationMethod::Analytic>::t_max = -5.;
-
 double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho0_pi0(
     const double s) {
   using std::atan;
