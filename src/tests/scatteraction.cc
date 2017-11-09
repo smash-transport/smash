@@ -14,9 +14,9 @@
 #include "../include/scatteractionbaryonbaryon.h"
 #include "../include/scatteractionbaryonmeson.h"
 
-using namespace Smash;
-using Smash::Test::Position;
-using Smash::Test::Momentum;
+using namespace smash;
+using smash::Test::Position;
+using smash::Test::Momentum;
 
 TEST(init_particle_types) {
   Test::create_actual_particletypes();

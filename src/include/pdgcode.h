@@ -20,7 +20,7 @@
 
 #include "pdgcode_constants.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup data
@@ -758,6 +758,6 @@ inline bool has_lepton_pair(const PdgCode pdg1, const PdgCode pdg2,
          is_dilepton(pdg2, pdg3);
 }
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_PDGCODE_H_

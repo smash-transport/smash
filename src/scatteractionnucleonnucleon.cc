@@ -17,7 +17,7 @@
 #include "include/parametrizations.h"
 #include "include/pow.h"
 
-namespace Smash {
+namespace smash {
 
 double ScatterActionNucleonNucleon::elastic_parametrization() {
   const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
@@ -301,4 +301,4 @@ void ScatterActionNucleonNucleon::sample_angles(
   log.debug("p_a: ", *p_a, "\np_b: ", *p_b);
 }
 
-}  // namespace Smash
+}  // namespace smash

@@ -13,7 +13,7 @@
 
 #include "include/numerics.h"
 
-namespace Smash {
+namespace smash {
 
 std::string QuantumNumbers::report_deviations(const QuantumNumbers& rhs) const {
   if (rhs == *this) {
@@ -67,4 +67,4 @@ std::string QuantumNumbers::report_deviations(const QuantumNumbers& rhs) const {
   return error_msg.str();
 }
 
-}  // namespace Smash
+}  // namespace smash

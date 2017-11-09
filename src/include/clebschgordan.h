@@ -12,7 +12,7 @@
 
 #include "particletype.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * Calculate Clebsch-Gordan coefficient
@@ -122,6 +122,6 @@ class I_tot_range {
   }
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_CLEBSCHGORDAN_H_

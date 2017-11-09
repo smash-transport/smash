@@ -12,7 +12,7 @@
 #include "../include/energymomentumtensor.h"
 #include "../include/fourvector.h"
 
-using namespace Smash;
+using namespace smash;
 
 TEST(assign) {
   EnergyMomentumTensor Tmn;
@@ -58,7 +58,7 @@ TEST(arithmetic) {
 }
 
 TEST(indices) {
-  using se = Smash::EnergyMomentumTensor;
+  using se = smash::EnergyMomentumTensor;
   COMPARE(se::tmn_index(0, 0), 0);
   COMPARE(se::tmn_index(0, 1), 1);
   COMPARE(se::tmn_index(0, 2), 2);
@@ -77,22 +77,22 @@ TEST(indices) {
 }
 
 TEST_CATCH(invalid_index1, std::invalid_argument) {
-  using se = Smash::EnergyMomentumTensor;
+  using se = smash::EnergyMomentumTensor;
   se::tmn_index(4, 0);
 }
 
 TEST_CATCH(invalid_index2, std::invalid_argument) {
-  using se = Smash::EnergyMomentumTensor;
+  using se = smash::EnergyMomentumTensor;
   se::tmn_index(0, 4);
 }
 
 TEST_CATCH(invalid_index3, std::invalid_argument) {
-  using se = Smash::EnergyMomentumTensor;
+  using se = smash::EnergyMomentumTensor;
   se::tmn_index(-1, -1);
 }
 
 TEST(add_particle) {
-  using se = Smash::EnergyMomentumTensor;
+  using se = smash::EnergyMomentumTensor;
   EnergyMomentumTensor T;
   const FourVector p = FourVector(1.0, 0.1, 0.2, 0.3);
   T.add_particle(p);

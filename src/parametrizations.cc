@@ -28,7 +28,7 @@
 // That is: GeV for energies and momenta, fm for distances and time, and mb for
 // cross sections.
 
-namespace Smash {
+namespace smash {
 
 /** total hadronic cross sections at high energies parametrized in the 2016 PDG
  *  book(http://pdg.lbl.gov/2016/reviews/rpp2016-rev-cross-section-plots.pdf) */
@@ -521,11 +521,11 @@ double kminusp_kbar0n(double mandelstam_s) {
  */
 
 double kminusp_piminussigmaplus(double sqrts) {
-  return 0.0788265 / Smash::square(sqrts - 1.38841);
+  return 0.0788265 / smash::square(sqrts - 1.38841);
 }
 
 double kminusp_piplussigmaminus(double sqrts) {
-  return 0.0196741 / Smash::square(sqrts - 1.42318);
+  return 0.0196741 / smash::square(sqrts - 1.42318);
 }
 
 double kminusp_pi0sigma0(double sqrts) {
@@ -621,4 +621,4 @@ double sigmaplussigmaminus_xi0n(double sqrts_sqrts0) {
   return sigmaplussigmaminus_ximinusp(sqrts_sqrts0);
 }
 
-}  // namespace Smash
+}  // namespace smash

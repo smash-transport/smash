@@ -15,7 +15,7 @@
 #include "../include/logging.h"
 #include "../include/thermalizationaction.h"
 
-using namespace Smash;
+using namespace smash;
 
 TEST(init) { set_default_loglevel(einhard::INFO); }
 
@@ -42,7 +42,7 @@ static BoxModus create_box_for_tests() {
   conf["Modi"]["Box"]["Init_Multiplicities"]["311"] = N;
   conf["Modi"]["Box"]["Length"] = L;
   conf["Modi"]["Box"]["Temperature"] = T_init;
-  const ExperimentParameters par = Smash::Test::default_parameters();
+  const ExperimentParameters par = smash::Test::default_parameters();
   return BoxModus(conf["Modi"], par);
 }
 
@@ -53,7 +53,7 @@ TEST(rest_frame_transformation) {
   //  4. Check Tmu0 = (e+p)umu unu - p gmunu
   //  5. Check that EoS is satisfied
   Particles P;
-  const ExperimentParameters par = Smash::Test::default_parameters();
+  const ExperimentParameters par = smash::Test::default_parameters();
   BoxModus b = create_box_for_tests();
   b.initial_conditions(&P, par);
 
@@ -91,7 +91,7 @@ TEST(rest_frame_transformation) {
 TEST(thermalization_action) {
   Particles P;
   BoxModus b = create_box_for_tests();
-  const ExperimentParameters par = Smash::Test::default_parameters();
+  const ExperimentParameters par = smash::Test::default_parameters();
   b.initial_conditions(&P, par);
 
   Configuration th_conf = Test::configuration();

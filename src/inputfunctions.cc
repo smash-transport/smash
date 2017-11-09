@@ -15,7 +15,7 @@
 #include "include/logging.h"
 #include "include/stringfunctions.h"
 
-namespace Smash {
+namespace smash {
 
 std::vector<Line> line_parser(const std::string &input) {
   const auto &log = logger<LogArea::InputParser>();
@@ -44,4 +44,4 @@ std::vector<Line> line_parser(const std::string &input) {
   return lines;
 }
 
-}  // namespace Smash
+}  // namespace smash

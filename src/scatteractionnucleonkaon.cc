@@ -14,7 +14,7 @@
 #include "include/parametrizations.h"
 #include "include/pdgcode_constants.h"
 
-namespace Smash {
+namespace smash {
 
 double ScatterActionNucleonKaon::elastic_parametrization() {
   const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
@@ -465,4 +465,4 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_cross_sections() {
   return process_list;
 }
 
-}  // namespace Smash
+}  // namespace smash

@@ -16,7 +16,7 @@
 #include "macros.h"
 #include "pdgcode.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup data
@@ -587,6 +587,6 @@ inline ParticleTypePtr ParticleType::get_antiparticle() const {
   return &find(pdgcode_.get_antiparticle());
 }
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_PARTICLETYPE_H_

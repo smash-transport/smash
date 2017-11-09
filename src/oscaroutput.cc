@@ -20,7 +20,7 @@
 #include "include/forwarddeclarations.h"
 #include "include/particles.h"
 
-namespace Smash {
+namespace smash {
 
 template <OscarOutputFormat Format, int Contents>
 OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
@@ -506,4 +506,4 @@ std::unique_ptr<OutputInterface> create_oscar_output(
   throw std::invalid_argument("Create_oscar_output got unknown content.");
 }
 
-}  // namespace Smash
+}  // namespace smash

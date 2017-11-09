@@ -11,7 +11,7 @@
 
 #include "../include/decayactiondilepton.h"
 
-using namespace Smash;
+using namespace smash;
 
 TEST(init_particle_types) {
   // enable debugging output

@@ -18,7 +18,7 @@
 #include "include/config.h"
 #include "include/particles.h"
 
-namespace Smash {
+namespace smash {
 
 BinaryOutputCollisions::BinaryOutputCollisions(const bf::path &path,
                                                std::string name,
@@ -152,4 +152,4 @@ void BinaryOutputBase::write_particledata(const ParticleData &p) {
   }
 }
 
-}  // namespace Smash
+}  // namespace smash

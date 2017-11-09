@@ -15,7 +15,7 @@
 #include "pdgcode.h"
 #include "processbranch.h"
 
-namespace Smash {
+namespace smash {
 
 /* A structure to hold information about the history of the particle,
  * e.g. the last interaction etc. */
@@ -321,6 +321,6 @@ inline PrintParticleListDetailed detailed(const ParticleList &list) {
 std::ostream &operator<<(std::ostream &out,
                          const PrintParticleListDetailed &particle_list);
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_PARTICLEDATA_H_

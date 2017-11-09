@@ -11,7 +11,7 @@
 
 #include "../include/fourvector.h"
 
-using namespace Smash;
+using namespace smash;
 
 FourVector A(0.12, 0.06, 0.003, -0.15), B(0.06, 0.03, 0.0015, -0.075);
 FourVector A2(0.12, 0.06, 0.003, -0.15), B2(0.06, 0.03, 0.0015, -0.075);

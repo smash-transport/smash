@@ -13,7 +13,7 @@
 #include "action.h"
 #include "grandcan_thermalizer.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup action
@@ -38,6 +38,6 @@ class ThermalizationAction : public Action {
   }
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_THERMALIZATIONACTION_H_

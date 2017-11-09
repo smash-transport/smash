@@ -21,7 +21,7 @@
 #include "include/processbranch.h"
 #include "include/quantumnumbers.h"
 
-namespace Smash {
+namespace smash {
 
 Action::Action(const ParticleList &in_part, double time)
     : incoming_particles_(in_part),
@@ -206,4 +206,4 @@ std::ostream &operator<<(std::ostream &out, const ActionList &actions) {
   return out << '}';
 }
 
-}  // namespace Smash
+}  // namespace smash

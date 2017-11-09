@@ -11,7 +11,7 @@
 
 #include "../include/distributions.h"
 
-using namespace Smash;
+using namespace smash;
 
 static double test_breit_wigner(const double srts, const double m,
                                 const double w) {

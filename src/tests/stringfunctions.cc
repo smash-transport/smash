@@ -2,7 +2,7 @@
 
 #include "../include/stringfunctions.h"
 
-using namespace Smash::utf8;
+using namespace smash::utf8;
 
 TEST(sequence_length) {
   COMPARE(sequence_length("xπ"), 1);

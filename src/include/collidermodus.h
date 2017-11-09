@@ -19,7 +19,7 @@
 #include "nucleus.h"
 #include "pdgcode.h"
 
-namespace Smash {
+namespace smash {
 
 struct ExperimentParameters;
 
@@ -182,6 +182,6 @@ class ColliderModus : public ModusDefault {
   friend std::ostream &operator<<(std::ostream &, const ColliderModus &);
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_COLLIDERMODUS_H_

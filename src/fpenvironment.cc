@@ -17,7 +17,7 @@
 
 #include "include/logging.h"
 
-namespace Smash {
+namespace smash {
 
 #if !defined _GNU_SOURCE && defined __SSE__
 bool enable_float_traps(int femask) {
@@ -141,4 +141,4 @@ void setup_default_float_traps() {
 #endif
 }
 
-}  // namespace Smash
+}  // namespace smash

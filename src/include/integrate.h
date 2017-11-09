@@ -27,7 +27,7 @@
 #include "fpenvironment.h"
 #include "random.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * A deleter type for std::unique_ptr to be used with
@@ -486,6 +486,6 @@ class Integrator2dCuhre {
   double prob_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_INTEGRATE_H_

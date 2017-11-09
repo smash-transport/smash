@@ -13,7 +13,7 @@
 
 #include "constants.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * Return velocity in the center of velocities frame of two particles given
@@ -203,6 +203,6 @@ inline double s_from_plab(double plab, double m_P, double m_T) {
   return m_P * m_P + m_T * m_T + 2 * m_T * std::sqrt(m_P * m_P + plab * plab);
 }
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_KINEMATICS_H_

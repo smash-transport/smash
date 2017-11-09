@@ -32,7 +32,7 @@
 #include "include/scatteractionphoton.h"
 #include "include/stringfunctions.h"
 
-namespace Smash {
+namespace smash {
 /*!\Userguide
 * \page input_collision_term_ Collision_Term
 * \key Elastic_Cross_Section (double, optional, default = -1.0 [mb]) \n
@@ -429,4 +429,4 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
   }
 }
 
-}  // namespace Smash
+}  // namespace smash

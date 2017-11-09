@@ -15,7 +15,7 @@
 
 #include "constants.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup data
@@ -284,6 +284,6 @@ void inline ThreeVector::rotate_z_axis_to(ThreeVector &r) {
   rotate_around_z(r.get_phi());
 }
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_THREEVECTOR_H_

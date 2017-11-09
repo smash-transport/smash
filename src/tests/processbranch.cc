@@ -12,7 +12,7 @@
 #include "../include/particledata.h"
 #include "../include/processbranch.h"
 
-using namespace Smash;
+using namespace smash;
 
 TEST(init_particle_types) {
   ParticleType::create_type_list(

@@ -12,7 +12,7 @@
 #include "../include/constants.h"
 #include "../include/kinematics.h"
 
-using namespace Smash;
+using namespace smash;
 
 TEST(center_of_velocity_v) {
   const double s = 2.9 * 2.9;

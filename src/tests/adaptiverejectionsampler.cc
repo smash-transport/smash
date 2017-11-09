@@ -16,7 +16,7 @@
 #include "../include/adaptiverejectionsampler.h"
 #include "../include/distributions.h"
 
-using namespace Smash;
+using namespace smash;
 
 TEST(woods_saxon_distribution_adaptive_rejection_sampling) {
   double radius = 6.4;

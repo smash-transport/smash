@@ -18,7 +18,7 @@
 #include "random.h"
 #include "threevector.h"
 
-namespace Smash {
+namespace smash {
 
 /** Angles provides a common interface for generating directions: i.e.,
  * two angles that should be interpreted as azimuthal and polar angles.
@@ -265,6 +265,6 @@ ThreeVector inline Angles::threevec() const {
 
 double inline Angles::theta() const { return std::acos(costheta_); }
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_ANGLES_H_

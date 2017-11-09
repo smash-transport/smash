@@ -29,12 +29,12 @@
 #include "forwarddeclarations.h"
 #include "macros.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * This macro is used to define functions that are in the C library and in the
  * std namespace. If a call to such a function without explicit namespace
- * qualification is made it will then call the function from the Smash
+ * qualification is made it will then call the function from the smash
  * namespace. Since the functions here are marked as deprecated they issue a
  * warning if some code tries to use a C library function call.
  *
@@ -313,6 +313,6 @@ SMASH_DEPRECATE_NONSTD(wprintf)
 SMASH_DEPRECATE_NONSTD(wscanf)
 #undef SMASH_DEPRECATE_NONSTD
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_DEPRECATE_C_FUNCTIONS_H_

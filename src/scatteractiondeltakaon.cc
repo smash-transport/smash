@@ -13,7 +13,7 @@
 #include "include/parametrizations.h"
 #include "include/pdgcode_constants.h"
 
-namespace Smash {
+namespace smash {
 
 void ScatterActionDeltaKaon::format_debug_output(std::ostream& out) const {
   out << "Delta-Kaon  ";
@@ -167,4 +167,4 @@ CollisionBranchList ScatterActionDeltaKaon::two_to_two_cross_sections() {
   return process_list;
 }
 
-}  // namespace Smash
+}  // namespace smash

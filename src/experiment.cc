@@ -39,8 +39,8 @@ namespace std {
  * time > 3h => hours
  *
  * \note This operator has to be in the \c std namespace for argument dependent
- * lookup to find it. If it were in the Smash namespace then the code would not
- * compile since none of its arguments is a type from the Smash namespace.
+ * lookup to find it. If it were in the smash namespace then the code would not
+ * compile since none of its arguments is a type from the smash namespace.
  */
 template <typename T, typename Ratio>
 static ostream &operator<<(ostream &out,
@@ -60,7 +60,7 @@ static ostream &operator<<(ostream &out,
 }
 }  // namespace std
 
-namespace Smash {
+namespace smash {
 
 /* ExperimentBase carries everything that is needed for the evolution */
 ExperimentPtr ExperimentBase::create(Configuration config,
@@ -1353,4 +1353,4 @@ void Experiment<Modus>::run() {
   }
 }
 
-}  // namespace Smash
+}  // namespace smash

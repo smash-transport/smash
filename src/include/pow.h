@@ -11,7 +11,7 @@
 #ifndef SRC_INCLUDE_POW_H_
 #define SRC_INCLUDE_POW_H_
 
-namespace Smash {
+namespace smash {
 
 /// Calculate integer powers using squaring.
 template <class T>
@@ -28,6 +28,6 @@ inline constexpr T square(const T base) {
   return pow_int(base, 2);
 }
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_POW_H_

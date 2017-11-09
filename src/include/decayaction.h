@@ -14,7 +14,7 @@
 
 #include "action.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup action
@@ -94,6 +94,6 @@ class DecayAction : public Action {
   virtual void one_to_three();
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_DECAYACTION_H_

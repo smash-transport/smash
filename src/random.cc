@@ -10,6 +10,6 @@
 #include "include/random.h"
 #include <random>
 
-namespace Smash {
+namespace smash {
 /*thread_local (see #3075)*/ Random::Engine Random::engine;
-}  // namespace Smash
+}  // namespace smash

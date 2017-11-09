@@ -19,7 +19,7 @@
 #include "lattice.h"
 #include "macros.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup output
@@ -155,6 +155,6 @@ class OutputInterface {
   const bool is_photon_output_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_OUTPUTINTERFACE_H_

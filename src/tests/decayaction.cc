@@ -17,7 +17,7 @@
 #include "../include/decayaction.h"
 #include "../include/decaymodes.h"
 
-using namespace Smash;
+using namespace smash;
 
 TEST(init_particle_types) {
   ParticleType::create_type_list(

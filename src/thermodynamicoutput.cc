@@ -24,7 +24,7 @@
 #include "include/particles.h"
 #include "include/vtkoutput.h"
 
-namespace Smash {
+namespace smash {
 
 /*!\Userguide
  * \page ascii_thermodynamic_output_ ASCII thermodynamic output
@@ -158,4 +158,4 @@ void ThermodynamicOutput::density_along_line(
   a_file.close();
 }
 
-}  // namespace Smash
+}  // namespace smash

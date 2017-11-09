@@ -18,7 +18,7 @@
 #include "include/forwarddeclarations.h"
 #include "include/particles.h"
 
-namespace Smash {
+namespace smash {
 
 BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
                                              std::string name,
@@ -146,4 +146,4 @@ void BinaryOutputParticles::at_intermediate_time(const Particles &particles,
   }
 }
 
-}  // namespace Smash
+}  // namespace smash

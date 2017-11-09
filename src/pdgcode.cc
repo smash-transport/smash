@@ -9,7 +9,7 @@
 
 #include "include/pdgcode.h"
 
-namespace Smash {
+namespace smash {
 
 std::istream& operator>>(std::istream& is, PdgCode& code) {
   std::string codestring("");
@@ -71,4 +71,4 @@ std::ostream& operator<<(std::ostream& s, const PdgCode& code) {
   return s << code.string();
 }
 
-}  // namespace Smash
+}  // namespace smash

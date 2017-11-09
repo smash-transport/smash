@@ -15,7 +15,7 @@
 #include "nucleus.h"
 #include "threevector.h"
 
-namespace Smash {
+namespace smash {
 
 /** DeformedNucleus: Child of nucleus for deformed nuclei.
  *
@@ -110,6 +110,6 @@ class DeformedNucleus : public Nucleus {
   Angles nuclear_orientation_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_DEFORMEDNUCLEUS_H_

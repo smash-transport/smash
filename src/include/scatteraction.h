@@ -18,7 +18,7 @@
 #include "kinematics.h"
 #include "processstring.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * Calculate the detailed balance factor R such that
@@ -356,6 +356,6 @@ class ScatterAction : public Action {
   StringProcess* string_process_ = nullptr;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_SCATTERACTION_H_

@@ -19,7 +19,7 @@
 #include "processbranch.h"
 #include "random.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup action
@@ -313,6 +313,6 @@ inline std::ostream &operator<<(std::ostream &out, const ActionPtr &action) {
  */
 std::ostream &operator<<(std::ostream &out, const ActionList &actions);
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_ACTION_H_
