@@ -85,6 +85,9 @@ class PhotonCrossSection<ComputationMethod::Lookup> {
 
   static std::unique_ptr<TabulationND<2>> tab_test_static_;
 
+  constexpr static double s0_diff = 0.1, s1_diff = 2.0, t0_diff = -5.0, t1_diff = -0.01, ds_diff = 0.01, dt_diff = 0.01;
+  constexpr static double s0_tot = 0.1, s1_tot = 1.0, ds_tot = 0.01;
+
  public:
   double xs_pi_pi_rho0(const double s);
   double xs_pi_pi0_rho(const double s);
