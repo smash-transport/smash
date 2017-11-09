@@ -8,10 +8,15 @@
  */
 
 #include <cmath>
+#include <memory>
+
+#include <iostream>
 #include "kinematics.h"
 #include "particletype.h"
 #include "pdgcode.h"
 #include "tabulationnd.h"
+#include "cxx14compat.h"
+#include "logging.h"
 
 // calculation method for the cross sections
 enum class ComputationMethod { Analytic, Lookup, Parametrized };
@@ -78,6 +83,8 @@ class PhotonCrossSection<ComputationMethod::Lookup> {
   static TabulationND<2> tab_pi0_rho_pi_diff_;
   static TabulationND<2> tab_pi_rho0_pi_diff_;
 
+  static std::unique_ptr<TabulationND<2>> tab_test_static_;
+
  public:
   double xs_pi_pi_rho0(const double s);
   double xs_pi_pi0_rho(const double s);
@@ -92,6 +99,8 @@ class PhotonCrossSection<ComputationMethod::Lookup> {
   double xs_diff_pi_rho0_pi(const double s, const double t);
   double xs_diff_pi_rho_pi0(const double s, const double t);
   double xs_diff_pi0_rho_pi(const double s, const double t);
+
+  double xs_diff_test_static(const double s, const double t);
 };
 
 template <>

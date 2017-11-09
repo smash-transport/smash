@@ -311,10 +311,9 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
 
   reac = photon_reaction_type(Action::incoming_particles());
 
-  PhotonCrossSection<ComputationMethod::Analytic> xs_object;
+  PhotonCrossSection<ComputationMethod::Lookup> xs_object;
 
-  auto hadron_out = outgoing_hadron(incoming_particles_);
-  double xsection = 0.0;
+  double tst = xs_object.xs_diff_test_static(1.0, 2.0);
 
   auto hadron_out = outgoing_hadron(incoming_particles_);
   double xsection = 0.0;
