@@ -5249,45 +5249,98 @@ double PhotonCrossSection<ComputationMethod::Lookup>::xs_pi_rho_pi0(
 // definition of differential xs-getters
 double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi_pi_rho0(
     const double s, const double t) {
-  return tab_pi_pi_rho0_diff_.get_linear(s, t);
+  
+        if (tab_pi_pi_rho0_diff_ == nullptr)
+        {
+            const auto &log = logger<LogArea::Experiment>();
+            log.info() << "init table\n";
+            tab_pi_pi_rho0_diff_ = make_unique<TabulationND<2>>(
+                s0_diff, s1_diff, t0_diff, t1_diff, ds_diff, dt_diff,
+                PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi_rho0);
+            )
+        }
+
+  return tab_pi_pi_rho0_diff_ _> get_linear(s, t);
 }
 
 double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi_pi0_rho(
     const double s, const double t) {
-  return tab_pi_pi0_rho_diff_.get_linear(s, t);
+ 
+        if (tab_pi_pi0_rho_diff_ == nullptr)
+        {
+            const auto &log = logger<LogArea::Experiment>();
+            log.info() << "init table\n";
+            tab_pi_pi0_rho_diff_ = make_unique<TabulationND<2>>(
+                s0_diff, s1_diff, t0_diff, t1_diff, ds_diff, dt_diff,
+                PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi0_rho);
+            )
+        }
+
+  return tab_pi_pi0_rho_diff_ _> get_linear(s, t);
 }
 
 double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi0_rho0_pi0(
     const double s, const double t) {
-  return tab_pi0_rho0_pi0_diff_.get_linear(s, t);
+  
+        if (tab_pi0_rho0_pi0_diff_ == nullptr)
+        {
+            const auto &log = logger<LogArea::Experiment>();
+            log.info() << "init table\n";
+            tab_pi0_rho0_pi0_diff_ = make_unique<TabulationND<2>>(
+                s0_diff, s1_diff, t0_diff, t1_diff, ds_diff, dt_diff,
+                PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi0_rho0_pi0);
+            )
+        }
+
+  return tab_pi0_rho0_pi0_diff_ _> get_linear(s, t);
 }
 
 double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi_rho_pi0(
     const double s, const double t) {
-  return tab_pi_rho_pi0_diff_.get_linear(s, t);
+  
+        if (tab_pi_rho_pi0_diff_ == nullptr)
+        {
+            const auto &log = logger<LogArea::Experiment>();
+            log.info() << "init table\n";
+            tab_pi_rho_pi0_diff_ = make_unique<TabulationND<2>>(
+                s0_diff, s1_diff, t0_diff, t1_diff, ds_diff, dt_diff,
+                PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho_pi0);
+            )
+        }
+
+  return tab_pi_rho_pi0_diff_ _> get_linear(s, t);
 }
 
 double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi0_rho_pi(
     const double s, const double t) {
-  return tab_pi0_rho_pi_diff_.get_linear(s, t);
+  
+        if (tab_pi0_rho_pi_diff_ == nullptr)
+        {
+            const auto &log = logger<LogArea::Experiment>();
+            log.info() << "init table\n";
+            tab_pi0_rho_pi_diff_ = make_unique<TabulationND<2>>(
+                s0_diff, s1_diff, t0_diff, t1_diff, ds_diff, dt_diff,
+                PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho0_pi);
+            )
+        }
+
+  return tab_pi0_rho_pi_diff_ _> get_linear(s, t);
 }
 
 double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi_rho0_pi(
     const double s, const double t) {
-  return tab_pi_rho0_pi_diff_.get_linear(s, t);
-}
 
-double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_test_static(
-    const double s, const double t) {
-  if (tab_test_static_ == nullptr) {
-      const auto &log = logger<LogArea::Experiment>();
-      log.info() << "Initializing test π⁰ photon table\n";
-    tab_test_static_ = make_unique<TabulationND<2>>(
-        1., 2., -0.1, -0.001, 0.1, 0.1,
-        PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho0_pi);
-  }
+        if (tab_pi_rho0_pi_diff_ == nullptr)
+        {
+            const auto &log = logger<LogArea::Experiment>();
+            log.info() << "init table\n";
+            tab_pi_rho0_pi_diff_ = make_unique<TabulationND<2>>(
+                s0_diff, s1_diff, t0_diff, t1_diff, ds_diff, dt_diff,
+                PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho0_pi);
+            )
+        }
 
-  return tab_test_static_ -> get_linear(s, t);
+  return tab_pi_rho0_pi_diff_ _> get_linear(s, t);
 }
 
 // definition of static lookup tables. fine-tuning for parameters needed.

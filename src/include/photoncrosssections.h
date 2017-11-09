@@ -69,19 +69,19 @@ class PhotonCrossSection<ComputationMethod::Analytic> {
 template <>
 class PhotonCrossSection<ComputationMethod::Lookup> {
  private:
-  static TabulationND<1> tab_pi_pi_rho0_;
-  static TabulationND<1> tab_pi_pi0_rho_;
-  static TabulationND<1> tab_pi0_rho0_pi0_;
-  static TabulationND<1> tab_pi_rho0_pi_;
-  static TabulationND<1> tab_pi_rho_pi0_;
-  static TabulationND<1> tab_pi0_rho_pi_;
+  static std::unique_ptr<TabulationND<1>> tab_pi_pi_rho0_;
+  static std::unique_ptr<TabulationND<1>> tab_pi_pi0_rho_;
+  static std::unique_ptr<TabulationND<1>> tab_pi0_rho0_pi0_;
+  static std::unique_ptr<TabulationND<1>> tab_pi_rho0_pi_;
+  static std::unique_ptr<TabulationND<1>> tab_pi_rho_pi0_;
+  static std::unique_ptr<TabulationND<1>> tab_pi0_rho_pi_;
 
-  static TabulationND<2> tab_pi0_rho0_pi0_diff_;
-  static TabulationND<2> tab_pi_pi_rho0_diff_;
-  static TabulationND<2> tab_pi_pi0_rho_diff_;
-  static TabulationND<2> tab_pi_rho_pi0_diff_;
-  static TabulationND<2> tab_pi0_rho_pi_diff_;
-  static TabulationND<2> tab_pi_rho0_pi_diff_;
+  static std::unique_ptr<TabulationND<2>> tab_pi0_rho0_pi0_diff_;
+  static std::unique_ptr<TabulationND<2>> tab_pi_pi_rho0_diff_;
+  static std::unique_ptr<TabulationND<2>> tab_pi_pi0_rho_diff_;
+  static std::unique_ptr<TabulationND<2>> tab_pi_rho_pi0_diff_;
+  static std::unique_ptr<TabulationND<2>> tab_pi0_rho_pi_diff_;
+  static std::unique_ptr<TabulationND<2>> tab_pi_rho0_pi_diff_;
 
   static std::unique_ptr<TabulationND<2>> tab_test_static_;
 
