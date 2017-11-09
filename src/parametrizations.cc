@@ -530,12 +530,12 @@ double kminusp_piplussigmaminus(double sqrts) {
 
 double kminusp_pi0sigma0(double sqrts) {
   // Fit to Landolt-Börnstein instead of UrQMD values
-  return 0.0403364 / Smash::square(sqrts - 1.39830305);
+  return 0.0403364 / smash::square(sqrts - 1.39830305);
 }
 
 double kminusp_pi0lambda(double sqrts) {
   // Fit to Landolt-Börnstein instead of UrQMD values
-  return 0.05932562 / Smash::square(sqrts - 1.38786692);
+  return 0.05932562 / smash::square(sqrts - 1.38786692);
 }
 
 // The other channels follow from the paramatriziation with the same strange

@@ -14,7 +14,7 @@
 #include "include/processstring.h"
 #include "include/random.h"
 
-namespace Smash {
+namespace smash {
 
 StringProcess::StringProcess()
     : pmin_gluon_lightcone_(0.001),
@@ -727,4 +727,4 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
   return number_of_fragments;
 }
 
-}  // namespace Smash
+}  // namespace smash

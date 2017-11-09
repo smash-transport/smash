@@ -16,7 +16,7 @@
 
 #include "particledata.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \brief String excitation processes used in SMASH
@@ -310,6 +310,6 @@ class StringProcess {
                       ThreeVector &evecLong);
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_STRINGPROCESS_H_
