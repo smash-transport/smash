@@ -11,7 +11,6 @@
 #include <array>
 #include <sstream>
 #include <cassert>
-#include <iostream>
 
 #include "constants.h"
 

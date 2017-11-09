@@ -305,12 +305,16 @@ ScatterActionPhoton::ReactionType ScatterActionPhoton::photon_reaction_type(
 */
 
 CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
+  
   CollisionBranchList process_list;
   static ParticleTypePtr photon_particle = &ParticleType::find(pdg::photon);
 
   reac = photon_reaction_type(Action::incoming_particles());
 
   PhotonCrossSection<ComputationMethod::Analytic> xs_object;
+
+  auto hadron_out = outgoing_hadron(incoming_particles_);
+  double xsection = 0.0;
 
   auto hadron_out = outgoing_hadron(incoming_particles_);
   double xsection = 0.0;
