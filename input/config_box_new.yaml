@@ -1,17 +1,17 @@
 Logging:
   default: INFO
-  Legacy: ALL
-  Main: ALL
+  #  Legacy: ALL
+  #Main: ALL
   Experiment: ALL
-  Box: ALL
-  Collider: ALL
-  Sphere: ALL
-  ParticleType: ALL
-  Action: ALL
-  FindScatter: ALL
-  DecayModes: ALL
+  #Box: ALL
+  #Collider: ALL
+  #Sphere: ALL
+  #ParticleType: ALL
+  #Action: ALL
+  #FindScatter: ALL
+  #DecayModes: ALL
   #ScatterAction: ALL
-  Pythia: ALL
+  #Pythia: ALL
 
 General:
     # Modus decision

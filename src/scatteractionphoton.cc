@@ -305,179 +305,67 @@ ScatterActionPhoton::ReactionType ScatterActionPhoton::photon_reaction_type(
 */
 
 CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
-  
   CollisionBranchList process_list;
-  static ParticleTypePtr photon_particle = &ParticleType::find(pdg::photon);
-
+  PhotonCrossSection<ComputationMethod::Lookup> xs_object;
+  
   reac = photon_reaction_type(Action::incoming_particles());
 
-  PhotonCrossSection<ComputationMethod::Lookup> xs_object;
-
-  double tst = xs_object.xs_diff_test_static(1.0, 2.0);
-
   auto hadron_out = outgoing_hadron(incoming_particles_);
-  double xsection = 0.0;
+  static ParticleTypePtr photon_particle = &ParticleType::find(pdg::photon);
+  
+
 
   ParticleData part_a = incoming_particles_[0];
   ParticleData part_b = incoming_particles_[1];
-
-  // needed?
-  /*
-  const double m_rho = rho0_particle->mass();
-  const double m_pi = pi0_particle->mass();
-*/
-
-  /* we should not get here if reaction is no photon reaction.
-  bool pion_found = true;
-
-  if (!part_a.type().pdgcode().is_pion()) {
-    if (part_b.type().pdgcode().is_pion()) {
-      part_a = incoming_particles_[1];
-      part_b = incoming_particles_[0];
-    } else {
-      pion_found = false;
-    }
-  }
-*/
-
-  // do a check according to incoming_particles_ and calculate the
-  // cross sections (xsection) for all possible reactions
-
   const double &m1 = part_a.effective_mass();
   const double &m2 = part_b.effective_mass();
-  // fixme: make const
-  double m3 = hadron_out->mass();
+  const double &m3 = hadron_out->mass();
 
   const double s = mandelstam_s();
-  double sqrts = sqrt_s();
-
-  auto mandelstam_t = get_t_range(sqrts, m1, m2, m3, 0.0);
-  // fixme: make const
-  double t1 = mandelstam_t[1];
-  double t2 = mandelstam_t[0];
+  const double sqrts = sqrt_s();
 
   ParticleTypePtr photon_out = photon_particle;
-
-  /* should not be necessary
-  if (sqrts <= m1 + m2) {
-    reac = ReactionType::no_reaction;
-  }
-  */
-
-  // ToDo: in future give reaction type to xs_object
+  double xsection = 0.0;
   switch (reac) {
     case ReactionType::pi_p_pi_m_rho_z:
-      // there are three possible reaction channels
-      // the first possible reaction (produces rho0)
-
-      // this check *should* not be necessary
-      if (sqrts > m3) {
         xsection = xs_object.xs_pi_pi_rho0(s);
         process_list.push_back(make_unique<CollisionBranch>(
             *hadron_out, *photon_out, xsection, ProcessType::TwoToTwo));
-      }
-
-      // should never get here, right?
-
-      // the second possible reaction (produces photon)
-      // -> only necessary in case of a stable rho meson
-      hadron_out = photon_particle;
-      m3 = 0.0;
-
-      mandelstam_t = get_t_range(sqrts, m1, m2, m3, 0.0);
-      t1 = mandelstam_t[1];
-      t2 = mandelstam_t[0];
-
-      // replace by really small constant
-      xsection = 0.0000000000001 * to_mb;
-      process_list.push_back(make_unique<CollisionBranch>(
-          *hadron_out, *photon_out, xsection, ProcessType::TwoToTwo));
-
       break;
 
     case ReactionType::pi_z_pi_m_rho_m:
     case ReactionType::pi_z_pi_p_rho_p:
-      // this check should be unecessary
-      if (sqrts > m3) {
         xsection = xs_object.xs_pi_pi0_rho(s);
-
         process_list.push_back(make_unique<CollisionBranch>(
             *hadron_out, *photon_out, xsection, ProcessType::TwoToTwo));
         break;
-      }
-
-      // should never get here, also pay attention that t1, t2 get overridden
-      // here.
-      // dummy: necessary in case of a stable rho meson
-
-      m3 = 0.0;
-
-      mandelstam_t = get_t_range(sqrts, m1, m2, m3, 0.0);
-      t1 = mandelstam_t[1];
-      t2 = mandelstam_t[0];
-
-      xsection = 0.0000000000000001;
-      process_list.push_back(make_unique<CollisionBranch>(
-          *hadron_out, *photon_out, xsection, ProcessType::TwoToTwo));
-      break;
 
     case ReactionType::pi_m_rho_z_pi_m:
     case ReactionType::pi_p_rho_z_pi_p:
-      if (sqrts > m3) {
         xsection = xs_object.xs_pi_rho0_pi(s);
-
         process_list.push_back(make_unique<CollisionBranch>(
             *hadron_out, *photon_out, xsection, ProcessType::TwoToTwo));
-      } else {
-        xsection = 0.0000000000001 * to_mb;
-        process_list.push_back(make_unique<CollisionBranch>(
-            *hadron_out, *photon_out, xsection, ProcessType::TwoToTwo));
-      }
       break;
 
     case ReactionType::pi_m_rho_p_pi_z:
     case ReactionType::pi_p_rho_m_pi_z:
 
-      if (sqrts > m3) {
-        // omega:
         xsection = xs_object.xs_pi_rho_pi0(s);
         process_list.push_back(make_unique<CollisionBranch>(
             *hadron_out, *photon_out, xsection, ProcessType::TwoToTwo));
-
-      } else {
-        xsection = 0.0000000000001 * to_mb;
-        process_list.push_back(make_unique<CollisionBranch>(
-            *hadron_out, *photon_out, xsection, ProcessType::TwoToTwo));
-      }
       break;
 
     case ReactionType::pi_z_rho_m_pi_m:
     case ReactionType::pi_z_rho_p_pi_p:
-      if (sqrts > m3) {
-        // omega:
         xsection = xs_object.xs_pi0_rho_pi(s);
         process_list.push_back(make_unique<CollisionBranch>(
             *hadron_out, *photon_out, xsection, ProcessType::TwoToTwo));
-      } else {
-        xsection = 0.0000000000001 * to_mb;
-        process_list.push_back(make_unique<CollisionBranch>(
-            *hadron_out, *photon_out, xsection, ProcessType::TwoToTwo));
-      }
       break;
 
     case ReactionType::pi_z_rho_z_pi_z:
-
-      if (sqrts > m3) {
         xsection = xs_object.xs_pi0_rho0_pi0(s);
-
         process_list.push_back(make_unique<CollisionBranch>(
             *hadron_out, *photon_out, xsection, ProcessType::TwoToTwo));
-      } else {
-        xsection = 0.0000000000001 * to_mb;
-        process_list.push_back(make_unique<CollisionBranch>(
-            *hadron_out, *photon_out, xsection, ProcessType::TwoToTwo));
-      }
-
       break;
   
     case ReactionType::no_reaction:

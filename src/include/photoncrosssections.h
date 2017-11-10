@@ -83,12 +83,14 @@ class PhotonCrossSection<ComputationMethod::Lookup> {
   static std::unique_ptr<TabulationND<2>> tab_pi0_rho_pi_diff_;
   static std::unique_ptr<TabulationND<2>> tab_pi_rho0_pi_diff_;
 
-  static std::unique_ptr<TabulationND<2>> tab_test_static_;
 
-  constexpr static double s0_diff = 0.1, s1_diff = 2.0, t0_diff = -5.0, t1_diff = -0.01, ds_diff = 0.01, dt_diff = 0.01;
-  constexpr static double s0_tot = 0.1, s1_tot = 1.0, ds_tot = 0.01;
 
  public:
+
+  const double s0_diff = 0.1, s1_diff = 2.0, t0_diff = -5.0;
+  const double t1_diff = -0.01, ds_diff = 0.01, dt_diff = 0.01;
+  const double s0_tot = 0.1, s1_tot = 2.0, ds_tot = 0.01;
+
   double xs_pi_pi_rho0(const double s);
   double xs_pi_pi0_rho(const double s);
   double xs_pi0_rho0_pi0(const double s);
@@ -102,8 +104,6 @@ class PhotonCrossSection<ComputationMethod::Lookup> {
   double xs_diff_pi_rho0_pi(const double s, const double t);
   double xs_diff_pi_rho_pi0(const double s, const double t);
   double xs_diff_pi0_rho_pi(const double s, const double t);
-
-  double xs_diff_test_static(const double s, const double t);
 };
 
 template <>

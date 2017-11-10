@@ -14,6 +14,7 @@ template class TabulationND<2>;
 double TabulationND<1>::get_linear(double x) const {
     //assert(x >= x0_ && x <= x1_);
     if (x <= x0_ || x >= x1_) {
+        std::cout << "here, x = " << x << std::endl;
         return f_(x);
     }
   const double index_double = (x - x0_) * inv_dx_;
