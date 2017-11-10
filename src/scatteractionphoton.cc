@@ -140,7 +140,7 @@ ParticleTypePtr ScatterActionPhoton::outgoing_hadron(const ParticleList &in) {
 bool ScatterActionPhoton::is_kinematically_possible(const double s,
                                                     const ParticleList &in) {
   auto hadron = outgoing_hadron(in);
-  if (hadron && hadron->mass() > s) {
+  if (hadron && hadron->mass() <= s) {
     return true;
   } else {
     return false;
