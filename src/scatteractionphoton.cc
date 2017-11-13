@@ -86,8 +86,6 @@ ScatterActionPhoton::ReactionType ScatterActionPhoton::photon_reaction_type(
 }
 
 ParticleTypePtr ScatterActionPhoton::outgoing_hadron(const ParticleList &in) {
-  // ToDo: not sure how to handle the returning of pointers. i have to think
-  // about this
   const static ParticleTypePtr rho_z_particle_ptr =
       &ParticleType::find(pdg::rho_z);
   const static ParticleTypePtr rho_p_particle_ptr =
@@ -130,9 +128,8 @@ ParticleTypePtr ScatterActionPhoton::outgoing_hadron(const ParticleList &in) {
       return pi_z_particle_ptr;
       break;
     default:
-      // ToDo: Think of something better, now returns particletypeptr with
-      // ivnalid index
-      ParticleTypePtr p;
+      // default constructor constructs p with invalid index
+      ParticleTypePtr p{};
       return p;
   }
 }
@@ -140,7 +137,8 @@ ParticleTypePtr ScatterActionPhoton::outgoing_hadron(const ParticleList &in) {
 bool ScatterActionPhoton::is_kinematically_possible(const double s,
                                                     const ParticleList &in) {
   auto hadron = outgoing_hadron(in);
-  if (hadron && hadron->mass() <= s) {
+  // hadron() returns true if index is valid
+  if (hadron() && hadron->mass() < s) {
     return true;
   } else {
     return false;
