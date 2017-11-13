@@ -29,6 +29,7 @@ double TabulationND<1>::get_linear(double x) const {
   const size_t upper = std::min(lower + 1, n_ - 1);
   const double x_lower = x0_ + lower * dx_;
   const double frac = (x - x_lower) * inv_dx_;
+  x_history_.push_back(x);
   return values_[lower] * (1 - frac) + values_[upper] * frac;
 }
 
@@ -54,7 +55,7 @@ double TabulationND<2>::get_linear(const double x, const double y) const {
   // get fraction of x between x_lower, x_lower + dx etc.
   const double dx = x_idx_d - x_idx;
   const double dy = y_idx_d - y_idx;
-
+  
   const double f_xy = values_[x_idx + y_idx * nx_] * (1 - dx) * (1 - dy) +
                       values_[x_idx + 1 + y_idx * nx_] * dx * (1 - dy) +
                       values_[x_idx + (y_idx + 1) * nx_] * (1 - dx) * dy +
