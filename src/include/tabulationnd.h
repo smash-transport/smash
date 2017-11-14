@@ -30,7 +30,7 @@ class TabulationND<1> {
     values_.resize(n_);
     double x = x0;
     for (size_t i = 0; i < n_; i++) {
-      values_[i] = f(x0_ + i*dx_);
+      values_[i] = f(x0_ + i * dx_);
     }
   }
 
@@ -49,7 +49,7 @@ class TabulationND<1> {
   const double x0_, x1_, dx_, inv_dx_;
   size_t n_;
   std::vector<double> values_;
-  
+
   std::function<double(double)> f_;
 };
 
@@ -109,50 +109,70 @@ class TabulationND<2> {
 
 template <>
 class TabulationND<3> {
-public:
-  TabulationND(const double x0, const double x1, const double y0, const double y1, const double z0, const double z3,
-  const double dx, const double dy, const double dz, std::function<double(double,double,double)> f)
-  :
-  x0_(x0),
-  x1_(x1),
-  y0_(y0),
-  y1_(y1),
-  z0_(z0),
-  z1_(z1),
-  dx_(dx),
-  dy_(dy),
-  dz_(dz),
-  f_(f)
-  inv_dx_(1 / dx),
-  inv_dy_(1 / dy),
-  inv_dz_(1 / dz) {
+ public:
+  TabulationND(const double x0, const double x1, const double y0,
+               const double y1, const double z0, const double z1,
+               const double dx, const double dy, const double dz,
+               std::function<double(double, double, double)> f)
+      : x0_(x0),
+        x1_(x1),
+        y0_(y0),
+        y1_(y1),
+        z0_(z0),
+        z1_(z1),
+        dx_(dx),
+        dy_(dy),
+        dz_(dz),
+        f_(f),
+        inv_dx_(1 / dx),
+        inv_dy_(1 / dy),
+        inv_dz_(1 / dz) {
+
     nx_ = std::ceil((x1_ - x0_) * inv_dx_ + 1);
     ny_ = std::ceil((y1_ - y0_) * inv_dy_ + 1);
     nz_ = std::ceil((z1_ - z0_) * inv_dz_ + 1);
-    
+
     n_ = nx_ * ny_ * nz_;
     values_.resize(n_);
-    double x, y, z;
-    for (size_t i = 0; i < n_x; i++)
-      for (size_t j = 0; j < n_y; j++)
-      for (size_t k = 0; k < n_z; k++)
-      {
-        x = x0_ + i * dx_;
-        y = y0_ + j* dy_;
-        z = z0_ + k * dz_;
 
-        // 
-      }
+    double x, y, z;
+    for (size_t k = 0; k < nz_; k++)
+      for (size_t j = 0; j < ny_; j++)
+        for (size_t i = 0; i < nx_; i++) {
+          x = x0_ + i * dx_;
+          y = y0_ + j * dy_;
+          z = z0_ + k * dz_;
+
+          values_[i + j * nx_+ k * nx_ * ny_] = f(x, y, z);
+        }
+
+    //
   }
 
-private:
+  double get_linear(const double x, const double y, const double z);
+
+  // getters
+  double x0() const { return x0_; }
+  double x1() const { return x1_; }
+  double y0() const { return y0_; }
+  double y1() const { return y1_; }
+  double z0() const { return z0_; }
+  double z1() const { return z1_; }
+  size_t nx() const { return nx_; }
+  size_t ny() const { return ny_; }
+  size_t nz() const { return nz_; }
+  size_t get_size() const { return values_.size(); };
+
+ private:
   const double x0_, x1_, y0_, y1_, z0_, z1_, dx_, dy_, dz_;
   const double inv_dx_, inv_dy_, inv_dz_;
   std::function<double(double, double, double)> f_;
   std::vector<double> values_;
   size_t nx_, ny_, nz_, n_;
-}
 
-} // namespace Smash
+  int val_from_index_(const int ix, const int iy, const int iz) const;
+};
+
+}  // namespace Smash
 
 #endif
