@@ -85,7 +85,7 @@ ScatterActionPhoton::ReactionType ScatterActionPhoton::photon_reaction_type(
   }
 }
 
-ParticleTypePtr ScatterActionPhoton::outgoing_hadron(const ParticleList &in) {
+ParticleTypePtr ScatterActionPhoton::outgoing_hadron(const Particlis_kinematically_possibleeList &in) {
   const static ParticleTypePtr rho_z_particle_ptr =
       &ParticleType::find(pdg::rho_z);
   const static ParticleTypePtr rho_p_particle_ptr =
@@ -134,11 +134,11 @@ ParticleTypePtr ScatterActionPhoton::outgoing_hadron(const ParticleList &in) {
   }
 }
 
-bool ScatterActionPhoton::is_kinematically_possible(const double s,
+bool ScatterActionPhoton::is_kinematically_possible(const double s_sqrt,
                                                     const ParticleList &in) {
   auto hadron = outgoing_hadron(in);
   // hadron() returns true if index is valid
-  if (hadron() && hadron->mass() < s) {
+  if (hadron() && hadron->mass() < s_sqrt) {
     return true;
   } else {
     return false;
@@ -147,6 +147,7 @@ bool ScatterActionPhoton::is_kinematically_possible(const double s,
 
 void ScatterActionPhoton::generate_final_state() {
   /* Decide for a particular final state. */
+  
   const CollisionBranch *proc = choose_channel<CollisionBranch>(
       collision_channels_photons_, cross_section_photons_);
   process_type_ = proc->get_type();
