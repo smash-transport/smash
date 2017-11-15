@@ -268,6 +268,8 @@ TEST(uniform_random_pi_rho_pi0) {
     fs.close();
   }
 }
+
+*/
 TEST(pi_rho_pi0) {
     const double s0_sqrt = 0.95, s1_sqrt = 1.1, t0 = -0.22, t1 = -0.02,
                  dt = 0.005, ds = 0.01;
@@ -296,4 +298,4 @@ TEST(pi_rho_pi0) {
     }
     fs.close();
   }
-*/
+
