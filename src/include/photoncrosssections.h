@@ -18,6 +18,7 @@
 #include "cxx14compat.h"
 #include "logging.h"
 
+namespace Smash {
 // calculation method for the cross sections
 enum class ComputationMethod { Analytic, Lookup, Parametrized };
 
@@ -108,3 +109,5 @@ class PhotonCrossSection<ComputationMethod::Lookup> {
 
 template <>
 class PhotonCrossSection<ComputationMethod::Parametrized> {};
+
+} // namespace Smash

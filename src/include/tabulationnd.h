@@ -16,6 +16,9 @@
 #include <vector>
 #include <cassert>
 
+namespace Smash{
+
+
 template <int dim>
 class TabulationND {};
 
@@ -100,5 +103,6 @@ class TabulationND<2> {
   std::function<double(double,double)> f_;
 };
 
+}
 
 #endif

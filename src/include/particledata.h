@@ -71,6 +71,9 @@ class ParticleData {
   /// \copydoc PdgCode::is_baryon
   bool is_baryon() const { return pdgcode().is_baryon(); }
 
+    /// \copydoc PdgCode::is_rho
+  bool is_rho() const { return type_->is_rho(); }
+
   /** Returns the particle's pole mass ("on-shell"). */
   double pole_mass() const { return type_->mass(); }
   /** Returns the particle's effective mass
