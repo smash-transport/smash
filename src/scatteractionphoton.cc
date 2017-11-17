@@ -282,10 +282,34 @@ double ScatterActionPhoton::mediator_mass(ReactionType reac) const {
   }
 }
 
+double ScatterActionPhoton::mediator_mass() const {
+
+    assert(reac != ReactionType::no_reaction);
+  switch (reac) {
+  case ReactionType::pi_p_pi_m_rho_z:
+  case ReactionType::pi_z_pi_m_rho_m:
+  case ReactionType::pi_z_pi_p_rho_p:
+    return hadron_out_mass_;
+  case ReactionType::pi_m_rho_p_pi_z:
+  case ReactionType::pi_p_rho_m_pi_z:
+  case ReactionType::pi_p_rho_z_pi_p:
+  case ReactionType::pi_m_rho_z_pi_m:
+  case ReactionType::pi_z_rho_m_pi_m:
+  case ReactionType::pi_z_rho_p_pi_p:
+  case ReactionType::pi_z_rho_z_pi_z:
+    return (incoming_particles_[0].is_rho())
+               ? incoming_particles_[0].effective_mass()
+               : incoming_particles_[1].effective_mass();
+  case ReactionType::no_reaction:
+      // throw RuntimeError;
+    return 0;
+  }
+}
+
 CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
   
   CollisionBranchList process_list;
-  PhotonCrossSection<ComputationMethod::Lookup> xs_object;
+  PhotonCrossSection<ComputationMethod::Analytic> xs_object;
 
   reac = photon_reaction_type(Action::incoming_particles());
 
@@ -306,24 +330,23 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
   // sampled mass
   const double &m3 = mediator_mass(reac);
 
-  // double m3 = mediator_mass(reac);
   switch (reac) {
     case ReactionType::pi_p_pi_m_rho_z:
-      xsection = xs_object.xs_pi_pi_rho0(s);
+      xsection = xs_object.xs_pi_pi_rho0(s, m3);
       process_list.push_back(make_unique<CollisionBranch>(
           *hadron_out_t_, *photon_particle, xsection, ProcessType::TwoToTwo));
       break;
 
     case ReactionType::pi_z_pi_m_rho_m:
     case ReactionType::pi_z_pi_p_rho_p:
-      xsection = xs_object.xs_pi_pi0_rho(s);
+      xsection = xs_object.xs_pi_pi0_rho(s, m3);
       process_list.push_back(make_unique<CollisionBranch>(
           *hadron_out_t_, *photon_particle, xsection, ProcessType::TwoToTwo));
       break;
 
     case ReactionType::pi_m_rho_z_pi_m:
     case ReactionType::pi_p_rho_z_pi_p:
-      xsection = xs_object.xs_pi_rho0_pi(s);
+      xsection = xs_object.xs_pi_rho0_pi(s, m3);
       process_list.push_back(make_unique<CollisionBranch>(
           *hadron_out_t_, *photon_particle, xsection, ProcessType::TwoToTwo));
       break;
@@ -331,20 +354,20 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
     case ReactionType::pi_m_rho_p_pi_z:
     case ReactionType::pi_p_rho_m_pi_z:
 
-      xsection = xs_object.xs_pi_rho_pi0(s);
+      xsection = xs_object.xs_pi_rho_pi0(s, m3);
       process_list.push_back(make_unique<CollisionBranch>(
           *hadron_out_t_, *photon_particle, xsection, ProcessType::TwoToTwo));
       break;
 
     case ReactionType::pi_z_rho_m_pi_m:
     case ReactionType::pi_z_rho_p_pi_p:
-      xsection = xs_object.xs_pi0_rho_pi(s);
+      xsection = xs_object.xs_pi0_rho_pi(s, m3);
       process_list.push_back(make_unique<CollisionBranch>(
           *hadron_out_t_, *photon_particle, xsection, ProcessType::TwoToTwo));
       break;
 
     case ReactionType::pi_z_rho_z_pi_z:
-      xsection = xs_object.xs_pi0_rho0_pi0(s);
+      xsection = xs_object.xs_pi0_rho0_pi0(s, m3);
       process_list.push_back(make_unique<CollisionBranch>(
           *hadron_out_t_, *photon_particle, xsection, ProcessType::TwoToTwo));
       break;
@@ -360,17 +383,18 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
 double ScatterActionPhoton::diff_cross_section(double t, double t2,
                                                double t1) const {
   const double to_mb = 0.3894;
-  static const float m_rho = ParticleType::find(pdg::rho_z).mass();
   static const float m_pi = ParticleType::find(pdg::pi_z).mass();
   double s = mandelstam_s();
   double diff_xsection = 0.0;
 
   PhotonCrossSection<ComputationMethod::Analytic> xs_object;
+  
+  const double m_rho = mediator_mass();
 
   switch (reac) {
     case ReactionType::pi_p_pi_m_rho_z:
       if (outgoing_particles_[0].type().pdgcode().is_rho()) {
-       diff_xsection = xs_object.xs_diff_pi_pi_rho0(s, t);
+       diff_xsection = xs_object.xs_diff_pi_pi_rho0(s, t, m_rho);
     //  } else if (outgoing_particles_[0].type().pdgcode() == pdg::eta) {
     //    diff_xsection = to_be_determined;
       } else if (outgoing_particles_[0].type().pdgcode() == pdg::photon) {
@@ -382,7 +406,7 @@ double ScatterActionPhoton::diff_cross_section(double t, double t2,
     case ReactionType::pi_z_pi_p_rho_p:
 
       if (outgoing_particles_[0].type().pdgcode().is_rho()) {
-        diff_xsection = xs_object.xs_diff_pi_pi0_rho(s,t);
+        diff_xsection = xs_object.xs_diff_pi_pi0_rho(s,t, m_rho);
       } else if (outgoing_particles_[0].type().pdgcode().is_pion()) {
         diff_xsection = 0.0000000000001/to_mb/(t2-t1);
       }
@@ -390,23 +414,23 @@ double ScatterActionPhoton::diff_cross_section(double t, double t2,
 
     case ReactionType::pi_m_rho_z_pi_m:
     case ReactionType::pi_p_rho_z_pi_p:
-      diff_xsection = xs_object.xs_diff_pi_rho0_pi(s, t);
+      diff_xsection = xs_object.xs_diff_pi_rho0_pi(s, t, m_rho);
 
       break;
 
     case ReactionType::pi_m_rho_p_pi_z:
     case ReactionType::pi_p_rho_m_pi_z:
-      diff_xsection = xs_object.xs_diff_pi_rho_pi0(s, t);
+      diff_xsection = xs_object.xs_diff_pi_rho_pi0(s, t, m_rho);
       break;
 
     case ReactionType::pi_z_rho_m_pi_m:
     case ReactionType::pi_z_rho_p_pi_p:
-      diff_xsection = xs_object.xs_diff_pi0_rho_pi(s, t);
+      diff_xsection = xs_object.xs_diff_pi0_rho_pi(s, t, m_rho);
       break;
     
     case ReactionType::pi_z_rho_z_pi_z:
 
-      diff_xsection = xs_object.xs_diff_pi0_rho0_pi0(s, t);
+      diff_xsection = xs_object.xs_diff_pi0_rho0_pi0(s, t, m_rho);
 
     
       break;

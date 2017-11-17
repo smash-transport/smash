@@ -37,7 +37,10 @@ class ScatterActionPhoton : public ScatterAction {
       : ScatterAction(in[0], in[1], time),
         number_of_fractional_photons_(nofp),
         hadron_out_t_(outgoing_hadron_type(in)),
-        hadron_out_mass_(sample_out_hadron_mass(hadron_out_t_)) {}
+        hadron_out_mass_(sample_out_hadron_mass(hadron_out_t_)) {
+            
+            reac = photon_reaction_type(in);
+        }
 
   void generate_final_state() override;
 
@@ -119,6 +122,7 @@ class ScatterActionPhoton : public ScatterAction {
   const int num_tab_pts_ = 200;
 
   double mediator_mass(ReactionType r) const;
+  double mediator_mass() const;
   // conversion factor to millibarn
   const double to_mb = 0.3894;
 

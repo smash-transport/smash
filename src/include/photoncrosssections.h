@@ -37,13 +37,7 @@ class PhotonCrossSection {};
 template <>
 class PhotonCrossSection<ComputationMethod::Analytic> {
  public:
-  static double xs_pi_pi_rho0(const double s);
-  static double xs_pi_pi0_rho(const double s);
-  static double xs_pi0_rho0_pi0(const double s);
-  static double xs_pi_rho0_pi(const double s);
-  static double xs_pi_rho_pi0(const double s);
-  static double xs_pi0_rho_pi(const double s);
-
+  
   static double xs_pi_pi_rho0(const double s, const double m_rho);
   static double xs_pi_pi0_rho(const double s, const double m_rho);
   static double xs_pi0_rho0_pi0(const double s, const double m_rho);
@@ -52,12 +46,12 @@ class PhotonCrossSection<ComputationMethod::Analytic> {
   static double xs_pi0_rho_pi(const double s, const double m_rho);
 
 
-  static double xs_diff_pi0_rho0_pi0(const double s, const double t);
-  static double xs_diff_pi_pi_rho0(const double s, const double t);
-  static double xs_diff_pi_pi0_rho(const double s, const double t);
-  static double xs_diff_pi_rho_pi0(const double s, const double t);
-  static double xs_diff_pi0_rho_pi(const double s, const double t);
-  static double xs_diff_pi_rho0_pi(const double s, const double t);
+  static double xs_diff_pi0_rho0_pi0(const double s, const double t, const double m_rho);
+  static double xs_diff_pi_pi_rho0(const double s, const double t, const double m_rho);
+  static double xs_diff_pi_pi0_rho(const double s, const double t, const double m_rho);
+  static double xs_diff_pi_rho_pi0(const double s, const double t, const double m_rho);
+  static double xs_diff_pi0_rho_pi(const double s, const double t, const double m_rho);
+  static double xs_diff_pi_rho0_pi(const double s, const double t, const double m_rho);
 
   static double s_min, s_max, t_min, t_max;
 
@@ -85,19 +79,19 @@ class PhotonCrossSection<ComputationMethod::Analytic> {
 template <>
 class PhotonCrossSection<ComputationMethod::Lookup> {
  private:
-  static std::unique_ptr<TabulationND<1>> tab_pi_pi_rho0_;
-  static std::unique_ptr<TabulationND<1>> tab_pi_pi0_rho_;
-  static std::unique_ptr<TabulationND<1>> tab_pi0_rho0_pi0_;
-  static std::unique_ptr<TabulationND<1>> tab_pi_rho0_pi_;
-  static std::unique_ptr<TabulationND<1>> tab_pi_rho_pi0_;
-  static std::unique_ptr<TabulationND<1>> tab_pi0_rho_pi_;
+  static std::unique_ptr<TabulationND<2>> tab_pi_pi_rho0_;
+  static std::unique_ptr<TabulationND<2>> tab_pi_pi0_rho_;
+  static std::unique_ptr<TabulationND<2>> tab_pi0_rho0_pi0_;
+  static std::unique_ptr<TabulationND<2>> tab_pi_rho0_pi_;
+  static std::unique_ptr<TabulationND<2>> tab_pi_rho_pi0_;
+  static std::unique_ptr<TabulationND<2>> tab_pi0_rho_pi_;
 
-  static std::unique_ptr<TabulationND<2>> tab_pi0_rho0_pi0_diff_;
-  static std::unique_ptr<TabulationND<2>> tab_pi_pi_rho0_diff_;
-  static std::unique_ptr<TabulationND<2>> tab_pi_pi0_rho_diff_;
-  static std::unique_ptr<TabulationND<2>> tab_pi_rho_pi0_diff_;
-  static std::unique_ptr<TabulationND<2>> tab_pi0_rho_pi_diff_;
-  static std::unique_ptr<TabulationND<2>> tab_pi_rho0_pi_diff_;
+  static std::unique_ptr<TabulationND<3>> tab_pi0_rho0_pi0_diff_;
+  static std::unique_ptr<TabulationND<3>> tab_pi_pi_rho0_diff_;
+  static std::unique_ptr<TabulationND<3>> tab_pi_pi0_rho_diff_;
+  static std::unique_ptr<TabulationND<3>> tab_pi_rho_pi0_diff_;
+  static std::unique_ptr<TabulationND<3>> tab_pi0_rho_pi_diff_;
+  static std::unique_ptr<TabulationND<3>> tab_pi_rho0_pi_diff_;
 
 
 
@@ -106,20 +100,21 @@ class PhotonCrossSection<ComputationMethod::Lookup> {
   const double s0_diff = 0.1, s1_diff = 2.0, t0_diff = -5.0;
   const double t1_diff = -0.01, ds_diff = 0.01, dt_diff = 0.01;
   const double s0_tot = 0.1, s1_tot = 2.0, ds_tot = 0.01;
+  const double m_rho_0 = 0.1, m_rho_1 = 0.2, dm = 0.01;
 
-  double xs_pi_pi_rho0(const double s);
-  double xs_pi_pi0_rho(const double s);
-  double xs_pi0_rho0_pi0(const double s);
-  double xs_pi_rho0_pi(const double s);
-  double xs_pi_rho_pi0(const double s);
-  double xs_pi0_rho_pi(const double s);
+  double xs_pi_pi_rho0(const double s, const double m_rho);
+  double xs_pi_pi0_rho(const double s, const double m_rho);
+  double xs_pi0_rho0_pi0(const double s, const double m_rho);
+  double xs_pi_rho0_pi(const double s, const double m_rho);
+  double xs_pi_rho_pi0(const double s, const double m_rho);
+  double xs_pi0_rho_pi(const double s, const double m_rho);
 
-  double xs_diff_pi_pi_rho0(const double s, const double t);
-  double xs_diff_pi_pi0_rho(const double s, const double t);
-  double xs_diff_pi0_rho0_pi0(const double s, const double t);
-  double xs_diff_pi_rho0_pi(const double s, const double t);
-  double xs_diff_pi_rho_pi0(const double s, const double t);
-  double xs_diff_pi0_rho_pi(const double s, const double t);
+  double xs_diff_pi_pi_rho0(const double s, const double t, const double m_rho);
+  double xs_diff_pi_pi0_rho(const double s, const double t, const double m_rho);
+  double xs_diff_pi0_rho0_pi0(const double s, const double t, const double m_rho);
+  double xs_diff_pi_rho0_pi(const double s, const double t, const double m_rho);
+  double xs_diff_pi_rho_pi0(const double s, const double t, const double m_rho);
+  double xs_diff_pi0_rho_pi(const double s, const double t, const double m_rho);
 };
 
 template <>
