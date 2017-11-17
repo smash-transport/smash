@@ -23,9 +23,9 @@
 #include "include/random.h"
 #include "include/tabulation.h"
 
-using std::atan;
-using std::pow;
 using std::sqrt;
+using std::pow;
+using std::atan;
 
 namespace Smash {
 
@@ -239,13 +239,16 @@ void ScatterActionPhoton::generate_final_state() {
   // constant arbitrary number.
   const auto id_process = ID_PROCESS_PHOTON;
   Action::check_conservation(id_process);
+
 }
 
 void ScatterActionPhoton::add_dummy_hadronic_channels(
-    double reaction_cross_section) {
+                            double reaction_cross_section) {
   CollisionBranchPtr dummy_process = make_unique<CollisionBranch>(
-      incoming_particles_[0].type(), incoming_particles_[1].type(),
-      reaction_cross_section, ProcessType::TwoToTwo);
+    incoming_particles_[0].type(),
+    incoming_particles_[1].type(),
+    reaction_cross_section,
+    ProcessType::TwoToTwo);
   add_collision(std::move(dummy_process));
 }
 
@@ -289,6 +292,7 @@ double ScatterActionPhoton::mediator_mass(ReactionType reac) const {
 }
 
 CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
+  
   CollisionBranchList process_list;
   PhotonCrossSection<ComputationMethod::Lookup> xs_object;
 
@@ -375,10 +379,11 @@ double ScatterActionPhoton::diff_cross_section(double t, double t2,
   switch (reac) {
     case ReactionType::pi_p_pi_m_rho_z:
       if (outgoing_particles_[0].type().pdgcode().is_rho()) {
-        diff_xsection = xs_object.xs_diff_pi_pi_rho0(s, t);
-
+       
+    //  } else if (outgoing_particles_[0].type().pdgcode() == pdg::eta) {
+    //    diff_xsection = to_be_determined;
       } else if (outgoing_particles_[0].type().pdgcode() == pdg::photon) {
-        diff_xsection = 0.0000000000001 / to_mb / (t2 - t1);
+        diff_xsection = 0.0000000000001/to_mb/(t2-t1);
       }
       break;
 
@@ -386,10 +391,9 @@ double ScatterActionPhoton::diff_cross_section(double t, double t2,
     case ReactionType::pi_z_pi_p_rho_p:
 
       if (outgoing_particles_[0].type().pdgcode().is_rho()) {
-        diff_xsection = xs_object.xs_diff_pi_pi0_rho(s, t);
-
+       
       } else if (outgoing_particles_[0].type().pdgcode().is_pion()) {
-        diff_xsection = 0.0000000000001 / to_mb / (t2 - t1);
+        diff_xsection = 0.0000000000001/to_mb/(t2-t1);
       }
       break;
 
@@ -402,20 +406,26 @@ double ScatterActionPhoton::diff_cross_section(double t, double t2,
     case ReactionType::pi_m_rho_p_pi_z:
     case ReactionType::pi_p_rho_m_pi_z:
       // omega:
-      diff_xsection = xs_object.xs_diff_pi_rho_pi0(s, t);
-
+      diff_xsection = 1/3.0*(0.0024867959858108648*pow(Const,2)*pow(g_POR,4)*(pow(mpion,8) - 2*pow(mpion,6)*pow(mrho,2) +
+        pow(mpion,4)*(pow(mrho,4) + 4*pow(s,2) - 2*s*t) +
+        pow(s,2)*(pow(mrho,4) + pow(s,2) + 2*s*t + 2*pow(t,2) - 2*pow(mrho,2)*(s + t)) -
+        2*pow(mpion,2)*s*(pow(mrho,4) + 2*s*(s + t) - pow(mrho,2)*(2*s + t))))/(pow(pow(momega,2) - s,2)*(pow(mpion,4)
+        + pow(pow(mrho,2) - s,2) - 2*pow(mpion,2)*(pow(mrho,2) + s)));
       break;
 
     case ReactionType::pi_z_rho_m_pi_m:
     case ReactionType::pi_z_rho_p_pi_p:
       // omega:
-      diff_xsection = xs_object.xs_diff_pi0_rho_pi(s, t);
-
+      diff_xsection = 1/3.0*(0.0024867959858108648*pow(Const,2)*pow(g_POR,4)*(pow(mpion,8) - 2*pow(mpion,6)*pow(mrho,2) +
+       pow(mpion,4)*(pow(mrho,4) - 2*(s - 2*t)*t) + pow(t,2)*(pow(mrho,4) + 2*pow(s,2) + 2*s*t + pow(t,2) - 2*pow(mrho,2)*(s + t)) -
+       2*pow(mpion,2)*t*(pow(mrho,4) + 2*t*(s + t) - pow(mrho,2)*(s + 2*t))))/
+       ((pow(mpion,4) + pow(pow(mrho,2) - s,2) - 2*pow(mpion,2)*(pow(mrho,2) + s))*pow(pow(momega,2) - t,2));
       break;
     case ReactionType::pi_z_rho_z_pi_z:
 
       diff_xsection = xs_object.xs_diff_pi0_rho0_pi0(s, t);
 
+    
       break;
     case ReactionType::no_reaction:
       // never reached
@@ -463,7 +473,7 @@ double ScatterActionPhoton::form_factor(double E_photon) {
       // never reached
       break;
   }
-  form_factor = pow(2.0 * pow(Lambda, 2) / (2.0 * pow(Lambda, 2) - t_ff), 2);
+  form_factor = pow(2.0*pow(Lambda,2)/(2.0*pow(Lambda,2)-t_ff),2);
   return form_factor;
 }
 

@@ -7,6 +7,11 @@
  *
  */
 
+
+#ifndef SRC_INCLUDE_PHOTONCROSSSECTION_H
+#define SRC_INCLUDE_PHOTONCROSSSECTION_H
+
+
 #include <cmath>
 #include <memory>
 

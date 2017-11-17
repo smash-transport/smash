@@ -72,3 +72,48 @@ double TabulationND<2>::get_closest(const double x, const double y) const {
 
   return values_[x_idx + nx_ * y_idx];
 }
+
+double TabulationND<3>::get_linear(const double x, const double y,
+                                   const double z) {
+  const double x_idx_d = (x - x0_) * inv_dx_;
+  const double y_idx_d = (y - y0_) * inv_dy_;
+  const double z_idx_d = (z - z0_) * inv_dz_;
+
+  size_t x_idx = static_cast<size_t>(x_idx_d);
+  size_t y_idx = static_cast<size_t>(y_idx_d);
+  size_t z_idx = static_cast<size_t>(z_idx_d);
+
+  const double dx = x_idx_d - x_idx;
+  const double dy = y_idx_d - y_idx;
+  const double dz = z_idx_d - z_idx;
+
+  // the computation is broken up in favor of readability. Conceptual this is
+  // the same method as used for the 2D case
+  
+  const double& c000 = val_from_index_(x_idx, y_idx, z_idx);
+  const double& c100 = val_from_index_(x_idx + 1, y_idx, z_idx);
+  const double& c001 = val_from_index_(x_idx, y_idx, z_idx + 1);
+  const double& c101 = val_from_index_(x_idx + 1, y_idx, z_idx + 1);
+  const double& c010 = val_from_index_(x_idx, y_idx + 1, z_idx);
+  const double& c110 = val_from_index_(x_idx + 1, y_idx + 1, z_idx);
+  const double& c011 = val_from_index_(x_idx, y_idx + 1, z_idx + 1);
+  const double& c111 = val_from_index_(x_idx+1,  y_idx+1, z_idx+1);
+
+  // first interpolate in x direction
+  const double c00 = c000 * (1 - dx) + c100 * dx;
+  const double c01 = c001 * (1 - dx) + c101 * dx;
+  const double c10 = c010 * (1 - dx) + c110 * dx;
+  const double c11 = c011 * (1 - dx) + c111 * dx;
+
+  // in y direction
+  const double c0 = c00 * (1 - dy) + c10 * dy;
+  const double c1 = c01 * (1 - dy) + c11 * dy;
+
+  // finally in z direction
+  return c0 * (1 - dz) + c1 * dz;
+}
+
+inline int TabulationND<3>::val_from_index_(const int ix, const int iy,
+                                            const int iz) const {
+  return values_[ix + iy * nx_ + iz * nx_ * ny_];
+}
