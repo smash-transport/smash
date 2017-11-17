@@ -246,7 +246,7 @@ double ScatterActionPhoton::sample_out_hadron_mass(
     const ParticleTypePtr out_t) {
   double mass = out_t->mass();
   const double cms_energy = sqrt_s();
-  if (cms_energy < out_t->min_mass_kinematic()) {
+  if (cms_energy <= out_t->min_mass_kinematic()) {
     throw InvalidResonanceFormation(
         "Problem in ScatterActionPhoton::sample_hadron_mass");
   }

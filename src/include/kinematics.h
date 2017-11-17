@@ -120,11 +120,14 @@ std::array<T, 2> get_t_range(const T sqrts, const T m1, const T m2, const T m3,
   const T sqrt_t0 = (m1 * m1 - m2 * m2 - m3 * m3 + m4 * m4) / (2. * sqrts);
   const T t0 = sqrt_t0 * sqrt_t0;
   T t_min = t0 - (p_i - p_f) * (p_i - p_f);
+  /*
   if (t_min > T(0.0)) {
     //assert(t_min < T(1e-15));
     t_min = T(0.0);
   }
+  */
   const T t_max = t0 - (p_i + p_f) * (p_i + p_f);
+  assert (t_min > t_max);
   return {t_min, t_max};
 }
 

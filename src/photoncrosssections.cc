@@ -14,7 +14,6 @@ using namespace Smash;
 // template class PhotonCrossSection<ComputationMethod::Analytic>;
 // template class PhotonCrossSection<ComputationMethod::Lookup>;
 
-constexpr double PhotonCrossSection<ComputationMethod::Analytic>::m_rho_;
 constexpr double PhotonCrossSection<ComputationMethod::Analytic>::m_pion_;
 
 
@@ -25,7 +24,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho0_pi0(
   using std::sqrt;
 
   const double mpion = m_pion_, mrho = m_rho;
-  auto t_mandelstam = get_t_range(sqrt(s), m_pion_, m_rho_, m_pion_, 0.0);
+  auto t_mandelstam = get_t_range(sqrt(s), m_pion_, m_rho, m_pion_, 0.0);
 
   const double t1 = t_mandelstam[1];
   const double t2 = t_mandelstam[0];
@@ -71,7 +70,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi(
   using std::pow;
   using std::sqrt;
   const double &mpion = m_pion_, &mrho = m_rho;
-  auto t_mandelstam = get_t_range(sqrt(s), m_pion_, m_rho_, m_pion_, 0.);
+  auto t_mandelstam = get_t_range(sqrt(s), m_pion_, m_rho, m_pion_, 0.);
   const double &t1 = t_mandelstam[1];
   const double &t2 = t_mandelstam[0];
 
@@ -111,7 +110,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0(
   using std::sqrt;
 
   const double &mpion = m_pion_, &mrho = m_rho;
-  auto t_mandelstam = get_t_range(sqrt(s), m_pion_, m_rho_, m_pion_, 0.);
+  auto t_mandelstam = get_t_range(sqrt(s), m_pion_, m_rho, m_pion_, 0.);
   const double &t1 = t_mandelstam[1];
   const double &t2 = t_mandelstam[0];
 
@@ -138,7 +137,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho0_pi(
   using std::sqrt;
   const double m_pi = m_pion_;
   const double &mpion = m_pion_, &mrho = m_rho;
-  auto t_mandelstam = get_t_range(sqrt(s), m_pion_, m_rho_, m_pion_, 0.);
+  auto t_mandelstam = get_t_range(sqrt(s), m_pion_, m_rho, m_pion_, 0.);
   const double &t1 = t_mandelstam[1];
   const double &t2 = t_mandelstam[0];
 
@@ -1376,11 +1375,10 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
   using std::pow;
   using std::sqrt;
   const double mpion = m_pion_, mrho = m_rho;
-  auto t_mandelstam = get_t_range(s, m_pion_, m_pion_, m_rho_, 0.0);
+  auto t_mandelstam = get_t_range(sqrt(s), m_pion_, m_pion_, m_rho, 0.0);
 
   const double t1 = t_mandelstam[1];
   const double t2 = t_mandelstam[0];
-
   const double xs = to_mb*(-(pow(Const,2)*pow(ghat,4)*((0.03125*pow(eta1 - 1.*eta2,2)*
                                      (eta1*eta2*(-2.*pow(ma1,8) - 2.*pow(mpion,8) + 2.*pow(mpion,4)*pow(mrho,4) + pow(ma1,6)*(8.*pow(mpion,2) - 4.*s) +
                                           pow(ma1,2)*pow(mpion,2)*(8.*pow(mpion,4) - 8.*pow(mrho,4) - 4.*pow(mpion,2)*s + 4.*pow(mrho,2)*s) +
