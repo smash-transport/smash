@@ -19,7 +19,6 @@
 #include "include/kinematics.h"
 #include "include/particletype.h"
 #include "include/pdgcode.h"
-#include "include/photoncrosssections.h"
 #include "include/pow.h"
 #include "include/random.h"
 #include "include/tabulation.h"
@@ -174,7 +173,6 @@ void ScatterActionPhoton::generate_final_state() {
   const double pcm_in = cm_momentum();
   const double pcm_out = pCM(sqrts, m3, 0.0);
 
-
   // move to sample_angle()
   assert(t1 < t2);
   double diff_xsection_max = 0.0;
@@ -186,7 +184,6 @@ void ScatterActionPhoton::generate_final_state() {
 
   double t = 0.0;
   int iteration_number = 0;
-  // Bug: diff_xsection_max set to 0 but then used in comparison
   do {
     t = Random::uniform(t1, t2);
     iteration_number++;
@@ -203,8 +200,7 @@ void ScatterActionPhoton::generate_final_state() {
   Angles phitheta(Random::uniform(0.0, twopi), costheta);
   outgoing_particles_[0].set_4momentum(hadron_out_mass_,
                                        phitheta.threevec() * pcm_out);
-  outgoing_particles_[1].set_4momentum(0.0,
-                                       -phitheta.threevec() * pcm_out);
+  outgoing_particles_[1].set_4momentum(0.0, -phitheta.threevec() * pcm_out);
 
   /* Weighing of the fractional photons */
   if (number_of_fractional_photons_ > 1) {
@@ -269,11 +265,9 @@ double ScatterActionPhoton::sample_out_hadron_mass(
   return mass;
 }
 
-
 double ScatterActionPhoton::mediator_mass(ReactionType reac) const {
-  
   assert(reac != ReactionType::no_reaction);
-  switch(reac) {
+  switch (reac) {
   case ReactionType::pi_p_pi_m_rho_z:
   case ReactionType::pi_z_pi_m_rho_m:
   case ReactionType::pi_z_pi_p_rho_p:
@@ -289,7 +283,7 @@ double ScatterActionPhoton::mediator_mass(ReactionType reac) const {
                ? incoming_particles_[0].effective_mass()
                : incoming_particles_[1].effective_mass();
   case ReactionType::no_reaction:
-    //throw RuntimeError;
+      // throw RuntimeError;
     return 0;
   }
 }
@@ -427,10 +421,7 @@ double ScatterActionPhoton::diff_cross_section(double t, double t2,
       // never reached
       break;
   }
-  return diff_xsection;
-  // conversionfactor to_mb in functions. this makes it analog to total cross
-  // sections.
-  // return diff_xsection * to_mb;
+  return diff_xsection * to_mb;
 }
 
 double ScatterActionPhoton::form_factor(double E_photon) {
