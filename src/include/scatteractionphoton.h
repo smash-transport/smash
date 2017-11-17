@@ -11,9 +11,23 @@
 #define SRC_INCLUDE_SCATTERACTIONPHOTON_H_
 
 #include <algorithm>
+#include <fstream>
+#include <iostream>
 
 #include "constants.h"
 #include "scatteraction.h"
+
+#include "angles.h"
+#include "constants.h"
+#include "cxx14compat.h"
+#include "integrate.h"
+#include "kinematics.h"
+#include "particletype.h"
+#include "photoncrosssections.h"
+#include "pdgcode.h"
+#include "pow.h"
+#include "random.h"
+#include "tabulation.h"
 
 namespace Smash {
 

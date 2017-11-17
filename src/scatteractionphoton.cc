@@ -7,27 +7,17 @@
  *
  */
 
-#include <fstream>
-#include <iostream>
+
 
 #include "include/scatteractionphoton.h"
 
-#include "include/angles.h"
-#include "include/constants.h"
-#include "include/cxx14compat.h"
-#include "include/integrate.h"
-#include "include/kinematics.h"
-#include "include/particletype.h"
-#include "include/pdgcode.h"
-#include "include/pow.h"
-#include "include/random.h"
-#include "include/tabulation.h"
 
-using std::sqrt;
-using std::pow;
-using std::atan;
 
-namespace Smash {
+//using std::sqrt;
+//using std::pow;
+//using std::atan;
+
+using namespace Smash;
 
 ScatterActionPhoton::ReactionType ScatterActionPhoton::photon_reaction_type(
     const ParticleList &in) {
@@ -264,6 +254,7 @@ double ScatterActionPhoton::sample_out_hadron_mass(
   if (!out_t->is_stable()) {
     mass = out_t->sample_resonance_mass(0, cms_energy);
   }
+  
 
   return mass;
 }
@@ -379,7 +370,7 @@ double ScatterActionPhoton::diff_cross_section(double t, double t2,
   switch (reac) {
     case ReactionType::pi_p_pi_m_rho_z:
       if (outgoing_particles_[0].type().pdgcode().is_rho()) {
-       
+       diff_xsection = xs_object.xs_diff_pi_pi_rho0(s, t);
     //  } else if (outgoing_particles_[0].type().pdgcode() == pdg::eta) {
     //    diff_xsection = to_be_determined;
       } else if (outgoing_particles_[0].type().pdgcode() == pdg::photon) {
@@ -391,7 +382,7 @@ double ScatterActionPhoton::diff_cross_section(double t, double t2,
     case ReactionType::pi_z_pi_p_rho_p:
 
       if (outgoing_particles_[0].type().pdgcode().is_rho()) {
-       
+        diff_xsection = xs_object.xs_diff_pi_pi0_rho(s,t);
       } else if (outgoing_particles_[0].type().pdgcode().is_pion()) {
         diff_xsection = 0.0000000000001/to_mb/(t2-t1);
       }
@@ -405,22 +396,14 @@ double ScatterActionPhoton::diff_cross_section(double t, double t2,
 
     case ReactionType::pi_m_rho_p_pi_z:
     case ReactionType::pi_p_rho_m_pi_z:
-      // omega:
-      diff_xsection = 1/3.0*(0.0024867959858108648*pow(Const,2)*pow(g_POR,4)*(pow(mpion,8) - 2*pow(mpion,6)*pow(mrho,2) +
-        pow(mpion,4)*(pow(mrho,4) + 4*pow(s,2) - 2*s*t) +
-        pow(s,2)*(pow(mrho,4) + pow(s,2) + 2*s*t + 2*pow(t,2) - 2*pow(mrho,2)*(s + t)) -
-        2*pow(mpion,2)*s*(pow(mrho,4) + 2*s*(s + t) - pow(mrho,2)*(2*s + t))))/(pow(pow(momega,2) - s,2)*(pow(mpion,4)
-        + pow(pow(mrho,2) - s,2) - 2*pow(mpion,2)*(pow(mrho,2) + s)));
+      diff_xsection = xs_object.xs_diff_pi_rho_pi0(s, t);
       break;
 
     case ReactionType::pi_z_rho_m_pi_m:
     case ReactionType::pi_z_rho_p_pi_p:
-      // omega:
-      diff_xsection = 1/3.0*(0.0024867959858108648*pow(Const,2)*pow(g_POR,4)*(pow(mpion,8) - 2*pow(mpion,6)*pow(mrho,2) +
-       pow(mpion,4)*(pow(mrho,4) - 2*(s - 2*t)*t) + pow(t,2)*(pow(mrho,4) + 2*pow(s,2) + 2*s*t + pow(t,2) - 2*pow(mrho,2)*(s + t)) -
-       2*pow(mpion,2)*t*(pow(mrho,4) + 2*t*(s + t) - pow(mrho,2)*(s + 2*t))))/
-       ((pow(mpion,4) + pow(pow(mrho,2) - s,2) - 2*pow(mpion,2)*(pow(mrho,2) + s))*pow(pow(momega,2) - t,2));
+      diff_xsection = xs_object.xs_diff_pi0_rho_pi(s, t);
       break;
+    
     case ReactionType::pi_z_rho_z_pi_z:
 
       diff_xsection = xs_object.xs_diff_pi0_rho0_pi0(s, t);
@@ -477,4 +460,3 @@ double ScatterActionPhoton::form_factor(double E_photon) {
   return form_factor;
 }
 
-}  // namespace Smash

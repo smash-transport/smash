@@ -20,8 +20,8 @@ double TabulationND<1>::get_linear(double x) const {
   // 1) resize table to include value asked for
   // 2) extrapolate and give warning
   // 3) return analytic value (and give warning)
-  assert(x >= x0_ && x <= x1_);
-  // if (x < x0_ || x > x1_) return f_(x);
+  //assert(x >= x0_ && x <= x1_);
+  if (x < x0_ || x > x1_) return f_(x);
 
   const double index_double = (x - x0_) * inv_dx_;
   // cast truncates, gets lower index
@@ -38,11 +38,11 @@ double TabulationND<2>::get_linear(const double x, const double y) const {
   // 1) resize table to include value asked for
   // 2) extrapolate and give warning
   // 3) return analytic value (and give warning)
-  assert(x >= x0_ && x <= x1_);
-  assert(y >= y0_ && y <= y1_);
-  // if (x < x0_ || x > x1_ || y < y0_ || y > y1_) {
-  //  return f_(x, y);
-  //}
+  //assert(x >= x0_ && x <= x1_);
+  //assert(y >= y0_ && y <= y1_);
+  if (x < x0_ || x > x1_ || y < y0_ || y > y1_) {
+    return f_(x, y);
+  }
 
   // lower index
   const double x_idx_d = (x - x0_) * inv_dx_;

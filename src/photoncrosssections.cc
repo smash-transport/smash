@@ -5305,7 +5305,7 @@ double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi_pi_rho0(
         PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi_rho0);
   }
 
-  return tab_pi_pi_rho0_diff_ -> get_linear(s, t);
+  return tab_pi_pi_rho0_diff_->get_linear(s, t);
 }
 
 double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi_pi0_rho(
@@ -5318,7 +5318,7 @@ double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi_pi0_rho(
         PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi0_rho);
   }
 
-  return tab_pi_pi0_rho_diff_ -> get_linear(s, t);
+  return tab_pi_pi0_rho_diff_->get_linear(s, t);
 }
 
 double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi0_rho0_pi0(
@@ -5331,7 +5331,7 @@ double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi0_rho0_pi0(
         PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi0_rho0_pi0);
   }
 
-  return tab_pi0_rho0_pi0_diff_ -> get_linear(s, t);
+  return tab_pi0_rho0_pi0_diff_->get_linear(s, t);
 }
 
 double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi_rho_pi0(
@@ -5344,7 +5344,7 @@ double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi_rho_pi0(
         PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho_pi0);
   }
 
-  return tab_pi_rho_pi0_diff_ -> get_linear(s, t);
+  return tab_pi_rho_pi0_diff_->get_linear(s, t);
 }
 
 double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi0_rho_pi(
@@ -5357,7 +5357,7 @@ double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi0_rho_pi(
         PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho0_pi);
   }
 
-  return tab_pi0_rho_pi_diff_ -> get_linear(s, t);
+  return tab_pi0_rho_pi_diff_->get_linear(s, t);
 }
 
 double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi_rho0_pi(
@@ -5370,13 +5370,13 @@ double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi_rho0_pi(
         PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho0_pi);
   }
 
-  return tab_pi_rho0_pi_diff_ -> get_linear(s, t);
+  return tab_pi_rho0_pi_diff_->get_linear(s, t);
 }
 
 // definition of static lookup tables. fine-tuning for parameters needed.
 //
-constexpr double s0 = 0.1, s1 = 18.4, t0 = -10., t1 = -0.001, ds = 0.01,
-                 dt = 0.01;
+constexpr double s0 = 0.1, s1 = 18.4, t0 = -10., t1 = -0.001, ds = 0.01;
+constexpr double dt = 0.01;
 std::unique_ptr<TabulationND<1>>
     PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_pi_rho0_ = nullptr;
 
@@ -5384,27 +5384,32 @@ std::unique_ptr<TabulationND<1>>
     PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_pi0_rho_ = nullptr;
 
 std::unique_ptr<TabulationND<1>>
-    PhotonCrossSection<ComputationMethod::Lookup>::tab_pi0_rho0_pi0_= nullptr;
+    PhotonCrossSection<ComputationMethod::Lookup>::tab_pi0_rho0_pi0_ = nullptr;
 
 std::unique_ptr<TabulationND<1>>
-    PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_rho0_pi_= nullptr;
+    PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_rho0_pi_ = nullptr;
 
 std::unique_ptr<TabulationND<1>>
-    PhotonCrossSection<ComputationMethod::Lookup>::tab_pi0_rho_pi_= nullptr;
+    PhotonCrossSection<ComputationMethod::Lookup>::tab_pi0_rho_pi_ = nullptr;
 
 std::unique_ptr<TabulationND<1>>
-    PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_rho_pi0_= nullptr;
+    PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_rho_pi0_ = nullptr;
 
 std::unique_ptr<TabulationND<2>>
-    PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_pi_rho0_diff_= nullptr;
+    PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_pi_rho0_diff_ =
+        nullptr;
 std::unique_ptr<TabulationND<2>>
-    PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_pi0_rho_diff_= nullptr;
+    PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_pi0_rho_diff_ =
+        nullptr;
 std::unique_ptr<TabulationND<2>>
-    PhotonCrossSection<ComputationMethod::Lookup>::tab_pi0_rho0_pi0_diff_= nullptr;
+    PhotonCrossSection<ComputationMethod::Lookup>::tab_pi0_rho0_pi0_diff_ =
+        nullptr;
 std::unique_ptr<TabulationND<2>>
-    PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_rho_pi0_diff_= nullptr;
+    PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_rho_pi0_diff_ =
+        nullptr;
 std::unique_ptr<TabulationND<2>>
-    PhotonCrossSection<ComputationMethod::Lookup>::tab_pi0_rho_pi_diff_= nullptr;
+    PhotonCrossSection<ComputationMethod::Lookup>::tab_pi0_rho_pi_diff_ =
+        nullptr;
 std::unique_ptr<TabulationND<2>>
-    PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_rho0_pi_diff_= nullptr;
-
+    PhotonCrossSection<ComputationMethod::Lookup>::tab_pi_rho0_pi_diff_ =
+        nullptr;

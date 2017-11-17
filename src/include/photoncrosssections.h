@@ -16,12 +16,14 @@
 #include <memory>
 
 #include <iostream>
+
+#include "logging.h"
+
 #include "kinematics.h"
 #include "particletype.h"
 #include "pdgcode.h"
 #include "tabulationnd.h"
 #include "cxx14compat.h"
-#include "logging.h"
 
 namespace Smash {
 // calculation method for the cross sections
@@ -30,7 +32,7 @@ enum class ComputationMethod { Analytic, Lookup, Parametrized };
 // usage would be
 // PhotonCrossSection xs<Analytic>; xs.xs_pi_pi_rho(var1, var2...)
 template <ComputationMethod method>
-class PhotonCrossSection;
+class PhotonCrossSection {};
 
 template <>
 class PhotonCrossSection<ComputationMethod::Analytic> {
@@ -116,3 +118,5 @@ template <>
 class PhotonCrossSection<ComputationMethod::Parametrized> {};
 
 } // namespace Smash
+
+#endif

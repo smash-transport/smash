@@ -18,9 +18,6 @@
 
 namespace Smash {
 
-namespace Smash{
-
-
 template <int dim>
 class TabulationND {};
 
