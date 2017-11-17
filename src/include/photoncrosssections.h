@@ -44,6 +44,14 @@ class PhotonCrossSection<ComputationMethod::Analytic> {
   static double xs_pi_rho_pi0(const double s);
   static double xs_pi0_rho_pi(const double s);
 
+  static double xs_pi_pi_rho0(const double s, const double m_rho);
+  static double xs_pi_pi0_rho(const double s, const double m_rho);
+  static double xs_pi0_rho0_pi0(const double s, const double m_rho);
+  static double xs_pi_rho0_pi(const double s, const double m_rho);
+  static double xs_pi_rho_pi0(const double s, const double m_rho);
+  static double xs_pi0_rho_pi(const double s, const double m_rho);
+
+
   static double xs_diff_pi0_rho0_pi0(const double s, const double t);
   static double xs_diff_pi_pi_rho0(const double s, const double t);
   static double xs_diff_pi_pi0_rho(const double s, const double t);
