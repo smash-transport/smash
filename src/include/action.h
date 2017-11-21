@@ -227,6 +227,13 @@ class Action {
     const auto &log = logger<LogArea::Action>();
     double random_weight = Random::uniform(0., total_weight);
     double weight_sum = 0.;
+
+    #ifndef NDEBUG
+    if (subprocesses.size() == 0)
+    {
+      std::cout << "debug";
+    }
+    #endif
     /* Loop through all subprocesses and select one by Monte Carlo, based on
      * their weights.  */
     for (const auto &proc : subprocesses) {
