@@ -159,7 +159,7 @@ void ScatterActionPhoton::generate_final_state() {
   const double pcm_in = cm_momentum();
   const double pcm_out = pCM(sqrts, m3, 0.0);
 
-  // move to sample_angle()
+  // find maximum of differential cross section
   assert(t1 < t2);
   double diff_xsection_max = 0.0;
   const double stepsize = (t2 - t1) / 100.0;
