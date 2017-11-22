@@ -823,6 +823,7 @@ bool Experiment<Modus>::perform_action(
     log.debug(~einhard::DRed(), "✘ ", action, " (discarded: invalid)");
     return false;
   }
+  action.input_potential(UB_lat_.get(), UI3_lat_.get(), potentials_.get());
   action.generate_final_state();
   log.debug("Process Type is: ", action.get_type());
   if (pauli_blocker_ && action.is_pauli_blocked(particles_, *pauli_blocker_)) {

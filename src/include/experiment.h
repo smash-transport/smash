@@ -296,7 +296,7 @@ class Experiment : public ExperimentBase {
   /// Type of density for lattice printout
   DensityType dens_type_lattice_printout_ = DensityType::None;
   /// Lattices for potentials
-  std::unique_ptr<RectangularLattice<double>> UB_lat_, UI3_lat_;
+  std::unique_ptr<RectangularLattice<double>> UB_lat_, UI3_lat_ = nullptr;
   /// Lattices for  potential gradients.
   std::unique_ptr<RectangularLattice<ThreeVector>> dUB_dr_lat_, dUI3_dr_lat_;
 

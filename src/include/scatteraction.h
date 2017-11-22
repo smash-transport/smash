@@ -144,8 +144,7 @@ class ScatterAction : public Action {
    *
    * \throws InvalidResonanceFormation
    */
-  void generate_final_state(Particles *particles,
-       const Potentials &pot) override;
+  void generate_final_state() override;
 
   double raw_weight_value() const override;
 
@@ -323,7 +322,7 @@ class ScatterAction : public Action {
   bool is_elastic() const;
 
   /** Perform a 2->1 resonance-formation process. */
-  void resonance_formation(Particles *particles, const Potentials $pot);
+  void resonance_formation();
 };
 
 }  // namespace Smash

@@ -195,8 +195,7 @@ void DecayAction::generate_final_state() {
 
 /* This is overridden from the Action class in order to
  * take care of the angular momentum L_. */
-std::pair<double, double> DecayAction::sample_masses(const Particles *particles,
-  const Potentials &pot) const {
+std::pair<double, double> DecayAction::sample_masses() const {
   const ParticleType &t_a = outgoing_particles_[0].type();
   const ParticleType &t_b = outgoing_particles_[1].type();
 

@@ -48,8 +48,7 @@ class DecayAction : public Action {
    */
   void generate_final_state() override;
 
-  std::pair<double, double> sample_masses(const Particles *particles,
-       const Potentials &pot) const override;
+  std::pair<double, double> sample_masses() const override;
 
   double raw_weight_value() const override { return total_width_; }
 

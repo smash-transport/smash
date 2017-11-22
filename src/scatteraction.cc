@@ -39,8 +39,7 @@ void ScatterAction::add_collisions(CollisionBranchList pv) {
                                  total_cross_section_);
 }
 
-void ScatterAction::generate_final_state(Particles *particles,
-     const Potentials &pot) {
+void ScatterAction::generate_final_state() {
   const auto &log = logger<LogArea::ScatterAction>();
 
   log.debug("Incoming particles: ", incoming_particles_);
@@ -65,7 +64,7 @@ void ScatterAction::generate_final_state(Particles *particles,
     case ProcessType::TwoToOne:
       /* resonance formation */
       /* processes computed in the center of momenta */
-      resonance_formation(particles, pot);
+      resonance_formation();
       break;
     case ProcessType::TwoToTwo:
       /* 2->2 inelastic scattering */
@@ -427,8 +426,7 @@ void ScatterAction::inelastic_scattering() {
   }
 }
 
-void ScatterAction::resonance_formation(Particles *particles,
-     const Potentials &pot) {
+void ScatterAction::resonance_formation() {
   const auto &log = logger<LogArea::ScatterAction>();
 
   if (outgoing_particles_.size() != 1) {
@@ -441,7 +439,7 @@ void ScatterAction::resonance_formation(Particles *particles,
     throw InvalidResonanceFormation(s);
   }
 
-  cms_kin_energy = kinetic_energy_cms(particles, pot);
+  const double cms_kin_energy = kinetic_energy_cms();
   /* 1 particle in final state: Center-of-momentum frame of initial particles
    * is the rest frame of the resonance.  */
   outgoing_particles_[0].set_4momentum(FourVector(cms_kin_energy, 0., 0., 0.));

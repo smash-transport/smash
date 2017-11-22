@@ -14,6 +14,7 @@
 #include <utility>
 #include <vector>
 
+#include "lattice.h"
 #include "particles.h"
 #include "pauliblocking.h"
 #include "potentials.h"
@@ -114,8 +115,7 @@ class Action {
    * This function selects a subprocess by Monte-Carlo decision and sets up
    * the final-state particles in phase space.
    */
-  virtual void generate_final_state(Particles *particles,
-          const Potentials &pot) = 0;
+  virtual void generate_final_state() = 0;
 
   /**
    * Actually perform the action, e.g. carry out a decay or scattering by
@@ -184,10 +184,18 @@ class Action {
    * Calculate the total kinetic energy of the outgoing particles in
    * the center of mass frame.
    */
-  double kinetic_energy_cms(const Particles *particles, const Potentials,pots)
+  double kinetic_energy_cms() const;
 
   /** Get the interaction point */
   FourVector get_interaction_point();
+
+  /** Input the information on the potential */
+  void input_potential(RectangularLattice<double> *UB_lat,
+        RectangularLattice<double> *UI3_lat, Potentials *pot) {
+        UB_lat_ = UB_lat;
+        UI3_lat_ = UI3_lat;
+        pot_ = pot;
+  }
 
   /**
    * \ingroup exception
@@ -215,6 +223,13 @@ class Action {
   const double time_of_execution_;
   /** type of process */
   ProcessType process_type_;
+  /** Pointer to the skymre potential on the lattice */
+  RectangularLattice<double> *UB_lat_ = nullptr;
+  /** Pointer to the symmmetry potential on the lattice */
+  RectangularLattice<double> *UI3_lat_ = nullptr;
+  /** Pointer to a Potential class */
+  Potentials *pot_ = nullptr;
+
 
   /// Sum of 4-momenta of incoming particles
   FourVector total_momentum() const {
@@ -265,15 +280,13 @@ class Action {
    *
    * \throws InvalidResonanceFormation
    */
-  virtual std::pair<double, double> sample_masses(const Particles *particles,
-          const Potentials &pot) const;
+  virtual std::pair<double, double> sample_masses() const;
 
   /**
    * Sample final-state angles in general X->2 processes
    * (here: using an isotropical angular distribution).
    */
-  virtual void sample_angles(std::pair<double, double> masses,
-          Particles *particles, const Potentials &pot);
+  virtual void sample_angles(std::pair<double, double> masses);
 
   /**
    * Sample the full 2-body phase-space (masses, momenta, angles)
