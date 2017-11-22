@@ -9,7 +9,7 @@
 
 #include "clock.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * Helper structure for Experiment.
@@ -57,6 +57,6 @@ struct ExperimentParameters {
   double low_snn_cut;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_EXPERIMENTPARAMETERS_H_

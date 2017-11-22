@@ -21,7 +21,7 @@
 #include "processbranch.h"
 #include "random.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup action
@@ -256,7 +256,8 @@ class Action {
       /* All processes apart from strings should have
        * a well-defined final state. */
       if (proc->particle_number() < 1 &&
-          proc->get_type() != ProcessType::String) {
+          proc->get_type() != ProcessType::StringSoft &&
+          proc->get_type() != ProcessType::StringHard) {
         continue;
       }
       weight_sum += proc->weight();
@@ -335,6 +336,6 @@ inline std::ostream &operator<<(std::ostream &out, const ActionPtr &action) {
  */
 std::ostream &operator<<(std::ostream &out, const ActionList &actions);
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_ACTION_H_

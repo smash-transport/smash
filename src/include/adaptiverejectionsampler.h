@@ -16,7 +16,7 @@
 
 #include "random.h"
 
-namespace Smash {
+namespace smash {
 
 namespace Rejection {
 /*x, expy=f(x), y=log(f(x)) coordinates used in AdaptiveRejectionSampler*/
@@ -170,6 +170,6 @@ class AdaptiveRejectionSampler {
 
 }  // end namespace Rejection
 
-}  // end namespace Smash
+}  // end namespace smash
 
 #endif  // SRC_INCLUDE_ADAPTIVEREJECTIONSAMPLER_H_

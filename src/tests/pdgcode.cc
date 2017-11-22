@@ -12,7 +12,7 @@
 #include "../include/pdgcode.h"
 #include "../include/pdgcode_constants.h"
 
-using namespace Smash;
+using namespace smash;
 
 // mesons:
 PdgCode pinull(0x111);
@@ -624,4 +624,14 @@ TEST(quark_content) {
   COMPARE(q[0], 0);
   COMPARE(q[1], 0);
   COMPARE(q[2], 0);
+}
+
+TEST(deexcite) {
+  std::vector<PdgCode> pdg_codes = {0x321, 0x100323, -0x9902214};
+  for (auto &pdg : pdg_codes) {
+    pdg.deexcite();
+  }
+  COMPARE(pdg_codes[0], 0x321);
+  COMPARE(pdg_codes[1], 0x323);
+  COMPARE(pdg_codes[2], -0x2214);
 }

@@ -17,7 +17,7 @@
 #include "include/particles.h"
 #include "include/random.h"
 
-namespace Smash {
+namespace smash {
 
 ActionList DecayActionsFinder::find_actions_in_cell(
     const ParticleList &search_list, double dt) const {
@@ -81,4 +81,4 @@ ActionList DecayActionsFinder::find_final_actions(const Particles &search_list,
   return actions;
 }
 
-}  // namespace Smash
+}  // namespace smash

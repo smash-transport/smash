@@ -122,21 +122,21 @@
  * But many of the classes in SMASH rely on specific data to do any useful
  * operations.
  * The obvious candidates are
- * - \ref Smash::ParticleData
- * - \ref Smash::ParticleType
- * - \ref Smash::Particles
- * - \ref Smash::Configuration
- * - \ref Smash::ProcessBranch
+ * - \ref smash::ParticleData
+ * - \ref smash::ParticleType
+ * - \ref smash::Particles
+ * - \ref smash::Configuration
+ * - \ref smash::ProcessBranch
  *
  * Each of these are interfaces to data that most classes in SMASH read,
- * modify, or create. For example, consider testing Smash::DecayAction. The
- * class is created with a const-ref to a Smash::ParticleData object. This
- * class in turn requires a Smash::ParticleType object for its constructor. To
- * make things worse, the Smash::DecayAction::perform function requires a
- * pointer to Smash::Particles (which contains a map of all existing
- * Smash::ParticleData objects). The \c perform function further calls
- * Smash::Action::choose_channel which requires a std::vector of
- * Smash::ProcessBranch to determine the the final state particles.
+ * modify, or create. For example, consider testing smash::DecayAction. The
+ * class is created with a const-ref to a smash::ParticleData object. This
+ * class in turn requires a smash::ParticleType object for its constructor. To
+ * make things worse, the smash::DecayAction::perform function requires a
+ * pointer to smash::Particles (which contains a map of all existing
+ * smash::ParticleData objects). The \c perform function further calls
+ * smash::Action::choose_channel which requires a std::vector of
+ * smash::ProcessBranch to determine the the final state particles.
  *
  * \subsection unittest_smash_compromise Compromise
  * We see that testing \c DecayAction in isolation will be hard. If we'd want to
@@ -1278,7 +1278,7 @@ UnitTest::Test2<F, Typelist...> hackTypelist(void (*)(Typelist...));
 
 // main {{{1
 int main(int argc, char **argv) {
-  Smash::setup_default_float_traps();
+  smash::setup_default_float_traps();
   UnitTest::initTest(argc, argv);
   UnitTest::runAll();
   return UnitTest::global_unit_test_object_.finalize();

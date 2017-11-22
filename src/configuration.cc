@@ -18,7 +18,7 @@
 
 #include "include/forwarddeclarations.h"
 
-namespace Smash {
+namespace smash {
 
 // internal helper functions
 namespace {
@@ -180,4 +180,4 @@ std::string Configuration::to_string() const {
   return s.str();
 }
 
-}  // namespace Smash
+}  // namespace smash

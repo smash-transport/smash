@@ -11,7 +11,7 @@
 
 #include "../include/tabulation.h"
 
-using namespace Smash;
+using namespace smash;
 
 TEST(constant) {
   // tabulate a constant function

@@ -15,7 +15,7 @@
 #include "constants.h"
 #include "scatteraction.h"
 
-namespace Smash {
+namespace smash {
 
 class ScatterActionPhoton : public ScatterAction {
  public:
@@ -86,6 +86,6 @@ class ScatterActionPhoton : public ScatterAction {
   double diff_cross_section(double t, double m3) const;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_SCATTERACTIONPHOTON_H_

@@ -29,7 +29,7 @@
 #include "include/pdgcode.h"
 #include "include/random.h"
 
-namespace Smash {
+namespace smash {
 
 /*!\Userguide
  * \page input_modi_collider_ Collider
@@ -451,4 +451,4 @@ std::pair<double, double> ColliderModus::get_velocities(double s, double m_a,
   return std::make_pair(v_a, v_b);
 }
 
-}  // namespace Smash
+}  // namespace smash

@@ -45,7 +45,7 @@ class path;
 }  // namespace filesystem
 }  // namespace boost
 
-namespace Smash {
+namespace smash {
 
 template <typename T>
 using build_unique_ptr_ = std::unique_ptr<T, std::default_delete<T>>;
@@ -218,7 +218,7 @@ using DecayTypePtr = build_unique_ptr_<DecayType>;
 
 namespace bf = boost::filesystem;
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // DOXYGEN
 #endif  // SRC_INCLUDE_FORWARDDECLARATIONS_H_

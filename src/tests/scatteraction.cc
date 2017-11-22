@@ -14,9 +14,9 @@
 #include "../include/scatteractionbaryonbaryon.h"
 #include "../include/scatteractionbaryonmeson.h"
 
-using namespace Smash;
-using Smash::Test::Position;
-using Smash::Test::Momentum;
+using namespace smash;
+using smash::Test::Position;
+using smash::Test::Momentum;
 
 TEST(init_particle_types) {
   Test::create_actual_particletypes();
@@ -195,6 +195,9 @@ TEST(pythia_running) {
   // construct action
   ScatterActionPtr act;
   act = make_unique<ScatterActionBaryonBaryon>(p1_copy, p2_copy, 0.2);
+  std::unique_ptr<StringProcess> string_process_interface =
+      make_unique<StringProcess>();
+  act->set_string_interface(string_process_interface.get());
   VERIFY(act != nullptr);
   COMPARE(p2_copy.type(), ParticleType::find(0x2212));
 
@@ -211,7 +214,7 @@ TEST(pythia_running) {
   VERIFY(act->is_valid(particles));
   act->generate_final_state();
   VERIFY(act->get_type() != ProcessType::Elastic);
-  VERIFY(act->get_type() == ProcessType::String);
+  VERIFY(act->get_type() == ProcessType::StringSoft);
   const uint32_t id_process = 1;
   act->perform(&particles, id_process);
   COMPARE(id_process, 1u);

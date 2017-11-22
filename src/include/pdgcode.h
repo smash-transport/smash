@@ -20,7 +20,7 @@
 
 #include "pdgcode_constants.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup data
@@ -533,6 +533,19 @@ class PdgCode {
             digits_.n_R_ * 100000 + digits_.n_ * 1000000);
   }
 
+  /// Remove all excitation, except spin. Sign and quark content remains.
+  void deexcite() { chunks_.excitation_ = 0; }
+
+  /** returns the net number of quarks with given flavour number
+   *
+   * \param quark PDG Code of quark: (1..6) = (d,u,s,c,b,t)
+   * \return for the net number of quarks (\#quarks - \#antiquarks)
+   *
+   * For public use, see strangeness(), charmness(), bottomness() and
+   * isospin3().
+   **/
+  int net_quark_number(const int quark) const;
+
  private:
 // amend this line with something that identifies your compiler if its
 // bit field order is like in the gnu c compiler for 64 bit
@@ -608,15 +621,6 @@ class PdgCode {
   /** Returns an unsigned integer with the PDG code in hexadecimal
    *  (disregarding the antiparticle flag). */
   inline std::uint32_t ucode() const { return (dump_ & 0x0fffffff); }
-  /** returns the net number of quarks with given flavour number
-   *
-   * \param quark PDG Code of quark: (1..6) = (d,u,s,c,b,t)
-   * \return for the net number of quarks (\#quarks - \#antiquarks)
-   *
-   * For public use, see strangeness(), charmness(), bottomness() and
-   * isospin3().
-   **/
-  int net_quark_number(const int quark) const;
   /** extract digits from a character. */
   inline std::uint32_t get_digit_from_char(const char inp) const {
     // atoi's behaviour for invalid input is undefined. I don't like
@@ -754,6 +758,6 @@ inline bool has_lepton_pair(const PdgCode pdg1, const PdgCode pdg2,
          is_dilepton(pdg2, pdg3);
 }
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_PDGCODE_H_

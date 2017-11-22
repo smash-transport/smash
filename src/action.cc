@@ -21,7 +21,7 @@
 #include "include/processbranch.h"
 #include "include/quantumnumbers.h"
 
-namespace Smash {
+namespace smash {
 
 Action::Action(const ParticleList &in_part, double time)
     : incoming_particles_(in_part),
@@ -222,7 +222,8 @@ void Action::check_conservation(const uint32_t id_process) const {
     log.error() << particle_names.str() << err_msg;
     // Pythia does not conserve energy and momentum at high energy, so we just
     // print the error and continue.
-    if (process_type_ == ProcessType::String) {
+    if ((process_type_ == ProcessType::StringSoft) ||
+        (process_type_ == ProcessType::StringHard)) {
       return;
     }
     if (id_process == ID_PROCESS_PHOTON) {
@@ -242,4 +243,4 @@ std::ostream &operator<<(std::ostream &out, const ActionList &actions) {
   return out << '}';
 }
 
-}  // namespace Smash
+}  // namespace smash

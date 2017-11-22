@@ -28,7 +28,7 @@
 // That is: GeV for energies and momenta, fm for distances and time, and mb for
 // cross sections.
 
-namespace Smash {
+namespace smash {
 
 /** total hadronic cross sections at high energies parametrized in the 2016 PDG
  *  book(http://pdg.lbl.gov/2016/reviews/rpp2016-rev-cross-section-plots.pdf) */
@@ -218,10 +218,10 @@ double ppbar_total(double mandelstam_s) {
   }
 }
 
-/** K+ p elastic cross section parametrization.
+/** K+ p elastic background cross section parametrization.
  * sigma(K+n->K+n) = sigma(K+n->K0p) = 0.5 * sigma(K+p->K+p)
  * Source: \iref{Buss:2011mx}, B.3.8 */
-double kplusp_elastic(double mandelstam_s) {
+double kplusp_elastic_background(double mandelstam_s) {
   constexpr double a0 = 10.508;  // mb
   constexpr double a1 = -3.716;  // mb/GeV
   constexpr double a2 = 1.845;   // mb/GeV^2
@@ -234,16 +234,23 @@ double kplusp_elastic(double mandelstam_s) {
   return (a0 + a1 * p_lab + a2 * p_lab2) / (1 + a3 * p_lab + a4 * p_lab2);
 }
 
-/** K+ n elastic cross section parametrization.
+/** K+ n elastic background cross section parametrization.
  * sigma(K+n->K+n) = sigma(K+n->K0p) = 0.5 * sigma(K+p->K+p)
  * Source: \iref{Buss:2011mx}, B.3.8 */
-double kplusn_elastic(double mandelstam_s) {
-  return 0.5 * kplusp_elastic(mandelstam_s);
+double kplusn_elastic_background(double mandelstam_s) {
+  return 0.5 * kplusp_elastic_background(mandelstam_s);
+}
+
+/** K+ n charge exchange cross section parametrization.
+ * sigma(K+n->K+n) = sigma(K+n->K0p) = 0.5 * sigma(K+p->K+p)
+ * Source: \iref{Buss:2011mx}, B.3.8 */
+double kplusn_k0p(double mandelstam_s) {
+  return 0.5 * kplusp_elastic_background(mandelstam_s);
 }
 
 /** K- p elastic cross section parametrization, PDG data.
  *
- * The PDG data is being interpolated using cubic splines. If more than one
+ * The PDG data is smoothed using the LOWESS algorithm. If more than one
  * cross section was given for one p_lab value, the corresponding cross sections
  * are averaged.
  */
@@ -275,9 +282,9 @@ static double kminusp_elastic_pdg(double mandelstam_s) {
   return (*kminusp_elastic_interpolation)(p_lab);
 }
 
-/** K- p elastic cross section parametrization.
+/** K- p elastic background cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.9 */
-double kminusp_elastic(double mandelstam_s) {
+double kminusp_elastic_background(double mandelstam_s) {
   const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
   double sigma;
   if (std::sqrt(mandelstam_s) < 1.68) {
@@ -321,41 +328,41 @@ double kminusp_elastic(double mandelstam_s) {
   return sigma;
 }
 
-/** K- n elastic cross section parametrization.
+/** K- n elastic background cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.9 */
-double kminusn_elastic(double) { return 4.0; }
+double kminusn_elastic_background(double) { return 4.0; }
 
-/** K0 p elastic cross section parametrization.
+/** K0 p elastic background cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.9 */
-double k0p_elastic(double mandelstam_s) {
+double k0p_elastic_background(double mandelstam_s) {
   // by isospin symmetry
-  return kplusn_elastic(mandelstam_s);
+  return kplusn_elastic_background(mandelstam_s);
 }
 
-/** K0 n elastic cross section parametrization.
+/** K0 n elastic background cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.9 */
-double k0n_elastic(double mandelstam_s) {
+double k0n_elastic_background(double mandelstam_s) {
   // by isospin symmetry
-  return kplusp_elastic(mandelstam_s);
+  return kplusp_elastic_background(mandelstam_s);
 }
 
-/** Kbar0 p elastic cross section parametrization.
+/** Kbar0 p elastic background cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.9 */
-double kbar0p_elastic(double mandelstam_s) {
+double kbar0p_elastic_background(double mandelstam_s) {
   // by isospin symmetry
-  return kminusn_elastic(mandelstam_s);
+  return kminusn_elastic_background(mandelstam_s);
 }
 
-/** Kbar0 n elastic cross section parametrization.
+/** Kbar0 n elastic background cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.9 */
-double kbar0n_elastic(double mandelstam_s) {
+double kbar0n_elastic_background(double mandelstam_s) {
   // by isospin symmetry
-  return kminusp_elastic(mandelstam_s);
+  return kminusp_elastic_background(mandelstam_s);
 }
 
-/** K+ p inelastic cross section parametrization.
+/** K+ p inelastic background cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.8 */
-double kplusp_inelastic(double mandelstam_s) {
+double kplusp_inelastic_background(double mandelstam_s) {
   if (kplusp_total_interpolation == nullptr) {
     std::vector<double> x = KPLUSP_TOT_PLAB;
     std::vector<double> y = KPLUSP_TOT_SIG;
@@ -367,24 +374,27 @@ double kplusp_inelastic(double mandelstam_s) {
         make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
   const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
-  return (*kplusp_total_interpolation)(p_lab)-kplusp_elastic(mandelstam_s);
+  return (*kplusp_total_interpolation)(p_lab)-kplusp_elastic_background(
+      mandelstam_s);
 }
 
-/** K+ n inelastic cross section parametrization.
+/** K+ n inelastic background cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.8 */
-double kplusn_inelastic(double mandelstam_s) {
+double kplusn_inelastic_background(double mandelstam_s) {
   if (kplusn_total_interpolation == nullptr) {
     std::vector<double> x = KPLUSN_TOT_PLAB;
     std::vector<double> y = KPLUSN_TOT_SIG;
     std::vector<double> dedup_x;
     std::vector<double> dedup_y;
     std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
-    dedup_y = smooth(dedup_x, dedup_y, 0.1, 5);
+    dedup_y = smooth(dedup_x, dedup_y, 0.05, 5);
     kplusn_total_interpolation =
         make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
   const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
-  return (*kplusn_total_interpolation)(p_lab)-kplusn_elastic(mandelstam_s);
+  return (*kplusn_total_interpolation)(p_lab)-kplusn_elastic_background(
+             mandelstam_s) -
+         kplusn_k0p(mandelstam_s);
 }
 
 /// Calculate and store all isospin ratios for K+ N reactions.
@@ -410,8 +420,8 @@ static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>, double,
     ratios[key] = ratio;
   };
 
-  // All inelastic channels are K+ N -> K Delta -> K pi N, with identical
-  // cross section, weighted by the isospin factor.
+  // All inelastic channels are K+ N -> K Delta -> K pi N or charge exchange,
+  // with identical cross section, weighted by the isospin factor.
   {
     const auto weight1 = isospin_clebsch_gordan_sqr_2to2(
         type_p, type_K_p, type_K_z, type_Delta_pp);
@@ -429,6 +439,15 @@ static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>, double,
 
     add_to_ratios(type_n, type_K_p, type_K_z, type_Delta_p, weight1, weight2);
     add_to_ratios(type_n, type_K_p, type_K_p, type_Delta_z, weight2, weight1);
+  }
+  {
+    const auto weight1 =
+        isospin_clebsch_gordan_sqr_2to2(type_n, type_K_p, type_K_z, type_p);
+    const auto weight2 =
+        isospin_clebsch_gordan_sqr_2to2(type_p, type_K_z, type_K_p, type_n);
+
+    add_to_ratios(type_n, type_K_p, type_K_z, type_p, weight1, weight2);
+    add_to_ratios(type_p, type_K_z, type_K_p, type_n, weight2, weight1);
   }
 
   // K+ and K0 have the same isospin projection, they are assumed to have
@@ -502,19 +521,21 @@ double kminusp_kbar0n(double mandelstam_s) {
  */
 
 double kminusp_piminussigmaplus(double sqrts) {
-  return 0.0788265 / Smash::square(sqrts - 1.38841);
+  return 0.0788265 / smash::square(sqrts - 1.38841);
 }
 
 double kminusp_piplussigmaminus(double sqrts) {
-  return 0.0196741 / Smash::square(sqrts - 1.42318);
+  return 0.0196741 / smash::square(sqrts - 1.42318);
 }
 
 double kminusp_pi0sigma0(double sqrts) {
-  return 0.55 * 0.0508208 / Smash::square(sqrts - 1.38837);
+  // Fit to Landolt-Börnstein instead of UrQMD values
+  return 0.0403364 / smash::square(sqrts - 1.39830305);
 }
 
 double kminusp_pi0lambda(double sqrts) {
-  return 0.45 * 0.0508208 / Smash::square(sqrts - 1.38837);
+  // Fit to Landolt-Börnstein instead of UrQMD values
+  return 0.05932562 / smash::square(sqrts - 1.38786692);
 }
 
 // The other channels follow from the paramatriziation with the same strange
@@ -600,4 +621,4 @@ double sigmaplussigmaminus_xi0n(double sqrts_sqrts0) {
   return sigmaplussigmaminus_ximinusp(sqrts_sqrts0);
 }
 
-}  // namespace Smash
+}  // namespace smash

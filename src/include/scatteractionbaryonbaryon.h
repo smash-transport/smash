@@ -12,7 +12,7 @@
 
 #include "scatteraction.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup action
@@ -72,6 +72,6 @@ class ScatterActionBaryonBaryon : public ScatterAction {
   void format_debug_output(std::ostream &out) const override;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_SCATTERACTIONBARYONBARYON_H_

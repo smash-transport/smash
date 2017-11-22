@@ -30,7 +30,7 @@
 #include "include/spheremodus.h"
 #include "include/threevector.h"
 
-namespace Smash {
+namespace smash {
 
 /*!\Userguide
  * \page input_modi_sphere_ Sphere
@@ -206,4 +206,4 @@ double SphereModus::initial_conditions(Particles *particles,
   log.info() << "Sphere initial total 4-momentum [GeV]: " << momentum_total;
   return start_time_;
 }
-}  // namespace Smash
+}  // namespace smash

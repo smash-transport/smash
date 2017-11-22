@@ -23,7 +23,7 @@
 #include "outputinterface.h"
 #include "outputparameters.h"
 
-namespace Smash {
+namespace smash {
 class Particles;
 
 /**
@@ -146,6 +146,6 @@ class RootOutput : public OutputInterface {
   void init_trees();
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_ROOTOUTPUT_H_

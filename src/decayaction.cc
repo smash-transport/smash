@@ -15,7 +15,7 @@
 #include "include/logging.h"
 #include "include/pdgcode.h"
 
-namespace Smash {
+namespace smash {
 
 DecayAction::DecayAction(const ParticleData &p, double time)
     : Action({p}, time), total_width_(0.) {}
@@ -231,4 +231,4 @@ void DecayAction::format_debug_output(std::ostream &out) const {
       << ", sqrt(s)=" << format(sqrt_s(), "GeV", 11, 9);
 }
 
-}  // namespace Smash
+}  // namespace smash

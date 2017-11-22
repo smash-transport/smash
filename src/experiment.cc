@@ -39,8 +39,8 @@ namespace std {
  * time > 3h => hours
  *
  * \note This operator has to be in the \c std namespace for argument dependent
- * lookup to find it. If it were in the Smash namespace then the code would not
- * compile since none of its arguments is a type from the Smash namespace.
+ * lookup to find it. If it were in the smash namespace then the code would not
+ * compile since none of its arguments is a type from the smash namespace.
  */
 template <typename T, typename Ratio>
 static ostream &operator<<(ostream &out,
@@ -60,7 +60,7 @@ static ostream &operator<<(ostream &out,
 }
 }  // namespace std
 
-namespace Smash {
+namespace smash {
 
 /* ExperimentBase carries everything that is needed for the evolution */
 ExperimentPtr ExperimentBase::create(Configuration config,
@@ -398,7 +398,6 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       metric_(
           config.take({"General", "Metric_Type"}, ExpansionMode::NoExpansion),
           config.take({"General", "Expansion_Rate"}, 0.1)),
-      strings_switch_(config.take({"Collision_Term", "Strings"}, false)),
       dileptons_switch_(config.has_value({"Output", "Dileptons"})),
       photons_switch_(config.has_value({"Output", "Photons"})),
       time_step_mode_(
@@ -416,7 +415,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   if (parameters_.two_to_one) {
     action_finders_.emplace_back(make_unique<DecayActionsFinder>());
   }
-  if (parameters_.two_to_one || parameters_.two_to_two) {
+  if (parameters_.two_to_one || parameters_.two_to_two ||
+      parameters_.strings_switch) {
     auto scat_finder = make_unique<ScatterActionsFinder>(
         config, parameters_, nucleon_has_interacted_, modus_.total_N_number(),
         modus_.proj_N_number(), n_fractional_photons_);
@@ -1007,7 +1007,7 @@ void Experiment<Modus>::run_time_evolution() {
     // fragmentation are off.  If potentials are on then momentum is conserved
     // only in average.  If string fragmentation is on, then energy and
     // momentum are only very roughly conserved in high-energy collisions.
-    if (!potentials_ && !strings_switch_ &&
+    if (!potentials_ && !parameters_.strings_switch &&
         metric_.mode_ == ExpansionMode::NoExpansion) {
       std::string err_msg = conserved_initial_.report_deviations(particles_);
       if (!err_msg.empty()) {
@@ -1354,4 +1354,4 @@ void Experiment<Modus>::run() {
   }
 }
 
-}  // namespace Smash
+}  // namespace smash

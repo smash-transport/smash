@@ -18,7 +18,7 @@
 
 #include "logging.h"
 
-namespace Smash {
+namespace smash {
 
 /** Clock tracks the simulation time, i.e., the time IN the simulation.
  *
@@ -290,6 +290,6 @@ class Clock {
   Representation reset_time_ = 0;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_CLOCK_H_

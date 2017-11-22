@@ -12,7 +12,7 @@
 
 #include "decayaction.h"
 
-namespace Smash {
+namespace smash {
 
 class DecayActionDilepton : public DecayAction {
  public:
@@ -44,6 +44,6 @@ class DecayActionDilepton : public DecayAction {
   double branching_ = 1.;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_DECAYACTIONDILEPTON_H_

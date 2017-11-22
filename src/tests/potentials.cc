@@ -26,7 +26,7 @@
 
 #include <boost/filesystem.hpp>
 
-using namespace Smash;
+using namespace smash;
 
 TEST(init_particle_types) {
   ParticleType::create_type_list(
@@ -71,7 +71,7 @@ TEST(potential_gradient) {
   conf["Potentials"]["Skyrme"]["Skyrme_A"] = -209.2;
   conf["Potentials"]["Skyrme"]["Skyrme_B"] = 156.4;
   conf["Potentials"]["Skyrme"]["Skyrme_Tau"] = 1.35;
-  ExperimentParameters param = Smash::Test::default_parameters();
+  ExperimentParameters param = smash::Test::default_parameters();
   std::unique_ptr<Potentials> pot =
       make_unique<Potentials>(conf["Potentials"], param);
 
@@ -117,7 +117,7 @@ TEST(nucleus_potential_profile) {
   conf["Modi"]["Collider"]["Target"]["Particles"]["2112"] = 34;
   conf["Modi"]["Collider"]["Target"]["Automatic"] = "True";
 
-  ExperimentParameters param = Smash::Test::default_parameters();
+  ExperimentParameters param = smash::Test::default_parameters();
   ColliderModus c(conf["Modi"], param);
   Particles P;
   c.initial_conditions(&P, param);
@@ -210,7 +210,7 @@ TEST(propagation_in_test_potential) {
   // Do not initialize particles: just artificially put one particle to list
   const double p_mass = 0.938;
   Configuration conf = Test::configuration();
-  ExperimentParameters param = Smash::Test::default_parameters();
+  ExperimentParameters param = smash::Test::default_parameters();
 
   // Create dummy outputs and our test potential
   const double U0 = 0.5;

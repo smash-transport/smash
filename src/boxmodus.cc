@@ -31,7 +31,7 @@
 #include "include/threevector.h"
 #include "include/wallcrossingaction.h"
 
-namespace Smash {
+namespace smash {
 
 /* console output on startup of box specific parameters */
 std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
@@ -220,4 +220,4 @@ int BoxModus::impose_boundary_conditions(Particles *particles,
   return wraps;
 }
 
-}  // namespace Smash
+}  // namespace smash

@@ -16,8 +16,9 @@
 #include "cxx14compat.h"
 #include "isoparticletype.h"
 #include "kinematics.h"
+#include "processstring.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * Calculate the detailed balance factor R such that
@@ -133,8 +134,6 @@ class ScatterAction : public Action {
    * local rest frame.
    *
    * Returns the squared distance.
-   *
-   * \fpPrecision Why \c double?
    */
   double transverse_distance_sqr() const;
 
@@ -216,8 +215,22 @@ class ScatterAction : public Action {
    * explicitly implemented channels at low energy (elastic, resonance
    * excitation, etc). This method has to be called after all other processes
    * have been added to the Action object.
+   *
+   * create a cross section for PYTHIA event generation
    */
   virtual CollisionBranchPtr string_excitation_cross_section();
+
+  /**
+   * Determine the cross section for string excitations, which is given by the
+   * difference between the parametrized total cross section and all the
+   * explicitly implemented channels at low energy (elastic, resonance
+   * excitation, etc). This method has to be called after all other processes
+   * have been added to the Action object.
+   *
+   * create a list of subprocesses (single-diffractive,
+   * double-diffractive and non-diffractive) and their cross sections.
+   */
+  virtual CollisionBranchList string_excitation_cross_sections();
 
   /**
   * Find all resonances that can be produced in a 2->1 collision of the two
@@ -244,8 +257,6 @@ class ScatterAction : public Action {
    *
    * \return The cross section for the process
    * [initial particle a] + [initial particle b] -> resonance.
-   *
-   * \fpPrecision Why \c double?
    */
   double two_to_one_formation(const ParticleType& type_resonance, double srts,
                               double cm_momentum_sqr);
@@ -263,23 +274,23 @@ class ScatterAction : public Action {
     using std::invalid_argument::invalid_argument;
   };
 
+  void set_string_interface(StringProcess* str_proc) {
+    string_process_ = str_proc;
+  }
+
   virtual double cross_section() const { return total_cross_section_; }
 
  protected:
   /** Determine the Mandelstam s variable,
    * s = (p_a + p_b)^2 = square of CMS energy.
-   *
-   * \fpPrecision Why \c double?
    */
   double mandelstam_s() const;
   /** Determine the momenta of the incoming particles in the
    * center-of-mass system.
-   * \fpPrecision Why \c double?
    */
   double cm_momentum() const;
   /** Determine the squared momenta of the incoming particles in the
    * center-of-mass system.
-   * \fpPrecision Why \c double?
    */
   double cm_momentum_squared() const;
   /// determine the velocity of the center-of-mass frame in the lab
@@ -293,8 +304,12 @@ class ScatterAction : public Action {
   /** Perform an inelastic two-body scattering, i.e. new particles are formed*/
   void inelastic_scattering();
 
+  /** Todo(ryu): document better - it is not really UrQMD-based, isn't it?
+   *  Perform the UrQMD-based string excitation and decay */
+  void string_excitation_soft();
+
   /** Perform the string excitation and decay via Pythia. */
-  void string_excitation();
+  void string_excitation_pythia();
 
   /**
    * \ingroup logging
@@ -323,8 +338,24 @@ class ScatterAction : public Action {
 
   /** Perform a 2->1 resonance-formation process. */
   void resonance_formation();
+
+  /**
+   * summation of the cross sections
+   * string_sub_cross_sections_sum_[i+1] is
+   * sum of string_sub_cross_sections over 0 to i
+   * This is added for determination of subprocess.
+   * string_sub_cross_sections[0] : single diffractive to A+X
+   * string_sub_cross_sections[1] : single diffractive to X+B
+   * string_sub_cross_sections[2] : double diffractive
+   * string_sub_cross_sections[3] : soft non-diffractive
+   * string_sub_cross_sections[4] : hard non-diffractive
+   */
+  std::array<double, 6> string_sub_cross_sections_sum_;
+
+  /** Pointer to interface class for strings */
+  StringProcess* string_process_ = nullptr;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_SCATTERACTION_H_

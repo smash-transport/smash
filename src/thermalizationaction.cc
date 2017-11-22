@@ -7,10 +7,10 @@
 
 #include "include/thermalizationaction.h"
 
-namespace Smash {
+namespace smash {
 
 ThermalizationAction::ThermalizationAction(const GrandCanThermalizer &gct,
                                            double absolute_execution_time)
     : Action(gct.particles_to_remove(), gct.particles_to_insert(),
              absolute_execution_time, ProcessType::Thermalization) {}
-}  // namespace Smash
+}  // namespace smash

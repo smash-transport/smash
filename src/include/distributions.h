@@ -7,7 +7,7 @@
 #ifndef SRC_INCLUDE_DISTRIBUTIONS_H_
 #define SRC_INCLUDE_DISTRIBUTIONS_H_
 
-namespace Smash {
+namespace smash {
 
 /**
  * Returns a relativistic Breit-Wigner distribution. The normalization is such
@@ -58,8 +58,6 @@ double cauchy(double x, double pole, double width);
  * \param[in] temperature \f$T\f$ (in GeV)
  *
  * \return \f$4\pi p^2 \exp{-\frac{E}{T}}\f$
- *
- * \fpPrecision Why \c double?
  */
 double density_integrand(const double energy, const double momentum_sqr,
                          const double temperature);
@@ -111,8 +109,6 @@ double sample_momenta_IC_2M(const double temperature, const double mass);
  * \param[in] mass Mass of the particle: \f$m = \sqrt{E^2 - p^2}\f$
  *
  * \return one possible momentum
- *
- * \fpPrecision Why \c double?
  */
 double sample_momenta_from_thermal(const double temperature, const double mass);
 
@@ -142,6 +138,6 @@ double woods_saxon_dist_func(const double r, const double radius,
                              const double diffusion);
 
 double sample_momenta_IC_ES(const double temperature);
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_DISTRIBUTIONS_H_

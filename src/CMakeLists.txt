@@ -111,6 +111,7 @@ set(smash_src
         pdgcode.cc
         potentials.cc
         processbranch.cc
+        processstring.cc
         propagation.cc
         quantumnumbers.cc
         random.cc

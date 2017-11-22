@@ -13,7 +13,7 @@
 
 #include "include/particledata.h"
 
-namespace Smash {
+namespace smash {
 
 ParticleList ProcessBranch::particle_list() const {
   ParticleList l;
@@ -60,8 +60,11 @@ std::ostream& operator<<(std::ostream& os, ProcessType process_type) {
     case ProcessType::TwoToTwo:
       os << "TwoToTwo";
       break;
-    case ProcessType::String:
-      os << "String";
+    case ProcessType::StringSoft:
+      os << "Soft String Excitation";
+      break;
+    case ProcessType::StringHard:
+      os << "Hard String via Pythia";
       break;
     case ProcessType::Decay:
       os << "Decay";
@@ -75,4 +78,4 @@ std::ostream& operator<<(std::ostream& os, ProcessType process_type) {
   return os;
 }
 
-}  // namespace Smash
+}  // namespace smash

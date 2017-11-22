@@ -13,7 +13,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-namespace Smash {
+namespace smash {
 
 FileLock::FileLock(bf::path path) : path_(path), acquired_(false) {}
 
@@ -42,4 +42,4 @@ FileLock::~FileLock() {
   }
 }
 
-}  // namespace Smash
+}  // namespace smash

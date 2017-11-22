@@ -62,7 +62,7 @@ static std::ostream &operator<<(std::ostream &out, const std::array<T, N> &a) {
 }
 }  // namespace std
 
-namespace Smash {
+namespace smash {
 
 ////////////////////////////////////////////////////////////////////////////////
 // GridBase
@@ -439,4 +439,4 @@ template Grid<GridOptions::PeriodicBoundaries>::Grid(
         &min_and_length,
     const Particles &particles, double max_interaction_length,
     CellSizeStrategy strategy);
-}  // namespace Smash
+}  // namespace smash

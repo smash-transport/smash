@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 
-namespace Smash {
+namespace smash {
 
 // std::string fill_left(const std::string &s, int width, char fill = ' ');
 std::string fill_right(const std::string &s, int width, char fill = ' ');
@@ -65,6 +65,6 @@ sequence_length(octet_iterator lead_it) {
 
 }  // namespace utf8
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_STRINGFUNCTIONS_H_

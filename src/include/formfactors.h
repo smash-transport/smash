@@ -13,7 +13,7 @@
 #include "constants.h"
 #include "pdgcode_constants.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * Returns the squared Blatt-Weisskopf functions, which influence the mass
@@ -130,6 +130,6 @@ inline double em_form_factor_sqr_vec(PdgCode pdg, double mass) {
  * normalized at the real-photon point. */
 inline double form_factor_delta(double) { return 3.12; }
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_FORMFACTORS_H_

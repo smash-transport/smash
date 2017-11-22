@@ -18,7 +18,7 @@
 #include "forwarddeclarations.h"
 #include "outputinterface.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup output
@@ -90,6 +90,6 @@ class VtkOutput : public OutputInterface {
   int vtk_fluidization_counter_ = 0;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_VTKOUTPUT_H_

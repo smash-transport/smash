@@ -11,7 +11,7 @@
 
 #include "../include/angles.h"
 
-using namespace Smash;
+using namespace smash;
 
 Angles dir;
 constexpr double accuracy = 1e-5;

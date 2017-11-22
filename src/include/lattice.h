@@ -21,7 +21,7 @@
 #include "logging.h"
 #include "numerics.h"
 
-namespace Smash {
+namespace smash {
 
 /** Enumerator option for lattice updates.
  *  Lattice update is a costly operation and should be performed only if
@@ -361,6 +361,6 @@ class RectangularLattice {
   }
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_LATTICE_H_

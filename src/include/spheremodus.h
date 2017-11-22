@@ -15,7 +15,7 @@
 #include "forwarddeclarations.h"
 #include "modusdefault.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup modus
@@ -76,5 +76,5 @@ class SphereModus : public ModusDefault {
    */
   friend std::ostream &operator<<(std::ostream &, const SphereModus &);
 };
-}  // namespace Smash
+}  // namespace smash
 #endif  // SRC_INCLUDE_SPHEREMODUS_H_

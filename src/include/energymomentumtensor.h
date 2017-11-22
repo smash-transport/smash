@@ -18,7 +18,7 @@
 #include "fourvector.h"
 #include "particledata.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup data
@@ -198,6 +198,6 @@ EnergyMomentumTensor inline operator/(EnergyMomentumTensor a, const double b) {
   return a;
 }
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_ENERGYMOMENTUMTENSOR_H_

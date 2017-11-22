@@ -24,7 +24,7 @@
 /* build dependent variables */
 #include "include/config.h"
 
-namespace Smash {
+namespace smash {
 
 namespace {
 /** prints usage information and exits the program
@@ -192,11 +192,11 @@ void ensure_path_is_valid(const bf::path &path) {
 
 }  // unnamed namespace
 
-}  // namespace Smash
+}  // namespace smash
 
 /* main - do command line parsing and hence decides modus */
 int main(int argc, char *argv[]) {
-  using namespace Smash;  // NOLINT(build/namespaces)
+  using namespace smash;  // NOLINT(build/namespaces)
   setup_default_float_traps();
 
   const auto &log = logger<LogArea::Main>();
