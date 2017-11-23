@@ -136,12 +136,13 @@ bool ScatterActionPhoton::is_kinematically_possible(const double s_sqrt,
 
 void ScatterActionPhoton::generate_final_state() {
   /* Decide for a particular final state. */
-
-  // is this needed? we have only one channel anyway, right?
-  // disadvantage: reduces error checking. 
-  
   //const CollisionBranch *proc = choose_channel<CollisionBranch>(
   //    collision_channels_photons_, cross_section_photons_);
+  if (collision_channels_photons_.size() != 1) {
+    const auto &log = logger<LogArea::ScatterAction>();
+    log.fatal() << "Problem in ScatterActionPhoton::generate_final_state()\n";
+    throw std::runtime_error("");
+  }
   auto *proc = collision_channels_photons_[0].get();
   process_type_ = proc->get_type();
   outgoing_particles_ = proc->particle_list();
