@@ -892,9 +892,11 @@ bool Experiment<Modus>::perform_action(
     // This can be done, because photon action is never performed, only
     // final state is generated and printed to photon output.
     // raw weight value is cross section of hadronic process
+    
     photon_act.add_dummy_hadronic_channels(action.raw_weight_value());
+    
     // Now add the actual photon reaction channel. here we also compute the 
-    // total cross sections
+    // total cross section
     photon_act.add_single_channel();
     for (int i = 0; i < n_fractional_photons_; i++) {
       photon_act.generate_final_state();

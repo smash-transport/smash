@@ -46,6 +46,8 @@ class ScatterActionPhoton : public ScatterAction {
 
   double raw_weight_value() const override { return weight_; }
 
+  // returns the cross section of the underlying hadronic process (note: this includes also 
+  // the total cross section of the photon channels.)
   double cross_section() const override { return total_cross_section_; }
 
   // we have to override sample_masses from Action. In Action sample_masses relies 

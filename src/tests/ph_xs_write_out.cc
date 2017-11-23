@@ -43,6 +43,42 @@ TEST(init_particle_types) {
       "Σ       1.189 0        3112    3212    3222\n"
       "e⁻ 0.000511 0 11\n");
 }
+
+TEST(broad_rho_pi_pi_rho0)
+{
+  PhotonCrossSection<ComputationMethod::Analytic> xs_obj;
+  std::stringstream ss;
+  ss << base_path << "pi_pi_rho0.dat";
+  //ss << base_path << "pi_rho0_pi_broad.dat";
+  std::fstream fs;
+  fs.open(ss.str(), std::fstream::out);
+
+  double s = 27.964798286403266;
+  //double s = 0.4055 * 0.4055;
+  double m_r, xs;
+  m_r = 0.776;
+  double s_sqrt = std::sqrt(s);
+  xs = xs_obj.xs_pi0_rho_pi(s, m_r);
+  std::cout << xs << std::endl;
+  //for (m_r = 0.35; m_r < std::sqrt(s) + 0.1; m_r += 0.001)
+  /*
+  for (; s_sqrt < 1.5; s_sqrt += 0.001)
+  {
+    s = s_sqrt * s_sqrt;
+    std::cout << s_sqrt << std::endl;
+  
+    xs = xs_obj.xs_pi_pi_rho0(s, m_r);
+    if (xs < 0) {
+    fs << s_sqrt << " " << xs << "\n";
+    }
+  }
+  */
+  fs.close();
+
+}
+
+
+/*
 TEST(get_t_ranges)
 {
     PhotonCrossSection<ComputationMethod::Analytic> xs_object;
@@ -59,6 +95,9 @@ TEST(get_t_ranges)
   //  xs = xs_object.xs_pi0_rho0_pi0(1.1);
 
 }
+*/
+
+
 /*
 TEST(uniform_random_pi0_rho0_pi0) {
   // sample N points and interpolate value there
@@ -270,6 +309,7 @@ TEST(uniform_random_pi_rho_pi0) {
 }
 
 */
+/*
 TEST(pi_rho_pi0) {
     const double s0_sqrt = 0.95, s1_sqrt = 1.1, t0 = -0.22, t1 = -0.02,
                  dt = 0.005, ds = 0.01;
@@ -298,4 +338,4 @@ TEST(pi_rho_pi0) {
     }
     fs.close();
   }
-
+*/
