@@ -109,7 +109,8 @@ double Action::kinetic_energy_cms() const {
   for (const auto &p_in : incoming_particles_) {
        /* Get the position of the incoming particle. */
        const ThreeVector r = p_in.position().threevec();
-       const auto scale = pot_->force_scale(p_in.type());
+       const auto scale = ((pot_ != nullptr) ? pot_->force_scale(p_in.type())
+                           : std::make_pair(0.0, 0));
        /* Check:
         * 1. Potential is turned on
         * 2. Lattice is turned on
@@ -127,7 +128,8 @@ double Action::kinetic_energy_cms() const {
   double potential_outgoing = 0.0;
   for (const auto &p_out : outgoing_particles_) {
        const ThreeVector r = p_out.position().threevec();
-       const auto scale = pot_->force_scale(p_out.type());
+       const auto scale = ((pot_ != nullptr) ? pot_->force_scale(p_out.type())
+                           : std::make_pair(0.0, 0));
        double UB, UI3;
        const bool UB_exist =
                  ((UB_lat_ != nullptr) ? UB_lat_->value_at(r, UB) : false);
