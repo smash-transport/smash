@@ -223,12 +223,6 @@ class Action {
   const double time_of_execution_;
   /** type of process */
   ProcessType process_type_;
-  /** Pointer to the skymre potential on the lattice */
-  RectangularLattice<double> *UB_lat_ = nullptr;
-  /** Pointer to the symmmetry potential on the lattice */
-  RectangularLattice<double> *UI3_lat_ = nullptr;
-  /** Pointer to a Potential class */
-  Potentials *pot_ = nullptr;
 
 
   /// Sum of 4-momenta of incoming particles
@@ -309,6 +303,13 @@ class Action {
     action.format_debug_output(out);
     return out;
   }
+ private:
+  /** Pointer to the skyrme potential on the lattice */
+  RectangularLattice<double> *UB_lat_ = nullptr;
+  /** Pointer to the symmmetry potential on the lattice */
+  RectangularLattice<double> *UI3_lat_ = nullptr;
+  /** Pointer to a Potential class */
+  Potentials *pot_ = nullptr;
 };
 
 inline std::vector<ActionPtr> &operator+=(std::vector<ActionPtr> &lhs,

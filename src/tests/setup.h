@@ -239,7 +239,7 @@ inline ExperimentParameters default_parameters(int testparticles = 1,
       {0., dt}, {0., 1.}, testparticles,
       1.0,      4.0,      true,
       true,     false,    NNbarTreatment::NoAnnihilation,
-      false,    0.};
+      false,    0., false};
 }
 
 /**

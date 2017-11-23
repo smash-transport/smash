@@ -55,6 +55,10 @@ struct ExperimentParameters {
   /// Elastic collisions between the nucleons with the square root s
   //  below low_snn_cut are excluded.
   double low_snn_cut;
+  /** This indicates whether the mean field potentials affect the scattering
+   *  or decaying processes by shifting the threshold energies.
+   */
+  bool potential_affect_threshold;
 };
 
 }  // namespace smash
