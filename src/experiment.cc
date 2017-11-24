@@ -258,8 +258,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
              " of the process: NN to NNpi");
   }
   const bool potential_affect_threshold =
-             (config.has_value({"Lattice", "Potential_Affect_Threshold"}) ?
-              config.take({"Lattice", "Potential_Affect_Threshold"}) : false);
+             (config.has_value({"Lattice", "Potential_Affect_Thresholds"}) ?
+              config.take({"Lattice", "Potential_Affect_Thresholds"}) : false);
   return {{0., dt},
           {0.0, output_dt},
           ntest,
