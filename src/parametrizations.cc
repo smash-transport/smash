@@ -70,6 +70,14 @@ double piminusp_high_energy(double mandelstam_s) {
   return xs_high_energy(mandelstam_s, true, 0.939, 0.138, 18.75, 9.56, 1.767);
 }
 
+double pp_string_hard(double mandelstam_s) {
+  double xs_ref = 0.0064;
+  double lnpow = 4.7;
+  double sqrts = std::sqrt(mandelstam_s);
+  double xs = xs_ref * std::pow(std::log(sqrts), lnpow);
+  return xs;
+}
+
 /** pi+p elastic cross section parametrization.
  * Source: GiBUU:parametrizationBarMes_HighEnergy.f90
  * The parametrizations of the elastic pion+nucleon cross sections

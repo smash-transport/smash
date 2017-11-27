@@ -380,8 +380,10 @@ CollisionBranchList ScatterAction::string_excitation_cross_sections() {
 
     /* Hard string process will be added later.
      * The corresponding cross section is set to be zero right now. */
-    double nondiffractive_hard = 0.;
-    double nondiffractive_soft = nondiffractive_all - nondiffractive_hard;
+    double hard_xsec = string_hard_cross_section();
+    double nondiffractive_soft = nondiffractive_all *
+                                 std::exp(- hard_xsec / nondiffractive_all);
+    double nondiffractive_hard = nondiffractive_all - nondiffractive_soft;
     log.debug("String cross sections [mb] are");
     log.debug("Single-diffractive AB->AX: ", single_diffr_AX);
     log.debug("Single-diffractive AB->XB: ", single_diffr_XB);
@@ -409,10 +411,10 @@ CollisionBranchList ScatterAction::string_excitation_cross_sections() {
       channel_list.push_back(make_unique<CollisionBranch>(
           sig_string_soft, ProcessType::StringSoft));
     }
-    // if(nondiffractive_hard > 0.) {
-    //  channel_list.push_back(make_unique<CollisionBranch>(nondiffractive_hard,
-    //      ProcessType::StringHard));
-    //}
+    if (nondiffractive_hard > 0.) {
+      channel_list.push_back(make_unique<CollisionBranch>(
+          nondiffractive_hard, ProcessType::StringHard));
+    }
   }
   return channel_list;
 }
@@ -582,7 +584,9 @@ void ScatterAction::string_excitation_pythia() {
     static /*thread_local (see #3075)*/ Pythia8::Pythia pythia(PYTHIA_XML_DIR,
                                                                false);
     /* select only inelastic events: */
-    pythia.readString("SoftQCD:inelastic = on");
+    //pythia.readString("SoftQCD:inelastic = on");
+    pythia.readString("SoftQCD:nonDiffractive = on");
+    pythia.readString("MultipartonInteractions:pTmin = 1.5");
     /* suppress unnecessary output */
     pythia.readString("Print:quiet = on");
     /* Create output of the Pythia particle list */
