@@ -39,7 +39,7 @@ General:
     Testparticles: 1
 
     # number of events
-    Nevents:      50
+    Nevents:     2 
 
     # width of gaussians representing particles, fm
     Gaussian_Sigma: 1.0
@@ -74,7 +74,7 @@ Output:
 #        Format:          ["Oscar2013", "Binary", "Root"]
     Photons:
         Format:          ["Oscar2013"]
-        Fractions:       500
+        Fractions:       100
 #    Thermodynamics:
 #        Format:          ["ASCII", "VTK"]
 #        # ("hadron", "baryon", "baryonic isospin", "pion"), baryon := net baryon
@@ -92,7 +92,7 @@ Collision_Term:
                                             #"resonances", "strings"
     Force_Decays_At_End:    True
     Isotropic:              False
-    Elastic_Cross_Section:  -1.0  # Globally used if non-negative, [mb]
+    Elastic_Cross_Section:  30.0  # Globally used if non-negative, [mb]
     Elastic_NN_Cutoff_Sqrts: 1.98 # Exclude the elastic collisions between the two
                                  # nucleons with the square root s below the value [GeV].
                                  # Exclusion is effectively turned off by setting any value

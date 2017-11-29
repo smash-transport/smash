@@ -41,6 +41,8 @@ double TabulationND<2>::get_linear(const double x, const double y) const {
   //assert(x >= x0_ && x <= x1_);
   //assert(y >= y0_ && y <= y1_);
   if (x < x0_ || x > x1_ || y < y0_ || y > y1_) {
+    const auto &log = logger<LogArea::ScatterAction>();
+    log.warn() << "Value out of tabulated values: " << x << " " << y << "\n"; 
     return f_(x, y);
   }
 
@@ -77,6 +79,8 @@ double TabulationND<3>::get_linear(const double x, const double y,
                                    const double z) {
 
   if (x < x0_ || x > x1_ || y < y0_ || y > y1_ || z < z0_ || z > z1_) {
+    const auto &log = logger<LogArea::ScatterAction>();
+    log.warn() << "Value out of tabulated values: " << x << " " << y << "\n"; 
     return f_(x, y, z);
   }
   const double x_idx_d = (x - x0_) * inv_dx_;

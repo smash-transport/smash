@@ -850,7 +850,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0(
                 pow(mrho,4)*(-2. - 4.*C4*s)))*log(abs(-2.*pow(mpion,2) + s + tmin)))/pow(mrho,6)))/
     (16.*Pi*(pow(mpion,4) + pow(pow(mrho,2) - s,2) - 2*pow(mpion,2)*(pow(mrho,2) + s))))/3.0;
 
-		return xs;
+		return to_mb * xs;
 }
          
 
