@@ -342,7 +342,6 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
 
     case ReactionType::pi_m_rho_p_pi_z:
     case ReactionType::pi_p_rho_m_pi_z:
-
       xsection = xs_object.xs_pi_rho_pi0(s, m3);
       break;
 
