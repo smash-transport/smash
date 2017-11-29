@@ -16,6 +16,9 @@
 #include <iostream>
 #include <vector>
 
+#include "logging.h"
+
+
 namespace Smash {
 
 template <int dim>
@@ -28,7 +31,6 @@ class TabulationND<1> {
       : x0_{x0}, x1_{x1}, dx_{dx}, inv_dx_{1 / dx}, f_(f) {
     n_ = ceil((x1_ - x0_) * inv_dx_) + 1;
     values_.resize(n_);
-    double x = x0;
     for (size_t i = 0; i < n_; i++) {
       values_[i] = f(x0_ + i * dx_);
     }
@@ -174,8 +176,8 @@ class TabulationND<3> {
 
  private:
   const double x0_, x1_, y0_, y1_, z0_, z1_, dx_, dy_, dz_;
-  const double inv_dx_, inv_dy_, inv_dz_;
   std::function<double(double, double, double)> f_;
+  const double inv_dx_, inv_dy_, inv_dz_;
   std::vector<double> values_;
   size_t nx_, ny_, nz_, n_;
 
