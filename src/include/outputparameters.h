@@ -64,6 +64,10 @@ struct OutputParameters {
       coll_extended = conf.take({"Collisions", "Extended"}, false);
       coll_printstartend = conf.take({"Collisions", "Print_Start_End"}, false);
     }
+
+    if (conf.has_value({"Dileptons"})) {
+      coll_extended = true;
+    }
   }
   /// Point, where thermodynamic quantities are calculated
   ThreeVector td_position;
