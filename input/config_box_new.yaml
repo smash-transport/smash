@@ -39,7 +39,7 @@ General:
     Testparticles: 1
 
     # number of events
-    Nevents:       1
+    Nevents:      50
 
     # width of gaussians representing particles, fm
     Gaussian_Sigma: 1.0
@@ -74,7 +74,7 @@ Output:
 #        Format:          ["Oscar2013", "Binary", "Root"]
     Photons:
         Format:          ["Oscar2013"]
-        Fractions:       1
+        Fractions:       500
 #    Thermodynamics:
 #        Format:          ["ASCII", "VTK"]
 #        # ("hadron", "baryon", "baryonic isospin", "pion"), baryon := net baryon
@@ -132,7 +132,7 @@ Modi:
         Length: 10.0
 
         # initialization temperature
-        Temperature: 0.8
+        Temperature: 0.2
 
         # initial condition
         # ("peaked momenta", "thermal momenta")
@@ -142,7 +142,7 @@ Modi:
         Start_Time:    0.0
 
         # use thermal box, if so with which chemical potentials
-        Use_Thermal_Multiplicities: False
+        Use_Thermal_Multiplicities: True
         Baryon_Chemical_Potential: 0.0
         Strange_Chemical_Potential: 0.0
 
