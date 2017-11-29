@@ -127,7 +127,8 @@ double Action::kinetic_energy_cms() const {
                  ((UI3_lat_ != nullptr) ? UI3_lat_->value_at(r, UI3) : false);
        /* Rescale the potential according to the particle species.*/
        const double B_pot = (UB_exist ? UB * scale.first : 0.0);
-       const double I3_pot = (UI3_exist ? UI3 * scale.second : 0.0);
+       const double I3_pot =
+         (UI3_exist ? UI3 * scale.second * p_in.type().isospin3_rel() : 0.0);
        potential_incoming += B_pot + I3_pot;
   }
   double potential_outgoing = 0.0;
@@ -141,7 +142,8 @@ double Action::kinetic_energy_cms() const {
        const bool UI3_exist =
                  ((UI3_lat_ != nullptr) ? UI3_lat_->value_at(r, UI3) : false);
        const double B_pot = (UB_exist ? UB * scale.first : 0.0);
-       const double I3_pot = (UI3_exist ? UI3 * scale.second : 0.0);
+       const double I3_pot =
+         (UI3_exist ? UI3 * scale.second * p_out.type().isospin3_rel() : 0.0);
        potential_outgoing += B_pot + I3_pot;
   }
   return sqrt_s() + potential_incoming - potential_outgoing;
