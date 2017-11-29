@@ -122,16 +122,15 @@ ParticleTypePtr ScatterActionPhoton::outgoing_hadron_type(
 
 bool ScatterActionPhoton::is_kinematically_possible(const double s_sqrt,
                                                     const ParticleList &in) {
-  return true;
-  // auto hadron = outgoing_hadron_type(in);
+  auto hadron = outgoing_hadron_type(in);
   // hadron() returns true if index is valid
-  /*
-  if (*hadron() && hadron->mass() < s_sqrt) {
+  
+  if (hadron->mass() < s_sqrt) {
     return true;
   } else {
     return false;
   }
-  */
+  
 }
 
 void ScatterActionPhoton::generate_final_state() {
@@ -304,7 +303,7 @@ double ScatterActionPhoton::mediator_mass() const {
 
 CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
   CollisionBranchList process_list;
-  PhotonCrossSection<ComputationMethod::Lookup> xs_object;
+  PhotonCrossSection<ComputationMethod::Analytic> xs_object;
 
   reac = photon_reaction_type(Action::incoming_particles());
 
@@ -380,7 +379,7 @@ double ScatterActionPhoton::diff_cross_section(double t, double t2,
   double diff_xsection = 0.0;
   const double m_rho = mediator_mass();
 
-  PhotonCrossSection<ComputationMethod::Lookup> xs_object;
+  PhotonCrossSection<ComputationMethod::Analytic> xs_object;
 
   switch (reac) {
     case ReactionType::pi_p_pi_m_rho_z:
