@@ -36,9 +36,9 @@ class ScatterActionPhoton : public ScatterAction {
   ScatterActionPhoton(const ParticleList &in, double time, int nofp)
       : ScatterAction(in[0], in[1], time),
         number_of_fractional_photons_(nofp),
-        hadron_out_t_(outgoing_hadron_type(in)),
-        hadron_out_mass_(sample_out_hadron_mass(hadron_out_t_)) {
-            
+        hadron_out_t_(outgoing_hadron_type(in))
+         {
+            hadron_out_mass_ = hadron_out_t_ -> mass();
             reac = photon_reaction_type(in);
         }
 
@@ -111,7 +111,7 @@ class ScatterActionPhoton : public ScatterAction {
   int const number_of_fractional_photons_;
 
   ParticleTypePtr hadron_out_t_;
-  const double hadron_out_mass_;
+  double hadron_out_mass_;
 
   double weight_ = 0.0;
 
