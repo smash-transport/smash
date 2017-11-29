@@ -57,6 +57,13 @@ void ScatterAction::generate_final_state() {
   /* The production point of the new particles.  */
   FourVector middle_point = get_interaction_point();
 
+  /* Set positions of the outgoing particles */
+  for (ParticleData &new_particle : outgoing_particles_) {
+    if (proc->get_type() != ProcessType::Elastic) {
+      new_particle.set_4position(middle_point);
+    }
+  }
+
   switch (process_type_) {
     case ProcessType::Elastic:
       /* 2->2 elastic scattering */
@@ -88,11 +95,8 @@ void ScatterAction::generate_final_state() {
           ", PDGcode2=" + incoming_particles_[1].pdgcode().string() + ")");
   }
 
-  /* Set positions & boost to computational frame. */
+  /* Set momenta & boost to computational frame. */
   for (ParticleData &new_particle : outgoing_particles_) {
-    if (proc->get_type() != ProcessType::Elastic) {
-      new_particle.set_4position(middle_point);
-    }
     new_particle.boost_momentum(-beta_cm());
   }
 }

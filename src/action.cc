@@ -99,7 +99,12 @@ void Action::perform(Particles *particles, uint32_t id_process) {
 
   log.debug("Particle map now has ", particles->size(), " elements.");
 
-  check_conservation(id_process);
+  /* Check the conservation laws if the modifications of the total kinetic
+   * energy of the outgoing particles by the mean field potentials are not
+   * taken into account. */
+  if (UB_lat_ == nullptr && UI3_lat_ == nullptr) {
+     check_conservation(id_process);
+  }
 }
 
 double Action::kinetic_energy_cms() const {
@@ -169,7 +174,6 @@ std::pair<double, double> Action::sample_masses() const {
     // two resonances in final state
     masses = t_a.sample_resonance_masses(t_b, cms_kin_energy);
   }
-
   return masses;
 }
 

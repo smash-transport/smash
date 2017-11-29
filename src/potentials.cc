@@ -129,9 +129,9 @@ std::pair<double, int> Potentials::force_scale(const ParticleType &data) const {
   direction.*/
   double skyrme_scale = 1.0;
   if (data.pdgcode().is_hyperon()) {
-    if (data.pdgcode().is_xi1321()) {
+    if (data.pdgcode().is_Xi()) {
       skyrme_scale = 1. / 3.;
-    } else if (data.pdgcode().is_Omega1672()) {
+    } else if (data.pdgcode().is_Omega()) {
       skyrme_scale = 0.;
     } else {
       skyrme_scale = 2. / 3.;

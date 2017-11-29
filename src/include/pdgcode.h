@@ -295,31 +295,28 @@ class PdgCode {
   }
 
   /// Is this a hyperon (Lambda, Sigma, Xi, Omega)?
-  inline bool is_hyperon() const {
-    const auto abs_code = std::abs(code());
-    switch (abs_code) {
-      case pdg::Lambda:
-      case pdg::Sigma_p:
-      case pdg::Sigma_z:
-      case pdg::Sigma_m:
-      case pdg::Xi_z:
-      case pdg::Xi_m:
-      case pdg::Omega_m:
-        return true;
-      default:
-        return false;
-    }
+  inline bool is_hyperon() const { return is_hadron() && digits_.n_q1_ == 3; }
+
+  /// Is this a Omega baryon?
+  inline bool is_Omega() const {
+    return is_hyperon() && digits_.n_q2_ == 3 && digits_.n_q3_ == 3;
   }
-  /// Is this a Xi(1321)?
-  inline bool is_xi1321() const {
-    const auto abs_code = std::abs(code());
-    return (abs_code == pdg::Xi_z) || (abs_code == pdg::Xi_m);
+
+  /// Is this a Xi baryon?
+  inline bool is_Xi() const {
+    return is_hyperon() && digits_.n_q2_ == 3 && digits_.n_q3_ != 3;
   }
-  /// Is this a Omega(1672)?
-  inline bool is_Omega1672() const {
-    const auto abs_code = std::abs(code());
-    return (abs_code == pdg::Omega_m);
+
+  /// Is this a Lambda baryon?
+  inline bool is_Lambda() const {
+    return is_hyperon() && digits_.n_q2_ == 1 && digits_.n_q3_ == 2;
   }
+
+  /// Is this a Sigma baryon?
+  inline bool is_Sigma() const {
+    return is_hyperon() && digits_.n_q2_ != 3 && !is_Lambda();
+  }
+
   /// Is this a kaon (K+, K-, K0, Kbar0)?
   inline bool is_kaon() const {
     const auto abs_code = std::abs(code());

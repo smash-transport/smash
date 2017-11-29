@@ -158,6 +158,10 @@ void DecayAction::generate_final_state() {
   const DecayBranch *proc =
       choose_channel<DecayBranch>(decay_channels_, total_width_);
   outgoing_particles_ = proc->particle_list();
+  /* set positions of the outgoing particles */
+  for (auto &p : outgoing_particles_) {
+    p.set_4position(incoming_particles_[0].position());
+  }
   process_type_ = proc->get_type();
   L_ = proc->angular_momentum();
   partial_width_ = proc->weight();
@@ -179,12 +183,11 @@ void DecayAction::generate_final_state() {
           std::to_string(incoming_particles_[0].effective_mass()) + ")");
   }
 
-  /* Set positions and formation time and boost back. */
+  /* Set formation time and boost back. */
   ThreeVector velocity_CM = incoming_particles_[0].velocity();
   for (auto &p : outgoing_particles_) {
     log.debug("particle momenta in lrf ", p);
     p.boost_momentum(-velocity_CM);
-    p.set_4position(incoming_particles_[0].position());
     p.set_formation_time(
         std::max(time_of_execution_, incoming_particles_[0].formation_time()));
     p.set_cross_section_scaling_factor(
