@@ -108,45 +108,69 @@ void Action::perform(Particles *particles, uint32_t id_process) {
 }
 
 double Action::kinetic_energy_cms() const {
-  /* Calculate the potential energies of the incoming and the outgoing
-   * particles. */
-  double potential_incoming = 0.0;
+  const auto &log = logger<LogArea::Action>();
+  /* scale_B returns the difference of the total force scales of the skyrme
+   * potential between the initial and final states. */
+  double scale_B = 0.0;
+  /* scale_I3 returns the difference of the total force scales of the symmetry
+   * potential between the initial and final states. */
+  double scale_I3 = 0.0;
+  std::string in_particle = "";
+  std::string out_particle = "";
+  std::string in_scale = "";
+  std::string out_scale = "";
+  std::string in_position = "";
+  std::string out_position = "";
   for (const auto &p_in : incoming_particles_) {
-       /* Get the position of the incoming particle. */
-       const ThreeVector r = p_in.position().threevec();
+       /* Get the force scale of the incoming particle. */
        const auto scale = ((pot_ != nullptr) ? pot_->force_scale(p_in.type())
                            : std::make_pair(0.0, 0));
-       /* Check:
-        * 1. Potential is turned on
-        * 2. Lattice is turned on
-        * 3. Particle is inside the lattice. */
-       double UB, UI3;
-       const bool UB_exist =
-                 ((UB_lat_ != nullptr) ? UB_lat_->value_at(r, UB) : false);
-       const bool UI3_exist =
-                 ((UI3_lat_ != nullptr) ? UI3_lat_->value_at(r, UI3) : false);
-       /* Rescale the potential according to the particle species.*/
-       const double B_pot = (UB_exist ? UB * scale.first : 0.0);
-       const double I3_pot =
-         (UI3_exist ? UI3 * scale.second * p_in.type().isospin3_rel() : 0.0);
-       potential_incoming += B_pot + I3_pot;
+       scale_B += scale.first;
+       scale_I3 += scale.second * p_in.type().isospin3_rel();
+       in_particle += p_in.type().name();
+       in_scale += ("(" + std::to_string(scale.first) + ", "
+          + std::to_string(scale.second * p_in.type().isospin3_rel()) + ") ");
+       in_position += ("(" + std::to_string(p_in.position().x1()) + ", "
+                    + std::to_string(p_in.position().x2()) + ", "
+                    + std::to_string(p_in.position().x3()) + ") ");
   }
-  double potential_outgoing = 0.0;
   for (const auto &p_out : outgoing_particles_) {
-       const ThreeVector r = p_out.position().threevec();
        const auto scale = ((pot_ != nullptr) ? pot_->force_scale(p_out.type())
                            : std::make_pair(0.0, 0));
-       double UB, UI3;
-       const bool UB_exist =
-                 ((UB_lat_ != nullptr) ? UB_lat_->value_at(r, UB) : false);
-       const bool UI3_exist =
-                 ((UI3_lat_ != nullptr) ? UI3_lat_->value_at(r, UI3) : false);
-       const double B_pot = (UB_exist ? UB * scale.first : 0.0);
-       const double I3_pot =
-         (UI3_exist ? UI3 * scale.second * p_out.type().isospin3_rel() : 0.0);
-       potential_outgoing += B_pot + I3_pot;
+       scale_B -= scale.first;
+       scale_I3 -= scale.second * p_out.type().isospin3_rel();
+       out_particle += p_out.type().name();
+       out_scale += ("(" + std::to_string(scale.first) + ", "
+          + std::to_string(scale.second * p_out.type().isospin3_rel()) + ") ");
+       out_position += ("(" + std::to_string(p_out.position().x1()) + ", "
+                    + std::to_string(p_out.position().x2()) + ", "
+                    + std::to_string(p_out.position().x3()) + ") ");
   }
-  return sqrt_s() + potential_incoming - potential_outgoing;
+  double UB, UI3;
+  /* The potentials will be evaluated at the position of the outgoing
+   * particles, which is the center of the collision. An exception is
+   * elastic scattering. But elastic scatterings are not affected by
+   * the potentials anyway. */
+  const ThreeVector r = outgoing_particles_[0].position().threevec();
+  /* Check:
+   * 1. Potential is turned on
+   * 2. Lattice is turned on
+   * 3. Particle is inside the lattice. */
+  const bool UB_exist =
+            ((UB_lat_ != nullptr) ? UB_lat_->value_at(r, UB) : false);
+  const bool UI3_exist =
+            ((UI3_lat_ != nullptr) ? UI3_lat_->value_at(r, UI3) : false);
+  /* Rescale to get the potential difference between the 
+   * initial and final state.*/
+  const double B_pot_diff = (UB_exist ? UB * scale_B : 0.0);
+  const double I3_pot_diff = (UI3_exist ? UI3 * scale_I3 : 0.0);
+  if (scale_B > really_small || scale_I3 > really_small) {
+     log.info("reaction: ", in_particle, "->", out_particle, ", DU = ", 
+              std::to_string(B_pot_diff + I3_pot_diff));
+     log.info("force scale: ", in_scale, " |  ", out_scale);
+     log.info("position: ", in_position, " |  ", out_position);
+  }
+  return sqrt_s() + B_pot_diff + I3_pot_diff;
 }
 
 std::pair<double, double> Action::sample_masses() const {
