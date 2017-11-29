@@ -44,35 +44,33 @@ TEST(init_particle_types) {
       "e⁻ 0.000511 0 11\n");
 }
 
-TEST(broad_rho_pi_pi_rho0)
+TEST(pi_pi0_rho_diff)
 {
   PhotonCrossSection<ComputationMethod::Analytic> xs_obj;
   std::stringstream ss;
-  ss << base_path << "pi_pi_rho0.dat";
+  ss << base_path << "pi_pi0_rho_diff.dat";
   //ss << base_path << "pi_rho0_pi_broad.dat";
   std::fstream fs;
   fs.open(ss.str(), std::fstream::out);
 
-  double s = 27.964798286403266;
   //double s = 0.4055 * 0.4055;
-  double m_r, xs;
-  m_r = 0.776;
-  double s_sqrt = std::sqrt(s);
-  xs = xs_obj.xs_pi0_rho_pi(s, m_r);
-  std::cout << xs << std::endl;
-  //for (m_r = 0.35; m_r < std::sqrt(s) + 0.1; m_r += 0.001)
-  /*
-  for (; s_sqrt < 1.5; s_sqrt += 0.001)
+
+  double m0 = 0.1, m1 = 1.0, dm = 0.01;
+  double s0 = 0.1, s1 = 2.0, ds = 0.01;
+  double t0 = -5.0, t1 = 1.0, dt = 0.01;
+  double xs, t, s, m;
+
+  for (m = m0; m < m1; m += dm)
+  for (s = s0; s < s1; s += ds)
+  for (t = t0; t < t1; t += dt)
   {
-    s = s_sqrt * s_sqrt;
-    std::cout << s_sqrt << std::endl;
+    std::cout << s << " " << t << " " << m << std::endl;
   
-    xs = xs_obj.xs_pi_pi_rho0(s, m_r);
-    if (xs < 0) {
-    fs << s_sqrt << " " << xs << "\n";
-    }
+    xs = xs_obj.xs_diff_pi_pi0_rho(s, t, m);
+    fs << s << " " << t << " " << m << " " << xs << "\n";
+
   }
-  */
+  
   fs.close();
 
 }

@@ -304,7 +304,7 @@ double ScatterActionPhoton::mediator_mass() const {
 
 CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
   CollisionBranchList process_list;
-  PhotonCrossSection<ComputationMethod::Analytic> xs_object;
+  PhotonCrossSection<ComputationMethod::Lookup> xs_object;
 
   reac = photon_reaction_type(Action::incoming_particles());
 
@@ -381,7 +381,7 @@ double ScatterActionPhoton::diff_cross_section(double t, double t2,
   double diff_xsection = 0.0;
   const double m_rho = mediator_mass();
 
-  const PhotonCrossSection<ComputationMethod::Analytic> xs_object;
+  PhotonCrossSection<ComputationMethod::Lookup> xs_object;
 
   switch (reac) {
     case ReactionType::pi_p_pi_m_rho_z:

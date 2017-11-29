@@ -75,6 +75,10 @@ double TabulationND<2>::get_closest(const double x, const double y) const {
 
 double TabulationND<3>::get_linear(const double x, const double y,
                                    const double z) {
+
+  if (x < x0_ || x > x1_ || y < y0_ || y > y1_ || z < z0_ || z > z1_) {
+    return f_(x, y, z);
+  }
   const double x_idx_d = (x - x0_) * inv_dx_;
   const double y_idx_d = (y - y0_) * inv_dy_;
   const double z_idx_d = (z - z0_) * inv_dz_;
