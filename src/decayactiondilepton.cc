@@ -40,7 +40,7 @@ void DecayActionDilepton::one_to_three() {
   const double mass_l2 = l2.type().mass();  // mass of second lepton
   const double mass_nl = nl.type().mass();  // mass of non-lepton
 
-  const double cms_energy = sqrt_s();
+  const double cms_energy = kinetic_energy_cms();
 
   // randomly select a dilepton mass
   const double dil_mass =
