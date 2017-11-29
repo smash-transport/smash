@@ -71,10 +71,10 @@ double piminusp_high_energy(double mandelstam_s) {
 }
 
 double pp_string_hard(double mandelstam_s) {
-  double xs_ref = 0.0064;
-  double lnpow = 4.7;
-  double sqrts = std::sqrt(mandelstam_s);
-  double xs = xs_ref * std::pow(std::log(sqrts), lnpow);
+  const double xs_ref = 0.0064;
+  const double lnpow = 4.7;
+  const double sqrts = std::sqrt(mandelstam_s);
+  const double xs = xs_ref * std::pow(std::log(sqrts), lnpow);
   return xs;
 }
 
