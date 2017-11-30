@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <utility>
 
 #include "constants.h"
 #include "scatteraction.h"
@@ -39,7 +40,7 @@ class ScatterActionPhoton : public ScatterAction {
         hadron_out_t_(outgoing_hadron_type(in))
          {
             hadron_out_mass_ = hadron_out_t_ -> mass();
-            reac = photon_reaction_type(in);
+            reac_ = photon_reaction_type(in);
         }
 
   void generate_final_state() override;
@@ -62,7 +63,7 @@ class ScatterActionPhoton : public ScatterAction {
   double sample_out_hadron_mass(const ParticleTypePtr out_type);
   /** Overridden to effectively return the reaction channel. */
   ProcessType get_type() const override {
-    return static_cast<ProcessType>(reac);
+    return static_cast<ProcessType>(reac_);
   }
   
   /** Adds one dummy channel with a given cross-section. The intended use is to
@@ -93,7 +94,13 @@ class ScatterActionPhoton : public ScatterAction {
     pi_z_rho_z_pi_z
   };
 
-  ReactionType reac = ReactionType::no_reaction;
+  enum class Mediator {
+    DEFAULT,
+    RHO,
+    OMEGA
+  };
+
+  ReactionType reac_ = ReactionType::no_reaction;
 
   /// Tells if the given incoming particles may produce photon
   // static ReactionType is_photon_reaction(const ParticleList &in);
@@ -106,7 +113,12 @@ class ScatterActionPhoton : public ScatterAction {
   static bool is_kinematically_possible(const double s, const ParticleList &in);
 
  private:
-  CollisionBranchList photon_cross_sections(bool from_check_collision=false);
+  CollisionBranchList photon_cross_sections(bool from_check_collision=false, Mediator mediator = Mediator::DEFAULT);
+
+  std::pair<double, double> diff_cross_section_single(const double t, const double t2, const double t1, const double m_rho);
+  std::pair<double, double> form_factor_single(const double E_photon);
+  double diff_cross_section_w_ff(const double t, const double t2, const double t1,
+                               const double m_rho, const double E_photon);
 
   int const number_of_fractional_photons_;
 
@@ -120,7 +132,8 @@ class ScatterActionPhoton : public ScatterAction {
 
   double cross_section_photons_ = 0.0;
 
-  double diff_cross_section(double t, double t2, double t1) const;
+  double diff_cross_section(const double t, const double t2, const double t1,
+  const double m_rho, Mediator mediator = Mediator::DEFAULT) const;
   const int num_tab_pts_ = 200;
 
   double mediator_mass(ReactionType r) const;

@@ -281,7 +281,6 @@ TEST(pi0_rho0_pi0_broad_rho_diff) {
  const double s0 = 0.1, s1 = 5.0, ds = 0.1;
   const double t0 = -5.0, t1 = 5.0, dt = 0.1;
   const double m0 = 0.1, m1 = 1.0, dm = 0.1;
-  std::cout << Process[0];
   std::stringstream ss;
   std::fstream fs; ss << "/home/jonas/Master/cross_sections_tests/broad/diff/" << "pi0_rho0_pi0.dat";
   fs.open(ss.str(), std::fstream::out);

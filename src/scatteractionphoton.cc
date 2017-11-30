@@ -130,12 +130,11 @@ bool ScatterActionPhoton::is_kinematically_possible(const double s_sqrt,
   } else {
     return false;
   }
-
 }
 
 void ScatterActionPhoton::generate_final_state() {
   /* Decide for a particular final state. */
-  //const CollisionBranch *proc = choose_channel<CollisionBranch>(
+  // const CollisionBranch *proc = choose_channel<CollisionBranch>(
   //    collision_channels_photons_, cross_section_photons_);
   if (collision_channels_photons_.size() != 1) {
     const auto &log = logger<LogArea::ScatterAction>();
@@ -169,7 +168,7 @@ void ScatterActionPhoton::generate_final_state() {
   const double stepsize = (t2 - t1) / 100.0;
   for (double t = t1; t < t2; t += stepsize) {
     diff_xsection_max =
-        std::max(diff_cross_section(t, t2, t1), diff_xsection_max);
+        std::max(diff_cross_section(t, t2, t1, m3), diff_xsection_max);
   }
 
   double t = 0.0;
@@ -177,7 +176,7 @@ void ScatterActionPhoton::generate_final_state() {
   do {
     t = Random::uniform(t1, t2);
     iteration_number++;
-  } while (diff_cross_section(t, t2, t1) <
+  } while (diff_cross_section(t, t2, t1, m3) <
                Random::uniform(0., diff_xsection_max) &&
            iteration_number < 100);
 
@@ -192,18 +191,22 @@ void ScatterActionPhoton::generate_final_state() {
                                        phitheta.threevec() * pcm_out);
   outgoing_particles_[1].set_4momentum(0.0, -phitheta.threevec() * pcm_out);
 
-  /* Weighing of the fractional photons */
-  if (number_of_fractional_photons_ > 1) {
-    weight_ = diff_cross_section(t, t2, t1) * (t2 - t1) /
-              (number_of_fractional_photons_ * cross_section());
-  } else {
-    weight_ = proc->weight() / cross_section();
-  }
-
   /* Set positions & boost to computational frame. */
   for (ParticleData &new_particle : outgoing_particles_) {
     new_particle.set_4position(middle_point);
     new_particle.boost_momentum(-beta_cm());
+  }
+
+  double E_Photon = outgoing_particles_[1].momentum()[0];
+
+  const double diff_xs = diff_cross_section_w_ff(t, t2, t1, m3, E_Photon);
+
+  /* Weighing of the fractional photons */
+  if (number_of_fractional_photons_ > 1) {
+    weight_ =
+        diff_xs * (t2 - t1) / (number_of_fractional_photons_ * cross_section());
+  } else {
+    weight_ = proc->weight() / cross_section();
   }
 
   /* Inlcusion of form factors (FF):
@@ -220,8 +223,6 @@ void ScatterActionPhoton::generate_final_state() {
   weight_FF = weight_noFF * FF^4
   The actual value of the form factor is determined in
   ScatterActionPhoton::form_factor(E_photon) */
-
-  double E_Photon = outgoing_particles_[1].momentum()[0];
 
   weight_ *= pow(form_factor(E_Photon), 4);
 
@@ -279,8 +280,8 @@ double ScatterActionPhoton::mediator_mass(ReactionType reac) const {
 }
 
 double ScatterActionPhoton::mediator_mass() const {
-  assert(reac != ReactionType::no_reaction);
-  switch (reac) {
+  assert(reac_ != ReactionType::no_reaction);
+  switch (reac_) {
     case ReactionType::pi_p_pi_m_rho_z:
     case ReactionType::pi_z_pi_m_rho_m:
     case ReactionType::pi_z_pi_p_rho_p:
@@ -301,11 +302,12 @@ double ScatterActionPhoton::mediator_mass() const {
   }
 }
 
-CollisionBranchList ScatterActionPhoton::photon_cross_sections(bool from_check_collision /*=false */) {
+CollisionBranchList ScatterActionPhoton::photon_cross_sections(
+    bool from_check_collision /*=false */, Mediator mediator /*=DEFAULT*/) {
   CollisionBranchList process_list;
   PhotonCrossSection<ComputationMethod::Lookup> xs_object;
 
-  reac = photon_reaction_type(Action::incoming_particles());
+  reac_ = photon_reaction_type(Action::incoming_particles());
 
   // auto hadron_out = outgoing_hadron_type(incoming_particles_);
   static ParticleTypePtr photon_particle = &ParticleType::find(pdg::photon);
@@ -322,9 +324,9 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections(bool from_check_c
   // the mass of the mediating particle depends on the channel. For an incoming
   // rho it is the mass of the incoming particle, for an outgoing rho it is the
   // sampled mass
-  const double &m3 = mediator_mass(reac);
+  const double &m3 = mediator_mass(reac_);
 
-  switch (reac) {
+  switch (reac_) {
     case ReactionType::pi_p_pi_m_rho_z:
       xsection = xs_object.xs_pi_pi_rho0(s, m3);
       break;
@@ -341,13 +343,31 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections(bool from_check_c
 
     case ReactionType::pi_m_rho_p_pi_z:
     case ReactionType::pi_p_rho_m_pi_z:
-      xsection = xs_object.xs_pi_rho_pi0(s, m3);
-      break;
+      if (mediator == Mediator::DEFAULT) {
+        xsection = xs_object.xs_pi_rho_pi0(s, m3);
+        break;
+      } else if (mediator == Mediator::RHO) {
+        xsection = xs_object.xs_pi_rho_pi0_rho_mediated(s, m3);
+        break;
+      } else if (mediator == Mediator::OMEGA) {
+        xsection = xs_object.xs_pi_rho_pi0_omega_mediated(s, m3);
+        break;
+      } else
+        throw std::runtime_error("");
 
     case ReactionType::pi_z_rho_m_pi_m:
     case ReactionType::pi_z_rho_p_pi_p:
-      xsection = xs_object.xs_pi0_rho_pi(s, m3);
-      break;
+      if (mediator == Mediator::DEFAULT) {
+        xsection = xs_object.xs_pi0_rho_pi(s, m3);
+        break;
+      } else if (mediator == Mediator::RHO) {
+        xsection = xs_object.xs_pi0_rho_pi_rho_mediated(s, m3);
+        break;
+      } else if (mediator == Mediator::OMEGA) {
+        xsection = xs_object.xs_pi0_rho_pi_omega_mediated(s, m3);
+        break;
+      } else
+        throw std::runtime_error("");
 
     case ReactionType::pi_z_rho_z_pi_z:
       xsection = xs_object.xs_pi0_rho0_pi0(s, m3);
@@ -359,7 +379,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections(bool from_check_c
   }
   // if we have a unphysical negative cross section set it manually to a small
   // value to circumvent problems with empty channels
-  if (xsection <= 0 && from_check_collision==false) {
+  if (xsection <= 0 && from_check_collision == false) {
     xsection = 1e-10;
     const auto &log = logger<LogArea::ScatterAction>();
     log.error("Calculated negative cross section.\nParticles ",
@@ -371,17 +391,18 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections(bool from_check_c
   return process_list;
 }
 
-double ScatterActionPhoton::diff_cross_section(double t, double t2,
-                                               double t1) const {
+double ScatterActionPhoton::diff_cross_section(const double t, const double t2,
+                                               const double t1,
+                                               const double m_rho,
+                                               Mediator mediator) const {
   const double to_mb = 0.3894;
   static const float m_pi = ParticleType::find(pdg::pi_z).mass();
   double s = mandelstam_s();
   double diff_xsection = 0.0;
-  const double m_rho = mediator_mass();
 
   PhotonCrossSection<ComputationMethod::Lookup> xs_object;
 
-  switch (reac) {
+  switch (reac_) {
     case ReactionType::pi_p_pi_m_rho_z:
       if (outgoing_particles_[0].type().pdgcode().is_rho()) {
         diff_xsection = xs_object.xs_diff_pi_pi_rho0(s, t, m_rho);
@@ -410,31 +431,47 @@ double ScatterActionPhoton::diff_cross_section(double t, double t2,
 
     case ReactionType::pi_m_rho_p_pi_z:
     case ReactionType::pi_p_rho_m_pi_z:
-      diff_xsection = xs_object.xs_diff_pi_rho_pi0(s, t, m_rho);
+      if (mediator == Mediator::DEFAULT) {
+        diff_xsection =
+            xs_object.xs_diff_pi_rho_pi0_rho_mediated(s, t, m_rho) +
+            xs_object.xs_diff_pi_rho_pi0_omega_mediated(s, t, m_rho);
+      } else if (mediator == Mediator::OMEGA) {
+        diff_xsection =
+            xs_object.xs_diff_pi_rho_pi0_omega_mediated(s, t, m_rho);
+      } else if (mediator == Mediator::RHO) {
+        diff_xsection = xs_object.xs_diff_pi_rho_pi0_rho_mediated(s, t, m_rho);
+      }
       break;
 
     case ReactionType::pi_z_rho_m_pi_m:
     case ReactionType::pi_z_rho_p_pi_p:
-      diff_xsection = xs_object.xs_diff_pi0_rho_pi(s, t, m_rho);
+      if (mediator == Mediator::DEFAULT) {
+        diff_xsection =
+            xs_object.xs_diff_pi0_rho_pi_rho_mediated(s, t, m_rho) +
+            xs_object.xs_diff_pi0_rho_pi_omega_mediated(s, t, m_rho);
+      } else if (mediator == Mediator::OMEGA) {
+        diff_xsection =
+            xs_object.xs_diff_pi0_rho_pi_omega_mediated(s, t, m_rho);
+      } else if (mediator == Mediator::RHO) {
+        diff_xsection = xs_object.xs_diff_pi0_rho_pi_rho_mediated(s, t, m_rho);
+      }
       break;
 
     case ReactionType::pi_z_rho_z_pi_z:
-
       diff_xsection = xs_object.xs_diff_pi0_rho0_pi0(s, t, m_rho);
-
       break;
     case ReactionType::no_reaction:
       // never reached
       break;
   }
-  return diff_xsection * to_mb;
+  return diff_xsection;
 }
 
 double ScatterActionPhoton::form_factor(double E_photon) {
   double form_factor = 1.0;
   double t_ff = 0.0;
   double Lambda = 1.0;
-  switch (reac) {
+  switch (reac_) {
       /* The form factor is assumed to be a hadronic dipole form factor which
       takes the shape: FF = (2*Lambda^2/(2*Lambda^2 - t))^2 with
   case ReactionType::pi_p_rho_z_pi_m:
@@ -470,6 +507,64 @@ double ScatterActionPhoton::form_factor(double E_photon) {
       break;
   }
   form_factor = pow(2.0 * pow(Lambda, 2) / (2.0 * pow(Lambda, 2) - t_ff), 2);
-  //return form_factor;
+  // return form_factor;
   return 1.0;
+}
+
+double ScatterActionPhoton::diff_cross_section_w_ff(const double t,
+                                                    const double t2,
+                                                    const double t1,
+                                                    const double m_rho,
+                                                    const double E_photon) {
+  double xs_ff;
+  // only C12, C13, C15, C16 need special treatment
+  switch (reac_) {
+
+    case ReactionType::pi_m_rho_p_pi_z:
+    case ReactionType::pi_p_rho_m_pi_z:
+    case ReactionType::pi_z_rho_m_pi_m:
+    case ReactionType::pi_z_rho_p_pi_p:
+      {
+      std::pair<double, double> FF = form_factor_single(E_photon);
+      std::pair<double, double> diff_xs = diff_cross_section_single(t, t2, t1, m_rho);
+      const double xs_ff = FF.first * diff_xs.first + FF.second * diff_xs.second;
+      return xs_ff;
+      break;
+      }
+    case ReactionType::pi_z_pi_p_rho_p:
+    case ReactionType::pi_z_pi_m_rho_m:
+    case ReactionType::pi_p_rho_z_pi_p:
+    case ReactionType::pi_m_rho_z_pi_m:
+    case ReactionType::pi_p_pi_m_rho_z:
+    case ReactionType::pi_z_rho_z_pi_z:
+       {
+       const double FF = form_factor(E_photon);
+       const double xs = diff_cross_section(t, t2, t1, m_rho);
+        const double xs_ff = FF * xs;
+        return xs_ff;
+      break;
+       }
+    case ReactionType::no_reaction:
+       throw std::runtime_error("");
+  }
+}
+
+std::pair<double, double> ScatterActionPhoton::form_factor_single(
+    const double E_photon) {
+  // returns form factor for the (pi,rho,a1) mediated process in the first
+  // argument, for the omeaga mediated process in the second
+  return std::pair<double, double>(1.0, 1.0);
+}
+
+std::pair<double, double> ScatterActionPhoton::diff_cross_section_single(
+    const double t, const double t2, const double t1, const double m_rho) {
+  // returns cross section for (pi, rho, a1) mediated process in the first
+  // argument, for the omega mediated process in the second.
+
+  const double diff_xs_rho =
+      diff_cross_section(t, t2, t1, m_rho, Mediator::RHO);
+  const double diff_xs_omega =
+      diff_cross_section(t, t2, t1, m_rho, Mediator::OMEGA);
+
+  return std::pair<double, double>(diff_xs_rho, diff_xs_omega);
 }
