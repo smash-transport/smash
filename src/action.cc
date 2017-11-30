@@ -164,12 +164,49 @@ double Action::kinetic_energy_cms() const {
    * initial and final state.*/
   const double B_pot_diff = (UB_exist ? UB * scale_B : 0.0);
   const double I3_pot_diff = (UI3_exist ? UI3 * scale_I3 : 0.0);
-  if (scale_B > really_small || scale_I3 > really_small) {
+  if (scale_B > really_small) {
      log.info("reaction: ", in_particle, "->", out_particle, ", DU = ", 
               std::to_string(B_pot_diff + I3_pot_diff));
      log.info("force scale: ", in_scale, " |  ", out_scale);
      log.info("position: ", in_position, " |  ", out_position);
   }
+  return sqrt_s() + B_pot_diff + I3_pot_diff;
+}
+
+double Action::kinetic_energy_cms(ThreeVector r,
+           ParticleTypePtrList p_out_types) const {
+  /* scale_B returns the difference of the total force scales of the skyrme
+   * potential between the initial and final states. */
+  double scale_B = 0.0;
+  /* scale_I3 returns the difference of the total force scales of the symmetry
+   * potential between the initial and final states. */
+  double scale_I3 = 0.0;
+  for (const auto &p_in : incoming_particles_) {
+       /* Get the force scale of the incoming particle. */
+       const auto scale = ((pot_ != nullptr) ? pot_->force_scale(p_in.type())
+                           : std::make_pair(0.0, 0));
+       scale_B += scale.first;
+       scale_I3 += scale.second * p_in.type().isospin3_rel();
+  }
+  for (const auto &p_out : p_out_types) {
+       const auto scale = ((pot_ != nullptr) ? pot_->force_scale(*p_out)
+                           : std::make_pair(0.0, 0));
+       scale_B -= scale.first;
+       scale_I3 -= scale.second * p_out->isospin3_rel();
+  }
+  double UB, UI3;
+  /* Check:
+   * 1. Potential is turned on
+   * 2. Lattice is turned on
+   * 3. Particle is inside the lattice. */
+  const bool UB_exist =
+            ((UB_lat_ != nullptr) ? UB_lat_->value_at(r, UB) : false);
+  const bool UI3_exist =
+            ((UI3_lat_ != nullptr) ? UI3_lat_->value_at(r, UI3) : false);
+  /* Rescale to get the potential difference between the 
+   * initial and final state.*/
+  const double B_pot_diff = (UB_exist ? UB * scale_B : 0.0);
+  const double I3_pot_diff = (UI3_exist ? UI3 * scale_I3 : 0.0);
   return sqrt_s() + B_pot_diff + I3_pot_diff;
 }
 

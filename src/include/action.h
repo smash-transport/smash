@@ -90,7 +90,14 @@ class Action {
   void add_process(ProcessBranchPtr<Branch> &p,
                    ProcessBranchList<Branch> &subprocesses,
                    double &total_weight) {
-    if (p->weight() > 0) {
+    /* Evaluate the total kinentic energy of the final state particles
+     * of this new subprocess. */
+    const ThreeVector r = get_interaction_point().threevec();
+    const auto out_particle_types = p->particle_types();
+    const double kin_energy_cms = kinetic_energy_cms(r, out_particle_types);
+    /* Reject the process if the total kinetic energy is smaller than the 
+     * threshold. */
+    if (p->weight() > 0 && kin_energy_cms > p->threshold()) {
       total_weight += p->weight();
       subprocesses.emplace_back(std::move(p));
     }
@@ -100,9 +107,16 @@ class Action {
   void add_processes(ProcessBranchList<Branch> pv,
                      ProcessBranchList<Branch> &subprocesses,
                      double &total_weight) {
+    const ThreeVector r = get_interaction_point().threevec();
     subprocesses.reserve(subprocesses.size() + pv.size());
     for (auto &proc : pv) {
-      if (proc->weight() > 0) {
+      /* Evaluate the total kinentic energy of the final state particles
+       * of this new subprocess. */
+      const auto out_particle_types = proc->particle_types();
+      const double kin_energy_cms = kinetic_energy_cms(r, out_particle_types);
+      /* Reject the process if the total kinetic energy is smaller than the 
+       * threshold. */
+      if (proc->weight() > 0 && kin_energy_cms > proc->threshold()) {
         total_weight += proc->weight();
         subprocesses.emplace_back(std::move(proc));
       }
@@ -182,9 +196,19 @@ class Action {
 
   /**
    * Calculate the total kinetic energy of the outgoing particles in
-   * the center of mass frame.
+   * the center of mass frame. This function is used when the species
+   * of the outgoing particles are already determined.
    */
   double kinetic_energy_cms() const;
+
+  /**
+   * Calculate the total kinetic energy of the outgoing particles in
+   * the center of mass frame. This function is used when the species
+   * of the outgoing particles are not yet determined. They can be any
+   * values in the possible branching processes.
+   */
+  double kinetic_energy_cms(ThreeVector r,
+         ParticleTypePtrList p_out_types) const;
 
   /** Get the interaction point */
   FourVector get_interaction_point();
@@ -223,7 +247,6 @@ class Action {
   const double time_of_execution_;
   /** type of process */
   ProcessType process_type_;
-
 
   /// Sum of 4-momenta of incoming particles
   FourVector total_momentum() const {
