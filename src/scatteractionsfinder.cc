@@ -211,7 +211,7 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData &data_a,
        ScatterActionPhoton::ReactionType::no_reaction)) {
     ScatterActionPhoton photon_act(act->incoming_particles(), 0.0,
                                    n_fractional_photons_);
-    photon_act.add_single_channel();
+    photon_act.add_single_channel(/*from_check_collision= */ true);
     photon_cross_section = photon_act.cross_section();
   }
   /* Cross section for collision criterion */
