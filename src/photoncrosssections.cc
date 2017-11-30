@@ -528,7 +528,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho0_pi(
 
 }
 
-/*
+
 //C12
 double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi(
     const double s, const double m_rho) {
@@ -1465,7 +1465,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho_pi0(
 	return to_mb * diff_xs / spin_deg_factor;
 }
 
-*/
+
 
 /*----------------------------------------------------------------------------*/
 /* 					Pi + Rho -> Pi + Photon channels mediated by (omega) 						  */
@@ -1537,7 +1537,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi0_rho0_pi0(
 
 	return to_mb * diff_xs / spin_deg_factor;
 }
-
+/*
 
 //C15
 double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0(
@@ -1631,7 +1631,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi0_rho_pi(
 
     return to_mb * diff_xs / spin_deg_factor;
 }
-
+*/
 
 /*----------------------------------------------------------------------------*/
 /* 					Pi + Pi -> Rho + Photon channels mediated by (Pi, Rho, a1) 				*/
