@@ -530,7 +530,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho0_pi(
 
 /*
 //C12
-double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi(
+double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi_rho_mediated(
     const double s, const double m_rho) {
   using std::atan;
   using std::pow;
@@ -824,7 +824,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi(
 	return xs * to_mb / spin_deg_factor;
 }
 
-double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi0_rho_pi(
+double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi0_rho_pi_rho_mediated(
     const double s, const double t, const double m_rho) {
   const double mpion = m_pion_;
 	const double mrho = m_rho;
@@ -904,7 +904,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi0_rho_pi(
 
 
 //C13
-double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0(
+double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0_rho_mediated(
     const double s, const double m_rho) {
   using std::atan;
   using std::pow;
@@ -1372,7 +1372,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0(
 	return xs * to_mb / spin_deg_factor;
 }
 
-double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho_pi0(
+double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho_pi0_rho_mediated(
     const double s, const double t, const double m_rho) {
   const double &mpion = m_pion_;
 	const double &mrho = m_rho;
@@ -1467,6 +1467,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho_pi0(
 
 */
 
+
 /*----------------------------------------------------------------------------*/
 /* 					Pi + Rho -> Pi + Photon channels mediated by (omega) 						  */
 /*----------------------------------------------------------------------------*/
@@ -1540,7 +1541,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi0_rho0_pi0(
 
 
 //C15
-double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0(
+double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0_omega_mediated(
     const double s, const double m_rho) {
   using std::atan;
   using std::pow;
@@ -1564,7 +1565,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0(
 	return xs * to_mb / spin_deg_factor;
 }
 
-double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho_pi0(
+double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho_pi0_omega_mediated(
     const double s, const double t, const double m_rho) {
   const double &mpion = m_pion_;
 	const double &mrho = m_rho;
@@ -1580,7 +1581,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho_pi0(
 
 
 //C16
-double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi(
+double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi_omega_mediated(
     const double s, const double m_rho) {
   using std::atan;
   using std::pow;
@@ -1618,7 +1619,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi(
 	return xs * to_mb / spin_deg_factor;
 }
 
-double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi0_rho_pi(
+double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi0_rho_pi_omega_mediated(
     const double s, const double t, const double m_rho) {
   const double &mpion = m_pion_;
 	const double &mrho = m_rho;
@@ -1632,6 +1633,16 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi0_rho_pi(
     return to_mb * diff_xs / spin_deg_factor;
 }
 
+/*----------------------------------------------------------------------------*/
+/*				 Pi + Rho -> Pi + Photon channels mediated by (Pi, Rho, a1)         */
+/*  				and omega summed																								  */
+/*----------------------------------------------------------------------------*/
+
+//C15 + 
+double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0(
+    const double s, const double m_rho) {
+			return 0;
+		}
 
 /*----------------------------------------------------------------------------*/
 /* 					Pi + Pi -> Rho + Photon channels mediated by (Pi, Rho, a1) 				*/
@@ -3659,46 +3670,12 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi0_rho(
 /*----------------------------------------------------------------------------*/
 
 
-// definition of total-xs getters
-double PhotonCrossSection<ComputationMethod::Lookup>::xs_pi_pi_rho0(
-    const double s, const double m_rho) {
-  if (tab_pi_pi_rho0_ == nullptr) {
-    const auto &log = logger<LogArea::Experiment>();
-    log.info("init table pi_pi_rho0\n");
-    tab_pi_pi_rho0_ = make_unique<TabulationND<2>>(
-        s0_tot, s1_tot, m_rho_0, m_rho_1, ds_tot, dm,
-        xs_wrapper<PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi_rho0>);
-  }
 
-  return tab_pi_pi_rho0_->get_linear(s, m_rho);
-}
+/*----------------------------------------------------------------------------*/
+/*				 Pi + Rho -> Pi + Photon channels mediated by (Pi, Rho, a1) 				*/
+/*----------------------------------------------------------------------------*/
 
-double PhotonCrossSection<ComputationMethod::Lookup>::xs_pi_pi0_rho(
-    const double s, const double m_rho) {
-  if (tab_pi_pi0_rho_ == nullptr) {
-    const auto &log = logger<LogArea::Experiment>();
-    log.info("init table pi_pi0_rho\n");
-    tab_pi_pi0_rho_ = make_unique<TabulationND<2>>(
-        s0_tot, s1_tot, m_rho_0, m_rho_1, ds_tot, dm,
-        xs_wrapper<PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho>);
-  }
-
-  return tab_pi_pi0_rho_->get_linear(s, m_rho);
-}
-
-double PhotonCrossSection<ComputationMethod::Lookup>::xs_pi0_rho0_pi0(
-    const double s, const double m_rho) {
-  if (tab_pi0_rho0_pi0_ == nullptr) {
-    const auto &log = logger<LogArea::Experiment>();
-    log.info("init table pi0_rho0_pi0\n");
-    tab_pi0_rho0_pi0_ =make_unique<TabulationND<2>>(
-        s0_tot, s1_tot, m_rho_0, m_rho_1, ds_tot, dm,
-        xs_wrapper<PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho0_pi0>);
-  }
-
-  return tab_pi0_rho0_pi0_->get_linear(s, m_rho);
-}
-
+//C11
 double PhotonCrossSection<ComputationMethod::Lookup>::xs_pi_rho0_pi(
     const double s, const double m_rho) {
   if (tab_pi_rho0_pi_ == nullptr) {
@@ -3712,57 +3689,36 @@ double PhotonCrossSection<ComputationMethod::Lookup>::xs_pi_rho0_pi(
   return tab_pi_rho0_pi_->get_linear(s, m_rho);
 }
 
-double PhotonCrossSection<ComputationMethod::Lookup>::xs_pi0_rho_pi(
-    const double s, const double m_rho) {
-  if (tab_pi0_rho_pi_ == nullptr) {
-    const auto &log = logger<LogArea::Experiment>();
-    log.info("init table pi0_rho_pi\n");
-    tab_pi0_rho_pi_ = make_unique<TabulationND<2>>(
-        s0_tot, s1_tot, m_rho_0, m_rho_1, ds_tot, dm,
-        xs_wrapper<PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi>);
-  }
-
-  return tab_pi0_rho_pi_->get_linear(s, m_rho);
-}
-
-double PhotonCrossSection<ComputationMethod::Lookup>::xs_pi_rho_pi0(
-    const double s, const double m_rho) {
-  if (tab_pi_rho_pi0_ == nullptr) {
-    const auto &log = logger<LogArea::Experiment>();
-    log.info("init table pi_rho_pi0\n");
-    tab_pi_rho_pi0_ = make_unique<TabulationND<2>>(
-        s0_tot, s1_tot, m_rho_0, m_rho_1, ds_tot, dm,
-        xs_wrapper<PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0>);
-  }
-
-  return tab_pi_rho_pi0_->get_linear(s, m_rho);
-}
-
-// definition of differential xs-getters
-double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi_pi_rho0(
+double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi_rho0_pi(
     const double s, const double t, const double m_rho) {
-  if (tab_pi_pi_rho0_diff_ == nullptr) {
+  if (tab_pi_rho0_pi_diff_ == nullptr) {
     const auto &log = logger<LogArea::Experiment>();
-    log.info() << "init table pi_pi_rho0_diff\n";
-    tab_pi_pi_rho0_diff_ = make_unique<TabulationND<3>>(
+    log.info() << "init table pi_rho0_pi_diff\n";
+    tab_pi_rho0_pi_diff_ = make_unique<TabulationND<3>>(
         s0_diff, s1_diff, t0_diff, t1_diff, m_rho_0, m_rho_1, ds_diff, dt_diff, dm,
-        xs_wrapper<PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi_rho0>);
+        PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho0_pi);
   }
 
-  return tab_pi_pi_rho0_diff_->get_linear(s, t, m_rho);
+  return tab_pi_rho0_pi_diff_->get_linear(s, t, m_rho);
 }
 
-double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi_pi0_rho(
-    const double s, const double t, const double m_rho) {
-  if (tab_pi_pi0_rho_diff_ == nullptr) {
+
+/*----------------------------------------------------------------------------*/
+/* 					Pi + Rho -> Pi + Photon channels mediated by (omega) 						  */
+/*----------------------------------------------------------------------------*/
+
+//C14
+double PhotonCrossSection<ComputationMethod::Lookup>::xs_pi0_rho0_pi0(
+    const double s, const double m_rho) {
+  if (tab_pi0_rho0_pi0_ == nullptr) {
     const auto &log = logger<LogArea::Experiment>();
-    log.info() << "init table pi_pi0_rho_diff\n";
-    tab_pi_pi0_rho_diff_ = make_unique<TabulationND<3>>(
-        s0_diff, s1_diff, t0_diff, t1_diff, m_rho_0, m_rho_1, ds_diff, dt_diff, dm,
-        xs_wrapper<PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi0_rho>);
+    log.info("init table pi0_rho0_pi0\n");
+    tab_pi0_rho0_pi0_ =make_unique<TabulationND<2>>(
+        s0_tot, s1_tot, m_rho_0, m_rho_1, ds_tot, dm,
+        xs_wrapper<PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho0_pi0>);
   }
 
-  return tab_pi_pi0_rho_diff_->get_linear(s, t, m_rho);
+  return tab_pi0_rho0_pi0_->get_linear(s, m_rho);
 }
 
 double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi0_rho0_pi0(
@@ -3778,6 +3734,21 @@ double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi0_rho0_pi0(
   return tab_pi0_rho0_pi0_diff_->get_linear(s, t, m_rho);
 }
 
+
+//C15
+double PhotonCrossSection<ComputationMethod::Lookup>::xs_pi_rho_pi0(
+    const double s, const double m_rho) {
+  if (tab_pi_rho_pi0_ == nullptr) {
+    const auto &log = logger<LogArea::Experiment>();
+    log.info("init table pi_rho_pi0\n");
+    tab_pi_rho_pi0_ = make_unique<TabulationND<2>>(
+        s0_tot, s1_tot, m_rho_0, m_rho_1, ds_tot, dm,
+        xs_wrapper<PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0>);
+  }
+
+  return tab_pi_rho_pi0_->get_linear(s, m_rho);
+}
+
 double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi_rho_pi0(
     const double s, const double t, const double m_rho) {
   if (tab_pi_rho_pi0_diff_ == nullptr) {
@@ -3789,6 +3760,20 @@ double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi_rho_pi0(
   }
 
   return tab_pi_rho_pi0_diff_->get_linear(s, t, m_rho);
+}
+
+//C16
+double PhotonCrossSection<ComputationMethod::Lookup>::xs_pi0_rho_pi(
+    const double s, const double m_rho) {
+  if (tab_pi0_rho_pi_ == nullptr) {
+    const auto &log = logger<LogArea::Experiment>();
+    log.info("init table pi0_rho_pi\n");
+    tab_pi0_rho_pi_ = make_unique<TabulationND<2>>(
+        s0_tot, s1_tot, m_rho_0, m_rho_1, ds_tot, dm,
+        xs_wrapper<PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi>);
+  }
+
+  return tab_pi0_rho_pi_->get_linear(s, m_rho);
 }
 
 double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi0_rho_pi(
@@ -3804,18 +3789,72 @@ double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi0_rho_pi(
   return tab_pi0_rho_pi_diff_->get_linear(s, t, m_rho);
 }
 
-double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi_rho0_pi(
-    const double s, const double t, const double m_rho) {
-  if (tab_pi_rho0_pi_diff_ == nullptr) {
+
+
+
+/*----------------------------------------------------------------------------*/
+/* 					Pi + Pi -> Rho + Photon channels mediated by (Pi, Rho, a1) 				*/
+/*----------------------------------------------------------------------------*/
+//C21
+double PhotonCrossSection<ComputationMethod::Lookup>::xs_pi_pi_rho0(
+    const double s, const double m_rho) {
+  if (tab_pi_pi_rho0_ == nullptr) {
     const auto &log = logger<LogArea::Experiment>();
-    log.info() << "init table pi_rho0_pi_diff\n";
-    tab_pi_rho0_pi_diff_ = make_unique<TabulationND<3>>(
-        s0_diff, s1_diff, t0_diff, t1_diff, m_rho_0, m_rho_1, ds_diff, dt_diff, dm,
-        PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho0_pi);
+    log.info("init table pi_pi_rho0\n");
+    tab_pi_pi_rho0_ = make_unique<TabulationND<2>>(
+        s0_tot, s1_tot, m_rho_0, m_rho_1, ds_tot, dm,
+        xs_wrapper<PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi_rho0>);
   }
 
-  return tab_pi_rho0_pi_diff_->get_linear(s, t, m_rho);
+  return tab_pi_pi_rho0_->get_linear(s, m_rho);
 }
+
+double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi_pi_rho0(
+    const double s, const double t, const double m_rho) {
+  if (tab_pi_pi_rho0_diff_ == nullptr) {
+    const auto &log = logger<LogArea::Experiment>();
+    log.info() << "init table pi_pi_rho0_diff\n";
+    tab_pi_pi_rho0_diff_ = make_unique<TabulationND<3>>(
+        s0_diff, s1_diff, t0_diff, t1_diff, m_rho_0, m_rho_1, ds_diff, dt_diff, dm,
+        xs_wrapper<PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi_rho0>);
+  }
+
+  return tab_pi_pi_rho0_diff_->get_linear(s, t, m_rho);
+}
+
+//C22
+double PhotonCrossSection<ComputationMethod::Lookup>::xs_pi_pi0_rho(
+    const double s, const double m_rho) {
+  if (tab_pi_pi0_rho_ == nullptr) {
+    const auto &log = logger<LogArea::Experiment>();
+    log.info("init table pi_pi0_rho\n");
+    tab_pi_pi0_rho_ = make_unique<TabulationND<2>>(
+        s0_tot, s1_tot, m_rho_0, m_rho_1, ds_tot, dm,
+        xs_wrapper<PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho>);
+  }
+
+  return tab_pi_pi0_rho_->get_linear(s, m_rho);
+}
+
+double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi_pi0_rho(
+    const double s, const double t, const double m_rho) {
+  if (tab_pi_pi0_rho_diff_ == nullptr) {
+    const auto &log = logger<LogArea::Experiment>();
+    log.info() << "init table pi_pi0_rho_diff\n";
+    tab_pi_pi0_rho_diff_ = make_unique<TabulationND<3>>(
+        s0_diff, s1_diff, t0_diff, t1_diff, m_rho_0, m_rho_1, ds_diff, dt_diff, dm,
+        xs_wrapper<PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi0_rho>);
+  }
+
+  return tab_pi_pi0_rho_diff_->get_linear(s, t, m_rho);
+}
+
+// definition of differential xs-getters
+
+
+
+
+
 
 // definition of static lookup tables. fine-tuning for parameters needed.
 //

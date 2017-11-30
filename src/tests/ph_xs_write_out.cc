@@ -272,11 +272,15 @@ TEST(stable_pi_rho_pi0) {
 }
 
 
+/**********************************
+ * BROAD RHO DIFFERENTIAL
+ * ********************************
+ */
 
 TEST(pi0_rho0_pi0_broad_rho_diff) { 
- const double s0 = 0.1, s1 = 5.0, ds = 0.01;
-  const double t0 = -5.0, t1 = 5.0, dt = 0.01;
-  const double m0 = 0.1, m1 = 1.0, dm = 0.01;
+ const double s0 = 0.1, s1 = 5.0, ds = 0.1;
+  const double t0 = -5.0, t1 = 5.0, dt = 0.1;
+  const double m0 = 0.1, m1 = 1.0, dm = 0.1;
   std::cout << Process[0];
   std::stringstream ss;
   std::fstream fs; ss << "/home/jonas/Master/cross_sections_tests/broad/diff/" << "pi0_rho0_pi0.dat";
@@ -298,9 +302,9 @@ xsTab = xs_tab.xs_diff_pi0_rho0_pi0(s,t,m);
   }
     
 TEST(pi0_rho_pi_broad_rho_diff) { 
- const double s0 = 0.1, s1 = 5.0, ds = 0.01;
-  const double t0 = -5.0, t1 = 5.0, dt = 0.01;
-  const double m0 = 0.1, m1 = 1.0, dm = 0.01;
+ const double s0 = 0.1, s1 = 5.0, ds = 0.1;
+  const double t0 = -5.0, t1 = 5.0, dt = 0.1;
+  const double m0 = 0.1, m1 = 1.0, dm = 0.1;
   std::cout << Process[0];
   std::stringstream ss;
   std::fstream fs; ss << "/home/jonas/Master/cross_sections_tests/broad/diff/" << "pi0_rho_pi.dat";
@@ -322,9 +326,9 @@ xsTab = xs_tab.xs_diff_pi0_rho_pi(s,t,m);
   }
     
 TEST(pi_pi0_rho_broad_rho_diff) { 
- const double s0 = 0.1, s1 = 5.0, ds = 0.01;
-  const double t0 = -5.0, t1 = 5.0, dt = 0.01;
-  const double m0 = 0.1, m1 = 1.0, dm = 0.01;
+ const double s0 = 0.1, s1 = 5.0, ds = 0.1;
+  const double t0 = -5.0, t1 = 5.0, dt = 0.1;
+  const double m0 = 0.1, m1 = 1.0, dm = 0.1;
   std::cout << Process[0];
   std::stringstream ss;
   std::fstream fs; ss << "/home/jonas/Master/cross_sections_tests/broad/diff/" << "pi_pi0_rho.dat";
@@ -346,9 +350,9 @@ xsTab = xs_tab.xs_diff_pi_pi0_rho(s,t,m);
   }
     
 TEST(pi_pi_rho0_broad_rho_diff) { 
- const double s0 = 0.1, s1 = 5.0, ds = 0.01;
-  const double t0 = -5.0, t1 = 5.0, dt = 0.01;
-  const double m0 = 0.1, m1 = 1.0, dm = 0.01;
+ const double s0 = 0.1, s1 = 5.0, ds = 0.1;
+  const double t0 = -5.0, t1 = 5.0, dt = 0.1;
+  const double m0 = 0.1, m1 = 1.0, dm = 0.1;
   std::cout << Process[0];
   std::stringstream ss;
   std::fstream fs; ss << "/home/jonas/Master/cross_sections_tests/broad/diff/" << "pi_pi_rho0.dat";
@@ -370,9 +374,9 @@ xsTab = xs_tab.xs_diff_pi_pi_rho0(s,t,m);
   }
     
 TEST(pi_rho0_pi_broad_rho_diff) { 
- const double s0 = 0.1, s1 = 5.0, ds = 0.01;
-  const double t0 = -5.0, t1 = 5.0, dt = 0.01;
-  const double m0 = 0.1, m1 = 1.0, dm = 0.01;
+ const double s0 = 0.1, s1 = 5.0, ds = 0.1;
+  const double t0 = -5.0, t1 = 5.0, dt = 0.1;
+  const double m0 = 0.1, m1 = 1.0, dm = 0.1;
   std::cout << Process[0];
   std::stringstream ss;
   std::fstream fs; ss << "/home/jonas/Master/cross_sections_tests/broad/diff/" << "pi_rho0_pi.dat";
@@ -394,9 +398,9 @@ xsTab = xs_tab.xs_diff_pi_rho0_pi(s,t,m);
   }
     
 TEST(pi_rho_pi0_broad_rho_diff) { 
- const double s0 = 0.1, s1 = 5.0, ds = 0.01;
-  const double t0 = -5.0, t1 = 5.0, dt = 0.01;
-  const double m0 = 0.1, m1 = 1.0, dm = 0.01;
+ const double s0 = 0.1, s1 = 5.0, ds = 0.1;
+  const double t0 = -5.0, t1 = 5.0, dt = 0.1;
+  const double m0 = 0.1, m1 = 1.0, dm = 0.1;
   std::cout << Process[0];
   std::stringstream ss;
   std::fstream fs; ss << "/home/jonas/Master/cross_sections_tests/broad/diff/" << "pi_rho_pi0.dat";
