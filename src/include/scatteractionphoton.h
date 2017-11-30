@@ -73,8 +73,8 @@ class ScatterActionPhoton : public ScatterAction {
   void add_dummy_hadronic_channels(double reaction_cross_section);
 
   /** To add only one reaction for testing purposes */
-  void add_single_channel() {
-    add_processes<CollisionBranch>(photon_cross_sections(),
+  void add_single_channel(bool from_check_collision=false) {
+    add_processes<CollisionBranch>(photon_cross_sections(from_check_collision),
                                    collision_channels_photons_,
                                    cross_section_photons_);
   }
@@ -106,7 +106,7 @@ class ScatterActionPhoton : public ScatterAction {
   static bool is_kinematically_possible(const double s, const ParticleList &in);
 
  private:
-  CollisionBranchList photon_cross_sections();
+  CollisionBranchList photon_cross_sections(bool from_check_collision=false);
 
   int const number_of_fractional_photons_;
 

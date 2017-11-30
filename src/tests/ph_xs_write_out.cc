@@ -8,15 +8,87 @@
 #include <string>
 #include <utility>
 #include "../include/kinematics.h"
+#include "../include/particletype.h"
 #include "../include/photoncrosssections.h"
 #include "../include/tabulationnd.h"
-#include "../include/particletype.h"
 #include "setup.h"
+#include <vector>
 
 using namespace Smash;
 
-const std::string base_path =
-    "/home/jonas/Master/cross_sections_tests/diff_xs/";
+const std::string basepath = "/home/jonas/Master/cross_sections_tests/stable/";
+
+std::vector<std::string> Process {
+  "pi0_rho0_pi0",
+  "pi0_rho_pi",
+  "pi_pi0_rho",
+  "pi_pi_rho0",
+  "pi_rho0_pi",
+  "pi_rho_pi0"
+}; 
+
+
+void diff_stable(std::string proc)
+{
+  const double s0 = 0.1, s1 = 5.0, ds = 0.01;
+  const double t0 = -5.0, t1 = 5.0, dt = 0.01;
+  const double mrho = 0.776;
+  std::cout << Process[0];
+  std::stringstream ss;
+  ss << basepath << "diff/ " << proc;
+  std::fstream fs;
+  fs.open(ss.str(), std::fstream::out);
+
+  double xsAn, xsTab;
+  PhotonCrossSection<ComputationMethod::Analytic> xs_an;
+  PhotonCrossSection<ComputationMethod::Lookup> xs_tab;
+  
+  for (double s = s0; s < s1; s += ds)
+  for (double t = t0; t < t1; t += dt)
+  {
+    // can not swtich on string...
+  if (proc == "pi0_rho0_pi0")
+  {
+    xsAn = xs_an.xs_diff_pi0_rho0_pi0(s, t, mrho);
+    xsTab = xs_tab.xs_diff_pi0_rho0_pi0(s, t, mrho);
+  }
+  else if (proc == "pi0_rho_pi")
+  {
+    xsAn = xs_an.xs_diff_pi0_rho_pi(s, t, mrho);
+    xsTab = xs_tab.xs_diff_pi0_rho_pi(s, t, mrho);
+    
+  }
+  else if (proc == "pi_pi0_rho")
+  {
+    xsAn = xs_an.xs_diff_pi_pi0_rho(s,t,mrho);
+    xsTab = xs_tab.xs_diff_pi_pi0_rho(s,t,mrho);
+    
+  }
+  else if (proc == "pi_pi_rho0")
+  {
+    xsAn = xs_an.xs_diff_pi_pi_rho0(s, t, mrho);
+    xsTab = xs_tab.xs_diff_pi_pi_rho0(s, t, mrho);
+  }
+  else if (proc == "pi_rho0_pi")
+  {
+    xsAn = xs_an.xs_diff_pi_rho0_pi(s, t, mrho);
+    xsTab = xs_tab.xs_diff_pi_rho0_pi(s, t, mrho);
+    
+  }
+  else if (proc == "pi_rho_pi0")
+  {
+    xsAn = xs_an.xs_diff_pi_rho_pi0(s, t, mrho);
+    xsTab = xs_tab.xs_diff_pi_rho_pi0(s, t, mrho);
+  }
+
+  fs << s << " " << t << " " << xsAn << " " << xsTab << "\n";
+
+
+  }
+
+  fs.close();
+}
+
 
 double random_double(double min, double max) {
   double random = ((double)rand()) / (double)RAND_MAX;
@@ -27,6 +99,12 @@ double random_double(double min, double max) {
 const double ds_val[] = {0.01, 0.05, 0.01};
 const double dt_val[] = {0.005, 0.05, 0.01};
 
+TEST(diff_stable__)
+{
+  for (const auto &s : Process) {
+    diff_stable(s);
+  }
+}
 
 TEST(init_particle_types) {
   ParticleType::create_type_list(
@@ -44,296 +122,298 @@ TEST(init_particle_types) {
       "e⁻ 0.000511 0 11\n");
 }
 
-TEST(pi_pi0_rho_diff)
-{
-  PhotonCrossSection<ComputationMethod::Analytic> xs_obj;
+TEST(stable_pi0_rho0_pi0) {
+  PhotonCrossSection<ComputationMethod::Analytic> xs_an;
+  PhotonCrossSection<ComputationMethod::Lookup> xs_tab;
+
   std::stringstream ss;
-  ss << base_path << "pi_pi0_rho_diff.dat";
-  //ss << base_path << "pi_rho0_pi_broad.dat";
+  ss << basepath << "pi0_rho0_pi0_tot.dat";
   std::fstream fs;
   fs.open(ss.str(), std::fstream::out);
 
-  //double s = 0.4055 * 0.4055;
+  double m_rho = 0.776;
+  double s0 = 0.1, s1 = 5.0, ds = 0.01;
+  double t0 = -5.0, t1 = 5.0, dt = 0.01;
 
-  double m0 = 0.1, m1 = 1.0, dm = 0.01;
-  double s0 = 0.1, s1 = 2.0, ds = 0.01;
-  double t0 = -5.0, t1 = 1.0, dt = 0.01;
-  double xs, t, s, m;
-
-  for (m = m0; m < m1; m += dm)
-  for (s = s0; s < s1; s += ds)
-  for (t = t0; t < t1; t += dt)
-  {
-    std::cout << s << " " << t << " " << m << std::endl;
-  
-    xs = xs_obj.xs_diff_pi_pi0_rho(s, t, m);
-    fs << s << " " << t << " " << m << " " << xs << "\n";
-
+  /***************
+   * Total XS
+   **************
+   */
+  for (double s = s0; s < s1; s += ds) {
+    const double xsA = xs_an.xs_pi0_rho0_pi0(s, m_rho);
+    const double xsT = xs_tab.xs_pi0_rho0_pi0(s, m_rho);
+    fs << s << " " << xsA << " " << xsT << "\n";
   }
-  
   fs.close();
-
 }
 
+TEST(stable_pi0_rho_pi) {
+  PhotonCrossSection<ComputationMethod::Analytic> xs_an;
+  PhotonCrossSection<ComputationMethod::Lookup> xs_tab;
 
-/*
-TEST(get_t_ranges)
-{
-    PhotonCrossSection<ComputationMethod::Analytic> xs_object;
-    const auto &rho_0 = ParticleType::find(0x113);
-    const auto &pi_0 = ParticleType::find(0x111);
-    double mass = rho_0.mass();
-    double xs;
-    auto t_range = get_t_range(1.95, pi_0.mass(), pi_0.mass(), rho_0.mass(), 0.);
-    std::cout << "t_range for pi.pi.rho " << t_range[0] << " " << t_range[1] << std::endl;
-    xs = xs_object.xs_pi_pi0_rho(0.95);
-//    xs = xs_object.xs_pi_pi0_rho(1.1);
+  std::stringstream ss;
+  ss << basepath << "pi0_rho_pi_tot.dat";
+  std::fstream fs;
+  fs.open(ss.str(), std::fstream::out);
 
- //   xs = xs_object.xs_pi0_rho0_pi0(0.95);
-  //  xs = xs_object.xs_pi0_rho0_pi0(1.1);
+  double m_rho = 0.776;
+  double s0 = 0.1, s1 = 5.0, ds = 0.01;
+  double t0 = -5.0, t1 = 5.0, dt = 0.01;
 
-}
-*/
-
-
-/*
-TEST(uniform_random_pi0_rho0_pi0) {
-  // sample N points and interpolate value there
-  const int N = 40000;
-
-  double s0_sqrt = 0.95, s1_sqrt = 1.1, t0 = -0.22, t1 = -0.02, dt = 0.01,
-         ds_sq = 0.01;
-  const double s0 = s0_sqrt * s0_sqrt, s1 = s1_sqrt * s1_sqrt;
-  for (int i = 0; i < 3; i++) {
-    dt = dt_val[i];
-    ds_sq = ds_val[i];
-    PhotonCrossSection<ComputationMethod::Analytic> xs_object;
-    TabulationND<2> tab2(s0, s1, t0, t1, ds_sq * ds_sq, dt,
-                         xs_object.xs_diff_pi0_rho0_pi0);
-    std::fstream fs;
-    std::stringstream ss;
-    ss << "/home/jonas/Master/cross_sections_tests/diff_xs/pi0_rho0_pi0/"
-       << "unirand_dt_" << dt << "_ds_" << ds_sq << ".dat";
-
-    fs.precision(10);
-    fs.open(ss.str(), std::fstream::out);
-    std::cout << ss.str();
-    double t, xs, s, s_sqrt, xs_interp, s_s, t_s;
-    fs << "#s_sqrt \t t \t xs_analytic \t xs_interp \t rel_difference <\n";
-    fs << "# " << tab2.get_size() << " points\n";
-    // sample at n random points between tabulated values
-    for (int i = 0; i < N; i++) {
-      s_sqrt = random_double(s0_sqrt, s1_sqrt);
-      s = s_sqrt * s_sqrt;
-      t = random_double(t0, t1);
-
-      xs = xs_object.xs_diff_pi0_rho0_pi0(s, t);
-      xs_interp = tab2.get_linear(s, t);
-      double divisor = (xs != 0) ? xs : 1;
-      double rel_diff = std::abs((xs - xs_interp)) / divisor;
-      fs << s_sqrt << " " << t << " " << xs << " " << xs_interp << " "
-         << rel_diff << "\n";
-    }
-
-    fs.close();
+  /***************
+   * Total XS
+   **************
+   */
+  for (double s = s0; s < s1; s += ds) {
+    const double xsA = xs_an.xs_pi0_rho_pi(s, m_rho);
+    const double xsT = xs_tab.xs_pi0_rho_pi(s, m_rho);
+    fs << s << " " << xsA << " " << xsT << "\n";
   }
+  fs.close();
 }
-TEST(uniform_random_pi_pi_rho0) {
-  // sample N points and interpolate value there
-  const int N = 40000;
-  double s0_sqrt = 0.95, s1_sqrt = 1.1, t0 = -0.22, t1 = -0.02, dt = 0.01,
-         ds_sq = 0.01;
-  const double s0 = s0_sqrt * s0_sqrt, s1 = s1_sqrt * s1_sqrt;
-  for (int i = 0; i < 3; i++) {
-    dt = dt_val[i];
-    ds_sq = ds_val[i];
+TEST(stable_pi_pi0_rho) {
+  PhotonCrossSection<ComputationMethod::Analytic> xs_an;
+  PhotonCrossSection<ComputationMethod::Lookup> xs_tab;
 
-    PhotonCrossSection<ComputationMethod::Analytic> xs_object;
-    TabulationND<2> tab2(s0, s1, t0, t1, ds_sq * ds_sq, dt,
-                         xs_object.xs_diff_pi_pi_rho0);
-    std::fstream fs;
-    std::stringstream ss;
-    ss << "/home/jonas/Master/cross_sections_tests/diff_xs/pi_pi_rho0/"
-       << "unirand_dt_" << dt << "_ds_" << ds_sq << ".dat";
+  std::stringstream ss;
+  ss << basepath << "pi_pi0_rho_tot.dat";
+  std::fstream fs;
+  fs.open(ss.str(), std::fstream::out);
 
-    fs.precision(10);
-    fs.open(ss.str(), std::fstream::out);
-    std::cout << ss.str();
-    double t, xs, s, s_sqrt, xs_interp, s_s, t_s;
-    fs << "#s_sqrt \t t \t xs_analytic \t xs_interp \t rel_difference \n";
-    fs << "# " << tab2.get_size() << " points\n";
-    // sample at n random points between tabulated values
-    for (int i = 0; i < N; i++) {
-      s_sqrt = random_double(s0_sqrt, s1_sqrt);
-      s = s_sqrt * s_sqrt;
-      t = random_double(t0, t1);
+  double m_rho = 0.776;
+  double s0 = 0.1, s1 = 5.0, ds = 0.01;
+  double t0 = -5.0, t1 = 5.0, dt = 0.01;
 
-      xs = xs_object.xs_diff_pi_pi_rho0(s, t);
-      xs_interp = tab2.get_linear(s, t);
-      double divisor = (xs != 0) ? xs : 1;
-      double rel_diff = std::abs((xs - xs_interp)) / divisor;
-      fs << s_sqrt << " " << t << " " << xs << " " << xs_interp << " "
-         << rel_diff << "\n";
-    }
-
-    fs.close();
+  /***************
+   * Total XS
+   **************
+   */
+  for (double s = s0; s < s1; s += ds) {
+    const double xsA = xs_an.xs_pi_pi0_rho(s, m_rho);
+    const double xsT = xs_tab.xs_pi_pi0_rho(s, m_rho);
+    fs << s << " " << xsA << " " << xsT << "\n";
   }
+  fs.close();
 }
-TEST(uniform_random_pi_pi0_rho) {
-  // sample N points and interpolate value there
-  const int N = 40000;
-  double s0_sqrt = 0.95, s1_sqrt = 1.1, t0 = -0.22, t1 = -0.02, dt = 0.01,
-         ds_sq = 0.01;
-  const double s0 = s0_sqrt * s0_sqrt, s1 = s1_sqrt * s1_sqrt;
-  for (int i = 0; i < 3; i++) {
-    dt = dt_val[i];
-    ds_sq = ds_val[i];
 
-    PhotonCrossSection<ComputationMethod::Analytic> xs_object;
-    TabulationND<2> tab2(s0, s1, t0, t1, ds_sq * ds_sq, dt,
-                         xs_object.xs_diff_pi_pi0_rho);
-    std::fstream fs;
-    std::stringstream ss;
-    ss << "/home/jonas/Master/cross_sections_tests/diff_xs/pi_pi0_rho/"
-       << "unirand_dt_" << dt << "_ds_" << ds_sq << ".dat";
+TEST(stable_pi_pi_rho0) {
+  PhotonCrossSection<ComputationMethod::Analytic> xs_an;
+  PhotonCrossSection<ComputationMethod::Lookup> xs_tab;
 
-    fs.precision(10);
-    fs.open(ss.str(), std::fstream::out);
-    std::cout << ss.str();
-    double t, xs, s, s_sqrt, xs_interp, s_s, t_s;
-    fs << "# s_sqrt \t t \t xs_analytic \t xs_interp \t rel_difference\n";
-    fs << "# " << tab2.get_size() << "\n";
+  std::stringstream ss;
+  ss << basepath << "pi_pi_rho0_tot.dat";
+  std::fstream fs;
+  fs.open(ss.str(), std::fstream::out);
 
-    // sample at n random points between tabulated values
-    for (int i = 0; i < N; i++) {
-      s_sqrt = random_double(s0_sqrt, s1_sqrt);
-      s = s_sqrt * s_sqrt;
-      t = random_double(t0, t1);
+  double m_rho = 0.776;
+  double s0 = 0.1, s1 = 5.0, ds = 0.01;
+  double t0 = -5.0, t1 = 5.0, dt = 0.01;
 
-      xs = xs_object.xs_diff_pi_pi0_rho(s, t);
-      xs_interp = tab2.get_linear(s, t);
-      double divisor = (xs != 0) ? xs : 1;
-      double rel_diff = std::abs((xs - xs_interp)) / divisor;
-      fs << s_sqrt << " " << t << " " << xs << " " << xs_interp << " "
-         << rel_diff << "\n";
-    }
-
-    fs.close();
+  /***************
+   * Total XS
+   **************
+   */
+  for (double s = s0; s < s1; s += ds) {
+    const double xsA = xs_an.xs_pi_pi_rho0(s, m_rho);
+    const double xsT = xs_tab.xs_pi_pi_rho0(s, m_rho);
+    fs << s << " " << xsA << " " << xsT << "\n";
   }
+  fs.close();
 }
-TEST(uniform_random_pi0_rho_pi) {
-  // sample N points and interpolate value there
-  const int N = 40000;
-  double s0_sqrt = 0.95, s1_sqrt = 1.1, t0 = -0.20, t1 = -0.03, dt = 0.01,
-         ds_sq = 0.01;
-  const double s0 = s0_sqrt * s0_sqrt, s1 = s1_sqrt * s1_sqrt;
-  for (int i = 0; i < 3; i++) {
-    dt = dt_val[i];
-    ds_sq = ds_val[i];
 
-    PhotonCrossSection<ComputationMethod::Analytic> xs_object;
-    TabulationND<2> tab2(s0, s1, t0, t1, ds_sq * ds_sq, dt,
-                         xs_object.xs_diff_pi0_rho_pi);
-    std::fstream fs;
-    std::stringstream ss;
-    ss << "/home/jonas/Master/cross_sections_tests/diff_xs/pi0_rho_pi/"
-       << "unirand_dt_" << dt << "_ds_" << ds_sq << ".dat";
+TEST(stable_pi_rho0_pi) {
+  PhotonCrossSection<ComputationMethod::Analytic> xs_an;
+  PhotonCrossSection<ComputationMethod::Lookup> xs_tab;
 
-    fs.precision(10);
-    fs.open(ss.str(), std::fstream::out);
-    std::cout << ss.str();
-    double t, xs, s, s_sqrt, xs_interp, s_s, t_s;
-    fs << "# s_sqrt \t t \t xs_analytic \t xs_interp \t rel_difference\n";
-    fs << "# " << tab2.get_size() << "\n";
-    // sample at n random points between tabulated values
-    for (int i = 0; i < N; i++) {
-      s_sqrt = random_double(s0_sqrt, s1_sqrt);
-      s = s_sqrt * s_sqrt;
-      t = random_double(t0, t1);
+  std::stringstream ss;
+  ss << basepath << "pi_rho0_pi_tot.dat";
+  std::fstream fs;
+  fs.open(ss.str(), std::fstream::out);
 
-      xs = xs_object.xs_diff_pi0_rho_pi(s, t);
-      xs_interp = tab2.get_linear(s, t);
-      double divisor = (xs != 0) ? xs : 1;
-      double rel_diff = std::abs((xs - xs_interp)) / divisor;
-      fs << s_sqrt << " " << t << " " << xs << " " << xs_interp << " "
-         << rel_diff << "\n";
-    }
+  double m_rho = 0.776;
+  double s0 = 0.1, s1 = 5.0, ds = 0.01;
+  double t0 = -5.0, t1 = 5.0, dt = 0.01;
 
-    fs.close();
+  /***************
+   * Total XS
+   **************
+   */
+  for (double s = s0; s < s1; s += ds) {
+    const double xsA = xs_an.xs_pi_rho0_pi(s, m_rho);
+    const double xsT = xs_tab.xs_pi_rho0_pi(s, m_rho);
+    fs << s << " " << xsA << " " << xsT << "\n";
   }
+  fs.close();
+}
+
+TEST(stable_pi_rho_pi0) {
+  PhotonCrossSection<ComputationMethod::Analytic> xs_an;
+  PhotonCrossSection<ComputationMethod::Lookup> xs_tab;
+
+  std::stringstream ss;
+  ss << basepath << "pi_rho_pi0_tot.dat";
+  std::fstream fs;
+  fs.open(ss.str(), std::fstream::out);
+
+  double m_rho = 0.776;
+  double s0 = 0.1, s1 = 5.0, ds = 0.01;
+  double t0 = -5.0, t1 = 5.0, dt = 0.01;
+
+  /***************
+   * Total XS
+   **************
+   */
+  for (double s = s0; s < s1; s += ds) {
+    const double xsA = xs_an.xs_pi_rho_pi0(s, m_rho);
+    const double xsT = xs_tab.xs_pi_rho_pi0(s, m_rho);
+    fs << s << " " << xsA << " " << xsT << "\n";
+  }
+  fs.close();
 }
 
 
-TEST(uniform_random_pi_rho_pi0) {
-  // sample N points and interpolate value there
-  const int N = 40000;
-  double s0_sqrt = 0.95, s1_sqrt = 1.1, t0 = -0.22, t1 = -0.02, dt = 0.01,
-         ds_sq = 0.01;
-  const double s0 = s0_sqrt * s0_sqrt, s1 = s1_sqrt * s1_sqrt;
-  for (int i = 0; i < 3; i++) {
-    dt = dt_val[i];
-    ds_sq = ds_val[i];
 
-    PhotonCrossSection<ComputationMethod::Analytic> xs_object;
-    TabulationND<2> tab2(s0, s1, t0, t1, ds_sq * ds_sq, dt,
-                         xs_object.xs_diff_pi_rho_pi0);
-    std::fstream fs;
-    std::stringstream ss;
-    ss << "/home/jonas/Master/cross_sections_tests/diff_xs/pi_rho_pi0/"
-       << "unirand_dt_" << dt << "_ds_" << ds_sq << ".dat";
+TEST(pi0_rho0_pi0_broad_rho_diff) { 
+ const double s0 = 0.1, s1 = 5.0, ds = 0.01;
+  const double t0 = -5.0, t1 = 5.0, dt = 0.01;
+  const double m0 = 0.1, m1 = 1.0, dm = 0.01;
+  std::cout << Process[0];
+  std::stringstream ss;
+  std::fstream fs; ss << "/home/jonas/Master/cross_sections_tests/broad/diff/" << "pi0_rho0_pi0.dat";
+  fs.open(ss.str(), std::fstream::out);
+  double xsAn, xsTab;
+  PhotonCrossSection<ComputationMethod::Analytic> xs_an;
+  PhotonCrossSection<ComputationMethod::Lookup> xs_tab;
 
-    fs.precision(10);
-    fs.open(ss.str(), std::fstream::out);
-    std::cout << ss.str();
-    double t, xs, s, s_sqrt, xs_interp, s_s, t_s;
-    fs << "# s_sqrt \t t \t xs_analytic \t xs_interp \t rel_difference\n";
-    fs << "# " << tab2.get_size() << "\n";
-    // sample at n random points between tabulated values
-    for (int i = 0; i < N; i++) {
-      s_sqrt = random_double(s0_sqrt, s1_sqrt);
-      s = s_sqrt * s_sqrt;
-      t = random_double(t0, t1);
+  for (double s = s0; s < s1; s += ds)
+  for (double t = t0; t < t1; t += dt)
+  for (double m = m0; m < m1; m += dm)
+  { 
+xsAn = xs_an.xs_diff_pi0_rho0_pi0(s, t, m);
+xsTab = xs_tab.xs_diff_pi0_rho0_pi0(s,t,m);
 
-      xs = xs_object.xs_diff_pi_rho_pi0(s, t);
-      xs_interp = tab2.get_linear(s, t);
-      double divisor = (xs != 0) ? xs : 1;
-      double rel_diff = std::abs((xs - xs_interp)) / divisor;
-      fs << s_sqrt << " " << t << " " << xs << " " << xs_interp << " "
-         << rel_diff << "\n";
+    fs << s << " " << t << " " << m << " " << xsAn << " " << xsTab << "\n";
     }
-
-    fs.close();
+  fs.close();
   }
-}
+    
+TEST(pi0_rho_pi_broad_rho_diff) { 
+ const double s0 = 0.1, s1 = 5.0, ds = 0.01;
+  const double t0 = -5.0, t1 = 5.0, dt = 0.01;
+  const double m0 = 0.1, m1 = 1.0, dm = 0.01;
+  std::cout << Process[0];
+  std::stringstream ss;
+  std::fstream fs; ss << "/home/jonas/Master/cross_sections_tests/broad/diff/" << "pi0_rho_pi.dat";
+  fs.open(ss.str(), std::fstream::out);
+  double xsAn, xsTab;
+  PhotonCrossSection<ComputationMethod::Analytic> xs_an;
+  PhotonCrossSection<ComputationMethod::Lookup> xs_tab;
 
-*/
-/*
-TEST(pi_rho_pi0) {
-    const double s0_sqrt = 0.95, s1_sqrt = 1.1, t0 = -0.22, t1 = -0.02,
-                 dt = 0.005, ds = 0.01;
-    const double s0 = s0_sqrt * s0_sqrt, s1 = s1_sqrt * s1_sqrt;
-    PhotonCrossSection<ComputationMethod::Analytic> xs_object;
-    TabulationND<2> tab2(s0, s1, t0, t1, ds, dt, xs_object.xs_diff_pi_rho_pi0);
-    std::fstream fs;
-    std::stringstream ss;
-    ss << "/home/jonas/Master/cross_sections_tests/diff_xs/pi_rho_pi0/"
-       << "dt_" << dt << "_ds_" << ds << ".dat";
-    fs.open(ss.str(), std::fstream::out);
-    std::cout << ss.str();
-    double t, xs, s, s_sqrt, xs_interp;
-    fs << "s_sqrt \t t \t xs_analytic \t xs_interp \t rel_difference\n";
-    for (s_sqrt = s0_sqrt; s_sqrt <= s1_sqrt; s_sqrt += 0.2 * ds) {
-      for (t = t0; t < t1; t += 0.2 * dt) {
-        s = s_sqrt * s_sqrt;
-        xs = xs_object.xs_diff_pi_rho_pi0(s, t);
-        xs_interp = tab2.get_linear(s, t);
-        double divisor = (xs != 0) ? xs : 1;
-        double rel_diff = std::abs((xs - xs_interp)) / divisor;
-        fs << s_sqrt << " " << t << " " << xs << " " << xs_interp << " "
-           << rel_diff << "\n";
-      }
-      fs << std::endl;
+  for (double s = s0; s < s1; s += ds)
+  for (double t = t0; t < t1; t += dt)
+  for (double m = m0; m < m1; m += dm)
+  { 
+xsAn = xs_an.xs_diff_pi0_rho_pi(s, t, m);
+xsTab = xs_tab.xs_diff_pi0_rho_pi(s,t,m);
+
+    fs << s << " " << t << " " << m << " " << xsAn << " " << xsTab << "\n";
     }
-    fs.close();
+  fs.close();
   }
-*/
+    
+TEST(pi_pi0_rho_broad_rho_diff) { 
+ const double s0 = 0.1, s1 = 5.0, ds = 0.01;
+  const double t0 = -5.0, t1 = 5.0, dt = 0.01;
+  const double m0 = 0.1, m1 = 1.0, dm = 0.01;
+  std::cout << Process[0];
+  std::stringstream ss;
+  std::fstream fs; ss << "/home/jonas/Master/cross_sections_tests/broad/diff/" << "pi_pi0_rho.dat";
+  fs.open(ss.str(), std::fstream::out);
+  double xsAn, xsTab;
+  PhotonCrossSection<ComputationMethod::Analytic> xs_an;
+  PhotonCrossSection<ComputationMethod::Lookup> xs_tab;
+
+  for (double s = s0; s < s1; s += ds)
+  for (double t = t0; t < t1; t += dt)
+  for (double m = m0; m < m1; m += dm)
+  { 
+xsAn = xs_an.xs_diff_pi_pi0_rho(s, t, m);
+xsTab = xs_tab.xs_diff_pi_pi0_rho(s,t,m);
+
+    fs << s << " " << t << " " << m << " " << xsAn << " " << xsTab << "\n";
+    }
+  fs.close();
+  }
+    
+TEST(pi_pi_rho0_broad_rho_diff) { 
+ const double s0 = 0.1, s1 = 5.0, ds = 0.01;
+  const double t0 = -5.0, t1 = 5.0, dt = 0.01;
+  const double m0 = 0.1, m1 = 1.0, dm = 0.01;
+  std::cout << Process[0];
+  std::stringstream ss;
+  std::fstream fs; ss << "/home/jonas/Master/cross_sections_tests/broad/diff/" << "pi_pi_rho0.dat";
+  fs.open(ss.str(), std::fstream::out);
+  double xsAn, xsTab;
+  PhotonCrossSection<ComputationMethod::Analytic> xs_an;
+  PhotonCrossSection<ComputationMethod::Lookup> xs_tab;
+
+  for (double s = s0; s < s1; s += ds)
+  for (double t = t0; t < t1; t += dt)
+  for (double m = m0; m < m1; m += dm)
+  { 
+xsAn = xs_an.xs_diff_pi_pi_rho0(s, t, m);
+xsTab = xs_tab.xs_diff_pi_pi_rho0(s,t,m);
+
+    fs << s << " " << t << " " << m << " " << xsAn << " " << xsTab << "\n";
+    }
+  fs.close();
+  }
+    
+TEST(pi_rho0_pi_broad_rho_diff) { 
+ const double s0 = 0.1, s1 = 5.0, ds = 0.01;
+  const double t0 = -5.0, t1 = 5.0, dt = 0.01;
+  const double m0 = 0.1, m1 = 1.0, dm = 0.01;
+  std::cout << Process[0];
+  std::stringstream ss;
+  std::fstream fs; ss << "/home/jonas/Master/cross_sections_tests/broad/diff/" << "pi_rho0_pi.dat";
+  fs.open(ss.str(), std::fstream::out);
+  double xsAn, xsTab;
+  PhotonCrossSection<ComputationMethod::Analytic> xs_an;
+  PhotonCrossSection<ComputationMethod::Lookup> xs_tab;
+
+  for (double s = s0; s < s1; s += ds)
+  for (double t = t0; t < t1; t += dt)
+  for (double m = m0; m < m1; m += dm)
+  { 
+xsAn = xs_an.xs_diff_pi_rho0_pi(s, t, m);
+xsTab = xs_tab.xs_diff_pi_rho0_pi(s,t,m);
+
+    fs << s << " " << t << " " << m << " " << xsAn << " " << xsTab << "\n";
+    }
+  fs.close();
+  }
+    
+TEST(pi_rho_pi0_broad_rho_diff) { 
+ const double s0 = 0.1, s1 = 5.0, ds = 0.01;
+  const double t0 = -5.0, t1 = 5.0, dt = 0.01;
+  const double m0 = 0.1, m1 = 1.0, dm = 0.01;
+  std::cout << Process[0];
+  std::stringstream ss;
+  std::fstream fs; ss << "/home/jonas/Master/cross_sections_tests/broad/diff/" << "pi_rho_pi0.dat";
+  fs.open(ss.str(), std::fstream::out);
+  double xsAn, xsTab;
+  PhotonCrossSection<ComputationMethod::Analytic> xs_an;
+  PhotonCrossSection<ComputationMethod::Lookup> xs_tab;
+
+  for (double s = s0; s < s1; s += ds)
+  for (double t = t0; t < t1; t += dt)
+  for (double m = m0; m < m1; m += dm)
+  { 
+xsAn = xs_an.xs_diff_pi_rho_pi0(s, t, m);
+xsTab = xs_tab.xs_diff_pi_rho_pi0(s,t,m);
+
+    fs << s << " " << t << " " << m << " " << xsAn << " " << xsTab << "\n";
+    }
+  fs.close();
+  }
+    
