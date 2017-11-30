@@ -124,13 +124,13 @@ bool ScatterActionPhoton::is_kinematically_possible(const double s_sqrt,
                                                     const ParticleList &in) {
   auto hadron = outgoing_hadron_type(in);
   // hadron() returns true if index is valid
-  
+
   if (hadron->mass() < s_sqrt) {
     return true;
   } else {
     return false;
   }
-  
+
 }
 
 void ScatterActionPhoton::generate_final_state() {
@@ -470,5 +470,6 @@ double ScatterActionPhoton::form_factor(double E_photon) {
       break;
   }
   form_factor = pow(2.0 * pow(Lambda, 2) / (2.0 * pow(Lambda, 2) - t_ff), 2);
-  return form_factor;
+  //return form_factor;
+  return 1.0;
 }
