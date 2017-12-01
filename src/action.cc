@@ -68,7 +68,7 @@ void Action::update_incoming(const Particles &particles) {
   }
 }
 
-FourVector Action::get_interaction_point() {
+FourVector Action::get_interaction_point() const {
   // Estimate for the interaction point in the calculational frame
   FourVector interaction_point = FourVector(0., 0., 0., 0.);
   for (const auto &part : incoming_particles_) {
@@ -76,6 +76,22 @@ FourVector Action::get_interaction_point() {
   }
   interaction_point /= incoming_particles_.size();
   return interaction_point;
+}
+
+std::pair<double, double> Action::get_potential_at_interaction_point() const {
+  const ThreeVector r = get_interaction_point().threevec();
+  double UB, UI3;
+  /* Check:
+   * 1. Potential is turned on
+   * 2. Lattice is turned on
+   * 3. Particle is inside the lattice. */
+  const bool UB_exist =
+            ((UB_lat_ != nullptr) ? UB_lat_->value_at(r, UB) : false);
+  const bool UI3_exist =
+            ((UI3_lat_ != nullptr) ? UI3_lat_->value_at(r, UI3) : false);
+  const double B_pot = (UB_exist ? UB : 0.0);
+  const double I3_pot = (UI3_exist ? UI3 : 0.0);
+  return std::make_pair(B_pot, I3_pot);
 }
 
 void Action::perform(Particles *particles, uint32_t id_process) {
@@ -146,24 +162,11 @@ double Action::kinetic_energy_cms() const {
                     + std::to_string(p_out.position().x2()) + ", "
                     + std::to_string(p_out.position().x3()) + ") ");
   }
-  double UB, UI3;
-  /* The potentials will be evaluated at the position of the outgoing
-   * particles, which is the center of the collision. An exception is
-   * elastic scattering. But elastic scatterings are not affected by
-   * the potentials anyway. */
-  const ThreeVector r = outgoing_particles_[0].position().threevec();
-  /* Check:
-   * 1. Potential is turned on
-   * 2. Lattice is turned on
-   * 3. Particle is inside the lattice. */
-  const bool UB_exist =
-            ((UB_lat_ != nullptr) ? UB_lat_->value_at(r, UB) : false);
-  const bool UI3_exist =
-            ((UI3_lat_ != nullptr) ? UI3_lat_->value_at(r, UI3) : false);
+  const auto potentials = get_potential_at_interaction_point();
   /* Rescale to get the potential difference between the 
    * initial and final state.*/
-  const double B_pot_diff = (UB_exist ? UB * scale_B : 0.0);
-  const double I3_pot_diff = (UI3_exist ? UI3 * scale_I3 : 0.0);
+  const double B_pot_diff = potentials.first * scale_B;
+  const double I3_pot_diff = potentials.second * scale_I3;
   if (scale_B > really_small) {
      log.info("reaction: ", in_particle, "->", out_particle, ", DU = ", 
               std::to_string(B_pot_diff + I3_pot_diff));
@@ -173,7 +176,7 @@ double Action::kinetic_energy_cms() const {
   return sqrt_s() + B_pot_diff + I3_pot_diff;
 }
 
-double Action::kinetic_energy_cms(ThreeVector r,
+double Action::kinetic_energy_cms(std::pair<double, double> potentials,
            ParticleTypePtrList p_out_types) const {
   /* scale_B returns the difference of the total force scales of the skyrme
    * potential between the initial and final states. */
@@ -194,19 +197,10 @@ double Action::kinetic_energy_cms(ThreeVector r,
        scale_B -= scale.first;
        scale_I3 -= scale.second * p_out->isospin3_rel();
   }
-  double UB, UI3;
-  /* Check:
-   * 1. Potential is turned on
-   * 2. Lattice is turned on
-   * 3. Particle is inside the lattice. */
-  const bool UB_exist =
-            ((UB_lat_ != nullptr) ? UB_lat_->value_at(r, UB) : false);
-  const bool UI3_exist =
-            ((UI3_lat_ != nullptr) ? UI3_lat_->value_at(r, UI3) : false);
   /* Rescale to get the potential difference between the 
    * initial and final state.*/
-  const double B_pot_diff = (UB_exist ? UB * scale_B : 0.0);
-  const double I3_pot_diff = (UI3_exist ? UI3 * scale_I3 : 0.0);
+  const double B_pot_diff = potentials.first * scale_B;
+  const double I3_pot_diff = potentials.second * scale_I3;
   return sqrt_s() + B_pot_diff + I3_pot_diff;
 }
 

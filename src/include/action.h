@@ -92,10 +92,11 @@ class Action {
                    double &total_weight) {
     /* Evaluate the total kinentic energy of the final state particles
      * of this new subprocess. */
-    const ThreeVector r = get_interaction_point().threevec();
+    const auto potentials = get_potential_at_interaction_point();
     const auto out_particle_types = p->particle_types();
-    const double kin_energy_cms = kinetic_energy_cms(r, out_particle_types);
-    /* Reject the process if the total kinetic energy is smaller than the 
+    const double kin_energy_cms = kinetic_energy_cms(potentials,
+                                              out_particle_types);
+    /* Reject the process if the total kinetic energy is smaller than the
      * threshold. */
     if (p->weight() > 0 && kin_energy_cms > p->threshold()) {
       total_weight += p->weight();
@@ -107,14 +108,15 @@ class Action {
   void add_processes(ProcessBranchList<Branch> pv,
                      ProcessBranchList<Branch> &subprocesses,
                      double &total_weight) {
-    const ThreeVector r = get_interaction_point().threevec();
+    const auto potentials = get_potential_at_interaction_point();
     subprocesses.reserve(subprocesses.size() + pv.size());
     for (auto &proc : pv) {
       /* Evaluate the total kinentic energy of the final state particles
        * of this new subprocess. */
       const auto out_particle_types = proc->particle_types();
-      const double kin_energy_cms = kinetic_energy_cms(r, out_particle_types);
-      /* Reject the process if the total kinetic energy is smaller than the 
+      const double kin_energy_cms = kinetic_energy_cms(potentials,
+                                               out_particle_types);
+      /* Reject the process if the total kinetic energy is smaller than the
        * threshold. */
       if (proc->weight() > 0 && kin_energy_cms > proc->threshold()) {
         total_weight += proc->weight();
@@ -207,11 +209,14 @@ class Action {
    * of the outgoing particles are not yet determined. They can be any
    * values in the possible branching processes.
    */
-  double kinetic_energy_cms(ThreeVector r,
+  double kinetic_energy_cms(std::pair<double, double> potentials,
          ParticleTypePtrList p_out_types) const;
 
   /** Get the interaction point */
-  FourVector get_interaction_point();
+  FourVector get_interaction_point() const;
+
+  /** Get the potential at the interaction point */
+  std::pair<double, double> get_potential_at_interaction_point() const;
 
   /** Input the information on the potential */
   void input_potential(RectangularLattice<double> *UB_lat,
