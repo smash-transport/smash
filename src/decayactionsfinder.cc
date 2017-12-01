@@ -59,6 +59,7 @@ ActionList DecayActionsFinder::find_actions_in_cell(
       // => decay_time ∈ [0, dt[
       // => the particle decays in this timestep.
       auto act = make_unique<DecayAction>(p, decay_time);
+      act->input_potential(UB_lat_, UI3_lat_, pot_);
       act->add_decays(std::move(processes));
       actions.emplace_back(std::move(act));
     }
@@ -75,6 +76,7 @@ ActionList DecayActionsFinder::find_final_actions(const Particles &search_list,
       continue; /* particle doesn't decay */
     }
     auto act = make_unique<DecayAction>(p, 0.);
+    act->input_potential(UB_lat_, UI3_lat_, pot_);
     act->add_decays(p.type().get_partial_widths(p.effective_mass()));
     actions.emplace_back(std::move(act));
   }

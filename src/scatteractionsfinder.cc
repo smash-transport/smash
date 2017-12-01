@@ -154,6 +154,7 @@ ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
   if (strings_switch_) {
     act->set_string_interface(string_process_interface_.get());
   }
+  act->input_potential(UB_lat_, UI3_lat_, pot_);
   return act;
 }
 
