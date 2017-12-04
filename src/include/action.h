@@ -90,15 +90,7 @@ class Action {
   void add_process(ProcessBranchPtr<Branch> &p,
                    ProcessBranchList<Branch> &subprocesses,
                    double &total_weight) {
-    /* Evaluate the total kinentic energy of the final state particles
-     * of this new subprocess. */
-    const auto potentials = get_potential_at_interaction_point();
-    const auto out_particle_types = p->particle_types();
-    const double kin_energy_cms = kinetic_energy_cms(potentials,
-                                              out_particle_types);
-    /* Reject the process if the total kinetic energy is smaller than the
-     * threshold. */
-    if (p->weight() > 0 && kin_energy_cms > p->threshold()) {
+    if (p->weight() > 0) {
       total_weight += p->weight();
       subprocesses.emplace_back(std::move(p));
     }
@@ -108,17 +100,9 @@ class Action {
   void add_processes(ProcessBranchList<Branch> pv,
                      ProcessBranchList<Branch> &subprocesses,
                      double &total_weight) {
-    const auto potentials = get_potential_at_interaction_point();
     subprocesses.reserve(subprocesses.size() + pv.size());
     for (auto &proc : pv) {
-      /* Evaluate the total kinentic energy of the final state particles
-       * of this new subprocess. */
-      const auto out_particle_types = proc->particle_types();
-      const double kin_energy_cms = kinetic_energy_cms(potentials,
-                                               out_particle_types);
-      /* Reject the process if the total kinetic energy is smaller than the
-       * threshold. */
-      if (proc->weight() > 0 && kin_energy_cms > proc->threshold()) {
+      if (proc->weight() > 0) {
         total_weight += proc->weight();
         subprocesses.emplace_back(std::move(proc));
       }
@@ -237,6 +221,12 @@ class Action {
   };
 
  protected:
+  /** Pointer to the skyrme potential on the lattice */
+  RectangularLattice<double> *UB_lat_ = nullptr;
+  /** Pointer to the symmmetry potential on the lattice */
+  RectangularLattice<double> *UI3_lat_ = nullptr;
+  /** Pointer to a Potential class */
+  Potentials *pot_ = nullptr;
   /** List with data of incoming particles.  */
   ParticleList incoming_particles_;
   /**
@@ -260,6 +250,31 @@ class Action {
       mom += p.momentum();
     }
     return mom;
+  }
+
+  /**
+   * Remove the sub-threshold processes from the list of sub processes.
+   */
+  template <typename Branch>
+  void filter_channel(ProcessBranchList<Branch> &subprocesses,
+                               double &total_weight) {
+    const auto potentials = get_potential_at_interaction_point();
+    /* Loop through all subprocesses and remove sub-threshold ones.*/
+    for (auto proc = subprocesses.begin(); proc != subprocesses.end();) {
+         /* Evaluate the total kinentic energy of the final state particles
+          * of this new subprocess. */
+         const auto out_particle_types = (*proc)->particle_types();
+         const double kin_energy_cms = kinetic_energy_cms(potentials,
+                                              out_particle_types);
+         /* Reject the process if the total kinetic energy is smaller than the
+          * threshold. */
+         if (kin_energy_cms < (*proc)->threshold()) {
+           total_weight -= (*proc)->weight();
+           proc = subprocesses.erase(proc);
+         } else {
+           ++proc;
+         }
+      }
   }
 
   /**
@@ -331,13 +346,6 @@ class Action {
     action.format_debug_output(out);
     return out;
   }
- private:
-  /** Pointer to the skyrme potential on the lattice */
-  RectangularLattice<double> *UB_lat_ = nullptr;
-  /** Pointer to the symmmetry potential on the lattice */
-  RectangularLattice<double> *UI3_lat_ = nullptr;
-  /** Pointer to a Potential class */
-  Potentials *pot_ = nullptr;
 };
 
 inline std::vector<ActionPtr> &operator+=(std::vector<ActionPtr> &lhs,

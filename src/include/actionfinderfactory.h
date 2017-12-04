@@ -85,22 +85,6 @@ class ActionFinderInterface {
    */
   virtual ActionList find_final_actions(const Particles &search_list,
                                         bool only_res = false) const = 0;
-
-  /** Input the information on the potential */
-  void input_potential(RectangularLattice<double> *UB_lat,
-        RectangularLattice<double> *UI3_lat, Potentials *pot) {
-        UB_lat_ = UB_lat;
-        UI3_lat_ = UI3_lat;
-        pot_ = pot;
-  };
-
- protected:
-  /** Pointer to the skyrme potential on the lattice */
-  RectangularLattice<double> *UB_lat_ = nullptr;
-  /** Pointer to the symmmetry potential on the lattice */
-  RectangularLattice<double> *UI3_lat_ = nullptr;
-  /** Pointer to a Potential class */
-  Potentials *pot_ = nullptr;
 };
 
 }  // namespace smash

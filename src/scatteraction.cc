@@ -45,6 +45,9 @@ void ScatterAction::generate_final_state() {
 
   log.debug("Incoming particles: ", incoming_particles_);
 
+  if (pot_ != nullptr) {
+     filter_channel(collision_channels_, total_cross_section_);
+  }
   /* Decide for a particular final state. */
   const CollisionBranch *proc = choose_channel<CollisionBranch>(
       collision_channels_, total_cross_section_);

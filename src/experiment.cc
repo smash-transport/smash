@@ -827,6 +827,9 @@ bool Experiment<Modus>::perform_action(
     log.debug(~einhard::DRed(), "✘ ", action, " (discarded: invalid)");
     return false;
   }
+  if (parameters_.potential_affect_threshold) {
+     action.input_potential(UB_lat_.get(), UI3_lat_.get(), potentials_.get());
+  }
   action.generate_final_state();
   log.debug("Process Type is: ", action.get_type());
   if (pauli_blocker_ && action.is_pauli_blocked(particles_, *pauli_blocker_)) {
@@ -964,20 +967,12 @@ void Experiment<Modus>::run_time_evolution() {
     grid.iterate_cells(
         [&](const ParticleList &search_list) {
           for (const auto &finder : action_finders_) {
-            if (parameters_.potential_affect_threshold) {
-               finder->input_potential(UB_lat_.get(),
-                        UI3_lat_.get(), potentials_.get());
-            }
             actions.insert(finder->find_actions_in_cell(search_list, dt));
           }
         },
         [&](const ParticleList &search_list,
             const ParticleList &neighbors_list) {
           for (const auto &finder : action_finders_) {
-            if (parameters_.potential_affect_threshold) {
-               finder->input_potential(UB_lat_.get(),
-                        UI3_lat_.get(), potentials_.get());
-            }
             actions.insert(finder->find_actions_with_neighbors(
                 search_list, neighbors_list, dt));
           }
@@ -1108,10 +1103,6 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
     time_left = end_time - act->time_of_execution();
     const ParticleList &outgoing_particles = act->outgoing_particles();
     for (const auto &finder : action_finders_) {
-      if (parameters_.potential_affect_threshold) {
-         finder->input_potential(UB_lat_.get(),
-                  UI3_lat_.get(), potentials_.get());
-      }
       // Outgoing particles can still decay, cross walls...
       actions.insert(
           finder->find_actions_in_cell(outgoing_particles, time_left));
@@ -1257,10 +1248,6 @@ void Experiment<Modus>::do_final_decays() {
     }
     /* Find actions. */
     for (const auto &finder : action_finders_) {
-      if (parameters_.potential_affect_threshold) {
-         finder->input_potential(UB_lat_.get(),
-                  UI3_lat_.get(), potentials_.get());
-      }
       actions.insert(finder->find_final_actions(particles_));
     }
     /* Perform actions. */
