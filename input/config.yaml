@@ -1,216 +1,34 @@
 Logging:
   default: INFO
-  #Legacy: ALL
-  #Main: ALL
-  #Experiment: ALL
-  #Box: ALL
-  #Collider: ALL
-  #Sphere: ALL
-  #ParticleType: ALL
-  #Action: ALL
-  #FindScatter: ALL
-  #DecayModes: ALL
-  #ScatterAction: ALL
-  #Pythia: ALL
 
 General:
-    # Modus decision
     Modus:         Collider
-
-    # Mode of time stepping. Possible values: None, Fixed, Adaptive
     Time_Step_Mode: Fixed
-
-    # additional parameters for the adaptive time step mode
-    #Adaptive_Time_Step:
-    #    Smoothing_Factor:       0.1
-    #    Target_Missed_Actions:  0.01
-    #    Allowed_Deviation:      2.5
-
-    # temporal grid spacing
     Delta_Time:    0.1
-
-    # end time of simulation
     End_Time:      100.0
-
-    # initial random seed (auto-generated if negative)
-    Randomseed:    1
-
-    # number of test particles
-    Testparticles: 1
-
-    # number of events
-    Nevents:       1
-
-    # width of gaussians representing particles, fm
-    Gaussian_Sigma: 1.0
-
-    # distance at which gaussian values are small enough to set them zero
-    Gauss_Cutoff_In_Sigma: 3.0
-
-    # reduce the combinatorics by placing the particles in a grid structure
+    Randomseed:    -1
+    Testparticles: 20
+    Nevents:       10
     Use_Grid: True
 
-    # Select which kind of expansion the metric should have (only use with sphere modus)
-    Metric_Type: "NoExpansion"
-
-    # Expansion rate of the metric, if any expansion was selected
-    Expansion_Rate: 0.1
-
 Output:
-    # how much time before recording measurables
     Output_Interval:  1.0
-    # Which density is written to collision headers:
-    # ("hadron", "baryon", "baryonic isospin", "pion", "none")
-    Density_Type:      "none"
-#    Particles:
-#        Format:          ["Oscar2013", "Oscar1999", "Binary", "VTK", "Root"]
-#        Extended:        True
-#        Only_Final:      True
-#    Collisions:
-#        Format:          ["Oscar2013", "Oscar1999", "Binary", "Root"]
-#        Extended:        True
-#        Print_Start_End: True
-#    Dileptons:
-#        Format:          ["Oscar2013", "Binary", "Root"]
-#    Photons:
-#        Format:          ["Oscar2013", "Oscar1999", "Binary", "Root"]
-#        Fractions:       100
-#    Thermodynamics:
-#        Format:          ["ASCII", "VTK"]
-#        # ("hadron", "baryon", "baryonic isospin", "pion"), baryon := net baryon
-#        Type:            "none"
-#        Quantities:      ["rho_eckart", "tmn", "tmn_landau", "landau_velocity"]
-#        Position:        [0.0, 0.0, 0.0]
-#        Smearing:        True
+    Particles:
+        Format:          ["Oscar2013", "Binary"]
+        Extended:        True
+    Collisions:
+        Format:          ["Oscar2013", "Binary"]
+        Extended:        True
+        Print_Start_End: True
 
-
-Collision_Term:
-    Two_to_One:             True
-    Two_to_Two:             True
-    Strings:                False
-    NNbar_Treatment:        no annihilation #Options are "no annihilation",
-                                            #"resonances", "strings"
-    Force_Decays_At_End:    True
-    Isotropic:              False
-    Elastic_Cross_Section:  -1.0  # Globally used if non-negative, [mb]
-    Elastic_NN_Cutoff_Sqrts: 1.98 # Exclude the elastic collisions between the two
-                                 # nucleons with the square root s below the value [GeV].
-                                 # Exclusion is effectively turned off by setting any value
-                                 # below 1.88 (the threshold energy of the elastic collsion).
-                                 # And the value is at best not beyond 2.02 ( the threshold
-                                 # energy of the inelastic collision NN->NNpi)
-#    Pauli_Blocking:
-#        Spatial_Averaging_Radius:   1.86
-#        Momentum_Averaging_Radius:  0.08
-#        Gaussian_Cutoff:            2.2
-
-#Forced_Thermalization:
-#    Lattice_Sizes:          [20.0, 20.0, 50.0]
-#    Cell_Number:            [21, 21, 101]
-#    Critical_Edens:         0.3     # forced therm. above this energy density [GeV/fm^3]
-#    Start_Time:             0.0     # forced therm. at t > this time [fm/c]
-#    Timestep:               1.0     # timestep of thermalization [fm/c]
-#    Algorithm:              biased BF  # mode sampling, biased BF, unbiased BF
-
-#Potentials:
-#    Skyrme:
-#        Skyrme_A: -209.2
-#        Skyrme_B: 156.4
-#        Skyrme_Tau: 1.35
-#    Symmetry:
-#        S_Pot: 18.0
-
-#Lattice:
-#    Origin:      [0.0, 0.0, 0.0]     # Coordinates of the left, down, near corner of the lattice
-#    Sizes:       [10.0, 10.0, 10.0]  # Sizes in x, y, z directions in fm
-#    Cell_Number: [20, 20, 20]        # Number of cells in x, y, z directions
-#    Periodic:    True                # Periodic continuation: x + i * lx is equivalent to x, same for y, z
 
 Modi:
-    Box:
-        # Cube size
-        Length: 10.0
-
-        # initialization temperature
-        Temperature: 0.2
-
-        # initial condition
-        # ("peaked momenta", "thermal momenta")
-        Initial_Condition: "thermal momenta"
-
-        # start time of simulation
-        Start_Time:    0.0
-
-        # use thermal box, if so with which chemical potentials
-        Use_Thermal_Multiplicities: False
-        Baryon_Chemical_Potential: 0.0
-        Strange_Chemical_Potential: 0.0
-
-        Init_Multiplicities:
-            211:    100
-            111:    100
-            -211:   100
-            2212:   50
-            2112:   50
-
-    Sphere:
-        # Sphere size
-        Radius: 5.0
-        # Current temperature
-        Sphere_Temperature: 0.2
-        # start time of simulation
-        Start_Time: 0.0
-        # Initialize sphere with thermal multiplicities
-        Use_Thermal_Multiplicities: False
-        # Number of particles in Sphere
-        Init_Multiplicities:
-            211:    100
-            111:    100
-            -211:   100
-            2212:   50
-            2112:   50
-        # Initial condition for the momenta in the sphere; mainly used in the
-        # expanding universe setup. Options are "thermal momenta", "IC_ES",
-        # "IC_1M", "IC_2M" (see Bazow et al. 2016 on FLRW solution of the
-        # Boltzmann equation) and "IC_Massive" (generalization of IC_ES)
-        Initial_Condition: "thermal momenta"
-
     Collider:
-        # Definitions for the projectile:
         Projectile:
-            Particles: {2212: 29, 2112: 34}  # Copper63
-            Automatic: true
-            Deformed: false
-        # Definitions for the target:
+            Particles: {2212: 79, 2112: 118} #Gold197
         Target:
-            Particles: {2212: 29, 2112: 34}  # Copper63
-            Automatic: true
-            Deformed: false
+            Particles: {2212: 79, 2112: 118} #Gold197
 
-        # Collision energy (E_Kin, P_Lab, Sqrtsnn).
-        Sqrtsnn: 3.0
-
-        # The reference frame in which to do the calculation.
-        # ("center of velocity", "center of mass", "fixed target")
-        Calculation_Frame: "center of velocity"
-
-        # Specify an impact parameter
-        Impact:
-            Value: 0.0
-
-        # Include Fermi motion
-        # ("off", "on", "frozen")
-        Fermi_Motion: "off"
-        # Determine whether the first collisions within the same nuclues are allowed
-        Collisions_Within_Nucleus: false
-
-    List:
-        # path of external particle list == File_Directory/File_Prefix{eventid}
-        File_Directory: "particle_lists_in"
-        File_Prefix: "event"
-
-        # starting number of event_id in event-by-event simulation
-        Shift_Id: 0
-
-        # start time of simulation
-        Start_Time: 0.0
+        E_Kin: 1.23
+        Fermi_Motion: "frozen"
+        Collisions_Within_Nucleus: False
