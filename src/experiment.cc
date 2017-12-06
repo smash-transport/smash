@@ -121,10 +121,10 @@ namespace {
  * \key Testparticles (int, optional, default = 1): \n
  * How many test particles per real particles should be simulated.
  *
- * \key Gaussian_Sigma (double, optional, default 1.0): \n
+ * \key Gaussian_Sigma (double, optional, default = 1.0): \n
  * Width [fm] of gaussians that represent Wigner density of particles.
  *
- * \key Gauss_Cutoff_In_Sigma (double, optional, default 4.0)
+ * \key Gauss_Cutoff_In_Sigma (double, optional, default = 4.0)
  * Distance in sigma at which gaussian is considered 0.
  *
  * \page input_output_options_ Output
