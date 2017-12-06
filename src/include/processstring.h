@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_STRINGPROCESS_H_
-#define SRC_INCLUDE_STRINGPROCESS_H_
+#ifndef SRC_INCLUDE_PROCESSSTRING_H_
+#define SRC_INCLUDE_PROCESSSTRING_H_
 
 #include <memory>
 #include <vector>
@@ -312,4 +312,4 @@ class StringProcess {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_STRINGPROCESS_H_
+#endif  // SRC_INCLUDE_PROCESSSTRING_H_

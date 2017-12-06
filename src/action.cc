@@ -124,55 +124,30 @@ void Action::perform(Particles *particles, uint32_t id_process) {
 }
 
 double Action::kinetic_energy_cms() const {
-//  const auto &log = logger<LogArea::Action>();
   /* scale_B returns the difference of the total force scales of the skyrme
    * potential between the initial and final states. */
   double scale_B = 0.0;
   /* scale_I3 returns the difference of the total force scales of the symmetry
    * potential between the initial and final states. */
   double scale_I3 = 0.0;
-// std::string in_particle = "";
-// std::string out_particle = "";
-// std::string in_scale = "";
-// std::string out_scale = "";
-// std::string in_position = "";
-// std::string out_position = "";
   for (const auto &p_in : incoming_particles_) {
        /* Get the force scale of the incoming particle. */
        const auto scale = ((pot_ != nullptr) ? pot_->force_scale(p_in.type())
                            : std::make_pair(0.0, 0));
        scale_B += scale.first;
        scale_I3 += scale.second * p_in.type().isospin3_rel();
-   //   in_particle += p_in.type().name() + "(" + std::to_string(p_in.id())+")";
-   //   in_scale += ("(" + std::to_string(scale.first) + ", "
-   //      + std::to_string(scale.second * p_in.type().isospin3_rel()) + ") ");
-   //   in_position += ("(" + std::to_string(p_in.position().x1()) + ", "
-   //                + std::to_string(p_in.position().x2()) + ", "
-   //                + std::to_string(p_in.position().x3()) + ") ");
   }
   for (const auto &p_out : outgoing_particles_) {
        const auto scale = ((pot_ != nullptr) ? pot_->force_scale(p_out.type())
                            : std::make_pair(0.0, 0));
        scale_B -= scale.first;
        scale_I3 -= scale.second * p_out.type().isospin3_rel();
-   //   out_particle += p_out.type().name();
-   //   out_scale += ("(" + std::to_string(scale.first) + ", "
-   //      + std::to_string(scale.second * p_out.type().isospin3_rel()) + ") ");
-   //   out_position += ("(" + std::to_string(p_out.position().x1()) + ", "
-   //                + std::to_string(p_out.position().x2()) + ", "
-   //                + std::to_string(p_out.position().x3()) + ") ");
   }
   const auto potentials = get_potential_at_interaction_point();
   /* Rescale to get the potential difference between the 
    * initial and final state.*/
   const double B_pot_diff = potentials.first * scale_B;
   const double I3_pot_diff = potentials.second * scale_I3;
-// if (scale_B > really_small) {
-//    log.info("reaction: ", in_particle, "->", out_particle, ", DU = ", 
-//             std::to_string(B_pot_diff + I3_pot_diff));
-//    log.info("force scale: ", in_scale, " |  ", out_scale);
-//    log.info("position: ", in_position, " |  ", out_position);
-// }
   return sqrt_s() + B_pot_diff + I3_pot_diff;
 }
 
@@ -184,43 +159,23 @@ double Action::kinetic_energy_cms(std::pair<double, double> potentials,
   /* scale_I3 returns the difference of the total force scales of the symmetry
    * potential between the initial and final states. */
   double scale_I3 = 0.0;
-// std::string in_particle = "";
-// std::string out_particle = "";
-// std::string in_scale = "";
-// std::string out_scale = "";
-// std::string in_position = "";
   for (const auto &p_in : incoming_particles_) {
        /* Get the force scale of the incoming particle. */
        const auto scale = ((pot_ != nullptr) ? pot_->force_scale(p_in.type())
                            : std::make_pair(0.0, 0));
        scale_B += scale.first;
        scale_I3 += scale.second * p_in.type().isospin3_rel();
-    //  in_particle += p_in.type().name() + "(" + std::to_string(p_in.id())+")";
-    //  in_scale += ("(" + std::to_string(scale.first) + ", "
-    //     + std::to_string(scale.second * p_in.type().isospin3_rel()) + ") ");
-    //  in_position += ("(" + std::to_string(p_in.position().x1()) + ", "
-    //               + std::to_string(p_in.position().x2()) + ", "
-    //               + std::to_string(p_in.position().x3()) + ") ");
   }
   for (const auto &p_out : p_out_types) {
        const auto scale = ((pot_ != nullptr) ? pot_->force_scale(*p_out)
                            : std::make_pair(0.0, 0));
        scale_B -= scale.first;
        scale_I3 -= scale.second * p_out->isospin3_rel();
-     // out_particle += p_out->name();
-     // out_scale += ("(" + std::to_string(scale.first) + ", "
-     //    + std::to_string(scale.second * p_out->isospin3_rel()) + ") ");
   }
   /* Rescale to get the potential difference between the 
    * initial and final state.*/
   const double B_pot_diff = potentials.first * scale_B;
   const double I3_pot_diff = potentials.second * scale_I3;
- //if (scale_B > really_small) {
- //   std::cout << "reaction: " << in_particle << "->" << out_particle << ", DU = " <<
- //            std::to_string(B_pot_diff + I3_pot_diff) << std::endl;
- //   std::cout << "force scale: " << in_scale << " |  " << out_scale << std::endl;
- //   std::cout << "position: " << in_position  << std::endl;
- //}
   return sqrt_s() + B_pot_diff + I3_pot_diff;
 }
 
