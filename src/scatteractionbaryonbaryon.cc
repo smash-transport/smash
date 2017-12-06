@@ -35,8 +35,8 @@ double ScatterActionBaryonBaryon::high_energy_cross_section() const {
 }
 
 double ScatterActionBaryonBaryon::string_hard_cross_section() const {
-  //const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
-  //const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
+  // const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
+  // const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
   const double s = mandelstam_s();
 
   /**

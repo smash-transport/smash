@@ -586,7 +586,7 @@ void ScatterAction::string_excitation_pythia() {
     static /*thread_local (see #3075)*/ Pythia8::Pythia pythia(PYTHIA_XML_DIR,
                                                                false);
     /* select only inelastic events: */
-    //pythia.readString("SoftQCD:inelastic = on");
+    // pythia.readString("SoftQCD:inelastic = on");
     pythia.readString("SoftQCD:nonDiffractive = on");
     pythia.readString("MultipartonInteractions:pTmin = 1.5");
     /* suppress unnecessary output */
