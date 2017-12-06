@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -14,8 +14,7 @@
 
 #include "scatteractionbaryonbaryon.h"
 
-namespace Smash {
-
+namespace smash {
 
 /**
  * \ingroup action
@@ -28,7 +27,7 @@ class ScatterActionNucleonNucleon : public ScatterActionBaryonBaryon {
   using ScatterActionBaryonBaryon::ScatterActionBaryonBaryon;
   /** Determine the (parametrized) elastic cross section for a
    * nucleon-nucleon collision. */
-  float elastic_parametrization() override;
+  double elastic_parametrization() override;
   /** Find all inelastic 2->2 processes for this reaction.
    * Calculate cross sections for resonance production from
    * nucleon-nucleon collisions (i.e. N N -> N R, N N -> Delta R).
@@ -56,14 +55,13 @@ class ScatterActionNucleonNucleon : public ScatterActionBaryonBaryon {
   /**
    * Utility function to avoid code replication in two_to_two_cross_sections
    */
-  template<class IntegrationMethod>
+  template <class IntegrationMethod>
   CollisionBranchList find_xsection_from_type(
-                                         const ParticleTypePtrList &type_res_1,
-                                         const ParticleTypePtrList &type_res_2,
-                                         const IntegrationMethod integrator);
+      const ParticleTypePtrList &type_res_1,
+      const ParticleTypePtrList &type_res_2,
+      const IntegrationMethod integrator);
 };
 
-
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_SCATTERACTIONNUCLEONNUCLEON_H_

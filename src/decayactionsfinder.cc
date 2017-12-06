@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -17,7 +17,7 @@
 #include "include/particles.h"
 #include "include/random.h"
 
-namespace Smash {
+namespace smash {
 
 ActionList DecayActionsFinder::find_actions_in_cell(
     const ParticleList &search_list, double dt) const {
@@ -27,27 +27,27 @@ ActionList DecayActionsFinder::find_actions_in_cell(
 
   for (const auto &p : search_list) {
     if (p.type().is_stable()) {
-      continue;      /* particle doesn't decay */
+      continue; /* particle doesn't decay */
     }
 
     DecayBranchList processes =
-                      p.type().get_partial_widths_hadronic(p.effective_mass());
+        p.type().get_partial_widths_hadronic(p.effective_mass());
     // total decay width (mass-dependent)
-    const float width = total_weight<DecayBranch>(processes);
+    const double width = total_weight<DecayBranch>(processes);
 
     // check if there are any (hadronic) decays
     if (!(width > 0.0)) {
       continue;
     }
 
-    constexpr float one_over_hbarc = 1.f/static_cast<float>(hbarc);
+    constexpr double one_over_hbarc = 1. / hbarc;
 
     /* The decay_time is sampled from an exponential distribution.
      * Even though it may seem suspicious that it is sampled every
      * timestep, it can be proven that this still overall obeys
      * the exponential decay law.
      */
-    const float decay_time = Random::exponential<float>(
+    const double decay_time = Random::exponential<double>(
         one_over_hbarc *
         p.inverse_gamma()  // The clock goes slower in the rest frame of the
                            // resonance
@@ -72,13 +72,13 @@ ActionList DecayActionsFinder::find_final_actions(const Particles &search_list,
 
   for (const auto &p : search_list) {
     if (p.type().is_stable()) {
-      continue;      /* particle doesn't decay */
+      continue; /* particle doesn't decay */
     }
-    auto act = make_unique<DecayAction>(p, 0.f);
+    auto act = make_unique<DecayAction>(p, 0.);
     act->add_decays(p.type().get_partial_widths(p.effective_mass()));
     actions.emplace_back(std::move(act));
   }
   return actions;
 }
 
-}  // namespace Smash
+}  // namespace smash

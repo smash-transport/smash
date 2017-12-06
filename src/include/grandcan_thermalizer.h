@@ -21,7 +21,7 @@
 #include "particledata.h"
 #include "quantumnumbers.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * The ThermLatticeNode class is intended to compute thermodynamical quantities
@@ -59,10 +59,10 @@ class ThermLatticeNode {
   FourVector Tmu0() const { return Tmu0_; }
   double nb() const { return nb_; }
   double ns() const { return ns_; }
-  double e()  const { return e_; }
-  double p()  const { return p_; }
-  ThreeVector v()  const { return v_; }
-  double T()   const { return T_; }
+  double e() const { return e_; }
+  double p() const { return p_; }
+  ThreeVector v() const { return v_; }
+  double T() const { return T_; }
   double mub() const { return mub_; }
   double mus() const { return mus_; }
 
@@ -87,7 +87,7 @@ class ThermLatticeNode {
   double mus_;
 };
 
-std::ostream &operator<<(std::ostream &s, const ThermLatticeNode &node);
+std::ostream& operator<<(std::ostream& s, const ThermLatticeNode& node);
 
 enum class HadronClass {
   /// All baryons
@@ -105,7 +105,6 @@ enum class HadronClass {
   /// Neutral non-strange mesons
   ZeroQZeroSMeson = 6,
 };
-
 
 /** The GrandCanThermalizer class implements the following functionality:
  *  1. Create a lattice and find the local rest frame energy density in each
@@ -127,37 +126,28 @@ enum class HadronClass {
 class GrandCanThermalizer {
  public:
   /// Create the thermalizer: allocate the lattice
-  GrandCanThermalizer(const std::array<float, 3> lat_sizes,
+  GrandCanThermalizer(const std::array<double, 3> lat_sizes,
                       const std::array<int, 3> n_cells,
-                      const std::array<float, 3> origin,
-                      bool periodicity,
-                      float e_critical,
-                      float t_start,
-                      float delta_t,
+                      const std::array<double, 3> origin, bool periodicity,
+                      double e_critical, double t_start, double delta_t,
                       ThermalizationAlgorithm algo);
   GrandCanThermalizer(Configuration& conf,
-                      const std::array<float, 3> lat_sizes,
-                      const std::array<float, 3> origin,
-                      bool periodicity) :
-    GrandCanThermalizer(lat_sizes,
-                        conf.take({"Cell_Number"}),
-                        origin,
-                        periodicity,
-                        conf.take({"Critical_Edens"}),
-                        conf.take({"Start_Time"}),
-                        conf.take({"Timestep"}),
-                        conf.take({"Algorithm"},
-                            ThermalizationAlgorithm::BiasedBF)) {}
+                      const std::array<double, 3> lat_sizes,
+                      const std::array<double, 3> origin, bool periodicity)
+      : GrandCanThermalizer(
+            lat_sizes, conf.take({"Cell_Number"}), origin, periodicity,
+            conf.take({"Critical_Edens"}), conf.take({"Start_Time"}),
+            conf.take({"Timestep"}),
+            conf.take({"Algorithm"}, ThermalizationAlgorithm::BiasedBF)) {}
   /// Check that the clock is close to n * period of thermalization
   bool is_time_to_thermalize(const Clock& clock) const {
-    const float t = clock.current_time();
-    const int n = static_cast<int>(std::floor((t - t_start_)/period_));
+    const double t = clock.current_time();
+    const int n = static_cast<int>(std::floor((t - t_start_) / period_));
     return (t > t_start_ &&
-            t < t_start_ + n*period_ + clock.timestep_duration());
+            t < t_start_ + n * period_ + clock.timestep_duration());
   }
   /// Compute all the thermodynamical quantities on the lattice from particles.
-  void update_lattice(const Particles& particles,
-                      const DensityParameters& par,
+  void update_lattice(const Particles& particles, const DensityParameters& par,
                       bool ignore_cells_under_treshold = true);
   /// Simply returns a vector uniformly sampled from the rectangular cell.
   ThreeVector uniform_in_cell() const;
@@ -166,7 +156,7 @@ class GrandCanThermalizer {
    *  \iref{Oliinychenko:2016vkg}.
    */
   void renormalize_momenta(ParticleList& plist,
-           const FourVector required_total_momentum);
+                           const FourVector required_total_momentum);
 
   // Functions for BF-sampling algorithm
 
@@ -188,23 +178,21 @@ class GrandCanThermalizer {
    * the cell to sample, picks up momentum and coordinate from the
    * corresponding distributions.
    */
-  void sample_in_random_cell_BF_algo(ParticleList& plist,
-                                     const double time,
+  void sample_in_random_cell_BF_algo(ParticleList& plist, const double time,
                                      size_t type_index);
   /**
-   * Samples particles to the sampled_list according to the BF algorithm.
+   * Samples particles to the sampled_list_ according to the BF algorithm.
    * Quantum numbers of the sampled particles are required to be as in
    * conserved_initial.
    */
-  void thermalize_BF_algo(ParticleList& sampled_list,
-                          QuantumNumbers& conserved_initial,
-                          double time, int ntest);
+  void thermalize_BF_algo(QuantumNumbers& conserved_initial, double time,
+                          int ntest);
 
   // Functions for mode-sampling algorithm
 
   /// Computes average number of particles in each cell.
   template <typename F>
-  void compute_N_in_cells_mode_algo(F &&condition) {
+  void compute_N_in_cells_mode_algo(F&& condition) {
     N_in_cells_.clear();
     N_total_in_cells_ = 0.0;
     for (auto cell_index : cells_to_sample_) {
@@ -214,8 +202,9 @@ class GrandCanThermalizer {
       for (ParticleTypePtr i : eos_typelist_) {
         if (condition(i->strangeness(), i->baryon_number(), i->charge())) {
           // N_i = n u^mu dsigma_mu = (isochronous hypersurface) n * V * gamma
-          N_tot += cell_volume_ * gamma *
-            HadronGasEos::partial_density(*i, cell.T(), cell.mub(), cell.mus());
+          N_tot +=
+              cell_volume_ * gamma * HadronGasEos::partial_density(
+                                         *i, cell.T(), cell.mub(), cell.mus());
         }
       }
       N_in_cells_.push_back(N_tot);
@@ -232,7 +221,7 @@ class GrandCanThermalizer {
    */
   template <typename F>
   ParticleData sample_in_random_cell_mode_algo(const double time,
-                                               F &&condition) {
+                                               F&& condition) {
     // Choose random cell, probability = N_in_cell/N_total
     double r = Random::uniform(0.0, N_total_in_cells_);
     double partial_sum = 0.0;
@@ -255,8 +244,8 @@ class GrandCanThermalizer {
       if (!condition(i->strangeness(), i->baryon_number(), i->charge())) {
         continue;
       }
-      N_sum += cell_volume_ * gamma *
-        HadronGasEos::partial_density(*i, cell.T(), cell.mub(), cell.mus());
+      N_sum += cell_volume_ * gamma * HadronGasEos::partial_density(
+                                          *i, cell.T(), cell.mub(), cell.mus());
       if (N_sum >= r) {
         type_to_sample = i;
         break;
@@ -265,7 +254,7 @@ class GrandCanThermalizer {
 
     ParticleData particle(*type_to_sample);
     // Note: it's pole mass for resonances!
-    const double m = static_cast<double>(type_to_sample->mass());
+    const double m = type_to_sample->mass();
     // Position
     particle.set_4position(FourVector(time, cell_center + uniform_in_cell()));
     // Momentum
@@ -279,28 +268,27 @@ class GrandCanThermalizer {
   }
 
   /*
-   * Samples particles to the sampled_list according to the mode algorithm.
+   * Samples particles to the sampled_list_ according to the mode algorithm.
    * Quantum numbers of the sampled particles are required to be as in
    * conserved_initial.
    */
-  void thermalize_mode_algo(ParticleList& sampled_list,
-                            QuantumNumbers& conserved_initial,
-                            double time);
+  void thermalize_mode_algo(QuantumNumbers& conserved_initial, double time);
 
   /// Main thermalize function, that chooses algorithm
-  void thermalize(Particles& particles, double time, int ntest);
+  void thermalize(const Particles& particles, double time, int ntest);
 
   void print_statistics(const Clock& clock) const;
 
-  RectangularLattice<ThermLatticeNode>& lattice() const {
-    return *lat_;
-  }
-  float e_crit() const { return e_crit_; }
+  RectangularLattice<ThermLatticeNode>& lattice() const { return *lat_; }
+  double e_crit() const { return e_crit_; }
+
+  ParticleList particles_to_remove() const { return to_remove_; }
+  ParticleList particles_to_insert() const { return sampled_list_; }
 
  private:
   ParticleTypePtrList list_eos_particles() const {
     ParticleTypePtrList res;
-    for (const ParticleType &ptype : ParticleType::list_all()) {
+    for (const ParticleType& ptype : ParticleType::list_all()) {
       if (HadronGasEos::is_eos_particle(ptype)) {
         res.push_back(&ptype);
       }
@@ -311,6 +299,7 @@ class GrandCanThermalizer {
     const int B = eos_typelist_[typelist_index]->baryon_number();
     const int S = eos_typelist_[typelist_index]->strangeness();
     const int ch = eos_typelist_[typelist_index]->charge();
+    // clang-format off
     return (B > 0) ? HadronClass::Baryon :
            (B < 0) ? HadronClass::Antibaryon :
            (S > 0) ? HadronClass::PositiveSMeson :
@@ -318,6 +307,7 @@ class GrandCanThermalizer {
            (ch > 0) ? HadronClass::PositiveQZeroSMeson :
            (ch < 0) ? HadronClass::NegativeQZeroSMeson :
                       HadronClass::ZeroQZeroSMeson;
+    // clang-format on
   }
   /// Returns multiplicity of the hadron class cl
   double mult_class(const HadronClass cl) const {
@@ -327,19 +317,21 @@ class GrandCanThermalizer {
   std::vector<size_t> cells_to_sample_;
   HadronGasEos eos_ = HadronGasEos(true);
   std::unique_ptr<RectangularLattice<ThermLatticeNode>> lat_;
+  ParticleList to_remove_;
+  ParticleList sampled_list_;
   const ParticleTypePtrList eos_typelist_;
   const size_t N_sorts_;
   std::vector<double> mult_sort_;
   std::vector<int> mult_int_;
   std::array<double, 7> mult_classes_;
   double N_total_in_cells_;
-  float cell_volume_;
-  const float e_crit_;
-  const float t_start_;
-  const float period_;
+  double cell_volume_;
+  const double e_crit_;
+  const double t_start_;
+  const double period_;
   const ThermalizationAlgorithm algorithm_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_GRANDCAN_THERMALIZER_H_

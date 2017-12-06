@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -13,7 +13,7 @@
 #include "actions.h"
 #include "configuration.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * This class implements the updating of adaptive timestep based on the
@@ -23,10 +23,10 @@ namespace Smash {
 
 class AdaptiveParameters {
  public:
-  explicit AdaptiveParameters(Configuration conf, double dt) :
-    smoothing_factor_(conf.take({"Smoothing_Factor"}, 0.1f)),
-    target_missed_actions_(conf.take({"Target_Missed_Actions"}, 0.01f)),
-    deviation_factor_(conf.take({"Allowed_Deviation"}, 2.5f)) {
+  explicit AdaptiveParameters(Configuration conf, double dt)
+      : smoothing_factor_(conf.take({"Smoothing_Factor"}, 0.1)),
+        target_missed_actions_(conf.take({"Target_Missed_Actions"}, 0.01)),
+        deviation_factor_(conf.take({"Allowed_Deviation"}, 2.5)) {
     initialize(dt);
   }
 
@@ -43,7 +43,7 @@ class AdaptiveParameters {
    * \param[in,out] dt timestep, which can be updated
    * \return if timestep was changed or not.
    */
-  bool update_timestep(const Actions &actions, size_t N_particles, double* dt) {
+  bool update_timestep(const Actions &actions, size_t N_particles, double *dt) {
     const auto &log = logger<LogArea::AdaptiveTS>();
     bool changed_timestep = false;
 
@@ -52,17 +52,17 @@ class AdaptiveParameters {
       N_inc += a->incoming_particles().size();
     }
     // factor for the incoming particles
-    const float f_inc =
-        (N_inc == 0u) ? 0.f : static_cast<float>(N_inc) / actions.size();
-    const float fraction_missed = 0.5f * N_inc * f_inc / N_particles;
-    const float allowed_deviation = deviation_factor_ * rate_ *
-        std::sqrt(0.5f * f_inc / target_missed_actions_ / N_particles);
-    const float current_rate = fraction_missed / (*dt);
-    const float rate_deviation = current_rate - rate_;
+    const double f_inc =
+        (N_inc == 0u) ? 0. : static_cast<double>(N_inc) / actions.size();
+    const double fraction_missed = 0.5 * N_inc * f_inc / N_particles;
+    const double allowed_deviation =
+        deviation_factor_ * rate_ *
+        std::sqrt(0.5 * f_inc / target_missed_actions_ / N_particles);
+    const double current_rate = fraction_missed / (*dt);
+    const double rate_deviation = current_rate - rate_;
     log.debug("Factor for the incoming particles: ", f_inc,
               ", fraction of missed actions: ", fraction_missed,
-              ", rate estimate: ", rate_,
-              ", rate deviation = ", rate_deviation,
+              ", rate estimate: ", rate_, ", rate deviation = ", rate_deviation,
               ", allowed = ", allowed_deviation);
     if (rate_deviation > allowed_deviation) {
       changed_timestep = true;
@@ -73,7 +73,7 @@ class AdaptiveParameters {
     return changed_timestep;
   }
 
-  float rate() const { return rate_; }
+  double rate() const { return rate_; }
 
   /**
    * The smoothing factor \f$ \alpha \f$ is responsible for smoothing the
@@ -83,13 +83,13 @@ class AdaptiveParameters {
    * corresponds to not changing the estimate of the rate at all with the new
    * data.
    */
-  const float smoothing_factor_;
+  const double smoothing_factor_;
 
   /**
    * The fraction of missed actions that is targeted by the algorithm. A smaller
    * value will lead to smaller time steps but also less missed actions.
    */
-  const float target_missed_actions_;
+  const double target_missed_actions_;
 
   /**
    * The deviation factor \f$ f_D \f$ sets the limit by how much the criterion
@@ -98,21 +98,21 @@ class AdaptiveParameters {
    * aborted time steps and consequently longer runtime. The condition is
    * \f[ r - \bar{r} < f_D \sqrt{\bar{r}/(dt \cdot N_P)} \f].
    */
-  const float deviation_factor_;
+  const double deviation_factor_;
 
  private:
   /// Estimate of current scattering rate
-  float rate_;
+  double rate_;
 };
 
-inline std::ostream& operator << (std::ostream &o,
-                                  const AdaptiveParameters &a) {
-  return o << "Adaptive time step:\n" <<
-       "  Smoothing factor: " << a.smoothing_factor_ << "\n" <<
-       "  Target missed actions: " << 100 * a.target_missed_actions_ << "%\n" <<
-       "  Allowed deviation: " << a.deviation_factor_ << "\n";
+inline std::ostream &operator<<(std::ostream &o, const AdaptiveParameters &a) {
+  return o << "Adaptive time step:\n"
+           << "  Smoothing factor: " << a.smoothing_factor_ << "\n"
+           << "  Target missed actions: " << 100 * a.target_missed_actions_
+           << "%\n"
+           << "  Allowed deviation: " << a.deviation_factor_ << "\n";
 }
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_ADAPTIVEPARAMETERS_H_

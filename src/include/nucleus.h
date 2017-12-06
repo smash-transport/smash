@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2014-2015
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -18,13 +18,14 @@
 #include "particledata.h"
 #include "threevector.h"
 
-namespace Smash {
+namespace smash {
 
 /** Nucleus: a nucleus is a collection of Particles (ParticleData thingys) that
  * are initialized before the beginning of the simulation and all have
  * the same velocity (and spatial proximity).
  *
- * Options added by Nucleus go in the "Modi"→"Nucleus"->"a nucleus" section of the
+ * Options added by Nucleus go in the "Modi"→"Nucleus"->"a nucleus" section of
+ * the
  * configuration, where "a nucleus" is either projectile or target.
  *
  * The following nucleus directives are understood:
@@ -32,7 +33,7 @@ namespace Smash {
  */
 class Nucleus {
  public:
-  Nucleus(const std::map<PdgCode, int>& particle_list, int nTest);
+  Nucleus(const std::map<PdgCode, int> &particle_list, int nTest);
   Nucleus(Configuration &config, int nTest);
 
   /** returns the mass of the nucleus
@@ -54,17 +55,17 @@ class Nucleus {
    * @param x the position at which to evaluate the function
    * @return un-normalized woods-saxon probability for @param x
    **/
-  float woods_saxon(float x);
+  double woods_saxon(double x);
 
   /// sets the positions of the nuclei inside nucleus A.
   void arrange_nucleons();
 
- /** Sets the deformation parameters of the Woods-Saxon distribution
-  * according to the current mass number.
-  *
-  * Ref. for nuclear radii is \iref{DeJager:1987qc}.
-  * For diffusiveness and saturation density, see [insert reference].
-  */
+  /** Sets the deformation parameters of the Woods-Saxon distribution
+   * according to the current mass number.
+   *
+   * Ref. for nuclear radii is \iref{DeJager:1987qc}.
+   * For diffusiveness and saturation density, see [insert reference].
+   */
   virtual void set_parameters_automatic();
 
   /** Sets the parameters of the Woods-Saxon according to
@@ -90,8 +91,6 @@ class Nucleus {
    *
    * @param beta_scalar magnitude (with sign) of the z
    * component velocity used for boosting.
-   *
-   * \fpPrecision Why \c double?
    **/
   void boost(double beta_scalar);
 
@@ -112,7 +111,7 @@ class Nucleus {
    * @param testparticles Number of test particles to use.
    *
    **/
-  void fill_from_list(const std::map<PdgCode, int>& particle_list,
+  void fill_from_list(const std::map<PdgCode, int> &particle_list,
                       int testparticles);
 
   /**
@@ -124,11 +123,8 @@ class Nucleus {
    * setting).
    *
    * @param simulation_time set the time of each particle to this value.
-   *
-   * \fpPrecision Why \c double?
    **/
-  void shift(double z_offset,
-             double x_offset, float simulation_time);
+  void shift(double z_offset, double x_offset, double simulation_time);
 
   /** Rotates the nucleus. (Spherical symmetry of nondeformed nuclei
    * means there is nothing to do.)
@@ -136,21 +132,20 @@ class Nucleus {
   virtual void rotate() {}
 
   /// copies the particles from this nucleus into the particle list.
-  void copy_particles(Particles* particles);
+  void copy_particles(Particles *particles);
 
   /// Number of numerical (=test-)particles in the nucleus:
-  inline size_t size() const {
-    return particles_.size();
-  }
+  inline size_t size() const { return particles_.size(); }
 
   /// Number of physical particles in the nucleus:
   inline size_t number_of_particles() const {
-    size_t nop = particles_.size()/testparticles_;
+    size_t nop = particles_.size() / testparticles_;
     // if size() is not a multiple of testparticles_, this will throw an
     // error.
     if (nop * testparticles_ != particles_.size()) {
-      throw TestparticleConfusion("Number of test particles and test particles"
-            "per particle are incompatible");
+      throw TestparticleConfusion(
+          "Number of test particles and test particles"
+          "per particle are incompatible");
     }
     return nop;
   }
@@ -169,12 +164,12 @@ class Nucleus {
   void align_center() {
     FourVector centerpoint = center();
     for (auto p = particles_.begin(); p != particles_.end(); ++p) {
-      p->set_4position(p->position()-centerpoint);
+      p->set_4position(p->position() - centerpoint);
     }
   }
 
   /// Write the nucleon positions to a text file.
-//   void print_nucleus(const char * file_name) const;
+  //   void print_nucleus(const char * file_name) const;
 
   /// \ingroup exception
   struct TestparticleConfusion : public std::length_error {
@@ -185,16 +180,16 @@ class Nucleus {
   /** diffusiveness of Woods-Saxon-distribution in this nucleus in fm
    * (for diffusiveness_ == 0, we obtain a hard sphere.
    **/
-  float diffusiveness_ = .545f;
+  double diffusiveness_ = .545;
   /// Saturation density of this nucleus.
-  float saturation_density_ = nuclear_density;
+  double saturation_density_ = nuclear_density;
   /// Nuclear radius of this nucleus
-  float nuclear_radius_;
+  double nuclear_radius_;
   /** single-proton-radius
    *
    * \see default_nuclear_radius
    * */
-  float proton_radius_ = 1.2f;
+  double proton_radius_ = 1.2;
   /// Number of testparticles per physical particle
   size_t testparticles_ = 1;
   /// particles associated with this nucleus.
@@ -206,9 +201,7 @@ class Nucleus {
     return particles_.begin();
   }
   /// for iterators over the particle list:
-  inline std::vector<ParticleData>::iterator end() {
-    return particles_.end();
-  }
+  inline std::vector<ParticleData>::iterator end() { return particles_.end(); }
   /// for iterators over the particle list:
   inline std::vector<ParticleData>::const_iterator cbegin() const {
     return particles_.cbegin();
@@ -220,47 +213,37 @@ class Nucleus {
   /// sets the diffusiveness of the nucleus
   ///
   /// \see diffusiveness_
-  inline void set_diffusiveness(float diffuse) {
-    diffusiveness_ = diffuse;
-  }
+  inline void set_diffusiveness(double diffuse) { diffusiveness_ = diffuse; }
   /// gets the diffusiveness of the nucleus
   ///
   /// \see diffusiveness_
-  inline float get_diffusiveness() const {
-    return diffusiveness_;
-  }
+  inline double get_diffusiveness() const { return diffusiveness_; }
   /// sets the saturation density of the nucleus
   ///
   /// \see saturation_density_
-  inline void set_saturation_density(float density) {
+  inline void set_saturation_density(double density) {
     saturation_density_ = density;
   }
   /// gets the saturation density of the nucleus
   ///
   /// \see saturation_density_
-  inline float get_saturation_density() const {
-    return saturation_density_;
-  }
+  inline double get_saturation_density() const { return saturation_density_; }
   /** returns a default radius for the nucleus
    *
    * Nuclear radius is calculated with the proton radius times the third
    * root of the number of nucleons.
    **/
-  inline float default_nuclear_radius() {
+  inline double default_nuclear_radius() {
     return proton_radius_ * std::pow(number_of_particles(), 1. / 3.);
   }
   /// sets the nuclear radius
   ///
   /// \see nuclear_radius
-  inline void set_nuclear_radius(float rad) {
-    nuclear_radius_ = rad;
-  }
+  inline void set_nuclear_radius(double rad) { nuclear_radius_ = rad; }
   /// gets the nuclear radius
   ///
   /// \see nuclear_radius
-  inline float get_nuclear_radius() const {
-    return nuclear_radius_;
-  }
+  inline double get_nuclear_radius() const { return nuclear_radius_; }
 
   /**\ingroup logging
    * Writes the state of the Nucleus object to the output stream.
@@ -268,6 +251,6 @@ class Nucleus {
   friend std::ostream &operator<<(std::ostream &, const Nucleus &);
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_NUCLEUS_H_

@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -13,12 +13,12 @@
 #include "scatteraction.h"
 #include "scatteractionbaryonmeson.h"
 
-namespace Smash {
-
+namespace smash {
 
 /**
  * \ingroup action
- * ScatterActionNucleonKaon is a special ScatterActionBaryonMeson which represents the
+ * ScatterActionNucleonKaon is a special ScatterActionBaryonMeson which
+ * represents the
  * scattering of a nucleon and a kaon.
  */
 class ScatterActionNucleonKaon : public ScatterActionBaryonMeson {
@@ -29,7 +29,7 @@ class ScatterActionNucleonKaon : public ScatterActionBaryonMeson {
    * Determine the elastic cross section for a nucleon-kaon collision.
    * It is given by a parametrization of experimental data.
    */
-  float elastic_parametrization() override;
+  double elastic_parametrization() override;
   /** Find all inelastic 2->2 processes for this reaction. */
   CollisionBranchList two_to_two_cross_sections() override;
 
@@ -41,6 +41,6 @@ class ScatterActionNucleonKaon : public ScatterActionBaryonMeson {
   void format_debug_output(std::ostream &out) const override;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_SCATTERACTIONNUCLEONKAON_H_

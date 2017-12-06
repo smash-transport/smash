@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2014
+ *    Copyright (c) 2013-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -9,7 +9,7 @@
 
 #include "clock.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * Helper structure for Experiment.
@@ -26,9 +26,9 @@ struct ExperimentParameters {
   /// number of test particle
   int testparticles;
   /// width of gaussian Wigner density of particles
-  float gaussian_sigma;
+  double gaussian_sigma;
   /// distance at which gaussian is cut, i.e. set to zero, IN SIGMA (not fm)
-  float gauss_cutoff_in_sigma;
+  double gauss_cutoff_in_sigma;
   /**
   * This indicates whether two to one reaction is switched on.
   */
@@ -57,6 +57,6 @@ struct ExperimentParameters {
   double low_snn_cut;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_EXPERIMENTPARAMETERS_H_

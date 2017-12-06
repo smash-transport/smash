@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -16,24 +16,26 @@
 #include "cxx14compat.h"
 #include "isoparticletype.h"
 #include "kinematics.h"
+#include "processstring.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * Calculate the detailed balance factor R such that
  * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
  * where $A, B, C, D$ are stable.
  */
-inline float detailed_balance_factor_stable(float s,
-               const ParticleType& a, const ParticleType& b,
-               const ParticleType& c, const ParticleType& d) {
-    float spin_factor = (c.spin() + 1)*(d.spin() + 1);
-    spin_factor /= (a.spin() + 1)*(b.spin() + 1);
-    float symmetry_factor = (1 + (a == b));
-    symmetry_factor /= (1 + (c == d));
-    const float momentum_factor = pCM_sqr_from_s(s, c.mass(), d.mass())
-                                / pCM_sqr_from_s(s, a.mass(), b.mass());
-    return spin_factor * symmetry_factor * momentum_factor;
+inline double detailed_balance_factor_stable(double s, const ParticleType& a,
+                                             const ParticleType& b,
+                                             const ParticleType& c,
+                                             const ParticleType& d) {
+  double spin_factor = (c.spin() + 1) * (d.spin() + 1);
+  spin_factor /= (a.spin() + 1) * (b.spin() + 1);
+  double symmetry_factor = (1 + (a == b));
+  symmetry_factor /= (1 + (c == d));
+  const double momentum_factor = pCM_sqr_from_s(s, c.mass(), d.mass()) /
+                                 pCM_sqr_from_s(s, a.mass(), b.mass());
+  return spin_factor * symmetry_factor * momentum_factor;
 }
 
 /**
@@ -41,18 +43,21 @@ inline float detailed_balance_factor_stable(float s,
  * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
  * where $A$ is unstable, $B$ is a kaon and $C, D$ are stable.
  */
-inline float detailed_balance_factor_RK(float sqrts, float pcm,
-               const ParticleType& a, const ParticleType& b,
-               const ParticleType& c, const ParticleType& d) {
-    assert(!a.is_stable());
-    assert(b.pdgcode().is_kaon());
-    float spin_factor = (c.spin() + 1)*(d.spin() + 1);
-    spin_factor /= (a.spin() + 1)*(b.spin() + 1);
-    float symmetry_factor = (1 + (a == b));
-    symmetry_factor /= (1 + (c == d));
-    const float momentum_factor = pCM_sqr(sqrts, c.mass(), d.mass())
-        / (pcm * a.iso_multiplet()->get_integral_RK(sqrts));
-    return spin_factor * symmetry_factor * momentum_factor;
+inline double detailed_balance_factor_RK(double sqrts, double pcm,
+                                         const ParticleType& a,
+                                         const ParticleType& b,
+                                         const ParticleType& c,
+                                         const ParticleType& d) {
+  assert(!a.is_stable());
+  assert(b.pdgcode().is_kaon());
+  double spin_factor = (c.spin() + 1) * (d.spin() + 1);
+  spin_factor /= (a.spin() + 1) * (b.spin() + 1);
+  double symmetry_factor = (1 + (a == b));
+  symmetry_factor /= (1 + (c == d));
+  const double momentum_factor =
+      pCM_sqr(sqrts, c.mass(), d.mass()) /
+      (pcm * a.iso_multiplet()->get_integral_RK(sqrts));
+  return spin_factor * symmetry_factor * momentum_factor;
 }
 
 /**
@@ -60,21 +65,22 @@ inline float detailed_balance_factor_RK(float sqrts, float pcm,
  * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
  * where $A$ and $B$ are unstable, and $C$ and $D$ are stable.
  */
-inline float detailed_balance_factor_RR(float sqrts, float pcm,
-               const ParticleType& particle_a, const ParticleType& particle_b,
-               const ParticleType& particle_c, const ParticleType& particle_d) {
-    assert(!particle_a.is_stable());
-    assert(!particle_b.is_stable());
-    float spin_factor = (particle_c.spin() + 1)*(particle_d.spin() + 1);
-    spin_factor /= (particle_a.spin() + 1)*(particle_b.spin() + 1);
-    float symmetry_factor = (1 + (particle_a == particle_b));
-    symmetry_factor /= (1 + (particle_c == particle_d));
-    const float momentum_factor = pCM_sqr(
-        sqrts, particle_c.mass(), particle_d.mass()) /
-        (pcm * particle_a.iso_multiplet()->get_integral_RR(particle_b, sqrts));
-    return spin_factor * symmetry_factor * momentum_factor;
+inline double detailed_balance_factor_RR(double sqrts, double pcm,
+                                         const ParticleType& particle_a,
+                                         const ParticleType& particle_b,
+                                         const ParticleType& particle_c,
+                                         const ParticleType& particle_d) {
+  assert(!particle_a.is_stable());
+  assert(!particle_b.is_stable());
+  double spin_factor = (particle_c.spin() + 1) * (particle_d.spin() + 1);
+  spin_factor /= (particle_a.spin() + 1) * (particle_b.spin() + 1);
+  double symmetry_factor = (1 + (particle_a == particle_b));
+  symmetry_factor /= (1 + (particle_c == particle_d));
+  const double momentum_factor =
+      pCM_sqr(sqrts, particle_c.mass(), particle_d.mass()) /
+      (pcm * particle_a.iso_multiplet()->get_integral_RR(particle_b, sqrts));
+  return spin_factor * symmetry_factor * momentum_factor;
 }
-
 
 /**
  * Add a 2-to-2 channel to a collision branch list given a cross section.
@@ -83,18 +89,18 @@ inline float detailed_balance_factor_RR(float sqrts, float pcm,
  * for the process. If the cross section is small, the branch is not added.
  */
 template <typename F>
-inline void add_channel(CollisionBranchList &process_list, F get_xsection,
-                        float sqrts, const ParticleType &type_a,
-                                     const ParticleType &type_b) {
-  const float sqrt_s_min = type_a.min_mass_spectral() +
-                                                     type_b.min_mass_spectral();
+inline void add_channel(CollisionBranchList& process_list, F get_xsection,
+                        double sqrts, const ParticleType& type_a,
+                        const ParticleType& type_b) {
+  const double sqrt_s_min =
+      type_a.min_mass_spectral() + type_b.min_mass_spectral();
   if (sqrts <= sqrt_s_min) {
-      return;
+    return;
   }
   const auto xsection = get_xsection();
   if (xsection > really_small) {
     process_list.push_back(make_unique<CollisionBranch>(
-      type_a, type_b, xsection, ProcessType::TwoToTwo));
+        type_a, type_b, xsection, ProcessType::TwoToTwo));
   }
 }
 
@@ -114,9 +120,9 @@ class ScatterAction : public Action {
    * \param[in] isotropic if true, do the collision isotropically
    * \param[in] string_formation_time the time a string takes to form
    */
-  ScatterAction(const ParticleData &in_part1, const ParticleData &in_part2,
+  ScatterAction(const ParticleData& in_part1, const ParticleData& in_part2,
                 double time, bool isotropic = false,
-                float string_formation_time = 1.0f);
+                double string_formation_time = 1.0);
 
   /** Add a new collision channel. */
   void add_collision(CollisionBranchPtr p);
@@ -128,8 +134,6 @@ class ScatterAction : public Action {
    * local rest frame.
    *
    * Returns the squared distance.
-   *
-   * \fpPrecision Why \c double?
    */
   double transverse_distance_sqr() const;
 
@@ -141,30 +145,35 @@ class ScatterAction : public Action {
    */
   void generate_final_state() override;
 
-  float raw_weight_value() const override;
+  double raw_weight_value() const override;
+
+  double partial_weight() const override;
 
   /** Add all possible subprocesses for this action object. */
-  virtual void add_all_processes(float elastic_parameter,
-    bool two_to_one, bool two_to_two, double low_snn_cut,
-    bool strings_switch, NNbarTreatment nnbar_treatment);
+  virtual void add_all_processes(double elastic_parameter, bool two_to_one,
+                                 bool two_to_two, double low_snn_cut,
+                                 bool strings_switch,
+                                 NNbarTreatment nnbar_treatment);
 
   /**
    * Determine the (parametrized) total cross section for this collision. This
    * is currently only used for calculating the string excitation cross section.
    */
-  virtual float total_cross_section() const { return 0.; }
+  virtual double total_cross_section() const { return 0.; }
 
   /**
-   * Determine the (parametrized) total cross section at high energies for this collision.
-   * This is currently only used for calculating the string excitation cross section.
+   * Determine the (parametrized) total cross section at high energies for this
+   * collision.
+   * This is currently only used for calculating the string excitation cross
+   * section.
    */
-  virtual float high_energy_cross_section() const { return 0.; }
+  virtual double high_energy_cross_section() const { return 0.; }
 
   /**
    * Determine the (parametrized) elastic cross section for this collision.
    * It is zero by default, but can be overridden in the child classes.
    */
-  virtual float elastic_parametrization() { return 0.; }
+  virtual double elastic_parametrization() { return 0.; }
 
   /// Returns list of possible collision channels
   const CollisionBranchList& collision_channels() {
@@ -182,7 +191,7 @@ class ScatterAction : public Action {
    * \return A ProcessBranch object containing the cross section and
    * final-state IDs.
    */
-  CollisionBranchPtr elastic_cross_section(float elast_par);
+  CollisionBranchPtr elastic_cross_section(double elast_par);
 
   /**
    * Determine the cross section for NNbar annihilation, which is given by the
@@ -195,7 +204,8 @@ class ScatterAction : public Action {
 
   /**
    * Determine the cross section for NNbar annihilation, which is given by
-   * detailed balance from the reverse reaction. See NNbar_annihilation_cross_section
+   * detailed balance from the reverse reaction. See
+   * NNbar_annihilation_cross_section
    */
   CollisionBranchList NNbar_creation_cross_section();
 
@@ -205,8 +215,22 @@ class ScatterAction : public Action {
    * explicitly implemented channels at low energy (elastic, resonance
    * excitation, etc). This method has to be called after all other processes
    * have been added to the Action object.
+   *
+   * create a cross section for PYTHIA event generation
    */
   virtual CollisionBranchPtr string_excitation_cross_section();
+
+  /**
+   * Determine the cross section for string excitations, which is given by the
+   * difference between the parametrized total cross section and all the
+   * explicitly implemented channels at low energy (elastic, resonance
+   * excitation, etc). This method has to be called after all other processes
+   * have been added to the Action object.
+   *
+   * create a list of subprocesses (single-diffractive,
+   * double-diffractive and non-diffractive) and their cross sections.
+   */
+  virtual CollisionBranchList string_excitation_cross_sections();
 
   /**
   * Find all resonances that can be produced in a 2->1 collision of the two
@@ -233,10 +257,8 @@ class ScatterAction : public Action {
    *
    * \return The cross section for the process
    * [initial particle a] + [initial particle b] -> resonance.
-   *
-   * \fpPrecision Why \c double?
    */
-  double two_to_one_formation(const ParticleType &type_resonance, double srts,
+  double two_to_one_formation(const ParticleType& type_resonance, double srts,
                               double cm_momentum_sqr);
 
   /** Find all inelastic 2->2 processes for this reaction. */
@@ -244,9 +266,6 @@ class ScatterAction : public Action {
     return CollisionBranchList();
   }
 
-  /** Determine the total energy in the center-of-mass frame,
-   * i.e. sqrt of Mandelstam s.  */
-  double sqrt_s() const override;
   /**
    * \ingroup exception
    * Thrown when ScatterAction is called to perform with unknown ProcessType.
@@ -255,23 +274,23 @@ class ScatterAction : public Action {
     using std::invalid_argument::invalid_argument;
   };
 
-  virtual float cross_section() const { return total_cross_section_; }
+  void set_string_interface(StringProcess* str_proc) {
+    string_process_ = str_proc;
+  }
+
+  virtual double cross_section() const { return total_cross_section_; }
 
  protected:
   /** Determine the Mandelstam s variable,
    * s = (p_a + p_b)^2 = square of CMS energy.
-   *
-   * \fpPrecision Why \c double?
    */
   double mandelstam_s() const;
   /** Determine the momenta of the incoming particles in the
    * center-of-mass system.
-   * \fpPrecision Why \c double?
    */
   double cm_momentum() const;
   /** Determine the squared momenta of the incoming particles in the
    * center-of-mass system.
-   * \fpPrecision Why \c double?
    */
   double cm_momentum_squared() const;
   /// determine the velocity of the center-of-mass frame in the lab
@@ -285,26 +304,33 @@ class ScatterAction : public Action {
   /** Perform an inelastic two-body scattering, i.e. new particles are formed*/
   void inelastic_scattering();
 
+  /** Todo(ryu): document better - it is not really UrQMD-based, isn't it?
+   *  Perform the UrQMD-based string excitation and decay */
+  void string_excitation_soft();
+
   /** Perform the string excitation and decay via Pythia. */
-  void string_excitation();
+  void string_excitation_pythia();
 
   /**
    * \ingroup logging
    * Writes information about this scatter action to the \p out stream.
    */
-  void format_debug_output(std::ostream &out) const override;
+  void format_debug_output(std::ostream& out) const override;
 
   /** List of possible collisions  */
   CollisionBranchList collision_channels_;
 
   /** Total cross section */
-  float total_cross_section_;
+  double total_cross_section_;
+
+  /** Partial cross-section to the chosen outgoing channel */
+  double partial_cross_section_;
 
   /** Do this collision isotropically. */
   bool isotropic_ = false;
 
   /** Formation time parameter for string fragmentation*/
-  float string_formation_time_ = 1.0f;
+  double string_formation_time_ = 1.0;
 
  private:
   /** Check if the scattering is elastic. */
@@ -312,8 +338,24 @@ class ScatterAction : public Action {
 
   /** Perform a 2->1 resonance-formation process. */
   void resonance_formation();
+
+  /**
+   * summation of the cross sections
+   * string_sub_cross_sections_sum_[i+1] is
+   * sum of string_sub_cross_sections over 0 to i
+   * This is added for determination of subprocess.
+   * string_sub_cross_sections[0] : single diffractive to A+X
+   * string_sub_cross_sections[1] : single diffractive to X+B
+   * string_sub_cross_sections[2] : double diffractive
+   * string_sub_cross_sections[3] : soft non-diffractive
+   * string_sub_cross_sections[4] : hard non-diffractive
+   */
+  std::array<double, 6> string_sub_cross_sections_sum_;
+
+  /** Pointer to interface class for strings */
+  StringProcess* string_process_ = nullptr;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_SCATTERACTION_H_

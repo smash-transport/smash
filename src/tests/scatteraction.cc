@@ -1,21 +1,22 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include "unittest.h"
+#include "unittest.h"  // This include has to be first
+
 #include "setup.h"
 
-#include "../include/scatteractionbaryonmeson.h"
 #include "../include/scatteractionbaryonbaryon.h"
+#include "../include/scatteractionbaryonmeson.h"
 
-using namespace Smash;
-using Smash::Test::Position;
-using Smash::Test::Momentum;
+using namespace smash;
+using smash::Test::Position;
+using smash::Test::Momentum;
 
 TEST(init_particle_types) {
   Test::create_actual_particletypes();
@@ -24,7 +25,7 @@ TEST(init_particle_types) {
 
 constexpr double r_x = 0.1;
 const FourVector pos_a = Position{0., -r_x, 0., 0.};
-const FourVector pos_b = Position{0.,  r_x, 0., 0.};
+const FourVector pos_b = Position{0., r_x, 0., 0.};
 const FourVector middle = (pos_a + pos_b) / 2.;
 
 TEST(sorting) {
@@ -36,11 +37,11 @@ TEST(sorting) {
   b.set_4position(pos_b);
   a.set_4momentum(Momentum{1.1, 1.0, 0., 0.});
 
-  constexpr float time1 = 1.f;
+  constexpr double time1 = 1.;
   ScatterAction act1(a, b, time1);
   COMPARE(act1.get_interaction_point(), middle);
 
-  constexpr float time2 = 1.1f;
+  constexpr double time2 = 1.1;
   ScatterAction act2(a, b, time2);
   VERIFY(act1 < act2);
 }
@@ -62,18 +63,17 @@ TEST(elastic_collision) {
   b = particles.insert(b);
 
   // create action
-  constexpr float time = 1.f;
+  constexpr double time = 1.;
   ScatterAction act(a, b, time);
   ScatterAction act_copy(a, b, time);
   VERIFY(act.is_valid(particles));
   VERIFY(act_copy.is_valid(particles));
 
   // add elastic channel
-  constexpr float sigma = 10.0;
+  constexpr double sigma = 10.0;
   constexpr bool strings_switch = false;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
-  act.add_all_processes(sigma, true, true, 0., strings_switch,
-                        nnbar_treatment);
+  act.add_all_processes(sigma, true, true, 0., strings_switch, nnbar_treatment);
 
   // check cross section
   COMPARE(act.cross_section(), sigma);
@@ -87,8 +87,8 @@ TEST(elastic_collision) {
   // verify that particles didn't change in the collision
   ParticleList in = act.incoming_particles();
   const ParticleList& out = act.outgoing_particles();
-  VERIFY((in[0] == out[0] && in[1] == out[1])
-         || (in[0] == out[1] && in[1] == out[0]));
+  VERIFY((in[0] == out[0] && in[1] == out[1]) ||
+         (in[0] == out[1] && in[1] == out[0]));
 
   // verify that the particles keep their positions after elastic scattering
   COMPARE(out[0].position(), pos_a);
@@ -109,8 +109,8 @@ TEST(elastic_collision) {
   VERIFY(!act_copy.is_valid(particles));
 
   // verify that the particles don't change in the particle list
-  VERIFY((in[0] == particles.front() && in[1] == particles.back())
-         || (in[0] == particles.back() && in[1] == particles.front()));
+  VERIFY((in[0] == particles.front() && in[1] == particles.back()) ||
+         (in[0] == particles.back() && in[1] == particles.front()));
 }
 
 TEST(outgoing_valid) {
@@ -138,18 +138,18 @@ TEST(outgoing_valid) {
 
   // construct action
   ScatterActionPtr act;
-  act = make_unique<ScatterActionBaryonMeson>(p1_copy, p2_copy, 0.2f);
+  act = make_unique<ScatterActionBaryonMeson>(p1_copy, p2_copy, 0.2);
   VERIFY(act != nullptr);
   COMPARE(p2_copy.type(), ParticleType::find(0x111));
 
   // add processes
-  constexpr float elastic_parameter = 0.f;  // don't include elastic scattering
+  constexpr double elastic_parameter = 0.;  // don't include elastic scattering
   constexpr bool strings_switch = false;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act->add_all_processes(elastic_parameter, true, true, 0., strings_switch,
                          nnbar_treatment);
 
-  VERIFY(act->cross_section() > 0.f);
+  VERIFY(act->cross_section() > 0.);
 
   // perform actions
   VERIFY(act->is_valid(particles));
@@ -194,24 +194,27 @@ TEST(pythia_running) {
 
   // construct action
   ScatterActionPtr act;
-  act = make_unique<ScatterActionBaryonBaryon>(p1_copy, p2_copy, 0.2f);
+  act = make_unique<ScatterActionBaryonBaryon>(p1_copy, p2_copy, 0.2);
+  std::unique_ptr<StringProcess> string_process_interface =
+      make_unique<StringProcess>();
+  act->set_string_interface(string_process_interface.get());
   VERIFY(act != nullptr);
   COMPARE(p2_copy.type(), ParticleType::find(0x2212));
 
   // add processes
-  constexpr float elastic_parameter = 0.f;  // don't include elastic scattering
+  constexpr double elastic_parameter = 0.;  // don't include elastic scattering
   constexpr bool strings_switch = true;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act->add_all_processes(elastic_parameter, false, false, 0., strings_switch,
                          nnbar_treatment);
 
-  VERIFY(act->cross_section() > 0.f);
+  VERIFY(act->cross_section() > 0.);
 
   // perform actions
   VERIFY(act->is_valid(particles));
   act->generate_final_state();
   VERIFY(act->get_type() != ProcessType::Elastic);
-  VERIFY(act->get_type() == ProcessType::String);
+  VERIFY(act->get_type() == ProcessType::StringSoft);
   const uint32_t id_process = 1;
   act->perform(&particles, id_process);
   COMPARE(id_process, 1u);
@@ -239,12 +242,12 @@ TEST(update_incoming) {
   b = particles.insert(b);
 
   // create action
-  constexpr float time = 0.2f;
+  constexpr double time = 0.2;
   ScatterAction act(a, b, time);
   VERIFY(act.is_valid(particles));
 
   // add elastic channel
-  constexpr float sigma = 10.0;
+  constexpr double sigma = 10.0;
   bool string_switch = true;
   NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act.add_all_processes(sigma, true, true, 0., string_switch, nnbar_treatment);

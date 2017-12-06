@@ -13,8 +13,7 @@
 #include "action.h"
 #include "actionfinderfactory.h"
 
-namespace Smash {
-
+namespace smash {
 
 /**
  * \ingroup action
@@ -25,12 +24,10 @@ class WallcrossingAction : public Action {
  public:
   WallcrossingAction(const ParticleData &in_part, const ParticleData &out_part,
                      const double time_until = 0.0)
-                 : Action(in_part, out_part, time_until, ProcessType::Wall) {}
-  float raw_weight_value() const override { return 1; };
-  void generate_final_state() override {};
-  double sqrt_s() const override {
-    return incoming_particles_[0].momentum().abs();
-  }
+      : Action(in_part, out_part, time_until, ProcessType::Wall) {}
+  double raw_weight_value() const override { return 1; };
+  double partial_weight() const override { return 1; };
+  void generate_final_state() override{};
   void format_debug_output(std::ostream &out) const override {
     out << "Wall crossing of " << incoming_particles_;
   }
@@ -38,7 +35,7 @@ class WallcrossingAction : public Action {
 
 class WallCrossActionsFinder : public ActionFinderInterface {
  public:
-  explicit WallCrossActionsFinder(float l) : l_{l, l, l} {};
+  explicit WallCrossActionsFinder(double l) : l_{l, l, l} {};
 
   /// Find the next wall crossings for every particle before time t_max
   ActionList find_actions_in_cell(const ParticleList &plist,
@@ -64,9 +61,9 @@ class WallCrossActionsFinder : public ActionFinderInterface {
 
  private:
   /// Periods in x,y,z directions in fm.
-  const std::array<float, 3> l_;
+  const std::array<double, 3> l_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_WALLCROSSINGACTION_H_

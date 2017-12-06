@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -21,14 +21,13 @@
 #include "include/processbranch.h"
 #include "include/quantumnumbers.h"
 
-namespace Smash {
+namespace smash {
 
 Action::Action(const ParticleList &in_part, double time)
-              : incoming_particles_(in_part),
-                time_of_execution_(time+in_part[0].position().x0()) {}
+    : incoming_particles_(in_part),
+      time_of_execution_(time + in_part[0].position().x0()) {}
 
 Action::~Action() = default;
-
 
 bool Action::is_valid(const Particles &particles) const {
   return std::all_of(
@@ -36,8 +35,8 @@ bool Action::is_valid(const Particles &particles) const {
       [&particles](const ParticleData &p) { return particles.is_valid(p); });
 }
 
-bool Action::is_pauli_blocked(const Particles & particles,
-                             const PauliBlocker& p_bl) const {
+bool Action::is_pauli_blocked(const Particles &particles,
+                              const PauliBlocker &p_bl) const {
   // Wall-crossing actions should never be blocked: currently
   // if the action is blocked, a particle continues to propagate in a straight
   // line. This would simply bring it out of the box.
@@ -47,11 +46,10 @@ bool Action::is_pauli_blocked(const Particles & particles,
   const auto &log = logger<LogArea::PauliBlocking>();
   for (const auto &p : outgoing_particles_) {
     if (p.is_baryon()) {
-      const auto f = p_bl.phasespace_dens(p.position().threevec(),
-                                           p.momentum().threevec(),
-                                           particles, p.pdgcode(),
-                                           incoming_particles_);
-      if (f >  Random::uniform(0.f, 1.f)) {
+      const auto f =
+          p_bl.phasespace_dens(p.position().threevec(), p.momentum().threevec(),
+                               particles, p.pdgcode(), incoming_particles_);
+      if (f > Random::uniform(0., 1.)) {
         log.debug("Action ", *this, " is pauli-blocked with f = ", f);
         return true;
       }
@@ -60,7 +58,7 @@ bool Action::is_pauli_blocked(const Particles & particles,
   return false;
 }
 
-const ParticleList& Action::incoming_particles() const {
+const ParticleList &Action::incoming_particles() const {
   return incoming_particles_;
 }
 
@@ -87,8 +85,8 @@ void Action::perform(Particles *particles, uint32_t id_process) {
   for (ParticleData &p : outgoing_particles_) {
     // store the history info
     if (process_type_ != ProcessType::Wall) {
-      p.set_history(p.get_history().collisions_per_particle+1, id_process,
-                  process_type_, time_of_execution_, incoming_particles_);
+      p.set_history(p.get_history().collisions_per_particle + 1, id_process,
+                    process_type_, time_of_execution_, incoming_particles_);
     }
   }
 
@@ -97,13 +95,12 @@ void Action::perform(Particles *particles, uint32_t id_process) {
   // properties.
   particles->update(incoming_particles_, outgoing_particles_,
                     (process_type_ != ProcessType::Elastic) &&
-                    (process_type_ != ProcessType::Wall));
+                        (process_type_ != ProcessType::Wall));
 
   log.debug("Particle map now has ", particles->size(), " elements.");
 
   check_conservation(id_process);
 }
-
 
 std::pair<double, double> Action::sample_masses() const {
   const ParticleType &t_a = outgoing_particles_[0].type();
@@ -118,10 +115,10 @@ std::pair<double, double> Action::sample_masses() const {
     const std::string reaction = incoming_particles_[0].type().name() +
                                  incoming_particles_[1].type().name() + "→" +
                                  t_a.name() + t_b.name();
-    throw InvalidResonanceFormation(reaction + ": not enough energy, " +
-      std::to_string(cms_energy) + " < " +
-      std::to_string(t_a.min_mass_kinematic()) + " + " +
-      std::to_string(t_b.min_mass_kinematic()));
+    throw InvalidResonanceFormation(
+        reaction + ": not enough energy, " + std::to_string(cms_energy) +
+        " < " + std::to_string(t_a.min_mass_kinematic()) + " + " +
+        std::to_string(t_b.min_mass_kinematic()));
   }
 
   /* If one of the particles is a resonance, sample its mass. */
@@ -137,7 +134,6 @@ std::pair<double, double> Action::sample_masses() const {
   return masses;
 }
 
-
 void Action::sample_angles(std::pair<double, double> masses) {
   const auto &log = logger<LogArea::Action>();
 
@@ -150,18 +146,17 @@ void Action::sample_angles(std::pair<double, double> masses) {
   if (!(pcm > 0.0)) {
     log.warn("Particle: ", p_a->pdgcode(), " radial momentum: ", pcm);
     log.warn("Etot: ", cms_energy, " m_a: ", masses.first,
-                                   " m_b: ", masses.second);
+             " m_b: ", masses.second);
   }
   /* Here we assume an isotropic angular distribution. */
   Angles phitheta;
   phitheta.distribute_isotropically();
 
-  p_a->set_4momentum(masses.first,   phitheta.threevec() * pcm);
+  p_a->set_4momentum(masses.first, phitheta.threevec() * pcm);
   p_b->set_4momentum(masses.second, -phitheta.threevec() * pcm);
 
   log.debug("p_a: ", *p_a, "\np_b: ", *p_b);
 }
-
 
 void Action::sample_2body_phasespace() {
   /* This function only operates on 2-particle final states. */
@@ -172,17 +167,16 @@ void Action::sample_2body_phasespace() {
   sample_angles(masses);
 }
 
-
 void Action::check_conservation(const uint32_t id_process) const {
   QuantumNumbers before(incoming_particles_);
   QuantumNumbers after(outgoing_particles_);
   if (before != after) {
     std::stringstream particle_names;
-    for (const auto& p : incoming_particles_) {
+    for (const auto &p : incoming_particles_) {
       particle_names << p.type().name();
     }
     particle_names << " vs. ";
-    for (const auto& p : outgoing_particles_) {
+    for (const auto &p : outgoing_particles_) {
       particle_names << p.type().name();
     }
     particle_names << "\n";
@@ -191,14 +185,15 @@ void Action::check_conservation(const uint32_t id_process) const {
     log.error() << particle_names.str() << err_msg;
     // Pythia does not conserve energy and momentum at high energy, so we just
     // print the error and continue.
-    if (process_type_ == ProcessType::String) {
+    if ((process_type_ == ProcessType::StringSoft) ||
+        (process_type_ == ProcessType::StringHard)) {
       return;
     }
     if (id_process == ID_PROCESS_PHOTON) {
       throw std::runtime_error("Conservation laws violated in photon process");
     } else {
-    throw std::runtime_error("Conservation laws violated in process " +
-                             std::to_string(id_process));
+      throw std::runtime_error("Conservation laws violated in process " +
+                               std::to_string(id_process));
     }
   }
 }
@@ -211,4 +206,4 @@ std::ostream &operator<<(std::ostream &out, const ActionList &actions) {
   return out << '}';
 }
 
-}  // namespace Smash
+}  // namespace smash

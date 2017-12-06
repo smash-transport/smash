@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -12,8 +12,7 @@
 
 #include "scatteraction.h"
 
-namespace Smash {
-
+namespace smash {
 
 /**
  * \ingroup action
@@ -26,7 +25,7 @@ class ScatterActionBaryonBaryon : public ScatterAction {
   using ScatterAction::ScatterAction;
   /** Determine the parametrized total cross section at high energies
    * for a baryon-baryon collision. */
-  float high_energy_cross_section() const override;
+  double high_energy_cross_section() const override;
   /* There is no resonance formation out of two baryons: Return empty list. */
   CollisionBranchList resonance_cross_sections() override {
     return CollisionBranchList();
@@ -39,7 +38,8 @@ class ScatterActionBaryonBaryon : public ScatterAction {
   * Calculate cross sections for resonance absorption
   * (i.e. NR->NN and ΔR->NN).
   *
-  * \param[in] is_anti_particles Whether the colliding particles are antiparticles
+  * \param[in] is_anti_particles Whether the colliding particles are
+  * antiparticles
   *
   * \return List of possible resonance absorption processes. Each element of the
   * list contains the types of the final-state particles and the cross section
@@ -60,10 +60,10 @@ class ScatterActionBaryonBaryon : public ScatterAction {
    *
    * \return Matrix amplitude squared \f$ |\mathcal{M}(\sqrt{s})|^2/16\pi \f$.
    */
-  static float nn_to_resonance_matrix_element(const double srts,
-                                              const ParticleType &type_a,
-                                              const ParticleType &type_b,
-                                              const int twoI);
+  static double nn_to_resonance_matrix_element(const double srts,
+                                               const ParticleType &type_a,
+                                               const ParticleType &type_b,
+                                               const int twoI);
 
   /**
    * \ingroup logging
@@ -72,7 +72,6 @@ class ScatterActionBaryonBaryon : public ScatterAction {
   void format_debug_output(std::ostream &out) const override;
 };
 
-
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_SCATTERACTIONBARYONBARYON_H_

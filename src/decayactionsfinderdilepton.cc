@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -15,38 +15,39 @@
 #include "include/decaymodes.h"
 #include "include/particles.h"
 
+namespace smash {
 
-namespace Smash {
-
-void DecayActionsFinderDilepton::shine(
-      const Particles &search_list,
-      OutputInterface* output,
-      float dt) const {
+void DecayActionsFinderDilepton::shine(const Particles &search_list,
+                                       OutputInterface *output,
+                                       double dt) const {
+  if (!output->is_dilepton_output()) {
+    return;
+  }
   for (const auto &p : search_list) {
     // effective mass of decaying particle
-    const float m_eff = p.effective_mass();
+    const double m_eff = p.effective_mass();
     const auto n_all_modes = p.type().get_partial_widths(m_eff).size();
     if (n_all_modes == 0) {
       continue;
     }
 
-    const float inv_gamma = p.inverse_gamma();
+    const double inv_gamma = p.inverse_gamma();
     DecayBranchList dil_modes = p.type().get_partial_widths_dilepton(m_eff);
 
     // if particle can only decay into dileptons or is stable, use shining only
     // in find_final_actions and ignore them here, also unformed
     // resonances cannot decay
-    if (dil_modes.size() == n_all_modes || p.type().is_stable()
-        || (p.formation_time() > p.position().x0())) {
+    if (dil_modes.size() == n_all_modes || p.type().is_stable() ||
+        (p.formation_time() > p.position().x0())) {
       continue;
     }
 
-    for (DecayBranchPtr & mode : dil_modes) {
+    for (DecayBranchPtr &mode : dil_modes) {
       // SHINING as described in \iref{Schmidt:2008hm}, chapter 2D
-      const float shining_weight = dt * inv_gamma * mode->weight() / hbarc;
+      const double shining_weight = dt * inv_gamma * mode->weight() / hbarc;
 
       if (shining_weight > 0.0) {  // decays that can happen
-        DecayActionDilepton act(p, 0.f, shining_weight);
+        DecayActionDilepton act(p, 0., shining_weight);
         act.add_decay(std::move(mode));
         act.generate_final_state();
         output->at_interaction(act, 0.0);
@@ -55,11 +56,12 @@ void DecayActionsFinderDilepton::shine(
   }
 }
 
-
-void DecayActionsFinderDilepton::shine_final(
-                  const Particles &search_list,
-                  OutputInterface* output,
-                  bool only_res) const {
+void DecayActionsFinderDilepton::shine_final(const Particles &search_list,
+                                             OutputInterface *output,
+                                             bool only_res) const {
+  if (!output->is_dilepton_output()) {
+    return;
+  }
   for (const auto &p : search_list) {
     const ParticleType &t = p.type();
     if (t.decay_modes().decay_mode_list().empty() ||
@@ -68,18 +70,18 @@ void DecayActionsFinderDilepton::shine_final(
     }
 
     // effective mass of decaying particle
-    const float m_eff = p.effective_mass();
+    const double m_eff = p.effective_mass();
     DecayBranchList dil_modes = t.get_partial_widths_dilepton(m_eff);
 
     // total decay width, also hadronic decays
-    const float width_tot = total_weight<DecayBranch>(
-                                                  t.get_partial_widths(m_eff));
+    const double width_tot =
+        total_weight<DecayBranch>(t.get_partial_widths(m_eff));
 
-    for (DecayBranchPtr & mode : dil_modes) {
-      const float shining_weight = mode->weight() / width_tot;
+    for (DecayBranchPtr &mode : dil_modes) {
+      const double shining_weight = mode->weight() / width_tot;
 
       if (shining_weight > 0.0) {  // decays that can happen
-        DecayActionDilepton act(p, 0.f, shining_weight);
+        DecayActionDilepton act(p, 0., shining_weight);
         act.add_decay(std::move(mode));
         act.generate_final_state();
         output->at_interaction(act, 0.0);
@@ -88,4 +90,4 @@ void DecayActionsFinderDilepton::shine_final(
   }
 }
 
-}  // namespace Smash
+}  // namespace smash

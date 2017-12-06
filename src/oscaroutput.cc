@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -20,60 +20,17 @@
 #include "include/forwarddeclarations.h"
 #include "include/particles.h"
 
-namespace Smash {
+namespace smash {
 
 template <OscarOutputFormat Format, int Contents>
 OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
                                            std::string name)
-    : file_{std::fopen((path / (name + ".oscar")).native().c_str(), "w")} {
-  /*!\Userguide
-   * \page input_oscar_particlelist Oscar_Particlelist
-   * Enables OSCAR particles output.
-   * OSCAR particles output provides the particle list at the output intervals.
-   * The text format
-   * is either OSCAR1999 or OSCAR2013, this is controlled by an option.
-   * Fixed moments of output can be: event start, event end, every next
-   * output interval \f$\Delta t \f$.
-   * Writing (or not writing) output at these moments is controlled by options.
-   * Output time interval \f$\Delta t \f$ is also regulated by an option.
-   *
-   * \key 2013_Format (bool, optional, default = false): \n
-   * true - output will be in OSCAR2013 format\n
-   * false - output will be in OSCAR1999 format
-   *
-   * \key 2013_Extended (bool, optional, default = false): \n
-   * true - print extended information for each particle \n
-   * false - regular output for each particle
-   *
-   * \key Only_Final (bool, optional, default = true): \n
-   * true - print only final particle list \n
-   * false - particle list at output interval including initial time
-   *
-   *  Detailed specification of OSCAR particle list format can be found here:
-   * \ref format_oscar_particlelist
-   *
-   * \page input_oscar_collisions Oscar_Collisions
-   * Enables OSCAR collisions output. The latter saves information about
-   * every collision, decay and box wall crossing in OSCAR1999 or OSCAR2013
-   * format.
-   * Optionally initial and final particle configurations can be written out.
-   *
-   * \key 2013_Format (bool, optional, default = false): \n
-   * true - output will be in OSCAR2013 format\n
-   * false - output will be in OSCAR1999 format
-   *
-   * \key 2013_Extended (bool, optional, default = false): \n
-   * true - print extended information for each particle \n
-   * false - regular output for each particle
-   *
-   * \key Print_Start_End (bool, optional, default = false): \n
-   * true - initial and final particle list is written out \n
-   * false - initial and final particle list is not written out
-   *
-   * Detailed specification of OSCAR collisions format can be found here:
-   * \ref format_oscar_collisions
-   */
-
+    : OutputInterface(name),
+      file_{std::fopen((path / (name + ".oscar" +
+                                ((Format == OscarFormat1999) ? "1999" : "")))
+                           .native()
+                           .c_str(),
+                       "w")} {
   /*!\Userguide
    * \page oscar_general_ OSCAR block structure
    * OSCAR outputs are a family of ASCII and binary formats that follow
@@ -117,24 +74,29 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
    * immediately after initialization, at event end (which is reached when
    * time is larger or equal than \c End_Time in configuration file) and
    * periodically during evolution, period is defined by \c Output_Interval
-   * option in configuration file, see \ref input_general_.
+   * option in configuration file, see output_content_specific_options_
+   * "content-specific output options".
    * Collisions output contains all collisions / decays / box wall crossings
    * and optionally initial and final configuration.
    */
   if (Format == OscarFormat2013) {
-    std::fprintf(file_.get(), "#!OSCAR2013 %s t x y z mass "
-                "p0 px py pz pdg ID\n", name.c_str());
-    std::fprintf(file_.get(), "# Units: fm fm fm fm "
-                "GeV GeV GeV GeV GeV none none\n");
+    std::fprintf(file_.get(),
+                 "#!OSCAR2013 %s t x y z mass "
+                 "p0 px py pz pdg ID charge\n",
+                 name.c_str());
+    std::fprintf(file_.get(),
+                 "# Units: fm fm fm fm "
+                 "GeV GeV GeV GeV GeV none none none\n");
     std::fprintf(file_.get(), "# %s\n", VERSION_MAJOR);
   } else if (Format == OscarFormat2013Extended) {
-    std::fprintf(file_.get(), "#!OSCAR2013Extended %s t x y z mass p0 px py pz"
-                 " pdg ID ncoll form_time xsecfac proc_id_origin"
-                 " proc_type_origin time_origin pdg_mother1 pdg_mother2 \n",
+    std::fprintf(file_.get(),
+                 "#!OSCAR2013Extended %s t x y z mass p0 px py pz"
+                 " pdg ID charge ncoll form_time xsecfac proc_id_origin"
+                 " proc_type_origin time_last_coll pdg_mother1 pdg_mother2\n",
                  name.c_str());
     std::fprintf(file_.get(),
                  "# Units: fm fm fm fm GeV GeV GeV GeV GeV"
-                " none none none fm none none none fm none none\n");
+                 " none none none none fm none none none fm none none\n");
     std::fprintf(file_.get(), "# %s\n", VERSION_MAJOR);
   } else {
     if (name == "particle_lists") {
@@ -146,7 +108,9 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
     std::fprintf(file_.get(), "# Block format:\n");
     std::fprintf(file_.get(), "# nin nout event_number\n");
     std::fprintf(file_.get(), "# id pdg 0 px py pz p0 mass x y z t\n");
-    std::fprintf(file_.get(), "# End of event: 0 0 event_number\n");
+    std::fprintf(file_.get(),
+                 "# End of event: 0 0 event_number"
+                 " impact_parameter\n");
     std::fprintf(file_.get(), "#\n");
   }
 }
@@ -180,7 +144,8 @@ void OscarOutput<Format, Contents>::at_eventstart(const Particles &particles,
 
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
-                                                const int event_number) {
+                                                const int event_number,
+                                                double impact_parameter) {
   if (Format == OscarFormat2013 || Format == OscarFormat2013Extended) {
     if (Contents & OscarParticlesAtEventend) {
       std::fprintf(file_.get(), "# event %i out %zu\n", event_number + 1,
@@ -188,7 +153,8 @@ void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
       write(particles);
     }
     // Comment end of an event
-    std::fprintf(file_.get(), "# event %i end 0\n", event_number + 1);
+    std::fprintf(file_.get(), "# event %i end 0 impact %7.3f\n",
+                 event_number + 1, impact_parameter);
   } else {
     // OSCAR line prefix : initial particles; final particles; event id
     // Last block of an event: initial = number of particles, final = 0
@@ -200,7 +166,8 @@ void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
       write(particles);
     }
     // Null interaction marks the end of an event
-    std::fprintf(file_.get(), "%zu %zu %i\n", zero, zero, event_number + 1);
+    std::fprintf(file_.get(), "%zu %zu %i %7.3f\n", zero, zero,
+                 event_number + 1, impact_parameter);
   }
   // Flush to disk
   std::fflush(file_.get());
@@ -211,12 +178,13 @@ void OscarOutput<Format, Contents>::at_interaction(const Action &action,
                                                    const double density) {
   if (Contents & OscarInteractions) {
     if (Format == OscarFormat2013 || Format == OscarFormat2013Extended) {
-      std::fprintf(
-          file_.get(),
-          "# interaction in %zu out %zu rho %12.7f weight %12.7g type %5i \n",
-          action.incoming_particles().size(),
-          action.outgoing_particles().size(), density,
-          action.raw_weight_value(), static_cast<int>(action.get_type()));
+      std::fprintf(file_.get(),
+                   "# interaction in %zu out %zu rho %12.7f weight %12.7g"
+                   " partial %12.7f type %5i\n",
+                   action.incoming_particles().size(),
+                   action.outgoing_particles().size(), density,
+                   action.raw_weight_value(), action.partial_weight(),
+                   static_cast<int>(action.get_type()));
     } else {
       /* OSCAR line prefix : initial final
        * particle creation: 0 1
@@ -225,10 +193,10 @@ void OscarOutput<Format, Contents>::at_interaction(const Action &action,
        * resonance decay: 1 2
        * etc.
        */
-      std::fprintf(file_.get(), "%zu %zu %12.7f %12.7f %5i \n",
+      std::fprintf(file_.get(), "%zu %zu %12.7f %12.7f %12.7f %5i\n",
                    action.incoming_particles().size(),
                    action.outgoing_particles().size(), density,
-                   action.raw_weight_value(),
+                   action.raw_weight_value(), action.partial_weight(),
                    static_cast<int>(action.get_type()));
     }
     for (const auto &p : action.incoming_particles()) {
@@ -264,7 +232,8 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * https://karman.physics.purdue.edu/OSCAR and
  * http://phy.duke.edu/~jeb65/oscar2013. SMASH OSCAR particles output
  * produces \c particle_lists.oscar file. Format is flexible, options that
- * regulate output can be found at \ref input_oscar_particlelist
+ * regulate output can be found at
+ * \ref output_content_specific_options_ "content-specific output options".
  * and at \ref input_general_. **Particle output always gives
  * the current particle list at a specific time.**
  * Oscar1999
@@ -279,7 +248,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * # Block format:
  * # nin nout event_number
  * # id pdg 0 px py pz p0 mass x y z t
- * # End of event: 0 0 event_number
+ * # End of event: 0 0 event_number impact_parameter
  * #
  * \endcode
  *
@@ -307,9 +276,10 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *
  * **Event end line**
  * \code
- * 0 0 event_number
+ * 0 0 event_number impact_parameter
  * \endcode
  *
+ * \anchor oscar2013_format
  * Oscar2013
  * ---------
  *
@@ -317,19 +287,24 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * standard. Format specifics are the following:\n
  * **Header**
  * \code
- * #!OSCAR2013 particle_lists t x y z mass p0 px py pz pdg ID
- * # Units: fm fm fm fm GeV GeV GeV GeV GeV none none
+ * #!OSCAR2013 particle_lists t x y z mass p0 px py pz pdg ID charge
+ * # Units: fm fm fm fm GeV GeV GeV GeV GeV none none none
  * # SMASH_version
  * \endcode
  *
  * For the extended version of this output the header is modified to read:\n
  * **Header**
- * \code
- * #!OSCAR2013 particle_lists t x y z mass p0 px py pz pdg ID ncoll form_time xsecfac proc_id_origin proc_type_origin time_origin pdg_mother1 pdg_mother2
- * # Units: fm fm fm fm GeV GeV GeV GeV GeV none none none fm none none none fm none none
- * # SMASH_version
- * \endcode
-
+ * <div class="fragment">
+ * <div class="line"><span class="preprocessor">#!OSCAR2013 particle_lists
+ *   t x y z mass p0 px py pz pdg
+ *   ID charge ncoll form_time xsecfac proc_id_origin proc_type_origin
+ *   t_last_coll pdg_mother1 pdg_mother2</span></div>
+ * <div class="line"><span class="preprocessor">\# Units: fm fm fm fm
+ *   GeV GeV GeV GeV GeV
+ *   none none none fm none none none fm none none</span></div>
+ * <div class="line"><span class="preprocessor">\# SMASH_version</span></div>
+ * </div>
+ *
  * **Output block header**\n
  * At start of event:
  * \code
@@ -346,13 +321,17 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \endcode
  *
  * For the extended version the particle line contains
- * \code
- * t x y z mass p0 px py pz pdg ID Ncoll formation_time cross_section_scaling_factor
- * process_ID_origin process_type_origin time_of_origin PDG_mother1 PDG_mother2
- * \endcode
+ *
+ * <div class="fragment">
+ * <div class="line"><span class="preprocessor">t x y z
+ *  mass p0 px py pz pdg ID charge Ncoll formation_time
+ *  xsecfac process_ID_origin process_type_origin t_last_coll
+ *  PDG_mother1 PDG_mother2</span></div>
+ * </div>
+ *
  * **Event end line**
  * \code
- * # event ev_num end 0
+ * # event ev_num end 0 impact impact_parameter
  * \endcode
  *
  * \page format_oscar_collisions Oscar collisions format
@@ -362,7 +341,8 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * https://karman.physics.purdue.edu/OSCAR and
  * http://phy.duke.edu/~jeb65/oscar2013. SMASH OSCAR collisions output
  * produces \c full_event_history.oscar file. Format is flexible, options
- * that regulate output can be found at \ref input_oscar_collisions
+ * that regulate output can be found at
+ * \ref output_content_specific_options_ "content-specific output options".
  * and at \ref input_general_. **Collision output always gives
  * a list of collisions/decays/box wall crossings plus optionally
  * initial and final configuration.**
@@ -407,7 +387,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *  Format specifics are the following:\n
  * **Header**
  * \code
- * #!OSCAR2013 full_event_history t x y z mass p0 px py pz pdg ID
+ * #!OSCAR2013 full_event_history t x y z mass p0 px py pz pdg ID charge
  * # Units: fm fm fm fm GeV GeV GeV GeV GeV none none
  * # SMASH_version
  * \endcode
@@ -428,12 +408,12 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *
  * **Particle line**
  * \code
- * t x y z mass p0 px py pz pdg ID
+ * t x y z mass p0 px py pz pdg ID charge
  * \endcode
  *
  * **Event end line**
  * \code
- * # event ev_num end 0
+ * # event ev_num end 0 impact impact_parameter
  * \endcode
  **/
 template <OscarOutputFormat Format, int Contents>
@@ -442,23 +422,23 @@ void OscarOutput<Format, Contents>::write_particledata(
   const FourVector pos = data.position();
   const FourVector mom = data.momentum();
   if (Format == OscarFormat2013) {
-    std::fprintf(file_.get(), "%g %g %g %g %g %.9g %.9g %.9g %.9g %s %i\n",
-                 pos.x0(), pos.x1(), pos.x2(), pos.x3(), data.effective_mass(),
-                 mom.x0(), mom.x1(), mom.x2(), mom.x3(),
-                 data.pdgcode().string().c_str(), data.id());
-  } else if (Format == OscarFormat2013Extended) {
-    std::fprintf(file_.get(), "%g %g %g %g %g %.9g %.9g %.9g"
-                 " %.9g %s %i %i %g %g %i %i %g %s %s\n",
+    std::fprintf(file_.get(), "%g %g %g %g %g %.9g %.9g %.9g %.9g %s %i %i\n",
                  pos.x0(), pos.x1(), pos.x2(), pos.x3(), data.effective_mass(),
                  mom.x0(), mom.x1(), mom.x2(), mom.x3(),
                  data.pdgcode().string().c_str(), data.id(),
-                 data.get_history().collisions_per_particle,
-                 data.formation_time(), data.cross_section_scaling_factor(),
-                 data.get_history().id_process,
-                 static_cast<int>(data.get_history().process_type),
-                 data.get_history().time_of_origin,
-                 data.get_history().p1.string().c_str(),
-                 data.get_history().p2.string().c_str());
+                 data.type().charge());
+  } else if (Format == OscarFormat2013Extended) {
+    const auto h = data.get_history();
+    std::fprintf(
+        file_.get(),
+        "%g %g %g %g %g %.9g %.9g %.9g"
+        " %.9g %s %i %i %i %g %g %i %i %g %s %s\n",
+        pos.x0(), pos.x1(), pos.x2(), pos.x3(), data.effective_mass(), mom.x0(),
+        mom.x1(), mom.x2(), mom.x3(), data.pdgcode().string().c_str(),
+        data.id(), data.type().charge(), h.collisions_per_particle,
+        data.formation_time(), data.cross_section_scaling_factor(),
+        h.id_process, static_cast<int>(h.process_type), h.time_last_collision,
+        h.p1.string().c_str(), h.p2.string().c_str());
   } else {
     std::fprintf(file_.get(), "%i %s %i %g %g %g %g %g %g %g %g %g\n",
                  data.id(), data.pdgcode().string().c_str(), 0, mom.x1(),
@@ -469,74 +449,61 @@ void OscarOutput<Format, Contents>::write_particledata(
 
 namespace {
 template <int Contents>
-std::unique_ptr<OutputInterface> create_select_format(const bf::path &path,
-                                                      Configuration config,
-                                                      std::string name) {
-  const bool modern_format = config.take({"2013_Format"}, false);
-  const bool extended_format = config.take({"2013_Extended"}, false);
+std::unique_ptr<OutputInterface> create_select_format(
+    bool modern_format, const bf::path &path, const OutputParameters &out_par,
+    std::string name) {
+  bool extended_format = (Contents & OscarInteractions) ? out_par.coll_extended
+                                                        : out_par.part_extended;
   if (modern_format && extended_format) {
-    return make_unique<OscarOutput<OscarFormat2013Extended,
-                                Contents>>(std::move(path), std::move(name));
+    return make_unique<OscarOutput<OscarFormat2013Extended, Contents>>(path,
+                                                                       name);
   } else if (modern_format) {
-    return make_unique<OscarOutput<OscarFormat2013, Contents>>(std::move(path),
-                                                               std::move(name));
+    return make_unique<OscarOutput<OscarFormat2013, Contents>>(path, name);
   } else {
-    return make_unique<OscarOutput<OscarFormat1999, Contents>>(std::move(path),
-                                                               std::move(name));
+    return make_unique<OscarOutput<OscarFormat1999, Contents>>(path, name);
   }
 }
 }  // unnamed namespace
 
-std::unique_ptr<OutputInterface> create_oscar_output(const bf::path &path,
-                                                     Configuration config) {
-  if (config.has_value({"Oscar_Particlelist"})) {
-    auto subconfig = config["Oscar_Particlelist"];
-    const bool enabled = subconfig.take({"Enable"}, true);
-    config.take({"Oscar_Particlelist"});
-    if (enabled) {
-      const bool only_final = subconfig.take({"Only_Final"}, true);
-      if (only_final) {
-        return create_select_format<OscarParticlesAtEventend>(
-            std::move(path), std::move(subconfig), "particle_lists");
-      } else {
-        return create_select_format<OscarTimesteps | OscarAtEventstart |
-                                    OscarParticlesAtEventend>(
-            std::move(path), std::move(subconfig), "particle_lists");
-      }
+std::unique_ptr<OutputInterface> create_oscar_output(
+    std::string format, std::string content, const bf::path &path,
+    const OutputParameters &out_par) {
+  if (format != "Oscar2013" && format != "Oscar1999") {
+    throw std::invalid_argument("Creating Oscar output: unknown format");
+  }
+  const bool modern_format = (format == "Oscar2013");
+  if (content == "Particles") {
+    if (out_par.part_only_final) {
+      return create_select_format<OscarParticlesAtEventend>(
+          modern_format, path, out_par, "particle_lists");
+    } else {
+      return create_select_format<OscarTimesteps | OscarAtEventstart |
+                                  OscarParticlesAtEventend>(
+          modern_format, path, out_par, "particle_lists");
+    }
+  } else if (content == "Collisions") {
+    if (out_par.coll_printstartend) {
+      return create_select_format<OscarInteractions | OscarAtEventstart |
+                                  OscarParticlesAtEventend>(
+          modern_format, path, out_par, "full_event_history");
+    } else {
+      return create_select_format<OscarInteractions>(
+          modern_format, path, out_par, "full_event_history");
+    }
+  } else if (content == "Dileptons") {
+    return make_unique<OscarOutput<OscarFormat2013Extended, OscarInteractions>>(
+        path, "Dileptons");
+  } else if (content == "Photons") {
+    if (modern_format) {
+      return make_unique<OscarOutput<OscarFormat2013, OscarInteractions>>(
+          path, "Photons");
+    } else {
+      return make_unique<OscarOutput<OscarFormat1999, OscarInteractions>>(
+          path, "Photons");
     }
   }
-  if (config.has_value({"Oscar_Collisions"})) {
-    auto subconfig = config["Oscar_Collisions"];
-    const bool enabled = subconfig.take({"Enable"}, true);
-    config.take({"Oscar_Collisions"});
-    if (enabled) {
-      const bool print_start_end = subconfig.take({"Print_Start_End"}, false);
-      if (print_start_end) {
-        return create_select_format<OscarInteractions | OscarAtEventstart |
-                                    OscarParticlesAtEventend>(
-            std::move(path), std::move(subconfig), "full_event_history");
-      } else {
-        return create_select_format<OscarInteractions>(
-            std::move(path), std::move(subconfig), "full_event_history");
-      }
-    }
-  }
-  return {};  // return a nullptr to signify the end of OSCAR outputs in the
-              // config file
+
+  throw std::invalid_argument("Create_oscar_output got unknown content.");
 }
 
-std::unique_ptr<OutputInterface> create_dilepton_output(bf::path path) {
-  /* for now the Oscar Output in the 2013 format is sufficient
-   * for dilepton output */
-  return make_unique<OscarOutput<OscarFormat2013Extended, OscarInteractions>>(
-      std::move(path), "DileptonOutput");
-}
-
-std::unique_ptr<OutputInterface> create_photon_output(bf::path path) {
-  /* for now the Oscar Output in the 2013 format is sufficient
-   * for photon output */
-  return make_unique<OscarOutput<OscarFormat2013, OscarInteractions>>(
-      std::move(path), "PhotonOutput");
-}
-
-}  // namespace Smash
+}  // namespace smash

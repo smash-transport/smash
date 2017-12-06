@@ -1,13 +1,14 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include "unittest.h"
+#include "unittest.h"  // This include has to be first
+
 #include "../include/lowess.h"
 
 #include <numeric>
@@ -22,7 +23,7 @@ TEST(smooth_trivial) {
   for (size_t i = 10; i < 20; i++) {
     y[i] = 1;
   }
-  const auto result = Smash::smooth(x, y, 0.4, 3, 0.);
+  const auto result = smash::smooth(x, y, 0.4, 3, 0.);
   for (size_t i = 0; i < 20; i++) {
     COMPARE_ABSOLUTE_ERROR(result[i], y[i], 1e-7);
   }
@@ -35,7 +36,7 @@ TEST(smooth_flat) {
   for (size_t i = 0; i < 20; i++) {
     y[i] = 0;
   }
-  const auto result = Smash::smooth(x, y, 0.4, 3, 0.);
+  const auto result = smash::smooth(x, y, 0.4, 3, 0.);
   for (size_t i = 0; i < 20; i++) {
     COMPARE_ABSOLUTE_ERROR(result[i], 0., 1e-7);
   }
@@ -47,7 +48,7 @@ TEST(smooth_range) {
   std::vector<double> y = x;
   // This test fails for 3 robustness iterations!
   constexpr size_t robustness_iterations = 0;
-  const auto result = Smash::smooth(x, y, 0.4, robustness_iterations, 0.);
+  const auto result = smash::smooth(x, y, 0.4, robustness_iterations, 0.);
   for (size_t i = 0; i < 20; i++) {
     COMPARE_ABSOLUTE_ERROR(result[i], x[i], 1e-7);
   }
@@ -67,7 +68,7 @@ TEST(smooth_simple) {
       8.87590555190343,   9.940975860297,   10.8981138457948, 11.7851424727769,
       12.6188717296918,   13.409849737403,  14.1516996584552, 14.9180658146586,
       15.695660019874,    16.4783034134255, 17.2617441530539, 18.0459201716397};
-  const auto result = Smash::smooth(x, y, 2. / 3, 3, 0.);
+  const auto result = smash::smooth(x, y, 2. / 3, 3, 0.);
   for (size_t i = 0; i < 20; i++) {
     COMPARE_ABSOLUTE_ERROR(result[i], smoothed_y[i], 1e-7);
   }

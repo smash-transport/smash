@@ -1,13 +1,14 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include "unittest.h"
+#include "unittest.h"  // This include has to be first
+
 #include "setup.h"
 
 #include "../include/boxmodus.h"
@@ -20,7 +21,7 @@
 
 #include <boost/filesystem.hpp>
 
-using namespace Smash;
+using namespace smash;
 
 TEST(init_particle_types) {
   ParticleType::create_type_list(
@@ -38,8 +39,9 @@ TEST(phase_space_density) {
   conf["Collision_Term"]["Pauli_Blocking"]["Momentum_Averaging_Radius"] = 0.08;
   conf["Collision_Term"]["Pauli_Blocking"]["Gaussian_Cutoff"] = 2.2;
 
-  ExperimentParameters param = Smash::Test::default_parameters();
-  std::unique_ptr<PauliBlocker> pb = make_unique<PauliBlocker>(conf["Collision_Term"]["Pauli_Blocking"], param);
+  ExperimentParameters param = smash::Test::default_parameters();
+  std::unique_ptr<PauliBlocker> pb = make_unique<PauliBlocker>(
+      conf["Collision_Term"]["Pauli_Blocking"], param);
   Particles part;
   PdgCode pdg = 0x2112;
   ParticleData one_particle{ParticleType::find(pdg)};
@@ -49,8 +51,8 @@ TEST(phase_space_density) {
   COMPARE(part.size(), 1u);
   ThreeVector r(1.218, 0.0, 0.0), p(0.0, 0.0, 0.0);
   ParticleList disregard;
-  const float f = pb->phasespace_dens(r, p, part, pdg, disregard);
-  const float f_expected = 9.93318f;
+  const double f = pb->phasespace_dens(r, p, part, pdg, disregard);
+  const double f_expected = 9.93318;
   COMPARE_RELATIVE_ERROR(f, f_expected, 1.e-3) << f << " ?= " << f_expected;
 }
 
@@ -67,8 +69,9 @@ TEST(phase_space_density) {
   conf["Collision_Term"]["Pauli_Blocking"]["Gaussian_Cutoff"] = 2.2;
   // Number of test-particles
   const size_t ntest = 10;
-  ExperimentParameters param = Smash::Test::default_parameters(ntest);
-  PauliBlocker *pb = new PauliBlocker(conf["Collision_Term"]["Pauli_Blocking"], param);
+  ExperimentParameters param = smash::Test::default_parameters(ntest);
+  PauliBlocker *pb = new PauliBlocker(conf["Collision_Term"]["Pauli_Blocking"],
+param);
   BoxModus *b = new BoxModus(conf["Modi"], param);
   Particles Pbox;
   b->initial_conditions(&Pbox, param);
@@ -77,7 +80,7 @@ TEST(phase_space_density) {
   ParticleList disregard;
   for (int i = 1; i < 100; i++) {
     const ThreeVector p = ThreeVector(0.0, 0.0, 5.0/100*i);
-    const float f = pb->phasespace_dens(r, p, Pbox, pdg, disregard);
+    const double f = pb->phasespace_dens(r, p, Pbox, pdg, disregard);
    // std::cout << 5.0/100*i << "  " << f << std::endl;
   }
 }*/
@@ -99,16 +102,17 @@ TEST(phase_space_density_nucleus) {
   Particles part_Au;
   Au.copy_particles(&part_Au);
 
-  ExperimentParameters param = Smash::Test::default_parameters(Ntest);
-  std::unique_ptr<PauliBlocker> pb = make_unique<PauliBlocker>(conf["Collision_Term"]["Pauli_Blocking"], param);
+  ExperimentParameters param = smash::Test::default_parameters(Ntest);
+  std::unique_ptr<PauliBlocker> pb = make_unique<PauliBlocker>(
+      conf["Collision_Term"]["Pauli_Blocking"], param);
 
   ThreeVector r(0.0, 0.0, 0.0);
   ThreeVector p;
   PdgCode pdg = 0x2212;
   ParticleList disregard;
   for (int i = 1; i < 100; i++) {
-    p = ThreeVector(0.0, 0.0, 0.5/100*i);
-    const float f = pb->phasespace_dens(r, p, part_Au, pdg, disregard);
-    std::cout << 0.5/100*i << "  " << f << std::endl;
+    p = ThreeVector(0.0, 0.0, 0.5 / 100 * i);
+    const double f = pb->phasespace_dens(r, p, part_Au, pdg, disregard);
+    std::cout << 0.5 / 100 * i << "  " << f << std::endl;
   }
 }

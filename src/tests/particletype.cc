@@ -1,18 +1,19 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include "unittest.h"
+#include "unittest.h"  // This include has to be first
+
 #include "../include/configuration.h"
 #include "../include/logging.h"
 #include "../include/particletype.h"
 
-using namespace Smash;
+using namespace smash;
 
 TEST(assign) {
   // enable debugging output
@@ -21,10 +22,10 @@ TEST(assign) {
   PdgCode smashon("9003234");
   // there is a double for mass and a float for width. This is
   // intentional.
-  ParticleType A("σ", 3.243, 0.234f, smashon);
+  ParticleType A("σ", 3.243, 0.234, smashon);
   COMPARE(A.name(), "σ");
-  COMPARE(A.mass(), 3.243f);
-  COMPARE(A.width_at_pole(), 0.234f);
+  COMPARE(A.mass(), 3.243);
+  COMPARE(A.width_at_pole(), 0.234);
   COMPARE(A.pdgcode(), smashon);
   COMPARE(A.isospin(), 0);
   COMPARE(A.charge(), smashon.charge());
@@ -35,7 +36,8 @@ TEST_CATCH(load_from_incorrect_string, ParticleType::LoadFailure) {
   ParticleType::create_type_list("Hallo Welt! (wave)");
 }
 
-TEST_CATCH(load_one_particle_with_incorrect_newline, ParticleType::LoadFailure) {
+TEST_CATCH(load_one_particle_with_incorrect_newline,
+           ParticleType::LoadFailure) {
   const std::string parts("pi0 0.1350\n-1.0 111");
   ParticleType::create_type_list(parts);
 }
@@ -61,177 +63,178 @@ TEST(create_type_list) {
       "N⁰ 0.938 -1.0 2112\n"
       "Δ  1.232 0.117 2224 2214 2114 1114\n"  // full multiplet in one line
       "Λ  1.116 0.0   3122\n"
-      "Σ  1.189 0.0   3222 3212 3112\n"       // full multiplet in one line
+      "Σ  1.189 0.0   3222 3212 3112\n"  // full multiplet in one line
       "e⁻ 0.000511 0.0 11\n"
       "μ⁻ 0.105 0.0 13\n"
       "γ  0.0  0.0  22");
 
-  COMPARE(ParticleType::list_all().size(), 37u);  // 21 given explicitly + 16 antiparticles
+  COMPARE(ParticleType::list_all().size(),
+          37u);  // 21 given explicitly + 16 antiparticles
 
   // pi0
   ParticleTypePtr type = &ParticleType::find(0x111);
-  COMPARE(type->mass(), 0.135f);
-  COMPARE(type->width_at_pole(), -1.f);
+  COMPARE(type->mass(), 0.135);
+  COMPARE(type->width_at_pole(), -1.);
   COMPARE(type->pdgcode(), PdgCode(0x111));
   COMPARE(type->charge(), 0);
   COMPARE(type->spin(), 0u);
   COMPARE(type->isospin(), 2);
   COMPARE(type->isospin3(), 0);
-  COMPARE(type->isospin3_rel(), 0.f);
+  COMPARE(type->isospin3_rel(), 0.);
 
   // pi+
   type = &ParticleType::find(0x211);
-  COMPARE(type->mass(), 0.1396f);
-  COMPARE(type->width_at_pole(), -1.f);
+  COMPARE(type->mass(), 0.1396);
+  COMPARE(type->width_at_pole(), -1.);
   COMPARE(type->pdgcode(), PdgCode(0x211));
   COMPARE(type->charge(), 1);
   COMPARE(type->spin(), 0u);
   COMPARE(type->isospin(), 2);
   COMPARE(type->isospin3(), 2);
-  COMPARE(type->isospin3_rel(), 1.f);
+  COMPARE(type->isospin3_rel(), 1.);
 
   // rho0
   type = &ParticleType::find(0x113);
-  COMPARE(type->mass(), 0.7755f);
-  COMPARE(type->width_at_pole(), .149f);
+  COMPARE(type->mass(), 0.7755);
+  COMPARE(type->width_at_pole(), .149);
   COMPARE(type->pdgcode(), PdgCode(0x113));
   COMPARE(type->charge(), 0);
   COMPARE(type->spin(), 2u);
   COMPARE(type->isospin(), 2);
   COMPARE(type->isospin3(), 0);
-  COMPARE(type->isospin3_rel(), 0.f);
+  COMPARE(type->isospin3_rel(), 0.);
 
   // Delta+
   type = &ParticleType::find(0x2214);
-  COMPARE(type->mass(), 1.232f);
-  COMPARE(type->width_at_pole(), .117f);
+  COMPARE(type->mass(), 1.232);
+  COMPARE(type->width_at_pole(), .117);
   COMPARE(type->pdgcode().dump(), 0x2214u);
   COMPARE(type->charge(), 1);
   COMPARE(type->spin(), 3u);
   COMPARE(type->isospin(), 3);
   COMPARE(type->isospin3(), 1);
-  COMPARE(type->isospin3_rel(), 1.f/3.f);
+  COMPARE(type->isospin3_rel(), 1. / 3.);
 
   // anti-Delta-
   type = &ParticleType::find(-0x1114);
-  COMPARE(type->mass(), 1.232f);
-  COMPARE(type->width_at_pole(), .117f);
+  COMPARE(type->mass(), 1.232);
+  COMPARE(type->width_at_pole(), .117);
   COMPARE(type->pdgcode().dump(), 0x80001114u);
   COMPARE(type->charge(), 1);
   COMPARE(type->spin(), 3u);
   COMPARE(type->isospin(), 3);
   COMPARE(type->isospin3(), 3);
-  COMPARE(type->isospin3_rel(), 1.f);
+  COMPARE(type->isospin3_rel(), 1.);
 
   // proton
   type = &ParticleType::find(0x2212);
-  COMPARE(type->mass(), .938f);
-  COMPARE(type->width_at_pole(), -1.f);
+  COMPARE(type->mass(), .938);
+  COMPARE(type->width_at_pole(), -1.);
   COMPARE(type->pdgcode().dump(), 0x2212u);
   COMPARE(type->charge(), 1);
   COMPARE(type->spin(), 1u);
   COMPARE(type->isospin(), 1);
   COMPARE(type->isospin3(), 1);
-  COMPARE(type->isospin3_rel(), 1.f);
+  COMPARE(type->isospin3_rel(), 1.);
 
   // neutron
   type = &ParticleType::find(0x2112);
-  COMPARE(type->mass(), .938f);
-  COMPARE(type->width_at_pole(), -1.f);
+  COMPARE(type->mass(), .938);
+  COMPARE(type->width_at_pole(), -1.);
   COMPARE(type->pdgcode().dump(), 0x2112u);
   COMPARE(type->charge(), 0);
   COMPARE(type->spin(), 1u);
   COMPARE(type->isospin(), 1);
   COMPARE(type->isospin3(), -1);
-  COMPARE(type->isospin3_rel(), -1.f);
+  COMPARE(type->isospin3_rel(), -1.);
 
   // eta
   type = &ParticleType::find(0x221);
-  COMPARE(type->mass(), .5479f);
-  COMPARE(type->width_at_pole(), 1.0e-6f);
+  COMPARE(type->mass(), .5479);
+  COMPARE(type->width_at_pole(), 1.0e-6);
   COMPARE(type->pdgcode().dump(), 0x221u);
   COMPARE(type->charge(), 0);
   COMPARE(type->spin(), 0u);
   COMPARE(type->isospin(), 0);
   COMPARE(type->isospin3(), 0);
-  COMPARE(type->isospin3_rel(), 0.f);
+  COMPARE(type->isospin3_rel(), 0.);
 
   // electron
   type = &ParticleType::find(0x11);
-  COMPARE(type->mass(), .000511f);
-  COMPARE(type->width_at_pole(), 0.f);
+  COMPARE(type->mass(), .000511);
+  COMPARE(type->width_at_pole(), 0.);
   COMPARE(type->pdgcode().dump(), 0x11u);
   COMPARE(type->charge(), -1);
   COMPARE(type->spin(), 1u);
   COMPARE(type->isospin(), 0);
   COMPARE(type->isospin3(), 0);
-  COMPARE(type->isospin3_rel(), 0.f);
+  COMPARE(type->isospin3_rel(), 0.);
 
   // anti-mu
   type = &ParticleType::find(-0x13);
-  COMPARE(type->mass(), .105f);
-  COMPARE(type->width_at_pole(), 0.f);
+  COMPARE(type->mass(), .105);
+  COMPARE(type->width_at_pole(), 0.);
   COMPARE(type->pdgcode().dump(), 0x80000013u);
   COMPARE(type->charge(), +1);
   COMPARE(type->spin(), 1u);
   COMPARE(type->isospin(), 0);
   COMPARE(type->isospin3(), 0);
-  COMPARE(type->isospin3_rel(), 0.f);
+  COMPARE(type->isospin3_rel(), 0.);
 
   // photon
   type = &ParticleType::find(0x22);
-  COMPARE(type->mass(), 0.f);
-  COMPARE(type->width_at_pole(), 0.f);
+  COMPARE(type->mass(), 0.);
+  COMPARE(type->width_at_pole(), 0.);
   COMPARE(type->pdgcode().dump(), 0x22u);
   COMPARE(type->charge(), 0);
   COMPARE(type->spin(), 2u);
   COMPARE(type->isospin(), 0);
   COMPARE(type->isospin3(), 0);
-  COMPARE(type->isospin3_rel(), 0.f);
+  COMPARE(type->isospin3_rel(), 0.);
 
   // K0
   type = &ParticleType::find(0x311);
-  COMPARE(type->mass(), .494f);
-  COMPARE(type->width_at_pole(), 0.f);
+  COMPARE(type->mass(), .494);
+  COMPARE(type->width_at_pole(), 0.);
   COMPARE(type->pdgcode().dump(), 0x311u);
   COMPARE(type->charge(), 0);
   COMPARE(type->spin(), 0u);
   COMPARE(type->isospin(), 1);
   COMPARE(type->isospin3(), -1);
-  COMPARE(type->isospin3_rel(), -1.f);
+  COMPARE(type->isospin3_rel(), -1.);
 
   // K-
   type = &ParticleType::find(-0x321);
-  COMPARE(type->mass(), .494f);
-  COMPARE(type->width_at_pole(), 0.f);
+  COMPARE(type->mass(), .494);
+  COMPARE(type->width_at_pole(), 0.);
   COMPARE(type->pdgcode().dump(), 0x80000321u);
   COMPARE(type->charge(), -1);
   COMPARE(type->spin(), 0u);
   COMPARE(type->isospin(), 1);
   COMPARE(type->isospin3(), -1);
-  COMPARE(type->isospin3_rel(), -1.f);
+  COMPARE(type->isospin3_rel(), -1.);
 
   // Sigma+
   type = &ParticleType::find(0x3222);
-  COMPARE(type->mass(), 1.189f);
-  COMPARE(type->width_at_pole(), 0.f);
+  COMPARE(type->mass(), 1.189);
+  COMPARE(type->width_at_pole(), 0.);
   COMPARE(type->pdgcode().dump(), 0x3222u);
   COMPARE(type->charge(), 1);
   COMPARE(type->spin(), 1u);
   COMPARE(type->isospin(), 2);
   COMPARE(type->isospin3(), 2);
-  COMPARE(type->isospin3_rel(), 1.f);
+  COMPARE(type->isospin3_rel(), 1.);
 
   // Lambda
   type = &ParticleType::find(0x3122);
-  COMPARE(type->mass(), 1.116f);
-  COMPARE(type->width_at_pole(), 0.f);
+  COMPARE(type->mass(), 1.116);
+  COMPARE(type->width_at_pole(), 0.);
   COMPARE(type->pdgcode().dump(), 0x3122u);
   COMPARE(type->charge(), 0);
   COMPARE(type->spin(), 1u);
   COMPARE(type->isospin(), 0);
   COMPARE(type->isospin3(), 0);
-  COMPARE(type->isospin3_rel(), 0.f);
+  COMPARE(type->isospin3_rel(), 0.);
 }
 
 TEST(list_all_iteration) {
@@ -250,5 +253,5 @@ TEST(exists) {
   VERIFY(ParticleType::exists(0x111));   // pi0
   VERIFY(ParticleType::exists(-0x211));  // pi-
 
-  VERIFY(!ParticleType::exists(0x667));   // ttbar
+  VERIFY(!ParticleType::exists(0x667));  // ttbar
 }

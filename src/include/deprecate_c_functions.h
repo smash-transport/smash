@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -29,12 +29,12 @@
 #include "forwarddeclarations.h"
 #include "macros.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * This macro is used to define functions that are in the C library and in the
  * std namespace. If a call to such a function without explicit namespace
- * qualification is made it will then call the function from the Smash
+ * qualification is made it will then call the function from the smash
  * namespace. Since the functions here are marked as deprecated they issue a
  * warning if some code tries to use a C library function call.
  *
@@ -48,13 +48,11 @@ namespace Smash {
  * C++ code is to use the C++ interface. This may enable additional optimization
  * opportunities.
  */
-#define SMASH_DEPRECATE_NONSTD(fun__)                                 \
-  template <typename... Ts>                                           \
-  SMASH_DEPRECATED(                                                   \
-      "Please add the std:: namespace for this function.")            \
-                                             auto fun__(Ts&&... args) \
-      ->decltype(std::fun__(args...)) {                               \
-    return std::fun__(args...);                                       \
+#define SMASH_DEPRECATE_NONSTD(fun__)                                   \
+  template <typename... Ts>                                             \
+  SMASH_DEPRECATED("Please add the std:: namespace for this function.") \
+  auto fun__(Ts&&... args)->decltype(std::fun__(args...)) {             \
+    return std::fun__(args...);                                         \
   }
 SMASH_DEPRECATE_NONSTD(abort)
 SMASH_DEPRECATE_NONSTD(abs)
@@ -315,6 +313,6 @@ SMASH_DEPRECATE_NONSTD(wprintf)
 SMASH_DEPRECATE_NONSTD(wscanf)
 #undef SMASH_DEPRECATE_NONSTD
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_DEPRECATE_C_FUNCTIONS_H_

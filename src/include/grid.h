@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -19,7 +19,7 @@
 #include "forwarddeclarations.h"
 #include "particles.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * Identifies the mode of the Grid.
@@ -57,7 +57,7 @@ class GridBase {
    * Returns the minimum x,y,z coordinates and the largest dx,dy,dz distances of
    * the particles in \p particles.
    */
-  static std::pair<std::array<float, 3>, std::array<float, 3>>
+  static std::pair<std::array<double, 3>, std::array<double, 3>>
   find_min_and_length(const Particles &particles);
 };
 
@@ -85,7 +85,7 @@ class Grid : public GridBase {
    * \param min_cell_length The minimal length a cell must have.
    * \param strategy The strategy for determining the cell size
    */
-  Grid(const Particles &particles, float min_cell_length,
+  Grid(const Particles &particles, double min_cell_length,
        CellSizeStrategy strategy = CellSizeStrategy::Optimal)
       : Grid{find_min_and_length(particles), std::move(particles),
              min_cell_length, strategy} {}
@@ -101,9 +101,9 @@ class Grid : public GridBase {
    * \param min_cell_length The minimal length a cell must have.
    * \param strategy The strategy for determining the cell size
    */
-  Grid(const std::pair<std::array<float, 3>, std::array<float, 3>> &
-           min_and_length,
-       const Particles &particles, float min_cell_length,
+  Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
+           &min_and_length,
+       const Particles &particles, double min_cell_length,
        CellSizeStrategy strategy = CellSizeStrategy::Optimal);
 
   /**
@@ -124,8 +124,8 @@ class Grid : public GridBase {
    */
   void iterate_cells(
       const std::function<void(const ParticleList &)> &search_cell_callback,
-      const std::function<void(const ParticleList &, const ParticleList &)> &
-          neighbor_cell_callback) const;
+      const std::function<void(const ParticleList &, const ParticleList &)>
+          &neighbor_cell_callback) const;
 
  private:
   /**
@@ -143,7 +143,7 @@ class Grid : public GridBase {
   }
 
   /// The 3 lengths of the complete grid. Used for periodic boundary wrapping.
-  const std::array<float, 3> length_;
+  const std::array<double, 3> length_;
 
   /// The number of cells in x, y, and z direction.
   std::array<int, 3> number_of_cells_;
@@ -152,6 +152,6 @@ class Grid : public GridBase {
   std::vector<ParticleList> cells_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_GRID_H_

@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2015
+ *    Copyright (c) 2013-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -16,45 +16,37 @@
 #include "forwarddeclarations.h"
 #include "modusdefault.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup modus
- * ListModus: Provides a modus for hydro afterburner calculations
+ * ListModus: Provides a modus for running SMASH on any external particle list,
+ * for example as an afterburner calculations for hybrid codes
+ *
+ * For configuring see \ref input_modi_list_.
 *
-*Particle-list is given with data format in OSCAR2013, it's the same as the output in build/data/{eventid}/particles.oscar
-*The detailed information is as follows:
-*#!OSCAR2013 particle_lists SMASH-0.50-70-gc203fad t x y z mass p0 px py pz pdg ID
-# Units: fm fm fm fm GeV GeV GeV GeV GeV none none
-* To use this modus, chose
-* \code
-* General:
-*      MODUS: List
-* \endcode
-* in the configuration file.
+*#!OSCAR2013 particle_lists SMASH-githash t x y z mass p0 px py pz pdg
 *
-* Options for ListModus go in the "Modi"→"List" section of the
-* configuration:
+* Since SMASH is searching for collisions in computational frame time 't',
+* all particles need to be at the same time. If this is not the case in
+* the list provided, the particles will be propagated backwards on
+* straight lines ("anti-freestreaming"). To avoid unphysical interactions
+* of these particles, the back-propagated particles receive a
+* formation_time and zero cross_section_scaling_factor. The cross-sections
+* are set to zero during the time, where the particle will just propagate
+* on a straight line again to appear at the formation_time into the system.
 *
-* \code
-* Modi:
-*      List:
-*              # definitions here
-* \endcode
-*
-* The following configuration options are understood:
-* \ref input_modi_list_
-*/
+ */
 class ListModus : public ModusDefault {
  public:
   /* default constructor with probable values */
   explicit ListModus(Configuration modus_config,
-                       const ExperimentParameters &parameters);
+                     const ExperimentParameters &parameters);
 
   /** creates initial conditions for the particles.
    */
   double initial_conditions(Particles *particles,
-                          const ExperimentParameters &parameters);
+                            const ExperimentParameters &parameters);
 
   /// \ingroup exception
   struct LoadFailure : public std::runtime_error {
@@ -69,7 +61,7 @@ class ListModus : public ModusDefault {
   std::string particle_list_file_prefix_;
 
   /// Starting time for the List; changed to the earliest formation time
-  double start_time_ = 0.0f;
+  double start_time_ = 0.;
 
   /// shift_id is the start number of event_id
   const int shift_id_;
@@ -79,8 +71,8 @@ class ListModus : public ModusDefault {
 
   /// check whether anti-freestreaming is needed, if yes return
   /// earliest formation time as start_time_
-  std::pair<bool, double> check_formation_time_(const std::string &
-                                              particle_list);
+  std::pair<bool, double> check_formation_time_(
+      const std::string &particle_list);
 
   /**\ingroup logging
    * Writes the initial state for the List to the output stream.
@@ -88,6 +80,6 @@ class ListModus : public ModusDefault {
   friend std::ostream &operator<<(std::ostream &, const ListModus &);
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_LISTMODUS_H_

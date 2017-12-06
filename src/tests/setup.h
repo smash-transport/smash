@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -13,14 +13,14 @@
 #include "../include/cxx14compat.h"
 #include "../include/decaymodes.h"
 #include "../include/experiment.h"
+#include "../include/particledata.h"
 #include "../include/particles.h"
 #include "../include/particletype.h"
-#include "../include/particledata.h"
 #include "../include/random.h"
 
 #include <boost/filesystem.hpp>
 
-namespace Smash {
+namespace smash {
 namespace Test {
 
 /**
@@ -52,11 +52,10 @@ inline void create_actual_decaymodes() {
   DecayModes::load_decaymodes(data);
 }
 
-
 /// The mass of the smashon particle.
-static constexpr float smashon_mass = 0.123f;
+static constexpr double smashon_mass = 0.123;
 /// The decay width of the smashon particle.
-static constexpr float smashon_width = 1.2f;
+static constexpr double smashon_width = 1.2;
 static constexpr const char smashon_pdg_string[] = "661";
 
 /**
@@ -65,7 +64,8 @@ static constexpr const char smashon_pdg_string[] = "661";
 inline void create_smashon_particletypes() {
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "σ " + std::to_string(smashon_mass) + " " + std::to_string(smashon_width) +
+      "σ " +
+      std::to_string(smashon_mass) + " " + std::to_string(smashon_width) +
       " 661\n");
 }
 
@@ -158,7 +158,7 @@ inline ParticleData smashon_random(int id = -1) {
  * \endcode
  */
 inline Configuration configuration(std::string overrides = {}) {
-  Configuration c{bf::path{TEST_CONFIG_PATH} / "input" };
+  Configuration c{bf::path{TEST_CONFIG_PATH} / "input"};
   if (!overrides.empty()) {
     c.merge_yaml(overrides);
   }
@@ -233,15 +233,19 @@ inline ParticlesPtr create_particles(
  * If needed you can set the testparticles parameter to a different value than
  * 1.
  */
-inline ExperimentParameters default_parameters(int testparticles = 1, float dt = 0.1f) {
-  return ExperimentParameters{{0.f, dt}, {0.f, 1.f}, testparticles, 1.0, 4.0,
-                              true, true, false, NNbarTreatment::NoAnnihilation, false, 0.};
+inline ExperimentParameters default_parameters(int testparticles = 1,
+                                               double dt = 0.1) {
+  return ExperimentParameters{
+      {0., dt}, {0., 1.}, testparticles,
+      1.0,      4.0,      true,
+      true,     false,    NNbarTreatment::NoAnnihilation,
+      false,    0.};
 }
 
 /**
  * @}
  */
 }  // namespace Test
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_TESTS_SETUP_H_

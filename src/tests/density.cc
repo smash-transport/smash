@@ -1,15 +1,18 @@
 /*
  *
- *    Copyright (c) 2014-2015
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include <map>
-#include "unittest.h"
+#include "unittest.h"  // This include has to be first
+
 #include "setup.h"
+#include "unittest.h"
+
+#include <map>
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -18,13 +21,12 @@
 #include "../include/configuration.h"
 #include "../include/cxx14compat.h"
 #include "../include/density.h"
-#include "../include/thermodynamicoutput.h"
 #include "../include/experiment.h"
 #include "../include/modusdefault.h"
 #include "../include/nucleus.h"
+#include "../include/thermodynamicoutput.h"
 
-
-using namespace Smash;
+using namespace smash;
 
 static const bf::path testoutputpath = bf::absolute(SMASH_TEST_OUTPUT_PATH);
 
@@ -46,51 +48,49 @@ static ParticleData create_proton(int id = -1) {
   return ParticleData{ParticleType::find(0x2212), id};
 }
 
-
 static ParticleData create_antiproton(int id = -1) {
   return ParticleData{ParticleType::find(-0x2212), id};
 }
 
 TEST(density_type) {
-  //pions
-  const ParticleType &pi_zero  = ParticleType::find(0x111);
-  const ParticleType &pi_plus  = ParticleType::find(0x211);
+  // pions
+  const ParticleType &pi_zero = ParticleType::find(0x111);
+  const ParticleType &pi_plus = ParticleType::find(0x211);
   const ParticleType &pi_minus = ParticleType::find(-0x211);
   // baryons
   const ParticleType &proton = ParticleType::find(0x2212);
 
   // verify that pions are recognized as pions
-  COMPARE(density_factor(pi_zero,  DensityType::Pion), 1.f);
-  COMPARE(density_factor(pi_plus,  DensityType::Pion), 1.f);
-  COMPARE(density_factor(pi_minus, DensityType::Pion), 1.f);
+  COMPARE(density_factor(pi_zero, DensityType::Pion), 1.);
+  COMPARE(density_factor(pi_plus, DensityType::Pion), 1.);
+  COMPARE(density_factor(pi_minus, DensityType::Pion), 1.);
 
   // verify that pions are not recognized as baryons
-  COMPARE(density_factor(pi_zero, DensityType::Baryon), 0.f);
+  COMPARE(density_factor(pi_zero, DensityType::Baryon), 0.);
 
   // verify that protons are recognized as baryons
-  COMPARE(density_factor(proton, DensityType::Baryon), 1.f);
+  COMPARE(density_factor(proton, DensityType::Baryon), 1.);
 
   // verify that protons are not recognized as pions
-  COMPARE(density_factor(proton, DensityType::Pion), 0.f);
+  COMPARE(density_factor(proton, DensityType::Pion), 0.);
 
   // verify that all are recognized as particles
-  COMPARE(density_factor(proton,   DensityType::Hadron), 1.f);
-  COMPARE(density_factor(pi_zero,  DensityType::Hadron), 1.f);
-  COMPARE(density_factor(pi_plus,  DensityType::Hadron), 1.f);
-  COMPARE(density_factor(pi_minus, DensityType::Hadron), 1.f);
+  COMPARE(density_factor(proton, DensityType::Hadron), 1.);
+  COMPARE(density_factor(pi_zero, DensityType::Hadron), 1.);
+  COMPARE(density_factor(pi_plus, DensityType::Hadron), 1.);
+  COMPARE(density_factor(pi_minus, DensityType::Hadron), 1.);
 }
 
 // create one particle moving along x axis and check density in comp. frame
 // check if density in the comp. frame gets contracted as expected
 TEST(density_value) {
-
   ParticleData part_x = create_proton();
   part_x.set_4momentum(FourVector(1.0, 0.95, 0.0, 0.0));
   part_x.set_4position(FourVector(0.0, 0.0, 0.0, 0.0));
   ParticleList P;
   P.push_back(part_x);
   ThreeVector r;
-  const ExperimentParameters exp_par = Smash::Test::default_parameters();
+  const ExperimentParameters exp_par = smash::Test::default_parameters();
   const DensityParameters par(exp_par);
   double rho;
   DensityType bar_dens = DensityType::Baryon;
@@ -100,20 +100,19 @@ TEST(density_value) {
      rhoX = SetPrecision[Exp[-1.0/2.0/(1.0 - 0.95*0.95)]/(2*Pi)^(3/2), 16]
    */
 
-  const double f = 1.0 / smearing_factor_rcut_correction(
-                                             exp_par.gauss_cutoff_in_sigma);
+  const double f =
+      1.0 / smearing_factor_rcut_correction(exp_par.gauss_cutoff_in_sigma);
   r = ThreeVector(1.0, 0.0, 0.0);
   rho = rho_eckart(r, P, par, bar_dens, false).first;
-  COMPARE_RELATIVE_ERROR(rho, 0.0003763388107782538*f, 1.e-5);
+  COMPARE_RELATIVE_ERROR(rho, 0.0003763388107782538 * f, 1.e-5);
 
   r = ThreeVector(0.0, 1.0, 0.0);
   rho = rho_eckart(r, P, par, bar_dens, false).first;
-  COMPARE_RELATIVE_ERROR(rho, 0.03851083689074894*f, 1.e-5);
+  COMPARE_RELATIVE_ERROR(rho, 0.03851083689074894 * f, 1.e-5);
 
   r = ThreeVector(0.0, 0.0, 1.0);
   rho = rho_eckart(r, P, par, bar_dens, false).first;
-  COMPARE_RELATIVE_ERROR(rho, 0.03851083689074894*f, 1.e-5);
-
+  COMPARE_RELATIVE_ERROR(rho, 0.03851083689074894 * f, 1.e-5);
 }
 
 TEST(density_eckart_special_cases) {
@@ -130,36 +129,36 @@ TEST(density_eckart_special_cases) {
   P.push_back(pr);
   P.push_back(apr);
   ThreeVector r(1.0, 0.0, 0.0);
-  const ExperimentParameters exp_par = Smash::Test::default_parameters();
+  const ExperimentParameters exp_par = smash::Test::default_parameters();
   const DensityParameters par(exp_par);
-  const double f = 1.0 / smearing_factor_rcut_correction(
-                                             exp_par.gauss_cutoff_in_sigma);
+  const double f =
+      1.0 / smearing_factor_rcut_correction(exp_par.gauss_cutoff_in_sigma);
   double rho = rho_eckart(r, P, par, DensityType::Baryon, false).first;
   COMPARE_ABSOLUTE_ERROR(rho, 0.0, 1.e-15) << rho;
 
   /* Now check for negative baryon density from antiproton */
-  P.erase(P.begin()); // Remove proton
+  P.erase(P.begin());  // Remove proton
   rho = rho_eckart(r, P, par, DensityType::Baryon, false).first;
-  COMPARE_RELATIVE_ERROR(rho, -0.0003763388107782538*f, 1.e-5) << rho;
+  COMPARE_RELATIVE_ERROR(rho, -0.0003763388107782538 * f, 1.e-5) << rho;
 }
 
 TEST(smearing_factor_normalization) {
   // Create density lattice with small lattice spacing
-  const std::array<float, 3> l = {10.0f, 10.0f, 10.0f};
+  const std::array<double, 3> l = {10., 10., 10.};
   const std::array<int, 3> n = {50, 60, 70};
-  const std::array<float, 3> origin = {0.0f, 0.0f, 0.0f};
+  const std::array<double, 3> origin = {0., 0., 0.};
   bool periodicity = true;
-  auto lat = make_unique<DensityLattice>(
-             l, n, origin, periodicity, LatticeUpdate::EveryTimestep);
+  auto lat = make_unique<DensityLattice>(l, n, origin, periodicity,
+                                         LatticeUpdate::EveryTimestep);
   // Create box with 1 proton
   const int N = 1;
-  const float L = 10.0f;
+  const double L = 10.;
   auto conf = Test::configuration();
   conf["Modus"] = "Box";
   conf.take({"Modi", "Box", "Init_Multiplicities"});
   conf["Modi"]["Box"]["Init_Multiplicities"]["2212"] = N;
   conf["Modi"]["Box"]["Length"] = L;
-  const ExperimentParameters par = Smash::Test::default_parameters();
+  const ExperimentParameters par = smash::Test::default_parameters();
   const DensityParameters dens_par = DensityParameters(par);
   std::unique_ptr<BoxModus> b = make_unique<BoxModus>(conf["Modi"], par);
   Particles P;
@@ -172,13 +171,13 @@ TEST(smearing_factor_normalization) {
   for (auto &node : *lat) {
     int_rho_r_d3r += node.density();
   }
-  int_rho_r_d3r *= L*L*L/n[0]/n[1]/n[2]/N;
+  int_rho_r_d3r *= L * L * L / n[0] / n[1] / n[2] / N;
   COMPARE_RELATIVE_ERROR(int_rho_r_d3r, 1.0, 3.e-6);
 }
 
 TEST(smearing_factor_rcut_correction) {
-  FUZZY_COMPARE(smearing_factor_rcut_correction(3.0), 0.970709f);
-  FUZZY_COMPARE(smearing_factor_rcut_correction(4.0), 0.998866f);
+  FUZZY_COMPARE(smearing_factor_rcut_correction(3.0), 0.97070911346511177);
+  FUZZY_COMPARE(smearing_factor_rcut_correction(4.0), 0.99886601571021467);
 }
 
 // check that analytical and numerical results for gradient of density coincide
@@ -198,15 +197,15 @@ TEST(density_gradient) {
   P.push_back(part1);
   P.push_back(part2);
 
-  const ExperimentParameters par = Smash::Test::default_parameters();
-  ThreeVector r,dr;
+  const ExperimentParameters par = smash::Test::default_parameters();
+  ThreeVector r, dr;
   FourVector jmu;
   DensityType dtype = DensityType::Baryon;
 
   ThreeVector num_grad, analit_grad;
   r = ThreeVector(0.0, 0.0, 0.0);
   std::pair<double, ThreeVector> rho_and_grad =
-                             rho_eckart(r, P, par, dtype, true);
+      rho_eckart(r, P, par, dtype, true);
   double rho_r = rho_and_grad.first;
 
   // analytical gradient
@@ -214,13 +213,13 @@ TEST(density_gradient) {
   // numerical gradient
   dr = ThreeVector(1.e-4, 0.0, 0.0);
   double rho_rdr = rho_eckart(r + dr, P, par, dtype, false).first;
-  num_grad.set_x1((rho_rdr - rho_r)/dr.x1());
+  num_grad.set_x1((rho_rdr - rho_r) / dr.x1());
   dr = ThreeVector(0.0, 1.e-4, 0.0);
   rho_rdr = rho_eckart(r + dr, P, par, dtype, false).first;
-  num_grad.set_x2((rho_rdr - rho_r)/dr.x2());
+  num_grad.set_x2((rho_rdr - rho_r) / dr.x2());
   dr = ThreeVector(0.0, 0.0, 1.e-4);
   rho_rdr = rho_eckart(r + dr, P, par, dtype, false).first;
-  num_grad.set_x3((rho_rdr - rho_r)/dr.x3());
+  num_grad.set_x3((rho_rdr - rho_r) / dr.x3());
   // compare them with: accuracy should not be worse than |dr|
   std::cout << num_grad << analit_grad << std::endl;
   COMPARE_ABSOLUTE_ERROR(num_grad.x1(), analit_grad.x1(), 1.e-4);
@@ -277,7 +276,7 @@ TEST(density_eckart_frame) {
   create_particle_list(Pdef);
   OutputsList out;
   // clock, output interval, cross-section, testparticles, gauss. sigma
-  ExperimentParameters param = Smash::Test::default_parameters();
+  ExperimentParameters param = smash::Test::default_parameters();
   double dx = 0.3;
   double dy = 0.3;
   double dz = 0.3;
@@ -331,8 +330,9 @@ TEST(nucleus_density) {
   const int npoints = 100;
 
   Configuration&& conf{testoutputpath, configfilename};
-  ExperimentParameters par = Smash::Test::default_parameters(Ntest);
-  std::unique_ptr<ThermodynamicOutput> out = make_unique<ThermodynamicOutput>(testoutputpath, std::move(conf));
+  ExperimentParameters par = smash::Test::default_parameters(Ntest);
+  std::unique_ptr<ThermodynamicOutput> out =
+make_unique<ThermodynamicOutput>(testoutputpath, std::move(conf));
   out->density_along_line("lead_densityX.dat", plist, par, dens_type,
                           lstart, lend, npoints);
 
@@ -352,13 +352,13 @@ ParticleType::create_type_list(
     "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
     "proton 0.938 0.0 2212\n");
 const int Ntest = 1000;
-const float L = 10.0f;
+const double L = 10.0;
 Configuration conf(TEST_CONFIG_PATH);
 conf["Modus"] = "Box";
 conf.take({"Modi", "Box", "Init_Multiplicities"});
 conf["Modi"]["Box"]["Init_Multiplicities"]["2212"] = 1000;
 conf["Modi"]["Box"]["Length"] = L;
-const ExperimentParameters par = Smash::Test::default_parameters(Ntest);
+const ExperimentParameters par = smash::Test::default_parameters(Ntest);
 std::unique_ptr<BoxModus> b = make_unique<BoxModus>(conf["Modi"], par);
 Particles P;
 b->initial_conditions(&P, par);
@@ -366,12 +366,13 @@ ParticleList plist = P.copy_to_vector();
 conf["Output"]["Density"]["x"] = 0.0;
 conf["Output"]["Density"]["y"] = 0.0;
 conf["Output"]["Density"]["z"] = 0.0;
-std::unique_ptr<ThermodynamicOutput> out = make_unique<ThermodynamicOutput>(testoutputpath,
+std::unique_ptr<ThermodynamicOutput> out =
+make_unique<ThermodynamicOutput>(testoutputpath,
                                          conf["Output"]["Density"]);
 const ThreeVector lstart = ThreeVector(0.0, 0.0, 0.0);
 const ThreeVector lend = ThreeVector(L, L, L);
 const int npoints = 100;
-ExperimentParameters par = Smash::Test::default_parameters(Ntest);
+ExperimentParameters par = smash::Test::default_parameters(Ntest);
 out->density_along_line("box_density.dat", plist, par, DensityType::Baryon,
                         lstart, lend, npoints);
 }*/

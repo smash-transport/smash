@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -13,12 +13,12 @@
 #include "scatteraction.h"
 #include "scatteractionbaryonmeson.h"
 
-namespace Smash {
-
+namespace smash {
 
 /**
  * \ingroup action
- * ScatterActionNucleonPion is a special ScatterActionBaryonMeson which represents the
+ * ScatterActionNucleonPion is a special ScatterActionBaryonMeson which
+ * represents the
  * scattering of a nucleon and a pion.
  */
 class ScatterActionNucleonPion : public ScatterActionBaryonMeson {
@@ -29,7 +29,7 @@ class ScatterActionNucleonPion : public ScatterActionBaryonMeson {
    * Determine the elastic cross section for a nucleon-pion collision.
    * It is given by a parametrization of experimental data.
    */
-  float elastic_parametrization() override;
+  double elastic_parametrization() override;
 
  protected:
   /**
@@ -39,6 +39,6 @@ class ScatterActionNucleonPion : public ScatterActionBaryonMeson {
   void format_debug_output(std::ostream &out) const override;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_SCATTERACTIONNUCLEONPION_H_

@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2014
+ *    Copyright (c) 2013-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -15,7 +15,7 @@
 #include "forwarddeclarations.h"
 #include "modusdefault.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup modus
@@ -49,29 +49,32 @@ class SphereModus : public ModusDefault {
 
   /** creates initial conditions for the particles.
    */
-  float initial_conditions(Particles *particles,
-                          const ExperimentParameters &parameters);
+  double initial_conditions(Particles *particles,
+                            const ExperimentParameters &parameters);
 
  private:
   /// Sphere radius length
-  float radius_;
+  double radius_;
   /// Temperature for momentum distribution
-  float sphere_temperature_;
+  double sphere_temperature_;
   /// Starting time for the Sphere
-  const float start_time_ = 0.0f;
+  const double start_time_ = 0.;
   /** whether to use a thermal initialization for all particles
    *  instead of specific numbers */
   const bool use_thermal_ = false;
   /// baryon chemical potential for thermal box
-  const float mub_;
+  const double mub_;
   /// strange chemical potential for thermal box
-  const float mus_;
+  const double mus_;
   /// particle multiplicities at initialization
   const std::map<PdgCode, int> init_multipl_;
+  /** Initialization scheme for momenta in the sphere;
+   *  used for expanding metric setup */
+  const SphereInitialCondition init_distr_;
   /**\ingroup logging
    * Writes the initial state for the Sphere to the output stream.
    */
   friend std::ostream &operator<<(std::ostream &, const SphereModus &);
 };
-}  // namespace Smash
+}  // namespace smash
 #endif  // SRC_INCLUDE_SPHEREMODUS_H_

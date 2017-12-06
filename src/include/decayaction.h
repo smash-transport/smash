@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -14,8 +14,7 @@
 
 #include "action.h"
 
-namespace Smash {
-
+namespace smash {
 
 /**
  * \ingroup action
@@ -34,7 +33,7 @@ class DecayAction : public Action {
    * \param[in] p The particle that should decay if the action is performed.
    * \param[in] time Time at which the action is supposed to take place
    */
-  DecayAction(const ParticleData &p, float time);
+  DecayAction(const ParticleData &p, double time);
 
   /** Add several new decays at once. */
   void add_decays(DecayBranchList pv);
@@ -51,13 +50,11 @@ class DecayAction : public Action {
 
   std::pair<double, double> sample_masses() const override;
 
-  float raw_weight_value() const override {
-    return total_width_;
-  }
+  double raw_weight_value() const override { return total_width_; }
 
-  float total_width() const {
-    return total_width_;
-  }
+  double partial_weight() const override { return partial_width_; }
+
+  double total_width() const { return total_width_; }
 
   /**
    * \ingroup exception
@@ -69,9 +66,6 @@ class DecayAction : public Action {
   };
 
  protected:
-  /// determine the total energy in the center-of-mass frame
-  double sqrt_s() const override;
-
   /**
    * \ingroup logging
    * Writes information about this decay action to the \p out stream.
@@ -82,7 +76,10 @@ class DecayAction : public Action {
   DecayBranchList decay_channels_;
 
   /** total decay width */
-  float total_width_;
+  double total_width_;
+
+  /** partial decay width to the chosen outgoing channel */
+  double partial_width_;
 
   /** angular momentum of the decay */
   int L_ = 0;
@@ -97,7 +94,6 @@ class DecayAction : public Action {
   virtual void one_to_three();
 };
 
-
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_DECAYACTION_H_

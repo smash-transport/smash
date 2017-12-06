@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2014-2015
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -15,7 +15,7 @@
 #include "nucleus.h"
 #include "threevector.h"
 
-namespace Smash {
+namespace smash {
 
 /** DeformedNucleus: Child of nucleus for deformed nuclei.
  *
@@ -28,12 +28,12 @@ namespace Smash {
  * \endcode
  * in the configuration file.
  *
- * Options added by NucleusModus go in the "Modi"→"Nucleus"->"a nucleus" section of the
+ * Options added by NucleusModus go in the "Modi"→"Nucleus"->"a nucleus" section
+ * of the
  * configuration, where "a nucleus" is either projectile or target.
- * All options from the nucleus will still apply. The deformed nucleus adds new or updated
+ * All options from the nucleus will still apply. The deformed nucleus adds new
+ * or updated
  * features which are outlined below.
- *
- * \fpPrecision Why \c double?
  *
  * The following deformed nucleus directives are understood:
  * -------------
@@ -41,14 +41,10 @@ namespace Smash {
 
 class DeformedNucleus : public Nucleus {
  public:
-  DeformedNucleus(const std::map<PdgCode, int>& particle_list, int nTest);
+  DeformedNucleus(const std::map<PdgCode, int> &particle_list, int nTest);
   DeformedNucleus(Configuration &config, int nTest);
 
   /** Return the deformed Woods-Saxon probability for the given position.
-   *
-   * \fpPrecision
-   * Double-precision is used for safety, no effort was made to check whether
-   * single-precision works.
    *
    * @param r The sample radius
    * @param cosx The cosine of the sample polar angle
@@ -93,13 +89,9 @@ class DeformedNucleus : public Nucleus {
   double y_l_0(int l, double cosx) const;
 
   /// Set deformation coefficient for Y_2_0.
-  inline void set_beta_2(double b2) {
-    beta2_ = b2;
-  }
+  inline void set_beta_2(double b2) { beta2_ = b2; }
   /// Set deformation coefficient for Y_4_0.
-  inline void set_beta_4(double b4) {
-    beta4_ = b4;
-  }
+  inline void set_beta_4(double b4) { beta4_ = b4; }
   /// Set the nucleus polar angle.
   inline void set_polar_angle(double theta) {
     nuclear_orientation_.set_theta(theta);
@@ -118,6 +110,6 @@ class DeformedNucleus : public Nucleus {
   Angles nuclear_orientation_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_DEFORMEDNUCLEUS_H_

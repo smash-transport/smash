@@ -1,17 +1,19 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include "unittest.h"
+#include "unittest.h"  // This include has to be first
+
 #include "setup.h"
+
 #include "../include/pdgcode.h"
 
-using namespace Smash;
+using namespace smash;
 
 TEST(init_particle_types) {
   ParticleType::create_type_list(
@@ -57,11 +59,11 @@ TEST(set_get) {
   p.set_history(3, 5, ProcessType::None, 1.2, ParticleList{});
   COMPARE(p.id_process(), 5u);
   COMPARE(p.get_history().collisions_per_particle, 3);
-  COMPARE(p.get_history().time_of_origin, 1.2f);
+  COMPARE(p.get_history().time_last_collision, 1.2);
   p.set_history(4, 6, ProcessType::None, 2.5, ParticleList{});
   COMPARE(p.id_process(), 6u);
   COMPARE(p.get_history().collisions_per_particle, 4);
-  COMPARE(p.get_history().time_of_origin, 2.5f);
+  COMPARE(p.get_history().time_last_collision, 2.5);
   FourVector m(1.0, 1.2, 1.4, 1.6);
   p.set_4momentum(m);
   COMPARE(p.momentum(), FourVector(1.0, 1.2, 1.4, 1.6));
@@ -83,9 +85,9 @@ TEST(set_get2) {
   COMPARE(p.momentum().x2(), 2.3);
   COMPARE(p.momentum().x3(), 2.5);
   ThreeVector v = p.velocity();
-  COMPARE(v.x1(), 2.1/sqrt(4.0 + M.sqr()));
-  COMPARE(v.x2(), 2.3/sqrt(4.0 + M.sqr()));
-  COMPARE(v.x3(), 2.5/sqrt(4.0 + M.sqr()));
+  COMPARE(v.x1(), 2.1 / sqrt(4.0 + M.sqr()));
+  COMPARE(v.x2(), 2.3 / sqrt(4.0 + M.sqr()));
+  COMPARE(v.x3(), 2.5 / sqrt(4.0 + M.sqr()));
   COMPARE_RELATIVE_ERROR(v.abs(), 0.8941469381, 1e-10);
   COMPARE_RELATIVE_ERROR(p.inverse_gamma(), 0.4477736628, 1e-10);
   p.boost(v);
@@ -102,10 +104,10 @@ TEST(comparisons) {
   ParticleData q = Test::smashon(2);
   ParticleData r = Test::smashon(1);
   VERIFY(!(p == q));
-  VERIFY(  p == r );
-  VERIFY(  p == 1 );
-  VERIFY(  p <  2 );
-  VERIFY(  p <  q );
+  VERIFY(p == r);
+  VERIFY(p == 1);
+  VERIFY(p < 2);
+  VERIFY(p < q);
 }
 
 TEST(translation) {

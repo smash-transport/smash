@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -9,12 +9,12 @@
 #define SRC_INCLUDE_ISOPARTICLETYPE_H_
 
 #include <string>
-#include<unordered_map>
+#include <unordered_map>
 
 #include "particletype.h"
 #include "tabulation.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup data
@@ -33,7 +33,7 @@ class IsoParticleType {
    * \param w The (average) width of the multiplet.
    * \param s Twice the spin of the multiplet.
    */
-  IsoParticleType(const std::string &n, float m, float w, unsigned int s);
+  IsoParticleType(const std::string &n, double m, double w, unsigned int s);
 
   /**
    * Copies are not allowed as they break intended use. Instead use a const-ref
@@ -47,7 +47,7 @@ class IsoParticleType {
   IsoParticleType(IsoParticleType &&) = default;
   IsoParticleType &operator=(IsoParticleType &&) = default;
 
-  /** 
+  /**
    * Returns whether the two IsoParticleType objects have the same PDG code for
    * their first state; if it is, it is the same iso multiplet.
    */
@@ -59,10 +59,10 @@ class IsoParticleType {
   const std::string &name() const { return name_; }
 
   /// Returns the (average) multiplet mass.
-  float mass() const { return mass_; }
+  double mass() const { return mass_; }
 
   /// Returns the (average) multiplet width.
-  float width() const { return width_; }
+  double width() const { return width_; }
 
   /// Returns twice the total isospin of the multiplet
   int isospin() const { return states_.size() - 1; }
@@ -90,7 +90,7 @@ class IsoParticleType {
   /**
    * Returns a list of all IsoParticleTypes
    */
-  static const IsoParticleTypeList& list_all();
+  static const IsoParticleTypeList &list_all();
 
   /**
    * Returns the IsoParticleType pointer for the given \p name.
@@ -99,21 +99,21 @@ class IsoParticleType {
    *
    * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
    */
-  static const IsoParticleType* try_find(const std::string &name);
+  static const IsoParticleType *try_find(const std::string &name);
 
   /**
    * Returns the IsoParticleType object for the given \p name.
    *
    * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
    */
-  static const IsoParticleType& find(const std::string &name);
+  static const IsoParticleType &find(const std::string &name);
 
   /**
    * Returns the IsoParticleType object for the given \p type.
    *
    * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
    */
-  static IsoParticleType* find(const ParticleType &type);
+  static IsoParticleType *find(const ParticleType &type);
 
   /// \ingroup exception
   struct ParticleNotFoundFailure : public std::runtime_error {
@@ -135,7 +135,8 @@ class IsoParticleType {
 
   /**
    * Add a new multiplet to the global list of IsoParticleTypes, which contains
-   * the type t. If the multiplet exists already, the type t will be added to it.
+   * the type t. If the multiplet exists already, the type t will be added to
+   * it.
    */
   static void create_multiplet(const ParticleType &type);
 
@@ -155,9 +156,9 @@ class IsoParticleType {
   /// name of the multiplet
   std::string name_;
   /// (average) mass of the multiplet
-  float mass_;
+  double mass_;
   /// (average) width of the multiplet
-  float width_;
+  double width_;
   /// twice the spin of the multiplet
   unsigned int spin_;
   /// list of states that are contained in the multiplet
@@ -172,14 +173,14 @@ class IsoParticleType {
    * where R is this multiplet and R' is a baryon resonance, associated
    * with a list of resonances R' for the NN -> RR' cross sections;
    * used to calculate every multiplet spectral function only once*/
-  std::unordered_map<IsoParticleType*, TabulationPtr> XS_RR_tabulations;
+  std::unordered_map<IsoParticleType *, TabulationPtr> XS_RR_tabulations;
 
   /**
    * Private version of the 'find' method that returns a non-const reference.
    */
-  static IsoParticleType& find_private(const std::string &name);
+  static IsoParticleType &find_private(const std::string &name);
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_ISOPARTICLETYPE_H_

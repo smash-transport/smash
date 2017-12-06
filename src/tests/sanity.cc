@@ -1,28 +1,28 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include "unittest.h"
+#include "unittest.h"  // This include has to be first
+
 #include "setup.h"
+
 #include "../include/boxmodus.h"
-#include "../include/configuration.h"
 #include "../include/collidermodus.h"
+#include "../include/configuration.h"
 #include "../include/experimentparameters.h"
 #include "../include/modusdefault.h"
 #include "../include/spheremodus.h"
 
 #include <boost/filesystem.hpp>
 
-using namespace Smash;
+using namespace smash;
 
-TEST(init_particle_types) {
-  Test::create_smashon_particletypes();
-}
+TEST(init_particle_types) { Test::create_smashon_particletypes(); }
 
 static ParticleData create_smashon_particle(int id = -1) {
   return ParticleData{ParticleType::find(0x661), id};
@@ -91,7 +91,7 @@ TEST(sanity_box) {
   conf["Modi"]["Box"]["Length"] = 5.0;
   conf["Modi"]["Box"]["Temperature"] = 0.13;
   conf["Modi"]["Box"]["Start_Time"] = 0.2;
-  ExperimentParameters param = Smash::Test::default_parameters();
+  ExperimentParameters param = smash::Test::default_parameters();
   BoxModus b(conf["Modi"], param);
   Particles P;
   create_particle_list(P);
@@ -107,7 +107,7 @@ TEST(sanity_collider) {
   conf["Modi"]["Collider"]["Sqrts_Reps"][1] = "661";
   conf["Modi"]["Collider"]["Projectile"]["Particles"]["661"] = 1;
   conf["Modi"]["Collider"]["Target"]["Particles"]["661"] = 1;
-  ExperimentParameters param = Smash::Test::default_parameters();
+  ExperimentParameters param = smash::Test::default_parameters();
   ColliderModus n(conf["Modi"], param);
   Particles P;
   create_particle_list(P);
@@ -121,7 +121,7 @@ TEST(sanity_sphere) {
   conf["Modi"]["Sphere"]["Start_Time"] = 0.0;
   conf.take({"Modi", "Sphere", "Init_Multiplicities"});
   conf["Modi"]["Sphere"]["Init_Multiplicities"]["661"] = 500;
-  ExperimentParameters param = Smash::Test::default_parameters();
+  ExperimentParameters param = smash::Test::default_parameters();
   SphereModus s(conf["Modi"], param);
   Particles P;
   create_particle_list(P);

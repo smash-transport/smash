@@ -1,16 +1,17 @@
 /*
- *    Copyright (c) 2016
+ *    Copyright (c) 2016-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  */
 
-#include "unittest.h"
+#include "unittest.h"  // This include has to be first
+
 #include "setup.h"
 
 #include "../include/decayactiondilepton.h"
 
-using namespace Smash;
+using namespace smash;
 
 TEST(init_particle_types) {
   // enable debugging output
@@ -49,12 +50,13 @@ TEST(pion_decay) {
   // Dalitz decay π⁰ -> e⁺ e⁻ γ
   DecayBranchList dil_modes = type_piz.get_partial_widths_dilepton(srts);
   COMPARE(dil_modes.size(), 1u);
-  const float piz_width = total_weight<DecayBranch>(type_piz.get_partial_widths(srts));
-  FUZZY_COMPARE(piz_width, 7.7e-9f);
+  const double piz_width =
+      total_weight<DecayBranch>(type_piz.get_partial_widths(srts));
+  FUZZY_COMPARE(piz_width, 7.7e-9);
   DecayBranchPtr &mode = dil_modes[0];
   // π⁰ decay action
-  const auto act = make_unique<DecayActionDilepton>(piz, 0.f,
-                                                    mode->weight()/piz_width);
+  const auto act =
+      make_unique<DecayActionDilepton>(piz, 0., mode->weight() / piz_width);
   act->add_decay(std::move(mode));
 
   // sample the final state and sum up all weights
@@ -70,26 +72,27 @@ TEST(pion_decay) {
   // the result for the π⁰ Dalitz will never match the BR exactly (even with
   // more event), because the analytic result of the formula that we use for the
   // differntial width (s. decaytype.cc) results in 4,7% overshoot of the BR
-  COMPARE_RELATIVE_ERROR(weight_sum / N_samples, 0.01174, 0.05f);
+  COMPARE_RELATIVE_ERROR(weight_sum / N_samples, 0.01174, 0.05);
 }
 
 TEST(eta_decay) {
   // set up a η at rest
   const ParticleType &type_etaz = ParticleType::find(0x221);
   ParticleData etaz{type_etaz};
-  etaz.set_4momentum(type_etaz.mass(),           // pole mass
-                    ThreeVector(0., 0., 0.));    // at rest
+  etaz.set_4momentum(type_etaz.mass(),          // pole mass
+                     ThreeVector(0., 0., 0.));  // at rest
   const auto srts = etaz.effective_mass();
 
   // Dalitz decay η -> e⁺ e⁻ γ
   DecayBranchList dil_modes = type_etaz.get_partial_widths_dilepton(srts);
   COMPARE(dil_modes.size(), 1u);
-  const float etaz_width = total_weight<DecayBranch>(type_etaz.get_partial_widths(srts));
-  FUZZY_COMPARE(etaz_width, 1.31e-6f);
+  const double etaz_width =
+      total_weight<DecayBranch>(type_etaz.get_partial_widths(srts));
+  FUZZY_COMPARE(etaz_width, 1.31e-6);
   DecayBranchPtr &mode = dil_modes[0];
   // π⁰ decay action
-  const auto act = make_unique<DecayActionDilepton>(etaz, 0.f,
-                                                    mode->weight()/etaz_width);
+  const auto act =
+      make_unique<DecayActionDilepton>(etaz, 0., mode->weight() / etaz_width);
   act->add_decay(std::move(mode));
 
   // sample the final state and sum up all weights
@@ -102,5 +105,5 @@ TEST(eta_decay) {
   }
   // verify that the shining weight for the η Dalitz decay is correct
   // (to an accuracy of five percent)
-  COMPARE_RELATIVE_ERROR(weight_sum / N_samples, 0.0069, 0.05f);
+  COMPARE_RELATIVE_ERROR(weight_sum / N_samples, 0.0069, 0.05);
 }

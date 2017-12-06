@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2012-2015
+ *    Copyright (c) 2012-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -24,7 +24,7 @@
 /* build dependent variables */
 #include "include/config.h"
 
-namespace Smash {
+namespace smash {
 
 namespace {
 /** prints usage information and exits the program
@@ -192,11 +192,11 @@ void ensure_path_is_valid(const bf::path &path) {
 
 }  // unnamed namespace
 
-}  // namespace Smash
+}  // namespace smash
 
 /* main - do command line parsing and hence decides modus */
 int main(int argc, char *argv[]) {
-  using namespace Smash;  // NOLINT(build/namespaces)
+  using namespace smash;  // NOLINT(build/namespaces)
   setup_default_float_traps();
 
   const auto &log = logger<LogArea::Main>();
@@ -319,7 +319,7 @@ int main(int argc, char *argv[]) {
     }
     if (list2n_activated) {
       // Do not make all elastic cross-sections a fixed number
-      constexpr float elastic_parameter = -1.0f;
+      constexpr double elastic_parameter = -1.;
       // Does not matter here, just dummy
       constexpr int ntest = 1;
       // Print only 2->n, n > 1. Do not dump decays, which can be found in
@@ -328,8 +328,8 @@ int main(int argc, char *argv[]) {
       ParticleType::create_type_list(configuration.take({"particles"}));
       DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
       std::vector<bool> nucleon_has_interacted = {};
-      auto scat_finder = make_unique<ScatterActionsFinder>(elastic_parameter,
-                                     ntest, nucleon_has_interacted, two_to_one);
+      auto scat_finder = make_unique<ScatterActionsFinder>(
+          elastic_parameter, ntest, nucleon_has_interacted, two_to_one);
       scat_finder->dump_reactions();
       std::exit(EXIT_SUCCESS);
     }
@@ -356,12 +356,12 @@ int main(int argc, char *argv[]) {
       for (unsigned int i = 0; i < 4 - n_arg; i++) {
         args.push_back("");
       }
-      float ma = (args[2] == "") ? a.mass() : std::stod(args[2]);
-      float mb = (args[3] == "") ? b.mass() : std::stod(args[3]);
+      double ma = (args[2] == "") ? a.mass() : std::stod(args[2]);
+      double mb = (args[3] == "") ? b.mass() : std::stod(args[3]);
       if (a.is_stable() && args[2] != "") {
         ma = a.mass();
         std::cout << "Warning: pole mass is used for stable particle "
-                  <<  a.name() << " instead of " << args[2] << std::endl;
+                  << a.name() << " instead of " << args[2] << std::endl;
       }
       if (b.is_stable() && args[3] != "") {
         mb = b.mass();
@@ -369,8 +369,8 @@ int main(int argc, char *argv[]) {
                   << b.name() << " instead of " << args[3] << std::endl;
       }
       std::vector<bool> nucleon_has_interacted = {};
-      auto scat_finder = make_unique<ScatterActionsFinder>(-1.f, 1,
-                                               nucleon_has_interacted, true);
+      auto scat_finder = make_unique<ScatterActionsFinder>(
+          -1., 1, nucleon_has_interacted, true);
       scat_finder->dump_cross_sections(a, b, ma, mb);
       std::exit(EXIT_SUCCESS);
     }
@@ -413,8 +413,8 @@ int main(int argc, char *argv[]) {
     }
 
     // keep a copy of the configuration that was used in the output directory
-    bf::ofstream(output_path / "config.yaml") << configuration.to_string()
-                                              << '\n';
+    bf::ofstream(output_path / "config.yaml")
+        << configuration.to_string() << '\n';
 
     // take the seed setting only after the configuration was stored to file
     seed = configuration.take({"General", "Randomseed"});

@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -11,7 +11,7 @@
 
 #include "include/iomanipulators.h"
 
-namespace Smash {
+namespace smash {
 
 std::ostream &operator<<(std::ostream &out, const ThreeVector &v) {
   out.put('(');
@@ -22,4 +22,4 @@ std::ostream &operator<<(std::ostream &out, const ThreeVector &v) {
   return out << ')';
 }
 
-}  // namespace Smash
+}  // namespace smash

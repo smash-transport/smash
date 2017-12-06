@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -17,7 +17,7 @@
 
 #include "include/logging.h"
 
-namespace Smash {
+namespace smash {
 
 #if !defined _GNU_SOURCE && defined __SSE__
 bool enable_float_traps(int femask) {
@@ -44,7 +44,7 @@ bool enable_float_traps(int femask) {
   fpucw &= ~femask;
 
   // load the FPU control word back
-  asm volatile("fldcw %0" :: "m"(fpucw));
+  asm volatile("fldcw %0" ::"m"(fpucw));
 #endif
 
   // the SSE CSR has the bit positions 7 bit positions further to the left
@@ -94,7 +94,7 @@ void setup_default_float_traps() {
     // operation". This is common and not really an error condition.
   }
 
-  // Install the signal handler if we have the functionality.
+// Install the signal handler if we have the functionality.
 #if (defined _POSIX_C_SOURCE && _POSIX_C_SOURCE >= 199309L) || \
     (defined _XOPEN_SOURCE && _XOPEN_SOURCE) ||                \
     (defined _POSIX_SOURCE && _POSIX_SOURCE)
@@ -141,4 +141,4 @@ void setup_default_float_traps() {
 #endif
 }
 
-}  // namespace Smash
+}  // namespace smash

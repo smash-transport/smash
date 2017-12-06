@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -14,13 +14,11 @@
 #include "include/configuration.h"
 #include "include/stringfunctions.h"
 
-namespace Smash {
+namespace smash {
 
 static einhard::LogLevel global_default_loglevel = einhard::ALL;
 
-einhard::LogLevel default_loglevel() {
-  return global_default_loglevel;
-}
+einhard::LogLevel default_loglevel() { return global_default_loglevel; }
 
 void set_default_loglevel(einhard::LogLevel level) {
   global_default_loglevel = level;
@@ -40,8 +38,8 @@ einhard::Logger<> &retrieve_logger_impl(int id) {
 template <int index, int stop = 0>
 constexpr typename std::enable_if<(index == stop), int>::type
 find_longest_logger_name() {
-  using LogAreaTag = typename std::remove_reference<
-      decltype(std::get<index>(std::declval<LogArea::AreaTuple &>()))>::type;
+  using LogAreaTag = typename std::remove_reference<decltype(
+      std::get<index>(std::declval<LogArea::AreaTuple &>()))>::type;
   return LogAreaTag::textual_length();
 }
 template <int index, int stop = 0, int mid = (index + stop) / 2>
@@ -87,4 +85,4 @@ void create_all_loggers(Configuration config) {
   create_all_loggers_impl<std::tuple_size<LogArea::AreaTuple>::value>(config);
 }
 
-}  // namespace Smash
+}  // namespace smash

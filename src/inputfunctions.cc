@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -15,7 +15,7 @@
 #include "include/logging.h"
 #include "include/stringfunctions.h"
 
-namespace Smash {
+namespace smash {
 
 std::vector<Line> line_parser(const std::string &input) {
   const auto &log = logger<LogArea::InputParser>();
@@ -44,4 +44,4 @@ std::vector<Line> line_parser(const std::string &input) {
   return lines;
 }
 
-}  // namespace Smash
+}  // namespace smash

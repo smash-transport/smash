@@ -1,26 +1,29 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include "unittest.h"
+#include "unittest.h"  // This include has to be first
+
 #include "../include/fpenvironment.h"
 
-#include <stdexcept>
-#include <csignal>
 #include <csetjmp>
+#include <csignal>
+#include <stdexcept>
 
-float blackhole = 0.f;
-float divisor = 0.f;
+double blackhole = 0.;
+double divisor = 0.;
 
 std::jmp_buf jump_buffer;
 
 struct fpe_exception : public std::exception {
-  const char *what() const noexcept override { return "Floating Point Exception"; }
+  const char *what() const noexcept override {
+    return "Floating Point Exception";
+  }
 };
 
 static void handle_fpe(int s) {
@@ -29,7 +32,7 @@ static void handle_fpe(int s) {
   }
 }
 
-static void do_division(float x) {
+static void do_division(double x) {
   if (setjmp(jump_buffer) == 0) {
     // normally goes here
     blackhole = x / divisor;
@@ -47,18 +50,18 @@ TEST(enable_float_traps) {
   std::signal(SIGFPE, &handle_fpe);
 
   VERIFY(!std::fetestexcept(FE_DIVBYZERO));  // flag not set yet
-  Smash::enable_float_traps(FE_DIVBYZERO);   // now it must trap
+  smash::enable_float_traps(FE_DIVBYZERO);   // now it must trap
   VERIFY(!std::fetestexcept(FE_DIVBYZERO));  // flag not set yet
 
   bool got_exception = false;
   try {
-    do_division(3.f);  // traps must be enabled now
+    do_division(3.);  // traps must be enabled now
     FAIL() << "may never be reached";
   } catch (fpe_exception &) {  // the signal handler produces an exception via
                                // longjmp
     got_exception = true;
   }
   VERIFY(!std::fetestexcept(
-             FE_DIVBYZERO));  // flag must not be set because it trapped
+      FE_DIVBYZERO));  // flag must not be set because it trapped
   VERIFY(got_exception);
 }

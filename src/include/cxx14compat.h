@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -13,7 +13,7 @@
 #include <memory>
 #include <utility>
 
-namespace Smash {
+namespace smash {
 
 /**
  * Will be in C++14's standard library
@@ -25,6 +25,6 @@ inline std::unique_ptr<T> make_unique(Args &&... args) {
   return std::unique_ptr<T>{new T{std::forward<Args>(args)...}};
 }
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_CXX14COMPAT_H_

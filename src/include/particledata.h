@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2012-2015
+ *    Copyright (c) 2012-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -15,8 +15,7 @@
 #include "pdgcode.h"
 #include "processbranch.h"
 
-namespace Smash {
-
+namespace smash {
 
 /* A structure to hold information about the history of the particle,
  * e.g. the last interaction etc. */
@@ -27,12 +26,16 @@ struct HistoryData {
   uint32_t id_process = 0;
   // type of the last action
   ProcessType process_type = ProcessType::None;
-  // time of the last action (excluding walls)
-  float time_of_origin = 0.0;
+  /**
+   * Time of the last action (excluding walls), time of kinetic freeze_out
+   * for HBT analysis this time should be larger or equal to the formation
+   * time of the particle, since only formed particles can freeze out
+   * The full coordinate space 4-vector can be obtained by back-propagation
+   */
+  double time_last_collision = 0.0;
   // PdgCodes of the parent particles
   PdgCode p1 = 0x0, p2 = 0x0;
 };
-
 
 /**
  * \ingroup data
@@ -69,10 +72,10 @@ class ParticleData {
   bool is_baryon() const { return pdgcode().is_baryon(); }
 
   /** Returns the particle's pole mass ("on-shell"). */
-  float pole_mass() const { return type_->mass(); }
+  double pole_mass() const { return type_->mass(); }
   /** Returns the particle's effective mass
    * (as determined from the 4-momentum, possibly "off-shell"). */
-  float effective_mass() const;
+  double effective_mass() const;
   /**
    * Return the ParticleType object associated to this particle.
    */
@@ -84,8 +87,8 @@ class ParticleData {
   HistoryData get_history() const { return history_; }
   /** Store history information, i.e. the type of process and possibly the
    * PdgCodes of the parent particles (\p plist). */
-  void set_history(int ncoll, uint32_t pid, ProcessType pt, float time_of_or,
-                   const ParticleList& plist);
+  void set_history(int ncoll, uint32_t pid, ProcessType pt, double time_of_or,
+                   const ParticleList &plist);
 
   /// return the particle's 4-momentum
   const FourVector &momentum() const { return momentum_; }
@@ -155,17 +158,16 @@ class ParticleData {
   }
 
   /// Return cross section scaling factor
-  const float &cross_section_scaling_factor() const {
+  const double &cross_section_scaling_factor() const {
     return cross_section_scaling_factor_;
   }
   /// Set the cross_section_scaling_factor
-  void set_cross_section_scaling_factor(const float &xsec_scal) {
+  void set_cross_section_scaling_factor(const double &xsec_scal) {
     cross_section_scaling_factor_ = xsec_scal;
   }
 
   /// get the velocity 3-vector
   ThreeVector velocity() const { return momentum_.velocity(); }
-
 
   /**
    * Returns the inverse of the gamma factor from the current velocity of the
@@ -182,7 +184,7 @@ class ParticleData {
    * zero and thus exhibits catastrophic cancellation.
    */
   double inverse_gamma() const {
-    return std::sqrt(1. - momentum_.sqr3() / (momentum_.x0()*momentum_.x0()));
+    return std::sqrt(1. - momentum_.sqr3() / (momentum_.x0() * momentum_.x0()));
   }
 
   /// Apply a full Lorentz boost of momentum and position
@@ -280,7 +282,7 @@ class ParticleData {
    */
   double formation_time_ = 0.0;
   /// cross section scaling factor for unformed particles
-  float cross_section_scaling_factor_ = 1.0;
+  double cross_section_scaling_factor_ = 1.0;
   // history information
   HistoryData history_;
 };
@@ -312,12 +314,13 @@ inline PrintParticleListDetailed detailed(const ParticleList &list) {
 }
 
 /** \ingroup logging
- * Writes a detailed overview over the particles in the \p particle_list argument
+ * Writes a detailed overview over the particles in the \p particle_list
+ * argument
  * to the stream. This overload is selected via the function \ref detailed.
  */
 std::ostream &operator<<(std::ostream &out,
                          const PrintParticleListDetailed &particle_list);
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_PARTICLEDATA_H_

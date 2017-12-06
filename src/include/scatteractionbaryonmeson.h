@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -12,8 +12,7 @@
 
 #include "scatteraction.h"
 
-namespace Smash {
-
+namespace smash {
 
 /**
  * \ingroup action
@@ -26,7 +25,8 @@ class ScatterActionBaryonMeson : public ScatterAction {
   using ScatterAction::ScatterAction;
   /** Determine the parametrized total cross section at high energies
    * for a baryon-meson collision. */
-  float high_energy_cross_section() const override;
+  double high_energy_cross_section() const override;
+
  protected:
   /**
    * \ingroup logging
@@ -35,7 +35,6 @@ class ScatterActionBaryonMeson : public ScatterAction {
   void format_debug_output(std::ostream &out) const override;
 };
 
-
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_SCATTERACTIONBARYONMESON_H_

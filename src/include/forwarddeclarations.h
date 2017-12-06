@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -45,7 +45,7 @@ class path;
 }  // namespace filesystem
 }  // namespace boost
 
-namespace Smash {
+namespace smash {
 
 template <typename T>
 using build_unique_ptr_ = std::unique_ptr<T, std::default_delete<T>>;
@@ -77,9 +77,9 @@ class ExperimentBase;
 struct ExperimentParameters;
 
 enum class CalculationFrame {
-    CenterOfVelocity,
-    CenterOfMass,
-    FixedTarget,
+  CenterOfVelocity,
+  CenterOfMass,
+  FixedTarget,
 };
 
 /// Option to use Fermi Motion
@@ -128,6 +128,40 @@ enum class BoxInitialCondition {
   PeakedMomenta,
 };
 
+/** Initial condition for a particle in a sphere
+ *
+ * IC_ES, IC_1M and IC_2M are off-equilibrium distributions used in massless
+ * comparisons of SMASH to the extended universe metric. They are described in
+ * some detail in iref \iref{Bazow:2016oky}
+ *
+ * IC_Massive is a generalization of IC_ES for the non-zero mass case; note that
+ * there is currently no analytical comparison possible with this distribution.
+ *
+ * The default value, ThermalMomenta, samples momenta from a Maxwell-Boltzmann
+ * distribution and thus generates a thermal ensemble.
+ */
+enum class SphereInitialCondition {
+  ThermalMomenta,
+  IC_ES,
+  IC_1M,
+  IC_2M,
+  IC_Massive,
+};
+
+/** Defines properties of expansion for the metric (e.g. FRW)
+ *
+ *  If anything else than NoExpansion is used, then a non-zero
+ *  Hubble parameter is computed and corrections are brought to the
+ *  propagation of all particles according to selected expanding
+ *  metric.
+ */
+enum class ExpansionMode {
+  NoExpansion,
+  MasslessFRW,
+  MassiveFRW,
+  Exponential,
+};
+
 enum class NNbarTreatment {
   NoAnnihilation,
   Resonances,
@@ -157,8 +191,6 @@ enum class ThermalizationAlgorithm {
   UnbiasedBF,
 };
 
-
-
 using ActionPtr = build_unique_ptr_<Action>;
 using ScatterActionPtr = build_unique_ptr_<ScatterAction>;
 using ActionList = build_vector_<ActionPtr>;
@@ -171,9 +203,9 @@ using ParticleTypeList = build_vector_<ParticleType>;
 using ParticleTypePtrList = build_vector_<ParticleTypePtr>;
 using IsoParticleTypeList = build_vector_<IsoParticleType>;
 
-template<typename T>
+template <typename T>
 using ProcessBranchPtr = build_unique_ptr_<T>;
-template<typename T>
+template <typename T>
 using ProcessBranchList = build_vector_<ProcessBranchPtr<T>>;
 using DecayBranchPtr = build_unique_ptr_<DecayBranch>;
 using DecayBranchList = build_vector_<DecayBranchPtr>;
@@ -186,8 +218,7 @@ using DecayTypePtr = build_unique_ptr_<DecayType>;
 
 namespace bf = boost::filesystem;
 
-
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // DOXYGEN
 #endif  // SRC_INCLUDE_FORWARDDECLARATIONS_H_

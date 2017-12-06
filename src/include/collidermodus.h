@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2014-2015
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -19,7 +19,7 @@
 #include "nucleus.h"
 #include "pdgcode.h"
 
-namespace Smash {
+namespace smash {
 
 struct ExperimentParameters;
 
@@ -53,11 +53,10 @@ class ColliderModus : public ModusDefault {
    *
    * In particular, it initializes the nuclei.
    */
-  float initial_conditions(Particles *particles,
-                           const ExperimentParameters &parameters);
+  double initial_conditions(Particles *particles,
+                            const ExperimentParameters &parameters);
   /// return the total test particle number of the initial nucleus
-  int total_N_number() const { return target_->size()
-                                    + projectile_->size(); }
+  int total_N_number() const { return target_->size() + projectile_->size(); }
   /// return the test particle number in the projectile nucleus
   int proj_N_number() const { return projectile_->size(); }
   /** return the beam velocity of the projectile, which will be
@@ -78,6 +77,8 @@ class ColliderModus : public ModusDefault {
   FermiMotion fermi_motion() { return fermi_motion_; }
   /// return whether the modus is collider modus
   bool is_collider() const { return true; }
+  /// return impact parameter of the collision
+  double impact_parameter() const { return impact_; }
   /// \ingroup exception
   /// Thrown when either \a projectile_ or \a target_ nuclei are empty.
   struct ColliderEmpty : public ModusDefault::BadInput {
@@ -114,17 +115,18 @@ class ColliderModus : public ModusDefault {
    * so that their centers move on antiparallel lines that are this
    * distance apart from each other.
    **/
-  float impact_ = 0.f;
+  double impact_ = 0.;
   /// Method used for sampling of impact parameter.
   Sampling sampling_ = Sampling::Quadratic;
   /// Minimum value of impact parameter.
-  float imp_min_ = 0.0;
+  double imp_min_ = 0.0;
   /// Maximum value of impact parameter.
-  float imp_max_ = 0.0;
+  double imp_max_ = 0.0;
   /// Maximum value of yield. Needed for custom impact parameter sampling.
-  float yield_max_ = 0.0;
+  double yield_max_ = 0.0;
   /// Pointer to the impact parameter interpolation.
-  std::unique_ptr<InterpolateDataLinear<float>> impact_interpolation_ = nullptr;
+  std::unique_ptr<InterpolateDataLinear<double>> impact_interpolation_ =
+      nullptr;
   /** Sample impact parameter.
    *
    * Samples the impact parameter from values between imp_min_ and imp_max_, if
@@ -142,7 +144,7 @@ class ColliderModus : public ModusDefault {
    * and target on +(this value)*v_target/v_projectile. In this way
    * projectile and target touch at t=0 in z=0.
    **/
-  float initial_z_displacement_ = 2.0;
+  double initial_z_displacement_ = 2.0;
   /**
    * Reference frame for the system.
    */
@@ -170,8 +172,6 @@ class ColliderModus : public ModusDefault {
    * @param m_a The mass of the projectile.
    * @param m_b The mass of the target.
    * @return < v_a, v_b > Velocities of the nuclei.
-   *
-   * \fpPrecision Why \c double?
    **/
   std::pair<double, double> get_velocities(double mandelstam_s, double m_a,
                                            double m_b);
@@ -182,6 +182,6 @@ class ColliderModus : public ModusDefault {
   friend std::ostream &operator<<(std::ostream &, const ColliderModus &);
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_COLLIDERMODUS_H_

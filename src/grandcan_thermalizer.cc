@@ -19,29 +19,24 @@
 #include "include/quantumnumbers.h"
 #include "include/random.h"
 
-namespace Smash {
+namespace smash {
 
-GrandCanThermalizer::GrandCanThermalizer(const std::array<float, 3> lat_sizes,
+GrandCanThermalizer::GrandCanThermalizer(const std::array<double, 3> lat_sizes,
                                          const std::array<int, 3> n_cells,
-                                         const std::array<float, 3> origin,
-                                         bool periodicity,
-                                         float e_critical,
-                                         float t_start,
-                                         float delta_t,
-                                         ThermalizationAlgorithm algo) :
-  eos_typelist_(list_eos_particles()),
-  N_sorts_(eos_typelist_.size()),
-  e_crit_(e_critical),
-  t_start_(t_start),
-  period_(delta_t),
-  algorithm_(algo) {
+                                         const std::array<double, 3> origin,
+                                         bool periodicity, double e_critical,
+                                         double t_start, double delta_t,
+                                         ThermalizationAlgorithm algo)
+    : eos_typelist_(list_eos_particles()),
+      N_sorts_(eos_typelist_.size()),
+      e_crit_(e_critical),
+      t_start_(t_start),
+      period_(delta_t),
+      algorithm_(algo) {
   const LatticeUpdate upd = LatticeUpdate::EveryFixedInterval;
-  lat_ = make_unique<RectangularLattice<ThermLatticeNode>>(lat_sizes,
-                                                           n_cells,
-                                                           origin,
-                                                           periodicity,
-                                                           upd);
-  const std::array<float, 3> abc = lat_->cell_sizes();
+  lat_ = make_unique<RectangularLattice<ThermLatticeNode>>(
+      lat_sizes, n_cells, origin, periodicity, upd);
+  const std::array<double, 3> abc = lat_->cell_sizes();
   cell_volume_ = abc[0] * abc[1] * abc[2];
   cells_to_sample_.resize(50000);
   mult_sort_.resize(N_sorts_);
@@ -49,29 +44,26 @@ GrandCanThermalizer::GrandCanThermalizer(const std::array<float, 3> lat_sizes,
 }
 
 ThreeVector GrandCanThermalizer::uniform_in_cell() const {
-  return ThreeVector(
-       Random::uniform(-0.5 * static_cast<double>(lat_->cell_sizes()[0]),
-                       +0.5 * static_cast<double>(lat_->cell_sizes()[0])),
-       Random::uniform(-0.5 * static_cast<double>(lat_->cell_sizes()[1]),
-                       +0.5 * static_cast<double>(lat_->cell_sizes()[1])),
-       Random::uniform(-0.5 * static_cast<double>(lat_->cell_sizes()[2]),
-                       +0.5 * static_cast<double>(lat_->cell_sizes()[2])));
+  return ThreeVector(Random::uniform(-0.5 * lat_->cell_sizes()[0],
+                                     +0.5 * lat_->cell_sizes()[0]),
+                     Random::uniform(-0.5 * lat_->cell_sizes()[1],
+                                     +0.5 * lat_->cell_sizes()[1]),
+                     Random::uniform(-0.5 * lat_->cell_sizes()[2],
+                                     +0.5 * lat_->cell_sizes()[2]));
 }
 
-
-
-void GrandCanThermalizer::sample_in_random_cell_BF_algo(
-                                           ParticleList& plist,
-                                           const double time,
-                                            size_t type_index) {
+void GrandCanThermalizer::sample_in_random_cell_BF_algo(ParticleList &plist,
+                                                        const double time,
+                                                        size_t type_index) {
   N_in_cells_.clear();
   N_total_in_cells_ = 0.0;
   for (auto cell_index : cells_to_sample_) {
     const ThermLatticeNode cell = (*lat_)[cell_index];
     const double gamma = 1.0 / std::sqrt(1.0 - cell.v().sqr());
-    const double N_this_cell = cell_volume_ * gamma *
-          HadronGasEos::partial_density(*eos_typelist_[type_index],
-                                        cell.T(), cell.mub(), cell.mus());
+    const double N_this_cell =
+        cell_volume_ * gamma *
+        HadronGasEos::partial_density(*eos_typelist_[type_index], cell.T(),
+                                      cell.mub(), cell.mus());
     N_in_cells_.push_back(N_this_cell);
     N_total_in_cells_ += N_this_cell;
   }
@@ -91,7 +83,7 @@ void GrandCanThermalizer::sample_in_random_cell_BF_algo(
 
     ParticleData particle(*eos_typelist_[type_index]);
     // Note: it's pole mass for resonances!
-    const double m = static_cast<double>(eos_typelist_[type_index]->mass());
+    const double m = eos_typelist_[type_index]->mass();
     // Position
     particle.set_4position(FourVector(time, cell_center + uniform_in_cell()));
     // Momentum
@@ -105,8 +97,8 @@ void GrandCanThermalizer::sample_in_random_cell_BF_algo(
   }
 }
 
-void GrandCanThermalizer::update_lattice(const Particles& particles,
-                                         const DensityParameters& dens_par,
+void GrandCanThermalizer::update_lattice(const Particles &particles,
+                                         const DensityParameters &dens_par,
                                          bool ignore_cells_under_treshold) {
   const DensityType dens_type = DensityType::Hadron;
   const LatticeUpdate update = LatticeUpdate::EveryFixedInterval;
@@ -116,10 +108,9 @@ void GrandCanThermalizer::update_lattice(const Particles& particles,
        no need to find T, mu, etc. So if e = T00 - T0i*vi <=
        T00 + sum abs(T0i) < e_crit, no efforts are necessary. */
     if (!ignore_cells_under_treshold ||
-        node.Tmu0().x0() +
-        std::abs(node.Tmu0().x1()) +
-        std::abs(node.Tmu0().x2()) +
-        std::abs(node.Tmu0().x3()) >= e_crit_) {
+        node.Tmu0().x0() + std::abs(node.Tmu0().x1()) +
+                std::abs(node.Tmu0().x2()) + std::abs(node.Tmu0().x3()) >=
+            e_crit_) {
       node.compute_rest_frame_quantities(eos_);
     } else {
       node = ThermLatticeNode();
@@ -134,7 +125,7 @@ void GrandCanThermalizer::sample_multinomial(HadronClass particle_class,
     if (get_class(i_type) != particle_class) {
       continue;
     }
-    const double p = mult_sort_[i_type]/sum;
+    const double p = mult_sort_[i_type] / sum;
     mult_int_[i_type] = Random::binomial(N_to_sample, p);
     /*std::cout << eos_typelist_[i_type]->name() <<
              ": mult_sort = " << mult_sort_[i_type] <<
@@ -147,34 +138,34 @@ void GrandCanThermalizer::sample_multinomial(HadronClass particle_class,
   }
 }
 
-void GrandCanThermalizer::thermalize(Particles& particles,
-                                     double time, int ntest) {
+void GrandCanThermalizer::thermalize(const Particles &particles, double time,
+                                     int ntest) {
   const auto &log = logger<LogArea::GrandcanThermalizer>();
   log.info("Starting forced thermalization, time ", time, " fm/c");
+  to_remove_.clear();
+  sampled_list_.clear();
   // Remove particles from the cells with e > e_crit_,
   // sum up their conserved quantities
   QuantumNumbers conserved_initial = QuantumNumbers();
   ThermLatticeNode node;
-  ParticleList to_remove;
   for (auto &particle : particles) {
-    const bool is_on_lattice = lat_->value_at(particle.position().threevec(),
-                                              node);
+    const bool is_on_lattice =
+        lat_->value_at(particle.position().threevec(), node);
     if (is_on_lattice && node.e() > e_crit_) {
-      to_remove.push_back(particle);
+      to_remove_.push_back(particle);
     }
   }
   // Do not thermalize too small number of particles: for the number
   // of particles < 30 the algorithm tends to hang or crash too often.
-  if (to_remove.size() > 30) {
-    for (auto &particle : to_remove) {
+  if (to_remove_.size() > 30) {
+    for (auto &particle : to_remove_) {
       conserved_initial.add_values(particle);
-      particles.remove(particle);
     }
   } else {
-    to_remove.clear();
+    to_remove_.clear();
     conserved_initial = QuantumNumbers();
   }
-  log.info("Removed ", to_remove.size(), " particles.");
+  log.info("Removed ", to_remove_.size(), " particles.");
 
   // Exit if there is nothing to thermalize
   if (conserved_initial == QuantumNumbers()) {
@@ -190,36 +181,30 @@ void GrandCanThermalizer::thermalize(Particles& particles,
   }
   log.info("Number of cells in the thermalization region = ",
            cells_to_sample_.size(), ", its total volume [fm^3]: ",
-           cells_to_sample_.size()*cell_volume_, ", in % of lattice: ",
-           100.0*cells_to_sample_.size()/lattice_total_cells);
+           cells_to_sample_.size() * cell_volume_, ", in % of lattice: ",
+           100.0 * cells_to_sample_.size() / lattice_total_cells);
 
-  ParticleList sampled_list;
   switch (algorithm_) {
     case ThermalizationAlgorithm::BiasedBF:
     case ThermalizationAlgorithm::UnbiasedBF:
-      thermalize_BF_algo(sampled_list, conserved_initial, time, ntest);
+      thermalize_BF_algo(conserved_initial, time, ntest);
       break;
     case ThermalizationAlgorithm::ModeSampling:
-      thermalize_mode_algo(sampled_list, conserved_initial, time);
+      thermalize_mode_algo(conserved_initial, time);
       break;
     default:
-      throw std::invalid_argument("This thermalization algorithm is"
-                                  " not yet implemented");
+      throw std::invalid_argument(
+          "This thermalization algorithm is"
+          " not yet implemented");
   }
-  log.info("Sampled ", sampled_list.size(), " particles.");
+  log.info("Sampled ", sampled_list_.size(), " particles.");
 
   // Adjust momenta
-  renormalize_momenta(sampled_list, conserved_initial.momentum());
-
-  for (auto &particle : sampled_list) {
-    particles.insert(particle);
-  }
+  renormalize_momenta(sampled_list_, conserved_initial.momentum());
 }
 
-void GrandCanThermalizer::thermalize_BF_algo(
-                            ParticleList& sampled_list,
-                            QuantumNumbers& conserved_initial,
-                            double time, int ntest) {
+void GrandCanThermalizer::thermalize_BF_algo(QuantumNumbers &conserved_initial,
+                                             double time, int ntest) {
   const auto &log = logger<LogArea::GrandcanThermalizer>();
 
   std::fill(mult_sort_.begin(), mult_sort_.end(), 0.0);
@@ -229,8 +214,8 @@ void GrandCanThermalizer::thermalize_BF_algo(
     for (size_t i = 0; i < N_sorts_; i++) {
       // N_i = n u^mu dsigma_mu = (isochronous hypersurface) n * V * gamma
       mult_sort_[i] += cell_volume_ * gamma * ntest *
-                  HadronGasEos::partial_density(*eos_typelist_[i],
-                                             cell.T(), cell.mub(), cell.mus());
+                       HadronGasEos::partial_density(
+                           *eos_typelist_[i], cell.T(), cell.mub(), cell.mus());
     }
   }
 
@@ -244,7 +229,7 @@ void GrandCanThermalizer::thermalize_BF_algo(
                                  conserved_initial.baryon_number());
 
   while (true) {
-    sampled_list.clear();
+    sampled_list_.clear();
     std::fill(mult_int_.begin(), mult_int_.end(), 0);
     const auto Nbar_antibar = bessel_sampler_B.sample();
 
@@ -260,14 +245,14 @@ void GrandCanThermalizer::thermalize_BF_algo(
     std::pair<int, int> NS_antiS;
     if (algorithm_ == ThermalizationAlgorithm::BiasedBF) {
       BesselSampler bessel_sampler_S(
-                             mult_class(HadronClass::PositiveSMeson),
-                             mult_class(HadronClass::NegativeSMeson),
-                             conserved_initial.strangeness() - S_sampled);
+          mult_class(HadronClass::PositiveSMeson),
+          mult_class(HadronClass::NegativeSMeson),
+          conserved_initial.strangeness() - S_sampled);
       NS_antiS = bessel_sampler_S.sample();
     } else if (algorithm_ == ThermalizationAlgorithm::UnbiasedBF) {
       NS_antiS = std::make_pair(
-        Random::poisson(mult_class(HadronClass::PositiveSMeson)),
-        Random::poisson(mult_class(HadronClass::NegativeSMeson)));
+          Random::poisson(mult_class(HadronClass::PositiveSMeson)),
+          Random::poisson(mult_class(HadronClass::NegativeSMeson)));
       if (NS_antiS.first - NS_antiS.second !=
           conserved_initial.strangeness() - S_sampled) {
         continue;
@@ -285,14 +270,14 @@ void GrandCanThermalizer::thermalize_BF_algo(
     std::pair<int, int> NC_antiC;
     if (algorithm_ == ThermalizationAlgorithm::BiasedBF) {
       BesselSampler bessel_sampler_C(
-        mult_class(HadronClass::PositiveQZeroSMeson),
-        mult_class(HadronClass::NegativeQZeroSMeson),
-        conserved_initial.charge() - ch_sampled);
+          mult_class(HadronClass::PositiveQZeroSMeson),
+          mult_class(HadronClass::NegativeQZeroSMeson),
+          conserved_initial.charge() - ch_sampled);
       NC_antiC = bessel_sampler_C.sample();
     } else if (algorithm_ == ThermalizationAlgorithm::UnbiasedBF) {
       NC_antiC = std::make_pair(
-        Random::poisson(mult_class(HadronClass::PositiveQZeroSMeson)),
-        Random::poisson(mult_class(HadronClass::NegativeQZeroSMeson)));
+          Random::poisson(mult_class(HadronClass::PositiveQZeroSMeson)),
+          Random::poisson(mult_class(HadronClass::NegativeQZeroSMeson)));
       if (NC_antiC.first - NC_antiC.second !=
           conserved_initial.charge() - ch_sampled) {
         continue;
@@ -301,19 +286,20 @@ void GrandCanThermalizer::thermalize_BF_algo(
 
     sample_multinomial(HadronClass::PositiveQZeroSMeson, NC_antiC.first);
     sample_multinomial(HadronClass::NegativeQZeroSMeson, NC_antiC.second);
-    sample_multinomial(HadronClass::ZeroQZeroSMeson,
-      Random::poisson(mult_class(HadronClass::ZeroQZeroSMeson)));
+    sample_multinomial(
+        HadronClass::ZeroQZeroSMeson,
+        Random::poisson(mult_class(HadronClass::ZeroQZeroSMeson)));
 
     for (size_t itype = 0; itype < N_sorts_; itype++) {
-      sample_in_random_cell_BF_algo(sampled_list, time, itype);
+      sample_in_random_cell_BF_algo(sampled_list_, time, itype);
     }
     double e_tot;
     const double e_init = conserved_initial.momentum().x0();
     e_tot = 0.0;
-    for (auto &particle : sampled_list) {
+    for (auto &particle : sampled_list_) {
       e_tot += particle.momentum().x0();
     }
-    if (std::abs(e_tot - e_init) > 0.01*e_init) {
+    if (std::abs(e_tot - e_init) > 0.01 * e_init) {
       log.debug("Rejecting: energy ", e_tot, " too far from e_init = ", e_init);
       continue;
     }
@@ -321,17 +307,17 @@ void GrandCanThermalizer::thermalize_BF_algo(
   }
 }
 
-void GrandCanThermalizer::renormalize_momenta(ParticleList& plist,
-                          const FourVector required_total_momentum) {
+void GrandCanThermalizer::renormalize_momenta(
+    ParticleList &plist, const FourVector required_total_momentum) {
   const auto &log = logger<LogArea::GrandcanThermalizer>();
 
   // Centralize momenta
   QuantumNumbers conserved = QuantumNumbers(plist);
   log.info("Required 4-momentum: ", required_total_momentum);
   log.info("Sampled 4-momentum: ", conserved.momentum());
-  const ThreeVector mom_to_add = (required_total_momentum.threevec()
-                                  - conserved.momentum().threevec())
-                                 / plist.size();
+  const ThreeVector mom_to_add =
+      (required_total_momentum.threevec() - conserved.momentum().threevec()) /
+      plist.size();
   log.info("Adjusting momenta by ", mom_to_add);
   for (auto &particle : plist) {
     particle.set_4momentum(particle.type().mass(),
@@ -341,7 +327,7 @@ void GrandCanThermalizer::renormalize_momenta(ParticleList& plist,
   // Boost every particle to the common center of mass frame
   conserved = QuantumNumbers(plist);
   const ThreeVector beta_CM_generated = conserved.momentum().velocity();
-  const ThreeVector beta_CM_required  = required_total_momentum.velocity();
+  const ThreeVector beta_CM_required = required_total_momentum.velocity();
 
   double E = 0.0;
   double E_expected = required_total_momentum.abs();
@@ -367,7 +353,7 @@ void GrandCanThermalizer::renormalize_momenta(ParticleList& plist,
     for (const auto &particle : plist) {
       const double p2 = particle.momentum().threevec().sqr();
       const double E2 = particle.momentum().x0() * particle.momentum().x0();
-      E += std::sqrt(E2 + a*(a + 2.0) * p2);
+      E += std::sqrt(E2 + a * (a + 2.0) * p2);
     }
     er = E - E_expected;
     if (er >= 0.0) {
@@ -382,49 +368,45 @@ void GrandCanThermalizer::renormalize_momenta(ParticleList& plist,
   log.info("Renormalizing momenta by factor 1+a, a = ", a);
   for (auto &particle : plist) {
     particle.set_4momentum(particle.type().mass(),
-                           (1+a)*particle.momentum().threevec());
+                           (1 + a) * particle.momentum().threevec());
     particle.boost_momentum(-beta_CM_required);
   }
 }
 
 void GrandCanThermalizer::thermalize_mode_algo(
-                             ParticleList& sampled_list,
-                             QuantumNumbers& conserved_initial,
-                             double time) {
+    QuantumNumbers &conserved_initial, double time) {
   double energy = 0.0;
-  int S_plus = 0, S_minus = 0,
-      B_plus = 0, B_minus = 0,
-      E_plus = 0, E_minus = 0;
+  int S_plus = 0, S_minus = 0, B_plus = 0, B_minus = 0, E_plus = 0, E_minus = 0;
   // Mode 1: sample until energy is conserved, take only strangeness < 0
-  auto condition1 = [] (int, int, int) { return true; };
+  auto condition1 = [](int, int, int) { return true; };
   compute_N_in_cells_mode_algo(condition1);
   while (conserved_initial.momentum().x0() > energy ||
          S_plus < conserved_initial.strangeness()) {
     ParticleData p = sample_in_random_cell_mode_algo(time, condition1);
     energy += p.momentum().x0();
     if (p.pdgcode().strangeness() > 0) {
-      sampled_list.push_back(p);
+      sampled_list_.push_back(p);
       S_plus += p.pdgcode().strangeness();
     }
   }
 
   // Mode 2: sample until strangeness is conserved
-  auto condition2 = [] (int S, int, int) { return (S < 0); };
+  auto condition2 = [](int S, int, int) { return (S < 0); };
   compute_N_in_cells_mode_algo(condition2);
   while (S_plus + S_minus > conserved_initial.strangeness()) {
     ParticleData p = sample_in_random_cell_mode_algo(time, condition2);
     const int s_part = p.pdgcode().strangeness();
     // Do not allow particles with S = -2 or -3 spoil the total sum
     if (S_plus + S_minus + s_part >= conserved_initial.strangeness()) {
-      sampled_list.push_back(p);
+      sampled_list_.push_back(p);
       S_minus += s_part;
     }
   }
 
   // Mode 3: sample non-strange baryons
-  auto condition3 = [] (int S, int, int) { return (S == 0); };
+  auto condition3 = [](int S, int, int) { return (S == 0); };
   QuantumNumbers conserved_remaining =
-                   conserved_initial - QuantumNumbers(sampled_list);
+      conserved_initial - QuantumNumbers(sampled_list_);
   energy = 0.0;
   compute_N_in_cells_mode_algo(condition3);
   while (conserved_remaining.momentum().x0() > energy ||
@@ -432,26 +414,26 @@ void GrandCanThermalizer::thermalize_mode_algo(
     ParticleData p = sample_in_random_cell_mode_algo(time, condition3);
     energy += p.momentum().x0();
     if (p.pdgcode().baryon_number() > 0) {
-      sampled_list.push_back(p);
+      sampled_list_.push_back(p);
       B_plus += p.pdgcode().baryon_number();
     }
   }
 
   // Mode 4: sample non-strange anti-baryons
-  auto condition4 = [] (int S, int B, int) { return (S == 0) && (B < 0); };
+  auto condition4 = [](int S, int B, int) { return (S == 0) && (B < 0); };
   compute_N_in_cells_mode_algo(condition4);
   while (B_plus + B_minus > conserved_remaining.baryon_number()) {
     ParticleData p = sample_in_random_cell_mode_algo(time, condition4);
     const int bar = p.pdgcode().baryon_number();
     if (B_plus + B_minus + bar >= conserved_remaining.baryon_number()) {
-      sampled_list.push_back(p);
+      sampled_list_.push_back(p);
       B_minus += bar;
     }
   }
 
   // Mode 5: sample non_strange mesons, but take only with charge > 0
-  auto condition5 = [] (int S, int B, int) { return (S == 0) && (B == 0); };
-  conserved_remaining = conserved_initial - QuantumNumbers(sampled_list);
+  auto condition5 = [](int S, int B, int) { return (S == 0) && (B == 0); };
+  conserved_remaining = conserved_initial - QuantumNumbers(sampled_list_);
   energy = 0.0;
   compute_N_in_cells_mode_algo(condition5);
   while (conserved_remaining.momentum().x0() > energy ||
@@ -459,13 +441,13 @@ void GrandCanThermalizer::thermalize_mode_algo(
     ParticleData p = sample_in_random_cell_mode_algo(time, condition5);
     energy += p.momentum().x0();
     if (p.pdgcode().charge() > 0) {
-      sampled_list.push_back(p);
+      sampled_list_.push_back(p);
       E_plus += p.pdgcode().charge();
     }
   }
 
   // Mode 6: sample non_strange mesons to conserve charge
-  auto condition6 = [] (int S, int B, int C) {
+  auto condition6 = [](int S, int B, int C) {
     return (S == 0) && (B == 0) && (C < 0);
   };
   compute_N_in_cells_mode_algo(condition6);
@@ -473,27 +455,26 @@ void GrandCanThermalizer::thermalize_mode_algo(
     ParticleData p = sample_in_random_cell_mode_algo(time, condition6);
     const int charge = p.pdgcode().charge();
     if (E_plus + E_minus + charge >= conserved_remaining.charge()) {
-      sampled_list.push_back(p);
+      sampled_list_.push_back(p);
       E_minus += charge;
     }
   }
 
   // Mode 7: sample neutral non-strange mesons to conserve energy
-  auto condition7 = [] (int S, int B, int C) {
+  auto condition7 = [](int S, int B, int C) {
     return (S == 0) && (B == 0) && (C == 0);
   };
-  conserved_remaining = conserved_initial - QuantumNumbers(sampled_list);
+  conserved_remaining = conserved_initial - QuantumNumbers(sampled_list_);
   energy = 0.0;
   compute_N_in_cells_mode_algo(condition7);
   while (conserved_remaining.momentum().x0() > energy) {
     ParticleData p = sample_in_random_cell_mode_algo(time, condition7);
-    sampled_list.push_back(p);
+    sampled_list_.push_back(p);
     energy += p.momentum().x0();
   }
 }
 
-
-void GrandCanThermalizer::print_statistics(const Clock& clock) const {
+void GrandCanThermalizer::print_statistics(const Clock &clock) const {
   struct to_average {
     double T;
     double mub;
@@ -507,70 +488,68 @@ void GrandCanThermalizer::print_statistics(const Clock& clock) const {
   int node_counter = 0;
   for (const auto &node : *lat_) {
     const double e = node.e();
-    on_lattice.T   += node.T()   * e;
+    on_lattice.T += node.T() * e;
     on_lattice.mub += node.mub() * e;
     on_lattice.mus += node.mus() * e;
-    on_lattice.nb  += node.nb()  * e;
-    on_lattice.ns  += node.ns()  * e;
+    on_lattice.nb += node.nb() * e;
+    on_lattice.ns += node.ns() * e;
     e_sum_on_lattice += e;
     if (e >= e_crit_) {
-      in_therm_reg.T   += node.T()   * e;
+      in_therm_reg.T += node.T() * e;
       in_therm_reg.mub += node.mub() * e;
       in_therm_reg.mus += node.mus() * e;
-      in_therm_reg.nb  += node.nb()  * e;
-      in_therm_reg.ns  += node.ns()  * e;
+      in_therm_reg.nb += node.nb() * e;
+      in_therm_reg.ns += node.ns() * e;
       e_sum_in_therm_reg += e;
       node_counter++;
     }
   }
   if (e_sum_on_lattice > really_small) {
-    on_lattice.T   /= e_sum_on_lattice;
+    on_lattice.T /= e_sum_on_lattice;
     on_lattice.mub /= e_sum_on_lattice;
     on_lattice.mus /= e_sum_on_lattice;
-    on_lattice.nb  /= e_sum_on_lattice;
-    on_lattice.ns  /= e_sum_on_lattice;
+    on_lattice.nb /= e_sum_on_lattice;
+    on_lattice.ns /= e_sum_on_lattice;
   }
   if (e_sum_in_therm_reg > really_small) {
-    in_therm_reg.T   /= e_sum_in_therm_reg;
+    in_therm_reg.T /= e_sum_in_therm_reg;
     in_therm_reg.mub /= e_sum_in_therm_reg;
     in_therm_reg.mus /= e_sum_in_therm_reg;
-    in_therm_reg.nb  /= e_sum_in_therm_reg;
-    in_therm_reg.ns  /= e_sum_in_therm_reg;
+    in_therm_reg.nb /= e_sum_in_therm_reg;
+    in_therm_reg.ns /= e_sum_in_therm_reg;
   }
 
   std::cout << "Current time [fm/c]: " << clock.current_time() << std::endl;
   std::cout << "Averages on the lattice - T[GeV], mub[GeV], mus[GeV], "
-            << "nb[fm^-3], ns[fm^-3]: "
-            << on_lattice.T << " " << on_lattice.mub << " " << on_lattice.mus
-            << " " << on_lattice.nb << " " << on_lattice.ns << std::endl;
+            << "nb[fm^-3], ns[fm^-3]: " << on_lattice.T << " " << on_lattice.mub
+            << " " << on_lattice.mus << " " << on_lattice.nb << " "
+            << on_lattice.ns << std::endl;
   std::cout << "Averages in therm. region - T[GeV], mub[GeV], mus[GeV], "
-            << "nb[fm^-3], ns[fm^-3]: "
-            << in_therm_reg.T << " " << in_therm_reg.mub << " "
-            << in_therm_reg.mus << " " << in_therm_reg.nb << " "
-            << in_therm_reg.ns << std::endl;
-  std::cout << "Volume with e > e_crit [fm^3]: "
-            << cell_volume_ * node_counter << std::endl;
+            << "nb[fm^-3], ns[fm^-3]: " << in_therm_reg.T << " "
+            << in_therm_reg.mub << " " << in_therm_reg.mus << " "
+            << in_therm_reg.nb << " " << in_therm_reg.ns << std::endl;
+  std::cout << "Volume with e > e_crit [fm^3]: " << cell_volume_ * node_counter
+            << std::endl;
 }
 
-ThermLatticeNode::ThermLatticeNode() :
-  Tmu0_(FourVector()),
-  nb_(0.0),
-  ns_(0.0),
-  e_(0.0),
-  p_(0.0),
-  v_(ThreeVector()),
-  T_(0.0),
-  mub_(0.0),
-  mus_(0.0) {}
+ThermLatticeNode::ThermLatticeNode()
+    : Tmu0_(FourVector()),
+      nb_(0.0),
+      ns_(0.0),
+      e_(0.0),
+      p_(0.0),
+      v_(ThreeVector()),
+      T_(0.0),
+      mub_(0.0),
+      mus_(0.0) {}
 
-void ThermLatticeNode::add_particle(const ParticleData& part, double factor) {
+void ThermLatticeNode::add_particle(const ParticleData &part, double factor) {
   Tmu0_ += part.momentum() * factor;
   nb_ += static_cast<double>(part.type().baryon_number()) * factor;
   ns_ += static_cast<double>(part.type().strangeness()) * factor;
 }
 
-void ThermLatticeNode::set_rest_frame_quantities(double T0,
-                                                 double mub0,
+void ThermLatticeNode::set_rest_frame_quantities(double T0, double mub0,
                                                  double mus0,
                                                  const ThreeVector v0) {
   T_ = T0;
@@ -583,7 +562,7 @@ void ThermLatticeNode::set_rest_frame_quantities(double T0,
   ns_ = HadronGasEos::net_strange_density(T_, mub_, mus_);
 }
 
-void ThermLatticeNode::compute_rest_frame_quantities(HadronGasEos& eos) {
+void ThermLatticeNode::compute_rest_frame_quantities(HadronGasEos &eos) {
   // ToDo(oliiny): use Newton's method instead of these iterations
   const int max_iter = 50;
   v_ = ThreeVector(0.0, 0.0, 0.0);
@@ -592,16 +571,16 @@ void ThermLatticeNode::compute_rest_frame_quantities(HadronGasEos& eos) {
   int iter;
   for (iter = 0; iter < max_iter; iter++) {
     e_previous_step = e_;
-    e_ = Tmu0_.x0() - Tmu0_.threevec()*v_;
+    e_ = Tmu0_.x0() - Tmu0_.threevec() * v_;
     if (std::abs(e_ - e_previous_step) < tolerance) {
       break;
     }
     const double gamma_inv = std::sqrt(1.0 - v_.sqr());
     EosTable::table_element tabulated;
-    eos.from_table(tabulated, e_, gamma_inv*nb_);
+    eos.from_table(tabulated, e_, gamma_inv * nb_);
     if (!eos.is_tabulated() || tabulated.p < 0.0) {
-      auto T_mub_mus = eos.solve_eos(e_, gamma_inv*nb_, gamma_inv*ns_);
-      T_   = T_mub_mus[0];
+      auto T_mub_mus = eos.solve_eos(e_, gamma_inv * nb_, gamma_inv * ns_);
+      T_ = T_mub_mus[0];
       mub_ = T_mub_mus[1];
       mus_ = T_mub_mus[2];
       p_ = HadronGasEos::pressure(T_, mub_, mus_);
@@ -611,26 +590,21 @@ void ThermLatticeNode::compute_rest_frame_quantities(HadronGasEos& eos) {
       mub_ = tabulated.mub;
       mus_ = tabulated.mus;
     }
-    v_ = Tmu0_.threevec()/(Tmu0_.x0() + p_);
+    v_ = Tmu0_.threevec() / (Tmu0_.x0() + p_);
   }
   if (iter == max_iter) {
-    std::cout << "Warning from solver: max iterations exceeded." <<
-                 " Accuracy: " << std::abs(e_ - e_previous_step) <<
-                 " is less than tolerance " << tolerance << std::endl;
+    std::cout << "Warning from solver: max iterations exceeded."
+              << " Accuracy: " << std::abs(e_ - e_previous_step)
+              << " is less than tolerance " << tolerance << std::endl;
   }
 }
 
 std::ostream &operator<<(std::ostream &out, const ThermLatticeNode &node) {
-  return out
-         << "T[mu,0]: " << node.Tmu0()
-         << ", nb: " << node.nb()
-         << ", ns: " << node.ns()
-         << ", v: " << node.v()
-         << ", e: " << node.e()
-         << ", p: " << node.p()
-         << ", T: " << node.T()
-         << ", mub: " << node.mub()
-         << ", mus: " << node.mus();
+  return out << "T[mu,0]: " << node.Tmu0() << ", nb: " << node.nb()
+             << ", ns: " << node.ns() << ", v: " << node.v()
+             << ", e: " << node.e() << ", p: " << node.p()
+             << ", T: " << node.T() << ", mub: " << node.mub()
+             << ", mus: " << node.mus();
 }
 
-}  // namespace Smash
+}  // namespace smash

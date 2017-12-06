@@ -16,7 +16,7 @@
 #include <memory>
 #include <stdexcept>
 
-namespace Smash {
+namespace smash {
 
 /**
  * FileDeleter is the deleter class for std::unique_ptr of std::FILE.
@@ -51,6 +51,6 @@ struct FileDeleter {
  * std::unique_ptr directly with std::FILE.
  */
 using FilePtr = std::unique_ptr<std::FILE, FileDeleter>;
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_FILEDELETER_H_

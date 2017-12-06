@@ -40,8 +40,8 @@
 #endif
 
 #ifdef HACK_OSTREAM_FOR_TTY
-#include <unistd.h>
 #include <ext/stdio_sync_filebuf.h>
+#include <unistd.h>
 #endif
 
 #include "assert.h"
@@ -122,21 +122,21 @@
  * But many of the classes in SMASH rely on specific data to do any useful
  * operations.
  * The obvious candidates are
- * - \ref Smash::ParticleData
- * - \ref Smash::ParticleType
- * - \ref Smash::Particles
- * - \ref Smash::Configuration
- * - \ref Smash::ProcessBranch
+ * - \ref smash::ParticleData
+ * - \ref smash::ParticleType
+ * - \ref smash::Particles
+ * - \ref smash::Configuration
+ * - \ref smash::ProcessBranch
  *
  * Each of these are interfaces to data that most classes in SMASH read,
- * modify, or create. For example, consider testing Smash::DecayAction. The
- * class is created with a const-ref to a Smash::ParticleData object. This
- * class in turn requires a Smash::ParticleType object for its constructor. To
- * make things worse, the Smash::DecayAction::perform function requires a
- * pointer to Smash::Particles (which contains a map of all existing
- * Smash::ParticleData objects). The \c perform function further calls
- * Smash::Action::choose_channel which requires a std::vector of
- * Smash::ProcessBranch to determine the the final state particles.
+ * modify, or create. For example, consider testing smash::DecayAction. The
+ * class is created with a const-ref to a smash::ParticleData object. This
+ * class in turn requires a smash::ParticleType object for its constructor. To
+ * make things worse, the smash::DecayAction::perform function requires a
+ * pointer to smash::Particles (which contains a map of all existing
+ * smash::ParticleData objects). The \c perform function further calls
+ * smash::Action::choose_channel which requires a std::vector of
+ * smash::ProcessBranch to determine the the final state particles.
  *
  * \subsection unittest_smash_compromise Compromise
  * We see that testing \c DecayAction in isolation will be hard. If we'd want to
@@ -149,13 +149,13 @@
  * actual SMASH classes to easily construct mock objects
  *
  * See \subpage unittest_mocking.
- * 
+ *
  * \subsection unittest_smash_good_example Good Example
- * While implementing the initial conditions (see 
+ * While implementing the initial conditions (see
  * \c src/test/initial_conditions.cc at the very end), the test to verify
  * momentum conservation was written first and then the code has been adjusted,
- * until the test passed successfully. This can serve as a positive example of 
- * test-driven development. 
+ * until the test passed successfully. This can serve as a positive example of
+ * test-driven development.
  *
  ******************************************************************************
  * \section unittest_run Running tests & Test-driven development
@@ -224,14 +224,17 @@
  * Let's take a look at what this tells us.
  * 1. The test macro that failed was in testfile.cc in line 5.
  * 2. If you want to look at the disassembly, the failure was at 0x40451f.
- * 3. The \ref COMPARE macro compared the expression `test` against the expression
+ * 3. The \ref COMPARE macro compared the expression `test` against the
+ expression
  *    `2`. It shows that `test` had a value of `3` while `2` had a value of `2`
  *    (what a surprise). Since the values are not equal `test == 2` returns \c
  *    false.
- * 4. The \ref COMPARE, \ref FUZZY_COMPARE, \ref VERIFY, and \ref FAIL macros can be used as
+ * 4. The \ref COMPARE, \ref FUZZY_COMPARE, \ref VERIFY, and \ref FAIL macros
+ can be used as
  *    streams. The output will only appear on failure and will be printed right
  *    after the normal output of the macro.
- * 5. Finally the name of the failed test (the name specified inside the \ref TEST()
+ * 5. Finally the name of the failed test (the name specified inside the \ref
+ TEST()
  *    macro) is printed.
  * 6. At the end of the run, a summary of the test results is shown. This may be
  *    important when there are many \ref TEST functions.
@@ -367,22 +370,23 @@
  * \p reference to determine the magnitude of 1 ulp.
  *
  * Example:
- * The value `1.f` is `0x3f800000` in binary. The value
- * `1.00000011920928955078125f` with binary representation `0x3f800001`
+ * The value `1.` is `0x3f800000` in binary. The value
+ * `1.00000011920928955078125` with binary representation `0x3f800001`
  * therefore has a distance of 1 ulp.
  * A positive distance means the \p test_value is larger than the \p reference.
  * A negative distance means the \p test_value is smaller than the \p reference.
- * * `FUZZY_COMPARE(1.00000011920928955078125f, 1.f)` will show a distance of 1
- * * `FUZZY_COMPARE(1.f, 1.00000011920928955078125f)` will show a distance of -1
+ * * `FUZZY_COMPARE(1.00000011920928955078125, 1.)` will show a distance of 1
+ * * `FUZZY_COMPARE(1., 1.00000011920928955078125)` will show a distance of -1
  *
- * The value `0.999999940395355224609375f` with binary representation
- * `0x3f7fffff` has a smaller exponent than `1.f`:
- * * `FUZZY_COMPARE(0.999999940395355224609375f, 1.f)` will show a distance of
+ * The value `0.999999940395355224609375` with binary representation
+ * `0x3f7fffff` has a smaller exponent than `1.`:
+ * * `FUZZY_COMPARE(0.999999940395355224609375, 1.)` will show a distance of
  * -0.5
- * * `FUZZY_COMPARE(1.f, 0.999999940395355224609375f)` will show a distance of 1
+ * * `FUZZY_COMPARE(1., 0.999999940395355224609375)` will show a distance of 1
  *
  * ### Comparing to 0
- * Distance to 0 is implemented as comparing to <tt>std::numeric_limits<T>::min()</tt>
+ * Distance to 0 is implemented as comparing to
+ * <tt>std::numeric_limits<T>::min()</tt>
  * instead and adding 1 to the resulting distance.
  */
 #define FUZZY_COMPARE(test_value, reference)
@@ -436,9 +440,7 @@ static __attribute__((__const__)) bool mayUseColor(const std::ostream &os) {
   return 1 == isatty(fileno(file));
 }
 #else
-static bool mayUseColor(const std::ostream &) {
-  return false;
-}
+static bool mayUseColor(const std::ostream &) { return false; }
 #endif
 
 static std::ostream &operator<<(std::ostream &s, const AnsiColor::Type &color) {
@@ -469,8 +471,7 @@ class UnitTester {  // {{{1
         only_name(0),
         m_finalized(false),
         failedTests(0),
-        passedTests(0) {
-  }
+        passedTests(0) {}
 
   int finalize() {
     m_finalized = true;
@@ -524,7 +525,6 @@ static inline void EXPECT_FAILURE() {  // {{{1
 }
 #ifndef DOXYGEN  // make the following invisible to DOXYGEN
 
-
 static const char *_unittest_fail() {  // {{{1
   if (global_unit_test_object_.expect_failure) {
     return "XFAIL: ";
@@ -545,7 +545,8 @@ static void initTest(int argc, char **argv) {  // {{{1
   for (int i = 1; i < argc; ++i) {
     if (0 == std::strcmp(argv[i], "--help") ||
         0 == std::strcmp(argv[i], "-h")) {
-      std::cout << "Usage: " << argv[0] << " [-h|--help] [--only <testname>] [-v|--vim]\n";
+      std::cout << "Usage: " << argv[0]
+                << " [-h|--help] [--only <testname>] [-v|--vim]\n";
       exit(0);
     } else if (0 == std::strcmp(argv[i], "--only") && i + 1 < argc) {
       global_unit_test_object_.only_name = argv[i + 1];
@@ -577,16 +578,13 @@ void UnitTester::runTestInt(TestFunction fun, const char *name) {  // {{{1
     setFuzzyness<float>(1);
     setFuzzyness<double>(1);
     fun();
-  }
-  catch (UnitTestFailure) {
-  }
-  catch (std::exception &e) {
+  } catch (UnitTestFailure) {
+  } catch (std::exception &e) {
     std::cout << _unittest_fail() << "┍ " << name
               << " threw an unexpected exception:\n";
     std::cout << _unittest_fail() << "│ " << e.what() << '\n';
     global_unit_test_object_.status = false;
-  }
-  catch (...) {
+  } catch (...) {
     std::cout << _unittest_fail() << "┍ " << name
               << " threw an unexpected exception, of unknown type\n";
     global_unit_test_object_.status = false;
@@ -706,7 +704,8 @@ class _UnitTest_Compare {  // {{{1
   }
 
   template <typename T,
-            typename = decltype(std::declval<std::ostream &>() << std::declval<T>())>
+            typename = decltype(std::declval<std::ostream &>()
+                                << std::declval<T>())>
   static std::true_type has_ostream_operator_impl(int);
   template <typename T>
   static std::false_type has_ostream_operator_impl(...);
@@ -802,7 +801,6 @@ class _UnitTest_Compare {  // {{{1
       print(" ulp");
     }
   }
-
 
   // Relative Error Compare ctor {{{2
   template <typename T, typename ET>
@@ -947,20 +945,18 @@ class _UnitTest_Compare {  // {{{1
   }
   // print overloads {{{2
   template <typename T>
-  static inline typename std::enable_if<has_ostream_operator<T>::value,
-                                        void>::type
-  print(const T &x) {
+  static inline
+      typename std::enable_if<has_ostream_operator<T>::value, void>::type
+      print(const T &x) {
     std::cout << x;
   }
   template <typename T>
-  static inline typename std::enable_if<!has_ostream_operator<T>::value,
-                                        void>::type
-  print(const T &x) {
+  static inline
+      typename std::enable_if<!has_ostream_operator<T>::value, void>::type
+      print(const T &x) {
     printMem(x);
   }
-  static void print(const std::type_info &x) {
-    std::cout << x.name();
-  }
+  static void print(const std::type_info &x) { std::cout << x.name(); }
   static void print(const char *str) {
     const char *pos = 0;
     if (0 != (pos = std::strchr(str, '\n'))) {
@@ -994,9 +990,7 @@ class _UnitTest_Compare {  // {{{1
       std::cout << ch;
     }
   }
-  static void print(bool b) {
-    std::cout << (b ? "true" : "false");
-  }
+  static void print(bool b) { std::cout << (b ? "true" : "false"); }
   // printLast {{{2
   static void printLast() {
     std::cout << std::endl;
@@ -1016,8 +1010,7 @@ class _UnitTest_Compare {  // {{{1
   }
   // printFuzzy... {{{2
   template <typename T>
-  static inline void printFuzzyInfo(T, T) {
-  }
+  static inline void printFuzzyInfo(T, T) {}
   template <typename T>
   static inline void printFuzzyInfoImpl(T a, T b, double fuzzyness) {
     print("\ndistance: ");
@@ -1075,9 +1068,7 @@ class ADD_PASS {
     ++global_unit_test_object_.passedTests;
     printPass();
   }
-  ~ADD_PASS() {
-    std::cout << std::endl;
-  }
+  ~ADD_PASS() { std::cout << std::endl; }
   template <typename T>
   ADD_PASS &operator<<(const T &x) {
     std::cout << x;
@@ -1104,7 +1095,7 @@ void unittest_assert(bool cond, const char *code, const char *file, int line) {
     std::cout << "       " << #code << " at " << __FILE__ << ":" << __LINE__ \
               << " did not fail as was expected.\n";                         \
     UnitTest::global_unit_test_object_.status = false;                       \
-    throw UnitTest::UnitTestFailure();                                                 \
+    throw UnitTest::UnitTestFailure();                                       \
     return;                                                                  \
   }                                                                          \
   UnitTest::global_unit_test_object_.expect_assert_failure = false
@@ -1206,8 +1197,7 @@ class Test : TestImpl {
   static void wrapper() {
     try {
       TestImpl::test_function();
-    }
-    catch (Exception &e) {
+    } catch (Exception &e) {
       return;
     }
     FAIL() << "Test was expected to throw, but it didn't";
@@ -1239,20 +1229,17 @@ class Test2;
 template <template <typename V> class TestFunctor>
 class Test2<TestFunctor> {
  protected:
-  explicit Test2(const std::string &) {
-  }
+  explicit Test2(const std::string &) {}
 };
 
 template <template <typename V> class TestFunctor, typename TestType0,
           typename... TestTypes>
-class Test2<TestFunctor, TestType0, TestTypes...> : public Test2<TestFunctor,
-                                                                 TestTypes...> {
+class Test2<TestFunctor, TestType0, TestTypes...>
+    : public Test2<TestFunctor, TestTypes...> {
   typedef Test2<TestFunctor, TestTypes...> Base;
 
  public:
-  static void call() {
-    TestFunctor<TestType0>()();
-  }
+  static void call() { TestFunctor<TestType0>()(); }
 
   explicit Test2(std::string name) : Base(name) {
     name += '<' + typeToString<TestType0>() + '>';
@@ -1274,7 +1261,8 @@ UnitTest::Test2<F, Typelist...> hackTypelist(void (*)(Typelist...));
     void operator()() {
 #define TEST_END \
   }              \
-  };
+  }              \
+  ;
 
 #define TEST(fun__)                                             \
   void fun__();                                                 \
@@ -1290,7 +1278,7 @@ UnitTest::Test2<F, Typelist...> hackTypelist(void (*)(Typelist...));
 
 // main {{{1
 int main(int argc, char **argv) {
-  Smash::setup_default_float_traps();
+  smash::setup_default_float_traps();
   UnitTest::initTest(argc, argv);
   UnitTest::runAll();
   return UnitTest::global_unit_test_object_.finalize();

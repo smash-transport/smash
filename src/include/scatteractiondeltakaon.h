@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2016
+ *    Copyright (c) 2016-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -13,12 +13,12 @@
 #include "scatteraction.h"
 #include "scatteractionbaryonmeson.h"
 
-namespace Smash {
-
+namespace smash {
 
 /**
  * \ingroup action
- * ScatterActionDeltaKaon is a special ScatterActionBaryonMeson which represents the
+ * ScatterActionDeltaKaon is a special ScatterActionBaryonMeson which represents
+ * the
  * scattering of a Delta and a kaon.
  */
 class ScatterActionDeltaKaon : public ScatterActionBaryonMeson {
@@ -36,6 +36,6 @@ class ScatterActionDeltaKaon : public ScatterActionBaryonMeson {
   void format_debug_output(std::ostream &out) const override;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_SCATTERACTIONDELTAKAON_H_

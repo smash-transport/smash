@@ -1,17 +1,18 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include "unittest.h"
-#include "../include/processbranch.h"
-#include "../include/particledata.h"
+#include "unittest.h"  // This include has to be first
 
-using namespace Smash;
+#include "../include/particledata.h"
+#include "../include/processbranch.h"
+
+using namespace smash;
 
 TEST(init_particle_types) {
   ParticleType::create_type_list(
@@ -21,22 +22,22 @@ TEST(init_particle_types) {
 }
 
 TEST(assign_default) {
-  CollisionBranch branch(0.f, ProcessType::String);
-  FUZZY_COMPARE(branch.weight(), 0.f);
-  COMPARE(branch.get_type(), ProcessType::String);
+  CollisionBranch branch(0., ProcessType::StringSoft);
+  FUZZY_COMPARE(branch.weight(), 0.);
+  COMPARE(branch.get_type(), ProcessType::StringSoft);
 }
 TEST(assign_1_particle) {
   PdgCode smashon("9876542");
-  CollisionBranch branch(ParticleType::find(smashon), 1.234f,
+  CollisionBranch branch(ParticleType::find(smashon), 1.234,
                          ProcessType::Elastic);
-  FUZZY_COMPARE(branch.weight(), 1.234f);
+  FUZZY_COMPARE(branch.weight(), 1.234);
 }
 TEST(assign_2_particle) {
   PdgCode smashon("9876542");
   CollisionBranch branch(ParticleType::find(smashon),
-                         ParticleType::find(smashon),
-                         2.345, ProcessType::Elastic);
-  FUZZY_COMPARE(branch.weight(), 2.345f);
+                         ParticleType::find(smashon), 2.345,
+                         ProcessType::Elastic);
+  FUZZY_COMPARE(branch.weight(), 2.345);
 }
 
 TEST(lists) {
@@ -73,10 +74,10 @@ TEST(add_particle) {
 }
 
 TEST(weights) {
-  CollisionBranch branch(0.f,ProcessType::Elastic);
-  branch.set_weight(0.34f);
-  COMPARE(branch.weight(), 0.34f);
+  CollisionBranch branch(0., ProcessType::Elastic);
+  branch.set_weight(0.34);
+  COMPARE(branch.weight(), 0.34);
   // double is intentional here.
   branch.set_weight(0.33);
-  COMPARE(branch.weight(), 0.33f);
+  COMPARE(branch.weight(), 0.33);
 }

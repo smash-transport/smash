@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -14,9 +14,9 @@
 #include "include/parametrizations.h"
 #include "include/pdgcode_constants.h"
 
-namespace Smash {
+namespace smash {
 
-float ScatterActionNucleonPion::elastic_parametrization() {
+double ScatterActionNucleonPion::elastic_parametrization() {
   const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
 
@@ -26,9 +26,9 @@ float ScatterActionNucleonPion::elastic_parametrization() {
 
   const double s = mandelstam_s();
 
-  float sig_el = 0.f;
+  double sig_el = 0.;
   switch (nucleon.code()) {
-      case pdg::p:
+    case pdg::p:
       switch (pion.code()) {
         case pdg::pi_p:
           sig_el = piplusp_elastic(s);
@@ -41,7 +41,7 @@ float ScatterActionNucleonPion::elastic_parametrization() {
           break;
       }
       break;
-      case pdg::n:
+    case pdg::n:
       switch (pion.code()) {
         case pdg::pi_p:
           sig_el = piminusp_elastic(s);
@@ -54,7 +54,7 @@ float ScatterActionNucleonPion::elastic_parametrization() {
           break;
       }
       break;
-      case -pdg::p:
+    case -pdg::p:
       switch (pion.code()) {
         case pdg::pi_p:
           sig_el = piminusp_elastic(s);
@@ -67,7 +67,7 @@ float ScatterActionNucleonPion::elastic_parametrization() {
           break;
       }
       break;
-      case -pdg::n:
+    case -pdg::n:
       switch (pion.code()) {
         case pdg::pi_p:
           sig_el = piplusp_elastic(s);
@@ -81,8 +81,9 @@ float ScatterActionNucleonPion::elastic_parametrization() {
       }
       break;
     default:
-      throw std::runtime_error("only the elastic cross section for proton-pion "
-                               "is implemented");
+      throw std::runtime_error(
+          "only the elastic cross section for proton-pion "
+          "is implemented");
   }
 
   if (sig_el > 0) {
@@ -91,9 +92,9 @@ float ScatterActionNucleonPion::elastic_parametrization() {
     std::stringstream ss;
     const auto name_a = incoming_particles_[0].type().name();
     const auto name_b = incoming_particles_[1].type().name();
-    ss << "problem in CrossSections::elastic: a=" << name_a
-       << " b=" << name_b << " j_a=" << pdg_a.spin() << " j_b="
-       << pdg_b.spin() << " sigma=" << sig_el << " s=" << s;
+    ss << "problem in CrossSections::elastic: a=" << name_a << " b=" << name_b
+       << " j_a=" << pdg_a.spin() << " j_b=" << pdg_b.spin()
+       << " sigma=" << sig_el << " s=" << s;
     throw std::runtime_error(ss.str());
   }
 }
@@ -103,5 +104,4 @@ void ScatterActionNucleonPion::format_debug_output(std::ostream &out) const {
   ScatterAction::format_debug_output(out);
 }
 
-
-}  // namespace Smash
+}  // namespace smash

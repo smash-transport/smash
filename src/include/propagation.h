@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -14,7 +14,18 @@
 #include "particles.h"
 #include "potentials.h"
 
-namespace Smash {
+namespace smash {
+
+struct ExpansionProperties {
+  // Defines the metric to be used
+  ExpansionMode mode_;
+  // Defines the expansion parameter (faster expansion for larger values)
+  double b_;
+
+  ExpansionProperties(ExpansionMode mode, double b) : mode_(mode), b_(b) {}
+};
+
+double calc_hubble(double time, const ExpansionProperties &metric);
 
 /** Propagates the positions of all particles on a straight line
   * through the current time step.
@@ -34,7 +45,14 @@ namespace Smash {
   * \return dt time interval of propagation
   */
 double propagate_straight_line(Particles *particles, double to_time,
-                       const std::vector<FourVector> &beam_momentum);
+                               const std::vector<FourVector> &beam_momentum);
+
+/** Modifies positions and momentum of all particles to account for
+  * space-time deformation.
+  */
+void expand_space_time(Particles *particles,
+                       const ExperimentParameters &parameters,
+                       const ExpansionProperties &metric);
 
 /**
  * Updates the momenta of all particles at the current
@@ -48,10 +66,9 @@ double propagate_straight_line(Particles *particles, double to_time,
  * \param UB_grad_lat Lattice for Skyrme potential gradient
  * \param UI3_grad_lat Lattice for symmetry potential gradient
  */
-void update_momenta(Particles *particles, double dt,
-                    const Potentials &pot,
-                    RectangularLattice<ThreeVector>* UB_grad_lat,
-                    RectangularLattice<ThreeVector>* UI3_grad_lat);
+void update_momenta(Particles *particles, double dt, const Potentials &pot,
+                    RectangularLattice<ThreeVector> *UB_grad_lat,
+                    RectangularLattice<ThreeVector> *UI3_grad_lat);
 
-}  // namespace Smash
+}  // namespace smash
 #endif  // SRC_INCLUDE_PROPAGATION_H_
