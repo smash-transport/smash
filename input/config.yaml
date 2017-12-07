@@ -8,7 +8,7 @@ General:
     End_Time:      100.0
     Randomseed:    -1
     Testparticles: 20
-    Nevents:       10
+    Nevents:       1
     Use_Grid: True
 
 Output:
