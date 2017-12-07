@@ -66,9 +66,21 @@ struct OutputParameters {
     }
 
     if (conf.has_value({"Dileptons"})) {
-      coll_extended = true;
+      dil_extended = conf.take({"Dileptons", "Extended"}, false);
     }
   }
+
+  /// Pass correct extended flag to binary collision output constructor
+  bool get_coll_extended(std::string name) const {
+    if (name == "Collisions") {
+      return coll_extended;
+    } else if (name == "Dileptons") {
+      return dil_extended;
+    } else {
+      return false;  // error
+    }
+  }
+
   /// Point, where thermodynamic quantities are calculated
   ThreeVector td_position;
   /// Type (e.g., baryon/pion/hadron) of thermodynamic quantity
@@ -95,6 +107,9 @@ struct OutputParameters {
   bool coll_extended;
   /// Print initial and final particles in event into collision output
   bool coll_printstartend;
+
+  /// Extended format for dilepton output
+  bool dil_extended;
 };
 
 }  // namespace smash
