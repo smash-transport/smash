@@ -78,7 +78,7 @@ double piminusp_high_energy(double mandelstam_s) {
  * doesn't affect the cross section at the low energies, I truncate
  * the parametrization at p_lab = 8 GeV, which correspons to square
  * root of s equal to 4 GeV. */
-float piplusp_elastic(double mandelstam_s) {
+double piplusp_elastic(double mandelstam_s) {
   double sigma;
   double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
   if (p_lab < 1.45) {
@@ -111,7 +111,7 @@ float piplusp_elastic(double mandelstam_s) {
 
 /** pi-p elastic cross section parametrization.
  * Source: GiBUU:parametrizationBarMes_HighEnergy.f90 */
-float piminusp_elastic(double mandelstam_s) {
+double piminusp_elastic(double mandelstam_s) {
   double sigma;
   double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
   const auto logp = std::log(p_lab);
