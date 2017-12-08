@@ -120,7 +120,7 @@ std::array<T, 2> get_t_range(const T sqrts, const T m1, const T m2, const T m3,
   const T t0 = sqrt_t0 * sqrt_t0;
   const T t_min = t0 - (p_i - p_f) * (p_i - p_f);
   const T t_max = t0 - (p_i + p_f) * (p_i + p_f);
-  assert(t_min > t_max);
+  assert(t_min >= t_max);
   return {t_min, t_max};
 }
 
