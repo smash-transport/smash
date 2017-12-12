@@ -39,7 +39,7 @@ General:
     Testparticles: 1
 
     # number of events
-    Nevents:     2 
+    Nevents:     50 
 
     # width of gaussians representing particles, fm
     Gaussian_Sigma: 1.0
@@ -74,7 +74,7 @@ Output:
 #        Format:          ["Oscar2013", "Binary", "Root"]
     Photons:
         Format:          ["Oscar2013"]
-        Fractions:       100
+        Fractions:       1
 #    Thermodynamics:
 #        Format:          ["ASCII", "VTK"]
 #        # ("hadron", "baryon", "baryonic isospin", "pion"), baryon := net baryon

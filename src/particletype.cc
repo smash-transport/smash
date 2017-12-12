@@ -599,9 +599,8 @@ double ParticleType::sample_resonance_mass(const double mass_stable,
    * a heuristic knowledge is used that usually such mass exist that
    * spectral_function(m) > spectral_function_simple(m). */
   const double sf_ratio_max =
-      std::max(1.,
-               this->spectral_function(max_mass) /
-                   this->spectral_function_simple(max_mass));
+      std::max(1., this->spectral_function(max_mass) /
+                       this->spectral_function_simple(max_mass));
 
   double mass_res, val;
   // outer loop: repeat if maximum is too small

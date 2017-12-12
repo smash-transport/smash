@@ -174,7 +174,7 @@ inline Line AdaptiveRejectionSampler::upper(int j) {
 Line AdaptiveRejectionSampler::lower(int j) { return scants_.at((j + 1) / 2); }
 
 /** get areas_ below piecewise exponential upper bounds
-*/
+ */
 void AdaptiveRejectionSampler::update_area() {
   areas_.resize(0);
   upper_bounds_.resize(0);

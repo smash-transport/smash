@@ -5,7 +5,7 @@
  *
  *    GNU General Public License (GPLv3 or later)
  *
-*/
+ */
 
 #include "include/pauliblocking.h"
 #include "include/constants.h"

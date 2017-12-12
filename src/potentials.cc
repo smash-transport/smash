@@ -5,7 +5,7 @@
  *
  *    GNU General Public License (GPLv3 or later)
  *
-*/
+ */
 
 #include "include/potentials.h"
 
@@ -83,8 +83,9 @@ double Potentials::skyrme_pot(const double baryon_density) const {
      under a charge reversal transformation. */
   const int sgn = tmp > 0 ? 1 : -1;
   // Return in GeV
-  return 1.0e-3 * sgn * (skyrme_a_ * std::abs(tmp) +
-                         skyrme_b_ * std::pow(std::abs(tmp), skyrme_tau_));
+  return 1.0e-3 * sgn *
+         (skyrme_a_ * std::abs(tmp) +
+          skyrme_b_ * std::pow(std::abs(tmp), skyrme_tau_));
 }
 
 double Potentials::symmetry_pot(const double baryon_isospin_density) const {

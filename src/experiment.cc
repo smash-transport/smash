@@ -467,91 +467,91 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   auto output_conf = config["Output"];
   /*!\Userguide
-    * \page output_general_ Output
-    *
-    * Output directory
-    * ----------------
-    *
-    * Per default, the selected output files
-    * will be saved in the directory ./data/\<run_id\>, where \<run_id\> is an
-    * integer number starting from 0. At the beginning of a run SMASH checks,
-    * if the ./data/0 directory exists. If it does not exist, it is created and
-    * all output files are written there. If the directory already exists,
-    * SMASH tries for ./data/1, ./data/2 and so on until it finds a free
-    * number.
-    *
-    * The user can change output directory by a command line option, if
-    * desired:
-    * \code smash -o <user_output_dir> \endcode
-    *
-    * Output content
-    * --------------
-    * \anchor output_contents_
-    * Output in SMASH is distinguished by _content_ and _format_, where content
-    * means the physical information contained in the output (e.g. list of
-    * particles, list of interactions, thermodynamics, etc) and format (e.g.
-    * Oscar, binary or ROOT). The same content can be printed out in several
-    * formats _simultaneously_.
-    *
-    * For an example of choosing specific output contents see
-    * \ref configuring_output_ "Configuring SMASH output".
-    *
-    * The list of possible contents follows:
-    *
-    * - \b Particles  List of particles at regular time intervals in the
-    *                 computational frame or (optionally) only at the event end.
-    *   - Available formats: \ref format_oscar_particlelist,
-    *      \ref format_binary_, \ref format_root, \ref format_vtk
-    * - \b Collisions List of interactions: collisions, decays, box wall
-    *                 crossings and forced thermalizations. Information about
-    *                 incoming, outgoing particles and the interaction itself
-    *                 is printed out.
-    *   - Available formats: \ref format_oscar_collisions, \ref format_binary_,
-    *                 \ref format_root
-    * - \b Dileptons  Special dilepton output, see \subpage input_dileptons.
-    *   - Available formats: \ref format_oscar_collisions,
-    *                   \ref format_binary_ and \ref format_root
-    * - \b Photons    Special photon output, see \subpage input_photons.
-    *   - Available formats: \ref format_oscar_collisions,
-    *                   \ref format_binary_ and \ref format_root.
-    * - \b Thermodynamics This output allows to print out thermodynamic
-    *          quantities such as density, energy-momentum tensor,
-    *          Landau velocity, etc at one selected point versus time
-    *          (simple ASCII format table \subpage ascii_thermodynamic_output_)
-    *          and on a spatial lattice  versus time (\ref output_vtk_lattice_).
-    * \anchor list_of_output_formats
-    * Output formats
-    * --------------
-    *
-    * For choosing output formats see
-    * \ref configuring_output_ "Configuring SMASH output".
-    * Every output content can be printed out in several formats:
-    * - \b "Oscar1999", \b "Oscar2013" - human-readable text output\n
-    *   - For "Particles" content: \subpage format_oscar_particlelist
-    *   - For "Collisions" content: \subpage format_oscar_collisions
-    *   - General block structure of OSCAR formats: \subpage oscar_general_
-    * - \b "Binary" - binary, not human-readable output
-    *   - Faster to read and write than text outputs
-    *   - Saves coordinates and momenta with the full double precision
-    *   - General file structure is similar to \subpage oscar_general_
-    *   - Detailed description: \subpage format_binary_
-    * - \b "Root" - binary output in the format used by ROOT software
-    *     (http://root.cern.ch)
-    *   - Even faster to read and write, requires less disk space
-    *   - Format description: \subpage format_root
-    * - \b "VTK" - text output suitable for an easy
-    *     visualization using paraview software
-    *   - This output can be opened by paraview to see the visulalization.
-    *   - For "Particles" content \subpage format_vtk
-    *   - For "Thermodynamics" content \subpage output_vtk_lattice_
-    * - \b "ASCII" - a human-readable text-format table of values
-    *   - Used only for "Thermodynamics", see
-    *     \subpage ascii_thermodynamic_output_
-    *
-    * \note Output of coordinates for the "Collisions" content in
-    *       the periodic box has a feature:
-    *       \subpage collisions_output_in_box_modus_
-    */
+   * \page output_general_ Output
+   *
+   * Output directory
+   * ----------------
+   *
+   * Per default, the selected output files
+   * will be saved in the directory ./data/\<run_id\>, where \<run_id\> is an
+   * integer number starting from 0. At the beginning of a run SMASH checks,
+   * if the ./data/0 directory exists. If it does not exist, it is created and
+   * all output files are written there. If the directory already exists,
+   * SMASH tries for ./data/1, ./data/2 and so on until it finds a free
+   * number.
+   *
+   * The user can change output directory by a command line option, if
+   * desired:
+   * \code smash -o <user_output_dir> \endcode
+   *
+   * Output content
+   * --------------
+   * \anchor output_contents_
+   * Output in SMASH is distinguished by _content_ and _format_, where content
+   * means the physical information contained in the output (e.g. list of
+   * particles, list of interactions, thermodynamics, etc) and format (e.g.
+   * Oscar, binary or ROOT). The same content can be printed out in several
+   * formats _simultaneously_.
+   *
+   * For an example of choosing specific output contents see
+   * \ref configuring_output_ "Configuring SMASH output".
+   *
+   * The list of possible contents follows:
+   *
+   * - \b Particles  List of particles at regular time intervals in the
+   *                 computational frame or (optionally) only at the event end.
+   *   - Available formats: \ref format_oscar_particlelist,
+   *      \ref format_binary_, \ref format_root, \ref format_vtk
+   * - \b Collisions List of interactions: collisions, decays, box wall
+   *                 crossings and forced thermalizations. Information about
+   *                 incoming, outgoing particles and the interaction itself
+   *                 is printed out.
+   *   - Available formats: \ref format_oscar_collisions, \ref format_binary_,
+   *                 \ref format_root
+   * - \b Dileptons  Special dilepton output, see \subpage input_dileptons.
+   *   - Available formats: \ref format_oscar_collisions,
+   *                   \ref format_binary_ and \ref format_root
+   * - \b Photons    Special photon output, see \subpage input_photons.
+   *   - Available formats: \ref format_oscar_collisions,
+   *                   \ref format_binary_ and \ref format_root.
+   * - \b Thermodynamics This output allows to print out thermodynamic
+   *          quantities such as density, energy-momentum tensor,
+   *          Landau velocity, etc at one selected point versus time
+   *          (simple ASCII format table \subpage ascii_thermodynamic_output_)
+   *          and on a spatial lattice  versus time (\ref output_vtk_lattice_).
+   * \anchor list_of_output_formats
+   * Output formats
+   * --------------
+   *
+   * For choosing output formats see
+   * \ref configuring_output_ "Configuring SMASH output".
+   * Every output content can be printed out in several formats:
+   * - \b "Oscar1999", \b "Oscar2013" - human-readable text output\n
+   *   - For "Particles" content: \subpage format_oscar_particlelist
+   *   - For "Collisions" content: \subpage format_oscar_collisions
+   *   - General block structure of OSCAR formats: \subpage oscar_general_
+   * - \b "Binary" - binary, not human-readable output
+   *   - Faster to read and write than text outputs
+   *   - Saves coordinates and momenta with the full double precision
+   *   - General file structure is similar to \subpage oscar_general_
+   *   - Detailed description: \subpage format_binary_
+   * - \b "Root" - binary output in the format used by ROOT software
+   *     (http://root.cern.ch)
+   *   - Even faster to read and write, requires less disk space
+   *   - Format description: \subpage format_root
+   * - \b "VTK" - text output suitable for an easy
+   *     visualization using paraview software
+   *   - This output can be opened by paraview to see the visulalization.
+   *   - For "Particles" content \subpage format_vtk
+   *   - For "Thermodynamics" content \subpage output_vtk_lattice_
+   * - \b "ASCII" - a human-readable text-format table of values
+   *   - Used only for "Thermodynamics", see
+   *     \subpage ascii_thermodynamic_output_
+   *
+   * \note Output of coordinates for the "Collisions" content in
+   *       the periodic box has a feature:
+   *       \subpage collisions_output_in_box_modus_
+   */
 
   /*!\Userguide
    * \page input_dileptons Dileptons
@@ -659,7 +659,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *      The velocity is obtained from the energy-momentum tensor
    *      \f$T^{\mu\nu}(t,x,y,z) \f$ by solving the generalized eigenvalue
    *      equation \f$(T^{\mu\nu} - \lambda g^{\mu\nu})u_{\mu}=0 \f$.
-  */
+   */
 
   // Create lattices
   if (config.has_value({"Lattice"})) {
@@ -804,10 +804,9 @@ static std::string format_measurements(const Particles &particles,
   std::ostringstream ss;
   ss << field<5> << time << field<12, 3> << difference.momentum().x0()
      << field<12, 3> << difference.momentum().abs3()
-     << field<12, 3> << (time > really_small
-                             ? 2.0 * scatterings_total /
-                                   (particles.size() * time)
-                             : 0.)
+     << field<
+            12,
+            3> << (time > really_small ? 2.0 * scatterings_total / (particles.size() * time) : 0.)
      << field<10, 3> << scatterings_this_interval
      << field<12, 3> << particles.size() << field<10, 3> << elapsed_seconds;
   return ss.str();
@@ -880,8 +879,9 @@ bool Experiment<Modus>::perform_action(
   // At every collision photons can be produced.
   if (photons_switch_ &&
       (ScatterActionPhoton::photon_reaction_type(action.incoming_particles()) !=
-       ScatterActionPhoton::ReactionType::no_reaction)
-      && ScatterActionPhoton::is_kinematically_possible(action.sqrt_s(), action.incoming_particles())) {
+       ScatterActionPhoton::ReactionType::no_reaction) &&
+      ScatterActionPhoton::is_kinematically_possible(
+          action.sqrt_s(), action.incoming_particles())) {
     // Time in the action constructor is relative to
     // current time of incoming
     constexpr double action_time = 0.;
@@ -892,10 +892,10 @@ bool Experiment<Modus>::perform_action(
     // This can be done, because photon action is never performed, only
     // final state is generated and printed to photon output.
     // raw weight value is cross section of hadronic process
-    
+
     photon_act.add_dummy_hadronic_channels(action.raw_weight_value());
-    
-    // Now add the actual photon reaction channel. here we also compute the 
+
+    // Now add the actual photon reaction channel. here we also compute the
     // total cross section
     photon_act.add_single_channel();
     for (int i = 0; i < n_fractional_photons_; i++) {

@@ -34,26 +34,26 @@
 
 namespace Smash {
 /*!\Userguide
-* \page input_collision_term_ Collision_Term
-* \key Elastic_Cross_Section (double, optional, default = -1.0 [mb]) \n
-* If a non-negative value is given, it will override the parametrized
-* elastic cross sections (which are energy-dependent) with a constant value.
-* This constant elastic cross section is used for all collisions.
-*
-* \key Isotropic (bool, optional, default = false) \n
-* Do all collisions isotropically.
-* \key Strings (bool, optional, default = false): \n
-* true - string excitation is enabled\n
-* false - string excitation is disabled
-* \key String_Formation_Time (double, optional, default = 1.0) \n
-* Parameter for formation time in string fragmentation in fm/c
-* \key low_snn_cut (double) in GeV \n
-* The elastic collisions betwen two nucleons with sqrt_s below
-* low_snn_cut cannot happen.
-* <1.88 - below the threshold energy of the elastic collsion, no effect
-* >2.02 - beyond the threshold energy of the inelastic collision NN->NNpi, not
-* suggested
-*/
+ * \page input_collision_term_ Collision_Term
+ * \key Elastic_Cross_Section (double, optional, default = -1.0 [mb]) \n
+ * If a non-negative value is given, it will override the parametrized
+ * elastic cross sections (which are energy-dependent) with a constant value.
+ * This constant elastic cross section is used for all collisions.
+ *
+ * \key Isotropic (bool, optional, default = false) \n
+ * Do all collisions isotropically.
+ * \key Strings (bool, optional, default = false): \n
+ * true - string excitation is enabled\n
+ * false - string excitation is disabled
+ * \key String_Formation_Time (double, optional, default = 1.0) \n
+ * Parameter for formation time in string fragmentation in fm/c
+ * \key low_snn_cut (double) in GeV \n
+ * The elastic collisions betwen two nucleons with sqrt_s below
+ * low_snn_cut cannot happen.
+ * <1.88 - below the threshold energy of the elastic collsion, no effect
+ * >2.02 - beyond the threshold energy of the inelastic collision NN->NNpi, not
+ * suggested
+ */
 
 ScatterActionsFinder::ScatterActionsFinder(
     Configuration config, const ExperimentParameters &parameters,
@@ -168,10 +168,10 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData &data_a,
     return nullptr;
   }
   /** If the two particles
-    * 1) belong to the two colliding nuclei
-    * 2) are within the same nucleus
-    * 3) both of them have never experienced any collisons,
-    * then the collision between them are banned. */
+   * 1) belong to the two colliding nuclei
+   * 2) are within the same nucleus
+   * 3) both of them have never experienced any collisons,
+   * then the collision between them are banned. */
   assert(data_a.id() >= 0);
   assert(data_b.id() >= 0);
   if (data_a.id() < N_tot_ && data_b.id() < N_tot_ &&
