@@ -263,6 +263,7 @@ class GrandCanThermalizer {
     phitheta.distribute_isotropically();
     particle.set_4momentum(m, phitheta.threevec() * momentum_radial);
     particle.boost_momentum(-cell.v());
+    particle.set_formation_time(time);
 
     return particle;
   }
