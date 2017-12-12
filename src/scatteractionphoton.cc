@@ -223,7 +223,8 @@ void ScatterActionPhoton::generate_final_state() {
 
   double E_Photon = outgoing_particles_[1].momentum()[0];
 
-  weight_ *= pow(form_factor(E_Photon), 4);
+  // no FF
+  //weight_ *= pow(form_factor(E_Photon), 4);
 
   // Photons are not really part of the normal processes, so we have to set a
   // constant arbitrary number.
