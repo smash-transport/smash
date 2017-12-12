@@ -534,6 +534,7 @@ double ScatterActionPhoton::diff_cross_section_w_ff(const double t,
       std::pair<double, double> FF = form_factor_single(E_photon);
       std::pair<double, double> diff_xs =
           diff_cross_section_single(t, t2, t1, m_rho);
+      // TODO: Broken right now. FF not yet implemented.
       const double xs_ff =
           FF.first * diff_xs.first + FF.second * diff_xs.second;
       return xs_ff;
@@ -545,7 +546,9 @@ double ScatterActionPhoton::diff_cross_section_w_ff(const double t,
     case ReactionType::pi_m_rho_z_pi_m:
     case ReactionType::pi_p_pi_m_rho_z:
     case ReactionType::pi_z_rho_z_pi_z: {
-      const double FF = form_factor(E_photon);
+      //const double FF = form_factor(E_photon);
+      // TODO: Remove this again. Only for comparison w/o form factor
+      const double FF = 1.0;
       const double xs = diff_cross_section(t, t2, t1, m_rho);
       const double xs_ff = FF * xs;
       return xs_ff;
@@ -560,6 +563,7 @@ std::pair<double, double> ScatterActionPhoton::form_factor_single(
     const double E_photon) {
   // returns form factor for the (pi,rho,a1) mediated process in the first
   // argument, for the omeaga mediated process in the second
+  // TODO: Implement!
   return std::pair<double, double>(1.0, 1.0);
 }
 

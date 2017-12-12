@@ -122,7 +122,7 @@ class ScatterActionPhoton : public ScatterAction {
 
   double hadron_out_mass_;
 
-  static constexpr MediatorType default_mediator_ = MediatorType::SUM;
+  static constexpr MediatorType default_mediator_ = MediatorType::RHO;
 
   double weight_ = 0.0;
 
