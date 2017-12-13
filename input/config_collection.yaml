@@ -252,9 +252,17 @@ Modi:
         Calculation_Frame: "center of mass"
         Calculation_Frame: "fixed target"
 
-        # Specify an impact parameter
+        # Specify an impact parameter (in fm)
         Impact:
             Value: 0.0
+            Sample: "quadratic"
+            Sample: "custom"  #only works in combination with Values and Yields.
+            Sample: "uniform"
+            Values: [0.0,0.0]
+            Yields: [0.0,0.0]
+            Range: [0.0,0.0]
+            Max: 0.0
+            Initial_Distance: 0.0
 
         # Include Fermi motion
         # ("off", "on", "frozen")
