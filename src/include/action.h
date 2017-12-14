@@ -76,7 +76,7 @@ class Action {
 
   /** Return the specific weight for the chosen outgoing channel.
    *  For scatterings it will be partial cross-section, for
-   *  decays - partial width, for dileptons - shining weight*branching.
+   *  decays (including dilepton decays) - partial width
    */
   virtual double partial_weight() const = 0;
 
