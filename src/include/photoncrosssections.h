@@ -98,9 +98,9 @@ class PhotonCrossSection<ComputationMethod::Lookup> {
 
  public:
 
-  const double s0_diff = 0.1, s1_diff = 6.0, t0_diff = -5.0;
+  const double s0_diff = 0.01, s1_diff = 20.0, t0_diff = -18.0;
   const double t1_diff = 5.0, ds_diff = 0.01, dt_diff = 0.01;
-  const double s0_tot = 0.1, s1_tot = 5.0, ds_tot = 0.01;
+  const double s0_tot = 0.01, s1_tot = 20.0, ds_tot = 0.01;
   const double m_rho_0 = 0.775, m_rho_1 = 0.777, dm = 0.01;
 
   double xs_pi_pi_rho0(const double s, const double m_rho);
