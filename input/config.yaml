@@ -72,6 +72,7 @@ Output:
 #        Print_Start_End: True
 #    Dileptons:
 #        Format:          ["Oscar2013", "Binary", "Root"]
+#        Extended:        True
 #    Photons:
 #        Format:          ["Oscar2013", "Oscar1999", "Binary", "Root"]
 #        Fractions:       100
