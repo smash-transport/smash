@@ -33,7 +33,8 @@ struct OutputParameters {
         part_extended(false),
         part_only_final(true),
         coll_extended(false),
-        coll_printstartend(false) {}
+        coll_printstartend(false),
+        dil_extended(false) {}
 
   /// Constructor from configuration
   explicit OutputParameters(Configuration&& conf) : OutputParameters() {
