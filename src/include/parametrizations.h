@@ -39,8 +39,18 @@ double piplusp_high_energy(double mandelstam_s);
 /** pi-p total cross section at high energies */
 double piminusp_high_energy(double mandelstam_s);
 
-/** pp hard scattering cross section (with partonic scattering) */
-double pp_string_hard(double mandelstam_s);
+/** parametrized hard scattering cross section (with partonic scattering) */
+double xs_string_hard(double mandelstam_s,
+                      double xs_0, double e_0, double lambda_pow);
+
+/** nucleon-nucleon hard scattering cross section (with partonic scattering) */
+double NN_string_hard(double mandelstam_s);
+
+/** nucleon-pion hard scattering cross section (with partonic scattering) */
+double Npi_string_hard(double mandelstam_s);
+
+/** pion-pion hard scattering cross section (with partonic scattering) */
+double pipi_string_hard(double mandelstam_s);
 
 /** pi+p elastic cross section parametrization */
 double piplusp_elastic(double mandelstam_s);

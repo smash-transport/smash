@@ -40,10 +40,10 @@ double ScatterActionBaryonBaryon::string_hard_cross_section() const {
   const double s = mandelstam_s();
 
   /**
-   * Currently proton-proton cross section is used for all case.
+   * Currently nucleon-nucleon cross section is used for all case.
    * This will be changed later by applying additive quark model.
    */
-  return pp_string_hard(s);
+  return NN_string_hard(s);
 }
 
 CollisionBranchList ScatterActionBaryonBaryon::two_to_two_cross_sections() {

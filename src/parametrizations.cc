@@ -70,12 +70,23 @@ double piminusp_high_energy(double mandelstam_s) {
   return xs_high_energy(mandelstam_s, true, 0.939, 0.138, 18.75, 9.56, 1.767);
 }
 
-double pp_string_hard(double mandelstam_s) {
-  const double xs_ref = 0.0064;
-  const double lnpow = 4.7;
+double xs_string_hard(double mandelstam_s,
+                      double xs_0, double e_0, double lambda_pow) {
   const double sqrts = std::sqrt(mandelstam_s);
-  const double xs = xs_ref * std::pow(std::log(sqrts), lnpow);
+  const double xs = xs_0 * std::pow(std::log(sqrts / e_0), lambda_pow);
   return xs;
+}
+
+double NN_string_hard(double mandelstam_s) {
+  return xs_string_hard(mandelstam_s, 0.087, 4.1, 3.8);
+}
+
+double Npi_string_hard(double mandelstam_s) {
+  return xs_string_hard(mandelstam_s, 0.042, 3.5, 4.2);
+}
+
+double pipi_string_hard(double mandelstam_s) {
+  return xs_string_hard(mandelstam_s, 0.013, 2.3, 4.7);
 }
 
 /** pi+p elastic cross section parametrization.
