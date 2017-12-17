@@ -8,6 +8,7 @@
  */
 
 #include "include/scatteractionmesonmeson.h"
+#include "include/parametrizations.h"
 
 namespace smash {
 
