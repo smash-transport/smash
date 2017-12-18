@@ -39,7 +39,7 @@ General:
     Testparticles: 1
 
     # number of events
-    Nevents:     5 
+    Nevents:     10 
 
     # width of gaussians representing particles, fm
     Gaussian_Sigma: 1.0
