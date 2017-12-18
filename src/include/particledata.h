@@ -86,7 +86,8 @@ class ParticleData {
   /// get history information
   HistoryData get_history() const { return history_; }
   /** Store history information, i.e. the type of process and possibly the
-   * PdgCodes of the parent particles (\p plist). */
+   * PdgCodes of the parent particles (\p plist). Note, history is not set
+   * for dileptons and photons. */
   void set_history(int ncoll, uint32_t pid, ProcessType pt, double time_of_or,
                    const ParticleList &plist);
 
