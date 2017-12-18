@@ -76,7 +76,7 @@ double xs_string_hard(double mandelstam_s,
   if(sqrts < e_0) {
     return 0.;
   } else {
-    const double xs = xs_0 * std::pow(std::log(sqrts / e_0), lambda_pow);
+    double xs = xs_0 * std::pow(std::log(sqrts / e_0), lambda_pow);
     return xs;
   }
 }
