@@ -5,22 +5,15 @@ General:
     Modus:         Collider
     Time_Step_Mode: Fixed
     Delta_Time:    0.1
-    End_Time:      100.0
+    End_Time:      200.0
     Randomseed:    -1
-    Testparticles: 20
     Nevents:       1
     Use_Grid: True
 
 Output:
-    Output_Interval:  1.0
+    Output_Interval:  5.0 
     Particles:
-        Format:          ["Oscar2013", "Binary"]
-        Extended:        True
-    Collisions:
-        Format:          ["Oscar2013", "Binary"]
-        Extended:        True
-        Print_Start_End: True
-
+        Format:          ["Oscar2013"]
 
 Modi:
     Collider:

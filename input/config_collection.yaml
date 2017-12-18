@@ -28,18 +28,18 @@ General:
 
     # Mode of time stepping. Possible values: None, Fixed, Adaptive
     Time_Step_Mode: None
-    Time_Step_Mode: Fixed
+    Time_Step_Mode: Fixed     # default
     Time_Step_Mode: Adaptive
 
     # additional parameters for the adaptive time step mode (need otherwise not
     # be included in the configuratio file)
     Adaptive_Time_Step:
-        Smoothing_Factor:       0.1
-        Target_Missed_Actions:  0.01
-        Allowed_Deviation:      2.5
+        Smoothing_Factor:       0.1   # default = 0.1
+        Target_Missed_Actions:  0.01  # default = 0.01
+        Allowed_Deviation:      2.5   # default = 2.5
 
     # temporal grid spacing
-    Delta_Time:    0.1
+    Delta_Time:    0.1     # default: 1.0 (required for fixed & adaptive timesteps)
 
     # end time of simulation
     End_Time:      100.0
@@ -49,36 +49,35 @@ General:
 
     # number of test particles
     # (For the use of Pauli Blocking, at least 20 test particles are necessary
-    # to yield useful results; Ntest = 200 is however recommended.)
-    Testparticles: 1
-
+    # to yield useful results, Ntest = 200 is however recommended.)
+    Testparticles: 1      # default = 1
     # number of events
     Nevents:       1
 
     # width of gaussians representing particles, in fm
-    Gaussian_Sigma: 1.0
+    Gaussian_Sigma: 1.0   # default = 1.0
 
     # distance at which gaussian values are small enough to set them zero
-    Gauss_Cutoff_In_Sigma: 3.0
+    Gauss_Cutoff_In_Sigma: 3.0    # default: 4.0
 
     # reduce the combinatorics by placing the particles in a grid structure
-    Use_Grid: True
+    Use_Grid: True  # default
     Use_Grid: False
 
     # Select which kind of expansion the metric should have (only use with sphere modus)
-    Metric_Type: "NoExpansion"
+    Metric_Type: "NoExpansion"  # default
     Metric_Type: "MasslessFRW"
     Metric_Type: "MassiveFRW"
     Metric_Type: "Exponential"
 
     # Expansion rate of the metric, if any expansion was selected
-    Expansion_Rate: 0.1
+    Expansion_Rate: 0.1         # default = 0.1
 
 Output:
     # how much time before recording measurables
-    Output_Interval:  1.0
+    Output_Interval:  1.0       # default: end_time
     # Which density is written to collision headers:
-    Density_Type:      "none"
+    Density_Type:      "none"   # default
     Density_Type:      "hadron"
     Density_Type:      "baryon"
     Density_Type:      "baryonic isospin"
@@ -92,14 +91,14 @@ Output:
     Collisions:
         Format:          ["Oscar2013", "Oscar1999", "Binary", "Root"]
         Extended:        True
-        Extended:        False
+        Extended:        False    # default
         Print_Start_End: True
-        Print_Start_End: False
+        Print_Start_End: False    # default
     Dileptons:
         Format:          ["Oscar2013", "Binary", "Root"]
     Photons:
         Format:          ["Oscar2013", "Oscar1999", "Binary", "Root"]
-        Fractions:       100
+        Fractions:       100      (no default)
     Thermodynamics:
         Format:          ["ASCII", "VTK"]
         # baryon := net baryon
@@ -107,39 +106,40 @@ Output:
         Type:            "baryon"
         Type:            "baryonic isospin"
         Type:            "pion"
-        Type:            "none"
+        Type:            "none"   # default
         Quantities:      ["rho_eckart", "tmn", "tmn_landau", "landau_velocity"]
         Position:        [0.0, 0.0, 0.0]
-        Smearing:        True
+        Smearing:        True     # default
         Smearing:        False
 
 
 Collision_Term:
-    Two_to_One:             True
+    Two_to_One:             True  # default
     Two_to_One:             False
-    Two_to_Two:             True
+    Two_to_Two:             True  # default
     Two_to_Two:             False
     Strings:                True
-    Strings:                False
-    NNbar_Treatment:        "no annihilation"
+    Strings:                False # default
+    NNbar_Treatment:        "no annihilation" # default
     NNbar_Treatment:        "resonances"
     NNbar_Treatment:        "strings"
 
-    Force_Decays_At_End:    True
+    Force_Decays_At_End:    True    # default
     Force_Decays_At_End:    False
     Isotropic:              True
-    Isotropic:              False
-    Elastic_Cross_Section:  -1.0  # Globally used if non-negative, [mb]
+    Isotropic:              False   # default
+    Elastic_Cross_Section:  -1.0  # Globally used if non-negative, [mb] (default = -1.0)
     Elastic_NN_Cutoff_Sqrts: 1.98 # Exclude the elastic collisions between the two
                                  # nucleons with the square root s below the value [GeV].
                                  # Exclusion is effectively turned off by setting any value
                                  # below 1.88 (the threshold energy of the elastic collsion).
                                  # And the value is at best not beyond 2.02 ( the threshold
                                  # energy of the inelastic collision NN->NNpi)
+                                 # default = 1.98
     Pauli_Blocking:
-        Spatial_Averaging_Radius:   1.86
-        Momentum_Averaging_Radius:  0.08
-        Gaussian_Cutoff:            2.2
+        Spatial_Averaging_Radius:   1.86  # default = 1.86
+        Momentum_Averaging_Radius:  0.08  # default = 0.08
+        Gaussian_Cutoff:            2.2   # default = 2.2
 
 Forced_Thermalization:
     Lattice_Sizes:          [20.0, 20.0, 50.0]
@@ -147,7 +147,7 @@ Forced_Thermalization:
     Critical_Edens:         0.3     # forced therm. above this energy density [GeV/fm^3]
     Start_Time:             0.0     # forced therm. at t > this time [fm/c]
     Timestep:               1.0     # timestep of thermalization [fm/c]
-    Algorithm:              "biased BF"
+    Algorithm:              "biased BF"     # default
     Algorithm:              "mode sampling"
     Algorithm:              "unbiased BF"
 
@@ -183,9 +183,9 @@ Modi:
 
         # use thermal box, if so with which chemical potentials
         Use_Thermal_Multiplicities: True
-        Use_Thermal_Multiplicities: False
-        Baryon_Chemical_Potential: 0.0
-        Strange_Chemical_Potential: 0.0
+        Use_Thermal_Multiplicities: False   # default
+        Baryon_Chemical_Potential: 0.0    # default = 0.0
+        Strange_Chemical_Potential: 0.0   # default = 0.0
 
         # The following multiplicities initialize a box with 300 pions (100 of
         # each charge state), 50 neutrons and 50 protons. This list can be
@@ -209,7 +209,7 @@ Modi:
         Start_Time: 0.0
         # Initialize sphere with thermal multiplicities
         Use_Thermal_Multiplicities: True
-        Use_Thermal_Multiplicities: False
+        Use_Thermal_Multiplicities: False   # default
         # Number of particles in Sphere
         Init_Multiplicities:
             211:    100
@@ -221,7 +221,7 @@ Modi:
         # expanding universe setup. Options are "thermal momenta", "IC_ES",
         # "IC_1M", "IC_2M" (see Bazow et al. 2016 on FLRW solution of the
         # Boltzmann equation) and "IC_Massive" (generalization of IC_ES)
-        Initial_Condition: "thermal momenta"
+        Initial_Condition: "thermal momenta"  # default
         Initial_Condition: "IC_ES"
         Initial_Condition: "IC_1M"
         Initial_Condition: "IC_2M"
@@ -230,17 +230,17 @@ Modi:
         # Definitions for the projectile:
         Projectile:
             Particles: {2212: 29, 2112: 34}  # Copper63
-            Automatic: True
+            Automatic: True    # default
             Automatic: False
             Deformed: True
-            Deformed: False
+            Deformed: False    # default
         # Definitions for the target:
         Target:
             Particles: {2212: 29, 2112: 34}  # Copper63
-            Automatic: True
+            Automatic: True    # default
             Automatic: False
             Deformed: True
-            Deformed: False
+            Deformed: False    # default
 
         # Collision energy (pick either E_Kin, P_Lab or Sqrtsnn).
         Sqrtsnn: 3.0
@@ -248,29 +248,30 @@ Modi:
         P_Lab: 1.5
 
         # The reference frame in which to do the calculation.
-        Calculation_Frame: "center of velocity"
+        Calculation_Frame: "center of velocity"   # default
         Calculation_Frame: "center of mass"
         Calculation_Frame: "fixed target"
 
-        # Specify an impact parameter (in fm)
+        # Specify an impact parameter
         Impact:
-            Value: 0.0
-            Sample: "quadratic"
-            Sample: "custom"  #only works in combination with Values and Yields.
+            Value: 0.0              # default (in fm)
+            Sample: "quadratic"     # default
+            Sample: "custom"
             Sample: "uniform"
-            Values: [0.0,0.0]
-            Yields: [0.0,0.0]
-            Range: [0.0,0.0]
-            Max: 0.0
-            Initial_Distance: 0.0
+            Values: [0.0, 3.0, 6.0, 9.0]
+            Yields: [0.000000, 2.999525, 5.959843, 6.995699]
+            Range: [3.0, 6.0]
+            Max: 6.0                # default = 0.0
+            Initial_Distance: 2.0   # default = 2.0
+
 
         # Include Fermi motion
         # ("off", "on", "frozen")
-        Fermi_Motion: "off"
+        Fermi_Motion: "off"         # default
         Fermi_Motion: "on"
         Fermi_Motion: "frozen"
         # Determine whether the first collisions within the same nuclues are allowed
-        Collisions_Within_Nucleus: True
+        Collisions_Within_Nucleus: True     (no default specified directly, set to "true" during execution)
         Collisions_Within_Nucleus: False
 
     List:
