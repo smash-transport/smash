@@ -138,9 +138,9 @@ std::pair<double, int> Potentials::force_scale(const ParticleType &data) const {
     }
   }
   skyrme_scale = skyrme_scale * data.pdgcode().baryon_number();
-  /* Hyperons are not affected by the symmetry force.*/
+  /* Symmetry force acts only on the strong stable nucleon and proton.*/
   const int symmetry_scale =
-      data.pdgcode().is_hyperon() ? 0 : data.pdgcode().baryon_number();
+      data.pdgcode().is_nucleon() ? data.pdgcode().baryon_number() : 0;
   return std::make_pair(skyrme_scale, symmetry_scale);
 }
 
