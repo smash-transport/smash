@@ -174,9 +174,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   const double dt = config.take({"General", "Delta_Time"}, 1.);
   const double output_dt = config.take({"Output", "Output_Interval"});
   const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
-  const std::set<IncludedReactions> included_2to2 =
-                         config.take({"Collision_Term", "Included_2to2"})
-                         .convert_for(included_2to2);
+  std::set<IncludedReactions> included_2to2 =
+                         config.take({"Collision_Term", "Included_2to2"});
   const bool strings_switch = config.take({"Collision_Term", "Strings"}, false);
   const NNbarTreatment nnbar_treatment = config.take(
                          {"Collision_Term", "NNbar_Treatment"},

@@ -83,12 +83,13 @@ ScatterActionsFinder::ScatterActionsFinder(
 
 ScatterActionsFinder::ScatterActionsFinder(
     double elastic_parameter, int testparticles,
-    const std::vector<bool> &nucleon_has_interacted, bool two_to_one)
+    const std::vector<bool> &nucleon_has_interacted, bool two_to_one,
+    const std::set<IncludedReactions> &included_2to2)
     : elastic_parameter_(elastic_parameter),
       testparticles_(testparticles),
       isotropic_(false),
       two_to_one_(two_to_one),
-      incl_set_({IncludedReactions::All}),
+      incl_set_(included_2to2),
       low_snn_cut_(0.0),
       strings_switch_(true),
       nnbar_treatment_(NNbarTreatment::NoAnnihilation),
@@ -310,6 +311,7 @@ void ScatterActionsFinder::dump_reactions() const {
   std::cout << "They can make " << N_pairs << " pairs." << std::endl;
   std::vector<double> momentum_scan_list = {0.1, 0.3, 0.5, 1.0, 2.0,
                                             3.0, 5.0, 10.0};
+int i=0;
   for (const IsoParticleType &A_isotype : IsoParticleType::list_all()) {
     for (const IsoParticleType &B_isotype : IsoParticleType::list_all()) {
       if (&A_isotype > &B_isotype) {
@@ -322,6 +324,7 @@ void ScatterActionsFinder::dump_reactions() const {
           if (A_type > B_type) {
             continue;
           }
+std::cout << i++ << " now checking " << A_type->pdgcode() << " " << B_type->pdgcode() << std::endl;
           ParticleData A(*A_type), B(*B_type);
           for (auto mom : momentum_scan_list) {
             A.set_4momentum(A.pole_mass(), mom, 0.0, 0.0);
