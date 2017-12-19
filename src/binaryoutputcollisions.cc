@@ -30,7 +30,7 @@ BinaryOutputCollisions::BinaryOutputCollisions(const bf::path &path,
                   .native()
                   .c_str(),
               "wb"),
-          name, out_par.coll_extended),
+          name, out_par.get_coll_extended(name)),
       print_start_end_(out_par.coll_printstartend) {}
 
 /*!\Userguide
@@ -95,8 +95,8 @@ void BinaryOutputCollisions::at_interaction(const Action &action,
   write(action.outgoing_particles());
 }
 
-BinaryOutputBase::BinaryOutputBase(FILE *f, std::string name, bool extended)
-    : OutputInterface(name), file_{f}, extended_(extended) {
+BinaryOutputBase::BinaryOutputBase(FILE *f, std::string name, bool extended_format)
+    : OutputInterface(name), file_{f}, extended_(extended_format) {
   std::fwrite("SMSH", 4, 1, file_.get());  // magic number
   write(format_version_);                  // file format version number
   std::uint16_t format_variant = static_cast<uint16_t>(extended_);
