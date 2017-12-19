@@ -78,7 +78,6 @@ void ScatterAction::generate_final_state() {
       break;
     case ProcessType::StringHard:
       /* hard string excitation */
-      std::cout << "hard string excitation implemented." << std::endl;
       string_excitation_pythia();
       break;
     default:
