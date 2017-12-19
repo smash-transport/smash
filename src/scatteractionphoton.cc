@@ -56,7 +56,7 @@ void ScatterActionPhoton::generate_final_state() {
   const double pcm_in = cm_momentum();
   const double pcm_out = pCM(sqrts, m3, 0.0);
 
-  double t = Random::uniform(t1, t2);
+  const double t = Random::uniform(t1, t2);
 
   // TODO(schaefer): this should be moved to kinematics.h and tested
   double costheta =
