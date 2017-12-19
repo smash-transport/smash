@@ -92,6 +92,7 @@ void GrandCanThermalizer::sample_in_random_cell_BF_algo(ParticleList &plist,
     phitheta.distribute_isotropically();
     particle.set_4momentum(m, phitheta.threevec() * momentum_radial);
     particle.boost_momentum(-cell.v());
+    particle.set_formation_time(time);
 
     plist.push_back(particle);
   }
