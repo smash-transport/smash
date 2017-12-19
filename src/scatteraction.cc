@@ -379,8 +379,9 @@ CollisionBranchList ScatterAction::string_excitation_cross_sections() {
     assert(std::abs(single_diffr_AX + single_diffr_XB + double_diffr +
                     nondiffractive_all - sig_string_all) < 1.e-6);
 
-    /* Hard string process will be added later.
-     * The corresponding cross section is set to be zero right now. */
+    /* Hard string process is added by hard cross section
+     * in conjunction with multipartion interaction picture
+     * \iref{Sjostrand:1987su}. */
     const double hard_xsec = string_hard_cross_section();
     const double nondiffractive_soft = nondiffractive_all *
                  std::exp(- hard_xsec / nondiffractive_all);
