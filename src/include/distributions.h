@@ -116,7 +116,7 @@ double sample_momenta_from_thermal(const double temperature, const double mass);
  * \param[in] momentum_radial \f$|\vec{p}|\f$ in units of [GeV]
  * \param[in] mass Mass of the particle: in units of [GeV]
  * \param[in] temperature Temperature of the system \f$T\f$ in units of [GeV]
- * \param[in] baryon_chemical_potential \f$n*\mu_{B}\f$ default=0
+ * \param[in] baryon_chemical_potential \f$n*\mu_{B}\f$ default = 0
  * \param[in] lam +/-1 or 0 to determine the distribution type
  * lam=0,  for juttner distribution
  * lam=-1, for bose-einstein distribution
