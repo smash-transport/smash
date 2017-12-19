@@ -28,7 +28,7 @@ General:
 
     # Mode of time stepping. Possible values: None, Fixed, Adaptive
     Time_Step_Mode: None
-    Time_Step_Mode: Fixed     # default
+    Time_Step_Mode: Fixed         # default
     Time_Step_Mode: Adaptive
 
     # additional parameters for the adaptive time step mode (need otherwise not
@@ -50,18 +50,18 @@ General:
     # number of test particles
     # (For the use of Pauli Blocking, at least 20 test particles are necessary
     # to yield useful results, Ntest = 200 is however recommended.)
-    Testparticles: 1      # default = 1
+    Testparticles: 1            # default = 1
     # number of events
     Nevents:       1
 
     # width of gaussians representing particles, in fm
-    Gaussian_Sigma: 1.0   # default = 1.0
+    Gaussian_Sigma: 1.0         # default = 1.0
 
     # distance at which gaussian values are small enough to set them zero
-    Gauss_Cutoff_In_Sigma: 3.0    # default: 4.0
+    Gauss_Cutoff_In_Sigma: 3.0  # default: 4.0
 
     # reduce the combinatorics by placing the particles in a grid structure
-    Use_Grid: True  # default
+    Use_Grid: True              # default
     Use_Grid: False
 
     # Select which kind of expansion the metric should have (only use with sphere modus)
@@ -85,8 +85,8 @@ Output:
     Particles:
         Format:          ["Oscar2013", "Oscar1999", "Binary", "VTK", "Root"]
         Extended:        True
-        Extended:        False
-        Only_Final:      True
+        Extended:        False    # default
+        Only_Final:      True     # default
         Only_Final:      False
     Collisions:
         Format:          ["Oscar2013", "Oscar1999", "Binary", "Root"]
