@@ -96,6 +96,8 @@ Output:
         Print_Start_End: False    # default
     Dileptons:
         Format:          ["Oscar2013", "Binary", "Root"]
+        Extended:        True
+        Extended:        False    # default
     Photons:
         Format:          ["Oscar2013", "Oscar1999", "Binary", "Root"]
         Fractions:       100      (no default)
