@@ -91,6 +91,8 @@ TEST(sanity_box) {
   conf["Modi"]["Box"]["Length"] = 5.0;
   conf["Modi"]["Box"]["Temperature"] = 0.13;
   conf["Modi"]["Box"]["Start_Time"] = 0.2;
+  conf["Modi"]["Box"]["Init_Multiplicities"]["2212"] = 100;
+  conf["Modi"]["Box"]["Init_Multiplicities"]["2112"] = 100;
   ExperimentParameters param = smash::Test::default_parameters();
   BoxModus b(conf["Modi"], param);
   Particles P;
@@ -102,11 +104,9 @@ TEST(sanity_collider) {
   Configuration conf = Test::configuration();
   conf.take({"Modi", "Collider", "Projectile"});
   conf.take({"Modi", "Collider", "Target"});
-  conf["Modi"]["Collider"]["Sqrtsnn"] = 1.0;
-  conf["Modi"]["Collider"]["Sqrts_Reps"][0] = "661";
-  conf["Modi"]["Collider"]["Sqrts_Reps"][1] = "661";
   conf["Modi"]["Collider"]["Projectile"]["Particles"]["661"] = 1;
   conf["Modi"]["Collider"]["Target"]["Particles"]["661"] = 1;
+  conf["Modi"]["Collider"]["Ekin"] = 1.0;
   ExperimentParameters param = smash::Test::default_parameters();
   ColliderModus n(conf["Modi"], param);
   Particles P;
@@ -119,7 +119,6 @@ TEST(sanity_sphere) {
   conf["Modi"]["Sphere"]["Radius"] = 10;
   conf["Modi"]["Sphere"]["Sphere_Temperature"] = 0.2;
   conf["Modi"]["Sphere"]["Start_Time"] = 0.0;
-  conf.take({"Modi", "Sphere", "Init_Multiplicities"});
   conf["Modi"]["Sphere"]["Init_Multiplicities"]["661"] = 500;
   ExperimentParameters param = smash::Test::default_parameters();
   SphereModus s(conf["Modi"], param);

@@ -37,11 +37,12 @@ static BoxModus create_box_for_tests() {
   const double L = 10.;
   const double T_init = 0.2;
   conf["Modus"] = "Box";
-  conf.take({"Modi", "Box", "Init_Multiplicities"});
   conf["Modi"]["Box"]["Init_Multiplicities"]["2212"] = N;
   conf["Modi"]["Box"]["Init_Multiplicities"]["311"] = N;
   conf["Modi"]["Box"]["Length"] = L;
   conf["Modi"]["Box"]["Temperature"] = T_init;
+  conf["Modi"]["Box"]["Initial_Condition"] = "thermal momenta";
+  conf["Modi"]["Box"]["Start_Time"] = 0.0;
   const ExperimentParameters par = smash::Test::default_parameters();
   return BoxModus(conf["Modi"], par);
 }

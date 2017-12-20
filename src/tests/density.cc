@@ -155,9 +155,11 @@ TEST(smearing_factor_normalization) {
   const double L = 10.;
   auto conf = Test::configuration();
   conf["Modus"] = "Box";
-  conf.take({"Modi", "Box", "Init_Multiplicities"});
   conf["Modi"]["Box"]["Init_Multiplicities"]["2212"] = N;
   conf["Modi"]["Box"]["Length"] = L;
+  conf["Modi"]["Box"]["Initial_Condition"] = "thermal momenta";
+  conf["Modi"]["Box"]["Temperature"] = 0.2;
+  conf["Modi"]["Box"]["Start_Time"] = 0.0;
   const ExperimentParameters par = smash::Test::default_parameters();
   const DensityParameters dens_par = DensityParameters(par);
   std::unique_ptr<BoxModus> b = make_unique<BoxModus>(conf["Modi"], par);
