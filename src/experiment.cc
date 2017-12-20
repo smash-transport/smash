@@ -242,7 +242,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   const double output_dt = config.take({"Output", "Output_Interval"}, t_end);
   const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
   const bool two_to_two = config.take({"Collision_Term", "Two_to_Two"}, true);
-  const bool strings_switch = config.take({"Collision_Term", "Strings"}, false);
+  const bool strings_switch = config.take({"Collision_Term", "Strings"}, true);
   const NNbarTreatment nnbar_treatment = config.take(
       {"Collision_Term", "NNbar_Treatment"}, NNbarTreatment::NoAnnihilation);
   const bool photons_switch = config.has_value({"Output", "Photons"});
