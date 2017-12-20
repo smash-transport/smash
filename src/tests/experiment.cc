@@ -43,7 +43,7 @@ TEST(create_sphere) { VERIFY(!!Test::experiment(
                          "  Nevents: 1\n"
                          "Modi: \n"
                          "  Sphere:\n"
-                         "    Initial_Condition: \"peaked momenta\"\n"
+                         "    Initial_Condition: \"thermal momenta\"\n"
                          "    Radius: 5.0\n"
                          "    Sphere_Temperature: 0.2\n"
                          "    Start_Time: 0.0\n"
