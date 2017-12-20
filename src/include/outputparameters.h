@@ -8,6 +8,7 @@
 #define SRC_INCLUDE_OUTPUTPARAMETERS_H_
 
 #include <set>
+#include <string>
 
 #include "configuration.h"
 #include "density.h"
