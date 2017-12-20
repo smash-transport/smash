@@ -95,7 +95,8 @@ void BinaryOutputCollisions::at_interaction(const Action &action,
   write(action.outgoing_particles());
 }
 
-BinaryOutputBase::BinaryOutputBase(FILE *f, std::string name, bool extended_format)
+BinaryOutputBase::BinaryOutputBase(FILE *f, std::string name,
+                                   bool extended_format)
     : OutputInterface(name), file_{f}, extended_(extended_format) {
   std::fwrite("SMSH", 4, 1, file_.get());  // magic number
   write(format_version_);                  // file format version number

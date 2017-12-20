@@ -73,7 +73,7 @@ double piminusp_high_energy(double mandelstam_s) {
 double xs_string_hard(double mandelstam_s,
                       double xs_0, double e_0, double lambda_pow) {
   const double sqrts = std::sqrt(mandelstam_s);
-  if(sqrts < e_0) {
+  if (sqrts < e_0) {
     return 0.;
   } else {
     double xs = xs_0 * std::pow(std::log(sqrts / e_0), lambda_pow);
