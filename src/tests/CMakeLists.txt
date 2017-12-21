@@ -324,9 +324,9 @@ if(USE_SANITIZER)
                     -c "Modi: {Box: {Init_Multiplicities: {111: 100}}}"
                     -c "Modi: {Box: {Init_Multiplicities: {2212: 50}}}"
                     -c "Modi: {Box: {Init_Multiplicities: {2112: 50}}}"
-                    -c "Collision_Term: {Strings: false}}")
+                    -c "Collision_Term: {Strings: false}")
    smash_add_runtest(sanitizer_collider smash_sanitizer smash_sanitizer -e 5.0 -m Collider
-                    -c "Collision_Term: {Strings: false}}")
+                    -c "Collision_Term: {Strings: false}")
    smash_add_runtest(sanitizer_sphere   smash_sanitizer smash_sanitizer -e 5.0
                     -m Sphere -c "Modi: {Sphere: {Radius: 5.0}}"
                     -c "Modi: {Sphere: {Sphere_Temperature: 0.2}}"
@@ -337,5 +337,5 @@ if(USE_SANITIZER)
                     -c "Modi: {Sphere: {Init_Multiplicities: {111: 100}}}"
                     -c "Modi: {Sphere: {Init_Multiplicities: {2212: 50}}}"
                     -c "Modi: {Sphere: {Init_Multiplicities: {2112: 50}}}"
-                    -c "Collision_Term: {Strings: false}}")
+                    -c "Collision_Term: {Strings: false}")
 endif()
