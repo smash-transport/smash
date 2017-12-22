@@ -91,8 +91,11 @@ TEST(sanity_box) {
   conf["Modi"]["Box"]["Length"] = 5.0;
   conf["Modi"]["Box"]["Temperature"] = 0.13;
   conf["Modi"]["Box"]["Start_Time"] = 0.2;
-  conf["Modi"]["Box"]["Init_Multiplicities"]["2212"] = 100;
-  conf["Modi"]["Box"]["Init_Multiplicities"]["2112"] = 100;
+  conf["Modi"]["Box"]["Init_Multiplicities"]["2212"] = 50;
+  conf["Modi"]["Box"]["Init_Multiplicities"]["2112"] = 50;
+  conf["Modi"]["Box"]["Init_Multiplicities"]["211"] = 100;
+  conf["Modi"]["Box"]["Init_Multiplicities"]["111"] = 100;
+  conf["Modi"]["Box"]["Init_Multiplicities"]["-211"] = 100;
   ExperimentParameters param = smash::Test::default_parameters();
   BoxModus b(conf["Modi"], param);
   Particles P;
