@@ -411,7 +411,7 @@ double ScatterActionPhoton::diff_cross_section(double t, double t2,
       // never reached
       break;
   }
-  return diff_xsection * to_mb;
+  return diff_xsection;
 }
 
 double ScatterActionPhoton::form_factor(double E_photon) {

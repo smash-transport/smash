@@ -1464,8 +1464,8 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho_pi0(
 
 	return to_mb * diff_xs / spin_deg_factor;
 }
-*/
 
+*/
 
 /*----------------------------------------------------------------------------*/
 /* 					Pi + Rho -> Pi + Photon channels mediated by (omega) 						  */
