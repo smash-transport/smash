@@ -50,7 +50,7 @@ TEST(enable_float_traps) {
   std::signal(SIGFPE, &handle_fpe);
 
   VERIFY(!std::fetestexcept(FE_DIVBYZERO));  // flag not set yet
-  Smash::enable_float_traps(FE_DIVBYZERO);   // now it must trap
+  smash::enable_float_traps(FE_DIVBYZERO);   // now it must trap
   VERIFY(!std::fetestexcept(FE_DIVBYZERO));  // flag not set yet
 
   bool got_exception = false;

@@ -26,7 +26,7 @@
 #include "../include/random.h"
 #include "../include/scatteraction.h"
 
-using namespace Smash;
+using namespace smash;
 
 static const double accuracy = 1.0e-4;
 static const int data_elements = 12;

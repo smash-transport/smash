@@ -10,7 +10,7 @@
 #ifndef SRC_INCLUDE_PDGCODE_CONSTANTS_H_
 #define SRC_INCLUDE_PDGCODE_CONSTANTS_H_
 
-namespace Smash {
+namespace smash {
 /**
  * Constants representing PDG codes.
  *
@@ -69,6 +69,6 @@ constexpr uint64_t pack(int32_t x, int32_t y) {
   //^ Casting to an intermediate 32-bit integer is important!
 }
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_PDGCODE_CONSTANTS_H_

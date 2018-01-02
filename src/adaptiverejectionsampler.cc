@@ -16,7 +16,7 @@
 #include "include/fpenvironment.h"
 #include "include/logging.h"
 
-namespace Smash {
+namespace smash {
 
 namespace Rejection {
 std::ostream &operator<<(std::ostream &out, const Point &p) {
@@ -383,4 +383,4 @@ double AdaptiveRejectionSampler::get_one_sample() {
 }
 
 }  // end namespace Rejection
-}  // end namespace Smash
+}  // end namespace smash

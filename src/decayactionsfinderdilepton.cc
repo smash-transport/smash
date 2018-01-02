@@ -15,7 +15,7 @@
 #include "include/decaymodes.h"
 #include "include/particles.h"
 
-namespace Smash {
+namespace smash {
 
 void DecayActionsFinderDilepton::shine(const Particles &search_list,
                                        OutputInterface *output,
@@ -90,4 +90,4 @@ void DecayActionsFinderDilepton::shine_final(const Particles &search_list,
   }
 }
 
-}  // namespace Smash
+}  // namespace smash

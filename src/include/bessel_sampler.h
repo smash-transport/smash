@@ -16,7 +16,7 @@
 #include "logging.h"
 #include "random.h"
 
-namespace Smash {
+namespace smash {
 
 /** The intention of this class is to efficiently sample \f$ (N_1, N_2) \f$
  * from the distribution \f$ p(N_1,N_2) \sim \mathrm{Poi}(\nu_1)
@@ -121,6 +121,6 @@ class BesselSampler {
   double sigma_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_BESSEL_SAMPLER_H_

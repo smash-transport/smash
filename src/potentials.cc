@@ -12,7 +12,7 @@
 #include "include/constants.h"
 #include "include/density.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * Potentials constructor. Gets parameters of potentials from configuration.
@@ -172,4 +172,4 @@ std::pair<ThreeVector, ThreeVector> Potentials::potential_gradient(
   return std::make_pair(dUB_dr, dUsym_dr);
 }
 
-}  // namespace Smash
+}  // namespace smash

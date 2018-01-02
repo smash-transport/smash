@@ -11,7 +11,7 @@
 
 #include <sstream>
 
-namespace Smash {
+namespace smash {
 
 inline static int utf8_adjust(const std::string &s, int width) {
   for (unsigned char c : s) {
@@ -98,4 +98,4 @@ std::vector<std::string> split(const std::string &s, char delim) {
   return elems;
 }
 
-}  // namespace Smash
+}  // namespace smash

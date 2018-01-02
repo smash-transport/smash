@@ -13,7 +13,7 @@
 #include "../include/fourvector.h"
 #include "../include/lattice.h"
 
-using namespace Smash;
+using namespace smash;
 
 static std::unique_ptr<RectangularLattice<FourVector>> create_lattice(bool p) {
   const std::array<double, 3> l = {10., 6., 2.};

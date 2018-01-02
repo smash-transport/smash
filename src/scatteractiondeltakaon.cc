@@ -13,7 +13,7 @@
 #include "include/parametrizations.h"
 #include "include/pdgcode_constants.h"
 
-namespace Smash {
+namespace smash {
 
 void ScatterActionDeltaKaon::format_debug_output(std::ostream& out) const {
   out << "Delta-Kaon  ";
@@ -49,7 +49,7 @@ CollisionBranchList ScatterActionDeltaKaon::two_to_two_cross_sections() {
                                                       type_K_p) *
                            kplusn_ratios.get_ratio(type_p, type_K_p, type_kaon,
                                                    type_delta) *
-                           kplusp_inelastic(s);
+                           kplusp_inelastic_background(s);
                   },
                   sqrts, type_p, type_K_p);
       break;
@@ -65,7 +65,7 @@ CollisionBranchList ScatterActionDeltaKaon::two_to_two_cross_sections() {
                                                       type_K_m) *
                            kplusn_ratios.get_ratio(type_p_bar, type_K_m,
                                                    type_kaon, type_delta) *
-                           kplusp_inelastic(s);
+                           kplusp_inelastic_background(s);
                   },
                   sqrts, type_p_bar, type_K_m);
       break;
@@ -83,7 +83,7 @@ CollisionBranchList ScatterActionDeltaKaon::two_to_two_cross_sections() {
                                                       type_K_p) *
                            kplusn_ratios.get_ratio(type_n, type_K_p, type_kaon,
                                                    type_delta) *
-                           kplusn_inelastic(s);
+                           kplusn_inelastic_background(s);
                   },
                   sqrts, type_n, type_K_p);
 
@@ -94,7 +94,7 @@ CollisionBranchList ScatterActionDeltaKaon::two_to_two_cross_sections() {
                                                       type_K_z) *
                            kplusn_ratios.get_ratio(type_p, type_K_z, type_kaon,
                                                    type_delta) *
-                           kplusp_inelastic(s);
+                           kplusp_inelastic_background(s);
                   },
                   sqrts, type_p, type_K_z);
       break;
@@ -112,7 +112,7 @@ CollisionBranchList ScatterActionDeltaKaon::two_to_two_cross_sections() {
                                                       type_K_m) *
                            kplusn_ratios.get_ratio(type_n_bar, type_K_m,
                                                    type_kaon, type_delta) *
-                           kplusn_inelastic(s);
+                           kplusn_inelastic_background(s);
                   },
                   sqrts, type_n_bar, type_K_m);
 
@@ -123,7 +123,7 @@ CollisionBranchList ScatterActionDeltaKaon::two_to_two_cross_sections() {
                                                       type_Kbar_z) *
                            kplusn_ratios.get_ratio(type_p_bar, type_Kbar_z,
                                                    type_kaon, type_delta) *
-                           kplusp_inelastic(s);
+                           kplusp_inelastic_background(s);
                   },
                   sqrts, type_p_bar, type_Kbar_z);
       break;
@@ -139,7 +139,7 @@ CollisionBranchList ScatterActionDeltaKaon::two_to_two_cross_sections() {
                                                       type_K_z) *
                            kplusn_ratios.get_ratio(type_n, type_K_z, type_kaon,
                                                    type_delta) *
-                           kplusn_inelastic(s);
+                           kplusn_inelastic_background(s);
                   },
                   sqrts, type_n, type_K_z);
       break;
@@ -155,7 +155,7 @@ CollisionBranchList ScatterActionDeltaKaon::two_to_two_cross_sections() {
                                                       type_Kbar_z) *
                            kplusn_ratios.get_ratio(type_n_bar, type_Kbar_z,
                                                    type_kaon, type_delta) *
-                           kplusn_inelastic(s);
+                           kplusn_inelastic_background(s);
                   },
                   sqrts, type_n_bar, type_Kbar_z);
       break;
@@ -167,4 +167,4 @@ CollisionBranchList ScatterActionDeltaKaon::two_to_two_cross_sections() {
   return process_list;
 }
 
-}  // namespace Smash
+}  // namespace smash

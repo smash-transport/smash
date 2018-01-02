@@ -32,7 +32,7 @@
 #include "include/processbranch.h"
 #include "include/stringfunctions.h"
 
-namespace Smash {
+namespace smash {
 
 #ifdef SMASH_INLINE_LIST_ALL
 const ParticleTypeList *all_particle_types = nullptr;
@@ -737,4 +737,4 @@ std::ostream &operator<<(std::ostream &out, const ParticleType &type) {
              << ", spin:" << field<2> << pdg.spin() << "/2 ]";
 }
 
-}  // namespace Smash
+}  // namespace smash

@@ -15,7 +15,7 @@
 #include "include/logging.h"
 #include "include/spheremodus.h"
 
-namespace Smash {
+namespace smash {
 
 /*Function to calculate the hubble parameter*/
 double calc_hubble(double time, const ExpansionProperties &metric) {
@@ -182,4 +182,4 @@ void update_momenta(Particles *particles, double dt, const Potentials &pot,
   }
 }
 
-}  // namespace Smash
+}  // namespace smash

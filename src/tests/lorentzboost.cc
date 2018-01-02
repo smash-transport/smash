@@ -10,7 +10,7 @@
 #include "../include/angles.h"
 #include "../include/fourvector.h"
 
-using namespace Smash;
+using namespace smash;
 
 constexpr double accuracy = 4e-9;
 Angles dir;

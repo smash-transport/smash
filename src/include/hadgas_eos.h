@@ -20,7 +20,7 @@
 #include "constants.h"
 #include "particletype.h"
 
-namespace Smash {
+namespace smash {
 
 // Forward declaration of HadronGasEos - it is used in EosTable
 class HadronGasEos;
@@ -229,6 +229,6 @@ class HadronGasEos {
   const bool tabulate_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_HADGAS_EOS_H_

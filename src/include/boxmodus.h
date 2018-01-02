@@ -13,7 +13,7 @@
 #include "forwarddeclarations.h"
 #include "modusdefault.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup modus
@@ -68,7 +68,7 @@ class BoxModus : public ModusDefault {
   int impose_boundary_conditions(Particles *particles,
                                  const OutputsList &output_list = {});
 
-  /// \copydoc Smash::ModusDefault::create_grid
+  /// \copydoc smash::ModusDefault::create_grid
   Grid<GridOptions::PeriodicBoundaries> create_grid(
       const Particles &particles, double min_cell_length,
       CellSizeStrategy strategy = CellSizeStrategy::Optimal) const {
@@ -78,7 +78,7 @@ class BoxModus : public ModusDefault {
             strategy};
   }
 
-  /// \copydoc Smash::ModusDefault::create_grandcan_thermalizer
+  /// \copydoc smash::ModusDefault::create_grandcan_thermalizer
   std::unique_ptr<GrandCanThermalizer> create_grandcan_thermalizer(
       Configuration &conf) const {
     const std::array<double, 3> lat_size = {length_, length_, length_};
@@ -88,7 +88,7 @@ class BoxModus : public ModusDefault {
                                             periodicity);
   }
 
-  /// \copydoc Smash::ModusDefault::max_timestep()
+  /// \copydoc smash::ModusDefault::max_timestep()
   double max_timestep(double max_transverse_distance_sqr) const {
     return 0.5 * std::sqrt(length_ * length_ - max_transverse_distance_sqr);
   }
@@ -119,6 +119,6 @@ class BoxModus : public ModusDefault {
   friend std::ostream &operator<<(std::ostream &, const BoxModus &);
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_BOXMODUS_H_

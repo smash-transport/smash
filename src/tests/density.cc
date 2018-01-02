@@ -26,7 +26,7 @@
 #include "../include/nucleus.h"
 #include "../include/thermodynamicoutput.h"
 
-using namespace Smash;
+using namespace smash;
 
 static const bf::path testoutputpath = bf::absolute(SMASH_TEST_OUTPUT_PATH);
 
@@ -90,7 +90,7 @@ TEST(density_value) {
   ParticleList P;
   P.push_back(part_x);
   ThreeVector r;
-  const ExperimentParameters exp_par = Smash::Test::default_parameters();
+  const ExperimentParameters exp_par = smash::Test::default_parameters();
   const DensityParameters par(exp_par);
   double rho;
   DensityType bar_dens = DensityType::Baryon;
@@ -129,7 +129,7 @@ TEST(density_eckart_special_cases) {
   P.push_back(pr);
   P.push_back(apr);
   ThreeVector r(1.0, 0.0, 0.0);
-  const ExperimentParameters exp_par = Smash::Test::default_parameters();
+  const ExperimentParameters exp_par = smash::Test::default_parameters();
   const DensityParameters par(exp_par);
   const double f =
       1.0 / smearing_factor_rcut_correction(exp_par.gauss_cutoff_in_sigma);
@@ -158,7 +158,7 @@ TEST(smearing_factor_normalization) {
   conf.take({"Modi", "Box", "Init_Multiplicities"});
   conf["Modi"]["Box"]["Init_Multiplicities"]["2212"] = N;
   conf["Modi"]["Box"]["Length"] = L;
-  const ExperimentParameters par = Smash::Test::default_parameters();
+  const ExperimentParameters par = smash::Test::default_parameters();
   const DensityParameters dens_par = DensityParameters(par);
   std::unique_ptr<BoxModus> b = make_unique<BoxModus>(conf["Modi"], par);
   Particles P;
@@ -197,7 +197,7 @@ TEST(density_gradient) {
   P.push_back(part1);
   P.push_back(part2);
 
-  const ExperimentParameters par = Smash::Test::default_parameters();
+  const ExperimentParameters par = smash::Test::default_parameters();
   ThreeVector r, dr;
   FourVector jmu;
   DensityType dtype = DensityType::Baryon;
@@ -276,7 +276,7 @@ TEST(density_eckart_frame) {
   create_particle_list(Pdef);
   OutputsList out;
   // clock, output interval, cross-section, testparticles, gauss. sigma
-  ExperimentParameters param = Smash::Test::default_parameters();
+  ExperimentParameters param = smash::Test::default_parameters();
   double dx = 0.3;
   double dy = 0.3;
   double dz = 0.3;
@@ -330,7 +330,7 @@ TEST(nucleus_density) {
   const int npoints = 100;
 
   Configuration&& conf{testoutputpath, configfilename};
-  ExperimentParameters par = Smash::Test::default_parameters(Ntest);
+  ExperimentParameters par = smash::Test::default_parameters(Ntest);
   std::unique_ptr<ThermodynamicOutput> out =
 make_unique<ThermodynamicOutput>(testoutputpath, std::move(conf));
   out->density_along_line("lead_densityX.dat", plist, par, dens_type,
@@ -358,7 +358,7 @@ conf["Modus"] = "Box";
 conf.take({"Modi", "Box", "Init_Multiplicities"});
 conf["Modi"]["Box"]["Init_Multiplicities"]["2212"] = 1000;
 conf["Modi"]["Box"]["Length"] = L;
-const ExperimentParameters par = Smash::Test::default_parameters(Ntest);
+const ExperimentParameters par = smash::Test::default_parameters(Ntest);
 std::unique_ptr<BoxModus> b = make_unique<BoxModus>(conf["Modi"], par);
 Particles P;
 b->initial_conditions(&P, par);
@@ -372,7 +372,7 @@ make_unique<ThermodynamicOutput>(testoutputpath,
 const ThreeVector lstart = ThreeVector(0.0, 0.0, 0.0);
 const ThreeVector lend = ThreeVector(L, L, L);
 const int npoints = 100;
-ExperimentParameters par = Smash::Test::default_parameters(Ntest);
+ExperimentParameters par = smash::Test::default_parameters(Ntest);
 out->density_along_line("box_density.dat", plist, par, DensityType::Baryon,
                         lstart, lend, npoints);
 }*/

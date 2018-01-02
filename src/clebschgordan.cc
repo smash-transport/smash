@@ -12,7 +12,7 @@
 #include "include/constants.h"
 #include "include/logging.h"
 
-namespace Smash {
+namespace smash {
 
 double clebsch_gordan(const int j_a, const int j_b, const int j_c,
                       const int m_a, const int m_b, const int m_c) {
@@ -95,4 +95,4 @@ double isospin_clebsch_gordan_sqr_2to2(const ParticleType &t_a,
   return isospin_factor;
 }
 
-}  // namespace Smash
+}  // namespace smash

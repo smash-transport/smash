@@ -14,7 +14,7 @@
 
 #include "scatteractionbaryonbaryon.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup action
@@ -62,6 +62,6 @@ class ScatterActionNucleonNucleon : public ScatterActionBaryonBaryon {
       const IntegrationMethod integrator);
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_SCATTERACTIONNUCLEONNUCLEON_H_

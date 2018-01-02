@@ -17,7 +17,7 @@
 #include "include/random.h"
 #include "include/threevector.h"
 
-namespace Smash {
+namespace smash {
 
 /*!\Userguide
  * \page input_deformed_nucleus_ Deformed Nucleus
@@ -173,4 +173,4 @@ double DeformedNucleus::y_l_0(int l, double cosx) const {
   }
 }
 
-}  // namespace Smash
+}  // namespace smash

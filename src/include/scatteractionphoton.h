@@ -46,25 +46,25 @@ class ScatterActionPhoton : public ScatterAction {
 
   double raw_weight_value() const override { return weight_; }
 
-  // returns the cross section of the underlying hadronic process (note: this includes also 
+  // returns the cross section of the underlying hadronic process (note: this includes also
   // the total cross section of the photon channels.)
   double cross_section() const override { return total_cross_section_; }
 
-  // we have to override sample_masses from Action. In Action sample_masses relies 
+  // we have to override sample_masses from Action. In Action sample_masses relies
   // on the outgoing particles member. At the point where we need this function, this member
-  // outgoing_particles_ of Action is not yet accessible. 
-  // ToDo: See if one can call the Action constructor in ScatterActionPhoton constructor and 
-  // set direct the outgoing particles (known at time of constructor calling). But since 
-  // all the inheritance stuff will change in the near future we might as well go for now 
-  // with the custom solution and treat the photons in the special manner as they are meant. 
+  // outgoing_particles_ of Action is not yet accessible.
+  // ToDo: See if one can call the Action constructor in ScatterActionPhoton constructor and
+  // set direct the outgoing particles (known at time of constructor calling). But since
+  // all the inheritance stuff will change in the near future we might as well go for now
+  // with the custom solution and treat the photons in the special manner as they are meant.
 
-  // actually we do not need a pair. second particle will always be a photon. 
+  // actually we do not need a pair. second particle will always be a photon.
   double sample_out_hadron_mass(const ParticleTypePtr out_type);
   /** Overridden to effectively return the reaction channel. */
   ProcessType get_type() const override {
     return static_cast<ProcessType>(reac);
   }
-  
+
   /** Adds one dummy channel with a given cross-section. The intended use is to
    * add the hadronic cross-section from already performed hadronic action
    * without recomputing it. The photon action is never performed, so
@@ -131,6 +131,6 @@ class ScatterActionPhoton : public ScatterAction {
   double form_factor(double E_photon);
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_SCATTERACTIONPHOTON_H_

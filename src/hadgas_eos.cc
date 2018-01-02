@@ -19,7 +19,7 @@
 #include "include/forwarddeclarations.h"
 #include "include/hadgas_eos.h"
 
-namespace Smash {
+namespace smash {
 
 EosTable::EosTable(double de, double dnb, size_t n_e, size_t n_nb)
     : de_(de), dnb_(dnb), n_e_(n_e), n_nb_(n_nb) {
@@ -443,4 +443,4 @@ std::string HadronGasEos::print_solver_state(size_t iter) const {
   return s.str();
 }
 
-}  // namespace Smash
+}  // namespace smash

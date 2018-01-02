@@ -14,7 +14,7 @@
 #include "../include/nucleus.h"
 #include "../include/pdgcode.h"
 
-using namespace Smash;
+using namespace smash;
 
 // we'll have equal particle tyoes for now so that center() ==
 // center_of_mass (which is not yet implemented).

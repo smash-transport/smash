@@ -19,7 +19,7 @@
 #include "include/quantumnumbers.h"
 #include "include/random.h"
 
-namespace Smash {
+namespace smash {
 
 GrandCanThermalizer::GrandCanThermalizer(const std::array<double, 3> lat_sizes,
                                          const std::array<int, 3> n_cells,
@@ -92,6 +92,7 @@ void GrandCanThermalizer::sample_in_random_cell_BF_algo(ParticleList &plist,
     phitheta.distribute_isotropically();
     particle.set_4momentum(m, phitheta.threevec() * momentum_radial);
     particle.boost_momentum(-cell.v());
+    particle.set_formation_time(time);
 
     plist.push_back(particle);
   }
@@ -607,4 +608,4 @@ std::ostream &operator<<(std::ostream &out, const ThermLatticeNode &node) {
              << ", mus: " << node.mus();
 }
 
-}  // namespace Smash
+}  // namespace smash

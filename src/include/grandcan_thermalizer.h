@@ -21,7 +21,7 @@
 #include "particledata.h"
 #include "quantumnumbers.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * The ThermLatticeNode class is intended to compute thermodynamical quantities
@@ -263,6 +263,7 @@ class GrandCanThermalizer {
     phitheta.distribute_isotropically();
     particle.set_4momentum(m, phitheta.threevec() * momentum_radial);
     particle.boost_momentum(-cell.v());
+    particle.set_formation_time(time);
 
     return particle;
   }
@@ -332,6 +333,6 @@ class GrandCanThermalizer {
   const ThermalizationAlgorithm algorithm_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_GRANDCAN_THERMALIZER_H_

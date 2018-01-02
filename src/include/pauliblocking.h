@@ -17,7 +17,7 @@
 #include "pdgcode.h"
 #include "threevector.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * A class that stores parameters needed for Pauli blocking,
@@ -68,6 +68,6 @@ class PauliBlocker {
   // Weights: tabulated results of numerical integration
   std::array<double, 30> weights_;
 };
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_PAULIBLOCKING_H_

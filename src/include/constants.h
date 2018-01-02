@@ -11,7 +11,7 @@
 #include <cstdint>
 #include <limits>
 
-namespace Smash {
+namespace smash {
 
 /**
  * GeV <-> fm conversion factor
@@ -95,6 +95,6 @@ constexpr double maximum_cross_section = 200.;  // mb
 constexpr std::uint32_t ID_PROCESS_PHOTON =
     std::numeric_limits<std::uint32_t>::max();
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_CONSTANTS_H_

@@ -19,7 +19,7 @@
 #include "include/logging.h"
 #include "include/stringfunctions.h"
 
-namespace Smash {
+namespace smash {
 
 std::vector<DecayModes> *DecayModes::all_decay_modes = nullptr;
 
@@ -389,4 +389,4 @@ void DecayModes::load_decaymodes(const std::string &input) {
   }
 }
 
-}  // namespace Smash
+}  // namespace smash

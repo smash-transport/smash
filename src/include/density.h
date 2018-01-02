@@ -23,7 +23,7 @@
 #include "pdgcode.h"
 #include "threevector.h"
 
-namespace Smash {
+namespace smash {
 
 /** Allows to choose which kind of density to calculate.
  *  The baryon density is necessary for the Skyrme potential.
@@ -336,6 +336,6 @@ void update_Tmn_lattice(RectangularLattice<EnergyMomentumTensor> *lat,
                         const DensityParameters &par,
                         const Particles &particles);
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_DENSITY_H_

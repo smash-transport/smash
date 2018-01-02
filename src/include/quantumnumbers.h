@@ -14,7 +14,7 @@
 
 #include "particles.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup data
@@ -262,6 +262,6 @@ class QuantumNumbers {
   int baryon_number_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_QUANTUMNUMBERS_H_

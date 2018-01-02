@@ -12,7 +12,7 @@
 
 #include "scatteraction.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup action
@@ -26,6 +26,11 @@ class ScatterActionBaryonMeson : public ScatterAction {
   /** Determine the parametrized total cross section at high energies
    * for a baryon-meson collision. */
   double high_energy_cross_section() const override;
+  /**
+   * Determine the (parametrized) hard non-diffractive string cross section
+   * for a baryon-meson collision.
+   */
+  double string_hard_cross_section() const override;
 
  protected:
   /**
@@ -35,6 +40,6 @@ class ScatterActionBaryonMeson : public ScatterAction {
   void format_debug_output(std::ostream &out) const override;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_SCATTERACTIONBARYONMESON_H_

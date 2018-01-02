@@ -32,7 +32,7 @@
 #include "include/scatteractionphoton.h"
 #include "include/stringfunctions.h"
 
-namespace Smash {
+namespace smash {
 /*!\Userguide
 * \page input_collision_term_ Collision_Term
 * \key Elastic_Cross_Section (double, optional, default = -1.0 [mb]) \n
@@ -79,6 +79,9 @@ ScatterActionsFinder::ScatterActionsFinder(
     const auto &log = logger<LogArea::FindScatter>();
     log.info("Constant elastic isotropic cross-section mode:", " using ",
              elastic_parameter_, " mb as maximal cross-section.");
+  }
+  if (strings_switch_) {
+    string_process_interface_ = make_unique<StringProcess>();
   }
 }
 
@@ -147,6 +150,9 @@ ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
     act = make_unique<ScatterActionMesonMeson>(data_a, data_b,
                                                time_until_collision, isotropic_,
                                                string_formation_time_);
+  }
+  if (strings_switch_) {
+    act->set_string_interface(string_process_interface_.get());
   }
   return act;
 }
@@ -334,12 +340,17 @@ void ScatterActionsFinder::dump_reactions() const {
             }
             any_nonzero_cs = true;
             for (const auto &channel : act->collision_channels()) {
+              const auto type = channel->get_type();
               std::string r;
-              if (channel->get_type() == ProcessType::String) {
-                r = A_type->name() + B_type->name() + std::string(" → strings");
+              if (type == ProcessType::StringSoft) {
+                r = A_type->name() + B_type->name() +
+                    std::string(" → strings (soft)");
+              } else if (type == ProcessType::StringHard) {
+                r = A_type->name() + B_type->name() +
+                    std::string(" → strings (hard)");
               } else {
                 std::string r_type =
-                    (channel->get_type() == ProcessType::Elastic)
+                    (type == ProcessType::Elastic)
                         ? std::string(" (el)")
                         : (channel->get_type() == ProcessType::TwoToTwo)
                               ? std::string(" (inel)")
@@ -418,4 +429,4 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
   }
 }
 
-}  // namespace Smash
+}  // namespace smash

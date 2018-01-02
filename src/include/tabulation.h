@@ -18,7 +18,7 @@
 #include "kinematics.h"
 #include "particletype.h"
 
-namespace Smash {
+namespace smash {
 
 enum class Extrapolation {
   Zero = 0,
@@ -149,6 +149,6 @@ inline std::unique_ptr<Tabulation> spectral_integral_unstable(
   });
 }
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_TABULATION_H_

@@ -11,7 +11,7 @@
 
 #include "../include/clock.h"
 
-using namespace Smash;
+using namespace smash;
 
 TEST(size) {
   // if this fails, then either the internal structure in Clock is

@@ -15,7 +15,7 @@
 #include "nucleus.h"
 #include "threevector.h"
 
-namespace Smash {
+namespace smash {
 
 /** DeformedNucleus: Child of nucleus for deformed nuclei.
  *
@@ -35,8 +35,6 @@ namespace Smash {
  * or updated
  * features which are outlined below.
  *
- * \fpPrecision Why \c double?
- *
  * The following deformed nucleus directives are understood:
  * -------------
  */
@@ -47,10 +45,6 @@ class DeformedNucleus : public Nucleus {
   DeformedNucleus(Configuration &config, int nTest);
 
   /** Return the deformed Woods-Saxon probability for the given position.
-   *
-   * \fpPrecision
-   * Double-precision is used for safety, no effort was made to check whether
-   * single-precision works.
    *
    * @param r The sample radius
    * @param cosx The cosine of the sample polar angle
@@ -116,6 +110,6 @@ class DeformedNucleus : public Nucleus {
   Angles nuclear_orientation_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_DEFORMEDNUCLEUS_H_

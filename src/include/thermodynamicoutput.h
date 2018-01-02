@@ -21,7 +21,7 @@
 #include "outputparameters.h"
 #include "threevector.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup output
@@ -66,6 +66,6 @@ class ThermodynamicOutput : public OutputInterface {
   const OutputParameters out_par_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_THERMODYNAMICOUTPUT_H_

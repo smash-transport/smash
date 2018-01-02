@@ -12,7 +12,7 @@
 #include <iomanip>
 #include <iostream>
 
-namespace Smash {
+namespace smash {
 
 Particles::Particles() : data_(new ParticleData[data_capacity_]) {
   for (unsigned i = 0; i < data_capacity_; ++i) {
@@ -162,4 +162,4 @@ std::ostream &operator<<(std::ostream &out, const Particles &particles) {
   return out;
 }
 
-}  // namespace Smash
+}  // namespace smash

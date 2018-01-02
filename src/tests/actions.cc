@@ -16,7 +16,7 @@
 #include "../include/actions.h"
 #include "../include/decayaction.h"
 
-using namespace Smash;
+using namespace smash;
 
 TEST(construct_and_insert) {
   Test::create_smashon_particletypes();

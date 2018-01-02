@@ -16,7 +16,7 @@
 #include "particletype.h"
 #include "pdgcode.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup data
@@ -89,8 +89,6 @@ class Particles {
    *
    * \note This function may only be called if the list of particles is not
    * empty.
-   *
-   * \fpPrecision Why \c double?
    */
   double time() const {
     assert(!is_empty());
@@ -410,6 +408,6 @@ class Particles {
   std::vector<unsigned> dirty_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_PARTICLES_H_

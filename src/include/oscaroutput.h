@@ -18,7 +18,7 @@
 #include "outputinterface.h"
 #include "outputparameters.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \addtogroup output
@@ -103,6 +103,6 @@ std::unique_ptr<OutputInterface> create_oscar_output(
 
 // @}
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_OSCAROUTPUT_H_

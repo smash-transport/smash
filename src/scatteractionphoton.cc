@@ -163,23 +163,7 @@ void ScatterActionPhoton::generate_final_state() {
   const double pcm_in = cm_momentum();
   const double pcm_out = pCM(sqrts, m3, 0.0);
 
-  // find maximum of differential cross section
-  assert(t1 < t2);
-  double diff_xsection_max = 0.0;
-  const double stepsize = (t2 - t1) / 100.0;
-  for (double t = t1; t < t2; t += stepsize) {
-    diff_xsection_max =
-        std::max(diff_cross_section(t, t2, t1), diff_xsection_max);
-  }
-
-  double t = 0.0;
-  int iteration_number = 0;
-  do {
-    t = Random::uniform(t1, t2);
-    iteration_number++;
-  } while (diff_cross_section(t, t2, t1) <
-               Random::uniform(0., diff_xsection_max) &&
-           iteration_number < 100);
+  const double t = Random::uniform(t1, t2);
 
   // TODO(schaefer): this should be moved to kinematics.h and tested
   double costheta =

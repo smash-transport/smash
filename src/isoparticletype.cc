@@ -11,7 +11,7 @@
 #include "include/kinematics.h"
 #include "include/logging.h"
 
-namespace Smash {
+namespace smash {
 
 static IsoParticleTypeList iso_type_list;
 
@@ -203,4 +203,4 @@ TabulationPtr IsoParticleType::integrate_RR(ParticleTypePtr &res2) {
   });
 }
 
-}  // namespace Smash
+}  // namespace smash

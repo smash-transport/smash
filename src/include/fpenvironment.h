@@ -12,7 +12,7 @@
 
 #include <cfenv>
 
-namespace Smash {
+namespace smash {
 
 /**
  * Standard C/C++ don't have a function to modify the trapping behavior. You
@@ -115,6 +115,6 @@ void without_float_traps(F &&f) {
   f();
 }
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_FPENVIRONMENT_H_

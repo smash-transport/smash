@@ -14,7 +14,7 @@
 #include "include/parametrizations.h"
 #include "include/pdgcode_constants.h"
 
-namespace Smash {
+namespace smash {
 
 double ScatterActionNucleonPion::elastic_parametrization() {
   const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
@@ -104,4 +104,4 @@ void ScatterActionNucleonPion::format_debug_output(std::ostream &out) const {
   ScatterAction::format_debug_output(out);
 }
 
-}  // namespace Smash
+}  // namespace smash

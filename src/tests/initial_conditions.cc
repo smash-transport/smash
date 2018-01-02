@@ -16,7 +16,7 @@
 #include "../include/modusdefault.h"
 #include "../include/spheremodus.h"
 
-using namespace Smash;
+using namespace smash;
 
 TEST(init_particle_types) { ParticleType::create_type_list("σ 0.4 0.0 661\n"); }
 

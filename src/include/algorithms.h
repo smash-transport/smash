@@ -29,7 +29,7 @@
  * * Sorting and related operations
  */
 
-namespace Smash {
+namespace smash {
 
 /**
  * Enforces periodic boundaries on the given collection of values.
@@ -89,6 +89,6 @@ inline UnaryFunction for_each(Container &&c, UnaryFunction &&f) {
                        std::forward<UnaryFunction>(f));
 }
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_ALGORITHMS_H_

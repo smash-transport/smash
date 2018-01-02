@@ -9,7 +9,7 @@
 
 #include <chrono>
 
-namespace Smash {
+namespace smash {
 using SystemTimePoint = std::chrono::time_point<std::chrono::system_clock>;
 using SystemClock = std::chrono::system_clock;
 /**

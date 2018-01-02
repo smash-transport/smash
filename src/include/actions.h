@@ -15,7 +15,7 @@
 #include "action.h"
 #include "forwarddeclarations.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup data
@@ -161,6 +161,6 @@ class Actions {
   std::vector<ActionPtr> data_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_ACTIONS_H_
