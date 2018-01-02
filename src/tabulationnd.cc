@@ -8,7 +8,7 @@
  */
 #include "include/tabulationnd.h"
 
-using namespace Smash;
+using namespace smash;
 
 //template class TabulationND<1>;
 //template class TabulationND<2>;
@@ -42,7 +42,7 @@ double TabulationND<2>::get_linear(const double x, const double y) const {
   //assert(y >= y0_ && y <= y1_);
   if (x < x0_ || x > x1_ || y < y0_ || y > y1_) {
     const auto &log = logger<LogArea::ScatterAction>();
-    log.warn() << "Value out of tabulated values: " << x << " " << y << "\n"; 
+    log.warn() << "Value out of tabulated values: " << x << " " << y << "\n";
     return f_(x, y);
   }
 
@@ -80,7 +80,7 @@ double TabulationND<3>::get_linear(const double x, const double y,
 
   if (x < x0_ || x > x1_ || y < y0_ || y > y1_ || z < z0_ || z > z1_) {
     const auto &log = logger<LogArea::ScatterAction>();
-    log.warn() << "Value out of tabulated values: " << x << " " << y << "\n"; 
+    log.warn() << "Value out of tabulated values: " << x << " " << y << "\n";
     return f_(x, y, z);
   }
   const double x_idx_d = (x - x0_) * inv_dx_;
@@ -97,7 +97,7 @@ double TabulationND<3>::get_linear(const double x, const double y,
 
   // the computation is broken up in favor of readability. Conceptual this is
   // the same method as used for the 2D case
-  
+
   const double& c000 = val_from_index_(x_idx, y_idx, z_idx);
   const double& c100 = val_from_index_(x_idx + 1, y_idx, z_idx);
   const double& c001 = val_from_index_(x_idx, y_idx, z_idx + 1);

@@ -42,7 +42,7 @@ namespace {
 */
 
 
-using namespace Smash;
+using namespace smash;
 
 // template class PhotonCrossSection<ComputationMethod::Analytic>;
 // template class PhotonCrossSection<ComputationMethod::Lookup>;
@@ -527,8 +527,8 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho0_pi(
 	return to_mb * diff_xs / spin_deg_factor;
 
 }
-/*
 
+/*
 //C12
 double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi(
     const double s, const double m_rho) {
@@ -1464,8 +1464,8 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho_pi0(
 
 	return to_mb * diff_xs / spin_deg_factor;
 }
-
 */
+
 
 /*----------------------------------------------------------------------------*/
 /* 					Pi + Rho -> Pi + Photon channels mediated by (omega) 						  */

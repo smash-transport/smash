@@ -13,7 +13,7 @@
 // using std::pow;
 // using std::atan;
 
-using namespace Smash;
+using namespace smash;
 
 ScatterActionPhoton::ReactionType ScatterActionPhoton::photon_reaction_type(
     const ParticleList &in) {

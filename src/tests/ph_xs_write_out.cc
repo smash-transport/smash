@@ -14,7 +14,7 @@
 #include "setup.h"
 #include <vector>
 
-using namespace Smash;
+using namespace smash;
 
 const std::string basepath = "/home/jonas/Master/cross_sections_tests/stable/";
 
@@ -25,7 +25,7 @@ std::vector<std::string> Process {
   "pi_pi_rho0",
   "pi_rho0_pi",
   "pi_rho_pi0"
-}; 
+};
 
 
 void diff_stable(std::string proc)
@@ -42,7 +42,7 @@ void diff_stable(std::string proc)
   double xsAn, xsTab;
   PhotonCrossSection<ComputationMethod::Analytic> xs_an;
   PhotonCrossSection<ComputationMethod::Lookup> xs_tab;
-  
+
   for (double s = s0; s < s1; s += ds)
   for (double t = t0; t < t1; t += dt)
   {
@@ -56,13 +56,13 @@ void diff_stable(std::string proc)
   {
     xsAn = xs_an.xs_diff_pi0_rho_pi(s, t, mrho);
     xsTab = xs_tab.xs_diff_pi0_rho_pi(s, t, mrho);
-    
+
   }
   else if (proc == "pi_pi0_rho")
   {
     xsAn = xs_an.xs_diff_pi_pi0_rho(s,t,mrho);
     xsTab = xs_tab.xs_diff_pi_pi0_rho(s,t,mrho);
-    
+
   }
   else if (proc == "pi_pi_rho0")
   {
@@ -73,7 +73,7 @@ void diff_stable(std::string proc)
   {
     xsAn = xs_an.xs_diff_pi_rho0_pi(s, t, mrho);
     xsTab = xs_tab.xs_diff_pi_rho0_pi(s, t, mrho);
-    
+
   }
   else if (proc == "pi_rho_pi0")
   {
@@ -273,7 +273,7 @@ TEST(stable_pi_rho_pi0) {
 
 
 
-TEST(pi0_rho0_pi0_broad_rho_diff) { 
+TEST(pi0_rho0_pi0_broad_rho_diff) {
  const double s0 = 0.1, s1 = 5.0, ds = 0.01;
   const double t0 = -5.0, t1 = 5.0, dt = 0.01;
   const double m0 = 0.1, m1 = 1.0, dm = 0.01;
@@ -288,7 +288,7 @@ TEST(pi0_rho0_pi0_broad_rho_diff) {
   for (double s = s0; s < s1; s += ds)
   for (double t = t0; t < t1; t += dt)
   for (double m = m0; m < m1; m += dm)
-  { 
+  {
 xsAn = xs_an.xs_diff_pi0_rho0_pi0(s, t, m);
 xsTab = xs_tab.xs_diff_pi0_rho0_pi0(s,t,m);
 
@@ -296,8 +296,8 @@ xsTab = xs_tab.xs_diff_pi0_rho0_pi0(s,t,m);
     }
   fs.close();
   }
-    
-TEST(pi0_rho_pi_broad_rho_diff) { 
+
+TEST(pi0_rho_pi_broad_rho_diff) {
  const double s0 = 0.1, s1 = 5.0, ds = 0.01;
   const double t0 = -5.0, t1 = 5.0, dt = 0.01;
   const double m0 = 0.1, m1 = 1.0, dm = 0.01;
@@ -312,7 +312,7 @@ TEST(pi0_rho_pi_broad_rho_diff) {
   for (double s = s0; s < s1; s += ds)
   for (double t = t0; t < t1; t += dt)
   for (double m = m0; m < m1; m += dm)
-  { 
+  {
 xsAn = xs_an.xs_diff_pi0_rho_pi(s, t, m);
 xsTab = xs_tab.xs_diff_pi0_rho_pi(s,t,m);
 
@@ -320,8 +320,8 @@ xsTab = xs_tab.xs_diff_pi0_rho_pi(s,t,m);
     }
   fs.close();
   }
-    
-TEST(pi_pi0_rho_broad_rho_diff) { 
+
+TEST(pi_pi0_rho_broad_rho_diff) {
  const double s0 = 0.1, s1 = 5.0, ds = 0.01;
   const double t0 = -5.0, t1 = 5.0, dt = 0.01;
   const double m0 = 0.1, m1 = 1.0, dm = 0.01;
@@ -336,7 +336,7 @@ TEST(pi_pi0_rho_broad_rho_diff) {
   for (double s = s0; s < s1; s += ds)
   for (double t = t0; t < t1; t += dt)
   for (double m = m0; m < m1; m += dm)
-  { 
+  {
 xsAn = xs_an.xs_diff_pi_pi0_rho(s, t, m);
 xsTab = xs_tab.xs_diff_pi_pi0_rho(s,t,m);
 
@@ -344,8 +344,8 @@ xsTab = xs_tab.xs_diff_pi_pi0_rho(s,t,m);
     }
   fs.close();
   }
-    
-TEST(pi_pi_rho0_broad_rho_diff) { 
+
+TEST(pi_pi_rho0_broad_rho_diff) {
  const double s0 = 0.1, s1 = 5.0, ds = 0.01;
   const double t0 = -5.0, t1 = 5.0, dt = 0.01;
   const double m0 = 0.1, m1 = 1.0, dm = 0.01;
@@ -360,7 +360,7 @@ TEST(pi_pi_rho0_broad_rho_diff) {
   for (double s = s0; s < s1; s += ds)
   for (double t = t0; t < t1; t += dt)
   for (double m = m0; m < m1; m += dm)
-  { 
+  {
 xsAn = xs_an.xs_diff_pi_pi_rho0(s, t, m);
 xsTab = xs_tab.xs_diff_pi_pi_rho0(s,t,m);
 
@@ -368,8 +368,8 @@ xsTab = xs_tab.xs_diff_pi_pi_rho0(s,t,m);
     }
   fs.close();
   }
-    
-TEST(pi_rho0_pi_broad_rho_diff) { 
+
+TEST(pi_rho0_pi_broad_rho_diff) {
  const double s0 = 0.1, s1 = 5.0, ds = 0.01;
   const double t0 = -5.0, t1 = 5.0, dt = 0.01;
   const double m0 = 0.1, m1 = 1.0, dm = 0.01;
@@ -384,7 +384,7 @@ TEST(pi_rho0_pi_broad_rho_diff) {
   for (double s = s0; s < s1; s += ds)
   for (double t = t0; t < t1; t += dt)
   for (double m = m0; m < m1; m += dm)
-  { 
+  {
 xsAn = xs_an.xs_diff_pi_rho0_pi(s, t, m);
 xsTab = xs_tab.xs_diff_pi_rho0_pi(s,t,m);
 
@@ -392,8 +392,8 @@ xsTab = xs_tab.xs_diff_pi_rho0_pi(s,t,m);
     }
   fs.close();
   }
-    
-TEST(pi_rho_pi0_broad_rho_diff) { 
+
+TEST(pi_rho_pi0_broad_rho_diff) {
  const double s0 = 0.1, s1 = 5.0, ds = 0.01;
   const double t0 = -5.0, t1 = 5.0, dt = 0.01;
   const double m0 = 0.1, m1 = 1.0, dm = 0.01;
@@ -408,7 +408,7 @@ TEST(pi_rho_pi0_broad_rho_diff) {
   for (double s = s0; s < s1; s += ds)
   for (double t = t0; t < t1; t += dt)
   for (double m = m0; m < m1; m += dm)
-  { 
+  {
 xsAn = xs_an.xs_diff_pi_rho_pi0(s, t, m);
 xsTab = xs_tab.xs_diff_pi_rho_pi0(s,t,m);
 
@@ -416,4 +416,3 @@ xsTab = xs_tab.xs_diff_pi_rho_pi0(s,t,m);
     }
   fs.close();
   }
-    

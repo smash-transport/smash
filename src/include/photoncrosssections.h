@@ -25,7 +25,7 @@
 #include "tabulationnd.h"
 #include "cxx14compat.h"
 
-namespace Smash {
+namespace smash {
 // calculation method for the cross sections
 enum class ComputationMethod { Analytic, Lookup, Parametrized };
 
@@ -37,7 +37,7 @@ class PhotonCrossSection {};
 template <>
 class PhotonCrossSection<ComputationMethod::Analytic> {
  public:
-  
+
   static double xs_pi_pi_rho0(const double s, const double m_rho);
   static double xs_pi_pi0_rho(const double s, const double m_rho);
   static double xs_pi0_rho0_pi0(const double s, const double m_rho);
@@ -58,7 +58,7 @@ class PhotonCrossSection<ComputationMethod::Analytic> {
  private:
 
   // masses are hardcoded. since we use static tabulation objects we
-  // can not make use of particleFinder. 
+  // can not make use of particleFinder.
   constexpr static double to_mb = 0.3894;
   constexpr static double Const = 0.059;
   constexpr static double g_POR = 11.93;
@@ -121,6 +121,6 @@ class PhotonCrossSection<ComputationMethod::Lookup> {
 template <>
 class PhotonCrossSection<ComputationMethod::Parametrized> {};
 
-} // namespace Smash
+} // namespace smash
 
 #endif

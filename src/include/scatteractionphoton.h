@@ -29,7 +29,7 @@
 #include "random.h"
 #include "tabulation.h"
 
-namespace Smash {
+namespace smash {
 
 class ScatterActionPhoton : public ScatterAction {
  public:
