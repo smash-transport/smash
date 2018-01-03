@@ -222,7 +222,7 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData &data_a,
   }
   /* Cross section for collision criterion */
   double cross_section_criterion =
-      (act->cross_section() + photon_cross_section) * fm2_mb * M_1_PI /
+      (act->cross_section()) * fm2_mb * M_1_PI /
       static_cast<double>(testparticles_);
   /* Consider cross section scaling factors only if the particles
    * are not formed yet at the prospective time of the interaction */

@@ -344,7 +344,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections(bool from_check_c
   // if we have a unphysical negative cross section set it manually to a small
   // value to circumvent problems with empty channels
   if (xsection <= 0 && from_check_collision==false) {
-    xsection = 1e-10;
+    xsection = 0.1;
     const auto &log = logger<LogArea::ScatterAction>();
     log.error("Calculated negative cross section.\nParticles ",
               incoming_particles_, " mass mediating particle: ", m3,
