@@ -7414,7 +7414,7 @@ double PhotonCrossSection<ComputationMethod::Lookup>::xs_diff_pi0_rho_pi(
     tab_pi0_rho_pi_diff_ = make_unique<TabulationND<3>>(
         s0_diff, s1_diff, t0_diff, t1_diff, m_rho_0, m_rho_1, ds_diff, dt_diff,
         dm,
-        PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho0_pi);
+        PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi0_rho_pi);
   }
 
   return tab_pi0_rho_pi_diff_->get_linear(s, t, m_rho);
