@@ -121,7 +121,7 @@ double TabulationND<3>::get_linear(const double x, const double y,
   return c0 * (1 - dz) + c1 * dz;
 }
 
-inline int TabulationND<3>::val_from_index_(const int ix, const int iy,
+inline double TabulationND<3>::val_from_index_(const int ix, const int iy,
                                             const int iz) const {
   return values_[ix + iy * nx_ + iz * nx_ * ny_];
 }

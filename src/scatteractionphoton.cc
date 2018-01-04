@@ -341,8 +341,12 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections(bool from_check_c
       // never reached
       break;
   }
-  // if we have a unphysical negative cross section set it manually to a small
-  // value to circumvent problems with empty channels
+
+  // Due to numerical reasons it can happen that the calculated cross sections 
+  // are negative (approximately 1e-15) if sqrt(s) is close to the threshold
+  // energy. In those cases the cross section is manually set to 0.1 mb, which
+  // is a reasonable value for the processes we are looking at (C14,C15,C16).
+
   if (xsection <= 0 && from_check_collision==false) {
     xsection = 0.1;
     const auto &log = logger<LogArea::ScatterAction>();

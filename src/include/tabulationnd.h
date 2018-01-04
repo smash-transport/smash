@@ -181,7 +181,7 @@ class TabulationND<3> {
   std::vector<double> values_;
   size_t nx_, ny_, nz_, n_;
 
-  int val_from_index_(const int ix, const int iy, const int iz) const;
+  double val_from_index_(const int ix, const int iy, const int iz) const;
 };
 
 }  // namespace smash
