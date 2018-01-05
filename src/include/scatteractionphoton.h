@@ -96,10 +96,10 @@ class ScatterActionPhoton : public ScatterAction {
 
   // the processes pi0 + rho => pi + y and pi + rho => pi0 + gamma can happen
   // via exchange of either (rho, a1, pi) or (omega). If MediatorType::SUM is
-  // set,the cross section for both channels are added. If MediatorType::RHO /
+  // set,the cross section for both channels are added. If MediatorType::PION /
   // OMEGA is set, only the channel where (rho, a1, pi) / (omega) is exchanged
   // will be used.
-  enum class MediatorType { SUM, RHO, OMEGA };
+  enum class MediatorType { SUM, PION, OMEGA };
 
   ReactionType reac_ = ReactionType::no_reaction;
 
@@ -122,7 +122,7 @@ class ScatterActionPhoton : public ScatterAction {
 
   double hadron_out_mass_;
 
-  static constexpr MediatorType default_mediator_ = MediatorType::RHO;
+  static constexpr MediatorType default_mediator_ = MediatorType::PION;
 
   double weight_ = 0.0;
 
@@ -134,9 +134,9 @@ class ScatterActionPhoton : public ScatterAction {
                             const double m_rho,
                             MediatorType mediator = default_mediator_) const;
 
-  double mediator_mass(ReactionType r) const;
+  //double mediator_mass(ReactionType r) const;
 
-  double mediator_mass() const;
+  double rho_mass() const;
   CollisionBranchList photon_cross_sections(
       bool from_check_collision = false, MediatorType mediator = default_mediator_);
 
@@ -148,6 +148,9 @@ class ScatterActionPhoton : public ScatterAction {
   std::pair<double, double> form_factor_single(const double E_photon);
 
   double form_factor(double E_photon);
+
+  double form_factor_pion(const double) const;
+  double form_factor_omega(const double) const;
 
   double diff_cross_section_w_ff(const double t, const double t2,
                                  const double t1, const double m_rho,
