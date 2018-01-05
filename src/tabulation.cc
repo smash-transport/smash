@@ -7,7 +7,7 @@
 
 #include "include/tabulation.h"
 
-namespace Smash {
+namespace smash {
 
 Tabulation::Tabulation(double x_min, double range, int num,
                        std::function<double(double)> f)
@@ -50,4 +50,4 @@ double Tabulation::get_value_linear(double x, Extrapolation extrapol) const {
   return values_[n] + (values_[n + 1] - values_[n]) * r;
 }
 
-}  // namespace Smash
+}  // namespace smash

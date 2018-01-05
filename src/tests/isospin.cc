@@ -14,7 +14,7 @@
 #include "../include/scatteractionbaryonbaryon.h"
 #include "../include/scatteractionnucleonnucleon.h"
 
-using namespace Smash;
+using namespace smash;
 
 TEST(init_particle_types) {
   ParticleType::create_type_list(

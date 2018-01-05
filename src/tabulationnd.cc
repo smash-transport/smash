@@ -8,7 +8,7 @@
  */
 #include "include/tabulationnd.h"
 
-using namespace Smash;
+using namespace smash;
 
 // template class TabulationND<1>;
 // template class TabulationND<2>;
@@ -42,7 +42,7 @@ double TabulationND<2>::get_linear(const double x, const double y) const {
   // assert(x >= x0_ && x <= x1_);
   // assert(y >= y0_ && y <= y1_);
   if (x < x0_ || x > x1_ || y < y0_ || y > y1_) {
-    const auto& log = logger<LogArea::ScatterAction>();
+    const auto &log = logger<LogArea::ScatterAction>();
     log.warn() << "Value out of tabulated values: " << x << " " << y << "\n";
     return f_(x, y);
   }
@@ -79,7 +79,7 @@ double TabulationND<2>::get_closest(const double x, const double y) const {
 double TabulationND<3>::get_linear(const double x, const double y,
                                    const double z) {
   if (x < x0_ || x > x1_ || y < y0_ || y > y1_ || z < z0_ || z > z1_) {
-    const auto& log = logger<LogArea::ScatterAction>();
+    const auto &log = logger<LogArea::ScatterAction>();
     log.warn() << "Value out of tabulated values: " << x << " " << y << "\n";
     return f_(x, y, z);
   }
@@ -121,7 +121,7 @@ double TabulationND<3>::get_linear(const double x, const double y,
   return c0 * (1 - dz) + c1 * dz;
 }
 
-inline int TabulationND<3>::val_from_index_(const int ix, const int iy,
+inline double TabulationND<3>::val_from_index_(const int ix, const int iy,
                                             const int iz) const {
   return values_[ix + iy * nx_ + iz * nx_ * ny_];
 }

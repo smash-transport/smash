@@ -13,7 +13,7 @@
 
 #include "threevector.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup data
@@ -365,6 +365,6 @@ double inline FourVector::abs3() const { return this->threevec().abs(); }
  */
 std::ostream &operator<<(std::ostream &os, const FourVector &vec);
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_FOURVECTOR_H_

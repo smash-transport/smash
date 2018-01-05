@@ -12,7 +12,7 @@
 #include "../include/tabulationnd.h"
 
 
-using namespace Smash;
+using namespace smash;
 
 //TEST(compile) { PhotonCrossSection<ComputationMethod::Lookup> xs_object; }
 
@@ -21,7 +21,7 @@ TEST(linear_3d) {
   const double dx = 0.1, dy = 0.1, dz = 0.1;
   TabulationND<3> tab{x0, x1, y0, y1, z0, z1, dx, dy, dz,
                      [](double x, double y, double z) { return x + y + z; }};
-  
+
   FUZZY_COMPARE(tab.get_linear(0.0, 0.0, 0.0), 0.0);
   FUZZY_COMPARE(tab.get_linear(1.0, 0.0, 0.0), 1.0);
   FUZZY_COMPARE(tab.get_linear(0.0, 1.0, 0.0), 1.0);
@@ -38,7 +38,7 @@ TEST(linear_3d) {
 
   COMPARE_RELATIVE_ERROR(tab.get_linear(0.05, 0.0, 0.0), 0.05, 0.01);
   COMPARE_RELATIVE_ERROR(tab.get_linear(0.05, 0.05, 0.05), 0.15, 0.01);
-  
-  
-  
+
+
+
 }

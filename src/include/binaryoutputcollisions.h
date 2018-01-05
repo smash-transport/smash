@@ -19,7 +19,7 @@
 #include "outputinterface.h"
 #include "outputparameters.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup output
@@ -87,6 +87,6 @@ class BinaryOutputCollisions : public BinaryOutputBase {
   bool print_start_end_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_BINARYOUTPUTCOLLISIONS_H_

@@ -18,7 +18,7 @@
 #include "random.h"
 #include "threevector.h"
 
-namespace Smash {
+namespace smash {
 
 /** Angles provides a common interface for generating directions: i.e.,
  * two angles that should be interpreted as azimuthal and polar angles.
@@ -47,12 +47,6 @@ namespace Smash {
  * on this never changing, though; the interface user should be totally
  * oblivious to this.
  *
- * \fpPrecision
- * The \c Angles class uses double precision in order to be compatible with the
- * \c ThreeVector class (conversion via \c Angles::threevec).
- * \todo
- * What does it mean "to be compatible with the ThreeVector class"? A conversion
- * from \c float to \c double is just as compatible.
  *
  * Possible future improvements
  * ----------------------------
@@ -271,6 +265,6 @@ ThreeVector inline Angles::threevec() const {
 
 double inline Angles::theta() const { return std::acos(costheta_); }
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_ANGLES_H_

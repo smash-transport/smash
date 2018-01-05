@@ -12,7 +12,7 @@
 
 #include "scatteraction.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup action
@@ -23,6 +23,11 @@ class ScatterActionMesonMeson : public ScatterAction {
  public:
   /* Inherit constructor. */
   using ScatterAction::ScatterAction;
+  /**
+   * Determine the (parametrized) hard non-diffractive string cross section
+   * for a meson-meson collision.
+   */
+  double string_hard_cross_section() const override;
 
  protected:
   /**
@@ -32,6 +37,6 @@ class ScatterActionMesonMeson : public ScatterAction {
   void format_debug_output(std::ostream &out) const override;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_SCATTERACTIONMESONMESON_H_

@@ -14,7 +14,7 @@
 
 #include "processbranch.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup data
@@ -86,6 +86,6 @@ class DecayModes {
   static std::vector<DecayModes> *all_decay_modes;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_DECAYMODES_H_

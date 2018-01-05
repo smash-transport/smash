@@ -10,12 +10,13 @@
 #ifndef SRC_INCLUDE_RANDOM_H_
 #define SRC_INCLUDE_RANDOM_H_
 
+#include <cassert>
 #include <limits>
 #include <random>
 #include <utility>
 #include <vector>
 
-namespace Smash {
+namespace smash {
 
 /** Namespace Random provides functions for Random Number Generation.
  */
@@ -125,7 +126,7 @@ T expo(T A, T x1, T x2) {
   const T a1 = A * x1, a2 = A * x2;
   const T a_min = std::log(std::numeric_limits<T>::min());
 #ifndef NDEBUG
-  assert(A > T(0.) && T(0.) >= x1 && x1 > x2 && a1 > a_min);
+  assert(A > T(0.) && x1 >= x2 && a1 > a_min);
 #endif
   const T r1 = std::exp(a1);
   const T r2 = a2 > a_min ? std::exp(a2) : T(0.);  // prevent underflow
@@ -271,6 +272,6 @@ T beta_a0(T xmin, T b) {
 }
 
 }  // namespace Random
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_RANDOM_H_

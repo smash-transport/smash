@@ -12,15 +12,14 @@
 
 #include "decayaction.h"
 
-namespace Smash {
+namespace smash {
 
 class DecayActionDilepton : public DecayAction {
  public:
   DecayActionDilepton(const ParticleData &p, double time_of_execution,
                       double shining_weight);
 
-  double raw_weight_value() const override { return shining_weight_; }
-  double partial_weight() const override {
+  double raw_weight_value() const override {
     return shining_weight_ * branching_;
   }
 
@@ -44,6 +43,6 @@ class DecayActionDilepton : public DecayAction {
   double branching_ = 1.;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_DECAYACTIONDILEPTON_H_

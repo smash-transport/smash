@@ -15,7 +15,7 @@
 #include "pdgcode.h"
 #include "processbranch.h"
 
-namespace Smash {
+namespace smash {
 
 /* A structure to hold information about the history of the particle,
  * e.g. the last interaction etc. */
@@ -89,7 +89,8 @@ class ParticleData {
   /// get history information
   HistoryData get_history() const { return history_; }
   /** Store history information, i.e. the type of process and possibly the
-   * PdgCodes of the parent particles (\p plist). */
+   * PdgCodes of the parent particles (\p plist). Note, history is not set
+   * for dileptons and photons. */
   void set_history(int ncoll, uint32_t pid, ProcessType pt, double time_of_or,
                    const ParticleList &plist);
 
@@ -324,6 +325,6 @@ inline PrintParticleListDetailed detailed(const ParticleList &list) {
 std::ostream &operator<<(std::ostream &out,
                          const PrintParticleListDetailed &particle_list);
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_PARTICLEDATA_H_

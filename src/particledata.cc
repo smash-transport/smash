@@ -16,7 +16,7 @@
 #include "include/constants.h"
 #include "include/iomanipulators.h"
 
-namespace Smash {
+namespace smash {
 
 double ParticleData::effective_mass() const {
   const double m_pole = pole_mass();
@@ -47,7 +47,8 @@ void ParticleData::set_history(int ncoll, uint32_t pid, ProcessType pt,
     case ProcessType::Elastic:
     case ProcessType::TwoToOne:
     case ProcessType::TwoToTwo:
-    case ProcessType::String:
+    case ProcessType::StringSoft:
+    case ProcessType::StringHard:
       // store two parent particles
       history_.p1 = plist[0].pdgcode();
       history_.p2 = plist[1].pdgcode();
@@ -107,4 +108,4 @@ std::ostream &operator<<(std::ostream &out,
   return out << ']';
 }
 
-}  // namespace Smash
+}  // namespace smash

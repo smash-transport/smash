@@ -18,7 +18,7 @@
 #include "include/pdgcode_constants.h"
 #include "include/pow.h"
 
-namespace Smash {
+namespace smash {
 
 // auxiliary functions
 
@@ -333,8 +333,9 @@ bool ThreeBodyDecayDilepton::has_mother(ParticleTypePtr mother) const {
   return mother == mother_;
 }
 
-double ThreeBodyDecayDilepton::diff_width(double m_par, double m_dil,
-                                          double m_other, ParticleTypePtr t) {
+double ThreeBodyDecayDilepton::diff_width(double m_par, double m_l,
+                                          double m_dil, double m_other,
+                                          ParticleTypePtr t) {
   // check threshold
   if (m_par < m_dil + m_other) {
     return 0;
@@ -345,6 +346,8 @@ double ThreeBodyDecayDilepton::diff_width(double m_par, double m_dil,
   const double m_par_sqr = m_par * m_par;
   const double m_par_cubed = m_par * m_par * m_par;
   const double m_other_sqr = m_other * m_other;
+  const double ph_sp_factor = std::sqrt(1. - 4. * m_l * m_l / m_dil_sqr) *
+                                (1. + 2. * m_l * m_l / m_dil_sqr);
 
   PdgCode pdg = t->pdgcode();
   if (pdg.is_meson()) {
@@ -357,7 +360,8 @@ double ThreeBodyDecayDilepton::diff_width(double m_par, double m_dil,
         double ff = em_form_factor_ps(pdg, m_dil);  // form factor
         /// see \iref{Landsberg:1986fd}, equation (3.8)
         return (4. * alpha / (3. * M_PI)) * gamma_2g / m_dil *
-               pow_int(1. - m_dil / m_par * m_dil / m_par, 3) * ff * ff;
+               pow_int(1. - m_dil / m_par * m_dil / m_par, 3) * ff * ff *
+               ph_sp_factor;
       }
       case 2: /* vectors: ω, φ */ {
         // width for decay into π⁰γ
@@ -373,7 +377,7 @@ double ThreeBodyDecayDilepton::diff_width(double m_par, double m_dil,
           return 0.;
         } else {
           return (2. * alpha / (3. * M_PI)) * gamma_pig / m_dil *
-                 std::pow(rad, 3. / 2.) * ff_sqr;
+                 std::pow(rad, 3. / 2.) * ff_sqr * ph_sp_factor;
         }
       }
       default:
@@ -402,7 +406,7 @@ double ThreeBodyDecayDilepton::diff_width(double m_par, double m_dil,
           const double t2 = pow_int(std::sqrt(rad2), 3);
           const double ff = form_factor_delta(m_dil);
           const double gamma_vi = t1 * t2 * ff * ff;
-          return 2. * alpha / (3. * M_PI) * gamma_vi / m_dil;
+          return 2. * alpha / (3. * M_PI) * gamma_vi / m_dil * ph_sp_factor;
         }
       }
       default:
@@ -445,7 +449,7 @@ double ThreeBodyDecayDilepton::width(double, double G0, double m) const {
           }
           return integrate(bottom, top,
                            [&](double m_dil) {
-                             return diff_width(m_parent, m_dil, m_other,
+                             return diff_width(m_parent, m_l, m_dil, m_other,
                                                mother_);
                            })
               .value();
@@ -455,4 +459,4 @@ double ThreeBodyDecayDilepton::width(double, double G0, double m) const {
   return tabulation_->get_value_linear(m, Extrapolation::Const);
 }
 
-}  // namespace Smash
+}  // namespace smash

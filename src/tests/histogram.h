@@ -13,7 +13,7 @@
 
 #include "../include/integrate.h"
 
-namespace Smash {
+namespace smash {
 
 /** A class for representing a one-dimensional histogram. */
 class Histogram1d {
@@ -158,4 +158,4 @@ void Histogram1d::test(Analytical analyt, std::string dbg_file) const {
   }
 }
 
-}  // namespace Smash
+}  // namespace smash

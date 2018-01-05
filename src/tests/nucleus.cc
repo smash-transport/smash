@@ -20,7 +20,7 @@ namespace particles_txt {
 #include <particles.txt.h>
 }
 
-using namespace Smash;
+using namespace smash;
 
 std::map<PdgCode, int> list = {{0x2212, 82}, {0x2112, 126}};
 

@@ -18,7 +18,7 @@
 
 #include "macros.h"
 
-namespace Smash {
+namespace smash {
 class Configuration;
 
 /*!\Userguide
@@ -253,7 +253,7 @@ FormattingHelper<T> format(const T &value, const char *unit, int width = -1,
                            int precision = -1) {
   return {value, width, precision, unit};
 }
-}  // namespace Smash
+}  // namespace smash
 
 namespace YAML {
 /** \internal

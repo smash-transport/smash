@@ -17,7 +17,7 @@
 #include "include/logging.h"
 #include "include/numerics.h"
 
-namespace Smash {
+namespace smash {
 
 FourVector EnergyMomentumTensor::landau_frame_4velocity() const {
   using Eigen::Matrix4d;
@@ -150,4 +150,4 @@ std::ostream &operator<<(std::ostream &out, const EnergyMomentumTensor &Tmn) {
   return out;
 }
 
-}  // namespace Smash
+}  // namespace smash

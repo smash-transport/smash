@@ -19,7 +19,7 @@
 #include "lattice.h"
 #include "macros.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup output
@@ -64,8 +64,6 @@ class OutputInterface {
    * \param action The action object, containing the initial and final state
    * etc.
    * \param density The density at the interaction point.
-   *
-   * \fpPrecision Why \c double?
    */
   virtual void at_interaction(const Action &action, const double density) {
     SMASH_UNUSED(action);
@@ -157,6 +155,6 @@ class OutputInterface {
   const bool is_photon_output_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_OUTPUTINTERFACE_H_

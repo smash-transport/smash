@@ -13,7 +13,7 @@
 #include "../include/logging.h"
 #include "../include/particletype.h"
 
-using namespace Smash;
+using namespace smash;
 
 TEST(assign) {
   // enable debugging output

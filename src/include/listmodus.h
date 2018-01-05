@@ -16,7 +16,7 @@
 #include "forwarddeclarations.h"
 #include "modusdefault.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup modus
@@ -80,6 +80,6 @@ class ListModus : public ModusDefault {
   friend std::ostream &operator<<(std::ostream &, const ListModus &);
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_LISTMODUS_H_

@@ -16,26 +16,32 @@
 #include "forwarddeclarations.h"
 #include "particletype.h"
 
-namespace Smash {
+namespace smash {
 
 /** Process Types are used to identify the type of the process,
- * currently we have 7 of these:
+ * currently we have 12 of these:
  * (0) nothing (None)
  * (1) elastic (Elastic)
  * (2) resonance formation (2->1) (TwoToOne)
  * (3) 2->2 (inelastic) (TwoToTwo)
- * (4) string excitation (String)
+ * (4) string excitation by PYTHIA (String)
  * (5) resonance decays (Decay)
- * (6) Wall transition (Wall)*/
+ * (6) Wall transition (Wall)
+ * (7) Forces thermalization
+ * (41) Soft string excitation
+ * (42) Hard string process involving 2->2 QCD process by PYTHIA
+ */
 enum class ProcessType {
   None = 0,
   Elastic = 1,
   TwoToOne = 2,
   TwoToTwo = 3,
-  String = 4,
+  // String = 4,
   Decay = 5,
   Wall = 6,
   Thermalization = 7,
+  StringSoft = 41,
+  StringHard = 42
 };
 
 std::ostream &operator<<(std::ostream &os, ProcessType process_type);
@@ -235,6 +241,6 @@ class DecayBranch : public ProcessBranch {
   const DecayType &type_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_PROCESSBRANCH_H_

@@ -15,7 +15,7 @@
 #include "particletype.h"
 #include "tabulation.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * DecayType is the abstract base class for all decay types.
@@ -152,7 +152,7 @@ class TwoBodyDecaySemistable : public TwoBodyDecay {
    *
    * We mostly stick to the GiBUU values, but use a different value for the ρπ
    * decay, in order to avoid secondary bumps in the ω spectral function and
-   * achieve a better normalization. In contrast to Smash, GiBUU does not have
+   * achieve a better normalization. In contrast to smash, GiBUU does not have
    * an ω → ρ π decay.
    */
   double get_Lambda();
@@ -220,8 +220,8 @@ class ThreeBodyDecayDilepton : public ThreeBodyDecay {
    * This differential width is used directly for the dilepton shining weights.
    * It is calculated according to \iref{Weil:2013mya}, eq. (30)-(36).
    */
-  static double diff_width(double m_parent, double m_dil, double m_other,
-                           ParticleTypePtr t);
+  static double diff_width(double m_par, double m_l, double m_dil,
+                           double m_other, ParticleTypePtr t);
   double width(double m0, double G0, double m) const override;
 
  protected:
@@ -229,6 +229,6 @@ class ThreeBodyDecayDilepton : public ThreeBodyDecay {
   ParticleTypePtr mother_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_DECAYTYPE_H_

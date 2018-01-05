@@ -19,7 +19,7 @@
 #include "logging.h"
 
 
-namespace Smash {
+namespace smash {
 
 template <int dim>
 class TabulationND {};
@@ -46,7 +46,7 @@ class TabulationND<1> {
   double x0() const { return x0_; }
   double x1() const { return x1_; }
   size_t n_points() const { return n_; }
-  std::vector<double> get_x_hist() { return x_history_; } 
+  std::vector<double> get_x_hist() { return x_history_; }
 
  private:
   const double x0_, x1_, dx_, inv_dx_;
@@ -106,7 +106,7 @@ class TabulationND<2> {
   size_t get_size() const { return values_.size(); };
   std::vector<double> get_x_hist() { return x_history_; }
   std::vector<double> get_y_hist() { return y_history_; }
-  
+
 
  private:
   const double x0_, x1_, y0_, y1_, dx_, dy_, inv_dx_, inv_dy_;
@@ -181,9 +181,9 @@ class TabulationND<3> {
   std::vector<double> values_;
   size_t nx_, ny_, nz_, n_;
 
-  int val_from_index_(const int ix, const int iy, const int iz) const;
+  double val_from_index_(const int ix, const int iy, const int iz) const;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif

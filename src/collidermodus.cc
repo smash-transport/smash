@@ -29,7 +29,7 @@
 #include "include/pdgcode.h"
 #include "include/random.h"
 
-namespace Smash {
+namespace smash {
 
 /*!\Userguide
  * \page input_modi_collider_ Collider
@@ -50,7 +50,7 @@ namespace Smash {
  * of the projectile nucleus (in AGeV). This assumes the target nucleus is at
  * rest.
  *
- * \key Calculation_Frame (string, required, default = "center of velocity"): \n
+ * \key Calculation_Frame (string, optional, default = "center of velocity"): \n
  * The frame in which the collision is calculated.\n
  * "center of velocity", "center of mass" or "fixed target"
  *
@@ -451,4 +451,4 @@ std::pair<double, double> ColliderModus::get_velocities(double s, double m_a,
   return std::make_pair(v_a, v_b);
 }
 
-}  // namespace Smash
+}  // namespace smash

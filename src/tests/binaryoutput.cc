@@ -27,7 +27,7 @@
 #include "../include/processbranch.h"
 #include "../include/scatteraction.h"
 
-using namespace Smash;
+using namespace smash;
 
 static const bf::path testoutputpath = bf::absolute(SMASH_TEST_OUTPUT_PATH);
 

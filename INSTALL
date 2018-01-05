@@ -75,20 +75,26 @@ Alternatively the compiler can also be specified to cmake like this:
     cmake .. -DCMAKE_CXX_COMPILER=g++
 
 
-Compiling SMASH on Mac OS
--------------------------
+Using the offical clang version on macOS
+----------------------------------------
 
-Unfortunately the Clang Compiler shipped with XCode or the Command Line Tools from Apple does not support all C++11 features that we use.
-
-The workaround is to install the official clang version. For example, this can be done with Homebrew (http://brew.sh):
+The clang compiler version shipped with XCode or the Command Line Tools from
+Apple in the past (before version 8.1) did not always support all C++ features
+that were used. If problems with compiling on macOS arise, try the official
+clang version. This can be done for example with Homebrew (http://brew.sh):
 
     brew install llvm
 
-After that you have to instruct cmake that it should use the newly installed clang compiler and also tell the linker where the libraries are by altering some cmake flags. Enter cmake like below:
+After that you have to instruct cmake that it should use the newly installed
+clang compiler and also tell the linker where the libraries are by altering some
+cmake flags. Enter the cmake command like below:
 
-    cmake .. -DCMAKE_CXX_COMPILER=/usr/local/opt/llvm/bin/clang++ -DCMAKE_EXE_LINKER_FLAGS="-L/usr/local/opt/llvm/lib -lc++abi" -DCMAKE_CXX_FLAGS=-I/usr/local/opt/llvm/include
+    cmake .. -DCMAKE_CXX_COMPILER=/usr/local/opt/llvm/bin/clang++
+    -DCMAKE_EXE_LINKER_FLAGS="-L/usr/local/opt/llvm/lib -lc++abi"
+    -DCMAKE_CXX_FLAGS=-I/usr/local/opt/llvm/include
 
-Note: FPE environment only works with gcc, so e.g. you won't get backtraces from floating point traps with clang.
+Note: FPE environment only works with gcc, so e.g. you won't get backtraces from
+floating point traps with clang in general.
 
 
 Disabling ROOT support

@@ -21,7 +21,7 @@
 #include "outputinterface.h"
 #include "potentials.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup modus
@@ -130,6 +130,6 @@ class ModusDefault {
   };
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_MODUSDEFAULT_H_

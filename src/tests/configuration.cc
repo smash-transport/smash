@@ -17,7 +17,7 @@
 
 #include <boost/filesystem.hpp>
 
-using namespace Smash;
+using namespace smash;
 
 static Configuration make_test_configuration() {
   return Configuration{bf::path{TEST_CONFIG_PATH} / "src" / "tests",

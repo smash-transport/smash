@@ -13,7 +13,7 @@
 
 #include "../include/random.h"
 
-using namespace Smash;
+using namespace smash;
 
 TEST(set_random_seed) {
   std::random_device rd;

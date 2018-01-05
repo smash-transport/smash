@@ -26,7 +26,7 @@
 #include "quantumnumbers.h"
 #include "thermalizationaction.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * Non-template interface to Experiment<Modus>.
@@ -349,11 +349,6 @@ class Experiment : public ExperimentBase {
   const ExpansionProperties metric_;
 
   /**
-   * This indicates whether string fragmentation is switched on.
-   */
-  const bool strings_switch_;
-
-  /**
    * This indicates whether dileptons are switched on.
    */
   const bool dileptons_switch_;
@@ -407,6 +402,6 @@ class Experiment : public ExperimentBase {
    */
   friend std::ostream &operator<<<>(std::ostream &out, const Experiment &e);
 };
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_EXPERIMENT_H_

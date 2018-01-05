@@ -21,7 +21,7 @@
 #include <utility>
 #include <vector>
 
-namespace Smash {
+namespace smash {
 
 namespace lowess {
 ////////////////////////////////////////////////////////////////////////////////
@@ -251,23 +251,19 @@ void lowess(const T *x, const T *y, size_t n, T *ys, T span, size_t iter,
 }  // namespace lowess
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Smooth data with Lowess smoother
-///
-/// Apply the LOWESS smoother (see the reference below) to the given data (x, y)
+/// Apply the LOWESS smoother (see the reference below) to the given data
+/// (x, y).
 ///
 /// \returns smoothed y-values
 /// \param x x-values.
 /// \param y y-values.
-/// \param span the smoother span. This gives the proportion of points in
-/// the plot
-///     which influence the smooth at each value. Larger values give more
-///     smoothness.
-/// \param iter the number of robustifying iterations which should be
-/// performed.
-///     Using smaller values of iter will make lowess run faster.
-/// \param delta values of x which lie within delta of each other replaced
-/// by a
-///     single value in the output from lowess.
+/// \param span The smoother span. This gives the proportion of points in
+///     the plot which influence the smoothness at each value. Larger values
+///     give more smoothness.
+/// \param iter The number of robustifying iterations which should be
+///     performed. Using smaller values of iter will make lowess run faster.
+/// \param delta Values of x which lie within delta of each other replaced
+///     by a single value in the output from lowess.
 ///     For delta = 0, delta will be calculated.
 ///
 /// References:
@@ -292,6 +288,6 @@ std::vector<T> smooth(const std::vector<T> &x, const std::vector<T> &y,
   return std::move(result);
 }
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_LOWESS_H_

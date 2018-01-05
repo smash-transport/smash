@@ -10,7 +10,7 @@
 #include "include/scatteractionbaryonmeson.h"
 #include "include/parametrizations.h"
 
-namespace Smash {
+namespace smash {
 
 void ScatterActionBaryonMeson::format_debug_output(std::ostream &out) const {
   out << "Baryon-Meson  ";
@@ -38,4 +38,16 @@ double ScatterActionBaryonMeson::high_energy_cross_section() const {
   }
 }
 
-}  // namespace Smash
+double ScatterActionBaryonMeson::string_hard_cross_section() const {
+  // const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
+  // const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
+  const double s = mandelstam_s();
+
+  /**
+   * Currently nucleon-pion cross section is used for all case.
+   * This will be changed later by applying additive quark model.
+   */
+  return Npi_string_hard(s);
+}
+
+}  // namespace smash

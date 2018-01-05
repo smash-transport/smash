@@ -17,7 +17,7 @@
 #include "include/particles.h"
 #include "include/vtkoutput.h"
 
-namespace Smash {
+namespace smash {
 
 VtkOutput::VtkOutput(const bf::path &path, std::string name)
     : OutputInterface(name), base_path_(std::move(path)) {}
@@ -289,4 +289,4 @@ void VtkOutput::thermodynamics_output(const GrandCanThermalizer &gct) {
                    [&](ThermLatticeNode &node) { return node.mus(); });
 }
 
-}  // namespace Smash
+}  // namespace smash

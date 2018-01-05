@@ -16,7 +16,7 @@
 TEST(one_dim_no_arguments) {
   // The used algorithm sometimes underestimates the true error by a few bits
   // of precision.
-  Smash::Integrator integrate;
+  smash::Integrator integrate;
   for (int i = 0; i < 10; ++i) {
     const auto result = integrate(0, i, [](double) { return 1.; });
     COMPARE_ABSOLUTE_ERROR(result.value(), double(i), 1.1 * result.error());
@@ -28,7 +28,7 @@ TEST(one_dim_no_arguments) {
 }
 
 TEST(one_dim_with_lambda_captures) {
-  Smash::Integrator integrate;
+  smash::Integrator integrate;
   for (int i = 0; i < 10; ++i) {
     const auto result = integrate(0, i, [i](double x) { return x + i; });
     COMPARE_ABSOLUTE_ERROR(result.value(), i * i * 1.5, result.error())
@@ -44,7 +44,7 @@ TEST(one_dim_with_lambda_captures) {
 }
 
 TEST(one_dim_result_conversion_to_value) {
-  Smash::Integrator integrate;
+  smash::Integrator integrate;
   for (int i = 0; i < 10; ++i) {
     const auto result1 = integrate(0, i, [](double x) { return x; });
     const double result2 = integrate(0, i, [](double x) { return x; });
@@ -55,7 +55,7 @@ TEST(one_dim_result_conversion_to_value) {
 // test two-dimensional Monte-Carlo integration
 
 TEST(two_dim) {
-  Smash::Integrator2d integrate;
+  smash::Integrator2d integrate;
   /* Here the errors are statistical. We check that the values agree within
    * 4 sigma. It is very unlikely that they lie outside the 4 sigma band. */
   constexpr int Nsigma = 4;
@@ -91,7 +91,7 @@ TEST(two_dim) {
 }
 
 TEST(two_dim_cuhre) {
-  Smash::Integrator2dCuhre integrate;
+  smash::Integrator2dCuhre integrate;
   /* Here the errors are statistical. We check that the values agree within
    * 4 sigma. It is very unlikely that they lie outside the 4 sigma band. */
   constexpr int Nsigma = 4;

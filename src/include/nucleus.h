@@ -18,7 +18,7 @@
 #include "particledata.h"
 #include "threevector.h"
 
-namespace Smash {
+namespace smash {
 
 /** Nucleus: a nucleus is a collection of Particles (ParticleData thingys) that
  * are initialized before the beginning of the simulation and all have
@@ -91,8 +91,6 @@ class Nucleus {
    *
    * @param beta_scalar magnitude (with sign) of the z
    * component velocity used for boosting.
-   *
-   * \fpPrecision Why \c double?
    **/
   void boost(double beta_scalar);
 
@@ -125,8 +123,6 @@ class Nucleus {
    * setting).
    *
    * @param simulation_time set the time of each particle to this value.
-   *
-   * \fpPrecision Why \c double?
    **/
   void shift(double z_offset, double x_offset, double simulation_time);
 
@@ -255,6 +251,6 @@ class Nucleus {
   friend std::ostream &operator<<(std::ostream &, const Nucleus &);
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_NUCLEUS_H_

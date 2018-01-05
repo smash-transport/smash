@@ -15,7 +15,7 @@
 #include "include/forwarddeclarations.h"
 #include "include/particles.h"
 
-namespace Smash {
+namespace smash {
 
 RootOutput::RootOutput(const bf::path &path, std::string name,
                        const OutputParameters &out_par)
@@ -297,4 +297,4 @@ void RootOutput::collisions_to_tree(const ParticleList &incoming,
 
   collisions_tree_->Fill();
 }
-}  // namespace Smash
+}  // namespace smash

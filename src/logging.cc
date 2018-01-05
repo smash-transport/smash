@@ -14,7 +14,7 @@
 #include "include/configuration.h"
 #include "include/stringfunctions.h"
 
-namespace Smash {
+namespace smash {
 
 static einhard::LogLevel global_default_loglevel = einhard::ALL;
 
@@ -85,4 +85,4 @@ void create_all_loggers(Configuration config) {
   create_all_loggers_impl<std::tuple_size<LogArea::AreaTuple>::value>(config);
 }
 
-}  // namespace Smash
+}  // namespace smash

@@ -13,7 +13,7 @@
 #include "actions.h"
 #include "configuration.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * This class implements the updating of adaptive timestep based on the
@@ -113,6 +113,6 @@ inline std::ostream &operator<<(std::ostream &o, const AdaptiveParameters &a) {
            << "  Allowed deviation: " << a.deviation_factor_ << "\n";
 }
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_ADAPTIVEPARAMETERS_H_

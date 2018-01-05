@@ -19,7 +19,7 @@
 #include "forwarddeclarations.h"
 #include "particles.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * Identifies the mode of the Grid.
@@ -152,6 +152,6 @@ class Grid : public GridBase {
   std::vector<ParticleList> cells_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_GRID_H_

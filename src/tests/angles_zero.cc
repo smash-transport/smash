@@ -11,7 +11,7 @@
 
 // tests if the angles add up to zero.
 
-using namespace Smash;
+using namespace smash;
 
 int main() {
   const int NUMBER = 100000000;

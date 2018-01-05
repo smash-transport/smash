@@ -17,7 +17,7 @@
 #include "include/logging.h"
 #include "include/random.h"
 
-namespace Smash {
+namespace smash {
 
 /* relativistic Breit-Wigner distribution */
 double breit_wigner(const double m, const double pole, const double width) {
@@ -281,4 +281,4 @@ double sample_momenta_IC_ES(const double temperature) {
   return momentum_radial;
 }
 
-}  // namespace Smash
+}  // namespace smash

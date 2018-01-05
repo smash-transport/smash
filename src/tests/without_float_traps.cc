@@ -49,8 +49,8 @@ static void do_division(double x) {
 TEST(without_float_traps) {
   std::signal(SIGFPE, &handle_fpe);
 
-  Smash::enable_float_traps(FE_DIVBYZERO);     // now div by zero must trap
-  Smash::without_float_traps([&] {             // temporarily disable the trap
+  smash::enable_float_traps(FE_DIVBYZERO);     // now div by zero must trap
+  smash::without_float_traps([&] {             // temporarily disable the trap
     VERIFY(!std::fetestexcept(FE_DIVBYZERO));  // flag not set yet
     do_division(2.);  // this sets the flag, but doesn't trap
     VERIFY(std::fetestexcept(FE_DIVBYZERO));  // flag must be set now

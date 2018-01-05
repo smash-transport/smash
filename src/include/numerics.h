@@ -23,7 +23,7 @@
  *
  */
 
-namespace Smash {
+namespace smash {
 /** checks two numbers for relative approximate equality.
  *
  * \param x
@@ -52,6 +52,6 @@ bool almost_equal_physics(const N x, const N y) {
               N(0.5 * small_number) * (std::abs(x) + std::abs(y)));
 }
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_NUMERICS_H_

@@ -9,6 +9,7 @@
 
 #include "include/photoncrosssections.h"
 
+namespace {
 typedef double (*Fun2D)(double, double);
 typedef double (*Fun3D)(double, double, double);
 
@@ -28,6 +29,8 @@ double xs_wrapper(const double s, const double t, const double m) {
     return 0;
 }
 
+}  // anonymous namespace
+
 /*
    The cross sections presented in this file are calculated applying an average
    over initial states and sum over final states. In transport simulations
@@ -37,7 +40,8 @@ double xs_wrapper(const double s, const double t, const double m) {
    particles to account for these particle properties.
 */
 
-using namespace Smash;
+
+using namespace smash;
 
 template class PhotonCrossSection<ComputationMethod::Analytic>;
 template class PhotonCrossSection<ComputationMethod::Lookup>;
@@ -3702,7 +3706,6 @@ double PhotonCrossSection<ComputationMethod::Analytic>::
 
   return to_mb * diff_xs / spin_deg_factor;
 }
-
 /*----------------------------------------------------------------------------*/
 /* 					Pi + Rho -> Pi + Photon channels mediated
  * by (omega) 						  */
@@ -3877,6 +3880,8 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi0_rho0_pi0(
   return to_mb * diff_xs / spin_deg_factor;
 }
 
+
+
 // C15
 double
 PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0_omega_mediated(
@@ -3892,31 +3897,21 @@ PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0_omega_mediated(
   const double spin_deg_factor = 3.0;
 
   const double xs =
-      (0.0024867959858108648 * pow(Const, 2) * pow(g_POR, 4) *
-       (pow(mpion, 8) * (1. * tmax - 1. * tmin) +
-        pow(mpion, 6) * pow(mrho, 2) * (-2. * tmax + 2. * tmin) +
-        pow(mpion, 4) * (pow(mrho, 4) * (1. * tmax - 1. * tmin) +
-                         s * (4. * s * tmax - 1. * pow(tmax, 2) -
-                              4. * s * tmin + 1. * pow(tmin, 2))) +
-        pow(s, 2) *
-            (1. * pow(s, 2) * tmax + 1. * s * pow(tmax, 2) +
-             0.6666666666666666 * pow(tmax, 3) +
-             pow(mrho, 4) * (1. * tmax - 1. * tmin) - 1. * pow(s, 2) * tmin -
-             1. * s * pow(tmin, 2) - 0.6666666666666666 * pow(tmin, 3) +
-             pow(mrho, 2) * (-2. * s * tmax - 1. * pow(tmax, 2) +
-                             2. * s * tmin + 1. * pow(tmin, 2))) +
-        pow(mpion, 2) * s *
-            (pow(mrho, 4) * (-2. * tmax + 2. * tmin) +
-             pow(mrho, 2) * (4. * s * tmax + 1. * pow(tmax, 2) - 4. * s * tmin -
-                             1. * pow(tmin, 2)) +
-             s * (-4. * s * tmax - 2. * pow(tmax, 2) + 4. * s * tmin +
-                  2. * pow(tmin, 2))))) /
-      ((pow(pow(momega, 2) - 1. * s, 2) *
-        (pow(mpion, 4) + pow(mrho, 4) +
-         pow(mpion, 2) * (-2. * pow(mrho, 2) - 2. * s) - 2. * pow(mrho, 2) * s +
-         pow(s, 2))));
+		(0.0024867959858108648*pow(Const,2)*pow(g_POR,4)*(pow(mpion,8)*(1.*tmax
+		- 1.*tmin) + pow(mpion,6)*pow(mrho,2)*(-2.*tmax + 2.*tmin) +
+		pow(mpion,4)*(pow(mrho,4)*(1.*tmax - 1.*tmin) + s*(4.*s*tmax
+		- 1.*pow(tmax,2) - 4.*s*tmin + 1.*pow(tmin,2))) + pow(s,2)*(1.*pow(s,2)*tmax
+		+ 1.*s*pow(tmax,2) + 0.6666666666666666*pow(tmax,3) + pow(mrho,4)*(1.*tmax
+		- 1.*tmin) - 1.*pow(s,2)*tmin - 1.*s*pow(tmin,2) -
+		0.6666666666666666*pow(tmin,3) + pow(mrho,2)*(-2.*s*tmax - 1.*pow(tmax,2)
+		+ 2.*s*tmin + 1.*pow(tmin,2))) + pow(mpion,2)*s*(pow(mrho,4)*(-2.*tmax
+		+ 2.*tmin) + pow(mrho,2)*(4.*s*tmax + 1.*pow(tmax,2) - 4.*s*tmin
+		- 1.*pow(tmin,2)) + s*(-4.*s*tmax - 2.*pow(tmax,2) + 4.*s*tmin
+		+ 2.*pow(tmin,2)))))/
+		((pow(pow(momega,2) - 1.*s,2)*(pow(mpion,4) + pow(mrho,4) +
+		pow(mpion,2)*(-2.*pow(mrho,2) - 2.*s) - 2.*pow(mrho,2)*s + pow(s,2))));
 
-  return xs * to_mb / spin_deg_factor;
+        return xs * to_mb / spin_deg_factor;
 }
 
 double PhotonCrossSection<ComputationMethod::Analytic>::

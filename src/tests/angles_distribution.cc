@@ -11,7 +11,7 @@
 
 // tests distributions for the angles.
 
-using namespace Smash;
+using namespace smash;
 
 int main() {
   // histograms in 1 degree steps:

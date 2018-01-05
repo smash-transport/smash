@@ -12,7 +12,7 @@
 
 #include "outputinterface.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup action
@@ -45,6 +45,6 @@ class DecayActionsFinderDilepton {
                    bool only_res = false) const;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_DECAYACTIONSFINDERDILEPTON_H_

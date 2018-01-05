@@ -20,7 +20,7 @@
 #include "include/forwarddeclarations.h"
 #include "include/particles.h"
 
-namespace Smash {
+namespace smash {
 
 template <OscarOutputFormat Format, int Contents>
 OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
@@ -491,8 +491,13 @@ std::unique_ptr<OutputInterface> create_oscar_output(
           modern_format, path, out_par, "full_event_history");
     }
   } else if (content == "Dileptons") {
-    return make_unique<OscarOutput<OscarFormat2013Extended, OscarInteractions>>(
-        path, "Dileptons");
+    if (out_par.dil_extended) {
+      return make_unique<OscarOutput<OscarFormat2013Extended,
+                         OscarInteractions>>(path, "Dileptons");
+    } else {
+      return make_unique<OscarOutput<OscarFormat2013,
+                         OscarInteractions>>(path, "Dileptons");
+    }
   } else if (content == "Photons") {
     if (modern_format) {
       return make_unique<OscarOutput<OscarFormat2013, OscarInteractions>>(
@@ -506,4 +511,4 @@ std::unique_ptr<OutputInterface> create_oscar_output(
   throw std::invalid_argument("Create_oscar_output got unknown content.");
 }
 
-}  // namespace Smash
+}  // namespace smash

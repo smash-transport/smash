@@ -13,7 +13,7 @@
 #include "scatteraction.h"
 #include "scatteractionbaryonmeson.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup action
@@ -36,6 +36,6 @@ class ScatterActionDeltaKaon : public ScatterActionBaryonMeson {
   void format_debug_output(std::ostream &out) const override;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_SCATTERACTIONDELTAKAON_H_

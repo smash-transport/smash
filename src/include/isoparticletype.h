@@ -14,7 +14,7 @@
 #include "particletype.h"
 #include "tabulation.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup data
@@ -181,6 +181,6 @@ class IsoParticleType {
   static IsoParticleType &find_private(const std::string &name);
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_ISOPARTICLETYPE_H_

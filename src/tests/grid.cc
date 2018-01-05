@@ -17,7 +17,7 @@
 #include <set>
 #include <unordered_set>
 
-using namespace Smash;
+using namespace smash;
 
 namespace std {
 // helpers for printing sets/pairs on test failure

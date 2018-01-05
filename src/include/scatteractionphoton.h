@@ -30,7 +30,7 @@
 #include "random.h"
 #include "tabulation.h"
 
-namespace Smash {
+namespace smash {
 
 class ScatterActionPhoton : public ScatterAction {
  public:
@@ -46,18 +46,16 @@ class ScatterActionPhoton : public ScatterAction {
 
   double raw_weight_value() const override { return weight_; }
 
-  // returns the cross section of the underlying hadronic process (note: this
-  // includes also the total cross section of the photon channels.)
+  // returns the cross section of the underlying hadronic process 
   double cross_section() const override { return total_cross_section_; }
 
-  // we have to override sample_masses from Action. In Action sample_masses
-  // relies on the outgoing particles member. At the point where we need this
-  // function, this member outgoing_particles_ of Action is not yet accessible.
-  // ToDo: See if one can call the Action constructor in ScatterActionPhoton
-  // constructor and set direct the outgoing particles (known at time of
-  // constructor calling). But since all the inheritance stuff will change in
-  // the near future we might as well go for now with the custom solution and
-  // treat the photons in the special manner as they are meant.
+  // we have to override sample_masses from Action. In Action sample_masses relies
+  // on the outgoing particles member. At the point where we need this function, this member
+  // outgoing_particles_ of Action is not yet accessible.
+  // ToDo: See if one can call the Action constructor in ScatterActionPhoton constructor and
+  // set direct the outgoing particles (known at time of constructor calling). But since
+  // all the inheritance stuff will change in the near future we might as well go for now
+  // with the custom solution and treat the photons in the special manner as they are meant.
 
   // actually we do not need a pair. second particle will always be a photon.
   double sample_out_hadron_mass(const ParticleTypePtr out_type);
@@ -160,6 +158,6 @@ class ScatterActionPhoton : public ScatterAction {
   const double to_mb = 0.3894;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_SCATTERACTIONPHOTON_H_

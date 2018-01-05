@@ -19,7 +19,7 @@
 #include "../include/oscaroutput.h"
 #include "../include/particles.h"
 
-using namespace Smash;
+using namespace smash;
 static const double accuracy = 5.e-5;
 static const bf::path testoutputpath = bf::absolute(SMASH_TEST_OUTPUT_PATH);
 

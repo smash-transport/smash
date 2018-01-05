@@ -112,6 +112,7 @@ set(smash_src
         photoncrosssections.cc
         potentials.cc
         processbranch.cc
+        processstring.cc
         propagation.cc
         quantumnumbers.cc
         random.cc

@@ -19,7 +19,7 @@
 #include "../include/pdgcode.h"
 #include "../include/scatteractionsfinder.h"
 
-using namespace Smash;
+using namespace smash;
 
 TEST(init_particle_types) { Test::create_smashon_particletypes(); }
 

@@ -36,7 +36,7 @@
 #include "include/random.h"
 #include "include/threevector.h"
 
-namespace Smash {
+namespace smash {
 
 /*!\Userguide
  * \page input_modi_list_ List
@@ -229,4 +229,4 @@ double ListModus::initial_conditions(Particles *particles,
 
   return start_time_;
 }
-}  // namespace Smash
+}  // namespace smash
