@@ -549,15 +549,20 @@ double ScatterActionPhoton::diff_cross_section_w_ff(const double t,
     case ReactionType::pi_z_pi_m_rho_m:
     case ReactionType::pi_p_rho_z_pi_p:
     case ReactionType::pi_m_rho_z_pi_m:
-    case ReactionType::pi_p_pi_m_rho_z:
-    case ReactionType::pi_z_rho_z_pi_z: {
+    case ReactionType::pi_p_pi_m_rho_z: 
       //const double FF = form_factor(E_photon);
       const double FF = form_factor_pion(E_photon);
       const double xs = diff_cross_section(t, t2, t1, m_rho);
       const double xs_ff = pow_int(FF,4) * xs;
       return xs_ff;
       break;
-    }
+    
+    case ReactionType::pi_z_rho_z_pi_z: 
+      const double FF = form_factor_omega(E_photon);
+      const double xs = diff_cross_section(t, t2, t1, m_rho);
+      const double xs_ff = pow_int(FF,4) * xs;
+      return xs_ff;
+                                        
     case ReactionType::no_reaction:
       throw std::runtime_error("");
   }
