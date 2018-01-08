@@ -59,6 +59,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho0_pi(
   using std::atan;
   using std::pow;
   using std::sqrt;
+  using std::abs;
   // const double m_pi = m_pion_;
   const double &mpion = m_pion_;
   // const double &mrho = m_rho;
@@ -1227,6 +1228,11 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho0_pi(
   const double &mpion = m_pion_;
   const double spin_deg_factor = 3.0;
 
+  using std::atan;
+  using std::pow;
+  using std::sqrt;
+  using std::abs;
+
   const double diff_xs =
       (pow(Const, 2) * pow(ghat, 4) *
        ((-8 * pow(-2 + delta, 2) * pow(mpion, 2)) /
@@ -1486,6 +1492,8 @@ PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi_rho_mediated(
   using std::atan;
   using std::pow;
   using std::sqrt;
+  using std::abs;
+
   const double &mpion = m_pion_;
   const double &mrho = m_rho;
   auto t_mandelstam = get_t_range(sqrt(s), m_pion_, m_rho, m_pion_, 0.);
@@ -2491,12 +2499,15 @@ PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0_rho_mediated(
   using std::atan;
   using std::pow;
   using std::sqrt;
+  using std::abs;
+
   const double &mpion = m_pion_;
   const double &mrho = m_rho;
   auto t_mandelstam = get_t_range(sqrt(s), m_pion_, m_rho, m_pion_, 0.);
   const double &tmax = t_mandelstam[0];
   const double &tmin = t_mandelstam[1];
   const double spin_deg_factor = 3.0;
+
 
   const double xs =
       (pow(Const, 2) * pow(ghat, 4) *
@@ -3516,6 +3527,11 @@ double PhotonCrossSection<ComputationMethod::Analytic>::
   const double &mrho = m_rho;
   const double spin_deg_factor = 3.0;
 
+  using std::atan;
+  using std::pow;
+  using std::sqrt;
+  using std::abs;
+
   const double diff_xs =
       ((pow(Const, 2) * pow(ghat, 4) *
         ((-0.25 * pow(-2 + delta, 2) * pow(mpion, 2) *
@@ -3716,6 +3732,12 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho0_pi0(
   using std::atan;
   using std::pow;
   using std::sqrt;
+
+  using std::atan;
+  using std::pow;
+  using std::sqrt;
+  using std::abs;
+
   const double &mpion = m_pion_;
   const double &mrho = m_rho;
   auto t_mandelstam = get_t_range(sqrt(s), m_pion_, m_rho, m_pion_, 0.0);
@@ -3834,6 +3856,15 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi0_rho0_pi0(
   const double &mrho = m_rho;
   const double spin_deg_factor = 3.0;
 
+  
+  using std::pow;
+  using std::log;
+
+  using std::atan;
+  using std::pow;
+  using std::sqrt;
+  using std::abs;
+
   double diff_xs =
       (pow(Const, 2) * pow(g_POR, 4) *
        (pow(momega, 4) * pow(s, 4) + 4 * pow(momega, 4) * pow(s, 3) * t -
@@ -3889,6 +3920,8 @@ PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0_omega_mediated(
   using std::atan;
   using std::pow;
   using std::sqrt;
+  using std::abs;
+
   const double &mpion = m_pion_;
   const double &mrho = m_rho;
   auto t_mandelstam = get_t_range(sqrt(s), m_pion_, m_rho, m_pion_, 0.);
@@ -3920,6 +3953,12 @@ double PhotonCrossSection<ComputationMethod::Analytic>::
   const double &mpion = m_pion_;
   const double &mrho = m_rho;
   const double spin_deg_factor = 3.0;
+
+  using std::atan;
+  using std::pow;
+  using std::sqrt;
+  using std::abs;
+
   const double diff_xs =
       (0.0024867959858108648 * pow(Const, 2) * pow(g_POR, 4) *
        (pow(mpion, 8) - 2 * pow(mpion, 6) * pow(mrho, 2) +
@@ -3941,6 +3980,7 @@ PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi_omega_mediated(
   using std::atan;
   using std::pow;
   using std::sqrt;
+  using std::abs;
   const double &mpion = m_pion_;
   const double &mrho = m_rho;
   auto t_mandelstam = get_t_range(sqrt(s), m_pion_, m_rho, m_pion_, 0.);
@@ -4069,6 +4109,8 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi_rho0(
   using std::atan;
   using std::pow;
   using std::sqrt;
+  using std::abs;
+
   const double s_sqrt = sqrt(s);
   const double &mpion = m_pion_;
   const double &mrho = m_rho;
@@ -6191,6 +6233,11 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi_rho0(
   const double &mrho = m_rho;
   const double spin_deg_factor = 1.0;
 
+  using std::atan;
+  using std::pow;
+  using std::sqrt;
+  using std::abs;
+
   const double diff_xs =
       ((pow(Const, 2) * pow(ghat, 4) *
         ((0.25 *
@@ -6439,6 +6486,8 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
   using std::atan;
   using std::pow;
   using std::sqrt;
+  using std::abs;
+
   const double &mpion = m_pion_;
   const double &mrho = m_rho;
   const double spin_deg_factor = 1.0;
@@ -7163,6 +7212,11 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi0_rho(
   const double &mpion = m_pion_;
   const double &mrho = m_rho;
   const double spin_deg_factor = 1.0;
+
+  using std::atan;
+  using std::pow;
+  using std::sqrt;
+  using std::abs;
 
   const double diff_xs =
       (pow(Const, 2) * pow(ghat, 4) *
