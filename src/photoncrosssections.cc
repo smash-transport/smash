@@ -43,8 +43,8 @@ double xs_wrapper(const double s, const double t, const double m) {
 
 using namespace smash;
 
-template class PhotonCrossSection<ComputationMethod::Analytic>;
-template class PhotonCrossSection<ComputationMethod::Lookup>;
+template class smash::PhotonCrossSection<ComputationMethod::Analytic>;
+template class smash::PhotonCrossSection<ComputationMethod::Lookup>;
 
 constexpr double PhotonCrossSection<ComputationMethod::Analytic>::m_pion_;
 
