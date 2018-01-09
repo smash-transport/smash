@@ -246,35 +246,6 @@ double ScatterActionPhoton::sample_out_hadron_mass(
   return mass;
 }
 
-// find the mass of the mediating rho particle for
-// (rho,a1,pi) mediated processes. 
-/*
-double ScatterActionPhoton::mediator_mass(ReactionType reac) const {
-  assert(reac != ReactionType::no_reaction);
-  switch (reac) {
-    // mass of outgoing rho. Already sampled. 
-    case ReactionType::pi_p_pi_m_rho_z:
-    case ReactionType::pi_z_pi_m_rho_m:
-    case ReactionType::pi_z_pi_p_rho_p:
-      return hadron_out_mass_;
-
-    // mass of incoming rho. 
-    case ReactionType::pi_m_rho_p_pi_z:
-    case ReactionType::pi_p_rho_m_pi_z:
-    case ReactionType::pi_p_rho_z_pi_p:
-    case ReactionType::pi_m_rho_z_pi_m:
-    case ReactionType::pi_z_rho_m_pi_m:
-    case ReactionType::pi_z_rho_p_pi_p:
-    case ReactionType::pi_z_rho_z_pi_z:
-      return (incoming_particles_[0].is_rho())
-                 ? incoming_particles_[0].effective_mass()
-                 : incoming_particles_[1].effective_mass();
-    case ReactionType::no_reaction:
-      // throw RuntimeError;
-      return 0;
-  }
-}
-*/
 
 // find the (potentially varying) mass of the participating rho. In case of 
 // an rho in the incoming channel it is the mass of the incoming rho, in case of 
@@ -310,19 +281,12 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections(
 
   static ParticleTypePtr photon_particle = &ParticleType::find(pdg::photon);
 
-  ParticleData part_a = incoming_particles_[0];
-  ParticleData part_b = incoming_particles_[1];
-  const double m1 = part_a.effective_mass();
-  const double m2 = part_b.effective_mass();
-
   const double s = mandelstam_s();
-  const double sqrts = sqrt_s();
-
-  double xsection = 0.0;
   // the mass of the mediating particle depends on the channel. For an incoming
   // rho it is the mass of the incoming particle, for an outgoing rho it is the
   // sampled mass
   const double &m_rho = rho_mass();
+  double xsection = 0.0;
 
   switch (reac_) {
     case ReactionType::pi_p_pi_m_rho_z:
@@ -397,8 +361,7 @@ double ScatterActionPhoton::diff_cross_section(const double t, const double t2,
                                                const double t1,
                                                const double m_rho,
                                                MediatorType mediator) const {
-  const double to_mb = 0.3894;
-  static const double m_pi = ParticleType::find(pdg::pi_z).mass();
+
   double s = mandelstam_s();
   double diff_xsection = 0.0;
 
@@ -411,7 +374,7 @@ double ScatterActionPhoton::diff_cross_section(const double t, const double t2,
         //  } else if (outgoing_particles_[0].type().pdgcode() == pdg::eta) {
         //    diff_xsection = to_be_determined;
       } else if (outgoing_particles_[0].type().pdgcode() == pdg::photon) {
-        diff_xsection = 0.0000000000001 / to_mb / (t2 - t1);
+        diff_xsection = 0.0000000000001 / to_mb_ / (t2 - t1);
       }
       break;
 
@@ -421,7 +384,7 @@ double ScatterActionPhoton::diff_cross_section(const double t, const double t2,
       if (outgoing_particles_[0].type().pdgcode().is_rho()) {
         diff_xsection = xs_object.xs_diff_pi_pi0_rho(s, t, m_rho);
       } else if (outgoing_particles_[0].type().pdgcode().is_pion()) {
-        diff_xsection = 0.0000000000001 / to_mb / (t2 - t1);
+        diff_xsection = 0.0000000000001 / to_mb_ / (t2 - t1);
       }
       break;
 
@@ -518,7 +481,6 @@ double ScatterActionPhoton::diff_cross_section_w_ff(const double t,
                                                     const double t1,
                                                     const double m_rho,
                                                     const double E_photon) {
-  double xs_ff;
   // only C12, C13, C15, C16 need special treatment
   switch (reac_) {
     case ReactionType::pi_m_rho_p_pi_z:
@@ -549,19 +511,21 @@ double ScatterActionPhoton::diff_cross_section_w_ff(const double t,
     case ReactionType::pi_z_pi_m_rho_m:
     case ReactionType::pi_p_rho_z_pi_p:
     case ReactionType::pi_m_rho_z_pi_m:
-    case ReactionType::pi_p_pi_m_rho_z: 
+    case ReactionType::pi_p_pi_m_rho_z: {
       //const double FF = form_factor(E_photon);
       const double FF = form_factor_pion(E_photon);
       const double xs = diff_cross_section(t, t2, t1, m_rho);
       const double xs_ff = pow_int(FF,4) * xs;
       return xs_ff;
       break;
+                                        }
     
-    case ReactionType::pi_z_rho_z_pi_z: 
+    case ReactionType::pi_z_rho_z_pi_z: { 
       const double FF = form_factor_omega(E_photon);
       const double xs = diff_cross_section(t, t2, t1, m_rho);
       const double xs_ff = pow_int(FF,4) * xs;
       return xs_ff;
+                                        }
                                         
     case ReactionType::no_reaction:
       throw std::runtime_error("");

@@ -38,8 +38,9 @@ class ScatterActionPhoton : public ScatterAction {
       : ScatterAction(in[0], in[1], time),
         number_of_fractional_photons_(nofp),
         hadron_out_t_(outgoing_hadron_type(in)) {
-    hadron_out_mass_ = hadron_out_t_->mass();
+    //hadron_out_mass_ = hadron_out_t_->mass();
     reac_ = photon_reaction_type(in);
+    hadron_out_mass_ = sample_out_hadron_mass(hadron_out_t_);
   }
 
   void generate_final_state() override;
@@ -155,7 +156,7 @@ class ScatterActionPhoton : public ScatterAction {
                                  const double E_photon);
 
   // conversion factor to millibarn
-  const double to_mb = 0.3894;
+  const double to_mb_ = 0.3894;
 };
 
 }  // namespace smash
