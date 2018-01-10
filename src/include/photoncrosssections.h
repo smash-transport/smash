@@ -73,7 +73,8 @@ class PhotonCrossSection<ComputationMethod::Analytic> {
   // can not make use of particleFinder.
   constexpr static double to_mb = 0.3894;
   constexpr static double Const = 0.059;
-  constexpr static double g_POR = 11.93;
+  //constexpr static double g_POR = 11.93;
+  constexpr static double g_POR = 22.6;
   constexpr static double ma1 = 1.26;
   constexpr static double ghat = 6.4483;
   constexpr static double eta1 = 2.3920;
