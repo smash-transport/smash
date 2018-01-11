@@ -247,10 +247,7 @@ double ScatterActionPhoton::sample_out_hadron_mass(
 }
 
 
-// find the (potentially varying) mass of the participating rho. In case of 
-// an rho in the incoming channel it is the mass of the incoming rho, in case of 
-// an rho in the outgoing channel it is the already sampled mass. 
-// When an rho acts in addition as a mediator, its mass is the same as the incoming / outgoing rho.   
+
 double ScatterActionPhoton::rho_mass() const {
   assert(reac_ != ReactionType::no_reaction);
   switch (reac_) {
@@ -432,55 +429,19 @@ double ScatterActionPhoton::diff_cross_section(const double t, const double t2,
   return diff_xsection;
 }
 
-double ScatterActionPhoton::form_factor(double E_photon) {
-  double form_factor = 1.0;
-  double t_ff = 0.0;
-  double Lambda = 1.0;
-  switch (reac_) {
-      /* The form factor is assumed to be a hadronic dipole form factor which
-      takes the shape: FF = (2*Lambda^2/(2*Lambda^2 - t))^2 with
-  case ReactionType::pi_p_rho_z_pi_m:
-      Lambda = 1.0 GeV. t depends on the lightest possible exchange particle in
-      the different channels. This could either be a pion or an omega meson. For
-      the computation the parametrizations given in \ref! are used. */
-      // TODO (schaefer): Include reference for FF!
-
-    case ReactionType::pi_p_pi_m_rho_z:
-    case ReactionType::pi_z_pi_p_rho_p:
-    case ReactionType::pi_z_pi_m_rho_m:
-    case ReactionType::pi_p_rho_z_pi_p:
-    case ReactionType::pi_m_rho_z_pi_m:
-      // case ReactionType::pi_rho:
-      // case ReactionType::pi0_rho:
-      t_ff = 34.5096 * pow(E_photon, 0.737) - 67.557 * pow(E_photon, 0.7584) +
-             32.858 * pow(E_photon, 0.7806);
-      break;
-    // lightest exchange particle: omega
-    case ReactionType::pi_m_rho_p_pi_z:
-    case ReactionType::pi_p_rho_m_pi_z:  // for omeaga
-
-    case ReactionType::pi_z_rho_m_pi_m:
-    case ReactionType::pi_z_rho_p_pi_p:  // for omega
-
-    case ReactionType::pi_z_rho_z_pi_z:
-      t_ff = -61.595 * pow(E_photon, 0.9979) + 28.592 * pow(E_photon, 1.1579) +
-             37.738 * pow(E_photon, 0.9317) - 5.282 * pow(E_photon, 1.3686);
-      break;
-
-    case ReactionType::no_reaction:
-      // never reached
-      break;
-  }
-  form_factor = pow(2.0 * pow(Lambda, 2) / (2.0 * pow(Lambda, 2) - t_ff), 2);
-  // return form_factor;
-  return 1.0;
-}
-
 double ScatterActionPhoton::diff_cross_section_w_ff(const double t,
                                                     const double t2,
                                                     const double t1,
                                                     const double m_rho,
                                                     const double E_photon) {
+ 
+  /* The form factor is assumed to be a hadronic dipole form factor which
+      takes the shape: FF = (2*Lambda^2/(2*Lambda^2 - t))^2 with
+      Lambda = 1.0 GeV. t depends on the lightest possible exchange particle in
+      the different channels. This could either be a pion or an omega meson. For
+      the computation the parametrizations given in \ref! are used. 
+      // TODO (schaefer): Include reference for FF!
+ */
   // only C12, C13, C15, C16 need special treatment
   switch (reac_) {
     case ReactionType::pi_m_rho_p_pi_z:

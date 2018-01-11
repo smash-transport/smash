@@ -74,7 +74,7 @@ Output:
 #        Format:          ["Oscar2013", "Binary", "Root"]
     Photons:
         Format:          ["Oscar2013"]
-        Fractions:       10
+        Fractions:       50 
 #    Thermodynamics:
 #        Format:          ["ASCII", "VTK"]
 #        # ("hadron", "baryon", "baryonic isospin", "pion"), baryon := net baryon
