@@ -80,18 +80,19 @@ FourVector Action::get_interaction_point() const {
 
 std::pair<double, double> Action::get_potential_at_interaction_point() const {
   const ThreeVector r = get_interaction_point().threevec();
-  double UB, UI3;
+  double UB = 0.;
+  double UI3 = 0.;
   /* Check:
    * 1. Potential is turned on
    * 2. Lattice is turned on
    * 3. Particle is inside the lattice. */
-  const bool UB_exist =
-            ((UB_lat_ != nullptr) ? UB_lat_->value_at(r, UB) : false);
-  const bool UI3_exist =
-            ((UI3_lat_ != nullptr) ? UI3_lat_->value_at(r, UI3) : false);
-  const double B_pot = (UB_exist ? UB : 0.0);
-  const double I3_pot = (UI3_exist ? UI3 : 0.0);
-  return std::make_pair(B_pot, I3_pot);
+   if (UB_lat_ != nullptr) {
+     UB_lat_->value_at(r, UB);
+   }
+   if (UI3_lat_ != nullptr) {
+     UI3_lat_->value_at(r, UI3);
+   }
+   return std::make_pair(UB, UI3);
 }
 
 void Action::perform(Particles *particles, uint32_t id_process) {

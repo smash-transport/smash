@@ -143,7 +143,8 @@ class RectangularLattice {
   /**
    * Interpolates lattice quantity to coordinate r. Result is stored
    * in the value variable. Returns true if coordinate r is on the
-   * lattice, false if out of the lattice.
+   * lattice, false if out of the lattice. In the latter case, the
+   * value is set to the default value (usually 0).
    **/
   // TODO(oliiny): maybe 1-order interpolation instead of 0-order?
   bool value_at(const ThreeVector& r, T& value) {
