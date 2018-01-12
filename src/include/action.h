@@ -204,11 +204,7 @@ class Action {
 
   /** Input the information on the potential */
   void input_potential(RectangularLattice<double> *UB_lat,
-        RectangularLattice<double> *UI3_lat, Potentials *pot) {
-        UB_lat_ = UB_lat;
-        UI3_lat_ = UI3_lat;
-        pot_ = pot;
-  }
+        RectangularLattice<double> *UI3_lat, Potentials *pot);
 
   /**
    * \ingroup exception
@@ -221,12 +217,6 @@ class Action {
   };
 
  protected:
-  /** Pointer to the skyrme potential on the lattice */
-  RectangularLattice<double> *UB_lat_ = nullptr;
-  /** Pointer to the symmmetry potential on the lattice */
-  RectangularLattice<double> *UI3_lat_ = nullptr;
-  /** Pointer to a Potential class */
-  Potentials *pot_ = nullptr;
   /** List with data of incoming particles.  */
   ParticleList incoming_particles_;
   /**

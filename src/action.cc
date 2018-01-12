@@ -8,6 +8,7 @@
  */
 
 #include "include/action.h"
+#include "include/action_globals.h"
 
 #include <assert.h>
 #include <algorithm>
@@ -86,13 +87,20 @@ std::pair<double, double> Action::get_potential_at_interaction_point() const {
    * 1. Potential is turned on
    * 2. Lattice is turned on
    * 3. Particle is inside the lattice. */
-   if (UB_lat_ != nullptr) {
-     UB_lat_->value_at(r, UB);
+   if (UB_lat_pointer != nullptr) {
+     UB_lat_pointer->value_at(r, UB);
    }
-   if (UI3_lat_ != nullptr) {
-     UI3_lat_->value_at(r, UI3);
+   if (UI3_lat_pointer != nullptr) {
+     UI3_lat_pointer->value_at(r, UI3);
    }
    return std::make_pair(UB, UI3);
+}
+
+void Action::input_potential(RectangularLattice<double> *UB_lat,
+      RectangularLattice<double> *UI3_lat, Potentials *pot) {
+      UB_lat_pointer = UB_lat;
+      UI3_lat_pointer = UI3_lat;
+      pot_pointer = pot;
 }
 
 void Action::perform(Particles *particles, uint32_t id_process) {
@@ -119,7 +127,7 @@ void Action::perform(Particles *particles, uint32_t id_process) {
   /* Check the conservation laws if the modifications of the total kinetic
    * energy of the outgoing particles by the mean field potentials are not
    * taken into account. */
-  if (UB_lat_ == nullptr && UI3_lat_ == nullptr) {
+  if (UB_lat_pointer == nullptr && UI3_lat_pointer == nullptr) {
      check_conservation(id_process);
   }
 }
@@ -133,13 +141,13 @@ double Action::kinetic_energy_cms() const {
   double scale_I3 = 0.0;
   for (const auto &p_in : incoming_particles_) {
        /* Get the force scale of the incoming particle. */
-       const auto scale = ((pot_ != nullptr) ? pot_->force_scale(p_in.type())
+       const auto scale = ((pot_pointer != nullptr) ? pot_pointer->force_scale(p_in.type())
                            : std::make_pair(0.0, 0));
        scale_B += scale.first;
        scale_I3 += scale.second * p_in.type().isospin3_rel();
   }
   for (const auto &p_out : outgoing_particles_) {
-       const auto scale = ((pot_ != nullptr) ? pot_->force_scale(p_out.type())
+       const auto scale = ((pot_pointer != nullptr) ? pot_pointer->force_scale(p_out.type())
                            : std::make_pair(0.0, 0));
        scale_B -= scale.first;
        scale_I3 -= scale.second * p_out.type().isospin3_rel();
@@ -162,13 +170,13 @@ double Action::kinetic_energy_cms(std::pair<double, double> potentials,
   double scale_I3 = 0.0;
   for (const auto &p_in : incoming_particles_) {
        /* Get the force scale of the incoming particle. */
-       const auto scale = ((pot_ != nullptr) ? pot_->force_scale(p_in.type())
+       const auto scale = ((pot_pointer != nullptr) ? pot_pointer->force_scale(p_in.type())
                            : std::make_pair(0.0, 0));
        scale_B += scale.first;
        scale_I3 += scale.second * p_in.type().isospin3_rel();
   }
   for (const auto &p_out : p_out_types) {
-       const auto scale = ((pot_ != nullptr) ? pot_->force_scale(*p_out)
+       const auto scale = ((pot_pointer != nullptr) ? pot_pointer->force_scale(*p_out)
                            : std::make_pair(0.0, 0));
        scale_B -= scale.first;
        scale_I3 -= scale.second * p_out->isospin3_rel();

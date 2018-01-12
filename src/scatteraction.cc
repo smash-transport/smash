@@ -11,6 +11,7 @@
 
 #include "Pythia8/Pythia.h"
 
+#include "include/action_globals.h"
 #include "include/constants.h"
 #include "include/cxx14compat.h"
 #include "include/fpenvironment.h"
@@ -45,7 +46,7 @@ void ScatterAction::generate_final_state() {
 
   log.debug("Incoming particles: ", incoming_particles_);
 
-  if (pot_ != nullptr) {
+  if (pot_pointer != nullptr) {
      filter_channel(collision_channels_, total_cross_section_);
   }
   /* Decide for a particular final state. */

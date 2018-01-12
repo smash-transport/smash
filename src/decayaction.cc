@@ -9,6 +9,7 @@
 
 #include "include/decayaction.h"
 
+#include "include/action_globals.h"
 #include "include/angles.h"
 #include "include/decaymodes.h"
 #include "include/kinematics.h"
@@ -155,7 +156,7 @@ void DecayAction::generate_final_state() {
    * according to their relative weights. Then decay the particle
    * by calling function one_to_two or one_to_three.
    */
-  if (pot_ != nullptr) {
+  if (pot_pointer != nullptr) {
      filter_channel(decay_channels_, total_width_);
   }
   const DecayBranch *proc =
