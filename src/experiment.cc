@@ -828,7 +828,7 @@ bool Experiment<Modus>::perform_action(
     return false;
   }
   if (parameters_.potential_affect_threshold) {
-     action.input_potential(UB_lat_.get(), UI3_lat_.get(), potentials_.get());
+     Action::input_potential(UB_lat_.get(), UI3_lat_.get(), potentials_.get());
   }
   action.generate_final_state();
   log.debug("Process Type is: ", action.get_type());

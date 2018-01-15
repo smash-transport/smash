@@ -203,7 +203,7 @@ class Action {
   std::pair<double, double> get_potential_at_interaction_point() const;
 
   /** Input the information on the potential */
-  void input_potential(RectangularLattice<double> *UB_lat,
+  static void input_potential(RectangularLattice<double> *UB_lat,
         RectangularLattice<double> *UI3_lat, Potentials *pot);
 
   /**
