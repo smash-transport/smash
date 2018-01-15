@@ -20,11 +20,11 @@ namespace smash {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 /** Pointer to the skyrme potential on the lattice */
-static RectangularLattice<double> *UB_lat_pointer = nullptr;
+extern RectangularLattice<double> *UB_lat_pointer;
 /** Pointer to the symmmetry potential on the lattice */
-static RectangularLattice<double> *UI3_lat_pointer = nullptr;
+extern RectangularLattice<double> *UI3_lat_pointer;
 /** Pointer to a Potential class */
-static Potentials *pot_pointer = nullptr;
+extern Potentials *pot_pointer;
 #pragma GCC diagnostic pop
 
 }  // namespace smash
