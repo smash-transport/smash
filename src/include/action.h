@@ -193,7 +193,7 @@ class Action {
    * an action is kinematically feasible.
    */
   double kinetic_energy_cms(std::pair<double, double> potentials,
-         ParticleTypePtrList p_out_types) const;
+                            ParticleTypePtrList p_out_types) const;
 
   /** Get the interaction point */
   FourVector get_interaction_point() const;
@@ -203,7 +203,8 @@ class Action {
 
   /** Input the information on the potential */
   static void input_potential(RectangularLattice<double> *UB_lat,
-        RectangularLattice<double> *UI3_lat, Potentials *pot);
+                              RectangularLattice<double> *UI3_lat,
+                              Potentials *pot);
 
   /**
    * \ingroup exception
@@ -246,24 +247,24 @@ class Action {
    */
   template <typename Branch>
   void filter_channel(ProcessBranchList<Branch> &subprocesses,
-                               double &total_weight) {
+                      double &total_weight) {
     const auto potentials = get_potential_at_interaction_point();
     /* Loop through all subprocesses and remove sub-threshold ones.*/
     for (auto proc = subprocesses.begin(); proc != subprocesses.end();) {
-         /* Evaluate the total kinentic energy of the final state particles
-          * of this new subprocess. */
-         const auto out_particle_types = (*proc)->particle_types();
-         const double kin_energy_cms = kinetic_energy_cms(potentials,
-                                              out_particle_types);
-         /* Reject the process if the total kinetic energy is smaller than the
-          * threshold. */
-         if (kin_energy_cms < (*proc)->threshold()) {
-           total_weight -= (*proc)->weight();
-           proc = subprocesses.erase(proc);
-         } else {
-           ++proc;
-         }
+      /* Evaluate the total kinentic energy of the final state particles
+       * of this new subprocess. */
+      const auto out_particle_types = (*proc)->particle_types();
+      const double kin_energy_cms =
+          kinetic_energy_cms(potentials, out_particle_types);
+      /* Reject the process if the total kinetic energy is smaller than the
+       * threshold. */
+      if (kin_energy_cms < (*proc)->threshold()) {
+        total_weight -= (*proc)->weight();
+        proc = subprocesses.erase(proc);
+      } else {
+        ++proc;
       }
+    }
   }
 
   /**

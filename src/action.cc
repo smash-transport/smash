@@ -85,29 +85,30 @@ std::pair<double, double> Action::get_potential_at_interaction_point() const {
   double UI3 = 0.;
   /* Check:
    * Lattice is turned on. */
-   if (UB_lat_pointer != nullptr) {
-  /* TODO(fengli) : A Lorentz transformation from the local rest frame to the
-   * center of mass frame of the incoming particles is missing here. Since all
-   * the actions take place in the center of mass frame of the incoming
-   * particles, particles should see potentials different from UB_lat_ or
-   * UI3_lat_ which are obtained in the local rest frame. But I don't think the
-   * Lorentz transformation is important in the low energy heavy-ion collisions,
-   * and turning on potentials violates the Lorentz covariance in the current
-   * SMASH version anyway, so I'd like to leave it to another issue in the
-   * future. */
-     UB_lat_pointer->value_at(r, UB);
-   }
-   if (UI3_lat_pointer != nullptr) {
-     UI3_lat_pointer->value_at(r, UI3);
-   }
-   return std::make_pair(UB, UI3);
+  if (UB_lat_pointer != nullptr) {
+    /* TODO(fengli) : A Lorentz transformation from the local rest frame to the
+     * center of mass frame of the incoming particles is missing here. Since all
+     * the actions take place in the center of mass frame of the incoming
+     * particles, particles should see potentials different from UB_lat_ or
+     * UI3_lat_ which are obtained in the local rest frame. But I don't think
+     * the Lorentz transformation is important in the low energy heavy-ion
+     * collisions, and turning on potentials violates the Lorentz covariance in
+     * the current SMASH version anyway, so I'd like to leave it to another
+     * issue in the future. */
+    UB_lat_pointer->value_at(r, UB);
+  }
+  if (UI3_lat_pointer != nullptr) {
+    UI3_lat_pointer->value_at(r, UI3);
+  }
+  return std::make_pair(UB, UI3);
 }
 
 void Action::input_potential(RectangularLattice<double> *UB_lat,
-      RectangularLattice<double> *UI3_lat, Potentials *pot) {
-      UB_lat_pointer = UB_lat;
-      UI3_lat_pointer = UI3_lat;
-      pot_pointer = pot;
+                             RectangularLattice<double> *UI3_lat,
+                             Potentials *pot) {
+  UB_lat_pointer = UB_lat;
+  UI3_lat_pointer = UI3_lat;
+  pot_pointer = pot;
 }
 
 void Action::perform(Particles *particles, uint32_t id_process) {
@@ -135,7 +136,7 @@ void Action::perform(Particles *particles, uint32_t id_process) {
    * energy of the outgoing particles by the mean field potentials are not
    * taken into account. */
   if (UB_lat_pointer == nullptr && UI3_lat_pointer == nullptr) {
-     check_conservation(id_process);
+    check_conservation(id_process);
   }
 }
 
@@ -147,17 +148,19 @@ double Action::kinetic_energy_cms() const {
    * potential between the initial and final states. */
   double scale_I3 = 0.0;
   for (const auto &p_in : incoming_particles_) {
-       /* Get the force scale of the incoming particle. */
-       const auto scale = ((pot_pointer != nullptr) ? pot_pointer->force_scale(p_in.type())
-                           : std::make_pair(0.0, 0));
-       scale_B += scale.first;
-       scale_I3 += scale.second * p_in.type().isospin3_rel();
+    /* Get the force scale of the incoming particle. */
+    const auto scale =
+        ((pot_pointer != nullptr) ? pot_pointer->force_scale(p_in.type())
+                                  : std::make_pair(0.0, 0));
+    scale_B += scale.first;
+    scale_I3 += scale.second * p_in.type().isospin3_rel();
   }
   for (const auto &p_out : outgoing_particles_) {
-       const auto scale = ((pot_pointer != nullptr) ? pot_pointer->force_scale(p_out.type())
-                           : std::make_pair(0.0, 0));
-       scale_B -= scale.first;
-       scale_I3 -= scale.second * p_out.type().isospin3_rel();
+    const auto scale =
+        ((pot_pointer != nullptr) ? pot_pointer->force_scale(p_out.type())
+                                  : std::make_pair(0.0, 0));
+    scale_B -= scale.first;
+    scale_I3 -= scale.second * p_out.type().isospin3_rel();
   }
   const auto potentials = get_potential_at_interaction_point();
   /* Rescale to get the potential difference between the
@@ -168,7 +171,7 @@ double Action::kinetic_energy_cms() const {
 }
 
 double Action::kinetic_energy_cms(std::pair<double, double> potentials,
-           ParticleTypePtrList p_out_types) const {
+                                  ParticleTypePtrList p_out_types) const {
   /* scale_B returns the difference of the total force scales of the skyrme
    * potential between the initial and final states. */
   double scale_B = 0.0;
@@ -176,19 +179,21 @@ double Action::kinetic_energy_cms(std::pair<double, double> potentials,
    * potential between the initial and final states. */
   double scale_I3 = 0.0;
   for (const auto &p_in : incoming_particles_) {
-       /* Get the force scale of the incoming particle. */
-       const auto scale = ((pot_pointer != nullptr) ? pot_pointer->force_scale(p_in.type())
-                           : std::make_pair(0.0, 0));
-       scale_B += scale.first;
-       scale_I3 += scale.second * p_in.type().isospin3_rel();
+    /* Get the force scale of the incoming particle. */
+    const auto scale =
+        ((pot_pointer != nullptr) ? pot_pointer->force_scale(p_in.type())
+                                  : std::make_pair(0.0, 0));
+    scale_B += scale.first;
+    scale_I3 += scale.second * p_in.type().isospin3_rel();
   }
   for (const auto &p_out : p_out_types) {
-       const auto scale = ((pot_pointer != nullptr) ? pot_pointer->force_scale(*p_out)
-                           : std::make_pair(0.0, 0));
-       scale_B -= scale.first;
-       scale_I3 -= scale.second * p_out->isospin3_rel();
+    const auto scale =
+        ((pot_pointer != nullptr) ? pot_pointer->force_scale(*p_out)
+                                  : std::make_pair(0.0, 0));
+    scale_B -= scale.first;
+    scale_I3 -= scale.second * p_out->isospin3_rel();
   }
-  /* Rescale to get the potential difference between the 
+  /* Rescale to get the potential difference between the
    * initial and final state.*/
   const double B_pot_diff = potentials.first * scale_B;
   const double I3_pot_diff = potentials.second * scale_I3;
