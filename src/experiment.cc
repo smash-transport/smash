@@ -724,6 +724,11 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
         "If you want Thermodynamic VTK output, configure a lattice for it.");
   }
 
+  // Store pointers to potential and lattice accessible for Action
+  if (parameters_.potential_affect_threshold) {
+     Action::input_potential(UB_lat_.get(), UI3_lat_.get(), potentials_.get());
+  }
+
   // Create forced thermalizer
   if (config.has_value({"Forced_Thermalization"})) {
     Configuration &&th_conf = config["Forced_Thermalization"];
@@ -826,9 +831,6 @@ bool Experiment<Modus>::perform_action(
   if (!action.is_valid(particles_)) {
     log.debug(~einhard::DRed(), "✘ ", action, " (discarded: invalid)");
     return false;
-  }
-  if (parameters_.potential_affect_threshold) {
-     Action::input_potential(UB_lat_.get(), UI3_lat_.get(), potentials_.get());
   }
   action.generate_final_state();
   log.debug("Process Type is: ", action.get_type());
