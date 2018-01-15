@@ -84,10 +84,17 @@ std::pair<double, double> Action::get_potential_at_interaction_point() const {
   double UB = 0.;
   double UI3 = 0.;
   /* Check:
-   * 1. Potential is turned on
-   * 2. Lattice is turned on
-   * 3. Particle is inside the lattice. */
+   * Lattice is turned on. */
    if (UB_lat_pointer != nullptr) {
+  /* TODO(fengli) : A Lorentz transformation from the local rest frame to the
+   * center of mass frame of the incoming particles is missing here. Since all
+   * the actions take place in the center of mass frame of the incoming
+   * particles, particles should see potentials different from UB_lat_ or
+   * UI3_lat_ which are obtained in the local rest frame. But I don't think the
+   * Lorentz transformation is important in the low energy heavy-ion collisions,
+   * and turning on potentials violates the Lorentz covariance in the current
+   * SMASH version anyway, so I'd like to leave it to another issue in the
+   * future. */
      UB_lat_pointer->value_at(r, UB);
    }
    if (UI3_lat_pointer != nullptr) {
@@ -153,7 +160,7 @@ double Action::kinetic_energy_cms() const {
        scale_I3 -= scale.second * p_out.type().isospin3_rel();
   }
   const auto potentials = get_potential_at_interaction_point();
-  /* Rescale to get the potential difference between the 
+  /* Rescale to get the potential difference between the
    * initial and final state.*/
   const double B_pot_diff = potentials.first * scale_B;
   const double I3_pot_diff = potentials.second * scale_I3;

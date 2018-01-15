@@ -189,9 +189,8 @@ class Action {
 
   /**
    * Calculate the total kinetic energy of the outgoing particles in
-   * the center of mass frame. This function is used when the species
-   * of the outgoing particles are not yet determined. They can be any
-   * values in the possible branching processes.
+   * the center of mass frame. This function is used to determine whether
+   * an action is kinematically feasible.
    */
   double kinetic_energy_cms(std::pair<double, double> potentials,
          ParticleTypePtrList p_out_types) const;
