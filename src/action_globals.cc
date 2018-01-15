@@ -12,8 +12,8 @@
 
 namespace smash {
 
-extern RectangularLattice<double> *UB_lat_pointer = nullptr;
-extern RectangularLattice<double> *UI3_lat_pointer = nullptr;
-extern Potentials *pot_pointer = nullptr;
+RectangularLattice<double> *UB_lat_pointer = nullptr;
+RectangularLattice<double> *UI3_lat_pointer = nullptr;
+Potentials *pot_pointer = nullptr;
 
 }  // namespace smash
