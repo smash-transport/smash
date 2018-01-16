@@ -26,6 +26,11 @@ class ScatterActionBaryonBaryon : public ScatterAction {
   /** Determine the parametrized total cross section at high energies
    * for a baryon-baryon collision. */
   double high_energy_cross_section() const override;
+  /**
+   * Determine the (parametrized) hard non-diffractive string cross section
+   * for a baryon-baryon collision.
+   */
+  double string_hard_cross_section() const override;
   /* There is no resonance formation out of two baryons: Return empty list. */
   CollisionBranchList resonance_cross_sections() override {
     return CollisionBranchList();

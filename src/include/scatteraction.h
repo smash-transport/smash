@@ -170,6 +170,12 @@ class ScatterAction : public Action {
   virtual double high_energy_cross_section() const { return 0.; }
 
   /**
+   * Determine the (parametrized) hard non-diffractive string cross section
+   * for this collision.
+   */
+  virtual double string_hard_cross_section() const { return 0.; }
+
+  /**
    * Determine the (parametrized) elastic cross section for this collision.
    * It is zero by default, but can be overridden in the child classes.
    */
