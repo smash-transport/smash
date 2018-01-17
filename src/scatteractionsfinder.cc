@@ -311,7 +311,6 @@ void ScatterActionsFinder::dump_reactions() const {
   std::cout << "They can make " << N_pairs << " pairs." << std::endl;
   std::vector<double> momentum_scan_list = {0.1, 0.3, 0.5, 1.0, 2.0,
                                             3.0, 5.0, 10.0};
-int i=0;
   for (const IsoParticleType &A_isotype : IsoParticleType::list_all()) {
     for (const IsoParticleType &B_isotype : IsoParticleType::list_all()) {
       if (&A_isotype > &B_isotype) {

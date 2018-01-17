@@ -302,7 +302,7 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_cross_sections() {
                         [&] { return kminusp_pi0lambda(sqrts); },
                         sqrts, type_pi_z, type_Lambda_bar);
           }
-          if (incl_KN_to_KDelta) {
+          if (incl_KN_to_KN) {
             const auto& type_n_bar = ParticleType::find(-pdg::n);
             const auto& type_K_z = ParticleType::find(pdg::K_z);
             add_channel(process_list,
