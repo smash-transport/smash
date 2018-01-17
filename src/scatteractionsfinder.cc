@@ -324,7 +324,6 @@ int i=0;
           if (A_type > B_type) {
             continue;
           }
-std::cout << i++ << " now checking " << A_type->pdgcode() << " " << B_type->pdgcode() << std::endl;
           ParticleData A(*A_type), B(*B_type);
           for (auto mom : momentum_scan_list) {
             A.set_4momentum(A.pole_mass(), mom, 0.0, 0.0);

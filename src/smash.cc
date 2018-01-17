@@ -328,9 +328,11 @@ int main(int argc, char *argv[]) {
       ParticleType::create_type_list(configuration.take({"particles"}));
       DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
       std::vector<bool> nucleon_has_interacted = {};
+      std::set<IncludedReactions> included_2to2 =
+                   configuration.take({"Collision_Term", "Included_2to2"});
       auto scat_finder = make_unique<ScatterActionsFinder>(elastic_parameter,
                                      ntest, nucleon_has_interacted, two_to_one,
-                           configuration.take({"Collision_Term", "Included_2to2"}));
+                                     included_2to2);
       scat_finder->dump_reactions();
       std::exit(EXIT_SUCCESS);
     }
