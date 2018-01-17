@@ -607,7 +607,7 @@ void ScatterAction::string_excitation_pythia() {
       int pdgid = ptype.pdgcode().get_decimal();
       double mass_pole = ptype.mass();
       double width_pole = ptype.width_at_pole();
-      /* check if the particle specie is in PYTHIA */
+      /* check if the particle species is in PYTHIA */
       if (pythia.particleData.isParticle(pdgid)) {
         /* set mass and width in PYTHIA */
         pythia.particleData.m0(pdgid, mass_pole);
