@@ -28,7 +28,8 @@ namespace smash {
  * \ingroup action
  * Action is the base class for a generic process that takes a number of
  * incoming particles and transforms them into any number of outgoing particles.
- * Currently such an action can be either a decay or a two-body collision
+ * Currently such an action can be either a decay, a two-body collision, a
+ * wallcrossing or a thermalization.
  * (see derived classes).
  */
 class Action {
