@@ -278,7 +278,6 @@ CollisionBranchPtr ScatterAction::elastic_cross_section(double elast_par) {
   return make_unique<CollisionBranch>(incoming_particles_[0].type(),
                                       incoming_particles_[1].type(),
                                       elastic_xs, ProcessType::Elastic);
-
 }
 
 CollisionBranchPtr ScatterAction::NNbar_annihilation_cross_section() {

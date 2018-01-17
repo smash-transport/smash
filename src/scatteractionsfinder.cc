@@ -83,8 +83,9 @@ ScatterActionsFinder::ScatterActionsFinder(
 
 ScatterActionsFinder::ScatterActionsFinder(
     double elastic_parameter, int testparticles,
-    const std::vector<bool> &nucleon_has_interacted, bool two_to_one,
-    const std::set<IncludedReactions> &included_2to2)
+    const std::vector<bool> &nucleon_has_interacted,
+    const std::set<IncludedReactions> &included_2to2,
+    bool two_to_one)
     : elastic_parameter_(elastic_parameter),
       testparticles_(testparticles),
       isotropic_(false),

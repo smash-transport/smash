@@ -37,9 +37,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
   /** Constructor for testing purposes. */
   ScatterActionsFinder(double elastic_parameter, int testparticles,
                        const std::vector<bool> &nucleon_has_interacted,
-                       bool two_to_one = true,
-                       const std::set<IncludedReactions> &included_2to2 =
-                             {IncludedReactions::All});
+                       const std::set<IncludedReactions> &included_2to2,
+                       bool two_to_one = true);
 
   /** Determine the collision time of the two particles [fm/c].
    *  Time of the closest approach is taken as collision time.
