@@ -1,17 +1,19 @@
 /*
  *
- *    Copyright (c) 2014-2015
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
-#include "unittest.h"
+
+#include "unittest.h"  // This include has to be first
+
 #include "setup.h"
 
 #include "../include/filelock.h"
 
-using namespace Smash;
+using namespace smash;
 
 static const bf::path testoutputpath = bf::absolute(SMASH_TEST_OUTPUT_PATH);
 

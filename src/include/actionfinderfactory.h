@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -15,7 +15,7 @@
 #include "clock.h"
 #include "forwarddeclarations.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup action
@@ -85,6 +85,6 @@ class ActionFinderInterface {
                                         bool only_res = false) const = 0;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_ACTIONFINDERFACTORY_H_

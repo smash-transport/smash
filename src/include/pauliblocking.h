@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -17,7 +17,7 @@
 #include "pdgcode.h"
 #include "threevector.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * A class that stores parameters needed for Pauli blocking,
@@ -40,8 +40,8 @@ class PauliBlocker {
 
   // Returns phase-space densityof particle pdg at the point (r,p)
   double phasespace_dens(const ThreeVector &r, const ThreeVector &p,
-                        const Particles &particles, const PdgCode pdg,
-                        const ParticleList &disregard) const;
+                         const Particles &particles, const PdgCode pdg,
+                         const ParticleList &disregard) const;
 
  private:
   // Tabulate integrals for weights
@@ -68,6 +68,6 @@ class PauliBlocker {
   // Weights: tabulated results of numerical integration
   std::array<double, 30> weights_;
 };
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_PAULIBLOCKING_H_

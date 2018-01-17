@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -13,7 +13,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-namespace Smash {
+namespace smash {
 
 FileLock::FileLock(bf::path path) : path_(path), acquired_(false) {}
 
@@ -24,8 +24,8 @@ bool FileLock::acquire() {
   }
   // The following POSIX syscall fails if the file already exists and creates it
   // otherwise. This is atomic, so there cannot be a race.
-  const int fd = open(path_.native().c_str(),
-                      O_EXCL | O_CREAT, S_IRUSR | S_IWUSR);
+  const int fd =
+      open(path_.native().c_str(), O_EXCL | O_CREAT, S_IRUSR | S_IWUSR);
   if (fd < 0) {
     return false;
   }
@@ -42,4 +42,4 @@ FileLock::~FileLock() {
   }
 }
 
-}  // namespace Smash
+}  // namespace smash

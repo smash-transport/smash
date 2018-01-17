@@ -67,7 +67,7 @@ if(NOT CPPLINT)
 endif()
 if(CPPLINT)
    message(STATUS "cpplint.py found at ${CPPLINT}")
-   set(CPPLINT_ARGS --filter=-build/c++11,-build/include_subdir,+build/include_alpha,-runtime/operator,-readability/streams,-readability/function,-runtime/references,-whitespace/operators --counting=detailed)
+   set(CPPLINT_ARGS --filter=-build/c++11,-build/include_subdir,+build/include_alpha,-runtime/operator,-readability/streams,-readability/function,-runtime/references,-whitespace/operators --counting=detailed --repository=${PROJECT_SOURCE_DIR})
    file(GLOB CPPLINT_FILES
         ${PROJECT_SOURCE_DIR}/src/include/*.h ${PROJECT_SOURCE_DIR}/src/*.cc)
    add_custom_target(cpplint
@@ -207,12 +207,13 @@ smash_add_unittest(interpolation)
 smash_add_unittest(isospin)
 smash_add_unittest(kinematics)
 smash_add_unittest(lattice)
+smash_add_unittest(listmodus)
 smash_add_unittest(lorentzboost)
 smash_add_unittest(lowess)
 smash_add_unittest(mass_sampling)
 smash_add_unittest(nucleus)
 smash_add_unittest(oscar2013output)
-smash_add_unittest(oscaroutput)
+smash_add_unittest(oscar1999output)
 smash_add_unittest(parametrizations)
 smash_add_unittest(particledata)
 smash_add_unittest(particles)
@@ -232,6 +233,7 @@ smash_add_unittest(spectral_functions)
 smash_add_unittest(stringfunctions)
 smash_add_unittest(tabulation)
 smash_add_unittest(threevector)
+smash_add_unittest(two_unstable_products)
 smash_add_unittest(vtkoutput)
 smash_add_unittest(width)
 smash_add_unittest(without_float_traps)
@@ -242,16 +244,56 @@ smash_add_runtest(smash_help smash smash -h)
 
 # verify that the binary runs with the various modi:
 smash_add_runtest(smash_run smash smash)
-smash_add_runtest(box_run smash smash -m Box)
+smash_add_runtest(box_run smash smash -m Box -e 100.0
+                  -c "Modi: {Box: {Initial_Condition: thermal momenta}}"
+                  -c "Modi: {Box: {Length: 10.0}}"
+                  -c "Modi: {Box: {Temperature: 0.2}}"
+                  -c "Modi: {Box: {Start_Time: 0.0}}"
+                  -c "Modi: {Box: {Init_Multiplicities: {211: 100}}}"
+                  -c "Modi: {Box: {Init_Multiplicities: {-211: 100}}}"
+                  -c "Modi: {Box: {Init_Multiplicities: {111: 100}}}"
+                  -c "Modi: {Box: {Init_Multiplicities: {2212: 50}}}"
+                  -c "Modi: {Box: {Init_Multiplicities: {2112: 50}}}")
 smash_add_runtest(collider_run smash smash -m Collider)
-smash_add_runtest(collider_frozen_fermi_run smash smash -m Collider -c "Modi: {Collider: {Fermi_Motion: frozen}}")
-smash_add_runtest(sphere_run smash smash -m Sphere)
-smash_add_runtest(dilepton_run smash smash -d ${CMAKE_CURRENT_SOURCE_DIR}/decaymodes_incl_dileptons.txt -c "Output: {Dileptons: {Format: Oscar}}")
+smash_add_runtest(collider_frozen_fermi_run smash smash -m Collider
+                  -c "Modi: {Collider: {Fermi_Motion: frozen}}")
+smash_add_runtest(sphere_run smash smash -m Sphere -e 100.0
+                  -c "Modi: {Sphere: {Radius: 5.0}}"
+                  -c "Modi: {Sphere: {Sphere_Temperature: 0.2}}"
+                  -c "Modi: {Sphere: {Start_Time: 0.0}}"
+                  -c "Modi: {Box: {Initial_Condition: thermal momenta}}"
+                  -c "Modi: {Sphere: {Init_Multiplicities: {211: 100}}}"
+                  -c "Modi: {Sphere: {Init_Multiplicities: {-211: 100}}}"
+                  -c "Modi: {Sphere: {Init_Multiplicities: {111: 100}}}"
+                  -c "Modi: {Sphere: {Init_Multiplicities: {2212: 50}}}"
+                  -c "Modi: {Sphere: {Init_Multiplicities: {2112: 50}}}")
+smash_add_runtest(dilepton_run smash smash -d ${CMAKE_CURRENT_SOURCE_DIR}/decaymodes_incl_dileptons.txt
+                  -c "Output: {Dileptons: {Format: [Oscar2013]}}")
 
 # verify that binary runs certain time (this corresponds to 20 steps)
-smash_add_runtest(box_steps smash smash -e 2.0 -c "General: {Delta_Time: 0.1}" -m Box)
-smash_add_runtest(collider_steps smash smash -e 2.0 -c "General: {Delta_Time: 0.1}" -m Collider)
-smash_add_runtest(sphere_steps smash smash -e 2.0 -c "General: {Delta_Time: 0.1}" -m Sphere)
+smash_add_runtest(box_steps smash smash -e 2.0 -c "General: {Delta_Time: 0.1}"
+                  -m Box -c "Modi: {Box: {Initial_Condition: thermal momenta}}"
+                  -c "Modi: {Box: {Length: 10.0}}"
+                  -c "Modi: {Box: {Temperature: 0.2}}"
+                  -c "Modi: {Box: {Start_Time: 0.0}}"
+                  -c "Modi: {Box: {Init_Multiplicities: {211: 100}}}"
+                  -c "Modi: {Box: {Init_Multiplicities: {-211: 100}}}"
+                  -c "Modi: {Box: {Init_Multiplicities: {111: 100}}}"
+                  -c "Modi: {Box: {Init_Multiplicities: {2212: 50}}}"
+                  -c "Modi: {Box: {Init_Multiplicities: {2112: 50}}}")
+smash_add_runtest(collider_steps smash smash -e 2.0
+                  -c "General: {Delta_Time: 0.1}" -m Collider)
+smash_add_runtest(sphere_steps smash smash -e 2.0
+                  -c "General: {Delta_Time: 0.1}" -m Sphere
+                  -c "Modi: {Sphere: {Radius: 5.0}}"
+                  -c "Modi: {Sphere: {Sphere_Temperature: 0.2}}"
+                  -c "Modi: {Sphere: {Start_Time: 0.0}}"
+                  -c "Modi: {Box: {Initial_Condition: thermal momenta}}"
+                  -c "Modi: {Sphere: {Init_Multiplicities: {211: 100}}}"
+                  -c "Modi: {Sphere: {Init_Multiplicities: {-211: 100}}}"
+                  -c "Modi: {Sphere: {Init_Multiplicities: {111: 100}}}"
+                  -c "Modi: {Sphere: {Init_Multiplicities: {2212: 50}}}"
+                  -c "Modi: {Sphere: {Init_Multiplicities: {2112: 50}}}")
 
 # verify that default run has no mem leaks
 find_program(CTEST_MEMORYCHECK_COMMAND valgrind)
@@ -272,7 +314,28 @@ else()
 endif()
 
 if(USE_SANITIZER)
-   smash_add_runtest(sanitizer_box      smash_sanitizer smash_sanitizer -e 5.0 -m Box)
-   smash_add_runtest(sanitizer_collider smash_sanitizer smash_sanitizer -e 5.0 -m Collider)
-   smash_add_runtest(sanitizer_sphere   smash_sanitizer smash_sanitizer -e 5.0 -m Sphere)
+   smash_add_runtest(sanitizer_box smash_sanitizer smash_sanitizer -e 5.0
+                    -m Box -c "Modi: {Box: {Initial_Condition: thermal momenta}}"
+                    -c "Modi: {Box: {Length: 10.0}}"
+                    -c "Modi: {Box: {Temperature: 0.2}}"
+                    -c "Modi: {Box: {Start_Time: 0.0}}"
+                    -c "Modi: {Box: {Init_Multiplicities: {211: 100}}}"
+                    -c "Modi: {Box: {Init_Multiplicities: {-211: 100}}}"
+                    -c "Modi: {Box: {Init_Multiplicities: {111: 100}}}"
+                    -c "Modi: {Box: {Init_Multiplicities: {2212: 50}}}"
+                    -c "Modi: {Box: {Init_Multiplicities: {2112: 50}}}"
+                    -c "Collision_Term: {Strings: false}")
+   smash_add_runtest(sanitizer_collider smash_sanitizer smash_sanitizer -e 5.0 -m Collider
+                    -c "Collision_Term: {Strings: false}")
+   smash_add_runtest(sanitizer_sphere   smash_sanitizer smash_sanitizer -e 5.0
+                    -m Sphere -c "Modi: {Sphere: {Radius: 5.0}}"
+                    -c "Modi: {Sphere: {Sphere_Temperature: 0.2}}"
+                    -c "Modi: {Sphere: {Start_Time: 0.0}}"
+                    -c "Modi: {Box: {Initial_Condition: thermal momenta}}"
+                    -c "Modi: {Sphere: {Init_Multiplicities: {211: 100}}}"
+                    -c "Modi: {Sphere: {Init_Multiplicities: {-211: 100}}}"
+                    -c "Modi: {Sphere: {Init_Multiplicities: {111: 100}}}"
+                    -c "Modi: {Sphere: {Init_Multiplicities: {2212: 50}}}"
+                    -c "Modi: {Sphere: {Init_Multiplicities: {2112: 50}}}"
+                    -c "Collision_Term: {Strings: false}")
 endif()

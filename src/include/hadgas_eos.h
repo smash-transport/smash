@@ -20,8 +20,7 @@
 #include "constants.h"
 #include "particletype.h"
 
-
-namespace Smash {
+namespace smash {
 
 // Forward declaration of HadronGasEos - it is used in EosTable
 class HadronGasEos;
@@ -38,12 +37,12 @@ class EosTable {
     double mub;
     double mus;
   };
-  void compile_table(HadronGasEos &eos,
-    const std::string& eos_savefile_name = "hadgas_eos.dat");
+  void compile_table(HadronGasEos& eos,
+                     const std::string& eos_savefile_name = "hadgas_eos.dat");
   void get(table_element& res, double e, double nb) const;
 
  private:
-  size_t index(size_t ie, size_t inb) const { return ie*n_nb_ + inb; }
+  size_t index(size_t ie, size_t inb) const { return ie * n_nb_ + inb; }
   std::vector<table_element> table_;
   double de_;
   double dnb_;
@@ -148,8 +147,8 @@ class HadronGasEos {
    *
    * \return partial density of the given hadron sort \f$n\f$ [fm\f$^{-3}\f$]
    */
-  static double partial_density(const ParticleType& ptype,
-                                double T, double mub, double mus);
+  static double partial_density(const ParticleType& ptype, double T, double mub,
+                                double mus);
   /**
    * Compute temperature and chemical potentials given energy-,
    * net baryon- and net strangeness density.
@@ -201,17 +200,18 @@ class HadronGasEos {
    * Compute (unnormalized) density of one hadron sort - helper function
    * used to reduce code duplication.
    */
-  static double scaled_partial_density(const ParticleType& ptype,
-                                       double beta, double mub, double mus);
+  static double scaled_partial_density(const ParticleType& ptype, double beta,
+                                       double mub, double mus);
   /// Interfaces EoS equations to be solved to gnu library
-  static int set_eos_solver_equations(const gsl_vector* x,
-                                      void* params, gsl_vector* f);
-  static double e_equation(double T, void *params);
+  static int set_eos_solver_equations(const gsl_vector* x, void* params,
+                                      gsl_vector* f);
+  static double e_equation(double T, void* params);
 
   /// Helpful printout, useful for debugging if gnu equation solving goes crazy
   std::string print_solver_state(size_t iter) const;
   /// Constant factor, that appears in front of many thermodyn. expressions
-  static constexpr double prefactor_ = 0.5*M_1_PI*M_1_PI/(hbarc*hbarc*hbarc);
+  static constexpr double prefactor_ =
+      0.5 * M_1_PI * M_1_PI / (hbarc * hbarc * hbarc);
   /// Precision of equation solving
   static constexpr double tolerance_ = 1.e-8;
   /// Number of equations in the system of equations to be solved
@@ -223,12 +223,12 @@ class HadronGasEos {
    * will be used for solving the EoS many times, so multiple allocations and
    * frees are unwanted.
    */
-  gsl_vector *x_;
-  gsl_multiroot_fsolver *solver_;
+  gsl_vector* x_;
+  gsl_multiroot_fsolver* solver_;
   /// Create an EoS table or not?
   const bool tabulate_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_HADGAS_EOS_H_

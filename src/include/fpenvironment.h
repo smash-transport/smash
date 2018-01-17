@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -12,7 +12,7 @@
 
 #include <cfenv>
 
-namespace Smash {
+namespace smash {
 
 /**
  * Standard C/C++ don't have a function to modify the trapping behavior. You
@@ -22,9 +22,7 @@ namespace Smash {
  */
 #if defined _GNU_SOURCE
 // glibc specific implementation
-inline bool enable_float_traps(int mask) {
-  return -1 != feenableexcept(mask);
-}
+inline bool enable_float_traps(int mask) { return -1 != feenableexcept(mask); }
 #elif defined __SSE__
 // directly program the trap on the SSE unit
 bool enable_float_traps(int femask);
@@ -117,6 +115,6 @@ void without_float_traps(F &&f) {
   f();
 }
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_FPENVIRONMENT_H_

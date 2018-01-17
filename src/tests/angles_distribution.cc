@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -11,7 +11,7 @@
 
 // tests distributions for the angles.
 
-using namespace Smash;
+using namespace smash;
 
 int main() {
   // histograms in 1 degree steps:
@@ -37,22 +37,21 @@ int main() {
   printf("#%7s %8s %8s\n", "angle", "dN/dphi", "dN/dtheta");
 
   for (int p = 0; p < 180; p++) {
-    printf("%3d %8.6f %5.2f %8.5f %8.5f %8.5f\n",
-           p, p * dangle, p * dcosine - 1.0,
-           (phi_histo[p] + 0.0) / dangle  / (NUMBER + 0.0),
+    printf("%3d %8.6f %5.2f %8.5f %8.5f %8.5f\n", p, p * dangle,
+           p * dcosine - 1.0, (phi_histo[p] + 0.0) / dangle / (NUMBER + 0.0),
            (cos_histo[p] + 0.0) / dcosine / (NUMBER + 0.0),
-           (theta_histo[p] + 0.0) / dangle  / (NUMBER + 0.0));
+           (theta_histo[p] + 0.0) / dangle / (NUMBER + 0.0));
   }
   for (int p = 180; p < 200; p++) {
-    printf("%3d %8.6f %5.2f %8.5f %8.5f\n",
-           p, p * dangle, p * dcosine - 1.0,
-           (phi_histo[p] + 0.0) / dangle  / (NUMBER + 0.0),
+    printf("%3d %8.6f %5.2f %8.5f %8.5f\n", p, p * dangle, p * dcosine - 1.0,
+           (phi_histo[p] + 0.0) / dangle / (NUMBER + 0.0),
            (cos_histo[p] + 0.0) / dcosine / (NUMBER + 0.0));
   }
   for (int p = 200; p < 360; p++) {
     printf("%3d %8.6f  0.00 %8.5f\n", p, p * dangle,
-                  (phi_histo[p] + 0.0) / dangle  / (NUMBER + 0.0));
+           (phi_histo[p] + 0.0) / dangle / (NUMBER + 0.0));
   }
+  // FIXME this test does not do anything
 
   return 0;
 }

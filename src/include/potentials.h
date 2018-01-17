@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_POTENTIALS_H_
 #define SRC_INCLUDE_POTENTIALS_H_
 
+#include <utility>
 #include <vector>
 
 #include "configuration.h"
@@ -24,7 +25,7 @@
 #define VIRTUAL_FOR_TESTS
 #endif
 
-namespace Smash {
+namespace smash {
 
 /**
  * A class that stores parameters of potentials, calculates
@@ -52,12 +53,20 @@ class Potentials {
    *            point r, \f$ |r-r_i| > r_{cut} \f$ then particle input
    *            to density will be ignored.
    * \param[in] acts_on Type of particle on which potential is going to act
-   *
-   * \fpPrecision Why \c double?
    **/
   VIRTUAL_FOR_TESTS
   double potential(const ThreeVector &r, const ParticleList &plist,
-                                         const ParticleType &acts_on) const;
+                   const ParticleType &acts_on) const;
+
+  /**
+   * Evaluates the scaling factor of the forces acting on the particles. The
+   * forces are equal to the product of the scaling factor and the gradient of
+   * the potential. The scaling factors are usually less than one for hyperons,
+   * and negative for anti-bayrons. The first component is the scaling factor
+   * of the Skyrme force, and the second component is that of the symmetry
+   * force.
+   **/
+  std::pair<double, int> force_scale(const ParticleType &data) const;
 
   /** Evaluates potential gradient at point r. Potential is always taken in
    * the local Eckart rest frame, but point r is in the computational frame.
@@ -67,12 +76,10 @@ class Potentials {
    *            calculation. If the distance between particle and calculation
    *            point r, \f$ |r-r_i| > r_{cut} \f$ then particle input
    *            to density will be ignored.
-   * \param[in] acts_on Type of particle on which potential is going to act
    **/
   VIRTUAL_FOR_TESTS
-  ThreeVector potential_gradient(const ThreeVector &r,
-                                 const ParticleList &plist,
-                                 const ParticleType &acts_on) const;
+  std::pair<ThreeVector, ThreeVector> potential_gradient(
+      const ThreeVector &r, const ParticleList &plist) const;
 
   /// Is Skyrme potential on?
   VIRTUAL_FOR_TESTS
@@ -87,23 +94,19 @@ class Potentials {
    */
   const DensityParameters param_;
 
-  // Skyrme potential on/off
+  /// Skyrme potential on/off
   bool use_skyrme_;
 
-  // Symmetry potential on/off
+  /// Symmetry potential on/off
   bool use_symmetry_;
 
-  /** Parameters of skyrme potentials
-   * \fpPrecision Why \c double?
-   */
+  /** Parameters of skyrme potentials */
   double skyrme_a_, skyrme_b_, skyrme_tau_;
 
-  /** Parameters of symmetry potential
-   * \fpPrecision Why \c double?
-   */
+  /** Parameters of symmetry potential */
   double symmetry_s_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_POTENTIALS_H_

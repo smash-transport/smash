@@ -20,7 +20,8 @@
 #define SRC_TESTS_ASSERT_H_
 
 #ifdef assert
-#error "The system assert.h (or some other header that defines assert) was included before our own assert.h"
+#error \
+    "The system assert.h (or some other header that defines assert) was included before our own assert.h"
 #endif
 
 namespace UnitTest {

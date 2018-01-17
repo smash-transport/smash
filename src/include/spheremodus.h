@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2014
+ *    Copyright (c) 2013-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -15,7 +15,7 @@
 #include "forwarddeclarations.h"
 #include "modusdefault.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup modus
@@ -50,7 +50,7 @@ class SphereModus : public ModusDefault {
   /** creates initial conditions for the particles.
    */
   double initial_conditions(Particles *particles,
-                          const ExperimentParameters &parameters);
+                            const ExperimentParameters &parameters);
 
  private:
   /// Sphere radius length
@@ -76,5 +76,5 @@ class SphereModus : public ModusDefault {
    */
   friend std::ostream &operator<<(std::ostream &, const SphereModus &);
 };
-}  // namespace Smash
+}  // namespace smash
 #endif  // SRC_INCLUDE_SPHEREMODUS_H_

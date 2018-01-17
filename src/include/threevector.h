@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -15,7 +15,7 @@
 
 #include "constants.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup data
@@ -35,7 +35,8 @@ namespace Smash {
  * discarded by rounding to single-precision, e.g. boosting to/from the
  * center-of-mass frame breaks.
  * \li It might be sufficient for \c ThreeVector of other quantities to use
- * single-precision, though. This could be implemented by making \c ThreeVector a
+ * single-precision, though. This could be implemented by making \c ThreeVector
+ * a
  * class template and use \c ThreeVector<double> for momenta and \c
  * ThreeVector<float> for the rest.
  */
@@ -92,15 +93,15 @@ class ThreeVector {
   /** Rotate the z-axis onto the vector r. */
   void inline rotate_z_axis_to(ThreeVector &r);
   /// negation: Returns \f$-\vec x\f$
-  ThreeVector inline operator- () const;
+  ThreeVector inline operator-() const;
   /// increase this vector by \f$\vec v: \vec x^\prime = \vec x + \vec v\f$
-  ThreeVector inline operator+= (const ThreeVector &v);
+  ThreeVector inline operator+=(const ThreeVector &v);
   /// decrease this vector by \f$\vec v: \vec x^\prime = \vec x - \vec v\f$
-  ThreeVector inline operator-= (const ThreeVector &v);
+  ThreeVector inline operator-=(const ThreeVector &v);
   /// scale this vector by \f$a: \vec x^\prime = a \cdot \vec x\f$
-  ThreeVector inline operator*= (const double &a);
+  ThreeVector inline operator*=(const double &a);
   /// divide this vector by \f$a: \vec x^\prime = \frac{1}{a} \cdot \vec x\f$
-  ThreeVector inline operator/= (const double &a);
+  ThreeVector inline operator/=(const double &a);
 
   bool operator==(const ThreeVector &rhs) const { return x_ == rhs.x_; }
   bool operator!=(const ThreeVector &rhs) const { return x_ != rhs.x_; }
@@ -143,81 +144,69 @@ class ThreeVector {
  */
 std::ostream &operator<<(std::ostream &, const ThreeVector &);
 
-double inline ThreeVector::x1() const {
-  return x_[0];
-}
+double inline ThreeVector::x1() const { return x_[0]; }
 
-void inline ThreeVector::set_x1(const double x) {
-  x_[0] = x;
-}
+void inline ThreeVector::set_x1(const double x) { x_[0] = x; }
 
-double inline ThreeVector::x2() const {
-  return x_[1];
-}
+double inline ThreeVector::x2() const { return x_[1]; }
 
-void inline ThreeVector::set_x2(const double y) {
-  x_[1] = y;
-}
+void inline ThreeVector::set_x2(const double y) { x_[1] = y; }
 
-double inline ThreeVector::x3() const {
-  return x_[2];
-}
+double inline ThreeVector::x3() const { return x_[2]; }
 
-void inline ThreeVector::set_x3(const double z) {
-  x_[2] = z;
-}
+void inline ThreeVector::set_x3(const double z) { x_[2] = z; }
 
-ThreeVector inline ThreeVector::operator- () const {
+ThreeVector inline ThreeVector::operator-() const {
   ThreeVector neg(-x_[0], -x_[1], -x_[2]);
   return neg;
 }
 
-ThreeVector inline ThreeVector::operator+= (const ThreeVector &v) {
+ThreeVector inline ThreeVector::operator+=(const ThreeVector &v) {
   x_[0] += v.x_[0];
   x_[1] += v.x_[1];
   x_[2] += v.x_[2];
   return *this;
 }
 
-ThreeVector inline operator+ (ThreeVector a, const ThreeVector &b) {
+ThreeVector inline operator+(ThreeVector a, const ThreeVector &b) {
   a += b;
   return a;
 }
 
-ThreeVector inline ThreeVector::operator-= (const ThreeVector &v) {
+ThreeVector inline ThreeVector::operator-=(const ThreeVector &v) {
   x_[0] -= v.x_[0];
   x_[1] -= v.x_[1];
   x_[2] -= v.x_[2];
   return *this;
 }
 
-ThreeVector inline operator- (ThreeVector a, const ThreeVector &b) {
+ThreeVector inline operator-(ThreeVector a, const ThreeVector &b) {
   a -= b;
   return a;
 }
 
-ThreeVector inline ThreeVector::operator*= (const double &a) {
+ThreeVector inline ThreeVector::operator*=(const double &a) {
   x_[0] *= a;
   x_[1] *= a;
   x_[2] *= a;
   return *this;
 }
 
-inline ThreeVector operator* (ThreeVector a, const double &b) {
+inline ThreeVector operator*(ThreeVector a, const double &b) {
   a *= b;
   return a;
 }
 
-inline ThreeVector operator* (const double &a, ThreeVector b) {
+inline ThreeVector operator*(const double &a, ThreeVector b) {
   b *= a;
   return b;
 }
 
-inline double operator* (ThreeVector a, const ThreeVector &b) {
-  return a.x1()*b.x1() + a.x2()*b.x2() + a.x3()*b.x3();
+inline double operator*(ThreeVector a, const ThreeVector &b) {
+  return a.x1() * b.x1() + a.x2() * b.x2() + a.x3() * b.x3();
 }
 
-ThreeVector inline ThreeVector::operator/= (const double &a) {
+ThreeVector inline ThreeVector::operator/=(const double &a) {
   const double a_inv = 1.0 / a;
   x_[0] *= a_inv;
   x_[1] *= a_inv;
@@ -225,18 +214,14 @@ ThreeVector inline ThreeVector::operator/= (const double &a) {
   return *this;
 }
 
-ThreeVector inline operator/ (ThreeVector a, const double &b) {
+ThreeVector inline operator/(ThreeVector a, const double &b) {
   a /= b;
   return a;
 }
 
-double inline ThreeVector::sqr() const {
-  return (*this)*(*this);
-}
+double inline ThreeVector::sqr() const { return (*this) * (*this); }
 
-double inline ThreeVector::abs() const {
-  return std::sqrt((*this)*(*this));
-}
+double inline ThreeVector::abs() const { return std::sqrt((*this) * (*this)); }
 
 double inline ThreeVector::get_phi() const {
   if (std::abs(x1()) < really_small && std::abs(x2()) < really_small) {
@@ -248,7 +233,7 @@ double inline ThreeVector::get_phi() const {
 
 double inline ThreeVector::get_theta() const {
   double r = abs();
-  return (r > 0.) ? std::acos(x3()/r) : 0.;
+  return (r > 0.) ? std::acos(x3() / r) : 0.;
 }
 
 void inline ThreeVector::rotate(double phi, double theta, double psi) {
@@ -262,15 +247,14 @@ void inline ThreeVector::rotate(double phi, double theta, double psi) {
   // Get original coordinates.
   std::array<double, 3> x_old = x_;
   // Compute new coordinates.
-  x_[0] = (cos_phi * cos_psi - sin_phi * cos_theta * sin_psi) * x_old[0]
-        + (sin_phi * cos_psi + cos_phi * cos_theta * sin_psi) * x_old[1]
-        + sin_theta * sin_psi * x_old[2];
-  x_[1] = (-cos_phi * sin_psi - sin_phi * cos_theta * cos_psi) * x_old[0]
-        + (-sin_phi * sin_psi + cos_phi * cos_theta * cos_psi) * x_old[1]
-        + sin_theta * cos_psi * x_old[2];
-  x_[2] = sin_phi * sin_theta * x_old[0]
-        - cos_phi * sin_theta * x_old[1]
-        + cos_theta * x_old[2];
+  x_[0] = (cos_phi * cos_psi - sin_phi * cos_theta * sin_psi) * x_old[0] +
+          (sin_phi * cos_psi + cos_phi * cos_theta * sin_psi) * x_old[1] +
+          sin_theta * sin_psi * x_old[2];
+  x_[1] = (-cos_phi * sin_psi - sin_phi * cos_theta * cos_psi) * x_old[0] +
+          (-sin_phi * sin_psi + cos_phi * cos_theta * cos_psi) * x_old[1] +
+          sin_theta * cos_psi * x_old[2];
+  x_[2] = sin_phi * sin_theta * x_old[0] - cos_phi * sin_theta * x_old[1] +
+          cos_theta * x_old[2];
 }
 
 void inline ThreeVector::rotate_around_y(double theta) {
@@ -279,9 +263,9 @@ void inline ThreeVector::rotate_around_y(double theta) {
   // Get original coordinates.
   std::array<double, 3> x_old = x_;
   // Compute new coordinates.
-  x_[0] = cost*x_old[0] + sint*x_old[2];
+  x_[0] = cost * x_old[0] + sint * x_old[2];
   // x_[1] is unchanged
-  x_[2] = -sint*x_old[0] + cost*x_old[2];
+  x_[2] = -sint * x_old[0] + cost * x_old[2];
 }
 
 void inline ThreeVector::rotate_around_z(double theta) {
@@ -290,8 +274,8 @@ void inline ThreeVector::rotate_around_z(double theta) {
   // Get original coordinates.
   std::array<double, 3> x_old = x_;
   // Compute new coordinates.
-  x_[0] = cost*x_old[0] - sint*x_old[1];
-  x_[1] = sint*x_old[0] + cost*x_old[1];
+  x_[0] = cost * x_old[0] - sint * x_old[1];
+  x_[1] = sint * x_old[0] + cost * x_old[1];
   // x_[2] is unchanged
 }
 
@@ -300,6 +284,6 @@ void inline ThreeVector::rotate_z_axis_to(ThreeVector &r) {
   rotate_around_z(r.get_phi());
 }
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_THREEVECTOR_H_

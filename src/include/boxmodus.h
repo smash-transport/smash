@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2012-2015
+ *    Copyright (c) 2012-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -13,7 +13,7 @@
 #include "forwarddeclarations.h"
 #include "modusdefault.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup modus
@@ -47,12 +47,12 @@ class BoxModus : public ModusDefault {
  public:
   /// Gathers all configuration variables for the Box.
   explicit BoxModus(Configuration modus_config,
-           const ExperimentParameters &parameters);
+                    const ExperimentParameters &parameters);
 
   /** creates initial conditions from the particles.
    */
   double initial_conditions(Particles *particles,
-                          const ExperimentParameters &parameters);
+                            const ExperimentParameters &parameters);
 
   /** Enforces that all particles are inside the box
    *
@@ -66,9 +66,9 @@ class BoxModus : public ModusDefault {
    */
 
   int impose_boundary_conditions(Particles *particles,
-                         const OutputsList &output_list = {});
+                                 const OutputsList &output_list = {});
 
-  /// \copydoc Smash::ModusDefault::create_grid
+  /// \copydoc smash::ModusDefault::create_grid
   Grid<GridOptions::PeriodicBoundaries> create_grid(
       const Particles &particles, double min_cell_length,
       CellSizeStrategy strategy = CellSizeStrategy::Optimal) const {
@@ -78,19 +78,19 @@ class BoxModus : public ModusDefault {
             strategy};
   }
 
-  /// \copydoc Smash::ModusDefault::create_grandcan_thermalizer
+  /// \copydoc smash::ModusDefault::create_grandcan_thermalizer
   std::unique_ptr<GrandCanThermalizer> create_grandcan_thermalizer(
-                                               Configuration& conf) const {
+      Configuration &conf) const {
     const std::array<double, 3> lat_size = {length_, length_, length_};
     const std::array<double, 3> origin = {0., 0., 0.};
     const bool periodicity = true;
     return make_unique<GrandCanThermalizer>(conf, lat_size, origin,
-        periodicity);
+                                            periodicity);
   }
 
-  /// \copydoc Smash::ModusDefault::max_timestep()
+  /// \copydoc smash::ModusDefault::max_timestep()
   double max_timestep(double max_transverse_distance_sqr) const {
-    return 0.5*std::sqrt(length_*length_ - max_transverse_distance_sqr);
+    return 0.5 * std::sqrt(length_ * length_ - max_transverse_distance_sqr);
   }
 
   double length() const { return length_; }
@@ -119,6 +119,6 @@ class BoxModus : public ModusDefault {
   friend std::ostream &operator<<(std::ostream &, const BoxModus &);
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_BOXMODUS_H_

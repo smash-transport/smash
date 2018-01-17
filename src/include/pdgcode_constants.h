@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2016
+ *    Copyright (c) 2016-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -10,7 +10,7 @@
 #ifndef SRC_INCLUDE_PDGCODE_CONSTANTS_H_
 #define SRC_INCLUDE_PDGCODE_CONSTANTS_H_
 
-namespace Smash {
+namespace smash {
 /**
  * Constants representing PDG codes.
  *
@@ -64,12 +64,11 @@ constexpr int h1 = 0x10223;
 /// Pack two int32_t into an uint64_t.
 /// This is useful for switch statements on pairs.
 constexpr uint64_t pack(int32_t x, int32_t y) {
-  return
-      (static_cast<uint64_t>(static_cast<uint32_t>(x)) << 32)
-      | static_cast<uint64_t>(static_cast<uint32_t>(y));
+  return (static_cast<uint64_t>(static_cast<uint32_t>(x)) << 32) |
+         static_cast<uint64_t>(static_cast<uint32_t>(y));
   //^ Casting to an intermediate 32-bit integer is important!
 }
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_PDGCODE_CONSTANTS_H_

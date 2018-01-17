@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2015
+ *    Copyright (c) 2013-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -12,7 +12,7 @@
 #include <iomanip>
 #include <iostream>
 
-namespace Smash {
+namespace smash {
 
 Particles::Particles() : data_(new ParticleData[data_capacity_]) {
   for (unsigned i = 0; i < data_capacity_; ++i) {
@@ -47,7 +47,7 @@ inline void Particles::copy_in(ParticleData &to, const ParticleData &from) {
   from.copy_to(to);
 }
 
-const ParticleData& Particles::insert(const ParticleData &p) {
+const ParticleData &Particles::insert(const ParticleData &p) {
   if (likely(dirty_.empty())) {
     ensure_capacity(1);
     ParticleData &in_vector = data_[data_size_];
@@ -130,7 +130,7 @@ void Particles::replace(const ParticleList &to_remove, ParticleList &to_add) {
     remove(to_remove[i]);
   }
   for (; i < to_add.size(); ++i) {
-    const ParticleData& p = insert(to_add[i]);
+    const ParticleData &p = insert(to_add[i]);
     to_add[i].id_ = p.id_;
     to_add[i].index_ = p.index_;
   }
@@ -162,4 +162,4 @@ std::ostream &operator<<(std::ostream &out, const Particles &particles) {
   return out;
 }
 
-}  // namespace Smash
+}  // namespace smash

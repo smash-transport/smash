@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -37,7 +37,7 @@ struct convert {
 };
 }  // namespace YAML
 
-namespace Smash {
+namespace smash {
 /*!\Userguide
  * \page inputoptions Input file Options
  *
@@ -275,20 +275,20 @@ class Configuration {
       const std::vector<std::string> v = operator std::vector<std::string>();
       std::set<ThermodynamicQuantity> s;
       for (const auto &x : v) {
-          if (x == "rho_eckart") {
-            s.insert(ThermodynamicQuantity::EckartDensity);
-          } else if (x == "tmn") {
-            s.insert(ThermodynamicQuantity::Tmn);
-          } else if (x == "tmn_landau") {
-            s.insert(ThermodynamicQuantity::TmnLandau);
-          } else if (x == "landau_velocity") {
-            s.insert(ThermodynamicQuantity::LandauVelocity);
-          } else {
-            throw IncorrectTypeInAssignment(
+        if (x == "rho_eckart") {
+          s.insert(ThermodynamicQuantity::EckartDensity);
+        } else if (x == "tmn") {
+          s.insert(ThermodynamicQuantity::Tmn);
+        } else if (x == "tmn_landau") {
+          s.insert(ThermodynamicQuantity::TmnLandau);
+        } else if (x == "landau_velocity") {
+          s.insert(ThermodynamicQuantity::LandauVelocity);
+        } else {
+          throw IncorrectTypeInAssignment(
               "The value for key \"" + std::string(key_) +
               "\" should be \"rho_eckart\", \"tmn\""
               ", \"tmn_landau\" or \"landau_velocity\".");
-          }
+        }
       }
       return s;
     }
@@ -420,7 +420,7 @@ class Configuration {
           "The value for key \"" + std::string(key_) +
           "\" should be \"thermal momenta\", \"IC_ES\", " +
           "\"IC_1M\", \"IC_2M\" or" + "\"IC_Massive\".");
-      }
+    }
 
     operator NNbarTreatment() const {
       const std::string s = operator std::string();
@@ -434,8 +434,8 @@ class Configuration {
         return NNbarTreatment::Strings;
       }
       throw IncorrectTypeInAssignment(
-          "The value for key \"" + std::string(key_) + "\" should be "
-          + "\"no annihilation\", \"detailed balance\", or \"strings\".");
+          "The value for key \"" + std::string(key_) + "\" should be " +
+          "\"no annihilation\", \"detailed balance\", or \"strings\".");
     }
 
     operator Sampling() const {
@@ -521,6 +521,8 @@ class Configuration {
    */
   void merge_yaml(const std::string &yaml);
 
+  std::vector<std::string> list_upmost_nodes();
+
   /**
    * The default interface for SMASH to read configuration values.
    *
@@ -568,6 +570,14 @@ class Configuration {
    */
   Value read(std::initializer_list<const char *> keys) const;
 
+  template <typename T>
+  T read(std::initializer_list<const char *> keys, T default_value) {
+    if (has_value(keys)) {
+      return read(keys).operator T();
+    }
+    return default_value;
+  }
+
   /**
    * Removes all entries in the map except for \p key.
    *
@@ -610,7 +620,7 @@ class Configuration {
    *  Returns if there is a (maybe empty) value behind the requested \p keys.
    */
   bool has_value_including_empty(
-                               std::initializer_list<const char *> keys) const;
+      std::initializer_list<const char *> keys) const;
   /**
    * Returns whether there is a non-empty value behind the requested \p keys.
    */
@@ -642,6 +652,6 @@ class Configuration {
   YAML::Node root_node_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_CONFIGURATION_H_

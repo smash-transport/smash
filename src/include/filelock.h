@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -14,7 +14,7 @@
 
 #include "forwarddeclarations.h"
 
-namespace Smash {
+namespace smash {
 
 /// Guard to create a file lock.
 ///
@@ -48,6 +48,6 @@ class FileLock {
   bool acquired_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_FILELOCK_H_

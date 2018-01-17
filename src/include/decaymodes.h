@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2014
+ *    Copyright (c) 2013-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -14,7 +14,7 @@
 
 #include "processbranch.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup data
@@ -38,9 +38,7 @@ class DecayModes {
   bool is_empty() const { return decay_modes_.empty(); }
 
   /* Pass out the decay modes */
-  const DecayBranchList &decay_mode_list() const {
-    return decay_modes_;
-  }
+  const DecayBranchList &decay_mode_list() const { return decay_modes_; }
 
   /**
    * Loads the DecayModes map as described in the \p input string.
@@ -51,7 +49,7 @@ class DecayModes {
   static void load_decaymodes(const std::string &input);
 
   /** Retrieve a decay type. */
-  static DecayType* get_decay_type(ParticleTypePtr mother,
+  static DecayType *get_decay_type(ParticleTypePtr mother,
                                    ParticleTypePtrList particle_types, int L);
 
   /// \ingroup exception
@@ -88,6 +86,6 @@ class DecayModes {
   static std::vector<DecayModes> *all_decay_modes;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_DECAYMODES_H_

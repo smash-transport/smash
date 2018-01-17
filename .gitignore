@@ -9,6 +9,7 @@
 *~
 build
 .directory
+.push_default
 *.diff
 *.orig
 *.rej

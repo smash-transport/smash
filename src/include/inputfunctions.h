@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -17,20 +17,19 @@
 #include "forwarddeclarations.h"
 #include "particletype.h"
 
-namespace Smash {
+namespace smash {
 
 /// Line consists of a line number and the contents of that line
-struct Line {/*{{{*/
+struct Line { /*{{{*/
   /// initialize line with empty string and number
   Line() = default;
   /// initialize a line with line number \p n and text \p t
-  Line(int n, std::string &&t) : number(n), text(std::move(t)) {
-  }
+  Line(int n, std::string &&t) : number(n), text(std::move(t)) {}
   /// line number
   int number;
   /// line content.
   std::string text;
-};/*}}}*/
+}; /*}}}*/
 
 /** builds a meaningful error message
  *
@@ -56,7 +55,7 @@ inline std::string build_error_string(std::string message, const Line &line) {
 build_vector_<Line> line_parser(const std::string &input);
 
 /// makes sure that nothing is left to read from this line.
-inline void ensure_all_read(std::istream &input, const Line &line) {/*{{{*/
+inline void ensure_all_read(std::istream &input, const Line &line) { /*{{{*/
   std::string tmp;
   input >> tmp;
   if (!input.eof()) {
@@ -65,7 +64,7 @@ inline void ensure_all_read(std::istream &input, const Line &line) {/*{{{*/
                                ") at the remainder of the line.",
                            line));
   }
-}/*}}}*/
+} /*}}}*/
 
 /**
  * Utility function to read a complete input stream (e.g. file) into one string.
@@ -82,6 +81,6 @@ inline std::string read_all(std::istream &&input) {
           std::istreambuf_iterator<char>{}};
 }
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_INPUTFUNCTIONS_H_

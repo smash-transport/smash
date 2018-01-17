@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2014
+ *    Copyright (c) 2013-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -11,7 +11,7 @@
 
 #include "clock.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * Helper structure for Experiment.
@@ -59,6 +59,6 @@ struct ExperimentParameters {
   double low_snn_cut;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_EXPERIMENTPARAMETERS_H_

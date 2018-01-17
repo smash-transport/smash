@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2014
+ *    Copyright (c) 2013-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -14,12 +14,12 @@
 
 #include "particletype.h"
 
-namespace Smash {
+namespace smash {
 
 /** total hadronic cross sections at high energies parametrized in the 2016 PDG
  *  book(http://pdg.lbl.gov/2016/reviews/rpp2016-rev-cross-section-plots.pdf) */
-double xs_high_energy(double mandelstam_s, bool is_opposite_charge,
-                     double ma, double mb, double P, double R1, double R2);
+double xs_high_energy(double mandelstam_s, bool is_opposite_charge, double ma,
+                      double mb, double P, double R1, double R2);
 
 /** pp total cross section at high energies */
 double pp_high_energy(double mandelstam_s);
@@ -39,53 +39,41 @@ double piplusp_high_energy(double mandelstam_s);
 /** pi-p total cross section at high energies */
 double piminusp_high_energy(double mandelstam_s);
 
-/** pi+p elastic cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
+/** parametrized hard scattering cross section (with partonic scattering) */
+double xs_string_hard(double mandelstam_s,
+                      double xs_0, double e_0, double lambda_pow);
+
+/** nucleon-nucleon hard scattering cross section (with partonic scattering) */
+double NN_string_hard(double mandelstam_s);
+
+/** nucleon-pion hard scattering cross section (with partonic scattering) */
+double Npi_string_hard(double mandelstam_s);
+
+/** pion-pion hard scattering cross section (with partonic scattering) */
+double pipi_string_hard(double mandelstam_s);
+
+/** pi+p elastic cross section parametrization */
 double piplusp_elastic(double mandelstam_s);
 
-/** pi-p elastic cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
+/** pi-p elastic cross section parametrization */
 double piminusp_elastic(double mandelstam_s);
 
-/** pp elastic cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
+/** pp elastic cross section parametrization */
 double pp_elastic(double mandelstam_s);
 
-/** pp total cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
+/** pp total cross section parametrization */
 double pp_total(double mandelstam_s);
 
-/** np elastic cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
+/** np elastic cross section parametrization */
 double np_elastic(double mandelstam_s);
 
-/** np total cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
+/** np total cross section parametrization */
 double np_total(double mandelstam_s);
 
-
-/** ppbar elastic cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
+/** ppbar elastic cross section parametrization */
 double ppbar_elastic(double mandelstam_s);
 
-/** ppbar total cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
+/** ppbar total cross section parametrization */
 double ppbar_total(double mandelstam_s);
 
 /** ppbar total cross section parametrization;
@@ -93,65 +81,43 @@ double ppbar_total(double mandelstam_s);
  */
 double ppbar_total(double mandelstam_s, double m_proj, double m_target);
 
-/** K+ p elastic cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
-double kplusp_elastic(double mandelstam_s);
+/** K+ p elastic background cross section parametrization */
+double kplusp_elastic_background(double mandelstam_s);
 
-/** K+ n elastic cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
-double kplusn_elastic(double mandelstam_s);
+/** K+ n elastic background cross section parametrization */
+double kplusn_elastic_background(double mandelstam_s);
 
-/** K- p elastic cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
-double kminusp_elastic(double mandelstam_s);
+/** K+ n charge exchange cross section parametrization. */
+double kplusn_k0p(double mandelstam_s);
 
-/** K- n elastic cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
-double kminusn_elastic(double mandelstam_s);
+/** K- p elastic background cross section parametrization */
+double kminusp_elastic_background(double mandelstam_s);
 
-/** K0 p elastic cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
-double k0p_elastic(double mandelstam_s);
+/** K- n elastic background cross section parametrization */
+double kminusn_elastic_background(double mandelstam_s);
 
-/** K0 n elastic cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
-double k0n_elastic(double mandelstam_s);
+/** K0 p elastic background cross section parametrization */
+double k0p_elastic_background(double mandelstam_s);
 
-/** Kbar0 p elastic cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
-double kbar0p_elastic(double mandelstam_s);
+/** K0 n elastic background cross section parametrization */
+double k0n_elastic_background(double mandelstam_s);
 
-/** Kbar0 n elastic cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
-double kbar0n_elastic(double mandelstam_s);
+/** Kbar0 p elastic background cross section parametrization */
+double kbar0p_elastic_background(double mandelstam_s);
 
-/** K+ p inelastic cross section parametrization
- *
- * \fpPrecision Why \c double?
- */
-double kplusp_inelastic(double mandelstam_s);
+/** Kbar0 n elastic background cross section parametrization */
+double kbar0n_elastic_background(double mandelstam_s);
 
-/** K+ n inelastic cross section parametrization
+/** K+ p inelastic background cross section parametrization */
+double kplusp_inelastic_background(double mandelstam_s);
+
+/** K+ n inelastic background cross section parametrization
  *
- * \fpPrecision Why \c double?
+ * This interpolates the experimental data of the total cross section and
+ * subtracts the elastic and charge exchange cross section.
+ *
  */
-double kplusn_inelastic(double mandelstam_s);
+double kplusn_inelastic_background(double mandelstam_s);
 
 /** Hash a pair of integers.
  *
@@ -159,25 +125,26 @@ double kplusn_inelastic(double mandelstam_s);
  * implementation.
  */
 struct pair_hash {
-    std::size_t operator () (const std::pair<uint64_t, uint64_t> &p) const {
-        auto h1 = std::hash<uint64_t>{}(p.first);
-        auto h2 = std::hash<uint64_t>{}(p.second);
+  std::size_t operator()(const std::pair<uint64_t, uint64_t>& p) const {
+    auto h1 = std::hash<uint64_t>{}(p.first);
+    auto h2 = std::hash<uint64_t>{}(p.second);
 
-        // In our case the integers are PDG codes. We know they are different
-        // and their order is defined, so we can simply combine the hashes
-        // using XOR. Note that this yields 0 for h1 == h2. Also,
-        // std::swap(h1, h2) does not not change the final hash.
-        assert(h1 != h2);
-        return h1 ^ h2;
-    }
+    // In our case the integers are PDG codes. We know they are different
+    // and their order is defined, so we can simply combine the hashes
+    // using XOR. Note that this yields 0 for h1 == h2. Also,
+    // std::swap(h1, h2) does not not change the final hash.
+    assert(h1 != h2);
+    return h1 ^ h2;
+  }
 };
 
 /** Isospin weights for inelastic K+ N channels.
  */
 class KplusNRatios {
  private:
-  mutable std::unordered_map<std::pair<uint64_t, uint64_t>,
-                             double, pair_hash> ratios_;
+  mutable std::unordered_map<std::pair<uint64_t, uint64_t>, double, pair_hash>
+      ratios_;
+
  public:
   /// Create an empty K+ N isospin ratio storage.
   KplusNRatios() : ratios_({}) {}
@@ -186,10 +153,10 @@ class KplusNRatios {
   ///
   /// On the first call all ratios are calculated.
   double get_ratio(const ParticleType& a, const ParticleType& b,
-                  const ParticleType& c, const ParticleType& d) const;
+                   const ParticleType& c, const ParticleType& d) const;
 };
 
-extern thread_local KplusNRatios kplusn_ratios;
+extern /*thread_local (see #3075)*/ KplusNRatios kplusn_ratios;
 
 /** K- p <-> Kbar0 n cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.9 */
@@ -252,6 +219,6 @@ double sigmaplussigmaminus_ximinusp(double sqrts_sqrts0);
 /// Sigma+ Sigma- <-> Xi0 n cross section parametrization
 double sigmaplussigmaminus_xi0n(double sqrts_sqrts0);
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_PARAMETRIZATIONS_H_

@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -14,8 +14,7 @@
 
 #include "scatteractionbaryonbaryon.h"
 
-namespace Smash {
-
+namespace smash {
 
 /**
  * \ingroup action
@@ -56,14 +55,13 @@ class ScatterActionNucleonNucleon : public ScatterActionBaryonBaryon {
   /**
    * Utility function to avoid code replication in two_to_two_cross_sections
    */
-  template<class IntegrationMethod>
+  template <class IntegrationMethod>
   CollisionBranchList find_xsection_from_type(
-                                         const ParticleTypePtrList &type_res_1,
-                                         const ParticleTypePtrList &type_res_2,
-                                         const IntegrationMethod integrator);
+      const ParticleTypePtrList &type_res_1,
+      const ParticleTypePtrList &type_res_2,
+      const IntegrationMethod integrator);
 };
 
-
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_SCATTERACTIONNUCLEONNUCLEON_H_

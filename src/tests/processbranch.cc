@@ -1,17 +1,18 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include "unittest.h"
-#include "../include/processbranch.h"
-#include "../include/particledata.h"
+#include "unittest.h"  // This include has to be first
 
-using namespace Smash;
+#include "../include/particledata.h"
+#include "../include/processbranch.h"
+
+using namespace smash;
 
 TEST(init_particle_types) {
   ParticleType::create_type_list(
@@ -21,9 +22,9 @@ TEST(init_particle_types) {
 }
 
 TEST(assign_default) {
-  CollisionBranch branch(0., ProcessType::String);
+  CollisionBranch branch(0., ProcessType::StringSoft);
   FUZZY_COMPARE(branch.weight(), 0.);
-  COMPARE(branch.get_type(), ProcessType::String);
+  COMPARE(branch.get_type(), ProcessType::StringSoft);
 }
 TEST(assign_1_particle) {
   PdgCode smashon("9876542");
@@ -34,8 +35,8 @@ TEST(assign_1_particle) {
 TEST(assign_2_particle) {
   PdgCode smashon("9876542");
   CollisionBranch branch(ParticleType::find(smashon),
-                         ParticleType::find(smashon),
-                         2.345, ProcessType::Elastic);
+                         ParticleType::find(smashon), 2.345,
+                         ProcessType::Elastic);
   FUZZY_COMPARE(branch.weight(), 2.345);
 }
 
@@ -73,7 +74,7 @@ TEST(add_particle) {
 }
 
 TEST(weights) {
-  CollisionBranch branch(0.,ProcessType::Elastic);
+  CollisionBranch branch(0., ProcessType::Elastic);
   branch.set_weight(0.34);
   COMPARE(branch.weight(), 0.34);
   // double is intentional here.

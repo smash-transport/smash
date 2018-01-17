@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -14,7 +14,7 @@
 
 #include "particles.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup data
@@ -54,13 +54,13 @@ class QuantumNumbers {
  public:
   /// construct QuantumNumbers collection with all fields 0.
   QuantumNumbers()
-        : momentum_(0., 0., 0., 0.),
-          charge_(0),
-          isospin3_(0),
-          strangeness_(0),
-          charmness_(0),
-          bottomness_(0),
-          baryon_number_(0) {}
+      : momentum_(0., 0., 0., 0.),
+        charge_(0),
+        isospin3_(0),
+        strangeness_(0),
+        charmness_(0),
+        bottomness_(0),
+        baryon_number_(0) {}
 
   /** construct QuantumNumbers collection
    *
@@ -72,41 +72,39 @@ class QuantumNumbers {
    * \param b Bottomness
    * \param B Baryon number
    */
-  QuantumNumbers(const FourVector& m,
-                 const int q, const int i3,
-                 const int s, const int c,
-                 const int b, const int B)
-        : momentum_(m),
-          charge_(q),
-          isospin3_(i3),
-          strangeness_(s),
-          charmness_(c),
-          bottomness_(b),
-          baryon_number_(B) {}
+  QuantumNumbers(const FourVector& m, const int q, const int i3, const int s,
+                 const int c, const int b, const int B)
+      : momentum_(m),
+        charge_(q),
+        isospin3_(i3),
+        strangeness_(s),
+        charmness_(c),
+        bottomness_(b),
+        baryon_number_(B) {}
 
   /** Construct QuantumNumbers collection from the conserved quantities
    * found in \p particles. */
-  explicit QuantumNumbers(const Particles &particles) : QuantumNumbers() {
-    for (const ParticleData &data : particles) {
+  explicit QuantumNumbers(const Particles& particles) : QuantumNumbers() {
+    for (const ParticleData& data : particles) {
       add_values(data);
     }
   }
 
   /** Construct QuantumNumbers collection from a particle list. */
-  explicit QuantumNumbers(const ParticleList &part) : QuantumNumbers() {
-    for (const auto &p : part) {
+  explicit QuantumNumbers(const ParticleList& part) : QuantumNumbers() {
+    for (const auto& p : part) {
       add_values(p);
     }
   }
 
   /* Add the quantum numbers of a single particle to the collection. */
-  void add_values(const ParticleData &p) {
-    momentum_      += p.momentum();
-    charge_        += p.pdgcode().charge();
-    isospin3_      += p.pdgcode().isospin3();
-    strangeness_   += p.pdgcode().strangeness();
-    charmness_     += p.pdgcode().charmness();
-    bottomness_    += p.pdgcode().bottomness();
+  void add_values(const ParticleData& p) {
+    momentum_ += p.momentum();
+    charge_ += p.pdgcode().charge();
+    isospin3_ += p.pdgcode().isospin3();
+    strangeness_ += p.pdgcode().strangeness();
+    charmness_ += p.pdgcode().charmness();
+    bottomness_ += p.pdgcode().bottomness();
     baryon_number_ += p.pdgcode().baryon_number();
   }
 
@@ -116,9 +114,7 @@ class QuantumNumbers {
    * \see QuantumNumbers::momentum_
    * \see ParticleData::momentum()
    */
-  FourVector momentum() const {
-    return momentum_;
-  }
+  FourVector momentum() const { return momentum_; }
 
   /** returns the total charge \f$Q = \sum_{i \in \mbox{particles}}
    * q_i\f$
@@ -126,54 +122,42 @@ class QuantumNumbers {
    * \see QuantumNumbers::charge_
    * \see PdgCode::charge()
    */
-  int charge() const {
-    return charge_;
-  }
+  int charge() const { return charge_; }
   /** returns twice the total isospin-3 component (twice) \f$I = \sum_{i
    * \in \mbox{particles}} 2{I_3}_i\f$
    *
    * \see QuantumNumbers::isospin3_
    * \see PdgCode::isospin3()
    */
-  int isospin3() const {
-    return isospin3_;
-  }
+  int isospin3() const { return isospin3_; }
   /** returns the total strangeness \f$S = \sum_{i \in \mbox{particles}}
    * S_i\f$
    *
    * \see QuantumNumbers::strangeness_
    * \see PdgCode::strangeness()
    */
-  int strangeness() const {
-    return strangeness_;
-  }
+  int strangeness() const { return strangeness_; }
   /** returns the total charm \f$C = \sum_{i \in \mbox{particles}}
    * C_i\f$
    *
    * \see QuantumNumbers::charmness_
    * \see PdgCode::charmness()
    */
-  int charmness() const {
-    return charmness_;
-  }
+  int charmness() const { return charmness_; }
   /** returns the total bottom \f$b = \sum_{i \in \mbox{particles}}
    * b_i\f$
    *
    * \see QuantumNumbers::bottomness_
    * \see PdgCode::bottomness()
    */
-  int bottomness() const {
-    return bottomness_;
-  }
+  int bottomness() const { return bottomness_; }
   /** returns the total baryon number \f$B = \sum_{i \in
    * \mbox{particles}} B_i\f$
    *
    * \see QuantumNumbers::baryon_number_
    * \see PdgCode::baryon_number()
    */
-  int baryon_number() const {
-    return baryon_number_;
-  }
+  int baryon_number() const { return baryon_number_; }
 
   /** returns true if all members compare true.
    *
@@ -184,18 +168,18 @@ class QuantumNumbers {
    *
    */
   bool operator==(const QuantumNumbers& rhs) const {
-    return (momentum_      == rhs.momentum_
-         && charge_        == rhs.charge_
-         && isospin3_      == rhs.isospin3_
-         && strangeness_   == rhs.strangeness_
-         && charmness_     == rhs.charmness_
-         && bottomness_    == rhs.bottomness_
-         && baryon_number_ == rhs.baryon_number_);
+    // clang-format off
+    return (momentum_ == rhs.momentum_ &&
+            charge_ == rhs.charge_ &&
+            isospin3_ == rhs.isospin3_ &&
+            strangeness_ == rhs.strangeness_ &&
+            charmness_ == rhs.charmness_ &&
+            bottomness_ == rhs.bottomness_ &&
+            baryon_number_ == rhs.baryon_number_);
+    // clang-format on
   }
   /// logical complement of QuantumNumbers::operator==
-  bool operator!=(const QuantumNumbers& rhs) const {
-    return !(*this == rhs);
-  }
+  bool operator!=(const QuantumNumbers& rhs) const { return !(*this == rhs); }
 
   /** entry-wise subtract of two sets of QuantumNumbers
    *
@@ -204,12 +188,9 @@ class QuantumNumbers {
    *
    */
   QuantumNumbers operator-(const QuantumNumbers& rhs) const {
-    return {momentum_      - rhs.momentum_,
-            charge_        - rhs.charge_,
-            isospin3_      - rhs.isospin3_,
-            strangeness_   - rhs.strangeness_,
-            charmness_     - rhs.charmness_,
-            bottomness_    - rhs.bottomness_,
+    return {momentum_ - rhs.momentum_,          charge_ - rhs.charge_,
+            isospin3_ - rhs.isospin3_,          strangeness_ - rhs.strangeness_,
+            charmness_ - rhs.charmness_,        bottomness_ - rhs.bottomness_,
             baryon_number_ - rhs.baryon_number_};
   }
 
@@ -281,6 +262,6 @@ class QuantumNumbers {
   int baryon_number_;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_QUANTUMNUMBERS_H_

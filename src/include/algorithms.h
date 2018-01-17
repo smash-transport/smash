@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -29,7 +29,7 @@
  * * Sorting and related operations
  */
 
-namespace Smash {
+namespace smash {
 
 /**
  * Enforces periodic boundaries on the given collection of values.
@@ -80,7 +80,8 @@ inline bool all_of(Container &&c, UnaryPredicate &&p) {
 }
 
 /**
- * Convenience wrapper for \c std::for_each that operates on a complete container.
+ * Convenience wrapper for \c std::for_each that operates on a complete
+ * container.
  */
 template <typename Container, typename UnaryFunction>
 inline UnaryFunction for_each(Container &&c, UnaryFunction &&f) {
@@ -88,6 +89,6 @@ inline UnaryFunction for_each(Container &&c, UnaryFunction &&f) {
                        std::forward<UnaryFunction>(f));
 }
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_ALGORITHMS_H_

@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -14,12 +14,13 @@
 
 #include "actionfinderfactory.h"
 
-namespace Smash {
+namespace smash {
 
 /**
  * \ingroup action
  * A simple decay finder:
- * Just loops through all particles and checks if they can decay during the next timestep.  */
+ * Just loops through all particles and checks if they can decay during the next
+ * timestep.  */
 class DecayActionsFinder : public ActionFinderInterface {
  public:
   /** Initialize the finder */
@@ -47,6 +48,6 @@ class DecayActionsFinder : public ActionFinderInterface {
                                 bool only_res = false) const override;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_DECAYACTIONSFINDER_H_

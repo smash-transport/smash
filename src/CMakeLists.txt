@@ -66,6 +66,7 @@ set(SMASH_LIBRARIES ${SMASH_LIBRARIES}
    yaml-cpp
    pythia
    -ldl  # required by pythia
+   cuhre suave divonne vegas  # Cuba multidimensional integration
    )
 
 # list the source files
@@ -110,6 +111,7 @@ set(smash_src
         pdgcode.cc
         potentials.cc
         processbranch.cc
+        processstring.cc
         propagation.cc
         quantumnumbers.cc
         random.cc
@@ -127,6 +129,7 @@ set(smash_src
         spheremodus.cc
         stringfunctions.cc
         tabulation.cc
+        thermalizationaction.cc
         thermodynamicoutput.cc
         threevector.cc
         tsc.cc

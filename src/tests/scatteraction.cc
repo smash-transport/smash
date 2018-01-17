@@ -1,21 +1,22 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include "unittest.h"
+#include "unittest.h"  // This include has to be first
+
 #include "setup.h"
 
-#include "../include/scatteractionbaryonmeson.h"
 #include "../include/scatteractionbaryonbaryon.h"
+#include "../include/scatteractionbaryonmeson.h"
 
-using namespace Smash;
-using Smash::Test::Position;
-using Smash::Test::Momentum;
+using namespace smash;
+using smash::Test::Position;
+using smash::Test::Momentum;
 
 TEST(init_particle_types) {
   Test::create_actual_particletypes();
@@ -24,7 +25,7 @@ TEST(init_particle_types) {
 
 constexpr double r_x = 0.1;
 const FourVector pos_a = Position{0., -r_x, 0., 0.};
-const FourVector pos_b = Position{0.,  r_x, 0., 0.};
+const FourVector pos_b = Position{0., r_x, 0., 0.};
 const FourVector middle = (pos_a + pos_b) / 2.;
 
 TEST(sorting) {
@@ -86,8 +87,8 @@ TEST(elastic_collision) {
   // verify that particles didn't change in the collision
   ParticleList in = act.incoming_particles();
   const ParticleList& out = act.outgoing_particles();
-  VERIFY((in[0] == out[0] && in[1] == out[1])
-         || (in[0] == out[1] && in[1] == out[0]));
+  VERIFY((in[0] == out[0] && in[1] == out[1]) ||
+         (in[0] == out[1] && in[1] == out[0]));
 
   // verify that the particles keep their positions after elastic scattering
   COMPARE(out[0].position(), pos_a);
@@ -108,8 +109,8 @@ TEST(elastic_collision) {
   VERIFY(!act_copy.is_valid(particles));
 
   // verify that the particles don't change in the particle list
-  VERIFY((in[0] == particles.front() && in[1] == particles.back())
-         || (in[0] == particles.back() && in[1] == particles.front()));
+  VERIFY((in[0] == particles.front() && in[1] == particles.back()) ||
+         (in[0] == particles.back() && in[1] == particles.front()));
 }
 
 TEST(outgoing_valid) {
@@ -196,6 +197,9 @@ TEST(pythia_running) {
   std::set<IncludedReactions> incl_2to2 = {};
   act = make_unique<ScatterActionBaryonBaryon>(p1_copy, p2_copy, 0.2, false,
                                                incl_2to2, 1.0);
+  std::unique_ptr<StringProcess> string_process_interface =
+      make_unique<StringProcess>();
+  act->set_string_interface(string_process_interface.get());
   VERIFY(act != nullptr);
   COMPARE(p2_copy.type(), ParticleType::find(0x2212));
 
@@ -212,7 +216,7 @@ TEST(pythia_running) {
   VERIFY(act->is_valid(particles));
   act->generate_final_state();
   VERIFY(act->get_type() != ProcessType::Elastic);
-  VERIFY(act->get_type() == ProcessType::String);
+  VERIFY(act->get_type() == ProcessType::StringSoft);
   const uint32_t id_process = 1;
   act->perform(&particles, id_process);
   COMPARE(id_process, 1u);

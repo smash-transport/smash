@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -12,7 +12,7 @@
 
 #include "decayaction.h"
 
-namespace Smash {
+namespace smash {
 
 class DecayActionDilepton : public DecayAction {
  public:
@@ -43,6 +43,6 @@ class DecayActionDilepton : public DecayAction {
   double branching_ = 1.;
 };
 
-}  // namespace Smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_DECAYACTIONDILEPTON_H_

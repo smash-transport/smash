@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2012-2015
+ *    Copyright (c) 2012-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -24,7 +24,7 @@
 /* build dependent variables */
 #include "include/config.h"
 
-namespace Smash {
+namespace smash {
 
 namespace {
 /** prints usage information and exits the program
@@ -192,11 +192,11 @@ void ensure_path_is_valid(const bf::path &path) {
 
 }  // unnamed namespace
 
-}  // namespace Smash
+}  // namespace smash
 
 /* main - do command line parsing and hence decides modus */
 int main(int argc, char *argv[]) {
-  using namespace Smash;  // NOLINT(build/namespaces)
+  using namespace smash;  // NOLINT(build/namespaces)
   setup_default_float_traps();
 
   const auto &log = logger<LogArea::Main>();
@@ -364,7 +364,7 @@ int main(int argc, char *argv[]) {
       if (a.is_stable() && args[2] != "") {
         ma = a.mass();
         std::cout << "Warning: pole mass is used for stable particle "
-                  <<  a.name() << " instead of " << args[2] << std::endl;
+                  << a.name() << " instead of " << args[2] << std::endl;
       }
       if (b.is_stable() && args[3] != "") {
         mb = b.mass();
@@ -417,8 +417,8 @@ int main(int argc, char *argv[]) {
     }
 
     // keep a copy of the configuration that was used in the output directory
-    bf::ofstream(output_path / "config.yaml") << configuration.to_string()
-                                              << '\n';
+    bf::ofstream(output_path / "config.yaml")
+        << configuration.to_string() << '\n';
 
     // take the seed setting only after the configuration was stored to file
     seed = configuration.take({"General", "Randomseed"});

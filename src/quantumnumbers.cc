@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -13,7 +13,7 @@
 
 #include "include/numerics.h"
 
-namespace Smash {
+namespace smash {
 
 std::string QuantumNumbers::report_deviations(const QuantumNumbers& rhs) const {
   if (rhs == *this) {
@@ -33,18 +33,16 @@ std::string QuantumNumbers::report_deviations(const QuantumNumbers& rhs) const {
   // that comparing integers may be faster than accessing the
   // iterators.
   int mu = 0;
-  for (auto here_iter = momentum_.cbegin(),
-            rhs_iter = rhs.momentum_.cbegin();
-        mu < 4;
-        ++here_iter, ++rhs_iter, ++mu) {
+  for (auto here_iter = momentum_.cbegin(), rhs_iter = rhs.momentum_.cbegin();
+       mu < 4; ++here_iter, ++rhs_iter, ++mu) {
     if (!almost_equal_physics(*here_iter, *rhs_iter)) {
       error_msg << " P_" << mu << ": " << *here_iter << " vs. " << *rhs_iter
                 << "; Δ = " << (*here_iter - *rhs_iter) << "\n";
     }
-    }
+  }
   if (charge_ != rhs.charge_) {
-    error_msg << "Deviation in Charge:\n " << charge_ << " vs. "
-              << rhs.charge_ << "\n";
+    error_msg << "Deviation in Charge:\n " << charge_ << " vs. " << rhs.charge_
+              << "\n";
   }
   if (isospin3_ != rhs.isospin3_) {
     error_msg << "Deviation in Isospin 3:\n " << isospin3_ << " vs. "
@@ -69,4 +67,4 @@ std::string QuantumNumbers::report_deviations(const QuantumNumbers& rhs) const {
   return error_msg.str();
 }
 
-}  // namespace Smash
+}  // namespace smash

@@ -1,19 +1,20 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
-#include "unittest.h"
-#include "../include/nucleus.h"
-#include "../include/deformednucleus.h"
+
+#include "unittest.h"  // This include has to be first
+
 #include "../include/constants.h"
+#include "../include/deformednucleus.h"
 #include "../include/fourvector.h"
+#include "../include/nucleus.h"
 #include "../include/particledata.h"
 #include "../include/pdgcode.h"
-
 
 #include <map>
 #include <vector>
@@ -22,7 +23,7 @@ namespace particles_txt {
 #include <particles.txt.h>
 }
 
-using namespace Smash;
+using namespace smash;
 
 std::map<PdgCode, int> small_list = {{0x2212, 1}};
 std::map<PdgCode, int> large_list = {{0x2212, 92}, {0x2112, 146}};
@@ -35,7 +36,7 @@ TEST(rotate_phi) {
   DeformedNucleus dnucleus(small_list, 1);
   // Plan is to rotate the (0, 1, 0, 1) vector by pi/2.
   // Rotation by pi/2 means (0, 1, 0, 1) -> (0, 0, 1, 1)
-  dnucleus.set_azimuthal_angle(M_PI/2);
+  dnucleus.set_azimuthal_angle(M_PI / 2);
   FourVector expectation = FourVector(0., 0., 1., 1.);
   for (auto i = dnucleus.begin(); i != dnucleus.end(); i++) {
     i->set_4position(FourVector(0., 1., 0., 1.));

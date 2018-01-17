@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015
+ *    Copyright (c) 2015-2017
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -14,87 +14,88 @@
 #include "include/parametrizations.h"
 #include "include/pdgcode_constants.h"
 
-namespace Smash {
+namespace smash {
 
 double ScatterActionNucleonKaon::elastic_parametrization() {
-  const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
-  const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
+  const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
+  const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
 
-  const PdgCode &nucleon = pdg_a.is_nucleon() ? pdg_a : pdg_b;
-  const PdgCode &kaon = pdg_a.is_nucleon() ? pdg_b : pdg_a;
+  const PdgCode& nucleon = pdg_a.is_nucleon() ? pdg_a : pdg_b;
+  const PdgCode& kaon = pdg_a.is_nucleon() ? pdg_b : pdg_a;
   assert(kaon != nucleon);
 
   const double s = mandelstam_s();
 
   double sig_el = 0.;
   switch (nucleon.code()) {
-      case pdg::p:
+    case pdg::p:
       switch (kaon.code()) {
         case pdg::K_p:
-          sig_el = kplusp_elastic(s);
+          sig_el = kplusp_elastic_background(s);
           break;
         case pdg::K_m:
-          sig_el = kminusp_elastic(s);
+          sig_el = kminusp_elastic_background(s);
           break;
         case pdg::K_z:
-          sig_el = k0p_elastic(s);
+          sig_el = k0p_elastic_background(s);
           break;
         case pdg::Kbar_z:
-          sig_el = kbar0p_elastic(s);
+          sig_el = kbar0p_elastic_background(s);
           break;
       }
       break;
-      case pdg::n:
+    case pdg::n:
       switch (kaon.code()) {
         case pdg::K_p:
-          sig_el = kplusn_elastic(s);
+          sig_el = kplusn_elastic_background(s);
           break;
         case pdg::K_m:
-          sig_el = kminusn_elastic(s);
+          sig_el = kminusn_elastic_background(s);
           break;
         case pdg::K_z:
-          sig_el = k0n_elastic(s);
+          sig_el = k0n_elastic_background(s);
           break;
         case pdg::Kbar_z:
-          sig_el = kbar0n_elastic(s);
+          sig_el = kbar0n_elastic_background(s);
           break;
       }
       break;
-      case -pdg::p:
+    case -pdg::p:
       switch (kaon.code()) {
         case pdg::K_p:
-          sig_el = kminusp_elastic(s);
+          sig_el = kminusp_elastic_background(s);
           break;
         case pdg::K_m:
-          sig_el = kplusp_elastic(s);
+          sig_el = kplusp_elastic_background(s);
           break;
         case pdg::K_z:
-          sig_el = kbar0p_elastic(s);
+          sig_el = kbar0p_elastic_background(s);
           break;
         case pdg::Kbar_z:
-          sig_el = k0p_elastic(s);
+          sig_el = k0p_elastic_background(s);
           break;
       }
       break;
-      case -pdg::n:
+    case -pdg::n:
       switch (kaon.code()) {
         case pdg::K_p:
-          sig_el = kminusn_elastic(s);
+          sig_el = kminusn_elastic_background(s);
           break;
         case pdg::K_m:
-          sig_el = kplusn_elastic(s);
+          sig_el = kplusn_elastic_background(s);
           break;
         case pdg::K_z:
-          sig_el = kbar0n_elastic(s);
+          sig_el = kbar0n_elastic_background(s);
           break;
         case pdg::Kbar_z:
-          sig_el = k0n_elastic(s);
+          sig_el = k0n_elastic_background(s);
           break;
       }
       break;
     default:
-      throw std::runtime_error("elastic cross section for antinucleon-kaon "
-                               "not implemented");
+      throw std::runtime_error(
+          "elastic cross section for antinucleon-kaon "
+          "not implemented");
   }
 
   if (sig_el > 0) {
@@ -103,23 +104,23 @@ double ScatterActionNucleonKaon::elastic_parametrization() {
     std::stringstream ss;
     const auto name_a = incoming_particles_[0].type().name();
     const auto name_b = incoming_particles_[1].type().name();
-    ss << "problem in CrossSections::elastic: a=" << name_a
-       << " b=" << name_b << " j_a=" << pdg_a.spin() << " j_b="
-       << pdg_b.spin() << " sigma=" << sig_el << " s=" << s;
+    ss << "problem in CrossSections::elastic: a=" << name_a << " b=" << name_b
+       << " j_a=" << pdg_a.spin() << " j_b=" << pdg_b.spin()
+       << " sigma=" << sig_el << " s=" << s;
     throw std::runtime_error(ss.str());
   }
 }
 
-void ScatterActionNucleonKaon::format_debug_output(std::ostream &out) const {
+void ScatterActionNucleonKaon::format_debug_output(std::ostream& out) const {
   out << "Nucleon-Kaon  ";
   ScatterAction::format_debug_output(out);
 }
 
 CollisionBranchList ScatterActionNucleonKaon::two_to_two_cross_sections() {
-  const ParticleType &a = incoming_particles_[0].type();
-  const ParticleType &b = incoming_particles_[1].type();
-  const ParticleType &type_nucleon = a.pdgcode().is_nucleon() ? a : b;
-  const ParticleType &type_kaon = a.pdgcode().is_nucleon() ? b : a;
+  const ParticleType& a = incoming_particles_[0].type();
+  const ParticleType& b = incoming_particles_[1].type();
+  const ParticleType& type_nucleon = a.pdgcode().is_nucleon() ? a : b;
+  const ParticleType& type_kaon = a.pdgcode().is_nucleon() ? b : a;
 
   const auto pdg_nucleon = type_nucleon.pdgcode().code();
   const auto pdg_kaon = type_kaon.pdgcode().code();
@@ -128,8 +129,8 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_cross_sections() {
   const double sqrts = sqrt_s();
 
   // Some variable declarations for frequently used quantities
-  const auto sigma_kplusp = kplusp_inelastic(s);
-  const auto sigma_kplusn = kplusn_inelastic(s);
+  const auto sigma_kplusp = kplusp_inelastic_background(s);
+  const auto sigma_kplusn = kplusn_inelastic_background(s);
 
   bool incl_KN_to_KN =
             included_2to2_.count(IncludedReactions::All) > 0 ||
@@ -446,4 +447,4 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_cross_sections() {
   return process_list;
 }
 
-}  // namespace Smash
+}  // namespace smash
