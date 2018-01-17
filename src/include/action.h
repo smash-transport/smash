@@ -14,6 +14,7 @@
 #include <utility>
 #include <vector>
 
+#include "action_globals.h"
 #include "lattice.h"
 #include "particles.h"
 #include "pauliblocking.h"
@@ -180,20 +181,59 @@ class Action {
   /// determine the total energy in the center-of-mass frame
   double sqrt_s() const { return total_momentum().abs(); }
 
+  /// The following two functions return the reference to the particle type of
+  /// the outgoint particles.
+  const ParticleType &type_of_pout(const ParticleData &p_out) const {
+    return p_out.type();
+  }
+  const ParticleType &type_of_pout(const ParticleTypePtr &p_out) const {
+    return *p_out;
+  }
+
   /**
    * Calculate the total kinetic energy of the outgoing particles in
-   * the center of mass frame. This function is used when the species
-   * of the outgoing particles are already determined.
+   * the center of mass frame in the presence (or absence) of the mean field
+   * potentials. This function is used when the species of the outgoing
+   * particles are already determined.
    */
   double kinetic_energy_cms() const;
 
   /**
    * Calculate the total kinetic energy of the outgoing particles in
-   * the center of mass frame. This function is used to determine whether
-   * an action is kinematically feasible.
+   * the center of mass frame in the presence (or absence) of the mean field
+   * potentials. This function is used to determine whether an action is
+   * kinematically feasible.
    */
+  template <typename outs>
   double kinetic_energy_cms(std::pair<double, double> potentials,
-                            ParticleTypePtrList p_out_types) const;
+                            outs p_out_types) const {
+    /* scale_B returns the difference of the total force scales of the skyrme
+     * potential between the initial and final states. */
+    double scale_B = 0.0;
+    /* scale_I3 returns the difference of the total force scales of the symmetry
+     * potential between the initial and final states. */
+    double scale_I3 = 0.0;
+    for (const auto &p_in : incoming_particles_) {
+      /* Get the force scale of the incoming particle. */
+      const auto scale =
+          ((pot_pointer != nullptr) ? pot_pointer->force_scale(p_in.type())
+                                    : std::make_pair(0.0, 0));
+      scale_B += scale.first;
+      scale_I3 += scale.second * p_in.type().isospin3_rel();
+    }
+    for (const auto &p_out : p_out_types) {
+      const auto scale = ((pot_pointer != nullptr)
+                              ? pot_pointer->force_scale(type_of_pout(p_out))
+                              : std::make_pair(0.0, 0));
+      scale_B -= scale.first;
+      scale_I3 -= scale.second * type_of_pout(p_out).isospin3_rel();
+    }
+    /* Rescale to get the potential difference between the
+     * initial and final state.*/
+    const double B_pot_diff = potentials.first * scale_B;
+    const double I3_pot_diff = potentials.second * scale_I3;
+    return sqrt_s() + B_pot_diff + I3_pot_diff;
+  }
 
   /** Get the interaction point */
   FourVector get_interaction_point() const;
@@ -254,8 +294,8 @@ class Action {
       /* Evaluate the total kinentic energy of the final state particles
        * of this new subprocess. */
       const auto out_particle_types = (*proc)->particle_types();
-      const double kin_energy_cms =
-          kinetic_energy_cms(potentials, out_particle_types);
+      const double kin_energy_cms = kinetic_energy_cms<ParticleTypePtrList>(
+          potentials, out_particle_types);
       /* Reject the process if the total kinetic energy is smaller than the
        * threshold. */
       if (kin_energy_cms < (*proc)->threshold()) {

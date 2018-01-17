@@ -8,7 +8,6 @@
  */
 
 #include "include/action.h"
-#include "include/action_globals.h"
 
 #include <assert.h>
 #include <algorithm>
@@ -141,63 +140,8 @@ void Action::perform(Particles *particles, uint32_t id_process) {
 }
 
 double Action::kinetic_energy_cms() const {
-  /* scale_B returns the difference of the total force scales of the skyrme
-   * potential between the initial and final states. */
-  double scale_B = 0.0;
-  /* scale_I3 returns the difference of the total force scales of the symmetry
-   * potential between the initial and final states. */
-  double scale_I3 = 0.0;
-  for (const auto &p_in : incoming_particles_) {
-    /* Get the force scale of the incoming particle. */
-    const auto scale =
-        ((pot_pointer != nullptr) ? pot_pointer->force_scale(p_in.type())
-                                  : std::make_pair(0.0, 0));
-    scale_B += scale.first;
-    scale_I3 += scale.second * p_in.type().isospin3_rel();
-  }
-  for (const auto &p_out : outgoing_particles_) {
-    const auto scale =
-        ((pot_pointer != nullptr) ? pot_pointer->force_scale(p_out.type())
-                                  : std::make_pair(0.0, 0));
-    scale_B -= scale.first;
-    scale_I3 -= scale.second * p_out.type().isospin3_rel();
-  }
   const auto potentials = get_potential_at_interaction_point();
-  /* Rescale to get the potential difference between the
-   * initial and final state.*/
-  const double B_pot_diff = potentials.first * scale_B;
-  const double I3_pot_diff = potentials.second * scale_I3;
-  return sqrt_s() + B_pot_diff + I3_pot_diff;
-}
-
-double Action::kinetic_energy_cms(std::pair<double, double> potentials,
-                                  ParticleTypePtrList p_out_types) const {
-  /* scale_B returns the difference of the total force scales of the skyrme
-   * potential between the initial and final states. */
-  double scale_B = 0.0;
-  /* scale_I3 returns the difference of the total force scales of the symmetry
-   * potential between the initial and final states. */
-  double scale_I3 = 0.0;
-  for (const auto &p_in : incoming_particles_) {
-    /* Get the force scale of the incoming particle. */
-    const auto scale =
-        ((pot_pointer != nullptr) ? pot_pointer->force_scale(p_in.type())
-                                  : std::make_pair(0.0, 0));
-    scale_B += scale.first;
-    scale_I3 += scale.second * p_in.type().isospin3_rel();
-  }
-  for (const auto &p_out : p_out_types) {
-    const auto scale =
-        ((pot_pointer != nullptr) ? pot_pointer->force_scale(*p_out)
-                                  : std::make_pair(0.0, 0));
-    scale_B -= scale.first;
-    scale_I3 -= scale.second * p_out->isospin3_rel();
-  }
-  /* Rescale to get the potential difference between the
-   * initial and final state.*/
-  const double B_pot_diff = potentials.first * scale_B;
-  const double I3_pot_diff = potentials.second * scale_I3;
-  return sqrt_s() + B_pot_diff + I3_pot_diff;
+  return kinetic_energy_cms<ParticleList>(potentials, outgoing_particles_);
 }
 
 std::pair<double, double> Action::sample_masses() const {
