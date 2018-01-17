@@ -146,11 +146,12 @@ class PdgCode {
   /** Checks the integer for invalid hex digits.
    *
    * Usually all digits are at least <= 9. The n_q digits are even <= 6
-   * (because there are only six quarks).
+   * (because there are only six quarks). The only exception is n_J, where
+   * we allow f = 15, which is the largest hexadecimal digit.
    *
    * If one of the hex digits is not also a valid decimal digit,
-   * something went wrong - maybe some user of this class forgot to
-   * prefix the input with '0x' and thus passed 221 instead of 0x221.
+   * something possibly went wrong - maybe some user of this class forgot
+   * to prefix the input with '0x' and thus passed 221 instead of 0x221.
    *
    * \return a bitmask indicating the offending digits. In the above
    * example, 221 = 0xd3, the second-to-last-digit is the offending one,
@@ -177,7 +178,7 @@ class PdgCode {
     if (digits_.n_q3_ > 6) {
       fail |= 1 << 1;
     }
-    if (digits_.n_J_ > 9) {
+    if (digits_.n_J_ > 15) {
       fail |= 1;
     }
     return fail;
@@ -521,12 +522,19 @@ class PdgCode {
    */
   static PdgCode invalid() { return PdgCode(0x0); }
 
-  /** returns an integer with decimal representation of the code.
+  /** Returns an integer with decimal representation of the code.
+   *
+   * If the code only has a hexadecimal representation, then 0 is returned.
    *
    * This is necessary for ROOT output.
    *
    */
   int get_decimal() const {
+    // If the representation is hexadecimal, we cannot represent it as a
+    // decimal integer. Return zero to indicate failue.
+    if (digits_.n_J_ > 9) {
+      return 0;
+    }
     return antiparticle_sign() *
            (digits_.n_J_ + digits_.n_q3_ * 10 + digits_.n_q2_ * 100 +
             digits_.n_q1_ * 1000 + digits_.n_L_ * 10000 +
@@ -621,26 +629,22 @@ class PdgCode {
   /** Returns an unsigned integer with the PDG code in hexadecimal
    *  (disregarding the antiparticle flag). */
   inline std::uint32_t ucode() const { return (dump_ & 0x0fffffff); }
-  /** extract digits from a character. */
+  /** extract digits from a hexadecimal character. */
   inline std::uint32_t get_digit_from_char(const char inp) const {
-    // atoi's behaviour for invalid input is undefined. I don't like
-    // that.
-
-    // this checks if the first four digits are 0011 (as they should be
-    // for ASCII digits).
-    if ((inp & 0xf0) ^ 0x30) {
-      throw InvalidPdgCode("PdgCode: Invalid character " +
-                           std::string(&inp, 1) + " found.\n");
+    // decimal digit
+    if (48 <= inp && inp <= 57) {
+      return inp - 48;
     }
-    // the last four digits are the number; they should not be > 9
-    // (i.e., one of [:;<=>?])
-    if ((inp & 0x0f) > 9) {
-      throw InvalidPdgCode("PdgCode: Invalid digit " + std::string(&inp, 1) +
-                           " found.\n");
+    // hexdecimal digit, uppercase
+    if (65 <= inp && inp <= 70) {
+      return inp - 65 + 10;
     }
-    // now that we've checked that the first bits are correct and the
-    // last bits are a number, we can return the last bits.
-    return (inp & 0x0f);
+    // hexdecimal digit, lowercase
+    if (97 <= inp && inp <= 102) {
+      return inp - 97 + 10;
+    }
+    throw InvalidPdgCode("PdgCode: Invalid character " +
+                         std::string(&inp, 1) + " found.\n");
   }
 
   /// takes a string and sets the fields.
