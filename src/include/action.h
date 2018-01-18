@@ -182,15 +182,6 @@ class Action {
   /// determine the total energy in the center-of-mass frame
   double sqrt_s() const { return total_momentum().abs(); }
 
-  /// The following two functions return the reference to the particle type of
-  /// the outgoint particles.
-  const ParticleType &type_of_pout(const ParticleData &p_out) const {
-    return p_out.type();
-  }
-  const ParticleType &type_of_pout(const ParticleTypePtr &p_out) const {
-    return *p_out;
-  }
-
   /**
    * Calculate the total kinetic energy of the outgoing particles in
    * the center of mass frame in the presence (or absence) of the mean field
@@ -376,6 +367,16 @@ class Action {
   friend std::ostream &operator<<(std::ostream &out, const Action &action) {
     action.format_debug_output(out);
     return out;
+  }
+
+ private:
+  /// The following two functions are the helper functions for
+  /// kinetic_energy_cms.
+  const ParticleType &type_of_pout(const ParticleData &p_out) const {
+    return p_out.type();
+  }
+  const ParticleType &type_of_pout(const ParticleTypePtr &p_out) const {
+    return *p_out;
   }
 };
 
