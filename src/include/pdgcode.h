@@ -231,8 +231,9 @@ class PdgCode {
 
   /// Construct the antiparticle to a given PDG code.
   PdgCode get_antiparticle() const {
-    // TODO(mkretz): more efficient implementation
-    return PdgCode(-code());
+    PdgCode result = *this;
+    result.digits_.antiparticle_ = !digits_.antiparticle_;
+    return result;
   }
 
   /// Construct PDG code from decimal number
