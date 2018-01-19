@@ -222,13 +222,10 @@ class PdgCode {
   /** Returns a signed integer with the PDG code in hexadecimal. */
   inline std::int32_t code() const { return antiparticle_sign() * ucode(); }
 
-  /// returns a C++ string from the PDG Code.
+  /// Represent the PDG Code as a decimal string.
   inline std::string string() const {
     std::stringstream ss;
-    if (digits_.antiparticle_) {
-      ss << "-";
-    }
-    ss << std::hex << ucode();
+    ss << get_decimal();
     return ss.str();
   }
 
@@ -524,21 +521,28 @@ class PdgCode {
 
   /** Returns an integer with decimal representation of the code.
    *
-   * If the code only has a hexadecimal representation, then 0 is returned.
+   * If the spin is too large for the last digit, an additional digit at the
+   * beginning will be used, so that the sum of the first and the last digit is
+   * the spin.
    *
-   * This is necessary for ROOT output.
+   * This is used for binary and ROOT output.
    *
    */
   int get_decimal() const {
-    // If the representation is hexadecimal, we cannot represent it as a
-    // decimal integer. Return zero to indicate failue.
-    if (digits_.n_J_ > 9) {
-      return 0;
+    int n_J_1 = 0;
+    int n_J_2 = digits_.n_J_;
+    if (n_J_2 > 9) {
+      n_J_1 = n_J_2 - 9;
+      n_J_2 = 9;
+      if (n_J_2 > 9) {
+        throw InvalidPdgCode("n_J is too large\n");
+      }
     }
     return antiparticle_sign() *
-           (digits_.n_J_ + digits_.n_q3_ * 10 + digits_.n_q2_ * 100 +
+           (n_J_2 + digits_.n_q3_ * 10 + digits_.n_q2_ * 100 +
             digits_.n_q1_ * 1000 + digits_.n_L_ * 10000 +
-            digits_.n_R_ * 100000 + digits_.n_ * 1000000);
+            digits_.n_R_ * 100000 + digits_.n_ * 1000000 +
+            n_J_1 * 10000000);
   }
 
   /// Remove all excitation, except spin. Sign and quark content remains.
@@ -647,7 +651,11 @@ class PdgCode {
                          std::string(&inp, 1) + " found.\n");
   }
 
-  /// takes a string and sets the fields.
+  /// Set the PDG code from the given string.
+  ///
+  /// This supports hexdecimal digits. If the last digit is not enough to
+  /// represent the spin, a digit can be added at the beginning which will be
+  /// added to the total spin.
   inline void set_from_string(const std::string& codestring) {
     dump_ = 0;
     // implicit with the above: digits_.antiparticle_ = false;
@@ -669,12 +677,16 @@ class PdgCode {
     }
     // save if the first character was a sign:
     unsigned int sign = c;
-    // codestring shouldn't be longer than 7 + sign.
-    if (length > 7 + sign) {
+    // codestring shouldn't be longer than 8 + sign.
+    if (length > 8 + sign) {
       throw InvalidPdgCode("String \"" + codestring +
                            "\" too long for PDG Code\n");
     }
     // please note that in what follows, we actually need c++, not ++c.
+    // first digit is used for n_J if the last digit is not enough.
+    if (length > 7 + sign) {
+      digits_.n_J_ += get_digit_from_char(codestring[c++]);
+    }
     // codestring has 7 digits? 7th from last goes in n_.
     if (length > 6 + sign) {
       digits_.n_ = get_digit_from_char(codestring[c++]);
@@ -710,7 +722,7 @@ class PdgCode {
     }
     // last digit is the spin degeneracy.
     if (length > sign) {
-      digits_.n_J_ = get_digit_from_char(codestring[c++]);
+      digits_.n_J_ += get_digit_from_char(codestring[c++]);
     } else {
       throw InvalidPdgCode(
           "String \"" + codestring +

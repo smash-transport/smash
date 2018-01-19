@@ -167,8 +167,8 @@ TEST(hexadecimal) {
   const PdgCode lambda_2350(0x990312a);
   COMPARE(lambda_2350.code(), 0x990312a);
   COMPARE(lambda_2350.dump(), 0x990312au);
-  COMPARE(lambda_2350.string(), "990312a");
-  COMPARE(lambda_2350.get_decimal(), 0);
+  COMPARE(lambda_2350.string(), "19903129");
+  COMPARE(lambda_2350.get_decimal(), 19903129);
 }
 
 TEST(hadron) {
@@ -476,6 +476,9 @@ TEST(initialize_from_string) {
   PdgCode particle4("990312a");
   COMPARE(particle4.dump(), 0x990312au);
   COMPARE(particle4, PdgCode("990312A"));
+  // Make sure the alternative encoding works.
+  PdgCode particle5("19903129");
+  COMPARE(particle4, particle5);
 }
 TEST_CATCH(empty_string, PdgCode::InvalidPdgCode) { PdgCode particle(""); }
 TEST_CATCH(long_string, PdgCode::InvalidPdgCode) {
