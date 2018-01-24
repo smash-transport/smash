@@ -9,6 +9,7 @@
 
 #include "include/decayaction.h"
 
+#include "include/action_globals.h"
 #include "include/angles.h"
 #include "include/decaymodes.h"
 #include "include/kinematics.h"
@@ -155,9 +156,16 @@ void DecayAction::generate_final_state() {
    * according to their relative weights. Then decay the particle
    * by calling function one_to_two or one_to_three.
    */
+  if (pot_pointer != nullptr) {
+     filter_channel(decay_channels_, total_width_);
+  }
   const DecayBranch *proc =
       choose_channel<DecayBranch>(decay_channels_, total_width_);
   outgoing_particles_ = proc->particle_list();
+  /* set positions of the outgoing particles */
+  for (auto &p : outgoing_particles_) {
+    p.set_4position(incoming_particles_[0].position());
+  }
   process_type_ = proc->get_type();
   L_ = proc->angular_momentum();
   partial_width_ = proc->weight();
@@ -179,12 +187,11 @@ void DecayAction::generate_final_state() {
           std::to_string(incoming_particles_[0].effective_mass()) + ")");
   }
 
-  /* Set positions and formation time and boost back. */
+  /* Set formation time and boost back. */
   ThreeVector velocity_CM = incoming_particles_[0].velocity();
   for (auto &p : outgoing_particles_) {
     log.debug("particle momenta in lrf ", p);
     p.boost_momentum(-velocity_CM);
-    p.set_4position(incoming_particles_[0].position());
     p.set_formation_time(
         std::max(time_of_execution_, incoming_particles_[0].formation_time()));
     p.set_cross_section_scaling_factor(
@@ -202,7 +209,7 @@ std::pair<double, double> DecayAction::sample_masses() const {
   // start with pole masses
   std::pair<double, double> masses = {t_a.mass(), t_b.mass()};
 
-  const double cms_energy = sqrt_s();
+  const double cms_energy = kinetic_energy_cms();
 
   if (cms_energy < t_a.min_mass_kinematic() + t_b.min_mass_kinematic()) {
     const std::string reaction =

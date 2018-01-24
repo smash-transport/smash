@@ -257,6 +257,9 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
     log.warn("The cut-off should be below the threshold energy",
              " of the process: NN to NNpi");
   }
+  const bool potential_affect_threshold =
+             (config.has_value({"Lattice", "Potentials_Affect_Thresholds"}) ?
+              config.take({"Lattice", "Potentials_Affect_Thresholds"}) : false);
   return {{0., dt},
           {0.0, output_dt},
           ntest,
@@ -267,7 +270,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
           strings_switch,
           nnbar_treatment,
           photons_switch,
-          low_snn_cut};
+          low_snn_cut,
+          potential_affect_threshold};
 }
 }  // unnamed namespace
 
@@ -718,6 +722,11 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   } else if (printout_lattice_td_) {
     log.error(
         "If you want Thermodynamic VTK output, configure a lattice for it.");
+  }
+
+  // Store pointers to potential and lattice accessible for Action
+  if (parameters_.potential_affect_threshold) {
+     Action::input_potential(UB_lat_.get(), UI3_lat_.get(), potentials_.get());
   }
 
   // Create forced thermalizer

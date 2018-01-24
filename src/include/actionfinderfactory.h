@@ -14,6 +14,8 @@
 
 #include "clock.h"
 #include "forwarddeclarations.h"
+#include "lattice.h"
+#include "potentials.h"
 
 namespace smash {
 
