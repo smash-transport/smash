@@ -25,12 +25,6 @@ class ScatterActionNucleonPion : public ScatterActionBaryonMeson {
  public:
   /* Inherit constructor. */
   using ScatterActionBaryonMeson::ScatterActionBaryonMeson;
-  /**
-   * Determine the elastic cross section for a nucleon-pion collision.
-   * It is given by a parametrization of experimental data.
-   */
-  double elastic_parametrization() override;
-
  protected:
   /**
    * \ingroup logging

@@ -12,6 +12,7 @@
 #include "Pythia8/Pythia.h"
 
 #include "include/constants.h"
+#include "include/crosssections.h"
 #include "include/cxx14compat.h"
 #include "include/fpenvironment.h"
 #include "include/kinematics.h"
@@ -158,13 +159,16 @@ void ScatterAction::add_all_processes(double elastic_parameter, bool two_to_one,
       }
     }
   }
+
+  cross_sections xs (incoming_particles_, sqrt_s());
+
   /** Elastic collisions between two nucleons with sqrt_s() below
    * low_snn_cut can not happen*/
   const bool reject_by_nucleon_elastic_cutoff =
       both_are_nucleons && t1.antiparticle_sign() == t2.antiparticle_sign() &&
       sqrt_s() < low_snn_cut;
   if (two_to_two && !reject_by_nucleon_elastic_cutoff) {
-    add_collision(elastic_cross_section(elastic_parameter));
+    add_collision(xs.elastic(elastic_parameter));
   }
   if (is_pythia) {
     /* string excitation */
@@ -172,7 +176,7 @@ void ScatterAction::add_all_processes(double elastic_parameter, bool two_to_one,
   } else {
     if (two_to_one) {
       /* resonance formation (2->1) */
-      add_collisions(resonance_cross_sections());
+      add_collisions(xs.two_to_one());
     }
     if (two_to_two) {
       /* 2->2 (inelastic) */
@@ -256,20 +260,6 @@ double ScatterAction::transverse_distance_sqr() const {
   return dr2 - dpdr * dpdr / dp2;
 }
 
-CollisionBranchPtr ScatterAction::elastic_cross_section(double elast_par) {
-  double elastic_xs;
-  if (elast_par >= 0.) {
-    // use constant elastic cross section from config file
-    elastic_xs = elast_par;
-  } else {
-    // use parametrization
-    elastic_xs = elastic_parametrization();
-  }
-  return make_unique<CollisionBranch>(incoming_particles_[0].type(),
-                                      incoming_particles_[1].type(), elastic_xs,
-                                      ProcessType::Elastic);
-}
-
 CollisionBranchPtr ScatterAction::NNbar_annihilation_cross_section() {
   const auto &log = logger<LogArea::ScatterAction>();
   /* Calculate NNbar cross section:
@@ -317,7 +307,8 @@ CollisionBranchPtr ScatterAction::string_excitation_cross_section() {
   /* Calculate string-excitation cross section:
    * Parametrized total minus all other present channels. */
   double sig_string =
-      std::max(0., high_energy_cross_section() - elastic_parametrization());
+      // TODO std::max(0., high_energy_cross_section() - elastic_parametrization());
+      std::max(0., high_energy_cross_section() - 0.);
   log.debug("String cross section is: ", sig_string);
   return make_unique<CollisionBranch>(sig_string, ProcessType::StringHard);
 }
@@ -327,7 +318,8 @@ CollisionBranchList ScatterAction::string_excitation_cross_sections() {
   /* Calculate string-excitation cross section:
    * Parametrized total minus all other present channels. */
   double sig_string_all =
-      std::max(0., high_energy_cross_section() - elastic_parametrization());
+      // TODO std::max(0., high_energy_cross_section() - elastic_parametrization());
+      std::max(0., high_energy_cross_section() - 0.);
 
   /* get PDG id for evaluation of the parametrized cross sections
    * for diffractive processes.
@@ -422,82 +414,6 @@ CollisionBranchList ScatterAction::string_excitation_cross_sections() {
   return channel_list;
 }
 
-double ScatterAction::two_to_one_formation(const ParticleType &type_resonance,
-                                           double srts,
-                                           double cm_momentum_sqr) {
-  const ParticleType &type_particle_a = incoming_particles_[0].type();
-  const ParticleType &type_particle_b = incoming_particles_[1].type();
-  /* Check for charge conservation. */
-  if (type_resonance.charge() !=
-      type_particle_a.charge() + type_particle_b.charge()) {
-    return 0.;
-  }
-
-  /* Check for baryon-number conservation. */
-  if (type_resonance.baryon_number() !=
-      type_particle_a.baryon_number() + type_particle_b.baryon_number()) {
-    return 0.;
-  }
-
-  /* Calculate partial in-width. */
-  const double partial_width = type_resonance.get_partial_in_width(
-      srts, incoming_particles_[0], incoming_particles_[1]);
-  if (partial_width <= 0.) {
-    return 0.;
-  }
-
-  /* Calculate spin factor */
-  const double spinfactor =
-      static_cast<double>(type_resonance.spin() + 1) /
-      ((type_particle_a.spin() + 1) * (type_particle_b.spin() + 1));
-  const int sym_factor =
-      (type_particle_a.pdgcode() == type_particle_b.pdgcode()) ? 2 : 1;
-  /** Calculate resonance production cross section
-   * using the Breit-Wigner distribution as probability amplitude.
-   * See Eq. (176) in \iref{Buss:2011mx}. */
-  return spinfactor * sym_factor * 2. * M_PI * M_PI / cm_momentum_sqr *
-         type_resonance.spectral_function(srts) * partial_width * hbarc *
-         hbarc / fm2_mb;
-}
-
-CollisionBranchList ScatterAction::resonance_cross_sections() {
-  const auto &log = logger<LogArea::ScatterAction>();
-  CollisionBranchList resonance_process_list;
-  const ParticleType &type_particle_a = incoming_particles_[0].type();
-  const ParticleType &type_particle_b = incoming_particles_[1].type();
-
-  const double srts = sqrt_s();
-  const double p_cm_sqr = cm_momentum_squared();
-
-  /* Find all the possible resonances */
-  for (const ParticleType &type_resonance : ParticleType::list_all()) {
-    /* Not a resonance, go to next type of particle */
-    if (type_resonance.is_stable()) {
-      continue;
-    }
-
-    /* Same resonance as in the beginning, ignore */
-    if ((!type_particle_a.is_stable() &&
-         type_resonance.pdgcode() == type_particle_a.pdgcode()) ||
-        (!type_particle_b.is_stable() &&
-         type_resonance.pdgcode() == type_particle_b.pdgcode())) {
-      continue;
-    }
-
-    double resonance_xsection =
-        two_to_one_formation(type_resonance, srts, p_cm_sqr);
-
-    /* If cross section is non-negligible, add resonance to the list */
-    if (resonance_xsection > really_small) {
-      resonance_process_list.push_back(make_unique<CollisionBranch>(
-          type_resonance, resonance_xsection, ProcessType::TwoToOne));
-      log.debug("Found resonance: ", type_resonance);
-      log.debug("2->1 with original particles: ", type_particle_a,
-                type_particle_b);
-    }
-  }
-  return resonance_process_list;
-}
 
 void ScatterAction::elastic_scattering() {
   // copy initial particles into final state

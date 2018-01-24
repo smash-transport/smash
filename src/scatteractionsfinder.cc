@@ -13,6 +13,7 @@
 
 #include "include/configuration.h"
 #include "include/constants.h"
+#include "include/crosssections.h"
 #include "include/cxx14compat.h"
 #include "include/decaymodes.h"
 #include "include/experimentparameters.h"
@@ -416,12 +417,13 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
       ScatterAction act(a_data, b_data, 0.0, false, 0.0);
       const double sqrts = act.sqrt_s();
       std::cout << sqrts << " ";
+      cross_sections cross_s (act.incoming_particles(), sqrts);
       for (const ParticleTypePtr resonance : ab_products) {
         const double p_cm_sqr = pCM_sqr(sqrts, m_a, m_b);
         const double xs =
             (sqrts < resonance->min_mass_kinematic())
                 ? 0.0
-                : act.two_to_one_formation(*resonance, sqrts, p_cm_sqr);
+                : cross_s.formation(*resonance, p_cm_sqr);
         std::cout << xs << " ";
       }
       std::cout << std::endl;

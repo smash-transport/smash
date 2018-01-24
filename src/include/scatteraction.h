@@ -175,29 +175,16 @@ class ScatterAction : public Action {
    */
   virtual double string_hard_cross_section() const { return 0.; }
 
-  /**
-   * Determine the (parametrized) elastic cross section for this collision.
-   * It is zero by default, but can be overridden in the child classes.
-   */
-  virtual double elastic_parametrization() { return 0.; }
+  // /**
+  //  * Determine the (parametrized) elastic cross section for this collision.
+  //  * It is zero by default, but can be overridden in the child classes.
+  //  */
+  // virtual double elastic_parametrization() { return 0.; }
 
   /// Returns list of possible collision channels
   const CollisionBranchList& collision_channels() {
     return collision_channels_;
   }
-
-  /**
-   * Determine the elastic cross section for this collision. If elastic_par is
-   * given (and positive), we just use a constant cross section of that size,
-   * otherwise a parametrization of the elastic cross section is used
-   * (if available).
-   *
-   * \param[in] elast_par Elastic cross section parameter from the input file.
-   *
-   * \return A ProcessBranch object containing the cross section and
-   * final-state IDs.
-   */
-  CollisionBranchPtr elastic_cross_section(double elast_par);
 
   /**
    * Determine the cross section for NNbar annihilation, which is given by the
@@ -237,35 +224,6 @@ class ScatterAction : public Action {
    * double-diffractive and non-diffractive) and their cross sections.
    */
   virtual CollisionBranchList string_excitation_cross_sections();
-
-  /**
-  * Find all resonances that can be produced in a 2->1 collision of the two
-  * input particles and the production cross sections of these resonances.
-  *
-  * Given the data and type information of two colliding particles,
-  * create a list of possible resonance production processes
-  * and their cross sections.
-  *
-  * \return A list of processes with resonance in the final state.
-  * Each element in the list contains the type of the final-state particle
-  * and the cross section for that particular process.
-  */
-  virtual CollisionBranchList resonance_cross_sections();
-
-  /**
-   * Return the 2-to-1 resonance production cross section for a given resonance.
-   *
-   * \param[in] type_resonance Type information for the resonance to be
-   * produced.
-   * \param[in] srts Total energy in the center-of-mass frame.
-   * \param[in] cm_momentum_sqr Square of the center-of-mass momentum of the
-   * two initial particles.
-   *
-   * \return The cross section for the process
-   * [initial particle a] + [initial particle b] -> resonance.
-   */
-  double two_to_one_formation(const ParticleType& type_resonance, double srts,
-                              double cm_momentum_sqr);
 
   /** Find all inelastic 2->2 processes for this reaction. */
   virtual CollisionBranchList two_to_two_cross_sections() {

@@ -19,34 +19,6 @@
 
 namespace smash {
 
-double ScatterActionNucleonNucleon::elastic_parametrization() {
-  const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
-  const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
-
-  const double s = mandelstam_s();
-
-  /* Use parametrized cross sections. */
-  double sig_el;
-  if (pdg_a == pdg_b) { /* pp */
-    sig_el = pp_elastic(s);
-  } else if (pdg_a.is_antiparticle_of(pdg_b)) { /* ppbar */
-    sig_el = ppbar_elastic(s);
-  } else { /* np */
-    sig_el = np_elastic(s);
-  }
-  if (sig_el > 0.) {
-    return sig_el;
-  } else {
-    std::stringstream ss;
-    const auto name_a = incoming_particles_[0].type().name();
-    const auto name_b = incoming_particles_[1].type().name();
-    ss << "problem in CrossSections::elastic: a=" << name_a << " b=" << name_b
-       << " j_a=" << pdg_a.spin() << " j_b=" << pdg_b.spin()
-       << " sigma=" << sig_el << " s=" << s;
-    throw std::runtime_error(ss.str());
-  }
-}
-
 /**
  * Computes the B coefficients from the Cugnon parametrization of the angular
  * distribution in elastic pp scattering, see equation (8) in
