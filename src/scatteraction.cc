@@ -62,11 +62,11 @@ void ScatterAction::generate_final_state() {
   FourVector middle_point = get_interaction_point();
 
   /* Set positions of the outgoing particles */
-  //for (ParticleData &new_particle : outgoing_particles_) {
-  //  if (proc->get_type() != ProcessType::Elastic) {
-  //    new_particle.set_4position(middle_point);
-  //  }
-  //}
+  // for (ParticleData &new_particle : outgoing_particles_) {
+  //   if (proc->get_type() != ProcessType::Elastic) {
+  //     new_particle.set_4position(middle_point);
+  //   }
+  // }
 
   switch (process_type_) {
     case ProcessType::Elastic:
