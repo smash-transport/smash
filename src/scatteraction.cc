@@ -62,11 +62,11 @@ void ScatterAction::generate_final_state() {
   FourVector middle_point = get_interaction_point();
 
   /* Set positions of the outgoing particles */
-  for (ParticleData &new_particle : outgoing_particles_) {
-    if (proc->get_type() != ProcessType::Elastic) {
-      new_particle.set_4position(middle_point);
-    }
-  }
+  //for (ParticleData &new_particle : outgoing_particles_) {
+  //  if (proc->get_type() != ProcessType::Elastic) {
+  //    new_particle.set_4position(middle_point);
+  //  }
+  //}
 
   switch (process_type_) {
     case ProcessType::Elastic:
@@ -99,8 +99,12 @@ void ScatterAction::generate_final_state() {
           ", PDGcode2=" + incoming_particles_[1].pdgcode().string() + ")");
   }
 
-  /* Set momenta & boost to computational frame. */
   for (ParticleData &new_particle : outgoing_particles_) {
+    /* Set positions of the outgoing particles */
+    if (proc->get_type() != ProcessType::Elastic) {
+      new_particle.set_4position(middle_point);
+    }
+    /* Set momenta & boost to computational frame. */
     new_particle.boost_momentum(-beta_cm());
   }
 }

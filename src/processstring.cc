@@ -300,7 +300,7 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   ParticleData new_particle(ParticleType::find(hadron_code));
   new_particle.set_4momentum(pstrHcom);
   new_particle.set_cross_section_scaling_factor(1.);
-  new_particle.set_formation_time(0.);
+  new_particle.set_formation_time(time_collision_);
   final_state_.push_back(new_particle);
 
   NpartFinal_ = NpartString_[0] + NpartString_[1];
@@ -521,7 +521,7 @@ bool StringProcess::next_BBbarAnn() {
       ParticleData new_particle(ParticleType::find(PDGcodes_[i]));
       new_particle.set_4momentum(pcom_[i]);
       new_particle.set_cross_section_scaling_factor(1.);
-      new_particle.set_formation_time(0.);
+      new_particle.set_formation_time(time_collision_);
       final_state_.push_back(new_particle);
     }
     NpartFinal_ = NpartString_[0] + NpartString_[1];
