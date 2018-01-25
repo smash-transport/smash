@@ -25,9 +25,7 @@ class ScatterActionNucleonKaon : public ScatterActionBaryonMeson {
  public:
   /* Inherit constructor. */
   using ScatterActionBaryonMeson::ScatterActionBaryonMeson;
-  /** Find all inelastic 2->2 processes for this reaction. */
-  CollisionBranchList two_to_two_cross_sections() override;
-
+  
  protected:
   /**
    * \ingroup logging

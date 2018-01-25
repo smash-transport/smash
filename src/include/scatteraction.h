@@ -20,89 +20,29 @@
 
 namespace smash {
 
-/**
- * Calculate the detailed balance factor R such that
- * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
- * where $A, B, C, D$ are stable.
- */
-inline double detailed_balance_factor_stable(double s, const ParticleType& a,
-                                             const ParticleType& b,
-                                             const ParticleType& c,
-                                             const ParticleType& d) {
-  double spin_factor = (c.spin() + 1) * (d.spin() + 1);
-  spin_factor /= (a.spin() + 1) * (b.spin() + 1);
-  double symmetry_factor = (1 + (a == b));
-  symmetry_factor /= (1 + (c == d));
-  const double momentum_factor = pCM_sqr_from_s(s, c.mass(), d.mass()) /
-                                 pCM_sqr_from_s(s, a.mass(), b.mass());
-  return spin_factor * symmetry_factor * momentum_factor;
-}
-
-/**
- * Calculate the detailed balance factor R such that
- * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
- * where $A$ is unstable, $B$ is a kaon and $C, D$ are stable.
- */
-inline double detailed_balance_factor_RK(double sqrts, double pcm,
-                                         const ParticleType& a,
-                                         const ParticleType& b,
-                                         const ParticleType& c,
-                                         const ParticleType& d) {
-  assert(!a.is_stable());
-  assert(b.pdgcode().is_kaon());
-  double spin_factor = (c.spin() + 1) * (d.spin() + 1);
-  spin_factor /= (a.spin() + 1) * (b.spin() + 1);
-  double symmetry_factor = (1 + (a == b));
-  symmetry_factor /= (1 + (c == d));
-  const double momentum_factor =
-      pCM_sqr(sqrts, c.mass(), d.mass()) /
-      (pcm * a.iso_multiplet()->get_integral_RK(sqrts));
-  return spin_factor * symmetry_factor * momentum_factor;
-}
-
-/**
- * Calculate the detailed balance factor R such that
- * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
- * where $A$ and $B$ are unstable, and $C$ and $D$ are stable.
- */
-inline double detailed_balance_factor_RR(double sqrts, double pcm,
-                                         const ParticleType& particle_a,
-                                         const ParticleType& particle_b,
-                                         const ParticleType& particle_c,
-                                         const ParticleType& particle_d) {
-  assert(!particle_a.is_stable());
-  assert(!particle_b.is_stable());
-  double spin_factor = (particle_c.spin() + 1) * (particle_d.spin() + 1);
-  spin_factor /= (particle_a.spin() + 1) * (particle_b.spin() + 1);
-  double symmetry_factor = (1 + (particle_a == particle_b));
-  symmetry_factor /= (1 + (particle_c == particle_d));
-  const double momentum_factor =
-      pCM_sqr(sqrts, particle_c.mass(), particle_d.mass()) /
-      (pcm * particle_a.iso_multiplet()->get_integral_RR(particle_b, sqrts));
-  return spin_factor * symmetry_factor * momentum_factor;
-}
-
-/**
- * Add a 2-to-2 channel to a collision branch list given a cross section.
- *
- * The cross section is only calculated if there is enough energy
- * for the process. If the cross section is small, the branch is not added.
- */
-template <typename F>
-inline void add_channel(CollisionBranchList& process_list, F get_xsection,
-                        double sqrts, const ParticleType& type_a,
-                        const ParticleType& type_b) {
-  const double sqrt_s_min =
-      type_a.min_mass_spectral() + type_b.min_mass_spectral();
-  if (sqrts <= sqrt_s_min) {
-    return;
+  // TODO Remove after NNbar is moved
+  /**
+   * Calculate the detailed balance factor R such that
+   * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
+   * where $A$ and $B$ are unstable, and $C$ and $D$ are stable.
+   */
+  inline double detailed_balance_factor_RR(double sqrts, double pcm,
+                                           const ParticleType& particle_a,
+                                           const ParticleType& particle_b,
+                                           const ParticleType& particle_c,
+                                           const ParticleType& particle_d) {
+    assert(!particle_a.is_stable());
+    assert(!particle_b.is_stable());
+    double spin_factor = (particle_c.spin() + 1) * (particle_d.spin() + 1);
+    spin_factor /= (particle_a.spin() + 1) * (particle_b.spin() + 1);
+    double symmetry_factor = (1 + (particle_a == particle_b));
+    symmetry_factor /= (1 + (particle_c == particle_d));
+    const double momentum_factor =
+        pCM_sqr(sqrts, particle_c.mass(), particle_d.mass()) /
+        (pcm * particle_a.iso_multiplet()->get_integral_RR(particle_b, sqrts));
+    return spin_factor * symmetry_factor * momentum_factor;
   }
-  const auto xsection = get_xsection();
-  if (xsection > really_small) {
-    process_list.push_back(make_unique<CollisionBranch>(
-        type_a, type_b, xsection, ProcessType::TwoToTwo));
-  }
-}
+
 
 /**
  * \ingroup action
@@ -224,11 +164,6 @@ class ScatterAction : public Action {
    * double-diffractive and non-diffractive) and their cross sections.
    */
   virtual CollisionBranchList string_excitation_cross_sections();
-
-  /** Find all inelastic 2->2 processes for this reaction. */
-  virtual CollisionBranchList two_to_two_cross_sections() {
-    return CollisionBranchList();
-  }
 
   /**
    * \ingroup exception
