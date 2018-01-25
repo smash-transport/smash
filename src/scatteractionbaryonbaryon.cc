@@ -17,22 +17,6 @@
 
 namespace smash {
 
-double ScatterActionBaryonBaryon::high_energy_cross_section() const {
-  const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
-  const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
-  const double s = mandelstam_s();
-
-  /* Currently all BB collisions use the nucleon-nucleon parametrizations. */
-  if (pdg_a == pdg_b) {
-    return pp_high_energy(s);  // pp, nn
-  } else if (pdg_a.is_antiparticle_of(pdg_b)) {
-    return ppbar_high_energy(s);  // ppbar, nnbar
-  } else if (pdg_a.antiparticle_sign() * pdg_b.antiparticle_sign() == 1) {
-    return np_high_energy(s);  // np, nbarpbar
-  } else {
-    return npbar_high_energy(s);  // npbar, nbarp
-  }
-}
 
 double ScatterActionBaryonBaryon::string_hard_cross_section() const {
   // const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();

@@ -114,6 +114,12 @@ class cross_sections {
   /** Find all inelastic 2->2 processes for Hyperon-Pion Scattering. */
   CollisionBranchList ypi_xx();
 
+  /** Determine the parametrized total cross section at high energies
+   * for the given collision, which is non-zero for Baryon-Baryon and
+   * Nucleon-Pion scatterings currently.
+   */
+  CollisionBranchPtr high_energy();
+
   /**
   * Calculate cross sections for resonance absorption
   * (i.e. NR->NN and ΔR->NN).
@@ -244,11 +250,6 @@ class cross_sections {
   }
 
 
-  // CollisionBranchPtr high_energy(); //TODO
-  //
-  // CollisionBranchList bb_he(); //TODO
-  // CollisionBranchList bm_he(); //TODO
-  //
   // CollisionBranchList NNbar_annihilation(); // TODO
   // CollisionBranchList NNbar_creation();  // TODO
   // CollisionBranchList call_correct_xs();

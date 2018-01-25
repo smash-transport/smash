@@ -1142,6 +1142,39 @@ CollisionBranchList cross_sections::ypi_xx() {
   return process_list;
 }
 
+double cross_sections::high_energy() const {
+  const PdgCode &pdg_a = scattering_particles_[0].type().pdgcode();
+  const PdgCode &pdg_b = scattering_particles_[1].type().pdgcode();
+  const double s = sqrt_s_ * sqrt_s_;
+
+  /* Currently all BB collisions use the nucleon-nucleon parametrizations. */
+  if (pdg_a.is_baryon() && pdg_b.is_baryon()) {
+    if (pdg_a == pdg_b) {
+      return pp_high_energy(s);  // pp, nn
+    } else if (pdg_a.is_antiparticle_of(pdg_b)) {
+      return ppbar_high_energy(s);  // ppbar, nnbar
+    } else if (pdg_a.antiparticle_sign() * pdg_b.antiparticle_sign() == 1) {
+      return np_high_energy(s);  // np, nbarpbar
+    } else {
+      return npbar_high_energy(s);  // npbar, nbarp
+    }
+  }
+
+  /* Pion nucleon interaction. */
+  if ((pdg_a == pdg::pi_p && pdg_b == pdg::p) ||
+      (pdg_b == pdg::pi_p && pdg_a == pdg::p) ||
+      (pdg_a == pdg::pi_m && pdg_b == pdg::n) ||
+      (pdg_b == pdg::pi_m && pdg_a == pdg::n)) {
+    return piplusp_high_energy(s);  // pi+ p, pi- n
+  } else if ((pdg_a == pdg::pi_m && pdg_b == pdg::p) ||
+             (pdg_b == pdg::pi_m && pdg_a == pdg::p) ||
+             (pdg_a == pdg::pi_p && pdg_b == pdg::n) ||
+             (pdg_b == pdg::pi_p && pdg_a == pdg::n)) {
+    return piminusp_high_energy(s);  // pi- p, pi+ n
+  } else {
+    return 0;
+  }
+}
 
 CollisionBranchList cross_sections::bar_bar_to_nuc_nuc(
     const bool is_anti_particles) {
