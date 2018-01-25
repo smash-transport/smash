@@ -118,7 +118,7 @@ class cross_sections {
    * for the given collision, which is non-zero for Baryon-Baryon and
    * Nucleon-Pion scatterings currently.
    */
-  CollisionBranchPtr high_energy();
+  double high_energy() const;
 
   /**
   * Calculate cross sections for resonance absorption
@@ -163,6 +163,23 @@ class cross_sections {
    * center-of-mass system.
    */
   double cm_momentum() const;
+
+
+  /**
+   * Determine the cross section for NNbar annihilation, which is given by the
+   * difference between the parametrized total cross section and all the
+   * explicitly implemented channels at low energy (in this case only elastic).
+   * This method has to be called after all other processes
+   * have been added to the Action object.
+   */
+  CollisionBranchPtr NNbar_annihilation(const double current_xs);
+
+  /**
+   * Determine the cross section for NNbar annihilation, which is given by
+   * detailed balance from the reverse reaction. See
+   * NNbar_annihilation_cross_section
+   */
+  CollisionBranchList NNbar_creation();
 
   /**
    * Add a 2-to-2 channel to a collision branch list given a cross section.

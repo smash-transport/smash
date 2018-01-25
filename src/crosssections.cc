@@ -1142,6 +1142,8 @@ CollisionBranchList cross_sections::ypi_xx() {
   return process_list;
 }
 
+
+
 double cross_sections::high_energy() const {
   const PdgCode &pdg_a = scattering_particles_[0].type().pdgcode();
   const PdgCode &pdg_b = scattering_particles_[1].type().pdgcode();
@@ -1175,6 +1177,55 @@ double cross_sections::high_energy() const {
     return 0;
   }
 }
+
+
+
+CollisionBranchPtr cross_sections::NNbar_annihilation(const double current_xs) {
+  // const auto &log = logger<LogArea::ScatterAction>();
+  /* Calculate NNbar cross section:
+   * Parametrized total minus all other present channels.*/
+  const double s = sqrt_s_ * sqrt_s_;
+  double nnbar_xsec = std::max(0., ppbar_total(s) - current_xs);
+  // log.debug("NNbar cross section is: ", nnbar_xsec);
+  // Make collision channel NNbar -> ρh₁(1170); eventually decays into 5π
+  return make_unique<CollisionBranch>(ParticleType::find(pdg::h1),
+                                      ParticleType::find(pdg::rho_z),
+                                      nnbar_xsec, ProcessType::TwoToTwo);
+}
+
+
+CollisionBranchList cross_sections::NNbar_creation() {
+  // const auto &log = logger<LogArea::ScatterAction>();
+  CollisionBranchList channel_list;
+  /* Calculate NNbar reverse cross section:
+   * from reverse reaction (see NNbar_annihilation_cross_section).*/
+  const double s = sqrt_s_ * sqrt_s_;
+  const double sqrts = sqrt_s_;
+  const double pcm = cm_momentum();
+
+  const auto &type_N = ParticleType::find(pdg::p);
+  const auto &type_Nbar = ParticleType::find(-pdg::p);
+
+  // Check available energy
+  if (sqrts - 2 * type_N.mass() < 0) {
+    return channel_list;
+  }
+
+  double xsection = detailed_balance_factor_RR(
+                        sqrts, pcm, scattering_particles_[0].type(),
+                        scattering_particles_[1].type(), type_N, type_Nbar) *
+                    std::max(0., ppbar_total(s) - ppbar_elastic(s));
+  // log.debug("NNbar reverse cross section is: ", xsection);
+  channel_list.push_back(make_unique<CollisionBranch>(
+      type_N, type_Nbar, xsection, ProcessType::TwoToTwo));
+  channel_list.push_back(make_unique<CollisionBranch>(
+      ParticleType::find(pdg::n), ParticleType::find(-pdg::n), xsection,
+      ProcessType::TwoToTwo));
+  return channel_list;
+}
+
+
+
 
 CollisionBranchList cross_sections::bar_bar_to_nuc_nuc(
     const bool is_anti_particles) {

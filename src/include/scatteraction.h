@@ -20,30 +20,6 @@
 
 namespace smash {
 
-  // TODO Remove after NNbar is moved
-  /**
-   * Calculate the detailed balance factor R such that
-   * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
-   * where $A$ and $B$ are unstable, and $C$ and $D$ are stable.
-   */
-  inline double detailed_balance_factor_RR(double sqrts, double pcm,
-                                           const ParticleType& particle_a,
-                                           const ParticleType& particle_b,
-                                           const ParticleType& particle_c,
-                                           const ParticleType& particle_d) {
-    assert(!particle_a.is_stable());
-    assert(!particle_b.is_stable());
-    double spin_factor = (particle_c.spin() + 1) * (particle_d.spin() + 1);
-    spin_factor /= (particle_a.spin() + 1) * (particle_b.spin() + 1);
-    double symmetry_factor = (1 + (particle_a == particle_b));
-    symmetry_factor /= (1 + (particle_c == particle_d));
-    const double momentum_factor =
-        pCM_sqr(sqrts, particle_c.mass(), particle_d.mass()) /
-        (pcm * particle_a.iso_multiplet()->get_integral_RR(particle_b, sqrts));
-    return spin_factor * symmetry_factor * momentum_factor;
-  }
-
-
 /**
  * \ingroup action
  * ScatterAction is a special action which takes two incoming particles
@@ -124,23 +100,7 @@ class ScatterAction : public Action {
   /// Returns list of possible collision channels
   const CollisionBranchList& collision_channels() {
     return collision_channels_;
-  }
-
-  /**
-   * Determine the cross section for NNbar annihilation, which is given by the
-   * difference between the parametrized total cross section and all the
-   * explicitly implemented channels at low energy (in this case only elastic).
-   * This method has to be called after all other processes
-   * have been added to the Action object.
-   */
-  CollisionBranchPtr NNbar_annihilation_cross_section();
-
-  /**
-   * Determine the cross section for NNbar annihilation, which is given by
-   * detailed balance from the reverse reaction. See
-   * NNbar_annihilation_cross_section
-   */
-  CollisionBranchList NNbar_creation_cross_section();
+  }  
 
   /**
    * Determine the cross section for string excitations, which is given by the
