@@ -574,6 +574,43 @@ void ScatterAction::resonance_formation() {
             outgoing_particles_[0].momentum());
 }
 
+/* This function will check whether a particle contains  
+ * at least the given number of valence quarks */
+bool ScatterAction::check_quark_number(int nquarks, PdgCode pdg){
+  if (pdg.is_meson()){
+    return nquarks == 1 || nquarks == -1;
+  }
+  if (pdg.is_baryon()){
+    if (pdg.baryon_number() == 1){
+      return nquarks == 1 || nquarks == 2;
+    }
+    if (pdg.baryon_number() == -1){
+      return nquarks == -1 || nquarks == -2;
+    }
+  }
+  throw std::runtime_error("String fragment is neither baryon nor meson");
+}
+
+/* This function will assign the cross section scaling factor 
+ * acccording to the particles number of quarks and the number of 
+ * quarks it got from the fragmented string */
+void ScatterAction::assign_scaling_factor(int nquark, ParticleData data,
+                                              double suppression_factor){
+  int nbaryon = data.pdgcode().baryon_number();
+  if (nquark == 0){
+    data.set_cross_section_scaling_factor(0.0);
+  }
+  else if (nbaryon==0){
+    // Mesons always get a scaling factor of 1/2 since there is never 
+    // a q-qbar pair at the end of a string so nquarks is always 1
+    data.set_cross_section_scaling_factor(0.5 * suppression_factor);
+  }
+  else if (data.is_baryon()){
+    data.set_cross_section_scaling_factor(suppression_factor*
+                                              nquark / (3.0 * nbaryon));
+  }
+}
+
 /* This function will generate outgoing particles in CM frame
  * from a hard process. */
 void ScatterAction::string_excitation_pythia() {
@@ -683,13 +720,77 @@ void ScatterAction::string_excitation_pythia() {
       }
     }
     /*
-     * sort new_intermediate_particles according to z-Momentum
+     * sort new_intermediate_particles according to z-velocity 
      */
     std::sort(
         new_intermediate_particles.begin(), new_intermediate_particles.end(),
         [&](ParticleData i, ParticleData j) {
-          return std::abs(i.momentum().x3()) > std::abs(j.momentum().x3());
-        });
+          return i.momentum().velocity().x3() 
+               < j.momentum().velocity().x3();});
+    /* Additional suppression factor to mimic coherence taken as 0.7
+     * from UrQMD (CTParam(59) */
+    const double suppression_factor = 0.7;
+    int random;
+    int nq1,nq2; //number of quarks at both ends of the string
+    if (Random::uniform(0., 1.) > 0.5){
+      random = 0;
+    }
+    else{
+      random = 1;
+    }
+    switch(incoming_particles_[random].pdgcode().baryon_number()){
+    case 0:
+      nq1=1;
+      nq2=-1;
+      break;
+    case 1:
+      nq1=2;
+      nq2=1;
+      break;
+    case -1:
+      nq1=-2;
+      nq2=-1;
+      break;
+    default:
+      throw std::runtime_error("string is neither mesonic nor baryonic");
+    }
+    int i1=0,i2=0,j1=0,j2=0, end = new_intermediate_particles.size()-1;
+    bool success=false;
+    // Try to find nq1 from the left side and nq2 from the rght side
+    // and then the other way around and see where the particles are 
+    // closer to the ends of the list
+    while (!success){
+      success=check_quark_number(nq1,new_intermediate_particles[i1].pdgcode());
+      i1++;
+    }
+    success=false;
+    while (!success && end >= i2){
+      success=check_quark_number(nq2,new_intermediate_particles[end-i2].pdgcode());
+      i2++;
+    }
+    success=false;
+    while (!success){
+      success=check_quark_number(nq2,new_intermediate_particles[j1].pdgcode());
+      j1++;
+    }
+    success=false;
+    while (!success && end >= j2){
+      success=check_quark_number(nq1,new_intermediate_particles[end-j2].pdgcode());
+      j2++;
+    }
+    if(i1+i2<j1+j2){//does this brake symmetry because it prefers j?
+      assign_scaling_factor(nq1, new_intermediate_particles[i1],
+                                                      suppression_factor);
+      assign_scaling_factor(nq2, new_intermediate_particles[end-i2],
+                                                      suppression_factor);
+    }
+    else{
+      assign_scaling_factor(nq2, new_intermediate_particles[j1],
+                                                      suppression_factor);
+      assign_scaling_factor(nq1, new_intermediate_particles[end-j2],
+                                                      suppression_factor);
+    }
+
     for (ParticleData data : new_intermediate_particles) {
       log.debug("Particle momenta after sorting: ", data.momentum());
       /* The hadrons are not immediately formed, currently a formation time of
@@ -697,25 +798,6 @@ void ScatterAction::string_excitation_pythia() {
        * to a fraction corresponding to the valence quark content. Hadrons
        * containing a valence quark are determined by highest z-momentum. */
       log.debug("The formation time is: ", string_formation_time_, "fm/c.");
-      /* Additional suppression factor to mimic coherence taken as 0.7
-       * from UrQMD (CTParam(59) */
-      const double suppression_factor = 0.7;
-      if (incoming_particles_[0].is_baryon() ||
-          incoming_particles_[1].is_baryon()) {
-        if (data == 0) {
-          data.set_cross_section_scaling_factor(suppression_factor * 0.66);
-        } else if (data == 1) {
-          data.set_cross_section_scaling_factor(suppression_factor * 0.34);
-        } else {
-          data.set_cross_section_scaling_factor(suppression_factor * 0.0);
-        }
-      } else {
-        if (data == 0 || data == 1) {
-          data.set_cross_section_scaling_factor(suppression_factor * 0.50);
-        } else {
-          data.set_cross_section_scaling_factor(suppression_factor * 0.0);
-        }
-      }
       // Set formation time: actual time of collision + time to form the
       // particle
       data.set_formation_time(string_formation_time_ * gamma_cm() +

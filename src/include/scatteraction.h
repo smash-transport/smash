@@ -342,6 +342,14 @@ class ScatterAction : public Action {
   /** Check if the scattering is elastic. */
   bool is_elastic() const;
 
+  /** Check if hadron contains at least the given number of quarks */
+  bool check_quark_number(int nquarks,PdgCode pdg);
+
+  /** assign a cross section scaling factor according to number of valence
+   * quarks from the string contained in the fragment and the total number of 
+   * quarks in the fragment */
+  void assign_scaling_factor(int nquark, ParticleData data, double suppression_factor);
+
   /** Perform a 2->1 resonance-formation process. */
   void resonance_formation();
 
