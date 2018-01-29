@@ -416,11 +416,6 @@ int main(int argc, char *argv[]) {
     bf::ofstream(output_path / "config.yaml")
         << configuration.to_string() << '\n';
 
-    // take the seed setting only after the configuration was stored to file
-    seed = configuration.take({"General", "Randomseed"});
-    Random::set_seed(seed);
-    log.info() << "Random number seed: " << seed;
-
     log.trace(source_location, " create ParticleType and DecayModes");
     ParticleType::create_type_list(configuration.take({"particles"}));
     DecayModes::load_decaymodes(configuration.take({"decaymodes"}));

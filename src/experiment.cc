@@ -9,6 +9,8 @@
 
 #include "include/experiment.h"
 
+#include <cstdint>
+
 #include "include/actions.h"
 #include "include/boxmodus.h"
 #include "include/collidermodus.h"
@@ -734,6 +736,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     Configuration &&th_conf = config["Forced_Thermalization"];
     thermalizer_ = modus_.create_grandcan_thermalizer(th_conf);
   }
+
+  // Take the seed setting only after the configuration was stored to a file
+  // in smash.cc
+  seed_ = config.take({"General", "Randomseed"});
 }
 
 const std::string hline(80, '-');
@@ -744,6 +750,20 @@ const std::string hline(80, '-');
 template <typename Modus>
 void Experiment<Modus>::initialize_new_event() {
   const auto &log = logger<LogArea::Experiment>();
+
+  Random::set_seed(seed_);
+  log.info() << "Random number seed: " << seed_;
+  // Set seed for the next event. It has to be positive, so it can be entered
+  // in the config.
+  //
+  // We have to be careful about the minimal integer, whose absolute value
+  // cannot be represented.
+  int64_t r = Random::advance();
+  while (r == INT64_MIN) {
+    r = Random::advance();
+  }
+  seed_ = std::abs(r);
+
   particles_.reset();
 
   /* Sample particles according to the initial conditions */
