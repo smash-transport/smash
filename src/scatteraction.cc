@@ -719,6 +719,12 @@ void ScatterAction::string_excitation_pythia() {
         }
       }
     }
+    /* 
+     *Set each particle's cross section scaling factor to 0 first
+     */
+    for (ParticleData data : new_intermediate_particles){
+      data.set_cross_section_scaling_factor(0.0);
+    }
     /*
      * sort new_intermediate_particles according to z-velocity 
      */
