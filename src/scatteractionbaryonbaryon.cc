@@ -46,7 +46,8 @@ double ScatterActionBaryonBaryon::string_hard_cross_section() const {
   return NN_string_hard(s);
 }
 
-CollisionBranchList ScatterActionBaryonBaryon::two_to_two_cross_sections() {
+CollisionBranchList ScatterActionBaryonBaryon::two_to_two_cross_sections
+                          (std::bitset<6> included_2to2) {
   CollisionBranchList process_list;
   const ParticleType &type_a = incoming_particles_[0].type();
   const ParticleType &type_b = incoming_particles_[1].type();
@@ -59,14 +60,12 @@ CollisionBranchList ScatterActionBaryonBaryon::two_to_two_cross_sections() {
 
   if (type_a.is_nucleon() || type_b.is_nucleon()) {
     /* N R → N N, N̅ R → N̅ N̅ */
-    if (included_2to2_.count(IncludedReactions::All) > 0 ||
-        included_2to2_.count(IncludedReactions::NN_to_NR) > 0) {
+    if (included_2to2[IncludedReactions::NN_to_NR] == 1) {
       process_list = bar_bar_to_nuc_nuc(anti_particles);
     }
   } else if (type_a.is_Delta() || type_b.is_Delta()) {
     /* Δ R → N N, Δ̅ R → N̅ N̅ */
-    if (included_2to2_.count(IncludedReactions::All) > 0 ||
-        included_2to2_.count(IncludedReactions::NN_to_DR) > 0) {
+    if (included_2to2[IncludedReactions::NN_to_DR] == 1) {
       process_list = bar_bar_to_nuc_nuc(anti_particles);
     }
   }

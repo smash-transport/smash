@@ -243,29 +243,30 @@ class Configuration {
       return arr;
     }
 
-    operator std::set<IncludedReactions>() const {
+    operator std::bitset<6>() const {
       const std::vector<std::string> v = operator std::vector<std::string>();
-      std::set<IncludedReactions> s;
+      std::bitset<6> s;
       for (const auto &x : v) {
           if (x == "All") {
-            s.insert(IncludedReactions::All);
+            s.flip();
           } else if (x == "Elastic") {
-            s.insert(IncludedReactions::Elastic);
+            s.set(IncludedReactions::Elastic);
           } else if (x == "NN_to_NR") {
-            s.insert(IncludedReactions::NN_to_NR);
+            s.set(IncludedReactions::NN_to_NR);
           } else if (x == "NN_to_DR") {
-            s.insert(IncludedReactions::NN_to_DR);
+            s.set(IncludedReactions::NN_to_DR);
           } else if (x == "KN_to_KN") {
-            s.insert(IncludedReactions::KN_to_KN);
+            s.set(IncludedReactions::KN_to_KN);
           } else if (x == "KN_to_KDelta") {
-            s.insert(IncludedReactions::KN_to_KDelta);
+            s.set(IncludedReactions::KN_to_KDelta);
           } else if (x == "Strangeness_exchange") {
-            s.insert(IncludedReactions::Strangeness_exchange);
+            s.set(IncludedReactions::Strangeness_exchange);
           } else {
             throw IncorrectTypeInAssignment(
               "The value for key \"" + std::string(key_) +
-              "\" should be \"NN_to_NN\", \"NN_to_NR\""
-              ", \"KN_to_KDelta\" or \"strangeness_exchange\".");
+              "\" should be \"All\", \"Elastic\", \"NN_to_NR\", \"NN_to_DR\","
+              "\"KN_to_KN\", \"KN_to_KDelta\" or \"strangeness_exchange\","
+              " or any combination of these.");
           }
       }
       return s;

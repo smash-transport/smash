@@ -26,11 +26,9 @@ namespace smash {
 ScatterAction::ScatterAction(const ParticleData &in_part_a,
                              const ParticleData &in_part_b,
                              double time, bool isotropic,
-                             std::set<IncludedReactions> included_2to2,
                              double string_formation_time)
     : Action({in_part_a, in_part_b}, time),
       total_cross_section_(0.), isotropic_(isotropic),
-      included_2to2_(included_2to2),
       string_formation_time_(string_formation_time) {}
 
 void ScatterAction::add_collision(CollisionBranchPtr p) {
@@ -102,6 +100,7 @@ void ScatterAction::generate_final_state() {
 
 void ScatterAction::add_all_processes(double elastic_parameter,
                                       bool two_to_one,
+                                      std::bitset<6> included_2to2,
                                       double low_snn_cut,
                                       bool strings_switch,
                                       NNbarTreatment nnbar_treatment) {
@@ -167,8 +166,7 @@ void ScatterAction::add_all_processes(double elastic_parameter,
   const bool reject_by_nucleon_elastic_cutoff = both_are_nucleons
                          && t1.antiparticle_sign() == t2.antiparticle_sign()
                          && sqrt_s() < low_snn_cut;
-  bool incl_elastic = included_2to2_.count(IncludedReactions::All) > 0 ||
-                      included_2to2_.count(IncludedReactions::Elastic) > 0;
+  bool incl_elastic = included_2to2[IncludedReactions::Elastic];
   if (incl_elastic && !reject_by_nucleon_elastic_cutoff) {
       add_collision(elastic_cross_section(elastic_parameter));
   }
@@ -180,9 +178,9 @@ void ScatterAction::add_all_processes(double elastic_parameter,
        /* resonance formation (2->1) */
        add_collisions(resonance_cross_sections());
      }
-     if (!included_2to2_.empty()) {
+     if (included_2to2.any()) {
        /* 2->2 (inelastic) */
-       add_collisions(two_to_two_cross_sections());
+       add_collisions(two_to_two_cross_sections(included_2to2));
      }
   }
   /** NNbar annihilation thru NNbar → ρh₁(1170); combined with the decays

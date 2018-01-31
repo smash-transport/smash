@@ -83,7 +83,8 @@ static double Cugnon_bnp(double plab) {
   }
 }
 
-CollisionBranchList ScatterActionNucleonNucleon::two_to_two_cross_sections() {
+CollisionBranchList ScatterActionNucleonNucleon::two_to_two_cross_sections
+                               (std::bitset<6> included_2to2) {
   CollisionBranchList process_list, channel_list;
   const double sqrts = sqrt_s();
 
@@ -100,8 +101,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_cross_sections() {
           ? ParticleType::list_anti_Deltas()
           : ParticleType::list_Deltas();
   /* First: Find N N → N R channels. */
-  if (included_2to2_.count(IncludedReactions::NN_to_NR) > 0 ||
-      included_2to2_.count(IncludedReactions::All) > 0) {
+  if (included_2to2[IncludedReactions::NN_to_NR] == 1) {
     channel_list = find_xsection_from_type(
         ParticleType::list_baryon_resonances(), nuc_or_anti_nuc,
         [&sqrts](const ParticleType &type_res_1, const ParticleType&){
@@ -114,8 +114,7 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_cross_sections() {
   }
 
   /* Second: Find N N → Δ R channels. */
-  if (included_2to2_.count(IncludedReactions::NN_to_DR) > 0 ||
-      included_2to2_.count(IncludedReactions::All) > 0) {
+  if (included_2to2[IncludedReactions::NN_to_DR] == 1) {
     channel_list = find_xsection_from_type(
       ParticleType::list_baryon_resonances(), delta_or_anti_delta,
       [&sqrts](const ParticleType &type_res_1, const ParticleType &type_res_2){

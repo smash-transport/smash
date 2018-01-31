@@ -235,7 +235,7 @@ inline ParticlesPtr create_particles(
  */
 inline ExperimentParameters default_parameters(int testparticles = 1,
                                                double dt = 0.1) {
-  std::set<IncludedReactions> included_2to2 = {IncludedReactions::All};
+  std::bitset<6> included_2to2 = std::bitset<6>(std::string("111111"));
   return ExperimentParameters{
       {0., dt},       {0., 1.}, testparticles,
       1.0,                 4.0,      true,

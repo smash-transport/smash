@@ -241,7 +241,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   const double t_end = config.read({"General", "End_Time"});
   const double output_dt = config.take({"Output", "Output_Interval"}, t_end);
   const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
-  std::set<IncludedReactions> included_2to2 =
+  std::bitset<6> included_2to2 =
                          config.take({"Collision_Term", "Included_2to2"});
   const bool strings_switch = config.take({"Collision_Term", "Strings"}, true);
   const NNbarTreatment nnbar_treatment = config.take(
@@ -416,7 +416,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   if (parameters_.two_to_one) {
     action_finders_.emplace_back(make_unique<DecayActionsFinder>());
   }
-  if (parameters_.two_to_one || !parameters_.included_2to2.empty(),
+  if (parameters_.two_to_one || parameters_.included_2to2.any(),
       parameters_.strings_switch) {
     auto scat_finder = make_unique<ScatterActionsFinder>(
         config, parameters_, nucleon_has_interacted_, modus_.total_N_number(),

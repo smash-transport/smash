@@ -36,7 +36,8 @@ class ScatterActionBaryonBaryon : public ScatterAction {
     return CollisionBranchList();
   }
   /** Find all inelastic 2->2 processes for this reaction. */
-  CollisionBranchList two_to_two_cross_sections() override;
+  CollisionBranchList two_to_two_cross_sections
+             (std::bitset<6> included_2to2) override;
 
  private:
   /**

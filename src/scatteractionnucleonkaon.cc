@@ -116,7 +116,8 @@ void ScatterActionNucleonKaon::format_debug_output(std::ostream& out) const {
   ScatterAction::format_debug_output(out);
 }
 
-CollisionBranchList ScatterActionNucleonKaon::two_to_two_cross_sections() {
+CollisionBranchList ScatterActionNucleonKaon::two_to_two_cross_sections
+                              (std::bitset<6> included_2to2) {
   const ParticleType& a = incoming_particles_[0].type();
   const ParticleType& b = incoming_particles_[1].type();
   const ParticleType& type_nucleon = a.pdgcode().is_nucleon() ? a : b;
@@ -133,14 +134,11 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_cross_sections() {
   const auto sigma_kplusn = kplusn_inelastic_background(s);
 
   bool incl_KN_to_KN =
-            included_2to2_.count(IncludedReactions::All) > 0 ||
-            included_2to2_.count(IncludedReactions::KN_to_KN) > 0;
+            included_2to2[IncludedReactions::KN_to_KN] == 1;
   bool incl_KN_to_KDelta =
-            included_2to2_.count(IncludedReactions::All) > 0 ||
-            included_2to2_.count(IncludedReactions::KN_to_KDelta) > 0;
+            included_2to2[IncludedReactions::KN_to_KDelta] == 1;
   bool incl_Strangeness_exchange =
-            included_2to2_.count(IncludedReactions::All) > 0 ||
-            included_2to2_.count(IncludedReactions::Strangeness_exchange) > 0;
+            included_2to2[IncludedReactions::Strangeness_exchange] == 1;
 
   CollisionBranchList process_list;
   switch (pdg_kaon) {
@@ -149,7 +147,7 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_cross_sections() {
       // charge exchange.
       switch (pdg_nucleon) {
         case pdg::p: {
-            if (incl_Strangeness_exchange) {
+          if (incl_Strangeness_exchange) {
             const auto& type_pi_z = ParticleType::find(pdg::pi_z);
             const auto& type_pi_m = ParticleType::find(pdg::pi_m);
             const auto& type_pi_p = ParticleType::find(pdg::pi_p);

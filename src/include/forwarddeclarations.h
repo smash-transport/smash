@@ -177,14 +177,14 @@ enum class ThermodynamicQuantity : char {
 };
 
 /// The different groups of 2 to 2 reactions that one can include
-enum class IncludedReactions {
-  All,
-  Elastic,
-  NN_to_NR,
-  NN_to_DR,
-  KN_to_KN,
-  KN_to_KDelta,
-  Strangeness_exchange,
+enum IncludedReactions {
+  All=50,
+  Elastic=0,
+  NN_to_NR=1,
+  NN_to_DR=2,
+  KN_to_KN=3,
+  KN_to_KDelta=4,
+  Strangeness_exchange=5,
 };
 
 /**

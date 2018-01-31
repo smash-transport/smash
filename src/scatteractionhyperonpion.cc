@@ -20,10 +20,10 @@ void ScatterActionHyperonPion::format_debug_output(std::ostream& out) const {
   ScatterAction::format_debug_output(out);
 }
 
-CollisionBranchList ScatterActionHyperonPion::two_to_two_cross_sections() {
+CollisionBranchList ScatterActionHyperonPion::two_to_two_cross_sections
+                          (std::bitset<6> included_2to2) {
   CollisionBranchList process_list;
-  if (included_2to2_.count(IncludedReactions::Strangeness_exchange) == 0 &&
-      included_2to2_.count(IncludedReactions::All) == 0) {
+  if (included_2to2[IncludedReactions::Strangeness_exchange] == 0) {
     return process_list;
   }
 
