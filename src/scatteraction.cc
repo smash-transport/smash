@@ -690,6 +690,7 @@ void ScatterAction::string_excitation_pythia() {
         [&](ParticleData i, ParticleData j) {
           return std::abs(i.momentum().x3()) > std::abs(j.momentum().x3());
         });
+    FourVector u_cm = FourVector(gamma_cm(),gamma_cm()*beta_cm());
     for (ParticleData data : new_intermediate_particles) {
       log.debug("Particle momenta after sorting: ", data.momentum());
       /* The hadrons are not immediately formed, currently a formation time of
@@ -716,9 +717,11 @@ void ScatterAction::string_excitation_pythia() {
           data.set_cross_section_scaling_factor(suppression_factor * 0.0);
         }
       }
+      ThreeVector v_calc = (data.momentum() / data.effective_mass() + u_cm).velocity();
       // Set formation time: actual time of collision + time to form the
       // particle
-      data.set_formation_time(string_formation_time_ * gamma_cm() +
+      double gamma_factor = 1.0 / std::sqrt(1-(v_calc).sqr());
+      data.set_formation_time(string_formation_time_ * gamma_factor +
                               time_of_execution_);
       outgoing_particles_.push_back(data);
     }
