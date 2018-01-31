@@ -610,6 +610,23 @@ void ScatterAction::assign_scaling_factor(int nquark, ParticleData data,
                                               nquark / (3.0 * nbaryon));
   }
 }
+/* This function will change i1 and i2 to be the index of leading 
+ * hadrons in list */
+void ScatterAction::find_leading(int &i1, int &i2, int nq1, int nq2, 
+                                                    ParticleList &list){
+  int end = list.size()-1;
+  bool success = false;
+  while (!success && i1 <= end){
+    success = check_quark_number(nq1,list[i1].pdgcode());
+    i1++;
+  }
+  i2 = end;
+  success = false;
+  while (!success && i2>0){
+    success= check_quark_number(nq2,list[i2].pdgcode());
+    i2--;
+  }
+}
 
 /* This function will generate outgoing particles in CM frame
  * from a hard process. */
@@ -760,40 +777,23 @@ void ScatterAction::string_excitation_pythia() {
     default:
       throw std::runtime_error("string is neither mesonic nor baryonic");
     }
-    int i1=0,i2=0,j1=0,j2=0, end = new_intermediate_particles.size()-1;
-    bool success=false;
+    int i1=0,i2=0,j1=0,j2=0;
     // Try to find nq1 from the left side and nq2 from the rght side
     // and then the other way around and see where the particles are 
     // closer to the ends of the list
-    while (!success){
-      success=check_quark_number(nq1,new_intermediate_particles[i1].pdgcode());
-      i1++;
-    }
-    success=false;
-    while (!success && end >= i2){
-      success=check_quark_number(nq2,new_intermediate_particles[end-i2].pdgcode());
-      i2++;
-    }
-    success=false;
-    while (!success){
-      success=check_quark_number(nq2,new_intermediate_particles[j1].pdgcode());
-      j1++;
-    }
-    success=false;
-    while (!success && end >= j2){
-      success=check_quark_number(nq1,new_intermediate_particles[end-j2].pdgcode());
-      j2++;
-    }
-    if(i1+i2<j1+j2){//does this brake symmetry because it prefers j?
+    find_leading(i1,i2,nq1,nq2,new_intermediate_particles);
+    find_leading(j1,j2,nq2,nq1,new_intermediate_particles);
+
+    if(i2-i1>j2-j1){//does this brake symmetry because it prefers j?
       assign_scaling_factor(nq1, new_intermediate_particles[i1],
                                                       suppression_factor);
-      assign_scaling_factor(nq2, new_intermediate_particles[end-i2],
+      assign_scaling_factor(nq2, new_intermediate_particles[i2],
                                                       suppression_factor);
     }
     else{
       assign_scaling_factor(nq2, new_intermediate_particles[j1],
                                                       suppression_factor);
-      assign_scaling_factor(nq1, new_intermediate_particles[end-j2],
+      assign_scaling_factor(nq1, new_intermediate_particles[j2],
                                                       suppression_factor);
     }
 

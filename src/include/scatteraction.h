@@ -342,6 +342,9 @@ class ScatterAction : public Action {
   /** Check if the scattering is elastic. */
   bool is_elastic() const;
 
+  /** find the leading hadrons with given quarknumbers at string ends */
+  void find_leading(int &i1, int &i2, int nq1, int nq2, ParticleList &list);
+
   /** Check if hadron contains at least the given number of quarks */
   bool check_quark_number(int nquarks,PdgCode pdg);
 
