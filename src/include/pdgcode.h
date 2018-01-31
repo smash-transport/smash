@@ -146,11 +146,12 @@ class PdgCode {
   /** Checks the integer for invalid hex digits.
    *
    * Usually all digits are at least <= 9. The n_q digits are even <= 6
-   * (because there are only six quarks).
+   * (because there are only six quarks). The only exception is n_J, where
+   * we allow f = 15, which is the largest hexadecimal digit.
    *
    * If one of the hex digits is not also a valid decimal digit,
-   * something went wrong - maybe some user of this class forgot to
-   * prefix the input with '0x' and thus passed 221 instead of 0x221.
+   * something possibly went wrong - maybe some user of this class forgot
+   * to prefix the input with '0x' and thus passed 221 instead of 0x221.
    *
    * \return a bitmask indicating the offending digits. In the above
    * example, 221 = 0xd3, the second-to-last-digit is the offending one,
@@ -177,7 +178,7 @@ class PdgCode {
     if (digits_.n_q3_ > 6) {
       fail |= 1 << 1;
     }
-    if (digits_.n_J_ > 9) {
+    if (digits_.n_J_ > 15) {
       fail |= 1;
     }
     return fail;
@@ -221,20 +222,18 @@ class PdgCode {
   /** Returns a signed integer with the PDG code in hexadecimal. */
   inline std::int32_t code() const { return antiparticle_sign() * ucode(); }
 
-  /// returns a C++ string from the PDG Code.
+  /// Represent the PDG Code as a decimal string.
   inline std::string string() const {
     std::stringstream ss;
-    if (digits_.antiparticle_) {
-      ss << "-";
-    }
-    ss << std::hex << ucode();
+    ss << get_decimal();
     return ss.str();
   }
 
   /// Construct the antiparticle to a given PDG code.
   PdgCode get_antiparticle() const {
-    // TODO(mkretz): more efficient implementation
-    return PdgCode(-code());
+    PdgCode result = *this;
+    result.digits_.antiparticle_ = !digits_.antiparticle_;
+    return result;
   }
 
   /// Construct PDG code from decimal number
@@ -295,31 +294,28 @@ class PdgCode {
   }
 
   /// Is this a hyperon (Lambda, Sigma, Xi, Omega)?
-  inline bool is_hyperon() const {
-    const auto abs_code = std::abs(code());
-    switch (abs_code) {
-      case pdg::Lambda:
-      case pdg::Sigma_p:
-      case pdg::Sigma_z:
-      case pdg::Sigma_m:
-      case pdg::Xi_z:
-      case pdg::Xi_m:
-      case pdg::Omega_m:
-        return true;
-      default:
-        return false;
-    }
+  inline bool is_hyperon() const { return is_hadron() && digits_.n_q1_ == 3; }
+
+  /// Is this a Omega baryon?
+  inline bool is_Omega() const {
+    return is_hyperon() && digits_.n_q2_ == 3 && digits_.n_q3_ == 3;
   }
-  /// Is this a Xi(1321)?
-  inline bool is_xi1321() const {
-    const auto abs_code = std::abs(code());
-    return (abs_code == pdg::Xi_z) || (abs_code == pdg::Xi_m);
+
+  /// Is this a Xi baryon?
+  inline bool is_Xi() const {
+    return is_hyperon() && digits_.n_q2_ == 3 && digits_.n_q3_ != 3;
   }
-  /// Is this a Omega(1672)?
-  inline bool is_Omega1672() const {
-    const auto abs_code = std::abs(code());
-    return (abs_code == pdg::Omega_m);
+
+  /// Is this a Lambda baryon?
+  inline bool is_Lambda() const {
+    return is_hyperon() && digits_.n_q2_ == 1 && digits_.n_q3_ == 2;
   }
+
+  /// Is this a Sigma baryon?
+  inline bool is_Sigma() const {
+    return is_hyperon() && digits_.n_q2_ != 3 && !is_Lambda();
+  }
+
   /// Is this a kaon (K+, K-, K0, Kbar0)?
   inline bool is_kaon() const {
     const auto abs_code = std::abs(code());
@@ -521,16 +517,30 @@ class PdgCode {
    */
   static PdgCode invalid() { return PdgCode(0x0); }
 
-  /** returns an integer with decimal representation of the code.
+  /** Returns an integer with decimal representation of the code.
    *
-   * This is necessary for ROOT output.
+   * If the spin is too large for the last digit, an additional digit at the
+   * beginning will be used, so that the sum of the first and the last digit is
+   * the spin.
+   *
+   * This is used for binary and ROOT output.
    *
    */
   int get_decimal() const {
+    int n_J_1 = 0;
+    int n_J_2 = digits_.n_J_;
+    if (n_J_2 > 9) {
+      n_J_1 = n_J_2 - 9;
+      n_J_2 = 9;
+      if (n_J_2 > 9) {
+        throw InvalidPdgCode("n_J is too large\n");
+      }
+    }
     return antiparticle_sign() *
-           (digits_.n_J_ + digits_.n_q3_ * 10 + digits_.n_q2_ * 100 +
+           (n_J_2 + digits_.n_q3_ * 10 + digits_.n_q2_ * 100 +
             digits_.n_q1_ * 1000 + digits_.n_L_ * 10000 +
-            digits_.n_R_ * 100000 + digits_.n_ * 1000000);
+            digits_.n_R_ * 100000 + digits_.n_ * 1000000 +
+            n_J_1 * 10000000);
   }
 
   /// Remove all excitation, except spin. Sign and quark content remains.
@@ -621,29 +631,29 @@ class PdgCode {
   /** Returns an unsigned integer with the PDG code in hexadecimal
    *  (disregarding the antiparticle flag). */
   inline std::uint32_t ucode() const { return (dump_ & 0x0fffffff); }
-  /** extract digits from a character. */
+  /** extract digits from a hexadecimal character. */
   inline std::uint32_t get_digit_from_char(const char inp) const {
-    // atoi's behaviour for invalid input is undefined. I don't like
-    // that.
-
-    // this checks if the first four digits are 0011 (as they should be
-    // for ASCII digits).
-    if ((inp & 0xf0) ^ 0x30) {
-      throw InvalidPdgCode("PdgCode: Invalid character " +
-                           std::string(&inp, 1) + " found.\n");
+    // decimal digit
+    if (48 <= inp && inp <= 57) {
+      return inp - 48;
     }
-    // the last four digits are the number; they should not be > 9
-    // (i.e., one of [:;<=>?])
-    if ((inp & 0x0f) > 9) {
-      throw InvalidPdgCode("PdgCode: Invalid digit " + std::string(&inp, 1) +
-                           " found.\n");
+    // hexdecimal digit, uppercase
+    if (65 <= inp && inp <= 70) {
+      return inp - 65 + 10;
     }
-    // now that we've checked that the first bits are correct and the
-    // last bits are a number, we can return the last bits.
-    return (inp & 0x0f);
+    // hexdecimal digit, lowercase
+    if (97 <= inp && inp <= 102) {
+      return inp - 97 + 10;
+    }
+    throw InvalidPdgCode("PdgCode: Invalid character " +
+                         std::string(&inp, 1) + " found.\n");
   }
 
-  /// takes a string and sets the fields.
+  /// Set the PDG code from the given string.
+  ///
+  /// This supports hexdecimal digits. If the last digit is not enough to
+  /// represent the spin, a digit can be added at the beginning which will be
+  /// added to the total spin.
   inline void set_from_string(const std::string& codestring) {
     dump_ = 0;
     // implicit with the above: digits_.antiparticle_ = false;
@@ -665,12 +675,16 @@ class PdgCode {
     }
     // save if the first character was a sign:
     unsigned int sign = c;
-    // codestring shouldn't be longer than 7 + sign.
-    if (length > 7 + sign) {
+    // codestring shouldn't be longer than 8 + sign.
+    if (length > 8 + sign) {
       throw InvalidPdgCode("String \"" + codestring +
                            "\" too long for PDG Code\n");
     }
     // please note that in what follows, we actually need c++, not ++c.
+    // first digit is used for n_J if the last digit is not enough.
+    if (length > 7 + sign) {
+      digits_.n_J_ += get_digit_from_char(codestring[c++]);
+    }
     // codestring has 7 digits? 7th from last goes in n_.
     if (length > 6 + sign) {
       digits_.n_ = get_digit_from_char(codestring[c++]);
@@ -706,7 +720,7 @@ class PdgCode {
     }
     // last digit is the spin degeneracy.
     if (length > sign) {
-      digits_.n_J_ = get_digit_from_char(codestring[c++]);
+      digits_.n_J_ += get_digit_from_char(codestring[c++]);
     } else {
       throw InvalidPdgCode(
           "String \"" + codestring +
