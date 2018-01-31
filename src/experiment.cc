@@ -898,14 +898,9 @@ bool Experiment<Modus>::perform_action(
     // Now add the actual photon reaction channel. here we also compute the
     // total cross section
     photon_act.add_single_channel();
-    for (int i = 0; i < n_fractional_photons_; i++) {
-      photon_act.generate_final_state();
-      for (const auto &output : outputs_) {
-        if (output->is_photon_output()) {
-          output->at_interaction(photon_act, rho);
-        }
-      }
-    }
+
+    photon_act.perform_photons(outputs_);
+
   }
   log.debug(~einhard::Green(), "✔ ", action);
   return true;
