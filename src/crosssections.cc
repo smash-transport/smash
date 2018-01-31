@@ -36,26 +36,32 @@ CollisionBranchPtr cross_sections::elastic(double elast_par) {
     elastic_xs = elast_par;
   } else {
     // use parametrization
-    const auto &pdg_a = scattering_particles_[0].pdgcode();
-    const auto &pdg_b = scattering_particles_[1].pdgcode();
-    if ((pdg_a.is_nucleon() && pdg_b.is_pion()) ||
-               (pdg_b.is_nucleon() && pdg_a.is_pion())) {
-      // Elastic Nucleon Pion Scattering
-      elastic_xs = npi_el();
-    } else if ((pdg_a.is_nucleon() && pdg_b.is_kaon()) ||
-             (pdg_b.is_nucleon() && pdg_a.is_kaon())) {
-      // Elastic Nucleon Kaon Scattering
-      elastic_xs = nk_el();
-    } else if (pdg_a.is_nucleon() && pdg_b.is_nucleon() &&
-               pdg_a.antiparticle_sign() == pdg_b.antiparticle_sign()) {
-      // Elastic Nucleon Nucleon Scattering
-      elastic_xs = nn_el();
-    }
+    elastic_xs = elastic_parametrization();
   }
   return make_unique<CollisionBranch>(scattering_particles_[0].type(),
                                       scattering_particles_[1].type(),
                                       elastic_xs,
                                       ProcessType::Elastic);
+}
+
+double cross_sections::elastic_parametrization() {
+  const auto &pdg_a = scattering_particles_[0].pdgcode();
+  const auto &pdg_b = scattering_particles_[1].pdgcode();
+  double elastic_xs = 0.0;
+  if ((pdg_a.is_nucleon() && pdg_b.is_pion()) ||
+             (pdg_b.is_nucleon() && pdg_a.is_pion())) {
+    // Elastic Nucleon Pion Scattering
+    elastic_xs = npi_el();
+  } else if ((pdg_a.is_nucleon() && pdg_b.is_kaon()) ||
+           (pdg_b.is_nucleon() && pdg_a.is_kaon())) {
+    // Elastic Nucleon Kaon Scattering
+    elastic_xs = nk_el();
+  } else if (pdg_a.is_nucleon() && pdg_b.is_nucleon() &&
+             pdg_a.antiparticle_sign() == pdg_b.antiparticle_sign()) {
+    // Elastic Nucleon Nucleon Scattering
+    elastic_xs = nn_el();
+  }
+  return elastic_xs;
 }
 
 double cross_sections::nn_el() {
@@ -1142,8 +1148,6 @@ CollisionBranchList cross_sections::ypi_xx() {
   return process_list;
 }
 
-
-
 double cross_sections::high_energy() const {
   const PdgCode &pdg_a = scattering_particles_[0].type().pdgcode();
   const PdgCode &pdg_b = scattering_particles_[1].type().pdgcode();
@@ -1176,6 +1180,150 @@ double cross_sections::high_energy() const {
   } else {
     return 0;
   }
+}
+
+
+CollisionBranchList cross_sections::string_excitation_cross_sections(StringProcess* string_process) {
+  // const auto &log = logger<LogArea::ScatterAction>();
+  /* Calculate string-excitation cross section:
+   * Parametrized total minus all other present channels. */
+  double sig_string_all =
+      std::max(0., high_energy() - elastic_parametrization());
+
+  /* get PDG id for evaluation of the parametrized cross sections
+   * for diffractive processes.
+   * (anti-)proton is used for (anti-)baryons and
+   * pion is used for mesons.
+   * This must be rescaled according to additive quark model
+   * in the case of exotic hadrons. */
+  std::array<int, 2> pdgid;
+  for (int i = 0; i < 2; i++) {
+    PdgCode pdg = scattering_particles_[i].type().pdgcode();
+    pdg.deexcite();
+    if (pdg.baryon_number() == 1) {
+      pdgid[i] = 2212;
+    } else if (pdg.baryon_number() == -1) {
+      pdgid[i] = -2212;
+    } else {
+      pdgid[i] = 211;
+    }
+  }
+
+  CollisionBranchList channel_list;
+  if (sig_string_all > 0.) {
+    /* Total parametrized cross-section (I) and pythia-produced total
+     * cross-section (II) do not necessarily coincide. If I > II then
+     * non-diffractive cross-section is reinforced to get I == II.
+     * If I < II then partial cross-sections are drained one-by-one
+     * to reduce II until I == II:
+     * first non-diffractive, then double-diffractive, then
+     * single-diffractive AB->AX and AB->XB in equal proportion.
+     * The way it is done here is not unique. I (ryu) think that at high energy
+     * collision this is not an issue, but at sqrt_s < 10 GeV it may
+     * matter. */
+    if (!string_process) {
+      throw std::runtime_error("string_process should be initialized.");
+    }
+    std::array<double, 3> xs = string_process->cross_sections_diffractive(
+        pdgid[0], pdgid[1], sqrt_s_);
+    double single_diffr_AX = xs[0], single_diffr_XB = xs[1],
+           double_diffr = xs[2];
+    double single_diffr = single_diffr_AX + single_diffr_XB;
+    double diffractive = single_diffr + double_diffr;
+    const double nondiffractive_all =
+      std::max(0., sig_string_all - diffractive);
+    diffractive = sig_string_all - nondiffractive_all;
+    double_diffr = std::max(0., diffractive - single_diffr);
+    const double a = (diffractive - double_diffr) / single_diffr;
+    single_diffr_AX *= a;
+    single_diffr_XB *= a;
+    assert(std::abs(single_diffr_AX + single_diffr_XB + double_diffr +
+                    nondiffractive_all - sig_string_all) < 1.e-6);
+
+    /* Hard string process is added by hard cross section
+     * in conjunction with multipartion interaction picture
+     * \iref{Sjostrand:1987su}. */
+    const double hard_xsec = string_hard_cross_section();
+    const double nondiffractive_soft = nondiffractive_all *
+                 std::exp(- hard_xsec / nondiffractive_all);
+    const double nondiffractive_hard = nondiffractive_all -
+                 nondiffractive_soft;
+    // log.debug("String cross sections [mb] are");
+    // log.debug("Single-diffractive AB->AX: ", single_diffr_AX);
+    // log.debug("Single-diffractive AB->XB: ", single_diffr_XB);
+    // log.debug("Double-diffractive AB->XX: ", double_diffr);
+    // log.debug("Soft non-diffractive: ", nondiffractive_soft);
+    // log.debug("Hard non-diffractive: ", nondiffractive_hard);
+    /* cross section of soft string excitation */
+    const double sig_string_soft = sig_string_all - nondiffractive_hard;
+
+    /* fill cross section arrays */
+    std::array<double, 5> string_sub_cross_sections;
+    std::array<double, 6> string_sub_cross_sections_sum;
+    string_sub_cross_sections[0] = single_diffr_AX;
+    string_sub_cross_sections[1] = single_diffr_XB;
+    string_sub_cross_sections[2] = double_diffr;
+    string_sub_cross_sections[3] = nondiffractive_soft;
+    string_sub_cross_sections[4] = nondiffractive_hard;
+    string_sub_cross_sections_sum[0] = 0.;
+    for (int i = 0; i < 5; i++) {
+      string_sub_cross_sections_sum[i + 1] =
+          string_sub_cross_sections_sum[i] + string_sub_cross_sections[i];
+    }
+
+    /* soft subprocess selection */
+    int iproc = -1;
+    double r_xsec = string_sub_cross_sections_sum[4] * Random::uniform(0., 1.);
+    for (int i = 0; i < 4; i++) {
+      if ((r_xsec >= string_sub_cross_sections_sum[i]) &&
+          (r_xsec < string_sub_cross_sections_sum[i + 1])) {
+        iproc = i;
+        break;
+      }
+    }
+    if (iproc == -1) {
+      throw std::runtime_error("soft string subprocess is not specified.");
+    }
+
+    string_process->set_iproc(iproc);
+
+    /* fill the list of process channels */
+    if (sig_string_soft > 0.) {
+      channel_list.push_back(make_unique<CollisionBranch>(
+          sig_string_soft, ProcessType::StringSoft));
+    }
+    if (nondiffractive_hard > 0.) {
+      channel_list.push_back(make_unique<CollisionBranch>(
+          nondiffractive_hard, ProcessType::StringHard));
+    }
+  }
+  return channel_list;
+}
+
+double cross_sections::string_hard_cross_section() const {
+  double cross_sec = 0.;
+  const ParticleData &data_a = scattering_particles_[0];
+  const ParticleData &data_b = scattering_particles_[1];
+  if (data_a.is_baryon() && data_b.is_baryon()) {
+    /**
+     * Currently nucleon-nucleon cross section is used for all baryon-baryon casees.
+     * This will be changed later by applying additive quark model.
+     */
+    cross_sec = NN_string_hard(sqrt_s_*sqrt_s_);
+  } else if (data_a.is_baryon() || data_b.is_baryon()) {
+    /**
+     * Currently nucleon-pion cross section is used for all baryon-meson cases.
+     * This will be changed later by applying additive quark model.
+     */
+    cross_sec = Npi_string_hard(sqrt_s_*sqrt_s_);
+  } else {
+    /**
+     * Currently pion-pion cross section is used for all meson-meson cases.
+     * This will be changed later by applying additive quark model.
+     */
+    cross_sec = pipi_string_hard(sqrt_s_*sqrt_s_);
+  }
+  return cross_sec;
 }
 
 
@@ -1223,7 +1371,6 @@ CollisionBranchList cross_sections::NNbar_creation() {
       ProcessType::TwoToTwo));
   return channel_list;
 }
-
 
 
 

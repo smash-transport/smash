@@ -77,53 +77,11 @@ class ScatterAction : public Action {
    */
   virtual double total_cross_section() const { return 0.; }
 
-  /**
-   * Determine the (parametrized) total cross section at high energies for this
-   * collision.
-   * This is currently only used for calculating the string excitation cross
-   * section.
-   */
-  virtual double high_energy_cross_section() const { return 0.; }
-
-  /**
-   * Determine the (parametrized) hard non-diffractive string cross section
-   * for this collision.
-   */
-  virtual double string_hard_cross_section() const { return 0.; }
-
-  // /**
-  //  * Determine the (parametrized) elastic cross section for this collision.
-  //  * It is zero by default, but can be overridden in the child classes.
-  //  */
-  // virtual double elastic_parametrization() { return 0.; }
 
   /// Returns list of possible collision channels
   const CollisionBranchList& collision_channels() {
     return collision_channels_;
-  }  
-
-  /**
-   * Determine the cross section for string excitations, which is given by the
-   * difference between the parametrized total cross section and all the
-   * explicitly implemented channels at low energy (elastic, resonance
-   * excitation, etc). This method has to be called after all other processes
-   * have been added to the Action object.
-   *
-   * create a cross section for PYTHIA event generation
-   */
-  virtual CollisionBranchPtr string_excitation_cross_section();
-
-  /**
-   * Determine the cross section for string excitations, which is given by the
-   * difference between the parametrized total cross section and all the
-   * explicitly implemented channels at low energy (elastic, resonance
-   * excitation, etc). This method has to be called after all other processes
-   * have been added to the Action object.
-   *
-   * create a list of subprocesses (single-diffractive,
-   * double-diffractive and non-diffractive) and their cross sections.
-   */
-  virtual CollisionBranchList string_excitation_cross_sections();
+  }
 
   /**
    * \ingroup exception
@@ -197,19 +155,6 @@ class ScatterAction : public Action {
 
   /** Perform a 2->1 resonance-formation process. */
   void resonance_formation();
-
-  /**
-   * summation of the cross sections
-   * string_sub_cross_sections_sum_[i+1] is
-   * sum of string_sub_cross_sections over 0 to i
-   * This is added for determination of subprocess.
-   * string_sub_cross_sections[0] : single diffractive to A+X
-   * string_sub_cross_sections[1] : single diffractive to X+B
-   * string_sub_cross_sections[2] : double diffractive
-   * string_sub_cross_sections[3] : soft non-diffractive
-   * string_sub_cross_sections[4] : hard non-diffractive
-   */
-  std::array<double, 6> string_sub_cross_sections_sum_;
 
   /** Pointer to interface class for strings */
   StringProcess* string_process_ = nullptr;

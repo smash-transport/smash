@@ -23,12 +23,6 @@ class ScatterActionBaryonBaryon : public ScatterAction {
  public:
   /* Inherit constructor. */
   using ScatterAction::ScatterAction;
-  /**
-   * Determine the (parametrized) hard non-diffractive string cross section
-   * for a baryon-baryon collision.
-   */
-  double string_hard_cross_section() const override;
-
 
  protected:
 

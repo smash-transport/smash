@@ -180,7 +180,7 @@ void ScatterAction::add_all_processes(double elastic_parameter, bool two_to_one,
   }
   if (is_pythia) {
     /* string excitation */
-    add_collisions(string_excitation_cross_sections());
+    add_collisions(xs.string_excitation_cross_sections(string_process_));
   } else {
     if (two_to_one) {
       /* resonance formation (2->1) */
@@ -267,119 +267,6 @@ double ScatterAction::transverse_distance_sqr() const {
    * d^2_{coll} = (x_a - x_b)^2 - ((x_a - x_b) . (p_a - p_b))^2 / (p_a - p_b)^2
    */
   return dr2 - dpdr * dpdr / dp2;
-}
-
-
-CollisionBranchPtr ScatterAction::string_excitation_cross_section() {
-  const auto &log = logger<LogArea::ScatterAction>();
-  /* Calculate string-excitation cross section:
-   * Parametrized total minus all other present channels. */
-  double sig_string =
-      // TODO std::max(0., high_energy_cross_section() - elastic_parametrization());
-      std::max(0., high_energy_cross_section() - 0.);
-  log.debug("String cross section is: ", sig_string);
-  return make_unique<CollisionBranch>(sig_string, ProcessType::StringHard);
-}
-
-CollisionBranchList ScatterAction::string_excitation_cross_sections() {
-  const auto &log = logger<LogArea::ScatterAction>();
-  /* Calculate string-excitation cross section:
-   * Parametrized total minus all other present channels. */
-  double sig_string_all =
-      // TODO std::max(0., high_energy_cross_section() - elastic_parametrization());
-      std::max(0., high_energy_cross_section() - 0.);
-
-  /* get PDG id for evaluation of the parametrized cross sections
-   * for diffractive processes.
-   * (anti-)proton is used for (anti-)baryons and
-   * pion is used for mesons.
-   * This must be rescaled according to additive quark model
-   * in the case of exotic hadrons. */
-  std::array<int, 2> pdgid;
-  for (int i = 0; i < 2; i++) {
-    PdgCode pdg = incoming_particles_[i].type().pdgcode();
-    pdg.deexcite();
-    if (pdg.baryon_number() == 1) {
-      pdgid[i] = 2212;
-    } else if (pdg.baryon_number() == -1) {
-      pdgid[i] = -2212;
-    } else {
-      pdgid[i] = 211;
-    }
-  }
-
-  CollisionBranchList channel_list;
-  if (sig_string_all > 0.) {
-    /* Total parametrized cross-section (I) and pythia-produced total
-     * cross-section (II) do not necessarily coincide. If I > II then
-     * non-diffractive cross-section is reinforced to get I == II.
-     * If I < II then partial cross-sections are drained one-by-one
-     * to reduce II until I == II:
-     * first non-diffractive, then double-diffractive, then
-     * single-diffractive AB->AX and AB->XB in equal proportion.
-     * The way it is done here is not unique. I (ryu) think that at high energy
-     * collision this is not an issue, but at sqrt_s < 10 GeV it may
-     * matter. */
-    if (!string_process_) {
-      throw std::runtime_error("string_process_ should be initialized.");
-    }
-    std::array<double, 3> xs = string_process_->cross_sections_diffractive(
-        pdgid[0], pdgid[1], sqrt_s());
-    double single_diffr_AX = xs[0], single_diffr_XB = xs[1],
-           double_diffr = xs[2];
-    double single_diffr = single_diffr_AX + single_diffr_XB;
-    double diffractive = single_diffr + double_diffr;
-    const double nondiffractive_all =
-      std::max(0., sig_string_all - diffractive);
-    diffractive = sig_string_all - nondiffractive_all;
-    double_diffr = std::max(0., diffractive - single_diffr);
-    const double a = (diffractive - double_diffr) / single_diffr;
-    single_diffr_AX *= a;
-    single_diffr_XB *= a;
-    assert(std::abs(single_diffr_AX + single_diffr_XB + double_diffr +
-                    nondiffractive_all - sig_string_all) < 1.e-6);
-
-    /* Hard string process is added by hard cross section
-     * in conjunction with multipartion interaction picture
-     * \iref{Sjostrand:1987su}. */
-    const double hard_xsec = string_hard_cross_section();
-    const double nondiffractive_soft = nondiffractive_all *
-                 std::exp(- hard_xsec / nondiffractive_all);
-    const double nondiffractive_hard = nondiffractive_all -
-                 nondiffractive_soft;
-    log.debug("String cross sections [mb] are");
-    log.debug("Single-diffractive AB->AX: ", single_diffr_AX);
-    log.debug("Single-diffractive AB->XB: ", single_diffr_XB);
-    log.debug("Double-diffractive AB->XX: ", double_diffr);
-    log.debug("Soft non-diffractive: ", nondiffractive_soft);
-    log.debug("Hard non-diffractive: ", nondiffractive_hard);
-    /* cross section of soft string excitation */
-    const double sig_string_soft = sig_string_all - nondiffractive_hard;
-
-    /* fill cross section arrays */
-    std::array<double, 5> string_sub_cross_sections;
-    string_sub_cross_sections[0] = single_diffr_AX;
-    string_sub_cross_sections[1] = single_diffr_XB;
-    string_sub_cross_sections[2] = double_diffr;
-    string_sub_cross_sections[3] = nondiffractive_soft;
-    string_sub_cross_sections[4] = nondiffractive_hard;
-    string_sub_cross_sections_sum_[0] = 0.;
-    for (int i = 0; i < 5; i++) {
-      string_sub_cross_sections_sum_[i + 1] =
-          string_sub_cross_sections_sum_[i] + string_sub_cross_sections[i];
-    }
-
-    /* fill the list of process channels */
-    if (sig_string_soft > 0.) {
-      channel_list.push_back(make_unique<CollisionBranch>(
-          sig_string_soft, ProcessType::StringSoft));
-    }
-    if (nondiffractive_hard > 0.) {
-      channel_list.push_back(make_unique<CollisionBranch>(
-          nondiffractive_hard, ProcessType::StringHard));
-    }
-  }
-  return channel_list;
 }
 
 
@@ -647,21 +534,7 @@ void ScatterAction::string_excitation_soft() {
     string_process_->init(incoming_particles_, time_of_execution_, gamma_cm());
     /* implement collision */
     bool success = false;
-
-    /* subprocess selection */
-    int iproc = -1;
-    double r_xsec = string_sub_cross_sections_sum_[4] * Random::uniform(0., 1.);
-    for (int i = 0; i < 4; i++) {
-      if ((r_xsec >= string_sub_cross_sections_sum_[i]) &&
-          (r_xsec < string_sub_cross_sections_sum_[i + 1])) {
-        iproc = i;
-        break;
-      }
-    }
-    if (iproc == -1) {
-      throw std::runtime_error("soft string subprocess is not specified.");
-    }
-
+    const int iproc = string_process_->get_iproc();
     int ntry = 0;
     const int ntry_max = 10000;
     while (!success && ntry < ntry_max) {

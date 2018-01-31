@@ -13,6 +13,7 @@
 #include "forwarddeclarations.h"
 #include "isoparticletype.h"
 #include "particles.h"
+#include "processstring.h"
 
 namespace smash {
 
@@ -33,6 +34,11 @@ class cross_sections {
    * final-state IDs.
    */
   CollisionBranchPtr elastic(double elast_par);
+
+  /**
+  * Choose between parametrization for elastic cross sections.
+  */
+  double elastic_parametrization();
 
   /**
    * Determine the (parametrized) elastic cross section for a
@@ -121,6 +127,24 @@ class cross_sections {
   double high_energy() const;
 
   /**
+   * Determine the cross section for string excitations, which is given by the
+   * difference between the parametrized total cross section and all the
+   * explicitly implemented channels at low energy (elastic, resonance
+   * excitation, etc). This method has to be called after all other processes
+   * have been added to the Action object.
+   *
+   * create a list of subprocesses (single-diffractive,
+   * double-diffractive and non-diffractive) and their cross sections.
+   */
+  CollisionBranchList string_excitation_cross_sections(StringProcess* string_process);
+
+  /**
+   * Determine the (parametrized) hard non-diffractive string cross section
+   * for this collision.
+   */
+  double string_hard_cross_section() const;
+
+  /**
   * Calculate cross sections for resonance absorption
   * (i.e. NR->NN and ΔR->NN).
   *
@@ -145,7 +169,7 @@ class cross_sections {
    *
    * \return Matrix amplitude squared \f$ |\mathcal{M}(\sqrt{s})|^2/16\pi \f$.
    */
-   // TODO WHY was this static before
+   // TODO WHY was this static before?
   double nn_to_resonance_matrix_element(const ParticleType &type_a,
                                                const ParticleType &type_b,
                                                const int twoI) const;
