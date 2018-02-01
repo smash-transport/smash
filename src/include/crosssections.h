@@ -22,6 +22,21 @@ class cross_sections {
 
   cross_sections(const ParticleList &scat_particles, const double sqrt_s);
 
+  void append_list(CollisionBranchList& main_list, CollisionBranchList in_list) {
+    main_list.reserve(main_list.size() + in_list.size());
+    for (auto &proc : in_list) {
+      main_list.emplace_back(std::move(proc));
+    }
+  }
+
+ /// TODO DOC
+  CollisionBranchList all_collisions(double elastic_parameter, bool two_to_one_switch,
+                                        bool two_to_two_switch_switch, double low_snn_cut,
+                                        bool strings_switch,
+                                        NNbarTreatment nnbar_treatment,
+                                        StringProcess* string_process);
+
+
   /**
    * Determine the elastic cross section for this collision. If elastic_par is
    * given (and positive), we just use a constant cross section of that size,
@@ -136,7 +151,7 @@ class cross_sections {
    * create a list of subprocesses (single-diffractive,
    * double-diffractive and non-diffractive) and their cross sections.
    */
-  CollisionBranchList string_excitation_cross_sections(StringProcess* string_process);
+  CollisionBranchList string_excitation(StringProcess* string_process);
 
   /**
    * Determine the (parametrized) hard non-diffractive string cross section
@@ -290,11 +305,8 @@ class cross_sections {
     return spin_factor * symmetry_factor * momentum_factor;
   }
 
-
-  // CollisionBranchList NNbar_annihilation(); // TODO
-  // CollisionBranchList NNbar_creation();  // TODO
-  // CollisionBranchList call_correct_xs();
-  // bool decide_string();
+  // DOCU
+  bool decide_string(bool strings_switch, const bool both_are_nucleons) const;
 
 
 
