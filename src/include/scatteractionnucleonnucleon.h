@@ -26,13 +26,6 @@ class ScatterActionNucleonNucleon : public ScatterActionBaryonBaryon {
   /* Inherit constructor. */
   using ScatterActionBaryonBaryon::ScatterActionBaryonBaryon;
 
- protected:
-  /**
-   * Sample final-state angles in a 2->2 collision (possibly anisotropic).
-   *
-   * \throws InvalidResonanceFormation
-   */
-  void sample_angles(std::pair<double, double> masses) override;
 
 };
 

@@ -65,6 +65,14 @@ class ScatterAction : public Action {
 
   double partial_weight() const override;
 
+  /**
+   * Sample final-state angles in a 2->2 collision (possibly anisotropic).
+   *
+   * \throws InvalidResonanceFormation
+   */
+  void sample_angles(std::pair<double, double> masses) override;
+
+
   /** Add all possible subprocesses for this action object. */
   virtual void add_all_processes(double elastic_parameter, bool two_to_one,
                                  bool two_to_two, double low_snn_cut,
