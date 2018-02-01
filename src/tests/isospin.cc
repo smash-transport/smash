@@ -13,8 +13,7 @@
 
 #include "../include/action.h"
 #include "../include/crosssections.h"
-#include "../include/scatteractionbaryonbaryon.h"
-#include "../include/scatteractionnucleonnucleon.h"
+#include "../include/scatteraction.h"
 
 using namespace smash;
 
@@ -38,13 +37,7 @@ static ScatterAction *set_up_action(const ParticleData &proj,
                                     const ParticleData &targ,
                                     CollisionBranchList &proc_list) {
   ScatterAction *act;
-  if (proj.pdgcode().is_nucleon() && targ.pdgcode().is_nucleon() &&
-      proj.pdgcode().antiparticle_sign() ==
-          targ.pdgcode().antiparticle_sign()) {
-    act = new ScatterActionNucleonNucleon(proj, targ, 0.);
-  } else {
-    act = new ScatterActionBaryonBaryon(proj, targ, 0.);
-  }
+  act = new ScatterAction(proj, targ, 0.);
   cross_sections xs (act->incoming_particles(), act->sqrt_s());
   proc_list = xs.two_to_two();
   //   act->add_processes(proc_list);

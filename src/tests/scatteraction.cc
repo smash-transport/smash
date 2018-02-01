@@ -11,8 +11,7 @@
 
 #include "setup.h"
 
-#include "../include/scatteractionbaryonbaryon.h"
-#include "../include/scatteractionbaryonmeson.h"
+#include "../include/scatteraction.h"
 
 using namespace smash;
 using smash::Test::Position;
@@ -138,7 +137,7 @@ TEST(outgoing_valid) {
 
   // construct action
   ScatterActionPtr act;
-  act = make_unique<ScatterActionBaryonMeson>(p1_copy, p2_copy, 0.2);
+  act = make_unique<ScatterAction>(p1_copy, p2_copy, 0.2);
   VERIFY(act != nullptr);
   COMPARE(p2_copy.type(), ParticleType::find(0x111));
 
@@ -194,7 +193,7 @@ TEST(pythia_running) {
 
   // construct action
   ScatterActionPtr act;
-  act = make_unique<ScatterActionBaryonBaryon>(p1_copy, p2_copy, 0.2);
+  act = make_unique<ScatterAction>(p1_copy, p2_copy, 0.2);
   std::unique_ptr<StringProcess> string_process_interface =
       make_unique<StringProcess>();
   act->set_string_interface(string_process_interface.get());

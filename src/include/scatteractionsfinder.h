@@ -119,11 +119,6 @@ class ScatterActionsFinder : public ActionFinderInterface {
                            double m_a, double m_b) const;
 
  private:
-  /* Construct a ScatterAction object,
-   * based on the types of the incoming particles. */
-  virtual ScatterActionPtr construct_scatter_action(
-      const ParticleData &data_a, const ParticleData &data_b,
-      double time_until_collision) const;
   /** Check for a single pair of particles (id_a, id_b) if a collision will
    * happen in the next timestep and create a corresponding Action object
    * in that case.

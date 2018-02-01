@@ -118,14 +118,6 @@ set(smash_src
         quantumnumbers.cc
         random.cc
         scatteraction.cc
-        scatteractionbaryonbaryon.cc
-        scatteractionbaryonmeson.cc
-        scatteractiondeltakaon.cc
-        scatteractionmesonmeson.cc
-        scatteractionnucleonpion.cc
-        scatteractionnucleonkaon.cc
-        scatteractionnucleonnucleon.cc
-        scatteractionhyperonpion.cc
         scatteractionphoton.cc
         scatteractionsfinder.cc
         spheremodus.cc
