@@ -242,7 +242,7 @@ class PdgCode {
   /// Construct PDG code from decimal number
   static PdgCode from_decimal(const int pdgcode_decimal) {
     // Nucleus
-    if (pdgcode_decimal > 1E10) {
+    if (pdgcode_decimal > 1E9) {
       return PdgCode(std::to_string(pdgcode_decimal));
     }
     int a = pdgcode_decimal;
