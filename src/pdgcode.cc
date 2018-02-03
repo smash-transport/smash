@@ -36,6 +36,21 @@ int PdgCode::net_quark_number(const int quark) const {
         std::string("Quark number must be in [1..8], received ") +
         std::to_string(quark));
   }
+  if (is_nucleus()) {
+    const int Np = nucleus_.Z_;
+    const int Nn = nucleus_.A_ - nucleus_.Z_;
+    const int NL = nucleus_.n_Lambda_;
+    if (quark == 1) {
+      return (2*Nn + Np + NL) * antiparticle_sign();
+    } else if (quark == 2) {
+      return (Nn + 2*Np + NL) * antiparticle_sign();
+    } else if (quark == 3) {
+      return NL * antiparticle_sign();
+    } else {
+      // Charmed nuclei may exist, but they are not foreseen by PDG standard
+      return 0.0;
+    }
+  }
   // non-hadrons and those that have none of this quark type: 0.
   if (!is_hadron() || (digits_.n_q1_ != quark && digits_.n_q2_ != quark &&
                        digits_.n_q3_ != quark)) {
