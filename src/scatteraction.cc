@@ -13,6 +13,7 @@
 
 #include <cmath>
 
+#include "include/action_globals.h"
 #include "include/constants.h"
 #include "include/cxx14compat.h"
 #include "include/fpenvironment.h"
@@ -47,6 +48,9 @@ void ScatterAction::generate_final_state() {
 
   log.debug("Incoming particles: ", incoming_particles_);
 
+  if (pot_pointer != nullptr) {
+     filter_channel(collision_channels_, total_cross_section_);
+  }
   /* Decide for a particular final state. */
   const CollisionBranch *proc = choose_channel<CollisionBranch>(
       collision_channels_, total_cross_section_);
@@ -80,7 +84,6 @@ void ScatterAction::generate_final_state() {
       break;
     case ProcessType::StringHard:
       /* hard string excitation */
-      std::cout << "hard string excitation implemented." << std::endl;
       string_excitation_pythia();
       break;
     default:
@@ -91,11 +94,12 @@ void ScatterAction::generate_final_state() {
           ", PDGcode2=" + incoming_particles_[1].pdgcode().string() + ")");
   }
 
-  /* Set positions & boost to computational frame. */
   for (ParticleData &new_particle : outgoing_particles_) {
+    /* Set positions of the outgoing particles */
     if (proc->get_type() != ProcessType::Elastic) {
       new_particle.set_4position(middle_point);
     }
+    /* Set momenta & boost to computational frame. */
     new_particle.boost_momentum(-beta_cm());
   }
 }
@@ -382,8 +386,9 @@ CollisionBranchList ScatterAction::string_excitation_cross_sections() {
     assert(std::abs(single_diffr_AX + single_diffr_XB + double_diffr +
                     nondiffractive_all - sig_string_all) < 1.e-6);
 
-    /* Hard string process will be added later.
-     * The corresponding cross section is set to be zero right now. */
+    /* Hard string process is added by hard cross section
+     * in conjunction with multipartion interaction picture
+     * \iref{Sjostrand:1987su}. */
     const double hard_xsec = string_hard_cross_section();
     const double nondiffractive_soft = nondiffractive_all *
                  std::exp(- hard_xsec / nondiffractive_all);
@@ -547,9 +552,10 @@ void ScatterAction::resonance_formation() {
     throw InvalidResonanceFormation(s);
   }
 
+  const double cms_kin_energy = kinetic_energy_cms();
   /* 1 particle in final state: Center-of-momentum frame of initial particles
    * is the rest frame of the resonance.  */
-  outgoing_particles_[0].set_4momentum(FourVector(sqrt_s(), 0., 0., 0.));
+  outgoing_particles_[0].set_4momentum(FourVector(cms_kin_energy, 0., 0., 0.));
 
   /* Set the formation time of the resonance to the larger formation time of the
    * incoming particles, if it is larger than the execution time; execution time

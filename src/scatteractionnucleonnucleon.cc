@@ -217,7 +217,7 @@ void ScatterActionNucleonNucleon::sample_angles(
   const double mass_a = masses.first;
   const double mass_b = masses.second;
 
-  const double cms_energy = sqrt_s();
+  const double cms_energy = kinetic_energy_cms();
 
   const std::array<double, 2> t_range = get_t_range<double>(
       cms_energy, nucleon_mass, nucleon_mass, mass_a, mass_b);

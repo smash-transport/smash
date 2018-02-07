@@ -62,7 +62,6 @@ TEST(initialize_collider_normal) {
                                 "    Particles: {661: 1}\n"
                                 "  Target:\n"
                                 "    Particles: {661: 8}\n"
-                                "  Sqrts_Reps: [661, 661]\n"
                                 "  Initial_Distance: 0\n"
                                 "  Impact:\n"
                                 "    Value: 0\n"),
@@ -92,7 +91,6 @@ TEST_CATCH(initialize_collider_low_energy, ModusDefault::InvalidEnergy) {
                                 "    Particles: {661: 1}\n"
                                 "  Target:\n"
                                 "    Particles: {661: 8}\n"
-                                "  Sqrts_Reps: [661, 661]\n"
                                 "  Initial_Distance: 0\n"),
                   Test::default_parameters());
   Particles P;
@@ -106,7 +104,6 @@ TEST_CATCH(initialize_nucleus_empty_projectile, ColliderModus::ColliderEmpty) {
                                 "    Particles: {661: 0}\n"
                                 "  Target:\n"
                                 "    Particles: {661: 8}\n"
-                                "  Sqrts_Reps: [0, 0]\n"
                                 "  Initial_Distance: 0\n"),
                   Test::default_parameters());
   Particles P;
@@ -120,7 +117,6 @@ TEST_CATCH(initialize_nucleus_empty_target, ColliderModus::ColliderEmpty) {
                                 "    Particles: {661: 8}\n"
                                 "  Target:\n"
                                 "    Particles: {661: 0}\n"
-                                "  Sqrts_Reps: [0, 0]\n"
                                 "  Initial_Distance: 0\n"),
                   Test::default_parameters());
   Particles P;

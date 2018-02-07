@@ -5,7 +5,7 @@
  *
  *    GNU General Public License (GPLv3 or later)
  *
-*/
+ */
 
 #include "include/potentials.h"
 
@@ -83,8 +83,9 @@ double Potentials::skyrme_pot(const double baryon_density) const {
      under a charge reversal transformation. */
   const int sgn = tmp > 0 ? 1 : -1;
   // Return in GeV
-  return 1.0e-3 * sgn * (skyrme_a_ * std::abs(tmp) +
-                         skyrme_b_ * std::pow(std::abs(tmp), skyrme_tau_));
+  return 1.0e-3 * sgn *
+         (skyrme_a_ * std::abs(tmp) +
+          skyrme_b_ * std::pow(std::abs(tmp), skyrme_tau_));
 }
 
 double Potentials::symmetry_pot(const double baryon_isospin_density) const {
@@ -96,6 +97,7 @@ double Potentials::potential(const ThreeVector &r, const ParticleList &plist,
                              const ParticleType &acts_on) const {
   double total_potential = 0.0;
   const bool compute_gradient = false;
+  const auto scale = force_scale(acts_on);
 
   if (!acts_on.is_baryon()) {
     return total_potential;
@@ -105,7 +107,7 @@ double Potentials::potential(const ThreeVector &r, const ParticleList &plist,
     const double rho_eck =
         rho_eckart(r, plist, param_, DensityType::Baryon, compute_gradient)
             .first;
-    total_potential += skyrme_pot(rho_eck);
+    total_potential += scale.first * skyrme_pot(rho_eck);
   }
   if (use_symmetry_) {
     // use isospin density
@@ -114,7 +116,7 @@ double Potentials::potential(const ThreeVector &r, const ParticleList &plist,
                    compute_gradient)
             .first;
     const double sym_pot = symmetry_pot(rho_iso) * acts_on.isospin3_rel();
-    total_potential += sym_pot;
+    total_potential += scale.second * sym_pot;
   }
   return total_potential;
 }
@@ -128,18 +130,18 @@ std::pair<double, int> Potentials::force_scale(const ParticleType &data) const {
   direction.*/
   double skyrme_scale = 1.0;
   if (data.pdgcode().is_hyperon()) {
-    if (data.pdgcode().is_xi1321()) {
+    if (data.pdgcode().is_Xi()) {
       skyrme_scale = 1. / 3.;
-    } else if (data.pdgcode().is_Omega1672()) {
+    } else if (data.pdgcode().is_Omega()) {
       skyrme_scale = 0.;
     } else {
       skyrme_scale = 2. / 3.;
     }
   }
   skyrme_scale = skyrme_scale * data.pdgcode().baryon_number();
-  /* Hyperons are not affected by the symmetry force.*/
+  /* Symmetry force acts only on the neutron and proton.*/
   const int symmetry_scale =
-      data.pdgcode().is_hyperon() ? 0 : data.pdgcode().baryon_number();
+      data.pdgcode().is_nucleon() ? data.pdgcode().baryon_number() : 0;
   return std::make_pair(skyrme_scale, symmetry_scale);
 }
 
