@@ -63,6 +63,58 @@ CollisionBranchList ScatterActionBaryonBaryon::two_to_two_cross_sections() {
     }
   }
 
+  if (((type_a.is_nucleon() && type_b.is_nucleus()) ||
+       (type_b.is_nucleon() && type_a.is_nucleus())) &&
+        type_a.antiparticle_sign() == type_b.antiparticle_sign()) {
+    // Nd → Nd' and reverse
+    process_list = n_nucleus_to_n_nucleus();
+  }
+
+  return process_list;
+}
+
+CollisionBranchList ScatterActionBaryonBaryon::n_nucleus_to_n_nucleus() {
+  const ParticleType &type_a = incoming_particles_[0].type();
+  const ParticleType &type_b = incoming_particles_[1].type();
+  const ParticleType &type_N = type_a.is_nucleon() ? type_a : type_b;
+  const ParticleType &type_nucleus = type_a.is_nucleus() ? type_a : type_b;
+  CollisionBranchList process_list;
+
+  std::cout << "Nucleon = " << type_N.name() << ", nucleus = " << type_nucleus.name() << std::endl;
+  ParticleTypePtrList nuclei = ParticleType::list_light_nuclei();
+  const double s = mandelstam_s();
+
+  for (ParticleTypePtr produced_nucleus : nuclei) {
+    // No elastic collisions for now
+    if (produced_nucleus == &type_nucleus ||
+        produced_nucleus->charge() != type_nucleus.charge() ||
+        produced_nucleus->baryon_number() != type_nucleus.baryon_number()) {
+      continue;
+    }
+    const double matrix_element = 10.0;
+    const double spin_factor = (produced_nucleus->spin() + 1) *
+                               (type_N.spin() + 1);
+    // Isospin factor is always the same, so it is included into matrix element
+    // Symmetry factor is always 1 here
+    const double kinematics_factor = hbarc*hbarc /
+                                     (16.0 * M_PI * s * cm_momentum());
+    double xsection = matrix_element * spin_factor * kinematics_factor;
+    if (produced_nucleus->is_stable()) {
+      assert(!type_nucleus.stable());
+      xsection *= pCM_from_s(s, type_N.mass(), produced_nucleus->mass());
+    } else {
+      assert(type_nucleus.stable());
+      const double resonance_integral =
+          produced_nucleus->iso_multiplet()->get_integral_NR(std::sqrt(s));
+      xsection *= resonance_integral;
+    }
+    process_list.push_back(make_unique<CollisionBranch>(
+          type_N, *produced_nucleus, xsection, ProcessType::TwoToTwo));
+    const auto &log = logger<LogArea::ScatterAction>();
+    log.info("Scattering with light nucleus: ", type_N, type_nucleus, "→ ",
+             type_N, *produced_nucleus, " at ", std::sqrt(s), " GeV, xs[mb] = ",
+             xsection);
+  }
   return process_list;
 }
 
