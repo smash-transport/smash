@@ -163,6 +163,13 @@ TEST(decimal) {
   COMPARE(lambda.get_decimal(), 3122);
   COMPARE(antixi.get_decimal(), -103312);
 }
+TEST(hexadecimal) {
+  const PdgCode lambda_2350(0x990312a);
+  COMPARE(lambda_2350.code(), 0x990312a);
+  COMPARE(lambda_2350.dump(), 0x990312au);
+  COMPARE(lambda_2350.string(), "19903129");
+  COMPARE(lambda_2350.get_decimal(), 19903129);
+}
 
 TEST(hadron) {
   VERIFY(!electron.is_hadron());
@@ -465,6 +472,13 @@ TEST(initialize_from_string) {
   COMPARE(particle2.dump(), 0x80000211u);
   PdgCode particle3("1234");
   COMPARE(particle3.dump(), 0x1234u);
+  // Make sure hexadecimal is supported.
+  PdgCode particle4("990312a");
+  COMPARE(particle4.dump(), 0x990312au);
+  COMPARE(particle4, PdgCode("990312A"));
+  // Make sure the alternative encoding works.
+  PdgCode particle5("19903129");
+  COMPARE(particle4, particle5);
 }
 TEST_CATCH(empty_string, PdgCode::InvalidPdgCode) { PdgCode particle(""); }
 TEST_CATCH(long_string, PdgCode::InvalidPdgCode) {
@@ -550,6 +564,9 @@ TEST(equal) {
   VERIFY(pion2 < omega_bc);
 }
 TEST(antiparticle) { VERIFY(pion.is_antiparticle_of(piminus)); }
+TEST(get_antiparticle) {
+  COMPARE(pion.get_antiparticle(), piminus);
+}
 
 TEST(from_decimal) {
   COMPARE(pion, PdgCode::from_decimal(211));
