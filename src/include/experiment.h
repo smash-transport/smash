@@ -396,6 +396,9 @@ class Experiment : public ExperimentBase {
            wall_actions_total_ = 0, previous_wall_actions_total_ = 0,
            total_pauli_blocked_ = 0;
 
+  /// Random seed for the next event.
+  int64_t seed_ = -1;
+
   /**\ingroup logging
    * Writes the initial state for the Experiment to the output stream.
    * It automatically appends the output of the current Modus.
