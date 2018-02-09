@@ -198,7 +198,7 @@ int StringProcess::append_final_state(const FourVector &uString,
 }
 
 void StringProcess::init(const ParticleList &incoming, double tcoll,
-                         double gamma) {
+                         double gamma, double string_tension) {
   PDGcodes_[0] = incoming[0].pdgcode();
   PDGcodes_[1] = incoming[1].pdgcode();
   massA_ = incoming[0].effective_mass();
@@ -225,6 +225,7 @@ void StringProcess::init(const ParticleList &incoming, double tcoll,
 
   time_collision_ = tcoll;
   gamma_factor_com_ = gamma;
+  kappa_tension_string_ = string_tension;
 }
 
 /**

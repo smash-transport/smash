@@ -119,10 +119,12 @@ class ScatterAction : public Action {
    * \param[in] time Time at which the action is supposed to take place
    * \param[in] isotropic if true, do the collision isotropically
    * \param[in] string_formation_time the time a string takes to form
+   * \param[in] string_tension the string tension in soft strings
    */
   ScatterAction(const ParticleData& in_part1, const ParticleData& in_part2,
                 double time, bool isotropic = false,
-                double string_formation_time = 1.0);
+                double string_formation_time = 1.0,
+                double string_tension = 1.0);
 
   /** Add a new collision channel. */
   void add_collision(CollisionBranchPtr p);
@@ -337,6 +339,9 @@ class ScatterAction : public Action {
 
   /** Formation time parameter for string fragmentation*/
   double string_formation_time_ = 1.0;
+
+  /** String tension parameter for soft string excitation */
+  double string_tension_ = 1.0;
 
  private:
   /** Check if the scattering is elastic. */

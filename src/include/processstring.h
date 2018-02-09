@@ -196,7 +196,8 @@ class StringProcess {
    * \param tcoll is time of collision.
    * \param gamma gamma factor of the center of mass.
    */
-  void init(const ParticleList &incoming, double tcoll, double gamma);
+  void init(const ParticleList &incoming, double tcoll, double gamma, 
+                                                        double string_tension);
   /**
    * compute three orthonormal basis vectors in the center of mass frame
    * such that one vector is along with the three-momentum of particle A.
