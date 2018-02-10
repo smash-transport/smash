@@ -762,4 +762,4 @@ N(2250)
 
 ######### Light nuclear resonances ########
 d'
-1.      1   N N   # Introduced to describe Nd <-> Nnp reaction via Nd <-> Nd' <->Nnp     
+1.      1   N N   # Introduced to describe Nd <-> Nnp reaction via Nd <-> Nd' <->Nnp

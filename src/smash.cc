@@ -299,7 +299,6 @@ int main(int argc, char *argv[]) {
       configuration.merge_yaml(config);
     }
     if (particles) {
-      std::cout << "particles: " << particles << std::endl;
       if (!bf::exists(particles)) {
         std::stringstream err;
         err << "The particles file was expected at '" << particles

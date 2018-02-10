@@ -80,7 +80,6 @@ CollisionBranchList ScatterActionBaryonBaryon::n_nucleus_to_n_nucleus() {
   const ParticleType &type_nucleus = type_a.is_nucleus() ? type_a : type_b;
   CollisionBranchList process_list;
 
-  std::cout << "Nucleon = " << type_N.name() << ", nucleus = " << type_nucleus.name() << std::endl;
   ParticleTypePtrList nuclei = ParticleType::list_light_nuclei();
   const double s = mandelstam_s();
 
@@ -91,14 +90,13 @@ CollisionBranchList ScatterActionBaryonBaryon::n_nucleus_to_n_nucleus() {
         produced_nucleus->baryon_number() != type_nucleus.baryon_number()) {
       continue;
     }
-    const double matrix_element = 10.0;
+    const double matrix_element = 750.0;
     const double spin_factor = (produced_nucleus->spin() + 1) *
                                (type_N.spin() + 1);
     // Isospin factor is always the same, so it is included into matrix element
     // Symmetry factor is always 1 here
-    const double kinematics_factor = hbarc*hbarc /
-                                     (16.0 * M_PI * s * cm_momentum());
-    double xsection = matrix_element * spin_factor * kinematics_factor;
+    // Absorb (hbarc)^2/16 pi factor into matrix element
+    double xsection = matrix_element * spin_factor / (s * cm_momentum());
     if (produced_nucleus->is_stable()) {
       assert(!type_nucleus.stable());
       xsection *= pCM_from_s(s, type_N.mass(), produced_nucleus->mass());
@@ -111,8 +109,8 @@ CollisionBranchList ScatterActionBaryonBaryon::n_nucleus_to_n_nucleus() {
     process_list.push_back(make_unique<CollisionBranch>(
           type_N, *produced_nucleus, xsection, ProcessType::TwoToTwo));
     const auto &log = logger<LogArea::ScatterAction>();
-    log.info("Scattering with light nucleus: ", type_N, type_nucleus, "→ ",
-             type_N, *produced_nucleus, " at ", std::sqrt(s), " GeV, xs[mb] = ",
+    log.error("Scattering with light nucleus: ", type_N.name(), type_nucleus.name(), "→ ",
+             type_N.name(), produced_nucleus->name(), " at ", std::sqrt(s), " GeV, xs[mb] = ",
              xsection);
   }
   return process_list;
@@ -254,6 +252,9 @@ double ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(
     } else if (twoI == 0) {
       return 25. / msqr;
     }
+  } else if ((type_a.is_nucleus() && type_b.pdgcode().is_pion()) ||
+             (type_b.is_nucleus() && type_a.pdgcode().is_pion())) {
+    return 100.0;  // todo(oliiny): to be determined
   }
   // all cases not listed: zero!
   return 0.;

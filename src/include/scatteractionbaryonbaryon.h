@@ -33,24 +33,6 @@ class ScatterActionBaryonBaryon : public ScatterAction {
   double string_hard_cross_section() const override;
   /** Find all inelastic 2->2 processes for this reaction. */
   CollisionBranchList two_to_two_cross_sections() override;
-
- private:
-  /**
-  * Calculate cross sections for resonance absorption
-  * (i.e. NR->NN and ΔR->NN).
-  *
-  * \param[in] is_anti_particles Whether the colliding particles are
-  * antiparticles
-  *
-  * \return List of possible resonance absorption processes. Each element of the
-  * list contains the types of the final-state particles and the cross section
-  * for that particular process.
-  */
-  CollisionBranchList bar_bar_to_nuc_nuc(const bool is_anti_particles);
-
-  CollisionBranchList n_nucleus_to_n_nucleus();
-
- protected:
   /**
    * Scattering matrix amplitude squared (divided by 16π) for resonance
    * production processes like NN → NR and NN → ΔR, where R is a baryon
@@ -67,7 +49,23 @@ class ScatterActionBaryonBaryon : public ScatterAction {
                                                const ParticleType &type_a,
                                                const ParticleType &type_b,
                                                const int twoI);
+ private:
+  /**
+  * Calculate cross sections for resonance absorption
+  * (i.e. NR->NN and ΔR->NN).
+  *
+  * \param[in] is_anti_particles Whether the colliding particles are
+  * antiparticles
+  *
+  * \return List of possible resonance absorption processes. Each element of the
+  * list contains the types of the final-state particles and the cross section
+  * for that particular process.
+  */
+  CollisionBranchList bar_bar_to_nuc_nuc(const bool is_anti_particles);
 
+  CollisionBranchList n_nucleus_to_n_nucleus();
+
+protected:
   /**
    * \ingroup logging
    * Writes information about this scatter action to the \p out stream.

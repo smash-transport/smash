@@ -32,6 +32,8 @@ class ScatterActionBaryonMeson : public ScatterAction {
    */
   double string_hard_cross_section() const override;
 
+  CollisionBranchList two_to_two_cross_sections() override;
+
  protected:
   /**
    * \ingroup logging

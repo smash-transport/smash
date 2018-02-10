@@ -121,6 +121,24 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_cross_sections() {
             std::inserter(process_list, process_list.end()));
   channel_list.clear();
 
+  /* Second: Find N N → d pi channels. */
+  ParticleTypePtr deutron = &ParticleType::find(PdgCode::from_decimal(1000010020));
+  ParticleTypePtr pim = &ParticleType::find(-0x211);
+  ParticleTypePtr pi0 = &ParticleType::find(0x111);
+  ParticleTypePtr pip = &ParticleType::find(0x211);
+  ParticleTypePtrList deutron_list = {deutron};
+  ParticleTypePtrList pion_list = {pim, pi0, pip};
+  channel_list = find_xsection_from_type(
+      deutron_list, pion_list,
+      [&sqrts](const ParticleType &type_res_1, const ParticleType &type_res_2) {
+        return pCM(sqrts, type_res_1.mass(), type_res_2.mass());
+      });
+  process_list.reserve(process_list.size() + channel_list.size());
+  std::move(channel_list.begin(), channel_list.end(),
+            std::inserter(process_list, process_list.end()));
+  channel_list.clear();
+
+
   return process_list;
 }
 
@@ -145,7 +163,6 @@ CollisionBranchList ScatterActionNucleonNucleon::find_xsection_from_type(
           type_particle_a.charge() + type_particle_b.charge()) {
         continue;
       }
-
       // loop over total isospin
       for (const int twoI : I_tot_range(type_particle_a, type_particle_b)) {
         const double isospin_factor = isospin_clebsch_gordan_sqr_2to2(
@@ -188,10 +205,9 @@ CollisionBranchList ScatterActionNucleonNucleon::find_xsection_from_type(
         if (xsection > really_small) {
           channel_list.push_back(make_unique<CollisionBranch>(
               *type_res_1, *type_res_2, xsection, ProcessType::TwoToTwo));
-          log.debug("Found 2->2 creation process for resonance ", type_res_1,
-                    ", ", type_res_2);
-          log.debug("2->2 with original particles: ", type_particle_a,
-                    type_particle_b);
+          log.info(type_particle_a.name(), type_particle_b.name(), "->",
+                   type_res_1->name(), type_res_2->name(),
+                   " at sqrt(s) [GeV] = ", sqrts, " with xs [mb] = ", xsection);
         }
       }
     }
