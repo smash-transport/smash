@@ -71,8 +71,8 @@ ScatterActionsFinder::ScatterActionsFinder(
       nucleon_has_interacted_(nucleon_has_interacted),
       N_tot_(N_tot),
       N_proj_(N_proj),
-      string_formation_time_(
-          config.take({"Collision_Term", "String_Formation_Time"}, 1.)),
+      string_formation_time_(config.take({"Collision_Term", 
+              "String_Parameters", "Formation_Time"}, 1.)),
       photons_(parameters.photons_switch),
       n_fractional_photons_(n_fractional_photons) {
   if (is_constant_elastic_isotropic()) {
@@ -81,8 +81,15 @@ ScatterActionsFinder::ScatterActionsFinder(
              elastic_parameter_, " mb as maximal cross-section.");
   }
   if (strings_switch_) {
-    string_process_interface_ = make_unique<StringProcess>(config.take(
-                                   {"Collision_Term", "String_Tension"},1.0));
+    string_process_interface_ = make_unique<StringProcess>(
+     config.take({"Collision_Term", "String_Parameters", "String_Tension"},1.0),
+     config.take({"Collision_Term", "String_Parameters", "Gluon_Beta"},0.5),
+     config.take({"Collision_Term", "String_Parameters", "Gluon_Pmin"},0.001),
+     config.take({"Collision_Term", "String_Parameters", "Quark_Alpha"},1.0),
+     config.take({"Collision_Term", "String_Parameters", "Quark_Beta"},2.5),
+     config.take({"Collision_Term", "String_Parameters", "Strange_Supp"},0.217),
+     config.take({"Collision_Term", "String_Parameters", "Diquark_Supp"},0.081),
+     config.take({"Collision_Term", "String_Parameters", "Sigma_Perp"},0.7));
   }
 }
 

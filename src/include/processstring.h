@@ -112,7 +112,10 @@ class StringProcess {
 
  public:
   /** Constructor, initializes pythia. Should only be called once. */
-  StringProcess(double string_tension = 1.0);
+  StringProcess(double string_tension = 1.0, double gluon_beta = 0.5, 
+                double gluon_pmin = 0.001, double quark_alpha = 1.0,
+                double quark_beta = 2.5, double strange_supp = 0.217,
+                double diquark_supp = 0.081, double sigma_perp = 0.7);
 
   /**
    * Interface to pythia_sigmatot_ to compute cross-sections of A+B->

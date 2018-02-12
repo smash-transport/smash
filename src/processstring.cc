@@ -16,12 +16,15 @@
 
 namespace smash {
 
-StringProcess::StringProcess(double string_tension)
-    : pmin_gluon_lightcone_(0.001),
-      pow_fgluon_beta_(0.5),
-      pow_fquark_alpha_(1.),
-      pow_fquark_beta_(2.5),
-      sigma_qperp_(0.5),
+StringProcess::StringProcess(double string_tension, double gluon_beta,
+                             double gluon_pmin, double quark_alpha,
+                             double quark_beta, double strange_supp,
+                             double diquark_supp, double sigma_perp)
+    : pmin_gluon_lightcone_(gluon_pmin),
+      pow_fgluon_beta_(gluon_beta),
+      pow_fquark_alpha_(quark_alpha),
+      pow_fquark_beta_(quark_beta),
+      sigma_qperp_(sigma_perp),
       kappa_tension_string_(string_tension),
       time_collision_(0.),
       gamma_factor_com_(1.) {
@@ -35,6 +38,8 @@ StringProcess::StringProcess(double string_tension)
   pythia_->readString("HadronLevel:Decay = off");
   /* transverse momentum spread in string fragmentation */
   pythia_->readString("StringPT:sigma = 0.25");
+  pythia_->readString("StringFlav:probQQtoQ = " + std::to_string(diquark_supp));
+  pythia_->readString("StringFlav:probStoUD = " + std::to_string(strange_supp));
   /* manually set the parton distribution function */
   pythia_->readString("PDF:pSet = 13");
   pythia_->readString("PDF:pSetB = 13");
@@ -123,7 +128,6 @@ int StringProcess::append_final_state(const FourVector &uString,
   xvertex_pos.resize(nfrag + 1);
   xvertex_neg.resize(nfrag + 1);
   // x^{+} coordinates of the forward end
-  std::cout << kappa_tension_string_ << std::endl;
   xvertex_pos[0] = p_pos_tot / kappa_tension_string_;
   for (int i = 0; i < nfrag; i++) {
     // recursively compute x^{+} coordinates of q-qbar formation vertex
@@ -211,10 +215,6 @@ void StringProcess::init(const ParticleList &incoming, double tcoll,
   sqrtsAB_ = (plab_[0] + plab_[1]).abs();
   /* Transverse momentum transferred to strings,
      parametrization to fit the experimental data */
-  sigma_qperp_ = (sqrtsAB_ < 4.)
-                     ? 0.5
-                     : 0.5 + 0.2 * std::log(sqrtsAB_ / 4.) / std::log(5.);
-
   ucomAB_ = (plab_[0] + plab_[1]) / sqrtsAB_;
   vcomAB_ = ucomAB_.velocity();
 
