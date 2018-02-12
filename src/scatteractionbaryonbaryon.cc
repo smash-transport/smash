@@ -14,6 +14,7 @@
 #include "include/constants.h"
 #include "include/cxx14compat.h"
 #include "include/parametrizations.h"
+#include "include/pow.h"
 
 namespace smash {
 
@@ -254,7 +255,11 @@ double ScatterActionBaryonBaryon::nn_to_resonance_matrix_element(
     }
   } else if ((type_a.is_nucleus() && type_b.pdgcode().is_pion()) ||
              (type_b.is_nucleus() && type_a.pdgcode().is_pion())) {
-    return 100.0;  // todo(oliiny): to be determined
+    // This parametrization is the result of fitting d+pi->NN cross-section.
+    // Already Breit-Wigner-like part provides a good fit, exponential fixes
+    // behaviour around the treshold.
+    return 0.055 / (pow_int(sqrts - 2.145, 2) + pow_int(0.065, 2)) *
+           (1.0 - std::exp(-(sqrts - 2.0) * 20.0));
   }
   // all cases not listed: zero!
   return 0.;
