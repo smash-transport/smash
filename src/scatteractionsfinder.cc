@@ -73,8 +73,6 @@ ScatterActionsFinder::ScatterActionsFinder(
       N_proj_(N_proj),
       string_formation_time_(
           config.take({"Collision_Term", "String_Formation_Time"}, 1.)),
-      string_tension_(
-          config.take({"Collision_Term", "String_Tension"}, 1.)),
       photons_(parameters.photons_switch),
       n_fractional_photons_(n_fractional_photons) {
   if (is_constant_elastic_isotropic()) {
@@ -83,7 +81,8 @@ ScatterActionsFinder::ScatterActionsFinder(
              elastic_parameter_, " mb as maximal cross-section.");
   }
   if (strings_switch_) {
-    string_process_interface_ = make_unique<StringProcess>();
+    string_process_interface_ = make_unique<StringProcess>(config.take(
+                                   {"Collision_Term", "String_Tension"},1.0));
   }
 }
 
@@ -102,7 +101,6 @@ ScatterActionsFinder::ScatterActionsFinder(
       N_tot_(0),
       N_proj_(0),
       string_formation_time_(1.),
-      string_tension_(1.),
       photons_(false),
       n_fractional_photons_(1) {}
 
@@ -117,42 +115,42 @@ ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
         (pdg_a.antiparticle_sign() == pdg_b.antiparticle_sign())) {
       act = make_unique<ScatterActionNucleonNucleon>(
           data_a, data_b, time_until_collision, isotropic_,
-          string_formation_time_, string_tension_);
+          string_formation_time_);
     } else {
       act = make_unique<ScatterActionBaryonBaryon>(
           data_a, data_b, time_until_collision, isotropic_,
-          string_formation_time_, string_tension_);
+          string_formation_time_);
     }
   } else if (data_a.is_baryon() || data_b.is_baryon()) {
     if ((pdg_a.is_nucleon() && pdg_b.is_pion()) ||
         (pdg_b.is_nucleon() && pdg_a.is_pion())) {
       act = make_unique<ScatterActionNucleonPion>(
           data_a, data_b, time_until_collision, isotropic_,
-          string_formation_time_, string_tension_);
+          string_formation_time_);
     } else if ((pdg_a.is_nucleon() && pdg_b.is_kaon()) ||
                (pdg_b.is_nucleon() && pdg_a.is_kaon())) {
       act = make_unique<ScatterActionNucleonKaon>(
           data_a, data_b, time_until_collision, isotropic_,
-          string_formation_time_, string_tension_);
+          string_formation_time_);
     } else if ((pdg_a.is_hyperon() && pdg_b.is_pion()) ||
                (pdg_b.is_hyperon() && pdg_a.is_pion())) {
       act = make_unique<ScatterActionHyperonPion>(
           data_a, data_b, time_until_collision, isotropic_,
-          string_formation_time_, string_tension_);
+          string_formation_time_);
     } else if ((pdg_a.is_Delta() && pdg_b.is_kaon()) ||
                (pdg_b.is_Delta() && pdg_a.is_kaon())) {
       act = make_unique<ScatterActionDeltaKaon>(
           data_a, data_b, time_until_collision, isotropic_,
-          string_formation_time_, string_tension_);
+          string_formation_time_);
     } else {
       act = make_unique<ScatterActionBaryonMeson>(
           data_a, data_b, time_until_collision, isotropic_,
-          string_formation_time_, string_tension_);
+          string_formation_time_);
     }
   } else {
     act = make_unique<ScatterActionMesonMeson>(data_a, data_b,
-                                  time_until_collision, isotropic_,
-                           string_formation_time_, string_tension_);
+                                               time_until_collision, isotropic_,
+                                               string_formation_time_);
   }
   if (strings_switch_) {
     act->set_string_interface(string_process_interface_.get());

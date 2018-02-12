@@ -16,13 +16,13 @@
 
 namespace smash {
 
-StringProcess::StringProcess()
+StringProcess::StringProcess(double string_tension)
     : pmin_gluon_lightcone_(0.001),
       pow_fgluon_beta_(0.5),
       pow_fquark_alpha_(1.),
       pow_fquark_beta_(2.5),
       sigma_qperp_(0.5),
-      kappa_tension_string_(1.0),
+      kappa_tension_string_(string_tension),
       time_collision_(0.),
       gamma_factor_com_(1.) {
   // setup and initialize pythia
@@ -123,6 +123,7 @@ int StringProcess::append_final_state(const FourVector &uString,
   xvertex_pos.resize(nfrag + 1);
   xvertex_neg.resize(nfrag + 1);
   // x^{+} coordinates of the forward end
+  std::cout << kappa_tension_string_ << std::endl;
   xvertex_pos[0] = p_pos_tot / kappa_tension_string_;
   for (int i = 0; i < nfrag; i++) {
     // recursively compute x^{+} coordinates of q-qbar formation vertex
@@ -198,7 +199,7 @@ int StringProcess::append_final_state(const FourVector &uString,
 }
 
 void StringProcess::init(const ParticleList &incoming, double tcoll,
-                         double gamma, double string_tension) {
+                         double gamma) {
   PDGcodes_[0] = incoming[0].pdgcode();
   PDGcodes_[1] = incoming[1].pdgcode();
   massA_ = incoming[0].effective_mass();
@@ -225,7 +226,6 @@ void StringProcess::init(const ParticleList &incoming, double tcoll,
 
   time_collision_ = tcoll;
   gamma_factor_com_ = gamma;
-  kappa_tension_string_ = string_tension;
 }
 
 /**

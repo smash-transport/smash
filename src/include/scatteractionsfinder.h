@@ -158,8 +158,6 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const int N_proj_;
   /** Parameter for formation time */
   const double string_formation_time_;
-  /** Parameter for string tension in soft strings */
-  const double string_tension_;
   /** Photons switch */
   const bool photons_;
   /** Number of fractional photons */
