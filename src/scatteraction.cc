@@ -496,8 +496,8 @@ CollisionBranchList ScatterAction::resonance_cross_sections() {
     if (resonance_xsection > really_small) {
       resonance_process_list.push_back(make_unique<CollisionBranch>(
           type_resonance, resonance_xsection, ProcessType::TwoToOne));
-      log.info("Found resonance: ", type_resonance);
-      log.info(type_particle_a.name(), type_particle_b.name(), "->",
+      log.debug("Found resonance: ", type_resonance);
+      log.debug(type_particle_a.name(), type_particle_b.name(), "->",
                type_resonance.name(), " at sqrt(s)[GeV] = ", srts,
                " with xs[mb] = ", resonance_xsection);
     }

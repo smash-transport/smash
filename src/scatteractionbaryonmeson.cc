@@ -99,7 +99,7 @@ CollisionBranchList ScatterActionBaryonMeson::two_to_two_cross_sections() {
             process_list.push_back(make_unique<CollisionBranch>(
                 *nuc_a, *nuc_b, xsection, ProcessType::TwoToTwo));
             const auto &log = logger<LogArea::ScatterAction>();
-            log.info(type_a.name(), type_b.name(), "->",
+            log.debug(type_a.name(), type_b.name(), "->",
                      nuc_a->name(), nuc_b->name(), " at sqrts [GeV] = ",
                      sqrts, " with cs[mb] = ", xsection);
           }

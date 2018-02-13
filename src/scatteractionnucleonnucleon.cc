@@ -205,7 +205,7 @@ CollisionBranchList ScatterActionNucleonNucleon::find_xsection_from_type(
         if (xsection > really_small) {
           channel_list.push_back(make_unique<CollisionBranch>(
               *type_res_1, *type_res_2, xsection, ProcessType::TwoToTwo));
-          log.info(type_particle_a.name(), type_particle_b.name(), "->",
+          log.debug(type_particle_a.name(), type_particle_b.name(), "->",
                    type_res_1->name(), type_res_2->name(),
                    " at sqrt(s) [GeV] = ", sqrts, " with xs [mb] = ", xsection);
         }
