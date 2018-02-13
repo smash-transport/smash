@@ -110,7 +110,7 @@ CollisionBranchList ScatterActionBaryonBaryon::n_nucleus_to_n_nucleus() {
     process_list.push_back(make_unique<CollisionBranch>(
           type_N, *produced_nucleus, xsection, ProcessType::TwoToTwo));
     const auto &log = logger<LogArea::ScatterAction>();
-    log.error("Scattering with light nucleus: ", type_N.name(), type_nucleus.name(), "→ ",
+    log.debug("Scattering with light nucleus: ", type_N.name(), type_nucleus.name(), "→ ",
              type_N.name(), produced_nucleus->name(), " at ", std::sqrt(s), " GeV, xs[mb] = ",
              xsection);
   }
