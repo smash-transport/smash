@@ -140,6 +140,10 @@ a multicore machine, e.g. via
 
 (on a quad-core machine).
 
+If a test crashes, there might be some leftover in the "test_output" folder,
+causing the test to always fail when run again. To fix this problem, just remove
+the folder.
+
 
 Installing binaries as a user
 -----------------------------
