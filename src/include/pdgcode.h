@@ -260,7 +260,7 @@ class PdgCode {
    * accessors of various properties                                          *
    *                                                                          *
    ****************************************************************************/
-  /// true if this is nucleus, false otherwise
+  /// true if this is a nucleus, false otherwise
   inline bool is_nucleus() const {
     assert(digits_.is_nucleus_ == nucleus_.is_nucleus_);
     return nucleus_.is_nucleus_;
@@ -283,7 +283,7 @@ class PdgCode {
     if (!is_hadron() || digits_.n_q1_ == 0) {
       return 0;
     }
-   return antiparticle_sign();
+    return antiparticle_sign();
   }
   /// Returns whether this PDG code identifies a baryon.
   inline bool is_baryon() const {
@@ -374,7 +374,6 @@ class PdgCode {
   inline int isospin3() const {
     // net_quark_number(2) is the number of u quarks,
     // net_quark_number(1) is the number of d quarks.
-    // std::cout << string() << " " << is_nucleus() << " " << net_quark_number(2) << " " << net_quark_number(1) << std::endl;
     return net_quark_number(2) - net_quark_number(1);
   }
   /** returns the net number of \f$\bar s\f$ quarks.
@@ -561,7 +560,6 @@ class PdgCode {
    */
   int get_decimal() const {
     if (is_nucleus()) {
-      // std::cout << "Nucleus: A = " << nucleus_.A_ << ", Z = " << nucleus_.Z_ << ", NL = " << nucleus_.n_Lambda_ << ", I = " << nucleus_.I_ << std::endl;
       // ±10LZZZAAAI
       return antiparticle_sign() *
              (nucleus_.I_ + 10 * nucleus_.A_ + 10000 * nucleus_.Z_ +

@@ -40,15 +40,12 @@ int PdgCode::net_quark_number(const int quark) const {
     const int Np = nucleus_.Z_;
     const int Nn = nucleus_.A_ - nucleus_.Z_;
     const int NL = nucleus_.n_Lambda_;
-    if (quark == 1) {
-      return (2*Nn + Np + NL) * antiparticle_sign();
-    } else if (quark == 2) {
-      return (Nn + 2*Np + NL) * antiparticle_sign();
-    } else if (quark == 3) {
-      return NL * antiparticle_sign();
-    } else {
+    switch (quark) {
+      case 1: return (2*Nn + Np + NL) * antiparticle_sign();
+      case 2: return (Nn + 2*Np + NL) * antiparticle_sign();
+      case 3: return NL * antiparticle_sign();
       // Charmed nuclei may exist, but they are not foreseen by PDG standard
-      return 0.0;
+      default: return 0.0;
     }
   }
   // non-hadrons and those that have none of this quark type: 0.

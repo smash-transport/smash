@@ -553,6 +553,12 @@ TEST_CATCH(invalid_digits_nJ_baryon, PdgCode::InvalidPdgCode) {
 TEST_CATCH(invalid_digits_antimeson, PdgCode::InvalidPdgCode) {
   PdgCode particle("-331");
 }
+TEST_CATCH(invalid_nucleus_10, PdgCode::InvalidPdgCode) {
+  PdgCode particle("2000010020");
+}
+TEST_CATCH(invalid_nucleus_digits, PdgCode::InvalidPdgCode) {
+  PdgCode particle("100010020");
+}
 
 TEST(stream) {
   PdgCode particle1;
