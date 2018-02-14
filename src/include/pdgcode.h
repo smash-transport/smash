@@ -744,15 +744,20 @@ class PdgCode {
     // Nucleus
     if (length == 10 + sign) {
       nucleus_.is_nucleus_ = true;
-      if (codestring.substr(c, 2) != "10") {
+      if (codestring[c] != '1' || codestring[c + 1] != '0') {
         throw InvalidPdgCode("Pdg code of nucleus \"" + codestring +
                              "\" should start with 10\n");
       }
+      c += 2;
       // ±10LZZZAAAI is the standard for nuclei
-      nucleus_.n_Lambda_ = std::stoi(codestring.substr(c + 2, 1));
-      nucleus_.Z_ = std::stoi(codestring.substr(c + 3, 3));
-      nucleus_.A_ = std::stoi(codestring.substr(c + 6, 3));
-      nucleus_.I_ = std::stoi(codestring.substr(c + 9, 1));
+      std::array<int, 8> digits;
+      for (int i = 0; i < 8; i++) {
+        digits[i] = get_digit_from_char(codestring[c + i]);
+      }
+      nucleus_.n_Lambda_ = digits[0];
+      nucleus_.Z_ = 100 * digits[1] + 10 * digits[2] + digits[3];
+      nucleus_.A_ = 100 * digits[4] + 10 * digits[5] + digits[6];
+      nucleus_.I_ = digits[7];
       return;
     }
 
