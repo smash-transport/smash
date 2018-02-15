@@ -69,11 +69,9 @@ class PhotonCrossSection<ComputationMethod::Analytic> {
 
  private:
 
-  // masses are hardcoded. since we use static tabulation objects we
-  // can not make use of particleFinder.
+
   constexpr static double to_mb = 0.3894;
   constexpr static double Const = 0.059;
-  //constexpr static double g_POR = 11.93;
   constexpr static double g_POR = 22.6;
   constexpr static double ma1 = 1.26;
   constexpr static double ghat = 6.4483;
@@ -83,82 +81,17 @@ class PhotonCrossSection<ComputationMethod::Analytic> {
   constexpr static double C4 = -0.14095;
   constexpr static double Gammaa1 = 0.4;
   constexpr static double Pi = M_PI;
-  constexpr static double m_omega = 0.783;
-  constexpr static double momega = 0.783;
+  constexpr static double m_omega_ = 0.783;
 
   constexpr static double m_pion_ = 0.139;
   //constexpr static double m_rho_ = 0.775;
 };
 
+
+// options not implemented for review version. Will be added in the future. 
+// We keep it here to not break compilation
 template <>
-class PhotonCrossSection<ComputationMethod::Lookup> {
- private:
-  static std::unique_ptr<TabulationND<2>> tab_pi_pi_rho0_;
-  static std::unique_ptr<TabulationND<2>> tab_pi_pi0_rho_;
-  static std::unique_ptr<TabulationND<2>> tab_pi0_rho0_pi0_;
-  static std::unique_ptr<TabulationND<2>> tab_pi_rho0_pi_;
-
-  static std::unique_ptr<TabulationND<2>> tab_pi_rho_pi0_;
-  static std::unique_ptr<TabulationND<2>> tab_pi_rho_pi0_rho_;
-  static std::unique_ptr<TabulationND<2>> tab_pi_rho_pi0_omega_;
-  
-  
-  static std::unique_ptr<TabulationND<2>> tab_pi0_rho_pi_;
-  static std::unique_ptr<TabulationND<2>> tab_pi0_rho_pi_rho_;
-  static std::unique_ptr<TabulationND<2>> tab_pi0_rho_pi_omega_;
-
-  static std::unique_ptr<TabulationND<3>> tab_pi0_rho0_pi0_diff_;
-  static std::unique_ptr<TabulationND<3>> tab_pi_pi_rho0_diff_;
-  static std::unique_ptr<TabulationND<3>> tab_pi_pi0_rho_diff_;
-
-  static std::unique_ptr<TabulationND<3>> tab_pi_rho_pi0_diff_;
-  static std::unique_ptr<TabulationND<3>> tab_pi_rho_pi0_rho_diff_;
-  static std::unique_ptr<TabulationND<3>> tab_pi_rho_pi0_omega_diff_;
-  
-
-  static std::unique_ptr<TabulationND<3>> tab_pi0_rho_pi_diff_;
-  static std::unique_ptr<TabulationND<3>> tab_pi0_rho_pi_rho_diff_;
-  static std::unique_ptr<TabulationND<3>> tab_pi0_rho_pi_omega_diff_;
-  
-  static std::unique_ptr<TabulationND<3>> tab_pi_rho0_pi_diff_;
-
-
-
- public:
-
-  const double s0_diff = 0.01, s1_diff = 20.0, t0_diff = -18.0;
-  const double t1_diff = 5.0, ds_diff = 0.01, dt_diff = 0.01;
-  const double s0_tot = 0.01, s1_tot = 20.0, ds_tot = 0.01;
-  const double m_rho_0 = 0.775, m_rho_1 = 0.777, dm = 0.01;
-
-  double xs_pi_pi_rho0(const double s, const double m_rho);
-  double xs_pi_pi0_rho(const double s, const double m_rho);
-  double xs_pi0_rho0_pi0(const double s, const double m_rho);
-  double xs_pi_rho0_pi(const double s, const double m_rho);
-  
-  double xs_pi_rho_pi0(const double s, const double m_rho);
-  double xs_pi_rho_pi0_rho_mediated(const double s, const double m_rho);
-  double xs_pi_rho_pi0_omega_mediated(const double s, const double m_rho);
-  
-  double xs_pi0_rho_pi(const double s, const double m_rho);
-  double xs_pi0_rho_pi_rho_mediated(const double s, const double m_rho);
-  double xs_pi0_rho_pi_omega_mediated(const double s, const double m_rho);
-
-
-  double xs_diff_pi_pi_rho0(const double s, const double t, const double m_rho);
-  double xs_diff_pi_pi0_rho(const double s, const double t, const double m_rho);
-  double xs_diff_pi0_rho0_pi0(const double s, const double t, const double m_rho);
-  double xs_diff_pi_rho0_pi(const double s, const double t, const double m_rho);
-  
-  double xs_diff_pi_rho_pi0(const double s, const double t, const double m_rho);
-  double xs_diff_pi_rho_pi0_rho_mediated(const double s, const double t, const double m_rho);
-  double xs_diff_pi_rho_pi0_omega_mediated(const double s, const double t, const double m_rho);
-  
-  double xs_diff_pi0_rho_pi(const double s, const double t, const double m_rho);
-  double xs_diff_pi0_rho_pi_rho_mediated(const double s, const double t, const double m_rho);
-  double xs_diff_pi0_rho_pi_omega_mediated(const double s, const double t, const double m_rho);
-  
-};
+class PhotonCrossSection<ComputationMethod::Lookup> {};
 
 template <>
 class PhotonCrossSection<ComputationMethod::Parametrized> {};
