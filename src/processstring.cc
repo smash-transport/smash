@@ -19,7 +19,8 @@ namespace smash {
 StringProcess::StringProcess(double string_tension, double gluon_beta,
                              double gluon_pmin, double quark_alpha,
                              double quark_beta, double strange_supp,
-                             double diquark_supp, double sigma_perp)
+                             double diquark_supp, double sigma_perp,
+                             double stringz_a, double stringz_b)
     : pmin_gluon_lightcone_(gluon_pmin),
       pow_fgluon_beta_(gluon_beta),
       pow_fquark_alpha_(quark_alpha),
@@ -40,6 +41,8 @@ StringProcess::StringProcess(double string_tension, double gluon_beta,
   pythia_->readString("StringPT:sigma = 0.25");
   pythia_->readString("StringFlav:probQQtoQ = " + std::to_string(diquark_supp));
   pythia_->readString("StringFlav:probStoUD = " + std::to_string(strange_supp));
+  pythia_->readString("StringZ:aLund = "+ std::to_string(stringz_a));
+  pythia_->readString("StringZ:bLund = "+ std::to_string(stringz_b));
   /* manually set the parton distribution function */
   pythia_->readString("PDF:pSet = 13");
   pythia_->readString("PDF:pSetB = 13");

@@ -89,7 +89,9 @@ ScatterActionsFinder::ScatterActionsFinder(
      config.take({"Collision_Term", "String_Parameters", "Quark_Beta"},2.5),
      config.take({"Collision_Term", "String_Parameters", "Strange_Supp"},0.217),
      config.take({"Collision_Term", "String_Parameters", "Diquark_Supp"},0.081),
-     config.take({"Collision_Term", "String_Parameters", "Sigma_Perp"},0.7));
+     config.take({"Collision_Term", "String_Parameters", "Sigma_Perp"},0.7),
+     config.take({"Collision_Term", "String_Parameters", "StringZ_A"},0.68),
+     config.take({"Collision_Term", "String_Parameters", "StringZ_B"},0.98));
   }
 }
 
