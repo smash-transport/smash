@@ -9,6 +9,8 @@
 
 #include "include/scatteractionphoton.h"
 
+#include "include/outputinterface.h"
+
 // using std::sqrt;
 // using std::pow;
 // using std::atan;
@@ -68,6 +70,20 @@ ScatterActionPhoton::ReactionType ScatterActionPhoton::photon_reaction_type(
     default:
       return ReactionType::no_reaction;
   }
+}
+
+void ScatterActionPhoton::perform_photons(const OutputsList &outputs)
+{
+  for (int i = 0; i < number_of_fractional_photons_; i++)
+  {
+    generate_final_state();
+    for (const auto &output : outputs) {
+      if (output->is_photon_output()) {
+        output-> at_interaction(*this, 0.0);
+      }
+    }
+  }
+  
 }
 
 ParticleTypePtr ScatterActionPhoton::outgoing_hadron_type(

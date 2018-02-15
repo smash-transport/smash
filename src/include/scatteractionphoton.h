@@ -21,6 +21,7 @@
 #include "angles.h"
 #include "constants.h"
 #include "cxx14compat.h"
+#include "forwarddeclarations.h"
 #include "integrate.h"
 #include "kinematics.h"
 #include "particletype.h"
@@ -58,6 +59,11 @@ class ScatterActionPhoton : public ScatterAction {
     reac_ = photon_reaction_type(in);
     hadron_out_mass_ = sample_out_hadron_mass(hadron_out_t_);
   }
+
+  /**
+   * Create photons and write to output
+   */
+  void perform_photons(const OutputsList &outputs);
 
   /**
    * Generate the final-state for the photon scatter process. Generates only one
@@ -188,7 +194,7 @@ class ScatterActionPhoton : public ScatterAction {
   /**
    * Calculate the differential cross section of photon process.
    * Formfactors are not included
-   * 
+   *
    * \param t Mandelstam-t
    * \param t2 upper bound for t-range
    * \param t1 lower bound for t-range
@@ -210,73 +216,72 @@ class ScatterActionPhoton : public ScatterAction {
    */
   double rho_mass() const;
 
-  /** 
-   * Computes the total cross section of the photon process. 
-   * 
-   * \returns List of photon reaction branches. Currently size will be one. 
+  /**
+   * Computes the total cross section of the photon process.
+   *
+   * \returns List of photon reaction branches. Currently size will be one.
    */
   CollisionBranchList photon_cross_sections(
       bool from_check_collision = false,
       MediatorType mediator = default_mediator_);
 
   /**
-   * For processes which can happen via (pi, a1, rho) and omega exchange, 
+   * For processes which can happen via (pi, a1, rho) and omega exchange,
    * return the differential cross section for the (pi, a1, rho) channel in
-   * the first argument, for the omega channel in the second. If only 
-   * one channel exists, both values are the same. 
-   * 
+   * the first argument, for the omega channel in the second. If only
+   * one channel exists, both values are the same.
+   *
    * \param t Mandelstam-t
    * \param t2 upper bound for t-range
    * \param t1 lower bound for t-range
    * \param m_rho Mass of the incoming or outgoing rho-particle
    *
-   * \returns Diff. cross section for (pi,a1,rho) in the first argument, 
+   * \returns Diff. cross section for (pi,a1,rho) in the first argument,
    * for omega in the second.
-   */ 
+   */
   std::pair<double, double> diff_cross_section_single(const double t,
                                                       const double t2,
                                                       const double t1,
                                                       const double m_rho);
 
-
   /**
-   * For processes which can happen via (pi, a1, rho) and omega exchange, 
+   * For processes which can happen via (pi, a1, rho) and omega exchange,
    * return the form factor for the (pi, a1, rho) channel in
-   * the first argument, for the omega channel in the second. If only 
-   * one channel exists, both values are the same. 
-   * 
+   * the first argument, for the omega channel in the second. If only
+   * one channel exists, both values are the same.
+   *
    * \param E_photon Energy of photon [GeV]
-   * 
-   * \returns Form factor for (pi,a1,rho) in the first argument, 
+   *
+   * \returns Form factor for (pi,a1,rho) in the first argument,
    * for omega in the second.
-   */ 
+   */
   std::pair<double, double> form_factor_single(const double E_photon);
 
   /**
-   * Compute the form factor for a process with a pion as the lightest exchange particle
-   * See wiki for details how form factors are handled.
-   */  
+   * Compute the form factor for a process with a pion as the lightest exchange
+   * particle See wiki for details how form factors are handled.
+   */
   double form_factor_pion(const double) const;
-  
+
   /**
-   * Compute the form factor for a process with a omega as the lightest exchange particle
-   * See wiki for details how form factors are handled.
+   * Compute the form factor for a process with a omega as the lightest exchange
+   * particle See wiki for details how form factors are handled.
    */
   double form_factor_omega(const double) const;
 
-  /** 
-   * Compute the differential cross section with form factors included. 
-   * Takes care of correct handling of processes with multiple channels by reading the 
-   * default_mediator_ member variable.
+  /**
+   * Compute the differential cross section with form factors included.
+   * Takes care of correct handling of processes with multiple channels by
+   * reading the default_mediator_ member variable.
    *
    * \param t Mandelstam-t.
    * \param t2 upper bound for t-range.
    * \param t1 lower bound for t-range.
    * \param m_rho Mass of the incoming or outgoing rho-particle.
-   * \param energy of outgoing photon. 
+   * \param energy of outgoing photon.
    *
    * \returns diff. cross section [mb / GeV \f$^2\f$]
-   */  
+   */
   double diff_cross_section_w_ff(const double t, const double t2,
                                  const double t1, const double m_rho,
                                  const double E_photon);
