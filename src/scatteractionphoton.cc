@@ -282,6 +282,7 @@ double ScatterActionPhoton::rho_mass() const {
                  ? incoming_particles_[0].effective_mass()
                  : incoming_particles_[1].effective_mass();
     case ReactionType::no_reaction:
+    default: 
       // throw RuntimeError;
       return 0;
   }
@@ -354,7 +355,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections(
   }
 
   // Due to numerical reasons it can happen that the calculated cross sections 
-  // are negative (approximately 1e-15) if sqrt(s) is close to the threshold
+  // are negative (approximately -1e-15) if sqrt(s) is close to the threshold
   // energy. In those cases the cross section is manually set to 0.1 mb, which
   // is a reasonable value for the processes we are looking at (C14,C15,C16).
 
@@ -489,7 +490,6 @@ double ScatterActionPhoton::diff_cross_section_w_ff(const double t,
     case ReactionType::pi_p_rho_z_pi_p:
     case ReactionType::pi_m_rho_z_pi_m:
     case ReactionType::pi_p_pi_m_rho_z: {
-      //const double FF = form_factor(E_photon);
       const double FF = form_factor_pion(E_photon);
       const double xs = diff_cross_section(t, t2, t1, m_rho);
       const double xs_ff = pow_int(FF,4) * xs;
@@ -505,7 +505,9 @@ double ScatterActionPhoton::diff_cross_section_w_ff(const double t,
                                         }
                                         
     case ReactionType::no_reaction:
+    default:
       throw std::runtime_error("");
+      return 0;
   }
 }
 

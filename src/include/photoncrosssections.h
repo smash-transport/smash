@@ -82,9 +82,7 @@ class PhotonCrossSection<ComputationMethod::Analytic> {
   constexpr static double Gammaa1 = 0.4;
   constexpr static double Pi = M_PI;
   constexpr static double m_omega_ = 0.783;
-
   constexpr static double m_pion_ = 0.139;
-  //constexpr static double m_rho_ = 0.775;
 };
 
 
