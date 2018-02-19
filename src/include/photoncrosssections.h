@@ -83,11 +83,28 @@ class PhotonCrossSection<ComputationMethod::Analytic> {
   constexpr static double C4 = -0.14095;
   constexpr static double Gammaa1 = 0.4;
   constexpr static double Pi = M_PI;
-  constexpr static double m_omega = 0.783;
-  constexpr static double momega = 0.783;
-
+  constexpr static double m_omega_ = 0.783;
   constexpr static double m_pion_ = 0.139;
-  //constexpr static double m_rho_ = 0.775;
+
+  // Heaviside step function. This function is not part of the cmath library,
+  // we need to define it ourselves. It is necessary for the implementation
+  // of a non-stable rho meson in the pi0 + rho0 -> pi0 + gamma channel. For
+  // this specific scattering process, there are s and t channels with different
+  // theresholds. For s-channels, this is the omega meson mass while it is the
+  // sum of pi and rho mass for the t-channel. This is problematic for low rho
+  // masses, for example m_rho = 500 MeV. In this case, the s-channel is
+  // kinematically not accessible and need thus be excluded from the cross
+  // sections. Thus, we need the Heaviside function.
+
+  static double HeavisideTheta(double x) {
+
+  	if (x >= 0.0){
+  		return 1.0;
+  	}
+  	else{
+  		return 0.0;
+  	}
+  }
 };
 
 template <>
