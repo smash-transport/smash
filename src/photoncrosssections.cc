@@ -9,6 +9,8 @@
 
 #include "include/photoncrosssections.h"
 
+// TODO: Remove this comment. Here for git stuff
+
 namespace {
 typedef double (*Fun2D)(double, double);
 typedef double (*Fun3D)(double, double, double);
