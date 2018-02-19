@@ -91,7 +91,8 @@ CollisionBranchList ScatterActionBaryonBaryon::n_nucleus_to_n_nucleus() {
         produced_nucleus->baryon_number() != type_nucleus.baryon_number()) {
       continue;
     }
-    const double matrix_element = 750.0;
+    const double tmp = std::sqrt(s) - 3.0 * nucleon_mass;
+    const double matrix_element = 82.628 / std::pow(tmp, 0.774) + 643.173 * tmp;
     const double spin_factor = (produced_nucleus->spin() + 1) *
                                (type_N.spin() + 1);
     // Isospin factor is always the same, so it is included into matrix element
