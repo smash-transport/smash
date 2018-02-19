@@ -167,7 +167,7 @@ static double piminusp_elastic_pdg(double mandelstam_s) {
     std::vector<double> dedup_x;
     std::vector<double> dedup_y;
     std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
-    dedup_y = smooth(dedup_x, dedup_y, 0.1, 5);
+    dedup_y = smooth(dedup_x, dedup_y, 0.03, 6);
     piminusp_elastic_interpolation =
         make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
@@ -187,6 +187,12 @@ double piminusp_elastic(double mandelstam_s) {
     sigma = 1.76 + 11.2 * std::pow(p_lab, -0.64) + 0.043 * logp * logp;
   } else {
     sigma = piminusp_elastic_pdg(mandelstam_s);
+  }
+  // Tune down the elastic cross section so that the total cross section
+  // can fit the data.
+  if (mandelstam_s > 3.24 && mandelstam_s < 3.8809) {
+    sigma *= (0.15 * cos(2 * M_PI * (sqrt(mandelstam_s) - 1.8) / (1.97 - 1.8))
+              + 0.85);
   }
   // The elastic contributions from decays still need to be subtracted.
   if (piminusp_elastic_res_interpolation == nullptr) {
