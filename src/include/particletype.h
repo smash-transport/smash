@@ -170,6 +170,18 @@ class ParticleType {
   /// Check if particle is a nucleus
   inline bool is_nucleus() const { return pdgcode_.is_nucleus(); }
 
+  /// Check if particle is an (anti-)deuteron
+  inline bool is_deuteron() const {
+    return is_nucleus() && std::abs(pdgcode_.get_decimal()) == 1000010020;
+  }
+
+  /// Check if particle is an artificial d' resonance
+  inline bool is_dprime() const {
+    return is_nucleus() && std::abs(pdgcode_.get_decimal()) == 1000010021;
+  }
+
+ 
+
   /**
    * The minimum mass of the resonance that is kinematically allowed.
    *
