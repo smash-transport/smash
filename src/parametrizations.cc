@@ -191,8 +191,8 @@ double piminusp_elastic(double mandelstam_s) {
   // Tune down the elastic cross section so that the total cross section
   // can fit the data.
   if (mandelstam_s > 3.24 && mandelstam_s < 3.8809) {
-    sigma *= (0.15 * cos(2 * M_PI * (sqrt(mandelstam_s) - 1.8) / (1.97 - 1.8))
-              + 0.85);
+    sigma *= (0.12 * cos(2 * M_PI * (sqrt(mandelstam_s) - 1.8) / (1.97 - 1.8))
+              + 0.88);
   }
   // The elastic contributions from decays still need to be subtracted.
   if (piminusp_elastic_res_interpolation == nullptr) {
