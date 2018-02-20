@@ -9,6 +9,7 @@
 
 #include "include/photoncrosssections.h"
 
+#include "include/constants.h"
 
 namespace {
 typedef double (*Fun2D)(double, double);
@@ -29,6 +30,31 @@ double xs_wrapper(const double s, const double t, const double m) {
   else
     return 0;
 }
+
+// Heaviside step function. This function is not part of the cmath library,
+  // we need to define it ourselves. It is necessary for the implementation
+  // of a non-stable rho meson in the pi0 + rho0 -> pi0 + gamma channel. For
+  // this specific scattering process, there are s and t channels with different
+  // theresholds. For s-channels, this is the omega meson mass while it is the
+  // sum of pi and rho mass for the t-channel. This is problematic for low rho
+  // masses, for example m_rho = 500 MeV. In this case, the s-channel is
+  // kinematically not accessible and need thus be excluded from the cross
+  // sections. Thus, we need the Heaviside function.
+
+  double HeavisideTheta(double x) {
+
+  	if (x >= 0.0){
+  		return 1.0;
+  	}
+  	else{
+  		return 0.0;
+  	}
+  }
+  
+  double cut_off(const double sigma_mb) {
+      return (sigma_mb > smash::maximum_cross_section) ? smash::maximum_cross_section : sigma_mb;
+  }
+
 
 }  // anonymous namespace
 
@@ -1217,7 +1243,8 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho0_pi(
                              2 * pow(m_pion_, 2) * (pow(m_rho, 2) + s))))) /
       (512. * Pi);
 
-  return xs * to_mb / spin_deg_factor;
+  return cut_off(xs * to_mb / spin_deg_factor);
+  
 }
 
 double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho0_pi(
@@ -1479,7 +1506,8 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho0_pi(
              2 * pow(m_pion_, 2) * (pow(m_rho, 2) + s)))) /
       (512. * Pi);
 
-  return to_mb * diff_xs / spin_deg_factor;
+  return cut_off(to_mb * diff_xs / spin_deg_factor);
+  
 }
 
 // C12
@@ -2289,7 +2317,7 @@ PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi_rho_mediated(
            (pow(m_pion_, 4) + pow(pow(m_rho, 2) - s, 2) -
             2 * pow(m_pion_, 2) * (pow(m_rho, 2) + s)));
 
-  return xs * to_mb / spin_deg_factor;
+  return cut_off(xs * to_mb / spin_deg_factor);
 }
 
 double PhotonCrossSection<ComputationMethod::Analytic>::
@@ -2484,7 +2512,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::
        (pow(m_pion_, 4) + pow(pow(m_rho, 2) - s, 2) -
         2 * pow(m_pion_, 2) * (pow(m_rho, 2) + s)));
 
-  return to_mb * diff_xs / spin_deg_factor;
+  return cut_off(to_mb * diff_xs / spin_deg_factor);
 }
 
 // C13
@@ -3511,7 +3539,7 @@ PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0_rho_mediated(
            (pow(m_pion_, 4) + pow(pow(m_rho, 2) - s, 2) -
             2 * pow(m_pion_, 2) * (pow(m_rho, 2) + s)));
 
-  return xs * to_mb / spin_deg_factor;
+  return cut_off(xs * to_mb / spin_deg_factor);
 }
 
 double PhotonCrossSection<ComputationMethod::Analytic>::
@@ -3713,7 +3741,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::
         (pow(m_pion_, 4) + pow(pow(m_rho, 2) - s, 2) -
          2 * pow(m_pion_, 2) * (pow(m_rho, 2) + s))));
 
-  return to_mb * diff_xs / spin_deg_factor;
+  return cut_off(to_mb * diff_xs / spin_deg_factor);
 }
 /*----------------------------------------------------------------------------*/
 /* 					Pi + Rho -> Pi + Photon channels mediated
@@ -3780,7 +3808,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho0_pi0(
                  pow(m_omega_,2)*(-0.25*pow(m_pion_,8) + 0.5*pow(m_pion_,4)*pow(s,2) + pow(m_pion_,2)*(1.*pow(m_rho,2) - 1.*s)*pow(s,2) + (-0.25*pow(m_rho,2) + 0.25*s)*pow(s,3)))*
                log(fabs(-1.*pow(m_omega_,2) + tmax))))/pow(pow(m_omega_,2) - 1.*s,2)))/(16.*Pi*(pow(m_pion_,4) + pow(pow(m_rho,2) - s,2) - 2*pow(m_pion_,2)*(pow(m_rho,2) + s))));
 
-  return xs * to_mb / spin_deg_factor;
+  return cut_off(xs * to_mb / spin_deg_factor);
 }
 
 double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi0_rho0_pi0(
@@ -3816,7 +3844,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi0_rho0_pi0(
                    pow(pow(m_omega_,2) - s,2)))/(16.*Pi*(pow(m_pion_,4) +
                    pow(pow(m_rho,2) - s,2) - 2*pow(m_pion_,2)*(pow(m_rho,2) + s))));
 
-  return to_mb * diff_xs / spin_deg_factor;
+  return cut_off(to_mb * diff_xs / spin_deg_factor);
 }
 
 
@@ -3829,6 +3857,12 @@ PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0_omega_mediated(
   using std::pow;
   using std::sqrt;
   using std::abs;
+
+  // only s-channel. cm energy has to be high enough to form
+  // the exchange omega-meson
+  if (sqrt(s) < m_omega_) {
+      return 0.0;
+  }
 
   auto t_mandelstam = get_t_range(sqrt(s), m_pion_, m_rho, m_pion_, 0.);
   const double &tmax = t_mandelstam[0];
@@ -3850,7 +3884,7 @@ PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0_omega_mediated(
 		((pow(pow(m_omega_,2) - 1.*s,2)*(pow(m_pion_,4) + pow(m_rho,4) +
 		pow(m_pion_,2)*(-2.*pow(m_rho,2) - 2.*s) - 2.*pow(m_rho,2)*s + pow(s,2))));
 
-        return xs * to_mb / spin_deg_factor;
+        return cut_off(xs * to_mb / spin_deg_factor);
 }
 
 double PhotonCrossSection<ComputationMethod::Analytic>::
@@ -3864,6 +3898,10 @@ double PhotonCrossSection<ComputationMethod::Analytic>::
   using std::sqrt;
   using std::abs;
 
+  if (sqrt(s) < m_omega_) {
+      return 0.0;
+  }
+
   const double diff_xs =
       (0.0024867959858108648 * pow(Const, 2) * pow(g_POR, 4) *
        (pow(m_pion_, 8) - 2 * pow(m_pion_, 6) * pow(m_rho, 2) +
@@ -3875,7 +3913,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::
       ((pow(pow(m_omega_, 2) - s, 2) * (pow(m_pion_, 4) + pow(pow(m_rho, 2) - s, 2) -
                                       2 * pow(m_pion_, 2) * (pow(m_rho, 2) + s))));
 
-  return to_mb * diff_xs / spin_deg_factor;
+  return cut_off(to_mb * diff_xs / spin_deg_factor);
 }
 
 // C16
@@ -3945,7 +3983,7 @@ PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi_omega_mediated(
       ((pow(m_pion_, 4) + pow(pow(m_rho, 2) - s, 2) -
         2 * pow(m_pion_, 2) * (pow(m_rho, 2) + s)));
 
-  return xs * to_mb / spin_deg_factor;
+  return cut_off(xs * to_mb / spin_deg_factor);
 }
 
 double PhotonCrossSection<ComputationMethod::Analytic>::
@@ -3965,7 +4003,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::
         2 * pow(m_pion_, 2) * (pow(m_rho, 2) + s)) *
        pow(pow(m_omega_, 2) - t, 2));
 
-  return to_mb * diff_xs / spin_deg_factor;
+  return cut_off(to_mb * diff_xs / spin_deg_factor);
 }
 
 /*----------------------------------------------------------------------------*/
@@ -3978,27 +4016,27 @@ double PhotonCrossSection<ComputationMethod::Analytic>::
 // C12 + C16
 double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi(
     const double s, const double m_rho) {
-  return xs_pi0_rho_pi_rho_mediated(s, m_rho) +
-         xs_pi0_rho_pi_omega_mediated(s, m_rho);
+  return cut_off(xs_pi0_rho_pi_rho_mediated(s, m_rho) +
+         xs_pi0_rho_pi_omega_mediated(s, m_rho));
 }
 
 double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi0_rho_pi(
     const double s, const double t, const double m_rho) {
-  return xs_diff_pi0_rho_pi_rho_mediated(s, t, m_rho) +
-         xs_diff_pi0_rho_pi_omega_mediated(s, t, m_rho);
+  return cut_off(xs_diff_pi0_rho_pi_rho_mediated(s, t, m_rho) +
+         xs_diff_pi0_rho_pi_omega_mediated(s, t, m_rho));
 }
 
 // C13 + C15
 double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0(
     const double s, const double m_rho) {
-  return xs_pi_rho_pi0_rho_mediated(s, m_rho) +
-         xs_pi_rho_pi0_omega_mediated(s, m_rho);
+  return cut_off(xs_pi_rho_pi0_rho_mediated(s, m_rho) +
+         xs_pi_rho_pi0_omega_mediated(s, m_rho));
 }
 
 double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho_pi0(
     const double s, const double t, const double m_rho) {
-  return xs_diff_pi_rho_pi0_rho_mediated(s, t, m_rho) +
-         xs_diff_pi_rho_pi0_omega_mediated(s, t, m_rho);
+  return cut_off(xs_diff_pi_rho_pi0_rho_mediated(s, t, m_rho) +
+         xs_diff_pi_rho_pi0_omega_mediated(s, t, m_rho));
 }
 
 /*----------------------------------------------------------------------------*/
@@ -6125,7 +6163,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi_rho0(
                   (-8. * pow(m_pion_, 2) - 4. * pow(m_rho, 2) + 4. * s)))) /
            (16. * Pi * s * (-4 * pow(m_pion_, 2) + s)));
 
-  return xs * to_mb / spin_deg_factor;
+  return cut_off(xs * to_mb / spin_deg_factor);
 }
 
 double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi_rho0(
@@ -6378,7 +6416,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi_rho0(
                    2))))) /
        (16. * Pi * s * (-4 * pow(m_pion_, 2) + s)));
 
-  return to_mb * diff_xs / spin_deg_factor;
+  return cut_off(to_mb * diff_xs / spin_deg_factor);
 }
 
 // C22
@@ -7104,7 +7142,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
              (pow(m_rho, 4) - 1. * pow(m_rho, 2) * s))) /
       (16. * Pi * (4 * pow(m_pion_, 2) - s) * s);
 
-  return xs * to_mb / spin_deg_factor;
+  return cut_off(xs * to_mb / spin_deg_factor);
 }
 
 double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi0_rho(
@@ -7267,7 +7305,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi0_rho(
             (pow(m_rho, 2) * (-pow(ma1, 2) + t)))) /
       (16. * Pi * s * (-4 * pow(m_pion_, 2) + s));
 
-  return to_mb * diff_xs / spin_deg_factor;
+  return cut_off(to_mb * diff_xs / spin_deg_factor);
 }
 
 /*----------------------------------------------------------------------------*/
