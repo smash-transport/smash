@@ -80,7 +80,6 @@ CollisionBranchList ScatterActionBaryonBaryon::n_nucleus_to_n_nucleus() {
   const ParticleType &type_N = type_a.is_nucleon() ? type_a : type_b;
   const ParticleType &type_nucleus = type_a.is_nucleus() ? type_a : type_b;
   CollisionBranchList process_list;
-
   ParticleTypePtrList nuclei = ParticleType::list_light_nuclei();
   const double s = mandelstam_s();
   const double sqrts = std::sqrt(s);
@@ -96,8 +95,10 @@ CollisionBranchList ScatterActionBaryonBaryon::n_nucleus_to_n_nucleus() {
     if (std::signbit(type_N.baryon_number()) ==
         std::signbit(type_nucleus.baryon_number())) {
       // Nd → Nd', N̅d̅→ N̅d̅' and reverse
-      const double tmp = sqrts - 3.0 * nucleon_mass;
-      matrix_element = 82.6278 / std::pow(tmp, 0.774245) + 643.173 * tmp;
+      const double tmp = sqrts - type_N.min_mass_kinematic() -
+                                 type_nucleus.min_mass_kinematic();
+      assert(tmp >= 0.0);
+      matrix_element = 79.0474 / std::pow(tmp, 0.7897) + 654.596 * tmp;
     } else {
       // N̅d →  N̅d', Nd̅→ Nd̅' and reverse
       matrix_element = 681.4;
@@ -116,13 +117,16 @@ CollisionBranchList ScatterActionBaryonBaryon::n_nucleus_to_n_nucleus() {
       const double resonance_integral =
           produced_nucleus->iso_multiplet()->get_integral_NR(sqrts);
       xsection *= resonance_integral;
+      //std::cout << "Resonance integral " << resonance_integral
+      //          << ", matrix element: " << matrix_element
+      //          << ", cm_momentum: " << cm_momentum() << std::endl;
     }
     process_list.push_back(make_unique<CollisionBranch>(
           type_N, *produced_nucleus, xsection, ProcessType::TwoToTwo));
     const auto &log = logger<LogArea::ScatterAction>();
-    log.debug("Scattering with light nucleus: ", type_N.name(), type_nucleus.name(), "→ ",
-             type_N.name(), produced_nucleus->name(), " at ", std::sqrt(s), " GeV, xs[mb] = ",
-             xsection);
+    log.debug(type_N.name(), type_nucleus.name(), "→ ",
+             type_N.name(), produced_nucleus->name(),
+             " at ", sqrts, " GeV, xs[mb] = ", xsection);
   }
   return process_list;
 }

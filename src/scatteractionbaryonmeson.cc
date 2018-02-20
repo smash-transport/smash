@@ -151,14 +151,14 @@ CollisionBranchList ScatterActionBaryonMeson::two_to_two_cross_sections() {
         const double resonance_integral =
             produced_nucleus->iso_multiplet()->get_integral_piR(sqrts);
         xsection *= resonance_integral;
-        std::cout << "Resonance integral " << resonance_integral
-                  << ", matrix element: " << matrix_element
-                  << ", cm_momentum: " << cm_momentum() << std::endl;
+        //std::cout << "Resonance integral " << resonance_integral
+        //          << ", matrix element: " << matrix_element
+        //          << ", cm_momentum: " << cm_momentum() << std::endl;
       }
       process_list.push_back(make_unique<CollisionBranch>(
             type_pi, *produced_nucleus, xsection, ProcessType::TwoToTwo));
       const auto &log = logger<LogArea::ScatterAction>();
-      log.info(type_pi.name(), type_nucleus.name(), "→ ",
+      log.debug(type_pi.name(), type_nucleus.name(), "→ ",
                type_pi.name(), produced_nucleus->name(), " at ", sqrts, " GeV, xs[mb] = ",
                xsection);
     }
