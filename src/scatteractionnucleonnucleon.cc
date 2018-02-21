@@ -83,7 +83,8 @@ static double Cugnon_bnp(double plab) {
   }
 }
 
-CollisionBranchList ScatterActionNucleonNucleon::two_to_two_cross_sections() {
+CollisionBranchList ScatterActionNucleonNucleon::two_to_two_cross_sections
+                               (ReactionsBitSet included_2to2) {
   CollisionBranchList process_list, channel_list;
   const double sqrts = sqrt_s();
 
@@ -100,26 +101,30 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_cross_sections() {
           ? ParticleType::list_anti_Deltas()
           : ParticleType::list_Deltas();
   /* First: Find N N → N R channels. */
-  channel_list = find_xsection_from_type(
-      ParticleType::list_baryon_resonances(), nuc_or_anti_nuc,
-      [&sqrts](const ParticleType &type_res_1, const ParticleType &) {
-        return type_res_1.iso_multiplet()->get_integral_NR(sqrts);
-      });
-  process_list.reserve(process_list.size() + channel_list.size());
-  std::move(channel_list.begin(), channel_list.end(),
-            std::inserter(process_list, process_list.end()));
-  channel_list.clear();
+  if (included_2to2[IncludedReactions::NN_to_NR] == 1) {
+    channel_list = find_xsection_from_type(
+        ParticleType::list_baryon_resonances(), nuc_or_anti_nuc,
+        [&sqrts](const ParticleType &type_res_1, const ParticleType&){
+            return type_res_1.iso_multiplet()->get_integral_NR(sqrts);
+        });
+    process_list.reserve(process_list.size() + channel_list.size());
+    std::move(channel_list.begin(), channel_list.end(),
+        std::inserter(process_list, process_list.end()));
+    channel_list.clear();
+  }
 
   /* Second: Find N N → Δ R channels. */
-  channel_list = find_xsection_from_type(
+  if (included_2to2[IncludedReactions::NN_to_DR] == 1) {
+    channel_list = find_xsection_from_type(
       ParticleType::list_baryon_resonances(), delta_or_anti_delta,
-      [&sqrts](const ParticleType &type_res_1, const ParticleType &type_res_2) {
+      [&sqrts](const ParticleType &type_res_1, const ParticleType &type_res_2){
         return type_res_1.iso_multiplet()->get_integral_RR(type_res_2, sqrts);
       });
-  process_list.reserve(process_list.size() + channel_list.size());
-  std::move(channel_list.begin(), channel_list.end(),
-            std::inserter(process_list, process_list.end()));
-  channel_list.clear();
+    process_list.reserve(process_list.size() + channel_list.size());
+    std::move(channel_list.begin(), channel_list.end(),
+        std::inserter(process_list, process_list.end()));
+    channel_list.clear();
+  }
 
   return process_list;
 }

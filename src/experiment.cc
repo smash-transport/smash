@@ -244,7 +244,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   const double t_end = config.read({"General", "End_Time"});
   const double output_dt = config.take({"Output", "Output_Interval"}, t_end);
   const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
-  const bool two_to_two = config.take({"Collision_Term", "Two_to_Two"}, true);
+  ReactionsBitSet included_2to2 =
+                         config.take({"Collision_Term", "Included_2to2"});
   bool strings_switch_default = true;
   if (modus_chooser == "Box") {
     strings_switch_default = false;
@@ -274,7 +275,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
           config.take({"General", "Gaussian_Sigma"}, 1.),
           config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.),
           two_to_one,
-          two_to_two,
+          included_2to2,
           strings_switch,
           nnbar_treatment,
           photons_switch,
@@ -427,7 +428,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   if (parameters_.two_to_one) {
     action_finders_.emplace_back(make_unique<DecayActionsFinder>());
   }
-  if (parameters_.two_to_one || parameters_.two_to_two ||
+  if (parameters_.two_to_one || parameters_.included_2to2.any(),
       parameters_.strings_switch) {
     auto scat_finder = make_unique<ScatterActionsFinder>(
         config, parameters_, nucleon_has_interacted_, modus_.total_N_number(),
