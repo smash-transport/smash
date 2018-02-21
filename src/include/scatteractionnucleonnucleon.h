@@ -41,7 +41,8 @@ class ScatterActionNucleonNucleon : public ScatterActionBaryonBaryon {
    * of the two nucleons. Each element in the list contains the type(s) of the
    * final state particle(s) and the cross section for that particular process.
    */
-  CollisionBranchList two_to_two_cross_sections() override;
+  CollisionBranchList two_to_two_cross_sections
+             (ReactionsBitSet included_2to2) override;
 
  protected:
   /**
