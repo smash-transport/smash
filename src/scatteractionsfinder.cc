@@ -120,7 +120,7 @@ ScatterActionsFinder::ScatterActionsFinder(
       string_formation_time_(1.),
       photons_(false),
       n_fractional_photons_(1) {
-    string_process_interface_ = make_unique<StringProcess>();
+    string_process_interface_ = make_unique<StringProcess>(1.0,0.5,0.001,1.0,2.5,0.217,0.081,0.7,0.68,0.98);
 }
 
 ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
