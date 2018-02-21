@@ -7,14 +7,17 @@
  *
  */
 
-#ifndef SRC_INCLUDE_FILEDELETER_H_
-#define SRC_INCLUDE_FILEDELETER_H_
+#ifndef SRC_INCLUDE_FILE_H_
+#define SRC_INCLUDE_FILE_H_
 
 #include <cerrno>
 #include <cstdio>
 #include <cstring>
 #include <memory>
 #include <stdexcept>
+#include <string>
+
+#include "cxx14compat.h"
 
 namespace smash {
 
@@ -51,6 +54,14 @@ struct FileDeleter {
  * std::unique_ptr directly with std::FILE.
  */
 using FilePtr = std::unique_ptr<std::FILE, FileDeleter>;
+
+/**
+ * Open a file with given mode.
+ *
+ * This wraps std::fopen but uses FileDeleter to automatically close the file.
+ */
+FilePtr fopen(const std::string& filename, const std::string& mode);
+
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_FILEDELETER_H_
+#endif  // SRC_INCLUDE_FILE_H_

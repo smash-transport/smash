@@ -19,7 +19,6 @@
 #include "include/density.h"
 #include "include/energymomentumtensor.h"
 #include "include/experimentparameters.h"
-#include "include/filedeleter.h"
 #include "include/forwarddeclarations.h"
 #include "include/particles.h"
 #include "include/vtkoutput.h"
@@ -155,7 +154,6 @@ void ThermodynamicOutput::density_along_line(
     a_file << r.x1() << " " << r.x2() << " " << r.x3() << " " << rho_eck
            << "\n";
   }
-  a_file.close();
 }
 
 }  // namespace smash

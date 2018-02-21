@@ -15,7 +15,7 @@
 
 #include "density.h"
 #include "experimentparameters.h"
-#include "filedeleter.h"
+#include "file.h"
 #include "forwarddeclarations.h"
 #include "outputinterface.h"
 #include "outputparameters.h"

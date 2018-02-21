@@ -13,7 +13,7 @@
 #include <memory>
 #include <string>
 
-#include "filedeleter.h"
+#include "file.h"
 #include "forwarddeclarations.h"
 #include "outputinterface.h"
 #include "outputparameters.h"

@@ -134,79 +134,80 @@ TEST(full2013_format) {
   const double impact_parameter = 1.783;
   osc2013full->at_eventend(particles, event_id, impact_parameter);
 
-  bf::fstream outputfile;
-  outputfile.open(outputfilepath, std::ios_base::in);
-  VERIFY(outputfile.good());
-  if (outputfile.good()) {
-    std::string line;
-    /* Check header */
-    std::getline(outputfile, line);
-    COMPARE(line,
-            "#!OSCAR2013 full_event_history t x y z mass p0 px py pz"
-            " pdg ID charge");
-    std::getline(outputfile, line);
-    COMPARE(line, "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none none");
-    std::getline(outputfile, line);
-    COMPARE(line, "# " VERSION_MAJOR);
-    /* Check initial particle list description line */
-    std::string initial_line =
-        "# event " + std::to_string(event_id + 1) + " in " + std::to_string(2);
-    std::getline(outputfile, line);
-    COMPARE(line, initial_line);
-    /* Check initial particle data lines item by item */
-    for (const ParticleData &data : action->incoming_particles()) {
-      std::array<std::string, data_elements> datastring;
-      for (int j = 0; j < data_elements; j++) {
-        outputfile >> datastring.at(j);
+  {
+    bf::fstream outputfile;
+    outputfile.open(outputfilepath, std::ios_base::in);
+    VERIFY(outputfile.good());
+    if (outputfile.good()) {
+      std::string line;
+      /* Check header */
+      std::getline(outputfile, line);
+      COMPARE(line,
+              "#!OSCAR2013 full_event_history t x y z mass p0 px py pz"
+              " pdg ID charge");
+      std::getline(outputfile, line);
+      COMPARE(line, "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none none");
+      std::getline(outputfile, line);
+      COMPARE(line, "# " VERSION_MAJOR);
+      /* Check initial particle list description line */
+      std::string initial_line =
+          "# event " + std::to_string(event_id + 1) + " in " + std::to_string(2);
+      std::getline(outputfile, line);
+      COMPARE(line, initial_line);
+      /* Check initial particle data lines item by item */
+      for (const ParticleData &data : action->incoming_particles()) {
+        std::array<std::string, data_elements> datastring;
+        for (int j = 0; j < data_elements; j++) {
+          outputfile >> datastring.at(j);
+        }
+        compare_particledata(datastring, data, data.id());
       }
-      compare_particledata(datastring, data, data.id());
-    }
-    /* Get the dangling newline character */
-    outputfile.get();
-    /* Check interaction block */
-    std::getline(outputfile, line);
-    std::string interaction_line = "# interaction in " + std::to_string(2) +
-                                   " out " +
-                                   std::to_string(final_particles.size());
-    // Allow additional fields
-    COMPARE(line.substr(0, interaction_line.size()), interaction_line);
-    for (const ParticleData &data : action->incoming_particles()) {
-      std::array<std::string, data_elements> datastring;
-      for (int j = 0; j < data_elements; j++) {
-        outputfile >> datastring.at(j);
+      /* Get the dangling newline character */
+      outputfile.get();
+      /* Check interaction block */
+      std::getline(outputfile, line);
+      std::string interaction_line = "# interaction in " + std::to_string(2) +
+                                     " out " +
+                                     std::to_string(final_particles.size());
+      // Allow additional fields
+      COMPARE(line.substr(0, interaction_line.size()), interaction_line);
+      for (const ParticleData &data : action->incoming_particles()) {
+        std::array<std::string, data_elements> datastring;
+        for (int j = 0; j < data_elements; j++) {
+          outputfile >> datastring.at(j);
+        }
+        compare_particledata(datastring, data, data.id());
       }
-      compare_particledata(datastring, data, data.id());
-    }
-    for (ParticleData &data : final_particles) {
-      std::array<std::string, data_elements> datastring;
-      for (int j = 0; j < data_elements; j++) {
-        outputfile >> datastring.at(j);
+      for (ParticleData &data : final_particles) {
+        std::array<std::string, data_elements> datastring;
+        for (int j = 0; j < data_elements; j++) {
+          outputfile >> datastring.at(j);
+        }
+        compare_particledata(datastring, data, data.id());
       }
-      compare_particledata(datastring, data, data.id());
-    }
-    /* Get the dangling newline character */
-    outputfile.get();
-    /* Check final particle list */
-    std::getline(outputfile, line);
-    std::string final_line = "# event " + std::to_string(event_id + 1) +
-                             " out " + std::to_string(particles.size());
-    COMPARE(line, final_line);
-    for (ParticleData &data : particles) {
-      std::array<std::string, data_elements> datastring;
-      for (int j = 0; j < data_elements; j++) {
-        outputfile >> datastring.at(j);
+      /* Get the dangling newline character */
+      outputfile.get();
+      /* Check final particle list */
+      std::getline(outputfile, line);
+      std::string final_line = "# event " + std::to_string(event_id + 1) +
+                               " out " + std::to_string(particles.size());
+      COMPARE(line, final_line);
+      for (ParticleData &data : particles) {
+        std::array<std::string, data_elements> datastring;
+        for (int j = 0; j < data_elements; j++) {
+          outputfile >> datastring.at(j);
+        }
+        compare_particledata(datastring, data, data.id());
       }
-      compare_particledata(datastring, data, data.id());
+      /* Get the dangling newline character */
+      outputfile.get();
+      /* Check for event end line */
+      std::getline(outputfile, line);
+      std::string end_line = "# event " + std::to_string(event_id + 1) +
+                             " end 0" + " impact   1.783";
+      COMPARE(line, end_line);
     }
-    /* Get the dangling newline character */
-    outputfile.get();
-    /* Check for event end line */
-    std::getline(outputfile, line);
-    std::string end_line = "# event " + std::to_string(event_id + 1) +
-                           " end 0" + " impact   1.783";
-    COMPARE(line, end_line);
   }
-  outputfile.close();
   VERIFY(bf::remove(outputfilepath));
 }
 
@@ -255,41 +256,42 @@ TEST(final2013_format) {
   osc2013final->at_eventend(particles, event_id, impact_parameter);
   COMPARE(action->outgoing_particles(), particles.copy_to_vector());
 
-  bf::fstream outputfile;
-  outputfile.open(outputfilepath, std::ios_base::in);
-  VERIFY(outputfile.good());
-  if (outputfile.good()) {
-    std::string line;
-    /* Check header */
-    std::getline(outputfile, line);
-    COMPARE(line,
-            "#!OSCAR2013 particle_lists t x y z mass p0 px py pz"
-            " pdg ID charge");
-    std::getline(outputfile, line);
-    COMPARE(line, "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none none");
-    std::getline(outputfile, line);
-    COMPARE(line, "# " VERSION_MAJOR);
-    /* Check final particle list */
-    std::getline(outputfile, line);
-    std::string final_line = "# event " + std::to_string(event_id + 1) +
-                             " out " + std::to_string(particles.size());
-    COMPARE(line, final_line);
-    for (ParticleData &data : particles) {
-      std::array<std::string, data_elements> datastring;
-      for (int j = 0; j < data_elements; j++) {
-        outputfile >> datastring.at(j);
+  {
+    bf::fstream outputfile;
+    outputfile.open(outputfilepath, std::ios_base::in);
+    VERIFY(outputfile.good());
+    if (outputfile.good()) {
+      std::string line;
+      /* Check header */
+      std::getline(outputfile, line);
+      COMPARE(line,
+              "#!OSCAR2013 particle_lists t x y z mass p0 px py pz"
+              " pdg ID charge");
+      std::getline(outputfile, line);
+      COMPARE(line, "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none none");
+      std::getline(outputfile, line);
+      COMPARE(line, "# " VERSION_MAJOR);
+      /* Check final particle list */
+      std::getline(outputfile, line);
+      std::string final_line = "# event " + std::to_string(event_id + 1) +
+                               " out " + std::to_string(particles.size());
+      COMPARE(line, final_line);
+      for (ParticleData &data : particles) {
+        std::array<std::string, data_elements> datastring;
+        for (int j = 0; j < data_elements; j++) {
+          outputfile >> datastring.at(j);
+        }
+        compare_particledata(datastring, data, data.id());
       }
-      compare_particledata(datastring, data, data.id());
+      /* Get the dangling newline character */
+      outputfile.get();
+      /* Check for event end line */
+      std::getline(outputfile, line);
+      std::string end_line = "# event " + std::to_string(event_id + 1) +
+                             " end 0" + " impact   2.340";
+      COMPARE(line, end_line);
     }
-    /* Get the dangling newline character */
-    outputfile.get();
-    /* Check for event end line */
-    std::getline(outputfile, line);
-    std::string end_line = "# event " + std::to_string(event_id + 1) +
-                           " end 0" + " impact   2.340";
-    COMPARE(line, end_line);
   }
-  outputfile.close();
   VERIFY(bf::remove(outputfilepath));
 }
 
@@ -326,80 +328,81 @@ TEST(full_extended_oscar) {
   const double impact_parameter = 1.783;
   osc2013full->at_eventend(particles, event_id, impact_parameter);
 
-  bf::fstream outputfile;
-  outputfile.open(outputfilepath, std::ios_base::in);
-  VERIFY(outputfile.good());
-  std::string line;
-  /* Check header */
-  std::getline(outputfile, line);
-  COMPARE(line,
-          "#!OSCAR2013Extended full_event_history"
-          " t x y z mass p0 px py pz pdg ID charge ncoll"
-          " form_time xsecfac proc_id_origin proc_type_origin"
-          " time_last_coll pdg_mother1 pdg_mother2");
-  std::getline(outputfile, line);
-  COMPARE(line,
-          "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none"
-          " none none fm none none none fm none none");
-  std::getline(outputfile, line);
-  COMPARE(line, "# " VERSION_MAJOR);
-  /* Check initial particle list description line */
-  std::string initial_line =
-      "# event " + std::to_string(event_id + 1) + " in " + std::to_string(2);
-  std::getline(outputfile, line);
-  COMPARE(line, initial_line);
-  /* Check initial particle data lines item by item */
-  for (const ParticleData &data : action->incoming_particles()) {
-    std::array<std::string, data_elements_extended> datastring;
-    for (int j = 0; j < data_elements_extended; j++) {
-      outputfile >> datastring.at(j);
+  {
+    bf::fstream outputfile;
+    outputfile.open(outputfilepath, std::ios_base::in);
+    VERIFY(outputfile.good());
+    std::string line;
+    /* Check header */
+    std::getline(outputfile, line);
+    COMPARE(line,
+            "#!OSCAR2013Extended full_event_history"
+            " t x y z mass p0 px py pz pdg ID charge ncoll"
+            " form_time xsecfac proc_id_origin proc_type_origin"
+            " time_last_coll pdg_mother1 pdg_mother2");
+    std::getline(outputfile, line);
+    COMPARE(line,
+            "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none"
+            " none none fm none none none fm none none");
+    std::getline(outputfile, line);
+    COMPARE(line, "# " VERSION_MAJOR);
+    /* Check initial particle list description line */
+    std::string initial_line =
+        "# event " + std::to_string(event_id + 1) + " in " + std::to_string(2);
+    std::getline(outputfile, line);
+    COMPARE(line, initial_line);
+    /* Check initial particle data lines item by item */
+    for (const ParticleData &data : action->incoming_particles()) {
+      std::array<std::string, data_elements_extended> datastring;
+      for (int j = 0; j < data_elements_extended; j++) {
+        outputfile >> datastring.at(j);
+      }
+      compare_extended_particledata(datastring, data, data.id());
     }
-    compare_extended_particledata(datastring, data, data.id());
-  }
-  /* Get the dangling newline character */
-  outputfile.get();
-  /* Check interaction block */
-  std::getline(outputfile, line);
-  std::string interaction_line = "# interaction in " + std::to_string(2) +
-                                 " out " +
-                                 std::to_string(final_particles.size());
-  // Allow additional fields
-  COMPARE(line.substr(0, interaction_line.size()), interaction_line);
-  for (const ParticleData &data : action->incoming_particles()) {
-    std::array<std::string, data_elements_extended> datastring;
-    for (int j = 0; j < data_elements_extended; j++) {
-      outputfile >> datastring.at(j);
+    /* Get the dangling newline character */
+    outputfile.get();
+    /* Check interaction block */
+    std::getline(outputfile, line);
+    std::string interaction_line = "# interaction in " + std::to_string(2) +
+                                   " out " +
+                                   std::to_string(final_particles.size());
+    // Allow additional fields
+    COMPARE(line.substr(0, interaction_line.size()), interaction_line);
+    for (const ParticleData &data : action->incoming_particles()) {
+      std::array<std::string, data_elements_extended> datastring;
+      for (int j = 0; j < data_elements_extended; j++) {
+        outputfile >> datastring.at(j);
+      }
+      compare_extended_particledata(datastring, data, data.id());
     }
-    compare_extended_particledata(datastring, data, data.id());
-  }
-  for (ParticleData &data : final_particles) {
-    std::array<std::string, data_elements_extended> datastring;
-    for (int j = 0; j < data_elements_extended; j++) {
-      outputfile >> datastring.at(j);
+    for (ParticleData &data : final_particles) {
+      std::array<std::string, data_elements_extended> datastring;
+      for (int j = 0; j < data_elements_extended; j++) {
+        outputfile >> datastring.at(j);
+      }
+      compare_extended_particledata(datastring, data, data.id());
     }
-    compare_extended_particledata(datastring, data, data.id());
-  }
-  /* Get the dangling newline character */
-  outputfile.get();
-  /* Check final particle list */
-  std::getline(outputfile, line);
-  std::string final_line = "# event " + std::to_string(event_id + 1) + " out " +
-                           std::to_string(particles.size());
-  COMPARE(line, final_line);
-  for (ParticleData &data : particles) {
-    std::array<std::string, data_elements_extended> datastring;
-    for (int j = 0; j < data_elements_extended; j++) {
-      outputfile >> datastring.at(j);
+    /* Get the dangling newline character */
+    outputfile.get();
+    /* Check final particle list */
+    std::getline(outputfile, line);
+    std::string final_line = "# event " + std::to_string(event_id + 1) + " out " +
+                             std::to_string(particles.size());
+    COMPARE(line, final_line);
+    for (ParticleData &data : particles) {
+      std::array<std::string, data_elements_extended> datastring;
+      for (int j = 0; j < data_elements_extended; j++) {
+        outputfile >> datastring.at(j);
+      }
+      compare_extended_particledata(datastring, data, data.id());
     }
-    compare_extended_particledata(datastring, data, data.id());
+    /* Get the dangling newline character */
+    outputfile.get();
+    /* Check for event end line */
+    std::getline(outputfile, line);
+    std::string end_line =
+        "# event " + std::to_string(event_id + 1) + " end 0" + " impact   1.783";
+    COMPARE(line, end_line);
   }
-  /* Get the dangling newline character */
-  outputfile.get();
-  /* Check for event end line */
-  std::getline(outputfile, line);
-  std::string end_line =
-      "# event " + std::to_string(event_id + 1) + " end 0" + " impact   1.783";
-  COMPARE(line, end_line);
-  outputfile.close();
   VERIFY(bf::remove(outputfilepath));
 }

@@ -14,7 +14,7 @@
 
 #include <boost/numeric/conversion/cast.hpp>
 
-#include "filedeleter.h"
+#include "file.h"
 #include "forwarddeclarations.h"
 #include "outputinterface.h"
 #include "outputparameters.h"

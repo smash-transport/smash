@@ -12,7 +12,7 @@
 
 #include "include/clock.h"
 #include "include/config.h"
-#include "include/filedeleter.h"
+#include "include/file.h"
 #include "include/forwarddeclarations.h"
 #include "include/particles.h"
 #include "include/vtkoutput.h"
@@ -213,7 +213,6 @@ void VtkOutput::thermodynamics_output(
   write_vtk_header(file, lattice, varname);
   write_vtk_scalar(file, lattice, varname,
                    [&](DensityOnLattice &node) { return node.density(); });
-  file.close();
   vtk_density_output_counter_++;
 }
 
@@ -278,7 +277,6 @@ void VtkOutput::thermodynamics_output(
                        return -u.threevec();
                      });
   }
-  file.close();
 }
 
 void VtkOutput::thermodynamics_output(const GrandCanThermalizer &gct) {

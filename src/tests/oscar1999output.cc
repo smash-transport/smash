@@ -105,88 +105,89 @@ TEST(fullhistory_format) {
 
   // const std::string outputfilename
   //    = (testoutputpath / outputfilename).native();
-  bf::fstream outputfile;
-  outputfile.open(outputfilepath, std::ios_base::in);
-  if (outputfile.good()) {
-    std::string line, item;
-    /* Check header */
-    std::string output_header = "";
-    std::string header =
-        "# OSC1999A\n"
-        "# full_event_history\n"
-        "# " VERSION_MAJOR
-        "\n"
-        "# Block format:\n"
-        "# nin nout event_number\n"
-        "# id pdg 0 px py pz p0 mass x y z t\n"
-        "# End of event: 0 0 event_number impact_parameter\n"
-        "#\n";
-    do {
+  {
+    bf::fstream outputfile;
+    outputfile.open(outputfilepath, std::ios_base::in);
+    if (outputfile.good()) {
+      std::string line, item;
+      /* Check header */
+      std::string output_header = "";
+      std::string header =
+          "# OSC1999A\n"
+          "# full_event_history\n"
+          "# " VERSION_MAJOR
+          "\n"
+          "# Block format:\n"
+          "# nin nout event_number\n"
+          "# id pdg 0 px py pz p0 mass x y z t\n"
+          "# End of event: 0 0 event_number impact_parameter\n"
+          "#\n";
+      do {
+        std::getline(outputfile, line);
+        output_header += line + '\n';
+      } while (line != "#");
+      COMPARE(output_header, header);
+      /* Check initial particle list description line item by item */
+      outputfile >> item;
+      COMPARE(std::atoi(item.c_str()), 0);
+      outputfile >> item;
+      COMPARE(std::stoul(item), 2u);
+      outputfile >> item;
+      COMPARE(std::atoi(item.c_str()), event_id + 1);
+      /* Check initial particle data lines item by item */
+      for (const ParticleData &data : action->incoming_particles()) {
+        std::array<std::string, 12> datastring;
+        for (int j = 0; j < 12; j++) {
+          outputfile >> datastring.at(j);
+        }
+        compare_particledata(datastring, data, data.id());
+      }
+      /* Check interaction block */
+      outputfile >> item;
+      COMPARE(std::stoul(item), 2u);
+      outputfile >> item;
+      // Additional fields are allowed: take rest of the line
       std::getline(outputfile, line);
-      output_header += line + '\n';
-    } while (line != "#");
-    COMPARE(output_header, header);
-    /* Check initial particle list description line item by item */
-    outputfile >> item;
-    COMPARE(std::atoi(item.c_str()), 0);
-    outputfile >> item;
-    COMPARE(std::stoul(item), 2u);
-    outputfile >> item;
-    COMPARE(std::atoi(item.c_str()), event_id + 1);
-    /* Check initial particle data lines item by item */
-    for (const ParticleData &data : action->incoming_particles()) {
-      std::array<std::string, 12> datastring;
-      for (int j = 0; j < 12; j++) {
-        outputfile >> datastring.at(j);
+      COMPARE(std::stoul(item), final_particles.size());
+      for (const ParticleData &data : action->incoming_particles()) {
+        std::array<std::string, 12> datastring;
+        for (int j = 0; j < 12; j++) {
+          outputfile >> datastring.at(j);
+        }
+        compare_particledata(datastring, data, data.id());
       }
-      compare_particledata(datastring, data, data.id());
-    }
-    /* Check interaction block */
-    outputfile >> item;
-    COMPARE(std::stoul(item), 2u);
-    outputfile >> item;
-    // Additional fields are allowed: take rest of the line
-    std::getline(outputfile, line);
-    COMPARE(std::stoul(item), final_particles.size());
-    for (const ParticleData &data : action->incoming_particles()) {
-      std::array<std::string, 12> datastring;
-      for (int j = 0; j < 12; j++) {
-        outputfile >> datastring.at(j);
+      for (ParticleData &data : final_particles) {
+        std::array<std::string, 12> datastring;
+        for (int j = 0; j < 12; j++) {
+          outputfile >> datastring.at(j);
+        }
+        compare_particledata(datastring, data, data.id());
       }
-      compare_particledata(datastring, data, data.id());
-    }
-    for (ParticleData &data : final_particles) {
-      std::array<std::string, 12> datastring;
-      for (int j = 0; j < 12; j++) {
-        outputfile >> datastring.at(j);
+      /* Check final particle list */
+      outputfile >> item;
+      COMPARE(std::stoul(item), final_particles.size());
+      outputfile >> item;
+      COMPARE(std::atoi(item.c_str()), 0);
+      outputfile >> item;
+      COMPARE(std::atoi(item.c_str()), event_id + 1);
+      for (ParticleData &data : particles) {
+        std::array<std::string, 12> datastring;
+        for (int j = 0; j < 12; j++) {
+          outputfile >> datastring.at(j);
+        }
+        compare_particledata(datastring, data, data.id());
       }
-      compare_particledata(datastring, data, data.id());
+      /* Check for null interaction */
+      outputfile >> item;
+      COMPARE(std::atoi(item.c_str()), 0);
+      outputfile >> item;
+      COMPARE(std::atoi(item.c_str()), 0);
+      outputfile >> item;
+      COMPARE(std::atoi(item.c_str()), event_id + 1);
+      outputfile >> item;
+      COMPARE(std::stod(item.c_str()), impact_parameter);
     }
-    /* Check final particle list */
-    outputfile >> item;
-    COMPARE(std::stoul(item), final_particles.size());
-    outputfile >> item;
-    COMPARE(std::atoi(item.c_str()), 0);
-    outputfile >> item;
-    COMPARE(std::atoi(item.c_str()), event_id + 1);
-    for (ParticleData &data : particles) {
-      std::array<std::string, 12> datastring;
-      for (int j = 0; j < 12; j++) {
-        outputfile >> datastring.at(j);
-      }
-      compare_particledata(datastring, data, data.id());
-    }
-    /* Check for null interaction */
-    outputfile >> item;
-    COMPARE(std::atoi(item.c_str()), 0);
-    outputfile >> item;
-    COMPARE(std::atoi(item.c_str()), 0);
-    outputfile >> item;
-    COMPARE(std::atoi(item.c_str()), event_id + 1);
-    outputfile >> item;
-    COMPARE(std::stod(item.c_str()), impact_parameter);
   }
-  outputfile.close();
   VERIFY(bf::remove(outputfilepath));
 }
 
@@ -227,52 +228,53 @@ TEST(particlelist_format) {
   action->perform(&particles, 1);
   oscfinal->at_eventend(particles, event_id, impact_parameter);
 
-  bf::fstream outputfile;
-  outputfile.open(outputfilepath, std::ios_base::in);
-  if (outputfile.good()) {
-    std::string line, item;
-    /* Check header */
-    std::string output_header = "";
-    std::string header =
-        "# OSC1999A\n"
-        "# final_id_p_x\n"
-        "# " VERSION_MAJOR
-        "\n"
-        "# Block format:\n"
-        "# nin nout event_number\n"
-        "# id pdg 0 px py pz p0 mass x y z t\n"
-        "# End of event: 0 0 event_number impact_parameter\n"
-        "#\n";
-    do {
-      std::getline(outputfile, line);
-      output_header += line + '\n';
-    } while (line != "#");
-    COMPARE(output_header, header);
-    /* Check final particle list */
-    outputfile >> item;
-    COMPARE(std::stoul(item), particles.size());
-    outputfile >> item;
-    COMPARE(std::atoi(item.c_str()), 0);
-    outputfile >> item;
-    COMPARE(std::atoi(item.c_str()), event_id + 1);
+  {
+    bf::fstream outputfile;
+    outputfile.open(outputfilepath, std::ios_base::in);
+    if (outputfile.good()) {
+      std::string line, item;
+      /* Check header */
+      std::string output_header = "";
+      std::string header =
+          "# OSC1999A\n"
+          "# final_id_p_x\n"
+          "# " VERSION_MAJOR
+          "\n"
+          "# Block format:\n"
+          "# nin nout event_number\n"
+          "# id pdg 0 px py pz p0 mass x y z t\n"
+          "# End of event: 0 0 event_number impact_parameter\n"
+          "#\n";
+      do {
+        std::getline(outputfile, line);
+        output_header += line + '\n';
+      } while (line != "#");
+      COMPARE(output_header, header);
+      /* Check final particle list */
+      outputfile >> item;
+      COMPARE(std::stoul(item), particles.size());
+      outputfile >> item;
+      COMPARE(std::atoi(item.c_str()), 0);
+      outputfile >> item;
+      COMPARE(std::atoi(item.c_str()), event_id + 1);
 
-    for (ParticleData &data : particles) {
-      std::array<std::string, 12> datastring;
-      for (int j = 0; j < 12; j++) {
-        outputfile >> datastring.at(j);
+      for (ParticleData &data : particles) {
+        std::array<std::string, 12> datastring;
+        for (int j = 0; j < 12; j++) {
+          outputfile >> datastring.at(j);
+        }
+        compare_particledata(datastring, data, data.id());
       }
-      compare_particledata(datastring, data, data.id());
+      /* Check for null interaction */
+      outputfile >> item;
+      COMPARE(std::atoi(item.c_str()), 0);
+      outputfile >> item;
+      COMPARE(std::atoi(item.c_str()), 0);
+      outputfile >> item;
+      COMPARE(std::atoi(item.c_str()), event_id + 1);
+      outputfile >> item;
+      COMPARE(std::stod(item.c_str()), impact_parameter);
     }
-    /* Check for null interaction */
-    outputfile >> item;
-    COMPARE(std::atoi(item.c_str()), 0);
-    outputfile >> item;
-    COMPARE(std::atoi(item.c_str()), 0);
-    outputfile >> item;
-    COMPARE(std::atoi(item.c_str()), event_id + 1);
-    outputfile >> item;
-    COMPARE(std::stod(item.c_str()), impact_parameter);
   }
-  outputfile.close();
   VERIFY(bf::remove(outputfilepath));
 }

@@ -13,7 +13,6 @@
 #include <string>
 
 #include "binaryoutputcollisions.h"
-#include "filedeleter.h"
 #include "forwarddeclarations.h"
 #include "outputparameters.h"
 
