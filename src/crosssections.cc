@@ -12,6 +12,7 @@
 #include "include/clebschgordan.h"
 #include "include/constants.h"
 #include "include/kinematics.h"
+#include "include/logging.h"
 #include "include/parametrizations.h"
 #include "include/particletype.h"
 
@@ -382,7 +383,7 @@ double cross_sections::nk_el() {
 }
 
 CollisionBranchList cross_sections::two_to_one() {
-  // const auto &log = logger<LogArea::ScatterAction>();
+  const auto &log = logger<LogArea::CrossSections>();
   CollisionBranchList resonance_process_list;
   /* There is no resonance formation out of two baryons: Return empty list. */
   if (!(scattering_particles_[0].is_baryon() &&
@@ -415,9 +416,9 @@ CollisionBranchList cross_sections::two_to_one() {
       if (resonance_xsection > really_small) {
         resonance_process_list.push_back(make_unique<CollisionBranch>(
             type_resonance, resonance_xsection, ProcessType::TwoToOne));
-        // log.debug("Found resonance: ", type_resonance);
-        // log.debug("2->1 with original particles: ", type_particle_a,
-        //           type_particle_b);
+        log.debug("Found resonance: ", type_resonance);
+        log.debug("2->1 with original particles: ", type_particle_a,
+                  type_particle_b);
       }
     }
   }
@@ -1295,7 +1296,7 @@ double cross_sections::high_energy() const {
 
 
 CollisionBranchList cross_sections::string_excitation(StringProcess* string_process) {
-  // const auto &log = logger<LogArea::ScatterAction>();
+  const auto &log = logger<LogArea::CrossSections>();
   /* Calculate string-excitation cross section:
    * Parametrized total minus all other present channels. */
   double sig_string_all =
@@ -1359,12 +1360,13 @@ CollisionBranchList cross_sections::string_excitation(StringProcess* string_proc
                  std::exp(- hard_xsec / nondiffractive_all);
     const double nondiffractive_hard = nondiffractive_all -
                  nondiffractive_soft;
-    // log.debug("String cross sections [mb] are");
-    // log.debug("Single-diffractive AB->AX: ", single_diffr_AX);
-    // log.debug("Single-diffractive AB->XB: ", single_diffr_XB);
-    // log.debug("Double-diffractive AB->XX: ", double_diffr);
-    // log.debug("Soft non-diffractive: ", nondiffractive_soft);
-    // log.debug("Hard non-diffractive: ", nondiffractive_hard);
+    log.debug("String cross sections [mb] are");
+    log.debug("Single-diffractive AB->AX: ", single_diffr_AX);
+    log.debug("Single-diffractive AB->XB: ", single_diffr_XB);
+    log.debug("Double-diffractive AB->XX: ", double_diffr);
+    log.debug("Soft non-diffractive: ", nondiffractive_soft);
+    log.debug("Hard non-diffractive: ", nondiffractive_hard);
+
     /* cross section of soft string excitation */
     const double sig_string_soft = sig_string_all - nondiffractive_hard;
 
@@ -1440,12 +1442,12 @@ double cross_sections::string_hard_cross_section() const {
 
 
 CollisionBranchPtr cross_sections::NNbar_annihilation(const double current_xs) {
-  // const auto &log = logger<LogArea::ScatterAction>();
+  const auto &log = logger<LogArea::CrossSections>();
   /* Calculate NNbar cross section:
    * Parametrized total minus all other present channels.*/
   const double s = sqrt_s_ * sqrt_s_;
   double nnbar_xsec = std::max(0., ppbar_total(s) - current_xs);
-  // log.debug("NNbar cross section is: ", nnbar_xsec);
+  log.debug("NNbar cross section is: ", nnbar_xsec);
   // Make collision channel NNbar -> ρh₁(1170); eventually decays into 5π
   return make_unique<CollisionBranch>(ParticleType::find(pdg::h1),
                                       ParticleType::find(pdg::rho_z),
@@ -1454,7 +1456,7 @@ CollisionBranchPtr cross_sections::NNbar_annihilation(const double current_xs) {
 
 
 CollisionBranchList cross_sections::NNbar_creation() {
-  // const auto &log = logger<LogArea::ScatterAction>();
+  const auto &log = logger<LogArea::CrossSections>();
   CollisionBranchList channel_list;
   /* Calculate NNbar reverse cross section:
    * from reverse reaction (see NNbar_annihilation_cross_section).*/
@@ -1474,7 +1476,7 @@ CollisionBranchList cross_sections::NNbar_creation() {
                         sqrts, pcm, scattering_particles_[0].type(),
                         scattering_particles_[1].type(), type_N, type_Nbar) *
                     std::max(0., ppbar_total(s) - ppbar_elastic(s));
-  // log.debug("NNbar reverse cross section is: ", xsection);
+  log.debug("NNbar reverse cross section is: ", xsection);
   channel_list.push_back(make_unique<CollisionBranch>(
       type_N, type_Nbar, xsection, ProcessType::TwoToTwo));
   channel_list.push_back(make_unique<CollisionBranch>(
@@ -1542,9 +1544,9 @@ CollisionBranchList cross_sections::bar_bar_to_nuc_nuc(
         if (xsection > really_small) {
           process_list.push_back(make_unique<CollisionBranch>(
               *nuc_a, *nuc_b, xsection, ProcessType::TwoToTwo));
-          // const auto &log = logger<LogArea::ScatterAction>();
-          // log.debug("2->2 absorption with original particles: ", type_a,
-          //           type_b);
+          const auto &log = logger<LogArea::CrossSections>();
+          log.debug("2->2 absorption with original particles: ", type_a,
+                    type_b);
         }
       }
     }
@@ -1632,7 +1634,7 @@ CollisionBranchList cross_sections::find_nn_xsection_from_type(
   const ParticleType &type_particle_a = scattering_particles_[0].type();
   const ParticleType &type_particle_b = scattering_particles_[1].type();
 
-  // const auto &log = logger<LogArea::ScatterAction>();
+  const auto &log = logger<LogArea::CrossSections>();
   CollisionBranchList channel_list;
   const double s = sqrt_s_ * sqrt_s_;
 
@@ -1688,10 +1690,10 @@ CollisionBranchList cross_sections::find_nn_xsection_from_type(
         if (xsection > really_small) {
           channel_list.push_back(make_unique<CollisionBranch>(
               *type_res_1, *type_res_2, xsection, ProcessType::TwoToTwo));
-          // log.debug("Found 2->2 creation process for resonance ", type_res_1,
-          //           ", ", type_res_2);
-          // log.debug("2->2 with original particles: ", type_particle_a,
-          //           type_particle_b);
+          log.debug("Found 2->2 creation process for resonance ", type_res_1,
+                    ", ", type_res_2);
+          log.debug("2->2 with original particles: ", type_particle_a,
+                    type_particle_b);
         }
       }
     }
