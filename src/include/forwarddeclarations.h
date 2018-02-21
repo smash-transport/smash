@@ -114,15 +114,15 @@ enum class TimeStepMode : char {
 };
 
 /** Initial condition for a particle in a box.
-*
-* If PeakedMomenta is used, all particles have the same momentum
-* \f$p = 3 \cdot T\f$ with T the temperature.
-*
-* Else, a thermalized ensemble is generated (the momenta are sampled
-* from a Maxwell-Boltzmann distribution).
-*
-* In either case, the positions in space are chosen randomly.
-*/
+ *
+ * If PeakedMomenta is used, all particles have the same momentum
+ * \f$p = 3 \cdot T\f$ with T the temperature.
+ *
+ * Else, a thermalized ensemble is generated (the momenta are sampled
+ * from a Maxwell-Boltzmann distribution).
+ *
+ * In either case, the positions in space are chosen randomly.
+ */
 enum class BoxInitialCondition {
   ThermalMomenta,
   PeakedMomenta,

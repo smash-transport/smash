@@ -140,9 +140,8 @@ double sample_momenta_IC_1M(const double temperature, const double mass) {
   if (mass > 0.) {
     // massive particles
     const double m_over_T = mass / temperature;
-    energy_average =
-        3 * temperature +
-        mass * gsl_sf_bessel_K1(m_over_T) / gsl_sf_bessel_Kn(2, m_over_T);
+    energy_average = 3 * temperature + mass * gsl_sf_bessel_K1(m_over_T) /
+                                           gsl_sf_bessel_Kn(2, m_over_T);
   } else {
     // massless particles
     energy_average = 3 * temperature;
@@ -179,9 +178,8 @@ double sample_momenta_IC_2M(const double temperature, const double mass) {
   if (mass > 0.) {
     // massive particles
     const double m_over_T = mass / temperature;
-    energy_average =
-        3 * temperature +
-        mass * gsl_sf_bessel_K1(m_over_T) / gsl_sf_bessel_Kn(2, m_over_T);
+    energy_average = 3 * temperature + mass * gsl_sf_bessel_K1(m_over_T) /
+                                           gsl_sf_bessel_Kn(2, m_over_T);
   } else {
     // massless particles
     energy_average = 3 * temperature;

@@ -50,7 +50,7 @@ void ScatterAction::generate_final_state() {
   log.debug("Incoming particles: ", incoming_particles_);
 
   if (pot_pointer != nullptr) {
-     filter_channel(collision_channels_, total_cross_section_);
+    filter_channel(collision_channels_, total_cross_section_);
   }
   /* Decide for a particular final state. */
   const CollisionBranch *proc = choose_channel<CollisionBranch>(
@@ -112,10 +112,10 @@ void ScatterAction::add_all_processes(double elastic_parameter, bool two_to_one,
                                       bool two_to_two, double low_snn_cut,
                                       bool strings_switch,
                                       NNbarTreatment nnbar_treatment) {
-
-  cross_sections xs (incoming_particles_, sqrt_s());
-  CollisionBranchList processes = xs.all_collisions(elastic_parameter, two_to_one, two_to_two,
-                         low_snn_cut, strings_switch, nnbar_treatment, string_process_);
+  cross_sections xs(incoming_particles_, sqrt_s());
+  CollisionBranchList processes =
+      xs.all_collisions(elastic_parameter, two_to_one, two_to_two, low_snn_cut,
+                        strings_switch, nnbar_treatment, string_process_);
 
   /* Add various subprocesses.*/
   add_collisions(std::move(processes));
@@ -221,8 +221,7 @@ static double Cugnon_bnp(double plab) {
   }
 }
 
-void ScatterAction::sample_angles(
-    std::pair<double, double> masses) {
+void ScatterAction::sample_angles(std::pair<double, double> masses) {
   if ((process_type_ == ProcessType::StringSoft) ||
       (process_type_ == ProcessType::StringHard)) {
     // We potentially have more than two particles, so the following angular
@@ -248,7 +247,8 @@ void ScatterAction::sample_angles(
   const std::array<double, 2> t_range = get_t_range<double>(
       cms_energy, nucleon_mass, nucleon_mass, mass_a, mass_b);
   Angles phitheta;
-  if (nn_scattering && p_a->pdgcode().is_nucleon() && p_b->pdgcode().is_nucleon() &&
+  if (nn_scattering && p_a->pdgcode().is_nucleon() &&
+      p_b->pdgcode().is_nucleon() &&
       p_a->pdgcode().antiparticle_sign() ==
           p_b->pdgcode().antiparticle_sign() &&
       !isotropic_) {
@@ -272,7 +272,8 @@ void ScatterAction::sample_angles(
     // determine scattering angles in center-of-mass frame
     phitheta = Angles(2. * M_PI * Random::canonical(),
                       1. - 2. * (t - t_range[0]) / (t_range[1] - t_range[0]));
-  } else if (nn_scattering && p_a->pdgcode().is_Delta() && p_b->pdgcode().is_nucleon() &&
+  } else if (nn_scattering && p_a->pdgcode().is_Delta() &&
+             p_b->pdgcode().is_nucleon() &&
              p_a->pdgcode().antiparticle_sign() ==
                  p_b->pdgcode().antiparticle_sign() &&
              !isotropic_) {
@@ -326,8 +327,6 @@ void ScatterAction::sample_angles(
 
   log.debug("p_a: ", *p_a, "\np_b: ", *p_b);
 }
-
-
 
 void ScatterAction::elastic_scattering() {
   // copy initial particles into final state

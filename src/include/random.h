@@ -187,8 +187,8 @@ double normal(const T &mean, const T &sigma) {
 }
 
 /** \return: one integer number sampled from discrete distribution
-* whose weight given by probability vector
-*/
+ * whose weight given by probability vector
+ */
 template <typename T>
 class discrete_dist {
  public:

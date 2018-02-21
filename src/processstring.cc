@@ -126,8 +126,8 @@ int StringProcess::append_final_state(const FourVector &uString,
   xvertex_pos[0] = p_pos_tot / kappa_tension_string_;
   for (int i = 0; i < nfrag; i++) {
     // recursively compute x^{+} coordinates of q-qbar formation vertex
-    xvertex_pos[i + 1] = xvertex_pos[i] -
-                         (fragments[i].momentum.x0() + fragments[i].pparallel) /
+    xvertex_pos[i + 1] =
+        xvertex_pos[i] - (fragments[i].momentum.x0() + fragments[i].pparallel) /
                              (kappa_tension_string_ * sqrt2_);
   }
   // x^{-} coordinates of the backward end

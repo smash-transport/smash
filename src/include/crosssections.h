@@ -19,23 +19,23 @@ namespace smash {
 
 class cross_sections {
  public:
+  cross_sections(const ParticleList& scat_particles, const double sqrt_s);
 
-  cross_sections(const ParticleList &scat_particles, const double sqrt_s);
-
-  void append_list(CollisionBranchList& main_list, CollisionBranchList in_list) {
+  void append_list(CollisionBranchList& main_list,
+                   CollisionBranchList in_list) {
     main_list.reserve(main_list.size() + in_list.size());
-    for (auto &proc : in_list) {
+    for (auto& proc : in_list) {
       main_list.emplace_back(std::move(proc));
     }
   }
 
- /// TODO DOC
-  CollisionBranchList all_collisions(double elastic_parameter, bool two_to_one_switch,
-                                        bool two_to_two_switch_switch, double low_snn_cut,
-                                        bool strings_switch,
-                                        NNbarTreatment nnbar_treatment,
-                                        StringProcess* string_process);
-
+  /// TODO DOC
+  CollisionBranchList all_collisions(double elastic_parameter,
+                                     bool two_to_one_switch,
+                                     bool two_to_two_switch_switch,
+                                     double low_snn_cut, bool strings_switch,
+                                     NNbarTreatment nnbar_treatment,
+                                     StringProcess* string_process);
 
   /**
    * Determine the elastic cross section for this collision. If elastic_par is
@@ -51,8 +51,8 @@ class cross_sections {
   CollisionBranchPtr elastic(double elast_par);
 
   /**
-  * Choose between parametrization for elastic cross sections.
-  */
+   * Choose between parametrization for elastic cross sections.
+   */
   double elastic_parametrization();
 
   /**
@@ -74,17 +74,17 @@ class cross_sections {
   double npi_el();
 
   /**
-  * Find all resonances that can be produced in a 2->1 collision of the two
-  * input particles and the production cross sections of these resonances.
-  *
-  * Given the data and type information of two colliding particles,
-  * create a list of possible resonance production processes
-  * and their cross sections.
-  *
-  * \return A list of processes with resonance in the final state.
-  * Each element in the list contains the type of the final-state particle
-  * and the cross section for that particular process.
-  */
+   * Find all resonances that can be produced in a 2->1 collision of the two
+   * input particles and the production cross sections of these resonances.
+   *
+   * Given the data and type information of two colliding particles,
+   * create a list of possible resonance production processes
+   * and their cross sections.
+   *
+   * \return A list of processes with resonance in the final state.
+   * Each element in the list contains the type of the final-state particle
+   * and the cross section for that particular process.
+   */
   CollisionBranchList two_to_one();
 
   /**
@@ -98,9 +98,7 @@ class cross_sections {
    * \return The cross section for the process
    * [initial particle a] + [initial particle b] -> resonance.
    */
-  double formation(const ParticleType &type_resonance,
-                                             double cm_momentum_sqr);
-
+  double formation(const ParticleType& type_resonance, double cm_momentum_sqr);
 
   /** Find all inelastic 2->2 processes for the given scattering.
    * This function calls the different, more specific functions for
@@ -160,18 +158,17 @@ class cross_sections {
   double string_hard_cross_section() const;
 
   /**
-  * Calculate cross sections for resonance absorption
-  * (i.e. NR->NN and ΔR->NN).
-  *
-  * \param[in] is_anti_particles Whether the colliding particles are
-  * antiparticles
-  *
-  * \return List of possible resonance absorption processes. Each element of the
-  * list contains the types of the final-state particles and the cross section
-  * for that particular process.
-  */
+   * Calculate cross sections for resonance absorption
+   * (i.e. NR->NN and ΔR->NN).
+   *
+   * \param[in] is_anti_particles Whether the colliding particles are
+   * antiparticles
+   *
+   * \return List of possible resonance absorption processes. Each element of
+   * the list contains the types of the final-state particles and the cross
+   * section for that particular process.
+   */
   CollisionBranchList bar_bar_to_nuc_nuc(const bool is_anti_particles);
-
 
   /**
    * Scattering matrix amplitude squared (divided by 16π) for resonance
@@ -184,25 +181,24 @@ class cross_sections {
    *
    * \return Matrix amplitude squared \f$ |\mathcal{M}(\sqrt{s})|^2/16\pi \f$.
    */
-   // TODO WHY was this static before?
-  double nn_to_resonance_matrix_element(const ParticleType &type_a,
-                                               const ParticleType &type_b,
-                                               const int twoI) const;
+  // TODO WHY was this static before?
+  double nn_to_resonance_matrix_element(const ParticleType& type_a,
+                                        const ParticleType& type_b,
+                                        const int twoI) const;
 
   /**
    * Utility function to avoid code replication in nn_xx().
    */
   template <class IntegrationMethod>
   CollisionBranchList find_nn_xsection_from_type(
-      const ParticleTypePtrList &type_res_1,
-      const ParticleTypePtrList &type_res_2,
+      const ParticleTypePtrList& type_res_1,
+      const ParticleTypePtrList& type_res_2,
       const IntegrationMethod integrator);
 
   /** Determine the momenta of the incoming particles in the
    * center-of-mass system.
    */
   double cm_momentum() const;
-
 
   /**
    * Determine the cross section for NNbar annihilation, which is given by the
@@ -241,7 +237,6 @@ class cross_sections {
           type_a, type_b, xsection, ProcessType::TwoToTwo));
     }
   }
-
 
   /**
    * Calculate the detailed balance factor R such that
@@ -308,17 +303,12 @@ class cross_sections {
   // DOCU
   bool decide_string(bool strings_switch, const bool both_are_nucleons) const;
 
-
-
  private:
-
   /** List with data of scattering particles.  */
   ParticleList scattering_particles_;
 
   /** total energy in the center-of-mass frame. */
   double sqrt_s_;
-
-
 };
 
 }  // namespace smash

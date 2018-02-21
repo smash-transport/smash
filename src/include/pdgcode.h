@@ -334,7 +334,7 @@ class PdgCode {
   }
 
   /** Determine whether a particle has a distinct antiparticle
-    * (or whether it is its own antiparticle). */
+   * (or whether it is its own antiparticle). */
   bool has_antiparticle() const {
     if (is_hadron()) {
       return (baryon_number() != 0) || (digits_.n_q2_ != digits_.n_q3_);

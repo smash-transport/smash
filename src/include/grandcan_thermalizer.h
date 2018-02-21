@@ -202,9 +202,9 @@ class GrandCanThermalizer {
       for (ParticleTypePtr i : eos_typelist_) {
         if (condition(i->strangeness(), i->baryon_number(), i->charge())) {
           // N_i = n u^mu dsigma_mu = (isochronous hypersurface) n * V * gamma
-          N_tot +=
-              cell_volume_ * gamma * HadronGasEos::partial_density(
-                                         *i, cell.T(), cell.mub(), cell.mus());
+          N_tot += cell_volume_ * gamma *
+                   HadronGasEos::partial_density(*i, cell.T(), cell.mub(),
+                                                 cell.mus());
         }
       }
       N_in_cells_.push_back(N_tot);
@@ -244,8 +244,9 @@ class GrandCanThermalizer {
       if (!condition(i->strangeness(), i->baryon_number(), i->charge())) {
         continue;
       }
-      N_sum += cell_volume_ * gamma * HadronGasEos::partial_density(
-                                          *i, cell.T(), cell.mub(), cell.mus());
+      N_sum +=
+          cell_volume_ * gamma *
+          HadronGasEos::partial_density(*i, cell.T(), cell.mub(), cell.mus());
       if (N_sum >= r) {
         type_to_sample = i;
         break;

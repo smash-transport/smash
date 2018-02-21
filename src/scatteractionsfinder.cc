@@ -27,26 +27,26 @@
 
 namespace smash {
 /*!\Userguide
-* \page input_collision_term_ Collision_Term
-* \key Elastic_Cross_Section (double, optional, default = -1.0 [mb]) \n
-* If a non-negative value is given, it will override the parametrized
-* elastic cross sections (which are energy-dependent) with a constant value.
-* This constant elastic cross section is used for all collisions.
-*
-* \key Isotropic (bool, optional, default = false) \n
-* Do all collisions isotropically.
-* \key Strings (bool, optional, default = false): \n
-* true - string excitation is enabled\n
-* false - string excitation is disabled
-* \key String_Formation_Time (double, optional, default = 1.0) \n
-* Parameter for formation time in string fragmentation in fm/c
-* \key low_snn_cut (double) in GeV \n
-* The elastic collisions betwen two nucleons with sqrt_s below
-* low_snn_cut cannot happen.
-* <1.88 - below the threshold energy of the elastic collsion, no effect
-* >2.02 - beyond the threshold energy of the inelastic collision NN->NNpi, not
-* suggested
-*/
+ * \page input_collision_term_ Collision_Term
+ * \key Elastic_Cross_Section (double, optional, default = -1.0 [mb]) \n
+ * If a non-negative value is given, it will override the parametrized
+ * elastic cross sections (which are energy-dependent) with a constant value.
+ * This constant elastic cross section is used for all collisions.
+ *
+ * \key Isotropic (bool, optional, default = false) \n
+ * Do all collisions isotropically.
+ * \key Strings (bool, optional, default = false): \n
+ * true - string excitation is enabled\n
+ * false - string excitation is disabled
+ * \key String_Formation_Time (double, optional, default = 1.0) \n
+ * Parameter for formation time in string fragmentation in fm/c
+ * \key low_snn_cut (double) in GeV \n
+ * The elastic collisions betwen two nucleons with sqrt_s below
+ * low_snn_cut cannot happen.
+ * <1.88 - below the threshold energy of the elastic collsion, no effect
+ * >2.02 - beyond the threshold energy of the inelastic collision NN->NNpi, not
+ * suggested
+ */
 
 ScatterActionsFinder::ScatterActionsFinder(
     Configuration config, const ExperimentParameters &parameters,
@@ -113,10 +113,10 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData &data_a,
     return nullptr;
   }
   /** If the two particles
-    * 1) belong to the two colliding nuclei
-    * 2) are within the same nucleus
-    * 3) both of them have never experienced any collisons,
-    * then the collision between them are banned. */
+   * 1) belong to the two colliding nuclei
+   * 2) are within the same nucleus
+   * 3) both of them have never experienced any collisons,
+   * then the collision between them are banned. */
   assert(data_a.id() >= 0);
   assert(data_b.id() >= 0);
   if (data_a.id() < N_tot_ && data_b.id() < N_tot_ &&
@@ -136,11 +136,10 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData &data_a,
   }
 
   /* Create ScatterAction object. */
-  ScatterActionPtr act = make_unique<ScatterAction>(data_a, data_b,
-                                             time_until_collision, isotropic_,
-                                             string_formation_time_);
+  ScatterActionPtr act = make_unique<ScatterAction>(
+      data_a, data_b, time_until_collision, isotropic_, string_formation_time_);
   if (strings_switch_) {
-   act->set_string_interface(string_process_interface_.get());
+    act->set_string_interface(string_process_interface_.get());
   }
 
   const double distance_squared = act->transverse_distance_sqr();
@@ -274,7 +273,8 @@ void ScatterActionsFinder::dump_reactions() const {
           for (auto mom : momentum_scan_list) {
             A.set_4momentum(A.pole_mass(), mom, 0.0, 0.0);
             B.set_4momentum(B.pole_mass(), -mom, 0.0, 0.0);
-            ScatterActionPtr act = make_unique<ScatterAction>(A, B, time, isotropic_, string_formation_time_);
+            ScatterActionPtr act = make_unique<ScatterAction>(
+                A, B, time, isotropic_, string_formation_time_);
             act->add_all_processes(elastic_parameter_, two_to_one_, two_to_two_,
                                    low_snn_cut_, strings_switch_,
                                    nnbar_treatment_);
@@ -360,13 +360,12 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
       ScatterAction act(a_data, b_data, 0.0, false, 0.0);
       const double sqrts = act.sqrt_s();
       std::cout << sqrts << " ";
-      cross_sections cross_s (act.incoming_particles(), sqrts);
+      cross_sections cross_s(act.incoming_particles(), sqrts);
       for (const ParticleTypePtr resonance : ab_products) {
         const double p_cm_sqr = pCM_sqr(sqrts, m_a, m_b);
-        const double xs =
-            (sqrts < resonance->min_mass_kinematic())
-                ? 0.0
-                : cross_s.formation(*resonance, p_cm_sqr);
+        const double xs = (sqrts < resonance->min_mass_kinematic())
+                              ? 0.0
+                              : cross_s.formation(*resonance, p_cm_sqr);
         std::cout << xs << " ";
       }
       std::cout << std::endl;

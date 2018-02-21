@@ -196,13 +196,9 @@ class StringProcess {
     kappa_tension_string_ = kappa_string;
   }
   /// Set the soft subprocess identifier
-  void set_iproc(int iproc) {
-    iproc_ = iproc;
-  }
+  void set_iproc(int iproc) { iproc_ = iproc; }
   /// Return the soft subprocess identifier
-  int get_iproc() {
-    return iproc_;
-  }
+  int get_iproc() { return iproc_; }
   /**
    * initialization
    * feed intial particles, time of collision and gamma factor of the center of

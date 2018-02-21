@@ -219,21 +219,21 @@ class ParticleType {
   DecayBranchList get_partial_widths(const double m) const;
 
   /**
-  * Get the mass-dependent partial decay widths of a particle with mass m.
-  * Returns a list of process branches, whose weights correspond to the
-  * actual partial widths. The list contains all but the dilepton branches.
-  *
-  * \param m Invariant mass of the decaying particle.
-  */
+   * Get the mass-dependent partial decay widths of a particle with mass m.
+   * Returns a list of process branches, whose weights correspond to the
+   * actual partial widths. The list contains all but the dilepton branches.
+   *
+   * \param m Invariant mass of the decaying particle.
+   */
   DecayBranchList get_partial_widths_hadronic(const double m) const;
 
   /**
-  * Get the mass-dependent partial decay widths of a particle with mass m.
-  * Returns a list of process branches, whose weights correspond to the
-  * actual partial widths. The list contains only the dilepton branches.
-  *
-  * \param m Invariant mass of the decaying particle.
-  */
+   * Get the mass-dependent partial decay widths of a particle with mass m.
+   * Returns a list of process branches, whose weights correspond to the
+   * actual partial widths. The list contains only the dilepton branches.
+   *
+   * \param m Invariant mass of the decaying particle.
+   */
   DecayBranchList get_partial_widths_dilepton(const double m) const;
 
   /**
@@ -291,28 +291,28 @@ class ParticleType {
   double spectral_function_simple(double m) const;
 
   /**
-  * Resonance mass sampling for 2-particle final state with one resonance
-  * (type given by 'this') and one stable particle.
-  *
-  * \param[in] mass_stable Mass of the stable particle.
-  * \param[in] cms_energy center-of-mass energy of the 2-particle final state.
-  * \param[in] L relative angular momentum of the final-state particles
-  *
-  * \return The mass of the resonance particle.
-  */
+   * Resonance mass sampling for 2-particle final state with one resonance
+   * (type given by 'this') and one stable particle.
+   *
+   * \param[in] mass_stable Mass of the stable particle.
+   * \param[in] cms_energy center-of-mass energy of the 2-particle final state.
+   * \param[in] L relative angular momentum of the final-state particles
+   *
+   * \return The mass of the resonance particle.
+   */
   double sample_resonance_mass(const double mass_stable,
                                const double cms_energy, int L = 0) const;
 
   /**
-  * Resonance mass sampling for 2-particle final state with two resonances.
-  *
-  * \param[in] t2 Type of the second resonance
-  *               (the first resonance is given by 'this').
-  * \param[in] cms_energy center-of-mass energy of the 2-particle final state.
-  * \param[in] L relative angular momentum of the final-state particles
-  *
-  * \return The masses of the resonance particles.
-  */
+   * Resonance mass sampling for 2-particle final state with two resonances.
+   *
+   * \param[in] t2 Type of the second resonance
+   *               (the first resonance is given by 'this').
+   * \param[in] cms_energy center-of-mass energy of the 2-particle final state.
+   * \param[in] L relative angular momentum of the final-state particles
+   *
+   * \return The masses of the resonance particles.
+   */
   std::pair<double, double> sample_resonance_masses(const ParticleType &t2,
                                                     const double cms_energy,
                                                     int L = 0) const;
@@ -334,7 +334,7 @@ class ParticleType {
   /** Returns a list of all nucleons (i.e. proton and neutron). */
   static ParticleTypePtrList &list_nucleons();
   /** Returns a list of all anti-nucleons (i.e. anti-proton and anti-neutron).
-    */
+   */
   static ParticleTypePtrList &list_anti_nucleons();
   /** Returns a list of the Delta(1232) baryons
    *  (i.e. all four charge states). */
