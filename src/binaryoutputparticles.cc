@@ -93,8 +93,8 @@ BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
  *
  * **Event end line**
  * \code
- * char    int
- * 'f' event_number
+ * char    int            int
+ * 'f' event_number impact_parameter
  * \endcode
  *
  * Particles output
