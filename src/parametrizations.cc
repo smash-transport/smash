@@ -137,7 +137,7 @@ double piplusp_elastic(double mandelstam_s) {
   if (piplusp_elastic_res_interpolation == nullptr) {
     std::vector<double> x = PIPLUSP_RES_SQRTS;
     for (auto& i : x) {
-      i = i * i;  //plab_from_s(i * i, pion_mass, nucleon_mass);
+      i = i * i;  // plab_from_s(i * i, pion_mass, nucleon_mass);
     }
     std::vector<double> y = PIPLUSP_RES_SIG;
     piplusp_elastic_res_interpolation =
@@ -198,7 +198,7 @@ double piminusp_elastic(double mandelstam_s) {
   if (piminusp_elastic_res_interpolation == nullptr) {
     std::vector<double> x = PIMINUSP_RES_SQRTS;
     for (auto& i : x) {
-      i = i * i;//plab_from_s(i * i, pion_mass, nucleon_mass);
+      i = i * i;  // plab_from_s(i * i, pion_mass, nucleon_mass);
     }
     std::vector<double> y = PIMINUSP_RES_SIG;
     piminusp_elastic_res_interpolation =
