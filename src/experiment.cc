@@ -93,11 +93,8 @@ ExperimentPtr ExperimentBase::create(Configuration config,
    * \li \subpage input_modi_box_
    * \li \subpage input_modi_list_
    */
-  const std::string modus_chooser = config.take({"General", "Modus"});
+  const std::string modus_chooser = config.read({"General", "Modus"});
   log.info() << "Modus for this calculation: " << modus_chooser;
-
-  // remove config maps of unused Modi
-  config["Modi"].remove_all_but(modus_chooser);
 
   if (modus_chooser == "Box") {
     return make_unique<Experiment<BoxModus>>(config, output_path);
@@ -237,6 +234,10 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
     throw std::invalid_argument("Testparticle number should be positive!");
   }
 
+  const std::string modus_chooser = config.take({"General", "Modus"});
+  // remove config maps of unused Modi
+  config["Modi"].remove_all_but(modus_chooser);
+
   // If this Delta_Time option is absent (this can be for timestepless mode)
   // just assign 1.0 fm/c, reasonable value will be set at event initialization
   const double dt = config.take({"General", "Delta_Time"}, 1.);
@@ -244,7 +245,12 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   const double output_dt = config.take({"Output", "Output_Interval"}, t_end);
   const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
   const bool two_to_two = config.take({"Collision_Term", "Two_to_Two"}, true);
-  const bool strings_switch = config.take({"Collision_Term", "Strings"}, true);
+  bool strings_switch_default = true;
+  if (modus_chooser == "Box") {
+    strings_switch_default = false;
+  }
+  const bool strings_switch = config.take(
+      {"Collision_Term", "Strings"}, strings_switch_default);
   const NNbarTreatment nnbar_treatment = config.take(
       {"Collision_Term", "NNbar_Treatment"}, NNbarTreatment::NoAnnihilation);
   const bool photons_switch = config.has_value({"Output", "Photons"});
