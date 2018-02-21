@@ -47,7 +47,7 @@ void ScatterAction::generate_final_state() {
   log.debug("Incoming particles: ", incoming_particles_);
 
   if (pot_pointer != nullptr) {
-     filter_channel(collision_channels_, total_cross_section_);
+    filter_channel(collision_channels_, total_cross_section_);
   }
   /* Decide for a particular final state. */
   const CollisionBranch *proc = choose_channel<CollisionBranch>(
@@ -375,7 +375,7 @@ CollisionBranchList ScatterAction::string_excitation_cross_sections() {
     double single_diffr = single_diffr_AX + single_diffr_XB;
     double diffractive = single_diffr + double_diffr;
     const double nondiffractive_all =
-      std::max(0., sig_string_all - diffractive);
+        std::max(0., sig_string_all - diffractive);
     diffractive = sig_string_all - nondiffractive_all;
     double_diffr = std::max(0., diffractive - single_diffr);
     const double a = (diffractive - double_diffr) / single_diffr;
@@ -388,10 +388,9 @@ CollisionBranchList ScatterAction::string_excitation_cross_sections() {
      * in conjunction with multipartion interaction picture
      * \iref{Sjostrand:1987su}. */
     const double hard_xsec = string_hard_cross_section();
-    const double nondiffractive_soft = nondiffractive_all *
-                 std::exp(- hard_xsec / nondiffractive_all);
-    const double nondiffractive_hard = nondiffractive_all -
-                 nondiffractive_soft;
+    const double nondiffractive_soft =
+        nondiffractive_all * std::exp(-hard_xsec / nondiffractive_all);
+    const double nondiffractive_hard = nondiffractive_all - nondiffractive_soft;
     log.debug("String cross sections [mb] are");
     log.debug("Single-diffractive AB->AX: ", single_diffr_AX);
     log.debug("Single-diffractive AB->XB: ", single_diffr_XB);
@@ -716,9 +715,12 @@ void ScatterAction::string_excitation_pythia() {
           data.set_cross_section_scaling_factor(suppression_factor * 0.0);
         }
       }
+      ThreeVector v_calc =
+          (data.momentum().LorentzBoost(-1.0 * beta_cm())).velocity();
       // Set formation time: actual time of collision + time to form the
       // particle
-      data.set_formation_time(string_formation_time_ * gamma_cm() +
+      double gamma_factor = 1.0 / std::sqrt(1 - (v_calc).sqr());
+      data.set_formation_time(string_formation_time_ * gamma_factor +
                               time_of_execution_);
       outgoing_particles_.push_back(data);
     }
