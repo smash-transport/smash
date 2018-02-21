@@ -42,7 +42,7 @@ class ScatterActionNucleonNucleon : public ScatterActionBaryonBaryon {
    * final state particle(s) and the cross section for that particular process.
    */
   CollisionBranchList two_to_two_cross_sections
-             (std::bitset<6> included_2to2) override;
+             (ReactionsBitSet included_2to2) override;
 
  protected:
   /**

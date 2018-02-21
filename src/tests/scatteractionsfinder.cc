@@ -66,7 +66,7 @@ TEST(collision_order) {
   const double elastic_parameter = radius * radius * M_PI / fm2_mb;  // in mb
   const int testparticles = 1;
   const std::vector<bool> has_interacted = {};
-  std::bitset<6> included_2to2 = std::bitset<6>(std::string("111111"));
+  ReactionsBitSet included_2to2 = ReactionsBitSet(std::string("111111"));
   ScatterActionsFinder finder(elastic_parameter, testparticles, has_interacted,
                               included_2to2);
 
@@ -140,7 +140,7 @@ TEST(scatter_particle_pair_only_once) {
   const double elastic_parameter = radius * radius * M_PI / fm2_mb;  // in mb
   const int testparticles = 1;
   const std::vector<bool> has_interacted = {};
-  std::bitset<6> included_2to2 = std::bitset<6>(std::string("111111"));
+  ReactionsBitSet included_2to2 = ReactionsBitSet(std::string("111111"));
   ScatterActionsFinder finder(elastic_parameter, testparticles, has_interacted,
                               included_2to2, true);
   ParticleList search_list = p.copy_to_vector();
@@ -202,7 +202,7 @@ TEST(find_next_action) {
       radius * radius * M_PI / fm2_mb;  // in mb
   constexpr int testparticles = 1;
   const std::vector<bool> has_interacted = {};
-  std::bitset<6> included_2to2 = std::bitset<6>(std::string("111111"));
+  ReactionsBitSet included_2to2 = ReactionsBitSet(std::string("111111"));
   ScatterActionsFinder finder(elastic_parameter, testparticles, has_interacted,
                               included_2to2, true);
 

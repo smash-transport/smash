@@ -38,7 +38,7 @@ struct ExperimentParameters {
   /**
   * This indicates which two to two reactions are switched off.
   */
-  const std::bitset<6> included_2to2;
+  const ReactionsBitSet included_2to2;
   /**
   * This indicates whether string fragmentation is switched on.
   */

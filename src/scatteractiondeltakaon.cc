@@ -21,7 +21,7 @@ void ScatterActionDeltaKaon::format_debug_output(std::ostream& out) const {
 }
 
 CollisionBranchList ScatterActionDeltaKaon::two_to_two_cross_sections
-              (std::bitset<6> included_2to2) {
+              (ReactionsBitSet included_2to2) {
   CollisionBranchList process_list;
   if (included_2to2[IncludedReactions::KN_to_KDelta] == 0) {
     return process_list;

@@ -27,7 +27,7 @@ class ScatterActionDeltaKaon : public ScatterActionBaryonMeson {
   using ScatterActionBaryonMeson::ScatterActionBaryonMeson;
   /** Find all inelastic 2->2 processes for this reaction. */
   CollisionBranchList two_to_two_cross_sections
-              (std::bitset<6> included_2to2) override;
+              (ReactionsBitSet included_2to2) override;
 
  protected:
   /**

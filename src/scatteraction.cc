@@ -105,7 +105,7 @@ void ScatterAction::generate_final_state() {
 
 void ScatterAction::add_all_processes(double elastic_parameter,
                                       bool two_to_one,
-                                      std::bitset<6> included_2to2,
+                                      ReactionsBitSet included_2to2,
                                       double low_snn_cut,
                                       bool strings_switch,
                                       NNbarTreatment nnbar_treatment) {

@@ -243,9 +243,9 @@ class Configuration {
       return arr;
     }
 
-    operator std::bitset<6>() const {
+    operator ReactionsBitSet() const {
       const std::vector<std::string> v = operator std::vector<std::string>();
-      std::bitset<6> s;
+      ReactionsBitSet s;
       for (const auto &x : v) {
           if (x == "All") {
             s.flip();

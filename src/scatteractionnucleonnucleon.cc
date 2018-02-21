@@ -84,7 +84,7 @@ static double Cugnon_bnp(double plab) {
 }
 
 CollisionBranchList ScatterActionNucleonNucleon::two_to_two_cross_sections
-                               (std::bitset<6> included_2to2) {
+                               (ReactionsBitSet included_2to2) {
   CollisionBranchList process_list, channel_list;
   const double sqrts = sqrt_s();
 

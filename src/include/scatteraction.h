@@ -155,7 +155,7 @@ class ScatterAction : public Action {
 
   /** Add all possible subprocesses for this action object. */
   virtual void add_all_processes(double elastic_parameter, bool two_to_one,
-    std::bitset<6> included_2to2, double low_snn_cut, bool strings_switch,
+    ReactionsBitSet included_2to2, double low_snn_cut, bool strings_switch,
     NNbarTreatment nnbar_treatment);
 
   /**
@@ -272,7 +272,7 @@ class ScatterAction : public Action {
 
   /** Find all inelastic 2->2 processes for this reaction. */
   virtual CollisionBranchList two_to_two_cross_sections
-                                (std::bitset<6>) {
+                                (ReactionsBitSet) {
     return CollisionBranchList();
   }
 

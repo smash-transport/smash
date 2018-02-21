@@ -73,7 +73,7 @@ TEST(elastic_collision) {
   constexpr double sigma = 10.0;
   constexpr bool strings_switch = false;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
-  act.add_all_processes(sigma, true, std::bitset<6>(std::string("111111")),
+  act.add_all_processes(sigma, true, ReactionsBitSet(std::string("111111")),
                         0., strings_switch, nnbar_treatment);
 
   // check cross section
@@ -148,7 +148,7 @@ TEST(outgoing_valid) {
   constexpr bool strings_switch = false;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act->add_all_processes(elastic_parameter, true,
-              std::bitset<6>(std::string("111111")), 0.,
+              ReactionsBitSet(std::string("111111")), 0.,
               strings_switch, nnbar_treatment);
 
   VERIFY(act->cross_section() > 0.);
@@ -196,7 +196,7 @@ TEST(pythia_running) {
 
   // construct action
   ScatterActionPtr act;
-  std::bitset<6> incl_2to2;
+  ReactionsBitSet incl_2to2;
   act = make_unique<ScatterActionBaryonBaryon>(p1_copy, p2_copy, 0.2,
                                                false, 1.0);
   std::unique_ptr<StringProcess> string_process_interface =
@@ -210,7 +210,7 @@ TEST(pythia_running) {
   constexpr bool strings_switch = true;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act->add_all_processes(elastic_parameter, false,
-                         std::bitset<6>(std::string("111111")), 0.,
+                         ReactionsBitSet(std::string("111111")), 0.,
                          strings_switch, nnbar_treatment);
 
   VERIFY(act->cross_section() > 0.);
@@ -255,7 +255,7 @@ TEST(update_incoming) {
   constexpr double sigma = 10.0;
   bool string_switch = true;
   NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
-  act.add_all_processes(sigma, true, std::bitset<6>(std::string("111111")),
+  act.add_all_processes(sigma, true, ReactionsBitSet(std::string("111111")),
                         0., string_switch, nnbar_treatment);
 
   // change the position of one of the particles

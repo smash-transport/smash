@@ -47,7 +47,7 @@ double ScatterActionBaryonBaryon::string_hard_cross_section() const {
 }
 
 CollisionBranchList ScatterActionBaryonBaryon::two_to_two_cross_sections
-                          (std::bitset<6> included_2to2) {
+                          (ReactionsBitSet included_2to2) {
   CollisionBranchList process_list;
   const ParticleType &type_a = incoming_particles_[0].type();
   const ParticleType &type_b = incoming_particles_[1].type();

@@ -117,7 +117,7 @@ void ScatterActionNucleonKaon::format_debug_output(std::ostream& out) const {
 }
 
 CollisionBranchList ScatterActionNucleonKaon::two_to_two_cross_sections
-                              (std::bitset<6> included_2to2) {
+                              (ReactionsBitSet included_2to2) {
   const ParticleType& a = incoming_particles_[0].type();
   const ParticleType& b = incoming_particles_[1].type();
   const ParticleType& type_nucleon = a.pdgcode().is_nucleon() ? a : b;

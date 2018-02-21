@@ -243,7 +243,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   const double t_end = config.read({"General", "End_Time"});
   const double output_dt = config.take({"Output", "Output_Interval"}, t_end);
   const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
-  std::bitset<6> included_2to2 =
+  ReactionsBitSet included_2to2 =
                          config.take({"Collision_Term", "Included_2to2"});
   const bool strings_switch = config.take({"Collision_Term", "Strings"}, true);
   const NNbarTreatment nnbar_treatment = config.take(

@@ -178,7 +178,7 @@ TEST(fullhistory_format) {
 
   /* Create elastic interaction (smashon + smashon). */
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
-  action->add_all_processes(10., true, std::bitset<6>(std::string("111111")),
+  action->add_all_processes(10., true, ReactionsBitSet(std::string("111111")),
                             0., true, NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
   ParticleList final_particles = action->outgoing_particles();
@@ -342,7 +342,7 @@ TEST(extended) {
 
   /* Create elastic interaction (smashon + smashon). */
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
-  action->add_all_processes(10., true, std::bitset<6>(std::string("111111")),
+  action->add_all_processes(10., true, ReactionsBitSet(std::string("111111")),
                             0., true, NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
   ParticleList final_particles = action->outgoing_particles();
