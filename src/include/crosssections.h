@@ -21,12 +21,26 @@ class cross_sections {
  public:
   cross_sections(const ParticleList& scat_particles, const double sqrt_s);
 
+  /**
+   * Append a list of processes to another (main) list of processes.
+   */
   void append_list(CollisionBranchList& main_list,
                    CollisionBranchList in_list) {
     main_list.reserve(main_list.size() + in_list.size());
     for (auto& proc : in_list) {
       main_list.emplace_back(std::move(proc));
     }
+  }
+
+  /**
+   * Sum all cross sections of the given process list.
+   */
+  double sum_xs_of(CollisionBranchList& list) {
+    double xs_sum = 0.0;
+    for (auto& proc : list) {
+      xs_sum += proc->weight();
+    }
+    return xs_sum;
   }
 
   /// TODO DOC
@@ -205,7 +219,7 @@ class cross_sections {
    * difference between the parametrized total cross section and all the
    * explicitly implemented channels at low energy (in this case only elastic).
    * This method has to be called after all other processes
-   * have been added to the Action object.
+   * have been determined.
    */
   CollisionBranchPtr NNbar_annihilation(const double current_xs);
 

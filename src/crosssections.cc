@@ -63,8 +63,9 @@ CollisionBranchList cross_sections::all_collisions(
    *  Only use in cases when detailed balance MUST happen, i.e. in a box! */
   if (nnbar_treatment == NNbarTreatment::Resonances) {
     if (t1.is_nucleon() && t2.pdgcode() == t1.get_antiparticle()->pdgcode()) {
-      // TODO: NNbar needs to know the current total XS as argument, not 0
-      process_list.emplace_back(NNbar_annihilation(0.0));
+      /* Has to be called after the other processes are already determined,
+       *  so that the sum of the cross sections includes all other processes. */
+      process_list.emplace_back(NNbar_annihilation(sum_xs_of(process_list)));
     }
     if ((t1.pdgcode() == pdg::rho_z && t2.pdgcode() == pdg::h1) ||
         (t1.pdgcode() == pdg::h1 && t2.pdgcode() == pdg::rho_z)) {

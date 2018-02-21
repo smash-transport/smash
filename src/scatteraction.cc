@@ -135,7 +135,6 @@ double ScatterAction::gamma_cm() const {
 
 double ScatterAction::mandelstam_s() const { return total_momentum().sqr(); }
 
-// TODO Maybe remove? Photons (Moved to XS class)
 double ScatterAction::cm_momentum() const {
   const double m1 = incoming_particles_[0].effective_mass();
   const double m2 = incoming_particles_[1].effective_mass();
