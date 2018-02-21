@@ -368,6 +368,7 @@ const std::initializer_list<double> PIMINUSP_ELASTIC_SIG = {
 static std::unique_ptr<InterpolateDataLinear<double>>
     piminusp_elastic_interpolation = nullptr;
 
+/// Center-of-mass energy.
 const std::initializer_list<double> PIMINUSP_RES_SQRTS = {
     1.08,  1.10,  1.12,  1.14,  1.16,  1.18,  1.20,  1.22,  1.24,  1.26,  1.28,
     1.30,  1.32,  1.34,  1.36,  1.38,  1.40,  1.42,  1.44,  1.46,  1.48,  1.50,
@@ -375,6 +376,11 @@ const std::initializer_list<double> PIMINUSP_RES_SQRTS = {
     1.74,  1.76,  1.78,  1.80,  1.82,  1.84,  1.86,  1.88,  1.90,  1.92,  1.94,
     1.96,  1.98,  2.00,  2.02,  2.04,  2.06,  2.08,  2.10,  2.12,  2.14,  2.16,
     2.18,  2.20};
+/// Elastic π⁻ N⁺ cross section contributions from decays.
+///
+/// These need to be subtracted from the interpolation of the PDG data on
+/// elastic cross sections. This data was generated using the SMASH analysis
+/// suite and should be updated when strange resonances are changed or added.
 const std::initializer_list<double> PIMINUSP_RES_SIG = {
     0.132595,   0.40252 ,   1.178451,   2.760204,   5.730226,
     10.782558,  17.245252,  20.786286,  18.877248,  15.375461,
@@ -443,6 +449,7 @@ const std::initializer_list<double> PIPLUSP_ELASTIC_SIG = {
 static std::unique_ptr<InterpolateDataLinear<double>>
     piplusp_elastic_interpolation = nullptr;
 
+/// Center-of-mass energy.
 const std::initializer_list<double> PIPLUSP_RES_SQRTS = {
     1.08,  1.10,  1.12,  1.14,  1.16,  1.18,  1.20,  1.22,  1.24,  1.26,  1.28,
     1.30,  1.32,  1.34,  1.36,  1.38,  1.40,  1.42,  1.44,  1.46,  1.48,  1.50,
@@ -450,6 +457,11 @@ const std::initializer_list<double> PIPLUSP_RES_SQRTS = {
     1.74,  1.76,  1.78,  1.80,  1.82,  1.84,  1.86,  1.88,  1.90,  1.92,  1.94,
     1.96,  1.98,  2.00,  2.02,  2.04,  2.06,  2.08,  2.10,  2.12,  2.14,  2.16,
     2.18,  2.20 };
+/// Elastic π⁺ N⁺ cross section contributions from decays.
+///
+/// These need to be subtracted from the interpolation of the PDG data on
+/// elastic cross sections. This data was generated using the SMASH analysis
+/// suite and should be updated when strange resonances are changed or added.
 const std::initializer_list<double> PIPLUSP_RES_SIG = {
     0.138618,    2.13515 ,    8.158391,   20.991292,   45.854734,
     89.292892,  145.033063,  172.723465,  151.669374,  114.877364,

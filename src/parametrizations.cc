@@ -137,7 +137,7 @@ double piplusp_elastic(double mandelstam_s) {
   if (piplusp_elastic_res_interpolation == nullptr) {
     std::vector<double> x = PIPLUSP_RES_SQRTS;
     for (auto& i : x) {
-      i = i * i;  // plab_from_s(i * i, pion_mass, nucleon_mass);
+      i = i * i; 
     }
     std::vector<double> y = PIPLUSP_RES_SIG;
     piplusp_elastic_res_interpolation =
@@ -188,8 +188,11 @@ double piminusp_elastic(double mandelstam_s) {
   } else {
     sigma = piminusp_elastic_pdg(mandelstam_s);
   }
-  // Tune down the elastic cross section so that the total cross section
-  // can fit the data.
+  // Tune down the elastic cross section when sqrt s is between 1.8 GeV 
+  // and 1.97 GeV so that the total cross section can fit the data. The
+  // scaling factor is chosen so that the it's equal to one and its 
+  // derivate vanishes at the both ends. The minimum scaling factor in this
+  // region is 0.88-0.12=0.76.
   if (mandelstam_s > 3.24 && mandelstam_s < 3.8809) {
     sigma *= (0.12 * cos(2 * M_PI * (sqrt(mandelstam_s) - 1.8) / (1.97 - 1.8))
               + 0.88);
@@ -198,7 +201,7 @@ double piminusp_elastic(double mandelstam_s) {
   if (piminusp_elastic_res_interpolation == nullptr) {
     std::vector<double> x = PIMINUSP_RES_SQRTS;
     for (auto& i : x) {
-      i = i * i;  // plab_from_s(i * i, pion_mass, nucleon_mass);
+      i = i * i;
     }
     std::vector<double> y = PIMINUSP_RES_SIG;
     piminusp_elastic_res_interpolation =

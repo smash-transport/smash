@@ -156,7 +156,7 @@ void ScatterAction::add_all_processes(double elastic_parameter, bool two_to_one,
     } else if (sqrt_s() >
                mix_scatter_type_energy - mix_scatter_type_window_width) {
           const double probability_pythia = 0.5 +
-                     0.5 * sin(0.5 * M_PI * (sqrt_s()- mix_scatter_type_energy)
+                     0.5 * sin(0.5 * M_PI * (sqrt_s() - mix_scatter_type_energy)
                      / mix_scatter_type_window_width);
       if (probability_pythia > Random::uniform(0., 1.)) {
         // scatterings at the middle energies are through string
