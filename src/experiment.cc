@@ -1348,9 +1348,12 @@ void Experiment<Modus>::run() {
     /* Sample initial particles, start clock, some printout and book-keeping */
     initialize_new_event();
     /* In the ColliderModus, if the first collisions within the same nucleus are
-     * forbidden, then nucleon_has_interacted_ is created to record whether the
-     * nucleons inside
-     * the colliding nuclei have experienced any collisions or not */
+     * forbidden, 'nucleon_has_interacted_', which records whether a nucleon has
+     * collided with another nucleon, is initialized equal to false. If allowed,
+     * 'nucleon_has_interacted' is initialized equal to true, which means these
+     * incoming particles have experienced some fake scatterings, they can
+     * therefore collide with each other later on since these collisions are not
+     * "first" to them. */
     if (modus_.is_collider()) {
       if (!modus_.cll_in_nucleus()) {
         nucleon_has_interacted_.assign(modus_.total_N_number(), false);
