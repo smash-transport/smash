@@ -73,17 +73,11 @@ class ScatterAction : public Action {
    */
   void sample_angles(std::pair<double, double> masses) override;
 
-  /** Add all possible subprocesses for this action object. */
-  virtual void add_all_processes(double elastic_parameter, bool two_to_one,
-                                 bool two_to_two, double low_snn_cut,
-                                 bool strings_switch,
-                                 NNbarTreatment nnbar_treatment);
-
-  /**
-   * Determine the (parametrized) total cross section for this collision. This
-   * is currently only used for calculating the string excitation cross section.
-   */
-  virtual double total_cross_section() const { return 0.; }
+  /** Add all possible scattering subprocesses for this action object. */
+  virtual void add_all_scatterings(double elastic_parameter, bool two_to_one,
+                                   bool two_to_two, double low_snn_cut,
+                                   bool strings_switch,
+                                   NNbarTreatment nnbar_treatment);
 
   /// Returns list of possible collision channels
   const CollisionBranchList& collision_channels() {

@@ -72,7 +72,8 @@ TEST(elastic_collision) {
   constexpr double sigma = 10.0;
   constexpr bool strings_switch = false;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
-  act.add_all_processes(sigma, true, true, 0., strings_switch, nnbar_treatment);
+  act.add_all_scatterings(sigma, true, true, 0., strings_switch,
+                          nnbar_treatment);
 
   // check cross section
   COMPARE(act.cross_section(), sigma);
@@ -145,8 +146,8 @@ TEST(outgoing_valid) {
   constexpr double elastic_parameter = 0.;  // don't include elastic scattering
   constexpr bool strings_switch = false;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
-  act->add_all_processes(elastic_parameter, true, true, 0., strings_switch,
-                         nnbar_treatment);
+  act->add_all_scatterings(elastic_parameter, true, true, 0., strings_switch,
+                           nnbar_treatment);
 
   VERIFY(act->cross_section() > 0.);
 
@@ -204,8 +205,8 @@ TEST(pythia_running) {
   constexpr double elastic_parameter = 0.;  // don't include elastic scattering
   constexpr bool strings_switch = true;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
-  act->add_all_processes(elastic_parameter, false, false, 0., strings_switch,
-                         nnbar_treatment);
+  act->add_all_scatterings(elastic_parameter, false, false, 0., strings_switch,
+                           nnbar_treatment);
 
   VERIFY(act->cross_section() > 0.);
 
@@ -249,7 +250,8 @@ TEST(update_incoming) {
   constexpr double sigma = 10.0;
   bool string_switch = true;
   NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
-  act.add_all_processes(sigma, true, true, 0., string_switch, nnbar_treatment);
+  act.add_all_scatterings(sigma, true, true, 0., string_switch,
+                          nnbar_treatment);
 
   // change the position of one of the particles
   const FourVector new_position(0.1, 0., 0., 0.);

@@ -108,14 +108,14 @@ void ScatterAction::generate_final_state() {
   }
 }
 
-void ScatterAction::add_all_processes(double elastic_parameter, bool two_to_one,
-                                      bool two_to_two, double low_snn_cut,
-                                      bool strings_switch,
-                                      NNbarTreatment nnbar_treatment) {
+void ScatterAction::add_all_scatterings(double elastic_parameter,
+                                        bool two_to_one, bool two_to_two,
+                                        double low_snn_cut, bool strings_switch,
+                                        NNbarTreatment nnbar_treatment) {
   cross_sections xs(incoming_particles_, sqrt_s());
-  CollisionBranchList processes =
-      xs.all_collisions(elastic_parameter, two_to_one, two_to_two, low_snn_cut,
-                        strings_switch, nnbar_treatment, string_process_);
+  CollisionBranchList processes = xs.generate_collision_list(
+      elastic_parameter, two_to_one, two_to_two, low_snn_cut, strings_switch,
+      nnbar_treatment, string_process_);
 
   /* Add various subprocesses.*/
   add_collisions(std::move(processes));
