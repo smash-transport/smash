@@ -56,8 +56,8 @@ RootOutput::RootOutput(const bf::path &path, std::string name,
    * Every physical quantity is in a separate TBranch.
    * One entry in the \c particles TTree is:
    * \code
-   * ev tcounter npart pdgcode[npart] t[npart] x[npart] y[npart] z[npart]
-   * p0[npart] px[npart] py[npart] pz[npart]
+   * ev tcounter npart impact_b pdgcode[npart] t[npart] x[npart] y[npart]
+   * z[npart] p0[npart] px[npart] py[npart] pz[npart]
    * \endcode
    * One tree entry is analogous to an OSCAR output block, but the maximal
    * number of particles in one entry is limited to 10000. This is done to limit
@@ -69,6 +69,7 @@ RootOutput::RootOutput(const bf::path &path, std::string name,
    * \li \c tcounter is number of output block in a given event in terms of
    *OSCAR
    * \li \c npart is number of particles in the block
+   * \li \c impact_b is the impact parameter of the event
    * \li \c pdgcode is PDG id array
    * \li \c t, \c x, \c y, \c z are position arrays
    * \li \c p0, \c px, \c py, \c pz are 4-momenta arrays
