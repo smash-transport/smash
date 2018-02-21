@@ -17,7 +17,10 @@
 #include <stdexcept>
 #include <string>
 
+#include <boost/filesystem.hpp>
+
 #include "cxx14compat.h"
+#include "forwarddeclarations.h"
 
 namespace smash {
 
@@ -56,11 +59,30 @@ struct FileDeleter {
 using FilePtr = std::unique_ptr<std::FILE, FileDeleter>;
 
 /**
+ * A RAII type to replace `std::FILE *`.
+ *
+ * While open, the file name ends with ".unfinished".
+ *
+ * Automatically closes and renames the file to the original when it goes out of
+ * scope.
+ */
+class RenamingFilePtr {
+ public:
+  RenamingFilePtr(const bf::path& filename, const std::string& mode);
+  FILE* get();
+  ~RenamingFilePtr();
+ private:
+  FILE* file_;
+  bf::path filename_;
+  bf::path filename_unfinished_;
+};
+
+/**
  * Open a file with given mode.
  *
  * This wraps std::fopen but uses FileDeleter to automatically close the file.
  */
-FilePtr fopen(const std::string& filename, const std::string& mode);
+FilePtr fopen(const bf::path& filename, const std::string& mode);
 
 }  // namespace smash
 
