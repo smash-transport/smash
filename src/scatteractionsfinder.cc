@@ -34,26 +34,26 @@
 
 namespace smash {
 /*!\Userguide
-* \page input_collision_term_ Collision_Term
-* \key Elastic_Cross_Section (double, optional, default = -1.0 [mb]) \n
-* If a non-negative value is given, it will override the parametrized
-* elastic cross sections (which are energy-dependent) with a constant value.
-* This constant elastic cross section is used for all collisions.
-*
-* \key Isotropic (bool, optional, default = false) \n
-* Do all collisions isotropically.
-* \key Strings (bool, optional, default = false): \n
-* true - string excitation is enabled\n
-* false - string excitation is disabled
-* \key String_Formation_Time (double, optional, default = 1.0) \n
-* Parameter for formation time in string fragmentation in fm/c
-* \key low_snn_cut (double) in GeV \n
-* The elastic collisions betwen two nucleons with sqrt_s below
-* low_snn_cut cannot happen.
-* <1.88 - below the threshold energy of the elastic collsion, no effect
-* >2.02 - beyond the threshold energy of the inelastic collision NN->NNpi, not
-* suggested
-*/
+ * \page input_collision_term_ Collision_Term
+ * \key Elastic_Cross_Section (double, optional, default = -1.0 [mb]) \n
+ * If a non-negative value is given, it will override the parametrized
+ * elastic cross sections (which are energy-dependent) with a constant value.
+ * This constant elastic cross section is used for all collisions.
+ *
+ * \key Isotropic (bool, optional, default = false) \n
+ * Do all collisions isotropically.
+ * \key Strings (bool, optional, default = false): \n
+ * true - string excitation is enabled\n
+ * false - string excitation is disabled
+ * \key String_Formation_Time (double, optional, default = 1.0) \n
+ * Parameter for formation time in string fragmentation in fm/c
+ * \key low_snn_cut (double) in GeV \n
+ * The elastic collisions betwen two nucleons with sqrt_s below
+ * low_snn_cut cannot happen.
+ * <1.88 - below the threshold energy of the elastic collsion, no effect
+ * >2.02 - beyond the threshold energy of the inelastic collision NN->NNpi, not
+ * suggested
+ */
 
 ScatterActionsFinder::ScatterActionsFinder(
     Configuration config, const ExperimentParameters &parameters,
@@ -71,8 +71,8 @@ ScatterActionsFinder::ScatterActionsFinder(
       nucleon_has_interacted_(nucleon_has_interacted),
       N_tot_(N_tot),
       N_proj_(N_proj),
-      string_formation_time_(config.take({"Collision_Term", 
-              "String_Parameters", "Formation_Time"}, 1.)),
+      string_formation_time_(config.take(
+          {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.)),
       photons_(parameters.photons_switch),
       n_fractional_photons_(n_fractional_photons) {
   if (is_constant_elastic_isotropic()) {
@@ -82,16 +82,22 @@ ScatterActionsFinder::ScatterActionsFinder(
   }
   if (strings_switch_) {
     string_process_interface_ = make_unique<StringProcess>(
-     config.take({"Collision_Term", "String_Parameters", "String_Tension"},1.0),
-     config.take({"Collision_Term", "String_Parameters", "Gluon_Beta"},0.5),
-     config.take({"Collision_Term", "String_Parameters", "Gluon_Pmin"},0.001),
-     config.take({"Collision_Term", "String_Parameters", "Quark_Alpha"},1.0),
-     config.take({"Collision_Term", "String_Parameters", "Quark_Beta"},2.5),
-     config.take({"Collision_Term", "String_Parameters", "Strange_Supp"},0.217),
-     config.take({"Collision_Term", "String_Parameters", "Diquark_Supp"},0.081),
-     config.take({"Collision_Term", "String_Parameters", "Sigma_Perp"},0.7),
-     config.take({"Collision_Term", "String_Parameters", "StringZ_A"},0.68),
-     config.take({"Collision_Term", "String_Parameters", "StringZ_B"},0.98));
+        config.take({"Collision_Term", "String_Parameters", "String_Tension"},
+                    1.0),
+        config.take({"Collision_Term", "String_Parameters", "Gluon_Beta"}, 0.5),
+        config.take({"Collision_Term", "String_Parameters", "Gluon_Pmin"},
+                    0.001),
+        config.take({"Collision_Term", "String_Parameters", "Quark_Alpha"},
+                    1.0),
+        config.take({"Collision_Term", "String_Parameters", "Quark_Beta"}, 2.5),
+        config.take({"Collision_Term", "String_Parameters", "Strange_Supp"},
+                    0.217),
+        config.take({"Collision_Term", "String_Parameters", "Diquark_Supp"},
+                    0.081),
+        config.take({"Collision_Term", "String_Parameters", "Sigma_Perp"}, 0.7),
+        config.take({"Collision_Term", "String_Parameters", "StringZ_A"}, 0.68),
+        config.take({"Collision_Term", "String_Parameters", "StringZ_B"},
+                    0.98));
   }
 }
 
@@ -184,10 +190,10 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData &data_a,
     return nullptr;
   }
   /** If the two particles
-    * 1) belong to the two colliding nuclei
-    * 2) are within the same nucleus
-    * 3) both of them have never experienced any collisons,
-    * then the collision between them are banned. */
+   * 1) belong to the two colliding nuclei
+   * 2) are within the same nucleus
+   * 3) both of them have never experienced any collisons,
+   * then the collision between them are banned. */
   assert(data_a.id() >= 0);
   assert(data_b.id() >= 0);
   if (data_a.id() < N_tot_ && data_b.id() < N_tot_ &&

@@ -41,8 +41,8 @@ StringProcess::StringProcess(double string_tension, double gluon_beta,
   pythia_->readString("StringPT:sigma = 0.25");
   pythia_->readString("StringFlav:probQQtoQ = " + std::to_string(diquark_supp));
   pythia_->readString("StringFlav:probStoUD = " + std::to_string(strange_supp));
-  pythia_->readString("StringZ:aLund = "+ std::to_string(stringz_a));
-  pythia_->readString("StringZ:bLund = "+ std::to_string(stringz_b));
+  pythia_->readString("StringZ:aLund = " + std::to_string(stringz_a));
+  pythia_->readString("StringZ:bLund = " + std::to_string(stringz_b));
   /* manually set the parton distribution function */
   pythia_->readString("PDF:pSet = 13");
   pythia_->readString("PDF:pSetB = 13");
@@ -134,8 +134,8 @@ int StringProcess::append_final_state(const FourVector &uString,
   xvertex_pos[0] = p_pos_tot / kappa_tension_string_;
   for (int i = 0; i < nfrag; i++) {
     // recursively compute x^{+} coordinates of q-qbar formation vertex
-    xvertex_pos[i + 1] = xvertex_pos[i] -
-                         (fragments[i].momentum.x0() + fragments[i].pparallel) /
+    xvertex_pos[i + 1] =
+        xvertex_pos[i] - (fragments[i].momentum.x0() + fragments[i].pparallel) /
                              (kappa_tension_string_ * sqrt2_);
   }
   // x^{-} coordinates of the backward end
