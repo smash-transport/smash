@@ -42,10 +42,11 @@ namespace smash {
  * compute total energy-momentum tensor of all particles in the box with
  * weights equal to 1, which corresponds to "Smearing: false".
  */
-ThermodynamicOutput::ThermodynamicOutput(const bf::path &path, std::string name,
+ThermodynamicOutput::ThermodynamicOutput(const bf::path &path,
+                                         const std::string& name,
                                          const OutputParameters &out_par)
     : OutputInterface(name),
-      file_{std::fopen((path / ("thermodynamics.dat")).native().c_str(), "w")},
+      file_{path / "thermodynamics.dat", "w"},
       out_par_(out_par) {
   std::fprintf(file_.get(), "# %s thermodynamics output\n", VERSION_MAJOR);
   const ThreeVector r = out_par.td_position;
