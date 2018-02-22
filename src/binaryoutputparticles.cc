@@ -24,8 +24,7 @@ BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
                                              std::string name,
                                              const OutputParameters &out_par)
     : BinaryOutputBase(
-          std::fopen(((path / "particles_binary.bin")).native().c_str(), "wb"),
-          name, out_par.part_extended),
+          path / "particles_binary.bin", "wb", name, out_par.part_extended),
       only_final_(out_par.part_only_final) {}
 
 /*!\Userguide
