@@ -89,7 +89,7 @@ class Particles;
   **/
 class RootOutput : public OutputInterface {
  public:
-  RootOutput(const bf::path &path, std::string name,
+  RootOutput(const bf::path &path, const std::string& name,
              const OutputParameters &out_par);
   ~RootOutput();
 
@@ -102,7 +102,8 @@ class RootOutput : public OutputInterface {
   void at_interaction(const Action &action, const double density) override;
 
  private:
-  const bf::path base_path_;
+  const bf::path filename_;
+  bf::path filename_unfinished_;
   std::unique_ptr<TFile> root_out_file_;
   // TFile takes ownership of all TTrees.
   // That's why TTree is not a unique pointer.
