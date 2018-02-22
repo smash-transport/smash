@@ -566,7 +566,7 @@ N(2250)
 # From UrQMD
 
 Δ(1950)
-0.30   3  N π        # 35 - 45 %, tuned for pNπ total cross sectionn
+0.30   3  N π        # 35 - 45 %, tuned for Nπ total cross section
 0.004  4  Σ K        # 0.3 - 0.5 %, tuned for Nπ->ΣK, NN->ΣK
 0.09   4  Δ π        #  1 -  9 %
 0.506  3  N(1440) π  # Introduced to fill up missing branching ratio
