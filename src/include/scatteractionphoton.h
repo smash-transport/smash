@@ -140,6 +140,10 @@ class ScatterActionPhoton : public ScatterAction {
 
   static ReactionType photon_reaction_type(const ParticleList &in);
 
+  static bool is_photon_reaction(const ParticleList &in) {
+    return photon_reaction_type(in) != ReactionType::no_reaction;
+  }
+
   /*
    * Return ParticleTypePtr of hadron in out channel, given the incoming
    * particles.

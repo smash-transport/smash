@@ -877,8 +877,14 @@ bool Experiment<Modus>::perform_action(
   }
 
   // At every collision photons can be produced.
-  if (photons_switch_ && ScatterActionPhoton::is_kinematically_possible(
-                             action.sqrt_s(), action.incoming_particles())) {
+  // Note: We rely here on the lazy evaluation of the arguments to if.
+  // It may happen that in a wall-crossing-action sqrt_s raise an exception
+  // Therefore we first have to check if the incoming particles can undergo
+  // an em-interaction.
+  if (photons_switch_ &&
+      ScatterActionPhoton::is_photon_reaction(action.incoming_particles()) &&
+      ScatterActionPhoton::is_kinematically_possible(
+          action.sqrt_s(), action.incoming_particles())) {
     // Time in the action constructor is relative to
     // current time of incoming
     constexpr double action_time = 0.;

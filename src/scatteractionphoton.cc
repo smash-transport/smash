@@ -138,7 +138,7 @@ ParticleTypePtr ScatterActionPhoton::outgoing_hadron_type(
 bool ScatterActionPhoton::is_kinematically_possible(const double s_sqrt,
                                                     const ParticleList &in) {
   auto reac = photon_reaction_type(in);
-  auto hadron = outgoing_hadron_type(reac);
+  auto hadron = outgoing_hadron_type(in);
 
   if (reac == ReactionType::no_reaction)
     return false;
