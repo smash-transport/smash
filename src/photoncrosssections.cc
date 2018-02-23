@@ -3835,10 +3835,14 @@ PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0_omega_mediated(
   using std::sqrt;
   using std::abs;
 
+  // we need this check here in case of using the summed up cross sections
+  if (sqrt(s) < m_omega_) return 0.0;
+
   auto t_mandelstam = get_t_range(sqrt(s), m_pion_, m_rho, m_pion_, 0.);
   const double &tmax = t_mandelstam[0];
   const double &tmin = t_mandelstam[1];
   const double spin_deg_factor = 3.0;
+
 
   const double xs =
 		(0.0024867959858108648*pow(Const,2)*pow(g_POR,4)*(pow(m_pion_,8)*(1.*tmax
@@ -3869,9 +3873,8 @@ double PhotonCrossSection<ComputationMethod::Analytic>::
   using std::sqrt;
   using std::abs;
 
-  if (sqrt(s) < m_omega_) {
-      return 0.0;
-  }
+    // we need this check here in case of using the summed up cross sections
+  if (sqrt(s) < m_omega_) return 0.0;
 
   const double diff_xs =
       (0.0024867959858108648 * pow(Const, 2) * pow(g_POR, 4) *

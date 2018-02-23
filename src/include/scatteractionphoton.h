@@ -145,6 +145,7 @@ class ScatterActionPhoton : public ScatterAction {
    * particles.
    */
   static ParticleTypePtr outgoing_hadron_type(const ParticleList &in);
+  static ParticleTypePtr outgoing_hadron_type(const ReactionType reaction);
 
   /*
    *  Check if CM-energy is sufficient to produce hadron in final state.
@@ -287,7 +288,8 @@ class ScatterActionPhoton : public ScatterAction {
                                  const double E_photon);
 
   // conversion factor to millibarn
-  const double to_mb_ = 0.3894;
+  //const double to_mb_ = 0.3894;
+  static constexpr double m_omega_ = 0.783;
 };
 
 }  // namespace smash
