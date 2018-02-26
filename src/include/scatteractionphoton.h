@@ -58,6 +58,11 @@ class ScatterActionPhoton : public ScatterAction {
     // hadron_out_mass_ = hadron_out_t_->mass();
     reac_ = photon_reaction_type(in);
     hadron_out_mass_ = sample_out_hadron_mass(hadron_out_t_);
+
+    // sanity check. TODO: Remove
+    if (reac_ == ReactionType::pi_z_rho_z_pi_z && default_mediator_ == MediatorType::PION) {
+      exit(1);
+    }
   }
 
   /**

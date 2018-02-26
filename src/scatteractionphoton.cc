@@ -142,6 +142,11 @@ bool ScatterActionPhoton::is_kinematically_possible(const double s_sqrt,
 
   if (reac == ReactionType::no_reaction)
     return false;
+
+                                    
+  if (default_mediator_ == MediatorType::PION && reac == ReactionType::pi_z_rho_z_pi_z) {
+    return false;
+  }
   // C15 happens only via s-channel. In case of omega as mediator make sure that
   // cm-energy is high enough to form an omega
   if ((reac == ReactionType::pi_m_rho_p_pi_z ||
@@ -154,7 +159,7 @@ bool ScatterActionPhoton::is_kinematically_possible(const double s_sqrt,
 
   // for all other processes: if cm-energy is not high enough to produce final
   // state particle reject the collision.
-  if (s_sqrt < hadron->mass()) {
+  if (hadron->is_stable() && s_sqrt < hadron->mass()) {
     return false;
   } else {
     return true;
