@@ -53,7 +53,8 @@ double ScatterActionBaryonMeson::string_hard_cross_section() const {
   return Npi_string_hard(s);
 }
 
-CollisionBranchList ScatterActionBaryonMeson::two_to_two_cross_sections() {
+CollisionBranchList ScatterActionBaryonMeson::two_to_two_cross_sections(
+  ReactionsBitSet /*included_2to2*/) {
   CollisionBranchList process_list;
   const ParticleType &type_a = incoming_particles_[0].type();
   const ParticleType &type_b = incoming_particles_[1].type();

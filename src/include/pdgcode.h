@@ -77,6 +77,20 @@ namespace smash {
  * involved with successive divisions by 10 and taking the remainder
  * etc.).
  *
+ * Representing nuclei
+ * -------------------
+ *
+ * Following PDG standard, nuclei are represented by codes ±10LZZZAAAI, where
+ * L is number of Lambdas inside the nucleus, ZZZ is charge, AAA is mass
+ * number and I is used for excitations. Internally nuclei are represented
+ * in a different way from hadrons, but all accessors (charge, baryon number,
+ * etc) work in the same way.
+ *
+ * Normally nuclei in SMASH are simulated as a collection of protons and
+ * neutrons, so there is no need in their PDG codes. However, it is
+ * interesting to study light nuclei production, considering them as single
+ * pointlike hadrons. This justifies introduction of nuclear PDG codes here.
+ *
  * Limitations:
  * ------------
  *
@@ -87,9 +101,8 @@ namespace smash {
  * not well-defined, and/or because the charge and baryon number is not
  * an integer anymore.)
  *
- * Also, tetra- and pentaquarks as well as compound objects (small or
- * large nuclei) cannot be represented; that, though, is a problem of
- * the PDG Numbering Scheme rather than of this class.
+ * Also, tetra- and pentaquarks cannot be represented; that, though,
+ * is a problem of the PDG Numbering Scheme rather than of this class.
  *
  **/
 
@@ -260,7 +273,7 @@ class PdgCode {
    * accessors of various properties                                          *
    *                                                                          *
    ****************************************************************************/
-  /// true if this is nucleus, false otherwise
+  /// true if this is a nucleus, false otherwise
   inline bool is_nucleus() const {
     assert(digits_.is_nucleus_ == nucleus_.is_nucleus_);
     return nucleus_.is_nucleus_;
@@ -283,7 +296,7 @@ class PdgCode {
     if (!is_hadron() || digits_.n_q1_ == 0) {
       return 0;
     }
-   return antiparticle_sign();
+    return antiparticle_sign();
   }
   /// Returns whether this PDG code identifies a baryon.
   inline bool is_baryon() const {
@@ -374,7 +387,6 @@ class PdgCode {
   inline int isospin3() const {
     // net_quark_number(2) is the number of u quarks,
     // net_quark_number(1) is the number of d quarks.
-    // std::cout << string() << " " << is_nucleus() << " " << net_quark_number(2) << " " << net_quark_number(1) << std::endl;
     return net_quark_number(2) - net_quark_number(1);
   }
   /** returns the net number of \f$\bar s\f$ quarks.
@@ -561,7 +573,6 @@ class PdgCode {
    */
   int get_decimal() const {
     if (is_nucleus()) {
-      // std::cout << "Nucleus: A = " << nucleus_.A_ << ", Z = " << nucleus_.Z_ << ", NL = " << nucleus_.n_Lambda_ << ", I = " << nucleus_.I_ << std::endl;
       // ±10LZZZAAAI
       return antiparticle_sign() *
              (nucleus_.I_ + 10 * nucleus_.A_ + 10000 * nucleus_.Z_ +
@@ -746,15 +757,20 @@ class PdgCode {
     // Nucleus
     if (length == 10 + sign) {
       nucleus_.is_nucleus_ = true;
-      if (codestring.substr(c, 2) != "10") {
+      if (codestring[c] != '1' || codestring[c + 1] != '0') {
         throw InvalidPdgCode("Pdg code of nucleus \"" + codestring +
                              "\" should start with 10\n");
       }
+      c += 2;
       // ±10LZZZAAAI is the standard for nuclei
-      nucleus_.n_Lambda_ = std::stoi(codestring.substr(c + 2, 1));
-      nucleus_.Z_ = std::stoi(codestring.substr(c + 3, 3));
-      nucleus_.A_ = std::stoi(codestring.substr(c + 6, 3));
-      nucleus_.I_ = std::stoi(codestring.substr(c + 9, 1));
+      std::array<int, 8> digits;
+      for (int i = 0; i < 8; i++) {
+        digits[i] = get_digit_from_char(codestring[c + i]);
+      }
+      nucleus_.n_Lambda_ = digits[0];
+      nucleus_.Z_ = 100 * digits[1] + 10 * digits[2] + digits[3];
+      nucleus_.A_ = 100 * digits[4] + 10 * digits[5] + digits[6];
+      nucleus_.I_ = digits[7];
       return;
     }
 

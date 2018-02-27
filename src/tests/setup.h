@@ -235,11 +235,12 @@ inline ParticlesPtr create_particles(
  */
 inline ExperimentParameters default_parameters(int testparticles = 1,
                                                double dt = 0.1) {
+  ReactionsBitSet included_2to2 = ReactionsBitSet(std::string("111111"));
   return ExperimentParameters{
-      {0., dt}, {0., 1.}, testparticles,
-      1.0,      4.0,      true,
-      true,     false,    NNbarTreatment::NoAnnihilation,
-      false,    0., false};
+      {0., dt},      {0., 1.}, testparticles,
+      1.0,           4.0,      true,
+      included_2to2, false,    NNbarTreatment::NoAnnihilation,
+      false,         0.,       false};
 }
 
 /**
