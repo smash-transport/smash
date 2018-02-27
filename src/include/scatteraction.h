@@ -74,7 +74,7 @@ class ScatterAction : public Action {
   void sample_angles(std::pair<double, double> masses) override;
 
   /** Add all possible scattering subprocesses for this action object. */
-  virtual void add_all_scatterings(double elastic_parameter, bool two_to_one,
+  void add_all_scatterings(double elastic_parameter, bool two_to_one,
                                    bool two_to_two, double low_snn_cut,
                                    bool strings_switch,
                                    NNbarTreatment nnbar_treatment);
