@@ -58,12 +58,12 @@ class ModusDefault {
 
   /** The following four parameters tell the number of nucleons in the
    *  colliding nuclei, the number of nucleons in the projectile, whether
-   *  the first collisions within the same nucleus are forbiden, and whether
+   *  the first collisions within the same nucleus are allowed, and whether
    *  the modus is Collider. They are all needed in the Collider modus. In
    *  the other modus, they take the following default value. */
   int total_N_number() const { return 0; }
   int proj_N_number() const { return 0; }
-  bool cll_in_nucleus() const { return true; }
+  bool cll_in_nucleus() const { return false; }
   bool is_collider() const { return false; }
   double impact_parameter() const { return 0.0; }
   /** The beam velocity of the projectile required in the Collider modus.

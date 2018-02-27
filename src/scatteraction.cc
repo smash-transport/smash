@@ -25,11 +25,11 @@
 namespace smash {
 
 ScatterAction::ScatterAction(const ParticleData &in_part_a,
-                             const ParticleData &in_part_b, double time,
-                             bool isotropic, double string_formation_time)
+                             const ParticleData &in_part_b,
+                             double time, bool isotropic,
+                             double string_formation_time)
     : Action({in_part_a, in_part_b}, time),
-      total_cross_section_(0.),
-      isotropic_(isotropic),
+      total_cross_section_(0.), isotropic_(isotropic),
       string_formation_time_(string_formation_time) {}
 
 void ScatterAction::add_collision(CollisionBranchPtr p) {
@@ -47,7 +47,7 @@ void ScatterAction::generate_final_state() {
   log.debug("Incoming particles: ", incoming_particles_);
 
   if (pot_pointer != nullptr) {
-     filter_channel(collision_channels_, total_cross_section_);
+    filter_channel(collision_channels_, total_cross_section_);
   }
   /* Decide for a particular final state. */
   const CollisionBranch *proc = choose_channel<CollisionBranch>(
@@ -102,8 +102,11 @@ void ScatterAction::generate_final_state() {
   }
 }
 
-void ScatterAction::add_all_processes(double elastic_parameter, bool two_to_one,
-                                      bool two_to_two, double low_snn_cut,
+
+void ScatterAction::add_all_processes(double elastic_parameter,
+                                      bool two_to_one,
+                                      ReactionsBitSet included_2to2,
+                                      double low_snn_cut,
                                       bool strings_switch,
                                       NNbarTreatment nnbar_treatment) {
   /* The string fragmentation is implemented in the same way in GiBUU (Physics
@@ -163,26 +166,27 @@ void ScatterAction::add_all_processes(double elastic_parameter, bool two_to_one,
       }
     }
   }
-  /** Elastic collisions between two nucleons with sqrt_s() below
-   * low_snn_cut can not happen*/
-  const bool reject_by_nucleon_elastic_cutoff =
-      both_are_nucleons && t1.antiparticle_sign() == t2.antiparticle_sign() &&
-      sqrt_s() < low_snn_cut;
-  if (two_to_two && !reject_by_nucleon_elastic_cutoff) {
-    add_collision(elastic_cross_section(elastic_parameter));
+    /** Elastic collisions between two nucleons with sqrt_s() below
+     * low_snn_cut can not happen*/
+  const bool reject_by_nucleon_elastic_cutoff = both_are_nucleons
+                         && t1.antiparticle_sign() == t2.antiparticle_sign()
+                         && sqrt_s() < low_snn_cut;
+  bool incl_elastic = included_2to2[IncludedReactions::Elastic];
+  if (incl_elastic && !reject_by_nucleon_elastic_cutoff) {
+      add_collision(elastic_cross_section(elastic_parameter));
   }
   if (is_pythia) {
     /* string excitation */
     add_collisions(string_excitation_cross_sections());
   } else {
-    if (two_to_one) {
-      /* resonance formation (2->1) */
-      add_collisions(resonance_cross_sections());
-    }
-    if (two_to_two) {
-      /* 2->2 (inelastic) */
-      add_collisions(two_to_two_cross_sections());
-    }
+     if (two_to_one) {
+       /* resonance formation (2->1) */
+       add_collisions(resonance_cross_sections());
+     }
+     if (included_2to2.any()) {
+       /* 2->2 (inelastic) */
+       add_collisions(two_to_two_cross_sections(included_2to2));
+     }
   }
   /** NNbar annihilation thru NNbar → ρh₁(1170); combined with the decays
    *  ρ → ππ and h₁(1170) → πρ, this gives a final state of 5 pions.
@@ -375,7 +379,7 @@ CollisionBranchList ScatterAction::string_excitation_cross_sections() {
     double single_diffr = single_diffr_AX + single_diffr_XB;
     double diffractive = single_diffr + double_diffr;
     const double nondiffractive_all =
-      std::max(0., sig_string_all - diffractive);
+        std::max(0., sig_string_all - diffractive);
     diffractive = sig_string_all - nondiffractive_all;
     double_diffr = std::max(0., diffractive - single_diffr);
     const double a = (diffractive - double_diffr) / single_diffr;
@@ -388,10 +392,9 @@ CollisionBranchList ScatterAction::string_excitation_cross_sections() {
      * in conjunction with multipartion interaction picture
      * \iref{Sjostrand:1987su}. */
     const double hard_xsec = string_hard_cross_section();
-    const double nondiffractive_soft = nondiffractive_all *
-                 std::exp(- hard_xsec / nondiffractive_all);
-    const double nondiffractive_hard = nondiffractive_all -
-                 nondiffractive_soft;
+    const double nondiffractive_soft =
+        nondiffractive_all * std::exp(-hard_xsec / nondiffractive_all);
+    const double nondiffractive_hard = nondiffractive_all - nondiffractive_soft;
     log.debug("String cross sections [mb] are");
     log.debug("Single-diffractive AB->AX: ", single_diffr_AX);
     log.debug("Single-diffractive AB->XB: ", single_diffr_XB);
@@ -716,9 +719,12 @@ void ScatterAction::string_excitation_pythia() {
           data.set_cross_section_scaling_factor(suppression_factor * 0.0);
         }
       }
+      ThreeVector v_calc =
+          (data.momentum().LorentzBoost(-1.0 * beta_cm())).velocity();
       // Set formation time: actual time of collision + time to form the
       // particle
-      data.set_formation_time(string_formation_time_ * gamma_cm() +
+      double gamma_factor = 1.0 / std::sqrt(1 - (v_calc).sqr());
+      data.set_formation_time(string_formation_time_ * gamma_factor +
                               time_of_execution_);
       outgoing_particles_.push_back(data);
     }
