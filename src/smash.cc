@@ -329,7 +329,8 @@ int main(int argc, char *argv[]) {
       DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
       std::vector<bool> nucleon_has_interacted = {};
       ReactionsBitSet included_2to2 =
-                   configuration.take({"Collision_Term", "Included_2to2"});
+                   configuration.take({"Collision_Term", "Included_2to2"},
+                   ReactionsBitSet(std::string("111111")));
       auto scat_finder = make_unique<ScatterActionsFinder>(elastic_parameter,
                                      ntest, nucleon_has_interacted,
                                      included_2to2, two_to_one);
