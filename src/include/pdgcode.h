@@ -77,6 +77,20 @@ namespace smash {
  * involved with successive divisions by 10 and taking the remainder
  * etc.).
  *
+ * Representing nuclei
+ * -------------------
+ *
+ * Following PDG standard, nuclei are represented by codes ±10LZZZAAAI, where
+ * L is number of Lambdas inside the nucleus, ZZZ is charge, AAA is mass
+ * number and I is used for excitations. Internally nuclei are represented
+ * in a different way from hadrons, but all accessors (charge, baryon number,
+ * etc) work in the same way.
+ *
+ * Normally nuclei in SMASH are simulated as a collection of protons and
+ * neutrons, so there is no need in their PDG codes. However, it is
+ * interesting to study light nuclei production, considering them as single
+ * pointlike hadrons. This justifies introduction of nuclear PDG codes here.
+ *
  * Limitations:
  * ------------
  *
@@ -87,9 +101,8 @@ namespace smash {
  * not well-defined, and/or because the charge and baryon number is not
  * an integer anymore.)
  *
- * Also, tetra- and pentaquarks as well as compound objects (small or
- * large nuclei) cannot be represented; that, though, is a problem of
- * the PDG Numbering Scheme rather than of this class.
+ * Also, tetra- and pentaquarks cannot be represented; that, though,
+ * is a problem of the PDG Numbering Scheme rather than of this class.
  *
  **/
 
