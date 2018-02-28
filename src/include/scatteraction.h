@@ -78,7 +78,7 @@ class ScatterAction : public Action {
 
   /** Add all possible scattering subprocesses for this action object. */
   void add_all_scatterings(double elastic_parameter, bool two_to_one,
-                                   bool two_to_two, double low_snn_cut,
+                                   ReactionsBitSet included_2to2, double low_snn_cut,
                                    bool strings_switch,
                                    NNbarTreatment nnbar_treatment);
 
