@@ -1541,7 +1541,7 @@ CollisionBranchList cross_sections::bar_bar_to_nuc_nuc(
 
         /* Calculate matrix element for inverse process. */
         const double matrix_element =
-            nn_to_resonance_matrix_element(twoI);
+            nn_to_resonance_matrix_element(sqrt_s_ ,type_a, type_b, twoI);
         if (matrix_element <= 0.) {
           continue;
         }
@@ -1573,9 +1573,9 @@ CollisionBranchList cross_sections::bar_bar_to_nuc_nuc(
 }
 
 double cross_sections::nn_to_resonance_matrix_element(
-    const int twoI) const {
-  const ParticleType& type_a = incoming_particles_[0].type();
-  const ParticleType& type_b = incoming_particles_[1].type();
+    double sqrts,
+    const ParticleType& type_a, const ParticleType& type_b,
+    const int twoI) {
   const double m_a = type_a.mass();
   const double m_b = type_b.mass();
   const double msqr = 2. * (m_a * m_a + m_b * m_b);
@@ -1585,14 +1585,14 @@ double cross_sections::nn_to_resonance_matrix_element(
   const double w_a = type_a.width_at_pole();
   const double w_b = type_b.width_at_pole();
   const double uplmt = m_a + m_b + 3.0 * (w_a + w_b) + 3.0;
-  if (sqrt_s_ > uplmt) {
+  if (sqrts > uplmt) {
     return 0.;
   }
   /** NN → NΔ: fit sqrt(s)-dependence to OBE model [\iref{Dmitriev:1986st}] */
   if (((type_a.is_Delta() && type_b.is_nucleon()) ||
        (type_b.is_Delta() && type_a.is_nucleon())) &&
       (type_a.antiparticle_sign() == type_b.antiparticle_sign())) {
-    return 68. / std::pow(sqrt_s_ - 1.104, 1.951);
+    return 68. / std::pow(sqrts - 1.104, 1.951);
     /** All other processes use a constant matrix element,
      *  similar to \iref{Bass:1998ca}, equ. (3.35). */
   } else if (((type_a.is_Nstar() && type_b.is_nucleon()) ||
@@ -1688,7 +1688,7 @@ CollisionBranchList cross_sections::find_nn_xsection_from_type(
 
         /* Calculate matrix element. */
         const double matrix_element =
-            nn_to_resonance_matrix_element(twoI);
+            nn_to_resonance_matrix_element(sqrt_s_ ,*type_res_1, *type_res_2, twoI);
         if (matrix_element <= 0.) {
           continue;
         }

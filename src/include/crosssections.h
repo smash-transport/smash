@@ -104,7 +104,6 @@ class cross_sections {
    */
   CollisionBranchList NNbar_creation();
 
-
  private:
 
   /**
@@ -188,11 +187,16 @@ class cross_sections {
    * production processes like NN → NR and NN → ΔR, where R is a baryon
    * resonance (Δ, N*, Δ*). Includes no spin or isospin factors.
    *
+   * \param[in] sqrts	sqrt(Mandelstam-s), i.e. collision CMS energy.
+   * \param[in] type_a Type information for the first final-state particle.
+   * \param[in] type_b Type information for the second final-state particle.
    * \param[in] twoI Twice the total isospin of the involved state.
    *
    * \return Matrix amplitude squared \f$ |\mathcal{M}(\sqrt{s})|^2/16\pi \f$.
    */
-  double nn_to_resonance_matrix_element(const int twoI) const;
+  static double nn_to_resonance_matrix_element(double sqrts, const ParticleType& type_a,
+                                        const ParticleType& type_b,
+                                        const int twoI);
 
   /**
    * Utility function to avoid code replication in nn_xx().
