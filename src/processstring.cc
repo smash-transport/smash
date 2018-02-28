@@ -48,7 +48,7 @@ StringProcess::StringProcess()
     int pdgid = ptype.pdgcode().get_decimal();
     double mass_pole = ptype.mass();
     double width_pole = ptype.width_at_pole();
-    /* check if the particle specie is in PYTHIA */
+    /* check if the particle species is in PYTHIA */
     if (pythia_->particleData.isParticle(pdgid)) {
       /* set mass and width in PYTHIA */
       pythia_->particleData.m0(pdgid, mass_pole);
@@ -300,7 +300,7 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   ParticleData new_particle(ParticleType::find(hadron_code));
   new_particle.set_4momentum(pstrHcom);
   new_particle.set_cross_section_scaling_factor(1.);
-  new_particle.set_formation_time(0.);
+  new_particle.set_formation_time(time_collision_);
   final_state_.push_back(new_particle);
 
   NpartFinal_ = NpartString_[0] + NpartString_[1];
@@ -521,7 +521,7 @@ bool StringProcess::next_BBbarAnn() {
       ParticleData new_particle(ParticleType::find(PDGcodes_[i]));
       new_particle.set_4momentum(pcom_[i]);
       new_particle.set_cross_section_scaling_factor(1.);
-      new_particle.set_formation_time(0.);
+      new_particle.set_formation_time(time_collision_);
       final_state_.push_back(new_particle);
     }
     NpartFinal_ = NpartString_[0] + NpartString_[1];

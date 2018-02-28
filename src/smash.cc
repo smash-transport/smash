@@ -328,8 +328,11 @@ int main(int argc, char *argv[]) {
       ParticleType::create_type_list(configuration.take({"particles"}));
       DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
       std::vector<bool> nucleon_has_interacted = {};
-      auto scat_finder = make_unique<ScatterActionsFinder>(
-          elastic_parameter, ntest, nucleon_has_interacted, two_to_one);
+      ReactionsBitSet included_2to2 =
+                   configuration.take({"Collision_Term", "Included_2to2"});
+      auto scat_finder = make_unique<ScatterActionsFinder>(elastic_parameter,
+                                     ntest, nucleon_has_interacted,
+                                     included_2to2, two_to_one);
       scat_finder->dump_reactions();
       std::exit(EXIT_SUCCESS);
     }
@@ -369,8 +372,9 @@ int main(int argc, char *argv[]) {
                   << b.name() << " instead of " << args[3] << std::endl;
       }
       std::vector<bool> nucleon_has_interacted = {};
-      auto scat_finder = make_unique<ScatterActionsFinder>(
-          -1., 1, nucleon_has_interacted, true);
+      ReactionsBitSet included_2to2(std::string("111111"));
+      auto scat_finder = make_unique<ScatterActionsFinder>(-1., 1,
+                  nucleon_has_interacted, included_2to2, true);
       scat_finder->dump_cross_sections(a, b, ma, mb);
       std::exit(EXIT_SUCCESS);
     }
@@ -415,11 +419,6 @@ int main(int argc, char *argv[]) {
     // keep a copy of the configuration that was used in the output directory
     bf::ofstream(output_path / "config.yaml")
         << configuration.to_string() << '\n';
-
-    // take the seed setting only after the configuration was stored to file
-    seed = configuration.take({"General", "Randomseed"});
-    Random::set_seed(seed);
-    log.info() << "Random number seed: " << seed;
 
     log.trace(source_location, " create ParticleType and DecayModes");
     ParticleType::create_type_list(configuration.take({"particles"}));

@@ -27,7 +27,7 @@ class cross_sections {
    */
   CollisionBranchList generate_collision_list(
       double elastic_parameter, bool two_to_one_switch,
-      bool two_to_two_switch_switch, double low_snn_cut, bool strings_switch,
+      ReactionsBitSet included_2to2, double low_snn_cut, bool strings_switch,
       NNbarTreatment nnbar_treatment, StringProcess* string_process);
 
   /**
@@ -74,7 +74,7 @@ class cross_sections {
    * This function calls the different, more specific functions for
    * the different scatterings.
    */
-  CollisionBranchList two_to_two();
+  CollisionBranchList two_to_two(ReactionsBitSet included_2to2);
 
   /**
    * Determine the cross section for string excitations, which is given by the
@@ -132,7 +132,7 @@ class cross_sections {
 
   /** Find all inelastic 2->2 processes for Baryon-Baryon Scattering
    * except the more specific Nucelon-Nucelon Scattering. */
-  CollisionBranchList bb_xx_except_nn();
+  CollisionBranchList bb_xx_except_nn(ReactionsBitSet included_2to2);
 
   /** Find all inelastic 2->2 processes for Nucelon-Nucelon Scattering.
    * Calculate cross sections for resonance production from
@@ -147,16 +147,16 @@ class cross_sections {
    * of the two nucleons. Each element in the list contains the type(s) of the
    * final state particle(s) and the cross section for that particular process.
    */
-  CollisionBranchList nn_xx();
+  CollisionBranchList nn_xx(ReactionsBitSet included_2to2);
 
   /** Find all inelastic 2->2 processes for Nucelon-Kaon Scattering. */
-  CollisionBranchList nk_xx();
+  CollisionBranchList nk_xx(ReactionsBitSet included_2to2);
 
   /** Find all inelastic 2->2 processes for Delta-Kaon Scattering. */
-  CollisionBranchList deltak_xx();
+  CollisionBranchList deltak_xx(ReactionsBitSet included_2to2);
 
   /** Find all inelastic 2->2 processes for Hyperon-Pion Scattering. */
-  CollisionBranchList ypi_xx();
+  CollisionBranchList ypi_xx(ReactionsBitSet included_2to2);
 
   /** Determine the parametrized total cross section at high energies
    * for the given collision, which is non-zero for Baryon-Baryon and

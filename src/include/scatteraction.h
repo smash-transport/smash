@@ -11,7 +11,8 @@
 #define SRC_INCLUDE_SCATTERACTION_H_
 
 #include <memory>
-#include <utility>
+#include <set>
+#include <string>
 
 #include "action.h"
 #include "cxx14compat.h"
@@ -35,11 +36,13 @@ class ScatterAction : public Action {
    * \param[in] in_part2 second scattering partner
    * \param[in] time Time at which the action is supposed to take place
    * \param[in] isotropic if true, do the collision isotropically
+   * \param[in] include2to2 set that contains infos about which
+   *             inelastic 2 to 2 channels are present
    * \param[in] string_formation_time the time a string takes to form
    */
   ScatterAction(const ParticleData& in_part1, const ParticleData& in_part2,
-                double time, bool isotropic = false,
-                double string_formation_time = 1.0);
+          double time, bool isotropic = false,
+          double string_formation_time = 1.0);
 
   /** Add a new collision channel. */
   void add_collision(CollisionBranchPtr p);

@@ -28,11 +28,11 @@
 namespace smash {
 
 ScatterAction::ScatterAction(const ParticleData &in_part_a,
-                             const ParticleData &in_part_b, double time,
-                             bool isotropic, double string_formation_time)
+                             const ParticleData &in_part_b,
+                             double time, bool isotropic,
+                             double string_formation_time)
     : Action({in_part_a, in_part_b}, time),
-      total_cross_section_(0.),
-      isotropic_(isotropic),
+      total_cross_section_(0.), isotropic_(isotropic),
       string_formation_time_(string_formation_time) {}
 
 void ScatterAction::add_collision(CollisionBranchPtr p) {
@@ -63,13 +63,6 @@ void ScatterAction::generate_final_state() {
 
   /* The production point of the new particles.  */
   FourVector middle_point = get_interaction_point();
-
-  /* Set positions of the outgoing particles */
-  for (ParticleData &new_particle : outgoing_particles_) {
-    if (proc->get_type() != ProcessType::Elastic) {
-      new_particle.set_4position(middle_point);
-    }
-  }
 
   switch (process_type_) {
     case ProcessType::Elastic:
@@ -102,19 +95,23 @@ void ScatterAction::generate_final_state() {
           ", PDGcode2=" + incoming_particles_[1].pdgcode().string() + ")");
   }
 
-  /* Set momenta & boost to computational frame. */
   for (ParticleData &new_particle : outgoing_particles_) {
+    /* Set positions of the outgoing particles */
+    if (proc->get_type() != ProcessType::Elastic) {
+      new_particle.set_4position(middle_point);
+    }
+    /* Set momenta & boost to computational frame. */
     new_particle.boost_momentum(-beta_cm());
   }
 }
 
 void ScatterAction::add_all_scatterings(double elastic_parameter,
-                                        bool two_to_one, bool two_to_two,
+                                        bool two_to_one, ReactionsBitSet included_2to2,
                                         double low_snn_cut, bool strings_switch,
                                         NNbarTreatment nnbar_treatment) {
   cross_sections xs(incoming_particles_, sqrt_s());
   CollisionBranchList processes = xs.generate_collision_list(
-      elastic_parameter, two_to_one, two_to_two, low_snn_cut, strings_switch,
+      elastic_parameter, two_to_one, included_2to2, low_snn_cut, strings_switch,
       nnbar_treatment, string_process_);
 
   /* Add various subprocesses.*/
@@ -436,7 +433,7 @@ void ScatterAction::string_excitation_pythia() {
       int pdgid = ptype.pdgcode().get_decimal();
       double mass_pole = ptype.mass();
       double width_pole = ptype.width_at_pole();
-      /* check if the particle specie is in PYTHIA */
+      /* check if the particle species is in PYTHIA */
       if (pythia.particleData.isParticle(pdgid)) {
         /* set mass and width in PYTHIA */
         pythia.particleData.m0(pdgid, mass_pole);
@@ -539,9 +536,12 @@ void ScatterAction::string_excitation_pythia() {
           data.set_cross_section_scaling_factor(suppression_factor * 0.0);
         }
       }
+      ThreeVector v_calc =
+          (data.momentum().LorentzBoost(-1.0 * beta_cm())).velocity();
       // Set formation time: actual time of collision + time to form the
       // particle
-      data.set_formation_time(string_formation_time_ * gamma_cm() +
+      double gamma_factor = 1.0 / std::sqrt(1 - (v_calc).sqr());
+      data.set_formation_time(string_formation_time_ * gamma_factor +
                               time_of_execution_);
       outgoing_particles_.push_back(data);
     }
