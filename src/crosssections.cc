@@ -18,6 +18,118 @@
 
 namespace smash {
 
+/**
+ * Helper function:
+ * Calculate the detailed balance factor R such that
+ * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
+ * where $A, B, C, D$ are stable.
+ */
+double detailed_balance_factor_stable(double s, const ParticleType& a,
+                                             const ParticleType& b,
+                                             const ParticleType& c,
+                                             const ParticleType& d) {
+  double spin_factor = (c.spin() + 1) * (d.spin() + 1);
+  spin_factor /= (a.spin() + 1) * (b.spin() + 1);
+  double symmetry_factor = (1 + (a == b));
+  symmetry_factor /= (1 + (c == d));
+  const double momentum_factor = pCM_sqr_from_s(s, c.mass(), d.mass()) /
+                                 pCM_sqr_from_s(s, a.mass(), b.mass());
+  return spin_factor * symmetry_factor * momentum_factor;
+}
+
+/**
+ * Helper function:
+ * Calculate the detailed balance factor R such that
+ * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
+ * where $A$ is unstable, $B$ is a kaon and $C, D$ are stable.
+ */
+double detailed_balance_factor_RK(double sqrts, double pcm,
+                                         const ParticleType& a,
+                                         const ParticleType& b,
+                                         const ParticleType& c,
+                                         const ParticleType& d) {
+  assert(!a.is_stable());
+  assert(b.pdgcode().is_kaon());
+  double spin_factor = (c.spin() + 1) * (d.spin() + 1);
+  spin_factor /= (a.spin() + 1) * (b.spin() + 1);
+  double symmetry_factor = (1 + (a == b));
+  symmetry_factor /= (1 + (c == d));
+  const double momentum_factor =
+      pCM_sqr(sqrts, c.mass(), d.mass()) /
+      (pcm * a.iso_multiplet()->get_integral_RK(sqrts));
+  return spin_factor * symmetry_factor * momentum_factor;
+}
+
+/**
+ * Helper function:
+ * Calculate the detailed balance factor R such that
+ * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
+ * where $A$ and $B$ are unstable, and $C$ and $D$ are stable.
+ */
+double detailed_balance_factor_RR(double sqrts, double pcm,
+                                         const ParticleType& particle_a,
+                                         const ParticleType& particle_b,
+                                         const ParticleType& particle_c,
+                                         const ParticleType& particle_d) {
+  assert(!particle_a.is_stable());
+  assert(!particle_b.is_stable());
+  double spin_factor = (particle_c.spin() + 1) * (particle_d.spin() + 1);
+  spin_factor /= (particle_a.spin() + 1) * (particle_b.spin() + 1);
+  double symmetry_factor = (1 + (particle_a == particle_b));
+  symmetry_factor /= (1 + (particle_c == particle_d));
+  const double momentum_factor =
+      pCM_sqr(sqrts, particle_c.mass(), particle_d.mass()) /
+      (pcm * particle_a.iso_multiplet()->get_integral_RR(particle_b, sqrts));
+  return spin_factor * symmetry_factor * momentum_factor;
+}
+
+/**
+ * Helper function:
+ * Add a 2-to-2 channel to a collision branch list given a cross section.
+ *
+ * The cross section is only calculated if there is enough energy
+ * for the process. If the cross section is small, the branch is not added.
+ */
+template <typename F>
+void add_channel(CollisionBranchList& process_list, F get_xsection,
+                        double sqrts, const ParticleType& type_a,
+                        const ParticleType& type_b) {
+  const double sqrt_s_min =
+      type_a.min_mass_spectral() + type_b.min_mass_spectral();
+  if (sqrts <= sqrt_s_min) {
+    return;
+  }
+  const auto xsection = get_xsection();
+  if (xsection > really_small) {
+    process_list.push_back(make_unique<CollisionBranch>(
+        type_a, type_b, xsection, ProcessType::TwoToTwo));
+  }
+}
+
+/**
+ * Helper function:
+ * Append a list of processes to another (main) list of processes.
+ */
+void append_list(CollisionBranchList& main_list,
+                 CollisionBranchList in_list) {
+  main_list.reserve(main_list.size() + in_list.size());
+  for (auto& proc : in_list) {
+    main_list.emplace_back(std::move(proc));
+  }
+}
+
+/**
+ * Helper function:
+ * Sum all cross sections of the given process list.
+ */
+double sum_xs_of(CollisionBranchList& list) {
+  double xs_sum = 0.0;
+  for (auto& proc : list) {
+    xs_sum += proc->weight();
+  }
+  return xs_sum;
+}
+
 cross_sections::cross_sections(const ParticleList& scat_particles,
                                const double sqrt_s)
     : incoming_particles_(scat_particles), sqrt_s_(sqrt_s) {}
@@ -69,55 +181,6 @@ CollisionBranchList cross_sections::generate_collision_list(
     }
   }
   return process_list;
-}
-
-bool cross_sections::decide_string(bool strings_switch,
-                                   const bool both_are_nucleons) const {
-  // Determine the energy region of the mixed scattering type for two types of
-  // scattering.
-  const ParticleType& t1 = incoming_particles_[0].type();
-  const ParticleType& t2 = incoming_particles_[1].type();
-  bool include_pythia = false;
-  double mix_scatter_type_energy;
-  double mix_scatter_type_window_width;
-  if (both_are_nucleons) {
-    // The energy region of the mixed scattering type for nucleon-nucleon
-    // collision is 4.0 - 5.0 GeV.
-    mix_scatter_type_energy = 4.5;
-    mix_scatter_type_window_width = 0.5;
-    // nucleon-nucleon collisions are included in pythia.
-    include_pythia = true;
-  } else if ((t1.pdgcode().is_pion() && t2.is_nucleon()) ||
-             (t1.is_nucleon() && t2.pdgcode().is_pion())) {
-    // The energy region of the mixed scattering type for pion-nucleon collision
-    // is 2.3 - 3.1 GeV.
-    mix_scatter_type_energy = 2.7;
-    mix_scatter_type_window_width = 0.4;
-    // pion-nucleon collisions are included in pythia.
-    include_pythia = true;
-  }
-  // string fragmentation is enabled when strings_switch is on and the process
-  // is included in pythia.
-  const bool enable_pythia = strings_switch && include_pythia;
-  // Whether the scattering is through string fragmentaion
-  bool is_pythia = false;
-  if (enable_pythia) {
-    if (sqrt_s_ > mix_scatter_type_energy + mix_scatter_type_window_width) {
-      // scatterings at high energies are through string fragmentation
-      is_pythia = true;
-    } else if (sqrt_s_ >
-               mix_scatter_type_energy - mix_scatter_type_window_width) {
-      const double probability_pythia =
-          (sqrt_s_ - mix_scatter_type_energy + mix_scatter_type_window_width) /
-          mix_scatter_type_window_width / 2.0;
-      if (probability_pythia > Random::uniform(0., 1.)) {
-        // scatterings at the middle energies are through string
-        // fragmentation by chance.
-        is_pythia = true;
-      }
-    }
-  }
-  return is_pythia;
 }
 
 CollisionBranchPtr cross_sections::elastic(double elast_par) {
@@ -1216,40 +1279,6 @@ CollisionBranchList cross_sections::ypi_xx() {
   return process_list;
 }
 
-double cross_sections::high_energy() const {
-  const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
-  const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
-  const double s = sqrt_s_ * sqrt_s_;
-
-  /* Currently all BB collisions use the nucleon-nucleon parametrizations. */
-  if (pdg_a.is_baryon() && pdg_b.is_baryon()) {
-    if (pdg_a == pdg_b) {
-      return pp_high_energy(s);  // pp, nn
-    } else if (pdg_a.is_antiparticle_of(pdg_b)) {
-      return ppbar_high_energy(s);  // ppbar, nnbar
-    } else if (pdg_a.antiparticle_sign() * pdg_b.antiparticle_sign() == 1) {
-      return np_high_energy(s);  // np, nbarpbar
-    } else {
-      return npbar_high_energy(s);  // npbar, nbarp
-    }
-  }
-
-  /* Pion nucleon interaction. */
-  if ((pdg_a == pdg::pi_p && pdg_b == pdg::p) ||
-      (pdg_b == pdg::pi_p && pdg_a == pdg::p) ||
-      (pdg_a == pdg::pi_m && pdg_b == pdg::n) ||
-      (pdg_b == pdg::pi_m && pdg_a == pdg::n)) {
-    return piplusp_high_energy(s);  // pi+ p, pi- n
-  } else if ((pdg_a == pdg::pi_m && pdg_b == pdg::p) ||
-             (pdg_b == pdg::pi_m && pdg_a == pdg::p) ||
-             (pdg_a == pdg::pi_p && pdg_b == pdg::n) ||
-             (pdg_b == pdg::pi_p && pdg_a == pdg::n)) {
-    return piminusp_high_energy(s);  // pi- p, pi+ n
-  } else {
-    return 0;
-  }
-}
-
 CollisionBranchList cross_sections::string_excitation(
     StringProcess* string_process) {
   const auto& log = logger<LogArea::CrossSections>();
@@ -1368,6 +1397,40 @@ CollisionBranchList cross_sections::string_excitation(
   return channel_list;
 }
 
+double cross_sections::high_energy() const {
+  const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
+  const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
+  const double s = sqrt_s_ * sqrt_s_;
+
+  /* Currently all BB collisions use the nucleon-nucleon parametrizations. */
+  if (pdg_a.is_baryon() && pdg_b.is_baryon()) {
+    if (pdg_a == pdg_b) {
+      return pp_high_energy(s);  // pp, nn
+    } else if (pdg_a.is_antiparticle_of(pdg_b)) {
+      return ppbar_high_energy(s);  // ppbar, nnbar
+    } else if (pdg_a.antiparticle_sign() * pdg_b.antiparticle_sign() == 1) {
+      return np_high_energy(s);  // np, nbarpbar
+    } else {
+      return npbar_high_energy(s);  // npbar, nbarp
+    }
+  }
+
+  /* Pion nucleon interaction. */
+  if ((pdg_a == pdg::pi_p && pdg_b == pdg::p) ||
+      (pdg_b == pdg::pi_p && pdg_a == pdg::p) ||
+      (pdg_a == pdg::pi_m && pdg_b == pdg::n) ||
+      (pdg_b == pdg::pi_m && pdg_a == pdg::n)) {
+    return piplusp_high_energy(s);  // pi+ p, pi- n
+  } else if ((pdg_a == pdg::pi_m && pdg_b == pdg::p) ||
+             (pdg_b == pdg::pi_m && pdg_a == pdg::p) ||
+             (pdg_a == pdg::pi_p && pdg_b == pdg::n) ||
+             (pdg_b == pdg::pi_p && pdg_a == pdg::n)) {
+    return piminusp_high_energy(s);  // pi- p, pi+ n
+  } else {
+    return 0;
+  }
+}
+
 double cross_sections::string_hard_cross_section() const {
   double cross_sec = 0.;
   const ParticleData& data_a = incoming_particles_[0];
@@ -1473,7 +1536,7 @@ CollisionBranchList cross_sections::bar_bar_to_nuc_nuc(
 
         /* Calculate matrix element for inverse process. */
         const double matrix_element =
-            nn_to_resonance_matrix_element(type_a, type_b, twoI);
+            nn_to_resonance_matrix_element(twoI);
         if (matrix_element <= 0.) {
           continue;
         }
@@ -1505,8 +1568,9 @@ CollisionBranchList cross_sections::bar_bar_to_nuc_nuc(
 }
 
 double cross_sections::nn_to_resonance_matrix_element(
-    const ParticleType& type_a, const ParticleType& type_b,
     const int twoI) const {
+  const ParticleType& type_a = incoming_particles_[0].type();
+  const ParticleType& type_b = incoming_particles_[1].type();
   const double m_a = type_a.mass();
   const double m_b = type_b.mass();
   const double msqr = 2. * (m_a * m_a + m_b * m_b);
@@ -1619,7 +1683,7 @@ CollisionBranchList cross_sections::find_nn_xsection_from_type(
 
         /* Calculate matrix element. */
         const double matrix_element =
-            nn_to_resonance_matrix_element(*type_res_1, *type_res_2, twoI);
+            nn_to_resonance_matrix_element(twoI);
         if (matrix_element <= 0.) {
           continue;
         }
@@ -1651,10 +1715,53 @@ CollisionBranchList cross_sections::find_nn_xsection_from_type(
   return channel_list;
 }
 
-double cross_sections::cm_momentum() const {
-  const double m1 = incoming_particles_[0].effective_mass();
-  const double m2 = incoming_particles_[1].effective_mass();
-  return pCM(sqrt_s_, m1, m2);
+bool cross_sections::decide_string(bool strings_switch,
+                                   const bool both_are_nucleons) const {
+  // Determine the energy region of the mixed scattering type for two types of
+  // scattering.
+  const ParticleType& t1 = incoming_particles_[0].type();
+  const ParticleType& t2 = incoming_particles_[1].type();
+  bool include_pythia = false;
+  double mix_scatter_type_energy;
+  double mix_scatter_type_window_width;
+  if (both_are_nucleons) {
+    // The energy region of the mixed scattering type for nucleon-nucleon
+    // collision is 4.0 - 5.0 GeV.
+    mix_scatter_type_energy = 4.5;
+    mix_scatter_type_window_width = 0.5;
+    // nucleon-nucleon collisions are included in pythia.
+    include_pythia = true;
+  } else if ((t1.pdgcode().is_pion() && t2.is_nucleon()) ||
+             (t1.is_nucleon() && t2.pdgcode().is_pion())) {
+    // The energy region of the mixed scattering type for pion-nucleon collision
+    // is 2.3 - 3.1 GeV.
+    mix_scatter_type_energy = 2.7;
+    mix_scatter_type_window_width = 0.4;
+    // pion-nucleon collisions are included in pythia.
+    include_pythia = true;
+  }
+  // string fragmentation is enabled when strings_switch is on and the process
+  // is included in pythia.
+  const bool enable_pythia = strings_switch && include_pythia;
+  // Whether the scattering is through string fragmentaion
+  bool is_pythia = false;
+  if (enable_pythia) {
+    if (sqrt_s_ > mix_scatter_type_energy + mix_scatter_type_window_width) {
+      // scatterings at high energies are through string fragmentation
+      is_pythia = true;
+    } else if (sqrt_s_ >
+               mix_scatter_type_energy - mix_scatter_type_window_width) {
+      const double probability_pythia =
+          (sqrt_s_ - mix_scatter_type_energy + mix_scatter_type_window_width) /
+          mix_scatter_type_window_width / 2.0;
+      if (probability_pythia > Random::uniform(0., 1.)) {
+        // scatterings at the middle energies are through string
+        // fragmentation by chance.
+        is_pythia = true;
+      }
+    }
+  }
+  return is_pythia;
 }
 
 }  // namespace smash

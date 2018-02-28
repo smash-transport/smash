@@ -22,28 +22,6 @@ class cross_sections {
   cross_sections(const ParticleList& scat_particles, const double sqrt_s);
 
   /**
-   * Append a list of processes to another (main) list of processes.
-   */
-  void append_list(CollisionBranchList& main_list,
-                   CollisionBranchList in_list) {
-    main_list.reserve(main_list.size() + in_list.size());
-    for (auto& proc : in_list) {
-      main_list.emplace_back(std::move(proc));
-    }
-  }
-
-  /**
-   * Sum all cross sections of the given process list.
-   */
-  double sum_xs_of(CollisionBranchList& list) {
-    double xs_sum = 0.0;
-    for (auto& proc : list) {
-      xs_sum += proc->weight();
-    }
-    return xs_sum;
-  }
-
-  /**
    * Generate a list of all possible collisions between the incoming particles
    * with the given c.m. energy and the calculated cross sections.
    */
@@ -66,29 +44,6 @@ class cross_sections {
   CollisionBranchPtr elastic(double elast_par);
 
   /**
-   * Choose between parametrization for elastic cross sections.
-   */
-  double elastic_parametrization();
-
-  /**
-   * Determine the (parametrized) elastic cross section for a
-   * nucleon-nucleon collision.
-   */
-  double nn_el();
-
-  /**
-   * Determine the elastic cross section for a nucleon-kaon collision.
-   * It is given by a parametrization of experimental data.
-   */
-  double nk_el();
-
-  /**
-   * Determine the elastic cross section for a nucleon-pion collision.
-   * It is given by a parametrization of experimental data.
-   */
-  double npi_el();
-
-  /**
    * Find all resonances that can be produced in a 2->1 collision of the two
    * input particles and the production cross sections of these resonances.
    *
@@ -103,16 +58,16 @@ class cross_sections {
   CollisionBranchList two_to_one();
 
   /**
-   * Return the 2-to-1 resonance production cross section for a given resonance.
-   *
-   * \param[in] type_resonance Type information for the resonance to be
-   * produced.
-   * \param[in] cm_momentum_sqr Square of the center-of-mass momentum of the
-   * two initial particles.
-   *
-   * \return The cross section for the process
-   * [initial particle a] + [initial particle b] -> resonance.
-   */
+    * Return the 2-to-1 resonance production cross section for a given resonance.
+    *
+    * \param[in] type_resonance Type information for the resonance to be
+    * produced.
+    * \param[in] cm_momentum_sqr Square of the center-of-mass momentum of the
+    * two initial particles.
+    *
+    * \return The cross section for the process
+    * [initial particle a] + [initial particle b] -> resonance.
+    */
   double formation(const ParticleType& type_resonance, double cm_momentum_sqr);
 
   /** Find all inelastic 2->2 processes for the given scattering.
@@ -120,6 +75,60 @@ class cross_sections {
    * the different scatterings.
    */
   CollisionBranchList two_to_two();
+
+  /**
+   * Determine the cross section for string excitations, which is given by the
+   * difference between the parametrized total cross section and all the
+   * explicitly implemented channels at low energy (elastic, resonance
+   * excitation, etc). This method has to be called after all other processes
+   * have been added to the Action object.
+   *
+   * create a list of subprocesses (single-diffractive,
+   * double-diffractive and non-diffractive) and their cross sections.
+   */
+  CollisionBranchList string_excitation(StringProcess* string_process);
+
+  /**
+   * Determine the cross section for NNbar annihilation, which is given by the
+   * difference between the parametrized total cross section and all the
+   * explicitly implemented channels at low energy (in this case only elastic).
+   * This method has to be called after all other processes
+   * have been determined.
+   */
+  CollisionBranchPtr NNbar_annihilation(const double current_xs);
+
+  /**
+   * Determine the cross section for NNbar annihilation, which is given by
+   * detailed balance from the reverse reaction. See
+   * NNbar_annihilation_cross_section
+   */
+  CollisionBranchList NNbar_creation();
+
+
+ private:
+
+  /**
+   * Choose between parametrization for elastic cross sections.
+   */
+  double elastic_parametrization();
+
+  /**
+   * Determine the (parametrized) elastic cross section for a
+   * nucleon-nucleon collision.
+   */
+  double nn_el();
+
+  /**
+   * Determine the elastic cross section for a nucleon-pion collision.
+   * It is given by a parametrization of experimental data.
+   */
+  double npi_el();
+
+  /**
+   * Determine the elastic cross section for a nucleon-kaon collision.
+   * It is given by a parametrization of experimental data.
+   */
+  double nk_el();
 
   /** Find all inelastic 2->2 processes for Baryon-Baryon Scattering
    * except the more specific Nucelon-Nucelon Scattering. */
@@ -156,18 +165,6 @@ class cross_sections {
   double high_energy() const;
 
   /**
-   * Determine the cross section for string excitations, which is given by the
-   * difference between the parametrized total cross section and all the
-   * explicitly implemented channels at low energy (elastic, resonance
-   * excitation, etc). This method has to be called after all other processes
-   * have been added to the Action object.
-   *
-   * create a list of subprocesses (single-diffractive,
-   * double-diffractive and non-diffractive) and their cross sections.
-   */
-  CollisionBranchList string_excitation(StringProcess* string_process);
-
-  /**
    * Determine the (parametrized) hard non-diffractive string cross section
    * for this collision.
    */
@@ -191,16 +188,11 @@ class cross_sections {
    * production processes like NN → NR and NN → ΔR, where R is a baryon
    * resonance (Δ, N*, Δ*). Includes no spin or isospin factors.
    *
-   * \param[in] type_a Type information for the first final-state particle.
-   * \param[in] type_b Type information for the second final-state particle.
    * \param[in] twoI Twice the total isospin of the involved state.
    *
    * \return Matrix amplitude squared \f$ |\mathcal{M}(\sqrt{s})|^2/16\pi \f$.
    */
-  // TODO WHY was this static before?
-  double nn_to_resonance_matrix_element(const ParticleType& type_a,
-                                        const ParticleType& type_b,
-                                        const int twoI) const;
+  double nn_to_resonance_matrix_element(const int twoI) const;
 
   /**
    * Utility function to avoid code replication in nn_xx().
@@ -210,111 +202,6 @@ class cross_sections {
       const ParticleTypePtrList& type_res_1,
       const ParticleTypePtrList& type_res_2,
       const IntegrationMethod integrator);
-
-  /** Determine the momenta of the incoming particles in the
-   * center-of-mass system.
-   */
-  double cm_momentum() const;
-
-  /**
-   * Determine the cross section for NNbar annihilation, which is given by the
-   * difference between the parametrized total cross section and all the
-   * explicitly implemented channels at low energy (in this case only elastic).
-   * This method has to be called after all other processes
-   * have been determined.
-   */
-  CollisionBranchPtr NNbar_annihilation(const double current_xs);
-
-  /**
-   * Determine the cross section for NNbar annihilation, which is given by
-   * detailed balance from the reverse reaction. See
-   * NNbar_annihilation_cross_section
-   */
-  CollisionBranchList NNbar_creation();
-
-  /**
-   * Add a 2-to-2 channel to a collision branch list given a cross section.
-   *
-   * The cross section is only calculated if there is enough energy
-   * for the process. If the cross section is small, the branch is not added.
-   */
-  template <typename F>
-  inline void add_channel(CollisionBranchList& process_list, F get_xsection,
-                          double sqrts, const ParticleType& type_a,
-                          const ParticleType& type_b) {
-    const double sqrt_s_min =
-        type_a.min_mass_spectral() + type_b.min_mass_spectral();
-    if (sqrts <= sqrt_s_min) {
-      return;
-    }
-    const auto xsection = get_xsection();
-    if (xsection > really_small) {
-      process_list.push_back(make_unique<CollisionBranch>(
-          type_a, type_b, xsection, ProcessType::TwoToTwo));
-    }
-  }
-
-  /**
-   * Calculate the detailed balance factor R such that
-   * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
-   * where $A, B, C, D$ are stable.
-   */
-  inline double detailed_balance_factor_stable(double s, const ParticleType& a,
-                                               const ParticleType& b,
-                                               const ParticleType& c,
-                                               const ParticleType& d) {
-    double spin_factor = (c.spin() + 1) * (d.spin() + 1);
-    spin_factor /= (a.spin() + 1) * (b.spin() + 1);
-    double symmetry_factor = (1 + (a == b));
-    symmetry_factor /= (1 + (c == d));
-    const double momentum_factor = pCM_sqr_from_s(s, c.mass(), d.mass()) /
-                                   pCM_sqr_from_s(s, a.mass(), b.mass());
-    return spin_factor * symmetry_factor * momentum_factor;
-  }
-
-  /**
-   * Calculate the detailed balance factor R such that
-   * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
-   * where $A$ is unstable, $B$ is a kaon and $C, D$ are stable.
-   */
-  inline double detailed_balance_factor_RK(double sqrts, double pcm,
-                                           const ParticleType& a,
-                                           const ParticleType& b,
-                                           const ParticleType& c,
-                                           const ParticleType& d) {
-    assert(!a.is_stable());
-    assert(b.pdgcode().is_kaon());
-    double spin_factor = (c.spin() + 1) * (d.spin() + 1);
-    spin_factor /= (a.spin() + 1) * (b.spin() + 1);
-    double symmetry_factor = (1 + (a == b));
-    symmetry_factor /= (1 + (c == d));
-    const double momentum_factor =
-        pCM_sqr(sqrts, c.mass(), d.mass()) /
-        (pcm * a.iso_multiplet()->get_integral_RK(sqrts));
-    return spin_factor * symmetry_factor * momentum_factor;
-  }
-
-  /**
-   * Calculate the detailed balance factor R such that
-   * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
-   * where $A$ and $B$ are unstable, and $C$ and $D$ are stable.
-   */
-  inline double detailed_balance_factor_RR(double sqrts, double pcm,
-                                           const ParticleType& particle_a,
-                                           const ParticleType& particle_b,
-                                           const ParticleType& particle_c,
-                                           const ParticleType& particle_d) {
-    assert(!particle_a.is_stable());
-    assert(!particle_b.is_stable());
-    double spin_factor = (particle_c.spin() + 1) * (particle_d.spin() + 1);
-    spin_factor /= (particle_a.spin() + 1) * (particle_b.spin() + 1);
-    double symmetry_factor = (1 + (particle_a == particle_b));
-    symmetry_factor /= (1 + (particle_c == particle_d));
-    const double momentum_factor =
-        pCM_sqr(sqrts, particle_c.mass(), particle_d.mass()) /
-        (pcm * particle_a.iso_multiplet()->get_integral_RR(particle_b, sqrts));
-    return spin_factor * symmetry_factor * momentum_factor;
-  }
 
   /** Return, if the scattering between the incoming particles are scattering
    * via string fragmentaion or not.
@@ -331,7 +218,15 @@ class cross_sections {
    */
   bool decide_string(bool strings_switch, const bool both_are_nucleons) const;
 
- private:
+  /** Determine the momenta of the incoming particles in the
+   * center-of-mass system.
+   */
+  double cm_momentum() const {
+    const double m1 = incoming_particles_[0].effective_mass();
+    const double m2 = incoming_particles_[1].effective_mass();
+    return pCM(sqrt_s_, m1, m2);
+  }
+
   /** List with data of scattering particles.  */
   ParticleList incoming_particles_;
 
