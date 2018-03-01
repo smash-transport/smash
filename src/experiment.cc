@@ -245,13 +245,13 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   const double output_dt = config.take({"Output", "Output_Interval"}, t_end);
   const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
   ReactionsBitSet included_2to2 =
-                         config.take({"Collision_Term", "Included_2to2"});
+      config.take({"Collision_Term", "Included_2to2"});
   bool strings_switch_default = true;
   if (modus_chooser == "Box") {
     strings_switch_default = false;
   }
-  const bool strings_switch = config.take(
-      {"Collision_Term", "Strings"}, strings_switch_default);
+  const bool strings_switch =
+      config.take({"Collision_Term", "Strings"}, strings_switch_default);
   const NNbarTreatment nnbar_treatment = config.take(
       {"Collision_Term", "NNbar_Treatment"}, NNbarTreatment::NoAnnihilation);
   const bool photons_switch = config.has_value({"Output", "Photons"});
@@ -841,8 +841,9 @@ static std::string format_measurements(const Particles &particles,
   std::ostringstream ss;
   ss << field<5> << time << field<12, 3> << difference.momentum().x0()
      << field<12, 3> << difference.momentum().abs3()
-     << field<12, 3> << (time > really_small ? 2.0 * scatterings_total /
-                                                 (particles.size() * time) : 0.)
+     << field<
+            12,
+            3> << (time > really_small ? 2.0 * scatterings_total / (particles.size() * time) : 0.)
      << field<10, 3> << scatterings_this_interval
      << field<12, 3> << particles.size() << field<10, 3> << elapsed_seconds;
   return ss.str();

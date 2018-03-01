@@ -41,8 +41,8 @@ class ScatterAction : public Action {
    * \param[in] string_formation_time the time a string takes to form
    */
   ScatterAction(const ParticleData& in_part1, const ParticleData& in_part2,
-          double time, bool isotropic = false,
-          double string_formation_time = 1.0);
+                double time, bool isotropic = false,
+                double string_formation_time = 1.0);
 
   /** Add a new collision channel. */
   void add_collision(CollisionBranchPtr p);
@@ -78,9 +78,8 @@ class ScatterAction : public Action {
 
   /** Add all possible scattering subprocesses for this action object. */
   void add_all_scatterings(double elastic_parameter, bool two_to_one,
-                                   ReactionsBitSet included_2to2, double low_snn_cut,
-                                   bool strings_switch,
-                                   NNbarTreatment nnbar_treatment);
+                           ReactionsBitSet included_2to2, double low_snn_cut,
+                           bool strings_switch, NNbarTreatment nnbar_treatment);
 
   /// Returns list of possible collision channels
   const CollisionBranchList& collision_channels() {

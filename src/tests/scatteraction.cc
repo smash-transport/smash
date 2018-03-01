@@ -73,7 +73,7 @@ TEST(elastic_collision) {
   constexpr bool strings_switch = false;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act.add_all_scatterings(sigma, true, ReactionsBitSet(std::string("111111")),
-                        0., strings_switch, nnbar_treatment);
+                          0., strings_switch, nnbar_treatment);
 
   // check cross section
   COMPARE(act.cross_section(), sigma);
@@ -147,8 +147,8 @@ TEST(outgoing_valid) {
   constexpr bool strings_switch = false;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act->add_all_scatterings(elastic_parameter, true,
-              ReactionsBitSet(std::string("111111")), 0.,
-              strings_switch, nnbar_treatment);
+                           ReactionsBitSet(std::string("111111")), 0.,
+                           strings_switch, nnbar_treatment);
 
   VERIFY(act->cross_section() > 0.);
 
@@ -195,8 +195,7 @@ TEST(pythia_running) {
 
   // construct action
   ScatterActionPtr act;
-  act = make_unique<ScatterAction>(p1_copy, p2_copy, 0.2,
-                                               false, 1.0);
+  act = make_unique<ScatterAction>(p1_copy, p2_copy, 0.2, false, 1.0);
   std::unique_ptr<StringProcess> string_process_interface =
       make_unique<StringProcess>();
   act->set_string_interface(string_process_interface.get());
@@ -208,8 +207,8 @@ TEST(pythia_running) {
   constexpr bool strings_switch = true;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act->add_all_scatterings(elastic_parameter, false,
-                         ReactionsBitSet(std::string("111111")), 0.,
-                         strings_switch, nnbar_treatment);
+                           ReactionsBitSet(std::string("111111")), 0.,
+                           strings_switch, nnbar_treatment);
 
   VERIFY(act->cross_section() > 0.);
 
@@ -254,7 +253,7 @@ TEST(update_incoming) {
   bool string_switch = true;
   NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act.add_all_scatterings(sigma, true, ReactionsBitSet(std::string("111111")),
-                        0., string_switch, nnbar_treatment);
+                          0., string_switch, nnbar_treatment);
 
   // change the position of one of the particles
   const FourVector new_position(0.1, 0., 0., 0.);

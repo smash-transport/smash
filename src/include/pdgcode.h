@@ -539,8 +539,7 @@ class PdgCode {
     return antiparticle_sign() *
            (n_J_2 + digits_.n_q3_ * 10 + digits_.n_q2_ * 100 +
             digits_.n_q1_ * 1000 + digits_.n_L_ * 10000 +
-            digits_.n_R_ * 100000 + digits_.n_ * 1000000 +
-            n_J_1 * 10000000);
+            digits_.n_R_ * 100000 + digits_.n_ * 1000000 + n_J_1 * 10000000);
   }
 
   /// Remove all excitation, except spin. Sign and quark content remains.
@@ -645,8 +644,8 @@ class PdgCode {
     if (97 <= inp && inp <= 102) {
       return inp - 97 + 10;
     }
-    throw InvalidPdgCode("PdgCode: Invalid character " +
-                         std::string(&inp, 1) + " found.\n");
+    throw InvalidPdgCode("PdgCode: Invalid character " + std::string(&inp, 1) +
+                         " found.\n");
   }
 
   /// Set the PDG code from the given string.

@@ -81,8 +81,7 @@ ScatterActionsFinder::ScatterActionsFinder(
 ScatterActionsFinder::ScatterActionsFinder(
     double elastic_parameter, int testparticles,
     const std::vector<bool> &nucleon_has_interacted,
-    const ReactionsBitSet &included_2to2,
-    bool two_to_one)
+    const ReactionsBitSet &included_2to2, bool two_to_one)
     : elastic_parameter_(elastic_parameter),
       testparticles_(testparticles),
       isotropic_(false),
@@ -97,7 +96,7 @@ ScatterActionsFinder::ScatterActionsFinder(
       string_formation_time_(1.),
       photons_(false),
       n_fractional_photons_(1) {
-    string_process_interface_ = make_unique<StringProcess>();
+  string_process_interface_ = make_unique<StringProcess>();
 }
 
 ActionPtr ScatterActionsFinder::check_collision(const ParticleData &data_a,
@@ -279,8 +278,8 @@ void ScatterActionsFinder::dump_reactions() const {
             B.set_4momentum(B.pole_mass(), -mom, 0.0, 0.0);
             ScatterActionPtr act = make_unique<ScatterAction>(
                 A, B, time, isotropic_, string_formation_time_);
-            act->add_all_scatterings(elastic_parameter_, two_to_one_,
-                                     incl_set_, low_snn_cut_, strings_switch_,
+            act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
+                                     low_snn_cut_, strings_switch_,
                                      nnbar_treatment_);
             const double total_cs = act->cross_section();
             if (total_cs <= 0.0) {

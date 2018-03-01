@@ -28,11 +28,11 @@
 namespace smash {
 
 ScatterAction::ScatterAction(const ParticleData &in_part_a,
-                             const ParticleData &in_part_b,
-                             double time, bool isotropic,
-                             double string_formation_time)
+                             const ParticleData &in_part_b, double time,
+                             bool isotropic, double string_formation_time)
     : Action({in_part_a, in_part_b}, time),
-      total_cross_section_(0.), isotropic_(isotropic),
+      total_cross_section_(0.),
+      isotropic_(isotropic),
       string_formation_time_(string_formation_time) {}
 
 void ScatterAction::add_collision(CollisionBranchPtr p) {
@@ -106,7 +106,8 @@ void ScatterAction::generate_final_state() {
 }
 
 void ScatterAction::add_all_scatterings(double elastic_parameter,
-                                        bool two_to_one, ReactionsBitSet included_2to2,
+                                        bool two_to_one,
+                                        ReactionsBitSet included_2to2,
                                         double low_snn_cut, bool strings_switch,
                                         NNbarTreatment nnbar_treatment) {
   cross_sections xs(incoming_particles_, sqrt_s());

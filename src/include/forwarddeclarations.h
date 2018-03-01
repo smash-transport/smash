@@ -33,7 +33,7 @@ struct default_delete;
 template <typename T, typename Deleter>
 class unique_ptr;
 
-template<std::size_t N>
+template <std::size_t N>
 class bitset;
 
 #ifdef _LIBCPP_END_NAMESPACE_STD

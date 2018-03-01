@@ -58,16 +58,16 @@ class cross_sections {
   CollisionBranchList two_to_one();
 
   /**
-    * Return the 2-to-1 resonance production cross section for a given resonance.
-    *
-    * \param[in] type_resonance Type information for the resonance to be
-    * produced.
-    * \param[in] cm_momentum_sqr Square of the center-of-mass momentum of the
-    * two initial particles.
-    *
-    * \return The cross section for the process
-    * [initial particle a] + [initial particle b] -> resonance.
-    */
+   * Return the 2-to-1 resonance production cross section for a given resonance.
+   *
+   * \param[in] type_resonance Type information for the resonance to be
+   * produced.
+   * \param[in] cm_momentum_sqr Square of the center-of-mass momentum of the
+   * two initial particles.
+   *
+   * \return The cross section for the process
+   * [initial particle a] + [initial particle b] -> resonance.
+   */
   double formation(const ParticleType& type_resonance, double cm_momentum_sqr);
 
   /** Find all inelastic 2->2 processes for the given scattering.
@@ -105,7 +105,6 @@ class cross_sections {
   CollisionBranchList NNbar_creation();
 
  private:
-
   /**
    * Choose between parametrization for elastic cross sections.
    */
@@ -194,9 +193,10 @@ class cross_sections {
    *
    * \return Matrix amplitude squared \f$ |\mathcal{M}(\sqrt{s})|^2/16\pi \f$.
    */
-  static double nn_to_resonance_matrix_element(double sqrts, const ParticleType& type_a,
-                                        const ParticleType& type_b,
-                                        const int twoI);
+  static double nn_to_resonance_matrix_element(double sqrts,
+                                               const ParticleType& type_a,
+                                               const ParticleType& type_b,
+                                               const int twoI);
 
   /**
    * Utility function to avoid code replication in nn_xx().
