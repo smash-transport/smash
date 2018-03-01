@@ -244,11 +244,9 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   const double t_end = config.read({"General", "End_Time"});
   const double output_dt = config.take({"Output", "Output_Interval"}, t_end);
   const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
-  ReactionsBitSet all_reactions_included;
-  all_reactions_included.set();
   ReactionsBitSet included_2to2 =
                   config.take({"Collision_Term", "Included_2to2"},
-                  all_reactions_included);
+                  ReactionsBitSet().set());
   bool strings_switch_default = true;
   if (modus_chooser == "Box") {
     strings_switch_default = false;

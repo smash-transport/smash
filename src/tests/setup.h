@@ -228,9 +228,7 @@ inline ParticlesPtr create_particles(
 
 /// returns BitSet of 2->2 reactions, where everything is on
 inline ReactionsBitSet all_reactions_included() {
-  ReactionsBitSet s;
-  s.set();
-  return s;
+  return ReactionsBitSet().set();
 }
 
 /**
