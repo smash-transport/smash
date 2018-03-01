@@ -24,7 +24,7 @@ namespace smash {
  * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
  * where $A, B, C, D$ are stable.
  */
-double detailed_balance_factor_stable(double s, const ParticleType& a,
+static double detailed_balance_factor_stable(double s, const ParticleType& a,
                                       const ParticleType& b,
                                       const ParticleType& c,
                                       const ParticleType& d) {
@@ -43,7 +43,7 @@ double detailed_balance_factor_stable(double s, const ParticleType& a,
  * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
  * where $A$ is unstable, $B$ is a kaon and $C, D$ are stable.
  */
-double detailed_balance_factor_RK(double sqrts, double pcm,
+static double detailed_balance_factor_RK(double sqrts, double pcm,
                                   const ParticleType& a, const ParticleType& b,
                                   const ParticleType& c,
                                   const ParticleType& d) {
@@ -65,7 +65,7 @@ double detailed_balance_factor_RK(double sqrts, double pcm,
  * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
  * where $A$ and $B$ are unstable, and $C$ and $D$ are stable.
  */
-double detailed_balance_factor_RR(double sqrts, double pcm,
+static double detailed_balance_factor_RR(double sqrts, double pcm,
                                   const ParticleType& particle_a,
                                   const ParticleType& particle_b,
                                   const ParticleType& particle_c,
@@ -109,7 +109,7 @@ void add_channel(CollisionBranchList& process_list, F get_xsection,
  * Helper function:
  * Append a list of processes to another (main) list of processes.
  */
-void append_list(CollisionBranchList& main_list, CollisionBranchList in_list) {
+static void append_list(CollisionBranchList& main_list, CollisionBranchList in_list) {
   main_list.reserve(main_list.size() + in_list.size());
   for (auto& proc : in_list) {
     main_list.emplace_back(std::move(proc));
@@ -120,7 +120,7 @@ void append_list(CollisionBranchList& main_list, CollisionBranchList in_list) {
  * Helper function:
  * Sum all cross sections of the given process list.
  */
-double sum_xs_of(CollisionBranchList& list) {
+static double sum_xs_of(CollisionBranchList& list) {
   double xs_sum = 0.0;
   for (auto& proc : list) {
     xs_sum += proc->weight();
