@@ -228,9 +228,9 @@ inline ParticlesPtr create_particles(
 
 /// returns BitSet of 2->2 reactions, where everything is on
 inline ReactionsBitSet all_reactions_included() {
-  ReactionsBitSet included_2to2 =
-    ReactionsBitSet(std::string(included_2to2.size(), '1'));
-  return included_2to2;
+  ReactionsBitSet s;
+  s.set();
+  return s;
 }
 
 /**

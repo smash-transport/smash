@@ -245,7 +245,7 @@ class Configuration {
 
     operator ReactionsBitSet() const {
       const std::vector<std::string> v = operator std::vector<std::string>();
-      ReactionsBitSet s = ReactionsBitSet(std::string(s.size(), '0'));
+      ReactionsBitSet s;
       for (const auto &x : v) {
         if (x == "All") {
           s.set();
