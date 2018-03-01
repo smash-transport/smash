@@ -330,7 +330,7 @@ int main(int argc, char *argv[]) {
       std::vector<bool> nucleon_has_interacted = {};
       ReactionsBitSet included_2to2 =
                    configuration.take({"Collision_Term", "Included_2to2"},
-                   ReactionsBitSet(std::string("111111")));
+                   ReactionsBitSet(std::string(sizeof(ReactionsBitSet), '1')));
       auto scat_finder = make_unique<ScatterActionsFinder>(elastic_parameter,
                                      ntest, nucleon_has_interacted,
                                      included_2to2, two_to_one);
@@ -373,7 +373,7 @@ int main(int argc, char *argv[]) {
                   << b.name() << " instead of " << args[3] << std::endl;
       }
       std::vector<bool> nucleon_has_interacted = {};
-      ReactionsBitSet included_2to2(std::string("111111"));
+      ReactionsBitSet included_2to2(std::string(included_2to2.size(), '1'));
       auto scat_finder = make_unique<ScatterActionsFinder>(-1., 1,
                   nucleon_has_interacted, included_2to2, true);
       scat_finder->dump_cross_sections(a, b, ma, mb);

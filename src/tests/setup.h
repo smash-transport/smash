@@ -226,6 +226,13 @@ inline ParticlesPtr create_particles(
   return p;
 }
 
+/// returns BitSet of 2->2 reactions, where everything is on
+inline ReactionsBitSet all_reactions_included() {
+  ReactionsBitSet included_2to2 =
+    ReactionsBitSet(std::string(included_2to2.size(), '1'));
+  return included_2to2;
+}
+
 /**
  * Creates a standard ExperimentParameters object which works for almost all
  * testing purposes.
@@ -235,11 +242,10 @@ inline ParticlesPtr create_particles(
  */
 inline ExperimentParameters default_parameters(int testparticles = 1,
                                                double dt = 0.1) {
-  ReactionsBitSet included_2to2 = ReactionsBitSet(std::string("111111"));
   return ExperimentParameters{
       {0., dt},      {0., 1.}, testparticles,
       1.0,           4.0,      true,
-      included_2to2, false,    NNbarTreatment::NoAnnihilation,
+      all_reactions_included(), false,    NNbarTreatment::NoAnnihilation,
       false,         0.,       false};
 }
 
