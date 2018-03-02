@@ -80,7 +80,7 @@ set(smash_src
         clebschgordan.cc
         collidermodus.cc
         configuration.cc
-	crosssections.cc
+        crosssections.cc
         decayaction.cc
         decayactionsfinder.cc
         decaymodes.cc
