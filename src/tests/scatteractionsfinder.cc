@@ -67,7 +67,7 @@ TEST(collision_order) {
   const int testparticles = 1;
   const std::vector<bool> has_interacted = {};
   ScatterActionsFinder finder(elastic_parameter, testparticles, has_interacted,
-                              Test::all_reactions_included());
+                              Test::all_reactions_included(), true);
 
   // prepare lists
   ParticleList search_list = particles.copy_to_vector();
