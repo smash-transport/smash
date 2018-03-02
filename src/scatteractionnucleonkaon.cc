@@ -232,6 +232,13 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_cross_sections
                                      type_K_m, type_Delta_z_bar); },
                         sqrts, type_K_m, type_Delta_z_bar);
           }
+          if (incl_KN_to_KN) {
+            const auto& type_Kbar_z = ParticleType::find(pdg::Kbar_z);
+            const auto& type_p_bar = ParticleType::find(-pdg::p);
+            add_channel(process_list,
+                        [&] { return kplusn_k0p(s); },
+                        sqrts, type_Kbar_z, type_p_bar);
+          }
           break;
         }
       }
@@ -276,6 +283,13 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_cross_sections
                                      type_nucleon, type_kaon,
                                      type_K_p, type_Delta_z); },
                         sqrts, type_K_p, type_Delta_z);
+          }
+          if (incl_KN_to_KN) {
+            const auto& type_K_z = ParticleType::find(pdg::K_z);
+            const auto& type_p = ParticleType::find(pdg::p);
+            add_channel(process_list,
+                        [&] { return kplusn_k0p(s); },
+                        sqrts, type_K_z, type_p);
           }
           break;
         }
@@ -354,6 +368,16 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_cross_sections
                                      type_K_p, type_Delta_z); },
                         sqrts, type_K_p, type_Delta_z);
           }
+          if (incl_KN_to_KN) {
+            const auto& type_K_p = ParticleType::find(pdg::K_p);
+            const auto& type_n = ParticleType::find(pdg::n);
+            add_channel(process_list,
+                        [&] { return kplusn_k0p(s) *
+                                     kplusn_ratios.get_ratio(
+                                     type_nucleon, type_kaon,
+                                     type_K_p, type_n); },
+                        sqrts, type_K_p, type_n);
+          }
           break;
         }
         case pdg::n: {
@@ -416,6 +440,15 @@ CollisionBranchList ScatterActionNucleonKaon::two_to_two_cross_sections
                                      type_nucleon, type_kaon,
                                      type_K_m, type_Delta_z_bar); },
                         sqrts, type_K_m, type_Delta_z_bar);
+          }
+          if (incl_KN_to_KN) {
+            const auto& type_K_m = ParticleType::find(pdg::K_m);
+            const auto& type_n_bar = ParticleType::find(-pdg::n);
+            add_channel(process_list,
+                        [&] { return kplusn_k0p(s) * kplusn_ratios.get_ratio(
+                                     type_nucleon, type_kaon,
+                                     type_K_m, type_n_bar); },
+                        sqrts, type_K_m, type_n_bar);
           }
           break;
         }
