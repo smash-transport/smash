@@ -156,19 +156,10 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData &data_a,
   act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
                            low_snn_cut_, strings_switch_, nnbar_treatment_);
 
-  /* Add photons to collision finding if necessary */
-  double photon_cross_section = 0.0;
-  if (photons_ &&
-      (ScatterActionPhoton::is_photon_reaction(act->incoming_particles()) !=
-       ScatterActionPhoton::ReactionType::no_reaction)) {
-    ScatterActionPhoton photon_act(act->incoming_particles(), 0.0,
-                                   n_fractional_photons_);
-    photon_act.add_single_channel();
-    photon_cross_section = photon_act.cross_section();
-  }
+
   /* Cross section for collision criterion */
   double cross_section_criterion =
-      (act->cross_section() + photon_cross_section) * fm2_mb * M_1_PI /
+      act->cross_section() * fm2_mb * M_1_PI /
       static_cast<double>(testparticles_);
   /* Consider cross section scaling factors only if the particles
    * are not formed yet at the prospective time of the interaction */
