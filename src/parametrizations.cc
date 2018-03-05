@@ -137,7 +137,7 @@ double piplusp_elastic(double mandelstam_s) {
   if (piplusp_elastic_res_interpolation == nullptr) {
     std::vector<double> x = PIPLUSP_RES_SQRTS;
     for (auto& i : x) {
-      i = i * i; 
+      i = i * i;
     }
     std::vector<double> y = PIPLUSP_RES_SIG;
     piplusp_elastic_res_interpolation =
@@ -188,9 +188,9 @@ double piminusp_elastic(double mandelstam_s) {
   } else {
     sigma = piminusp_elastic_pdg(mandelstam_s);
   }
-  // Tune down the elastic cross section when sqrt s is between 1.8 GeV 
+  // Tune down the elastic cross section when sqrt s is between 1.8 GeV
   // and 1.97 GeV so that the total cross section can fit the data. The
-  // scaling factor is chosen so that the it's equal to one and its 
+  // scaling factor is chosen so that the it's equal to one and its
   // derivate vanishes at the both ends. The minimum scaling factor in this
   // region is 0.88-0.12=0.76.
   if (mandelstam_s > 3.24 && mandelstam_s < 3.8809) {
