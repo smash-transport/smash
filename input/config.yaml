@@ -13,6 +13,13 @@ Output:
     Output_Interval:  5.0
     Particles:
         Format:          ["Oscar2013"]
+
+Collision_Term:
+    Included_2to2:       ["All"] # Options are ["All", "Elastic", "NN_to_NR",
+                                    # "NN_to_DR", "KN_to_KN", "KN_to_KDelta",
+                                    # "Strangeness_exchange"]
+                                    # Empty brackets results in no 2 to 2 reactions
+
 Modi:
     Collider:
         Projectile:
