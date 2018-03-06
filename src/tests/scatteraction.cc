@@ -73,7 +73,7 @@ TEST(elastic_collision) {
   constexpr double sigma = 10.0;
   constexpr bool strings_switch = false;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
-  act.add_all_processes(sigma, true, ReactionsBitSet(std::string("111111")),
+  act.add_all_processes(sigma, true, Test::all_reactions_included(),
                         0., strings_switch, nnbar_treatment);
 
   // check cross section
@@ -148,7 +148,7 @@ TEST(outgoing_valid) {
   constexpr bool strings_switch = false;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act->add_all_processes(elastic_parameter, true,
-              ReactionsBitSet(std::string("111111")), 0.,
+              Test::all_reactions_included(), 0.,
               strings_switch, nnbar_treatment);
 
   VERIFY(act->cross_section() > 0.);
@@ -210,7 +210,7 @@ TEST(pythia_running) {
   constexpr bool strings_switch = true;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act->add_all_processes(elastic_parameter, false,
-                         ReactionsBitSet(std::string("111111")), 0.,
+                         Test::all_reactions_included(), 0.,
                          strings_switch, nnbar_treatment);
 
   VERIFY(act->cross_section() > 0.);
@@ -255,7 +255,7 @@ TEST(update_incoming) {
   constexpr double sigma = 10.0;
   bool string_switch = true;
   NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
-  act.add_all_processes(sigma, true, ReactionsBitSet(std::string("111111")),
+  act.add_all_processes(sigma, true, Test::all_reactions_included(),
                         0., string_switch, nnbar_treatment);
 
   // change the position of one of the particles
