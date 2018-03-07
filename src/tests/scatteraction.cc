@@ -12,6 +12,7 @@
 #include "setup.h"
 
 #include "../include/scatteractionbaryonbaryon.h"
+#include "../include/scatteractionnucleonnucleon.h"
 #include "../include/scatteractionbaryonmeson.h"
 
 using namespace smash;
@@ -220,6 +221,65 @@ TEST(pythia_running) {
   act->generate_final_state();
   VERIFY(act->get_type() != ProcessType::Elastic);
   VERIFY(act->get_type() == ProcessType::StringSoft);
+  const uint32_t id_process = 1;
+  act->perform(&particles, id_process);
+  COMPARE(id_process, 1u);
+
+  // check the outgoing particles
+  const ParticleList& outgoing_particles = act->outgoing_particles();
+  VERIFY(outgoing_particles.size() > 0u);  // should be at least one
+  VERIFY(particles.is_valid(outgoing_particles[0]));
+  VERIFY(outgoing_particles[0].id() > p1_copy.id());
+  VERIFY(outgoing_particles[0].id() > p2_copy.id());
+}
+
+TEST(no_strings) {
+  // create two protons
+  // TODO(steinberg): test more pairs after Jan's restructuring is merged
+  ParticleData p1{ParticleType::find(0x2212)};
+  ParticleData p2{ParticleType::find(0x2212)};
+  // set position
+  p1.set_4position(pos_a);
+  p2.set_4position(pos_b);
+  // set momenta
+  constexpr double p_x = 1.0;
+  p1.set_4momentum(p1.pole_mass(), p_x, 0., 0.);
+  p2.set_4momentum(p2.pole_mass(), -p_x, 0., 0.);
+
+  // put in particles object
+  Particles particles;
+  particles.insert(p1);
+  particles.insert(p2);
+
+  // get valid copies back
+  ParticleList plist = particles.copy_to_vector();
+  auto p1_copy = plist[0];
+  auto p2_copy = plist[1];
+  VERIFY(particles.is_valid(p1_copy) && particles.is_valid(p2_copy));
+
+  // construct action
+  ScatterActionPtr act;
+  ReactionsBitSet incl_2to2;
+  act = make_unique<ScatterActionNucleonNucleon>(p1_copy, p2_copy, 0.2,
+                                                 false, 1.0);
+  VERIFY(act != nullptr);
+  COMPARE(p2_copy.type(), ParticleType::find(0x2212));
+
+  // add processes
+  constexpr double elastic_parameter = 0.;  // don't include elastic scattering
+  constexpr bool strings_switch = false;
+  constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
+  act->add_all_processes(elastic_parameter, false,
+                         Test::all_reactions_included(), 0.,
+                         strings_switch, nnbar_treatment);
+
+  VERIFY(act->cross_section() > 0.);
+
+  // perform actions
+  VERIFY(act->is_valid(particles));
+  act->generate_final_state();
+  //VERIFY(act->get_type() != ProcessType::Elastic);
+  //VERIFY(act->get_type() == ProcessType::StringSoft);
   const uint32_t id_process = 1;
   act->perform(&particles, id_process);
   COMPARE(id_process, 1u);
