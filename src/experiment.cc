@@ -429,7 +429,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   if (parameters_.two_to_one) {
     action_finders_.emplace_back(make_unique<DecayActionsFinder>());
   }
-  if (parameters_.two_to_one || parameters_.included_2to2.any(),
+  if (parameters_.two_to_one || parameters_.included_2to2.any() ||
       parameters_.strings_switch) {
     auto scat_finder = make_unique<ScatterActionsFinder>(
         config, parameters_, nucleon_has_interacted_, modus_.total_N_number(),
