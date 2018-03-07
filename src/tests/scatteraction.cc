@@ -278,8 +278,6 @@ TEST(no_strings) {
   // perform actions
   VERIFY(act->is_valid(particles));
   act->generate_final_state();
-  //VERIFY(act->get_type() != ProcessType::Elastic);
-  //VERIFY(act->get_type() == ProcessType::StringSoft);
   const uint32_t id_process = 1;
   act->perform(&particles, id_process);
   COMPARE(id_process, 1u);
@@ -288,8 +286,6 @@ TEST(no_strings) {
   const ParticleList& outgoing_particles = act->outgoing_particles();
   VERIFY(outgoing_particles.size() > 0u);  // should be at least one
   VERIFY(particles.is_valid(outgoing_particles[0]));
-  VERIFY(outgoing_particles[0].id() > p1_copy.id());
-  VERIFY(outgoing_particles[0].id() > p2_copy.id());
 }
 
 TEST(update_incoming) {
