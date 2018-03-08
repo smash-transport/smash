@@ -33,14 +33,14 @@ class Actions {
   /**
    * Creates a new Actions object from an ActionList.
    *
-   * The actions are sorted before they are stored in the object. The entries of
+   * The actions are stored in a heap and not sorted. The entries of
    * the ActionList are rendered invalid by this constructor.
    *
    * \param action_list The ActionList from which to construct the Actions
    *                    object
    */
   explicit Actions(ActionList&& action_list) : data_(std::move(action_list)) {
-    sort(data_);
+    std::make_heap(data_.begin(), data_.end(), cmp);
   }
 
   /**
@@ -66,6 +66,7 @@ class Actions {
     if (data_.empty()) {
       throw std::runtime_error("Empty actions list!");
     }
+    std::pop_heap(data_.begin(), data_.end(), cmp);
     ActionPtr act = std::move(data_.back());
     data_.pop_back();
     return act;
@@ -74,20 +75,14 @@ class Actions {
   /**
    * Insert a list of actions into this object.
    *
-   * They're inserted at the right places to keep the complete list sorted.
+   * They're inserted at the right places to keep the complete list a heap.
    *
    * \param new_acts The actions that will be inserted.
    */
   void insert(ActionList&& new_acts) {
-    if (new_acts.empty()) {
-      return;
+    for (auto& a : new_acts) {
+      insert(std::move(a));
     }
-    sort(new_acts);
-
-    const size_t old_end = data_.size();
-    data_.insert(data_.end(), std::make_move_iterator(new_acts.begin()),
-                 std::make_move_iterator(new_acts.end()));
-    merge(data_, old_end);
   }
 
   /**
@@ -98,9 +93,8 @@ class Actions {
    * \param action The action to insert.
    */
   void insert(ActionPtr&& action) {
-    const size_t old_end = data_.size();
     data_.push_back(std::move(action));
-    merge(data_, old_end);
+    std::push_heap(data_.begin(), data_.end(), cmp);
   }
 
   /**
@@ -129,26 +123,11 @@ class Actions {
 
  private:
   /**
-   * Sort the actions such that the first action is at the end of the list.
-   *
-   * \param action_list The list to sort.
+   *  Compare two action pointer such that the maximum is the most recent
+   *  action.
    */
-  static void sort(ActionList& action_list) {
-    std::sort(action_list.begin(), action_list.end(),
-              [](const ActionPtr& a, const ActionPtr& b) { return *b < *a; });
-  }
-
-  /**
-   * Merge the two lists while preserving the ordering.
-   *
-   * \param action_list The concatenation of the two lists.
-   * \param separation_index The index of the first element of the second list.
-   */
-  static void merge(ActionList& action_list, size_t separation_index) {
-    std::inplace_merge(
-        action_list.begin(), action_list.begin() + separation_index,
-        action_list.end(),
-        [](const ActionPtr& a, const ActionPtr& b) { return *b < *a; });
+  static bool cmp(const ActionPtr& a, const ActionPtr& b) {
+    return a->time_of_execution() > b->time_of_execution();
   }
 
   /**

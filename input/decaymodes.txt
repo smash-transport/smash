@@ -443,11 +443,11 @@ N(1900)
 0.06   0  N(1535) π    #  4 - 10 %
 
 N(1990)
-0.12   3  N π
+0.06   3  N π  # tuned for p π-
 0.20   3  N ρ  # BR lowered to improve pp --> pp ρ cross section, shifted to N σ
-0.14   3  Δ π
+0.18   3  Δ π
 0.05   3  N(1440) π
-0.02   3  Λ K  # tuned for Nπ->ΛK
+0.04   3  Λ K  # tuned for Nπ->ΛK
 0.46   4  N σ  # σ and ππ combined
 # From UrQMD
 # FIXME The UrQMD papers are ambigious whether this state produces φ
@@ -516,15 +516,15 @@ N(2250)
 #^ disabled, because it overshoots the pi+p cross section
 
 Δ(1620)
-0.25   0  N π        # 20 - 30 %
+0.30   0  N π        # 20 - 30 %, tuned for Nπ
 0.53   2  Δ π        # 52 - 72 %
-0.10   0  N ρ        # > 0
+0.05   0  N ρ        # > 0
 0.07   2  N ρ        # > 0
 0.05   0  N(1440) π  #  3 -  9 %
 
 Δ(1700)
-0.19   2  N π        # 10 - 20 %
-0.25   0  Δ π        #  5 - 35 %
+0.20   2  N π        # 10 - 20 %, tuned for Nπ
+0.24   0  Δ π        #  5 - 35 %
 0.16   2  Δ π        #  4 - 16 %
 0.30   0  N ρ        # > 0
 0.05   0  Δ η        #  3 -  7 %
@@ -532,8 +532,8 @@ N(2250)
 0.01   1  N(1535) π  # 0.5 - 1.5 %
 
 Δ(1905)
-0.12   3  N π        #  9 - 15 %
-0.33   1  Δ π        # 23 - 43 %
+0.13   3  N π        #  9 - 15 %, tuned for Nπ
+0.32   1  Δ π        # 23 - 43 %
 0.34   3  Δ π        #      seen
 0.06   1  N ρ        #      seen, KSU value used
 0.04   1  Δ η        #  2 -  6 %
@@ -541,8 +541,8 @@ N(2250)
 0.10   1  N(1680) π  #  5 - 15 %
 
 Δ(1910)
-0.25   0  N π        # 15 - 30 %
-0.42   0  Δ π        # 34 - 66 %
+0.30   0  N π        # 15 - 30 %, tuned for Nπ
+0.37   0  Δ π        # 34 - 66 %
 0.12   0  Σ K        #  4 - 14 %, tuned for Nπ->ΣK
 0.07   0  N(1440) π  #  3 -  9 %
 0.09   0  Δ η        #  5 - 13 %
@@ -566,10 +566,10 @@ N(2250)
 # From UrQMD
 
 Δ(1950)
-0.40   3  N π        # 35 - 45 %
+0.30   3  N π        # 35 - 45 %, tuned for Nπ total cross section
 0.004  4  Σ K        # 0.3 - 0.5 %, tuned for Nπ->ΣK, NN->ΣK
 0.09   4  Δ π        #  1 -  9 %
-0.406  3  N(1440) π  # Introduced to fill up missing branching ratio
+0.506  3  N(1440) π  # Introduced to fill up missing branching ratio
 0.09   1  N(1680) π  #  3 -  9 %
 0.01   4  Δ η        # < 1 %
 
@@ -759,3 +759,7 @@ N(2250)
 
 Ω(2250)  # 0(? ?)
 1.      1   Ξ(1530) K̅  # >0
+
+######### Light nuclear resonances ########
+d'
+1.      1   N N   # Introduced to describe Nd <-> Nnp reaction via Nd <-> Nd' <->Nnp

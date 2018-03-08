@@ -9,6 +9,8 @@
 
 #include "include/scatteraction.h"
 
+#include <cmath>
+
 #include "Pythia8/Pythia.h"
 
 #include "include/action_globals.h"
@@ -25,11 +27,11 @@
 namespace smash {
 
 ScatterAction::ScatterAction(const ParticleData &in_part_a,
-                             const ParticleData &in_part_b, double time,
-                             bool isotropic, double string_formation_time)
+                             const ParticleData &in_part_b,
+                             double time, bool isotropic,
+                             double string_formation_time)
     : Action({in_part_a, in_part_b}, time),
-      total_cross_section_(0.),
-      isotropic_(isotropic),
+      total_cross_section_(0.), isotropic_(isotropic),
       string_formation_time_(string_formation_time) {}
 
 void ScatterAction::add_collision(CollisionBranchPtr p) {
@@ -47,7 +49,7 @@ void ScatterAction::generate_final_state() {
   log.debug("Incoming particles: ", incoming_particles_);
 
   if (pot_pointer != nullptr) {
-     filter_channel(collision_channels_, total_cross_section_);
+    filter_channel(collision_channels_, total_cross_section_);
   }
   /* Decide for a particular final state. */
   const CollisionBranch *proc = choose_channel<CollisionBranch>(
@@ -102,8 +104,11 @@ void ScatterAction::generate_final_state() {
   }
 }
 
-void ScatterAction::add_all_processes(double elastic_parameter, bool two_to_one,
-                                      bool two_to_two, double low_snn_cut,
+
+void ScatterAction::add_all_processes(double elastic_parameter,
+                                      bool two_to_one,
+                                      ReactionsBitSet included_2to2,
+                                      double low_snn_cut,
                                       bool strings_switch,
                                       NNbarTreatment nnbar_treatment) {
   /* The string fragmentation is implemented in the same way in GiBUU (Physics
@@ -136,9 +141,9 @@ void ScatterAction::add_all_processes(double elastic_parameter, bool two_to_one,
   } else if ((t1.pdgcode().is_pion() && t2.is_nucleon()) ||
              (t1.is_nucleon() && t2.pdgcode().is_pion())) {
     // The energy region of the mixed scattering type for pion-nucleon collision
-    // is 2.3 - 3.1 GeV.
-    mix_scatter_type_energy = 2.7;
-    mix_scatter_type_window_width = 0.4;
+    // is 1.9 - 2.2 GeV.
+    mix_scatter_type_energy = 2.05;
+    mix_scatter_type_window_width = 0.15;
     // pion-nucleon collisions are included in pythia.
     include_pythia = true;
   }
@@ -153,9 +158,9 @@ void ScatterAction::add_all_processes(double elastic_parameter, bool two_to_one,
       is_pythia = true;
     } else if (sqrt_s() >
                mix_scatter_type_energy - mix_scatter_type_window_width) {
-      const double probability_pythia =
-          (sqrt_s() - mix_scatter_type_energy + mix_scatter_type_window_width) /
-          mix_scatter_type_window_width / 2.0;
+          const double probability_pythia = 0.5 +
+                     0.5 * sin(0.5 * M_PI * (sqrt_s() - mix_scatter_type_energy)
+                     / mix_scatter_type_window_width);
       if (probability_pythia > Random::uniform(0., 1.)) {
         // scatterings at the middle energies are through string
         // fragmentation by chance.
@@ -163,26 +168,27 @@ void ScatterAction::add_all_processes(double elastic_parameter, bool two_to_one,
       }
     }
   }
-  /** Elastic collisions between two nucleons with sqrt_s() below
-   * low_snn_cut can not happen*/
-  const bool reject_by_nucleon_elastic_cutoff =
-      both_are_nucleons && t1.antiparticle_sign() == t2.antiparticle_sign() &&
-      sqrt_s() < low_snn_cut;
-  if (two_to_two && !reject_by_nucleon_elastic_cutoff) {
-    add_collision(elastic_cross_section(elastic_parameter));
+    /** Elastic collisions between two nucleons with sqrt_s() below
+     * low_snn_cut can not happen*/
+  const bool reject_by_nucleon_elastic_cutoff = both_are_nucleons
+                         && t1.antiparticle_sign() == t2.antiparticle_sign()
+                         && sqrt_s() < low_snn_cut;
+  bool incl_elastic = included_2to2[IncludedReactions::Elastic];
+  if (incl_elastic && !reject_by_nucleon_elastic_cutoff) {
+      add_collision(elastic_cross_section(elastic_parameter));
   }
   if (is_pythia) {
     /* string excitation */
     add_collisions(string_excitation_cross_sections());
   } else {
-    if (two_to_one) {
-      /* resonance formation (2->1) */
-      add_collisions(resonance_cross_sections());
-    }
-    if (two_to_two) {
-      /* 2->2 (inelastic) */
-      add_collisions(two_to_two_cross_sections());
-    }
+     if (two_to_one) {
+       /* resonance formation (2->1) */
+       add_collisions(resonance_cross_sections());
+     }
+     if (included_2to2.any()) {
+       /* 2->2 (inelastic) */
+       add_collisions(two_to_two_cross_sections(included_2to2));
+     }
   }
   /** NNbar annihilation thru NNbar → ρh₁(1170); combined with the decays
    *  ρ → ππ and h₁(1170) → πρ, this gives a final state of 5 pions.
@@ -375,7 +381,7 @@ CollisionBranchList ScatterAction::string_excitation_cross_sections() {
     double single_diffr = single_diffr_AX + single_diffr_XB;
     double diffractive = single_diffr + double_diffr;
     const double nondiffractive_all =
-      std::max(0., sig_string_all - diffractive);
+        std::max(0., sig_string_all - diffractive);
     diffractive = sig_string_all - nondiffractive_all;
     double_diffr = std::max(0., diffractive - single_diffr);
     const double a = (diffractive - double_diffr) / single_diffr;
@@ -388,10 +394,9 @@ CollisionBranchList ScatterAction::string_excitation_cross_sections() {
      * in conjunction with multipartion interaction picture
      * \iref{Sjostrand:1987su}. */
     const double hard_xsec = string_hard_cross_section();
-    const double nondiffractive_soft = nondiffractive_all *
-                 std::exp(- hard_xsec / nondiffractive_all);
-    const double nondiffractive_hard = nondiffractive_all -
-                 nondiffractive_soft;
+    const double nondiffractive_soft =
+        nondiffractive_all * std::exp(-hard_xsec / nondiffractive_all);
+    const double nondiffractive_hard = nondiffractive_all - nondiffractive_soft;
     log.debug("String cross sections [mb] are");
     log.debug("Single-diffractive AB->AX: ", single_diffr_AX);
     log.debug("Single-diffractive AB->XB: ", single_diffr_XB);
@@ -597,15 +602,14 @@ bool ScatterAction::check_quark_number(int nquarks, PdgCode pdg){
 void ScatterAction::assign_scaling_factor(int nquark, ParticleData data,
                                               double suppression_factor){
   int nbaryon = data.pdgcode().baryon_number();
-  if (nquark == 0){
-    data.set_cross_section_scaling_factor(0.0);
-  }
-  else if (nbaryon==0){
+  if (nbaryon==0){
     // Mesons always get a scaling factor of 1/2 since there is never 
-    // a q-qbar pair at the end of a string so nquarks is always 1
+    // a q-qbar pair at the end of a string so nquark is always 1
     data.set_cross_section_scaling_factor(0.5 * suppression_factor);
   }
   else if (data.is_baryon()){
+    // Leading baryons get a factor of 2/3 if they carry 2
+    // and 1/3 if they carry 1 of the strings valence quarks
     data.set_cross_section_scaling_factor(suppression_factor*
                                               nquark / (3.0 * nbaryon));
   }
@@ -804,9 +808,12 @@ void ScatterAction::string_excitation_pythia() {
        * to a fraction corresponding to the valence quark content. Hadrons
        * containing a valence quark are determined by highest z-momentum. */
       log.debug("The formation time is: ", string_formation_time_, "fm/c.");
+      ThreeVector v_calc =
+          (data.momentum().LorentzBoost(-1.0 * beta_cm())).velocity();
       // Set formation time: actual time of collision + time to form the
       // particle
-      data.set_formation_time(string_formation_time_ * gamma_cm() +
+      double gamma_factor = 1.0 / std::sqrt(1 - (v_calc).sqr());
+      data.set_formation_time(string_formation_time_ * gamma_factor +
                               time_of_execution_);
       outgoing_particles_.push_back(data);
     }

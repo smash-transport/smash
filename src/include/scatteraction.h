@@ -11,6 +11,8 @@
 #define SRC_INCLUDE_SCATTERACTION_H_
 
 #include <memory>
+#include <set>
+#include <string>
 
 #include "action.h"
 #include "cxx14compat.h"
@@ -118,11 +120,13 @@ class ScatterAction : public Action {
    * \param[in] in_part2 second scattering partner
    * \param[in] time Time at which the action is supposed to take place
    * \param[in] isotropic if true, do the collision isotropically
+   * \param[in] include2to2 set that contains infos about which
+   *             inelastic 2 to 2 channels are present
    * \param[in] string_formation_time the time a string takes to form
    */
   ScatterAction(const ParticleData& in_part1, const ParticleData& in_part2,
-                double time, bool isotropic = false,
-                double string_formation_time = 1.0);
+          double time, bool isotropic = false,
+          double string_formation_time = 1.0);
 
   /** Add a new collision channel. */
   void add_collision(CollisionBranchPtr p);
@@ -151,9 +155,8 @@ class ScatterAction : public Action {
 
   /** Add all possible subprocesses for this action object. */
   virtual void add_all_processes(double elastic_parameter, bool two_to_one,
-                                 bool two_to_two, double low_snn_cut,
-                                 bool strings_switch,
-                                 NNbarTreatment nnbar_treatment);
+    ReactionsBitSet included_2to2, double low_snn_cut, bool strings_switch,
+    NNbarTreatment nnbar_treatment);
 
   /**
    * Determine the (parametrized) total cross section for this collision. This
@@ -268,7 +271,8 @@ class ScatterAction : public Action {
                               double cm_momentum_sqr);
 
   /** Find all inelastic 2->2 processes for this reaction. */
-  virtual CollisionBranchList two_to_two_cross_sections() {
+  virtual CollisionBranchList two_to_two_cross_sections
+                                (ReactionsBitSet) {
     return CollisionBranchList();
   }
 
