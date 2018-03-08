@@ -125,8 +125,8 @@ class ScatterAction : public Action {
    * \param[in] string_formation_time the time a string takes to form
    */
   ScatterAction(const ParticleData& in_part1, const ParticleData& in_part2,
-          double time, bool isotropic = false,
-          double string_formation_time = 1.0);
+                double time, bool isotropic = false,
+                double string_formation_time = 1.0);
 
   /** Add a new collision channel. */
   void add_collision(CollisionBranchPtr p);
@@ -155,8 +155,9 @@ class ScatterAction : public Action {
 
   /** Add all possible subprocesses for this action object. */
   virtual void add_all_processes(double elastic_parameter, bool two_to_one,
-    ReactionsBitSet included_2to2, double low_snn_cut, bool strings_switch,
-    NNbarTreatment nnbar_treatment);
+                                 ReactionsBitSet included_2to2,
+                                 double low_snn_cut, bool strings_switch,
+                                 NNbarTreatment nnbar_treatment);
 
   /**
    * Determine the (parametrized) total cross section for this collision. This
@@ -242,17 +243,17 @@ class ScatterAction : public Action {
   virtual CollisionBranchList string_excitation_cross_sections();
 
   /**
-  * Find all resonances that can be produced in a 2->1 collision of the two
-  * input particles and the production cross sections of these resonances.
-  *
-  * Given the data and type information of two colliding particles,
-  * create a list of possible resonance production processes
-  * and their cross sections.
-  *
-  * \return A list of processes with resonance in the final state.
-  * Each element in the list contains the type of the final-state particle
-  * and the cross section for that particular process.
-  */
+   * Find all resonances that can be produced in a 2->1 collision of the two
+   * input particles and the production cross sections of these resonances.
+   *
+   * Given the data and type information of two colliding particles,
+   * create a list of possible resonance production processes
+   * and their cross sections.
+   *
+   * \return A list of processes with resonance in the final state.
+   * Each element in the list contains the type of the final-state particle
+   * and the cross section for that particular process.
+   */
   virtual CollisionBranchList resonance_cross_sections();
 
   /**
@@ -271,8 +272,7 @@ class ScatterAction : public Action {
                               double cm_momentum_sqr);
 
   /** Find all inelastic 2->2 processes for this reaction. */
-  virtual CollisionBranchList two_to_two_cross_sections
-                                (ReactionsBitSet) {
+  virtual CollisionBranchList two_to_two_cross_sections(ReactionsBitSet) {
     return CollisionBranchList();
   }
 
@@ -347,15 +347,17 @@ class ScatterAction : public Action {
   bool is_elastic() const;
 
   /** find the leading hadrons with given quarknumbers at string ends */
-  void find_leading(int &i1, int &i2, int nq1, int nq2, ParticleList &list);
+  static void find_leading(int& i1, int& i2, int nq1, int nq2,
+                           ParticleList& list);
 
   /** Check if hadron contains at least the given number of quarks */
-  bool check_quark_number(int nquarks,PdgCode pdg);
+  static bool check_quark_number(int nquarks, PdgCode pdg);
 
   /** assign a cross section scaling factor according to number of valence
-   * quarks from the string contained in the fragment and the total number of 
+   * quarks from the string contained in the fragment and the total number of
    * quarks in the fragment */
-  void assign_scaling_factor(int nquark, ParticleData data, double suppression_factor);
+  static void assign_scaling_factor(int nquark, ParticleData data,
+                                    double suppression_factor);
 
   /** Perform a 2->1 resonance-formation process. */
   void resonance_formation();
