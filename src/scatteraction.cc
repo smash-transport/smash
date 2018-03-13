@@ -27,11 +27,11 @@
 namespace smash {
 
 ScatterAction::ScatterAction(const ParticleData &in_part_a,
-                             const ParticleData &in_part_b,
-                             double time, bool isotropic,
-                             double string_formation_time)
+                             const ParticleData &in_part_b, double time,
+                             bool isotropic, double string_formation_time)
     : Action({in_part_a, in_part_b}, time),
-      total_cross_section_(0.), isotropic_(isotropic),
+      total_cross_section_(0.),
+      isotropic_(isotropic),
       string_formation_time_(string_formation_time) {}
 
 void ScatterAction::add_collision(CollisionBranchPtr p) {
@@ -104,12 +104,9 @@ void ScatterAction::generate_final_state() {
   }
 }
 
-
-void ScatterAction::add_all_processes(double elastic_parameter,
-                                      bool two_to_one,
+void ScatterAction::add_all_processes(double elastic_parameter, bool two_to_one,
                                       ReactionsBitSet included_2to2,
-                                      double low_snn_cut,
-                                      bool strings_switch,
+                                      double low_snn_cut, bool strings_switch,
                                       NNbarTreatment nnbar_treatment) {
   /* The string fragmentation is implemented in the same way in GiBUU (Physics
    * Reports 512(2012), 1-124, pg. 33). If the center of mass energy is low, two
@@ -158,9 +155,9 @@ void ScatterAction::add_all_processes(double elastic_parameter,
       is_pythia = true;
     } else if (sqrt_s() >
                mix_scatter_type_energy - mix_scatter_type_window_width) {
-          const double probability_pythia = 0.5 +
-                     0.5 * sin(0.5 * M_PI * (sqrt_s() - mix_scatter_type_energy)
-                     / mix_scatter_type_window_width);
+      const double probability_pythia =
+          0.5 + 0.5 * sin(0.5 * M_PI * (sqrt_s() - mix_scatter_type_energy) /
+                          mix_scatter_type_window_width);
       if (probability_pythia > Random::uniform(0., 1.)) {
         // scatterings at the middle energies are through string
         // fragmentation by chance.
@@ -168,27 +165,27 @@ void ScatterAction::add_all_processes(double elastic_parameter,
       }
     }
   }
-    /** Elastic collisions between two nucleons with sqrt_s() below
-     * low_snn_cut can not happen*/
-  const bool reject_by_nucleon_elastic_cutoff = both_are_nucleons
-                         && t1.antiparticle_sign() == t2.antiparticle_sign()
-                         && sqrt_s() < low_snn_cut;
+  /** Elastic collisions between two nucleons with sqrt_s() below
+   * low_snn_cut can not happen*/
+  const bool reject_by_nucleon_elastic_cutoff =
+      both_are_nucleons && t1.antiparticle_sign() == t2.antiparticle_sign() &&
+      sqrt_s() < low_snn_cut;
   bool incl_elastic = included_2to2[IncludedReactions::Elastic];
   if (incl_elastic && !reject_by_nucleon_elastic_cutoff) {
-      add_collision(elastic_cross_section(elastic_parameter));
+    add_collision(elastic_cross_section(elastic_parameter));
   }
   if (is_pythia) {
     /* string excitation */
     add_collisions(string_excitation_cross_sections());
   } else {
-     if (two_to_one) {
-       /* resonance formation (2->1) */
-       add_collisions(resonance_cross_sections());
-     }
-     if (included_2to2.any()) {
-       /* 2->2 (inelastic) */
-       add_collisions(two_to_two_cross_sections(included_2to2));
-     }
+    if (two_to_one) {
+      /* resonance formation (2->1) */
+      add_collisions(resonance_cross_sections());
+    }
+    if (included_2to2.any()) {
+      /* 2->2 (inelastic) */
+      add_collisions(two_to_two_cross_sections(included_2to2));
+    }
   }
   /** NNbar annihilation thru NNbar → ρh₁(1170); combined with the decays
    *  ρ → ππ and h₁(1170) → πρ, this gives a final state of 5 pions.
@@ -579,55 +576,54 @@ void ScatterAction::resonance_formation() {
             outgoing_particles_[0].momentum());
 }
 
-/* This function will check whether a particle contains  
+/* This function will check whether a particle contains
  * at least the given number of valence quarks */
-bool ScatterAction::check_quark_number(int nquarks, PdgCode pdg){
-  if (pdg.is_meson()){
+bool ScatterAction::check_quark_number(int nquarks, PdgCode pdg) {
+  if (pdg.is_meson()) {
     return nquarks == 1 || nquarks == -1;
   }
-  if (pdg.is_baryon()){
-    if (pdg.baryon_number() == 1){
+  if (pdg.is_baryon()) {
+    if (pdg.baryon_number() == 1) {
       return nquarks == 1 || nquarks == 2;
     }
-    if (pdg.baryon_number() == -1){
+    if (pdg.baryon_number() == -1) {
       return nquarks == -1 || nquarks == -2;
     }
   }
   throw std::runtime_error("String fragment is neither baryon nor meson");
 }
 
-/* This function will assign the cross section scaling factor 
- * acccording to the particles number of quarks and the number of 
+/* This function will assign the cross section scaling factor
+ * acccording to the particles number of quarks and the number of
  * quarks it got from the fragmented string */
 void ScatterAction::assign_scaling_factor(int nquark, ParticleData data,
-                                              double suppression_factor){
+                                          double suppression_factor) {
   int nbaryon = data.pdgcode().baryon_number();
-  if (nbaryon==0){
-    // Mesons always get a scaling factor of 1/2 since there is never 
+  if (nbaryon == 0) {
+    // Mesons always get a scaling factor of 1/2 since there is never
     // a q-qbar pair at the end of a string so nquark is always 1
     data.set_cross_section_scaling_factor(0.5 * suppression_factor);
-  }
-  else if (data.is_baryon()){
+  } else if (data.is_baryon()) {
     // Leading baryons get a factor of 2/3 if they carry 2
     // and 1/3 if they carry 1 of the strings valence quarks
-    data.set_cross_section_scaling_factor(suppression_factor*
-                                              nquark / (3.0 * nbaryon));
+    data.set_cross_section_scaling_factor(suppression_factor * nquark /
+                                          (3.0 * nbaryon));
   }
 }
-/* This function will change i1 and i2 to be the index of leading 
+/* This function will change i1 and i2 to be the index of leading
  * hadrons in list */
-void ScatterAction::find_leading(int &i1, int &i2, int nq1, int nq2, 
-                                                    ParticleList &list){
-  int end = list.size()-1;
+void ScatterAction::find_leading(int &i1, int &i2, int nq1, int nq2,
+                                 ParticleList &list) {
+  int end = list.size() - 1;
   bool success = false;
-  while (!success && i1 <= end){
-    success = check_quark_number(nq1,list[i1].pdgcode());
+  while (!success && i1 <= end) {
+    success = check_quark_number(nq1, list[i1].pdgcode());
     i1++;
   }
   i2 = end;
   success = false;
-  while (!success && i2>0){
-    success= check_quark_number(nq2,list[i2].pdgcode());
+  while (!success && i2 > 0) {
+    success = check_quark_number(nq2, list[i2].pdgcode());
     i2--;
   }
 }
@@ -740,65 +736,63 @@ void ScatterAction::string_excitation_pythia() {
         }
       }
     }
-    /* 
+    /*
      *Set each particle's cross section scaling factor to 0 first
      */
-    for (ParticleData data : new_intermediate_particles){
+    for (ParticleData data : new_intermediate_particles) {
       data.set_cross_section_scaling_factor(0.0);
     }
     /*
-     * sort new_intermediate_particles according to z-velocity 
+     * sort new_intermediate_particles according to z-velocity
      */
     std::sort(
         new_intermediate_particles.begin(), new_intermediate_particles.end(),
         [&](ParticleData i, ParticleData j) {
-          return i.momentum().velocity().x3() 
-               < j.momentum().velocity().x3();});
+          return i.momentum().velocity().x3() < j.momentum().velocity().x3();
+        });
     /* Additional suppression factor to mimic coherence taken as 0.7
      * from UrQMD (CTParam(59) */
     const double suppression_factor = 0.7;
     int random;
-    int nq1,nq2; //number of quarks at both ends of the string
-    if (Random::uniform(0., 1.) > 0.5){
+    int nq1, nq2;  // number of quarks at both ends of the string
+    if (Random::uniform(0., 1.) > 0.5) {
       random = 0;
-    }
-    else{
+    } else {
       random = 1;
     }
-    switch(incoming_particles_[random].pdgcode().baryon_number()){
-    case 0:
-      nq1=1;
-      nq2=-1;
-      break;
-    case 1:
-      nq1=2;
-      nq2=1;
-      break;
-    case -1:
-      nq1=-2;
-      nq2=-1;
-      break;
-    default:
-      throw std::runtime_error("string is neither mesonic nor baryonic");
+    switch (incoming_particles_[random].pdgcode().baryon_number()) {
+      case 0:
+        nq1 = 1;
+        nq2 = -1;
+        break;
+      case 1:
+        nq1 = 2;
+        nq2 = 1;
+        break;
+      case -1:
+        nq1 = -2;
+        nq2 = -1;
+        break;
+      default:
+        throw std::runtime_error("string is neither mesonic nor baryonic");
     }
-    int i1=0,i2=0,j1=0,j2=0;
+    int i1 = 0, i2 = 0, j1 = 0, j2 = 0;
     // Try to find nq1 from the left side and nq2 from the rght side
-    // and then the other way around and see where the particles are 
+    // and then the other way around and see where the particles are
     // closer to the ends of the list
-    find_leading(i1,i2,nq1,nq2,new_intermediate_particles);
-    find_leading(j1,j2,nq2,nq1,new_intermediate_particles);
+    find_leading(i1, i2, nq1, nq2, new_intermediate_particles);
+    find_leading(j1, j2, nq2, nq1, new_intermediate_particles);
 
-    if(i2-i1>j2-j1){//does this brake symmetry because it prefers j?
+    if (i2 - i1 > j2 - j1) {  // does this brake symmetry because it prefers j?
       assign_scaling_factor(nq1, new_intermediate_particles[i1],
-                                                      suppression_factor);
+                            suppression_factor);
       assign_scaling_factor(nq2, new_intermediate_particles[i2],
-                                                      suppression_factor);
-    }
-    else{
+                            suppression_factor);
+    } else {
       assign_scaling_factor(nq2, new_intermediate_particles[j1],
-                                                      suppression_factor);
+                            suppression_factor);
       assign_scaling_factor(nq1, new_intermediate_particles[j2],
-                                                      suppression_factor);
+                            suppression_factor);
     }
 
     for (ParticleData data : new_intermediate_particles) {
