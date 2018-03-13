@@ -101,28 +101,6 @@ ScatterActionsFinder::ScatterActionsFinder(
   }
 }
 
-ScatterActionsFinder::ScatterActionsFinder(
-    double elastic_parameter, int testparticles,
-    const std::vector<bool> &nucleon_has_interacted,
-    const ReactionsBitSet &included_2to2, bool two_to_one)
-    : elastic_parameter_(elastic_parameter),
-      testparticles_(testparticles),
-      isotropic_(false),
-      two_to_one_(two_to_one),
-      incl_set_(included_2to2),
-      low_snn_cut_(0.0),
-      strings_switch_(true),
-      nnbar_treatment_(NNbarTreatment::NoAnnihilation),
-      nucleon_has_interacted_(nucleon_has_interacted),
-      N_tot_(0),
-      N_proj_(0),
-      string_formation_time_(1.),
-      photons_(false),
-      n_fractional_photons_(1) {
-  string_process_interface_ = make_unique<StringProcess>(
-      1.0, 0.5, 0.001, 1.0, 2.5, 0.217, 0.081, 0.7, 0.68, 0.98);
-}
-
 ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
     const ParticleData &data_a, const ParticleData &data_b,
     double time_until_collision) const {
