@@ -123,7 +123,7 @@ TEST(full2013_format) {
 
   /* Create elastic interaction (smashon + smashon). */
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
-  action->add_all_processes(10., true, ReactionsBitSet(std::string("111111")),
+  action->add_all_processes(10., true, Test::all_reactions_included(),
                             0., true, NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
   ParticleList final_particles = action->outgoing_particles();
@@ -242,7 +242,7 @@ TEST(final2013_format) {
 
   /* Create interaction ("elastic scattering") */
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
-  action->add_all_processes(10., true, ReactionsBitSet(std::string("111111")),
+  action->add_all_processes(10., true, Test::all_reactions_included(),
                             0., true, NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
 
@@ -315,7 +315,7 @@ TEST(full_extended_oscar) {
 
   /* Create elastic interaction (smashon + smashon). */
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
-  action->add_all_processes(10., true, ReactionsBitSet(std::string("111111")),
+  action->add_all_processes(10., true, Test::all_reactions_included(),
                             0., true, NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
   ParticleList final_particles = action->outgoing_particles();

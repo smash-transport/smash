@@ -43,8 +43,7 @@ static ScatterAction *set_up_action(const ParticleData &proj,
   } else {
     act = new ScatterActionBaryonBaryon(proj, targ, 0.);
   }
-  proc_list = act->two_to_two_cross_sections
-                     (ReactionsBitSet(std::string("111111")));
+  proc_list = act->two_to_two_cross_sections(Test::all_reactions_included());
   //   act->add_processes(proc_list);
 
   std::printf("%s+ %s, sqrt(s) = %f GeV, sigma = %f mb, %lu Channels \n",

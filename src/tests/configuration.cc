@@ -281,3 +281,29 @@ TEST_CATCH(take_array_wrong_n, Configuration::IncorrectTypeInAssignment) {
   std::array<int, 4> x = conf.take({"test"});
   SMASH_UNUSED(x);
 }
+
+TEST(reactions_bitset) {
+  // Make sure that only the right bits are set
+  Configuration conf = make_test_configuration();
+  conf.merge_yaml("{test: [NN_to_NR, KN_to_KN]}");
+  ReactionsBitSet bs = conf.take({"test"});
+  for (std::size_t i = 0; i < bs.size(); i++) {
+    if (i == IncludedReactions::NN_to_NR || i == IncludedReactions::KN_to_KN) {
+      VERIFY(bs.test(i));
+    } else {
+      VERIFY(!bs.test(i));
+    }
+  }
+  // Make sure that all bits are set
+  conf.merge_yaml("{test2: [All]}");
+  ReactionsBitSet bs2 = conf.take({"test2"});
+  for (std::size_t i = 0; i < bs2.size(); i++) {
+    VERIFY(bs2.test(i));
+  }
+  // All means really ALL reactions are on
+  conf.merge_yaml("{test3: [NN_to_NR, All]}");
+  ReactionsBitSet bs3 = conf.take({"test3"});
+  for (std::size_t i = 0; i < bs3.size(); i++) {
+    VERIFY(bs3.test(i));
+  }
+}
