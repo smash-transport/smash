@@ -137,7 +137,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
   /** Enable 2->1 processes. */
   const bool two_to_one_;
   /** List of included 2<->2 reactions */
-  const ReactionsBitSet &incl_set_;
+  const ReactionsBitSet incl_set_;
   /** Elastic collsions between two nucleons with
    ** sqrt_s below low_snn_cut_ are excluded. */
   const double low_snn_cut_;

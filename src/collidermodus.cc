@@ -146,7 +146,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
     frame_ = modus_cfg.take({"Calculation_Frame"});
   }
 
-  /// Determine whether to avoid the first collsions within the same nucleus
+  /// Determine whether to allow the first collisions within the same nucleus
   if (modus_cfg.has_value({"Collisions_Within_Nucleus"})) {
     cll_in_nucleus_ = modus_cfg.take({"Collisions_Within_Nucleus"});
   }

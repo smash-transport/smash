@@ -1,4 +1,5 @@
 /*
+ *
  *    Copyright (c) 2012-2017
  *      SMASH Team
  *
@@ -327,7 +328,8 @@ int main(int argc, char *argv[]) {
       DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
       std::vector<bool> nucleon_has_interacted = {};
       ReactionsBitSet included_2to2 =
-          configuration.take({"Collision_Term", "Included_2to2"});
+              configuration.take({"Collision_Term", "Included_2to2"},
+              ReactionsBitSet().set());
       ExperimentParameters params = ExperimentParameters{
           {0., 1.},
           {0., 1.},
@@ -382,7 +384,7 @@ int main(int argc, char *argv[]) {
                   << b.name() << " instead of " << args[3] << std::endl;
       }
       std::vector<bool> nucleon_has_interacted = {};
-      ReactionsBitSet included_2to2(std::string("111111"));
+      ReactionsBitSet included_2to2(ReactionsBitSet().set());
       configuration.merge_yaml(
           "{Collision_Term: {Elastic_Cross_Section: -1.0}}");
       ExperimentParameters params = ExperimentParameters{
