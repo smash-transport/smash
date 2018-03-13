@@ -190,6 +190,26 @@ void ensure_path_is_valid(const bf::path &path) {
   }
 }
 
+/// prepares ActionsFinder for cross-section and reaction dumps
+ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
+  std::vector<bool> nucleon_has_interacted = {};
+  ReactionsBitSet included_2to2 =
+          configuration.take({"Collision_Term", "Included_2to2"},
+          ReactionsBitSet().set());
+  // Since it will be used solely for cross-section dump, most of
+  // parameters do not play any role here and are set arbitrarily.
+  // Only parameters, that switch reactions on/off matter.
+  bool two_to_one = false;
+  ExperimentParameters params = ExperimentParameters{
+      {0., 1.}, {0., 1.}, 1, 1.0, 4., two_to_one,
+      included_2to2,
+      configuration.take({"Collision_Term", "Strings"}, true),
+      NNbarTreatment::NoAnnihilation,
+      false, 0.0, false};
+  return ScatterActionsFinder(configuration, params,
+                              nucleon_has_interacted, 0, 0, 1);
+}
+
 }  // unnamed namespace
 
 }  // namespace smash
@@ -326,26 +346,8 @@ int main(int argc, char *argv[]) {
       configuration.merge_yaml("{Collision_Term: {Two_to_One: False}}");
       ParticleType::create_type_list(configuration.take({"particles"}));
       DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
-      std::vector<bool> nucleon_has_interacted = {};
-      ReactionsBitSet included_2to2 =
-              configuration.take({"Collision_Term", "Included_2to2"},
-              ReactionsBitSet().set());
-      ExperimentParameters params = ExperimentParameters{
-          {0., 1.},
-          {0., 1.},
-          1,
-          1.0,
-          4.,
-          false,
-          included_2to2,
-          configuration.take({"Collision_Term", "Strings"}, true),
-          NNbarTreatment::NoAnnihilation,
-          false,
-          0.0,
-          false};
-      auto scat_finder = make_unique<ScatterActionsFinder>(
-          configuration, params, nucleon_has_interacted, 0, 0, 1);
-      scat_finder->dump_reactions();
+      auto scat_finder = actions_finder_for_dump(configuration);
+      scat_finder.dump_reactions();
       std::exit(EXIT_SUCCESS);
     }
     if (resonance_dump_activated) {
@@ -383,26 +385,8 @@ int main(int argc, char *argv[]) {
         std::cout << "Warning: pole mass is used for stable particle "
                   << b.name() << " instead of " << args[3] << std::endl;
       }
-      std::vector<bool> nucleon_has_interacted = {};
-      ReactionsBitSet included_2to2(ReactionsBitSet().set());
-      configuration.merge_yaml(
-          "{Collision_Term: {Elastic_Cross_Section: -1.0}}");
-      ExperimentParameters params = ExperimentParameters{
-          {0., 1.},
-          {0., 1.},
-          1,
-          1.,
-          4.,
-          true,
-          included_2to2,
-          configuration.take({"Collision_Term", "Strings"}, true),
-          NNbarTreatment::NoAnnihilation,
-          false,
-          0.,
-          false};
-      auto scat_finder = make_unique<ScatterActionsFinder>(
-          configuration, params, nucleon_has_interacted, 0, 0, 1);
-      scat_finder->dump_cross_sections(a, b, ma, mb);
+      auto scat_finder = actions_finder_for_dump(configuration);
+      scat_finder.dump_cross_sections(a, b, ma, mb);
       std::exit(EXIT_SUCCESS);
     }
     if (modus) {
