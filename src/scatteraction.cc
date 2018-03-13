@@ -576,8 +576,8 @@ void ScatterAction::resonance_formation() {
             outgoing_particles_[0].momentum());
 }
 
-/* This function will check whether a particle contains
- * at least the given number of valence quarks */
+/** Check whether a particle contains
+ *  at least the given number of valence quarks */
 bool ScatterAction::check_quark_number(int nquarks, PdgCode pdg) {
   if (pdg.is_meson()) {
     return nquarks == 1 || nquarks == -1;
@@ -593,7 +593,7 @@ bool ScatterAction::check_quark_number(int nquarks, PdgCode pdg) {
   throw std::runtime_error("String fragment is neither baryon nor meson");
 }
 
-/* This function will assign the cross section scaling factor
+/** Assign the cross section scaling factor
  * acccording to the particles number of quarks and the number of
  * quarks it got from the fragmented string */
 void ScatterAction::assign_scaling_factor(int nquark, ParticleData data,
@@ -610,8 +610,7 @@ void ScatterAction::assign_scaling_factor(int nquark, ParticleData data,
                                           (3.0 * nbaryon));
   }
 }
-/* This function will change i1 and i2 to be the index of leading
- * hadrons in list */
+/** Change i1 and i2 to be the index of leading hadrons in list */
 void ScatterAction::find_leading(int &i1, int &i2, int nq1, int nq2,
                                  ParticleList &list) {
   int end = list.size() - 1;
@@ -628,8 +627,7 @@ void ScatterAction::find_leading(int &i1, int &i2, int nq1, int nq2,
   }
 }
 
-/* This function will generate outgoing particles in CM frame
- * from a hard process. */
+/** Generate outgoing particles in CM frame from a hard process. */
 void ScatterAction::string_excitation_pythia() {
   assert(incoming_particles_.size() == 2);
   const auto &log = logger<LogArea::Pythia>();
