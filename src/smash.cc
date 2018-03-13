@@ -318,7 +318,8 @@ int main(int argc, char *argv[]) {
     }
     if (list2n_activated) {
       // Do not make all elastic cross-sections a fixed number
-      configuration.merge_yaml("{Collision_Term: {Elastic_Cross_Section: -1.0}}");
+      configuration.merge_yaml(
+          "{Collision_Term: {Elastic_Cross_Section: -1.0}}");
       // Print only 2->n, n > 1. Do not dump decays, which can be found in
       // decaymodes.txt anyway
       configuration.merge_yaml("{Collision_Term: {Two_to_One: False}}");
@@ -326,13 +327,22 @@ int main(int argc, char *argv[]) {
       DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
       std::vector<bool> nucleon_has_interacted = {};
       ReactionsBitSet included_2to2 =
-                   configuration.take({"Collision_Term", "Included_2to2"});
-      ExperimentParameters params = ExperimentParameters{{0.,1.},
-             {0.,1.},1,1.0,4.,false,included_2to2,
-              configuration.take({"Collision_Term", "Strings"}, true),
-              NNbarTreatment::NoAnnihilation,false, 0.0, false};
-      auto scat_finder = make_unique<ScatterActionsFinder>(configuration,
-                                      params, nucleon_has_interacted, 0, 0,1);
+          configuration.take({"Collision_Term", "Included_2to2"});
+      ExperimentParameters params = ExperimentParameters{
+          {0., 1.},
+          {0., 1.},
+          1,
+          1.0,
+          4.,
+          false,
+          included_2to2,
+          configuration.take({"Collision_Term", "Strings"}, true),
+          NNbarTreatment::NoAnnihilation,
+          false,
+          0.0,
+          false};
+      auto scat_finder = make_unique<ScatterActionsFinder>(
+          configuration, params, nucleon_has_interacted, 0, 0, 1);
       scat_finder->dump_reactions();
       std::exit(EXIT_SUCCESS);
     }
@@ -373,13 +383,23 @@ int main(int argc, char *argv[]) {
       }
       std::vector<bool> nucleon_has_interacted = {};
       ReactionsBitSet included_2to2(std::string("111111"));
-      configuration.merge_yaml("{Collision_Term: {Elastic_Cross_Section: -1.0}}");
-      ExperimentParameters params = ExperimentParameters{{0.,1.},
-                    {0.,1.}, 1, 1.,4.,true, included_2to2, 
-                    configuration.take({"Collision_Term", "Strings"}, true),
-                    NNbarTreatment::NoAnnihilation,false,0.,false};
-      auto scat_finder = make_unique<ScatterActionsFinder>(configuration,
-                         params, nucleon_has_interacted, 0,0, 1);
+      configuration.merge_yaml(
+          "{Collision_Term: {Elastic_Cross_Section: -1.0}}");
+      ExperimentParameters params = ExperimentParameters{
+          {0., 1.},
+          {0., 1.},
+          1,
+          1.,
+          4.,
+          true,
+          included_2to2,
+          configuration.take({"Collision_Term", "Strings"}, true),
+          NNbarTreatment::NoAnnihilation,
+          false,
+          0.,
+          false};
+      auto scat_finder = make_unique<ScatterActionsFinder>(
+          configuration, params, nucleon_has_interacted, 0, 0, 1);
       scat_finder->dump_cross_sections(a, b, ma, mb);
       std::exit(EXIT_SUCCESS);
     }
