@@ -69,6 +69,9 @@ class ListModus : public ModusDefault {
   /// event_id_ = the unique id of the current even
   int event_id_;
 
+  /// Counters for warnings to avoid spamming, if there are too many
+  int n_warns_precision_ = 0, n_warns_mass_consistency_ = 0;
+
   /// check whether anti-freestreaming is needed, if yes return
   /// earliest formation time as start_time_
   std::pair<bool, double> check_formation_time_(
