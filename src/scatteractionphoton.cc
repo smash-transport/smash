@@ -216,12 +216,10 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
           u1 = -s - t1;
           u2 = -s - t2;
           e = t2 - t1 +
-              2 * m_pi_2 *
-                  ((1 - 2 * m_pi_2 / s) * std::log(t2 / t1) +
-                   m_pi_2 * (t2 - t1) / (t1 * t2));
-          e += 2 * m_pi_2 *
-               ((1 - 2 * m_pi_2 / s) * std::log(u1 / u2) +
-                m_pi_2 * (u1 - u2) / (u1 * u2));
+              2 * m_pi_2 * ((1 - 2 * m_pi_2 / s) * std::log(t2 / t1) +
+                            m_pi_2 * (t2 - t1) / (t1 * t2));
+          e += 2 * m_pi_2 * ((1 - 2 * m_pi_2 / s) * std::log(u1 / u2) +
+                             m_pi_2 * (u1 - u2) / (u1 * u2));
           xsection = xsection * e * to_mb;
           process_list.push_back(make_unique<CollisionBranch>(
               *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
@@ -312,14 +310,13 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections() {
           xsection = alpha * g_rho_2 / (12 * s * p_cm_2);
           t1 += -m_pi_2;
           t2 += -m_pi_2;
-          xsection = xsection *
-                     (2 * (t2 - t1) -
-                      s * (pow_int(m2, 2) - 4 * m_pi_2) /
-                          pow_int(s - m_pi_2, 2) * (t2 - t1) -
-                      (pow_int(m2, 2) - 4 * m_pi_2) *
-                          ((s - pow_int(m2, 2) + m_pi_2) / (s - m_pi_2) *
-                               std::log(t2 / t1) +
-                           m_pi_2 * (t2 - t1) / (t1 * t2))) *
+          xsection = xsection * (2 * (t2 - t1) -
+                                 s * (pow_int(m2, 2) - 4 * m_pi_2) /
+                                     pow_int(s - m_pi_2, 2) * (t2 - t1) -
+                                 (pow_int(m2, 2) - 4 * m_pi_2) *
+                                     ((s - pow_int(m2, 2) + m_pi_2) /
+                                          (s - m_pi_2) * std::log(t2 / t1) +
+                                      m_pi_2 * (t2 - t1) / (t1 * t2))) *
                      to_mb;
           process_list.push_back(make_unique<CollisionBranch>(
               *part_out, *photon_out, xsection, ProcessType::TwoToTwo));
@@ -532,12 +529,11 @@ double ScatterActionPhoton::diff_cross_section(double t, double m3) const {
       if (outgoing_particles_[0].type().pdgcode().is_rho()) {
         diff_xsection = alpha * g_rho_2 / (4 * s * p_cm_2);
         diff_xsection =
-            diff_xsection * (2 -
-                             DM / (t - m_pi_2) *
-                                 ((s - 2 * m_pi_2) / (s - pow_int(m3, 2)) +
+            diff_xsection *
+            (2 -
+             DM / (t - m_pi_2) * ((s - 2 * m_pi_2) / (s - pow_int(m3, 2)) +
                                   m_pi_2 / (t - m_pi_2)) -
-                             DM / (u - m_pi_2) *
-                                 ((s - 2 * m_pi_2) / (s - pow_int(m3, 2)) +
+             DM / (u - m_pi_2) * ((s - 2 * m_pi_2) / (s - pow_int(m3, 2)) +
                                   m_pi_2 / (u - m_pi_2)));
       } else if (outgoing_particles_[0].type().pdgcode() == pdg::eta) {
         diff_xsection =
@@ -595,10 +591,9 @@ double ScatterActionPhoton::diff_cross_section(double t, double m3) const {
           (pow_int(s - m_pi_2, 2) -
            4 * m2 * (pow_int(m2, 2) - 4 * pow_int(m_pi, 2))) /
               pow_int(u - m2, 2);
-      e += 1 / (u - m2) *
-           (5 * (s - m_pi_2) - pow_int(s - m_pi_2, 2) / m2 -
-            4 * (pow_int(m2, 2) - 4 * pow_int(m_pi, 2)) * (s - m_pi_2 + m2) /
-                (s - m_pi_2));
+      e += 1 / (u - m2) * (5 * (s - m_pi_2) - pow_int(s - m_pi_2, 2) / m2 -
+                           4 * (pow_int(m2, 2) - 4 * pow_int(m_pi, 2)) *
+                               (s - m_pi_2 + m2) / (s - m_pi_2));
       diff_xsection = diff_xsection * e;
       break;
     case ReactionType::pi_eta:

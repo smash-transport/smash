@@ -81,8 +81,7 @@ ScatterActionsFinder::ScatterActionsFinder(
 ScatterActionsFinder::ScatterActionsFinder(
     double elastic_parameter, int testparticles,
     const std::vector<bool> &nucleon_has_interacted,
-    ReactionsBitSet included_2to2,
-    bool two_to_one)
+    ReactionsBitSet included_2to2, bool two_to_one)
     : elastic_parameter_(elastic_parameter),
       testparticles_(testparticles),
       isotropic_(false),
@@ -157,11 +156,9 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData &data_a,
   act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
                            low_snn_cut_, strings_switch_, nnbar_treatment_);
 
-
   /* Cross section for collision criterion */
-  double cross_section_criterion =
-      act->cross_section() * fm2_mb * M_1_PI /
-      static_cast<double>(testparticles_);
+  double cross_section_criterion = act->cross_section() * fm2_mb * M_1_PI /
+                                   static_cast<double>(testparticles_);
   /* Consider cross section scaling factors only if the particles
    * are not formed yet at the prospective time of the interaction */
   if (data_a.formation_time() > data_a.position().x0() + time_until_collision) {

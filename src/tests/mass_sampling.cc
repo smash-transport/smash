@@ -89,7 +89,7 @@ TEST(omega_decay) {
            blatt_weisskopf_sqr(pcm, 1);
   }
                     //,"masses_rho_neutral.dat"
-  );
+                    );
 
   printf("testing ρ⁺ distribution ...\n");
   hist_charged.test([&](double m) {
@@ -98,5 +98,5 @@ TEST(omega_decay) {
            blatt_weisskopf_sqr(pcm, 1);
   }
                     //,"masses_rho_charged.dat"
-  );
+                    );
 }

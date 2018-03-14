@@ -19,7 +19,7 @@
 #include <stdexcept>
 #include <string>
 
-#include<iostream>
+#include <iostream>
 
 #include "pdgcode_constants.h"
 
@@ -286,7 +286,7 @@ class PdgCode {
   /// returns true if this is a lepton.
   inline bool is_lepton() const {
     return (digits_.n_q1_ == 0 && digits_.n_q2_ == 0 && digits_.n_q3_ == 1 &&
-           !is_nucleus());
+            !is_nucleus());
   }
   /// returns the baryon number of the particle.
   inline int baryon_number() const {

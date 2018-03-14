@@ -145,14 +145,13 @@ double piplusp_elastic(double mandelstam_s) {
   }
   // Interpolation may not be good if sqrts is beyond 2.2 GeV
   if (mandelstam_s < 4.84) {
-     sigma -= (*piplusp_elastic_res_interpolation)(mandelstam_s);
+    sigma -= (*piplusp_elastic_res_interpolation)(mandelstam_s);
   }
   if (sigma < 0) {
-     sigma = really_small;
+    sigma = really_small;
   }
   return sigma;
 }
-
 
 /** pi- p elastic cross section parametrization, PDG data.
  *
@@ -194,8 +193,8 @@ double piminusp_elastic(double mandelstam_s) {
   // derivate vanishes at the both ends. The minimum scaling factor in this
   // region is 0.88-0.12=0.76.
   if (mandelstam_s > 3.24 && mandelstam_s < 3.8809) {
-    sigma *= (0.12 * cos(2 * M_PI * (sqrt(mandelstam_s) - 1.8) / (1.97 - 1.8))
-              + 0.88);
+    sigma *= (0.12 * cos(2 * M_PI * (sqrt(mandelstam_s) - 1.8) / (1.97 - 1.8)) +
+              0.88);
   }
   // The elastic contributions from decays still need to be subtracted.
   if (piminusp_elastic_res_interpolation == nullptr) {
@@ -209,10 +208,10 @@ double piminusp_elastic(double mandelstam_s) {
   }
   // Interpolation may not be good if sqrts is beyond 2.2 GeV
   if (mandelstam_s < 4.84) {
-     sigma -= (*piminusp_elastic_res_interpolation)(mandelstam_s);
+    sigma -= (*piminusp_elastic_res_interpolation)(mandelstam_s);
   }
   if (sigma < 0) {
-     sigma = really_small;
+    sigma = really_small;
   }
   return sigma;
 }
