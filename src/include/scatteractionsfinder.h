@@ -38,7 +38,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
   /** Constructor for testing purposes. */
   ScatterActionsFinder(double elastic_parameter, int testparticles,
                        const std::vector<bool> &nucleon_has_interacted,
-                       const ReactionsBitSet &included_2to2,
+                       ReactionsBitSet included_2to2,
                        bool two_to_one = true);
 
   /** Determine the collision time of the two particles [fm/c].
@@ -138,7 +138,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
   /** Enable 2->1 processes. */
   const bool two_to_one_;
   /** List of included 2<->2 reactions */
-  const ReactionsBitSet &incl_set_;
+  const ReactionsBitSet incl_set_;
   /** Elastic collsions between two nucleons with
    ** sqrt_s below low_snn_cut_ are excluded. */
   const double low_snn_cut_;

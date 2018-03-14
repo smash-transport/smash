@@ -248,7 +248,8 @@ class Configuration {
       ReactionsBitSet s;
       for (const auto &x : v) {
         if (x == "All") {
-          s.flip();
+          s.set();
+          break;
         } else if (x == "Elastic") {
           s.set(IncludedReactions::Elastic);
         } else if (x == "NN_to_NR") {
@@ -263,10 +264,10 @@ class Configuration {
           s.set(IncludedReactions::Strangeness_exchange);
         } else {
           throw IncorrectTypeInAssignment(
-              "The value for key \"" + std::string(key_) +
-              "\" should be \"All\", \"Elastic\", \"NN_to_NR\", \"NN_to_DR\","
-              "\"KN_to_KN\", \"KN_to_KDelta\" or \"strangeness_exchange\","
-              " or any combination of these.");
+            "The value for key \"" + std::string(key_) +
+            "\" should be \"All\", \"Elastic\", \"NN_to_NR\", \"NN_to_DR\","
+            "\"KN_to_KN\", \"KN_to_KDelta\" or \"strangeness_exchange\","
+            " or any combination of these.");
         }
       }
       return s;

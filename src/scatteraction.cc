@@ -9,6 +9,8 @@
 
 #include "include/scatteraction.h"
 
+#include <cmath>
+
 #include "Pythia8/Pythia.h"
 
 #include "include/action_globals.h"

@@ -93,6 +93,27 @@ double pipi_string_hard(double mandelstam_s) {
   return xs_string_hard(mandelstam_s, 0.013, 2.3, 4.7);
 }
 
+/** pi+ p elastic cross section parametrization, PDG data.
+ *
+ * The PDG data is smoothed using the LOWESS algorithm. If more than one
+ * cross section was given for one p_lab value, the corresponding cross sections
+ * are averaged.
+ */
+static double piplusp_elastic_pdg(double mandelstam_s) {
+  if (piplusp_elastic_interpolation == nullptr) {
+    std::vector<double> x = PIPLUSP_ELASTIC_P_LAB;
+    std::vector<double> y = PIPLUSP_ELASTIC_SIG;
+    std::vector<double> dedup_x;
+    std::vector<double> dedup_y;
+    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    dedup_y = smooth(dedup_x, dedup_y, 0.1, 5);
+    piplusp_elastic_interpolation =
+        make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
+  }
+  const double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
+  return (*piplusp_elastic_interpolation)(p_lab);
+}
+
 /** pi+p elastic cross section parametrization.
  * Source: GiBUU:parametrizationBarMes_HighEnergy.f90
  * The parametrizations of the elastic pion+nucleon cross sections
@@ -102,27 +123,98 @@ double pipi_string_hard(double mandelstam_s) {
  * the parametrization at p_lab = 8 GeV, which correspons to square
  * root of s equal to 4 GeV. */
 double piplusp_elastic(double mandelstam_s) {
+  double sigma;
   double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
-  if (p_lab < 8.0 /*1.45*/) {
-    return really_small;
-    //} else if (p_lab < 2.0) {
-    //    return 16.0 - (p_lab - 1.45) * 7.5 / 0.55;
-  } else {
+  if (mandelstam_s < 2.25) {
+    sigma = really_small;
+  } else if (mandelstam_s > 4.84) {
     const auto logp = std::log(p_lab);
-    return 11.4 * std::pow(p_lab, -0.4) + 0.079 * logp * logp;
+    sigma = 11.4 * std::pow(p_lab, -0.4) + 0.079 * logp * logp;
+  } else {
+    sigma = piplusp_elastic_pdg(mandelstam_s);
   }
+  // The elastic contributions from decays still need to be subtracted.
+  if (piplusp_elastic_res_interpolation == nullptr) {
+    std::vector<double> x = PIPLUSP_RES_SQRTS;
+    for (auto& i : x) {
+      i = i * i;
+    }
+    std::vector<double> y = PIPLUSP_RES_SIG;
+    piplusp_elastic_res_interpolation =
+        make_unique<InterpolateDataSpline>(x, y);
+  }
+  // Interpolation may not be good if sqrts is beyond 2.2 GeV
+  if (mandelstam_s < 4.84) {
+     sigma -= (*piplusp_elastic_res_interpolation)(mandelstam_s);
+  }
+  if (sigma < 0) {
+     sigma = really_small;
+  }
+  return sigma;
+}
+
+
+/** pi- p elastic cross section parametrization, PDG data.
+ *
+ * The PDG data is smoothed using the LOWESS algorithm. If more than one
+ * cross section was given for one p_lab value, the corresponding cross sections
+ * are averaged.
+ */
+static double piminusp_elastic_pdg(double mandelstam_s) {
+  if (piminusp_elastic_interpolation == nullptr) {
+    std::vector<double> x = PIMINUSP_ELASTIC_P_LAB;
+    std::vector<double> y = PIMINUSP_ELASTIC_SIG;
+    std::vector<double> dedup_x;
+    std::vector<double> dedup_y;
+    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    dedup_y = smooth(dedup_x, dedup_y, 0.03, 6);
+    piminusp_elastic_interpolation =
+        make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
+  }
+  const double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
+  return (*piminusp_elastic_interpolation)(p_lab);
 }
 
 /** pi-p elastic cross section parametrization.
  * Source: GiBUU:parametrizationBarMes_HighEnergy.f90 */
 double piminusp_elastic(double mandelstam_s) {
+  double sigma;
   double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
-  if (p_lab < 8.0 /*2.0*/) {
-    return really_small;
+  const auto logp = std::log(p_lab);
+  if (mandelstam_s < 1.69) {
+    sigma = really_small;
+  } else if (mandelstam_s > 4.84) {
+    sigma = 1.76 + 11.2 * std::pow(p_lab, -0.64) + 0.043 * logp * logp;
   } else {
-    const auto logp = std::log(p_lab);
-    return 1.76 + 11.2 * std::pow(p_lab, -0.64) + 0.043 * logp * logp;
+    sigma = piminusp_elastic_pdg(mandelstam_s);
   }
+  // Tune down the elastic cross section when sqrt s is between 1.8 GeV
+  // and 1.97 GeV so that the total cross section can fit the data. The
+  // scaling factor is chosen so that the it's equal to one and its
+  // derivate vanishes at the both ends. The minimum scaling factor in this
+  // region is 0.88-0.12=0.76.
+  if (mandelstam_s > 3.24 && mandelstam_s < 3.8809) {
+    sigma *= (0.12 * cos(2 * M_PI * (sqrt(mandelstam_s) - 1.8) / (1.97 - 1.8))
+              + 0.88);
+  }
+  // The elastic contributions from decays still need to be subtracted.
+  if (piminusp_elastic_res_interpolation == nullptr) {
+    std::vector<double> x = PIMINUSP_RES_SQRTS;
+    for (auto& i : x) {
+      i = i * i;
+    }
+    std::vector<double> y = PIMINUSP_RES_SIG;
+    piminusp_elastic_res_interpolation =
+        make_unique<InterpolateDataSpline>(x, y);
+  }
+  // Interpolation may not be good if sqrts is beyond 2.2 GeV
+  if (mandelstam_s < 4.84) {
+     sigma -= (*piminusp_elastic_res_interpolation)(mandelstam_s);
+  }
+  if (sigma < 0) {
+     sigma = really_small;
+  }
+  return sigma;
 }
 
 /** pp elastic cross section parametrization.
