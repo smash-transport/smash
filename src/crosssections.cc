@@ -67,19 +67,19 @@ static double detailed_balance_factor_RK(double sqrts, double pcm,
  * where $A$ and $B$ are unstable, and $C$ and $D$ are stable.
  */
 static double detailed_balance_factor_RR(double sqrts, double pcm,
-                                         const ParticleType& particle_a,
-                                         const ParticleType& particle_b,
-                                         const ParticleType& particle_c,
-                                         const ParticleType& particle_d) {
-  assert(!particle_a.is_stable());
-  assert(!particle_b.is_stable());
-  double spin_factor = (particle_c.spin() + 1) * (particle_d.spin() + 1);
-  spin_factor /= (particle_a.spin() + 1) * (particle_b.spin() + 1);
-  double symmetry_factor = (1 + (particle_a == particle_b));
-  symmetry_factor /= (1 + (particle_c == particle_d));
+                                         const ParticleType& a,
+                                         const ParticleType& b,
+                                         const ParticleType& c,
+                                         const ParticleType& d) {
+  assert(!a.is_stable());
+  assert(!b.is_stable());
+  double spin_factor = (c.spin() + 1) * (d.spin() + 1);
+  spin_factor /= (a.spin() + 1) * (b.spin() + 1);
+  double symmetry_factor = (1 + (a == b));
+  symmetry_factor /= (1 + (c == d));
   const double momentum_factor =
-      pCM_sqr(sqrts, particle_c.mass(), particle_d.mass()) /
-      (pcm * particle_a.iso_multiplet()->get_integral_RR(particle_b, sqrts));
+      pCM_sqr(sqrts, c.mass(), d.mass()) /
+      (pcm * a.iso_multiplet()->get_integral_RR(b, sqrts));
   return spin_factor * symmetry_factor * momentum_factor;
 }
 
@@ -199,8 +199,8 @@ CollisionBranchPtr cross_sections::elastic(double elast_par) {
 }
 
 double cross_sections::elastic_parametrization() {
-  const auto& pdg_a = incoming_particles_[0].pdgcode();
-  const auto& pdg_b = incoming_particles_[1].pdgcode();
+  const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
+  const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
   double elastic_xs = 0.0;
   if ((pdg_a.is_nucleon() && pdg_b.is_pion()) ||
       (pdg_b.is_nucleon() && pdg_a.is_pion())) {
