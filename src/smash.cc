@@ -361,6 +361,7 @@ int main(int argc, char *argv[]) {
     if (cross_section_dump_activated) {
       ParticleType::create_type_list(configuration.take({"particles"}));
       DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
+      configuration.merge_yaml("{Collision_Term: {Two_to_One: True}}");
       std::string arg_string(cs_string);
       std::vector<std::string> args = split(arg_string, ',');
       const unsigned int n_arg = args.size();
