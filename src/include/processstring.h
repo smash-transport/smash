@@ -212,16 +212,33 @@ class StringProcess {
    */
   void compute_incoming_lightcone_momenta();
   /**
+   * Determine string masses and directions in which strings are stretched
+   * \param quarks pdg ids of string ends
+   * \param pstr_com 4-momenta of strings in the C.o.m. frame
+   * \param m_str masses of strings
+   * \param evec_str are directions in which strings are stretched.
+   * \return whether masses are above the threshold
+   */
+  bool make_mass_evec_2strings(
+      const std::array<std::array<int, 2>, 2> &quarks,
+      const std::array<FourVector, 2> &pstr_com,
+      std::array<double, 2> &m_str,
+      std::array<ThreeVector, 2> &evec_str);
+  /**
    * Prepare kinematics of two strings, fragment them and append to final_state
    * \param quarks pdg ids of string ends
    * \param pstr_com 4-momenta of strings in the C.o.m. frame
    * \param m_str masses of strings
+   * \param evec_str are directions in which strings are stretched.
+   * \param flip_string_ends is whether or not we randomly switch string ends.
    * \return whether fragmentations and final state creation was successful
    */
   bool make_final_state_2strings(
       const std::array<std::array<int, 2>, 2> &quarks,
       const std::array<FourVector, 2> &pstr_com,
-      const std::array<double, 2> &m_str);
+      const std::array<double, 2> &m_str,
+      const std::array<ThreeVector, 2> &evec_str,
+      const bool flip_string_ends);
 
   /**
    * Single-diffractive process
@@ -307,10 +324,11 @@ class StringProcess {
    * \param mString is the string mass.
    * \param evecLong is unit 3-vector specifying the direction of diquark or
    * anti-diquark.
+   * \param flip_string_ends is whether or not we randomly switch string ends.
    * \return number of hadrons fragmented out of string.
    */
   int fragment_string(int idq1, int idq2, double mString,
-                      ThreeVector &evecLong);
+                      ThreeVector &evecLong, const bool flip_string_ends);
 };
 
 }  // namespace smash
