@@ -611,20 +611,23 @@ void ScatterAction::assign_scaling_factor(int nquark, ParticleData data,
   }
 }
 /** Change i1 and i2 to be the index of leading hadrons in list */
-void ScatterAction::find_leading(int &i1, int &i2, int nq1, int nq2,
+std::pair<int,int> ScatterAction::find_leading(int nq1, int nq2,
                                  ParticleList &list) {
   int end = list.size() - 1;
   bool success = false;
+  int i1 = 0;
   while (!success && i1 <= end) {
     success = check_quark_number(nq1, list[i1].pdgcode());
     i1++;
   }
-  i2 = end;
+  int i2 = end;
   success = false;
   while (!success && i2 > 0) {
     success = check_quark_number(nq2, list[i2].pdgcode());
     i2--;
   }
+  std::pair<int, int> indices(i1,i2);
+  return indices;
 }
 
 /** Generate outgoing particles in CM frame from a hard process. */
@@ -751,14 +754,8 @@ void ScatterAction::string_excitation_pythia() {
     /* Additional suppression factor to mimic coherence taken as 0.7
      * from UrQMD (CTParam(59) */
     const double suppression_factor = 0.7;
-    int random;
     int nq1, nq2;  // number of quarks at both ends of the string
-    if (Random::uniform(0., 1.) > 0.5) {
-      random = 0;
-    } else {
-      random = 1;
-    }
-    switch (incoming_particles_[random].pdgcode().baryon_number()) {
+    switch(incoming_particles_[Random::uniform_int(0, 1)].type().baryon_number()){
       case 0:
         nq1 = 1;
         nq2 = -1;
@@ -774,22 +771,21 @@ void ScatterAction::string_excitation_pythia() {
       default:
         throw std::runtime_error("string is neither mesonic nor baryonic");
     }
-    int i1 = 0, i2 = 0, j1 = 0, j2 = 0;
     // Try to find nq1 from the left side and nq2 from the rght side
     // and then the other way around and see where the particles are
     // closer to the ends of the list
-    find_leading(i1, i2, nq1, nq2, new_intermediate_particles);
-    find_leading(j1, j2, nq2, nq1, new_intermediate_particles);
+    std::pair<int,int> i = find_leading(nq1, nq2, new_intermediate_particles);
+    std::pair<int,int> j = find_leading(nq2, nq1, new_intermediate_particles);
 
-    if (i2 - i1 > j2 - j1) {  // does this brake symmetry because it prefers j?
-      assign_scaling_factor(nq1, new_intermediate_particles[i1],
+    if (i.second - i.first > j.second - j.first) {
+      assign_scaling_factor(nq1, new_intermediate_particles[i.first],
                             suppression_factor);
-      assign_scaling_factor(nq2, new_intermediate_particles[i2],
+      assign_scaling_factor(nq2, new_intermediate_particles[i.second],
                             suppression_factor);
     } else {
-      assign_scaling_factor(nq2, new_intermediate_particles[j1],
+      assign_scaling_factor(nq2, new_intermediate_particles[j.first],
                             suppression_factor);
-      assign_scaling_factor(nq1, new_intermediate_particles[j2],
+      assign_scaling_factor(nq1, new_intermediate_particles[j.second],
                             suppression_factor);
     }
 

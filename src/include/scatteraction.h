@@ -347,8 +347,7 @@ class ScatterAction : public Action {
   bool is_elastic() const;
 
   /** find the leading hadrons with given quarknumbers at string ends */
-  static void find_leading(int& i1, int& i2, int nq1, int nq2,
-                           ParticleList& list);
+  static std::pair<int,int> find_leading(int nq1, int nq2, ParticleList& list);
 
   /** Check if hadron contains at least the given number of quarks */
   static bool check_quark_number(int nquarks, PdgCode pdg);
