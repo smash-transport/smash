@@ -313,7 +313,7 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   return true;
 }
 
-bool make_mass_evec_2strings(
+bool StringProcess::make_mass_evec_2strings(
     const std::array<std::array<int, 2>, 2> &quarks,
     const std::array<FourVector, 2> &pstr_com,
     std::array<double, 2> &m_str,
