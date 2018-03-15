@@ -67,6 +67,14 @@ class StringProcess {
   std::array<ThreeVector, 3> evecBasisAB_;
   /// total number of final state particles
   int NpartFinal_;
+  /**
+   * soft subprocess identifier
+   * 0: single diffractive to A+X
+   * 1: single diffractive to X+B
+   * 2: double diffractive
+   * 3: soft non-diffractive
+   */
+  int iproc_ = -1;
   /// number of particles fragmented from strings
   std::array<int, 2> NpartString_;
   /// the minimum lightcone momentum scale carried by gluon
@@ -94,7 +102,6 @@ class StringProcess {
   double time_collision_;
   /// Lorentz gamma factor of center of mass in the computational frame
   double gamma_factor_com_;
-
   /// square root of 2 (sqrt(2))
   double sqrt2_;
 
@@ -191,6 +198,10 @@ class StringProcess {
   void set_tension_string(double kappa_string) {
     kappa_tension_string_ = kappa_string;
   }
+  /// Set the soft subprocess identifier
+  void set_iproc(int iproc) { iproc_ = iproc; }
+  /// Return the soft subprocess identifier
+  int get_iproc() { return iproc_; }
   /**
    * initialization
    * feed intial particles, time of collision and gamma factor of the center of

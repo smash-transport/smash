@@ -64,9 +64,7 @@ void set_seed(T &&seed) {
 }
 
 /// Advance the engine's state and return the generated value.
-inline Engine::result_type advance() {
-  return engine();
-}
+inline Engine::result_type advance() { return engine(); }
 
 /** returns a uniformly distributed random real number \f$\chi \in [{\rm
  * min}, {\rm max})\f$ */
@@ -192,8 +190,8 @@ double normal(const T &mean, const T &sigma) {
 }
 
 /** \return: one integer number sampled from discrete distribution
-* whose weight given by probability vector
-*/
+ * whose weight given by probability vector
+ */
 template <typename T>
 class discrete_dist {
  public:

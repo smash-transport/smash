@@ -11,9 +11,7 @@
 
 #include "setup.h"
 
-#include "../include/scatteractionbaryonbaryon.h"
-#include "../include/scatteractionnucleonnucleon.h"
-#include "../include/scatteractionbaryonmeson.h"
+#include "../include/scatteraction.h"
 
 using namespace smash;
 using smash::Test::Momentum;
@@ -74,8 +72,8 @@ TEST(elastic_collision) {
   constexpr double sigma = 10.0;
   constexpr bool strings_switch = false;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
-  act.add_all_processes(sigma, true, Test::all_reactions_included(),
-                        0., strings_switch, nnbar_treatment);
+  act.add_all_scatterings(sigma, true, Test::all_reactions_included(), 0.,
+                          strings_switch, nnbar_treatment);
 
   // check cross section
   COMPARE(act.cross_section(), sigma);
@@ -140,7 +138,7 @@ TEST(outgoing_valid) {
 
   // construct action
   ScatterActionPtr act;
-  act = make_unique<ScatterActionBaryonMeson>(p1_copy, p2_copy, 0.2);
+  act = make_unique<ScatterAction>(p1_copy, p2_copy, 0.2);
   VERIFY(act != nullptr);
   COMPARE(p2_copy.type(), ParticleType::find(0x111));
 
@@ -148,9 +146,9 @@ TEST(outgoing_valid) {
   constexpr double elastic_parameter = 0.;  // don't include elastic scattering
   constexpr bool strings_switch = false;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
-  act->add_all_processes(elastic_parameter, true,
-              Test::all_reactions_included(), 0.,
-              strings_switch, nnbar_treatment);
+  act->add_all_scatterings(elastic_parameter, true,
+                           Test::all_reactions_included(), 0., strings_switch,
+                           nnbar_treatment);
 
   VERIFY(act->cross_section() > 0.);
 
@@ -197,9 +195,7 @@ TEST(pythia_running) {
 
   // construct action
   ScatterActionPtr act;
-  ReactionsBitSet incl_2to2;
-  act = make_unique<ScatterActionBaryonBaryon>(p1_copy, p2_copy, 0.2,
-                                               false, 1.0);
+  act = make_unique<ScatterAction>(p1_copy, p2_copy, 0.2, false, 1.0);
   std::unique_ptr<StringProcess> string_process_interface =
       make_unique<StringProcess>(1.0, 0.5, 0.001, 1.0, 2.5, 0.217, 0.081, 0.7,
                                  0.68, 0.98);
@@ -211,9 +207,9 @@ TEST(pythia_running) {
   constexpr double elastic_parameter = 0.;  // don't include elastic scattering
   constexpr bool strings_switch = true;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
-  act->add_all_processes(elastic_parameter, false,
-                         Test::all_reactions_included(), 0.,
-                         strings_switch, nnbar_treatment);
+  act->add_all_scatterings(elastic_parameter, false,
+                           Test::all_reactions_included(), 0., strings_switch,
+                           nnbar_treatment);
 
   VERIFY(act->cross_section() > 0.);
 
@@ -261,8 +257,7 @@ TEST(no_strings) {
   // construct action
   ScatterActionPtr act;
   ReactionsBitSet incl_2to2;
-  act = make_unique<ScatterActionNucleonNucleon>(p1_copy, p2_copy, 0.2,
-                                                 false, 1.0);
+  act = make_unique<ScatterAction>(p1_copy, p2_copy, 0.2, false, 1.0);
   VERIFY(act != nullptr);
   COMPARE(p2_copy.type(), ParticleType::find(0x2212));
 
@@ -270,9 +265,9 @@ TEST(no_strings) {
   constexpr double elastic_parameter = 0.;  // don't include elastic scattering
   constexpr bool strings_switch = false;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
-  act->add_all_processes(elastic_parameter, false,
-                         Test::all_reactions_included(), 0.,
-                         strings_switch, nnbar_treatment);
+  act->add_all_scatterings(elastic_parameter, false,
+                           Test::all_reactions_included(), 0., strings_switch,
+                           nnbar_treatment);
 
   VERIFY(act->cross_section() > 0.);
 
@@ -312,8 +307,8 @@ TEST(update_incoming) {
   constexpr double sigma = 10.0;
   bool string_switch = true;
   NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
-  act.add_all_processes(sigma, true, Test::all_reactions_included(),
-                        0., string_switch, nnbar_treatment);
+  act.add_all_scatterings(sigma, true, Test::all_reactions_included(), 0.,
+                          string_switch, nnbar_treatment);
 
   // change the position of one of the particles
   const FourVector new_position(0.1, 0., 0., 0.);

@@ -142,7 +142,7 @@ class RootOutput : public OutputInterface {
   int autosave_frequency_;
 
   /* Basic initialization routine, creating the TTree objects
-    * for particles and collisions. */
+   * for particles and collisions. */
   void init_trees();
 };
 
