@@ -40,8 +40,8 @@ double piplusp_high_energy(double mandelstam_s);
 double piminusp_high_energy(double mandelstam_s);
 
 /** parametrized hard scattering cross section (with partonic scattering) */
-double xs_string_hard(double mandelstam_s,
-                      double xs_0, double e_0, double lambda_pow);
+double xs_string_hard(double mandelstam_s, double xs_0, double e_0,
+                      double lambda_pow);
 
 /** nucleon-nucleon hard scattering cross section (with partonic scattering) */
 double NN_string_hard(double mandelstam_s);

@@ -23,9 +23,9 @@
 #include "include/random.h"
 #include "include/tabulation.h"
 
-using std::sqrt;
-using std::pow;
 using std::atan;
+using std::pow;
+using std::sqrt;
 
 namespace smash {
 

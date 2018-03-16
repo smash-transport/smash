@@ -492,11 +492,12 @@ std::unique_ptr<OutputInterface> create_oscar_output(
     }
   } else if (content == "Dileptons") {
     if (out_par.dil_extended) {
-      return make_unique<OscarOutput<OscarFormat2013Extended,
-                         OscarInteractions>>(path, "Dileptons");
+      return make_unique<
+          OscarOutput<OscarFormat2013Extended, OscarInteractions>>(path,
+                                                                   "Dileptons");
     } else {
-      return make_unique<OscarOutput<OscarFormat2013,
-                         OscarInteractions>>(path, "Dileptons");
+      return make_unique<OscarOutput<OscarFormat2013, OscarInteractions>>(
+          path, "Dileptons");
     }
   } else if (content == "Photons") {
     if (modern_format) {

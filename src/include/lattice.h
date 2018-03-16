@@ -36,17 +36,17 @@ enum class LatticeUpdate {
 };
 
 /**
-  * A container class to hold all the arrays on the lattice and access them.
-  */
+ * A container class to hold all the arrays on the lattice and access them.
+ */
 template <typename T>
 class RectangularLattice {
  public:
   /**
-    * Creates rectangular lattice of sizes (lx,ly,lz) fm with
-    * nx, ny, nz cells in x,y,z directions respectively. Cell
-    * i,j,k comprises volume ((i,i+1)lx/nx; (j,j+1)ly/ny; (k,k+1)lz/nz),
-    * i: 0,nx-1; j: 0, ny-1; k: 0, nz-1;
-    */
+   * Creates rectangular lattice of sizes (lx,ly,lz) fm with
+   * nx, ny, nz cells in x,y,z directions respectively. Cell
+   * i,j,k comprises volume ((i,i+1)lx/nx; (j,j+1)ly/ny; (k,k+1)lz/nz),
+   * i: 0,nx-1; j: 0, ny-1; k: 0, nz-1;
+   */
   RectangularLattice(const std::array<double, 3>& l,
                      const std::array<int, 3>& n,
                      const std::array<double, 3>& orig, bool per,
