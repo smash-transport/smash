@@ -90,14 +90,13 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_cross_sections
 
   /* Find whether colliding particles are nucleons or anti-nucleons;
    * adjust lists of produced particles. */
-  const ParticleTypePtrList &nuc_or_anti_nuc =
-      incoming_particles_[0].type().antiparticle_sign() == -1 &&
-              incoming_particles_[1].type().antiparticle_sign() == -1
+  bool both_antinucleons =
+      (incoming_particles_[0].type().antiparticle_sign() == -1) &&
+      (incoming_particles_[1].type().antiparticle_sign() == -1);
+  const ParticleTypePtrList &nuc_or_anti_nuc = both_antinucleons
           ? ParticleType::list_anti_nucleons()
           : ParticleType::list_nucleons();
-  const ParticleTypePtrList &delta_or_anti_delta =
-      incoming_particles_[0].type().antiparticle_sign() == -1 &&
-              incoming_particles_[1].type().antiparticle_sign() == -1
+  const ParticleTypePtrList &delta_or_anti_delta = both_antinucleons
           ? ParticleType::list_anti_Deltas()
           : ParticleType::list_Deltas();
   /* First: Find N N → N R channels. */
@@ -127,14 +126,18 @@ CollisionBranchList ScatterActionNucleonNucleon::two_to_two_cross_sections
   }
 
   /* Second: Find N N → d pi channels. */
-  ParticleTypePtr deutron = &ParticleType::find(PdgCode::from_decimal(1000010020));
+  ParticleTypePtr deutron =
+                  &ParticleType::find(PdgCode::from_decimal(1000010020));
+  ParticleTypePtr antideutron =
+                  &ParticleType::find(PdgCode::from_decimal(-1000010020));
   ParticleTypePtr pim = &ParticleType::find(-0x211);
   ParticleTypePtr pi0 = &ParticleType::find(0x111);
   ParticleTypePtr pip = &ParticleType::find(0x211);
-  ParticleTypePtrList deutron_list = {deutron};
-  ParticleTypePtrList pion_list = {pim, pi0, pip};
+  const ParticleTypePtrList deutron_list = {deutron};
+  const ParticleTypePtrList antideutron_list = {antideutron};
+  const ParticleTypePtrList pion_list = {pim, pi0, pip};
   channel_list = find_xsection_from_type(
-      deutron_list, pion_list,
+      (both_antinucleons ? antideutron_list : deutron_list), pion_list,
       [&sqrts](const ParticleType &type_res_1, const ParticleType &type_res_2) {
         return pCM(sqrts, type_res_1.mass(), type_res_2.mass());
       });
