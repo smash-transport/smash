@@ -54,12 +54,19 @@ CollisionBranchList ScatterActionBaryonBaryon::two_to_two_cross_sections
   const ParticleType &type_b = incoming_particles_[1].type();
 
   bool same_sign = type_a.antiparticle_sign() == type_b.antiparticle_sign();
-  if (!same_sign) {
+  bool any_nucleus = type_a.is_nucleus() || type_b.is_nucleus();
+  if (!same_sign && !any_nucleus) {
     return process_list;
   }
   bool anti_particles = type_a.antiparticle_sign() == -1;
-
-  if (type_a.is_nucleon() || type_b.is_nucleon()) {
+  if (any_nucleus) {
+    if ( (type_a.is_nucleon() && type_b.is_nucleus()) ||
+       (type_b.is_nucleon() && type_a.is_nucleus()) ) {
+      // Nd → Nd', N̅d →  N̅d', N̅d̅→ N̅d̅', Nd̅→ Nd̅'
+      // and reverse (for example Nd'→ Nd).
+      process_list = n_nucleus_to_n_nucleus();
+    }
+  } else if (type_a.is_nucleon() || type_b.is_nucleon()) {
     /* N R → N N, N̅ R → N̅ N̅ */
     if (included_2to2[IncludedReactions::NN_to_NR] == 1) {
       process_list = bar_bar_to_nuc_nuc(anti_particles);
@@ -69,13 +76,6 @@ CollisionBranchList ScatterActionBaryonBaryon::two_to_two_cross_sections
     if (included_2to2[IncludedReactions::NN_to_DR] == 1) {
       process_list = bar_bar_to_nuc_nuc(anti_particles);
     }
-  }
-
-  if ( (type_a.is_nucleon() && type_b.is_nucleus()) ||
-       (type_b.is_nucleon() && type_a.is_nucleus()) ) {
-    // Nd → Nd', N̅d →  N̅d', N̅d̅→ N̅d̅', Nd̅→ Nd̅'
-    // and reverse (for example Nd'→ Nd).
-    process_list = n_nucleus_to_n_nucleus();
   }
 
   return process_list;
