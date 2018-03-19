@@ -1457,7 +1457,7 @@ CollisionBranchList cross_sections::string_excitation(
     for (int i = 0; i < 4; i++) {
       if ((r_xsec >= string_sub_cross_sections_sum[i]) &&
           (r_xsec < string_sub_cross_sections_sum[i + 1])) {
-        iproc = i;
+        iproc = static_cast<StringSoftType>(i);
         break;
       }
     }
