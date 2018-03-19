@@ -132,7 +132,7 @@ class StringProcess {
   StringProcess(double string_tension, double gluon_beta, double gluon_pmin,
                 double quark_alpha, double quark_beta, double strange_supp,
                 double diquark_supp, double sigma_perp, double stringz_a,
-                double stringz_b);
+                double stringz_b, double string_sigma_T);
 
   /**
    * Interface to pythia_sigmatot_ to compute cross-sections of A+B->
