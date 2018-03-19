@@ -56,6 +56,9 @@ namespace smash {
  * \li \subpage input_lattice_
  * \li \subpage input_potentials_
  *
+ * \par Information on formatting of the input file can be found here:
+ * \li \subpage input_indentation_
+ *
  * \ifnot user
  * \par The relevant functions and classes for input are:
  * \li \ref Configuration
@@ -74,6 +77,37 @@ namespace smash {
  *
  * Available Settings
  * ------------------
+ */
+
+/*!\Userguide
+ * \page input_indentation_ Indentation
+ * In the config.yaml file, the indentation is a part of the syntax. Indents
+ * are used to structure informations in categories. For example:
+ * \code
+ * Output:
+ *     Output_Interval: 1.0
+ *     Particles:
+ *         Format:      ["Oscar2013"]
+ * \endcode
+ * This part of an input file in carries information about the desired
+ * output. One general information for the output given would be the output
+ * interval. The indent indicates, that this information belongs to the
+ * category output. In this example one can also see the subcategory Particles.
+ * This category contains information on the output of particles. The format is
+ * one information, that belongs to this category. Therefore it has a larger
+ * indent.
+ * <BR> Technically, one could change the size of the indentation for example as
+ * follows:
+ * \code
+ * Output:
+ *   Output_Interval: 1.0
+ *   Particles:
+ *         Format: ["Oscar2013"]
+ * \endcode
+ * As can be seen, the size of the indent can be varied, as long as it is
+ * consistent withing each category. However, in SMASH the convention is
+ * to use four spaces for each indent consistently. The first example
+ * shows the correct indentation.
  */
 
 /**
