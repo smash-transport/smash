@@ -594,25 +594,25 @@ void ScatterAction::string_excitation_soft() {
     string_process_->init(incoming_particles_, time_of_execution_, gamma_cm());
     /* implement collision */
     bool success = false;
-    const int iproc = string_process_->get_iproc();
+    StringSoftType iproc = string_process_->get_subproc();
     int ntry = 0;
     const int ntry_max = 10000;
     while (!success && ntry < ntry_max) {
       ntry++;
       switch (iproc) {
-        case 0:
+        case StringSoftType::SingleDiffAX:
           /* single diffractive to A+X */
           success = string_process_->next_SDiff(true);
           break;
-        case 1:
+        case StringSoftType::SingleDiffXB:
           /* single diffractive to X+B */
           success = string_process_->next_SDiff(false);
           break;
-        case 2:
+        case StringSoftType::DoubleDiff:
           /* double diffractive */
           success = string_process_->next_DDiff();
           break;
-        case 3:
+        case StringSoftType::NonDiff:
           /* soft non-diffractive */
           success = string_process_->next_NDiffSoft();
           break;
