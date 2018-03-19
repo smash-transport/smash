@@ -180,8 +180,6 @@ class ParticleType {
     return is_nucleus() && std::abs(pdgcode_.get_decimal()) == 1000010021;
   }
 
- 
-
   /**
    * The minimum mass of the resonance that is kinematically allowed.
    *

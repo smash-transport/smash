@@ -1404,6 +1404,7 @@ CollisionBranchList cross_sections::ypi_xx(ReactionsBitSet included_2to2) {
 
 CollisionBranchList cross_sections::pion_d_or_dprime_xx(ReactionsBitSet
                                                         /*included_2to2*/) {
+  const auto &log = logger<LogArea::ScatterAction>();
   CollisionBranchList process_list;
   const double sqrts = sqrt_s_;
   const ParticleType &type_a = incoming_particles_[0].type();
@@ -1427,7 +1428,7 @@ CollisionBranchList cross_sections::pion_d_or_dprime_xx(ReactionsBitSet
         for (const int twoI : I_tot_range(*nuc_a, *nuc_b)) {
           const double isospin_factor = isospin_clebsch_gordan_sqr_2to2(
               type_a, type_b, *nuc_a, *nuc_b, twoI);
-          /* If Clebsch-Gordan coefficient is zero, don't bother with the rest */
+          /* If Clebsch-Gordan coefficient = 0, don't bother with the rest */
           if (std::abs(isospin_factor) < really_small) {
             continue;
           }
@@ -1487,9 +1488,10 @@ CollisionBranchList cross_sections::pion_d_or_dprime_xx(ReactionsBitSet
           0.0672 / pow_int(tmp, 2) - 6.61753 / tmp;
       const double spin_factor = (produced_nucleus->spin() + 1) *
                                  (type_pi.spin() + 1);
-      // Isospin factor is always the same, so it is included into matrix element
-      // Symmetry factor is always 1 here
-      // Absorb (hbarc)^2/16 pi factor into matrix element
+      // Isospin factor is always the same, so it is included into the
+      // matrix element.
+      // Symmetry factor is always 1 here.
+      // The (hbarc)^2/16 pi factor is absorbed into matrix element.
       double xsection = matrix_element * spin_factor / (s * cm_momentum());
       if (produced_nucleus->is_stable()) {
         assert(!type_nucleus.stable());
@@ -1499,16 +1501,15 @@ CollisionBranchList cross_sections::pion_d_or_dprime_xx(ReactionsBitSet
         const double resonance_integral =
             produced_nucleus->iso_multiplet()->get_integral_piR(sqrts);
         xsection *= resonance_integral;
-        //std::cout << "Resonance integral " << resonance_integral
-        //          << ", matrix element: " << matrix_element
-        //          << ", cm_momentum: " << cm_momentum() << std::endl;
+        log.debug("Resonance integral ", resonance_integral,
+                  ", matrix element: ", matrix_element,
+                  ", cm_momentum: ", cm_momentum());
       }
       process_list.push_back(make_unique<CollisionBranch>(
             type_pi, *produced_nucleus, xsection, ProcessType::TwoToTwo));
-      const auto &log = logger<LogArea::ScatterAction>();
       log.debug(type_pi.name(), type_nucleus.name(), "→ ",
-               type_pi.name(), produced_nucleus->name(), " at ", sqrts, " GeV, xs[mb] = ",
-               xsection);
+               type_pi.name(), produced_nucleus->name(),
+               " at ", sqrts, " GeV, xs[mb] = ", xsection);
     }
   }
   return process_list;
