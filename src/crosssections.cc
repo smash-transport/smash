@@ -428,42 +428,38 @@ double cross_sections::nk_el() {
 CollisionBranchList cross_sections::two_to_one() {
   const auto& log = logger<LogArea::CrossSections>();
   CollisionBranchList resonance_process_list;
-  /* There is no resonance formation out of two baryons: Return empty list. */
-  if (!(incoming_particles_[0].is_baryon() &&
-        incoming_particles_[1].is_baryon())) {
-    const ParticleType& type_particle_a = incoming_particles_[0].type();
-    const ParticleType& type_particle_b = incoming_particles_[1].type();
+  const ParticleType& type_particle_a = incoming_particles_[0].type();
+  const ParticleType& type_particle_b = incoming_particles_[1].type();
 
-    const double m1 = incoming_particles_[0].effective_mass();
-    const double m2 = incoming_particles_[1].effective_mass();
-    const double p_cm_sqr = pCM_sqr(sqrt_s_, m1, m2);
+  const double m1 = incoming_particles_[0].effective_mass();
+  const double m2 = incoming_particles_[1].effective_mass();
+  const double p_cm_sqr = pCM_sqr(sqrt_s_, m1, m2);
 
-    /* Find all the possible resonances */
-    for (const ParticleType& type_resonance : ParticleType::list_all()) {
-      /* Not a resonance, go to next type of particle */
-      if (type_resonance.is_stable()) {
-        continue;
-      }
+  /* Find all the possible resonances */
+  for (const ParticleType& type_resonance : ParticleType::list_all()) {
+    /* Not a resonance, go to next type of particle */
+    if (type_resonance.is_stable()) {
+      continue;
+    }
 
-      /* Same resonance as in the beginning, ignore */
-      if ((!type_particle_a.is_stable() &&
-           type_resonance.pdgcode() == type_particle_a.pdgcode()) ||
-          (!type_particle_b.is_stable() &&
-           type_resonance.pdgcode() == type_particle_b.pdgcode())) {
-        continue;
-      }
+    /* Same resonance as in the beginning, ignore */
+    if ((!type_particle_a.is_stable() &&
+         type_resonance.pdgcode() == type_particle_a.pdgcode()) ||
+        (!type_particle_b.is_stable() &&
+         type_resonance.pdgcode() == type_particle_b.pdgcode())) {
+      continue;
+    }
 
-      double resonance_xsection = formation(type_resonance, p_cm_sqr);
+    double resonance_xsection = formation(type_resonance, p_cm_sqr);
 
-      /* If cross section is non-negligible, add resonance to the list */
-      if (resonance_xsection > really_small) {
-        resonance_process_list.push_back(make_unique<CollisionBranch>(
-            type_resonance, resonance_xsection, ProcessType::TwoToOne));
-        log.debug("Found resonance: ", type_resonance);
-        log.debug(type_particle_a.name(), type_particle_b.name(), "->",
-                  type_resonance.name(), " at sqrt(s)[GeV] = ", sqrt_s_,
-                  " with xs[mb] = ", resonance_xsection);
-      }
+    /* If cross section is non-negligible, add resonance to the list */
+    if (resonance_xsection > really_small) {
+      resonance_process_list.push_back(make_unique<CollisionBranch>(
+          type_resonance, resonance_xsection, ProcessType::TwoToOne));
+      log.debug("Found resonance: ", type_resonance);
+      log.debug(type_particle_a.name(), type_particle_b.name(), "->",
+                type_resonance.name(), " at sqrt(s)[GeV] = ", sqrt_s_,
+                " with xs[mb] = ", resonance_xsection);
     }
   }
   return resonance_process_list;
