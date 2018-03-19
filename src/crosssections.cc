@@ -1453,7 +1453,6 @@ CollisionBranchList cross_sections::pion_d_or_dprime_xx(ReactionsBitSet
           if (xsection > really_small) {
             process_list.push_back(make_unique<CollisionBranch>(
                 *nuc_a, *nuc_b, xsection, ProcessType::TwoToTwo));
-            const auto &log = logger<LogArea::ScatterAction>();
             log.debug(type_a.name(), type_b.name(), "->",
                      nuc_a->name(), nuc_b->name(), " at sqrts [GeV] = ",
                      sqrts, " with cs[mb] = ", xsection);
