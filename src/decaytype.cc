@@ -144,7 +144,7 @@ static /*thread_local (see #3075)*/ Integrator integrate;
 double TwoBodyDecaySemistable::rho(double mass) const {
   if (tabulation_ == nullptr) {
     /* TODO(weil): Move this lazy init to a global initialization function,
-      * in order to avoid race conditions in multi-threading. */
+     * in order to avoid race conditions in multi-threading. */
     const ParticleTypePtr res = particle_types_[1];
     const double tabulation_interval = std::max(2., 10. * res->width_at_pole());
     const double m_stable = particle_types_[0]->mass();
@@ -198,7 +198,7 @@ static /*thread_local*/ Integrator2dCuhre integrate2d(1E7);
 double TwoBodyDecayUnstable::rho(double mass) const {
   if (tabulation_ == nullptr) {
     /* TODO(weil): Move this lazy init to a global initialization function,
-      * in order to avoid race conditions in multi-threading. */
+     * in order to avoid race conditions in multi-threading. */
     const ParticleTypePtr r1 = particle_types_[0];
     const ParticleTypePtr r2 = particle_types_[1];
     const double m1_min = r1->min_mass_kinematic();
@@ -346,7 +346,7 @@ double ThreeBodyDecayDilepton::diff_width(double m_par, double m_l,
   const double m_par_cubed = m_par * m_par * m_par;
   const double m_other_sqr = m_other * m_other;
   const double ph_sp_factor = std::sqrt(1. - 4. * m_l * m_l / m_dil_sqr) *
-                                (1. + 2. * m_l * m_l / m_dil_sqr);
+                              (1. + 2. * m_l * m_l / m_dil_sqr);
 
   PdgCode pdg = t->pdgcode();
   if (pdg.is_meson()) {

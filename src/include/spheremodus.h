@@ -20,27 +20,27 @@ namespace smash {
 /**
  * \ingroup modus
  * SphereModus: Provides a modus for expanding matter calculations
-*
-*  Matter is put in a sphere of radius R with isotropic thermal momenta.
-*
-* To use this modus, chose
-* \code
-* General:
-*      MODUS: Sphere
-* \endcode
-* in the configuration file.
-*
-* Options for SphereModus go in the "Modi"→"Sphere" section of the
-* configuration:
-*
-* \code
-* Modi:
-*      Sphere:
-*              # definitions here
-* \endcode
-*
-* The following configuration options are understood: \ref input_modi_sphere_
-*/
+ *
+ *  Matter is put in a sphere of radius R with isotropic thermal momenta.
+ *
+ * To use this modus, chose
+ * \code
+ * General:
+ *      MODUS: Sphere
+ * \endcode
+ * in the configuration file.
+ *
+ * Options for SphereModus go in the "Modi"→"Sphere" section of the
+ * configuration:
+ *
+ * \code
+ * Modi:
+ *      Sphere:
+ *              # definitions here
+ * \endcode
+ *
+ * The following configuration options are understood: \ref input_modi_sphere_
+ */
 class SphereModus : public ModusDefault {
  public:
   /* default constructor with probable values */

@@ -157,7 +157,7 @@ void DecayAction::generate_final_state() {
    * by calling function one_to_two or one_to_three.
    */
   if (pot_pointer != nullptr) {
-     filter_channel(decay_channels_, total_width_);
+    filter_channel(decay_channels_, total_width_);
   }
   const DecayBranch *proc =
       choose_channel<DecayBranch>(decay_channels_, total_width_);

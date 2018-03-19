@@ -288,7 +288,7 @@ TEST(gradient_periodic) {
 }
 
 /* Test gradient for 2x2x2 lattice. The test is that it doesn't segfault.
-*/
+ */
 TEST(gradient_2x2x2lattice) {
   const std::array<double, 3> l = {9., 7., 13.};
   const std::array<int, 3> n = {2, 2, 2};

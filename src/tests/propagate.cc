@@ -19,8 +19,8 @@
 #include "../include/spheremodus.h"
 
 using namespace smash;
-using smash::Test::Position;
 using smash::Test::Momentum;
+using smash::Test::Position;
 
 TEST(init_particle_types) { Test::create_smashon_particletypes(); }
 

@@ -604,9 +604,7 @@ TEST(equal) {
   VERIFY(pion2 < omega_bc);
 }
 TEST(antiparticle) { VERIFY(pion.is_antiparticle_of(piminus)); }
-TEST(get_antiparticle) {
-  COMPARE(pion.get_antiparticle(), piminus);
-}
+TEST(get_antiparticle) { COMPARE(pion.get_antiparticle(), piminus); }
 
 TEST(from_decimal) {
   COMPARE(pion, PdgCode::from_decimal(211));

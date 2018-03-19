@@ -19,7 +19,7 @@
 #include <stdexcept>
 #include <string>
 
-#include<iostream>
+#include <iostream>
 
 #include "pdgcode_constants.h"
 
@@ -286,7 +286,7 @@ class PdgCode {
   /// returns true if this is a lepton.
   inline bool is_lepton() const {
     return (digits_.n_q1_ == 0 && digits_.n_q2_ == 0 && digits_.n_q3_ == 1 &&
-           !is_nucleus());
+            !is_nucleus());
   }
   /// returns the baryon number of the particle.
   inline int baryon_number() const {
@@ -369,7 +369,7 @@ class PdgCode {
   }
 
   /** Determine whether a particle has a distinct antiparticle
-    * (or whether it is its own antiparticle). */
+   * (or whether it is its own antiparticle). */
   bool has_antiparticle() const {
     if (is_nucleus()) {
       return true;
@@ -590,8 +590,7 @@ class PdgCode {
     return antiparticle_sign() *
            (n_J_2 + digits_.n_q3_ * 10 + digits_.n_q2_ * 100 +
             digits_.n_q1_ * 1000 + digits_.n_L_ * 10000 +
-            digits_.n_R_ * 100000 + digits_.n_ * 1000000 +
-            n_J_1 * 10000000);
+            digits_.n_R_ * 100000 + digits_.n_ * 1000000 + n_J_1 * 10000000);
   }
 
   /// Remove all excitation, except spin. Sign and quark content remains.
@@ -723,8 +722,8 @@ class PdgCode {
     if (97 <= inp && inp <= 102) {
       return inp - 97 + 10;
     }
-    throw InvalidPdgCode("PdgCode: Invalid character " +
-                         std::string(&inp, 1) + " found.\n");
+    throw InvalidPdgCode("PdgCode: Invalid character " + std::string(&inp, 1) +
+                         " found.\n");
   }
 
   /// Set the PDG code from the given string.
