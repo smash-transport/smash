@@ -198,7 +198,7 @@ TEST(pythia_running) {
   act = make_unique<ScatterAction>(p1_copy, p2_copy, 0.2, false, 1.0);
   std::unique_ptr<StringProcess> string_process_interface =
       make_unique<StringProcess>(1.0, 0.5, 0.001, 1.0, 2.5, 0.217, 0.081, 0.7,
-                                 0.68, 0.98);
+                                 0.68, 0.98, 0.25);
   act->set_string_interface(string_process_interface.get());
   VERIFY(act != nullptr);
   COMPARE(p2_copy.type(), ParticleType::find(0x2212));

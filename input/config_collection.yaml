@@ -133,6 +133,7 @@ Collision_Term:
         Sigma_Perp:         0.7
         StringZ_A:          0.68 #Pythia default
         StringZ_B:          0.98 #Pythia default
+        String_Sigma_T:     0.25 
     NNbar_Treatment:        "no annihilation" # default
     NNbar_Treatment:        "resonances"
     NNbar_Treatment:        "strings"

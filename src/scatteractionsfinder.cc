@@ -85,7 +85,8 @@ ScatterActionsFinder::ScatterActionsFinder(
         subconfig.take({"Diquark_Supp"}, 0.081),
         subconfig.take({"Sigma_Perp"}, 0.7),
         subconfig.take({"StringZ_A"}, 0.68),
-        subconfig.take({"StringZ_B"}, 0.98));
+        subconfig.take({"StringZ_B"}, 0.98),
+        subconfig.take({"String_Sigma_T"}, 0.25));
   }
 }
 
