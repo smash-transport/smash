@@ -7,10 +7,8 @@
  *
  */
 
-
-#ifndef SRC_INCLUDE_PHOTONCROSSSECTION_H
-#define SRC_INCLUDE_PHOTONCROSSSECTION_H
-
+#ifndef SRC_INCLUDE_PHOTONCROSSSECTIONS_H_
+#define SRC_INCLUDE_PHOTONCROSSSECTIONS_H_
 
 #include <cmath>
 #include <memory>
@@ -19,11 +17,10 @@
 
 #include "logging.h"
 
+#include "cxx14compat.h"
 #include "kinematics.h"
 #include "particletype.h"
 #include "pdgcode.h"
-#include "tabulationnd.h"
-#include "cxx14compat.h"
 
 namespace smash {
 // calculation method for the cross sections
@@ -37,39 +34,49 @@ class PhotonCrossSection {};
 template <>
 class PhotonCrossSection<ComputationMethod::Analytic> {
  public:
-
   static double xs_pi_pi_rho0(const double s, const double m_rho);
   static double xs_pi_pi0_rho(const double s, const double m_rho);
   static double xs_pi0_rho0_pi0(const double s, const double m_rho);
   static double xs_pi_rho0_pi(const double s, const double m_rho);
-  
+
   static double xs_pi_rho_pi0(const double s, const double m_rho);
   static double xs_pi_rho_pi0_rho_mediated(const double s, const double m_rho);
-  static double xs_pi_rho_pi0_omega_mediated(const double s, const double m_rho);
-  
+  static double xs_pi_rho_pi0_omega_mediated(const double s,
+                                             const double m_rho);
+
   static double xs_pi0_rho_pi(const double s, const double m_rho);
   static double xs_pi0_rho_pi_rho_mediated(const double s, const double m_rho);
-  static double xs_pi0_rho_pi_omega_mediated(const double s, const double m_rho);
+  static double xs_pi0_rho_pi_omega_mediated(const double s,
+                                             const double m_rho);
 
+  static double xs_diff_pi_pi_rho0(const double s, const double t,
+                                   const double m_rho);
+  static double xs_diff_pi_pi0_rho(const double s, const double t,
+                                   const double m_rho);
+  static double xs_diff_pi0_rho0_pi0(const double s, const double t,
+                                     const double m_rho);
+  static double xs_diff_pi_rho0_pi(const double s, const double t,
+                                   const double m_rho);
 
-  static double xs_diff_pi_pi_rho0(const double s, const double t, const double m_rho);
-  static double xs_diff_pi_pi0_rho(const double s, const double t, const double m_rho);
-  static double xs_diff_pi0_rho0_pi0(const double s, const double t, const double m_rho);
-  static double xs_diff_pi_rho0_pi(const double s, const double t, const double m_rho);
-  
-  static double xs_diff_pi_rho_pi0(const double s, const double t, const double m_rho);
-  static double xs_diff_pi_rho_pi0_rho_mediated(const double s, const double t, const double m_rho);
-  static double xs_diff_pi_rho_pi0_omega_mediated(const double s, const double t, const double m_rho);
-  
-  static double xs_diff_pi0_rho_pi(const double s, const double t, const double m_rho);
-  static double xs_diff_pi0_rho_pi_rho_mediated(const double s, const double t, const double m_rho);
-  static double xs_diff_pi0_rho_pi_omega_mediated(const double s, const double t, const double m_rho);
+  static double xs_diff_pi_rho_pi0(const double s, const double t,
+                                   const double m_rho);
+  static double xs_diff_pi_rho_pi0_rho_mediated(const double s, const double t,
+                                                const double m_rho);
+  static double xs_diff_pi_rho_pi0_omega_mediated(const double s,
+                                                  const double t,
+                                                  const double m_rho);
+
+  static double xs_diff_pi0_rho_pi(const double s, const double t,
+                                   const double m_rho);
+  static double xs_diff_pi0_rho_pi_rho_mediated(const double s, const double t,
+                                                const double m_rho);
+  static double xs_diff_pi0_rho_pi_omega_mediated(const double s,
+                                                  const double t,
+                                                  const double m_rho);
 
   static double s_min, s_max, t_min, t_max;
 
  private:
-
-
   constexpr static double to_mb = 0.3894;
   constexpr static double Const = 0.059;
   constexpr static double g_POR = 22.6;
@@ -85,8 +92,7 @@ class PhotonCrossSection<ComputationMethod::Analytic> {
   constexpr static double m_pion_ = 0.139;
 };
 
-
-// options not implemented for review version. Will be added in the future. 
+// options not implemented for review version. Will be added in the future.
 // We keep it here to not break compilation
 template <>
 class PhotonCrossSection<ComputationMethod::Lookup> {};
@@ -94,6 +100,6 @@ class PhotonCrossSection<ComputationMethod::Lookup> {};
 template <>
 class PhotonCrossSection<ComputationMethod::Parametrized> {};
 
-} // namespace smash
+}  // namespace smash
 
-#endif
+#endif  // SRC_INCLUDE_PHOTONCROSSSECTIONS_H_

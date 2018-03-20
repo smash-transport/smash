@@ -46,10 +46,9 @@ double cut_off(const double sigma_mb) {
    particles to account for these particle properties.
 */
 
-using namespace smash;
-
-template class smash::PhotonCrossSection<ComputationMethod::Analytic>;
-template class smash::PhotonCrossSection<ComputationMethod::Lookup>;
+namespace smash {
+template class PhotonCrossSection<ComputationMethod::Analytic>;
+template class PhotonCrossSection<ComputationMethod::Lookup>;
 
 constexpr double PhotonCrossSection<ComputationMethod::Analytic>::m_pion_;
 
@@ -6784,8 +6783,8 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                    (8. * pow(m_pion_, 4) - 8. * pow(m_rho, 4) -
                     4. * pow(m_pion_, 2) * s + 4. * pow(m_rho, 2) * s) +
                pow(ma1, 4) * (-12. * pow(m_pion_, 4) + 2. * pow(m_rho, 4) +
-                              8. * pow(m_pion_, 2) * s + 4. * pow(m_rho, 2) * s -
-                              4. * pow(s, 2))) +
+                              8. * pow(m_pion_, 2) * s +
+                              4. * pow(m_rho, 2) * s - 4. * pow(s, 2))) +
           pow(eta2, 2) *
               (1. * pow(ma1, 8) + 1. * pow(m_pion_, 8) -
                2. * pow(m_pion_, 6) * pow(m_rho, 2) +
@@ -6795,9 +6794,10 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                pow(ma1, 4) * (6. * pow(m_pion_, 4) + 1. * pow(m_rho, 4) +
                               pow(m_pion_, 2) * (-6. * pow(m_rho, 2) - 4. * s) -
                               2. * pow(m_rho, 2) * s + 2. * pow(s, 2)) +
-               pow(ma1, 2) * (-4. * pow(m_pion_, 6) -
-                              2. * pow(m_pion_, 2) * pow(m_rho, 2) * s +
-                              pow(m_pion_, 4) * (6. * pow(m_rho, 2) + 2. * s))) +
+               pow(ma1, 2) *
+                   (-4. * pow(m_pion_, 6) -
+                    2. * pow(m_pion_, 2) * pow(m_rho, 2) * s +
+                    pow(m_pion_, 4) * (6. * pow(m_rho, 2) + 2. * s))) +
           pow(eta1, 2) *
               (1. * pow(ma1, 8) +
                pow(ma1, 6) *
@@ -6805,13 +6805,15 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                pow(ma1, 4) * (6. * pow(m_pion_, 4) + 1. * pow(m_rho, 4) +
                               pow(m_pion_, 2) * (6. * pow(m_rho, 2) - 4. * s) -
                               4. * pow(m_rho, 2) * s + 2. * pow(s, 2)) +
-               pow(ma1, 2) * (-4. * pow(m_pion_, 6) +
-                              2. * pow(m_pion_, 2) * pow(m_rho, 2) * s +
-                              pow(m_rho, 2) * (2. * pow(m_rho, 2) - 2. * s) * s +
-                              pow(m_pion_, 4) * (-6. * pow(m_rho, 2) + 2. * s)) +
+               pow(ma1, 2) *
+                   (-4. * pow(m_pion_, 6) +
+                    2. * pow(m_pion_, 2) * pow(m_rho, 2) * s +
+                    pow(m_rho, 2) * (2. * pow(m_rho, 2) - 2. * s) * s +
+                    pow(m_pion_, 4) * (-6. * pow(m_rho, 2) + 2. * s)) +
                pow(m_pion_, 2) *
-                   (1. * pow(m_pion_, 6) + 2. * pow(m_pion_, 4) * pow(m_rho, 2) -
-                    2. * pow(m_rho, 6) + 2. * pow(m_rho, 4) * s +
+                   (1. * pow(m_pion_, 6) +
+                    2. * pow(m_pion_, 4) * pow(m_rho, 2) - 2. * pow(m_rho, 6) +
+                    2. * pow(m_rho, 4) * s +
                     pow(m_pion_, 2) *
                         (1. * pow(m_rho, 4) - 2. * pow(m_rho, 2) * s))))) /
             (1. * pow(ma1, 2) - 1. * tmin) -
@@ -6833,12 +6835,13 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
           0.75 * pow(m_rho, 4) * s + 0.125 * pow(m_rho, 2) * pow(s, 2) +
           0.25 * pow(s, 3) +
           pow(m_pion_, 2) * (2.5 * pow(m_rho, 4) + 0.25 * pow(m_rho, 2) * s -
-                           0.75 * pow(s, 2))) *
+                             0.75 * pow(s, 2))) *
          tmin) /
             pow(m_rho, 6) -
         0.03125 * pow(eta1 - 1. * eta2, 2) *
             (eta1 * eta2 *
-                 (-6. * pow(ma1, 4) - 12. * pow(m_pion_, 4) + 2. * pow(m_rho, 4) +
+                 (-6. * pow(ma1, 4) - 12. * pow(m_pion_, 4) +
+                  2. * pow(m_rho, 4) +
                   pow(ma1, 2) * (16. * pow(m_pion_, 2) - 8. * s) +
                   8. * pow(m_pion_, 2) * s + 4. * pow(m_rho, 2) * s -
                   4. * pow(s, 2)) +
@@ -6862,8 +6865,8 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
           pow(m_rho, 2) * s *
               (0.08333333333333333 - 0.16666666666666666 * C4 * s) +
           pow(m_pion_, 2) * (1. * C4 * pow(m_rho, 4) + 0.08333333333333333 * s +
-                           pow(m_rho, 2) * (-0.4166666666666667 -
-                                           0.3333333333333333 * C4 * s))) *
+                             pow(m_rho, 2) * (-0.4166666666666667 -
+                                              0.3333333333333333 * C4 * s))) *
          tmin) /
             pow(m_rho, 4) -
         (0.25 * (1. * eta1 - 1. * eta2) *
@@ -6899,8 +6902,8 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
         0.03125 * pow(eta1 - 1. * eta2, 3) *
             (eta2 * (-1. * pow(ma1, 2) + 2. * pow(m_pion_, 2) -
                      1. * pow(m_rho, 2) - 1. * s) +
-             eta1 *
-                 (pow(ma1, 2) - 2. * pow(m_pion_, 2) - 1. * pow(m_rho, 2) + s)) *
+             eta1 * (pow(ma1, 2) - 2. * pow(m_pion_, 2) - 1. * pow(m_rho, 2) +
+                     s)) *
             pow(tmin, 2) +
         (1.5 * delta *
          (1. * C4 * pow(m_rho, 4) + 0.08333333333333333 * s +
@@ -6909,7 +6912,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
             pow(m_rho, 4) -
         (0.125 * (1. * eta1 - 1. * eta2) *
          (pow(m_rho, 2) * (eta1 * (1. - 2. * C4 * pow(m_rho, 2)) +
-                          eta2 * (-1. + 2. * C4 * pow(m_rho, 2))) +
+                           eta2 * (-1. + 2. * C4 * pow(m_rho, 2))) +
           delta * (eta2 * (-1. * pow(ma1, 2) + 3. * pow(m_pion_, 2) -
                            1. * pow(m_rho, 2) - 1. * s) +
                    eta1 * (1. * pow(ma1, 2) - 3. * pow(m_pion_, 2) -
@@ -6930,8 +6933,8 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                    (8. * pow(m_pion_, 4) - 8. * pow(m_rho, 4) -
                     4. * pow(m_pion_, 2) * s + 4. * pow(m_rho, 2) * s) +
                pow(ma1, 4) * (-12. * pow(m_pion_, 4) + 2. * pow(m_rho, 4) +
-                              8. * pow(m_pion_, 2) * s + 4. * pow(m_rho, 2) * s -
-                              4. * pow(s, 2))) +
+                              8. * pow(m_pion_, 2) * s +
+                              4. * pow(m_rho, 2) * s - 4. * pow(s, 2))) +
           pow(eta2, 2) *
               (1. * pow(ma1, 8) + 1. * pow(m_pion_, 8) -
                2. * pow(m_pion_, 6) * pow(m_rho, 2) +
@@ -6941,9 +6944,10 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                pow(ma1, 4) * (6. * pow(m_pion_, 4) + 1. * pow(m_rho, 4) +
                               pow(m_pion_, 2) * (-6. * pow(m_rho, 2) - 4. * s) -
                               2. * pow(m_rho, 2) * s + 2. * pow(s, 2)) +
-               pow(ma1, 2) * (-4. * pow(m_pion_, 6) -
-                              2. * pow(m_pion_, 2) * pow(m_rho, 2) * s +
-                              pow(m_pion_, 4) * (6. * pow(m_rho, 2) + 2. * s))) +
+               pow(ma1, 2) *
+                   (-4. * pow(m_pion_, 6) -
+                    2. * pow(m_pion_, 2) * pow(m_rho, 2) * s +
+                    pow(m_pion_, 4) * (6. * pow(m_rho, 2) + 2. * s))) +
           pow(eta1, 2) *
               (1. * pow(ma1, 8) +
                pow(ma1, 6) *
@@ -6951,13 +6955,15 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                pow(ma1, 4) * (6. * pow(m_pion_, 4) + 1. * pow(m_rho, 4) +
                               pow(m_pion_, 2) * (6. * pow(m_rho, 2) - 4. * s) -
                               4. * pow(m_rho, 2) * s + 2. * pow(s, 2)) +
-               pow(ma1, 2) * (-4. * pow(m_pion_, 6) +
-                              2. * pow(m_pion_, 2) * pow(m_rho, 2) * s +
-                              pow(m_rho, 2) * (2. * pow(m_rho, 2) - 2. * s) * s +
-                              pow(m_pion_, 4) * (-6. * pow(m_rho, 2) + 2. * s)) +
+               pow(ma1, 2) *
+                   (-4. * pow(m_pion_, 6) +
+                    2. * pow(m_pion_, 2) * pow(m_rho, 2) * s +
+                    pow(m_rho, 2) * (2. * pow(m_rho, 2) - 2. * s) * s +
+                    pow(m_pion_, 4) * (-6. * pow(m_rho, 2) + 2. * s)) +
                pow(m_pion_, 2) *
-                   (1. * pow(m_pion_, 6) + 2. * pow(m_pion_, 4) * pow(m_rho, 2) -
-                    2. * pow(m_rho, 6) + 2. * pow(m_rho, 4) * s +
+                   (1. * pow(m_pion_, 6) +
+                    2. * pow(m_pion_, 4) * pow(m_rho, 2) - 2. * pow(m_rho, 6) +
+                    2. * pow(m_rho, 4) * s +
                     pow(m_pion_, 2) *
                         (1. * pow(m_rho, 4) - 2. * pow(m_rho, 2) * s))))) /
             (1. * pow(ma1, 2) - 1. * tmax) +
@@ -6979,12 +6985,13 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
           0.75 * pow(m_rho, 4) * s + 0.125 * pow(m_rho, 2) * pow(s, 2) +
           0.25 * pow(s, 3) +
           pow(m_pion_, 2) * (2.5 * pow(m_rho, 4) + 0.25 * pow(m_rho, 2) * s -
-                           0.75 * pow(s, 2))) *
+                             0.75 * pow(s, 2))) *
          tmax) /
             pow(m_rho, 6) +
         0.03125 * pow(eta1 - 1. * eta2, 2) *
             (eta1 * eta2 *
-                 (-6. * pow(ma1, 4) - 12. * pow(m_pion_, 4) + 2. * pow(m_rho, 4) +
+                 (-6. * pow(ma1, 4) - 12. * pow(m_pion_, 4) +
+                  2. * pow(m_rho, 4) +
                   pow(ma1, 2) * (16. * pow(m_pion_, 2) - 8. * s) +
                   8. * pow(m_pion_, 2) * s + 4. * pow(m_rho, 2) * s -
                   4. * pow(s, 2)) +
@@ -7008,8 +7015,8 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
           pow(m_rho, 2) * s *
               (0.08333333333333333 - 0.16666666666666666 * C4 * s) +
           pow(m_pion_, 2) * (1. * C4 * pow(m_rho, 4) + 0.08333333333333333 * s +
-                           pow(m_rho, 2) * (-0.4166666666666667 -
-                                           0.3333333333333333 * C4 * s))) *
+                             pow(m_rho, 2) * (-0.4166666666666667 -
+                                              0.3333333333333333 * C4 * s))) *
          tmax) /
             pow(m_rho, 4) +
         (0.25 * (1. * eta1 - 1. * eta2) *
@@ -7045,8 +7052,8 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
         0.03125 * pow(eta1 - 1. * eta2, 3) *
             (eta2 * (-1. * pow(ma1, 2) + 2. * pow(m_pion_, 2) -
                      1. * pow(m_rho, 2) - 1. * s) +
-             eta1 *
-                 (pow(ma1, 2) - 2. * pow(m_pion_, 2) - 1. * pow(m_rho, 2) + s)) *
+             eta1 * (pow(ma1, 2) - 2. * pow(m_pion_, 2) - 1. * pow(m_rho, 2) +
+                     s)) *
             pow(tmax, 2) -
         (1.5 * delta *
          (1. * C4 * pow(m_rho, 4) + 0.08333333333333333 * s +
@@ -7055,7 +7062,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
             pow(m_rho, 4) +
         (0.125 * (1. * eta1 - 1. * eta2) *
          (pow(m_rho, 2) * (eta1 * (1. - 2. * C4 * pow(m_rho, 2)) +
-                          eta2 * (-1. + 2. * C4 * pow(m_rho, 2))) +
+                           eta2 * (-1. + 2. * C4 * pow(m_rho, 2))) +
           delta * (eta2 * (-1. * pow(ma1, 2) + 3. * pow(m_pion_, 2) -
                            1. * pow(m_rho, 2) - 1. * s) +
                    eta1 * (1. * pow(ma1, 2) - 3. * pow(m_pion_, 2) -
@@ -7196,13 +7203,14 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
         (0.12499995 * pow(delta, 2) * pow(s, 3) * tmin *
          HeavisideTheta(-m_rho + sqrt(s))) /
             (pow(m_rho, 6) - 1. * pow(m_rho, 4) * s) +
-        (0.6250005000000001 * pow(delta, 2) * pow(m_pion_, 2) * pow(s, 3) * tmin *
-         HeavisideTheta(-m_rho + sqrt(s))) /
+        (0.6250005000000001 * pow(delta, 2) * pow(m_pion_, 2) * pow(s, 3) *
+         tmin * HeavisideTheta(-m_rho + sqrt(s))) /
             (pow(m_rho, 8) - 1. * pow(m_rho, 6) * s) -
         (0.1875 * pow(delta, 2) * pow(s, 4) * tmin *
          HeavisideTheta(-m_rho + sqrt(s))) /
             (pow(m_rho, 8) - 1. * pow(m_rho, 6) * s) +
-        (2. * pow(m_pion_, 2) * pow(tmin, 2) * HeavisideTheta(-m_rho + sqrt(s))) /
+        (2. * pow(m_pion_, 2) * pow(tmin, 2) *
+         HeavisideTheta(-m_rho + sqrt(s))) /
             pow(pow(m_rho, 2) - 1. * s, 2) +
         (1. * pow(m_rho, 2) * pow(tmin, 2) * HeavisideTheta(-m_rho + sqrt(s))) /
             pow(pow(m_rho, 2) - 1. * s, 2) +
@@ -7251,8 +7259,8 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
         (0.50000025 * C4 * delta * pow(s, 2) * pow(tmin, 2) *
          HeavisideTheta(-m_rho + sqrt(s))) /
             (pow(m_rho, 4) - 1. * pow(m_rho, 2) * s) +
-        (0.9999974999999999 * pow(delta, 2) * pow(m_pion_, 2) * s * pow(tmin, 2) *
-         HeavisideTheta(-m_rho + sqrt(s))) /
+        (0.9999974999999999 * pow(delta, 2) * pow(m_pion_, 2) * s *
+         pow(tmin, 2) * HeavisideTheta(-m_rho + sqrt(s))) /
             (pow(m_rho, 6) - 1. * pow(m_rho, 4) * s) +
         (0.2500002 * delta * pow(s, 2) * pow(tmin, 2) *
          HeavisideTheta(-m_rho + sqrt(s))) /
@@ -7405,13 +7413,14 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
         (0.12499995 * pow(delta, 2) * pow(s, 3) * tmax *
          HeavisideTheta(-m_rho + sqrt(s))) /
             (pow(m_rho, 6) - 1. * pow(m_rho, 4) * s) -
-        (0.6250005000000001 * pow(delta, 2) * pow(m_pion_, 2) * pow(s, 3) * tmax *
-         HeavisideTheta(-m_rho + sqrt(s))) /
+        (0.6250005000000001 * pow(delta, 2) * pow(m_pion_, 2) * pow(s, 3) *
+         tmax * HeavisideTheta(-m_rho + sqrt(s))) /
             (pow(m_rho, 8) - 1. * pow(m_rho, 6) * s) +
         (0.1875 * pow(delta, 2) * pow(s, 4) * tmax *
          HeavisideTheta(-m_rho + sqrt(s))) /
             (pow(m_rho, 8) - 1. * pow(m_rho, 6) * s) -
-        (2. * pow(m_pion_, 2) * pow(tmax, 2) * HeavisideTheta(-m_rho + sqrt(s))) /
+        (2. * pow(m_pion_, 2) * pow(tmax, 2) *
+         HeavisideTheta(-m_rho + sqrt(s))) /
             pow(pow(m_rho, 2) - 1. * s, 2) -
         (1. * pow(m_rho, 2) * pow(tmax, 2) * HeavisideTheta(-m_rho + sqrt(s))) /
             pow(pow(m_rho, 2) - 1. * s, 2) -
@@ -7460,8 +7469,8 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
         (0.50000025 * C4 * delta * pow(s, 2) * pow(tmax, 2) *
          HeavisideTheta(-m_rho + sqrt(s))) /
             (pow(m_rho, 4) - 1. * pow(m_rho, 2) * s) -
-        (0.9999974999999999 * pow(delta, 2) * pow(m_pion_, 2) * s * pow(tmax, 2) *
-         HeavisideTheta(-m_rho + sqrt(s))) /
+        (0.9999974999999999 * pow(delta, 2) * pow(m_pion_, 2) * s *
+         pow(tmax, 2) * HeavisideTheta(-m_rho + sqrt(s))) /
             (pow(m_rho, 6) - 1. * pow(m_rho, 4) * s) -
         (0.2500002 * delta * pow(s, 2) * pow(tmax, 2) *
          HeavisideTheta(-m_rho + sqrt(s))) /
@@ -7502,18 +7511,20 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                   pow(m_pion_, 4) * (-3. * pow(m_rho, 2) + s) +
                   pow(ma1, 4) *
                       (-6. * pow(m_pion_, 2) - 3. * pow(m_rho, 2) + 3. * s) +
-                  pow(ma1, 2) * (6. * pow(m_pion_, 4) + pow(m_rho, 4) +
-                                 pow(m_pion_, 2) * (6. * pow(m_rho, 2) - 4. * s) -
-                                 4. * pow(m_rho, 2) * s + 2. * pow(s, 2))) +
+                  pow(ma1, 2) *
+                      (6. * pow(m_pion_, 4) + pow(m_rho, 4) +
+                       pow(m_pion_, 2) * (6. * pow(m_rho, 2) - 4. * s) -
+                       4. * pow(m_rho, 2) * s + 2. * pow(s, 2))) +
              pow(eta2, 2) *
                  (2. * pow(ma1, 6) - 2. * pow(m_pion_, 6) -
                   1. * pow(m_pion_, 2) * pow(m_rho, 2) * s +
                   pow(m_pion_, 4) * (3. * pow(m_rho, 2) + s) +
                   pow(ma1, 4) *
                       (-6. * pow(m_pion_, 2) + 3. * pow(m_rho, 2) + 3. * s) +
-                  pow(ma1, 2) * (6. * pow(m_pion_, 4) + pow(m_rho, 4) +
-                                 pow(m_pion_, 2) * (-6. * pow(m_rho, 2) - 4. * s) -
-                                 2. * pow(m_rho, 2) * s + 2. * pow(s, 2)))) *
+                  pow(ma1, 2) *
+                      (6. * pow(m_pion_, 4) + pow(m_rho, 4) +
+                       pow(m_pion_, 2) * (-6. * pow(m_rho, 2) - 4. * s) -
+                       2. * pow(m_rho, 2) * s + 2. * pow(s, 2)))) *
             log(fabs(-1. * pow(ma1, 2) + tmin)) +
         (0.25 * (-2. + delta) * (eta1 - 1. * eta2) *
          (eta2 * (-0.5 * pow(ma1, 6) - 0.5 * pow(m_pion_, 6) +
@@ -7522,13 +7533,14 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                       (0.5 * pow(m_pion_, 2) + 0.5 * pow(m_rho, 2) - 1. * s) +
                   pow(ma1, 2) * pow(m_pion_, 2) *
                       (0.5 * pow(m_pion_, 2) + 1. * pow(m_rho, 2) - 1. * s)) +
-          eta1 *
-              (pow(ma1, 4) * (1. * pow(m_pion_, 2) + 0.5 * s) +
-               pow(m_pion_, 2) * (1. * pow(m_pion_, 4) + 1. * pow(m_rho, 4) +
-                                pow(m_pion_, 2) * (-1. * pow(m_rho, 2) + 0.5 * s) -
-                                0.5 * pow(m_rho, 2) * s) +
-               pow(ma1, 2) * (-2. * pow(m_pion_, 4) - 0.5 * pow(m_rho, 2) * s +
-                              pow(m_pion_, 2) * (-1. * pow(m_rho, 2) + 1. * s)))) *
+          eta1 * (pow(ma1, 4) * (1. * pow(m_pion_, 2) + 0.5 * s) +
+                  pow(m_pion_, 2) *
+                      (1. * pow(m_pion_, 4) + 1. * pow(m_rho, 4) +
+                       pow(m_pion_, 2) * (-1. * pow(m_rho, 2) + 0.5 * s) -
+                       0.5 * pow(m_rho, 2) * s) +
+                  pow(ma1, 2) *
+                      (-2. * pow(m_pion_, 4) - 0.5 * pow(m_rho, 2) * s +
+                       pow(m_pion_, 2) * (-1. * pow(m_rho, 2) + 1. * s)))) *
          log(fabs(-1. * pow(ma1, 2) + tmin))) /
             (pow(ma1, 2) - 1. * pow(m_pion_, 2)) -
         (0.25 * (1. * eta1 - 1. * eta2) *
@@ -7536,8 +7548,8 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
               (eta1 * (1. * pow(ma1, 6) - 1. * pow(m_pion_, 6) +
                        pow(m_pion_, 4) * (-2.5 * pow(m_rho, 2) + 0.5 * s) +
                        pow(m_pion_, 2) * s * (-0.5 * pow(m_rho, 2) + 1. * s) +
-                       pow(ma1, 4) * (-3. * pow(m_pion_, 2) - 1.5 * pow(m_rho, 2) +
-                                      1.5 * s) +
+                       pow(ma1, 4) * (-3. * pow(m_pion_, 2) -
+                                      1.5 * pow(m_rho, 2) + 1.5 * s) +
                        s * (0.5 * pow(m_rho, 4) - 0.25 * pow(m_rho, 2) * s -
                             0.25 * pow(s, 2)) +
                        pow(ma1, 2) *
@@ -7545,8 +7557,8 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                             pow(m_pion_, 2) * (4. * pow(m_rho, 2) - 2. * s) -
                             2. * pow(m_rho, 2) * s + 1. * pow(s, 2))) +
                eta2 * (-1. * pow(ma1, 6) +
-                       pow(ma1, 4) *
-                           (3. * pow(m_pion_, 2) - 1. * pow(m_rho, 2) - 1. * s) +
+                       pow(ma1, 4) * (3. * pow(m_pion_, 2) -
+                                      1. * pow(m_rho, 2) - 1. * s) +
                        pow(m_pion_, 2) *
                            (1. * pow(m_pion_, 4) - 0.5 * pow(m_rho, 4) +
                             0.25 * pow(m_rho, 2) * s - 0.25 * pow(s, 2)) +
@@ -7565,15 +7577,16 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                             pow(m_pion_, 2) * (2. - 4. * C4 * pow(m_rho, 2)) +
                             pow(m_rho, 2) * (-1.5 - 4. * C4 * s) +
                             s * (0.5 + 2. * C4 * s))) +
-               eta1 * (pow(ma1, 4) * (1. - 2. * C4 * pow(m_rho, 2)) +
-                       pow(m_pion_, 4) * (1. - 2. * C4 * pow(m_rho, 2)) +
-                       (-0.5 * pow(m_rho, 2) + 0.5 * s) * s +
-                       pow(ma1, 2) *
-                           (-1. * pow(m_rho, 2) + 2. * C4 * pow(m_rho, 4) +
-                            pow(m_pion_, 2) * (-2. + 4. * C4 * pow(m_rho, 2)) -
-                            2. * C4 * pow(s, 2)) +
-                       pow(m_pion_, 2) * (-4. * C4 * pow(m_rho, 4) - 1. * s +
-                                        pow(m_rho, 2) * (2. + 4. * C4 * s))))) *
+               eta1 *
+                   (pow(ma1, 4) * (1. - 2. * C4 * pow(m_rho, 2)) +
+                    pow(m_pion_, 4) * (1. - 2. * C4 * pow(m_rho, 2)) +
+                    (-0.5 * pow(m_rho, 2) + 0.5 * s) * s +
+                    pow(ma1, 2) *
+                        (-1. * pow(m_rho, 2) + 2. * C4 * pow(m_rho, 4) +
+                         pow(m_pion_, 2) * (-2. + 4. * C4 * pow(m_rho, 2)) -
+                         2. * C4 * pow(s, 2)) +
+                    pow(m_pion_, 2) * (-4. * C4 * pow(m_rho, 4) - 1. * s +
+                                       pow(m_rho, 2) * (2. + 4. * C4 * s))))) *
          log(fabs(-1. * pow(ma1, 2) + tmin))) /
             pow(m_rho, 2) -
         (HeavisideTheta(-m_rho + sqrt(s)) *
@@ -7587,8 +7600,8 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                     pow(ma1, 4) * (-2. * pow(m_rho, 2) + 1. * delta * s) +
                     pow(m_pion_, 4) * (-6. * pow(m_rho, 2) + 3. * delta * s) +
                     pow(m_pion_, 2) * (-3. * pow(m_rho, 4) +
-                                     (3. + 1.5 * delta) * pow(m_rho, 2) * s -
-                                     1.5 * delta * pow(s, 2)) +
+                                       (3. + 1.5 * delta) * pow(m_rho, 2) * s -
+                                       1.5 * delta * pow(s, 2)) +
                     pow(ma1, 2) * (0.5 * pow(m_rho, 4) +
                                    (-2.5 - 0.25 * delta) * pow(m_rho, 2) * s +
                                    1.25 * delta * pow(s, 2) +
@@ -7603,13 +7616,13 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                     pow(m_pion_, 4) * (3. * pow(m_rho, 2) - 1.5 * delta * s) +
                     pow(ma1, 4) * (1. * pow(m_rho, 2) - 0.5 * delta * s) +
                     pow(m_pion_, 2) * (4. * pow(m_rho, 4) +
-                                     (-2. - 2. * delta) * pow(m_rho, 2) * s +
-                                     1. * delta * pow(s, 2)) +
+                                       (-2. - 2. * delta) * pow(m_rho, 2) * s +
+                                       1. * delta * pow(s, 2)) +
                     pow(ma1, 2) * (-1.5 * pow(m_rho, 4) +
                                    (1.5 + 0.75 * delta) * pow(m_rho, 2) * s -
                                    0.75 * delta * pow(s, 2) +
                                    pow(m_pion_, 2) * (-3. * pow(m_rho, 2) +
-                                                    1.5 * delta * s))) +
+                                                      1.5 * delta * s))) +
                pow(eta2, 2) *
                    (-0.75 * pow(m_rho, 6) + 0.5 * pow(m_rho, 4) * s +
                     0.375 * delta * pow(m_rho, 4) * s +
@@ -7619,30 +7632,33 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                     pow(m_pion_, 4) * (3. * pow(m_rho, 2) - 1.5 * delta * s) +
                     pow(ma1, 4) * (1. * pow(m_rho, 2) - 0.5 * delta * s) +
                     pow(m_pion_, 2) * (-1. * pow(m_rho, 4) +
-                                     (-1. + 0.5 * delta) * pow(m_rho, 2) * s +
-                                     0.5 * delta * pow(s, 2)) +
+                                       (-1. + 0.5 * delta) * pow(m_rho, 2) * s +
+                                       0.5 * delta * pow(s, 2)) +
                     pow(ma1, 2) * (1. * pow(m_rho, 4) +
                                    (1. - 0.5 * delta) * pow(m_rho, 2) * s -
                                    0.5 * delta * pow(s, 2) +
                                    pow(m_pion_, 2) * (-3. * pow(m_rho, 2) +
-                                                    1.5 * delta * s)))) *
+                                                      1.5 * delta * s)))) *
               tmin -
           0.25 *
               (eta1 * eta2 *
                    (0.5 * pow(m_rho, 4) - 2.5 * pow(m_rho, 2) * s -
-                    0.25 * delta * pow(m_rho, 2) * s + 1.25 * delta * pow(s, 2) +
+                    0.25 * delta * pow(m_rho, 2) * s +
+                    1.25 * delta * pow(s, 2) +
                     pow(m_pion_, 2) * (6. * pow(m_rho, 2) - 3. * delta * s) +
                     pow(ma1, 2) * (-2. * pow(m_rho, 2) + 1. * delta * s)) +
                pow(eta1, 2) *
                    (-1.5 * pow(m_rho, 4) + 1.5 * pow(m_rho, 2) * s +
-                    0.75 * delta * pow(m_rho, 2) * s - 0.75 * delta * pow(s, 2) +
+                    0.75 * delta * pow(m_rho, 2) * s -
+                    0.75 * delta * pow(s, 2) +
                     pow(ma1, 2) * (1. * pow(m_rho, 2) - 0.5 * delta * s) +
                     pow(m_pion_, 2) * (-3. * pow(m_rho, 2) + 1.5 * delta * s)) +
                pow(eta2, 2) *
                    (1. * pow(m_rho, 4) + 1. * pow(m_rho, 2) * s -
                     0.5 * delta * pow(m_rho, 2) * s - 0.5 * delta * pow(s, 2) +
                     pow(ma1, 2) * (1. * pow(m_rho, 2) - 0.5 * delta * s) +
-                    pow(m_pion_, 2) * (-3. * pow(m_rho, 2) + 1.5 * delta * s))) *
+                    pow(m_pion_, 2) *
+                        (-3. * pow(m_rho, 2) + 1.5 * delta * s))) *
               pow(tmin, 2) -
           0.16666666666666666 *
               (pow(eta1, 2) * (1. * pow(m_rho, 2) - 0.5 * delta * s) +
@@ -7653,9 +7669,10 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
               (eta1 * eta2 *
                    (pow(m_pion_, 6) * (2. * pow(m_rho, 2) - 1. * delta * s) +
                     pow(ma1, 6) * (-2. * pow(m_rho, 2) + 1. * delta * s) +
-                    pow(m_pion_, 4) * (2.5 * pow(m_rho, 4) +
-                                     (-0.5 - 1.25 * delta) * pow(m_rho, 2) * s +
-                                     0.25 * delta * pow(s, 2)) +
+                    pow(m_pion_, 4) *
+                        (2.5 * pow(m_rho, 4) +
+                         (-0.5 - 1.25 * delta) * pow(m_rho, 2) * s +
+                         0.25 * delta * pow(s, 2)) +
                     s * (-0.25 * pow(m_rho, 6) +
                          0.125 * delta * pow(m_rho, 4) * s +
                          0.25 * pow(m_rho, 2) * pow(s, 2) -
@@ -7665,17 +7682,18 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                          (0.5 + 0.125 * delta) * pow(m_rho, 4) * s +
                          (-1.25 - 0.25 * delta) * pow(m_rho, 2) * pow(s, 2) +
                          0.625 * delta * pow(s, 3)) +
-                    pow(ma1, 4) *
-                        (0.5 * pow(m_rho, 4) +
-                         (-2.5 - 0.25 * delta) * pow(m_rho, 2) * s +
-                         1.25 * delta * pow(s, 2) +
-                         pow(m_pion_, 2) * (6. * pow(m_rho, 2) - 3. * delta * s)) +
+                    pow(ma1, 4) * (0.5 * pow(m_rho, 4) +
+                                   (-2.5 - 0.25 * delta) * pow(m_rho, 2) * s +
+                                   1.25 * delta * pow(s, 2) +
+                                   pow(m_pion_, 2) *
+                                       (6. * pow(m_rho, 2) - 3. * delta * s)) +
                     pow(ma1, 2) *
                         (0.25 * pow(m_rho, 6) +
                          (1.5 - 0.125 * delta) * pow(m_rho, 4) * s +
                          (-0.75 - 0.75 * delta) * pow(m_rho, 2) * pow(s, 2) +
                          0.375 * delta * pow(s, 3) +
-                         pow(m_pion_, 4) * (-6. * pow(m_rho, 2) + 3. * delta * s) +
+                         pow(m_pion_, 4) *
+                             (-6. * pow(m_rho, 2) + 3. * delta * s) +
                          pow(m_pion_, 2) *
                              (-3. * pow(m_rho, 4) +
                               (3. + 1.5 * delta) * pow(m_rho, 2) * s -
@@ -7692,14 +7710,15 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                     pow(ma1, 4) * (1. * pow(m_rho, 4) +
                                    (1. - 0.5 * delta) * pow(m_rho, 2) * s -
                                    0.5 * delta * pow(s, 2) +
-                                   pow(m_pion_, 2) *
-                                       (-3. * pow(m_rho, 2) + 1.5 * delta * s)) +
+                                   pow(m_pion_, 2) * (-3. * pow(m_rho, 2) +
+                                                      1.5 * delta * s)) +
                     pow(ma1, 2) *
                         (-0.75 * pow(m_rho, 6) +
                          (0.5 + 0.375 * delta) * pow(m_rho, 4) * s +
                          (0.25 - 0.25 * delta) * pow(m_rho, 2) * pow(s, 2) -
                          0.125 * delta * pow(s, 3) +
-                         pow(m_pion_, 4) * (3. * pow(m_rho, 2) - 1.5 * delta * s) +
+                         pow(m_pion_, 4) *
+                             (3. * pow(m_rho, 2) - 1.5 * delta * s) +
                          pow(m_pion_, 2) *
                              (-1. * pow(m_rho, 4) +
                               (-1. + 0.5 * delta) * pow(m_rho, 2) * s +
@@ -7709,9 +7728,10 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                     pow(m_pion_, 2) * pow(s, 2) *
                         (1. * pow(m_rho, 2) - 0.5 * delta * s) +
                     pow(m_pion_, 6) * (-1. * pow(m_rho, 2) + 0.5 * delta * s) +
-                    pow(m_pion_, 4) * (-2.5 * pow(m_rho, 4) +
-                                     (0.5 + 1.25 * delta) * pow(m_rho, 2) * s -
-                                     0.25 * delta * pow(s, 2)) +
+                    pow(m_pion_, 4) *
+                        (-2.5 * pow(m_rho, 4) +
+                         (0.5 + 1.25 * delta) * pow(m_rho, 2) * s -
+                         0.25 * delta * pow(s, 2)) +
                     s * (0.25 * pow(m_rho, 6) -
                          0.125 * delta * pow(m_rho, 4) * s -
                          0.25 * pow(m_rho, 2) * pow(s, 2) +
@@ -7719,14 +7739,15 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                     pow(ma1, 4) * (-1.5 * pow(m_rho, 4) +
                                    (1.5 + 0.75 * delta) * pow(m_rho, 2) * s -
                                    0.75 * delta * pow(s, 2) +
-                                   pow(m_pion_, 2) *
-                                       (-3. * pow(m_rho, 2) + 1.5 * delta * s)) +
+                                   pow(m_pion_, 2) * (-3. * pow(m_rho, 2) +
+                                                      1.5 * delta * s)) +
                     pow(ma1, 2) *
                         (0.5 * pow(m_rho, 6) +
                          (-2. - 0.25 * delta) * pow(m_rho, 4) * s +
                          (0.5 + 1. * delta) * pow(m_rho, 2) * pow(s, 2) -
                          0.25 * delta * pow(s, 3) +
-                         pow(m_pion_, 4) * (3. * pow(m_rho, 2) - 1.5 * delta * s) +
+                         pow(m_pion_, 4) *
+                             (3. * pow(m_rho, 2) - 1.5 * delta * s) +
                          pow(m_pion_, 2) *
                              (4. * pow(m_rho, 4) +
                               (-2. - 2. * delta) * pow(m_rho, 2) * s +
@@ -7753,7 +7774,8 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
               2. * C4 * pow(m_rho, 8) - 1. * C4 * delta * pow(m_rho, 8) +
               1. * pow(m_rho, 4) * s + 0.25 * delta * pow(m_rho, 4) * s -
               0.375 * pow(delta, 2) * pow(m_rho, 4) * s -
-              6. * C4 * pow(m_rho, 6) * s + 3. * C4 * delta * pow(m_rho, 6) * s -
+              6. * C4 * pow(m_rho, 6) * s +
+              3. * C4 * delta * pow(m_rho, 6) * s -
               0.5 * pow(m_rho, 2) * pow(s, 2) -
               0.75 * delta * pow(m_rho, 2) * pow(s, 2) +
               0.5 * pow(delta, 2) * pow(m_rho, 2) * pow(s, 2) +
@@ -7765,11 +7787,11 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                    (0.5 - 0.125 * pow(delta, 2)) * pow(m_rho, 2) * s +
                    (-1.25 + 0.625 * delta) * delta * pow(s, 2) +
                    pow(m_rho, 4) * (-0.5 + 1.25 * delta - 0.5 * pow(delta, 2) -
-                                   2. * C4 * s + 1. * C4 * delta * s)) +
+                                    2. * C4 * s + 1. * C4 * delta * s)) +
               (pow(m_pion_, 2) * ((-2. + 1. * delta) * pow(m_rho, 4) -
-                                0.5000000000000001 * pow(2. - 1. * delta, 2) *
-                                    pow(m_rho, 2) * s +
-                                (1. - 0.5 * delta) * delta * pow(s, 2)) +
+                                  0.5000000000000001 * pow(2. - 1. * delta, 2) *
+                                      pow(m_rho, 2) * s +
+                                  (1. - 0.5 * delta) * delta * pow(s, 2)) +
                s * ((-0.5 + 0.25 * delta) * pow(m_rho, 4) +
                     (0.5 - 0.125 * pow(delta, 2)) * pow(m_rho, 2) * s +
                     (-0.25 + 0.125 * delta) * delta * pow(s, 2))) *
@@ -7780,17 +7802,13 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                        pow(m_rho, 2) * s +
                    (0.25 - 0.125 * delta) * delta * pow(s, 2)) +
               pow(m_pion_, 2) * (C4 * (4. - 2. * delta) * pow(m_rho, 6) +
-                               delta * (-3. + 1.5 * delta) * pow(s, 2) +
-                               pow(m_rho, 2) * s *
-                                   (2. - 1.5 * pow(delta, 2) + 4. * C4 * s +
-                                    delta * (2. - 2. * C4 * s)) +
-                               pow(m_rho, 4) * (-2. - 8. * C4 * s +
-                                               delta * (1. + 4. * C4 * s))) +
-              s * ((0.5 - 0.25 * delta) * pow(m_rho, 4) + 0.12500000000000003
-              * pow(2. - 1. * delta, 2) * pow(m_rho, 2) * s +
-              (-0.25 + 0.125 * delta) * delta * pow(s, 2) + pow(m_pion_, 2) *
-              ((-4. + 2. * delta) * pow(m_rho, 2) +
-              (2. - 1. * delta) * delta * s)) *
+                                 delta * (-3. + 1.5 * delta) * pow(s, 2) +
+                                 pow(m_rho, 2) * s *
+                                     (2. - 1.5 * pow(delta, 2) + 4. * C4 * s +
+                                      delta * (2. - 2. * C4 * s)) +
+                                 pow(m_rho, 4) * (-2. - 8. * C4 * s +
+                                                  delta * (1. + 4. * C4 * s))) +
+              s * ((0.5 - 0.25 * delta) * pow(m_rho, 4) + 0.12500000000000003 * pow(2. - 1. * delta, 2) * pow(m_rho, 2) * s + (-0.25 + 0.125 * delta) * delta * pow(s, 2) + pow(m_pion_, 2) * ((-4. + 2. * delta) * pow(m_rho, 2) + (2. - 1. * delta) * delta * s)) *
                   HeavisideTheta(-m_rho + sqrt(s))) *
              log(fabs(-1. * pow(m_pion_, 2) + tmin))) /
             (pow(m_rho, 4) * (pow(m_rho, 2) - 1. * s)) +
@@ -7800,31 +7818,32 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                  (-4. * pow(ma1, 6) +
                   pow(ma1, 4) * (12. * pow(m_pion_, 2) - 6. * s) +
                   pow(m_pion_, 2) * (4. * pow(m_pion_, 4) - 4. * pow(m_rho, 4) -
-                                   2. * pow(m_pion_, 2) * s +
-                                   2. * pow(m_rho, 2) * s) +
+                                     2. * pow(m_pion_, 2) * s +
+                                     2. * pow(m_rho, 2) * s) +
                   pow(ma1, 2) * (-12. * pow(m_pion_, 4) + 2. * pow(m_rho, 4) +
                                  8. * pow(m_pion_, 2) * s +
                                  4. * pow(m_rho, 2) * s - 4. * pow(s, 2))) +
-             pow(eta1, 2) * (2. * pow(ma1, 6) - 2. * pow(m_pion_, 6) +
-                             pow(m_pion_, 2) * pow(m_rho, 2) * s +
-                             pow(m_rho, 2) * (pow(m_rho, 2) - 1. * s) * s +
-                             pow(m_pion_, 4) * (-3. * pow(m_rho, 2) + s) +
-                             pow(ma1, 4) * (-6. * pow(m_pion_, 2) -
-                                            3. * pow(m_rho, 2) + 3. * s) +
-                             pow(ma1, 2) *
-                                 (6. * pow(m_pion_, 4) + pow(m_rho, 4) +
-                                  pow(m_pion_, 2) * (6. * pow(m_rho, 2) - 4. * s) -
-                                  4. * pow(m_rho, 2) * s + 2. * pow(s, 2))) +
-             pow(eta2, 2) * (2. * pow(ma1, 6) - 2. * pow(m_pion_, 6) -
-                             1. * pow(m_pion_, 2) * pow(m_rho, 2) * s +
-                             pow(m_pion_, 4) * (3. * pow(m_rho, 2) + s) +
-                             pow(ma1, 4) * (-6. * pow(m_pion_, 2) +
-                                            3. * pow(m_rho, 2) + 3. * s) +
-                             pow(ma1, 2) *
-                                 (6. * pow(m_pion_, 4) + pow(m_rho, 4) +
-                                  pow(m_pion_, 2) *
-                                      (-6. * pow(m_rho, 2) - 4. * s) -
-                                  2. * pow(m_rho, 2) * s + 2. * pow(s, 2)))) *
+             pow(eta1, 2) *
+                 (2. * pow(ma1, 6) - 2. * pow(m_pion_, 6) +
+                  pow(m_pion_, 2) * pow(m_rho, 2) * s +
+                  pow(m_rho, 2) * (pow(m_rho, 2) - 1. * s) * s +
+                  pow(m_pion_, 4) * (-3. * pow(m_rho, 2) + s) +
+                  pow(ma1, 4) *
+                      (-6. * pow(m_pion_, 2) - 3. * pow(m_rho, 2) + 3. * s) +
+                  pow(ma1, 2) * (6. * pow(m_pion_, 4) + pow(m_rho, 4) +
+                                 pow(m_pion_, 2) *
+                                     (6. * pow(m_rho, 2) - 4. * s) -
+                                 4. * pow(m_rho, 2) * s + 2. * pow(s, 2))) +
+             pow(eta2, 2) *
+                 (2. * pow(ma1, 6) - 2. * pow(m_pion_, 6) -
+                  1. * pow(m_pion_, 2) * pow(m_rho, 2) * s +
+                  pow(m_pion_, 4) * (3. * pow(m_rho, 2) + s) +
+                  pow(ma1, 4) *
+                      (-6. * pow(m_pion_, 2) + 3. * pow(m_rho, 2) + 3. * s) +
+                  pow(ma1, 2) * (6. * pow(m_pion_, 4) + pow(m_rho, 4) +
+                                 pow(m_pion_, 2) *
+                                     (-6. * pow(m_rho, 2) - 4. * s) -
+                                 2. * pow(m_rho, 2) * s + 2. * pow(s, 2)))) *
             log(fabs(-1. * pow(ma1, 2) + tmax)) -
         (0.25 * (-2. + delta) * (eta1 - 1. * eta2) *
          (eta2 *
@@ -7836,39 +7855,42 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                    (0.5 * pow(m_pion_, 2) + 1. * pow(m_rho, 2) - 1. * s)) +
           eta1 *
               (pow(ma1, 4) * (1. * pow(m_pion_, 2) + 0.5 * s) +
-               pow(m_pion_, 2) * (1. * pow(m_pion_, 4) + 1. * pow(m_rho, 4) +
-                                pow(m_pion_, 2) * (-1. * pow(m_rho, 2) + 0.5 * s) -
-                                0.5 * pow(m_rho, 2) * s) +
+               pow(m_pion_, 2) *
+                   (1. * pow(m_pion_, 4) + 1. * pow(m_rho, 4) +
+                    pow(m_pion_, 2) * (-1. * pow(m_rho, 2) + 0.5 * s) -
+                    0.5 * pow(m_rho, 2) *
+                        s) +
                pow(ma1, 2) * (-2. * pow(m_pion_, 4) - 0.5 * pow(m_rho, 2) * s +
-                              pow(m_pion_, 2) * (-1. * pow(m_rho, 2) + 1. * s)))) *
+                              pow(m_pion_, 2) *
+                                  (-1. * pow(m_rho, 2) + 1. * s)))) *
          log(fabs(-1. * pow(ma1, 2) + tmax))) /
             (pow(ma1, 2) - 1. * pow(m_pion_, 2)) +
         (0.25 * (1. * eta1 - 1. * eta2) *
          (delta *
               (eta1 *
                    (1. * pow(ma1, 6) - 1. * pow(m_pion_, 6) +
-                    pow(m_pion_, 4) *
-                        (-2.5 * pow(m_rho, 2) + 0.5 * s) +
-                    pow(m_pion_, 2) *
-                        s *
-                        (-0.5 * pow(m_rho, 2) + 1. * s) +
+                    pow(m_pion_, 4) * (-2.5 * pow(m_rho, 2) + 0.5 * s) +
+                    pow(m_pion_, 2) * s * (-0.5 * pow(m_rho, 2) + 1. * s) +
                     pow(ma1, 4) *
-                        (-3. * pow(m_pion_, 2) - 1.5 * pow(m_rho, 2) + 1.5 * s) +
+                        (-3. * pow(m_pion_, 2) - 1.5 * pow(m_rho, 2) +
+                         1.5 * s) +
                     s * (0.5 * pow(m_rho, 4) - 0.25 * pow(m_rho, 2) * s -
-                         0.25 *
-                             pow(s, 2)) +
+                         0.25 * pow(s, 2)) +
                     pow(ma1, 2) *
                         (3. * pow(m_pion_, 4) + 0.5 * pow(m_rho, 4) +
                          pow(m_pion_, 2) *
                              (4. * pow(m_rho, 2) - 2. * s) -
-                         2. * pow(m_rho, 2) * s + 1. * pow(s, 2))) +
+                         2. * pow(m_rho, 2) *
+                             s +
+                         1. * pow(s, 2))) +
                eta2 *
                    (-1. * pow(ma1, 6) +
                     pow(ma1, 4) *
                         (3. * pow(m_pion_, 2) - 1. * pow(m_rho, 2) - 1. * s) +
-                    pow(m_pion_, 2) *
-                        (1. * pow(m_pion_, 4) - 0.5 * pow(m_rho, 4) +
-                         0.25 * pow(m_rho, 2) * s - 0.25 * pow(s, 2)) +
+                    pow(m_pion_, 2) * (1. * pow(m_pion_, 4) -
+                                       0.5 * pow(m_rho, 4) +
+                                       0.25 * pow(m_rho, 2) * s -
+                                       0.25 * pow(s, 2)) +
                     pow(ma1, 2) * (-3. * pow(m_pion_, 4) + 1. * pow(m_rho, 4) +
                                    0.25 * pow(m_rho, 2) * s - 0.75 * pow(s, 2) +
                                    pow(m_pion_, 2) *
@@ -7880,28 +7902,31 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                         (0.5 * pow(m_rho, 2) +
                          pow(m_pion_, 2) * (-1. + 2. * C4 * pow(m_rho, 2)) +
                          0.5 * s) +
-                    pow(ma1, 2) *
-                        (2. * C4 * pow(m_rho, 4) +
-                         pow(m_pion_, 2) * (2. - 4. * C4 * pow(m_rho, 2)) +
-                         pow(m_rho, 2) * (-1.5 - 4. * C4 * s) +
-                         s * (0.5 + 2. * C4 * s))) +
+                    pow(ma1, 2) * (2. * C4 * pow(m_rho, 4) +
+                                   pow(m_pion_, 2) *
+                                       (2. - 4. * C4 * pow(m_rho, 2)) +
+                                   pow(m_rho, 2) * (-1.5 - 4. * C4 * s) +
+                                   s * (0.5 + 2. * C4 * s))) +
                eta1 *
                    (pow(ma1, 4) * (1. - 2. * C4 * pow(m_rho, 2)) +
                     pow(m_pion_, 4) * (1. - 2. * C4 * pow(m_rho, 2)) +
                     (-0.5 * pow(m_rho, 2) + 0.5 * s) * s +
                     pow(ma1, 2) *
                         (-1. * pow(m_rho, 2) + 2. * C4 * pow(m_rho, 4) +
-                         pow(m_pion_, 2) * (-2. + 4. * C4 * pow(m_rho, 2)) -
+                         pow(m_pion_, 2) *
+                             (-2. + 4. * C4 * pow(m_rho, 2)) -
                          2. * C4 * pow(s, 2)) +
-                    pow(m_pion_, 2) * (-4. * C4 * pow(m_rho, 4) - 1. * s +
-                                     pow(m_rho, 2) * (2. + 4. * C4 * s))))) *
+                    pow(m_pion_, 2) *
+                        (-4. * C4 * pow(m_rho, 4) - 1. * s +
+                         pow(m_rho, 2) * (2. + 4. * C4 * s))))) *
          log(fabs(-1. * pow(ma1, 2) + tmax))) /
             pow(m_rho, 2) +
         (HeavisideTheta(-m_rho + sqrt(s)) *
          (-0.5 *
               (eta1 * eta2 *
-                   (0.25 * pow(m_rho, 6) +
-                    1.5 * pow(m_rho, 4) * s - 0.125 * delta * pow(m_rho, 4) * s -
+                   (0.25 * pow(m_rho, 6) + 1.5 * pow(m_rho, 4) * s -
+                    0.125 *
+                        delta * pow(m_rho, 4) * s -
                     0.75 * pow(m_rho, 2) * pow(s, 2) -
                     0.75 * delta * pow(m_rho, 2) * pow(s, 2) +
                     0.375 *
@@ -7909,8 +7934,8 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                     pow(ma1, 4) * (-2. * pow(m_rho, 2) + 1. * delta * s) +
                     pow(m_pion_, 4) * (-6. * pow(m_rho, 2) + 3. * delta * s) +
                     pow(m_pion_, 2) * (-3. * pow(m_rho, 4) +
-                                     (3. + 1.5 * delta) * pow(m_rho, 2) * s -
-                                     1.5 * delta * pow(s, 2)) +
+                                       (3. + 1.5 * delta) * pow(m_rho, 2) * s -
+                                       1.5 * delta * pow(s, 2)) +
                     pow(ma1, 2) * (0.5 * pow(m_rho, 4) +
                                    (-2.5 - 0.25 * delta) * pow(m_rho, 2) * s +
                                    1.25 * delta * pow(s, 2) +
@@ -7924,17 +7949,20 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                     0.25 * delta * pow(s, 3) +
                     pow(m_pion_, 4) * (3. * pow(m_rho, 2) - 1.5 * delta * s) +
                     pow(ma1, 4) * (1. * pow(m_rho, 2) - 0.5 * delta * s) +
-                    pow(m_pion_, 2) * (4. * pow(m_rho, 4) +
-                                     (-2. - 2. * delta) * pow(m_rho, 2) * s +
-                                     1. * delta * pow(s, 2)) +
-                    pow(ma1, 2) * (-1.5 * pow(m_rho, 4) +
-                                   (1.5 + 0.75 * delta) * pow(m_rho, 2) * s -
-                                   0.75 * delta * pow(s, 2) +
-                                   pow(m_pion_, 2) * (-3. * pow(m_rho, 2) +
-                                                    1.5 * delta * s))) +
+                    pow(m_pion_, 2) *
+                        (4. * pow(m_rho, 4) +
+                         (-2. - 2. * delta) * pow(m_rho, 2) * s +
+                         1. * delta * pow(s, 2)) +
+                    pow(ma1, 2) *
+                        (-1.5 * pow(m_rho, 4) +
+                         (1.5 + 0.75 * delta) * pow(m_rho, 2) * s -
+                         0.75 * delta * pow(s, 2) +
+                         pow(m_pion_, 2) *
+                             (-3. * pow(m_rho, 2) + 1.5 * delta * s))) +
                pow(eta2, 2) *
-                   (-0.75 * pow(m_rho, 6) +
-                    0.5 * pow(m_rho, 4) * s + 0.375 * delta * pow(m_rho, 4) * s +
+                   (-0.75 * pow(m_rho, 6) + 0.5 * pow(m_rho, 4) * s +
+                    0.375 *
+                        delta * pow(m_rho, 4) * s +
                     0.25 * pow(m_rho, 2) * pow(s, 2) -
                     0.25 * delta * pow(m_rho, 2) * pow(s, 2) -
                     0.125 *
@@ -7942,30 +7970,35 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                     pow(m_pion_, 4) * (3. * pow(m_rho, 2) - 1.5 * delta * s) +
                     pow(ma1, 4) * (1. * pow(m_rho, 2) - 0.5 * delta * s) +
                     pow(m_pion_, 2) * (-1. * pow(m_rho, 4) +
-                                     (-1. + 0.5 * delta) * pow(m_rho, 2) * s +
-                                     0.5 * delta * pow(s, 2)) +
-                    pow(ma1, 2) * (1. * pow(m_rho, 4) +
-                                   (1. - 0.5 * delta) * pow(m_rho, 2) * s -
-                                   0.5 * delta * pow(s, 2) +
-                                   pow(m_pion_, 2) * (-3. * pow(m_rho, 2) +
-                                                    1.5 * delta * s)))) *
+                                       (-1. + 0.5 * delta) * pow(m_rho, 2) * s +
+                                       0.5 *
+                                           delta * pow(s, 2)) +
+                    pow(ma1, 2) *
+                        (1. * pow(m_rho, 4) +
+                         (1. - 0.5 * delta) * pow(m_rho, 2) * s -
+                         0.5 * delta * pow(s, 2) +
+                         pow(m_pion_, 2) *
+                             (-3. * pow(m_rho, 2) + 1.5 * delta * s)))) *
               tmax -
           0.25 *
               (eta1 * eta2 *
                    (0.5 * pow(m_rho, 4) - 2.5 * pow(m_rho, 2) * s -
-                    0.25 * delta * pow(m_rho, 2) * s + 1.25 * delta * pow(s, 2) +
+                    0.25 * delta * pow(m_rho, 2) * s +
+                    1.25 * delta * pow(s, 2) +
                     pow(m_pion_, 2) * (6. * pow(m_rho, 2) - 3. * delta * s) +
                     pow(ma1, 2) * (-2. * pow(m_rho, 2) + 1. * delta * s)) +
                pow(eta1, 2) *
                    (-1.5 * pow(m_rho, 4) + 1.5 * pow(m_rho, 2) * s +
-                    0.75 * delta * pow(m_rho, 2) * s - 0.75 * delta * pow(s, 2) +
+                    0.75 * delta * pow(m_rho, 2) * s -
+                    0.75 * delta * pow(s, 2) +
                     pow(ma1, 2) * (1. * pow(m_rho, 2) - 0.5 * delta * s) +
                     pow(m_pion_, 2) * (-3. * pow(m_rho, 2) + 1.5 * delta * s)) +
                pow(eta2, 2) *
                    (1. * pow(m_rho, 4) + 1. * pow(m_rho, 2) * s -
                     0.5 * delta * pow(m_rho, 2) * s - 0.5 * delta * pow(s, 2) +
                     pow(ma1, 2) * (1. * pow(m_rho, 2) - 0.5 * delta * s) +
-                    pow(m_pion_, 2) * (-3. * pow(m_rho, 2) + 1.5 * delta * s))) *
+                    pow(m_pion_, 2) *
+                        (-3. * pow(m_rho, 2) + 1.5 * delta * s))) *
               pow(tmax, 2) -
           0.16666666666666666 *
               (pow(eta1, 2) * (1. * pow(m_rho, 2) - 0.5 * delta * s) +
@@ -7976,9 +8009,10 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
               (eta1 * eta2 *
                    (pow(m_pion_, 6) * (2. * pow(m_rho, 2) - 1. * delta * s) +
                     pow(ma1, 6) * (-2. * pow(m_rho, 2) + 1. * delta * s) +
-                    pow(m_pion_, 4) * (2.5 * pow(m_rho, 4) +
-                                     (-0.5 - 1.25 * delta) * pow(m_rho, 2) * s +
-                                     0.25 * delta * pow(s, 2)) +
+                    pow(m_pion_, 4) *
+                        (2.5 * pow(m_rho, 4) +
+                         (-0.5 - 1.25 * delta) * pow(m_rho, 2) * s +
+                         0.25 * delta * pow(s, 2)) +
                     s * (-0.25 * pow(m_rho, 6) +
                          0.125 *
                              delta * pow(m_rho, 4) * s +
@@ -7991,23 +8025,23 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                          (-1.25 - 0.25 * delta) * pow(m_rho, 2) * pow(s, 2) +
                          0.625 *
                              delta * pow(s, 3)) +
-                    pow(ma1, 4) *
-                        (0.5 * pow(m_rho, 4) +
-                         (-2.5 - 0.25 * delta) * pow(m_rho, 2) * s +
-                         1.25 * delta * pow(s, 2) +
-                         pow(m_pion_, 2) * (6. * pow(m_rho, 2) - 3. * delta * s)) +
+                    pow(ma1, 4) * (0.5 * pow(m_rho, 4) +
+                                   (-2.5 - 0.25 * delta) * pow(m_rho, 2) * s +
+                                   1.25 * delta * pow(s, 2) +
+                                   pow(m_pion_, 2) *
+                                       (6. * pow(m_rho, 2) - 3. * delta * s)) +
                     pow(ma1, 2) *
                         (0.25 * pow(m_rho, 6) +
                          (1.5 - 0.125 * delta) * pow(m_rho, 4) * s +
                          (-0.75 - 0.75 * delta) * pow(m_rho, 2) * pow(s, 2) +
                          0.375 *
                              delta * pow(s, 3) +
-                         pow(m_pion_, 4) * (-6. * pow(m_rho, 2) + 3. * delta * s) +
-                         pow(m_pion_, 2) * (-3. * pow(m_rho, 4) +
-                                          (3. + 1.5 * delta) * pow(m_rho, 2) *
-                                              s -
-                                          1.5 *
-                                              delta * pow(s, 2)))) +
+                         pow(m_pion_, 4) *
+                             (-6. * pow(m_rho, 2) + 3. * delta * s) +
+                         pow(m_pion_, 2) *
+                             (-3. * pow(m_rho, 4) +
+                              (3. + 1.5 * delta) * pow(m_rho, 2) * s -
+                              1.5 * delta * pow(s, 2)))) +
                pow(eta2, 2) *
                    (pow(ma1, 6) * (1. * pow(m_rho, 2) - 0.5 * delta * s) +
                     pow(m_pion_, 2) *
@@ -8018,52 +8052,58 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                              delta * pow(s, 3) +
                          pow(m_pion_, 4) *
                              (-1. * pow(m_rho, 2) + 0.5 * delta * s)) +
-                    pow(ma1, 4) * (1. * pow(m_rho, 4) +
-                                   (1. - 0.5 * delta) * pow(m_rho, 2) * s -
-                                   0.5 * delta * pow(s, 2) +
-                                   pow(m_pion_, 2) *
-                                       (-3. * pow(m_rho, 2) + 1.5 * delta * s)) +
+                    pow(ma1, 4) *
+                        (1. * pow(m_rho, 4) +
+                         (1. - 0.5 * delta) * pow(m_rho, 2) * s -
+                         0.5 * delta * pow(s, 2) +
+                         pow(m_pion_, 2) *
+                             (-3. * pow(m_rho, 2) + 1.5 * delta * s)) +
                     pow(ma1, 2) *
                         (-0.75 * pow(m_rho, 6) +
                          (0.5 + 0.375 * delta) * pow(m_rho, 4) * s +
                          (0.25 - 0.25 * delta) * pow(m_rho, 2) * pow(s, 2) -
                          0.125 *
                              delta * pow(s, 3) +
-                         pow(m_pion_, 4) * (3. * pow(m_rho, 2) - 1.5 * delta * s) +
+                         pow(m_pion_, 4) *
+                             (3. * pow(m_rho, 2) - 1.5 * delta * s) +
                          pow(m_pion_, 2) *
                              (-1. * pow(m_rho, 4) +
-                              (-1. + 0.5 * delta) * pow(m_rho, 2) * s +
+                              (-1. + 0.5 * delta) *
+                                  pow(m_rho, 2) *
+                                  s +
                               0.5 * delta * pow(s, 2)))) +
                pow(eta1, 2) *
                    (pow(ma1, 6) * (1. * pow(m_rho, 2) - 0.5 * delta * s) +
                     pow(m_pion_, 2) * pow(s, 2) *
                         (1. * pow(m_rho, 2) - 0.5 * delta * s) +
                     pow(m_pion_, 6) * (-1. * pow(m_rho, 2) + 0.5 * delta * s) +
-                    pow(m_pion_, 4) *
-                        (-2.5 * pow(m_rho, 4) +
-                         (0.5 + 1.25 * delta) * pow(m_rho, 2) * s -
-                         0.25 * delta * pow(s, 2)) +
+                    pow(m_pion_, 4) * (-2.5 * pow(m_rho, 4) +
+                                       (0.5 + 1.25 * delta) * pow(m_rho, 2) *
+                                           s -
+                                       0.25 * delta * pow(s, 2)) +
                     s * (0.25 * pow(m_rho, 6) -
                          0.125 *
                              delta * pow(m_rho, 4) * s -
                          0.25 * pow(m_rho, 2) * pow(s, 2) +
                          0.125 *
                              delta * pow(s, 3)) +
-                    pow(ma1, 4) * (-1.5 * pow(m_rho, 4) +
-                                   (1.5 + 0.75 * delta) * pow(m_rho, 2) * s -
-                                   0.75 * delta * pow(s, 2) +
-                                   pow(m_pion_, 2) *
-                                       (-3. * pow(m_rho, 2) + 1.5 * delta * s)) +
+                    pow(ma1, 4) *
+                        (-1.5 * pow(m_rho, 4) +
+                         (1.5 + 0.75 * delta) * pow(m_rho, 2) * s -
+                         0.75 * delta * pow(s, 2) +
+                         pow(m_pion_, 2) *
+                             (-3. * pow(m_rho, 2) + 1.5 * delta * s)) +
                     pow(ma1, 2) *
                         (0.5 * pow(m_rho, 6) +
                          (-2. - 0.25 * delta) * pow(m_rho, 4) * s +
                          (0.5 + 1. * delta) * pow(m_rho, 2) * pow(s, 2) -
                          0.25 * delta * pow(s, 3) +
-                         pow(m_pion_, 4) * (3. * pow(m_rho, 2) - 1.5 * delta * s) +
-                         pow(m_pion_, 2) * (4. * pow(m_rho, 4) +
-                                          (-2. - 2. * delta) * pow(m_rho, 2) *
-                                              s +
-                                          1. * delta * pow(s, 2))))) *
+                         pow(m_pion_, 4) *
+                             (3. * pow(m_rho, 2) - 1.5 * delta * s) +
+                         pow(m_pion_, 2) *
+                             (4. * pow(m_rho, 4) +
+                              (-2. - 2. * delta) * pow(m_rho, 2) * s +
+                              1. * delta * pow(s, 2))))) *
               log(fabs(-1. * pow(ma1, 2) + tmax)))) /
             (pow(m_rho, 2) * (pow(m_rho, 2) - 1. * s)) +
         0.5 * pow(-2. + delta, 2) * pow(m_pion_, 2) *
@@ -8087,7 +8127,8 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
               1. * pow(m_rho, 4) * s + 0.25 * delta * pow(m_rho, 4) * s -
               0.375 *
                   pow(delta, 2) * pow(m_rho, 4) * s -
-              6. * C4 * pow(m_rho, 6) * s + 3. * C4 * delta * pow(m_rho, 6) * s -
+              6. * C4 * pow(m_rho, 6) * s +
+              3. * C4 * delta * pow(m_rho, 6) * s -
               0.5 * pow(m_rho, 2) * pow(s, 2) -
               0.75 * delta * pow(m_rho, 2) * pow(s, 2) +
               0.5 * pow(delta, 2) * pow(m_rho, 2) * pow(s, 2) +
@@ -8097,15 +8138,15 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
               pow(m_pion_, 2) *
                   (C4 * (2. - 1. * delta) * pow(m_rho, 6) +
                    (0.5 - 0.125 * pow(delta, 2)) * pow(m_rho, 2) * s +
-                   (-1.25 + 0.625 * delta) * delta * pow(s, 2) +
-                   pow(m_rho, 4) *
-                       (-0.5 + 1.25 * delta - 0.5 * pow(delta, 2) -
-                        2. * C4 * s +
-                        1. * C4 * delta * s)) +
+                   (-1.25 + 0.625 * delta) *
+                       delta *
+                       pow(s, 2) +
+                   pow(m_rho, 4) * (-0.5 + 1.25 * delta - 0.5 * pow(delta, 2) -
+                                    2. * C4 * s + 1. * C4 * delta * s)) +
               (pow(m_pion_, 2) * ((-2. + 1. * delta) * pow(m_rho, 4) -
-                                0.5000000000000001 * pow(2. - 1. * delta, 2) *
-                                    pow(m_rho, 2) * s +
-                                (1. - 0.5 * delta) * delta * pow(s, 2)) +
+                                  0.5000000000000001 * pow(2. - 1. * delta, 2) *
+                                      pow(m_rho, 2) * s +
+                                  (1. - 0.5 * delta) * delta * pow(s, 2)) +
                s * ((-0.5 + 0.25 * delta) * pow(m_rho, 4) +
                     (0.5 - 0.125 * pow(delta, 2)) * pow(m_rho, 2) * s +
                     (-0.25 + 0.125 * delta) * delta * pow(s, 2))) *
@@ -8115,15 +8156,18 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                    0.12500000000000003 * pow(2. - 1. * delta, 2) *
                        pow(m_rho, 2) * s +
                    (0.25 - 0.125 * delta) * delta * pow(s, 2)) +
-              pow(m_pion_, 2) * (C4 * (4. - 2. * delta) * pow(m_rho, 6) +
-              delta * (-3. + 1.5 * delta) * pow(s, 2) + pow(m_rho, 2) * s *
-          (2. - 1.5 * pow(delta, 2) + 4. * C4 * s + delta * (2. - 2. * C4 * s))
-          + pow(m_rho, 4) * (-2. - 8. * C4 * s + delta * (1. + 4. * C4 * s)))
-          + s * ((0.5 - 0.25 * delta) * pow(m_rho, 4) + 0.12500000000000003 *
-          pow(2. - 1. * delta, 2) * pow(m_rho, 2) * s + (-0.25 + 0.125 * delta)
-          * delta * pow(s, 2) + pow(m_pion_, 2) * ((-4. + 2. * delta) *
-          pow(m_rho, 2) + (2. - 1. * delta) * delta * s)) *
-          HeavisideTheta(-m_rho + sqrt(s))) *
+              pow(m_pion_, 2) *
+                  (C4 * (4. - 2. * delta) * pow(m_rho, 6) +
+                   delta *
+                       (-3. + 1.5 * delta) * pow(s, 2) +
+                   pow(m_rho, 2) * s *
+                       (2. - 1.5 * pow(delta, 2) + 4. * C4 * s +
+                        delta *
+                            (2. - 2. * C4 * s)) +
+                   pow(m_rho, 4) *
+                       (-2. - 8. * C4 * s + delta * (1. + 4. * C4 * s))) +
+              s * ((0.5 - 0.25 * delta) * pow(m_rho, 4) + 0.12500000000000003 * pow(2. - 1. * delta, 2) * pow(m_rho, 2) * s + (-0.25 + 0.125 * delta) * delta * pow(s, 2) + pow(m_pion_, 2) * ((-4. + 2. * delta) * pow(m_rho, 2) + (2. - 1. * delta) * delta * s)) *
+                  HeavisideTheta(-m_rho + sqrt(s))) *
              log(fabs(-1. * pow(m_pion_, 2) + tmax))) /
             (pow(m_rho, 4) * (pow(m_rho, 2) - 1. * s)))) /
       (16. * Pi * s * (-4 * pow(m_pion_, 2) + s));
@@ -8152,7 +8196,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi0_rho(
         (pow(delta, 2) *
          (0.5 * pow(m_pion_, 4) * pow(m_rho, 2) + 0.125 * pow(m_rho, 6) +
           pow(m_pion_, 2) * (1.25 * pow(m_rho, 4) - 0.375 * pow(s, 2) +
-                           pow(m_rho, 2) * (0.125 * s - 1. * t)) +
+                             pow(m_rho, 2) * (0.125 * s - 1. * t)) +
           pow(m_rho, 4) * (-0.375 * s - 0.5 * t) +
           pow(s, 2) * (0.125 * s + 0.125 * t) +
           pow(m_rho, 2) *
@@ -8160,7 +8204,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi0_rho(
             pow(m_rho, 6) +
         (delta * (2. * C4 * pow(m_rho, 6) +
                   pow(m_pion_, 2) * (3. * C4 * pow(m_rho, 4) + 0.25 * s +
-                                   pow(m_rho, 2) * (-1.25 - 1. * C4 * s)) +
+                                     pow(m_rho, 2) * (-1.25 - 1. * C4 * s)) +
                   s * (-0.25 * s - 0.25 * t) +
                   pow(m_rho, 4) * (-0.75 - 1.5 * C4 * s - 3. * C4 * t) +
                   pow(m_rho, 2) *
@@ -8174,7 +8218,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi0_rho(
                   pow(m_pion_, 4) * (-2 * pow(m_rho, 2) + s - 4 * t) +
                   s * t * (-pow(m_rho, 2) + t) +
                   pow(m_pion_, 2) * (2 * pow(m_rho, 4) + 2 * t * (s + t) -
-                                   pow(m_rho, 2) * (s + 2 * t))))) /
+                                     pow(m_rho, 2) * (s + 2 * t))))) /
             ((-pow(ma1, 2) + t) * (-pow(m_pion_, 2) + t)) +
         (0.03125 * pow(eta1 - eta2, 2) *
          (-2 * eta1 * eta2 *
@@ -8191,7 +8235,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi0_rho(
                2 * pow(m_pion_, 2) * t *
                    (2 * t * (s + t) + pow(m_rho, 2) * (s + 3 * t)) +
                pow(m_pion_, 4) * (pow(m_rho, 4) + 6 * pow(m_rho, 2) * t +
-                                2 * t * (s + 3 * t))) +
+                                  2 * t * (s + 3 * t))) +
           pow(eta1, 2) *
               (pow(m_pion_, 8) + 2 * pow(m_pion_, 6) * (pow(m_rho, 2) - 2 * t) -
                2 * pow(m_pion_, 2) * (pow(m_rho, 2) - s - t) *
@@ -8199,38 +8243,40 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi0_rho(
                t * (-pow(m_rho, 2) + t) *
                    (2 * pow(s, 2) + 2 * s * t + pow(t, 2) -
                     pow(m_rho, 2) * (2 * s + t)) +
-               pow(m_pion_, 4) * (pow(m_rho, 4) - 2 * pow(m_rho, 2) * (s + 3 * t) +
-                                2 * t * (s + 3 * t))))) /
+               pow(m_pion_, 4) *
+                   (pow(m_rho, 4) - 2 * pow(m_rho, 2) * (s + 3 * t) +
+                    2 * t * (s + 3 * t))))) /
             pow(pow(ma1, 2) - t, 2) -
         (0.0625 * (eta1 - eta2) *
          (eta2 *
               (-4 * delta * pow(m_pion_, 6) +
                4 * pow(m_pion_, 4) *
                    (pow(m_rho, 2) - 2 * C4 * pow(m_rho, 4) + 3 * delta * t) +
-               pow(m_pion_, 2) * (delta * (s - 6 * t) * (s + 2 * t) -
-                                (2 + delta) * pow(m_rho, 2) * (s + 4 * t) +
-                                2 * pow(m_rho, 4) * (-1 + delta + 8 * C4 * t)) +
+               pow(m_pion_, 2) *
+                   (delta * (s - 6 * t) * (s + 2 * t) -
+                    (2 + delta) * pow(m_rho, 2) * (s + 4 * t) +
+                    2 * pow(m_rho, 4) * (-1 + delta + 8 * C4 * t)) +
                t * (-8 * C4 * pow(m_rho, 6) +
                     pow(m_rho, 4) * (6 - 4 * delta + 16 * C4 * s - 8 * C4 * t) +
                     pow(m_rho, 2) * (-(s * (2 + delta + 8 * C4 * s)) +
-                                    4 * (1 + delta) * t) +
+                                     4 * (1 + delta) * t) +
                     delta * (3 * pow(s, 2) + 4 * s * t + 4 * pow(t, 2)))) +
-          eta1 *
-              (4 * delta * pow(m_pion_, 6) - 8 * C4 * pow(m_rho, 6) * t +
-               delta * (pow(s, 3) - 4 * pow(s, 2) * t - 6 * s * pow(t, 2) -
-                        4 * pow(t, 3)) -
-               2 * pow(m_pion_, 4) *
-                   ((2 - 5 * delta) * pow(m_rho, 2) - 4 * C4 * pow(m_rho, 4) +
-                    delta * (s + 6 * t)) +
-               2 * pow(m_rho, 4) *
-                   (s - delta * s + t * (2 - delta + 4 * C4 * t)) +
-               pow(m_rho, 2) *
-                   (8 * delta * s * t + 2 * (-2 + 3 * delta) * pow(t, 2) +
-                    pow(s, 2) * (-2 + delta + 8 * C4 * t)) -
-               2 * pow(m_pion_, 2) *
-                   (-8 * C4 * pow(m_rho, 6) + 2 * delta * (s - 3 * t) * (s + t) -
-                    pow(m_rho, 2) * ((2 + delta) * s + (4 - 8 * delta) * t) +
-                    pow(m_rho, 4) * (4 + 8 * C4 * (s + t)))))) /
+          eta1 * (4 * delta * pow(m_pion_, 6) - 8 * C4 * pow(m_rho, 6) * t +
+                  delta * (pow(s, 3) - 4 * pow(s, 2) * t - 6 * s * pow(t, 2) -
+                           4 * pow(t, 3)) -
+                  2 * pow(m_pion_, 4) *
+                      ((2 - 5 * delta) * pow(m_rho, 2) -
+                       4 * C4 * pow(m_rho, 4) + delta * (s + 6 * t)) +
+                  2 * pow(m_rho, 4) *
+                      (s - delta * s + t * (2 - delta + 4 * C4 * t)) +
+                  pow(m_rho, 2) *
+                      (8 * delta * s * t + 2 * (-2 + 3 * delta) * pow(t, 2) +
+                       pow(s, 2) * (-2 + delta + 8 * C4 * t)) -
+                  2 * pow(m_pion_, 2) *
+                      (-8 * C4 * pow(m_rho, 6) +
+                       2 * delta * (s - 3 * t) * (s + t) -
+                       pow(m_rho, 2) * ((2 + delta) * s + (4 - 8 * delta) * t) +
+                       pow(m_rho, 4) * (4 + 8 * C4 * (s + t)))))) /
             (pow(m_rho, 2) * (-pow(ma1, 2) + t)) +
         (0.0625 * pow(-2 * pow(m_rho, 2) + delta * s, 2) *
          (8 * pow(m_pion_, 4) * pow(m_rho, 2) + 2 * pow(m_rho, 6) + pow(s, 3) +
@@ -8241,7 +8287,8 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi0_rho(
             (pow(m_rho, 6) * pow(pow(m_rho, 2) - s, 2)) -
         (0.0625 * (eta1 - eta2) * (2 * pow(m_rho, 2) - delta * s) *
          (-(eta2 * (2 * pow(m_pion_, 2) + pow(m_rho, 2) - s - 2 * t) *
-            (2 * pow(m_pion_, 4) + pow(m_pion_, 2) * (-pow(m_rho, 2) + s - 4 * t) +
+            (2 * pow(m_pion_, 4) +
+             pow(m_pion_, 2) * (-pow(m_rho, 2) + s - 4 * t) +
              t * (3 * pow(m_rho, 2) + s + 2 * t))) +
           eta1 * (4 * pow(m_pion_, 6) - pow(m_rho, 4) * s + pow(s, 3) +
                   2 * pow(m_pion_, 4) * (5 * pow(m_rho, 2) - s - 6 * t) -
@@ -8252,15 +8299,15 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi0_rho(
          HeavisideTheta(-m_rho + sqrt(s))) /
             (pow(m_rho, 2) * (pow(m_rho, 2) - s) * (pow(ma1, 2) - t)) -
         (3. * (1. * pow(m_rho, 2) - 0.5 * delta * s) *
-         (delta *
-              (0.666667 * pow(m_pion_, 4) * pow(m_rho, 2) +
-               0.166667 * pow(m_rho, 6) +
-               pow(m_pion_, 2) * (1.66667 * pow(m_rho, 4) - 0.416667 * pow(s, 2) +
-                                pow(m_rho, 2) * (0.0833333 * s - 1.33333 * t)) +
-               pow(m_rho, 4) * (-0.541667 * s - 0.666667 * t) +
-               pow(s, 2) * (0.125 * s + 0.0833333 * t) +
-               pow(m_rho, 2) * (-0.0833333 * pow(s, 2) + 0.583333 * s * t +
-                               0.666667 * pow(t, 2))) +
+         (delta * (0.666667 * pow(m_pion_, 4) * pow(m_rho, 2) +
+                   0.166667 * pow(m_rho, 6) +
+                   pow(m_pion_, 2) *
+                       (1.66667 * pow(m_rho, 4) - 0.416667 * pow(s, 2) +
+                        pow(m_rho, 2) * (0.0833333 * s - 1.33333 * t)) +
+                   pow(m_rho, 4) * (-0.541667 * s - 0.666667 * t) +
+                   pow(s, 2) * (0.125 * s + 0.0833333 * t) +
+                   pow(m_rho, 2) * (-0.0833333 * pow(s, 2) + 0.583333 * s * t +
+                                    0.666667 * pow(t, 2))) +
           pow(m_rho, 2) *
               (1. * C4 * pow(m_rho, 6) +
                pow(m_pion_, 2) *
@@ -8269,20 +8316,20 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi0_rho(
                s * (-0.0833333 * s - 0.166667 * t) +
                pow(m_rho, 4) * (-0.416667 - 1.33333 * C4 * s - 2. * C4 * t) +
                pow(m_rho, 2) * (0.833333 * t + s * (0.5 + 0.333333 * C4 * s +
-                                                   0.666667 * C4 * t)))) *
+                                                    0.666667 * C4 * t)))) *
          HeavisideTheta(-m_rho + sqrt(s))) /
             (pow(m_rho, 8) - 1. * pow(m_rho, 6) * s) +
         ((0.125 * (-2 + delta) *
           (pow(m_pion_, 4) * ((-2 + 4 * delta) * pow(m_rho, 2) +
-                            8 * C4 * pow(m_rho, 4) + 5 * delta * s) -
+                              8 * C4 * pow(m_rho, 4) + 5 * delta * s) -
            8 * C4 * pow(m_rho, 6) * t + delta * s * t * (s + t) +
            pow(m_rho, 2) * (delta * s * (s - 3 * t) - 2 * t * (s + t)) +
            2 * pow(m_rho, 4) *
                ((-1 + delta) * s + t + 4 * C4 * t * (2 * s + t)) -
            pow(m_pion_, 2) * (8 * C4 * pow(m_rho, 6) + delta * s * (s + 6 * t) +
-                            2 * pow(m_rho, 4) * (-3 + 8 * C4 * t) +
-                            pow(m_rho, 2) * ((-2 + 9 * delta) * s +
-                                            4 * (-1 + delta) * t)))) /
+                              2 * pow(m_rho, 4) * (-3 + 8 * C4 * t) +
+                              pow(m_rho, 2) * ((-2 + 9 * delta) * s +
+                                               4 * (-1 + delta) * t)))) /
              (-pow(m_pion_, 2) + t) -
          (0.125 * (-2. + delta) * (-2. * pow(m_rho, 2) + delta * s) *
           (pow(m_pion_, 4) * (4. * pow(m_rho, 2) + 4. * s) +
@@ -8296,3 +8343,5 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi0_rho(
 
   return cut_off(to_mb * diff_xs / spin_deg_factor);
 }
+
+}  //  namespace smash

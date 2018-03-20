@@ -11,12 +11,7 @@
 
 #include "include/outputinterface.h"
 
-// using std::sqrt;
-// using std::pow;
-// using std::atan;
-
-using namespace smash;
-
+namespace smash {
 // Determines the reaction type (process) based on the incoming particles.
 // This mapping is unique.
 
@@ -89,17 +84,17 @@ void ScatterActionPhoton::perform_photons(const OutputsList &outputs) {
 // Determines outgoing hadron from ReactionType.
 ParticleTypePtr ScatterActionPhoton::outgoing_hadron_type(
     const ReactionType reaction) {
-  const static ParticleTypePtr rho_z_particle_ptr =
+  static const ParticleTypePtr rho_z_particle_ptr =
       &ParticleType::find(pdg::rho_z);
-  const static ParticleTypePtr rho_p_particle_ptr =
+  static const ParticleTypePtr rho_p_particle_ptr =
       &ParticleType::find(pdg::rho_p);
-  const static ParticleTypePtr rho_m_particle_ptr =
+  static const ParticleTypePtr rho_m_particle_ptr =
       &ParticleType::find(pdg::rho_m);
-  const static ParticleTypePtr pi_z_particle_ptr =
+  static const ParticleTypePtr pi_z_particle_ptr =
       &ParticleType::find(pdg::pi_z);
-  const static ParticleTypePtr pi_p_particle_ptr =
+  static const ParticleTypePtr pi_p_particle_ptr =
       &ParticleType::find(pdg::pi_p);
-  const static ParticleTypePtr pi_m_particle_ptr =
+  static const ParticleTypePtr pi_m_particle_ptr =
       &ParticleType::find(pdg::pi_m);
 
   switch (reaction) {
@@ -149,8 +144,8 @@ bool ScatterActionPhoton::is_kinematically_possible(const double s_sqrt,
   if (reac == ReactionType::no_reaction)
     return false;
 
-
-  if (default_mediator_ == MediatorType::PION && reac == ReactionType::pi_z_rho_z_pi_z) {
+  if (default_mediator_ == MediatorType::PION &&
+      reac == ReactionType::pi_z_rho_z_pi_z) {
     return false;
   }
   // C15 has only s-channel. Make sure that CM-energy is high
@@ -336,9 +331,9 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections(
       } else if (mediator == MediatorType::OMEGA) {
         xsection = xs_object.xs_pi_rho_pi0_omega_mediated(s, m_rho);
         break;
-      } else
+      } else {
         throw std::runtime_error("");
-
+      }
     case ReactionType::pi_z_rho_m_pi_m:
     case ReactionType::pi_z_rho_p_pi_p:
       if (mediator == MediatorType::SUM) {
@@ -350,8 +345,9 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections(
       } else if (mediator == MediatorType::OMEGA) {
         xsection = xs_object.xs_pi0_rho_pi_omega_mediated(s, m_rho);
         break;
-      } else
+      } else {
         throw std::runtime_error("");
+      }
 
     case ReactionType::pi_z_rho_z_pi_z:
       xsection = xs_object.xs_pi0_rho0_pi0(s, m_rho);
@@ -389,13 +385,13 @@ double ScatterActionPhoton::diff_cross_section(const double t,
 
   switch (reac_) {
     case ReactionType::pi_p_pi_m_rho_z:
-        diff_xsection = xs_object.xs_diff_pi_pi_rho0(s, t, m_rho);
+      diff_xsection = xs_object.xs_diff_pi_pi_rho0(s, t, m_rho);
 
       break;
 
     case ReactionType::pi_z_pi_m_rho_m:
     case ReactionType::pi_z_pi_p_rho_p:
-        diff_xsection = xs_object.xs_diff_pi_pi0_rho(s, t, m_rho);
+      diff_xsection = xs_object.xs_diff_pi_pi0_rho(s, t, m_rho);
 
       break;
 
@@ -464,8 +460,7 @@ double ScatterActionPhoton::diff_cross_section_w_ff(const double t,
     case ReactionType::pi_z_rho_p_pi_p: {
       if (default_mediator_ == MediatorType::SUM) {
         std::pair<double, double> FF = form_factor_single(E_photon);
-        std::pair<double, double> diff_xs =
-            diff_cross_section_single(t, m_rho);
+        std::pair<double, double> diff_xs = diff_cross_section_single(t, m_rho);
         const double xs_ff = pow_int(FF.first, 4) * diff_xs.first +
                              pow_int(FF.second, 4) * diff_xs.second;
         return xs_ff;
@@ -534,10 +529,8 @@ double ScatterActionPhoton::form_factor_omega(const double E_photon) const {
 
 // Returns form factor for the (pi,rho,a1) mediated process in the first
 // argument, for the omeaga mediated process in the second
-// TODO: Find a better name for this function
 std::pair<double, double> ScatterActionPhoton::form_factor_single(
     const double E_photon) {
-
   return std::pair<double, double>(form_factor_pion(E_photon),
                                    form_factor_omega(E_photon));
 }
@@ -546,11 +539,11 @@ std::pair<double, double> ScatterActionPhoton::form_factor_single(
 // argument, for the omega mediated process in the second.
 std::pair<double, double> ScatterActionPhoton::diff_cross_section_single(
     const double t, const double m_rho) {
-
-  const double diff_xs_rho =
-      diff_cross_section(t, m_rho, MediatorType::PION);
+  const double diff_xs_rho = diff_cross_section(t, m_rho, MediatorType::PION);
   const double diff_xs_omega =
       diff_cross_section(t, m_rho, MediatorType::OMEGA);
 
   return std::pair<double, double>(diff_xs_rho, diff_xs_omega);
 }
+
+}  // namespace smash

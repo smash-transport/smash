@@ -15,9 +15,6 @@
 #include <iostream>
 #include <utility>
 
-#include "constants.h"
-#include "scatteraction.h"
-
 #include "angles.h"
 #include "constants.h"
 #include "cxx14compat.h"
@@ -29,6 +26,7 @@
 #include "photoncrosssections.h"
 #include "pow.h"
 #include "random.h"
+#include "scatteraction.h"
 #include "tabulation.h"
 
 namespace smash {
@@ -60,7 +58,8 @@ class ScatterActionPhoton : public ScatterAction {
     hadron_out_mass_ = sample_out_hadron_mass(hadron_out_t_);
 
     // sanity check. TODO: Remove
-    if (reac_ == ReactionType::pi_z_rho_z_pi_z && default_mediator_ == MediatorType::PION) {
+    if (reac_ == ReactionType::pi_z_rho_z_pi_z &&
+        default_mediator_ == MediatorType::PION) {
       exit(1);
     }
   }
@@ -151,7 +150,10 @@ class ScatterActionPhoton : public ScatterAction {
 
   /*
    * Return ParticleTypePtr of hadron in out channel, given the incoming
-   * particles.
+   * particles. This function is overloaded since we need the hadron type in
+   * different places. In some cases the ReactionType member reac_ is already
+   * set, in others it is not. Having an overloaded function avoids unnecessary
+   * calls to photon_reaction_type.
    */
   static ParticleTypePtr outgoing_hadron_type(const ParticleList &in);
   static ParticleTypePtr outgoing_hadron_type(const ReactionType reaction);
@@ -211,8 +213,7 @@ class ScatterActionPhoton : public ScatterAction {
    *
    * \returns differential cross section. [mb/\f$GeV^2\f$]
    */
-  double diff_cross_section(const double t,
-                            const double m_rho,
+  double diff_cross_section(const double t, const double m_rho,
                             MediatorType mediator = default_mediator_) const;
 
   /**
@@ -292,7 +293,7 @@ class ScatterActionPhoton : public ScatterAction {
                                  const double E_photon);
 
   // conversion factor to millibarn
-  //const double to_mb_ = 0.3894;
+  // const double to_mb_ = 0.3894;
   static constexpr double m_omega_ = 0.783;
 };
 
