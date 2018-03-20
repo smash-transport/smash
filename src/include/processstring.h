@@ -19,6 +19,22 @@
 namespace smash {
 
 /**
+ * StringSoft Types are used to identify the type of the soft string subprocess
+ * (-1) nothing (None)
+ * (0) single diffractive A+B to A+X (SingleDiffAX)
+ * (1) single diffractive A+B to X+B (SingleDiffXB)
+ * (2) double diffractive (DoubleDiff)
+ * (3) soft non-diffractive (NonDiff)
+ */
+enum class StringSoftType {
+  None = -1,
+  SingleDiffAX = 0,
+  SingleDiffXB = 1,
+  DoubleDiff = 2,
+  NonDiff = 3
+};
+
+/**
  * \brief String excitation processes used in SMASH
  *
  * Only one instance of this class should be created.
@@ -67,14 +83,8 @@ class StringProcess {
   std::array<ThreeVector, 3> evecBasisAB_;
   /// total number of final state particles
   int NpartFinal_;
-  /**
-   * soft subprocess identifier
-   * 0: single diffractive to A+X
-   * 1: single diffractive to X+B
-   * 2: double diffractive
-   * 3: soft non-diffractive
-   */
-  int iproc_ = -1;
+  /// soft subprocess identifier
+  StringSoftType subproc_;
   /// number of particles fragmented from strings
   std::array<int, 2> NpartString_;
   /// the minimum lightcone momentum scale carried by gluon
@@ -199,9 +209,9 @@ class StringProcess {
     kappa_tension_string_ = kappa_string;
   }
   /// Set the soft subprocess identifier
-  void set_iproc(int iproc) { iproc_ = iproc; }
+  void set_subproc(StringSoftType iproc) { subproc_ = iproc; }
   /// Return the soft subprocess identifier
-  int get_iproc() { return iproc_; }
+  StringSoftType get_subproc() { return subproc_; }
   /**
    * initialization
    * feed intial particles, time of collision and gamma factor of the center of
