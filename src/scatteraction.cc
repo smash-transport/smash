@@ -608,15 +608,15 @@ void ScatterAction::assign_scaling_factor(int nquark, ParticleData &data,
   }
 }
 
-std::pair<int,int> ScatterAction::find_leading(int nq1, int nq2,
-                                 ParticleList &list) {
-  assert(list.size()>=2);
+std::pair<int, int> ScatterAction::find_leading(int nq1, int nq2,
+                                                ParticleList &list) {
+  assert(list.size() >= 2);
   int end = list.size() - 1;
   bool success = false;
   int i1 = 0;
   while (!success && i1 <= end) {
     success = check_quark_number(nq1, list[i1].pdgcode());
-    if (!success){
+    if (!success) {
       i1++;
     }
   }
@@ -624,29 +624,30 @@ std::pair<int,int> ScatterAction::find_leading(int nq1, int nq2,
   success = false;
   while (!success && i2 > 0) {
     success = check_quark_number(nq2, list[i2].pdgcode());
-    if (!success){
+    if (!success) {
       i2--;
     }
   }
-  std::pair<int, int> indices(i1,i2);
+  std::pair<int, int> indices(i1, i2);
   return indices;
 }
 
 void ScatterAction::assign_all_scaling_factors(ParticleList &incoming_particles,
                                                ParticleList &outgoing_particles,
-                                               double suppression_factor){
+                                               double suppression_factor) {
   // Set each particle's cross section scaling factor to 0 first
   for (ParticleData &data : outgoing_particles) {
     data.set_cross_section_scaling_factor(0.0);
   }
   // sort outgoing particles according to z-velocity
-  std::sort(
-      outgoing_particles.begin(), outgoing_particles.end(),
-      [&](ParticleData i, ParticleData j) {
-        return i.momentum().velocity().x3() < j.momentum().velocity().x3();
-      });
+  std::sort(outgoing_particles.begin(), outgoing_particles.end(),
+            [&](ParticleData i, ParticleData j) {
+              return i.momentum().velocity().x3() <
+                     j.momentum().velocity().x3();
+            });
   int nq1, nq2;  // number of quarks at both ends of the string
-  switch(incoming_particles[Random::uniform_int(0, 1)].type().baryon_number()){
+  switch (
+      incoming_particles[Random::uniform_int(0, 1)].type().baryon_number()) {
     case 0:
       nq1 = 1;
       nq2 = -1;
@@ -665,16 +666,14 @@ void ScatterAction::assign_all_scaling_factors(ParticleList &incoming_particles,
   // Try to find nq1 on one string end and nq2 on the other string end and the
   // other way around. When the leading particles are close to the string ends,
   // the quarks are assumed to be distributed this way.
-  std::pair<int,int> i = find_leading(nq1, nq2, outgoing_particles);
-  std::pair<int,int> j = find_leading(nq2, nq1, outgoing_particles);
+  std::pair<int, int> i = find_leading(nq1, nq2, outgoing_particles);
+  std::pair<int, int> j = find_leading(nq2, nq1, outgoing_particles);
   if (i.second - i.first > j.second - j.first) {
-    assign_scaling_factor(nq1, outgoing_particles[i.first],
-                          suppression_factor);
+    assign_scaling_factor(nq1, outgoing_particles[i.first], suppression_factor);
     assign_scaling_factor(nq2, outgoing_particles[i.second],
-    suppression_factor);
-  } else {
-    assign_scaling_factor(nq2, outgoing_particles[j.first],
                           suppression_factor);
+  } else {
+    assign_scaling_factor(nq2, outgoing_particles[j.first], suppression_factor);
     assign_scaling_factor(nq1, outgoing_particles[j.second],
                           suppression_factor);
   }

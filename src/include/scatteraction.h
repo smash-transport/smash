@@ -185,14 +185,14 @@ class ScatterAction : public Action {
    */
   virtual double elastic_parametrization() { return 0.; }
 
-  /**                                                                                      
-   * Assign a cross section scaling factor to all outgoing particles.                      
-   * Factor is only non-zero, when the outgoing particle carries                           
-   * a valence quark from the excited hadron.                                              
+  /**
+   * Assign a cross section scaling factor to all outgoing particles.
+   * Factor is only non-zero, when the outgoing particle carries
+   * a valence quark from the excited hadron.
    */
-  static void assign_all_scaling_factors(ParticleList &incoming_particles,
-                                  ParticleList &outgoing_particles,
-                                  double suppression_factor);
+  static void assign_all_scaling_factors(ParticleList& incoming_particles,
+                                         ParticleList& outgoing_particles,
+                                         double suppression_factor);
 
   /// Returns list of possible collision channels
   const CollisionBranchList& collision_channels() {
@@ -358,26 +358,26 @@ class ScatterAction : public Action {
   /** Perform a 2->1 resonance-formation process. */
   void resonance_formation();
 
-  /**                                                                                      
-   * Find the first particle, which can carry nq1, and the last particle,                  
-   * which can carry nq2 valence quarks and return their indices in                        
-   * the given list.                                                                       
-   */                                                                                      
-  static std::pair<int,int> find_leading(int nq1, int nq2, ParticleList& list);                   
-                                                                                         
-  /**                                                                                      
-   * Check if a particle with the given pdg code can have nquarks quarks.                  
-   */                                                                                      
-  static bool check_quark_number(int nquarks, PdgCode pdg);                                       
-                                                                                         
-  /**                                                                                      
-   * Assign a cross section scaling factor to the given particle.                          
-   * The scaling factor is the number of quarks from the excited hadron,                   
-   * that the fragment carries devided by the total number of quarks in                    
-   * this fragment.                                                                        
-   */                                                                                      
-  static void assign_scaling_factor(int nquark, ParticleData &data,                               
-                             double suppression_factor);                                     
+  /**
+   * Find the first particle, which can carry nq1, and the last particle,
+   * which can carry nq2 valence quarks and return their indices in
+   * the given list.
+   */
+  static std::pair<int, int> find_leading(int nq1, int nq2, ParticleList& list);
+
+  /**
+   * Check if a particle with the given pdg code can have nquarks quarks.
+   */
+  static bool check_quark_number(int nquarks, PdgCode pdg);
+
+  /**
+   * Assign a cross section scaling factor to the given particle.
+   * The scaling factor is the number of quarks from the excited hadron,
+   * that the fragment carries devided by the total number of quarks in
+   * this fragment.
+   */
+  static void assign_scaling_factor(int nquark, ParticleData& data,
+                                    double suppression_factor);
 
   /**
    * summation of the cross sections

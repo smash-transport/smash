@@ -15,8 +15,8 @@
 #include "../include/scatteractionbaryonmeson.h"
 
 using namespace smash;
-using smash::Test::Position;
 using smash::Test::Momentum;
+using smash::Test::Position;
 
 TEST(init_particle_types) {
   Test::create_actual_particletypes();
@@ -73,8 +73,8 @@ TEST(elastic_collision) {
   constexpr double sigma = 10.0;
   constexpr bool strings_switch = false;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
-  act.add_all_processes(sigma, true, Test::all_reactions_included(),
-                        0., strings_switch, nnbar_treatment);
+  act.add_all_processes(sigma, true, Test::all_reactions_included(), 0.,
+                        strings_switch, nnbar_treatment);
 
   // check cross section
   COMPARE(act.cross_section(), sigma);
@@ -148,8 +148,8 @@ TEST(outgoing_valid) {
   constexpr bool strings_switch = false;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act->add_all_processes(elastic_parameter, true,
-              Test::all_reactions_included(), 0.,
-              strings_switch, nnbar_treatment);
+                         Test::all_reactions_included(), 0., strings_switch,
+                         nnbar_treatment);
 
   VERIFY(act->cross_section() > 0.);
 
@@ -197,8 +197,8 @@ TEST(pythia_running) {
   // construct action
   ScatterActionPtr act;
   ReactionsBitSet incl_2to2;
-  act = make_unique<ScatterActionBaryonBaryon>(p1_copy, p2_copy, 0.2,
-                                               false, 1.0);
+  act =
+      make_unique<ScatterActionBaryonBaryon>(p1_copy, p2_copy, 0.2, false, 1.0);
   std::unique_ptr<StringProcess> string_process_interface =
       make_unique<StringProcess>();
   act->set_string_interface(string_process_interface.get());
@@ -210,8 +210,8 @@ TEST(pythia_running) {
   constexpr bool strings_switch = true;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act->add_all_processes(elastic_parameter, false,
-                         Test::all_reactions_included(), 0.,
-                         strings_switch, nnbar_treatment);
+                         Test::all_reactions_included(), 0., strings_switch,
+                         nnbar_treatment);
 
   VERIFY(act->cross_section() > 0.);
 
@@ -255,8 +255,8 @@ TEST(update_incoming) {
   constexpr double sigma = 10.0;
   bool string_switch = true;
   NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
-  act.add_all_processes(sigma, true, Test::all_reactions_included(),
-                        0., string_switch, nnbar_treatment);
+  act.add_all_processes(sigma, true, Test::all_reactions_included(), 0.,
+                        string_switch, nnbar_treatment);
 
   // change the position of one of the particles
   const FourVector new_position(0.1, 0., 0., 0.);
@@ -267,14 +267,14 @@ TEST(update_incoming) {
   COMPARE(act.incoming_particles()[0].position(), new_position);
 }
 
-TEST(string_scaling_factors){
+TEST(string_scaling_factors) {
   ParticleData a{ParticleType::find(0x2212)};
   ParticleData b{ParticleType::find(0x2212)};
-  ParticleList incoming{a,b};
+  ParticleList incoming{a, b};
   ParticleData c{ParticleType::find(-0x2212)};  // anti proton
-  ParticleData d{ParticleType::find(0x2212)};  // proton
-  ParticleData e{ParticleType::find(0x111)};  // pi0
-  ParticleData f{ParticleType::find(0x111)};  // pi0
+  ParticleData d{ParticleType::find(0x2212)};   // proton
+  ParticleData e{ParticleType::find(0x111)};    // pi0
+  ParticleData f{ParticleType::find(0x111)};    // pi0
   c.set_id(0);
   d.set_id(1);
   e.set_id(2);
@@ -283,18 +283,18 @@ TEST(string_scaling_factors){
   d.set_4momentum(0.938, {0., 0., -0.5});
   e.set_4momentum(0.138, {0., 0., 0.5});
   f.set_4momentum(0.138, {0., 0., 1.});
-  ParticleList outgoing = {e,d,c,f};  // here in random order
+  ParticleList outgoing = {e, d, c, f};  // here in random order
   ScatterAction::assign_all_scaling_factors(incoming, outgoing, 0.7);
   // outgoing list is now assumed to be sorted by z-velocity (so c,d,e,f)
-  VERIFY(outgoing[0]==c);
-  VERIFY(outgoing[1]==d);
-  VERIFY(outgoing[2]==e);
-  VERIFY(outgoing[3]==f);
+  VERIFY(outgoing[0] == c);
+  VERIFY(outgoing[1] == d);
+  VERIFY(outgoing[2] == e);
+  VERIFY(outgoing[3] == f);
   // Since the string is baryonic, the proton has to carry the diquark,
   // which leads to a scaling factor of 0.7*2/3 and the faster pion (f)
   // gets the other quark and a scaling factor of 0.7*1/2
-  COMPARE(outgoing[0].cross_section_scaling_factor(),0.);
-  COMPARE(outgoing[1].cross_section_scaling_factor(),0.7*2./3.);
-  COMPARE(outgoing[2].cross_section_scaling_factor(),0.);
-  COMPARE(outgoing[3].cross_section_scaling_factor(),0.7/2.0);
+  COMPARE(outgoing[0].cross_section_scaling_factor(), 0.);
+  COMPARE(outgoing[1].cross_section_scaling_factor(), 0.7 * 2. / 3.);
+  COMPARE(outgoing[2].cross_section_scaling_factor(), 0.);
+  COMPARE(outgoing[3].cross_section_scaling_factor(), 0.7 / 2.0);
 }
