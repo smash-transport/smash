@@ -296,7 +296,7 @@ class Experiment : public ExperimentBase {
   /// Type of density for lattice printout
   DensityType dens_type_lattice_printout_ = DensityType::None;
   /// Lattices for potentials
-  std::unique_ptr<RectangularLattice<double>> UB_lat_, UI3_lat_;
+  std::unique_ptr<RectangularLattice<double>> UB_lat_, UI3_lat_ = nullptr;
   /// Lattices for  potential gradients.
   std::unique_ptr<RectangularLattice<ThreeVector>> dUB_dr_lat_, dUI3_dr_lat_;
 
@@ -395,6 +395,9 @@ class Experiment : public ExperimentBase {
   uint64_t interactions_total_ = 0, previous_interactions_total_ = 0,
            wall_actions_total_ = 0, previous_wall_actions_total_ = 0,
            total_pauli_blocked_ = 0;
+
+  /// Random seed for the next event.
+  int64_t seed_ = -1;
 
   /**\ingroup logging
    * Writes the initial state for the Experiment to the output stream.

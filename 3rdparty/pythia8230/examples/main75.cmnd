@@ -1,0 +1,33 @@
+!Test commands for Dark Matter module.
+
+! Masses
+55:m0 = 700.0
+54:m0 = 500.0
+52:m0 = 100.0
+
+! Couplings
+Zp:gZp = 0.5
+Zp:vu = 1.0
+Zp:vd = 1.0
+Zp:vX = 5.0
+
+Sdm:vf = 1.0
+Sdm:vX = 1.0
+
+! Settings
+Beams:eCM = 13000.
+Next:numberCount = 100
+Init:showOneParticleData = 54
+Init:showChangedSettings = on      ! list changed settings
+Init:showChangedParticleData = on  ! list changed particle data
+Next:numberShowInfo = 0            ! print event information n times
+Next:numberShowProcess = 2         ! print process record n times
+Next:numberShowEvent = 0           ! print event record n times
+
+PartonLevel:MPI = off
+PartonLevel:ISR = on
+PartonLevel:FSR = off
+
+! Process selection
+DM:gg2S2XXj = on
+! DM:ffbar2Zp2XXj = on

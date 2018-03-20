@@ -52,6 +52,8 @@ class Configuration;
  * \li \key Lattice
  * \li \key AdaptiveTS
  * \li \key Pythia
+ * \li \key GrandcanThermalizer
+ * \li \key CrossSections
  *
  * Each key can have one of the following values:
  * \li ALL   - Log all messages (default)
@@ -153,6 +155,7 @@ DECLARE_LOGAREA(23, Sampling);
 DECLARE_LOGAREA(24, AdaptiveTS);
 DECLARE_LOGAREA(25, Pythia);
 DECLARE_LOGAREA(26, GrandcanThermalizer);
+DECLARE_LOGAREA(27, CrossSections);
 
 /// This type collects all existing log areas so they will be created with the
 /// correct log level automatically.
@@ -161,7 +164,7 @@ using AreaTuple =
                ParticleType, FindScatter, Clock, DecayModes, Resonances,
                ScatterAction, Distributions, Propagation, Grid, List, Nucleus,
                Density, PauliBlocking, Tmn, Fpe, Lattice, Sampling, AdaptiveTS,
-               Pythia, GrandcanThermalizer>;
+               Pythia, GrandcanThermalizer, CrossSections>;
 }  // namespace LogArea
 
 /**

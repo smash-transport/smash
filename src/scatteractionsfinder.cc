@@ -13,6 +13,7 @@
 
 #include "include/configuration.h"
 #include "include/constants.h"
+#include "include/crosssections.h"
 #include "include/cxx14compat.h"
 #include "include/decaymodes.h"
 #include "include/experimentparameters.h"
@@ -21,14 +22,6 @@
 #include "include/macros.h"
 #include "include/particles.h"
 #include "include/scatteraction.h"
-#include "include/scatteractionbaryonbaryon.h"
-#include "include/scatteractionbaryonmeson.h"
-#include "include/scatteractiondeltakaon.h"
-#include "include/scatteractionhyperonpion.h"
-#include "include/scatteractionmesonmeson.h"
-#include "include/scatteractionnucleonkaon.h"
-#include "include/scatteractionnucleonnucleon.h"
-#include "include/scatteractionnucleonpion.h"
 #include "include/scatteractionphoton.h"
 #include "include/stringfunctions.h"
 
@@ -64,15 +57,15 @@ ScatterActionsFinder::ScatterActionsFinder(
       testparticles_(parameters.testparticles),
       isotropic_(config.take({"Collision_Term", "Isotropic"}, false)),
       two_to_one_(parameters.two_to_one),
-      two_to_two_(parameters.two_to_two),
+      incl_set_(parameters.included_2to2),
       low_snn_cut_(parameters.low_snn_cut),
       strings_switch_(parameters.strings_switch),
       nnbar_treatment_(parameters.nnbar_treatment),
       nucleon_has_interacted_(nucleon_has_interacted),
       N_tot_(N_tot),
       N_proj_(N_proj),
-      string_formation_time_(
-          config.take({"Collision_Term", "String_Formation_Time"}, 1.)),
+      string_formation_time_(config.take(
+          {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.)),
       photons_(parameters.photons_switch),
       n_fractional_photons_(n_fractional_photons) {
   if (is_constant_elastic_isotropic()) {
@@ -81,80 +74,20 @@ ScatterActionsFinder::ScatterActionsFinder(
              elastic_parameter_, " mb as maximal cross-section.");
   }
   if (strings_switch_) {
-    string_process_interface_ = make_unique<StringProcess>();
+    auto subconfig = config["Collision_Term"]["String_Parameters"];
+    string_process_interface_ = make_unique<StringProcess>(
+        subconfig.take({"String_Tension"}, 1.0),
+        subconfig.take({"Gluon_Beta"}, 0.5),
+        subconfig.take({"Gluon_Pmin"}, 0.001),
+        subconfig.take({"Quark_Alpha"}, 1.0),
+        subconfig.take({"Quark_Beta"}, 2.5),
+        subconfig.take({"Strange_Supp"}, 0.217),
+        subconfig.take({"Diquark_Supp"}, 0.081),
+        subconfig.take({"Sigma_Perp"}, 0.7),
+        subconfig.take({"StringZ_A"}, 0.68),
+        subconfig.take({"StringZ_B"}, 0.98),
+        subconfig.take({"String_Sigma_T"}, 0.25));
   }
-}
-
-ScatterActionsFinder::ScatterActionsFinder(
-    double elastic_parameter, int testparticles,
-    const std::vector<bool> &nucleon_has_interacted, bool two_to_one)
-    : elastic_parameter_(elastic_parameter),
-      testparticles_(testparticles),
-      isotropic_(false),
-      two_to_one_(two_to_one),
-      two_to_two_(true),
-      low_snn_cut_(0.0),
-      strings_switch_(true),
-      nnbar_treatment_(NNbarTreatment::NoAnnihilation),
-      nucleon_has_interacted_(nucleon_has_interacted),
-      N_tot_(0),
-      N_proj_(0),
-      string_formation_time_(1.),
-      photons_(false),
-      n_fractional_photons_(1) {}
-
-ScatterActionPtr ScatterActionsFinder::construct_scatter_action(
-    const ParticleData &data_a, const ParticleData &data_b,
-    double time_until_collision) const {
-  const auto &pdg_a = data_a.pdgcode();
-  const auto &pdg_b = data_b.pdgcode();
-  ScatterActionPtr act;
-  if (data_a.is_baryon() && data_b.is_baryon()) {
-    if ((pdg_a.is_nucleon() && pdg_b.is_nucleon()) &&
-        (pdg_a.antiparticle_sign() == pdg_b.antiparticle_sign())) {
-      act = make_unique<ScatterActionNucleonNucleon>(
-          data_a, data_b, time_until_collision, isotropic_,
-          string_formation_time_);
-    } else {
-      act = make_unique<ScatterActionBaryonBaryon>(
-          data_a, data_b, time_until_collision, isotropic_,
-          string_formation_time_);
-    }
-  } else if (data_a.is_baryon() || data_b.is_baryon()) {
-    if ((pdg_a.is_nucleon() && pdg_b.is_pion()) ||
-        (pdg_b.is_nucleon() && pdg_a.is_pion())) {
-      act = make_unique<ScatterActionNucleonPion>(
-          data_a, data_b, time_until_collision, isotropic_,
-          string_formation_time_);
-    } else if ((pdg_a.is_nucleon() && pdg_b.is_kaon()) ||
-               (pdg_b.is_nucleon() && pdg_a.is_kaon())) {
-      act = make_unique<ScatterActionNucleonKaon>(
-          data_a, data_b, time_until_collision, isotropic_,
-          string_formation_time_);
-    } else if ((pdg_a.is_hyperon() && pdg_b.is_pion()) ||
-               (pdg_b.is_hyperon() && pdg_a.is_pion())) {
-      act = make_unique<ScatterActionHyperonPion>(
-          data_a, data_b, time_until_collision, isotropic_,
-          string_formation_time_);
-    } else if ((pdg_a.is_Delta() && pdg_b.is_kaon()) ||
-               (pdg_b.is_Delta() && pdg_a.is_kaon())) {
-      act = make_unique<ScatterActionDeltaKaon>(
-          data_a, data_b, time_until_collision, isotropic_,
-          string_formation_time_);
-    } else {
-      act = make_unique<ScatterActionBaryonMeson>(
-          data_a, data_b, time_until_collision, isotropic_,
-          string_formation_time_);
-    }
-  } else {
-    act = make_unique<ScatterActionMesonMeson>(data_a, data_b,
-                                               time_until_collision, isotropic_,
-                                               string_formation_time_);
-  }
-  if (strings_switch_) {
-    act->set_string_interface(string_process_interface_.get());
-  }
-  return act;
 }
 
 ActionPtr ScatterActionsFinder::check_collision(const ParticleData &data_a,
@@ -197,8 +130,12 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData &data_a,
   }
 
   /* Create ScatterAction object. */
-  ScatterActionPtr act =
-      construct_scatter_action(data_a, data_b, time_until_collision);
+  ScatterActionPtr act = make_unique<ScatterAction>(
+      data_a, data_b, time_until_collision, isotropic_, string_formation_time_);
+  if (strings_switch_) {
+    act->set_string_interface(string_process_interface_.get());
+  }
+
   const double distance_squared = act->transverse_distance_sqr();
 
   /* Don't calculate cross section if the particles are very far apart. */
@@ -207,13 +144,18 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData &data_a,
   }
 
   /* Add various subprocesses.  */
-  act->add_all_processes(elastic_parameter_, two_to_one_, two_to_two_,
-                         low_snn_cut_, strings_switch_, nnbar_treatment_);
+  act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
+                           low_snn_cut_, strings_switch_, nnbar_treatment_);
 
   /* Cross section for collision criterion */
+<<<<<<< HEAD
   double cross_section_criterion =
       (act->cross_section()) * fm2_mb * M_1_PI /
       static_cast<double>(testparticles_);
+=======
+  double cross_section_criterion = act->cross_section() * fm2_mb * M_1_PI /
+                                   static_cast<double>(testparticles_);
+>>>>>>> master
   /* Consider cross section scaling factors only if the particles
    * are not formed yet at the prospective time of the interaction */
   if (data_a.formation_time() > data_a.position().x0() + time_until_collision) {
@@ -320,10 +262,11 @@ void ScatterActionsFinder::dump_reactions() const {
           for (auto mom : momentum_scan_list) {
             A.set_4momentum(A.pole_mass(), mom, 0.0, 0.0);
             B.set_4momentum(B.pole_mass(), -mom, 0.0, 0.0);
-            ScatterActionPtr act = construct_scatter_action(A, B, time);
-            act->add_all_processes(elastic_parameter_, two_to_one_, two_to_two_,
-                                   low_snn_cut_, strings_switch_,
-                                   nnbar_treatment_);
+            ScatterActionPtr act = make_unique<ScatterAction>(
+                A, B, time, isotropic_, string_formation_time_);
+            act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
+                                     low_snn_cut_, strings_switch_,
+                                     nnbar_treatment_);
             const double total_cs = act->cross_section();
             if (total_cs <= 0.0) {
               continue;
@@ -406,12 +349,12 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
       ScatterAction act(a_data, b_data, 0.0, false, 0.0);
       const double sqrts = act.sqrt_s();
       std::cout << sqrts << " ";
+      cross_sections cross_s(act.incoming_particles(), sqrts);
       for (const ParticleTypePtr resonance : ab_products) {
         const double p_cm_sqr = pCM_sqr(sqrts, m_a, m_b);
-        const double xs =
-            (sqrts < resonance->min_mass_kinematic())
-                ? 0.0
-                : act.two_to_one_formation(*resonance, sqrts, p_cm_sqr);
+        const double xs = (sqrts < resonance->min_mass_kinematic())
+                              ? 0.0
+                              : cross_s.formation(*resonance, p_cm_sqr);
         std::cout << xs << " ";
       }
       std::cout << std::endl;

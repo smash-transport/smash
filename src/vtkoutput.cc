@@ -19,7 +19,7 @@
 
 namespace smash {
 
-VtkOutput::VtkOutput(const bf::path &path, std::string name)
+VtkOutput::VtkOutput(const bf::path &path, const std::string &name)
     : OutputInterface(name), base_path_(std::move(path)) {}
 
 VtkOutput::~VtkOutput() {}

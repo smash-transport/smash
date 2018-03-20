@@ -1,4 +1,5 @@
 add_subdirectory(einhard)
-add_subdirectory(yaml-cpp-0.5.3)
-add_subdirectory(pythia8226)
+set(YAML_CPP_BUILD_TESTS OFF)
+add_subdirectory(yaml-cpp-0.6.1)
+add_subdirectory(pythia8230)
 add_subdirectory(Cuba-4.2)

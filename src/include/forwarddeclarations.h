@@ -33,6 +33,9 @@ struct default_delete;
 template <typename T, typename Deleter>
 class unique_ptr;
 
+template <std::size_t N>
+class bitset;
+
 #ifdef _LIBCPP_END_NAMESPACE_STD
 _LIBCPP_END_NAMESPACE_STD
 #else
@@ -114,15 +117,15 @@ enum class TimeStepMode : char {
 };
 
 /** Initial condition for a particle in a box.
-*
-* If PeakedMomenta is used, all particles have the same momentum
-* \f$p = 3 \cdot T\f$ with T the temperature.
-*
-* Else, a thermalized ensemble is generated (the momenta are sampled
-* from a Maxwell-Boltzmann distribution).
-*
-* In either case, the positions in space are chosen randomly.
-*/
+ *
+ * If PeakedMomenta is used, all particles have the same momentum
+ * \f$p = 3 \cdot T\f$ with T the temperature.
+ *
+ * Else, a thermalized ensemble is generated (the momenta are sampled
+ * from a Maxwell-Boltzmann distribution).
+ *
+ * In either case, the positions in space are chosen randomly.
+ */
 enum class BoxInitialCondition {
   ThermalMomenta,
   PeakedMomenta,
@@ -175,6 +178,20 @@ enum class ThermodynamicQuantity : char {
   TmnLandau,
   LandauVelocity,
 };
+
+/// The different groups of 2 to 2 reactions that one can include
+enum IncludedReactions {
+  All = 50,
+  Elastic = 0,
+  NN_to_NR = 1,
+  NN_to_DR = 2,
+  KN_to_KN = 3,
+  KN_to_KDelta = 4,
+  Strangeness_exchange = 5,
+};
+
+/// Container for the 2 to 2 reactions in the code
+typedef std::bitset<6> ReactionsBitSet;
 
 /**
  * Defines the algorithm used for the forced thermalization.

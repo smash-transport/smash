@@ -154,9 +154,9 @@ class ParticleData {
     return p;
   }
 
-  /// Return formation time of the particle
+  /// Return the absolute formation time of the particle
   double formation_time() const { return formation_time_; }
-  /// Set the formation time
+  /// Set the absolute formation time
   void set_formation_time(const double &form_time) {
     formation_time_ = form_time;
   }

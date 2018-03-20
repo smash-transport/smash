@@ -50,6 +50,8 @@ PdgCode xi_c(0x4322);
 PdgCode omega_c_bar(-0x4332);
 PdgCode xi_cc_bar(-0x4422);
 PdgCode omega_bc(0x5432);
+PdgCode deutron("1000010020");
+PdgCode He4("1000020040");
 // non-hadrons:
 // leptons
 PdgCode electron(0x11);
@@ -151,6 +153,8 @@ TEST(string) {
   COMPARE(antidelta.string(), "-122224");
   COMPARE(lambda.string(), "3122");
   COMPARE(antixi.string(), "-103312");
+  COMPARE(deutron.string(), "1000010020");
+  COMPARE(He4.string(), "1000020040");
 }
 TEST(decimal) {
   COMPARE(electron.get_decimal(), 11);
@@ -162,6 +166,15 @@ TEST(decimal) {
   COMPARE(antidelta.get_decimal(), -122224);
   COMPARE(lambda.get_decimal(), 3122);
   COMPARE(antixi.get_decimal(), -103312);
+  COMPARE(deutron.get_decimal(), 1000010020);
+  COMPARE(He4.get_decimal(), 1000020040);
+}
+TEST(hexadecimal) {
+  const PdgCode lambda_2350(0x990312a);
+  COMPARE(lambda_2350.code(), 0x990312a);
+  COMPARE(lambda_2350.dump(), 0x990312au);
+  COMPARE(lambda_2350.string(), "19903129");
+  COMPARE(lambda_2350.get_decimal(), 19903129);
 }
 
 TEST(hadron) {
@@ -169,6 +182,16 @@ TEST(hadron) {
   VERIFY(pion.is_hadron());
   VERIFY(proton.is_hadron());
   VERIFY(antidelta.is_hadron());
+  VERIFY(deutron.is_hadron());
+}
+
+TEST(nucleus) {
+  VERIFY(!electron.is_nucleus());
+  VERIFY(!pion.is_nucleus());
+  VERIFY(!proton.is_nucleus());
+  VERIFY(!antidelta.is_nucleus());
+  VERIFY(deutron.is_nucleus());
+  VERIFY(He4.is_nucleus());
 }
 
 TEST(lepton) {
@@ -178,6 +201,7 @@ TEST(lepton) {
   VERIFY(!photon.is_lepton());
   VERIFY(!pion.is_lepton());
   VERIFY(!proton.is_lepton());
+  VERIFY(!deutron.is_lepton());
 }
 
 TEST(dilepton) {
@@ -215,6 +239,8 @@ TEST(baryon_number) {
   COMPARE(omega_c_bar.baryon_number(), -1);
   COMPARE(xi_cc_bar.baryon_number(), -1);
   COMPARE(omega_bc.baryon_number(), 1);
+  COMPARE(deutron.baryon_number(), 2);
+  COMPARE(He4.baryon_number(), 4);
 }
 TEST(isospin3) {
   COMPARE(electron.isospin3(), 0);
@@ -240,6 +266,7 @@ TEST(isospin3) {
   COMPARE(omega_c_bar.isospin3(), 0);
   COMPARE(xi_cc_bar.isospin3(), -1);
   COMPARE(omega_bc.isospin3(), 0);
+  COMPARE(deutron.isospin3(), 0);
 }
 TEST(strangeness) {
   COMPARE(electron.strangeness(), 0);
@@ -265,6 +292,7 @@ TEST(strangeness) {
   COMPARE(omega_c_bar.strangeness(), +2);
   COMPARE(xi_cc_bar.strangeness(), 0);
   COMPARE(omega_bc.strangeness(), -1);
+  COMPARE(deutron.strangeness(), 0);
 }
 TEST(charmness) {
   COMPARE(electron.charmness(), 0);
@@ -290,6 +318,7 @@ TEST(charmness) {
   COMPARE(omega_c_bar.charmness(), -1);
   COMPARE(xi_cc_bar.charmness(), -2);
   COMPARE(omega_bc.charmness(), +1);
+  COMPARE(deutron.charmness(), 0);
 }
 TEST(bottomness) {
   COMPARE(electron.bottomness(), 0);
@@ -315,6 +344,7 @@ TEST(bottomness) {
   COMPARE(omega_c_bar.bottomness(), 0);
   COMPARE(xi_cc_bar.bottomness(), 0);
   COMPARE(omega_bc.bottomness(), -1);
+  COMPARE(deutron.bottomness(), 0);
 }
 TEST(charge) {
   COMPARE(electron.charge(), -1);
@@ -342,6 +372,8 @@ TEST(charge) {
   COMPARE(omega_c_bar.charge(), 0);
   COMPARE(xi_cc_bar.charge(), -2);
   COMPARE(omega_bc.charge(), 0);
+  COMPARE(deutron.charge(), 1);
+  COMPARE(He4.charge(), 2);
 }
 TEST(quarks) {
   COMPARE(electron.quarks(), 0x000);
@@ -465,6 +497,13 @@ TEST(initialize_from_string) {
   COMPARE(particle2.dump(), 0x80000211u);
   PdgCode particle3("1234");
   COMPARE(particle3.dump(), 0x1234u);
+  // Make sure hexadecimal is supported.
+  PdgCode particle4("990312a");
+  COMPARE(particle4.dump(), 0x990312au);
+  COMPARE(particle4, PdgCode("990312A"));
+  // Make sure the alternative encoding works.
+  PdgCode particle5("19903129");
+  COMPARE(particle4, particle5);
 }
 TEST_CATCH(empty_string, PdgCode::InvalidPdgCode) { PdgCode particle(""); }
 TEST_CATCH(long_string, PdgCode::InvalidPdgCode) {
@@ -514,6 +553,12 @@ TEST_CATCH(invalid_digits_nJ_baryon, PdgCode::InvalidPdgCode) {
 TEST_CATCH(invalid_digits_antimeson, PdgCode::InvalidPdgCode) {
   PdgCode particle("-331");
 }
+TEST_CATCH(invalid_nucleus_10, PdgCode::InvalidPdgCode) {
+  PdgCode particle("2000010020");
+}
+TEST_CATCH(invalid_nucleus_digits, PdgCode::InvalidPdgCode) {
+  PdgCode particle("100010020");
+}
 
 TEST(stream) {
   PdgCode particle1;
@@ -550,11 +595,13 @@ TEST(equal) {
   VERIFY(pion2 < omega_bc);
 }
 TEST(antiparticle) { VERIFY(pion.is_antiparticle_of(piminus)); }
+TEST(get_antiparticle) { COMPARE(pion.get_antiparticle(), piminus); }
 
 TEST(from_decimal) {
   COMPARE(pion, PdgCode::from_decimal(211));
   COMPARE(Kminus, PdgCode::from_decimal(-321));
   COMPARE(antixi, PdgCode::from_decimal(-103312));
+  COMPARE(deutron, PdgCode::from_decimal(1000010020));
 }
 
 TEST(antiparticles) {
@@ -567,6 +614,8 @@ TEST(antiparticles) {
   COMPARE(electron.has_antiparticle(), true);
   COMPARE(antimu.has_antiparticle(), true);
   COMPARE(photon.has_antiparticle(), false);
+  COMPARE(deutron.has_antiparticle(), true);
+  COMPARE(He4.has_antiparticle(), true);
 }
 
 TEST(pack_int) {

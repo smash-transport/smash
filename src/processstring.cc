@@ -16,13 +16,18 @@
 
 namespace smash {
 
-StringProcess::StringProcess()
-    : pmin_gluon_lightcone_(0.001),
-      pow_fgluon_beta_(0.5),
-      pow_fquark_alpha_(1.),
-      pow_fquark_beta_(2.5),
-      sigma_qperp_(0.5),
-      kappa_tension_string_(1.0),
+StringProcess::StringProcess(double string_tension, double gluon_beta,
+                             double gluon_pmin, double quark_alpha,
+                             double quark_beta, double strange_supp,
+                             double diquark_supp, double sigma_perp,
+                             double stringz_a, double stringz_b,
+                             double string_sigma_T)
+    : pmin_gluon_lightcone_(gluon_pmin),
+      pow_fgluon_beta_(gluon_beta),
+      pow_fquark_alpha_(quark_alpha),
+      pow_fquark_beta_(quark_beta),
+      sigma_qperp_(sigma_perp),
+      kappa_tension_string_(string_tension),
       time_collision_(0.),
       gamma_factor_com_(1.) {
   // setup and initialize pythia
@@ -34,7 +39,11 @@ StringProcess::StringProcess()
   /* No resonance decays, since the resonances will be handled by SMASH */
   pythia_->readString("HadronLevel:Decay = off");
   /* transverse momentum spread in string fragmentation */
-  pythia_->readString("StringPT:sigma = 0.25");
+  pythia_->readString("StringPT:sigma = " + std::to_string(string_sigma_T));
+  pythia_->readString("StringFlav:probQQtoQ = " + std::to_string(diquark_supp));
+  pythia_->readString("StringFlav:probStoUD = " + std::to_string(strange_supp));
+  pythia_->readString("StringZ:aLund = " + std::to_string(stringz_a));
+  pythia_->readString("StringZ:bLund = " + std::to_string(stringz_b));
   /* manually set the parton distribution function */
   pythia_->readString("PDF:pSet = 13");
   pythia_->readString("PDF:pSetB = 13");
@@ -48,7 +57,7 @@ StringProcess::StringProcess()
     int pdgid = ptype.pdgcode().get_decimal();
     double mass_pole = ptype.mass();
     double width_pole = ptype.width_at_pole();
-    /* check if the particle specie is in PYTHIA */
+    /* check if the particle species is in PYTHIA */
     if (pythia_->particleData.isParticle(pdgid)) {
       /* set mass and width in PYTHIA */
       pythia_->particleData.m0(pdgid, mass_pole);
@@ -126,8 +135,8 @@ int StringProcess::append_final_state(const FourVector &uString,
   xvertex_pos[0] = p_pos_tot / kappa_tension_string_;
   for (int i = 0; i < nfrag; i++) {
     // recursively compute x^{+} coordinates of q-qbar formation vertex
-    xvertex_pos[i + 1] = xvertex_pos[i] -
-                         (fragments[i].momentum.x0() + fragments[i].pparallel) /
+    xvertex_pos[i + 1] =
+        xvertex_pos[i] - (fragments[i].momentum.x0() + fragments[i].pparallel) /
                              (kappa_tension_string_ * sqrt2_);
   }
   // x^{-} coordinates of the backward end
@@ -210,10 +219,6 @@ void StringProcess::init(const ParticleList &incoming, double tcoll,
   sqrtsAB_ = (plab_[0] + plab_[1]).abs();
   /* Transverse momentum transferred to strings,
      parametrization to fit the experimental data */
-  sigma_qperp_ = (sqrtsAB_ < 4.)
-                     ? 0.5
-                     : 0.5 + 0.2 * std::log(sqrtsAB_ / 4.) / std::log(5.);
-
   ucomAB_ = (plab_[0] + plab_[1]) / sqrtsAB_;
   vcomAB_ = ucomAB_.velocity();
 
@@ -300,7 +305,7 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   ParticleData new_particle(ParticleType::find(hadron_code));
   new_particle.set_4momentum(pstrHcom);
   new_particle.set_cross_section_scaling_factor(1.);
-  new_particle.set_formation_time(0.);
+  new_particle.set_formation_time(time_collision_);
   final_state_.push_back(new_particle);
 
   NpartFinal_ = NpartString_[0] + NpartString_[1];
@@ -521,7 +526,7 @@ bool StringProcess::next_BBbarAnn() {
       ParticleData new_particle(ParticleType::find(PDGcodes_[i]));
       new_particle.set_4momentum(pcom_[i]);
       new_particle.set_cross_section_scaling_factor(1.);
-      new_particle.set_formation_time(0.);
+      new_particle.set_formation_time(time_collision_);
       final_state_.push_back(new_particle);
     }
     NpartFinal_ = NpartString_[0] + NpartString_[1];

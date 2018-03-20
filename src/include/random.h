@@ -63,14 +63,17 @@ void set_seed(T &&seed) {
   engine.seed(std::forward<T>(seed));
 }
 
-/** returns a uniformly distributed random number \f$\chi \in [{\rm
+/// Advance the engine's state and return the generated value.
+inline Engine::result_type advance() { return engine(); }
+
+/** returns a uniformly distributed random real number \f$\chi \in [{\rm
  * min}, {\rm max})\f$ */
 template <typename T>
 T uniform(T min, T max) {
   return std::uniform_real_distribution<T>(min, max)(engine);
 }
 
-/** returns a uniformly distributed random number \f$\chi \in [{\rm
+/** returns a uniformly distributed random integer number \f$\chi \in [{\rm
  * min}, {\rm max})\f$ */
 template <typename T>
 T uniform_int(T min, T max) {
@@ -187,8 +190,8 @@ double normal(const T &mean, const T &sigma) {
 }
 
 /** \return: one integer number sampled from discrete distribution
-* whose weight given by probability vector
-*/
+ * whose weight given by probability vector
+ */
 template <typename T>
 class discrete_dist {
  public:

@@ -143,7 +143,7 @@ bool ScatterActionPhoton::is_kinematically_possible(const double s_sqrt,
   if (reac == ReactionType::no_reaction)
     return false;
 
-                                    
+
   if (default_mediator_ == MediatorType::PION && reac == ReactionType::pi_z_rho_z_pi_z) {
     return false;
   }

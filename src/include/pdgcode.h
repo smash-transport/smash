@@ -12,11 +12,14 @@
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <cstdlib>
 #include <iosfwd>
 #include <sstream>
 #include <stdexcept>
 #include <string>
+
+#include <iostream>
 
 #include "pdgcode_constants.h"
 
@@ -74,6 +77,20 @@ namespace smash {
  * involved with successive divisions by 10 and taking the remainder
  * etc.).
  *
+ * Representing nuclei
+ * -------------------
+ *
+ * Following PDG standard, nuclei are represented by codes ±10LZZZAAAI, where
+ * L is number of Lambdas inside the nucleus, ZZZ is charge, AAA is mass
+ * number and I is used for excitations. Internally nuclei are represented
+ * in a different way from hadrons, but all accessors (charge, baryon number,
+ * etc) work in the same way.
+ *
+ * Normally nuclei in SMASH are simulated as a collection of protons and
+ * neutrons, so there is no need in their PDG codes. However, it is
+ * interesting to study light nuclei production, considering them as single
+ * pointlike hadrons. This justifies introduction of nuclear PDG codes here.
+ *
  * Limitations:
  * ------------
  *
@@ -84,9 +101,8 @@ namespace smash {
  * not well-defined, and/or because the charge and baryon number is not
  * an integer anymore.)
  *
- * Also, tetra- and pentaquarks as well as compound objects (small or
- * large nuclei) cannot be represented; that, though, is a problem of
- * the PDG Numbering Scheme rather than of this class.
+ * Also, tetra- and pentaquarks cannot be represented; that, though,
+ * is a problem of the PDG Numbering Scheme rather than of this class.
  *
  **/
 
@@ -146,11 +162,12 @@ class PdgCode {
   /** Checks the integer for invalid hex digits.
    *
    * Usually all digits are at least <= 9. The n_q digits are even <= 6
-   * (because there are only six quarks).
+   * (because there are only six quarks). The only exception is n_J, where
+   * we allow f = 15, which is the largest hexadecimal digit.
    *
    * If one of the hex digits is not also a valid decimal digit,
-   * something went wrong - maybe some user of this class forgot to
-   * prefix the input with '0x' and thus passed 221 instead of 0x221.
+   * something possibly went wrong - maybe some user of this class forgot
+   * to prefix the input with '0x' and thus passed 221 instead of 0x221.
    *
    * \return a bitmask indicating the offending digits. In the above
    * example, 221 = 0xd3, the second-to-last-digit is the offending one,
@@ -177,7 +194,7 @@ class PdgCode {
     if (digits_.n_q3_ > 6) {
       fail |= 1 << 1;
     }
-    if (digits_.n_J_ > 9) {
+    if (digits_.n_J_ > 15) {
       fail |= 1;
     }
     return fail;
@@ -221,24 +238,26 @@ class PdgCode {
   /** Returns a signed integer with the PDG code in hexadecimal. */
   inline std::int32_t code() const { return antiparticle_sign() * ucode(); }
 
-  /// returns a C++ string from the PDG Code.
+  /// Represent the PDG Code as a decimal string.
   inline std::string string() const {
     std::stringstream ss;
-    if (digits_.antiparticle_) {
-      ss << "-";
-    }
-    ss << std::hex << ucode();
+    ss << get_decimal();
     return ss.str();
   }
 
   /// Construct the antiparticle to a given PDG code.
   PdgCode get_antiparticle() const {
-    // TODO(mkretz): more efficient implementation
-    return PdgCode(-code());
+    PdgCode result = *this;
+    result.digits_.antiparticle_ = !digits_.antiparticle_;
+    return result;
   }
 
   /// Construct PDG code from decimal number
   static PdgCode from_decimal(const int pdgcode_decimal) {
+    // Nucleus
+    if (pdgcode_decimal > 1E9) {
+      return PdgCode(std::to_string(pdgcode_decimal));
+    }
     int a = pdgcode_decimal;
     int hex_pdg = 0, tmp = 1;
     while (a) {
@@ -254,26 +273,40 @@ class PdgCode {
    * accessors of various properties                                          *
    *                                                                          *
    ****************************************************************************/
+  /// true if this is a nucleus, false otherwise
+  inline bool is_nucleus() const {
+    assert(digits_.is_nucleus_ == nucleus_.is_nucleus_);
+    return nucleus_.is_nucleus_;
+  }
+
   /// returns true if this is a baryon, antibaryon or meson.
   inline bool is_hadron() const {
-    return (digits_.n_q3_ != 0 && digits_.n_q2_ != 0);
+    return ((digits_.n_q3_ != 0 && digits_.n_q2_ != 0) || is_nucleus());
   }
   /// returns true if this is a lepton.
   inline bool is_lepton() const {
-    return (digits_.n_q1_ == 0 && digits_.n_q2_ == 0 && digits_.n_q3_ == 1);
+    return (digits_.n_q1_ == 0 && digits_.n_q2_ == 0 && digits_.n_q3_ == 1 &&
+            !is_nucleus());
   }
   /// returns the baryon number of the particle.
   inline int baryon_number() const {
+    if (is_nucleus()) {
+      return static_cast<int>(nucleus_.A_) * antiparticle_sign();
+    }
     if (!is_hadron() || digits_.n_q1_ == 0) {
       return 0;
     }
     return antiparticle_sign();
   }
   /// Returns whether this PDG code identifies a baryon.
-  inline bool is_baryon() const { return is_hadron() && digits_.n_q1_ != 0; }
+  inline bool is_baryon() const {
+    return (is_hadron() && digits_.n_q1_ != 0) || is_nucleus();
+  }
 
   /// Returns whether this PDG code identifies a meson.
-  inline bool is_meson() const { return is_hadron() && digits_.n_q1_ == 0; }
+  inline bool is_meson() const {
+    return (is_hadron() && digits_.n_q1_ == 0) && !is_nucleus();
+  }
 
   /// Is this a nucleon/anti-nucleon (p, n, -p, -n)?
   inline bool is_nucleon() const {
@@ -296,30 +329,29 @@ class PdgCode {
 
   /// Is this a hyperon (Lambda, Sigma, Xi, Omega)?
   inline bool is_hyperon() const {
-    const auto abs_code = std::abs(code());
-    switch (abs_code) {
-      case pdg::Lambda:
-      case pdg::Sigma_p:
-      case pdg::Sigma_z:
-      case pdg::Sigma_m:
-      case pdg::Xi_z:
-      case pdg::Xi_m:
-      case pdg::Omega_m:
-        return true;
-      default:
-        return false;
-    }
+    return is_hadron() && digits_.n_q1_ == 3 && !is_nucleus();
   }
-  /// Is this a Xi(1321)?
-  inline bool is_xi1321() const {
-    const auto abs_code = std::abs(code());
-    return (abs_code == pdg::Xi_z) || (abs_code == pdg::Xi_m);
+
+  /// Is this a Omega baryon?
+  inline bool is_Omega() const {
+    return is_hyperon() && digits_.n_q2_ == 3 && digits_.n_q3_ == 3;
   }
-  /// Is this a Omega(1672)?
-  inline bool is_Omega1672() const {
-    const auto abs_code = std::abs(code());
-    return (abs_code == pdg::Omega_m);
+
+  /// Is this a Xi baryon?
+  inline bool is_Xi() const {
+    return is_hyperon() && digits_.n_q2_ == 3 && digits_.n_q3_ != 3;
   }
+
+  /// Is this a Lambda baryon?
+  inline bool is_Lambda() const {
+    return is_hyperon() && digits_.n_q2_ == 1 && digits_.n_q3_ == 2;
+  }
+
+  /// Is this a Sigma baryon?
+  inline bool is_Sigma() const {
+    return is_hyperon() && digits_.n_q2_ != 3 && !is_Lambda();
+  }
+
   /// Is this a kaon (K+, K-, K0, Kbar0)?
   inline bool is_kaon() const {
     const auto abs_code = std::abs(code());
@@ -337,8 +369,11 @@ class PdgCode {
   }
 
   /** Determine whether a particle has a distinct antiparticle
-    * (or whether it is its own antiparticle). */
+   * (or whether it is its own antiparticle). */
   bool has_antiparticle() const {
+    if (is_nucleus()) {
+      return true;
+    }
     if (is_hadron()) {
       return (baryon_number() != 0) || (digits_.n_q2_ != digits_.n_q3_);
     } else {
@@ -413,6 +448,12 @@ class PdgCode {
    * 2 (meaning spin=1) for the Higgs, though.
    */
   inline unsigned int spin() const {
+    if (is_nucleus()) {
+      // Currently the only nucleus I care about is deutron, which has spin one
+      // todo(oliiny): take care of spin for nuclei
+      return 2;
+    }
+
     if (is_hadron()) {
       if (digits_.n_J_ == 0) {
         return 0;  // special cases: K0_L=0x130 & K0_S=0x310
@@ -428,7 +469,7 @@ class PdgCode {
   }
   /** Returns the spin degeneracy \f$2s + 1\f$ of a particle **/
   inline unsigned int spin_degeneracy() const {
-    if (is_hadron() && digits_.n_J_ > 0) {
+    if (is_hadron() && digits_.n_J_ > 0 && !is_nucleus()) {
       return digits_.n_J_;
     }
     return spin() + 1;
@@ -439,7 +480,7 @@ class PdgCode {
   }
   /// returns an integer with only the quark numbers set.
   inline std::int32_t quarks() const {
-    if (!is_hadron()) {
+    if (!is_hadron() || is_nucleus()) {
       return 0;
     }
     return chunks_.quarks_;
@@ -459,7 +500,7 @@ class PdgCode {
     std::array<int, 3> result = {static_cast<int>(digits_.n_q1_),
                                  static_cast<int>(digits_.n_q2_),
                                  static_cast<int>(digits_.n_q3_)};
-    if (is_hadron()) {
+    if (is_hadron() && !is_nucleus()) {
       // Antibaryons
       if (digits_.n_q1_ != 0 && digits_.antiparticle_) {
         for (size_t i = 0; i < 3; i++) {
@@ -521,20 +562,45 @@ class PdgCode {
    */
   static PdgCode invalid() { return PdgCode(0x0); }
 
-  /** returns an integer with decimal representation of the code.
+  /** Returns an integer with decimal representation of the code.
    *
-   * This is necessary for ROOT output.
+   * If the spin is too large for the last digit, an additional digit at the
+   * beginning will be used, so that the sum of the first and the last digit is
+   * the spin.
+   *
+   * This is used for binary and ROOT output.
    *
    */
   int get_decimal() const {
+    if (is_nucleus()) {
+      // ±10LZZZAAAI
+      return antiparticle_sign() *
+             (nucleus_.I_ + 10 * nucleus_.A_ + 10000 * nucleus_.Z_ +
+              10000000 * nucleus_.n_Lambda_ + 1000000000);
+    }
+    int n_J_1 = 0;
+    int n_J_2 = digits_.n_J_;
+    if (n_J_2 > 9) {
+      n_J_1 = n_J_2 - 9;
+      n_J_2 = 9;
+      if (n_J_2 > 9) {
+        throw InvalidPdgCode("n_J is too large\n");
+      }
+    }
     return antiparticle_sign() *
-           (digits_.n_J_ + digits_.n_q3_ * 10 + digits_.n_q2_ * 100 +
+           (n_J_2 + digits_.n_q3_ * 10 + digits_.n_q2_ * 100 +
             digits_.n_q1_ * 1000 + digits_.n_L_ * 10000 +
-            digits_.n_R_ * 100000 + digits_.n_ * 1000000);
+            digits_.n_R_ * 100000 + digits_.n_ * 1000000 + n_J_1 * 10000000);
   }
 
   /// Remove all excitation, except spin. Sign and quark content remains.
-  void deexcite() { chunks_.excitation_ = 0; }
+  void deexcite() {
+    if (!is_nucleus()) {
+      chunks_.excitation_ = 0;
+    } else {
+      nucleus_.I_ = 0;
+    }
+  }
 
   /** returns the net number of quarks with given flavour number
    *
@@ -583,11 +649,14 @@ class PdgCode {
       /// "radial excitation"
       std::uint32_t n_R_ : 4;
       /// first field: "counter"
-      std::uint32_t n_ : 4, : 3;
+      std::uint32_t n_ : 4, : 2;
+      /// 1 for nuclei, 0 for the rest
+      bool is_nucleus_ : 1;
       /// first bit: stores the sign.
       bool antiparticle_ : 1;
 #else  // reverse ordering
-      bool antiparticle_ : 1, : 3;
+      bool antiparticle_ : 1;
+      bool is_nucleus : 1, : 2;
       std::uint32_t n_ : 4;
       std::uint32_t n_R_ : 4;
       std::uint32_t n_L_ : 4;
@@ -616,39 +685,57 @@ class PdgCode {
       std::uint32_t quarks_ : 12, : 4;
 #endif
     } chunks_;
+    /** structure for the nuclei */
+    struct {
+#if SMASH_BITFIELD_ORDER_ == 1
+      std::uint32_t n_Lambda_ : 6;
+      std::uint32_t Z_ : 10;
+      std::uint32_t A_ : 10;
+      std::uint32_t I_ : 4;
+      bool is_nucleus_ : 1;
+      bool antiparticle_ : 1;
+#else  // reverse ordering
+      bool antiparticle_ : 1;
+      bool is_nucleus_ : 1;
+      std::uint32_t I_ : 4;
+      std::uint32_t A_ : 10;
+      std::uint32_t Z_ : 10;
+      std::uint32_t n_Lambda_ : 6;
+#endif
+    } nucleus_;
   };
 
   /** Returns an unsigned integer with the PDG code in hexadecimal
    *  (disregarding the antiparticle flag). */
   inline std::uint32_t ucode() const { return (dump_ & 0x0fffffff); }
-  /** extract digits from a character. */
+  /** extract digits from a hexadecimal character. */
   inline std::uint32_t get_digit_from_char(const char inp) const {
-    // atoi's behaviour for invalid input is undefined. I don't like
-    // that.
-
-    // this checks if the first four digits are 0011 (as they should be
-    // for ASCII digits).
-    if ((inp & 0xf0) ^ 0x30) {
-      throw InvalidPdgCode("PdgCode: Invalid character " +
-                           std::string(&inp, 1) + " found.\n");
+    // decimal digit
+    if (48 <= inp && inp <= 57) {
+      return inp - 48;
     }
-    // the last four digits are the number; they should not be > 9
-    // (i.e., one of [:;<=>?])
-    if ((inp & 0x0f) > 9) {
-      throw InvalidPdgCode("PdgCode: Invalid digit " + std::string(&inp, 1) +
-                           " found.\n");
+    // hexdecimal digit, uppercase
+    if (65 <= inp && inp <= 70) {
+      return inp - 65 + 10;
     }
-    // now that we've checked that the first bits are correct and the
-    // last bits are a number, we can return the last bits.
-    return (inp & 0x0f);
+    // hexdecimal digit, lowercase
+    if (97 <= inp && inp <= 102) {
+      return inp - 97 + 10;
+    }
+    throw InvalidPdgCode("PdgCode: Invalid character " + std::string(&inp, 1) +
+                         " found.\n");
   }
 
-  /// takes a string and sets the fields.
+  /// Set the PDG code from the given string.
+  ///
+  /// This supports hexdecimal digits. If the last digit is not enough to
+  /// represent the spin, a digit can be added at the beginning which will be
+  /// added to the total spin.
   inline void set_from_string(const std::string& codestring) {
     dump_ = 0;
     // implicit with the above: digits_.antiparticle_ = false;
     digits_.n_ = digits_.n_R_ = digits_.n_L_ = digits_.n_q1_ = digits_.n_q2_ =
-        digits_.n_q3_ = digits_.n_J_ = 0;
+        digits_.n_q3_ = digits_.n_J_ = digits_.is_nucleus_ = 0;
     size_t length = codestring.size();
     if (length < 1) {
       throw InvalidPdgCode("Empty string does not contain PDG Code\n");
@@ -665,12 +752,37 @@ class PdgCode {
     }
     // save if the first character was a sign:
     unsigned int sign = c;
-    // codestring shouldn't be longer than 7 + sign.
-    if (length > 7 + sign) {
+
+    // Nucleus
+    if (length == 10 + sign) {
+      nucleus_.is_nucleus_ = true;
+      if (codestring[c] != '1' || codestring[c + 1] != '0') {
+        throw InvalidPdgCode("Pdg code of nucleus \"" + codestring +
+                             "\" should start with 10\n");
+      }
+      c += 2;
+      // ±10LZZZAAAI is the standard for nuclei
+      std::array<int, 8> digits;
+      for (int i = 0; i < 8; i++) {
+        digits[i] = get_digit_from_char(codestring[c + i]);
+      }
+      nucleus_.n_Lambda_ = digits[0];
+      nucleus_.Z_ = 100 * digits[1] + 10 * digits[2] + digits[3];
+      nucleus_.A_ = 100 * digits[4] + 10 * digits[5] + digits[6];
+      nucleus_.I_ = digits[7];
+      return;
+    }
+
+    // codestring shouldn't be longer than 8 + sign, except for nuclei
+    if (length > 8 + sign) {
       throw InvalidPdgCode("String \"" + codestring +
                            "\" too long for PDG Code\n");
     }
     // please note that in what follows, we actually need c++, not ++c.
+    // first digit is used for n_J if the last digit is not enough.
+    if (length > 7 + sign) {
+      digits_.n_J_ += get_digit_from_char(codestring[c++]);
+    }
     // codestring has 7 digits? 7th from last goes in n_.
     if (length > 6 + sign) {
       digits_.n_ = get_digit_from_char(codestring[c++]);
@@ -706,7 +818,7 @@ class PdgCode {
     }
     // last digit is the spin degeneracy.
     if (length > sign) {
-      digits_.n_J_ = get_digit_from_char(codestring[c++]);
+      digits_.n_J_ += get_digit_from_char(codestring[c++]);
     } else {
       throw InvalidPdgCode(
           "String \"" + codestring +

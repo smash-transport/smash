@@ -347,7 +347,7 @@ double ThreeBodyDecayDilepton::diff_width(double m_par, double m_l,
   const double m_par_cubed = m_par * m_par * m_par;
   const double m_other_sqr = m_other * m_other;
   const double ph_sp_factor = std::sqrt(1. - 4. * m_l * m_l / m_dil_sqr) *
-                                (1. + 2. * m_l * m_l / m_dil_sqr);
+                              (1. + 2. * m_l * m_l / m_dil_sqr);
 
   PdgCode pdg = t->pdgcode();
   if (pdg.is_meson()) {

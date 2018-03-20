@@ -122,6 +122,18 @@ Collision_Term:
     Two_to_Two:             False
     Strings:                True
     Strings:                False # default
+    String_Parameters:
+        String_Tension:     1.0 #GeV/fm
+        Gluon_Beta:         0.5
+        Gluon_Pmin:         0.001 #GeV
+        Quark_Alpha:        1.0
+        Quark_Beta:         2.5
+        Strange_Supp:       0.217 #Pythia default 
+        Diquark_Supp:       0.081 #Pythia default
+        Sigma_Perp:         0.7
+        StringZ_A:          0.68 #Pythia default
+        StringZ_B:          0.98 #Pythia default
+        String_Sigma_T:     0.25
     NNbar_Treatment:        "no annihilation" # default
     NNbar_Treatment:        "resonances"
     NNbar_Treatment:        "strings"
@@ -167,6 +179,7 @@ Lattice:
     Cell_Number: [20, 20, 20]        # Number of cells in x, y, z directions
     Periodic:    True                # Periodic continuation: x + i * lx is equivalent to x, same for y, z
     Periodic:    False
+    Potentials_Affect_Thresholds:  True  # Mean field potentials change the threshold energies of the actions.
 
 Modi:
     Box:

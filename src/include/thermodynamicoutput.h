@@ -53,7 +53,7 @@ class ThermodynamicOutput : public OutputInterface {
                             const DensityParameters &dens_param) override;
 
   /** Prints density along the specified line. Useful to make 1D plots of
-    * density profiles.
+   * density profiles.
    */
   void density_along_line(const char *file_name, const ParticleList &plist,
                           const DensityParameters &param, DensityType dens_type,
