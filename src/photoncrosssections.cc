@@ -13,15 +13,13 @@
 
 namespace {
 
-// Heaviside step function. This function is not part of the cmath library,
-// we need to define it ourselves. It is necessary for the implementation
-// of a non-stable rho meson in the pi0 + rho0 -> omega -> pi0 + gamma and
-// pi + pi0 -> rho + gamma channel. For these specific scattering processes,
-// there are s and t channels with different theresholds. While the t-channel
-// can always be performed, the s-channel is kinematically only accessible if
-// sqrt(s) is higher than the mass of the exchange particle. As such, the
-// corresponding s-channels need to be excluded from the cross sections
-// below their specific thresholds.
+// Necessary for the implementation of a non-stable rho meson in the
+// pi0 + rho0 -> omega -> pi0 + gamma and pi + pi0 -> rho + gamma channel.
+// For these specific scattering processes, there are s and t channels with
+// different theresholds. While the t-channel can always be performed, the
+// s-channel is kinematically only accessible if sqrt(s) >= mass of the exchange
+// particle. The corresponding s-channels need to be excluded from the
+// cross sections below their specific thresholds.
 
 double HeavisideTheta(double x) {
   if (x >= 0.0) {
@@ -42,7 +40,7 @@ double cut_off(const double sigma_mb) {
 /*
    The cross sections presented in this file are calculated applying an average
    over initial states and sum over final states. In transport simulations
-         individual particles are propagated which have a specific degeneracy
+   individual particles are propagated which have a specific degeneracy
    state such that an average over initial states is superflous. The cross
    sections need thus be divided by the spin degeneracy factor of the initial
    particles to account for these particle properties.

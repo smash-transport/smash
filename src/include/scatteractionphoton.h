@@ -193,7 +193,7 @@ class ScatterActionPhoton : public ScatterAction {
    */
 
   enum class MediatorType { SUM, PION, OMEGA };
-  static constexpr MediatorType default_mediator_ = MediatorType::PION;
+  static constexpr MediatorType default_mediator_ = MediatorType::SUM;
 
   /// Weight of the produced photon.
   double weight_ = 0.0;
@@ -206,14 +206,12 @@ class ScatterActionPhoton : public ScatterAction {
    * Formfactors are not included
    *
    * \param t Mandelstam-t
-   * \param t2 upper bound for t-range
-   * \param t1 lower bound for t-range
    * \param m_rho Mass of the incoming or outgoing rho-particle
    * \param mediator Switch for determing which mediating particle to use
    *
    * \returns differential cross section. [mb/\f$GeV^2\f$]
    */
-  double diff_cross_section(const double t, const double t2, const double t1,
+  double diff_cross_section(const double t,
                             const double m_rho,
                             MediatorType mediator = default_mediator_) const;
 
@@ -250,8 +248,6 @@ class ScatterActionPhoton : public ScatterAction {
    * for omega in the second.
    */
   std::pair<double, double> diff_cross_section_single(const double t,
-                                                      const double t2,
-                                                      const double t1,
                                                       const double m_rho);
 
   /**
@@ -292,8 +288,7 @@ class ScatterActionPhoton : public ScatterAction {
    *
    * \returns diff. cross section [mb / GeV \f$^2\f$]
    */
-  double diff_cross_section_w_ff(const double t, const double t2,
-                                 const double t1, const double m_rho,
+  double diff_cross_section_w_ff(const double t, const double m_rho,
                                  const double E_photon);
 
   // conversion factor to millibarn
