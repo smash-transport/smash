@@ -1,20 +1,5 @@
 Logging:
   default: INFO
-<<<<<<< HEAD
-  Legacy: ALL
-  Main: ALL
-  Experiment: ALL
-  Box: ALL
-  Collider: ALL
-  Sphere: ALL
-  ParticleType: ALL
-  Action: ALL
-  FindScatter: ALL
-  DecayModes: ALL
-  ScatterAction: ALL
-  Pythia: ALL
-=======
->>>>>>> master
 
 General:
     Modus:         Collider
