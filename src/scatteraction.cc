@@ -616,7 +616,7 @@ void ScatterAction::string_excitation_soft() {
           /* soft non-diffractive */
           success = string_process_->next_NDiffSoft();
           break;
-        default:
+        case StringSoftType::None:
           success = false;
       }
     }
