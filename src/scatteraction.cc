@@ -593,10 +593,7 @@ bool ScatterAction::check_quark_number(int nquarks, PdgCode pdg) {
   throw std::runtime_error("String fragment is neither baryon nor meson");
 }
 
-/** Assign the cross section scaling factor
- * acccording to the particles number of quarks and the number of
- * quarks it got from the fragmented string */
-void ScatterAction::assign_scaling_factor(int nquark, ParticleData data,
+void ScatterAction::assign_scaling_factor(int nquark, ParticleData &data,
                                           double suppression_factor) {
   int nbaryon = data.pdgcode().baryon_number();
   if (nbaryon == 0) {
@@ -610,25 +607,78 @@ void ScatterAction::assign_scaling_factor(int nquark, ParticleData data,
                                           (3.0 * nbaryon));
   }
 }
-/** Change i1 and i2 to be the index of leading hadrons in list */
+
 std::pair<int,int> ScatterAction::find_leading(int nq1, int nq2,
                                  ParticleList &list) {
+  assert(list.size()>=2);
   int end = list.size() - 1;
   bool success = false;
   int i1 = 0;
   while (!success && i1 <= end) {
     success = check_quark_number(nq1, list[i1].pdgcode());
-    i1++;
+    if (!success){
+      i1++;
+    }
   }
   int i2 = end;
   success = false;
   while (!success && i2 > 0) {
     success = check_quark_number(nq2, list[i2].pdgcode());
-    i2--;
+    if (!success){
+      i2--;
+    }
   }
   std::pair<int, int> indices(i1,i2);
   return indices;
 }
+
+void ScatterAction::assign_all_scaling_factors(ParticleList &incoming_particles,
+                                               ParticleList &outgoing_particles,
+                                               double suppression_factor){
+  // Set each particle's cross section scaling factor to 0 first
+  for (ParticleData &data : outgoing_particles) {
+    data.set_cross_section_scaling_factor(0.0);
+  }
+  // sort outgoing particles according to z-velocity
+  std::sort(
+      outgoing_particles.begin(), outgoing_particles.end(),
+      [&](ParticleData i, ParticleData j) {
+        return i.momentum().velocity().x3() < j.momentum().velocity().x3();
+      });
+  int nq1, nq2;  // number of quarks at both ends of the string
+  switch(incoming_particles[Random::uniform_int(0, 1)].type().baryon_number()){
+    case 0:
+      nq1 = 1;
+      nq2 = -1;
+      break;
+    case 1:
+      nq1 = 2;
+      nq2 = 1;
+      break;
+    case -1:
+      nq1 = -2;
+      nq2 = -1;
+      break;
+    default:
+      throw std::runtime_error("string is neither mesonic nor baryonic");
+  }
+  // Try to find nq1 on one string end and nq2 on the other string end and the
+  // other way around. When the leading particles are close to the string ends,
+  // the quarks are assumed to be distributed this way.
+  std::pair<int,int> i = find_leading(nq1, nq2, outgoing_particles);
+  std::pair<int,int> j = find_leading(nq2, nq1, outgoing_particles);
+  if (i.second - i.first > j.second - j.first) {
+    assign_scaling_factor(nq1, outgoing_particles[i.first],
+                          suppression_factor);
+    assign_scaling_factor(nq2, outgoing_particles[i.second],
+    suppression_factor);
+  } else {
+    assign_scaling_factor(nq2, outgoing_particles[j.first],
+                          suppression_factor);
+    assign_scaling_factor(nq1, outgoing_particles[j.second],
+                          suppression_factor);
+  }
+};
 
 /** Generate outgoing particles in CM frame from a hard process. */
 void ScatterAction::string_excitation_pythia() {
@@ -737,58 +787,11 @@ void ScatterAction::string_excitation_pythia() {
         }
       }
     }
-    /*
-     *Set each particle's cross section scaling factor to 0 first
-     */
-    for (ParticleData data : new_intermediate_particles) {
-      data.set_cross_section_scaling_factor(0.0);
-    }
-    /*
-     * sort new_intermediate_particles according to z-velocity
-     */
-    std::sort(
-        new_intermediate_particles.begin(), new_intermediate_particles.end(),
-        [&](ParticleData i, ParticleData j) {
-          return i.momentum().velocity().x3() < j.momentum().velocity().x3();
-        });
     /* Additional suppression factor to mimic coherence taken as 0.7
      * from UrQMD (CTParam(59) */
     const double suppression_factor = 0.7;
-    int nq1, nq2;  // number of quarks at both ends of the string
-    switch(incoming_particles_[Random::uniform_int(0, 1)].type().baryon_number()){
-      case 0:
-        nq1 = 1;
-        nq2 = -1;
-        break;
-      case 1:
-        nq1 = 2;
-        nq2 = 1;
-        break;
-      case -1:
-        nq1 = -2;
-        nq2 = -1;
-        break;
-      default:
-        throw std::runtime_error("string is neither mesonic nor baryonic");
-    }
-    // Try to find nq1 from the left side and nq2 from the rght side
-    // and then the other way around and see where the particles are
-    // closer to the ends of the list
-    std::pair<int,int> i = find_leading(nq1, nq2, new_intermediate_particles);
-    std::pair<int,int> j = find_leading(nq2, nq1, new_intermediate_particles);
-
-    if (i.second - i.first > j.second - j.first) {
-      assign_scaling_factor(nq1, new_intermediate_particles[i.first],
-                            suppression_factor);
-      assign_scaling_factor(nq2, new_intermediate_particles[i.second],
-                            suppression_factor);
-    } else {
-      assign_scaling_factor(nq2, new_intermediate_particles[j.first],
-                            suppression_factor);
-      assign_scaling_factor(nq1, new_intermediate_particles[j.second],
-                            suppression_factor);
-    }
-
+    assign_all_scaling_factors(incoming_particles_, new_intermediate_particles,
+                               suppression_factor);
     for (ParticleData data : new_intermediate_particles) {
       log.debug("Particle momenta after sorting: ", data.momentum());
       /* The hadrons are not immediately formed, currently a formation time of

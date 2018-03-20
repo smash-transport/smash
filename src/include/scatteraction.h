@@ -185,6 +185,15 @@ class ScatterAction : public Action {
    */
   virtual double elastic_parametrization() { return 0.; }
 
+  /**                                                                                      
+   * Assign a cross section scaling factor to all outgoing particles.                      
+   * Factor is only non-zero, when the outgoing particle carries                           
+   * a valence quark from the excited hadron.                                              
+   */
+  static void assign_all_scaling_factors(ParticleList &incoming_particles,
+                                  ParticleList &outgoing_particles,
+                                  double suppression_factor);
+
   /// Returns list of possible collision channels
   const CollisionBranchList& collision_channels() {
     return collision_channels_;
@@ -346,20 +355,29 @@ class ScatterAction : public Action {
   /** Check if the scattering is elastic. */
   bool is_elastic() const;
 
-  /** find the leading hadrons with given quarknumbers at string ends */
-  static std::pair<int,int> find_leading(int nq1, int nq2, ParticleList& list);
-
-  /** Check if hadron contains at least the given number of quarks */
-  static bool check_quark_number(int nquarks, PdgCode pdg);
-
-  /** assign a cross section scaling factor according to number of valence
-   * quarks from the string contained in the fragment and the total number of
-   * quarks in the fragment */
-  static void assign_scaling_factor(int nquark, ParticleData data,
-                                    double suppression_factor);
-
   /** Perform a 2->1 resonance-formation process. */
   void resonance_formation();
+
+  /**                                                                                      
+   * Find the first particle, which can carry nq1, and the last particle,                  
+   * which can carry nq2 valence quarks and return their indices in                        
+   * the given list.                                                                       
+   */                                                                                      
+  static std::pair<int,int> find_leading(int nq1, int nq2, ParticleList& list);                   
+                                                                                         
+  /**                                                                                      
+   * Check if a particle with the given pdg code can have nquarks quarks.                  
+   */                                                                                      
+  static bool check_quark_number(int nquarks, PdgCode pdg);                                       
+                                                                                         
+  /**                                                                                      
+   * Assign a cross section scaling factor to the given particle.                          
+   * The scaling factor is the number of quarks from the excited hadron,                   
+   * that the fragment carries devided by the total number of quarks in                    
+   * this fragment.                                                                        
+   */                                                                                      
+  static void assign_scaling_factor(int nquark, ParticleData &data,                               
+                             double suppression_factor);                                     
 
   /**
    * summation of the cross sections
