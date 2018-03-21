@@ -284,8 +284,9 @@ TEST(string_scaling_factors) {
   e.set_4momentum(0.138, {0., 0., 0.5});
   f.set_4momentum(0.138, {0., 0., 1.});
   ParticleList outgoing = {e, d, c, f};  // here in random order
-  constexpr double coherence_factor = 0.7; 
-  ScatterAction::assign_all_scaling_factors(incoming, outgoing, coherence_factor);
+  constexpr double coherence_factor = 0.7;
+  ScatterAction::assign_all_scaling_factors(incoming, outgoing,
+                                            coherence_factor);
   // outgoing list is now assumed to be sorted by z-velocity (so c,d,e,f)
   VERIFY(outgoing[0] == c);
   VERIFY(outgoing[1] == d);
@@ -295,7 +296,41 @@ TEST(string_scaling_factors) {
   // which leads to a scaling factor of 0.7*2/3 and the faster pion (f)
   // gets the other quark and a scaling factor of 0.7*1/2
   COMPARE(outgoing[0].cross_section_scaling_factor(), 0.);
-  COMPARE(outgoing[1].cross_section_scaling_factor(), coherence_factor * 2. / 3.);
+  COMPARE(outgoing[1].cross_section_scaling_factor(),
+          coherence_factor * 2. / 3.);
   COMPARE(outgoing[2].cross_section_scaling_factor(), 0.);
   COMPARE(outgoing[3].cross_section_scaling_factor(), coherence_factor / 2.0);
+
+  incoming = {e, f};  // Mesonic string
+  e.set_4momentum(0.138, {0., 0., -1.0});
+  f.set_4momentum(0.138, {0., 0., -0.5});
+  c.set_4momentum(0.938, {0., 0., 0.5});
+  d.set_4momentum(0.938, {0., 0., 1.0});
+  outgoing = {f, c, d, e};  // again in random order
+  // Since it is a Mesonic string, the valence quarks to distribute are
+  // a quark and an anti-quark. Particle d will carry the quark and is assigned
+  // a scaling factor of 0.7 * 1/3. On the other side of the string is a meson
+  // (Particle e). This contains an anti-quark and will therefore get a scaling
+  // factor of 0.7 * 1/2.
+  ScatterAction::assign_all_scaling_factors(incoming, outgoing,
+                                            coherence_factor);
+  COMPARE(outgoing[0].cross_section_scaling_factor(), 0.5 * coherence_factor);
+  COMPARE(outgoing[1].cross_section_scaling_factor(), 0);
+  COMPARE(outgoing[2].cross_section_scaling_factor(), 0);
+  COMPARE(outgoing[3].cross_section_scaling_factor(), coherence_factor / 3.);
+  VERIFY(outgoing[3] == d);
+  // While partile d was now the last particle in the list, if we exchange the
+  // momenta of d and c, particle c will be assigned the scaling factor.
+  // Even though particle c is an anti-baryon, this is correct, since the meson
+  // on the other end of the string can also carry the quark instead.
+  c.set_4momentum(0.938, {0., 0., 1.0});
+  d.set_4momentum(0.938, {0., 0., 0.5});
+  outgoing = {c, d, e, f};
+  ScatterAction::assign_all_scaling_factors(incoming, outgoing,
+                                            coherence_factor);
+  COMPARE(outgoing[0].cross_section_scaling_factor(), 0.5 * coherence_factor);
+  COMPARE(outgoing[1].cross_section_scaling_factor(), 0.);
+  COMPARE(outgoing[2].cross_section_scaling_factor(), 0.);
+  COMPARE(outgoing[3].cross_section_scaling_factor(), coherence_factor / 3.);
+  VERIFY(outgoing[3] == c);
 }
