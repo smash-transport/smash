@@ -122,3 +122,42 @@ TEST(list_from_oscar2013_output) {
     COMPARE(a.pdgcode(), b.pdgcode());
   }
 }
+
+TEST(multiple_events_in_file) {
+  OutputParameters out_par = OutputParameters();
+  out_par.part_only_final = true;
+  out_par.part_extended = false;
+
+  std::unique_ptr<OutputInterface> osc2013final =
+      create_oscar_output("Oscar2013", "Particles", testoutputpath, out_par);
+  VERIFY(bool(osc2013final));
+
+  const bf::path outputfilename = "particle_lists.oscar";
+  const bf::path outputfilepath = testoutputpath / outputfilename;
+  VERIFY(bf::exists(outputfilepath));
+
+  const int max_events = 10;
+
+  for (auto cur_event = 0; cur_event < max_events; cur_event++)
+  {
+    // Create random particles
+    Particles particles;
+    constexpr size_t N = 10;
+    for (size_t i = 0; i < N; i++) {
+      particles.insert(Test::smashon_random());
+    }
+
+    std::cout << "Initial particles:" << std::endl;
+    for (const auto &p : particles) {
+      std::cout << p << std::endl;
+    }
+
+    // Print them to file in OSCAR 2013 format
+    int event_id = cur_event;
+    const double impact_parameter = 2.34;  // just a dummy value here
+    osc2013final->at_eventend(particles, event_id, impact_parameter);
+  }
+
+
+
+}
