@@ -33,10 +33,10 @@ StringProcess::StringProcess(double string_tension, double gluon_beta,
   // setup and initialize pythia for hard string process
   pythia_parton_ = make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
   /* select only non-diffractive events
-  /* diffractive ones are implemented in a separate routine */
+   * diffractive ones are implemented in a separate routine */
   pythia_parton_->readString("SoftQCD:nonDiffractive = on");
   pythia_parton_->readString("MultipartonInteractions:pTmin = 1.5");
-  common_setup_pythia(Pythia8::Pythia *pythia_parton_.get(),
+  common_setup_pythia(pythia_parton_.get(),
                       strange_supp, diquark_supp, stringz_a, stringz_b,
                       string_sigma_T);
 
@@ -44,7 +44,7 @@ StringProcess::StringProcess(double string_tension, double gluon_beta,
   pythia_hadron_ = make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
   /* turn off all parton-level processes to implement only hadronization */
   pythia_hadron_->readString("ProcessLevel:all = off");
-  common_setup_pythia(Pythia8::Pythia *pythia_hadron_.get(),
+  common_setup_pythia(pythia_hadron_.get(),
                       strange_supp, diquark_supp, stringz_a, stringz_b,
                       string_sigma_T);
 
