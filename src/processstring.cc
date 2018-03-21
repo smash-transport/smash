@@ -363,8 +363,8 @@ bool StringProcess::make_mass_evec_2strings(
 
     m_str[i] = pstr_com[i].sqr();
     m_str[i] = (m_str[i] > 0.) ? std::sqrt(m_str[i]) : 0.;
-    const double threshold = pythia_->particleData.m0(quarks[i][0]) +
-                             pythia_->particleData.m0(quarks[i][1]);
+    const double threshold = pythia_hadron_->particleData.m0(quarks[i][0]) +
+                             pythia_hadron_->particleData.m0(quarks[i][1]);
     // string mass must be larger than threshold set by PYTHIA.
     if (m_str[i] > threshold) {
       found_mass[i] = true;
