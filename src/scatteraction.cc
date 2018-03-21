@@ -595,22 +595,14 @@ std::pair<int, int> ScatterAction::find_leading(int nq1, int nq2,
                                                 ParticleList &list) {
   assert(list.size() >= 2);
   int end = list.size() - 1;
-  bool success = false;
-  int i1 = 0;
-  while (!success && i1 <= end) {
-    success = list[i1].pdgcode().contains_enough_valence_quarks(nq1);
-    if (!success) {
-      i1++;
-    }
-  }
-  int i2 = end;
-  success = false;
-  while (!success && i2 > 0) {
-    success = list[i2].pdgcode().contains_enough_valence_quarks(nq2);
-    if (!success) {
-      i2--;
-    }
-  }
+  int i1, i2;
+  for (i1 = 0;
+       i1 <= end && !list[i1].pdgcode().contains_enough_valence_quarks(nq1);
+       i1++)
+    ;
+  for (i2 = end;
+       i2 >= 0 && !list[i2].pdgcode().contains_enough_valence_quarks(nq2); i2--)
+    ;
   std::pair<int, int> indices(i1, i2);
   return indices;
 }
