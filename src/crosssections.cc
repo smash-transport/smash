@@ -1815,9 +1815,9 @@ bool cross_sections::decide_string(bool strings_switch,
   } else if ((t1.pdgcode().is_pion() && t2.is_nucleon()) ||
              (t1.is_nucleon() && t2.pdgcode().is_pion())) {
     // The energy region of the mixed scattering type for pion-nucleon collision
-    // is 2.3 - 3.1 GeV.
-    mix_scatter_type_energy = 2.7;
-    mix_scatter_type_window_width = 0.4;
+    // is 1.9 - 2.2 GeV.
+    mix_scatter_type_energy = 2.05;
+    mix_scatter_type_window_width = 0.15;
     // pion-nucleon collisions are included in pythia.
     include_pythia = true;
   }
@@ -1832,9 +1832,9 @@ bool cross_sections::decide_string(bool strings_switch,
       is_pythia = true;
     } else if (sqrt_s_ >
                mix_scatter_type_energy - mix_scatter_type_window_width) {
-      const double probability_pythia =
-          (sqrt_s_ - mix_scatter_type_energy + mix_scatter_type_window_width) /
-          mix_scatter_type_window_width / 2.0;
+      const double probability_pythia =0.5 +
+                    0.5 * sin(0.5 * M_PI * (sqrt_s() - mix_scatter_type_energy)
+                    / mix_scatter_type_window_width);
       if (probability_pythia > Random::uniform(0., 1.)) {
         // scatterings at the middle energies are through string
         // fragmentation by chance.
