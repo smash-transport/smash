@@ -121,8 +121,11 @@ class StringProcess {
    */
   ParticleList final_state_;
 
+  /// PYTHIA object used in hard string routine
+  std::unique_ptr<Pythia8::Pythia> pythia_parton_;
+
   /// PYTHIA object used in fragmentation
-  std::unique_ptr<Pythia8::Pythia> pythia_;
+  std::unique_ptr<Pythia8::Pythia> pythia_hadron_;
 
   /// An object to compute cross-sections
   Pythia8::SigmaTotal pythia_sigmatot_;
@@ -133,6 +136,26 @@ class StringProcess {
                 double quark_alpha, double quark_beta, double strange_supp,
                 double diquark_supp, double sigma_perp, double stringz_a,
                 double stringz_b, double string_sigma_T);
+
+  /**
+   * Common setup of PYTHIA objects for soft and hard string routines
+   * \param pythia_in pointer to the PYTHIA object
+   * \param strange_supp strangeness suppression factor in fragmentation
+   * \param diquark_supp diqurk suppression factor in fragmentation
+   * \param stringz_a parameter StringZ:aLund for the fragmentation function
+   * \param stringz_b parameter StringZ:bLund for the fragmentation function
+   * \param string_sigma_T transverse momentum spread in fragmentation
+   */
+  void common_setup_pythia(Pythia8::Pythia *pythia_in,
+                           double strange_supp, double diquark_supp,
+                           double stringz_a, double stringz_b,
+                           double string_sigma_T);
+
+  /**
+   * Function to get the PYTHIA object for hard string routine
+   * \return pointer to the PYTHIA object used in hard string routine
+   */
+  Pythia8::Pythia* get_ptr_pythia_parton() { return pythia_parton_.get(); }
 
   /**
    * Interface to pythia_sigmatot_ to compute cross-sections of A+B->
@@ -153,8 +176,8 @@ class StringProcess {
     // are used to evaluate the energy threshold.
     const int pdg_a_mod = (pdg_a > 1000) ? pdg_a : 10 * (pdg_a / 10) + 3;
     const int pdg_b_mod = (pdg_b > 1000) ? pdg_b : 10 * (pdg_b / 10) + 3;
-    sqrts_threshold += pythia_->particleData.m0(pdg_a_mod) +
-                       pythia_->particleData.m0(pdg_b_mod);
+    sqrts_threshold += pythia_hadron_->particleData.m0(pdg_a_mod) +
+                       pythia_hadron_->particleData.m0(pdg_b_mod);
     // Constant cross-section for sub-processes below threshold equal to
     // cross-section at the threshold.
     if (sqrt_s < sqrts_threshold) {
