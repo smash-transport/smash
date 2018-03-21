@@ -284,7 +284,8 @@ TEST(string_scaling_factors) {
   e.set_4momentum(0.138, {0., 0., 0.5});
   f.set_4momentum(0.138, {0., 0., 1.});
   ParticleList outgoing = {e, d, c, f};  // here in random order
-  ScatterAction::assign_all_scaling_factors(incoming, outgoing, 0.7);
+  constexpr double coherence_factor = 0.7; 
+  ScatterAction::assign_all_scaling_factors(incoming, outgoing, coherence_factor);
   // outgoing list is now assumed to be sorted by z-velocity (so c,d,e,f)
   VERIFY(outgoing[0] == c);
   VERIFY(outgoing[1] == d);
@@ -294,7 +295,7 @@ TEST(string_scaling_factors) {
   // which leads to a scaling factor of 0.7*2/3 and the faster pion (f)
   // gets the other quark and a scaling factor of 0.7*1/2
   COMPARE(outgoing[0].cross_section_scaling_factor(), 0.);
-  COMPARE(outgoing[1].cross_section_scaling_factor(), 0.7 * 2. / 3.);
+  COMPARE(outgoing[1].cross_section_scaling_factor(), coherence_factor * 2. / 3.);
   COMPARE(outgoing[2].cross_section_scaling_factor(), 0.);
-  COMPARE(outgoing[3].cross_section_scaling_factor(), 0.7 / 2.0);
+  COMPARE(outgoing[3].cross_section_scaling_factor(), coherence_factor / 2.0);
 }
