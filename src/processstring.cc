@@ -774,16 +774,22 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
   }
   ThreeVector direction = sign_direction * evecLong;
 
+  Pythia8::Vec4 pSum = 0.;
+
   // For status and (anti)color see \iref{Sjostrand:2007gs}.
   const int status1 = 1, color1 = 1, anticolor1 = 0;
   Pythia8::Vec4 pquark = set_Vec4(E1, -direction * pCMquark);
+  pSum += pquark;
   pythia_hadron_->event.append(idq1, status1, color1, anticolor1, pquark, m1);
 
   const int status2 = 1, color2 = 0, anticolor2 = 1;
   pquark = set_Vec4(E2, direction * pCMquark);
+  pSum += pquark;
   pythia_hadron_->event.append(idq2, status2, color2, anticolor2, pquark, m2);
 
   // implement PYTHIA fragmentation
+  pythia_hadron_->event[0].p( pSum );
+  pythia_hadron_->event[0].m( pSum.mCalc() );
   const bool successful_hadronization = pythia_hadron_->forceHadronLevel();
   int number_of_fragments = 0;
   if (successful_hadronization) {
