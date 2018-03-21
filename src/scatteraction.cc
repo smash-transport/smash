@@ -413,8 +413,9 @@ void ScatterAction::string_excitation_pythia() {
     /* set all necessary parameters for Pythia
      * Create Pythia object */
     log.debug("Creating Pythia object.");
-    //static /*thread_local (see #3075)*/ Pythia8::Pythia pythia(PYTHIA_XML_DIR,
-    //                                                           false);
+    // static /*thread_local (see #3075)*/
+    //     Pythia8::Pythia pythia(PYTHIA_XML_DIR,
+    //                            false);
     Pythia8::Pythia *pythia;
     pythia = string_process_->get_ptr_pythia_parton();
 
