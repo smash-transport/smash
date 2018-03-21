@@ -761,8 +761,8 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
   pythia_hadron_->event.append(idq2, status2, color2, anticolor2, pquark, m2);
 
   // implement PYTHIA fragmentation
-  pythia_hadron_->event[0].p( pSum );
-  pythia_hadron_->event[0].m( pSum.mCalc() );
+  pythia_hadron_->event[0].p(pSum);
+  pythia_hadron_->event[0].m(pSum.mCalc());
   const bool successful_hadronization = pythia_hadron_->forceHadronLevel();
   int number_of_fragments = 0;
   if (successful_hadronization) {
