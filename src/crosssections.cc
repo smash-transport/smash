@@ -1796,13 +1796,20 @@ CollisionBranchList cross_sections::find_nn_xsection_from_type(
   return channel_list;
 }
 
+bool cross_sections::included_in_string(const bool both_are_nucleons) const {
+  const ParticleType& t1 = incoming_particles_[0].type();
+  const ParticleType& t2 = incoming_particles_[1].type();
+  // Either both of the incoming particles are nucleons, or one is a nucleon
+  // while the other is a pion.
+  return both_are_nucleons || (t1.pdgcode().is_pion() && t2.is_nucleon())
+        || (t1.is_nucleon() && t2.pdgcode().is_pion());
+}
+
 bool cross_sections::decide_string(bool strings_switch,
                                    const bool both_are_nucleons) const {
   // Determine the energy region of the mixed scattering type for two types of
   // scattering.
-  const ParticleType& t1 = incoming_particles_[0].type();
-  const ParticleType& t2 = incoming_particles_[1].type();
-  bool include_pythia = false;
+  const bool included = included_in_string(both_are_nucleons);
   double mix_scatter_type_energy;
   double mix_scatter_type_window_width;
   if (both_are_nucleons) {
@@ -1810,20 +1817,15 @@ bool cross_sections::decide_string(bool strings_switch,
     // collision is 4.0 - 5.0 GeV.
     mix_scatter_type_energy = 4.5;
     mix_scatter_type_window_width = 0.5;
-    // nucleon-nucleon collisions are included in pythia.
-    include_pythia = true;
-  } else if ((t1.pdgcode().is_pion() && t2.is_nucleon()) ||
-             (t1.is_nucleon() && t2.pdgcode().is_pion())) {
+  } else if (included) {
     // The energy region of the mixed scattering type for pion-nucleon collision
     // is 1.9 - 2.2 GeV.
     mix_scatter_type_energy = 2.05;
     mix_scatter_type_window_width = 0.15;
-    // pion-nucleon collisions are included in pythia.
-    include_pythia = true;
   }
   // string fragmentation is enabled when strings_switch is on and the process
   // is included in pythia.
-  const bool enable_pythia = strings_switch && include_pythia;
+  const bool enable_pythia = strings_switch && included;
   // Whether the scattering is through string fragmentaion
   bool is_pythia = false;
   if (enable_pythia) {
