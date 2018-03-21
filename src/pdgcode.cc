@@ -41,11 +41,15 @@ int PdgCode::net_quark_number(const int quark) const {
     const int Nn = nucleus_.A_ - nucleus_.Z_;
     const int NL = nucleus_.n_Lambda_;
     switch (quark) {
-      case 1: return (2*Nn + Np + NL) * antiparticle_sign();
-      case 2: return (Nn + 2*Np + NL) * antiparticle_sign();
-      case 3: return NL * antiparticle_sign();
+      case 1:
+        return (2 * Nn + Np + NL) * antiparticle_sign();
+      case 2:
+        return (Nn + 2 * Np + NL) * antiparticle_sign();
+      case 3:
+        return NL * antiparticle_sign();
       // Charmed nuclei may exist, but they are not foreseen by PDG standard
-      default: return 0.0;
+      default:
+        return 0.0;
     }
   }
   // non-hadrons and those that have none of this quark type: 0.
@@ -83,8 +87,9 @@ std::ostream& operator<<(std::ostream& s, const PdgCode& code) {
   return s << code.string();
 }
 
-bool PdgCode::contains_enough_valence_quarks(int valence_quarks_required) const {
-  if (is_meson()){
+bool PdgCode::contains_enough_valence_quarks(
+    int valence_quarks_required) const {
+  if (is_meson()) {
     return valence_quarks_required == 1 || valence_quarks_required == -1;
   }
   if (is_baryon()) {
