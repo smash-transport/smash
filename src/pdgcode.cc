@@ -83,4 +83,18 @@ std::ostream& operator<<(std::ostream& s, const PdgCode& code) {
   return s << code.string();
 }
 
+bool PdgCode::contains_enough_valence_quarks(int valence_quarks_required) const {
+  if (is_meson()){
+    return valence_quarks_required == 1 || valence_quarks_required == -1;
+  }
+  if (is_baryon()) {
+    if (baryon_number() == 1) {
+      return valence_quarks_required == 1 || valence_quarks_required == 2;
+    }
+    if (baryon_number() == -1) {
+      return valence_quarks_required == -1 || valence_quarks_required == -1;
+    }
+  }
+  throw std::runtime_error("String fragment is neither baryon nor meson");
+}
 }  // namespace smash

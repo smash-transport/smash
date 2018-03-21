@@ -366,11 +366,6 @@ class ScatterAction : public Action {
   static std::pair<int, int> find_leading(int nq1, int nq2, ParticleList& list);
 
   /**
-   * Check if a particle with the given pdg code can have nquarks quarks.
-   */
-  static bool check_quark_number(int nquarks, PdgCode pdg);
-
-  /**
    * Assign a cross section scaling factor to the given particle.
    * The scaling factor is the number of quarks from the excited hadron,
    * that the fragment carries devided by the total number of quarks in

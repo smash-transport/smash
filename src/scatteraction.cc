@@ -576,23 +576,6 @@ void ScatterAction::resonance_formation() {
             outgoing_particles_[0].momentum());
 }
 
-/** Check whether a particle contains
- *  at least the given number of valence quarks */
-bool ScatterAction::check_quark_number(int nquarks, PdgCode pdg) {
-  if (pdg.is_meson()) {
-    return nquarks == 1 || nquarks == -1;
-  }
-  if (pdg.is_baryon()) {
-    if (pdg.baryon_number() == 1) {
-      return nquarks == 1 || nquarks == 2;
-    }
-    if (pdg.baryon_number() == -1) {
-      return nquarks == -1 || nquarks == -2;
-    }
-  }
-  throw std::runtime_error("String fragment is neither baryon nor meson");
-}
-
 void ScatterAction::assign_scaling_factor(int nquark, ParticleData &data,
                                           double suppression_factor) {
   int nbaryon = data.pdgcode().baryon_number();
@@ -615,7 +598,7 @@ std::pair<int, int> ScatterAction::find_leading(int nq1, int nq2,
   bool success = false;
   int i1 = 0;
   while (!success && i1 <= end) {
-    success = check_quark_number(nq1, list[i1].pdgcode());
+    success = list[i1].pdgcode().contains_enough_valence_quarks(nq1);
     if (!success) {
       i1++;
     }
@@ -623,7 +606,7 @@ std::pair<int, int> ScatterAction::find_leading(int nq1, int nq2,
   int i2 = end;
   success = false;
   while (!success && i2 > 0) {
-    success = check_quark_number(nq2, list[i2].pdgcode());
+    success = list[i2].pdgcode().contains_enough_valence_quarks(nq2);
     if (!success) {
       i2--;
     }
