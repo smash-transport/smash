@@ -141,7 +141,7 @@ class StringProcess {
    * Common setup of PYTHIA objects for soft and hard string routines
    * \param pythia_in pointer to the PYTHIA object
    * \param strange_supp strangeness suppression factor in fragmentation
-   * \param diquark_supp diqurk suppression factor in fragmentation
+   * \param diquark_supp diquark suppression factor in fragmentation
    * \param stringz_a parameter StringZ:aLund for the fragmentation function
    * \param stringz_b parameter StringZ:bLund for the fragmentation function
    * \param string_sigma_T transverse momentum spread in fragmentation
