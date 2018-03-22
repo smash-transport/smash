@@ -299,14 +299,10 @@ class PdgCode {
     return antiparticle_sign();
   }
   /// Returns whether this PDG code identifies a baryon.
-  inline bool is_baryon() const {
-    return is_hadron() && digits_.n_q1_ != 0;
-  }
+  inline bool is_baryon() const { return is_hadron() && digits_.n_q1_ != 0; }
 
   /// Returns whether this PDG code identifies a meson.
-  inline bool is_meson() const {
-    return is_hadron() && digits_.n_q1_ == 0;
-  }
+  inline bool is_meson() const { return is_hadron() && digits_.n_q1_ == 0; }
 
   /// Is this a nucleon/anti-nucleon (p, n, -p, -n)?
   inline bool is_nucleon() const {
@@ -328,9 +324,7 @@ class PdgCode {
   }
 
   /// Is this a hyperon (Lambda, Sigma, Xi, Omega)?
-  inline bool is_hyperon() const {
-    return is_hadron() && digits_.n_q1_ == 3;
-  }
+  inline bool is_hyperon() const { return is_hadron() && digits_.n_q1_ == 3; }
 
   /// Is this a Omega baryon?
   inline bool is_Omega() const {
