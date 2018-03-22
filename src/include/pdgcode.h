@@ -528,6 +528,10 @@ class PdgCode {
     return result;
   }
 
+  /** Check whether a particle contains at least the given number of
+   * valence quarks. This is necessary for string fragmentation. */
+  bool contains_enough_valence_quarks(int valence_quarks_required) const;
+
   /****************************************************************************
    *                                                                          *
    * operations with more than one PDG Code                                   *

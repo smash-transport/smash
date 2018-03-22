@@ -1452,20 +1452,20 @@ CollisionBranchList cross_sections::string_excitation(
     }
 
     /* soft subprocess selection */
-    int iproc = -1;
+    StringSoftType iproc = StringSoftType::None;
     double r_xsec = string_sub_cross_sections_sum[4] * Random::uniform(0., 1.);
     for (int i = 0; i < 4; i++) {
       if ((r_xsec >= string_sub_cross_sections_sum[i]) &&
           (r_xsec < string_sub_cross_sections_sum[i + 1])) {
-        iproc = i;
+        iproc = static_cast<StringSoftType>(i);
         break;
       }
     }
-    if (iproc == -1) {
+    if (iproc == StringSoftType::None) {
       throw std::runtime_error("soft string subprocess is not specified.");
     }
 
-    string_process->set_iproc(iproc);
+    string_process->set_subproc(iproc);
 
     /* fill the list of process channels */
     if (sig_string_soft > 0.) {

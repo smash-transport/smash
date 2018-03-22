@@ -397,8 +397,85 @@ void ScatterAction::resonance_formation() {
             outgoing_particles_[0].momentum());
 }
 
-/* This function will generate outgoing particles in CM frame
- * from a hard process. */
+void ScatterAction::assign_scaling_factor(int nquark, ParticleData &data,
+                                          double suppression_factor) {
+  int nbaryon = data.pdgcode().baryon_number();
+  if (nbaryon == 0) {
+    // Mesons always get a scaling factor of 1/2 since there is never
+    // a q-qbar pair at the end of a string so nquark is always 1
+    data.set_cross_section_scaling_factor(0.5 * suppression_factor);
+  } else if (data.is_baryon()) {
+    // Leading baryons get a factor of 2/3 if they carry 2
+    // and 1/3 if they carry 1 of the strings valence quarks
+    data.set_cross_section_scaling_factor(suppression_factor * nquark /
+                                          (3.0 * nbaryon));
+  }
+}
+
+std::pair<int, int> ScatterAction::find_leading(int nq1, int nq2,
+                                                ParticleList &list) {
+  assert(list.size() >= 2);
+  int end = list.size() - 1;
+  int i1, i2;
+  for (i1 = 0;
+       i1 <= end && !list[i1].pdgcode().contains_enough_valence_quarks(nq1);
+       i1++)
+    ;
+  for (i2 = end;
+       i2 >= 0 && !list[i2].pdgcode().contains_enough_valence_quarks(nq2); i2--)
+    ;
+  std::pair<int, int> indices(i1, i2);
+  return indices;
+}
+
+void ScatterAction::assign_all_scaling_factors(ParticleList &incoming_particles,
+                                               ParticleList &outgoing_particles,
+                                               double suppression_factor) {
+  // Set each particle's cross section scaling factor to 0 first
+  for (ParticleData &data : outgoing_particles) {
+    data.set_cross_section_scaling_factor(0.0);
+  }
+  // sort outgoing particles according to z-velocity
+  std::sort(outgoing_particles.begin(), outgoing_particles.end(),
+            [&](ParticleData i, ParticleData j) {
+              return i.momentum().velocity().x3() <
+                     j.momentum().velocity().x3();
+            });
+  int nq1, nq2;  // number of quarks at both ends of the string
+  switch (
+      incoming_particles[Random::uniform_int(0, 1)].type().baryon_number()) {
+    case 0:
+      nq1 = 1;
+      nq2 = -1;
+      break;
+    case 1:
+      nq1 = 2;
+      nq2 = 1;
+      break;
+    case -1:
+      nq1 = -2;
+      nq2 = -1;
+      break;
+    default:
+      throw std::runtime_error("string is neither mesonic nor baryonic");
+  }
+  // Try to find nq1 on one string end and nq2 on the other string end and the
+  // other way around. When the leading particles are close to the string ends,
+  // the quarks are assumed to be distributed this way.
+  std::pair<int, int> i = find_leading(nq1, nq2, outgoing_particles);
+  std::pair<int, int> j = find_leading(nq2, nq1, outgoing_particles);
+  if (i.second - i.first > j.second - j.first) {
+    assign_scaling_factor(nq1, outgoing_particles[i.first], suppression_factor);
+    assign_scaling_factor(nq2, outgoing_particles[i.second],
+                          suppression_factor);
+  } else {
+    assign_scaling_factor(nq2, outgoing_particles[j.first], suppression_factor);
+    assign_scaling_factor(nq1, outgoing_particles[j.second],
+                          suppression_factor);
+  }
+};
+
+/** Generate outgoing particles in CM frame from a hard process. */
 void ScatterAction::string_excitation_pythia() {
   assert(incoming_particles_.size() == 2);
   const auto &log = logger<LogArea::Pythia>();
@@ -505,14 +582,11 @@ void ScatterAction::string_excitation_pythia() {
         }
       }
     }
-    /*
-     * sort new_intermediate_particles according to z-Momentum
-     */
-    std::sort(
-        new_intermediate_particles.begin(), new_intermediate_particles.end(),
-        [&](ParticleData i, ParticleData j) {
-          return std::abs(i.momentum().x3()) > std::abs(j.momentum().x3());
-        });
+    /* Additional suppression factor to mimic coherence taken as 0.7
+     * from UrQMD (CTParam(59) */
+    const double suppression_factor = 0.7;
+    assign_all_scaling_factors(incoming_particles_, new_intermediate_particles,
+                               suppression_factor);
     for (ParticleData data : new_intermediate_particles) {
       log.debug("Particle momenta after sorting: ", data.momentum());
       /* The hadrons are not immediately formed, currently a formation time of
@@ -520,25 +594,6 @@ void ScatterAction::string_excitation_pythia() {
        * to a fraction corresponding to the valence quark content. Hadrons
        * containing a valence quark are determined by highest z-momentum. */
       log.debug("The formation time is: ", string_formation_time_, "fm/c.");
-      /* Additional suppression factor to mimic coherence taken as 0.7
-       * from UrQMD (CTParam(59) */
-      const double suppression_factor = 0.7;
-      if (incoming_particles_[0].is_baryon() ||
-          incoming_particles_[1].is_baryon()) {
-        if (data == 0) {
-          data.set_cross_section_scaling_factor(suppression_factor * 0.66);
-        } else if (data == 1) {
-          data.set_cross_section_scaling_factor(suppression_factor * 0.34);
-        } else {
-          data.set_cross_section_scaling_factor(suppression_factor * 0.0);
-        }
-      } else {
-        if (data == 0 || data == 1) {
-          data.set_cross_section_scaling_factor(suppression_factor * 0.50);
-        } else {
-          data.set_cross_section_scaling_factor(suppression_factor * 0.0);
-        }
-      }
       ThreeVector v_calc =
           (data.momentum().LorentzBoost(-1.0 * beta_cm())).velocity();
       // Set formation time: actual time of collision + time to form the
@@ -594,29 +649,29 @@ void ScatterAction::string_excitation_soft() {
     string_process_->init(incoming_particles_, time_of_execution_, gamma_cm());
     /* implement collision */
     bool success = false;
-    const int iproc = string_process_->get_iproc();
+    StringSoftType iproc = string_process_->get_subproc();
     int ntry = 0;
     const int ntry_max = 10000;
     while (!success && ntry < ntry_max) {
       ntry++;
       switch (iproc) {
-        case 0:
+        case StringSoftType::SingleDiffAX:
           /* single diffractive to A+X */
           success = string_process_->next_SDiff(true);
           break;
-        case 1:
+        case StringSoftType::SingleDiffXB:
           /* single diffractive to X+B */
           success = string_process_->next_SDiff(false);
           break;
-        case 2:
+        case StringSoftType::DoubleDiff:
           /* double diffractive */
           success = string_process_->next_DDiff();
           break;
-        case 3:
+        case StringSoftType::NonDiff:
           /* soft non-diffractive */
           success = string_process_->next_NDiffSoft();
           break;
-        default:
+        case StringSoftType::None:
           success = false;
       }
     }
