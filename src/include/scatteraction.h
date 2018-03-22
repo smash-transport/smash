@@ -83,6 +83,15 @@ class ScatterAction : public Action {
                            bool strings_switch, bool use_transition_probability,
                            NNbarTreatment nnbar_treatment);
 
+  /**
+   * Assign a cross section scaling factor to all outgoing particles.
+   * Factor is only non-zero, when the outgoing particle carries
+   * a valence quark from the excited hadron.
+   */
+  static void assign_all_scaling_factors(ParticleList& incoming_particles,
+                                         ParticleList& outgoing_particles,
+                                         double suppression_factor);
+
   /// Returns list of possible collision channels
   const CollisionBranchList& collision_channels() {
     return collision_channels_;
@@ -160,6 +169,22 @@ class ScatterAction : public Action {
 
   /** Perform a 2->1 resonance-formation process. */
   void resonance_formation();
+
+  /**
+   * Find the first particle, which can carry nq1, and the last particle,
+   * which can carry nq2 valence quarks and return their indices in
+   * the given list.
+   */
+  static std::pair<int, int> find_leading(int nq1, int nq2, ParticleList& list);
+
+  /**
+   * Assign a cross section scaling factor to the given particle.
+   * The scaling factor is the number of quarks from the excited hadron,
+   * that the fragment carries devided by the total number of quarks in
+   * this fragment.
+   */
+  static void assign_scaling_factor(int nquark, ParticleData& data,
+                                    double suppression_factor);
 
   /** Pointer to interface class for strings */
   StringProcess* string_process_ = nullptr;

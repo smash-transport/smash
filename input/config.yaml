@@ -1,5 +1,5 @@
 Logging:
-  default: INFO
+    default: INFO
 
 General:
     Modus:         Collider
