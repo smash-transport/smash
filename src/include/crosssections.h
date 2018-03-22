@@ -243,7 +243,7 @@ class cross_sections {
 
   /** both of the incoming particles are nucleons. */
   bool both_are_nucleons_ = incoming_particles_[0].type().is_nucleon() &&
-                            incoming_particles_[0].type().is_nucleon();
+                            incoming_particles_[1].type().is_nucleon();
 
   /** total energy in the center-of-mass frame. */
   double sqrt_s_;

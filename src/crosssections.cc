@@ -157,9 +157,9 @@ CollisionBranchList cross_sections::generate_collision_list(
     /* string excitation */
     /* Calculate string-excitation cross section:
      * Parametrized total minus all other present channels. */
-    const double sig_string_tot =
+    const double sig_string =
       std::max(0., high_energy() - elastic_parametrization());
-    append_list(process_list, string_excitation(sig_string_tot, string_process));
+    append_list(process_list, string_excitation(sig_string, string_process));
   } else {
     if (two_to_one_switch) {
       /* resonance formation (2->1) */
