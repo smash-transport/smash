@@ -156,11 +156,17 @@ class cross_sections {
   /** Find all inelastic 2->2 processes for Hyperon-Pion Scattering. */
   CollisionBranchList ypi_xx(ReactionsBitSet included_2to2);
 
-  /** dπ→ NN, d̅π→ N̅N̅; πd→ πd' (mockup for πd→ πnp), πd̅→ πd̅' and reverse. */
-  CollisionBranchList pion_d_or_dprime_xx(ReactionsBitSet included_2to2);
+  /** Find all inelastic 2->2 processes involving Pion and (anti-) Deuteron,
+   *  specifically dπ→ NN, d̅π→ N̅N̅; πd→ πd' (mockup for πd→ πnp), πd̅→ πd̅' and
+   *  reverse.
+   */
+  CollisionBranchList dpi_xx(ReactionsBitSet included_2to2);
 
-  /** Nd → Nd', N̅d →  N̅d', N̅d̅→ N̅d̅', Nd̅→ Nd̅' and reverse (e.g. Nd'→ Nd). */
-  CollisionBranchList n_nucleus_to_n_nucleus(ReactionsBitSet included_2to2);
+  /** Find all inelastic 2->2 processes involving Nucleon and (anti-) Deuteron,
+   *  specifically Nd → Nd', N̅d →  N̅d', N̅d̅→ N̅d̅', Nd̅→ Nd̅'
+   *  and reverse (e.g. Nd'→ Nd).
+   */
+  CollisionBranchList dn_xx(ReactionsBitSet included_2to2);
 
   /** Determine the parametrized total cross section at high energies
    * for the given collision, which is non-zero for Baryon-Baryon and

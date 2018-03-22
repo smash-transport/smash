@@ -281,7 +281,7 @@ class PdgCode {
 
   /// returns true if this is a baryon, antibaryon or meson.
   inline bool is_hadron() const {
-    return ((digits_.n_q3_ != 0 && digits_.n_q2_ != 0) || is_nucleus());
+    return (digits_.n_q3_ != 0 && digits_.n_q2_ != 0);
   }
   /// returns true if this is a lepton.
   inline bool is_lepton() const {
@@ -300,12 +300,12 @@ class PdgCode {
   }
   /// Returns whether this PDG code identifies a baryon.
   inline bool is_baryon() const {
-    return (is_hadron() && digits_.n_q1_ != 0) || is_nucleus();
+    return is_hadron() && digits_.n_q1_ != 0;
   }
 
   /// Returns whether this PDG code identifies a meson.
   inline bool is_meson() const {
-    return (is_hadron() && digits_.n_q1_ == 0) && !is_nucleus();
+    return is_hadron() && digits_.n_q1_ == 0;
   }
 
   /// Is this a nucleon/anti-nucleon (p, n, -p, -n)?
@@ -329,7 +329,7 @@ class PdgCode {
 
   /// Is this a hyperon (Lambda, Sigma, Xi, Omega)?
   inline bool is_hyperon() const {
-    return is_hadron() && digits_.n_q1_ == 3 && !is_nucleus();
+    return is_hadron() && digits_.n_q1_ == 3;
   }
 
   /// Is this a Omega baryon?
@@ -412,7 +412,7 @@ class PdgCode {
    * 0.
    **/
   int charge() const {
-    if (is_hadron()) {
+    if (is_hadron() || is_nucleus()) {
       // Q will accumulate 3*charge (please excuse the upper case. I
       // want to distinguish this from q which might be interpreted as
       // shorthand for "quark".)
@@ -469,7 +469,7 @@ class PdgCode {
   }
   /** Returns the spin degeneracy \f$2s + 1\f$ of a particle **/
   inline unsigned int spin_degeneracy() const {
-    if (is_hadron() && digits_.n_J_ > 0 && !is_nucleus()) {
+    if (is_hadron() && digits_.n_J_ > 0) {
       return digits_.n_J_;
     }
     return spin() + 1;
@@ -500,7 +500,7 @@ class PdgCode {
     std::array<int, 3> result = {static_cast<int>(digits_.n_q1_),
                                  static_cast<int>(digits_.n_q2_),
                                  static_cast<int>(digits_.n_q3_)};
-    if (is_hadron() && !is_nucleus()) {
+    if (is_hadron()) {
       // Antibaryons
       if (digits_.n_q1_ != 0 && digits_.antiparticle_) {
         for (size_t i = 0; i < 3; i++) {
