@@ -136,19 +136,18 @@ cross_sections::cross_sections(const ParticleList& scat_particles,
 
 CollisionBranchList cross_sections::generate_collision_list(
     double elastic_parameter, bool two_to_one_switch,
-    ReactionsBitSet included_2to2, double low_snn_cut, bool strings_switch,
+    ReactionsBitSet included_2to2, double low_snn_cut,
+    bool strings_switch, bool use_transition_probability,
     NNbarTreatment nnbar_treatment, StringProcess* string_process) {
   CollisionBranchList process_list;
   const ParticleType& t1 = incoming_particles_[0].type();
   const ParticleType& t2 = incoming_particles_[1].type();
-  const bool both_are_nucleons = t1.is_nucleon() && t2.is_nucleon();
-
-  const bool is_pythia = decide_string(strings_switch, both_are_nucleons);
-
+  const bool is_pythia = use_transition_probability &&
+                   decide_string(strings_switch);
   /** Elastic collisions between two nucleons with sqrt_s below
    * low_snn_cut can not happen*/
   const bool reject_by_nucleon_elastic_cutoff =
-      both_are_nucleons && t1.antiparticle_sign() == t2.antiparticle_sign() &&
+      both_are_nucleons_ && t1.antiparticle_sign() == t2.antiparticle_sign() &&
       sqrt_s_ < low_snn_cut;
   bool incl_elastic = included_2to2[IncludedReactions::Elastic];
   if (incl_elastic && !reject_by_nucleon_elastic_cutoff) {
@@ -156,7 +155,11 @@ CollisionBranchList cross_sections::generate_collision_list(
   }
   if (is_pythia) {
     /* string excitation */
-    append_list(process_list, string_excitation(string_process));
+    /* Calculate string-excitation cross section:
+     * Parametrized total minus all other present channels. */
+    const double sig_string_tot =
+      std::max(0., high_energy() - elastic_parametrization());
+    append_list(process_list, string_excitation(sig_string_tot, string_process));
   } else {
     if (two_to_one_switch) {
       /* resonance formation (2->1) */
@@ -1363,13 +1366,8 @@ CollisionBranchList cross_sections::ypi_xx(ReactionsBitSet included_2to2) {
 }
 
 CollisionBranchList cross_sections::string_excitation(
-    StringProcess* string_process) {
+    double sig_string_all, StringProcess* string_process) {
   const auto& log = logger<LogArea::CrossSections>();
-  /* Calculate string-excitation cross section:
-   * Parametrized total minus all other present channels. */
-  double sig_string_all =
-      std::max(0., high_energy() - elastic_parametrization());
-
   /* get PDG id for evaluation of the parametrized cross sections
    * for diffractive processes.
    * (anti-)proton is used for (anti-)baryons and
@@ -1796,23 +1794,22 @@ CollisionBranchList cross_sections::find_nn_xsection_from_type(
   return channel_list;
 }
 
-bool cross_sections::included_in_string(const bool both_are_nucleons) const {
+bool cross_sections::included_in_string() const {
   const ParticleType& t1 = incoming_particles_[0].type();
   const ParticleType& t2 = incoming_particles_[1].type();
   // Either both of the incoming particles are nucleons, or one is a nucleon
   // while the other is a pion.
-  return both_are_nucleons || (t1.pdgcode().is_pion() && t2.is_nucleon())
+  return both_are_nucleons_ || (t1.pdgcode().is_pion() && t2.is_nucleon())
         || (t1.is_nucleon() && t2.pdgcode().is_pion());
 }
 
-bool cross_sections::decide_string(bool strings_switch,
-                                   const bool both_are_nucleons) const {
+bool cross_sections::decide_string(bool strings_switch) const {
   // Determine the energy region of the mixed scattering type for two types of
   // scattering.
-  const bool included = included_in_string(both_are_nucleons);
+  const bool included = included_in_string();
   double mix_scatter_type_energy;
   double mix_scatter_type_window_width;
-  if (both_are_nucleons) {
+  if (both_are_nucleons_) {
     // The energy region of the mixed scattering type for nucleon-nucleon
     // collision is 4.0 - 5.0 GeV.
     mix_scatter_type_energy = 4.5;
@@ -1835,7 +1832,7 @@ bool cross_sections::decide_string(bool strings_switch,
     } else if (sqrt_s_ >
                mix_scatter_type_energy - mix_scatter_type_window_width) {
       const double probability_pythia =0.5 +
-                    0.5 * sin(0.5 * M_PI * (sqrt_s() - mix_scatter_type_energy)
+                    0.5 * sin(0.5 * M_PI * (sqrt_s_ - mix_scatter_type_energy)
                     / mix_scatter_type_window_width);
       if (probability_pythia > Random::uniform(0., 1.)) {
         // scatterings at the middle energies are through string

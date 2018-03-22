@@ -250,8 +250,13 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   if (modus_chooser == "Box") {
     strings_switch_default = false;
   }
+  bool use_transition_probability_default = false;
   const bool strings_switch =
       config.take({"Collision_Term", "Strings"}, strings_switch_default);
+  const bool use_transition_probability =
+      config.take({"Collision_Term", "Strings",
+                   "Switch_on_Strings_with_Probability"},
+                   use_transition_probability_default);
   const NNbarTreatment nnbar_treatment = config.take(
       {"Collision_Term", "NNbar_Treatment"}, NNbarTreatment::NoAnnihilation);
   const bool photons_switch = config.has_value({"Output", "Photons"});
@@ -278,6 +283,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
           two_to_one,
           included_2to2,
           strings_switch,
+          use_transition_probability,
           nnbar_treatment,
           photons_switch,
           low_snn_cut,

@@ -27,7 +27,8 @@ class cross_sections {
    */
   CollisionBranchList generate_collision_list(
       double elastic_parameter, bool two_to_one_switch,
-      ReactionsBitSet included_2to2, double low_snn_cut, bool strings_switch,
+      ReactionsBitSet included_2to2, double low_snn_cut,
+      bool strings_switch, bool use_transition_probability,
       NNbarTreatment nnbar_treatment, StringProcess* string_process);
 
   /**
@@ -86,7 +87,8 @@ class cross_sections {
    * create a list of subprocesses (single-diffractive,
    * double-diffractive and non-diffractive) and their cross sections.
    */
-  CollisionBranchList string_excitation(StringProcess* string_process);
+  CollisionBranchList string_excitation(double sig_string_all,
+                                        StringProcess* string_process);
 
   /**
    * Determine the cross section for NNbar annihilation, which is given by the
@@ -103,6 +105,17 @@ class cross_sections {
    * NNbar_annihilation_cross_section
    */
   CollisionBranchList NNbar_creation();
+
+  /** Determine the parametrized total cross section at high energies
+   * for the given collision, which is non-zero for Baryon-Baryon and
+   * Nucleon-Pion scatterings currently.
+   */
+  double high_energy() const;
+
+  /** Return if the species of the two incoming particles are allowed to
+   * interact via string fragmentation. Currently, only nucleon-nucleon
+   * and nucleon-pion can interact via string. */
+  bool included_in_string() const;
 
  private:
   /**
@@ -156,12 +169,6 @@ class cross_sections {
   /** Find all inelastic 2->2 processes for Hyperon-Pion Scattering. */
   CollisionBranchList ypi_xx(ReactionsBitSet included_2to2);
 
-  /** Determine the parametrized total cross section at high energies
-   * for the given collision, which is non-zero for Baryon-Baryon and
-   * Nucleon-Pion scatterings currently.
-   */
-  double high_energy() const;
-
   /**
    * Determine the (parametrized) hard non-diffractive string cross section
    * for this collision.
@@ -207,11 +214,6 @@ class cross_sections {
       const ParticleTypePtrList& type_res_2,
       const IntegrationMethod integrator);
 
-  /** Return if the species of the two incoming particles are allowed to
-   * interact via string fragmentation. Currently, only nucleon-nucleon
-   * and nucleon-pion can interact via string. */
-  bool included_in_string(const bool both_are_nucleons) const;
-
   /** Return, if the scattering between the incoming particles are scattering
    * via string fragmentaion or not.
    * The string fragmentation is implemented in the same way in GiBUU (Physics
@@ -225,7 +227,7 @@ class cross_sections {
    * mix_scatter_type_window_width) to infinity. In between, the probability for
    * string fragmentation increases smoothly from 0 to 1 as the c.m. energy.
    */
-  bool decide_string(bool strings_switch, const bool both_are_nucleons) const;
+  bool decide_string(bool strings_switch) const;
 
   /** Determine the momenta of the incoming particles in the
    * center-of-mass system.
@@ -238,6 +240,10 @@ class cross_sections {
 
   /** List with data of scattering particles.  */
   ParticleList incoming_particles_;
+
+  /** both of the incoming particles are nucleons. */
+  bool both_are_nucleons_ = incoming_particles_[0].type().is_nucleon() &&
+                            incoming_particles_[0].type().is_nucleon();
 
   /** total energy in the center-of-mass frame. */
   double sqrt_s_;

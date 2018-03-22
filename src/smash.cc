@@ -204,6 +204,8 @@ ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
       {0., 1.}, {0., 1.}, 1, 1.0, 4., two_to_one,
       included_2to2,
       configuration.take({"Collision_Term", "Strings"}, true),
+      configuration.take({"Collision_Term", "Strings",
+                          "Switch_on_Strings_with_Probability"}, false),
       NNbarTreatment::NoAnnihilation,
       false, 0.0, false};
   return ScatterActionsFinder(configuration, params,

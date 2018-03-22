@@ -111,14 +111,25 @@ void ScatterAction::add_all_scatterings(double elastic_parameter,
                                         bool two_to_one,
                                         ReactionsBitSet included_2to2,
                                         double low_snn_cut, bool strings_switch,
+                                        bool use_transition_probability,
                                         NNbarTreatment nnbar_treatment) {
   cross_sections xs(incoming_particles_, sqrt_s());
   CollisionBranchList processes = xs.generate_collision_list(
       elastic_parameter, two_to_one, included_2to2, low_snn_cut, strings_switch,
-      nnbar_treatment, string_process_);
+      use_transition_probability, nnbar_treatment, string_process_);
 
   /* Add various subprocesses.*/
   add_collisions(std::move(processes));
+
+  /* If the string fragmentation is not turned on with a probability increasing
+   * smoothly with energy, then it is implemented with a cross section equal to
+   * the difference between the paramatrized total cross section and the sum of
+   * the cross sections without string. */
+  if (strings_switch && !use_transition_probability && xs.included_in_string()
+      && xs.high_energy() > cross_section()) {
+    add_collisions(xs.string_excitation(xs.high_energy() - cross_section(),
+                                                           string_process_));
+  }
 }
 
 double ScatterAction::raw_weight_value() const { return total_cross_section_; }

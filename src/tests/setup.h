@@ -243,7 +243,7 @@ inline ExperimentParameters default_parameters(int testparticles = 1,
   return ExperimentParameters{
       {0., dt},      {0., 1.}, testparticles,
       1.0,           4.0,      true,
-      all_reactions_included(), false,    NNbarTreatment::NoAnnihilation,
+      all_reactions_included(), false, false,   NNbarTreatment::NoAnnihilation,
       false,         0.,       false};
 }
 
