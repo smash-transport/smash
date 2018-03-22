@@ -190,8 +190,8 @@ std::ostream &operator<<(std::ostream &s,
 }  // namespace std
 
 TEST(periodic_grid) {
-  using Test::Position;
   using Test::Momentum;
+  using Test::Position;
   for (const int testparticles : {1, 5}) {
     for (const int nparticles : {1, 5, 20, 75, 124, 125}) {
       const double min_cell_length = minimal_cell_length(testparticles);

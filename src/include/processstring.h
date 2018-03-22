@@ -19,6 +19,22 @@
 namespace smash {
 
 /**
+ * StringSoft Types are used to identify the type of the soft string subprocess
+ * (-1) nothing (None)
+ * (0) single diffractive A+B to A+X (SingleDiffAX)
+ * (1) single diffractive A+B to X+B (SingleDiffXB)
+ * (2) double diffractive (DoubleDiff)
+ * (3) soft non-diffractive (NonDiff)
+ */
+enum class StringSoftType {
+  None = -1,
+  SingleDiffAX = 0,
+  SingleDiffXB = 1,
+  DoubleDiff = 2,
+  NonDiff = 3
+};
+
+/**
  * \brief String excitation processes used in SMASH
  *
  * Only one instance of this class should be created.
@@ -67,6 +83,8 @@ class StringProcess {
   std::array<ThreeVector, 3> evecBasisAB_;
   /// total number of final state particles
   int NpartFinal_;
+  /// soft subprocess identifier
+  StringSoftType subproc_;
   /// number of particles fragmented from strings
   std::array<int, 2> NpartString_;
   /// the minimum lightcone momentum scale carried by gluon
@@ -94,7 +112,6 @@ class StringProcess {
   double time_collision_;
   /// Lorentz gamma factor of center of mass in the computational frame
   double gamma_factor_com_;
-
   /// square root of 2 (sqrt(2))
   double sqrt2_;
 
@@ -112,7 +129,10 @@ class StringProcess {
 
  public:
   /** Constructor, initializes pythia. Should only be called once. */
-  StringProcess();
+  StringProcess(double string_tension, double gluon_beta, double gluon_pmin,
+                double quark_alpha, double quark_beta, double strange_supp,
+                double diquark_supp, double sigma_perp, double stringz_a,
+                double stringz_b, double string_sigma_T);
 
   /**
    * Interface to pythia_sigmatot_ to compute cross-sections of A+B->
@@ -188,6 +208,10 @@ class StringProcess {
   void set_tension_string(double kappa_string) {
     kappa_tension_string_ = kappa_string;
   }
+  /// Set the soft subprocess identifier
+  void set_subproc(StringSoftType iproc) { subproc_ = iproc; }
+  /// Return the soft subprocess identifier
+  StringSoftType get_subproc() { return subproc_; }
   /**
    * initialization
    * feed intial particles, time of collision and gamma factor of the center of

@@ -35,25 +35,19 @@ class ScatterActionsFinder : public ActionFinderInterface {
                        const std::vector<bool> &nucleon_has_interacted,
                        int N_tot, int N_proj, int n_fractional_photons);
 
-  /** Constructor for testing purposes. */
-  ScatterActionsFinder(double elastic_parameter, int testparticles,
-                       const std::vector<bool> &nucleon_has_interacted,
-                       ReactionsBitSet included_2to2,
-                       bool two_to_one = true);
-
   /** Determine the collision time of the two particles [fm/c].
    *  Time of the closest approach is taken as collision time.
    */
   static inline double collision_time(const ParticleData &p1,
                                       const ParticleData &p2) {
     /** UrQMD collision time in computational frame,
-    * see \iref{Bass:1998ca} (3.28):
-    * position of particle 1: r_1 [fm]
-    * position of particle 2: r_2 [fm]
-    * velocity of particle 1: v_1
-    * velocity of particle 1: v_2
-    * t_{coll} = - (r_1 - r_2) . (v_1 - v_2) / (v_1 - v_2)^2 [fm/c]
-    */
+     * see \iref{Bass:1998ca} (3.28):
+     * position of particle 1: r_1 [fm]
+     * position of particle 2: r_2 [fm]
+     * velocity of particle 1: v_1
+     * velocity of particle 1: v_2
+     * t_{coll} = - (r_1 - r_2) . (v_1 - v_2) / (v_1 - v_2)^2 [fm/c]
+     */
     const ThreeVector dv_times_e1e2 =
         p1.momentum().threevec() * p2.momentum().x0() -
         p2.momentum().threevec() * p1.momentum().x0();
@@ -121,11 +115,6 @@ class ScatterActionsFinder : public ActionFinderInterface {
                            double m_a, double m_b) const;
 
  private:
-  /* Construct a ScatterAction object,
-   * based on the types of the incoming particles. */
-  virtual ScatterActionPtr construct_scatter_action(
-      const ParticleData &data_a, const ParticleData &data_b,
-      double time_until_collision) const;
   /** Check for a single pair of particles (id_a, id_b) if a collision will
    * happen in the next timestep and create a corresponding Action object
    * in that case.
