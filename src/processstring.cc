@@ -73,10 +73,10 @@ void StringProcess::common_setup_pythia(Pythia8::Pythia *pythia_in,
   /* transverse momentum spread in string fragmentation */
   pythia_in->readString("StringPT:sigma = " +
                              std::to_string(string_sigma_T));
-  /* diqurk suppression factore in string fragmentation */
+  /* diquark suppression factor in string fragmentation */
   pythia_in->readString("StringFlav:probQQtoQ = " +
                              std::to_string(diquark_supp));
-  /* strangeness suppression factore in string fragmentation */
+  /* strangeness suppression factor in string fragmentation */
   pythia_in->readString("StringFlav:probStoUD = " +
                              std::to_string(strange_supp));
   /* parameters for the fragmentation function */
