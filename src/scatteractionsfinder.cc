@@ -367,6 +367,9 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
   std::cout << "# sqrt(s) [GeV], " << a.name() << b.name() << "→ ";
   for (const auto channel : all_channels) {
     std::cout << "      ";
+    if (channel.empty()) {
+      std::cout << "strings";
+    }
     for (const ParticleTypePtr ptype : channel) {
       std::cout << ptype->name();
     }
