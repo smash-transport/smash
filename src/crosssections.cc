@@ -1422,8 +1422,8 @@ CollisionBranchList cross_sections::string_excitation(
      * in conjunction with multipartion interaction picture
      * \iref{Sjostrand:1987su}. */
     const double hard_xsec = string_hard_cross_section();
-    const double nondiffractive_soft =
-        nondiffractive_all * std::exp(-hard_xsec / nondiffractive_all);
+    const double nondiffractive_soft = (nondiffractive_all > 0. ?
+        nondiffractive_all * std::exp(-hard_xsec / nondiffractive_all) : 0.);
     const double nondiffractive_hard = nondiffractive_all - nondiffractive_soft;
     log.debug("String cross sections [mb] are");
     log.debug("Single-diffractive AB->AX: ", single_diffr_AX);

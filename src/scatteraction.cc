@@ -128,7 +128,7 @@ void ScatterAction::add_all_scatterings(double elastic_parameter,
   if (strings_switch && !use_transition_probability && xs.included_in_string()
       && xs.high_energy() > cross_section() && sqrt_s() >
       incoming_particles_[0].pole_mass() +
-      incoming_particles_[1].pole_mass() + 1.5) {
+      incoming_particles_[1].pole_mass() + 0.9) {
     add_collisions(xs.string_excitation(xs.high_energy() - cross_section(),
                                                            string_process_));
   }
