@@ -121,10 +121,12 @@ void ScatterAction::add_all_scatterings(double elastic_parameter,
   /* Add various subprocesses.*/
   add_collisions(std::move(processes));
 
-  /* If the string fragmentation is not turned on with a probability increasing
-   * smoothly with energy, then it is implemented with a cross section equal to
-   * the difference between the paramatrized total cross section and the sum of
-   * the cross sections without string. */
+  /* If the string processes are not triggered by a probability, then they
+   * always happen as long as the parametrized total cross section is larger
+   * than the sum of the cross sections of the non-string processes, and the
+   * square root s exceeds the threshold by at least 0.9 GeV. The cross section
+   * of the string processes are counted by taking the difference between the
+   * parametrized total and the sum of the non-strings. */
   if (strings_switch && !use_transition_probability && xs.included_in_string()
       && xs.high_energy() > cross_section() && sqrt_s() >
       incoming_particles_[0].pole_mass() +
