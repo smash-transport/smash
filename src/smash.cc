@@ -199,7 +199,7 @@ ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
   // Since it will be used solely for cross-section dump, most of
   // parameters do not play any role here and are set arbitrarily.
   // Only parameters, that switch reactions on/off matter.
-  bool two_to_one = false;
+  bool two_to_one = configuration.take({"Collision_Term", "Two_to_One"});
   ExperimentParameters params = ExperimentParameters{
       {0., 1.}, {0., 1.}, 1, 1.0, 4., two_to_one,
       included_2to2,

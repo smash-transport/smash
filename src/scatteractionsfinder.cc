@@ -10,6 +10,8 @@
 #include "include/scatteractionsfinder.h"
 
 #include <algorithm>
+#include <map>
+#include <vector>
 
 #include "include/configuration.h"
 #include "include/constants.h"
@@ -310,49 +312,86 @@ void ScatterActionsFinder::dump_reactions() const {
 void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
                                                const ParticleType &b,
                                                double m_a, double m_b) const {
-  const ParticleTypePtrList incoming_list = {&a, &b};
-  std::vector<ParticleTypePtr> ab_products;
+  typedef std::vector<std::pair<double, double>> xs_saver;
+  std::map<ParticleTypePtrList, xs_saver> xs_dump;
 
-  for (const ParticleType &resonance : ParticleType::list_all()) {
-    const auto &decaymodes = resonance.decay_modes().decay_mode_list();
-    for (const auto &mode : decaymodes) {
-      if (mode->type().has_particles(incoming_list)) {
-        ab_products.push_back(&resonance);
+  ParticleData a_data(a), b_data(b);
+  constexpr int n_momentum_points = 200;
+  constexpr double momentum_step = 0.02;
+  for (int i = 1; i < n_momentum_points; i++) {
+    const double momentum = momentum_step * i;
+    a_data.set_4momentum(m_a, momentum, 0.0, 0.0);
+    b_data.set_4momentum(m_b, -momentum, 0.0, 0.0);
+    const double sqrts = (a_data.momentum() + b_data.momentum()).abs();
+    const ParticleList incoming = {a_data, b_data};
+    cross_sections xs_class(incoming, sqrts);
+    CollisionBranchList processes = xs_class.generate_collision_list(
+    elastic_parameter_, two_to_one_, incl_set_, low_snn_cut_, strings_switch_,
+    nnbar_treatment_, string_process_interface_.get());
+    for (const auto &process : processes) {
+      // Sorting is needed to find duplicates, such as Δ⁰Δ⁺⁺ and Δ⁺⁺Δ⁰,
+      // which actually occur in SMASH, because of the way channels are added:
+      // for example one channel can be added twice with halved cross-section.
+      ParticleTypePtrList ptype_list = process->particle_types();
+      std::sort(ptype_list.begin(), ptype_list.end());
+      const double xs = process->weight();
+      if (xs > 0.0) {
+        if (!xs_dump[ptype_list].empty() &&
+            std::abs(xs_dump[ptype_list].back().first - sqrts) < 1.e-9) {
+          xs_dump[ptype_list].back().second += xs;
+        } else {
+          xs_dump[ptype_list].push_back(std::make_pair(sqrts, xs));
+        }
       }
     }
   }
 
-  std::string description = "# sqrt(s) [GeV]";
-  std::string ab_string = " " + a.name() + b.name() + "->";
-  for (const ParticleTypePtr resonance : ab_products) {
-    description += ab_string + resonance->name();
+  // Nice ordering of channels by summed pole mass of products
+  std::vector<ParticleTypePtrList> all_channels;
+  for (const auto channel : xs_dump) {
+    all_channels.push_back(channel.first);
   }
-  std::cout << description << std::endl;
-
-  if (ab_products.size() > 0) {
-    ParticleData a_data(a), b_data(b);
-    constexpr int n_points = 1000;
-
-    std::cout << std::fixed;
-    std::cout << std::setprecision(8);
-    constexpr double momentum_step = 0.01;
-    for (int i = 1; i < n_points; i++) {
-      const double momentum = momentum_step * i;
-      a_data.set_4momentum(m_a, momentum, 0.0, 0.0);
-      b_data.set_4momentum(m_b, -momentum, 0.0, 0.0);
-      ScatterAction act(a_data, b_data, 0.0, false, 0.0);
-      const double sqrts = act.sqrt_s();
-      std::cout << sqrts << " ";
-      cross_sections cross_s(act.incoming_particles(), sqrts);
-      for (const ParticleTypePtr resonance : ab_products) {
-        const double p_cm_sqr = pCM_sqr(sqrts, m_a, m_b);
-        const double xs = (sqrts < resonance->min_mass_kinematic())
-                              ? 0.0
-                              : cross_s.formation(*resonance, p_cm_sqr);
-        std::cout << xs << " ";
-      }
-      std::cout << std::endl;
+  std::sort(all_channels.begin(), all_channels.end(),
+    [](const ParticleTypePtrList lista, const ParticleTypePtrList listb) {
+    double sum_a = 0.0, sum_b = 0.0;
+    for (const auto ptype : lista) {
+      sum_a += ptype->mass();
     }
+    for (const auto ptype : listb) {
+      sum_b += ptype->mass();
+    }
+    return sum_a < sum_b;
+  });
+
+  // Print header
+  std::cout << "# sqrt(s) [GeV], " << a.name() << b.name() << "→ ";
+  for (const auto channel : all_channels) {
+    std::cout << "      ";
+    for (const ParticleTypePtr ptype : channel) {
+      std::cout << ptype->name();
+    }
+  }
+  std::cout << std::endl;
+
+  // Print out all partial cross-sections
+  for (int i = 1; i < n_momentum_points; i++) {
+    const double momentum = momentum_step * i;
+    a_data.set_4momentum(m_a, momentum, 0.0, 0.0);
+    b_data.set_4momentum(m_b, -momentum, 0.0, 0.0);
+    const double sqrts = (a_data.momentum() + b_data.momentum()).abs();
+    printf("%17.5f      ", sqrts);
+    for (const auto channel : all_channels) {
+      const xs_saver energy_and_xs = xs_dump[channel];
+      size_t j = 0;
+      for (; j < energy_and_xs.size() && energy_and_xs[j].first < sqrts; j++);
+      double xs = 0.0;
+      if (j < energy_and_xs.size() &&
+          std::abs(energy_and_xs[j].first - sqrts) < 1.e-9) {
+        xs = energy_and_xs[j].second;
+      }
+      printf("%12.6f", xs);
+    }
+    printf("\n");
   }
 }
 
