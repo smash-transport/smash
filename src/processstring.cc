@@ -325,7 +325,6 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   /* determine direction in which the string is stretched.
    * this is set to be same with the the collision axis
    * in the center of mass frame. */
-  //const ThreeVector threeMomentum = pstrXcom.threevec();
   const ThreeVector threeMomentum = is_AB_to_AX ?
                                     pcom_[1].threevec() : pcom_[0].threevec();
   const FourVector pnull = FourVector(threeMomentum.abs(), threeMomentum);
@@ -381,8 +380,7 @@ bool StringProcess::make_mass_evec_2strings(
 
   if (!found_mass[0] || !found_mass[1]) {
     return false;
-  }
-  else {
+  } else {
     return true;
   }
 }
@@ -396,13 +394,7 @@ bool StringProcess::make_final_state_2strings(
   const std::array<FourVector, 2> ustr_com = {pstr_com[0] / m_str[0],
                                               pstr_com[1] / m_str[1]};
   for (int i = 0; i < 2; i++) {
-    /* determine direction in which string i is stretched.
-     * this is set to be same with the three-momentum of string
-     * in the center of mass frame. */
-    //const ThreeVector mom = pstr_com[i].threevec();
-    //const FourVector pnull(mom.abs(), mom);
-    //const FourVector prs = pnull.LorentzBoost(ustr_com[i].velocity());
-    //ThreeVector evec = prs.threevec() / prs.threevec().abs();
+    // determine direction in which string i is stretched.
     ThreeVector evec = evec_str[i];
     // perform fragmentation and add particles to final_state.
     int nfrag = fragment_string(quarks[i][0], quarks[i][1], m_str[i],
