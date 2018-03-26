@@ -95,7 +95,7 @@ void usage(const int rc, const std::string &progname) {
    *     mass m.
    * <tr><td>`-s <pdg1>,<pdg2>[,mass1,mass2]`
    * <td>`--cross-sections <pdg1>,<pdg2>[,mass1,mass2]`
-   * <td> Dumps the partial 2->1 cross-section of pdg1 + pdg2 with
+   * <td> Dumps all the partial cross-sections of pdg1 + pdg2 with
    *     masses mass1 and mass2. Masses are optional, default values are pole
    *     masses.
    * <tr><td>`-f` <td>`--force`
@@ -126,7 +126,7 @@ void usage(const int rc, const std::string &progname) {
       "  -r, --resonance <pdg>   dump width(m) and m*spectral function(m^2)"
       " for resonance pdg\n"
       "  -s, --cross-sections    <pdg1>,<pdg2>[,mass1,mass2] \n"
-      "                          dump all 2->1 partial cross-sections of "
+      "                          dump all partial cross-sections of "
       "pdg1 + pdg2 reactions versus sqrt(s).\n"
       "                          Masses are optional, by default pole masses"
       " are used.\n"
