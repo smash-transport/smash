@@ -369,11 +369,19 @@ bool StringProcess::make_mass_evec_2strings(
       found_mass[i] = true;
       /* determine direction in which string i is stretched.
        * this is set to be same with the collision axis
-       * in the center of mass frame. */
-      const FourVector ustr_com = pstr_com[i] / m_str[i];
+       * in the center of mass frame.
+       * Initial state partons inside incoming hadrons are
+       * moving along the collision axis,
+       * which is parallel to three momenta of incoming hadrons
+       * in the center of mass frame.
+       * Given that partons are assumed to be massless,
+       * their four momenta are null vectors and parallel to pnull.
+       * If we take unit three-vector of prs,
+       * which is pnull in the rest frame of string,
+       * it would be the direction in which string ends are moving. */
       const ThreeVector mom = pcom_[i].threevec();
       const FourVector pnull(mom.abs(), mom);
-      const FourVector prs = pnull.LorentzBoost(ustr_com.velocity());
+      const FourVector prs = pnull.LorentzBoost(pstr_com[i].velocity());
       evec_str[i] = prs.threevec() / prs.threevec().abs();
     }
   }
