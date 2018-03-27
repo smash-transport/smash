@@ -1478,7 +1478,8 @@ CollisionBranchList cross_sections::dpi_xx(ReactionsBitSet
       // same matrix element for πd and πd̅
       const double tmp =
           sqrts - type_a.min_mass_kinematic() - type_b.min_mass_kinematic();
-      // Purely experimental-data-based, ad hoc parametrization
+      // Matrix element is fit to match the inelastic pi+ d -> pi+ n p
+      // cross-section from the Fig. 5 of [\iref{Arndt:1994bs}].
       const double matrix_element =
           295.5 + 2.862 / (0.00283735 + pow_int(sqrts - 2.181, 2)) +
           0.0672 / pow_int(tmp, 2) - 6.61753 / tmp;
@@ -1535,9 +1536,13 @@ CollisionBranchList cross_sections::dn_xx(ReactionsBitSet /*included_2to2*/) {
       const double tmp = sqrts - type_N.min_mass_kinematic() -
                          type_nucleus.min_mass_kinematic();
       assert(tmp >= 0.0);
+      // Fit to match experimental cross-section Nd -> Nnp from
+      // [\iref{Carlson1973}]
       matrix_element = 79.0474 / std::pow(tmp, 0.7897) + 654.596 * tmp;
     } else {
       // N̅d →  N̅d', Nd̅→ Nd̅' and reverse
+      // Fit to roughly match experimental cross-section N̅d -> N̅ np from
+      // [\iref{Bizzarri:1973sp}].
       matrix_element = 681.4;
     }
     const double spin_factor =
@@ -1924,7 +1929,8 @@ double cross_sections::nn_to_resonance_matrix_element(
              (type_b.is_deuteron() && type_a.pdgcode().is_pion())) {
     // This parametrization is the result of fitting d+pi->NN cross-section.
     // Already Breit-Wigner-like part provides a good fit, exponential fixes
-    // behaviour around the treshold.
+    // behaviour around the treshold. The d+pi experimental cross-section
+    // was taken from Fig. 2 of [\iref{Tanabe:1987vg}].
     return 0.055 / (pow_int(sqrts - 2.145, 2) + pow_int(0.065, 2)) *
            (1.0 - std::exp(-(sqrts - 2.0) * 20.0));
   }
