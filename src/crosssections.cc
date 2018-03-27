@@ -1511,6 +1511,60 @@ CollisionBranchList cross_sections::dpi_xx(ReactionsBitSet
   return process_list;
 }
 
+CollisionBranchList cross_sections::dn_xx(ReactionsBitSet /*included_2to2*/) {
+  const ParticleType& type_a = incoming_particles_[0].type();
+  const ParticleType& type_b = incoming_particles_[1].type();
+  const ParticleType& type_N = type_a.is_nucleon() ? type_a : type_b;
+  const ParticleType& type_nucleus = type_a.is_nucleus() ? type_a : type_b;
+  CollisionBranchList process_list;
+  ParticleTypePtrList nuclei = ParticleType::list_light_nuclei();
+  const double s = sqrt_s_ * sqrt_s_;
+  const double sqrts = sqrt_s_;
+
+  for (ParticleTypePtr produced_nucleus : nuclei) {
+    // No elastic collisions for now, respect conservation laws
+    if (produced_nucleus == &type_nucleus ||
+        produced_nucleus->charge() != type_nucleus.charge() ||
+        produced_nucleus->baryon_number() != type_nucleus.baryon_number()) {
+      continue;
+    }
+    double matrix_element = 0.0;
+    if (std::signbit(type_N.baryon_number()) ==
+        std::signbit(type_nucleus.baryon_number())) {
+      // Nd → Nd', N̅d̅→ N̅d̅' and reverse
+      const double tmp = sqrts - type_N.min_mass_kinematic() -
+                         type_nucleus.min_mass_kinematic();
+      assert(tmp >= 0.0);
+      matrix_element = 79.0474 / std::pow(tmp, 0.7897) + 654.596 * tmp;
+    } else {
+      // N̅d →  N̅d', Nd̅→ Nd̅' and reverse
+      matrix_element = 681.4;
+    }
+    const double spin_factor =
+        (produced_nucleus->spin() + 1) * (type_N.spin() + 1);
+    // Isospin factor is always the same, so it is included into matrix element
+    // Symmetry factor is always 1 here
+    // Absorb (hbarc)^2/16 pi factor into matrix element
+    double xsection = matrix_element * spin_factor / (s * cm_momentum());
+    if (produced_nucleus->is_stable()) {
+      assert(!type_nucleus.stable());
+      xsection *= pCM_from_s(s, type_N.mass(), produced_nucleus->mass());
+    } else {
+      assert(type_nucleus.stable());
+      const double resonance_integral =
+          produced_nucleus->iso_multiplet()->get_integral_NR(sqrts);
+      xsection *= resonance_integral;
+    }
+    process_list.push_back(make_unique<CollisionBranch>(
+        type_N, *produced_nucleus, xsection, ProcessType::TwoToTwo));
+    const auto& log = logger<LogArea::ScatterAction>();
+    log.debug(type_N.name(), type_nucleus.name(), "→ ", type_N.name(),
+              produced_nucleus->name(), " at ", sqrts,
+              " GeV, xs[mb] = ", xsection);
+  }
+  return process_list;
+}
+
 CollisionBranchList cross_sections::string_excitation(
     StringProcess* string_process) {
   const auto& log = logger<LogArea::CrossSections>();
@@ -1729,60 +1783,6 @@ CollisionBranchList cross_sections::NNbar_creation() {
       ParticleType::find(pdg::n), ParticleType::find(-pdg::n), xsection,
       ProcessType::TwoToTwo));
   return channel_list;
-}
-
-CollisionBranchList cross_sections::dn_xx(ReactionsBitSet /*included_2to2*/) {
-  const ParticleType& type_a = incoming_particles_[0].type();
-  const ParticleType& type_b = incoming_particles_[1].type();
-  const ParticleType& type_N = type_a.is_nucleon() ? type_a : type_b;
-  const ParticleType& type_nucleus = type_a.is_nucleus() ? type_a : type_b;
-  CollisionBranchList process_list;
-  ParticleTypePtrList nuclei = ParticleType::list_light_nuclei();
-  const double s = sqrt_s_ * sqrt_s_;
-  const double sqrts = sqrt_s_;
-
-  for (ParticleTypePtr produced_nucleus : nuclei) {
-    // No elastic collisions for now, respect conservation laws
-    if (produced_nucleus == &type_nucleus ||
-        produced_nucleus->charge() != type_nucleus.charge() ||
-        produced_nucleus->baryon_number() != type_nucleus.baryon_number()) {
-      continue;
-    }
-    double matrix_element = 0.0;
-    if (std::signbit(type_N.baryon_number()) ==
-        std::signbit(type_nucleus.baryon_number())) {
-      // Nd → Nd', N̅d̅→ N̅d̅' and reverse
-      const double tmp = sqrts - type_N.min_mass_kinematic() -
-                         type_nucleus.min_mass_kinematic();
-      assert(tmp >= 0.0);
-      matrix_element = 79.0474 / std::pow(tmp, 0.7897) + 654.596 * tmp;
-    } else {
-      // N̅d →  N̅d', Nd̅→ Nd̅' and reverse
-      matrix_element = 681.4;
-    }
-    const double spin_factor =
-        (produced_nucleus->spin() + 1) * (type_N.spin() + 1);
-    // Isospin factor is always the same, so it is included into matrix element
-    // Symmetry factor is always 1 here
-    // Absorb (hbarc)^2/16 pi factor into matrix element
-    double xsection = matrix_element * spin_factor / (s * cm_momentum());
-    if (produced_nucleus->is_stable()) {
-      assert(!type_nucleus.stable());
-      xsection *= pCM_from_s(s, type_N.mass(), produced_nucleus->mass());
-    } else {
-      assert(type_nucleus.stable());
-      const double resonance_integral =
-          produced_nucleus->iso_multiplet()->get_integral_NR(sqrts);
-      xsection *= resonance_integral;
-    }
-    process_list.push_back(make_unique<CollisionBranch>(
-        type_N, *produced_nucleus, xsection, ProcessType::TwoToTwo));
-    const auto& log = logger<LogArea::ScatterAction>();
-    log.debug(type_N.name(), type_nucleus.name(), "→ ", type_N.name(),
-              produced_nucleus->name(), " at ", sqrts,
-              " GeV, xs[mb] = ", xsection);
-  }
-  return process_list;
 }
 
 CollisionBranchList cross_sections::bar_bar_to_nuc_nuc(
