@@ -398,7 +398,7 @@ bool StringProcess::make_final_state_2strings(
     const std::array<FourVector, 2> &pstr_com,
     const std::array<double, 2> &m_str,
     const std::array<ThreeVector, 2> &evec_str,
-    const bool flip_string_ends) {
+    bool flip_string_ends) {
   const std::array<FourVector, 2> ustr_com = {pstr_com[0] / m_str[0],
                                               pstr_com[1] / m_str[1]};
   for (int i = 0; i < 2; i++) {
@@ -738,7 +738,7 @@ void StringProcess::make_string_ends(const PdgCode &pdg, int &idq1, int &idq2) {
 
 int StringProcess::fragment_string(int idq1, int idq2, double mString,
                                    ThreeVector &evecLong,
-                                   const bool flip_string_ends) {
+                                   bool flip_string_ends) {
   pythia_hadron_->event.reset();
   // evaluate 3 times total baryon number of the string
   const int bstring = pythia_hadron_->particleData.baryonNumberType(idq1) +

@@ -282,7 +282,7 @@ class StringProcess {
       const std::array<FourVector, 2> &pstr_com,
       const std::array<double, 2> &m_str,
       const std::array<ThreeVector, 2> &evec_str,
-      const bool flip_string_ends);
+      bool flip_string_ends);
 
   /**
    * Single-diffractive process
@@ -372,7 +372,7 @@ class StringProcess {
    * \return number of hadrons fragmented out of string.
    */
   int fragment_string(int idq1, int idq2, double mString,
-                      ThreeVector &evecLong, const bool flip_string_ends);
+                      ThreeVector &evecLong, bool flip_string_ends);
 };
 
 }  // namespace smash
