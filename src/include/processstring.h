@@ -108,6 +108,8 @@ class StringProcess {
   double sigma_qperp_;
   /// string tension
   double kappa_tension_string_;
+  /// constant proper time in the case of constant formation time
+  double time_formation_const_;
   /// time of collision in the computational frame
   double time_collision_;
   /// Lorentz gamma factor of center of mass in the computational frame
@@ -132,10 +134,13 @@ class StringProcess {
 
  public:
   /** Constructor, initializes pythia. Should only be called once. */
-  StringProcess(double string_tension, double gluon_beta, double gluon_pmin,
-                double quark_alpha, double quark_beta, double strange_supp,
-                double diquark_supp, double sigma_perp, double stringz_a,
-                double stringz_b, double string_sigma_T);
+  StringProcess(double string_tension, double time_formation,
+                double gluon_beta, double gluon_pmin,
+                double quark_alpha, double quark_beta,
+                double strange_supp, double diquark_supp,
+                double sigma_perp,
+                double stringz_a, double stringz_b,
+                double string_sigma_T);
 
   /**
    * Common setup of PYTHIA objects for soft and hard string routines
@@ -315,6 +320,12 @@ class StringProcess {
    */
   bool next_NDiffSoft();
   /**
+   * Hard Non-diffractive process
+   * is based on PYTHIA 8 with partonic showers and interactions.
+   * \return whether the process is successfully implemented.
+   */
+  bool next_NDiffHard();
+  /**
    * Baryon-antibaryon annihilation process
    * Based on what UrQMD \iref{Bass:1998ca,Bleicher:1999xi} does,
    * it create two mesonic strings after annihilating one quark-antiquark pair.
@@ -339,6 +350,17 @@ class StringProcess {
    */
   int append_final_state(const FourVector &uString,
                          const ThreeVector &evecLong);
+
+  /**
+   * convert Kaon-L or Kaon-S into K0 or Anti-K0
+   * \param pythia_id is PDG id to be converted.
+   */
+  static void convert_KaonLS(int &pythia_id) {
+    if (pythia_id == 310 || pythia_id == 130) {
+      pythia_id = (Random::uniform_int(0, 1) == 0) ? 311 : -311;
+    }
+  }
+
   /**
    * Construct diquark from two quarks. Order does not matter.
    * \param q1 PDG code of quark 1
@@ -373,6 +395,32 @@ class StringProcess {
    */
   int fragment_string(int idq1, int idq2, double mString,
                       ThreeVector &evecLong, bool flip_string_ends);
+
+  /**
+   * Assign a cross section scaling factor to all outgoing particles.
+   * Factor is only non-zero, when the outgoing particle carries
+   * a valence quark from the excited hadron.
+   */
+  static void assign_all_scaling_factors(int baryon_string,
+                                         ParticleList& outgoing_particles,
+                                         ThreeVector &evec_coll,
+                                         double suppression_factor);
+
+  /**
+   * Find the first particle, which can carry nq1, and the last particle,
+   * which can carry nq2 valence quarks and return their indices in
+   * the given list.
+   */
+  static std::pair<int, int> find_leading(int nq1, int nq2, ParticleList& list);
+
+  /**
+   * Assign a cross section scaling factor to the given particle.
+   * The scaling factor is the number of quarks from the excited hadron,
+   * that the fragment carries devided by the total number of quarks in
+   * this fragment.
+   */
+  static void assign_scaling_factor(int nquark, ParticleData& data,
+                                    double suppression_factor);
 };
 
 }  // namespace smash
