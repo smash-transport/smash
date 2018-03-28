@@ -11,10 +11,11 @@
 #define SRC_INCLUDE_PROCESSSTRING_H_
 
 #include <memory>
+#include <utility>
 #include <vector>
-#include "Pythia8/Pythia.h"
 
 #include "particledata.h"
+#include "Pythia8/Pythia.h"
 
 namespace smash {
 

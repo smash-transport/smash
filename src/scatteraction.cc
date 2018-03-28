@@ -415,7 +415,7 @@ void ScatterAction::string_excitation(bool is_soft_proc) {
     const int ntry_max = 10000;
     while (!success && ntry < ntry_max) {
       ntry++;
-      if(is_soft_proc) {
+      if (is_soft_proc) {
         switch (iproc) {
           case StringSoftType::SingleDiffAX:
             /* single diffractive to A+X */
