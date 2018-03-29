@@ -214,10 +214,10 @@ double HadronGasEos::energy_density(double T, double mub, double mus) {
     x = std::exp(x);
     const size_t g = ptype.spin() + 1;
     // Small mass case, z*z*K_2(z) -> 2, z*z*z*K_1(z) -> 0 at z->0
-    e += (z < really_small)
-             ? 3.0 * g * x
-             : z * z * g * x * (3.0 * gsl_sf_bessel_Kn_scaled(2, z) +
-                                z * gsl_sf_bessel_K1_scaled(z));
+    e += (z < really_small) ? 3.0 * g * x
+                            : z * z * g * x *
+                                  (3.0 * gsl_sf_bessel_Kn_scaled(2, z) +
+                                   z * gsl_sf_bessel_K1_scaled(z));
   }
   e *= prefactor_ * T * T * T * T;
   return e;

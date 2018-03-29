@@ -75,18 +75,18 @@ ScatterActionsFinder::ScatterActionsFinder(
   }
   if (strings_switch_) {
     auto subconfig = config["Collision_Term"]["String_Parameters"];
-    string_process_interface_ = make_unique<StringProcess>(
-        subconfig.take({"String_Tension"}, 1.0),
-        subconfig.take({"Gluon_Beta"}, 0.5),
-        subconfig.take({"Gluon_Pmin"}, 0.001),
-        subconfig.take({"Quark_Alpha"}, 1.0),
-        subconfig.take({"Quark_Beta"}, 2.5),
-        subconfig.take({"Strange_Supp"}, 0.217),
-        subconfig.take({"Diquark_Supp"}, 0.081),
-        subconfig.take({"Sigma_Perp"}, 0.7),
-        subconfig.take({"StringZ_A"}, 0.68),
-        subconfig.take({"StringZ_B"}, 0.98),
-        subconfig.take({"String_Sigma_T"}, 0.25));
+    string_process_interface_ =
+        make_unique<StringProcess>(subconfig.take({"String_Tension"}, 1.0),
+                                   subconfig.take({"Gluon_Beta"}, 0.5),
+                                   subconfig.take({"Gluon_Pmin"}, 0.001),
+                                   subconfig.take({"Quark_Alpha"}, 1.0),
+                                   subconfig.take({"Quark_Beta"}, 2.5),
+                                   subconfig.take({"Strange_Supp"}, 0.217),
+                                   subconfig.take({"Diquark_Supp"}, 0.081),
+                                   subconfig.take({"Sigma_Perp"}, 0.7),
+                                   subconfig.take({"StringZ_A"}, 0.68),
+                                   subconfig.take({"StringZ_B"}, 0.98),
+                                   subconfig.take({"String_Sigma_T"}, 0.25));
   }
 }
 
