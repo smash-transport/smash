@@ -15,11 +15,11 @@
 
 namespace smash {
 
-/// Fill the string with characters to the left until the given width is reached.
+/// Fill string with characters to the left until the given width is reached.
 std::string fill_left(const std::string &s, size_t width, char fill = ' ');
-/// Fill the string with characters to the right until the given width is reached.
+/// Fill string with characters to the right until the given width is reached.
 std::string fill_right(const std::string &s, size_t width, char fill = ' ');
-/// Fill the string with characters at both sides until the given width is reached.
+/// Fill string with characters at both sides until the given width is reached.
 std::string fill_both(const std::string &s, size_t width, char fill = ' ');
 
 /// takes a string and strips leading and trailing whitespaces.
