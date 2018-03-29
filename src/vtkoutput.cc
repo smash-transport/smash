@@ -20,7 +20,8 @@
 namespace smash {
 
 VtkOutput::VtkOutput(const bf::path &path, const std::string &name)
-    : OutputInterface(name), base_path_(std::move(path)) {}
+    : OutputInterface(name), base_path_(std::move(path)),
+      is_thermodynamics_output_(name == "Thermodynamics") {}
 
 VtkOutput::~VtkOutput() {}
 
@@ -57,8 +58,10 @@ void VtkOutput::at_eventstart(const Particles &particles,
   vtk_fluidization_counter_ = 0;
 
   current_event_ = event_number;
-  write(particles);
-  vtk_output_counter_++;
+  if (!is_thermodynamics_output_) {
+    write(particles);
+    vtk_output_counter_++;
+  }
 }
 
 void VtkOutput::at_eventend(const Particles & /*particles*/,
@@ -67,8 +70,10 @@ void VtkOutput::at_eventend(const Particles & /*particles*/,
 
 void VtkOutput::at_intermediate_time(const Particles &particles, const Clock &,
                                      const DensityParameters &) {
-  write(particles);
-  vtk_output_counter_++;
+  if (!is_thermodynamics_output_) {
+    write(particles);
+    vtk_output_counter_++;
+  }
 }
 
 void VtkOutput::write(const Particles &particles) {
@@ -199,6 +204,9 @@ std::string VtkOutput::make_varname(const ThermodynamicQuantity tq,
 void VtkOutput::thermodynamics_output(
     const ThermodynamicQuantity tq, const DensityType dens_type,
     RectangularLattice<DensityOnLattice> &lattice) {
+  if (!is_thermodynamics_output_) {
+    return;
+  }
   std::ofstream file;
   const std::string varname = make_varname(tq, dens_type);
   file.open(make_filename(varname, vtk_density_output_counter_), std::ios::out);
@@ -227,6 +235,9 @@ void VtkOutput::thermodynamics_output(
 void VtkOutput::thermodynamics_output(
     const ThermodynamicQuantity tq, const DensityType dens_type,
     RectangularLattice<EnergyMomentumTensor> &Tmn_lattice) {
+  if (!is_thermodynamics_output_) {
+    return;
+  }
   std::ofstream file;
   const std::string varname = make_varname(tq, dens_type);
 
@@ -271,6 +282,9 @@ void VtkOutput::thermodynamics_output(
 }
 
 void VtkOutput::thermodynamics_output(const GrandCanThermalizer &gct) {
+  if (!is_thermodynamics_output_) {
+    return;
+  }
   std::ofstream file;
   file.open(make_filename("fluidization_td", vtk_fluidization_counter_++),
             std::ios::out);

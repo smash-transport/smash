@@ -429,7 +429,15 @@ int main(int argc, char *argv[]) {
     }
 
     // keep a copy of the configuration that was used in the output directory
+    // also save information about SMASH build as a comment
     bf::ofstream(output_path / "config.yaml")
+        << "# " << VERSION_MAJOR << '\n'
+        << "# Branch   : " << GIT_BRANCH << '\n'
+        << "# System   : " << CMAKE_SYSTEM << '\n'
+        << "# Compiler : " << CMAKE_CXX_COMPILER_ID << ' '
+        << CMAKE_CXX_COMPILER_VERSION << '\n'
+        << "# Build    : " << CMAKE_BUILD_TYPE << '\n'
+        << "# Date     : " << BUILD_DATE << '\n'
         << configuration.to_string() << '\n';
 
     log.trace(source_location, " create ParticleType and DecayModes");

@@ -342,6 +342,7 @@ void Experiment<Modus>::create_output(std::string format, std::string content,
         make_unique<ThermodynamicOutput>(output_path, content, out_par));
   } else if (content == "Thermodynamics" && format == "VTK") {
     printout_lattice_td_ = true;
+    outputs_.emplace_back(make_unique<VtkOutput>(output_path, content));
   } else {
     log.error() << "Unknown combination of format (" << format
                 << ") and content (" << content << "). Fix the config.";

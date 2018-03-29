@@ -105,10 +105,10 @@ Output:
         Format:          ["ASCII", "VTK"]
         # baryon := net baryon
         Type:            "hadron"
-        Type:            "baryon"
+        Type:            "baryon" # default
         Type:            "baryonic isospin"
         Type:            "pion"
-        Type:            "none"   # default
+        Type:            "none"
         Quantities:      ["rho_eckart", "tmn", "tmn_landau", "landau_velocity"]
         Position:        [0.0, 0.0, 0.0]
         Smearing:        True     # default
@@ -128,7 +128,7 @@ Collision_Term:
         Gluon_Pmin:         0.001 #GeV
         Quark_Alpha:        1.0
         Quark_Beta:         2.5
-        Strange_Supp:       0.217 #Pythia default 
+        Strange_Supp:       0.217 #Pythia default
         Diquark_Supp:       0.081 #Pythia default
         Sigma_Perp:         0.7
         StringZ_A:          0.68 #Pythia default
