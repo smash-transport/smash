@@ -379,7 +379,8 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
     for (const auto channel : all_channels) {
       const xs_saver energy_and_xs = xs_dump[channel];
       size_t j = 0;
-      for (; j < energy_and_xs.size() && energy_and_xs[j].first < sqrts; j++);
+      for (; j < energy_and_xs.size() && energy_and_xs[j].first < sqrts; j++) {
+      }
       double xs = 0.0;
       if (j < energy_and_xs.size() &&
           std::abs(energy_and_xs[j].first - sqrts) < really_small) {
