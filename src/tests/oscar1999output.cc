@@ -68,43 +68,46 @@ static void compare_particledata(const std::array<std::string, 12> &datastring,
 }
 
 TEST(fullhistory_format) {
-  // Set options
-  OutputParameters out_par = OutputParameters();
-  out_par.coll_printstartend = true;
-  out_par.coll_extended = false;
-
-  std::unique_ptr<OutputInterface> oscfull =
-      create_oscar_output("Oscar1999", "Collisions", testoutputpath, out_par);
-  VERIFY(bool(oscfull));
-
-  const bf::path outputfilepath =
-      testoutputpath / "full_event_history.oscar1999";
-  VERIFY(bf::exists(outputfilepath));
-
+  /* Create elastic interaction (smashon + smashon). */
   Test::create_smashon_particletypes();
-
   Particles particles;
   const ParticleData p1 = particles.insert(Test::smashon_random());
   const ParticleData p2 = particles.insert(Test::smashon_random());
-
-  int event_id = 0;
-  double impact_parameter = 3.7;
-  /* Initial state output */
-  oscfull->at_eventstart(particles, event_id);
-
-  /* Create elastic interaction (smashon + smashon). */
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
                               true, NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
-  ParticleList final_particles = action->outgoing_particles();
-  oscfull->at_interaction(*action, 0.);
+  const ParticleList final_particles = action->outgoing_particles();
 
-  /* Final state output */
-  oscfull->at_eventend(particles, event_id, impact_parameter);
+  const int event_id = 0;
+  const double impact_parameter = 3.7;
 
-  // const std::string outputfilename
-  //    = (testoutputpath / outputfilename).native();
+  const bf::path outputfilepath =
+      testoutputpath / "full_event_history.oscar1999";
+  bf::path outputfilepath_unfinished = outputfilepath;
+  outputfilepath_unfinished += ".unfinished";
+
+  {
+    OutputParameters out_par = OutputParameters();
+    out_par.coll_printstartend = true;
+    out_par.coll_extended = false;
+
+    std::unique_ptr<OutputInterface> oscfull =
+        create_oscar_output("Oscar1999", "Collisions", testoutputpath, out_par);
+    VERIFY(bool(oscfull));
+    VERIFY(bf::exists(outputfilepath_unfinished));
+
+    /* Initial state output */
+    oscfull->at_eventstart(particles, event_id);
+
+    oscfull->at_interaction(*action, 0.);
+
+    /* Final state output */
+    oscfull->at_eventend(particles, event_id, impact_parameter);
+  }
+  VERIFY(!bf::exists(outputfilepath_unfinished));
+  VERIFY(bf::exists(outputfilepath));
+
   {
     bf::fstream outputfile;
     outputfile.open(outputfilepath, std::ios_base::in);
@@ -156,7 +159,7 @@ TEST(fullhistory_format) {
         }
         compare_particledata(datastring, data, data.id());
       }
-      for (ParticleData &data : final_particles) {
+      for (const ParticleData &data : final_particles) {
         std::array<std::string, 12> datastring;
         for (int j = 0; j < 12; j++) {
           outputfile >> datastring.at(j);
@@ -192,41 +195,44 @@ TEST(fullhistory_format) {
 }
 
 TEST(particlelist_format) {
-  // Set options
-  OutputParameters out_par = OutputParameters();
-  out_par.part_only_final = true;
-  out_par.part_extended = false;
-
-  std::unique_ptr<OutputInterface> oscfinal =
-      create_oscar_output("Oscar1999", "Particles", testoutputpath, out_par);
-  VERIFY(bool(oscfinal));
-
-  const bf::path outputfilepath = testoutputpath / "particle_lists.oscar1999";
-  VERIFY(bf::exists(outputfilepath));
-
-  Particles particles;
   /* Create 2 particles */
+  Particles particles;
   const ParticleData p1 = particles.insert(Test::smashon_random());
   const ParticleData p2 = particles.insert(Test::smashon_random());
-
-  int event_id = 0;
-  double impact_parameter = 2.4;
-
-  /* Initial state output (note that this should not do anything!) */
-  oscfinal->at_eventstart(particles, event_id);
 
   /* Create interaction ("elastic scattering") */
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
                               true, NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
+  const int event_id = 0;
+  double impact_parameter = 2.4;
 
-  /* As with initial state output, this should not do anything */
-  oscfinal->at_interaction(*action, 0.);
+  const bf::path outputfilepath = testoutputpath / "particle_lists.oscar1999";
+  bf::path outputfilepath_unfinished = outputfilepath;
+  outputfilepath_unfinished += ".unfinished";
+  {
+    OutputParameters out_par = OutputParameters();
+    out_par.part_only_final = true;
+    out_par.part_extended = false;
 
-  /* Final state output; this is the only thing we expect to find in file */
-  action->perform(&particles, 1);
-  oscfinal->at_eventend(particles, event_id, impact_parameter);
+    std::unique_ptr<OutputInterface> oscfinal =
+        create_oscar_output("Oscar1999", "Particles", testoutputpath, out_par);
+    VERIFY(bool(oscfinal));
+    VERIFY(bf::exists(outputfilepath_unfinished));
+
+    /* Initial state output (note that this should not do anything!) */
+    oscfinal->at_eventstart(particles, event_id);
+
+    /* As with initial state output, this should not do anything */
+    oscfinal->at_interaction(*action, 0.);
+
+    /* Final state output; this is the only thing we expect to find in file */
+    action->perform(&particles, 1);
+    oscfinal->at_eventend(particles, event_id, impact_parameter);
+  }
+  VERIFY(!bf::exists(outputfilepath_unfinished));
+  VERIFY(bf::exists(outputfilepath));
 
   {
     bf::fstream outputfile;

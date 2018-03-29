@@ -158,51 +158,54 @@ static bool compare_final_block_header(const int &ev,
 }
 
 TEST(fullhistory_format) {
-  /* Set the most verbose option */
-  OutputParameters output_par = OutputParameters();
-  output_par.coll_printstartend = true;
-  output_par.coll_extended = false;
-
-  /* Create an instance of binary output */
-  std::unique_ptr<BinaryOutputCollisions> bin_output =
-      make_unique<BinaryOutputCollisions>(testoutputpath, "Collisions",
-                                          output_par);
-  const bf::path collisionsoutputfilepath =
-      testoutputpath / "collisions_binary.bin";
-  VERIFY(bf::exists(collisionsoutputfilepath));
-
   /* create two smashon particles */
   Particles particles;
   const ParticleData p1 = particles.insert(Test::smashon_random());
   const ParticleData p2 = particles.insert(Test::smashon_random());
 
-  int event_id = 0;
-  /* Write initial state output: the two smashons we created */
-  bin_output->at_eventstart(particles, event_id);
-
   /* Create elastic interaction (smashon + smashon). */
+  const int event_id = 0;
+  const double impact_parameter = 1.473;
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
                               true, NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
   ParticleList final_particles = action->outgoing_particles();
   const double rho = 0.123;
-  bin_output->at_interaction(*action, rho);
 
-  /* Final state output */
-  action->perform(&particles, 1);
-  const double impact_parameter = 1.473;
-  bin_output->at_eventend(particles, event_id, impact_parameter);
+  const bf::path collisionsoutputfilepath =
+      testoutputpath / "collisions_binary.bin";
+  bf::path collisionsoutputfilepath_unfinished = collisionsoutputfilepath;
+  collisionsoutputfilepath_unfinished += ".unfinished";
+  {
+    /* Set the most verbose option */
+    OutputParameters output_par = OutputParameters();
+    output_par.coll_printstartend = true;
+    output_par.coll_extended = false;
+
+    /* Create an instance of binary output */
+    auto bin_output = make_unique<BinaryOutputCollisions>(testoutputpath,
+        "Collisions", output_par);
+    VERIFY(bf::exists(collisionsoutputfilepath_unfinished));
+
+    /* Write initial state output: the two smashons we created */
+    bin_output->at_eventstart(particles, event_id);
+    bin_output->at_interaction(*action, rho);
+
+    /* Final state output */
+    action->perform(&particles, 1);
+    bin_output->at_eventend(particles, event_id, impact_parameter);
+  }
+  VERIFY(!bf::exists(collisionsoutputfilepath_unfinished));
+  VERIFY(bf::exists(collisionsoutputfilepath));
 
   /*
    * Now we have an artificially generated binary output.
    * Let us try if we can read and understand it.
    */
 
-  // Open file as a binary
-  const auto filename = collisionsoutputfilepath.native();
   {
-    FilePtr binF = fopen(filename, "rb");
+    FilePtr binF = fopen(collisionsoutputfilepath.native(), "rb");
     VERIFY(binF.get());
     // Header
     std::vector<char> buf(4);
@@ -218,7 +221,7 @@ TEST(fullhistory_format) {
     COMPARE(format_version_number, current_format_version);
     COMPARE(smash_version, VERSION_MAJOR);
 
-    // particles at event atart: expect two smashons
+    // particles at event start: expect two smashons
     VERIFY(compare_particles_block_header(2, binF));
     VERIFY(compare_particle(p1, binF));
     VERIFY(compare_particle(p2, binF));
@@ -239,52 +242,55 @@ TEST(fullhistory_format) {
     VERIFY(compare_final_block_header(event_id, impact_parameter, binF));
   }
 
-  // remove file
-  VERIFY(!std::remove(filename.c_str()));
+  VERIFY(bf::remove(collisionsoutputfilepath));
 }
 
 TEST(particles_format) {
-  /* Set the most verbose option */
-  OutputParameters output_par = OutputParameters();
-  output_par.part_extended = false;
-  output_par.part_only_final = false;
-
-  /* Create an instance of binary output */
-  std::unique_ptr<BinaryOutputParticles> bin_output =
-      make_unique<BinaryOutputParticles>(testoutputpath, "Particles",
-                                         output_par);
-  VERIFY(bf::exists(testoutputpath / "particles_binary.bin"));
-
   /* create two smashon particles */
   const auto particles =
       Test::create_particles(2, [] { return Test::smashon_random(); });
-
-  int event_id = 0;
-  /* Write initial state output: the two smashons we created */
-  bin_output->at_eventstart(*particles, event_id);
-
-  /* Interaction smashon + smashon -> smashon */
-  ParticleList initial_particles = particles->copy_to_vector();
-  ParticleList final_state = {Test::smashon_random()};
-  particles->replace(initial_particles, final_state);
-  ParticleList final_particles = particles->copy_to_vector();
-  Clock clock;
-
-  DensityParameters dens_par(Test::default_parameters());
-  bin_output->at_intermediate_time(*particles, clock, dens_par);
-
-  /* Final state output */
+  const int event_id = 0;
   const double impact_parameter = 4.382;
-  bin_output->at_eventend(*particles, event_id, impact_parameter);
+  const ParticleList initial_particles = particles->copy_to_vector();
+
+  const bf::path particleoutputpath = testoutputpath / "particles_binary.bin";
+  bf::path particleoutputpath_unfinished = particleoutputpath;
+  particleoutputpath_unfinished += ".unfinished";
+  {
+    /* Set the most verbose option */
+    OutputParameters output_par = OutputParameters();
+    output_par.part_extended = false;
+    output_par.part_only_final = false;
+    /* Create an instance of binary output */
+    auto bin_output = make_unique<BinaryOutputParticles>(testoutputpath,
+        "Particles", output_par);
+    VERIFY(bool(bin_output));
+    VERIFY(bf::exists(particleoutputpath_unfinished));
+
+    /* Write initial state output: the two smashons we created */
+    bin_output->at_eventstart(*particles, event_id);
+    /* Interaction smashon + smashon -> smashon */
+    ParticleList final_state = {Test::smashon_random()};
+    particles->replace(initial_particles, final_state);
+
+    Clock clock;
+    DensityParameters dens_par(Test::default_parameters());
+    bin_output->at_intermediate_time(*particles, clock, dens_par);
+
+    /* Final state output */
+    bin_output->at_eventend(*particles, event_id, impact_parameter);
+  }
+  const ParticleList final_particles = particles->copy_to_vector();
+  VERIFY(!bf::exists(particleoutputpath_unfinished));
+  VERIFY(bf::exists(particleoutputpath));
+
   /*
    * Now we have an artificially generated binary output.
    * Let us try if we can read and understand it.
    */
 
-  // Open file as a binary
-  const auto filename = (testoutputpath / "particles_binary.bin").native();
   {
-    FilePtr binF = fopen(filename, "rb");
+    FilePtr binF = fopen(particleoutputpath.native(), "rb");
     VERIFY(binF.get());
     // Header
     std::vector<char> buf(4);
@@ -318,31 +324,14 @@ TEST(particles_format) {
     VERIFY(compare_final_block_header(event_id, impact_parameter, binF));
   }
 
-  // remove file
-  VERIFY(!std::remove(filename.c_str()));
+  VERIFY(bf::remove(particleoutputpath));
 }
 
 TEST(extended) {
-  OutputParameters output_par = OutputParameters();
-  output_par.coll_printstartend = true;
-  output_par.coll_extended = true;
-
-  /* Create an instance of binary output */
-  std::unique_ptr<BinaryOutputCollisions> bin_output =
-      make_unique<BinaryOutputCollisions>(testoutputpath, "Collisions",
-                                          output_par);
-  const bf::path collisionsoutputfilepath =
-      testoutputpath / "collisions_binary.bin";
-  VERIFY(bf::exists(collisionsoutputfilepath));
-
   /* create two smashon particles */
   Particles particles;
   const ParticleData p1 = particles.insert(Test::smashon_random());
   const ParticleData p2 = particles.insert(Test::smashon_random());
-
-  int event_id = 0;
-  /* Write initial state output: the two smashons we created */
-  bin_output->at_eventstart(particles, event_id);
 
   /* Create elastic interaction (smashon + smashon). */
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
@@ -351,22 +340,41 @@ TEST(extended) {
   action->generate_final_state();
   ParticleList final_particles = action->outgoing_particles();
   const double rho = 0.123;
-  bin_output->at_interaction(*action, rho);
 
-  /* Final state output */
-  action->perform(&particles, 1);
+  const int event_id = 0;
   const double impact_parameter = 1.473;
-  bin_output->at_eventend(particles, event_id, impact_parameter);
+  const bf::path collisionsoutputfilepath =
+      testoutputpath / "collisions_binary.bin";
+  bf::path collisionsoutputfilepath_unfinished = collisionsoutputfilepath;
+  collisionsoutputfilepath_unfinished += ".unfinished";
+  {
+    OutputParameters output_par = OutputParameters();
+    output_par.coll_printstartend = true;
+    output_par.coll_extended = true;
+
+    /* Create an instance of binary output */
+    auto bin_output = make_unique<BinaryOutputCollisions>(testoutputpath,
+        "Collisions", output_par);
+    VERIFY(bf::exists(collisionsoutputfilepath_unfinished));
+
+    /* Write initial state output: the two smashons we created */
+    bin_output->at_eventstart(particles, event_id);
+    bin_output->at_interaction(*action, rho);
+
+    /* Final state output */
+    action->perform(&particles, 1);
+    bin_output->at_eventend(particles, event_id, impact_parameter);
+  }
+  VERIFY(!bf::exists(collisionsoutputfilepath_unfinished));
+  VERIFY(bf::exists(collisionsoutputfilepath));
 
   /*
    * Now we have an artificially generated binary output.
    * Let us try if we can read and understand it.
    */
 
-  // Open file as a binary
-  const auto filename = collisionsoutputfilepath.native();
   {
-    FilePtr binF = fopen(filename, "rb");
+    FilePtr binF = fopen(collisionsoutputfilepath.native(), "rb");
     VERIFY(binF.get());
     // Header
     std::vector<char> buf(4);
@@ -407,6 +415,5 @@ TEST(extended) {
     VERIFY(compare_final_block_header(event_id, impact_parameter, binF));
   }
 
-  // remove file
-  VERIFY(!std::remove(filename.c_str()));
+  VERIFY(bf::remove(collisionsoutputfilepath));
 }
