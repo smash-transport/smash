@@ -95,7 +95,7 @@ void usage(const int rc, const std::string &progname) {
    *     mass m.
    * <tr><td>`-s <pdg1>,<pdg2>[,mass1,mass2]`
    * <td>`--cross-sections <pdg1>,<pdg2>[,mass1,mass2]`
-   * <td> Dumps the partial 2->1 cross-section of pdg1 + pdg2 with
+   * <td> Dumps all the partial cross-sections of pdg1 + pdg2 with
    *     masses mass1 and mass2. Masses are optional, default values are pole
    *     masses.
    * <tr><td>`-f` <td>`--force`
@@ -126,7 +126,7 @@ void usage(const int rc, const std::string &progname) {
       "  -r, --resonance <pdg>   dump width(m) and m*spectral function(m^2)"
       " for resonance pdg\n"
       "  -s, --cross-sections    <pdg1>,<pdg2>[,mass1,mass2] \n"
-      "                          dump all 2->1 partial cross-sections of "
+      "                          dump all partial cross-sections of "
       "pdg1 + pdg2 reactions versus sqrt(s).\n"
       "                          Masses are optional, by default pole masses"
       " are used.\n"
@@ -199,7 +199,7 @@ ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
   // Since it will be used solely for cross-section dump, most of
   // parameters do not play any role here and are set arbitrarily.
   // Only parameters, that switch reactions on/off matter.
-  bool two_to_one = false;
+  bool two_to_one = configuration.take({"Collision_Term", "Two_to_One"});
   ExperimentParameters params = ExperimentParameters{
       {0., 1.}, {0., 1.}, 1, 1.0, 4., two_to_one,
       included_2to2,
