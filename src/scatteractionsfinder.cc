@@ -365,7 +365,7 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
   std::cout << "# Dumping partial cross-sections in mb" << std::endl;
   std::cout << "# sqrt(s) [GeV], " << a.name() << b.name() << "→ ";
   for (const auto channel : all_channels) {
-    std::cout << "      " << channel;
+    std::cout << smash::fill_left(channel, 12, ' ');
   }
   std::cout << std::endl;
 
