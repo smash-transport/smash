@@ -56,6 +56,9 @@ namespace smash {
  * \li \subpage input_lattice_
  * \li \subpage input_potentials_
  *
+ * \par Information on formatting of the input file can be found here:
+ * \li \subpage input_indentation_
+ *
  * \ifnot user
  * \par The relevant functions and classes for input are:
  * \li \ref Configuration
@@ -74,6 +77,20 @@ namespace smash {
  *
  * Available Settings
  * ------------------
+ */
+
+/*!\Userguide
+ * \page input_indentation_ Indentation
+ * In the config.yaml file, it is important to keep a consistent indentation.
+ * The convention that is agreed on is the use of 4 spaces. For example:
+ * \code
+ * Output:
+ *     Output_Interval: 1.0
+ *     Particles:
+ *         Format:      ["Oscar2013"]
+ * \endcode
+ * This is a part of the output configuration. The Output_Interval attribute
+ * belongs to the Output category, whereas Particles is a subcategory.
  */
 
 /**
