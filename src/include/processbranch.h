@@ -210,6 +210,8 @@ class CollisionBranch : public ProcessBranch {
   ProcessType process_type_;
 };
 
+std::ostream& operator<<(std::ostream& os, const CollisionBranch& cbranch);
+
 /**
  * \ingroup data
  *

@@ -46,6 +46,29 @@ double ProcessBranch::threshold() const {
   return threshold_;
 }
 
+std::ostream& operator<<(std::ostream& os, const CollisionBranch& cbranch) {
+  ProcessType ptype = cbranch.get_type();
+  if (ptype == ProcessType::StringSoft || ptype == ProcessType::StringHard) {
+    os << "strings";
+  } else if (ptype == ProcessType::TwoToOne ||
+             ptype == ProcessType::TwoToTwo ||
+             ptype == ProcessType::Elastic ||
+             ptype == ProcessType::Decay) {
+    ParticleTypePtrList ptype_list = cbranch.particle_types();
+    // Sorting ensures unique name for every channel
+    // It avoids duplicates, such as Δ⁰Δ⁺⁺ and Δ⁺⁺Δ⁰,
+    // which actually occur in SMASH, because of the way channels are added:
+    // for example one channel can be added twice with halved cross-section.
+    std::sort(ptype_list.begin(), ptype_list.end());
+    for (const auto& type : ptype_list) {
+      os << type->name();
+    }
+  } else {
+    os << ptype;
+  }
+  return os;
+}
+
 std::ostream& operator<<(std::ostream& os, ProcessType process_type) {
   switch (process_type) {
     case ProcessType::None:
