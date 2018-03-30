@@ -409,9 +409,9 @@
 
 namespace UnitTest {
 
-using std::vector;
-using std::tuple;
 using std::get;
+using std::tuple;
+using std::vector;
 
 namespace AnsiColor {
 struct Type {

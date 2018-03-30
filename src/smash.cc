@@ -95,7 +95,7 @@ void usage(const int rc, const std::string &progname) {
    *     mass m.
    * <tr><td>`-s <pdg1>,<pdg2>[,mass1,mass2]`
    * <td>`--cross-sections <pdg1>,<pdg2>[,mass1,mass2]`
-   * <td> Dumps the partial 2->1 cross-section of pdg1 + pdg2 with
+   * <td> Dumps all the partial cross-sections of pdg1 + pdg2 with
    *     masses mass1 and mass2. Masses are optional, default values are pole
    *     masses.
    * <tr><td>`-f` <td>`--force`
@@ -126,7 +126,7 @@ void usage(const int rc, const std::string &progname) {
       "  -r, --resonance <pdg>   dump width(m) and m*spectral function(m^2)"
       " for resonance pdg\n"
       "  -s, --cross-sections    <pdg1>,<pdg2>[,mass1,mass2] \n"
-      "                          dump all 2->1 partial cross-sections of "
+      "                          dump all partial cross-sections of "
       "pdg1 + pdg2 reactions versus sqrt(s).\n"
       "                          Masses are optional, by default pole masses"
       " are used.\n"
@@ -188,6 +188,26 @@ void ensure_path_is_valid(const bf::path &path) {
           "a different process.");
     }
   }
+}
+
+/// prepares ActionsFinder for cross-section and reaction dumps
+ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
+  std::vector<bool> nucleon_has_interacted = {};
+  ReactionsBitSet included_2to2 =
+          configuration.take({"Collision_Term", "Included_2to2"},
+          ReactionsBitSet().set());
+  // Since it will be used solely for cross-section dump, most of
+  // parameters do not play any role here and are set arbitrarily.
+  // Only parameters, that switch reactions on/off matter.
+  bool two_to_one = configuration.take({"Collision_Term", "Two_to_One"});
+  ExperimentParameters params = ExperimentParameters{
+      {0., 1.}, {0., 1.}, 1, 1.0, 4., two_to_one,
+      included_2to2,
+      configuration.take({"Collision_Term", "Strings"}, true),
+      NNbarTreatment::NoAnnihilation,
+      false, 0.0, false};
+  return ScatterActionsFinder(configuration, params,
+                              nucleon_has_interacted, 0, 0, 1);
 }
 
 }  // unnamed namespace
@@ -319,22 +339,15 @@ int main(int argc, char *argv[]) {
     }
     if (list2n_activated) {
       // Do not make all elastic cross-sections a fixed number
-      constexpr double elastic_parameter = -1.;
-      // Does not matter here, just dummy
-      constexpr int ntest = 1;
+      configuration.merge_yaml(
+          "{Collision_Term: {Elastic_Cross_Section: -1.0}}");
       // Print only 2->n, n > 1. Do not dump decays, which can be found in
       // decaymodes.txt anyway
-      constexpr bool two_to_one = false;
+      configuration.merge_yaml("{Collision_Term: {Two_to_One: False}}");
       ParticleType::create_type_list(configuration.take({"particles"}));
       DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
-      std::vector<bool> nucleon_has_interacted = {};
-      ReactionsBitSet included_2to2 =
-                   configuration.take({"Collision_Term", "Included_2to2"},
-                   ReactionsBitSet().set());
-      auto scat_finder = make_unique<ScatterActionsFinder>(elastic_parameter,
-                                     ntest, nucleon_has_interacted,
-                                     included_2to2, two_to_one);
-      scat_finder->dump_reactions();
+      auto scat_finder = actions_finder_for_dump(configuration);
+      scat_finder.dump_reactions();
       std::exit(EXIT_SUCCESS);
     }
     if (resonance_dump_activated) {
@@ -348,6 +361,7 @@ int main(int argc, char *argv[]) {
     if (cross_section_dump_activated) {
       ParticleType::create_type_list(configuration.take({"particles"}));
       DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
+      configuration.merge_yaml("{Collision_Term: {Two_to_One: True}}");
       std::string arg_string(cs_string);
       std::vector<std::string> args = split(arg_string, ',');
       const unsigned int n_arg = args.size();
@@ -372,10 +386,8 @@ int main(int argc, char *argv[]) {
         std::cout << "Warning: pole mass is used for stable particle "
                   << b.name() << " instead of " << args[3] << std::endl;
       }
-      std::vector<bool> nucleon_has_interacted = {};
-      auto scat_finder = make_unique<ScatterActionsFinder>(-1., 1,
-                  nucleon_has_interacted, ReactionsBitSet().set(), true);
-      scat_finder->dump_cross_sections(a, b, ma, mb);
+      auto scat_finder = actions_finder_for_dump(configuration);
+      scat_finder.dump_cross_sections(a, b, ma, mb);
       std::exit(EXIT_SUCCESS);
     }
     if (modus) {
@@ -417,7 +429,15 @@ int main(int argc, char *argv[]) {
     }
 
     // keep a copy of the configuration that was used in the output directory
+    // also save information about SMASH build as a comment
     bf::ofstream(output_path / "config.yaml")
+        << "# " << VERSION_MAJOR << '\n'
+        << "# Branch   : " << GIT_BRANCH << '\n'
+        << "# System   : " << CMAKE_SYSTEM << '\n'
+        << "# Compiler : " << CMAKE_CXX_COMPILER_ID << ' '
+        << CMAKE_CXX_COMPILER_VERSION << '\n'
+        << "# Build    : " << CMAKE_BUILD_TYPE << '\n'
+        << "# Date     : " << BUILD_DATE << '\n'
         << configuration.to_string() << '\n';
 
     log.trace(source_location, " create ParticleType and DecayModes");

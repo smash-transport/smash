@@ -27,7 +27,7 @@ namespace smash {
  */
 class VtkOutput : public OutputInterface {
  public:
-  VtkOutput(const bf::path &path, const std::string& name);
+  VtkOutput(const bf::path &path, const std::string &name);
   ~VtkOutput();
 
   void at_eventstart(const Particles &particles,
@@ -88,6 +88,8 @@ class VtkOutput : public OutputInterface {
   int vtk_v_landau_output_counter_ = 0;
   /// Number of fluidization output
   int vtk_fluidization_counter_ = 0;
+  /// Is the VTK output a thermodynamics output
+  bool is_thermodynamics_output_;
 };
 
 }  // namespace smash

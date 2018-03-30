@@ -19,6 +19,22 @@
 namespace smash {
 
 /**
+ * StringSoft Types are used to identify the type of the soft string subprocess
+ * (-1) nothing (None)
+ * (0) single diffractive A+B to A+X (SingleDiffAX)
+ * (1) single diffractive A+B to X+B (SingleDiffXB)
+ * (2) double diffractive (DoubleDiff)
+ * (3) soft non-diffractive (NonDiff)
+ */
+enum class StringSoftType {
+  None = -1,
+  SingleDiffAX = 0,
+  SingleDiffXB = 1,
+  DoubleDiff = 2,
+  NonDiff = 3
+};
+
+/**
  * \brief String excitation processes used in SMASH
  *
  * Only one instance of this class should be created.
@@ -67,6 +83,8 @@ class StringProcess {
   std::array<ThreeVector, 3> evecBasisAB_;
   /// total number of final state particles
   int NpartFinal_;
+  /// soft subprocess identifier
+  StringSoftType subproc_;
   /// number of particles fragmented from strings
   std::array<int, 2> NpartString_;
   /// the minimum lightcone momentum scale carried by gluon
@@ -94,7 +112,6 @@ class StringProcess {
   double time_collision_;
   /// Lorentz gamma factor of center of mass in the computational frame
   double gamma_factor_com_;
-
   /// square root of 2 (sqrt(2))
   double sqrt2_;
 
@@ -104,15 +121,41 @@ class StringProcess {
    */
   ParticleList final_state_;
 
+  /// PYTHIA object used in hard string routine
+  std::unique_ptr<Pythia8::Pythia> pythia_parton_;
+
   /// PYTHIA object used in fragmentation
-  std::unique_ptr<Pythia8::Pythia> pythia_;
+  std::unique_ptr<Pythia8::Pythia> pythia_hadron_;
 
   /// An object to compute cross-sections
   Pythia8::SigmaTotal pythia_sigmatot_;
 
  public:
   /** Constructor, initializes pythia. Should only be called once. */
-  StringProcess();
+  StringProcess(double string_tension, double gluon_beta, double gluon_pmin,
+                double quark_alpha, double quark_beta, double strange_supp,
+                double diquark_supp, double sigma_perp, double stringz_a,
+                double stringz_b, double string_sigma_T);
+
+  /**
+   * Common setup of PYTHIA objects for soft and hard string routines
+   * \param pythia_in pointer to the PYTHIA object
+   * \param strange_supp strangeness suppression factor in fragmentation
+   * \param diquark_supp diquark suppression factor in fragmentation
+   * \param stringz_a parameter StringZ:aLund for the fragmentation function
+   * \param stringz_b parameter StringZ:bLund for the fragmentation function
+   * \param string_sigma_T transverse momentum spread in fragmentation
+   */
+  void common_setup_pythia(Pythia8::Pythia *pythia_in,
+                           double strange_supp, double diquark_supp,
+                           double stringz_a, double stringz_b,
+                           double string_sigma_T);
+
+  /**
+   * Function to get the PYTHIA object for hard string routine
+   * \return pointer to the PYTHIA object used in hard string routine
+   */
+  Pythia8::Pythia* get_ptr_pythia_parton() { return pythia_parton_.get(); }
 
   /**
    * Interface to pythia_sigmatot_ to compute cross-sections of A+B->
@@ -133,8 +176,8 @@ class StringProcess {
     // are used to evaluate the energy threshold.
     const int pdg_a_mod = (pdg_a > 1000) ? pdg_a : 10 * (pdg_a / 10) + 3;
     const int pdg_b_mod = (pdg_b > 1000) ? pdg_b : 10 * (pdg_b / 10) + 3;
-    sqrts_threshold += pythia_->particleData.m0(pdg_a_mod) +
-                       pythia_->particleData.m0(pdg_b_mod);
+    sqrts_threshold += pythia_hadron_->particleData.m0(pdg_a_mod) +
+                       pythia_hadron_->particleData.m0(pdg_b_mod);
     // Constant cross-section for sub-processes below threshold equal to
     // cross-section at the threshold.
     if (sqrt_s < sqrts_threshold) {
@@ -188,6 +231,10 @@ class StringProcess {
   void set_tension_string(double kappa_string) {
     kappa_tension_string_ = kappa_string;
   }
+  /// Set the soft subprocess identifier
+  void set_subproc(StringSoftType iproc) { subproc_ = iproc; }
+  /// Return the soft subprocess identifier
+  StringSoftType get_subproc() { return subproc_; }
   /**
    * initialization
    * feed intial particles, time of collision and gamma factor of the center of

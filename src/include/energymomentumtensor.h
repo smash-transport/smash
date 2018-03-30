@@ -97,10 +97,10 @@ class EnergyMomentumTensor {
   EnergyMomentumTensor boosted(const FourVector &u) const;
 
   /**
-    * Given momentum p of the particle adds \f$ p^{\mu}p^{\mu}/p^0\f$
-    * to the energy momentum tensor.
-    * Input momentum is fourvector with upper index, as all 4-momenta in SMASH
-    */
+   * Given momentum p of the particle adds \f$ p^{\mu}p^{\mu}/p^0\f$
+   * to the energy momentum tensor.
+   * Input momentum is fourvector with upper index, as all 4-momenta in SMASH
+   */
   void add_particle(const FourVector &mom);
   /// Same, but \f$ p^{\mu}p^{\mu}/p^0\f$ times factor is added.
   void add_particle(const ParticleData &p, double factor);
@@ -130,9 +130,9 @@ class EnergyMomentumTensor {
 
  private:
   /** The internal storage of the components.
-    * Tensor has 16 components, but it is symmetric, so number
-    * of independent components reduces to 10.
-    */
+   * Tensor has 16 components, but it is symmetric, so number
+   * of independent components reduces to 10.
+   */
   tmn_type Tmn_;
 };
 
