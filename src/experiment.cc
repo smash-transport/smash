@@ -380,6 +380,12 @@ void Experiment<Modus>::create_output(std::string format, std::string content,
  * \key Two_to_Two (bool, optional, default = true) \n
  * Enable 2 <--> 2 collisions.
  *
+ * \key No_Collisions (bool, optional, default = false) \n
+ * Disable all possible collisions, only allow decays to occur
+ * if not forbidden by other options. Useful for running SMASH
+ * as a decay afterburner, but not recommended in general, because
+ * it breaks the detailed balance.
+ *
  * \key Force_Decays_At_End (bool, optional, default = true): \n
  * true - force all resonances to decay after last timestep \n
  * false - don't force decays (final output can contain resonances)
@@ -430,8 +436,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   if (parameters_.two_to_one) {
     action_finders_.emplace_back(make_unique<DecayActionsFinder>());
   }
-  if (parameters_.two_to_one || parameters_.included_2to2.any() ||
-      parameters_.strings_switch) {
+  bool no_coll = config.take({"Collision_Term", "No_Collisions"}, false);
+  if ((parameters_.two_to_one || parameters_.included_2to2.any() ||
+      parameters_.strings_switch) && !no_coll) {
     auto scat_finder = make_unique<ScatterActionsFinder>(
         config, parameters_, nucleon_has_interacted_, modus_.total_N_number(),
         modus_.proj_N_number(), n_fractional_photons_);
