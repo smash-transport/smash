@@ -7,14 +7,20 @@
  *
  */
 
-#ifndef SRC_INCLUDE_FILEDELETER_H_
-#define SRC_INCLUDE_FILEDELETER_H_
+#ifndef SRC_INCLUDE_FILE_H_
+#define SRC_INCLUDE_FILE_H_
 
 #include <cerrno>
 #include <cstdio>
 #include <cstring>
 #include <memory>
 #include <stdexcept>
+#include <string>
+
+#include <boost/filesystem.hpp>
+
+#include "cxx14compat.h"
+#include "forwarddeclarations.h"
 
 namespace smash {
 
@@ -51,6 +57,33 @@ struct FileDeleter {
  * std::unique_ptr directly with std::FILE.
  */
 using FilePtr = std::unique_ptr<std::FILE, FileDeleter>;
+
+/**
+ * A RAII type to replace `std::FILE *`.
+ *
+ * While open, the file name ends with ".unfinished".
+ *
+ * Automatically closes and renames the file to the original when it goes out of
+ * scope.
+ */
+class RenamingFilePtr {
+ public:
+  RenamingFilePtr(const bf::path& filename, const std::string& mode);
+  FILE* get();
+  ~RenamingFilePtr();
+ private:
+  FILE* file_;
+  bf::path filename_;
+  bf::path filename_unfinished_;
+};
+
+/**
+ * Open a file with given mode.
+ *
+ * This wraps std::fopen but uses FileDeleter to automatically close the file.
+ */
+FilePtr fopen(const bf::path& filename, const std::string& mode);
+
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_FILEDELETER_H_
+#endif  // SRC_INCLUDE_FILE_H_
