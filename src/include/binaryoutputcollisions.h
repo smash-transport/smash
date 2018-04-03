@@ -14,7 +14,7 @@
 
 #include <boost/numeric/conversion/cast.hpp>
 
-#include "filedeleter.h"
+#include "file.h"
 #include "forwarddeclarations.h"
 #include "outputinterface.h"
 #include "outputparameters.h"
@@ -27,7 +27,8 @@ namespace smash {
  **/
 class BinaryOutputBase : public OutputInterface {
  protected:
-  explicit BinaryOutputBase(FILE *f, std::string name, bool extended_format);
+  explicit BinaryOutputBase(const bf::path& path, const std::string& mode,
+                            const std::string& name, bool extended_format);
   void write(const std::string &s);
   void write(const double x);
   void write(const FourVector &v);
@@ -46,7 +47,7 @@ class BinaryOutputBase : public OutputInterface {
   void write_particledata(const ParticleData &p);
 
   /// Binary particles output
-  FilePtr file_;
+  RenamingFilePtr file_;
 
  private:
   /// file format version number

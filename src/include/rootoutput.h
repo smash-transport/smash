@@ -89,7 +89,7 @@ class Particles;
   **/
 class RootOutput : public OutputInterface {
  public:
-  RootOutput(const bf::path &path, std::string name,
+  RootOutput(const bf::path &path, const std::string& name,
              const OutputParameters &out_par);
   ~RootOutput();
 
@@ -102,7 +102,8 @@ class RootOutput : public OutputInterface {
   void at_interaction(const Action &action, const double density) override;
 
  private:
-  const bf::path base_path_;
+  const bf::path filename_;
+  bf::path filename_unfinished_;
   std::unique_ptr<TFile> root_out_file_;
   // TFile takes ownership of all TTrees.
   // That's why TTree is not a unique pointer.
@@ -112,24 +113,27 @@ class RootOutput : public OutputInterface {
   void collisions_to_tree(const ParticleList &incoming,
                           const ParticleList &outgoing, const double weight,
                           const double partial_weight);
-  // Counts number of output in a given event
+  /// Number of output in a given event.
   int output_counter_ = 0;
+  /// Number of current event.
   int current_event_ = 0;
 
+  /// Maximal buffer size.
   static const int max_buffer_size_ = 10000;
-  // Variables that serve as buffer for filling TTree
+  /// Buffer for filling TTree.
   std::array<double, max_buffer_size_> p0, px, py, pz, t, x, y, z;
+  /// Buffer for filling TTree.
   std::array<int, max_buffer_size_> pdgcode;
   int npart, tcounter, ev, nin, nout;
   double wgt, par_wgt, impact_b;
 
-  // Option to write collisions tree
+  /// Option to write collisions tree.
   bool write_collisions_;
 
-  // Option to write particles tree
+  /// Option to write particles tree.
   bool write_particles_;
 
-  // Print only final particles in the event, no intermediate output
+  /// Print only final particles in the event, no intermediate output.
   bool particles_only_final_;
 
   /** Root file cannot be read if it was not properly closed and finalized.

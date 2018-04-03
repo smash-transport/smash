@@ -15,7 +15,7 @@
 
 #include "density.h"
 #include "experimentparameters.h"
-#include "filedeleter.h"
+#include "file.h"
 #include "forwarddeclarations.h"
 #include "outputinterface.h"
 #include "outputparameters.h"
@@ -36,7 +36,7 @@ namespace smash {
  **/
 class ThermodynamicOutput : public OutputInterface {
  public:
-  ThermodynamicOutput(const bf::path &path, std::string name,
+  ThermodynamicOutput(const bf::path &path, const std::string& name,
                       const OutputParameters &out_par);
   ~ThermodynamicOutput();
 
@@ -61,7 +61,7 @@ class ThermodynamicOutput : public OutputInterface {
                           const ThreeVector &line_end, int n_points);
 
  private:
-  FilePtr file_;
+  RenamingFilePtr file_;
   // Structure that holds all the information about what to printout
   const OutputParameters out_par_;
 };
