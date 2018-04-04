@@ -116,7 +116,6 @@ BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
                         : modus_config.take({"Box", "Init_Multiplicities"})
                               .convert_for(init_multipl_)) {}
 
-/* initial_conditions - sets particle data for @particles */
 double BoxModus::initial_conditions(Particles *particles,
                                     const ExperimentParameters &parameters) {
   const auto &log = logger<LogArea::Box>();
@@ -193,7 +192,6 @@ double BoxModus::initial_conditions(Particles *particles,
   return start_time_;
 }
 
-/* Enforce periodic boundaries and output wall hits to collision files */
 int BoxModus::impose_boundary_conditions(Particles *particles,
                                          const OutputsList &output_list) {
   const auto &log = logger<LogArea::Box>();

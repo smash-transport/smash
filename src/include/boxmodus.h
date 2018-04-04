@@ -23,11 +23,11 @@ namespace smash {
  * condition, particles are either reflected on the boundaries
  * (not implemented now) or inserted on opposite positions.
  *
- * To use this modus, chose
+ * To use this modus, choose
     Modus:         Box
  * \code
  * General:
- *      MODUS: Box
+ *      Modus: Box
  * \endcode
  * in the configuration file.
  *
@@ -45,26 +45,42 @@ namespace smash {
  */
 class BoxModus : public ModusDefault {
  public:
-  /// Gathers all configuration variables for the Box.
+  /**
+   * Gathers all configuration variables for the Box.
+   *
+   * \param[in] modus_config The configuration object that sets all
+   *                         initial conditions of the experiment.
+   * \param[in] parameters Unused, but necessary because of templated
+   *                       initialization (see ColliderModus)
+   */
   explicit BoxModus(Configuration modus_config,
                     const ExperimentParameters &parameters);
 
-  /** creates initial conditions from the particles.
+  /**
+   * Generates initial state of the particles in the system according to
+   * specified parameters: number of particles of each species, momentum
+   * and coordinate space distributions. Susbsequently makes the total
+   * 3-momentum 0.
+   *
+   * \param[out] particles An empty list that gets filled up by this function
+   * \param[in] parameters The initialization parameters of the box
+   * \return The starting time of the simulation
    */
   double initial_conditions(Particles *particles,
                             const ExperimentParameters &parameters);
 
-  /** Enforces that all particles are inside the box
+  /**
+   * Enforces that all particles are inside the box
    *
    * \param[in] particles particles to check their position and possibly
    *            move it
    * \param[in] output_list output objects
+   * \return The number of particles that were put back into the box
    *
-   * In BoxModus if particle crosses the wall of the box, it is
+   * In BoxModus if a particle crosses the wall of the box, it is
    * inserted from the opposite side. Wall crossings are written to
    * collision output: this is where OutputsList is used.
    */
-
   int impose_boundary_conditions(Particles *particles,
                                  const OutputsList &output_list = {});
 
@@ -103,20 +119,32 @@ class BoxModus : public ModusDefault {
   const double temperature_;
   /// initial time of the box
   const double start_time_ = 0.;
-  /** whether to use a thermal initialization for all particles
-   *  instead of specific numbers */
+  /**
+   * whether to use a thermal initialization for all particles
+   * instead of specific numbers
+   */
   const bool use_thermal_ = false;
-  /// baryon chemical potential for thermal box
+  /**
+   * baryon chemical potential for thermal box;
+   * only used if use_thermal_ is true
+   */
   const double mub_;
-  /// strange chemical potential for thermal box
+  /**
+   * strange chemical potential for thermal box;
+   * only used if use_thermal_ is true
+   */
   const double mus_;
   /// particle multiplicities at initialization
   const std::map<PdgCode, int> init_multipl_;
 
   /**\ingroup logging
-   * Writes the initial state for the Box to the output stream.
+   * console output on startup of box specific parameters;
+   * writes the initial state for the Box to the output stream.
+   *
+   * \param[in] out The ostream into which to output
+   * \param[in] m The BoxModus object to write into out
    */
-  friend std::ostream &operator<<(std::ostream &, const BoxModus &);
+  friend std::ostream &operator<<(std::ostream &out, const BoxModus &m);
 };
 
 }  // namespace smash
