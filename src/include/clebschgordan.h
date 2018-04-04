@@ -67,17 +67,17 @@ double isospin_clebsch_gordan_sqr_3to1(const ParticleType &p_a,
  * 2-to-2 reaction A + B -> C + D. If a total isospin value I is given
  * (doubled in order to be integer), then only contributions with that total
  * isospin will be counted.
- * \param[in] t_a Information on spin/isospin of particle a
- * \param[in] t_b Information on spin/isospin of particle b
- * \param[in] t_c Information on spin/isospin of particle c
- * \param[in] t_d Information on spin/isospin of particle d
+ * \param[in] p_a Information on spin/isospin of particle a
+ * \param[in] p_b Information on spin/isospin of particle b
+ * \param[in] p_c Information on spin/isospin of particle c
+ * \param[in] p_d Information on spin/isospin of particle d
  * \param[in] I total isospin of the reaction
  * \return Clebsch-Gordan squared for 2->2 reaction
  */
- double isospin_clebsch_gordan_sqr_2to2(const ParticleType &t_a,
-                                       const ParticleType &t_b,
-                                       const ParticleType &t_c,
-                                       const ParticleType &t_d,
+ double isospin_clebsch_gordan_sqr_2to2(const ParticleType &p_a,
+                                       const ParticleType &p_b,
+                                       const ParticleType &p_c,
+                                       const ParticleType &p_d,
                                        const int I = -1);
     
 ///Range of total isospin for reaction of particle a with particle b.
@@ -92,11 +92,11 @@ class I_tot_range {
    * Get the allowed range of total isospin for a collision a + b. Returns
    * maximum and minimum of allowed values.
    */
-  I_tot_range(const ParticleType &t_a, const ParticleType &t_b) {
+  I_tot_range(const ParticleType &p_a, const ParticleType &p_b) {
     // Compute total isospin range with given particles.
-    const int I_z_abs = std::abs(t_a.isospin3() + t_b.isospin3());
-    I_max_ = t_a.isospin() + t_b.isospin();
-    I_min_ = std::max(std::abs(t_a.isospin() - t_b.isospin()), I_z_abs);
+    const int I_z_abs = std::abs(p_a.isospin3() + p_b.isospin3());
+    I_max_ = p_a.isospin() + p_b.isospin();
+    I_min_ = std::max(std::abs(p_a.isospin() - p_b.isospin()), I_z_abs);
   }
 
   /**
@@ -104,11 +104,11 @@ class I_tot_range {
    * Returns maximum and minimum of allowed values or empty range, if reaction
    * is forbidden due to isospin.
    */
-  I_tot_range(const ParticleType &t_a, const ParticleType &t_b,
-              const ParticleType &t_c, const ParticleType &t_d) {
+  I_tot_range(const ParticleType &p_a, const ParticleType &p_b,
+              const ParticleType &p_c, const ParticleType &p_d) {
     // Compute total isospin range with given initial and final particles.
-    const int I_z = t_a.isospin3() + t_b.isospin3();
-    if (I_z != t_c.isospin3() + t_d.isospin3()) {
+    const int I_z = p_a.isospin3() + p_b.isospin3();
+    if (I_z != p_c.isospin3() + p_d.isospin3()) {
       /* This reaction is forbidden by isospin conservation.
        * Set impossible values to make sure an empty range is returned. */
       I_min_ = 1;
@@ -116,9 +116,9 @@ class I_tot_range {
       return;
     }
     I_max_ =
-        std::min(t_a.isospin() + t_b.isospin(), t_c.isospin() + t_d.isospin());
-    I_min_ = std::max(std::abs(t_a.isospin() - t_b.isospin()),
-                      std::abs(t_c.isospin() - t_d.isospin()));
+        std::min(p_a.isospin() + p_b.isospin(), p_c.isospin() + p_d.isospin());
+    I_min_ = std::max(std::abs(p_a.isospin() - p_b.isospin()),
+                      std::abs(p_c.isospin() - p_d.isospin()));
     I_min_ = std::max(I_min_, std::abs(I_z));
   }
 
