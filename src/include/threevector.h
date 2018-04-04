@@ -73,11 +73,17 @@ class ThreeVector {
   double inline get_phi() const;
   /// calculate the polar angle theta
   double inline get_theta() const;
-  /** Rotate vector by the given Euler angles phi, theta, psi. If we
+  /**
+   * Rotate vector by the given Euler angles phi, theta, psi. If we
    * assume the standard basis x, y, z then this means applying the
    * matrix for a rotation of phi about z, followed by the matrix for
    * a rotation theta about the rotated x axis. Last, psi is a rotation
    * about the rotated z axis.
+   * \param phi angle by which the first rotation is done about z axis.
+   * \param theta angle by which the second rotation is done
+   *        about the rotated x axis.
+   * \param psi angle by which the third rotation is done
+   *        about the rotated z axis.
    *
    * Euler angles are used to make rotation of several (different) position
    * vectors belonging to one rigid body easy. A ThreeVector could be rotated
@@ -86,11 +92,11 @@ class ThreeVector {
    * angles for every position.
    */
   void inline rotate(double phi, double theta, double psi);
-  /** Rotate the vector around the y axis by the given angle theta. */
+  /// Rotate the vector around the y axis by the given angle theta.
   void inline rotate_around_y(double theta);
-  /** Rotate the vector around the z axis by the given angle theta. */
+  /// Rotate the vector around the z axis by the given angle theta.
   void inline rotate_around_z(double theta);
-  /** Rotate the z-axis onto the vector r. */
+  /// Rotate the z-axis onto the vector r.
   void inline rotate_z_axis_to(ThreeVector &r);
   /// negation: Returns \f$-\vec x\f$
   ThreeVector inline operator-() const;
@@ -139,7 +145,8 @@ class ThreeVector {
   std::array<double, 3> x_;
 };
 
-/**\ingroup logging
+/**
+ * \ingroup logging
  * Writes the three components of the vector to the output stream.
  */
 std::ostream &operator<<(std::ostream &, const ThreeVector &);
@@ -168,6 +175,7 @@ ThreeVector inline ThreeVector::operator+=(const ThreeVector &v) {
   return *this;
 }
 
+/// return sum of two three-vectors \f$ \vec{a} + \vec{b} \f$.
 ThreeVector inline operator+(ThreeVector a, const ThreeVector &b) {
   a += b;
   return a;
@@ -180,6 +188,7 @@ ThreeVector inline ThreeVector::operator-=(const ThreeVector &v) {
   return *this;
 }
 
+/// return difference between two three-vectors \f$ \vec{a} - \vec{b} \f$.
 ThreeVector inline operator-(ThreeVector a, const ThreeVector &b) {
   a -= b;
   return a;
@@ -192,16 +201,22 @@ ThreeVector inline ThreeVector::operator*=(const double &a) {
   return *this;
 }
 
+/// multiply a three-vector by constant factor \f$ b \vec{a} \f$.
 inline ThreeVector operator*(ThreeVector a, const double &b) {
   a *= b;
   return a;
 }
 
+/// multiply a three-vector by constant factor \f$ a \vec{b} \f$.
 inline ThreeVector operator*(const double &a, ThreeVector b) {
   b *= a;
   return b;
 }
 
+/**
+ * return inner product of two three-vectors
+ * /f$ \vec{a} \cdot \vec{b} /f$
+ */
 inline double operator*(ThreeVector a, const ThreeVector &b) {
   return a.x1() * b.x1() + a.x2() * b.x2() + a.x3() * b.x3();
 }
@@ -214,6 +229,7 @@ ThreeVector inline ThreeVector::operator/=(const double &a) {
   return *this;
 }
 
+/// divide a three-vector by constant factor \f$ \vec{a} / b \f$.
 ThreeVector inline operator/(ThreeVector a, const double &b) {
   a /= b;
   return a;
