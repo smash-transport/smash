@@ -118,16 +118,15 @@ class ThreeVector {
   using const_iterator = std::array<double, 3>::const_iterator;
 
   /**
-   * Returns an iterator starting at the 0th component.
+   * \return an iterator starting at the 0th component.
    *
    * The iterator implements the RandomIterator concept. Thus, you can simply
    * write `begin() + 1` to get an iterator that points to the 1st component.
    */
   iterator begin() { return x_.begin(); }
 
-  /**
-   * Returns an iterator pointing after the 4th component.
-   */
+
+  /// \return an iterator pointing after the 4th component.
   iterator end() { return x_.end(); }
 
   /// const overload of the above
@@ -175,7 +174,7 @@ ThreeVector inline ThreeVector::operator+=(const ThreeVector &v) {
   return *this;
 }
 
-/// return sum of two three-vectors \f$ \vec{a} + \vec{b} \f$.
+/// \return sum of two three-vectors \f$ \vec{a} + \vec{b} \f$.
 ThreeVector inline operator+(ThreeVector a, const ThreeVector &b) {
   a += b;
   return a;
@@ -188,7 +187,7 @@ ThreeVector inline ThreeVector::operator-=(const ThreeVector &v) {
   return *this;
 }
 
-/// return difference between two three-vectors \f$ \vec{a} - \vec{b} \f$.
+/// \return difference between two three-vectors \f$ \vec{a} - \vec{b} \f$.
 ThreeVector inline operator-(ThreeVector a, const ThreeVector &b) {
   a -= b;
   return a;
@@ -214,7 +213,7 @@ inline ThreeVector operator*(const double &a, ThreeVector b) {
 }
 
 /**
- * return inner product of two three-vectors
+ * \return inner product of two three-vectors
  * /f$ \vec{a} \cdot \vec{b} /f$
  */
 inline double operator*(ThreeVector a, const ThreeVector &b) {

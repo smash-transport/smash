@@ -237,7 +237,7 @@ class PdgCode {
     return (dump_ & 0x8fffffff);
   }
 
-  /// Returns a signed integer with the PDG code in hexadecimal.
+  /// \return a signed integer with the PDG code in hexadecimal.
   inline std::int32_t code() const { return antiparticle_sign() * ucode(); }
 
   /// Represent the PDG Code as a decimal string.
@@ -282,18 +282,18 @@ class PdgCode {
     return nucleus_.is_nucleus_;
   }
 
-  /// returns true if this is a baryon, antibaryon or meson.
+  /// \return true if this is a baryon, antibaryon or meson.
   inline bool is_hadron() const {
     return ((digits_.n_q3_ != 0 && digits_.n_q2_ != 0) || is_nucleus());
   }
 
-  /// returns true if this is a lepton.
+  /// \return true if this is a lepton.
   inline bool is_lepton() const {
     return (digits_.n_q1_ == 0 && digits_.n_q2_ == 0 && digits_.n_q3_ == 1 &&
             !is_nucleus());
   }
 
-  /// returns the baryon number of the particle.
+  /// \return the baryon number of the particle.
   inline int baryon_number() const {
     if (is_nucleus()) {
       return static_cast<int>(nucleus_.A_) * antiparticle_sign();
@@ -304,73 +304,73 @@ class PdgCode {
     return antiparticle_sign();
   }
 
-  /// Returns whether this PDG code identifies a baryon.
+  /// \return whether this PDG code identifies a baryon.
   inline bool is_baryon() const {
     return (is_hadron() && digits_.n_q1_ != 0) || is_nucleus();
   }
 
-  /// Returns whether this PDG code identifies a meson.
+  /// \return whether this PDG code identifies a meson.
   inline bool is_meson() const {
     return (is_hadron() && digits_.n_q1_ == 0) && !is_nucleus();
   }
 
-  /// Is this a nucleon/anti-nucleon (p, n, -p, -n)?
+  /// \return whether this is a nucleon/anti-nucleon (p, n, -p, -n)
   inline bool is_nucleon() const {
     const auto abs_code = std::abs(code());
     return (abs_code == pdg::p || abs_code == pdg::n);
   }
 
-  /// Is this a N*(1535) (+/0)?
+  /// \return whether this is a N*(1535) (+/0)
   inline bool is_Nstar1535() const {
     const auto abs_code = std::abs(code());
     return (abs_code == pdg::N1535_p || abs_code == pdg::N1535_z);
   }
 
-  /// Is this a Delta(1232) (with anti-delta)?
+  /// \return whether this is a Delta(1232) (with anti-delta)
   inline bool is_Delta() const {
     const auto abs_code = std::abs(code());
     return (abs_code == pdg::Delta_pp || abs_code == pdg::Delta_p ||
             abs_code == pdg::Delta_z || abs_code == pdg::Delta_m);
   }
 
-  /// Is this a hyperon (Lambda, Sigma, Xi, Omega)?
+  /// \return whether this is a hyperon (Lambda, Sigma, Xi, Omega)
   inline bool is_hyperon() const {
     return is_hadron() && digits_.n_q1_ == 3 && !is_nucleus();
   }
 
-  /// Is this a Omega baryon?
+  /// \return whether this is a Omega baryon
   inline bool is_Omega() const {
     return is_hyperon() && digits_.n_q2_ == 3 && digits_.n_q3_ == 3;
   }
 
-  /// Is this a Xi baryon?
+  /// \return whether this is a Xi baryon
   inline bool is_Xi() const {
     return is_hyperon() && digits_.n_q2_ == 3 && digits_.n_q3_ != 3;
   }
 
-  /// Is this a Lambda baryon?
+  /// \return whether this is a Lambda baryon
   inline bool is_Lambda() const {
     return is_hyperon() && digits_.n_q2_ == 1 && digits_.n_q3_ == 2;
   }
 
-  /// Is this a Sigma baryon?
+  /// \return whether this is a Sigma baryon
   inline bool is_Sigma() const {
     return is_hyperon() && digits_.n_q2_ != 3 && !is_Lambda();
   }
 
-  /// Is this a kaon (K+, K-, K0, Kbar0)?
+  /// \return whether this is a kaon (K+, K-, K0, Kbar0)
   inline bool is_kaon() const {
     const auto abs_code = std::abs(code());
     return (abs_code == pdg::K_p) || (abs_code == pdg::K_z);
   }
 
-  /// Is this a pion (pi+/pi0/pi-)?
+  /// \return whether this is a pion (pi+/pi0/pi-)
   inline bool is_pion() const {
     const auto c = code();
     return (c == pdg::pi_z) || (c == pdg::pi_p) || (c == pdg::pi_m);
   }
 
-  /// Is this a rho meson (rho+/rho0/rho-)?
+  /// \return whether this is a rho meson (rho+/rho0/rho-)
   inline bool is_rho() const {
     const auto c = code();
     return (c == pdg::rho_z) || (c == pdg::rho_p) || (c == pdg::rho_m);
@@ -392,7 +392,8 @@ class PdgCode {
   }
 
   /**
-   * returns twice the isospin-3 component \f$I_3\f$.
+   * \return twice the isospin-3 component \f$I_3\f$.
+   *
    * This is calculated from the sum of net_quark_number of up and down.
    */
   inline int isospin3() const {
@@ -402,19 +403,22 @@ class PdgCode {
   }
 
   /**
-   * returns the net number of \f$\bar s\f$ quarks.
+   * \return the net number of \f$\bar s\f$ quarks.
+   *
    * For particles with one strange quark, -1 is returned.
    */
   inline int strangeness() const { return -net_quark_number(3); }
 
   /**
-   * returns the net number of \f$c\f$ quarks
+   * \return the net number of \f$c\f$ quarks
+   *
    * For particles with one charm quark, +1 is returned.
    */
   inline int charmness() const { return +net_quark_number(4); }
 
   /**
-   * returns the net number of \f$\bar b\f$ quarks
+   * \return the net number of \f$\bar b\f$ quarks
+   *
    * For particles with one bottom quark, -1 is returned.
    */
   inline int bottomness() const { return -net_quark_number(5); }
@@ -460,7 +464,8 @@ class PdgCode {
   }
 
   /**
-   * Returns twice the spin of a particle.
+   * \return twice the spin of a particle.
+   *
    * The code is good for hadrons, leptons and spin-1-bosons. It returns
    * 2 (meaning spin=1) for the Higgs, though.
    */
@@ -485,18 +490,18 @@ class PdgCode {
      * have 21-29 and 2spin = 2 (this fails for the Higgs). */
     return digits_.n_q3_;
   }
-  // Returns the spin degeneracy \f$2s + 1\f$ of a particle.
+  /// \return the spin degeneracy \f$2s + 1\f$ of a particle.
   inline unsigned int spin_degeneracy() const {
     if (is_hadron() && digits_.n_J_ > 0 && !is_nucleus()) {
       return digits_.n_J_;
     }
     return spin() + 1;
   }
-  // returns -1 for antiparticles and +1 for particles.
+  /// \return -1 for antiparticles and +1 for particles.
   inline int antiparticle_sign() const {
     return (digits_.antiparticle_ ? -1 : +1);
   }
-  // returns an integer with only the quark numbers set.
+  /// \return an integer with only the quark numbers set.
   inline std::int32_t quarks() const {
     if (!is_hadron() || is_nucleus()) {
       return 0;
@@ -505,7 +510,6 @@ class PdgCode {
   }
 
   /**
-   * Returns quark content, useful for interfacing to Pythia.
    * The return is always an array of three numbers, which are pdgcodes
    * of quarks: 1 - d, 2 - u, 3 - s, 4 - c, 5 - b. Antiquarks get a negative
    * sign. For mesons the first number in array is always 0.
@@ -572,13 +576,13 @@ class PdgCode {
      * dump_ works just fine. */
   }
 
-  /// returns if the codes are equal
+  /// \return if the codes are equal
   inline bool operator==(const PdgCode rhs) const { return dump_ == rhs.dump_; }
 
-  /// returns if the codes are not equal.
+  /// \return if the codes are not equal.
   inline bool operator!=(const PdgCode rhs) const { return !(*this == rhs); }
 
-  /// returns if the code of rhs is the inverse of this one.
+  /// \return if the code of rhs is the inverse of this one.
   inline bool is_antiparticle_of(const PdgCode rhs) const {
     return code() == -rhs.code();
   }
@@ -594,7 +598,7 @@ class PdgCode {
   static PdgCode invalid() { return PdgCode(0x0); }
 
   /**
-   * Returns an integer with decimal representation of the code.
+   * \return an integer with decimal representation of the code.
    * If the spin is too large for the last digit, an additional digit at the
    * beginning will be used, so that the sum of the first and the last digit is
    * the spin.
@@ -635,6 +639,7 @@ class PdgCode {
    * returns the net number of quarks with given flavour number
    * For public use, see strangeness(), charmness(), bottomness() and
    * isospin3().
+   * \todo Why quark numbers 7 and 8 are allowed?
    * \param quark PDG Code of quark: (1..6) = (d,u,s,c,b,t)
    * \return for the net number of quarks (\#quarks - \#antiquarks)
    */
@@ -739,7 +744,7 @@ class PdgCode {
   };
 
   /**
-   * Returns an unsigned integer with the PDG code in hexadecimal
+   * \return an unsigned integer with the PDG code in hexadecimal
    * (disregarding the antiparticle flag).
    */
   inline std::uint32_t ucode() const { return (dump_ & 0x0fffffff); }

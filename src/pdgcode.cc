@@ -30,7 +30,6 @@ std::istream& operator>>(std::istream& is, PdgCode& code) {
 
 int PdgCode::net_quark_number(const int quark) const {
   // input sanitization: Only quark numbers 1 through 8 are allowed.
-  // \todo Why quark numbers 7 and 8 are allowed?
   if (quark < 1 || quark > 8) {
     throw std::invalid_argument(
         std::string("PdgCode::net_quark_number(): ") +
