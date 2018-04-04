@@ -23,10 +23,6 @@
 
 namespace smash {
 
-Action::Action(const ParticleList &in_part, double time)
-    : incoming_particles_(in_part),
-      time_of_execution_(time + in_part[0].position().x0()) {}
-
 Action::~Action() = default;
 
 bool Action::is_valid(const Particles &particles) const {
@@ -122,9 +118,9 @@ void Action::perform(Particles *particles, uint32_t id_process) {
     }
   }
 
-  // For elastic collisions and box wall crossings it is not necessary to remove
-  // particles from the list and insert new ones, it is enough to update their
-  // properties.
+  /* For elastic collisions and box wall crossings it is not necessary to remove
+   * particles from the list and insert new ones, it is enough to update their
+   * properties. */
   particles->update(incoming_particles_, outgoing_particles_,
                     (process_type_ != ProcessType::Elastic) &&
                         (process_type_ != ProcessType::Wall));
@@ -223,8 +219,8 @@ void Action::check_conservation(const uint32_t id_process) const {
     const auto &log = logger<LogArea::Action>();
     std::string err_msg = before.report_deviations(after);
     log.error() << particle_names.str() << err_msg;
-    // Pythia does not conserve energy and momentum at high energy, so we just
-    // print the error and continue.
+    /* Pythia does not conserve energy and momentum at high energy, so we just
+     * print the error and continue. */
     if ((process_type_ == ProcessType::StringSoft) ||
         (process_type_ == ProcessType::StringHard)) {
       return;
