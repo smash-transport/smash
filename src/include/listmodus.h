@@ -21,8 +21,25 @@ namespace smash {
 /**
  * \ingroup modus
  * ListModus: Provides a modus for running SMASH on any external particle list,
- * for example as an afterburner calculations for hybrid codes
+ * for example as an afterburner calculations for hybrid codes.
  *
+ * To use this modus, choose
+    Modus:         List
+ * \code
+ * General:
+ *      Modus: Box
+ * \endcode
+ * in the configuration file.
+ *
+ * Options for BoxModus go in the "Modi"→"Box" section of the
+ * configuration:
+ *
+ * \code
+ * Modi:
+ *      Box:
+ *              # definitions here
+ * \endcode
+
  * For configuring see \ref input_modi_list_.
  *
  *#!OSCAR2013 particle_lists SMASH-githash t x y z mass p0 px py pz pdg
@@ -39,16 +56,34 @@ namespace smash {
  */
 class ListModus : public ModusDefault {
  public:
-  /* default constructor with probable values */
+  /**
+   * Constructor
+   *
+   * Gathers all configuration variables for the List.
+   *
+   * \param[in] modus_config The configuration object that sets all
+   *                         initial conditions of the experiment.
+   * \param[in] parameters Unused, but necessary because of templated
+   *                       initialization
+   * \todo JB:remove the second parameter?
+   */
   explicit ListModus(Configuration modus_config,
                      const ExperimentParameters &parameters);
 
-  /** creates initial conditions for the particles.
+  /**
+   * Generates initial state of the particles in the system according to list. 
+   *
+   * \param[out] particles An empty list that gets filled up by this function
+   * \param[in] parameters Unused, but necessary because of templated use of
+   *                       this function
+   * \return The starting time of the simulation
    */
   double initial_conditions(Particles *particles,
                             const ExperimentParameters &parameters);
 
-  /// \ingroup exception
+  /** \ingroup exception
+   * Used when external particle list cannot be found.
+   */
   struct LoadFailure : public std::runtime_error {
     using std::runtime_error::runtime_error;
   };
@@ -66,19 +101,32 @@ class ListModus : public ModusDefault {
   /// shift_id is the start number of event_id
   const int shift_id_;
 
-  /// event_id_ = the unique id of the current even
+  /// event_id_ = the unique id of the current event
   int event_id_;
 
-  /// Counters for warnings to avoid spamming, if there are too many
-  int n_warns_precision_ = 0, n_warns_mass_consistency_ = 0;
+  /// Counter for mass-check warnings to avoid spamming
+  int n_warns_precision_ = 0;
+  /// Counter for energy-momentum conservation warnings to avoid spamming
+  int n_warns_mass_consistency_ = 0;
 
-  /// check whether anti-freestreaming is needed, if yes return
-  /// earliest formation time as start_time_
+  /**
+   * Judge whether formation times are the same for all the particles;
+   * Don't do anti-freestreaming if start with the same formation time.
+   * if needed, calculates earliest formation time as start_time_
+   *
+   * \param[in] particle_list The list of particles to be checked
+   * \return A pair <bool, double> where the boolean is whether or not
+   *         anti-freestreaming is needed and the double is the earliest
+   *         formation time.
+   */
   std::pair<bool, double> check_formation_time_(
       const std::string &particle_list);
 
   /**\ingroup logging
    * Writes the initial state for the List to the output stream.
+   *
+   * \param[in] out The ostream into which to output
+   * \param[in] m The ListModus object to write into out
    */
   friend std::ostream &operator<<(std::ostream &, const ListModus &);
 };

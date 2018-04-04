@@ -46,12 +46,15 @@ namespace smash {
 class BoxModus : public ModusDefault {
  public:
   /**
+   * Constructor
+   *
    * Gathers all configuration variables for the Box.
    *
    * \param[in] modus_config The configuration object that sets all
    *                         initial conditions of the experiment.
    * \param[in] parameters Unused, but necessary because of templated
-   *                       initialization (see ColliderModus)
+   *                       initialization
+   * \todo JB:remove the second parameter?
    */
   explicit BoxModus(Configuration modus_config,
                     const ExperimentParameters &parameters);
@@ -109,9 +112,11 @@ class BoxModus : public ModusDefault {
     return 0.5 * std::sqrt(length_ * length_ - max_transverse_distance_sqr);
   }
 
+  /// \return Length of the box
   double length() const { return length_; }
 
  private:
+  /// initial momenta distribution: thermal or peaked momenta
   const BoxInitialCondition initial_condition_;
   /// length of the cube's edge in fm/c
   const double length_;
@@ -119,22 +124,17 @@ class BoxModus : public ModusDefault {
   const double temperature_;
   /// initial time of the box
   const double start_time_ = 0.;
-  /**
-   * whether to use a thermal initialization for all particles
-   * instead of specific numbers
-   */
+  /** whether to use a thermal initialization for all particles
+   *  instead of specific numbers */
   const bool use_thermal_ = false;
-  /**
-   * baryon chemical potential for thermal box;
-   * only used if use_thermal_ is true
-   */
+  /** baryon chemical potential for thermal box;
+   *  only used if use_thermal_ is true */
   const double mub_;
-  /**
-   * strange chemical potential for thermal box;
-   * only used if use_thermal_ is true
-   */
+  /** strange chemical potential for thermal box;
+   *  only used if use_thermal_ is true */
   const double mus_;
-  /// particle multiplicities at initialization
+  /** particle multiplicities at initialization;
+   *  required if use_thermal_ is false */
   const std::map<PdgCode, int> init_multipl_;
 
   /**\ingroup logging

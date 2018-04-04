@@ -55,13 +55,13 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
 /*!\Userguide
  * \page input_modi_box_ Box
  *
- * \key Initial_Condition (int, required): \n
+ * \key Initial_Condition (BoxInitialCondition, required): \n
  * Controls initial momentum distribution of particles.
- * If the value is 2 then all the particles have momentum
+ * If the value is "peaked momenta" then all the particles have momentum
  * \f$p = 3 \cdot T\f$, where T is the temperature. Directions
  * of momenta are uniformly distributed.
- * If the value is not 2 then thermal momenta (sampled from a
- * Maxwell-Boltzmann distribution) are taken.
+ * Else, then "thermal momenta" (sampled from a
+ * Maxwell-Boltzmann distribution) are used.
  *
  * \key Length (double, required): \n
  * Length of the cube's edge in fm

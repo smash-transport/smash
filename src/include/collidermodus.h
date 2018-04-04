@@ -27,10 +27,10 @@ struct ExperimentParameters;
  * \ingroup modus
  * ColliderModus: Provides a modus for colliding nuclei.
  *
- * To use this modus, chose
+ * To use this modus, choose
  * \code
  * General:
- *      MODUS: Collider
+ *      Modus: Collider
  * \endcode
  * in the configuration file.
  *
@@ -41,75 +41,97 @@ struct ExperimentParameters;
  */
 class ColliderModus : public ModusDefault {
  public:
-  /** Constructor
+  /**
+   * Constructor
    *
    * Takes all there is to take from the (truncated!) configuration
    * object (only contains configuration for this modus).
+   *
+   * \param[in] modus_config The configuration object that sets all
+   *                         initial conditions of the experiment.
+   * \param[in] parameters Unused, but necessary because of templated
+   *                       initialization
+   * \todo JB:remove the second parameter?
    **/
   explicit ColliderModus(Configuration modus_config,
                          const ExperimentParameters &parameters);
 
-  /** Creates initial conditions from the particles.
+  /**
+   * Generates initial state of the particles in the system.
+   * In particular, it initializes the momenta and positions of nucleons
+   * withing the colliding nuclei.
    *
-   * In particular, it initializes the nuclei.
+   * \param[out] particles An empty list that gets filled up by this function
+   * \param[in] parameters The initialization parameters of the system
+   * \return The starting time of the simulation (negative, so that nuclei
+   *         collide exactly at t=0)
    */
   double initial_conditions(Particles *particles,
                             const ExperimentParameters &parameters);
-  /// return the total test particle number of the initial nucleus
+  /// \return The total number of test particles in the initial nuclei
   int total_N_number() const { return target_->size() + projectile_->size(); }
-  /// return the test particle number in the projectile nucleus
+  /// \return The number of test particles in the projectile nucleus
   int proj_N_number() const { return projectile_->size(); }
-  /** return the beam velocity of the projectile, which will be
-   *  used to calculate the beam momenta in experiment.cc if Fermi
-   *  motion is frozen.
+  /**
+   * \return the beam velocity of the projectile, which will be
+   *         used to calculate the beam momenta in experiment.cc if Fermi
+   *         motion is frozen.
    */
   double velocity_projectile() const { return velocity_projectile_; }
-  /** return the beam velocity of the target, which will be
-   *  used to calculate the beam momenta in experiment.cc if fermi
-   *  motion is frozen.
+  /**
+   * \return the beam velocity of the target, which will be
+   *         used to calculate the beam momenta in experiment.cc if fermi
+   *         motion is frozen.
    */
   double velocity_target() const { return velocity_target_; }
-  /** return the flag: whether to allow the first collsions within the same
+  /**
+   * \return A flag: whether to allow first collisions within the same
    *  nucleus.
    */
   bool cll_in_nucleus() { return cll_in_nucleus_; }
-  /// return the fermi motion type
+  /// \return The fermi motion type
   FermiMotion fermi_motion() { return fermi_motion_; }
-  /// return whether the modus is collider modus
+  /// \return whether the modus is collider (which is, yes, trivially true)
   bool is_collider() const { return true; }
-  /// return impact parameter of the collision
+  /// \return impact parameter of the collision
   double impact_parameter() const { return impact_; }
-  /// \ingroup exception
-  /// Thrown when either \a projectile_ or \a target_ nuclei are empty.
+  /** \ingroup exception
+   *  Thrown when either \a projectile_ or \a target_ nuclei are empty.
+   */
   struct ColliderEmpty : public ModusDefault::BadInput {
     using ModusDefault::BadInput::BadInput;
   };
 
  private:
-  /** Projectile.
+  /**
+   * Projectile.
    *
-   * The object that comes from negative z-values at positive x-values
+   * The object that goes from negative z-values to positive z-values
    * with positive velocity.
    **/
   std::unique_ptr<Nucleus> projectile_;
-  /** Target.
+  /**
+   * Target.
    *
-   * The object that comes from positive z-values at negative x-values
+   * The object that goes from positive z-values to negative z-values
    * with negative velocity. In fixed target experiments, the target is
    * at rest.
    **/
   std::unique_ptr<Nucleus> target_;
-  /** Center-of-mass energy squared of the nucleus-nucleus collision.
+  /**
+   * Center-of-mass energy squared of the nucleus-nucleus collision.
    *
    * needs to be double to allow for calculations at LHC energies
    * **/
   double total_s_;
-  /** Center-of-mass energy of a nucleon-nucleon collision.
+  /**
+   * Center-of-mass energy of a nucleon-nucleon collision.
    *
    * needs to be double to allow for calculations at LHC energies
    * **/
   double sqrt_s_NN_;
-  /** Impact parameter.
+  /**
+   * Impact parameter.
    *
    * The nuclei projectile_ and target_ will be shifted along the x axis
    * so that their centers move on antiparallel lines that are this
@@ -146,7 +168,7 @@ class ColliderModus : public ModusDefault {
    **/
   double initial_z_displacement_ = 2.0;
   /**
-   * Reference frame for the system.
+   * Reference frame for the system, as specified from config
    */
   CalculationFrame frame_ = CalculationFrame::CenterOfVelocity;
   /**
@@ -154,7 +176,7 @@ class ColliderModus : public ModusDefault {
    */
   FermiMotion fermi_motion_ = FermiMotion::Off;
   /**
-   * An option to include the first collisions within the same nucleus
+   * An option to accept first collisions within the same nucleus
    */
   bool cll_in_nucleus_;
   /**
@@ -165,19 +187,23 @@ class ColliderModus : public ModusDefault {
    * beam velocity of the target
    */
   double velocity_target_ = 0.0;
-  /** Get the frame dependent velocity for each nucleus, using
+  /**
+   * Get the frame dependent velocity for each nucleus, using
    * the current reference frame. \see frame_
    *
-   * @param mandelstam_s The total center-of-mass energy of the system.
-   * @param m_a The mass of the projectile.
-   * @param m_b The mass of the target.
-   * @return < v_a, v_b > Velocities of the nuclei.
+   * \param[in] mandelstam_s The total center-of-mass energy of the system.
+   * \param[in] m_a The (positive) mass of the projectile.
+   * \param[in] m_b The (positive) mass of the target.
+   * \return A pair < v_a, v_b > containing the velocities of the nuclei.
    **/
   std::pair<double, double> get_velocities(double mandelstam_s, double m_a,
                                            double m_b);
 
   /**\ingroup logging
    * Writes the initial state for the ColliderModus to the output stream.
+   *
+   * \param[in] out The ostream into which to output
+   * \param[in] m The ColliderModus object to write into out
    */
   friend std::ostream &operator<<(std::ostream &, const ColliderModus &);
 };

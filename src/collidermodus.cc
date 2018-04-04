@@ -210,7 +210,6 @@ ColliderModus::ColliderModus(Configuration modus_config,
    * (target at rest).  */
   if (modus_cfg.has_value({"E_Kin"})) {
     const double e_kin = modus_cfg.take({"E_Kin"});
-    // Check that energy is nonnegative.
     if (e_kin < 0) {
       throw ModusDefault::InvalidEnergy(
           "Input Error: "
@@ -225,7 +224,6 @@ ColliderModus::ColliderModus(Configuration modus_config,
   // Option 3: Momentum of the projectile nucleus (target at rest).
   if (modus_cfg.has_value({"P_Lab"})) {
     const double p_lab = modus_cfg.take({"P_Lab"});
-    // Check that p_lab is nonnegative.
     if (p_lab < 0) {
       throw ModusDefault::InvalidEnergy(
           "Input Error: "
@@ -248,8 +246,8 @@ ColliderModus::ColliderModus(Configuration modus_config,
         "Please provide only one of Sqrtsnn/E_Kin/P_Lab.");
   }
 
-  // Impact parameter setting: Either "Value", "Range", "Max" or "Sample".
-  // Unspecified means 0 impact parameter.
+  /* Impact parameter setting: Either "Value", "Range", "Max" or "Sample".
+   * Unspecified means 0 impact parameter.*/
   if (modus_cfg.has_value({"Impact", "Value"})) {
     impact_ = modus_cfg.take({"Impact", "Value"});
     imp_min_ = impact_;
@@ -294,6 +292,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
       imp_max_ = modus_cfg.take({"Impact", "Max"});
     }
   }
+  /// \todo include a check that only one method of specifying impact is used
 
   // Look for user-defined initial separation between nuclei.
   if (modus_cfg.has_value({"Initial_Distance"})) {
@@ -318,7 +317,6 @@ std::ostream &operator<<(std::ostream &out, const ColliderModus &m) {
 double ColliderModus::initial_conditions(Particles *particles,
                                          const ExperimentParameters &) {
   const auto &log = logger<LogArea::Collider>();
-  // Sample impact parameter distribution.
   sample_impact();
 
   log.info() << "Impact parameter = " << format(impact_, "fm");
@@ -373,7 +371,7 @@ double ColliderModus::initial_conditions(Particles *particles,
 
   // Shift the nuclei into starting positions. Contracted spheres with
   // nuclear radii should touch exactly at t=0. Modus starts at negative
-  // time corresponding to additinal initial displacement.
+  // time corresponding to additional initial displacement.
   const double d_a = std::max(0., projectile_->get_diffusiveness());
   const double d_b = std::max(0., target_->get_diffusiveness());
   const double r_a = projectile_->get_nuclear_radius();
@@ -397,7 +395,7 @@ void ColliderModus::sample_impact() {
   switch (sampling_) {
     case Sampling::Quadratic: {
       // quadratic sampling: Note that for bmin > bmax, this still yields
-      // the correct distribution (only that canonical() = 0 then is the
+      // the correct distribution (however canonical() = 0 is then the
       // upper end, not the lower).
       impact_ = std::sqrt(imp_min_ * imp_min_ +
                           Random::canonical() *

@@ -96,6 +96,10 @@ namespace smash {
  * and 4-momenta (p0, px, py, pz) =
  * (0.232871, 0.116953, -0.115553, 0.090303) GeV,\n
  * with mass = 0.138 GeV, pdg = 111, id = 0 and charge 0 will be initialized.
+ *
+ * ### WARNING:
+ * Currently only one event per file is supported. Having more than one
+ * event per file will lead to undefined behavior.
  */
 
 ListModus::ListModus(Configuration modus_config, const ExperimentParameters &)
@@ -118,9 +122,6 @@ std::ostream &operator<<(std::ostream &out, const ListModus &m) {
   return out;
 }
 
-/* Judge whether formation time are the same for all the particles;
- * Don't do anti-freestreaming if start with the same formation time.
- * Choose the earliest formation time as start_time_ */
 std::pair<bool, double> ListModus::check_formation_time_(
     const std::string &particle_list) {
   double earliest_formation_time = DBL_MAX;
