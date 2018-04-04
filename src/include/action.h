@@ -57,31 +57,30 @@ class Action {
         time_of_execution_(absolute_execution_time),
         process_type_(type) {}
 
-  /** Copying is disabled. Use pointers or create a new Action. */
+  /// Copying is disabled. Use pointers or create a new Action.
   Action(const Action &) = delete;
 
-  /** Virtual Destructor.
+  /**
+   * Virtual Destructor.
    * The declaration of the destructor is necessary to make it virtual.
    */
   virtual ~Action();
 
-  /** For sorting by time of execution. */
+  /// For sorting by time of execution.
   bool operator<(const Action &rhs) const {
     return time_of_execution_ < rhs.time_of_execution_;
   }
 
   /** Return the raw weight value, which is a cross section in case of a
-   * ScatterAction, a decay width in case of a DecayAction and a shining
-   * weight in case of a DecayActionDilepton.
-   *
-   * Prefer to use a more specific function.
-   */
+    * ScatterAction, a decay width in case of a DecayAction and a shining
+    * weight in case of a DecayActionDilepton.
+    *
+    * Prefer to use a more specific function. */
   virtual double raw_weight_value() const = 0;
 
   /** Return the specific weight for the chosen outgoing channel.
-   *  For scatterings it will be partial cross-section, for
-   *  decays (including dilepton decays) - partial width
-   */
+    * For scatterings it will be partial cross-section, for
+    *  decays (including dilepton decays) - partial width */
   virtual double partial_weight() const = 0;
 
   /** Return the process type. */
