@@ -35,8 +35,7 @@ double clebsch_gordan(const int j_a, const int j_b, const int j_c,
 }
 
 /* Calculate isospin Clebsch-Gordan coefficient for two particles p_a and p_b
- * coupling to a total isospin (I_tot, I_z).
- */
+ * coupling to a total isospin (I_tot, I_z). */
 static double isospin_clebsch_gordan_2to1(const ParticleType &p_a,
                                           const ParticleType &p_b,
                                           const int I_tot, const int I_z) {
@@ -48,7 +47,7 @@ double isospin_clebsch_gordan_sqr_3to1(const ParticleType &p_a,
                                        const ParticleType &p_b,
                                        const ParticleType &p_c,
                                        const ParticleType &Res) {
-  // calculate allowed I_ab
+  // Calculate allowed isospin range for 3->1 reaction I_ab
   const auto min_I_ab = std::abs(p_a.isospin() - p_b.isospin());
   const auto max_I_ab = p_a.isospin() + p_b.isospin();
   std::vector<int> possible_I_ab(max_I_ab - min_I_ab + 1);
