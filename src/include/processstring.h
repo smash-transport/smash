@@ -40,9 +40,9 @@ enum class StringSoftType {
  * Only one instance of this class should be created.
  *
  * This class implements string excitation processes based on the UrQMD model
- * \iref{Bass:1998ca,Bleicher:1999xi} and subsequent fragmentation
+ * \iref{Bass:1998ca}, \iref{Bleicher:1999xi} and subsequent fragmentation
  * according to the LUND/PYTHIA fragmentation scheme
- * \iref{Andersson:1983ia,Sjostrand:2014zea}.
+ * \iref{Andersson:1983ia}, \iref{Sjostrand:2014zea}.
  *
  * The class implemets the following functionality:
  * - given two colliding initial state particles it provides hadronic final
@@ -153,6 +153,19 @@ class StringProcess {
    *        for the fragmentation function
    * \param[in] string_sigma_T transverse momentum spread (StringPT:sigma)
    *        in fragmentation [GeV]
+   *
+   * \see StringProcess::common_setup_pythia(Pythia8::Pythia *,
+   *                     double, double, double, double, double)
+   * \see StringProcess::kappa_tension_string_
+   * \see StringProcess::pow_fgluon_beta_
+   * \see StringProcess::pmin_gluon_lightcone_
+   * \see StringProcess::pow_fquark_alpha_
+   * \see StringProcess::pow_fquark_beta_
+   * \see StringProcess::sigma_qperp_
+   * \see 3rdparty/pythia8230/share/Pythia8/xmldoc/FlavourSelection.xml
+   * \see 3rdparty/pythia8230/share/Pythia8/xmldoc/Fragmentation.xml
+   * \see 3rdparty/pythia8230/share/Pythia8/xmldoc/MasterSwitches.xml
+   * \see 3rdparty/pythia8230/share/Pythia8/xmldoc/MultipartonInteractions.xml
    */
   StringProcess(double string_tension, double gluon_beta, double gluon_pmin,
                 double quark_alpha, double quark_beta, double strange_supp,
@@ -172,6 +185,9 @@ class StringProcess {
    *        for the fragmentation function
    * \param[in] string_sigma_T transverse momentum spread (StringPT:sigma)
    *        in fragmentation [GeV]
+   *
+   * \see 3rdparty/pythia8230/share/Pythia8/xmldoc/FlavourSelection.xml
+   * \see 3rdparty/pythia8230/share/Pythia8/xmldoc/Fragmentation.xml
    */
   void common_setup_pythia(Pythia8::Pythia *pythia_in,
                            double strange_supp, double diquark_supp,
@@ -316,7 +332,8 @@ class StringProcess {
    * Double-diffractive process ( A + B -> X + X )
    * is similar to the single-diffractive process,
    * but lightcone momenta of gluons are sampled
-   * in the same was as the UrQMD model \iref{Bass:1998ca,Bleicher:1999xi}.
+   * in the same was as the UrQMD model \iref{Bass:1998ca},
+   * \iref{Bleicher:1999xi}.
    * String masses are computed after pomeron exchange
    * aquiring transverse momentum transfer.
    * \return whether the process is successfully implemented.
@@ -329,13 +346,13 @@ class StringProcess {
    * This involves a parton exchange in conjunction with momentum transfer.
    * Probability distribution function of the lightcone momentum fraction
    * carried by quark is based on the UrQMD model
-   * \iref{Bass:1998ca,Bleicher:1999xi}.
+   * \iref{Bass:1998ca}, \iref{Bleicher:1999xi}.
    * \return whether the process is successfully implemented.
    */
   bool next_NDiffSoft();
   /**
    * Baryon-antibaryon annihilation process
-   * Based on what UrQMD \iref{Bass:1998ca,Bleicher:1999xi} does,
+   * Based on what UrQMD \iref{Bass:1998ca}, \iref{Bleicher:1999xi} does,
    * it create two mesonic strings after annihilating one quark-antiquark pair.
    * Each string has mass equal to half of sqrts.
    * \return whether the process is successfully implemented.
@@ -386,7 +403,7 @@ class StringProcess {
 
   /**
    * perform string fragmentation to determine species and momenta of hadrons
-   * by implementing PYTHIA 8.2 \iref{Andersson:1983ia,Sjostrand:2014zea}.
+   * by implementing PYTHIA 8.2 \iref{Andersson:1983ia}, \iref{Sjostrand:2014zea}.
    * \param[in] idq1 PDG id of quark or anti-diquark (carrying color index).
    * \param[in] idq2 PDG id of diquark or anti-quark (carrying anti-color index).
    * \param[in] mString the string mass.
