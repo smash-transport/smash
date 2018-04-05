@@ -227,13 +227,17 @@ class HadronGasEos {
  private:
   /// A structure for passing equation parameters to the gnu library
   struct rparams {
+    /// energy density
     double e;
+    /// net baryon density
     double nb;
+    /// net strange density
     double ns;
   };
 
   /// Another structure for passing energy density to the gnu library
   struct eparams {
+    /// energy density
     double edens;
   };
 
