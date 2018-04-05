@@ -53,7 +53,7 @@ class Action {
    * \param[in] out_part list of outgoing particles
    * \param[in] time time at which the action is supposed to take place
    *                 (relative to the current time of the incoming particles)
-   * /param[in] type type of the interaction
+   * \param[in] type type of the interaction
    */
   Action(const ParticleData &in_part, const ParticleData &out_part, double time,
          ProcessType type)
@@ -68,8 +68,9 @@ class Action {
    *
    * \param[in] in_part list of incoming particles
    * \param[in] out_part list of outgoing particles
-   * \param[in] time absolute time at which the action is supposed to take place
-   * /param[in] type type of the interaction
+   * \param[in] absolute_execution_time absolute time at which the action is
+   *                                             supposed to take place
+   * \param[in] type type of the interaction
    */
   Action(const ParticleList &in_part, const ParticleList &out_part,
          double absolute_execution_time, ProcessType type)
@@ -375,7 +376,7 @@ class Action {
   /**
    * Decide for a particular final-state channel via Monte-Carlo
    * and return it as a ProcessBranch
-   * \param[in] subprocess list of possible processes
+   * \param[in] subprocesses list of possible processes
    * \param[in] total_weight summed weight of all processes
    * \return ProcessBranch that is sampled
    */

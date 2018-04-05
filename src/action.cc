@@ -81,7 +81,8 @@ std::pair<double, double> Action::get_potential_at_interaction_point() const {
   /* Check:
    * Lattice is turned on. */
   if (UB_lat_pointer != nullptr) {
-    /* TODO(fengli) : A Lorentz transformation from the local rest frame to the
+    /** \todo TODO(fengli):
+     * A Lorentz transformation from the local rest frame to the
      * center of mass frame of the incoming particles is missing here. Since all
      * the actions take place in the center of mass frame of the incoming
      * particles, particles should see potentials different from UB_lat_ or
@@ -89,7 +90,8 @@ std::pair<double, double> Action::get_potential_at_interaction_point() const {
      * the Lorentz transformation is important in the low energy heavy-ion
      * collisions, and turning on potentials violates the Lorentz covariance in
      * the current SMASH version anyway, so I'd like to leave it to another
-     * issue in the future. */
+     * issue in the future.
+     */
     UB_lat_pointer->value_at(r, UB);
   }
   if (UI3_lat_pointer != nullptr) {
