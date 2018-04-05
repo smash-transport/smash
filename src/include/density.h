@@ -258,8 +258,12 @@ class DensityOnLattice {
   /// Default constructor
   DensityOnLattice()
       : jmu_pos_(FourVector()), jmu_neg_(FourVector()), density_(0.0) {}
+
   /**
    * Adds particle to 4-current: \f$j^{\mu} += p^{\mu}/p^0 \cdot factor \f$
+   * Two private class members jmu_pos_ and jmu_neg_ indicating the 4-current
+   * of the positively and negatively charged particles are updated by this
+   * function
    *
    * \param[in] part Particle would be added to the current density 
    *            on the lattice.
@@ -268,10 +272,6 @@ class DensityOnLattice {
    *            particle contribution to given density type (e.g. anti-proton
    *            contributes with factor -1 to baryon density, proton - with
    *            factor 1).
-   * \param[out] jmu_pos_ Four-current density of the postively charged
-   *             particle.
-   * \param[out] jmu_neg_ Four-current density of the negatively charged
-   *             particle.
    */
   void add_particle(const ParticleData &part, double factor) {
     if (factor > 0.0) {
@@ -280,10 +280,12 @@ class DensityOnLattice {
       jmu_neg_ += FourVector(factor, part.velocity() * factor);
     }
   }
+
   /**
-   * Compute the net density on the local lattice
+   * Compute the net density on the local lattice, and assign it
+   * to the private class member density_
+   *
    * \param[in] norm_factor Normalization factor
-   * \param[out] Net density on the local lattice [fm\f$^{-3}\f$]
    */
   void compute_density(const double norm_factor = 1.0) {
     density_ = (jmu_pos_.abs() - jmu_neg_.abs()) * norm_factor;
@@ -307,6 +309,7 @@ typedef RectangularLattice<DensityOnLattice> DensityLattice;
 
 /**
  * Updates the contents on the lattice.
+ *
  * \param[out] lat The lattice on which the content will be updated
  * \param[in] update tells if called for update at printout or at timestep
  * \param[in] dens_type density type to be computed on the lattice
@@ -356,6 +359,7 @@ void update_general_lattice(RectangularLattice<T> *lat,
 
 /**
  * Calculates density on the lattice in an time-efficient way.
+ *
  * \param[out] lat The lattice on which the density will be updated
  * \param[in] update tells if called for update at printout or at timestep
  * \param[in] dens_type density type to be computed on the lattice
@@ -370,6 +374,7 @@ void update_density_lattice(DensityLattice *lat, const LatticeUpdate update,
 
 /** 
  * Calculates energy-momentum tensor on the lattice in an time-efficient way.
+ *
  * \param[out] lat The lattice on which the energy-momentum tensor
  *             will be updated.
  * \param[in] update tells if called for update at printout or at timestep

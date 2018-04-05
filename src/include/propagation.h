@@ -16,39 +16,70 @@
 
 namespace smash {
 
+/**
+ * Struct containing the type of the metric and the expansion parameter in
+ * the metric. These elements shall be used in the Expansion Mode, which is
+ * implemented in SMASH to compare with the analytical solution
+ * \iref{Bazow:2015dha} to the Boltzmann equation with a Hubble expansion.
+ */
 struct ExpansionProperties {
-  // Defines the metric to be used
+  /// Type of metric used
   ExpansionMode mode_;
-  // Defines the expansion parameter (faster expansion for larger values)
+  /// Expansion parameter in the metric(faster expansion for larger values)
   double b_;
-
+  /**
+   * Constructor of ExpansionProperties
+   *
+   * \param[in] mode Type of metric used in the Expansion Mode.
+   * \param[in] b Expansion parameter in the metric
+   */
   ExpansionProperties(ExpansionMode mode, double b) : mode_(mode), b_(b) {}
 };
 
+/**
+ * Calculate the Hubble parameter \f$H(t)\f$, which discribes how large
+ * the expansion flow is. The flow \f$\vec v=H(t) \vec x\f$
+ * \iref{Tindall:2016try}
+ *
+ * \param[in] time time in the computational frame. [fm]
+ * \param[in] metric Struct containing the parameters needed to
+ *            calculate the metric.
+ * \return Hubble parameter \f$[fm^\f${-1}\f$]
+ */
 double calc_hubble(double time, const ExpansionProperties &metric);
 
-/** Propagates the positions of all particles on a straight line
- * through the current time step.
+/**
+ * Propagates the positions of all particles on a straight line
+ * to a given moment.
  *
  * For each particle, the position is shifted:
- * \f[\vec x^\prime = \vec x + \vec v \cdot \Delta t\f]
+ * \f[\vec x^\prime = \vec x + \vec v \Delta t\f]
  * where \f$\vec x\f$ is the current position, \f$\vec v\f$ its
  * velocity and \f$\Delta t\f$ the duration of this timestep.
  *
- * \param[in,out] particles The particle list in the event
- * \param[in] to_time final time
+ * \param[out] particles The particle list in the event
+ * \param[in] to_time final time [fm]
  * \param[in] beam_momentum This vector of 4-momenta should have
  *            non-zero size only if "frozen Fermi motion" is on.
  *            The the Fermi momenta are only used for collisions,
  *            but not for propagation. In this case beam_momentum
- *            is used for propagation.
- * \return dt time interval of propagation
+ *            is used for propagating the initial nucleons. [GeV]
+ * \return dt time interval of propagation which is equal to the
+ *            difference between the final time and the initial
+ *            time read from the 4-position of the particle.
  */
 double propagate_straight_line(Particles *particles, double to_time,
                                const std::vector<FourVector> &beam_momentum);
 
-/** Modifies positions and momentum of all particles to account for
+/** 
+ * Modifies positions and momentum of all particles to account for
  * space-time deformation.
+ *
+ * \param[out] particles All the particles in the event
+ * \param[in] parameters A struct containing the parameters from which
+ *            we extract the time in the computational frame.
+ * \param[in] metric A struct containing the parameters need to calculate
+ *            the metric
  */
 void expand_space_time(Particles *particles,
                        const ExperimentParameters &parameters,
@@ -60,11 +91,11 @@ void expand_space_time(Particles *particles,
  *
  * \f[ \frac{dp}{dt} = -dU(r)/dr \f]
  *
- * \param[in,out] particles The particle list in the event
+ * \param[out] particles The particle list in the event
  * \param[in] dt timestep
- * \param pot The potentials in the system
- * \param UB_grad_lat Lattice for Skyrme potential gradient
- * \param UI3_grad_lat Lattice for symmetry potential gradient
+ * \param[in] pot The potentials in the system
+ * \param[in] UB_grad_lat Lattice for Skyrme potential gradient
+ * \param[in] UI3_grad_lat Lattice for symmetry potential gradient
  */
 void update_momenta(Particles *particles, double dt, const Potentials &pot,
                     RectangularLattice<ThreeVector> *UB_grad_lat,
