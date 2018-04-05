@@ -216,7 +216,7 @@ inline ThreeVector operator*(const double &a, ThreeVector b) {
 
 /**
  * \return inner product of two three-vectors
- * /f$ \vec{a} \cdot \vec{b} /f$
+ * \f$ \vec{a} \cdot \vec{b} \f$
  */
 inline double operator*(ThreeVector a, const ThreeVector &b) {
   return a.x1() * b.x1() + a.x2() * b.x2() + a.x3() * b.x3();
