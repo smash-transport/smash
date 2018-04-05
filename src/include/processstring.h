@@ -387,10 +387,10 @@ class StringProcess {
   /**
    * perform string fragmentation to determine species and momenta of hadrons
    * by implementing PYTHIA 8.2 \iref{Andersson:1983ia,Sjostrand:2014zea}.
-   * \param idq1[in] PDG id of quark or anti-diquark (carrying color index).
-   * \param idq2[in] PDG id of diquark or anti-quark (carrying anti-color index).
-   * \param mString[in] the string mass.
-   * \param evecLong[in] unit 3-vector specifying the direction of diquark or
+   * \param[in] idq1 PDG id of quark or anti-diquark (carrying color index).
+   * \param[in] idq2 PDG id of diquark or anti-quark (carrying anti-color index).
+   * \param[in] mString the string mass.
+   * \param[in] evecLong unit 3-vector specifying the direction of diquark or
    *                     anti-diquark.
    * \return number of hadrons fragmented out of string.
    */
