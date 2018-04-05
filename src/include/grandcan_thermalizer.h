@@ -442,7 +442,7 @@ class GrandCanThermalizer {
   /// Real number multiplicity for each particle type
   std::vector<double> mult_sort_;
   /// Integer multiplicity for each particle type
-  std::vector<int> mult_int_;s
+  std::vector<int> mult_int_;
   /**
    * The different hadron species according to the enum defined
    * in \see HadronClass
