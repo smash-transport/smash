@@ -21,6 +21,81 @@
 
 namespace smash {
 
+ThermLatticeNode::ThermLatticeNode()
+    : Tmu0_(FourVector()),
+      nb_(0.0),
+      ns_(0.0),
+      e_(0.0),
+      p_(0.0),
+      v_(ThreeVector()),
+      T_(0.0),
+      mub_(0.0),
+      mus_(0.0) {}
+
+void ThermLatticeNode::add_particle(const ParticleData &part, double factor) {
+  Tmu0_ += part.momentum() * factor;
+  nb_ += static_cast<double>(part.type().baryon_number()) * factor;
+  ns_ += static_cast<double>(part.type().strangeness()) * factor;
+}
+
+void ThermLatticeNode::set_rest_frame_quantities(double T0, double mub0,
+                                                 double mus0,
+                                                 const ThreeVector v0) {
+  T_ = T0;
+  mub_ = mub0;
+  mus_ = mus0;
+  v_ = v0;
+  e_ = HadronGasEos::energy_density(T_, mub_, mus_);
+  p_ = HadronGasEos::pressure(T_, mub_, mus_);
+  nb_ = HadronGasEos::net_baryon_density(T_, mub_, mus_);
+  ns_ = HadronGasEos::net_strange_density(T_, mub_, mus_);
+}
+
+void ThermLatticeNode::compute_rest_frame_quantities(HadronGasEos &eos) {
+  // ToDo(oliiny): use Newton's method instead of these iterations
+  const int max_iter = 50;
+  v_ = ThreeVector(0.0, 0.0, 0.0);
+  double e_previous_step = 0.0;
+  const double tolerance = 5.e-4;
+  int iter;
+  for (iter = 0; iter < max_iter; iter++) {
+    e_previous_step = e_;
+    e_ = Tmu0_.x0() - Tmu0_.threevec() * v_;
+    if (std::abs(e_ - e_previous_step) < tolerance) {
+      break;
+    }
+    const double gamma_inv = std::sqrt(1.0 - v_.sqr());
+    EosTable::table_element tabulated;
+    eos.from_table(tabulated, e_, gamma_inv * nb_);
+    if (!eos.is_tabulated() || tabulated.p < 0.0) {
+      auto T_mub_mus = eos.solve_eos(e_, gamma_inv * nb_, gamma_inv * ns_);
+      T_ = T_mub_mus[0];
+      mub_ = T_mub_mus[1];
+      mus_ = T_mub_mus[2];
+      p_ = HadronGasEos::pressure(T_, mub_, mus_);
+    } else {
+      p_ = tabulated.p;
+      T_ = tabulated.T;
+      mub_ = tabulated.mub;
+      mus_ = tabulated.mus;
+    }
+    v_ = Tmu0_.threevec() / (Tmu0_.x0() + p_);
+  }
+  if (iter == max_iter) {
+    std::cout << "Warning from solver: max iterations exceeded."
+              << " Accuracy: " << std::abs(e_ - e_previous_step)
+              << " is less than tolerance " << tolerance << std::endl;
+  }
+}
+
+std::ostream &operator<<(std::ostream &out, const ThermLatticeNode &node) {
+  return out << "T[mu,0]: " << node.Tmu0() << ", nb: " << node.nb()
+             << ", ns: " << node.ns() << ", v: " << node.v()
+             << ", e: " << node.e() << ", p: " << node.p()
+             << ", T: " << node.T() << ", mub: " << node.mub()
+             << ", mus: " << node.mus();
+}
+
 GrandCanThermalizer::GrandCanThermalizer(const std::array<double, 3> lat_sizes,
                                          const std::array<int, 3> n_cells,
                                          const std::array<double, 3> origin,
@@ -531,81 +606,6 @@ void GrandCanThermalizer::print_statistics(const Clock &clock) const {
             << in_therm_reg.nb << " " << in_therm_reg.ns << std::endl;
   std::cout << "Volume with e > e_crit [fm^3]: " << cell_volume_ * node_counter
             << std::endl;
-}
-
-ThermLatticeNode::ThermLatticeNode()
-    : Tmu0_(FourVector()),
-      nb_(0.0),
-      ns_(0.0),
-      e_(0.0),
-      p_(0.0),
-      v_(ThreeVector()),
-      T_(0.0),
-      mub_(0.0),
-      mus_(0.0) {}
-
-void ThermLatticeNode::add_particle(const ParticleData &part, double factor) {
-  Tmu0_ += part.momentum() * factor;
-  nb_ += static_cast<double>(part.type().baryon_number()) * factor;
-  ns_ += static_cast<double>(part.type().strangeness()) * factor;
-}
-
-void ThermLatticeNode::set_rest_frame_quantities(double T0, double mub0,
-                                                 double mus0,
-                                                 const ThreeVector v0) {
-  T_ = T0;
-  mub_ = mub0;
-  mus_ = mus0;
-  v_ = v0;
-  e_ = HadronGasEos::energy_density(T_, mub_, mus_);
-  p_ = HadronGasEos::pressure(T_, mub_, mus_);
-  nb_ = HadronGasEos::net_baryon_density(T_, mub_, mus_);
-  ns_ = HadronGasEos::net_strange_density(T_, mub_, mus_);
-}
-
-void ThermLatticeNode::compute_rest_frame_quantities(HadronGasEos &eos) {
-  // ToDo(oliiny): use Newton's method instead of these iterations
-  const int max_iter = 50;
-  v_ = ThreeVector(0.0, 0.0, 0.0);
-  double e_previous_step = 0.0;
-  const double tolerance = 5.e-4;
-  int iter;
-  for (iter = 0; iter < max_iter; iter++) {
-    e_previous_step = e_;
-    e_ = Tmu0_.x0() - Tmu0_.threevec() * v_;
-    if (std::abs(e_ - e_previous_step) < tolerance) {
-      break;
-    }
-    const double gamma_inv = std::sqrt(1.0 - v_.sqr());
-    EosTable::table_element tabulated;
-    eos.from_table(tabulated, e_, gamma_inv * nb_);
-    if (!eos.is_tabulated() || tabulated.p < 0.0) {
-      auto T_mub_mus = eos.solve_eos(e_, gamma_inv * nb_, gamma_inv * ns_);
-      T_ = T_mub_mus[0];
-      mub_ = T_mub_mus[1];
-      mus_ = T_mub_mus[2];
-      p_ = HadronGasEos::pressure(T_, mub_, mus_);
-    } else {
-      p_ = tabulated.p;
-      T_ = tabulated.T;
-      mub_ = tabulated.mub;
-      mus_ = tabulated.mus;
-    }
-    v_ = Tmu0_.threevec() / (Tmu0_.x0() + p_);
-  }
-  if (iter == max_iter) {
-    std::cout << "Warning from solver: max iterations exceeded."
-              << " Accuracy: " << std::abs(e_ - e_previous_step)
-              << " is less than tolerance " << tolerance << std::endl;
-  }
-}
-
-std::ostream &operator<<(std::ostream &out, const ThermLatticeNode &node) {
-  return out << "T[mu,0]: " << node.Tmu0() << ", nb: " << node.nb()
-             << ", ns: " << node.ns() << ", v: " << node.v()
-             << ", e: " << node.e() << ", p: " << node.p()
-             << ", T: " << node.T() << ", mub: " << node.mub()
-             << ", mus: " << node.mus();
 }
 
 }  // namespace smash
