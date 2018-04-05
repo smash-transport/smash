@@ -90,18 +90,18 @@ class StringProcess {
   /// the minimum lightcone momentum scale carried by gluon [GeV]
   double pmin_gluon_lightcone_;
   /**
-   * parameter for the gluon distribution function
-   * P(x) = 1/x * (1 - x)^{1 + pow_fgluon_beta_}
+   * parameter \f$\beta\f$ for the gluon distribution function
+   * \f$ P(x) = x^{-1} (1 - x)^{1 + \beta} \f$
    */
   double pow_fgluon_beta_;
   /**
-   * parameter for the quark distribution function
-   * P(x) = x^{pow_fquark_alpha_ - 1} * (1 - x)^{pow_fquark_beta_ - 1}
+   * parameter \f$\alpha\f$ for the quark distribution function
+   * \f$ P(x) = x^{\alpha - 1} * (1 - x)^{\beta - 1} \f$
    */
   double pow_fquark_alpha_;
   /**
-   * parameter for the quark distribution function
-   * P(x) = x^{pow_fquark_alpha_ - 1} * (1 - x)^{pow_fquark_beta_ - 1}
+   * parameter \f$\beta\f$ for the quark distribution function
+   * \f$ P(x) = x^{\alpha - 1} * (1 - x)^{\beta - 1} \f$
    */
   double pow_fquark_beta_;
   /**
@@ -137,21 +137,21 @@ class StringProcess {
  public:
   /**
    * Constructor, initializes pythia. Should only be called once.
-   * \param string_tension value of kappa_tension_string_
-   * \param gluon_beta value of pow_fgluon_beta_
-   * \param gluon_pmin value of pmin_gluon_lightcone_
-   * \param quark_alpha value of pow_fquark_alpha_
-   * \param quark_beta value of pow_fquark_beta_
-   * \param strange_supp strangeness suppression factor
+   * \param[in] string_tension value of kappa_tension_string_
+   * \param[in] gluon_beta value of pow_fgluon_beta_
+   * \param[in] gluon_pmin value of pmin_gluon_lightcone_
+   * \param[in] quark_alpha value of pow_fquark_alpha_
+   * \param[in] quark_beta value of pow_fquark_beta_
+   * \param[in] strange_supp strangeness suppression factor
    *        (StringFlav:probStoUD) in fragmentation
-   * \param diquark_supp diquark suppression factor
+   * \param[in] diquark_supp diquark suppression factor
    *        (StringFlav:probQQtoQ) in fragmentation
-   * \param sigma_perp value of sigma_qperp_
-   * \param stringz_a parameter (StringZ:aLund)
+   * \param[in] sigma_perp value of sigma_qperp_
+   * \param[in] stringz_a parameter (StringZ:aLund)
    *        for the fragmentation function
-   * \param stringz_b parameter (StringZ:bLund)
+   * \param[in] stringz_b parameter (StringZ:bLund)
    *        for the fragmentation function
-   * \param string_sigma_T transverse momentum spread (StringPT:sigma)
+   * \param[in] string_sigma_T transverse momentum spread (StringPT:sigma)
    *        in fragmentation
    */
   StringProcess(double string_tension, double gluon_beta, double gluon_pmin,
@@ -161,16 +161,16 @@ class StringProcess {
 
   /**
    * Common setup of PYTHIA objects for soft and hard string routines
-   * \param pythia_in pointer to the PYTHIA object
-   * \param strange_supp strangeness suppression factor
+   * \param[out] pythia_in pointer to the PYTHIA object
+   * \param[in] strange_supp strangeness suppression factor
    *        (StringFlav:probStoUD) in fragmentation
-   * \param diquark_supp diquark suppression factor
+   * \param[in] diquark_supp diquark suppression factor
    *        (StringFlav:probQQtoQ) in fragmentation
-   * \param stringz_a parameter (StringZ:aLund)
+   * \param[in] stringz_a parameter (StringZ:aLund)
    *        for the fragmentation function
-   * \param stringz_b parameter (StringZ:bLund)
+   * \param[in] stringz_b parameter (StringZ:bLund)
    *        for the fragmentation function
-   * \param string_sigma_T transverse momentum spread (StringPT:sigma)
+   * \param[in] string_sigma_T transverse momentum spread (StringPT:sigma)
    *        in fragmentation
    */
   void common_setup_pythia(Pythia8::Pythia *pythia_in,
@@ -187,9 +187,9 @@ class StringProcess {
   /**
    * Interface to pythia_sigmatot_ to compute cross-sections of A+B->
    * different final states \iref{Schuler:1993wr}.
-   * \param pdg_a pdg code of incoming particle A
-   * \param pdg_b pdg code of incoming particle B
-   * \param sqrt_s collision energy in the center of mass frame [GeV]
+   * \param[in] pdg_a pdg code of incoming particle A
+   * \param[in] pdg_b pdg code of incoming particle B
+   * \param[in] sqrt_s collision energy in the center of mass frame [GeV]
    * \return array with single diffractive cross-sections AB->AX, AB->XB and
    * double diffractive AB->XX.
    */
@@ -264,7 +264,10 @@ class StringProcess {
   void set_tension_string(double kappa_string) {
     kappa_tension_string_ = kappa_string;
   }
-  /// Set the soft subprocess identifier
+  /**
+   * Set the soft subprocess identifier
+   * \param[in] iproc soft string subprocess that will be implemented
+   */
   void set_subproc(StringSoftType iproc) { subproc_ = iproc; }
   /// \return the soft subprocess identifier
   StringSoftType get_subproc() { return subproc_; }
@@ -272,9 +275,9 @@ class StringProcess {
    * initialization
    * feed intial particles, time of collision and gamma factor of the center of
    * mass.
-   * \param incoming is the list of initial state particles.
-   * \param tcoll is time of collision.
-   * \param gamma gamma factor of the center of mass.
+   * \param[in] incoming is the list of initial state particles.
+   * \param[in] tcoll is time of collision.
+   * \param[in] gamma gamma factor of the center of mass.
    */
   void init(const ParticleList &incoming, double tcoll, double gamma);
   /**
@@ -290,9 +293,9 @@ class StringProcess {
   void compute_incoming_lightcone_momenta();
   /**
    * Prepare kinematics of two strings, fragment them and append to final_state
-   * \param quarks pdg ids of string ends
-   * \param pstr_com 4-momenta of strings in the C.o.m. frame
-   * \param m_str masses of strings
+   * \param[in] quarks pdg ids of string ends
+   * \param[in] pstr_com 4-momenta of strings in the C.o.m. frame
+   * \param[in] m_str masses of strings
    * \return whether fragmentations and final state creation was successful
    */
   bool make_final_state_2strings(
@@ -303,7 +306,7 @@ class StringProcess {
   /**
    * Single-diffractive process
    * is based on single pomeron exchange described in \iref{Ingelman:1984ns}.
-   * \param is_AB_to_AX specifies which hadron to excite into a string.
+   * \param[in] is_AB_to_AX specifies which hadron to excite into a string.
    *                    true : A + B -> A + X
    *                    false : A + B -> X + B
    * \return whether the process is successfully implemented.
@@ -349,30 +352,32 @@ class StringProcess {
   /**
    * compute the formation time and fill the arrays with final-state particles
    * as described in \iref{Andersson:1983ia}.
-   * \param uString is velocity four vector of the string.
-   * \param evecLong is unit 3-vector in which string is stretched.
+   * \param[in] uString is velocity four vector of the string.
+   * \param[in] evecLong is unit 3-vector in which string is stretched.
    * \return number of hadrons fragmented out of string.
    */
   int append_final_state(const FourVector &uString,
                          const ThreeVector &evecLong);
   /**
    * Construct diquark from two quarks. Order does not matter.
-   * \param q1 PDG code of quark 1
-   * \param q2 PDG code of quark 2
+   * \param[in] q1 PDG code of quark 1
+   * \param[in] q2 PDG code of quark 2
    * \return PDG code of diquark composed of q1 and q2
    */
   int diquark_from_quarks(int q1, int q2);
 
   /**
    * make a random selection to determine partonic contents at the string ends.
-   * \param pdgcode_in is PdgCode of hadron which transforms into a string.
-   * \param idq1 is PDG id of quark or anti-diquark.
-   * \param idq2 is PDG id of anti-quark or diquark.
+   * \param[in] pdgcode_in is PdgCode of hadron which transforms into a string.
+   * \param[out] idq1 is PDG id of quark or anti-diquark.
+   * \param[out] idq2 is PDG id of anti-quark or diquark.
    */
   void make_string_ends(const PdgCode &pdgcode_in, int &idq1, int &idq2);
 
   /**
    * Easy setter of Pythia Vec4 from SMASH
+   * \param[in] energy time component
+   * \param[in] mom spatial three-vector
    * \return Pythia Vec4 from energy and ThreeVector
    */
   Pythia8::Vec4 set_Vec4(double energy, const ThreeVector &mom) {
@@ -382,11 +387,11 @@ class StringProcess {
   /**
    * perform string fragmentation to determine species and momenta of hadrons
    * by implementing PYTHIA 8.2 \iref{Andersson:1983ia,Sjostrand:2014zea}.
-   * \param idq1 PDG id of quark or anti-diquark (carrying color index).
-   * \param idq2 PDG id of diquark or anti-quark (carrying anti-color index).
-   * \param mString the string mass.
-   * \param evecLong unit 3-vector specifying the direction of diquark or
-   *                 anti-diquark.
+   * \param idq1[in] PDG id of quark or anti-diquark (carrying color index).
+   * \param idq2[in] PDG id of diquark or anti-quark (carrying anti-color index).
+   * \param mString[in] the string mass.
+   * \param evecLong[in] unit 3-vector specifying the direction of diquark or
+   *                     anti-diquark.
    * \return number of hadrons fragmented out of string.
    */
   int fragment_string(int idq1, int idq2, double mString,

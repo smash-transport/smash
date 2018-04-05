@@ -136,7 +136,7 @@ class PdgCode {
    * receive a signed integer and process it into a PDG Code. The sign
    * is taken as antiparticle boolean, while the absolute value of the
    * integer is used as hexdigits.
-   * \param codenumber The number 0x221 is interpreted as an η meson,
+   * \param[in] codenumber The number 0x221 is interpreted as an η meson,
    * -0x211 is a "charged pi antiparticle", i.e., a \f$\pi^-\f$.
    */
   PdgCode(std::int32_t codenumber) : dump_(0x0) {  // NOLINT(runtime/explicit)
@@ -553,7 +553,7 @@ class PdgCode {
   /**
    * Check whether a particle contains at least the given number of
    * valence quarks. This is necessary for string fragmentation.
-   * \param valence_quarks_required number of valence quarks
+   * \param[in] valence_quarks_required number of valence quarks
    * that particle is supposed to contain.
    */
   bool contains_enough_valence_quarks(int valence_quarks_required) const;
@@ -640,7 +640,7 @@ class PdgCode {
    * For public use, see strangeness(), charmness(), bottomness() and
    * isospin3().
    * \todo Why quark numbers 7 and 8 are allowed?
-   * \param quark PDG Code of quark: (1..6) = (d,u,s,c,b,t)
+   * \param[in] quark PDG Code of quark: (1..6) = (d,u,s,c,b,t)
    * \return for the net number of quarks (\#quarks - \#antiquarks)
    */
   int net_quark_number(const int quark) const;
