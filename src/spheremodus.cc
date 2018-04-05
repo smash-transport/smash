@@ -36,13 +36,13 @@ namespace smash {
  * \page input_modi_sphere_ Sphere
  *
  * \key Radius (double, required): \n
- * Radius of the Sphere.
+ * Radius of the Sphere, in fm.
  *
  * \key Sphere_Temperature (double, required):\n
- * Temperature for the momentum sampling in the sphere (in GeV).
+ * Temperature to sample momenta in the sphere, in GeV.
  *
  * \key Start_Time (double, required):\n
- * Starting time of Sphere calculation.
+ * Starting time of sphere calculation.
  *
  * \key Init_Multiplicities (int int, required):\n
  * Initial multiplicities per particle species.

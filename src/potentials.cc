@@ -41,13 +41,13 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
    * \f[ U_{Sk} = A(\rho/\rho_0) + B (\rho/\rho_0)^{\tau} \,, \f]
    * where \f$ \rho \f$ is baryon density in the local Eckart rest frame.
    *
-   * \key Skyrme_A (double, required): \n
+   * \key Skyrme_A (double, required, no default): \n
    *      Parameter A of Skyrme potential in MeV
    *
-   * \key Skyrme_B (double, required): \n
+   * \key Skyrme_B (double, required, no default): \n
    *      Parameter B of Skyrme potential in MeV
    *
-   * \key Skyrme_Tau (double, required): \n
+   * \key Skyrme_Tau (double, required, no default): \n
    *      Parameter \f$\tau\f$ of Skyrme potential.
    */
   if (use_skyrme_) {
@@ -64,7 +64,7 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
    * where \f$ \rho_n\f$ is neutron density and \f$ \rho_p\f$ is proton
    * density. Definition and implementation are still to be worked out.
    *
-   * \key S_pot (double, required): \n
+   * \key S_pot (double, required, no default): \n
    *      Parameter \f$S_{pot}\f$ of symmetry potential in MeV
    */
   if (use_symmetry_) {

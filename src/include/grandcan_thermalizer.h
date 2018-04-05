@@ -166,6 +166,32 @@ enum class HadronClass {
  *  is not the case for multiplicity fluctuations. For details see
  *  \iref{Oliinychenko:2016vkg}.
  */
+
+/*!\Userguide
+ * \page input_forced_thermalization_ Forced_Thermalization
+ *
+ * \key Cell_Number (list of 3 doubles, required, no default): \n
+ * Number of cells in each direction (x,y,z).
+ *
+ * \key Critical_Edens (double, required, )
+ * Critical energydensity above which forced thermalization is applied, in
+ * GeV/fm^3.
+ *
+ * \key Start_Time (double, required, no default): \n
+ * Time after which forced thermalization may be applied (in fm/c), if energydensity is
+ * sufficiently high.
+ *
+ * \key Timestep (double, required, no default): \n
+ * Timestep of thermalization, in fm/c.
+ *
+ * \key Algorithm (string, optional, default = "biased BF") \n
+ * Algorithm applied to enforce thermalization. See \iref{Oliinychenko:2016vkg}
+ * for more details.
+ * \li \key "unbiased BF" - slowest, but theoretically most robust
+ * \li \key "biased BF" - faster, but theoretically less robust
+ * \li \key "mode sampling" - fastest, bust least robust
+ *
+ */
 class GrandCanThermalizer {
  public:
   /**

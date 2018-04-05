@@ -58,6 +58,7 @@ namespace smash {
  * \li \subpage input_output_options_
  * \li \subpage input_lattice_
  * \li \subpage input_potentials_
+ * \li \subpage input_forced_thermalization_
  *
  * \par Information on formatting of the input file can be found here:
  * \li \subpage input_indentation_
