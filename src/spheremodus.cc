@@ -39,7 +39,7 @@ namespace smash {
  * Radius of the Sphere.
  *
  * \key Sphere_Temperature (double, required):\n
- * Temperature for the momentum sampling in the sphere in GeV.
+ * Temperature for the momentum sampling in the sphere (in GeV).
  *
  * \key Start_Time (double, required):\n
  * Starting time of Sphere calculation.
@@ -67,11 +67,11 @@ namespace smash {
  * the number of particles is not fixed from event to event.
  *
  * \key Baryon_Chemical_Potential (double, optional, default = 0.0): \n
- * Baryon chemical potential \f$ \mu_B \f$ used in case if
+ * Baryon chemical potential \f$ \mu_B \f$ only used if
  * Use_Thermal_Multiplicities is true to compute thermal densities \f$ n_i \f$.
  *
  * \key Strange_Chemical_Potential (double, optional, default = 0.0): \n
- * Strangeness chemical potential \f$ \mu_S \f$ used in case if
+ * Strangeness chemical potential \f$ \mu_S \f$ only used if
  * Use_Thermal_Multiplicities is true to compute thermal densities \f$ n_i \f$.
  *
  * \key Initial_Condition (SphereInitialCondition, default =
