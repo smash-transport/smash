@@ -20,7 +20,8 @@
 
 namespace smash {
 
-/** Angles provides a common interface for generating directions: i.e.,
+/**
+ * Angles provides a common interface for generating directions: i.e.,
  * two angles that should be interpreted as azimuthal and polar angles.
  *
  * Usage:
@@ -53,42 +54,49 @@ namespace smash {
  *
  * More distributions need to be implemented once there is a physics
  * case to use them.
- **/
+ */
 
 class Angles {
  public:
   /// Standard initializer, points in x-direction.
   Angles() : phi_(0), costheta_(0) {}
-  /// initializer with given phi and cos(theta)
+  /**
+   * initializer with given phi and cos(theta)
+   * \param[in] ph the azimuthal angle
+   * \param[in] cost cosine of the polar angle
+   */
   Angles(double ph, double cost) {
     set_phi(ph);
     set_costheta(cost);
   }
-  /** populate the object with a new direction
+  /**
+   * populate the object with a new direction
    *
    * the direction is taken randomly from a homogeneous distribution,
    * i.e., each point on a unit sphere is equally likely.
-   **/
+   */
   void distribute_isotropically();
-  /** update azimuthal angle
+  /**
+   * update azimuthal angle
    *
    * sets the azimuthal angle and leaves the polar angle untouched.
    *
-   * @param phi any real number to set the azimuthal angle \f$\varphi\f$
+   * \param[in] phi any real number to set the azimuthal angle \f$\varphi\f$
    * to.
-   **/
+   */
   void set_phi(const double phi);
-  /** update polar angle from its cosine.
+  /**
+   * update polar angle from its cosine.
    *
    * sets the polar angle and leaves the azimuthal angle untouched.
    * This is the preferred way of setting the polar information.
    *
-   * @param cos cosine of the polar angle \f$\cos\vartheta\f$. Must be
+   * \param[in] cos cosine of the polar angle \f$\cos\vartheta\f$. Must be
    * in range [-1 .. 1], else an Exception is thrown.
-   *
-   **/
+   */
   void set_costheta(const double cos);
-  /** update polar angle from itself
+  /**
+   * update polar angle from itself
    *
    * sets the polar angle and leaves the azimuthal angle untouched.
    * In the interface (public functions) we don't specify if theta or
@@ -100,63 +108,70 @@ class Angles {
    * set-function for the thing you have at hand. Accepts any real
    * number.
    *
-   * @param theta any real number to set the polar angle \f$\vartheta\f$
+   * \param[in] theta any real number to set the polar angle \f$\vartheta\f$
    * to.
    */
   void set_theta(const double theta);
-  /** advance polar angle
+  /**
+   * advance polar angle
    *
    * polar angle is advanced. A positive addition means that we go
    * towards the southpole.
    *
    * \see add_to_theta(const double& delta, const bool& reverse)
    *
-   * @param delta angle increment
-   * @return true if pole has been crossed.
-   **/
+   * \param[in] delta angle increment
+   * \return true if pole has been crossed.
+   */
   bool add_to_theta(const double delta);
-  /** advance polar angle
+  /**
+   * advance polar angle
    *
    * polar angle is advanced. When crossing a pole, azimuthal angle is
    * changed by 180 degrees.
    *
-   * @param delta angle increment. Must not be outside [\f$-\pi\f$ ..
+   * \param[in] delta angle increment. Must not be outside [\f$-\pi\f$ ..
    * \f$\pi\f$].
-   * @param reverse if true, we start in the "far" hemisphere, meaning a
+   * \param[in] reverse if true, we start in the "far" hemisphere, meaning a
    * positive delta will shift the object towards the north pole.
    *
-   * @return returns true if we end up in the far hemisphere, false if
+   * \return returns true if we end up in the far hemisphere, false if
    * we end up in the original hemisphere.
-   **/
+   */
   bool add_to_theta(const double delta, const bool reverse);
-  /// get azimuthal angle
+  /// \return azimuthal angle
   double phi() const;
-  /// get cosine of polar angle
+  /// \return cosine of polar angle
   double costheta() const;
-  /// get sine of polar angle
+  /// \return sine of polar angle
   double sintheta() const;
-  /** get x projection of the direction
+  /**
+   * \return \f$x\f$ projection of the direction
    *
    * \f$x = \sin\vartheta \cos\varphi\f$
-   **/
+   */
   double x() const;
-  /** get y projection of the direction
+  /**
+   * \return \f$y\f$ projection of the direction
    *
    * \f$y = \sin\vartheta \sin\varphi\f$
-   **/
+   */
   double y() const;
-  /** get z projection of the direction
+  /**
+   * \return \f$z\f$ projection of the direction
    *
    * \f$z = \cos\vartheta\f$
    **/
   double z() const;
-  /// get the three-vector
+  /// \return the three-vector
   ThreeVector inline threevec() const;
-  /// returns the polar angle
+  /// \return the polar angle
   double theta() const;
 
-  /// \ingroup exception
-  /// thrown for invalid values for theta
+  /**
+   * \ingroup exception
+   * thrown for invalid values for theta
+   */
   struct InvalidTheta : public std::invalid_argument {
     using std::invalid_argument::invalid_argument;
   };
@@ -168,7 +183,8 @@ class Angles {
   double costheta_;
 };
 
-/** \ingroup logging
+/**
+ * \ingroup logging
  * Creates output for an Angles object in the form "φ: 0.1294, cos ϑ:  0.423".
  */
 inline std::ostream &operator<<(std::ostream &out, const Angles &a) {
@@ -194,8 +210,7 @@ void inline Angles::set_costheta(const double newcos) {
   /* check if costheta_ is in -1..1. If not, well. Error handling here
    * is a lot harder than in the above. Still, I will silently do the
    * same as above. Note, though, that costheta = 1 is allowed, even if
-   * it cannot be generated by distribute_isotropically().
-   */
+   * it cannot be generated by distribute_isotropically(). */
   if ((costheta_ < -1. - really_small) || (costheta_ > 1. + really_small)) {
     throw InvalidTheta("Wrong value for costheta (must be in [-1,1]): " +
                        std::to_string(costheta_));
@@ -208,8 +223,7 @@ void inline Angles::set_costheta(const double newcos) {
 }
 void inline Angles::set_theta(const double newtheta) {
   /* no error handling necessary, because this gives a sensible answer
-   * for every real number.
-   */
+   * for every real number. */
   set_costheta(std::cos(newtheta));
 }
 
@@ -221,19 +235,18 @@ bool inline Angles::add_to_theta(const double delta) {
   double theta_plus_delta = delta + theta();
   /* if sum is not in [0, PI], force it to be there:
    * "upper" overflow:
-   * theta + delta + the_new_angle = 2*M_PI
-   */
+   * theta + delta + the_new_angle = 2*M_PI */
   if (theta_plus_delta > M_PI) {
     set_theta(twopi - theta_plus_delta);
-    /* set_phi takes care that phi_ is in [0 .. 2*M_PI] */
+    // set_phi takes care that phi_ is in [0 .. 2*M_PI]
     set_phi(phi() + M_PI);
     return true;  // meaning "we did change phi"
-    /* "lower" overflow: theta + delta switches sign */
+    // "lower" overflow: theta + delta switches sign
   } else if (theta_plus_delta < 0) {
     set_theta(-theta_plus_delta);
     set_phi(phi() + M_PI);
     return true;  // meaning "we did change phi"
-    /* no overflow: set theta, do not touch phi: */
+    // no overflow: set theta, do not touch phi:
   } else {
     set_theta(theta_plus_delta);
   }
@@ -245,8 +258,7 @@ bool inline Angles::add_to_theta(const double delta, const bool reverse) {
   /* if we had to reverse first time and now reverse again OR if we
    * didn't reverse in either part, we do not reverse in total.
    * else: if we reverse in one, but not the other part, we reverse in
-   * total.
-   */
+   * total. */
   return this_reverse ^ reverse;
 }
 
