@@ -107,7 +107,7 @@ GrandCanThermalizer::GrandCanThermalizer(const std::array<double, 3> lat_sizes,
       N_sorts_(eos_typelist_.size()),
       e_crit_(e_critical),
       t_start_(t_start),
-      s(delta_t),
+      period_(delta_t),
       algorithm_(algo) {
   const LatticeUpdate upd = LatticeUpdate::EveryFixedInterval;
   lat_ = make_unique<RectangularLattice<ThermLatticeNode>>(
