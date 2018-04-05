@@ -276,7 +276,7 @@ class PdgCode {
    *                                                                          *
    ****************************************************************************/
 
-  /// true if this is a nucleus, false otherwise
+  /// \return true if this is a nucleus, false otherwise
   inline bool is_nucleus() const {
     assert(digits_.is_nucleus_ == nucleus_.is_nucleus_);
     return nucleus_.is_nucleus_;
@@ -464,6 +464,7 @@ class PdgCode {
   }
 
   /**
+   * \todo (oliiny): take care of spin for nuclei
    * \return twice the spin of a particle.
    *
    * The code is good for hadrons, leptons and spin-1-bosons. It returns
@@ -472,8 +473,7 @@ class PdgCode {
   inline unsigned int spin() const {
     if (is_nucleus()) {
       /* Currently the only nucleus I care about is deutron,
-       * which has spin one.
-       * \todo (oliiny): take care of spin for nuclei */
+       * which has spin one. */
       return 2;
     }
 

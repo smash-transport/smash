@@ -53,25 +53,25 @@ class ThreeVector {
   /// const overload of the above.
   double operator[](std::size_t i) const { return x_[i]; }
 
-  /// retrieve first component
+  /// \return first component
   double inline x1() const;
   /// set first component
   void inline set_x1(double x);
-  /// retrieve second component
+  /// \return second component
   double inline x2() const;
   /// set second component
   void inline set_x2(double y);
-  /// retrieve third component
+  /// \return third component
   double inline x3() const;
   /// set third component
   void inline set_x3(double z);
-  /// calculate the square of the vector (which is a scalar)
+  /// \return the square of the vector (which is a scalar)
   double inline sqr() const;
-  /// calculate the absolute value
+  /// \return the absolute value
   double inline abs() const;
-  /// calculate the azimuthal angle phi
+  /// \return the azimuthal angle phi
   double inline get_phi() const;
-  /// calculate the polar angle theta
+  /// \return the polar angle theta
   double inline get_theta() const;
   /**
    * Rotate vector by the given Euler angles phi, theta, psi. If we
@@ -109,7 +109,9 @@ class ThreeVector {
   /// divide this vector by \f$a: \vec x^\prime = \frac{1}{a} \cdot \vec x\f$
   ThreeVector inline operator/=(const double &a);
 
+  /// \return whether the vector is identical to another vector
   bool operator==(const ThreeVector &rhs) const { return x_ == rhs.x_; }
+  /// \return whether the vector is different from another vector
   bool operator!=(const ThreeVector &rhs) const { return x_ != rhs.x_; }
 
   /// iterates over the components

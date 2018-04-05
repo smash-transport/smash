@@ -229,6 +229,8 @@ int StringProcess::append_final_state(const FourVector &uString,
     fragment_position = fragment_position.LorentzBoost(-vstring);
     t_prod = fragment_position.x0();
 
+    /* create new particle with specific PDG id
+     * and assign momentum. */
     ParticleData new_particle(ParticleType::find(fragments[i].pdg));
     new_particle.set_4momentum(fragments[i].momentum);
 
@@ -313,6 +315,7 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
     return false;
   }
   double sign_direction = is_AB_to_AX ? 1. : -1.;
+  // determine three momentum of the final state hadron
   const ThreeVector cm_momentum =
       sign_direction *
       (evecBasisAB_[0] * std::sqrt(pabscomHX_sqr - QTrn * QTrn) +

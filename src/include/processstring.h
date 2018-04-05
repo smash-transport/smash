@@ -21,10 +21,10 @@ namespace smash {
 /**
  * StringSoft Types are used to identify the type of the soft string subprocess
  * (-1) nothing (None)
- * (0) single diffractive A+B to A+X (SingleDiffAX)
- * (1) single diffractive A+B to X+B (SingleDiffXB)
- * (2) double diffractive (DoubleDiff)
- * (3) soft non-diffractive (NonDiff)
+ * (0)  single diffractive A+B to A+X (SingleDiffAX)
+ * (1)  single diffractive A+B to X+B (SingleDiffXB)
+ * (2)  double diffractive (DoubleDiff)
+ * (3)  soft non-diffractive (NonDiff)
  */
 enum class StringSoftType {
   None = -1,
@@ -266,7 +266,7 @@ class StringProcess {
   }
   /// Set the soft subprocess identifier
   void set_subproc(StringSoftType iproc) { subproc_ = iproc; }
-  /// Return the soft subprocess identifier
+  /// \return the soft subprocess identifier
   StringSoftType get_subproc() { return subproc_; }
   /**
    * initialization
@@ -375,7 +375,6 @@ class StringProcess {
    * Easy setter of Pythia Vec4 from SMASH
    * \return Pythia Vec4 from energy and ThreeVector
    */
-
   Pythia8::Vec4 set_Vec4(double energy, const ThreeVector &mom) {
     return Pythia8::Vec4(mom.x1(), mom.x2(), mom.x3(), energy);
   }
