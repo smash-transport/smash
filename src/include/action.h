@@ -244,7 +244,12 @@ class Action {
    * the center of mass frame in the presence (or absence) of the mean field
    * potentials. This function is used to determine whether an action is
    * kinematically feasible.
-   TODO*/
+   *
+   * \param[in] potentials skyrme and asymmetry potential for particle [GeV]
+   * \param[in] p_out_types outgoing particle types
+   * \return total kinetic energy of the outgoing particles in
+   *                                           the center of mass frame [GeV]
+   */
   template <typename outs>
   double kinetic_energy_cms(std::pair<double, double> potentials,
                             outs p_out_types) const {
@@ -278,15 +283,24 @@ class Action {
 
   /**
    * Get the interaction point
-   *
    * \return four vector of interaction point
    */
   FourVector get_interaction_point() const;
 
-  /// Get the potential at the interaction point TODO
+  /**
+  * Get the potential at the interaction point
+  * \return skyrme and asymmetry potential [GeV]
+  */
   std::pair<double, double> get_potential_at_interaction_point() const;
 
-  /// Input the information on the potential TODO
+  /**
+   * Input the information on the potentials and store in global variables defined in
+   * action_globals.
+   *
+   * \param[in] UB_lat skyrme potential on lattice
+   * \param[in] UI3_lat symmmetry potential on lattice
+   * \param[in] pot potential class
+   */
   static void input_potential(RectangularLattice<double> *UB_lat,
                               RectangularLattice<double> *UI3_lat,
                               Potentials *pot);
@@ -331,7 +345,11 @@ class Action {
     return mom;
   }
 
-  /// Remove the sub-threshold processes from the list of sub processes. TODO
+  /**
+   * Remove the sub-threshold processes from the list of sub processes.
+   * \param[out] subprocesses list of processes that are possible
+   * \param[out] total_weight summed weight of all subprocess (after filtering)
+   */
   template <typename Branch>
   void filter_channel(ProcessBranchList<Branch> &subprocesses,
                       double &total_weight) {
@@ -357,7 +375,10 @@ class Action {
   /**
    * Decide for a particular final-state channel via Monte-Carlo
    * and return it as a ProcessBranch
-   *TODO/
+   * \param[in] subprocess list of possible processes
+   * \param[in] total_weight summed weight of all processes
+   * \return ProcessBranch that is sampled
+   */
   template <typename Branch>
   const Branch *choose_channel(const ProcessBranchList<Branch> &subprocesses,
                                double total_weight) {
@@ -438,7 +459,12 @@ class Action {
   }
 };
 
-// TODO
+/**
+ * Append vector of action pointers
+ * \param[in] lhs vector of action pointers that is appended to
+ * \param[in] rhs vector of action pointers that is appended
+ * \return vector of action pointers containing lhs and rhs
+ */
 inline std::vector<ActionPtr> &operator+=(std::vector<ActionPtr> &lhs,
                                           std::vector<ActionPtr> &&rhs) {
   if (lhs.size() == 0) {
