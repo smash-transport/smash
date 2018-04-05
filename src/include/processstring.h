@@ -96,12 +96,12 @@ class StringProcess {
   double pow_fgluon_beta_;
   /**
    * parameter \f$\alpha\f$ for the quark distribution function
-   * \f$ P(x) = x^{\alpha - 1} * (1 - x)^{\beta - 1} \f$
+   * \f$ P(x) = x^{\alpha - 1} (1 - x)^{\beta - 1} \f$
    */
   double pow_fquark_alpha_;
   /**
    * parameter \f$\beta\f$ for the quark distribution function
-   * \f$ P(x) = x^{\alpha - 1} * (1 - x)^{\beta - 1} \f$
+   * \f$ P(x) = x^{\alpha - 1} (1 - x)^{\beta - 1} \f$
    */
   double pow_fquark_beta_;
   /**
@@ -116,7 +116,7 @@ class StringProcess {
   double time_collision_;
   /// Lorentz gamma factor of center of mass in the computational frame
   double gamma_factor_com_;
-  /// square root of 2 (sqrt(2))
+  /// square root of 2 (\f$\sqrt{2}\f$)
   double sqrt2_;
 
   /**
@@ -137,7 +137,7 @@ class StringProcess {
  public:
   /**
    * Constructor, initializes pythia. Should only be called once.
-   * \param[in] string_tension value of kappa_tension_string_
+   * \param[in] string_tension value of kappa_tension_string_ [GeV/fm]
    * \param[in] gluon_beta value of pow_fgluon_beta_
    * \param[in] gluon_pmin value of pmin_gluon_lightcone_
    * \param[in] quark_alpha value of pow_fquark_alpha_
@@ -146,13 +146,13 @@ class StringProcess {
    *        (StringFlav:probStoUD) in fragmentation
    * \param[in] diquark_supp diquark suppression factor
    *        (StringFlav:probQQtoQ) in fragmentation
-   * \param[in] sigma_perp value of sigma_qperp_
+   * \param[in] sigma_perp value of sigma_qperp_ [GeV]
    * \param[in] stringz_a parameter (StringZ:aLund)
    *        for the fragmentation function
    * \param[in] stringz_b parameter (StringZ:bLund)
    *        for the fragmentation function
    * \param[in] string_sigma_T transverse momentum spread (StringPT:sigma)
-   *        in fragmentation
+   *        in fragmentation [GeV]
    */
   StringProcess(double string_tension, double gluon_beta, double gluon_pmin,
                 double quark_alpha, double quark_beta, double strange_supp,
@@ -171,7 +171,7 @@ class StringProcess {
    * \param[in] stringz_b parameter (StringZ:bLund)
    *        for the fragmentation function
    * \param[in] string_sigma_T transverse momentum spread (StringPT:sigma)
-   *        in fragmentation
+   *        in fragmentation [GeV]
    */
   void common_setup_pythia(Pythia8::Pythia *pythia_in,
                            double strange_supp, double diquark_supp,
