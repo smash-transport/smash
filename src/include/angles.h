@@ -179,7 +179,7 @@ class Angles {
  private:
   /// azimuthal angle \f$\varphi\f$
   double phi_;
-  /// cosine of polar angle \f$\cos\varphi\f$
+  /// cosine of polar angle \f$\cos\vartheta\f$
   double costheta_;
 };
 
