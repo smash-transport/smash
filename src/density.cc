@@ -33,8 +33,8 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
     const ThreeVector &r, const FourVector &p, const double m_inv,
     const DensityParameters &dens_par, const bool compute_gradient) {
   const double r_sqr = r.sqr();
+  // Distance from particle to point of interest > r_cut
   if (r_sqr > dens_par.r_cut_sqr()) {
-    // Distance from particle to point of interest > r_cut
     return std::make_pair(0.0, ThreeVector(0.0, 0.0, 0.0));
   }
 
@@ -42,8 +42,8 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
   const double u_r_scalar = r * u.threevec();
   const double r_rest_sqr = r_sqr + u_r_scalar * u_r_scalar;
 
+  // Lorentz contracted distance from particle to point of interest > r_cut
   if (r_rest_sqr > dens_par.r_cut_sqr()) {
-    // Lorentz contracted distance from particle to point of interest > r_cut
     return std::make_pair(0.0, ThreeVector(0.0, 0.0, 0.0));
   }
   const double sf = std::exp(-r_rest_sqr * dens_par.two_sig_sqr_inv()) * u.x0();
@@ -61,15 +61,14 @@ std::pair<double, ThreeVector> rho_eckart_impl(const ThreeVector &r,
                                                DensityType dens_type,
                                                bool compute_gradient) {
   /* In the array first FourVector is jmu and next 3 are d jmu / dr.
-   Division into positive and negative charges is necessary to avoid
-   problems with the Eckart frame definition. Example of problem:
-   get Eckart frame for two identical oppositely flying bunches of
-   electrons and positrons. For this case jmu = (0, 0, 0, non-zero),
-   so jmu.abs does not exist and Eckart frame is not defined.
-   If one takes rho = jmu_pos.abs - jmu_neg.abs, it is still Lorentz-
-   invariant and gives the right limit in non-relativistic case, but
-   it gives no such problem.
-  */
+   * Division into positive and negative charges is necessary to avoid
+   * problems with the Eckart frame definition. Example of problem:
+   * get Eckart frame for two identical oppositely flying bunches of
+   * electrons and positrons. For this case jmu = (0, 0, 0, non-zero),
+   * so jmu.abs does not exist and Eckart frame is not defined.
+   * If one takes rho = jmu_pos.abs - jmu_neg.abs, it is still Lorentz-
+   * invariant and gives the right limit in non-relativistic case, but
+   * it gives no such problem. */
   std::array<FourVector, 4> jmu_pos, jmu_neg;
 
   for (const auto &p : plist) {

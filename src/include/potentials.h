@@ -38,6 +38,7 @@ class Potentials {
  public:
   /**
    * Potentials constructor.
+   *
    * \param[in] conf Configuration which contains the booleans
    *            determining whether to turn on the Skyrme or the
    *            symmetry potentials, and the coefficents controlling
@@ -133,7 +134,7 @@ class Potentials {
 
  private:
   /** 
-   * Struct that contains the gaussian smearing factor \f$\sigma\f$,
+   * Struct that contains the gaussian smearing width \f$\sigma\f$,
    * the distance cutoff \f$r_{\rm cut}\f$ and the testparticle number
    * needed for the density calculation.
    */
