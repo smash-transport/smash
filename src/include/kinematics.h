@@ -18,7 +18,6 @@ namespace smash {
 /**
  * \return velocity in the center of velocities frame of two particles given
  * their mandelstam s and masses
- *
  * \param s mandelstamm s of the collision [GeV^2]
  * \param ma Mass of the first particle [GeV]
  * \param mb Mass of the second particle [GeV]
@@ -34,7 +33,6 @@ inline double center_of_velocity_v(double s, double ma, double mb) {
 /**
  * \return velocity of projectile in the fixed target frame given
  * their mandelstam s of projectile and target and their masses
- *
  * \param s mandelstamm s of the collision [GeV^2]
  * \param ma Mass of the projectile [GeV]
  * \param mb Mass of the target [GeV]
@@ -47,7 +45,6 @@ inline double fixed_target_projectile_v(double s, double ma, double mb) {
 /**
  * \return the squared center-of-mass momentum of two particles,
  * given s and their masses.
- *
  * \param s mandelstamm s of the process [GeV^2].
  * \param mass_a Mass of first particle [GeV].
  * \param mass_b Mass of second particle [GeV].
@@ -62,7 +59,6 @@ T pCM_sqr_from_s(const T s, const T mass_a, const T mass_b) noexcept {
 /**
  * \return the center-of-mass momentum of two particles,
  * given s and their masses.
- *
  * \param s mandelstamm s of the process [GeV^2].
  * \param mass_a Mass of first particle [GeV].
  * \param mass_b Mass of second particle [GeV].
@@ -76,7 +72,6 @@ T pCM_from_s(const T s, const T mass_a, const T mass_b) noexcept {
 /**
  * \return the center-of-mass momentum of two particles,
  * given sqrt(s) and their masses.
- *
  * \param sqrts sqrt(s) of the process [GeV].
  * \param mass_a Mass of first particle [GeV].
  * \param mass_b Mass of second particle [GeV].
@@ -89,7 +84,6 @@ T pCM(const T sqrts, const T mass_a, const T mass_b) noexcept {
 /**
  * \return the squared center-of-mass momentum of two particles,
  * given sqrt(s) and their masses.
- *
  * \param sqrts sqrt(s) of the process [GeV].
  * \param mass_a Mass of first particle [GeV].
  * \param mass_b Mass of second particle [GeV].

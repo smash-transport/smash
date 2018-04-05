@@ -54,23 +54,23 @@ enum class StringSoftType {
 class StringProcess {
  private:
   // The following 4 variables are in the center of mass frame
-  /// forward lightcone momentum p^{+} of incoming particle A
+  /// forward lightcone momentum p^{+} of incoming particle A [GeV]
   double PPosA_;
-  /// forward lightcone momentum p^{+} of incoming particle B
+  /// forward lightcone momentum p^{+} of incoming particle B [GeV]
   double PPosB_;
-  /// backward lightcone momentum p^{-} of incoming particle A
+  /// backward lightcone momentum p^{-} of incoming particle A [GeV]
   double PNegA_;
-  /// backward lightcone momentum p^{-} of incoming particle B
+  /// backward lightcone momentum p^{-} of incoming particle B [GeV]
   double PNegB_;
-  /// masses of incoming particles
+  /// masses of incoming particles [GeV]
   double massA_, massB_;
-  /// sqrt of Mandelstam variable s of collision
+  /// sqrt of Mandelstam variable s of collision [GeV]
   double sqrtsAB_;
   /// PdgCodes of incoming particles
   std::array<PdgCode, 2> PDGcodes_;
-  /// momenta of incoming particles in the lab frame
+  /// momenta of incoming particles in the lab frame [GeV]
   std::array<FourVector, 2> plab_;
-  /// momenta of incoming particles in the center of mass frame
+  /// momenta of incoming particles in the center of mass frame [GeV]
   std::array<FourVector, 2> pcom_;
   /// velocity four vector of the center of mass in the lab frame
   FourVector ucomAB_;
@@ -87,7 +87,7 @@ class StringProcess {
   StringSoftType subproc_;
   /// number of particles fragmented from strings
   std::array<int, 2> NpartString_;
-  /// the minimum lightcone momentum scale carried by gluon
+  /// the minimum lightcone momentum scale carried by gluon [GeV]
   double pmin_gluon_lightcone_;
   /**
    * parameter for the gluon distribution function
@@ -105,14 +105,14 @@ class StringProcess {
    */
   double pow_fquark_beta_;
   /**
-   * Transverse momentum spread of the excited strings.
+   * Transverse momentum spread of the excited strings. [GeV]
    * Transverse momenta of strings are sampled according to gaussian
    * distribution with width sigma_qperp_
    */
   double sigma_qperp_;
-  /// string tension
+  /// string tension [GeV/fm]
   double kappa_tension_string_;
-  /// time of collision in the computational frame
+  /// time of collision in the computational frame [fm]
   double time_collision_;
   /// Lorentz gamma factor of center of mass in the computational frame
   double gamma_factor_com_;
