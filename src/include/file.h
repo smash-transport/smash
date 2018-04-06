@@ -37,7 +37,9 @@ struct FileDeleter {
   /// The class has no members, so this is a noop.
   constexpr FileDeleter() = default;
 
-  /// frees the std::FILE resource if it is non-zero.
+  /// Frees the std::FILE resource if it is non-zero.
+  ///
+  /// \param[in] f File resource.
   void operator()(std::FILE *f) const {
     if (f == nullptr) {
       return;
@@ -68,12 +70,24 @@ using FilePtr = std::unique_ptr<std::FILE, FileDeleter>;
  */
 class RenamingFilePtr {
  public:
+  /**
+   * Construct a `RenamingFilePtr`.
+   *
+   * \param[in] filename Path to the file.
+   * \param[in] mode The mode in which the file should be opened (see
+   *                 `std::fopen`).
+   * \return The constructed object.
+   */
   RenamingFilePtr(const bf::path& filename, const std::string& mode);
+  /// Get the underlying `FILE*` pointer.
   FILE* get();
   ~RenamingFilePtr();
  private:
+  /// Internal file pointer.
   FILE* file_;
+  /// Path of the finished file.
   bf::path filename_;
+  /// Path of the unfinished file.
   bf::path filename_unfinished_;
 };
 
@@ -81,6 +95,11 @@ class RenamingFilePtr {
  * Open a file with given mode.
  *
  * This wraps std::fopen but uses FileDeleter to automatically close the file.
+ *
+ * \param[in] filename Path to the file.
+ * \param[in] mode The mode in which the file should be opened (see
+ *                 `std::fopen`).
+ * \return The constructed `FilePtr`.
  */
 FilePtr fopen(const bf::path& filename, const std::string& mode);
 
