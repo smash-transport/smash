@@ -77,7 +77,11 @@ struct OutputParameters {
     }
   }
 
-  /// Pass correct extended flag to binary collision output constructor
+  /**
+   * Pass correct extended flag to binary collision output constructor
+   * \param[in] name (File)name of the output.
+   * \return Extended flag for binary output.
+   */
   bool get_coll_extended(std::string name) const {
     if (name == "Collisions") {
       return coll_extended;
@@ -90,28 +94,40 @@ struct OutputParameters {
 
   /// Point, where thermodynamic quantities are calculated
   ThreeVector td_position;
+
   /// Type (e.g., baryon/pion/hadron) of thermodynamic quantity
   DensityType td_dens_type;
+
   /// Print out Eckart rest frame density of type td_dens_type or not?
   bool td_rho_eckart;
+
   /// Print out energy-momentum tensor of type td_dens_type or not?
   bool td_tmn;
-  /** Print out energy-momentum tensor in Landau rest frame
-   * (of type td_dens_type) or not? */
+
+  /**
+   * Print out energy-momentum tensor in Landau rest frame
+   * (of type td_dens_type) or not?
+   */
   bool td_tmn_landau;
+
   /// Print out Landau velocity of type td_dens_type or not?
   bool td_v_landau;
-  /** Whether smearing is on or off; WARNING : if smearing is off,
-      then final result is in GeV instead of GeV/fm3 */
+
+  /**
+   * Whether smearing is on or off; WARNING : if smearing is off,
+   * then final result is in GeV instead of GeV/fm3
+   */
   bool td_smearing;
 
   /// Extended format for particles output
   bool part_extended;
+
   /// Print only final particles in event
   bool part_only_final;
 
   /// Extended format for collisions output
   bool coll_extended;
+
   /// Print initial and final particles in event into collision output
   bool coll_printstartend;
 

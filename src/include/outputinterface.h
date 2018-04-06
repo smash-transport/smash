@@ -37,7 +37,7 @@ class OutputInterface {
 
   /**
    * Construct output interface.
-   * \param[in] name Filename of output.
+   * \param[in] name (File)name of output.
    */
   explicit OutputInterface(std::string name)
       : is_dilepton_output_(name == "Dileptons"),
