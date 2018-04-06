@@ -157,11 +157,11 @@ double SphereModus::initial_conditions(Particles *particles,
       case (SphereInitialCondition::IC_ES):
         momentum_radial = sample_momenta_IC_ES(this->sphere_temperature_);
         break;
-      case (SphereInitialCondition::1M_IC):
+      case (SphereInitialCondition::IC_1M):
         momentum_radial =
             sample_momenta_1M_IC(this->sphere_temperature_, data.pole_mass());
         break;
-      case (SphereInitialCondition::2M_IC):
+      case (SphereInitialCondition::IC_2M):
         momentum_radial =
             sample_momenta_2M_IC(this->sphere_temperature_, data.pole_mass());
         break;
