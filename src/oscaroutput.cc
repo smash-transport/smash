@@ -155,9 +155,9 @@ void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
     std::fprintf(file_.get(), "# event %i end 0 impact %7.3f\n",
                  event_number + 1, impact_parameter);
   } else {
-    // OSCAR line prefix : initial particles; final particles; event id
-    // Last block of an event: initial = number of particles, final = 0
-    // Block ends with null interaction
+    /* OSCAR line prefix : initial particles; final particles; event id
+     * Last block of an event: initial = number of particles, final = 0
+     * Block ends with null interaction. */
     const size_t zero = 0;
     if (Contents & OscarParticlesAtEventend) {
       std::fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero,
@@ -190,8 +190,7 @@ void OscarOutput<Format, Contents>::at_interaction(const Action &action,
        * particle 2<->2 collision: 2 2
        * resonance formation: 2 1
        * resonance decay: 1 2
-       * etc.
-       */
+       * etc.*/
       std::fprintf(file_.get(), "%zu %zu %12.7f %12.7f %12.7f %5i\n",
                    action.incoming_particles().size(),
                    action.outgoing_particles().size(), density,
@@ -415,6 +414,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * # event ev_num end 0 impact impact_parameter
  * \endcode
  **/
+
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::write_particledata(
     const ParticleData &data) {
@@ -447,6 +447,16 @@ void OscarOutput<Format, Contents>::write_particledata(
 }
 
 namespace {
+/**
+ * Helper function that creates the oscar output with the format selected by
+ * create_oscar_output (except for Ddleptons and photons).
+ *
+ * \param[in] modern_format Use the 1999 or 2013 format
+ * \param[in] path Path of output
+ * \param[in] out_par Output parameters that hold the output configuration
+ * \param[in] name (File)name of ouput
+ * \return Unique pointer to oscar output
+ */
 template <int Contents>
 std::unique_ptr<OutputInterface> create_select_format(
     bool modern_format, const bf::path &path, const OutputParameters &out_par,

@@ -11,6 +11,12 @@
 #include <cstdint>
 #include <limits>
 
+/**
+ * \file
+ *
+ * Collection of useful constants that are know at compile time.
+ */
+
 namespace smash {
 
 /**
@@ -20,14 +26,13 @@ namespace smash {
  * precision.
  */
 constexpr double hbarc = 0.197327053;
-/**
- * mb <-> fm^2 conversion factor
- */
+
+ /// mb <-> fm^2 conversion factor
 constexpr double fm2_mb = 0.1;
-/**
- * Numerical error tolerance
- */
+
+// Numerical error tolerance
 constexpr double really_small = 1.0e-6;
+
 /**
  * \f$ 2\pi \f$
  *
@@ -35,33 +40,34 @@ constexpr double really_small = 1.0e-6;
  * precision.
  */
 constexpr double twopi = 2. * M_PI;
-/**
- * Ground state density of symmetric nuclear matter, fm^-3
- */
+
+/// Ground state density of symmetric nuclear matter, fm^-3
 constexpr double nuclear_density = 0.168;
-/**
- * Physical error tolerance
- *
- */
+
+/// Physical error tolerance
 constexpr double small_number = 1.0e-4;
+
 /**
  * nucleon mass in GeV
  *
  * Note that this should be the same as in particles.txt.
  */
 constexpr double nucleon_mass = 0.938;
+
 /**
  * pion mass in GeV
  *
  * Note that this should be the same as in particles.txt.
  */
 constexpr double pion_mass = 0.138;
+
 /**
  * kaon mass in GeV
  *
  * Note that this should be the same as in particles.txt.
  */
 constexpr double kaon_mass = 0.494;
+
 /**
  * Delta mass in GeV
  *
@@ -69,9 +75,7 @@ constexpr double kaon_mass = 0.494;
  */
 constexpr double delta_mass = 1.232;
 
-/**
- * Fine-struture constant, approximately 1/137
- */
+/// Fine-struture constant, approximately 1/137
 constexpr double alpha = 7.2973525698e-3;
 
 /**

@@ -60,27 +60,67 @@ enum OscarOutputContents {
 template <OscarOutputFormat Format, int Contents>
 class OscarOutput : public OutputInterface {
  public:
+
+  /**
+   * Create oscar output.
+   *
+   * \param[in] path Output path.
+   * \param[in] name Name of the ouput.
+   */
   OscarOutput(const bf::path &path, const std::string& name);
 
-  /// writes the initial particle information of an event
+  /**
+   * Writes the initial particle information of an event to the oscar output.
+   * \param[in] particles Current list of all particles.
+   * \param[in] event_number Number of event.
+   */
   void at_eventstart(const Particles &particles,
                      const int event_number) override;
 
-  /// writes the final particle information of an event
+  /**
+   * Writes the final particle information of an event to the oscar output.
+   * \param[in] particles Current list of particles.
+   * \param[in] event_number Number of event.
+   * \param[in] impact_parameter Impact parameter of this event.
+   */
   void at_eventend(const Particles &particles, const int event_number,
                    double impact_parameter) override;
 
-  /// Write a prefix line and a line per particle to OSCAR output.
+  /**
+   * Writes a interaction prefix line and a line for every incoming and
+   * outgoing particle to the oscar output.
+   * \param[in] action Action that holds the information of the interaction.
+   * \param[in] density Density at the interaction point.
+   */
   void at_interaction(const Action &action, const double density) override;
 
-  void at_intermediate_time(const Particles &particle, const Clock &clock,
+  /**
+   * Writes a prefix line then write out all current particles.
+   * \param[in] particles Current list of particles.
+   * \param[in] clock Unused, needed since inherited.
+   * \param[in] dens_param Unused, needed since inherited.
+   */
+  void at_intermediate_time(const Particles &particles, const Clock &clock,
                             const DensityParameters &dens_param) override;
 
  private:
+  /**
+   * Write single particle information line to output.
+   * \param[in] data Data of particle.
+   */
   void write_particledata(const ParticleData &data);
+
+  /**
+   * Write the particle information of a list of particles to the output.
+   * One line per particle.
+   * \param[in] particles List of particles to be written
+   */
   void write(const Particles &particles);
 
+  /// Keep track of event number.
   int current_event_ = 0;
+
+  /// Full filepath of the output file.
   RenamingFilePtr file_;
 };
 

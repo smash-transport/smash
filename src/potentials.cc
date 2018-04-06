@@ -14,9 +14,6 @@
 
 namespace smash {
 
-/**
- * Potentials constructor. Gets parameters of potentials from configuration.
- */
 Potentials::Potentials(Configuration conf, const DensityParameters &param)
     : param_(param),
       use_skyrme_(conf.has_value({"Skyrme"})),
@@ -80,15 +77,13 @@ Potentials::~Potentials() {}
 double Potentials::skyrme_pot(const double baryon_density) const {
   const double tmp = baryon_density / nuclear_density;
   /* U = U(|rho|) * sgn , because the sign of the potential changes
-     under a charge reversal transformation. */
+   * under a charge reversal transformation. */
   const int sgn = tmp > 0 ? 1 : -1;
-  // Return in GeV
   return 1.0e-3 * sgn * (skyrme_a_ * std::abs(tmp) +
                          skyrme_b_ * std::pow(std::abs(tmp), skyrme_tau_));
 }
 
 double Potentials::symmetry_pot(const double baryon_isospin_density) const {
-  // Return in GeV -> 10^-3 coefficient
   return 1.0e-3 * 2. * symmetry_s_ * baryon_isospin_density / nuclear_density;
 }
 
@@ -109,7 +104,6 @@ double Potentials::potential(const ThreeVector &r, const ParticleList &plist,
     total_potential += scale.first * skyrme_pot(rho_eck);
   }
   if (use_symmetry_) {
-    // use isospin density
     const double rho_iso =
         rho_eckart(r, plist, param_, DensityType::BaryonicIsospin,
                    compute_gradient)
@@ -121,12 +115,6 @@ double Potentials::potential(const ThreeVector &r, const ParticleList &plist,
 }
 
 std::pair<double, int> Potentials::force_scale(const ParticleType &data) const {
-  /* For Lambda and Sigma, since they carry 2 light (u or d) quarks, they
-  are affected by 2/3 of the Skyrme force. Xi carries 1 light quark, it
-  is affected by 1/3 of the Skyrme force. Omega carries no light quark, so
-  it's not affected by the Skyrme force. Anti-baryons are affected by the
-  force as large as the force acting on baryons but with an opposite
-  direction.*/
   double skyrme_scale = 1.0;
   if (data.pdgcode().is_hyperon()) {
     if (data.pdgcode().is_Xi()) {
@@ -138,7 +126,7 @@ std::pair<double, int> Potentials::force_scale(const ParticleType &data) const {
     }
   }
   skyrme_scale = skyrme_scale * data.pdgcode().baryon_number();
-  /* Symmetry force acts only on the neutron and proton.*/
+  // Symmetry force acts only on the neutron and proton.
   const int symmetry_scale =
       data.pdgcode().is_nucleon() ? data.pdgcode().baryon_number() : 0;
   return std::make_pair(skyrme_scale, symmetry_scale);
@@ -163,7 +151,6 @@ std::pair<ThreeVector, ThreeVector> Potentials::potential_gradient(
 
   ThreeVector dUsym_dr(0.0, 0.0, 0.0);
   if (use_symmetry_) {
-    // use isospin density
     const ThreeVector p_iso =
         rho_eckart(r, plist, param_, DensityType::BaryonicIsospin,
                    compute_gradient)

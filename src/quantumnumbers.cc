@@ -24,14 +24,14 @@ std::string QuantumNumbers::report_deviations(const QuantumNumbers& rhs) const {
   if (momentum_ != rhs.momentum_) {
     error_msg << "Deviation in Four-Momentum:\n" << std::scientific;
   }
-  // programmer's note: here, I'd like to simultaneously loop over an
-  // integer (for the output; so that we know which component is
-  // faulty) and both the current and rhs's momentum four-vector. If
-  // there is a better way to do this, feel free to implement.
-  //
-  // I chose mu < 4 as the breaking condition out of the vague feeling
-  // that comparing integers may be faster than accessing the
-  // iterators.
+  /* programmer's note: here, I'd like to simultaneously loop over an
+   * integer (for the output; so that we know which component is
+   * faulty) and both the current and rhs's momentum four-vector. If
+   * there is a better way to do this, feel free to implement.
+   *
+   * I chose mu < 4 as the breaking condition out of the vague feeling
+   * that comparing integers may be faster than accessing the
+   * iterators. */
   int mu = 0;
   for (auto here_iter = momentum_.cbegin(), rhs_iter = rhs.momentum_.cbegin();
        mu < 4; ++here_iter, ++rhs_iter, ++mu) {

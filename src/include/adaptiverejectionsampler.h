@@ -70,6 +70,8 @@ std::ostream &operator<<(std::ostream &out, const Line &l);
  *\endcode
  */
 
+/// \todo unused
+
 class AdaptiveRejectionSampler {
  public:
   /* distribution function f(x) for sampling

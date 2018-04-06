@@ -23,6 +23,8 @@
 #include <utility>
 #include <vector>
 
+namespace smash {
+
 /*
  * Linear interpolation.
  */
@@ -30,12 +32,19 @@
 template <typename T>
 class InterpolateLinear {
  public:
-  T slope_, yintercept_;
+  /// Slope of the linear interpolation.
+  T slope_;
+  /// y-axis intercept of the linear interpolation.
+  T yintercept_;
   /// Linear interpolation given two points (x0, y0) and (x1, y1).
   ///
-  /// Returns the interpolation function.
+  /// \return The interpolation function.
   InterpolateLinear(T x0, T y0, T x1, T y1);
+
   /// Calculate linear interpolation at x.
+  ///
+  /// \param x Interpolation argument.
+  /// \return Interpolated value.
   T operator()(T x) const;
 };
 
@@ -44,13 +53,18 @@ class InterpolateDataLinear {
  public:
   /// Interpolate function f given discrete samples f(x_i) = y_i.
   ///
-  /// Returns the interpolation function.
+  /// \param x x-values.
+  /// \param y y-values.
+  /// \return The interpolation function.
   ///
   /// Piecewise linear interpolation is used.
   /// Values outside the given samples will use the outmost linear
   /// interpolation.
   InterpolateDataLinear(const std::vector<T>& x, const std::vector<T>& y);
   /// Calculate interpolation of f at x.
+  ///
+  /// \param x Interpolation argument.
+  /// \return Interpolated value.
   T operator()(T x) const;
 
  private:
@@ -73,6 +87,10 @@ T InterpolateLinear<T>::operator()(T x) const {
 using Permutation = std::vector<size_t>;
 
 /// Calculate the permutations necessary for sorting a vector.
+///
+/// \param v Vector to be sorted.
+/// \param compare Comparison function (see `std::sort`).
+/// \return Vector of indices into the original vector.
 template <typename T, typename Cmp>
 Permutation generate_sort_permutation(std::vector<T> const& v, Cmp compare) {
   Permutation p(v.size());
@@ -83,6 +101,10 @@ Permutation generate_sort_permutation(std::vector<T> const& v, Cmp compare) {
 }
 
 /// Apply a permutation to a vector.
+///
+/// \param v Vector to be permuted.
+/// \param p Permutation to be applied.
+/// \return Permuted vector.
 template <typename T>
 std::vector<T> apply_permutation(const std::vector<T>& v,
                                  const Permutation& p) {
@@ -93,6 +115,12 @@ std::vector<T> apply_permutation(const std::vector<T>& v,
 }
 
 /// Check whether two components have the same value in a sorted vector x.
+///
+/// Throws an exception if duplicates are encountered.
+///
+/// \param x Vector to be checked for duplicates.
+/// \param error_position String used in the error message, indicating where
+///                       the error originated.
 template <typename T>
 void check_duplicates(const std::vector<T>& x,
                       const std::string& error_position) {
@@ -126,6 +154,10 @@ InterpolateDataLinear<T>::InterpolateDataLinear(const std::vector<T>& x,
 /// than x. If no such value exists, the first value is returned.
 ///
 /// This assumes v is sorted and uses a binary search.
+///
+/// \param v Vector to be searched.
+/// \param x Upper bound for indexed value.
+/// \return Largest index corresponding to value below upper bound.
 ///
 /// Example:
 /// >>> std::vector<int> x = { 0, 2, 4, 6, 8, 10 };
@@ -163,7 +195,9 @@ class InterpolateDataSpline {
  public:
   /// Interpolate function f given discrete samples f(x_i) = y_i.
   ///
-  /// Returns the interpolation function.
+  /// \param x x-values.
+  /// \param y y-values.
+  /// \return The interpolation function.
   ///
   /// Cubic spline interpolation is used.
   /// Values outside the given samples will use the outmost sample
@@ -181,5 +215,7 @@ class InterpolateDataSpline {
   gsl_interp_accel* acc_;
   gsl_spline* spline_;
 };
+
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_INTERPOLATION_H_

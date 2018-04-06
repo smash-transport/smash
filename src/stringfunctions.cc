@@ -13,7 +13,16 @@
 
 namespace smash {
 
-inline static size_t utf8_adjust(const std::string &s, size_t width) {
+namespace utf8 {
+
+/// Adjust filling width by taking the size of unicode characters into account.
+/// This is necessary, because UTF-8 characters can be represented by more than
+/// byte.
+///
+/// \param s String to be filled.
+/// \param width Width (in bytes) to be adjusted.
+/// \return Adjusted width.
+inline static size_t adjust(const std::string &s, size_t width) {
   for (unsigned char c : s) {
     if (c >= 0xFC) {
       width += 5;
@@ -34,7 +43,7 @@ inline static size_t utf8_adjust(const std::string &s, size_t width) {
 }
 
 std::string fill_left(const std::string &s, size_t width, char fill) {
-  width = utf8_adjust(s, width - s.size());
+  width = adjust(s, width - s.size());
   if (width > 0) {
     return std::string(width, fill) + s;
   }
@@ -42,7 +51,7 @@ std::string fill_left(const std::string &s, size_t width, char fill) {
 }
 
 std::string fill_right(const std::string &s, size_t width, char fill) {
-  width = utf8_adjust(s, width - s.size());
+  width = adjust(s, width - s.size());
   if (width > 0) {
     return s + std::string(width, fill);
   }
@@ -50,7 +59,7 @@ std::string fill_right(const std::string &s, size_t width, char fill) {
 }
 
 std::string fill_both(const std::string &s, size_t width, char fill) {
-  width = utf8_adjust(s, width - s.size());
+  width = adjust(s, width - s.size());
   if (width > 0) {
     const int l = width / 2;
     const int r = width - l;
@@ -58,6 +67,8 @@ std::string fill_both(const std::string &s, size_t width, char fill) {
   }
   return s;
 }
+
+}  // namespace utf8
 
 std::string trim(const std::string &s) {
   const auto begin = s.find_first_not_of(" \t\n\r");
@@ -81,6 +92,16 @@ void isoclean(std::string &s) {
   remove_substr(s, "⁻");
   remove_substr(s, "⁰");
 }
+
+/// Split string by delimiter.
+///
+/// \param[in] s String to be split.
+/// \param[in] delim Splitting delimiter.
+/// \param[out] result Split string as iterator.
+//
+// Necessary for the next function
+template <typename Out>
+void split(const std::string &s, char delim, Out result);
 
 template <typename Out>
 void split(const std::string &s, char delim, Out result) {

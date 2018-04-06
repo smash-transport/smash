@@ -21,6 +21,7 @@
 namespace smash {
 
 // internal helper functions
+/// \todo(warning) Internal helper functions have no documentation
 namespace {
 YAML::Node find_node_at(YAML::Node node,
                         std::initializer_list<const char *> keys) {
@@ -70,9 +71,11 @@ namespace decaymodes_txt {
 
 }  // unnamed namespace
 
+// Default constructor
 Configuration::Configuration(const bf::path &path)
     : Configuration(path, "config.yaml") {}
 
+// Constructor checking for validity of input
 Configuration::Configuration(const bf::path &path, const bf::path &filename) {
   const auto file_path = path / filename;
   if (!bf::exists(file_path)) {

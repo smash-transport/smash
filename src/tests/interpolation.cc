@@ -13,6 +13,8 @@
 
 #include <vector>
 
+using namespace smash;
+
 TEST(interpolate_linear) {
   const auto f = InterpolateLinear<double>(0, 0, 1, 2);
   COMPARE(f(0), 0);
