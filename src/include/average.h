@@ -88,6 +88,6 @@ std::pair<std::vector<T>, std::vector<T>> dedup_avg(const std::vector<T>& x,
   return std::make_pair(std::move(new_x), std::move(new_y));
 }
 
-} // namespace smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_AVERAGE_H_

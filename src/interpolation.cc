@@ -54,4 +54,4 @@ double InterpolateDataSpline::operator()(double xi) const {
   return gsl_spline_eval(spline_, xi, acc_);
 }
 
-} // namespace smash
+}  // namespace smash

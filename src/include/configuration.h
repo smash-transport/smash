@@ -605,7 +605,7 @@ class Configuration {
    */
   Value read(std::initializer_list<const char *> keys) const;
 
-  ///\see read
+  /// \see read
   template <typename T>
   T read(std::initializer_list<const char *> keys, T default_value) {
     if (has_value(keys)) {

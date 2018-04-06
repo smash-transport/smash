@@ -216,6 +216,6 @@ class InterpolateDataSpline {
   gsl_spline* spline_;
 };
 
-} // namespace smash
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_INTERPOLATION_H_

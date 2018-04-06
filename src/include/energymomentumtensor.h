@@ -168,7 +168,7 @@ EnergyMomentumTensor inline operator+(EnergyMomentumTensor a,
   a += b;
   return a;
 }
-    
+
 EnergyMomentumTensor inline EnergyMomentumTensor::operator-=(
     const EnergyMomentumTensor &Tmn0) {
   for (size_t i = 0; i < 10; i++) {

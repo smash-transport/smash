@@ -74,18 +74,18 @@ double isospin_clebsch_gordan_sqr_3to1(const ParticleType &p_a,
  * \param[in] I total isospin of the reaction
  * \return Clebsch-Gordan squared for 2->2 reaction
  */
- double isospin_clebsch_gordan_sqr_2to2(const ParticleType &p_a,
+double isospin_clebsch_gordan_sqr_2to2(const ParticleType &p_a,
                                        const ParticleType &p_b,
                                        const ParticleType &p_c,
                                        const ParticleType &p_d,
                                        const int I = -1);
-    
-///Range of total isospin for reaction of particle a with particle b.
+
+/// Range of total isospin for reaction of particle a with particle b.
 class I_tot_range {
  private:
-/// Value of minimum total isospin
+  /// Value of minimum total isospin
   int I_min_;
-/// Value of maximum total isospin
+  /// Value of maximum total isospin
   int I_max_;
 
  public:
@@ -124,7 +124,7 @@ class I_tot_range {
   }
 
   /// Iterator class for determination of total isospin
-  /// \todo (warnings) add detailed documentation on all parameters etc 
+  /// \todo (warnings) add detailed documentation on all parameters etc
   class iterator : public std::iterator<std::forward_iterator_tag, int> {
    private:
     int c_;
