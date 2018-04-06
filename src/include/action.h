@@ -41,7 +41,7 @@ class Action {
    * \param[in] time time at which the action is supposed to take place
    *                 (relative to the current time of the incoming particles)
    */
-  Action::Action(const ParticleList &in_part, double time)
+  Action(const ParticleList &in_part, double time)
       : incoming_particles_(in_part),
         time_of_execution_(time + in_part[0].position().x0()) {}
 
