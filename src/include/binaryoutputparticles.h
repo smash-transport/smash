@@ -49,17 +49,17 @@ class BinaryOutputParticles : public BinaryOutputBase {
   /**
    * Writes the initial particle information of an event to the binary output.
    * \param[in] particles Current list of all particles.
-   * \param[in] event_number Number of event. (unused, since inherited)
+   * \param[in] event_number Unused, needed since inherited.
    */
   void at_eventstart(const Particles &particles,
                      const int event_number) override;
 
- /**
-  * Writes the final particle information of an event to the oscar output.
-  * \param[in] particles Current list of particles.
-  * \param[in] event_number Number of event.
-  * \param[in] impact_parameter Impact parameter of this event.
-  */
+  /**
+   * Writes the final particle information of an event to the binary output.
+   * \param[in] particles Current list of particles.
+   * \param[in] event_number Number of event.
+   * \param[in] impact_parameter Impact parameter of this event.
+   */
   void at_eventend(const Particles &particles, const int event_number,
                    double impact_parameter) override;
 
