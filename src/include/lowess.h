@@ -24,7 +24,6 @@
 namespace smash {
 
 namespace lowess {
-////////////////////////////////////////////////////////////////////////////////
 /// Fit value at x[i]
 ///  Based on R function lowest: Translated to C++ by C. Stratowa
 ///  (R source file: lowess.c by R Development Core Team (C) 1999-2001)
@@ -96,7 +95,6 @@ void lowest(const T *x, const T *y, size_t n, T xs, T &ys, size_t nleft,
   }
 }
 
-////////////////////////////////////////////////////////////////////////////////
 /// Partial sort.
 /// based on R function rPsort: adapted to C++ by Christian Stratowa
 /// (R source file: R_sort.c by R Development Core Team (C) 1999-2001)
@@ -128,7 +126,6 @@ void psort(T *x, size_t n, size_t k) {
   }
 }
 
-////////////////////////////////////////////////////////////////////////////////
 /// Lowess regression smoother.
 /// Based on R function clowess: Translated to C++ by C. Stratowa
 /// (R source file: lowess.c by R Development Core Team (C) 1999-2001)
@@ -250,11 +247,10 @@ void lowess(const T *x, const T *y, size_t n, T *ys, T span, size_t iter,
 
 }  // namespace lowess
 
-////////////////////////////////////////////////////////////////////////////////
 /// Apply the LOWESS smoother (see the reference below) to the given data
 /// (x, y).
 ///
-/// \returns smoothed y-values
+/// \returns Smoothed y-values.
 /// \param x x-values.
 /// \param y y-values.
 /// \param span The smoother span. This gives the proportion of points in
