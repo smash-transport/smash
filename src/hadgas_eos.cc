@@ -20,6 +20,9 @@
 #include "include/forwarddeclarations.h"
 #include "include/fpenvironment.h"
 #include "include/hadgas_eos.h"
+#include "include/logging.h"
+#include "include/pow.h"
+#include "include/random.h"
 
 namespace smash {
 
@@ -195,13 +198,18 @@ double HadronGasEos::scaled_partial_density(const ParticleType &ptype,
   } else {
     // Integral \int_{threshold}^{\infty} A(m) N_{thermal}(m) dm,
     // where A(m) is the spectral function of the resonance.
-    const double m_th = ptype.min_mass_kinematic();
+    const double m0 = ptype.mass();
+    const double w0 = ptype.width_at_pole();
+    const double mth = ptype.min_mass_spectral();
+    const double u_min = std::atan(2.0 * (mth - m0) / w0);
+    const double u_max = 0.5 * M_PI;
     Integrator integrate;
-    const double result = g * integrate(0.0, 1.0, [&](double y) {
+    const double result = g * integrate(u_min, u_max, [&](double u) {
       // One of many possible variable substitutions. Not clear if it has
-      // any advantages, except transforming (m_th, inf) to (0, 1).
-      const double m = m_th / y;
-      const double jacobian = - m_th / (y * y);
+      // any advantages, except transforming (m_th, inf) to finite interval.
+      const double tanu = std::tan(u);
+      const double m = m0 + 0.5 * w0 * tanu;
+      const double jacobian = 0.5 * w0 * (1.0 + tanu * tanu);
       return ptype.spectral_function(m) * jacobian *
              scaled_partial_density_auxiliary(m * beta, mu_over_T);
     });
@@ -293,6 +301,79 @@ double HadronGasEos::net_strange_density(double T, double mub, double mus) {
   }
   rho *= prefactor_ * T * T * T;
   return rho;
+}
+
+double HadronGasEos::sample_mass_thermal(const ParticleType &ptype,
+                                         double beta) {
+  // Sampling mass m from A(m) x^2 BesselK_2(x), where x = beta m.
+  // Strategy employs idea of importance sampling:
+  // 1) Sample mass from A(m): inverse transform method
+  // 2) Reject by f(x) = x^2 BesselK_2(x). f(x) monotonously decreases
+  //    and has maximum at x = xmin. So it makes sense to reject using
+  //    f(x)/f(xmin).
+
+  // Inverse transform method, instead of mass m a dimensionless variable
+  // u = std::atan(2.0 * (m - m0) / w0) is used. This allows to transform
+  // (m_threshold, inf) to a finite interval and make integrand less peaky.
+  const double m0 = ptype.mass();
+  const double w0 = ptype.width_at_pole();
+  const double mth = ptype.min_mass_spectral();
+  const double u_min = std::atan(2.0 * (mth - m0) / w0);
+  const double u_max = 0.5 * M_PI;
+  constexpr size_t n_interpolation_points = 1000;
+  const double du = (u_max - u_min) / n_interpolation_points;
+  std::array<double, n_interpolation_points> cumulative_integral;
+  cumulative_integral[0] = 0.0;
+  for (size_t i = 1; i < n_interpolation_points; i++) {
+    const double u = u_min + du * i;
+    const double tanu = std::tan(u);
+    const double mass = m0 + 0.5 * w0 * tanu;
+    const double jacobian = 0.5 * w0 * (1.0 + tanu * tanu);
+    cumulative_integral[i] = cumulative_integral[i - 1] + du *
+                             jacobian *
+                             ptype.spectral_function(mass);
+  }
+  if (std::abs(cumulative_integral[n_interpolation_points - 1] - 1.0) >
+      1.e-2) {
+    const auto &log = logger<LogArea::Experiment>();
+    log.trace() << source_location;
+    log.warn("Norm of the spectral function (", ptype.name(),
+             ") is ", cumulative_integral[n_interpolation_points - 1],
+             ", while it has to be 1.");
+  }
+
+  const double norm = 1.0 / gsl_sf_bessel_Kn_scaled(2, mth * beta);
+  double m;
+  do {
+    // sample mass from A(m), binary search to invert the tabulated integral
+    const double y = Random::canonical();
+    int i_min = 0, i_max = n_interpolation_points - 1;
+    while (i_min != i_max - 1) {
+      int i = (i_min + i_max) / 2;
+      if (cumulative_integral[i] <= y) {
+        i_min = i;
+      } else {
+        i_max = i;
+      }
+    }
+    const double y1 = cumulative_integral[i_min];
+    const double y2 = cumulative_integral[i_min + 1];
+    assert(y1 <= y && y2 > y);
+    const double x1 = u_min + du * i_min;
+    const double x2 = u_min + du * (i_min + 1);
+    const double x = x1 + (y - y1) * (x2 - x1) / (y2 - y1);
+    m = m0 + 0.5 * w0 * std::tan(x);
+
+    // Accept with probability f(x)/f(xmin), f(x) = x^2 BesselK_2(x).
+    double accept_probability = square(m / mth) * std::exp(- beta * (m - mth)) *
+            gsl_sf_bessel_Kn_scaled(2, m * beta) * norm;
+    assert(accept_probability <= 1.0);
+    if (Random::canonical() <= accept_probability) {
+      break;
+    }
+  } while (true);
+
+  return m;
 }
 
 double HadronGasEos::mus_net_strangeness0(double T, double mub) {

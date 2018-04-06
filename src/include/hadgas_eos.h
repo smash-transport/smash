@@ -149,6 +149,7 @@ class HadronGasEos {
    */
   static double partial_density(const ParticleType& ptype, double T, double mub,
                                 double mus);
+  static double sample_mass_thermal(const ParticleType &ptype, double beta);
   /**
    * Compute temperature and chemical potentials given energy-,
    * net baryon- and net strangeness density.
