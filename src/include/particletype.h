@@ -378,7 +378,7 @@ class ParticleType {
    * type. All other internal references for a particle type should use
    * ParticleTypePtr instead.
    *
-   * \param[in] the unique pdg code to try to find
+   * \param[in] pdgcode the unique pdg code to try to find
    * \return the ParticleTypePtr that corresponds to this pdg code, or an
              invalid pointer
    */
@@ -393,7 +393,7 @@ class ParticleType {
    * type. All other internal references for a particle type should use
    * ParticleTypePtr instead.
    *
-   * \param[in] the unique pdg code to try to find
+   * \param[in] pdgcode the unique pdg code to try to find
    * \return the ParticleTypePtr that corresponds to this pdg code
    */
   static const ParticleType &find(PdgCode pdgcode);
