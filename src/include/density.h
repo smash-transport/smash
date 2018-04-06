@@ -161,7 +161,7 @@ class DensityParameters {
   double r_cut_sqr_;
   /// \f$ (2 \sigma^2)^{-1} \f$ [fm\f$^{-2}\f$]
   double two_sig_sqr_inv_;
-  /// Normalization for smearing factor 
+  /// Normalization for smearing factor
   double norm_factor_sf_;
   /// Normalization for the gradient of the smearing factor
   double norm_factor_sf_grad_;

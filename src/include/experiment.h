@@ -158,7 +158,7 @@ class Experiment : public ExperimentBase {
    *
    * \param[in] action The action to perform. If it performs, it'll modify
    *                   the private member particles_
-   * \param[in] particles_before_actions A container with the ParticleData 
+   * \param[in] particles_before_actions A container with the ParticleData
    *                 from this time step before any actions were performed
    * \return False if the action is rejected either due to invalidity or
    *         Pauli-blocking, or true if it's accepted and performed.
@@ -177,7 +177,7 @@ class Experiment : public ExperimentBase {
   void create_output(std::string format, std::string content,
                      const bf::path &output_path, const OutputParameters &par);
 
-  /** 
+  /**
    * Propagate all particles until time to_time without any interactions
    * and shine dileptons.
    *
@@ -185,7 +185,7 @@ class Experiment : public ExperimentBase {
    */
   void propagate_and_shine(double to_time);
 
-  /** 
+  /**
    * Runs the time evolution of an event with fixed-sized time steps,
    * adaptive time steps or without timesteps, from action to actions.
    * Within one timestep (fixed or adaptive) evolution from action to action
@@ -210,7 +210,7 @@ class Experiment : public ExperimentBase {
   /// Performs the final decays of an event
   void do_final_decays();
 
-  /** 
+  /**
    * Output at the end of an event
    *
    * \param[in] evt_num Number of the event
@@ -220,7 +220,6 @@ class Experiment : public ExperimentBase {
   /// Intermediate output during an event
   void intermediate_output();
 
-  
   /// Recompute potentials on lattices if necessary.
   void update_potentials();
 
@@ -257,7 +256,6 @@ class Experiment : public ExperimentBase {
    */
   Modus modus_;
 
-  
   /// The particles interacting in the experiment.
   Particles particles_;
 
@@ -285,14 +283,14 @@ class Experiment : public ExperimentBase {
   /// The Photon output
   OutputPtr photon_output_;
 
-  /** 
+  /**
    * nucleon_has_interacted_ labels whether the particles in the nuclei
    * have experienced any collisions or not. It's only valid in
    * the ColliderModus, so is set as an empty vector by default.
    */
   std::vector<bool> nucleon_has_interacted_ = {};
 
-  /** 
+  /**
    * The initial nucleons in the ColliderModus propagate with
    * beam_momentum_, if Fermi motion is frozen. It's only valid in
    * the ColliderModus, so is set as an empty vector by default.
@@ -317,7 +315,7 @@ class Experiment : public ExperimentBase {
   /// Isospin projection density on the lattices
   std::unique_ptr<DensityLattice> jmu_I3_lat_;
 
-  /** 
+  /**
    * Custom density on the lattices.
    * In the config user asks for some kind of density for printout.
    * Baryon and isospin projection density are anyway needed for potentials.
@@ -343,7 +341,7 @@ class Experiment : public ExperimentBase {
 
   /// Lattices of energy-momentum tensors for printout
   std::unique_ptr<RectangularLattice<EnergyMomentumTensor>> Tmn_;
-  
+
   /// Whether to print the energy-momentum tensor
   bool printout_tmn_ = false;
 
@@ -378,7 +376,7 @@ class Experiment : public ExperimentBase {
   /// simulation time at which the evolution is stopped.
   const double end_time_;
 
-  /** 
+  /**
    * The clock's timestep size at start up
    *
    * Stored here so that the next event will remember this.
@@ -409,7 +407,7 @@ class Experiment : public ExperimentBase {
   /// Maximal distance at which particles can interact, squared
   double max_transverse_distance_sqr_ = std::numeric_limits<double>::max();
 
-  /** 
+  /**
    * The conserved quantities of the system.
    *
    * This struct carries the sums of the single particle's various

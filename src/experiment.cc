@@ -22,6 +22,7 @@
 #include "include/scatteractionphoton.h"
 #include "include/scatteractionsfinder.h"
 #include "include/spheremodus.h"
+// Output
 #include "include/binaryoutputcollisions.h"
 #include "include/binaryoutputparticles.h"
 #include "include/oscaroutput.h"
