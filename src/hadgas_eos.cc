@@ -16,7 +16,9 @@
 #include <boost/filesystem.hpp>
 
 #include "include/constants.h"
+#include "include/integrate.h"
 #include "include/forwarddeclarations.h"
+#include "include/fpenvironment.h"
 #include "include/hadgas_eos.h"
 
 namespace smash {
@@ -166,24 +168,45 @@ HadronGasEos::~HadronGasEos() {
   gsl_vector_free(x_);
 }
 
+double HadronGasEos::scaled_partial_density_auxiliary(double m_over_T,
+                                                      double mu_over_T) {
+  double x = mu_over_T - m_over_T;
+  {
+    // Allow underflow
+    DisableFloatTraps guard(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
+    x = std::exp(x);
+  }
+  // The case of small mass: K_n(z) -> (n-1)!/2 *(2/z)^n, z -> 0
+  // z*z*K_2(z) -> 2
+  return (m_over_T < really_small)
+         ? 2.0 * x
+         : m_over_T * m_over_T * x * gsl_sf_bessel_Kn_scaled(2, m_over_T);
+}
+
 double HadronGasEos::scaled_partial_density(const ParticleType &ptype,
                                             double beta, double mub,
                                             double mus) {
-  const double z = ptype.mass() * beta;
-  double x = beta * (ptype.baryon_number() * mub + ptype.strangeness() * mus -
-                     ptype.mass());
-  const unsigned int g = ptype.spin() + 1;
-  /*if (x < -600.0) {
-    std::cout << x << " " << z << " " << g << std::endl;
-  }*/
-  if (x < -500.0) {
-    return 0.0;
+  const double m_over_T = ptype.mass() * beta;
+  double mu_over_T = beta * (ptype.baryon_number() * mub +
+                               ptype.strangeness() * mus);
+  const double g = ptype.spin() + 1;
+  if (ptype.is_stable()) {
+    return g * scaled_partial_density_auxiliary(m_over_T, mu_over_T);
+  } else {
+    // Integral \int_{threshold}^{\infty} A(m) N_{thermal}(m) dm,
+    // where A(m) is the spectral function of the resonance.
+    const double m_th = ptype.min_mass_kinematic();
+    Integrator integrate;
+    const double result = g * integrate(0.0, 1.0, [&](double y) {
+      // One of many possible variable substitutions. Not clear if it has
+      // any advantages, except transforming (m_th, inf) to (0, 1).
+      const double m = m_th / y;
+      const double jacobian = - m_th / (y * y);
+      return ptype.spectral_function(m) * jacobian *
+             scaled_partial_density_auxiliary(m * beta, mu_over_T);
+    });
+    return result;
   }
-  x = std::exp(x);
-  // The case of small mass: K_n(z) -> (n-1)!/2 *(2/z)^n, z -> 0
-  // z*z*K_2(z) -> 2
-  return (z < really_small) ? 2.0 * g * x
-                            : z * z * g * x * gsl_sf_bessel_Kn_scaled(2, z);
 }
 
 double HadronGasEos::partial_density(const ParticleType &ptype, double T,

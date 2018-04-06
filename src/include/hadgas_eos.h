@@ -197,9 +197,11 @@ class HadronGasEos {
   };
 
   /**
-   * Compute (unnormalized) density of one hadron sort - helper function
+   * Compute (unnormalized) density of one hadron sort - helper functions
    * used to reduce code duplication.
    */
+  static double scaled_partial_density_auxiliary(double m_over_T,
+                                                 double mu_over_T);
   static double scaled_partial_density(const ParticleType& ptype, double beta,
                                        double mub, double mus);
   /// Interfaces EoS equations to be solved to gnu library
