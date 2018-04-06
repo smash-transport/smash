@@ -15,10 +15,11 @@
 #include <utility>
 #include <vector>
 
-/// Represent an average value.
+/// Calculate an average value incrementally.
 template <typename T>
 class Average {
  public:
+  /// Create a new object to calculate an average.
   Average() : avg_(0), n_(0) {}
 
   /// Add a value to the set of numbers defining the average.
@@ -47,6 +48,10 @@ class Average {
 /// Remove duplicates from data (x, y) by averaging y.
 ///
 /// Assumes (x, y) is sorted.
+///
+/// \param x x-values.
+/// \param y y-values.
+/// \return New x and y values as a pair of vectors.
 template <typename T>
 std::pair<std::vector<T>, std::vector<T>> dedup_avg(const std::vector<T>& x,
                                                     const std::vector<T>& y) {
