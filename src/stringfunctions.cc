@@ -82,6 +82,16 @@ void isoclean(std::string &s) {
   remove_substr(s, "⁰");
 }
 
+/// Split string by delimiter.
+///
+/// \param[in] s String to be split.
+/// \param[in] delim Splitting delimiter.
+/// \param[out] result Split string as iterator.
+//
+// Necessary for the next function
+template <typename Out>
+void split(const std::string &s, char delim, Out result);
+
 template <typename Out>
 void split(const std::string &s, char delim, Out result) {
   std::stringstream ss;
