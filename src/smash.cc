@@ -178,7 +178,7 @@ bf::path default_output_path() {
 
 /**
  * Ensures the output path is valid (throws if not)
- * \param[in] The output path to be written to
+ * \param[in] path The output path to be written to
  */
 void ensure_path_is_valid(const bf::path &path) {
   if (bf::exists(path)) {

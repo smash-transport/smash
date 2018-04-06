@@ -460,6 +460,7 @@ FourVector Nucleus::center() const {
   return centerpoint;
 }
 
+/// \todo(warning) this friend is documented in .h file
 std::ostream &operator<<(std::ostream &out, const Nucleus &n) {
   return out << "  #particles   #testparticles   mass [GeV]   "
                 "radius [fm]  diffusiveness [fm]\n"
