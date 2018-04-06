@@ -24,8 +24,11 @@
 
 namespace YAML {
 template <typename T>
+/// \todo(warnings) Needs documentation, if actually used
 struct convert {
+  /// \todo (unused)
   static Node encode(const T &x) { return Node{static_cast<std::string>(x)}; }
+  /// \todo (unused)
   static bool decode(const Node &node, T &x) {
     if (!node.IsScalar()) {
       return false;
@@ -122,20 +125,25 @@ namespace smash {
  */
 class Configuration {
  public:
-  /// \ingroup exception
-  /// Thrown when the types in the config file and C++ don't match.
+  /**
+   * \ingroup exception
+   * Thrown when the types in the config file and C++ don't match.
+   */
   struct IncorrectTypeInAssignment : public std::runtime_error {
     using std::runtime_error::runtime_error;
   };
-
-  /// \ingroup exception
-  /// Thrown for YAML parse errors
+  /**
+   * \ingroup exception
+   * Thrown for YAML parse errors
+   */
   struct ParseError : public std::runtime_error {
     using std::runtime_error::runtime_error;
   };
 
-  /// \ingroup exception
-  /// Thrown if the file does not exist
+  /**
+   * \ingroup exception
+   * Thrown if the file does not exist
+   */
   struct FileDoesNotExist : public std::runtime_error {
     using std::runtime_error::runtime_error;
   };
@@ -150,11 +158,13 @@ class Configuration {
   class Value {
     friend class Configuration;
 
-    /// a YAML leaf node
+    /// a YAML leaf node \todo What is that?
     const YAML::Node node_;
+    /// The key to be interpreted
     const char *const key_;
 
-    /** Constructs the Value wrapper from a YAML::Node.
+    /**
+     * Constructs the Value wrapper from a YAML::Node.
      *
      * \note This constructor must be implicit, otherwise it's impossible to
      * return an rvalue Value object - because the copy constructor is deleted.
@@ -169,9 +179,9 @@ class Configuration {
     }
 
    public:
-    /// if you want to copy this you're doing it wrong
+    /// If you want to copy this you're doing it wrong
     Value(const Value &) = delete;
-    /// if you want to copy this you're doing it wrong
+    /// If you want to copy this you're doing it wrong
     Value &operator=(const Value &) = delete;
 
     /**
@@ -223,6 +233,10 @@ class Configuration {
       }
     }
 
+    /**
+     * \todo(warning) Is it okay to leave the following list of self-explanatory
+     * operators undocumented?
+     */
     template <typename T>
     operator std::vector<T>() const {
       try {
@@ -491,17 +505,17 @@ class Configuration {
   };
 
   /**
-   * Reads config.yaml from the specified \p path.
+   * Reads config.yaml from the specified path.
    *
-   * \param path The directory where the SMASH config files are located.
+   * \param[in] path The directory where the SMASH config files are located.
    */
   explicit Configuration(const bf::path &path);
 
   /**
-   * Reads a YAML config file from the specified \p path.
+   * Reads a YAML config file from the specified path.
    *
-   * \param path The directory where the SMASH config files are located.
-   * \param filename The filename (without path) of the YAML config file, in
+   * \param[in] path The directory where the SMASH config files are located.
+   * \param[in] filename The filename (without path) of the YAML config file, in
    *                 case you don't want the default "config.yaml".
    */
   explicit Configuration(const bf::path &path, const bf::path &filename);
@@ -518,14 +532,14 @@ class Configuration {
   explicit Configuration(const char *yaml) : root_node_(YAML::Load(yaml)) {}
 #endif
 
-  /// if you want to copy this you're doing it wrong
+  /// If you want to copy this you're doing it wrong
   Configuration(const Configuration &) = default;
-  /// if you want to copy this you're doing it wrong
+  /// If you want to copy this you're doing it wrong
   Configuration &operator=(const Configuration &) = default;
 
-  /// moving is fine
+  /// Moving is fine
   Configuration(Configuration &&) = default;
-  /// moving is fine
+  /// Moving is fine
   Configuration &operator=(Configuration &&) = default;
 
   /**
@@ -536,10 +550,11 @@ class Configuration {
    * existing tree.
    * The merge resolves conflicts by taking the value from \p yaml.
    *
-   * \param yaml A string with YAML (or JSON) content that is to be merged.
+   * \param[in] yaml A string with YAML (or JSON) content that is to be merged.
    */
   void merge_yaml(const std::string &yaml);
 
+  /// \todo(warning) I have no idea what this is doing (petersen)
   std::vector<std::string> list_upmost_nodes();
 
   /**
@@ -551,8 +566,8 @@ class Configuration {
    * By removing the value, the Configuration object keeps track which settings
    * were never read.
    *
-   * \param keys You can pass an arbitrary number of keys inside curly braces,
-   *             following the nesting structure in the config file. Example:
+   * \param[in] keys You can pass an arbitrary number of keys inside curly
+   * braces, following the nesting structure in the config file. Example:
                  \verbatim
      Group:
          Key: Value
@@ -565,6 +580,7 @@ class Configuration {
    */
   Value take(std::initializer_list<const char *> keys);
 
+  /// \see take
   template <typename T>
   T take(std::initializer_list<const char *> keys, T default_value) {
     if (has_value(keys)) {
@@ -581,14 +597,15 @@ class Configuration {
    * it from the Configuration object. Semantically, this means the value was
    * not used.
    *
-   * \param keys You can pass an arbitrary number of keys inside curly braces,
-   *             following the nesting structure in the config file.
+   * \param[in] keys You can pass an arbitrary number of keys inside curly
+   * braces, following the nesting structure in the config file.
    *
    * \return A proxy object that converts to the correct type automatically on
    *         assignment.
    */
   Value read(std::initializer_list<const char *> keys) const;
 
+  ///\see read
   template <typename T>
   T read(std::initializer_list<const char *> keys, T default_value) {
     if (has_value(keys)) {
@@ -600,7 +617,7 @@ class Configuration {
   /**
    * Removes all entries in the map except for \p key.
    *
-   * \param key The key of the map entry to keep.
+   * \param[in] key The key of the map entry to keep.
    */
   void remove_all_but(const std::string &key);
 
@@ -612,6 +629,7 @@ class Configuration {
    * will automatically convert the data you assign to a string representation
    * suitable for the YAML file.
    *
+   * \param[in] key The name of the key to be looked up
    * \return An opaque object that can be assigned to.
    *
    * \see take
@@ -625,7 +643,7 @@ class Configuration {
   /**
    * Assignment overwrites the value of the current YAML node.
    *
-   * \param value An arbitrary value that yaml-cpp can convert into YAML
+   * \param[in] value An arbitrary value that yaml-cpp can convert into YAML
    * representation. Any builtin type, strings, maps, and vectors can be used
    * here.
    */
@@ -636,12 +654,14 @@ class Configuration {
   }
 
   /**
-   *  Returns if there is a (maybe empty) value behind the requested \p keys.
+   * Returns if there is a (maybe empty) value behind the requested \p keys.
+   * \param[in] keys List of keys to be checked for
    */
   bool has_value_including_empty(
       std::initializer_list<const char *> keys) const;
   /**
    * Returns whether there is a non-empty value behind the requested \p keys.
+   * \param[in] keys List of keys to be checked for
    */
   bool has_value(std::initializer_list<const char *> keys) const;
 
