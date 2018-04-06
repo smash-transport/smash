@@ -221,6 +221,8 @@ double ppbar_total(double mandelstam_s);
  * \todo unused (also not even defined)
  *
  * \param[in] mandelstam_s the rest frame total energy squared
+ * \param[in] m_proj mass of projectile?
+ * \param[in] m_target mass of target?
  * \return the parametrized cross-section
  */
 double ppbar_total(double mandelstam_s, double m_proj, double m_target);
@@ -355,7 +357,7 @@ struct pair_hash {
  */
 class KplusNRatios {
  private:
-  ///Internal representation of isospin weights once calculated
+  /// Internal representation of isospin weights once calculated
   mutable std::unordered_map<std::pair<uint64_t, uint64_t>, double, pair_hash>
       ratios_;
 
@@ -455,7 +457,9 @@ double kminusn_piminuslambda(double sqrts);
  * Two hyperon exchange, based on effective model by Feng Li,
  * as in UrQMD (\iref{Graef:2014mra}).
  *
- * \param[in] sqrts the rest frame total energy
+ * \param[in] sqrts_sqrts0 the rest frame total energy minus threshold energy
+ * \param[in] p_N momentum of outgoing nucleon in center of mass frame
+ * \param[in] p_lambda momentum of incoming lambda in center of mass frame
  * \return the parametrized cross-section
  */
 double lambdalambda_ximinusp(double sqrts_sqrts0, double p_N, double p_lambda);
@@ -465,7 +469,9 @@ double lambdalambda_ximinusp(double sqrts_sqrts0, double p_N, double p_lambda);
  * Two hyperon exchange, based on effective model by Feng Li,
  * as in UrQMD (\iref{Graef:2014mra}).
  *
- * \param[in] sqrts the rest frame total energy
+ * \param[in] sqrts_sqrts0 the rest frame total energy minus threshold energy
+ * \param[in] p_N momentum of outgoing nucleon in center of mass frame
+ * \param[in] p_lambda momentum of incoming lambda in center of mass frame
  * \return the parametrized cross-section
  */
 double lambdalambda_xi0n(double sqrts_sqrts0, double p_N, double p_lambda);
@@ -475,7 +481,7 @@ double lambdalambda_xi0n(double sqrts_sqrts0, double p_N, double p_lambda);
  * Two hyperon exchange, based on effective model by Feng Li,
  * as in UrQMD (\iref{Graef:2014mra}).
  *
- * \param[in] sqrts the rest frame total energy
+ * \param[in] sqrts_sqrts0 the rest frame total energy minus threshold energy
  * \return the parametrized cross-section
  */
 double lambdasigmaplus_xi0p(double sqrts_sqrts0);
@@ -485,7 +491,7 @@ double lambdasigmaplus_xi0p(double sqrts_sqrts0);
  * Two hyperon exchange, based on effective model by Feng Li,
  * as in UrQMD (\iref{Graef:2014mra}).
  *
- * \param[in] sqrts the rest frame total energy
+ * \param[in] sqrts_sqrts0 the rest frame total energy minus threshold energy
  * \return the parametrized cross-section
  */
 double lambdasigmaminus_ximinusn(double sqrts_sqrts0);
@@ -495,7 +501,7 @@ double lambdasigmaminus_ximinusn(double sqrts_sqrts0);
  * Two hyperon exchange, based on effective model by Feng Li,
  * as in UrQMD (\iref{Graef:2014mra}).
  *
- * \param[in] sqrts the rest frame total energy
+ * \param[in] sqrts_sqrts0 the rest frame total energy minus threshold energy
  * \return the parametrized cross-section
  */
 double lambdasigma0_ximinusp(double sqrts_sqrts0);
@@ -505,7 +511,7 @@ double lambdasigma0_ximinusp(double sqrts_sqrts0);
  * Two hyperon exchange, based on effective model by Feng Li,
  * as in UrQMD (\iref{Graef:2014mra}).
  *
- * \param[in] sqrts the rest frame total energy
+ * \param[in] sqrts_sqrts0 the rest frame total energy minus threshold energy
  * \return the parametrized cross-section
  */
 double lambdasigma0_xi0n(double sqrts_sqrts0);
@@ -515,7 +521,7 @@ double lambdasigma0_xi0n(double sqrts_sqrts0);
  * Two hyperon exchange, based on effective model by Feng Li,
  * as in UrQMD (\iref{Graef:2014mra}).
  *
- * \param[in] sqrts the rest frame total energy
+ * \param[in] sqrts_sqrts0 the rest frame total energy minus threshold energy
  * \return the parametrized cross-section
  */
 double sigma0sigma0_ximinusp(double sqrts_sqrts0);
@@ -528,7 +534,7 @@ double sigma0sigma0_ximinusp(double sqrts_sqrts0);
  * Note that there is a typo in the paper in equation (6):
  * "Lambda Sigma0 -> Xi0 n" should be "Sigma0 Sigma0 -> Xi0 n".
  *
- * \param[in] sqrts the rest frame total energy
+ * \param[in] sqrts_sqrts0 the rest frame total energy minus threshold energy
  * \return the parametrized cross-section
  */
 double sigma0sigma0_xi0n(double sqrts_sqrts0);
@@ -538,7 +544,7 @@ double sigma0sigma0_xi0n(double sqrts_sqrts0);
  * Two hyperon exchange, based on effective model by Feng Li,
  * as in UrQMD (\iref{Graef:2014mra}).
  *
- * \param[in] sqrts the rest frame total energy
+ * \param[in] sqrts_sqrts0 the rest frame total energy minus threshold energy
  * \return the parametrized cross-section
  */
 double sigmaplussigmaminus_xi0p(double sqrts_sqrts0);
@@ -548,7 +554,7 @@ double sigmaplussigmaminus_xi0p(double sqrts_sqrts0);
  * Two hyperon exchange, based on effective model by Feng Li,
  * as in UrQMD (\iref{Graef:2014mra}).
  *
- * \param[in] sqrts the rest frame total energy
+ * \param[in] sqrts_sqrts0 the rest frame total energy minus threshold energy
  * \return the parametrized cross-section
  */
 double sigma0sigmaminus_ximinusn(double sqrts_sqrts0);
@@ -558,7 +564,7 @@ double sigma0sigmaminus_ximinusn(double sqrts_sqrts0);
  * Two hyperon exchange, based on effective model by Feng Li,
  * as in UrQMD (\iref{Graef:2014mra}).
  *
- * \param[in] sqrts the rest frame total energy
+ * \param[in] sqrts_sqrts0 the rest frame total energy minus threshold energy
  * \return the parametrized cross-section
  */
 double sigmaplussigmaminus_ximinusp(double sqrts_sqrts0);
@@ -568,7 +574,7 @@ double sigmaplussigmaminus_ximinusp(double sqrts_sqrts0);
  * Two hyperon exchange, based on effective model by Feng Li,
  * as in UrQMD (\iref{Graef:2014mra}).
  *
- * \param[in] sqrts the rest frame total energy
+ * \param[in] sqrts_sqrts0 the rest frame total energy minus threshold energy
  * \return the parametrized cross-section
  */
 double sigmaplussigmaminus_xi0n(double sqrts_sqrts0);

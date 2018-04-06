@@ -161,7 +161,7 @@ class FourVector {
    * (x_0, x_1, x_2, x_3) = (x_0, \vec{r})\f$ with velocity \f$\vec v\f$
    * is
    *
-   * \f/{eqnarray*}{x^\prime_0 = \gamma \cdot (x_0 - \vec{r}\cdot\vec{v}),\f}
+   * \f{eqnarray*}{x^\prime_0 = \gamma \cdot (x_0 - \vec{r}\cdot\vec{v}),\f}
    *
    * and the space-like components i = 1, 2, 3 are:
    * \f{eqnarray*}{
@@ -298,7 +298,7 @@ class FourVector {
   std::array<double, 4> x_;
 };
 
-//Definitions of previous inline functions
+// Definitions of previous inline functions
 
 double inline FourVector::x0(void) const { return x_[0]; }
 
