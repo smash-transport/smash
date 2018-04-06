@@ -28,8 +28,9 @@ class HadronGasEos;
 /**
  * A class to hold, compute and access tabulated EoS.
  */
+ /// \todo Oliiny: add documentation for EosTable functions
+
 class EosTable {
-/// \todo Oliiny: add documentation for EosTable functions
  public:
   EosTable(double de, double dnb, size_t n_e, size_t n_b);
   struct table_element {

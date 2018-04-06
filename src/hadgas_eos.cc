@@ -110,7 +110,6 @@ finish_consistency_check:
     }
     // Save table to file
     std::cout << "Saving table to file " << eos_savefile_name << std::endl;
-    const EosTable::table_element s3 = table_[index(ie, inb + 1)];
     std::ofstream file;
     file.open(eos_savefile_name, std::ios::out);
     file << de_ << " " << dnb_ << std::endl;
@@ -138,6 +137,7 @@ void EosTable::get(EosTable::table_element &res, double e, double nb) const {
     const double an = nb / dnb_ - inb;
     const EosTable::table_element s1 = table_[index(ie, inb)];
     const EosTable::table_element s2 = table_[index(ie + 1, inb)];
+    const EosTable::table_element s3 = table_[index(ie, inb + 1)];
     const EosTable::table_element s4 = table_[index(ie + 1, inb + 1)];
     res.p = ae * (an * s4.p + (1.0 - an) * s2.p) +
             (1.0 - ae) * (an * s3.p + (1.0 - an) * s1.p);
