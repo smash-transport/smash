@@ -16,7 +16,7 @@ namespace {
 // Necessary for the implementation of a non-stable rho meson in the
 // pi0 + rho0 -> omega -> pi0 + gamma and pi + pi0 -> rho + gamma channel.
 // For these specific scattering processes, there are s and t channels with
-// different theresholds. While the t-channel can always be performed, the
+// different thresholds. While the t-channel can always be performed, the
 // s-channel is kinematically only accessible if sqrt(s) >= mass of the exchange
 // particle. The corresponding s-channels need to be excluded from the
 // cross sections below their specific thresholds.
@@ -50,11 +50,11 @@ namespace smash {
 template class PhotonCrossSection<ComputationMethod::Analytic>;
 template class PhotonCrossSection<ComputationMethod::Lookup>;
 
-constexpr double PhotonCrossSection<ComputationMethod::Analytic>::m_pion_;
 
 /*----------------------------------------------------------------------------*/
-/*				 Pi + Rho -> Pi + Photon channels mediated by
- * (Pi, Rho, a1) 				*/
+/*				 Pi + Rho -> Pi + Photon channels mediated by */
+/*                                                      (Pi, Rho, a1)
+ */
 /*----------------------------------------------------------------------------*/
 
 // C11
@@ -3831,11 +3831,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho0_pi0(
   using std::atan;
   using std::pow;
   using std::sqrt;
-
   using std::abs;
-  using std::atan;
-  using std::pow;
-  using std::sqrt;
 
   auto t_mandelstam = get_t_range(sqrt(s), m_pion_, m_rho, m_pion_, 0.0);
   const double tmin = t_mandelstam[1];

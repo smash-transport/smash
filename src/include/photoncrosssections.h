@@ -13,12 +13,11 @@
 #include <cmath>
 #include <memory>
 
-#include <iostream>
-
-#include "logging.h"
+//#include <iostream>
 
 #include "cxx14compat.h"
 #include "kinematics.h"
+#include "logging.h"
 #include "particletype.h"
 #include "pdgcode.h"
 

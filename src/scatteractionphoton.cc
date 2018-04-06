@@ -9,7 +9,22 @@
 
 #include "include/scatteractionphoton.h"
 
+#include <algorithm>
+#include <utility>
+
+#include "include/angles.h"
+#include "include/constants.h"
+#include "include/cxx14compat.h"
+#include "include/forwarddeclarations.h"
 #include "include/outputinterface.h"
+#include "include/kinematics.h"
+#include "include/particletype.h"
+#include "include/pdgcode.h"
+#include "include/photoncrosssections.h"
+#include "include/pow.h"
+#include "include/random.h"
+#include "include/scatteraction.h"
+#include "include/tabulation.h"
 
 namespace smash {
 // Determines the reaction type (process) based on the incoming particles.
@@ -17,10 +32,6 @@ namespace smash {
 
 ScatterActionPhoton::ReactionType ScatterActionPhoton::photon_reaction_type(
     const ParticleList &in) {
-  // ToDo: is this check here necessary?
-  if (in.size() != 2) {
-    return ReactionType::no_reaction;
-  }
 
   PdgCode a = in[0].pdgcode();
   PdgCode b = in[1].pdgcode();
@@ -135,7 +146,6 @@ ParticleTypePtr ScatterActionPhoton::outgoing_hadron_type(
   return outgoing_hadron_type(reac);
 }
 
-// Different kinematic constraints for the processes
 bool ScatterActionPhoton::is_kinematically_possible(const double s_sqrt,
                                                     const ParticleList &in) {
   auto reac = photon_reaction_type(in);
@@ -168,12 +178,10 @@ bool ScatterActionPhoton::is_kinematically_possible(const double s_sqrt,
 }
 
 void ScatterActionPhoton::generate_final_state() {
-  /* Decide for a particular final state. */
-  // const CollisionBranch *proc = choose_channel<CollisionBranch>(
-  //    collision_channels_photons_, cross_section_photons_);
+  
   if (collision_channels_photons_.size() != 1) {
     const auto &log = logger<LogArea::ScatterAction>();
-    log.fatal() << "Problem in ScatterActionPhoton::generate_final_state()\n";
+    log.fatal() << "Problem in ScatterActionPhoton::generate_final_state().\n";
     throw std::runtime_error("");
   }
   auto *proc = collision_channels_photons_[0].get();
