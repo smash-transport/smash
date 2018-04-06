@@ -2,7 +2,6 @@
 
 #include "../include/stringfunctions.h"
 
-using namespace smash;
 using namespace smash::utf8;
 
 TEST(sequence_length) {
