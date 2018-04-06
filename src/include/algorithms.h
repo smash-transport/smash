@@ -69,9 +69,9 @@ static bool enforce_periodic_boundaries(
 /**
  * Convenience wrapper for \c std::all_of that operates on a complete container.
  *
- * Returns whether all elements in \p c return \c true when passed to \p p.
  * \param c A container of elements to examine.
  * \param p unary predicate.
+ * \return whether all elements in \p c return \c true when passed to \p p.
  */
 template <typename Container, typename UnaryPredicate>
 inline bool all_of(Container &&c, UnaryPredicate &&p) {
@@ -82,6 +82,9 @@ inline bool all_of(Container &&c, UnaryPredicate &&p) {
 /**
  * Convenience wrapper for \c std::for_each that operates on a complete
  * container.
+ *
+ * \param c A container of elements on which to perform the function f
+ * \param f A function to apply on all elements of the container c
  */
 template <typename Container, typename UnaryFunction>
 inline UnaryFunction for_each(Container &&c, UnaryFunction &&f) {

@@ -63,6 +63,7 @@ const std::initializer_list<double> KMINUSP_ELASTIC_P_LAB = {
     4.60000,   5.00000,   5.50000,   6.00000,  7.20020,  9.00010,  10.12000,
     14.30000,  14.30000,  25.20000,  32.10000, 40.10000, 50.00000, 70.00000,
     100.00000, 140.00000, 147.00000, 175.00000};
+
 /// PDG data on K- p elastic cross section: cross section.
 const std::initializer_list<double> KMINUSP_ELASTIC_SIG = {
     313.50, 103.60, 113.00, 44.800, 58.500, 187.00, 92.000, 71.500, 92.800,
@@ -100,6 +101,8 @@ const std::initializer_list<double> KMINUSP_ELASTIC_SIG = {
     4.9500, 4.9400, 4.4000, 4.6000, 4.3000, 4.5000, 4.2000, 3.8400, 4.1000,
     3.6200, 4.2300, 3.9500, 3.2400, 2.9600, 3.0100, 2.4600, 2.5600, 2.3300,
     2.5400, 2.5300, 2.5100, 2.5200, 2.7400, 2.5900};
+
+/// A null interpolation that gets filled using the KMINUSP_ELASTIC data
 static std::unique_ptr<InterpolateDataLinear<double>>
     kminusp_elastic_interpolation = nullptr;
 
@@ -157,6 +160,7 @@ const std::initializer_list<double> KMINUSP_TOT_PLAB = {
     50.000,  50.000,  50.000,  50.000,  50.000,  52.500,  55.000,  55.000,
     55.000,  70.000,  100.000, 100.000, 100.000, 120.000, 147.000, 150.000,
     150.000, 170.000, 175.000, 200.000, 200.000, 240.000, 280.000, 310.000};
+
 /// PDG data on K- p total cross section: cross section.
 const std::initializer_list<double> KMINUSP_TOT_SIG = {
     113.80, 98.00, 94.00, 96.70, 75.10, 89.30, 90.70, 82.50, 79.40, 78.60,
@@ -201,23 +205,28 @@ const std::initializer_list<double> KMINUSP_TOT_SIG = {
     20.45,  20.45, 21.00, 20.48, 20.30, 20.25, 20.40, 20.32, 21.50, 20.49,
     20.23,  20.38, 20.80, 20.45, 20.41, 20.59, 21.50, 20.60, 20.57, 20.65,
     21.40,  20.79, 20.84, 21.30, 21.32, 21.45};
+
+/// \todo unused
 static std::unique_ptr<InterpolateDataLinear<double>>
     kminusp_total_interpolation = nullptr;
 
-/// Center-of-mass energy.
+/// Center-of-mass energy list for K̅⁻ N⁺
 const std::initializer_list<double> KMINUSP_RES_SQRTS = {
     1.4355, 1.4530, 1.4730, 1.4929, 1.5129, 1.5329, 1.5529, 1.5729,
     1.5929, 1.6128, 1.6328, 1.6528, 1.6728, 1.6928, 1.7127, 1.7327,
     1.7527, 1.7727, 1.7927, 1.8127, 1.8326, 1.8526, 1.8726, 1.8926,
-    1.9126, 1.9325, 1.9525, 1.9725, 1.9925, 2.0125, 2.0325, 2.0524,
+    0.9126, 1.9325, 1.9525, 1.9725, 1.9925, 2.0125, 2.0325, 2.0524,
     2.0724, 2.0924, 2.1124, 2.1324, 2.1523, 2.1723, 2.1923, 2.2123,
     2.2323, 2.2523, 2.2722, 2.2922, 2.3122, 2.3322, 2.3522, 2.3721,
     2.3921, 2.4121, 2.4321, 2.4521, 2.4721, 2.4920, 2.5120, 2.5320};
-/// Elastic K̅⁻ N⁺ cross section contributions from decays.
-///
-/// These need to be subtracted from the interpolation of the PDG data on
-/// elastic cross sections. This data was generated using the SMASH analysis
-/// suite and should be updated when strange resonances are changed or added.
+
+/**
+ * Elastic K̅⁻ N⁺ cross section contributions from decays.
+ *
+ * These need to be subtracted from the interpolation of the PDG data on
+ * elastic cross sections. This data was generated using the SMASH analysis
+ * suite and should be updated when strange resonances are changed or added.
+ */
 const std::initializer_list<double> KMINUSP_RES_SIG = {
     0.46856081097,  0.68994120313, 1.00475205957,  1.66469547655,
     5.63530052434,  4.17372028288, 4.50737036469,  8.00913400697,
@@ -233,111 +242,36 @@ const std::initializer_list<double> KMINUSP_RES_SIG = {
     2.13817978212,  2.16907178433, 2.08118209913,  1.83166338166,
     1.56038155638,  1.27216056674, 1.03167072054,  0.85006416230,
     0.39627220898,  0.57172926654, 0.51129452389,  0.44626386026};
+
+/// A null interpolation that gets filled using the KMINUSP_RES data
 static std::unique_ptr<InterpolateDataSpline>
     kminusp_elastic_res_interpolation = nullptr;
 
-/// PDG data on K+ n total cross section: momentum in lab frame.
-// One data point is ignored because it is an outlier and messes up the
-// smoothing.
-const std::initializer_list<double> KPLUSN_TOT_PLAB = {0.770,
-                                                       0.888,
-                                                       0.939,
-                                                       0.970,
-                                                       0.989,
-                                                       1.040,
-                                                       1.091,
-                                                       1.141,
-                                                       /*1.170,*/ 1.191,
-                                                       1.242,
-                                                       1.292,
-                                                       1.300,
-                                                       1.342,
-                                                       1.392,
-                                                       1.440,
-                                                       1.442,
-                                                       1.492,
-                                                       1.550,
-                                                       1.593,
-                                                       1.600,
-                                                       1.643,
-                                                       1.690,
-                                                       1.693,
-                                                       1.700,
-                                                       1.743,
-                                                       1.750,
-                                                       1.793,
-                                                       1.800,
-                                                       1.850,
-                                                       1.893,
-                                                       1.900,
-                                                       1.950,
-                                                       1.970,
-                                                       1.993,
-                                                       2.000,
-                                                       2.050,
-                                                       2.093,
-                                                       2.100,
-                                                       2.150,
-                                                       2.193,
-                                                       2.200,
-                                                       2.260,
-                                                       2.300,
-                                                       2.350,
-                                                       2.393,
-                                                       2.400,
-                                                       2.450,
-                                                       2.500,
-                                                       2.550,
-                                                       2.550,
-                                                       2.600,
-                                                       2.650,
-                                                       2.700,
-                                                       2.750,
-                                                       2.800,
-                                                       2.830,
-                                                       2.850,
-                                                       2.900,
-                                                       2.950,
-                                                       3.000,
-                                                       3.050,
-                                                       3.100,
-                                                       3.150,
-                                                       3.200,
-                                                       3.250,
-                                                       3.300,
-                                                       6.000,
-                                                       8.000,
-                                                       10.000,
-                                                       12.000,
-                                                       14.000,
-                                                       15.000,
-                                                       16.000,
-                                                       18.000,
-                                                       20.000,
-                                                       20.000,
-                                                       25.000,
-                                                       30.000,
-                                                       35.000,
-                                                       35.000,
-                                                       40.000,
-                                                       45.000,
-                                                       50.000,
-                                                       50.000,
-                                                       50.000,
-                                                       55.000,
-                                                       70.000,
-                                                       100.000,
-                                                       100.000,
-                                                       120.000,
-                                                       150.000,
-                                                       150.000,
-                                                       170.000,
-                                                       200.000,
-                                                       200.000,
-                                                       240.000,
-                                                       280.000,
-                                                       310.000};
-/// PDG data on K+ n total cross section: cross section.
+/**
+ * PDG data on K+ n total cross section: momentum in lab frame.
+ * One data point is ignored because it is an outlier and messes up the
+ * smoothing.
+ */
+const std::initializer_list<double> KPLUSN_TOT_PLAB = {
+    0.770,   0.888,   0.939,   0.970,   0.989,   1.040,   1.091,   1.141,
+    /*1.170,*/ 1.191,   1.242,   1.292,   1.300,   1.342,   1.392,   1.440,
+    1.442,   1.492,   1.550,   1.593,   1.600,   1.643,   1.690,   1.693,
+    1.700,   1.743,   1.750,   1.793,   1.800,   1.850,   1.893,   1.900,
+    1.950,   1.970,   1.993,   2.000,   2.050,   2.093,   2.100,   2.150,
+    2.193,   2.200,   2.260,   2.300,   2.350,   2.393,   2.400,   2.450,
+    2.500,   2.550,   2.550,   2.600,   2.650,   2.700,   2.750,   2.800,
+    2.830,   2.850,   2.900,   2.950,   3.000,   3.050,   3.100,   3.150,
+    3.200,   3.250,   3.300,   6.000,   8.000,   10.000,  12.000,  14.000,
+    15.000,  16.000,  18.000,  20.000,  20.000,  25.000,  30.000,  35.000,
+    35.000,  40.000,  45.000,  50.000,  50.000,  50.000,  55.000,  70.000,
+    100.000, 100.000, 120.000, 150.000, 150.000, 170.000, 200.000, 200.000,
+    240.000, 280.000, 310.000};
+
+/**
+ * PDG data on K+ n total cross section: cross section.
+ * One data point is ignored because it is an outlier and messes up the
+ * smoothing.
+ */
 const std::initializer_list<double> KPLUSN_TOT_SIG = {
     15.50, 16.85, 17.60, 17.80, 18.53, 18.91, 20.61, 21.25, /*18.20,*/ 20.87,
     20.26, 19.68, 18.50, 19.32, 19.22, 18.10, 19.07, 18.95, 18.91,
@@ -350,6 +284,8 @@ const std::initializer_list<double> KPLUSN_TOT_SIG = {
     17.40, 17.60, 17.94, 17.70, 17.78, 17.69, 18.29, 18.12, 18.15,
     18.30, 18.66, 18.56, 18.02, 18.43, 18.60, 19.04, 18.99, 19.23,
     19.63, 19.55, 19.74, 19.72, 19.82, 20.37, 20.61, 20.80};
+
+/// A null interpolation that gets filled using the KPLUSN_TOT data
 static std::unique_ptr<InterpolateDataLinear<double>>
     kplusn_total_interpolation = nullptr;
 
@@ -381,6 +317,7 @@ const std::initializer_list<double> KPLUSP_TOT_PLAB = {
     40.000,  42.500,  45.000,  50.000,  50.000,  50.000,  52.200,  55.000,
     70.000,  100.000, 100.000, 100.000, 100.000, 120.000, 147.000, 150.000,
     150.000, 170.000, 175.000, 200.000, 200.000, 240.000, 280.000, 310.000};
+
 /// PDG data on K+ p total cross section: cross section.
 const std::initializer_list<double> KPLUSP_TOT_SIG = {
     11.40, 13.00, 14.00, 12.20, 13.20, 13.69, 12.81, 16.30, 12.70, 13.58, 13.02,
@@ -402,6 +339,8 @@ const std::initializer_list<double> KPLUSP_TOT_SIG = {
     17.30, 17.50, 17.42, 17.68, 17.72, 18.40, 17.82, 17.80, 18.05, 17.91, 17.88,
     18.06, 18.03, 18.37, 18.28, 18.17, 18.52, 18.40, 18.88, 18.70, 18.85, 19.14,
     19.52, 19.36, 19.33, 19.64, 18.20, 19.91, 19.84, 20.22, 20.45, 20.67};
+
+/// A null interpolation that gets filled using the KPLUSP_TOT data
 static std::unique_ptr<InterpolateDataLinear<double>>
     kplusp_total_interpolation = nullptr;
 
@@ -423,6 +362,7 @@ const std::initializer_list<double> PIMINUSP_ELASTIC_P_LAB = {
     1.475,   1.485,   1.495,   1.497,   1.499,   1.503,   1.5031,  1.509,
     1.567,   1.59,    1.6,     1.603,   1.71,    1.85,    2.1,     2.14,
     2.26,    2.29,    2.7,     2.75,    2.77,    2.7999,  3.,      3.15};
+
 /// PDG data on pi- p elastic cross section: cross section
 const std::initializer_list<double> PIMINUSP_ELASTIC_SIG = {
     1.847,  2.9,    9.6,    11.3,   12.8,   17.,    20.1,   21.4,   22.5,
@@ -440,21 +380,26 @@ const std::initializer_list<double> PIMINUSP_ELASTIC_SIG = {
     11.163, 11.69,  10.,    10.39,  10.21,  9.65,   9.,     9.82,   10.4,
     11.1,   9.69,   9.3,    8.91,   8.5,    7.7,    7.2,    7.2,    7.8,
     7.57,   6.1};
+
+/// A null interpolation that gets filled using the PIMINUSP_ELASTIC data
 static std::unique_ptr<InterpolateDataLinear<double>>
     piminusp_elastic_interpolation = nullptr;
 
-/// Center-of-mass energy.
+/// Center-of-mass energy list for π⁻ N⁺
 const std::initializer_list<double> PIMINUSP_RES_SQRTS = {
     1.08, 1.10, 1.12, 1.14, 1.16, 1.18, 1.20, 1.22, 1.24, 1.26, 1.28, 1.30,
     1.32, 1.34, 1.36, 1.38, 1.40, 1.42, 1.44, 1.46, 1.48, 1.50, 1.52, 1.54,
     1.56, 1.58, 1.60, 1.62, 1.64, 1.66, 1.68, 1.70, 1.72, 1.74, 1.76, 1.78,
     1.80, 1.82, 1.84, 1.86, 1.88, 1.90, 1.92, 1.94, 1.96, 1.98, 2.00, 2.02,
     2.04, 2.06, 2.08, 2.10, 2.12, 2.14, 2.16, 2.18, 2.20};
-/// Elastic π⁻ N⁺ cross section contributions from decays.
-///
-/// These need to be subtracted from the interpolation of the PDG data on
-/// elastic cross sections. This data was generated using the SMASH analysis
-/// suite and should be updated when strange resonances are changed or added.
+
+/**
+ * Elastic π⁻ N⁺ cross section contributions from decays.
+ *
+ * These need to be subtracted from the interpolation of the PDG data on
+ * elastic cross sections. This data was generated using the SMASH analysis
+ * suite and should be updated when strange resonances are changed or added.
+ */
 const std::initializer_list<double> PIMINUSP_RES_SIG = {
     0.132595,  0.40252,   1.178451,  2.760204,  5.730226,  10.782558, 17.245252,
     20.786286, 18.877248, 15.375461, 12.793756, 11.279813, 10.825084, 11.051209,
@@ -465,6 +410,8 @@ const std::initializer_list<double> PIMINUSP_RES_SIG = {
     5.694986,  5.432877,  5.117872,  4.64471,   4.184152,  3.679608,  3.128582,
     2.56838,   1.975527,  1.434032,  0.958996,  0.554314,  0.243301,  0.0644,
     0.};
+
+/// A null interpolation that gets filled using the PIMINUSP_RES data
 static std::unique_ptr<InterpolateDataSpline>
     piminusp_elastic_res_interpolation = nullptr;
 
@@ -487,6 +434,7 @@ const std::initializer_list<double> PIPLUSP_ELASTIC_P_LAB = {
     12.8,    14.8,    16.,     16.2,    16.7,    29.,     32.1,    43.,
     50.,     60.,     70.,     100.,    140.,    147.,    175.,    200.,
     250.};
+
 /// PDG data on pi+ p elastic cross section: cross section
 const std::initializer_list<double> PIPLUSP_ELASTIC_SIG = {
     6.15,  15.8,  20.4,  140.9, 91.6,  71.6,  67.5,  57.3,  60.19, 46.6,  40.8,
@@ -501,21 +449,26 @@ const std::initializer_list<double> PIPLUSP_ELASTIC_SIG = {
     6.88,  7.15,  6.5,   6.4,   5.85,  5.79,  5.33,  5.47,  4.9,   4.9,   5.02,
     4.75,  4.2,   4.54,  4.46,  4.21,  4.21,  3.98,  3.19,  3.37,  3.16,  3.29,
     3.1,   3.35,  3.3,   3.39,  3.24,  3.37,  3.17,  3.3};
+
+/// A null interpolation that gets filled using the PIPLUSP_ELASTIC_SIG data
 static std::unique_ptr<InterpolateDataLinear<double>>
     piplusp_elastic_interpolation = nullptr;
 
-/// Center-of-mass energy.
+/// Center-of-mass energy list for π⁺ N⁺
 const std::initializer_list<double> PIPLUSP_RES_SQRTS = {
     1.08, 1.10, 1.12, 1.14, 1.16, 1.18, 1.20, 1.22, 1.24, 1.26, 1.28, 1.30,
     1.32, 1.34, 1.36, 1.38, 1.40, 1.42, 1.44, 1.46, 1.48, 1.50, 1.52, 1.54,
     1.56, 1.58, 1.60, 1.62, 1.64, 1.66, 1.68, 1.70, 1.72, 1.74, 1.76, 1.78,
     1.80, 1.82, 1.84, 1.86, 1.88, 1.90, 1.92, 1.94, 1.96, 1.98, 2.00, 2.02,
     2.04, 2.06, 2.08, 2.10, 2.12, 2.14, 2.16, 2.18, 2.20};
-/// Elastic π⁺ N⁺ cross section contributions from decays.
-///
-/// These need to be subtracted from the interpolation of the PDG data on
-/// elastic cross sections. This data was generated using the SMASH analysis
-/// suite and should be updated when strange resonances are changed or added.
+
+/**
+ * Elastic π⁺ N⁺ cross section contributions from decays.
+ *
+ * These need to be subtracted from the interpolation of the PDG data on
+ * elastic cross sections. This data was generated using the SMASH analysis
+ * suite and should be updated when strange resonances are changed or added.
+ */
 const std::initializer_list<double> PIPLUSP_RES_SIG = {
     0.138618,   2.13515,    8.158391,   20.991292,  45.854734, 89.292892,
     145.033063, 172.723465, 151.669374, 114.877364, 84.588934, 63.360182,
@@ -527,6 +480,8 @@ const std::initializer_list<double> PIPLUSP_RES_SIG = {
     8.50303,    7.217433,   5.980272,   4.895307,   3.946998,  3.17339,
     2.523094,   1.938636,   1.462639,   1.015587,   0.660593,  0.36496,
     0.163456,   0.039142,   0.};
+
+/// A null interpolation that gets filled using the PIPLUSP_RES data
 static std::unique_ptr<InterpolateDataSpline>
     piplusp_elastic_res_interpolation = nullptr;
 }  // namespace smash

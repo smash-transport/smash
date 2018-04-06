@@ -44,7 +44,7 @@ BinaryOutputCollisions::BinaryOutputCollisions(const bf::path &path,
  **/
 
 void BinaryOutputCollisions::at_eventstart(const Particles &particles,
-                                           const int /*event_number*/) {
+                                           const int) {
   char pchar = 'p';
   if (print_start_end_) {
     std::fwrite(&pchar, sizeof(char), 1, file_.get());

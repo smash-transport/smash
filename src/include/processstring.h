@@ -34,6 +34,9 @@ enum class StringSoftType {
   NonDiff = 3
 };
 
+// \todo Sangwook: make file (processstring) and class (StringProcess) name
+// consistent
+
 /**
  * \brief String excitation processes used in SMASH
  *

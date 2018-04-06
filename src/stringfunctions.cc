@@ -68,7 +68,7 @@ std::string fill_both(const std::string &s, size_t width, char fill) {
   return s;
 }
 
-} // namespace utf8
+}  // namespace utf8
 
 std::string trim(const std::string &s) {
   const auto begin = s.find_first_not_of(" \t\n\r");

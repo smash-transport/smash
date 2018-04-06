@@ -21,7 +21,7 @@ namespace smash {
 /**
  * \ingroup data
  *
- * Particle type contains the static properties of a particle
+ * Particle type contains the static properties of a particle species
  *
  * Before creation of Experiment, SMASH initializes the list of particles
  * (\ref list_all). After construction these values are immutable.
@@ -38,17 +38,17 @@ class ParticleType {
    * Decay width cutoff for considering a particle as stable.
    *
    * We currently regard a particle type as stable if its on-shell width is less
-   * than 200 keV. The cutoff is chosen such that the η and the η' are stable.
+   * than 10 keV. The cutoff is chosen such that the η and the η' are stable.
    */
   static constexpr double width_cutoff = 1e-5;
 
   /**
    * Creates a fully initialized ParticleType object.
    *
-   * \param n The name of the particle.
-   * \param m The mass of the particle.
-   * \param w The width of the particle.
-   * \param id The PDG code of the particle.
+   * \param[in] n The name of the particle.
+   * \param[in] m The mass of the particle.
+   * \param[in] w The width of the particle.
+   * \param[in] id The PDG code of the particle.
    *
    * \note The remaining properties ParticleType provides are derived from the
    *       PDG code and therefore cannot be set explicitly (this avoids the
@@ -68,34 +68,35 @@ class ParticleType {
   ParticleType(ParticleType &&) = default;
   ParticleType &operator=(ParticleType &&) = default;
 
-  /// Returns the DecayModes object for this particle type.
+  /// \return the DecayModes object for this particle type.
   const DecayModes &decay_modes() const;
 
-  /// Returns the name of the particle.
+  /// \return the name of the particle.
   const std::string &name() const { return name_; }
 
-  /// Returns the particle pole mass.
+  /// \return the particle pole mass.
   double mass() const { return mass_; }
 
-  /// Returns the squared particle mass.
+  /// \return the squared particle mass.
   double mass_sqr() const { return mass_ * mass_; }
 
-  /// Returns the particle width (at the mass pole).
+  /// \return the particle width (at the mass pole).
   double width_at_pole() const { return width_; }
 
-  /// Returns the PDG code of the particle.
+  /// \return the PDG code of the particle.
   PdgCode pdgcode() const { return pdgcode_; }
 
   /// \copydoc PdgCode::has_antiparticle
   bool has_antiparticle() const { return pdgcode_.has_antiparticle(); }
 
-  /// Return a pointer to the corresponding antiparticle ParticleType object.
+  /// \return a pointer to the corresponding antiparticle ParticleType object.
   ParticleTypePtr get_antiparticle() const;
 
   /// \copydoc PdgCode::antiparticle_sign
   int antiparticle_sign() const { return pdgcode_.antiparticle_sign(); }
 
-  /** Returns twice the isospin vector length \f$I\f$.
+  /**
+   * Returns twice the isospin vector length \f$I\f$.
    *
    * This returns e.g. 1 for nucleons, 2 for pions and 3 for Deltas.
    * It is always positive.
@@ -105,15 +106,13 @@ class ParticleType {
   /// \copydoc PdgCode::isospin3
   int isospin3() const { return I3_; }
 
-  /// Returns the isospin-3 component relative to the total isospin.
+  /// \return the isospin-3 component relative to the total isospin.
   double isospin3_rel() const {
     unsigned int I = isospin();
     return (I == 0) ? 0 : static_cast<double>(isospin3()) / I;
   }
 
-  /**
-   * Returns a pointer to the Isospin-multiplet of this PDG Code.
-   */
+  /// \return a pointer to the Isospin-multiplet of this PDG Code.
   IsoParticleType *iso_multiplet() const { return iso_multiplet_; }
 
   /// \copydoc PdgCode::charge
@@ -149,7 +148,7 @@ class ParticleType {
   /// \copydoc PdgCode::is_rho
   bool is_rho() const { return pdgcode_.is_rho(); }
 
-  /// Is this a nucleon resonance (N*)?
+  /// \return Is this a nucleon resonance (N*)?
   inline bool is_Nstar() const {
     return is_baryon() && isospin() == 1 && !pdgcode_.is_nucleon() &&
            pdgcode_.strangeness() == 0 && pdgcode_.charmness() == 0;
@@ -158,13 +157,13 @@ class ParticleType {
   /// \copydoc PdgCode::is_Nstar1535
   bool is_Nstar1535() const { return pdgcode_.is_Nstar1535(); }
 
-  /// Is this a Delta resonance (Delta*)?
+  /// \return Is this a Delta resonance (Delta*)?
   inline bool is_Deltastar() const {
     return is_baryon() && isospin() == 3 && !pdgcode_.is_Delta() &&
            pdgcode_.strangeness() == 0 && pdgcode_.charmness() == 0;
   }
 
-  /// Check if the particle is stable
+  /// \return true if the particle is stable
   inline bool is_stable() const { return width_ < width_cutoff; }
 
   /**
@@ -175,7 +174,7 @@ class ParticleType {
    * (In other words, find the smallest sum of final-state particle masses.)
    *
    * \return The minimum mass that a particle of this type can assume, where at
-   * least one decay is possible.
+   *         least one decay is possible.
    */
   double min_mass_kinematic() const;
 
@@ -183,10 +182,9 @@ class ParticleType {
    * The minimum mass of the resonance, where the spectral function is non-zero.
    *
    * Calculate the the smallest mass where the spectral function still has a
-   * contribution.
-   * This value can be different from min_mass_kinematic, if the spectral
-   * function
-   * becomes zero at masses higher than min_mass_kinematic.
+   * contribution. This value can be different from min_mass_kinematic,
+   * if the spectral function becomes zero at masses higher than
+   * min_mass_kinematic.
    *
    * \return The minimum mass that a particle of this type can assume, where the
    * spectral function still has a non-zero value.
@@ -197,42 +195,46 @@ class ParticleType {
    * Get the mass-dependent partial decay width of a particle with mass m
    * in a particular decay mode.
    *
-   * \param m Invariant mass of the decaying particle.
-   * \param mode Decay mode to consider.
+   * \param[in] m Invariant mass of the decaying particle.
+   * \param[in] mode Decay mode to consider.
+   * \return the partial width of this specific mode for this mass
    */
   double partial_width(const double m, const DecayBranch *mode) const;
 
   /**
    * Get the mass-dependent total width of a particle with mass m.
    *
-   * \param m Invariant mass of the decaying particle.
+   * \param[in] m Invariant mass of the decaying particle.
+   * \return the total width for all modes for this mass
    */
   double total_width(const double m) const;
 
   /**
-   * Get the mass-dependent partial decay widths of a particle with mass m.
-   * Returns a list of process branches, whose weights correspond to the
-   * actual partial widths. The list contains all branches.
+   * Get all the mass-dependent partial decay widths of a particle with mass m.
    *
-   * \param m Invariant mass of the decaying particle.
+   * \param[in] m Invariant mass of the decaying particle.
+   * \return a list of process branches, whose weights correspond to the
+   *         actual partial widths. The list contains all branches.
    */
   DecayBranchList get_partial_widths(const double m) const;
 
   /**
-   * Get the mass-dependent partial decay widths of a particle with mass m.
-   * Returns a list of process branches, whose weights correspond to the
-   * actual partial widths. The list contains all but the dilepton branches.
+   * Get the mass-dependent hadronic partial decay widths
+   * of a particle with mass m.
    *
-   * \param m Invariant mass of the decaying particle.
+   * \param[in] m Invariant mass of the decaying particle.
+   * \return a list of process branches, whose weights correspond to the
+   *         actual partial widths. The list contains only hadronic branches.
    */
   DecayBranchList get_partial_widths_hadronic(const double m) const;
 
   /**
-   * Get the mass-dependent partial decay widths of a particle with mass m.
-   * Returns a list of process branches, whose weights correspond to the
-   * actual partial widths. The list contains only the dilepton branches.
+   * Get the mass-dependent dilepton partial decay widths
+   * of a particle with mass m.
    *
-   * \param m Invariant mass of the decaying particle.
+   * \param[in] m Invariant mass of the decaying particle.
+   * \return a list of process branches, whose weights correspond to the
+   *         actual partial widths. The list contains only dilepton branches.
    */
   DecayBranchList get_partial_widths_dilepton(const double m) const;
 
@@ -240,9 +242,10 @@ class ParticleType {
    * Get the mass-dependent partial width of a resonance with mass m,
    * decaying into two given daughter particles.
    *
-   * \param m Invariant mass of the decaying resonance.
-   * \param t_a Type of first daughter particle.
-   * \param t_b Type of second daughter particle.
+   * \param[in] m Invariant mass of the decaying resonance.
+   * \param[in] t_a Type of first daughter particle.
+   * \param[in] t_b Type of second daughter particle.
+   * \return the partial width for this mass and this specific decay channel
    */
   double get_partial_width(const double m, const ParticleType &t_a,
                            const ParticleType &t_b) const;
@@ -253,9 +256,10 @@ class ParticleType {
    * particles, the in-width equals the 'normal' partial decay width
    * (i.e. the 'out-width').
    *
-   * \param m Invariant mass of the decaying resonance.
-   * \param p_a First daughter particle.
-   * \param p_b Second daughter particle.
+   * \param[in] m Invariant mass of the decaying resonance.
+   * \param[in] p_a First daughter particle.
+   * \param[in] p_b Second daughter particle.
+   * \return the partial in-width for this mass and this specific decay channel
    */
   double get_partial_in_width(const double m, const ParticleData &p_a,
                               const ParticleData &p_b) const;
@@ -266,18 +270,28 @@ class ParticleType {
    * \frac{m^2\Gamma(m)}{(m^2-m_0^2)^2+(m\Gamma(m))^2} \f$
    * of the resonance (relativistic Breit-Wigner distribution with
    * mass-dependent width, where N is a normalization factor).
-   * \param m Actual off-shell mass of the resonance, where the
-   *          spectral function is supposed to be evaluated.
+   *
+   * \param[in] m Actual off-shell mass of the resonance, where the
+   *              spectral function is to be evaluated.
+   * \return the value of the spectral function for this mass
+   *
    * \note The normalization factor N ensures that the spectral function is
    *       normalized to unity.
    */
   double spectral_function(double m) const;
 
   /**
-   * Full spectral function without normalization factor. */
+   * Full spectral function without normalization factor.
+   * \see spectral_function
+   *
+   * \param[in] m Actual off-shell mass of the resonance, where the
+   *              spectral function is to be evaluated.
+   * \return the value of the non-normalized spectral function for this mass
+   */
   double spectral_function_no_norm(double m) const;
 
   /**
+   * \todo unused
    * The spectral function with a constant width (= width at pole).
    * It is guaranteed to be normalized to 1, when integrated from 0 to inf. */
   double spectral_function_const_width(double m) const;
@@ -287,6 +301,10 @@ class ParticleType {
    * Cauchy distribution (non-relativistic Breit-Wigner with constant width).
    * It can be integrated analytically, and is normalized to 1 when integrated
    * from -inf to inf.
+   *
+   * \param[in] m Actual off-shell mass of the resonance, where the
+   *              spectral function is to be evaluated.
+   * \return the Cauchy spectral function at mass m
    */
   double spectral_function_simple(double m) const;
 
@@ -326,24 +344,28 @@ class ParticleType {
   /**
    * Returns a list of all ParticleType objects.
    *
-   * \note The order of the list may be sorted by PDG codes, but do not rely on
-   *       this.
+   * \note This list is not sorted, do not rely on it.
    */
   static const ParticleTypeList &list_all();
 
-  /** Returns a list of all nucleons (i.e. proton and neutron). */
+  /// \return a list of all nucleons (i.e. proton and neutron).
   static ParticleTypePtrList &list_nucleons();
-  /** Returns a list of all anti-nucleons (i.e. anti-proton and anti-neutron).
-   */
+  /// \return a list of all anti-nucleons (i.e. anti-proton and anti-neutron).
   static ParticleTypePtrList &list_anti_nucleons();
-  /** Returns a list of the Delta(1232) baryons
-   *  (i.e. all four charge states). */
+  /** 
+   * \return a list of the Delta(1232) baryons
+   *         (i.e. all four charge states).
+   */
   static ParticleTypePtrList &list_Deltas();
-  /** Returns a list of the anti-Delta(1232) baryons
-   *  (i.e. all four charge states). */
+  /**
+   * \return a list of the anti-Delta(1232) baryons
+   *          (i.e. all four charge states).
+   */
   static ParticleTypePtrList &list_anti_Deltas();
-  /** Returns a list of all baryon resonances,
-   * i.e. unstable baryons (not including antibaryons). */
+  /**
+   * \return a list of all baryon resonances,
+   *         i.e. unstable baryons (not including antibaryons).
+   */
   static ParticleTypePtrList &list_baryon_resonances();
 
   /**
@@ -355,6 +377,10 @@ class ParticleType {
    * do not use this function except for user input that selects a particle
    * type. All other internal references for a particle type should use
    * ParticleTypePtr instead.
+   *
+   * \param[in] pdgcode the unique pdg code to try to find
+   * \return the ParticleTypePtr that corresponds to this pdg code, or an
+             invalid pointer
    */
   static const ParticleTypePtr try_find(PdgCode pdgcode);
 
@@ -366,22 +392,26 @@ class ParticleType {
    * do not use this function except for user input that selects a particle
    * type. All other internal references for a particle type should use
    * ParticleTypePtr instead.
+   *
+   * \param[in] pdgcode the unique pdg code to try to find
+   * \return the ParticleTypePtr that corresponds to this pdg code
    */
   static const ParticleType &find(PdgCode pdgcode);
+
   /// \ingroup exception
   struct PdgNotFoundFailure : public std::runtime_error {
     using std::runtime_error::runtime_error;
   };
 
   /**
-   * Returns whether the ParticleType with the given \p pdgcode exists.
+   * \return whether the ParticleType with the given \p pdgcode exists.
    *
    * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
    */
   static bool exists(PdgCode pdgcode);
 
   /**
-   * Returns whether the ParticleType with the given \p name exists.
+   * \return whether the ParticleType with the given \p name exists.
    *
    * \note The complexity of the search is \f$\mathcal O(N)\f$.
    */
@@ -392,27 +422,36 @@ class ParticleType {
    * data. This function must only be called once (will fail on second
    * invocation).
    *
-   * \param particles A string that contains the definition of ParticleTypes to
+   * \param[in] particles A string that contains the definition of ParticleTypes to
    *                  be created.
    */
   static void create_type_list(const std::string &particles);
 
-  /// Returns whether the two ParticleType objects have the same PDG code.
+  /**
+   * \param[in] rhs another ParticleType to compare to
+   * \return whether the two ParticleType objects have the same PDG code.
+   */
   bool operator==(const ParticleType &rhs) const {
     return pdgcode() == rhs.pdgcode();
   }
-  /// Returns whether the two ParticleType objects have different PDG codes.
+  /**
+   * \param[in] rhs another ParticleType to compare to
+   * \return whether the two ParticleType objects have different PDG codes.
+   */
   bool operator!=(const ParticleType &rhs) const {
     return pdgcode() != rhs.pdgcode();
   }
-  /// "Less than" operator for sorting the ParticleType list (by PDG code)
+  /**
+   * "Less than" operator for sorting the ParticleType list (by PDG code)
+   *
+   * \param[in] rhs another ParticleType to compare to
+   * \return whether the PDG code of rhs is larger than the one from *this
+   */
   bool operator<(const ParticleType &rhs) const {
     return pdgcode() < rhs.pdgcode();
   }
 
-  /**
-   * Check if unstable particles have any decay modes and throw errors.
-   */
+  /// Check if unstable particles have decay modes and throw errors if not.
   static void check_consistency();
 
   /**
@@ -469,24 +508,31 @@ class ParticleType {
   double width_;
   /// PDG Code of the particle
   PdgCode pdgcode_;
-  /// minimum kinematically allowed mass of the particle
-  /* Mutable, because it is initialized at first call of minimum mass function,
-     so it's logically const, but not physically const, which is a classical
-     case for using mutable. */
+  /**
+   * minimum kinematically allowed mass of the particle
+   * Mutable, because it is initialized at first call of minimum mass function,
+   * so it's logically const, but not physically const, which is a classical
+   * case for using mutable.
+   */
   mutable double min_mass_kinematic_;
-  /// minimum mass, where the spectral function is non-zero
+  /**
+   * minimum mass, where the spectral function is non-zero
+   * Mutable, because it is initialized at first call of minimum mass function,
+   * so it's logically const, but not physically const, which is a classical
+   * case for using mutable.
+   */
   mutable double min_mass_spectral_;
   /** This normalization factor ensures that the spectral function is normalized
    * to unity, when integrated over its full domain. */
   mutable double norm_factor_ = -1.;
-  /** charge, isospin and isospin projection of the particle
-   *
-   * This is filled automatically from pdgcode_.
-   */
+  /// Charge of the particle; filled automatically from pdgcode_.
   int charge_;
+  /// Isospin of the particle; filled automatically from pdgcode_.
   mutable int isospin_;
+  /// Isospin projection of the particle; filled automatically from pdgcode_.
   int I3_;
 
+  /// Container for the isospin multiplet information
   IsoParticleType *iso_multiplet_ = nullptr;
 
   // Maximum factor for single-res mass sampling, cf. sample_resonance_mass.
@@ -496,6 +542,9 @@ class ParticleType {
 
   /**\ingroup logging
    * Writes all information about the particle type to the output stream.
+   *
+   * \param[in] out The ostream into which to output
+   * \param[in] type The ParticleType object to write into out
    */
   friend std::ostream &operator<<(std::ostream &out, const ParticleType &type);
 };
@@ -509,10 +558,10 @@ class ParticleType {
  */
 class ParticleTypePtr {
  public:
-  /// Dereferences the pointer and returns the ParticleType object.
+  /// \return Dereferences the pointer and returns the ParticleType object.
   const ParticleType &operator*() const { return lookup(); }
 
-  /// Dereferences the pointer and returns the ParticleType object.
+  /// \return Dereferences the pointer and returns the ParticleType object.
   const ParticleType *operator->() const {
     // this requires std::addressof because &lookup() would call
     // ParticleType::operator& and return ParticleTypePtr again
@@ -522,28 +571,43 @@ class ParticleTypePtr {
   /// Default construction initializes with an invalid index.
   ParticleTypePtr() = default;
 
-  /// Returns whether the two objects reference the same ParticleType object.
+  /// \return whether the two objects reference the same ParticleType object.
   bool operator==(const ParticleTypePtr &rhs) const {
     return index_ == rhs.index_;
   }
 
-  /// Returns whether the two objects reference different ParticleType objects.
+  /**
+   * \param[in] rhs the ParticleTypePtr to compare to
+   * \return whether the two objects reference different ParticleType objects.
+   */
   bool operator!=(const ParticleTypePtr &rhs) const {
     return index_ != rhs.index_;
   }
-  // "Less than" operator
+  /**
+   * "Less than" operator
+   *
+   * \param[in] rhs the ParticleTypePtr to compare to
+   * \return whether the index is smaller than rhs' index.
+   */
   bool operator<(const ParticleTypePtr &rhs) const {
     return index_ < rhs.index_;
   }
 
-  /// Returns whether the objects stores a valid ParticleType reference.
+  /// \return whether the objects stores a valid ParticleType reference.
   operator bool() const { return index_ != 0xffff; }
 
  private:
-  /// ParticleType::operator& is a friend in order to call the constructor
+  /**
+   * ParticleType::operator& is a friend in order to call the constructor
+   *
+   * \return the pointer to a ParticleType
+   */
   friend ParticleTypePtr ParticleType::operator&() const;
 
-  /// Constructs a pointer to the ParticleType object at offset \p i.
+  /** Constructs a pointer to the ParticleType object at offset \p i.
+   *
+   * \param[in] i the offset where to create.
+   */
   explicit ParticleTypePtr(std::uint16_t i) : index_(i) {}
 
   /**
@@ -554,6 +618,8 @@ class ParticleTypePtr {
    * It then asks for the vector of all ParticleType objects
    * (ParticleType::list_all) and uses vector::operator[] to return an lvalue
    * reference to the ParticleType object at the offset \p index_.
+   *
+   * \return a reference to the ParticleType object at offset \p index_.
    */
   const ParticleType &lookup() const {
     assert(index_ != 0xffff);

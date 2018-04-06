@@ -99,7 +99,7 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData &data_a,
   const auto &log = logger<LogArea::FindScatter>();
 #endif
 
-  /* just collided with this particle */
+  // just collided with this particle
   if (data_a.id_process() > 0 && data_a.id_process() == data_b.id_process()) {
 #ifndef NDEBUG
     log.debug("Skipping collided particles at time ", data_a.position().x0(),
@@ -108,7 +108,7 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData &data_a,
 #endif
     return nullptr;
   }
-  /** If the two particles
+  /* If the two particles
    * 1) belong to the two colliding nuclei
    * 2) are within the same nucleus
    * 3) both of them have never experienced any collisons,
@@ -123,15 +123,15 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData &data_a,
     return nullptr;
   }
 
-  /* Determine time of collision. */
+  // Determine time of collision.
   const double time_until_collision = collision_time(data_a, data_b);
 
-  /* Check that collision happens in this timestep. */
+  // Check that collision happens in this timestep.
   if (time_until_collision < 0. || time_until_collision >= dt) {
     return nullptr;
   }
 
-  /* Create ScatterAction object. */
+  // Create ScatterAction object.
   ScatterActionPtr act = make_unique<ScatterAction>(
       data_a, data_b, time_until_collision, isotropic_, string_formation_time_);
   if (strings_switch_) {
@@ -140,16 +140,16 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData &data_a,
 
   const double distance_squared = act->transverse_distance_sqr();
 
-  /* Don't calculate cross section if the particles are very far apart. */
+  // Don't calculate cross section if the particles are very far apart.
   if (distance_squared >= max_transverse_distance_sqr(testparticles_)) {
     return nullptr;
   }
 
-  /* Add various subprocesses.  */
+  // Add various subprocesses.
   act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
                            low_snn_cut_, strings_switch_, nnbar_treatment_);
 
-  /* Cross section for collision criterion */
+  // Cross section for collision criterion
   double cross_section_criterion = act->cross_section() * fm2_mb * M_1_PI /
                                    static_cast<double>(testparticles_);
   /* Consider cross section scaling factors only if the particles
@@ -161,7 +161,7 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData &data_a,
     cross_section_criterion *= data_b.cross_section_scaling_factor();
   }
 
-  /* distance criterion according to cross_section */
+  // distance criterion according to cross_section
   if (distance_squared >= cross_section_criterion) {
     return nullptr;
   }
@@ -213,8 +213,8 @@ ActionList ScatterActionsFinder::find_actions_with_surrounding_particles(
     double dt) const {
   std::vector<ActionPtr> actions;
   for (const ParticleData &p2 : surrounding_list) {
-    // don't look for collisions if the particle from the surrounding list is
-    // also in the search list
+    /* don't look for collisions if the particle from the surrounding list is
+     * also in the search list */
     auto result = std::find_if(
         search_list.begin(), search_list.end(),
         [&p2](const ParticleData &p) { return p.id() == p2.id(); });

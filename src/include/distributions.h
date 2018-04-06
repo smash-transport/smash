@@ -150,7 +150,7 @@ double sample_momenta_non_eq_mass(const double temperature, const double mass);
  * \return one possible momentum between mass and 50 GeV
  */
 double sample_momenta_1M_IC(const double temperature, const double mass);
-    
+
 /**
  * Samples a momentum from the non-equilibrium distribution
  * 2M_IC from \iref{Bazow:2016oky}
