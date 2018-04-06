@@ -147,14 +147,22 @@ class Potentials {
   bool use_symmetry_;
 
   /** 
-   * Parameters of skyrme potentials:
-   * skyrme_a_ is the coefficient in front of
-   * \f$\frac{\rho}{\rho_0}\f$ in GeV,
-   * skyrme_b_ is the coefficient in front of
-   * \f$(\frac{\rho}{\rho_0})^\tau\f$ in GeV,
-   * skyrme_tau is the power index.
+   * Parameter of skyrme potentials:
+   * the coefficient in front of \f$\frac{\rho}{\rho_0}\f$ in GeV
    */
-  double skyrme_a_, skyrme_b_, skyrme_tau_;
+  double skyrme_a_;
+
+  /** 
+   * Parameters of skyrme potentials:
+   * the coefficient in front of \f$(\frac{\rho}{\rho_0})^\tau\f$ in GeV
+   */
+  double skyrme_b_;
+
+  /** 
+   * Parameters of skyrme potentials:
+   * the power index.
+   */
+  double skyrme_tau_;
 
   /// coefficent in front of the symmetry term.
   double symmetry_s_;

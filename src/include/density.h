@@ -38,6 +38,13 @@ enum class DensityType {
   Pion = 4,
 };
 
+/**
+ * Create the output operator for the densities
+ *
+ * \param[out] os Output operator for the densities
+ * \param[in] dt Type of density (e.g. baryon density)
+ * \return An output operator for the densities
+ */
 std::ostream &operator<<(std::ostream &os, DensityType dt);
 
 /** 
@@ -109,7 +116,7 @@ class DensityParameters {
   /**
    * Constructor of DensityParameters.
    *
-   * \param[in]: par Struct containing the Gaussian smearing width
+   * \param[in] par Struct containing the Gaussian smearing width
    *             \f$\sigma\f$, the cutoff factor \f$a\f$ where the
    *             cutoff radius \f$r_{\rm cut}=a\sigma\f$, and the
    *             testparticle number.
@@ -298,8 +305,10 @@ class DensityOnLattice {
   FourVector jmu_neg() const { return jmu_neg_; }
 
  private:
-  /// Four-current density of the positively and negativelly charged particle.
-  FourVector jmu_pos_, jmu_neg_;
+  /// Four-current density of the positively charged particle.
+  FourVector jmu_pos_;
+  /// Four-current density of the negatively charged particle.
+  FourVector jmu_neg_;
   /// Net density
   double density_;
 };
