@@ -34,8 +34,14 @@ double clebsch_gordan(const int j_a, const int j_b, const int j_c,
   return result;
 }
 
-/* Calculate isospin Clebsch-Gordan coefficient for two particles p_a and p_b
- * coupling to a total isospin (I_tot, I_z). */
+/**
+ * Calculate isospin Clebsch-Gordan coefficient for two particles p_a and p_b
+ * coupling to a total isospin \see clebsch_gordan for details (I_tot, I_z).
+ * \param[in] p_a Information of particle type for first particle
+ * \param[in] p_b Information of particle type for second particle
+ * \param[out] I_tot Total isospin of the reaction
+ * \param[out] I_z Total isospin 3 component of the reaction
+ */
 static double isospin_clebsch_gordan_2to1(const ParticleType &p_a,
                                           const ParticleType &p_b,
                                           const int I_tot, const int I_z) {

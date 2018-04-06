@@ -57,7 +57,7 @@ class EnergyMomentumTensor {
   /**
    * Access the index of component \f$ (\mu, \nu) \f$.
    * \param[in] mu \f$\mu\f$ is the row index (0 to 3)
-   * \param[in] nu \f$\nu$f$ is the line index (0 to 3)
+   * \param[in] nu \f$\nu\f$ is the line index (0 to 3)
    */
   static std::int8_t tmn_index(std::int8_t mu, std::int8_t nu) {
     // clang-format off
@@ -150,8 +150,8 @@ class EnergyMomentumTensor {
 /**
  * \ingroup logging
  * Prints out 4x4 tensor to the output stream.
- * \param[in] & Location of output
- * \param[in] & Energy-momentum tensor
+ * \param[in] out Location of output
+ * \param[in] Tmn Energy-momentum tensor
  */
 std::ostream &operator<<(std::ostream &, const EnergyMomentumTensor &);
 
@@ -162,13 +162,13 @@ EnergyMomentumTensor inline EnergyMomentumTensor::operator+=(
   }
   return *this;
 }
-
+/// Direct addition operator
 EnergyMomentumTensor inline operator+(EnergyMomentumTensor a,
                                       const EnergyMomentumTensor &b) {
   a += b;
   return a;
 }
-
+    
 EnergyMomentumTensor inline EnergyMomentumTensor::operator-=(
     const EnergyMomentumTensor &Tmn0) {
   for (size_t i = 0; i < 10; i++) {
@@ -176,7 +176,7 @@ EnergyMomentumTensor inline EnergyMomentumTensor::operator-=(
   }
   return *this;
 }
-
+/// Direct subtraction operator
 EnergyMomentumTensor inline operator-(EnergyMomentumTensor a,
                                       const EnergyMomentumTensor &b) {
   a -= b;
@@ -189,12 +189,12 @@ EnergyMomentumTensor inline EnergyMomentumTensor::operator*=(const double a) {
   }
   return *this;
 }
-
+/// Direct multiplication operator
 inline EnergyMomentumTensor operator*(EnergyMomentumTensor a, const double b) {
   a *= b;
   return a;
 }
-
+/// Direct multiplication operator
 inline EnergyMomentumTensor operator*(const double a, EnergyMomentumTensor b) {
   b *= a;
   return b;
@@ -206,7 +206,7 @@ EnergyMomentumTensor inline EnergyMomentumTensor::operator/=(const double a) {
   }
   return *this;
 }
-
+/// Direct division operator
 EnergyMomentumTensor inline operator/(EnergyMomentumTensor a, const double b) {
   a /= b;
   return a;

@@ -50,14 +50,10 @@ class ThermLatticeNode {
   /**
    * Default constructor of thermal quantities on the lattice returning
    * thermodynamic quantities in computational frame
-   * \param[out] Tmu0_ Four vector \f$T^{\mu 0}\f$
-   * \param[out] nb_ Net baryon density at this location
-   * \param[out] ns_ Net strangeness density
-   * \param[out] e_ Energy density
-   * \param[out] v_ 3 vector velocity of local rest frame
-   * \param[out] T_ Temperature
-   * \param[out] mub_ Net baryon chemical potential
-   * \param[out] mus_ Net strangeness chemical potential
+   * \return Tmu0_ Four vector \f$T^{\mu 0}\f$, nb_ Net baryon density at
+   * this location, ns_ Net strangeness density, e_ Energy density,
+   * v_ 3 vector velocity of local rest frame, T_ Temperature
+   * mub_ Net baryon chemical potential, mus_ Net strangeness chemical potential
    */
   ThermLatticeNode();
   /// \todo unused apart from example above
@@ -191,6 +187,7 @@ class GrandCanThermalizer {
                       const std::array<double, 3> origin, bool periodicity,
                       double e_critical, double t_start, double delta_t,
                       ThermalizationAlgorithm algo);
+  /// \see GrandCanThermalizer Exactly the same but taking values from config
   GrandCanThermalizer(Configuration& conf,
                       const std::array<double, 3> lat_sizes,
                       const std::array<double, 3> origin, bool periodicity)
@@ -218,7 +215,7 @@ class GrandCanThermalizer {
    * \param[in] ignore_cells_under_threshold Boolean that is true by default
    */
   void update_lattice(const Particles& particles, const DensityParameters& par,
-                      bool ignore_cells_under_treshold = true);
+                      bool ignore_cells_under_threshold = true);
   /// \return 3 vector uniformly sampled from the rectangular cell.
   ThreeVector uniform_in_cell() const;
   /**

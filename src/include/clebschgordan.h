@@ -53,7 +53,7 @@ inline double isospin_clebsch_gordan_sqr_2to1(const ParticleType &p_a,
  * p_a, p_b and p_c coupling to a resonance Res.
  * \param[in] p_a Information on spin/isospin of particle a
  * \param[in] p_b Information on spin/isospin of particle b
- * \param[in] p_b Information on spin/isospin of particle c
+ * \param[in] p_c Information on spin/isospin of particle c
  * \param[in] Res Information on spin/isospin of resonance
  * \return Clebsch-Gordan squared for 3->1 reaction
  */
@@ -83,8 +83,9 @@ double isospin_clebsch_gordan_sqr_3to1(const ParticleType &p_a,
 ///Range of total isospin for reaction of particle a with particle b.
 class I_tot_range {
  private:
-/// Return values of the minimum and maximum total isospin
+/// Value of minimum total isospin
   int I_min_;
+/// Value of maximum total isospin
   int I_max_;
 
  public:
@@ -122,7 +123,8 @@ class I_tot_range {
     I_min_ = std::max(I_min_, std::abs(I_z));
   }
 
-  /// Iterator class for determination of total isospin 
+  /// Iterator class for determination of total isospin
+  /// \todo (warnings) add detailed documentation on all parameters etc 
   class iterator : public std::iterator<std::forward_iterator_tag, int> {
    private:
     int c_;
