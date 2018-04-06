@@ -15,6 +15,8 @@
 #include <utility>
 #include <vector>
 
+namespace smash {
+
 /// Calculate an average value incrementally.
 template <typename T>
 class Average {
@@ -85,5 +87,7 @@ std::pair<std::vector<T>, std::vector<T>> dedup_avg(const std::vector<T>& x,
   new_y.push_back(avg.average());
   return std::make_pair(std::move(new_x), std::move(new_y));
 }
+
+} // namespace smash
 
 #endif  // SRC_INCLUDE_AVERAGE_H_

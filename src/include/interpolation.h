@@ -23,6 +23,8 @@
 #include <utility>
 #include <vector>
 
+namespace smash {
+
 /*
  * Linear interpolation.
  */
@@ -213,5 +215,7 @@ class InterpolateDataSpline {
   gsl_interp_accel* acc_;
   gsl_spline* spline_;
 };
+
+} // namespace smash
 
 #endif  // SRC_INCLUDE_INTERPOLATION_H_
