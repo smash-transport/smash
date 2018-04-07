@@ -172,7 +172,7 @@ class Experiment : public ExperimentBase {
    * \param[in] format Format of the output file (e.g. Root, Oscar, Vtk)
    * \param[in] content Content of the output (e.g. particles, collisions)
    * \param[in] output_path Path of the output file
-   * \param[in] OutputParameters Output options.(e.g. Extended)
+   * \param[in] par Output options.(e.g. Extended)
    */
   void create_output(std::string format, std::string content,
                      const bf::path &output_path, const OutputParameters &par);

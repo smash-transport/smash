@@ -18,10 +18,11 @@
 
 #include "include/forwarddeclarations.h"
 
+/// \todo(warning) Internal helper functions have no documentation
+
 namespace smash {
 
 // internal helper functions
-/// \todo(warning) Internal helper functions have no documentation
 namespace {
 YAML::Node find_node_at(YAML::Node node,
                         std::initializer_list<const char *> keys) {

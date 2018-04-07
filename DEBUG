@@ -69,6 +69,8 @@ You can run clang-format to automatically format all code in SMASH correctly usi
 
     for i in src/*.cc src/include/*.h src/tests/*.cc src/tests/*.h; do clang-format -i $i; done;
 
+    */*/*/*/
+
 \subsection profiling_perf Perf
 
 A different method for profiling SMASH uses performance counters and the \c perf

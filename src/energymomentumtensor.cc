@@ -52,7 +52,9 @@ FourVector EnergyMomentumTensor::landau_frame_4velocity() const {
 // Eigen values should be strictly real and non-negative.
 
 /* Here and further I assume that eigenvalues are given in
- * descending order. \todo(oliiny): check Eigen documentation
+ * descending order.
+ * 
+ * \todo(oliiny): check Eigen documentation
  * to make sure this is always true.*/
 #ifndef NDEBUG
   Vector4d eig_im = es.eigenvalues().imag();

@@ -965,7 +965,7 @@ bool Experiment<Modus>::perform_action(
   return true;
 }
 
-/** 
+/**
  * Make sure `interactions_total` can be represented as a 32-bit integer.
  * This is necessary for converting to a `id_process`. The latter is 32-bit
  * integer, because it is written like this to binary output.
@@ -1138,7 +1138,7 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
               ", action time = ", act->time_of_execution());
     propagate_and_shine(act->time_of_execution());
 
-    /* (2) Perform action. 
+    /* (2) Perform action.
      *
      * Update the positions of the incoming particles, because the information
      * in the action object will be outdated as the particles have been
@@ -1199,7 +1199,7 @@ void Experiment<Modus>::intermediate_output() {
       interactions_this_interval, conserved_initial_, time_start_,
       parameters_.outputclock.current_time());
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
-  /* \todo (Dima) is this part of the code still useful?
+  /** \todo (Dima) is this part of the code still useful?
    *
    * if (thermalizer_) {
    *  thermalizer_->update_lattice(particles_, density_param_);
