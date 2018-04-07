@@ -36,15 +36,8 @@ class ScatterActionPhoton : public ScatterAction {
       : ScatterAction(in[0], in[1], time),
         number_of_fractional_photons_(nofp),
         hadron_out_t_(outgoing_hadron_type(in)) {
-    // hadron_out_mass_ = hadron_out_t_->mass();
     reac_ = photon_reaction_type(in);
     hadron_out_mass_ = sample_out_hadron_mass(hadron_out_t_);
-
-    // sanity check. TODO: Remove
-    if (reac_ == ReactionType::pi_z_rho_z_pi_z &&
-        default_mediator_ == MediatorType::PION) {
-      exit(1);
-    }
   }
 
   /**
@@ -61,7 +54,6 @@ class ScatterActionPhoton : public ScatterAction {
   /**
    * Return the weight of the produced photon.
    */
-
   double raw_weight_value() const override { return weight_; }
 
   /**
@@ -74,13 +66,7 @@ class ScatterActionPhoton : public ScatterAction {
    * particle is stable.
    *
    */
-
-  // actually we do not need a pair. second particle will always be a photon.
   double sample_out_hadron_mass(const ParticleTypePtr out_type);
-  /** Overridden to effectively return the reaction channel. */
-  ProcessType get_type() const override {
-    return static_cast<ProcessType>(reac_);
-  }
 
   /**
    * Adds one hadronic channel with a given cross-section. The intended use is
@@ -91,11 +77,10 @@ class ScatterActionPhoton : public ScatterAction {
 
   /**
    * Add the photonic channel. Also compute the total cross section.
-   *
    */
 
-  void add_single_channel(bool from_check_collision = false) {
-    add_processes<CollisionBranch>(photon_cross_sections(from_check_collision),
+  void add_single_channel() {
+    add_processes<CollisionBranch>(photon_cross_sections(),
                                    collision_channels_photons_,
                                    cross_section_photons_);
   }
@@ -164,7 +149,7 @@ class ScatterActionPhoton : public ScatterAction {
 
   ParticleTypePtr hadron_out_t_;
 
-  /// Mass of outgoing hadron 
+  /// Mass of outgoing hadron
   double hadron_out_mass_;
 
   /*
@@ -204,7 +189,9 @@ class ScatterActionPhoton : public ScatterAction {
    * an rho in the incoming channel it is the mass of the incoming rho, in case
    * of an rho in the outgoing channel it is the mass sampled in the
    * constructor. When an rho acts in addition as a mediator, its mass is the
-   * same as the incoming / outgoing rho.
+   * same as the incoming / outgoing rho. This function returns the alrady
+   * sampled mass or the mass of the incoming rho, depending on the reaction
+   * channel.
    */
   double rho_mass() const;
 
@@ -214,7 +201,6 @@ class ScatterActionPhoton : public ScatterAction {
    * \returns List of photon reaction branches. Currently size will be one.
    */
   CollisionBranchList photon_cross_sections(
-      bool from_check_collision = false,
       MediatorType mediator = default_mediator_);
 
   /**
@@ -275,8 +261,6 @@ class ScatterActionPhoton : public ScatterAction {
   double diff_cross_section_w_ff(const double t, const double m_rho,
                                  const double E_photon);
 
-  // conversion factor to millibarn
-  // const double to_mb_ = 0.3894;
   static constexpr double m_omega_ = 0.783;
 };
 
