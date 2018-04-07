@@ -164,7 +164,7 @@ class ScatterActionPhoton : public ScatterAction {
 
   ParticleTypePtr hadron_out_t_;
 
-  /// Mass of outgoing hadron [GeV]
+  /// Mass of outgoing hadron 
   double hadron_out_mass_;
 
   /*

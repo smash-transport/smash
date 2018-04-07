@@ -111,7 +111,7 @@ set(smash_src
         particles.cc
         particletype.cc
         pdgcode.cc
-        photoncrosssections.cc
+        crosssectionsphoton.cc
         potentials.cc
         processbranch.cc
         processstring.cc

@@ -20,10 +20,9 @@
 #include "include/kinematics.h"
 #include "include/particletype.h"
 #include "include/pdgcode.h"
-#include "include/photoncrosssections.h"
+#include "include/crosssectionsphoton.h"
 #include "include/pow.h"
 #include "include/random.h"
-#include "include/scatteraction.h"
 #include "include/tabulation.h"
 
 namespace smash {

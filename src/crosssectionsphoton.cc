@@ -7,7 +7,7 @@
  *
  */
 
-#include "include/photoncrosssections.h"
+#include "include/crosssectionsphoton.h"
 
 #include "include/constants.h"
 
