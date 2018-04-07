@@ -292,7 +292,7 @@ double ScatterActionPhoton::rho_mass() const {
 }
 
 CollisionBranchList ScatterActionPhoton::photon_cross_sections(
-     MediatorType mediator) {
+    MediatorType mediator) {
   CollisionBranchList process_list;
   PhotonCrossSection<ComputationMethod::Analytic> xs_object;
 

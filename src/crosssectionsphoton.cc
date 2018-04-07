@@ -44,6 +44,7 @@ double cut_off(const double sigma_mb) {
    state such that an average over initial states is superflous. The cross
    sections need thus be divided by the spin degeneracy factor of the initial
    particles to account for these particle properties.
+   The C-naming is in accordance to the matrix elements from (\iref{Turbide:2006})
 */
 
 namespace smash {
