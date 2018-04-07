@@ -305,6 +305,9 @@ double HadronGasEos::net_strange_density(double T, double mub, double mus) {
 
 double HadronGasEos::sample_mass_thermal(const ParticleType &ptype,
                                          double beta) {
+  if (ptype.is_stable()) {
+    return ptype.mass();
+  }
   // Sampling mass m from A(m) x^2 BesselK_2(x), where x = beta m.
   // Strategy employs idea of importance sampling:
   // 1) Sample mass from A(m): inverse transform method

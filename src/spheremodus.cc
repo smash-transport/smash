@@ -118,9 +118,9 @@ double SphereModus::initial_conditions(Particles *particles,
                                        const ExperimentParameters &parameters) {
   const auto &log = logger<LogArea::Sphere>();
   FourVector momentum_total(0, 0, 0, 0);
+  const double T = this->sphere_temperature_;
   /* Create NUMBER OF PARTICLES according to configuration */
   if (use_thermal_) {
-    const double T = sphere_temperature_;
     const double V = 4.0 / 3.0 * M_PI * radius_ * radius_ * radius_;
     for (const ParticleType &ptype : ParticleType::list_all()) {
       if (HadronGasEos::is_eos_particle(ptype)) {
@@ -147,37 +147,31 @@ double SphereModus::initial_conditions(Particles *particles,
   for (ParticleData &data : *particles) {
     Angles phitheta;
     /* thermal momentum according Maxwell-Boltzmann distribution */
-    double momentum_radial;
+    double momentum_radial, mass = data.pole_mass();
     /* assign momentum_radial according to requested distribution */
     switch (init_distr_) {
-      case (SphereInitialCondition::ThermalMomenta):
-        momentum_radial = sample_momenta_from_thermal(this->sphere_temperature_,
-                                                      data.pole_mass());
-        break;
       case (SphereInitialCondition::IC_ES):
-        momentum_radial = sample_momenta_IC_ES(this->sphere_temperature_);
+        momentum_radial = sample_momenta_IC_ES(T);
         break;
       case (SphereInitialCondition::IC_1M):
-        momentum_radial =
-            sample_momenta_IC_1M(this->sphere_temperature_, data.pole_mass());
+        momentum_radial = sample_momenta_IC_1M(T, mass);
         break;
       case (SphereInitialCondition::IC_2M):
-        momentum_radial =
-            sample_momenta_IC_2M(this->sphere_temperature_, data.pole_mass());
+        momentum_radial = sample_momenta_IC_2M(T, mass);
         break;
       case (SphereInitialCondition::IC_Massive):
-        momentum_radial = sample_momenta_non_eq_mass(this->sphere_temperature_,
-                                                     data.pole_mass());
+        momentum_radial = sample_momenta_non_eq_mass(T, mass);
         break;
+      case (SphereInitialCondition::ThermalMomenta):
       default:
-        momentum_radial = sample_momenta_from_thermal(this->sphere_temperature_,
-                                                      data.pole_mass());
+        mass = HadronGasEos::sample_mass_thermal(data.type(), 1.0 / T);
+        momentum_radial = sample_momenta_from_thermal(T, mass);
         break;
     }
     phitheta.distribute_isotropically();
-    log.debug("Particle ", data.id(), " radial momenta ", momentum_radial, ' ',
-              phitheta);
-    data.set_4momentum(data.pole_mass(), phitheta.threevec() * momentum_radial);
+    log.debug(data.type().name(),"(id ", data.id(), ") radial momentum ",
+              momentum_radial, ", direction", phitheta);
+    data.set_4momentum(mass, phitheta.threevec() * momentum_radial);
     momentum_total += data.momentum();
     /* uniform sampling in a sphere with radius r */
     double position_radial;
@@ -190,7 +184,7 @@ double SphereModus::initial_conditions(Particles *particles,
   }
   /* Make total 3-momentum 0 */
   for (ParticleData &data : *particles) {
-    data.set_4momentum(data.pole_mass(),
+    data.set_4momentum(data.momentum().abs(),
                        data.momentum().threevec() -
                            momentum_total.threevec() / particles->size());
   }
