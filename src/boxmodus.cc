@@ -162,7 +162,7 @@ double BoxModus::initial_conditions(Particles *particles,
       momentum_radial = sample_momenta_from_thermal(T, mass);
     }
     phitheta.distribute_isotropically();
-    log.debug(data.type().name(),"(id ", data.id(), ") radial momentum ",
+    log.debug(data.type().name(), "(id ", data.id(), ") radial momentum ",
               momentum_radial, ", direction", phitheta);
     data.set_4momentum(mass, phitheta.threevec() * momentum_radial);
     momentum_total += data.momentum();

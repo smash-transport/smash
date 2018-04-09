@@ -16,10 +16,10 @@
 #include <boost/filesystem.hpp>
 
 #include "include/constants.h"
-#include "include/integrate.h"
 #include "include/forwarddeclarations.h"
 #include "include/fpenvironment.h"
 #include "include/hadgas_eos.h"
+#include "include/integrate.h"
 #include "include/logging.h"
 #include "include/pow.h"
 #include "include/random.h"
