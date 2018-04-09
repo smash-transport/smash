@@ -867,8 +867,8 @@ static std::string format_measurements(const Particles &particles,
   ss << field<5> << time << field<12, 3> << difference.momentum().x0()
      << field<12, 3> << difference.momentum().abs3()
      << field<12, 3> << (time > really_small
-                            ? 2.0 * scatterings_total / (particles.size() * time)
-                            : 0.)
+                           ? 2.0 * scatterings_total / (particles.size() * time)
+                           : 0.)
      << field<10, 3> << scatterings_this_interval
      << field<12, 3> << particles.size() << field<10, 3> << elapsed_seconds;
   // clang-format on
