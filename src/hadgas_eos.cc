@@ -174,11 +174,14 @@ HadronGasEos::~HadronGasEos() {
 double HadronGasEos::scaled_partial_density_auxiliary(double m_over_T,
                                                       double mu_over_T) {
   double x = mu_over_T - m_over_T;
-  {
+  //{
     // Allow underflow
-    DisableFloatTraps guard(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
-    x = std::exp(x);
+  //  DisableFloatTraps guard(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
+  if (x < -500.0) {
+    return 0.0;
   }
+  x = std::exp(x);
+  //}
   // The case of small mass: K_n(z) -> (n-1)!/2 *(2/z)^n, z -> 0
   // z*z*K_2(z) -> 2
   return (m_over_T < really_small)
@@ -309,73 +312,60 @@ double HadronGasEos::sample_mass_thermal(const ParticleType &ptype,
     return ptype.mass();
   }
   // Sampling mass m from A(m) x^2 BesselK_2(x), where x = beta m.
-  // Strategy employs idea of importance sampling:
-  // 1) Sample mass from A(m): inverse transform method
-  // 2) Reject by f(x) = x^2 BesselK_2(x). f(x) monotonously decreases
-  //    and has maximum at x = xmin. So it makes sense to reject using
-  //    f(x)/f(xmin).
+  // Strategy employs the idea of importance sampling:
+  // -- Sample mass from the simple Breit-Wigner first, then
+  //    reject by the ratio.
+  // -- Note that f(x) = x^2 BesselK_2(x) monotonously decreases
+  //    and has maximum at x = xmin. That is why instead of f(x)
+  //    the ratio f(x)/f(xmin) is used.
 
-  // Inverse transform method, instead of mass m a dimensionless variable
-  // u = std::atan(2.0 * (m - m0) / w0) is used. This allows to transform
-  // (m_threshold, inf) to a finite interval and make integrand less peaky.
-  const double m0 = ptype.mass();
-  const double w0 = ptype.width_at_pole();
-  const double mth = ptype.min_mass_spectral();
-  const double u_min = std::atan(2.0 * (mth - m0) / w0);
-  const double u_max = 0.5 * M_PI;
-  constexpr size_t n_interpolation_points = 1000;
-  const double du = (u_max - u_min) / n_interpolation_points;
-  std::array<double, n_interpolation_points> cumulative_integral;
-  cumulative_integral[0] = 0.0;
-  for (size_t i = 1; i < n_interpolation_points; i++) {
-    const double u = u_min + du * i;
-    const double tanu = std::tan(u);
-    const double mass = m0 + 0.5 * w0 * tanu;
-    const double jacobian = 0.5 * w0 * (1.0 + tanu * tanu);
-    cumulative_integral[i] = cumulative_integral[i - 1] + du *
-                             jacobian *
-                             ptype.spectral_function(mass);
-  }
-  if (std::abs(cumulative_integral[n_interpolation_points - 1] - 1.0) >
-      1.e-2) {
-    const auto &log = logger<LogArea::Experiment>();
-    log.trace() << source_location;
-    log.warn("Norm of the spectral function (", ptype.name(),
-             ") is ", cumulative_integral[n_interpolation_points - 1],
-             ", while it has to be 1.");
-  }
-
-  const double norm = 1.0 / gsl_sf_bessel_Kn_scaled(2, mth * beta);
-  double m;
-  do {
-    // sample mass from A(m), binary search to invert the tabulated integral
-    const double y = Random::canonical();
-    int i_min = 0, i_max = n_interpolation_points - 1;
-    while (i_min != i_max - 1) {
-      int i = (i_min + i_max) / 2;
-      if (cumulative_integral[i] <= y) {
-        i_min = i;
-      } else {
-        i_max = i;
+  const double max_mass = 5.0;  // GeV
+  double m, q;
+  {
+    // Allow underflows in exponentials
+    DisableFloatTraps guard(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
+    const double w0 = ptype.width_at_pole();
+    const double mth = ptype.min_mass_spectral();
+    const double m0 = ptype.mass();
+    double max_ratio = m0 * m0 * std::exp(- beta * m0) *
+                       gsl_sf_bessel_Kn_scaled(2, m0 * beta) *
+                       ptype.spectral_function(m0) /
+                       ptype.spectral_function_simple(m0);
+    // Coarse loop to find max_ratio
+    constexpr int npoints = 31;
+    const double dm = (max_mass - mth) / npoints;
+    for (size_t i = 1; i < npoints; i++) {
+      m = mth + dm * i;
+      const double thermal_factor = m * m * std::exp(- beta * m) *
+                          gsl_sf_bessel_Kn_scaled(2, m * beta);
+      q = ptype.spectral_function(m) * thermal_factor /
+            ptype.spectral_function_simple(m);
+      if (q > max_ratio) {
+        max_ratio = q;
       }
     }
-    const double y1 = cumulative_integral[i_min];
-    const double y2 = cumulative_integral[i_min + 1];
-    assert(y1 <= y && y2 > y);
-    const double x1 = u_min + du * i_min;
-    const double x2 = u_min + du * (i_min + 1);
-    const double x = x1 + (y - y1) * (x2 - x1) / (y2 - y1);
-    m = m0 + 0.5 * w0 * std::tan(x);
+    max_ratio *= 1.5;
 
-    // Accept with probability f(x)/f(xmin), f(x) = x^2 BesselK_2(x).
-    double accept_probability = square(m / mth) * std::exp(- beta * (m - mth)) *
-            gsl_sf_bessel_Kn_scaled(2, m * beta) * norm;
-    assert(accept_probability <= 1.0);
-    if (Random::canonical() <= accept_probability) {
-      break;
-    }
-  } while (true);
-
+    do {
+      // sample mass from A(m)
+      do {
+        m = Random::cauchy(m0, 0.5 * w0, mth, max_mass);
+        const double thermal_factor = m * m * std::exp(- beta * m) *
+                          gsl_sf_bessel_Kn_scaled(2, m * beta);
+        q = ptype.spectral_function(m) * thermal_factor /
+            ptype.spectral_function_simple(m);
+      } while (q < Random::uniform(0., max_ratio));
+      if (q > max_ratio) {
+        const auto &log = logger<LogArea::Resonances>();
+        log.warn(ptype.name(), " - maximum increased in",
+                 " sample_mass_thermal from ", max_ratio, " to ", q,
+                 ", mass = ", m);
+        max_ratio = q;
+      } else {
+        break;
+      }
+    } while (true);
+  }
   return m;
 }
 
