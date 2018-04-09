@@ -36,17 +36,15 @@ StringProcess::StringProcess(double string_tension, double gluon_beta,
    * diffractive ones are implemented in a separate routine */
   pythia_parton_->readString("SoftQCD:nonDiffractive = on");
   pythia_parton_->readString("MultipartonInteractions:pTmin = 1.5");
-  common_setup_pythia(pythia_parton_.get(),
-                      strange_supp, diquark_supp, stringz_a, stringz_b,
-                      string_sigma_T);
+  common_setup_pythia(pythia_parton_.get(), strange_supp, diquark_supp,
+                      stringz_a, stringz_b, string_sigma_T);
 
   // setup and initialize pythia for fragmentation
   pythia_hadron_ = make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
   /* turn off all parton-level processes to implement only hadronization */
   pythia_hadron_->readString("ProcessLevel:all = off");
-  common_setup_pythia(pythia_hadron_.get(),
-                      strange_supp, diquark_supp, stringz_a, stringz_b,
-                      string_sigma_T);
+  common_setup_pythia(pythia_hadron_.get(), strange_supp, diquark_supp,
+                      stringz_a, stringz_b, string_sigma_T);
 
   /* initialize PYTHIA */
   pythia_hadron_->init();
@@ -64,8 +62,8 @@ StringProcess::StringProcess(double string_tension, double gluon_beta,
 
 void StringProcess::common_setup_pythia(Pythia8::Pythia *pythia_in,
                                         double strange_supp,
-                                        double diquark_supp,
-                                        double stringz_a, double stringz_b,
+                                        double diquark_supp, double stringz_a,
+                                        double stringz_b,
                                         double string_sigma_T) {
   // choose parametrization for mass-dependent width
   pythia_in->readString("ParticleData:modeBreitWigner = 4");
@@ -74,14 +72,13 @@ void StringProcess::common_setup_pythia(Pythia8::Pythia *pythia_in,
   pythia_in->readString("MultipartonInteractions:pTmin = 1.5");
   pythia_in->readString("MultipartonInteractions:nSample = 10000");
   // transverse momentum spread in string fragmentation
-  pythia_in->readString("StringPT:sigma = " +
-                             std::to_string(string_sigma_T));
+  pythia_in->readString("StringPT:sigma = " + std::to_string(string_sigma_T));
   // diquark suppression factor in string fragmentation
   pythia_in->readString("StringFlav:probQQtoQ = " +
-                             std::to_string(diquark_supp));
+                        std::to_string(diquark_supp));
   // strangeness suppression factor in string fragmentation
   pythia_in->readString("StringFlav:probStoUD = " +
-                             std::to_string(strange_supp));
+                        std::to_string(strange_supp));
   // parameters for the fragmentation function
   pythia_in->readString("StringZ:aLund = " + std::to_string(stringz_a));
   pythia_in->readString("StringZ:bLund = " + std::to_string(stringz_b));
@@ -148,10 +145,9 @@ int StringProcess::append_final_state(const FourVector &uString,
           "StringProcess::append_final_state warning :"
           " particle is not meson or baryon.");
     }
-    FourVector mom(pythia_hadron_->event[ipyth].e(),
-                   pythia_hadron_->event[ipyth].px(),
-                   pythia_hadron_->event[ipyth].py(),
-                   pythia_hadron_->event[ipyth].pz());
+    FourVector mom(
+        pythia_hadron_->event[ipyth].e(), pythia_hadron_->event[ipyth].px(),
+        pythia_hadron_->event[ipyth].py(), pythia_hadron_->event[ipyth].pz());
     double pparallel = mom.threevec() * evecLong;
     double y = 0.5 * std::log((mom.x0() + pparallel) / (mom.x0() - pparallel));
     fragments.push_back({mom, pparallel, y, 0.0, pdg, false});

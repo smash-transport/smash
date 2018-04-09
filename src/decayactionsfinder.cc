@@ -48,9 +48,8 @@ ActionList DecayActionsFinder::find_actions_in_cell(
      * the exponential decay law.
      */
     const double decay_time = Random::exponential<double>(
-        one_over_hbarc *
-        p.inverse_gamma()  // The clock goes slower in the rest frame of the
-                           // resonance
+        one_over_hbarc * p.inverse_gamma()  // The clock goes slower in the rest
+                                            // frame of the resonance
         * width);
     /* If the particle is not yet formed at the decay time,
      * it should not be able to decay */

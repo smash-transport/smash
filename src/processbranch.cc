@@ -50,10 +50,8 @@ std::ostream& operator<<(std::ostream& os, const CollisionBranch& cbranch) {
   ProcessType ptype = cbranch.get_type();
   if (ptype == ProcessType::StringSoft || ptype == ProcessType::StringHard) {
     os << "strings";
-  } else if (ptype == ProcessType::TwoToOne ||
-             ptype == ProcessType::TwoToTwo ||
-             ptype == ProcessType::Elastic ||
-             ptype == ProcessType::Decay) {
+  } else if (ptype == ProcessType::TwoToOne || ptype == ProcessType::TwoToTwo ||
+             ptype == ProcessType::Elastic || ptype == ProcessType::Decay) {
     ParticleTypePtrList ptype_list = cbranch.particle_types();
     // Sorting ensures unique name for every channel
     // It avoids duplicates, such as Δ⁰Δ⁺⁺ and Δ⁺⁺Δ⁰,

@@ -149,8 +149,8 @@ TEST(full2013_format) {
       std::getline(outputfile, line);
       COMPARE(line, "# " VERSION_MAJOR);
       /* Check initial particle list description line */
-      std::string initial_line =
-          "# event " + std::to_string(event_id + 1) + " in " + std::to_string(2);
+      std::string initial_line = "# event " + std::to_string(event_id + 1) +
+                                 " in " + std::to_string(2);
       std::getline(outputfile, line);
       COMPARE(line, initial_line);
       /* Check initial particle data lines item by item */
@@ -319,7 +319,7 @@ TEST(full_extended_oscar) {
     out_par.coll_extended = true;
 
     std::unique_ptr<OutputInterface> osc2013full =
-      create_oscar_output("Oscar2013", "Collisions", testoutputpath, out_par);
+        create_oscar_output("Oscar2013", "Collisions", testoutputpath, out_par);
     VERIFY(bool(osc2013full));
     VERIFY(bf::exists(outputfilepath_unfinished));
 
@@ -391,8 +391,8 @@ TEST(full_extended_oscar) {
     outputfile.get();
     /* Check final particle list */
     std::getline(outputfile, line);
-    std::string final_line = "# event " + std::to_string(event_id + 1) + " out " +
-                             std::to_string(particles.size());
+    std::string final_line = "# event " + std::to_string(event_id + 1) +
+                             " out " + std::to_string(particles.size());
     COMPARE(line, final_line);
     for (ParticleData &data : particles) {
       std::array<std::string, data_elements_extended> datastring;
@@ -405,8 +405,8 @@ TEST(full_extended_oscar) {
     outputfile.get();
     /* Check for event end line */
     std::getline(outputfile, line);
-    std::string end_line =
-        "# event " + std::to_string(event_id + 1) + " end 0" + " impact   1.783";
+    std::string end_line = "# event " + std::to_string(event_id + 1) +
+                           " end 0" + " impact   1.783";
     COMPARE(line, end_line);
   }
   VERIFY(bf::remove(outputfilepath));

@@ -21,7 +21,6 @@ namespace smash {
  * function argument passing.
  */
 struct ExperimentParameters {
-
   /// System clock (for simulation time keeping in the computational frame)
   Clock labclock;
 

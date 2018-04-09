@@ -68,14 +68,14 @@ class ModusDefault {
   bool is_collider() const { return false; }
   /// \return The impact parameter; overwritten in ColliderModus
   double impact_parameter() const { return 0.0; }
-  /** \return The beam velocity of the projectile required in the Collider modus.
-   * In the other modus, return zero. */
+  /** \return The beam velocity of the projectile required in the Collider
+   * modus. In the other modus, return zero. */
   double velocity_projectile() const { return 0.0; }
   /** \return The beam velocity of the target required in the Collider modus.
    * In the other modus, return zero. */
   double velocity_target() const { return 0.0; }
-  /** \return The type of Fermi motion required in the Collider modus. In the other
-   * modus, just return FermiMotion::Off. */
+  /** \return The type of Fermi motion required in the Collider modus. In the
+   * other modus, just return FermiMotion::Off. */
   FermiMotion fermi_motion() const { return FermiMotion::Off; }
   /// \return Maximal timestep accepted by this modus. Negative means infinity.
   double max_timestep(double) const { return -1.; }

@@ -43,7 +43,7 @@ namespace smash {
  * weights equal to 1, which corresponds to "Smearing: false".
  */
 ThermodynamicOutput::ThermodynamicOutput(const bf::path &path,
-                                         const std::string& name,
+                                         const std::string &name,
                                          const OutputParameters &out_par)
     : OutputInterface(name),
       file_{path / "thermodynamics.dat", "w"},

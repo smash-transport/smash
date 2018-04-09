@@ -20,7 +20,8 @@
 namespace smash {
 
 VtkOutput::VtkOutput(const bf::path &path, const std::string &name)
-    : OutputInterface(name), base_path_(std::move(path)),
+    : OutputInterface(name),
+      base_path_(std::move(path)),
       is_thermodynamics_output_(name == "Thermodynamics") {}
 
 VtkOutput::~VtkOutput() {}

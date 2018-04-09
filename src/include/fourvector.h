@@ -169,11 +169,11 @@ class FourVector {
    * \vec{r}\cdot\vec{v} - \gamma \cdot x_0)\\
    *            &=& x_i + v_i \cdot (\frac{\gamma^2}{\gamma + 1} \cdot
    * \vec{r}\cdot\vec{v} - \gamma \cdot x_0)\\
-   *            &=& x_i - v_i \cdot \frac{\gamma}{\gamma + 1} \cdot (\gamma(x_0 -
+   *            &=& x_i - v_i \cdot \frac{\gamma}{\gamma + 1} \cdot (\gamma(x_0
+   * -
    * \vec{r}\cdot\vec{v}) + x_0 )\\
-   *            &=& x_i - v_i \cdot \frac{\gamma}{\gamma + 1} \cdot (x^\prime_0 +
-   * x_0)
-   * \f}
+   *            &=& x_i - v_i \cdot \frac{\gamma}{\gamma + 1} \cdot (x^\prime_0
+   * + x_0) \f}
    *
    * Note: This function is equivalent to -velocity Boost from ROOT
    */

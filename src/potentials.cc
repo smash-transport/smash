@@ -79,8 +79,9 @@ double Potentials::skyrme_pot(const double baryon_density) const {
   /* U = U(|rho|) * sgn , because the sign of the potential changes
    * under a charge reversal transformation. */
   const int sgn = tmp > 0 ? 1 : -1;
-  return 1.0e-3 * sgn * (skyrme_a_ * std::abs(tmp) +
-                         skyrme_b_ * std::pow(std::abs(tmp), skyrme_tau_));
+  return 1.0e-3 * sgn *
+         (skyrme_a_ * std::abs(tmp) +
+          skyrme_b_ * std::pow(std::abs(tmp), skyrme_tau_));
 }
 
 double Potentials::symmetry_pot(const double baryon_isospin_density) const {

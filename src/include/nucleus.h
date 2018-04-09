@@ -106,14 +106,13 @@ class Nucleus {
   void add_particle(int pdgcode);
 
   /**
-   * Adds particles from a map PDG code => Number_of_particles_with_that_PDG_code
-   * to the nucleus.
-   * E.g., the map [2212: 6, 2112: 7] initializes C-13 (6 protons
-   * and 7 neutrons). The particles are only created, no position or
-   * momenta are yet assigned. It is also possible to use any other PDG
-   * code, in addition to nucleons.
-   * \param[out] particle_list The particle slots that are created.
-   * \param[in] testparticles Number of test particles to use.
+   * Adds particles from a map PDG code =>
+   * Number_of_particles_with_that_PDG_code to the nucleus. E.g., the map [2212:
+   * 6, 2112: 7] initializes C-13 (6 protons and 7 neutrons). The particles are
+   * only created, no position or momenta are yet assigned. It is also possible
+   * to use any other PDG code, in addition to nucleons. \param[out]
+   * particle_list The particle slots that are created. \param[in] testparticles
+   * Number of test particles to use.
    */
   void fill_from_list(const std::map<PdgCode, int> &particle_list,
                       int testparticles);
@@ -204,9 +203,7 @@ class Nucleus {
     return particles_.begin();
   }
   /// For iterators over the particle list:
-  inline std::vector<ParticleData>::iterator end() {
-    return particles_.end();
-  }
+  inline std::vector<ParticleData>::iterator end() { return particles_.end(); }
   /// For iterators over the particle list:
   inline std::vector<ParticleData>::const_iterator cbegin() const {
     return particles_.cbegin();

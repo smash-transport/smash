@@ -235,8 +235,8 @@ class GrandCanThermalizer {
    * according to the multinomial distribution with sum N: \f$ p(n_1, n_2,
    * \dots) = \prod a_i^{n_i} \times \frac{N!}{n_1!n_2! \dots} \f$ if \f$ \sum
    * n_i = N \f$  and \f$ p = 0 \f$ otherwise.
-   * \param[in] particle_class A certain group of hadron species \see HadronClass
-   * \param[out] N Number of particles to be sampled
+   * \param[in] particle_class A certain group of hadron species \see
+   * HadronClass \param[out] N Number of particles to be sampled
    */
   void sample_multinomial(HadronClass particle_class, int N);
   /**
@@ -284,9 +284,9 @@ class GrandCanThermalizer {
       for (ParticleTypePtr i : eos_typelist_) {
         if (condition(i->strangeness(), i->baryon_number(), i->charge())) {
           // N_i = n u^mu dsigma_mu = (isochronous hypersurface) n * V * gamma
-          N_tot +=
-              cell_volume_ * gamma * HadronGasEos::partial_density(
-                                         *i, cell.T(), cell.mub(), cell.mus());
+          N_tot += cell_volume_ * gamma *
+                   HadronGasEos::partial_density(*i, cell.T(), cell.mub(),
+                                                 cell.mus());
         }
       }
       N_in_cells_.push_back(N_tot);
@@ -328,8 +328,9 @@ class GrandCanThermalizer {
       if (!condition(i->strangeness(), i->baryon_number(), i->charge())) {
         continue;
       }
-      N_sum += cell_volume_ * gamma * HadronGasEos::partial_density(
-                                          *i, cell.T(), cell.mub(), cell.mus());
+      N_sum +=
+          cell_volume_ * gamma *
+          HadronGasEos::partial_density(*i, cell.T(), cell.mub(), cell.mus());
       if (N_sum >= r) {
         type_to_sample = i;
         break;

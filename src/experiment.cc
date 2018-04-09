@@ -239,7 +239,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   config["Modi"].remove_all_but(modus_chooser);
 
   /* If this Delta_Time option is absent (this can be for timestepless mode)
-   * just assign 1.0 fm/c, reasonable value will be set at event initialization */
+   * just assign 1.0 fm/c, reasonable value will be set at event initialization
+   */
   const double dt = config.take({"General", "Delta_Time"}, 1.);
   const double t_end = config.read({"General", "End_Time"});
   const double output_dt = config.take({"Output", "Output_Interval"}, t_end);
@@ -777,7 +778,8 @@ void Experiment<Modus>::initialize_new_event() {
   // Sample particles according to the initial conditions
   double start_time = modus_.initial_conditions(&particles_, parameters_);
   /* For box modus make sure that particles are in the box. In principle, after
-   * a correct initialization they should be, so this is just playing it safe. */
+   * a correct initialization they should be, so this is just playing it safe.
+   */
   modus_.impose_boundary_conditions(&particles_, outputs_);
   // Reset the simulation clock
   double timestep = delta_time_startup_;

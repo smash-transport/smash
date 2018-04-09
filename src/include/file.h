@@ -40,7 +40,7 @@ struct FileDeleter {
   /// Frees the std::FILE resource if it is non-zero.
   ///
   /// \param[in] f File resource.
-  void operator()(std::FILE *f) const {
+  void operator()(std::FILE* f) const {
     if (f == nullptr) {
       return;
     }
@@ -82,6 +82,7 @@ class RenamingFilePtr {
   /// Get the underlying `FILE*` pointer.
   FILE* get();
   ~RenamingFilePtr();
+
  private:
   /// Internal file pointer.
   FILE* file_;

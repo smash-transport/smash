@@ -104,7 +104,8 @@ class EnergyMomentumTensor {
   /**
    * Given momentum of the particle adds \f$p^{\mu}p^{\mu}/p^0\f$
    * to the energy momentum tensor.
-   * \param[in] mom Momentum 4-vector with upper index, as all 4-momenta in SMASH
+   * \param[in] mom Momentum 4-vector with upper index, as all 4-momenta in
+   * SMASH
    */
   void add_particle(const FourVector &mom);
   /**

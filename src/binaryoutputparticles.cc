@@ -23,8 +23,8 @@ namespace smash {
 BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
                                              std::string name,
                                              const OutputParameters &out_par)
-    : BinaryOutputBase(
-          path / "particles_binary.bin", "wb", name, out_par.part_extended),
+    : BinaryOutputBase(path / "particles_binary.bin", "wb", name,
+                       out_par.part_extended),
       only_final_(out_par.part_only_final) {}
 
 /*!\Userguide

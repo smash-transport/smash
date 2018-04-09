@@ -57,6 +57,7 @@ class uniform_dist {
   uniform_dist(T min, T max) : distribution(min, max) {}
   /** \returns A random number in the interval. */
   T operator()() { return distribution(engine); }
+
  private:
   /** The distribution object that is being used. */
   std::uniform_real_distribution<T> distribution;
@@ -270,6 +271,7 @@ class discrete_dist {
   }
   /** Draw a random number from the discrete distribution. */
   int operator()() { return distribution(engine); }
+
  private:
   /** The distribution object that is being used. */
   std::discrete_distribution<> distribution;

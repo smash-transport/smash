@@ -124,9 +124,8 @@ double sample_momenta_1M_IC(const double temperature, const double mass) {
   if (mass > 0.) {
     // massive particles
     const double m_over_T = mass / temperature;
-    energy_average =
-        3 * temperature +
-        mass * gsl_sf_bessel_K1(m_over_T) / gsl_sf_bessel_Kn(2, m_over_T);
+    energy_average = 3 * temperature + mass * gsl_sf_bessel_K1(m_over_T) /
+                                           gsl_sf_bessel_Kn(2, m_over_T);
   } else {
     // massless particles
     energy_average = 3 * temperature;
@@ -162,9 +161,8 @@ double sample_momenta_2M_IC(const double temperature, const double mass) {
   if (mass > 0.) {
     // massive particles
     const double m_over_T = mass / temperature;
-    energy_average =
-        3 * temperature +
-        mass * gsl_sf_bessel_K1(m_over_T) / gsl_sf_bessel_Kn(2, m_over_T);
+    energy_average = 3 * temperature + mass * gsl_sf_bessel_K1(m_over_T) /
+                                           gsl_sf_bessel_Kn(2, m_over_T);
   } else {
     // massless particles
     energy_average = 3 * temperature;
@@ -255,7 +253,7 @@ double sample_momenta_from_thermal(const double temperature,
   return momentum_radial;
 }
 
-  double sample_momenta_IC_ES(const double temperature) {
+double sample_momenta_IC_ES(const double temperature) {
   double momentum_radial;
   const double a = -std::log(Random::canonical_nonzero());
   const double b = -std::log(Random::canonical_nonzero());

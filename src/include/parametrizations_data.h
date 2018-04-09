@@ -252,6 +252,7 @@ static std::unique_ptr<InterpolateDataSpline>
  * One data point is ignored because it is an outlier and messes up the
  * smoothing.
  */
+// clang-format off
 const std::initializer_list<double> KPLUSN_TOT_PLAB = {
     0.770,   0.888,   0.939,   0.970,   0.989,   1.040,   1.091,   1.141,
     /*1.170,*/ 1.191,   1.242,   1.292,   1.300,   1.342,   1.392,   1.440,
@@ -266,6 +267,7 @@ const std::initializer_list<double> KPLUSN_TOT_PLAB = {
     35.000,  40.000,  45.000,  50.000,  50.000,  50.000,  55.000,  70.000,
     100.000, 100.000, 120.000, 150.000, 150.000, 170.000, 200.000, 200.000,
     240.000, 280.000, 310.000};
+// clang-format on
 
 /**
  * PDG data on K+ n total cross section: cross section.

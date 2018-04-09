@@ -201,7 +201,8 @@ class Action {
    *                                                              Pauli-blocking.
    * \return true, if the action is Pauli-blocked, false otherwise
    */
-  bool is_pauli_blocked(const Particles &particles, const PauliBlocker &p_bl) const;
+  bool is_pauli_blocked(const Particles &particles,
+                        const PauliBlocker &p_bl) const;
 
   /// Return the list of particles that go into the interaction.
   const ParticleList &incoming_particles() const;
@@ -289,14 +290,14 @@ class Action {
   FourVector get_interaction_point() const;
 
   /**
-  * Get the potential at the interaction point
-  * \return skyrme and asymmetry potential [GeV]
-  */
+   * Get the potential at the interaction point
+   * \return skyrme and asymmetry potential [GeV]
+   */
   std::pair<double, double> get_potential_at_interaction_point() const;
 
   /**
-   * Input the information on the potentials and store in global variables defined in
-   * action_globals.
+   * Input the information on the potentials and store in global variables
+   * defined in action_globals.
    *
    * \param[in] UB_lat skyrme potential on lattice
    * \param[in] UI3_lat symmmetry potential on lattice

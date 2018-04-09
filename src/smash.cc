@@ -202,22 +202,28 @@ void ensure_path_is_valid(const bf::path &path) {
  */
 ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
   std::vector<bool> nucleon_has_interacted = {};
-  ReactionsBitSet included_2to2 =
-          configuration.take({"Collision_Term", "Included_2to2"},
-          ReactionsBitSet().set());
+  ReactionsBitSet included_2to2 = configuration.take(
+      {"Collision_Term", "Included_2to2"}, ReactionsBitSet().set());
   /** Since it will be used solely for cross-section dump, most of
    * parameters do not play any role here and are set arbitrarily.
    * Only parameters, that switch reactions on/off matter. */
   bool two_to_one = configuration.take({"Collision_Term", "Two_to_One"});
   ExperimentParameters params = ExperimentParameters{
-      {0., 1.}, {0., 1.}, 1, 1.0, 4., two_to_one,
+      {0., 1.},
+      {0., 1.},
+      1,
+      1.0,
+      4.,
+      two_to_one,
       included_2to2,
       configuration.take({"Collision_Term", "Strings"}, true),
       configuration.take({"Collision_Term", "NNbar_Treatment"},
                          NNbarTreatment::NoAnnihilation),
-      false, 0.0, false};
-  return ScatterActionsFinder(configuration, params,
-                              nucleon_has_interacted, 0, 0, 1);
+      false,
+      0.0,
+      false};
+  return ScatterActionsFinder(configuration, params, nucleon_has_interacted, 0,
+                              0, 1);
 }
 
 }  // unnamed namespace

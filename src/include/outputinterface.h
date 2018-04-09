@@ -34,7 +34,6 @@ namespace smash {
  */
 class OutputInterface {
  public:
-
   /**
    * Construct output interface.
    * \param[in] name (File)name of output.

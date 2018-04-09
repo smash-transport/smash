@@ -28,7 +28,7 @@ class HadronGasEos;
 /**
  * A class to hold, compute and access tabulated EoS.
  */
- /// \todo Oliiny: add documentation for EosTable functions
+/// \todo Oliiny: add documentation for EosTable functions
 
 class EosTable {
  public:
@@ -179,16 +179,16 @@ class HadronGasEos {
   std::array<double, 3> solve_eos(double e, double nb, double ns,
                                   std::array<double, 3> initial_approximation);
 
-/**
- * Compute temperature and chemical potentials given energy-,
- * net baryon- and net strangeness density without an inital approximation.
- *
- * \param[in] e energy density [GeV/fm\f$^3\f$]
- * \param[in] nb net baryon density [fm\f$^{-3}\f$]
- * \param[in] ns net strangeness density [fm\f$^{-3}\f$]
- * \return array of 3 values: temperature, baryon chemical potential
- *         and strange chemical potential
- */
+  /**
+   * Compute temperature and chemical potentials given energy-,
+   * net baryon- and net strangeness density without an inital approximation.
+   *
+   * \param[in] e energy density [GeV/fm\f$^3\f$]
+   * \param[in] nb net baryon density [fm\f$^{-3}\f$]
+   * \param[in] ns net strangeness density [fm\f$^{-3}\f$]
+   * \return array of 3 values: temperature, baryon chemical potential
+   *         and strange chemical potential
+   */
   std::array<double, 3> solve_eos(double e, double nb, double ns) {
     return solve_eos(e, nb, ns, solve_eos_initial_approximation(e, nb));
   }

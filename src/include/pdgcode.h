@@ -428,7 +428,7 @@ class PdgCode {
    * The charge is calculated from the quark content (for hadrons) or
    * basically tabellized; currently leptons, neutrinos and the standard
    * model gauge bosons are known; unknown particles return a charge of
-   * 0. 
+   * 0.
    * \return charge of the particle
    */
   int charge() const {
@@ -718,7 +718,7 @@ class PdgCode {
       std::uint32_t quarks_ : 12;
       /// the excitation digits n_, n_R_, n_L_
       std::uint32_t excitation_ : 12, : 4;
-#else /// reverse ordering
+#else  /// reverse ordering
       std::uint32_t : 4, excitation_ : 12;
       std::uint32_t quarks_ : 12, : 4;
 #endif

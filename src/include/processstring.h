@@ -192,16 +192,15 @@ class StringProcess {
    * \see 3rdparty/pythia8230/share/Pythia8/xmldoc/FlavourSelection.xml
    * \see 3rdparty/pythia8230/share/Pythia8/xmldoc/Fragmentation.xml
    */
-  void common_setup_pythia(Pythia8::Pythia *pythia_in,
-                           double strange_supp, double diquark_supp,
-                           double stringz_a, double stringz_b,
-                           double string_sigma_T);
+  void common_setup_pythia(Pythia8::Pythia *pythia_in, double strange_supp,
+                           double diquark_supp, double stringz_a,
+                           double stringz_b, double string_sigma_T);
 
   /**
    * Function to get the PYTHIA object for hard string routine
    * \return pointer to the PYTHIA object used in hard string routine
    */
-  Pythia8::Pythia* get_ptr_pythia_parton() { return pythia_parton_.get(); }
+  Pythia8::Pythia *get_ptr_pythia_parton() { return pythia_parton_.get(); }
 
   /**
    * Interface to pythia_sigmatot_ to compute cross-sections of A+B->
@@ -406,12 +405,11 @@ class StringProcess {
 
   /**
    * perform string fragmentation to determine species and momenta of hadrons
-   * by implementing PYTHIA 8.2 \iref{Andersson:1983ia}, \iref{Sjostrand:2014zea}.
-   * \param[in] idq1 PDG id of quark or anti-diquark (carrying color index).
-   * \param[in] idq2 PDG id of diquark or anti-quark (carrying anti-color index).
-   * \param[in] mString the string mass.
-   * \param[in] evecLong unit 3-vector specifying the direction of diquark or
-   *                     anti-diquark.
+   * by implementing PYTHIA 8.2 \iref{Andersson:1983ia},
+   * \iref{Sjostrand:2014zea}. \param[in] idq1 PDG id of quark or anti-diquark
+   * (carrying color index). \param[in] idq2 PDG id of diquark or anti-quark
+   * (carrying anti-color index). \param[in] mString the string mass. \param[in]
+   * evecLong unit 3-vector specifying the direction of diquark or anti-diquark.
    * \return number of hadrons fragmented out of string.
    */
   int fragment_string(int idq1, int idq2, double mString,

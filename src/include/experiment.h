@@ -133,14 +133,12 @@ class Experiment : public ExperimentBase {
    * This constructor is only called from the ExperimentBase::create factory
    * method.
    *
-   * \param[in] config  The Configuration object contains all initial setup of the
-   *                experiment. It is forwarded to the constructors of member
-   *                variables as needed.
-   *                Note that the object is passed by non-const reference. This
-   *                is only necessary for bookkeeping: Values are not only read,
-   *                but actually taken out of the object. Thus, all values that
-   *                remain were not used.
-   * \param[in] output_path The directory where the output files are written.
+   * \param[in] config  The Configuration object contains all initial setup of
+   * the experiment. It is forwarded to the constructors of member variables as
+   * needed. Note that the object is passed by non-const reference. This is only
+   * necessary for bookkeeping: Values are not only read, but actually taken out
+   * of the object. Thus, all values that remain were not used. \param[in]
+   * output_path The directory where the output files are written.
    */
   explicit Experiment(Configuration config, const bf::path &output_path);
 

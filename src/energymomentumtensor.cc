@@ -53,7 +53,7 @@ FourVector EnergyMomentumTensor::landau_frame_4velocity() const {
 
 /* Here and further I assume that eigenvalues are given in
  * descending order.
- * 
+ *
  * \todo(oliiny): check Eigen documentation
  * to make sure this is always true.*/
 #ifndef NDEBUG

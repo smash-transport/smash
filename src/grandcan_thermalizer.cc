@@ -88,7 +88,6 @@ void ThermLatticeNode::set_rest_frame_quantities(double T0, double mub0,
   ns_ = HadronGasEos::net_strange_density(T_, mub_, mus_);
 }
 
-
 std::ostream &operator<<(std::ostream &out, const ThermLatticeNode &node) {
   return out << "T[mu,0]: " << node.Tmu0() << ", nb: " << node.nb()
              << ", ns: " << node.ns() << ", v: " << node.v()

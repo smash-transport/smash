@@ -27,7 +27,7 @@ namespace smash {
  */
 constexpr double hbarc = 0.197327053;
 
- /// mb <-> fm^2 conversion factor
+/// mb <-> fm^2 conversion factor
 constexpr double fm2_mb = 0.1;
 
 // Numerical error tolerance

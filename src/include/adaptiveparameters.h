@@ -39,9 +39,7 @@ class AdaptiveParameters {
    * Calculate the rate that would lead to the given time step size.
    * \param[in] dt time step size [fm]
    */
-  void initialize(double dt) {
-    rate_ = target_missed_actions_ / dt;
-  }
+  void initialize(double dt) { rate_ = target_missed_actions_ / dt; }
 
   /**
    * Updates timestep if necessary.
