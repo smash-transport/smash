@@ -232,11 +232,11 @@ void ScatterActionPhoton::generate_final_state() {
   // Weighing of the fractional photons
   if (number_of_fractional_photons_ > 1) {
     weight_ =
-        diff_xs * (t2 - t1) / (number_of_fractional_photons_ * cross_section());
+        diff_xs * (t2 - t1) / (number_of_fractional_photons_
+                                * hadronic_cross_section_);
   } else {
-    weight_ = proc->weight() / cross_section();
+    weight_ = proc->weight() / hadronic_cross_section_;
   }
-
   // Photons are not really part of the normal processes, so we have to set a
   // constant arbitrary number.
   const auto id_process = ID_PROCESS_PHOTON;

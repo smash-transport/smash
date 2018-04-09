@@ -34,14 +34,14 @@ TEST(pi_rho0_pi_gamma) {
   const int number_of_photons = 10000;
   ParticleList in{pi, rho0};
   const auto act =
-      make_unique<ScatterActionPhoton>(in, 0.05, number_of_photons);
+      make_unique<ScatterActionPhoton>(in, 0.05, number_of_photons, 5.0);
   act->add_single_channel();
   double tot_weight = 0.0;
   for (int i = 0; i < number_of_photons; i++) {
     act->generate_final_state();
     tot_weight += act->raw_weight_value();
   }
-  COMPARE_RELATIVE_ERROR(tot_weight, 1.0, 0.08);
+  COMPARE_RELATIVE_ERROR(tot_weight, 0.000722419008, 0.08);
 }
 
 TEST(photon_reaction_type_function) {
@@ -62,6 +62,6 @@ TEST(photon_reaction_type_function) {
          ScatterActionPhoton::ReactionType::no_reaction);
   VERIFY(ScatterActionPhoton::photon_reaction_type(l3) ==
          ScatterActionPhoton::ReactionType::no_reaction);
-  VERIFY(ScatterActionPhoton::photon_reaction_type(l4) !=
+  VERIFY(ScatterActionPhoton::photon_reaction_type(l4) ==
          ScatterActionPhoton::ReactionType::no_reaction);
 }

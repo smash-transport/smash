@@ -433,7 +433,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       parameters_.strings_switch) {
     auto scat_finder = make_unique<ScatterActionsFinder>(
         config, parameters_, nucleon_has_interacted_, modus_.total_N_number(),
-        modus_.proj_N_number(), n_fractional_photons_);
+        modus_.proj_N_number());
     max_transverse_distance_sqr_ =
         scat_finder->max_transverse_distance_sqr(parameters_.testparticles);
     action_finders_.emplace_back(std::move(scat_finder));
@@ -926,7 +926,8 @@ bool Experiment<Modus>::perform_action(
     // current time of incoming
     constexpr double action_time = 0.;
     ScatterActionPhoton photon_act(action.incoming_particles(), action_time,
-                                   n_fractional_photons_);
+                                   n_fractional_photons_,
+                                   action.raw_weight_value());
     // Add a completely dummy process to photon action.  The only important
     // thing is that its cross-section is equal to cross-section of action.
     // This can be done, because photon action is never performed, only

@@ -33,7 +33,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
   ScatterActionsFinder(Configuration config,
                        const ExperimentParameters &parameters,
                        const std::vector<bool> &nucleon_has_interacted,
-                       int N_tot, int N_proj, int n_fractional_photons);
+                       int N_tot, int N_proj);
 
   /** Determine the collision time of the two particles [fm/c].
    *  Time of the closest approach is taken as collision time.
@@ -151,8 +151,6 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const double string_formation_time_;
   /** Photons switch */
   const bool photons_;
-  /** Number of fractional photons */
-  const bool n_fractional_photons_;
 };
 
 #if 0

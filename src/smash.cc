@@ -207,7 +207,7 @@ ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
       NNbarTreatment::NoAnnihilation,
       false, 0.0, false};
   return ScatterActionsFinder(configuration, params,
-                              nucleon_has_interacted, 0, 0, 1);
+                              nucleon_has_interacted, 0, 0);
 }
 
 }  // unnamed namespace

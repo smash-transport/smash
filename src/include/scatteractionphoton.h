@@ -17,9 +17,9 @@ namespace smash {
 /**
  * \ingroup action
  * ScatterActionPhoton is a special action which takes two incoming particles
- * and performs an perturbative electromagnetic scattering.
+ * and performs a perturbative electromagnetic scattering.
  * The final state particles are not further propagated, only written
- * to output.
+ * to the output.
  */
 
 class ScatterActionPhoton : public ScatterAction {
@@ -29,13 +29,15 @@ class ScatterActionPhoton : public ScatterAction {
    *
    * \param[in] in ParticleList of incoming particles
    * \param[in] time Time relative to underlying hadronic action.
-   * \param[in] n_fp Number of photons to produce for each hadronic scattering
+   * \param[in] nofp Number of photons to produce for each hadronic scattering
    */
 
-  ScatterActionPhoton(const ParticleList &in, double time, int nofp)
+  ScatterActionPhoton(const ParticleList &in, double time, int nofp,
+                      double hadronic_cross_section)
       : ScatterAction(in[0], in[1], time),
         number_of_fractional_photons_(nofp),
-        hadron_out_t_(outgoing_hadron_type(in)) {
+        hadron_out_t_(outgoing_hadron_type(in)),
+        hadronic_cross_section_(hadronic_cross_section) {
     reac_ = photon_reaction_type(in);
     hadron_out_mass_ = sample_out_hadron_mass(hadron_out_t_);
   }
@@ -170,6 +172,8 @@ class ScatterActionPhoton : public ScatterAction {
 
   /// Total cross section of photonic process.
   double cross_section_photons_ = 0.0;
+
+  double hadronic_cross_section_ = 0.0;
 
   /**
    * Calculate the differential cross section of photon process.
