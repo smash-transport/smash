@@ -71,7 +71,7 @@ class ListModus : public ModusDefault {
                      const ExperimentParameters &parameters);
 
   /**
-   * Generates initial state of the particles in the system according to list. 
+   * Generates initial state of the particles in the system according to list.
    *
    * \param[out] particles An empty list that gets filled up by this function
    * \param[in] parameters Unused, but necessary because of templated use of
@@ -128,13 +128,14 @@ class ListModus : public ModusDefault {
   std::pair<bool, double> check_formation_time_(
       const std::string &particle_list);
 
-  /// check if file given by filepath has events left after streampos last_position
+  /// check if file given by filepath has events left after streampos
+  /// last_position
   bool file_has_events_(bf::path filepath, std::streampos last_position);
 
   /// last read position in current file
   std::streampos last_read_position_;
 
-  /// Return file path based on integer 
+  /// Return file path based on integer
   bf::path file_path_(const int file_id);
 
   /// Read the next event. Either from the current file or from the next.
@@ -147,7 +148,6 @@ class ListModus : public ModusDefault {
    * \param[in] m The ListModus object to write into out
    */
   friend std::ostream &operator<<(std::ostream &, const ListModus &);
-
 };
 
 }  // namespace smash

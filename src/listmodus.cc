@@ -161,7 +161,7 @@ double ListModus::initial_conditions(Particles *particles,
 
   constexpr int max_warns_precision = 10, max_warn_mass_consistency = 10;
 
-  for (const Line &line : line_parser(particle_lists)) {
+  for (const Line &line : line_parser(particle_list)) {
     std::istringstream lineinput(line.text);
     double t, x, y, z, mass, E, px, py, pz;
     int id, charge;
@@ -196,25 +196,28 @@ double ListModus::initial_conditions(Particles *particles,
                      << ", where m is SMASH mass.";
           n_warns_precision_++;
         } else if (n_warns_precision_ == max_warns_precision) {
-          log.warn("Further warnings about SMASH mass versus input mass"
-                   " inconsistencies will be suppressed.");
-         n_warns_precision_++;
+          log.warn(
+              "Further warnings about SMASH mass versus input mass"
+              " inconsistencies will be suppressed.");
+          n_warns_precision_++;
         }
         particle.set_4momentum(mass, ThreeVector(px, py, pz));
       }
       particle.set_4momentum(FourVector(E, px, py, pz));
       // On-shell condition consistency check
-      if (std::abs(particle.momentum().sqr() - mass*mass) > really_small) {
+      if (std::abs(particle.momentum().sqr() - mass * mass) > really_small) {
         if (n_warns_mass_consistency_ < max_warn_mass_consistency) {
-          log.warn() << "Provided 4-momentum " << particle.momentum() << " and "
-                    << " mass " << mass << " do not satisfy E^2 - p^2 = m^2."
-                    << " This may originate from the lack of numerical"
-                    << " precision in the input. Setting E to sqrt(p^2 + m^2).";
+          log.warn()
+              << "Provided 4-momentum " << particle.momentum() << " and "
+              << " mass " << mass << " do not satisfy E^2 - p^2 = m^2."
+              << " This may originate from the lack of numerical"
+              << " precision in the input. Setting E to sqrt(p^2 + m^2).";
           n_warns_mass_consistency_++;
         } else if (n_warns_mass_consistency_ == max_warn_mass_consistency) {
-          log.warn("Further warnings about E != sqrt(p^2 + m^2) will"
-                   " be suppressed.");
-         n_warns_mass_consistency_++;
+          log.warn(
+              "Further warnings about E != sqrt(p^2 + m^2) will"
+              " be suppressed.");
+          n_warns_mass_consistency_++;
         }
         particle.set_4momentum(mass, ThreeVector(px, py, pz));
       }
@@ -272,7 +275,6 @@ bf::path ListModus::file_path_(const int file_id) {
 }
 
 std::string ListModus::next_event_() {
-
   constexpr char comment_token = '#';
 
   const bf::path fpath = file_path_(file_id_);
@@ -282,27 +284,29 @@ std::string ListModus::next_event_() {
   if (last_read_position_ == 0) {
     // skip header (4 lines starting with #)
     std::string tmp;
-    while (std::getline(ifs, tmp) && ifs.peek() == comment_token)
-      ;
+    while (std::getline(ifs, tmp) && ifs.peek() == comment_token) {
+    }
   }
 
   if (!file_has_events_(fpath, last_read_position_)) {
-    // current file out of events. get next file and call this function recursively.
+    // current file out of events. get next file and call this function
+    // recursively.
     file_id_++;
     last_read_position_ = 0;
     ifs.close();
     return next_event_();
   }
 
-  // read one event. events marked by line # event end i 
+  // read one event. events marked by line # event end i
   std::string event_string;
   const std::string needle = "end";
   std::string line;
   while (getline(ifs, line)) {
     if (line.find(needle) == std::string::npos) {
       event_string += line + "\n";
-    } else
+    } else {
       break;
+    }
   }
 
   // save position for next event read
@@ -321,7 +325,7 @@ bool ListModus::file_has_events_(bf::path filepath,
   ifs.seekg(last_position);
   // skip over comment lines
   while (std::getline(ifs, line) && line[0] != '#')
-    ;
+  {}
   if (ifs.eof()) {
     return false;
   }

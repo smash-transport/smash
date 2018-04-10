@@ -23,26 +23,24 @@ using namespace smash;
 static const double accuracy = 5.e-4;
 static const bf::path testoutputpath = bf::absolute(SMASH_TEST_OUTPUT_PATH);
 
-bf::path create_particlefile(const OutputParameters out_par,
-                             const int file_number,
-                             std::vector<ParticleList> &init_particle_vec,
-                             const int particles_per_event = 10,
-                             const int n_events = 1) {
+static void create_particlefile(const OutputParameters out_par, const int file_number,
+                         std::vector<ParticleList> &init_particle_vec,
+                         const int particles_per_event = 10,
+                         const int n_events = 1) {
   std::unique_ptr<OutputInterface> osc2013final =
       create_oscar_output("Oscar2013", "Particles", testoutputpath, out_par);
   VERIFY(bool(osc2013final));
 
   const bf::path outputfilename = "particle_lists.oscar";
   const bf::path outputfilepath = testoutputpath / outputfilename;
-  VERIFY(bf::exists(outputfilepath));
 
   // Create random particles
   for (int event = 0; event < n_events; event++) {
     Particles particles;
-    for (size_t i = 0; i < particles_per_event; i++) {
+    for (int i = 0; i < particles_per_event; i++) {
       particles.insert(Test::smashon_random());
     }
-
+    
     /*
     std::cout << "Initial particles:" << std::endl;
     for (const auto &p : particles) {
@@ -57,13 +55,17 @@ bf::path create_particlefile(const OutputParameters out_par,
     osc2013final->at_eventend(particles, event, impact_parameter);
   }
 
+  // release and let destructor rename the file
+  osc2013final.reset();
+
+  VERIFY(bf::exists(outputfilepath));
   // Rename the oscar file to match listmodus format
   const std::string pathstring = "event" + std::to_string(file_number);
   const bf::path listinputfile = pathstring;
   const bf::path inputfilepath = testoutputpath / listinputfile;
   std::rename(outputfilepath.native().c_str(), inputfilepath.native().c_str());
 
-  return inputfilepath;
+  VERIFY(bf::exists(inputfilepath));
 }
 
 TEST(directory_is_created) {
@@ -104,12 +106,13 @@ TEST(list_from_oscar2013_output) {
   Particles particles_read;
   list_modus.initial_conditions(&particles_read, par);
 
-  /*
+  /* 
   std::cout << "Particles from list modus:" << std::endl;
   for (const auto &p : particles_read) {
     std::cout << p << std::endl;
   }
   */
+  
 
   // Scroll particles back to the earliest time, as list modus is supposed to do
   double earliest_t = 1.e8;
@@ -148,8 +151,8 @@ TEST(multiple_files_one_event) {
 
   std::vector<ParticleList> init_particles;
   constexpr int events_per_file = 1;
-  constexpr int particles_per_event = 10;
-  constexpr int n_files = 5;
+  constexpr int particles_per_event = 2;
+  constexpr int n_files = 2;
 
   for (int i = 0; i < n_files; i++) {
     create_particlefile(out_par, i, init_particles, particles_per_event,
@@ -263,7 +266,6 @@ TEST(multiple_files_multiple_events) {
   }
 }
 
-
 TEST(multiple_events_in_file) {
   OutputParameters out_par = OutputParameters();
   out_par.part_only_final = true;
@@ -275,7 +277,7 @@ TEST(multiple_events_in_file) {
   std::vector<ParticleList> init_particles;
 
   create_particlefile(out_par, 0, init_particles, particles_per_event,
-max_events);
+                      max_events);
 
   // Create list modus
   std::string list_conf_str = "List:\n";
@@ -331,4 +333,3 @@ max_events);
     }
   }
 }
-
