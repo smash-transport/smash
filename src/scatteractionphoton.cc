@@ -31,6 +31,11 @@ namespace smash {
 // This mapping is unique.
 ScatterActionPhoton::ReactionType ScatterActionPhoton::photon_reaction_type(
     const ParticleList &in) {
+
+  if (in.size() != 2) {
+      return ReactionType::no_reaction;
+  }
+
   PdgCode a = in[0].pdgcode();
   PdgCode b = in[1].pdgcode();
 
@@ -366,7 +371,7 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections(
   if (xsection <= 0) {
     xsection = 0.1;
     const auto &log = logger<LogArea::ScatterAction>();
-    log.error("Calculated negative cross section.\nParticles ",
+    log.warn("Calculated negative cross section.\nParticles ",
               incoming_particles_, " mass rho particle: ", m_rho,
               ", sqrt_s: ", std::sqrt(s));
   }
