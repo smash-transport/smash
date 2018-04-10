@@ -461,7 +461,6 @@ void Nucleus::copy_particles(Particles *external_particles) {
     a_file << std::to_string(this_position.x1()) + " " +
               std::to_string(this_position.x2()) + " " +
               std::to_string(this_position.x3()) << std::endl;
-    a_file.close();
   }
 }*/
 

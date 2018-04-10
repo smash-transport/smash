@@ -53,7 +53,12 @@ struct OutputParameters {
       td_tmn = (quan.count(ThermodynamicQuantity::Tmn) > 0);
       td_tmn_landau = (quan.count(ThermodynamicQuantity::TmnLandau) > 0);
       td_v_landau = (quan.count(ThermodynamicQuantity::LandauVelocity) > 0);
-      td_dens_type = subcon.take({"Type"}, DensityType::None);
+      td_dens_type = subcon.take({"Type"}, DensityType::Baryon);
+      if (td_dens_type == DensityType::None &&
+          (td_rho_eckart || td_tmn || td_tmn_landau || td_v_landau)) {
+        log.warn("Requested Thermodynamics output with Density type None. ",
+                 "Change the density type to avoid output being dropped.");
+      }
       td_smearing = subcon.take({"Smearing"}, true);
     }
 

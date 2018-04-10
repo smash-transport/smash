@@ -137,31 +137,33 @@ TEST(nucleus_potential_profile) {
   std::ofstream a_file;
   const double timestep = param.labclock.timestep_duration();
   for (auto it = 0; it < 20; it++) {
-    a_file.open(("Nucleus_U_xy.vtk." + std::to_string(it)).c_str(),
-                std::ios::out);
-    plist = P.copy_to_vector();
-    a_file << "# vtk DataFile Version 2.0\n"
-           << "potential\n"
-           << "ASCII\n"
-           << "DATASET STRUCTURED_POINTS\n"
-           << "DIMENSIONS " << 2 * nx + 1 << " " << 2 * ny + 1 << " 1\n"
-           << "SPACING 1 1 1\n"
-           << "ORIGIN " << -nx << " " << -ny << " 0\n"
-           << "POINT_DATA " << (2 * nx + 1) * (2 * ny + 1) << "\n"
-           << "SCALARS potential double 1\n"
-           << "LOOKUP_TABLE default\n";
+    {
+      a_file.open(("Nucleus_U_xy.vtk." + std::to_string(it)).c_str(),
+                  std::ios::out);
+      plist = P.copy_to_vector();
+      a_file << "# vtk DataFile Version 2.0\n"
+             << "potential\n"
+             << "ASCII\n"
+             << "DATASET STRUCTURED_POINTS\n"
+             << "DIMENSIONS " << 2 * nx + 1 << " " << 2 * ny + 1 << " 1\n"
+             << "SPACING 1 1 1\n"
+             << "ORIGIN " << -nx << " " << -ny << " 0\n"
+             << "POINT_DATA " << (2 * nx + 1) * (2 * ny + 1) << "\n"
+             << "SCALARS potential double 1\n"
+             << "LOOKUP_TABLE default\n";
 
-    a_file << std::setprecision(8);
-    a_file << std::fixed;
-    for (auto iy = -ny; iy <= ny; iy++) {
-      for (auto ix = -nx; ix <= nx; ix++) {
-        r = ThreeVector(ix * dx, iy * dy, 8.0);
-        pot_value = pot->potential(r, plist, proton);
-        a_file << pot_value << " ";
+      a_file << std::setprecision(8);
+      a_file << std::fixed;
+      for (auto iy = -ny; iy <= ny; iy++) {
+        for (auto ix = -nx; ix <= nx; ix++) {
+          r = ThreeVector(ix * dx, iy * dy, 8.0);
+          pot_value = pot->potential(r, plist, proton);
+          a_file << pot_value << " ";
+        }
+        a_file << "\n";
       }
-      a_file << "\n";
     }
-    a_file.close();
+
     for (auto i = 0; i < 50; i++) {
       const double time_to = 5.0 * it + i * timestep;
       const double dt = propagate_straight_line(&P, time_to, {});

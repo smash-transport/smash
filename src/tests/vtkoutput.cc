@@ -73,133 +73,134 @@ TEST(vtkoutputfile) {
       testoutputpath / "pos_ev00000_tstep00001.vtk";
   VERIFY(bf::exists(outputfile2path));
 
-  bf::fstream outputfile;
-  outputfile.open(outputfilepath, std::ios_base::in);
-  if (outputfile.good()) {
-    std::string line, item;
-    /* Check header */
-    std::string output_header = "";
-    std::string header =
-        "# vtk DataFile Version 2.0\n"
-        "Generated from molecular-offset data " VERSION_MAJOR
-        "\n"
-        "ASCII\n"
-        "DATASET UNSTRUCTURED_GRID\n";
-    do {
-      std::getline(outputfile, line);
-      output_header += line + '\n';
-    } while (line != "DATASET UNSTRUCTURED_GRID" && !outputfile.eof());
-    COMPARE(output_header, header);
-    /* Check position information */
-    outputfile >> item;
-    COMPARE(item, "POINTS");
-    outputfile >> item;
-    COMPARE(std::stoul(item), particles.size());
-    outputfile >> item;
-    COMPARE(item, "double");
-    COMPARE(particles.size(), size_t(number_of_particles));
-    for (const auto &pd : particles) {
-      std::array<std::string, 3> position_string;
-      for (int j = 0; j < 3; j++) {
-        outputfile >> item;
-        position_string[j] = item;
+  {
+    bf::fstream outputfile;
+    outputfile.open(outputfilepath, std::ios_base::in);
+    if (outputfile.good()) {
+      std::string line, item;
+      /* Check header */
+      std::string output_header = "";
+      std::string header =
+          "# vtk DataFile Version 2.0\n"
+          "Generated from molecular-offset data " VERSION_MAJOR
+          "\n"
+          "ASCII\n"
+          "DATASET UNSTRUCTURED_GRID\n";
+      do {
+        std::getline(outputfile, line);
+        output_header += line + '\n';
+      } while (line != "DATASET UNSTRUCTURED_GRID" && !outputfile.eof());
+      COMPARE(output_header, header);
+      /* Check position information */
+      outputfile >> item;
+      COMPARE(item, "POINTS");
+      outputfile >> item;
+      COMPARE(std::stoul(item), particles.size());
+      outputfile >> item;
+      COMPARE(item, "double");
+      COMPARE(particles.size(), size_t(number_of_particles));
+      for (const auto &pd : particles) {
+        std::array<std::string, 3> position_string;
+        for (int j = 0; j < 3; j++) {
+          outputfile >> item;
+          position_string[j] = item;
+        }
+        compare_threevector(position_string, pd.position().threevec());
       }
-      compare_threevector(position_string, pd.position().threevec());
-    }
-    /* Check cell information */
-    outputfile >> item;
-    COMPARE(item, "CELLS");
-    outputfile >> item;
-    COMPARE(std::stoul(item), particles.size());
-    outputfile >> item;
-    COMPARE(std::stoul(item), particles.size() * 2);
-    for (int i = 0; i < number_of_particles; i++) {
+      /* Check cell information */
       outputfile >> item;
-      COMPARE(std::atoi(item.c_str()), 1);
+      COMPARE(item, "CELLS");
       outputfile >> item;
-      COMPARE(std::atoi(item.c_str()), i);
-    }
-    outputfile >> item;
-    COMPARE(item, "CELL_TYPES");
-    outputfile >> item;
-    COMPARE(std::stoul(item), particles.size());
-    for (int i = 0; i < number_of_particles; i++) {
+      COMPARE(std::stoul(item), particles.size());
       outputfile >> item;
-      COMPARE(std::atoi(item.c_str()), 1);
-    }
-    /* Check point data */
-    outputfile >> item;
-    COMPARE(item, "POINT_DATA");
-    outputfile >> item;
-    COMPARE(std::stoul(item), particles.size());
-    outputfile >> item;
-    COMPARE(item, "SCALARS");
-    outputfile >> item;
-    COMPARE(item, "pdg_codes");
-    outputfile >> item;
-    COMPARE(item, "int");
-    outputfile >> item;
-    COMPARE(item, "1");
-    outputfile >> item;
-    COMPARE(item, "LOOKUP_TABLE");
-    outputfile >> item;
-    COMPARE(item, "default");
-    for (int i = 0; i < number_of_particles; i++) {
+      COMPARE(std::stoul(item), particles.size() * 2);
+      for (int i = 0; i < number_of_particles; i++) {
+        outputfile >> item;
+        COMPARE(std::atoi(item.c_str()), 1);
+        outputfile >> item;
+        COMPARE(std::atoi(item.c_str()), i);
+      }
       outputfile >> item;
-      COMPARE(item, "661");
-    }
-    /* Check SCALARS is_formed */
-    outputfile >> item;
-    COMPARE(item, "SCALARS");
-    outputfile >> item;
-    COMPARE(item, "is_formed");
-    outputfile >> item;
-    COMPARE(item, "int");
-    outputfile >> item;
-    COMPARE(item, "1");
-    outputfile >> item;
-    COMPARE(item, "LOOKUP_TABLE");
-    outputfile >> item;
-    COMPARE(item, "default");
-    for (int i = 0; i < number_of_particles; i++) {
+      COMPARE(item, "CELL_TYPES");
+      outputfile >> item;
+      COMPARE(std::stoul(item), particles.size());
+      for (int i = 0; i < number_of_particles; i++) {
+        outputfile >> item;
+        COMPARE(std::atoi(item.c_str()), 1);
+      }
+      /* Check point data */
+      outputfile >> item;
+      COMPARE(item, "POINT_DATA");
+      outputfile >> item;
+      COMPARE(std::stoul(item), particles.size());
+      outputfile >> item;
+      COMPARE(item, "SCALARS");
+      outputfile >> item;
+      COMPARE(item, "pdg_codes");
+      outputfile >> item;
+      COMPARE(item, "int");
       outputfile >> item;
       COMPARE(item, "1");
-    }
-    /* Check SCALARS cross_section_scaling_factor */
-    outputfile >> item;
-    COMPARE(item, "SCALARS");
-    outputfile >> item;
-    COMPARE(item, "cross_section_scaling_factor");
-    outputfile >> item;
-    COMPARE(item, "double");
-    outputfile >> item;
-    COMPARE(item, "1");
-    outputfile >> item;
-    COMPARE(item, "LOOKUP_TABLE");
-    outputfile >> item;
-    COMPARE(item, "default");
-    for (int i = 0; i < number_of_particles; i++) {
+      outputfile >> item;
+      COMPARE(item, "LOOKUP_TABLE");
+      outputfile >> item;
+      COMPARE(item, "default");
+      for (int i = 0; i < number_of_particles; i++) {
+        outputfile >> item;
+        COMPARE(item, "661");
+      }
+      /* Check SCALARS is_formed */
+      outputfile >> item;
+      COMPARE(item, "SCALARS");
+      outputfile >> item;
+      COMPARE(item, "is_formed");
+      outputfile >> item;
+      COMPARE(item, "int");
       outputfile >> item;
       COMPARE(item, "1");
-    }
-    /* Check momentum vectors */
-    outputfile >> item;
-    COMPARE(item, "VECTORS");
-    outputfile >> item;
-    COMPARE(item, "momentum");
-    outputfile >> item;
-    COMPARE(item, "double");
-    COMPARE(particles.size(), size_t(number_of_particles));
-    for (const auto &pd : particles) {
-      std::array<std::string, 3> momentum_string;
-      for (int j = 0; j < 3; j++) {
+      outputfile >> item;
+      COMPARE(item, "LOOKUP_TABLE");
+      outputfile >> item;
+      COMPARE(item, "default");
+      for (int i = 0; i < number_of_particles; i++) {
         outputfile >> item;
-        momentum_string[j] = item;
+        COMPARE(item, "1");
       }
-      compare_threevector(momentum_string, pd.momentum().threevec());
+      /* Check SCALARS cross_section_scaling_factor */
+      outputfile >> item;
+      COMPARE(item, "SCALARS");
+      outputfile >> item;
+      COMPARE(item, "cross_section_scaling_factor");
+      outputfile >> item;
+      COMPARE(item, "double");
+      outputfile >> item;
+      COMPARE(item, "1");
+      outputfile >> item;
+      COMPARE(item, "LOOKUP_TABLE");
+      outputfile >> item;
+      COMPARE(item, "default");
+      for (int i = 0; i < number_of_particles; i++) {
+        outputfile >> item;
+        COMPARE(item, "1");
+      }
+      /* Check momentum vectors */
+      outputfile >> item;
+      COMPARE(item, "VECTORS");
+      outputfile >> item;
+      COMPARE(item, "momentum");
+      outputfile >> item;
+      COMPARE(item, "double");
+      COMPARE(particles.size(), size_t(number_of_particles));
+      for (const auto &pd : particles) {
+        std::array<std::string, 3> momentum_string;
+        for (int j = 0; j < 3; j++) {
+          outputfile >> item;
+          momentum_string[j] = item;
+        }
+        compare_threevector(momentum_string, pd.momentum().threevec());
+      }
     }
   }
-  outputfile.close();
   VERIFY(bf::remove(outputfilepath));
   VERIFY(bf::remove(outputfile2path));
 }
