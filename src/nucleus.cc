@@ -31,8 +31,7 @@ Nucleus::Nucleus(Configuration &config, int nTest) {
   // Fill nuclei with particles.
   std::map<PdgCode, int> part = config.take({"Particles"});
   fill_from_list(part, nTest);
-  // Ask to construct nuclei based on atomic number;
-  // otherwise, look for the user-defined values or take the default parameters.
+  // Look for user-defined values or take the default parameters.
   if (config.has_value({"Automatic"}) && config.take({"Automatic"})) {
     set_parameters_automatic();
   } else {
@@ -55,14 +54,13 @@ double Nucleus::mass() const {
  * The distribution
  * ----------------
  *
- *
  * Nucleons in nuclei are distributed according to a
  * Woods-Saxon-distribution (see \iref{Woods:1954zz})
  *
  * \f[\frac{dN}{d^3r} = \frac{\rho_0}{\exp\left(\frac{r-r_0}{d}\right)
  * +1},\f]
  *
- * where \f$d\f$ is the \em diffuseness of the nucleus. For \f$d=0\f$,
+ * where \f$d\f$ is the \em diffusiveness of the nucleus. For \f$d=0\f$,
  * the nucleus is a hard sphere.  \f$\rho_0\f$ and \f$r_0\f$ are, in
  * this limit, the nuclear ground state density and
  * nuclear radius, respectively. For small \f$d\f$, this is still
@@ -76,7 +74,7 @@ double Nucleus::mass() const {
  *
  * Let us rewrite that in units of \f$d\f$ (that's the diffusiveness)
  * and drop any constraints on normalization (since in the end we only
- * care about relative probabilities: we create as many nuclei as we
+ * care about relative probabilities: we create as many nucleons as we
  * need). Now, \f$p(B)\f$ is the un-normalized probability to obtain a
  * point at \f$r = Bd\f$ (with \f$R = r_0/d\f$):
  *
@@ -139,7 +137,7 @@ double Nucleus::mass() const {
  * \frac{1}{c_1} \cdot \frac{3}{R} \\
  * \frac{1}{c_1} \cdot \frac{6}{R^2} \\
  * \frac{1}{c_1} \cdot \frac{6}{R^3}
- * \end{cases}.\]
+ * \end{cases}.\f]
  *
  * Let us see how those are generated. \f$\chi_i\f$ are uniformly
  * distributed numbers between 0 and 1.
@@ -195,15 +193,12 @@ double Nucleus::mass() const {
  * \f$\tau\f$ yields \f$t\f$], integrated over all possible combinations
  * that have that property.
  *
- * \fpPrecision
- * Why does the `do-while` loop require double-precision?
- *
  * From the beginning
  * ------------------
  *
  *  So, the algorithm needs to do all this from the end:
  *
- **/
+ */
 ThreeVector Nucleus::distribute_nucleon() const {
   // Get the solid angle of the nucleon.
   Angles dir;
@@ -236,14 +231,15 @@ ThreeVector Nucleus::distribute_nucleon() const {
         }
       }
     }
-    /** \li Generate \f$t\f$ from the distribution in the respective
+    /**
+     * \li Generate \f$t\f$ from the distribution in the respective
      * branches
-     * \li \a reject that number with a probability
+     * \li \a Reject that number with a probability
      * \f$1-(1+\exp(-|t|))^{-1}\f$ (the efficiency of this should be
      * \f$\gg \frac{1}{2}\f$)
-     **/
+     */
   } while (Random::canonical() > 1. / (1. + std::exp(-std::abs(t))));
-  /// \li shift and rescale \f$t\f$ to \f$r = d\cdot t + r_0\f$
+  /// \li Shift and rescale \f$t\f$ to \f$r = d\cdot t + r_0\f$
   double position_scaled = t + radius_scaled;
   double position = position_scaled * diffusiveness_;
   return dir.threevec() * position;
@@ -257,8 +253,8 @@ void Nucleus::arrange_nucleons() {
   for (auto i = begin(); i != end(); i++) {
     // Initialize momentum
     i->set_4momentum(i->pole_mass(), 0.0, 0.0, 0.0);
-    // Sampling the W.S., get the radial
-    // position and solid angle for the nucleon.
+    /* Sampling the Woods-Saxon, get the radial
+     * position and solid angle for the nucleon. */
     ThreeVector pos = distribute_nucleon();
 
     // Set the position of the nucleon.
@@ -270,6 +266,10 @@ void Nucleus::arrange_nucleons() {
   rotate();
 }
 
+/**
+ * \todo Issue #4743 covers the update of this part with references; Also
+ * the Hirano-Nara correction should be an option
+ */
 void Nucleus::set_parameters_automatic() {
   int A = Nucleus::number_of_particles();
   switch (A) {
@@ -318,11 +318,9 @@ void Nucleus::set_parameters_automatic() {
 }
 
 void Nucleus::set_parameters_from_config(Configuration &config) {
-  // Diffusiveness
   if (config.has_value({"Diffusiveness"})) {
     set_diffusiveness(static_cast<double>(config.take({"Diffusiveness"})));
   }
-  // Radius
   if (config.has_value({"Radius"})) {
     set_nuclear_radius(static_cast<double>(config.take({"Radius"})));
   } else {
@@ -379,8 +377,8 @@ void Nucleus::generate_fermi_momenta() {
     // No Fermi momenta should be assigned
     assert(ptot.x1() == 0.0 && ptot.x2() == 0.0 && ptot.x3() == 0.0);
   } else {
-    // Make sure that total momentum is zero - redistribute ptot equally
-    // among protons and neutrons
+    /* Ensure zero total momentum of nucleus - redistribute ptot equally
+     * among protons and neutrons */
     const ThreeVector centralizer = ptot / A;
     for (auto i = begin(); i != end(); i++) {
       if (i->pdgcode() == pdg::p || i->pdgcode() == pdg::n) {
@@ -395,26 +393,26 @@ void Nucleus::boost(double beta_scalar) {
   double beta_squared = beta_scalar * beta_scalar;
   double one_over_gamma = std::sqrt(1.0 - beta_squared);
   double gamma = 1.0 / one_over_gamma;
-  // We are talking about a /passive/ lorentz transformation here, as
-  // far as I can see, so we need to boost in the direction opposite to
-  // where we want to go
-  //     ( The vector we transform - p - stays unchanged, but we go into
-  //       a system that moves with -beta. Now in this frame, it seems
-  //       like p has been accelerated with +beta.
-  //     )
+  /* We are talking about a /passive/ lorentz transformation here, as
+   * far as I can see, so we need to boost in the direction opposite to
+   * where we want to go
+   *     ( The vector we transform - p - stays unchanged, but we go into
+   *       a system that moves with -beta. Now in this frame, it seems
+   *       like p has been accelerated with +beta.
+   *     ) */
   for (auto i = begin(); i != end(); i++) {
-    // a real Lorentz Transformation would leave the particles at
-    // different times here, which we would then have to propagate back
-    // to equal times. Since we know the result, we can simply multiply
-    // the z-value with 1/gamma.
+    /* a real Lorentz Transformation would leave the particles at
+     * different times here, which we would then have to propagate back
+     * to equal times. Since we know the result, we can simply multiply
+     * the z-value with 1/gamma. */
     FourVector this_position = i->position();
     this_position.set_x3(this_position.x3() * one_over_gamma);
     i->set_4position(this_position);
-    // The simple Lorentz transformation of momenta does not take into account
-    // that nucleus has binding energy. Here we apply the method used
-    // in the JAM code \iref{Nara:1999dz}: p' = p_beam + gamma*p_F.
-    // This formula is derived under assumption that all nucleons have
-    // the same binding energy.
+    /* The simple Lorentz transformation of momenta does not take into account
+     * that nucleus has binding energy. Here we apply the method used
+     * in the JAM code \iref{Nara:1999dz}: p' = p_beam + gamma*p_F.
+     * This formula is derived under assumption that all nucleons have
+     * the same binding energy. */
     ThreeVector mom_i = i->momentum().threevec();
     i->set_4momentum(i->pole_mass(), mom_i.x1(), mom_i.x2(),
                      gamma * (beta_scalar * i->pole_mass() + mom_i.x3()));
@@ -453,18 +451,6 @@ void Nucleus::copy_particles(Particles *external_particles) {
   }
 }
 
-/*void Nucleus::print_nucleus(const char * file_name) const {
-  for (auto i = cbegin(); i != cend(); i++) {
-    FourVector this_position = i->position();
-    std::ofstream a_file;
-    a_file.open(file_name, std::ios::app);
-    a_file << std::to_string(this_position.x1()) + " " +
-              std::to_string(this_position.x2()) + " " +
-              std::to_string(this_position.x3()) << std::endl;
-    a_file.close();
-  }
-}*/
-
 FourVector Nucleus::center() const {
   FourVector centerpoint(0.0, 0.0, 0.0, 0.0);
   for (auto p = cbegin(); p != cend(); p++) {
@@ -474,6 +460,7 @@ FourVector Nucleus::center() const {
   return centerpoint;
 }
 
+/// \todo(warning) this friend is documented in .h file
 std::ostream &operator<<(std::ostream &out, const Nucleus &n) {
   return out << "  #particles   #testparticles   mass [GeV]   "
                 "radius [fm]  diffusiveness [fm]\n"

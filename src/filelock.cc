@@ -15,7 +15,7 @@
 
 namespace smash {
 
-FileLock::FileLock(bf::path path) : path_(path), acquired_(false) {}
+FileLock::FileLock(const bf::path& path) : path_(path), acquired_(false) {}
 
 bool FileLock::acquire() {
   if (acquired_) {

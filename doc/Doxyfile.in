@@ -197,11 +197,11 @@ TAB_SIZE               = 4
 # will result in a user-defined paragraph with heading "Side Effects:".
 # You can put \n's in the value part of an alias to insert newlines.
 
-ALIASES                = "NucleusModus=Smash::NucleusModus" \
-                         "SphereModus=Smash::SphereModus" \
-                         "BoxModus=Smash::BoxModus" \
-                         "ColliderModus=Smash::ColliderModus" \
-                         "ListModus=Smash::ListModus" \
+ALIASES                = "NucleusModus=smash::NucleusModus" \
+                         "SphereModus=smash::SphereModus" \
+                         "BoxModus=smash::BoxModus" \
+                         "ColliderModus=smash::ColliderModus" \
+                         "ListModus=smash::ListModus" \
                          "fpPrecision=\xrefitem float_precision \"Floating-Point Precision\" \"Floating-Point Precision\"" \
                          "key=\c" \
                          "Userguide=" \

@@ -17,12 +17,11 @@
 namespace smash {
 
 /**
- * Return velocity in the center of velocities frame of two particles given
+ * \return velocity in the center of velocities frame of two particles given
  * their mandelstam s and masses
- *
- * \param s mandelstamm s of the collision [GeV^2]
- * \param ma Mass of the first particle [GeV]
- * \param mb Mass of the second particle [GeV]
+ * \param[in] s mandelstamm s of the collision [GeV^2]
+ * \param[in] ma Mass of the first particle [GeV]
+ * \param[in] mb Mass of the second particle [GeV]
  *
  * needs to be double to allow for calculations at LHC energies
  */
@@ -33,12 +32,11 @@ inline double center_of_velocity_v(double s, double ma, double mb) {
 }
 
 /**
- * Return velocity of projectile in the fixed target frame given
+ * \return velocity of projectile in the fixed target frame given
  * their mandelstam s of projectile and target and their masses
- *
- * \param s mandelstamm s of the collision [GeV^2]
- * \param ma Mass of the projectile [GeV]
- * \param mb Mass of the target [GeV]
+ * \param[in] s mandelstamm s of the collision [GeV^2]
+ * \param[in] ma Mass of the projectile [GeV]
+ * \param[in] mb Mass of the target [GeV]
  */
 inline double fixed_target_projectile_v(double s, double ma, double mb) {
   const double inv_gamma = 2 * ma * mb / (s - ma * ma - mb * mb);
@@ -46,12 +44,11 @@ inline double fixed_target_projectile_v(double s, double ma, double mb) {
 }
 
 /**
- * Return the squared center-of-mass momentum of two particles,
+ * \return the squared center-of-mass momentum of two particles,
  * given s and their masses.
- *
- * \param s mandelstamm s of the process [GeV^2].
- * \param mass_a Mass of first particle [GeV].
- * \param mass_b Mass of second particle [GeV].
+ * \param[in] s mandelstamm s of the process [GeV^2].
+ * \param[in] mass_a Mass of first particle [GeV].
+ * \param[in] mass_b Mass of second particle [GeV].
  */
 template <typename T>
 T pCM_sqr_from_s(const T s, const T mass_a, const T mass_b) noexcept {
@@ -61,12 +58,11 @@ T pCM_sqr_from_s(const T s, const T mass_a, const T mass_b) noexcept {
 }
 
 /**
- * Return the center-of-mass momentum of two particles,
+ * \return the center-of-mass momentum of two particles,
  * given s and their masses.
- *
- * \param s mandelstamm s of the process [GeV^2].
- * \param mass_a Mass of first particle [GeV].
- * \param mass_b Mass of second particle [GeV].
+ * \param[in] s mandelstamm s of the process [GeV^2].
+ * \param[in] mass_a Mass of first particle [GeV].
+ * \param[in] mass_b Mass of second particle [GeV].
  */
 template <typename T>
 T pCM_from_s(const T s, const T mass_a, const T mass_b) noexcept {
@@ -75,12 +71,11 @@ T pCM_from_s(const T s, const T mass_a, const T mass_b) noexcept {
 }
 
 /**
- * Return the center-of-mass momentum of two particles,
+ * \return the center-of-mass momentum of two particles,
  * given sqrt(s) and their masses.
- *
- * \param sqrts sqrt(s) of the process [GeV].
- * \param mass_a Mass of first particle [GeV].
- * \param mass_b Mass of second particle [GeV].
+ * \param[in] sqrts sqrt(s) of the process [GeV].
+ * \param[in] mass_a Mass of first particle [GeV].
+ * \param[in] mass_b Mass of second particle [GeV].
  */
 template <typename T>
 T pCM(const T sqrts, const T mass_a, const T mass_b) noexcept {
@@ -88,12 +83,11 @@ T pCM(const T sqrts, const T mass_a, const T mass_b) noexcept {
 }
 
 /**
- * Return the squared center-of-mass momentum of two particles,
+ * \return the squared center-of-mass momentum of two particles,
  * given sqrt(s) and their masses.
- *
- * \param sqrts sqrt(s) of the process [GeV].
- * \param mass_a Mass of first particle [GeV].
- * \param mass_b Mass of second particle [GeV].
+ * \param[in] sqrts sqrt(s) of the process [GeV].
+ * \param[in] mass_a Mass of first particle [GeV].
+ * \param[in] mass_b Mass of second particle [GeV].
  */
 template <typename T>
 T pCM_sqr(const T sqrts, const T mass_a, const T mass_b) noexcept {
@@ -103,11 +97,11 @@ T pCM_sqr(const T sqrts, const T mass_a, const T mass_b) noexcept {
 /**
  * Get the range of mandelstam-t values allowed in a particular 2->2 process,
  * see PDG 2014 booklet, equ. (46.34).
- * \param sqrts sqrt(s) of the process [GeV].
- * \param m1 Mass of first  incoming particle [GeV].
- * \param m2 Mass of second incoming particle [GeV].
- * \param m3 Mass of first  outgoing particle [GeV].
- * \param m4 Mass of second outgoing particle [GeV].
+ * \param[in] sqrts sqrt(s) of the process [GeV].
+ * \param[in] m1 Mass of first  incoming particle [GeV].
+ * \param[in] m2 Mass of second incoming particle [GeV].
+ * \param[in] m3 Mass of first  outgoing particle [GeV].
+ * \param[in] m4 Mass of second outgoing particle [GeV].
  * \return array consisiting of {t_min, t_max}
  * Note that both t_min and t_max are negative,
  * with |t_min| < |t_max|, i.e. t_min > t_max.
@@ -144,8 +138,12 @@ static inline void check_radicand(double mandelstam_s, double radicand) {
   }
 }
 
-/** Convert mandelstam-s to p_lab in a fixed-target collision.
+/**
+ * Convert mandelstam-s to p_lab in a fixed-target collision.
  * This assumes both particles have the given mass.
+ * \param[in] mandelstam_s the mandelstam variable s
+ * \param[in] mass mass of projectile and target
+ * \return momentum of the projectile in the lab frame
  */
 inline double plab_from_s(double mandelstam_s, double mass) {
   const double radicand = mandelstam_s * (mandelstam_s - 4 * mass * mass);
@@ -156,14 +154,24 @@ inline double plab_from_s(double mandelstam_s, double mass) {
 #endif
   return std::sqrt(radicand) / (2 * mass);
 }
-/** Convert mandelstam-s to p_lab in a fixed-target collision.
+
+/**
+ * Convert mandelstam-s to p_lab in a fixed-target collision.
  * This assumes both particles have the mass of a nucleon.
+ * \param[in] mandelstam_s the mandelstam variable s
+ * \return momentum of the projectile in the lab frame
  */
 inline double plab_from_s(double mandelstam_s) {
   return plab_from_s(mandelstam_s, nucleon_mass);
 }
-/** Convert mandelstam-s to p_lab in a fixed-target collision.
+
+/**
+ * Convert mandelstam-s to p_lab in a fixed-target collision.
  * The mass of the projectile and the mass of the target have to be given.
+ * \param[in] mandelstam_s the mandelstam variable s
+ * \param[in] m_projectile mass of the projectile
+ * \param[in] m_target mass of the target
+ * \return momentum of the projectile in the lab frame
  */
 inline double plab_from_s(double mandelstam_s, double m_projectile,
                           double m_target) {
@@ -172,10 +180,9 @@ inline double plab_from_s(double mandelstam_s, double m_projectile,
   const double radicand =
       (mandelstam_s - m_sum * m_sum) * (mandelstam_s - m_diff * m_diff);
 /* This is equivalent to:
-const double radicand
-    = (mandelstam_s - m_a_sq - m_b_sq) * (mandelstam_s - m_a_sq - m_b_sq)
-      - 4 * m_a_sq * m_b_sq;
-*/
+ * const double radicand
+ *     = (mandelstam_s - m_a_sq - m_b_sq) * (mandelstam_s - m_a_sq - m_b_sq)
+ *     - 4 * m_a_sq * m_b_sq; */
 #ifndef NDEBUG
   check_energy(mandelstam_s, m_sum);
   check_radicand(mandelstam_s, radicand);
@@ -187,6 +194,10 @@ const double radicand
  * Convert E_kin to mandelstam-s for a fixed-target setup,
  * with a projectile of mass m_P and a kinetic energy e_kin
  * and a target of mass m_T at rest.
+ * \param[in] e_kin kinetic energy of the projectile in the lab frame
+ * \param[in] m_P mass of the projectile
+ * \param[in] m_T mass of the target
+ * \return the mandelstam variable s
  */
 inline double s_from_Ekin(double e_kin, double m_P, double m_T) {
   return m_P * m_P + m_T * m_T + 2 * m_T * (m_P + e_kin);
@@ -196,6 +207,10 @@ inline double s_from_Ekin(double e_kin, double m_P, double m_T) {
  * Convert p_lab to mandelstam-s for a fixed-target setup,
  * with a projectile of mass m_P and momentum plab
  * and a target of mass m_T at rest.
+ * \param[in] plab momentum of the projectile in the lab frame
+ * \param[in] m_P mass of the projectile
+ * \param[in] m_T mass of the target
+ * \return the mandelstam variable s
  */
 inline double s_from_plab(double plab, double m_P, double m_T) {
   return m_P * m_P + m_T * m_T + 2 * m_T * std::sqrt(m_P * m_P + plab * plab);

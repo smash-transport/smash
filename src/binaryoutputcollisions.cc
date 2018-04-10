@@ -24,13 +24,8 @@ BinaryOutputCollisions::BinaryOutputCollisions(const bf::path &path,
                                                std::string name,
                                                const OutputParameters &out_par)
     : BinaryOutputBase(
-          std::fopen(
-              (path /
-               ((name == "Collisions" ? "collisions_binary" : name) + ".bin"))
-                  .native()
-                  .c_str(),
-              "wb"),
-          name, out_par.get_coll_extended(name)),
+          path / ((name == "Collisions" ? "collisions_binary" : name) + ".bin"),
+          "wb", name, out_par.get_coll_extended(name)),
       print_start_end_(out_par.coll_printstartend) {}
 
 /*!\Userguide
@@ -49,7 +44,7 @@ BinaryOutputCollisions::BinaryOutputCollisions(const bf::path &path,
  **/
 
 void BinaryOutputCollisions::at_eventstart(const Particles &particles,
-                                           const int /*event_number*/) {
+                                           const int) {
   char pchar = 'p';
   if (print_start_end_) {
     std::fwrite(&pchar, sizeof(char), 1, file_.get());
@@ -95,9 +90,11 @@ void BinaryOutputCollisions::at_interaction(const Action &action,
   write(action.outgoing_particles());
 }
 
-BinaryOutputBase::BinaryOutputBase(FILE *f, std::string name,
+BinaryOutputBase::BinaryOutputBase(const bf::path &path,
+                                   const std::string &mode,
+                                   const std::string &name,
                                    bool extended_format)
-    : OutputInterface(name), file_{f}, extended_(extended_format) {
+    : OutputInterface(name), file_{path, mode}, extended_(extended_format) {
   std::fwrite("SMSH", 4, 1, file_.get());  // magic number
   write(format_version_);                  // file format version number
   std::uint16_t format_variant = static_cast<uint16_t>(extended_);

@@ -19,7 +19,6 @@
 #include "include/density.h"
 #include "include/energymomentumtensor.h"
 #include "include/experimentparameters.h"
-#include "include/filedeleter.h"
 #include "include/forwarddeclarations.h"
 #include "include/particles.h"
 #include "include/vtkoutput.h"
@@ -43,10 +42,11 @@ namespace smash {
  * compute total energy-momentum tensor of all particles in the box with
  * weights equal to 1, which corresponds to "Smearing: false".
  */
-ThermodynamicOutput::ThermodynamicOutput(const bf::path &path, std::string name,
+ThermodynamicOutput::ThermodynamicOutput(const bf::path &path,
+                                         const std::string &name,
                                          const OutputParameters &out_par)
     : OutputInterface(name),
-      file_{std::fopen((path / ("thermodynamics.dat")).native().c_str(), "w")},
+      file_{path / "thermodynamics.dat", "w"},
       out_par_(out_par) {
   std::fprintf(file_.get(), "# %s thermodynamics output\n", VERSION_MAJOR);
   const ThreeVector r = out_par.td_position;
@@ -155,7 +155,6 @@ void ThermodynamicOutput::density_along_line(
     a_file << r.x1() << " " << r.x2() << " " << r.x3() << " " << rho_eck
            << "\n";
   }
-  a_file.close();
 }
 
 }  // namespace smash

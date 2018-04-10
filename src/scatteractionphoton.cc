@@ -440,18 +440,20 @@ double ScatterActionPhoton::diff_cross_section(const double t,
 double ScatterActionPhoton::diff_cross_section_w_ff(const double t,
                                                     const double m_rho,
                                                     const double E_photon) {
-  /* The form factor is assumed to be a hadronic dipole form factor which
-      takes the shape: FF = (2*Lambda^2/(2*Lambda^2 - t))^2 with
-      Lambda = 1.0 GeV. t depends on the lightest possible exchange particle in
-      the different channels. This could either be a pion or an omega meson. For
-      the computation the parametrizations given in (\iref{Turbide:2006})
-      are used.
+  /**
+   * The form factor is assumed to be a hadronic dipole form factor which
+   * takes the shape: FF = (2*Lambda^2/(2*Lambda^2 - t))^2 with
+   * Lambda = 1.0 GeV. t depends on the lightest possible exchange particle in
+   * the different channels. This could either be a pion or an omega meson. For
+   * the computation the parametrizations given in (\iref{Turbide:2006})
+   * are used.
+   */
 
-     C12, C13, C15, C16 need special treatment. These processes have identical
+   /* C12, C13, C15, C16 need special treatment. These processes have identical
       incoming and outgoing particles, but diffrent mediating particles and
-     hence different form factors. If both channels are added up
-     (MediatorType::SUM), each contribution is corrected by the corresponding
-     form factor.
+      hence different form factors. If both channels are added up
+      (MediatorType::SUM), each contribution is corrected by the corresponding
+      form factor.
    */
   switch (reac_) {
     case ReactionType::pi_m_rho_p_pi_z:

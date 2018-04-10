@@ -56,7 +56,7 @@ TEST(spectral_functions) {
     } else if (result_no_norm.value() < 1 - warning_level) {
       std::cout << AnsiColor::yellow;
     }
-    std::cout << fill_right(type.name(), 11) << ": "
+    std::cout << utf8::fill_right(type.name(), 11) << ": "
               << format(result_no_norm.value(), nullptr, -1, 4) << " ± "
               << result_no_norm.error() << ", " << result_const.value() << " ± "
               << result_const.error() << ", " << result.value() << " ± "

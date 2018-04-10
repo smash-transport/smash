@@ -47,8 +47,6 @@ DeformedNucleus::DeformedNucleus(Configuration &config, int nTest)
     : Nucleus(config, nTest) {}
 
 double DeformedNucleus::deformed_woods_saxon(double r, double cosx) const {
-  // Return the deformed woods-saxon calculation
-  // at the given location for the current system.
   return Nucleus::get_saturation_density() /
          (1 + std::exp(r - Nucleus::get_nuclear_radius() *
                                (1 + beta2_ * y_l_0(2, cosx) +
@@ -59,7 +57,7 @@ double DeformedNucleus::deformed_woods_saxon(double r, double cosx) const {
 ThreeVector DeformedNucleus::distribute_nucleon() const {
   double a_radius;
   Angles a_direction;
-  // Set a sensible max bound for radial sampling.
+  // Set a sensible maximum bound for radial sampling.
   double radius_max =
       Nucleus::get_nuclear_radius() / Nucleus::get_diffusiveness() +
       Nucleus::get_nuclear_radius() * Nucleus::get_diffusiveness();
@@ -67,19 +65,20 @@ ThreeVector DeformedNucleus::distribute_nucleon() const {
   // Sample the distribution.
   do {
     a_direction.distribute_isotropically();
-    a_radius = radius_max * std::cbrt(Random::canonical());  // sample r**2 dr
+    // sample r**2 dr
+    a_radius = radius_max * std::cbrt(Random::canonical());
   } while (Random::canonical() >
            deformed_woods_saxon(a_radius, a_direction.costheta()) /
                Nucleus::get_saturation_density());
 
-  // Update (x, y, z).
+  // Update (x, y, z) positions.
   return a_direction.threevec() * a_radius;
 }
 
 void DeformedNucleus::set_parameters_automatic() {
   // Initialize the inherited attributes.
   Nucleus::set_parameters_automatic();
-
+  /// \todo In issue #4743 the corrected values should be optional
   // Set the deformation parameters.
   switch (Nucleus::number_of_particles()) {
     case 238:  // Uranium
@@ -115,7 +114,6 @@ void DeformedNucleus::set_parameters_automatic() {
 void DeformedNucleus::set_parameters_from_config(Configuration &config) {
   // Inherited nucleus parameters.
   Nucleus::set_parameters_from_config(config);
-
   // Deformation parameters.
   if (config.has_value({"Beta_2"})) {
     set_beta_2(static_cast<double>(config.take({"Beta_2"})));
@@ -123,18 +121,14 @@ void DeformedNucleus::set_parameters_from_config(Configuration &config) {
   if (config.has_value({"Beta_4"})) {
     set_beta_4(static_cast<double>(config.take({"Beta_4"})));
   }
-
   // Saturation density (normalization for accept/reject sampling)
   if (config.has_value({"Saturation_Density"})) {
     Nucleus::set_saturation_density(
         static_cast<double>(config.take({"Saturation_Density"})));
   }
-
-  // Polar angle
   if (config.has_value({"Theta"})) {
     set_polar_angle(static_cast<double>(config.take({"Theta"})));
   }
-  // Azimuth
   if (config.has_value({"Phi"})) {
     set_azimuthal_angle(static_cast<double>(config.take({"Phi"})));
   }
@@ -142,10 +136,10 @@ void DeformedNucleus::set_parameters_from_config(Configuration &config) {
 
 void DeformedNucleus::rotate() {
   for (auto &particle : *this) {
-    // Rotate every vector by the nuclear azimuth phi and polar angle
-    // theta (the Euler angles). This means applying the matrix for a
-    // rotation of phi about z, followed by the matrix for a rotation
-    // theta about the rotated x axis. The third angle psi is 0 by symmetry.
+    /* Rotate every vector by the nuclear azimuth phi and polar angle
+     * theta (the Euler angles). This means applying the matrix for a
+     * rotation of phi about z, followed by the matrix for a rotation
+     * theta about the rotated x axis. The third angle psi is 0 by symmetry.*/
     ThreeVector three_pos = particle.position().threevec();
     three_pos.rotate(nuclear_orientation_.phi(), nuclear_orientation_.theta(),
                      0.);

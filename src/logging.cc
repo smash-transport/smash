@@ -74,7 +74,7 @@ inline typename std::enable_if<(index != 0)>::type create_all_loggers_impl(
                 "id values in the LogArea types. Please fix! (see top of "
                 "'include/logging.h')");
   auto &logger = global_logger_collection[LogAreaTag::id];
-  const auto tmp = fill_both(LogAreaTag::textual(), longest_name);
+  const auto tmp = utf8::fill_both(LogAreaTag::textual(), longest_name);
   logger.setAreaName(tmp);
   logger.setVerbosity(
       config.take({LogAreaTag::textual()}, global_default_loglevel));

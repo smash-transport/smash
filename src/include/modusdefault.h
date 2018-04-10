@@ -34,8 +34,10 @@ namespace smash {
  * The rules for adding functions to this class are as follows:
  * - This class is empty per default.
  * - You can add a function if you have a function that is different in at least
- *   two subclasses and equal in at least two subclasses.
+ *   one subclass.
  * - Code that is common to all goes into ExperimentImplementation.
+ *
+ * \todo JB: many of these functions could/should be virtual
  */
 class ModusDefault {
  public:
@@ -56,37 +58,39 @@ class ModusDefault {
     return 0;
   }
 
-  /** The following four parameters tell the number of nucleons in the
-   *  colliding nuclei, the number of nucleons in the projectile, whether
-   *  the first collisions within the same nucleus are allowed, and whether
-   *  the modus is Collider. They are all needed in the Collider modus. In
-   *  the other modus, they take the following default value. */
+  /// \return Number of nucleons in both nuclei; only used in ColliderModus
   int total_N_number() const { return 0; }
+  /// \return Number of nucleons in projectile; only used in ColliderModus
   int proj_N_number() const { return 0; }
+  /// \return Whether to allow collisions in nuclei; only used in ColliderModus
   bool cll_in_nucleus() const { return false; }
+  /// \return Checks if modus is collider; overwritten in ColliderModus
   bool is_collider() const { return false; }
+  /// \return The impact parameter; overwritten in ColliderModus
   double impact_parameter() const { return 0.0; }
-  /** The beam velocity of the projectile required in the Collider modus.
-   *   In the other modus, return zero. */
+  /** \return The beam velocity of the projectile required in the Collider
+   * modus. In the other modus, return zero. */
   double velocity_projectile() const { return 0.0; }
-  /** The beam velocity of the target required in the Collider modus.
-   *   In the other modus, return zero. */
+  /** \return The beam velocity of the target required in the Collider modus.
+   * In the other modus, return zero. */
   double velocity_target() const { return 0.0; }
-  /** The type of Fermi motion required in the Collider modus. In the other
-   *  modus, just return FermiMotion::Off. */
+  /** \return The type of Fermi motion required in the Collider modus. In the
+   * other modus, just return FermiMotion::Off. */
   FermiMotion fermi_motion() const { return FermiMotion::Off; }
-  /// Maximal timestep accepted by this modus. Negative means infinity.
+  /// \return Maximal timestep accepted by this modus. Negative means infinity.
   double max_timestep(double) const { return -1.; }
 
+  /// \return Length of the box; overwritten in BoxModus
   double length() const { return -1.; }
 
   /**
    * Creates the Grid with normal boundary conditions.
    *
-   * \param particles The Particles object containing all particles of the
+   * \param[in] particles The Particles object containing all particles of the
    *                  currently running Experiment.
-   * \param min_cell_length The minimal length of the grid cells.
-   * \param strategy The strategy to determine the cell size
+   * \param[in] min_cell_length The minimal length of the grid cells.
+   * \param[in] strategy The strategy to determine the cell size
+   * \return the Grid object
    *
    * \see Grid::Grid
    */
@@ -106,7 +110,7 @@ class ModusDefault {
       Configuration& conf) const {
     /* Lattice is placed such that the center is 0,0,0.
        If one wants to have a central cell with center at 0,0,0 then
-       number of cells should be odd (2k+1) in each direction.
+       number of cells should be odd (2k+1) in every direction.
      */
     const std::array<double, 3> l = conf.take({"Lattice_Sizes"});
     const std::array<double, 3> origin = {-0.5 * l[0], -0.5 * l[1],
@@ -117,7 +121,6 @@ class ModusDefault {
 
   /** \ingroup exception
    *  BadInput is an error to throw if the configuration options are invalid.
-   *
    **/
   struct BadInput : public std::invalid_argument {
     using std::invalid_argument::invalid_argument;

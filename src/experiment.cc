@@ -22,7 +22,7 @@
 #include "include/scatteractionphoton.h"
 #include "include/scatteractionsfinder.h"
 #include "include/spheremodus.h"
-/* Outputs */
+// Output
 #include "include/binaryoutputcollisions.h"
 #include "include/binaryoutputparticles.h"
 #include "include/oscaroutput.h"
@@ -238,8 +238,9 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   // remove config maps of unused Modi
   config["Modi"].remove_all_but(modus_chooser);
 
-  // If this Delta_Time option is absent (this can be for timestepless mode)
-  // just assign 1.0 fm/c, reasonable value will be set at event initialization
+  /* If this Delta_Time option is absent (this can be for timestepless mode)
+   * just assign 1.0 fm/c, reasonable value will be set at event initialization
+   */
   const double dt = config.take({"General", "Delta_Time"}, 1.);
   const double t_end = config.read({"General", "End_Time"});
   const double output_dt = config.take({"Output", "Output_Interval"}, t_end);
@@ -255,8 +256,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   const NNbarTreatment nnbar_treatment = config.take(
       {"Collision_Term", "NNbar_Treatment"}, NNbarTreatment::NoAnnihilation);
   const bool photons_switch = config.has_value({"Output", "Photons"});
-  /// Elastic collisions between the nucleons with the square root s
-  //  below low_snn_cut are excluded.
+  /* Elastic collisions between the nucleons with the square root s
+   * below low_snn_cut are excluded. */
   const double low_snn_cut =
       config.take({"Collision_Term", "Elastic_NN_Cutoff_Sqrts"}, 1.98);
   const auto proton = ParticleType::try_find(pdg::p);
@@ -285,9 +286,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
 }
 }  // unnamed namespace
 
-/**
- * Creates a verbose textual description of the setup of the Experiment.
- */
+/// Creates a verbose textual description of the setup of the Experiment.
 template <typename Modus>
 std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
   switch (e.time_step_mode_) {
@@ -342,6 +341,7 @@ void Experiment<Modus>::create_output(std::string format, std::string content,
         make_unique<ThermodynamicOutput>(output_path, content, out_par));
   } else if (content == "Thermodynamics" && format == "VTK") {
     printout_lattice_td_ = true;
+    outputs_.emplace_back(make_unique<VtkOutput>(output_path, content));
   } else {
     log.error() << "Unknown combination of format (" << format
                 << ") and content (" << content << "). Fix the config.";
@@ -608,10 +608,11 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     }
   }
 
-  // We can take away the Fermi motion flag, because the collider modus is
-  // already initialized. We only need it when potentials are enabled, but we
-  // always have to take it, otherwise SMASH will complain about unused
-  // options.  We have to provide a default value for modi other than Collider.
+  /* We can take away the Fermi motion flag, because the collider modus is
+   * already initialized. We only need it when potentials are enabled, but we
+   * always have to take it, otherwise SMASH will complain about unused
+   * options. We have to provide a default value for modi other than Collider.
+   */
   const FermiMotion motion =
       config.take({"Modi", "Collider", "Fermi_Motion"}, FermiMotion::Off);
   if (config.has_value({"Potentials"})) {
@@ -745,27 +746,27 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     thermalizer_ = modus_.create_grandcan_thermalizer(th_conf);
   }
 
-  // Take the seed setting only after the configuration was stored to a file
-  // in smash.cc
+  /* Take the seed setting only after the configuration was stored to a file
+   * in smash.cc */
   seed_ = config.take({"General", "Randomseed"});
 }
 
+/// String representing a horizontal line.
 const std::string hline(80, '-');
 
 /* This method reads the particle type and cross section information
- * and does the initialization of the system (fill the particles map)
- */
+ * and does the initialization of the system (fill the particles map) */
 template <typename Modus>
 void Experiment<Modus>::initialize_new_event() {
   const auto &log = logger<LogArea::Experiment>();
 
   Random::set_seed(seed_);
   log.info() << "Random number seed: " << seed_;
-  // Set seed for the next event. It has to be positive, so it can be entered
-  // in the config.
-  //
-  // We have to be careful about the minimal integer, whose absolute value
-  // cannot be represented.
+  /* Set seed for the next event. It has to be positive, so it can be entered
+   * in the config.
+   *
+   * We have to be careful about the minimal integer, whose absolute value
+   * cannot be represented. */
   int64_t r = Random::advance();
   while (r == INT64_MIN) {
     r = Random::advance();
@@ -774,12 +775,13 @@ void Experiment<Modus>::initialize_new_event() {
 
   particles_.reset();
 
-  /* Sample particles according to the initial conditions */
+  // Sample particles according to the initial conditions
   double start_time = modus_.initial_conditions(&particles_, parameters_);
-  // For box modus make sure that particles are in the box. In principle, after
-  // a correct initialization they should be, so this is just playing it safe.
+  /* For box modus make sure that particles are in the box. In principle, after
+   * a correct initialization they should be, so this is just playing it safe.
+   */
   modus_.impose_boundary_conditions(&particles_, outputs_);
-  /* Reset the simulation clock */
+  // Reset the simulation clock
   double timestep = delta_time_startup_;
 
   switch (time_step_mode_) {
@@ -800,7 +802,7 @@ void Experiment<Modus>::initialize_new_event() {
   Clock clock_for_this_event(start_time, timestep);
   parameters_.labclock = std::move(clock_for_this_event);
 
-  /* Reset the output clock */
+  // Reset the output clock
   const double dt_output = parameters_.outputclock.timestep_duration();
   const double zeroth_output_time =
       std::floor(start_time / dt_output) * dt_output;
@@ -820,13 +822,35 @@ void Experiment<Modus>::initialize_new_event() {
   interactions_total_ = 0;
   previous_interactions_total_ = 0;
   total_pauli_blocked_ = 0;
-  /* Print output headers */
+  // Print output headers
   log.info() << hline;
   log.info() << " Time       <Ediff>      <pdiff>  <scattrate>    <scatt>  "
                 "<particles>   <timing>";
   log.info() << hline;
 }
 
+/**
+ * Generate the tabulated string which will be printed to the screen when
+ * SMASH is running
+ *
+ * \param[in] particles The interacting particles. Their information will be
+ *            used to check the conservation of the total energy and momentum.
+ *	      the total number of the particles will be used and printed as
+ *	      well.
+ * \param[in] scatterings_total Total number of the scatterings from the
+ *            beginning to the current time step.
+ * \param[in] scatterings_this_interval Number of the scatterings occur within
+ *            the current timestep.
+ * \param[in] conserved_initial Initial quantum numbers needed to check the
+ *            conservations
+ * \param[in] time_start Moment in the REAL WORLD when SMASH starts to run [s]
+ * \param[in] time Current moment in SMASH [fm/c]
+ * \return 'Current time in SMASH [fm/c]', 'Deviation of the energy from the
+ *          initial value [GeV]', 'Deviation of the momentum from the initial
+ *          value [GeV]', 'Averaged collisional rate [c/fm]', 'Number of the
+ *          scatterings occur within the timestep', 'Total particle number',
+ *          'Computing time consumed'
+ */
 static std::string format_measurements(const Particles &particles,
                                        uint64_t scatterings_total,
                                        uint64_t scatterings_this_interval,
@@ -839,13 +863,15 @@ static std::string format_measurements(const Particles &particles,
   const QuantumNumbers difference = conserved_initial - current_values;
 
   std::ostringstream ss;
+  // clang-format off
   ss << field<5> << time << field<12, 3> << difference.momentum().x0()
      << field<12, 3> << difference.momentum().abs3()
-     << field<
-            12,
-            3> << (time > really_small ? 2.0 * scatterings_total / (particles.size() * time) : 0.)
+     << field<12, 3> << (time > really_small
+                           ? 2.0 * scatterings_total / (particles.size() * time)
+                           : 0.)
      << field<10, 3> << scatterings_this_interval
      << field<12, 3> << particles.size() << field<10, 3> << elapsed_seconds;
+  // clang-format on
   return ss.str();
 }
 
@@ -866,8 +892,8 @@ bool Experiment<Modus>::perform_action(
     return false;
   }
   if (modus_.is_collider()) {
-    // Mark incoming nucleons as interacted - now they are permitted
-    // to collide with nucleons from their native nucleus
+    /* Mark incoming nucleons as interacted - now they are permitted
+     * to collide with nucleons from their native nucleus */
     for (const auto &incoming : action.incoming_particles()) {
       assert(incoming.id() >= 0);
       if (incoming.id() < modus_.total_N_number()) {
@@ -875,8 +901,8 @@ bool Experiment<Modus>::perform_action(
       }
     }
   }
-  // Make sure to pick a non-zero integer, because 0 is reserved for "no
-  // interaction yet".
+  /* Make sure to pick a non-zero integer, because 0 is reserved for "no
+   * interaction yet". */
   const auto id_process = static_cast<uint32_t>(interactions_total_ + 1);
   action.perform(&particles_, id_process);
   interactions_total_++;
@@ -922,22 +948,24 @@ bool Experiment<Modus>::perform_action(
       ScatterActionPhoton::is_photon_reaction(action.incoming_particles()) &&
       ScatterActionPhoton::is_kinematically_possible(
           action.sqrt_s(), action.incoming_particles())) {
-    // Time in the action constructor is relative to
-    // current time of incoming
+    /* Time in the action constructor is relative to
+     * current time of incoming */
     constexpr double action_time = 0.;
     ScatterActionPhoton photon_act(action.incoming_particles(), action_time,
                                    n_fractional_photons_,
                                    action.raw_weight_value());
-    // Add a completely dummy process to photon action.  The only important
-    // thing is that its cross-section is equal to cross-section of action.
-    // This can be done, because photon action is never performed, only
-    // final state is generated and printed to photon output.
-    // raw weight value is cross section of hadronic process
+
+   /**
+    * Add a completely dummy process to the photon action. The only important
+    * thing is that its cross-section is equal to the cross-section of the
+    * hadronic action. This can be done, because the photon action is never
+    * actually performed, only the final state is generated and printed to
+    * the photon output.
+    */
 
     photon_act.add_dummy_hadronic_process(action.raw_weight_value());
 
-    // Now add the actual photon reaction channel. here we also compute the
-    // total cross section
+    // Now add the actual photon reaction channel.
     photon_act.add_single_process();
 
     photon_act.perform_photons(outputs_);
@@ -946,9 +974,13 @@ bool Experiment<Modus>::perform_action(
   return true;
 }
 
-/// Make sure `interactions_total` can be represented as a 32-bit integer.
-/// This is necessary for converting to a `id_process`. The latter is 32-bit
-/// integer, because it is written like this to binary output.
+/**
+ * Make sure `interactions_total` can be represented as a 32-bit integer.
+ * This is necessary for converting to a `id_process`. The latter is 32-bit
+ * integer, because it is written like this to binary output.
+ *
+ * \param[in] interactions_total Total interaction number
+ */
 static void check_interactions_total(uint64_t interactions_total) {
   constexpr uint64_t max_uint32 = std::numeric_limits<uint32_t>::max();
   if (interactions_total >= max_uint32) {
@@ -973,7 +1005,7 @@ void Experiment<Modus>::run_time_evolution() {
         std::min(parameters_.labclock.timestep_duration(), end_time_ - t);
     log.debug("Timestepless propagation for next ", dt, " fm/c.");
 
-    /* Perform forced thermalization if required */
+    // Perform forced thermalization if required
     if (thermalizer_ &&
         thermalizer_->is_time_to_thermalize(parameters_.labclock)) {
       const bool ignore_cells_under_treshold = true;
@@ -1025,7 +1057,7 @@ void Experiment<Modus>::run_time_evolution() {
     run_time_evolution_timestepless(actions);
 
     /* (4) Update potentials (if computed on the lattice) and
-           compute new momenta according to equations of motion */
+     *     compute new momenta according to equations of motion */
     if (potentials_) {
       update_potentials();
       update_momenta(&particles_, parameters_.labclock.timestep_duration(),
@@ -1033,19 +1065,19 @@ void Experiment<Modus>::run_time_evolution() {
     }
 
     /* (5) Expand universe if non-minkowskian metric; updates
-           positions and momenta according to the selected expansion */
+     *     positions and momenta according to the selected expansion */
     if (metric_.mode_ != ExpansionMode::NoExpansion) {
       expand_space_time(&particles_, parameters_, metric_);
     }
 
     ++parameters_.labclock;
 
-    /* (5) Check conservation laws. */
-
-    // Check conservation of conserved quantities if potentials and string
-    // fragmentation are off.  If potentials are on then momentum is conserved
-    // only in average.  If string fragmentation is on, then energy and
-    // momentum are only very roughly conserved in high-energy collisions.
+    /* (6) Check conservation laws.
+     *
+     * Check conservation of conserved quantities if potentials and string
+     * fragmentation are off.  If potentials are on then momentum is conserved
+     * only in average.  If string fragmentation is on, then energy and
+     * momentum are only very roughly conserved in high-energy collisions. */
     if (!potentials_ && !parameters_.strings_switch &&
         metric_.mode_ == ExpansionMode::NoExpansion) {
       std::string err_msg = conserved_initial_.report_deviations(particles_);
@@ -1115,17 +1147,17 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
               ", action time = ", act->time_of_execution());
     propagate_and_shine(act->time_of_execution());
 
-    /* (2) Perform action. */
-
-    // Update the positions of the incoming particles, because the information
-    // in the action object will be outdated as the particles have been
-    // propagated since the construction of the action.
+    /* (2) Perform action.
+     *
+     * Update the positions of the incoming particles, because the information
+     * in the action object will be outdated as the particles have been
+     * propagated since the construction of the action. */
     act->update_incoming(particles_);
 
     const bool performed = perform_action(*act, particles_);
 
-    // No need to update actions for outgoing particles
-    // if the action is not performed.
+    /* No need to update actions for outgoing particles
+     * if the action is not performed. */
     if (!performed) {
       continue;
     }
@@ -1176,11 +1208,13 @@ void Experiment<Modus>::intermediate_output() {
       interactions_this_interval, conserved_initial_, time_start_,
       parameters_.outputclock.current_time());
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
-  /*if (thermalizer_) {
-    thermalizer_->update_lattice(particles_, density_param_);
-    thermalizer_->print_statistics(parameters_.labclock);
+  /** \todo (Dima) is this part of the code still useful?
+   *
+   * if (thermalizer_) {
+   *  thermalizer_->update_lattice(particles_, density_param_);
+   *  thermalizer_->print_statistics(parameters_.labclock);
   }*/
-  /* save evolution data */
+  // save evolution data
   for (const auto &output : outputs_) {
     if (output->is_dilepton_output() || output->is_photon_output()) {
       continue;
@@ -1273,24 +1307,24 @@ void Experiment<Modus>::do_final_decays() {
 
     interactions_old = interactions_total_;
 
-    /* Dileptons: shining of remaining resonances */
+    // Dileptons: shining of remaining resonances
     if (dilepton_finder_ != nullptr) {
       for (const auto &output : outputs_) {
         dilepton_finder_->shine_final(particles_, output.get(), true);
       }
     }
-    /* Find actions. */
+    // Find actions.
     for (const auto &finder : action_finders_) {
       actions.insert(finder->find_final_actions(particles_));
     }
-    /* Perform actions. */
+    // Perform actions.
     while (!actions.is_empty()) {
       perform_action(*actions.pop(), particles_before_actions);
     }
     // loop until no more decays occur
   } while (interactions_total_ > interactions_old);
 
-  /* Dileptons: shining of stable particles at the end */
+  // Dileptons: shining of stable particles at the end
   if (dilepton_finder_ != nullptr) {
     for (const auto &output : outputs_) {
       dilepton_finder_->shine_final(particles_, output.get(), false);
@@ -1301,9 +1335,9 @@ void Experiment<Modus>::do_final_decays() {
 template <typename Modus>
 void Experiment<Modus>::final_output(const int evt_num) {
   const auto &log = logger<LogArea::Experiment>();
-  // make sure the experiment actually ran (note: we should compare this
-  // to the start time, but we don't know that. Therefore, we check that
-  // the time is positive, which should heuristically be the same).
+  /* make sure the experiment actually ran (note: we should compare this
+   * to the start time, but we don't know that. Therefore, we check that
+   * the time is positive, which should heuristically be the same). */
   if (likely(parameters_.labclock > 0)) {
     const uint64_t wall_actions_this_interval =
         wall_actions_total_ - previous_wall_actions_total_;
@@ -1316,7 +1350,7 @@ void Experiment<Modus>::final_output(const int evt_num) {
         parameters_.outputclock.current_time());
     log.info() << hline;
     log.info() << "Time real: " << SystemClock::now() - time_start_;
-    /* if there are no particles no interactions happened */
+    // if there are no particles no interactions happened
     log.info() << "Final scattering rate: "
                << (particles_.is_empty()
                        ? 0
@@ -1349,7 +1383,7 @@ void Experiment<Modus>::run() {
   for (int j = 0; j < nevents_; j++) {
     mainlog.info() << "Event " << j;
 
-    /* Sample initial particles, start clock, some printout and book-keeping */
+    // Sample initial particles, start clock, some printout and book-keeping
     initialize_new_event();
     /* In the ColliderModus, if the first collisions within the same nucleus are
      * forbidden, 'nucleon_has_interacted_', which records whether a nucleon has
@@ -1366,8 +1400,7 @@ void Experiment<Modus>::run() {
       }
     }
     /* In the ColliderModus, if Fermi motion is frozen, assign the beam momenta
-     * to
-     * the nucleons in both the projectile and the target. */
+     * to the nucleons in both the projectile and the target. */
     if (modus_.is_collider() && modus_.fermi_motion() == FermiMotion::Frozen) {
       for (int i = 0; i < modus_.total_N_number(); i++) {
         const auto mass_beam = particles_.copy_to_vector()[i].effective_mass();
@@ -1380,7 +1413,7 @@ void Experiment<Modus>::run() {
       }
     }
 
-    /* Output at event start */
+    // Output at event start
     for (const auto &output : outputs_) {
       output->at_eventstart(particles_, j);
     }
@@ -1391,7 +1424,7 @@ void Experiment<Modus>::run() {
       do_final_decays();
     }
 
-    /* Output at event end */
+    // Output at event end
     final_output(j);
   }
 }

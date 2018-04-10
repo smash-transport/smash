@@ -39,7 +39,7 @@ namespace smash {
  * Radius of the Sphere.
  *
  * \key Sphere_Temperature (double, required):\n
- * Temperature for the momentum sampling in the sphere in GeV.
+ * Temperature for the momentum sampling in the sphere (in GeV).
  *
  * \key Start_Time (double, required):\n
  * Starting time of Sphere calculation.
@@ -67,11 +67,11 @@ namespace smash {
  * the number of particles is not fixed from event to event.
  *
  * \key Baryon_Chemical_Potential (double, optional, default = 0.0): \n
- * Baryon chemical potential \f$ \mu_B \f$ used in case if
+ * Baryon chemical potential \f$ \mu_B \f$ only used if
  * Use_Thermal_Multiplicities is true to compute thermal densities \f$ n_i \f$.
  *
  * \key Strange_Chemical_Potential (double, optional, default = 0.0): \n
- * Strangeness chemical potential \f$ \mu_S \f$ used in case if
+ * Strangeness chemical potential \f$ \mu_S \f$ only used if
  * Use_Thermal_Multiplicities is true to compute thermal densities \f$ n_i \f$.
  *
  * \key Initial_Condition (SphereInitialCondition, default =
@@ -159,11 +159,11 @@ double SphereModus::initial_conditions(Particles *particles,
         break;
       case (SphereInitialCondition::IC_1M):
         momentum_radial =
-            sample_momenta_IC_1M(this->sphere_temperature_, data.pole_mass());
+            sample_momenta_1M_IC(this->sphere_temperature_, data.pole_mass());
         break;
       case (SphereInitialCondition::IC_2M):
         momentum_radial =
-            sample_momenta_IC_2M(this->sphere_temperature_, data.pole_mass());
+            sample_momenta_2M_IC(this->sphere_temperature_, data.pole_mass());
         break;
       case (SphereInitialCondition::IC_Massive):
         momentum_radial = sample_momenta_non_eq_mass(this->sphere_temperature_,
