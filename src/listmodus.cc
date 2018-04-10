@@ -75,7 +75,7 @@ namespace smash {
  *      File_Directory: "particle_lists_in"
  *      File_Prefix: "event"
  *
- *      # starting number of event_id in event-by-event simulation
+ *      # starting number of file_id in event-by-event simulation
  *      Shift_Id: 0
  *
  *      # start time of simulation
@@ -107,7 +107,8 @@ ListModus::ListModus(Configuration modus_config, const ExperimentParameters &)
   std::string fp = modus_config.take({"List", "File_Prefix"});
   particle_list_file_prefix_ = fp;
 
-  event_id_ = shift_id_;
+  event_id_ = 0;
+  file_id_ = shift_id_;
 }
 
 /* console output on startup of List specific parameters */
@@ -150,36 +151,14 @@ std::pair<bool, double> ListModus::check_formation_time_(
 double ListModus::initial_conditions(Particles *particles,
                                      const ExperimentParameters &) {
   const auto &log = logger<LogArea::List>();
-  /* Readin PARTICLES from file */
-  std::stringstream fname;
-  fname << particle_list_file_prefix_ << event_id_;
 
-  const bf::path default_path = bf::absolute(particle_list_file_directory_);
+  std::string particle_list = next_event_();
 
-  const bf::path fpath = default_path / fname.str();
-
-  log.debug() << fpath.filename().native() << '\n';
-
-  if (!bf::exists(fpath)) {
-    log.fatal() << fpath.filename().native() << " does not exist! \n"
-                << "\n Usage of smash with external particle lists:\n"
-                << "1. Put the external particle lists in file \n"
-                << "File_Directory/File_Prefix{id} where {id} "
-                << "traversal [Shift_Id, Nevent-1]\n"
-                << "2. Particles info: t x y z mass p0 px py pz"
-                << " pdg ID charge\n"
-                << "in units of: fm fm fm fm GeV GeV GeV GeV GeV"
-                << " none none none\n";
-    throw std::runtime_error("External particle list does not exist!");
-  }
-
-  std::string particle_lists = read_all(bf::ifstream{fpath});
-
-  auto check = check_formation_time_(particle_lists);
+  auto check = check_formation_time_(particle_list);
   bool anti_streaming_needed = std::get<0>(check);
   start_time_ = std::get<1>(check);
 
-  for (const Line &line : line_parser(particle_lists)) {
+  for (const Line &line : line_parser(particle_list)) {
     std::istringstream lineinput(line.text);
     double t, x, y, z, mass, E, px, py, pz;
     int id, charge;
@@ -229,4 +208,96 @@ double ListModus::initial_conditions(Particles *particles,
 
   return start_time_;
 }
+
+bf::path ListModus::file_path_(const int file_id) {
+  const auto &log = logger<LogArea::List>();
+  std::stringstream fname;
+  fname << particle_list_file_prefix_ << file_id;
+
+  const bf::path default_path = bf::absolute(particle_list_file_directory_);
+
+  const bf::path fpath = default_path / fname.str();
+
+  log.debug() << fpath.filename().native() << '\n';
+
+  if (!bf::exists(fpath)) {
+    log.fatal() << fpath.filename().native() << " does not exist! \n"
+                << "\n Usage of smash with external particle lists:\n"
+                << "1. Put the external particle lists in file \n"
+                << "File_Directory/File_Prefix{id} where {id} "
+                << "traversal [Shift_Id, Nevent-1]\n"
+                << "2. Particles info: t x y z mass p0 px py pz"
+                << " pdg ID charge\n"
+                << "in units of: fm fm fm fm GeV GeV GeV GeV GeV"
+                << " none none none\n";
+    throw std::runtime_error("External particle list does not exist!");
+  }
+
+  return fpath;
+}
+
+std::string ListModus::next_event_() {
+
+  constexpr char comment_token = '#';
+
+  const bf::path fpath = file_path_(file_id_);
+  bf::ifstream ifs{fpath};
+  ifs.seekg(last_read_position_);
+
+  if (last_read_position_ == 0) {
+    // skip header (4 lines starting with #)
+    std::string tmp;
+    while (std::getline(ifs, tmp) && ifs.peek() == comment_token)
+      ;
+  }
+
+  if (!file_has_events_(fpath, last_read_position_)) {
+    // current file out of events. get next file and call this function recursively.
+    file_id_++;
+    last_read_position_ = 0;
+    ifs.close();
+    return next_event_();
+  }
+
+  // read one event. events marked by line # event end i 
+  std::string event_string;
+  const std::string needle = "end";
+  std::string line;
+  while (getline(ifs, line)) {
+    if (line.find(needle) == std::string::npos) {
+      event_string += line + "\n";
+    } else
+      break;
+  }
+
+  // save position for next event read
+  last_read_position_ = ifs.tellg();
+  ifs.close();
+
+  return event_string;
+}
+
+bool ListModus::file_has_events_(bf::path filepath,
+                                 std::streampos last_position) {
+  const auto &log = logger<LogArea::List>();
+  bf::ifstream ifs{filepath};
+  std::string line;
+
+  ifs.seekg(last_position);
+  // skip over comment lines
+  while (std::getline(ifs, line) && line[0] != '#')
+    ;
+  if (ifs.eof()) {
+    return false;
+  }
+
+  if (!ifs.good()) {
+    log.fatal() << "Error while reading " << filepath.filename().native();
+    throw std::runtime_error("Error while reading external particle list");
+  }
+
+  ifs.close();
+  return true;
+}
+
 }  // namespace smash
