@@ -265,7 +265,6 @@ class ScatterActionPhoton : public ScatterAction {
                                  const double E_photon);
 
   static constexpr double m_omega_ = 0.783;
-  const double mass_omega_ = ParticleType::find(0x223).mass();
 
 };
 

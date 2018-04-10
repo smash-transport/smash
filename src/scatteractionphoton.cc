@@ -230,7 +230,6 @@ void ScatterActionPhoton::generate_final_state() {
   const double diff_xs = diff_cross_section_w_ff(t, m_rho, E_Photon);
 
   // Weighing of the fractional photons
-  std::cout << mass_omega_ << std::endl;
   if (number_of_fractional_photons_ > 1) {
     weight_ =
         diff_xs * (t2 - t1) / (number_of_fractional_photons_
