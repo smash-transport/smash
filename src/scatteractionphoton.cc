@@ -176,12 +176,12 @@ bool ScatterActionPhoton::is_kinematically_possible(const double s_sqrt,
 
 void ScatterActionPhoton::generate_final_state() {
   // we have only one reaction per incoming particle pair
-  if (collision_channels_photons_.size() != 1) {
+  if (collision_processes_photons_.size() != 1) {
     const auto &log = logger<LogArea::ScatterAction>();
     log.fatal() << "Problem in ScatterActionPhoton::generate_final_state().\n";
     throw std::runtime_error("");
   }
-  auto *proc = collision_channels_photons_[0].get();
+  auto *proc = collision_processes_photons_[0].get();
 
   outgoing_particles_ = proc->particle_list();
 
@@ -230,6 +230,7 @@ void ScatterActionPhoton::generate_final_state() {
   const double diff_xs = diff_cross_section_w_ff(t, m_rho, E_Photon);
 
   // Weighing of the fractional photons
+  std::cout << mass_omega_ << std::endl;
   if (number_of_fractional_photons_ > 1) {
     weight_ =
         diff_xs * (t2 - t1) / (number_of_fractional_photons_
@@ -243,7 +244,7 @@ void ScatterActionPhoton::generate_final_state() {
   Action::check_conservation(id_process);
 }
 
-void ScatterActionPhoton::add_dummy_hadronic_channels(
+void ScatterActionPhoton::add_dummy_hadronic_process(
     double reaction_cross_section) {
   CollisionBranchPtr dummy_process = make_unique<CollisionBranch>(
       incoming_particles_[0].type(), incoming_particles_[1].type(),
@@ -443,7 +444,8 @@ double ScatterActionPhoton::diff_cross_section_w_ff(const double t,
       takes the shape: FF = (2*Lambda^2/(2*Lambda^2 - t))^2 with
       Lambda = 1.0 GeV. t depends on the lightest possible exchange particle in
       the different channels. This could either be a pion or an omega meson. For
-      the computation the parametrizations given in \ref! are used.
+      the computation the parametrizations given in (\iref{Turbide:2006})
+      are used.
 
      C12, C13, C15, C16 need special treatment. These processes have identical
       incoming and outgoing particles, but diffrent mediating particles and

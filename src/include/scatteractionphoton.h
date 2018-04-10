@@ -71,24 +71,24 @@ class ScatterActionPhoton : public ScatterAction {
   double sample_out_hadron_mass(const ParticleTypePtr out_type);
 
   /**
-   * Adds one hadronic channel with a given cross-section. The intended use is
+   * Adds one hadronic process with a given cross-section. The intended use is
    * to add the hadronic cross-section from already performed hadronic action
    * without recomputing it.
    */
-  void add_dummy_hadronic_channels(double reaction_cross_section);
+  void add_dummy_hadronic_process(double reaction_cross_section);
 
   /**
-   * Add the photonic channel. Also compute the total cross section.
+   * Add the photonic process. Also compute the total cross section.
    */
 
-  void add_single_channel() {
+  void add_single_process() {
     add_processes<CollisionBranch>(photon_cross_sections(),
-                                   collision_channels_photons_,
+                                   collision_processes_photons_,
                                    cross_section_photons_);
   }
 
   /**
-   * Enum for encoding the reaction channel. It is uniquely determined by the
+   * Enum for encoding the process. It is uniquely determined by the
    * incoming particles.
    */
 
@@ -107,9 +107,9 @@ class ScatterActionPhoton : public ScatterAction {
   };
 
   /*
-   * Returns reaction channel from incoming particles. If
+   * Returns process from incoming particles. If
    * incoming particles are not part of any implemented photonic process, return
-   * no_reaction
+   * no_reaction.
    */
 
   static ReactionType photon_reaction_type(const ParticleList &in);
@@ -138,7 +138,7 @@ class ScatterActionPhoton : public ScatterAction {
    * Holds the photon branch. As of now, this will always
    * hold only one branch.
    */
-  CollisionBranchList collision_channels_photons_;
+  CollisionBranchList collision_processes_photons_;
 
   /// Photonic process as determined from incoming particles.
   ReactionType reac_;
@@ -159,8 +159,8 @@ class ScatterActionPhoton : public ScatterAction {
    * via different mediating particles. Relevant only for the processes
    * pi0 + rho => pi + y and pi + rho => pi0 + gamma, which both can happen
    * via exchange of (rho, a1, pi) or omega.
-   * If MediatorType::SUM is set, the cross section for both channels is added.
-   * If MediatorType::PION/ OMEGA is set, only the respective channels are
+   * If MediatorType::SUM is set, the cross section for both processes is added.
+   * If MediatorType::PION/ OMEGA is set, only the respective processes are
    * computed.
    */
 
@@ -176,7 +176,7 @@ class ScatterActionPhoton : public ScatterAction {
   double hadronic_cross_section_ = 0.0;
 
   /**
-   * Calculate the differential cross section of photon process.
+   * Calculate the differential cross section of  photon process.
    * Formfactors are not included
    *
    * \param t Mandelstam-t
@@ -190,12 +190,11 @@ class ScatterActionPhoton : public ScatterAction {
 
   /**
    * Find the mass of the participating rho-particle. In case of
-   * an rho in the incoming channel it is the mass of the incoming rho, in case
+   * a rho in the incoming channel it is the mass of the incoming rho, in case
    * of an rho in the outgoing channel it is the mass sampled in the
    * constructor. When an rho acts in addition as a mediator, its mass is the
    * same as the incoming / outgoing rho. This function returns the alrady
-   * sampled mass or the mass of the incoming rho, depending on the reaction
-   * channel.
+   * sampled mass or the mass of the incoming rho, depending on the process.
    */
   double rho_mass() const;
 
@@ -209,9 +208,9 @@ class ScatterActionPhoton : public ScatterAction {
 
   /**
    * For processes which can happen via (pi, a1, rho) and omega exchange,
-   * return the differential cross section for the (pi, a1, rho) channel in
-   * the first argument, for the omega channel in the second. If only
-   * one channel exists, both values are the same.
+   * return the differential cross section for the (pi, a1, rho) process in
+   * the first argument, for the omega process in the second. If only
+   * one process exists, both values are the same.
    *
    * \param t Mandelstam-t
    * \param t2 upper bound for t-range
@@ -226,9 +225,9 @@ class ScatterActionPhoton : public ScatterAction {
 
   /**
    * For processes which can happen via (pi, a1, rho) and omega exchange,
-   * return the form factor for the (pi, a1, rho) channel in
-   * the first argument, for the omega channel in the second. If only
-   * one channel exists, both values are the same.
+   * return the form factor for the (pi, a1, rho) process in
+   * the first argument, for the omega process in the second. If only
+   * one process exists, both values are the same.
    *
    * \param E_photon Energy of photon [GeV]
    *
@@ -251,7 +250,7 @@ class ScatterActionPhoton : public ScatterAction {
 
   /**
    * Compute the differential cross section with form factors included.
-   * Takes care of correct handling of processes with multiple channels by
+   * Takes care of correct handling of reactions with multiple processes by
    * reading the default_mediator_ member variable.
    *
    * \param t Mandelstam-t.
@@ -266,6 +265,8 @@ class ScatterActionPhoton : public ScatterAction {
                                  const double E_photon);
 
   static constexpr double m_omega_ = 0.783;
+  const double mass_omega_ = ParticleType::find(0x223).mass();
+
 };
 
 }  // namespace smash
