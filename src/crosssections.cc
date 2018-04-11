@@ -1480,10 +1480,10 @@ CollisionBranchList cross_sections::pion_d_or_dprime_xx(ReactionsBitSet
       // The (hbarc)^2/16 pi factor is absorbed into matrix element.
       double xsection = matrix_element * spin_factor / (s * cm_momentum());
       if (produced_nucleus->is_stable()) {
-        assert(!type_nucleus.stable());
+        assert(!type_nucleus.is_stable());
         xsection *= pCM_from_s(s, type_pi.mass(), produced_nucleus->mass());
       } else {
-        assert(type_nucleus.stable());
+        assert(type_nucleus.is_stable());
         const double resonance_integral =
             produced_nucleus->iso_multiplet()->get_integral_piR(sqrts);
         xsection *= resonance_integral;
@@ -1760,10 +1760,10 @@ CollisionBranchList cross_sections::n_nucleus_to_n_nucleus(
     // Absorb (hbarc)^2/16 pi factor into matrix element
     double xsection = matrix_element * spin_factor / (s * cm_momentum());
     if (produced_nucleus->is_stable()) {
-      assert(!type_nucleus.stable());
+      assert(!type_nucleus.is_stable());
       xsection *= pCM_from_s(s, type_N.mass(), produced_nucleus->mass());
     } else {
-      assert(type_nucleus.stable());
+      assert(type_nucleus.is_stable());
       const double resonance_integral =
           produced_nucleus->iso_multiplet()->get_integral_NR(sqrts);
       xsection *= resonance_integral;
