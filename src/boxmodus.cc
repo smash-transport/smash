@@ -55,25 +55,24 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
 /*!\Userguide
  * \page input_modi_box_ Box
  *
- * \key Initial_Condition (BoxInitialCondition, required): \n
+ * \key Initial_Condition (string, required, no default): \n
  * Controls initial momentum distribution of particles.
- * If the value is "peaked momenta" then all the particles have momentum
- * \f$p = 3 \cdot T\f$, where T is the temperature. Directions
- * of momenta are uniformly distributed.
- * Else, then "thermal momenta" (sampled from a
- * Maxwell-Boltzmann distribution) are used.
+ * \li \key "peaked momenta" - All particles have momentum \f$p = 3 \cdot T\f$,
+ * where T is the temperature. Directions of momenta are uniformly distributed.
+ * \li \key "thermal momenta" - Momenta are sampled from a Maxwell-Boltzmann
+ * distribution.
  *
  * \key Length (double, required): \n
- * Length of the cube's edge in fm
+ * Length of the cube's edge, in fm.
  *
  * \key Temperature (double, required): \n
- * Temperature in the box in GeV.
+ * Temperature in the box, in GeV.
  *
  * \key Start_Time (double, required): \n
  * Starting time of the simulation.
  * All particles in the box are initialized with \f$x^0\f$ = Start_Time.
  *
- * \key Init_Multiplicities (int int, required): \n
+ * \key Init_Multiplicities (int, required): \n
  * Map of PDG number and quantity of this PDG number.
  * Controls how many particles of each sort will be initialized. \n
  * Example:

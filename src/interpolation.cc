@@ -9,6 +9,8 @@
 
 #include <iostream>
 
+namespace smash {
+
 InterpolateDataSpline::InterpolateDataSpline(const std::vector<double>& x,
                                              const std::vector<double>& y) {
   const auto N = x.size();
@@ -51,3 +53,5 @@ double InterpolateDataSpline::operator()(double xi) const {
   // cubic spline interpolation
   return gsl_spline_eval(spline_, xi, acc_);
 }
+
+}  // namespace smash

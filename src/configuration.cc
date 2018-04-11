@@ -18,6 +18,8 @@
 
 #include "include/forwarddeclarations.h"
 
+/// \todo(warning) Internal helper functions have no documentation
+
 namespace smash {
 
 // internal helper functions
@@ -70,9 +72,11 @@ namespace decaymodes_txt {
 
 }  // unnamed namespace
 
+// Default constructor
 Configuration::Configuration(const bf::path &path)
     : Configuration(path, "config.yaml") {}
 
+// Constructor checking for validity of input
 Configuration::Configuration(const bf::path &path, const bf::path &filename) {
   const auto file_path = path / filename;
   if (!bf::exists(file_path)) {

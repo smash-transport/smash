@@ -123,7 +123,8 @@ void Histogram1d::test(Analytical analyt, std::string dbg_file) const {
       const double ana = analyt(x) * norm;
       // if we want to print the distribution, print!
       if (file) {
-        fprintf(file.get(), "%7.3f %7d %7.3f %7.3f\n", x, counts, stat_err, ana);
+        fprintf(file.get(), "%7.3f %7d %7.3f %7.3f\n", x, counts, stat_err,
+                ana);
       }
       const double diff = (counts - ana) / stat_err;  // normalized deviation
       chi_sqr += diff * diff;                         // chi-squared

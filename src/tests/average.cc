@@ -11,6 +11,8 @@
 
 #include "../include/average.h"
 
+using namespace smash;
+
 TEST(average) {
   Average<double> avg;
   for (int i = 1; i <= 5; i++)

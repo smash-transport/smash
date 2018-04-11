@@ -23,10 +23,6 @@
 
 namespace smash {
 
-Action::Action(const ParticleList &in_part, double time)
-    : incoming_particles_(in_part),
-      time_of_execution_(time + in_part[0].position().x0()) {}
-
 Action::~Action() = default;
 
 bool Action::is_valid(const Particles &particles) const {
@@ -85,7 +81,8 @@ std::pair<double, double> Action::get_potential_at_interaction_point() const {
   /* Check:
    * Lattice is turned on. */
   if (UB_lat_pointer != nullptr) {
-    /* TODO(fengli) : A Lorentz transformation from the local rest frame to the
+    /** \todo TODO(fengli):
+     * A Lorentz transformation from the local rest frame to the
      * center of mass frame of the incoming particles is missing here. Since all
      * the actions take place in the center of mass frame of the incoming
      * particles, particles should see potentials different from UB_lat_ or
@@ -93,7 +90,8 @@ std::pair<double, double> Action::get_potential_at_interaction_point() const {
      * the Lorentz transformation is important in the low energy heavy-ion
      * collisions, and turning on potentials violates the Lorentz covariance in
      * the current SMASH version anyway, so I'd like to leave it to another
-     * issue in the future. */
+     * issue in the future.
+     */
     UB_lat_pointer->value_at(r, UB);
   }
   if (UI3_lat_pointer != nullptr) {
@@ -122,9 +120,9 @@ void Action::perform(Particles *particles, uint32_t id_process) {
     }
   }
 
-  // For elastic collisions and box wall crossings it is not necessary to remove
-  // particles from the list and insert new ones, it is enough to update their
-  // properties.
+  /* For elastic collisions and box wall crossings it is not necessary to remove
+   * particles from the list and insert new ones, it is enough to update their
+   * properties. */
   particles->update(incoming_particles_, outgoing_particles_,
                     (process_type_ != ProcessType::Elastic) &&
                         (process_type_ != ProcessType::Wall));
@@ -223,8 +221,8 @@ void Action::check_conservation(const uint32_t id_process) const {
     const auto &log = logger<LogArea::Action>();
     std::string err_msg = before.report_deviations(after);
     log.error() << particle_names.str() << err_msg;
-    // Pythia does not conserve energy and momentum at high energy, so we just
-    // print the error and continue.
+    /* Pythia does not conserve energy and momentum at high energy, so we just
+     * print the error and continue. */
     if ((process_type_ == ProcessType::StringSoft) ||
         (process_type_ == ProcessType::StringHard)) {
       return;

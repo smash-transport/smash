@@ -34,8 +34,13 @@ double clebsch_gordan(const int j_a, const int j_b, const int j_c,
   return result;
 }
 
-/* Calculate isospin Clebsch-Gordan coefficient for two particles p_a and p_b
- * coupling to a total isospin (I_tot, I_z).
+/**
+ * Calculate isospin Clebsch-Gordan coefficient for two particles p_a and p_b
+ * coupling to a total isospin \see clebsch_gordan for details (I_tot, I_z).
+ * \param[in] p_a Information of particle type for first particle
+ * \param[in] p_b Information of particle type for second particle
+ * \param[out] I_tot Total isospin of the reaction
+ * \param[out] I_z Total isospin 3 component of the reaction
  */
 static double isospin_clebsch_gordan_2to1(const ParticleType &p_a,
                                           const ParticleType &p_b,
@@ -48,7 +53,7 @@ double isospin_clebsch_gordan_sqr_3to1(const ParticleType &p_a,
                                        const ParticleType &p_b,
                                        const ParticleType &p_c,
                                        const ParticleType &Res) {
-  // calculate allowed I_ab
+  // Calculate allowed isospin range for 3->1 reaction I_ab
   const auto min_I_ab = std::abs(p_a.isospin() - p_b.isospin());
   const auto max_I_ab = p_a.isospin() + p_b.isospin();
   std::vector<int> possible_I_ab(max_I_ab - min_I_ab + 1);
@@ -77,18 +82,18 @@ double isospin_clebsch_gordan_sqr_3to1(const ParticleType &p_a,
   return cg * cg;
 }
 
-double isospin_clebsch_gordan_sqr_2to2(const ParticleType &t_a,
-                                       const ParticleType &t_b,
-                                       const ParticleType &t_c,
-                                       const ParticleType &t_d, const int I) {
-  const int I_z = t_a.isospin3() + t_b.isospin3();
+double isospin_clebsch_gordan_sqr_2to2(const ParticleType &p_a,
+                                       const ParticleType &p_b,
+                                       const ParticleType &p_c,
+                                       const ParticleType &p_d, const int I) {
+  const int I_z = p_a.isospin3() + p_b.isospin3();
 
   /* Loop over total isospin in allowed range. */
   double isospin_factor = 0.;
-  for (const int I_tot : I_tot_range(t_a, t_b, t_c, t_d)) {
+  for (const int I_tot : I_tot_range(p_a, p_b, p_c, p_d)) {
     if (I < 0 || I_tot == I) {
-      const double cg_in = isospin_clebsch_gordan_2to1(t_a, t_b, I_tot, I_z);
-      const double cg_out = isospin_clebsch_gordan_2to1(t_c, t_d, I_tot, I_z);
+      const double cg_in = isospin_clebsch_gordan_2to1(p_a, p_b, I_tot, I_z);
+      const double cg_out = isospin_clebsch_gordan_2to1(p_c, p_d, I_tot, I_z);
       isospin_factor = isospin_factor + cg_in * cg_in * cg_out * cg_out;
     }
   }

@@ -76,7 +76,7 @@ namespace smash {
  *
  * See also \ref collisions_output_in_box_modus_.
  **/
-RootOutput::RootOutput(const bf::path &path, const std::string& name,
+RootOutput::RootOutput(const bf::path &path, const std::string &name,
                        const OutputParameters &out_par)
     : OutputInterface(name),
       filename_(path / (name + ".root")),

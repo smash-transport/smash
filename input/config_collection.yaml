@@ -120,6 +120,8 @@ Collision_Term:
     Two_to_One:             False
     Two_to_Two:             True  # default
     Two_to_Two:             False
+    No_Collisions:          False # default
+    No_Collisions:          True
     Strings:                True
     Strings:                False # default
     String_Parameters:

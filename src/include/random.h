@@ -48,16 +48,22 @@ extern /*thread_local (see #3075)*/ Engine engine;
 template <typename T>
 class uniform_dist {
  public:
-  /** creates the object and fixes the interval */
+  /**
+   * Creates the object and fixes the interval.
+   *
+   * \param min Lower bound of interval.
+   * \param max Upper bound of interval.
+   * */
   uniform_dist(T min, T max) : distribution(min, max) {}
-  /** returns a random number in the interval */
+  /** \returns A random number in the interval. */
   T operator()() { return distribution(engine); }
-  /** the distribution object that is being used. */
+
  private:
+  /** The distribution object that is being used. */
   std::uniform_real_distribution<T> distribution;
 };
 
-/** sets the seed of the random number engine. */
+/** Sets the seed of the random number engine. */
 template <typename T>
 void set_seed(T &&seed) {
   engine.seed(std::forward<T>(seed));
@@ -66,23 +72,34 @@ void set_seed(T &&seed) {
 /// Advance the engine's state and return the generated value.
 inline Engine::result_type advance() { return engine(); }
 
-/** returns a uniformly distributed random real number \f$\chi \in [{\rm
- * min}, {\rm max})\f$ */
+/**
+ * Returns a uniformly distributed random real number \f$\chi \in [{\rm
+ * min}, {\rm max})\f$
+ *
+ * \param min Minimal sampled value.
+ * \param max Maximal sampled value.
+ */
 template <typename T>
 T uniform(T min, T max) {
   return std::uniform_real_distribution<T>(min, max)(engine);
 }
 
-/** returns a uniformly distributed random integer number \f$\chi \in [{\rm
- * min}, {\rm max})\f$ */
+/**
+ * Returns a uniformly distributed random integer number \f$\chi \in [{\rm
+ * min}, {\rm max})\f$
+ *
+ * \param min Minimal sampled value.
+ * \param max Maximal sampled value.
+ */
 template <typename T>
 T uniform_int(T min, T max) {
   return std::uniform_int_distribution<T>(min, max)(engine);
 }
 
-/** returns a uniformly distributed random number \f$\chi \in [0,1)\f$
+/**
+ * Returns a uniformly distributed random number \f$\chi \in [0,1)\f$.
  *
- * Not that the popular implementations in GCC and clang may return 1:
+ * Note that the popular implementations in GCC and clang may return 1:
  *
  * https://gcc.gnu.org/bugzilla/show_bug.cgi?id=64351
  * https://llvm.org/bugs/show_bug.cgi?id=18767
@@ -93,7 +110,8 @@ T canonical() {
       engine);
 }
 
-/** returns a uniformly distributed random number \f$\chi \in (0,1]\f$
+/**
+ * Returns a uniformly distributed random number \f$\chi \in (0,1]\f$.
  */
 template <typename T = double>
 T canonical_nonzero() {
@@ -103,16 +121,24 @@ T canonical_nonzero() {
       T(1));
 }
 
-/** returns a uniform_dist object */
+/**
+ * \return A uniform_dist object.
+ * \param min Lower bound of interval.
+ * \param max Upper bound of interval.
+ * */
 template <typename T>
 uniform_dist<T> make_uniform_distribution(T min, T max) {
   return uniform_dist<T>(min, max);
 }
 
-/** returns an exponentially distributed random number
+/**
+ * Draws an exponentially distributed random number.
  *
  * Probability for a given return value \f$\chi\f$ is \f$p(\chi) =
- * \Theta(\chi) \cdot \exp(-t)\f$
+ * \Theta(\chi) \cdot \exp(-t)\f$.
+ *
+ * \param lambda Rate parameter.
+ * \return Sampled random number.
  */
 template <typename T = double>
 T exponential(T lambda) {
@@ -121,9 +147,16 @@ T exponential(T lambda) {
   return -std::log(canonical_nonzero()) / lambda;
 }
 
-/** Evaluates a random number x according to an exponential distribution
- * exp(A*x), where A is assumed to be positive, and x is typically negative.
- * The result x is restricted to lie between x1 and x2 (with x2 < x <= x1). */
+/**
+ * Draws a random number x from an exponential distribution exp(A*x), where A is
+ * assumed to be positive, and x is typically negative.
+ * The result x is restricted to lie between x1 and x2 (with x2 < x <= x1).
+ *
+ * \param A Positive shape parameter.
+ * \param x1 Maximal sampled value.
+ * \param x2 Minimal sampled value.
+ * \return Sampled random number.
+ */
 template <typename T = double>
 T expo(T A, T x1, T x2) {
   const T a1 = A * x1, a2 = A * x2;
@@ -142,7 +175,12 @@ T expo(T A, T x1, T x2) {
   return x;
 }
 
-// signum function
+/**
+ * Signum function.
+ *
+ * \param val The input value.
+ * \return The sign of the input value.
+ */
 template <typename T>
 int sgn(T val) {
   return (T(0) < val) - (val < T(0));
@@ -150,10 +188,11 @@ int sgn(T val) {
 
 /**
  * Draws a random number according to a power-law distribution ~ x^n.
- * \param n exponent in power law (arbitrary real number)
- * \param xMin minimum value
- * \param xMax maximum value
- * \return random number between xMin and xMax
+ *
+ * \param n Exponent in power law (arbitrary real number).
+ * \param xMin Minimum value.
+ * \param xMax Maximum value.
+ * \return Random number between xMin and xMax.
  */
 template <typename T = double>
 T power(T n, T xMin, T xMax) {
@@ -169,50 +208,72 @@ T power(T n, T xMin, T xMax) {
   }
 }
 
-/** returns an poisson distributed random number
+/**
+ * Returns a Poisson distributed random number.
  *
  * Probability for a given return value \f$\chi\f$ is \f$p(\chi) =
  * \chi^i/i! \cdot \exp(-\chi)\f$
+ *
+ * \param lam Mean value of the distribution.
+ * \return Sampled random number.
  */
 template <typename T>
 int poisson(const T &lam) {
   return std::poisson_distribution<int>(lam)(engine);
 }
 
+/**
+ * Returns a binomially distributed random number.
+ *
+ * \param N Number of trials.
+ * \param p Probability of a trial generating true.
+ * \return Sampled random number.
+ */
 template <typename T>
 int binomial(const int N, const T &p) {
   return std::binomial_distribution<int>(N, p)(engine);
 }
 
+/**
+ * Returns a random number drawn from a normal distribution.
+ *
+ * \param mean Mean value of the distribution.
+ * \param sigma Standard deviation of the distribution.
+ * \return Sampled random number.
+ */
 template <typename T>
 double normal(const T &mean, const T &sigma) {
   return std::normal_distribution<double>(mean, sigma)(engine);
 }
 
-/** \return: one integer number sampled from discrete distribution
- * whose weight given by probability vector
+/**
+ * Discrete distribution with weight given by probability vector.
  */
 template <typename T>
 class discrete_dist {
  public:
-  /** default discrete distribution */
+  /** Default discrete distribution.
+   *
+   * Always draws 0.
+   */
   discrete_dist() : distribution({1.0}) {}
 
-  /** creates the object from probability vector */
+  /** Construct from probability vector. */
   explicit discrete_dist(const std::vector<T> &plist)
       : distribution(plist.begin(), plist.end()) {}
 
-  /** creates the object from probability list */
+  /** Construct from probability list. */
   explicit discrete_dist(std::initializer_list<T> l) : distribution(l) {}
 
-  /** reset the discrete distribution with new list*/
+  /** Reset the discrete distribution from a new probability list. */
   void reset_weights(const std::vector<T> &plist) {
     distribution = std::discrete_distribution<>(plist.begin(), plist.end());
   }
-  /** returns a random number in the interval */
+  /** Draw a random number from the discrete distribution. */
   int operator()() { return distribution(engine); }
-  /** the distribution object that is being used. */
+
  private:
+  /** The distribution object that is being used. */
   std::discrete_distribution<> distribution;
 };
 
@@ -227,6 +288,7 @@ class discrete_dist {
  * sharpness of the peak.
  * \param min Minimum value to be returned.
  * \param max Maximum value to be returned.
+ * \return Sampled random number.
  */
 template <typename T = double>
 T cauchy(T pole, T width, T min, T max) {
@@ -245,6 +307,10 @@ T cauchy(T pole, T width, T min, T max) {
  *  x^{a-1} (1-x)^{b-1}\f$. This distribution is necessary for string
  *  formation. The implementation uses a property connecting beta distribution
  * to gamma-distribution. Interchanging a and b will not change results.
+ *
+ * \param a Shape parameter.
+ * \param b Scale parameter.
+ * \return Sampled random number.
  */
 template <typename T = double>
 T beta(T a, T b) {
@@ -263,6 +329,10 @@ T beta(T a, T b) {
  * formation. The implementation uses the following property:
  * \f$p(x)dx = dx/x (1-x)^b = (1-x)^b d ln(x) = (1 - e^{-y})^b dy\f$, where
  * \f$ y = - ln(x) \f$.
+ *
+ * \param xmin Minimal sampled value.
+ * \param b Second shape parameter.
+ * \return Sampled random number.
  */
 template <typename T = double>
 T beta_a0(T xmin, T b) {

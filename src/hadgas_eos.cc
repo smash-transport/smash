@@ -30,7 +30,6 @@ void EosTable::compile_table(HadronGasEos &eos,
                              const std::string &eos_savefile_name) {
   bool table_read_success = false, table_consistency = true;
   if (boost::filesystem::exists(eos_savefile_name)) {
-    // Read table from file
     std::cout << "Reading table from file " << eos_savefile_name << std::endl;
     std::ifstream file;
     file.open(eos_savefile_name, std::ios::in);
@@ -173,14 +172,11 @@ double HadronGasEos::scaled_partial_density(const ParticleType &ptype,
   double x = beta * (ptype.baryon_number() * mub + ptype.strangeness() * mus -
                      ptype.mass());
   const unsigned int g = ptype.spin() + 1;
-  /*if (x < -600.0) {
-    std::cout << x << " " << z << " " << g << std::endl;
-  }*/
   if (x < -500.0) {
     return 0.0;
   }
   x = std::exp(x);
-  // The case of small mass: K_n(z) -> (n-1)!/2 *(2/z)^n, z -> 0
+  // In the case of small masses: K_n(z) -> (n-1)!/2 *(2/z)^n, z -> 0,
   // z*z*K_2(z) -> 2
   return (z < really_small) ? 2.0 * g * x
                             : z * z * g * x * gsl_sf_bessel_Kn_scaled(2, z);
@@ -213,11 +209,11 @@ double HadronGasEos::energy_density(double T, double mub, double mus) {
     }
     x = std::exp(x);
     const size_t g = ptype.spin() + 1;
-    // Small mass case, z*z*K_2(z) -> 2, z*z*z*K_1(z) -> 0 at z->0
-    e += (z < really_small)
-             ? 3.0 * g * x
-             : z * z * g * x * (3.0 * gsl_sf_bessel_Kn_scaled(2, z) +
-                                z * gsl_sf_bessel_K1_scaled(z));
+    // Small mass case, z*z*K_2(z) -> 2, z*z*z*K_1(z) -> 0 for z->0
+    e += (z < really_small) ? 3.0 * g * x
+                            : z * z * g * x *
+                                  (3.0 * gsl_sf_bessel_Kn_scaled(2, z) +
+                                   z * gsl_sf_bessel_K1_scaled(z));
   }
   e *= prefactor_ * T * T * T * T;
   return e;
@@ -399,8 +395,8 @@ std::array<double, 3> HadronGasEos::solve_eos(
   do {
     iter++;
     const auto iterate_status = gsl_multiroot_fsolver_iterate(solver_);
-
     // std::cout << print_solver_state(iter);
+
     // Avoiding too low temperature
     if (gsl_vector_get(solver_->x, 0) < 0.015) {
       return {0.0, 0.0, 0.0};

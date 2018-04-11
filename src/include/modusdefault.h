@@ -68,14 +68,14 @@ class ModusDefault {
   bool is_collider() const { return false; }
   /// \return The impact parameter; overwritten in ColliderModus
   double impact_parameter() const { return 0.0; }
-  /** \return The beam velocity of the projectile required in the Collider modus.
-   * In the other modus, return zero. */
+  /** \return The beam velocity of the projectile required in the Collider
+   * modus. In the other modus, return zero. */
   double velocity_projectile() const { return 0.0; }
   /** \return The beam velocity of the target required in the Collider modus.
    * In the other modus, return zero. */
   double velocity_target() const { return 0.0; }
-  /** \return The type of Fermi motion required in the Collider modus. In the other
-   * modus, just return FermiMotion::Off. */
+  /** \return The type of Fermi motion required in the Collider modus. In the
+   * other modus, just return FermiMotion::Off. */
   FermiMotion fermi_motion() const { return FermiMotion::Off; }
   /// \return Maximal timestep accepted by this modus. Negative means infinity.
   double max_timestep(double) const { return -1.; }
@@ -112,6 +112,15 @@ class ModusDefault {
        If one wants to have a central cell with center at 0,0,0 then
        number of cells should be odd (2k+1) in every direction.
      */
+
+  /*!\Userguide
+   * \page input_forced_thermalization_ Forced_Thermalization
+   * \key Lattice_Sizes (list of 3 doubles, required, no default): \n
+   * The lattice is placed such that the center is [0.0,0.0,0.0].
+   * If one wants to have a central cell with center at [0.0,0.0,0.0] then
+   * number of cells should be odd (2k+1) in every direction.
+   */
+
     const std::array<double, 3> l = conf.take({"Lattice_Sizes"});
     const std::array<double, 3> origin = {-0.5 * l[0], -0.5 * l[1],
                                           -0.5 * l[2]};
