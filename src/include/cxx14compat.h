@@ -16,7 +16,8 @@
 namespace smash {
 
 /**
- * Will be in C++14's standard library
+ * Definition for make_unique
+ * Is in C++14's standard library; necessary for older compilers
  *
  * \see http://en.cppreference.com/w/cpp/memory/unique_ptr/make_unique
  */

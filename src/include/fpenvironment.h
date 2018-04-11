@@ -14,18 +14,22 @@
 
 namespace smash {
 
+#if defined _GNU_SOURCE
 /**
  * Standard C/C++ don't have a function to modify the trapping behavior. You
  * can only save and restore the setup. With glibc you can change it via
  * feenableexcept and fedisableexcept. Without glibc inline asm and SSE
  * intrinsics can do it (for x86).
+ *
+ * \param mask Bit mask representing the flags to set.
+ * \return Whether the trap was successfully set.
+ *
+ * glibc specific implementation
  */
-#if defined _GNU_SOURCE
-// glibc specific implementation
 inline bool enable_float_traps(int mask) { return -1 != feenableexcept(mask); }
 #elif defined __SSE__
 // directly program the trap on the SSE unit
-bool enable_float_traps(int femask);
+bool enable_float_traps(int mask);
 #else
 // fallback that fails to set the trap
 inline bool enable_float_traps(int) { return false; }
@@ -73,6 +77,7 @@ class DisableFloatTraps {
    * Constructs the guard object.
    *
    * \param mask A bitwise or of the traps you want to keep enabled.
+   * \return The constructed object.
    */
   explicit DisableFloatTraps(int mask = 0) {
     std::feholdexcept(&environment_);

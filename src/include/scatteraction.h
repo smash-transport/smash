@@ -37,8 +37,6 @@ class ScatterAction : public Action {
    * \param[in] in_part2 second scattering partner
    * \param[in] time Time at which the action is supposed to take place
    * \param[in] isotropic if true, do the collision isotropically
-   * \param[in] include2to2 set that contains infos about which
-   *             inelastic 2 to 2 channels are present
    * \param[in] string_formation_time the time a string takes to form
    */
   ScatterAction(const ParticleData& in_part1, const ParticleData& in_part2,
@@ -81,6 +79,15 @@ class ScatterAction : public Action {
   void add_all_scatterings(double elastic_parameter, bool two_to_one,
                            ReactionsBitSet included_2to2, double low_snn_cut,
                            bool strings_switch, NNbarTreatment nnbar_treatment);
+
+  /**
+   * Assign a cross section scaling factor to all outgoing particles.
+   * Factor is only non-zero, when the outgoing particle carries
+   * a valence quark from the excited hadron.
+   */
+  static void assign_all_scaling_factors(ParticleList& incoming_particles,
+                                         ParticleList& outgoing_particles,
+                                         double suppression_factor);
 
   /// Returns list of possible collision channels
   const CollisionBranchList& collision_channels() {
@@ -159,6 +166,22 @@ class ScatterAction : public Action {
 
   /** Perform a 2->1 resonance-formation process. */
   void resonance_formation();
+
+  /**
+   * Find the first particle, which can carry nq1, and the last particle,
+   * which can carry nq2 valence quarks and return their indices in
+   * the given list.
+   */
+  static std::pair<int, int> find_leading(int nq1, int nq2, ParticleList& list);
+
+  /**
+   * Assign a cross section scaling factor to the given particle.
+   * The scaling factor is the number of quarks from the excited hadron,
+   * that the fragment carries devided by the total number of quarks in
+   * this fragment.
+   */
+  static void assign_scaling_factor(int nquark, ParticleData& data,
+                                    double suppression_factor);
 
   /** Pointer to interface class for strings */
   StringProcess* string_process_ = nullptr;

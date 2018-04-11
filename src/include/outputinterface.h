@@ -25,14 +25,19 @@ namespace smash {
  * \ingroup output
  *
  * \brief Abstraction of generic output
+ *
  * Any output should inherit this class. It provides virtual methods that will
  * be called at predefined moments:
- * 1) At event start and event end
- * 2) After every N'th timestep
- * 3) At each interaction
+ * 1) At event start and event end: at_eventstart, at_eventend
+ * 2) After every fixed time period: at_intermediate_time, thermodynamics_output
+ * 3) At each interaction: at_interaction
  */
 class OutputInterface {
  public:
+  /**
+   * Construct output interface.
+   * \param[in] name (File)name of output.
+   */
   explicit OutputInterface(std::string name)
       : is_dilepton_output_(name == "Dileptons"),
         is_photon_output_(name == "Photons") {}
@@ -52,7 +57,7 @@ class OutputInterface {
    * option.
    * \param particles List of particles.
    * \param event_number Number of the current event.
-   * \param impact_parameter distance between centers of nuclei in this event.
+   * \param impact_parameter Distance between centers of nuclei in this event.
    *          Only makes sense for collider modus.
    */
   virtual void at_eventend(const Particles &particles, const int event_number,
@@ -89,6 +94,8 @@ class OutputInterface {
    * \param tq Thermodynamic quantity to be written, used for file name etc.
    * \param dt Type of density, i.e. which particles to take into account.
    * \param lattice Lattice of tabulated values.
+   *
+   * Only used for vtk output. Not connected to ThermodynamicOutput.
    */
   virtual void thermodynamics_output(
       const ThermodynamicQuantity tq, const DensityType dt,
@@ -104,6 +111,8 @@ class OutputInterface {
    * \param tq Thermodynamic quantity to be written: Tmn, Tmn_Landau, v_Landau
    * \param dt Type of density, i.e. which particles to take into account.
    * \param lattice Lattice of tabulated values.
+   *
+   * Only used for vtk output. Not connected to ThermodynamicOutput.
    */
   virtual void thermodynamics_output(
       const ThermodynamicQuantity tq, const DensityType dt,
@@ -113,13 +122,28 @@ class OutputInterface {
     SMASH_UNUSED(lattice);
   }
 
+  /**
+   * Output to write energy-momentum tensor and related quantities from the
+   * thermalizer class.
+   * \param gct Pointer to thermalizer
+   *
+   * Only used for vtk output. Not connected to ThermodynamicOutput.
+   */
   virtual void thermodynamics_output(const GrandCanThermalizer &gct) {
     SMASH_UNUSED(gct);
   }
 
+  /// Get, whether this is the dilepton output?
   bool is_dilepton_output() const { return is_dilepton_output_; }
+
+  /// Get, whether this is the photon output?
   bool is_photon_output() const { return is_photon_output_; }
 
+  /**
+   * Convert thermodynamic quantities to strings.
+   * \param[in] tq Enum value of the thermodynamic quantity.
+   * \return String description of the enumerator.
+   */
   const char *to_string(const ThermodynamicQuantity tq) {
     switch (tq) {
       case ThermodynamicQuantity::EckartDensity:
@@ -134,6 +158,11 @@ class OutputInterface {
     throw std::invalid_argument("Unknown thermodynamic quantity.");
   }
 
+  /**
+   * Convert density types to strings.
+   * \param[in] dens_type enum value of the density type
+   * \return String description of the enumerator.
+   */
   const char *to_string(const DensityType dens_type) {
     switch (dens_type) {
       case DensityType::Hadron:
@@ -151,7 +180,10 @@ class OutputInterface {
   }
 
  protected:
+  /// Is this the dilepton output?
   const bool is_dilepton_output_;
+
+  /// Is this the photon output?
   const bool is_photon_output_;
 };
 

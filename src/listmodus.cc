@@ -96,6 +96,10 @@ namespace smash {
  * and 4-momenta (p0, px, py, pz) =
  * (0.232871, 0.116953, -0.115553, 0.090303) GeV,\n
  * with mass = 0.138 GeV, pdg = 111, id = 0 and charge 0 will be initialized.
+ *
+ * ### WARNING:
+ * Currently only one event per file is supported. Having more than one
+ * event per file will lead to undefined behavior.
  */
 
 ListModus::ListModus(Configuration modus_config, const ExperimentParameters &)
@@ -118,9 +122,6 @@ std::ostream &operator<<(std::ostream &out, const ListModus &m) {
   return out;
 }
 
-/* Judge whether formation time are the same for all the particles;
- * Don't do anti-freestreaming if start with the same formation time.
- * Choose the earliest formation time as start_time_ */
 std::pair<bool, double> ListModus::check_formation_time_(
     const std::string &particle_list) {
   double earliest_formation_time = DBL_MAX;
@@ -216,25 +217,28 @@ double ListModus::initial_conditions(Particles *particles,
                      << ", where m is SMASH mass.";
           n_warns_precision_++;
         } else if (n_warns_precision_ == max_warns_precision) {
-          log.warn("Further warnings about SMASH mass versus input mass"
-                   " inconsistencies will be suppressed.");
-         n_warns_precision_++;
+          log.warn(
+              "Further warnings about SMASH mass versus input mass"
+              " inconsistencies will be suppressed.");
+          n_warns_precision_++;
         }
         particle.set_4momentum(mass, ThreeVector(px, py, pz));
       }
       particle.set_4momentum(FourVector(E, px, py, pz));
       // On-shell condition consistency check
-      if (std::abs(particle.momentum().sqr() - mass*mass) > really_small) {
+      if (std::abs(particle.momentum().sqr() - mass * mass) > really_small) {
         if (n_warns_mass_consistency_ < max_warn_mass_consistency) {
-          log.warn() << "Provided 4-momentum " << particle.momentum() << " and "
-                    << " mass " << mass << " do not satisfy E^2 - p^2 = m^2."
-                    << " This may originate from the lack of numerical"
-                    << " precision in the input. Setting E to sqrt(p^2 + m^2).";
+          log.warn()
+              << "Provided 4-momentum " << particle.momentum() << " and "
+              << " mass " << mass << " do not satisfy E^2 - p^2 = m^2."
+              << " This may originate from the lack of numerical"
+              << " precision in the input. Setting E to sqrt(p^2 + m^2).";
           n_warns_mass_consistency_++;
         } else if (n_warns_mass_consistency_ == max_warn_mass_consistency) {
-          log.warn("Further warnings about E != sqrt(p^2 + m^2) will"
-                   " be suppressed.");
-         n_warns_mass_consistency_++;
+          log.warn(
+              "Further warnings about E != sqrt(p^2 + m^2) will"
+              " be suppressed.");
+          n_warns_mass_consistency_++;
         }
         particle.set_4momentum(mass, ThreeVector(px, py, pz));
       }

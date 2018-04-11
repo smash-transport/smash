@@ -13,7 +13,6 @@
 #include <string>
 
 #include "binaryoutputcollisions.h"
-#include "filedeleter.h"
 #include "forwarddeclarations.h"
 #include "outputparameters.h"
 
@@ -33,26 +32,47 @@ namespace smash {
  *
  * Details of the output format can be found
  * on the wiki in User Guide section, look for binary output.
- **/
+ */
 class BinaryOutputParticles : public BinaryOutputBase {
  public:
+  /**
+   * Create binary particle output.
+   *
+   * \param[in] path Output path.
+   * \param[in] name Name of the ouput.
+   * \param[in] out_par A structure containing parameters of the output.
+   */
   BinaryOutputParticles(const bf::path &path, std::string name,
                         const OutputParameters &out_par);
 
-  /// writes the initial particle information of an event
+  /**
+   * Writes the initial particle information of an event to the binary output.
+   * \param[in] particles Current list of all particles.
+   * \param[in] event_number Unused, needed since inherited.
+   */
   void at_eventstart(const Particles &particles,
                      const int event_number) override;
 
-  /// writes the final particle information of an event
+  /**
+   * Writes the final particle information of an event to the binary output.
+   * \param[in] particles Current list of particles.
+   * \param[in] event_number Number of event.
+   * \param[in] impact_parameter Impact parameter of this event.
+   */
   void at_eventend(const Particles &particles, const int event_number,
                    double impact_parameter) override;
 
-  /// writes particles every time interval fixed by option OUTPUT_INTERVAL
+  /**
+   * writes particles every time interval fixed by option OUTPUT_INTERVAL
+   * \param[in] particles Current list of particles.
+   * \param[in] clock Unused, needed since inherited.
+   * \param[in] dens_param Unused, needed since inherited.
+   */
   void at_intermediate_time(const Particles &particles, const Clock &clock,
                             const DensityParameters &dens_param) override;
 
  private:
-  /// Option: print initial and final particles or not
+  /// Write only final particles (True) or both, inital and final (False).
   bool only_final_;
 };
 

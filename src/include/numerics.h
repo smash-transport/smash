@@ -20,21 +20,20 @@
  *
  * This file collects generic numerical functions such as for
  * approximate equality checks between to floating point values.
- *
  */
 
 namespace smash {
-/** checks two numbers for relative approximate equality.
+/**
+ * checks two numbers for relative approximate equality.
  *
- * \param x
- * \param y
- *
- * \returns true the difference between x and y is less than or equal to
- * \f$\delta = \f$SMASH::really_small or that times the average of
+ * \return true if the difference between x and y is less than or equal to
+ * \f$\delta = \f$smash::really_small or that times the average of
  * \f$|x|\f$ and \f$|y|\f$:
  *
  * \f[|x - y| \stackrel{?}{\le} \delta \mbox{ or } |x - y|
  * \stackrel{?}{\le} \frac{|x| + |y|}{2} \cdot \delta\f]
+ *
+ * \see smash::really_small
  */
 template <typename N>
 bool almost_equal(const N x, const N y) {
@@ -42,8 +41,16 @@ bool almost_equal(const N x, const N y) {
           std::abs(x - y) <=
               N(0.5 * really_small) * (std::abs(x) + std::abs(y)));
 }
-/** Same as above, but for physical checks like energy-momentum conser-
- * vation small_number is enough precision-wise
+/**
+ * Same as smash::almost_equal, but for physical checks like energy-momentum
+ * conservation small_number is enough precision-wise
+ *
+ * \return true if the difference between x and y is less than or equal to
+ * \f$\delta = \f$smash::small_number or that times the average of
+ * \f$|x|\f$ and \f$|y|\f$:
+ *
+ * \see smash::small_number
+ * \see smash::almost_equal
  */
 template <typename N>
 bool almost_equal_physics(const N x, const N y) {
