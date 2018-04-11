@@ -56,7 +56,7 @@ class ThermLatticeNode {
    * mub_ Net baryon chemical potential, mus_ Net strangeness chemical potential
    */
   ThermLatticeNode();
-  /** 
+  /**
    *  Add particle contribution to Tmu0, nb and ns
    *  May look like unused at first glance, but it is actually used
    *  by update_general_lattice, where the node type of the lattice
@@ -466,7 +466,7 @@ class GrandCanThermalizer {
   ParticleList to_remove_;
   /// Newly generated particles by thermalizer
   ParticleList sampled_list_;
-  /** 
+  /**
    * List of particle types from which equation of state is computed.
    * Most particles are included, but not all of them.
    * For example, photons and leptons are not included. Heavy hadrons, that

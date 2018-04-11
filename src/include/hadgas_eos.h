@@ -31,12 +31,12 @@ class HadronGasEos;
 
 class EosTable {
  public:
-  /** 
+  /**
    * Sets up a table p/T/muB/mus versus (e, nb), where e is energy density,
    * nb is net baryon density, p - pressure, T - temperature, muB -
-   * net baryon chemical potential, muS - net strangeness potential. 
+   * net baryon chemical potential, muS - net strangeness potential.
    * Net strangeness density and isospin projection density are assumed to be 0
-   * (Note that corresponding chemical potentials are still non-zero, 
+   * (Note that corresponding chemical potentials are still non-zero,
    * because muB != 0).
    *
    * After calling this constructor the table is allocated, but it is
@@ -46,7 +46,7 @@ class EosTable {
    * \param[in] dnb step in net baryon density [GeV/fm^3]
    * \param[in] n_e number of steps in energy density
    * \param[in] n_e number of steps in net baryon density
-   * 
+   *
    * Entry at (ie, inb) corresponds to energy density and net baryon density
    * (e, nb) = (ie*de, inb*dnb) [GeV/fm^4, GeV/fm^3].
    */
@@ -67,7 +67,7 @@ class EosTable {
    */
   void compile_table(HadronGasEos& eos,
                      const std::string& eos_savefile_name = "hadgas_eos.dat");
-  /** 
+  /**
    * Obtain interpolated p/T/muB/muS from the tabulated equation of state
    * given energy density and net baryon density.
    *
