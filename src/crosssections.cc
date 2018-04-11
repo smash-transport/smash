@@ -1437,9 +1437,6 @@ CollisionBranchList cross_sections::dpi_xx(ReactionsBitSet
           if (xsection > really_small) {
             process_list.push_back(make_unique<CollisionBranch>(
                 *nuc_a, *nuc_b, xsection, ProcessType::TwoToTwo));
-            log.debug(type_a.name(), type_b.name(), "->",
-                     nuc_a->name(), nuc_b->name(), " at sqrts [GeV] = ",
-                     sqrts, " with cs[mb] = ", xsection);
             log.debug(type_a.name(), type_b.name(), "->", nuc_a->name(),
                       nuc_b->name(), " at sqrts [GeV] = ", sqrts,
                       " with cs[mb] = ", xsection);
