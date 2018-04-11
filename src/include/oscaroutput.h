@@ -60,14 +60,13 @@ enum OscarOutputContents {
 template <OscarOutputFormat Format, int Contents>
 class OscarOutput : public OutputInterface {
  public:
-
   /**
    * Create oscar output.
    *
    * \param[in] path Output path.
    * \param[in] name Name of the ouput.
    */
-  OscarOutput(const bf::path &path, const std::string& name);
+  OscarOutput(const bf::path &path, const std::string &name);
 
   /**
    * Writes the initial particle information of an event to the oscar output.
@@ -138,7 +137,7 @@ class OscarOutput : public OutputInterface {
  *             in event, etc.
  */
 std::unique_ptr<OutputInterface> create_oscar_output(
-    const std::string& format, const std::string& content, const bf::path &path,
+    const std::string &format, const std::string &content, const bf::path &path,
     const OutputParameters &out_par);
 
 // @}

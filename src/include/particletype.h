@@ -352,7 +352,7 @@ class ParticleType {
   static ParticleTypePtrList &list_nucleons();
   /// \return a list of all anti-nucleons (i.e. anti-proton and anti-neutron).
   static ParticleTypePtrList &list_anti_nucleons();
-  /** 
+  /**
    * \return a list of the Delta(1232) baryons
    *         (i.e. all four charge states).
    */
@@ -422,8 +422,8 @@ class ParticleType {
    * data. This function must only be called once (will fail on second
    * invocation).
    *
-   * \param[in] particles A string that contains the definition of ParticleTypes to
-   *                  be created.
+   * \param[in] particles A string that contains the definition of ParticleTypes
+   * to be created.
    */
   static void create_type_list(const std::string &particles);
 

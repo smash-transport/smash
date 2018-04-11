@@ -35,19 +35,54 @@ namespace smash {
  * elastic cross sections (which are energy-dependent) with a constant value.
  * This constant elastic cross section is used for all collisions.
  *
- * \key Isotropic (bool, optional, default = false) \n
+ * \key Isotropic (bool, optional, default = \key false) \n
  * Do all collisions isotropically.
- * \key Strings (bool, optional, default = false): \n
- * true - string excitation is enabled\n
- * false - string excitation is disabled
- * \key String_Formation_Time (double, optional, default = 1.0) \n
- * Parameter for formation time in string fragmentation in fm/c
- * \key low_snn_cut (double) in GeV \n
+ *
+ * \key Elastic_NN_Cutoff_Sqrts (double, optional, default = 1.98): \n
  * The elastic collisions betwen two nucleons with sqrt_s below
- * low_snn_cut cannot happen.
- * <1.88 - below the threshold energy of the elastic collsion, no effect
- * >2.02 - beyond the threshold energy of the inelastic collision NN->NNpi, not
- * suggested
+ * Elastic_NN_Cutoff_Sqrts, in GeV, cannot happen. \n
+ * \li \key Elastic_NN_Cutoff_Sqrts < 1.88 - Below the threshold energy of the
+ * elastic collsion, no effect \n
+ * \li \key Elastic_NN_Cutoff_Sqrts > 2.02 - Beyond the threshold energy of the
+ * inelastic collision NN->NNpi, not suggested
+ *
+ * \key Strings (bool, optional, default = \key true for each setup except box): \n
+ * \li \key true - String excitation is enabled\n
+ * \li \key false - String excitation is disabled
+ *
+ * \key String_Formation_Time (double, optional, default = 1.0): \n
+ * Parameter for formation time in string fragmentation, in fm/c.
+ *
+ * \subpage string_parameters
+ *
+ * \page string_parameters String_Parameters
+ * A set of parameters with which the string fragmentation can be modified.
+ * (TODO(Mohs): Explain them in one sentence and add formulas.) \n
+ *
+ * \key String_Tension (double, optional, default = 1.0 GeV/fm) \n
+ *
+ * \key Gluon_Beta (double, optional, default = 0.5) \n
+ *
+ * \key Gluon_Pmin (double, optional, default = 0.001 GeV) \n
+ *
+ * \key Quark_Alpha (double, optional, default = 1.0) \n
+ *
+ * \key Quark_Beta (double, optional, default = 2.5) \n
+ *
+ * \key Strange_Supp (double, optional, default = 0.217 as in Pythia) \n
+ * Strangeness suppression factor.
+ *
+ * \key Diquark_Supp (double, optional, default = 0.081 as in Pythia) \n
+ * Diquark suppression factor.
+ *
+ * \key Sigma_Perp (double, optional, default = 0.7 ) \n
+ *
+ * \key StringZ_A (double, optional, default = 0.68 as in Pythia) \n
+ *
+ * \key StringZ_B (double, optional, default = 0.98 as in Pythia) \n
+ *
+ * \key String_Sigma_T (double, optional, default = 0.25)
+ *
  */
 
 ScatterActionsFinder::ScatterActionsFinder(
@@ -77,18 +112,18 @@ ScatterActionsFinder::ScatterActionsFinder(
   }
   if (strings_switch_) {
     auto subconfig = config["Collision_Term"]["String_Parameters"];
-    string_process_interface_ = make_unique<StringProcess>(
-        subconfig.take({"String_Tension"}, 1.0),
-        subconfig.take({"Gluon_Beta"}, 0.5),
-        subconfig.take({"Gluon_Pmin"}, 0.001),
-        subconfig.take({"Quark_Alpha"}, 1.0),
-        subconfig.take({"Quark_Beta"}, 2.5),
-        subconfig.take({"Strange_Supp"}, 0.217),
-        subconfig.take({"Diquark_Supp"}, 0.081),
-        subconfig.take({"Sigma_Perp"}, 0.7),
-        subconfig.take({"StringZ_A"}, 0.68),
-        subconfig.take({"StringZ_B"}, 0.98),
-        subconfig.take({"String_Sigma_T"}, 0.25));
+    string_process_interface_ =
+        make_unique<StringProcess>(subconfig.take({"String_Tension"}, 1.0),
+                                   subconfig.take({"Gluon_Beta"}, 0.5),
+                                   subconfig.take({"Gluon_Pmin"}, 0.001),
+                                   subconfig.take({"Quark_Alpha"}, 1.0),
+                                   subconfig.take({"Quark_Beta"}, 2.5),
+                                   subconfig.take({"Strange_Supp"}, 0.217),
+                                   subconfig.take({"Diquark_Supp"}, 0.081),
+                                   subconfig.take({"Sigma_Perp"}, 0.7),
+                                   subconfig.take({"StringZ_A"}, 0.68),
+                                   subconfig.take({"StringZ_B"}, 0.98),
+                                   subconfig.take({"String_Sigma_T"}, 0.25));
   }
 }
 
@@ -327,8 +362,8 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
     const ParticleList incoming = {a_data, b_data};
     cross_sections xs_class(incoming, sqrts);
     CollisionBranchList processes = xs_class.generate_collision_list(
-    elastic_parameter_, two_to_one_, incl_set_, low_snn_cut_, strings_switch_,
-    nnbar_treatment_, string_process_interface_.get());
+        elastic_parameter_, two_to_one_, incl_set_, low_snn_cut_,
+        strings_switch_, nnbar_treatment_, string_process_interface_.get());
     for (const auto &process : processes) {
       const double xs = process->weight();
       if (xs <= 0.0) {
@@ -343,7 +378,7 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
       }
       outgoing_total_mass[description] = m_tot;
       if (!xs_dump[description].empty() &&
-        std::abs(xs_dump[description].back().first - sqrts) < really_small) {
+          std::abs(xs_dump[description].back().first - sqrts) < really_small) {
         xs_dump[description].back().second += xs;
       } else {
         xs_dump[description].push_back(std::make_pair(sqrts, xs));
@@ -357,9 +392,9 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
     all_channels.push_back(channel.first);
   }
   std::sort(all_channels.begin(), all_channels.end(),
-    [&](const std::string& str_a, const std::string& str_b) {
-      return outgoing_total_mass[str_a] < outgoing_total_mass[str_b];
-  });
+            [&](const std::string &str_a, const std::string &str_b) {
+              return outgoing_total_mass[str_a] < outgoing_total_mass[str_b];
+            });
 
   // Print header
   std::cout << "# Dumping partial cross-sections in mb" << std::endl;

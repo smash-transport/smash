@@ -231,13 +231,13 @@ ThreeVector Nucleus::distribute_nucleon() const {
         }
       }
     }
-  /**
-   * \li Generate \f$t\f$ from the distribution in the respective
-   * branches
-   * \li \a Reject that number with a probability
-   * \f$1-(1+\exp(-|t|))^{-1}\f$ (the efficiency of this should be
-   * \f$\gg \frac{1}{2}\f$)
-   */
+    /**
+     * \li Generate \f$t\f$ from the distribution in the respective
+     * branches
+     * \li \a Reject that number with a probability
+     * \f$1-(1+\exp(-|t|))^{-1}\f$ (the efficiency of this should be
+     * \f$\gg \frac{1}{2}\f$)
+     */
   } while (Random::canonical() > 1. / (1. + std::exp(-std::abs(t))));
   /// \li Shift and rescale \f$t\f$ to \f$r = d\cdot t + r_0\f$
   double position_scaled = t + radius_scaled;

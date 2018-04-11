@@ -47,7 +47,7 @@ enum class DensityType {
  */
 std::ostream &operator<<(std::ostream &os, DensityType dt);
 
-/** 
+/**
  * Get the factor that determines how much a particle contributes to the
  * density type that is computed. E.g. positive pion contributes with
  * factor 1 to total particle density and with factor 0 to baryon density.
@@ -107,7 +107,7 @@ inline double smearing_factor_rcut_correction(const double rcut_in_sigma) {
   return -2.0 / std::sqrt(M_PI) * x * std::exp(-x * x) + std::erf(x);
 }
 
-/** 
+/**
  * A class to precalculate and store parameters relevant for density
  * calculation. It has to be initialized only once per SMASH run.
  */
@@ -143,7 +143,7 @@ class DensityParameters {
   double r_cut_sqr() const { return r_cut_sqr_; }
   /// \return \f$ (2 \sigma^2)^{-1} \f$ [fm\f$^{-2}\f$]
   double two_sig_sqr_inv() const { return two_sig_sqr_inv_; }
-  /** 
+  /**
    * \return Normalization for smearing factor. Unnormalized smearing factor
    *         \f$ sf(\vec{r}) \f$ has to be multiplied by this to have
    *         \f$ \int d^3r \, sf(\vec{r}) = 1 \f$.
@@ -228,7 +228,7 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
  *   ThreeVector and ThreeVector currently comes only as double.
  *   Density itself is double for uniformity: if gradient is double,
  *   density should also be.
- * \return (density in the local Eckart frame [fm\$f^{-3}\$f], 
+ * \return (density in the local Eckart frame [fm\$f^{-3}\$f],
  *          the gradient of the density or a 0 3-vector)
  */
 std::pair<double, ThreeVector> rho_eckart(const ThreeVector &r,
@@ -243,7 +243,7 @@ std::pair<double, ThreeVector> rho_eckart(const ThreeVector &r,
                                           DensityType dens_type,
                                           bool compute_gradient);
 
-/** 
+/**
  * A class for time-efficient (time-memory trade-off) calculation of density
  * on the lattice. It holds two FourVectors - positive and negative
  * summands of 4-current, and the density itself. Four-currents are
@@ -272,9 +272,9 @@ class DensityOnLattice {
    * of the positively and negatively charged particles are updated by this
    * function
    *
-   * \param[in] part Particle would be added to the current density 
+   * \param[in] part Particle would be added to the current density
    *            on the lattice.
-   * \param[in] factor Factor can in principle be any scalar multiplier. 
+   * \param[in] factor Factor can in principle be any scalar multiplier.
    *            Physics-wise it accounts for smearing on the lattice and for
    *            particle contribution to given density type (e.g. anti-proton
    *            contributes with factor -1 to baryon density, proton - with
@@ -381,7 +381,7 @@ void update_density_lattice(DensityLattice *lat, const LatticeUpdate update,
                             const DensityParameters &par,
                             const Particles &particles);
 
-/** 
+/**
  * Calculates energy-momentum tensor on the lattice in an time-efficient way.
  *
  * \param[out] lat The lattice on which the energy-momentum tensor

@@ -23,8 +23,8 @@ namespace smash {
 BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
                                              std::string name,
                                              const OutputParameters &out_par)
-    : BinaryOutputBase(
-          path / "particles_binary.bin", "wb", name, out_par.part_extended),
+    : BinaryOutputBase(path / "particles_binary.bin", "wb", name,
+                       out_par.part_extended),
       only_final_(out_par.part_only_final) {}
 
 /*!\Userguide
@@ -118,7 +118,7 @@ void BinaryOutputParticles::at_eventend(const Particles &particles,
                                         const int event_number,
                                         double impact_parameter) {
   char pchar = 'p';
-  // \todo Is the if-statement below really correct, if only_final_ is False?
+  /// \todo Is the if-statement below really correct, if only_final_ is False?
   if (only_final_) {
     std::fwrite(&pchar, sizeof(char), 1, file_.get());
     write(particles.size());

@@ -35,14 +35,13 @@ namespace smash {
  */
 class BinaryOutputParticles : public BinaryOutputBase {
  public:
-
- /**
-  * Create binary particle output.
-  *
-  * \param[in] path Output path.
-  * \param[in] name Name of the ouput.
-  * \param[in] out_par A structure containing parameters of the output.
-  */
+  /**
+   * Create binary particle output.
+   *
+   * \param[in] path Output path.
+   * \param[in] name Name of the ouput.
+   * \param[in] out_par A structure containing parameters of the output.
+   */
   BinaryOutputParticles(const bf::path &path, std::string name,
                         const OutputParameters &out_par);
 

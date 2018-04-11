@@ -29,7 +29,7 @@ namespace smash {
  */
 class ScatterActionsFinder : public ActionFinderInterface {
  public:
-  /** 
+  /**
    * Constructor of the finder with the given parameters.
    *
    * \param[in] config Configuration of smash from which we take:
@@ -52,7 +52,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
    *            there will be no more "first" collisions to be excluded.
    * \param[in] N_tot Total number of the initial nucleons. This number,
    *            as well as the next parameter, will be used to determine
-   *            whether two intial nucleons are within the same nucleus 
+   *            whether two intial nucleons are within the same nucleus
    *            if we'd like to exclude the firs collisions among them.
    * \param[in] N_proj Total projectile number
    * \param[in] n_fractional_photons A number used to replace one outgoing
@@ -68,7 +68,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
                        const std::vector<bool> &nucleon_has_interacted,
                        int N_tot, int N_proj, int n_fractional_photons);
 
-  /** 
+  /**
    * Determine the collision time of the two particles.
    * Time of the closest approach is taken as collision time.
    *
@@ -102,7 +102,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
            (p1.momentum().x0() * p2.momentum().x0() / dv_times_e1e2_sqr);
   }
 
-  /** 
+  /**
    * Search for all the possible collisions within one cell. This function is
    * only used for counting the primary collisions at the beginning of each
    * time step. (Although it's also called afterwards for searching the
@@ -111,12 +111,12 @@ class ScatterActionsFinder : public ActionFinderInterface {
    *
    * \param[in] search_list A list of particles within one cell
    * \param[in] dt The maximum time interval at the current time step [fm/c]
-   * \return A list of possible scatter actions 
+   * \return A list of possible scatter actions
    */
   ActionList find_actions_in_cell(const ParticleList &search_list,
                                   double dt) const override;
 
-  /** 
+  /**
    * Search for all the possible collisions among the neighboring cells. This
    * function is only used for counting the primary collisions at the beginning
    * of each time step.
@@ -124,26 +124,26 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * \param[in] search_list A list of particles within the current cell
    * \param[in] neighbors_list A list of particles within the neighboring cell
    * \param[in] dt The maximum time interval at the current time step [fm/c]
-   * \return A list of possible scatter actions 
+   * \return A list of possible scatter actions
    */
   ActionList find_actions_with_neighbors(const ParticleList &search_list,
                                          const ParticleList &neighbors_list,
                                          double dt) const override;
 
-  /** 
+  /**
    * Search for all the possible secondary collisions between the outgoing
    * particles and the rest.
    *
    * \param[in] search_list A list of particles within the current cell
    * \param[in] surrounding_list The whole particle list
    * \param[in] dt The maximum time interval at the current time step [fm/c]
-   * \return A list of possible scatter actions 
+   * \return A list of possible scatter actions
    */
   ActionList find_actions_with_surrounding_particles(
       const ParticleList &search_list, const Particles &surrounding_list,
       double dt) const override;
 
-  /** 
+  /**
    * Find some final collisions at the end of the simulation.
    * Currently does nothing.
    */
@@ -168,7 +168,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
   }
 
   /**
-   * Calculate the maximum transvers distance as a preliminary criterion 
+   * Calculate the maximum transvers distance as a preliminary criterion
    * for the collisions.
    *
    * \param[in] testparticles Number of test particles. The cross sections, as
@@ -194,11 +194,13 @@ class ScatterActionsFinder : public ActionFinderInterface {
   /**
    * Print out partial cross-sections of all processes that can occur in
    * the collision of a(mass = m_a) and b(mass = m_b).
-   * 
+   *
    * \param[in] a The specie of the first incoming particle.
    * \param[in] b The specie of the second incoming particle.
+   * \param[in] m_a Mass of species a.
+   * \param[in] m_b Mass of species b.
    * \todo (redundant) Are the masses redundant here since the pole mass
-   *                   is already included in the ParticleType. 
+   *                   is already included in the ParticleType.
    */
   void dump_cross_sections(const ParticleType &a, const ParticleType &b,
                            double m_a, double m_b) const;
@@ -229,7 +231,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const bool two_to_one_;
   /// List of included 2<->2 reactions
   const ReactionsBitSet incl_set_;
-  /** 
+  /**
    * Elastic collsions between two nucleons with
    * sqrt_s below low_snn_cut_ are excluded.
    */
@@ -238,7 +240,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const bool strings_switch_;
   /// Switch for NNbar reactions
   const NNbarTreatment nnbar_treatment_;
-  /** 
+  /**
    * Parameter to record whether the nucleon
    * has experienced a collision or not
    */

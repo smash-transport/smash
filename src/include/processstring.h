@@ -192,16 +192,15 @@ class StringProcess {
    * \see 3rdparty/pythia8230/share/Pythia8/xmldoc/FlavourSelection.xml
    * \see 3rdparty/pythia8230/share/Pythia8/xmldoc/Fragmentation.xml
    */
-  void common_setup_pythia(Pythia8::Pythia *pythia_in,
-                           double strange_supp, double diquark_supp,
-                           double stringz_a, double stringz_b,
-                           double string_sigma_T);
+  void common_setup_pythia(Pythia8::Pythia *pythia_in, double strange_supp,
+                           double diquark_supp, double stringz_a,
+                           double stringz_b, double string_sigma_T);
 
   /**
    * Function to get the PYTHIA object for hard string routine
    * \return pointer to the PYTHIA object used in hard string routine
    */
-  Pythia8::Pythia* get_ptr_pythia_parton() { return pythia_parton_.get(); }
+  Pythia8::Pythia *get_ptr_pythia_parton() { return pythia_parton_.get(); }
 
   /**
    * Interface to pythia_sigmatot_ to compute cross-sections of A+B->

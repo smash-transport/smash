@@ -24,11 +24,11 @@ namespace smash {
 
 template <OscarOutputFormat Format, int Contents>
 OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
-                                           const std::string& name)
+                                           const std::string &name)
     : OutputInterface(name),
-      file_{
-        path / (name + ".oscar" + ((Format == OscarFormat1999) ? "1999" : "")),
-        "w"} {
+      file_{path /
+                (name + ".oscar" + ((Format == OscarFormat1999) ? "1999" : "")),
+            "w"} {
   /*!\Userguide
    * \page oscar_general_ OSCAR block structure
    * OSCAR outputs are a family of ASCII and binary formats that follow
@@ -72,8 +72,8 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
    * immediately after initialization, at event end (which is reached when
    * time is larger or equal than \c End_Time in configuration file) and
    * periodically during evolution, period is defined by \c Output_Interval
-   * option in configuration file, see output_content_specific_options_
-   * "content-specific output options".
+   * option in configuration file, see
+   * \ref output_content_specific_options_ "content-specific output options".
    * Collisions output contains all collisions / decays / box wall crossings
    * and optionally initial and final configuration.
    */
@@ -97,8 +97,8 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
                  " none none none none fm none none none fm none none\n");
     std::fprintf(file_.get(), "# %s\n", VERSION_MAJOR);
   } else {
-    const std::string& oscar_name =
-         name == "particle_lists" ? "final_id_p_x" : name;
+    const std::string &oscar_name =
+        name == "particle_lists" ? "final_id_p_x" : name;
     // This is necessary because OSCAR199A requires
     // this particular string for particle output.
 
@@ -460,7 +460,7 @@ namespace {
 template <int Contents>
 std::unique_ptr<OutputInterface> create_select_format(
     bool modern_format, const bf::path &path, const OutputParameters &out_par,
-    const std::string& name) {
+    const std::string &name) {
   bool extended_format = (Contents & OscarInteractions) ? out_par.coll_extended
                                                         : out_par.part_extended;
   if (modern_format && extended_format) {
@@ -475,7 +475,7 @@ std::unique_ptr<OutputInterface> create_select_format(
 }  // unnamed namespace
 
 std::unique_ptr<OutputInterface> create_oscar_output(
-    const std::string& format, const std::string& content, const bf::path &path,
+    const std::string &format, const std::string &content, const bf::path &path,
     const OutputParameters &out_par) {
   if (format != "Oscar2013" && format != "Oscar1999") {
     throw std::invalid_argument("Creating Oscar output: unknown format");

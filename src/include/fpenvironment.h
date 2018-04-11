@@ -14,6 +14,7 @@
 
 namespace smash {
 
+#if defined _GNU_SOURCE
 /**
  * Standard C/C++ don't have a function to modify the trapping behavior. You
  * can only save and restore the setup. With glibc you can change it via
@@ -22,9 +23,9 @@ namespace smash {
  *
  * \param mask Bit mask representing the flags to set.
  * \return Whether the trap was successfully set.
+ *
+ * glibc specific implementation
  */
-#if defined _GNU_SOURCE
-// glibc specific implementation
 inline bool enable_float_traps(int mask) { return -1 != feenableexcept(mask); }
 #elif defined __SSE__
 // directly program the trap on the SSE unit

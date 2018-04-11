@@ -35,8 +35,8 @@ class BinaryOutputBase : public OutputInterface {
    * \param[in] name Name of the ouput.
    * \param[in] extended_format Is the written ouput extended.
    */
-  explicit BinaryOutputBase(const bf::path& path, const std::string& mode,
-                            const std::string& name, bool extended_format);
+  explicit BinaryOutputBase(const bf::path &path, const std::string &mode,
+                            const std::string &name, bool extended_format);
 
   /**
    * Write string to binary output.
@@ -128,7 +128,6 @@ class BinaryOutputBase : public OutputInterface {
  */
 class BinaryOutputCollisions : public BinaryOutputBase {
  public:
-
   /**
    * Create binary particle output.
    *

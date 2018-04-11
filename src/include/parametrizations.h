@@ -119,7 +119,7 @@ double NN_string_hard(double mandelstam_s);
 /**
  * nucleon-pion hard scattering cross section (with partonic scattering)
  *
- * \param[in] mandelstam_s the rest frame total energy squared 
+ * \param[in] mandelstam_s the rest frame total energy squared
  * \return the parametrized cross-section
  */
 double Npi_string_hard(double mandelstam_s);
@@ -127,7 +127,7 @@ double Npi_string_hard(double mandelstam_s);
 /**
  * pion-pion hard scattering cross section (with partonic scattering)
  *
- * \param[in] mandelstam_s the rest frame total energy squared 
+ * \param[in] mandelstam_s the rest frame total energy squared
  * \return the parametrized cross-section
  */
 double pipi_string_hard(double mandelstam_s);
@@ -143,7 +143,7 @@ double pipi_string_hard(double mandelstam_s);
  * the parametrization at p_lab = 8 GeV, which correspons to square
  * root of s equal to 4 GeV.
  *
- * \param[in] mandelstam_s the rest frame total energy squared 
+ * \param[in] mandelstam_s the rest frame total energy squared
  * \return the parametrized cross-section
  */
 double piplusp_elastic(double mandelstam_s);
@@ -161,7 +161,7 @@ double piminusp_elastic(double mandelstam_s);
  * pp elastic cross section parametrization
  * Source: \iref{Weil:2013mya}, eq. (44)
  *
- * \param[in] mandelstam_s the rest frame total energy squared 
+ * \param[in] mandelstam_s the rest frame total energy squared
  * \return the parametrized cross-section
  */
 double pp_elastic(double mandelstam_s);

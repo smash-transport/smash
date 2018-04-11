@@ -44,7 +44,7 @@ struct ExpansionProperties {
  * \param[in] time time in the computational frame. [fm]
  * \param[in] metric Struct containing the parameters needed to
  *            calculate the metric.
- * \return Hubble parameter \f$[fm^\f${-1}\f$]
+ * \return Hubble parameter [fm^\f${-1}\f$]
  */
 double calc_hubble(double time, const ExpansionProperties &metric);
 
@@ -53,7 +53,7 @@ double calc_hubble(double time, const ExpansionProperties &metric);
  * to a given moment.
  *
  * For each particle, the position is shifted:
- * \f[\vec x^\prime = \vec x + \vec v \Delta t\f]
+ * \f[ \vec x^\prime = \vec x + \vec v \Delta t \f]
  * where \f$\vec x\f$ is the current position, \f$\vec v\f$ its
  * velocity and \f$\Delta t\f$ the duration of this timestep.
  *
@@ -71,7 +71,7 @@ double calc_hubble(double time, const ExpansionProperties &metric);
 double propagate_straight_line(Particles *particles, double to_time,
                                const std::vector<FourVector> &beam_momentum);
 
-/** 
+/**
  * Modifies positions and momentum of all particles to account for
  * space-time deformation.
  *

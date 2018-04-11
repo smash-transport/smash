@@ -70,7 +70,7 @@ class Potentials {
    */
   double symmetry_pot(const double baryon_isospin_density) const;
 
-  /** 
+  /**
    * Evaluates potential at point r. Potential is always taken in the local
    * Eckart rest frame, but point r is in the computational frame.
    *
@@ -85,7 +85,7 @@ class Potentials {
    * \return Total potential energe acting on the particle: \f[U_{\rm tot}
    *         =Q_BU_B+2I_3U_I\f] in GeV, where \f$Q_B\f$ is the baryon charge
    *	     scaled by the ratio of the light (u, d) quark to the total quark
-   *         number and \f$I_3\f$ is the third compnent of the isospin. 
+   *         number and \f$I_3\f$ is the third compnent of the isospin.
    */
   VIRTUAL_FOR_TESTS
   double potential(const ThreeVector &r, const ParticleList &plist,
@@ -109,7 +109,7 @@ class Potentials {
    */
   std::pair<double, int> force_scale(const ParticleType &data) const;
 
-  /** 
+  /**
    * Evaluates potential gradient at point r. Potential is always taken in
    * the local Eckart rest frame, but point r is in the computational frame.
    *
@@ -133,7 +133,7 @@ class Potentials {
   bool use_symmetry() const { return use_symmetry_; }
 
  private:
-  /** 
+  /**
    * Struct that contains the gaussian smearing width \f$\sigma\f$,
    * the distance cutoff \f$r_{\rm cut}\f$ and the testparticle number
    * needed for the density calculation.
@@ -146,19 +146,19 @@ class Potentials {
   /// Symmetry potential on/off
   bool use_symmetry_;
 
-  /** 
+  /**
    * Parameter of skyrme potentials:
    * the coefficient in front of \f$\frac{\rho}{\rho_0}\f$ in GeV
    */
   double skyrme_a_;
 
-  /** 
+  /**
    * Parameters of skyrme potentials:
    * the coefficient in front of \f$(\frac{\rho}{\rho_0})^\tau\f$ in GeV
    */
   double skyrme_b_;
 
-  /** 
+  /**
    * Parameters of skyrme potentials:
    * the power index.
    */

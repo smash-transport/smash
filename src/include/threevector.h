@@ -127,7 +127,6 @@ class ThreeVector {
    */
   iterator begin() { return x_.begin(); }
 
-
   /// \return an iterator pointing after the 4th component.
   iterator end() { return x_.end(); }
 

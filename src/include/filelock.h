@@ -32,7 +32,7 @@ class FileLock {
   ///
   /// This will not create a file, use acquire() for that.
   ///
-  /// \param[in] Path to file.
+  /// \param[in] path Path to file.
   /// \return Constructed object.
   explicit FileLock(const bf::path& path);
   /// Delete the lock file when the guard is destroyed.

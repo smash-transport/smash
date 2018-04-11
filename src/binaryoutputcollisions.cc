@@ -24,8 +24,8 @@ BinaryOutputCollisions::BinaryOutputCollisions(const bf::path &path,
                                                std::string name,
                                                const OutputParameters &out_par)
     : BinaryOutputBase(
-        path / ((name == "Collisions" ? "collisions_binary" : name) + ".bin"),
-        "wb", name, out_par.get_coll_extended(name)),
+          path / ((name == "Collisions" ? "collisions_binary" : name) + ".bin"),
+          "wb", name, out_par.get_coll_extended(name)),
       print_start_end_(out_par.coll_printstartend) {}
 
 /*!\Userguide
@@ -90,9 +90,9 @@ void BinaryOutputCollisions::at_interaction(const Action &action,
   write(action.outgoing_particles());
 }
 
-BinaryOutputBase::BinaryOutputBase(const bf::path& path,
-                                   const std::string& mode,
-                                   const std::string& name,
+BinaryOutputBase::BinaryOutputBase(const bf::path &path,
+                                   const std::string &mode,
+                                   const std::string &name,
                                    bool extended_format)
     : OutputInterface(name), file_{path, mode}, extended_(extended_format) {
   std::fwrite("SMSH", 4, 1, file_.get());  // magic number

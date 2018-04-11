@@ -20,7 +20,8 @@
 namespace smash {
 
 VtkOutput::VtkOutput(const bf::path &path, const std::string &name)
-    : OutputInterface(name), base_path_(std::move(path)),
+    : OutputInterface(name),
+      base_path_(std::move(path)),
       is_thermodynamics_output_(name == "Thermodynamics") {}
 
 VtkOutput::~VtkOutput() {}
@@ -217,7 +218,7 @@ void VtkOutput::thermodynamics_output(
 }
 
 /*!\Userguide
- * \page output_vtk_lattice_ Thermodynamics vtk output
+ * \page output_vtk_lattice_ Thermodynamics VTK output
  * Additionally to density, energy-momentum tensor \f$T^{\mu\nu} \f$,
  * energy-momentum tensor in Landau rest frame \f$T^{\mu\nu}_L \f$ and
  * velocity of Landau rest frame \f$v_L\f$ on the lattice can be printed out
@@ -228,7 +229,8 @@ void VtkOutput::thermodynamics_output(
  * be opened
  * directly with ParaView (http://paraview.org).
  *
- * For configuring the output see \subpage input_vtk_lattice_.
+ * For configuring the output see \ref output_content_specific_options_
+ * "content-specific output options".
  */
 
 void VtkOutput::thermodynamics_output(
