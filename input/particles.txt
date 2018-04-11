@@ -152,9 +152,10 @@ e⁻ 0.000511 0 11
 γ  0        0 22
 
 ########## light nuclei #########
-
-d  1.8756 0      1000010020
-d' 1.8856 0.100  1000010021
+# These are normally represented by neutrons and protons
+# and should be uncommented only for specific studies
+# d  1.8756 0      1000010020
+# d' 1.8856 0.100  1000010021
 
 ########## hadrons needed for Pythia #########################
 ########## (no cross sections and decay widths yet) ##########
