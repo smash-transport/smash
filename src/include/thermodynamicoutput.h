@@ -36,7 +36,7 @@ namespace smash {
  **/
 class ThermodynamicOutput : public OutputInterface {
  public:
-  ThermodynamicOutput(const bf::path &path, const std::string& name,
+  ThermodynamicOutput(const bf::path &path, const std::string &name,
                       const OutputParameters &out_par);
   ~ThermodynamicOutput();
 

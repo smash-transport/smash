@@ -211,11 +211,12 @@ double TwoBodyDecayUnstable::rho(double mass) const {
           const double m1_max = sqrts - m2_min;
           const double m2_max = sqrts - m1_min;
 
-          const double result =
-              integrate2d(m1_min, m1_max, m2_min, m2_max, [&](double m1,
-                                                              double m2) {
-                return integrand_rho_Manley_2res(sqrts, m1, m2, r1, r2, L_);
-              }).value();
+          const double result = integrate2d(m1_min, m1_max, m2_min, m2_max,
+                                            [&](double m1, double m2) {
+                                              return integrand_rho_Manley_2res(
+                                                  sqrts, m1, m2, r1, r2, L_);
+                                            })
+                                    .value();
           return result;
         });
   }

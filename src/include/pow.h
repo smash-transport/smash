@@ -7,13 +7,17 @@
  *
  */
 
-/// Efficient templates for calculating integer powers.
 #ifndef SRC_INCLUDE_POW_H_
 #define SRC_INCLUDE_POW_H_
 
 namespace smash {
 
-/// Calculate integer powers using squaring.
+/**
+ * Efficient template for calculating integer powers using squaring.
+ * \param[in] base
+ * \param[in] exponent
+ * \return base^exponent
+ */
 template <class T>
 inline constexpr T pow_int(const T base, unsigned const exponent) {
   return (exponent == 0)
@@ -23,6 +27,11 @@ inline constexpr T pow_int(const T base, unsigned const exponent) {
                    : base * pow_int(base, exponent - 1);
 }
 
+/**
+ * Efficient template for calculating the square.
+ * \param[in] base value that gets squared
+ * \return result of squaring base
+ */
 template <class T>
 inline constexpr T square(const T base) {
   return pow_int(base, 2);

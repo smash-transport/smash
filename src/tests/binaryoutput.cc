@@ -43,7 +43,7 @@ static const int current_format_version = 6;
 
 /* A set of convenient functions to read binary */
 
-static void read_binary(std::string &s, const FilePtr& file) {
+static void read_binary(std::string &s, const FilePtr &file) {
   std::int32_t size = s.size();
   COMPARE(std::fread(&size, sizeof(std::int32_t), 1, file.get()), 1u);
   std::vector<char> buf(size);
@@ -51,21 +51,20 @@ static void read_binary(std::string &s, const FilePtr& file) {
   s.assign(&buf[0], size);
 }
 
-static void read_binary(FourVector &v, const FilePtr& file) {
+static void read_binary(FourVector &v, const FilePtr &file) {
   COMPARE(std::fread(v.begin(), sizeof(*v.begin()), 4, file.get()), 4u);
 }
 
-static void read_binary(std::int32_t &x, const FilePtr& file) {
+static void read_binary(std::int32_t &x, const FilePtr &file) {
   COMPARE(std::fread(&x, sizeof(x), 1, file.get()), 1u);
 }
 
-static void read_binary(double &x, const FilePtr& file) {
+static void read_binary(double &x, const FilePtr &file) {
   COMPARE(std::fread(&x, sizeof(x), 1, file.get()), 1u);
 }
 
 /* Function to read and compare particle */
-static bool compare_particle(const ParticleData &p,
-                             const FilePtr& file) {
+static bool compare_particle(const ParticleData &p, const FilePtr &file) {
   int id, pdgcode, charge;
   double mass;
   FourVector pos, mom;
@@ -83,8 +82,8 @@ static bool compare_particle(const ParticleData &p,
 }
 
 /* Reads and compares particle in case of extended format */
-static void compare_particle_extended(const ParticleData &p, 
-                                      const FilePtr& file) {
+static void compare_particle_extended(const ParticleData &p,
+                                      const FilePtr &file) {
   VERIFY(compare_particle(p, file));
   int collisions_per_particle, id_process, process_type, p1pdg, p2pdg;
   double formation_time, xs_scaling_factor, time_last_collision;
@@ -109,7 +108,7 @@ static void compare_particle_extended(const ParticleData &p,
 
 /* function to read and compare particle block header */
 static bool compare_particles_block_header(const int &npart,
-                                           const FilePtr& file) {
+                                           const FilePtr &file) {
   int npart_read;
   char c_read;
   COMPARE(std::fread(&c_read, sizeof(char), 1, file.get()), 1u);
@@ -122,7 +121,7 @@ static bool compare_particles_block_header(const int &npart,
 /* function to read and compare collision block header */
 static bool compare_interaction_block_header(const int &nin, const int &nout,
                                              const Action &action, double rho,
-                                             const FilePtr& file) {
+                                             const FilePtr &file) {
   int nin_read, nout_read, process_type_read;
   double rho_read, weight_read, partial_weight_read;
   char c_read;
@@ -147,7 +146,7 @@ static bool compare_interaction_block_header(const int &nin, const int &nout,
 /* function to read and compare event end line */
 static bool compare_final_block_header(const int &ev,
                                        const double &impact_parameter,
-                                       const FilePtr& file) {
+                                       const FilePtr &file) {
   int ev_read;
   char c_read;
   double b_read;
@@ -184,8 +183,8 @@ TEST(fullhistory_format) {
     output_par.coll_extended = false;
 
     /* Create an instance of binary output */
-    auto bin_output = make_unique<BinaryOutputCollisions>(testoutputpath,
-        "Collisions", output_par);
+    auto bin_output = make_unique<BinaryOutputCollisions>(
+        testoutputpath, "Collisions", output_par);
     VERIFY(bf::exists(collisionsoutputfilepath_unfinished));
 
     /* Write initial state output: the two smashons we created */
@@ -262,8 +261,8 @@ TEST(particles_format) {
     output_par.part_extended = false;
     output_par.part_only_final = false;
     /* Create an instance of binary output */
-    auto bin_output = make_unique<BinaryOutputParticles>(testoutputpath,
-        "Particles", output_par);
+    auto bin_output = make_unique<BinaryOutputParticles>(
+        testoutputpath, "Particles", output_par);
     VERIFY(bool(bin_output));
     VERIFY(bf::exists(particleoutputpath_unfinished));
 
@@ -353,8 +352,8 @@ TEST(extended) {
     output_par.coll_extended = true;
 
     /* Create an instance of binary output */
-    auto bin_output = make_unique<BinaryOutputCollisions>(testoutputpath,
-        "Collisions", output_par);
+    auto bin_output = make_unique<BinaryOutputCollisions>(
+        testoutputpath, "Collisions", output_par);
     VERIFY(bf::exists(collisionsoutputfilepath_unfinished));
 
     /* Write initial state output: the two smashons we created */
@@ -385,7 +384,8 @@ TEST(extended) {
     magic.assign(&buf[0], 4);
     VERIFY(std::fread(&format_version_number, sizeof(format_version_number), 1,
                       binF.get()) == 1);
-    VERIFY(std::fread(&extended_version, sizeof(extended_version), 1, binF.get()) == 1);
+    VERIFY(std::fread(&extended_version, sizeof(extended_version), 1,
+                      binF.get()) == 1);
     read_binary(smash_version, binF);  // smash version
 
     COMPARE(magic, "SMSH");

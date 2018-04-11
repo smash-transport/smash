@@ -19,45 +19,40 @@
 
 namespace smash {
 
-/* relativistic Breit-Wigner distribution */
+// Relativistic Breit-Wigner distribution
 double breit_wigner(const double m, const double pole, const double width) {
   const double msqr = m * m;
   const double dmsqr = msqr - pole * pole;
   return 2. * msqr * width / (M_PI * (dmsqr * dmsqr + msqr * width * width));
 }
 
-/* non-relativistic Breit-Wigner distribution */
+// Non-relativistic Breit-Wigner distribution
 double breit_wigner_nonrel(double m, double pole, double width) {
   return cauchy(m, pole, width / 2.);
 }
 
+// Cauchy distribution used in non-relativistic Breit-Wigner above
 double cauchy(double x, double pole, double width) {
   const double dm = x - pole;
   return width / (M_PI * (dm * dm + width * width));
 }
 
-/** woods-saxon distribution function  */
 double woods_saxon_dist_func(const double r, const double radius,
                              const double diffusion) {
   return 1.0 / (std::exp((r - radius) / diffusion) + 1.0);
 }
 
-/** density_integrand - Maxwell-Boltzmann distribution */
+// density_integrand - Maxwell-Boltzmann distribution
 double density_integrand(const double energy, const double momentum_sqr,
                          const double temperature) {
   return 4.0 * M_PI * momentum_sqr * exp(-energy / temperature);
 }
 
-/** density_integrand - off_equilibrium distribution for massive particles
- * \f[f=pe^{-\frac{\sqrt{m^2+p^2}}{T_0}}\f] */
 double density_integrand_mass(const double energy, const double momentum_sqr,
                               const double temperature) {
   return momentum_sqr * std::sqrt(momentum_sqr) * exp(-energy / temperature);
 }
 
-/** density integrand - 1M_IC massless particles for expanding metric
- * initialization,
- * see \iref{Bazow:2016oky}*/
 double density_integrand_1M_IC(const double energy, const double momentum_sqr,
                                const double temperature) {
   return ((3.0 / 20.0) * (momentum_sqr / (temperature * temperature)) -
@@ -65,9 +60,6 @@ double density_integrand_1M_IC(const double energy, const double momentum_sqr,
          exp(-energy / temperature) * momentum_sqr;
 }
 
-/** density integrand - 2M_IC massless particles for expanding metric
- * initialization,
- * see \iref{Bazow:2016oky}*/
 double density_integrand_2M_IC(const double energy, const double momentum_sqr,
                                const double temperature) {
   return (0.75 + 0.125 * (momentum_sqr / (temperature * temperature)) -
@@ -79,10 +71,6 @@ double density_integrand_2M_IC(const double energy, const double momentum_sqr,
          exp(-energy / temperature) * momentum_sqr;
 }
 
-/* General Juttner distribution
- * lam = 1: to Fermion-Dirac distribution
- * lam = 0: to Thermal distribution
- * lam =-1: to Bose-Einstein distribution */
 double juttner_distribution_func(const double momentum_radial,
                                  const double mass, const double temperature,
                                  const double baryon_chemical_potential,
@@ -94,20 +82,17 @@ double juttner_distribution_func(const double momentum_radial,
           lam);
 }
 
-/** sample_momenta via rejection method, according to non-equilibrium
- * distribution \f[f=pe^{-\frac{\sqrt{m^2+p^2}}{T_0}}\f]
- */
 double sample_momenta_non_eq_mass(const double temperature, const double mass) {
   const auto &log = logger<LogArea::Distributions>();
   log.debug("Sample momenta with mass ", mass, " and T ", temperature);
 
-  // calculate range on momentum values to use
-  // ideally 0.0 and as large as possible but we want to be efficient!
+  /* Calculate range on momentum values to use
+   * ideally 0.0 and as large as possible but we want to be efficient! */
   const double mom_min = 0.0;
   const double mom_max =
       std::sqrt(50. * 50. * temperature * temperature - mass * mass);
-  // calculate momentum and energy values that will give
-  // maxima of density_integrand_mass, verified by differentiation
+  /* Calculate momentum and energy values that will give
+   * maxima of density_integrand_mass, verified by differentiation */
   const double p_non_eq_sq =
       0.5 * (9 * temperature * temperature +
              temperature *
@@ -131,18 +116,16 @@ double sample_momenta_non_eq_mass(const double temperature, const double mass) {
   return momentum_radial;
 }
 
-/** sample_momenta for the 1M IC condition - return thermal momenta */
-double sample_momenta_IC_1M(const double temperature, const double mass) {
+double sample_momenta_1M_IC(const double temperature, const double mass) {
   const auto &log = logger<LogArea::Distributions>();
   log.debug("Sample momenta with mass ", mass, " and T ", temperature);
-  /* Maxwell-Boltzmann average E <E>=3T + m * K_1(m/T) / K_2(m/T) */
+  // Maxwell-Boltzmann average E <E>=3T + m * K_1(m/T) / K_2(m/T)
   double energy_average;
   if (mass > 0.) {
     // massive particles
     const double m_over_T = mass / temperature;
-    energy_average =
-        3 * temperature +
-        mass * gsl_sf_bessel_K1(m_over_T) / gsl_sf_bessel_Kn(2, m_over_T);
+    energy_average = 3 * temperature + mass * gsl_sf_bessel_K1(m_over_T) /
+                                           gsl_sf_bessel_Kn(2, m_over_T);
   } else {
     // massless particles
     energy_average = 3 * temperature;
@@ -170,8 +153,7 @@ double sample_momenta_IC_1M(const double temperature, const double mass) {
   return std::sqrt(momentum_radial_sqr);
 }
 
-/** sample_momenta for the 2M IC condition - return thermal momenta */
-double sample_momenta_IC_2M(const double temperature, const double mass) {
+double sample_momenta_2M_IC(const double temperature, const double mass) {
   const auto &log = logger<LogArea::Distributions>();
   log.debug("Sample momenta with mass ", mass, " and T ", temperature);
   /* Maxwell-Boltzmann average E <E>=3T + m * K_1(m/T) / K_2(m/T) */
@@ -179,9 +161,8 @@ double sample_momenta_IC_2M(const double temperature, const double mass) {
   if (mass > 0.) {
     // massive particles
     const double m_over_T = mass / temperature;
-    energy_average =
-        3 * temperature +
-        mass * gsl_sf_bessel_K1(m_over_T) / gsl_sf_bessel_Kn(2, m_over_T);
+    energy_average = 3 * temperature + mass * gsl_sf_bessel_K1(m_over_T) /
+                                           gsl_sf_bessel_Kn(2, m_over_T);
   } else {
     // massless particles
     energy_average = 3 * temperature;
@@ -271,7 +252,7 @@ double sample_momenta_from_thermal(const double temperature,
   }
   return momentum_radial;
 }
-/// sample momenta according to the momentum distribution in ref{Bazow:2016oky}
+
 double sample_momenta_IC_ES(const double temperature) {
   double momentum_radial;
   const double a = -std::log(Random::canonical_nonzero());

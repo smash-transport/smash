@@ -217,25 +217,28 @@ double ListModus::initial_conditions(Particles *particles,
                      << ", where m is SMASH mass.";
           n_warns_precision_++;
         } else if (n_warns_precision_ == max_warns_precision) {
-          log.warn("Further warnings about SMASH mass versus input mass"
-                   " inconsistencies will be suppressed.");
-         n_warns_precision_++;
+          log.warn(
+              "Further warnings about SMASH mass versus input mass"
+              " inconsistencies will be suppressed.");
+          n_warns_precision_++;
         }
         particle.set_4momentum(mass, ThreeVector(px, py, pz));
       }
       particle.set_4momentum(FourVector(E, px, py, pz));
       // On-shell condition consistency check
-      if (std::abs(particle.momentum().sqr() - mass*mass) > really_small) {
+      if (std::abs(particle.momentum().sqr() - mass * mass) > really_small) {
         if (n_warns_mass_consistency_ < max_warn_mass_consistency) {
-          log.warn() << "Provided 4-momentum " << particle.momentum() << " and "
-                    << " mass " << mass << " do not satisfy E^2 - p^2 = m^2."
-                    << " This may originate from the lack of numerical"
-                    << " precision in the input. Setting E to sqrt(p^2 + m^2).";
+          log.warn()
+              << "Provided 4-momentum " << particle.momentum() << " and "
+              << " mass " << mass << " do not satisfy E^2 - p^2 = m^2."
+              << " This may originate from the lack of numerical"
+              << " precision in the input. Setting E to sqrt(p^2 + m^2).";
           n_warns_mass_consistency_++;
         } else if (n_warns_mass_consistency_ == max_warn_mass_consistency) {
-          log.warn("Further warnings about E != sqrt(p^2 + m^2) will"
-                   " be suppressed.");
-         n_warns_mass_consistency_++;
+          log.warn(
+              "Further warnings about E != sqrt(p^2 + m^2) will"
+              " be suppressed.");
+          n_warns_mass_consistency_++;
         }
         particle.set_4momentum(mass, ThreeVector(px, py, pz));
       }

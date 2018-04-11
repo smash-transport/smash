@@ -36,23 +36,28 @@ namespace smash {
  *
  * Possible Incident Energies, only one can be given:
  *
- * \key Sqrtsnn (double, optional, no default): \n
+ * \li \key Sqrtsnn (double, optional, no default): \n
  * Defines the energy of the collision as center-of-mass
  * energy in the collision of one participant each from both nuclei
  * (using the average participant mass in the given nucleus).
  *
- * \key E_Kin (double, optional, no default): \n
+ * \li \key E_Kin (double, optional, no default): \n
  * Defines the energy of the collision by the kinetic energy per nucleon of
  * the projectile nucleus (in AGeV). This assumes the target nucleus is at rest.
  *
- * \key P_Lab (double, optional, no default): \n
+ * \li \key P_Lab (double, optional, no default): \n
  * Defines the energy of the collision by the initial momentum per nucleon
  * of the projectile nucleus (in AGeV). This assumes the target nucleus is at
  * rest.
  *
  * \key Calculation_Frame (string, optional, default = "center of velocity"): \n
  * The frame in which the collision is calculated.\n
- * "center of velocity", "center of mass" or "fixed target"
+ * \li \key "center of velocity"
+ * \li \key "center of mass"
+ * \li \key "fixed target"
+ *
+ * \subpage projectile_and_target
+ * \page projectile_and_target Projectile_And_Target
  *
  * \key Projectile: \n
  * Section for projectile nucleus. The projectile will
@@ -63,7 +68,6 @@ namespace smash {
  * Section for target nucleus. The target will start at \f$z
  * > 0\f$ and fly in negative \f$z\f$-direction, at \f$x \le 0\f$.
  *
- *
  * \key Projectile: and \key Target: \n
  * \li \key Particles (int:int, int:int, required):\n
  * A map in which the keys are PDG codes and the
@@ -72,47 +76,57 @@ namespace smash {
  * lead-208 nucleus (82 protons and 126 neutrons = 208 nucleons), and
  * `Particles: {2212: 1, 2112: 1, 3122: 1}` for Hyper-Triton (one
  * proton, one neutron and one Lambda).
+ *
  * \li \key Deformed (bool, optional, default = false): \n
- * true - deformed nucleus is initialized
+ * true - deformed nucleus is initialized \n
  * false - spherical nucleus is initialized
+ *
  * \li \key Automatic (bool, optional, default = true): \n
  * true - sets all necessary parameters based on the atomic number
  * of the input nucleus \n
  * false - manual values according to deformed nucleus (see below)
  *
+ * \li \subpage input_deformed_nucleus_
  * Additional Woods-Saxon Parameters: \n
  * There are also many other
  * parameters for specifying the shape of the Woods-Saxon distribution,
  * and other nucleus specific properties. See nucleus.cc and
  * deformednucleus.cc for more on these choices.
  *
- * \li \subpage input_deformed_nucleus_
- *
+ * \page input_modi_collider_ Collider
+ * \subpage input_impact_parameter
+ * \page input_impact_parameter Impact_Parameter
  * \key Impact: \n
  * A section for the impact parameter (= distance (in fm) of the two
  * straight lines that the center of masses of the nuclei travel on).
  *
- * \li \key Value (double, optional, optional, default = 0.): fixed value for
+ * \key Value (double, optional, optional, default = 0.0): \n
+ * fixed value for
  * the impact parameter. No other \key Impact: directive is looked at.
- * \li \key Sample (string, optional, default = \key quadratic): \n
- * if \key uniform, use uniform sampling of the impact parameter
- * (\f$dP(b) = db\f$). If \key quadratic use areal (aka quadratic) input
+ *
+ * \key Sample (string, optional, default = \key quadratic): \n
+ * \li \key "uniform" - use uniform sampling of the impact parameter
+ * (\f$dP(b) = db\f$)
+ * \li \key "quadratic" - use areal (aka quadratic) input
  * sampling (the probability of an input parameter range is proportional to the
- * area corresponding to that range, \f$dP(b) = b\cdot db\f$). If \key custom,
- * use \key Values and \key Yields to interpolate the impact parameter
- * distribution and use rejection sampling.
- * \li \key Values (doubles, optional):
+ * area corresponding to that range, \f$dP(b) = b\cdot db\f$).
+ * \li \key "custom" - use \key Values and \key Yields to interpolate the
+ * impact parameter distribution and use rejection sampling.
+ *
+ * Values (doubles, optional, default = 0.0): \n
  * Values of the impact parameter, corresponding to \key Yields. Must be same
  * length as \key Yields. Required for \key Sample = "custom".
- * \li \key Yields (doubles, optional):
+ *
+ * \key Yields (doubles, optional): \n
  * Values of the particle yields, corresponding to \key Values. Must be same
  * length as \key Values. Required for \key Sample = "custom".
  *
- * \li \key Range (double, double, optional, default = 0.):\n
+ * \key Range (double, double, optional, default = 0.):\n
  * A vector of minimal and maximal impact parameters
  * between which b should be chosen. (The order of these is not
  * important.)
- * \li \key Max (double, optional, default = 0.):
+ *
+ * \key Max (double, optional, default = 0.): \n
  * Like `Range: [0.0, Max]`. Note that if both \key Range and
  * \key Max are specified, \key Max takes precedence.
  *
@@ -129,11 +143,10 @@ namespace smash {
  * to chosen calculation frame, and thus the actual distance may be different.
  *
  * \key Fermi_Motion (string, optional, default = "off"): \n
- * Defines if Fermi motion is included.\n
- * "off", "on" or "frozen"\n
- * Use "frozen" if you want to use Fermi motion
- * without potentials. Use "on" if you want to use Fermi motion
- * in combination with potentials.\n
+ * \li \key "on" - Switch Fermi motion on, in combination with potentials
+ * \li \key "off" - Switch Fermi motion off
+ * \li \key "frozen" - Use "frozen" if you want to use Fermi motion
+ * without potentials
  *
  */
 

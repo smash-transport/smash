@@ -73,9 +73,10 @@ TEST(juttner_distribution_adaptive_rejection_sampling) {
   double highlim = 15.0;
   Rejection::AdaptiveRejectionSampler juttner_sampler(
       [&](double x) {
-        return x * x * juttner_distribution_func(x, mass, temperature,
-                                                 baryon_chemical_potential,
-                                                 fermion_boson_factor);
+        return x * x *
+               juttner_distribution_func(x, mass, temperature,
+                                         baryon_chemical_potential,
+                                         fermion_boson_factor);
       },
       lowlim, highlim);
 
@@ -102,9 +103,9 @@ TEST(juttner_distribution_adaptive_rejection_sampling) {
   double R = 1.0;
   double value_at_radius = histogram.at(R / dx);
   double expected_at_radius =
-      R * R * juttner_distribution_func(R, mass, temperature,
-                                        baryon_chemical_potential,
-                                        fermion_boson_factor);
+      R * R *
+      juttner_distribution_func(R, mass, temperature, baryon_chemical_potential,
+                                fermion_boson_factor);
 
   double probes[9] = {0.1,        0.5,     0.7,     1.0,    1.5,
                       0.0001 * R, 2.0 * R, 2.5 * R, 3.0 * R};

@@ -2,8 +2,8 @@
 \mainpage SMASH Development Documentation
 
 \par Important entry points
-- \ref Smash::Experiment
-- \ref Smash::Configuration
+- \ref smash::Experiment
+- \ref smash::Configuration
 
 \par Configuration options
 - \ref inputoptions
