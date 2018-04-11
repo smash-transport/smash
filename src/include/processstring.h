@@ -138,6 +138,8 @@ class StringProcess {
   Pythia8::SigmaTotal pythia_sigmatot_;
 
  public:
+  // clang-format off
+
   /**
    * Constructor, initializes pythia. Should only be called once.
    * \param[in] string_tension value of kappa_tension_string_ [GeV/fm]
@@ -195,6 +197,8 @@ class StringProcess {
   void common_setup_pythia(Pythia8::Pythia *pythia_in, double strange_supp,
                            double diquark_supp, double stringz_a,
                            double stringz_b, double string_sigma_T);
+
+  // clang-format on
 
   /**
    * Function to get the PYTHIA object for hard string routine
@@ -420,6 +424,8 @@ class StringProcess {
     return Pythia8::Vec4(mom.x1(), mom.x2(), mom.x3(), energy);
   }
 
+  // clang-format off
+
   /**
    * perform string fragmentation to determine species and momenta of hadrons
    * by implementing PYTHIA 8.2 \iref{Andersson:1983ia}, \iref{Sjostrand:2014zea}.
@@ -433,6 +439,8 @@ class StringProcess {
    */
   int fragment_string(int idq1, int idq2, double mString,
                       ThreeVector &evecLong, bool flip_string_ends);
+
+  // clang-format on
 };
 
 }  // namespace smash
