@@ -284,7 +284,7 @@ class PdgCode {
 
   /// \return true if this is a baryon, antibaryon or meson.
   inline bool is_hadron() const {
-    return ((digits_.n_q3_ != 0 && digits_.n_q2_ != 0) || is_nucleus());
+    return (digits_.n_q3_ != 0 && digits_.n_q2_ != 0 && !is_nucleus());
   }
 
   /// \return true if this is a lepton.
@@ -303,16 +303,11 @@ class PdgCode {
     }
     return antiparticle_sign();
   }
+  /// Returns whether this PDG code identifies a baryon.
+  inline bool is_baryon() const { return is_hadron() && digits_.n_q1_ != 0; }
 
-  /// \return whether this PDG code identifies a baryon.
-  inline bool is_baryon() const {
-    return (is_hadron() && digits_.n_q1_ != 0) || is_nucleus();
-  }
-
-  /// \return whether this PDG code identifies a meson.
-  inline bool is_meson() const {
-    return (is_hadron() && digits_.n_q1_ == 0) && !is_nucleus();
-  }
+  /// Returns whether this PDG code identifies a meson.
+  inline bool is_meson() const { return is_hadron() && digits_.n_q1_ == 0; }
 
   /// \return whether this is a nucleon/anti-nucleon (p, n, -p, -n)
   inline bool is_nucleon() const {
@@ -334,9 +329,7 @@ class PdgCode {
   }
 
   /// \return whether this is a hyperon (Lambda, Sigma, Xi, Omega)
-  inline bool is_hyperon() const {
-    return is_hadron() && digits_.n_q1_ == 3 && !is_nucleus();
-  }
+  inline bool is_hyperon() const { return is_hadron() && digits_.n_q1_ == 3; }
 
   /// \return whether this is a Omega baryon
   inline bool is_Omega() const {
@@ -432,10 +425,10 @@ class PdgCode {
    * \return charge of the particle
    */
   int charge() const {
-    if (is_hadron()) {
-      /* Q will accumulate 3*charge (please excuse the upper case.
-       * I want to distinguish this from q which might be interpreted as
-       * shorthand for "quark".) */
+    if (is_hadron() || is_nucleus()) {
+      // Q will accumulate 3*charge (please excuse the upper case. I
+      // want to distinguish this from q which might be interpreted as
+      // shorthand for "quark".)
       int Q = 0;
       /* This loops over d,u,s,c,b,t quarks (the latter can be safely ignored,
        * but I don't think this will be a bottle neck. */
@@ -492,7 +485,7 @@ class PdgCode {
   }
   /// \return the spin degeneracy \f$2s + 1\f$ of a particle.
   inline unsigned int spin_degeneracy() const {
-    if (is_hadron() && digits_.n_J_ > 0 && !is_nucleus()) {
+    if (is_hadron() && digits_.n_J_ > 0) {
       return digits_.n_J_;
     }
     return spin() + 1;
@@ -522,7 +515,7 @@ class PdgCode {
     std::array<int, 3> result = {static_cast<int>(digits_.n_q1_),
                                  static_cast<int>(digits_.n_q2_),
                                  static_cast<int>(digits_.n_q3_)};
-    if (is_hadron() && !is_nucleus()) {
+    if (is_hadron()) {
       // Antibaryons
       if (digits_.n_q1_ != 0 && digits_.antiparticle_) {
         for (size_t i = 0; i < 3; i++) {

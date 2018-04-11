@@ -185,8 +185,8 @@ TEST(hadron) {
   VERIFY(pion.is_hadron());
   VERIFY(proton.is_hadron());
   VERIFY(antidelta.is_hadron());
-  VERIFY(deutron.is_hadron());
-  VERIFY(antideutron.is_hadron());
+  VERIFY(!deutron.is_hadron());
+  VERIFY(!antideutron.is_hadron());
 }
 
 TEST(nucleus) {
@@ -207,6 +207,24 @@ TEST(lepton) {
   VERIFY(!pion.is_lepton());
   VERIFY(!proton.is_lepton());
   VERIFY(!deutron.is_lepton());
+}
+
+TEST(is_meson) {
+  VERIFY(pion.is_meson());
+  VERIFY(!deutron.is_meson());
+  VERIFY(!antideutron.is_meson());
+  VERIFY(!proton.is_meson());
+  VERIFY(!antiproton.is_meson());
+  VERIFY(!antimu.is_meson());
+}
+
+TEST(is_baryon) {
+  VERIFY(!pion.is_baryon());
+  VERIFY(!deutron.is_baryon());
+  VERIFY(!antideutron.is_baryon());
+  VERIFY(proton.is_baryon());
+  VERIFY(antiproton.is_baryon());
+  VERIFY(!antimu.is_baryon());
 }
 
 TEST(dilepton) {
