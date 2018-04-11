@@ -31,22 +31,24 @@ class HadronGasEos;
 
 class EosTable {
  public:
-  /** Sets up a table p/T/muB/mus versus (e, nb), where e is energy density,
-   *  nb is net baryon density, p - pressure, T - temperature, muB -
-   *  baryonchemical potential, muS - strange potential. Net strangeness
-   *  density and isospin prijection density are assumed to be 0
-   *  (corresponding chemical potentials are still non-zero, because muB != 0)
+  /** 
+   * Sets up a table p/T/muB/mus versus (e, nb), where e is energy density,
+   * nb is net baryon density, p - pressure, T - temperature, muB -
+   * net baryon chemical potential, muS - net strangeness potential. 
+   * Net strangeness density and isospin projection density are assumed to be 0
+   * (Note that corresponding chemical potentials are still non-zero, 
+   * because muB != 0).
    *
-   *  After calling this constructor the table is allocated, but it is
-   *  still empty. To compute values call compile_table.
+   * After calling this constructor the table is allocated, but it is
+   * still empty. To compute values call compile_table.
    *
-   *  \param[in] de step in energy density [GeV/fm^4]
-   *  \param[in] dnb step in net baryon density [GeV/fm^3]
-   *  \param[in] n_e number of steps in energy density
-   *  \param[in] n_e number of steps in net baryon density
-   *
-   *  Entry at (ie, inb) corresponds to energy density and net baryon density
-   *  (e, nb) = (ie*de, inb*dnb) [GeV/fm^4, GeV/fm^3].
+   * \param[in] de step in energy density [GeV/fm^4]
+   * \param[in] dnb step in net baryon density [GeV/fm^3]
+   * \param[in] n_e number of steps in energy density
+   * \param[in] n_e number of steps in net baryon density
+   * 
+   * Entry at (ie, inb) corresponds to energy density and net baryon density
+   * (e, nb) = (ie*de, inb*dnb) [GeV/fm^4, GeV/fm^3].
    */
   EosTable(double de, double dnb, size_t n_e, size_t n_b);
   struct table_element {
@@ -55,7 +57,8 @@ class EosTable {
     double mub;
     double mus;
   };
-  /** Computes the actual content of the table (for EosTable description see
+  /**
+   * Computes the actual content of the table (for EosTable description see
    * documentation of the constructor).
    *
    * \param[in] eos equation of state
@@ -64,12 +67,13 @@ class EosTable {
    */
   void compile_table(HadronGasEos& eos,
                      const std::string& eos_savefile_name = "hadgas_eos.dat");
-  /** Obtain interpolated p/T/muB/muS from the tabulated equation of state
-   *  given energy density and net baryon density.
+  /** 
+   * Obtain interpolated p/T/muB/muS from the tabulated equation of state
+   * given energy density and net baryon density.
    *
-   *  \param[in] e energy density
-   *  \param[in] nb net baryon density
-   *  \param[out] res structure, that contains p/T/muB/muS
+   * \param[in] e energy density
+   * \param[in] nb net baryon density
+   * \param[out] res structure, that contains p/T/muB/muS
    */
   void get(table_element& res, double e, double nb) const;
 
