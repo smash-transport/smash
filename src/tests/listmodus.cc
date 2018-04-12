@@ -71,8 +71,7 @@ static bf::path create_particlefile(
 }
 
 static void create_non_oscar_particlefile(
-    const int file_number, std::vector<ParticleList> &init_particle_vec,
-    const int particles_per_event = 10) {
+    const int file_number, std::vector<ParticleList> &init_particle_vec) {
   // Write oscar output, but write only one event and remove all comment lines.
   // This mimics the output of some hydro codes
   OutputParameters out_par = OutputParameters();
@@ -198,7 +197,6 @@ TEST(multiple_file_non_oscar_output) {
       std::cout << p << std::endl;
     }
     */
-    
 
     // Scroll particles back to the earliest time, as list modus is supposed to
     // do
