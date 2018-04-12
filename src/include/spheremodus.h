@@ -84,7 +84,7 @@ class SphereModus : public ModusDefault {
   /** whether to use thermal multiplicities for all particles
    *  instead of specific numbers */
   const bool use_thermal_ = false;
-  /** baryon chemical potential for thermal box;
+  /** baryon chemical potential for thermal ;
    *  only used if use_thermal_ is true */
   const double mub_;
   /** strange chemical potential for thermal box;
@@ -93,6 +93,11 @@ class SphereModus : public ModusDefault {
   /** particle multiplicities at initialization;
    *  required if use_thermal_ is false */
   const std::map<PdgCode, int> init_multipl_;
+  /**
+   * Average multiplicities in case of thermal initialization.
+   * Saved to avoid recalculating at every event
+   */
+  std::map<PdgCode, double> average_multipl_;
   /** Initialization scheme for momenta in the sphere;
    *  used for expanding metric setup */
   const SphereInitialCondition init_distr_;

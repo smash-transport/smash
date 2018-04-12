@@ -122,25 +122,28 @@ double SphereModus::initial_conditions(Particles *particles,
   /* Create NUMBER OF PARTICLES according to configuration */
   if (use_thermal_) {
     const double V = 4.0 / 3.0 * M_PI * radius_ * radius_ * radius_;
-    for (const ParticleType &ptype : ParticleType::list_all()) {
-      if (HadronGasEos::is_eos_particle(ptype)) {
-        const double n = HadronGasEos::partial_density(ptype, T, mub_, mus_);
-        const double thermal_mult = n * V * parameters.testparticles;
-        assert(thermal_mult > 0.0);
-        const int thermal_mult_int = Random::poisson(thermal_mult);
-        particles->create(thermal_mult_int, ptype.pdgcode());
-        log.debug(ptype.name(), " initial multiplicity ", thermal_mult_int);
+    if (average_multipl_.empty()) {
+      for (const ParticleType &ptype : ParticleType::list_all()) {
+        if (HadronGasEos::is_eos_particle(ptype)) {
+          const double n = HadronGasEos::partial_density(ptype, T, mub_, mus_);
+          average_multipl_[ptype.pdgcode()] = n * V * parameters.testparticles;
+        }
       }
     }
-    log.info() << "Initial baryon density "
-               << HadronGasEos::net_baryon_density(T, mub_, mus_);
-    log.info() << "Initial strange density "
-               << HadronGasEos::net_strange_density(T, mub_, mus_);
+    double nb_init = 0.0, ns_init = 0.0;
+    for (const auto &mult : average_multipl_) {
+      const int thermal_mult_int = Random::poisson(mult.second);
+      particles->create(thermal_mult_int, mult.first);
+      nb_init += mult.second * mult.first.baryon_number();
+      ns_init += mult.second * mult.first.strangeness();
+      log.debug(mult.first, " initial multiplicity ", thermal_mult_int);
+    }
+    log.info("Initial hadron gas baryon density ", nb_init);
+    log.info("Initial hadron gas strange density ", ns_init);
   } else {
     for (const auto &p : init_multipl_) {
       particles->create(p.second * parameters.testparticles, p.first);
-      log.debug() << "Particle " << p.first << " initial multiplicity "
-                  << p.second;
+      log.debug("Particle ", p.first, " initial multiplicity ", p.second);
     }
   }
   /* loop over particle data to fill in momentum and position information */
