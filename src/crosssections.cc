@@ -636,8 +636,8 @@ CollisionBranchList cross_sections::nn_xx(ReactionsBitSet included_2to2) {
     const ParticleTypePtrList pion_list = {pim, pi0, pip};
     channel_list = find_nn_xsection_from_type(
         (both_antinucleons ? antideutron_list : deutron_list), pion_list,
-        [&sqrts](const ParticleType &type_res_1,
-                 const ParticleType &type_res_2) {
+        [&sqrts](const ParticleType& type_res_1,
+                 const ParticleType& type_res_2) {
           return pCM(sqrts, type_res_1.mass(), type_res_2.mass());
         });
     process_list.reserve(process_list.size() + channel_list.size());

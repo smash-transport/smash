@@ -81,29 +81,39 @@ class SphereModus : public ModusDefault {
   double sphere_temperature_;
   /// Starting time for the Sphere
   const double start_time_ = 0.;
-  /** whether to use thermal multiplicities for all particles
-   *  instead of specific numbers */
+  /**
+   *  Whether to use a thermal initialization for all particles
+   *  instead of specific numbers
+   */
   const bool use_thermal_ = false;
-  /** baryon chemical potential for thermal ;
-   *  only used if use_thermal_ is true */
+  /**
+   *  Baryon chemical potential for thermal initialization;
+   *  only used if use_thermal_ is true
+   */
   const double mub_;
-  /** strange chemical potential for thermal box;
-   *  only used if use_thermal_ is true */
+  /**
+   * Strange chemical potential for thermal initialization;
+   * only used if use_thermal_ is true
+   */
   const double mus_;
-  /** particle multiplicities at initialization;
-   *  required if use_thermal_ is false */
+  /**
+   * Particle multiplicities at initialization;
+   * required if use_thermal_ is false
+   */
   const std::map<PdgCode, int> init_multipl_;
   /**
    * Average multiplicities in case of thermal initialization.
    * Saved to avoid recalculating at every event
    */
   std::map<PdgCode, double> average_multipl_;
-  /** Initialization scheme for momenta in the sphere;
-   *  used for expanding metric setup */
+  /**
+   * Initialization scheme for momenta in the sphere;
+   * used for expanding metric setup
+   */
   const SphereInitialCondition init_distr_;
   /**\ingroup logging
    * Writes the initial state for the Sphere to the output stream.
-
+   *
    * \param[in] out The ostream into which to output
    * \param[in] m The SphereModus object to write into out
    */

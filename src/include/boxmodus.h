@@ -134,14 +134,14 @@ class BoxModus : public ModusDefault {
    *  only used if use_thermal_ is true
    */
   const double mub_;
-  /** 
+  /**
    * Strange chemical potential for thermal initialization;
    * only used if use_thermal_ is true
    */
   const double mus_;
   /**
-   *  Particle multiplicities at initialization;
-   *  required if use_thermal_ is false
+   * Particle multiplicities at initialization;
+   * required if use_thermal_ is false
    */
   const std::map<PdgCode, int> init_multipl_;
   /**

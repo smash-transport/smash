@@ -45,7 +45,7 @@ class EosTable {
    * \param[in] de step in energy density [GeV/fm^4]
    * \param[in] dnb step in net baryon density [GeV/fm^3]
    * \param[in] n_e number of steps in energy density
-   * \param[in] n_e number of steps in net baryon density
+   * \param[in] n_b number of steps in net baryon density
    *
    * Entry at (ie, inb) corresponds to energy density and net baryon density
    * (e, nb) = (ie*de, inb*dnb) [GeV/fm^4, GeV/fm^3].
@@ -289,6 +289,14 @@ class HadronGasEos {
   };
 
   /**
+   * Function used to avoid duplications in density calculations.
+   * \param[in] m_over_T mass to temperature ratio \f$ m/T \f$
+   * \param[in] mu_over_T chemical potential to temperature ratio \f$ \mu/T \f$
+   * \return calculated \f$ (m/T)^2 exp(\mu/T) K_2(m/T) \f$
+   */
+  static double scaled_partial_density_auxiliary(double m_over_T,
+                                                 double mu_over_T);
+  /**
    * Compute (unnormalized) density of one hadron sort - helper functions
    * used to reduce code duplication.
    *
@@ -299,8 +307,6 @@ class HadronGasEos {
    * \return partial (unnormalized) density of the given hadron sort
    *         \f$n\f$ [fm\f$^{-3}\f$]
    */
-  static double scaled_partial_density_auxiliary(double m_over_T,
-                                                 double mu_over_T);
   static double scaled_partial_density(const ParticleType& ptype, double beta,
                                        double mub, double mus);
 
