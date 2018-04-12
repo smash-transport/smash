@@ -167,7 +167,7 @@ class IsoParticleType {
   /// list of states that are contained in the multiplet
   ParticleTypePtrList states_;
 
-  /// A tabulation of the spectral integral for the Rpi -> R'pi cross sections.
+  /// A tabulation of the spectral integral for the dpi -> d'pi cross sections.
   TabulationPtr XS_piR_tabulation_;
   /// A tabulation of the spectral integral for the NK -> RK cross sections.
   TabulationPtr XS_RK_tabulation_;
