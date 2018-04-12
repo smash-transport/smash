@@ -38,19 +38,6 @@ static void compare_fourvector(const FourVector &a, const FourVector &b) {
 }
 
 TEST(list_from_oscar2013_output) {
-  // Create OSCAR 2013 output
-  OutputParameters out_par = OutputParameters();
-  out_par.part_only_final = true;
-  out_par.part_extended = false;
-
-  std::unique_ptr<OutputInterface> osc2013final =
-      create_oscar_output("Oscar2013", "Particles", testoutputpath, out_par);
-  VERIFY(bool(osc2013final));
-
-  const bf::path outputfilename = "particle_lists.oscar";
-  const bf::path outputfilepath = testoutputpath / outputfilename;
-  VERIFY(bf::exists(outputfilepath));
-
   // Create random particles
   Particles particles;
   constexpr size_t N = 10;
@@ -58,15 +45,33 @@ TEST(list_from_oscar2013_output) {
     particles.insert(Test::smashon_random());
   }
 
-  std::cout << "Initial particles:" << std::endl;
-  for (const auto &p : particles) {
-    std::cout << p << std::endl;
-  }
+  const bf::path outputfilename = "particle_lists.oscar";
+  const bf::path outputfilepath = testoutputpath / outputfilename;
+  bf::path outputfilepath_unfinished = outputfilepath;
+  outputfilepath_unfinished += ".unfinished";
 
-  // Print them to file in OSCAR 2013 format
-  const int event_id = 0;
-  const double impact_parameter = 2.34;  // just a dummy value here
-  osc2013final->at_eventend(particles, event_id, impact_parameter);
+  {
+    // Create OSCAR 2013 output
+    OutputParameters out_par = OutputParameters();
+    out_par.part_only_final = true;
+    out_par.part_extended = false;
+    std::unique_ptr<OutputInterface> osc2013final =
+        create_oscar_output("Oscar2013", "Particles", testoutputpath, out_par);
+    VERIFY(bool(osc2013final));
+
+    VERIFY(bf::exists(outputfilepath_unfinished));
+
+    std::cout << "Initial particles:" << std::endl;
+    for (const auto &p : particles) {
+      std::cout << p << std::endl;
+    }
+
+    // Print them to file in OSCAR 2013 format
+    const int event_id = 0;
+    const double impact_parameter = 2.34;  // just a dummy value here
+    osc2013final->at_eventend(particles, event_id, impact_parameter);
+  }
+  VERIFY(bf::exists(outputfilepath));
 
   // Rename the oscar file to match listmodus format
   const bf::path listinputfile = "event0";

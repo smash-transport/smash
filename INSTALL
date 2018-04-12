@@ -18,7 +18,7 @@ It requires the following tools & libraries:
 - boost filesystem >= 1.49
 
 Further tools that can be helpful (mainly for development):
-- clang-format >= 4.0
+- clang-format = 6.0
 - ROOT >= 5.34
 - doxygen >= 1.8.4
 - valgrind
@@ -184,7 +184,8 @@ This tells you to download "Clang for x86_64 Ubuntu 16.04". (You might have to
 look for an older version to get pre-built binaries.)
 
 It is sufficient to unpack the archive with `tar xf` and to copy only the
-binary you need (clang-format), see "Installing binaries as a user" above.
+binary you need (`clang-format` in the `bin` folder of the archive), see
+"Installing binaries as a user" above.
 
 
 Installing cpplint

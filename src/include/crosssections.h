@@ -17,6 +17,7 @@
 
 namespace smash {
 
+// TODO(staudenmaier): Class documentation
 class cross_sections {
  public:
   cross_sections(const ParticleList& scat_particles, const double sqrt_s);
@@ -24,6 +25,16 @@ class cross_sections {
   /**
    * Generate a list of all possible collisions between the incoming particles
    * with the given c.m. energy and the calculated cross sections.
+   * \param[in] elastic_parameter If non-zero, given global elastic cross
+   *                                                            section.
+   * \param[in] two_to_one_switch 2->1 reactions enabled?
+   * \param[in] included_2to2 Which 2->2 ractions are enabled?
+   * \param[in] low_snn_cut Elastic collisions with CME below are forbidden.
+   * \param[in] strings_switch Are string processes enabled?
+   * \param[in] nnbar_treatment NNbar treatment through resonance, strings or
+   *                                                        none
+   * \param[in] string_process String process used for string fragmentaion.
+   * \return List of all possible collisions.
    */
   CollisionBranchList generate_collision_list(
       double elastic_parameter, bool two_to_one_switch,
@@ -74,6 +85,8 @@ class cross_sections {
   /** Find all inelastic 2->2 processes for the given scattering.
    * This function calls the different, more specific functions for
    * the different scatterings.
+   * \param[in] included_2to2 Which 2->2 ractions are enabled?
+   * \return List of all possibe inelastic 2->2 processes.
    */
   CollisionBranchList two_to_two(ReactionsBitSet included_2to2);
 
@@ -81,11 +94,15 @@ class cross_sections {
    * Determine the cross section for string excitations, which is given by the
    * difference between the parametrized total cross section and all the
    * explicitly implemented channels at low energy (elastic, resonance
-   * excitation, etc). This method has to be called after all other processes
-   * have been added to the Action object.
+   * excitation, etc).
+   * \param[in] string_process String process used for string fragmentaion.
    *
-   * create a list of subprocesses (single-diffractive,
-   * double-diffractive and non-diffractive) and their cross sections.
+   * \return List of subprocesses (single-diffractive,
+   * double-diffractive and non-diffractive) with their cross sections
+   *
+   * This method has to be called after all other processes
+   * have been determined.
+   * \todo Same assumption made by NNbar_annihilation. Resolve.
    */
   CollisionBranchList string_excitation(double sig_string_all,
                                         StringProcess* string_process);
@@ -94,8 +111,14 @@ class cross_sections {
    * Determine the cross section for NNbar annihilation, which is given by the
    * difference between the parametrized total cross section and all the
    * explicitly implemented channels at low energy (in this case only elastic).
+   * \param[in] current_xs Sum of all cross sections of already determined
+   *                                                     processes
+   * \return Collision Branch with NNbar annihilation process and its cross
+   *   section
+   *
    * This method has to be called after all other processes
    * have been determined.
+   * \todo Same assumption made by string_excitation. Resolve.
    */
   CollisionBranchPtr NNbar_annihilation(const double current_xs);
 
@@ -106,24 +129,24 @@ class cross_sections {
    */
   CollisionBranchList NNbar_creation();
 
-  /** Determine the parametrized total cross section at high energies
+  /**
+   * Determine the parametrized total cross section at high energies
    * for the given collision, which is non-zero for Baryon-Baryon and
    * Nucleon-Pion scatterings currently.
    */
   double high_energy() const;
 
-  /** Return if the species of the two incoming particles are allowed to
+  /**
+   * Return if the species of the two incoming particles are allowed to
    * interact via string fragmentation. Currently, only nucleon-nucleon
    * and nucleon-pion can interact via string. */
   bool included_in_string() const;
 
  private:
-  /**
-   * Choose between parametrization for elastic cross sections.
-   */
+  /// Choose between parametrization for elastic cross sections.
   double elastic_parametrization();
 
-  /**
+  /** TODO(staudenmaier): Revise documentation from here on. Also .cc file.
    * Determine the (parametrized) elastic cross section for a
    * nucleon-nucleon collision.
    */
@@ -141,11 +164,14 @@ class cross_sections {
    */
   double nk_el();
 
-  /** Find all inelastic 2->2 processes for Baryon-Baryon Scattering
-   * except the more specific Nucelon-Nucelon Scattering. */
+  /**
+   * Find all inelastic 2->2 processes for Baryon-Baryon Scattering
+   * except the more specific Nucleon-Nucleon Scattering.
+   */
   CollisionBranchList bb_xx_except_nn(ReactionsBitSet included_2to2);
 
-  /** Find all inelastic 2->2 processes for Nucelon-Nucelon Scattering.
+  /**
+   * Find all inelastic 2->2 processes for Nucelon-Nucelon Scattering.
    * Calculate cross sections for resonance production from
    * nucleon-nucleon collisions (i.e. N N -> N R, N N -> Delta R).
    *
@@ -168,6 +194,18 @@ class cross_sections {
 
   /** Find all inelastic 2->2 processes for Hyperon-Pion Scattering. */
   CollisionBranchList ypi_xx(ReactionsBitSet included_2to2);
+
+  /** Find all inelastic 2->2 processes involving Pion and (anti-) Deuteron,
+   *  specifically dπ→ NN, d̅π→ N̅N̅; πd→ πd' (mockup for πd→ πnp), πd̅→ πd̅' and
+   *  reverse.
+   */
+  CollisionBranchList dpi_xx(ReactionsBitSet included_2to2);
+
+  /** Find all inelastic 2->2 processes involving Nucleon and (anti-) Deuteron,
+   *  specifically Nd → Nd', N̅d →  N̅d', N̅d̅→ N̅d̅', Nd̅→ Nd̅'
+   *  and reverse (e.g. Nd'→ Nd).
+   */
+  CollisionBranchList dn_xx(ReactionsBitSet included_2to2);
 
   /**
    * Determine the (parametrized) hard non-diffractive string cross section
@@ -214,7 +252,8 @@ class cross_sections {
       const ParticleTypePtrList& type_res_2,
       const IntegrationMethod integrator);
 
-  /** Return, if the scattering between the incoming particles are scattering
+  /**
+   * Return, if the scattering between the incoming particles are scattering
    * via string fragmentaion or not.
    * The string fragmentation is implemented in the same way in GiBUU (Physics
    * Reports 512(2012), 1-124, pg. 33). If the center of mass energy is low, two
@@ -229,7 +268,8 @@ class cross_sections {
    */
   bool decide_string(bool strings_switch) const;
 
-  /** Determine the momenta of the incoming particles in the
+  /**
+   * Determine the momenta of the incoming particles in the
    * center-of-mass system.
    */
   double cm_momentum() const {
@@ -238,14 +278,14 @@ class cross_sections {
     return pCM(sqrt_s_, m1, m2);
   }
 
-  /** List with data of scattering particles.  */
+  /// List with data of scattering particles.
   ParticleList incoming_particles_;
 
-  /** both of the incoming particles are nucleons. */
+  /// both of the incoming particles are nucleons.
   bool both_are_nucleons_ = incoming_particles_[0].type().is_nucleon() &&
                             incoming_particles_[1].type().is_nucleon();
 
-  /** total energy in the center-of-mass frame. */
+  /// total energy in the center-of-mass frame.
   double sqrt_s_;
 };
 

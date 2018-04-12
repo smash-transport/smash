@@ -17,11 +17,9 @@
 
 namespace smash {
 
-/*Function to calculate the hubble parameter*/
 double calc_hubble(double time, const ExpansionProperties &metric) {
   double h;  // Hubble parameter
 
-  // No expansion case
   switch (metric.mode_) {
     case ExpansionMode::NoExpansion:
       h = 0.;
@@ -42,7 +40,6 @@ double calc_hubble(double time, const ExpansionProperties &metric) {
   return h;
 }
 
-/* Simple straight line propagation without potentials*/
 double propagate_straight_line(Particles *particles, double to_time,
                                const std::vector<FourVector> &beam_momentum) {
   const auto &log = logger<LogArea::Propagation>();
@@ -57,14 +54,14 @@ double propagate_straight_line(Particles *particles, double to_time,
       log.error("propagate_straight_line - negative dt = ", dt);
     }
     assert(dt >= 0.0);
-    // "Frozen Fermi motion": Fermi momenta are only used for collisions,
-    // but not for propagation. This is done to avoid nucleus flying apart
-    // even if potentials are off. Initial nucleons before the first collision
-    // are propagated only according to beam momentum.
-    // Initial nucleons are distinguished by data.id() < the size of
-    // beam_momentum, which is by default zero except for the collider modus
-    // with the fermi motion == frozen.
-    // todo(m. mayer): improve this condition (see comment #11 issue #4213)
+    /* "Frozen Fermi motion": Fermi momenta are only used for collisions,
+     * but not for propagation. This is done to avoid nucleus flying apart
+     * even if potentials are off. Initial nucleons before the first collision
+     * are propagated only according to beam momentum.
+     * Initial nucleons are distinguished by data.id() < the size of
+     * beam_momentum, which is by default zero except for the collider modus
+     * with the fermi motion == frozen.
+     * todo(m. mayer): improve this condition (see comment #11 issue #4213)*/
     assert(data.id() >= 0);
     const bool avoid_fermi_motion =
         (static_cast<uint64_t>(data.id()) <
@@ -138,8 +135,7 @@ void update_momenta(Particles *particles, double dt, const Potentials &pot,
     const ThreeVector r = data.position().threevec();
     /* Lattices can be used for calculation if 1-2 are fulfilled:
      * 1) Required lattices are not nullptr - possibly_use_lattice
-     * 2) r is not out of required lattices
-     */
+     * 2) r is not out of required lattices */
     const bool use_lattice =
         possibly_use_lattice &&
         (pot.use_skyrme() ? UB_grad_lat->value_at(r, dUB_dr) : true) &&

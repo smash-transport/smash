@@ -98,54 +98,257 @@ static void compare_extended_particledata(
 }
 
 TEST(full2013_format) {
-  // Set options
-  OutputParameters out_par = OutputParameters();
-  out_par.coll_printstartend = true;
-  out_par.coll_extended = false;
-
-  std::unique_ptr<OutputInterface> osc2013full =
-      create_oscar_output("Oscar2013", "Collisions", testoutputpath, out_par);
-  VERIFY(bool(osc2013full));
-
-  const bf::path outputfilename = "full_event_history.oscar";
-  const bf::path outputfilepath = testoutputpath / outputfilename;
-  VERIFY(bf::exists(outputfilepath));
-
+  /* Create elastic interaction (smashon + smashon). */
   Test::create_smashon_particletypes();
-
   Particles particles;
   const ParticleData p1 = particles.insert(Test::smashon_random());
   const ParticleData p2 = particles.insert(Test::smashon_random());
-
-  int event_id = 0;
-  /* Initial state output */
-  osc2013full->at_eventstart(particles, event_id);
-
-  /* Create elastic interaction (smashon + smashon). */
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
                               true, false, NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
   ParticleList final_particles = action->outgoing_particles();
-  osc2013full->at_interaction(*action, 0.);
-
-  /* Final state output */
-  action->perform(&particles, 1);
   const double impact_parameter = 1.783;
-  osc2013full->at_eventend(particles, event_id, impact_parameter);
+  const int event_id = 0;
 
-  bf::fstream outputfile;
-  outputfile.open(outputfilepath, std::ios_base::in);
-  VERIFY(outputfile.good());
-  if (outputfile.good()) {
+  const bf::path outputfilename = "full_event_history.oscar";
+  const bf::path outputfilepath = testoutputpath / outputfilename;
+  bf::path outputfilepath_unfinished = outputfilepath;
+  outputfilepath_unfinished += ".unfinished";
+  {
+    OutputParameters out_par = OutputParameters();
+    out_par.coll_printstartend = true;
+    out_par.coll_extended = false;
+
+    std::unique_ptr<OutputInterface> osc2013full =
+        create_oscar_output("Oscar2013", "Collisions", testoutputpath, out_par);
+    VERIFY(bool(osc2013full));
+    VERIFY(bf::exists(outputfilepath_unfinished));
+
+    osc2013full->at_eventstart(particles, event_id);
+    osc2013full->at_interaction(*action, 0.);
+    action->perform(&particles, 1);
+    osc2013full->at_eventend(particles, event_id, impact_parameter);
+  }
+  VERIFY(!bf::exists(outputfilepath_unfinished));
+  VERIFY(bf::exists(outputfilepath));
+
+  {
+    bf::fstream outputfile;
+    outputfile.open(outputfilepath, std::ios_base::in);
+    VERIFY(outputfile.good());
+    if (outputfile.good()) {
+      std::string line;
+      /* Check header */
+      std::getline(outputfile, line);
+      COMPARE(line,
+              "#!OSCAR2013 full_event_history t x y z mass p0 px py pz"
+              " pdg ID charge");
+      std::getline(outputfile, line);
+      COMPARE(line, "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none none");
+      std::getline(outputfile, line);
+      COMPARE(line, "# " VERSION_MAJOR);
+      /* Check initial particle list description line */
+      std::string initial_line = "# event " + std::to_string(event_id + 1) +
+                                 " in " + std::to_string(2);
+      std::getline(outputfile, line);
+      COMPARE(line, initial_line);
+      /* Check initial particle data lines item by item */
+      for (const ParticleData &data : action->incoming_particles()) {
+        std::array<std::string, data_elements> datastring;
+        for (int j = 0; j < data_elements; j++) {
+          outputfile >> datastring.at(j);
+        }
+        compare_particledata(datastring, data, data.id());
+      }
+      /* Get the dangling newline character */
+      outputfile.get();
+      /* Check interaction block */
+      std::getline(outputfile, line);
+      std::string interaction_line = "# interaction in " + std::to_string(2) +
+                                     " out " +
+                                     std::to_string(final_particles.size());
+      // Allow additional fields
+      COMPARE(line.substr(0, interaction_line.size()), interaction_line);
+      for (const ParticleData &data : action->incoming_particles()) {
+        std::array<std::string, data_elements> datastring;
+        for (int j = 0; j < data_elements; j++) {
+          outputfile >> datastring.at(j);
+        }
+        compare_particledata(datastring, data, data.id());
+      }
+      for (ParticleData &data : final_particles) {
+        std::array<std::string, data_elements> datastring;
+        for (int j = 0; j < data_elements; j++) {
+          outputfile >> datastring.at(j);
+        }
+        compare_particledata(datastring, data, data.id());
+      }
+      /* Get the dangling newline character */
+      outputfile.get();
+      /* Check final particle list */
+      std::getline(outputfile, line);
+      std::string final_line = "# event " + std::to_string(event_id + 1) +
+                               " out " + std::to_string(particles.size());
+      COMPARE(line, final_line);
+      for (ParticleData &data : particles) {
+        std::array<std::string, data_elements> datastring;
+        for (int j = 0; j < data_elements; j++) {
+          outputfile >> datastring.at(j);
+        }
+        compare_particledata(datastring, data, data.id());
+      }
+      /* Get the dangling newline character */
+      outputfile.get();
+      /* Check for event end line */
+      std::getline(outputfile, line);
+      std::string end_line = "# event " + std::to_string(event_id + 1) +
+                             " end 0" + " impact   1.783";
+      COMPARE(line, end_line);
+    }
+  }
+  VERIFY(bf::remove(outputfilepath));
+}
+
+TEST(final2013_format) {
+  // Set options
+  const bf::path configfilename = "oscar_2013.yaml";
+  const bf::path configfilepath = testoutputpath / configfilename;
+  bf::ofstream(configfilepath) << "    Only_Final:      True\n";
+  VERIFY(bf::exists(configfilepath));
+
+  /* Create 2 particles */
+  Particles particles;
+  const ParticleData p1 = particles.insert(Test::smashon_random());
+  const ParticleData p2 = particles.insert(Test::smashon_random());
+  const int event_id = 0;
+  const double impact_parameter = 2.34;
+
+  /* Create interaction ("elastic scattering") */
+  ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
+  action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
+                              true, false, NNbarTreatment::NoAnnihilation);
+  action->generate_final_state();
+
+  const bf::path outputfilename = "particle_lists.oscar";
+  const bf::path outputfilepath = testoutputpath / outputfilename;
+  bf::path outputfilepath_unfinished = outputfilepath;
+  outputfilepath_unfinished += ".unfinished";
+  {
+    OutputParameters out_par = OutputParameters();
+    out_par.part_only_final = true;
+    out_par.part_extended = false;
+
+    std::unique_ptr<OutputInterface> osc2013final =
+        create_oscar_output("Oscar2013", "Particles", testoutputpath, out_par);
+    VERIFY(bool(osc2013final));
+    VERIFY(bf::exists(outputfilepath_unfinished));
+    /* Initial state output (note that this should not do anything!) */
+    osc2013final->at_eventstart(particles, event_id);
+    /* As with initial state output, this should not do anything */
+    osc2013final->at_interaction(*action, 0.);
+    /* Final state output; this is the only thing we expect to find in file */
+    action->perform(&particles, 1);
+    osc2013final->at_eventend(particles, event_id, impact_parameter);
+  }
+  VERIFY(!bf::exists(outputfilepath_unfinished));
+  VERIFY(bf::exists(outputfilepath));
+
+  COMPARE(action->outgoing_particles(), particles.copy_to_vector());
+
+  {
+    bf::fstream outputfile;
+    outputfile.open(outputfilepath, std::ios_base::in);
+    VERIFY(outputfile.good());
+    if (outputfile.good()) {
+      std::string line;
+      /* Check header */
+      std::getline(outputfile, line);
+      COMPARE(line,
+              "#!OSCAR2013 particle_lists t x y z mass p0 px py pz"
+              " pdg ID charge");
+      std::getline(outputfile, line);
+      COMPARE(line, "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none none");
+      std::getline(outputfile, line);
+      COMPARE(line, "# " VERSION_MAJOR);
+      /* Check final particle list */
+      std::getline(outputfile, line);
+      std::string final_line = "# event " + std::to_string(event_id + 1) +
+                               " out " + std::to_string(particles.size());
+      COMPARE(line, final_line);
+      for (ParticleData &data : particles) {
+        std::array<std::string, data_elements> datastring;
+        for (int j = 0; j < data_elements; j++) {
+          outputfile >> datastring.at(j);
+        }
+        compare_particledata(datastring, data, data.id());
+      }
+      /* Get the dangling newline character */
+      outputfile.get();
+      /* Check for event end line */
+      std::getline(outputfile, line);
+      std::string end_line = "# event " + std::to_string(event_id + 1) +
+                             " end 0" + " impact   2.340";
+      COMPARE(line, end_line);
+    }
+  }
+  VERIFY(bf::remove(outputfilepath));
+}
+
+TEST(full_extended_oscar) {
+  const bf::path outputfilename = "full_event_history.oscar";
+  const bf::path outputfilepath = testoutputpath / outputfilename;
+  bf::path outputfilepath_unfinished = outputfilepath;
+  outputfilepath_unfinished += ".unfinished";
+
+  /* Create elastic interaction (smashon + smashon). */
+  Particles particles;
+  const ParticleData p1 = particles.insert(Test::smashon_random());
+  const ParticleData p2 = particles.insert(Test::smashon_random());
+  ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
+  action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
+                              true, false, NNbarTreatment::NoAnnihilation);
+  action->generate_final_state();
+  ParticleList final_particles = action->outgoing_particles();
+  const int event_id = 0;
+  const double impact_parameter = 1.783;
+
+  {
+    OutputParameters out_par = OutputParameters();
+    out_par.coll_printstartend = true;
+    out_par.coll_extended = true;
+
+    std::unique_ptr<OutputInterface> osc2013full =
+        create_oscar_output("Oscar2013", "Collisions", testoutputpath, out_par);
+    VERIFY(bool(osc2013full));
+    VERIFY(bf::exists(outputfilepath_unfinished));
+
+    /* Initial state output */
+    osc2013full->at_eventstart(particles, event_id);
+    osc2013full->at_interaction(*action, 0.);
+    /* Final state output */
+    action->perform(&particles, 1);
+    osc2013full->at_eventend(particles, event_id, impact_parameter);
+  }
+  VERIFY(!bf::exists(outputfilepath_unfinished));
+  VERIFY(bf::exists(outputfilepath));
+
+  {
+    bf::fstream outputfile;
+    outputfile.open(outputfilepath, std::ios_base::in);
+    VERIFY(outputfile.good());
     std::string line;
     /* Check header */
     std::getline(outputfile, line);
     COMPARE(line,
-            "#!OSCAR2013 full_event_history t x y z mass p0 px py pz"
-            " pdg ID charge");
+            "#!OSCAR2013Extended full_event_history"
+            " t x y z mass p0 px py pz pdg ID charge ncoll"
+            " form_time xsecfac proc_id_origin proc_type_origin"
+            " time_last_coll pdg_mother1 pdg_mother2");
     std::getline(outputfile, line);
-    COMPARE(line, "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none none");
+    COMPARE(line,
+            "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none"
+            " none none fm none none none fm none none");
     std::getline(outputfile, line);
     COMPARE(line, "# " VERSION_MAJOR);
     /* Check initial particle list description line */
@@ -155,11 +358,11 @@ TEST(full2013_format) {
     COMPARE(line, initial_line);
     /* Check initial particle data lines item by item */
     for (const ParticleData &data : action->incoming_particles()) {
-      std::array<std::string, data_elements> datastring;
-      for (int j = 0; j < data_elements; j++) {
+      std::array<std::string, data_elements_extended> datastring;
+      for (int j = 0; j < data_elements_extended; j++) {
         outputfile >> datastring.at(j);
       }
-      compare_particledata(datastring, data, data.id());
+      compare_extended_particledata(datastring, data, data.id());
     }
     /* Get the dangling newline character */
     outputfile.get();
@@ -171,18 +374,18 @@ TEST(full2013_format) {
     // Allow additional fields
     COMPARE(line.substr(0, interaction_line.size()), interaction_line);
     for (const ParticleData &data : action->incoming_particles()) {
-      std::array<std::string, data_elements> datastring;
-      for (int j = 0; j < data_elements; j++) {
+      std::array<std::string, data_elements_extended> datastring;
+      for (int j = 0; j < data_elements_extended; j++) {
         outputfile >> datastring.at(j);
       }
-      compare_particledata(datastring, data, data.id());
+      compare_extended_particledata(datastring, data, data.id());
     }
     for (ParticleData &data : final_particles) {
-      std::array<std::string, data_elements> datastring;
-      for (int j = 0; j < data_elements; j++) {
+      std::array<std::string, data_elements_extended> datastring;
+      for (int j = 0; j < data_elements_extended; j++) {
         outputfile >> datastring.at(j);
       }
-      compare_particledata(datastring, data, data.id());
+      compare_extended_particledata(datastring, data, data.id());
     }
     /* Get the dangling newline character */
     outputfile.get();
@@ -192,11 +395,11 @@ TEST(full2013_format) {
                              " out " + std::to_string(particles.size());
     COMPARE(line, final_line);
     for (ParticleData &data : particles) {
-      std::array<std::string, data_elements> datastring;
-      for (int j = 0; j < data_elements; j++) {
+      std::array<std::string, data_elements_extended> datastring;
+      for (int j = 0; j < data_elements_extended; j++) {
         outputfile >> datastring.at(j);
       }
-      compare_particledata(datastring, data, data.id());
+      compare_extended_particledata(datastring, data, data.id());
     }
     /* Get the dangling newline character */
     outputfile.get();
@@ -206,200 +409,5 @@ TEST(full2013_format) {
                            " end 0" + " impact   1.783";
     COMPARE(line, end_line);
   }
-  outputfile.close();
-  VERIFY(bf::remove(outputfilepath));
-}
-
-TEST(final2013_format) {
-  // Set options
-  const bf::path configfilename = "oscar_2013.yaml";
-  const bf::path configfilepath = testoutputpath / configfilename;
-  bf::ofstream(configfilepath) << "    Only_Final:      True\n";
-  VERIFY(bf::exists(configfilepath));
-
-  OutputParameters out_par = OutputParameters();
-  out_par.part_only_final = true;
-  out_par.part_extended = false;
-
-  std::unique_ptr<OutputInterface> osc2013final =
-      create_oscar_output("Oscar2013", "Particles", testoutputpath, out_par);
-  VERIFY(bool(osc2013final));
-
-  const bf::path outputfilename = "particle_lists.oscar";
-  const bf::path outputfilepath = testoutputpath / outputfilename;
-  VERIFY(bf::exists(outputfilepath));
-
-  Particles particles;
-
-  /* Create 2 particles */
-  const ParticleData p1 = particles.insert(Test::smashon_random());
-  const ParticleData p2 = particles.insert(Test::smashon_random());
-
-  int event_id = 0;
-
-  /* Initial state output (note that this should not do anything!) */
-  osc2013final->at_eventstart(particles, event_id);
-
-  /* Create interaction ("elastic scattering") */
-  ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
-  action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
-                              true, false, NNbarTreatment::NoAnnihilation);
-  action->generate_final_state();
-
-  /* As with initial state output, this should not do anything */
-  osc2013final->at_interaction(*action, 0.);
-
-  /* Final state output; this is the only thing we expect to find in file */
-  action->perform(&particles, 1);
-  const double impact_parameter = 2.34;
-  osc2013final->at_eventend(particles, event_id, impact_parameter);
-  COMPARE(action->outgoing_particles(), particles.copy_to_vector());
-
-  bf::fstream outputfile;
-  outputfile.open(outputfilepath, std::ios_base::in);
-  VERIFY(outputfile.good());
-  if (outputfile.good()) {
-    std::string line;
-    /* Check header */
-    std::getline(outputfile, line);
-    COMPARE(line,
-            "#!OSCAR2013 particle_lists t x y z mass p0 px py pz"
-            " pdg ID charge");
-    std::getline(outputfile, line);
-    COMPARE(line, "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none none");
-    std::getline(outputfile, line);
-    COMPARE(line, "# " VERSION_MAJOR);
-    /* Check final particle list */
-    std::getline(outputfile, line);
-    std::string final_line = "# event " + std::to_string(event_id + 1) +
-                             " out " + std::to_string(particles.size());
-    COMPARE(line, final_line);
-    for (ParticleData &data : particles) {
-      std::array<std::string, data_elements> datastring;
-      for (int j = 0; j < data_elements; j++) {
-        outputfile >> datastring.at(j);
-      }
-      compare_particledata(datastring, data, data.id());
-    }
-    /* Get the dangling newline character */
-    outputfile.get();
-    /* Check for event end line */
-    std::getline(outputfile, line);
-    std::string end_line = "# event " + std::to_string(event_id + 1) +
-                           " end 0" + " impact   2.340";
-    COMPARE(line, end_line);
-  }
-  outputfile.close();
-  VERIFY(bf::remove(outputfilepath));
-}
-
-TEST(full_extended_oscar) {
-  OutputParameters out_par = OutputParameters();
-  out_par.coll_printstartend = true;
-  out_par.coll_extended = true;
-  std::unique_ptr<OutputInterface> osc2013full =
-      create_oscar_output("Oscar2013", "Collisions", testoutputpath, out_par);
-  VERIFY(bool(osc2013full));
-
-  const bf::path outputfilename = "full_event_history.oscar";
-  const bf::path outputfilepath = testoutputpath / outputfilename;
-  VERIFY(bf::exists(outputfilepath));
-
-  Particles particles;
-  const ParticleData p1 = particles.insert(Test::smashon_random());
-  const ParticleData p2 = particles.insert(Test::smashon_random());
-
-  int event_id = 0;
-  /* Initial state output */
-  osc2013full->at_eventstart(particles, event_id);
-
-  /* Create elastic interaction (smashon + smashon). */
-  ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
-  action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
-                              true, false, NNbarTreatment::NoAnnihilation);
-  action->generate_final_state();
-  ParticleList final_particles = action->outgoing_particles();
-  osc2013full->at_interaction(*action, 0.);
-
-  /* Final state output */
-  action->perform(&particles, 1);
-  const double impact_parameter = 1.783;
-  osc2013full->at_eventend(particles, event_id, impact_parameter);
-
-  bf::fstream outputfile;
-  outputfile.open(outputfilepath, std::ios_base::in);
-  VERIFY(outputfile.good());
-  std::string line;
-  /* Check header */
-  std::getline(outputfile, line);
-  COMPARE(line,
-          "#!OSCAR2013Extended full_event_history"
-          " t x y z mass p0 px py pz pdg ID charge ncoll"
-          " form_time xsecfac proc_id_origin proc_type_origin"
-          " time_last_coll pdg_mother1 pdg_mother2");
-  std::getline(outputfile, line);
-  COMPARE(line,
-          "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none"
-          " none none fm none none none fm none none");
-  std::getline(outputfile, line);
-  COMPARE(line, "# " VERSION_MAJOR);
-  /* Check initial particle list description line */
-  std::string initial_line =
-      "# event " + std::to_string(event_id + 1) + " in " + std::to_string(2);
-  std::getline(outputfile, line);
-  COMPARE(line, initial_line);
-  /* Check initial particle data lines item by item */
-  for (const ParticleData &data : action->incoming_particles()) {
-    std::array<std::string, data_elements_extended> datastring;
-    for (int j = 0; j < data_elements_extended; j++) {
-      outputfile >> datastring.at(j);
-    }
-    compare_extended_particledata(datastring, data, data.id());
-  }
-  /* Get the dangling newline character */
-  outputfile.get();
-  /* Check interaction block */
-  std::getline(outputfile, line);
-  std::string interaction_line = "# interaction in " + std::to_string(2) +
-                                 " out " +
-                                 std::to_string(final_particles.size());
-  // Allow additional fields
-  COMPARE(line.substr(0, interaction_line.size()), interaction_line);
-  for (const ParticleData &data : action->incoming_particles()) {
-    std::array<std::string, data_elements_extended> datastring;
-    for (int j = 0; j < data_elements_extended; j++) {
-      outputfile >> datastring.at(j);
-    }
-    compare_extended_particledata(datastring, data, data.id());
-  }
-  for (ParticleData &data : final_particles) {
-    std::array<std::string, data_elements_extended> datastring;
-    for (int j = 0; j < data_elements_extended; j++) {
-      outputfile >> datastring.at(j);
-    }
-    compare_extended_particledata(datastring, data, data.id());
-  }
-  /* Get the dangling newline character */
-  outputfile.get();
-  /* Check final particle list */
-  std::getline(outputfile, line);
-  std::string final_line = "# event " + std::to_string(event_id + 1) + " out " +
-                           std::to_string(particles.size());
-  COMPARE(line, final_line);
-  for (ParticleData &data : particles) {
-    std::array<std::string, data_elements_extended> datastring;
-    for (int j = 0; j < data_elements_extended; j++) {
-      outputfile >> datastring.at(j);
-    }
-    compare_extended_particledata(datastring, data, data.id());
-  }
-  /* Get the dangling newline character */
-  outputfile.get();
-  /* Check for event end line */
-  std::getline(outputfile, line);
-  std::string end_line =
-      "# event " + std::to_string(event_id + 1) + " end 0" + " impact   1.783";
-  COMPARE(line, end_line);
-  outputfile.close();
   VERIFY(bf::remove(outputfilepath));
 }

@@ -27,10 +27,11 @@
 namespace smash {
 
 namespace {
-/** prints usage information and exits the program
+/**
+ * Prints usage information and exits the program
  *
- * \param rc Exit status to return
- * \param progname Name of the program
+ * \param[out] rc Exit status to return
+ * \param[in] progname Name of the program
  *
  * usage() is called when either the `--help` or `-h` command line
  * options are given to the program; in this case, the exit status is
@@ -95,7 +96,7 @@ void usage(const int rc, const std::string &progname) {
    *     mass m.
    * <tr><td>`-s <pdg1>,<pdg2>[,mass1,mass2]`
    * <td>`--cross-sections <pdg1>,<pdg2>[,mass1,mass2]`
-   * <td> Dumps the partial 2->1 cross-section of pdg1 + pdg2 with
+   * <td> Dumps all the partial cross-sections of pdg1 + pdg2 with
    *     masses mass1 and mass2. Masses are optional, default values are pole
    *     masses.
    * <tr><td>`-f` <td>`--force`
@@ -126,7 +127,7 @@ void usage(const int rc, const std::string &progname) {
       "  -r, --resonance <pdg>   dump width(m) and m*spectral function(m^2)"
       " for resonance pdg\n"
       "  -s, --cross-sections    <pdg1>,<pdg2>[,mass1,mass2] \n"
-      "                          dump all 2->1 partial cross-sections of "
+      "                          dump all partial cross-sections of "
       "pdg1 + pdg2 reactions versus sqrt(s).\n"
       "                          Masses are optional, by default pole masses"
       " are used.\n"
@@ -138,15 +139,17 @@ void usage(const int rc, const std::string &progname) {
   std::exit(rc);
 }
 
-/** \ingroup exception
- *  Exception class that is thrown if the requested output directory
+/**
+ * \ingroup exception
+ * Exception class that is thrown, if the requested output directory
  * already exists and `-f` was not specified on the command line.
  */
 struct OutputDirectoryExists : public std::runtime_error {
   using std::runtime_error::runtime_error;
 };
-/** \ingroup exception
- *  Exception class that is thrown if no new output path can be
+/**
+ * \ingroup exception
+ * Exception class that is thrown, if no new output path can be
  * generated (there is a directory name for each positive integer
  * value)
  */
@@ -154,7 +157,7 @@ struct OutputDirectoryOutOfIds : public std::runtime_error {
   using std::runtime_error::runtime_error;
 };
 
-/// returns the default path for output.
+/// Returns the default path for output.
 bf::path default_output_path() {
   const bf::path p = bf::absolute("data");
   if (!bf::exists(p)) {
@@ -173,7 +176,10 @@ bf::path default_output_path() {
   return p2;
 }
 
-/// makes sure the output path is valid (throws if not)
+/**
+ * Ensures the output path is valid (throws if not)
+ * \param[in] path The output path to be written to
+ */
 void ensure_path_is_valid(const bf::path &path) {
   if (bf::exists(path)) {
     if (!bf::is_directory(path)) {
@@ -190,33 +196,49 @@ void ensure_path_is_valid(const bf::path &path) {
   }
 }
 
-/// prepares ActionsFinder for cross-section and reaction dumps
+/**
+ * Prepares ActionsFinder for cross-section and reaction dumps
+ * \param[in] configuration Necessary parameters to switch reactions on/off
+ */
 ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
   std::vector<bool> nucleon_has_interacted = {};
-  ReactionsBitSet included_2to2 =
-          configuration.take({"Collision_Term", "Included_2to2"},
-          ReactionsBitSet().set());
+  ReactionsBitSet included_2to2 = configuration.take(
+      {"Collision_Term", "Included_2to2"}, ReactionsBitSet().set());
   // Since it will be used solely for cross-section dump, most of
   // parameters do not play any role here and are set arbitrarily.
   // Only parameters, that switch reactions on/off matter.
-  bool two_to_one = false;
+  bool two_to_one = configuration.take({"Collision_Term", "Two_to_One"});
   ExperimentParameters params = ExperimentParameters{
-      {0., 1.}, {0., 1.}, 1, 1.0, 4., two_to_one,
+      {0., 1.},
+      {0., 1.},
+      1,
+      1.0,
+      4.,
+      two_to_one,
       included_2to2,
       configuration.take({"Collision_Term", "Strings"}, true),
-      configuration.take({"Collision_Term", "Strings",
+      configuration.take({"Collision_Term",
                           "Switch_on_Strings_with_Probability"}, false),
-      NNbarTreatment::NoAnnihilation,
-      false, 0.0, false};
-  return ScatterActionsFinder(configuration, params,
-                              nucleon_has_interacted, 0, 0, 1);
+      configuration.take({"Collision_Term", "NNbar_Treatment"},
+                         NNbarTreatment::NoAnnihilation),
+      false,
+      0.0,
+      false};
+  return ScatterActionsFinder(configuration, params, nucleon_has_interacted, 0,
+                              0, 1);
 }
 
 }  // unnamed namespace
 
 }  // namespace smash
 
-/* main - do command line parsing and hence decides modus */
+/**
+ * Main program
+ * Smashes Many Accelerated Strongly-Interacting Hadrons :-)
+ * do command line parsing and hence decides modus
+ * \param[in] argc Number of arguments on command-line
+ * \param[in] argv List of arguments on command-line
+ */
 int main(int argc, char *argv[]) {
   using namespace smash;  // NOLINT(build/namespaces)
   setup_default_float_traps();
@@ -238,7 +260,7 @@ int main(int argc, char *argv[]) {
                                  {"version", no_argument, 0, 'v'},
                                  {nullptr, 0, 0, 0}};
 
-  /* strip any path to progname */
+  // strip any path to progname
   const std::string progname = bf::path(argv[0]).filename().native();
 
   try {
@@ -251,7 +273,7 @@ int main(int argc, char *argv[]) {
     bool resonance_dump_activated = false;
     bool cross_section_dump_activated = false;
 
-    /* parse command-line arguments */
+    // parse command-line arguments
     int opt;
     while ((opt = getopt_long(argc, argv, "c:d:e:fhi:m:p:o:lr:s:v", longopts,
                               nullptr)) != -1) {
@@ -314,14 +336,13 @@ int main(int argc, char *argv[]) {
       usage(EXIT_FAILURE, progname);
     }
 
-    /* read in config file */
+    // Read in config file
     Configuration configuration(input_path.parent_path(),
                                 input_path.filename());
     for (const auto &config : extra_config) {
       configuration.merge_yaml(config);
     }
     if (particles) {
-      std::cout << "particles: " << particles << std::endl;
       if (!bf::exists(particles)) {
         std::stringstream err;
         err << "The particles file was expected at '" << particles
@@ -343,8 +364,8 @@ int main(int argc, char *argv[]) {
       // Do not make all elastic cross-sections a fixed number
       configuration.merge_yaml(
           "{Collision_Term: {Elastic_Cross_Section: -1.0}}");
-      // Print only 2->n, n > 1. Do not dump decays, which can be found in
-      // decaymodes.txt anyway
+      /* Print only 2->n, n > 1. Do not dump decays, which can be found in
+       * decaymodes.txt anyway */
       configuration.merge_yaml("{Collision_Term: {Two_to_One: False}}");
       ParticleType::create_type_list(configuration.take({"particles"}));
       DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
@@ -399,7 +420,7 @@ int main(int argc, char *argv[]) {
       configuration["General"]["End_Time"] = std::abs(std::atof(end_time));
     }
 
-    /* set up logging */
+    // Set up logging
     set_default_loglevel(
         configuration.take({"Logging", "default"}, einhard::ALL));
     create_all_loggers(configuration["Logging"]);
@@ -413,7 +434,7 @@ int main(int argc, char *argv[]) {
       configuration["General"]["Randomseed"] = seed;
     }
 
-    /* check output path*/
+    // Check output path
     ensure_path_is_valid(output_path);
     const bf::path lock_path = output_path / "smash.lock";
     FileLock lock(lock_path);
@@ -430,8 +451,16 @@ int main(int argc, char *argv[]) {
           "directory, clean up, or tell SMASH to ignore existing files.");
     }
 
-    // keep a copy of the configuration that was used in the output directory
+    /* Keep a copy of the configuration that was used in the output directory
+     * also save information about SMASH build as a comment */
     bf::ofstream(output_path / "config.yaml")
+        << "# " << VERSION_MAJOR << '\n'
+        << "# Branch   : " << GIT_BRANCH << '\n'
+        << "# System   : " << CMAKE_SYSTEM << '\n'
+        << "# Compiler : " << CMAKE_CXX_COMPILER_ID << ' '
+        << CMAKE_CXX_COMPILER_VERSION << '\n'
+        << "# Build    : " << CMAKE_BUILD_TYPE << '\n'
+        << "# Date     : " << BUILD_DATE << '\n'
         << configuration.to_string() << '\n';
 
     log.trace(source_location, " create ParticleType and DecayModes");
@@ -439,7 +468,7 @@ int main(int argc, char *argv[]) {
     DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
     ParticleType::check_consistency();
 
-    // create an experiment
+    // Create an experiment
     log.trace(source_location, " create Experiment");
     auto experiment = ExperimentBase::create(configuration, output_path);
     const std::string report = configuration.unused_values_report();
@@ -448,7 +477,7 @@ int main(int argc, char *argv[]) {
                  << report;
     }
 
-    // run the experiment
+    // Run the experiment
     log.trace(source_location, " run the Experiment");
     experiment->run();
   } catch (std::exception &e) {

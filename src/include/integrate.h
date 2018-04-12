@@ -53,19 +53,23 @@ class Result : public std::pair<double, double> {
   using Base = std::pair<double, double>;
 
  public:
-  /// forward the pair constructors
+  /// Forward the pair constructors.
   using Base::pair;
 
-  /// conversion to double yields the value of the integral
+  /// Conversion to double yields the value of the integral.
   operator double() const { return Base::first; }
 
-  /// access the first entry in the pair as the value
+  /// Access the first entry in the pair as the value.
   double value() const { return Base::first; }
 
-  /// access the second entry in the pair as the absolute error
+  /// Access the second entry in the pair as the absolute error.
   double error() const { return Base::second; }
 
-  /// Check whether the error is small and alert if it is not
+  /// Check whether the error is small and alert if it is not.
+  ///
+  /// \param integration_name Name of the integration used for error message.
+  /// \param relative_tolerance Relative error tolerance.
+  /// \param absolute_tolerance Absolute error tolerance.
   void check_error(const std::string &integration_name,
                    double relative_tolerance = 5e-4,
                    double absolute_tolerance = 1e-9) const {
@@ -122,6 +126,7 @@ class Integrator {
    *            must return a `double` and take a single `double` argument. If
    *            you want to pass additional data to the callable you can e.g.
    *            use lambda captures.
+   * \return Pair of integral value and absolute error estimate.
    */
   template <typename F>
   Result operator()(double a, double b, F &&fun) {
@@ -217,6 +222,7 @@ class Integrator1dMonte {
    *            must return a `double` and take two `double` arguments. If you
    *            want to pass additional data to the callable you can e.g. use
    *            lambda captures.
+   * \return Pair of integral value and absolute error estimate.
    */
   template <typename F>
   Result operator()(double min, double max, F &&fun) {
@@ -318,6 +324,7 @@ class Integrator2d {
    *            must return a `double` and take two `double` arguments. If you
    *            want to pass additional data to the callable you can e.g. use
    *            lambda captures.
+   * \return Pair of integral value and absolute error estimate.
    */
   template <typename F>
   Result operator()(double min1, double max1, double min2, double max2,
@@ -409,6 +416,7 @@ class Integrator2dCuhre {
    *            must return a `double` and take two `double` arguments. If you
    *            want to pass additional data to the callable you can e.g. use
    *            lambda captures.
+   * \return Pair of integral value and absolute error estimate.
    */
   template <typename F>
   Result operator()(double min1, double max1, double min2, double max2, F fun) {

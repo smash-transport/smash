@@ -19,34 +19,17 @@
 #include "include/density.h"
 #include "include/energymomentumtensor.h"
 #include "include/experimentparameters.h"
-#include "include/filedeleter.h"
 #include "include/forwarddeclarations.h"
 #include "include/particles.h"
 #include "include/vtkoutput.h"
 
 namespace smash {
 
-/*!\Userguide
- * \page ascii_thermodynamic_output_ ASCII thermodynamic output
- *
- * Prints out thermodynamic quantities at a fixed coordinate against time.
- * The list of available quantities and the way they are configured are
- * the same as for \ref input_vtk_lattice_. Addtional options are
- *
- * \key Position (list of 3 doubles, optional, default = [0.0, 0.0, 0.0])
- * Point, at which TD quantities are computed.
- *
- * \key Smearing (bool, optional, default = true): \n
- * Using Gaussian smearing for computing thermodynamic quantities or not.
- * Normally, if one computes TD quantities at a fixed point, smearing should
- * be on. However, for calculation of viscosity it was useful to
- * compute total energy-momentum tensor of all particles in the box with
- * weights equal to 1, which corresponds to "Smearing: false".
- */
-ThermodynamicOutput::ThermodynamicOutput(const bf::path &path, std::string name,
+ThermodynamicOutput::ThermodynamicOutput(const bf::path &path,
+                                         const std::string &name,
                                          const OutputParameters &out_par)
     : OutputInterface(name),
-      file_{std::fopen((path / ("thermodynamics.dat")).native().c_str(), "w")},
+      file_{path / "thermodynamics.dat", "w"},
       out_par_(out_par) {
   std::fprintf(file_.get(), "# %s thermodynamics output\n", VERSION_MAJOR);
   const ThreeVector r = out_par.td_position;
@@ -155,7 +138,6 @@ void ThermodynamicOutput::density_along_line(
     a_file << r.x1() << " " << r.x2() << " " << r.x3() << " " << rho_eck
            << "\n";
   }
-  a_file.close();
 }
 
 }  // namespace smash

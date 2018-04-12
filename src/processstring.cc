@@ -36,17 +36,15 @@ StringProcess::StringProcess(double string_tension, double gluon_beta,
    * diffractive ones are implemented in a separate routine */
   pythia_parton_->readString("SoftQCD:nonDiffractive = on");
   pythia_parton_->readString("MultipartonInteractions:pTmin = 1.5");
-  common_setup_pythia(pythia_parton_.get(),
-                      strange_supp, diquark_supp, stringz_a, stringz_b,
-                      string_sigma_T);
+  common_setup_pythia(pythia_parton_.get(), strange_supp, diquark_supp,
+                      stringz_a, stringz_b, string_sigma_T);
 
   // setup and initialize pythia for fragmentation
   pythia_hadron_ = make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
   /* turn off all parton-level processes to implement only hadronization */
   pythia_hadron_->readString("ProcessLevel:all = off");
-  common_setup_pythia(pythia_hadron_.get(),
-                      strange_supp, diquark_supp, stringz_a, stringz_b,
-                      string_sigma_T);
+  common_setup_pythia(pythia_hadron_.get(), strange_supp, diquark_supp,
+                      stringz_a, stringz_b, string_sigma_T);
 
   /* initialize PYTHIA */
   pythia_hadron_->init();
@@ -64,53 +62,54 @@ StringProcess::StringProcess(double string_tension, double gluon_beta,
 
 void StringProcess::common_setup_pythia(Pythia8::Pythia *pythia_in,
                                         double strange_supp,
-                                        double diquark_supp,
-                                        double stringz_a, double stringz_b,
+                                        double diquark_supp, double stringz_a,
+                                        double stringz_b,
                                         double string_sigma_T) {
+  // choose parametrization for mass-dependent width
   pythia_in->readString("ParticleData:modeBreitWigner = 4");
+  /* choose minimum transverse momentum scale
+   * involved in partonic interactions */
   pythia_in->readString("MultipartonInteractions:pTmin = 1.5");
   pythia_in->readString("MultipartonInteractions:nSample = 10000");
-  /* transverse momentum spread in string fragmentation */
-  pythia_in->readString("StringPT:sigma = " +
-                             std::to_string(string_sigma_T));
-  /* diquark suppression factor in string fragmentation */
+  // transverse momentum spread in string fragmentation
+  pythia_in->readString("StringPT:sigma = " + std::to_string(string_sigma_T));
+  // diquark suppression factor in string fragmentation
   pythia_in->readString("StringFlav:probQQtoQ = " +
-                             std::to_string(diquark_supp));
-  /* strangeness suppression factor in string fragmentation */
+                        std::to_string(diquark_supp));
+  // strangeness suppression factor in string fragmentation
   pythia_in->readString("StringFlav:probStoUD = " +
-                             std::to_string(strange_supp));
-  /* parameters for the fragmentation function */
+                        std::to_string(strange_supp));
+  // parameters for the fragmentation function
   pythia_in->readString("StringZ:aLund = " + std::to_string(stringz_a));
   pythia_in->readString("StringZ:bLund = " + std::to_string(stringz_b));
 
-  /* manually set the parton distribution function */
+  // manually set the parton distribution function
   pythia_in->readString("PDF:pSet = 13");
   pythia_in->readString("PDF:pSetB = 13");
   pythia_in->readString("PDF:piSet = 1");
   pythia_in->readString("PDF:piSetB = 1");
-
   pythia_in->readString("Beams:idA = 2212");
   pythia_in->readString("Beams:idB = 2212");
   pythia_in->readString("Beams:eCM = 10.");
 
-  /* suppress unnecessary output */
+  // suppress unnecessary output
   pythia_in->readString("Print:quiet = on");
-  /* No resonance decays, since the resonances will be handled by SMASH */
+  // No resonance decays, since the resonances will be handled by SMASH
   pythia_in->readString("HadronLevel:Decay = off");
-  /* set particle masses and widths in PYTHIA to be same with those in SMASH */
+  // set particle masses and widths in PYTHIA to be same with those in SMASH
   for (auto &ptype : ParticleType::list_all()) {
     int pdgid = ptype.pdgcode().get_decimal();
     double mass_pole = ptype.mass();
     double width_pole = ptype.width_at_pole();
-    /* check if the particle species is in PYTHIA */
+    // check if the particle species is in PYTHIA
     if (pythia_in->particleData.isParticle(pdgid)) {
-      /* set mass and width in PYTHIA */
+      // set mass and width in PYTHIA
       pythia_in->particleData.m0(pdgid, mass_pole);
       pythia_in->particleData.mWidth(pdgid, width_pole);
     }
   }
 
-  /* make energy-momentum conservation in PYTHIA more precise */
+  // make energy-momentum conservation in PYTHIA more precise
   pythia_in->readString("Check:epTolErr = 1e-6");
   pythia_in->readString("Check:epTolWarn = 1e-8");
 }
@@ -146,10 +145,9 @@ int StringProcess::append_final_state(const FourVector &uString,
           "StringProcess::append_final_state warning :"
           " particle is not meson or baryon.");
     }
-    FourVector mom(pythia_hadron_->event[ipyth].e(),
-                   pythia_hadron_->event[ipyth].px(),
-                   pythia_hadron_->event[ipyth].py(),
-                   pythia_hadron_->event[ipyth].pz());
+    FourVector mom(
+        pythia_hadron_->event[ipyth].e(), pythia_hadron_->event[ipyth].px(),
+        pythia_hadron_->event[ipyth].py(), pythia_hadron_->event[ipyth].pz());
     double pparallel = mom.threevec() * evecLong;
     double y = 0.5 * std::log((mom.x0() + pparallel) / (mom.x0() - pparallel));
     fragments.push_back({mom, pparallel, y, 0.0, pdg, false});
@@ -227,9 +225,13 @@ int StringProcess::append_final_state(const FourVector &uString,
     fragment_position = fragment_position.LorentzBoost(-vstring);
     t_prod = fragment_position.x0();
 
+    /* create new particle with specific PDG id
+     * and assign momentum. */
     ParticleData new_particle(ParticleType::find(fragments[i].pdg));
     new_particle.set_4momentum(fragments[i].momentum);
 
+    /* additional suppression factor to take
+     * the quantum coherence effect into account. */
     constexpr double suppression_factor = 0.7;
     new_particle.set_cross_section_scaling_factor(
         fragments[i].is_leading ? suppression_factor * fragments[i].xtotfac
@@ -252,9 +254,8 @@ void StringProcess::init(const ParticleList &incoming, double tcoll,
   plab_[0] = incoming[0].momentum();
   plab_[1] = incoming[1].momentum();
 
+  // compute sqrts and velocity of the center of mass.
   sqrtsAB_ = (plab_[0] + plab_[1]).abs();
-  /* Transverse momentum transferred to strings,
-     parametrization to fit the experimental data */
   ucomAB_ = (plab_[0] + plab_[1]) / sqrtsAB_;
   vcomAB_ = ucomAB_.velocity();
 
@@ -268,11 +269,9 @@ void StringProcess::init(const ParticleList &incoming, double tcoll,
   gamma_factor_com_ = gamma;
 }
 
-/**
- * single diffractive
- * channel = 1 : A + B -> A + X
- * channel = 2 : A + B -> X + B
- */
+/* single diffractive
+ * is_AB_to_AX = true  : A + B -> A + X
+ * is_AB_to_AX = false : A + B -> X + B */
 bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   NpartFinal_ = 0;
   NpartString_[0] = 0;
@@ -300,18 +299,19 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   QTrx = Random::normal(0., sigma_qperp_ / sqrt2_);
   QTry = Random::normal(0., sigma_qperp_ / sqrt2_);
   QTrn = std::sqrt(QTrx * QTrx + QTry * QTry);
-  // sample the string mass and evaluate the three-momenta of hadron and
-  // string.
+  /* sample the string mass and
+   * evaluate the three-momenta of hadron and string. */
   massX = Random::power(-1.0, mstrMin, mstrMax);
   pabscomHX_sqr = pCM_sqr(sqrtsAB_, massH, massX);
-  // magnitude of the three momentum must be larger than the transverse
-  // momentum.
+  /* magnitude of the three momentum must be larger
+   * than the transverse momentum. */
   const bool foundPabsX = pabscomHX_sqr > QTrn * QTrn;
 
   if (!foundPabsX) {
     return false;
   }
   double sign_direction = is_AB_to_AX ? 1. : -1.;
+  // determine three momentum of the final state hadron
   const ThreeVector cm_momentum =
       sign_direction *
       (evecBasisAB_[0] * std::sqrt(pabscomHX_sqr - QTrn * QTrn) +
@@ -379,7 +379,7 @@ bool StringProcess::make_final_state_2strings(
   return false;
 }
 
-/** double-diffractive : A + B -> X + X */
+// double-diffractive : A + B -> X + X
 bool StringProcess::next_DDiff() {
   NpartFinal_ = 0;
   NpartString_[0] = 0;
@@ -438,7 +438,7 @@ bool StringProcess::next_DDiff() {
   return success;
 }
 
-/** soft non-diffractive */
+// soft non-diffractive
 bool StringProcess::next_NDiffSoft() {
   NpartFinal_ = 0;
   NpartString_[0] = 0;
@@ -522,7 +522,7 @@ bool StringProcess::next_NDiffSoft() {
   return success;
 }
 
-/** baryon-antibaryon annihilation */
+// baryon-antibaryon annihilation
 bool StringProcess::next_BBbarAnn() {
   const std::array<FourVector, 2> ustrcom = {FourVector(1., 0., 0., 0.),
                                              FourVector(1., 0., 0., 0.)};
@@ -532,6 +532,7 @@ bool StringProcess::next_BBbarAnn() {
   NpartString_[1] = 0;
   final_state_.clear();
 
+  // check if the initial state is baryon-antibaryon pair.
   PdgCode baryon = PDGcodes_[0], antibaryon = PDGcodes_[1];
   if (baryon.baryon_number() == -1) {
     std::swap(baryon, antibaryon);
@@ -632,6 +633,8 @@ void StringProcess::make_orthonormal_basis() {
     double ex, ey, et;
     double theta, phi;
 
+    /* evecBasisAB_[0] is set to be longitudinal direction
+     * which is parallel to the collision axis. */
     evecBasisAB_[0] = pcom_[0].threevec() / pabscomAB;
 
     theta = std::acos(evecBasisAB_[0].x3());
@@ -645,6 +648,8 @@ void StringProcess::make_orthonormal_basis() {
       phi = -std::acos(ex / et);
     }
 
+    /* The transverse plane is spanned
+     * by evecBasisAB_[1] and evecBasisAB_[2]. */
     evecBasisAB_[1].set_x1(cos(theta) * cos(phi));
     evecBasisAB_[1].set_x2(cos(theta) * sin(phi));
     evecBasisAB_[1].set_x3(-sin(theta));
@@ -653,6 +658,7 @@ void StringProcess::make_orthonormal_basis() {
     evecBasisAB_[2].set_x2(cos(phi));
     evecBasisAB_[2].set_x3(0.);
   } else {
+    // if pcom_[0].threevec() is very close to the z axis
     if (pcom_[0].x3() > 0.) {
       evecBasisAB_[1] = ThreeVector(1., 0., 0.);
       evecBasisAB_[2] = ThreeVector(0., 1., 0.);
@@ -741,8 +747,8 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
   if (Random::uniform_int(0, 1) == 0) {
     /* in the case where we flip the string ends,
      * we need to flip the longitudinal unit vector itself
-     * since it is set to be direction of diquark (anti-quark) or anti-diquark.
-     */
+     * since it is set to be direction of diquark (anti-quark)
+     * or anti-diquark. */
     evecLong = -evecLong;
   }
   ThreeVector direction = sign_direction * evecLong;

@@ -25,7 +25,7 @@ namespace smash {
  * recommendations where  the compound assignment operators is used as a
  * base for their non-compound counterparts. This means that the
  * operator + is implemented in terms of +=. The operator+ returns
- * a copy of it's result. + and friends are non-members, while
+ * a copy of its result. + and friends are non-members, while
  * the compound assignment counterparts, changing the left
  * argument, are a member of the FourVector class.
  *
@@ -47,111 +47,224 @@ class FourVector {
   /// default constructor nulls the fourvector components
   FourVector() : x_({0., 0., 0., 0.}) {}
 
-  /// copy constructor
+  /**
+   * copy constructor
+   *
+   * \param[in] y0 The time component to be copied
+   * \param[in] y1 The x component to be copied
+   * \param[in] y2 The y component to be copied
+   * \param[in] y3 the z component to be copied
+   */
   FourVector(double y0, double y1, double y2, double y3)
       : x_({y0, y1, y2, y3}) {}
 
-  /// construct from time-like component and a ThreeVector.
+  /**
+   * construct from time-like component and a ThreeVector.
+   *
+   * \param[in] y0 The time component to be used
+   * \param[in] vec A ThreeVector (x,y,z) to be used
+   */
   FourVector(double y0, ThreeVector vec)
       : x_({y0, vec.x1(), vec.x2(), vec.x3()}) {}
 
-  /// access the component at offset \p i.
+  /**
+   * access the component at offset \p i.
+   * This operator results in the same as using the x0()...x3() functions
+   *
+   * \param[in] i the index of the component to access (has to be 0,1,2 or 3)
+   * \return the component at index i
+   */
   double &operator[](std::size_t i) { return x_[i]; }
-  /// const overload of the above.
+  /// const overload of the [] operator
   double operator[](std::size_t i) const { return x_[i]; }
 
-  /// retrieve time-like component
+  /// \return the time-like component
   double inline x0() const;
-  /// set time-like component
+  /// \param[in] t set time-like component
   void inline set_x0(double t);
-  /// retrieve first space-like component
+  /// \return the first space-like component
   double inline x1() const;
-  /// set first space-like component
+  /// \param[in] x set first space-like component
   void inline set_x1(double x);
-  /// retrieve second space-like component
+  /// \return the second space-like component
   double inline x2() const;
-  /// set second space-like component
+  /// \param[in] y set second space-like component
   void inline set_x2(double y);
-  /// set third space-like component
+  /// \return the third space-like component
   double inline x3() const;
-  /// set third space-like component
+  /// \param[in] z set third space-like component
   void inline set_x3(double z);
-  /// get the three-vector (spatial components)
+  /// \return the space-like three-vector (x,y,z components)
   ThreeVector inline threevec() const;
+
   /**
    * Get the velocity (3-vector divided by zero component).
    * Should only be used with momentum 4-vectors (not with space-time ones).
+   *
+   * \return the ThreeVector velocity
    */
   ThreeVector inline velocity() const;
-  /** calculate the scalar product with another four-vector
+
+  /**
+   * calculate the scalar product with another four-vector
    *
+   * \param[in] a the FourVector to dot product with *this
    * \return \f$x^\mu a_\mu\f$
    */
   double inline Dot(const FourVector &a) const;
-  /** calculate the square of the vector (which is a scalar)
+
+  /**
+   * calculate the square of the vector (which is a scalar)
    *
    * \return \f$x^\mu x_\mu\f$
    */
   double inline sqr() const;
-  /** calculate the lorentz invariant absolute value
+
+  /**
+   * calculate the lorentz invariant absolute value
    *
    * \return \f$\sqrt{x^\mu x_\mu}\f$
    *
    * Note that this will fail for space-like vectors.
    */
   double inline abs() const;
-  /** calculate the square of the spatial three-vector
+
+  /**
+   * calculate the square of the spatial three-vector
    *
    * \return \f$\vec x \cdot \vec x\f$
-   *
    */
   double inline sqr3() const;
-  /** calculate the absolute value of the spatial three-vector
+
+  /**
+   * calculate the absolute value of the spatial three-vector
    *
    * \return \f$\sqrt{\vec x \cdot \vec x}\f$
    */
   double inline abs3() const;
+
   /** Returns the FourVector boosted with velocity v.
    *
    * The current FourVector is not changed.
    *
    * \param v (\f$\vec{v}\f$) is a ThreeVector representing the
    * boost velocity
+   *
+   * Algorithmic
+   * -----------
+   *
+   * (Notation: \f$\vec{a}\f$ is a Three-Vector, \f$a^\mu\f$ is a Four-Vector.)
+   *
+   * The gamma factor is \f$\gamma = 1/\sqrt{1-\vec{v}^2}\f$.
+   *
+   * The time-like component of a Lorentz-boosted FourVector \f$x^\mu =
+   * (x_0, x_1, x_2, x_3) = (x_0, \vec{r})\f$ with velocity \f$\vec v\f$
+   * is
+   *
+   * \f{eqnarray*}{x^\prime_0 = \gamma \cdot (x_0 - \vec{r}\cdot\vec{v}),\f}
+   *
+   * and the space-like components i = 1, 2, 3 are:
+   * \f{eqnarray*}{
+   * x^\prime_i &=& x_i + v_i \cdot (\frac{\gamma - 1}{\vec{v}^2} \cdot
+   * \vec{r}\cdot\vec{v} - \gamma \cdot x_0)\\
+   *            &=& x_i + v_i \cdot (\frac{\gamma^2}{\gamma + 1} \cdot
+   * \vec{r}\cdot\vec{v} - \gamma \cdot x_0)\\
+   *            &=& x_i - v_i \cdot \frac{\gamma}{\gamma + 1} \cdot (\gamma(x_0
+   * -
+   * \vec{r}\cdot\vec{v}) + x_0 )\\
+   *            &=& x_i - v_i \cdot \frac{\gamma}{\gamma + 1} \cdot (x^\prime_0
+   * + x_0) \f}
+   *
+   * Note: This function is equivalent to -velocity Boost from ROOT
    */
   FourVector LorentzBoost(const ThreeVector &v) const;
 
-  /// checks component-wise equality (accuracy \f$10^{-12}\f$)
+  /**
+   * Check if all four vector components are almost equal
+   * (accuracy \f$10^{-4}\f$).
+   *
+   * \param[in] a The FourVector to compare to
+   * \return Whether *this and a are almost equal
+   */
   bool operator==(const FourVector &a) const;
-  /// checks inequality (logical complement to
-  /// FourVector::operator==(const FourVector&) const)
+
+  /**
+   * checks inequality (logical complement to
+   * FourVector::operator==(const FourVector&) const)
+   *
+   * \param[in] a The FourVector to compare to
+   * \return Whether *this and a are not almost equal
+   */
   bool inline operator!=(const FourVector &a) const;
-  /// checks if \f$x^\mu > a^\mu\f$ for all \f$\mu\f$
+
+  /**
+   * checks if \f$x^\mu > a^\mu\f$ for all \f$\mu\f$
+   * (all four vector components are below comparison vector)
+   *
+   * \param[in] a The FourVector to compare to
+   * \return Whether all components of *this are strictly below the
+   *         corresponding components of a
+   */
   bool inline operator<(const FourVector &a) const;
-  /// checks if \f$x^\mu > a^\mu\f$ for all \f$\mu\f$
+
+  /**
+   * checks if \f$x^\mu > a^\mu\f$ for all \f$\mu\f$
+   * (all four vector components are above comparison vector)
+   *
+   * \param[in] a The FourVector to compare to
+   * \return Whether all components of *this are strictly above the
+   *         corresponding components of a
+   */
   bool inline operator>(const FourVector &a) const;
-  /// logical complement to FourVector::operator>(const FourVector&) const
+
+  /**
+   * logical complement to FourVector::operator>(const FourVector&) const
+   *
+   * \param[in] a The FourVector to compare to
+   * \return Whether all components of *this are below or equal to the
+   *         corresponding components of a
+   */
   bool inline operator<=(const FourVector &a) const;
-  /// logical complement to FourVector::operator<(const FourVector&) const
+
+  /**
+   * logical complement to FourVector::operator<(const FourVector&) const
+   *
+   * \param[in] a The FourVector to compare to
+   * \return Whether all components of *this are above or equal to the
+   *         corresponding components of a
+   */
   bool inline operator>=(const FourVector &a) const;
-  /// checks if \f$x^\mu < a\f$ for all \f$\mu\f$.
-  bool inline operator==(const double &a) const;
-  /// logical complement of FourVector::operator==(const double&) const
-  bool inline operator!=(const double &a) const;
-  /// checks if \f$x^\mu < a\f$ for all \f$\mu\f$.
-  bool inline operator<(const double &a) const;
-  /// checks if \f$x^\mu > a\f$ for all \f$\mu\f$.
-  bool inline operator>(const double &a) const;
-  /// logical complement to FourVector::operator>(const double&) const
-  bool inline operator<=(const double &a) const;
-  /// logical complement to FourVector::operator<(const double&) const
-  bool inline operator>=(const double &a) const;
-  /// adds \f$a_\mu: x_\mu^\prime = x_\mu + a_\mu\f$
+
+  /**
+   * adds \f$a_\mu: x_\mu^\prime = x_\mu + a_\mu\f$
+   *
+   * \param[in] a The FourVector to add
+   * \return FourVector that consists of the added components of *this and a
+   */
   FourVector inline operator+=(const FourVector &a);
-  /// subtracts \f$a_\mu: x_\mu^\prime = x_\mu - a_\mu\f$
+
+  /**
+   * subtracts \f$a_\mu: x_\mu^\prime = x_\mu - a_\mu\f$
+   *
+   * \param[in] a The FourVector to subtract
+   * \return FourVector consisting of the components of a subtracted from *this
+   */
   FourVector inline operator-=(const FourVector &a);
-  /// multiplies by \f$a: x_\mu^\prime = a \cdot x_\mu\f$
+
+  /**
+   * multiplies by \f$a: x_\mu^\prime = a \cdot x_\mu\f$
+   *
+   * \param[in] a The value with which to multiply
+   * \return FourVector where each component of *this has been multiplied by a
+   */
   FourVector inline operator*=(const double &a);
-  /// divides by \f$a: x_\mu^\prime = \frac{1}{a} \cdot x_\mu\f$
+
+  /**
+   * divides by \f$a: x_\mu^\prime = \frac{1}{a} \cdot x_\mu\f$
+   *
+   * \param[in] a The value by which to divide
+   * \return FourVector where each component of *this has been divided by a
+   */
   FourVector inline operator/=(const double &a);
 
   /// iterates over the components
@@ -160,21 +273,19 @@ class FourVector {
   using const_iterator = std::array<double, 4>::const_iterator;
 
   /**
-   * Returns an iterator starting at the 0th component.
+   * \return An iterator starting at the 0th component.
    *
    * The iterator implements the RandomIterator concept. Thus, you can simply
    * write `begin() + 1` to get an iterator that points to the 1st component.
    */
   iterator begin() { return x_.begin(); }
 
-  /**
-   * Returns an iterator pointing after the 4th component.
-   */
+  /// \return An iterator pointing after the 4th component.
   iterator end() { return x_.end(); }
 
-  /// const overload of the above
+  /// \return A const_iterator pointing at the 0th component.
   const_iterator begin() const { return x_.begin(); }
-  /// const overload of the above
+  /// \return A const_iterator pointing after the 4th component.
   const_iterator end() const { return x_.end(); }
 
   /// \see begin
@@ -186,6 +297,8 @@ class FourVector {
   /// internal storage of this vector's components
   std::array<double, 4> x_;
 };
+
+// Definitions of previous inline functions
 
 double inline FourVector::x0(void) const { return x_[0]; }
 
@@ -214,7 +327,6 @@ bool inline FourVector::operator!=(const FourVector &a) const {
   return !(*this == a);
 }
 
-// all four vector components are below comparison vector
 bool inline FourVector::operator<(const FourVector &a) const {
   return (x_[0] < a.x_[0]) && (x_[1] < a.x_[1]) && (x_[2] < a.x_[2]) &&
          (x_[3] < a.x_[3]);
@@ -235,38 +347,6 @@ bool inline FourVector::operator>=(const FourVector &a) const {
   return !(*this < a);
 }
 
-// all vector components are equal to that number
-bool inline FourVector::operator==(const double &a) const {
-  return std::abs(x_[0] - a) < 1e-12 && std::abs(x_[1] - a) < 1e-12 &&
-         std::abs(x_[2] - a) < 1e-12 && std::abs(x_[3] - a) < 1e-12;
-}
-
-// use == operator for the inverse !=
-bool inline FourVector::operator!=(const double &a) const {
-  return !(*this == a);
-}
-
-// all vector components are below that number
-bool inline FourVector::operator<(const double &a) const {
-  return (x_[0] < a) && (x_[1] < a) && (x_[2] < a) && (x_[3] < a);
-}
-
-// all vector components are above that number
-bool inline FourVector::operator>(const double &a) const {
-  return (x_[0] > a) && (x_[1] > a) && (x_[2] > a) && (x_[3] > a);
-}
-
-// all vector components are less equal that number
-bool inline FourVector::operator<=(const double &a) const {
-  return !(*this > a);
-}
-
-// all vector components are greater equal that number
-bool inline FourVector::operator>=(const double &a) const {
-  return !(*this < a);
-}
-
-// += assignement addition
 FourVector inline FourVector::operator+=(const FourVector &a) {
   this->x_[0] += a.x_[0];
   this->x_[1] += a.x_[1];
@@ -276,8 +356,11 @@ FourVector inline FourVector::operator+=(const FourVector &a) {
 }
 
 // addition +operator uses +=
-/** add two FourVectors
+/**
+ * add two FourVectors
  *
+ * \param[in] a The first FourVector to add
+ * \param[in] b The second FourVector to add
  * \return \f$x^\mu = a^\mu + b^\mu\f$
  */
 inline FourVector operator+(FourVector a, const FourVector &b) {
@@ -285,7 +368,6 @@ inline FourVector operator+(FourVector a, const FourVector &b) {
   return a;
 }
 
-// -= assignement subtraction
 FourVector inline FourVector::operator-=(const FourVector &a) {
   this->x_[0] -= a.x_[0];
   this->x_[1] -= a.x_[1];
@@ -294,8 +376,12 @@ FourVector inline FourVector::operator-=(const FourVector &a) {
   return *this;
 }
 
-/** subtract two FourVectors
+// subtraction -operator uses -=
+/**
+ * subtract two FourVectors
  *
+ * \param[in] a The FourVector from which to subtract
+ * \param[in] b The FourVector to subtract
  * \return \f$x^\mu = a^\mu - b^\mu\f$
  */
 inline FourVector operator-(FourVector a, const FourVector &b) {
@@ -303,7 +389,6 @@ inline FourVector operator-(FourVector a, const FourVector &b) {
   return a;
 }
 
-// assignement factor multiplication
 FourVector inline FourVector::operator*=(const double &a) {
   this->x_[0] *= a;
   this->x_[1] *= a;
@@ -313,8 +398,11 @@ FourVector inline FourVector::operator*=(const double &a) {
 }
 
 // factor multiplication uses *=
-/** multiply a vector with a scalar
+/**
+ * multiply a vector with a scalar
  *
+ * \param[in] a The FourVector to multiply
+ * \param[in] b The value with which to multiply
  * \return \f$x^\mu = b \cdot a^\mu\f$
  */
 inline FourVector operator*(FourVector a, double b) {
@@ -326,7 +414,6 @@ inline FourVector operator*(double b, FourVector a) {
   return a;
 }
 
-// assignement factor division
 FourVector inline FourVector::operator/=(const double &a) {
   const double a_inv = 1.0 / a;
   this->x_[0] *= a_inv;
@@ -337,8 +424,11 @@ FourVector inline FourVector::operator/=(const double &a) {
 }
 
 // factor division uses /=
-/** divide a vector by a scalar
+/**
+ * divide a vector by a scalar
  *
+ * \param[in] a The FourVector to divide
+ * \param[in] b The value with which to divide
  * \return \f$x^\mu = \frac{1}{b} \cdot a^\mu\f$
  */
 inline FourVector operator/(FourVector a, const double &b) {
@@ -362,6 +452,9 @@ double inline FourVector::abs3() const { return this->threevec().abs(); }
 
 /**\ingroup logging
  * Writes the four components of the vector to the output stream.
+ *
+ * \param[in] os The ostream into which to output
+ * \param[in] vec The FourVector to write into os
  */
 std::ostream &operator<<(std::ostream &os, const FourVector &vec);
 

@@ -12,7 +12,7 @@
 
 #include "include/clock.h"
 #include "include/config.h"
-#include "include/filedeleter.h"
+#include "include/file.h"
 #include "include/forwarddeclarations.h"
 #include "include/particles.h"
 #include "include/vtkoutput.h"
@@ -20,7 +20,9 @@
 namespace smash {
 
 VtkOutput::VtkOutput(const bf::path &path, const std::string &name)
-    : OutputInterface(name), base_path_(std::move(path)) {}
+    : OutputInterface(name),
+      base_path_(std::move(path)),
+      is_thermodynamics_output_(name == "Thermodynamics") {}
 
 VtkOutput::~VtkOutput() {}
 
@@ -57,8 +59,10 @@ void VtkOutput::at_eventstart(const Particles &particles,
   vtk_fluidization_counter_ = 0;
 
   current_event_ = event_number;
-  write(particles);
-  vtk_output_counter_++;
+  if (!is_thermodynamics_output_) {
+    write(particles);
+    vtk_output_counter_++;
+  }
 }
 
 void VtkOutput::at_eventend(const Particles & /*particles*/,
@@ -67,8 +71,10 @@ void VtkOutput::at_eventend(const Particles & /*particles*/,
 
 void VtkOutput::at_intermediate_time(const Particles &particles, const Clock &,
                                      const DensityParameters &) {
-  write(particles);
-  vtk_output_counter_++;
+  if (!is_thermodynamics_output_) {
+    write(particles);
+    vtk_output_counter_++;
+  }
 }
 
 void VtkOutput::write(const Particles &particles) {
@@ -199,18 +205,20 @@ std::string VtkOutput::make_varname(const ThermodynamicQuantity tq,
 void VtkOutput::thermodynamics_output(
     const ThermodynamicQuantity tq, const DensityType dens_type,
     RectangularLattice<DensityOnLattice> &lattice) {
+  if (!is_thermodynamics_output_) {
+    return;
+  }
   std::ofstream file;
   const std::string varname = make_varname(tq, dens_type);
   file.open(make_filename(varname, vtk_density_output_counter_), std::ios::out);
   write_vtk_header(file, lattice, varname);
   write_vtk_scalar(file, lattice, varname,
                    [&](DensityOnLattice &node) { return node.density(); });
-  file.close();
   vtk_density_output_counter_++;
 }
 
 /*!\Userguide
- * \page output_vtk_lattice_ Thermodynamics vtk output
+ * \page output_vtk_lattice_ Thermodynamics VTK output
  * Additionally to density, energy-momentum tensor \f$T^{\mu\nu} \f$,
  * energy-momentum tensor in Landau rest frame \f$T^{\mu\nu}_L \f$ and
  * velocity of Landau rest frame \f$v_L\f$ on the lattice can be printed out
@@ -221,12 +229,16 @@ void VtkOutput::thermodynamics_output(
  * be opened
  * directly with ParaView (http://paraview.org).
  *
- * For configuring the output see \subpage input_vtk_lattice_.
+ * For configuring the output see \ref output_content_specific_options_
+ * "content-specific output options".
  */
 
 void VtkOutput::thermodynamics_output(
     const ThermodynamicQuantity tq, const DensityType dens_type,
     RectangularLattice<EnergyMomentumTensor> &Tmn_lattice) {
+  if (!is_thermodynamics_output_) {
+    return;
+  }
   std::ofstream file;
   const std::string varname = make_varname(tq, dens_type);
 
@@ -267,10 +279,12 @@ void VtkOutput::thermodynamics_output(
                        return -u.threevec();
                      });
   }
-  file.close();
 }
 
 void VtkOutput::thermodynamics_output(const GrandCanThermalizer &gct) {
+  if (!is_thermodynamics_output_) {
+    return;
+  }
   std::ofstream file;
   file.open(make_filename("fluidization_td", vtk_fluidization_counter_++),
             std::ios::out);

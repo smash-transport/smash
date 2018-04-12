@@ -25,16 +25,16 @@ FourVector EnergyMomentumTensor::landau_frame_4velocity() const {
   const auto &log = logger<LogArea::Tmn>();
   /* We want to solve the generalized eigenvalue problem
      T^{\mu \nu} h_{nu} = \lambda g^{\mu \nu} h_{nu}, or in the other way
-     T_{\mu}^{\nu} h_{nu} = \lambda h_{mu}. Eigenvector
+     T_{\mu}^{\nu} h_{nu} = \lambda h_{mu}. The eigenvector
      corresponding to the largest (and the only positive) eigenvalue is
      proportional to 4-velocity of the Landau frame.
      Denote T^{\mu}_{\nu} as A and g^{\mu \nu} as B.
      A is symmetric and positive semi-definite. B is symmetric.
      A x = \lambda B x. I have to solve generalized eigenvalue
-     problem, because A can be not positively defined (e.g. if
+     problem, because A can be not positively definite (e.g. if
      energy-momentum tensor is computed for particles with momenta lying
-     in one plane). For positively defined A a more efficient solution
-     is possible, but I (oliiny) do not consider it until it becomes
+     in one plane). For positively definite A a more efficient solution
+     is possible, but I (oliiny) do not consider it, until it becomes
      important for SMASH performance.
      */
   Matrix4d A;
@@ -51,9 +51,11 @@ FourVector EnergyMomentumTensor::landau_frame_4velocity() const {
 
 // Eigen values should be strictly real and non-negative.
 
-// Here and further I assume that eigenvalues are given in
-// descending order. TODO(oliiny): check Eigen documentation
-// to make sure this is always true.
+/* Here and further I assume that eigenvalues are given in
+ * descending order.
+ *
+ * \todo(oliiny): check Eigen documentation
+ * to make sure this is always true.*/
 #ifndef NDEBUG
   Vector4d eig_im = es.eigenvalues().imag();
   Vector4d eig_re = es.eigenvalues().real();

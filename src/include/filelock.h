@@ -31,20 +31,25 @@ class FileLock {
   /// Construct a file lock guard with a lock file at the given path.
   ///
   /// This will not create a file, use acquire() for that.
-  explicit FileLock(bf::path path);
+  ///
+  /// \param[in] path Path to file.
+  /// \return Constructed object.
+  explicit FileLock(const bf::path& path);
   /// Delete the lock file when the guard is destroyed.
   ~FileLock();
   /// Try to acquire the file lock.
   ///
-  /// Returns false if the file already exists.
-  /// Returns true and creates the file otherwise.
+  /// \return Returns false if the file already exists.
+  ///         Returns true and creates the file otherwise.
   ///
   /// Will throw an std::runtime_error if called another time after returning
   /// true or if the lockfile cannot be closed.
   bool acquire();
 
  private:
+  /// Path to the file lock.
   bf::path path_;
+  /// Whether the lock has been acquired.
   bool acquired_;
 };
 

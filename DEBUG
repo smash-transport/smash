@@ -65,9 +65,17 @@ You can look at the \c gmon.out information with gprof.
 Code formatting
 ---------------
 
-You can run clang-format to automatically format all code in SMASH correctly using the following command:
+You can run clang-format to automatically format all code in SMASH correctly
+using the following command:
 
     for i in src/*.cc src/include/*.h src/tests/*.cc src/tests/*.h; do clang-format -i $i; done;
+
+If clang-format does changes that don't look good, you can disable it locally
+using comments like this:
+
+    // clang-format off
+    ...
+    // clang-format on
 
 \subsection profiling_perf Perf
 
