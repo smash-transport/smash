@@ -40,8 +40,8 @@
 #endif
 
 #ifdef HACK_OSTREAM_FOR_TTY
-#include <ext/stdio_sync_filebuf.h>
 #include <unistd.h>
+#include <ext/stdio_sync_filebuf.h>
 #endif
 
 #include "assert.h"
@@ -703,9 +703,8 @@ class _UnitTest_Compare {  // {{{1
     }
   }
 
-  template <typename T,
-            typename = decltype(std::declval<std::ostream &>()
-                                << std::declval<T>())>
+  template <typename T, typename = decltype(std::declval<std::ostream &>()
+                                            << std::declval<T>())>
   static std::true_type has_ostream_operator_impl(int);
   template <typename T>
   static std::false_type has_ostream_operator_impl(...);

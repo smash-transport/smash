@@ -61,7 +61,6 @@ TEST(list_from_oscar2013_output) {
 
     VERIFY(bf::exists(outputfilepath_unfinished));
 
-
     std::cout << "Initial particles:" << std::endl;
     for (const auto &p : particles) {
       std::cout << p << std::endl;

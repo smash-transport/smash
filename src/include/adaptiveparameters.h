@@ -4,6 +4,7 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
+
 #ifndef SRC_INCLUDE_ADAPTIVEPARAMETERS_H_
 #define SRC_INCLUDE_ADAPTIVEPARAMETERS_H_
 
@@ -20,9 +21,13 @@ namespace smash {
  * estimate scattering rate. If the rate is too high for a given timestep then
  * the timestep is decreased and vice vesa.
  */
-
 class AdaptiveParameters {
  public:
+  /**
+   * Construct parameters for adaptive timesteps.
+   * \param[in] conf Configuration build from config.yaml.
+   * \param[in] dt Time step [fm]
+   */
   explicit AdaptiveParameters(Configuration conf, double dt)
       : smoothing_factor_(conf.take({"Smoothing_Factor"}, 0.1)),
         target_missed_actions_(conf.take({"Target_Missed_Actions"}, 0.01)),
@@ -30,17 +35,18 @@ class AdaptiveParameters {
     initialize(dt);
   }
 
-  void initialize(double dt) {
-    // Calculate the rate that would lead to the given time step size.
-    rate_ = target_missed_actions_ / dt;
-  }
+  /**
+   * Calculate the rate that would lead to the given time step size.
+   * \param[in] dt time step size [fm]
+   */
+  void initialize(double dt) { rate_ = target_missed_actions_ / dt; }
 
   /**
    * Updates timestep if necessary.
    *
-   * \param actions The actions from the current time step.
-   * \param N_particles The number of particles in the system.
-   * \param[in,out] dt timestep, which can be updated
+   * \param[in] actions The actions from the current time step.
+   * \param[in] N_particles The number of particles in the system.
+   * \param[out] dt timestep, which can be updated [dt]
    * \return if timestep was changed or not.
    */
   bool update_timestep(const Actions &actions, size_t N_particles, double *dt) {
@@ -73,6 +79,7 @@ class AdaptiveParameters {
     return changed_timestep;
   }
 
+  /// Get estimate of current scattering rate
   double rate() const { return rate_; }
 
   /**
@@ -105,6 +112,11 @@ class AdaptiveParameters {
   double rate_;
 };
 
+/**
+ * Structured output for the adaptive parameters.
+ * \param[in] o Outputstream
+ * \param[in] a The set of adaptive parameters.
+ */
 inline std::ostream &operator<<(std::ostream &o, const AdaptiveParameters &a) {
   return o << "Adaptive time step:\n"
            << "  Smoothing factor: " << a.smoothing_factor_ << "\n"

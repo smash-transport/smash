@@ -16,8 +16,15 @@ namespace smash {
 
 /**
  * Calculate Clebsch-Gordan coefficient
+ * \f$(-1)^{j_a - j_b + m_c} \sqrt{(2 j_c + 1)} \cdot [Wigner 3J symbol] \f$
+ * \param[in] j_a spin of first particle
+ * \param[in] j_b spin of second particle
+ * \param[in] j_c spin of resonance
+ * \param[in] m_a isospin of first particle
+ * \param[in] m_b isospin of second particle
+ * \param[in] m_c isospin of resonance
+ * \return Clebsch-Gordan coefficient for coupling of particles a, b and c
  *
- * \f$(-1)^{j_a - j_b + m_c} \sqrt(2 j_c + 1) \cdot [Wigner 3J symbol] \f$
  * Note that the calculation assumes that the spin/isospin values (j/m)
  * have been multiplied by two (in order to be integer).
  */
@@ -27,6 +34,10 @@ double clebsch_gordan(const int j_a, const int j_b, const int j_c,
 /**
  * Calculate the squared isospin Clebsch-Gordan coefficient for two particles
  * p_a and p_b coupling to a resonance Res.
+ * \param[in] p_a Information on spin/isospin of particle a
+ * \param[in] p_b Information on spin/isospin of particle b
+ * \param[in] Res Information on spin/isospin of resonance
+ * \return Clebsch-Gordan squared for 2->1 reaction
  */
 inline double isospin_clebsch_gordan_sqr_2to1(const ParticleType &p_a,
                                               const ParticleType &p_b,
@@ -40,6 +51,11 @@ inline double isospin_clebsch_gordan_sqr_2to1(const ParticleType &p_a,
 /**
  * Calculate the squared isospin Clebsch-Gordan coefficient for three particles
  * p_a, p_b and p_c coupling to a resonance Res.
+ * \param[in] p_a Information on spin/isospin of particle a
+ * \param[in] p_b Information on spin/isospin of particle b
+ * \param[in] p_c Information on spin/isospin of particle c
+ * \param[in] Res Information on spin/isospin of resonance
+ * \return Clebsch-Gordan squared for 3->1 reaction
  */
 double isospin_clebsch_gordan_sqr_3to1(const ParticleType &p_a,
                                        const ParticleType &p_b,
@@ -51,48 +67,64 @@ double isospin_clebsch_gordan_sqr_3to1(const ParticleType &p_a,
  * 2-to-2 reaction A + B -> C + D. If a total isospin value I is given
  * (doubled in order to be integer), then only contributions with that total
  * isospin will be counted.
+ * \param[in] p_a Information on spin/isospin of particle a
+ * \param[in] p_b Information on spin/isospin of particle b
+ * \param[in] p_c Information on spin/isospin of particle c
+ * \param[in] p_d Information on spin/isospin of particle d
+ * \param[in] I total isospin of the reaction
+ * \return Clebsch-Gordan squared for 2->2 reaction
  */
-double isospin_clebsch_gordan_sqr_2to2(const ParticleType &t_a,
-                                       const ParticleType &t_b,
-                                       const ParticleType &t_c,
-                                       const ParticleType &t_d,
+double isospin_clebsch_gordan_sqr_2to2(const ParticleType &p_a,
+                                       const ParticleType &p_b,
+                                       const ParticleType &p_c,
+                                       const ParticleType &p_d,
                                        const int I = -1);
 
+/// Range of total isospin for reaction of particle a with particle b.
 class I_tot_range {
  private:
+  /// Value of minimum total isospin
   int I_min_;
+  /// Value of maximum total isospin
   int I_max_;
 
  public:
-  /** Get the allowed range of total isospin for a collision A + B. Returns
-   * maximum and minimum of allowed values. */
-  I_tot_range(const ParticleType &t_a, const ParticleType &t_b) {
+  /**
+   * Get the allowed range of total isospin for a collision a + b. Returns
+   * maximum and minimum of allowed values.
+   */
+  I_tot_range(const ParticleType &p_a, const ParticleType &p_b) {
     // Compute total isospin range with given particles.
-    const int I_z_abs = std::abs(t_a.isospin3() + t_b.isospin3());
-    I_max_ = t_a.isospin() + t_b.isospin();
-    I_min_ = std::max(std::abs(t_a.isospin() - t_b.isospin()), I_z_abs);
+    const int I_z_abs = std::abs(p_a.isospin3() + p_b.isospin3());
+    I_max_ = p_a.isospin() + p_b.isospin();
+    I_min_ = std::max(std::abs(p_a.isospin() - p_b.isospin()), I_z_abs);
   }
 
-  /** Get the allowed range of total isospin for a collision A + B <-> C + D.
-   * Returns maximum and minimum of allowed values. */
-  I_tot_range(const ParticleType &t_a, const ParticleType &t_b,
-              const ParticleType &t_c, const ParticleType &t_d) {
+  /**
+   * Get the allowed range of total isospin for a collision a + b <-> c + d.
+   * Returns maximum and minimum of allowed values or empty range, if reaction
+   * is forbidden due to isospin.
+   */
+  I_tot_range(const ParticleType &p_a, const ParticleType &p_b,
+              const ParticleType &p_c, const ParticleType &p_d) {
     // Compute total isospin range with given initial and final particles.
-    const int I_z = t_a.isospin3() + t_b.isospin3();
-    if (I_z != t_c.isospin3() + t_d.isospin3()) {
-      // This reaction is forbidden by isospin conservation.
-      // Set impossible values to make sure an empty range is returned.
+    const int I_z = p_a.isospin3() + p_b.isospin3();
+    if (I_z != p_c.isospin3() + p_d.isospin3()) {
+      /* This reaction is forbidden by isospin conservation.
+       * Set impossible values to make sure an empty range is returned. */
       I_min_ = 1;
       I_max_ = 0;
       return;
     }
     I_max_ =
-        std::min(t_a.isospin() + t_b.isospin(), t_c.isospin() + t_d.isospin());
-    I_min_ = std::max(std::abs(t_a.isospin() - t_b.isospin()),
-                      std::abs(t_c.isospin() - t_d.isospin()));
+        std::min(p_a.isospin() + p_b.isospin(), p_c.isospin() + p_d.isospin());
+    I_min_ = std::max(std::abs(p_a.isospin() - p_b.isospin()),
+                      std::abs(p_c.isospin() - p_d.isospin()));
     I_min_ = std::max(I_min_, std::abs(I_z));
   }
 
+  /// Iterator class for determination of total isospin
+  /// \todo (warnings) add detailed documentation on all parameters etc
   class iterator : public std::iterator<std::forward_iterator_tag, int> {
    private:
     int c_;

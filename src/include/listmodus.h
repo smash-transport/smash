@@ -71,7 +71,7 @@ class ListModus : public ModusDefault {
                      const ExperimentParameters &parameters);
 
   /**
-   * Generates initial state of the particles in the system according to list. 
+   * Generates initial state of the particles in the system according to list.
    *
    * \param[out] particles An empty list that gets filled up by this function
    * \param[in] parameters Unused, but necessary because of templated use of

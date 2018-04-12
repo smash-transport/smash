@@ -89,7 +89,7 @@ class Particles;
   **/
 class RootOutput : public OutputInterface {
  public:
-  RootOutput(const bf::path &path, const std::string& name,
+  RootOutput(const bf::path &path, const std::string &name,
              const OutputParameters &out_par);
   ~RootOutput();
 

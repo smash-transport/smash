@@ -36,13 +36,13 @@ namespace smash {
  * \page input_modi_sphere_ Sphere
  *
  * \key Radius (double, required): \n
- * Radius of the Sphere.
+ * Radius of the Sphere, in fm.
  *
  * \key Sphere_Temperature (double, required):\n
- * Temperature for the momentum sampling in the sphere (in GeV).
+ * Temperature to sample momenta in the sphere, in GeV.
  *
  * \key Start_Time (double, required):\n
- * Starting time of Sphere calculation.
+ * Starting time of sphere calculation.
  *
  * \key Init_Multiplicities (int int, required):\n
  * Initial multiplicities per particle species.
@@ -154,10 +154,10 @@ double SphereModus::initial_conditions(Particles *particles,
         momentum_radial = sample_momenta_IC_ES(T);
         break;
       case (SphereInitialCondition::IC_1M):
-        momentum_radial = sample_momenta_IC_1M(T, mass);
+        momentum_radial = sample_momenta_1M_IC(T, mass);
         break;
       case (SphereInitialCondition::IC_2M):
-        momentum_radial = sample_momenta_IC_2M(T, mass);
+        momentum_radial = sample_momenta_2M_IC(T, mass);
         break;
       case (SphereInitialCondition::IC_Massive):
         momentum_radial = sample_momenta_non_eq_mass(T, mass);

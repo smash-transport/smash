@@ -45,6 +45,7 @@ ParticleTypePtrList anti_nucs_list;
 ParticleTypePtrList deltas_list;
 ParticleTypePtrList anti_deltas_list;
 ParticleTypePtrList baryon_resonances_list;
+ParticleTypePtrList light_nuclei_list;
 }  // unnamed namespace
 
 const ParticleTypeList &ParticleType::list_all() {
@@ -79,6 +80,10 @@ ParticleTypePtrList &ParticleType::list_anti_Deltas() {
 
 ParticleTypePtrList &ParticleType::list_baryon_resonances() {
   return baryon_resonances_list;
+}
+
+ParticleTypePtrList &ParticleType::list_light_nuclei() {
+  return light_nuclei_list;
 }
 
 const ParticleTypePtr ParticleType::try_find(PdgCode pdgcode) {
@@ -294,6 +299,12 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
     }
     baryon_resonances_list.push_back(&type_resonance);
     baryon_resonances_list.push_back(type_resonance.get_antiparticle());
+  }
+
+  for (const ParticleType &type : ParticleType::list_all()) {
+    if (type.is_nucleus()) {
+      light_nuclei_list.push_back(&type);
+    }
   }
 } /*}}}*/
 
@@ -599,9 +610,8 @@ double ParticleType::sample_resonance_mass(const double mass_stable,
    * a heuristic knowledge is used that usually such mass exist that
    * spectral_function(m) > spectral_function_simple(m). */
   const double sf_ratio_max =
-      std::max(1.,
-               this->spectral_function(max_mass) /
-                   this->spectral_function_simple(max_mass));
+      std::max(1., this->spectral_function(max_mass) /
+                       this->spectral_function_simple(max_mass));
 
   double mass_res, val;
   // outer loop: repeat if maximum is too small

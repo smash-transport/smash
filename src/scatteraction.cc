@@ -419,10 +419,12 @@ std::pair<int, int> ScatterAction::find_leading(int nq1, int nq2,
   int i1, i2;
   for (i1 = 0;
        i1 <= end && !list[i1].pdgcode().contains_enough_valence_quarks(nq1);
-       i1++) { }
+       i1++) {
+  }
   for (i2 = end;
        i2 >= 0 && !list[i2].pdgcode().contains_enough_valence_quarks(nq2);
-       i2--) { }
+       i2--) {
+  }
   std::pair<int, int> indices(i1, i2);
   return indices;
 }
