@@ -275,18 +275,12 @@ bf::path ListModus::file_path_(const int file_id) {
 }
 
 std::string ListModus::next_event_() {
+  const auto &log = logger<LogArea::List>();
   constexpr char comment_token = '#';
 
   const bf::path fpath = file_path_(file_id_);
   bf::ifstream ifs{fpath};
   ifs.seekg(last_read_position_);
-
-  if (last_read_position_ == 0) {
-    // skip header (4 lines starting with #)
-    std::string tmp;
-    while (std::getline(ifs, tmp) && ifs.peek() == comment_token) {
-    }
-  }
 
   if (!file_has_events_(fpath, last_read_position_)) {
     // current file out of events. get next file and call this function
@@ -297,7 +291,8 @@ std::string ListModus::next_event_() {
     return next_event_();
   }
 
-  // read one event. events marked by line # event end i
+  // read one event. events marked by line # event end i in case of Oscar
+  // output. Assume one event per file for all other output formats
   std::string event_string;
   const std::string needle = "end";
   std::string line;
@@ -309,6 +304,10 @@ std::string ListModus::next_event_() {
     }
   }
 
+  if (!ifs.eof() && (ifs.fail() || ifs.bad())) {
+    log.fatal() << "Error while reading " << fpath.filename().native();
+    throw std::runtime_error("Error while reading external particle list");
+  }
   // save position for next event read
   last_read_position_ = ifs.tellg();
   ifs.close();
@@ -322,15 +321,20 @@ bool ListModus::file_has_events_(bf::path filepath,
   bf::ifstream ifs{filepath};
   std::string line;
 
-  ifs.seekg(last_position);
-  // skip over comment lines, assume that a max. of two consecutive comment lines can occur
-  int skipped_lines = 0;
-  while (std::getline(ifs, line) && line[0] != '#' && ++skipped_lines < 2)
-  {
+  // last event read read at end of file. we know this because errors are
+  // handled in next_event
+  if (last_position == -1) {
+    return false;
   }
-  // jump back. If comments where present line parser will ignore them anyway
   ifs.seekg(last_position);
-  
+  // skip over comment lines, assume that a max. of four consecutive comment
+  // lines can occur
+  int skipped_lines = 0;
+  const int max_comment_lines = 4;
+  while (std::getline(ifs, line) && line[0] != '#' &&
+         skipped_lines++ < max_comment_lines) {
+  }
+
   if (ifs.eof()) {
     return false;
   }
