@@ -323,9 +323,14 @@ bool ListModus::file_has_events_(bf::path filepath,
   std::string line;
 
   ifs.seekg(last_position);
-  // skip over comment lines
-  while (std::getline(ifs, line) && line[0] != '#')
-  {}
+  // skip over comment lines, assume that a max. of two consecutive comment lines can occur
+  int skipped_lines = 0;
+  while (std::getline(ifs, line) && line[0] != '#' && ++skipped_lines < 2)
+  {
+  }
+  // jump back. If comments where present line parser will ignore them anyway
+  ifs.seekg(last_position);
+  
   if (ifs.eof()) {
     return false;
   }
