@@ -153,9 +153,9 @@ class ParticleData {
 
   /// Return the absolute formation time of the particle
   double formation_time() const { return formation_time_; }
-  /** 
+  /**
    * Return the absolute time, where the cross section scaling factor slowly
-   * starts increasing from the given scaling factor to 1 
+   * starts increasing from the given scaling factor to 1
    */
   double begin_formation_time() const { return begin_formation_time_; }
   /// Set the absolute formation time
@@ -165,7 +165,7 @@ class ParticleData {
     begin_formation_time_ = form_time;
   }
   /**
-   * Set the time, when the cross section scaling factor begins, and finishes 
+   * Set the time, when the cross section scaling factor begins, and finishes
    * to increase from the given cross section scaling factor to 1
    *
    * The cross section will only grow slowly, if the option is used
@@ -239,8 +239,8 @@ class ParticleData {
       : id_(uid), index_(index), type_(&ptype) {}
 
   /// Return the cross section scaling factor at the time of collision
-   double current_xsec_scaling_factor(double time_until_collision,
-                                      double power) const;
+  double current_xsec_scaling_factor(double time_until_collision,
+                                     double power) const;
 
  private:
   friend class Particles;

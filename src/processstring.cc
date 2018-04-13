@@ -236,8 +236,8 @@ int StringProcess::append_final_state(const FourVector &uString,
     new_particle.set_cross_section_scaling_factor(
         fragments[i].is_leading ? suppression_factor * fragments[i].xtotfac
                                 : 0.);
-    new_particle.set_slow_formation_times(time_collision_,
-                                  time_collision_ + gamma_factor_com_ * t_prod);
+    new_particle.set_slow_formation_times(
+        time_collision_, time_collision_ + gamma_factor_com_ * t_prod);
     final_state_.push_back(new_particle);
   }
 

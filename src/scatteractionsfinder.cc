@@ -46,9 +46,9 @@ namespace smash {
  * \li \key Elastic_NN_Cutoff_Sqrts > 2.02 - Beyond the threshold energy of the
  * inelastic collision NN->NNpi, not suggested
  *
- * \key Strings (bool, optional, default = \key true for each setup except box): \n
- * \li \key true - String excitation is enabled\n
- * \li \key false - String excitation is disabled
+ * \key Strings (bool, optional, default = \key true for each setup except box):
+ * \n \li \key true - String excitation is enabled\n \li \key false - String
+ * excitation is disabled
  *
  * \key String_Formation_Time (double, optional, default = 1.0): \n
  * Parameter for formation time in string fragmentation, in fm/c.
@@ -105,8 +105,8 @@ ScatterActionsFinder::ScatterActionsFinder(
           {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.)),
       photons_(parameters.photons_switch),
       n_fractional_photons_(n_fractional_photons),
-      particle_formation_power_(config.take(
-                         {"Collision_Term", "Power_Particle_Formation"}, 0.)) {
+      particle_formation_power_(
+          config.take({"Collision_Term", "Power_Particle_Formation"}, 0.)) {
   if (is_constant_elastic_isotropic()) {
     const auto &log = logger<LogArea::FindScatter>();
     log.info("Constant elastic isotropic cross-section mode:", " using ",
@@ -191,9 +191,9 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData &data_a,
                                    static_cast<double>(testparticles_);
   // Take cross section scaling factors into account
   cross_section_criterion *= data_a.current_xsec_scaling_factor(
-                              time_until_collision, particle_formation_power_);
+      time_until_collision, particle_formation_power_);
   cross_section_criterion *= data_b.current_xsec_scaling_factor(
-                              time_until_collision, particle_formation_power_);
+      time_until_collision, particle_formation_power_);
 
   // distance criterion according to cross_section
   if (distance_squared >= cross_section_criterion) {
