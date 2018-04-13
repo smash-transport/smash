@@ -256,6 +256,11 @@ class ScatterActionsFinder : public ActionFinderInterface {
   /// Number of fractional photons
   /// \todo (not used) asignee: Anna Schaefer
   const bool n_fractional_photons_;
+  /**
+   * The cross section scaling factor increases with this power in time.
+   * A step function is used if this is not lager than 0.
+   */
+  const double particle_formation_power_;
 };
 
 }  // namespace smash

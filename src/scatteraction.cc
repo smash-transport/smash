@@ -347,11 +347,15 @@ void ScatterAction::inelastic_scattering() {
   const double t1 = incoming_particles_[1].formation_time();
 
   const size_t index_tmax = (t0 > t1) ? 0 : 1;
+  const double form_time_begin = 
+                incoming_particles_[index_tmax].begin_formation_time();
   const double sc =
       incoming_particles_[index_tmax].cross_section_scaling_factor();
   if (t0 > time_of_execution_ || t1 > time_of_execution_) {
-    outgoing_particles_[0].set_formation_time(std::max(t0, t1));
-    outgoing_particles_[1].set_formation_time(std::max(t0, t1));
+    outgoing_particles_[0].set_slow_formation_times(form_time_begin,
+                                                     std::max(t0, t1));
+    outgoing_particles_[1].set_slow_formation_times(form_time_begin,
+                                                    std::max(t0, t1));
     outgoing_particles_[0].set_cross_section_scaling_factor(sc);
     outgoing_particles_[1].set_cross_section_scaling_factor(sc);
   } else {
@@ -385,10 +389,13 @@ void ScatterAction::resonance_formation() {
   const double t1 = incoming_particles_[1].formation_time();
 
   const size_t index_tmax = (t0 > t1) ? 0 : 1;
+  const double begin_form_time = 
+                        incoming_particles_[index_tmax].begin_formation_time();
   const double sc =
       incoming_particles_[index_tmax].cross_section_scaling_factor();
   if (t0 > time_of_execution_ || t1 > time_of_execution_) {
-    outgoing_particles_[0].set_formation_time(std::max(t0, t1));
+    outgoing_particles_[0].set_slow_formation_times(begin_form_time,
+                                                    std::max(t0, t1));
     outgoing_particles_[0].set_cross_section_scaling_factor(sc);
   } else {
     outgoing_particles_[0].set_formation_time(time_of_execution_);
@@ -573,8 +580,8 @@ void ScatterAction::string_excitation_pythia() {
       // Set formation time: actual time of collision + time to form the
       // particle
       double gamma_factor = 1.0 / std::sqrt(1 - (v_calc).sqr());
-      data.set_formation_time(string_formation_time_ * gamma_factor +
-                              time_of_execution_);
+      data.set_slow_formation_times(time_of_execution_, string_formation_time_ 
+                                    * gamma_factor + time_of_execution_);
       outgoing_particles_.push_back(data);
     }
     /* If the incoming particles already were unformed, the formation
@@ -596,7 +603,8 @@ void ScatterAction::string_excitation_pythia() {
          * the current outgoing particle's formation time, then the latter
          * is overwritten by the former*/
         if (tform_in > tform_out) {
-          outgoing_particles_[i].set_formation_time(tform_in);
+          outgoing_particles_[i].set_slow_formation_times(time_of_execution_,
+                                                          tform_in);
         }
       }
     }
@@ -672,7 +680,8 @@ void ScatterAction::string_excitation_soft() {
          * the current outgoing particle's formation time, then the latter
          * is overwritten by the former*/
         if (tform_in > tform_out) {
-          outgoing_particles_[i].set_formation_time(tform_in);
+          outgoing_particles_[i].set_slow_formation_times(time_of_execution_,
+                                                          tform_in);
         }
       }
     }
