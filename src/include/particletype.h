@@ -166,6 +166,19 @@ class ParticleType {
   /// \return true if the particle is stable
   inline bool is_stable() const { return width_ < width_cutoff; }
 
+  /// Check if particle is a nucleus
+  inline bool is_nucleus() const { return pdgcode_.is_nucleus(); }
+
+  /// Check if particle is an (anti-)deuteron
+  inline bool is_deuteron() const {
+    return is_nucleus() && std::abs(pdgcode_.get_decimal()) == 1000010020;
+  }
+
+  /// Check if particle is an artificial d' resonance
+  inline bool is_dprime() const {
+    return is_nucleus() && std::abs(pdgcode_.get_decimal()) == 1000010021;
+  }
+
   /**
    * The minimum mass of the resonance that is kinematically allowed.
    *
@@ -367,6 +380,9 @@ class ParticleType {
    *         i.e. unstable baryons (not including antibaryons).
    */
   static ParticleTypePtrList &list_baryon_resonances();
+  /** Returns a list of all light nuclei from SMASH particle list.
+   *  Nucleons are not included into light nuclei by convention. */
+  static ParticleTypePtrList &list_light_nuclei();
 
   /**
    * Returns the ParticleTypePtr for the given \p pdgcode.

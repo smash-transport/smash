@@ -56,7 +56,8 @@ class ThermLatticeNode {
    * mub_ Net baryon chemical potential, mus_ Net strangeness chemical potential
    */
   ThermLatticeNode();
-  /** Add particle contribution to Tmu0, nb and ns
+  /**
+   *  Add particle contribution to Tmu0, nb and ns
    *  May look like unused at first glance, but it is actually used
    *  by update_general_lattice, where the node type of the lattice
    *  is templated.
@@ -72,7 +73,7 @@ class ThermLatticeNode {
    * has an ideal-fluid form. For more details and discussion see
    * \iref{Oliinychenko:2015lva}. The advantage of this rest frame
    * transformation is that it conserves energy and momentum, even
-   * although it neglects dissipative part of the energy-momentum tensor.
+   * though the dissipative part of the energy-momentum tensor is neglected.
    */
   void compute_rest_frame_quantities(HadronGasEos& eos);
   /**
@@ -465,12 +466,13 @@ class GrandCanThermalizer {
   ParticleList to_remove_;
   /// Newly generated particles by thermalizer
   ParticleList sampled_list_;
-  /** List of particle types from which equation of state is computed.
-   *  Most particles are included, but not all of them.
-   *  For example, photons and leptons are not included. Heavy hadrons, that
-   *  can originate from pythia, but cannot interact in SMASH are not included.
-   *  The latter are excluded to avoid violations of charm and bottomness
-   *  conservation in case HadronGasEoS is used for forced thermalization.
+  /**
+   * List of particle types from which equation of state is computed.
+   * Most particles are included, but not all of them.
+   * For example, photons and leptons are not included. Heavy hadrons, that
+   * can originate from Pythia, but do not interact in SMASH are not included.
+   * The latter are excluded to avoid violations of charm and bottomness
+   * conservation, when HadronGasEoS is used for forced thermalization.
    */
   const ParticleTypePtrList eos_typelist_;
   /// Number of different species to be sampled
