@@ -317,11 +317,11 @@ class StringProcess {
    * Determine string masses and directions in which strings are stretched
    * \param[in] quarks pdg ids of string ends
    * \param[in] pstr_com 4-momenta of strings in the C.o.m. frame
-   * \param[in] m_str masses of strings
-   * \param[in] evec_str are directions in which strings are stretched.
+   * \param[out] m_str masses of strings
+   * \param[out] evec_str are directions in which strings are stretched.
    * \return whether masses are above the threshold
    */
-  bool make_mass_evec_2strings(
+  bool set_mass_and_direction_2strings(
       const std::array<std::array<int, 2>, 2> &quarks,
       const std::array<FourVector, 2> &pstr_com,
       std::array<double, 2> &m_str,
@@ -331,7 +331,7 @@ class StringProcess {
    * \param[in] quarks pdg ids of string ends
    * \param[in] pstr_com 4-momenta of strings in the C.o.m. frame
    * \param[in] m_str masses of strings
-   * \param[in] evec_str are directions in which strings are stretched.
+   * \param[out] evec_str are directions in which strings are stretched.
    * \param[in] flip_string_ends is whether or not we randomly switch string ends.
    * \return whether fragmentations and final state creation was successful
    */
