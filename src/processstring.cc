@@ -351,7 +351,7 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   return true;
 }
 
-bool StringProcess::make_mass_evec_2strings(
+bool StringProcess::set_mass_and_direction_2strings(
     const std::array<std::array<int, 2>, 2> &quarks,
     const std::array<FourVector, 2> &pstr_com,
     std::array<double, 2> &m_str,
@@ -368,8 +368,8 @@ bool StringProcess::make_mass_evec_2strings(
     // string mass must be larger than threshold set by PYTHIA.
     if (m_str[i] > threshold) {
       found_mass[i] = true;
-      /* determine direction in which string i is stretched.
-       * this is set to be same with the collision axis
+      /* Determine direction in which string i is stretched.
+       * This is set to be same with the collision axis
        * in the center of mass frame.
        * Initial state partons inside incoming hadrons are
        * moving along the collision axis,
@@ -387,11 +387,7 @@ bool StringProcess::make_mass_evec_2strings(
     }
   }
 
-  if (!found_mass[0] || !found_mass[1]) {
-    return false;
-  } else {
-    return true;
-  }
+  return found_mass[0] && found_mass[1];
 }
 
 bool StringProcess::make_final_state_2strings(
@@ -462,8 +458,9 @@ bool StringProcess::next_DDiff() {
   pstr_com[1] =
       FourVector((PPosB_ - QPos + PNegB_ - QNeg) / sqrt2_, threeMomentum);
 
-  const bool found_masses = make_mass_evec_2strings(quarks, pstr_com, m_str,
-                                                    evec_str);
+  const bool found_masses = set_mass_and_direction_2strings(quarks,
+                                                            pstr_com, m_str,
+                                                            evec_str);
   if (!found_masses) {
     return false;
   }
@@ -537,8 +534,9 @@ bool StringProcess::next_NDiffSoft() {
   pstr_com[1] =
       FourVector((PPosB_ - dPPos + PNegB_ - dPNeg) / sqrt2_, threeMomentum);
 
-  const bool found_masses = make_mass_evec_2strings(quarks, pstr_com, m_str,
-                                                    evec_str);
+  const bool found_masses = set_mass_and_direction_2strings(quarks,
+                                                            pstr_com, m_str,
+                                                            evec_str);
   if (!found_masses) {
     return false;
   }

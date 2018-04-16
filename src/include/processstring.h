@@ -141,6 +141,8 @@ class StringProcess {
   Pythia8::SigmaTotal pythia_sigmatot_;
 
  public:
+  // clang-format off
+
   /**
    * Constructor, initializes pythia. Should only be called once.
    * \param[in] string_tension value of kappa_tension_string_ [GeV/fm]
@@ -203,6 +205,8 @@ class StringProcess {
   void common_setup_pythia(Pythia8::Pythia *pythia_in, double strange_supp,
                            double diquark_supp, double stringz_a,
                            double stringz_b, double string_sigma_T);
+
+  // clang-format on
 
   /**
    * Function to get the PYTHIA object for hard string routine
@@ -319,13 +323,13 @@ class StringProcess {
   void compute_incoming_lightcone_momenta();
   /**
    * Determine string masses and directions in which strings are stretched
-   * \param quarks pdg ids of string ends
-   * \param pstr_com 4-momenta of strings in the C.o.m. frame
-   * \param m_str masses of strings
-   * \param evec_str are directions in which strings are stretched.
+   * \param[in] quarks pdg ids of string ends
+   * \param[in] pstr_com 4-momenta of strings in the C.o.m. frame
+   * \param[out] m_str masses of strings
+   * \param[out] evec_str are directions in which strings are stretched.
    * \return whether masses are above the threshold
    */
-  bool make_mass_evec_2strings(
+  bool set_mass_and_direction_2strings(
       const std::array<std::array<int, 2>, 2> &quarks,
       const std::array<FourVector, 2> &pstr_com,
       std::array<double, 2> &m_str,
@@ -425,7 +429,7 @@ class StringProcess {
    * \param[in] q2 PDG code of quark 2
    * \return PDG code of diquark composed of q1 and q2
    */
-  int diquark_from_quarks(int q1, int q2);
+  static int diquark_from_quarks(int q1, int q2);
 
   /**
    * make a random selection to determine partonic contents at the string ends.
@@ -433,7 +437,7 @@ class StringProcess {
    * \param[out] idq1 is PDG id of quark or anti-diquark.
    * \param[out] idq2 is PDG id of anti-quark or diquark.
    */
-  void make_string_ends(const PdgCode &pdgcode_in, int &idq1, int &idq2);
+  static void make_string_ends(const PdgCode &pdgcode_in, int &idq1, int &idq2);
 
   /**
    * Easy setter of Pythia Vec4 from SMASH
@@ -441,18 +445,20 @@ class StringProcess {
    * \param[in] mom spatial three-vector
    * \return Pythia Vec4 from energy and ThreeVector
    */
-  Pythia8::Vec4 set_Vec4(double energy, const ThreeVector &mom) {
+  static Pythia8::Vec4 set_Vec4(double energy, const ThreeVector &mom) {
     return Pythia8::Vec4(mom.x1(), mom.x2(), mom.x3(), energy);
   }
 
+  // clang-format off
+
   /**
    * perform string fragmentation to determine species and momenta of hadrons
-   * by implementing PYTHIA 8.2 \iref{Andersson:1983ia,Sjostrand:2014zea}.
-   * \param[in] idq1 is PDG id of quark or anti-diquark (carrying color index).
-   * \param[in] idq2 is PDG id of diquark or anti-quark (carrying anti-color index).
-   * \param[in] mString is the string mass.
-   * \param[out] evecLong is unit 3-vector specifying the direction of diquark or
-   * anti-diquark.
+   * by implementing PYTHIA 8.2 \iref{Andersson:1983ia}, \iref{Sjostrand:2014zea}.
+   * \param[in] idq1 PDG id of quark or anti-diquark (carrying color index).
+   * \param[in] idq2 PDG id of diquark or anti-quark (carrying anti-color index).
+   * \param[in] mString the string mass.
+   * \param[out] evecLong unit 3-vector specifying the direction of diquark or
+   *                      anti-diquark.
    * \param[in] flip_string_ends is whether or not we randomly switch string ends.
    * \return number of hadrons fragmented out of string.
    */
@@ -484,6 +490,8 @@ class StringProcess {
    */
   static void assign_scaling_factor(int nquark, ParticleData& data,
                                     double suppression_factor);
+
+  // clang-format on
 };
 
 }  // namespace smash
