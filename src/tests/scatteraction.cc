@@ -11,7 +11,9 @@
 
 #include "setup.h"
 
+#include "../include/angles.h"
 #include "../include/scatteraction.h"
+#include "Pythia8/Pythia.h"
 
 using namespace smash;
 using smash::Test::Momentum;
@@ -317,6 +319,57 @@ TEST(update_incoming) {
   // update the action
   act.update_incoming(particles);
   COMPARE(act.incoming_particles()[0].position(), new_position);
+}
+
+TEST(string_diquark_from_quarks) {
+  // ud-diquark
+  int id1 = 1;
+  int id2 = 2;
+  int id_diquark = StringProcess::diquark_from_quarks(id1, id2);
+  VERIFY(id_diquark == 2101 || id_diquark == 2103);
+  // uu-diquark
+  id1 = 2;
+  id_diquark = StringProcess::diquark_from_quarks(id1, id2);
+  VERIFY(id_diquark == 2203);
+}
+
+TEST(string_make_string_ends) {
+  int id1, id2;
+  // decompose pion+ into u, dbar
+  PdgCode pdg_piplus = PdgCode(0x211);
+  StringProcess::make_string_ends(pdg_piplus, id1, id2);
+  VERIFY(id1 == 2 && id2 == -1);
+  // decompose pion- into d, ubar
+  PdgCode pdg_piminus = PdgCode(-0x211);
+  StringProcess::make_string_ends(pdg_piminus, id1, id2);
+  VERIFY(id1 == 1 && id2 == -2);
+  // decompose proton into u, ud-diquark or d, uu-diquark
+  PdgCode pdg_proton = PdgCode(0x2212);
+  StringProcess::make_string_ends(pdg_proton, id1, id2);
+  VERIFY((id1 == 1 && id2 == 2203) ||
+         (id1 == 2 && (id2 == 2101 || 2103)));
+  // decompose anti-proton ubar, ud-antidiquark or dbar, uu-antidiquark
+  PdgCode pdg_antip = PdgCode(-0x2212);
+  StringProcess::make_string_ends(pdg_antip, id1, id2);
+  VERIFY((id1 == -1 && id2 == -2203) ||
+         (id1 == -2 && (id2 == -2101 || -2103)));
+}
+
+TEST(string_set_Vec4) {
+  // make arbitrary lightlike 4-vector with random direction
+  Angles angle_random = Angles(0., 0.);
+  angle_random.distribute_isotropically();
+  const double energy = 10.;
+  const ThreeVector mom = energy * angle_random.threevec();
+  Pythia8::Vec4 vector = Pythia8::Vec4(0., 0., 0., 0.);
+  // set Pythia8::Vec4
+  vector = StringProcess::set_Vec4(energy, mom);
+  // check if Pythia8::Vec4 is same with 4-vector from energy and mom
+  const double energy_scale = 0.5 * (vector.e() + energy);
+  VERIFY(std::abs(vector.e() - energy) < really_small * energy_scale);
+  VERIFY(std::abs(vector.px() - mom.x1()) < really_small * energy_scale);
+  VERIFY(std::abs(vector.py() - mom.x2()) < really_small * energy_scale);
+  VERIFY(std::abs(vector.pz() - mom.x3()) < really_small * energy_scale);
 }
 
 TEST(string_scaling_factors) {
