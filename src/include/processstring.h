@@ -404,7 +404,7 @@ class StringProcess {
    * \param[in] q2 PDG code of quark 2
    * \return PDG code of diquark composed of q1 and q2
    */
-  int diquark_from_quarks(int q1, int q2);
+  static int diquark_from_quarks(int q1, int q2);
 
   /**
    * make a random selection to determine partonic contents at the string ends.
@@ -412,7 +412,7 @@ class StringProcess {
    * \param[out] idq1 is PDG id of quark or anti-diquark.
    * \param[out] idq2 is PDG id of anti-quark or diquark.
    */
-  void make_string_ends(const PdgCode &pdgcode_in, int &idq1, int &idq2);
+  static void make_string_ends(const PdgCode &pdgcode_in, int &idq1, int &idq2);
 
   /**
    * Easy setter of Pythia Vec4 from SMASH
@@ -420,7 +420,7 @@ class StringProcess {
    * \param[in] mom spatial three-vector
    * \return Pythia Vec4 from energy and ThreeVector
    */
-  Pythia8::Vec4 set_Vec4(double energy, const ThreeVector &mom) {
+  static Pythia8::Vec4 set_Vec4(double energy, const ThreeVector &mom) {
     return Pythia8::Vec4(mom.x1(), mom.x2(), mom.x3(), energy);
   }
 
