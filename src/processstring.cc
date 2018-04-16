@@ -109,6 +109,10 @@ void StringProcess::common_setup_pythia(Pythia8::Pythia *pythia_in,
       // set mass and width in PYTHIA
       pythia_in->particleData.m0(pdgid, mass_pole);
       pythia_in->particleData.mWidth(pdgid, width_pole);
+    } else if (pdgid == 310 || pdgid == 130) {
+      // set mass and width of Kaon-L and Kaon-S
+      pythia_in->particleData.m0(pdgid, kaon_mass);
+      pythia_in->particleData.mWidth(pdgid, 0.);
     }
   }
 
@@ -581,25 +585,28 @@ bool StringProcess::next_NDiffHard() {
   }
 
   ParticleList new_intermediate_particles;
+  ParticleList new_non_hadron_particles;
   for (int i = 0; i < event.size(); i++) {
     if (event[i].isFinal()) {
+      int pythia_id = event[i].id();
+      log.debug("PDG ID from Pythia:", pythia_id);
+      /* K_short and K_long need to be converted to K0
+       * since SMASH only knows K0 */
+      convert_KaonLS(pythia_id);
+      const std::string s = std::to_string(pythia_id);
+      PdgCode pythia_code(s);
+      ParticleData new_particle(ParticleType::find(pythia_code));
+      ThreeVector threeMomentum = evecBasisAB_[0] * event[i].pz() +
+                                  evecBasisAB_[1] * event[i].px() +
+                                  evecBasisAB_[2] * event[i].py();
+      FourVector momentum =
+          FourVector(event[i].e(), threeMomentum);
+      new_particle.set_4momentum(momentum);
+      log.debug("4-momentum from Pythia: ", momentum);
       if (event[i].isHadron()) {
-        int pythia_id = event[i].id();
-        log.debug("PDG ID from Pythia:", pythia_id);
-        /* K_short and K_long need to be converted to K0
-         * since SMASH only knows K0 */
-        convert_KaonLS(pythia_id);
-        const std::string s = std::to_string(pythia_id);
-        PdgCode pythia_code(s);
-        ParticleData new_particle(ParticleType::find(pythia_code));
-        ThreeVector threeMomentum = evecBasisAB_[0] * event[i].pz() +
-                                    evecBasisAB_[1] * event[i].px() +
-                                    evecBasisAB_[2] * event[i].py();
-        FourVector momentum =
-            FourVector(event[i].e(), threeMomentum);
-        new_particle.set_4momentum(momentum);
-        log.debug("4-momentum from Pythia: ", momentum);
         new_intermediate_particles.push_back(new_particle);
+      } else {
+        new_non_hadron_particles.push_back(new_particle);
       }
     }
   }
@@ -625,6 +632,12 @@ bool StringProcess::next_NDiffHard() {
     double gamma_factor = 1.0 / std::sqrt(1 - (v_calc).sqr());
     data.set_formation_time(time_formation_const_ * gamma_factor +
                             time_collision_);
+    final_state_.push_back(data);
+  }
+
+  for (ParticleData data : new_non_hadron_particles) {
+    data.set_cross_section_scaling_factor(1.);
+    data.set_formation_time(time_collision_);
     final_state_.push_back(data);
   }
 
