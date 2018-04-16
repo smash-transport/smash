@@ -351,8 +351,8 @@ TEST(string_make_string_ends) {
   // decompose anti-proton ubar, ud-antidiquark or dbar, uu-antidiquark
   PdgCode pdg_antip = PdgCode(-0x2212);
   StringProcess::make_string_ends(pdg_antip, id1, id2);
-  VERIFY((id1 == -1 && id2 == -2203) ||
-         (id1 == -2 && (id2 == -2101 || -2103)));
+  VERIFY((id2 == -1 && id1 == -2203) ||
+         (id2 == -2 && (id1 == -2101 || -2103)));
 }
 
 TEST(string_set_Vec4) {
