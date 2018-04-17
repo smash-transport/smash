@@ -126,7 +126,7 @@ class ScatterAction : public Action {
   /**
    * Todo(ryu): document better - it is not really UrQMD-based, isn't it?
    * Perform the UrQMD-based string excitation and decay
-   * \param is_soft_proc whether or not it is soft process */
+   * \param[in] is_soft_proc whether or not it is soft process */
   void string_excitation(bool is_soft_proc);
 
   /**

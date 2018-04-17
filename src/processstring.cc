@@ -30,6 +30,7 @@ StringProcess::StringProcess(double string_tension, double time_formation,
       pow_fquark_beta_(quark_beta),
       sigma_qperp_(sigma_perp),
       kappa_tension_string_(string_tension),
+      additional_xsec_supp_(0.7),
       time_formation_const_(time_formation),
       time_collision_(0.),
       gamma_factor_com_(1.) {
@@ -237,9 +238,8 @@ int StringProcess::append_final_state(const FourVector &uString,
 
     /* additional suppression factor to take
      * the quantum coherence effect into account. */
-    constexpr double suppression_factor = 0.7;
     new_particle.set_cross_section_scaling_factor(
-        fragments[i].is_leading ? suppression_factor * fragments[i].xtotfac
+        fragments[i].is_leading ? additional_xsec_supp_ * fragments[i].xtotfac
                                 : 0.);
     new_particle.set_formation_time(time_collision_ +
                                     gamma_factor_com_ * t_prod);
@@ -562,22 +562,22 @@ bool StringProcess::next_NDiffHard() {
   std::stringstream buffer1, buffer2, buffer3, buffer4;
   buffer1 << "Random:seed = " << Random::canonical();
   pythia_parton_->readString(buffer1.str());
-  /* set the incoming particles */
+  // set the incoming particles
   buffer2 << "Beams:idA = " << PDGcodes_[0];
   pythia_parton_->readString(buffer2.str());
   log.debug("First particle in string excitation: ", PDGcodes_[0]);
   buffer3 << "Beams:idB = " << PDGcodes_[1];
-  log.debug("Second particle in string excitation: ", PDGcodes_[1]);
   pythia_parton_->readString(buffer3.str());
+  log.debug("Second particle in string excitation: ", PDGcodes_[1]);
   buffer4 << "Beams:eCM = " << sqrtsAB_;
   pythia_parton_->readString(buffer4.str());
   log.debug("Pythia call with eCM = ", buffer4.str());
-  /* Initialize Pythia. */
+  // Initialize Pythia.
   const bool pythia_initialized = pythia_parton_->init();
   if (!pythia_initialized) {
     throw std::runtime_error("Pythia failed to initialize.");
   }
-  /* Short notation for Pythia event */
+  // Short notation for Pythia event
   Pythia8::Event &event = pythia_parton_->event;
   bool final_state_success = false;
   while (!final_state_success) {
@@ -596,6 +596,12 @@ bool StringProcess::next_NDiffHard() {
       const std::string s = std::to_string(pythia_id);
       PdgCode pythia_code(s);
       ParticleData new_particle(ParticleType::find(pythia_code));
+      /* evecBasisAB_[0] is a unit 3-vector in the collision axis,
+       * while evecBasisAB_[1] and evecBasisAB_[2] spans the transverse plane.
+       * Given that PYTHIA assumes z-direction to be the collision axis,
+       * pz from PYTHIA should be the momentum compoment in evecBasisAB_[0].
+       * px and py are respectively the momentum components in two
+       * transverse directions evecBasisAB_[1] and evecBasisAB_[2]. */
       ThreeVector threeMomentum = evecBasisAB_[0] * event[i].pz() +
                                   evecBasisAB_[1] * event[i].px() +
                                   evecBasisAB_[2] * event[i].py();
@@ -612,12 +618,11 @@ bool StringProcess::next_NDiffHard() {
   }
 
   /* Additional suppression factor to mimic coherence taken as 0.7
-     * from UrQMD (CTParam(59) */
-  const double suppression_factor = 0.7;
+   * from UrQMD (CTParam(59) */
   const int baryon_string =
       PDGcodes_[Random::uniform_int(0, 1)].baryon_number();
   assign_all_scaling_factors(baryon_string, new_intermediate_particles,
-                             evecBasisAB_[0], suppression_factor);
+                             evecBasisAB_[0], additional_xsec_supp_);
   for (ParticleData data : new_intermediate_particles) {
     log.debug("Particle momenta after sorting: ", data.momentum());
     /* The hadrons are not immediately formed, currently a formation time of
@@ -627,8 +632,8 @@ bool StringProcess::next_NDiffHard() {
     log.debug("The formation time is: ", time_formation_const_, "fm/c.");
     ThreeVector v_calc =
         (data.momentum().LorentzBoost(-1.0 * vcomAB_)).velocity();
-    // Set formation time: actual time of collision + time to form the
-    // particle
+    /* Set formation time: actual time of collision + time to form the
+     * particle */
     double gamma_factor = 1.0 / std::sqrt(1 - (v_calc).sqr());
     data.set_formation_time(time_formation_const_ * gamma_factor +
                             time_collision_);

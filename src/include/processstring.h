@@ -117,6 +117,11 @@ class StringProcess {
   double sigma_qperp_;
   /// string tension [GeV/fm]
   double kappa_tension_string_;
+  /**
+   * additional cross-section suppression factor
+   * to take coherence effect into account.
+   */
+  double additional_xsec_supp_;
   /// constant proper time in the case of constant formation time [fm]
   double time_formation_const_;
   /// time of collision in the computational frame [fm]
@@ -416,7 +421,7 @@ class StringProcess {
 
   /**
    * convert Kaon-L or Kaon-S into K0 or Anti-K0
-   * \param pythia_id is PDG id to be converted.
+   * \param[out] pythia_id is PDG id to be converted.
    */
   static void convert_KaonLS(int &pythia_id) {
     if (pythia_id == 310 || pythia_id == 130) {
