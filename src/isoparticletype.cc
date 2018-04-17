@@ -161,6 +161,19 @@ double IsoParticleType::get_integral_NR(double sqrts) {
   return XS_NR_tabulation_->get_value_linear(sqrts);
 }
 
+double IsoParticleType::get_integral_piR(double sqrts) {
+  if (XS_piR_tabulation_ == nullptr) {
+    // initialize tabulation
+    /* TODO(weil): Move this lazy init to a global initialization function,
+     * in order to avoid race conditions in multi-threading. */
+    ParticleTypePtr type_res = states_[0];
+    ParticleTypePtr pion = IsoParticleType::find("π").get_states()[0];
+    XS_piR_tabulation_ =
+        spectral_integral_semistable(integrate, *type_res, *pion, 2.0);
+  }
+  return XS_piR_tabulation_->get_value_linear(sqrts);
+}
+
 double IsoParticleType::get_integral_RK(double sqrts) {
   if (XS_RK_tabulation_ == nullptr) {
     // initialize tabulation
