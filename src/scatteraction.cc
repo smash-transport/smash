@@ -645,6 +645,10 @@ void ScatterAction::string_excitation_soft() {
           /* soft non-diffractive */
           success = string_process_->next_NDiffSoft();
           break;
+        case StringSoftType::BBbar:
+          /* soft BBbar 2 mesonic annihilation */
+          success = string_process_->next_BBbarAnn();
+          break;
         case StringSoftType::None:
           success = false;
       }

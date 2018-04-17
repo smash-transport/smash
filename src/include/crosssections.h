@@ -256,7 +256,7 @@ class cross_sections {
    * mix_scatter_type_window_width) to infinity. In between, the probability for
    * string fragmentation increases linearly from 0 to 1 as the c.m. energy.
    */
-  bool decide_string(bool strings_switch, const bool both_are_nucleons) const;
+  bool decide_string(bool strings_switch, bool treat_nnbar_with_strings) const;
 
   /** Determine the momenta of the incoming particles in the
    * center-of-mass system.

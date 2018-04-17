@@ -1586,90 +1586,106 @@ CollisionBranchList cross_sections::string_excitation(
 
   CollisionBranchList channel_list;
   if (sig_string_all > 0.) {
-    /* Total parametrized cross-section (I) and pythia-produced total
-     * cross-section (II) do not necessarily coincide. If I > II then
-     * non-diffractive cross-section is reinforced to get I == II.
-     * If I < II then partial cross-sections are drained one-by-one
-     * to reduce II until I == II:
-     * first non-diffractive, then double-diffractive, then
-     * single-diffractive AB->AX and AB->XB in equal proportion.
-     * The way it is done here is not unique. I (ryu) think that at high energy
-     * collision this is not an issue, but at sqrt_s < 10 GeV it may
-     * matter. */
     if (!string_process) {
       throw std::runtime_error("string_process should be initialized.");
     }
-    std::array<double, 3> xs =
+
+    /*
+     * The case for baryon/anti-baryon annihilation is treated separately,
+     * as in this case we use only one way to break up the particles, namely
+     * into 2 mesonic strings of equal mass after annihilating one quark-
+     * anti-quark pair. See StringProcess::next_BBbarAnn()
+     */
+    if (pdgid[0] + pdgid[1] == 0) {
+      /// \todo JB:not sure if there should be a hard string here as well
+      channel_list.push_back(make_unique<CollisionBranch>(
+                             sig_string_all, ProcessType::StringSoft));
+      string_process->set_subproc(StringSoftType::BBbar);
+    } else {
+      /* Total parametrized cross-section (I) and pythia-produced total
+       * cross-section (II) do not necessarily coincide. If I > II then
+       * non-diffractive cross-section is reinforced to get I == II.
+       * If I < II then partial cross-sections are drained one-by-one
+       * to reduce II until I == II:
+       * first non-diffractive, then double-diffractive, then
+       * single-diffractive AB->AX and AB->XB in equal proportion.
+       * The way it is done here is not unique. I (ryu) think that at high energy
+       * collision this is not an issue, but at sqrt_s < 10 GeV it may
+       * matter. */
+      std::array<double, 3> xs =
         string_process->cross_sections_diffractive(pdgid[0], pdgid[1], sqrt_s_);
-    double single_diffr_AX = xs[0], single_diffr_XB = xs[1],
-           double_diffr = xs[2];
-    double single_diffr = single_diffr_AX + single_diffr_XB;
-    double diffractive = single_diffr + double_diffr;
-    const double nondiffractive_all =
-        std::max(0., sig_string_all - diffractive);
-    diffractive = sig_string_all - nondiffractive_all;
-    double_diffr = std::max(0., diffractive - single_diffr);
-    const double a = (diffractive - double_diffr) / single_diffr;
-    single_diffr_AX *= a;
-    single_diffr_XB *= a;
-    assert(std::abs(single_diffr_AX + single_diffr_XB + double_diffr +
-                    nondiffractive_all - sig_string_all) < 1.e-6);
+      double single_diffr_AX = xs[0], single_diffr_XB = xs[1],
+             double_diffr = xs[2];
+      double single_diffr = single_diffr_AX + single_diffr_XB;
+      double diffractive = single_diffr + double_diffr;
+      const double nondiffractive_all =
+          std::max(0., sig_string_all - diffractive);
+      diffractive = sig_string_all - nondiffractive_all;
+      double_diffr = std::max(0., diffractive - single_diffr);
+      const double a = (diffractive - double_diffr) / single_diffr;
+      single_diffr_AX *= a;
+      single_diffr_XB *= a;
+      assert(std::abs(single_diffr_AX + single_diffr_XB + double_diffr +
+                      nondiffractive_all - sig_string_all) < 1.e-6);
 
-    /* Hard string process is added by hard cross section
-     * in conjunction with multipartion interaction picture
-     * \iref{Sjostrand:1987su}. */
-    const double hard_xsec = string_hard_cross_section();
-    const double nondiffractive_soft =
-        nondiffractive_all * std::exp(-hard_xsec / nondiffractive_all);
-    const double nondiffractive_hard = nondiffractive_all - nondiffractive_soft;
-    log.debug("String cross sections [mb] are");
-    log.debug("Single-diffractive AB->AX: ", single_diffr_AX);
-    log.debug("Single-diffractive AB->XB: ", single_diffr_XB);
-    log.debug("Double-diffractive AB->XX: ", double_diffr);
-    log.debug("Soft non-diffractive: ", nondiffractive_soft);
-    log.debug("Hard non-diffractive: ", nondiffractive_hard);
+      /* Hard string process is added by hard cross section
+       * in conjunction with multipartion interaction picture
+       * \iref{Sjostrand:1987su}. */
+      const double hard_xsec = string_hard_cross_section();
+      const double nondiffractive_soft =
+          nondiffractive_all * std::exp(-hard_xsec / nondiffractive_all);
+      const double nondiffractive_hard = nondiffractive_all
+                                       - nondiffractive_soft;
+      log.debug("String cross sections [mb] are");
+      log.debug("Single-diffractive AB->AX: ", single_diffr_AX);
+      log.debug("Single-diffractive AB->XB: ", single_diffr_XB);
+      log.debug("Double-diffractive AB->XX: ", double_diffr);
+      log.debug("Soft non-diffractive: ", nondiffractive_soft);
+      log.debug("Hard non-diffractive: ", nondiffractive_hard);
 
-    /* cross section of soft string excitation */
-    const double sig_string_soft = sig_string_all - nondiffractive_hard;
+      /* cross section of soft string excitation */
+      const double sig_string_soft = sig_string_all - nondiffractive_hard;
 
-    /* fill cross section arrays */
-    std::array<double, 5> string_sub_cross_sections;
-    std::array<double, 6> string_sub_cross_sections_sum;
-    string_sub_cross_sections[0] = single_diffr_AX;
-    string_sub_cross_sections[1] = single_diffr_XB;
-    string_sub_cross_sections[2] = double_diffr;
-    string_sub_cross_sections[3] = nondiffractive_soft;
-    string_sub_cross_sections[4] = nondiffractive_hard;
-    string_sub_cross_sections_sum[0] = 0.;
-    for (int i = 0; i < 5; i++) {
-      string_sub_cross_sections_sum[i + 1] =
-          string_sub_cross_sections_sum[i] + string_sub_cross_sections[i];
-    }
-
-    /* soft subprocess selection */
-    StringSoftType iproc = StringSoftType::None;
-    double r_xsec = string_sub_cross_sections_sum[4] * Random::uniform(0., 1.);
-    for (int i = 0; i < 4; i++) {
-      if ((r_xsec >= string_sub_cross_sections_sum[i]) &&
-          (r_xsec < string_sub_cross_sections_sum[i + 1])) {
-        iproc = static_cast<StringSoftType>(i);
-        break;
+      /* fill cross section arrays */
+      std::array<double, 5> string_sub_cross_sections;
+      std::array<double, 6> string_sub_cross_sections_sum;
+      string_sub_cross_sections[0] = single_diffr_AX;
+      string_sub_cross_sections[1] = single_diffr_XB;
+      string_sub_cross_sections[2] = double_diffr;
+      string_sub_cross_sections[3] = nondiffractive_soft;
+      string_sub_cross_sections[4] = nondiffractive_hard;
+      string_sub_cross_sections_sum[0] = 0.;
+      for (int i = 0; i < 5; i++) {
+        string_sub_cross_sections_sum[i + 1] =
+            string_sub_cross_sections_sum[i] + string_sub_cross_sections[i];
       }
-    }
-    if (iproc == StringSoftType::None) {
-      throw std::runtime_error("soft string subprocess is not specified.");
-    }
 
-    string_process->set_subproc(iproc);
+      /* soft subprocess selection */
+      StringSoftType iproc = StringSoftType::None;
+      double r_xsec = string_sub_cross_sections_sum[4]
+                    * Random::uniform(0., 1.);
+      for (int i = 0; i < 4; i++) {
+        if ((r_xsec >= string_sub_cross_sections_sum[i]) &&
+            (r_xsec < string_sub_cross_sections_sum[i + 1])) {
+          iproc = static_cast<StringSoftType>(i);
+          break;
+        }
+      }
+      if (iproc == StringSoftType::None) {
+        throw std::runtime_error("soft string subprocess is not specified.");
+      }
 
-    /* fill the list of process channels */
-    if (sig_string_soft > 0.) {
-      channel_list.push_back(make_unique<CollisionBranch>(
-          sig_string_soft, ProcessType::StringSoft));
-    }
-    if (nondiffractive_hard > 0.) {
-      channel_list.push_back(make_unique<CollisionBranch>(
-          nondiffractive_hard, ProcessType::StringHard));
+      string_process->set_subproc(iproc);
+
+      /* fill the list of process channels */
+      if (sig_string_soft > 0.) {
+        channel_list.push_back(make_unique<CollisionBranch>(
+            sig_string_soft, ProcessType::StringSoft));
+      }
+      if (nondiffractive_hard > 0.) {
+        channel_list.push_back(make_unique<CollisionBranch>(
+            nondiffractive_hard, ProcessType::StringHard));
+      }
     }
   }
   return channel_list;
@@ -2001,21 +2017,30 @@ CollisionBranchList cross_sections::find_nn_xsection_from_type(
 }
 
 bool cross_sections::decide_string(bool strings_switch,
-                                   const bool both_are_nucleons) const {
+                                   bool treat_nnbar_with_strings) const {
   // Determine the energy region of the mixed scattering type for two types of
   // scattering.
   const ParticleType& t1 = incoming_particles_[0].type();
   const ParticleType& t2 = incoming_particles_[1].type();
   bool include_pythia = false;
+  // Whether the scattering is through string fragmentaion
+  bool is_pythia = false;
   double mix_scatter_type_energy;
   double mix_scatter_type_window_width;
-  if (both_are_nucleons) {
+  if (t1.is_nucleon() && t2.is_nucleon() &&
+      t1.antiparticle_sign() == t2.antiparticle_sign()) {
     // The energy region of the mixed scattering type for nucleon-nucleon
     // collision is 4.0 - 5.0 GeV.
     mix_scatter_type_energy = 4.5;
     mix_scatter_type_window_width = 0.5;
     // nucleon-nucleon collisions are included in pythia.
     include_pythia = true;
+  /// \todo JB:figure out whether is_baryon() is true also for anti-baryons
+  } else if (treat_nnbar_with_strings &&
+             t1.is_baryon() && t2.is_baryon() &&
+             t1.antiparticle_sign() != t2.antiparticle_sign()) {
+      // NNbar only goes through strings, so there is no "window" considerations
+      is_pythia = true;
   } else if ((t1.pdgcode().is_pion() && t2.is_nucleon()) ||
              (t1.is_nucleon() && t2.pdgcode().is_pion())) {
     // The energy region of the mixed scattering type for pion-nucleon collision
@@ -2029,7 +2054,6 @@ bool cross_sections::decide_string(bool strings_switch,
   // is included in pythia.
   const bool enable_pythia = strings_switch && include_pythia;
   // Whether the scattering is through string fragmentaion
-  bool is_pythia = false;
   if (enable_pythia) {
     if (sqrt_s_ > mix_scatter_type_energy + mix_scatter_type_window_width) {
       // scatterings at high energies are through string fragmentation
