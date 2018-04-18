@@ -538,8 +538,50 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * \key Allowed_Deviation (double, optional, default = 2.5) \n
    * Limit by how much the target can be exceeded before the time step is
    * aborted.
+   **/
+
+  /*!\Userguide
+   * \page input_general_
+   *
+   * \n
+   * Example: Configuring General Properties \n
+   * --------------
+   * The following example provides a possibility for the \key General
+   * configuration.
+   *
+   *\verbatim
+   General:
+       Modus: Collider
+       Delta_Time: 0.1
+       Testparticles: 1
+       Gaussian_Sigma: 1.0
+       Gauss_Cutoff_In_Sigma: 3.0
+       End_Time: 100.0
+       Randomseed: -1
+       Nevents: 20
+       Use_Grid: True
+       Time_Step_Mode: Fixed
+   \endverbatim
+   * For the use of adaptive timesteps, change the \key Time_Step_Mode and
+   * include the corresponding additional parameters:
+   *\verbatim
+       Time_Step_Mode: Adaptive
+       Adaptive_Time_Step:
+           Smoothing_Factor:       0.1
+           Target_Missed_Actions:  0.01
+           Allowed_Deviation:      2.5
+   \endverbatim
+   *
+   * In the case of an expanding sphere setup, change the \key Modus and provide
+   * further information about the expansion.
+   *\verbatim
+       Modus: Sphere
+       MetricType: MasslessFRW
+       Expansion_Rate: 0.1
+   \endverbatim
    *
    **/
+
   if (time_step_mode_ == TimeStepMode::Adaptive) {
     adaptive_parameters_ = make_unique<AdaptiveParameters>(
         config["General"]["Adaptive_Time_Step"], delta_time_startup_);
