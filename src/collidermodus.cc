@@ -147,6 +147,41 @@ namespace smash {
  * \li \key "off" - Switch Fermi motion off
  * \li \key "frozen" - Use "frozen" if you want to use Fermi motion
  * without potentials
+ ** \page input_modi_collider_ Collider
+ * * \n
+ * Example: Configuring a Heavy-ion Collision \n
+ * --------------
+ * The following example configures a Cu63-Cu63 collision at \f$\sqrt{s}=3.0\f$
+ * GeV with zero impact parameter and Fermi motion taken into consideration. The
+ * calculation frame is the dafult, center of velocity, and the nuclei are not
+ * deformed.
+ *
+ *\verbatim
+ Modi:
+     Collider:
+         Projectile:
+             Particles:    {2212: 29, 2112 :34}
+         Target:
+             Particles:    {2212: 29, 2112 :34}
+         Sqrtsnn: 3.0
+ \endverbatim
+ * For the use of adaptive timesteps, change the \key Time_Step_Mode and
+ * include the corresponding additional parameters:
+ *\verbatim
+     Time_Step_Mode: Adaptive
+     Adaptive_Time_Step:
+         Smoothing_Factor:       0.1
+         Target_Missed_Actions:  0.01
+         Allowed_Deviation:      2.5
+ \endverbatim
+ *
+ * In the case of an expanding sphere setup, change the \key Modus and provide
+ * further information about the expansion.
+ *\verbatim
+     Modus: Sphere
+     MetricType: MasslessFRW
+     Expansion_Rate: 0.1
+ \endverbatim
  *
  */
 
