@@ -76,7 +76,7 @@ class Tabulation {
   std::vector<double> values_;
 
   // lower bound for tabulation
-  const double x_min_
+  const double x_min_;
 
   // upper bound for tabulation
   const double x_max_;
