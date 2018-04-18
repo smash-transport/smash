@@ -77,6 +77,10 @@ class ListModus : public ModusDefault {
    * \param[in] parameters Unused, but necessary because of templated use of
    *                       this function
    * \return The starting time of the simulation
+   * \throw runtime_error if an input list file could not be found
+   * \throw LoadFailure if an input list file is not correctly formatted
+   * \throw invalid_argument if the listed charge of a particle does not
+   *                         correspond to its pdg charge
    */
   double initial_conditions(Particles *particles,
                             const ExperimentParameters &parameters);
