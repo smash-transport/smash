@@ -21,8 +21,9 @@
 
 namespace smash {
 
+/// Global pointer to the decay modes list
 std::vector<DecayModes> *DecayModes::all_decay_modes = nullptr;
-
+/// Global pointer to the decay types list
 std::vector<DecayTypePtr> *all_decay_types = nullptr;
 
 void DecayModes::add_mode(ParticleTypePtr mother, double ratio, int L,
@@ -120,12 +121,21 @@ void DecayModes::renormalize(std::string name) {
   }
 }
 
+/* unnamed namespace; its content is accessible only in this file.
+ * This is identically the same as have a static function, but if one
+ * wanted to specify a file-local type, this would be the way to go. */
 namespace {
+/**
+ * Passes back the address offset of a particletype in the list of all particles
+ *
+ * \param[in] pdg the pdg code of the sought particle type
+ * \return the address offset of this particle type
+ */
 inline std::size_t find_offset(PdgCode pdg) {
   return std::addressof(ParticleType::find(pdg)) -
          std::addressof(ParticleType::list_all()[0]);
 }
-}  // unnamed namespace
+} // unnamed namespace
 
 void DecayModes::load_decaymodes(const std::string &input) {
   const auto &log = logger<LogArea::DecayModes>();
@@ -227,7 +237,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
 
       std::string name;
       lineinput >> name;
-      bool multi = true;  // does the decay channel refer to whole multiplets?
+      bool multi = true;
       while (lineinput) {
         decay_particles.emplace_back(name);
         const auto isotype = IsoParticleType::try_find(name);
