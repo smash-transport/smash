@@ -16,7 +16,7 @@
 namespace smash {
 
 /**
- * Returns the squared Blatt-Weisskopf functions, which influence the mass
+ * \return the squared Blatt-Weisskopf functions, which influence the mass
  * dependence of the decay widths. See e.g. \iref{Effenberger:1999wlg}, page 28.
  *
  * \param p_ab Momentum of outgoing particles A and B in center-of-mass frame.
@@ -24,7 +24,7 @@ namespace smash {
  *
  * This is used as a standard form factor for all hadronic decays. Note that all
  * the Blatt-Weisskopf functions approach one for large p_ab and behave like
- * p_ab**L for small p_ab. They are increasing monotonically with p_ab.
+ * p_ab**L for small \p p_ab. They are increasing monotonically with \p p_ab.
  */
 inline double blatt_weisskopf_sqr(const double p_ab, const int L)
 #ifdef NDEBUG
@@ -88,10 +88,16 @@ inline double post_ff_sqr(double m, double M0, double srts0, double L) {
 
 // electromagnetic transition form factors for the dilepton dalitz decays
 
-/** Electromagnetic transition form factor for P → γ e⁺ e⁻, with a
+/**
+ * \return Electromagnetic transition form factor for P → γ e⁺ e⁻, with a
  * pseudoscalar meson P = π⁰,η,η', as a function of the dilepton mass.
+ *
  * For the π⁰ see \iref{Landsberg:1986fd}. For the η the Lambda parameter is
- * fitted to NA60 data, see \iref{Arnaldi:2009aa}. */
+ * fitted to NA60 data, see \iref{Arnaldi:2009aa}.
+ *
+ * \param pdg PDG code of the decaying meson.
+ * \param mass Invariant dilepton mass [GeV].
+ */
 inline double em_form_factor_ps(PdgCode pdg, double mass) {
   switch (pdg.code()) {
     case pdg::pi_z:
@@ -106,9 +112,15 @@ inline double em_form_factor_ps(PdgCode pdg, double mass) {
   }
 }
 
-/** Squared electromagnetic transition form factor for V → π⁰ e⁺ e⁻, with a
- * vector meson V = ω,φ, as a function of the dilepton mass.
- * For the ω see \iref{Bratkovskaya:1996qe}. */
+/**
+ * \return Squared electromagnetic transition form factor for V → π⁰ e⁺ e⁻, with
+ * a vector meson V = ω,φ, as a function of the dilepton mass.
+ *
+ * For the ω, see \iref{Bratkovskaya:1996qe}.
+ *
+ * \param pdg PDG code of the decaying meson.
+ * \param mass Invariant dilepton mass [GeV].
+ */
 inline double em_form_factor_sqr_vec(PdgCode pdg, double mass) {
   switch (pdg.code()) {
     case pdg::omega: {
@@ -125,9 +137,14 @@ inline double em_form_factor_sqr_vec(PdgCode pdg, double mass) {
   }
 }
 
-/** Electromagnetic transition form factor for Delta -> N e+ e-
- * as a function of the dilepton mass. Currently assumed to be constant,
- * normalized at the real-photon point. */
+/**
+ * \return Electromagnetic transition form factor for Delta -> N e+ e-
+ * as a function of the dilepton mass \p m.
+ *
+ * \param m Invariant dilepton mass [GeV].
+ *
+ * Currently assumed to be constant, normalized at the real-photon point.
+ */
 inline double form_factor_delta(double) { return 3.12; }
 
 }  // namespace smash
