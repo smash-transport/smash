@@ -133,7 +133,7 @@ static double sum_xs_of(CollisionBranchList& list) {
 
 cross_sections::cross_sections(const ParticleList& scat_particles,
                                const double sqrt_s)
-    : incoming_particles_(scat_particles), sqrt_s_(sqrt_s) {}
+    : incoming_particles_(incoming_particles), sqrt_s_(sqrt_s) {}
 
 CollisionBranchList cross_sections::generate_collision_list(
     double elastic_parameter, bool two_to_one_switch,
