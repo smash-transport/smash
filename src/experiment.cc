@@ -266,10 +266,6 @@ namespace {
  *         Smearing:        True
  * \endcode
  *
- * \page input_lattice_ Lattice
- * \key Potentials_Affect_Thresholds (bool, optional, default = false): \n
- * Include potential effects, since mean field potentials change the threshold
- * energies of the actions.
  */
 
 /** Gathers all general Experiment parameters
@@ -544,7 +540,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * \page input_general_
    *
    * \n
-   * Example: Configuring General Properties \n
+   * Example: Configuring General Properties
    * --------------
    * The following example provides a possibility for the \key General
    * configuration.
@@ -758,9 +754,30 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *      Use periodic continuation or not. With periodic continuation
    *      x + i * lx is equivalent to x, same for y, z.
    *
+   * \key Potentials_Affect_Thresholds (bool, optional, default = false): \n
+   * Include potential effects, since mean field potentials change the threshold
+   * energies of the actions.
+   *
    * For format of lattice output see \ref output_vtk_lattice_. To configure
    * output of the quantities on the lattice to vtk files see
    * \ref input_output_options_.
+   *
+   * \n
+   * Examples: Configuring the Lattice
+   * --------------
+   * The following example configures the lattice with the origin in (0,0,0),
+   * 20 cells of 10 fm size in each direction and with periodic boundary
+   * conditions. The potential effects on the thresholds are taken into
+   * consideration.
+   *
+   *\verbatim
+   Lattice:
+       Origin: [0.0, 0.0, 0.0]
+       Sizes: [10.0, 10.0, 10.0]
+       Cell_Number: [20, 20, 20]
+       Periodic: True
+       Potentials_Affect_Thresholds: True
+   \endverbatim
    */
 
   // Create lattices

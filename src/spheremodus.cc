@@ -74,11 +74,50 @@ namespace smash {
  * Strangeness chemical potential \f$ \mu_S \f$ only used if
  * Use_Thermal_Multiplicities is true to compute thermal densities \f$ n_i \f$.
  *
- * \key Initial_Condition (SphereInitialCondition, default =
- * SphereInitialCondition::ThermalMomenta) \n
+ * \key Initial_Condition (string, optional, default = "thermal momenta") \n
  * Initial distribution to use for momenta of particles. Mainly used in the
- * expanding universe scenario, options are "thermal momenta", "IC_ES", "IC_1M"
- * "IC_2M" and "IC_Massive"; see \iref{Bazow:2016oky} and \iref{Tindall:2016try}
+ * expanding universe scenario, options are:
+ * \li \key thermal momenta - equilibrium Boltzmann distribution
+ * \li \key IC_ES - off-equilibrium distribution
+ * \li \key IC_1M - off-equilibrium distribution
+ * \li \key IC_2M - off-equilibrium distribution
+ * \li \key IC_Massive - off-equilibrium distribution
+ * See \iref{Bazow:2016oky} and \iref{Tindall:2016try} for further explanations
+ * about the different distribution functions..
+ *
+ * \n
+ * Examples: Configuring a Sphere Simulation
+ * --------------
+ * The following example configures an expanding sphere with a radius of 5 fm
+ * at a temperature of 200 MeV. The particles are initialized
+ * with thermal momenta at a start time of 0 fm. The particle numbers at
+ * initialization are 100 \f$ \pi^+ \f$, 100 \f$ \pi^- \f$, 100 \f$ \pi^0 \f$,
+ * 50 protons and 50 neutrons.
+ *
+ *\verbatim
+ Modi:
+     Box:
+         Radius: 5.0
+         Sphere_Temperature: 0.2
+         Initial_Condition: "thermal momenta"
+         Start_Time: 0.0
+         Init_Multiplicities:
+             211:    100
+             111:    100
+             -211:   100
+             2212:   50
+             2112:   50
+ \endverbatim
+ *
+ * As for the box, it is also possible to initialize a thermal sphere based on
+ * thermal multiplicities. This is done via
+ *\verbatim
+ Modi:
+     Box:
+         Length: 10.0
+         Temperature: 0.2
+         Use_Thermal_Multiplicities: True
+ \endverbatim
  */
 
 SphereModus::SphereModus(Configuration modus_config,

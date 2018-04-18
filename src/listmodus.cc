@@ -41,19 +41,10 @@ namespace smash {
 /*!\Userguide
  * \page input_modi_list_ List
  *
- * <b> Purpose: Provides a modus for hydro afterburner calculations </b>
- *
- * Takes files with list of particles in
- * \ref oscar2013_format "Oscar 2013 format" as an input. These
- * particles are treated as a starting setup.
- *
- * To select the List modus:
- * \code
- * General:
- *     Modus:  List
- * \endcode
- *
- * ### Input options:
+ * The list modus provides a modus for hydro afterburner calculations. It takes
+ * files with a list of particles in \ref oscar2013_format "Oscar 2013 format"
+ * as an input. These particles are treated as a starting setup. The input
+ * parameters are:
  *
  * \key File_Directory (string, required):\n
  * Directory for the external particle lists
@@ -67,22 +58,38 @@ namespace smash {
  * \key Shift_Id (int, required):\n
  * Starting id for event_id_
  *
- * ### Example of configuration:
+ * \n
+ * <b> WARNING: Currently only one event per file is supported. Having more than
+ * one event per file will lead to undefined behavior. </b>
  *
- * \code
- *  List:
- *      # path of external particle list == File_Directory/File_Prefix{eventid}
- *      File_Directory: "particle_lists_in"
- *      File_Prefix: "event"
+ * \n
+ * Examples: Configuring an Afterburner Simulation
+ * --------------
+ * The following example sets up an afterburner simulation for a set of particle
+ * files located in "particle_lists_in". The files are named as
+ * "event{event_id}". SMASH is run once for each event file in the folder.
+ *\verbatim
+ Modi:
+     List:
+         File_Directory: "particle_lists_in"
+         File_Prefix: "event"
+
+ \endverbatim
  *
- *      # starting number of event_id in event-by-event simulation
- *      Shift_Id: 0
+ * It might for some reason be necessary to not run SMASH starting with the
+ * first event, it this case, the event_id can be shifted. Additionally, the
+ * start time can be manually adjusted. This can be done via:
+ *\verbatim
+ Modi:
+     List:
+         Shift_Id: 10
+         Start_Time: 0.0
+ \endverbatim
  *
- *      # start time of simulation
- *      Start_Time: 0.0
- * \endcode
- *
- * ### Example of input in particle_lists_in/event{id}
+ * \n
+ * Example: Structure of Input Particle File
+ * --------------
+ * The following example shows how an input file should be formatted:
  * <div class="fragment">
  * <div class="line"><span class="preprocessor">#!OSCAR2013 particle_lists
  * t x y z mass p0 px py pz pdg ID charge</span></div>
@@ -97,9 +104,6 @@ namespace smash {
  * (0.232871, 0.116953, -0.115553, 0.090303) GeV,\n
  * with mass = 0.138 GeV, pdg = 111, id = 0 and charge 0 will be initialized.
  *
- * ### WARNING:
- * Currently only one event per file is supported. Having more than one
- * event per file will lead to undefined behavior.
  */
 
 ListModus::ListModus(Configuration modus_config, const ExperimentParameters &)
