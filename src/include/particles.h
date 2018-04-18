@@ -40,7 +40,6 @@ class Particles {
   /// Cannot be copied
   Particles &operator=(const Particles &) = delete;
 
-  
   /// \return a copy of all particles as a std::vector<ParticleData>.
   ParticleList copy_to_vector() const {
     if (dirty_.empty()) {

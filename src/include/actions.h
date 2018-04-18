@@ -84,7 +84,7 @@ class Actions {
    *
    * The function makes sure that the action is inserted at the right place.
    *
-   * \param action[in] The action to insert.
+   * \param[in] action The action to insert.
    */
   void insert(ActionPtr&& action) {
     data_.push_back(std::move(action));
