@@ -23,7 +23,7 @@ namespace smash {
  * \tparam p The floating precision.
  * \tparam CharT Character type of the output stream.
  * \tparam Traits Traits of the output stream.
- * \param[inout] The output stream.
+ * \param[inout] s The output stream.
  * \return The output stream.
  */
 template <int w = 9, int p = w - 3, typename CharT, typename Traits>
