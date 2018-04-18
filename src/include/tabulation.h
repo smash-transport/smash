@@ -20,6 +20,7 @@
 
 namespace smash {
 
+/// The kind of extrapolation used by the tabulation.
 enum class Extrapolation {
   Zero = 0,
   Const = 1,
@@ -27,7 +28,7 @@ enum class Extrapolation {
 };
 
 /**
- * A class for storing a one-dimensional lookup table of doubleing-point values.
+ * A class for storing a one-dimensional lookup table of floating-point values.
  */
 class Tabulation {
  public:
