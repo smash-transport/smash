@@ -27,19 +27,31 @@ namespace smash {
  * The finder works with two body dilepton decays as well as with dalitz
  * dilepton decays.
  */
-
 class DecayActionsFinderDilepton {
  public:
-  /** Initialize the finder */
+  /// Initialize the finder
   DecayActionsFinderDilepton() {}
 
-  /// Check the whole particles list and print out possible dilepton decays
+  /**
+   * Check the whole particles list and print out possible dilepton decays.
+   *
+   * \param[in] search_list List of all particles.
+   * \param[in] output Pointer to the dilepton output.
+   * \param[in] dt Length of timestep [fm]
+   */
   void shine(const Particles& search_list, OutputInterface* output,
              double dt) const;
 
-  /** Shine dileptons from resonances at the end of the simulation. This is
-   * special, because the shining time is now until resonance decays and not
-   * some fixed dt interval.
+  /**
+   * Shine dileptons from resonances at the end of the simulation. This is
+   * special, because the shining time is now until the resonance would decay and
+   * not for some fixed dt interval.
+   *
+   * \param[in] search_list List of all particles.
+   * \param[in] output Pointer to the dilepton output.
+   * \param[in] only_res optional parameter that requests that only actions
+   *                     regarding resonances are considered (disregarding stable
+   *                     particles)
    */
   void shine_final(const Particles& search_list, OutputInterface* output,
                    bool only_res = false) const;
