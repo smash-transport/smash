@@ -79,10 +79,10 @@ class ThreeVector {
    * matrix for a rotation of phi about z, followed by the matrix for
    * a rotation theta about the rotated x axis. Last, psi is a rotation
    * about the rotated z axis.
-   * \param phi angle by which the first rotation is done about z axis.
-   * \param theta angle by which the second rotation is done
+   * \param[in] phi angle by which the first rotation is done about z axis.
+   * \param[in] theta angle by which the second rotation is done
    *        about the rotated x axis.
-   * \param psi angle by which the third rotation is done
+   * \param[in] psi angle by which the third rotation is done
    *        about the rotated z axis.
    *
    * Euler angles are used to make rotation of several (different) position
@@ -92,11 +92,20 @@ class ThreeVector {
    * angles for every position.
    */
   void inline rotate(double phi, double theta, double psi);
-  /// Rotate the vector around the y axis by the given angle theta.
+  /**
+   * Rotate the vector around the y axis by the given angle theta.
+   * \param[in] theta angle by which the rotation is done about y axis.
+   */
   void inline rotate_around_y(double theta);
-  /// Rotate the vector around the z axis by the given angle theta.
+  /**
+   * Rotate the vector around the z axis by the given angle theta.
+   * \param[in] theta angle by which the rotation is done about z axis.
+   */
   void inline rotate_around_z(double theta);
-  /// Rotate the z-axis onto the vector r.
+  /**
+   * Rotate the z-axis onto the vector r.
+   * \param[in] r direction in which new new z-axis is aligned
+   */
   void inline rotate_z_axis_to(ThreeVector &r);
   /// negation: Returns \f$-\vec x\f$
   ThreeVector inline operator-() const;

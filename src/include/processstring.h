@@ -47,7 +47,7 @@ enum class StringSoftType {
  * according to the LUND/PYTHIA fragmentation scheme
  * \iref{Andersson:1983ia}, \iref{Sjostrand:2014zea}.
  *
- * The class implemets the following functionality:
+ * The class implements the following functionality:
  * - given two colliding initial state particles it provides hadronic final
  *   state after single diffractive, double diffractive and non-diffractive
  *   string excitation
@@ -316,8 +316,8 @@ class StringProcess {
   /**
    * Determine string masses and directions in which strings are stretched
    * \param[in] quarks pdg ids of string ends
-   * \param[in] pstr_com 4-momenta of strings in the C.o.m. frame
-   * \param[out] m_str masses of strings
+   * \param[in] pstr_com 4-momenta of strings in the C.o.m. frame [GeV]
+   * \param[out] m_str masses of strings [GeV]
    * \param[out] evec_str are directions in which strings are stretched.
    * \return whether masses are above the threshold
    */
@@ -329,8 +329,8 @@ class StringProcess {
   /**
    * Prepare kinematics of two strings, fragment them and append to final_state
    * \param[in] quarks pdg ids of string ends
-   * \param[in] pstr_com 4-momenta of strings in the C.o.m. frame
-   * \param[in] m_str masses of strings
+   * \param[in] pstr_com 4-momenta of strings in the C.o.m. frame [GeV]
+   * \param[in] m_str masses of strings [GeV]
    * \param[out] evec_str are directions in which strings are stretched.
    * \param[in] flip_string_ends is whether or not we randomly switch string ends.
    * \return whether fragmentations and final state creation was successful
@@ -431,7 +431,7 @@ class StringProcess {
    * by implementing PYTHIA 8.2 \iref{Andersson:1983ia}, \iref{Sjostrand:2014zea}.
    * \param[in] idq1 PDG id of quark or anti-diquark (carrying color index).
    * \param[in] idq2 PDG id of diquark or anti-quark (carrying anti-color index).
-   * \param[in] mString the string mass.
+   * \param[in] mString the string mass. [GeV]
    * \param[out] evecLong unit 3-vector specifying the direction of diquark or
    *                      anti-diquark.
    * \param[in] flip_string_ends is whether or not we randomly switch string ends.

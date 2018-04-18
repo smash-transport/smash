@@ -64,7 +64,7 @@ class QuantumNumbers {
 
   /**
    * construct QuantumNumbers collection
-   * \param[in] m Momentum FourVector
+   * \param[in] m Momentum FourVector [GeV]
    * \param[in] q Charge
    * \param[in] i3 Isospin
    * \param[in] s Strangeness
@@ -121,7 +121,7 @@ class QuantumNumbers {
 
   /**
    * \return the total momentum four-vector
-   * \f$P^\mu = \sum_{i \in \mbox{particles}} (E_i, \vec p_i)\f$
+   * \f$P^\mu = \sum_{i \in \mbox{particles}} (E_i, \vec p_i)\f$ [GeV]
    *
    * \see QuantumNumbers::momentum_
    * \see ParticleData::momentum()
@@ -215,6 +215,7 @@ class QuantumNumbers {
   /**
    * checks if the current particle list has still the same values and
    * reports about differences.
+   * \param[in] particles set of particles whose quantum number is compared
    *
    * \see QuantumNumbers::report_deviations(const QuantumNumbers&) const
    */
@@ -245,7 +246,7 @@ class QuantumNumbers {
 
  private:
   /**
-   * total momentum four-vector
+   * total momentum four-vector [GeV]
    *
    * \see QuantumNumbers::momentum()
    */
