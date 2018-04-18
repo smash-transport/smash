@@ -51,8 +51,15 @@ class ScatterAction : public Action {
   /**
    * Calculate the transverse distance of the two incoming particles in their
    * local rest frame.
+   * 
+   * According to UrQMD criterion
+   * position of particle a: x_a \n
+   * position of particle b: x_b \n
+   * momentum of particle a: p_a \n
+   * momentum of particle b: p_b \n
+   * \f[d^2_{coll} = (\vec{x_a} - \vec{x_b})^2 - \frac{((\vec{x_a} - \vec{x_b}) \cdot (\vec{p_a} - \vec{p_b}))^2 } {(\vec{p_a} - \vec{p_b})^2}\f]
    *
-   * Returns the squared distance.
+   * \return  squared distance.
    */
   double transverse_distance_sqr() const;
 
@@ -82,8 +89,17 @@ class ScatterAction : public Action {
 
   /**
    * Assign a cross section scaling factor to all outgoing particles.
-   * Factor is only non-zero, when the outgoing particle carries
-   * a valence quark from the excited hadron.
+   *
+   * The factor is only non-zero, when the outgoing particle carries
+   * a valence quark from the excited hadron. The assigned cross section 
+   * scaling factor is equal to the number of the valence quarks from the
+   * fragmented hadron contained in the fragment divided by the total number
+   * of valence quarks of that fragment multiplied by a coherence factor 
+   * \param[in] incoming_particles list of colliding particles to form a string
+   * \param[out] outgoing_particles list of string fragments to which scaling 
+   * factors are assigned
+   * \param[in] suppression_factor additional coherence factor to be 
+   * multiplied with scaling factor
    */
   static void assign_all_scaling_factors(ParticleList& incoming_particles,
                                          ParticleList& outgoing_particles,
@@ -168,17 +184,32 @@ class ScatterAction : public Action {
   void resonance_formation();
 
   /**
+   * Find the leading string fragments 
+   *
    * Find the first particle, which can carry nq1, and the last particle,
    * which can carry nq2 valence quarks and return their indices in
    * the given list.
+   *
+   * \param[in] nq1 number of valence quarks from excited hadron at forward
+   * end of the string
+   * \param[in] nq2 number of valance quarks from excited hadron at backward
+   * end of the string
+   * \param[in] list list of string fragments
+   * \return indices of the leading hadrons in \p list
    */
   static std::pair<int, int> find_leading(int nq1, int nq2, ParticleList& list);
 
   /**
    * Assign a cross section scaling factor to the given particle.
+   *
    * The scaling factor is the number of quarks from the excited hadron,
    * that the fragment carries devided by the total number of quarks in
-   * this fragment.
+   * this fragment multiplied by coherence factor.
+   *
+   * \param[in] nquark number of valence quarks from the excited hadron
+   * contained in the given string fragment \p data
+   * \param[out] data particle to assign a scaling factor to
+   * \param[in] suppression_factor coherence factor to decrease scaling factor
    */
   static void assign_scaling_factor(int nquark, ParticleData& data,
                                     double suppression_factor);
