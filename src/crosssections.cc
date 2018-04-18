@@ -131,7 +131,7 @@ static double sum_xs_of(CollisionBranchList& list) {
   return xs_sum;
 }
 
-cross_sections::cross_sections(const ParticleList& scat_particles,
+cross_sections::cross_sections(const ParticleList& incoming_particles,
                                const double sqrt_s)
     : incoming_particles_(incoming_particles), sqrt_s_(sqrt_s) {}
 
