@@ -286,6 +286,9 @@ class StringProcess {
   void set_tension_string(double kappa_string) {
     kappa_tension_string_ = kappa_string;
   }
+
+  // clang-format off
+
   /**
    * Set the soft subprocess identifier
    * \param[in] iproc soft string subprocess that will be implemented
@@ -346,8 +349,8 @@ class StringProcess {
    * Single-diffractive process
    * is based on single pomeron exchange described in \iref{Ingelman:1984ns}.
    * \param[in] is_AB_to_AX specifies which hadron to excite into a string.
-   *                    true : A + B -> A + X
-   *                    false : A + B -> X + B
+   *            true : A + B -> A + X,
+   *            false : A + B -> X + B
    * \return whether the process is successfully implemented.
    */
   bool next_SDiff(bool is_AB_to_AX);
@@ -371,6 +374,9 @@ class StringProcess {
    * carried by quark is based on the UrQMD model
    * \iref{Bass:1998ca}, \iref{Bleicher:1999xi}.
    * \return whether the process is successfully implemented.
+   *
+   * \throw InvalidBaryonNumber (runtime_error)
+   *        if incoming particles are neither mesonic nor baryonic
    */
   bool next_NDiffSoft();
   /**
@@ -379,6 +385,9 @@ class StringProcess {
    * it create two mesonic strings after annihilating one quark-antiquark pair.
    * Each string has mass equal to half of sqrts.
    * \return whether the process is successfully implemented.
+   *
+   * \throw NotBBbarPair (invalid_argument)
+   *        if incoming particles are not baryon-antibaryon pair
    */
   bool next_BBbarAnn();
 
@@ -395,6 +404,11 @@ class StringProcess {
    * \param[in] uString is velocity four vector of the string.
    * \param[in] evecLong is unit 3-vector in which string is stretched.
    * \return number of hadrons fragmented out of string.
+   *
+   * \throw NonHadronFragment (invalid_argument)
+   *        if fragmented particle is not hadron
+   * \throw InvalidBaryonNumber (invalid_argument)
+   *        if string is neither mesonic nor baryonic
    */
   int append_final_state(const FourVector &uString,
                          const ThreeVector &evecLong);
@@ -424,8 +438,6 @@ class StringProcess {
     return Pythia8::Vec4(mom.x1(), mom.x2(), mom.x3(), energy);
   }
 
-  // clang-format off
-
   /**
    * perform string fragmentation to determine species and momenta of hadrons
    * by implementing PYTHIA 8.2 \iref{Andersson:1983ia}, \iref{Sjostrand:2014zea}.
@@ -436,6 +448,9 @@ class StringProcess {
    *                      anti-diquark.
    * \param[in] flip_string_ends is whether or not we randomly switch string ends.
    * \return number of hadrons fragmented out of string.
+   *
+   * \throw MassTooLow (runtime_error)
+   *        if string mass is lower than threshold set by PYTHIA
    */
   int fragment_string(int idq1, int idq2, double mString,
                       ThreeVector &evecLong, bool flip_string_ends);
