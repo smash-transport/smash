@@ -151,15 +151,23 @@ class RectangularLattice {
   /// \return The enum, which tells at which time lattice needs to be updated
   LatticeUpdate when_update() const { return when_update_; }
 
-  /// Iterators and accessors
+  /// Iterator of lattice
   using iterator = typename std::vector<T>::iterator;
+  /// Const interator of lattice
   using const_iterator = typename std::vector<T>::const_iterator;
+  /// \return First element of lattice
   iterator begin() { return lattice_.begin(); }
+  /// \return First element of lattice (const)
   const_iterator begin() const { return lattice_.begin(); }
+  /// \return Last element of lattice
   iterator end() { return lattice_.end(); }
+  /// \return Last element of lattice (const)
   const_iterator end() const { return lattice_.end(); }
+  /// \return ith element of lattice
   T& operator[](std::size_t i) { return lattice_[i]; }
+  /// \return ith element of lattice (const)
   const T& operator[](std::size_t i) const { return lattice_[i]; }
+  /// \return Size of lattice
   std::size_t size() const { return lattice_.size(); }
 
   /**
