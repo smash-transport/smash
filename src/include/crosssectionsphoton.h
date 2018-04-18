@@ -71,13 +71,12 @@ class PhotonCrossSection<ComputationMethod::Analytic> {
   /**
    * The choice of these parameters, necessary to determine the photon cross
    * sections, follows from (\iref{Turbide:2006}). Here, different combinations
-   * of parameters were proposed and investigated. We decideds to use the
+   * of parameters were proposed and investigated. We decided to use the
    * parameters of set II in their categorization.
    */
 
   constexpr static double Const = 0.059;
   constexpr static double g_POR = 22.6;
-  constexpr static double m_a1_ = 1.26;
   constexpr static double ghat = 6.4483;
   constexpr static double eta1 = 2.3920;
   constexpr static double eta2 = 1.9430;
@@ -85,11 +84,6 @@ class PhotonCrossSection<ComputationMethod::Analytic> {
   constexpr static double C4 = -0.14095;
   constexpr static double Gammaa1 = 0.4;
   constexpr static double Pi = M_PI;
-  constexpr static double m_omega_ = 0.783;
-  constexpr static double m_pion_ = 0.139;
-
-  // convert to mbarn:
-  constexpr static double to_mb = 0.3894;
 };
 
 // options not implemented for review version. Will be added in the future.

@@ -264,8 +264,6 @@ class ScatterActionPhoton : public ScatterAction {
   double diff_cross_section_w_ff(const double t, const double m_rho,
                                  const double E_photon);
 
-  static constexpr double m_omega_ = 0.783;
-
 };
 
 }  // namespace smash

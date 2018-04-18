@@ -25,6 +25,7 @@
 #include "include/random.h"
 #include "include/tabulation.h"
 
+
 namespace smash {
 
 // Determines the reaction type (process) based on the incoming particles.
@@ -165,7 +166,7 @@ bool ScatterActionPhoton::is_kinematically_possible(const double s_sqrt,
   if ((reac == ReactionType::pi_m_rho_p_pi_z ||
        reac == ReactionType::pi_p_rho_m_pi_z) &&
       default_mediator_ == MediatorType::OMEGA) {
-    if (s_sqrt < m_omega_) {
+    if (s_sqrt < omega_mass) {
       return false;
     }
   }
