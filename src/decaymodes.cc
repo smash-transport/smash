@@ -135,7 +135,7 @@ inline std::size_t find_offset(PdgCode pdg) {
   return std::addressof(ParticleType::find(pdg)) -
          std::addressof(ParticleType::list_all()[0]);
 }
-} // unnamed namespace
+}  // unnamed namespace
 
 void DecayModes::load_decaymodes(const std::string &input) {
   const auto &log = logger<LogArea::DecayModes>();

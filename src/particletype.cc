@@ -197,8 +197,8 @@ static std::string chargestr(int charge) {
 void ParticleType::create_type_list(const std::string &input) {  // {{{
   const auto &log = logger<LogArea::ParticleType>();
   static ParticleTypeList type_list;
-  type_list.clear();  /* in case LoadFailure was thrown and caught and we should
-                       * try again */
+  type_list.clear();  // in case LoadFailure was thrown and caught and we should
+                      // try again
   for (const Line &line : line_parser(input)) {
     std::istringstream lineinput(line.text);
     std::string name;

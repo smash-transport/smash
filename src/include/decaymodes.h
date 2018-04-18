@@ -55,7 +55,7 @@ class DecayModes {
    */
   void renormalize(std::string name);
 
-  ///\return true if empty (i.e. no decay modes)
+  /// \return true if empty (i.e. no decay modes)
   bool is_empty() const { return decay_modes_.empty(); }
 
   /// \return pass out the decay modes list
