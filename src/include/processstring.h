@@ -375,7 +375,7 @@ class StringProcess {
    * \iref{Bass:1998ca}, \iref{Bleicher:1999xi}.
    * \return whether the process is successfully implemented.
    *
-   * \throw InvalidBaryonNumber (runtime_error)
+   * \throw std::runtime_error
    *        if incoming particles are neither mesonic nor baryonic
    */
   bool next_NDiffSoft();
@@ -386,7 +386,7 @@ class StringProcess {
    * Each string has mass equal to half of sqrts.
    * \return whether the process is successfully implemented.
    *
-   * \throw NotBBbarPair (invalid_argument)
+   * \throw std::invalid_argument
    *        if incoming particles are not baryon-antibaryon pair
    */
   bool next_BBbarAnn();
@@ -405,10 +405,8 @@ class StringProcess {
    * \param[in] evecLong is unit 3-vector in which string is stretched.
    * \return number of hadrons fragmented out of string.
    *
-   * \throw NonHadronFragment (invalid_argument)
-   *        if fragmented particle is not hadron
-   * \throw InvalidBaryonNumber (invalid_argument)
-   *        if string is neither mesonic nor baryonic
+   * \throw std::invalid_argument if fragmented particle is not hadron
+   * \throw std::invalid_argument if string is neither mesonic nor baryonic
    */
   int append_final_state(const FourVector &uString,
                          const ThreeVector &evecLong);
@@ -449,7 +447,7 @@ class StringProcess {
    * \param[in] flip_string_ends is whether or not we randomly switch string ends.
    * \return number of hadrons fragmented out of string.
    *
-   * \throw MassTooLow (runtime_error)
+   * \throw std::runtime_error
    *        if string mass is lower than threshold set by PYTHIA
    */
   int fragment_string(int idq1, int idq2, double mString,
