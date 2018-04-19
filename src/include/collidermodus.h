@@ -181,6 +181,9 @@ class ColliderModus : public ModusDefault {
   /**
    * Reference frame for the system, as specified from config
    */
+  /// \todo enum classes do not appear in doxygen, since they are
+  /// defined in fowarddeclarations which is intentionally neglected
+  /// from doxygen (s. fowarddeclerations.h)
   CalculationFrame frame_ = CalculationFrame::CenterOfVelocity;
   /**
    * An option to include Fermi motion ("off", "on", "frozen")
