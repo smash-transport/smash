@@ -22,12 +22,13 @@ namespace smash {
 ActionList DecayActionsFinder::find_actions_in_cell(
     const ParticleList &search_list, double dt) const {
   ActionList actions;
-  actions.reserve(10);  /* for short time steps this seems reasonable to expect
-                         * less than 10 decays in most time steps */
+  /* for short time steps this seems reasonable to expect
+   * less than 10 decays in most time steps */
+  actions.reserve(10);
 
   for (const auto &p : search_list) {
     if (p.type().is_stable()) {
-      continue; // particle doesn't decay
+      continue;  // particle doesn't decay
     }
 
     DecayBranchList processes =
@@ -48,8 +49,9 @@ ActionList DecayActionsFinder::find_actions_in_cell(
      * the exponential decay law.
      */
     const double decay_time = Random::exponential<double>(
-        one_over_hbarc * p.inverse_gamma()  /* The clock goes slower in the rest
-                                             * frame of the resonance */
+        /* The clock goes slower in the rest
+         * frame of the resonance */
+        one_over_hbarc * p.inverse_gamma()
         * width);
     /* If the particle is not yet formed at the decay time,
      * it should not be able to decay */
@@ -71,7 +73,7 @@ ActionList DecayActionsFinder::find_final_actions(const Particles &search_list,
 
   for (const auto &p : search_list) {
     if (p.type().is_stable()) {
-      continue; // particle doesn't decay
+      continue;  // particle doesn't decay
     }
     auto act = make_unique<DecayAction>(p, 0.);
     act->add_decays(p.type().get_partial_widths(p.effective_mass()));
