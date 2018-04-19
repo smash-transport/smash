@@ -136,7 +136,8 @@ class PdgCode {
    * receive a signed integer and process it into a PDG Code. The sign
    * is taken as antiparticle boolean, while the absolute value of the
    * integer is used as hexdigits.
-   * \param[in] codenumber The number 0x221 is interpreted as an η meson,
+   * \param[in] codenumber a signed integer which represent the PDG code
+   * The number 0x221 is interpreted as an η meson,
    * -0x211 is a "charged pi antiparticle", i.e., a \f$\pi^-\f$.
    */
   PdgCode(std::int32_t codenumber) : dump_(0x0) {  // NOLINT(runtime/explicit)
@@ -202,7 +203,14 @@ class PdgCode {
     return fail;
   }
 
-  /// Do all sorts of validity checks.
+  /**
+   * Do all sorts of validity checks.
+   * \throw InvalidPdgCode if meson has even n_J_ (fermionic spin)
+   * \throw InvalidPdgCode if baryon has odd n_J_ (bosonic spin)
+   * \throw InvalidPdgCode if n_J_ is 0 (spin is not defined.)
+   * \throw InvalidPdgCode if particle does not have antiparticle when
+   * it is supposed to do.
+   */
   void check() const {
     // n_J must be odd for mesons and even for baryons (and cannot be zero)
     if (is_hadron()) {
@@ -240,7 +248,7 @@ class PdgCode {
   /// \return a signed integer with the PDG code in hexadecimal.
   inline std::int32_t code() const { return antiparticle_sign() * ucode(); }
 
-  /// Represent the PDG Code as a decimal string.
+  /// \return the PDG Code as a decimal string.
   inline std::string string() const {
     std::stringstream ss;
     ss << get_decimal();
@@ -254,7 +262,10 @@ class PdgCode {
     return result;
   }
 
-  /// Construct PDG code from decimal number.
+  /**
+   * Construct PDG code from decimal number.
+   * \param[in] pdgcode_decimal decimal integer representing the PDG code
+   */
   static PdgCode from_decimal(const int pdgcode_decimal) {
     // Nucleus
     if (std::abs(pdgcode_decimal) > 1E9) {
@@ -303,10 +314,10 @@ class PdgCode {
     }
     return antiparticle_sign();
   }
-  /// Returns whether this PDG code identifies a baryon.
+  /// \return whether this PDG code identifies a baryon.
   inline bool is_baryon() const { return is_hadron() && digits_.n_q1_ != 0; }
 
-  /// Returns whether this PDG code identifies a meson.
+  /// \return whether this PDG code identifies a meson.
   inline bool is_meson() const { return is_hadron() && digits_.n_q1_ == 0; }
 
   /// \return whether this is a nucleon/anti-nucleon (p, n, -p, -n)
@@ -370,7 +381,7 @@ class PdgCode {
   }
 
   /**
-   * Determine whether a particle has a distinct antiparticle
+   * \return whether a particle has a distinct antiparticle
    * (or whether it is its own antiparticle).
    */
   bool has_antiparticle() const {
@@ -544,10 +555,14 @@ class PdgCode {
   }
 
   /**
-   * Check whether a particle contains at least the given number of
-   * valence quarks. This is necessary for string fragmentation.
+   * \return whether a particle contains at least the given number of
+   * valence quarks.
    * \param[in] valence_quarks_required number of valence quarks
    * that particle is supposed to contain.
+   *
+   * \throw std::runtime_error if it is not a hadron
+   *
+   * This is necessary for string fragmentation.
    */
   bool contains_enough_valence_quarks(int valence_quarks_required) const;
 
@@ -596,6 +611,8 @@ class PdgCode {
    * beginning will be used, so that the sum of the first and the last digit is
    * the spin.
    * This is used for binary and ROOT output.
+   *
+   * \throw InvalidPdgCode if the spin degeneracy is larger than 9
    */
   int get_decimal() const {
     if (is_nucleus()) {
@@ -635,6 +652,9 @@ class PdgCode {
    * \todo Why quark numbers 7 and 8 are allowed?
    * \param[in] quark PDG Code of quark: (1..6) = (d,u,s,c,b,t)
    * \return for the net number of quarks (\#quarks - \#antiquarks)
+   *
+   * \throw std::invalid_argument
+   * if quark is not any of d, u, s, c, b and t quarks
    */
   int net_quark_number(const int quark) const;
 
@@ -742,7 +762,12 @@ class PdgCode {
    */
   inline std::uint32_t ucode() const { return (dump_ & 0x0fffffff); }
 
-  /// extract digits from a hexadecimal character.
+  /**
+   * \return digits from a hexadecimal character.
+   * \param[in] inp character which is translated into digit
+   *
+   * \throw InvalidPdgCode if character does not correspond to digit
+   */
   inline std::uint32_t get_digit_from_char(const char inp) const {
     // decimal digit
     if (48 <= inp && inp <= 57) {
@@ -765,6 +790,21 @@ class PdgCode {
    * This supports hexdecimal digits. If the last digit is not enough to
    * represent the spin, a digit can be added at the beginning which will be
    * added to the total spin.
+   * \param[in] codestring string which is translated into PdgCode
+   *
+   * \throw InvalidPdgCode if the input string is empty
+   * \throw InvalidPdgCode
+   * if it is a nucleus whose PDG code does not begin with 10
+   * \throw InvalidPdgCode
+   * if it is not a nucleus while number of digits is more than 8
+   * \throw InvalidPdgCode
+   * if the 1st quark field is not any of d, u, s, c, b and t quarks
+   * \throw InvalidPdgCode
+   * if the 2nd quark field is not any of d, u, s, c, b and t quarks
+   * \throw InvalidPdgCode
+   * if the 3rd quark field is not any of d, u, s, c, b and t quarks
+   * \throw InvalidPdgCode
+   * if there is nothing else but sign
    */
   inline void set_from_string(const std::string& codestring) {
     dump_ = 0;
@@ -865,6 +905,11 @@ class PdgCode {
   /**
    * Sets the bitfield from an unsigned integer. Usually called from
    * the constructors.
+   * \param[in] abscode integer which replace PDG code except sign
+   *
+   * \throw InvalidPdgCode if input is not a valid PDG code
+   *
+   * \see PdgCode::test_code
    */
   inline void set_fields(std::uint32_t abscode) {
     /* "dump_ =" overwrites antiparticle_, but this needs to have been set
@@ -891,7 +936,7 @@ std::istream& operator>>(std::istream& is, PdgCode& code);
  */
 std::ostream& operator<<(std::ostream& is, const PdgCode& code);
 
-/// Checks if two given particles represent a lepton pair (e+e- or mu+mu-).
+/// \return if two given particles represent a lepton pair (e+e- or mu+mu-).
 inline bool is_dilepton(const PdgCode pdg1, const PdgCode pdg2) {
   const auto c1 = pdg1.code();
   const auto c2 = pdg2.code();
@@ -901,7 +946,7 @@ inline bool is_dilepton(const PdgCode pdg1, const PdgCode pdg2) {
 }
 
 /**
- * Checks if two of the three given particles represent a lepton pair
+ * \return if two of the three given particles represent a lepton pair
  * (e+e- or mu+mu-).
  */
 inline bool has_lepton_pair(const PdgCode pdg1, const PdgCode pdg2,

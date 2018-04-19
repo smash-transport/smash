@@ -71,21 +71,21 @@ if(DOXYGEN)
 
       add_custom_target(undocumented ${DOXYGEN}
          ${CMAKE_CURRENT_BINARY_DIR}/DoxyfileOnlyDocumented 2>&1 |
-         ${GREP} -v 3rdparty |
          ${SORT} -u |
-         ${GREP} -ic warning: |
-         ${XARGS} ${PRINTF} "============ There are %d undocumented entities ============\\n"
+         ${GREP} -i warning: | ${GREP} -iv "einhard"
          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-         COMMENT "Building Doxygen Code Documentation (only documented entities)"
+         COMMENT "Building Doxygen Code Documentation (only with documented entities) and output doxgen warnings"
          VERBATIM
          )
 
-      add_custom_target(undocumented_verbose ${DOXYGEN}
+      add_custom_target(undocumented_count ${DOXYGEN}
          ${CMAKE_CURRENT_BINARY_DIR}/DoxyfileOnlyDocumented 2>&1 |
+         ${GREP} -v 3rdparty |
          ${SORT} -u |
-         ${GREP} -i warning:
+         ${GREP} -i warning: | ${GREP} -icv "einhard" |
+         ${XARGS} ${PRINTF} "============ There are %d doxygen warnings about missing documentation ============\\n"
          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-         COMMENT "Building Doxygen Code Documentation (only documented entities)"
+         COMMENT "Building Doxygen Code Documentation (only with documented entities) and count doxgen warnings"
          VERBATIM
          )
    endif()

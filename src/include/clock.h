@@ -20,7 +20,8 @@
 
 namespace smash {
 
-/** Clock tracks the simulation time, i.e., the time IN the simulation.
+/**
+ * Clock tracks the time in the simulation.
  *
  * The basic unit is 1 fm/c = \f$1 / 2.99798542 \cdot 10^{-23}\f$s
  * \f$\approx 0.33 \cdot 10^{-24}\f$ s.
@@ -76,14 +77,6 @@ class Clock {
    * Defines the resolution of the clock (i.e. the smallest representable time
    * difference).
    *
-   * \fpPrecision
-   * This constant is only used to derive other constant expressions, which are
-   * in single-precision:
-   * \li It doesn't matter for the execution / data-representation of SMASH at
-   * all
-   * \li The increased precision is necessery to determine the correctly rounded
-   * inverse for \c from_float.
-   *
    * The value 0.000001 is very well suited because
    * \li It should be \f$10^{-n},\;n\in\mathbb{N}\f$. That's because we want to
    * use it to convert user input/output and that's in decimal representation.
@@ -101,11 +94,11 @@ class Clock {
  public:
   /// default initializer: Timestep size is set to 0!
   Clock() = default;
-  /** initialize with base time and time step size.
+  /**
+   * Initialize with base time and time step size.
    *
    * \param time base time
    * \param dt step size
-   *
    */
   Clock(const double time, const double dt)
       : timestep_duration_(convert(dt)), reset_time_(convert(time)) {
@@ -113,11 +106,12 @@ class Clock {
       throw std::range_error("No negative time increment allowed");
     }
   }
-  /// returns the current time
+  /// Returns the current time.
   double current_time() const {
     return convert(reset_time_ + timestep_duration_ * counter_);
   }
-  /** returns the time in the next tick
+  /**
+   * Returns the time in the next tick.
    *
    * This function is needed, because current_time() + timestep_duration()
    * is not the same as the next tick (numerically; this is due to
@@ -130,12 +124,12 @@ class Clock {
     }
     return convert(reset_time_ + timestep_duration_ * (counter_ + 1));
   }
-  /// returns the time step size.
+  /// Returns the time step size.
   double timestep_duration() const { return convert(timestep_duration_); }
-  /** sets the time step size (and resets the counter)
+  /**
+   * Sets the time step size (and resets the counter).
    *
    * \param dt new time step size
-   *
    */
   void set_timestep_duration(const double dt) {
     if (dt < 0.) {
@@ -145,7 +139,8 @@ class Clock {
     counter_ = 0;
     timestep_duration_ = convert(dt);
   }
-  /** checks if a multiple of a given interval is reached within the
+  /**
+   * Checks if a multiple of a given interval is reached within the
    * next tick.
    *
    * \param interval The interval \f$t_i\f$ at which, for instance,
@@ -176,7 +171,8 @@ class Clock {
     }
     return (timestep_duration_ - 1 + next) % int_interval < timestep_duration_;
   }
-  /** returns the next multiple of a given interval
+  /**
+   * Returns the next multiple of a given interval.
    *
    * \param interval the interval in question
    *
@@ -191,7 +187,8 @@ class Clock {
     }
     return convert((current / int_interval + 1) * int_interval);
   }
-  /** set the time step such that it ends on the next multiple of the interval
+  /**
+   * Set the time step such that it ends on the next multiple of the interval.
    *
    * \param interval The given interval
    */
@@ -207,12 +204,14 @@ class Clock {
           (current / int_interval + 1) * int_interval - current;
     }
   }
-  /** resets the time to a pre-defined value
+  /**
+   * Resets the time to a pre-defined value \p reset_time.
    *
    * This is the only way of turning the clock back. It is needed so
    * that the time can be adjusted after initialization (different
    * initial conditions may require different starting times).
    *
+   * \param reset_time New time
    **/
   void reset(const double reset_time) {
     if (reset_time < current_time()) {
@@ -222,7 +221,8 @@ class Clock {
     reset_time_ = convert(reset_time);
     counter_ = 0;
   }
-  /** advances the clock by one tick (\f$\Delta t\f$)
+  /**
+   * Advances the clock by one tick (\f$\Delta t\f$).
    *
    * This operator is used as `++clock`. The operator `clock++` is not
    * implemented deliberately, because that requires a copy of the clock
@@ -239,6 +239,7 @@ class Clock {
   /**
    * Advances the clock by an arbitrary timestep (multiple of 0.000001 fm/c).
    *
+   * \param big_timestep Timestep by which the clock is advanced.
    * \note It uses a template parameter only for disambiguation with the
    * overload below.
    */
@@ -260,29 +261,40 @@ class Clock {
     counter_ += advance_several_timesteps;
     return *this;
   }
-  /// compares the times between two clocks.
+  /** Compares the times between two clocks.
+   *
+   * \param rhs The other clock.
+   */
   bool operator<(const Clock& rhs) const {
     return (reset_time_ + timestep_duration_ * counter_) <
            (rhs.reset_time_ + rhs.timestep_duration_ * rhs.counter_);
   }
-  /// compares the time of the clock against a fixed time.
+  /**
+   * Compares the time of the clock against a fixed time.
+   *
+   * \param time The other time.
+   */
   bool operator<(double time) const { return current_time() < time; }
-  /// compares the time of the clock against a fixed time.
+  /**
+   * Compares the time of the clock against a fixed time.
+   *
+   * \param time The other time.
+   */
   bool operator>(double time) const { return current_time() > time; }
 
  private:
   static constexpr double to_double = resolution;
   static constexpr double from_double = 1. / resolution;
 
-  /// convert a double value into the internal int representation
+  /// Convert a double \p x into the internal int representation.
   static Representation convert(double x) {
     return std::round(x * from_double);
   }
-  /// convert an internal int value into the double representation
+  /// Convert an internal int value \p x into the double representation.
   static double convert(Representation x) { return x * to_double; }
 
-  /// clock tick. This is purely internal and will be reset when the
-  /// timestep size is changed
+  /// Clock tick. This is purely internal and will be reset when the
+  /// timestep size is changed.
   Representation counter_ = 0;
   /// The time step size \f$\Delta t\f$ in $10^{-3}$ fm.
   Representation timestep_duration_ = 0u;
