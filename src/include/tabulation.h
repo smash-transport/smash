@@ -20,6 +20,7 @@
 
 namespace smash {
 
+/// The kind of extrapolation used by the tabulation.
 enum class Extrapolation {
   Zero = 0,
   Const = 1,
@@ -27,11 +28,13 @@ enum class Extrapolation {
 };
 
 /**
- * A class for storing a one-dimensional lookup table of doubleing-point values.
+ * A class for storing a one-dimensional lookup table of floating-point values.
  */
 class Tabulation {
  public:
-  /** Construct a new tabulation object.
+  /**
+   * Construct a new tabulation object.
+   *
    * \param x_min lower bound of tabulation domain
    * \param range range (x_max-x_min) of tabulation domain
    * \param num number of intervals (the number of tabulated points is actually
@@ -40,25 +43,46 @@ class Tabulation {
    */
   Tabulation(double x_min, double range, int num,
              std::function<double(double)> f);
-  /** Look up a value from the tabulation (without any interpolation, simply
-   * using the closest tabulated value). If x is below the lower tabulation
+
+  /**
+   * Look up a value from the tabulation (without any interpolation, simply
+   * using the closest tabulated value). If \par x is below the lower tabulation
    * bound we return 0, if it is above the upper bound we return the tabulated
-   * value at the upper bound. */
+   * value at the upper bound.
+   *
+   * \param x Argument to tabulated function.
+   * \return Tabulated value using constant interpolation.
+   */
   double get_value_step(double x) const;
-  /** Look up a value from the tabulation using linear interpolation.
+
+  /**
+   * Look up a value from the tabulation using linear interpolation.
    * If x is above the upper bound, then by default we use linear extrapolation
    * of the two highest tabulated points. Optionally one can also extrapolate
    * with rightmost value or zero. Linear extrapolation is not an arbitrary
    * choice, in fact many functions tabulated in SMASH have a linear
-   * asymptotics, e.g. rho(m) functions. */
+   * asymptotics, e.g. rho(m) functions.
+   *
+   * \param x Argument to tabulated function.
+   * \param extrapolation \ref Extrapolation that should be used for values
+   * outside the tabulation.
+   * \return Tabulated value using linear interpolation.
+   */
   double get_value_linear(
       double x, Extrapolation extrapolation = Extrapolation::Linear) const;
 
  protected:
   // vector for storing tabulated values
   std::vector<double> values_;
-  // lower bound and inverse step size 1/dx for tabulation
-  const double x_min_, x_max_, inv_dx_;
+
+  // lower bound for tabulation
+  const double x_min_;
+
+  // upper bound for tabulation
+  const double x_max_;
+
+  /// inverse step size 1/dx
+  const double inv_dx_;
 };
 
 /**
@@ -69,10 +93,11 @@ class Tabulation {
  * resonance mass, \f$ A(m) \f$ is the spectral function
  *  and \f$ p_{cm}^f \f$ is the center-of-mass momentum of the final state.
  *
- * \param[in] resonance_mass Actual mass of the resonance.
- * \param[in] sqrts Center-of-mass energy, i.e. sqrt of Mandelstam s.
- * \param[in] stable_mass mass of the stable particle in the final state
- * \param[in] type type of the resonance
+ * \param[in] resonance_mass Actual mass of the resonance [GeV].
+ * \param[in] sqrts Center-of-mass Energy, i.e. sqrt of Mandelstam s [GeV].
+ * \param[in] stable_mass Mass of the stable particle in the final state [GeV].
+ * \param[in] type Type of the resonance.
+ * \return Value of the integrand.
  */
 inline double spec_func_integrand_1res(double resonance_mass, double sqrts,
                                        double stable_mass,
@@ -96,11 +121,12 @@ inline double spec_func_integrand_1res(double resonance_mass, double sqrts,
  * spectral functions and \f$ p_{cm}^f \f$ is the center-of-mass momentum of
  * the final state.
  *
- * \param[in] sqrts Center-of-mass energy, i.e. sqrt of Mandelstam s.
- * \param[in] res_mass_1 Actual mass of the first resonance.
- * \param[in] res_mass_2 Actual mass of the second resonance.
+ * \param[in] sqrts Center-of-mass energy, i.e. sqrt of Mandelstam s [GeV].
+ * \param[in] res_mass_1 Actual mass of the first resonance [GeV].
+ * \param[in] res_mass_2 Actual mass of the second resonance [GeV].
  * \param[in] t1 Type of the first resonance.
  * \param[in] t2 Type of the second resonance.
+ * \return Value of the integrand.
  */
 inline double spec_func_integrand_2res(double sqrts, double res_mass_1,
                                        double res_mass_2,
@@ -117,8 +143,14 @@ inline double spec_func_integrand_2res(double sqrts, double res_mass_1,
 }
 
 /**
- * Create a table for the spectral integral
- *  of a resonance and a stable particle.
+ * Create a table for the spectral integral of a resonance and a stable
+ * particle.
+ *
+ * \param[inout] integrate Numerical integrator.
+ * \param[in] resonance Type of the resonance particle.
+ * \param[in] stable Type of the stable particle.
+ * \param[in] range Distance between tabulation points [GeV].
+ * \return Tabulation of the given integral.
  */
 inline std::unique_ptr<Tabulation> spectral_integral_semistable(
     Integrator& integrate, const ParticleType& resonance,
@@ -133,7 +165,14 @@ inline std::unique_ptr<Tabulation> spectral_integral_semistable(
       });
 }
 
-/// Create a table for the spectral integral of two resonances.
+/** Create a table for the spectral integral of two resonances.
+ *
+ * \param[inout] integrate2d Numerical integrator.
+ * \param[in] res1 Type of the first resonance particle.
+ * \param[in] res2 Type of the second resonance particle.
+ * \param[in] range Distance between tabulation points [GeV].
+ * \return Tabulation of the given integral.
+ */
 inline std::unique_ptr<Tabulation> spectral_integral_unstable(
     Integrator2dCuhre& integrate2d, const ParticleType& res1,
     const ParticleType& res2, double range) {

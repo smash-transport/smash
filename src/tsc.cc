@@ -13,6 +13,8 @@
 #include <iomanip>
 #include <iostream>
 
+namespace smash {
+
 std::ostream &operator<<(std::ostream &out, const TimeStampCounter &tsc) {
   auto c = tsc.cycles();
   int blocks[10];
@@ -32,3 +34,5 @@ std::ostream &operator<<(std::ostream &out, const TimeStampCounter &tsc) {
   out.fill(lastFill);
   return out << " Cycles";
 }
+
+}  // namespace smash

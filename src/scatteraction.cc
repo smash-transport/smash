@@ -492,7 +492,7 @@ void ScatterAction::string_excitation_pythia() {
   const PdgCode pdg1 = incoming_particles_[0].type().pdgcode();
   const PdgCode pdg2 = incoming_particles_[1].type().pdgcode();
 
-  // Disable doubleing point exception trap for Pythia
+  // Disable floating point exception trap for Pythia
   {
     DisableFloatTraps guard;
     /* set all necessary parameters for Pythia
@@ -625,7 +625,7 @@ void ScatterAction::string_excitation_pythia() {
 void ScatterAction::string_excitation_soft() {
   assert(incoming_particles_.size() == 2);
   const auto &log = logger<LogArea::Pythia>();
-  // Disable doubleing point exception trap for Pythia
+  // Disable floating point exception trap for Pythia
   {
     DisableFloatTraps guard;
     /* initialize the string_process_ object for this particular collision */

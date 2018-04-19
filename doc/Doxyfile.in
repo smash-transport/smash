@@ -669,7 +669,7 @@ INPUT                  = \
                          src/tests/unittest.h \
                          src/tests/setup.h \
                          src/ \
-                         AUTHORS DEBUG INSTALL \
+                         DEBUG \
                          3rdparty/einhard/einhard.hpp
 
 # This tag can be used to specify the character encoding of the source files

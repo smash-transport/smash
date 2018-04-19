@@ -323,14 +323,15 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
 
   const FourVector ustrXcom = pstrXcom / massX;
   /* determine direction in which the string is stretched.
-   * this is set to be same with the three-momentum of string
+   * this is set to be same with the the collision axis
    * in the center of mass frame. */
-  const ThreeVector threeMomentum = pstrXcom.threevec();
+  const ThreeVector threeMomentum = is_AB_to_AX ?
+                                    pcom_[1].threevec() : pcom_[0].threevec();
   const FourVector pnull = FourVector(threeMomentum.abs(), threeMomentum);
   const FourVector prs = pnull.LorentzBoost(ustrXcom.velocity());
   ThreeVector evec = prs.threevec() / prs.threevec().abs();
   // perform fragmentation and add particles to final_state.
-  int nfrag = fragment_string(idqX1, idqX2, massX, evec);
+  int nfrag = fragment_string(idqX1, idqX2, massX, evec, true);
   if (nfrag < 1) {
     NpartString_[0] = 0;
     return false;
@@ -349,22 +350,59 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   return true;
 }
 
+bool StringProcess::set_mass_and_direction_2strings(
+    const std::array<std::array<int, 2>, 2> &quarks,
+    const std::array<FourVector, 2> &pstr_com,
+    std::array<double, 2> &m_str,
+    std::array<ThreeVector, 2> &evec_str) {
+
+  std::array<bool, 2> found_mass;
+  for (int i = 0; i < 2; i++) {
+    found_mass[i] = false;
+
+    m_str[i] = pstr_com[i].sqr();
+    m_str[i] = (m_str[i] > 0.) ? std::sqrt(m_str[i]) : 0.;
+    const double threshold = pythia_hadron_->particleData.m0(quarks[i][0]) +
+                             pythia_hadron_->particleData.m0(quarks[i][1]);
+    // string mass must be larger than threshold set by PYTHIA.
+    if (m_str[i] > threshold) {
+      found_mass[i] = true;
+      /* Determine direction in which string i is stretched.
+       * This is set to be same with the collision axis
+       * in the center of mass frame.
+       * Initial state partons inside incoming hadrons are
+       * moving along the collision axis,
+       * which is parallel to three momenta of incoming hadrons
+       * in the center of mass frame.
+       * Given that partons are assumed to be massless,
+       * their four momenta are null vectors and parallel to pnull.
+       * If we take unit three-vector of prs,
+       * which is pnull in the rest frame of string,
+       * it would be the direction in which string ends are moving. */
+      const ThreeVector mom = pcom_[i].threevec();
+      const FourVector pnull(mom.abs(), mom);
+      const FourVector prs = pnull.LorentzBoost(pstr_com[i].velocity());
+      evec_str[i] = prs.threevec() / prs.threevec().abs();
+    }
+  }
+
+  return found_mass[0] && found_mass[1];
+}
+
 bool StringProcess::make_final_state_2strings(
     const std::array<std::array<int, 2>, 2> &quarks,
     const std::array<FourVector, 2> &pstr_com,
-    const std::array<double, 2> &m_str) {
+    const std::array<double, 2> &m_str,
+    const std::array<ThreeVector, 2> &evec_str,
+    bool flip_string_ends) {
   const std::array<FourVector, 2> ustr_com = {pstr_com[0] / m_str[0],
                                               pstr_com[1] / m_str[1]};
   for (int i = 0; i < 2; i++) {
-    /* determine direction in which string i is stretched.
-     * this is set to be same with the three-momentum of string
-     * in the center of mass frame. */
-    const ThreeVector mom = pstr_com[i].threevec();
-    const FourVector pnull(mom.abs(), mom);
-    const FourVector prs = pnull.LorentzBoost(ustr_com[i].velocity());
-    ThreeVector evec = prs.threevec() / prs.threevec().abs();
+    // determine direction in which string i is stretched.
+    ThreeVector evec = evec_str[i];
     // perform fragmentation and add particles to final_state.
-    int nfrag = fragment_string(quarks[i][0], quarks[i][1], m_str[i], evec);
+    int nfrag = fragment_string(quarks[i][0], quarks[i][1], m_str[i],
+                                evec, flip_string_ends);
     if (nfrag <= 0) {
       NpartString_[i] = 0;
       return false;
@@ -386,10 +424,10 @@ bool StringProcess::next_DDiff() {
   NpartString_[1] = 0;
   final_state_.clear();
 
-  std::array<bool, 2> found_mass = {false, false};
   std::array<std::array<int, 2>, 2> quarks;
   std::array<FourVector, 2> pstr_com;
   std::array<double, 2> m_str;
+  std::array<ThreeVector, 2> evec_str;
   ThreeVector threeMomentum;
 
   // decompose hadron into quark (and diquark) contents
@@ -418,23 +456,16 @@ bool StringProcess::next_DDiff() {
                   evecBasisAB_[1] * QTrx - evecBasisAB_[2] * QTry;
   pstr_com[1] =
       FourVector((PPosB_ - QPos + PNegB_ - QNeg) / sqrt2_, threeMomentum);
-  found_mass[0] = false;
-  found_mass[1] = false;
-  for (int i = 0; i < 2; i++) {
-    m_str[i] = pstr_com[i].sqr();
-    m_str[i] = (m_str[i] > 0.) ? std::sqrt(m_str[i]) : 0.;
-    const double threshold = pythia_hadron_->particleData.m0(quarks[i][0]) +
-                             pythia_hadron_->particleData.m0(quarks[i][1]);
-    // string mass must be larger than threshold set by PYTHIA.
-    if (m_str[i] > threshold) {
-      found_mass[i] = true;
-    }
-  }
 
-  if (!found_mass[0] || !found_mass[1]) {
+  const bool found_masses = set_mass_and_direction_2strings(quarks,
+                                                            pstr_com, m_str,
+                                                            evec_str);
+  if (!found_masses) {
     return false;
   }
-  const bool success = make_final_state_2strings(quarks, pstr_com, m_str);
+  const bool flip_string_ends = true;
+  const bool success = make_final_state_2strings(quarks, pstr_com, m_str,
+                                                 evec_str, flip_string_ends);
   return success;
 }
 
@@ -445,10 +476,10 @@ bool StringProcess::next_NDiffSoft() {
   NpartString_[1] = 0;
   final_state_.clear();
 
-  std::array<bool, 2> found_mass = {false, false};
   std::array<std::array<int, 2>, 2> quarks;
   std::array<FourVector, 2> pstr_com;
   std::array<double, 2> m_str;
+  std::array<ThreeVector, 2> evec_str;
 
   // decompose hadron into quark (and diquark) contents
   int idqA1, idqA2, idqB1, idqB2;
@@ -502,23 +533,15 @@ bool StringProcess::next_NDiffSoft() {
   pstr_com[1] =
       FourVector((PPosB_ - dPPos + PNegB_ - dPNeg) / sqrt2_, threeMomentum);
 
-  found_mass[0] = false;
-  found_mass[1] = false;
-  for (int i = 0; i < 2; i++) {
-    m_str[i] = pstr_com[i].sqr();
-    m_str[i] = (m_str[i] > 0.) ? std::sqrt(m_str[i]) : 0.;
-    const double threshold = pythia_hadron_->particleData.m0(quarks[i][0]) +
-                             pythia_hadron_->particleData.m0(quarks[i][1]);
-    // string mass must be larger than threshold set by PYTHIA.
-    if (m_str[i] > threshold) {
-      found_mass[i] = true;
-    }
-  }
-
-  if (!found_mass[0] || !found_mass[1]) {
+  const bool found_masses = set_mass_and_direction_2strings(quarks,
+                                                            pstr_com, m_str,
+                                                            evec_str);
+  if (!found_masses) {
     return false;
   }
-  const bool success = make_final_state_2strings(quarks, pstr_com, m_str);
+  const bool flip_string_ends = false;
+  const bool success = make_final_state_2strings(quarks, pstr_com, m_str,
+                                                 evec_str, flip_string_ends);
   return success;
 }
 
@@ -616,7 +639,8 @@ bool StringProcess::next_BBbarAnn() {
   for (int i = 0; i < 2; i++) {
     ThreeVector evec = pcom_[i].threevec() / pcom_[i].threevec().abs();
     const int nfrag = fragment_string(remaining_quarks[i],
-                                      remaining_antiquarks[i], mstr[i], evec);
+                                      remaining_antiquarks[i], mstr[i],
+                                      evec, true);
     if (nfrag <= 0) {
       NpartString_[i] = 0;
       return false;
@@ -717,7 +741,8 @@ void StringProcess::make_string_ends(const PdgCode &pdg, int &idq1, int &idq2) {
 }
 
 int StringProcess::fragment_string(int idq1, int idq2, double mString,
-                                   ThreeVector &evecLong) {
+                                   ThreeVector &evecLong,
+                                   bool flip_string_ends) {
   pythia_hadron_->event.reset();
   // evaluate 3 times total baryon number of the string
   const int bstring = pythia_hadron_->particleData.baryonNumberType(idq1) +
@@ -744,7 +769,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
   const double E1 = std::sqrt(m1 * m1 + pCMquark * pCMquark);
   const double E2 = std::sqrt(m2 * m2 + pCMquark * pCMquark);
 
-  if (Random::uniform_int(0, 1) == 0) {
+  if (flip_string_ends && Random::uniform_int(0, 1) == 0) {
     /* in the case where we flip the string ends,
      * we need to flip the longitudinal unit vector itself
      * since it is set to be direction of diquark (anti-quark)

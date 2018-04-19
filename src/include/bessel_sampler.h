@@ -18,8 +18,9 @@
 
 namespace smash {
 
-/** The intention of this class is to efficiently sample \f$ (N_1, N_2) \f$
- * from the distribution \f$ p(N_1,N_2) \sim \mathrm{Poi}(\nu_1)
+/**
+ * The intention of this class is to efficiently sample \f$ (N_1, N_2) \f$
+ * from the Skellam distribution \f$ p(N_1,N_2) \sim \mathrm{Poi}(\nu_1)
  * \mathrm{Poi}(\nu_2) \delta(N_1 - N_2 = N)\f$, where \f$\mathrm{Poi}(\nu)\f$
  * denotes Poisson distribution with mean \f$\nu\f$. In other words, this
  * class samples two Poisson numbers with a given mean and a fixed difference.
@@ -34,9 +35,16 @@ namespace smash {
  * approximated well by gaussian, else probabilities are computed explicitely
  * and table sampling is applied.
  */
-
 class BesselSampler {
  public:
+  /**
+   * Construct a \ref BesselSampler.
+   *
+   * \param poisson_mean1 Mean of the first number's Poisson distribution.
+   * \param poisson_mean2 Mean of the second number's Poisson distribution.
+   * \param fixed_difference Difference between the sampled numbers.
+   * \return Constructed sampler.
+   */
   BesselSampler(const double poisson_mean1, const double poisson_mean2,
                 const int fixed_difference)
       : a_(2.0 * std::sqrt(poisson_mean1 * poisson_mean2)),
@@ -76,8 +84,10 @@ class BesselSampler {
     }
   }
 
-  /** Samples poissonian A and B such that A - B = N.
-   *  \return \f$(A, B)\f$
+  /**
+   * Sample two numbers from given Poissonians with fixed difference.
+   *
+   * \return Pair of first and second sampled number.
    */
   std::pair<int, int> sample() {
     const int N_smaller = (m_ >= m_switch_method_)
@@ -88,8 +98,13 @@ class BesselSampler {
   }
 
  private:
-  /** Compute ratio of Bessel functions r(n,a) = bessel_I(n+1,a)/bessel_I(n,a)
-   *  using continued fraction representation, see \iref{Yuan2000}.
+  /**
+   * Compute ratio of Bessel functions r(n,a) = bessel_I(n+1,a)/bessel_I(n,a)
+   * using continued fraction representation (see \iref{Yuan2000}).
+   *
+   * \param n First Bessel parameter.
+   * \param a Second Bessel parameter.
+   * \return Ratio bessel_I(n+1,a)/bessel_I(n,a).
    */
   static double r(int n, double a) {
     const double a_inv = 1.0 / a;
@@ -109,15 +124,16 @@ class BesselSampler {
   }
   /// Vector to store tabulated values of probabilities for small m case
   Random::discrete_dist<double> dist_;
-  /// Parameters of the Bessel distribution
+  // Parameters of the Bessel distribution.
   double m_;
   const double a_;
   const int N_;
   const bool N_is_positive_;
   static constexpr double m_switch_method_ = 6.0;
   static constexpr double negligible_probability_ = 1.e-12;
-  /// Mean and variance of the Bessel distribution
+  /// Mean of the Bessel distribution.
   double mu_;
+  /// Standard deviation of the Bessel distribution.
   double sigma_;
 };
 

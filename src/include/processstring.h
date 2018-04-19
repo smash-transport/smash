@@ -47,7 +47,7 @@ enum class StringSoftType {
  * according to the LUND/PYTHIA fragmentation scheme
  * \iref{Andersson:1983ia}, \iref{Sjostrand:2014zea}.
  *
- * The class implemets the following functionality:
+ * The class implements the following functionality:
  * - given two colliding initial state particles it provides hadronic final
  *   state after single diffractive, double diffractive and non-diffractive
  *   string excitation
@@ -138,6 +138,8 @@ class StringProcess {
   Pythia8::SigmaTotal pythia_sigmatot_;
 
  public:
+  // clang-format off
+
   /**
    * Constructor, initializes pythia. Should only be called once.
    * \param[in] string_tension value of kappa_tension_string_ [GeV/fm]
@@ -195,6 +197,8 @@ class StringProcess {
   void common_setup_pythia(Pythia8::Pythia *pythia_in, double strange_supp,
                            double diquark_supp, double stringz_a,
                            double stringz_b, double string_sigma_T);
+
+  // clang-format on
 
   /**
    * Function to get the PYTHIA object for hard string routine
@@ -282,6 +286,9 @@ class StringProcess {
   void set_tension_string(double kappa_string) {
     kappa_tension_string_ = kappa_string;
   }
+
+  // clang-format off
+
   /**
    * Set the soft subprocess identifier
    * \param[in] iproc soft string subprocess that will be implemented
@@ -310,23 +317,40 @@ class StringProcess {
    */
   void compute_incoming_lightcone_momenta();
   /**
+   * Determine string masses and directions in which strings are stretched
+   * \param[in] quarks pdg ids of string ends
+   * \param[in] pstr_com 4-momenta of strings in the C.o.m. frame [GeV]
+   * \param[out] m_str masses of strings [GeV]
+   * \param[out] evec_str are directions in which strings are stretched.
+   * \return whether masses are above the threshold
+   */
+  bool set_mass_and_direction_2strings(
+      const std::array<std::array<int, 2>, 2> &quarks,
+      const std::array<FourVector, 2> &pstr_com,
+      std::array<double, 2> &m_str,
+      std::array<ThreeVector, 2> &evec_str);
+  /**
    * Prepare kinematics of two strings, fragment them and append to final_state
    * \param[in] quarks pdg ids of string ends
-   * \param[in] pstr_com 4-momenta of strings in the C.o.m. frame
-   * \param[in] m_str masses of strings
+   * \param[in] pstr_com 4-momenta of strings in the C.o.m. frame [GeV]
+   * \param[in] m_str masses of strings [GeV]
+   * \param[out] evec_str are directions in which strings are stretched.
+   * \param[in] flip_string_ends is whether or not we randomly switch string ends.
    * \return whether fragmentations and final state creation was successful
    */
   bool make_final_state_2strings(
       const std::array<std::array<int, 2>, 2> &quarks,
       const std::array<FourVector, 2> &pstr_com,
-      const std::array<double, 2> &m_str);
+      const std::array<double, 2> &m_str,
+      const std::array<ThreeVector, 2> &evec_str,
+      bool flip_string_ends);
 
   /**
    * Single-diffractive process
    * is based on single pomeron exchange described in \iref{Ingelman:1984ns}.
    * \param[in] is_AB_to_AX specifies which hadron to excite into a string.
-   *                    true : A + B -> A + X
-   *                    false : A + B -> X + B
+   *            true : A + B -> A + X,
+   *            false : A + B -> X + B
    * \return whether the process is successfully implemented.
    */
   bool next_SDiff(bool is_AB_to_AX);
@@ -350,6 +374,9 @@ class StringProcess {
    * carried by quark is based on the UrQMD model
    * \iref{Bass:1998ca}, \iref{Bleicher:1999xi}.
    * \return whether the process is successfully implemented.
+   *
+   * \throw std::runtime_error
+   *        if incoming particles are neither mesonic nor baryonic
    */
   bool next_NDiffSoft();
   /**
@@ -358,6 +385,9 @@ class StringProcess {
    * it create two mesonic strings after annihilating one quark-antiquark pair.
    * Each string has mass equal to half of sqrts.
    * \return whether the process is successfully implemented.
+   *
+   * \throw std::invalid_argument
+   *        if incoming particles are not baryon-antibaryon pair
    */
   bool next_BBbarAnn();
 
@@ -374,6 +404,9 @@ class StringProcess {
    * \param[in] uString is velocity four vector of the string.
    * \param[in] evecLong is unit 3-vector in which string is stretched.
    * \return number of hadrons fragmented out of string.
+   *
+   * \throw std::invalid_argument if fragmented particle is not hadron
+   * \throw std::invalid_argument if string is neither mesonic nor baryonic
    */
   int append_final_state(const FourVector &uString,
                          const ThreeVector &evecLong);
@@ -383,7 +416,7 @@ class StringProcess {
    * \param[in] q2 PDG code of quark 2
    * \return PDG code of diquark composed of q1 and q2
    */
-  int diquark_from_quarks(int q1, int q2);
+  static int diquark_from_quarks(int q1, int q2);
 
   /**
    * make a random selection to determine partonic contents at the string ends.
@@ -391,7 +424,7 @@ class StringProcess {
    * \param[out] idq1 is PDG id of quark or anti-diquark.
    * \param[out] idq2 is PDG id of anti-quark or diquark.
    */
-  void make_string_ends(const PdgCode &pdgcode_in, int &idq1, int &idq2);
+  static void make_string_ends(const PdgCode &pdgcode_in, int &idq1, int &idq2);
 
   /**
    * Easy setter of Pythia Vec4 from SMASH
@@ -399,21 +432,28 @@ class StringProcess {
    * \param[in] mom spatial three-vector
    * \return Pythia Vec4 from energy and ThreeVector
    */
-  Pythia8::Vec4 set_Vec4(double energy, const ThreeVector &mom) {
+  static Pythia8::Vec4 set_Vec4(double energy, const ThreeVector &mom) {
     return Pythia8::Vec4(mom.x1(), mom.x2(), mom.x3(), energy);
   }
 
   /**
    * perform string fragmentation to determine species and momenta of hadrons
-   * by implementing PYTHIA 8.2 \iref{Andersson:1983ia},
-   * \iref{Sjostrand:2014zea}. \param[in] idq1 PDG id of quark or anti-diquark
-   * (carrying color index). \param[in] idq2 PDG id of diquark or anti-quark
-   * (carrying anti-color index). \param[in] mString the string mass. \param[in]
-   * evecLong unit 3-vector specifying the direction of diquark or anti-diquark.
+   * by implementing PYTHIA 8.2 \iref{Andersson:1983ia}, \iref{Sjostrand:2014zea}.
+   * \param[in] idq1 PDG id of quark or anti-diquark (carrying color index).
+   * \param[in] idq2 PDG id of diquark or anti-quark (carrying anti-color index).
+   * \param[in] mString the string mass. [GeV]
+   * \param[out] evecLong unit 3-vector specifying the direction of diquark or
+   *                      anti-diquark.
+   * \param[in] flip_string_ends is whether or not we randomly switch string ends.
    * \return number of hadrons fragmented out of string.
+   *
+   * \throw std::runtime_error
+   *        if string mass is lower than threshold set by PYTHIA
    */
   int fragment_string(int idq1, int idq2, double mString,
-                      ThreeVector &evecLong);
+                      ThreeVector &evecLong, bool flip_string_ends);
+
+  // clang-format on
 };
 
 }  // namespace smash

@@ -45,7 +45,7 @@ void DecayAction::one_to_three() {
   const double mass_c = outgoing_c_type.mass();
   const double mass_resonance = incoming_particles_[0].effective_mass();
 
-  /* mandelstam-s limits for pairs ab and bc */
+  // mandelstam-s limits for pairs ab and bc
   const double s_ab_max = (mass_resonance - mass_c) * (mass_resonance - mass_c);
   const double s_ab_min = (mass_a + mass_b) * (mass_a + mass_b);
   const double s_bc_max = (mass_resonance - mass_a) * (mass_resonance - mass_a);
@@ -81,7 +81,7 @@ void DecayAction::one_to_three() {
   log.debug("s_ab: ", s_ab, " s_bc: ", s_bc, " min: ", dalitz_bc_min,
             " max: ", dalitz_bc_max);
 
-  /* Compute energy and momentum magnitude */
+  // Compute energy and momentum magnitude
   const double energy_a =
       (mass_resonance * mass_resonance + mass_a * mass_a - s_bc) /
       (2 * mass_resonance);
@@ -101,13 +101,13 @@ void DecayAction::one_to_three() {
   }
   log.debug("Calculating the angles...");
 
-  /* momentum_a direction is random */
+  // momentum_a direction is random
   Angles phitheta;
   phitheta.distribute_isotropically();
-  /* This is the angle of the plane of the three decay particles */
+  // This is the angle of the plane of the three decay particles
   outgoing_a.set_4momentum(mass_a, phitheta.threevec() * momentum_a);
 
-  /* Angle between a and b */
+  // Angle between a and b
   double theta_ab = std::acos(
       (energy_a * energy_b - 0.5 * (s_ab - mass_a * mass_a - mass_b * mass_b)) /
       (momentum_a * momentum_b));
@@ -116,18 +116,18 @@ void DecayAction::one_to_three() {
   bool phi_has_changed = phitheta.add_to_theta(theta_ab);
   outgoing_b.set_4momentum(mass_b, phitheta.threevec() * momentum_b);
 
-  /* Angle between b and c */
+  // Angle between b and c
   double theta_bc = std::acos(
       (energy_b * energy_c - 0.5 * (s_bc - mass_b * mass_b - mass_c * mass_c)) /
       (momentum_b * momentum_c));
   log.debug("theta_bc: ", theta_bc, " Eb: ", energy_b, " Ec: ", energy_c,
             " sbc: ", s_bc, " pb: ", momentum_b, " pc: ", momentum_c);
-  // pass information on whether phi has changed during the last adding
-  // on to add_to_theta:
+  /* pass information on whether phi has changed during the last adding
+   * on to add_to_theta: */
   phitheta.add_to_theta(theta_bc, phi_has_changed);
   outgoing_c.set_4momentum(mass_c, phitheta.threevec() * momentum_c);
 
-  /* Momentum check */
+  // Momentum check
   FourVector ptot =
       outgoing_a.momentum() + outgoing_b.momentum() + outgoing_c.momentum();
 
@@ -149,8 +149,7 @@ void DecayAction::one_to_three() {
 void DecayAction::generate_final_state() {
   const auto &log = logger<LogArea::DecayModes>();
   log.debug("Process: Resonance decay. ");
-  /*
-   * Execute a decay process for the selected particle.
+  /* Execute a decay process for the selected particle.
    *
    * Randomly select one of the decay modes of the particle
    * according to their relative weights. Then decay the particle
@@ -162,7 +161,7 @@ void DecayAction::generate_final_state() {
   const DecayBranch *proc =
       choose_channel<DecayBranch>(decay_channels_, total_width_);
   outgoing_particles_ = proc->particle_list();
-  /* set positions of the outgoing particles */
+  // set positions of the outgoing particles
   for (auto &p : outgoing_particles_) {
     p.set_4position(incoming_particles_[0].position());
   }
@@ -187,7 +186,7 @@ void DecayAction::generate_final_state() {
           std::to_string(incoming_particles_[0].effective_mass()) + ")");
   }
 
-  /* Set formation time and boost back. */
+  // Set formation time and boost back.
   ThreeVector velocity_CM = incoming_particles_[0].velocity();
   for (auto &p : outgoing_particles_) {
     log.debug("particle momenta in lrf ", p);
@@ -221,7 +220,7 @@ std::pair<double, double> DecayAction::sample_masses() const {
         std::to_string(t_b.min_mass_kinematic()));
   }
 
-  /* If one of the particles is a resonance, sample its mass. */
+  // If one of the particles is a resonance, sample its mass.
   if (!t_a.is_stable() && t_b.is_stable()) {
     masses.first = t_a.sample_resonance_mass(t_b.mass(), cms_energy, L_);
   } else if (!t_b.is_stable() && t_a.is_stable()) {
