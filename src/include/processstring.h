@@ -49,7 +49,7 @@ enum class StringSoftType {
  * according to the LUND/PYTHIA fragmentation scheme
  * \iref{Andersson:1983ia}, \iref{Sjostrand:2014zea}.
  *
- * The class implemets the following functionality:
+ * The class implements the following functionality:
  * - given two colliding initial state particles it provides hadronic final
  *   state after single diffractive, double diffractive and non-diffractive
  *   string excitation
@@ -300,6 +300,9 @@ class StringProcess {
   void set_tension_string(double kappa_string) {
     kappa_tension_string_ = kappa_string;
   }
+
+  // clang-format off
+
   /**
    * Set the soft subprocess identifier
    * \param[in] iproc soft string subprocess that will be implemented
@@ -330,8 +333,8 @@ class StringProcess {
   /**
    * Determine string masses and directions in which strings are stretched
    * \param[in] quarks pdg ids of string ends
-   * \param[in] pstr_com 4-momenta of strings in the C.o.m. frame
-   * \param[out] m_str masses of strings
+   * \param[in] pstr_com 4-momenta of strings in the C.o.m. frame [GeV]
+   * \param[out] m_str masses of strings [GeV]
    * \param[out] evec_str are directions in which strings are stretched.
    * \return whether masses are above the threshold
    */
@@ -343,8 +346,8 @@ class StringProcess {
   /**
    * Prepare kinematics of two strings, fragment them and append to final_state
    * \param[in] quarks pdg ids of string ends
-   * \param[in] pstr_com 4-momenta of strings in the C.o.m. frame
-   * \param[in] m_str masses of strings
+   * \param[in] pstr_com 4-momenta of strings in the C.o.m. frame [GeV]
+   * \param[in] m_str masses of strings [GeV]
    * \param[out] evec_str are directions in which strings are stretched.
    * \param[in] flip_string_ends is whether or not we randomly switch string ends.
    * \return whether fragmentations and final state creation was successful
@@ -360,8 +363,8 @@ class StringProcess {
    * Single-diffractive process
    * is based on single pomeron exchange described in \iref{Ingelman:1984ns}.
    * \param[in] is_AB_to_AX specifies which hadron to excite into a string.
-   *                    true : A + B -> A + X
-   *                    false : A + B -> X + B
+   *            true : A + B -> A + X,
+   *            false : A + B -> X + B
    * \return whether the process is successfully implemented.
    */
   bool next_SDiff(bool is_AB_to_AX);
@@ -385,6 +388,9 @@ class StringProcess {
    * carried by quark is based on the UrQMD model
    * \iref{Bass:1998ca}, \iref{Bleicher:1999xi}.
    * \return whether the process is successfully implemented.
+   *
+   * \throw std::runtime_error
+   *        if incoming particles are neither mesonic nor baryonic
    */
   bool next_NDiffSoft();
   /**
@@ -399,6 +405,9 @@ class StringProcess {
    * it create two mesonic strings after annihilating one quark-antiquark pair.
    * Each string has mass equal to half of sqrts.
    * \return whether the process is successfully implemented.
+   *
+   * \throw std::invalid_argument
+   *        if incoming particles are not baryon-antibaryon pair
    */
   bool next_BBbarAnn();
 
@@ -415,6 +424,9 @@ class StringProcess {
    * \param[in] uString is velocity four vector of the string.
    * \param[in] evecLong is unit 3-vector in which string is stretched.
    * \return number of hadrons fragmented out of string.
+   *
+   * \throw std::invalid_argument if fragmented particle is not hadron
+   * \throw std::invalid_argument if string is neither mesonic nor baryonic
    */
   int append_final_state(const FourVector &uString,
                          const ThreeVector &evecLong);
@@ -455,26 +467,37 @@ class StringProcess {
     return Pythia8::Vec4(mom.x1(), mom.x2(), mom.x3(), energy);
   }
 
-  // clang-format off
-
   /**
    * perform string fragmentation to determine species and momenta of hadrons
    * by implementing PYTHIA 8.2 \iref{Andersson:1983ia}, \iref{Sjostrand:2014zea}.
    * \param[in] idq1 PDG id of quark or anti-diquark (carrying color index).
    * \param[in] idq2 PDG id of diquark or anti-quark (carrying anti-color index).
-   * \param[in] mString the string mass.
+   * \param[in] mString the string mass. [GeV]
    * \param[out] evecLong unit 3-vector specifying the direction of diquark or
    *                      anti-diquark.
    * \param[in] flip_string_ends is whether or not we randomly switch string ends.
    * \return number of hadrons fragmented out of string.
+   *
+   * \throw std::runtime_error
+   *        if string mass is lower than threshold set by PYTHIA
    */
   int fragment_string(int idq1, int idq2, double mString,
                       ThreeVector &evecLong, bool flip_string_ends);
 
   /**
    * Assign a cross section scaling factor to all outgoing particles.
-   * Factor is only non-zero, when the outgoing particle carries
-   * a valence quark from the excited hadron.
+   *
+   * The factor is only non-zero, when the outgoing particle carries
+   * a valence quark from the excited hadron. The assigned cross section
+   * scaling factor is equal to the number of the valence quarks from the
+   * fragmented hadron contained in the fragment divided by the total number
+   * of valence quarks of that fragment multiplied by a coherence factor
+   * \param[in] baryon_string baryon number of the string
+   * \param[out] outgoing_particles list of string fragments to which scaling
+   *             factors are assigned
+   * \param[in] evec_coll direction in which the string is stretched
+   * \param[in] suppression_factor additional coherence factor to be
+   *            multiplied with scaling factor
    */
   static void assign_all_scaling_factors(int baryon_string,
                                          ParticleList& outgoing_particles,
@@ -482,17 +505,32 @@ class StringProcess {
                                          double suppression_factor);
 
   /**
+   * Find the leading string fragments
+   *
    * Find the first particle, which can carry nq1, and the last particle,
    * which can carry nq2 valence quarks and return their indices in
    * the given list.
+   *
+   * \param[in] nq1 number of valence quarks from excited hadron at forward
+   *                end of the string
+   * \param[in] nq2 number of valance quarks from excited hadron at backward
+   *                end of the string
+   * \param[in] list list of string fragments
+   * \return indices of the leading hadrons in \p list
    */
   static std::pair<int, int> find_leading(int nq1, int nq2, ParticleList& list);
 
   /**
    * Assign a cross section scaling factor to the given particle.
+   *
    * The scaling factor is the number of quarks from the excited hadron,
    * that the fragment carries devided by the total number of quarks in
-   * this fragment.
+   * this fragment multiplied by coherence factor.
+   *
+   * \param[in] nquark number of valence quarks from the excited hadron
+   *            contained in the given string fragment \p data
+   * \param[out] data particle to assign a scaling factor to
+   * \param[in] suppression_factor coherence factor to decrease scaling factor
    */
   static void assign_scaling_factor(int nquark, ParticleData& data,
                                     double suppression_factor);

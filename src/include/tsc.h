@@ -29,10 +29,23 @@
 #pragma intrinsic(__rdtsc)
 #endif
 
+namespace smash {
+
+/**
+ * A low-overhead timer for benchmarking small regions of code.
+ *
+ * This is usually unused in SMASH, because it should only be temporarily
+ * used when benchmarking.
+ */
 class TimeStampCounter {
  public:
+  /// Start the counter.
   void start();
+
+  /// Stop the counter.
   void stop();
+
+  /// \return Number of counted CPU cycles.
   uint64_t cycles() const;
 
  private:
@@ -69,5 +82,7 @@ inline void TimeStampCounter::stop() {
 inline uint64_t TimeStampCounter::cycles() const { return m_end.a - m_start.a; }
 
 std::ostream &operator<<(std::ostream &out, const TimeStampCounter &tsc);
+
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_TSC_H_

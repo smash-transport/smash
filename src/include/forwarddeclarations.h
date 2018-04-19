@@ -79,6 +79,7 @@ class Tabulation;
 class ExperimentBase;
 struct ExperimentParameters;
 
+/// The calculation frame
 enum class CalculationFrame {
   CenterOfVelocity,
   CenterOfMass,
@@ -105,8 +106,7 @@ enum class Sampling {
   Custom,
 };
 
-/** The time step mode.
- */
+/// The time step mode.
 enum class TimeStepMode : char {
   /// Don't use time steps; propagate from action to action.
   None,
@@ -116,7 +116,8 @@ enum class TimeStepMode : char {
   Adaptive,
 };
 
-/** Initial condition for a particle in a box.
+/**
+ * Initial condition for a particle in a box.
  *
  * If PeakedMomenta is used, all particles have the same momentum
  * \f$p = 3 \cdot T\f$ with T the temperature.
@@ -131,7 +132,8 @@ enum class BoxInitialCondition {
   PeakedMomenta,
 };
 
-/** Initial condition for a particle in a sphere
+/**
+ * Initial condition for a particle in a sphere
  *
  * IC_ES, IC_1M and IC_2M are off-equilibrium distributions used in massless
  * comparisons of SMASH to the extended universe metric. They are described in
@@ -151,7 +153,8 @@ enum class SphereInitialCondition {
   IC_Massive,
 };
 
-/** Defines properties of expansion for the metric (e.g. FRW)
+/**
+ * Defines properties of expansion for the metric (e.g. FRW)
  *
  *  If anything else than NoExpansion is used, then a non-zero
  *  Hubble parameter is computed and corrections are brought to the
@@ -165,9 +168,13 @@ enum class ExpansionMode {
   Exponential,
 };
 
+/// Treatment of N Nbar Annihilation
 enum class NNbarTreatment {
+  /// No Annihilation
   NoAnnihilation,
+  /// Use intermediate Resonances
   Resonances,
+  /// Use string fragmentation
   Strings,
 };
 

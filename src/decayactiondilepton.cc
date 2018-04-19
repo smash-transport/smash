@@ -59,7 +59,7 @@ void DecayActionDilepton::one_to_three() {
   // perform decay into non-lepton and virtual photon (dilepton)
   const double dil_mom = pCM(cms_energy, dil_mass, mass_nl);
 
-  /* Here we assume an isotropic angular distribution. */
+  // Here we assume an isotropic angular distribution.
   Angles phitheta;
   phitheta.distribute_isotropically();
 
@@ -70,7 +70,7 @@ void DecayActionDilepton::one_to_three() {
   // perform decay of virtual photon into two leptons
   const double mom_lep = pCM(dil_mass, mass_l1, mass_l2);
 
-  /* Here we assume an isotropic angular distribution. */
+  // Here we assume an isotropic angular distribution.
   phitheta.distribute_isotropically();
 
   l1.set_4momentum(mass_l1, phitheta.threevec() * mom_lep);

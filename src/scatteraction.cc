@@ -403,7 +403,7 @@ void ScatterAction::resonance_formation() {
 void ScatterAction::string_excitation(bool is_soft_proc) {
   assert(incoming_particles_.size() == 2);
   const auto &log = logger<LogArea::Pythia>();
-  // Disable doubleing point exception trap for Pythia
+  // Disable floating point exception trap for Pythia
   {
     DisableFloatTraps guard;
     /* initialize the string_process_ object for this particular collision */

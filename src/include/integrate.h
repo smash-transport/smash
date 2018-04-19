@@ -121,6 +121,7 @@ class Integrator {
    *
    * \param a The lower limit of the integral.
    * \param b The upper limit of the integral.
+   * \tparam F Type of the integrand function.
    * \param fun The callable to integrate over. This callable may be a function
    *            pointer, lambda, or a functor object. In any case, the callable
    *            must return a `double` and take a single `double` argument. If
@@ -217,6 +218,7 @@ class Integrator1dMonte {
    *
    * \param min The lower limit of the integration.
    * \param max The upper limit of the integration.
+   * \tparam F Type of the integrand function.
    * \param fun The callable to integrate over. This callable may be a function
    *            pointer, lambda, or a functor object. In any case, the callable
    *            must return a `double` and take two `double` arguments. If you
@@ -319,6 +321,7 @@ class Integrator2d {
    * \param max1 The upper limit in the first dimension.
    * \param min2 The lower limit in the second dimension.
    * \param max2 The upper limit in the second dimension.
+   * \tparam F Type of the integrand function.
    * \param fun The callable to integrate over. This callable may be a function
    *            pointer, lambda, or a functor object. In any case, the callable
    *            must return a `double` and take two `double` arguments. If you
@@ -362,8 +365,12 @@ class Integrator2d {
   const std::size_t number_of_calls_;
 };
 
-/// This is a wrapper for the integrand, so we can pass the limits as well for
-/// renormalizing to the unit cube.
+/**
+ * This is a wrapper for the integrand, so we can pass the limits as well for
+ * renormalizing to the unit cube.
+ *
+ * \tparam F Type of the integrand function.
+ */
 template <typename F>
 struct Integrand2d {
   double min1;
@@ -411,6 +418,7 @@ class Integrator2dCuhre {
    * \param max1 The upper limit in the first dimension.
    * \param min2 The lower limit in the second dimension.
    * \param max2 The upper limit in the second dimension.
+   * \tparam F Type of the integrand function.
    * \param fun The callable to integrate over. This callable may be a function
    *            pointer, lambda, or a functor object. In any case, the callable
    *            must return a `double` and take two `double` arguments. If you
