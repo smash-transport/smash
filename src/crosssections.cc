@@ -156,7 +156,7 @@ CollisionBranchList cross_sections::generate_collision_list(
     process_list.emplace_back(elastic(elastic_parameter));
   }
   if (is_pythia) {
-    // string excitation 
+    // string excitation
     append_list(process_list, string_excitation(string_process));
   } else {
     if (two_to_one_switch) {
@@ -164,7 +164,7 @@ CollisionBranchList cross_sections::generate_collision_list(
       append_list(process_list, two_to_one());
     }
     if (included_2to2.any()) {
-      // 2->2 (inelastic) 
+      // 2->2 (inelastic)
       append_list(process_list, two_to_two(included_2to2));
     }
   }
@@ -1703,7 +1703,7 @@ double cross_sections::high_energy() const {
              (pdg_b == pdg::pi_m && pdg_a == pdg::p) ||
              (pdg_a == pdg::pi_p && pdg_b == pdg::n) ||
              (pdg_b == pdg::pi_p && pdg_a == pdg::n)) {
-    return piminusp_high_energy(s); // pi- p, pi+ n
+    return piminusp_high_energy(s);  // pi- p, pi+ n
   } else {
     return 0;
   }
