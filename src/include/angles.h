@@ -135,7 +135,7 @@ class Angles {
    * \param[in] reverse if true, we start in the "far" hemisphere, meaning a
    * positive delta will shift the object towards the north pole.
    *
-   * \return returns true if we end up in the far hemisphere, false if
+   * \return true if we end up in the far hemisphere, false if
    * we end up in the original hemisphere.
    */
   bool add_to_theta(const double delta, const bool reverse);

@@ -104,8 +104,13 @@ double TwoBodyDecayStable::in_width(double m0, double G0, double m, double,
 
 // TwoBodyDecaySemistable
 
-/// re-arrange the particle list such that the first particle is the stable one
-static ParticleTypePtrList arrange_particles(ParticleTypePtrList part_types) {
+/**
+ * Rearrange the particle list such that the first particle is the stable one.
+ *
+ * \param[inout] part_types Particle list to be rearranged.
+ * \return Reference to rearranged particle list.
+ */
+static ParticleTypePtrList& arrange_particles(ParticleTypePtrList& part_types) {
   if (part_types[1]->is_stable()) {
     std::swap(part_types[0], part_types[1]);
   }

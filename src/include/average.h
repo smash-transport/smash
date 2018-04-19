@@ -17,23 +17,26 @@
 
 namespace smash {
 
-/// Calculate an average value incrementally.
+/** Calculate an average value incrementally.
+ *
+ * \tparam T Type of the values (should be floating point).
+ */
 template <typename T>
 class Average {
  public:
   /// Create a new object to calculate an average.
   Average() : avg_(0), n_(0) {}
 
-  /// Add a value to the set of numbers defining the average.
+  /// Add a value \p x to the set of numbers defining the average.
   void add(T x) {
     avg_ = (avg_ * n_ + x) / (n_ + 1);
     n_++;
   }
 
-  /// Current average.
+  /// \return Current average.
   T average() const { return avg_; }
 
-  /// Number of values used to calculate the average.
+  /// \return Number of values used to calculate the average.
   uint64_t number_of_values() const { return n_; }
 
   /// Reset the average to 0.
@@ -43,17 +46,21 @@ class Average {
   }
 
  private:
+  /// Average.
   T avg_;
+  /// Sample size.
   uint64_t n_;
 };
 
-/// Remove duplicates from data (x, y) by averaging y.
-///
-/// Assumes (x, y) is sorted.
-///
-/// \param x x-values.
-/// \param y y-values.
-/// \return New x and y values as a pair of vectors.
+/** Remove duplicates from data (x, y) by averaging y.
+ *
+ * Assumes (x, y) is sorted.
+ *
+ * \tparam T Type of the values (should be floating point).
+ * \param x x-values.
+ * \param y y-values.
+ * \return New x and y values as a pair of vectors.
+ */
 template <typename T>
 std::pair<std::vector<T>, std::vector<T>> dedup_avg(const std::vector<T>& x,
                                                     const std::vector<T>& y) {
