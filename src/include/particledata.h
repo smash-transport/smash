@@ -257,6 +257,7 @@ class ParticleData {
     dst.position_ = position_;
     dst.formation_time_ = formation_time_;
     dst.cross_section_scaling_factor_ = cross_section_scaling_factor_;
+    dst.begin_formation_time_ = begin_formation_time_;
   }
 
   /**
