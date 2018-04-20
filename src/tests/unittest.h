@@ -44,7 +44,6 @@
 #include <ext/stdio_sync_filebuf.h>
 #endif
 
-#include "assert.h"
 #include "macros.h"
 #include "ulp.h"
 
