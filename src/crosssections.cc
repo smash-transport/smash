@@ -143,8 +143,9 @@ CollisionBranchList cross_sections::generate_collision_list(
   const ParticleType& t1 = incoming_particles_[0].type();
   const ParticleType& t2 = incoming_particles_[1].type();
   const bool both_are_nucleons = t1.is_nucleon() && t2.is_nucleon();
+  const bool both_are_baryons = t1.is_baryon() && t2.is_baryon();
 
-  const bool is_pythia = decide_string(strings_switch, both_are_nucleons);
+  const bool is_pythia = decide_string(strings_switch, both_are_baryons);
 
   /* Elastic collisions between two nucleons with sqrt_s below
    * low_snn_cut can not happen. */
@@ -2013,7 +2014,7 @@ CollisionBranchList cross_sections::find_nn_xsection_from_type(
 }
 
 bool cross_sections::decide_string(bool strings_switch,
-                                   bool treat_nnbar_with_strings) const {
+                                   bool treat_BBbar_with_strings) const {
   /* Determine the energy region of the mixed scattering type for two types of
    * scattering. */
   const ParticleType& t1 = incoming_particles_[0].type();
@@ -2032,7 +2033,7 @@ bool cross_sections::decide_string(bool strings_switch,
     // nucleon-nucleon collisions are included in pythia.
     include_pythia = true;
   /// \todo JB:figure out whether is_baryon() is true also for anti-baryons
-  } else if (treat_nnbar_with_strings &&
+  } else if (treat_BBbar_with_strings &&
              t1.is_baryon() && t2.is_baryon() &&
              t1.antiparticle_sign() != t2.antiparticle_sign()) {
       // NNbar only goes through strings, so there is no "window" considerations
