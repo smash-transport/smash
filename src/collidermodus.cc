@@ -69,7 +69,7 @@ namespace smash {
  * \li \key "frozen" - Use "frozen" if you want to use Fermi motion
  * without potentials
  *
- * \key Collisions_Within_Nucleus (string, optional, default = false)
+ * \key Collisions_Within_Nucleus (string, optional, default = false) \n
  * Determine whether to allow the first collisions within the same nucleus.
  * \li \key true - First collisions within the same nucleus allowed
  * \li \key false - First collisions within the same nucleus forbidden
@@ -207,7 +207,7 @@ namespace smash {
              Particles:    {2212: 29, 2112 :34}
          Sqrtsnn: 3.0
  \endverbatim
- * To configure a fixed target heavy-ion collision with deformed nuclei whose
+ * To configure a fixed target heavy-ion collision with deformed nuclei, whose
  * deformation is explicitly declared, it can be done according to the following
  * example:
  *\verbatim
@@ -235,12 +235,12 @@ namespace smash {
          Calculation_Frame: "fixed target"
  \endverbatim
  *
- * To further use Fermi motion and forbid the first collisions within the
- * projectile or target nucleus, add the following to the \key Collider
- * subection in the configuration file:
+ * To further use Fermi motion and allow the first collisions within the
+ * projectile or target nucleus, the corresponding options need to be activated
+ * by means of:
  *\verbatim
          Fermi_Motion: "on"
-         Collisions_Within_Nucleus: "False"
+         Collisions_Within_Nucleus: True
  \endverbatim
  *
  * Additionally, the impact parameter may be specified manually. See

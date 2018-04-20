@@ -253,11 +253,11 @@ namespace {
      Output_Interval: 1.0
      Density_Type: "baryon"
      Particles:
-         Format: ["Oscar1999", "VTK", "Root"]
+         Format:    ["Oscar1999", "VTK", "Root"]
          Extended: False
          Only_Final: False
      Collisions:
-         Format: ["Oscar2013"]
+         Format:    ["Oscar2013"]
          Extended: True
          Print_Start_End: True
  \endverbatim
@@ -270,10 +270,10 @@ namespace {
  * 100 fractional photons.
  *\verbatim
      Dileptons:
-         Format: ["Oscar2013", "Binary"]
+         Format:    ["Oscar2013", "Binary"]
          Extended: True
      Photons:
-         Format: ["Oscar2013"]
+         Format:    ["Oscar2013"]
          Fractions: 100
  \endverbatim
  *
@@ -285,11 +285,11 @@ namespace {
  * in "ASCII" and "VTK" format.
  *\verbatim
      Thermodynamics:
-         Format:          ["ASCII", "VTK"]
-         Type:            "hadron"
-         Quantities:      ["rho_eckart", "tmn_landau"]
-         Position:        [0.0, 0.0, 0.0]
-         Smearing:        False
+         Format:    ["ASCII", "VTK"]
+         Type: "hadron"
+         Quantities:    ["rho_eckart", "tmn_landau"]
+         Position:    [0.0, 0.0, 0.0]
+         Smearing: False
  \endverbatim
  */
 
@@ -598,9 +598,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *\verbatim
        Time_Step_Mode: Adaptive
        Adaptive_Time_Step:
-           Smoothing_Factor:       0.1
-           Target_Missed_Actions:  0.01
-           Allowed_Deviation:      2.5
+           Smoothing_Factor: 0.1
+           Target_Missed_Actions: 0.01
+           Allowed_Deviation: 2.5
    \endverbatim
    *
    * In the case of an expanding sphere setup, change the \key Modus and provide
@@ -807,9 +807,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *
    *\verbatim
    Lattice:
-       Origin: [0.0, 0.0, 0.0]
-       Sizes: [10.0, 10.0, 10.0]
-       Cell_Number: [20, 20, 20]
+       Origin:    [0.0, 0.0, 0.0]
+       Sizes:    [10.0, 10.0, 10.0]
+       Cell_Number:    [20, 20, 20]
        Periodic: True
        Potentials_Affect_Thresholds: True
    \endverbatim

@@ -133,8 +133,8 @@ class ModusDefault {
    * \n
    *\verbatim
    Forced_Thermalization:
-       Lattice_Sizes: [20.0, 20.0, 50.0]
-       Cell_Number: [21, 21, 101]
+       Lattice_Sizes:    [20.0, 20.0, 50.0]
+       Cell_Number:    [21, 21, 101]
        Critical_Edens: 0.3
        Start_Time: 10.0
        Timestep: 1.0

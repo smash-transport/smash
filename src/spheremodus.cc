@@ -47,14 +47,7 @@ namespace smash {
  * \key Init_Multiplicities (int int, required):\n
  * Initial multiplicities per particle species.
  * Map of PDG number and quantity of this PDG number.
- * Controls how many particles of each sort will be initialized. \n
- * Example:
- * \verbatim
- Init_Multiplicities:
- 2112: 200
- -2112: 100
- \endverbatim
- * It means that 200 neutrons and 100 antineutrons will be initialized.
+ * Controls how many particles of each species will be initialized.
  *
  * \key Use_Thermal_Multiplicities (bool, optional, default = false): \n
  * If this option is set to true then Init_Multiplicities are ignored and the
@@ -82,6 +75,7 @@ namespace smash {
  * \li \key IC_1M - off-equilibrium distribution
  * \li \key IC_2M - off-equilibrium distribution
  * \li \key IC_Massive - off-equilibrium distribution
+ *
  * See \iref{Bazow:2016oky} and \iref{Tindall:2016try} for further explanations
  * about the different distribution functions..
  *
@@ -102,14 +96,14 @@ namespace smash {
          Initial_Condition: "thermal momenta"
          Start_Time: 0.0
          Init_Multiplicities:
-             211:    100
-             111:    100
-             -211:   100
-             2212:   50
-             2112:   50
+             211: 100
+             111: 100
+             -211: 100
+             2212: 50
+             2112: 50
  \endverbatim
  *
- * As for the box, it is also possible to initialize a thermal sphere based on
+ * It is also possible to initialize a sphere based on
  * thermal multiplicities. This is done via
  *\verbatim
  Modi:

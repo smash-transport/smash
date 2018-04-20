@@ -97,7 +97,7 @@ namespace smash {
  *
  *\verbatim
  Collision_Term:
-     Included_2to2: ["Elastic", "NN_to_NR", "NN_to_DR", "KN_to_KN", "KN_to_KDelta"]
+     Included_2to2:    ["Elastic", "NN_to_NR", "NN_to_DR", "KN_to_KN", "KN_to_KDelta"]
      Two_to_One: True
      Force_Decays_At_End: False
      NNbar_Treatment: "resonances"

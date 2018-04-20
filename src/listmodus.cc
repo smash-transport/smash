@@ -78,7 +78,7 @@ namespace smash {
  *
  * It might for some reason be necessary to not run SMASH starting with the
  * first event, it this case, the event_id can be shifted. Additionally, the
- * start time can be manually adjusted. This can be done via:
+ * start time can be manually adjusted.
  *\verbatim
  Modi:
      List:
@@ -98,10 +98,10 @@ namespace smash {
  * <div class="line"><span class="preprocessor">0.1 6.42036 1.66473 9.38499
  * 0.138 0.232871 0.116953 -0.115553 0.090303 111 0 0</span></div>
  * </div>
- * It means that one \f$ \pi^0 \f$ with spatial coordinates\n
- * (t, x, y, z) = (0.1, 6.42036, 1.66473, 9.38499) fm and\n
+ * It means that one \f$ \pi^0 \f$ with spatial coordinates
+ * (t, x, y, z) = (0.1, 6.42036, 1.66473, 9.38499) fm and
  * and 4-momenta (p0, px, py, pz) =
- * (0.232871, 0.116953, -0.115553, 0.090303) GeV,\n
+ * (0.232871, 0.116953, -0.115553, 0.090303) GeV,
  * with mass = 0.138 GeV, pdg = 111, id = 0 and charge 0 will be initialized.
  *
  */

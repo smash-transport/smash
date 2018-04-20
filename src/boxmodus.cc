@@ -111,11 +111,11 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
          Initial_Condition: "thermal momenta"
          Start_Time: 0.0
          Init_Multiplicities:
-             211:    100
-             111:    100
-             -211:   100
-             2212:   50
-             2112:   50
+             211: 100
+             111: 100
+             -211: 100
+             2212: 50
+             2112: 50
  \endverbatim
  *
  * On the contrary, it is also possible to initialize a thermal box based on

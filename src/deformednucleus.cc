@@ -24,7 +24,7 @@ namespace smash {
  *
  * Additional Parameters to specify the shape of the modified Woods-Saxon
  * distribution, necessary to configure the deformation of the nucleus if
- * \key Deformed: true and \key Automatic: false.: \n
+ * \key Deformed: True and \key Automatic: False.: \n
  *
  * \li \key Beta_2 (double, optional):\n
  * The deformation coefficient for the spherical harmonic Y_2_0 in the
