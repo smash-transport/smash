@@ -83,6 +83,61 @@ namespace smash {
  *
  * \key String_Sigma_T (double, optional, default = 0.25)
  *
+ * \page input_collision_term_ Collision_Term
+ * \n
+ * Example: Configuring the Collision Term
+ * --------------
+ * The following example configures SMASH to include all but
+ * strangeness exchange involving 2 <--> 2 scatterings, to treat N + Nbar
+ * processes as resonance formations and to not force decays at the end of the
+ * simulation. The elastic cross section is globally set to 30 mbarn and the
+ * \f$ \sqrt{s} \f$ cutoff for elastic nucleon + nucleon collisions is 1.93 GeV.
+ * All collisions are performed isotropically and 2 <--> 1 processes are
+ * forbidden.
+ *
+ *\verbatim
+ Collision_Term:
+     Included_2to2: ["Elastic", "NN_to_NR", "NN_to_DR", "KN_to_KN", "KN_to_KDelta"]
+     Two_to_One: True
+     Force_Decays_At_End: False
+     NNbar_Treatment: "resonances"
+     Elastic_Cross_Section: 30.0
+     Elastic_NN_Cutoff_Sqrts: 1.93
+     Isotropic: True
+ \endverbatim
+ *
+ * If necessary, all collisions can be turned off by inserting
+ *\verbatim
+     No_Collisions: True
+ \endverbatim
+ * in the configuration file. \n
+ * \n
+ * Additionally, string fragmentation can be activated. If desired, the user can
+ * also configure the string parameters.
+ *
+ *\verbatim
+     Strings: True
+     String_Parameters:
+         String_Tension: 1.0
+         Gluon_Beta: 0.5
+         Gluon_Pmin: 0.001
+         Quark_Alpha: 1.0
+         Quark_Beta: 2.5
+         Strange_Supp: 0.217
+         Diquark_Supp: 0.081
+         Sigma_Perp: 0.7
+         StringZ_A: 0.68
+         StringZ_B: 0.98
+         String_Sigma_T: 0.25
+ \endverbatim
+ *
+ * Pauli Blocking can further be activated by means of the following subsection
+ *\verbatim
+     Pauli_Blocking:
+         Spatial_Averaging_Radius: 1.86
+         Momentum_Averaging_Radius: 0.08
+         Gaussian_Cutoff: 2.2
+ \endverbatim
  */
 
 ScatterActionsFinder::ScatterActionsFinder(

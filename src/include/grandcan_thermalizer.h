@@ -175,7 +175,7 @@ enum class HadronClass {
  */
 
 /*!\Userguide
- * \page input_forced_thermalization_ Forced_Thermalization
+ * \page input_forced_thermalization_ Forced Thermalization
  *
  * \key Cell_Number (list of 3 doubles, required, no default): \n
  * Number of cells in each direction (x,y,z).
