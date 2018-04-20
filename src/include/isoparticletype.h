@@ -50,6 +50,8 @@ class IsoParticleType {
   /**
    * Returns whether the two IsoParticleType objects have the same PDG code for
    * their first state; if it is, it is the same iso multiplet.
+   *
+   * \param rhs The other multiplet.
    */
   bool operator==(const IsoParticleType &rhs) const {
     return states_[0]->pdgcode() == rhs.states_[0]->pdgcode();
@@ -78,6 +80,8 @@ class IsoParticleType {
   /**
    * Add a new state to an existing multiplet
    * (and check if isospin symmetry is fulfilled).
+   *
+   * \param type The particle state to be added.
    */
   void add_state(const ParticleType &type);
 
@@ -88,7 +92,7 @@ class IsoParticleType {
   bool has_anti_multiplet() const;
 
   /**
-   * Returns a list of all IsoParticleTypes
+   * Returns a list of all IsoParticleTypes.
    */
   static const IsoParticleTypeList &list_all();
 
@@ -97,6 +101,7 @@ class IsoParticleType {
    * If the particle type is not found, an invalid pointer is returned.
    * You can convert the pointer to a bool to check whether it is valid.
    *
+   * \param name The name of the of the particle type.
    * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
    */
   static const IsoParticleType *try_find(const std::string &name);
@@ -104,6 +109,8 @@ class IsoParticleType {
   /**
    * Returns the IsoParticleType object for the given \p name.
    *
+   * \param name The name of the of the particle type to be found.
+   * \throw ParticleNotFoundFailure if \p name not found.
    * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
    */
   static const IsoParticleType &find(const std::string &name);
@@ -111,6 +118,8 @@ class IsoParticleType {
   /**
    * Returns the IsoParticleType object for the given \p type.
    *
+   * \param type The particle type to be found.
+   * \throw ParticleNotFoundFailure if \p type not found.
    * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
    */
   static IsoParticleType *find(const ParticleType &type);
@@ -123,6 +132,7 @@ class IsoParticleType {
   /**
    * Returns whether the ParticleType with the given \p pdgcode exists.
    *
+   * \param name The name of the of the particle type to be found.
    * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
    */
   static bool exists(const std::string &name);
@@ -130,29 +140,55 @@ class IsoParticleType {
   /**
    * Returns the ParticleType object for the given \p name, by first finding the
    * correct multiplet and then looking for the desired state.
+   *
+   * \param name The name of the of the particle state to be found.
+   * \throw std::runtime_error if \p name is not found.
    */
   static const ParticleTypePtr find_state(const std::string &name);
 
   /**
    * Add a new multiplet to the global list of IsoParticleTypes, which contains
-   * the type t. If the multiplet exists already, the type t will be added to
+   * \p type. If the multiplet exists already, the \p type will be added to
    * it.
+   *
+   * \param type The multiplet to be created.
    */
   static void create_multiplet(const ParticleType &type);
 
-  /// Look up the tabulated resonance integral for the XX -> NR cross section.
+  /**
+   * Look up the tabulated resonance integral for the XX -> NR cross section.
+   *
+   * \param sqrts The center-of-mass energy.
+   */
   double get_integral_NR(double sqrts);
 
-  /// Look up the tabulated resonance integral for the XX -> RR cross section.
+  /**
+   * Look up the tabulated resonance integral for the XX -> RR cross section.
+   *
+   * \param type_res_2 Type of the two resonances in the final state.
+   * \param sqrts The center-of-mass energy.
+   */
   double get_integral_RR(const ParticleType &type_res_2, double sqrts);
 
-  /// Utility function to help compute various XX->RR spectral integrals
+  /**
+   * Utility function to help compute various XX->RR spectral integrals
+   *
+   * \param type_res_2 Type of the two resonances in the final state.
+   */
   TabulationPtr integrate_RR(ParticleTypePtr &type_res_2);
 
-  /// Look up the tabulated resonance integral for the XX -> RK cross section.
+  /**
+   * Look up the tabulated resonance integral for the XX -> RK cross section.
+   *
+   * \param sqrts The center-of-mass energy.
+   */
   double get_integral_RK(double sqrts);
 
-  // Look up the tabulated resonance integral for the XX -> piR cross section.
+  /**
+   * Look up the tabulated resonance integral for the XX -> piR cross section.
+   *
+   * \param sqrts The center-of-mass energy.
+   */
   double get_integral_piR(double sqrts);
 
  private:
@@ -171,13 +207,17 @@ class IsoParticleType {
   TabulationPtr XS_piR_tabulation_;
   /// A tabulation of the spectral integral for the NK -> RK cross sections.
   TabulationPtr XS_RK_tabulation_;
-  /* A tabulation for the NN -> NR and NN -> DR cross sections,
-   * where R is a resonance from this multiplet. */
+  /**
+   * A tabulation for the NN -> NR and NN -> DR cross sections,
+   * where R is a resonance from this multiplet.
+   */
   TabulationPtr XS_NR_tabulation_, XS_DR_tabulation_;
-  /* A tabulation list for the NN -> RR' cross sections,
+  /**
+   * A tabulation list for the NN -> RR' cross sections,
    * where R is this multiplet and R' is a baryon resonance, associated
    * with a list of resonances R' for the NN -> RR' cross sections;
-   * used to calculate every multiplet spectral function only once*/
+   * used to calculate every multiplet spectral function only once
+   */
   std::unordered_map<IsoParticleType *, TabulationPtr> XS_RR_tabulations;
 
   /**

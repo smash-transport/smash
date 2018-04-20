@@ -169,6 +169,7 @@ ScatterActionsFinder::ScatterActionsFinder(
     auto subconfig = config["Collision_Term"]["String_Parameters"];
     string_process_interface_ =
         make_unique<StringProcess>(subconfig.take({"String_Tension"}, 1.0),
+                                   string_formation_time_,
                                    subconfig.take({"Gluon_Beta"}, 0.5),
                                    subconfig.take({"Gluon_Pmin"}, 0.001),
                                    subconfig.take({"Quark_Alpha"}, 1.0),
