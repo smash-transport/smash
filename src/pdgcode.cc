@@ -99,7 +99,7 @@ bool PdgCode::contains_enough_valence_quarks(
       return valence_quarks_required == 1 || valence_quarks_required == 2;
     }
     if (baryon_number() == -1) {
-      return valence_quarks_required == -1 || valence_quarks_required == -1;
+      return valence_quarks_required == -1 || valence_quarks_required == -2;
     }
   }
   throw std::runtime_error("String fragment is neither baryon nor meson");

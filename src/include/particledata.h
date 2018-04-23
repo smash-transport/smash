@@ -17,14 +17,16 @@
 
 namespace smash {
 
-/* A structure to hold information about the history of the particle,
- * e.g. the last interaction etc. */
+/** 
+ * A structure to hold information about the history of the particle,
+ * e.g. the last interaction etc. 
+ */
 struct HistoryData {
   /// Collision counter per particle, zero only for initially present particles
   int collisions_per_particle = 0;
-  // id of the last action
+  /// id of the last action
   uint32_t id_process = 0;
-  // type of the last action
+  /// type of the last action
   ProcessType process_type = ProcessType::None;
   /**
    * Time of the last action (excluding walls), time of kinetic freeze_out
@@ -33,7 +35,7 @@ struct HistoryData {
    * The full coordinate space 4-vector can be obtained by back-propagation
    */
   double time_last_collision = 0.0;
-  // PdgCodes of the parent particles
+  /// PdgCodes of the parent particles
   PdgCode p1 = 0x0, p2 = 0x0;
 };
 
@@ -52,49 +54,90 @@ class ParticleData {
    * specific \p unique_id.
    *
    * All other values are initialized to improbable values.
+   *
+   * \param[in] particle_type Type of particle to be created
+   * \param[in] unique_id id of particle to be created
    */
   explicit ParticleData(const ParticleType &particle_type, int unique_id = -1)
       : id_(unique_id), type_(&particle_type) {}
 
-  /// look up the id of the particle
+  /**
+   * Get the id of the particle
+   * \return particle id
+   */
   int id() const { return id_; }
-  /// set id of the particle
+  /**
+   * Set id of the particle
+   * \param[in] i id to be assigned to the particle
+   */
   void set_id(int i) { id_ = i; }
 
-  /// look up the pdgcode of the particle
+  /**
+   * Get the pdgcode of the particle
+   * \return pdgcode of the particle
+   */
   PdgCode pdgcode() const { return type_->pdgcode(); }
 
-  // convenience accessors to PdgCode:
+  // Convenience accessors to PdgCode:
   /// \copydoc PdgCode::is_hadron
   bool is_hadron() const { return type_->is_hadron(); }
 
   /// \copydoc PdgCode::is_baryon
   bool is_baryon() const { return pdgcode().is_baryon(); }
 
-  /** Returns the particle's pole mass ("on-shell"). */
+  /** 
+   * Get the particle's pole mass ("on-shell"). 
+   * \return pole mass of the particle [GeV]
+   */
   double pole_mass() const { return type_->mass(); }
-  /** Returns the particle's effective mass
-   * (as determined from the 4-momentum, possibly "off-shell"). */
+  /** 
+   * Get the particle's effective mass
+   * 
+   * Determined from the 4-momentum \f$m=\sqrt{p_\mu p^\mu}\f$.
+   * Possibly "off-shell".
+   * \return particle's effective mass
+   */
   double effective_mass() const;
   /**
-   * Return the ParticleType object associated to this particle.
+   * Get the Type of the particle
+   * \return ParticleType object associated to this particle.
    */
   const ParticleType &type() const { return *type_; }
 
-  /// look up the id of the last action
+  /**
+   * Get the id of the last action
+   * \return id of particle's latest collision
+   */
   uint32_t id_process() const { return history_.id_process; }
-  /// get history information
+  /**  
+   * Get history information
+   * \return particle's history
+   */
   HistoryData get_history() const { return history_; }
-  /** Store history information, i.e. the type of process and possibly the
+  /** 
+   * Store history information
+   * 
+   * The history contains the type of process and possibly the
    * PdgCodes of the parent particles (\p plist). Note, history is not set
-   * for dileptons and photons. */
+   * for dileptons and photons. 
+   * \param[in] ncoll particle's number of collisions
+   * \param[in] pid id of the particle's latest process
+   * \param[in] pt process type of the particle's latest process
+   * \param[in] time_of_or time of latest collision [fm]
+   * \param[in] plist list of parent particles */
   void set_history(int ncoll, uint32_t pid, ProcessType pt, double time_of_or,
                    const ParticleList &plist);
 
-  /// return the particle's 4-momentum
+  /**
+   * Get the particle's 4-momentum
+   * \return particle's 4-momentum [GeV]
+   */
   const FourVector &momentum() const { return momentum_; }
 
-  /// set the particle's 4-momentum directly
+  /**
+   * Set the particle's 4-momentum directly
+   * \param[in] momentum_vector 4-vector \f$p^\mu = (E,\vec{p})^T\f$
+   */
   void set_4momentum(const FourVector &momentum_vector) {
     momentum_ = momentum_vector;
   }
@@ -127,22 +170,38 @@ class ParticleData {
   }
   /**
    * Set the momentum of the particle without modifying the energy.
+   *
    * WARNING: Mass gets modified.
+   * \param[in] mom momentum 3-vector 
    */
   void set_3momentum(const ThreeVector &mom) {
     momentum_ = FourVector(momentum_.x0(), mom);
   }
 
-  /// The particle's position in Minkowski space
+  /**
+   * Get the particle's position in Minkowski space
+   * \return particle's position 4-vector
+   */
   const FourVector &position() const { return position_; }
-  /// Set the particle's position directly
+  /**
+   * Set the particle's 4-position directly
+   * \param[in] pos position 4-vector
+   */
   void set_4position(const FourVector &pos) { position_ = pos; }
-  /// Set the particle 3-position only (the time component is not changed)
+  /**
+   * Set particle's 3-position 
+   *
+   * the time component is not changed
+   * \param[in] pos position 3-vector
+   */
   void set_3position(const ThreeVector &pos) {
     position_ = FourVector(position_.x0(), pos);
   }
 
-  /// Translate the particle position by \p delta.
+  /** 
+   * Translate the particle position
+   * \param[in] delta 3-vector by which the particle is translated [fm]
+   */
   ParticleData translated(const ThreeVector &delta) const {
     ParticleData p = *this;
     p.position_[1] += delta[0];
@@ -151,14 +210,26 @@ class ParticleData {
     return p;
   }
 
-  /// Return the absolute formation time of the particle
-  double formation_time() const { return formation_time_; }
   /**
-   * Return the absolute time, where the cross section scaling factor slowly
-   * starts increasing from the given scaling factor to 1
+   * Get the absolute formation time of the particle 
+   * \return particle's formation time
+   */
+  double formation_time() const { return formation_time_; }
+
+  /**
+   * Get the absolute time, where the cross section scaling factor
+   * starts increasing with time from the given scaling factor to 1
+   * \return time when the cross section starts to increase
    */
   double begin_formation_time() const { return begin_formation_time_; }
-  /// Set the absolute formation time
+
+  /** 
+   * Set the absolute formation time
+   *
+   * The particle's cross section scaling factor will be a Heavyside fuction
+   * of time.
+   * \param[in] form_time absolute formation time
+   */
   void set_formation_time(const double &form_time) {
     formation_time_ = form_time;
     // cross section scaling factor will be a step function in time
@@ -178,20 +249,32 @@ class ParticleData {
     formation_time_ = form_time;
   }
 
-  /// Return cross section scaling factor
+  /**
+   * Get the cross section scaling factor
+   * \return particle's crosss section scaling factor
+   */
   const double &cross_section_scaling_factor() const {
     return cross_section_scaling_factor_;
   }
-  /// Set the cross_section_scaling_factor
+  /**
+   * Set the particle's cross_section_scaling_factor
+   * 
+   * All cross sections of this particle are scaled down by this factor until
+   * the formation time is over.
+   * \param[in] xsec_scal cross section scaling factor
+   */
   void set_cross_section_scaling_factor(const double &xsec_scal) {
     cross_section_scaling_factor_ = xsec_scal;
   }
 
-  /// get the velocity 3-vector
+  /**
+   * Get the velocity 3-vector
+   * \return 3-velocity of the particle
+   */
   ThreeVector velocity() const { return momentum_.velocity(); }
 
   /**
-   * Returns the inverse of the gamma factor from the current velocity of the
+   * Get the inverse of the gamma factor from the current velocity of the
    * particle.
    *
    * \f[\frac{1}{\gamma}=\sqrt{1-v^2}\f]
@@ -199,6 +282,8 @@ class ParticleData {
    * This functions is more efficient than calculating the gamma factor from
    * \ref velocity, since the \ref velocity function must execute three
    * divisions (for every space component of the momentum vector).
+   * 
+   * \returns inverse gamma factor
    *
    * \fpPrecision This function must use double-precision for the calculation of
    * \f$ \beta \f$ and \f$ 1-\beta \f$ as the latter results in a value close to
@@ -208,32 +293,57 @@ class ParticleData {
     return std::sqrt(1. - momentum_.sqr3() / (momentum_.x0() * momentum_.x0()));
   }
 
-  /// Apply a full Lorentz boost of momentum and position
+  /**
+   * Apply a full Lorentz boost of momentum and position
+   * \param[in] v boost 3-velocity
+   */
   void boost(const ThreeVector &v) {
     set_4momentum(momentum_.LorentzBoost(v));
     set_4position(position_.LorentzBoost(v));
   }
 
-  /// Apply a Lorentz-boost of only the momentum
+  /**
+   * Apply a Lorentz-boost to only the momentum
+   * \param[in] v boost 3-veloctity 
+   */ 
   void boost_momentum(const ThreeVector &v) {
     set_4momentum(momentum_.LorentzBoost(v));
   }
 
-  /// Returns whether the particles are identical
+  /**
+   * Check whether two particles have the same id
+   * \param[in] a particle to compare to
+   * \return whether the particles have the same id
+   */
   bool operator==(const ParticleData &a) const { return this->id_ == a.id_; }
-  /// Defines a total order of particles according to their id.
+  /**
+   * Check if this particle has a smaller id than another particle
+   * \param[in] a particle to compare to
+   * \return whether this particle has a smaller id than other particle
+   */
   bool operator<(const ParticleData &a) const { return this->id_ < a.id_; }
 
-  /// check if the particles are identical to a given id
+  /**
+   * Check if the particle has a given id
+   * \param[in] id_a id to compare to
+   * \return whether the particle has the given id 
+   */
   bool operator==(int id_a) const { return this->id_ == id_a; }
-  /// sort particles along to given id
+  /**
+   * Check whether the particle's id is smaller than the given id
+   * \param[in] id_a number to compare particle's id to
+   */
   bool operator<(int id_a) const { return this->id_ < id_a; }
 
   /**
-   * Construct a particle with the given type, id, and index in Particles.
+   * Construct a particle with the given type, id and index in Particles.
+   *
    * This constructor may only be called (directly or indirectly) from
    * Particles. This constructor should be private, but can't be in order to
    * support vector::emplace_back.
+   * \param[in] ptype Type of the particle to be constructed
+   * \param[in] uid id of the particle to be constructed
+   * \param[in] index index of the particle to be constructed
    */
   ParticleData(const ParticleType &ptype, int uid, int index)
       : id_(uid), index_(index), type_(&ptype) {}
@@ -247,9 +357,10 @@ class ParticleData {
   ParticleData() = default;
 
   /**
-   * Called from Particles to copy parts of ParticleData into its list of
-   * particles. Specifically it avoids to copy id_, index_, and type_. These
-   * three are handled by Particles.
+   * Copies some information of the particle to the given particle \p dst.
+   *
+   * Specifically it avoids to copy id_, index_, and type_.
+   * \param[in] dst particle values are copied to
    */
   void copy_to(ParticleData &dst) const {
     dst.history_ = history_;
@@ -285,9 +396,10 @@ class ParticleData {
    */
   ParticleTypePtr type_;
 
-  static_assert(sizeof(ParticleTypePtr) == 2,
-                "");  // this leaves us two Bytes padding to use for "free"
-  static_assert(sizeof(bool) <= 2, "");  // make sure we don't exceed that space
+  // this leaves us two Bytes padding to use for "free"
+  static_assert(sizeof(ParticleTypePtr) == 2, "");
+  // make sure we don't exceed that space
+  static_assert(sizeof(bool) <= 2, "");
   /**
    * If \c true, the object is an entry in Particles::data_ and does not hold
    * valid particle data. Specifically iterations over Particles must skip
@@ -310,29 +422,33 @@ class ParticleData {
   double begin_formation_time_ = 0.0;
   /// cross section scaling factor for unformed particles
   double cross_section_scaling_factor_ = 1.0;
-  // history information
+  /// history information
   HistoryData history_;
 };
 
-/**\ingroup logging
+/**
+ * \ingroup logging
  * Writes the state of the particle to the output stream.
  */
 std::ostream &operator<<(std::ostream &s, const ParticleData &p);
 
-/** \ingroup logging
+/** 
+ * \ingroup logging
  * Writes a compact overview over the particles in the \p particle_list argument
  * to the stream.
  */
 std::ostream &operator<<(std::ostream &out, const ParticleList &particle_list);
 
-/**\ingroup logging
+/**
+ * \ingroup logging
  * \internal
  * Helper type to attach the request for detailed printing to the type.
  */
 struct PrintParticleListDetailed {
   const ParticleList &list;
 };
-/**\ingroup loggingk
+/**
+ * \ingroup loggingk
  * Request the ParticleList to be printed in full detail (i.e. one full
  * ParticleData printout per line).
  */
@@ -340,7 +456,8 @@ inline PrintParticleListDetailed detailed(const ParticleList &list) {
   return {list};
 }
 
-/** \ingroup logging
+/**
+ * \ingroup logging
  * Writes a detailed overview over the particles in the \p particle_list
  * argument
  * to the stream. This overload is selected via the function \ref detailed.

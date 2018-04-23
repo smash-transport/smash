@@ -55,13 +55,17 @@ template <std::size_t index, int>
 inline typename std::enable_if<(index == 0)>::type create_all_loggers_impl(
     Configuration &) {}  // do nothing to end the recursion
 
-/*!
+/**
  * \internal
  * Recurse over the log areas in the LogArea::AreaTuple type. (The recursion is
  * ended via the overload above.)
  *
  * For every entry in the list the corresponding Logger object in
  * global_logger_collection is set up with area name and verbosity.
+ *
+ * \tparam index Recursion index.
+ * \tparam longest_name Length of longest log area name.
+ * \param[inout] config Configuration object.
  */
 template <std::size_t index,
           int longest_name = find_longest_logger_name<index - 1>()>
