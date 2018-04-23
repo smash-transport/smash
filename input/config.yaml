@@ -14,10 +14,6 @@ Output:
     Particles:
         Format:          ["Oscar2013"]
 
-Collision_Term:
-    Strings:                True
-    NNbar_Treatment:        "strings"
-
 Modi:
     Collider:
         Projectile:
