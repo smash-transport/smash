@@ -131,6 +131,9 @@ class StringProcess {
   /// square root of 2 (\f$\sqrt{2}\f$)
   double sqrt2_;
 
+  /// Remembers if Pythia is initialized or not
+  bool pythia_parton_initialized_ = false;
+
   /**
    * final state array
    * which must be accessed after the collision
