@@ -228,3 +228,47 @@ TEST(find_next_action) {
   // compare to what the action finder found
   FUZZY_COMPARE(action->time_of_execution(), collision_time);
 }
+
+TEST(increasing_scaling_factors){
+  constexpr double energy = 1.;
+  constexpr double v = 0.5;
+  constexpr double dx = 10;
+  constexpr double dy = 1.;
+  constexpr double time = -10.;
+  // Cross section is 2 times area with a radius of impact the parameter dy
+  constexpr double xsec = 4. * dy * dy * M_PI / fm2_mb;
+  // Quadratic increase of scaling factor with time leads to linear increase of
+  // the maximum distance, at which particles still collide, with time.
+  constexpr double alpha = 2.;
+  constexpr double delta_t_coll = dx / (2. * v); 
+  ParticleData p_a = ParticleData{ParticleType::find(0x661), 1};
+  p_a.set_4position(FourVector(time, 0, 0, 0));
+  p_a.set_4momentum(FourVector(energy, energy * v, 0, 0));
+  ParticleData p_b =ParticleData{ParticleType::find(0x661), 2};
+  p_b.set_4position(FourVector(time, dx, dy, 0));
+  p_b.set_4momentum(FourVector(energy, -energy * v, 0, 0));
+  // Set one particle to be half formed at time of collision.
+  p_a.set_slow_formation_times(time, time + 2. * delta_t_coll);
+  p_a.set_cross_section_scaling_factor(0.);
+  // Set up scatter actions finder
+  Configuration config =
+      Test::configuration("Collision_Term: {Elastic_Cross_Section: " +
+                          std::to_string(xsec) + "}");
+  // For a power of larger than alpha, the particles should collide
+  config.merge_yaml("Collision_Term: {Power_Particle_Formation: " +
+                    std::to_string(alpha - 0.1) + "}");
+  ExperimentParameters exp_par = Test::default_parameters();
+  const std::vector<bool> has_interacted = {};
+  ScatterActionsFinder finder(config, exp_par, has_interacted, 0, 0, 1);
+  COMPARE(finder.find_actions_in_cell({p_a, p_b}, 2. * delta_t_coll).size(), 
+          1u);
+  // Set up a scatter actions finder so that the particles shouldn't collide
+  Configuration config2 =
+      Test::configuration("Collision_Term: {Elastic_Cross_Section: " +
+                          std::to_string(xsec) + "}");
+  config2.merge_yaml("Collision_Term: {Power_Particle_Formation: " +
+                    std::to_string(alpha + 0.1) + "}");
+  ScatterActionsFinder finder2(config2, exp_par, has_interacted, 0, 0, 1);
+  COMPARE(finder2.find_actions_in_cell({p_a, p_b}, 2. * delta_t_coll).size(), 
+                                       0u);
+}
