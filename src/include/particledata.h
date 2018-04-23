@@ -223,7 +223,7 @@ class ParticleData {
    */
   double begin_formation_time() const { return begin_formation_time_; }
 
-  /** 
+  /**
    * Set the absolute formation time
    *
    * The particle's cross section scaling factor will be a Heavyside fuction
