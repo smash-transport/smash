@@ -62,7 +62,6 @@ namespace smash {
  * <b> WARNING: Currently only one event per file is supported. Having more than
  * one event per file will lead to undefined behavior. </b>
  *
-<<<<<<< HEAD
  * \n
  * Examples: Configuring an Afterburner Simulation
  * --------------
@@ -76,16 +75,6 @@ namespace smash {
          File_Prefix: "event"
 
  \endverbatim
-=======
- * \code
- *  List:
- *      # path of external particle list == File_Directory/File_Prefix{eventid}
- *      File_Directory: "particle_lists_in"
- *      File_Prefix: "event"
- *
- *      # starting number of file_id in event-by-event simulation
- *      Shift_Id: 0
->>>>>>> master
  *
  * It might for some reason be necessary to not run SMASH starting with the
  * first event, it this case, the event_id can be shifted. Additionally, the
