@@ -233,56 +233,75 @@ TEST(pythia_running) {
 }
 
 TEST(no_strings) {
-  // create two protons
-  // TODO(steinberg): test more pairs after Jan's restructuring is merged
-  ParticleData p1{ParticleType::find(0x2212)};
-  ParticleData p2{ParticleType::find(0x2212)};
-  // set position
-  p1.set_4position(pos_a);
-  p2.set_4position(pos_b);
-  // set momenta
-  constexpr double p_x = 1.0;
-  p1.set_4momentum(p1.pole_mass(), p_x, 0., 0.);
-  p2.set_4momentum(p2.pole_mass(), -p_x, 0., 0.);
+  const auto& proton = ParticleType::find(pdg::p);
+  const auto& pi_z = ParticleType::find(pdg::pi_z);
+  const auto& pi_m = ParticleType::find(pdg::pi_m);
+  const auto& pi_p = ParticleType::find(pdg::pi_p);
+  const auto& K_p = ParticleType::find(pdg::K_p);
+  const auto& K_m = ParticleType::find(pdg::K_m);
+  const std::vector<std::pair<const ParticleType&, const ParticleType&>> pairs = {
+    {proton, proton},
+    {proton, pi_z},
+    {proton, pi_m},
+    {proton, pi_p},
+    {pi_p, pi_m},
+    {proton, K_m},
+    {proton, K_p}
+  };
+  for (const auto& p : pairs) {
+    ParticleData p1{p.first};
+    ParticleData p2{p.second};
 
-  // put in particles object
-  Particles particles;
-  particles.insert(p1);
-  particles.insert(p2);
+    // set up particles
+    p1.set_4position(pos_a);
+    p2.set_4position(pos_b);
+    const double m1 = p1.pole_mass();
+    const double m2 = p2.pole_mass();
+    const double sqrts = m1 + m2 + 0.2;
+    const double p_x = plab_from_s(sqrts * sqrts, m1, m2);
+    p1.set_4momentum(p1.pole_mass(), p_x, 0., 0.);
+    p2.set_4momentum(p2.pole_mass(), 0., 0., 0.);
+    std::cout << "Testing following pair:\n" << p1 << "\n" << p2 << std::endl;
 
-  // get valid copies back
-  ParticleList plist = particles.copy_to_vector();
-  auto p1_copy = plist[0];
-  auto p2_copy = plist[1];
-  VERIFY(particles.is_valid(p1_copy) && particles.is_valid(p2_copy));
+    // put in particles object
+    Particles particles;
+    particles.insert(p1);
+    particles.insert(p2);
 
-  // construct action
-  ScatterActionPtr act;
-  act = make_unique<ScatterAction>(p1_copy, p2_copy, 0.2, false, 1.0);
-  VERIFY(act != nullptr);
-  COMPARE(p2_copy.type(), ParticleType::find(0x2212));
+    // get valid copies back
+    ParticleList plist = particles.copy_to_vector();
+    auto p1_copy = plist[0];
+    auto p2_copy = plist[1];
+    VERIFY(particles.is_valid(p1_copy) && particles.is_valid(p2_copy));
 
-  // add processes
-  constexpr double elastic_parameter = 0.;  // don't include elastic scattering
-  constexpr bool strings_switch = false;
-  constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
-  act->add_all_scatterings(elastic_parameter, false,
+    // construct action
+    ScatterActionPtr act;
+    ReactionsBitSet incl_2to2;
+    act = make_unique<ScatterAction>(p1_copy, p2_copy, 0.2, false, 1.0);
+    VERIFY(act != nullptr);
+
+    // add processes
+    constexpr double elastic_parameter = 0.;  // don't include elastic scattering
+    constexpr bool strings_switch = false;
+    constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
+    act->add_all_scatterings(elastic_parameter, true,
                            Test::all_reactions_included(), 0., strings_switch,
                            false, false, nnbar_treatment);
 
-  VERIFY(act->cross_section() > 0.);
+    VERIFY(act->cross_section() > 0.);
 
-  // perform actions
-  VERIFY(act->is_valid(particles));
-  act->generate_final_state();
-  const uint32_t id_process = 1;
-  act->perform(&particles, id_process);
-  COMPARE(id_process, 1u);
+    // perform actions
+    VERIFY(act->is_valid(particles));
+    act->generate_final_state();
+    const uint32_t id_process = 1;
+    act->perform(&particles, id_process);
+    COMPARE(id_process, 1u);
 
-  // check the outgoing particles
-  const ParticleList& outgoing_particles = act->outgoing_particles();
-  VERIFY(outgoing_particles.size() > 0u);  // should be at least one
-  VERIFY(particles.is_valid(outgoing_particles[0]));
+    // check the outgoing particles
+    const ParticleList& outgoing_particles = act->outgoing_particles();
+    VERIFY(outgoing_particles.size() > 0u);  // should be at least one
+    VERIFY(particles.is_valid(outgoing_particles[0]));
+  }
 }
 
 TEST(update_incoming) {
