@@ -193,14 +193,14 @@ CollisionBranchPtr cross_sections::elastic(double elast_par) {
     elastic_xs = elast_par;
   } else {
     // use parametrization
-    elastic_xs = elastic_parametrization();
+    elastic_xs = elastic_parametrization(true);
   }
   return make_unique<CollisionBranch>(incoming_particles_[0].type(),
                                       incoming_particles_[1].type(), elastic_xs,
                                       ProcessType::Elastic);
 }
 
-double cross_sections::elastic_parametrization() {
+double cross_sections::elastic_parametrization(bool AQM_active) {
   const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
   double elastic_xs = 0.0;
@@ -216,6 +216,26 @@ double cross_sections::elastic_parametrization() {
              pdg_a.antiparticle_sign() == pdg_b.antiparticle_sign()) {
     // Elastic Nucleon Nucleon Scattering
     elastic_xs = nn_el();
+  } else if (AQM_active) {
+    if (pdg_a.is_baryon() && pdg_b.is_baryon()) {
+      // todo JB : double check those parametrizations
+      elastic_xs = nn_el(); // valid also for annihilation
+    }
+    else if ((pdg_a.is_meson() && pdg_b.is_baryon()) ||
+             (pdg_b.is_meson() && pdg_a.is_baryon())) {
+      elastic_xs = piplusp_elastic(sqrt_s_ * sqrt_s_);
+      // todo JB : fix this cross section so it doesn't subtract resonant contribution
+    }
+    else if (pdg_a.is_meson() && pdg_b.is_meson()) {
+      double s = sqrt_s_ * sqrt_s_;
+      if (s > 4 * nucleon_mass * nucleon_mass) {
+        // until we get a ππ parametrization
+        // todo JB : fix this cross section so it doesn't subtract resonant contribution
+        elastic_xs = 4./9. * pp_elastic(sqrt_s_ * sqrt_s_);
+      }
+    }
+    elastic_xs *= (1. - 0.4 * pdg_a.frac_strange()) *
+                  (1. - 0.4 * pdg_b.frac_strange());
   }
   return elastic_xs;
 }
@@ -1564,7 +1584,7 @@ CollisionBranchList cross_sections::string_excitation(
   /* Calculate string-excitation cross section:
    * Parametrized total minus all other present channels. */
   double sig_string_all =
-      std::max(0., high_energy() - elastic_parametrization());
+      std::max(0., high_energy() - elastic_parametrization(true));
 
   /* get PDG id for evaluation of the parametrized cross sections
    * for diffractive processes.
@@ -1696,34 +1716,47 @@ double cross_sections::high_energy() const {
   const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
   const double s = sqrt_s_ * sqrt_s_;
+  double xs = 0.;
 
   // Currently all BB collisions use the nucleon-nucleon parametrizations.
   if (pdg_a.is_baryon() && pdg_b.is_baryon()) {
     if (pdg_a == pdg_b) {
-      return pp_high_energy(s);     // pp, nn
+      xs = pp_high_energy(s);     // pp, nn
     } else if (pdg_a.is_antiparticle_of(pdg_b)) {
-      return ppbar_high_energy(s);  // ppbar, nnbar
+      xs = ppbar_high_energy(s);  // ppbar, nnbar
     } else if (pdg_a.antiparticle_sign() * pdg_b.antiparticle_sign() == 1) {
-      return np_high_energy(s);     // np, nbarpbar
+      xs = np_high_energy(s);     // np, nbarpbar
     } else {
-      return npbar_high_energy(s);  // npbar, nbarp
+      xs = npbar_high_energy(s);  // npbar, nbarp
     }
   }
 
-  // Pion nucleon interaction.
+  // Pion nucleon interaction / baryon-meson
   if ((pdg_a == pdg::pi_p && pdg_b == pdg::p) ||
       (pdg_b == pdg::pi_p && pdg_a == pdg::p) ||
       (pdg_a == pdg::pi_m && pdg_b == pdg::n) ||
       (pdg_b == pdg::pi_m && pdg_a == pdg::n)) {
-    return piplusp_high_energy(s);  // pi+ p, pi- n
+    xs = piplusp_high_energy(s);  // pi+ p, pi- n
   } else if ((pdg_a == pdg::pi_m && pdg_b == pdg::p) ||
              (pdg_b == pdg::pi_m && pdg_a == pdg::p) ||
              (pdg_a == pdg::pi_p && pdg_b == pdg::n) ||
              (pdg_b == pdg::pi_p && pdg_a == pdg::n)) {
-    return piminusp_high_energy(s);  // pi- p, pi+ n
-  } else {
-    return 0;
+    xs = piminusp_high_energy(s);  // pi- p, pi+ n
+  } else if ((pdg_a.is_meson() && pdg_b.is_baryon()) ||
+             (pdg_b.is_meson() && pdg_b.is_baryon())) {
+    xs = piminusp_high_energy(s); // default for baryon-meson
   }
+
+  /* Meson-meson interaction goes through AQM from pp, until we get a proper
+   * parametrization for π π */
+  if (pdg_a.is_meson() && pdg_b.is_meson()) {
+    xs = 4./9. * piplusp_high_energy(s); // 4/9 factor since 2 mesons in AQM
+  }
+
+  // AQM scaling for cross-sections
+  xs *= (1. - 0.4 * pdg_a.frac_strange()) * (1. - 0.4 * pdg_b.frac_strange());
+
+  return xs;
 }
 
 double cross_sections::string_hard_cross_section() const {

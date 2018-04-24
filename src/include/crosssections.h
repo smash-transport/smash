@@ -143,9 +143,11 @@ class cross_sections {
  private:
   /**
    *  Choose between parametrizations for elastic cross sections.
+   *
+   * \param[in] AQM_active whether AQM is activated
    * \return Elastic cross section
    */
-  double elastic_parametrization();
+  double elastic_parametrization(bool AQM_active);
 
   /**
    * Determine the (parametrized) elastic cross section for a
