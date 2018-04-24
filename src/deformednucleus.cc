@@ -44,6 +44,37 @@ namespace smash {
  *
  * \li \key Phi (double, optional):\n
  * The azimuthal angle by which to rotate the nucleus.
+ *
+ * \n
+ * Example: Configuring a deformed nucleus
+ * --------------
+ * To configure a fixed target heavy-ion collision with deformed nuclei, whose
+ * deformation is explicitly declared, it can be done according to the following
+ * example:
+ *\verbatim
+ Modi:
+     Collider:
+         Projectile:
+             Particles:    {2212: 29, 2112 :34}
+             Deformed: True
+             Automatic: False
+             Beta_2: 0.0
+             Beta_4: 0.0
+             Saturation_Density: 0.168
+             Theta: 0.0
+             Phi: 0.0
+         Target:
+             Particles:    {2212: 29, 2112 :34}
+             Deformed: True
+             Automatic: False
+             Beta_2: 0.0
+             Beta_4: 0.0
+             Saturation_Density: 0.168
+             Theta: 0.0
+             Phi: 0.0
+         E_kin: 1.2
+         Calculation_Frame: "fixed target"
+ \endverbatim
  */
 
 DeformedNucleus::DeformedNucleus(const std::map<PdgCode, int> &particle_list,

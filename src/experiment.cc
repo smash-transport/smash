@@ -201,7 +201,9 @@ namespace {
  * \anchor Thermodynamics
  * - \b Thermodynamics \n
  *   The user can print thermodynamical quantities on the spatial lattice to
- *   vtk output. The lattice for the output is regulated by the options of
+ *   vtk output. Note, that the Thermodynamics output requires a lattice.
+ *   This lattice needs to be enabled in the conguration file and is regulated
+ *   by the options of
  *   \ref input_lattice_. \n
  * \n
  *  \key Type (string, optional, default = \key "baryon"): \n

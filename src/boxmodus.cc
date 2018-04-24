@@ -100,7 +100,7 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
  * The following example configures an infinite matter simulation in a Box with
  * 10 fm cube length at a temperature of 200 MeV. The particles are initialized
  * with thermal momenta at a start time of 10 fm. The particle numbers at
- * initialization are 100 \f$ \pi^+ \f$, 100 \f$ \pi^- \f$, 100 \f$ \pi^0 \f$,
+ * initialization are 100 \f$ \pi^+ \f$, 100 \f$ \pi^0 \f$, 100 \f$ \pi^- \f$,
  * 50 protons and 50 neutrons.
  *
  *\verbatim
@@ -109,7 +109,7 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
          Length: 10.0
          Temperature: 0.2
          Initial_Condition: "thermal momenta"
-         Start_Time: 0.0
+         Start_Time: 10.0
          Init_Multiplicities:
              211: 100
              111: 100

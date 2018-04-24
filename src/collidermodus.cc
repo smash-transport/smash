@@ -51,7 +51,7 @@ namespace smash {
  * rest.
  *
  * Note that using \key E_kin or \key P_Lab to quantify the collision energy is
- * not sufficient to configure a collision in a fixed target system. You need to
+ * not sufficient to configure a collision in a fixed target frame. You need to
  * additionally change the \key Calculation_Frame. Any format of incident energy
  * can however be combined with any calculation frame, the provided incident
  * energy is then intrinsically translated to the quantity needed for the
@@ -64,7 +64,8 @@ namespace smash {
  * \li \key "fixed target"
  *
  * \key Fermi_Motion (string, optional, default = "off"): \n
- * \li \key "on" - Switch Fermi motion on, in combination with potentials
+ * \li \key "on" - Switch Fermi motion on, it is recommended to also activate
+ * potentials
  * \li \key "off" - Switch Fermi motion off
  * \li \key "frozen" - Use "frozen" if you want to use Fermi motion
  * without potentials
@@ -158,7 +159,9 @@ namespace smash {
  * --------------
  * The impact parameter can be configured to have a fixed value in the \key
  * Collider subsection of Modi. In addition, the initial distance of the nuclei
- * in \f$ z \f$-direction is assigned a specific value:
+ * in \f$ z \f$-direction is assigned a specific value. This does not affect the
+ * time at which the nuclei will collide, but only changes the start time of the
+ * simulation as the nuclei are further apart when the simulation begins.
  *
  *\verbatim
  Modi:
@@ -193,7 +196,7 @@ namespace smash {
  * \n
  * Examples: Configuring Heavy-ion Collisions
  * --------------
- * The following example configures a Cu63-Cu63 collision at \f$\sqrt{s}=3.0\f$
+ * The following example configures a Cu63-Cu63 collision at \f$\sqrt{s_{NN}}=3.0\f$
  * GeV with zero impact parameter and Fermi motion taken into consideration. The
  * calculation frame is the default, center of velocity, and the nuclei are not
  * deformed.
@@ -206,33 +209,6 @@ namespace smash {
          Target:
              Particles:    {2212: 29, 2112 :34}
          Sqrtsnn: 3.0
- \endverbatim
- * To configure a fixed target heavy-ion collision with deformed nuclei, whose
- * deformation is explicitly declared, it can be done according to the following
- * example:
- *\verbatim
- Modi:
-     Collider:
-         Projectile:
-             Particles:    {2212: 29, 2112 :34}
-             Deformed: True
-             Automatic: False
-             Beta_2: 0.0
-             Beta_4: 0.0
-             Saturation_Density: 0.168
-             Theta: 0.0
-             Phi: 0.0
-         Target:
-             Particles:    {2212: 29, 2112 :34}
-             Deformed: True
-             Automatic: False
-             Beta_2: 0.0
-             Beta_4: 0.0
-             Saturation_Density: 0.168
-             Theta: 0.0
-             Phi: 0.0
-         E_kin: 1.2
-         Calculation_Frame: "fixed target"
  \endverbatim
  *
  * To further use Fermi motion and allow the first collisions within the

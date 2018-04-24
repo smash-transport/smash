@@ -59,11 +59,7 @@ namespace smash {
  * Starting id for event_id_
  *
  * \n
- * <b> WARNING: Currently only one event per file is supported. Having more than
- * one event per file will lead to undefined behavior. </b>
- *
- * \n
- * Examples: Configuring an Afterburner Simulation
+ * Example: Configuring an Afterburner Simulation
  * --------------
  * The following example sets up an afterburner simulation for a set of particle
  * files located in "particle_lists_in". The files are named as

@@ -196,7 +196,7 @@ enum class HadronClass {
  * for more details.
  * \li \key "unbiased BF" - slowest, but theoretically most robust
  * \li \key "biased BF" - faster, but theoretically less robust
- * \li \key "mode sampling" - fastest, bust least robust
+ * \li \key "mode sampling" - fastest, but least robust
  *
  */
 class GrandCanThermalizer {
