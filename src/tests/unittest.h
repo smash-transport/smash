@@ -19,6 +19,8 @@
 #ifndef SRC_TESTS_UNITTEST_H_
 #define SRC_TESTS_UNITTEST_H_
 
+#include "assert.h"
+
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
@@ -44,7 +46,6 @@
 #include <ext/stdio_sync_filebuf.h>
 #endif
 
-#include "assert.h"
 #include "macros.h"
 #include "ulp.h"
 
