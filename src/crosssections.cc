@@ -1659,8 +1659,8 @@ CollisionBranchList cross_sections::string_excitation(
        * in conjunction with multipartion interaction picture
        * \iref{Sjostrand:1987su}. */
       const double hard_xsec = string_hard_cross_section();
-      const double nondiffractive_soft =
-          nondiffractive_all * std::exp(-hard_xsec / nondiffractive_all);
+      const double nondiffractive_soft = nondiffractive_all > 0. ?
+        nondiffractive_all * std::exp(-hard_xsec / nondiffractive_all) : 0.;
       const double nondiffractive_hard = nondiffractive_all
                                        - nondiffractive_soft;
       log.debug("String cross sections [mb] are");
@@ -1695,9 +1695,10 @@ CollisionBranchList cross_sections::string_excitation(
         if ((r_xsec >= string_sub_cross_sections_sum[i]) &&
             (r_xsec < string_sub_cross_sections_sum[i + 1])) {
           iproc = static_cast<StringSoftType>(i);
-          break;
+         break;
         }
       }
+
       if (iproc == StringSoftType::None) {
         throw std::runtime_error("soft string subprocess is not specified.");
       }
