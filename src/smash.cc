@@ -218,7 +218,7 @@ ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
       included_2to2,
       configuration.take({"Collision_Term", "Strings"}, true),
       configuration.take({"Collision_Term",
-                          "Switch_on_Strings_with_Probability"}, false),
+                          "Strings_with_Probability"}, false),
       configuration.take({"Collision_Term", "NNbar_Treatment"},
                          NNbarTreatment::NoAnnihilation),
       false,

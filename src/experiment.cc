@@ -301,17 +301,17 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
   ReactionsBitSet included_2to2 =
       config.take({"Collision_Term", "Included_2to2"}, ReactionsBitSet().set());
-  bool strings_switch_default = true;
+  constexpr bool strings_switch_default = true;
   if (modus_chooser == "Box") {
     strings_switch_default = false;
   }
-  bool use_transition_probability_default = false;
+  constexpr bool strings_with_probability_default = false;
   const bool strings_switch =
       config.take({"Collision_Term", "Strings"}, strings_switch_default);
-  const bool use_transition_probability =
+  const bool strings_with_probability =
       config.take({"Collision_Term",
-                   "Switch_on_Strings_with_Probability"},
-                   use_transition_probability_default);
+                   "Strings_with_Probability"},
+                   strings_with_probability_default);
   const NNbarTreatment nnbar_treatment = config.take(
       {"Collision_Term", "NNbar_Treatment"}, NNbarTreatment::NoAnnihilation);
   const bool photons_switch = config.has_value({"Output", "Photons"});
@@ -338,7 +338,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
           two_to_one,
           included_2to2,
           strings_switch,
-          use_transition_probability,
+          strings_with_probability,
           nnbar_treatment,
           photons_switch,
           low_snn_cut,
@@ -470,7 +470,7 @@ void Experiment<Modus>::create_output(std::string format, std::string content,
  *  ρ → ππ and h₁(1170) → πρ, which gives 5 pions on average.
  * \li \key "strings" - Annihilation throug string fragmentation.
  *
- * \key Switch_on_String_with_Probability (bool, optional, default = \key false): \n
+ * \key String_with_Probability (bool, optional, default = \key false): \n
  * \li \key true - String processes are triggered according to a probability
  *                 increasing smoothly with the collisional energy from 0 to 1
  *                 in a certain energy window. At energies beyond that window,

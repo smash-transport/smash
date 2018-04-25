@@ -52,7 +52,7 @@ struct ExperimentParameters {
    * taking the difference between the parametrized total cross section
    * and the sum of the non-string cross sections.
    */
-  bool use_transition_probability;
+  bool strings_with_probability;
   /**
    * This indicates how NN̅ annihilation should be treated; options are to
    * neglect it, make it conserve detailed balance using NN̅ → h₁(1170)ρ

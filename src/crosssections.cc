@@ -138,12 +138,12 @@ cross_sections::cross_sections(const ParticleList& incoming_particles,
 CollisionBranchList cross_sections::generate_collision_list(
     double elastic_parameter, bool two_to_one_switch,
     ReactionsBitSet included_2to2, double low_snn_cut,
-    bool strings_switch, bool use_transition_probability,
+    bool strings_switch, bool strings_with_probability,
     NNbarTreatment nnbar_treatment, StringProcess* string_process) {
   CollisionBranchList process_list;
   const ParticleType& t1 = incoming_particles_[0].type();
   const ParticleType& t2 = incoming_particles_[1].type();
-  const bool is_pythia = use_transition_probability &&
+  const bool is_pythia = strings_with_probability &&
                    decide_string(strings_switch);
   /* Elastic collisions between two nucleons with sqrt_s below
    * low_snn_cut can not happen. */
@@ -155,10 +155,7 @@ CollisionBranchList cross_sections::generate_collision_list(
     process_list.emplace_back(elastic(elastic_parameter));
   }
   if (is_pythia) {
-    /* string excitation
-     *
-     * Calculate string-excitation cross section:
-     * string-excitation cross section =
+    /* String-excitation cross section =
      * Parametrized total cross - the contributions
      * from all other present channels. */
     const double sig_string =
@@ -2034,7 +2031,7 @@ bool cross_sections::decide_string(bool strings_switch) const {
       is_pythia = true;
     } else if (sqrt_s_ >
                mix_scatter_type_energy - mix_scatter_type_window_width) {
-      const double probability_pythia =0.5 +
+      const double probability_pythia = 0.5 +
                     0.5 * sin(0.5 * M_PI * (sqrt_s_ - mix_scatter_type_energy)
                     / mix_scatter_type_window_width);
       if (probability_pythia > Random::uniform(0., 1.)) {

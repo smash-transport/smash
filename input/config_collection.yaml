@@ -124,8 +124,8 @@ Collision_Term:
     No_Collisions:          True
     Strings:                True
     Strings:                False # default
-    Switch_on_Strings_with_Probabilty:    True
-    Switch_on_Strings_with_Probabilty:    False # default
+    Strings_with_Probabilty:    True
+    Strings_with_Probabilty:    False # default
     String_Parameters:
         String_Tension:     1.0 #GeV/fm
         Gluon_Beta:         0.5

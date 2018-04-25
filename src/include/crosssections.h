@@ -27,7 +27,7 @@ class cross_sections {
  public:
   /**
    * Construct CrossSections instance.
-   * 
+   *
    * \param[in] incoming_particles Particles that are reacting.
    * \param[in] sqrt_s Center-of-mass energy of the reaction.
    */
@@ -36,12 +36,18 @@ class cross_sections {
   /**
    * Generate a list of all possible collisions between the incoming particles
    * with the given c.m. energy and the calculated cross sections.
+   * The string processes are not added at this step if it's not triggerd
+   * according to the probability. It will then be added in
+   * add_all_scatterings in scatteraction.cc
+   *
    * \param[in] elastic_parameter If non-zero, given global elastic cross
    *                                                            section.
    * \param[in] two_to_one_switch 2->1 reactions enabled?
    * \param[in] included_2to2 Which 2->2 ractions are enabled?
    * \param[in] low_snn_cut Elastic collisions with CME below are forbidden.
    * \param[in] strings_switch Are string processes enabled?
+   * \param[in] strings_with_probability Are string processes triggered
+   *            according to a probability?
    * \param[in] nnbar_treatment NNbar treatment through resonance, strings or
    *                                                        none
    * \param[in] string_process String process used for string fragmentaion.
@@ -50,7 +56,7 @@ class cross_sections {
   CollisionBranchList generate_collision_list(
       double elastic_parameter, bool two_to_one_switch,
       ReactionsBitSet included_2to2, double low_snn_cut,
-      bool strings_switch, bool use_transition_probability,
+      bool strings_switch, bool strings_with_probability,
       NNbarTreatment nnbar_treatment, StringProcess* string_process);
 
   /**
@@ -106,10 +112,11 @@ class cross_sections {
    * difference between the parametrized total cross section and all the
    * explicitly implemented channels at low energy (elastic, resonance
    * excitation, etc).
-   * \param[in] string_process String process used for string fragmentaion.
    *
+   * \param[in] string_process String process used for string fragmentaion.
+   * \param[in] sig_string_all Total cross section for the string process [mb].
    * \return List of subprocesses (single-diffractive,
-   * double-diffractive and non-diffractive) with their cross sections
+   *        double-diffractive and non-diffractive) with their cross sections.
    *
    * This method has to be called after all other processes
    * have been determined.
@@ -150,9 +157,10 @@ class cross_sections {
   double high_energy() const;
 
   /**
-   * Return if the species of the two incoming particles are allowed to
+   * \return if the species of the two incoming particles are allowed to
    * interact via string fragmentation. Currently, only nucleon-nucleon
-   * and nucleon-pion can interact via string. */
+   * and nucleon-pion can interact via string.
+   */
   bool included_in_string() const;
 
  private:
