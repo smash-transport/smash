@@ -736,7 +736,7 @@ TEST(net_quark_number) {
   VERIFY(ap.net_quark_number(2) == -2);
 
   // antineutron has one ubar and two dbar
-  PdgCode n(-0x2112);
+  PdgCode an(-0x2112);
   VERIFY(an.net_quark_number(1) == -2);
   VERIFY(an.net_quark_number(2) == -1);
 }
