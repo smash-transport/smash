@@ -182,7 +182,7 @@ void OscarOutput<Format, Contents>::at_interaction(const Action &action,
                    " partial %12.7f type %5i\n",
                    action.incoming_particles().size(),
                    action.outgoing_particles().size(), density,
-                   action.raw_weight_value(), action.partial_weight(),
+                   action.get_total_weight(), action.get_partial_weight(),
                    static_cast<int>(action.get_type()));
     } else {
       /* OSCAR line prefix : initial final
@@ -194,7 +194,7 @@ void OscarOutput<Format, Contents>::at_interaction(const Action &action,
       std::fprintf(file_.get(), "%zu %zu %12.7f %12.7f %12.7f %5i\n",
                    action.incoming_particles().size(),
                    action.outgoing_particles().size(), density,
-                   action.raw_weight_value(), action.partial_weight(),
+                   action.get_total_weight(), action.get_partial_weight(),
                    static_cast<int>(action.get_type()));
     }
     for (const auto &p : action.incoming_particles()) {

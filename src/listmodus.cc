@@ -41,19 +41,10 @@ namespace smash {
 /*!\Userguide
  * \page input_modi_list_ List
  *
- * <b> Purpose: Provides a modus for hydro afterburner calculations </b>
- *
- * Takes files with list of particles in
- * \ref oscar2013_format "Oscar 2013 format" as an input. These
- * particles are treated as a starting setup.
- *
- * To select the List modus:
- * \code
- * General:
- *     Modus:  List
- * \endcode
- *
- * ### Input options:
+ * The list modus provides a modus for hydro afterburner calculations. It takes
+ * files with a list of particles in \ref oscar2013_format "Oscar 2013 format"
+ * as an input. These particles are treated as a starting setup. The input
+ * parameters are:
  *
  * \key File_Directory (string, required):\n
  * Directory for the external particle lists
@@ -67,22 +58,34 @@ namespace smash {
  * \key Shift_Id (int, required):\n
  * Starting id for event_id_
  *
- * ### Example of configuration:
+ * \n
+ * Example: Configuring an Afterburner Simulation
+ * --------------
+ * The following example sets up an afterburner simulation for a set of particle
+ * files located in "particle_lists_in". The files are named as
+ * "event{event_id}". SMASH is run once for each event file in the folder.
+ *\verbatim
+ Modi:
+     List:
+         File_Directory: "particle_lists_in"
+         File_Prefix: "event"
+
+ \endverbatim
  *
- * \code
- *  List:
- *      # path of external particle list == File_Directory/File_Prefix{eventid}
- *      File_Directory: "particle_lists_in"
- *      File_Prefix: "event"
+ * It might for some reason be necessary to not run SMASH starting with the
+ * first event, it this case, the event_id can be shifted. Additionally, the
+ * start time can be manually adjusted.
+ *\verbatim
+ Modi:
+     List:
+         Shift_Id: 10
+         Start_Time: 0.0
+ \endverbatim
  *
- *      # starting number of event_id in event-by-event simulation
- *      Shift_Id: 0
- *
- *      # start time of simulation
- *      Start_Time: 0.0
- * \endcode
- *
- * ### Example of input in particle_lists_in/event{id}
+ * \n
+ * Example: Structure of Input Particle File
+ * --------------
+ * The following example shows how an input file should be formatted:
  * <div class="fragment">
  * <div class="line"><span class="preprocessor">#!OSCAR2013 particle_lists
  * t x y z mass p0 px py pz pdg ID charge</span></div>
@@ -91,15 +94,12 @@ namespace smash {
  * <div class="line"><span class="preprocessor">0.1 6.42036 1.66473 9.38499
  * 0.138 0.232871 0.116953 -0.115553 0.090303 111 0 0</span></div>
  * </div>
- * It means that one \f$ \pi^0 \f$ with spatial coordinates\n
- * (t, x, y, z) = (0.1, 6.42036, 1.66473, 9.38499) fm and\n
+ * It means that one \f$ \pi^0 \f$ with spatial coordinates
+ * (t, x, y, z) = (0.1, 6.42036, 1.66473, 9.38499) fm and
  * and 4-momenta (p0, px, py, pz) =
- * (0.232871, 0.116953, -0.115553, 0.090303) GeV,\n
+ * (0.232871, 0.116953, -0.115553, 0.090303) GeV,
  * with mass = 0.138 GeV, pdg = 111, id = 0 and charge 0 will be initialized.
  *
- * ### WARNING:
- * Currently only one event per file is supported. Having more than one
- * event per file will lead to undefined behavior.
  */
 
 ListModus::ListModus(Configuration modus_config, const ExperimentParameters &)
@@ -111,7 +111,8 @@ ListModus::ListModus(Configuration modus_config, const ExperimentParameters &)
   std::string fp = modus_config.take({"List", "File_Prefix"});
   particle_list_file_prefix_ = fp;
 
-  event_id_ = shift_id_;
+  event_id_ = 0;
+  file_id_ = shift_id_;
 }
 
 /* console output on startup of List specific parameters */
@@ -151,38 +152,16 @@ std::pair<bool, double> ListModus::check_formation_time_(
 double ListModus::initial_conditions(Particles *particles,
                                      const ExperimentParameters &) {
   const auto &log = logger<LogArea::List>();
-  /* Readin PARTICLES from file */
-  std::stringstream fname;
-  fname << particle_list_file_prefix_ << event_id_;
 
-  const bf::path default_path = bf::absolute(particle_list_file_directory_);
+  std::string particle_list = next_event_();
 
-  const bf::path fpath = default_path / fname.str();
-
-  log.debug() << fpath.filename().native() << '\n';
-
-  if (!bf::exists(fpath)) {
-    log.fatal() << fpath.filename().native() << " does not exist! \n"
-                << "\n Usage of smash with external particle lists:\n"
-                << "1. Put the external particle lists in file \n"
-                << "File_Directory/File_Prefix{id} where {id} "
-                << "traversal [Shift_Id, Nevent-1]\n"
-                << "2. Particles info: t x y z mass p0 px py pz"
-                << " pdg ID charge\n"
-                << "in units of: fm fm fm fm GeV GeV GeV GeV GeV"
-                << " none none none\n";
-    throw std::runtime_error("External particle list does not exist!");
-  }
-
-  std::string particle_lists = read_all(bf::ifstream{fpath});
-
-  auto check = check_formation_time_(particle_lists);
+  auto check = check_formation_time_(particle_list);
   bool anti_streaming_needed = std::get<0>(check);
   start_time_ = std::get<1>(check);
 
   constexpr int max_warns_precision = 10, max_warn_mass_consistency = 10;
 
-  for (const Line &line : line_parser(particle_lists)) {
+  for (const Line &line : line_parser(particle_list)) {
     std::istringstream lineinput(line.text);
     double t, x, y, z, mass, E, px, py, pz;
     int id, charge;
@@ -267,4 +246,105 @@ double ListModus::initial_conditions(Particles *particles,
 
   return start_time_;
 }
+
+bf::path ListModus::file_path_(const int file_id) {
+  const auto &log = logger<LogArea::List>();
+  std::stringstream fname;
+  fname << particle_list_file_prefix_ << file_id;
+
+  const bf::path default_path = bf::absolute(particle_list_file_directory_);
+
+  const bf::path fpath = default_path / fname.str();
+
+  log.debug() << fpath.filename().native() << '\n';
+
+  if (!bf::exists(fpath)) {
+    log.fatal() << fpath.filename().native() << " does not exist! \n"
+                << "\n Usage of smash with external particle lists:\n"
+                << "1. Put the external particle lists in file \n"
+                << "File_Directory/File_Prefix{id} where {id} "
+                << "traversal [Shift_Id, Nevent-1]\n"
+                << "2. Particles info: t x y z mass p0 px py pz"
+                << " pdg ID charge\n"
+                << "in units of: fm fm fm fm GeV GeV GeV GeV GeV"
+                << " none none none\n";
+    throw std::runtime_error("External particle list does not exist!");
+  }
+
+  return fpath;
+}
+
+std::string ListModus::next_event_() {
+  const auto &log = logger<LogArea::List>();
+
+  const bf::path fpath = file_path_(file_id_);
+  bf::ifstream ifs{fpath};
+  ifs.seekg(last_read_position_);
+
+  if (!file_has_events_(fpath, last_read_position_)) {
+    // current file out of events. get next file and call this function
+    // recursively.
+    file_id_++;
+    last_read_position_ = 0;
+    ifs.close();
+    return next_event_();
+  }
+
+  // read one event. events marked by line # event end i in case of Oscar
+  // output. Assume one event per file for all other output formats
+  std::string event_string;
+  const std::string needle = "end";
+  std::string line;
+  while (getline(ifs, line)) {
+    if (line.find(needle) == std::string::npos) {
+      event_string += line + "\n";
+    } else {
+      break;
+    }
+  }
+
+  if (!ifs.eof() && (ifs.fail() || ifs.bad())) {
+    log.fatal() << "Error while reading " << fpath.filename().native();
+    throw std::runtime_error("Error while reading external particle list");
+  }
+  // save position for next event read
+  last_read_position_ = ifs.tellg();
+  ifs.close();
+
+  return event_string;
+}
+
+bool ListModus::file_has_events_(bf::path filepath,
+                                 std::streampos last_position) {
+  const auto &log = logger<LogArea::List>();
+  bf::ifstream ifs{filepath};
+  std::string line;
+
+  // last event read read at end of file. we know this because errors are
+  // handled in next_event
+  if (last_position == -1) {
+    return false;
+  }
+  ifs.seekg(last_position);
+  // skip over comment lines, assume that a max. of four consecutive comment
+  // lines can occur
+  int skipped_lines = 0;
+  const int max_comment_lines = 4;
+  while (std::getline(ifs, line) && line[0] != '#' &&
+         skipped_lines++ < max_comment_lines) {
+  }
+
+  if (ifs.eof()) {
+    return false;
+  }
+
+  if (!ifs.good()) {
+    log.fatal() << "Error while reading " << filepath.filename().native();
+    throw std::runtime_error("Error while reading external particle list");
+  }
+
+  ifs.close();
+  return true;
+}
+
 }  // namespace smash

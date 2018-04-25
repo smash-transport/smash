@@ -25,7 +25,7 @@ class ScatterActionPhoton : public ScatterAction {
 
   void generate_final_state() override;
 
-  double raw_weight_value() const override { return weight_; }
+  double get_total_weight() const override { return weight_; }
 
   double cross_section() const override {
     return total_cross_section_ + cross_section_photons_;

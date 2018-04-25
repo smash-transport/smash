@@ -74,14 +74,7 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
  *
  * \key Init_Multiplicities (int, required): \n
  * Map of PDG number and quantity of this PDG number.
- * Controls how many particles of each sort will be initialized. \n
- * Example:
- * \verbatim
-   Init_Multiplicties:
-       2112: 200
-       -2112: 100
-   \endverbatim
- * It means that 200 neutrons and 100 antineutrons will be initialized.
+ * Controls how many particles of each sort will be initialized.
  *
  * \key Use_Thermal_Multiplicities (bool, optional, default = false): \n
  * If this option is set to true then Init_Multiplicities are ignored and the
@@ -100,6 +93,42 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
  * \key Strange_Chemical_Potential (double, optional, default = 0.0): \n
  * Strangeness chemical potential \f$ \mu_S \f$ used in case if
  * Use_Thermal_Multiplicities is true to compute thermal densities \f$ n_i \f$.
+ *
+ * \n
+ * Examples: Configuring a Box Simulation
+ * --------------
+ * The following example configures an infinite matter simulation in a Box with
+ * 10 fm cube length at a temperature of 200 MeV. The particles are initialized
+ * with thermal momenta at a start time of 10 fm. The particle numbers at
+ * initialization are 100 \f$ \pi^+ \f$, 100 \f$ \pi^0 \f$, 100 \f$ \pi^- \f$,
+ * 50 protons and 50 neutrons.
+ *
+ *\verbatim
+ Modi:
+     Box:
+         Length: 10.0
+         Temperature: 0.2
+         Initial_Condition: "thermal momenta"
+         Start_Time: 10.0
+         Init_Multiplicities:
+             211: 100
+             111: 100
+             -211: 100
+             2212: 50
+             2112: 50
+ \endverbatim
+ *
+ * On the contrary, it is also possible to initialize a thermal box based on
+ * thermal multiplicities. This is done via
+ *\verbatim
+ Modi:
+     Box:
+         Length: 10.0
+         Temperature: 0.2
+         Use_Thermal_Multiplicities: True
+         Baryon_Chemical_Potential: 0.0
+         Strange_Chemical_Potential: 0.0
+ \endverbatim
  */
 BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
     : initial_condition_(modus_config.take({"Box", "Initial_Condition"})),

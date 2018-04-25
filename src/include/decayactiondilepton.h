@@ -30,14 +30,14 @@ class DecayActionDilepton : public DecayAction {
    * call add_processes after construction.
    *
    * \param[in] p The particle that should decay if the action is performed.
-   * \param[in] time_of_execution Time at which the action is supposed to take place
-   * \param[in] shining_weight The weight of the dilepton decay accroding to the
-   * shining method.
+   * \param[in] time_of_execution Time at which the action is supposed to take
+   * place \param[in] shining_weight The weight of the dilepton decay accroding
+   * to the shining method.
    */
   DecayActionDilepton(const ParticleData &p, double time_of_execution,
                       double shining_weight);
 
-  double raw_weight_value() const override {
+  double get_total_weight() const override {
     return shining_weight_ * branching_;
   }
 

@@ -112,7 +112,7 @@ void ScatterAction::add_all_scatterings(double elastic_parameter,
                                         ReactionsBitSet included_2to2,
                                         double low_snn_cut, bool strings_switch,
                                         NNbarTreatment nnbar_treatment) {
-  cross_sections xs(incoming_particles_, sqrt_s());
+  CrossSections xs(incoming_particles_, sqrt_s());
   CollisionBranchList processes = xs.generate_collision_list(
       elastic_parameter, two_to_one, included_2to2, low_snn_cut, strings_switch,
       nnbar_treatment, string_process_);
@@ -121,9 +121,11 @@ void ScatterAction::add_all_scatterings(double elastic_parameter,
   add_collisions(std::move(processes));
 }
 
-double ScatterAction::raw_weight_value() const { return total_cross_section_; }
+double ScatterAction::get_total_weight() const { return total_cross_section_; }
 
-double ScatterAction::partial_weight() const { return partial_cross_section_; }
+double ScatterAction::get_partial_weight() const {
+  return partial_cross_section_;
+}
 
 ThreeVector ScatterAction::beta_cm() const {
   return total_momentum().velocity();
