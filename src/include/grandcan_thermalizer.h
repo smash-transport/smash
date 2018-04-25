@@ -175,7 +175,7 @@ enum class HadronClass {
  */
 
 /*!\Userguide
- * \page input_forced_thermalization_ Forced_Thermalization
+ * \page input_forced_thermalization_ Forced Thermalization
  *
  * \key Cell_Number (list of 3 doubles, required, no default): \n
  * Number of cells in each direction (x,y,z).
@@ -196,7 +196,7 @@ enum class HadronClass {
  * for more details.
  * \li \key "unbiased BF" - slowest, but theoretically most robust
  * \li \key "biased BF" - faster, but theoretically less robust
- * \li \key "mode sampling" - fastest, bust least robust
+ * \li \key "mode sampling" - fastest, but least robust
  *
  */
 class GrandCanThermalizer {
