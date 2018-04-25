@@ -20,13 +20,20 @@ namespace smash {
  * \ingroup action
  * A simple decay finder:
  * Just loops through all particles and checks if they can decay during the next
- * timestep.  */
+ * timestep.
+ */
 class DecayActionsFinder : public ActionFinderInterface {
  public:
-  /** Initialize the finder */
+  /// Initialize the finder
   DecayActionsFinder() {}
-  /** Check the whole particle list for decays
-   * and return a list with the corrsponding Action objects. */
+
+  /**
+   * Check the whole particle list for decays.
+   *
+   * \param[in] search_list All particles in grid cell.
+   * \param[in] dt Size of timestep [fm]
+   * \return List with the found (Decay)Action objects.
+   */
   ActionList find_actions_in_cell(const ParticleList &search_list,
                                   double dt) const override;
 
@@ -36,6 +43,7 @@ class DecayActionsFinder : public ActionFinderInterface {
                                          double) const override {
     return {};
   }
+
   /// Ignore the surrounding searches for decays
   ActionList find_actions_with_surrounding_particles(const ParticleList &,
                                                      const Particles &,
@@ -43,7 +51,14 @@ class DecayActionsFinder : public ActionFinderInterface {
     return {};
   }
 
-  /** Force all resonances to decay at the end of the simulation. */
+  /**
+   * Force all resonances to decay at the end of the simulation.
+   *
+   * \param[in] search_list All particles at the end of simulation.
+   * \param[in] only_res optional parameter that requests that only actions
+   *                     regarding resonances are considered (disregarding
+   * stable particles) \return List with the found (Decay)Action objects.
+   */
   ActionList find_final_actions(const Particles &search_list,
                                 bool only_res = false) const override;
 };

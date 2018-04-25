@@ -166,6 +166,19 @@ class ParticleType {
   /// \return true if the particle is stable
   inline bool is_stable() const { return width_ < width_cutoff; }
 
+  /// Check if particle is a nucleus
+  inline bool is_nucleus() const { return pdgcode_.is_nucleus(); }
+
+  /// Check if particle is an (anti-)deuteron
+  inline bool is_deuteron() const {
+    return is_nucleus() && std::abs(pdgcode_.get_decimal()) == 1000010020;
+  }
+
+  /// Check if particle is an artificial d' resonance
+  inline bool is_dprime() const {
+    return is_nucleus() && std::abs(pdgcode_.get_decimal()) == 1000010021;
+  }
+
   /**
    * The minimum mass of the resonance that is kinematically allowed.
    *
@@ -211,6 +224,7 @@ class ParticleType {
 
   /**
    * Get all the mass-dependent partial decay widths of a particle with mass m.
+   * \todo lots of code duplication in general in these partial width functions
    *
    * \param[in] m Invariant mass of the decaying particle.
    * \return a list of process branches, whose weights correspond to the
@@ -221,20 +235,24 @@ class ParticleType {
   /**
    * Get the mass-dependent hadronic partial decay widths
    * of a particle with mass m.
+   * \todo lots of code duplication with get_partial_widths_dilepton
    *
    * \param[in] m Invariant mass of the decaying particle.
    * \return a list of process branches, whose weights correspond to the
    *         actual partial widths. The list contains only hadronic branches.
+   * \throw runtime_error if a decay has less than 2 or more than 3 products
    */
   DecayBranchList get_partial_widths_hadronic(const double m) const;
 
   /**
    * Get the mass-dependent dilepton partial decay widths
    * of a particle with mass m.
+   * \todo lots of code duplication with get_partial_widths_hadronic
    *
    * \param[in] m Invariant mass of the decaying particle.
    * \return a list of process branches, whose weights correspond to the
    *         actual partial widths. The list contains only dilepton branches.
+   * \throw runtime_error if a decay has less than 2 or more than 3 products
    */
   DecayBranchList get_partial_widths_dilepton(const double m) const;
 
@@ -293,7 +311,8 @@ class ParticleType {
   /**
    * \todo unused
    * The spectral function with a constant width (= width at pole).
-   * It is guaranteed to be normalized to 1, when integrated from 0 to inf. */
+   * It is guaranteed to be normalized to 1, when integrated from 0 to inf.
+   */
   double spectral_function_const_width(double m) const;
 
   /**
@@ -336,15 +355,17 @@ class ParticleType {
                                                     int L = 0) const;
 
   /**
-   *  Prints out width and spectral function versus mass to the
-   *  standard output. This is useful for debugging and analysis.
+   * Prints out width and spectral function versus mass to the
+   * standard output. This is useful for debugging and analysis.
+   *
+   * \throw if the particle type is stable
    */
   void dump_width_and_spectral_function() const;
 
   /**
    * Returns a list of all ParticleType objects.
    *
-   * \note This list is not sorted, do not rely on it.
+   * \note This list is currently sorted, but do not rely on it.
    */
   static const ParticleTypeList &list_all();
 
@@ -359,7 +380,7 @@ class ParticleType {
   static ParticleTypePtrList &list_Deltas();
   /**
    * \return a list of the anti-Delta(1232) baryons
-   *          (i.e. all four charge states).
+   *         (i.e. all four charge states).
    */
   static ParticleTypePtrList &list_anti_Deltas();
   /**
@@ -367,6 +388,11 @@ class ParticleType {
    *         i.e. unstable baryons (not including antibaryons).
    */
   static ParticleTypePtrList &list_baryon_resonances();
+  /**
+   * \return a list of all light nuclei from SMASH particle list.
+   *         Nucleons are not included into light nuclei by convention.
+   */
+  static ParticleTypePtrList &list_light_nuclei();
 
   /**
    * Returns the ParticleTypePtr for the given \p pdgcode.
@@ -395,6 +421,7 @@ class ParticleType {
    *
    * \param[in] pdgcode the unique pdg code to try to find
    * \return the ParticleTypePtr that corresponds to this pdg code
+   * \throw PdgNotFoundFailure pdgcode not found in available particle types
    */
   static const ParticleType &find(PdgCode pdgcode);
 
@@ -404,6 +431,7 @@ class ParticleType {
   };
 
   /**
+   * \param[in] pdgcode the PdgCode to look for
    * \return whether the ParticleType with the given \p pdgcode exists.
    *
    * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
@@ -411,6 +439,7 @@ class ParticleType {
   static bool exists(PdgCode pdgcode);
 
   /**
+   * \param[in] name the name to look for
    * \return whether the ParticleType with the given \p name exists.
    *
    * \note The complexity of the search is \f$\mathcal O(N)\f$.
@@ -423,7 +452,12 @@ class ParticleType {
    * invocation).
    *
    * \param[in] particles A string that contains the definition of ParticleTypes
-   * to be created.
+   *                      to be created.
+   * \throw LoadFailure if a line in the particle file could not be read, or if
+   *                    there are duplicates in it
+   * \throw runtime_error if the mass of of nucleons, kaons and deltas are
+   *                      different from the hardcoded masses, or if this
+   *                      function is called more than once
    */
   static void create_type_list(const std::string &particles);
 
@@ -451,7 +485,7 @@ class ParticleType {
     return pdgcode() < rhs.pdgcode();
   }
 
-  /// Check if unstable particles have decay modes and throw errors if not.
+  /// \throw runtime_error if unstable particles have no decay modes
   static void check_consistency();
 
   /**
@@ -535,15 +569,15 @@ class ParticleType {
   /// Container for the isospin multiplet information
   IsoParticleType *iso_multiplet_ = nullptr;
 
-  // Maximum factor for single-res mass sampling, cf. sample_resonance_mass.
+  /// Maximum factor for single-res mass sampling, cf. sample_resonance_mass.
   mutable double max_factor1_ = 1.;
-  // Maximum factor for double-res mass sampling, cf. sample_resonance_masses.
+  /// Maximum factor for double-res mass sampling, cf. sample_resonance_masses.
   mutable double max_factor2_ = 1.;
 
   /**\ingroup logging
    * Writes all information about the particle type to the output stream.
    *
-   * \param[in] out The ostream into which to output
+   * \param[out] out The ostream into which to output
    * \param[in] type The ParticleType object to write into out
    */
   friend std::ostream &operator<<(std::ostream &out, const ParticleType &type);
@@ -571,7 +605,12 @@ class ParticleTypePtr {
   /// Default construction initializes with an invalid index.
   ParticleTypePtr() = default;
 
-  /// \return whether the two objects reference the same ParticleType object.
+  /**
+   * \param[in] rhs the ParticleTypePtr to compare to
+   * \return whether the two objects reference the same ParticleType object.
+   *
+   * \todo JB:should this not compare pdgcodes or something?
+   */
   bool operator==(const ParticleTypePtr &rhs) const {
     return index_ == rhs.index_;
   }
@@ -594,6 +633,7 @@ class ParticleTypePtr {
   }
 
   /// \return whether the objects stores a valid ParticleType reference.
+  /// \todo unused
   operator bool() const { return index_ != 0xffff; }
 
  private:
@@ -634,7 +674,7 @@ class ParticleTypePtr {
   std::uint16_t index_ = 0xffff;
 };
 
-// #define SMASH_INLINE_LIST_ALL 1
+// #define some global variables and functions
 #ifdef SMASH_INLINE_LIST_ALL
 extern const ParticleTypeList *all_particle_types;
 inline const ParticleTypeList &ParticleType::list_all() {

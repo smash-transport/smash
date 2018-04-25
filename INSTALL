@@ -184,7 +184,8 @@ This tells you to download "Clang for x86_64 Ubuntu 16.04". (You might have to
 look for an older version to get pre-built binaries.)
 
 It is sufficient to unpack the archive with `tar xf` and to copy only the
-binary you need (clang-format), see "Installing binaries as a user" above.
+binary you need (`clang-format` in the `bin` folder of the archive), see
+"Installing binaries as a user" above.
 
 
 Installing cpplint

@@ -36,9 +36,9 @@ void DecayActionDilepton::one_to_three() {
   ParticleData &l1 = outgoing_particles_[(non_lepton_position + 1) % 3];
   ParticleData &l2 = outgoing_particles_[(non_lepton_position + 2) % 3];
 
-  const double mass_l1 = l1.type().mass();  // mass of first lepton
-  const double mass_l2 = l2.type().mass();  // mass of second lepton
-  const double mass_nl = nl.type().mass();  // mass of non-lepton
+  const double mass_l1 = l1.type().mass();  // (pole) mass of first lepton
+  const double mass_l2 = l2.type().mass();  // (pole) mass of second lepton
+  const double mass_nl = nl.type().mass();  // (pole) mass of non-lepton
 
   const double cms_energy = kinetic_energy_cms();
 
@@ -48,7 +48,8 @@ void DecayActionDilepton::one_to_three() {
   const double delta_m = cms_energy - mass_nl - mass_l1 - mass_l2;
 
   const double diff_width = ThreeBodyDecayDilepton::diff_width(
-      cms_energy, mass_l1, dil_mass, mass_nl, &incoming_particles_[0].type());
+      cms_energy, mass_l1, dil_mass, mass_nl, &nl.type(),
+      &incoming_particles_[0].type());
 
   /* Branching factor, which corrects the shining weight for the differential
    * width at a particular dilepton mass. We do an implicit Monte-Carlo
@@ -59,7 +60,7 @@ void DecayActionDilepton::one_to_three() {
   // perform decay into non-lepton and virtual photon (dilepton)
   const double dil_mom = pCM(cms_energy, dil_mass, mass_nl);
 
-  /* Here we assume an isotropic angular distribution. */
+  // Here we assume an isotropic angular distribution.
   Angles phitheta;
   phitheta.distribute_isotropically();
 
@@ -70,7 +71,7 @@ void DecayActionDilepton::one_to_three() {
   // perform decay of virtual photon into two leptons
   const double mom_lep = pCM(dil_mass, mass_l1, mass_l2);
 
-  /* Here we assume an isotropic angular distribution. */
+  // Here we assume an isotropic angular distribution.
   phitheta.distribute_isotropically();
 
   l1.set_4momentum(mass_l1, phitheta.threevec() * mom_lep);

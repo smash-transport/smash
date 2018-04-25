@@ -11,23 +11,26 @@
 
 #include "include/angles.h"
 #include "include/kinematics.h"
+#include "include/logging.h"
 #include "include/processstring.h"
 #include "include/random.h"
 
 namespace smash {
 
-StringProcess::StringProcess(double string_tension, double gluon_beta,
-                             double gluon_pmin, double quark_alpha,
-                             double quark_beta, double strange_supp,
-                             double diquark_supp, double sigma_perp,
-                             double stringz_a, double stringz_b,
-                             double string_sigma_T)
+StringProcess::StringProcess(double string_tension, double time_formation,
+                             double gluon_beta, double gluon_pmin,
+                             double quark_alpha, double quark_beta,
+                             double strange_supp, double diquark_supp,
+                             double sigma_perp, double stringz_a,
+                             double stringz_b, double string_sigma_T)
     : pmin_gluon_lightcone_(gluon_pmin),
       pow_fgluon_beta_(gluon_beta),
       pow_fquark_alpha_(quark_alpha),
       pow_fquark_beta_(quark_beta),
       sigma_qperp_(sigma_perp),
       kappa_tension_string_(string_tension),
+      additional_xsec_supp_(0.7),
+      time_formation_const_(time_formation),
       time_collision_(0.),
       gamma_factor_com_(1.) {
   // setup and initialize pythia for hard string process
@@ -106,6 +109,10 @@ void StringProcess::common_setup_pythia(Pythia8::Pythia *pythia_in,
       // set mass and width in PYTHIA
       pythia_in->particleData.m0(pdgid, mass_pole);
       pythia_in->particleData.mWidth(pdgid, width_pole);
+    } else if (pdgid == 310 || pdgid == 130) {
+      // set mass and width of Kaon-L and Kaon-S
+      pythia_in->particleData.m0(pdgid, kaon_mass);
+      pythia_in->particleData.mWidth(pdgid, 0.);
     }
   }
 
@@ -136,9 +143,7 @@ int StringProcess::append_final_state(const FourVector &uString,
     }
     int pythia_id = pythia_hadron_->event[ipyth].id();
     /* K_short and K_long need are converted to K0 since SMASH only knows K0 */
-    if (pythia_id == 310 || pythia_id == 130) {
-      pythia_id = (Random::uniform_int(0, 1) == 0) ? 311 : -311;
-    }
+    convert_KaonLS(pythia_id);
     PdgCode pdg = PdgCode::from_decimal(pythia_id);
     if (!pdg.is_hadron()) {
       throw std::invalid_argument(
@@ -232,9 +237,8 @@ int StringProcess::append_final_state(const FourVector &uString,
 
     /* additional suppression factor to take
      * the quantum coherence effect into account. */
-    constexpr double suppression_factor = 0.7;
     new_particle.set_cross_section_scaling_factor(
-        fragments[i].is_leading ? suppression_factor * fragments[i].xtotfac
+        fragments[i].is_leading ? additional_xsec_supp_ * fragments[i].xtotfac
                                 : 0.);
     new_particle.set_formation_time(time_collision_ +
                                     gamma_factor_com_ * t_prod);
@@ -323,14 +327,15 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
 
   const FourVector ustrXcom = pstrXcom / massX;
   /* determine direction in which the string is stretched.
-   * this is set to be same with the three-momentum of string
+   * this is set to be same with the the collision axis
    * in the center of mass frame. */
-  const ThreeVector threeMomentum = pstrXcom.threevec();
+  const ThreeVector threeMomentum =
+      is_AB_to_AX ? pcom_[1].threevec() : pcom_[0].threevec();
   const FourVector pnull = FourVector(threeMomentum.abs(), threeMomentum);
   const FourVector prs = pnull.LorentzBoost(ustrXcom.velocity());
   ThreeVector evec = prs.threevec() / prs.threevec().abs();
   // perform fragmentation and add particles to final_state.
-  int nfrag = fragment_string(idqX1, idqX2, massX, evec);
+  int nfrag = fragment_string(idqX1, idqX2, massX, evec, true);
   if (nfrag < 1) {
     NpartString_[0] = 0;
     return false;
@@ -349,22 +354,56 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   return true;
 }
 
+bool StringProcess::set_mass_and_direction_2strings(
+    const std::array<std::array<int, 2>, 2> &quarks,
+    const std::array<FourVector, 2> &pstr_com, std::array<double, 2> &m_str,
+    std::array<ThreeVector, 2> &evec_str) {
+  std::array<bool, 2> found_mass;
+  for (int i = 0; i < 2; i++) {
+    found_mass[i] = false;
+
+    m_str[i] = pstr_com[i].sqr();
+    m_str[i] = (m_str[i] > 0.) ? std::sqrt(m_str[i]) : 0.;
+    const double threshold = pythia_hadron_->particleData.m0(quarks[i][0]) +
+                             pythia_hadron_->particleData.m0(quarks[i][1]);
+    // string mass must be larger than threshold set by PYTHIA.
+    if (m_str[i] > threshold) {
+      found_mass[i] = true;
+      /* Determine direction in which string i is stretched.
+       * This is set to be same with the collision axis
+       * in the center of mass frame.
+       * Initial state partons inside incoming hadrons are
+       * moving along the collision axis,
+       * which is parallel to three momenta of incoming hadrons
+       * in the center of mass frame.
+       * Given that partons are assumed to be massless,
+       * their four momenta are null vectors and parallel to pnull.
+       * If we take unit three-vector of prs,
+       * which is pnull in the rest frame of string,
+       * it would be the direction in which string ends are moving. */
+      const ThreeVector mom = pcom_[i].threevec();
+      const FourVector pnull(mom.abs(), mom);
+      const FourVector prs = pnull.LorentzBoost(pstr_com[i].velocity());
+      evec_str[i] = prs.threevec() / prs.threevec().abs();
+    }
+  }
+
+  return found_mass[0] && found_mass[1];
+}
+
 bool StringProcess::make_final_state_2strings(
     const std::array<std::array<int, 2>, 2> &quarks,
     const std::array<FourVector, 2> &pstr_com,
-    const std::array<double, 2> &m_str) {
+    const std::array<double, 2> &m_str,
+    const std::array<ThreeVector, 2> &evec_str, bool flip_string_ends) {
   const std::array<FourVector, 2> ustr_com = {pstr_com[0] / m_str[0],
                                               pstr_com[1] / m_str[1]};
   for (int i = 0; i < 2; i++) {
-    /* determine direction in which string i is stretched.
-     * this is set to be same with the three-momentum of string
-     * in the center of mass frame. */
-    const ThreeVector mom = pstr_com[i].threevec();
-    const FourVector pnull(mom.abs(), mom);
-    const FourVector prs = pnull.LorentzBoost(ustr_com[i].velocity());
-    ThreeVector evec = prs.threevec() / prs.threevec().abs();
+    // determine direction in which string i is stretched.
+    ThreeVector evec = evec_str[i];
     // perform fragmentation and add particles to final_state.
-    int nfrag = fragment_string(quarks[i][0], quarks[i][1], m_str[i], evec);
+    int nfrag = fragment_string(quarks[i][0], quarks[i][1], m_str[i], evec,
+                                flip_string_ends);
     if (nfrag <= 0) {
       NpartString_[i] = 0;
       return false;
@@ -386,10 +425,10 @@ bool StringProcess::next_DDiff() {
   NpartString_[1] = 0;
   final_state_.clear();
 
-  std::array<bool, 2> found_mass = {false, false};
   std::array<std::array<int, 2>, 2> quarks;
   std::array<FourVector, 2> pstr_com;
   std::array<double, 2> m_str;
+  std::array<ThreeVector, 2> evec_str;
   ThreeVector threeMomentum;
 
   // decompose hadron into quark (and diquark) contents
@@ -418,23 +457,15 @@ bool StringProcess::next_DDiff() {
                   evecBasisAB_[1] * QTrx - evecBasisAB_[2] * QTry;
   pstr_com[1] =
       FourVector((PPosB_ - QPos + PNegB_ - QNeg) / sqrt2_, threeMomentum);
-  found_mass[0] = false;
-  found_mass[1] = false;
-  for (int i = 0; i < 2; i++) {
-    m_str[i] = pstr_com[i].sqr();
-    m_str[i] = (m_str[i] > 0.) ? std::sqrt(m_str[i]) : 0.;
-    const double threshold = pythia_hadron_->particleData.m0(quarks[i][0]) +
-                             pythia_hadron_->particleData.m0(quarks[i][1]);
-    // string mass must be larger than threshold set by PYTHIA.
-    if (m_str[i] > threshold) {
-      found_mass[i] = true;
-    }
-  }
 
-  if (!found_mass[0] || !found_mass[1]) {
+  const bool found_masses =
+      set_mass_and_direction_2strings(quarks, pstr_com, m_str, evec_str);
+  if (!found_masses) {
     return false;
   }
-  const bool success = make_final_state_2strings(quarks, pstr_com, m_str);
+  const bool flip_string_ends = true;
+  const bool success = make_final_state_2strings(quarks, pstr_com, m_str,
+                                                 evec_str, flip_string_ends);
   return success;
 }
 
@@ -445,10 +476,10 @@ bool StringProcess::next_NDiffSoft() {
   NpartString_[1] = 0;
   final_state_.clear();
 
-  std::array<bool, 2> found_mass = {false, false};
   std::array<std::array<int, 2>, 2> quarks;
   std::array<FourVector, 2> pstr_com;
   std::array<double, 2> m_str;
+  std::array<ThreeVector, 2> evec_str;
 
   // decompose hadron into quark (and diquark) contents
   int idqA1, idqA2, idqB1, idqB2;
@@ -502,24 +533,113 @@ bool StringProcess::next_NDiffSoft() {
   pstr_com[1] =
       FourVector((PPosB_ - dPPos + PNegB_ - dPNeg) / sqrt2_, threeMomentum);
 
-  found_mass[0] = false;
-  found_mass[1] = false;
-  for (int i = 0; i < 2; i++) {
-    m_str[i] = pstr_com[i].sqr();
-    m_str[i] = (m_str[i] > 0.) ? std::sqrt(m_str[i]) : 0.;
-    const double threshold = pythia_hadron_->particleData.m0(quarks[i][0]) +
-                             pythia_hadron_->particleData.m0(quarks[i][1]);
-    // string mass must be larger than threshold set by PYTHIA.
-    if (m_str[i] > threshold) {
-      found_mass[i] = true;
+  const bool found_masses =
+      set_mass_and_direction_2strings(quarks, pstr_com, m_str, evec_str);
+  if (!found_masses) {
+    return false;
+  }
+  const bool flip_string_ends = false;
+  const bool success = make_final_state_2strings(quarks, pstr_com, m_str,
+                                                 evec_str, flip_string_ends);
+  return success;
+}
+
+// hard non-diffractive
+bool StringProcess::next_NDiffHard() {
+  const auto &log = logger<LogArea::Pythia>();
+  final_state_.clear();
+  /* Set the random seed of the Pythia Random Number Generator.
+   * Please note: Here we use a random number generated by the
+   * SMASH, since every call of pythia.init should produce
+   * different events. */
+  pythia_parton_->readString("Random:setSeed = on");
+  std::stringstream buffer1, buffer2, buffer3, buffer4;
+  buffer1 << "Random:seed = " << Random::canonical();
+  pythia_parton_->readString(buffer1.str());
+  // set the incoming particles
+  buffer2 << "Beams:idA = " << PDGcodes_[0];
+  pythia_parton_->readString(buffer2.str());
+  log.debug("First particle in string excitation: ", PDGcodes_[0]);
+  buffer3 << "Beams:idB = " << PDGcodes_[1];
+  pythia_parton_->readString(buffer3.str());
+  log.debug("Second particle in string excitation: ", PDGcodes_[1]);
+  buffer4 << "Beams:eCM = " << sqrtsAB_;
+  pythia_parton_->readString(buffer4.str());
+  log.debug("Pythia call with eCM = ", buffer4.str());
+  // Initialize Pythia.
+  const bool pythia_initialized = pythia_parton_->init();
+  if (!pythia_initialized) {
+    throw std::runtime_error("Pythia failed to initialize.");
+  }
+  // Short notation for Pythia event
+  Pythia8::Event &event = pythia_parton_->event;
+  bool final_state_success = false;
+  while (!final_state_success) {
+    final_state_success = pythia_parton_->next();
+  }
+
+  ParticleList new_intermediate_particles;
+  ParticleList new_non_hadron_particles;
+  for (int i = 0; i < event.size(); i++) {
+    if (event[i].isFinal()) {
+      int pythia_id = event[i].id();
+      log.debug("PDG ID from Pythia:", pythia_id);
+      /* K_short and K_long need to be converted to K0
+       * since SMASH only knows K0 */
+      convert_KaonLS(pythia_id);
+      const std::string s = std::to_string(pythia_id);
+      PdgCode pythia_code(s);
+      ParticleData new_particle(ParticleType::find(pythia_code));
+      /* evecBasisAB_[0] is a unit 3-vector in the collision axis,
+       * while evecBasisAB_[1] and evecBasisAB_[2] spans the transverse plane.
+       * Given that PYTHIA assumes z-direction to be the collision axis,
+       * pz from PYTHIA should be the momentum compoment in evecBasisAB_[0].
+       * px and py are respectively the momentum components in two
+       * transverse directions evecBasisAB_[1] and evecBasisAB_[2]. */
+      ThreeVector threeMomentum = evecBasisAB_[0] * event[i].pz() +
+                                  evecBasisAB_[1] * event[i].px() +
+                                  evecBasisAB_[2] * event[i].py();
+      FourVector momentum = FourVector(event[i].e(), threeMomentum);
+      new_particle.set_4momentum(momentum);
+      log.debug("4-momentum from Pythia: ", momentum);
+      if (event[i].isHadron()) {
+        new_intermediate_particles.push_back(new_particle);
+      } else {
+        new_non_hadron_particles.push_back(new_particle);
+      }
     }
   }
 
-  if (!found_mass[0] || !found_mass[1]) {
-    return false;
+  /* Additional suppression factor to mimic coherence taken as 0.7
+   * from UrQMD (CTParam(59) */
+  const int baryon_string =
+      PDGcodes_[Random::uniform_int(0, 1)].baryon_number();
+  assign_all_scaling_factors(baryon_string, new_intermediate_particles,
+                             evecBasisAB_[0], additional_xsec_supp_);
+  for (ParticleData data : new_intermediate_particles) {
+    log.debug("Particle momenta after sorting: ", data.momentum());
+    /* The hadrons are not immediately formed, currently a formation time of
+     * 1 fm is universally applied and cross section is reduced to zero and
+     * to a fraction corresponding to the valence quark content. Hadrons
+     * containing a valence quark are determined by highest z-momentum. */
+    log.debug("The formation time is: ", time_formation_const_, "fm/c.");
+    ThreeVector v_calc =
+        (data.momentum().LorentzBoost(-1.0 * vcomAB_)).velocity();
+    /* Set formation time: actual time of collision + time to form the
+     * particle */
+    double gamma_factor = 1.0 / std::sqrt(1 - (v_calc).sqr());
+    data.set_formation_time(time_formation_const_ * gamma_factor +
+                            time_collision_);
+    final_state_.push_back(data);
   }
-  const bool success = make_final_state_2strings(quarks, pstr_com, m_str);
-  return success;
+
+  for (ParticleData data : new_non_hadron_particles) {
+    data.set_cross_section_scaling_factor(1.);
+    data.set_formation_time(time_collision_);
+    final_state_.push_back(data);
+  }
+
+  return final_state_success;
 }
 
 // baryon-antibaryon annihilation
@@ -615,8 +735,8 @@ bool StringProcess::next_BBbarAnn() {
   // Fragment two strings
   for (int i = 0; i < 2; i++) {
     ThreeVector evec = pcom_[i].threevec() / pcom_[i].threevec().abs();
-    const int nfrag = fragment_string(remaining_quarks[i],
-                                      remaining_antiquarks[i], mstr[i], evec);
+    const int nfrag = fragment_string(
+        remaining_quarks[i], remaining_antiquarks[i], mstr[i], evec, true);
     if (nfrag <= 0) {
       NpartString_[i] = 0;
       return false;
@@ -717,7 +837,8 @@ void StringProcess::make_string_ends(const PdgCode &pdg, int &idq1, int &idq2) {
 }
 
 int StringProcess::fragment_string(int idq1, int idq2, double mString,
-                                   ThreeVector &evecLong) {
+                                   ThreeVector &evecLong,
+                                   bool flip_string_ends) {
   pythia_hadron_->event.reset();
   // evaluate 3 times total baryon number of the string
   const int bstring = pythia_hadron_->particleData.baryonNumberType(idq1) +
@@ -744,7 +865,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
   const double E1 = std::sqrt(m1 * m1 + pCMquark * pCMquark);
   const double E2 = std::sqrt(m2 * m2 + pCMquark * pCMquark);
 
-  if (Random::uniform_int(0, 1) == 0) {
+  if (flip_string_ends && Random::uniform_int(0, 1) == 0) {
     /* in the case where we flip the string ends,
      * we need to flip the longitudinal unit vector itself
      * since it is set to be direction of diquark (anti-quark)
@@ -780,6 +901,85 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
   }
 
   return number_of_fragments;
+}
+
+void StringProcess::assign_scaling_factor(int nquark, ParticleData &data,
+                                          double suppression_factor) {
+  int nbaryon = data.pdgcode().baryon_number();
+  if (nbaryon == 0) {
+    // Mesons always get a scaling factor of 1/2 since there is never
+    // a q-qbar pair at the end of a string so nquark is always 1
+    data.set_cross_section_scaling_factor(0.5 * suppression_factor);
+  } else if (data.is_baryon()) {
+    // Leading baryons get a factor of 2/3 if they carry 2
+    // and 1/3 if they carry 1 of the strings valence quarks
+    data.set_cross_section_scaling_factor(suppression_factor * nquark /
+                                          (3.0 * nbaryon));
+  }
+}
+
+std::pair<int, int> StringProcess::find_leading(int nq1, int nq2,
+                                                ParticleList &list) {
+  assert(list.size() >= 2);
+  int end = list.size() - 1;
+  int i1, i2;
+  for (i1 = 0;
+       i1 <= end && !list[i1].pdgcode().contains_enough_valence_quarks(nq1);
+       i1++) {
+  }
+  for (i2 = end;
+       i2 >= 0 && !list[i2].pdgcode().contains_enough_valence_quarks(nq2);
+       i2--) {
+  }
+  std::pair<int, int> indices(i1, i2);
+  return indices;
+}
+
+void StringProcess::assign_all_scaling_factors(int baryon_string,
+                                               ParticleList &outgoing_particles,
+                                               ThreeVector &evec_coll,
+                                               double suppression_factor) {
+  // Set each particle's cross section scaling factor to 0 first
+  for (ParticleData &data : outgoing_particles) {
+    data.set_cross_section_scaling_factor(0.0);
+  }
+  // sort outgoing particles according to z-velocity
+  std::sort(outgoing_particles.begin(), outgoing_particles.end(),
+            [&](ParticleData i, ParticleData j) {
+              return i.momentum().velocity() * evec_coll <
+                     j.momentum().velocity() * evec_coll;
+            });
+  int nq1, nq2;  // number of quarks at both ends of the string
+  switch (baryon_string) {
+    case 0:
+      nq1 = 1;
+      nq2 = -1;
+      break;
+    case 1:
+      nq1 = 2;
+      nq2 = 1;
+      break;
+    case -1:
+      nq1 = -2;
+      nq2 = -1;
+      break;
+    default:
+      throw std::runtime_error("string is neither mesonic nor baryonic");
+  }
+  // Try to find nq1 on one string end and nq2 on the other string end and the
+  // other way around. When the leading particles are close to the string ends,
+  // the quarks are assumed to be distributed this way.
+  std::pair<int, int> i = find_leading(nq1, nq2, outgoing_particles);
+  std::pair<int, int> j = find_leading(nq2, nq1, outgoing_particles);
+  if (i.second - i.first > j.second - j.first) {
+    assign_scaling_factor(nq1, outgoing_particles[i.first], suppression_factor);
+    assign_scaling_factor(nq2, outgoing_particles[i.second],
+                          suppression_factor);
+  } else {
+    assign_scaling_factor(nq2, outgoing_particles[j.first], suppression_factor);
+    assign_scaling_factor(nq1, outgoing_particles[j.second],
+                          suppression_factor);
+  }
 }
 
 }  // namespace smash

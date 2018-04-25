@@ -20,16 +20,14 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
       use_symmetry_(conf.has_value({"Symmetry"})) {
   /*!\Userguide
    * \page input_potentials_ Potentials
-   * To switch potentials on / off one can just uncomment/comment the
-   * section, to switch on only Skyrme or Symmetry potentials uncomment
-   * only the part you want to switch on.
+   * Skyrme and/or Symmetry potentials can be accounted for within a SMASH
+   * simulation.
    *
-   *
-   * Currently potentials are just added without re-adjusting the energy
-   * and momenta of colliding nucleons. This can be done, because the
-   * binding energy of nucleons is from 0 to 8 MeV per nucleon and
-   * kinetic energies, at which SMASH operates are at least 400 MeV per
-   * nucleon, so the binding energy can be neglected compared to the
+   * Currently, potentials are just added without re-adjusting the energy
+   * and momenta of the colliding nucleons. This can be done, because the
+   * binding energy of nucleons is between 0 and 8 MeV per nucleon while the
+   * kinetic energies, at which SMASH operates, are at least 400 MeV per
+   * nucleon. The binding energy can thus be neglected compared to the
    * kinetic energy.
    *
    * \li \subpage potentials_skyrme_
@@ -41,14 +39,34 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
    * \f[ U_{Sk} = A(\rho/\rho_0) + B (\rho/\rho_0)^{\tau} \,, \f]
    * where \f$ \rho \f$ is baryon density in the local Eckart rest frame.
    *
-   * \key Skyrme_A (double, required): \n
+   * \key Skyrme_A (double, required, no default): \n
    *      Parameter A of Skyrme potential in MeV
    *
-   * \key Skyrme_B (double, required): \n
+   * \key Skyrme_B (double, required, no default): \n
    *      Parameter B of Skyrme potential in MeV
    *
-   * \key Skyrme_Tau (double, required): \n
+   * \key Skyrme_Tau (double, required, no default): \n
    *      Parameter \f$\tau\f$ of Skyrme potential.
+   *
+   * \page input_potentials_ Potentials
+   * \n
+   * Example: Configuring Potentials
+   * --------------
+   *
+   * The following extract from the configuration file configures SMASH such
+   * that the Skyrme as well as the Symmetry potential are activated for the
+   * simulation. There is however no necessity to include both simultaneously. They
+   * can be switched on and off individually.
+   * \n
+   *\verbatim
+   Potentials:
+       Skyrme:
+           Skyrme_A: -209.2
+           Skyrme_B: 156.4
+           Skyrme_Tau: 1.35
+       Symmetry:
+           S_Pot: 18.0
+   \endverbatim
    */
   if (use_skyrme_) {
     skyrme_a_ = conf.take({"Skyrme", "Skyrme_A"});
@@ -64,7 +82,7 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
    * where \f$ \rho_n\f$ is neutron density and \f$ \rho_p\f$ is proton
    * density. Definition and implementation are still to be worked out.
    *
-   * \key S_pot (double, required): \n
+   * \key S_pot (double, required, no default): \n
    *      Parameter \f$S_{pot}\f$ of symmetry potential in MeV
    */
   if (use_symmetry_) {
@@ -79,6 +97,7 @@ double Potentials::skyrme_pot(const double baryon_density) const {
   /* U = U(|rho|) * sgn , because the sign of the potential changes
    * under a charge reversal transformation. */
   const int sgn = tmp > 0 ? 1 : -1;
+  // Return in GeV
   return 1.0e-3 * sgn *
          (skyrme_a_ * std::abs(tmp) +
           skyrme_b_ * std::pow(std::abs(tmp), skyrme_tau_));

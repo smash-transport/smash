@@ -28,7 +28,7 @@ namespace smash {
  */
 class Actions {
  public:
-  /** Default constructor, creating an empty Actions object. */
+  /// Default constructor, creating an empty Actions object.
   Actions() {}
   /**
    * Creates a new Actions object from an ActionList.
@@ -36,31 +36,25 @@ class Actions {
    * The actions are stored in a heap and not sorted. The entries of
    * the ActionList are rendered invalid by this constructor.
    *
-   * \param action_list The ActionList from which to construct the Actions
+   * \param[in] action_list The ActionList from which to construct the Actions
    *                    object
    */
   explicit Actions(ActionList&& action_list) : data_(std::move(action_list)) {
     std::make_heap(data_.begin(), data_.end(), cmp);
   }
 
-  /**
-   * Cannot be copied
-   */
+  /// Cannot be copied
   Actions(const Actions&) = delete;
-  /**
-   * Cannot be copied
-   */
+  /// Cannot be copied
   Actions& operator=(const Actions&) = delete;
 
-  /**
-   * Returns whether the list of actions is empty.
-   */
+  /// \return whether the list of actions is empty.
   bool is_empty() const { return data_.empty(); }
 
   /**
-   * Returns the first action in the list and removes it from the list.
+   * Return the first action in the list and removes it from the list.
    *
-   * Throws runtime_error if the list is empty.
+   * \throw RuntimeError if the list is empty.
    */
   ActionPtr pop() {
     if (data_.empty()) {
@@ -77,7 +71,7 @@ class Actions {
    *
    * They're inserted at the right places to keep the complete list a heap.
    *
-   * \param new_acts The actions that will be inserted.
+   * \param[in] new_acts The actions that will be inserted.
    */
   void insert(ActionList&& new_acts) {
     for (auto& a : new_acts) {
@@ -90,41 +84,37 @@ class Actions {
    *
    * The function makes sure that the action is inserted at the right place.
    *
-   * \param action The action to insert.
+   * \param[in] action The action to insert.
    */
   void insert(ActionPtr&& action) {
     data_.push_back(std::move(action));
     std::push_heap(data_.begin(), data_.end(), cmp);
   }
 
-  /**
-   * Number of actions.
-   */
+  /// \return Number of actions.
   ActionList::size_type size() const { return data_.size(); }
 
-  /**
-   * Delete all actions.
-   */
+  /// Delete all actions.
   void clear() { data_.clear(); }
 
-  /**
-   * Returns an iterator to the earliest action.
-   */
+  /// \return an iterator to the earliest action.
   std::vector<ActionPtr>::const_reverse_iterator begin() const {
     return data_.crbegin();
   }
 
-  /**
-   * Returns an iterator to the place following the last action.
-   */
+  /// \return an iterator to the place following the last action.
   std::vector<ActionPtr>::const_reverse_iterator end() const {
     return data_.crend();
   }
 
  private:
   /**
-   *  Compare two action pointer such that the maximum is the most recent
-   *  action.
+   * Compare two action pointer such that the maximum is the most recent
+   * action.
+   *
+   * \param[in] a First action
+   * \param[in] b Second action
+   * \return Whether the first action will be exetuted later than the second.
    */
   static bool cmp(const ActionPtr& a, const ActionPtr& b) {
     return a->time_of_execution() > b->time_of_execution();

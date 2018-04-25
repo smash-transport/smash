@@ -11,7 +11,9 @@
 
 #include "setup.h"
 
+#include "../include/angles.h"
 #include "../include/scatteraction.h"
+#include "Pythia8/Pythia.h"
 
 using namespace smash;
 using smash::Test::Momentum;
@@ -197,8 +199,8 @@ TEST(pythia_running) {
   ScatterActionPtr act;
   act = make_unique<ScatterAction>(p1_copy, p2_copy, 0.2, false, 1.0);
   std::unique_ptr<StringProcess> string_process_interface =
-      make_unique<StringProcess>(1.0, 0.5, 0.001, 1.0, 2.5, 0.217, 0.081, 0.7,
-                                 0.68, 0.98, 0.25);
+      make_unique<StringProcess>(1.0, 1.0, 0.5, 0.001, 1.0, 2.5, 0.217, 0.081,
+                                 0.7, 0.68, 0.98, 0.25);
   act->set_string_interface(string_process_interface.get());
   VERIFY(act != nullptr);
   COMPARE(p2_copy.type(), ParticleType::find(0x2212));
@@ -319,6 +321,55 @@ TEST(update_incoming) {
   COMPARE(act.incoming_particles()[0].position(), new_position);
 }
 
+TEST(string_diquark_from_quarks) {
+  // ud-diquark
+  int id1 = 1;
+  int id2 = 2;
+  int id_diquark = StringProcess::diquark_from_quarks(id1, id2);
+  VERIFY(id_diquark == 2101 || id_diquark == 2103);
+  // uu-diquark
+  id1 = 2;
+  id_diquark = StringProcess::diquark_from_quarks(id1, id2);
+  VERIFY(id_diquark == 2203);
+}
+
+TEST(string_make_string_ends) {
+  int id1, id2;
+  // decompose pion+ into u, dbar
+  PdgCode pdg_piplus = PdgCode(0x211);
+  StringProcess::make_string_ends(pdg_piplus, id1, id2);
+  VERIFY(id1 == 2 && id2 == -1);
+  // decompose pion- into d, ubar
+  PdgCode pdg_piminus = PdgCode(-0x211);
+  StringProcess::make_string_ends(pdg_piminus, id1, id2);
+  VERIFY(id1 == 1 && id2 == -2);
+  // decompose proton into u, ud-diquark or d, uu-diquark
+  PdgCode pdg_proton = PdgCode(0x2212);
+  StringProcess::make_string_ends(pdg_proton, id1, id2);
+  VERIFY((id1 == 1 && id2 == 2203) || (id1 == 2 && (id2 == 2101 || 2103)));
+  // decompose anti-proton ubar, ud-antidiquark or dbar, uu-antidiquark
+  PdgCode pdg_antip = PdgCode(-0x2212);
+  StringProcess::make_string_ends(pdg_antip, id1, id2);
+  VERIFY((id2 == -1 && id1 == -2203) || (id2 == -2 && (id1 == -2101 || -2103)));
+}
+
+TEST(string_set_Vec4) {
+  // make arbitrary lightlike 4-vector with random direction
+  Angles angle_random = Angles(0., 0.);
+  angle_random.distribute_isotropically();
+  const double energy = 10.;
+  const ThreeVector mom = energy * angle_random.threevec();
+  Pythia8::Vec4 vector = Pythia8::Vec4(0., 0., 0., 0.);
+  // set Pythia8::Vec4
+  vector = StringProcess::set_Vec4(energy, mom);
+  // check if Pythia8::Vec4 is same with 4-vector from energy and mom
+  const double energy_scale = 0.5 * (vector.e() + energy);
+  VERIFY(std::abs(vector.e() - energy) < really_small * energy_scale);
+  VERIFY(std::abs(vector.px() - mom.x1()) < really_small * energy_scale);
+  VERIFY(std::abs(vector.py() - mom.x2()) < really_small * energy_scale);
+  VERIFY(std::abs(vector.pz() - mom.x3()) < really_small * energy_scale);
+}
+
 TEST(string_scaling_factors) {
   ParticleData a{ParticleType::find(0x2212)};
   ParticleData b{ParticleType::find(0x2212)};
@@ -337,7 +388,10 @@ TEST(string_scaling_factors) {
   f.set_4momentum(0.138, {0., 0., 1.});
   ParticleList outgoing = {e, d, c, f};  // here in random order
   constexpr double coherence_factor = 0.7;
-  ScatterAction::assign_all_scaling_factors(incoming, outgoing,
+  ThreeVector evec_coll = ThreeVector(0., 0., 1.);
+  int baryon_string =
+      incoming[Random::uniform_int(0, 1)].type().baryon_number();
+  StringProcess::assign_all_scaling_factors(baryon_string, outgoing, evec_coll,
                                             coherence_factor);
   // outgoing list is now assumed to be sorted by z-velocity (so c,d,e,f)
   VERIFY(outgoing[0] == c);
@@ -364,7 +418,8 @@ TEST(string_scaling_factors) {
   // a scaling factor of 0.7 * 1/3. On the other side of the string is a meson
   // (Particle e). This contains an anti-quark and will therefore get a scaling
   // factor of 0.7 * 1/2.
-  ScatterAction::assign_all_scaling_factors(incoming, outgoing,
+  baryon_string = 0;
+  StringProcess::assign_all_scaling_factors(baryon_string, outgoing, evec_coll,
                                             coherence_factor);
   COMPARE(outgoing[0].cross_section_scaling_factor(), 0.5 * coherence_factor);
   COMPARE(outgoing[1].cross_section_scaling_factor(), 0);
@@ -378,7 +433,7 @@ TEST(string_scaling_factors) {
   c.set_4momentum(0.938, {0., 0., 1.0});
   d.set_4momentum(0.938, {0., 0., 0.5});
   outgoing = {c, d, e, f};
-  ScatterAction::assign_all_scaling_factors(incoming, outgoing,
+  StringProcess::assign_all_scaling_factors(baryon_string, outgoing, evec_coll,
                                             coherence_factor);
   COMPARE(outgoing[0].cross_section_scaling_factor(), 0.5 * coherence_factor);
   COMPARE(outgoing[1].cross_section_scaling_factor(), 0.);

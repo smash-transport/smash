@@ -51,6 +51,7 @@ PdgCode omega_c_bar(-0x4332);
 PdgCode xi_cc_bar(-0x4422);
 PdgCode omega_bc(0x5432);
 PdgCode deutron("1000010020");
+PdgCode antideutron("-1000010020");
 PdgCode He4("1000020040");
 // non-hadrons:
 // leptons
@@ -154,6 +155,7 @@ TEST(string) {
   COMPARE(lambda.string(), "3122");
   COMPARE(antixi.string(), "-103312");
   COMPARE(deutron.string(), "1000010020");
+  COMPARE(antideutron.string(), "-1000010020");
   COMPARE(He4.string(), "1000020040");
 }
 TEST(decimal) {
@@ -167,6 +169,7 @@ TEST(decimal) {
   COMPARE(lambda.get_decimal(), 3122);
   COMPARE(antixi.get_decimal(), -103312);
   COMPARE(deutron.get_decimal(), 1000010020);
+  COMPARE(antideutron.get_decimal(), -1000010020);
   COMPARE(He4.get_decimal(), 1000020040);
 }
 TEST(hexadecimal) {
@@ -182,7 +185,8 @@ TEST(hadron) {
   VERIFY(pion.is_hadron());
   VERIFY(proton.is_hadron());
   VERIFY(antidelta.is_hadron());
-  VERIFY(deutron.is_hadron());
+  VERIFY(!deutron.is_hadron());
+  VERIFY(!antideutron.is_hadron());
 }
 
 TEST(nucleus) {
@@ -191,6 +195,7 @@ TEST(nucleus) {
   VERIFY(!proton.is_nucleus());
   VERIFY(!antidelta.is_nucleus());
   VERIFY(deutron.is_nucleus());
+  VERIFY(antideutron.is_nucleus());
   VERIFY(He4.is_nucleus());
 }
 
@@ -202,6 +207,24 @@ TEST(lepton) {
   VERIFY(!pion.is_lepton());
   VERIFY(!proton.is_lepton());
   VERIFY(!deutron.is_lepton());
+}
+
+TEST(is_meson) {
+  VERIFY(pion.is_meson());
+  VERIFY(!deutron.is_meson());
+  VERIFY(!antideutron.is_meson());
+  VERIFY(!proton.is_meson());
+  VERIFY(!antiproton.is_meson());
+  VERIFY(!antimu.is_meson());
+}
+
+TEST(is_baryon) {
+  VERIFY(!pion.is_baryon());
+  VERIFY(!deutron.is_baryon());
+  VERIFY(!antideutron.is_baryon());
+  VERIFY(proton.is_baryon());
+  VERIFY(antiproton.is_baryon());
+  VERIFY(!antimu.is_baryon());
 }
 
 TEST(dilepton) {
@@ -240,6 +263,7 @@ TEST(baryon_number) {
   COMPARE(xi_cc_bar.baryon_number(), -1);
   COMPARE(omega_bc.baryon_number(), 1);
   COMPARE(deutron.baryon_number(), 2);
+  COMPARE(antideutron.baryon_number(), -2);
   COMPARE(He4.baryon_number(), 4);
 }
 TEST(isospin3) {
@@ -267,6 +291,7 @@ TEST(isospin3) {
   COMPARE(xi_cc_bar.isospin3(), -1);
   COMPARE(omega_bc.isospin3(), 0);
   COMPARE(deutron.isospin3(), 0);
+  COMPARE(antideutron.isospin3(), 0);
 }
 TEST(strangeness) {
   COMPARE(electron.strangeness(), 0);
@@ -293,6 +318,7 @@ TEST(strangeness) {
   COMPARE(xi_cc_bar.strangeness(), 0);
   COMPARE(omega_bc.strangeness(), -1);
   COMPARE(deutron.strangeness(), 0);
+  COMPARE(antideutron.strangeness(), 0);
 }
 TEST(charmness) {
   COMPARE(electron.charmness(), 0);
@@ -373,6 +399,7 @@ TEST(charge) {
   COMPARE(xi_cc_bar.charge(), -2);
   COMPARE(omega_bc.charge(), 0);
   COMPARE(deutron.charge(), 1);
+  COMPARE(antideutron.charge(), -1);
   COMPARE(He4.charge(), 2);
 }
 TEST(quarks) {
@@ -602,6 +629,7 @@ TEST(from_decimal) {
   COMPARE(Kminus, PdgCode::from_decimal(-321));
   COMPARE(antixi, PdgCode::from_decimal(-103312));
   COMPARE(deutron, PdgCode::from_decimal(1000010020));
+  COMPARE(antideutron, PdgCode::from_decimal(-1000010020));
 }
 
 TEST(antiparticles) {
@@ -615,6 +643,7 @@ TEST(antiparticles) {
   COMPARE(antimu.has_antiparticle(), true);
   COMPARE(photon.has_antiparticle(), false);
   COMPARE(deutron.has_antiparticle(), true);
+  COMPARE(antideutron.has_antiparticle(), true);
   COMPARE(He4.has_antiparticle(), true);
 }
 

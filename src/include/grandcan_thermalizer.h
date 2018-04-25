@@ -56,8 +56,12 @@ class ThermLatticeNode {
    * mub_ Net baryon chemical potential, mus_ Net strangeness chemical potential
    */
   ThermLatticeNode();
-  /// \todo unused apart from example above
-  /// Add particle contribution to Tmu0, nb and ns
+  /**
+   *  Add particle contribution to Tmu0, nb and ns
+   *  May look like unused at first glance, but it is actually used
+   *  by update_general_lattice, where the node type of the lattice
+   *  is templated.
+   */
   void add_particle(const ParticleData& p, double factor);
   /**
    * Temperature, chemical potentials and rest frame velocity are
@@ -65,8 +69,11 @@ class ThermLatticeNode {
    * \param[in] eos \see HadronGasEos based on Tmu0, nb and ns
    * \return Temperature T, net baryon chemical potential mub,
    * net strangeness chemical potential mus and the velocity of the
-   * rest frame
-   * \todo (oliiny) which rest frame? Landau/Eckart, does it matter?
+   * Landau rest frame, under assumption that energy-momentum tensor
+   * has an ideal-fluid form. For more details and discussion see
+   * \iref{Oliinychenko:2015lva}. The advantage of this rest frame
+   * transformation is that it conserves energy and momentum, even
+   * though the dissipative part of the energy-momentum tensor is neglected.
    */
   void compute_rest_frame_quantities(HadronGasEos& eos);
   /**
@@ -165,6 +172,32 @@ enum class HadronClass {
  *  to reproduce the mean values of multiplicities correctly. However, this
  *  is not the case for multiplicity fluctuations. For details see
  *  \iref{Oliinychenko:2016vkg}.
+ */
+
+/*!\Userguide
+ * \page input_forced_thermalization_ Forced Thermalization
+ *
+ * \key Cell_Number (list of 3 doubles, required, no default): \n
+ * Number of cells in each direction (x,y,z).
+ *
+ * \key Critical_Edens (double, required, )
+ * Critical energydensity above which forced thermalization is applied, in
+ * GeV/fm^3.
+ *
+ * \key Start_Time (double, required, no default): \n
+ * Time after which forced thermalization may be applied (in fm/c), if
+ * energydensity is sufficiently high.
+ *
+ * \key Timestep (double, required, no default): \n
+ * Timestep of thermalization, in fm/c.
+ *
+ * \key Algorithm (string, optional, default = "biased BF") \n
+ * Algorithm applied to enforce thermalization. See \iref{Oliinychenko:2016vkg}
+ * for more details.
+ * \li \key "unbiased BF" - slowest, but theoretically most robust
+ * \li \key "biased BF" - faster, but theoretically less robust
+ * \li \key "mode sampling" - fastest, but least robust
+ *
  */
 class GrandCanThermalizer {
  public:
@@ -433,7 +466,14 @@ class GrandCanThermalizer {
   ParticleList to_remove_;
   /// Newly generated particles by thermalizer
   ParticleList sampled_list_;
-  /// \todo (oliiny) what does that mean?
+  /**
+   * List of particle types from which equation of state is computed.
+   * Most particles are included, but not all of them.
+   * For example, photons and leptons are not included. Heavy hadrons, that
+   * can originate from Pythia, but do not interact in SMASH are not included.
+   * The latter are excluded to avoid violations of charm and bottomness
+   * conservation, when HadronGasEoS is used for forced thermalization.
+   */
   const ParticleTypePtrList eos_typelist_;
   /// Number of different species to be sampled
   const size_t N_sorts_;

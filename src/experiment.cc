@@ -75,15 +75,12 @@ ExperimentPtr ExperimentBase::create(Configuration config,
    * Selects a modus for the calculation, e.g.\ infinite matter
    * calculation, collision of two particles or collision of nuclei. The modus
    * will be configured in \ref input_modi_. Recognized values are:
-   * \li \key Collider for collisions of nuclei or compound objects. See \ref
+   * \li \key Collider - For collisions of nuclei or compound objects. See \ref
    *     \ColliderModus
-   * \li \key Sphere for calculations of the expansion of a thermalized sphere.
-   * See
-   *     \ref \SphereModus
-   * \li \key Box for infinite matter calculation in a rectangular box. See \ref
-   *     \BoxModus
-   * \li \key List for given external particle list. See \ref
-   *     \ListModus
+   * \li \key Sphere - For calculations of the expansion of a thermalized
+   * sphere. See \ref \SphereModus \li \key Box - For infinite matter
+   * calculation in a rectangular box. See \ref \BoxModus \li \key List - For
+   * given external particle list. See \ref \ListModus
    */
 
   /*!\Userguide
@@ -113,110 +110,188 @@ ExperimentPtr ExperimentBase::create(Configuration config,
 namespace {
 /*!\Userguide
  * \page input_general_ General
- * \key Delta_Time (double, required): \n
+ * \key Delta_Time (double, optional, default: 1.0): \n
  * Time step for the calculation, in fm/c.
  * Not required for timestepless mode.
  *
  * \key Testparticles (int, optional, default = 1): \n
- * How many test particles per real particles should be simulated.
+ * How many test particles per real particle should be simulated.
  *
  * \key Gaussian_Sigma (double, optional, default = 1.0): \n
- * Width [fm] of gaussians that represent Wigner density of particles.
+ * Width of gaussians that represent Wigner density of particles, in fm.
  *
- * \key Gauss_Cutoff_In_Sigma (double, optional, default = 4.0)
+ * \key Gauss_Cutoff_In_Sigma (double, optional, default = 4.0): \n
  * Distance in sigma at which gaussian is considered 0.
  *
  * \page input_output_options_ Output
  *
  * Description of options
  * ---------------------
+ * To produce a certain output content it is necessary to explicitly configure
+ * it in the Output section of the configuration file. This means, that the
+ * Output section needs to contain a subsection for the desired output.
+ * Aditionally, there are general output configuration parameters. \n
+ * \n
+ * ### General output configuration parameters:
  * \key Output_Interval (double, optional, default = End_Time): \n
  * Defines the period of intermediate output of the status of the simulated
  * system in Standard Output and other output formats which support this
  * functionality.
  *
  * \key Density_Type (string, optional, default = "none"): \n
- * Determines which kind of density is printed into the collision files.
+ * Determines which kind of density is printed into the headers of the
+ * collision files.
  * Possible values:\n
- * \li "hadron"           - total hadronic density
- * \li "baryon"           - net baryon density
- * \li "baryonic isospin" - baryonic isospin density
- * \li "pion"             - pion density
- * \li "none"             - do not calculate density, print 0.0
+ * \li \key "hadron" - Total hadronic density
+ * \li \key "baryon" - Net baryon density
+ * \li \key "baryonic isospin" - Baryonic isospin density
+ * \li \key "pion" - Pion density
+ * \li \key "none" - Do not calculate density, print 0.0
  *
- * Futher options are defined for every single output \b content
+ * \n
+ * ### Format configuration independently of the specific output content
+ * Further options are defined for every single output content
  * (see \ref output_contents_ "output contents" for the list of
- * possible contents) in the following way:
- * \code
- * Content:
- *     Format: ["format1", "format2", ...]
- *     Option1: Value  # Content-specific options
- *     Option2: Value
- *     ...
- * \endcode
+ * possible contents). Independently of the content, it is always necessary
+ * to provide the format in which the output should be generated.
  *
- * To disable a certain output content,  remove or comment out the
- * corresponding section. Every output can be printed in several formats
- * simultaneously. The following option chooses list of formats:
- *
- * \key Format (list of formats, optional, default = []):\n
+ * \key Format (list of formats, optional, default = [ ]):\n
  * List of formats for writing particular content.
  * Possible formats for every content are listed and described in
  * \ref output_contents_ "output contents". List of available formats is
  * \ref list_of_output_formats "here".
+ * \n
+ * Besides the universal \key Format option, there are also content-specific output
+ * options that are listed below.
  *
  * ### Content-specific output options
  * \anchor output_content_specific_options_
  *
- * - \b Particles
- *
+ * - \b Particles \n
  *   \key Extended (bool, optional, default = false): \n
- *   true - print extended information for each particle \n
- *   false - regular output for each particle
+ *   \li \key true - Print extended information for each particle \n
+ *   \li \key false - Regular output for each particle
  *
  *   \key Only_Final (bool, optional, default = true): \n
- *   true - print only final particle list \n
- *   false - particle list at output interval including initial time
- * - \b Collisions
- *
+ *   \li \key true - Print only final particle list \n
+ *   \li \key false - Particle list at output interval including initial time \n
+ * \n
+ * - \b Collisions \n
  *   \key Extended (bool, optional, default = false): \n
- *   true - print extended information for each particle \n
- *   false - regular output for each particle
+ *   \li \key true - Print extended information for each particle \n
+ *   \li \key false - Regular output for each particle
  *
  *   \key Print_Start_End (bool, optional, default = false): \n
- *   true - initial and final particle list is printed out \n
- *   false - initial and final particle list is not printed out
- * - \b Photons - see \ref input_photons
- * - \b Thermodynamics - see \subpage input_vtk_lattice_ for full spatial
- *   lattice output and \subpage ascii_thermodynamic_output_ for output at one
- *   point versus time.
+ *   \li \key true - Initial and final particle list is printed out \n
+ *   \li \key false - Initial and final particle list is not printed out \n
+ * \n
+ * - \b Dileptons \n
+ *   \key Extended (bool, optional, default = false): \n
+ *   \li \key true - Print extended information for each particle \n
+ *   \li \key false - Regular output for each particle \n
+ * \n
+ * - \b Photons \n
+ *   \key Fractions (int, required): \n
+ *   Number of fractional photons sampled per single perturbatively produced
+ *   photon. See \ref input_photons for further information. \n
+ * \n
+ * \anchor Thermodynamics
+ * - \b Thermodynamics \n
+ *   The user can print thermodynamical quantities on the spatial lattice to
+ *   vtk output. Note, that the Thermodynamics output requires a lattice.
+ *   This lattice needs to be enabled in the conguration file and is regulated
+ *   by the options of
+ *   \ref input_lattice_. \n
+ * \n
+ *  \key Type (string, optional, default = \key "baryon"): \n
+ *  Particle type taken into consideration, "baryon" corresponds to "net
+ baryon".
+ *   \li \key "hadron"
+ *   \li \key "baryon"
+ *   \li \key "baryonic isospin"
+ *   \li \key "pion"
+ *   \li \key "none"
  *
+ *   \key Quantities (list of thermodynamic quantities, optional, default = [
+ ]):\n
+ *   List of thermodynamic quantities that are printed to the output. Possible
+ *   quantities are:
+ *   \li \key "rho_eckart" - Eckart rest frame density
+ *   \li \key "tmn" - Energy-momentum tensor \f$T^{\mu\nu}(t,x,y,z) \f$
+ *   \li \key "tmn_landau" - Energy-momentum tensor in the Landau rest frame.
+ *      This tensor is computed by boosting \f$T^{\mu\nu}(t,x,y,z) \f$
+ *      to the local rest frame, where \f$T^{0i} \f$ = 0.
+ *   \li \key "landau_velocity" - Velocity of the Landau rest frame.
+ *      The velocity is obtained from the energy-momentum tensor
+ *      \f$T^{\mu\nu}(t,x,y,z) \f$ by solving the generalized eigenvalue
+ *      equation \f$(T^{\mu\nu} - \lambda g^{\mu\nu})u_{\mu}=0 \f$.
+ *
+ *   \key Position (list of 3 doubles, optional, default = [0.0, 0.0, 0.0]): \n
+ *   Point, at which thermodynamic quantities are computed.
+ *
+ *   \key Smearing (bool, optional, default = true): \n
+ *   Using Gaussian smearing for computing thermodynamic quantities or not.
+ *   \li \key true - smearing applied
+ *   \li \key false - smearing not applied
+ *
+ *   Normally, if one computes thermodynamic quantities at a fixed point,
+ *   smearing should be applied. It can however be useful to compute the energy-
+ *   energy-momentum tensor of all particles in a box with weights = 1, which
+ *   would correspond to \key "Smearing: false".
+ *
+ * \n
  * \anchor configuring_output_
- * Example configuring SMASH output
+ * Example: Configuring the SMASH Output
  * --------------
- * As an example, if one wants to have all of the following simultaneously:
- * \li particles at the end of event printed out in binary and Root formats
- * \li dileptons printed in Oscar2013 format
- * \li net baryon density at point (0, 0, 0) printed as a table
- *     against time every 1 fm/c
+ * The following example configures the output to be printed in an interval of
+ * 1 fm and with the net baryon density being printed to the header.
+ * The particles output is generated in "Oscar1999", VTK and "Root" format,
+ * generating output for each time step. The collisions output is formatted
+ * according to an extended "Oscar2013" format and the initial and final
+ * particle lists are printed as well.
+ *\verbatim
+ Output:
+     Output_Interval: 1.0
+     Density_Type: "baryon"
+     Particles:
+         Format:    ["Oscar1999", "VTK", "Root"]
+         Extended: False
+         Only_Final: False
+     Collisions:
+         Format:    ["Oscar2013"]
+         Extended: True
+         Print_Start_End: True
+ \endverbatim
  *
- * then the output section of configuration will be the following.
+ * To further activate photons and dileptons in the SMASH simulation and to also
+ * generate the output, the corresponding subsections need to be present in the
+ * configuration file. In the following example, the dilepton output is
+ * generated in extended "Oscar2013" and "Binary" format. The photon output
+ * is printed in "Oscar2013" format while the calculation is performed with
+ * 100 fractional photons.
+ *\verbatim
+     Dileptons:
+         Format:    ["Oscar2013", "Binary"]
+         Extended: True
+     Photons:
+         Format:    ["Oscar2013"]
+         Fractions: 100
+ \endverbatim
  *
- * \code
- * Output:
- *     Output_Interval:  1.0
- *     Particles:
- *         Format:          ["Binary", "Root"]
- *         Only_Final:      True
- *     Dileptons:
- *         Format:          ["Oscar2013"]
- *     Thermodynamics:
- *         Format:          ["ASCII"]
- *         Type:            "baryon"
- *         Quantities:      ["rho_eckart"]
- *         Position:        [0.0, 0.0, 0.0]
- *         Smearing:        True
- * \endcode
+ * Additionally, the thermodynsamics output can be activated. In this example,
+ * thermodynamic output is activated for hadrons. The quanities that are printed
+ * are the density in the Eckart rest frame and the energy momentum tensor in
+ * the Landau rest frame. These quantities are printed at each time step for the
+ * position (0,0,0). Gaussian smearing is not applied. The output is provided
+ * in "ASCII" and "VTK" format.
+ *\verbatim
+     Thermodynamics:
+         Format:    ["ASCII", "VTK"]
+         Type: "hadron"
+         Quantities:    ["rho_eckart", "tmn_landau"]
+         Position:    [0.0, 0.0, 0.0]
+         Smearing: False
+ \endverbatim
  */
 
 /** Gathers all general Experiment parameters
@@ -225,6 +300,7 @@ namespace {
  * \return The ExperimentParameters struct filled with values from the
  * Configuration
  */
+
 ExperimentParameters create_experiment_parameters(Configuration config) {
   const auto &log = logger<LogArea::Experiment>();
   log.trace() << source_location;
@@ -354,7 +430,7 @@ void Experiment<Modus>::create_output(std::string format, std::string content,
  * The time after which the evolution is stopped. Note
  * that the starting time depends on the chosen Modus.
  *
- * \key Randomseed (int64_t, required): \n
+ * \key Randomseed (int, required): \n
  * Initial seed for the random number generator. If this is
  * negative, the seed will be randomly generated by the operating system.
  *
@@ -362,39 +438,64 @@ void Experiment<Modus>::create_output(std::string format, std::string content,
  * Number of events to calculate.
  *
  * \key Use_Grid (bool, optional, default = true): \n
- * true - a grid is used to reduce the combinatorics of interaction lookup \n
- * false - no grid is used
+ * \li \key true - A grid is used to reduce the combinatorics of interaction
+ * lookup \n \li \key false - No grid is used.
  *
  * \key Time_Step_Mode (string, optional, default = Fixed): \n
  * The mode of time stepping. Possible values: \n
- * None - No time steps are used. Cannot be used with potentials \n
- * Fixed - Fixed-sized time steps \n
- * Adaptive - Time steps with adaptive sizes
+ * \li \key None - No time steps are used. Cannot be used with potentials \n
+ * \li \key Fixed - Fixed-sized time steps \n
+ * \li \key Adaptive - Time steps with adaptive sizes.
  *
- * \page input_collision_term_ Collision_Term
- *
- * \key Two_to_One (bool, optional, default = true) \n
- * Enable 2 <--> 1 processes (resonance formation and decays).
- *
- * \key Two_to_Two (bool, optional, default = true) \n
- * Enable 2 <--> 2 collisions.
- *
- * \key Force_Decays_At_End (bool, optional, default = true): \n
- * true - force all resonances to decay after last timestep \n
- * false - don't force decays (final output can contain resonances)
- *
- * \key Metric_Type (ExpansionMode, optional, default = NoExpansion): \n
- * NoExpansion - default SMASH run, with Minkowski metric \n
- * MasslessFRW - FRW expansion going as t^(1/2)
- * MassiveFRW - FRW expansion going as t^(2/3)
- * Exponential - FRW expansion going as e^(t/2)
+ * \key Metric_Type (string, optional, default = NoExpansion): \n
+ * Select which kind of expansion the metric should have. This needs only be
+ * specified for the sphere modus:
+ * \li \key NoExpansion - Default SMASH run, with Minkowski metric \n
+ * \li \key MasslessFRW - FRW expansion going as t^(1/2)
+ * \li \key MassiveFRW - FRW expansion going as t^(2/3)
+ * \li \key Exponential - FRW expansion going as e^(t/2)
  *
  * \key Expansion_Rate (double, optional, default = 0.1) \n
  * Corresponds to the speed of expansion of the universe in non minkowski
- * metrics \n
- * This value is useless if NoExpansion is selected; it corresponds to \n
- * \f$b_r/l_0\f$ if the metric type is MasslessFRW or MassiveFRW, and to \n
- * the parameter b in the Exponential expansion where \f$a(t) ~ e^{bt/2}\f$
+ * metrics if MetricType is any other than \key NoExpansion. \n
+ * It corresponds to \f$b_r/l_0\f$ if the metric type is \key MasslessFRW or
+ * \key MassiveFRW, and to the parameter b in the Exponential expansion where
+ * \f$a(t) ~ e^{bt/2}\f$. \n
+ *
+ * \page input_collision_term_ Collision_Term
+ *
+ * \key Two_to_One (bool, optional, default = \key true) \n
+ * Enable 2 <--> 1 processes (resonance formation and decays).
+ *
+ * \key Included_2to2 (list of 2 <--> 2 reactions,
+ * optional, default = ["All"]) \n
+ * List that contains all possible 2 <--> 2 process categories. Each process of
+ * the listed category can be performed within the simulation. Possible categories are:
+ * \li \key "Elastic" - elastic binary scatterings
+ * \li \key "NN_to_NR" - nucleon + nucleon <--> nucleon + resonance
+ * \li \key "NN_to_DR" - nucleon + nucleon <--> delta + resonance
+ * \li \key "KN_to_KN" - kaon + nucleon <--> kaon + nucleon
+ * \li \key "KN_to_KDelta" - kaon + nucleon <--> kaon + dela
+ * \li \key "Strangeness_exchange" - processes with strangeness exchange
+ * \li \key "All" - include all binary processes, no necessity to list each
+ * single category
+ *
+ * \key Force_Decays_At_End (bool, optional, default = \key true): \n
+ * \li \key true - Force all resonances to decay after last timestep \n
+ * \li \key false - Don't force decays (final output can contain resonances)
+ *
+ * \key No_Collisions (bool, optional, default = false) \n
+ * Disable all possible collisions, only allow decays to occur
+ * if not forbidden by other options. Useful for running SMASH
+ * as a decay afterburner, but not recommended in general, because
+ * it breaks the detailed balance.
+ *
+ * \key NNbar_Treatment (string, optional, default = "no annihilation")
+ * \li \key "no annihilation" - No annihilation of NNbar is performed.
+ * \li \key "resonances" - Annhilation through NNbar → ρh₁(1170); combined with
+ *  ρ → ππ and h₁(1170) → πρ, which gives 5 pions on average.
+ * \li \key "strings" - Annihilation throug string fragmentation.
+ *
  * \subpage pauliblocker
  */
 template <typename Modus>
@@ -429,8 +530,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   if (parameters_.two_to_one) {
     action_finders_.emplace_back(make_unique<DecayActionsFinder>());
   }
-  if (parameters_.two_to_one || parameters_.included_2to2.any() ||
-      parameters_.strings_switch) {
+  bool no_coll = config.take({"Collision_Term", "No_Collisions"}, false);
+  if ((parameters_.two_to_one || parameters_.included_2to2.any() ||
+       parameters_.strings_switch) &&
+      !no_coll) {
     auto scat_finder = make_unique<ScatterActionsFinder>(
         config, parameters_, nucleon_has_interacted_, modus_.total_N_number(),
         modus_.proj_N_number());
@@ -468,8 +571,50 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * \key Allowed_Deviation (double, optional, default = 2.5) \n
    * Limit by how much the target can be exceeded before the time step is
    * aborted.
+   **/
+
+  /*!\Userguide
+   * \page input_general_
+   *
+   * \n
+   * Example: Configuring General Properties
+   * --------------
+   * The following example provides a possibility for the \key General
+   * configuration.
+   *
+   *\verbatim
+   General:
+       Modus: Collider
+       Delta_Time: 0.1
+       Testparticles: 1
+       Gaussian_Sigma: 1.0
+       Gauss_Cutoff_In_Sigma: 3.0
+       End_Time: 100.0
+       Randomseed: -1
+       Nevents: 20
+       Use_Grid: True
+       Time_Step_Mode: Fixed
+   \endverbatim
+   * For the use of adaptive timesteps, change the \key Time_Step_Mode and
+   * include the corresponding additional parameters:
+   *\verbatim
+       Time_Step_Mode: Adaptive
+       Adaptive_Time_Step:
+           Smoothing_Factor: 0.1
+           Target_Missed_Actions: 0.01
+           Allowed_Deviation: 2.5
+   \endverbatim
+   *
+   * In the case of an expanding sphere setup, change the \key Modus and provide
+   * further information about the expansion.
+   *\verbatim
+       Modus: Sphere
+       MetricType: MasslessFRW
+       Expansion_Rate: 0.1
+   \endverbatim
    *
    **/
+
   if (time_step_mode_ == TimeStepMode::Adaptive) {
     adaptive_parameters_ = make_unique<AdaptiveParameters>(
         config["General"]["Adaptive_Time_Step"], delta_time_startup_);
@@ -531,8 +676,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * - \b Thermodynamics This output allows to print out thermodynamic
    *          quantities such as density, energy-momentum tensor,
    *          Landau velocity, etc at one selected point versus time
-   *          (simple ASCII format table \subpage ascii_thermodynamic_output_)
-   *          and on a spatial lattice  versus time (\ref output_vtk_lattice_).
+   *          and on a spatial lattice  versus time \ref Thermodynamics.
    * \anchor list_of_output_formats
    * Output formats
    * --------------
@@ -559,8 +703,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *   - For "Particles" content \subpage format_vtk
    *   - For "Thermodynamics" content \subpage output_vtk_lattice_
    * - \b "ASCII" - a human-readable text-format table of values
-   *   - Used only for "Thermodynamics", see
-   *     \subpage ascii_thermodynamic_output_
+   *   - Used only for "Thermodynamics", see \ref Thermodynamics
    *
    * \note Output of coordinates for the "Collisions" content in
    *       the periodic box has a feature:
@@ -635,45 +778,43 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   /*!\Userguide
    * \page input_lattice_ Lattice
    *
-   * \key Sizes (array<double,3>, required): \n
+   * \key Sizes (array<double,3>, required, no default): \n
    *      Sizes of lattice in x, y, z directions in fm.
    *
-   * \key Cell_Number (array<int,3>, required): \n
+   * \key Cell_Number (array<int,3>, required, no default): \n
    *      Number of cells in x, y, z directions.
    *
-   * \key Origin (array<double,3>, required): \n
+   * \key Origin (array<double,3>, required, no default): \n
    *      Coordinates of the left, down, near corner of the lattice in fm.
    *
-   * \key Periodic (bool, required): \n
+   * \key Periodic (bool, required, no default): \n
    *      Use periodic continuation or not. With periodic continuation
    *      x + i * lx is equivalent to x, same for y, z.
+   *
+   * \key Potentials_Affect_Thresholds (bool, optional, default = false): \n
+   * Include potential effects, since mean field potentials change the threshold
+   * energies of the actions.
    *
    * For format of lattice output see \ref output_vtk_lattice_. To configure
    * output of the quantities on the lattice to vtk files see
    * \ref input_output_options_.
    *
-   * \page input_vtk_lattice_ lattice vtk output
+   * \n
+   * Examples: Configuring the Lattice
+   * --------------
+   * The following example configures the lattice with the origin in (0,0,0),
+   * 20 cells of 10 fm size in each direction and with periodic boundary
+   * conditions. The potential effects on the thresholds are taken into
+   * consideration.
    *
-   * User can print thermodynamical quantities on the spatial lattice
-   * to vtk output.
-   * The lattice for the output is regulated by options of lattice
-   * \subpage input_lattice_. The type of thermodynamic quantities is
-   * chosen by the following options of the "Thermodynamic" output.
-   *
-   * \key Type (string, optional, default = "none"): \n
-   * Chooses hadron/baryon/pion/baryonic isospin thermodynamic quantities
-   *
-   * \key Quantities (list of strings, optional, default = []): \n
-   * List of quantities that can be printed:
-   *  \li "rho_eckart": Eckart rest frame density
-   *  \li "tmn": Energy-momentum tensor \f$T^{\mu\nu}(t,x,y,z) \f$
-   *  \li "tmn_landau": Energy-momentum tensor in the Landau rest frame.
-   *      This tensor is computed by boosting \f$T^{\mu\nu}(t,x,y,z) \f$
-   *      to the local rest frame, where \f$T^{0i} \f$ = 0.
-   *  \li "landau_velocity": Velocity of the Landau rest frame.
-   *      The velocity is obtained from the energy-momentum tensor
-   *      \f$T^{\mu\nu}(t,x,y,z) \f$ by solving the generalized eigenvalue
-   *      equation \f$(T^{\mu\nu} - \lambda g^{\mu\nu})u_{\mu}=0 \f$.
+   *\verbatim
+   Lattice:
+       Origin:    [0.0, 0.0, 0.0]
+       Sizes:    [10.0, 10.0, 10.0]
+       Cell_Number:    [20, 20, 20]
+       Periodic: True
+       Potentials_Affect_Thresholds: True
+   \endverbatim
    */
 
   // Create lattices

@@ -28,9 +28,9 @@ namespace smash {
  *
  * Any output should inherit this class. It provides virtual methods that will
  * be called at predefined moments:
- * 1) At event start and event end
- * 2) After every N'th timestep
- * 3) At each interaction
+ * 1) At event start and event end: at_eventstart, at_eventend
+ * 2) After every fixed time period: at_intermediate_time, thermodynamics_output
+ * 3) At each interaction: at_interaction
  */
 class OutputInterface {
  public:

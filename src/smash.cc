@@ -204,9 +204,9 @@ ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
   std::vector<bool> nucleon_has_interacted = {};
   ReactionsBitSet included_2to2 = configuration.take(
       {"Collision_Term", "Included_2to2"}, ReactionsBitSet().set());
-  /** Since it will be used solely for cross-section dump, most of
-   * parameters do not play any role here and are set arbitrarily.
-   * Only parameters, that switch reactions on/off matter. */
+  // Since it will be used solely for cross-section dump, most of
+  // parameters do not play any role here and are set arbitrarily.
+  // Only parameters, that switch reactions on/off matter.
   bool two_to_one = configuration.take({"Collision_Term", "Two_to_One"});
   ExperimentParameters params = ExperimentParameters{
       {0., 1.},
@@ -341,7 +341,6 @@ int main(int argc, char *argv[]) {
       configuration.merge_yaml(config);
     }
     if (particles) {
-      std::cout << "particles: " << particles << std::endl;
       if (!bf::exists(particles)) {
         std::stringstream err;
         err << "The particles file was expected at '" << particles

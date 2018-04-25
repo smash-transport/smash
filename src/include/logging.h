@@ -19,6 +19,8 @@
 #include "macros.h"
 
 namespace smash {
+
+/// Configuration object to set the verbosity of each area independently.
 class Configuration;
 
 /*!\Userguide
@@ -27,6 +29,7 @@ class Configuration;
  * It contains the following keys, all of which have string values and are
  * optional:
  * \li \key default (determines the default logging level for all areas)
+ * \li \key Legacy
  * \li \key Main
  * \li \key Experiment
  * \li \key Box
@@ -66,7 +69,45 @@ class Configuration;
  * \li OFF   - If selected no messages will be output
  *
  * Note that the logging levels TRACE and DEBUG are only available in
- * debugging builds (i.e. with -DCMAKE_BUILD_TYPE=Debug).
+ * debugging builds (i.e. with -DCMAKE_BUILD_TYPE=Debug). \n
+ *
+ * \n
+ * Example: Configuring the Logging Area
+ * --------------
+ * To activate all informational messages (\key INFO) for all logging areas,
+ * include the following in the configuration file:
+ *\verbatim
+ Logging:
+     default: INFO
+     Legacy: INFO
+     Main: INFO
+     Experiment: INFO
+     Box: INFO
+     Collider: INFO
+     Sphere: INFO
+     ParticleType: INFO
+     Action: INFO
+     FindScatter: INFO
+     DecayModes: INFO
+     ScatterAction: INFO
+     Pythia: INFO
+     InputParser: INFO
+     Clock: INFO
+     Resonances: INFO
+     Distributions: INFO
+     Propagation: INFO
+     Grid: INFO
+     List: INFO
+     Nucleus: INFO
+     Density: INFO
+     PauliBlocking: INFO
+     Tmn: INFO
+     Fpe: INFO
+     Lattice: INFO
+     AdaptiveTS: INFO
+     GrandcanThermalizer: INFO
+     CrossSections: INFO
+ \endverbatim
  */
 
 /** \addtogroup logging
@@ -178,14 +219,15 @@ using AreaTuple =
 void create_all_loggers(Configuration config);
 
 /** \internal
- * Returns the einhard::Logger object created for the area with the associated
+ * \return The einhard::Logger object created for the area with the associated
  * index \p id.
  */
 einhard::Logger<> &retrieve_logger_impl(int id);
 
 /**
- * Returns the einhard::Logger object created for the named area
- * (see the LogArea types).
+ * \return The einhard::Logger object created for the named area (see the
+ * LogArea types).
+ * \tparam LogAreaTag Type determining the logging area.
  */
 template <typename LogAreaTag>
 inline einhard::Logger<> &logger() {
@@ -204,7 +246,7 @@ inline einhard::Logger<> &logger() {
   __FILE__ ":" + std::to_string(__LINE__) + " (" + __func__ + ')'
 
 /**
- * Return the default log level to use if no specific level is configured.
+ * \return The default log level to use if no specific level is configured.
  */
 einhard::LogLevel default_loglevel();
 
@@ -217,7 +259,9 @@ einhard::LogLevel default_loglevel();
 void set_default_loglevel(einhard::LogLevel level);
 
 /** \internal
- * Formatting helper
+ * Formatting helper.
+ *
+ * \tparam T Value that is being formatted.
  */
 template <typename T>
 struct FormattingHelper {
@@ -245,6 +289,7 @@ struct FormattingHelper {
  * Acts as a stream modifier for std::ostream to output an object with an
  * optional suffix string and with a given field width and precision.
  *
+ * \tparam T Value that is being formatted.
  * \param value The object to be written to the stream.
  * \param unit  An optional suffix string, typically used for a unit. May be
  *              nullptr.
@@ -265,11 +310,24 @@ namespace YAML {
  */
 template <>
 struct convert<einhard::LogLevel> {
-  /// convert from einhard::LogLevel to YAML::Node
+  /**
+   * Convert from einhard::LogLevel to YAML::Node.
+   *
+   * \param x Log level.
+   * \return Corresponding YAML node.
+   */
   static Node encode(const einhard::LogLevel &x) {
     return Node{einhard::getLogLevelString(x)};
   }
-  /// convert from YAML::Node to einhard::LogLevel
+
+  /**
+   * Convert from YAML::Node to einhard::LogLevel.
+   *
+   * \param[in] node YAML node.
+   * \param[out] x Where the corresponding log level will be stored if the
+   * conversion was successful.
+   * \return Whether the conversion was successful.
+   */
   static bool decode(const Node &node, einhard::LogLevel &x) {
     if (!node.IsScalar()) {
       return false;

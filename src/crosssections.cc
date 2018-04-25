@@ -15,6 +15,7 @@
 #include "include/logging.h"
 #include "include/parametrizations.h"
 #include "include/particletype.h"
+#include "include/pow.h"
 
 namespace smash {
 
@@ -22,7 +23,7 @@ namespace smash {
  * Helper function:
  * Calculate the detailed balance factor R such that
  * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
- * where $A, B, C, D$ are stable.
+ * where \f$ A, B, C, D \f$ are stable.
  */
 static double detailed_balance_factor_stable(double s, const ParticleType& a,
                                              const ParticleType& b,
@@ -41,7 +42,7 @@ static double detailed_balance_factor_stable(double s, const ParticleType& a,
  * Helper function:
  * Calculate the detailed balance factor R such that
  * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
- * where $A$ is unstable, $B$ is a kaon and $C, D$ are stable.
+ * where \f$A\f$ is unstable, \f$B\f$ is a kaon and \f$C, D\f$ are stable.
  */
 static double detailed_balance_factor_RK(double sqrts, double pcm,
                                          const ParticleType& a,
@@ -64,7 +65,7 @@ static double detailed_balance_factor_RK(double sqrts, double pcm,
  * Helper function:
  * Calculate the detailed balance factor R such that
  * \f[ R = \sigma(AB \to CD) / \sigma(CD \to AB) \f]
- * where $A$ and $B$ are unstable, and $C$ and $D$ are stable.
+ * where \f$A\f$ and \f$B\f$ are unstable, and \f$C\f$ and \f$D\f$ are stable.
  */
 static double detailed_balance_factor_RR(double sqrts, double pcm,
                                          const ParticleType& a,
@@ -130,9 +131,9 @@ static double sum_xs_of(CollisionBranchList& list) {
   return xs_sum;
 }
 
-cross_sections::cross_sections(const ParticleList& scat_particles,
+cross_sections::cross_sections(const ParticleList& incoming_particles,
                                const double sqrt_s)
-    : incoming_particles_(scat_particles), sqrt_s_(sqrt_s) {}
+    : incoming_particles_(incoming_particles), sqrt_s_(sqrt_s) {}
 
 CollisionBranchList cross_sections::generate_collision_list(
     double elastic_parameter, bool two_to_one_switch,
@@ -145,8 +146,8 @@ CollisionBranchList cross_sections::generate_collision_list(
 
   const bool is_pythia = decide_string(strings_switch, both_are_nucleons);
 
-  /** Elastic collisions between two nucleons with sqrt_s below
-   * low_snn_cut can not happen*/
+  /* Elastic collisions between two nucleons with sqrt_s below
+   * low_snn_cut can not happen. */
   const bool reject_by_nucleon_elastic_cutoff =
       both_are_nucleons && t1.antiparticle_sign() == t2.antiparticle_sign() &&
       sqrt_s_ < low_snn_cut;
@@ -155,21 +156,21 @@ CollisionBranchList cross_sections::generate_collision_list(
     process_list.emplace_back(elastic(elastic_parameter));
   }
   if (is_pythia) {
-    /* string excitation */
+    // string excitation
     append_list(process_list, string_excitation(string_process));
   } else {
     if (two_to_one_switch) {
-      /* resonance formation (2->1) */
+      // resonance formation (2->1)
       append_list(process_list, two_to_one());
     }
     if (included_2to2.any()) {
-      /* 2->2 (inelastic) */
+      // 2->2 (inelastic)
       append_list(process_list, two_to_two(included_2to2));
     }
   }
-  /** NNbar annihilation thru NNbar → ρh₁(1170); combined with the decays
-   *  ρ → ππ and h₁(1170) → πρ, this gives a final state of 5 pions.
-   *  Only use in cases when detailed balance MUST happen, i.e. in a box! */
+  /* NNbar annihilation thru NNbar → ρh₁(1170); combined with the decays
+   * ρ → ππ and h₁(1170) → πρ, this gives a final state of 5 pions.
+   * Only use in cases when detailed balance MUST happen, i.e. in a box! */
   if (nnbar_treatment == NNbarTreatment::Resonances) {
     if (t1.is_nucleon() && t2.pdgcode() == t1.get_antiparticle()->pdgcode()) {
       /* Has to be called after the other processes are already determined,
@@ -224,13 +225,13 @@ double cross_sections::nn_el() {
 
   const double s = sqrt_s_ * sqrt_s_;
 
-  /* Use parametrized cross sections. */
+  // Use parametrized cross sections.
   double sig_el;
-  if (pdg_a == pdg_b) { /* pp */
+  if (pdg_a == pdg_b) {
     sig_el = pp_elastic(s);
-  } else if (pdg_a.is_antiparticle_of(pdg_b)) { /* ppbar */
+  } else if (pdg_a.is_antiparticle_of(pdg_b)) {
     sig_el = ppbar_elastic(s);
-  } else { /* np */
+  } else {
     sig_el = np_elastic(s);
   }
   if (sig_el > 0.) {
@@ -427,41 +428,38 @@ double cross_sections::nk_el() {
 CollisionBranchList cross_sections::two_to_one() {
   const auto& log = logger<LogArea::CrossSections>();
   CollisionBranchList resonance_process_list;
-  /* There is no resonance formation out of two baryons: Return empty list. */
-  if (!(incoming_particles_[0].is_baryon() &&
-        incoming_particles_[1].is_baryon())) {
-    const ParticleType& type_particle_a = incoming_particles_[0].type();
-    const ParticleType& type_particle_b = incoming_particles_[1].type();
+  const ParticleType& type_particle_a = incoming_particles_[0].type();
+  const ParticleType& type_particle_b = incoming_particles_[1].type();
 
-    const double m1 = incoming_particles_[0].effective_mass();
-    const double m2 = incoming_particles_[1].effective_mass();
-    const double p_cm_sqr = pCM_sqr(sqrt_s_, m1, m2);
+  const double m1 = incoming_particles_[0].effective_mass();
+  const double m2 = incoming_particles_[1].effective_mass();
+  const double p_cm_sqr = pCM_sqr(sqrt_s_, m1, m2);
 
-    /* Find all the possible resonances */
-    for (const ParticleType& type_resonance : ParticleType::list_all()) {
-      /* Not a resonance, go to next type of particle */
-      if (type_resonance.is_stable()) {
-        continue;
-      }
+  // Find all the possible resonances
+  for (const ParticleType& type_resonance : ParticleType::list_all()) {
+    /* Not a resonance, go to next type of particle */
+    if (type_resonance.is_stable()) {
+      continue;
+    }
 
-      /* Same resonance as in the beginning, ignore */
-      if ((!type_particle_a.is_stable() &&
-           type_resonance.pdgcode() == type_particle_a.pdgcode()) ||
-          (!type_particle_b.is_stable() &&
-           type_resonance.pdgcode() == type_particle_b.pdgcode())) {
-        continue;
-      }
+    // Same resonance as in the beginning, ignore
+    if ((!type_particle_a.is_stable() &&
+         type_resonance.pdgcode() == type_particle_a.pdgcode()) ||
+        (!type_particle_b.is_stable() &&
+         type_resonance.pdgcode() == type_particle_b.pdgcode())) {
+      continue;
+    }
 
-      double resonance_xsection = formation(type_resonance, p_cm_sqr);
+    double resonance_xsection = formation(type_resonance, p_cm_sqr);
 
-      /* If cross section is non-negligible, add resonance to the list */
-      if (resonance_xsection > really_small) {
-        resonance_process_list.push_back(make_unique<CollisionBranch>(
-            type_resonance, resonance_xsection, ProcessType::TwoToOne));
-        log.debug("Found resonance: ", type_resonance);
-        log.debug("2->1 with original particles: ", type_particle_a,
-                  type_particle_b);
-      }
+    // If cross section is non-negligible, add resonance to the list
+    if (resonance_xsection > really_small) {
+      resonance_process_list.push_back(make_unique<CollisionBranch>(
+          type_resonance, resonance_xsection, ProcessType::TwoToOne));
+      log.debug("Found resonance: ", type_resonance);
+      log.debug(type_particle_a.name(), type_particle_b.name(), "->",
+                type_resonance.name(), " at sqrt(s)[GeV] = ", sqrt_s_,
+                " with xs[mb] = ", resonance_xsection);
     }
   }
   return resonance_process_list;
@@ -471,26 +469,26 @@ double cross_sections::formation(const ParticleType& type_resonance,
                                  double cm_momentum_sqr) {
   const ParticleType& type_particle_a = incoming_particles_[0].type();
   const ParticleType& type_particle_b = incoming_particles_[1].type();
-  /* Check for charge conservation. */
+  // Check for charge conservation.
   if (type_resonance.charge() !=
       type_particle_a.charge() + type_particle_b.charge()) {
     return 0.;
   }
 
-  /* Check for baryon-number conservation. */
+  // Check for baryon-number conservation.
   if (type_resonance.baryon_number() !=
       type_particle_a.baryon_number() + type_particle_b.baryon_number()) {
     return 0.;
   }
 
-  /* Calculate partial in-width. */
+  // Calculate partial in-width.
   const double partial_width = type_resonance.get_partial_in_width(
       sqrt_s_, incoming_particles_[0], incoming_particles_[1]);
   if (partial_width <= 0.) {
     return 0.;
   }
 
-  /* Calculate spin factor */
+  // Calculate spin factor
   const double spinfactor =
       static_cast<double>(type_resonance.spin() + 1) /
       ((type_particle_a.spin() + 1) * (type_particle_b.spin() + 1));
@@ -508,6 +506,8 @@ CollisionBranchList cross_sections::two_to_two(ReactionsBitSet included_2to2) {
   CollisionBranchList process_list;
   const ParticleData& data_a = incoming_particles_[0];
   const ParticleData& data_b = incoming_particles_[1];
+  const ParticleType& type_a = data_a.type();
+  const ParticleType& type_b = data_b.type();
   const auto& pdg_a = data_a.pdgcode();
   const auto& pdg_b = data_b.pdgcode();
   if (data_a.is_baryon() && data_b.is_baryon()) {
@@ -519,7 +519,8 @@ CollisionBranchList cross_sections::two_to_two(ReactionsBitSet included_2to2) {
       // Baryon Baryon Scattering
       process_list = bb_xx_except_nn(included_2to2);
     }
-  } else if (data_a.is_baryon() || data_b.is_baryon()) {
+  } else if ((type_a.is_baryon() && type_b.is_meson()) ||
+             (type_a.is_meson() && type_b.is_baryon())) {
     // Baryon Meson Scattering
     if ((pdg_a.is_nucleon() && pdg_b.is_kaon()) ||
         (pdg_b.is_nucleon() && pdg_a.is_kaon())) {
@@ -534,6 +535,18 @@ CollisionBranchList cross_sections::two_to_two(ReactionsBitSet included_2to2) {
       // Delta Kaon Scattering
       process_list = deltak_xx(included_2to2);
     }
+  } else if (type_a.is_nucleus() || type_b.is_nucleus()) {
+    if ((type_a.is_nucleon() && type_b.is_nucleus()) ||
+        (type_b.is_nucleon() && type_a.is_nucleus())) {
+      // Nucleon Deuteron and Nucleon d' Scattering
+      process_list = dn_xx(included_2to2);
+    } else if (((type_a.is_deuteron() || type_a.is_dprime()) &&
+                pdg_b.is_pion()) ||
+               ((type_b.is_deuteron() || type_b.is_dprime()) &&
+                pdg_a.is_pion())) {
+      // Pion Deuteron and Pion d' Scattering
+      process_list = dpi_xx(included_2to2);
+    }
   }
   return process_list;
 }
@@ -545,18 +558,18 @@ CollisionBranchList cross_sections::bb_xx_except_nn(
   const ParticleType& type_b = incoming_particles_[1].type();
 
   bool same_sign = type_a.antiparticle_sign() == type_b.antiparticle_sign();
-  if (!same_sign) {
+  bool any_nucleus = type_a.is_nucleus() || type_b.is_nucleus();
+  if (!same_sign && !any_nucleus) {
     return process_list;
   }
   bool anti_particles = type_a.antiparticle_sign() == -1;
-
   if (type_a.is_nucleon() || type_b.is_nucleon()) {
-    /* N R → N N, N̅ R → N̅ N̅ */
+    // N R → N N, N̅ R → N̅ N̅
     if (included_2to2[IncludedReactions::NN_to_NR] == 1) {
       process_list = bar_bar_to_nuc_nuc(anti_particles);
     }
   } else if (type_a.is_Delta() || type_b.is_Delta()) {
-    /* Δ R → N N, Δ̅ R → N̅ N̅ */
+    // Δ R → N N, Δ̅ R → N̅ N̅
     if (included_2to2[IncludedReactions::NN_to_DR] == 1) {
       process_list = bar_bar_to_nuc_nuc(anti_particles);
     }
@@ -572,17 +585,16 @@ CollisionBranchList cross_sections::nn_xx(ReactionsBitSet included_2to2) {
 
   /* Find whether colliding particles are nucleons or anti-nucleons;
    * adjust lists of produced particles. */
+  bool both_antinucleons =
+      (incoming_particles_[0].type().antiparticle_sign() == -1) &&
+      (incoming_particles_[1].type().antiparticle_sign() == -1);
   const ParticleTypePtrList& nuc_or_anti_nuc =
-      incoming_particles_[0].type().antiparticle_sign() == -1 &&
-              incoming_particles_[1].type().antiparticle_sign() == -1
-          ? ParticleType::list_anti_nucleons()
-          : ParticleType::list_nucleons();
+      both_antinucleons ? ParticleType::list_anti_nucleons()
+                        : ParticleType::list_nucleons();
   const ParticleTypePtrList& delta_or_anti_delta =
-      incoming_particles_[0].type().antiparticle_sign() == -1 &&
-              incoming_particles_[1].type().antiparticle_sign() == -1
-          ? ParticleType::list_anti_Deltas()
-          : ParticleType::list_Deltas();
-  /* First: Find N N → N R channels. */
+      both_antinucleons ? ParticleType::list_anti_Deltas()
+                        : ParticleType::list_Deltas();
+  // Find N N → N R channels.
   if (included_2to2[IncludedReactions::NN_to_NR] == 1) {
     channel_list = find_nn_xsection_from_type(
         ParticleType::list_baryon_resonances(), nuc_or_anti_nuc,
@@ -595,13 +607,38 @@ CollisionBranchList cross_sections::nn_xx(ReactionsBitSet included_2to2) {
     channel_list.clear();
   }
 
-  /* Second: Find N N → Δ R channels. */
+  // Find N N → Δ R channels.
   if (included_2to2[IncludedReactions::NN_to_DR] == 1) {
     channel_list = find_nn_xsection_from_type(
         ParticleType::list_baryon_resonances(), delta_or_anti_delta,
         [&sqrts](const ParticleType& type_res_1,
                  const ParticleType& type_res_2) {
           return type_res_1.iso_multiplet()->get_integral_RR(type_res_2, sqrts);
+        });
+    process_list.reserve(process_list.size() + channel_list.size());
+    std::move(channel_list.begin(), channel_list.end(),
+              std::inserter(process_list, process_list.end()));
+    channel_list.clear();
+  }
+
+  // Find N N → dπ and N̅ N̅→ d̅π channels.
+  ParticleTypePtr deutron =
+      ParticleType::try_find(PdgCode::from_decimal(pdg::decimal_d));
+  ParticleTypePtr antideutron =
+      ParticleType::try_find(PdgCode::from_decimal(pdg::decimal_antid));
+  ParticleTypePtr pim = ParticleType::try_find(pdg::pi_m);
+  ParticleTypePtr pi0 = ParticleType::try_find(pdg::pi_z);
+  ParticleTypePtr pip = ParticleType::try_find(pdg::pi_p);
+  // Make sure all the necessary particle types are found
+  if (deutron && antideutron && pim && pi0 && pip) {
+    const ParticleTypePtrList deutron_list = {deutron};
+    const ParticleTypePtrList antideutron_list = {antideutron};
+    const ParticleTypePtrList pion_list = {pim, pi0, pip};
+    channel_list = find_nn_xsection_from_type(
+        (both_antinucleons ? antideutron_list : deutron_list), pion_list,
+        [&sqrts](const ParticleType& type_res_1,
+                 const ParticleType& type_res_2) {
+          return pCM(sqrts, type_res_1.mass(), type_res_2.mass());
         });
     process_list.reserve(process_list.size() + channel_list.size());
     std::move(channel_list.begin(), channel_list.end(),
@@ -635,8 +672,8 @@ CollisionBranchList cross_sections::nk_xx(ReactionsBitSet included_2to2) {
   CollisionBranchList process_list;
   switch (pdg_kaon) {
     case pdg::K_m: {
-      // All inelastic K- N channels here are strangeness exchange, plus one
-      // charge exchange.
+      /* All inelastic K- N channels here are strangeness exchange, plus one
+       * charge exchange. */
       switch (pdg_nucleon) {
         case pdg::p: {
           if (incl_Strangeness_exchange) {
@@ -745,8 +782,8 @@ CollisionBranchList cross_sections::nk_xx(ReactionsBitSet included_2to2) {
       break;
     }
     case pdg::K_p: {
-      // All inelastic channels are K+ N -> K Delta -> K pi N, with identical
-      // cross section, weighted by the isospin factor.
+      /* All inelastic channels are K+ N -> K Delta -> K pi N, with identical
+       * cross section, weighted by the isospin factor. */
       switch (pdg_nucleon) {
         case pdg::p: {
           if (incl_KN_to_KDelta) {
@@ -853,8 +890,8 @@ CollisionBranchList cross_sections::nk_xx(ReactionsBitSet included_2to2) {
       break;
     }
     case pdg::K_z: {
-      // K+ and K0 have the same isospin projection, they are assumed to have
-      // the same cross section here.
+      /* K+ and K0 have the same isospin projection, they are assumed to have
+       * the same cross section here. */
 
       switch (pdg_nucleon) {
         case pdg::p: {
@@ -1018,9 +1055,9 @@ CollisionBranchList cross_sections::deltak_xx(ReactionsBitSet included_2to2) {
 
   const double s = sqrt_s_ * sqrt_s_;
   const double pcm = cm_momentum();
-  // The cross sections are determined from the backward reactions via
-  // detailed balance. The same isospin factors as for the backward reaction
-  // are used.
+  /* The cross sections are determined from the backward reactions via
+   * detailed balance. The same isospin factors as for the backward reaction
+   * are used. */
   switch (pack(pdg_delta, pdg_kaon)) {
     case pack(pdg::Delta_pp, pdg::K_z):
     case pack(pdg::Delta_p, pdg::K_p): {
@@ -1349,6 +1386,177 @@ CollisionBranchList cross_sections::ypi_xx(ReactionsBitSet included_2to2) {
   return process_list;
 }
 
+CollisionBranchList cross_sections::dpi_xx(ReactionsBitSet
+                                           /*included_2to2*/) {
+  const auto& log = logger<LogArea::ScatterAction>();
+  CollisionBranchList process_list;
+  const double sqrts = sqrt_s_;
+  const ParticleType& type_a = incoming_particles_[0].type();
+  const ParticleType& type_b = incoming_particles_[1].type();
+
+  // pi d -> N N
+  if ((type_a.is_deuteron() && type_b.pdgcode().is_pion()) ||
+      (type_b.is_deuteron() && type_a.pdgcode().is_pion())) {
+    const int baryon_number = type_a.baryon_number() + type_b.baryon_number();
+    ParticleTypePtrList nuc = (baryon_number > 0)
+                                  ? ParticleType::list_nucleons()
+                                  : ParticleType::list_anti_nucleons();
+    const double s = sqrt_s_ * sqrt_s_;
+    for (ParticleTypePtr nuc_a : nuc) {
+      for (ParticleTypePtr nuc_b : nuc) {
+        if (type_a.charge() + type_b.charge() !=
+            nuc_a->charge() + nuc_b->charge()) {
+          continue;
+        }
+        // loop over total isospin
+        for (const int twoI : I_tot_range(*nuc_a, *nuc_b)) {
+          const double isospin_factor = isospin_clebsch_gordan_sqr_2to2(
+              type_a, type_b, *nuc_a, *nuc_b, twoI);
+          // If Clebsch-Gordan coefficient = 0, don't bother with the rest.
+          if (std::abs(isospin_factor) < really_small) {
+            continue;
+          }
+
+          // Calculate matrix element for inverse process.
+          const double matrix_element =
+              nn_to_resonance_matrix_element(sqrts, type_a, type_b, twoI);
+          if (matrix_element <= 0.) {
+            continue;
+          }
+
+          const double spin_factor = (nuc_a->spin() + 1) * (nuc_b->spin() + 1);
+          const int sym_fac_in =
+              (type_a.iso_multiplet() == type_b.iso_multiplet()) ? 2 : 1;
+          const int sym_fac_out =
+              (nuc_a->iso_multiplet() == nuc_b->iso_multiplet()) ? 2 : 1;
+          double p_cm_final = pCM_from_s(s, nuc_a->mass(), nuc_b->mass());
+          const double xsection = isospin_factor * spin_factor * sym_fac_in /
+                                  sym_fac_out * p_cm_final * matrix_element /
+                                  (s * cm_momentum());
+
+          if (xsection > really_small) {
+            process_list.push_back(make_unique<CollisionBranch>(
+                *nuc_a, *nuc_b, xsection, ProcessType::TwoToTwo));
+            log.debug(type_a.name(), type_b.name(), "->", nuc_a->name(),
+                      nuc_b->name(), " at sqrts [GeV] = ", sqrts,
+                      " with cs[mb] = ", xsection);
+          }
+        }
+      }
+    }
+  }
+
+  // pi d -> pi d' (effectively pi d -> pi p n)  AND reverse, pi d' -> pi d
+  if (((type_a.is_deuteron() || type_a.is_dprime()) &&
+       type_b.pdgcode().is_pion()) ||
+      ((type_b.is_deuteron() || type_b.is_dprime()) &&
+       type_a.pdgcode().is_pion())) {
+    const ParticleType& type_pi = type_a.pdgcode().is_pion() ? type_a : type_b;
+    const ParticleType& type_nucleus = type_a.is_nucleus() ? type_a : type_b;
+    ParticleTypePtrList nuclei = ParticleType::list_light_nuclei();
+    const double s = sqrt_s_ * sqrt_s_;
+    for (ParticleTypePtr produced_nucleus : nuclei) {
+      // No elastic collisions for now
+      if (produced_nucleus == &type_nucleus ||
+          produced_nucleus->charge() != type_nucleus.charge() ||
+          produced_nucleus->baryon_number() != type_nucleus.baryon_number()) {
+        continue;
+      }
+      // same matrix element for πd and πd̅
+      const double tmp =
+          sqrts - type_a.min_mass_kinematic() - type_b.min_mass_kinematic();
+      /* Matrix element is fit to match the inelastic pi+ d -> pi+ n p
+       * cross-section from the Fig. 5 of [\iref{Arndt:1994bs}]. */
+      const double matrix_element =
+          295.5 + 2.862 / (0.00283735 + pow_int(sqrts - 2.181, 2)) +
+          0.0672 / pow_int(tmp, 2) - 6.61753 / tmp;
+      const double spin_factor =
+          (produced_nucleus->spin() + 1) * (type_pi.spin() + 1);
+      /* Isospin factor is always the same, so it is included into the
+       * matrix element.
+       * Symmetry factor is always 1 here.
+       * The (hbarc)^2/16 pi factor is absorbed into matrix element. */
+      double xsection = matrix_element * spin_factor / (s * cm_momentum());
+      if (produced_nucleus->is_stable()) {
+        assert(!type_nucleus.is_stable());
+        xsection *= pCM_from_s(s, type_pi.mass(), produced_nucleus->mass());
+      } else {
+        assert(type_nucleus.is_stable());
+        const double resonance_integral =
+            produced_nucleus->iso_multiplet()->get_integral_piR(sqrts);
+        xsection *= resonance_integral;
+        log.debug("Resonance integral ", resonance_integral,
+                  ", matrix element: ", matrix_element,
+                  ", cm_momentum: ", cm_momentum());
+      }
+      process_list.push_back(make_unique<CollisionBranch>(
+          type_pi, *produced_nucleus, xsection, ProcessType::TwoToTwo));
+      log.debug(type_pi.name(), type_nucleus.name(), "→ ", type_pi.name(),
+                produced_nucleus->name(), " at ", sqrts,
+                " GeV, xs[mb] = ", xsection);
+    }
+  }
+  return process_list;
+}
+
+CollisionBranchList cross_sections::dn_xx(ReactionsBitSet /*included_2to2*/) {
+  const ParticleType& type_a = incoming_particles_[0].type();
+  const ParticleType& type_b = incoming_particles_[1].type();
+  const ParticleType& type_N = type_a.is_nucleon() ? type_a : type_b;
+  const ParticleType& type_nucleus = type_a.is_nucleus() ? type_a : type_b;
+  CollisionBranchList process_list;
+  ParticleTypePtrList nuclei = ParticleType::list_light_nuclei();
+  const double s = sqrt_s_ * sqrt_s_;
+  const double sqrts = sqrt_s_;
+
+  for (ParticleTypePtr produced_nucleus : nuclei) {
+    // No elastic collisions for now, respect conservation laws
+    if (produced_nucleus == &type_nucleus ||
+        produced_nucleus->charge() != type_nucleus.charge() ||
+        produced_nucleus->baryon_number() != type_nucleus.baryon_number()) {
+      continue;
+    }
+    double matrix_element = 0.0;
+    if (std::signbit(type_N.baryon_number()) ==
+        std::signbit(type_nucleus.baryon_number())) {
+      // Nd → Nd', N̅d̅→ N̅d̅' and reverse
+      const double tmp = sqrts - type_N.min_mass_kinematic() -
+                         type_nucleus.min_mass_kinematic();
+      assert(tmp >= 0.0);
+      /* Fit to match experimental cross-section Nd -> Nnp from
+       * [\iref{Carlson1973}] */
+      matrix_element = 79.0474 / std::pow(tmp, 0.7897) + 654.596 * tmp;
+    } else {
+      /* N̅d →  N̅d', Nd̅→ Nd̅' and reverse
+       * Fit to roughly match experimental cross-section N̅d -> N̅ np from
+       * [\iref{Bizzarri:1973sp}]. */
+      matrix_element = 681.4;
+    }
+    const double spin_factor =
+        (produced_nucleus->spin() + 1) * (type_N.spin() + 1);
+    /* Isospin factor is always the same, so it is included into matrix element
+     * Symmetry factor is always 1 here
+     * Absorb (hbarc)^2/16 pi factor into matrix element */
+    double xsection = matrix_element * spin_factor / (s * cm_momentum());
+    if (produced_nucleus->is_stable()) {
+      assert(!type_nucleus.is_stable());
+      xsection *= pCM_from_s(s, type_N.mass(), produced_nucleus->mass());
+    } else {
+      assert(type_nucleus.is_stable());
+      const double resonance_integral =
+          produced_nucleus->iso_multiplet()->get_integral_NR(sqrts);
+      xsection *= resonance_integral;
+    }
+    process_list.push_back(make_unique<CollisionBranch>(
+        type_N, *produced_nucleus, xsection, ProcessType::TwoToTwo));
+    const auto& log = logger<LogArea::ScatterAction>();
+    log.debug(type_N.name(), type_nucleus.name(), "→ ", type_N.name(),
+              produced_nucleus->name(), " at ", sqrts,
+              " GeV, xs[mb] = ", xsection);
+  }
+  return process_list;
+}
+
 CollisionBranchList cross_sections::string_excitation(
     StringProcess* string_process) {
   const auto& log = logger<LogArea::CrossSections>();
@@ -1421,10 +1629,10 @@ CollisionBranchList cross_sections::string_excitation(
     log.debug("Soft non-diffractive: ", nondiffractive_soft);
     log.debug("Hard non-diffractive: ", nondiffractive_hard);
 
-    /* cross section of soft string excitation */
+    // cross section of soft string excitation
     const double sig_string_soft = sig_string_all - nondiffractive_hard;
 
-    /* fill cross section arrays */
+    // fill cross section arrays
     std::array<double, 5> string_sub_cross_sections;
     std::array<double, 6> string_sub_cross_sections_sum;
     string_sub_cross_sections[0] = single_diffr_AX;
@@ -1438,7 +1646,7 @@ CollisionBranchList cross_sections::string_excitation(
           string_sub_cross_sections_sum[i] + string_sub_cross_sections[i];
     }
 
-    /* soft subprocess selection */
+    // soft subprocess selection
     StringSoftType iproc = StringSoftType::None;
     double r_xsec = string_sub_cross_sections_sum[4] * Random::uniform(0., 1.);
     for (int i = 0; i < 4; i++) {
@@ -1454,7 +1662,7 @@ CollisionBranchList cross_sections::string_excitation(
 
     string_process->set_subproc(iproc);
 
-    /* fill the list of process channels */
+    // fill the list of process channels
     if (sig_string_soft > 0.) {
       channel_list.push_back(make_unique<CollisionBranch>(
           sig_string_soft, ProcessType::StringSoft));
@@ -1472,7 +1680,7 @@ double cross_sections::high_energy() const {
   const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
   const double s = sqrt_s_ * sqrt_s_;
 
-  /* Currently all BB collisions use the nucleon-nucleon parametrizations. */
+  // Currently all BB collisions use the nucleon-nucleon parametrizations.
   if (pdg_a.is_baryon() && pdg_b.is_baryon()) {
     if (pdg_a == pdg_b) {
       return pp_high_energy(s);  // pp, nn
@@ -1485,7 +1693,7 @@ double cross_sections::high_energy() const {
     }
   }
 
-  /* Pion nucleon interaction. */
+  // Pion nucleon interaction.
   if ((pdg_a == pdg::pi_p && pdg_b == pdg::p) ||
       (pdg_b == pdg::pi_p && pdg_a == pdg::p) ||
       (pdg_a == pdg::pi_m && pdg_b == pdg::n) ||
@@ -1506,20 +1714,17 @@ double cross_sections::string_hard_cross_section() const {
   const ParticleData& data_a = incoming_particles_[0];
   const ParticleData& data_b = incoming_particles_[1];
   if (data_a.is_baryon() && data_b.is_baryon()) {
-    /**
-     * Currently nucleon-nucleon cross section is used for all baryon-baryon
+    /* Currently nucleon-nucleon cross section is used for all baryon-baryon
      * casees. This will be changed later by applying additive quark model.
      */
     cross_sec = NN_string_hard(sqrt_s_ * sqrt_s_);
   } else if (data_a.is_baryon() || data_b.is_baryon()) {
-    /**
-     * Currently nucleon-pion cross section is used for all baryon-meson cases.
+    /* Currently nucleon-pion cross section is used for all baryon-meson cases.
      * This will be changed later by applying additive quark model.
      */
     cross_sec = Npi_string_hard(sqrt_s_ * sqrt_s_);
   } else {
-    /**
-     * Currently pion-pion cross section is used for all meson-meson cases.
+    /* Currently pion-pion cross section is used for all meson-meson cases.
      * This will be changed later by applying additive quark model.
      */
     cross_sec = pipi_string_hard(sqrt_s_ * sqrt_s_);
@@ -1576,7 +1781,7 @@ CollisionBranchList cross_sections::bar_bar_to_nuc_nuc(
   CollisionBranchList process_list;
 
   const double s = sqrt_s_ * sqrt_s_;
-  /* CM momentum in final state */
+  // CM momentum in final state
   double p_cm_final = std::sqrt(s - 4. * nucleon_mass * nucleon_mass) / 2.;
 
   ParticleTypePtrList nuc_or_anti_nuc;
@@ -1586,7 +1791,7 @@ CollisionBranchList cross_sections::bar_bar_to_nuc_nuc(
     nuc_or_anti_nuc = ParticleType::list_nucleons();
   }
 
-  /* Loop over all nucleon or anti-nucleon charge states. */
+  // Loop over all nucleon or anti-nucleon charge states.
   for (ParticleTypePtr nuc_a : nuc_or_anti_nuc) {
     for (ParticleTypePtr nuc_b : nuc_or_anti_nuc) {
       /* Check for charge conservation. */
@@ -1598,12 +1803,12 @@ CollisionBranchList cross_sections::bar_bar_to_nuc_nuc(
       for (const int twoI : I_tot_range(*nuc_a, *nuc_b)) {
         const double isospin_factor = isospin_clebsch_gordan_sqr_2to2(
             type_a, type_b, *nuc_a, *nuc_b, twoI);
-        /* If Clebsch-Gordan coefficient is zero, don't bother with the rest */
+        // If Clebsch-Gordan coefficient is zero, don't bother with the rest
         if (std::abs(isospin_factor) < really_small) {
           continue;
         }
 
-        /* Calculate matrix element for inverse process. */
+        // Calculate matrix element for inverse process.
         const double matrix_element =
             nn_to_resonance_matrix_element(sqrt_s_, type_a, type_b, twoI);
         if (matrix_element <= 0.) {
@@ -1651,7 +1856,7 @@ double cross_sections::nn_to_resonance_matrix_element(
   if (sqrts > uplmt) {
     return 0.;
   }
-  /** NN → NΔ: fit sqrt(s)-dependence to OBE model [\iref{Dmitriev:1986st}] */
+  /// NN → NΔ: fit sqrt(s)-dependence to OBE model [\iref{Dmitriev:1986st}]
   if (((type_a.is_Delta() && type_b.is_nucleon()) ||
        (type_b.is_Delta() && type_a.is_nucleon())) &&
       (type_a.antiparticle_sign() == type_b.antiparticle_sign())) {
@@ -1666,7 +1871,7 @@ double cross_sections::nn_to_resonance_matrix_element(
       return 7. / msqr;
     } else if (twoI == 0) {
       const double parametrization = 14. / msqr;
-      /* pn → pnη cross section is known to be larger than the corresponding
+      /** pn → pnη cross section is known to be larger than the corresponding
        * pp → ppη cross section by a factor of 6.5 [\iref{Calen:1998vh}].
        * Since the eta is mainly produced by an intermediate N*(1535) we
        * introduce an explicit isospin asymmetry for the production of N*(1535)
@@ -1704,7 +1909,16 @@ double cross_sections::nn_to_resonance_matrix_element(
     } else if (twoI == 0) {
       return 25. / msqr;
     }
+  } else if ((type_a.is_deuteron() && type_b.pdgcode().is_pion()) ||
+             (type_b.is_deuteron() && type_a.pdgcode().is_pion())) {
+    /* This parametrization is the result of fitting d+pi->NN cross-section.
+     * Already Breit-Wigner-like part provides a good fit, exponential fixes
+     * behaviour around the treshold. The d+pi experimental cross-section
+     * was taken from Fig. 2 of [\iref{Tanabe:1987vg}]. */
+    return 0.055 / (pow_int(sqrts - 2.145, 2) + pow_int(0.065, 2)) *
+           (1.0 - std::exp(-(sqrts - 2.0) * 20.0));
   }
+
   // all cases not listed: zero!
   return 0.;
 }
@@ -1720,11 +1934,11 @@ CollisionBranchList cross_sections::find_nn_xsection_from_type(
   CollisionBranchList channel_list;
   const double s = sqrt_s_ * sqrt_s_;
 
-  /* Loop over specified first resonance list */
+  // Loop over specified first resonance list
   for (ParticleTypePtr type_res_1 : list_res_1) {
-    /* Loop over specified second resonance list */
+    // Loop over specified second resonance list
     for (ParticleTypePtr type_res_2 : list_res_2) {
-      /* Check for charge conservation. */
+      // Check for charge conservation.
       if (type_res_1->charge() + type_res_2->charge() !=
           type_particle_a.charge() + type_particle_b.charge()) {
         continue;
@@ -1734,12 +1948,12 @@ CollisionBranchList cross_sections::find_nn_xsection_from_type(
       for (const int twoI : I_tot_range(type_particle_a, type_particle_b)) {
         const double isospin_factor = isospin_clebsch_gordan_sqr_2to2(
             type_particle_a, type_particle_b, *type_res_1, *type_res_2, twoI);
-        /* If Clebsch-Gordan coefficient is zero, don't bother with the rest. */
+        // If Clebsch-Gordan coefficient is zero, don't bother with the rest.
         if (std::abs(isospin_factor) < really_small) {
           continue;
         }
 
-        /* Integration limits. */
+        // Integration limits.
         const double lower_limit = type_res_1->min_mass_kinematic();
         const double upper_limit = sqrt_s_ - type_res_2->mass();
         /* Check the available energy (requiring it to be a little above the
@@ -1749,7 +1963,7 @@ CollisionBranchList cross_sections::find_nn_xsection_from_type(
           continue;
         }
 
-        /* Calculate matrix element. */
+        // Calculate matrix element.
         const double matrix_element = nn_to_resonance_matrix_element(
             sqrt_s_, *type_res_1, *type_res_2, twoI);
         if (matrix_element <= 0.) {
@@ -1785,31 +1999,31 @@ CollisionBranchList cross_sections::find_nn_xsection_from_type(
 
 bool cross_sections::decide_string(bool strings_switch,
                                    const bool both_are_nucleons) const {
-  // Determine the energy region of the mixed scattering type for two types of
-  // scattering.
+  /* Determine the energy region of the mixed scattering type for two types of
+   * scattering. */
   const ParticleType& t1 = incoming_particles_[0].type();
   const ParticleType& t2 = incoming_particles_[1].type();
   bool include_pythia = false;
   double mix_scatter_type_energy;
   double mix_scatter_type_window_width;
   if (both_are_nucleons) {
-    // The energy region of the mixed scattering type for nucleon-nucleon
-    // collision is 4.0 - 5.0 GeV.
+    /* The energy region of the mixed scattering type for nucleon-nucleon
+     * collision is 4.0 - 5.0 GeV. */
     mix_scatter_type_energy = 4.5;
     mix_scatter_type_window_width = 0.5;
     // nucleon-nucleon collisions are included in pythia.
     include_pythia = true;
   } else if ((t1.pdgcode().is_pion() && t2.is_nucleon()) ||
              (t1.is_nucleon() && t2.pdgcode().is_pion())) {
-    // The energy region of the mixed scattering type for pion-nucleon collision
-    // is 2.3 - 3.1 GeV.
+    /* The energy region of the mixed scattering type for pion-nucleon collision
+     * is 2.3 - 3.1 GeV. */
     mix_scatter_type_energy = 2.7;
     mix_scatter_type_window_width = 0.4;
     // pion-nucleon collisions are included in pythia.
     include_pythia = true;
   }
-  // string fragmentation is enabled when strings_switch is on and the process
-  // is included in pythia.
+  /* string fragmentation is enabled when strings_switch is on and the process
+   * is included in pythia. */
   const bool enable_pythia = strings_switch && include_pythia;
   // Whether the scattering is through string fragmentaion
   bool is_pythia = false;
@@ -1823,8 +2037,8 @@ bool cross_sections::decide_string(bool strings_switch,
           (sqrt_s_ - mix_scatter_type_energy + mix_scatter_type_window_width) /
           mix_scatter_type_window_width / 2.0;
       if (probability_pythia > Random::uniform(0., 1.)) {
-        // scatterings at the middle energies are through string
-        // fragmentation by chance.
+        /* scatterings at the middle energies are through string
+         * fragmentation by chance. */
         is_pythia = true;
       }
     }

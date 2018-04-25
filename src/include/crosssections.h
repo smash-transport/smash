@@ -17,10 +17,21 @@
 
 namespace smash {
 
-// TODO(staudenmaier): Class documentation
+/**
+ * The cross section class assembels everything that is needed to
+ * calculate the cross section and returns a list of all possible reactions
+ * for the incoming particles at the given energy with the calculated cross
+ * sections.
+ */
 class cross_sections {
  public:
-  cross_sections(const ParticleList& scat_particles, const double sqrt_s);
+  /**
+   * Construct CrossSections instance.
+   *
+   * \param[in] incoming_particles Particles that are reacting.
+   * \param[in] sqrt_s Center-of-mass energy of the reaction.
+   */
+  cross_sections(const ParticleList& incoming_particles, const double sqrt_s);
 
   /**
    * Generate a list of all possible collisions between the incoming particles
@@ -84,7 +95,7 @@ class cross_sections {
   /** Find all inelastic 2->2 processes for the given scattering.
    * This function calls the different, more specific functions for
    * the different scatterings.
-   * \param[in] included_2to2 Which 2->2 ractions are enabled?
+   * \param[in] included_2to2 Which 2->2 reactions are enabled?
    * \return List of all possibe inelastic 2->2 processes.
    */
   CollisionBranchList two_to_two(ReactionsBitSet included_2to2);
@@ -124,34 +135,44 @@ class cross_sections {
    * Determine the cross section for NNbar annihilation, which is given by
    * detailed balance from the reverse reaction. See
    * NNbar_annihilation_cross_section
+   * \return Collision Branch with NNbar creation process and its cross
+   * section
    */
   CollisionBranchList NNbar_creation();
 
  private:
-  /// Choose between parametrization for elastic cross sections.
+  /**
+   *  Choose between parametrizations for elastic cross sections.
+   * \return Elastic cross section
+   */
   double elastic_parametrization();
 
-  /** TODO(staudenmaier): Revise documentation from here on. Also .cc file.
+  /**
    * Determine the (parametrized) elastic cross section for a
-   * nucleon-nucleon collision.
+   * nucleon-nucleon (NN) collision.
+   * \return Elastic cross section for NN
    */
   double nn_el();
 
   /**
-   * Determine the elastic cross section for a nucleon-pion collision.
+   * Determine the elastic cross section for a nucleon-pion (Npi) collision.
    * It is given by a parametrization of experimental data.
+   * \return Elastic cross section for Npi
    */
   double npi_el();
 
   /**
-   * Determine the elastic cross section for a nucleon-kaon collision.
+   * Determine the elastic cross section for a nucleon-kaon (NK) collision.
    * It is given by a parametrization of experimental data.
+   * \return Elastic cross section for NK
    */
   double nk_el();
 
   /**
-   * Find all inelastic 2->2 processes for Baryon-Baryon Scattering
+   * Find all inelastic 2->2 processes for Baryon-Baryon (BB) Scattering
    * except the more specific Nucleon-Nucleon Scattering.
+   * \param[in] included_2to2 Which 2->2 reactions are enabled?
+   * \return List of all possible BB reactions with their cross sections
    */
   CollisionBranchList bb_xx_except_nn(ReactionsBitSet included_2to2);
 
@@ -165,30 +186,62 @@ class cross_sections {
    * 2. Isospin factors (Clebsch-Gordan)
    * 3. Enough energy for all decay channels to be available for the resonance
    *
+   * \param[in] included_2to2 Which 2->2 reactions are enabled?
+   *
    * \return List of resonance production processes possible in the collision
    * of the two nucleons. Each element in the list contains the type(s) of the
    * final state particle(s) and the cross section for that particular process.
    */
   CollisionBranchList nn_xx(ReactionsBitSet included_2to2);
 
-  /** Find all inelastic 2->2 processes for Nucelon-Kaon Scattering. */
+  /**
+   * Find all inelastic 2->2 processes for Nucelon-Kaon (NK) Scattering.
+   * \param[in] included_2to2 Which 2->2 reactions are enabled?
+   * \return List of all possible NK reactions with their cross sections
+   */
   CollisionBranchList nk_xx(ReactionsBitSet included_2to2);
 
-  /** Find all inelastic 2->2 processes for Delta-Kaon Scattering. */
+  /**
+   * Find all inelastic 2->2 processes for Delta-Kaon (DeltaK) Scattering.
+   * \param[in] included_2to2 Which 2->2 reactions are enabled?
+   * \return List of all possible DeltaK reactions with their cross sections
+   * */
   CollisionBranchList deltak_xx(ReactionsBitSet included_2to2);
 
-  /** Find all inelastic 2->2 processes for Hyperon-Pion Scattering. */
+  /**
+   * Find all inelastic 2->2 processes for Hyperon-Pion (Ypi) Scattering.
+   * \param[in] included_2to2 Which 2->2 reactions are enabled?
+   * \return List of all possible Ypi reactions with their cross sections
+   */
   CollisionBranchList ypi_xx(ReactionsBitSet included_2to2);
 
+  /**
+   * Find all inelastic 2->2 processes involving Pion and (anti-) Deuteron
+   * (dpi), specifically dπ→ NN, d̅π→ N̅N̅; πd→ πd' (mockup for πd→ πnp), πd̅→ πd̅'
+   * and reverse. \param[in] included_2to2 Which 2->2 reactions are enabled?
+   * \return List of all possible dpi reactions with their cross sections
+   */
+  CollisionBranchList dpi_xx(ReactionsBitSet included_2to2);
+
+  /**
+   * Find all inelastic 2->2 processes involving Nucleon and (anti-) Deuteron
+   * (dN), specifically Nd → Nd', N̅d →  N̅d', N̅d̅→ N̅d̅', Nd̅→ Nd̅' and reverse (e.g.
+   * Nd'→ Nd). \param[in] included_2to2 Which 2->2 reactions are enabled?
+   * \return List of all possible dN reactions with their cross sections
+   */
+  CollisionBranchList dn_xx(ReactionsBitSet included_2to2);
+
   /** Determine the parametrized total cross section at high energies
-   * for the given collision, which is non-zero for Baryon-Baryon and
+   * for the given collision, which is non-zero only for Baryon-Baryon and
    * Nucleon-Pion scatterings currently.
+   * \return High energy cross section
    */
   double high_energy() const;
 
   /**
    * Determine the (parametrized) hard non-diffractive string cross section
    * for this collision.
+   * \return Parametrized cross section
    */
   double string_hard_cross_section() const;
 
@@ -224,6 +277,12 @@ class cross_sections {
 
   /**
    * Utility function to avoid code replication in nn_xx().
+   * \param[in] type_res_1 List of possible first final resonance types
+   * \param[in] type_res_2 List of possible second final resonance types
+   * \param[in] integrator Used to integrate over the kinematically allowed
+   * mass range of the Breit-Wigner distribution
+   * \return List of all possible NN reactions with their cross sections
+   * with different final states
    */
   template <class IntegrationMethod>
   CollisionBranchList find_nn_xsection_from_type(
@@ -231,7 +290,8 @@ class cross_sections {
       const ParticleTypePtrList& type_res_2,
       const IntegrationMethod integrator);
 
-  /** Return, if the scattering between the incoming particles are scattering
+  /**
+   * Return, if the scattering between the incoming particles are scattering
    * via string fragmentaion or not.
    * The string fragmentation is implemented in the same way in GiBUU (Physics
    * Reports 512(2012), 1-124, pg. 33). If the center of mass energy is low, two
@@ -243,11 +303,19 @@ class cross_sections {
    * while the high energy region is from (mix_scatter_type_energy +
    * mix_scatter_type_window_width) to infinity. In between, the probability for
    * string fragmentation increases linearly from 0 to 1 as the c.m. energy.
+   *
+   * \param[in] strings_switch Is string fragmentation enabled?
+   * \param[in] both_are_nucleons Are both incoming particles nucleons?
+   *
+   * \return Is the scattering between the incoming particles done via string
+   * fragmentaion or not?
    */
   bool decide_string(bool strings_switch, const bool both_are_nucleons) const;
 
-  /** Determine the momenta of the incoming particles in the
+  /**
+   * Determine the momenta of the incoming particles in the
    * center-of-mass system.
+   * \return Center-of-mass momentum
    */
   double cm_momentum() const {
     const double m1 = incoming_particles_[0].effective_mass();
@@ -255,10 +323,10 @@ class cross_sections {
     return pCM(sqrt_s_, m1, m2);
   }
 
-  /** List with data of scattering particles.  */
+  /// List with data of scattering particles.
   ParticleList incoming_particles_;
 
-  /** total energy in the center-of-mass frame. */
+  /// Total energy in the center-of-mass frame.
   double sqrt_s_;
 };
 

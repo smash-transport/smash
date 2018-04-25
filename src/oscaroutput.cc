@@ -72,8 +72,8 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
    * immediately after initialization, at event end (which is reached when
    * time is larger or equal than \c End_Time in configuration file) and
    * periodically during evolution, period is defined by \c Output_Interval
-   * option in configuration file, see output_content_specific_options_
-   * "content-specific output options".
+   * option in configuration file, see
+   * \ref output_content_specific_options_ "content-specific output options".
    * Collisions output contains all collisions / decays / box wall crossings
    * and optionally initial and final configuration.
    */

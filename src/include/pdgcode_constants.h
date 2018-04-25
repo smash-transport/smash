@@ -89,6 +89,9 @@ constexpr int rho_m = -0x213;
 /// h₁(1170).
 constexpr int h1 = 0x10223;
 
+constexpr int decimal_d = 1000010020;
+constexpr int decimal_antid = -1000010020;
+
 }  // namespace pdg
 
 /// Pack two int32_t into an uint64_t.
