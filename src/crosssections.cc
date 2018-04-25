@@ -1560,7 +1560,7 @@ CollisionBranchList CrossSections::dn_xx(ReactionsBitSet /*included_2to2*/) {
   return process_list;
 }
 
-CollisionBranchList cross_sections::string_excitation(
+CollisionBranchList CrossSections::string_excitation(
     double sig_string_all, StringProcess* string_process) {
   const auto& log = logger<LogArea::CrossSections>();
   /* get PDG id for evaluation of the parametrized cross sections
@@ -1996,7 +1996,7 @@ CollisionBranchList CrossSections::find_nn_xsection_from_type(
   return channel_list;
 }
 
-bool cross_sections::included_in_string() const {
+bool CrossSections::included_in_string() const {
   const ParticleType& t1 = incoming_particles_[0].type();
   const ParticleType& t2 = incoming_particles_[1].type();
   /* Either both of the incoming particles are nucleons, or one is a nucleon
@@ -2005,7 +2005,7 @@ bool cross_sections::included_in_string() const {
         || (t1.is_nucleon() && t2.pdgcode().is_pion());
 }
 
-bool cross_sections::decide_string(bool strings_switch) const {
+bool CrossSections::decide_string(bool strings_switch) const {
   /* Determine the energy region of the mixed scattering type for two types of
    * scattering. */
   const bool included = included_in_string();
