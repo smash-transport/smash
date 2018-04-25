@@ -704,6 +704,43 @@ TEST(quark_content) {
   COMPARE(q[2], 0);
 }
 
+TEST(net_quark_number) {
+  // pion+ has one u and one dbar
+  PdgCode pip(0x211);
+  VERIFY(pip.net_quark_number(1) == -1);
+  VERIFY(pip.net_quark_number(2) == 1);
+
+  // pion- has one d and one ubar
+  PdgCode pim(-0x211);
+  VERIFY(pim.net_quark_number(1) == 1);
+  VERIFY(pim.net_quark_number(2) == -1);
+
+  // pion0 has one vanishing net u and d quark numbers
+  PdgCode pi0(0x111);
+  VERIFY(pi0.net_quark_number(1) == 0);
+  VERIFY(pi0.net_quark_number(2) == 0);
+
+  // proton has two u and one d
+  PdgCode p(0x2212);
+  VERIFY(p.net_quark_number(1) == 1);
+  VERIFY(p.net_quark_number(2) == 2);
+
+  // neutron has one u and two d
+  PdgCode n(0x2112);
+  VERIFY(n.net_quark_number(1) == 2);
+  VERIFY(n.net_quark_number(2) == 1);
+
+  // antiproton has two ubar and one dbar
+  PdgCode ap(-0x2212);
+  VERIFY(ap.net_quark_number(1) == -1);
+  VERIFY(ap.net_quark_number(2) == -2);
+
+  // antineutron has one ubar and two dbar
+  PdgCode n(-0x2112);
+  VERIFY(an.net_quark_number(1) == -2);
+  VERIFY(an.net_quark_number(2) == -1);
+}
+
 TEST(deexcite) {
   std::vector<PdgCode> pdg_codes = {0x321, 0x100323, -0x9902214};
   for (auto &pdg : pdg_codes) {

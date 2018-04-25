@@ -673,9 +673,9 @@ bool StringProcess::next_BBbarAnn() {
   std::vector<int> qcount_bar, qcount_antibar;
   std::vector<int> n_combinations;
   bool no_combinations = true;
-  for (int i = 1; i < n_q_types + 1; i++) {
-    qcount_bar.push_back(baryon.net_quark_number(i));
-    qcount_antibar.push_back(-antibaryon.net_quark_number(i));
+  for (int i = 0; i < n_q_types; i++) {
+    qcount_bar.push_back(baryon.net_quark_number(i + 1));
+    qcount_antibar.push_back(-antibaryon.net_quark_number(i + 1));
     const int n_i = qcount_bar[i] * qcount_antibar[i];
     n_combinations.push_back(n_i);
     if (n_i > 0) {

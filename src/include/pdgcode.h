@@ -649,7 +649,6 @@ class PdgCode {
    * returns the net number of quarks with given flavour number
    * For public use, see strangeness(), charmness(), bottomness() and
    * isospin3().
-   * \todo Why quark numbers 7 and 8 are allowed?
    * \param[in] quark PDG Code of quark: (1..6) = (d,u,s,c,b,t)
    * \return for the net number of quarks (\#quarks - \#antiquarks)
    *
