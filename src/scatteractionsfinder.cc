@@ -61,15 +61,16 @@ namespace smash {
  * \key String_Tension (double, optional, default = 1.0 GeV/fm) \n
  * String tension \f$\kappa\f$ connecting massless quarks in Hamiltonian:
  * \f[H=|p_1|+|p_2|+\kappa |x_1-x_2|\f]
- * This parameter is only used to determine particles' formation times in the
- * soft string routine.
+ * This parameter is only used to determine particles' formation times
+ * according to the yo-yo formalism (in the soft string routine for now).
  *
  * \key Gluon_Beta (double, optional, default = 0.5) \n
  * Parameter \f$\beta\f$ in parton distribution function for gluons:
  * \f[\mathrm{PDF}_g(x) \propto \frac{1}{x}(1-x)^{\beta+1}\f]
  *
  * \key Gluon_Pmin (double, optional, default = 0.001 GeV) \n
- * Smallest possible value for gluon lightcone momentum fraction to be sampled
+ * Smallest possible scale for gluon lightcone momentum.
+ * This is divided by sqrts to get the minimum fraction to be sampled
  * from PDF shown above.
  *
  * \key Quark_Alpha (double, optional, default = 1.0) \n
