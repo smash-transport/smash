@@ -132,7 +132,7 @@ static double sum_xs_of(CollisionBranchList& list) {
 }
 
 CrossSections::CrossSections(const ParticleList& incoming_particles,
-                               const double sqrt_s)
+                             const double sqrt_s)
     : incoming_particles_(incoming_particles), sqrt_s_(sqrt_s) {}
 
 CollisionBranchList CrossSections::generate_collision_list(
@@ -466,7 +466,7 @@ CollisionBranchList CrossSections::two_to_one() {
 }
 
 double CrossSections::formation(const ParticleType& type_resonance,
-                                 double cm_momentum_sqr) {
+                                double cm_momentum_sqr) {
   const ParticleType& type_particle_a = incoming_particles_[0].type();
   const ParticleType& type_particle_b = incoming_particles_[1].type();
   // Check for charge conservation.
@@ -1387,7 +1387,7 @@ CollisionBranchList CrossSections::ypi_xx(ReactionsBitSet included_2to2) {
 }
 
 CollisionBranchList CrossSections::dpi_xx(ReactionsBitSet
-                                           /*included_2to2*/) {
+                                          /*included_2to2*/) {
   const auto& log = logger<LogArea::ScatterAction>();
   CollisionBranchList process_list;
   const double sqrts = sqrt_s_;
@@ -1841,9 +1841,10 @@ CollisionBranchList CrossSections::bar_bar_to_nuc_nuc(
   return process_list;
 }
 
-double CrossSections::nn_to_resonance_matrix_element(
-    double sqrts, const ParticleType& type_a, const ParticleType& type_b,
-    const int twoI) {
+double CrossSections::nn_to_resonance_matrix_element(double sqrts,
+                                                     const ParticleType& type_a,
+                                                     const ParticleType& type_b,
+                                                     const int twoI) {
   const double m_a = type_a.mass();
   const double m_b = type_b.mass();
   const double msqr = 2. * (m_a * m_a + m_b * m_b);
@@ -1998,7 +1999,7 @@ CollisionBranchList CrossSections::find_nn_xsection_from_type(
 }
 
 bool CrossSections::decide_string(bool strings_switch,
-                                   const bool both_are_nucleons) const {
+                                  const bool both_are_nucleons) const {
   /* Determine the energy region of the mixed scattering type for two types of
    * scattering. */
   const ParticleType& t1 = incoming_particles_[0].type();
