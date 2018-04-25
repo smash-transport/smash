@@ -46,6 +46,14 @@ struct ExperimentParameters {
   bool strings_switch;
 
   /**
+   * This indicates whether the string fragmentation is swiched on with
+   * a probability smoothly increasing with energy. If it's set equal to
+   * false, the cross section of the string fragmentation is counted by
+   * taking the difference between the parametrized total cross section
+   * and the sum of the non-string cross sections.
+   */
+  bool use_transition_probability;
+  /**
    * This indicates how NN̅ annihilation should be treated; options are to
    * neglect it, make it conserve detailed balance using NN̅ → h₁(1170)ρ
    * (which goes to 5 pions on average) or use strings.

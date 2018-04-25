@@ -137,28 +137,37 @@ cross_sections::cross_sections(const ParticleList& incoming_particles,
 
 CollisionBranchList cross_sections::generate_collision_list(
     double elastic_parameter, bool two_to_one_switch,
-    ReactionsBitSet included_2to2, double low_snn_cut, bool strings_switch,
+    ReactionsBitSet included_2to2, double low_snn_cut,
+    bool strings_switch, bool use_transition_probability,
     NNbarTreatment nnbar_treatment, StringProcess* string_process) {
   CollisionBranchList process_list;
   const ParticleType& t1 = incoming_particles_[0].type();
   const ParticleType& t2 = incoming_particles_[1].type();
-  const bool both_are_nucleons = t1.is_nucleon() && t2.is_nucleon();
 
-  const bool is_pythia = decide_string(strings_switch,
+  const bool is_pythia = use_transition_probability && 
+                         decide_string(strings_switch,
                            nnbar_treatment == NNbarTreatment::Strings);
 
   /* Elastic collisions between two nucleons with sqrt_s below
    * low_snn_cut can not happen. */
   const bool reject_by_nucleon_elastic_cutoff =
-      both_are_nucleons && t1.antiparticle_sign() == t2.antiparticle_sign() &&
+      t1.is_nucleon() && t2.is_nucleon() &&
+      t1.antiparticle_sign() == t2.antiparticle_sign() &&
       sqrt_s_ < low_snn_cut;
   bool incl_elastic = included_2to2[IncludedReactions::Elastic];
   if (incl_elastic && !reject_by_nucleon_elastic_cutoff) {
     process_list.emplace_back(elastic(elastic_parameter));
   }
   if (is_pythia) {
-    // string excitation
-    append_list(process_list, string_excitation(string_process));
+    /* string excitation
+     *
+     * Calculate string-excitation cross section:
+     * string-excitation cross section =
+     * Parametrized total cross - the contributions
+     * from all other present channels. */
+    const double sig_string =
+      std::max(0., high_energy() - elastic_parametrization());
+    append_list(process_list, string_excitation(sig_string, string_process));
   } else {
     if (two_to_one_switch) {
       // resonance formation (2->1)
@@ -1499,10 +1508,10 @@ CollisionBranchList cross_sections::dpi_xx(ReactionsBitSet
        * The (hbarc)^2/16 pi factor is absorbed into matrix element. */
       double xsection = matrix_element * spin_factor / (s * cm_momentum());
       if (produced_nucleus->is_stable()) {
-        assert(!type_nucleus.stable());
+        assert(!type_nucleus.is_stable());
         xsection *= pCM_from_s(s, type_pi.mass(), produced_nucleus->mass());
       } else {
-        assert(type_nucleus.stable());
+        assert(type_nucleus.is_stable());
         const double resonance_integral =
             produced_nucleus->iso_multiplet()->get_integral_piR(sqrts);
         xsection *= resonance_integral;
@@ -1560,10 +1569,10 @@ CollisionBranchList cross_sections::dn_xx(ReactionsBitSet /*included_2to2*/) {
      * Absorb (hbarc)^2/16 pi factor into matrix element */
     double xsection = matrix_element * spin_factor / (s * cm_momentum());
     if (produced_nucleus->is_stable()) {
-      assert(!type_nucleus.stable());
+      assert(!type_nucleus.is_stable());
       xsection *= pCM_from_s(s, type_N.mass(), produced_nucleus->mass());
     } else {
-      assert(type_nucleus.stable());
+      assert(type_nucleus.is_stable());
       const double resonance_integral =
           produced_nucleus->iso_multiplet()->get_integral_NR(sqrts);
       xsection *= resonance_integral;
@@ -1579,13 +1588,8 @@ CollisionBranchList cross_sections::dn_xx(ReactionsBitSet /*included_2to2*/) {
 }
 
 CollisionBranchList cross_sections::string_excitation(
-    StringProcess* string_process) {
+    double sig_string_all, StringProcess* string_process) {
   const auto& log = logger<LogArea::CrossSections>();
-  /* Calculate string-excitation cross section:
-   * Parametrized total minus all other present channels. */
-  double sig_string_all =
-      std::max(0., high_energy() - elastic_parametrization(true));
-
   /* get PDG id for evaluation of the parametrized cross sections
    * for diffractive processes.
    * (anti-)proton is used for (anti-)baryons and
@@ -2079,8 +2083,8 @@ bool cross_sections::decide_string(bool strings_switch,
      * a transition region in the middle. Determine transition region: */
     double region_lower, region_upper;
     if (is_Npi_scattering) {
-      region_lower = 2.3;
-      region_upper = 3.1;
+      region_lower = 1.9;
+      region_upper = 2.2;
     } else if (is_NN_scattering) {
       region_lower = 4.0;
       region_upper = 5.0;
@@ -2092,8 +2096,9 @@ bool cross_sections::decide_string(bool strings_switch,
       return false;
     }
     else {
-      double prob_pythia = (sqrt_s_ - region_lower) /
-                           (region_upper - region_lower);
+      double prob_pythia = 0.5 * sin(0.5 * M_PI * 
+               sqrt_s_ - (region_lower + region_upper)/2.) /
+               (region_upper - region_lower);
       assert(prob_pythia >= 0. && prob_pythia <= 1.);
       return prob_pythia > Random::uniform(0.,1.)
     }

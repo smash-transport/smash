@@ -238,6 +238,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const double low_snn_cut_;
   /// Switch to turn off string excitation.
   const bool strings_switch_;
+  /// Decide whether to implement string fragmentation based on a probability
+  const bool use_transition_probability_;
   /// Switch for NNbar reactions
   const NNbarTreatment nnbar_treatment_;
   /**
