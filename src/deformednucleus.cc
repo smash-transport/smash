@@ -20,7 +20,7 @@
 namespace smash {
 
 /*!\Userguide
- * \page projectile_and_target
+ * \page projectile_and_target Projectile and Target
  *
  * Additional Parameters to specify the shape of the modified Woods-Saxon
  * distribution, necessary to configure the deformation of the nucleus if
