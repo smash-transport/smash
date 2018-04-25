@@ -72,9 +72,9 @@ class ScatterAction : public Action {
    */
   void generate_final_state() override;
 
-  double raw_weight_value() const override;
+  double get_total_weight() const override;
 
-  double partial_weight() const override;
+  double get_partial_weight() const override;
 
   /**
    * Sample final-state angles in a 2->2 collision (possibly anisotropic).
