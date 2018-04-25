@@ -200,7 +200,7 @@ CollisionBranchPtr cross_sections::elastic(double elast_par) {
                                       ProcessType::Elastic);
 }
 
-double cross_sections::elastic_parametrization(bool AQM_active) {
+double cross_sections::elastic_parametrization(bool use_AQM) {
   const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
   double elastic_xs = 0.0;
@@ -216,7 +216,7 @@ double cross_sections::elastic_parametrization(bool AQM_active) {
              pdg_a.antiparticle_sign() == pdg_b.antiparticle_sign()) {
     // Elastic Nucleon Nucleon Scattering
     elastic_xs = nn_el();
-  } else if (AQM_active) {
+  } else if (use_AQM) {
     if (pdg_a.is_baryon() && pdg_b.is_baryon()) {
       // todo JB : double check those parametrizations
       elastic_xs = nn_el(); // valid also for annihilation
@@ -2047,6 +2047,7 @@ CollisionBranchList cross_sections::find_nn_xsection_from_type(
 }
 
 bool cross_sections::decide_string(bool strings_switch,
+                                   bool use_AQM,
                                    bool treat_BBbar_with_strings) const {
   /* string fragmentation is enabled when strings_switch is on and the process
    * is included in pythia. */
