@@ -33,7 +33,6 @@ StringProcess::StringProcess(double string_tension, double time_formation,
       time_formation_const_(time_formation),
       time_collision_(0.),
       gamma_factor_com_(1.) {
-  std::cout << "Initializing StringProcess" << std::endl;
   // setup and initialize pythia for hard string process
   pythia_parton_ = make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
   /* select only non-diffractive events
@@ -587,11 +586,11 @@ bool StringProcess::next_NDiffHard() {
 
   // Short notation for Pythia event
   Pythia8::Event &event = pythia_parton_->event;
-  log.info("Pythia event created");
+  log.debug("Pythia hard event created");
   bool final_state_success = false;
   while (!final_state_success) {
     final_state_success = pythia_parton_->next();
-    log.info("Pythia final state computed, success = ", final_state_success);
+    log.debug("Pythia final state computed, success = ", final_state_success);
   }
 
   ParticleList new_intermediate_particles;
