@@ -298,7 +298,7 @@ class ThreeBodyDecayDilepton : public ThreeBodyDecay {
    * \param t Type of the parent particle.
    */
   static double diff_width(double m_par, double m_l, double m_dil,
-                           double m_other, ParticleTypePtr other,
+                          double m_other, ParticleTypePtr other,
                            ParticleTypePtr t);
   double width(double m0, double G0, double m) const override;
 

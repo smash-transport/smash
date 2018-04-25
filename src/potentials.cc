@@ -20,16 +20,14 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
       use_symmetry_(conf.has_value({"Symmetry"})) {
   /*!\Userguide
    * \page input_potentials_ Potentials
-   * To switch potentials on / off one can just uncomment/comment the
-   * section, to switch on only Skyrme or Symmetry potentials uncomment
-   * only the part you want to switch on.
+   * Skyrme and/or Symmetry potentials can be accounted for within a SMASH
+   * simulation.
    *
-   *
-   * Currently potentials are just added without re-adjusting the energy
-   * and momenta of colliding nucleons. This can be done, because the
-   * binding energy of nucleons is from 0 to 8 MeV per nucleon and
-   * kinetic energies, at which SMASH operates are at least 400 MeV per
-   * nucleon, so the binding energy can be neglected compared to the
+   * Currently, potentials are just added without re-adjusting the energy
+   * and momenta of the colliding nucleons. This can be done, because the
+   * binding energy of nucleons is between 0 and 8 MeV per nucleon while the
+   * kinetic energies, at which SMASH operates, are at least 400 MeV per
+   * nucleon. The binding energy can thus be neglected compared to the
    * kinetic energy.
    *
    * \li \subpage potentials_skyrme_
@@ -49,6 +47,26 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
    *
    * \key Skyrme_Tau (double, required, no default): \n
    *      Parameter \f$\tau\f$ of Skyrme potential.
+   *
+   * \page input_potentials_ Potentials
+   * \n
+   * Example: Configuring Potentials
+   * --------------
+   *
+   * The following extract from the configuration file configures SMASH such
+   * that the Skyrme as well as the Symmetry potential are activated for the
+   * simulation. There is however no necessity to include both simultaneously. They
+   * can be switched on and off individually.
+   * \n
+   *\verbatim
+   Potentials:
+       Skyrme:
+           Skyrme_A: -209.2
+           Skyrme_B: 156.4
+           Skyrme_Tau: 1.35
+       Symmetry:
+           S_Pot: 18.0
+   \endverbatim
    */
   if (use_skyrme_) {
     skyrme_a_ = conf.take({"Skyrme", "Skyrme_A"});

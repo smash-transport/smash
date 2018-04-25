@@ -127,6 +127,12 @@ namespace {
  *
  * Description of options
  * ---------------------
+ * To produce a certain output content it is necessary to explicitly configure
+ * it in the Output section of the configuration file. This means, that the
+ * Output section needs to contain a subsection for the desired output.
+ * Aditionally, there are general output configuration parameters. \n
+ * \n
+ * ### General output configuration parameters:
  * \key Output_Interval (double, optional, default = End_Time): \n
  * Defines the period of intermediate output of the status of the simulated
  * system in Standard Output and other output formats which support this
@@ -140,29 +146,23 @@ namespace {
  * \li \key "baryon" - Net baryon density
  * \li \key "baryonic isospin" - Baryonic isospin density
  * \li \key "pion" - Pion density
- * \li \key "none" - D
- o not calculate density, print 0.0
+ * \li \key "none" - Do not calculate density, print 0.0
  *
- * Further options are defined for every single output \b content
+ * \n
+ * ### Format configuration independently of the specific output content
+ * Further options are defined for every single output content
  * (see \ref output_contents_ "output contents" for the list of
- * possible contents) in the following way:
- * \code
- * Content:
- *     Format: ["format1", "format2", ...]
- *     Option1: Value  # Content-specific options
- *     Option2: Value
- *     ...
- * \endcode
- *
- * To disable a certain output content,  remove or comment out the
- * corresponding section. Every output can be printed in several formats
- * simultaneously. The following option chooses list of formats:
+ * possible contents). Independently of the content, it is always necessary
+ * to provide the format in which the output should be generated.
  *
  * \key Format (list of formats, optional, default = [ ]):\n
  * List of formats for writing particular content.
  * Possible formats for every content are listed and described in
  * \ref output_contents_ "output contents". List of available formats is
  * \ref list_of_output_formats "here".
+ * \n
+ * Besides the universal \key Format option, there are also content-specific output
+ * options that are listed below.
  *
  * ### Content-specific output options
  * \anchor output_content_specific_options_
@@ -198,7 +198,9 @@ namespace {
  * \anchor Thermodynamics
  * - \b Thermodynamics \n
  *   The user can print thermodynamical quantities on the spatial lattice to
- *   vtk output. The lattice for the output is regulated by the options of
+ *   vtk output. Note, that the Thermodynamics output requires a lattice.
+ *   This lattice needs to be enabled in the conguration file and is regulated
+ *   by the options of
  *   \ref input_lattice_. \n
  * \n
  *  \key Type (string, optional, default = \key "baryon"): \n
@@ -239,36 +241,57 @@ namespace {
  *
  * \n
  * \anchor configuring_output_
- * Example: Configuring SMASH output
+ * Example: Configuring the SMASH Output
  * --------------
- * As an example, if one wants to have all of the following simultaneously:
- * \li particles at the end of event printed out in binary and Root formats
- * \li dileptons printed in Oscar2013 format
- * \li net baryon density at point (0, 0, 0) printed as a table
- *     against time every 1 fm/c
+ * The following example configures the output to be printed in an interval of
+ * 1 fm and with the net baryon density being printed to the header.
+ * The particles output is generated in "Oscar1999", VTK and "Root" format,
+ * generating output for each time step. The collisions output is formatted
+ * according to an extended "Oscar2013" format and the initial and final
+ * particle lists are printed as well.
+ *\verbatim
+ Output:
+     Output_Interval: 1.0
+     Density_Type: "baryon"
+     Particles:
+         Format:    ["Oscar1999", "VTK", "Root"]
+         Extended: False
+         Only_Final: False
+     Collisions:
+         Format:    ["Oscar2013"]
+         Extended: True
+         Print_Start_End: True
+ \endverbatim
  *
- * then the output section of configuration will be the following.
+ * To further activate photons and dileptons in the SMASH simulation and to also
+ * generate the output, the corresponding subsections need to be present in the
+ * configuration file. In the following example, the dilepton output is
+ * generated in extended "Oscar2013" and "Binary" format. The photon output
+ * is printed in "Oscar2013" format while the calculation is performed with
+ * 100 fractional photons.
+ *\verbatim
+     Dileptons:
+         Format:    ["Oscar2013", "Binary"]
+         Extended: True
+     Photons:
+         Format:    ["Oscar2013"]
+         Fractions: 100
+ \endverbatim
  *
- * \code
- * Output:
- *     Output_Interval:  1.0
- *     Particles:
- *         Format:          ["Binary", "Root"]
- *         Only_Final:      True
- *     Dileptons:
- *         Format:          ["Oscar2013"]
- *     Thermodynamics:
- *         Format:          ["ASCII"]
- *         Type:            "baryon"
- *         Quantities:      ["rho_eckart"]
- *         Position:        [0.0, 0.0, 0.0]
- *         Smearing:        True
- * \endcode
- *
- * \page input_lattice_ Lattice
- * \key Potentials_Affect_Thresholds (bool, optional, default = false): \n
- * Include potential effects, since mean field potentials change the threshold
- * energies of the actions.
+ * Additionally, the thermodynsamics output can be activated. In this example,
+ * thermodynamic output is activated for hadrons. The quanities that are printed
+ * are the density in the Eckart rest frame and the energy momentum tensor in
+ * the Landau rest frame. These quantities are printed at each time step for the
+ * position (0,0,0). Gaussian smearing is not applied. The output is provided
+ * in "ASCII" and "VTK" format.
+ *\verbatim
+     Thermodynamics:
+         Format:    ["ASCII", "VTK"]
+         Type: "hadron"
+         Quantities:    ["rho_eckart", "tmn_landau"]
+         Position:    [0.0, 0.0, 0.0]
+         Smearing: False
+ \endverbatim
  */
 
 /** Gathers all general Experiment parameters
@@ -450,8 +473,18 @@ void Experiment<Modus>::create_output(std::string format, std::string content,
  * \key Two_to_One (bool, optional, default = \key true) \n
  * Enable 2 <--> 1 processes (resonance formation and decays).
  *
- * \key Two_to_Two (bool, optional, default = \key true) \n
- * Enable 2 <--> 2 collisions.
+ * \key Included_2to2 (list of 2 <--> 2 reactions,
+ * optional, default = ["All"]) \n
+ * List that contains all possible 2 <--> 2 process categories. Each process of
+ * the listed category can be performed within the simulation. Possible categories are:
+ * \li \key "Elastic" - elastic binary scatterings
+ * \li \key "NN_to_NR" - nucleon + nucleon <--> nucleon + resonance
+ * \li \key "NN_to_DR" - nucleon + nucleon <--> delta + resonance
+ * \li \key "KN_to_KN" - kaon + nucleon <--> kaon + nucleon
+ * \li \key "KN_to_KDelta" - kaon + nucleon <--> kaon + dela
+ * \li \key "Strangeness_exchange" - processes with strangeness exchange
+ * \li \key "All" - include all binary processes, no necessity to list each
+ * single category
  *
  * \key Force_Decays_At_End (bool, optional, default = \key true): \n
  * \li \key true - Force all resonances to decay after last timestep \n
@@ -469,7 +502,7 @@ void Experiment<Modus>::create_output(std::string format, std::string content,
  *  ρ → ππ and h₁(1170) → πρ, which gives 5 pions on average.
  * \li \key "strings" - Annihilation throug string fragmentation.
  *
- * \key String_with_Probability (bool, optional, default = \key false): \n
+ * \key Strings_with_Probability (bool, optional, default = \key false): \n
  * \li \key true - String processes are triggered according to a probability
  *                 increasing smoothly with the collisional energy from 0 to 1
  *                 in a certain energy window. At energies beyond that window,
@@ -564,8 +597,50 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * \key Allowed_Deviation (double, optional, default = 2.5) \n
    * Limit by how much the target can be exceeded before the time step is
    * aborted.
+   **/
+
+  /*!\Userguide
+   * \page input_general_
+   *
+   * \n
+   * Example: Configuring General Properties
+   * --------------
+   * The following example provides a possibility for the \key General
+   * configuration.
+   *
+   *\verbatim
+   General:
+       Modus: Collider
+       Delta_Time: 0.1
+       Testparticles: 1
+       Gaussian_Sigma: 1.0
+       Gauss_Cutoff_In_Sigma: 3.0
+       End_Time: 100.0
+       Randomseed: -1
+       Nevents: 20
+       Use_Grid: True
+       Time_Step_Mode: Fixed
+   \endverbatim
+   * For the use of adaptive timesteps, change the \key Time_Step_Mode and
+   * include the corresponding additional parameters:
+   *\verbatim
+       Time_Step_Mode: Adaptive
+       Adaptive_Time_Step:
+           Smoothing_Factor: 0.1
+           Target_Missed_Actions: 0.01
+           Allowed_Deviation: 2.5
+   \endverbatim
+   *
+   * In the case of an expanding sphere setup, change the \key Modus and provide
+   * further information about the expansion.
+   *\verbatim
+       Modus: Sphere
+       MetricType: MasslessFRW
+       Expansion_Rate: 0.1
+   \endverbatim
    *
    **/
+
   if (time_step_mode_ == TimeStepMode::Adaptive) {
     adaptive_parameters_ = make_unique<AdaptiveParameters>(
         config["General"]["Adaptive_Time_Step"], delta_time_startup_);
@@ -742,9 +817,30 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *      Use periodic continuation or not. With periodic continuation
    *      x + i * lx is equivalent to x, same for y, z.
    *
+   * \key Potentials_Affect_Thresholds (bool, optional, default = false): \n
+   * Include potential effects, since mean field potentials change the threshold
+   * energies of the actions.
+   *
    * For format of lattice output see \ref output_vtk_lattice_. To configure
    * output of the quantities on the lattice to vtk files see
    * \ref input_output_options_.
+   *
+   * \n
+   * Examples: Configuring the Lattice
+   * --------------
+   * The following example configures the lattice with the origin in (0,0,0),
+   * 20 cells of 10 fm size in each direction and with periodic boundary
+   * conditions. The potential effects on the thresholds are taken into
+   * consideration.
+   *
+   *\verbatim
+   Lattice:
+       Origin:    [0.0, 0.0, 0.0]
+       Sizes:    [10.0, 10.0, 10.0]
+       Cell_Number:    [20, 20, 20]
+       Periodic: True
+       Potentials_Affect_Thresholds: True
+   \endverbatim
    */
 
   // Create lattices

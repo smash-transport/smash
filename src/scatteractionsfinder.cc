@@ -57,32 +57,111 @@ namespace smash {
  *
  * \page string_parameters String_Parameters
  * A set of parameters with which the string fragmentation can be modified.
- * (TODO(Mohs): Explain them in one sentence and add formulas.) \n
  *
  * \key String_Tension (double, optional, default = 1.0 GeV/fm) \n
+ * String tension \f$\kappa\f$ connecting massless quarks in Hamiltonian:
+ * \f[H=|p_1|+|p_2|+\kappa |x_1-x_2|\f]
+ * This parameter is only used to determine particles' formation times
+ * according to the yo-yo formalism (in the soft string routine for now).
  *
  * \key Gluon_Beta (double, optional, default = 0.5) \n
+ * Parameter \f$\beta\f$ in parton distribution function for gluons:
+ * \f[\mathrm{PDF}_g(x) \propto \frac{1}{x}(1-x)^{\beta+1}\f]
  *
  * \key Gluon_Pmin (double, optional, default = 0.001 GeV) \n
+ * Smallest possible scale for gluon lightcone momentum.
+ * This is divided by sqrts to get the minimum fraction to be sampled
+ * from PDF shown above.
  *
  * \key Quark_Alpha (double, optional, default = 1.0) \n
+ * Parameter \f$\alpha\f$ in parton distribution function for quarks:
+ * \f[\mathrm{PDF}_q\propto x^{\alpha-1}(1-x)^{\beta-1}\f]
  *
  * \key Quark_Beta (double, optional, default = 2.5) \n
+ * Parameter \f$\beta\f$ in PDF for quarks shown above.
  *
  * \key Strange_Supp (double, optional, default = 0.217 as in Pythia) \n
- * Strangeness suppression factor.
+ * Strangeness suppression factor \f$\lambda\f$:
+ * \f[\lambda=\frac{P(s\bar{s})}{P(u\bar{u})}=\frac{P(s\bar{s})}{P(d\bar{d})}\f]
+ * Defines the probability to produce a \f$s\bar{s}\f$ pair relative to produce
+ * a light \f$q\bar{q}\f$ pair
  *
  * \key Diquark_Supp (double, optional, default = 0.081 as in Pythia) \n
- * Diquark suppression factor.
+ * Diquark suppression factor. Defines the probability to produce a diquark
+ * antidiquark pair relative to producing a qurk antiquark pair.
  *
  * \key Sigma_Perp (double, optional, default = 0.7 ) \n
+ * Parameter \f$\sigma_\perp\f$ in distribution for transverse momentum
+ * transfer between colliding hadrons \f$p_\perp\f$ and string mass \f$M_X\f$:
+ * \f[\frac{d^3N}{dM^2_Xd^2\mathbf{p_\perp}}\propto \frac{1}{M_X^2}
+ * \exp\left(-\frac{p_\perp^2}{\sigma_\perp^2}\right)\f]
  *
  * \key StringZ_A (double, optional, default = 0.68 as in Pythia) \n
+ * Parameter a in pythia fragmentation function \f$f(z)\f$:
+ * \f[f(z) = \frac{1}{z} (1-z)^a \exp\left(-b\frac{m_T^2}{z}\right)\f]
  *
  * \key StringZ_B (double, optional, default = 0.98 as in Pythia) \n
+ * Parameter \f$b\f$ in pythia fragmentation function shown above.
  *
  * \key String_Sigma_T (double, optional, default = 0.25)
+ * Standard deviation in Gaussian for transverse momentum distributed to
+ * string fragments during fragmentation.
  *
+ * \page input_collision_term_ Collision_Term
+ * \n
+ * Example: Configuring the Collision Term
+ * --------------
+ * The following example configures SMASH to include all but
+ * strangeness exchange involving 2 <--> 2 scatterings, to treat N + Nbar
+ * processes as resonance formations and to not force decays at the end of the
+ * simulation. The elastic cross section is globally set to 30 mbarn and the
+ * \f$ \sqrt{s} \f$ cutoff for elastic nucleon + nucleon collisions is 1.93 GeV.
+ * All collisions are performed isotropically and 2 <--> 1 processes are
+ * forbidden.
+ *
+ *\verbatim
+ Collision_Term:
+     Included_2to2:    ["Elastic", "NN_to_NR", "NN_to_DR", "KN_to_KN", "KN_to_KDelta"]
+     Two_to_One: True
+     Force_Decays_At_End: False
+     NNbar_Treatment: "resonances"
+     Elastic_Cross_Section: 30.0
+     Elastic_NN_Cutoff_Sqrts: 1.93
+     Isotropic: True
+ \endverbatim
+ *
+ * If necessary, all collisions can be turned off by inserting
+ *\verbatim
+     No_Collisions: True
+ \endverbatim
+ * in the configuration file. \n
+ * \n
+ * Additionally, string fragmentation can be activated. If desired, the user can
+ * also configure the string parameters.
+ *
+ *\verbatim
+     Strings: True
+     String_Parameters:
+         String_Tension: 1.0
+         Gluon_Beta: 0.5
+         Gluon_Pmin: 0.001
+         Quark_Alpha: 1.0
+         Quark_Beta: 2.5
+         Strange_Supp: 0.217
+         Diquark_Supp: 0.081
+         Sigma_Perp: 0.7
+         StringZ_A: 0.68
+         StringZ_B: 0.98
+         String_Sigma_T: 0.25
+ \endverbatim
+ *
+ * Pauli Blocking can further be activated by means of the following subsection
+ *\verbatim
+     Pauli_Blocking:
+         Spatial_Averaging_Radius: 1.86
+         Momentum_Averaging_Radius: 0.08
+         Gaussian_Cutoff: 2.2
+ \endverbatim
  */
 
 ScatterActionsFinder::ScatterActionsFinder(
