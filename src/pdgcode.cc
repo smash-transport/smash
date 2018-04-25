@@ -57,22 +57,32 @@ int PdgCode::net_quark_number(const int quark) const {
                        digits_.n_q3_ != quark)) {
     return 0;
   }
-
-  std::array<int, 3> quarks;
-  quarks = quark_content();
-  int net_number = 0;
-  int ibegin = baryon_number() != 0 ? 0 : 1;
-  for(int i = ibegin; i < 3; i++) {
-    // add 1 for quark
-    if(quarks[i] == quark) {
-      net_number += 1;
-    }
-    // subtract 1 for antiquark
-    else if(quarks[i] == -quark) {
-      net_number -= 1;
-    }
+  // baryons: count quarks.
+  if (baryon_number() != 0) {
+    // for anti-baryons, the sign changes:
+    return antiparticle_sign() *
+           ((digits_.n_q1_ == quark) + (digits_.n_q2_ == quark) +
+            (digits_.n_q3_ == quark));
   }
-  return net_number;
+
+  // mesons.
+
+  // quarkonium state? Not open net_quark_number.
+  if (digits_.n_q3_ == quark && digits_.n_q2_ == quark) {
+    return 0;
+  }
+  /* this has covered all the easy stuff
+   * get the "other" quark. (We know this must exist, since they are
+   * not both the right one and one of them is the right one). */
+  int otherquark = (digits_.n_q2_ == quark) ? digits_.n_q3_ : digits_.n_q2_;
+  /* "our" quark is the heavier one: 1 for u,c,t; -1 for d,s,b (and of
+   * course the antiparticle sign) */
+  if (quark > otherquark) {
+    return ((quark % 2 == 0) ? 1 : -1) * antiparticle_sign();
+  }
+  /* ours is the lighter: If the heavier particle is u,c,t, the lighter
+   * one (ours) is an antiquark. */
+  return ((otherquark % 2 == 0) ? -1 : 1) * antiparticle_sign();
 }
 
 std::ostream& operator<<(std::ostream& s, const PdgCode& code) {

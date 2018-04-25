@@ -547,6 +547,12 @@ class PdgCode {
             result[2] = -result[2];
           }
         }
+        // add extra minus sign according to the pdg convention
+        if (digits_.n_q2_ % 2 == 1) {
+          for (int i = 1; i <= 2; i++) {
+            result[i] = -result[i];
+          }
+        }
       }
     } else {
       result = {0, 0, 0};
