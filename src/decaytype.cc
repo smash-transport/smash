@@ -357,7 +357,7 @@ double ThreeBodyDecayDilepton::diff_width(double m_par, double m_l,
 
   PdgCode pdg = t->pdgcode();
   if (pdg.is_meson()) {
-    const ParticleType &photon = ParticleType::find(pdg::photon);
+    const ParticleType& photon = ParticleType::find(pdg::photon);
     switch (pdg.spin()) {
       case 0: /* pseudoscalars: π⁰, η, η' */ {
         // width for decay into 2γ
@@ -454,9 +454,9 @@ double ThreeBodyDecayDilepton::width(double, double G0, double m) const {
           }
           return integrate(bottom, top,
                            [&](double m_dil) {
-                             return diff_width(m_parent, m_l, m_dil, m_other,
-                                           particle_types_[non_lepton_position],
-                                           mother_);
+                             return diff_width(
+                                 m_parent, m_l, m_dil, m_other,
+                                 particle_types_[non_lepton_position], mother_);
                            })
               .value();
         });
