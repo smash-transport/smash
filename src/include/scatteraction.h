@@ -51,13 +51,14 @@ class ScatterAction : public Action {
   /**
    * Calculate the transverse distance of the two incoming particles in their
    * local rest frame.
-   * 
+   *
    * According to UrQMD criterion
    * position of particle a: x_a \n
    * position of particle b: x_b \n
    * momentum of particle a: p_a \n
    * momentum of particle b: p_b \n
-   * \f[d^2_{coll} = (\vec{x_a} - \vec{x_b})^2 - \frac{((\vec{x_a} - \vec{x_b}) \cdot (\vec{p_a} - \vec{p_b}))^2 } {(\vec{p_a} - \vec{p_b})^2}\f]
+   * \f[d^2_{coll} = (\vec{x_a} - \vec{x_b})^2 - \frac{((\vec{x_a} - \vec{x_b})
+   * \cdot (\vec{p_a} - \vec{p_b}))^2 } {(\vec{p_a} - \vec{p_b})^2}\f]
    *
    * \return  squared distance.
    */
@@ -71,9 +72,9 @@ class ScatterAction : public Action {
    */
   void generate_final_state() override;
 
-  double raw_weight_value() const override;
+  double get_total_weight() const override;
 
-  double partial_weight() const override;
+  double get_partial_weight() const override;
 
   /**
    * Sample final-state angles in a 2->2 collision (possibly anisotropic).

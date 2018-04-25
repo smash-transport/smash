@@ -33,8 +33,8 @@ class ThermalizationAction : public Action {
                        double absolute_labframe_time);
   /// No need to do anything, because outgoing particles are set in constructor
   void generate_final_state() {}
-  double raw_weight_value() const { return 0.0; }
-  double partial_weight() const { return 0.0; }
+  double get_total_weight() const { return 0.0; }
+  double get_partial_weight() const { return 0.0; }
   /// This method checks, if there are particles in the region to be thermalized
   bool any_particles_thermalized() const {
     return (incoming_particles_.size() > 0);

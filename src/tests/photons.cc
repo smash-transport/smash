@@ -39,7 +39,7 @@ TEST(pi_rho0_pi_gamma) {
   double tot_weight = 0.0;
   for (int i = 0; i < number_of_photons; i++) {
     act->generate_final_state();
-    tot_weight += act->raw_weight_value();
+    tot_weight += act->get_total_weight();
   }
   COMPARE_RELATIVE_ERROR(tot_weight, 1.0, 0.08);
 }

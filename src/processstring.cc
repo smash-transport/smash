@@ -21,9 +21,8 @@ StringProcess::StringProcess(double string_tension, double time_formation,
                              double gluon_beta, double gluon_pmin,
                              double quark_alpha, double quark_beta,
                              double strange_supp, double diquark_supp,
-                             double sigma_perp,
-                             double stringz_a, double stringz_b,
-                             double string_sigma_T)
+                             double sigma_perp, double stringz_a,
+                             double stringz_b, double string_sigma_T)
     : pmin_gluon_lightcone_(gluon_pmin),
       pow_fgluon_beta_(gluon_beta),
       pow_fquark_alpha_(quark_alpha),
@@ -331,8 +330,8 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   /* determine direction in which the string is stretched.
    * this is set to be same with the the collision axis
    * in the center of mass frame. */
-  const ThreeVector threeMomentum = is_AB_to_AX ?
-                                    pcom_[1].threevec() : pcom_[0].threevec();
+  const ThreeVector threeMomentum =
+      is_AB_to_AX ? pcom_[1].threevec() : pcom_[0].threevec();
   const FourVector pnull = FourVector(threeMomentum.abs(), threeMomentum);
   const FourVector prs = pnull.LorentzBoost(ustrXcom.velocity());
   ThreeVector evec = prs.threevec() / prs.threevec().abs();
@@ -358,10 +357,8 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
 
 bool StringProcess::set_mass_and_direction_2strings(
     const std::array<std::array<int, 2>, 2> &quarks,
-    const std::array<FourVector, 2> &pstr_com,
-    std::array<double, 2> &m_str,
+    const std::array<FourVector, 2> &pstr_com, std::array<double, 2> &m_str,
     std::array<ThreeVector, 2> &evec_str) {
-
   std::array<bool, 2> found_mass;
   for (int i = 0; i < 2; i++) {
     found_mass[i] = false;
@@ -399,16 +396,15 @@ bool StringProcess::make_final_state_2strings(
     const std::array<std::array<int, 2>, 2> &quarks,
     const std::array<FourVector, 2> &pstr_com,
     const std::array<double, 2> &m_str,
-    const std::array<ThreeVector, 2> &evec_str,
-    bool flip_string_ends) {
+    const std::array<ThreeVector, 2> &evec_str, bool flip_string_ends) {
   const std::array<FourVector, 2> ustr_com = {pstr_com[0] / m_str[0],
                                               pstr_com[1] / m_str[1]};
   for (int i = 0; i < 2; i++) {
     // determine direction in which string i is stretched.
     ThreeVector evec = evec_str[i];
     // perform fragmentation and add particles to final_state.
-    int nfrag = fragment_string(quarks[i][0], quarks[i][1], m_str[i],
-                                evec, flip_string_ends);
+    int nfrag = fragment_string(quarks[i][0], quarks[i][1], m_str[i], evec,
+                                flip_string_ends);
     if (nfrag <= 0) {
       NpartString_[i] = 0;
       return false;
@@ -463,9 +459,8 @@ bool StringProcess::next_DDiff() {
   pstr_com[1] =
       FourVector((PPosB_ - QPos + PNegB_ - QNeg) / sqrt2_, threeMomentum);
 
-  const bool found_masses = set_mass_and_direction_2strings(quarks,
-                                                            pstr_com, m_str,
-                                                            evec_str);
+  const bool found_masses =
+      set_mass_and_direction_2strings(quarks, pstr_com, m_str, evec_str);
   if (!found_masses) {
     return false;
   }
@@ -539,9 +534,8 @@ bool StringProcess::next_NDiffSoft() {
   pstr_com[1] =
       FourVector((PPosB_ - dPPos + PNegB_ - dPNeg) / sqrt2_, threeMomentum);
 
-  const bool found_masses = set_mass_and_direction_2strings(quarks,
-                                                            pstr_com, m_str,
-                                                            evec_str);
+  const bool found_masses =
+      set_mass_and_direction_2strings(quarks, pstr_com, m_str, evec_str);
   if (!found_masses) {
     return false;
   }
@@ -621,8 +615,7 @@ bool StringProcess::next_NDiffHard() {
       ThreeVector threeMomentum = evecBasisAB_[0] * event[i].pz() +
                                   evecBasisAB_[1] * event[i].px() +
                                   evecBasisAB_[2] * event[i].py();
-      FourVector momentum =
-          FourVector(event[i].e(), threeMomentum);
+      FourVector momentum = FourVector(event[i].e(), threeMomentum);
       new_particle.set_4momentum(momentum);
       log.debug("4-momentum from Pythia: ", momentum);
       if (event[i].isHadron()) {
@@ -758,9 +751,8 @@ bool StringProcess::next_BBbarAnn() {
   // Fragment two strings
   for (int i = 0; i < 2; i++) {
     ThreeVector evec = pcom_[i].threevec() / pcom_[i].threevec().abs();
-    const int nfrag = fragment_string(remaining_quarks[i],
-                                      remaining_antiquarks[i], mstr[i],
-                                      evec, true);
+    const int nfrag = fragment_string(
+        remaining_quarks[i], remaining_antiquarks[i], mstr[i], evec, true);
     if (nfrag <= 0) {
       NpartString_[i] = 0;
       return false;
@@ -949,10 +941,12 @@ std::pair<int, int> StringProcess::find_leading(int nq1, int nq2,
   int i1, i2;
   for (i1 = 0;
        i1 <= end && !list[i1].pdgcode().contains_enough_valence_quarks(nq1);
-       i1++) { }
+       i1++) {
+  }
   for (i2 = end;
        i2 >= 0 && !list[i2].pdgcode().contains_enough_valence_quarks(nq2);
-       i2--) { }
+       i2--) {
+  }
   std::pair<int, int> indices(i1, i2);
   return indices;
 }

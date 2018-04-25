@@ -36,18 +36,18 @@ class DecayAction : public Action {
   DecayAction(const ParticleData &p, double time);
 
   /**
-   * Add several new decays at once. 
+   * Add several new decays at once.
    * \param[in] pv List of decays to be added.
    */
   void add_decays(DecayBranchList pv);
 
-  /** 
+  /**
    * Add one new decay.
    * \param[in] p Decay to be added.
    */
   void add_decay(DecayBranchPtr p);
 
-  /** 
+  /**
    * Generate the final state of the decay process.
    * Performs a decay of one particle to two or three particles.
    *
@@ -57,11 +57,11 @@ class DecayAction : public Action {
 
   std::pair<double, double> sample_masses() const override;
 
-  double raw_weight_value() const override { return total_width_; }
+  double get_total_weight() const override { return total_width_; }
 
-  double partial_weight() const override { return partial_width_; }
+  double get_partial_weight() const override { return partial_width_; }
 
-  /** 
+  /**
    * Get total decay width
    * \return Total width of decay
    */

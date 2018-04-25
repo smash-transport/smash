@@ -29,6 +29,7 @@ class Configuration;
  * It contains the following keys, all of which have string values and are
  * optional:
  * \li \key default (determines the default logging level for all areas)
+ * \li \key Legacy
  * \li \key Main
  * \li \key Experiment
  * \li \key Box
@@ -68,7 +69,45 @@ class Configuration;
  * \li OFF   - If selected no messages will be output
  *
  * Note that the logging levels TRACE and DEBUG are only available in
- * debugging builds (i.e. with -DCMAKE_BUILD_TYPE=Debug).
+ * debugging builds (i.e. with -DCMAKE_BUILD_TYPE=Debug). \n
+ *
+ * \n
+ * Example: Configuring the Logging Area
+ * --------------
+ * To activate all informational messages (\key INFO) for all logging areas,
+ * include the following in the configuration file:
+ *\verbatim
+ Logging:
+     default: INFO
+     Legacy: INFO
+     Main: INFO
+     Experiment: INFO
+     Box: INFO
+     Collider: INFO
+     Sphere: INFO
+     ParticleType: INFO
+     Action: INFO
+     FindScatter: INFO
+     DecayModes: INFO
+     ScatterAction: INFO
+     Pythia: INFO
+     InputParser: INFO
+     Clock: INFO
+     Resonances: INFO
+     Distributions: INFO
+     Propagation: INFO
+     Grid: INFO
+     List: INFO
+     Nucleus: INFO
+     Density: INFO
+     PauliBlocking: INFO
+     Tmn: INFO
+     Fpe: INFO
+     Lattice: INFO
+     AdaptiveTS: INFO
+     GrandcanThermalizer: INFO
+     CrossSections: INFO
+ \endverbatim
  */
 
 /** \addtogroup logging

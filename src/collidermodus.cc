@@ -50,14 +50,33 @@ namespace smash {
  * of the projectile nucleus (in AGeV). This assumes the target nucleus is at
  * rest.
  *
+ * Note that using \key E_kin or \key P_Lab to quantify the collision energy is
+ * not sufficient to configure a collision in a fixed target frame. You need to
+ * additionally change the \key Calculation_Frame. Any format of incident energy
+ * can however be combined with any calculation frame, the provided incident
+ * energy is then intrinsically translated to the quantity needed for the
+ * computation.
+ *
  * \key Calculation_Frame (string, optional, default = "center of velocity"): \n
  * The frame in which the collision is calculated.\n
  * \li \key "center of velocity"
  * \li \key "center of mass"
  * \li \key "fixed target"
  *
+ * \key Fermi_Motion (string, optional, default = "off"): \n
+ * \li \key "on" - Switch Fermi motion on, it is recommended to also activate
+ * potentials
+ * \li \key "off" - Switch Fermi motion off
+ * \li \key "frozen" - Use "frozen" if you want to use Fermi motion
+ * without potentials
+ *
+ * \key Collisions_Within_Nucleus (string, optional, default = false) \n
+ * Determine whether to allow the first collisions within the same nucleus.
+ * \li \key true - First collisions within the same nucleus allowed
+ * \li \key false - First collisions within the same nucleus forbidden
+ *
  * \subpage projectile_and_target
- * \page projectile_and_target Projectile_And_Target
+ * \page projectile_and_target Projectile and Target
  *
  * \key Projectile: \n
  * Section for projectile nucleus. The projectile will
@@ -77,25 +96,18 @@ namespace smash {
  * `Particles: {2212: 1, 2112: 1, 3122: 1}` for Hyper-Triton (one
  * proton, one neutron and one Lambda).
  *
+ * \li \key Automatic (bool, optional, default = true): \n
+ * true - sets all necessary parameters for a deformed nucleus based on the
+ * atomic number of the input nucleus \n
+ * false - manual values according to deformed nucleus (see below)
+ *
  * \li \key Deformed (bool, optional, default = false): \n
  * true - deformed nucleus is initialized \n
  * false - spherical nucleus is initialized
  *
- * \li \key Automatic (bool, optional, default = true): \n
- * true - sets all necessary parameters based on the atomic number
- * of the input nucleus \n
- * false - manual values according to deformed nucleus (see below)
- *
- * \li \subpage input_deformed_nucleus_
- * Additional Woods-Saxon Parameters: \n
- * There are also many other
- * parameters for specifying the shape of the Woods-Saxon distribution,
- * and other nucleus specific properties. See nucleus.cc and
- * deformednucleus.cc for more on these choices.
- *
  * \page input_modi_collider_ Collider
- * \subpage input_impact_parameter
- * \page input_impact_parameter Impact_Parameter
+ * \subpage input_impact_parameter_
+ * \page input_impact_parameter_ Impact Parameter
  * \key Impact: \n
  * A section for the impact parameter (= distance (in fm) of the two
  * straight lines that the center of masses of the nuclei travel on).
@@ -142,11 +154,73 @@ namespace smash {
  * Note that this distance is applied before the Lorentz boost
  * to chosen calculation frame, and thus the actual distance may be different.
  *
- * \key Fermi_Motion (string, optional, default = "off"): \n
- * \li \key "on" - Switch Fermi motion on, in combination with potentials
- * \li \key "off" - Switch Fermi motion off
- * \li \key "frozen" - Use "frozen" if you want to use Fermi motion
- * without potentials
+ * \n
+ * Examples: Configuring the Impact Parameter
+ * --------------
+ * The impact parameter can be configured to have a fixed value in the \key
+ * Collider subsection of Modi. In addition, the initial distance of the nuclei
+ * in \f$ z \f$-direction is assigned a specific value. This does not affect the
+ * time at which the nuclei will collide, but only changes the start time of the
+ * simulation as the nuclei are further apart when the simulation begins.
+ *
+ *\verbatim
+ Modi:
+     Collider:
+         Impact:
+             Value: 0.1
+             Initial_Distance: 3.0
+ \endverbatim
+ ** The impact parameter may further be sampled from a uniform or quadratic
+ * distribution in a certain impact parameter range:
+ *
+ *\verbatim
+ Modi:
+     Collider:
+         Impact:
+             Sample: "uniform"
+             Range: [3.0, 6.0]
+ \endverbatim
+ *
+ * A custom impact parameter distribution based on a set of \key Values and
+ * \key Yields, can be configured as follows:
+ *\verbatim
+ Modi:
+     Collider:
+         Impact:
+             Sample: "custom"
+             Values: [0.0, 3.0, 6.0, 9.0]
+             Yields: [0.000000, 2.999525, 5.959843, 6.995699]
+ \endverbatim
+ *
+ ** \page input_modi_collider_ Collider
+ * \n
+ * Examples: Configuring Heavy-ion Collisions
+ * --------------
+ * The following example configures a Cu63-Cu63 collision at \f$\sqrt{s_{NN}}=3.0\f$
+ * GeV with zero impact parameter and Fermi motion taken into consideration. The
+ * calculation frame is the default, center of velocity, and the nuclei are not
+ * deformed.
+ *
+ *\verbatim
+ Modi:
+     Collider:
+         Projectile:
+             Particles:    {2212: 29, 2112 :34}
+         Target:
+             Particles:    {2212: 29, 2112 :34}
+         Sqrtsnn: 3.0
+ \endverbatim
+ *
+ * To further use Fermi motion and allow the first collisions within the
+ * projectile or target nucleus, the corresponding options need to be activated
+ * by means of:
+ *\verbatim
+         Fermi_Motion: "on"
+         Collisions_Within_Nucleus: True
+ \endverbatim
+ *
+ * Additionally, the impact parameter may be specified manually. See
+ * \ref input_impact_parameter_ for an example.
  *
  */
 
