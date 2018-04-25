@@ -81,6 +81,7 @@ set(smash_src
         collidermodus.cc
         configuration.cc
         crosssections.cc
+        crosssectionsphoton.cc
         decayaction.cc
         decayactionsfinder.cc
         decaymodes.cc
@@ -112,7 +113,6 @@ set(smash_src
         particles.cc
         particletype.cc
         pdgcode.cc
-        crosssectionsphoton.cc
         potentials.cc
         processbranch.cc
         processstring.cc
@@ -125,8 +125,8 @@ set(smash_src
         spheremodus.cc
         stringfunctions.cc
         tabulation.cc
-        thermalizationaction.cc
         tabulationnd.cc
+        thermalizationaction.cc
         thermodynamicoutput.cc
         threevector.cc
         tsc.cc
