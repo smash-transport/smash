@@ -522,6 +522,7 @@ void Experiment<Modus>::create_output(std::string format, std::string content,
  *                  cross sections contributed by the non-string processes. The
  *                  string cross section is thus obtained by taking the
  *                  difference between them.
+ *
  * \subpage pauliblocker
  */
 template <typename Modus>
