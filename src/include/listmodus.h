@@ -77,6 +77,10 @@ class ListModus : public ModusDefault {
    * \param[in] parameters Unused, but necessary because of templated use of
    *                       this function
    * \return The starting time of the simulation
+   * \throw runtime_error if an input list file could not be found
+   * \throw LoadFailure if an input list file is not correctly formatted
+   * \throw invalid_argument if the listed charge of a particle does not
+   *                         correspond to its pdg charge
    */
   double initial_conditions(Particles *particles,
                             const ExperimentParameters &parameters);
@@ -95,14 +99,20 @@ class ListModus : public ModusDefault {
   /// File prefix of the particle list
   std::string particle_list_file_prefix_;
 
+  /// File name of current file
+  std::string current_particle_list_file_;
+
   /// Starting time for the List; changed to the earliest formation time
   double start_time_ = 0.;
 
-  /// shift_id is the start number of event_id
+  /// shift_id is the start number of file_id_
   const int shift_id_;
 
   /// event_id_ = the unique id of the current event
   int event_id_;
+
+  /// file_id_ is the id of the current file
+  int file_id_;
 
   /// Counter for mass-check warnings to avoid spamming
   int n_warns_precision_ = 0;
@@ -121,6 +131,19 @@ class ListModus : public ModusDefault {
    */
   std::pair<bool, double> check_formation_time_(
       const std::string &particle_list);
+
+  /// check if file given by filepath has events left after streampos
+  /// last_position
+  bool file_has_events_(bf::path filepath, std::streampos last_position);
+
+  /// last read position in current file
+  std::streampos last_read_position_;
+
+  /// Return file path based on integer
+  bf::path file_path_(const int file_id);
+
+  /// Read the next event. Either from the current file or from the next.
+  std::string next_event_();
 
   /**\ingroup logging
    * Writes the initial state for the List to the output stream.

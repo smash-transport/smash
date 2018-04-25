@@ -34,9 +34,9 @@ void DecayActionsFinderDilepton::shine(const Particles &search_list,
     const double inv_gamma = p.inverse_gamma();
     DecayBranchList dil_modes = p.type().get_partial_widths_dilepton(m_eff);
 
-    // if particle can only decay into dileptons or is stable, use shining only
-    // in find_final_actions and ignore them here, also unformed
-    // resonances cannot decay
+    /* if particle can only decay into dileptons or is stable, use shining only
+     * in find_final_actions and ignore them here, also unformed
+     * resonances cannot decay */
     if (dil_modes.size() == n_all_modes || p.type().is_stable() ||
         (p.formation_time() > p.position().x0())) {
       continue;

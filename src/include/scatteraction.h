@@ -51,8 +51,15 @@ class ScatterAction : public Action {
   /**
    * Calculate the transverse distance of the two incoming particles in their
    * local rest frame.
+   * 
+   * According to UrQMD criterion
+   * position of particle a: x_a \n
+   * position of particle b: x_b \n
+   * momentum of particle a: p_a \n
+   * momentum of particle b: p_b \n
+   * \f[d^2_{coll} = (\vec{x_a} - \vec{x_b})^2 - \frac{((\vec{x_a} - \vec{x_b}) \cdot (\vec{p_a} - \vec{p_b}))^2 } {(\vec{p_a} - \vec{p_b})^2}\f]
    *
-   * Returns the squared distance.
+   * \return  squared distance.
    */
   double transverse_distance_sqr() const;
 
@@ -80,15 +87,6 @@ class ScatterAction : public Action {
                            ReactionsBitSet included_2to2, double low_snn_cut,
                            bool strings_switch, bool use_transition_probability,
                            NNbarTreatment nnbar_treatment);
-
-  /**
-   * Assign a cross section scaling factor to all outgoing particles.
-   * Factor is only non-zero, when the outgoing particle carries
-   * a valence quark from the excited hadron.
-   */
-  static void assign_all_scaling_factors(ParticleList& incoming_particles,
-                                         ParticleList& outgoing_particles,
-                                         double suppression_factor);
 
   /// Returns list of possible collision channels
   const CollisionBranchList& collision_channels() {
@@ -133,12 +131,11 @@ class ScatterAction : public Action {
   /** Perform an inelastic two-body scattering, i.e. new particles are formed*/
   void inelastic_scattering();
 
-  /** Todo(ryu): document better - it is not really UrQMD-based, isn't it?
-   *  Perform the UrQMD-based string excitation and decay */
-  void string_excitation_soft();
-
-  /** Perform the string excitation and decay via Pythia. */
-  void string_excitation_pythia();
+  /**
+   * Todo(ryu): document better - it is not really UrQMD-based, isn't it?
+   * Perform the UrQMD-based string excitation and decay
+   * \param[in] is_soft_proc whether or not it is soft process */
+  void string_excitation(bool is_soft_proc);
 
   /**
    * \ingroup logging
@@ -167,22 +164,6 @@ class ScatterAction : public Action {
 
   /** Perform a 2->1 resonance-formation process. */
   void resonance_formation();
-
-  /**
-   * Find the first particle, which can carry nq1, and the last particle,
-   * which can carry nq2 valence quarks and return their indices in
-   * the given list.
-   */
-  static std::pair<int, int> find_leading(int nq1, int nq2, ParticleList& list);
-
-  /**
-   * Assign a cross section scaling factor to the given particle.
-   * The scaling factor is the number of quarks from the excited hadron,
-   * that the fragment carries devided by the total number of quarks in
-   * this fragment.
-   */
-  static void assign_scaling_factor(int nquark, ParticleData& data,
-                                    double suppression_factor);
 
   /** Pointer to interface class for strings */
   StringProcess* string_process_ = nullptr;

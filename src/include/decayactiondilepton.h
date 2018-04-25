@@ -14,8 +14,26 @@
 
 namespace smash {
 
+/**
+ * \ingroup action
+ * DecayActionDilepton is special action create for particles
+ * that can decay into dileptons. Such actions are never actually
+ * performed, but only written into the dilepton output according to
+ * our perturbative treatment.
+ */
 class DecayActionDilepton : public DecayAction {
  public:
+  /**
+   * Construct a DecayActionDilepton from a particle \p p.
+   *
+   * It does not initialize the list of possible decay processes. You need to
+   * call add_processes after construction.
+   *
+   * \param[in] p The particle that should decay if the action is performed.
+   * \param[in] time_of_execution Time at which the action is supposed to take place
+   * \param[in] shining_weight The weight of the dilepton decay accroding to the
+   * shining method.
+   */
   DecayActionDilepton(const ParticleData &p, double time_of_execution,
                       double shining_weight);
 

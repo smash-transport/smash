@@ -29,9 +29,9 @@ class ActionFinderInterface {
   /**
    * Abstract function for finding actions, given a list of particles.
    *
-   * \param search_list a list of particles where each pair needs to be tested
-   *                    for possible interaction
-   * \param dt duration of the current time step in fm/c
+   * \param[in] search_list a list of particles where each pair needs to be
+   *                  tested  for possible interaction
+   * \param[in] dt duration of the current time step in fm/c
    * \return The function returns a list (std::vector) of Action objects that
    *         could possibly be executed in this time step.
    */
@@ -41,11 +41,11 @@ class ActionFinderInterface {
    * Abstract function for finding actions, given two lists of particles,
    * a search list and a neighbors list.
    *
-   * \param search_list a list of particles where each particle needs to be
-   *                    tested for possible interactions with the neighbors
-   * \param neighbors_list a list of particles that need to be tested against
-   *                       particles in search_list for possible interaction
-   * \param dt duration of the current time step in fm/c
+   * \param[in] search_list a list of particles where each particle needs to
+   *                  be tested for possible interactions with the neighbors
+   * \param[in] neighbors_list a list of particles that need to be tested
+   *                  against particles in search_list for possible interaction
+   * \param[in] dt duration of the current time step in fm/c
    * \return The function returns a list (std::vector) of Action objects that
    *         could possibly be executed in this time step.
    */
@@ -59,12 +59,12 @@ class ActionFinderInterface {
    *
    * Note: The first list can be a subset of the second list.
    *
-   * \param search_list a list of particles where each particle needs to be
+   * \param[in] search_list a list of particles where each particle needs to be
    *                    tested for possible interactions with the surrounding
    *                    particles
-   * \param surrounding_list a list of particles that need to be tested against
-   *                         particles in search_list for possible interaction
-   * \param dt duration of the current time step in fm/c
+   * \param[in] surrounding_list a list of particles that need to be tested
+   *                  against particles in search_list for possible interaction
+   * \param[in] dt duration of the current time step in fm/c
    * \return The function returns a list (std::vector) of Action objects that
    *         could possibly be executed in this time step.
    */
@@ -75,10 +75,10 @@ class ActionFinderInterface {
   /**
    * This abstract function finds 'final' actions (for cleaning up at the end
    * of the simulation, e.g. letting the remaining resonances decay).
-   * \param search_list a list of particles where each particle needs to be
+   * \param[in] search_list a list of particles where each particle needs to be
    *                    tested for possible interactions with the surrounding
    *                    particles
-   * \param only_res this optional parameter requests that only actions
+   * \param[in] only_res this optional parameter requests that only actions
    *                 regarding resonances are considered (disregarding stable
    *                 particles)
    * \return The function returns a list (std::vector) of Action objects.

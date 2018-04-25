@@ -35,13 +35,20 @@ class DecayAction : public Action {
    */
   DecayAction(const ParticleData &p, double time);
 
-  /** Add several new decays at once. */
+  /**
+   * Add several new decays at once. 
+   * \param[in] pv List of decays to be added.
+   */
   void add_decays(DecayBranchList pv);
 
-  /** Add one new decay.*/
+  /** 
+   * Add one new decay.
+   * \param[in] p Decay to be added.
+   */
   void add_decay(DecayBranchPtr p);
 
-  /** Generate the final state of the decay process.
+  /** 
+   * Generate the final state of the decay process.
    * Performs a decay of one particle to two or three particles.
    *
    * \throws InvalidDecay
@@ -54,6 +61,10 @@ class DecayAction : public Action {
 
   double partial_weight() const override { return partial_width_; }
 
+  /** 
+   * Get total decay width
+   * \return Total width of decay
+   */
   double total_width() const { return total_width_; }
 
   /**
@@ -72,16 +83,16 @@ class DecayAction : public Action {
    */
   void format_debug_output(std::ostream &out) const override;
 
-  /** list of possible decays  */
+  /// List of possible decays
   DecayBranchList decay_channels_;
 
-  /** total decay width */
+  /// total decay width
   double total_width_;
 
-  /** partial decay width to the chosen outgoing channel */
+  /// partial decay width to the chosen outgoing channel
   double partial_width_;
 
-  /** angular momentum of the decay */
+  /// Angular momentum of the decay
   int L_ = 0;
 
  protected:

@@ -51,6 +51,15 @@ class ColliderModus : public ModusDefault {
    *                         initial conditions of the experiment.
    * \param[in] parameters Unused, but necessary because of templated
    *                       initialization
+   * \throw ColliderEmpty if projectile or nucleus are empty (i.e. do
+   *                      not contain particles)
+   * \throw InvalidEnergy if sqrts from config is not large enough to support
+   *                      the colliding masses of the nuclei, or if E_kin or
+   *                      P_lab are negative
+   * \throw domain_error if more or less than exactly one of the
+   *                     input energy options is specified, or if custom
+   *                     impact parameter Values and Yields are improperly
+   *                     supplied
    * \todo JB:remove the second parameter?
    **/
   explicit ColliderModus(Configuration modus_config,
@@ -65,6 +74,8 @@ class ColliderModus : public ModusDefault {
    * \param[in] parameters The initialization parameters of the system
    * \return The starting time of the simulation (negative, so that nuclei
    *         collide exactly at t=0)
+   * \throw domain_error if the velocities of each nucleus are >= 1, or if
+   *                     input for Fermi motion is invalid
    */
   double initial_conditions(Particles *particles,
                             const ExperimentParameters &parameters);
@@ -170,6 +181,9 @@ class ColliderModus : public ModusDefault {
   /**
    * Reference frame for the system, as specified from config
    */
+  /// \todo enum classes do not appear in doxygen, since they are
+  /// defined in fowarddeclarations which is intentionally neglected
+  /// from doxygen (s. fowarddeclerations.h)
   CalculationFrame frame_ = CalculationFrame::CenterOfVelocity;
   /**
    * An option to include Fermi motion ("off", "on", "frozen")
@@ -195,7 +209,8 @@ class ColliderModus : public ModusDefault {
    * \param[in] m_a The (positive) mass of the projectile.
    * \param[in] m_b The (positive) mass of the target.
    * \return A pair < v_a, v_b > containing the velocities of the nuclei.
-   **/
+   * \throw domain_error if the reference frame is not properly specified
+   */
   std::pair<double, double> get_velocities(double mandelstam_s, double m_a,
                                            double m_b);
 
