@@ -18,7 +18,6 @@
 
 #include "logging.h"
 
-
 namespace smash {
 
 template <int dim>
@@ -55,8 +54,6 @@ class TabulationND<1> {
   mutable std::vector<double> x_history_;
   std::function<double(double)> f_;
 };
-
-
 
 template <>
 class TabulationND<2> {
@@ -107,16 +104,14 @@ class TabulationND<2> {
   std::vector<double> get_x_hist() { return x_history_; }
   std::vector<double> get_y_hist() { return y_history_; }
 
-
  private:
   const double x0_, x1_, y0_, y1_, dx_, dy_, inv_dx_, inv_dy_;
   size_t n_, nx_, ny_;
   std::vector<double> values_;
   mutable std::vector<double> x_history_;
   mutable std::vector<double> y_history_;
-  std::function<double(double,double)> f_;
+  std::function<double(double, double)> f_;
 };
-
 
 template <>
 class TabulationND<3> {
@@ -138,7 +133,6 @@ class TabulationND<3> {
         inv_dx_(1 / dx),
         inv_dy_(1 / dy),
         inv_dz_(1 / dz) {
-
     nx_ = std::ceil((x1_ - x0_) * inv_dx_ + 1);
     ny_ = std::ceil((y1_ - y0_) * inv_dy_ + 1);
     nz_ = std::ceil((z1_ - z0_) * inv_dz_ + 1);
@@ -154,7 +148,7 @@ class TabulationND<3> {
           y = y0_ + j * dy_;
           z = z0_ + k * dz_;
 
-          values_[i + j * nx_+ k * nx_ * ny_] = f(x, y, z);
+          values_[i + j * nx_ + k * nx_ * ny_] = f(x, y, z);
         }
 
     //

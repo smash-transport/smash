@@ -25,16 +25,14 @@
 #include "include/random.h"
 #include "include/tabulation.h"
 
-
 namespace smash {
 
 // Determines the reaction type (process) based on the incoming particles.
 // This mapping is unique.
 ScatterActionPhoton::ReactionType ScatterActionPhoton::photon_reaction_type(
     const ParticleList &in) {
-
   if (in.size() != 2) {
-      return ReactionType::no_reaction;
+    return ReactionType::no_reaction;
   }
 
   PdgCode a = in[0].pdgcode();
@@ -237,9 +235,8 @@ void ScatterActionPhoton::generate_final_state() {
 
   // Weighing of the fractional photons
   if (number_of_fractional_photons_ > 1) {
-    weight_ =
-        diff_xs * (t2 - t1) / (number_of_fractional_photons_
-                                * hadronic_cross_section_);
+    weight_ = diff_xs * (t2 - t1) /
+              (number_of_fractional_photons_ * hadronic_cross_section_);
   } else {
     weight_ = proc->weight() / hadronic_cross_section_;
   }
@@ -373,8 +370,8 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections(
     xsection = 0.1;
     const auto &log = logger<LogArea::ScatterAction>();
     log.warn("Calculated negative cross section.\nParticles ",
-              incoming_particles_, " mass rho particle: ", m_rho,
-              ", sqrt_s: ", std::sqrt(s));
+             incoming_particles_, " mass rho particle: ", m_rho,
+             ", sqrt_s: ", std::sqrt(s));
   }
   process_list.push_back(make_unique<CollisionBranch>(
       *hadron_out_t_, *photon_particle, xsection, ProcessType::TwoToTwo));
@@ -454,12 +451,12 @@ double ScatterActionPhoton::diff_cross_section_w_ff(const double t,
    * are used.
    */
 
-   /* C12, C13, C15, C16 need special treatment. These processes have identical
-      incoming and outgoing particles, but diffrent mediating particles and
-      hence different form factors. If both channels are added up
-      (MediatorType::SUM), each contribution is corrected by the corresponding
-      form factor.
-   */
+  /* C12, C13, C15, C16 need special treatment. These processes have identical
+     incoming and outgoing particles, but diffrent mediating particles and
+     hence different form factors. If both channels are added up
+     (MediatorType::SUM), each contribution is corrected by the corresponding
+     form factor.
+  */
   switch (reac_) {
     case ReactionType::pi_m_rho_p_pi_z:
     case ReactionType::pi_p_rho_m_pi_z:

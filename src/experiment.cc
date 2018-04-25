@@ -161,7 +161,8 @@ namespace {
  * \ref output_contents_ "output contents". List of available formats is
  * \ref list_of_output_formats "here".
  * \n
- * Besides the universal \key Format option, there are also content-specific output
+ * Besides the universal \key Format option, there are also content-specific
+ output
  * options that are listed below.
  *
  * ### Content-specific output options
@@ -470,12 +471,11 @@ void Experiment<Modus>::create_output(std::string format, std::string content,
  * \key Included_2to2 (list of 2 <--> 2 reactions,
  * optional, default = ["All"]) \n
  * List that contains all possible 2 <--> 2 process categories. Each process of
- * the listed category can be performed within the simulation. Possible categories are:
- * \li \key "Elastic" - elastic binary scatterings
- * \li \key "NN_to_NR" - nucleon + nucleon <--> nucleon + resonance
- * \li \key "NN_to_DR" - nucleon + nucleon <--> delta + resonance
- * \li \key "KN_to_KN" - kaon + nucleon <--> kaon + nucleon
- * \li \key "KN_to_KDelta" - kaon + nucleon <--> kaon + dela
+ * the listed category can be performed within the simulation. Possible
+ * categories are: \li \key "Elastic" - elastic binary scatterings \li \key
+ * "NN_to_NR" - nucleon + nucleon <--> nucleon + resonance \li \key "NN_to_DR" -
+ * nucleon + nucleon <--> delta + resonance \li \key "KN_to_KN" - kaon + nucleon
+ * <--> kaon + nucleon \li \key "KN_to_KDelta" - kaon + nucleon <--> kaon + dela
  * \li \key "Strangeness_exchange" - processes with strangeness exchange
  * \li \key "All" - include all binary processes, no necessity to list each
  * single category
@@ -1096,16 +1096,16 @@ bool Experiment<Modus>::perform_action(
                                    n_fractional_photons_,
                                    action.raw_weight_value());
 
-   /**
-    * Add a completely dummy process to the photon action. The only important
-    * thing is that its cross-section is equal to the cross-section of the
-    * hadronic action. This can be done, because the photon action is never
-    * actually performed, only the final state is generated and printed to
-    * the photon output.
-    * Note: The cross_section_scaling_factor can be neglected here, since it
-    * cancels out for the weighting, where a ratio of (unscaled) photon
-    * cross section and (unscaled) hadronic cross section is taken.
-    */
+    /**
+     * Add a completely dummy process to the photon action. The only important
+     * thing is that its cross-section is equal to the cross-section of the
+     * hadronic action. This can be done, because the photon action is never
+     * actually performed, only the final state is generated and printed to
+     * the photon output.
+     * Note: The cross_section_scaling_factor can be neglected here, since it
+     * cancels out for the weighting, where a ratio of (unscaled) photon
+     * cross section and (unscaled) hadronic cross section is taken.
+     */
     photon_act.add_dummy_hadronic_process(action.raw_weight_value());
 
     // Now add the actual photon reaction channel.
