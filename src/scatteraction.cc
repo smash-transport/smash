@@ -113,7 +113,7 @@ void ScatterAction::add_all_scatterings(double elastic_parameter,
                                         double low_snn_cut, bool strings_switch,
                                         bool strings_with_probability,
                                         NNbarTreatment nnbar_treatment) {
-  cross_sections xs(incoming_particles_, sqrt_s());
+  CrossSections xs(incoming_particles_, sqrt_s());
   CollisionBranchList processes = xs.generate_collision_list(
       elastic_parameter, two_to_one, included_2to2, low_snn_cut, strings_switch,
       strings_with_probability, nnbar_treatment, string_process_);

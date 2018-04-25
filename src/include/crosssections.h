@@ -23,7 +23,7 @@ namespace smash {
  * for the incoming particles at the given energy with the calculated cross
  * sections.
  */
-class cross_sections {
+class CrossSections {
  public:
   /**
    * Construct CrossSections instance.
@@ -31,7 +31,7 @@ class cross_sections {
    * \param[in] incoming_particles Particles that are reacting.
    * \param[in] sqrt_s Center-of-mass energy of the reaction.
    */
-  cross_sections(const ParticleList& incoming_particles, const double sqrt_s);
+  CrossSections(const ParticleList& incoming_particles, const double sqrt_s);
 
   /**
    * Generate a list of all possible collisions between the incoming particles
