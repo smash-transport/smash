@@ -144,9 +144,11 @@ CollisionBranchList cross_sections::generate_collision_list(
   const ParticleType& t1 = incoming_particles_[0].type();
   const ParticleType& t2 = incoming_particles_[1].type();
 
-  const bool is_pythia = use_transition_probability && 
+  bool use_AQM = true;
+  const bool is_pythia = use_transition_probability &&
                          decide_string(strings_switch,
-                           nnbar_treatment == NNbarTreatment::Strings);
+                         use_transition_probability, use_AQM,
+                         nnbar_treatment == NNbarTreatment::Strings);
 
   /* Elastic collisions between two nucleons with sqrt_s below
    * low_snn_cut can not happen. */
@@ -156,7 +158,7 @@ CollisionBranchList cross_sections::generate_collision_list(
       sqrt_s_ < low_snn_cut;
   bool incl_elastic = included_2to2[IncludedReactions::Elastic];
   if (incl_elastic && !reject_by_nucleon_elastic_cutoff) {
-    process_list.emplace_back(elastic(elastic_parameter));
+    process_list.emplace_back(elastic(elastic_parameter, use_AQM));
   }
   if (is_pythia) {
     /* string excitation
@@ -166,7 +168,7 @@ CollisionBranchList cross_sections::generate_collision_list(
      * Parametrized total cross - the contributions
      * from all other present channels. */
     const double sig_string =
-      std::max(0., high_energy() - elastic_parametrization());
+      std::max(0., high_energy() - elastic_parametrization(use_AQM));
     append_list(process_list, string_excitation(sig_string, string_process));
   } else {
     if (two_to_one_switch) {
@@ -195,14 +197,14 @@ CollisionBranchList cross_sections::generate_collision_list(
   return process_list;
 }
 
-CollisionBranchPtr cross_sections::elastic(double elast_par) {
+CollisionBranchPtr cross_sections::elastic(double elast_par, bool use_AQM) {
   double elastic_xs = 0.;
   if (elast_par >= 0.) {
     // use constant elastic cross section from config file
     elastic_xs = elast_par;
   } else {
     // use parametrization
-    elastic_xs = elastic_parametrization(true);
+    elastic_xs = elastic_parametrization(use_AQM);
   }
   return make_unique<CollisionBranch>(incoming_particles_[0].type(),
                                       incoming_particles_[1].type(), elastic_xs,
@@ -2051,6 +2053,7 @@ CollisionBranchList cross_sections::find_nn_xsection_from_type(
 }
 
 bool cross_sections::decide_string(bool strings_switch,
+                                   bool use_transition_probability,
                                    bool use_AQM,
                                    bool treat_BBbar_with_strings) const {
   /* string fragmentation is enabled when strings_switch is on and the process
@@ -2070,8 +2073,17 @@ bool cross_sections::decide_string(bool strings_switch,
   const bool is_Npi_scattering =
                       (t1.pdgcode().is_pion() && t2.is_nucleon()) ||
                       (t1.is_nucleon() && t2.pdgcode().is_pion());
+  /* True for baryon-baryon, anti-baryon-anti-baryon, baryon-meson,
+   * anti-baryon-meson and meson-meson*/
+  const bool is_AQM_scattering = use_AQM &&
+                      ((t1.is_baryon() && t2.is_baryon() &&
+                        t1.antiparticle_sign() == t2.antiparticle_sign()) ||
+                      ((t1.is_baryon() && t2.is_meson()) ||
+                       (t2.is_baryon() && t1.is_meson())) ||
+                       (t1.is_meson() && t2.is_meson()));
 
-  if (!is_NN_scattering && !is_BBbar_scattering && is_Npi_scattering) {
+  if (!is_NN_scattering && !is_BBbar_scattering && !is_Npi_scattering &&
+      !is_AQM_scattering) {
     return false;
   }
   else if (is_BBbar_scattering) {
@@ -2079,6 +2091,16 @@ bool cross_sections::decide_string(bool strings_switch,
     return true;
   }
   else {
+    /* if we do not use the probability transition algorithm, this is always a
+     * string contribution if the energy is large enough*/
+    if (!use_transition_probability) {
+      if (sqrt_s_ > incoming_particles_[0].pole_mass() +
+                    incoming_particles_[1].pole_mass() + 0.9) {
+        return true;
+      } else {
+        return false;
+      }
+    }
     /* No strings at low energy, only strings at high energy and
      * a transition region in the middle. Determine transition region: */
     double region_lower, region_upper;
@@ -2088,6 +2110,12 @@ bool cross_sections::decide_string(bool strings_switch,
     } else if (is_NN_scattering) {
       region_lower = 4.0;
       region_upper = 5.0;
+    } else if (is_AQM_scattering) {
+      /* Transition region around 0.9 larger than the sum of pole masses;
+       * highly arbitrary, feel free to improve */
+      region_lower = incoming_particles_[0].pole_mass() +
+                     incoming_particles_[1].pole_mass() + 0.4;
+      region_upper = region_lower + 1.;
     }
 
     if (sqrt_s_ > region_upper) {
@@ -2100,7 +2128,7 @@ bool cross_sections::decide_string(bool strings_switch,
                sqrt_s_ - (region_lower + region_upper)/2.) /
                (region_upper - region_lower);
       assert(prob_pythia >= 0. && prob_pythia <= 1.);
-      return prob_pythia > Random::uniform(0.,1.)
+      return prob_pythia > Random::uniform(0.,1.);
     }
   }
 }
