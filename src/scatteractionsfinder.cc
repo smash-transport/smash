@@ -439,7 +439,7 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
     b_data.set_4momentum(m_b, -momentum, 0.0, 0.0);
     const double sqrts = (a_data.momentum() + b_data.momentum()).abs();
     const ParticleList incoming = {a_data, b_data};
-    cross_sections xs_class(incoming, sqrts);
+    CrossSections xs_class(incoming, sqrts);
     CollisionBranchList processes = xs_class.generate_collision_list(
         elastic_parameter_, two_to_one_, incl_set_, low_snn_cut_,
         strings_switch_, nnbar_treatment_, string_process_interface_.get());
