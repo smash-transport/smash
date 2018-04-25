@@ -961,8 +961,10 @@ bool Experiment<Modus>::perform_action(
     * hadronic action. This can be done, because the photon action is never
     * actually performed, only the final state is generated and printed to
     * the photon output.
+    * Note: The cross_section_scaling_factor can be neglected here, since it
+    * cancels out for the weighting, where a ratio of (unscaled) photon
+    * cross section and (unscaled) hadronic cross section is taken.
     */
-
     photon_act.add_dummy_hadronic_process(action.raw_weight_value());
 
     // Now add the actual photon reaction channel.
