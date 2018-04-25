@@ -231,13 +231,15 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
  * \return (density in the local Eckart frame [fm\$f^{-3}\$f],
  *          the gradient of the density or a 0 3-vector)
  */
-std::pair<double, ThreeVector> rho_eckart(const ThreeVector &r,
+std::pair<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart(
+                                          const ThreeVector &r,
                                           const ParticleList &plist,
                                           const DensityParameters &par,
                                           DensityType dens_type,
                                           bool compute_gradient);
 /// convenience overload of the above
-std::pair<double, ThreeVector> rho_eckart(const ThreeVector &r,
+std::pair<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart(
+                                          const ThreeVector &r,
                                           const Particles &plist,
                                           const DensityParameters &par,
                                           DensityType dens_type,

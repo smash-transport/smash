@@ -96,7 +96,8 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
  *          the gradient of the density or a 0 3-vector)
  */
 template <typename /*ParticlesContainer*/ T>
-std::pair<double, ThreeVector> rho_eckart_impl(const ThreeVector &r,
+std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart_impl(
+                                               const ThreeVector &r,
                                                const T &plist,
                                                const DensityParameters &par,
                                                DensityType dens_type,
@@ -110,7 +111,7 @@ std::pair<double, ThreeVector> rho_eckart_impl(const ThreeVector &r,
    * If one takes rho = jmu_pos.abs - jmu_neg.abs, it is still Lorentz-
    * invariant and gives the right limit in non-relativistic case, but
    * it gives no such problem. */
-  std::array<FourVector, 4> jmu_pos, jmu_neg;
+  std::array<FourVector, 5> jmu_pos, jmu_neg;
 
   for (const auto &p : plist) {
     const double dens_factor = density_factor(p.type(), dens_type);
@@ -134,6 +135,8 @@ std::pair<double, ThreeVector> rho_eckart_impl(const ThreeVector &r,
       if (compute_gradient) {
         for (int k = 1; k <= 3; k++) {
           jmu_pos[k] += tmp * sf_and_grad.second[k - 1];
+          jmu_pos[4] -= tmp * sf_and_grad.second[k - 1]
+                        * tmp.threevec()[k-1] / dense_factor;
         }
       }
     } else {
@@ -141,38 +144,50 @@ std::pair<double, ThreeVector> rho_eckart_impl(const ThreeVector &r,
       if (compute_gradient) {
         for (int k = 1; k <= 3; k++) {
           jmu_neg[k] += tmp * sf_and_grad.second[k - 1];
+          jmu_neg[4] -= tmp * sf_and_grad.second[k - 1]
+                        * tmp.threevec()[k-1] / dense_factor;
         }
       }
     }
   }
 
+  // Eckart density
   const double rho_eck =
       (jmu_pos[0].abs() - jmu_neg[0].abs()) * par.norm_factor_sf();
 
-  ThreeVector rho_eck_grad;
+  // $\partial_t \vec j$
+  const ThreeVector dj_dt = compute_gradient
+                 ? (jmu_pos[4] - jmu_neg[4]).threevec() * par.norm_factor_sf()
+                 : ThreeVector(0.0, 0.0, 0.0);
+
+  // Gradient of density
+  ThreeVector rho_grad;
+  // Curl of current density
+  ThreeVector j_rot;
   if (compute_gradient) {
+    j_rot.set_x1(jmu_pos[2].x3() - jmu_pos[3].x2());
+    j_rot.set_x2(jmu_pos[3].x1() - jmu_pos[1].x3());
+    j_rot.set_x3(jmu_pos[1].x2() - jmu_pos[2].x1());
+    j_rot *= par.norm_factor_sf();
     for (int i = 1; i < 4; i++) {
-      rho_eck_grad[i - 1] = 0.;
-      if (jmu_pos[0].x0() > really_small) {
-        rho_eck_grad[i - 1] += jmu_pos[i].Dot(jmu_pos[0]) / jmu_pos[0].abs();
-      }
-      if (jmu_pos[0].x0() < -really_small) {
-        rho_eck_grad[i - 1] -= jmu_neg[i].Dot(jmu_neg[0]) / jmu_neg[0].abs();
-      }
+        rho_grad[i - 1] += (jmu_pos[i].x0() - jmu_neg[i].x0())
+                            * par.norm_factor_sf();
     }
-    rho_eck_grad *= par.norm_factor_sf_grad();
   }
-  return std::make_pair(rho_eck, rho_eck_grad);
+
+  return std::make_tuple(rho_eck, dj_dt, rho_grad, j_rot);
 }
 
-std::pair<double, ThreeVector> rho_eckart(const ThreeVector &r,
+std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart(
+                                          const ThreeVector &r,
                                           const ParticleList &plist,
                                           const DensityParameters &par,
                                           DensityType dens_type,
                                           bool compute_gradient) {
   return rho_eckart_impl(r, plist, par, dens_type, compute_gradient);
 }
-std::pair<double, ThreeVector> rho_eckart(const ThreeVector &r,
+std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart(
+                                          const ThreeVector &r,
                                           const Particles &plist,
                                           const DensityParameters &par,
                                           DensityType dens_type,

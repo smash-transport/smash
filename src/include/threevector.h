@@ -115,6 +115,11 @@ class ThreeVector {
   ThreeVector inline operator-=(const ThreeVector &v);
   /// scale this vector by \f$a: \vec x^\prime = a \cdot \vec x\f$
   ThreeVector inline operator*=(const double &a);
+  /**
+   * cross product between this vector and
+   * \f$v: \vec x^\prime = \vec x \times \vec v\f$
+   */
+  ThreeVector inline operator*=(const ThreeVector &v);
   /// divide this vector by \f$a: \vec x^\prime = \frac{1}{a} \cdot \vec x\f$
   ThreeVector inline operator/=(const double &a);
 
@@ -207,6 +212,14 @@ ThreeVector inline ThreeVector::operator*=(const double &a) {
   x_[0] *= a;
   x_[1] *= a;
   x_[2] *= a;
+  return *this;
+}
+
+ThreeVector inline ThreeVector::operator*=(const ThreeVector &v) {
+  ThreeVector tmp(x_[0], x_[1], x_[2])
+  x_[0] *= tmp.x_[1] * v.x_[2] - tmp.x_[2] * v.x_[1];
+  x_[1] *= tmp.x_[2] * v.x_[0] - tmp.x_[0] * v.x_[2];
+  x_[2] *= tmp.x_[0] * v.x_[1] - tmp.x_[1] * v.x_[0];
   return *this;
 }
 
