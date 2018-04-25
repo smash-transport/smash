@@ -2048,58 +2048,55 @@ CollisionBranchList cross_sections::find_nn_xsection_from_type(
 
 bool cross_sections::decide_string(bool strings_switch,
                                    bool treat_BBbar_with_strings) const {
-  /* Determine the energy region of the mixed scattering type for two types of
-   * scattering. */
-  const ParticleType& t1 = incoming_particles_[0].type();
-  const ParticleType& t2 = incoming_particles_[1].type();
-  bool include_pythia = false;
-  // Whether the scattering is through string fragmentaion
-  bool is_pythia = false;
-  double mix_scatter_type_energy;
-  double mix_scatter_type_window_width;
-  if (t1.is_nucleon() && t2.is_nucleon() &&
-      t1.antiparticle_sign() == t2.antiparticle_sign()) {
-    /* The energy region of the mixed scattering type for nucleon-nucleon
-     * collision is 4.0 - 5.0 GeV. */
-    mix_scatter_type_energy = 4.5;
-    mix_scatter_type_window_width = 0.5;
-    // nucleon-nucleon collisions are included in pythia.
-    include_pythia = true;
-  } else if (treat_BBbar_with_strings &&
-             t1.is_baryon() && t2.is_baryon() &&
-             t1.pdgcode().is_antiparticle_of(t2.pdgcode())) {
-      // NNbar only goes through strings, so there is no "window" considerations
-      is_pythia = true;
-  } else if ((t1.pdgcode().is_pion() && t2.is_nucleon()) ||
-             (t1.is_nucleon() && t2.pdgcode().is_pion())) {
-    /* The energy region of the mixed scattering type for pion-nucleon collision
-     * is 2.3 - 3.1 GeV. */
-    mix_scatter_type_energy = 2.7;
-    mix_scatter_type_window_width = 0.4;
-    // pion-nucleon collisions are included in pythia.
-    include_pythia = true;
-  }
   /* string fragmentation is enabled when strings_switch is on and the process
    * is included in pythia. */
-  const bool enable_pythia = strings_switch && include_pythia;
-  // Whether the scattering is through string fragmentaion
-  if (enable_pythia) {
-    if (sqrt_s_ > mix_scatter_type_energy + mix_scatter_type_window_width) {
-      // scatterings at high energies are through string fragmentation
-      is_pythia = true;
-    } else if (sqrt_s_ >
-               mix_scatter_type_energy - mix_scatter_type_window_width) {
-      const double probability_pythia =
-          (sqrt_s_ - mix_scatter_type_energy + mix_scatter_type_window_width) /
-          mix_scatter_type_window_width / 2.0;
-      if (probability_pythia > Random::uniform(0., 1.)) {
-        /* scatterings at the middle energies are through string
-         * fragmentation by chance. */
-        is_pythia = true;
-      }
+  if (!strings_switch) {
+    return false;
+  }
+
+  const ParticleType& t1 = incoming_particles_[0].type();
+  const ParticleType& t2 = incoming_particles_[1].type();
+
+  const bool is_NN_scattering = t1.is_nucleon() && t2.is_nucleon() &&
+                      t1.antiparticle_sign() == t2.antiparticle_sign();
+  const bool is_BBbar_scattering = treat_BBbar_with_strings &&
+                      t1.is_baryon() && t2.is_baryon() &&
+                      t1.pdgcode().is_antiparticle_of(t2.pdgcode());
+  const bool is_Npi_scattering =
+                      (t1.pdgcode().is_pion() && t2.is_nucleon()) ||
+                      (t1.is_nucleon() && t2.pdgcode().is_pion());
+
+  if (!is_NN_scattering && !is_BBbar_scattering && is_Npi_scattering) {
+    return false;
+  }
+  else if (is_BBbar_scattering) {
+    // NNbar only goes through strings, so there is no "window" considerations
+    return true;
+  }
+  else {
+    /* No strings at low energy, only strings at high energy and
+     * a transition region in the middle. Determine transition region: */
+    double region_lower, region_upper;
+    if (is_Npi_scattering) {
+      region_lower = 2.3;
+      region_upper = 3.1;
+    } else if (is_NN_scattering) {
+      region_lower = 4.0;
+      region_upper = 5.0;
+    }
+
+    if (sqrt_s_ > region_upper) {
+      return true;
+    } else if (sqrt_s_ < region_lower) {
+      return false;
+    }
+    else {
+      double prob_pythia = (sqrt_s_ - region_lower) /
+                           (region_upper - region_lower);
+      assert(prob_pythia >= 0. && prob_pythia <= 1.);
+      return prob_pythia > Random::uniform(0.,1.)
     }
   }
-  return is_pythia;
 }
 
 }  // namespace smash
