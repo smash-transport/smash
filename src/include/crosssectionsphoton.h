@@ -15,7 +15,7 @@
 
 namespace smash {
 // calculation method for the cross sections
-enum class ComputationMethod { Analytic, Lookup, Parametrized };
+enum class ComputationMethod { Analytic };
 
 // usage would be
 // PhotonCrossSection xs<Analytic>; xs.xs_pi_pi_rho(var1, var2...)
@@ -72,7 +72,8 @@ class PhotonCrossSection<ComputationMethod::Analytic> {
    * The choice of these parameters, necessary to determine the photon cross
    * sections, follows from (\iref{Turbide:2006}). Here, different combinations
    * of parameters were proposed and investigated. We decided to use the
-   * parameters of set II in their categorization.
+   * parameters of set II in their categorization. They are named identically,
+   * except for "Const", which corresponds to "C" in \iref{Turbide:2006}.
    */
 
   constexpr static double Const = 0.059;
@@ -85,14 +86,6 @@ class PhotonCrossSection<ComputationMethod::Analytic> {
   constexpr static double Gammaa1 = 0.4;
   constexpr static double Pi = M_PI;
 };
-
-// options not implemented for review version. Will be added in the future.
-// We keep it here to not break compilation
-template <>
-class PhotonCrossSection<ComputationMethod::Lookup> {};
-
-template <>
-class PhotonCrossSection<ComputationMethod::Parametrized> {};
 
 }  // namespace smash
 
