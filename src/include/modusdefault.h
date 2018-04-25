@@ -113,13 +113,13 @@ class ModusDefault {
        number of cells should be odd (2k+1) in every direction.
      */
 
-  /*!\Userguide
-   * \page input_forced_thermalization_ Forced_Thermalization
-   * \key Lattice_Sizes (list of 3 doubles, required, no default): \n
-   * The lattice is placed such that the center is [0.0,0.0,0.0].
-   * If one wants to have a central cell with center at [0.0,0.0,0.0] then
-   * number of cells should be odd (2k+1) in every direction.
-   */
+    /*!\Userguide
+     * \page input_forced_thermalization_ Forced_Thermalization
+     * \key Lattice_Sizes (list of 3 doubles, required, no default): \n
+     * The lattice is placed such that the center is [0.0,0.0,0.0].
+     * If one wants to have a central cell with center at [0.0,0.0,0.0] then
+     * number of cells should be odd (2k+1) in every direction.
+     */
 
     const std::array<double, 3> l = conf.take({"Lattice_Sizes"});
     const std::array<double, 3> origin = {-0.5 * l[0], -0.5 * l[1],

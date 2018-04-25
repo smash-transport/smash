@@ -185,8 +185,8 @@ enum class HadronClass {
  * GeV/fm^3.
  *
  * \key Start_Time (double, required, no default): \n
- * Time after which forced thermalization may be applied (in fm/c), if energydensity is
- * sufficiently high.
+ * Time after which forced thermalization may be applied (in fm/c), if
+ * energydensity is sufficiently high.
  *
  * \key Timestep (double, required, no default): \n
  * Timestep of thermalization, in fm/c.

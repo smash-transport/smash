@@ -199,9 +199,8 @@ TEST(pythia_running) {
   ScatterActionPtr act;
   act = make_unique<ScatterAction>(p1_copy, p2_copy, 0.2, false, 1.0);
   std::unique_ptr<StringProcess> string_process_interface =
-      make_unique<StringProcess>(1.0, 1.0, 0.5, 0.001,
-                                 1.0, 2.5, 0.217, 0.081, 0.7,
-                                 0.68, 0.98, 0.25);
+      make_unique<StringProcess>(1.0, 1.0, 0.5, 0.001, 1.0, 2.5, 0.217, 0.081,
+                                 0.7, 0.68, 0.98, 0.25);
   act->set_string_interface(string_process_interface.get());
   VERIFY(act != nullptr);
   COMPARE(p2_copy.type(), ParticleType::find(0x2212));
@@ -347,13 +346,11 @@ TEST(string_make_string_ends) {
   // decompose proton into u, ud-diquark or d, uu-diquark
   PdgCode pdg_proton = PdgCode(0x2212);
   StringProcess::make_string_ends(pdg_proton, id1, id2);
-  VERIFY((id1 == 1 && id2 == 2203) ||
-         (id1 == 2 && (id2 == 2101 || 2103)));
+  VERIFY((id1 == 1 && id2 == 2203) || (id1 == 2 && (id2 == 2101 || 2103)));
   // decompose anti-proton ubar, ud-antidiquark or dbar, uu-antidiquark
   PdgCode pdg_antip = PdgCode(-0x2212);
   StringProcess::make_string_ends(pdg_antip, id1, id2);
-  VERIFY((id2 == -1 && id1 == -2203) ||
-         (id2 == -2 && (id1 == -2101 || -2103)));
+  VERIFY((id2 == -1 && id1 == -2203) || (id2 == -2 && (id1 == -2101 || -2103)));
 }
 
 TEST(string_set_Vec4) {
@@ -394,8 +391,8 @@ TEST(string_scaling_factors) {
   ThreeVector evec_coll = ThreeVector(0., 0., 1.);
   int baryon_string =
       incoming[Random::uniform_int(0, 1)].type().baryon_number();
-  StringProcess::assign_all_scaling_factors(baryon_string, outgoing,
-                                            evec_coll, coherence_factor);
+  StringProcess::assign_all_scaling_factors(baryon_string, outgoing, evec_coll,
+                                            coherence_factor);
   // outgoing list is now assumed to be sorted by z-velocity (so c,d,e,f)
   VERIFY(outgoing[0] == c);
   VERIFY(outgoing[1] == d);
@@ -422,8 +419,8 @@ TEST(string_scaling_factors) {
   // (Particle e). This contains an anti-quark and will therefore get a scaling
   // factor of 0.7 * 1/2.
   baryon_string = 0;
-  StringProcess::assign_all_scaling_factors(baryon_string, outgoing,
-                                            evec_coll, coherence_factor);
+  StringProcess::assign_all_scaling_factors(baryon_string, outgoing, evec_coll,
+                                            coherence_factor);
   COMPARE(outgoing[0].cross_section_scaling_factor(), 0.5 * coherence_factor);
   COMPARE(outgoing[1].cross_section_scaling_factor(), 0);
   COMPARE(outgoing[2].cross_section_scaling_factor(), 0);
@@ -436,8 +433,8 @@ TEST(string_scaling_factors) {
   c.set_4momentum(0.938, {0., 0., 1.0});
   d.set_4momentum(0.938, {0., 0., 0.5});
   outgoing = {c, d, e, f};
-  StringProcess::assign_all_scaling_factors(baryon_string, outgoing,
-                                            evec_coll, coherence_factor);
+  StringProcess::assign_all_scaling_factors(baryon_string, outgoing, evec_coll,
+                                            coherence_factor);
   COMPARE(outgoing[0].cross_section_scaling_factor(), 0.5 * coherence_factor);
   COMPARE(outgoing[1].cross_section_scaling_factor(), 0.);
   COMPARE(outgoing[2].cross_section_scaling_factor(), 0.);

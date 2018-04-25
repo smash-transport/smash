@@ -77,13 +77,10 @@ ExperimentPtr ExperimentBase::create(Configuration config,
    * will be configured in \ref input_modi_. Recognized values are:
    * \li \key Collider - For collisions of nuclei or compound objects. See \ref
    *     \ColliderModus
-   * \li \key Sphere - For calculations of the expansion of a thermalized sphere.
-   * See
-   *     \ref \SphereModus
-   * \li \key Box - For infinite matter calculation in a rectangular box. See \ref
-   *     \BoxModus
-   * \li \key List - For given external particle list. See \ref
-   *     \ListModus
+   * \li \key Sphere - For calculations of the expansion of a thermalized
+   * sphere. See \ref \SphereModus \li \key Box - For infinite matter
+   * calculation in a rectangular box. See \ref \BoxModus \li \key List - For
+   * given external particle list. See \ref \ListModus
    */
 
   /*!\Userguide
@@ -205,14 +202,16 @@ namespace {
  *   \ref input_lattice_. \n
  * \n
  *  \key Type (string, optional, default = \key "baryon"): \n
- *  Particle type taken into consideration, "baryon" corresponds to "net baryon".
+ *  Particle type taken into consideration, "baryon" corresponds to "net
+ baryon".
  *   \li \key "hadron"
  *   \li \key "baryon"
  *   \li \key "baryonic isospin"
  *   \li \key "pion"
  *   \li \key "none"
  *
- *   \key Quantities (list of thermodynamic quantities, optional, default = [ ]):\n
+ *   \key Quantities (list of thermodynamic quantities, optional, default = [
+ ]):\n
  *   List of thermodynamic quantities that are printed to the output. Possible
  *   quantities are:
  *   \li \key "rho_eckart" - Eckart rest frame density
@@ -422,8 +421,8 @@ void Experiment<Modus>::create_output(std::string format, std::string content,
  * Number of events to calculate.
  *
  * \key Use_Grid (bool, optional, default = true): \n
- * \li \key true - A grid is used to reduce the combinatorics of interaction lookup \n
- * \li \key false - No grid is used.
+ * \li \key true - A grid is used to reduce the combinatorics of interaction
+ * lookup \n \li \key false - No grid is used.
  *
  * \key Time_Step_Mode (string, optional, default = Fixed): \n
  * The mode of time stepping. Possible values: \n
@@ -526,7 +525,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   }
   bool no_coll = config.take({"Collision_Term", "No_Collisions"}, false);
   if ((parameters_.two_to_one || parameters_.included_2to2.any() ||
-      parameters_.strings_switch) && !no_coll) {
+       parameters_.strings_switch) &&
+      !no_coll) {
     auto scat_finder = make_unique<ScatterActionsFinder>(
         config, parameters_, nucleon_has_interacted_, modus_.total_N_number(),
         modus_.proj_N_number(), n_fractional_photons_);

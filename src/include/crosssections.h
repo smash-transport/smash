@@ -18,7 +18,7 @@
 namespace smash {
 
 /**
- * The cross section class assembels everything that is needed to 
+ * The cross section class assembels everything that is needed to
  * calculate the cross section and returns a list of all possible reactions
  * for the incoming particles at the given energy with the calculated cross
  * sections.
@@ -210,48 +210,46 @@ class cross_sections {
    * 3. Enough energy for all decay channels to be available for the resonance
    *
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
-   * 
+   *
    * \return List of resonance production processes possible in the collision
    * of the two nucleons. Each element in the list contains the type(s) of the
    * final state particle(s) and the cross section for that particular process.
    */
   CollisionBranchList nn_xx(ReactionsBitSet included_2to2);
 
-  /** 
-   * Find all inelastic 2->2 processes for Nucelon-Kaon (NK) Scattering. 
+  /**
+   * Find all inelastic 2->2 processes for Nucelon-Kaon (NK) Scattering.
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
    * \return List of all possible NK reactions with their cross sections
    */
   CollisionBranchList nk_xx(ReactionsBitSet included_2to2);
 
-  /** 
-   * Find all inelastic 2->2 processes for Delta-Kaon (DeltaK) Scattering. 
+  /**
+   * Find all inelastic 2->2 processes for Delta-Kaon (DeltaK) Scattering.
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
    * \return List of all possible DeltaK reactions with their cross sections
    * */
   CollisionBranchList deltak_xx(ReactionsBitSet included_2to2);
 
-  /** 
-   * Find all inelastic 2->2 processes for Hyperon-Pion (Ypi) Scattering. 
+  /**
+   * Find all inelastic 2->2 processes for Hyperon-Pion (Ypi) Scattering.
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
    * \return List of all possible Ypi reactions with their cross sections
    */
   CollisionBranchList ypi_xx(ReactionsBitSet included_2to2);
 
-  /** 
-   * Find all inelastic 2->2 processes involving Pion and (anti-) Deuteron (dpi),
-   * specifically dπ→ NN, d̅π→ N̅N̅; πd→ πd' (mockup for πd→ πnp), πd̅→ πd̅' and
-   * reverse.
-   * \param[in] included_2to2 Which 2->2 reactions are enabled?
+  /**
+   * Find all inelastic 2->2 processes involving Pion and (anti-) Deuteron
+   * (dpi), specifically dπ→ NN, d̅π→ N̅N̅; πd→ πd' (mockup for πd→ πnp), πd̅→ πd̅'
+   * and reverse. \param[in] included_2to2 Which 2->2 reactions are enabled?
    * \return List of all possible dpi reactions with their cross sections
    */
   CollisionBranchList dpi_xx(ReactionsBitSet included_2to2);
 
-  /** 
-   * Find all inelastic 2->2 processes involving Nucleon and (anti-) Deuteron (dN),
-   *  specifically Nd → Nd', N̅d →  N̅d', N̅d̅→ N̅d̅', Nd̅→ Nd̅'
-   *  and reverse (e.g. Nd'→ Nd).
-   * \param[in] included_2to2 Which 2->2 reactions are enabled?
+  /**
+   * Find all inelastic 2->2 processes involving Nucleon and (anti-) Deuteron
+   * (dN), specifically Nd → Nd', N̅d →  N̅d', N̅d̅→ N̅d̅', Nd̅→ Nd̅' and reverse (e.g.
+   * Nd'→ Nd). \param[in] included_2to2 Which 2->2 reactions are enabled?
    * \return List of all possible dN reactions with their cross sections
    */
   CollisionBranchList dn_xx(ReactionsBitSet included_2to2);
@@ -299,8 +297,8 @@ class cross_sections {
    * \param[in] type_res_2 List of possible second final resonance types
    * \param[in] integrator Used to integrate over the kinematically allowed
    * mass range of the Breit-Wigner distribution
-   * \return List of all possible NN reactions with their cross sections 
-   * with different final states 
+   * \return List of all possible NN reactions with their cross sections
+   * with different final states
    */
   template <class IntegrationMethod>
   CollisionBranchList find_nn_xsection_from_type(
@@ -325,7 +323,7 @@ class cross_sections {
    * \param[in] strings_switch Is string fragmentation enabled?
    * \param[in] both_are_nucleons Are both incoming particles nucleons?
    *
-   * \return Is the scattering between the incoming particles done via string 
+   * \return Is the scattering between the incoming particles done via string
    * fragmentaion or not?
    */
   bool decide_string(bool strings_switch) const;
@@ -333,7 +331,7 @@ class cross_sections {
   /**
    * Determine the momenta of the incoming particles in the
    * center-of-mass system.
-   * \return Center-of-mass momentum 
+   * \return Center-of-mass momentum
    */
   double cm_momentum() const {
     const double m1 = incoming_particles_[0].effective_mass();

@@ -46,9 +46,9 @@ namespace smash {
  * \li \key Elastic_NN_Cutoff_Sqrts > 2.02 - Beyond the threshold energy of the
  * inelastic collision NN->NNpi, not suggested
  *
- * \key Strings (bool, optional, default = \key true for each setup except box): \n
- * \li \key true - String excitation is enabled\n
- * \li \key false - String excitation is disabled
+ * \key Strings (bool, optional, default = \key true for each setup except box):
+ * \n \li \key true - String excitation is enabled\n \li \key false - String
+ * excitation is disabled
  *
  * \key String_Formation_Time (double, optional, default = 1.0): \n
  * Parameter for formation time in string fragmentation, in fm/c.
@@ -113,19 +113,18 @@ ScatterActionsFinder::ScatterActionsFinder(
   }
   if (strings_switch_) {
     auto subconfig = config["Collision_Term"]["String_Parameters"];
-    string_process_interface_ =
-        make_unique<StringProcess>(subconfig.take({"String_Tension"}, 1.0),
-                                   string_formation_time_,
-                                   subconfig.take({"Gluon_Beta"}, 0.5),
-                                   subconfig.take({"Gluon_Pmin"}, 0.001),
-                                   subconfig.take({"Quark_Alpha"}, 1.0),
-                                   subconfig.take({"Quark_Beta"}, 2.5),
-                                   subconfig.take({"Strange_Supp"}, 0.217),
-                                   subconfig.take({"Diquark_Supp"}, 0.081),
-                                   subconfig.take({"Sigma_Perp"}, 0.7),
-                                   subconfig.take({"StringZ_A"}, 0.68),
-                                   subconfig.take({"StringZ_B"}, 0.98),
-                                   subconfig.take({"String_Sigma_T"}, 0.25));
+    string_process_interface_ = make_unique<StringProcess>(
+        subconfig.take({"String_Tension"}, 1.0), string_formation_time_,
+        subconfig.take({"Gluon_Beta"}, 0.5),
+        subconfig.take({"Gluon_Pmin"}, 0.001),
+        subconfig.take({"Quark_Alpha"}, 1.0),
+        subconfig.take({"Quark_Beta"}, 2.5),
+        subconfig.take({"Strange_Supp"}, 0.217),
+        subconfig.take({"Diquark_Supp"}, 0.081),
+        subconfig.take({"Sigma_Perp"}, 0.7),
+        subconfig.take({"StringZ_A"}, 0.68),
+        subconfig.take({"StringZ_B"}, 0.98),
+        subconfig.take({"String_Sigma_T"}, 0.25));
   }
 }
 

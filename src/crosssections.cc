@@ -639,8 +639,8 @@ CollisionBranchList cross_sections::nn_xx(ReactionsBitSet included_2to2) {
     const ParticleTypePtrList pion_list = {pim, pi0, pip};
     channel_list = find_nn_xsection_from_type(
         (both_antinucleons ? antideutron_list : deutron_list), pion_list,
-        [&sqrts](const ParticleType &type_res_1,
-                 const ParticleType &type_res_2) {
+        [&sqrts](const ParticleType& type_res_1,
+                 const ParticleType& type_res_2) {
           return pCM(sqrts, type_res_1.mass(), type_res_2.mass());
         });
     process_list.reserve(process_list.size() + channel_list.size());
@@ -1681,11 +1681,11 @@ double cross_sections::high_energy() const {
   // Currently all BB collisions use the nucleon-nucleon parametrizations.
   if (pdg_a.is_baryon() && pdg_b.is_baryon()) {
     if (pdg_a == pdg_b) {
-      return pp_high_energy(s);     // pp, nn
+      return pp_high_energy(s);  // pp, nn
     } else if (pdg_a.is_antiparticle_of(pdg_b)) {
       return ppbar_high_energy(s);  // ppbar, nnbar
     } else if (pdg_a.antiparticle_sign() * pdg_b.antiparticle_sign() == 1) {
-      return np_high_energy(s);     // np, nbarpbar
+      return np_high_energy(s);  // np, nbarpbar
     } else {
       return npbar_high_energy(s);  // npbar, nbarp
     }
@@ -1955,7 +1955,8 @@ CollisionBranchList cross_sections::find_nn_xsection_from_type(
         const double lower_limit = type_res_1->min_mass_kinematic();
         const double upper_limit = sqrt_s_ - type_res_2->mass();
         /* Check the available energy (requiring it to be a little above the
-         * threshold, because the integration will not work if it's too close). */
+         * threshold, because the integration will not work if it's too close).
+         */
         if (upper_limit - lower_limit < 1E-3) {
           continue;
         }
