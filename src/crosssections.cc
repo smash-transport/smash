@@ -1591,13 +1591,14 @@ CollisionBranchList CrossSections::string_excitation(
       throw std::runtime_error("string_process should be initialized.");
     }
 
+    const bool BBbar_pair = pdgid[0] + pdgid[1] == 0;
     /*
      * The case for baryon/anti-baryon annihilation is treated separately,
      * as in this case we use only one way to break up the particles, namely
      * into 2 mesonic strings of equal mass after annihilating one quark-
      * anti-quark pair. See StringProcess::next_BBbarAnn()
      */
-    if (pdgid[0] + pdgid[1] == 0) {
+    if (BBbar_pair) {
       /// \todo JB:not sure if there should be a hard string here as well
       channel_list.push_back(make_unique<CollisionBranch>(
                              sig_string_all, ProcessType::StringSoft));

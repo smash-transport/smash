@@ -548,7 +548,7 @@ class PdgCode {
           }
         }
         // add extra minus sign according to the pdg convention
-        if (digits_.n_q2_ % 2 == 1) {
+        if (digits_.n_q2_ != digits_.n_q3_ && digits_.n_q2_ % 2 == 1) {
           for (int i = 1; i <= 2; i++) {
             result[i] = -result[i];
           }
