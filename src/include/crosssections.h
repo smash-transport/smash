@@ -305,7 +305,7 @@ class CrossSections {
    * string fragmentation increases linearly from 0 to 1 as the c.m. energy.
    *
    * \param[in] strings_switch Is string fragmentation enabled?
-   * \param[in] both_are_nucleons Are both incoming particles nucleons?
+   * \param[in] treat_nnbar_with_strings if annihilation is treated by string?
    *
    * \return Is the scattering between the incoming particles done via string
    * fragmentaion or not?

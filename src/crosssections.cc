@@ -2016,7 +2016,7 @@ CollisionBranchList CrossSections::find_nn_xsection_from_type(
 }
 
 bool CrossSections::decide_string(bool strings_switch,
-                                  const bool both_are_nucleons) const {
+                                  const bool treat_BBbar_with_strings) const {
   /* Determine the energy region of the mixed scattering type for two types of
    * scattering. */
   const ParticleType& t1 = incoming_particles_[0].type();
