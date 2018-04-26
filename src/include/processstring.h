@@ -14,9 +14,13 @@
 #include <utility>
 #include <vector>
 
-#include "Pythia8/Pythia.h"
+// clang-format off
+
 #include "constants.h"
 #include "particledata.h"
+#include "Pythia8/Pythia.h"
+
+// clang-format on
 
 namespace smash {
 
