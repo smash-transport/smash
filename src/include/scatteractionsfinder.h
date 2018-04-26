@@ -251,8 +251,6 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const int N_proj_;
   /// Parameter for formation time
   const double string_formation_time_;
-  /// Photons switch
-  const bool photons_;
 };
 
 }  // namespace smash

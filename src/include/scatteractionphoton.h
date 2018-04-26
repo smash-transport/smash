@@ -36,8 +36,8 @@ class ScatterActionPhoton : public ScatterAction {
                       double hadronic_cross_section)
       : ScatterAction(in[0], in[1], time),
         number_of_fractional_photons_(nofp),
-        hadron_out_t_(outgoing_hadron_type(in)),
-        hadronic_cross_section_(hadronic_cross_section) {
+        hadron_out_t_(outgoing_hadron_type(in)) {
+        total_cross_section_ = hadronic_cross_section;
     reac_ = photon_reaction_type(in);
     hadron_out_mass_ = sample_out_hadron_mass(hadron_out_t_);
   }
@@ -172,8 +172,6 @@ class ScatterActionPhoton : public ScatterAction {
 
   /// Total cross section of photonic process.
   double cross_section_photons_ = 0.0;
-
-  double hadronic_cross_section_ = 0.0;
 
   /**
    * Calculate the differential cross section of  photon process.

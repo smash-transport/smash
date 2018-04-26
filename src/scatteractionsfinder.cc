@@ -177,8 +177,7 @@ ScatterActionsFinder::ScatterActionsFinder(
       N_tot_(N_tot),
       N_proj_(N_proj),
       string_formation_time_(config.take(
-          {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.)),
-      photons_(parameters.photons_switch) {
+          {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.)) {
   if (is_constant_elastic_isotropic()) {
     const auto &log = logger<LogArea::FindScatter>();
     log.info("Constant elastic isotropic cross-section mode:", " using ",
