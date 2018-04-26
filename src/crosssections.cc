@@ -1591,103 +1591,122 @@ CollisionBranchList CrossSections::string_excitation(
       throw std::runtime_error("string_process should be initialized.");
     }
 
-    const bool BBbar_pair = pdgid[0] + pdgid[1] == 0;
+    /* Total parametrized cross-section (I) and pythia-produced total
+     * cross-section (II) do not necessarily coincide. If I > II then
+     * non-diffractive cross-section is reinforced to get I == II.
+     * If I < II then partial cross-sections are drained one-by-one
+     * to reduce II until I == II:
+     * first non-diffractive, then double-diffractive, then
+     * single-diffractive AB->AX and AB->XB in equal proportion.
+     * The way it is done here is not unique. I (ryu) think that at high energy
+     * collision this is not an issue, but at sqrt_s < 10 GeV it may
+     * matter. */
+    std::array<double, 3> xs =
+      string_process->cross_sections_diffractive(pdgid[0], pdgid[1], sqrt_s_);
+    double single_diffr_AX = xs[0], single_diffr_XB = xs[1],
+           double_diffr = xs[2];
+    double single_diffr = single_diffr_AX + single_diffr_XB;
+    double diffractive = single_diffr + double_diffr;
+
     /*
      * The case for baryon/anti-baryon annihilation is treated separately,
      * as in this case we use only one way to break up the particles, namely
      * into 2 mesonic strings of equal mass after annihilating one quark-
      * anti-quark pair. See StringProcess::next_BBbarAnn()
      */
+    const bool BBbar_pair = pdgid[0] + pdgid[1] == 0;
+    double sig_annihilation;
     if (BBbar_pair) {
-      /// \todo JB:not sure if there should be a hard string here as well
-      channel_list.push_back(make_unique<CollisionBranch>(
-                             sig_string_all, ProcessType::StringSoft));
-      string_process->set_subproc(StringSoftType::BBbar);
+      /* In the case of baryon-antibaryon pair,
+       * the parametrized cross section for annihilation will be added.
+       * See xs_ppbar_annihilation(). */
+      sig_annihilation = std::min(sig_string_all,
+                                  xs_ppbar_annihilation(sqrt_s_));
     } else {
-      /* Total parametrized cross-section (I) and pythia-produced total
-       * cross-section (II) do not necessarily coincide. If I > II then
-       * non-diffractive cross-section is reinforced to get I == II.
-       * If I < II then partial cross-sections are drained one-by-one
-       * to reduce II until I == II:
-       * first non-diffractive, then double-diffractive, then
-       * single-diffractive AB->AX and AB->XB in equal proportion.
-       * The way it is done here is not unique. I (ryu) think that at high energy
-       * collision this is not an issue, but at sqrt_s < 10 GeV it may
-       * matter. */
-      std::array<double, 3> xs =
-        string_process->cross_sections_diffractive(pdgid[0], pdgid[1], sqrt_s_);
-      double single_diffr_AX = xs[0], single_diffr_XB = xs[1],
-             double_diffr = xs[2];
-      double single_diffr = single_diffr_AX + single_diffr_XB;
-      double diffractive = single_diffr + double_diffr;
-      const double nondiffractive_all =
-          std::max(0., sig_string_all - diffractive);
-      diffractive = sig_string_all - nondiffractive_all;
-      double_diffr = std::max(0., diffractive - single_diffr);
-      const double a = (diffractive - double_diffr) / single_diffr;
-      single_diffr_AX *= a;
-      single_diffr_XB *= a;
-      assert(std::abs(single_diffr_AX + single_diffr_XB + double_diffr +
-                      nondiffractive_all - sig_string_all) < 1.e-6);
+      sig_annihilation = 0.;
+    }
 
+    const double nondiffractive_all =
+        std::max(0., sig_string_all - sig_annihilation - diffractive);
+    diffractive = sig_string_all - sig_annihilation - nondiffractive_all;
+    double_diffr = std::max(0., diffractive - single_diffr);
+    const double a = (diffractive - double_diffr) / single_diffr;
+    single_diffr_AX *= a;
+    single_diffr_XB *= a;
+    assert(std::abs(single_diffr_AX + single_diffr_XB + double_diffr +
+                    sig_annihilation + nondiffractive_all -
+                    sig_string_all) < 1.e-6);
+
+    double nondiffractive_soft = 0.;
+    double nondiffractive_hard = 0.;
+    if (nondiffractive_all > 0.) {
       /* Hard string process is added by hard cross section
        * in conjunction with multipartion interaction picture
        * \iref{Sjostrand:1987su}. */
       const double hard_xsec = string_hard_cross_section();
-      const double nondiffractive_soft =
+      nondiffractive_soft =
           nondiffractive_all * std::exp(-hard_xsec / nondiffractive_all);
-      const double nondiffractive_hard = nondiffractive_all
-                                       - nondiffractive_soft;
-      log.debug("String cross sections [mb] are");
-      log.debug("Single-diffractive AB->AX: ", single_diffr_AX);
-      log.debug("Single-diffractive AB->XB: ", single_diffr_XB);
-      log.debug("Double-diffractive AB->XX: ", double_diffr);
-      log.debug("Soft non-diffractive: ", nondiffractive_soft);
-      log.debug("Hard non-diffractive: ", nondiffractive_hard);
+      nondiffractive_hard = nondiffractive_all - nondiffractive_soft;
+    }
+    log.debug("String cross sections [mb] are");
+    log.debug("Single-diffractive AB->AX: ", single_diffr_AX);
+    log.debug("Single-diffractive AB->XB: ", single_diffr_XB);
+    log.debug("Double-diffractive AB->XX: ", double_diffr);
+    log.debug("Soft non-diffractive: ", nondiffractive_soft);
+    log.debug("Hard non-diffractive: ", nondiffractive_hard);
+    log.debug("B-Bbar annihilation: ", sig_annihilation);
 
-      /* cross section of soft string excitation */
-      const double sig_string_soft = sig_string_all - nondiffractive_hard;
+    /* cross section of soft string excitation including annihilation */
+    const double sig_string_soft = sig_string_all - nondiffractive_hard;
 
-      /* fill cross section arrays */
-      std::array<double, 5> string_sub_cross_sections;
-      std::array<double, 6> string_sub_cross_sections_sum;
-      string_sub_cross_sections[0] = single_diffr_AX;
-      string_sub_cross_sections[1] = single_diffr_XB;
-      string_sub_cross_sections[2] = double_diffr;
-      string_sub_cross_sections[3] = nondiffractive_soft;
-      string_sub_cross_sections[4] = nondiffractive_hard;
-      string_sub_cross_sections_sum[0] = 0.;
-      for (int i = 0; i < 5; i++) {
-        string_sub_cross_sections_sum[i + 1] =
-            string_sub_cross_sections_sum[i] + string_sub_cross_sections[i];
-      }
+    /* fill cross section arrays */
+    std::array<double, 6> string_sub_cross_sections;
+    std::array<double, 7> string_sub_cross_sections_sum;
+    string_sub_cross_sections[0] = single_diffr_AX;
+    string_sub_cross_sections[1] = single_diffr_XB;
+    string_sub_cross_sections[2] = double_diffr;
+    string_sub_cross_sections[3] = nondiffractive_soft;
+    string_sub_cross_sections[4] = sig_annihilation;
+    string_sub_cross_sections[5] = nondiffractive_hard;
+    string_sub_cross_sections_sum[0] = 0.;
+    for (int i = 0; i < 6; i++) {
+      string_sub_cross_sections_sum[i + 1] =
+          string_sub_cross_sections_sum[i] + string_sub_cross_sections[i];
+    }
 
-      /* soft subprocess selection */
-      StringSoftType iproc = StringSoftType::None;
-      double r_xsec = string_sub_cross_sections_sum[4]
-                    * Random::uniform(0., 1.);
-      for (int i = 0; i < 4; i++) {
-        if ((r_xsec >= string_sub_cross_sections_sum[i]) &&
-            (r_xsec < string_sub_cross_sections_sum[i + 1])) {
-          iproc = static_cast<StringSoftType>(i);
-          break;
-        }
+    /* soft subprocess selection */
+    StringSoftType iproc = StringSoftType::None;
+    int imax = 0;
+    /* baryon-antibaryon can annihilate and this correspond to
+     * StringSoftType::BBbar. */
+    if (BBbar_pair) {
+      imax = 5;
+    } else {
+      imax = 4;
+    }
+    double r_xsec = string_sub_cross_sections_sum[imax] *
+                    Random::uniform(0., 1.);
+    for (int i = 0; i < imax; i++) {
+      if ((r_xsec >= string_sub_cross_sections_sum[i]) &&
+          (r_xsec < string_sub_cross_sections_sum[i + 1])) {
+        iproc = static_cast<StringSoftType>(i);
+        break;
       }
-      if (iproc == StringSoftType::None) {
-        throw std::runtime_error("soft string subprocess is not specified.");
-      }
+    }
+    if (iproc == StringSoftType::None) {
+      throw std::runtime_error("soft string subprocess is not specified.");
+    }
 
-      string_process->set_subproc(iproc);
+    string_process->set_subproc(iproc);
 
-      /* fill the list of process channels */
-      if (sig_string_soft > 0.) {
-        channel_list.push_back(make_unique<CollisionBranch>(
-            sig_string_soft, ProcessType::StringSoft));
-      }
-      if (nondiffractive_hard > 0.) {
-        channel_list.push_back(make_unique<CollisionBranch>(
-            nondiffractive_hard, ProcessType::StringHard));
-      }
+    /* fill the list of process channels */
+    if (sig_string_soft > 0.) {
+      channel_list.push_back(make_unique<CollisionBranch>(
+          sig_string_soft, ProcessType::StringSoft));
+    }
+    if (nondiffractive_hard > 0.) {
+      channel_list.push_back(make_unique<CollisionBranch>(
+          nondiffractive_hard, ProcessType::StringHard));
     }
   }
   return channel_list;
