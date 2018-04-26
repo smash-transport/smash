@@ -52,7 +52,8 @@ double cut_off(const double sigma_mb) {
 */
 
 namespace smash {
-//template class PhotonCrossSection<ComputationMethod::Analytic>; (really remove this?)
+// template class PhotonCrossSection<ComputationMethod::Analytic>; (really
+// remove this?)
 
 /*----------------------------------------------------------------------------*/
 /*				 Pi + Rho -> Pi + Photon channels mediated by */

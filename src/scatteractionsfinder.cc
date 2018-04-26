@@ -257,7 +257,7 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData &data_a,
   // Add various subprocesses.
   act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
                            low_snn_cut_, strings_switch_,
-                           strings_with_probability_,  nnbar_treatment_);
+                           strings_with_probability_, nnbar_treatment_);
 
   // Cross section for collision criterion
   double cross_section_criterion = act->cross_section() * fm2_mb * M_1_PI /
@@ -370,10 +370,9 @@ void ScatterActionsFinder::dump_reactions() const {
             B.set_4momentum(B.pole_mass(), -mom, 0.0, 0.0);
             ScatterActionPtr act = make_unique<ScatterAction>(
                 A, B, time, isotropic_, string_formation_time_);
-            act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
-                                     low_snn_cut_, strings_switch_,
-                                     strings_with_probability_,
-                                     nnbar_treatment_);
+            act->add_all_scatterings(
+                elastic_parameter_, two_to_one_, incl_set_, low_snn_cut_,
+                strings_switch_, strings_with_probability_, nnbar_treatment_);
             const double total_cs = act->cross_section();
             if (total_cs <= 0.0) {
               continue;

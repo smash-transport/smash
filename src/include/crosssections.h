@@ -55,9 +55,9 @@ class CrossSections {
    */
   CollisionBranchList generate_collision_list(
       double elastic_parameter, bool two_to_one_switch,
-      ReactionsBitSet included_2to2, double low_snn_cut,
-      bool strings_switch, bool strings_with_probability,
-      NNbarTreatment nnbar_treatment, StringProcess* string_process);
+      ReactionsBitSet included_2to2, double low_snn_cut, bool strings_switch,
+      bool strings_with_probability, NNbarTreatment nnbar_treatment,
+      StringProcess* string_process);
 
   /**
    * Determine the elastic cross section for this collision. If elastic_par is

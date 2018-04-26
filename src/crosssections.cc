@@ -137,14 +137,14 @@ CrossSections::CrossSections(const ParticleList& incoming_particles,
 
 CollisionBranchList CrossSections::generate_collision_list(
     double elastic_parameter, bool two_to_one_switch,
-    ReactionsBitSet included_2to2, double low_snn_cut,
-    bool strings_switch, bool strings_with_probability,
-    NNbarTreatment nnbar_treatment, StringProcess* string_process) {
+    ReactionsBitSet included_2to2, double low_snn_cut, bool strings_switch,
+    bool strings_with_probability, NNbarTreatment nnbar_treatment,
+    StringProcess* string_process) {
   CollisionBranchList process_list;
   const ParticleType& t1 = incoming_particles_[0].type();
   const ParticleType& t2 = incoming_particles_[1].type();
-  const bool is_pythia = strings_with_probability &&
-                   decide_string(strings_switch);
+  const bool is_pythia =
+      strings_with_probability && decide_string(strings_switch);
   /* Elastic collisions between two nucleons with sqrt_s below
    * low_snn_cut can not happen. */
   const bool reject_by_nucleon_elastic_cutoff =
@@ -159,7 +159,7 @@ CollisionBranchList CrossSections::generate_collision_list(
      * Parametrized total cross - the contributions
      * from all other present channels. */
     const double sig_string =
-      std::max(0., high_energy() - elastic_parametrization());
+        std::max(0., high_energy() - elastic_parametrization());
     append_list(process_list, string_excitation(sig_string, string_process));
   } else {
     if (two_to_one_switch) {
@@ -1617,8 +1617,10 @@ CollisionBranchList CrossSections::string_excitation(
      * in conjunction with multipartion interaction picture
      * \iref{Sjostrand:1987su}. */
     const double hard_xsec = string_hard_cross_section();
-    const double nondiffractive_soft = (nondiffractive_all > 0. ?
-        nondiffractive_all * std::exp(-hard_xsec / nondiffractive_all) : 0.);
+    const double nondiffractive_soft =
+        (nondiffractive_all > 0.
+             ? nondiffractive_all * std::exp(-hard_xsec / nondiffractive_all)
+             : 0.);
     const double nondiffractive_hard = nondiffractive_all - nondiffractive_soft;
     log.debug("String cross sections [mb] are");
     log.debug("Single-diffractive AB->AX: ", single_diffr_AX);
@@ -2001,8 +2003,8 @@ bool CrossSections::included_in_string() const {
   const ParticleType& t2 = incoming_particles_[1].type();
   /* Either both of the incoming particles are nucleons, or one is a nucleon
    * while the other is a pion. */
-  return both_are_nucleons_ || (t1.pdgcode().is_pion() && t2.is_nucleon())
-        || (t1.is_nucleon() && t2.pdgcode().is_pion());
+  return both_are_nucleons_ || (t1.pdgcode().is_pion() && t2.is_nucleon()) ||
+         (t1.is_nucleon() && t2.pdgcode().is_pion());
 }
 
 bool CrossSections::decide_string(bool strings_switch) const {
@@ -2033,9 +2035,9 @@ bool CrossSections::decide_string(bool strings_switch) const {
       is_pythia = true;
     } else if (sqrt_s_ >
                mix_scatter_type_energy - mix_scatter_type_window_width) {
-      const double probability_pythia = 0.5 +
-                    0.5 * sin(0.5 * M_PI * (sqrt_s_ - mix_scatter_type_energy)
-                    / mix_scatter_type_window_width);
+      const double probability_pythia =
+          0.5 + 0.5 * sin(0.5 * M_PI * (sqrt_s_ - mix_scatter_type_energy) /
+                          mix_scatter_type_window_width);
       if (probability_pythia > Random::uniform(0., 1.)) {
         /* scatterings at the middle energies are through string
          * fragmentation by chance. */

@@ -332,9 +332,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   const bool strings_switch =
       config.take({"Collision_Term", "Strings"}, strings_switch_default);
   const bool strings_with_probability =
-      config.take({"Collision_Term",
-                   "Strings_with_Probability"},
-                   strings_with_probability_default);
+      config.take({"Collision_Term", "Strings_with_Probability"},
+                  strings_with_probability_default);
   const NNbarTreatment nnbar_treatment = config.take(
       {"Collision_Term", "NNbar_Treatment"}, NNbarTreatment::NoAnnihilation);
   const bool photons_switch = config.has_value({"Output", "Photons"});

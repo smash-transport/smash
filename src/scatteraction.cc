@@ -127,12 +127,12 @@ void ScatterAction::add_all_scatterings(double elastic_parameter,
    * square root s exceeds the threshold by at least 0.9 GeV. The cross section
    * of the string processes are counted by taking the difference between the
    * parametrized total and the sum of the non-strings. */
-  if (strings_switch && !strings_with_probability && xs.included_in_string()
-      && xs.high_energy() > cross_section() && sqrt_s() >
-      incoming_particles_[0].pole_mass() +
-      incoming_particles_[1].pole_mass() + 0.9) {
+  if (strings_switch && !strings_with_probability && xs.included_in_string() &&
+      xs.high_energy() > cross_section() &&
+      sqrt_s() > incoming_particles_[0].pole_mass() +
+                     incoming_particles_[1].pole_mass() + 0.9) {
     add_collisions(xs.string_excitation(xs.high_energy() - cross_section(),
-                                                           string_process_));
+                                        string_process_));
   }
 }
 
