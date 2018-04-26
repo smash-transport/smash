@@ -365,10 +365,17 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
     const double sqrts = (a_data.momentum() + b_data.momentum()).abs();
     const ParticleList incoming = {a_data, b_data};
     cross_sections xs_class(incoming, sqrts);
-    CollisionBranchList processes = xs_class.generate_collision_list(
-        elastic_parameter_, two_to_one_, incl_set_, low_snn_cut_,
-        strings_switch_, use_transition_probability_, nnbar_treatment_,
-        string_process_interface_.get());
+    // Create ScatterAction object.
+    ScatterActionPtr act = make_unique<ScatterAction>(
+        a_data, b_data, 0., isotropic_, string_formation_time_);
+    if (strings_switch_) {
+      act->set_string_interface(string_process_interface_.get());
+    }
+    act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
+                             low_snn_cut_, strings_switch_,
+                             use_transition_probability_,
+                             nnbar_treatment_);
+    const CollisionBranchList& processes = act->collision_channels();
     for (const auto &process : processes) {
       const double xs = process->weight();
       if (xs <= 0.0) {

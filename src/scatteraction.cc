@@ -461,39 +461,51 @@ void ScatterAction::string_excitation(bool is_soft_proc) {
       }
     }
     if (ntry == ntry_max) {
-      throw std::runtime_error("too many tries in string_excitation().");
-    }
-    outgoing_particles_ = string_process_->get_final_state();
-    /* If the incoming particles already were unformed, the formation
-     * times and cross section scaling factors need to be adjusted */
-    const double tform_in = std::max(incoming_particles_[0].formation_time(),
-                                     incoming_particles_[1].formation_time());
-    if (tform_in > time_of_execution_) {
-      const double fin =
-          (incoming_particles_[0].formation_time() >
-           incoming_particles_[1].formation_time())
-              ? incoming_particles_[0].cross_section_scaling_factor()
-              : incoming_particles_[1].cross_section_scaling_factor();
-      for (size_t i = 0; i < outgoing_particles_.size(); i++) {
-        const double tform_out = outgoing_particles_[i].formation_time();
-        const double fout =
-            outgoing_particles_[i].cross_section_scaling_factor();
-        outgoing_particles_[i].set_cross_section_scaling_factor(fin * fout);
-        /* If the unformed incoming particles' formation time is larger than
-         * the current outgoing particle's formation time, then the latter
-         * is overwritten by the former*/
-        if (tform_in > tform_out) {
-          outgoing_particles_[i].set_formation_time(tform_in);
+      /* If pythia fails to form a string, it is usually because the energy
+       * is not large enough. In this case, an elastic scattering happens.
+       *
+       * Since particles are normally added after process selection for
+       * strings, outgoing_particles is still uninitialized, and memory
+       * needs to be allocated. We also shift the process_type_ to elastic
+       * so that sample_angles does a proper treatment. */
+      outgoing_particles_.reserve(2);
+      outgoing_particles_.push_back(ParticleData{incoming_particles_[0]});
+      outgoing_particles_.push_back(ParticleData{incoming_particles_[1]});
+      process_type_ = ProcessType::Elastic;
+      elastic_scattering();
+    } else {
+      outgoing_particles_ = string_process_->get_final_state();
+      /* If the incoming particles already were unformed, the formation
+       * times and cross section scaling factors need to be adjusted */
+      const double tform_in = std::max(incoming_particles_[0].formation_time(),
+                                       incoming_particles_[1].formation_time());
+      if (tform_in > time_of_execution_) {
+        const double fin =
+            (incoming_particles_[0].formation_time() >
+             incoming_particles_[1].formation_time())
+                ? incoming_particles_[0].cross_section_scaling_factor()
+                : incoming_particles_[1].cross_section_scaling_factor();
+        for (size_t i = 0; i < outgoing_particles_.size(); i++) {
+          const double tform_out = outgoing_particles_[i].formation_time();
+          const double fout =
+              outgoing_particles_[i].cross_section_scaling_factor();
+          outgoing_particles_[i].set_cross_section_scaling_factor(fin * fout);
+          /* If the unformed incoming particles' formation time is larger than
+           * the current outgoing particle's formation time, then the latter
+           * is overwritten by the former*/
+          if (tform_in > tform_out) {
+            outgoing_particles_[i].set_formation_time(tform_in);
+          }
         }
       }
+      /* Check momentum difference for debugging */
+      FourVector out_mom;
+      for (ParticleData data : outgoing_particles_) {
+        out_mom += data.momentum();
+      }
+      log.debug("Incoming momenta string:", total_momentum());
+      log.debug("Outgoing momenta string:", out_mom);
     }
-    /* Check momentum difference for debugging */
-    FourVector out_mom;
-    for (ParticleData data : outgoing_particles_) {
-      out_mom += data.momentum();
-    }
-    log.debug("Incoming momenta string:", total_momentum());
-    log.debug("Outgoing momenta string:", out_mom);
   }
 }
 

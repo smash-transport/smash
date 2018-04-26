@@ -2076,6 +2076,7 @@ bool cross_sections::decide_string(bool strings_switch,
                       (t1.is_nucleon() && t2.pdgcode().is_pion());
   /* True for baryon-baryon, anti-baryon-anti-baryon, baryon-meson,
    * anti-baryon-meson and meson-meson*/
+
   const bool is_AQM_scattering = use_AQM &&
                       ((t1.is_baryon() && t2.is_baryon() &&
                         t1.antiparticle_sign() == t2.antiparticle_sign()) ||
@@ -2111,7 +2112,7 @@ bool cross_sections::decide_string(bool strings_switch,
     } else if (is_NN_scattering) {
       region_lower = 4.0;
       region_upper = 5.0;
-    } else if (is_AQM_scattering) {
+    } else { //AQM
       /* Transition region around 0.9 larger than the sum of pole masses;
        * highly arbitrary, feel free to improve */
       region_lower = incoming_particles_[0].pole_mass() +
