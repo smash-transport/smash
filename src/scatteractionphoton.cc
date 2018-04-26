@@ -235,9 +235,9 @@ void ScatterActionPhoton::generate_final_state() {
   // Weighing of the fractional photons
   if (number_of_fractional_photons_ > 1) {
     weight_ = diff_xs * (t2 - t1) /
-              (number_of_fractional_photons_ * total_cross_section_);
+              (number_of_fractional_photons_ * hadronic_cross_section());
   } else {
-    weight_ = proc->weight() / total_cross_section_;
+    weight_ = proc->weight() / hadronic_cross_section();
   }
   // Photons are not really part of the normal processes, so we have to set a
   // constant arbitrary number.
