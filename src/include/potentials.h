@@ -48,6 +48,7 @@ class Potentials {
    *            the testparticle number needed for the density calculation.
    */
   Potentials(Configuration conf, const DensityParameters &parameters);
+  VIRTUAL_FOR_TESTS
   ~Potentials();
 
   /**
