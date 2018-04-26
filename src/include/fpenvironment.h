@@ -21,6 +21,11 @@ namespace smash {
  * feenableexcept and fedisableexcept. Without glibc inline asm and SSE
  * intrinsics can do it (for x86).
  *
+ * It is important that the used compiler supports floating-point traps, other-
+ * wise it might break them by reordering floating-point operations when
+ * optimizing. Currently floating-point traps are disabled for Clang, because
+ * it does not support them.
+ *
  * \param mask Bit mask representing the flags to set.
  * \return Whether the trap was successfully set.
  *
