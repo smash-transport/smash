@@ -94,6 +94,15 @@ double piplusp_high_energy(double mandelstam_s);
 double piminusp_high_energy(double mandelstam_s);
 
 /**
+ * parametrized cross-section for proton-antiproton annihilation
+ * used in the UrQMD model
+ *
+ * \param[in] mandelstam_s the rest frame total energy squared
+ * \return the parametrized cross-section
+ */
+double xs_ppbar_annihilation(double mandelstam_s);
+
+/**
  * Utility function called by specific other parametrizations
  * Parametrized hard scattering cross section (with partonic scattering)
  * This parametrization is a direct fit to cross sections in PYTHIA

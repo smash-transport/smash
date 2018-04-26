@@ -131,11 +131,11 @@ static double sum_xs_of(CollisionBranchList& list) {
   return xs_sum;
 }
 
-cross_sections::cross_sections(const ParticleList& incoming_particles,
-                               const double sqrt_s)
+CrossSections::CrossSections(const ParticleList& incoming_particles,
+                             const double sqrt_s)
     : incoming_particles_(incoming_particles), sqrt_s_(sqrt_s) {}
 
-CollisionBranchList cross_sections::generate_collision_list(
+CollisionBranchList CrossSections::generate_collision_list(
     double elastic_parameter, bool two_to_one_switch,
     ReactionsBitSet included_2to2, double low_snn_cut,
     bool strings_switch, bool use_AQM, bool use_transition_probability,
@@ -196,7 +196,7 @@ CollisionBranchList cross_sections::generate_collision_list(
   return process_list;
 }
 
-CollisionBranchPtr cross_sections::elastic(double elast_par, bool use_AQM) {
+CollisionBranchPtr CrossSections::elastic(double elast_par, bool use_AQM) {
   double elastic_xs = 0.;
   if (elast_par >= 0.) {
     // use constant elastic cross section from config file
@@ -210,7 +210,7 @@ CollisionBranchPtr cross_sections::elastic(double elast_par, bool use_AQM) {
                                       ProcessType::Elastic);
 }
 
-double cross_sections::elastic_parametrization(bool use_AQM) {
+double CrossSections::elastic_parametrization(bool use_AQM) {
   const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
   double elastic_xs = 0.0;
@@ -248,7 +248,7 @@ double cross_sections::elastic_parametrization(bool use_AQM) {
   return elastic_xs;
 }
 
-double cross_sections::nn_el() {
+double CrossSections::nn_el() {
   const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
 
@@ -276,7 +276,7 @@ double cross_sections::nn_el() {
   }
 }
 
-double cross_sections::npi_el() {
+double CrossSections::npi_el() {
   const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
 
@@ -359,7 +359,7 @@ double cross_sections::npi_el() {
   }
 }
 
-double cross_sections::nk_el() {
+double CrossSections::nk_el() {
   const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
 
@@ -454,7 +454,7 @@ double cross_sections::nk_el() {
   }
 }
 
-CollisionBranchList cross_sections::two_to_one() {
+CollisionBranchList CrossSections::two_to_one() {
   const auto& log = logger<LogArea::CrossSections>();
   CollisionBranchList resonance_process_list;
   const ParticleType& type_particle_a = incoming_particles_[0].type();
@@ -494,8 +494,8 @@ CollisionBranchList cross_sections::two_to_one() {
   return resonance_process_list;
 }
 
-double cross_sections::formation(const ParticleType& type_resonance,
-                                 double cm_momentum_sqr) {
+double CrossSections::formation(const ParticleType& type_resonance,
+                                double cm_momentum_sqr) {
   const ParticleType& type_particle_a = incoming_particles_[0].type();
   const ParticleType& type_particle_b = incoming_particles_[1].type();
   // Check for charge conservation.
@@ -531,7 +531,7 @@ double cross_sections::formation(const ParticleType& type_resonance,
          hbarc / fm2_mb;
 }
 
-CollisionBranchList cross_sections::two_to_two(ReactionsBitSet included_2to2) {
+CollisionBranchList CrossSections::two_to_two(ReactionsBitSet included_2to2) {
   CollisionBranchList process_list;
   const ParticleData& data_a = incoming_particles_[0];
   const ParticleData& data_b = incoming_particles_[1];
@@ -580,7 +580,7 @@ CollisionBranchList cross_sections::two_to_two(ReactionsBitSet included_2to2) {
   return process_list;
 }
 
-CollisionBranchList cross_sections::bb_xx_except_nn(
+CollisionBranchList CrossSections::bb_xx_except_nn(
     ReactionsBitSet included_2to2) {
   CollisionBranchList process_list;
   const ParticleType& type_a = incoming_particles_[0].type();
@@ -607,7 +607,7 @@ CollisionBranchList cross_sections::bb_xx_except_nn(
   return process_list;
 }
 
-CollisionBranchList cross_sections::nn_xx(ReactionsBitSet included_2to2) {
+CollisionBranchList CrossSections::nn_xx(ReactionsBitSet included_2to2) {
   CollisionBranchList process_list, channel_list;
 
   const double sqrts = sqrt_s_;
@@ -665,8 +665,8 @@ CollisionBranchList cross_sections::nn_xx(ReactionsBitSet included_2to2) {
     const ParticleTypePtrList pion_list = {pim, pi0, pip};
     channel_list = find_nn_xsection_from_type(
         (both_antinucleons ? antideutron_list : deutron_list), pion_list,
-        [&sqrts](const ParticleType &type_res_1,
-                 const ParticleType &type_res_2) {
+        [&sqrts](const ParticleType& type_res_1,
+                 const ParticleType& type_res_2) {
           return pCM(sqrts, type_res_1.mass(), type_res_2.mass());
         });
     process_list.reserve(process_list.size() + channel_list.size());
@@ -678,7 +678,7 @@ CollisionBranchList cross_sections::nn_xx(ReactionsBitSet included_2to2) {
   return process_list;
 }
 
-CollisionBranchList cross_sections::nk_xx(ReactionsBitSet included_2to2) {
+CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) {
   const ParticleType& a = incoming_particles_[0].type();
   const ParticleType& b = incoming_particles_[1].type();
   const ParticleType& type_nucleon = a.pdgcode().is_nucleon() ? a : b;
@@ -1069,7 +1069,7 @@ CollisionBranchList cross_sections::nk_xx(ReactionsBitSet included_2to2) {
   return process_list;
 }
 
-CollisionBranchList cross_sections::deltak_xx(ReactionsBitSet included_2to2) {
+CollisionBranchList CrossSections::deltak_xx(ReactionsBitSet included_2to2) {
   CollisionBranchList process_list;
   if (included_2to2[IncludedReactions::KN_to_KDelta] == 0) {
     return process_list;
@@ -1217,7 +1217,7 @@ CollisionBranchList cross_sections::deltak_xx(ReactionsBitSet included_2to2) {
   return process_list;
 }
 
-CollisionBranchList cross_sections::ypi_xx(ReactionsBitSet included_2to2) {
+CollisionBranchList CrossSections::ypi_xx(ReactionsBitSet included_2to2) {
   CollisionBranchList process_list;
   if (included_2to2[IncludedReactions::Strangeness_exchange] == 0) {
     return process_list;
@@ -1415,8 +1415,8 @@ CollisionBranchList cross_sections::ypi_xx(ReactionsBitSet included_2to2) {
   return process_list;
 }
 
-CollisionBranchList cross_sections::dpi_xx(ReactionsBitSet
-                                           /*included_2to2*/) {
+CollisionBranchList CrossSections::dpi_xx(ReactionsBitSet
+                                          /*included_2to2*/) {
   const auto& log = logger<LogArea::ScatterAction>();
   CollisionBranchList process_list;
   const double sqrts = sqrt_s_;
@@ -1528,7 +1528,7 @@ CollisionBranchList cross_sections::dpi_xx(ReactionsBitSet
   return process_list;
 }
 
-CollisionBranchList cross_sections::dn_xx(ReactionsBitSet /*included_2to2*/) {
+CollisionBranchList CrossSections::dn_xx(ReactionsBitSet /*included_2to2*/) {
   const ParticleType& type_a = incoming_particles_[0].type();
   const ParticleType& type_b = incoming_particles_[1].type();
   const ParticleType& type_N = type_a.is_nucleon() ? type_a : type_b;
@@ -1586,7 +1586,7 @@ CollisionBranchList cross_sections::dn_xx(ReactionsBitSet /*included_2to2*/) {
   return process_list;
 }
 
-CollisionBranchList cross_sections::string_excitation(
+CollisionBranchList CrossSections::string_excitation(
     double sig_string_all, StringProcess* string_process) {
   const auto& log = logger<LogArea::CrossSections>();
   /* get PDG id for evaluation of the parametrized cross sections
@@ -1614,109 +1614,128 @@ CollisionBranchList cross_sections::string_excitation(
       throw std::runtime_error("string_process should be initialized.");
     }
 
+    /* Total parametrized cross-section (I) and pythia-produced total
+     * cross-section (II) do not necessarily coincide. If I > II then
+     * non-diffractive cross-section is reinforced to get I == II.
+     * If I < II then partial cross-sections are drained one-by-one
+     * to reduce II until I == II:
+     * first non-diffractive, then double-diffractive, then
+     * single-diffractive AB->AX and AB->XB in equal proportion.
+     * The way it is done here is not unique. I (ryu) think that at high energy
+     * collision this is not an issue, but at sqrt_s < 10 GeV it may
+     * matter. */
+    std::array<double, 3> xs =
+      string_process->cross_sections_diffractive(pdgid[0], pdgid[1], sqrt_s_);
+    double single_diffr_AX = xs[0], single_diffr_XB = xs[1],
+           double_diffr = xs[2];
+    double single_diffr = single_diffr_AX + single_diffr_XB;
+    double diffractive = single_diffr + double_diffr;
+
     /*
      * The case for baryon/anti-baryon annihilation is treated separately,
      * as in this case we use only one way to break up the particles, namely
      * into 2 mesonic strings of equal mass after annihilating one quark-
      * anti-quark pair. See StringProcess::next_BBbarAnn()
      */
-    if (pdgid[0] + pdgid[1] == 0) {
-      /// \todo JB:not sure if there should be a hard string here as well
-      channel_list.push_back(make_unique<CollisionBranch>(
-                             sig_string_all, ProcessType::StringSoft));
-      string_process->set_subproc(StringSoftType::BBbar);
+    const bool BBbar_pair = pdgid[0] + pdgid[1] == 0;
+    double sig_annihilation;
+    if (BBbar_pair) {
+      /* In the case of baryon-antibaryon pair,
+       * the parametrized cross section for annihilation will be added.
+       * See xs_ppbar_annihilation(). */
+      sig_annihilation = std::min(sig_string_all,
+                                  xs_ppbar_annihilation(sqrt_s_));
     } else {
-      /* Total parametrized cross-section (I) and pythia-produced total
-       * cross-section (II) do not necessarily coincide. If I > II then
-       * non-diffractive cross-section is reinforced to get I == II.
-       * If I < II then partial cross-sections are drained one-by-one
-       * to reduce II until I == II:
-       * first non-diffractive, then double-diffractive, then
-       * single-diffractive AB->AX and AB->XB in equal proportion.
-       * The way it is done here is not unique. I (ryu) think that at high energy
-       * collision this is not an issue, but at sqrt_s < 10 GeV it may
-       * matter. */
-      std::array<double, 3> xs =
-        string_process->cross_sections_diffractive(pdgid[0], pdgid[1], sqrt_s_);
-      double single_diffr_AX = xs[0], single_diffr_XB = xs[1],
-             double_diffr = xs[2];
-      double single_diffr = single_diffr_AX + single_diffr_XB;
-      double diffractive = single_diffr + double_diffr;
-      const double nondiffractive_all =
-          std::max(0., sig_string_all - diffractive);
-      diffractive = sig_string_all - nondiffractive_all;
-      double_diffr = std::max(0., diffractive - single_diffr);
-      const double a = (diffractive - double_diffr) / single_diffr;
-      single_diffr_AX *= a;
-      single_diffr_XB *= a;
-      assert(std::abs(single_diffr_AX + single_diffr_XB + double_diffr +
-                      nondiffractive_all - sig_string_all) < 1.e-6);
+      sig_annihilation = 0.;
+    }
 
+    const double nondiffractive_all =
+        std::max(0., sig_string_all - sig_annihilation - diffractive);
+    diffractive = sig_string_all - sig_annihilation - nondiffractive_all;
+    double_diffr = std::max(0., diffractive - single_diffr);
+    const double a = (diffractive - double_diffr) / single_diffr;
+    single_diffr_AX *= a;
+    single_diffr_XB *= a;
+    assert(std::abs(single_diffr_AX + single_diffr_XB + double_diffr +
+                    sig_annihilation + nondiffractive_all -
+                    sig_string_all) < 1.e-6);
+
+    double nondiffractive_soft = 0.;
+    double nondiffractive_hard = 0.;
+    if (nondiffractive_all > 0.) {
       /* Hard string process is added by hard cross section
        * in conjunction with multipartion interaction picture
        * \iref{Sjostrand:1987su}. */
       const double hard_xsec = string_hard_cross_section();
-      const double nondiffractive_soft = nondiffractive_all > 0. ?
-        nondiffractive_all * std::exp(-hard_xsec / nondiffractive_all) : 0.;
-      const double nondiffractive_hard = nondiffractive_all
-                                       - nondiffractive_soft;
-      log.debug("String cross sections [mb] are");
-      log.debug("Single-diffractive AB->AX: ", single_diffr_AX);
-      log.debug("Single-diffractive AB->XB: ", single_diffr_XB);
-      log.debug("Double-diffractive AB->XX: ", double_diffr);
-      log.debug("Soft non-diffractive: ", nondiffractive_soft);
-      log.debug("Hard non-diffractive: ", nondiffractive_hard);
+      nondiffractive_soft =
+          nondiffractive_all * std::exp(-hard_xsec / nondiffractive_all);
+      nondiffractive_hard = nondiffractive_all - nondiffractive_soft;
+    }
+    log.debug("String cross sections [mb] are");
+    log.debug("Single-diffractive AB->AX: ", single_diffr_AX);
+    log.debug("Single-diffractive AB->XB: ", single_diffr_XB);
+    log.debug("Double-diffractive AB->XX: ", double_diffr);
+    log.debug("Soft non-diffractive: ", nondiffractive_soft);
+    log.debug("Hard non-diffractive: ", nondiffractive_hard);
+    log.debug("B-Bbar annihilation: ", sig_annihilation);
 
-      /* cross section of soft string excitation */
-      const double sig_string_soft = sig_string_all - nondiffractive_hard;
+    /* cross section of soft string excitation including annihilation */
+    const double sig_string_soft = sig_string_all - nondiffractive_hard;
 
-      /* fill cross section arrays */
-      std::array<double, 5> string_sub_cross_sections;
-      std::array<double, 6> string_sub_cross_sections_sum;
-      string_sub_cross_sections[0] = single_diffr_AX;
-      string_sub_cross_sections[1] = single_diffr_XB;
-      string_sub_cross_sections[2] = double_diffr;
-      string_sub_cross_sections[3] = nondiffractive_soft;
-      string_sub_cross_sections[4] = nondiffractive_hard;
-      string_sub_cross_sections_sum[0] = 0.;
-      for (int i = 0; i < 5; i++) {
-        string_sub_cross_sections_sum[i + 1] =
-            string_sub_cross_sections_sum[i] + string_sub_cross_sections[i];
+    /* fill cross section arrays */
+    std::array<double, 6> string_sub_cross_sections;
+    std::array<double, 7> string_sub_cross_sections_sum;
+    string_sub_cross_sections[0] = single_diffr_AX;
+    string_sub_cross_sections[1] = single_diffr_XB;
+    string_sub_cross_sections[2] = double_diffr;
+    string_sub_cross_sections[3] = nondiffractive_soft;
+    string_sub_cross_sections[4] = sig_annihilation;
+    string_sub_cross_sections[5] = nondiffractive_hard;
+    string_sub_cross_sections_sum[0] = 0.;
+    for (int i = 0; i < 6; i++) {
+      string_sub_cross_sections_sum[i + 1] =
+          string_sub_cross_sections_sum[i] + string_sub_cross_sections[i];
+    }
+
+    /* soft subprocess selection */
+    StringSoftType iproc = StringSoftType::None;
+    int imax = 0;
+    /* baryon-antibaryon can annihilate and this correspond to
+     * StringSoftType::BBbar. */
+    if (BBbar_pair) {
+      imax = 5;
+    } else {
+      imax = 4;
+    }
+    double r_xsec = string_sub_cross_sections_sum[imax] *
+                    Random::uniform(0., 1.);
+    for (int i = 0; i < imax; i++) {
+      if ((r_xsec >= string_sub_cross_sections_sum[i]) &&
+          (r_xsec < string_sub_cross_sections_sum[i + 1])) {
+        iproc = static_cast<StringSoftType>(i);
+        break;
       }
+    }
+    if (iproc == StringSoftType::None) {
+      throw std::runtime_error("soft string subprocess is not specified.");
+    }
 
-      /* soft subprocess selection */
-      StringSoftType iproc = StringSoftType::None;
-      double r_xsec = string_sub_cross_sections_sum[4]
-                    * Random::uniform(0., 1.);
-      for (int i = 0; i < 4; i++) {
-        if ((r_xsec >= string_sub_cross_sections_sum[i]) &&
-            (r_xsec < string_sub_cross_sections_sum[i + 1])) {
-          iproc = static_cast<StringSoftType>(i);
-         break;
-        }
-      }
+    string_process->set_subproc(iproc);
 
-      if (iproc == StringSoftType::None) {
-        throw std::runtime_error("soft string subprocess is not specified.");
-      }
-
-      string_process->set_subproc(iproc);
-
-      /* fill the list of process channels */
-      if (sig_string_soft > 0.) {
-        channel_list.push_back(make_unique<CollisionBranch>(
-            sig_string_soft, ProcessType::StringSoft));
-      }
-      if (nondiffractive_hard > 0.) {
-        channel_list.push_back(make_unique<CollisionBranch>(
-            nondiffractive_hard, ProcessType::StringHard));
-      }
+    /* fill the list of process channels */
+    if (sig_string_soft > 0.) {
+      channel_list.push_back(make_unique<CollisionBranch>(
+          sig_string_soft, ProcessType::StringSoft));
+    }
+    if (nondiffractive_hard > 0.) {
+      channel_list.push_back(make_unique<CollisionBranch>(
+          nondiffractive_hard, ProcessType::StringHard));
     }
   }
   return channel_list;
 }
 
-double cross_sections::high_energy() const {
+double CrossSections::high_energy() const {
   const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
   const double s = sqrt_s_ * sqrt_s_;
@@ -1763,7 +1782,7 @@ double cross_sections::high_energy() const {
   return xs;
 }
 
-double cross_sections::string_hard_cross_section() const {
+double CrossSections::string_hard_cross_section() const {
   double cross_sec = 0.;
   const ParticleData& data_a = incoming_particles_[0];
   const ParticleData& data_b = incoming_particles_[1];
@@ -1786,7 +1805,7 @@ double cross_sections::string_hard_cross_section() const {
   return cross_sec;
 }
 
-CollisionBranchPtr cross_sections::NNbar_annihilation(const double current_xs) {
+CollisionBranchPtr CrossSections::NNbar_annihilation(const double current_xs) {
   const auto& log = logger<LogArea::CrossSections>();
   /* Calculate NNbar cross section:
    * Parametrized total minus all other present channels.*/
@@ -1799,7 +1818,7 @@ CollisionBranchPtr cross_sections::NNbar_annihilation(const double current_xs) {
                                       nnbar_xsec, ProcessType::TwoToTwo);
 }
 
-CollisionBranchList cross_sections::NNbar_creation() {
+CollisionBranchList CrossSections::NNbar_creation() {
   const auto& log = logger<LogArea::CrossSections>();
   CollisionBranchList channel_list;
   /* Calculate NNbar reverse cross section:
@@ -1828,7 +1847,7 @@ CollisionBranchList cross_sections::NNbar_creation() {
   return channel_list;
 }
 
-CollisionBranchList cross_sections::bar_bar_to_nuc_nuc(
+CollisionBranchList CrossSections::bar_bar_to_nuc_nuc(
     const bool is_anti_particles) {
   const ParticleType& type_a = incoming_particles_[0].type();
   const ParticleType& type_b = incoming_particles_[1].type();
@@ -1895,9 +1914,10 @@ CollisionBranchList cross_sections::bar_bar_to_nuc_nuc(
   return process_list;
 }
 
-double cross_sections::nn_to_resonance_matrix_element(
-    double sqrts, const ParticleType& type_a, const ParticleType& type_b,
-    const int twoI) {
+double CrossSections::nn_to_resonance_matrix_element(double sqrts,
+                                                     const ParticleType& type_a,
+                                                     const ParticleType& type_b,
+                                                     const int twoI) {
   const double m_a = type_a.mass();
   const double m_b = type_b.mass();
   const double msqr = 2. * (m_a * m_a + m_b * m_b);
@@ -1978,7 +1998,7 @@ double cross_sections::nn_to_resonance_matrix_element(
 }
 
 template <class IntegrationMethod>
-CollisionBranchList cross_sections::find_nn_xsection_from_type(
+CollisionBranchList CrossSections::find_nn_xsection_from_type(
     const ParticleTypePtrList& list_res_1,
     const ParticleTypePtrList& list_res_2, const IntegrationMethod integrator) {
   const ParticleType& type_particle_a = incoming_particles_[0].type();
@@ -2011,7 +2031,8 @@ CollisionBranchList cross_sections::find_nn_xsection_from_type(
         const double lower_limit = type_res_1->min_mass_kinematic();
         const double upper_limit = sqrt_s_ - type_res_2->mass();
         /* Check the available energy (requiring it to be a little above the
-         * threshold, because the integration will not work if it's too close). */
+         * threshold, because the integration will not work if it's too close).
+         */
         if (upper_limit - lower_limit < 1E-3) {
           continue;
         }
@@ -2050,7 +2071,7 @@ CollisionBranchList cross_sections::find_nn_xsection_from_type(
   return channel_list;
 }
 
-bool cross_sections::decide_string(bool strings_switch,
+bool CrossSections::decide_string(bool strings_switch,
                                    bool use_transition_probability,
                                    bool use_AQM,
                                    bool treat_BBbar_with_strings) const {

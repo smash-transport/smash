@@ -18,6 +18,7 @@
 
 #include "include/average.h"
 #include "include/clebschgordan.h"
+#include "include/constants.h"
 #include "include/cxx14compat.h"
 #include "include/interpolation.h"
 #include "include/kinematics.h"
@@ -62,6 +63,17 @@ double piplusp_high_energy(double mandelstam_s) {
 
 double piminusp_high_energy(double mandelstam_s) {
   return xs_high_energy(mandelstam_s, true, 0.939, 0.138, 18.75, 9.56, 1.767);
+}
+
+double xs_ppbar_annihilation(double mandelstam_s) {
+  const double xs_ref = 120.;
+  const double s_ref = 4. * nucleon_mass * nucleon_mass;
+  const double constant_a = 0.05;
+  const double constant_b = 0.6;
+  const double factor = constant_a * constant_a * s_ref / (
+                        (mandelstam_s - s_ref) * (mandelstam_s - s_ref) +
+                        constant_a * constant_a * s_ref) + constant_b;
+  return xs_ref * (s_ref / mandelstam_s) * factor;
 }
 
 double xs_string_hard(double mandelstam_s, double xs_0, double e_0,

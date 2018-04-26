@@ -114,7 +114,7 @@ void ScatterAction::add_all_scatterings(double elastic_parameter,
                                         bool use_AQM,
                                         bool use_transition_probability,
                                         NNbarTreatment nnbar_treatment) {
-  cross_sections xs(incoming_particles_, sqrt_s());
+  CrossSections xs(incoming_particles_, sqrt_s());
   CollisionBranchList processes = xs.generate_collision_list(
       elastic_parameter, two_to_one, included_2to2, low_snn_cut, strings_switch,
       use_AQM, use_transition_probability, nnbar_treatment, string_process_);
@@ -138,9 +138,11 @@ void ScatterAction::add_all_scatterings(double elastic_parameter,
   }
 }
 
-double ScatterAction::raw_weight_value() const { return total_cross_section_; }
+double ScatterAction::get_total_weight() const { return total_cross_section_; }
 
-double ScatterAction::partial_weight() const { return partial_cross_section_; }
+double ScatterAction::get_partial_weight() const {
+  return partial_cross_section_;
+}
 
 ThreeVector ScatterAction::beta_cm() const {
   return total_momentum().velocity();

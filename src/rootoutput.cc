@@ -206,7 +206,7 @@ void RootOutput::at_interaction(const Action &action,
                                 const double /*density*/) {
   if (write_collisions_) {
     collisions_to_tree(action.incoming_particles(), action.outgoing_particles(),
-                       action.raw_weight_value(), action.partial_weight());
+                       action.get_total_weight(), action.get_partial_weight());
   }
 }
 
