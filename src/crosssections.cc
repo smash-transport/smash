@@ -1612,7 +1612,6 @@ CollisionBranchList CrossSections::string_excitation(
 
   CollisionBranchList channel_list;
   if (total_string_xs > 0.) {
-
     /* Total parametrized cross-section (I) and pythia-produced total
      * cross-section (II) do not necessarily coincide. If I > II then
      * non-diffractive cross-section is reinforced to get I == II.
