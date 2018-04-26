@@ -410,16 +410,25 @@ class PdgCode {
    * \return the fraction number of strange quarks
    *         (strange + anti-strange) / total
    *
-   * This is useful for the AQM cross-section scaling.
+   * This is useful for the AQM cross-section scaling, and needs to
+   * be positive definite.
    */
   inline double frac_strange() const {
-    /* The quarkonium state returns 0 in the case of net strangeness
+    /* The quarkonium state has 0 net strangeness
     *  but there are actually 2 strange quarks out of 2 total */
     if (is_hadron() && digits_.n_q3_ == 3 && digits_.n_q2_ == 3) {
       return 1.;
     } else {
       // For all other cases, there isn't both a strange and anti-strange
-      return abs(strangeness()) / 3.;
+      if (is_baryon()) {
+        return abs(strangeness()) / 3.;
+      } else if (is_meson()) {
+        return abs(strangeness()) / 2.;
+      } else {
+        /* If not baryon or meson, this should be 0, as AQM does not
+         * extend to non-hadrons */
+        return 0.;
+      }
     }
   }
 

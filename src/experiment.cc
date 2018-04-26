@@ -506,6 +506,14 @@ void Experiment<Modus>::create_output(std::string format, std::string content,
  *  ρ → ππ and h₁(1170) → πρ, which gives 5 pions on average.
  * \li \key "strings" - Annihilation throug string fragmentation.
  *
+ * \key Use_AQM (bool, optional, default = \key false) \n
+ * Turn on AQM cross-sections for exotic combination of particles
+ * (baryon-baryon cross-sections are scaled from proton-proton high energy
+ * parametrization, for example). This includes both elastic and non-elastic
+ * contributions; non-elastic contributions go through string fragmentation.
+ * Turning off strings or elastic collisions while leaving this on will
+ * result in the corresponding part of the AQM cross-sections to also be off.
+ *
  * \key Strings_with_Probability (bool, optional, default = \key false): \n
  * \li \key true - String processes are triggered according to a probability
  *                 increasing smoothly with the collisional energy from 0 to 1

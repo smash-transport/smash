@@ -50,7 +50,7 @@ class CrossSections {
    *            according to a probability?
    * \param[in] nnbar_treatment NNbar treatment through resonance, strings or
    *                                                        none
-   * \param[in] string_process String process used for string fragmentaion.
+   * \param[in] string_process String process used for string fragmentation.
    * \return List of all possible collisions.
    */
   CollisionBranchList generate_collision_list(
@@ -114,7 +114,7 @@ class CrossSections {
    * explicitly implemented channels at low energy (elastic, resonance
    * excitation, etc).
    *
-   * \param[in] string_process String process used for string fragmentaion.
+   * \param[in] string_process String process used for string fragmentation.
    * \param[in] total_string_xs Total cross section for the string process [mb].
    * \return List of subprocesses (single-diffractive,
    *        double-diffractive and non-diffractive) with their cross sections.
@@ -160,7 +160,7 @@ class CrossSections {
 
   /**
    * Return, if the scattering between the incoming particles are scattering
-   * via string fragmentaion or not.
+   * via string fragmentation or not.
    *
    * If use_transition_probability is true:
    * The string fragmentation is implemented in the same way in GiBUU (Physics
@@ -176,7 +176,7 @@ class CrossSections {
    *
    * If use_transition_probability is false:
    * The string fragmentation is implemented similarly to what is in UrQMD
-   * (\iref{Bass:1998ca}). If sqrts islower than some cutoff value, there are
+   * (\iref{Bass:1998ca}). If sqrts is lower than some cutoff value, there are
    * no strings. If higher, strings are allowed, with the cross-section being
    * the difference between some parametrized total cross-section and the sum
    * of all other channels, if this parametrization is larger than the sum of
@@ -199,7 +199,7 @@ class CrossSections {
    * \param[in] treat_nnbar_with_strings use strings for nnbar treatment?
    *
    * \return Is the scattering between the incoming particles done via string·
-   * fragmentaion or not?
+   * fragmentation or not?
    */
   bool decide_string(bool strings_switch, bool use_transition_probability,
                      bool use_AQM, bool treat_nnbar_with_strings) const;
