@@ -26,6 +26,8 @@ namespace smash {
  */
 class ActionFinderInterface {
  public:
+  virtual ~ActionFinderInterface() = default;
+
   /**
    * Abstract function for finding actions, given a list of particles.
    *
