@@ -14,9 +14,9 @@
 #include <utility>
 #include <vector>
 
-#include "Pythia8/Pythia.h"
 #include "constants.h"
 #include "particledata.h"
+#include "Pythia8/Pythia.h"
 
 namespace smash {
 

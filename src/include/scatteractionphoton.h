@@ -10,6 +10,8 @@
 #ifndef SRC_INCLUDE_SCATTERACTIONPHOTON_H_
 #define SRC_INCLUDE_SCATTERACTIONPHOTON_H_
 
+#include <utility>
+
 #include "scatteraction.h"
 
 namespace smash {

@@ -10,7 +10,6 @@
 #include "include/scatteractionphoton.h"
 
 #include <algorithm>
-#include <utility>
 
 #include "include/angles.h"
 #include "include/constants.h"

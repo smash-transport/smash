@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_PHOTONCROSSSECTIONS_H_
-#define SRC_INCLUDE_PHOTONCROSSSECTIONS_H_
+#ifndef SRC_INCLUDE_CROSSSECTIONSPHOTON_H_
+#define SRC_INCLUDE_CROSSSECTIONSPHOTON_H_
 
 #include "cxx14compat.h"
 #include "kinematics.h"
@@ -89,4 +89,4 @@ class PhotonCrossSection<ComputationMethod::Analytic> {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_PHOTONCROSSSECTIONS_H_
+#endif  // SRC_INCLUDE_CROSSSECTIONSPHOTON_H_
