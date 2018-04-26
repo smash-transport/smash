@@ -1769,9 +1769,9 @@ double CrossSections::high_energy() const {
   }
 
   /* Meson-meson interaction goes through AQM from pp, until we get a proper
-   * parametrization for π π */
+   * parametrization for π π, see user guide "Use_AQM"*/
   if (pdg_a.is_meson() && pdg_b.is_meson()) {
-    xs = 4./9. * piplusp_high_energy(s);  // 4/9 factor since 2 mesons in AQM
+    xs = 4./9. * pp_high_energy(s);  // 4/9 factor since 2 mesons in AQM
   }
 
   // AQM scaling for cross-sections

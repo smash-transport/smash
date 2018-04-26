@@ -512,6 +512,15 @@ void Experiment<Modus>::create_output(std::string format, std::string content,
  * contributions; non-elastic contributions go through string fragmentation.
  * Turning off strings or elastic collisions while leaving this on will
  * result in the corresponding part of the AQM cross-sections to also be off.
+ * Cross-sections parametrization are scaled according to 
+ * \f[ \frac{\sigma^{AQM}_{process}}{\sigma^{AQM}_{ref_process}}
+ * \sigma^{param}_{ref_process}\f]
+ * where \f$ \sigma^{AQM}_x = 40 \left( \frac{2}{3} \right)^{n_{meson}}
+ * (1 - 0.4 x^s_1) (1 - 0.4 x^s_2) \f$, with \f$n_{meson}\f$ being the number
+ * of mesons in the process, \f$x^s_{1,2}\f$ the fraction of strange quarks in
+ * the participant. "process" is then a generic process and "ref_process" a
+ * reference process such as PP for which solid parametrizations exist.
+ * (\iref{Bass:1998ca})
  *
  * \key Strings_with_Probability (bool, optional, default = \key false): \n
  * \li \key true - String processes are triggered according to a probability
