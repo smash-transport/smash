@@ -527,7 +527,7 @@ void Experiment<Modus>::create_output(std::string format, std::string content,
  *                 sections of the scatterings to the certain final states,
  *                 which might be crucial for the production of the rare
  *                 species, will be reduced at the high energies. \n
- * \li \key false - String processe always happens as long as the collisional
+ * \li \key false - String processes always happen as long as the collisional
  *                  energy exceeds the threshold value by 0.9 GeV, and the
  *                  parametrized total cross section is larger than the sum of
  *                  cross sections contributed by the non-string processes. The
