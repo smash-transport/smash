@@ -328,15 +328,15 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
     strings_switch_default = false;
   }
   bool use_AQM_default = false;
-  bool use_transition_probability_default = false;
+  constexpr bool strings_with_probability_default = false;
   const bool strings_switch =
       config.take({"Collision_Term", "Strings"}, strings_switch_default);
   const bool use_AQM =
       config.take({"Collision_Term", "Use_AQM"}, use_AQM_default);
-  const bool use_transition_probability =
+  const bool strings_with_probability =
       config.take({"Collision_Term",
-                   "Switch_on_Strings_with_Probability"},
-                   use_transition_probability_default);
+                   "Strings_with_Probability"},
+                   strings_with_probability_default);
   const NNbarTreatment nnbar_treatment = config.take(
       {"Collision_Term", "NNbar_Treatment"}, NNbarTreatment::NoAnnihilation);
   const bool photons_switch = config.has_value({"Output", "Photons"});
@@ -364,7 +364,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
           included_2to2,
           strings_switch,
           use_AQM,
-          use_transition_probability,
+          strings_with_probability,
           nnbar_treatment,
           photons_switch,
           low_snn_cut,
@@ -506,7 +506,7 @@ void Experiment<Modus>::create_output(std::string format, std::string content,
  *  ρ → ππ and h₁(1170) → πρ, which gives 5 pions on average.
  * \li \key "strings" - Annihilation throug string fragmentation.
  *
- * \key Switch_on_String_with_Probability (bool, optional, default = \key false): \n
+ * \key Strings_with_Probability (bool, optional, default = \key false): \n
  * \li \key true - String processes are triggered according to a probability
  *                 increasing smoothly with the collisional energy from 0 to 1
  *                 in a certain energy window. At energies beyond that window,
@@ -526,6 +526,7 @@ void Experiment<Modus>::create_output(std::string format, std::string content,
  *                  cross sections contributed by the non-string processes. The
  *                  string cross section is thus obtained by taking the
  *                  difference between them.
+ *
  * \subpage pauliblocker
  */
 template <typename Modus>

@@ -241,7 +241,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
   /// Switch to control whether to use AQM or not
   const bool use_AQM_;
   /// Decide whether to implement string fragmentation based on a probability
-  const bool use_transition_probability_;
+  const bool strings_with_probability_;
   /// Switch for NNbar reactions
   const NNbarTreatment nnbar_treatment_;
   /**

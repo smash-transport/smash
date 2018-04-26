@@ -219,7 +219,7 @@ ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
       configuration.take({"Collision_Term", "Strings"}, true),
       configuration.take({"Collision_Term", "Use_AQM"}, false),
       configuration.take({"Collision_Term",
-                          "Switch_on_Strings_with_Probability"}, false),
+                          "Strings_with_Probability"}, false),
       configuration.take({"Collision_Term", "NNbar_Treatment"},
                          NNbarTreatment::NoAnnihilation),
       false,

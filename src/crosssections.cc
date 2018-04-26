@@ -138,15 +138,15 @@ CrossSections::CrossSections(const ParticleList& incoming_particles,
 CollisionBranchList CrossSections::generate_collision_list(
     double elastic_parameter, bool two_to_one_switch,
     ReactionsBitSet included_2to2, double low_snn_cut,
-    bool strings_switch, bool use_AQM, bool use_transition_probability,
+    bool strings_switch, bool use_AQM, bool strings_with_probability,
     NNbarTreatment nnbar_treatment, StringProcess* string_process) {
   CollisionBranchList process_list;
   const ParticleType& t1 = incoming_particles_[0].type();
   const ParticleType& t2 = incoming_particles_[1].type();
 
-  const bool is_pythia = use_transition_probability &&
+  const bool is_pythia = strings_with_probability &&
                          decide_string(strings_switch,
-                         use_transition_probability, use_AQM,
+                         strings_with_probability, use_AQM,
                          nnbar_treatment == NNbarTreatment::Strings);
 
   /* Elastic collisions between two nucleons with sqrt_s below
@@ -160,10 +160,7 @@ CollisionBranchList CrossSections::generate_collision_list(
     process_list.emplace_back(elastic(elastic_parameter, use_AQM));
   }
   if (is_pythia) {
-    /* string excitation
-     *
-     * Calculate string-excitation cross section:
-     * string-excitation cross section =
+    /* String-excitation cross section =
      * Parametrized total cross - the contributions
      * from all other present channels. */
     const double sig_string =

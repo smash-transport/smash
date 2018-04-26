@@ -177,7 +177,7 @@ ScatterActionsFinder::ScatterActionsFinder(
       low_snn_cut_(parameters.low_snn_cut),
       strings_switch_(parameters.strings_switch),
       use_AQM_(parameters.use_AQM),
-      use_transition_probability_(parameters.use_transition_probability),
+      strings_with_probability_(parameters.strings_with_probability),
       nnbar_treatment_(parameters.nnbar_treatment),
       nucleon_has_interacted_(nucleon_has_interacted),
       N_tot_(N_tot),
@@ -264,7 +264,7 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData &data_a,
   // Add various subprocesses.
   act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
                            low_snn_cut_, strings_switch_, use_AQM_,
-                           use_transition_probability_,  nnbar_treatment_);
+                           strings_with_probability_,  nnbar_treatment_);
 
   // Cross section for collision criterion
   double cross_section_criterion = act->cross_section() * fm2_mb * M_1_PI /
@@ -379,7 +379,7 @@ void ScatterActionsFinder::dump_reactions() const {
                 A, B, time, isotropic_, string_formation_time_);
             act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
                                      low_snn_cut_, strings_switch_, use_AQM_,
-                                     use_transition_probability_,
+                                     strings_with_probability_,
                                      nnbar_treatment_);
             const double total_cs = act->cross_section();
             if (total_cs <= 0.0) {
@@ -451,7 +451,7 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
     }
     act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
                              low_snn_cut_, strings_switch_, use_AQM_,
-                             use_transition_probability_,
+                             strings_with_probability_,
                              nnbar_treatment_);
     const CollisionBranchList& processes = act->collision_channels();
     for (const auto &process : processes) {
