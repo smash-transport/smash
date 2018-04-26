@@ -138,8 +138,8 @@ static bool compare_interaction_block_header(const int &nin, const int &nout,
   // std::cout << nout_read << " " << nout << std::endl;
   // std::cout << rho << std::endl;
   return (c_read == 'i') && (nin_read == nin) && (nout_read == nout) &&
-         (rho_read == rho) && (weight_read == action.raw_weight_value()) &&
-         (partial_weight_read == action.partial_weight()) &&
+         (rho_read == rho) && (weight_read == action.get_total_weight()) &&
+         (partial_weight_read == action.get_partial_weight()) &&
          (process_type_read == process_type);
 }
 
@@ -167,7 +167,7 @@ TEST(fullhistory_format) {
   const double impact_parameter = 1.473;
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
-                              true, NNbarTreatment::NoAnnihilation);
+                              true, false, NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
   ParticleList final_particles = action->outgoing_particles();
   const double rho = 0.123;
@@ -335,7 +335,7 @@ TEST(extended) {
   /* Create elastic interaction (smashon + smashon). */
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
-                              true, NNbarTreatment::NoAnnihilation);
+                              true, false, NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
   ParticleList final_particles = action->outgoing_particles();
   const double rho = 0.123;

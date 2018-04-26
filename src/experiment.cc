@@ -328,8 +328,13 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   if (modus_chooser == "Box") {
     strings_switch_default = false;
   }
+  constexpr bool strings_with_probability_default = false;
   const bool strings_switch =
       config.take({"Collision_Term", "Strings"}, strings_switch_default);
+  const bool strings_with_probability =
+      config.take({"Collision_Term",
+                   "Strings_with_Probability"},
+                   strings_with_probability_default);
   const NNbarTreatment nnbar_treatment = config.take(
       {"Collision_Term", "NNbar_Treatment"}, NNbarTreatment::NoAnnihilation);
   const bool photons_switch = config.has_value({"Output", "Photons"});
@@ -356,6 +361,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
           two_to_one,
           included_2to2,
           strings_switch,
+          strings_with_probability,
           nnbar_treatment,
           photons_switch,
           low_snn_cut,
@@ -495,6 +501,27 @@ void Experiment<Modus>::create_output(std::string format, std::string content,
  * \li \key "resonances" - Annhilation through NNbar → ρh₁(1170); combined with
  *  ρ → ππ and h₁(1170) → πρ, which gives 5 pions on average.
  * \li \key "strings" - Annihilation throug string fragmentation.
+ *
+ * \key Strings_with_Probability (bool, optional, default = \key false): \n
+ * \li \key true - String processes are triggered according to a probability
+ *                 increasing smoothly with the collisional energy from 0 to 1
+ *                 in a certain energy window. At energies beyond that window,
+ *                 all the inelastic scatterings are via strings, while at the
+ *                 energies below that window, all the scatterings are via
+ *                 non-string processes. One should be careful that in this
+ *                 approach, the scatterings via resoances are also suppressed
+ *                 in the intermediate energy region, and vanishes at high
+ *                 energies, e.g. pπ→Δ→ΣK can't happen at a collisional energy
+ *                 beyond 2.2 GeV in this approach. Therefore, the cross
+ *                 sections of the scatterings to the certain final states,
+ *                 which might be crucial for the production of the rare
+ *                 species, will be reduced at the high energies. \n
+ * \li \key false - String processe always happens as long as the collisional
+ *                  energy exceeds the threshold value by 0.9 GeV, and the
+ *                  parametrized total cross section is larger than the sum of
+ *                  cross sections contributed by the non-string processes. The
+ *                  string cross section is thus obtained by taking the
+ *                  difference between them.
  *
  * \subpage pauliblocker
  */
@@ -1094,7 +1121,7 @@ bool Experiment<Modus>::perform_action(
     constexpr double action_time = 0.;
     ScatterActionPhoton photon_act(action.incoming_particles(), action_time,
                                    n_fractional_photons_,
-                                   action.raw_weight_value());
+                                   action.get_total_weight());
 
     /**
      * Add a completely dummy process to the photon action. The only important
@@ -1106,7 +1133,7 @@ bool Experiment<Modus>::perform_action(
      * cancels out for the weighting, where a ratio of (unscaled) photon
      * cross section and (unscaled) hadronic cross section is taken.
      */
-    photon_act.add_dummy_hadronic_process(action.raw_weight_value());
+    photon_act.add_dummy_hadronic_process(action.get_total_weight());
 
     // Now add the actual photon reaction channel.
     photon_act.add_single_process();

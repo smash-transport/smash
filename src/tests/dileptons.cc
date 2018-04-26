@@ -65,7 +65,7 @@ TEST(pion_decay) {
   printf("sampling pion Dalitz ...\n");
   for (int i = 0; i < N_samples; i++) {
     act->generate_final_state();
-    weight_sum += act->raw_weight_value();
+    weight_sum += act->get_total_weight();
   }
   // verify that the shining weight for the π⁰ Dalitz decay is correct
   // (to an accuracy of five percent)
@@ -101,7 +101,7 @@ TEST(eta_decay) {
   printf("sampling eta Dalitz ...\n");
   for (int i = 0; i < N_samples; i++) {
     act->generate_final_state();
-    weight_sum += act->raw_weight_value();
+    weight_sum += act->get_total_weight();
   }
   // verify that the shining weight for the η Dalitz decay is correct
   // (to an accuracy of five percent)

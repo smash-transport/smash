@@ -5,12 +5,12 @@ General:
     Modus:         Collider
     Time_Step_Mode: Fixed
     Delta_Time:    0.1
-    End_Time:      200.0
+    End_Time:      50.0
     Randomseed:    -1
-    Nevents:       1
+    Nevents:       10
 
 Output:
-    Output_Interval:  5.0
+    Output_Interval:  50.0
     Particles:
         Format:          ["Oscar2013"]
 
@@ -21,5 +21,10 @@ Modi:
         Target:
             Particles: {2212: 79, 2112: 118} #Gold197
 
-        E_Kin: 1.23
+        E_Kin: 10.0
         Fermi_Motion: "frozen"
+
+
+Collision_Term:
+    Strings:                False # default
+    Switch_on_Strings_with_Probabilty:    True

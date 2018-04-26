@@ -53,10 +53,7 @@ class ScatterActionPhoton : public ScatterAction {
    */
   void generate_final_state() override;
 
-  /**
-   * Return the weight of the produced photon.
-   */
-  double raw_weight_value() const override { return weight_; }
+  double get_total_weight() const override { return weight_; }
 
   /**
    * Return the total cross section of the underlying hadronic scattering
