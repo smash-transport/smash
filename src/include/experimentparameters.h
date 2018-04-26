@@ -45,6 +45,9 @@ struct ExperimentParameters {
   /// This indicates whether string fragmentation is switched on.
   bool strings_switch;
 
+  /// Whether to use the AQM or not
+  bool use_AQM;
+
   /**
    * This indicates whether the string fragmentation is swiched on with
    * a probability smoothly increasing with energy. If it's set equal to

@@ -50,7 +50,7 @@ class cross_sections {
   CollisionBranchList generate_collision_list(
       double elastic_parameter, bool two_to_one_switch,
       ReactionsBitSet included_2to2, double low_snn_cut,
-      bool strings_switch, bool use_transition_probability,
+      bool strings_switch, bool use_AQM, bool use_transition_probability,
       NNbarTreatment nnbar_treatment, StringProcess* string_process);
 
   /**

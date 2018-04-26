@@ -97,6 +97,7 @@ ScatterActionsFinder::ScatterActionsFinder(
       incl_set_(parameters.included_2to2),
       low_snn_cut_(parameters.low_snn_cut),
       strings_switch_(parameters.strings_switch),
+      use_AQM_(parameters.use_AQM),
       use_transition_probability_(parameters.use_transition_probability),
       nnbar_treatment_(parameters.nnbar_treatment),
       nucleon_has_interacted_(nucleon_has_interacted),
@@ -184,7 +185,7 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData &data_a,
 
   // Add various subprocesses.
   act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
-                           low_snn_cut_, strings_switch_,
+                           low_snn_cut_, strings_switch_, use_AQM_,
                            use_transition_probability_,  nnbar_treatment_);
 
   // Cross section for collision criterion
@@ -299,7 +300,7 @@ void ScatterActionsFinder::dump_reactions() const {
             ScatterActionPtr act = make_unique<ScatterAction>(
                 A, B, time, isotropic_, string_formation_time_);
             act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
-                                     low_snn_cut_, strings_switch_,
+                                     low_snn_cut_, strings_switch_, use_AQM_,
                                      use_transition_probability_,
                                      nnbar_treatment_);
             const double total_cs = act->cross_section();
@@ -372,7 +373,7 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
       act->set_string_interface(string_process_interface_.get());
     }
     act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
-                             low_snn_cut_, strings_switch_,
+                             low_snn_cut_, strings_switch_, use_AQM_,
                              use_transition_probability_,
                              nnbar_treatment_);
     const CollisionBranchList& processes = act->collision_channels();

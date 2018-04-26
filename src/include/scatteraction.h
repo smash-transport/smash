@@ -85,7 +85,8 @@ class ScatterAction : public Action {
   /** Add all possible scattering subprocesses for this action object. */
   void add_all_scatterings(double elastic_parameter, bool two_to_one,
                            ReactionsBitSet included_2to2, double low_snn_cut,
-                           bool strings_switch, bool use_transition_probability,
+                           bool strings_switch, bool use_AQM,
+                           bool use_transition_probability,
                            NNbarTreatment nnbar_treatment);
 
   /// Returns list of possible collision channels

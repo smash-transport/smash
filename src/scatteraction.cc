@@ -111,12 +111,13 @@ void ScatterAction::add_all_scatterings(double elastic_parameter,
                                         bool two_to_one,
                                         ReactionsBitSet included_2to2,
                                         double low_snn_cut, bool strings_switch,
+                                        bool use_AQM,
                                         bool use_transition_probability,
                                         NNbarTreatment nnbar_treatment) {
   cross_sections xs(incoming_particles_, sqrt_s());
   CollisionBranchList processes = xs.generate_collision_list(
       elastic_parameter, two_to_one, included_2to2, low_snn_cut, strings_switch,
-      use_transition_probability, nnbar_treatment, string_process_);
+      use_AQM, use_transition_probability, nnbar_treatment, string_process_);
 
   /* Add various subprocesses.*/
   add_collisions(std::move(processes));
@@ -128,7 +129,7 @@ void ScatterAction::add_all_scatterings(double elastic_parameter,
    * of the string processes are counted by taking the difference between the
    * parametrized total and the sum of the non-strings. */
   if (!use_transition_probability && xs.decide_string(strings_switch,
-                    use_transition_probability, true,
+                    use_transition_probability, use_AQM,
                     nnbar_treatment == NNbarTreatment::Strings)) {
     double xs_diff = xs.high_energy() - cross_section();
     if (xs_diff > 0.) {

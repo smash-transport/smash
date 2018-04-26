@@ -138,13 +138,12 @@ cross_sections::cross_sections(const ParticleList& incoming_particles,
 CollisionBranchList cross_sections::generate_collision_list(
     double elastic_parameter, bool two_to_one_switch,
     ReactionsBitSet included_2to2, double low_snn_cut,
-    bool strings_switch, bool use_transition_probability,
+    bool strings_switch, bool use_AQM, bool use_transition_probability,
     NNbarTreatment nnbar_treatment, StringProcess* string_process) {
   CollisionBranchList process_list;
   const ParticleType& t1 = incoming_particles_[0].type();
   const ParticleType& t2 = incoming_particles_[1].type();
 
-  bool use_AQM = true;
   const bool is_pythia = use_transition_probability &&
                          decide_string(strings_switch,
                          use_transition_probability, use_AQM,

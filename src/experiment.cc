@@ -305,9 +305,12 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   if (modus_chooser == "Box") {
     strings_switch_default = false;
   }
+  bool use_AQM_default = false;
   bool use_transition_probability_default = false;
   const bool strings_switch =
       config.take({"Collision_Term", "Strings"}, strings_switch_default);
+  const bool use_AQM =
+      config.take({"Collision_Term", "Use_AQM"}, use_AQM_default);
   const bool use_transition_probability =
       config.take({"Collision_Term",
                    "Switch_on_Strings_with_Probability"},
@@ -338,6 +341,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
           two_to_one,
           included_2to2,
           strings_switch,
+          use_AQM,
           use_transition_probability,
           nnbar_treatment,
           photons_switch,
