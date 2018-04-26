@@ -30,6 +30,9 @@ constexpr double hbarc = 0.197327053;
 /// mb <-> fm^2 conversion factor
 constexpr double fm2_mb = 0.1;
 
+/// GeV^-2 <-> mb conversion factor
+constexpr double gev2_mb = hbarc * hbarc / fm2_mb;
+
 // Numerical error tolerance
 constexpr double really_small = 1.0e-6;
 
@@ -68,6 +71,19 @@ constexpr double pion_mass = 0.138;
  */
 constexpr double kaon_mass = 0.494;
 
+/**
+ * omega mass in GeV
+ *
+ * Note that this should be the same as in particles.txt.
+ */
+constexpr double omega_mass = 0.783;
+
+/**
+ * a1 mass in GeV
+ *
+ * Note that this should be the same as in particles.txt.
+ */
+constexpr double a1_mass = 1.26;
 /**
  * Delta mass in GeV
  *

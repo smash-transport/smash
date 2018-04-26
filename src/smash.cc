@@ -226,7 +226,7 @@ ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
       0.0,
       false};
   return ScatterActionsFinder(configuration, params, nucleon_has_interacted, 0,
-                              0, 1);
+                              0);
 }
 
 }  // unnamed namespace

@@ -258,7 +258,6 @@ TEST(no_strings) {
 
   // construct action
   ScatterActionPtr act;
-  ReactionsBitSet incl_2to2;
   act = make_unique<ScatterAction>(p1_copy, p2_copy, 0.2, false, 1.0);
   VERIFY(act != nullptr);
   COMPARE(p2_copy.type(), ParticleType::find(0x2212));

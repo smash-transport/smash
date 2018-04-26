@@ -147,34 +147,36 @@ BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
 double BoxModus::initial_conditions(Particles *particles,
                                     const ExperimentParameters &parameters) {
   const auto &log = logger<LogArea::Box>();
-  double momentum_radial = 0;
+  double momentum_radial = 0, mass;
   Angles phitheta;
   FourVector momentum_total(0, 0, 0, 0);
   auto uniform_length = Random::make_uniform_distribution(0.0, this->length_);
-
+  const double T = this->temperature_;
   /* Create NUMBER OF PARTICLES according to configuration, or thermal case */
   if (use_thermal_) {
     const double V = length_ * length_ * length_;
-    for (const ParticleType &ptype : ParticleType::list_all()) {
-      if (HadronGasEos::is_eos_particle(ptype)) {
-        const double n =
-            HadronGasEos::partial_density(ptype, temperature_, mub_, mus_);
-        const double thermal_mult = n * V * parameters.testparticles;
-        assert(thermal_mult > 0.0);
-        const int thermal_mult_int = Random::poisson(thermal_mult);
-        particles->create(thermal_mult_int, ptype.pdgcode());
-        log.debug(ptype.name(), " initial multiplicity ", thermal_mult_int);
+    if (average_multipl_.empty()) {
+      for (const ParticleType &ptype : ParticleType::list_all()) {
+        if (HadronGasEos::is_eos_particle(ptype)) {
+          const double n = HadronGasEos::partial_density(ptype, T, mub_, mus_);
+          average_multipl_[ptype.pdgcode()] = n * V * parameters.testparticles;
+        }
       }
     }
-    log.info() << "Initial hadron gas baryon density "
-               << HadronGasEos::net_baryon_density(temperature_, mub_, mus_);
-    log.info() << "Initial hadron gas strange density "
-               << HadronGasEos::net_strange_density(temperature_, mub_, mus_);
+    double nb_init = 0.0, ns_init = 0.0;
+    for (const auto &mult : average_multipl_) {
+      const int thermal_mult_int = Random::poisson(mult.second);
+      particles->create(thermal_mult_int, mult.first);
+      nb_init += mult.second * mult.first.baryon_number();
+      ns_init += mult.second * mult.first.strangeness();
+      log.debug(mult.first, " initial multiplicity ", thermal_mult_int);
+    }
+    log.info("Initial hadron gas baryon density ", nb_init);
+    log.info("Initial hadron gas strange density ", ns_init);
   } else {
     for (const auto &p : init_multipl_) {
       particles->create(p.second * parameters.testparticles, p.first);
-      log.debug() << "Particle " << p.first << " initial multiplicity "
-                  << p.second;
+      log.debug("Particle ", p.first, " initial multiplicity ", p.second);
     }
   }
 
@@ -182,16 +184,17 @@ double BoxModus::initial_conditions(Particles *particles,
     /* Set MOMENTUM SPACE distribution */
     if (this->initial_condition_ == BoxInitialCondition::PeakedMomenta) {
       /* initial thermal momentum is the average 3T */
-      momentum_radial = 3.0 * this->temperature_;
+      momentum_radial = 3.0 * T;
+      mass = data.pole_mass();
     } else {
       /* thermal momentum according Maxwell-Boltzmann distribution */
-      momentum_radial =
-          sample_momenta_from_thermal(this->temperature_, data.pole_mass());
+      mass = HadronGasEos::sample_mass_thermal(data.type(), 1.0 / T);
+      momentum_radial = sample_momenta_from_thermal(T, mass);
     }
     phitheta.distribute_isotropically();
-    log.debug() << data << ", radial momentum:" << field << momentum_radial
-                << ", " << phitheta;
-    data.set_4momentum(data.pole_mass(), phitheta.threevec() * momentum_radial);
+    log.debug(data.type().name(), "(id ", data.id(), ") radial momentum ",
+              momentum_radial, ", direction", phitheta);
+    data.set_4momentum(mass, phitheta.threevec() * momentum_radial);
     momentum_total += data.momentum();
 
     /* Set COORDINATE SPACE distribution */
@@ -203,7 +206,7 @@ double BoxModus::initial_conditions(Particles *particles,
 
   /* Make total 3-momentum 0 */
   for (ParticleData &data : *particles) {
-    data.set_4momentum(data.pole_mass(),
+    data.set_4momentum(data.momentum().abs(),
                        data.momentum().threevec() -
                            momentum_total.threevec() / particles->size());
   }

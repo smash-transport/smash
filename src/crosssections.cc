@@ -2092,30 +2092,26 @@ bool CrossSections::decide_string(bool strings_switch,
                       (t1.is_nucleon() && t2.pdgcode().is_pion());
   /* True for baryon-baryon, anti-baryon-anti-baryon, baryon-meson,
    * anti-baryon-meson and meson-meson*/
-
   const bool is_AQM_scattering = use_AQM &&
                       ((t1.is_baryon() && t2.is_baryon() &&
                         t1.antiparticle_sign() == t2.antiparticle_sign()) ||
                       ((t1.is_baryon() && t2.is_meson()) ||
                        (t2.is_baryon() && t1.is_meson())) ||
                        (t1.is_meson() && t2.is_meson()));
+  const double mass_sum = incoming_particles_[0].pole_mass() +
+                          incoming_particles_[1].pole_mass();
 
   if (!is_NN_scattering && !is_BBbar_scattering && !is_Npi_scattering &&
       !is_AQM_scattering) {
     return false;
   } else if (is_BBbar_scattering) {
-    // NNbar only goes through strings, so there is no "window" considerations
+    // BBbar only goes through strings, so there are no "window" considerations
     return true;
   } else {
     /* if we do not use the probability transition algorithm, this is always a
-     * string contribution if the energy is large enough*/
+     * string contribution if the energy is large enough */
     if (!use_transition_probability) {
-      if (sqrt_s_ > incoming_particles_[0].pole_mass() +
-                    incoming_particles_[1].pole_mass() + 0.9) {
-        return true;
-      } else {
-        return false;
-      }
+      return (sqrt_s_ > mass_sum + 0.9);
     }
     /* No strings at low energy, only strings at high energy and
      * a transition region in the middle. Determine transition region: */
@@ -2126,12 +2122,11 @@ bool CrossSections::decide_string(bool strings_switch,
     } else if (is_NN_scattering) {
       region_lower = 4.0;
       region_upper = 5.0;
-    } else {  // AQM
+    } else {  // AQM - Additive Quark Model
       /* Transition region around 0.9 larger than the sum of pole masses;
        * highly arbitrary, feel free to improve */
-      region_lower = incoming_particles_[0].pole_mass() +
-                     incoming_particles_[1].pole_mass() + 0.4;
-      region_upper = region_lower + 1.;
+      region_lower = mass_sum + 0.9;
+      region_upper = mass_sum + 1.9;
     }
 
     if (sqrt_s_ > region_upper) {
@@ -2139,9 +2134,11 @@ bool CrossSections::decide_string(bool strings_switch,
     } else if (sqrt_s_ < region_lower) {
       return false;
     } else {
-      double prob_pythia = 0.5 * sin(0.5 * M_PI *
-               sqrt_s_ - (region_lower + region_upper)/2.) /
-               (region_upper - region_lower);
+      // Rescale transition region to [-1, 1]
+      double x = (sqrt_s_ - (region_lower + region_upper)/2.) /
+                 (region_upper - region_lower);
+      assert(x >= -1.0 && x <= 1.0);
+      double prob_pythia = 0.5 * (std::sin(0.5 * M_PI * x) + 1.0);
       assert(prob_pythia >= 0. && prob_pythia <= 1.);
       return prob_pythia > Random::uniform(0., 1.);
     }

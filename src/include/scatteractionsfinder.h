@@ -66,7 +66,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
   ScatterActionsFinder(Configuration config,
                        const ExperimentParameters &parameters,
                        const std::vector<bool> &nucleon_has_interacted,
-                       int N_tot, int N_proj, int n_fractional_photons);
+                       int N_tot, int N_proj);
 
   /**
    * Determine the collision time of the two particles.
@@ -255,11 +255,6 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const int N_proj_;
   /// Parameter for formation time
   const double string_formation_time_;
-  /// Photons switch
-  const bool photons_;
-  /// Number of fractional photons
-  /// \todo (not used) asignee: Anna Schaefer
-  const bool n_fractional_photons_;
 };
 
 }  // namespace smash

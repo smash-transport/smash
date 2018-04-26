@@ -160,7 +160,7 @@ class ScatterAction : public Action {
   /** List of possible collisions  */
   CollisionBranchList collision_channels_;
 
-  /** Total cross section */
+  /** Total hadronic cross section */
   double total_cross_section_;
 
   /** Partial cross-section to the chosen outgoing channel */

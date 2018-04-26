@@ -14,13 +14,10 @@
 #include <utility>
 #include <vector>
 
-// clang-format off
+#include "Pythia8/Pythia.h"
 
 #include "constants.h"
 #include "particledata.h"
-#include "Pythia8/Pythia.h"
-
-// clang-format on
 
 namespace smash {
 
@@ -136,6 +133,9 @@ class StringProcess {
   double gamma_factor_com_;
   /// square root of 2 (\f$\sqrt{2}\f$)
   double sqrt2_;
+
+  /// Remembers if Pythia is initialized or not
+  bool pythia_parton_initialized_ = false;
 
   /**
    * final state array

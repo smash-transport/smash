@@ -55,7 +55,8 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
    *
    * The following extract from the configuration file configures SMASH such
    * that the Skyrme as well as the Symmetry potential are activated for the
-   * simulation. There is however no necessity to include both simultaneously. They
+   * simulation. There is however no necessity to include both simultaneously.
+   They
    * can be switched on and off individually.
    * \n
    *\verbatim

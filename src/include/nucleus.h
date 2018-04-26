@@ -37,6 +37,8 @@ class Nucleus {
    */
   Nucleus(Configuration &config, int nTest);
 
+  virtual ~Nucleus() = default;
+
   /**
    * \return Mass of the nucleus.
    * It needs to be double to allow for calculations at LHC energies.

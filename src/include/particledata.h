@@ -85,6 +85,8 @@ class ParticleData {
   /// \copydoc PdgCode::is_baryon
   bool is_baryon() const { return pdgcode().is_baryon(); }
 
+  /// \copydoc PdgCode::is_rho
+  bool is_rho() const { return type_->is_rho(); }
   /**
    * Get the particle's pole mass ("on-shell").
    * \return pole mass of the particle [GeV]

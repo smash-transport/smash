@@ -121,12 +121,9 @@ namespace smash {
  *
  *\verbatim
  Collision_Term:
-     Included_2to2:    ["Elastic", "NN_to_NR", "NN_to_DR", "KN_to_KN", "KN_to_KDelta"]
-     Two_to_One: True
-     Force_Decays_At_End: False
-     NNbar_Treatment: "resonances"
-     Elastic_Cross_Section: 30.0
-     Elastic_NN_Cutoff_Sqrts: 1.93
+     Included_2to2:    ["Elastic", "NN_to_NR", "NN_to_DR", "KN_to_KN",
+ "KN_to_KDelta"] Two_to_One: True Force_Decays_At_End: False NNbar_Treatment:
+ "resonances" Elastic_Cross_Section: 30.0 Elastic_NN_Cutoff_Sqrts: 1.93
      Isotropic: True
  \endverbatim
  *
@@ -166,8 +163,7 @@ namespace smash {
 
 ScatterActionsFinder::ScatterActionsFinder(
     Configuration config, const ExperimentParameters &parameters,
-    const std::vector<bool> &nucleon_has_interacted, int N_tot, int N_proj,
-    int n_fractional_photons = 1)
+    const std::vector<bool> &nucleon_has_interacted, int N_tot, int N_proj)
     : elastic_parameter_(
           config.take({"Collision_Term", "Elastic_Cross_Section"}, -1.)),
       testparticles_(parameters.testparticles),
@@ -183,9 +179,7 @@ ScatterActionsFinder::ScatterActionsFinder(
       N_tot_(N_tot),
       N_proj_(N_proj),
       string_formation_time_(config.take(
-          {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.)),
-      photons_(parameters.photons_switch),
-      n_fractional_photons_(n_fractional_photons) {
+          {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.)) {
   if (is_constant_elastic_isotropic()) {
     const auto &log = logger<LogArea::FindScatter>();
     log.info("Constant elastic isotropic cross-section mode:", " using ",
