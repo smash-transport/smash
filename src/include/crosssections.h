@@ -107,6 +107,7 @@ class CrossSections {
    * difference between the parametrized total cross section and all the
    * explicitly implemented channels at low energy (elastic, resonance
    * excitation, etc).
+   * \param[in] total_string_xs the total string cross-section
    * \param[in] string_process String process used for string fragmentaion.
    *
    * \return List of subprocesses (single-diffractive,
@@ -116,7 +117,7 @@ class CrossSections {
    * have been determined.
    * \todo Same assumption made by NNbar_annihilation. Resolve.
    */
-  CollisionBranchList string_excitation(double sig_string_all,
+  CollisionBranchList string_excitation(double total_string_xs,
                                         StringProcess* string_process);
 
   /**

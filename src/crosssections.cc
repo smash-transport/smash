@@ -1587,8 +1587,13 @@ CollisionBranchList CrossSections::dn_xx(ReactionsBitSet /*included_2to2*/) {
 }
 
 CollisionBranchList CrossSections::string_excitation(
-    double sig_string_all, StringProcess* string_process) {
+    double total_string_xs, StringProcess* string_process) {
   const auto& log = logger<LogArea::CrossSections>();
+
+  if (!string_process) {
+    throw std::runtime_error("string_process should be initialized.");
+  }
+
   /* get PDG id for evaluation of the parametrized cross sections
    * for diffractive processes.
    * (anti-)proton is used for (anti-)baryons and
@@ -1609,10 +1614,7 @@ CollisionBranchList CrossSections::string_excitation(
   }
 
   CollisionBranchList channel_list;
-  if (sig_string_all > 0.) {
-    if (!string_process) {
-      throw std::runtime_error("string_process should be initialized.");
-    }
+  if (total_string_xs > 0.) {
 
     /* Total parametrized cross-section (I) and pythia-produced total
      * cross-section (II) do not necessarily coincide. If I > II then
@@ -1643,22 +1645,22 @@ CollisionBranchList CrossSections::string_excitation(
       /* In the case of baryon-antibaryon pair,
        * the parametrized cross section for annihilation will be added.
        * See xs_ppbar_annihilation(). */
-      sig_annihilation = std::min(sig_string_all,
+      sig_annihilation = std::min(total_string_xs,
                                   xs_ppbar_annihilation(sqrt_s_));
     } else {
       sig_annihilation = 0.;
     }
 
     const double nondiffractive_all =
-        std::max(0., sig_string_all - sig_annihilation - diffractive);
-    diffractive = sig_string_all - sig_annihilation - nondiffractive_all;
+        std::max(0., total_string_xs - sig_annihilation - diffractive);
+    diffractive = total_string_xs - sig_annihilation - nondiffractive_all;
     double_diffr = std::max(0., diffractive - single_diffr);
     const double a = (diffractive - double_diffr) / single_diffr;
     single_diffr_AX *= a;
     single_diffr_XB *= a;
     assert(std::abs(single_diffr_AX + single_diffr_XB + double_diffr +
                     sig_annihilation + nondiffractive_all -
-                    sig_string_all) < 1.e-6);
+                    total_string_xs) < 1.e-6);
 
     double nondiffractive_soft = 0.;
     double nondiffractive_hard = 0.;
@@ -1680,7 +1682,7 @@ CollisionBranchList CrossSections::string_excitation(
     log.debug("B-Bbar annihilation: ", sig_annihilation);
 
     /* cross section of soft string excitation including annihilation */
-    const double sig_string_soft = sig_string_all - nondiffractive_hard;
+    const double sig_string_soft = total_string_xs - nondiffractive_hard;
 
     /* fill cross section arrays */
     std::array<double, 6> string_sub_cross_sections;
