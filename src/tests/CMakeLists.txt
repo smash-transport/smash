@@ -201,6 +201,7 @@ smash_add_unittest(fourvector)
 smash_add_unittest(grandcan_thermalizer)
 smash_add_unittest(grid)
 smash_add_unittest(hadgas_eos)
+smash_add_unittest(hadgas_eos2)
 smash_add_unittest(initial_conditions)
 smash_add_unittest(integrate)
 smash_add_unittest(interpolation)
@@ -238,6 +239,7 @@ smash_add_unittest(vtkoutput)
 smash_add_unittest(width)
 smash_add_unittest(without_float_traps)
 smash_add_unittest(yamltest)
+
 
 # verify that the binary has a cli help
 smash_add_runtest(smash_help smash smash -h)

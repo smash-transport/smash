@@ -121,12 +121,9 @@ namespace smash {
  *
  *\verbatim
  Collision_Term:
-     Included_2to2:    ["Elastic", "NN_to_NR", "NN_to_DR", "KN_to_KN", "KN_to_KDelta"]
-     Two_to_One: True
-     Force_Decays_At_End: False
-     NNbar_Treatment: "resonances"
-     Elastic_Cross_Section: 30.0
-     Elastic_NN_Cutoff_Sqrts: 1.93
+     Included_2to2:    ["Elastic", "NN_to_NR", "NN_to_DR", "KN_to_KN",
+ "KN_to_KDelta"] Two_to_One: True Force_Decays_At_End: False NNbar_Treatment:
+ "resonances" Elastic_Cross_Section: 30.0 Elastic_NN_Cutoff_Sqrts: 1.93
      Isotropic: True
  \endverbatim
  *
@@ -166,8 +163,7 @@ namespace smash {
 
 ScatterActionsFinder::ScatterActionsFinder(
     Configuration config, const ExperimentParameters &parameters,
-    const std::vector<bool> &nucleon_has_interacted, int N_tot, int N_proj,
-    int n_fractional_photons = 1)
+    const std::vector<bool> &nucleon_has_interacted, int N_tot, int N_proj)
     : elastic_parameter_(
           config.take({"Collision_Term", "Elastic_Cross_Section"}, -1.)),
       testparticles_(parameters.testparticles),
@@ -176,14 +172,13 @@ ScatterActionsFinder::ScatterActionsFinder(
       incl_set_(parameters.included_2to2),
       low_snn_cut_(parameters.low_snn_cut),
       strings_switch_(parameters.strings_switch),
+      strings_with_probability_(parameters.strings_with_probability),
       nnbar_treatment_(parameters.nnbar_treatment),
       nucleon_has_interacted_(nucleon_has_interacted),
       N_tot_(N_tot),
       N_proj_(N_proj),
       string_formation_time_(config.take(
-          {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.)),
-      photons_(parameters.photons_switch),
-      n_fractional_photons_(n_fractional_photons) {
+          {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.)) {
   if (is_constant_elastic_isotropic()) {
     const auto &log = logger<LogArea::FindScatter>();
     log.info("Constant elastic isotropic cross-section mode:", " using ",
@@ -261,7 +256,8 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData &data_a,
 
   // Add various subprocesses.
   act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
-                           low_snn_cut_, strings_switch_, nnbar_treatment_);
+                           low_snn_cut_, strings_switch_,
+                           strings_with_probability_, nnbar_treatment_);
 
   // Cross section for collision criterion
   double cross_section_criterion = act->cross_section() * fm2_mb * M_1_PI /
@@ -374,9 +370,9 @@ void ScatterActionsFinder::dump_reactions() const {
             B.set_4momentum(B.pole_mass(), -mom, 0.0, 0.0);
             ScatterActionPtr act = make_unique<ScatterAction>(
                 A, B, time, isotropic_, string_formation_time_);
-            act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
-                                     low_snn_cut_, strings_switch_,
-                                     nnbar_treatment_);
+            act->add_all_scatterings(
+                elastic_parameter_, two_to_one_, incl_set_, low_snn_cut_,
+                strings_switch_, strings_with_probability_, nnbar_treatment_);
             const double total_cs = act->cross_section();
             if (total_cs <= 0.0) {
               continue;
@@ -442,7 +438,8 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
     CrossSections xs_class(incoming, sqrts);
     CollisionBranchList processes = xs_class.generate_collision_list(
         elastic_parameter_, two_to_one_, incl_set_, low_snn_cut_,
-        strings_switch_, nnbar_treatment_, string_process_interface_.get());
+        strings_switch_, strings_with_probability_, nnbar_treatment_,
+        string_process_interface_.get());
     for (const auto &process : processes) {
       const double xs = process->weight();
       if (xs <= 0.0) {

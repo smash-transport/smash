@@ -151,66 +151,63 @@ double SphereModus::initial_conditions(Particles *particles,
                                        const ExperimentParameters &parameters) {
   const auto &log = logger<LogArea::Sphere>();
   FourVector momentum_total(0, 0, 0, 0);
+  const double T = this->sphere_temperature_;
   /* Create NUMBER OF PARTICLES according to configuration */
   if (use_thermal_) {
-    const double T = sphere_temperature_;
     const double V = 4.0 / 3.0 * M_PI * radius_ * radius_ * radius_;
-    for (const ParticleType &ptype : ParticleType::list_all()) {
-      if (HadronGasEos::is_eos_particle(ptype)) {
-        const double n = HadronGasEos::partial_density(ptype, T, mub_, mus_);
-        const double thermal_mult = n * V * parameters.testparticles;
-        assert(thermal_mult > 0.0);
-        const int thermal_mult_int = Random::poisson(thermal_mult);
-        particles->create(thermal_mult_int, ptype.pdgcode());
-        log.debug(ptype.name(), " initial multiplicity ", thermal_mult_int);
+    if (average_multipl_.empty()) {
+      for (const ParticleType &ptype : ParticleType::list_all()) {
+        if (HadronGasEos::is_eos_particle(ptype)) {
+          const double n = HadronGasEos::partial_density(ptype, T, mub_, mus_);
+          average_multipl_[ptype.pdgcode()] = n * V * parameters.testparticles;
+        }
       }
     }
-    log.info() << "Initial baryon density "
-               << HadronGasEos::net_baryon_density(T, mub_, mus_);
-    log.info() << "Initial strange density "
-               << HadronGasEos::net_strange_density(T, mub_, mus_);
+    double nb_init = 0.0, ns_init = 0.0;
+    for (const auto &mult : average_multipl_) {
+      const int thermal_mult_int = Random::poisson(mult.second);
+      particles->create(thermal_mult_int, mult.first);
+      nb_init += mult.second * mult.first.baryon_number();
+      ns_init += mult.second * mult.first.strangeness();
+      log.debug(mult.first, " initial multiplicity ", thermal_mult_int);
+    }
+    log.info("Initial hadron gas baryon density ", nb_init);
+    log.info("Initial hadron gas strange density ", ns_init);
   } else {
     for (const auto &p : init_multipl_) {
       particles->create(p.second * parameters.testparticles, p.first);
-      log.debug() << "Particle " << p.first << " initial multiplicity "
-                  << p.second;
+      log.debug("Particle ", p.first, " initial multiplicity ", p.second);
     }
   }
   /* loop over particle data to fill in momentum and position information */
   for (ParticleData &data : *particles) {
     Angles phitheta;
     /* thermal momentum according Maxwell-Boltzmann distribution */
-    double momentum_radial;
+    double momentum_radial, mass = data.pole_mass();
     /* assign momentum_radial according to requested distribution */
     switch (init_distr_) {
-      case (SphereInitialCondition::ThermalMomenta):
-        momentum_radial = sample_momenta_from_thermal(this->sphere_temperature_,
-                                                      data.pole_mass());
-        break;
       case (SphereInitialCondition::IC_ES):
-        momentum_radial = sample_momenta_IC_ES(this->sphere_temperature_);
+        momentum_radial = sample_momenta_IC_ES(T);
         break;
       case (SphereInitialCondition::IC_1M):
-        momentum_radial =
-            sample_momenta_1M_IC(this->sphere_temperature_, data.pole_mass());
+        momentum_radial = sample_momenta_1M_IC(T, mass);
         break;
       case (SphereInitialCondition::IC_2M):
-        momentum_radial =
-            sample_momenta_2M_IC(this->sphere_temperature_, data.pole_mass());
+        momentum_radial = sample_momenta_2M_IC(T, mass);
         break;
       case (SphereInitialCondition::IC_Massive):
-        momentum_radial = sample_momenta_non_eq_mass(this->sphere_temperature_,
-                                                     data.pole_mass());
+        momentum_radial = sample_momenta_non_eq_mass(T, mass);
         break;
+      case (SphereInitialCondition::ThermalMomenta):
       default:
-        momentum_radial = sample_momenta_from_thermal(this->sphere_temperature_,
-                                                      data.pole_mass());
+        mass = HadronGasEos::sample_mass_thermal(data.type(), 1.0 / T);
+        momentum_radial = sample_momenta_from_thermal(T, mass);
         break;
     }
     phitheta.distribute_isotropically();
-    log.debug("Particle ", data.id(), " radial momenta ", momentum_radial, ' ',
-              phitheta);
-    data.set_4momentum(data.pole_mass(), phitheta.threevec() * momentum_radial);
+    log.debug(data.type().name(), "(id ", data.id(), ") radial momentum ",
+              momentum_radial, ", direction", phitheta);
+    data.set_4momentum(mass, phitheta.threevec() * momentum_radial);
     momentum_total += data.momentum();
     /* uniform sampling in a sphere with radius r */
     double position_radial;
@@ -223,7 +220,7 @@ double SphereModus::initial_conditions(Particles *particles,
   }
   /* Make total 3-momentum 0 */
   for (ParticleData &data : *particles) {
-    data.set_4momentum(data.pole_mass(),
+    data.set_4momentum(data.momentum().abs(),
                        data.momentum().threevec() -
                            momentum_total.threevec() / particles->size());
   }

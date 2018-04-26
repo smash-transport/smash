@@ -124,20 +124,34 @@ class BoxModus : public ModusDefault {
   const double temperature_;
   /// initial time of the box
   const double start_time_ = 0.;
-  /** whether to use a thermal initialization for all particles
-   *  instead of specific numbers */
+  /**
+   *  Whether to use a thermal initialization for all particles
+   *  instead of specific numbers
+   */
   const bool use_thermal_ = false;
-  /** baryon chemical potential for thermal box;
-   *  only used if use_thermal_ is true */
+  /**
+   *  Baryon chemical potential for thermal initialization;
+   *  only used if use_thermal_ is true
+   */
   const double mub_;
-  /** strange chemical potential for thermal box;
-   *  only used if use_thermal_ is true */
+  /**
+   * Strange chemical potential for thermal initialization;
+   * only used if use_thermal_ is true
+   */
   const double mus_;
-  /** particle multiplicities at initialization;
-   *  required if use_thermal_ is false */
+  /**
+   * Particle multiplicities at initialization;
+   * required if use_thermal_ is false
+   */
   const std::map<PdgCode, int> init_multipl_;
+  /**
+   * Average multiplicities in case of thermal initialization.
+   * Saved to avoid recalculating at every event
+   */
+  std::map<PdgCode, double> average_multipl_;
 
-  /**\ingroup logging
+  /**
+   * \ingroup logging
    * console output on startup of box specific parameters;
    * writes the initial state for the Box to the output stream.
    *

@@ -228,6 +228,7 @@ void Action::check_conservation(const uint32_t id_process) const {
       return;
     }
     if (id_process == ID_PROCESS_PHOTON) {
+      abort();
       throw std::runtime_error("Conservation laws violated in photon process");
     } else {
       throw std::runtime_error("Conservation laws violated in process " +

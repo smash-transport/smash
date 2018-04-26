@@ -75,7 +75,7 @@ TEST(elastic_collision) {
   constexpr bool strings_switch = false;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act.add_all_scatterings(sigma, true, Test::all_reactions_included(), 0.,
-                          strings_switch, nnbar_treatment);
+                          strings_switch, false, nnbar_treatment);
 
   // check cross section
   COMPARE(act.cross_section(), sigma);
@@ -150,7 +150,7 @@ TEST(outgoing_valid) {
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act->add_all_scatterings(elastic_parameter, true,
                            Test::all_reactions_included(), 0., strings_switch,
-                           nnbar_treatment);
+                           false, nnbar_treatment);
 
   VERIFY(act->cross_section() > 0.);
 
@@ -211,7 +211,7 @@ TEST(pythia_running) {
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act->add_all_scatterings(elastic_parameter, false,
                            Test::all_reactions_included(), 0., strings_switch,
-                           nnbar_treatment);
+                           false, nnbar_treatment);
 
   VERIFY(act->cross_section() > 0.);
 
@@ -258,7 +258,6 @@ TEST(no_strings) {
 
   // construct action
   ScatterActionPtr act;
-  ReactionsBitSet incl_2to2;
   act = make_unique<ScatterAction>(p1_copy, p2_copy, 0.2, false, 1.0);
   VERIFY(act != nullptr);
   COMPARE(p2_copy.type(), ParticleType::find(0x2212));
@@ -269,7 +268,7 @@ TEST(no_strings) {
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act->add_all_scatterings(elastic_parameter, false,
                            Test::all_reactions_included(), 0., strings_switch,
-                           nnbar_treatment);
+                           false, nnbar_treatment);
 
   VERIFY(act->cross_section() > 0.);
 
@@ -310,7 +309,7 @@ TEST(update_incoming) {
   bool string_switch = true;
   NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act.add_all_scatterings(sigma, true, Test::all_reactions_included(), 0.,
-                          string_switch, nnbar_treatment);
+                          string_switch, false, nnbar_treatment);
 
   // change the position of one of the particles
   const FourVector new_position(0.1, 0., 0., 0.);

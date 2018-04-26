@@ -196,7 +196,8 @@ namespace smash {
  * \n
  * Examples: Configuring Heavy-ion Collisions
  * --------------
- * The following example configures a Cu63-Cu63 collision at \f$\sqrt{s_{NN}}=3.0\f$
+ * The following example configures a Cu63-Cu63 collision at
+ \f$\sqrt{s_{NN}}=3.0\f$
  * GeV with zero impact parameter and Fermi motion taken into consideration. The
  * calculation frame is the default, center of velocity, and the nuclei are not
  * deformed.
