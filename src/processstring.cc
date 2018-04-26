@@ -560,15 +560,9 @@ bool StringProcess::next_NDiffHard() {
   /* Perform PYTHIA initialization if it was not previously initialized
    * or the initial state changed. */
   if (!pythia_parton_initialized_ || !same_initial_state) {
-    pythia_parton_initialized_ = false;
-    std::stringstream buffer1, buffer2, buffer3;
-    // set the incoming particles
-    buffer1 << "Beams:idA = " << PDGcodes_[0];
-    pythia_parton_->readString(buffer1.str());
-    buffer2 << "Beams:idB = " << PDGcodes_[1];
-    pythia_parton_->readString(buffer2.str());
-    buffer3 << "Beams:eCM = " << sqrtsAB_;
-    pythia_parton_->readString(buffer3.str());
+    pythia_parton_->settings.mode("Beams:idA", PDGcodes_[0].get_decimal());
+    pythia_parton_->settings.mode("Beams:idB", PDGcodes_[1].get_decimal());
+    pythia_parton_->settings.parm("Beams:eCM", sqrtsAB_);
 
     pythia_parton_initialized_ = pythia_parton_->init();
     log.info("Pythia initialized with ", PDGcodes_[0], "+", PDGcodes_[1],
@@ -579,8 +573,8 @@ bool StringProcess::next_NDiffHard() {
   }
   /* Set the random seed of the Pythia Random Number Generator.
    * Pythia's random is controlled by SMASH in every single collision.
-   * In this way we ensure that the results are identical for the
-   * same SMASH random seed for every event. */
+   * In this way we ensure that the results are reproducible
+   * for every event if one knows SMASH random seed. */
   const int maxint = std::numeric_limits<int>::max();
   pythia_parton_->rndm.init(Random::uniform_int(1, maxint));
 
