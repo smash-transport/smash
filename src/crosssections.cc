@@ -229,18 +229,16 @@ double cross_sections::elastic_parametrization(bool use_AQM) {
   } else if (use_AQM) {
     if (pdg_a.is_baryon() && pdg_b.is_baryon()) {
       // todo JB : double check those parametrizations
-      elastic_xs = nn_el(); // valid also for annihilation
-    }
-    else if ((pdg_a.is_meson() && pdg_b.is_baryon()) ||
+      elastic_xs = nn_el();  // valid also for annihilation
+    } else if ((pdg_a.is_meson() && pdg_b.is_baryon()) ||
              (pdg_b.is_meson() && pdg_a.is_baryon())) {
       elastic_xs = piplusp_elastic(sqrt_s_ * sqrt_s_);
-      // todo JB : fix this cross section so it doesn't subtract resonant contribution
-    }
-    else if (pdg_a.is_meson() && pdg_b.is_meson()) {
+      // todo JB : fix this cross section so it doesn't subtract resonances
+    } else if (pdg_a.is_meson() && pdg_b.is_meson()) {
       double s = sqrt_s_ * sqrt_s_;
       if (s > 4 * nucleon_mass * nucleon_mass) {
         // until we get a ππ parametrization
-        // todo JB : fix this cross section so it doesn't subtract resonant contribution
+        // todo JB : fix this cross section so it doesn't subtract resonances
         elastic_xs = 4./9. * pp_elastic(sqrt_s_ * sqrt_s_);
       }
     }
@@ -1750,13 +1748,13 @@ double cross_sections::high_energy() const {
     xs = piminusp_high_energy(s);  // pi- p, pi+ n
   } else if ((pdg_a.is_meson() && pdg_b.is_baryon()) ||
              (pdg_b.is_meson() && pdg_b.is_baryon())) {
-    xs = piminusp_high_energy(s); // default for baryon-meson
+    xs = piminusp_high_energy(s);  // default for baryon-meson
   }
 
   /* Meson-meson interaction goes through AQM from pp, until we get a proper
    * parametrization for π π */
   if (pdg_a.is_meson() && pdg_b.is_meson()) {
-    xs = 4./9. * piplusp_high_energy(s); // 4/9 factor since 2 mesons in AQM
+    xs = 4./9. * piplusp_high_energy(s);  // 4/9 factor since 2 mesons in AQM
   }
 
   // AQM scaling for cross-sections
@@ -2086,12 +2084,10 @@ bool cross_sections::decide_string(bool strings_switch,
   if (!is_NN_scattering && !is_BBbar_scattering && !is_Npi_scattering &&
       !is_AQM_scattering) {
     return false;
-  }
-  else if (is_BBbar_scattering) {
+  } else if (is_BBbar_scattering) {
     // NNbar only goes through strings, so there is no "window" considerations
     return true;
-  }
-  else {
+  } else {
     /* if we do not use the probability transition algorithm, this is always a
      * string contribution if the energy is large enough*/
     if (!use_transition_probability) {
@@ -2111,7 +2107,7 @@ bool cross_sections::decide_string(bool strings_switch,
     } else if (is_NN_scattering) {
       region_lower = 4.0;
       region_upper = 5.0;
-    } else { //AQM
+    } else {  // AQM
       /* Transition region around 0.9 larger than the sum of pole masses;
        * highly arbitrary, feel free to improve */
       region_lower = incoming_particles_[0].pole_mass() +
@@ -2123,13 +2119,12 @@ bool cross_sections::decide_string(bool strings_switch,
       return true;
     } else if (sqrt_s_ < region_lower) {
       return false;
-    }
-    else {
-      double prob_pythia = 0.5 * sin(0.5 * M_PI * 
+    } else {
+      double prob_pythia = 0.5 * sin(0.5 * M_PI *
                sqrt_s_ - (region_lower + region_upper)/2.) /
                (region_upper - region_lower);
       assert(prob_pythia >= 0. && prob_pythia <= 1.);
-      return prob_pythia > Random::uniform(0.,1.);
+      return prob_pythia > Random::uniform(0., 1.);
     }
   }
 }

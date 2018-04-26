@@ -417,9 +417,10 @@ class PdgCode {
     *  but there are actually 2 strange quarks out of 2 total */
     if (is_hadron() && digits_.n_q3_ == 3 && digits_.n_q2_ == 3) {
       return 1.;
+    } else {
+      // For all other cases, there isn't both a strange and anti-strange
+      return abs(strangeness()) / 3.;
     }
-    // For all other cases, there isn't both a strange and anti-strange
-    else return abs(strangeness()) / 3.;
   }
 
   /**
