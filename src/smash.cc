@@ -217,13 +217,14 @@ ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
       two_to_one,
       included_2to2,
       configuration.take({"Collision_Term", "Strings"}, true),
+      configuration.take({"Collision_Term", "Strings_with_Probability"}, false),
       configuration.take({"Collision_Term", "NNbar_Treatment"},
                          NNbarTreatment::NoAnnihilation),
       false,
       0.0,
       false};
   return ScatterActionsFinder(configuration, params, nucleon_has_interacted, 0,
-                              0, 1);
+                              0);
 }
 
 }  // unnamed namespace

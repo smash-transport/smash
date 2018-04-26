@@ -111,14 +111,29 @@ void ScatterAction::add_all_scatterings(double elastic_parameter,
                                         bool two_to_one,
                                         ReactionsBitSet included_2to2,
                                         double low_snn_cut, bool strings_switch,
+                                        bool strings_with_probability,
                                         NNbarTreatment nnbar_treatment) {
   CrossSections xs(incoming_particles_, sqrt_s());
   CollisionBranchList processes = xs.generate_collision_list(
       elastic_parameter, two_to_one, included_2to2, low_snn_cut, strings_switch,
-      nnbar_treatment, string_process_);
+      strings_with_probability, nnbar_treatment, string_process_);
 
   /* Add various subprocesses.*/
   add_collisions(std::move(processes));
+
+  /* If the string processes are not triggered by a probability, then they
+   * always happen as long as the parametrized total cross section is larger
+   * than the sum of the cross sections of the non-string processes, and the
+   * square root s exceeds the threshold by at least 0.9 GeV. The cross section
+   * of the string processes are counted by taking the difference between the
+   * parametrized total and the sum of the non-strings. */
+  if (strings_switch && !strings_with_probability && xs.included_in_string() &&
+      xs.high_energy() > cross_section() &&
+      sqrt_s() > incoming_particles_[0].pole_mass() +
+                     incoming_particles_[1].pole_mass() + 0.9) {
+    add_collisions(xs.string_excitation(xs.high_energy() - cross_section(),
+                                        string_process_));
+  }
 }
 
 double ScatterAction::get_total_weight() const { return total_cross_section_; }

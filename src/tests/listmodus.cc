@@ -180,14 +180,14 @@ TEST(multiple_file_non_oscar_output) {
 
   std::vector<ParticleList> init_particles;
 
-  constexpr int max_events = 10;
-  for (int i = 0; i < max_events; i++) {
+  constexpr size_t max_events = 10;
+  for (size_t i = 0; i < max_events; i++) {
     create_non_oscar_particlefile(i, init_particles);
   }
   COMPARE(init_particles.size(), max_events);
 
   // Read particles with list modus
-  for (int current_event = 0; current_event < max_events; current_event++) {
+  for (size_t current_event = 0; current_event < max_events; current_event++) {
     Particles particles_read;
     list_modus.initial_conditions(&particles_read, par);
 

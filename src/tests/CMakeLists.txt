@@ -240,6 +240,7 @@ smash_add_unittest(width)
 smash_add_unittest(without_float_traps)
 smash_add_unittest(yamltest)
 
+
 # verify that the binary has a cli help
 smash_add_runtest(smash_help smash smash -h)
 

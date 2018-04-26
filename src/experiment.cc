@@ -161,7 +161,8 @@ namespace {
  * \ref output_contents_ "output contents". List of available formats is
  * \ref list_of_output_formats "here".
  * \n
- * Besides the universal \key Format option, there are also content-specific output
+ * Besides the universal \key Format option, there are also content-specific
+ output
  * options that are listed below.
  *
  * ### Content-specific output options
@@ -327,8 +328,12 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   if (modus_chooser == "Box") {
     strings_switch_default = false;
   }
+  constexpr bool strings_with_probability_default = false;
   const bool strings_switch =
       config.take({"Collision_Term", "Strings"}, strings_switch_default);
+  const bool strings_with_probability =
+      config.take({"Collision_Term", "Strings_with_Probability"},
+                  strings_with_probability_default);
   const NNbarTreatment nnbar_treatment = config.take(
       {"Collision_Term", "NNbar_Treatment"}, NNbarTreatment::NoAnnihilation);
   const bool photons_switch = config.has_value({"Output", "Photons"});
@@ -355,6 +360,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
           two_to_one,
           included_2to2,
           strings_switch,
+          strings_with_probability,
           nnbar_treatment,
           photons_switch,
           low_snn_cut,
@@ -470,12 +476,11 @@ void Experiment<Modus>::create_output(std::string format, std::string content,
  * \key Included_2to2 (list of 2 <--> 2 reactions,
  * optional, default = ["All"]) \n
  * List that contains all possible 2 <--> 2 process categories. Each process of
- * the listed category can be performed within the simulation. Possible categories are:
- * \li \key "Elastic" - elastic binary scatterings
- * \li \key "NN_to_NR" - nucleon + nucleon <--> nucleon + resonance
- * \li \key "NN_to_DR" - nucleon + nucleon <--> delta + resonance
- * \li \key "KN_to_KN" - kaon + nucleon <--> kaon + nucleon
- * \li \key "KN_to_KDelta" - kaon + nucleon <--> kaon + dela
+ * the listed category can be performed within the simulation. Possible
+ * categories are: \li \key "Elastic" - elastic binary scatterings \li \key
+ * "NN_to_NR" - nucleon + nucleon <--> nucleon + resonance \li \key "NN_to_DR" -
+ * nucleon + nucleon <--> delta + resonance \li \key "KN_to_KN" - kaon + nucleon
+ * <--> kaon + nucleon \li \key "KN_to_KDelta" - kaon + nucleon <--> kaon + dela
  * \li \key "Strangeness_exchange" - processes with strangeness exchange
  * \li \key "All" - include all binary processes, no necessity to list each
  * single category
@@ -495,6 +500,27 @@ void Experiment<Modus>::create_output(std::string format, std::string content,
  * \li \key "resonances" - Annhilation through NNbar → ρh₁(1170); combined with
  *  ρ → ππ and h₁(1170) → πρ, which gives 5 pions on average.
  * \li \key "strings" - Annihilation throug string fragmentation.
+ *
+ * \key Strings_with_Probability (bool, optional, default = \key false): \n
+ * \li \key true - String processes are triggered according to a probability
+ *                 increasing smoothly with the collisional energy from 0 to 1
+ *                 in a certain energy window. At energies beyond that window,
+ *                 all the inelastic scatterings are via strings, while at the
+ *                 energies below that window, all the scatterings are via
+ *                 non-string processes. One should be careful that in this
+ *                 approach, the scatterings via resoances are also suppressed
+ *                 in the intermediate energy region, and vanishes at high
+ *                 energies, e.g. pπ→Δ→ΣK can't happen at a collisional energy
+ *                 beyond 2.2 GeV in this approach. Therefore, the cross
+ *                 sections of the scatterings to the certain final states,
+ *                 which might be crucial for the production of the rare
+ *                 species, will be reduced at the high energies. \n
+ * \li \key false - String processe always happens as long as the collisional
+ *                  energy exceeds the threshold value by 0.9 GeV, and the
+ *                  parametrized total cross section is larger than the sum of
+ *                  cross sections contributed by the non-string processes. The
+ *                  string cross section is thus obtained by taking the
+ *                  difference between them.
  *
  * \subpage pauliblocker
  */
@@ -536,7 +562,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       !no_coll) {
     auto scat_finder = make_unique<ScatterActionsFinder>(
         config, parameters_, nucleon_has_interacted_, modus_.total_N_number(),
-        modus_.proj_N_number(), n_fractional_photons_);
+        modus_.proj_N_number());
     max_transverse_distance_sqr_ =
         scat_finder->max_transverse_distance_sqr(parameters_.testparticles);
     action_finders_.emplace_back(std::move(scat_finder));
@@ -1081,29 +1107,37 @@ bool Experiment<Modus>::perform_action(
   }
 
   // At every collision photons can be produced.
+  // Note: We rely here on the lazy evaluation of the arguments to if.
+  // It may happen that in a wall-crossing-action sqrt_s raise an exception
+  // Therefore we first have to check if the incoming particles can undergo
+  // an em-interaction.
   if (photons_switch_ &&
-      (ScatterActionPhoton::is_photon_reaction(action.incoming_particles()) !=
-       ScatterActionPhoton::ReactionType::no_reaction)) {
+      ScatterActionPhoton::is_photon_reaction(action.incoming_particles()) &&
+      ScatterActionPhoton::is_kinematically_possible(
+          action.sqrt_s(), action.incoming_particles())) {
     /* Time in the action constructor is relative to
      * current time of incoming */
     constexpr double action_time = 0.;
     ScatterActionPhoton photon_act(action.incoming_particles(), action_time,
-                                   n_fractional_photons_);
-    /* Add a completely dummy process to photon action.  The only important
-     * thing is that its cross-section is equal to cross-section of action.
-     * This can be done, because photon action is never performed, only
-     * final state is generated and printed to photon output. */
-    photon_act.add_dummy_hadronic_channels(action.get_total_weight());
-    // Now add the actual photon reaction channel
-    photon_act.add_single_channel();
-    for (int i = 0; i < n_fractional_photons_; i++) {
-      photon_act.generate_final_state();
-      for (const auto &output : outputs_) {
-        if (output->is_photon_output()) {
-          output->at_interaction(photon_act, rho);
-        }
-      }
-    }
+                                   n_fractional_photons_,
+                                   action.get_total_weight());
+
+    /**
+     * Add a completely dummy process to the photon action. The only important
+     * thing is that its cross-section is equal to the cross-section of the
+     * hadronic action. This can be done, because the photon action is never
+     * actually performed, only the final state is generated and printed to
+     * the photon output.
+     * Note: The cross_section_scaling_factor can be neglected here, since it
+     * cancels out for the weighting, where a ratio of (unscaled) photon
+     * cross section and (unscaled) hadronic cross section is taken.
+     */
+    photon_act.add_dummy_hadronic_process(action.get_total_weight());
+
+    // Now add the actual photon reaction channel.
+    photon_act.add_single_process();
+
+    photon_act.perform_photons(outputs_);
   }
   log.debug(~einhard::Green(), "✔ ", action);
   return true;
