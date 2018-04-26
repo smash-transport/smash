@@ -136,9 +136,11 @@ void ScatterAction::add_all_scatterings(double elastic_parameter,
   }
 }
 
-double ScatterAction::raw_weight_value() const { return total_cross_section_; }
+double ScatterAction::get_total_weight() const { return total_cross_section_; }
 
-double ScatterAction::partial_weight() const { return partial_cross_section_; }
+double ScatterAction::get_partial_weight() const {
+  return partial_cross_section_;
+}
 
 ThreeVector ScatterAction::beta_cm() const {
   return total_momentum().velocity();

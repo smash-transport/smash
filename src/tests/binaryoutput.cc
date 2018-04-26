@@ -138,8 +138,8 @@ static bool compare_interaction_block_header(const int &nin, const int &nout,
   // std::cout << nout_read << " " << nout << std::endl;
   // std::cout << rho << std::endl;
   return (c_read == 'i') && (nin_read == nin) && (nout_read == nout) &&
-         (rho_read == rho) && (weight_read == action.raw_weight_value()) &&
-         (partial_weight_read == action.partial_weight()) &&
+         (rho_read == rho) && (weight_read == action.get_total_weight()) &&
+         (partial_weight_read == action.get_partial_weight()) &&
          (process_type_read == process_type);
 }
 

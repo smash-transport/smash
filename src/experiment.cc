@@ -1120,7 +1120,7 @@ bool Experiment<Modus>::perform_action(
      * thing is that its cross-section is equal to cross-section of action.
      * This can be done, because photon action is never performed, only
      * final state is generated and printed to photon output. */
-    photon_act.add_dummy_hadronic_channels(action.raw_weight_value());
+    photon_act.add_dummy_hadronic_channels(action.get_total_weight());
     // Now add the actual photon reaction channel
     photon_act.add_single_channel();
     for (int i = 0; i < n_fractional_photons_; i++) {
