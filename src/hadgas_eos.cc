@@ -326,19 +326,27 @@ double HadronGasEos::sample_mass_thermal(const ParticleType &ptype,
                        gsl_sf_bessel_Kn_scaled(2, m0 * beta) *
                        ptype.spectral_function(m0) /
                        ptype.spectral_function_simple(m0);
-    // Coarse loop to find max_ratio
+    // Heuristic adaptive maximum search to find max_ratio
     constexpr int npoints = 31;
-    const double dm = (max_mass - mth) / npoints;
-    for (size_t i = 1; i < npoints; i++) {
-      m = mth + dm * i;
-      const double thermal_factor = m * m * std::exp(- beta * m) *
-                          gsl_sf_bessel_Kn_scaled(2, m * beta);
-      q = ptype.spectral_function(m) * thermal_factor /
-            ptype.spectral_function_simple(m);
-      if (q > max_ratio) {
-        max_ratio = q;
+    double m_lower = mth, m_upper = max_mass, m_where_max = m0;
+
+    for (size_t n_iterations = 0; n_iterations < 2; n_iterations ++) {
+      const double dm = (m_upper - m_lower) / npoints;
+      for (size_t i = 1; i < npoints; i++) {
+        m = m_lower + dm * i;
+        const double thermal_factor = m * m * std::exp(- beta * m) *
+                            gsl_sf_bessel_Kn_scaled(2, m * beta);
+        q = ptype.spectral_function(m) * thermal_factor /
+              ptype.spectral_function_simple(m);
+        if (q > max_ratio) {
+          max_ratio = q;
+          m_where_max = m;
+        }
       }
+      m_lower = m_where_max - (m_where_max - m_lower) * 0.1;
+      m_upper = m_where_max + (m_upper - m_where_max) * 0.1;
     }
+    // Safety factor
     max_ratio *= 1.5;
 
     do {
@@ -354,8 +362,10 @@ double HadronGasEos::sample_mass_thermal(const ParticleType &ptype,
         const auto &log = logger<LogArea::Resonances>();
         log.warn(ptype.name(), " - maximum increased in",
                  " sample_mass_thermal from ", max_ratio, " to ", q,
-                 ", mass = ", m);
+                 ", mass = ", m, " previously assumed maximum at m = ",
+                 m_where_max);
         max_ratio = q;
+        m_where_max = m;
       } else {
         break;
       }
