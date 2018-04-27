@@ -328,7 +328,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   if (modus_chooser == "Box") {
     strings_switch_default = false;
   }
-  bool use_AQM_default = false;
+  bool use_AQM_default = true;
   constexpr bool strings_with_probability_default = false;
   const bool strings_switch =
       config.take({"Collision_Term", "Strings"}, strings_switch_default);
@@ -338,7 +338,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
       config.take({"Collision_Term", "Strings_with_Probability"},
                   strings_with_probability_default);
   const NNbarTreatment nnbar_treatment = config.take(
-      {"Collision_Term", "NNbar_Treatment"}, NNbarTreatment::NoAnnihilation);
+      {"Collision_Term", "NNbar_Treatment"}, NNbarTreatment::Strings);
   const bool photons_switch = config.has_value({"Output", "Photons"});
   /* Elastic collisions between the nucleons with the square root s
    * below low_snn_cut are excluded. */
@@ -499,13 +499,13 @@ void Experiment<Modus>::create_output(std::string format, std::string content,
  * as a decay afterburner, but not recommended in general, because
  * it breaks the detailed balance.
  *
- * \key NNbar_Treatment (string, optional, default = "no annihilation")
+ * \key NNbar_Treatment (string, optional, default = "strings")
  * \li \key "no annihilation" - No annihilation of NNbar is performed.
  * \li \key "resonances" - Annhilation through NNbar → ρh₁(1170); combined with
  *  ρ → ππ and h₁(1170) → πρ, which gives 5 pions on average.
  * \li \key "strings" - Annihilation throug string fragmentation.
  *
- * \key Use_AQM (bool, optional, default = \key false) \n
+ * \key Use_AQM (bool, optional, default = \key true) \n
  * Turn on AQM cross-sections for exotic combination of particles
  * (baryon-baryon cross-sections are scaled from proton-proton high energy
  * parametrization, for example). This includes both elastic and non-elastic
