@@ -550,7 +550,7 @@ bool StringProcess::next_NDiffHard() {
   final_state_.clear();
 
   std::array<bool, 2> accepted_by_pythia;
-  for (i = 0; i < 2; i++) {
+  for (int i = 0; i < 2; i++) {
     int pdgid = PDGcodes_[i].get_decimal();
     accepted_by_pythia[i] = pdgid == 2212 || pdgid == -2212 ||
                             pdgid == 2112 || pdgid == -2112 ||
