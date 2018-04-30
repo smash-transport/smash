@@ -9,266 +9,296 @@ See this file on how to compile it and CONTRIBUTING for development hints.
  *                          Comput. Phys. Comm. 178 (2008) 852.
 
 
- /*!\Userguide
- \page install Installation
+/*!\Userguide
+\page install Installation
 
- Quick instructions how to build smash.
+Quick instructions how to build smash.
 
- Prerequisites
- -------------
+Prerequisites
+-------------
 
- SMASH is known to compile and work with one of these compilers (which have the
- required C++11 features):
- - gcc >= 4.8
- - clang >= 3.2
+SMASH is known to compile and work with one of these compilers (which have the
+required C++11 features):
+- gcc >= 4.8
+- clang >= 3.2
 
- It requires the following tools & libraries:
- - cmake
- - the GNU Scientific Library
- - the Eigen library for linear algebra (see http://eigen.tuxfamily.org)
- - boost filesystem >= 1.49
+It requires the following tools & libraries:
+- cmake
+- the GNU Scientific Library
+- the Eigen library for linear algebra (see http://eigen.tuxfamily.org)
+- boost filesystem >= 1.49
 
- Further tools that can be helpful (mainly for development):
- - clang-format = 6.0
- - ROOT >= 5.34
- - doxygen >= 1.8.4
- - valgrind
- - cpplint
- - cppcheck
- - codespell
+Further tools that can be helpful (mainly for development):
+- clang-format = 6.0
+- ROOT >= 5.34
+- doxygen >= 1.8.4
+- valgrind
+- cpplint
+- cppcheck
+- codespell
 
- Support for ROOT output is only enabled if a suitable version of ROOT is found
- on the system.
+Support for ROOT output is only enabled if a suitable version of ROOT is found
+on the system.
 
 
- Building SMASH
- --------------
+Building SMASH
+--------------
 
- Build SMASH in a separate directory:
+Build SMASH in a separate directory:
 
-     mkdir build
-     cd build
-     cmake ..
-     make
+    mkdir build
+    cd build
+    cmake ..
+    make
 
- Run it with specific settings:
+Run it with specific settings:
 
-     vi config.yaml
-     ./smash
+    vi config.yaml
+    ./smash
 
 
- Size of the code
- ----------------
+Choosing a build type
+---------------------
 
- Please note that after compilation the 'smash' directory (including 'build')
- has a size of about 4GB. If disk space is restricted, one suggestion is to
- just run
+There are different build types available, which compile the SMASH code for
+different situations.
 
-     make smash
+For a debug build (with all warnings, but no optimization) use:
 
- which will only compile the main code. As a default the unit tests are also
- compiled which leads to a large portion of the disk space consumption. It is
- still recommended to run the unit tests at least once, when compiling in
- a new environment to ensure that everything works as expected.
+    cmake .. -DCMAKE_BUILD_TYPE=Debug
 
+For a release build (full optimization and no warnings) use:
 
- Changing the compiler
- ---------------------
+    cmake .. -DCMAKE_BUILD_TYPE=Release
 
- In order to use a particular compiler, you can set the following environment
- variables:
+For a profiling build use:
 
-     export CC=gcc
-     export CXX=g++
+    cmake .. -DCMAKE_BUILD_TYPE=Profiling
 
- Alternatively the compiler can also be specified to cmake like this:
+The default build type is 'RelWithDebInfo', which provides both optimization
+and debug info.
 
-     cmake .. -DCMAKE_CXX_COMPILER=g++
 
+Enhancing build verbosity
+-------------------------
 
- Using the offical clang version on macOS
- ----------------------------------------
+To find cmake build errors (best debugged with full compiler output) use:
 
- The clang compiler version shipped with XCode or the Command Line Tools from
- Apple in the past (before version 8.1) did not always support all C++ features
- that were used. If problems with compiling on macOS arise, try the official
- clang version. This can be done for example with Homebrew (http://brew.sh):
+    make VERBOSE=1
 
-     brew install llvm
 
- After that you have to instruct cmake that it should use the newly installed
- clang compiler and also tell the linker where the libraries are by altering some
- cmake flags. Enter the cmake command like below:
+Size of the code
+----------------
 
-     cmake .. -DCMAKE_CXX_COMPILER=/usr/local/opt/llvm/bin/clang++
-     -DCMAKE_EXE_LINKER_FLAGS="-L/usr/local/opt/llvm/lib -lc++abi"
-     -DCMAKE_CXX_FLAGS=-I/usr/local/opt/llvm/include
+Please note that after compilation the 'smash' directory (including 'build')
+has a size of about 4GB. If disk space is restricted, one suggestion is to
+just run
 
- Note: FPE environment only works with gcc, so e.g. you won't get backtraces from
- floating point traps with clang in general.
+    make smash
 
+which will only compile the main code. As a default the unit tests are also
+compiled which leads to a large portion of the disk space consumption. It is
+still recommended to run the unit tests at least once, when compiling in
+a new environment to ensure that everything works as expected.
 
- Disabling ROOT support
- ---------------------------
 
- Producing ROOT output requires ROOT installed (see http://root.cern.ch).
- If ROOT is found, the support for ROOT output is automatically enabled.
- In order to disable it, one can do the follwoing:
+Changing the compiler
+---------------------
 
-     cmake -DUSE_ROOT=OFF <source_dir>
-     make
+In order to use a particular compiler, you can set the following environment
+variables:
 
- Building the Documentation
- --------------------------
+    export CC=gcc
+    export CXX=g++
 
- Build the code documentation:
+Alternatively the compiler can also be specified to cmake like this:
 
-     make doc
-     firefox doc/html/index.html
+    cmake .. -DCMAKE_CXX_COMPILER=g++
 
- Build the user documentation:
 
-     make user
-     firefox doc/user/index.html
+Using the offical clang version on macOS
+----------------------------------------
 
+The clang compiler version shipped with XCode or the Command Line Tools from
+Apple in the past (before version 8.1) did not always support all C++ features
+that were used. If problems with compiling on macOS arise, try the official
+clang version. This can be done for example with Homebrew (http://brew.sh):
 
- Running Tests
- -------------
+    brew install llvm
 
- Run the various unit tests:
+After that you have to instruct cmake that it should use the newly installed
+clang compiler and also tell the linker where the libraries are by altering some
+cmake flags. Enter the cmake command like below:
 
-     make test
+    cmake .. -DCMAKE_CXX_COMPILER=/usr/local/opt/llvm/bin/clang++
+    -DCMAKE_EXE_LINKER_FLAGS="-L/usr/local/opt/llvm/lib -lc++abi"
+    -DCMAKE_CXX_FLAGS=-I/usr/local/opt/llvm/include
 
- Another way to do this is:
+Note: FPE environment only works with gcc, so e.g. you won't get backtraces from
+floating point traps with clang in general.
 
-     ctest
 
+Disabling ROOT support
+---------------------------
 
- This has the advantage that it can also be used for running tests in parallel on
- a multicore machine, e.g. via
+Producing ROOT output requires ROOT installed (see http://root.cern.ch).
+If ROOT is found, the support for ROOT output is automatically enabled.
+In order to disable it, one can do the follwoing:
 
-     ctest -j4
+    cmake -DUSE_ROOT=OFF <source_dir>
+    make
 
- (on a quad-core machine).
+Building the Documentation
+--------------------------
 
- If a test crashes, there might be some leftover in the "test_output" folder,
- causing the test to always fail when run again. To fix this problem, just remove
- the folder.
+Build the code documentation:
 
+    make doc
+    firefox doc/html/index.html
 
- Installing binaries as a user
- -----------------------------
+Build the user documentation:
 
- If you don't have administrator privileges on the machine you are using, you can
- still install software locally. Just copy the binary (in this example
- "clang-format") to a local folder and update your path:
+    make user
+    firefox doc/user/index.html
 
-     mkdir ~/bin
-     cp ./clang-format ~/bin
-     echo 'export PATH=$PATH:~/bin' >> ~/.bashrc
-     source ~/.bashrc
 
- After this, you can just copy executable files to `~/bin` to install them. This
- also works for other exectuables like cpplint. You might have to set them to be
- executable with "chmod u+x ~/bin/my-binary".
+Running Tests
+-------------
 
+Run the various unit tests:
 
- Installing clang-format
- -----------------------
+    make test
 
- clang-format is a part of the clang compiler. You can download the most recent
- binaries here:
+Another way to do this is:
 
-     http://releases.llvm.org/download.html
+    ctest
 
- Make sure to pick a pre-built binary for your system. For example, for Ubuntu
- you could run:
 
-     $ lsb_release -a
-     No LSB modules are available.
-     Distributor ID: Ubuntu
-     Description:    Ubuntu 16.04.2 LTS
-     Release:        16.04
-     Codename:       xenial
+This has the advantage that it can also be used for running tests in parallel on
+a multicore machine, e.g. via
 
- This tells you to download "Clang for x86_64 Ubuntu 16.04". (You might have to
- look for an older version to get pre-built binaries.)
+    ctest -j4
 
- It is sufficient to unpack the archive with `tar xf` and to copy only the
- binary you need (`clang-format` in the `bin` folder of the archive), see
- "Installing binaries as a user" above.
+(on a quad-core machine).
 
+If a test crashes, there might be some leftover in the "test_output" folder,
+causing the test to always fail when run again. To fix this problem, just remove
+the folder.
 
- Installing cpplint
- ------------------
 
- We use cpplint to enforce some of our style guide lines as part of our tests.
- You can install it like this:
+Installing binaries as a user
+-----------------------------
 
-     pip install --user cpplint
+If you don't have administrator privileges on the machine you are using, you can
+still install software locally. Just copy the binary (in this example
+"clang-format") to a local folder and update your path:
 
- You might have to add `~/.local/bin` to your `$PATH`, see "Installing binaries
- as a user".
+    mkdir ~/bin
+    cp ./clang-format ~/bin
+    echo 'export PATH=$PATH:~/bin' >> ~/.bashrc
+    source ~/.bashrc
 
+After this, you can just copy executable files to `~/bin` to install them. This
+also works for other exectuables like cpplint. You might have to set them to be
+executable with "chmod u+x ~/bin/my-binary".
 
- Installing cppcheck
- -------------------
 
- You can use cppcheck to find some problems in the code, it has quite a few
- false positives though. Download and compile the latest version:
+Installing clang-format
+-----------------------
 
-     git clone git://github.com/danmar/cppcheck.git
-     cd cppcheck
-     make
+clang-format is a part of the clang compiler. You can download the most recent
+binaries here:
 
- You can then copy it to your local binary folder, see "Installing binaries
- as a user".
+    http://releases.llvm.org/download.html
 
+Make sure to pick a pre-built binary for your system. For example, for Ubuntu
+you could run:
 
- Installing codespell
- --------------------
+    $ lsb_release -a
+    No LSB modules are available.
+    Distributor ID: Ubuntu
+    Description:    Ubuntu 16.04.2 LTS
+    Release:        16.04
+    Codename:       xenial
 
- If you want to check the spelling in comments, try codespell. You can install
- it like this:
+This tells you to download "Clang for x86_64 Ubuntu 16.04". (You might have to
+look for an older version to get pre-built binaries.)
 
-     pip install --user codespell
+It is sufficient to unpack the archive with `tar xf` and to copy only the
+binary you need (`clang-format` in the `bin` folder of the archive), see
+"Installing binaries as a user" above.
 
- It is the same as installing cpplint.
 
+Installing cpplint
+------------------
 
- Including Eigen header files from custom location
- -------------------------------------------------
+We use cpplint to enforce some of our style guide lines as part of our tests.
+You can install it like this:
 
- Let's assume Eigen headers will be unpacked in $HOME.
+    pip install --user cpplint
 
- - Download latest package [latest-eigen].tar.gz from http://eigen.tuxfamily.org
+You might have to add `~/.local/bin` to your `$PATH`, see "Installing binaries
+as a user".
 
- - unpack: tar -xf [latest-eigen].tar.gz -C $HOME
 
- - in smash/build/, create build files with
+Installing cppcheck
+-------------------
 
-   cmake -DCMAKE_INSTALL_PREFIX=$HOME/[latest-eigen]/ ..
+You can use cppcheck to find some problems in the code, it has quite a few
+false positives though. Download and compile the latest version:
 
+    git clone git://github.com/danmar/cppcheck.git
+    cd cppcheck
+    make
 
- Using a custom GSL build
- ------------------------
+You can then copy it to your local binary folder, see "Installing binaries
+as a user".
 
- Run the following:
 
-     wget ftp://ftp.gnu.org/gnu/gsl/gsl-latest.tar.gz
-     tar -zxvf gsl-latest.tar.gz
+Installing codespell
+--------------------
 
- This creates a folder named "gsl-[version_number]" called $GSL here.
+If you want to check the spelling in comments, try codespell. You can install
+it like this:
 
-     cd $GSL
-     ./configure --prefix $GSL
-     make -jN
-     make install
+    pip install --user codespell
 
- Here N is the number of cores to use in the "make" command. When compiling
- SMASH, run cmake with
+It is the same as installing cpplint.
 
-     cmake -DCMAKE_PREFIX_PATH=$GSL ..
 
- Note: In case of problems, make sure to start with a clean build folder.
- */
+Including Eigen header files from custom location
+-------------------------------------------------
+
+Let's assume Eigen headers will be unpacked in $HOME.
+
+- Download latest package [latest-eigen].tar.gz from http://eigen.tuxfamily.org
+
+- unpack: tar -xf [latest-eigen].tar.gz -C $HOME
+
+- in smash/build/, create build files with
+
+    cmake -DCMAKE_INSTALL_PREFIX=$HOME/[latest-eigen]/ ..
+
+
+Using a custom GSL build
+------------------------
+
+Run the following:
+
+    wget ftp://ftp.gnu.org/gnu/gsl/gsl-latest.tar.gz
+    tar -zxvf gsl-latest.tar.gz
+
+This creates a folder named "gsl-[version_number]" called $GSL here.
+
+    cd $GSL
+    ./configure --prefix $GSL
+    make -jN
+    make install
+
+Here N is the number of cores to use in the "make" command. When compiling
+SMASH, run cmake with
+
+    cmake -DCMAKE_PREFIX_PATH=$GSL ..
+
+Note: In case of problems, make sure to start with a clean build folder.
+*/
