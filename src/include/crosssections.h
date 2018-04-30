@@ -116,7 +116,6 @@ class CrossSections {
    *
    * \param[in] string_process String process used for string fragmentation.
    * \param[in] total_string_xs Total cross section for the string process [mb].
-   * \param[out] subproc_soft_string soft string subprocess identifier
    * \return List of subprocesses (single-diffractive,
    *        double-diffractive and non-diffractive) with their cross sections.
    *
@@ -125,8 +124,7 @@ class CrossSections {
    * \todo Same assumption made by NNbar_annihilation. Resolve.
    */
   CollisionBranchList string_excitation(double total_string_xs,
-                                        StringProcess* string_process,
-                                        StringSoftType &subproc_soft_string);
+                                        StringProcess* string_process);
 
   /**
    * Determine the cross section for NNbar annihilation, which is given by the
@@ -212,6 +210,9 @@ class CrossSections {
    * and nucleon-pion can interact via string.
    */
   bool included_in_string() const;
+
+  /// \return soft string subprocess identifier
+  StringSoftType get_subproc_soft_string() { return subproc_soft_string_; }
 
  private:
   /**
@@ -378,6 +379,9 @@ class CrossSections {
 
   /// Total energy in the center-of-mass frame.
   double sqrt_s_;
+
+  /// soft string subprocess identifier
+  StringSoftType subproc_soft_string_;
 };
 
 }  // namespace smash
