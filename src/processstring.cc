@@ -549,6 +549,26 @@ bool StringProcess::next_NDiffHard() {
   const auto &log = logger<LogArea::Pythia>();
   final_state_.clear();
 
+  std::array<bool, 2> accepted_by_pythia;
+  for (i = 0; i < 2; i++) {
+    int pdgid = PDGcodes_[i].get_decimal();
+    accepted_by_pythia[i] = pdgid == 2212 || pdgid == -2212 ||
+                            pdgid == 2112 || pdgid == -2112 ||
+                            pdgid == 211 || pdgid == 111 || pdgid == -211;
+  }
+  if (!accepted_by_pythia[0] || !accepted_by_pythia[1]) {
+    for (int i = 0; i < 2; i++) {
+      NpartString_[i] = 1;
+      ParticleData new_particle(ParticleType::find(PDGcodes_[i]));
+      new_particle.set_4momentum(pcom_[i]);
+      new_particle.set_cross_section_scaling_factor(1.);
+      new_particle.set_formation_time(time_collision_);
+      final_state_.push_back(new_particle);
+    }
+    NpartFinal_ = NpartString_[0] + NpartString_[1];
+    return true;
+  }
+
   int previous_idA = pythia_parton_->mode("Beams:idA"),
       previous_idB = pythia_parton_->mode("Beams:idB");
   double previous_eCM = pythia_parton_->parm("Beams:eCM");
