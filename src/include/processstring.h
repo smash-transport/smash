@@ -91,8 +91,6 @@ class StringProcess {
   std::array<ThreeVector, 3> evecBasisAB_;
   /// total number of final state particles
   int NpartFinal_;
-  /// soft subprocess identifier
-  StringSoftType subproc_;
   /// number of particles fragmented from strings
   std::array<int, 2> NpartString_;
   /// the minimum lightcone momentum scale carried by gluon [GeV]
@@ -309,13 +307,6 @@ class StringProcess {
 
   // clang-format off
 
-  /**
-   * Set the soft subprocess identifier
-   * \param[in] iproc soft string subprocess that will be implemented
-   */
-  void set_subproc(StringSoftType iproc) { subproc_ = iproc; }
-  /// \return the soft subprocess identifier
-  StringSoftType get_subproc() { return subproc_; }
   /**
    * initialization
    * feed intial particles, time of collision and gamma factor of the center of

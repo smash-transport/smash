@@ -133,7 +133,8 @@ void ScatterAction::add_all_scatterings(double elastic_parameter,
                     nnbar_treatment == NNbarTreatment::Strings)) {
     const double xs_diff = xs.high_energy() - cross_section();
     if (xs_diff > 0.) {
-      add_collisions(xs.string_excitation(xs_diff, string_process_));
+      add_collisions(xs.string_excitation(xs_diff, string_process_,
+                                          subproc_soft_string_));
     }
   }
 }
@@ -429,13 +430,12 @@ void ScatterAction::string_excitation(bool is_soft_proc) {
     string_process_->init(incoming_particles_, time_of_execution_, gamma_cm());
     /* implement collision */
     bool success = false;
-    StringSoftType iproc = string_process_->get_subproc();
     int ntry = 0;
     const int ntry_max = 10000;
     while (!success && ntry < ntry_max) {
       ntry++;
       if (is_soft_proc) {
-        switch (iproc) {
+        switch (subproc_soft_string_) {
           case StringSoftType::SingleDiffAX:
             /* single diffractive to A+X */
             success = string_process_->next_SDiff(true);

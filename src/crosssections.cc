@@ -1584,7 +1584,8 @@ CollisionBranchList CrossSections::dn_xx(ReactionsBitSet /*included_2to2*/) {
 }
 
 CollisionBranchList CrossSections::string_excitation(
-    double total_string_xs, StringProcess* string_process) {
+    double total_string_xs, StringProcess* string_process,
+    StringSoftType &subproc_soft_string) {
   const auto& log = logger<LogArea::CrossSections>();
 
   if (!string_process) {
@@ -1718,7 +1719,7 @@ CollisionBranchList CrossSections::string_excitation(
       throw std::runtime_error("soft string subprocess is not specified.");
     }
 
-    string_process->set_subproc(iproc);
+    subproc_soft_string = iproc;
 
     /* fill the list of process channels */
     if (sig_string_soft > 0.) {

@@ -181,6 +181,9 @@ class ScatterAction : public Action {
 
   /** Pointer to interface class for strings */
   StringProcess* string_process_ = nullptr;
+
+  /// soft string subprocess identifier
+  StringSoftType subproc_soft_string_;
 };
 
 }  // namespace smash
