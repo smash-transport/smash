@@ -653,6 +653,7 @@ bool StringProcess::next_NDiffHard() {
 
 // baryon-antibaryon annihilation
 bool StringProcess::next_BBbarAnn() {
+  const auto &log = logger<LogArea::Pythia>();
   const std::array<FourVector, 2> ustrcom = {FourVector(1., 0., 0., 0.),
                                              FourVector(1., 0., 0., 0.)};
 
@@ -660,6 +661,9 @@ bool StringProcess::next_BBbarAnn() {
   NpartString_[0] = 0;
   NpartString_[1] = 0;
   final_state_.clear();
+
+  log.info("Annihilation occurs between ", PDGcodes_[0], "+", PDGcodes_[1],
+           " at CM energy [GeV] ", sqrtsAB_);
 
   // check if the initial state is baryon-antibaryon pair.
   PdgCode baryon = PDGcodes_[0], antibaryon = PDGcodes_[1];

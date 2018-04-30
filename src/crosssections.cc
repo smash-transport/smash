@@ -1609,6 +1609,7 @@ CollisionBranchList CrossSections::string_excitation(
       pdgid[i] = 211;
     }
   }
+  bool BBbar_pair = pdgid[0] + pdgid[1] == 0;
 
   CollisionBranchList channel_list;
   if (total_string_xs > 0.) {
@@ -1635,14 +1636,13 @@ CollisionBranchList CrossSections::string_excitation(
      * into 2 mesonic strings of equal mass after annihilating one quark-
      * anti-quark pair. See StringProcess::next_BBbarAnn()
      */
-    const bool BBbar_pair = pdgid[0] + pdgid[1] == 0;
     double sig_annihilation;
     if (BBbar_pair) {
       /* In the case of baryon-antibaryon pair,
        * the parametrized cross section for annihilation will be added.
        * See xs_ppbar_annihilation(). */
       sig_annihilation = std::min(total_string_xs,
-                                  xs_ppbar_annihilation(sqrt_s_));
+                                  xs_ppbar_annihilation(sqrt_s_ * sqrt_s_));
     } else {
       sig_annihilation = 0.;
     }
