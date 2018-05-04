@@ -2137,8 +2137,8 @@ bool CrossSections::decide_string(bool strings_switch,
       // Rescale transition region to [-1, 1]
       double x = (sqrt_s_ - (region_lower + region_upper)/2.) /
                  (region_upper - region_lower);
-      assert(x >= -1.0 && x <= 1.0);
-      double prob_pythia = 0.5 * (std::sin(0.5 * M_PI * x) + 1.0);
+      assert(x >= -0.5 && x <= 0.5);
+      double prob_pythia = 0.5 * (std::sin(M_PI * x) + 1.0);
       assert(prob_pythia >= 0. && prob_pythia <= 1.);
       return prob_pythia > Random::uniform(0., 1.);
     }
