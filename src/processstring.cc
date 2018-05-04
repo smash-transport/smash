@@ -682,8 +682,8 @@ bool StringProcess::next_BBbarAnn() {
   NpartString_[1] = 0;
   final_state_.clear();
 
-  log.info("Annihilation occurs between ", PDGcodes_[0], "+", PDGcodes_[1],
-           " at CM energy [GeV] ", sqrtsAB_);
+  log.debug("Annihilation occurs between ", PDGcodes_[0], "+", PDGcodes_[1],
+            " at CM energy [GeV] ", sqrtsAB_);
 
   // check if the initial state is baryon-antibaryon pair.
   PdgCode baryon = PDGcodes_[0], antibaryon = PDGcodes_[1];
