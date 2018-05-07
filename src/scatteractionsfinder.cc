@@ -371,6 +371,9 @@ void ScatterActionsFinder::dump_reactions() const {
             B.set_4momentum(B.pole_mass(), -mom, 0.0, 0.0);
             ScatterActionPtr act = make_unique<ScatterAction>(
                 A, B, time, isotropic_, string_formation_time_);
+            if (strings_switch_) {
+              act->set_string_interface(string_process_interface_.get());
+            }
             act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
                                      low_snn_cut_, strings_switch_, use_AQM_,
                                      strings_with_probability_,
