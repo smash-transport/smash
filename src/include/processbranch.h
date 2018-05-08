@@ -26,10 +26,10 @@ namespace smash {
  * (3) 2->2 (inelastic) (TwoToTwo)
  * (4) string excitation by PYTHIA (String)
  * (5) resonance decays (Decay)
- * (6) Wall transition (Wall)
- * (7) Forces thermalization
- * (41) Soft string excitation
- * (42) Hard string process involving 2->2 QCD process by PYTHIA
+ * (6) wall transition (Wall)
+ * (7) forced thermalization
+ * (41-45) soft string excitation
+ * (46) hard string process involving 2->2 QCD process by PYTHIA
  */
 enum class ProcessType {
   None = 0,
@@ -40,9 +40,19 @@ enum class ProcessType {
   Decay = 5,
   Wall = 6,
   Thermalization = 7,
-  StringSoft = 41,
-  StringHard = 42
+  StringSoftSingleDiffractiveAX = 41,
+  StringSoftSingleDiffractiveXB = 42,
+  StringSoftDoubleDiffractive   = 43,
+  StringSoftAnnihilation        = 44,
+  StringSoftNonDiffractive      = 45,
+  StringHard = 46
 };
+
+/**
+ * Check if a given process type is a soft string excitation
+ * \param[in] p The process type
+ */
+bool is_string_soft_process(ProcessType p);
 
 std::ostream &operator<<(std::ostream &os, ProcessType process_type);
 

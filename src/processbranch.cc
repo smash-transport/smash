@@ -15,6 +15,14 @@
 
 namespace smash {
 
+bool is_string_soft_process(ProcessType p) {
+  return p == ProcessType::StringSoftSingleDiffractiveAX ||
+         p == ProcessType::StringSoftSingleDiffractiveXB ||
+         p == ProcessType::StringSoftDoubleDiffractive ||
+         p == ProcessType::StringSoftAnnihilation ||
+         p == ProcessType::StringSoftNonDiffractive;
+}
+
 ParticleList ProcessBranch::particle_list() const {
   ParticleList l;
   l.reserve(particle_number());
@@ -48,8 +56,10 @@ double ProcessBranch::threshold() const {
 
 std::ostream& operator<<(std::ostream& os, const CollisionBranch& cbranch) {
   ProcessType ptype = cbranch.get_type();
-  if (ptype == ProcessType::StringSoft || ptype == ProcessType::StringHard) {
-    os << "strings";
+  if (is_string_soft_process(ptype)) {
+    os << "string soft";
+  } else if (ptype == ProcessType::StringHard) {
+    os << "strings hard";
   } else if (ptype == ProcessType::TwoToOne || ptype == ProcessType::TwoToTwo ||
              ptype == ProcessType::Elastic || ptype == ProcessType::Decay) {
     ParticleTypePtrList ptype_list = cbranch.particle_types();
@@ -81,7 +91,11 @@ std::ostream& operator<<(std::ostream& os, ProcessType process_type) {
     case ProcessType::TwoToTwo:
       os << "TwoToTwo";
       break;
-    case ProcessType::StringSoft:
+    case ProcessType::StringSoftSingleDiffractiveAX:
+    case ProcessType::StringSoftSingleDiffractiveXB:
+    case ProcessType::StringSoftDoubleDiffractive:
+    case ProcessType::StringSoftAnnihilation:
+    case ProcessType::StringSoftNonDiffractive:
       os << "Soft String Excitation";
       break;
     case ProcessType::StringHard:

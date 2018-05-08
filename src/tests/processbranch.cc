@@ -22,9 +22,9 @@ TEST(init_particle_types) {
 }
 
 TEST(assign_default) {
-  CollisionBranch branch(0., ProcessType::StringSoft);
+  CollisionBranch branch(0., ProcessType::StringSoftSingleDiffractiveAX);
   FUZZY_COMPARE(branch.weight(), 0.);
-  COMPARE(branch.get_type(), ProcessType::StringSoft);
+  COMPARE(branch.get_type(), ProcessType::StringSoftSingleDiffractiveAX);
 }
 TEST(assign_1_particle) {
   PdgCode smashon("9876542");
