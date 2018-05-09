@@ -134,8 +134,10 @@ void ScatterAction::add_all_scatterings(double elastic_parameter,
     const double xs_diff = xs.high_energy() - cross_section();
     if (xs_diff > 0.) {
       add_collisions(xs.string_excitation(xs_diff, string_process_));
-      subproc_soft_string_ = xs.get_subproc_soft_string();
     }
+  }
+  if (strings_switch) {
+    subproc_soft_string_ = xs.get_subproc_soft_string();
   }
 }
 
