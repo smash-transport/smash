@@ -237,6 +237,23 @@ double ppbar_total(double mandelstam_s);
 double ppbar_total(double mandelstam_s, double m_proj, double m_target);
 
 /**
+ * Deuteron pion elastic cross-section [mb] parametrized by \iref{Oh:2009gx}.
+ *
+ * \param[in] mandelstam_s the rest frame total energy squared
+ * \return the parametrized cross-section
+ */
+double deuteron_pion_elastic(double mandelstam_s);
+
+/**
+ * Deuteron nucleon elastic cross-section [mb] parametrized
+ * by \iref{Oh:2009gx}.
+ *
+ * \param[in] mandelstam_s the rest frame total energy squared
+ * \return the parametrized cross-section
+ */
+double deuteron_nucleon_elastic(double mandelstam_s);
+
+/**
  * K+ p elastic background cross section parametrization.
  * sigma(K+n->K+n) = sigma(K+n->K0p) = 0.5 * sigma(K+p->K+p)
  * Source: \iref{Buss:2011mx}, B.3.8

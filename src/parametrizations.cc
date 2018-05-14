@@ -310,6 +310,19 @@ double ppbar_total(double mandelstam_s) {
   }
 }
 
+double deuteron_pion_elastic(double mandelstam_s) {
+  const double s = mandelstam_s;
+  return 63.0 * std::exp(- smash::square(s - 4.67) / 0.15) +
+         15.0 * std::exp(- smash::square(s - 6.25) / 0.3);
+}
+
+double deuteron_nucleon_elastic(double mandelstam_s) {
+  const double s = mandelstam_s;
+  return 2500.0 * std::exp(- smash::square(s - 7.93) / 0.003) +
+         600.0  * std::exp(- smash::square(s - 7.93) / 0.1) +
+         10.0;
+} 
+
 double kplusp_elastic_background(double mandelstam_s) {
   constexpr double a0 = 10.508;  // mb
   constexpr double a1 = -3.716;  // mb/GeV

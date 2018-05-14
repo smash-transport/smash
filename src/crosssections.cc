@@ -223,6 +223,19 @@ double CrossSections::elastic_parametrization(bool use_AQM) {
              pdg_a.antiparticle_sign() == pdg_b.antiparticle_sign()) {
     // Elastic Nucleon Nucleon Scattering
     elastic_xs = nn_el();
+  } else if (pdg_a.is_nucleus() || pdg_b.is_nucleus()) {
+    const PdgCode& pdg_nucleus = pdg_a.is_nucleus() ? pdg_a : pdg_b;
+    const PdgCode& pdg_other = pdg_a.is_nucleus() ? pdg_b : pdg_a;
+    const bool is_deuteron =
+        std::abs(pdg_nucleus.get_decimal()) == pdg::decimal_d;
+    // Elastic (Anti-)deuteron Pion Scattering
+    if (is_deuteron && pdg_other.is_pion()) {
+      elastic_xs = deuteron_pion_elastic(sqrt_s_ * sqrt_s_);
+    }
+    // Elastic (Anti-)deuteron (Anti-)Nucleon Scattering
+    if (is_deuteron && pdg_other.is_nucleon()) {
+      elastic_xs = deuteron_nucleon_elastic(sqrt_s_ * sqrt_s_);
+    }
   } else if (use_AQM) {
     if (pdg_a.is_baryon() && pdg_b.is_baryon()) {
       // todo JB : double check those parametrizations
@@ -1482,7 +1495,7 @@ CollisionBranchList CrossSections::dpi_xx(ReactionsBitSet
     ParticleTypePtrList nuclei = ParticleType::list_light_nuclei();
     const double s = sqrt_s_ * sqrt_s_;
     for (ParticleTypePtr produced_nucleus : nuclei) {
-      // No elastic collisions for now
+      // Elastic collisions are treated in a different function
       if (produced_nucleus == &type_nucleus ||
           produced_nucleus->charge() != type_nucleus.charge() ||
           produced_nucleus->baryon_number() != type_nucleus.baryon_number()) {
