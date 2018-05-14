@@ -321,7 +321,7 @@ double deuteron_nucleon_elastic(double mandelstam_s) {
   return 2500.0 * std::exp(- smash::square(s - 7.93) / 0.003) +
          600.0  * std::exp(- smash::square(s - 7.93) / 0.1) +
          10.0;
-} 
+}
 
 double kplusp_elastic_background(double mandelstam_s) {
   constexpr double a0 = 10.508;  // mb
