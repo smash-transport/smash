@@ -370,6 +370,7 @@ int main(int argc, char *argv[]) {
       configuration.merge_yaml("{Collision_Term: {Two_to_One: False}}");
       ParticleType::create_type_list(configuration.take({"particles"}));
       DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
+      ParticleType::check_consistency();
       auto scat_finder = actions_finder_for_dump(configuration);
       scat_finder.dump_reactions();
       std::exit(EXIT_SUCCESS);
@@ -377,6 +378,7 @@ int main(int argc, char *argv[]) {
     if (resonance_dump_activated) {
       ParticleType::create_type_list(configuration.take({"particles"}));
       DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
+      ParticleType::check_consistency();
       PdgCode pdg(pdg_string);
       const ParticleType &res = ParticleType::find(pdg);
       res.dump_width_and_spectral_function();
@@ -385,6 +387,7 @@ int main(int argc, char *argv[]) {
     if (cross_section_dump_activated) {
       ParticleType::create_type_list(configuration.take({"particles"}));
       DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
+      ParticleType::check_consistency();
       configuration.merge_yaml("{Collision_Term: {Two_to_One: True}}");
       std::string arg_string(cs_string);
       std::vector<std::string> args = split(arg_string, ',');
