@@ -237,7 +237,9 @@ double ppbar_total(double mandelstam_s);
 double ppbar_total(double mandelstam_s, double m_proj, double m_target);
 
 /**
- * Deuteron pion elastic cross-section [mb] parametrized by \iref{Oh:2009gx}.
+ * Deuteron pion elastic cross-section [mb] parametrized
+ * to fit pi-d elastic scattering data (the data collection
+ * was be obtained from SAID data base, gwdac.phys.gwu.edu)
  *
  * \param[in] mandelstam_s the rest frame total energy squared
  * \return the parametrized cross-section

@@ -311,9 +311,7 @@ double ppbar_total(double mandelstam_s) {
 }
 
 double deuteron_pion_elastic(double mandelstam_s) {
-  const double s = mandelstam_s;
-  return 63.0 * std::exp(- smash::square(s - 4.67) / 0.15) +
-         15.0 * std::exp(- smash::square(s - 6.25) / 0.3);
+  return 0.3 / (smash::square(std::sqrt(mandelstam_s) - 2.172) + 0.065*0.065);
 }
 
 double deuteron_nucleon_elastic(double mandelstam_s) {
