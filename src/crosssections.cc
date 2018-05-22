@@ -228,12 +228,11 @@ double CrossSections::elastic_parametrization(bool use_AQM) {
     const PdgCode& pdg_other = pdg_a.is_nucleus() ? pdg_b : pdg_a;
     const bool is_deuteron =
         std::abs(pdg_nucleus.get_decimal()) == pdg::decimal_d;
-    // Elastic (Anti-)deuteron Pion Scattering
     if (is_deuteron && pdg_other.is_pion()) {
+      // Elastic (Anti-)deuteron Pion Scattering
       elastic_xs = deuteron_pion_elastic(sqrt_s_ * sqrt_s_);
-    }
-    // Elastic (Anti-)deuteron (Anti-)Nucleon Scattering
-    if (is_deuteron && pdg_other.is_nucleon()) {
+    } else if (is_deuteron && pdg_other.is_nucleon()) {
+      // Elastic (Anti-)deuteron (Anti-)Nucleon Scattering
       elastic_xs = deuteron_nucleon_elastic(sqrt_s_ * sqrt_s_);
     }
   } else if (use_AQM) {
