@@ -324,11 +324,11 @@ double kplusp_elastic_background(double mandelstam_s) {
 }
 
 double kplusn_elastic_background(double mandelstam_s) {
-  return 0.5 * kplusp_elastic_background(mandelstam_s);
+  return 0.25 * kplusp_elastic_background(mandelstam_s);
 }
 
 double kplusn_k0p(double mandelstam_s) {
-  return 0.5 * kplusp_elastic_background(mandelstam_s);
+  return 0.25 * kplusp_elastic_background(mandelstam_s);
 }
 
 /** K- p elastic cross section parametrization, PDG data.
@@ -446,9 +446,8 @@ double kplusn_inelastic_background(double mandelstam_s) {
         make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
   const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
-  return (*kplusn_total_interpolation)(p_lab)-kplusn_elastic_background(
-             mandelstam_s) -
-         kplusn_k0p(mandelstam_s);
+  return (*kplusn_total_interpolation)(p_lab) - kplusn_elastic_background(
+             mandelstam_s) - kplusn_k0p(mandelstam_s);
 }
 
 /**
