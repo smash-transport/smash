@@ -362,7 +362,12 @@ struct pair_hash {
 };
 
 /**
- * Isospin weights for inelastic K+ N channels.
+ * Calculate and store isospin ratios for K N -> K Delta reactions.
+ *
+ * The ratios are given by the squared Clebsch-Gordan coefficient for the respective
+ * reaction, divided by the sum of the squared coefficients of all possible
+ * isospin-symmetric reactions. They are used when calculating the corresponding
+ * cross sections from the parametrizations of experimental data.
  */
 class KplusNRatios {
  private:
@@ -371,11 +376,11 @@ class KplusNRatios {
       ratios_;
 
  public:
-  /// Create an empty K+ N isospin ratio storage.
+  /// Create an empty K N -> K Delta isospin ratio storage.
   KplusNRatios() : ratios_({}) {}
 
   /**
-   * Return the isospin ratio of the given K+ N reaction's cross section.
+   * Return the isospin ratio of the given K N -> K Delta cross section.
    *
    * On the first call all ratios are calculated.
    */

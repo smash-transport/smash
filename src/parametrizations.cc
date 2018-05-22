@@ -452,10 +452,12 @@ double kplusn_inelastic_background(double mandelstam_s) {
 }
 
 /**
- * Calculate and store all isospin ratios for K+ N reactions.
+ * Calculate and store isospin ratios for K N -> K Delta reactions.
  *
- * \param[out] ratios an empty unordered map of the ratios for K+ N reactions
-               that gets filled with appropriate values on first call
+ * See the documentation of `KplusNRatios` for details.
+ *
+ * \param[inout] ratios An empty map where the ratios for K N -> K Delta
+ *                      reactions are stored.
  */
 static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>, double,
                                           pair_hash>& ratios) {
@@ -468,6 +470,8 @@ static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>, double,
   const auto& type_Delta_z = ParticleType::find(pdg::Delta_z);
   const auto& type_Delta_m = ParticleType::find(pdg::Delta_m);
 
+  /// Store the isospin ratio of the given reaction relative to all other
+  /// possible isospin-symmetric reactions.
   auto add_to_ratios = [&](const ParticleType& a, const ParticleType& b,
                            const ParticleType& c, const ParticleType& d,
                            double weight_numerator, double weight_other) {
@@ -481,6 +485,8 @@ static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>, double,
 
   // All inelastic channels are K+ N -> K Delta -> K pi N or charge exchange,
   // with identical cross section, weighted by the isospin factor.
+  //
+  // For charge exchange, the isospin factors are 1, so they are excluded here.
   {
     const auto weight1 = isospin_clebsch_gordan_sqr_2to2(
         type_p, type_K_p, type_K_z, type_Delta_pp);
@@ -499,18 +505,9 @@ static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>, double,
     add_to_ratios(type_n, type_K_p, type_K_z, type_Delta_p, weight1, weight2);
     add_to_ratios(type_n, type_K_p, type_K_p, type_Delta_z, weight2, weight1);
   }
-  {
-    const auto weight1 =
-        isospin_clebsch_gordan_sqr_2to2(type_n, type_K_p, type_K_z, type_p);
-    const auto weight2 =
-        isospin_clebsch_gordan_sqr_2to2(type_p, type_K_z, type_K_p, type_n);
 
-    add_to_ratios(type_n, type_K_p, type_K_z, type_p, weight1, weight2);
-    add_to_ratios(type_p, type_K_z, type_K_p, type_n, weight2, weight1);
-  }
-
-  // K+ and K0 have the same isospin projection, they are assumed to have
-  // the same cross section here.
+  // K+ and K0 have the same mass and spin, their cross sections are assumed to
+  // only differ in isospin factors.
   {
     const auto weight1 = isospin_clebsch_gordan_sqr_2to2(
         type_p, type_K_z, type_K_z, type_Delta_p);

@@ -916,8 +916,8 @@ CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) {
       break;
     }
     case pdg::K_z: {
-      /* K+ and K0 have the same isospin projection, they are assumed to have
-       * the same cross section here. */
+      // K+ and K0 have the same mass and spin, so their cross sections are
+      // assumed to only differ in isospin factors.
 
       switch (pdg_nucleon) {
         case pdg::p: {
@@ -946,9 +946,9 @@ CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) {
             const auto& type_n = ParticleType::find(pdg::n);
             add_channel(process_list,
                         [&] {
-                          return kplusn_k0p(s) *
-                                 kplusn_ratios.get_ratio(
-                                     type_nucleon, type_kaon, type_K_p, type_n);
+                          // The isospin factor is 1, see the parametrizations
+                          // tests.
+                          return kplusn_k0p(s);
                         },
                         sqrt_s_, type_K_p, type_n);
           }
@@ -1003,24 +1003,23 @@ CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) {
         case -pdg::p: {
           if (incl_KN_to_KDelta) {
             const auto& type_K_m = ParticleType::find(pdg::K_m);
-            const auto& type_Kbar_z = ParticleType::find(pdg::Kbar_z);
-            const auto& type_Delta_p_bar = ParticleType::find(-pdg::Delta_p);
-            const auto& type_Delta_z_bar = ParticleType::find(-pdg::Delta_z);
+            const auto& type_Kbar_z = type_kaon;
+            const auto& type_Delta_bar_m = ParticleType::find(-pdg::Delta_p);
+            const auto& type_Delta_bar_z = ParticleType::find(-pdg::Delta_z);
             add_channel(process_list,
                         [&] {
-                          return sigma_kplusp *
-                                 kplusn_ratios.get_ratio(type_nucleon,
-                                                         type_kaon, type_Kbar_z,
-                                                         type_Delta_p_bar);
+                          // The isospin factor is 1, see the parametrizations
+                          // tests.
+                          return sigma_kplusp;
                         },
-                        sqrt_s_, type_Kbar_z, type_Delta_p_bar);
+                        sqrt_s_, type_Kbar_z, type_Delta_bar_m);
             add_channel(process_list,
                         [&] {
                           return sigma_kplusp * kplusn_ratios.get_ratio(
                                                     type_nucleon, type_kaon,
-                                                    type_K_m, type_Delta_z_bar);
+                                                    type_K_m, type_Delta_bar_z);
                         },
-                        sqrt_s_, type_K_m, type_Delta_z_bar);
+                        sqrt_s_, type_K_m, type_Delta_bar_z);
           }
           if (incl_KN_to_KN) {
             const auto& type_K_m = ParticleType::find(pdg::K_m);
