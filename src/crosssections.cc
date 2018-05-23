@@ -1013,7 +1013,7 @@ CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) {
                           return sigma_kplusn *
                                  kplusn_ratios.get_ratio(type_nucleon,
                                                          type_kaon, type_Kbar_z,
-                                                         type_Delta_p_bar);
+                                                         type_Delta_bar_m);
                         },
                         sqrt_s_, type_Kbar_z, type_Delta_bar_m);
             add_channel(process_list,
