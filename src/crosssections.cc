@@ -137,24 +137,23 @@ CrossSections::CrossSections(const ParticleList& incoming_particles,
 
 CollisionBranchList CrossSections::generate_collision_list(
     double elastic_parameter, bool two_to_one_switch,
-    ReactionsBitSet included_2to2, double low_snn_cut,
-    bool strings_switch, bool use_AQM, bool strings_with_probability,
-    NNbarTreatment nnbar_treatment, StringProcess* string_process) {
+    ReactionsBitSet included_2to2, double low_snn_cut, bool strings_switch,
+    bool use_AQM, bool strings_with_probability, NNbarTreatment nnbar_treatment,
+    StringProcess* string_process) {
   CollisionBranchList process_list;
   const ParticleType& t1 = incoming_particles_[0].type();
   const ParticleType& t2 = incoming_particles_[1].type();
 
-  const bool is_pythia = strings_with_probability &&
-                         decide_string(strings_switch,
-                         strings_with_probability, use_AQM,
-                         nnbar_treatment == NNbarTreatment::Strings);
+  const bool is_pythia =
+      strings_with_probability &&
+      decide_string(strings_switch, strings_with_probability, use_AQM,
+                    nnbar_treatment == NNbarTreatment::Strings);
 
   /* Elastic collisions between two nucleons with sqrt_s below
    * low_snn_cut can not happen. */
   const bool reject_by_nucleon_elastic_cutoff =
       t1.is_nucleon() && t2.is_nucleon() &&
-      t1.antiparticle_sign() == t2.antiparticle_sign() &&
-      sqrt_s_ < low_snn_cut;
+      t1.antiparticle_sign() == t2.antiparticle_sign() && sqrt_s_ < low_snn_cut;
   bool incl_elastic = included_2to2[IncludedReactions::Elastic];
   if (incl_elastic && !reject_by_nucleon_elastic_cutoff) {
     process_list.emplace_back(elastic(elastic_parameter, use_AQM));
@@ -164,7 +163,7 @@ CollisionBranchList CrossSections::generate_collision_list(
      * Parametrized total cross - the contributions
      * from all other present channels. */
     const double sig_string =
-      std::max(0., high_energy() - elastic_parametrization(use_AQM));
+        std::max(0., high_energy() - elastic_parametrization(use_AQM));
     append_list(process_list, string_excitation(sig_string, string_process));
   } else {
     if (two_to_one_switch) {
@@ -228,7 +227,7 @@ double CrossSections::elastic_parametrization(bool use_AQM) {
       // todo JB : double check those parametrizations
       elastic_xs = nn_el();  // valid also for annihilation
     } else if ((pdg_a.is_meson() && pdg_b.is_baryon()) ||
-             (pdg_b.is_meson() && pdg_a.is_baryon())) {
+               (pdg_b.is_meson() && pdg_a.is_baryon())) {
       elastic_xs = piplusp_elastic(sqrt_s_ * sqrt_s_);
       // todo JB : fix this cross section so it doesn't subtract resonances
     } else if (pdg_a.is_meson() && pdg_b.is_meson()) {
@@ -236,11 +235,11 @@ double CrossSections::elastic_parametrization(bool use_AQM) {
       if (s > 4 * nucleon_mass * nucleon_mass) {
         // until we get a ππ parametrization
         // todo JB : fix this cross section so it doesn't subtract resonances
-        elastic_xs = 4./9. * pp_elastic(sqrt_s_ * sqrt_s_);
+        elastic_xs = 4. / 9. * pp_elastic(sqrt_s_ * sqrt_s_);
       }
     }
-    elastic_xs *= (1. - 0.4 * pdg_a.frac_strange()) *
-                  (1. - 0.4 * pdg_b.frac_strange());
+    elastic_xs *=
+        (1. - 0.4 * pdg_a.frac_strange()) * (1. - 0.4 * pdg_b.frac_strange());
   }
   return elastic_xs;
 }
@@ -758,10 +757,10 @@ CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) {
             const auto& type_Delta_p_bar = ParticleType::find(-pdg::Delta_p);
             add_channel(process_list,
                         [&] {
-                          return sigma_kplusp *
-                                 kaon_nucleon_ratios.get_ratio(type_nucleon,
-                                                         type_kaon, type_Kbar_z,
-                                                         type_Delta_pp_bar);
+                          return sigma_kplusp * kaon_nucleon_ratios.get_ratio(
+                                                    type_nucleon, type_kaon,
+                                                    type_Kbar_z,
+                                                    type_Delta_pp_bar);
                         },
                         sqrt_s_, type_Kbar_z, type_Delta_pp_bar);
             add_channel(process_list,
@@ -782,10 +781,10 @@ CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) {
             const auto& type_Delta_z_bar = ParticleType::find(-pdg::Delta_z);
             add_channel(process_list,
                         [&] {
-                          return sigma_kplusn *
-                                 kaon_nucleon_ratios.get_ratio(type_nucleon,
-                                                         type_kaon, type_Kbar_z,
-                                                         type_Delta_p_bar);
+                          return sigma_kplusn * kaon_nucleon_ratios.get_ratio(
+                                                    type_nucleon, type_kaon,
+                                                    type_Kbar_z,
+                                                    type_Delta_p_bar);
                         },
                         sqrt_s_, type_Kbar_z, type_Delta_p_bar);
             add_channel(process_list,
@@ -1010,10 +1009,10 @@ CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) {
             const auto& type_Delta_bar_z = ParticleType::find(-pdg::Delta_z);
             add_channel(process_list,
                         [&] {
-                          return sigma_kplusn *
-                                 kaon_nucleon_ratios.get_ratio(type_nucleon,
-                                                         type_kaon, type_Kbar_z,
-                                                         type_Delta_bar_m);
+                          return sigma_kplusn * kaon_nucleon_ratios.get_ratio(
+                                                    type_nucleon, type_kaon,
+                                                    type_Kbar_z,
+                                                    type_Delta_bar_m);
                         },
                         sqrt_s_, type_Kbar_z, type_Delta_bar_m);
             add_channel(process_list,
@@ -1045,10 +1044,10 @@ CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) {
             const auto& type_Delta_m_bar = ParticleType::find(-pdg::Delta_m);
             add_channel(process_list,
                         [&] {
-                          return sigma_kplusp *
-                                 kaon_nucleon_ratios.get_ratio(type_nucleon,
-                                                         type_kaon, type_Kbar_z,
-                                                         type_Delta_z_bar);
+                          return sigma_kplusp * kaon_nucleon_ratios.get_ratio(
+                                                    type_nucleon, type_kaon,
+                                                    type_Kbar_z,
+                                                    type_Delta_z_bar);
                         },
                         sqrt_s_, type_Kbar_z, type_Delta_z_bar);
             add_channel(process_list,
@@ -1096,8 +1095,8 @@ CollisionBranchList CrossSections::deltak_xx(ReactionsBitSet included_2to2) {
                     return detailed_balance_factor_RK(sqrt_s_, pcm, type_delta,
                                                       type_kaon, type_p,
                                                       type_K_p) *
-                           kaon_nucleon_ratios.get_ratio(type_p, type_K_p, type_kaon,
-                                                   type_delta) *
+                           kaon_nucleon_ratios.get_ratio(
+                               type_p, type_K_p, type_kaon, type_delta) *
                            kplusp_inelastic_background(s);
                   },
                   sqrt_s_, type_p, type_K_p);
@@ -1112,8 +1111,8 @@ CollisionBranchList CrossSections::deltak_xx(ReactionsBitSet included_2to2) {
                     return detailed_balance_factor_RK(sqrt_s_, pcm, type_delta,
                                                       type_kaon, type_p_bar,
                                                       type_K_m) *
-                           kaon_nucleon_ratios.get_ratio(type_p_bar, type_K_m,
-                                                   type_kaon, type_delta) *
+                           kaon_nucleon_ratios.get_ratio(
+                               type_p_bar, type_K_m, type_kaon, type_delta) *
                            kplusp_inelastic_background(s);
                   },
                   sqrt_s_, type_p_bar, type_K_m);
@@ -1130,8 +1129,8 @@ CollisionBranchList CrossSections::deltak_xx(ReactionsBitSet included_2to2) {
                     return detailed_balance_factor_RK(sqrt_s_, pcm, type_delta,
                                                       type_kaon, type_n,
                                                       type_K_p) *
-                           kaon_nucleon_ratios.get_ratio(type_n, type_K_p, type_kaon,
-                                                   type_delta) *
+                           kaon_nucleon_ratios.get_ratio(
+                               type_n, type_K_p, type_kaon, type_delta) *
                            kplusn_inelastic_background(s);
                   },
                   sqrt_s_, type_n, type_K_p);
@@ -1141,8 +1140,8 @@ CollisionBranchList CrossSections::deltak_xx(ReactionsBitSet included_2to2) {
                     return detailed_balance_factor_RK(sqrt_s_, pcm, type_delta,
                                                       type_kaon, type_p,
                                                       type_K_z) *
-                           kaon_nucleon_ratios.get_ratio(type_p, type_K_z, type_kaon,
-                                                   type_delta) *
+                           kaon_nucleon_ratios.get_ratio(
+                               type_p, type_K_z, type_kaon, type_delta) *
                            kplusn_inelastic_background(s);
                   },
                   sqrt_s_, type_p, type_K_z);
@@ -1159,8 +1158,8 @@ CollisionBranchList CrossSections::deltak_xx(ReactionsBitSet included_2to2) {
                     return detailed_balance_factor_RK(sqrt_s_, pcm, type_delta,
                                                       type_kaon, type_n_bar,
                                                       type_K_m) *
-                           kaon_nucleon_ratios.get_ratio(type_n_bar, type_K_m,
-                                                   type_kaon, type_delta) *
+                           kaon_nucleon_ratios.get_ratio(
+                               type_n_bar, type_K_m, type_kaon, type_delta) *
                            kplusn_inelastic_background(s);
                   },
                   sqrt_s_, type_n_bar, type_K_m);
@@ -1170,8 +1169,8 @@ CollisionBranchList CrossSections::deltak_xx(ReactionsBitSet included_2to2) {
                     return detailed_balance_factor_RK(sqrt_s_, pcm, type_delta,
                                                       type_kaon, type_p_bar,
                                                       type_Kbar_z) *
-                           kaon_nucleon_ratios.get_ratio(type_p_bar, type_Kbar_z,
-                                                   type_kaon, type_delta) *
+                           kaon_nucleon_ratios.get_ratio(
+                               type_p_bar, type_Kbar_z, type_kaon, type_delta) *
                            kplusn_inelastic_background(s);
                   },
                   sqrt_s_, type_p_bar, type_Kbar_z);
@@ -1186,8 +1185,8 @@ CollisionBranchList CrossSections::deltak_xx(ReactionsBitSet included_2to2) {
                     return detailed_balance_factor_RK(sqrt_s_, pcm, type_delta,
                                                       type_kaon, type_n,
                                                       type_K_z) *
-                           kaon_nucleon_ratios.get_ratio(type_n, type_K_z, type_kaon,
-                                                   type_delta) *
+                           kaon_nucleon_ratios.get_ratio(
+                               type_n, type_K_z, type_kaon, type_delta) *
                            kplusp_inelastic_background(s);
                   },
                   sqrt_s_, type_n, type_K_z);
@@ -1202,8 +1201,8 @@ CollisionBranchList CrossSections::deltak_xx(ReactionsBitSet included_2to2) {
                     return detailed_balance_factor_RK(sqrt_s_, pcm, type_delta,
                                                       type_kaon, type_n_bar,
                                                       type_Kbar_z) *
-                           kaon_nucleon_ratios.get_ratio(type_n_bar, type_Kbar_z,
-                                                   type_kaon, type_delta) *
+                           kaon_nucleon_ratios.get_ratio(
+                               type_n_bar, type_Kbar_z, type_kaon, type_delta) *
                            kplusp_inelastic_background(s);
                   },
                   sqrt_s_, type_n_bar, type_Kbar_z);
@@ -1626,7 +1625,7 @@ CollisionBranchList CrossSections::string_excitation(
      * collision this is not an issue, but at sqrt_s < 10 GeV it may
      * matter. */
     std::array<double, 3> xs =
-      string_process->cross_sections_diffractive(pdgid[0], pdgid[1], sqrt_s_);
+        string_process->cross_sections_diffractive(pdgid[0], pdgid[1], sqrt_s_);
     double single_diffr_AX = xs[0], single_diffr_XB = xs[1],
            double_diffr = xs[2];
     double single_diffr = single_diffr_AX + single_diffr_XB;
@@ -1643,8 +1642,8 @@ CollisionBranchList CrossSections::string_excitation(
       /* In the case of baryon-antibaryon pair,
        * the parametrized cross section for annihilation will be added.
        * See xs_ppbar_annihilation(). */
-      sig_annihilation = std::min(total_string_xs,
-                                  xs_ppbar_annihilation(sqrt_s_ * sqrt_s_));
+      sig_annihilation =
+          std::min(total_string_xs, xs_ppbar_annihilation(sqrt_s_ * sqrt_s_));
     } else {
       sig_annihilation = 0.;
     }
@@ -1657,8 +1656,8 @@ CollisionBranchList CrossSections::string_excitation(
     single_diffr_AX *= a;
     single_diffr_XB *= a;
     assert(std::abs(single_diffr_AX + single_diffr_XB + double_diffr +
-                    sig_annihilation + nondiffractive_all -
-                    total_string_xs) < 1.e-6);
+                    sig_annihilation + nondiffractive_all - total_string_xs) <
+           1.e-6);
 
     double nondiffractive_soft = 0.;
     double nondiffractive_hard = 0.;
@@ -1707,8 +1706,8 @@ CollisionBranchList CrossSections::string_excitation(
     } else {
       imax = 4;
     }
-    double r_xsec = string_sub_cross_sections_sum[imax] *
-                    Random::uniform(0., 1.);
+    double r_xsec =
+        string_sub_cross_sections_sum[imax] * Random::uniform(0., 1.);
     for (int i = 0; i < imax; i++) {
       if ((r_xsec >= string_sub_cross_sections_sum[i]) &&
           (r_xsec < string_sub_cross_sections_sum[i + 1])) {
@@ -1744,11 +1743,11 @@ double CrossSections::high_energy() const {
   // Currently all BB collisions use the nucleon-nucleon parametrizations.
   if (pdg_a.is_baryon() && pdg_b.is_baryon()) {
     if (pdg_a == pdg_b) {
-      xs = pp_high_energy(s);     // pp, nn
+      xs = pp_high_energy(s);  // pp, nn
     } else if (pdg_a.is_antiparticle_of(pdg_b)) {
       xs = ppbar_high_energy(s);  // ppbar, nnbar
     } else if (pdg_a.antiparticle_sign() * pdg_b.antiparticle_sign() == 1) {
-      xs = np_high_energy(s);     // np, nbarpbar
+      xs = np_high_energy(s);  // np, nbarpbar
     } else {
       xs = npbar_high_energy(s);  // npbar, nbarp
     }
@@ -1773,7 +1772,7 @@ double CrossSections::high_energy() const {
   /* Meson-meson interaction goes through AQM from pp, until we get a proper
    * parametrization for π π, see user guide "Use_AQM"*/
   if (pdg_a.is_meson() && pdg_b.is_meson()) {
-    xs = 4./9. * pp_high_energy(s);  // 4/9 factor since 2 mesons in AQM
+    xs = 4. / 9. * pp_high_energy(s);  // 4/9 factor since 2 mesons in AQM
   }
 
   // AQM scaling for cross-sections
@@ -2072,9 +2071,8 @@ CollisionBranchList CrossSections::find_nn_xsection_from_type(
 }
 
 bool CrossSections::decide_string(bool strings_switch,
-                                   bool use_transition_probability,
-                                   bool use_AQM,
-                                   bool treat_BBbar_with_strings) const {
+                                  bool use_transition_probability, bool use_AQM,
+                                  bool treat_BBbar_with_strings) const {
   /* string fragmentation is enabled when strings_switch is on and the process
    * is included in pythia. */
   if (!strings_switch) {
@@ -2084,24 +2082,24 @@ bool CrossSections::decide_string(bool strings_switch,
   const ParticleType& t1 = incoming_particles_[0].type();
   const ParticleType& t2 = incoming_particles_[1].type();
 
-  const bool is_NN_scattering = t1.is_nucleon() && t2.is_nucleon() &&
-                      t1.antiparticle_sign() == t2.antiparticle_sign();
-  const bool is_BBbar_scattering = treat_BBbar_with_strings &&
-                      t1.is_baryon() && t2.is_baryon() &&
-                      t1.pdgcode().is_antiparticle_of(t2.pdgcode());
-  const bool is_Npi_scattering =
-                      (t1.pdgcode().is_pion() && t2.is_nucleon()) ||
-                      (t1.is_nucleon() && t2.pdgcode().is_pion());
+  const bool is_NN_scattering =
+      t1.is_nucleon() && t2.is_nucleon() &&
+      t1.antiparticle_sign() == t2.antiparticle_sign();
+  const bool is_BBbar_scattering =
+      treat_BBbar_with_strings && t1.is_baryon() && t2.is_baryon() &&
+      t1.pdgcode().is_antiparticle_of(t2.pdgcode());
+  const bool is_Npi_scattering = (t1.pdgcode().is_pion() && t2.is_nucleon()) ||
+                                 (t1.is_nucleon() && t2.pdgcode().is_pion());
   /* True for baryon-baryon, anti-baryon-anti-baryon, baryon-meson,
    * anti-baryon-meson and meson-meson*/
-  const bool is_AQM_scattering = use_AQM &&
-                      ((t1.is_baryon() && t2.is_baryon() &&
-                        t1.antiparticle_sign() == t2.antiparticle_sign()) ||
-                      ((t1.is_baryon() && t2.is_meson()) ||
-                       (t2.is_baryon() && t1.is_meson())) ||
-                       (t1.is_meson() && t2.is_meson()));
-  const double mass_sum = incoming_particles_[0].pole_mass() +
-                          incoming_particles_[1].pole_mass();
+  const bool is_AQM_scattering =
+      use_AQM && ((t1.is_baryon() && t2.is_baryon() &&
+                   t1.antiparticle_sign() == t2.antiparticle_sign()) ||
+                  ((t1.is_baryon() && t2.is_meson()) ||
+                   (t2.is_baryon() && t1.is_meson())) ||
+                  (t1.is_meson() && t2.is_meson()));
+  const double mass_sum =
+      incoming_particles_[0].pole_mass() + incoming_particles_[1].pole_mass();
 
   if (!is_NN_scattering && !is_BBbar_scattering && !is_Npi_scattering &&
       !is_AQM_scattering) {
@@ -2137,7 +2135,7 @@ bool CrossSections::decide_string(bool strings_switch,
       return false;
     } else {
       // Rescale transition region to [-1, 1]
-      double x = (sqrt_s_ - (region_lower + region_upper)/2.) /
+      double x = (sqrt_s_ - (region_lower + region_upper) / 2.) /
                  (region_upper - region_lower);
       assert(x >= -0.5 && x <= 0.5);
       double prob_pythia = 0.5 * (std::sin(M_PI * x) + 1.0);

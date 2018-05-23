@@ -70,9 +70,10 @@ double xs_ppbar_annihilation(double mandelstam_s) {
   const double s_ref = 4. * nucleon_mass * nucleon_mass;
   const double constant_a = 0.05;
   const double constant_b = 0.6;
-  const double factor = constant_a * constant_a * s_ref / (
-                        (mandelstam_s - s_ref) * (mandelstam_s - s_ref) +
-                        constant_a * constant_a * s_ref) + constant_b;
+  const double factor = constant_a * constant_a * s_ref /
+                            ((mandelstam_s - s_ref) * (mandelstam_s - s_ref) +
+                             constant_a * constant_a * s_ref) +
+                        constant_b;
   return xs_ref * (s_ref / mandelstam_s) * factor;
 }
 
@@ -446,8 +447,9 @@ double kplusn_inelastic_background(double mandelstam_s) {
         make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
   const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
-  return (*kplusn_total_interpolation)(p_lab) - kplusn_elastic_background(
-             mandelstam_s) - kplusn_k0p(mandelstam_s);
+  return (*kplusn_total_interpolation)(p_lab)-kplusn_elastic_background(
+             mandelstam_s) -
+         kplusn_k0p(mandelstam_s);
 }
 
 /**
@@ -526,9 +528,10 @@ static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>, double,
   }
 }
 
-double KaonNucleonRatios::get_ratio(
-    const ParticleType& a, const ParticleType& b,
-    const ParticleType& c, const ParticleType& d) const {
+double KaonNucleonRatios::get_ratio(const ParticleType& a,
+                                    const ParticleType& b,
+                                    const ParticleType& c,
+                                    const ParticleType& d) const {
   /* If this method is called with anti-nucleons, flip all particles to
    * anti-particles;
    * the ratio is equal */
