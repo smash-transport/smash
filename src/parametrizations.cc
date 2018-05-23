@@ -453,7 +453,7 @@ double kplusn_inelastic_background(double mandelstam_s) {
 /**
  * Calculate and store isospin ratios for K N -> K Delta reactions.
  *
- * See the documentation of `KplusNRatios` for details.
+ * See the documentation of `KaonNucleonRatios` for details.
  *
  * \param[inout] ratios An empty map where the ratios for K N -> K Delta
  *                      reactions are stored.
@@ -482,7 +482,7 @@ static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>, double,
     ratios[key] = ratio;
   };
 
-  // All inelastic channels are K+ N -> K Delta -> K pi N or charge exchange,
+  // All inelastic channels are K N -> K Delta -> K pi N or charge exchange,
   // with identical cross section, weighted by the isospin factor.
   //
   // For charge exchange, the isospin factors are 1, so they are excluded here.
@@ -504,7 +504,6 @@ static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>, double,
     add_to_ratios(type_n, type_K_p, type_K_z, type_Delta_p, weight1, weight2);
     add_to_ratios(type_n, type_K_p, type_K_p, type_Delta_z, weight2, weight1);
   }
-
   // K+ and K0 have the same mass and spin, their cross sections are assumed to
   // only differ in isospin factors.
   {
@@ -527,9 +526,9 @@ static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>, double,
   }
 }
 
-double KplusNRatios::get_ratio(const ParticleType& a, const ParticleType& b,
-                               const ParticleType& c,
-                               const ParticleType& d) const {
+double KaonNucleonRatios::get_ratio(
+    const ParticleType& a, const ParticleType& b,
+    const ParticleType& c, const ParticleType& d) const {
   /* If this method is called with anti-nucleons, flip all particles to
    * anti-particles;
    * the ratio is equal */
@@ -552,7 +551,7 @@ double KplusNRatios::get_ratio(const ParticleType& a, const ParticleType& b,
   return ratios_.at(key);
 }
 
-/*thread_local (see #3075)*/ KplusNRatios kplusn_ratios;
+/*thread_local (see #3075)*/ KaonNucleonRatios kaon_nucleon_ratios;
 
 double kminusp_kbar0n(double mandelstam_s) {
   constexpr double a0 = 100;   // mb GeV^2

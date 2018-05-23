@@ -369,7 +369,7 @@ struct pair_hash {
  * isospin-symmetric reactions. They are used when calculating the corresponding
  * cross sections from the parametrizations of experimental data.
  */
-class KplusNRatios {
+class KaonNucleonRatios {
  private:
   /// Internal representation of isospin weights once calculated
   mutable std::unordered_map<std::pair<uint64_t, uint64_t>, double, pair_hash>
@@ -377,7 +377,7 @@ class KplusNRatios {
 
  public:
   /// Create an empty K N -> K Delta isospin ratio storage.
-  KplusNRatios() : ratios_({}) {}
+  KaonNucleonRatios() : ratios_({}) {}
 
   /**
    * Return the isospin ratio of the given K N -> K Delta cross section.
@@ -388,7 +388,7 @@ class KplusNRatios {
                    const ParticleType& c, const ParticleType& d) const;
 };
 
-extern /*thread_local (see #3075)*/ KplusNRatios kplusn_ratios;
+extern /*thread_local (see #3075)*/ KaonNucleonRatios kaon_nucleon_ratios;
 
 /**
  * K- p <-> Kbar0 n cross section parametrization.

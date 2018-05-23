@@ -759,14 +759,14 @@ CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) {
             add_channel(process_list,
                         [&] {
                           return sigma_kplusp *
-                                 kplusn_ratios.get_ratio(type_nucleon,
+                                 kaon_nucleon_ratios.get_ratio(type_nucleon,
                                                          type_kaon, type_Kbar_z,
                                                          type_Delta_pp_bar);
                         },
                         sqrt_s_, type_Kbar_z, type_Delta_pp_bar);
             add_channel(process_list,
                         [&] {
-                          return sigma_kplusp * kplusn_ratios.get_ratio(
+                          return sigma_kplusp * kaon_nucleon_ratios.get_ratio(
                                                     type_nucleon, type_kaon,
                                                     type_K_m, type_Delta_p_bar);
                         },
@@ -783,14 +783,14 @@ CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) {
             add_channel(process_list,
                         [&] {
                           return sigma_kplusn *
-                                 kplusn_ratios.get_ratio(type_nucleon,
+                                 kaon_nucleon_ratios.get_ratio(type_nucleon,
                                                          type_kaon, type_Kbar_z,
                                                          type_Delta_p_bar);
                         },
                         sqrt_s_, type_Kbar_z, type_Delta_p_bar);
             add_channel(process_list,
                         [&] {
-                          return sigma_kplusn * kplusn_ratios.get_ratio(
+                          return sigma_kplusn * kaon_nucleon_ratios.get_ratio(
                                                     type_nucleon, type_kaon,
                                                     type_K_m, type_Delta_z_bar);
                         },
@@ -819,14 +819,14 @@ CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) {
             const auto& type_Delta_p = ParticleType::find(pdg::Delta_p);
             add_channel(process_list,
                         [&] {
-                          return sigma_kplusp * kplusn_ratios.get_ratio(
+                          return sigma_kplusp * kaon_nucleon_ratios.get_ratio(
                                                     type_nucleon, type_kaon,
                                                     type_K_z, type_Delta_pp);
                         },
                         sqrt_s_, type_K_z, type_Delta_pp);
             add_channel(process_list,
                         [&] {
-                          return sigma_kplusp * kplusn_ratios.get_ratio(
+                          return sigma_kplusp * kaon_nucleon_ratios.get_ratio(
                                                     type_nucleon, type_kaon,
                                                     type_K_p, type_Delta_p);
                         },
@@ -842,14 +842,14 @@ CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) {
             const auto& type_Delta_z = ParticleType::find(pdg::Delta_z);
             add_channel(process_list,
                         [&] {
-                          return sigma_kplusn * kplusn_ratios.get_ratio(
+                          return sigma_kplusn * kaon_nucleon_ratios.get_ratio(
                                                     type_nucleon, type_kaon,
                                                     type_K_z, type_Delta_p);
                         },
                         sqrt_s_, type_K_z, type_Delta_p);
             add_channel(process_list,
                         [&] {
-                          return sigma_kplusn * kplusn_ratios.get_ratio(
+                          return sigma_kplusn * kaon_nucleon_ratios.get_ratio(
                                                     type_nucleon, type_kaon,
                                                     type_K_p, type_Delta_z);
                         },
@@ -930,14 +930,14 @@ CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) {
             const auto& type_Delta_z = ParticleType::find(pdg::Delta_z);
             add_channel(process_list,
                         [&] {
-                          return sigma_kplusn * kplusn_ratios.get_ratio(
+                          return sigma_kplusn * kaon_nucleon_ratios.get_ratio(
                                                     type_nucleon, type_kaon,
                                                     type_K_z, type_Delta_p);
                         },
                         sqrt_s_, type_K_z, type_Delta_p);
             add_channel(process_list,
                         [&] {
-                          return sigma_kplusn * kplusn_ratios.get_ratio(
+                          return sigma_kplusn * kaon_nucleon_ratios.get_ratio(
                                                     type_nucleon, type_kaon,
                                                     type_K_p, type_Delta_z);
                         },
@@ -964,14 +964,14 @@ CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) {
             const auto& type_Delta_m = ParticleType::find(pdg::Delta_m);
             add_channel(process_list,
                         [&] {
-                          return sigma_kplusp * kplusn_ratios.get_ratio(
+                          return sigma_kplusp * kaon_nucleon_ratios.get_ratio(
                                                     type_nucleon, type_kaon,
                                                     type_K_z, type_Delta_z);
                         },
                         sqrt_s_, type_K_z, type_Delta_z);
             add_channel(process_list,
                         [&] {
-                          return sigma_kplusp * kplusn_ratios.get_ratio(
+                          return sigma_kplusp * kaon_nucleon_ratios.get_ratio(
                                                     type_nucleon, type_kaon,
                                                     type_K_p, type_Delta_m);
                         },
@@ -1011,14 +1011,14 @@ CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) {
             add_channel(process_list,
                         [&] {
                           return sigma_kplusn *
-                                 kplusn_ratios.get_ratio(type_nucleon,
+                                 kaon_nucleon_ratios.get_ratio(type_nucleon,
                                                          type_kaon, type_Kbar_z,
                                                          type_Delta_bar_m);
                         },
                         sqrt_s_, type_Kbar_z, type_Delta_bar_m);
             add_channel(process_list,
                         [&] {
-                          return sigma_kplusn * kplusn_ratios.get_ratio(
+                          return sigma_kplusn * kaon_nucleon_ratios.get_ratio(
                                                     type_nucleon, type_kaon,
                                                     type_K_m, type_Delta_bar_z);
                         },
@@ -1046,14 +1046,14 @@ CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) {
             add_channel(process_list,
                         [&] {
                           return sigma_kplusp *
-                                 kplusn_ratios.get_ratio(type_nucleon,
+                                 kaon_nucleon_ratios.get_ratio(type_nucleon,
                                                          type_kaon, type_Kbar_z,
                                                          type_Delta_z_bar);
                         },
                         sqrt_s_, type_Kbar_z, type_Delta_z_bar);
             add_channel(process_list,
                         [&] {
-                          return sigma_kplusp * kplusn_ratios.get_ratio(
+                          return sigma_kplusp * kaon_nucleon_ratios.get_ratio(
                                                     type_nucleon, type_kaon,
                                                     type_K_m, type_Delta_m_bar);
                         },
@@ -1096,7 +1096,7 @@ CollisionBranchList CrossSections::deltak_xx(ReactionsBitSet included_2to2) {
                     return detailed_balance_factor_RK(sqrt_s_, pcm, type_delta,
                                                       type_kaon, type_p,
                                                       type_K_p) *
-                           kplusn_ratios.get_ratio(type_p, type_K_p, type_kaon,
+                           kaon_nucleon_ratios.get_ratio(type_p, type_K_p, type_kaon,
                                                    type_delta) *
                            kplusp_inelastic_background(s);
                   },
@@ -1112,7 +1112,7 @@ CollisionBranchList CrossSections::deltak_xx(ReactionsBitSet included_2to2) {
                     return detailed_balance_factor_RK(sqrt_s_, pcm, type_delta,
                                                       type_kaon, type_p_bar,
                                                       type_K_m) *
-                           kplusn_ratios.get_ratio(type_p_bar, type_K_m,
+                           kaon_nucleon_ratios.get_ratio(type_p_bar, type_K_m,
                                                    type_kaon, type_delta) *
                            kplusp_inelastic_background(s);
                   },
@@ -1130,7 +1130,7 @@ CollisionBranchList CrossSections::deltak_xx(ReactionsBitSet included_2to2) {
                     return detailed_balance_factor_RK(sqrt_s_, pcm, type_delta,
                                                       type_kaon, type_n,
                                                       type_K_p) *
-                           kplusn_ratios.get_ratio(type_n, type_K_p, type_kaon,
+                           kaon_nucleon_ratios.get_ratio(type_n, type_K_p, type_kaon,
                                                    type_delta) *
                            kplusn_inelastic_background(s);
                   },
@@ -1141,7 +1141,7 @@ CollisionBranchList CrossSections::deltak_xx(ReactionsBitSet included_2to2) {
                     return detailed_balance_factor_RK(sqrt_s_, pcm, type_delta,
                                                       type_kaon, type_p,
                                                       type_K_z) *
-                           kplusn_ratios.get_ratio(type_p, type_K_z, type_kaon,
+                           kaon_nucleon_ratios.get_ratio(type_p, type_K_z, type_kaon,
                                                    type_delta) *
                            kplusn_inelastic_background(s);
                   },
@@ -1159,7 +1159,7 @@ CollisionBranchList CrossSections::deltak_xx(ReactionsBitSet included_2to2) {
                     return detailed_balance_factor_RK(sqrt_s_, pcm, type_delta,
                                                       type_kaon, type_n_bar,
                                                       type_K_m) *
-                           kplusn_ratios.get_ratio(type_n_bar, type_K_m,
+                           kaon_nucleon_ratios.get_ratio(type_n_bar, type_K_m,
                                                    type_kaon, type_delta) *
                            kplusn_inelastic_background(s);
                   },
@@ -1170,7 +1170,7 @@ CollisionBranchList CrossSections::deltak_xx(ReactionsBitSet included_2to2) {
                     return detailed_balance_factor_RK(sqrt_s_, pcm, type_delta,
                                                       type_kaon, type_p_bar,
                                                       type_Kbar_z) *
-                           kplusn_ratios.get_ratio(type_p_bar, type_Kbar_z,
+                           kaon_nucleon_ratios.get_ratio(type_p_bar, type_Kbar_z,
                                                    type_kaon, type_delta) *
                            kplusn_inelastic_background(s);
                   },
@@ -1186,7 +1186,7 @@ CollisionBranchList CrossSections::deltak_xx(ReactionsBitSet included_2to2) {
                     return detailed_balance_factor_RK(sqrt_s_, pcm, type_delta,
                                                       type_kaon, type_n,
                                                       type_K_z) *
-                           kplusn_ratios.get_ratio(type_n, type_K_z, type_kaon,
+                           kaon_nucleon_ratios.get_ratio(type_n, type_K_z, type_kaon,
                                                    type_delta) *
                            kplusp_inelastic_background(s);
                   },
@@ -1202,7 +1202,7 @@ CollisionBranchList CrossSections::deltak_xx(ReactionsBitSet included_2to2) {
                     return detailed_balance_factor_RK(sqrt_s_, pcm, type_delta,
                                                       type_kaon, type_n_bar,
                                                       type_Kbar_z) *
-                           kplusn_ratios.get_ratio(type_n_bar, type_Kbar_z,
+                           kaon_nucleon_ratios.get_ratio(type_n_bar, type_Kbar_z,
                                                    type_kaon, type_delta) *
                            kplusp_inelastic_background(s);
                   },
