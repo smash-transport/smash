@@ -917,7 +917,9 @@ CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) {
     }
     case pdg::K_z: {
       // K+ and K0 have the same mass and spin, so their cross sections are
-      // assumed to only differ in isospin factors.
+      // assumed to only differ in isospin factors. For the initial state, we
+      // assume that K0 p is equivalent to K+ n and K0 n equivalent to K+ p,
+      // like for the elastic background.
 
       switch (pdg_nucleon) {
         case pdg::p: {
@@ -928,14 +930,14 @@ CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) {
             const auto& type_Delta_z = ParticleType::find(pdg::Delta_z);
             add_channel(process_list,
                         [&] {
-                          return sigma_kplusp * kplusn_ratios.get_ratio(
+                          return sigma_kplusn * kplusn_ratios.get_ratio(
                                                     type_nucleon, type_kaon,
                                                     type_K_z, type_Delta_p);
                         },
                         sqrt_s_, type_K_z, type_Delta_p);
             add_channel(process_list,
                         [&] {
-                          return sigma_kplusp * kplusn_ratios.get_ratio(
+                          return sigma_kplusn * kplusn_ratios.get_ratio(
                                                     type_nucleon, type_kaon,
                                                     type_K_p, type_Delta_z);
                         },
@@ -962,14 +964,14 @@ CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) {
             const auto& type_Delta_m = ParticleType::find(pdg::Delta_m);
             add_channel(process_list,
                         [&] {
-                          return sigma_kplusn * kplusn_ratios.get_ratio(
+                          return sigma_kplusp * kplusn_ratios.get_ratio(
                                                     type_nucleon, type_kaon,
                                                     type_K_z, type_Delta_z);
                         },
                         sqrt_s_, type_K_z, type_Delta_z);
             add_channel(process_list,
                         [&] {
-                          return sigma_kplusn * kplusn_ratios.get_ratio(
+                          return sigma_kplusp * kplusn_ratios.get_ratio(
                                                     type_nucleon, type_kaon,
                                                     type_K_p, type_Delta_m);
                         },
@@ -1008,7 +1010,7 @@ CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) {
             const auto& type_Delta_bar_z = ParticleType::find(-pdg::Delta_z);
             add_channel(process_list,
                         [&] {
-                          return sigma_kplusp *
+                          return sigma_kplusn *
                                  kplusn_ratios.get_ratio(type_nucleon,
                                                          type_kaon, type_Kbar_z,
                                                          type_Delta_p_bar);
@@ -1016,7 +1018,7 @@ CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) {
                         sqrt_s_, type_Kbar_z, type_Delta_bar_m);
             add_channel(process_list,
                         [&] {
-                          return sigma_kplusp * kplusn_ratios.get_ratio(
+                          return sigma_kplusn * kplusn_ratios.get_ratio(
                                                     type_nucleon, type_kaon,
                                                     type_K_m, type_Delta_bar_z);
                         },
@@ -1043,7 +1045,7 @@ CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) {
             const auto& type_Delta_m_bar = ParticleType::find(-pdg::Delta_m);
             add_channel(process_list,
                         [&] {
-                          return sigma_kplusn *
+                          return sigma_kplusp *
                                  kplusn_ratios.get_ratio(type_nucleon,
                                                          type_kaon, type_Kbar_z,
                                                          type_Delta_z_bar);
@@ -1051,7 +1053,7 @@ CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) {
                         sqrt_s_, type_Kbar_z, type_Delta_z_bar);
             add_channel(process_list,
                         [&] {
-                          return sigma_kplusn * kplusn_ratios.get_ratio(
+                          return sigma_kplusp * kplusn_ratios.get_ratio(
                                                     type_nucleon, type_kaon,
                                                     type_K_m, type_Delta_m_bar);
                         },
@@ -1141,7 +1143,7 @@ CollisionBranchList CrossSections::deltak_xx(ReactionsBitSet included_2to2) {
                                                       type_K_z) *
                            kplusn_ratios.get_ratio(type_p, type_K_z, type_kaon,
                                                    type_delta) *
-                           kplusp_inelastic_background(s);
+                           kplusn_inelastic_background(s);
                   },
                   sqrt_s_, type_p, type_K_z);
       break;
@@ -1170,7 +1172,7 @@ CollisionBranchList CrossSections::deltak_xx(ReactionsBitSet included_2to2) {
                                                       type_Kbar_z) *
                            kplusn_ratios.get_ratio(type_p_bar, type_Kbar_z,
                                                    type_kaon, type_delta) *
-                           kplusp_inelastic_background(s);
+                           kplusn_inelastic_background(s);
                   },
                   sqrt_s_, type_p_bar, type_Kbar_z);
       break;
@@ -1186,7 +1188,7 @@ CollisionBranchList CrossSections::deltak_xx(ReactionsBitSet included_2to2) {
                                                       type_K_z) *
                            kplusn_ratios.get_ratio(type_n, type_K_z, type_kaon,
                                                    type_delta) *
-                           kplusn_inelastic_background(s);
+                           kplusp_inelastic_background(s);
                   },
                   sqrt_s_, type_n, type_K_z);
       break;
@@ -1202,7 +1204,7 @@ CollisionBranchList CrossSections::deltak_xx(ReactionsBitSet included_2to2) {
                                                       type_Kbar_z) *
                            kplusn_ratios.get_ratio(type_n_bar, type_Kbar_z,
                                                    type_kaon, type_delta) *
-                           kplusn_inelastic_background(s);
+                           kplusp_inelastic_background(s);
                   },
                   sqrt_s_, type_n_bar, type_Kbar_z);
       break;

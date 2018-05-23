@@ -271,7 +271,8 @@ class CrossSections {
   CollisionBranchList nn_xx(ReactionsBitSet included_2to2);
 
   /**
-   * Find all inelastic 2->2 processes for Nucelon-Kaon (NK) Scattering.
+   * Find all inelastic 2->2 background processes for Nucleon-Kaon (NK)
+   * Scattering.
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
    * \return List of all possible NK reactions with their cross sections
    */
