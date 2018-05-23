@@ -1008,9 +1008,10 @@ CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) {
             const auto& type_Delta_bar_z = ParticleType::find(-pdg::Delta_z);
             add_channel(process_list,
                         [&] {
-                          // The isospin factor is 1, see the parametrizations
-                          // tests.
-                          return sigma_kplusp;
+                          return sigma_kplusp *
+                                 kplusn_ratios.get_ratio(type_nucleon,
+                                                         type_kaon, type_Kbar_z,
+                                                         type_Delta_p_bar);
                         },
                         sqrt_s_, type_Kbar_z, type_Delta_bar_m);
             add_channel(process_list,
@@ -1026,9 +1027,9 @@ CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) {
             const auto& type_n_bar = ParticleType::find(-pdg::n);
             add_channel(process_list,
                         [&] {
-                          return kplusn_k0p(s) * kplusn_ratios.get_ratio(
-                                                     type_nucleon, type_kaon,
-                                                     type_K_m, type_n_bar);
+                          // The isospin factor is 1, see the parametrizations
+                          // tests.
+                          return kplusn_k0p(s);
                         },
                         sqrt_s_, type_K_m, type_n_bar);
           }
