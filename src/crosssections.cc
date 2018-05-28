@@ -229,7 +229,7 @@ double CrossSections::elastic_parametrization(bool use_AQM) {
       elastic_xs = nn_el();  // valid also for annihilation
     } else if ((pdg_a.is_meson() && pdg_b.is_baryon()) ||
              (pdg_b.is_meson() && pdg_a.is_baryon())) {
-      elastic_xs = piplusp_elastic(sqrt_s_ * sqrt_s_);
+      elastic_xs = piplusp_elastic_no_subtraction(sqrt_s_ * sqrt_s_);
       // todo JB : fix this cross section so it doesn't subtract resonances
     } else if (pdg_a.is_meson() && pdg_b.is_meson()) {
       double s = sqrt_s_ * sqrt_s_;
