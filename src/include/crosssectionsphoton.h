@@ -92,7 +92,7 @@ class CrosssectionsPhoton<ComputationMethod::Analytic> {
                                                   const double m_rho);
   ///@}
 
-  // Todo{JR}: Needed for tabulation. 
+  // Todo{JR}: Needed for tabulation.
   /// @cond
   static double s_min, s_max, t_min, t_max;
   /// @endcond
