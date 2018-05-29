@@ -87,7 +87,8 @@ class Particles;
   * TTree a collision TTree is created. Information about each collision is
   * written as one leaf: nin, nout - number of incoming and outgoing particles,
   * ev - event number, weight - total weight of the collision (wgt),
-  * partial_weight - partial weight of the collision (par_wgt), (t,x,y,z), (p0,px,py,pz) - arrays of dimension nin+nout
+  * partial_weight - partial weight of the collision (par_wgt), (t,x,y,z),
+  (p0,px,py,pz) - arrays of dimension nin+nout
   * that contain coordinates and momenta.
   **/
 class RootOutput : public OutputInterface {

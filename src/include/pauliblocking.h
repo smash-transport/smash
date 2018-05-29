@@ -36,10 +36,9 @@ namespace smash {
 class PauliBlocker {
  public:
   /**
-   * PauliBlocker constructor. Gets parameters from configuration and experiment.
-   * Tabulates necessary integrals.
-   * \param[in] conf Configurations from config.yaml.
-   * \param[in] parameters Parameters given by Experiment.
+   * PauliBlocker constructor. Gets parameters from configuration and
+   * experiment. Tabulates necessary integrals. \param[in] conf Configurations
+   * from config.yaml. \param[in] parameters Parameters given by Experiment.
    */
   PauliBlocker(Configuration conf, const ExperimentParameters &parameters);
 

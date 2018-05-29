@@ -20,7 +20,6 @@ PauliBlocker::PauliBlocker(Configuration conf,
       rr_(conf.take({"Spatial_Averaging_Radius"}, 1.86)),
       rp_(conf.take({"Momentum_Averaging_Radius"}, 0.08)),
       ntest_(param.testparticles) {
-
   /*!\Userguide
    * \page pauliblocker Pauli_Blocking
    *

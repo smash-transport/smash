@@ -198,7 +198,7 @@ class CollisionBranch : public ProcessBranch {
    * \param[in] w Weight of created branch.
    * \param[in] p_type Process type of created branch.
    */
-   CollisionBranch(const ParticleType &type_a, const ParticleType &type_b,
+  CollisionBranch(const ParticleType &type_a, const ParticleType &type_b,
                   double w, ProcessType p_type)
       : ProcessBranch(w), process_type_(p_type) {
     particle_types_.reserve(2);
@@ -262,11 +262,11 @@ std::ostream &operator<<(std::ostream &os, const CollisionBranch &cbranch);
  */
 class DecayBranch : public ProcessBranch {
  public:
- /**
-  * Construct decay branch.
-  * \param[in] t DecayType of branch.
-  * \param[in] w Weight of created branch.
-  */
+  /**
+   * Construct decay branch.
+   * \param[in] t DecayType of branch.
+   * \param[in] w Weight of created branch.
+   */
   DecayBranch(const DecayType &t, double w) : ProcessBranch(w), type_(t) {}
   /// The move constructor efficiently moves the particle-type list member.
   DecayBranch(DecayBranch &&rhs)

@@ -21,7 +21,6 @@
 
 namespace smash {
 
-
 /// Identifies the mode of the Grid.
 enum class GridOptions : char {
   /// Without ghost cells
