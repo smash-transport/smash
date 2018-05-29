@@ -22,32 +22,79 @@ namespace smash {
 
 /**
  * \ingroup output
- * SMASH output in a paraview format,
- * intended for simple visualization.
+ * SMASH output in a paraview format, intended for simple visualization.
  */
 class VtkOutput : public OutputInterface {
  public:
+  /**
+   * Create a new VTK output.
+   *
+   * \param path Path to the output file.
+   * \param name Name of the output.
+   */
   VtkOutput(const bf::path &path, const std::string &name);
   ~VtkOutput();
 
+  /**
+   * Writes the initial particle information list of an event to the VTK
+   * output.
+   *
+   * \param particles Current list of all particles.
+   * \param event_number Number of the current event.
+   */
   void at_eventstart(const Particles &particles,
                      const int event_number) override;
+
+  /**
+   * Writes the final particle information list of an event to the VTK
+   * output. This currently does not do anything, because it is not
+   * required for the VTK output.
+   *
+   * \param particles Unused. Current list of particles.
+   * \param event_number Unused. Number of event.
+   * \param impact_parameter Unused. Impact parameter of this event.
+   */
   void at_eventend(const Particles &particles, const int event_number,
                    double impact_parameter) override;
+
+  /**
+   * Writes out all current particles.
+   *
+   * \param particles Current list of particles.
+   * \param clock Unused, needed since inherited.
+   * \param dens_param Unused, needed since inherited.
+   */
   void at_intermediate_time(const Particles &particles, const Clock &clock,
                             const DensityParameters &dens_param) override;
 
-  /// Prints 3D Lattice in vtk format on a grid
+  /**
+   * Prints the density lattice in VTK format on a grid.
+   *
+   * \param tq The quantity whose density should be written.
+   * \param dt The type of the density.
+   * \param lattice The lattice from which the quantity is taken.
+   */
   void thermodynamics_output(
       const ThermodynamicQuantity tq, const DensityType dt,
       RectangularLattice<DensityOnLattice> &lattice) override;
 
-  /// Prints 3D Lattice in vtk format on a grid
+  /**
+   * Prints the energy-momentum-tensor lattice in VTK format on a grid.
+   *
+   * \param tq The quantity whose density should be written.
+   * \param dt The type of the density.
+   * \param lattice The lattice from which the quantity is taken.
+   */
   void thermodynamics_output(
       const ThermodynamicQuantity tq, const DensityType dt,
       RectangularLattice<EnergyMomentumTensor> &lattice) override;
 
-  /// Printout of the thermodynamic quantities from the thermalizer class
+  /**
+   * Printout of all thermodynamic quantities from the thermalizer class.
+   *
+   * \param gct Grand-canonical thermalizer from which the quantities are
+   *            taken.
+   */
   void thermodynamics_output(const GrandCanThermalizer &gct) override;
 
  private:
