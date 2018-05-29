@@ -31,11 +31,13 @@ class ScatterActionPhoton : public ScatterAction {
    *
    * \param[in] in ParticleList of incoming particles.
    * \param[in] time Time relative to underlying hadronic action.
-   * \param[in] n_frac_photons Number of photons to produce for each hadronic scattering.
-   * \param[in] hadronic_cross_section_input Cross-section of underlying hadronic cross-section. 
+   * \param[in] n_frac_photons Number of photons to produce for each hadronic
+   * scattering. \param[in] hadronic_cross_section_input Cross-section of
+   * underlying hadronic cross-section.
    */
 
-  ScatterActionPhoton(const ParticleList &in, const double time, const int n_frac_photons,
+  ScatterActionPhoton(const ParticleList &in, const double time,
+                      const int n_frac_photons,
                       const double hadronic_cross_section_input)
       : ScatterAction(in[0], in[1], time),
         number_of_fractional_photons_(n_frac_photons),
@@ -48,7 +50,8 @@ class ScatterActionPhoton : public ScatterAction {
   /**
    * Create the photon final state and write to output.
    *
-   * \param[in] outputs List of all outputs. Does not have to be a specific photon output, the function will take care of this.
+   * \param[in] outputs List of all outputs. Does not have to be a specific
+   * photon output, the function will take care of this.
    */
   void perform_photons(const OutputsList &outputs);
 
@@ -59,7 +62,7 @@ class ScatterActionPhoton : public ScatterAction {
   void generate_final_state() override;
 
   /**
-   * Return the weight of the last created photon. 
+   * Return the weight of the last created photon.
    *
    * \return total weight
    */
@@ -85,15 +88,17 @@ class ScatterActionPhoton : public ScatterAction {
 
   /**
    * Adds one hadronic process with a given cross-section. The intended use is
-   * to add the hadronic cross-section from the already performed hadronic action
-   * without recomputing it.
+   * to add the hadronic cross-section from the already performed hadronic
+   * action without recomputing it.
    *
-   * \param[in] reaction_cross_section Total cross-section of underlying hadronic process [mb]
+   * \param[in] reaction_cross_section Total cross-section of underlying
+   * hadronic process [mb]
    */
   void add_dummy_hadronic_process(double reaction_cross_section);
 
   /**
-   * Add the photonic process. Also compute the total cross section as a side effect.
+   * Add the photonic process. Also compute the total cross section as a side
+   * effect.
    */
 
   void add_single_process() {
@@ -104,7 +109,9 @@ class ScatterActionPhoton : public ScatterAction {
 
   /**
    * Enum for encoding the photon process. It is uniquely determined by the
-   * incoming particles. The naming scheme is : Incoming_1__Incoming_2__Outgoing_hadron. The photon is omitted in the naming.
+   * incoming particles. The naming scheme is :
+   * Incoming_1__Incoming_2__Outgoing_hadron. The photon is omitted in the
+   * naming.
    */
 
   enum class ReactionType {
@@ -126,13 +133,14 @@ class ScatterActionPhoton : public ScatterAction {
    * incoming particles are not part of any implemented photonic process, return
    * no_reaction.
    *
-   * \param[in] in ParticleList of incoming particles. 
-   * \return ReactionType enum-member 
+   * \param[in] in ParticleList of incoming particles.
+   * \return ReactionType enum-member
    */
   static ReactionType photon_reaction_type(const ParticleList &in);
 
-  /** 
-   * Check if particles can undergo an implemented photon process. This function does not check the involved kinematics. 
+  /**
+   * Check if particles can undergo an implemented photon process. This function
+   * does not check the involved kinematics.
    *
    * \param[in] in ParticleList of incoming particles.
    * \return bool if photon reaction implemented.
@@ -144,7 +152,7 @@ class ScatterActionPhoton : public ScatterAction {
   /**
    * Return ParticleTypePtr of hadron in the out channel, given the incoming
    * particles. This function is overloaded since we need the hadron type in
-   * different places. 
+   * different places.
    *
    * \param [in] in ParticleList of incoming particles.
    * \returns ParticeTypePtr to hadron in outgoing channel.
@@ -153,8 +161,8 @@ class ScatterActionPhoton : public ScatterAction {
 
   /**
    * Return ParticleTypePtr of hadron in the out channel,
-   * given the ReactionType. This function is overloaded since we need the hadron type in
-   * different places. 
+   * given the ReactionType. This function is overloaded since we need the
+   * hadron type in different places.
    *
    * \param [in] reaction ReactionType, determined from incoming particles.
    * \returns ParticeTypePtr to hadron in outgoing channel.
@@ -166,9 +174,10 @@ class ScatterActionPhoton : public ScatterAction {
    *
    *  \param [in] s_sqrt CM-energy [GeV]
    *  \param [in] in ParticleList of incoming hadrons
-   *  \returns true if particles can get produced. 
+   *  \returns true if particles can get produced.
    */
-  static bool is_kinematically_possible(const double s_sqrt, const ParticleList &in);
+  static bool is_kinematically_possible(const double s_sqrt,
+                                        const ParticleList &in);
 
  private:
   /**
@@ -180,14 +189,14 @@ class ScatterActionPhoton : public ScatterAction {
   /// Photonic process as determined from incoming particles.
   ReactionType reac_;
 
-  /** 
+  /**
    * Number of photons created for each hadronic scattering, needed for correct
    * weighting. Note that in generate_final_state() only one photon + hadron is
    * created.
    */
   const int number_of_fractional_photons_;
 
-  /// ParticlePtr to the outgoing hadron. 
+  /// ParticlePtr to the outgoing hadron.
   ParticleTypePtr hadron_out_t_;
 
   /// Mass of outgoing hadron
@@ -254,7 +263,7 @@ class ScatterActionPhoton : public ScatterAction {
    * return the differential cross section for the (pi, a1, rho) process in
    * the first argument, for the omega process in the second. If only
    * one process exists, both values are the same.
-   * 
+   *
    * \param[in] t Mandelstam-t [GeV^2]
    * \param[in] m_rho Mass of the incoming or outgoing rho-particle [GeV]
    *

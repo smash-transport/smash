@@ -15,27 +15,31 @@
 
 namespace smash {
 /**
- * Calculation method for the cross sections. It has only one member at the moment. In the future there will be more options.
+ * Calculation method for the cross sections. It has only one member at the
+ * moment. In the future there will be more options.
  */
 enum class ComputationMethod { Analytic };
 
 template <ComputationMethod method>
 class CrosssectionsPhoton {};
 
-/** 
- * Class to calculate the cross-section of a meson-meson to meson-photon process. This template specialization uses the analytic formulas for the cross-sections.
+/**
+ * Class to calculate the cross-section of a meson-meson to meson-photon
+ * process. This template specialization uses the analytic formulas for the
+ * cross-sections.
  */
 template <>
 class CrosssectionsPhoton<ComputationMethod::Analytic> {
  public:
-   /** @name Total cross-section 
-    * The functions in this group calculate the analytical value of the total cross-section for a photon process. 
-    *
-    * \param[in] s Mandelstam-s [GeV^2]
-    * \param[in] m_rho Mass of participating rho-meson [GeV]
-    * \returns photon cross-section [mb]
-    */
-   ///@{
+  /** @name Total cross-section
+   * The functions in this group calculate the analytical value of the total
+   * cross-section for a photon process.
+   *
+   * \param[in] s Mandelstam-s [GeV^2]
+   * \param[in] m_rho Mass of participating rho-meson [GeV]
+   * \returns photon cross-section [mb]
+   */
+  ///@{
   static double xs_pi_pi_rho0(const double s, const double m_rho);
   static double xs_pi_pi0_rho(const double s, const double m_rho);
   static double xs_pi0_rho0_pi0(const double s, const double m_rho);
@@ -52,15 +56,16 @@ class CrosssectionsPhoton<ComputationMethod::Analytic> {
                                              const double m_rho);
   ///@}
 
-   /** @name Differential cross-section 
-    * The functions in this group calculate the analytical value of the differential cross-section for a photon process. 
-    *
-    * \param[in] s Mandelstam-s [GeV^2]
-    * \param[in] t Mandelstam-t [GeV^2]
-    * \param[in] m_rho Mass of participating rho-meson [GeV]
-    * \returns photon cross-section [mb]
-    */
-   ///@{
+  /** @name Differential cross-section
+   * The functions in this group calculate the analytical value of the
+   * differential cross-section for a photon process.
+   *
+   * \param[in] s Mandelstam-s [GeV^2]
+   * \param[in] t Mandelstam-t [GeV^2]
+   * \param[in] m_rho Mass of participating rho-meson [GeV]
+   * \returns photon cross-section [mb]
+   */
+  ///@{
   static double xs_diff_pi_pi_rho0(const double s, const double t,
                                    const double m_rho);
   static double xs_diff_pi_pi0_rho(const double s, const double t,
