@@ -98,21 +98,61 @@ class VtkOutput : public OutputInterface {
   void thermodynamics_output(const GrandCanThermalizer &gct) override;
 
  private:
+  /**
+   * Write the given particles to the output.
+   *
+   * \param particles The particles.
+   */
   void write(const Particles &particles);
 
+  /**
+   * Make a file name given a description and a counter.
+   *
+   * \param description The description.
+   * \param counter The counter enumerating the outputs.
+   */
   std::string make_filename(const std::string &description, int counter);
 
+  /**
+   * Make a variable name given quantity and density type.
+   *
+   * \param tq The quantity.
+   * \param dens_type The density type.
+   */
   std::string make_varname(const ThermodynamicQuantity tq,
                            const DensityType dens_type);
 
+  /**
+   * Write the VTK header.
+   *
+   * \param file Output file.
+   * \param lat Lattice corresponding to output.
+   * \param description Description of the output.
+   */
   template <typename T>
   void write_vtk_header(std::ofstream &file, RectangularLattice<T> &lat,
                         const std::string &description);
 
+  /**
+   * Write a VTK scalar.
+   *
+   * \param file Output file.
+   * \param lat Lattice corresponding to output.
+   * \param varname Name of the output variable.
+   * \param function Function that gets the scalar given a lattice node.
+   */
   template <typename T, typename F>
   void write_vtk_scalar(std::ofstream &file, RectangularLattice<T> &lat,
                         const std::string &varname, F &&function);
 
+  /**
+   * Write a VTK vector.
+   *
+   * \param file Output file.
+   * \param lat Lattice corresponding to output.
+   * \param varname Name of the output variable.
+   * \param function Function that gets the vector given a lattice node.
+   */
   template <typename T, typename F>
   void write_vtk_vector(std::ofstream &file, RectangularLattice<T> &lat,
                         const std::string &varname, F &&function);
