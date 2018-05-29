@@ -133,7 +133,7 @@ void ScatterAction::add_all_scatterings(double elastic_parameter,
                     nnbar_treatment == NNbarTreatment::Strings)) {
     const double xs_diff = xs.high_energy() - cross_section();
     if (xs_diff > 0.) {
-      add_collisions(xs.string_excitation(xs_diff, string_process_));
+      add_collisions(xs.string_excitation(xs_diff, string_process_, use_AQM));
     }
   }
   if (strings_switch) {

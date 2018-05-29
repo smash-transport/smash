@@ -167,7 +167,8 @@ CollisionBranchList CrossSections::generate_collision_list(
      * from all other present channels. */
     const double sig_string =
         std::max(0., high_energy() - elastic_parametrization(use_AQM));
-    append_list(process_list, string_excitation(sig_string, string_process));
+    append_list(process_list,
+        string_excitation(sig_string, string_process, use_AQM));
   } else {
     if (two_to_one_switch) {
       // resonance formation (2->1)
@@ -1600,20 +1601,23 @@ CollisionBranchList CrossSections::dn_xx(ReactionsBitSet /*included_2to2*/) {
 }
 
 CollisionBranchList CrossSections::string_excitation(
-    double total_string_xs, StringProcess* string_process) {
+    double total_string_xs, StringProcess* string_process, bool use_AQM) {
   const auto& log = logger<LogArea::CrossSections>();
 
   if (!string_process) {
     throw std::runtime_error("string_process should be initialized.");
   }
 
-  /* get PDG id for evaluation of the parametrized cross sections
+  /* Get PDG id for evaluation of the parametrized cross sections
    * for diffractive processes.
    * (anti-)proton is used for (anti-)baryons and
    * pion is used for mesons.
    * This must be rescaled according to additive quark model
-   * in the case of exotic hadrons. */
+   * in the case of exotic hadrons.
+   * Also calculate the multiplicative factor for AQM
+   * based on the quark contents. */
   std::array<int, 2> pdgid;
+  double AQM_factor = 1.;
   for (int i = 0; i < 2; i++) {
     PdgCode pdg = incoming_particles_[i].type().pdgcode();
     pdg.deexcite();
@@ -1624,6 +1628,7 @@ CollisionBranchList CrossSections::string_excitation(
     } else {
       pdgid[i] = 211;
     }
+    AQM_factor = AQM_factor * (1. - 0.4 * pdg.frac_strange());
   }
 
   /* Determine if the initial state is a baryon-antibaryon pair,
@@ -1659,6 +1664,11 @@ CollisionBranchList CrossSections::string_excitation(
      * matter. */
     std::array<double, 3> xs =
         string_process->cross_sections_diffractive(pdgid[0], pdgid[1], sqrt_s_);
+    if (use_AQM) {
+      for (int ip = 0; ip < 3; ip++) {
+        xs[ip] = xs[ip] * AQM_factor;
+      }
+    }
     double single_diffr_AX = xs[0], single_diffr_XB = xs[1],
            double_diffr = xs[2];
     double single_diffr = single_diffr_AX + single_diffr_XB;
@@ -1675,8 +1685,11 @@ CollisionBranchList CrossSections::string_excitation(
       /* In the case of baryon-antibaryon pair,
        * the parametrized cross section for annihilation will be added.
        * See xs_ppbar_annihilation(). */
-      sig_annihilation =
-          std::min(total_string_xs, xs_ppbar_annihilation(sqrt_s_ * sqrt_s_));
+      double xs_param = xs_ppbar_annihilation(sqrt_s_ * sqrt_s_);
+      if (use_AQM) {
+        xs_param = xs_param * AQM_factor;
+      }
+      sig_annihilation = std::min(total_string_xs, xs_param);
     } else {
       sig_annihilation = 0.;
     }
