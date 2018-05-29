@@ -1129,7 +1129,7 @@ bool Experiment<Modus>::perform_action(
 
   // At every collision photons can be produced.
   // Note: We rely here on the lazy evaluation of the arguments to if.
-  // It may happen that in a wall-crossing-action sqrt_s raise an exception
+  // It may happen that in a wall-crossing-action sqrt_s raises an exception.
   // Therefore we first have to check if the incoming particles can undergo
   // an em-interaction.
   if (photons_switch_ &&
