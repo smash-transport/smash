@@ -4,6 +4,29 @@
 
 We use [doxygen](http://doxygen.org) for generating documentation from our code.
 
+### How to build docs with doxygen yourself
+
+You need to have doxygen version 1.8.4 installed. Then just call:
+
+    make doc
+
+and you'll find `doc/html/index.html` in your build directory.
+
+Additionally, there are two more targets that can be used to test the completeness of the documentation:
+
+    make undocumented
+    make undocumented_count
+
+Both are building the doxygen documentation only for completely documented entities, but the main purpose of both is that all warnings are displayed when running. So, the first target outputs all doxygen warnings about missing documentation and the second one only counts (and outputs) the number of warnings.
+
+#### Creating the User Guide
+
+Call
+
+    make user
+
+to obtain the files in `doc/user/index.html`
+
 ### What to document in the code
 
 Code documentation has two important purposes:
@@ -83,20 +106,6 @@ Here, `XXX` should be the BibTex key for the paper from Inspire. In order to fin
 
 After adding a new reference, you should run the script `doc/get_bibtex.sh`, which will update the file [smash.bib](https://fias.uni-frankfurt.de/pm/projects/smash/repository/revisions/master/entry/doc/smash.bib) by fetching the BibTex entries of all `iref` references from Inspire.
 
-### How to build docs with doxygen yourself
-
-You need to have doxygen version 1.8.4 installed. Then just call:
-
-    make doc
-
-and you'll find `doc/html/index.html` in your build directory.
-
-Additionally, there are two more targets that can be used to test the completeness of the documentation:
-
-    make undocumented
-    make undocumented_count
-
-Both are building the doxygen documentation only for completely documented entities, but the main purpose of both is that all warnings are displayed when running. So, the first target outputs all doxygen warnings about missing documentation and the second one only counts (and outputs) the number of warnings.
 
 ### User Guide
 
@@ -116,14 +125,6 @@ The User Guide will be written in the code base, i.e., documentation of configur
 ```
 
 The workflow is that `doc/CMakeLists.txt` extracts all `/*!\Userguide ... */` Sections into `doc/userguide.dox` which is then included into the User Guide Doxygen tree. Currently, the cmake script processes all `src/include/*.h` and `src/*.cc` files.
-
-#### Creating the User Guide
-
-Call
-
-    make user
-
-to obtain the files in `doc/user/index.html`
 
 ## Coding Rules
 
