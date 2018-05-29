@@ -26,8 +26,6 @@
 
 namespace smash {
 
-// Determines the reaction type (process) based on the incoming particles.
-// This mapping is unique.
 ScatterActionPhoton::ReactionType ScatterActionPhoton::photon_reaction_type(
     const ParticleList &in) {
   if (in.size() != 2) {
@@ -272,10 +270,12 @@ double ScatterActionPhoton::sample_out_hadron_mass(
 double ScatterActionPhoton::rho_mass() const {
   assert(reac_ != ReactionType::no_reaction);
   switch (reac_) {
+    // rho in final state. use already sampled mass
     case ReactionType::pi_p_pi_m_rho_z:
     case ReactionType::pi_z_pi_m_rho_m:
     case ReactionType::pi_z_pi_p_rho_p:
       return hadron_out_mass_;
+    // rho in initial state, use its mass
     case ReactionType::pi_m_rho_p_pi_z:
     case ReactionType::pi_p_rho_m_pi_z:
     case ReactionType::pi_p_rho_z_pi_p:
@@ -296,7 +296,7 @@ double ScatterActionPhoton::rho_mass() const {
 CollisionBranchList ScatterActionPhoton::photon_cross_sections(
     MediatorType mediator) {
   CollisionBranchList process_list;
-  PhotonCrossSection<ComputationMethod::Analytic> xs_object;
+  CrosssectionsPhoton<ComputationMethod::Analytic> xs_object;
 
   static ParticleTypePtr photon_particle = &ParticleType::find(pdg::photon);
 
@@ -383,7 +383,7 @@ double ScatterActionPhoton::diff_cross_section(const double t,
   const double s = mandelstam_s();
   double diff_xsection = 0.0;
 
-  PhotonCrossSection<ComputationMethod::Analytic> xs_object;
+  CrosssectionsPhoton<ComputationMethod::Analytic> xs_object;
 
   switch (reac_) {
     case ReactionType::pi_p_pi_m_rho_z:
