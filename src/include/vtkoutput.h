@@ -47,7 +47,7 @@ class VtkOutput : public OutputInterface {
       const ThermodynamicQuantity tq, const DensityType dt,
       RectangularLattice<EnergyMomentumTensor> &lattice) override;
 
-  /// Printout of the thermodynamic quantities from thethermalizer class
+  /// Printout of the thermodynamic quantities from the thermalizer class
   void thermodynamics_output(const GrandCanThermalizer &gct) override;
 
  private:

@@ -21,17 +21,18 @@ namespace smash {
 
 /// Line consists of a line number and the contents of that line
 struct Line { /*{{{*/
-  /// initialize line with empty string and number
+  /// Initialize line with empty string and number
   Line() = default;
-  /// initialize a line with line number \p n and text \p t
+  /// Initialize a line with line number \p n and text \p t
   Line(int n, std::string &&t) : number(n), text(std::move(t)) {}
-  /// line number
+  /// Line number
   int number;
-  /// line content.
+  /// Line content.
   std::string text;
 }; /*}}}*/
 
-/** builds a meaningful error message
+/**
+ * Builds a meaningful error message
  *
  * Takes the message and quotes the Line where the error occurs
  *
@@ -50,11 +51,11 @@ inline std::string build_error_string(std::string message, const Line &line) {
  * comments and empty lines. The remaining lines will be returned as a vector
  * of strings and linenumber pairs (Line).
  *
- * \param input an lvalue reference to an input stream
+ * \param[in] input an lvalue reference to an input stream
  */
 build_vector_<Line> line_parser(const std::string &input);
 
-/// makes sure that nothing is left to read from this line.
+/// Makes sure that nothing is left to read from this line.
 inline void ensure_all_read(std::istream &input, const Line &line) { /*{{{*/
   std::string tmp;
   input >> tmp;
@@ -69,7 +70,7 @@ inline void ensure_all_read(std::istream &input, const Line &line) { /*{{{*/
 /**
  * Utility function to read a complete input stream (e.g. file) into one string.
  *
- * \param input The input stream. Since it reads until EOF und thus "uses up the
+ * \param[in] input The input stream. Since it reads until EOF und thus "uses up the
  * whole input stream" the function takes an rvalue reference to the stream
  * object (just pass a temporary).
  *

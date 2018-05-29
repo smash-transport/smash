@@ -35,37 +35,56 @@ namespace smash {
  */
 class PauliBlocker {
  public:
+  /**
+   * PauliBlocker constructor. Gets parameters from configuration and experiment.
+   * Tabulates necessary integrals.
+   * \param[in] conf Configurations from config.yaml.
+   * \param[in] parameters Parameters given by Experiment.
+   */
   PauliBlocker(Configuration conf, const ExperimentParameters &parameters);
+
+  /// Destructor
   ~PauliBlocker();
 
-  // Returns phase-space densityof particle pdg at the point (r,p)
+  /**
+   * Calculate phase-space density of particle pdg at the point (r,p).
+   *
+   * \param[in] r Position vector.
+   * \param[in] p Momentum vector.
+   * \param[in] particles List of all current particles.
+   * \param[in] pdg PDG number of species for which density to be calculated.
+   * \param[in] disregard Do not count particles that should be disregarded.
+   * This is intended to avoid counting incoming particles when the phase-space
+   * density for outgoing ones is estimated.
+   * \return Phase-space density
+   */
   double phasespace_dens(const ThreeVector &r, const ThreeVector &p,
                          const Particles &particles, const PdgCode pdg,
                          const ParticleList &disregard) const;
 
  private:
-  // Tabulate integrals for weights
+  /// Tabulate integrals for weights
   void init_weights();
 
-  // Analytical calculation of weights
+  /// Analytical calculation of weights
   void init_weights_analytical();
 
-  // Sigma of the gaussian used for smearing
+  /// Sigma of the gaussian used for smearing
   double sig_;
 
-  // Radius, after which gaussians (used for averaging) are cut, fm
+  /// Radius, after which gaussians (used for averaging) are cut, fm
   double rc_;
 
-  // Radius of averaging in coordinate space, fm
+  /// Radius of averaging in coordinate space, fm
   double rr_;
 
-  // Radius of averaging in momentum space, GeV/c
+  /// Radius of averaging in momentum space, GeV/c
   double rp_;
 
-  // Testparticles number
+  /// Testparticles number
   int ntest_;
 
-  // Weights: tabulated results of numerical integration
+  /// Weights: tabulated results of numerical integration
   std::array<double, 30> weights_;
 };
 }  // namespace smash
