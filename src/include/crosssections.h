@@ -377,6 +377,9 @@ class CrossSections {
   bool both_are_nucleons_ = incoming_particles_[0].type().is_nucleon() &&
                             incoming_particles_[1].type().is_nucleon();
 
+  /// Whether incoming particles are a baryon-antibaryon pair
+  bool is_BBbar_pair_;
+
   /// Total energy in the center-of-mass frame.
   double sqrt_s_;
 

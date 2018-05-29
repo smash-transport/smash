@@ -144,6 +144,9 @@ CollisionBranchList CrossSections::generate_collision_list(
   const ParticleType& t1 = incoming_particles_[0].type();
   const ParticleType& t2 = incoming_particles_[1].type();
 
+  is_BBbar_pair_ = t1.is_baryon() && t2.is_baryon() &&
+                   t1.antiparticle_sign() == -t2.antiparticle_sign();
+
   const bool is_pythia =
       strings_with_probability &&
       decide_string(strings_switch, strings_with_probability, use_AQM,
@@ -1622,7 +1625,25 @@ CollisionBranchList CrossSections::string_excitation(
       pdgid[i] = 211;
     }
   }
-  bool BBbar_pair = pdgid[0] + pdgid[1] == 0;
+
+  /* Determine if the initial state is a baryon-antibaryon pair,
+   * which can annihilate. */
+  bool can_annihilate = false;
+  if (is_BBbar_pair_) {
+    int n_q_types = 5;  // u, d, s, c, b
+    for (int iq = 1; iq <= n_q_types; iq++) {
+      std::array<int, 2> nquark;
+      for (int i = 0; i < 2; i++) {
+        nquark[i] =
+            incoming_particles_[i].type().pdgcode().net_quark_number(iq);
+        nquark[i] = std::abs(nquark[i]);
+      }
+      if (nquark[0] > 0 && nquark[1] > 0) {
+        can_annihilate = true;
+        break;
+      }
+    }
+  }
 
   CollisionBranchList channel_list;
   if (total_string_xs > 0.) {
@@ -1650,7 +1671,7 @@ CollisionBranchList CrossSections::string_excitation(
      * anti-quark pair. See StringProcess::next_BBbarAnn()
      */
     double sig_annihilation;
-    if (BBbar_pair) {
+    if (can_annihilate) {
       /* In the case of baryon-antibaryon pair,
        * the parametrized cross section for annihilation will be added.
        * See xs_ppbar_annihilation(). */
@@ -1713,7 +1734,7 @@ CollisionBranchList CrossSections::string_excitation(
     int imax = 0;
     /* baryon-antibaryon can annihilate and this correspond to
      * StringSoftType::BBbar. */
-    if (BBbar_pair) {
+    if (can_annihilate) {
       imax = 5;
     } else {
       imax = 4;
@@ -2098,8 +2119,7 @@ bool CrossSections::decide_string(bool strings_switch,
       t1.is_nucleon() && t2.is_nucleon() &&
       t1.antiparticle_sign() == t2.antiparticle_sign();
   const bool is_BBbar_scattering =
-      treat_BBbar_with_strings && t1.is_baryon() && t2.is_baryon() &&
-      t1.pdgcode().is_antiparticle_of(t2.pdgcode());
+      treat_BBbar_with_strings && is_BBbar_pair_;
   const bool is_Npi_scattering = (t1.pdgcode().is_pion() && t2.is_nucleon()) ||
                                  (t1.is_nucleon() && t2.pdgcode().is_pion());
   /* True for baryon-baryon, anti-baryon-anti-baryon, baryon-meson,
