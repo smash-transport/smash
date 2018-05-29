@@ -394,7 +394,8 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
 }
 
 template <typename Modus>
-void Experiment<Modus>::create_output(std::string format, std::string content,
+void Experiment<Modus>::create_output(const std::string &format,
+                                      const std::string &content,
                                       const bf::path &output_path,
                                       const OutputParameters &out_par) {
   const auto &log = logger<LogArea::Experiment>();
