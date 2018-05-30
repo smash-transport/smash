@@ -186,6 +186,16 @@ double piminusp_elastic(double mandelstam_s);
 double pp_elastic(double mandelstam_s);
 
 /**
+ * pp elastic cross section parametrization, with only the high
+ * energy part generalized to all energy regimes (used for AQM)
+ * Source: \iref{Weil:2013mya}, eq. (44)
+ *
+ * \param[in] mandelstam_s the rest frame total energy squared
+ * \return the parametrized cross-section
+ */
+double pp_elastic_high_energy(double(mandelstam_s);
+
+/**
  * pp total cross section parametrization
  * Sources:
  * low-p: \iref{Cugnon:1996kh}

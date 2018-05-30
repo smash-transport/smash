@@ -237,6 +237,12 @@ double pp_elastic(double mandelstam_s) {
   }
 }
 
+double pp_elastic_high_energy(double(mandelstam_s) {
+  double p_lab = plab_from_s(mandelstam_s);
+  return 11.9 + 26.9 * std::pow(p_lab, -1.21) + 0.169 * logp * logp -
+         1.85 * logp;
+}
+
 double pp_total(double mandelstam_s) {
   double p_lab = plab_from_s(mandelstam_s);
   if (p_lab < 0.4) {

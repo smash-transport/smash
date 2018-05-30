@@ -225,12 +225,10 @@ double CrossSections::elastic_parametrization(bool use_AQM) {
     elastic_xs = nn_el();
   } else if (use_AQM) {
     if (pdg_a.is_baryon() && pdg_b.is_baryon()) {
-      // todo JB : double check those parametrizations
       elastic_xs = nn_el();  // valid also for annihilation
     } else if ((pdg_a.is_meson() && pdg_b.is_baryon()) ||
              (pdg_b.is_meson() && pdg_a.is_baryon())) {
       elastic_xs = piplusp_elastic_no_subtraction(sqrt_s_ * sqrt_s_);
-      // todo JB : fix this cross section so it doesn't subtract resonances
     } else if (pdg_a.is_meson() && pdg_b.is_meson()) {
       double s = sqrt_s_ * sqrt_s_;
       if (s > 4 * nucleon_mass * nucleon_mass) {
@@ -252,13 +250,17 @@ double CrossSections::nn_el() {
   const double s = sqrt_s_ * sqrt_s_;
 
   // Use parametrized cross sections.
-  double sig_el;
-  if (pdg_a == pdg_b) {
-    sig_el = pp_elastic(s);
-  } else if (pdg_a.is_antiparticle_of(pdg_b)) {
+  double sig_el = -1.;
+  if (pdg_a.is_antiparticle_of(pdg_b)) {
     sig_el = ppbar_elastic(s);
-  } else {
-    sig_el = np_elastic(s);
+  } else if (pdg_a.is_nucleon() && pdg_b.is_nucleon()) {
+    if (pdg_a == pdg_b) {
+      sig_el = pp_elastic(s);
+    } else {
+      sig_el = np_elastic(s);
+    }
+  } else { // AQM
+    sig_el = pp_elastic_high_energy(s);
   }
   if (sig_el > 0.) {
     return sig_el;
