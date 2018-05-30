@@ -237,10 +237,15 @@ class Particles {
     friend class Particles;
 
    public:
+    /// remove const qualification
     using value_type = typename std::remove_const<T>::type;
+    /// provide the pointer of a reference
     using pointer = typename std::add_pointer<T>::type;
+    /// creates a lvalue reference
     using reference = typename std::add_lvalue_reference<T>::type;
+    /// add const qualification to a pointer
     using const_pointer = typename std::add_const<pointer>::type;
+    /// add const qualification to a reference
     using const_reference = typename std::add_const<reference>::type;
 
    private:
@@ -347,7 +352,9 @@ class Particles {
       return ptr_ >= rhs.ptr_;
     }
   };
+  /// An alias to the GenericIterator class of ParticleData
   using iterator = GenericIterator<ParticleData>;
+  /// An alias to the GenericIterator class of const ParticleData
   using const_iterator = GenericIterator<const ParticleData>;
 
   /// \return a reference to the first particle in the list.
@@ -435,7 +442,7 @@ class Particles {
    * Ensure that the capacity of data_ is large enough to hold \p to_add more
    * entries. If the capacity does not sufficent increase_capacity is called.
    *
-   * \param[in] Number of particles which is going to be added to the list.
+   * \param[in] to_add Number of particles which is going to be added to the list.
    */
   inline void ensure_capacity(unsigned to_add);
   /**
