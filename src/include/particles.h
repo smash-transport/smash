@@ -121,13 +121,15 @@ class Particles {
     if (data_size_ <= copy.index_) {
       return false;
     }
+    /* Check if the particles still exists. If it decayed
+     * or scattered inelastically it is gone. */
     return data_[copy.index_].id() ==
-               copy.id()  /* Check if the particles still exists. If it decayed
-                           * or scattered inelastically it is gone. */
+               copy.id()
+           /* If the particle has scattered
+            * elastically, its id_process has
+            * changed and we consider it invalid. */
            && data_[copy.index_].id_process() ==
-                  copy.id_process();  /* If the particle has scattered
-                                       * elastically, its id_process has
-                                       * changed and we consider it invalid. */
+                  copy.id_process();
   }
 
   /**
