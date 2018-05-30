@@ -136,6 +136,9 @@ void ScatterAction::add_all_scatterings(double elastic_parameter,
       add_collisions(xs.string_excitation(xs_diff, string_process_));
     }
   }
+  if (strings_switch) {
+    subproc_soft_string_ = xs.get_subproc_soft_string();
+  }
 }
 
 double ScatterAction::get_total_weight() const { return total_cross_section_; }

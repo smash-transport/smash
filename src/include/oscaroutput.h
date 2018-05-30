@@ -95,6 +95,7 @@ class OscarOutput : public OutputInterface {
 
   /**
    * Writes a prefix line then write out all current particles.
+   *
    * \param[in] particles Current list of particles.
    * \param[in] clock Unused, needed since inherited.
    * \param[in] dens_param Unused, needed since inherited.

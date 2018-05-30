@@ -36,15 +36,13 @@ double ProcessBranch::threshold() const {
   if (threshold_ < 0.) {
     /* Sum up the (minimum) masses of all final-state particles
      * this requires double-precision to ensure that the sum is never
-     * smaller than the real sum would be without rounding
-     */
+     * smaller than the real sum would be without rounding. */
     double thr = 0.;
     for (const auto& type : particle_types()) {
       thr += type->min_mass_kinematic();
     }
     /* This may round up or down. Up is good. If down
-     * we must add one ULP via 'nextafter'.
-     */
+     * we must add one ULP via 'nextafter'. */
     const double rounded = thr;
     threshold_ =
         rounded < thr
@@ -74,10 +72,10 @@ std::ostream& operator<<(std::ostream& os, const CollisionBranch& cbranch) {
   } else if (ptype == ProcessType::TwoToOne || ptype == ProcessType::TwoToTwo ||
              ptype == ProcessType::Elastic || ptype == ProcessType::Decay) {
     ParticleTypePtrList ptype_list = cbranch.particle_types();
-    // Sorting ensures unique name for every channel
-    // It avoids duplicates, such as Δ⁰Δ⁺⁺ and Δ⁺⁺Δ⁰,
-    // which actually occur in SMASH, because of the way channels are added:
-    // for example one channel can be added twice with halved cross-section.
+    /* Sorting ensures unique name for every channel
+     * It avoids duplicates, such as Δ⁰Δ⁺⁺ and Δ⁺⁺Δ⁰,
+     * which actually occur in SMASH, because of the way channels are added:
+     * for example one channel can be added twice with halved cross-section. */
     std::sort(ptype_list.begin(), ptype_list.end());
     for (const auto& type : ptype_list) {
       os << type->name();

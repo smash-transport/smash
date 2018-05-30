@@ -55,8 +55,8 @@ class CrossSections {
    */
   CollisionBranchList generate_collision_list(
       double elastic_parameter, bool two_to_one_switch,
-      ReactionsBitSet included_2to2, double low_snn_cut,
-      bool strings_switch, bool use_AQM, bool strings_with_probability,
+      ReactionsBitSet included_2to2, double low_snn_cut, bool strings_switch,
+      bool use_AQM, bool strings_with_probability,
       NNbarTreatment nnbar_treatment, StringProcess* string_process);
 
   /**
@@ -157,7 +157,6 @@ class CrossSections {
    */
   double high_energy() const;
 
-
   /**
    * Return, if the scattering between the incoming particles are scattering
    * via string fragmentation or not.
@@ -189,7 +188,7 @@ class CrossSections {
    * BB annihilation also uses this function to decide whether to produce
    * strings or not. Since there are no other contributions for this process,
    * there are no cutoffs or gradual increase in the probability of this process
-   * happening or not, it just requires the proper combination of incoming 
+   * happening or not, it just requires the proper combination of incoming
    * particles and config parameters.
    *
    * \param[in] strings_switch Is string fragmentation enabled?
@@ -268,7 +267,8 @@ class CrossSections {
   CollisionBranchList nn_xx(ReactionsBitSet included_2to2);
 
   /**
-   * Find all inelastic 2->2 processes for Nucelon-Kaon (NK) Scattering.
+   * Find all inelastic 2->2 background processes for Nucleon-Kaon (NK)
+   * Scattering.
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
    * \return List of all possible NK reactions with their cross sections
    */
