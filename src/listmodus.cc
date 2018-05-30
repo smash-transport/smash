@@ -43,7 +43,8 @@ namespace smash {
  *
  * The list modus provides a modus for hydro afterburner calculations. It takes
  * files with a list of particles in \ref oscar2013_format "Oscar 2013 format"
- * as an input. These particles are treated as a starting setup. The input
+ * as an input. These particles are treated as a starting setup. Multiple events
+ per file are supported. The input
  * parameters are:
  *
  * \key File_Directory (string, required):\n
@@ -56,14 +57,14 @@ namespace smash {
  * Starting time of List calculation.
  *
  * \key Shift_Id (int, required):\n
- * Starting id for event_id_
+ * Starting id for file_id_, i.e. the first file which is read.
  *
  * \n
  * Example: Configuring an Afterburner Simulation
  * --------------
  * The following example sets up an afterburner simulation for a set of particle
  * files located in "particle_lists_in". The files are named as
- * "event{event_id}". SMASH is run once for each event file in the folder.
+ * "event{event_id}". SMASH is run once for each event in the folder.
  *\verbatim
  Modi:
      List:
@@ -73,7 +74,7 @@ namespace smash {
  \endverbatim
  *
  * It might for some reason be necessary to not run SMASH starting with the
- * first event, it this case, the event_id can be shifted. Additionally, the
+ * first file. In this case, the file_id can be shifted. Additionally, the
  * start time can be manually adjusted.
  *\verbatim
  Modi:
@@ -93,12 +94,18 @@ namespace smash {
  * GeV GeV GeV GeV GeV none none none</span></div>
  * <div class="line"><span class="preprocessor">0.1 6.42036 1.66473 9.38499
  * 0.138 0.232871 0.116953 -0.115553 0.090303 111 0 0</span></div>
+ * <div class="line"><span class="preprocessor">\# event 0 end</span></div>
+ * <div class="line"><span class="preprocessor">\# event 1</span></div>
+ * <div class="line"><span class="preprocessor">0.1 6.42036 1.66473 9.38499
+ * 0.138 0.232871 0.116953 -0.115553 0.090303 111 0 0</span></div>
+ * <div class="line"><span class="preprocessor">\# event 1 end</span></div>
  * </div>
  * It means that one \f$ \pi^0 \f$ with spatial coordinates
  * (t, x, y, z) = (0.1, 6.42036, 1.66473, 9.38499) fm and
  * and 4-momenta (p0, px, py, pz) =
  * (0.232871, 0.116953, -0.115553, 0.090303) GeV,
- * with mass = 0.138 GeV, pdg = 111, id = 0 and charge 0 will be initialized.
+ * with mass = 0.138 GeV, pdg = 111, id = 0 and charge 0 will be initialized for
+ the first event (and also for the second event).
  *
  */
 

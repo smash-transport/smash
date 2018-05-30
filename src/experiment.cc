@@ -394,7 +394,8 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
 }
 
 template <typename Modus>
-void Experiment<Modus>::create_output(std::string format, std::string content,
+void Experiment<Modus>::create_output(const std::string &format,
+                                      const std::string &content,
                                       const bf::path &output_path,
                                       const OutputParameters &out_par) {
   const auto &log = logger<LogArea::Experiment>();
@@ -1129,7 +1130,7 @@ bool Experiment<Modus>::perform_action(
 
   // At every collision photons can be produced.
   // Note: We rely here on the lazy evaluation of the arguments to if.
-  // It may happen that in a wall-crossing-action sqrt_s raise an exception
+  // It may happen that in a wall-crossing-action sqrt_s raises an exception.
   // Therefore we first have to check if the incoming particles can undergo
   // an em-interaction.
   if (photons_switch_ &&
