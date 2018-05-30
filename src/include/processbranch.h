@@ -25,20 +25,37 @@ namespace smash {
  * (1) elastic (Elastic)
  * (2) resonance formation (2->1) (TwoToOne)
  * (3) 2->2 (inelastic) (TwoToTwo)
- * (4) string excitation by PYTHIA (String) - disabled since more specific
- *                                            types are specified below (41, 42)
+ * (4x), x = 1-6: string excitations, 2->many
+ *   (41-45) soft string excitations. Here "soft" means that the process does
+ *           involve quark or gluon scattering. A string is formed with quark
+ *           and antiquark, or quark and diquark, in its ends. Then this
+ *           string decays. Depending on which quark and anti- (or di-)quarks
+ *           are selected for string formation, the process can be:
+ *           (41) single diffractive AB->AX. Here both quark and anti-
+ *                (or di-) quark are taken from B.
+ *           (42) single diffractive AB->XB. Here both quark and anti-
+ *                (or di-) quark are taken from B.
+ *           (43) double diffractive. Two strings are formed, one from A and
+ *                one from B.
+ *           (44) a special case of baryon-antibaryon annihilation. One pair
+ *                qqbar annihilates immediately and two strings are formed.
+ *           (45) non-diffractive. Two strings are formed both have ends in
+ *                A and B.
+ *   (46) hard string process involving 2->2 QCD process by PYTHIA. Here quarks
+ *        do not simply form a string. They actually scatter on parton level
+ *        first.
  * (5) resonance decays (Decay)
  * (6) wall transition (Wall)
  * (7) forced thermalization
- * (41-45) soft string excitation
- * (46) hard string process involving 2->2 QCD process by PYTHIA
+ *
+ * Corresponding integer numbers are given explicitly,
+ * because they appear in the output.
  */
 enum class ProcessType {
   None = 0,
   Elastic = 1,
   TwoToOne = 2,
   TwoToTwo = 3,
-  // String = 4,
   Decay = 5,
   Wall = 6,
   Thermalization = 7,
