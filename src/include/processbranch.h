@@ -34,7 +34,10 @@ namespace smash {
  *           (41) single diffractive AB->AX. Here both quark and anti-
  *                (or di-) quark are taken from B.
  *           (42) single diffractive AB->XB. Here both quark and anti-
- *                (or di-) quark are taken from B.
+ *                (or di-) quark are taken from A. It makes sense to separate
+ *                it from (41), because A and B can be particles of different
+ *                types, for example, a pion and a proton. It matters then,
+ *                whether the pion creates a string or the proton.
  *           (43) double diffractive. Two strings are formed, one from A and
  *                one from B.
  *           (44) a special case of baryon-antibaryon annihilation. One pair
