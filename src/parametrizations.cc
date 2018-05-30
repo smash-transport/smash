@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2017
+ *    Copyright (c) 2013-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -18,6 +18,7 @@
 
 #include "include/average.h"
 #include "include/clebschgordan.h"
+#include "include/constants.h"
 #include "include/cxx14compat.h"
 #include "include/interpolation.h"
 #include "include/kinematics.h"
@@ -62,6 +63,18 @@ double piplusp_high_energy(double mandelstam_s) {
 
 double piminusp_high_energy(double mandelstam_s) {
   return xs_high_energy(mandelstam_s, true, 0.939, 0.138, 18.75, 9.56, 1.767);
+}
+
+double xs_ppbar_annihilation(double mandelstam_s) {
+  const double xs_ref = 120.;
+  const double s_ref = 4. * nucleon_mass * nucleon_mass;
+  const double constant_a = 0.05;
+  const double constant_b = 0.6;
+  const double factor = constant_a * constant_a * s_ref /
+                            ((mandelstam_s - s_ref) * (mandelstam_s - s_ref) +
+                             constant_a * constant_a * s_ref) +
+                        constant_b;
+  return xs_ref * (s_ref / mandelstam_s) * factor;
 }
 
 double xs_string_hard(double mandelstam_s, double xs_0, double e_0,
@@ -298,6 +311,18 @@ double ppbar_total(double mandelstam_s) {
   }
 }
 
+double deuteron_pion_elastic(double mandelstam_s) {
+  const double tmp = std::sqrt(mandelstam_s) - 2.172;
+  return 4.0 + 0.27 / (tmp * tmp + 0.065 * 0.065);
+}
+
+double deuteron_nucleon_elastic(double mandelstam_s) {
+  const double s = mandelstam_s;
+  return 2500.0 * std::exp(- smash::square(s - 7.93) / 0.003) +
+         600.0  * std::exp(- smash::square(s - 7.93) / 0.1) +
+         10.0;
+}
+
 double kplusp_elastic_background(double mandelstam_s) {
   constexpr double a0 = 10.508;  // mb
   constexpr double a1 = -3.716;  // mb/GeV
@@ -312,11 +337,11 @@ double kplusp_elastic_background(double mandelstam_s) {
 }
 
 double kplusn_elastic_background(double mandelstam_s) {
-  return 0.5 * kplusp_elastic_background(mandelstam_s);
+  return 0.25 * kplusp_elastic_background(mandelstam_s);
 }
 
 double kplusn_k0p(double mandelstam_s) {
-  return 0.5 * kplusp_elastic_background(mandelstam_s);
+  return 0.25 * kplusp_elastic_background(mandelstam_s);
 }
 
 /** K- p elastic cross section parametrization, PDG data.
@@ -440,10 +465,12 @@ double kplusn_inelastic_background(double mandelstam_s) {
 }
 
 /**
- * Calculate and store all isospin ratios for K+ N reactions.
+ * Calculate and store isospin ratios for K N -> K Delta reactions.
  *
- * \param[out] ratios an empty unordered map of the ratios for K+ N reactions
-               that gets filled with appropriate values on first call
+ * See the documentation of `KaonNucleonRatios` for details.
+ *
+ * \param[inout] ratios An empty map where the ratios for K N -> K Delta
+ *                      reactions are stored.
  */
 static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>, double,
                                           pair_hash>& ratios) {
@@ -456,6 +483,8 @@ static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>, double,
   const auto& type_Delta_z = ParticleType::find(pdg::Delta_z);
   const auto& type_Delta_m = ParticleType::find(pdg::Delta_m);
 
+  /// Store the isospin ratio of the given reaction relative to all other
+  /// possible isospin-symmetric reactions.
   auto add_to_ratios = [&](const ParticleType& a, const ParticleType& b,
                            const ParticleType& c, const ParticleType& d,
                            double weight_numerator, double weight_other) {
@@ -467,8 +496,10 @@ static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>, double,
     ratios[key] = ratio;
   };
 
-  // All inelastic channels are K+ N -> K Delta -> K pi N or charge exchange,
+  // All inelastic channels are K N -> K Delta -> K pi N or charge exchange,
   // with identical cross section, weighted by the isospin factor.
+  //
+  // For charge exchange, the isospin factors are 1, so they are excluded here.
   {
     const auto weight1 = isospin_clebsch_gordan_sqr_2to2(
         type_p, type_K_p, type_K_z, type_Delta_pp);
@@ -487,18 +518,8 @@ static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>, double,
     add_to_ratios(type_n, type_K_p, type_K_z, type_Delta_p, weight1, weight2);
     add_to_ratios(type_n, type_K_p, type_K_p, type_Delta_z, weight2, weight1);
   }
-  {
-    const auto weight1 =
-        isospin_clebsch_gordan_sqr_2to2(type_n, type_K_p, type_K_z, type_p);
-    const auto weight2 =
-        isospin_clebsch_gordan_sqr_2to2(type_p, type_K_z, type_K_p, type_n);
-
-    add_to_ratios(type_n, type_K_p, type_K_z, type_p, weight1, weight2);
-    add_to_ratios(type_p, type_K_z, type_K_p, type_n, weight2, weight1);
-  }
-
-  // K+ and K0 have the same isospin projection, they are assumed to have
-  // the same cross section here.
+  // K+ and K0 have the same mass and spin, their cross sections are assumed to
+  // only differ in isospin factors.
   {
     const auto weight1 = isospin_clebsch_gordan_sqr_2to2(
         type_p, type_K_z, type_K_z, type_Delta_p);
@@ -519,9 +540,10 @@ static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>, double,
   }
 }
 
-double KplusNRatios::get_ratio(const ParticleType& a, const ParticleType& b,
-                               const ParticleType& c,
-                               const ParticleType& d) const {
+double KaonNucleonRatios::get_ratio(const ParticleType& a,
+                                    const ParticleType& b,
+                                    const ParticleType& c,
+                                    const ParticleType& d) const {
   /* If this method is called with anti-nucleons, flip all particles to
    * anti-particles;
    * the ratio is equal */
@@ -544,7 +566,7 @@ double KplusNRatios::get_ratio(const ParticleType& a, const ParticleType& b,
   return ratios_.at(key);
 }
 
-/*thread_local (see #3075)*/ KplusNRatios kplusn_ratios;
+/*thread_local (see #3075)*/ KaonNucleonRatios kaon_nucleon_ratios;
 
 double kminusp_kbar0n(double mandelstam_s) {
   constexpr double a0 = 100;   // mb GeV^2

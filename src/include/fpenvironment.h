@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2017
+ *    Copyright (c) 2015-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -14,12 +14,17 @@
 
 namespace smash {
 
-#if defined _GNU_SOURCE
+#if defined _GNU_SOURCE && !defined __clang__
 /**
  * Standard C/C++ don't have a function to modify the trapping behavior. You
  * can only save and restore the setup. With glibc you can change it via
  * feenableexcept and fedisableexcept. Without glibc inline asm and SSE
  * intrinsics can do it (for x86).
+ *
+ * It is important that the used compiler supports floating-point traps, other-
+ * wise it might break them by reordering floating-point operations when
+ * optimizing. Currently floating-point traps are disabled for Clang, because
+ * it does not support them.
  *
  * \param mask Bit mask representing the flags to set.
  * \return Whether the trap was successfully set.
@@ -27,7 +32,7 @@ namespace smash {
  * glibc specific implementation
  */
 inline bool enable_float_traps(int mask) { return -1 != feenableexcept(mask); }
-#elif defined __SSE__
+#elif defined __SSE__ && !defined __clang__
 // directly program the trap on the SSE unit
 bool enable_float_traps(int mask);
 #else

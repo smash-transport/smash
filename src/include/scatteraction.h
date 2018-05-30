@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2017
+ *    Copyright (c) 2015-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -51,13 +51,14 @@ class ScatterAction : public Action {
   /**
    * Calculate the transverse distance of the two incoming particles in their
    * local rest frame.
-   * 
+   *
    * According to UrQMD criterion
    * position of particle a: x_a \n
    * position of particle b: x_b \n
    * momentum of particle a: p_a \n
    * momentum of particle b: p_b \n
-   * \f[d^2_{coll} = (\vec{x_a} - \vec{x_b})^2 - \frac{((\vec{x_a} - \vec{x_b}) \cdot (\vec{p_a} - \vec{p_b}))^2 } {(\vec{p_a} - \vec{p_b})^2}\f]
+   * \f[d^2_{coll} = (\vec{x_a} - \vec{x_b})^2 - \frac{((\vec{x_a} - \vec{x_b})
+   * \cdot (\vec{p_a} - \vec{p_b}))^2 } {(\vec{p_a} - \vec{p_b})^2}\f]
    *
    * \return  squared distance.
    */
@@ -71,9 +72,9 @@ class ScatterAction : public Action {
    */
   void generate_final_state() override;
 
-  double raw_weight_value() const override;
+  double get_total_weight() const override;
 
-  double partial_weight() const override;
+  double get_partial_weight() const override;
 
   /**
    * Sample final-state angles in a 2->2 collision (possibly anisotropic).
@@ -82,10 +83,24 @@ class ScatterAction : public Action {
    */
   void sample_angles(std::pair<double, double> masses) override;
 
-  /** Add all possible scattering subprocesses for this action object. */
+  /** Add all possible scattering subprocesses for this action object.
+   *
+   * \param[in] elastic_parameter If non-zero, given global
+   *            elastic cross section.
+   * \param[in] two_to_one_switch 2->1 reactions enabled?
+   * \param[in] included_2to2 Which 2->2 ractions are enabled?
+   * \param[in] low_snn_cut Elastic collisions with CME below are forbidden.
+   * \param[in] strings_switch Are string processes enabled?
+   * \param[in] strings_with_probability Are string processes triggered
+   *            according to a probability?
+   * \param[in] nnbar_treatment NNbar treatment through resonance, strings or
+   *                                                        none
+   */
   void add_all_scatterings(double elastic_parameter, bool two_to_one,
                            ReactionsBitSet included_2to2, double low_snn_cut,
-                           bool strings_switch, NNbarTreatment nnbar_treatment);
+                           bool strings_switch, bool use_AQM,
+                           bool strings_with_probability,
+                           NNbarTreatment nnbar_treatment);
 
   /// Returns list of possible collision channels
   const CollisionBranchList& collision_channels() {
@@ -145,7 +160,7 @@ class ScatterAction : public Action {
   /** List of possible collisions  */
   CollisionBranchList collision_channels_;
 
-  /** Total cross section */
+  /** Total hadronic cross section */
   double total_cross_section_;
 
   /** Partial cross-section to the chosen outgoing channel */
@@ -166,6 +181,9 @@ class ScatterAction : public Action {
 
   /** Pointer to interface class for strings */
   StringProcess* string_process_ = nullptr;
+
+  /// soft string subprocess identifier
+  StringSoftType subproc_soft_string_;
 };
 
 }  // namespace smash

@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2017
+ *    Copyright (c) 2015-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -19,7 +19,7 @@
 
 namespace smash {
 
-#if !defined _GNU_SOURCE && defined __SSE__
+#if !defined _GNU_SOURCE && defined __SSE__ && !defined __clang__
 bool enable_float_traps(int femask) {
   static_assert(FE_INVALID == 0x01,
                 "incorrect assumption that FE_INVALID == 0x01");

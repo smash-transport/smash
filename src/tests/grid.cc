@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2017
+ *    Copyright (c) 2015-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -299,7 +299,7 @@ TEST(periodic_grid) {
 
       // Now search through the original list to verify the grid search found
       // everything.
-      auto &&wrap = [&length](ParticleData p, int i) {
+      auto &&wrap = [](ParticleData p, int i) {
         auto pos = p.position();
         if (i > 0) {
           pos[i] += length;

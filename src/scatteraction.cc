@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -111,19 +111,41 @@ void ScatterAction::add_all_scatterings(double elastic_parameter,
                                         bool two_to_one,
                                         ReactionsBitSet included_2to2,
                                         double low_snn_cut, bool strings_switch,
+                                        bool use_AQM,
+                                        bool strings_with_probability,
                                         NNbarTreatment nnbar_treatment) {
-  cross_sections xs(incoming_particles_, sqrt_s());
+  CrossSections xs(incoming_particles_, sqrt_s());
   CollisionBranchList processes = xs.generate_collision_list(
       elastic_parameter, two_to_one, included_2to2, low_snn_cut, strings_switch,
-      nnbar_treatment, string_process_);
+      use_AQM, strings_with_probability, nnbar_treatment, string_process_);
 
   /* Add various subprocesses.*/
   add_collisions(std::move(processes));
+
+  /* If the string processes are not triggered by a probability, then they
+   * always happen as long as the parametrized total cross section is larger
+   * than the sum of the cross sections of the non-string processes, and the
+   * square root s exceeds the threshold by at least 0.9 GeV. The cross section
+   * of the string processes are counted by taking the difference between the
+   * parametrized total and the sum of the non-strings. */
+  if (!strings_with_probability && xs.decide_string(strings_switch,
+                    strings_with_probability, use_AQM,
+                    nnbar_treatment == NNbarTreatment::Strings)) {
+    const double xs_diff = xs.high_energy() - cross_section();
+    if (xs_diff > 0.) {
+      add_collisions(xs.string_excitation(xs_diff, string_process_));
+    }
+  }
+  if (strings_switch) {
+    subproc_soft_string_ = xs.get_subproc_soft_string();
+  }
 }
 
-double ScatterAction::raw_weight_value() const { return total_cross_section_; }
+double ScatterAction::get_total_weight() const { return total_cross_section_; }
 
-double ScatterAction::partial_weight() const { return partial_cross_section_; }
+double ScatterAction::get_partial_weight() const {
+  return partial_cross_section_;
+}
 
 ThreeVector ScatterAction::beta_cm() const {
   return total_momentum().velocity();
@@ -417,13 +439,12 @@ void ScatterAction::string_excitation(bool is_soft_proc) {
     string_process_->init(incoming_particles_, time_of_execution_, gamma_cm());
     /* implement collision */
     bool success = false;
-    StringSoftType iproc = string_process_->get_subproc();
     int ntry = 0;
     const int ntry_max = 10000;
     while (!success && ntry < ntry_max) {
       ntry++;
       if (is_soft_proc) {
-        switch (iproc) {
+        switch (subproc_soft_string_) {
           case StringSoftType::SingleDiffAX:
             /* single diffractive to A+X */
             success = string_process_->next_SDiff(true);
@@ -440,6 +461,10 @@ void ScatterAction::string_excitation(bool is_soft_proc) {
             /* soft non-diffractive */
             success = string_process_->next_NDiffSoft();
             break;
+          case StringSoftType::BBbar:
+            /* soft BBbar 2 mesonic annihilation */
+            success = string_process_->next_BBbarAnn();
+            break;
           case StringSoftType::None:
             success = false;
         }
@@ -448,40 +473,52 @@ void ScatterAction::string_excitation(bool is_soft_proc) {
       }
     }
     if (ntry == ntry_max) {
-      throw std::runtime_error("too many tries in string_excitation().");
-    }
-    outgoing_particles_ = string_process_->get_final_state();
-    /* If the incoming particles already were unformed, the formation
-     * times and cross section scaling factors need to be adjusted */
-    const double tform_in = std::max(incoming_particles_[0].formation_time(),
-                                     incoming_particles_[1].formation_time());
-    if (tform_in > time_of_execution_) {
-      const double fin =
-          (incoming_particles_[0].formation_time() >
-           incoming_particles_[1].formation_time())
-              ? incoming_particles_[0].cross_section_scaling_factor()
-              : incoming_particles_[1].cross_section_scaling_factor();
-      for (size_t i = 0; i < outgoing_particles_.size(); i++) {
-        const double tform_out = outgoing_particles_[i].formation_time();
-        const double fout =
-            outgoing_particles_[i].cross_section_scaling_factor();
-        outgoing_particles_[i].set_cross_section_scaling_factor(fin * fout);
-        /* If the unformed incoming particles' formation time is larger than
-         * the current outgoing particle's formation time, then the latter
-         * is overwritten by the former*/
-        if (tform_in > tform_out) {
-          outgoing_particles_[i].set_slow_formation_times(time_of_execution_,
-                                                          tform_in);
+      /* If pythia fails to form a string, it is usually because the energy
+       * is not large enough. In this case, an elastic scattering happens.
+       *
+       * Since particles are normally added after process selection for
+       * strings, outgoing_particles is still uninitialized, and memory
+       * needs to be allocated. We also shift the process_type_ to elastic
+       * so that sample_angles does a proper treatment. */
+      outgoing_particles_.reserve(2);
+      outgoing_particles_.push_back(ParticleData{incoming_particles_[0]});
+      outgoing_particles_.push_back(ParticleData{incoming_particles_[1]});
+      process_type_ = ProcessType::Elastic;
+      elastic_scattering();
+    } else {
+      outgoing_particles_ = string_process_->get_final_state();
+      /* If the incoming particles already were unformed, the formation
+       * times and cross section scaling factors need to be adjusted */
+      const double tform_in = std::max(incoming_particles_[0].formation_time(),
+                                       incoming_particles_[1].formation_time());
+      if (tform_in > time_of_execution_) {
+        const double fin =
+            (incoming_particles_[0].formation_time() >
+             incoming_particles_[1].formation_time())
+                ? incoming_particles_[0].cross_section_scaling_factor()
+                : incoming_particles_[1].cross_section_scaling_factor();
+        for (size_t i = 0; i < outgoing_particles_.size(); i++) {
+          const double tform_out = outgoing_particles_[i].formation_time();
+          const double fout =
+              outgoing_particles_[i].cross_section_scaling_factor();
+          outgoing_particles_[i].set_cross_section_scaling_factor(fin * fout);
+          /* If the unformed incoming particles' formation time is larger than
+           * the current outgoing particle's formation time, then the latter
+           * is overwritten by the former*/
+          if (tform_in > tform_out) {
+            outgoing_particles_[i].set_slow_formation_times(time_of_execution_,
+                                                            tform_in);
+          }
         }
       }
+      /* Check momentum difference for debugging */
+      FourVector out_mom;
+      for (ParticleData data : outgoing_particles_) {
+        out_mom += data.momentum();
+      }
+      log.debug("Incoming momenta string:", total_momentum());
+      log.debug("Outgoing momenta string:", out_mom);
     }
-    /* Check momentum difference for debugging */
-    FourVector out_mom;
-    for (ParticleData data : outgoing_particles_) {
-      out_mom += data.momentum();
-    }
-    log.debug("Incoming momenta string:", total_momentum());
-    log.debug("Outgoing momenta string:", out_mom);
   }
 }
 

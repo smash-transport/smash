@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2017
+ *    Copyright (c) 2015-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -69,7 +69,7 @@ TEST(collision_order) {
   Configuration config =
       Test::configuration("Collision_Term: {Elastic_Cross_Section: " +
                           std::to_string(elastic_parameter) + "}");
-  ScatterActionsFinder finder(config, exp_par, has_interacted, 0, 0, 1);
+  ScatterActionsFinder finder(config, exp_par, has_interacted, 0, 0);
 
   // prepare lists
   ParticleList search_list = particles.copy_to_vector();
@@ -144,7 +144,7 @@ TEST(scatter_particle_pair_only_once) {
   Configuration config =
       Test::configuration("Collision_Term: {Elastic_Cross_Section: " +
                           std::to_string(elastic_parameter) + "}");
-  ScatterActionsFinder finder(config, exp_par, has_interacted, 0, 0, 1);
+  ScatterActionsFinder finder(config, exp_par, has_interacted, 0, 0);
   ParticleList search_list = p.copy_to_vector();
   double dt = 0.9;  // fm/c
 
@@ -207,7 +207,7 @@ TEST(find_next_action) {
   Configuration config =
       Test::configuration("Collision_Term: {Elastic_Cross_Section: " +
                           std::to_string(elastic_parameter) + "}");
-  ScatterActionsFinder finder(config, exp_par, has_interacted, 0, 0, 1);
+  ScatterActionsFinder finder(config, exp_par, has_interacted, 0, 0);
 
   // prepare list of particles that will be checked for possible actions
   ParticleList particle_list = particles.copy_to_vector();
@@ -258,7 +258,7 @@ TEST(increasing_scaling_factors) {
                     std::to_string(alpha - 0.1) + "}");
   ExperimentParameters exp_par = Test::default_parameters();
   const std::vector<bool> has_interacted = {};
-  ScatterActionsFinder finder(config, exp_par, has_interacted, 0, 0, 1);
+  ScatterActionsFinder finder(config, exp_par, has_interacted, 0, 0);
   COMPARE(finder.find_actions_in_cell({p_a, p_b}, 2. * delta_t_coll).size(),
           1u);
   // Set up a scatter actions finder so that the particles shouldn't collide
@@ -266,7 +266,7 @@ TEST(increasing_scaling_factors) {
       "Collision_Term: {Elastic_Cross_Section: " + std::to_string(xsec) + "}");
   config2.merge_yaml("Collision_Term: {Power_Particle_Formation: " +
                      std::to_string(alpha + 0.1) + "}");
-  ScatterActionsFinder finder2(config2, exp_par, has_interacted, 0, 0, 1);
+  ScatterActionsFinder finder2(config2, exp_par, has_interacted, 0, 0);
   COMPARE(finder2.find_actions_in_cell({p_a, p_b}, 2. * delta_t_coll).size(),
           0u);
 }

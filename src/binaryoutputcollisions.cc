@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -80,9 +80,9 @@ void BinaryOutputCollisions::at_interaction(const Action &action,
   write(action.incoming_particles().size());
   write(action.outgoing_particles().size());
   std::fwrite(&density, sizeof(double), 1, file_.get());
-  const double weight = action.raw_weight_value();
+  const double weight = action.get_total_weight();
   std::fwrite(&weight, sizeof(double), 1, file_.get());
-  const double partial_weight = action.partial_weight();
+  const double partial_weight = action.get_partial_weight();
   std::fwrite(&partial_weight, sizeof(double), 1, file_.get());
   const auto type = static_cast<uint32_t>(action.get_type());
   std::fwrite(&type, sizeof(uint32_t), 1, file_.get());

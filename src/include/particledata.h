@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2012-2017
+ *    Copyright (c) 2012-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -17,9 +17,9 @@
 
 namespace smash {
 
-/** 
+/**
  * A structure to hold information about the history of the particle,
- * e.g. the last interaction etc. 
+ * e.g. the last interaction etc.
  */
 struct HistoryData {
   /// Collision counter per particle, zero only for initially present particles
@@ -85,14 +85,16 @@ class ParticleData {
   /// \copydoc PdgCode::is_baryon
   bool is_baryon() const { return pdgcode().is_baryon(); }
 
-  /** 
-   * Get the particle's pole mass ("on-shell"). 
+  /// \copydoc PdgCode::is_rho
+  bool is_rho() const { return type_->is_rho(); }
+  /**
+   * Get the particle's pole mass ("on-shell").
    * \return pole mass of the particle [GeV]
    */
   double pole_mass() const { return type_->mass(); }
-  /** 
+  /**
    * Get the particle's effective mass
-   * 
+   *
    * Determined from the 4-momentum \f$m=\sqrt{p_\mu p^\mu}\f$.
    * Possibly "off-shell".
    * \return particle's effective mass
@@ -109,17 +111,17 @@ class ParticleData {
    * \return id of particle's latest collision
    */
   uint32_t id_process() const { return history_.id_process; }
-  /**  
+  /**
    * Get history information
    * \return particle's history
    */
   HistoryData get_history() const { return history_; }
-  /** 
+  /**
    * Store history information
-   * 
+   *
    * The history contains the type of process and possibly the
    * PdgCodes of the parent particles (\p plist). Note, history is not set
-   * for dileptons and photons. 
+   * for dileptons and photons.
    * \param[in] ncoll particle's number of collisions
    * \param[in] pid id of the particle's latest process
    * \param[in] pt process type of the particle's latest process
@@ -172,7 +174,7 @@ class ParticleData {
    * Set the momentum of the particle without modifying the energy.
    *
    * WARNING: Mass gets modified.
-   * \param[in] mom momentum 3-vector 
+   * \param[in] mom momentum 3-vector
    */
   void set_3momentum(const ThreeVector &mom) {
     momentum_ = FourVector(momentum_.x0(), mom);
@@ -189,7 +191,7 @@ class ParticleData {
    */
   void set_4position(const FourVector &pos) { position_ = pos; }
   /**
-   * Set particle's 3-position 
+   * Set particle's 3-position
    *
    * the time component is not changed
    * \param[in] pos position 3-vector
@@ -198,7 +200,7 @@ class ParticleData {
     position_ = FourVector(position_.x0(), pos);
   }
 
-  /** 
+  /**
    * Translate the particle position
    * \param[in] delta 3-vector by which the particle is translated [fm]
    */
@@ -211,7 +213,7 @@ class ParticleData {
   }
 
   /**
-   * Get the absolute formation time of the particle 
+   * Get the absolute formation time of the particle
    * \return particle's formation time
    */
   double formation_time() const { return formation_time_; }
@@ -258,7 +260,7 @@ class ParticleData {
   }
   /**
    * Set the particle's cross_section_scaling_factor
-   * 
+   *
    * All cross sections of this particle are scaled down by this factor until
    * the formation time is over.
    * \param[in] xsec_scal cross section scaling factor
@@ -282,7 +284,7 @@ class ParticleData {
    * This functions is more efficient than calculating the gamma factor from
    * \ref velocity, since the \ref velocity function must execute three
    * divisions (for every space component of the momentum vector).
-   * 
+   *
    * \returns inverse gamma factor
    *
    * \fpPrecision This function must use double-precision for the calculation of
@@ -304,8 +306,8 @@ class ParticleData {
 
   /**
    * Apply a Lorentz-boost to only the momentum
-   * \param[in] v boost 3-veloctity 
-   */ 
+   * \param[in] v boost 3-veloctity
+   */
   void boost_momentum(const ThreeVector &v) {
     set_4momentum(momentum_.LorentzBoost(v));
   }
@@ -326,7 +328,7 @@ class ParticleData {
   /**
    * Check if the particle has a given id
    * \param[in] id_a id to compare to
-   * \return whether the particle has the given id 
+   * \return whether the particle has the given id
    */
   bool operator==(int id_a) const { return this->id_ == id_a; }
   /**
@@ -432,7 +434,7 @@ class ParticleData {
  */
 std::ostream &operator<<(std::ostream &s, const ParticleData &p);
 
-/** 
+/**
  * \ingroup logging
  * Writes a compact overview over the particles in the \p particle_list argument
  * to the stream.

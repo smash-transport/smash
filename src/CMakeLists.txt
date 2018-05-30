@@ -81,6 +81,7 @@ set(smash_src
         collidermodus.cc
         configuration.cc
         crosssections.cc
+        crosssectionsphoton.cc
         decayaction.cc
         decayactionsfinder.cc
         decaymodes.cc

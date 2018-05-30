@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -149,9 +149,6 @@ RootOutput::~RootOutput() {
   bf::rename(filename_unfinished_, filename_);
 }
 
-/**
- * Writes to tree "at_eventstart".
- */
 void RootOutput::at_eventstart(const Particles &particles,
                                const int event_number) {
   // save event number
@@ -166,9 +163,6 @@ void RootOutput::at_eventstart(const Particles &particles,
   }
 }
 
-/**
- * Writes to tree "at_tstep_N", where N is timestep number counting from 1.
- */
 void RootOutput::at_intermediate_time(const Particles &particles, const Clock &,
                                       const DensityParameters &) {
   if (write_particles_ && !particles_only_final_) {
@@ -177,9 +171,6 @@ void RootOutput::at_intermediate_time(const Particles &particles, const Clock &,
   }
 }
 
-/**
- * Writes to tree "at_eventend".
- */
 void RootOutput::at_eventend(const Particles &particles,
                              const int /*event_number*/,
                              double impact_parameter) {
@@ -187,8 +178,8 @@ void RootOutput::at_eventend(const Particles &particles,
   if (write_particles_) {
     particles_to_tree(particles);
   }
-  // Forced regular dump from operational memory to disk. Very demanding!
-  // If program crashes written data will NOT be lost
+  /* Forced regular dump from operational memory to disk. Very demanding!
+   * If program crashes written data will NOT be lost. */
   if (current_event_ > 0 && current_event_ % autosave_frequency_ == 0) {
     if (write_particles_) {
       particles_tree_->AutoSave("SaveSelf");
@@ -199,20 +190,14 @@ void RootOutput::at_eventend(const Particles &particles,
   }
 }
 
-/**
- * Writes interactions to ROOT-file
- */
 void RootOutput::at_interaction(const Action &action,
                                 const double /*density*/) {
   if (write_collisions_) {
     collisions_to_tree(action.incoming_particles(), action.outgoing_particles(),
-                       action.raw_weight_value(), action.partial_weight());
+                       action.get_total_weight(), action.get_partial_weight());
   }
 }
 
-/**
- * Writes particles to a tree defined by treename.
- */
 void RootOutput::particles_to_tree(const Particles &particles) {
   int i = 0;
 

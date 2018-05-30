@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -94,20 +94,26 @@ class Action {
   }
 
   /**
-   * Return the raw weight value, which is the cross section in case of a
-   * ScatterAction, the decay width in case of a DecayAction and the shining
+   * Return the total weight value, which is mainly used for the weight
+   * output entry. It has different meanings depending of the type of
+   * action. It is the total cross section in case of a ScatterAction,
+   * the total decay width in case of a DecayAction and the shining
    * weight in case of a DecayActionDilepton.
    *
-   * Prefer to use a more specific function.
+   * Prefer to use a more specific function. If there is no weight for the
+   * action type, 0 should be returned.
    */
-  virtual double raw_weight_value() const = 0;
+  virtual double get_total_weight() const = 0;
 
   /**
-   * Return the specific weight for the chosen outgoing channel.
-   * For scatterings it will be the partial cross-section, for
-   * decays (including dilepton decays) the partial width.
+   * Return the specific weight for the chosen outgoing channel, which is mainly
+   * used for the partial weight output entry. For scatterings it will be the
+   * partial cross section, for decays (including dilepton decays) the partial
+   * decay width.
+   *
+   * If there is no weight for the action type, 0 should be returned.
    */
-  virtual double partial_weight() const = 0;
+  virtual double get_partial_weight() const = 0;
 
   /// Return the process type.
   virtual ProcessType get_type() const { return process_type_; }
@@ -409,6 +415,7 @@ class Action {
               weight_sum, " ", total_weight, " ",
               //          random_weight, "\n", *this);
               random_weight, "\n");
+    abort();
     throw std::runtime_error("problem in choose_channel");
   }
 

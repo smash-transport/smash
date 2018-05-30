@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -105,7 +105,7 @@ TEST(full2013_format) {
   const ParticleData p2 = particles.insert(Test::smashon_random());
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
-                              true, NNbarTreatment::NoAnnihilation);
+                          true, false, false, NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
   ParticleList final_particles = action->outgoing_particles();
   const double impact_parameter = 1.783;
@@ -227,7 +227,7 @@ TEST(final2013_format) {
   /* Create interaction ("elastic scattering") */
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
-                              true, NNbarTreatment::NoAnnihilation);
+                          true, false, false, NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
 
   const bf::path outputfilename = "particle_lists.oscar";
@@ -307,7 +307,7 @@ TEST(full_extended_oscar) {
   const ParticleData p2 = particles.insert(Test::smashon_random());
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
-                              true, NNbarTreatment::NoAnnihilation);
+                          true, false, false, NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
   ParticleList final_particles = action->outgoing_particles();
   const int event_id = 0;

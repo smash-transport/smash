@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -228,6 +228,7 @@ void Action::check_conservation(const uint32_t id_process) const {
       return;
     }
     if (id_process == ID_PROCESS_PHOTON) {
+      abort();
       throw std::runtime_error("Conservation laws violated in photon process");
     } else {
       throw std::runtime_error("Conservation laws violated in process " +

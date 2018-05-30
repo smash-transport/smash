@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2017
+ *    Copyright (c) 2015-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -23,7 +23,7 @@
 
 namespace smash {
 
-/** 
+/**
  * Enumerator option for lattice updates.
  * Lattice update is a costly operation and should be performed only if
  * necessary. Possible needs are: output - then it is enough to update

@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -407,6 +407,32 @@ class PdgCode {
   }
 
   /**
+   * \return the fraction number of strange quarks
+   *         (strange + anti-strange) / total
+   *
+   * This is useful for the AQM cross-section scaling, and needs to
+   * be positive definite.
+   */
+  inline double frac_strange() const {
+    /* The quarkonium state has 0 net strangeness
+    *  but there are actually 2 strange quarks out of 2 total */
+    if (is_hadron() && digits_.n_q3_ == 3 && digits_.n_q2_ == 3) {
+      return 1.;
+    } else {
+      // For all other cases, there isn't both a strange and anti-strange
+      if (is_baryon()) {
+        return abs(strangeness()) / 3.;
+      } else if (is_meson()) {
+        return abs(strangeness()) / 2.;
+      } else {
+        /* If not baryon or meson, this should be 0, as AQM does not
+         * extend to non-hadrons */
+        return 0.;
+      }
+    }
+  }
+
+  /**
    * \return the net number of \f$\bar s\f$ quarks.
    *
    * For particles with one strange quark, -1 is returned.
@@ -547,6 +573,12 @@ class PdgCode {
             result[2] = -result[2];
           }
         }
+        // add extra minus sign according to the pdg convention
+        if (digits_.n_q2_ != digits_.n_q3_ && digits_.n_q2_ % 2 == 1) {
+          for (int i = 1; i <= 2; i++) {
+            result[i] = -result[i];
+          }
+        }
       }
     } else {
       result = {0, 0, 0};
@@ -649,7 +681,6 @@ class PdgCode {
    * returns the net number of quarks with given flavour number
    * For public use, see strangeness(), charmness(), bottomness() and
    * isospin3().
-   * \todo Why quark numbers 7 and 8 are allowed?
    * \param[in] quark PDG Code of quark: (1..6) = (d,u,s,c,b,t)
    * \return for the net number of quarks (\#quarks - \#antiquarks)
    *

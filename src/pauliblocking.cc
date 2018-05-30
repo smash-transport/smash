@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -13,10 +13,6 @@
 
 namespace smash {
 
-/**
- * PauliBlocker constructor. Gets parameters from configuration.
- * Tabulates necessary integrals.
- */
 PauliBlocker::PauliBlocker(Configuration conf,
                            const ExperimentParameters &param)
     : sig_(param.gaussian_sigma),
@@ -64,9 +60,9 @@ double PauliBlocker::phasespace_dens(const ThreeVector &r, const ThreeVector &p,
                                      const ParticleList &disregard) const {
   double f = 0.0;
 
-  // TODO(oliiny): looping over all particles is inefficient,
-  // I need only particles within rp_ radius in momentum and
-  // within rr_+rc_ in coordinate space. Some search algorithm might help.
+  /* TODO(oliiny): looping over all particles is inefficient,
+   * I need only particles within rp_ radius in momentum and
+   * within rr_+rc_ in coordinate space. Some search algorithm might help. */
   for (const auto &part : particles) {
     // Only consider identical particles
     if (part.pdgcode() != pdg) {
@@ -82,9 +78,7 @@ double PauliBlocker::phasespace_dens(const ThreeVector &r, const ThreeVector &p,
     if (rdist_sqr >= (rr_ + rc_) * (rr_ + rc_)) {
       continue;
     }
-    // Do not count particles that should be disregarded. This is intended to
-    // avoid counting incoming particles when the phase-space density for
-    // outgoing ones is estimated.
+    // Do not count particles that should be disregarded.
     bool to_disregard = false;
     for (const auto &disregard_part : disregard) {
       if (part.id() == disregard_part.id()) {

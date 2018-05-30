@@ -14,9 +14,10 @@
 #include <utility>
 #include <vector>
 
+#include "Pythia8/Pythia.h"
+
 #include "constants.h"
 #include "particledata.h"
-#include "Pythia8/Pythia.h"
 
 namespace smash {
 
@@ -27,13 +28,15 @@ namespace smash {
  * (1)  single diffractive A+B to X+B (SingleDiffXB)
  * (2)  double diffractive (DoubleDiff)
  * (3)  soft non-diffractive (NonDiff)
+ * (4)  BBbar annihilation through 2 mesonic strings
  */
 enum class StringSoftType {
   None = -1,
   SingleDiffAX = 0,
   SingleDiffXB = 1,
   DoubleDiff = 2,
-  NonDiff = 3
+  NonDiff = 3,
+  BBbar = 4
 };
 
 // \todo Sangwook: make file (processstring) and class (StringProcess) name
@@ -88,8 +91,6 @@ class StringProcess {
   std::array<ThreeVector, 3> evecBasisAB_;
   /// total number of final state particles
   int NpartFinal_;
-  /// soft subprocess identifier
-  StringSoftType subproc_;
   /// number of particles fragmented from strings
   std::array<int, 2> NpartString_;
   /// the minimum lightcone momentum scale carried by gluon [GeV]
@@ -130,6 +131,9 @@ class StringProcess {
   double gamma_factor_com_;
   /// square root of 2 (\f$\sqrt{2}\f$)
   double sqrt2_;
+
+  /// Remembers if Pythia is initialized or not
+  bool pythia_parton_initialized_ = false;
 
   /**
    * final state array
@@ -303,13 +307,6 @@ class StringProcess {
 
   // clang-format off
 
-  /**
-   * Set the soft subprocess identifier
-   * \param[in] iproc soft string subprocess that will be implemented
-   */
-  void set_subproc(StringSoftType iproc) { subproc_ = iproc; }
-  /// \return the soft subprocess identifier
-  StringSoftType get_subproc() { return subproc_; }
   /**
    * initialization
    * feed intial particles, time of collision and gamma factor of the center of
