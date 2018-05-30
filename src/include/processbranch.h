@@ -19,54 +19,57 @@
 namespace smash {
 
 /**
- * Process Types are used to identify the type of the process,
- * currently we have the following:
- * (0) nothing (None)
- * (1) elastic (Elastic)
- * (2) resonance formation (2->1) (TwoToOne)
- * (3) 2->2 (inelastic) (TwoToTwo)
- * (4x), x = 1-6: string excitations, 2->many
- *   (41-45) soft string excitations. Here "soft" means that the process does
- *           involve quark or gluon scattering. A string is formed with quark
- *           and antiquark, or quark and diquark, in its ends. Then this
- *           string decays. Depending on which quark and anti- (or di-)quarks
- *           are selected for string formation, the process can be:
- *           (41) single diffractive AB->AX. Here both quark and anti-
- *                (or di-) quark are taken from B.
- *           (42) single diffractive AB->XB. Here both quark and anti-
- *                (or di-) quark are taken from A. It makes sense to separate
- *                it from (41), because A and B can be particles of different
- *                types, for example, a pion and a proton. It matters then,
- *                whether the pion creates a string or the proton.
- *           (43) double diffractive. Two strings are formed, one from A and
- *                one from B.
- *           (44) a special case of baryon-antibaryon annihilation. One pair
- *                qqbar annihilates immediately and two strings are formed.
- *           (45) non-diffractive. Two strings are formed both have ends in
- *                A and B.
- *   (46) hard string process involving 2->2 QCD process by PYTHIA. Here quarks
- *        do not simply form a string. They actually scatter on parton level
- *        first.
- * (5) resonance decays (Decay)
- * (6) wall transition (Wall)
- * (7) forced thermalization
- *
- * Corresponding integer numbers are given explicitly,
- * because they appear in the output.
+ * Process Types are used to identify the type of the process. Corresponding
+ * integer numbers are given explicitly, because they appear in the output.
  */
 enum class ProcessType {
+  /// nothing
   None = 0,
+  /// elastic scattering: particles remain the same, only momenta change
   Elastic = 1,
+  /// resonance formation (2->1)
   TwoToOne = 2,
+  /// 2->2 inelastic scattering
   TwoToTwo = 3,
+  /// resonance decays
   Decay = 5,
+  /// box wall crossing
   Wall = 6,
+  /**
+   *  forced thermalization, many particles are replaced
+   *  by a thermalized ensemble
+   */
   Thermalization = 7,
+  /**
+   * (41-45) soft string excitations. Here "soft" means that the process does
+   *         not involve quark or gluon scattering. A string is formed by quark
+   *         and antiquark, or quark and diquark, in its ends. Then this
+   *         string decays. Depending on which quark and anti- (or di-)quarks
+   *         are selected for string formation, the process has one of the
+   *         following types.
+   */
+  /// single diffractive AB->AX. Both quark and anti-/di-quark taken from B.
   StringSoftSingleDiffractiveAX = 41,
+  /**
+   *  single diffractive AB->XB. Both quark and anti-/di-quark taken from A.
+   *  It makes sense to distinguish it from AB->AX, because A and B can be
+   *  particles of different types, for example, a pion and a proton.
+   *  It matters then, whether the pion creates a string or the proton.
+   */
   StringSoftSingleDiffractiveXB = 42,
+  /// double diffractive. Two strings are formed, one from A and one from B.
   StringSoftDoubleDiffractive   = 43,
+  /**
+   * a special case of baryon-antibaryon annihilation. One pair qqbar
+   * annihilates immediately and then two strings are formed.
+   */
   StringSoftAnnihilation        = 44,
+  /// non-diffractive. Two strings are formed both have ends in A and B.
   StringSoftNonDiffractive      = 45,
+  /**
+   *  hard string process involving 2->2 QCD process by PYTHIA. Here quarks
+   *  do not simply form a string. They actually scatter on parton level first.
+   */
   StringHard = 46
 };
 
