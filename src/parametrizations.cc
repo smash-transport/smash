@@ -120,8 +120,8 @@ static double piplusp_elastic_pdg(double mandelstam_s) {
   return (*piplusp_elastic_interpolation)(p_lab);
 }
 
-double piplusp_elastic_high_energy(double mandelstam_s) {
-  double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
+double piplusp_elastic_high_energy(double mandelstam_s, double m1, double m2) {
+  double p_lab = plab_from_s(mandelstam_s, m1, m2);
   return 11.4 * std::pow(p_lab, -0.4) + 0.079 * logp * logp;;
 }
 
@@ -238,8 +238,8 @@ double pp_elastic(double mandelstam_s) {
   }
 }
 
-double pp_elastic_high_energy(double(mandelstam_s) {
-  double p_lab = plab_from_s(mandelstam_s);
+double pp_elastic_high_energy(double(mandelstam_s, double m1, double m2) {
+  double p_lab = plab_from_s(mandelstam_s,m1,m2);
   return 11.9 + 26.9 * std::pow(p_lab, -1.21) + 0.169 * logp * logp -
          1.85 * logp;
 }

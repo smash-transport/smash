@@ -148,9 +148,11 @@ double pipi_string_hard(double mandelstam_s);
  * parametrization used at all energies (useful for AQM)
  *
  * \param[in] mandelstam_s the rest frame total energy squared
+ * \param[in] m1 the mass of the first particle
+ * \param[in] m2 the mass of the second particle
  * \return the parametrized cross-section
  */
-double piplusp_elastic_high_energy(double mandelstam_s);
+double piplusp_elastic_high_energy(double mandelstam_s, double m1, double m2);
 
 /**
  * pi+p elastic cross section parametrization, PDG data.
@@ -192,9 +194,11 @@ double pp_elastic(double mandelstam_s);
  * Source: \iref{Weil:2013mya}, eq. (44)
  *
  * \param[in] mandelstam_s the rest frame total energy squared
+ * \param[in] m1 the mass of the first particle
+ * \param[in] m2 the mass of the second particle
  * \return the parametrized cross-section
  */
-double pp_elastic_high_energy(double(mandelstam_s);
+double pp_elastic_high_energy(double(mandelstam_s, double m1, double m2);
 
 /**
  * pp total cross section parametrization
