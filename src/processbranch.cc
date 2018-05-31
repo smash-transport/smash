@@ -54,19 +54,15 @@ double ProcessBranch::threshold() const {
 
 std::ostream& operator<<(std::ostream& os, const CollisionBranch& cbranch) {
   ProcessType ptype = cbranch.get_type();
-  if (is_string_soft_process(ptype)) {
-    if (ptype == ProcessType::StringSoftSingleDiffractiveAX ||
-        ptype == ProcessType::StringSoftSingleDiffractiveXB) {
-      os << "1-diff";
-    } else if (ptype == ProcessType::StringSoftDoubleDiffractive) {
-      os << "2-diff";
-    } else if (ptype == ProcessType::StringSoftAnnihilation) {
-      os << "BBbar";
-    } else if (ptype == ProcessType::StringSoftNonDiffractive) {
-      os << "non-diff";
-    } else {
-      throw std::invalid_argument("Unexpected soft string process type");
-    }
+  if (ptype == ProcessType::StringSoftSingleDiffractiveAX ||
+      ptype == ProcessType::StringSoftSingleDiffractiveXB) {
+    os << "1-diff";
+  } else if (ptype == ProcessType::StringSoftDoubleDiffractive) {
+    os << "2-diff";
+  } else if (ptype == ProcessType::StringSoftAnnihilation) {
+    os << "BBbar";
+  } else if (ptype == ProcessType::StringSoftNonDiffractive) {
+    os << "non-diff";
   } else if (ptype == ProcessType::StringHard) {
     os << "hard";
   } else if (ptype == ProcessType::TwoToOne || ptype == ProcessType::TwoToTwo ||
