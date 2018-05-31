@@ -198,7 +198,7 @@ double pp_elastic(double mandelstam_s);
  * \param[in] m2 the mass of the second particle
  * \return the parametrized cross-section
  */
-double pp_elastic_high_energy(double(mandelstam_s, double m1, double m2);
+double pp_elastic_high_energy(double mandelstam_s, double m1, double m2);
 
 /**
  * pp total cross section parametrization
