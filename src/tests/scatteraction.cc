@@ -210,7 +210,7 @@ TEST(pythia_running) {
   constexpr bool strings_switch = true;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act->add_all_scatterings(elastic_parameter, false,
-                           Test::all_reactions_included(), 0., strings_switch,
+                           ReactionsBitSet(), 0., strings_switch,
                            false, false, nnbar_treatment);
 
   VERIFY(act->cross_section() > 0.);
@@ -219,7 +219,7 @@ TEST(pythia_running) {
   VERIFY(act->is_valid(particles));
   act->generate_final_state();
   VERIFY(act->get_type() != ProcessType::Elastic);
-  VERIFY(act->get_type() == ProcessType::StringSoft);
+  COMPARE(is_string_soft_process(act->get_type()), true) << act->get_type();
   const uint32_t id_process = 1;
   act->perform(&particles, id_process);
   COMPARE(id_process, 1u);

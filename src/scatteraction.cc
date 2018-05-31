@@ -81,13 +81,13 @@ void ScatterAction::generate_final_state() {
       /* Sample the particle momenta in CM system. */
       inelastic_scattering();
       break;
-    case ProcessType::StringSoft:
-      /* soft string excitation */
-      string_excitation(true);
-      break;
+    case ProcessType::StringSoftSingleDiffractiveAX:
+    case ProcessType::StringSoftSingleDiffractiveXB:
+    case ProcessType::StringSoftDoubleDiffractive:
+    case ProcessType::StringSoftAnnihilation:
+    case ProcessType::StringSoftNonDiffractive:
     case ProcessType::StringHard:
-      /* hard string excitation */
-      string_excitation(false);
+      string_excitation();
       break;
     default:
       throw InvalidScatterAction(
@@ -135,9 +135,6 @@ void ScatterAction::add_all_scatterings(double elastic_parameter,
     if (xs_diff > 0.) {
       add_collisions(xs.string_excitation(xs_diff, string_process_));
     }
-  }
-  if (strings_switch) {
-    subproc_soft_string_ = xs.get_subproc_soft_string();
   }
 }
 
@@ -243,7 +240,7 @@ static double Cugnon_bnp(double plab) {
 }
 
 void ScatterAction::sample_angles(std::pair<double, double> masses) {
-  if ((process_type_ == ProcessType::StringSoft) ||
+  if (is_string_soft_process(process_type_) ||
       (process_type_ == ProcessType::StringHard)) {
     // We potentially have more than two particles, so the following angular
     // distributions don't work. Instead we just keep the angular
@@ -422,7 +419,7 @@ void ScatterAction::resonance_formation() {
 /* This function will generate outgoing particles in CM frame
  * from a hard process.
  * The way to excite soft strings is based on the UrQMD model */
-void ScatterAction::string_excitation(bool is_soft_proc) {
+void ScatterAction::string_excitation() {
   assert(incoming_particles_.size() == 2);
   const auto &log = logger<LogArea::Pythia>();
   // Disable floating point exception trap for Pythia
@@ -436,33 +433,33 @@ void ScatterAction::string_excitation(bool is_soft_proc) {
     const int ntry_max = 10000;
     while (!success && ntry < ntry_max) {
       ntry++;
-      if (is_soft_proc) {
-        switch (subproc_soft_string_) {
-          case StringSoftType::SingleDiffAX:
-            /* single diffractive to A+X */
-            success = string_process_->next_SDiff(true);
-            break;
-          case StringSoftType::SingleDiffXB:
-            /* single diffractive to X+B */
-            success = string_process_->next_SDiff(false);
-            break;
-          case StringSoftType::DoubleDiff:
-            /* double diffractive */
-            success = string_process_->next_DDiff();
-            break;
-          case StringSoftType::NonDiff:
-            /* soft non-diffractive */
-            success = string_process_->next_NDiffSoft();
-            break;
-          case StringSoftType::BBbar:
-            /* soft BBbar 2 mesonic annihilation */
-            success = string_process_->next_BBbarAnn();
-            break;
-          case StringSoftType::None:
-            success = false;
-        }
-      } else {
-        success = string_process_->next_NDiffHard();
+      switch (process_type_) {
+        case ProcessType::StringSoftSingleDiffractiveAX:
+          /* single diffractive to A+X */
+          success = string_process_->next_SDiff(true);
+          break;
+        case ProcessType::StringSoftSingleDiffractiveXB:
+          /* single diffractive to X+B */
+          success = string_process_->next_SDiff(false);
+          break;
+        case ProcessType::StringSoftDoubleDiffractive:
+          /* double diffractive */
+          success = string_process_->next_DDiff();
+          break;
+        case ProcessType::StringSoftNonDiffractive:
+          /* soft non-diffractive */
+          success = string_process_->next_NDiffSoft();
+          break;
+        case ProcessType::StringSoftAnnihilation:
+          /* soft BBbar 2 mesonic annihilation */
+          success = string_process_->next_BBbarAnn();
+          break;
+        case ProcessType::StringHard:
+          success = string_process_->next_NDiffHard();
+          break;
+        default:
+          log.error("Unknown string process required.");
+          success = false;
       }
     }
     if (ntry == ntry_max) {

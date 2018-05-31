@@ -396,13 +396,6 @@ class Action {
     /* Loop through all subprocesses and select one by Monte Carlo, based on
      * their weights.  */
     for (const auto &proc : subprocesses) {
-      /* All processes apart from strings should have
-       * a well-defined final state. */
-      if (proc->particle_number() < 1 &&
-          proc->get_type() != ProcessType::StringSoft &&
-          proc->get_type() != ProcessType::StringHard) {
-        continue;
-      }
       weight_sum += proc->weight();
       if (random_weight <= weight_sum) {
         /* Return the full process information. */

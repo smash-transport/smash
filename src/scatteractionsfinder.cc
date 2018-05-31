@@ -371,6 +371,9 @@ void ScatterActionsFinder::dump_reactions() const {
             B.set_4momentum(B.pole_mass(), -mom, 0.0, 0.0);
             ScatterActionPtr act = make_unique<ScatterAction>(
                 A, B, time, isotropic_, string_formation_time_);
+            if (strings_switch_) {
+              act->set_string_interface(string_process_interface_.get());
+            }
             act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
                                      low_snn_cut_, strings_switch_, use_AQM_,
                                      strings_with_probability_,
@@ -383,12 +386,10 @@ void ScatterActionsFinder::dump_reactions() const {
             for (const auto &channel : act->collision_channels()) {
               const auto type = channel->get_type();
               std::string r;
-              if (type == ProcessType::StringSoft) {
+              if (is_string_soft_process(type) ||
+                  type == ProcessType::StringHard) {
                 r = A_type->name() + B_type->name() +
-                    std::string(" → strings (soft)");
-              } else if (type == ProcessType::StringHard) {
-                r = A_type->name() + B_type->name() +
-                    std::string(" → strings (hard)");
+                    std::string(" → strings");
               } else {
                 std::string r_type =
                     (type == ProcessType::Elastic)
@@ -468,6 +469,9 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
         xs_dump[description].push_back(std::make_pair(sqrts, xs));
       }
     }
+    xs_dump["total"].push_back(std::make_pair(sqrts, act->cross_section()));
+    // Total cross-section should be the first in the list -> negative mass
+    outgoing_total_mass["total"] = -1.0;
   }
 
   // Nice ordering of channels by summed pole mass of products

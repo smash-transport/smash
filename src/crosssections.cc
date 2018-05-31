@@ -1649,15 +1649,13 @@ CollisionBranchList CrossSections::string_excitation(
      * into 2 mesonic strings of equal mass after annihilating one quark-
      * anti-quark pair. See StringProcess::next_BBbarAnn()
      */
-    double sig_annihilation;
+    double sig_annihilation = 0.0;
     if (BBbar_pair) {
       /* In the case of baryon-antibaryon pair,
        * the parametrized cross section for annihilation will be added.
        * See xs_ppbar_annihilation(). */
       sig_annihilation =
           std::min(total_string_xs, xs_ppbar_annihilation(sqrt_s_ * sqrt_s_));
-    } else {
-      sig_annihilation = 0.;
     }
 
     const double nondiffractive_all =
@@ -1693,50 +1691,20 @@ CollisionBranchList CrossSections::string_excitation(
     /* cross section of soft string excitation including annihilation */
     const double sig_string_soft = total_string_xs - nondiffractive_hard;
 
-    /* fill cross section arrays */
-    std::array<double, 6> string_sub_cross_sections;
-    std::array<double, 7> string_sub_cross_sections_sum;
-    string_sub_cross_sections[0] = single_diffr_AX;
-    string_sub_cross_sections[1] = single_diffr_XB;
-    string_sub_cross_sections[2] = double_diffr;
-    string_sub_cross_sections[3] = nondiffractive_soft;
-    string_sub_cross_sections[4] = sig_annihilation;
-    string_sub_cross_sections[5] = nondiffractive_hard;
-    string_sub_cross_sections_sum[0] = 0.;
-    for (int i = 0; i < 6; i++) {
-      string_sub_cross_sections_sum[i + 1] =
-          string_sub_cross_sections_sum[i] + string_sub_cross_sections[i];
-    }
-
-    /* soft subprocess selection */
-    StringSoftType iproc = StringSoftType::None;
-    int imax = 0;
-    /* baryon-antibaryon can annihilate and this correspond to
-     * StringSoftType::BBbar. */
-    if (BBbar_pair) {
-      imax = 5;
-    } else {
-      imax = 4;
-    }
-    double r_xsec =
-        string_sub_cross_sections_sum[imax] * Random::uniform(0., 1.);
-    for (int i = 0; i < imax; i++) {
-      if ((r_xsec >= string_sub_cross_sections_sum[i]) &&
-          (r_xsec < string_sub_cross_sections_sum[i + 1])) {
-        iproc = static_cast<StringSoftType>(i);
-        break;
-      }
-    }
-    if (iproc == StringSoftType::None) {
-      throw std::runtime_error("soft string subprocess is not specified.");
-    }
-
-    subproc_soft_string_ = iproc;
-
     /* fill the list of process channels */
     if (sig_string_soft > 0.) {
       channel_list.push_back(make_unique<CollisionBranch>(
-          sig_string_soft, ProcessType::StringSoft));
+          single_diffr_AX,
+          ProcessType::StringSoftSingleDiffractiveAX));
+      channel_list.push_back(make_unique<CollisionBranch>(
+          single_diffr_XB,
+          ProcessType::StringSoftSingleDiffractiveXB));
+      channel_list.push_back(make_unique<CollisionBranch>(
+          double_diffr, ProcessType::StringSoftDoubleDiffractive));
+      channel_list.push_back(make_unique<CollisionBranch>(
+          nondiffractive_soft, ProcessType::StringSoftNonDiffractive));
+      channel_list.push_back(make_unique<CollisionBranch>(
+          sig_annihilation, ProcessType::StringSoftAnnihilation));
     }
     if (nondiffractive_hard > 0.) {
       channel_list.push_back(make_unique<CollisionBranch>(
