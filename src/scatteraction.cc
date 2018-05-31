@@ -205,12 +205,16 @@ double ScatterAction::transverse_distance_sqr() const {
 
 /**
  * Computes the B coefficients from the Cugnon parametrization of the angular
- * distribution in elastic pp scattering, see equation (8) in
- * \iref{Cugnon:1996kh}.
+ * distribution in elastic pp scattering.
+ *
+ * See equation (8) in \iref{Cugnon:1996kh}.
  * Note: The original Cugnon parametrization is only applicable for
  * plab < 6 GeV and keeps rising above that. We add an upper limit of b <= 9,
  * in order to be compatible with high-energy data (up to plab ~ 25 GeV).
+ *
  * \param[in] plab Lab momentum in GeV.
+ *
+ * \return Cugnon B coefficient for elatic proton-proton scatterings.
  */
 static double Cugnon_bpp(double plab) {
   if (plab < 2.) {
@@ -223,9 +227,13 @@ static double Cugnon_bpp(double plab) {
 
 /**
  * Computes the B coefficients from the Cugnon parametrization of the angular
- * distribution in elastic np scattering, see equation (10) in
- * \iref{Cugnon:1996kh}.
+ * distribution in elastic np scattering.
+ *
+ * See equation (10) in \iref{Cugnon:1996kh}.
+ *
  * \param[in] plab Lab momentum in GeV.
+ *
+ * \return Cugnon B coefficient for elastic proton-neutron scatterings.
  */
 static double Cugnon_bnp(double plab) {
   if (plab < 0.225) {
