@@ -120,7 +120,12 @@ static double piplusp_elastic_pdg(double mandelstam_s) {
   return (*piplusp_elastic_interpolation)(p_lab);
 }
 
-double piplusp_elastic_no_subtraction(double mandelstam_s) {
+double piplusp_elastic_high_energy(double mandelstam_s) {
+  double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
+  return 11.4 * std::pow(p_lab, -0.4) + 0.079 * logp * logp;;
+}
+
+double piplusp_elastic(double mandelstam_s) {
   double sigma;
   double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
   if (mandelstam_s < 2.25) {
@@ -131,11 +136,7 @@ double piplusp_elastic_no_subtraction(double mandelstam_s) {
   } else {
     sigma = piplusp_elastic_pdg(mandelstam_s);
   }
-  return sigma;
-}
 
-double piplusp_elastic(double mandelstam_s) {
-  double sigma = piplusp_elastic_no_subtraction(mandelstam_s);
   // The elastic contributions from decays still need to be subtracted.
   if (piplusp_elastic_res_interpolation == nullptr) {
     std::vector<double> x = PIPLUSP_RES_SQRTS;

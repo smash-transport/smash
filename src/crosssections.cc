@@ -228,13 +228,13 @@ double CrossSections::elastic_parametrization(bool use_AQM) {
       elastic_xs = nn_el();  // valid also for annihilation
     } else if ((pdg_a.is_meson() && pdg_b.is_baryon()) ||
              (pdg_b.is_meson() && pdg_a.is_baryon())) {
-      elastic_xs = piplusp_elastic_no_subtraction(sqrt_s_ * sqrt_s_);
+      elastic_xs = piplusp_elastic_high_energy(sqrt_s_ * sqrt_s_);
     } else if (pdg_a.is_meson() && pdg_b.is_meson()) {
       double s = sqrt_s_ * sqrt_s_;
       if (s > 4 * nucleon_mass * nucleon_mass) {
         // until we get a ππ parametrization
         // todo JB : fix this cross section so it doesn't subtract resonances
-        elastic_xs = 4./9. * pp_elastic(sqrt_s_ * sqrt_s_);
+        elastic_xs = 2./3. * piplusp_elastic_high_energy(sqrt_s_ * sqrt_s_);
       }
     }
     elastic_xs *= (1. - 0.4 * pdg_a.frac_strange()) *
@@ -1741,7 +1741,9 @@ double CrossSections::high_energy() const {
   /* Meson-meson interaction goes through AQM from pp, until we get a proper
    * parametrization for π π, see user guide "Use_AQM"*/
   if (pdg_a.is_meson() && pdg_b.is_meson()) {
-    xs = 4./9. * pp_high_energy(s);  // 4/9 factor since 2 mesons in AQM
+    /* 2/3 factor since difference of 1 meson between meson-meson
+     * and baryon-meson */
+    xs = 2./3. * piplusp_high_energy(s);
   }
 
   // AQM scaling for cross-sections

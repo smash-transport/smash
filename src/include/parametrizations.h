@@ -142,14 +142,15 @@ double Npi_string_hard(double mandelstam_s);
 double pipi_string_hard(double mandelstam_s);
 
 /**
- * pi+p elactic cross section parametrization, PDG data.
+ * pi+p elactic cross section parametrization.
  * Source: GiBUU:parametrizationBarMes_HighEnergy.f90
- * Elastic contributions from decays are not subtracted (useful for AQM)
+ * Elastic contributions from decays are not subtracted, high energy
+ * parametrization used at all energies (useful for AQM)
  *
  * \param[in] mandelstam_s the rest frame total energy squared
  * \return the parametrized cross-section
  */
-double piplusp_elastic_no_subtraction(double mandelstam_s);
+double piplusp_elastic_high_energy(double mandelstam_s);
 
 /**
  * pi+p elastic cross section parametrization, PDG data.
