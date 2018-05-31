@@ -236,19 +236,15 @@ double CrossSections::elastic_parametrization(bool use_AQM) {
         elastic_xs = piplusp_elastic_high_energy(sqrt_s_ * sqrt_s_, m2, m1);
       }
     } else if (pdg_a.is_meson() && pdg_b.is_meson()) {
-      double s = sqrt_s_ * sqrt_s_;
-      if (s > 4 * nucleon_mass * nucleon_mass) {
-        // until we get a ππ parametrization
-        // todo JB : fix this cross section so it doesn't subtract resonances
-        double m1 = incoming_particles_[0].effective_mass();
-        double m2 = incoming_particles_[1].effective_mass();
-        if (m1 < m2) {
-          elastic_xs = piplusp_elastic_high_energy(sqrt_s_ * sqrt_s_, m1, m2);
-        } else {
-          elastic_xs = piplusp_elastic_high_energy(sqrt_s_ * sqrt_s_, m2, m1);
-        }
-        elastic_xs *= 2./3.;
+      // meson-meson goes thru scaling from π+p parametrization
+      double m1 = incoming_particles_[0].effective_mass();
+      double m2 = incoming_particles_[1].effective_mass();
+      if (m1 < m2) {
+        elastic_xs = piplusp_elastic_high_energy(sqrt_s_ * sqrt_s_, m1, m2);
+      } else {
+        elastic_xs = piplusp_elastic_high_energy(sqrt_s_ * sqrt_s_, m2, m1);
       }
+      elastic_xs *= 2./3.;
     }
     elastic_xs *= (1. - 0.4 * pdg_a.frac_strange()) *
                   (1. - 0.4 * pdg_b.frac_strange());
