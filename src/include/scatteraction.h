@@ -148,8 +148,8 @@ class ScatterAction : public Action {
   /**
    * Todo(ryu): document better - it is not really UrQMD-based, isn't it?
    * Perform the UrQMD-based string excitation and decay
-   * \param[in] is_soft_proc whether or not it is soft process */
-  void string_excitation(bool is_soft_proc);
+   */
+  void string_excitation();
 
   /**
    * \ingroup logging
@@ -181,9 +181,6 @@ class ScatterAction : public Action {
 
   /** Pointer to interface class for strings */
   StringProcess* string_process_ = nullptr;
-
-  /// soft string subprocess identifier
-  StringSoftType subproc_soft_string_;
 };
 
 }  // namespace smash

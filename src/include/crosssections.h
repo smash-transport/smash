@@ -212,9 +212,6 @@ class CrossSections {
    */
   bool included_in_string() const;
 
-  /// \return soft string subprocess identifier
-  StringSoftType get_subproc_soft_string() { return subproc_soft_string_; }
-
  private:
   /**
    *  Choose between parametrizations for elastic cross sections.
@@ -384,9 +381,6 @@ class CrossSections {
 
   /// Total energy in the center-of-mass frame.
   double sqrt_s_;
-
-  /// soft string subprocess identifier
-  StringSoftType subproc_soft_string_;
 };
 
 }  // namespace smash
