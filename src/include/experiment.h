@@ -172,7 +172,7 @@ class Experiment : public ExperimentBase {
    * \param[in] output_path Path of the output file
    * \param[in] par Output options.(e.g. Extended)
    */
-  void create_output(std::string format, std::string content,
+  void create_output(const std::string &format, const std::string &content,
                      const bf::path &output_path, const OutputParameters &par);
 
   /**

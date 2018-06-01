@@ -52,7 +52,7 @@ double cut_off(const double sigma_mb) {
 */
 
 namespace smash {
-// template class PhotonCrossSection<ComputationMethod::Analytic>; (really
+// template class CrosssectionsPhoton<ComputationMethod::Analytic>; (really
 // remove this?)
 
 /*----------------------------------------------------------------------------*/
@@ -62,7 +62,7 @@ namespace smash {
 /*----------------------------------------------------------------------------*/
 
 // C11
-double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho0_pi(
+double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_rho0_pi(
     const double s, const double m_rho) {
   using std::abs;
   using std::atan;
@@ -1313,7 +1313,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho0_pi(
   return cut_off(xs * gev2_mb / spin_deg_factor);
 }
 
-double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho0_pi(
+double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi_rho0_pi(
     const double s, const double t, const double m_rho) {
   const double spin_deg_factor = 3.0;
 
@@ -1582,7 +1582,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho0_pi(
 
 // C12
 double
-PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi_rho_mediated(
+CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi0_rho_pi_rho_mediated(
     const double s, const double m_rho) {
   using std::abs;
   using std::atan;
@@ -2443,7 +2443,7 @@ PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi_rho_mediated(
   return cut_off(xs * gev2_mb / spin_deg_factor);
 }
 
-double PhotonCrossSection<ComputationMethod::Analytic>::
+double CrosssectionsPhoton<ComputationMethod::Analytic>::
     xs_diff_pi0_rho_pi_rho_mediated(const double s, const double t,
                                     const double m_rho) {
   const double spin_deg_factor = 3.0;
@@ -2645,7 +2645,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::
 
 // C13
 double
-PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0_rho_mediated(
+CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_rho_pi0_rho_mediated(
     const double s, const double m_rho) {
   using std::abs;
   using std::atan;
@@ -3758,7 +3758,7 @@ PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0_rho_mediated(
   return cut_off(xs * gev2_mb / spin_deg_factor);
 }
 
-double PhotonCrossSection<ComputationMethod::Analytic>::
+double CrosssectionsPhoton<ComputationMethod::Analytic>::
     xs_diff_pi_rho_pi0_rho_mediated(const double s, const double t,
                                     const double m_rho) {
   const double spin_deg_factor = 3.0;
@@ -3974,7 +3974,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::
  * mediated by (omega) 						  */
 /*----------------------------------------------------------------------------*/
 // C14
-double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho0_pi0(
+double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi0_rho0_pi0(
     const double s, const double m_rho) {
   using std::abs;
   using std::atan;
@@ -4151,7 +4151,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho0_pi0(
   return cut_off(xs * gev2_mb / spin_deg_factor);
 }
 
-double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi0_rho0_pi0(
+double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi0_rho0_pi0(
     const double s, const double t, const double m_rho) {
   const double spin_deg_factor = 3.0;
 
@@ -4200,7 +4200,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi0_rho0_pi0(
 
 // C15
 double
-PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0_omega_mediated(
+CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_rho_pi0_omega_mediated(
     const double s, const double m_rho) {
   using std::abs;
   using std::atan;
@@ -4244,7 +4244,7 @@ PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0_omega_mediated(
   return cut_off(xs * gev2_mb / spin_deg_factor);
 }
 
-double PhotonCrossSection<ComputationMethod::Analytic>::
+double CrosssectionsPhoton<ComputationMethod::Analytic>::
     xs_diff_pi_rho_pi0_omega_mediated(const double s, const double t,
                                       const double m_rho) {
   const double spin_deg_factor = 3.0;
@@ -4275,7 +4275,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::
 
 // C16
 double
-PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi_omega_mediated(
+CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi0_rho_pi_omega_mediated(
     const double s, const double m_rho) {
   using std::abs;
   using std::atan;
@@ -4353,7 +4353,7 @@ PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi_omega_mediated(
   return cut_off(xs * gev2_mb / spin_deg_factor);
 }
 
-double PhotonCrossSection<ComputationMethod::Analytic>::
+double CrosssectionsPhoton<ComputationMethod::Analytic>::
     xs_diff_pi0_rho_pi_omega_mediated(const double s, const double t,
                                       const double m_rho) {
   const double spin_deg_factor = 3.0;
@@ -4381,26 +4381,26 @@ double PhotonCrossSection<ComputationMethod::Analytic>::
 /*----------------------------------------------------------------------------*/
 
 // C12 + C16
-double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi0_rho_pi(
+double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi0_rho_pi(
     const double s, const double m_rho) {
   return cut_off(xs_pi0_rho_pi_rho_mediated(s, m_rho) +
                  xs_pi0_rho_pi_omega_mediated(s, m_rho));
 }
 
-double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi0_rho_pi(
+double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi0_rho_pi(
     const double s, const double t, const double m_rho) {
   return cut_off(xs_diff_pi0_rho_pi_rho_mediated(s, t, m_rho) +
                  xs_diff_pi0_rho_pi_omega_mediated(s, t, m_rho));
 }
 
 // C13 + C15
-double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_rho_pi0(
+double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_rho_pi0(
     const double s, const double m_rho) {
   return cut_off(xs_pi_rho_pi0_rho_mediated(s, m_rho) +
                  xs_pi_rho_pi0_omega_mediated(s, m_rho));
 }
 
-double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho_pi0(
+double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi_rho_pi0(
     const double s, const double t, const double m_rho) {
   return cut_off(xs_diff_pi_rho_pi0_rho_mediated(s, t, m_rho) +
                  xs_diff_pi_rho_pi0_omega_mediated(s, t, m_rho));
@@ -4411,7 +4411,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_rho_pi0(
  * mediated by (Pi, Rho, a1) 				*/
 /*----------------------------------------------------------------------------*/
 // C21
-double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi_rho0(
+double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_pi_rho0(
     const double s, const double m_rho) {
   using std::abs;
   using std::atan;
@@ -6727,7 +6727,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi_rho0(
   return cut_off(xs * gev2_mb / spin_deg_factor);
 }
 
-double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi_rho0(
+double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi_pi_rho0(
     const double s, const double t, const double m_rho) {
   const double spin_deg_factor = 1.0;
 
@@ -7005,7 +7005,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi_rho0(
 }
 
 // C22
-double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
+double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_pi0_rho(
     const double s, const double m_rho) {
   using std::abs;
   using std::atan;
@@ -8581,7 +8581,7 @@ double PhotonCrossSection<ComputationMethod::Analytic>::xs_pi_pi0_rho(
   return cut_off(xs * gev2_mb / spin_deg_factor);
 }
 
-double PhotonCrossSection<ComputationMethod::Analytic>::xs_diff_pi_pi0_rho(
+double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi_pi0_rho(
     const double s, const double t, const double m_rho) {
   const double spin_deg_factor = 1.0;
 

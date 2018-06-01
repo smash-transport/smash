@@ -21,26 +21,25 @@
 
 namespace smash {
 
-/**
- * Identifies the mode of the Grid.
- */
+/// Identifies the mode of the Grid.
 enum class GridOptions : char {
-  /// without ghost cells
+  /// Without ghost cells
   Normal = 0,
-  /// with ghost cells for periodic boundaries
+  /// With ghost cells for periodic boundaries
   PeriodicBoundaries = 1
 };
 
-/**
- * Indentifies the strategy of determining the cell size.
- */
+/// Indentifies the strategy of determining the cell size.
 enum class CellSizeStrategy : char {
   /// Look for optimal cell size.
   Optimal,
-  /// Make cells as large as possible.
-  ///
-  /// This means a single cell for normal boundary conditions and 8 cells
-  /// for periodic boundary conditions.
+
+  /**
+   * Make cells as large as possible.
+   *
+   * This means a single cell for normal boundary conditions and 8 cells
+   * for periodic boundary conditions.
+   */
   Largest
 };
 

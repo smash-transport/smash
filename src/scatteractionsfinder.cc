@@ -469,6 +469,9 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
         xs_dump[description].push_back(std::make_pair(sqrts, xs));
       }
     }
+    xs_dump["total"].push_back(std::make_pair(sqrts, act->cross_section()));
+    // Total cross-section should be the first in the list -> negative mass
+    outgoing_total_mass["total"] = -1.0;
   }
 
   // Nice ordering of channels by summed pole mass of products

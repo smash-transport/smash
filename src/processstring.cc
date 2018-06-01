@@ -573,8 +573,8 @@ bool StringProcess::next_NDiffHard() {
       previous_idB = pythia_parton_->mode("Beams:idB");
   double previous_eCM = pythia_parton_->parm("Beams:eCM");
 
-  bool same_initial_state = previous_idA == PDGcodes_[0].get_decimal() ||
-                            previous_idB == PDGcodes_[1].get_decimal() ||
+  bool same_initial_state = previous_idA == PDGcodes_[0].get_decimal() &&
+                            previous_idB == PDGcodes_[1].get_decimal() &&
                             std::abs(previous_eCM - sqrtsAB_) < really_small;
 
   /* Perform PYTHIA initialization if it was not previously initialized
