@@ -1684,7 +1684,7 @@ CollisionBranchList CrossSections::string_excitation(
     /* In the case of baryon-antibaryon pair,
      * the parametrized cross section for annihilation will be added.
      * See xs_ppbar_annihilation(). */
-    const double xs_param = xs_ppbar_annihilation(sqrt_s_ * sqrt_s_);
+    double xs_param = xs_ppbar_annihilation(sqrt_s_ * sqrt_s_);
     if (use_AQM) {
       xs_param *= AQM_factor;
     }
