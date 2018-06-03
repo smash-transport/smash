@@ -372,10 +372,6 @@ class CrossSections {
   /// List with data of scattering particles.
   ParticleList incoming_particles_;
 
-  /// Both of the incoming particles are nucleons.
-  bool both_are_nucleons_ = incoming_particles_[0].type().is_nucleon() &&
-                            incoming_particles_[1].type().is_nucleon();
-
   /// Whether incoming particles are a baryon-antibaryon pair
   bool is_BBbar_pair_;
 
