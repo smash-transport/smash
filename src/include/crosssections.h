@@ -101,9 +101,12 @@ class CrossSections {
    */
   double formation(const ParticleType& type_resonance, double cm_momentum_sqr);
 
-  /** Find all inelastic 2->2 processes for the given scattering.
+  /**
+   * Find all inelastic 2->2 processes for the given scattering.
+   *
    * This function calls the different, more specific functions for
    * the different scatterings.
+   *
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
    * \return List of all possibe inelastic 2->2 processes.
    */
@@ -114,6 +117,8 @@ class CrossSections {
    * difference between the parametrized total cross section and all the
    * explicitly implemented channels at low energy (elastic, resonance
    * excitation, etc).
+   *
+   * FIXME: Is this is affected by AQM scaling?
    *
    * \param[in] string_process String process used for string fragmentation.
    * \param[in] total_string_xs Total cross section for the string process [mb].
@@ -155,6 +160,8 @@ class CrossSections {
    * Determine the parametrized total cross section at high energies
    * for the given collision, which is non-zero for Baryon-Baryon and
    * Nucleon-Pion scatterings currently.
+   *
+   * This is rescaled by AQM factors.
    */
   double high_energy() const;
 
@@ -308,7 +315,8 @@ class CrossSections {
   /**
    * Determine the (parametrized) hard non-diffractive string cross section
    * for this collision.
-   * \return Parametrized cross section
+   *
+   * \return Parametrized cross section without AQM scaling.
    */
   double string_hard_cross_section() const;
 

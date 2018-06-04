@@ -1610,16 +1610,20 @@ CollisionBranchList CrossSections::string_excitation(
    * (anti-)proton is used for (anti-)baryons and
    * pion is used for mesons.
    * This must be rescaled according to additive quark model
-   * in the case of exotic hadrons. */
+   * in the case of exotic hadrons.
+   * FIXME: Is this done or not?
+   */
   std::array<int, 2> pdgid;
   for (int i = 0; i < 2; i++) {
     PdgCode pdg = incoming_particles_[i].type().pdgcode();
     pdg.deexcite();
+    // FIXME: What about charge?
     if (pdg.baryon_number() == 1) {
       pdgid[i] = 2212;
     } else if (pdg.baryon_number() == -1) {
       pdgid[i] = -2212;
     } else {
+      // FIXME: What about dileptons and photons?
       pdgid[i] = 211;
     }
   }
