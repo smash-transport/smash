@@ -118,8 +118,6 @@ class CrossSections {
    * explicitly implemented channels at low energy (elastic, resonance
    * excitation, etc).
    *
-   * FIXME: Is this is affected by AQM scaling?
-   *
    * \param[in] string_process String process used for string fragmentation.
    * \param[in] total_string_xs Total cross section for the string process [mb].
    * \return List of subprocesses (single-diffractive,

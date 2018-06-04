@@ -1611,7 +1611,6 @@ CollisionBranchList CrossSections::string_excitation(
    * pion is used for mesons.
    * This must be rescaled according to additive quark model
    * in the case of exotic hadrons.
-   * FIXME: Is this done or not?
    */
   std::array<int, 2> pdgid;
   for (int i = 0; i < 2; i++) {
