@@ -46,6 +46,7 @@ class CrossSections {
    * \param[in] included_2to2 Which 2->2 ractions are enabled?
    * \param[in] low_snn_cut Elastic collisions with CME below are forbidden.
    * \param[in] strings_switch Are string processes enabled?
+   * \param[in] use_AQM Is the Additive Quark Model enabled?
    * \param[in] strings_with_probability Are string processes triggered
    *            according to a probability?
    * \param[in] nnbar_treatment NNbar treatment through resonance, strings or
@@ -66,7 +67,7 @@ class CrossSections {
    * (if available).
    *
    * \param[in] elast_par Elastic cross section parameter from the input file.
-   * \param[in] use_AQM whether to extend elastic cross-sections with AQM
+   * \param[in] use_AQM Whether to extend elastic cross-sections with AQM.
    *
    * \return A ProcessBranch object containing the cross section and
    * final-state IDs.
