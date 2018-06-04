@@ -66,8 +66,9 @@ class ScatterAction : public Action {
    * position of particle b: x_b \n
    * momentum of particle a: p_a \n
    * momentum of particle b: p_b \n
-   * \f[d^2_\mathrm{coll} = (\vec{x_a} - \vec{x_b})^2 - \frac{((\vec{x_a} - \vec{x_b})
-   * \cdot (\vec{p_a} - \vec{p_b}))^2 } {(\vec{p_a} - \vec{p_b})^2}\f]
+   * \f[d^2_\mathrm{coll} = (\vec{x_a} - \vec{x_b})^2 - \frac{((\vec{x_a} -
+   * \vec{x_b}) \cdot (\vec{p_a} - \vec{p_b}))^2 } {(\vec{p_a} -
+   * \vec{p_b})^2}\f]
    *
    * \return  squared distance \f$d^2_\mathrm{coll}\f$.
    */
@@ -159,24 +160,24 @@ class ScatterAction : public Action {
   virtual double cross_section() const { return total_cross_section_; }
 
  protected:
-  /** 
+  /**
    * Determine the Mandelstam s variable,
-   * 
+   *
    * \f[s = (p_a + p_b)^2\f]
    * Equal to the square of CMS energy.
    *
    * \return Mandelstam s
    */
   double mandelstam_s() const;
-  /** 
+  /**
    * Get the momentum of the center of mass of the incoming particles
    * in the calculation frame.
-   * 
+   *
    * \return center of mass momentum.
    */
   double cm_momentum() const;
-  /** 
-   * Get the squared momentum of the center of mass of the incoming 
+  /**
+   * Get the squared momentum of the center of mass of the incoming
    * particles in the calculation frame.
    *
    * \return center of mass momentum squared.
@@ -197,7 +198,7 @@ class ScatterAction : public Action {
    */
   double gamma_cm() const;
 
-  ///Perform an elastic two-body scattering, i.e. just exchange momentum. 
+  /// Perform an elastic two-body scattering, i.e. just exchange momentum.
   void elastic_scattering();
 
   /// Perform an inelastic two-body scattering, i.e. new particles are formed
@@ -215,7 +216,7 @@ class ScatterAction : public Action {
    */
   void format_debug_output(std::ostream& out) const override;
 
-  ///List of possible collisions
+  /// List of possible collisions
   CollisionBranchList collision_channels_;
 
   /// Total hadronic cross section
