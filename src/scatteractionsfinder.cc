@@ -73,24 +73,24 @@ namespace smash {
  * This is divided by sqrts to get the minimum fraction to be sampled
  * from PDF shown above.
  *
- * \key Quark_Alpha (double, optional, default = 1.0) \n
+ * \key Quark_Alpha (double, optional, default = 2.0) \n
  * Parameter \f$\alpha\f$ in parton distribution function for quarks:
  * \f[\mathrm{PDF}_q\propto x^{\alpha-1}(1-x)^{\beta-1}\f]
  *
- * \key Quark_Beta (double, optional, default = 2.5) \n
+ * \key Quark_Beta (double, optional, default = 5.0) \n
  * Parameter \f$\beta\f$ in PDF for quarks shown above.
  *
- * \key Strange_Supp (double, optional, default = 0.217 as in Pythia) \n
+ * \key Strange_Supp (double, optional, default = 0.165) \n
  * Strangeness suppression factor \f$\lambda\f$:
  * \f[\lambda=\frac{P(s\bar{s})}{P(u\bar{u})}=\frac{P(s\bar{s})}{P(d\bar{d})}\f]
  * Defines the probability to produce a \f$s\bar{s}\f$ pair relative to produce
  * a light \f$q\bar{q}\f$ pair
  *
- * \key Diquark_Supp (double, optional, default = 0.081 as in Pythia) \n
+ * \key Diquark_Supp (double, optional, default = 0.042) \n
  * Diquark suppression factor. Defines the probability to produce a diquark
  * antidiquark pair relative to producing a qurk antiquark pair.
  *
- * \key Sigma_Perp (double, optional, default = 0.7 ) \n
+ * \key Sigma_Perp (double, optional, default = 0.4) \n
  * Parameter \f$\sigma_\perp\f$ in distribution for transverse momentum
  * transfer between colliding hadrons \f$p_\perp\f$ and string mass \f$M_X\f$:
  * \f[\frac{d^3N}{dM^2_Xd^2\mathbf{p_\perp}}\propto \frac{1}{M_X^2}
@@ -100,10 +100,10 @@ namespace smash {
  * Parameter a in pythia fragmentation function \f$f(z)\f$:
  * \f[f(z) = \frac{1}{z} (1-z)^a \exp\left(-b\frac{m_T^2}{z}\right)\f]
  *
- * \key StringZ_B (double, optional, default = 0.98 as in Pythia) \n
+ * \key StringZ_B (double, optional, default = 0.5) \n
  * Parameter \f$b\f$ in pythia fragmentation function shown above.
  *
- * \key String_Sigma_T (double, optional, default = 0.25)
+ * \key String_Sigma_T (double, optional, default = 0.5)
  * Standard deviation in Gaussian for transverse momentum distributed to
  * string fragments during fragmentation.
  *
@@ -191,14 +191,14 @@ ScatterActionsFinder::ScatterActionsFinder(
         subconfig.take({"String_Tension"}, 1.0), string_formation_time_,
         subconfig.take({"Gluon_Beta"}, 0.5),
         subconfig.take({"Gluon_Pmin"}, 0.001),
-        subconfig.take({"Quark_Alpha"}, 1.0),
-        subconfig.take({"Quark_Beta"}, 2.5),
-        subconfig.take({"Strange_Supp"}, 0.217),
-        subconfig.take({"Diquark_Supp"}, 0.081),
-        subconfig.take({"Sigma_Perp"}, 0.7),
+        subconfig.take({"Quark_Alpha"}, 2.0),
+        subconfig.take({"Quark_Beta"}, 5.0),
+        subconfig.take({"Strange_Supp"}, 0.165),
+        subconfig.take({"Diquark_Supp"}, 0.042),
+        subconfig.take({"Sigma_Perp"}, 0.4),
         subconfig.take({"StringZ_A"}, 0.68),
-        subconfig.take({"StringZ_B"}, 0.98),
-        subconfig.take({"String_Sigma_T"}, 0.25));
+        subconfig.take({"StringZ_B"}, 0.5),
+        subconfig.take({"String_Sigma_T"}, 0.5));
   }
 }
 
