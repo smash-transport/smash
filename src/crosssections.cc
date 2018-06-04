@@ -133,7 +133,12 @@ static double sum_xs_of(CollisionBranchList& list) {
 
 CrossSections::CrossSections(const ParticleList& incoming_particles,
                              const double sqrt_s)
-    : incoming_particles_(incoming_particles), sqrt_s_(sqrt_s) {}
+    : incoming_particles_(incoming_particles), sqrt_s_(sqrt_s),
+      is_BBbar_pair_(incoming_particles_[0].type().is_baryon() &&
+                     incoming_particles_[1].type().is_baryon() &&
+                     incoming_particles_[0].type().antiparticle_sign() ==
+                     -incoming_particles_[1].type().antiparticle_sign()) {
+}
 
 CollisionBranchList CrossSections::generate_collision_list(
     double elastic_parameter, bool two_to_one_switch,
@@ -143,9 +148,6 @@ CollisionBranchList CrossSections::generate_collision_list(
   CollisionBranchList process_list;
   const ParticleType& t1 = incoming_particles_[0].type();
   const ParticleType& t2 = incoming_particles_[1].type();
-
-  is_BBbar_pair_ = t1.is_baryon() && t2.is_baryon() &&
-                   t1.antiparticle_sign() == -t2.antiparticle_sign();
 
   const bool is_pythia =
       strings_with_probability &&

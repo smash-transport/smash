@@ -372,11 +372,11 @@ class CrossSections {
   /// List with data of scattering particles.
   ParticleList incoming_particles_;
 
-  /// Whether incoming particles are a baryon-antibaryon pair
-  bool is_BBbar_pair_;
-
   /// Total energy in the center-of-mass frame.
   double sqrt_s_;
+
+  /// Whether incoming particles are a baryon-antibaryon pair
+  const bool is_BBbar_pair_;
 };
 
 }  // namespace smash
