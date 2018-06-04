@@ -120,6 +120,7 @@ class CrossSections {
    *
    * \param[in] string_process String process used for string fragmentation.
    * \param[in] total_string_xs Total cross section for the string process [mb].
+   * \param[in] use_AQM whether to extend string cross-sections with AQM
    * \return List of subprocesses (single-diffractive,
    *        double-diffractive and non-diffractive) with their cross sections.
    *
@@ -128,7 +129,8 @@ class CrossSections {
    * \todo Same assumption made by NNbar_annihilation. Resolve.
    */
   CollisionBranchList string_excitation(double total_string_xs,
-                                        StringProcess* string_process);
+                                        StringProcess* string_process,
+                                        bool use_AQM);
 
   /**
    * Determine the cross section for NNbar annihilation, which is given by the
@@ -377,12 +379,11 @@ class CrossSections {
   /// List with data of scattering particles.
   ParticleList incoming_particles_;
 
-  /// Both of the incoming particles are nucleons.
-  bool both_are_nucleons_ = incoming_particles_[0].type().is_nucleon() &&
-                            incoming_particles_[1].type().is_nucleon();
-
   /// Total energy in the center-of-mass frame.
   double sqrt_s_;
+
+  /// Whether incoming particles are a baryon-antibaryon pair
+  const bool is_BBbar_pair_;
 };
 
 }  // namespace smash

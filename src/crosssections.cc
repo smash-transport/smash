@@ -133,7 +133,12 @@ static double sum_xs_of(CollisionBranchList& list) {
 
 CrossSections::CrossSections(const ParticleList& incoming_particles,
                              const double sqrt_s)
-    : incoming_particles_(incoming_particles), sqrt_s_(sqrt_s) {}
+    : incoming_particles_(incoming_particles), sqrt_s_(sqrt_s),
+      is_BBbar_pair_(incoming_particles_[0].type().is_baryon() &&
+                     incoming_particles_[1].type().is_baryon() &&
+                     incoming_particles_[0].type().antiparticle_sign() ==
+                     -incoming_particles_[1].type().antiparticle_sign()) {
+}
 
 CollisionBranchList CrossSections::generate_collision_list(
     double elastic_parameter, bool two_to_one_switch,
@@ -164,7 +169,8 @@ CollisionBranchList CrossSections::generate_collision_list(
      * from all other present channels. */
     const double sig_string =
         std::max(0., high_energy() - elastic_parametrization(use_AQM));
-    append_list(process_list, string_excitation(sig_string, string_process));
+    append_list(process_list,
+        string_excitation(sig_string, string_process, use_AQM));
   } else {
     if (two_to_one_switch) {
       // resonance formation (2->1)
@@ -1598,122 +1604,151 @@ CollisionBranchList CrossSections::dn_xx(ReactionsBitSet /*included_2to2*/) {
 }
 
 CollisionBranchList CrossSections::string_excitation(
-    double total_string_xs, StringProcess* string_process) {
+    double total_string_xs, StringProcess* string_process, bool use_AQM) {
   const auto& log = logger<LogArea::CrossSections>();
 
   if (!string_process) {
     throw std::runtime_error("string_process should be initialized.");
   }
 
-  /* get PDG id for evaluation of the parametrized cross sections
+  CollisionBranchList channel_list;
+  if (total_string_xs <= 0.) {
+    return channel_list;
+  }
+
+  /* Get PDG id for evaluation of the parametrized cross sections
    * for diffractive processes.
    * (anti-)proton is used for (anti-)baryons and
    * pion is used for mesons.
    * This must be rescaled according to additive quark model
    * in the case of exotic hadrons.
-   */
+   * Also calculate the multiplicative factor for AQM
+   * based on the quark contents. */
   std::array<int, 2> pdgid;
+  double AQM_factor = 1.;
   for (int i = 0; i < 2; i++) {
     PdgCode pdg = incoming_particles_[i].type().pdgcode();
-    pdg.deexcite();
     // FIXME: What about charge?
     if (pdg.baryon_number() == 1) {
-      pdgid[i] = 2212;
+      pdgid[i] = pdg::p_decimal;
     } else if (pdg.baryon_number() == -1) {
-      pdgid[i] = -2212;
+      pdgid[i] = -pdg::p_decimal;
     } else {
       // FIXME: What about dileptons and photons?
-      pdgid[i] = 211;
+      pdgid[i] = pdg::pi_p_decimal;
+    }
+    AQM_factor *= (1. - 0.4 * pdg.frac_strange());
+  }
+
+  /* Determine if the initial state is a baryon-antibaryon pair,
+   * which can annihilate. */
+  bool can_annihilate = false;
+  if (is_BBbar_pair_) {
+    int n_q_types = 5;  // u, d, s, c, b
+    for (int iq = 1; iq <= n_q_types; iq++) {
+      std::array<int, 2> nquark;
+      for (int i = 0; i < 2; i++) {
+        nquark[i] =
+            incoming_particles_[i].type().pdgcode().net_quark_number(iq);
+      }
+      if (nquark[0] != 0 && nquark[1] != 0) {
+        can_annihilate = true;
+        break;
+      }
     }
   }
-  bool BBbar_pair = pdgid[0] + pdgid[1] == 0;
 
-  CollisionBranchList channel_list;
-  if (total_string_xs > 0.) {
-    /* Total parametrized cross-section (I) and pythia-produced total
-     * cross-section (II) do not necessarily coincide. If I > II then
-     * non-diffractive cross-section is reinforced to get I == II.
-     * If I < II then partial cross-sections are drained one-by-one
-     * to reduce II until I == II:
-     * first non-diffractive, then double-diffractive, then
-     * single-diffractive AB->AX and AB->XB in equal proportion.
-     * The way it is done here is not unique. I (ryu) think that at high energy
-     * collision this is not an issue, but at sqrt_s < 10 GeV it may
-     * matter. */
-    std::array<double, 3> xs =
-        string_process->cross_sections_diffractive(pdgid[0], pdgid[1], sqrt_s_);
-    double single_diffr_AX = xs[0], single_diffr_XB = xs[1],
-           double_diffr = xs[2];
-    double single_diffr = single_diffr_AX + single_diffr_XB;
-    double diffractive = single_diffr + double_diffr;
-
-    /*
-     * The case for baryon/anti-baryon annihilation is treated separately,
-     * as in this case we use only one way to break up the particles, namely
-     * into 2 mesonic strings of equal mass after annihilating one quark-
-     * anti-quark pair. See StringProcess::next_BBbarAnn()
-     */
-    double sig_annihilation = 0.0;
-    if (BBbar_pair) {
-      /* In the case of baryon-antibaryon pair,
-       * the parametrized cross section for annihilation will be added.
-       * See xs_ppbar_annihilation(). */
-      sig_annihilation =
-          std::min(total_string_xs, xs_ppbar_annihilation(sqrt_s_ * sqrt_s_));
+  /* Total parametrized cross-section (I) and pythia-produced total
+   * cross-section (II) do not necessarily coincide. If I > II then
+   * non-diffractive cross-section is reinforced to get I == II.
+   * If I < II then partial cross-sections are drained one-by-one
+   * to reduce II until I == II:
+   * first non-diffractive, then double-diffractive, then
+   * single-diffractive AB->AX and AB->XB in equal proportion.
+   * The way it is done here is not unique. I (ryu) think that at high energy
+   * collision this is not an issue, but at sqrt_s < 10 GeV it may
+   * matter. */
+  std::array<double, 3> xs =
+      string_process->cross_sections_diffractive(pdgid[0], pdgid[1], sqrt_s_);
+  if (use_AQM) {
+    for (int ip = 0; ip < 3; ip++) {
+      xs[ip] *= AQM_factor;
     }
+  }
+  double single_diffr_AX = xs[0], single_diffr_XB = xs[1],
+         double_diffr = xs[2];
+  double single_diffr = single_diffr_AX + single_diffr_XB;
+  double diffractive = single_diffr + double_diffr;
 
-    const double nondiffractive_all =
-        std::max(0., total_string_xs - sig_annihilation - diffractive);
-    diffractive = total_string_xs - sig_annihilation - nondiffractive_all;
-    double_diffr = std::max(0., diffractive - single_diffr);
-    const double a = (diffractive - double_diffr) / single_diffr;
-    single_diffr_AX *= a;
-    single_diffr_XB *= a;
-    assert(std::abs(single_diffr_AX + single_diffr_XB + double_diffr +
-                    sig_annihilation + nondiffractive_all - total_string_xs) <
-           1.e-6);
-
-    double nondiffractive_soft = 0.;
-    double nondiffractive_hard = 0.;
-    if (nondiffractive_all > 0.) {
-      /* Hard string process is added by hard cross section
-       * in conjunction with multipartion interaction picture
-       * \iref{Sjostrand:1987su}. */
-      const double hard_xsec = string_hard_cross_section();
-      nondiffractive_soft =
-          nondiffractive_all * std::exp(-hard_xsec / nondiffractive_all);
-      nondiffractive_hard = nondiffractive_all - nondiffractive_soft;
+  /* The case for baryon/anti-baryon annihilation is treated separately,
+   * as in this case we use only one way to break up the particles, namely
+   * into 2 mesonic strings of equal mass after annihilating one quark-
+   * anti-quark pair. See StringProcess::next_BBbarAnn() */
+  double sig_annihilation = 0.0;
+  if (can_annihilate) {
+    /* In the case of baryon-antibaryon pair,
+     * the parametrized cross section for annihilation will be added.
+     * See xs_ppbar_annihilation(). */
+    double xs_param = xs_ppbar_annihilation(sqrt_s_ * sqrt_s_);
+    if (use_AQM) {
+      xs_param *= AQM_factor;
     }
-    log.debug("String cross sections [mb] are");
-    log.debug("Single-diffractive AB->AX: ", single_diffr_AX);
-    log.debug("Single-diffractive AB->XB: ", single_diffr_XB);
-    log.debug("Double-diffractive AB->XX: ", double_diffr);
-    log.debug("Soft non-diffractive: ", nondiffractive_soft);
-    log.debug("Hard non-diffractive: ", nondiffractive_hard);
-    log.debug("B-Bbar annihilation: ", sig_annihilation);
+    sig_annihilation = std::min(total_string_xs, xs_param);
+  }
 
-    /* cross section of soft string excitation including annihilation */
-    const double sig_string_soft = total_string_xs - nondiffractive_hard;
+  const double nondiffractive_all =
+      std::max(0., total_string_xs - sig_annihilation - diffractive);
+  diffractive = total_string_xs - sig_annihilation - nondiffractive_all;
+  double_diffr = std::max(0., diffractive - single_diffr);
+  const double a = (diffractive - double_diffr) / single_diffr;
+  single_diffr_AX *= a;
+  single_diffr_XB *= a;
+  assert(std::abs(single_diffr_AX + single_diffr_XB + double_diffr +
+                  sig_annihilation + nondiffractive_all - total_string_xs) <
+         1.e-6);
 
-    /* fill the list of process channels */
-    if (sig_string_soft > 0.) {
-      channel_list.push_back(make_unique<CollisionBranch>(
-          single_diffr_AX,
-          ProcessType::StringSoftSingleDiffractiveAX));
-      channel_list.push_back(make_unique<CollisionBranch>(
-          single_diffr_XB,
-          ProcessType::StringSoftSingleDiffractiveXB));
-      channel_list.push_back(make_unique<CollisionBranch>(
-          double_diffr, ProcessType::StringSoftDoubleDiffractive));
-      channel_list.push_back(make_unique<CollisionBranch>(
-          nondiffractive_soft, ProcessType::StringSoftNonDiffractive));
+  double nondiffractive_soft = 0.;
+  double nondiffractive_hard = 0.;
+  if (nondiffractive_all > 0.) {
+    /* Hard string process is added by hard cross section
+     * in conjunction with multipartion interaction picture
+     * \iref{Sjostrand:1987su}. */
+    const double hard_xsec = string_hard_cross_section();
+    nondiffractive_soft =
+        nondiffractive_all * std::exp(-hard_xsec / nondiffractive_all);
+    nondiffractive_hard = nondiffractive_all - nondiffractive_soft;
+  }
+  log.debug("String cross sections [mb] are");
+  log.debug("Single-diffractive AB->AX: ", single_diffr_AX);
+  log.debug("Single-diffractive AB->XB: ", single_diffr_XB);
+  log.debug("Double-diffractive AB->XX: ", double_diffr);
+  log.debug("Soft non-diffractive: ", nondiffractive_soft);
+  log.debug("Hard non-diffractive: ", nondiffractive_hard);
+  log.debug("B-Bbar annihilation: ", sig_annihilation);
+
+  /* cross section of soft string excitation including annihilation */
+  const double sig_string_soft = total_string_xs - nondiffractive_hard;
+
+  /* fill the list of process channels */
+  if (sig_string_soft > 0.) {
+    channel_list.push_back(make_unique<CollisionBranch>(
+        single_diffr_AX,
+        ProcessType::StringSoftSingleDiffractiveAX));
+    channel_list.push_back(make_unique<CollisionBranch>(
+        single_diffr_XB,
+        ProcessType::StringSoftSingleDiffractiveXB));
+    channel_list.push_back(make_unique<CollisionBranch>(
+        double_diffr, ProcessType::StringSoftDoubleDiffractive));
+    channel_list.push_back(make_unique<CollisionBranch>(
+        nondiffractive_soft, ProcessType::StringSoftNonDiffractive));
+    if (can_annihilate) {
       channel_list.push_back(make_unique<CollisionBranch>(
           sig_annihilation, ProcessType::StringSoftAnnihilation));
     }
-    if (nondiffractive_hard > 0.) {
-      channel_list.push_back(make_unique<CollisionBranch>(
-          nondiffractive_hard, ProcessType::StringHard));
-    }
+  }
+  if (nondiffractive_hard > 0.) {
+    channel_list.push_back(make_unique<CollisionBranch>(
+        nondiffractive_hard, ProcessType::StringHard));
   }
   return channel_list;
 }
@@ -2084,8 +2119,7 @@ bool CrossSections::decide_string(bool strings_switch,
       t1.is_nucleon() && t2.is_nucleon() &&
       t1.antiparticle_sign() == t2.antiparticle_sign();
   const bool is_BBbar_scattering =
-      treat_BBbar_with_strings && t1.is_baryon() && t2.is_baryon() &&
-      t1.pdgcode().is_antiparticle_of(t2.pdgcode());
+      treat_BBbar_with_strings && is_BBbar_pair_;
   const bool is_Npi_scattering = (t1.pdgcode().is_pion() && t2.is_nucleon()) ||
                                  (t1.is_nucleon() && t2.pdgcode().is_pion());
   /* True for baryon-baryon, anti-baryon-anti-baryon, baryon-meson,

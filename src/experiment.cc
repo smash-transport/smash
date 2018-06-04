@@ -344,7 +344,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
           config_coll.take({"Included_2to2"}, ReactionsBitSet().set()),
           config_coll.take({"Strings"}, modus_chooser != "Box"),
           config_coll.take({"Use_AQM"}, true),
-          config_coll.take({"Strings_with_Probability"}, false),
+          config_coll.take({"Strings_with_Probability"}, true),
           config_coll.take({"NNbar_Treatment"}, NNbarTreatment::Strings),
           config.has_value({"Output", "Photons"}),
           low_snn_cut,
@@ -503,7 +503,7 @@ void Experiment<Modus>::create_output(const std::string &format,
  * reference process such as PP for which solid parametrizations exist.
  * (\iref{Bass:1998ca})
  *
- * \key Strings_with_Probability (bool, optional, default = \key false): \n
+ * \key Strings_with_Probability (bool, optional, default = \key true): \n
  * \li \key true - String processes are triggered according to a probability
  *                 increasing smoothly with the collisional energy from 0 to 1
  *                 in a certain energy window. At energies beyond that window,
