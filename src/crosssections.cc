@@ -1722,6 +1722,18 @@ CollisionBranchList CrossSections::string_excitation(
 double CrossSections::high_energy() const {
   const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
+
+  // Disable AQM cross section for KN, because it destroys the total cross
+  // section. This is only a temporary fix, see #6262.
+  if (((pdg_a == pdg::K_p || pdg_a == pdg::K_z) && pdg_b.is_nucleon()) ||
+      ((pdg_b == pdg::K_p || pdg_b == pdg::K_z) && pdg_a.is_nucleon()) ||
+      ((pdg_a == -pdg::K_p || pdg_a == -pdg::K_z) &&
+       pdg_b.get_antiparticle().is_nucleon()) ||
+      ((pdg_b == -pdg::K_p || pdg_b == -pdg::K_z) &&
+       pdg_a.get_antiparticle().is_nucleon())) {
+    return 0.;
+  }
+
   const double s = sqrt_s_ * sqrt_s_;
   double xs = 0.;
 
