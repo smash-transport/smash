@@ -1796,7 +1796,7 @@ double CrossSections::high_energy() const {
              (pdg_b == pdg::pi_p && pdg_a == pdg::n)) {
     xs = piminusp_high_energy(s);  // pi- p, pi+ n
   } else if ((pdg_a.is_meson() && pdg_b.is_baryon()) ||
-             (pdg_b.is_meson() && pdg_b.is_baryon())) {
+             (pdg_b.is_meson() && pdg_a.is_baryon())) {
     xs = piminusp_high_energy(s);  // default for baryon-meson
   }
 
