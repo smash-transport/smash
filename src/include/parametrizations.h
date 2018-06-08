@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2017
+ *    Copyright (c) 2013-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -94,6 +94,15 @@ double piplusp_high_energy(double mandelstam_s);
 double piminusp_high_energy(double mandelstam_s);
 
 /**
+ * parametrized cross-section for proton-antiproton annihilation
+ * used in the UrQMD model
+ *
+ * \param[in] mandelstam_s the rest frame total energy squared
+ * \return the parametrized cross-section
+ */
+double xs_ppbar_annihilation(double mandelstam_s);
+
+/**
  * Utility function called by specific other parametrizations
  * Parametrized hard scattering cross section (with partonic scattering)
  * This parametrization is a direct fit to cross sections in PYTHIA
@@ -133,6 +142,19 @@ double Npi_string_hard(double mandelstam_s);
 double pipi_string_hard(double mandelstam_s);
 
 /**
+ * pi+p elactic cross section parametrization.
+ * Source: GiBUU:parametrizationBarMes_HighEnergy.f90
+ * Elastic contributions from decays are not subtracted, high energy
+ * parametrization used at all energies (useful for AQM)
+ *
+ * \param[in] mandelstam_s the rest frame total energy squared
+ * \param[in] m1 the mass of the first particle
+ * \param[in] m2 the mass of the second particle
+ * \return the parametrized cross-section
+ */
+double piplusp_elastic_high_energy(double mandelstam_s, double m1, double m2);
+
+/**
  * pi+p elastic cross section parametrization, PDG data.
  * Source: GiBUU:parametrizationBarMes_HighEnergy.f90
  *
@@ -165,6 +187,18 @@ double piminusp_elastic(double mandelstam_s);
  * \return the parametrized cross-section
  */
 double pp_elastic(double mandelstam_s);
+
+/**
+ * pp elastic cross section parametrization, with only the high
+ * energy part generalized to all energy regimes (used for AQM)
+ * Source: \iref{Weil:2013mya}, eq. (44)
+ *
+ * \param[in] mandelstam_s the rest frame total energy squared
+ * \param[in] m1 the mass of the first particle
+ * \param[in] m2 the mass of the second particle
+ * \return the parametrized cross-section
+ */
+double pp_elastic_high_energy(double mandelstam_s, double m1, double m2);
 
 /**
  * pp total cross section parametrization
@@ -226,6 +260,25 @@ double ppbar_total(double mandelstam_s);
  * \return the parametrized cross-section
  */
 double ppbar_total(double mandelstam_s, double m_proj, double m_target);
+
+/**
+ * Deuteron pion elastic cross-section [mb] parametrized
+ * to fit pi-d elastic scattering data (the data collection
+ * was be obtained from SAID data base, gwdac.phys.gwu.edu)
+ *
+ * \param[in] mandelstam_s the rest frame total energy squared
+ * \return the parametrized cross-section
+ */
+double deuteron_pion_elastic(double mandelstam_s);
+
+/**
+ * Deuteron nucleon elastic cross-section [mb] parametrized
+ * by \iref{Oh:2009gx}.
+ *
+ * \param[in] mandelstam_s the rest frame total energy squared
+ * \return the parametrized cross-section
+ */
+double deuteron_nucleon_elastic(double mandelstam_s);
 
 /**
  * K+ p elastic background cross section parametrization.
@@ -353,20 +406,25 @@ struct pair_hash {
 };
 
 /**
- * Isospin weights for inelastic K+ N channels.
+ * Calculate and store isospin ratios for K N -> K Delta reactions.
+ *
+ * The ratios are given by the squared Clebsch-Gordan coefficient for the respective
+ * reaction, divided by the sum of the squared coefficients of all possible
+ * isospin-symmetric reactions. They are used when calculating the corresponding
+ * cross sections from the parametrizations of experimental data.
  */
-class KplusNRatios {
+class KaonNucleonRatios {
  private:
   /// Internal representation of isospin weights once calculated
   mutable std::unordered_map<std::pair<uint64_t, uint64_t>, double, pair_hash>
       ratios_;
 
  public:
-  /// Create an empty K+ N isospin ratio storage.
-  KplusNRatios() : ratios_({}) {}
+  /// Create an empty K N -> K Delta isospin ratio storage.
+  KaonNucleonRatios() : ratios_({}) {}
 
   /**
-   * Return the isospin ratio of the given K+ N reaction's cross section.
+   * Return the isospin ratio of the given K N -> K Delta cross section.
    *
    * On the first call all ratios are calculated.
    */
@@ -374,7 +432,7 @@ class KplusNRatios {
                    const ParticleType& c, const ParticleType& d) const;
 };
 
-extern /*thread_local (see #3075)*/ KplusNRatios kplusn_ratios;
+extern /*thread_local (see #3075)*/ KaonNucleonRatios kaon_nucleon_ratios;
 
 /**
  * K- p <-> Kbar0 n cross section parametrization.

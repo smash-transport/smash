@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -36,6 +36,8 @@ class Nucleus {
    * \param[in] nTest number of testparticles
    */
   Nucleus(Configuration &config, int nTest);
+
+  virtual ~Nucleus() = default;
 
   /**
    * \return Mass of the nucleus.

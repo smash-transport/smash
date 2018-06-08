@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2017
+ *    Copyright (c) 2013-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -113,13 +113,36 @@ class ModusDefault {
        number of cells should be odd (2k+1) in every direction.
      */
 
-  /*!\Userguide
-   * \page input_forced_thermalization_ Forced_Thermalization
-   * \key Lattice_Sizes (list of 3 doubles, required, no default): \n
-   * The lattice is placed such that the center is [0.0,0.0,0.0].
-   * If one wants to have a central cell with center at [0.0,0.0,0.0] then
-   * number of cells should be odd (2k+1) in every direction.
-   */
+    /*!\Userguide
+     * \page input_forced_thermalization_ Forced Thermalization
+     * \key Lattice_Sizes (list of 3 doubles, required, no default): \n
+     * The lattice is placed such that the center is [0.0,0.0,0.0].
+     * If one wants to have a central cell with center at [0.0,0.0,0.0] then
+     * number of cells should be odd (2k+1) in every direction. \n
+     * \n
+     * Example: Configure Forced Thermalization
+     * --------------
+     * Forced Thermalization for certain regions is applied if the corresponding
+     * section is present in the configuration file. The following example
+     * activates forced thermalization in cells in which the energy density is
+     * above 0.3 GeV/fm^3. The lattice is initialized with 21 cells in x and y
+     * direction and 101 cells in z-direction. The lattice size is 20 fm in x
+     and
+     * y direction and 50 fm in z-direction. The thermalization is applied only
+     * for times later than 10 fm with a timestep of 1 fm/c. The sampling is
+     done
+     * according to the "biased BF" algorithm.
+     * \n
+     *\verbatim
+     Forced_Thermalization:
+         Lattice_Sizes:    [20.0, 20.0, 50.0]
+         Cell_Number:    [21, 21, 101]
+         Critical_Edens: 0.3
+         Start_Time: 10.0
+         Timestep: 1.0
+         Algorithm: "biased BF"
+     \endverbatim
+     */
 
     const std::array<double, 3> l = conf.take({"Lattice_Sizes"});
     const std::array<double, 3> origin = {-0.5 * l[0], -0.5 * l[1],

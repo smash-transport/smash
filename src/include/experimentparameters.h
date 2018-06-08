@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2017
+ *    Copyright (c) 2013-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -45,6 +45,17 @@ struct ExperimentParameters {
   /// This indicates whether string fragmentation is switched on.
   bool strings_switch;
 
+  /// Whether to use the AQM or not
+  bool use_AQM;
+
+  /**
+   * This indicates whether the string fragmentation is swiched on with
+   * a probability smoothly increasing with energy. If it's set equal to
+   * false, the cross section of the string fragmentation is counted by
+   * taking the difference between the parametrized total cross section
+   * and the sum of the non-string cross sections.
+   */
+  bool strings_with_probability;
   /**
    * This indicates how NN̅ annihilation should be treated; options are to
    * neglect it, make it conserve detailed balance using NN̅ → h₁(1170)ρ

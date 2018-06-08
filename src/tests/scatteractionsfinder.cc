@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2017
+ *    Copyright (c) 2015-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -69,7 +69,7 @@ TEST(collision_order) {
   Configuration config =
       Test::configuration("Collision_Term: {Elastic_Cross_Section: " +
                           std::to_string(elastic_parameter) + "}");
-  ScatterActionsFinder finder(config, exp_par, has_interacted, 0, 0, 1);
+  ScatterActionsFinder finder(config, exp_par, has_interacted, 0, 0);
 
   // prepare lists
   ParticleList search_list = particles.copy_to_vector();
@@ -144,7 +144,7 @@ TEST(scatter_particle_pair_only_once) {
   Configuration config =
       Test::configuration("Collision_Term: {Elastic_Cross_Section: " +
                           std::to_string(elastic_parameter) + "}");
-  ScatterActionsFinder finder(config, exp_par, has_interacted, 0, 0, 1);
+  ScatterActionsFinder finder(config, exp_par, has_interacted, 0, 0);
   ParticleList search_list = p.copy_to_vector();
   double dt = 0.9;  // fm/c
 
@@ -207,7 +207,7 @@ TEST(find_next_action) {
   Configuration config =
       Test::configuration("Collision_Term: {Elastic_Cross_Section: " +
                           std::to_string(elastic_parameter) + "}");
-  ScatterActionsFinder finder(config, exp_par, has_interacted, 0, 0, 1);
+  ScatterActionsFinder finder(config, exp_par, has_interacted, 0, 0);
 
   // prepare list of particles that will be checked for possible actions
   ParticleList particle_list = particles.copy_to_vector();

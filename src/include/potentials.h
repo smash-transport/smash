@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -48,6 +48,7 @@ class Potentials {
    *            the testparticle number needed for the density calculation.
    */
   Potentials(Configuration conf, const DensityParameters &parameters);
+  VIRTUAL_FOR_TESTS
   ~Potentials();
 
   /**

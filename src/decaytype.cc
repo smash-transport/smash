@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2015-2017
+ *    Copyright (c) 2015-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -340,6 +340,7 @@ bool ThreeBodyDecayDilepton::has_mother(ParticleTypePtr mother) const {
 
 double ThreeBodyDecayDilepton::diff_width(double m_par, double m_l,
                                           double m_dil, double m_other,
+                                          ParticleTypePtr other,
                                           ParticleTypePtr t) {
   // check threshold
   if (m_par < m_dil + m_other) {
@@ -356,8 +357,7 @@ double ThreeBodyDecayDilepton::diff_width(double m_par, double m_l,
 
   PdgCode pdg = t->pdgcode();
   if (pdg.is_meson()) {
-    const ParticleType &photon = ParticleType::find(pdg::photon);
-    const ParticleType &pi0 = ParticleType::find(pdg::pi_z);
+    const ParticleType& photon = ParticleType::find(pdg::photon);
     switch (pdg.spin()) {
       case 0: /* pseudoscalars: π⁰, η, η' */ {
         // width for decay into 2γ
@@ -369,8 +369,8 @@ double ThreeBodyDecayDilepton::diff_width(double m_par, double m_l,
                ph_sp_factor;
       }
       case 2: /* vectors: ω, φ */ {
-        // width for decay into π⁰γ
-        const double gamma_pig = t->get_partial_width(m_par, pi0, photon);
+        // width for decay into Pγ with P = π,η
+        const double gamma_pg = t->get_partial_width(m_par, *other, photon);
         double ff_sqr =
             em_form_factor_sqr_vec(pdg, m_dil);  // form factor squared
         /// see \iref{Landsberg:1986fd}, equation (3.4)
@@ -381,7 +381,7 @@ double ThreeBodyDecayDilepton::diff_width(double m_par, double m_l,
           assert(rad > -1E-5);
           return 0.;
         } else {
-          return (2. * alpha / (3. * M_PI)) * gamma_pig / m_dil *
+          return (2. * alpha / (3. * M_PI)) * gamma_pg / m_dil *
                  std::pow(rad, 3. / 2.) * ff_sqr * ph_sp_factor;
         }
       }
@@ -454,8 +454,9 @@ double ThreeBodyDecayDilepton::width(double, double G0, double m) const {
           }
           return integrate(bottom, top,
                            [&](double m_dil) {
-                             return diff_width(m_parent, m_l, m_dil, m_other,
-                                               mother_);
+                             return diff_width(
+                                 m_parent, m_l, m_dil, m_other,
+                                 particle_types_[non_lepton_position], mother_);
                            })
               .value();
         });

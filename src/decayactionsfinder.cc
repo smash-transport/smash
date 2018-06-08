@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -51,8 +51,7 @@ ActionList DecayActionsFinder::find_actions_in_cell(
     const double decay_time = Random::exponential<double>(
         /* The clock goes slower in the rest
          * frame of the resonance */
-        one_over_hbarc * p.inverse_gamma()
-        * width);
+        one_over_hbarc * p.inverse_gamma() * width);
     /* If the particle is not yet formed at the decay time,
      * it should not be able to decay */
     if (decay_time < dt &&

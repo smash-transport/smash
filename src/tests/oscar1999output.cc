@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -75,7 +75,7 @@ TEST(fullhistory_format) {
   const ParticleData p2 = particles.insert(Test::smashon_random());
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
-                              true, NNbarTreatment::NoAnnihilation);
+                          true, false, false, NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
   const ParticleList final_particles = action->outgoing_particles();
 
@@ -203,7 +203,7 @@ TEST(particlelist_format) {
   /* Create interaction ("elastic scattering") */
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
-                              true, NNbarTreatment::NoAnnihilation);
+                          true, false, false, NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
   const int event_id = 0;
   double impact_parameter = 2.4;

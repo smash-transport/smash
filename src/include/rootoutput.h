@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -45,8 +45,10 @@ class Particles;
   * For each particle characteristic there is a separate branch.
   * Currently these are t,x,y,z (coordinates), p0,px,py,pz (4-momentum),
   * pdgid - PDG code of particle, that characterizes its sort,
-  * ev - number of event particle encountered in and
-  * tcounter - number of output block in a given event.
+  * ev - number of event particle encountered in,
+  * tcounter - number of output block in a given event,
+  * npart - number of particles and
+  * impact_b - impact parameter.
   *
   * Here is an example of ROOT macro to read the ROOT output of SMASH:
   * \code
@@ -84,13 +86,24 @@ class Particles;
   * If option write_collisions is set True, then in addition to particles
   * TTree a collision TTree is created. Information about each collision is
   * written as one leaf: nin, nout - number of incoming and outgoing particles,
-  * ev - event number, (t,x,y,z), (p0,px,py,pz) - arrays of dimension nin+nout
+  * ev - event number, weight - total weight of the collision (wgt),
+  * partial_weight - partial weight of the collision (par_wgt), (t,x,y,z),
+  (p0,px,py,pz) - arrays of dimension nin+nout
   * that contain coordinates and momenta.
   **/
 class RootOutput : public OutputInterface {
  public:
+  /**
+   * Construct ROOT output.
+   *
+   * \param[in] path Output path.
+   * \param[in] name Name of the ouput.
+   * \param[in] out_par A structure containing parameters of the output.
+   */
   RootOutput(const bf::path &path, const std::string &name,
              const OutputParameters &out_par);
+
+  /// Destructor
   ~RootOutput();
 
   void at_eventstart(const Particles &particles,
@@ -102,14 +115,38 @@ class RootOutput : public OutputInterface {
   void at_interaction(const Action &action, const double density) override;
 
  private:
+  /// Filename of output
   const bf::path filename_;
+  /// Filename of output as long as simulation is still running.
   bf::path filename_unfinished_;
+  /// Pointer to root output file.
   std::unique_ptr<TFile> root_out_file_;
-  // TFile takes ownership of all TTrees.
-  // That's why TTree is not a unique pointer.
+  /**
+   * TTree for particles output.
+   *
+   * TFile takes ownership of all TTrees.
+   * That's why TTree is not a unique pointer.
+   */
   TTree *particles_tree_;
+  /**
+   * TTree for collision output.
+   *
+   * TFile takes ownership of all TTrees.
+   * That's why TTree is not a unique pointer.
+   */
   TTree *collisions_tree_;
+  /**
+   * Writes particles to a tree defined by treename.
+   * \param[in] particles Particles to be written to output.
+   */
   void particles_to_tree(const Particles &particles);
+  /**
+   * Writes collisions to a tree defined by treename.
+   * \param[in] incoming Incoming particles to be written to output.
+   * \param[in] outgoing Outgoing particles to be written to output.
+   * \param[in] weight Total weight of the collision.
+   * \param[in] partial_weight Partial weight of the collision
+   */
   void collisions_to_tree(const ParticleList &incoming,
                           const ParticleList &outgoing, const double weight,
                           const double partial_weight);
@@ -120,12 +157,14 @@ class RootOutput : public OutputInterface {
 
   /// Maximal buffer size.
   static const int max_buffer_size_ = 10000;
-  /// Buffer for filling TTree.
+
+  //@{
+  /// Buffer for filling TTree. See class documentation for definitions.
   std::array<double, max_buffer_size_> p0, px, py, pz, t, x, y, z;
-  /// Buffer for filling TTree.
   std::array<int, max_buffer_size_> pdgcode;
   int npart, tcounter, ev, nin, nout;
   double wgt, par_wgt, impact_b;
+  //@}
 
   /// Option to write collisions tree.
   bool write_collisions_;
@@ -136,17 +175,21 @@ class RootOutput : public OutputInterface {
   /// Print only final particles in the event, no intermediate output.
   bool particles_only_final_;
 
-  /** Root file cannot be read if it was not properly closed and finalized.
+  /**
+   * Root file cannot be read if it was not properly closed and finalized.
    * It can happen that SMASH simulation crashed and root file was not closed.
    * To save results of simulation in such case, "AutoSave" is
    * applied every N events. The autosave_frequency_ sets
    * this N (default N = 1000). Note that "AutoSave" operation is very
    * time-consuming, so the Autosave_Frequency is
-   * always a compromise between safety and speed.*/
+   * always a compromise between safety and speed.
+   */
   int autosave_frequency_;
 
-  /* Basic initialization routine, creating the TTree objects
-   * for particles and collisions. */
+  /**
+   * Basic initialization routine, creating the TTree objects
+   * for particles and collisions.
+   */
   void init_trees();
 };
 

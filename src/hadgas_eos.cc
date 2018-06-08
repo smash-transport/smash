@@ -17,7 +17,12 @@
 
 #include "include/constants.h"
 #include "include/forwarddeclarations.h"
+#include "include/fpenvironment.h"
 #include "include/hadgas_eos.h"
+#include "include/integrate.h"
+#include "include/logging.h"
+#include "include/pow.h"
+#include "include/random.h"
 
 namespace smash {
 
@@ -165,21 +170,49 @@ HadronGasEos::~HadronGasEos() {
   gsl_vector_free(x_);
 }
 
-double HadronGasEos::scaled_partial_density(const ParticleType &ptype,
-                                            double beta, double mub,
-                                            double mus) {
-  const double z = ptype.mass() * beta;
-  double x = beta * (ptype.baryon_number() * mub + ptype.strangeness() * mus -
-                     ptype.mass());
-  const unsigned int g = ptype.spin() + 1;
+double HadronGasEos::scaled_partial_density_auxiliary(double m_over_T,
+                                                      double mu_over_T) {
+  double x = mu_over_T - m_over_T;
   if (x < -500.0) {
     return 0.0;
   }
   x = std::exp(x);
   // In the case of small masses: K_n(z) -> (n-1)!/2 *(2/z)^n, z -> 0,
   // z*z*K_2(z) -> 2
-  return (z < really_small) ? 2.0 * g * x
-                            : z * z * g * x * gsl_sf_bessel_Kn_scaled(2, z);
+  return (m_over_T < really_small)
+         ? 2.0 * x
+         : m_over_T * m_over_T * x * gsl_sf_bessel_Kn_scaled(2, m_over_T);
+}
+
+double HadronGasEos::scaled_partial_density(const ParticleType &ptype,
+                                            double beta, double mub,
+                                            double mus) {
+  const double m_over_T = ptype.mass() * beta;
+  double mu_over_T = beta * (ptype.baryon_number() * mub +
+                               ptype.strangeness() * mus);
+  const double g = ptype.spin() + 1;
+  if (ptype.is_stable()) {
+    return g * scaled_partial_density_auxiliary(m_over_T, mu_over_T);
+  } else {
+    // Integral \int_{threshold}^{\infty} A(m) N_{thermal}(m) dm,
+    // where A(m) is the spectral function of the resonance.
+    const double m0 = ptype.mass();
+    const double w0 = ptype.width_at_pole();
+    const double mth = ptype.min_mass_spectral();
+    const double u_min = std::atan(2.0 * (mth - m0) / w0);
+    const double u_max = 0.5 * M_PI;
+    Integrator integrate;
+    const double result = g * integrate(u_min, u_max, [&](double u) {
+      // One of many possible variable substitutions. Not clear if it has
+      // any advantages, except transforming (m_th, inf) to finite interval.
+      const double tanu = std::tan(u);
+      const double m = m0 + 0.5 * w0 * tanu;
+      const double jacobian = 0.5 * w0 * (1.0 + tanu * tanu);
+      return ptype.spectral_function(m) * jacobian *
+             scaled_partial_density_auxiliary(m * beta, mu_over_T);
+    });
+    return result;
+  }
 }
 
 double HadronGasEos::partial_density(const ParticleType &ptype, double T,
@@ -266,6 +299,79 @@ double HadronGasEos::net_strange_density(double T, double mub, double mus) {
   }
   rho *= prefactor_ * T * T * T;
   return rho;
+}
+
+double HadronGasEos::sample_mass_thermal(const ParticleType &ptype,
+                                         double beta) {
+  if (ptype.is_stable()) {
+    return ptype.mass();
+  }
+  // Sampling mass m from A(m) x^2 BesselK_2(x), where x = beta m.
+  // Strategy employs the idea of importance sampling:
+  // -- Sample mass from the simple Breit-Wigner first, then
+  //    reject by the ratio.
+  // -- Note that f(x) = x^2 BesselK_2(x) monotonously decreases
+  //    and has maximum at x = xmin. That is why instead of f(x)
+  //    the ratio f(x)/f(xmin) is used.
+
+  const double max_mass = 5.0;  // GeV
+  double m, q;
+  {
+    // Allow underflows in exponentials
+    DisableFloatTraps guard(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
+    const double w0 = ptype.width_at_pole();
+    const double mth = ptype.min_mass_spectral();
+    const double m0 = ptype.mass();
+    double max_ratio = m0 * m0 * std::exp(- beta * m0) *
+                       gsl_sf_bessel_Kn_scaled(2, m0 * beta) *
+                       ptype.spectral_function(m0) /
+                       ptype.spectral_function_simple(m0);
+    // Heuristic adaptive maximum search to find max_ratio
+    constexpr int npoints = 31;
+    double m_lower = mth, m_upper = max_mass, m_where_max = m0;
+
+    for (size_t n_iterations = 0; n_iterations < 2; n_iterations ++) {
+      const double dm = (m_upper - m_lower) / npoints;
+      for (size_t i = 1; i < npoints; i++) {
+        m = m_lower + dm * i;
+        const double thermal_factor = m * m * std::exp(- beta * m) *
+                            gsl_sf_bessel_Kn_scaled(2, m * beta);
+        q = ptype.spectral_function(m) * thermal_factor /
+              ptype.spectral_function_simple(m);
+        if (q > max_ratio) {
+          max_ratio = q;
+          m_where_max = m;
+        }
+      }
+      m_lower = m_where_max - (m_where_max - m_lower) * 0.1;
+      m_upper = m_where_max + (m_upper - m_where_max) * 0.1;
+    }
+    // Safety factor
+    max_ratio *= 1.5;
+
+    do {
+      // sample mass from A(m)
+      do {
+        m = Random::cauchy(m0, 0.5 * w0, mth, max_mass);
+        const double thermal_factor = m * m * std::exp(- beta * m) *
+                          gsl_sf_bessel_Kn_scaled(2, m * beta);
+        q = ptype.spectral_function(m) * thermal_factor /
+            ptype.spectral_function_simple(m);
+      } while (q < Random::uniform(0., max_ratio));
+      if (q > max_ratio) {
+        const auto &log = logger<LogArea::Resonances>();
+        log.warn(ptype.name(), " - maximum increased in",
+                 " sample_mass_thermal from ", max_ratio, " to ", q,
+                 ", mass = ", m, " previously assumed maximum at m = ",
+                 m_where_max);
+        max_ratio = q;
+        m_where_max = m;
+      } else {
+        break;
+      }
+    } while (true);
+  }
+  return m;
 }
 
 double HadronGasEos::mus_net_strangeness0(double T, double mub) {
