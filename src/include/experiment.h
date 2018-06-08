@@ -331,11 +331,13 @@ class Experiment : public ExperimentBase {
   /// Lattices for symmetry potentials
   std::unique_ptr<RectangularLattice<double>> UI3_lat_ = nullptr;
 
-  /// Lattices for Skyme potential gradients.
-  std::unique_ptr<RectangularLattice<ThreeVector>> dUB_dr_lat_;
+  /// Lattices for the electric and magnetic components of the Skyme force
+  std::unique_ptr<RectangularLattice<std::pair<ThreeVector, ThreeVector>>>
+  FB_lat_;
 
-  /// Lattices for symmetry potential gradients.
-  std::unique_ptr<RectangularLattice<ThreeVector>> dUI3_dr_lat_;
+  /// Lattices for the electric and magnetic component of the symmetry force
+  std::unique_ptr<RectangularLattice<std::pair<ThreeVector, ThreeVector>>>
+  FI3_lat_;
 
   /// Lattices of energy-momentum tensors for printout
   std::unique_ptr<RectangularLattice<EnergyMomentumTensor>> Tmn_;

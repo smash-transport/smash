@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -115,11 +115,6 @@ class ThreeVector {
   ThreeVector inline operator-=(const ThreeVector &v);
   /// scale this vector by \f$a: \vec x^\prime = a \cdot \vec x\f$
   ThreeVector inline operator*=(const double &a);
-  /**
-   * cross product between this vector and
-   * \f$v: \vec x^\prime = \vec x \times \vec v\f$
-   */
-  ThreeVector inline operator*=(const ThreeVector &v);
   /// divide this vector by \f$a: \vec x^\prime = \frac{1}{a} \cdot \vec x\f$
   ThreeVector inline operator/=(const double &a);
 
@@ -215,14 +210,6 @@ ThreeVector inline ThreeVector::operator*=(const double &a) {
   return *this;
 }
 
-ThreeVector inline ThreeVector::operator*=(const ThreeVector &v) {
-  ThreeVector tmp(x_[0], x_[1], x_[2])
-  x_[0] *= tmp.x_[1] * v.x_[2] - tmp.x_[2] * v.x_[1];
-  x_[1] *= tmp.x_[2] * v.x_[0] - tmp.x_[0] * v.x_[2];
-  x_[2] *= tmp.x_[0] * v.x_[1] - tmp.x_[1] * v.x_[0];
-  return *this;
-}
-
 /// multiply a three-vector by constant factor \f$ b \vec{a} \f$.
 inline ThreeVector operator*(ThreeVector a, const double &b) {
   a *= b;
@@ -241,6 +228,16 @@ inline ThreeVector operator*(const double &a, ThreeVector b) {
  */
 inline double operator*(ThreeVector a, const ThreeVector &b) {
   return a.x1() * b.x1() + a.x2() * b.x2() + a.x3() * b.x3();
+}
+
+/**
+ * \return cross product of two three-vectors
+ * \f$ \vec{a} \times \vec{b} \f$
+ */
+inline ThreeVector operator^(ThreeVector a, const ThreeVector &b) {
+  return ThreeVector(a.x2() * b.x3() - a.x3() * b.x2(),
+                     a.x3() * b.x1() - a.x1() * b.x3(),
+                     a.x1() * b.x2() - a.x2() * b.x1());
 }
 
 ThreeVector inline ThreeVector::operator/=(const double &a) {

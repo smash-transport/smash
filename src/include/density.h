@@ -231,14 +231,14 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
  * \return (density in the local Eckart frame [fm\$f^{-3}\$f],
  *          the gradient of the density or a 0 3-vector)
  */
-std::pair<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart(
+std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart(
                                           const ThreeVector &r,
                                           const ParticleList &plist,
                                           const DensityParameters &par,
                                           DensityType dens_type,
                                           bool compute_gradient);
 /// convenience overload of the above
-std::pair<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart(
+std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart(
                                           const ThreeVector &r,
                                           const Particles &plist,
                                           const DensityParameters &par,
@@ -266,7 +266,8 @@ class DensityOnLattice {
  public:
   /// Default constructor
   DensityOnLattice()
-      : jmu_pos_(FourVector()), jmu_neg_(FourVector()), density_(0.0) {}
+      : jmu_pos_(FourVector()), jmu_neg_(FourVector()),
+      djmu_dx_({FourVector(), FourVector(), FourVector(), FourVector()}) {}
 
   /**
    * Adds particle to 4-current: \f$j^{\mu} += p^{\mu}/p^0 \cdot factor \f$
@@ -276,31 +277,80 @@ class DensityOnLattice {
    *
    * \param[in] part Particle would be added to the current density
    *            on the lattice.
-   * \param[in] factor Factor can in principle be any scalar multiplier.
-   *            Physics-wise it accounts for smearing on the lattice and for
-   *            particle contribution to given density type (e.g. anti-proton
-   *            contributes with factor -1 to baryon density, proton - with
-   *            factor 1).
+   * \param[in] factor particle contribution to given density type (e.g.
+   *            anti-proton contributes with factor -1 to baryon density,
+   *            proton - with factor 1).
+   * \param[in] sf Smearing factor of the density
+   * \param[in] compute_gradient Whether to compute the gradients
+   *            (including the time derivative)
+   * \param[in] sf_grad Smearing factor of the gradients
    */
-  void add_particle(const ParticleData &part, double factor) {
+  void add_particle(const ParticleData &part, double factor, double sf,
+       bool compute_gradient, ThreeVector sf_grad) {
+    const FourVector PartFourVelocity = FourVector(1.0, part.velocity());
     if (factor > 0.0) {
-      jmu_pos_ += FourVector(factor, part.velocity() * factor);
+      jmu_pos_ += PartFourVelocity * factor * sf;
     } else {
-      jmu_neg_ += FourVector(factor, part.velocity() * factor);
+      jmu_neg_ += PartFourVelocity * factor * sf;
+    }
+    if (compute_gradient) {
+       for (int k = 1; k <= 3; k++) {
+           djmu_dx_[k] += factor * PartFourVelocity * sf_grad[k-1];
+           djmu_dx_[0] -= factor * PartFourVelocity * sf_grad[k-1]
+                         * part.velocity()[k-1];
+       }
     }
   }
 
   /**
-   * Compute the net density on the local lattice, and assign it
-   * to the private class member density_
+   * Compute the net Eckart density on the local lattice
    *
    * \param[in] norm_factor Normalization factor
+   * \return Net Eckart density on the local lattice [fm\f$^{-3}\f$]
    */
-  void compute_density(const double norm_factor = 1.0) {
-    density_ = (jmu_pos_.abs() - jmu_neg_.abs()) * norm_factor;
+  double density(const double norm_factor = 1.0) {
+    return (jmu_pos_.abs() - jmu_neg_.abs()) * norm_factor;
   }
-  /// \return Net density on the lattice
-  double density() const { return density_; }
+
+  /**
+   * Compute curl of the current on the local lattice
+   *
+   * \param[in] norm_factor Normalization factor
+   * \return \f$\nabla\times\j\f$ [fm \f$^{-4}\f$]
+   */
+  ThreeVector rot_j(const double norm_factor = 1.0) {
+    ThreeVector j_rot;
+    j_rot.set_x1(djmu_dx_[2].x3() - djmu_dx_[3].x2());
+    j_rot.set_x2(djmu_dx_[3].x1() - djmu_dx_[1].x3());
+    j_rot.set_x3(djmu_dx_[1].x2() - djmu_dx_[2].x1());
+    j_rot *= norm_factor;
+    return j_rot;
+  }
+
+  /**
+   * Compute gradient of the density on the local lattice
+   *
+   * \param[in] norm_factor Normalization factor
+   * \return \f$\nabla\rho\f$ [fm \f$^{-4}\f$]
+   */
+  ThreeVector grad_rho(const double norm_factor = 1.0) {
+    ThreeVector rho_grad;
+    for (int i = 1; i < 4; i++) {
+        rho_grad[i - 1] = djmu_dx_[i].x0() * norm_factor;
+    }
+    return rho_grad;
+  }
+
+  /**
+   * Compute time direvative of the current density on the local lattice
+   *
+   * \param[in] norm_factor Normalization factor
+   * \return \f$\partial_t \vec j\f$ [fm \f$^{-4}\f$]
+   */
+  ThreeVector dj_dt(const double norm_factor = 1.0) {
+    return djmu_dx_[0].threevec() * norm_factor;
+  }
+
   /// \return Current density of the positively charged particle
   FourVector jmu_pos() const { return jmu_pos_; }
   /// \return Current density of the negatively charged particle
@@ -311,8 +361,8 @@ class DensityOnLattice {
   FourVector jmu_pos_;
   /// Four-current density of the negatively charged particle.
   FourVector jmu_neg_;
-  /// Net density
-  double density_;
+  /// \f$\partial_\nu j^\mu \f$
+  std::array<FourVector, 4> djmu_dx_;
 };
 
 /// Conveniency typedef for lattice of density
@@ -377,11 +427,13 @@ void update_general_lattice(RectangularLattice<T> *lat,
  * \param[in] par a structure containing testparticles number and gaussian
  *            smearing parameters.
  * \param[in] particles the particles vector
+ * \param[in] compute_gradient Whether to compute the gradients
  */
 void update_density_lattice(DensityLattice *lat, const LatticeUpdate update,
                             const DensityType dens_type,
                             const DensityParameters &par,
-                            const Particles &particles);
+                            const Particles &particles,
+                            bool compute_gradient);
 
 /**
  * Calculates energy-momentum tensor on the lattice in an time-efficient way.

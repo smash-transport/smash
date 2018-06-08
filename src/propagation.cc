@@ -114,16 +114,16 @@ void expand_space_time(Particles *particles,
 }
 
 void update_momenta(Particles *particles, double dt, const Potentials &pot,
-                    RectangularLattice<ThreeVector> *UB_grad_lat,
-                    RectangularLattice<ThreeVector> *UI3_grad_lat) {
+           RectangularLattice<std::pair<ThreeVector, ThreeVector>> *FB_lat,
+           RectangularLattice<std::pair<ThreeVector, ThreeVector>> *FI3_lat) {
   // Copy particles before propagation to calculate potentials from them
   const ParticleList plist = particles->copy_to_vector();
 
   const auto &log = logger<LogArea::Propagation>();
   bool possibly_use_lattice =
-      (pot.use_skyrme() ? (UB_grad_lat != nullptr) : true) &&
-      (pot.use_symmetry() ? (UI3_grad_lat != nullptr) : true);
-  ThreeVector dUB_dr, dUI3_dr;
+      (pot.use_skyrme() ? (FB_lat != nullptr) : true) &&
+      (pot.use_symmetry() ? (FI3_lat != nullptr) : true);
+  std::pair<ThreeVector, ThreeVector> FB, FI3;
   double min_time_scale = std::numeric_limits<double>::infinity();
 
   for (ParticleData &data : *particles) {
@@ -138,32 +138,33 @@ void update_momenta(Particles *particles, double dt, const Potentials &pot,
      * 2) r is not out of required lattices */
     const bool use_lattice =
         possibly_use_lattice &&
-        (pot.use_skyrme() ? UB_grad_lat->value_at(r, dUB_dr) : true) &&
-        (pot.use_symmetry() ? UI3_grad_lat->value_at(r, dUI3_dr) : true);
+        (pot.use_skyrme() ? FB_lat->value_at(r, FB) : true) &&
+        (pot.use_symmetry() ? FI3_lat->value_at(r, FI3) : true);
     if (!pot.use_skyrme()) {
-      dUB_dr = ThreeVector(0.0, 0.0, 0.0);
+      FB = std::make_pair(ThreeVector(0., 0., 0.), ThreeVector(0., 0., 0.));
     }
     if (!pot.use_symmetry()) {
-      dUI3_dr = ThreeVector(0.0, 0.0, 0.0);
+      FI3 = std::make_pair(ThreeVector(0., 0., 0.), ThreeVector(0., 0., 0.));
     }
     if (!use_lattice) {
-      const auto tmp = pot.potential_gradient(r, plist);
-      dUB_dr = tmp.first;
-      dUI3_dr = tmp.second;
+      const auto tmp = pot.force(r, plist);
+      FB = std::make_pair(std::get<0>(tmp), std::get<1>(tmp));
+      FI3 = std::make_pair(std::get<2>(tmp), std::get<3>(tmp));
     }
-    const ThreeVector dU_dr =
-        scale.first * dUB_dr +
-        scale.second * data.type().isospin3_rel() * dUI3_dr;
-    log.debug("Update momenta: dU/dr [GeV/fm] = ", dU_dr);
+    const ThreeVector Force =
+        scale.first * (FB.first + (data.momentum().velocity() ^ FB.second))
+        + scale.second * data.type().isospin3_rel()
+        * (FI3.first + (data.momentum().velocity() ^ FI3.second));
+    log.debug("Update momenta: F [GeV/fm] = ", Force);
     data.set_4momentum(data.effective_mass(),
-                       data.momentum().threevec() - dU_dr * dt);
+                       data.momentum().threevec() + Force * dt);
 
     // calculate the time scale of the change in momentum
-    const double dU_dr_abs = dU_dr.abs();
-    if (dU_dr_abs < really_small) {
+    const double Force_abs = Force.abs();
+    if (Force_abs < really_small) {
       continue;
     }
-    const double time_scale = data.momentum().x0() / dU_dr_abs;
+    const double time_scale = data.momentum().x0() / Force_abs;
     if (time_scale < min_time_scale) {
       min_time_scale = time_scale;
     }

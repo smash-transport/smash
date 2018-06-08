@@ -102,7 +102,7 @@ std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart_impl(
                                                const DensityParameters &par,
                                                DensityType dens_type,
                                                bool compute_gradient) {
-  /* In the array first FourVector is jmu and next 3 are d jmu / dr.
+  /* The current density of the positively and negatively charged particles.
    * Division into positive and negative charges is necessary to avoid
    * problems with the Eckart frame definition. Example of problem:
    * get Eckart frame for two identical oppositely flying bunches of
@@ -111,7 +111,11 @@ std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart_impl(
    * If one takes rho = jmu_pos.abs - jmu_neg.abs, it is still Lorentz-
    * invariant and gives the right limit in non-relativistic case, but
    * it gives no such problem. */
-  std::array<FourVector, 5> jmu_pos, jmu_neg;
+  FourVector jmu_pos, jmu_neg;
+  /* The array of the derivatives of the current density.
+   * The zeroth component is the time derivative,
+   * while the next 3 ones are spacial derivatives. */
+  std::array<FourVector, 4> djmu_dx;
 
   for (const auto &p : plist) {
     const double dens_factor = density_factor(p.type(), dens_type);
@@ -131,33 +135,26 @@ std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart_impl(
     }
     const FourVector tmp = mom * (dens_factor / mom.x0());
     if (dens_factor > 0.) {
-      jmu_pos[0] += tmp * sf_and_grad.first;
-      if (compute_gradient) {
-        for (int k = 1; k <= 3; k++) {
-          jmu_pos[k] += tmp * sf_and_grad.second[k - 1];
-          jmu_pos[4] -= tmp * sf_and_grad.second[k - 1]
-                        * tmp.threevec()[k-1] / dense_factor;
-        }
-      }
+      jmu_pos += tmp * sf_and_grad.first;
     } else {
-      jmu_neg[0] += tmp * sf_and_grad.first;
-      if (compute_gradient) {
-        for (int k = 1; k <= 3; k++) {
-          jmu_neg[k] += tmp * sf_and_grad.second[k - 1];
-          jmu_neg[4] -= tmp * sf_and_grad.second[k - 1]
-                        * tmp.threevec()[k-1] / dense_factor;
-        }
+      jmu_neg += tmp * sf_and_grad.first;
+    }
+    if (compute_gradient) {
+      for (int k = 1; k <= 3; k++) {
+        djmu_dx[k] += tmp * sf_and_grad.second[k - 1];
+        djmu_dx[0] -= tmp * sf_and_grad.second[k - 1]
+                      * tmp.threevec()[k-1] / dens_factor;
       }
     }
   }
 
   // Eckart density
   const double rho_eck =
-      (jmu_pos[0].abs() - jmu_neg[0].abs()) * par.norm_factor_sf();
+      (jmu_pos.abs() - jmu_neg.abs()) * par.norm_factor_sf();
 
   // $\partial_t \vec j$
   const ThreeVector dj_dt = compute_gradient
-                 ? (jmu_pos[4] - jmu_neg[4]).threevec() * par.norm_factor_sf()
+                 ? djmu_dx[0].threevec() * par.norm_factor_sf()
                  : ThreeVector(0.0, 0.0, 0.0);
 
   // Gradient of density
@@ -165,17 +162,15 @@ std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart_impl(
   // Curl of current density
   ThreeVector j_rot;
   if (compute_gradient) {
-    j_rot.set_x1(jmu_pos[2].x3() - jmu_pos[3].x2());
-    j_rot.set_x2(jmu_pos[3].x1() - jmu_pos[1].x3());
-    j_rot.set_x3(jmu_pos[1].x2() - jmu_pos[2].x1());
+    j_rot.set_x1(djmu_dx[2].x3() - djmu_dx[3].x2());
+    j_rot.set_x2(djmu_dx[3].x1() - djmu_dx[1].x3());
+    j_rot.set_x3(djmu_dx[1].x2() - djmu_dx[2].x1());
     j_rot *= par.norm_factor_sf();
     for (int i = 1; i < 4; i++) {
-        rho_grad[i - 1] += (jmu_pos[i].x0() - jmu_neg[i].x0())
-                            * par.norm_factor_sf();
+        rho_grad[i - 1] += djmu_dx[i].x0() * par.norm_factor_sf();
     }
   }
-
-  return std::make_tuple(rho_eck, dj_dt, rho_grad, j_rot);
+  return std::make_tuple(rho_eck, rho_grad, dj_dt, j_rot);
 }
 
 std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart(
@@ -199,11 +194,42 @@ void update_density_lattice(RectangularLattice<DensityOnLattice> *lat,
                             const LatticeUpdate update,
                             const DensityType dens_type,
                             const DensityParameters &par,
-                            const Particles &particles) {
-  update_general_lattice(lat, update, dens_type, par, particles);
-  // Compute density from jmus
-  for (auto &node : *lat) {
-    node.compute_density();
+                            const Particles &particles,
+                            bool compute_gradient) {
+  // Do not proceed if lattice does not exists/update not required
+  if (lat == nullptr || lat->when_update() != update) {
+    return;
+  }
+  lat->reset();
+  const double norm_factor = par.norm_factor_sf();
+  for (const auto &part : particles) {
+    const double dens_factor = density_factor(part.type(), dens_type);
+    if (std::abs(dens_factor) < really_small) {
+      continue;
+    }
+    const FourVector p = part.momentum();
+    const double m = p.abs();
+    if (unlikely(m < really_small)) {
+      const auto &log = logger<LogArea::Density>();
+      log.warn("Gaussian smearing is undefined for momentum ", p);
+      continue;
+    }
+    const double m_inv = 1.0 / m;
+
+    const ThreeVector pos = part.position().threevec();
+    lat->iterate_in_radius(
+        pos, par.r_cut(), [&](DensityOnLattice &node, int ix, int iy, int iz) {
+          const ThreeVector r = lat->cell_center(ix, iy, iz);
+          const double sf =
+              norm_factor *
+              unnormalized_smearing_factor(pos - r, p, m_inv, par).first;
+          const ThreeVector sf_grad =
+              norm_factor *
+              unnormalized_smearing_factor(pos - r, p, m_inv, par).second;
+          if (sf > really_small) {
+            node.add_particle(part, dens_factor, sf, compute_gradient, sf_grad);
+          }
+        });
   }
 }
 
