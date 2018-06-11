@@ -22,7 +22,8 @@ StringProcess::StringProcess(double string_tension, double time_formation,
                              double quark_alpha, double quark_beta,
                              double strange_supp, double diquark_supp,
                              double sigma_perp, double stringz_a,
-                             double stringz_b, double string_sigma_T)
+                             double stringz_b, double string_sigma_T,
+                             double factor_t_form)
     : pmin_gluon_lightcone_(gluon_pmin),
       pow_fgluon_beta_(gluon_beta),
       pow_fquark_alpha_(quark_alpha),
@@ -31,6 +32,7 @@ StringProcess::StringProcess(double string_tension, double time_formation,
       kappa_tension_string_(string_tension),
       additional_xsec_supp_(0.7),
       time_formation_const_(time_formation),
+      soft_t_form_(factor_t_form),
       time_collision_(0.),
       gamma_factor_com_(1.) {
   // setup and initialize pythia for hard string process
@@ -241,7 +243,7 @@ int StringProcess::append_final_state(const FourVector &uString,
         fragments[i].is_leading ? additional_xsec_supp_ * fragments[i].xtotfac
                                 : 0.);
     new_particle.set_formation_time(time_collision_ +
-                                    gamma_factor_com_ * t_prod);
+                                    soft_t_form_ * gamma_factor_com_ * t_prod);
     final_state_.push_back(new_particle);
   }
 
@@ -552,9 +554,9 @@ bool StringProcess::next_NDiffHard() {
   std::array<bool, 2> accepted_by_pythia;
   for (int i = 0; i < 2; i++) {
     int pdgid = PDGcodes_[i].get_decimal();
-    accepted_by_pythia[i] = pdgid == 2212 || pdgid == -2212 ||
-                            pdgid == 2112 || pdgid == -2112 ||
-                            pdgid == 211 || pdgid == 111 || pdgid == -211;
+    accepted_by_pythia[i] = pdgid == 2212 || pdgid == -2212 || pdgid == 2112 ||
+                            pdgid == -2112 || pdgid == 211 || pdgid == 111 ||
+                            pdgid == -211;
   }
   if (!accepted_by_pythia[0] || !accepted_by_pythia[1]) {
     for (int i = 0; i < 2; i++) {

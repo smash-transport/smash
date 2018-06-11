@@ -196,9 +196,9 @@ ScatterActionsFinder::ScatterActionsFinder(
         subconfig.take({"Strange_Supp"}, 0.165),
         subconfig.take({"Diquark_Supp"}, 0.042),
         subconfig.take({"Sigma_Perp"}, 0.4),
-        subconfig.take({"StringZ_A"}, 0.68),
-        subconfig.take({"StringZ_B"}, 0.5),
-        subconfig.take({"String_Sigma_T"}, 0.5));
+        subconfig.take({"StringZ_A"}, 0.68), subconfig.take({"StringZ_B"}, 0.5),
+        subconfig.take({"String_Sigma_T"}, 0.5),
+        subconfig.take({"Form_Time_Factor"}, 1.0));
   }
 }
 
@@ -258,7 +258,7 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData &data_a,
   // Add various subprocesses.
   act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
                            low_snn_cut_, strings_switch_, use_AQM_,
-                           strings_with_probability_,  nnbar_treatment_);
+                           strings_with_probability_, nnbar_treatment_);
 
   // Cross section for collision criterion
   double cross_section_criterion = act->cross_section() * fm2_mb * M_1_PI /
@@ -388,8 +388,7 @@ void ScatterActionsFinder::dump_reactions() const {
               std::string r;
               if (is_string_soft_process(type) ||
                   type == ProcessType::StringHard) {
-                r = A_type->name() + B_type->name() +
-                    std::string(" → strings");
+                r = A_type->name() + B_type->name() + std::string(" → strings");
               } else {
                 std::string r_type =
                     (type == ProcessType::Elastic)
@@ -446,9 +445,8 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
     }
     act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
                              low_snn_cut_, strings_switch_, use_AQM_,
-                             strings_with_probability_,
-                             nnbar_treatment_);
-    const CollisionBranchList& processes = act->collision_channels();
+                             strings_with_probability_, nnbar_treatment_);
+    const CollisionBranchList &processes = act->collision_channels();
     for (const auto &process : processes) {
       const double xs = process->weight();
       if (xs <= 0.0) {
