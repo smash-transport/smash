@@ -610,7 +610,7 @@ bool StringProcess::next_NDiffHard() {
 
   Pythia8::Vec4 pSum = 0.;
   pythia_hadron_->event.reset();
-  for (int i = 0; i < pythia_parton_->event.size(); i++){
+  for (int i = 0; i < pythia_parton_->event.size(); i++) {
     if (pythia_parton_->event[i].isFinal()) {
       const int pdgid = pythia_parton_->event[i].id();
       Pythia8::Vec4 pquark = pythia_parton_->event[i].p();
