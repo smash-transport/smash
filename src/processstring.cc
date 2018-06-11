@@ -39,6 +39,7 @@ StringProcess::StringProcess(double string_tension, double time_formation,
    * diffractive ones are implemented in a separate routine */
   pythia_parton_->readString("SoftQCD:nonDiffractive = on");
   pythia_parton_->readString("MultipartonInteractions:pTmin = 1.5");
+  pythia_parton_->readString("HadronLevel:all = off");
   common_setup_pythia(pythia_parton_.get(), strange_supp, diquark_supp,
                       stringz_a, stringz_b, string_sigma_T);
 
@@ -599,12 +600,37 @@ bool StringProcess::next_NDiffHard() {
   pythia_parton_->rndm.init(Random::uniform_int(1, maxint));
 
   // Short notation for Pythia event
-  Pythia8::Event &event = pythia_parton_->event;
+  Pythia8::Event &event = pythia_hadron_->event;
   log.debug("Pythia hard event created");
   bool final_state_success = false;
   while (!final_state_success) {
     final_state_success = pythia_parton_->next();
     log.debug("Pythia final state computed, success = ", final_state_success);
+  }
+
+  Pythia8::Vec4 pSum = 0.;
+  pythia_hadron_->event.reset();
+  for (int i = 0; i < pythia_parton_->event.size(); i++){
+    if (pythia_parton_->event[i].isFinal()) {
+      const int pdgid = pythia_parton_->event[i].id();
+      Pythia8::Vec4 pquark = pythia_parton_->event[i].p();
+      pSum += pquark;
+      const double mass = pythia_parton_->particleData.m0(pdgid);
+
+      const int status = 1;
+      const int color = pythia_parton_->event[i].col();
+      const int anticolor = pythia_parton_->event[i].acol();
+      pythia_hadron_->event.append(pdgid, status,
+                                   color, anticolor, pquark, mass);
+    }
+  }
+  pythia_hadron_->event[0].p(pSum);
+  pythia_hadron_->event[0].m(pSum.mCalc());
+
+  bool hadronize_success = false;
+  while (!hadronize_success) {
+    hadronize_success = pythia_hadron_->forceHadronLevel();
+    log.debug("Pythia hadronized, success = ", hadronize_success);
   }
 
   ParticleList new_intermediate_particles;
