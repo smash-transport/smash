@@ -321,29 +321,11 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   const double dt = config.take({"General", "Delta_Time"}, 1.);
   const double t_end = config.read({"General", "End_Time"});
   const double output_dt = config.take({"Output", "Output_Interval"}, t_end);
-  const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
-  ReactionsBitSet included_2to2 =
-      config.take({"Collision_Term", "Included_2to2"}, ReactionsBitSet().set());
-  bool strings_switch_default = true;
-  if (modus_chooser == "Box") {
-    strings_switch_default = false;
-  }
-  bool use_AQM_default = true;
-  constexpr bool strings_with_probability_default = false;
-  const bool strings_switch =
-      config.take({"Collision_Term", "Strings"}, strings_switch_default);
-  const bool use_AQM =
-      config.take({"Collision_Term", "Use_AQM"}, use_AQM_default);
-  const bool strings_with_probability =
-      config.take({"Collision_Term", "Strings_with_Probability"},
-                  strings_with_probability_default);
-  const NNbarTreatment nnbar_treatment = config.take(
-      {"Collision_Term", "NNbar_Treatment"}, NNbarTreatment::Strings);
-  const bool photons_switch = config.has_value({"Output", "Photons"});
+  auto config_coll = config["Collision_Term"];
   /* Elastic collisions between the nucleons with the square root s
    * below low_snn_cut are excluded. */
   const double low_snn_cut =
-      config.take({"Collision_Term", "Elastic_NN_Cutoff_Sqrts"}, 1.98);
+      config_coll.take({"Elastic_NN_Cutoff_Sqrts"}, 1.98);
   const auto proton = ParticleType::try_find(pdg::p);
   const auto pion = ParticleType::try_find(pdg::pi_z);
   if (proton && pion &&
@@ -352,21 +334,19 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
              " of the process: NN to NNpi");
   }
   const bool potential_affect_threshold =
-      (config.has_value({"Lattice", "Potentials_Affect_Thresholds"})
-           ? config.take({"Lattice", "Potentials_Affect_Thresholds"})
-           : false);
+           config.take({"Lattice", "Potentials_Affect_Thresholds"}, false);
   return {{0., dt},
           {0.0, output_dt},
           ntest,
           config.take({"General", "Gaussian_Sigma"}, 1.),
           config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.),
-          two_to_one,
-          included_2to2,
-          strings_switch,
-          use_AQM,
-          strings_with_probability,
-          nnbar_treatment,
-          photons_switch,
+          config_coll.take({"Two_to_One"}, true),
+          config_coll.take({"Included_2to2"}, ReactionsBitSet().set()),
+          config_coll.take({"Strings"}, modus_chooser != "Box"),
+          config_coll.take({"Use_AQM"}, true),
+          config_coll.take({"Strings_with_Probability"}, true),
+          config_coll.take({"NNbar_Treatment"}, NNbarTreatment::Strings),
+          config.has_value({"Output", "Photons"}),
           low_snn_cut,
           potential_affect_threshold};
 }
@@ -523,7 +503,7 @@ void Experiment<Modus>::create_output(const std::string &format,
  * reference process such as PP for which solid parametrizations exist.
  * (\iref{Bass:1998ca})
  *
- * \key Strings_with_Probability (bool, optional, default = \key false): \n
+ * \key Strings_with_Probability (bool, optional, default = \key true): \n
  * \li \key true - String processes are triggered according to a probability
  *                 increasing smoothly with the collisional energy from 0 to 1
  *                 in a certain energy window. At energies beyond that window,

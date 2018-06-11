@@ -21,24 +21,6 @@
 
 namespace smash {
 
-/**
- * StringSoft Types are used to identify the type of the soft string subprocess
- * (-1) nothing (None)
- * (0)  single diffractive A+B to A+X (SingleDiffAX)
- * (1)  single diffractive A+B to X+B (SingleDiffXB)
- * (2)  double diffractive (DoubleDiff)
- * (3)  soft non-diffractive (NonDiff)
- * (4)  BBbar annihilation through 2 mesonic strings
- */
-enum class StringSoftType {
-  None = -1,
-  SingleDiffAX = 0,
-  SingleDiffXB = 1,
-  DoubleDiff = 2,
-  NonDiff = 3,
-  BBbar = 4
-};
-
 // \todo Sangwook: make file (processstring) and class (StringProcess) name
 // consistent
 

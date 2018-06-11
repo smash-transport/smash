@@ -121,9 +121,16 @@ static double piplusp_elastic_pdg(double mandelstam_s) {
   return (*piplusp_elastic_interpolation)(p_lab);
 }
 
+double piplusp_elastic_high_energy(double mandelstam_s, double m1, double m2) {
+  const double p_lab = (m1 > m2) ? plab_from_s(mandelstam_s, m2, m1) :
+                                   plab_from_s(mandelstam_s, m1, m2);
+  const auto logp = std::log(p_lab);
+  return 11.4 * std::pow(p_lab, -0.4) + 0.079 * logp * logp;
+}
+
 double piplusp_elastic(double mandelstam_s) {
   double sigma;
-  double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
+  const double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
   if (mandelstam_s < 2.25) {
     sigma = really_small;
   } else if (mandelstam_s > 4.84) {
@@ -132,6 +139,7 @@ double piplusp_elastic(double mandelstam_s) {
   } else {
     sigma = piplusp_elastic_pdg(mandelstam_s);
   }
+
   // The elastic contributions from decays still need to be subtracted.
   if (piplusp_elastic_res_interpolation == nullptr) {
     std::vector<double> x = PIPLUSP_RES_SQRTS;
@@ -175,7 +183,7 @@ static double piminusp_elastic_pdg(double mandelstam_s) {
 
 double piminusp_elastic(double mandelstam_s) {
   double sigma;
-  double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
+  const double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
   const auto logp = std::log(p_lab);
   if (mandelstam_s < 1.69) {
     sigma = really_small;
@@ -214,14 +222,14 @@ double piminusp_elastic(double mandelstam_s) {
 }
 
 double pp_elastic(double mandelstam_s) {
-  double p_lab = plab_from_s(mandelstam_s);
+  const double p_lab = plab_from_s(mandelstam_s);
   if (p_lab < 0.435) {
     return 5.12 * nucleon_mass /
                (mandelstam_s - 4 * nucleon_mass * nucleon_mass) +
            1.67;
   } else if (p_lab < 0.8) {
     return 23.5 +
-           1000 * (p_lab - 0.7) * (p_lab - 0.7) * (p_lab - 0.7) * (p_lab - 0.7);
+           1000 * pow_int(p_lab - 0.7, 4);
   } else if (p_lab < 2.0) {
     return 1250 / (p_lab + 50) - 4 * (p_lab - 1.3) * (p_lab - 1.3);
   } else if (p_lab < 2.776) {
@@ -233,13 +241,21 @@ double pp_elastic(double mandelstam_s) {
   }
 }
 
+double pp_elastic_high_energy(double mandelstam_s, double m1, double m2) {
+  const double p_lab = (m1 > m2) ? plab_from_s(mandelstam_s, m2, m1) :
+                                   plab_from_s(mandelstam_s, m1, m2);
+  const auto logp = std::log(p_lab);
+  return 11.9 + 26.9 * std::pow(p_lab, -1.21) + 0.169 * logp * logp -
+         1.85 * logp;
+}
+
 double pp_total(double mandelstam_s) {
-  double p_lab = plab_from_s(mandelstam_s);
+  const double p_lab = plab_from_s(mandelstam_s);
   if (p_lab < 0.4) {
     return 34 * std::pow(p_lab / 0.4, -2.104);
   } else if (p_lab < 0.8) {
     return 23.5 +
-           1000 * (p_lab - 0.7) * (p_lab - 0.7) * (p_lab - 0.7) * (p_lab - 0.7);
+           1000 * pow_int(p_lab - 0.7, 4);
   } else if (p_lab < 1.5) {
     return 23.5 + 24.6 / (1 + std::exp(-(p_lab - 1.2) / 0.1));
   } else if (p_lab < 5.0) {
@@ -251,7 +267,7 @@ double pp_total(double mandelstam_s) {
 }
 
 double np_elastic(double mandelstam_s) {
-  double p_lab = plab_from_s(mandelstam_s);
+  const double p_lab = plab_from_s(mandelstam_s);
   if (p_lab < 0.525) {
     return 17.05 * nucleon_mass /
                (mandelstam_s - 4 * nucleon_mass * nucleon_mass) -
@@ -270,7 +286,7 @@ double np_elastic(double mandelstam_s) {
 }
 
 double np_total(double mandelstam_s) {
-  double p_lab = plab_from_s(mandelstam_s);
+  const double p_lab = plab_from_s(mandelstam_s);
   const auto logp = std::log(p_lab);
   if (p_lab < 0.4) {
     return 6.3555 * std::pow(p_lab, -3.2481) * std::exp(-0.377 * logp * logp);
@@ -286,7 +302,7 @@ double np_total(double mandelstam_s) {
 }
 
 double ppbar_elastic(double mandelstam_s) {
-  double p_lab = plab_from_s(mandelstam_s);
+  const double p_lab = plab_from_s(mandelstam_s);
   if (p_lab < 0.3) {
     return 78.6;
   } else if (p_lab < 5.0) {
@@ -299,7 +315,7 @@ double ppbar_elastic(double mandelstam_s) {
 }
 
 double ppbar_total(double mandelstam_s) {
-  double p_lab = plab_from_s(mandelstam_s);
+  const double p_lab = plab_from_s(mandelstam_s);
   if (p_lab < 0.3) {
     return 271.6 * std::exp(-1.1 * p_lab * p_lab);
   } else if (p_lab < 5.0) {

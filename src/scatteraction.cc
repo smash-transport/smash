@@ -81,13 +81,13 @@ void ScatterAction::generate_final_state() {
       /* Sample the particle momenta in CM system. */
       inelastic_scattering();
       break;
-    case ProcessType::StringSoft:
-      /* soft string excitation */
-      string_excitation(true);
-      break;
+    case ProcessType::StringSoftSingleDiffractiveAX:
+    case ProcessType::StringSoftSingleDiffractiveXB:
+    case ProcessType::StringSoftDoubleDiffractive:
+    case ProcessType::StringSoftAnnihilation:
+    case ProcessType::StringSoftNonDiffractive:
     case ProcessType::StringHard:
-      /* hard string excitation */
-      string_excitation(false);
+      string_excitation();
       break;
     default:
       throw InvalidScatterAction(
@@ -107,13 +107,10 @@ void ScatterAction::generate_final_state() {
   }
 }
 
-void ScatterAction::add_all_scatterings(double elastic_parameter,
-                                        bool two_to_one,
-                                        ReactionsBitSet included_2to2,
-                                        double low_snn_cut, bool strings_switch,
-                                        bool use_AQM,
-                                        bool strings_with_probability,
-                                        NNbarTreatment nnbar_treatment) {
+void ScatterAction::add_all_scatterings(
+    double elastic_parameter, bool two_to_one, ReactionsBitSet included_2to2,
+    double low_snn_cut, bool strings_switch, bool use_AQM,
+    bool strings_with_probability, NNbarTreatment nnbar_treatment) {
   CrossSections xs(incoming_particles_, sqrt_s());
   CollisionBranchList processes = xs.generate_collision_list(
       elastic_parameter, two_to_one, included_2to2, low_snn_cut, strings_switch,
@@ -128,16 +125,13 @@ void ScatterAction::add_all_scatterings(double elastic_parameter,
    * square root s exceeds the threshold by at least 0.9 GeV. The cross section
    * of the string processes are counted by taking the difference between the
    * parametrized total and the sum of the non-strings. */
-  if (!strings_with_probability && xs.decide_string(strings_switch,
-                    strings_with_probability, use_AQM,
-                    nnbar_treatment == NNbarTreatment::Strings)) {
+  if (!strings_with_probability &&
+      xs.decide_string(strings_switch, strings_with_probability, use_AQM,
+                       nnbar_treatment == NNbarTreatment::Strings)) {
     const double xs_diff = xs.high_energy() - cross_section();
     if (xs_diff > 0.) {
-      add_collisions(xs.string_excitation(xs_diff, string_process_));
+      add_collisions(xs.string_excitation(xs_diff, string_process_, use_AQM));
     }
-  }
-  if (strings_switch) {
-    subproc_soft_string_ = xs.get_subproc_soft_string();
   }
 }
 
@@ -208,12 +202,16 @@ double ScatterAction::transverse_distance_sqr() const {
 
 /**
  * Computes the B coefficients from the Cugnon parametrization of the angular
- * distribution in elastic pp scattering, see equation (8) in
- * \iref{Cugnon:1996kh}.
+ * distribution in elastic pp scattering.
+ *
+ * See equation (8) in \iref{Cugnon:1996kh}.
  * Note: The original Cugnon parametrization is only applicable for
  * plab < 6 GeV and keeps rising above that. We add an upper limit of b <= 9,
  * in order to be compatible with high-energy data (up to plab ~ 25 GeV).
+ *
  * \param[in] plab Lab momentum in GeV.
+ *
+ * \return Cugnon B coefficient for elatic proton-proton scatterings.
  */
 static double Cugnon_bpp(double plab) {
   if (plab < 2.) {
@@ -226,9 +224,13 @@ static double Cugnon_bpp(double plab) {
 
 /**
  * Computes the B coefficients from the Cugnon parametrization of the angular
- * distribution in elastic np scattering, see equation (10) in
- * \iref{Cugnon:1996kh}.
+ * distribution in elastic np scattering.
+ *
+ * See equation (10) in \iref{Cugnon:1996kh}.
+ *
  * \param[in] plab Lab momentum in GeV.
+ *
+ * \return Cugnon B coefficient for elastic proton-neutron scatterings.
  */
 static double Cugnon_bnp(double plab) {
   if (plab < 0.225) {
@@ -243,7 +245,7 @@ static double Cugnon_bnp(double plab) {
 }
 
 void ScatterAction::sample_angles(std::pair<double, double> masses) {
-  if ((process_type_ == ProcessType::StringSoft) ||
+  if (is_string_soft_process(process_type_) ||
       (process_type_ == ProcessType::StringHard)) {
     // We potentially have more than two particles, so the following angular
     // distributions don't work. Instead we just keep the angular
@@ -429,7 +431,7 @@ void ScatterAction::resonance_formation() {
 /* This function will generate outgoing particles in CM frame
  * from a hard process.
  * The way to excite soft strings is based on the UrQMD model */
-void ScatterAction::string_excitation(bool is_soft_proc) {
+void ScatterAction::string_excitation() {
   assert(incoming_particles_.size() == 2);
   const auto &log = logger<LogArea::Pythia>();
   // Disable floating point exception trap for Pythia
@@ -443,33 +445,33 @@ void ScatterAction::string_excitation(bool is_soft_proc) {
     const int ntry_max = 10000;
     while (!success && ntry < ntry_max) {
       ntry++;
-      if (is_soft_proc) {
-        switch (subproc_soft_string_) {
-          case StringSoftType::SingleDiffAX:
-            /* single diffractive to A+X */
-            success = string_process_->next_SDiff(true);
-            break;
-          case StringSoftType::SingleDiffXB:
-            /* single diffractive to X+B */
-            success = string_process_->next_SDiff(false);
-            break;
-          case StringSoftType::DoubleDiff:
-            /* double diffractive */
-            success = string_process_->next_DDiff();
-            break;
-          case StringSoftType::NonDiff:
-            /* soft non-diffractive */
-            success = string_process_->next_NDiffSoft();
-            break;
-          case StringSoftType::BBbar:
-            /* soft BBbar 2 mesonic annihilation */
-            success = string_process_->next_BBbarAnn();
-            break;
-          case StringSoftType::None:
-            success = false;
-        }
-      } else {
-        success = string_process_->next_NDiffHard();
+      switch (process_type_) {
+        case ProcessType::StringSoftSingleDiffractiveAX:
+          /* single diffractive to A+X */
+          success = string_process_->next_SDiff(true);
+          break;
+        case ProcessType::StringSoftSingleDiffractiveXB:
+          /* single diffractive to X+B */
+          success = string_process_->next_SDiff(false);
+          break;
+        case ProcessType::StringSoftDoubleDiffractive:
+          /* double diffractive */
+          success = string_process_->next_DDiff();
+          break;
+        case ProcessType::StringSoftNonDiffractive:
+          /* soft non-diffractive */
+          success = string_process_->next_NDiffSoft();
+          break;
+        case ProcessType::StringSoftAnnihilation:
+          /* soft BBbar 2 mesonic annihilation */
+          success = string_process_->next_BBbarAnn();
+          break;
+        case ProcessType::StringHard:
+          success = string_process_->next_NDiffHard();
+          break;
+        default:
+          log.error("Unknown string process required.");
+          success = false;
       }
     }
     if (ntry == ntry_max) {

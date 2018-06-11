@@ -46,6 +46,7 @@ class CrossSections {
    * \param[in] included_2to2 Which 2->2 ractions are enabled?
    * \param[in] low_snn_cut Elastic collisions with CME below are forbidden.
    * \param[in] strings_switch Are string processes enabled?
+   * \param[in] use_AQM Is the Additive Quark Model enabled?
    * \param[in] strings_with_probability Are string processes triggered
    *            according to a probability?
    * \param[in] nnbar_treatment NNbar treatment through resonance, strings or
@@ -66,7 +67,7 @@ class CrossSections {
    * (if available).
    *
    * \param[in] elast_par Elastic cross section parameter from the input file.
-   * \param[in] use_AQM whether to extend elastic cross-sections with AQM
+   * \param[in] use_AQM Whether to extend elastic cross-sections with AQM.
    *
    * \return A ProcessBranch object containing the cross section and
    * final-state IDs.
@@ -100,9 +101,12 @@ class CrossSections {
    */
   double formation(const ParticleType& type_resonance, double cm_momentum_sqr);
 
-  /** Find all inelastic 2->2 processes for the given scattering.
+  /**
+   * Find all inelastic 2->2 processes for the given scattering.
+   *
    * This function calls the different, more specific functions for
    * the different scatterings.
+   *
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
    * \return List of all possibe inelastic 2->2 processes.
    */
@@ -116,6 +120,7 @@ class CrossSections {
    *
    * \param[in] string_process String process used for string fragmentation.
    * \param[in] total_string_xs Total cross section for the string process [mb].
+   * \param[in] use_AQM whether to extend string cross-sections with AQM
    * \return List of subprocesses (single-diffractive,
    *        double-diffractive and non-diffractive) with their cross sections.
    *
@@ -124,7 +129,8 @@ class CrossSections {
    * \todo Same assumption made by NNbar_annihilation. Resolve.
    */
   CollisionBranchList string_excitation(double total_string_xs,
-                                        StringProcess* string_process);
+                                        StringProcess* string_process,
+                                        bool use_AQM);
 
   /**
    * Determine the cross section for NNbar annihilation, which is given by the
@@ -154,6 +160,8 @@ class CrossSections {
    * Determine the parametrized total cross section at high energies
    * for the given collision, which is non-zero for Baryon-Baryon and
    * Nucleon-Pion scatterings currently.
+   *
+   * This is rescaled by AQM factors.
    */
   double high_energy() const;
 
@@ -209,9 +217,6 @@ class CrossSections {
    * and nucleon-pion can interact via string.
    */
   bool included_in_string() const;
-
-  /// \return soft string subprocess identifier
-  StringSoftType get_subproc_soft_string() { return subproc_soft_string_; }
 
  private:
   /**
@@ -310,7 +315,8 @@ class CrossSections {
   /**
    * Determine the (parametrized) hard non-diffractive string cross section
    * for this collision.
-   * \return Parametrized cross section
+   *
+   * \return Parametrized cross section without AQM scaling.
    */
   double string_hard_cross_section() const;
 
@@ -373,15 +379,11 @@ class CrossSections {
   /// List with data of scattering particles.
   ParticleList incoming_particles_;
 
-  /// Both of the incoming particles are nucleons.
-  bool both_are_nucleons_ = incoming_particles_[0].type().is_nucleon() &&
-                            incoming_particles_[1].type().is_nucleon();
-
   /// Total energy in the center-of-mass frame.
   double sqrt_s_;
 
-  /// soft string subprocess identifier
-  StringSoftType subproc_soft_string_;
+  /// Whether incoming particles are a baryon-antibaryon pair
+  const bool is_BBbar_pair_;
 };
 
 }  // namespace smash
