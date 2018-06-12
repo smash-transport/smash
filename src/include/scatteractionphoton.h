@@ -73,7 +73,7 @@ class ScatterActionPhoton : public ScatterAction {
    *
    * \return total cross-section [mb]
    */
-  double hadronic_cross_section() const { return total_cross_section_; }
+  double hadronic_cross_section() const { return hadronic_cross_section_; }
 
   /**
    * Sample the mass of the outgoing hadron. Returns the pole mass if
