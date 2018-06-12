@@ -740,9 +740,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   /*!\Userguide
    * \page input_dileptons Dileptons
-   * Enables Dilepton Output together with DecayActionsFinderDilepton.
-   * Dilepton Output saves information about decays, which include Dileptons,
-   * at every timestep.
+   * Enables dilepton output together with DecayActionsFinderDilepton.
+   * By default, the extended OSCAR output is enabled. The dilepton output
+   * format is identical to the collision output, it does however only contain
+   * information about the dilepton decays at every timestep.
    *
    * The treatment of Dilepton Decays is special:
    *
