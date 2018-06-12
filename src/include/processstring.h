@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_PROCESSSTRING_H_
 
 #include <memory>
+#include <string>
 #include <utility>
 #include <vector>
 
