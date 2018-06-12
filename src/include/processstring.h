@@ -411,6 +411,22 @@ class StringProcess {
                          const ThreeVector &evecLong);
 
   /**
+   * append new particle from PYTHIA to a specific particle list
+   * \param[in] pdgid PDG id of particle
+   * \param[in] momentum four-momentum of particle
+   * \param[out] intermediate_particles particle list to which
+   *             the new particle is added.
+   */
+  static void append_intermediate_list(int pdgid, FourVector momentum,
+                                       ParticleList &intermediate_particles) {
+    const std::string s = std::to_string(pdgid);
+    PdgCode pythia_code(s);
+    ParticleData new_particle(ParticleType::find(pythia_code));
+    new_particle.set_4momentum(momentum);
+    intermediate_particles.push_back(new_particle);
+  }
+
+  /**
    * convert Kaon-L or Kaon-S into K0 or Anti-K0
    * \param[out] pythia_id is PDG id to be converted.
    */
@@ -444,6 +460,23 @@ class StringProcess {
    */
   static Pythia8::Vec4 set_Vec4(double energy, const ThreeVector &mom) {
     return Pythia8::Vec4(mom.x1(), mom.x2(), mom.x3(), energy);
+  }
+
+  /**
+   * compute the four-momentum properly oriented in the lab frame
+   * \param[in] particle particle object from PYTHIA event generation
+   *            where z-axis is set to be the collision axis
+   * \param[in] evec_basis three basis vectors in the lab frame
+   *            evec_basis[0] is unit vector in the collision axis and
+   *            other two span the transverse plane
+   * \return four-momentum of particle in the lab frame
+   */
+  static FourVector reorient(Pythia8::Particle &particle,
+                             std::array<ThreeVector, 3> &evec_basis) {
+    ThreeVector three_momentum = evec_basis[0] * particle.pz() +
+                                 evec_basis[1] * particle.px() +
+                                 evec_basis[2] * particle.py();
+    return FourVector(particle.e(), three_momentum);
   }
 
   /**
