@@ -223,7 +223,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
 }
 
 /*!\Userguide
- * \page format_oscar_particlelist Oscar particles format
+ * \page format_oscar_particlelist OSCAR particles format
  * The format follows general block structure of OSCAR format:
  * \ref oscar_general_. There are two kinds of this format -
  * OSCAR2013 and OSCAR1999. Information about OSCAR standard can be found at
@@ -332,7 +332,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * # event ev_num end 0 impact impact_parameter
  * \endcode
  *
- * \page format_oscar_collisions Oscar collisions format
+ * \page format_oscar_collisions OSCAR collisions format
  * The format follows general block structure of OSCAR format:
  * \ref oscar_general_. There are two kinds of this format -
  * OSCAR2013 and OSCAR1999. Information about OSCAR standard can be found at

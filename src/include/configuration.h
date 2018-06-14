@@ -50,6 +50,12 @@ namespace smash {
  * SMASH does not recognize, then on startup it will tell you about the keys it
  * could not make any sense of.
  *
+ * By default, SMASH copies the config.yaml file used to set up the SMASH run to
+ * the output directory of the simulation. For the sake of reproducibility,
+ * the randomly generated number seed (if the user specified a negative seed) is
+ * inserted into the copied file and the used particles and decaymodes are
+ * appended as well.
+ *
  * \par The available keys are documented on the following pages:
  * \li \subpage input_general_
  * \li \subpage input_logging_

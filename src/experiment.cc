@@ -493,7 +493,7 @@ void Experiment<Modus>::create_output(const std::string &format,
  * contributions; non-elastic contributions go through string fragmentation.
  * Turning off strings or elastic collisions while leaving this on will
  * result in the corresponding part of the AQM cross-sections to also be off.
- * Cross-sections parametrization are scaled according to 
+ * Cross-sections parametrization are scaled according to
  * \f[ \frac{\sigma^{AQM}_{process}}{\sigma^{AQM}_{ref_process}}
  * \sigma^{param}_{ref_process}\f]
  * where \f$ \sigma^{AQM}_x = 40 \left( \frac{2}{3} \right)^{n_{meson}}
@@ -719,7 +719,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * - \b "Binary" - binary, not human-readable output
    *   - Faster to read and write than text outputs
    *   - Saves coordinates and momenta with the full double precision
-   *   - General file structure is similar to \subpage oscar_general_
+   *   - General file structure is similar to \ref oscar_general_
    *   - Detailed description: \subpage format_binary_
    * - \b "Root" - binary output in the format used by ROOT software
    *     (http://root.cern.ch)
@@ -740,9 +740,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   /*!\Userguide
    * \page input_dileptons Dileptons
-   * Enables Dilepton Output together with DecayActionsFinderDilepton.
-   * Dilepton Output saves information about decays, which include Dileptons,
-   * at every timestep.
+   * Enables dilepton output together with DecayActionsFinderDilepton.
+   * By default, the extended OSCAR output is enabled. The dilepton output
+   * format is identical to the collision output, it does however only contain
+   * information about the dilepton decays at every timestep.
    *
    * The treatment of Dilepton Decays is special:
    *
@@ -762,7 +763,35 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   /*!\Userguide
    * \page input_photons Photons
-   * Todo(schaefer): document photons
+   * Enables the photon output together with the correpsoning
+   * ScatterActionPhoton.
+   *
+   * Photons are treated perturbatively and are produced from binary
+   * scattering processes. Their production follows the framework from Turbide
+   * et al. described in \iref{Turbide:2006}. Following the perturbative
+   * treatment, the produced photons do not contribute to the evolution of the
+   * hadronic system. They are rather direcly printed to the photon output.
+   * The mechanism for photon production is the following:
+   * \li Look for hadronic interactions of particles that are also incoming
+   * particles of a photon process. Currently, the latter include binary
+   * scatterings of \f$ \pi \f$ and \f$ \rho \f$ mesons.
+   * \li Perform the photon action and write the results to the photon output.
+   * The final state particles are not of interested anymore as they are not
+   * propagated further in the evolution. To account for the probabiity that
+   * photon processes are significantly less likely than hadronic processes,
+   * the produced photons are weighted according to the ratio of the photon
+   * cross section to the hadronic cross section used the find the interaction.
+   * This weight can be found in the weight element of the photon output.
+   * \li Perform the original hadronic action based on which the photon action
+   * was found. Propagate all final states particles throughout the hadronic
+   * evolution as if no photon action had occured.
+   *
+   * As photons are produced very rarely, a lot of statistics is necessery to
+   * yield useful results. Alternatively, it it possible to use fractional
+   * photons. This means that for each produced photon, \f$ N_{\text{Frac}} \f$
+   * photons are actually sampled with different kinematic properties so that
+   * more phase space is covered. See \ref input_output_options_ on how to set the
+   * flag.
    **/
 
   dens_type_ = config.take({"Output", "Density_Type"}, DensityType::None);
