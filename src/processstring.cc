@@ -122,7 +122,8 @@ void StringProcess::common_setup_pythia(Pythia8::Pythia *pythia_in,
 }
 
 // compute the formation time and fill the arrays with final-state particles
-int StringProcess::append_final_state(const FourVector &uString,
+int StringProcess::append_final_state(ParticleList &intermediate_particles,
+                                      const FourVector &uString,
                                       const ThreeVector &evecLong) {
   struct fragment_type {
     FourVector momentum;
@@ -266,7 +267,9 @@ void StringProcess::init(const ParticleList &incoming, double tcoll,
   pcom_[0] = plab_[0].LorentzBoost(vcomAB_);
   pcom_[1] = plab_[1].LorentzBoost(vcomAB_);
 
-  make_orthonormal_basis();
+  const double pabscomAB = pCM(sqrtsAB_, massA_, massB_);
+  make_orthonormal_basis(pcom_[0].threevec() / pabscomAB, evecBasisAB_);
+
   compute_incoming_lightcone_momenta();
 
   time_collision_ = tcoll;
@@ -335,12 +338,15 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   const FourVector prs = pnull.LorentzBoost(ustrXcom.velocity());
   ThreeVector evec = prs.threevec() / prs.threevec().abs();
   // perform fragmentation and add particles to final_state.
-  int nfrag = fragment_string(idqX1, idqX2, massX, evec, true);
+  ParticleList new_intermediate_particles;
+  int nfrag = fragment_string(idqX1, idqX2, massX, evec, true,
+                              new_intermediate_particles);
   if (nfrag < 1) {
     NpartString_[0] = 0;
     return false;
   }
-  NpartString_[0] = append_final_state(ustrXcom, evec);
+  NpartString_[0] = append_final_state(new_intermediate_particles,
+                                       ustrXcom, evec);
 
   NpartString_[1] = 1;
   PdgCode hadron_code = is_AB_to_AX ? PDGcodes_[0] : PDGcodes_[1];
@@ -399,16 +405,19 @@ bool StringProcess::make_final_state_2strings(
   const std::array<FourVector, 2> ustr_com = {pstr_com[0] / m_str[0],
                                               pstr_com[1] / m_str[1]};
   for (int i = 0; i < 2; i++) {
+    ParticleList new_intermediate_particles;
+
     // determine direction in which string i is stretched.
     ThreeVector evec = evec_str[i];
     // perform fragmentation and add particles to final_state.
     int nfrag = fragment_string(quarks[i][0], quarks[i][1], m_str[i], evec,
-                                flip_string_ends);
+                                flip_string_ends, new_intermediate_particles);
     if (nfrag <= 0) {
       NpartString_[i] = 0;
       return false;
     }
-    NpartString_[i] = append_final_state(ustr_com[i], evec);
+    NpartString_[i] = append_final_state(new_intermediate_particles,
+                                         ustr_com[i], evec);
     assert(nfrag == NpartString_[i]);
   }
   if ((NpartString_[0] > 0) && (NpartString_[1] > 0)) {
@@ -767,33 +776,36 @@ bool StringProcess::next_BBbarAnn() {
   }
   // Fragment two strings
   for (int i = 0; i < 2; i++) {
+    ParticleList new_intermediate_particles;
+
     ThreeVector evec = pcom_[i].threevec() / pcom_[i].threevec().abs();
     const int nfrag = fragment_string(
-        remaining_quarks[i], remaining_antiquarks[i], mstr[i], evec, true);
+        remaining_quarks[i], remaining_antiquarks[i],
+        mstr[i], evec, true, new_intermediate_particles);
     if (nfrag <= 0) {
       NpartString_[i] = 0;
       return false;
     }
-    NpartString_[i] = append_final_state(ustrcom[i], evec);
+    NpartString_[i] = append_final_state(new_intermediate_particles,
+                                         ustrcom[i], evec);
   }
   NpartFinal_ = NpartString_[0] + NpartString_[1];
   return true;
 }
 
-void StringProcess::make_orthonormal_basis() {
-  const double pabscomAB = pCM(sqrtsAB_, massA_, massB_);
-  if (std::abs(pcom_[0].x3()) < (1. - 1.0e-8) * pabscomAB) {
+void StringProcess::make_orthonormal_basis(
+         ThreeVector &evec_polar, std::array<ThreeVector, 3> &evec_basis) {
+  if (std::abs(evec_polar.x3()) < (1. - 1.0e-8)) {
     double ex, ey, et;
     double theta, phi;
 
-    /* evecBasisAB_[0] is set to be longitudinal direction
-     * which is parallel to the collision axis. */
-    evecBasisAB_[0] = pcom_[0].threevec() / pabscomAB;
+    // evec_basis[0] is set to be longitudinal direction
+    evec_basis[0] = evec_polar;
 
-    theta = std::acos(evecBasisAB_[0].x3());
+    theta = std::acos(evec_basis[0].x3());
 
-    ex = evecBasisAB_[0].x1();
-    ey = evecBasisAB_[0].x2();
+    ex = evec_basis[0].x1();
+    ey = evec_basis[0].x2();
     et = std::sqrt(ex * ex + ey * ey);
     if (ey > 0.) {
       phi = std::acos(ex / et);
@@ -802,24 +814,24 @@ void StringProcess::make_orthonormal_basis() {
     }
 
     /* The transverse plane is spanned
-     * by evecBasisAB_[1] and evecBasisAB_[2]. */
-    evecBasisAB_[1].set_x1(cos(theta) * cos(phi));
-    evecBasisAB_[1].set_x2(cos(theta) * sin(phi));
-    evecBasisAB_[1].set_x3(-sin(theta));
+     * by evec_basis[1] and evec_basis[2]. */
+    evec_basis[1].set_x1(cos(theta) * cos(phi));
+    evec_basis[1].set_x2(cos(theta) * sin(phi));
+    evec_basis[1].set_x3(-sin(theta));
 
-    evecBasisAB_[2].set_x1(-sin(phi));
-    evecBasisAB_[2].set_x2(cos(phi));
-    evecBasisAB_[2].set_x3(0.);
+    evec_basis[2].set_x1(-sin(phi));
+    evec_basis[2].set_x2(cos(phi));
+    evec_basis[2].set_x3(0.);
   } else {
-    // if pcom_[0].threevec() is very close to the z axis
-    if (pcom_[0].x3() > 0.) {
-      evecBasisAB_[1] = ThreeVector(1., 0., 0.);
-      evecBasisAB_[2] = ThreeVector(0., 1., 0.);
-      evecBasisAB_[0] = ThreeVector(0., 0., 1.);
+    // if evec_polar is very close to the z axis
+    if (evec_polar.x3() > 0.) {
+      evec_basis[1] = ThreeVector(1., 0., 0.);
+      evec_basis[2] = ThreeVector(0., 1., 0.);
+      evec_basis[0] = ThreeVector(0., 0., 1.);
     } else {
-      evecBasisAB_[1] = ThreeVector(0., 1., 0.);
-      evecBasisAB_[2] = ThreeVector(1., 0., 0.);
-      evecBasisAB_[0] = ThreeVector(0., 0., -1.);
+      evec_basis[1] = ThreeVector(0., 1., 0.);
+      evec_basis[2] = ThreeVector(1., 0., 0.);
+      evec_basis[0] = ThreeVector(0., 0., -1.);
     }
   }
 }
@@ -871,11 +883,33 @@ void StringProcess::make_string_ends(const PdgCode &pdg, int &idq1, int &idq2) {
 
 int StringProcess::fragment_string(int idq1, int idq2, double mString,
                                    ThreeVector &evecLong,
-                                   bool flip_string_ends) {
+                                   bool flip_string_ends,
+                                   ParticleList &intermediate_particles) {
   pythia_hadron_->event.reset();
-  // evaluate 3 times total baryon number of the string
-  const int bstring = pythia_hadron_->particleData.baryonNumberType(idq1) +
-                      pythia_hadron_->particleData.baryonNumberType(idq2);
+  intermediate_particles.clear();
+
+  std::array<int, 2> idqIn;
+  idqIn[0] = idq1;
+  idqIn[1] = idq2;
+
+  std::array<int, 5> nqstring;
+  for (int iq = 0; iq < 5; iq++) {
+    nqstring[iq] = 0;
+  }
+
+  int bstring = 0;
+
+  for (int i = 0; i < 2; i++) {
+    // evaluate 3 times total baryon number of the string
+    bstring += pythia_hadron_->particleData.baryonNumberType(idqIn[i]);
+
+    for (int iq = 0; iq < 5; iq++) {
+      nqstring[iq] += (idqIn[i] > 0 ? 1 : -1) *
+          pythia_hadron_->particleData.nQuarksInCode(std::abs(idqIn[i]),
+                                                     iq + 1);
+    }
+  }
+
   /* diquark (anti-quark) with PDG id idq2 is going in the direction of
    * evecLong.
    * quark with PDG id idq1 is going in the direction opposite to evecLong. */
@@ -887,8 +921,8 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
     sign_direction = -1;
   }
 
-  const double m1 = pythia_hadron_->particleData.m0(idq1);
-  const double m2 = pythia_hadron_->particleData.m0(idq2);
+  const double m1 = pythia_hadron_->particleData.m0(idqIn[0]);
+  const double m2 = pythia_hadron_->particleData.m0(idqIn[1]);
   if (m1 + m2 > mString) {
     throw std::runtime_error("String fragmentation: m1 + m2 > mString");
   }
@@ -913,12 +947,14 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
   const int status1 = 1, color1 = 1, anticolor1 = 0;
   Pythia8::Vec4 pquark = set_Vec4(E1, -direction * pCMquark);
   pSum += pquark;
-  pythia_hadron_->event.append(idq1, status1, color1, anticolor1, pquark, m1);
+  pythia_hadron_->event.append(idqIn[0], status1, color1, anticolor1,
+                               pquark, m1);
 
   const int status2 = 1, color2 = 0, anticolor2 = 1;
   pquark = set_Vec4(E2, direction * pCMquark);
   pSum += pquark;
-  pythia_hadron_->event.append(idq2, status2, color2, anticolor2, pquark, m2);
+  pythia_hadron_->event.append(idqIn[1], status2, color2, anticolor2,
+                               pquark, m2);
 
   // implement PYTHIA fragmentation
   pythia_hadron_->event[0].p(pSum);

@@ -299,10 +299,15 @@ class StringProcess {
    */
   void init(const ParticleList &incoming, double tcoll, double gamma);
   /**
-   * compute three orthonormal basis vectors in the center of mass frame
-   * such that one vector is along with the three-momentum of particle A.
+   * compute three orthonormal basis vectors from unit vector
+   * in the longitudinal direction
+   * \param[in] evec_polar unit three-vector in the longitudinal direction
+   * \param[out] evec_basis orthonormal basis vectors of which
+   *             evec_basis[0] is in the longitudinal direction while
+   *             evec_basis[1] and evec_basis[2] span the transverse plane.
    */
-  void make_orthonormal_basis();
+  static void make_orthonormal_basis(ThreeVector &evec_polar,
+                                     std::array<ThreeVector, 3> &evec_basis);
   /**
    * compute the lightcone momenta of incoming particles
    * where the longitudinal direction is set to be same
@@ -407,7 +412,8 @@ class StringProcess {
    * \throw std::invalid_argument if fragmented particle is not hadron
    * \throw std::invalid_argument if string is neither mesonic nor baryonic
    */
-  int append_final_state(const FourVector &uString,
+  int append_final_state(ParticleList &intermediate_particles,
+                         const FourVector &uString,
                          const ThreeVector &evecLong);
 
   /**
@@ -461,7 +467,8 @@ class StringProcess {
    *        if string mass is lower than threshold set by PYTHIA
    */
   int fragment_string(int idq1, int idq2, double mString,
-                      ThreeVector &evecLong, bool flip_string_ends);
+                      ThreeVector &evecLong, bool flip_string_ends,
+                      ParticleList &intermediate_particles);
 
   /**
    * Assign a cross section scaling factor to all outgoing particles.

@@ -320,6 +320,24 @@ TEST(update_incoming) {
   COMPARE(act.incoming_particles()[0].position(), new_position);
 }
 
+TEST(string_orthonormal_basis) {
+  ThreeVector evec_polar = ThreeVector(0., 1., 0.);
+  std::array<ThreeVector, 3> evec_basis;
+  StringProcess::make_orthonormal_basis(evec_polar, evec_basis);
+
+  VERIFY(std::abs(evec_basis[0].x1()) < really_small);
+  VERIFY(std::abs(evec_basis[0].x2() - 1.) < really_small);
+  VERIFY(std::abs(evec_basis[0].x3()) < really_small);
+
+  VERIFY(std::abs(evec_basis[1].x1()) < really_small);
+  VERIFY(std::abs(evec_basis[1].x2()) < really_small);
+  VERIFY(std::abs(evec_basis[1].x3() + 1.) < really_small);
+
+  VERIFY(std::abs(evec_basis[2].x1() + 1.) < really_small);
+  VERIFY(std::abs(evec_basis[2].x2()) < really_small);
+  VERIFY(std::abs(evec_basis[2].x3()) < really_small);
+}
+
 TEST(string_diquark_from_quarks) {
   // ud-diquark
   int id1 = 1;
