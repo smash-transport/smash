@@ -138,6 +138,8 @@ int StringProcess::append_final_state(ParticleList &intermediate_particles,
   double p_pos_tot = 0.0, p_neg_tot = 0.0;
   int bstring = 0;
 
+  intermediate_particles.clear();
+
   for (int ipyth = 0; ipyth < pythia_hadron_->event.size(); ipyth++) {
     if (!pythia_hadron_->event[ipyth].isFinal()) {
       continue;
@@ -268,7 +270,8 @@ void StringProcess::init(const ParticleList &incoming, double tcoll,
   pcom_[1] = plab_[1].LorentzBoost(vcomAB_);
 
   const double pabscomAB = pCM(sqrtsAB_, massA_, massB_);
-  make_orthonormal_basis(pcom_[0].threevec() / pabscomAB, evecBasisAB_);
+  ThreeVector evec_coll = pcom_[0].threevec() / pabscomAB;
+  make_orthonormal_basis(evec_coll, evecBasisAB_);
 
   compute_incoming_lightcone_momenta();
 
