@@ -39,6 +39,7 @@ StringProcess::StringProcess(double string_tension, double time_formation,
    * diffractive ones are implemented in a separate routine */
   pythia_parton_->readString("SoftQCD:nonDiffractive = on");
   pythia_parton_->readString("MultipartonInteractions:pTmin = 1.5");
+  pythia_parton_->readString("HadronLevel:all = off");
   common_setup_pythia(pythia_parton_.get(), strange_supp, diquark_supp,
                       stringz_a, stringz_b, string_sigma_T);
 
@@ -611,7 +612,7 @@ bool StringProcess::next_NDiffHard() {
   pythia_parton_->rndm.init(Random::uniform_int(1, maxint));
 
   // Short notation for Pythia event
-  Pythia8::Event &event = pythia_parton_->event;
+  Pythia8::Event &event = pythia_hadron_->event;
   log.debug("Pythia hard event created");
   bool final_state_success = false;
   while (!final_state_success) {
@@ -621,6 +622,41 @@ bool StringProcess::next_NDiffHard() {
 
   ParticleList new_intermediate_particles;
   ParticleList new_non_hadron_particles;
+
+  Pythia8::Vec4 pSum = 0.;
+  pythia_hadron_->event.reset();
+  for (int i = 0; i < pythia_parton_->event.size(); i++) {
+    if (pythia_parton_->event[i].isFinal()) {
+      const int pdgid = pythia_parton_->event[i].id();
+
+      if (pythia_parton_->event[i].isParton()) {
+        Pythia8::Vec4 pquark = pythia_parton_->event[i].p();
+        const double mass = pythia_parton_->particleData.m0(pdgid);
+
+        const int status = 1;
+        const int color = pythia_parton_->event[i].col();
+        const int anticolor = pythia_parton_->event[i].acol();
+
+        pSum += pquark;
+        pythia_hadron_->event.append(pdgid, status,
+                                     color, anticolor, pquark, mass);
+      } else {
+        FourVector momentum = reorient(pythia_parton_->event[i], evecBasisAB_);
+        log.debug("4-momentum from Pythia: ", momentum);
+        append_intermediate_list(pdgid, momentum,
+                                 new_non_hadron_particles);
+      }
+    }
+  }
+  pythia_hadron_->event[0].p(pSum);
+  pythia_hadron_->event[0].m(pSum.mCalc());
+
+  bool hadronize_success = false;
+  while (!hadronize_success) {
+    hadronize_success = pythia_hadron_->forceHadronLevel();
+    log.debug("Pythia hadronized, success = ", hadronize_success);
+  }
+
   for (int i = 0; i < event.size(); i++) {
     if (event[i].isFinal()) {
       int pythia_id = event[i].id();
@@ -628,25 +664,21 @@ bool StringProcess::next_NDiffHard() {
       /* K_short and K_long need to be converted to K0
        * since SMASH only knows K0 */
       convert_KaonLS(pythia_id);
-      const std::string s = std::to_string(pythia_id);
-      PdgCode pythia_code(s);
-      ParticleData new_particle(ParticleType::find(pythia_code));
+
       /* evecBasisAB_[0] is a unit 3-vector in the collision axis,
        * while evecBasisAB_[1] and evecBasisAB_[2] spans the transverse plane.
        * Given that PYTHIA assumes z-direction to be the collision axis,
        * pz from PYTHIA should be the momentum compoment in evecBasisAB_[0].
        * px and py are respectively the momentum components in two
        * transverse directions evecBasisAB_[1] and evecBasisAB_[2]. */
-      ThreeVector threeMomentum = evecBasisAB_[0] * event[i].pz() +
-                                  evecBasisAB_[1] * event[i].px() +
-                                  evecBasisAB_[2] * event[i].py();
-      FourVector momentum = FourVector(event[i].e(), threeMomentum);
-      new_particle.set_4momentum(momentum);
+      FourVector momentum = reorient(event[i], evecBasisAB_);
       log.debug("4-momentum from Pythia: ", momentum);
       if (event[i].isHadron()) {
-        new_intermediate_particles.push_back(new_particle);
+        append_intermediate_list(pythia_id, momentum,
+                                 new_intermediate_particles);
       } else {
-        new_non_hadron_particles.push_back(new_particle);
+        append_intermediate_list(pythia_id, momentum,
+                                 new_non_hadron_particles);
       }
     }
   }
