@@ -945,6 +945,14 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
     }
   }
 
+  if (flip_string_ends && Random::uniform_int(0, 1) == 0) {
+    /* in the case where we flip the string ends,
+     * we need to flip the longitudinal unit vector itself
+     * since it is set to be direction of diquark (anti-quark)
+     * or anti-diquark. */
+    evecLong = -evecLong;
+  }
+
   /* diquark (anti-quark) with PDG id idq2 is going in the direction of
    * evecLong.
    * quark with PDG id idq1 is going in the direction opposite to evecLong. */
@@ -967,13 +975,6 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
   const double E1 = std::sqrt(m1 * m1 + pCMquark * pCMquark);
   const double E2 = std::sqrt(m2 * m2 + pCMquark * pCMquark);
 
-  if (flip_string_ends && Random::uniform_int(0, 1) == 0) {
-    /* in the case where we flip the string ends,
-     * we need to flip the longitudinal unit vector itself
-     * since it is set to be direction of diquark (anti-quark)
-     * or anti-diquark. */
-    evecLong = -evecLong;
-  }
   ThreeVector direction = sign_direction * evecLong;
 
   Pythia8::Vec4 pSum = 0.;
@@ -998,13 +999,25 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
   int number_of_fragments = 0;
   if (successful_hadronization) {
     for (int ipart = 0; ipart < pythia_hadron_->event.size(); ipart++) {
-      if (pythia_hadron_->event[ipart].isFinal()) {
-        number_of_fragments++;
+      if (!pythia_hadron_->event[ipyth].isFinal()) {
+        continue;
       }
-    }
-  }
+      int pythia_id = pythia_hadron_->event[ipyth].id();
+      /* K_short and K_long need are converted to K0
+       * since SMASH only knows K0 */
+      convert_KaonLS(pythia_id);
+      FourVector momentum(
+          pythia_hadron_->event[ipyth].e(), pythia_hadron_->event[ipyth].px(),
+          pythia_hadron_->event[ipyth].py(), pythia_hadron_->event[ipyth].pz());
+      append_intermediate_list(pythia_id, momentum, intermediate_particles);
 
-  return number_of_fragments;
+      number_of_fragments++;
+    }
+
+    return number_of_fragments;
+  } else {
+    return 0;
+  }
 }
 
 void StringProcess::assign_scaling_factor(int nquark, ParticleData &data,
