@@ -406,6 +406,8 @@ class StringProcess {
   /**
    * compute the formation time and fill the arrays with final-state particles
    * as described in \iref{Andersson:1983ia}.
+   * \param[out] intermediate_particles list of fragmented particles
+                 to be appended
    * \param[in] uString is velocity four vector of the string.
    * \param[in] evecLong is unit 3-vector in which string is stretched.
    * \return number of hadrons fragmented out of string.
@@ -495,6 +497,7 @@ class StringProcess {
    * \param[out] evecLong unit 3-vector specifying the direction of diquark or
    *                      anti-diquark.
    * \param[in] flip_string_ends is whether or not we randomly switch string ends.
+   * \param[out] intermediate_particles list of fragmented particles
    * \return number of hadrons fragmented out of string.
    *
    * \throw std::runtime_error

@@ -998,7 +998,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
   const bool successful_hadronization = pythia_hadron_->forceHadronLevel();
   int number_of_fragments = 0;
   if (successful_hadronization) {
-    for (int ipart = 0; ipart < pythia_hadron_->event.size(); ipart++) {
+    for (int ipyth = 0; ipyth < pythia_hadron_->event.size(); ipyth++) {
       if (!pythia_hadron_->event[ipyth].isFinal()) {
         continue;
       }
