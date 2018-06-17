@@ -927,22 +927,11 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
   idqIn[0] = idq1;
   idqIn[1] = idq2;
 
-  std::array<int, 5> nqstring;
-  for (int iq = 0; iq < 5; iq++) {
-    nqstring[iq] = 0;
-  }
-
   int bstring = 0;
 
   for (int i = 0; i < 2; i++) {
     // evaluate 3 times total baryon number of the string
     bstring += pythia_hadron_->particleData.baryonNumberType(idqIn[i]);
-
-    for (int iq = 0; iq < 5; iq++) {
-      nqstring[iq] += (idqIn[i] > 0 ? 1 : -1) *
-          pythia_hadron_->particleData.nQuarksInCode(std::abs(idqIn[i]),
-                                                     iq + 1);
-    }
   }
 
   if (flip_string_ends && Random::uniform_int(0, 1) == 0) {
@@ -964,33 +953,138 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
     sign_direction = -1;
   }
 
-  const double m1 = pythia_hadron_->particleData.m0(idqIn[0]);
-  const double m2 = pythia_hadron_->particleData.m0(idqIn[1]);
+  const double m1 = pythia_hadron_->particleData.m0(idq1);
+  const double m2 = pythia_hadron_->particleData.m0(idq2);
   if (m1 + m2 > mString) {
     throw std::runtime_error("String fragmentation: m1 + m2 > mString");
   }
-
-  // evaluate momenta of quarks
-  const double pCMquark = pCM(mString, m1, m2);
-  const double E1 = std::sqrt(m1 * m1 + pCMquark * pCMquark);
-  const double E2 = std::sqrt(m2 * m2 + pCMquark * pCMquark);
-
-  ThreeVector direction = sign_direction * evecLong;
-
   Pythia8::Vec4 pSum = 0.;
 
-  // For status and (anti)color see \iref{Sjostrand:2007gs}.
-  const int status1 = 1, color1 = 1, anticolor1 = 0;
-  Pythia8::Vec4 pquark = set_Vec4(E1, -direction * pCMquark);
-  pSum += pquark;
-  pythia_hadron_->event.append(idqIn[0], status1, color1, anticolor1,
-                               pquark, m1);
+  if ((std::abs(bstring) == 3) && (mString > m1 + m2 + 1.)) {
+    const double ssbar_supp = pythia_hadron_->parm("StringFlav:probStoUD");
+    std::array<ThreeVector, 3> evec_basis;
+    make_orthonormal_basis(evecLong, evec_basis);
 
-  const int status2 = 1, color2 = 0, anticolor2 = 1;
-  pquark = set_Vec4(E2, direction * pCMquark);
-  pSum += pquark;
-  pythia_hadron_->event.append(idqIn[1], status2, color2, anticolor2,
-                               pquark, m2);
+    bool found_leading_baryon = false;
+    while (!found_leading_baryon) {
+
+      double idnew_qqbar = 0;
+      if (Random::uniform(0., 1. + ssbar_supp) < 1.) {
+        if (Random::uniform_int(0, 1) == 0) {
+          idnew_qqbar = 1;
+        } else {
+          idnew_qqbar = 2;
+        }
+      } else {
+        idnew_qqbar = 3;
+      }
+
+      int id_diquark = 0;
+      if (bstring > 0) {
+        id_diquark = std::abs(idqIn[1]);
+        idqIn[1] = -idnew_qqbar;
+      } else {
+        id_diquark = std::abs(idqIn[0]);
+        idqIn[0] = idnew_qqbar;
+      }
+
+      std::array<int, 5> frag_net_q;
+      for (int iq = 0; iq < 5; iq++) {
+        frag_net_q[iq] = (baryon > 0 ? 1 : -1) *
+                         (pythia_hadron_->particleData.nQuarksInCode(
+                          idnew_qqbar, iq + 1) +
+                          pythia_hadron_->particleData.nQuarksInCode(
+                          id_diquark, iq + 1));
+      }
+      const int frag_iso3 = frag_net_q[1] - frag_net_q[0];
+      const int frag_strange = -frag_net_q[2];
+      const int frag_charm = frag_net_q[3];
+      const int frag_bottom = -frag_net_q[4];
+
+      std::vector<int> pdgid_possible;
+      std::vector<double> weight_possible;
+      std::vector<double> weight_summed;
+      pdgid_possible.clear();
+      weight_possible.clear();
+      weight_summed.clear();
+      for (auto &ptype : ParticleType::list_all()) {
+        const int pdgid = (baryon > 0 ? 1 : -1) *
+                          std::abs(ptype.pdgcode().get_decimal());
+        if ((pythia_hadron_->particleData.isParticle(pdgid)) &&
+            (frag_iso3 == ptype.pdgcode().isospin3()) &&
+            (frag_strange == ptype.pdgcode().strangeness()) &&
+            (frag_charm == ptype.pdgcode().charmness()) &&
+            (frag_bottom == ptype.pdgcode().bottomness())) {
+          const int spin_degeneracy = ptype.pdgcode().spin_degeneracy();
+          const double mass_pole = ptype.mass();
+          const double weight = static_cast<double>(spin_degeneracy) / mass_pole;
+          pdgid_possible.push_back(pdgid);
+          weight_possible.push_back(weight);
+        }
+      }
+      const int n_possible = pdgid_possible.size();
+      weight_summed.push_back(0.);
+      for (int i = 0; i < n_possible; i++) {
+        weight_summed.push_back(weight_summed[i] + weight_possible[i]);
+      }
+
+      int pdgid_frag = 0;
+      const double uspc = Random::uniform(0., weight_summed[n_possible]);
+      for (int i = 0; i < n_possible; i++) {
+        if ((uspc >= weight_summed[i]) && (uspc < weight_summed[i + 1])) {
+          pdgid_frag = pdgid_possible[i];
+          break;
+        }
+      }
+      const double mass_frag = pythia_hadron_->particleData.mSel(pdgid_frag);
+
+      const double QTrx = Random::normal(0., sigma_qperp_ / sqrt2_);
+      const double QTry = Random::normal(0., sigma_qperp_ / sqrt2_);
+      const double QTrn = std::sqrt(QTrx * QTrx + QTry * QTry);
+      const double mTrn_frag = std::sqrt(QTrn * QTrn + mass_frag * mass_frag);
+
+      const double ppos_frag = 0.6 * mString / sqrt2_;
+      const double pneg_frag = 0.5 * mTrn_frag * mTrn_frag / ppos_frag;
+      const double ppos_string_new = mString / sqrt2_ - ppos_frag;
+      const double pneg_string_new = mString / sqrt2_ - pneg_frag;
+      const double mass_string_new = std::sqrt(std::max(0.,
+                                     2. * ppos_string_new * pneg_string_new -
+                                     QTrn * QTrn));
+
+      double mass_min = 0.;
+      for (int i = 0; i < 2; i++) {
+        mass_min += pythia_hadron_->particleData.m0(idqIn[i]);
+      }
+      if (mass_string_new > mass_min) {
+        found_leading_baryon = true;
+
+        FourVector mom_frag((ppos_frag + pneg_frag) / sqrt2_,
+                            (ppos_frag - pneg_frag) * evec_basis[0] +
+                            QTrx * evec_basis[1] + QTry * evec_basis[2]);
+        append_intermediate_list(pdgid_frag, mom_frag, intermediate_particles);
+      }
+    }
+  } else {
+    // evaluate momenta of quarks
+    const double pCMquark = pCM(mString, m1, m2);
+    const double E1 = std::sqrt(m1 * m1 + pCMquark * pCMquark);
+    const double E2 = std::sqrt(m2 * m2 + pCMquark * pCMquark);
+
+    ThreeVector direction = sign_direction * evecLong;
+
+    // For status and (anti)color see \iref{Sjostrand:2007gs}.
+    const int status1 = 1, color1 = 1, anticolor1 = 0;
+    Pythia8::Vec4 pquark = set_Vec4(E1, -direction * pCMquark);
+    pSum += pquark;
+    pythia_hadron_->event.append(idqIn[0], status1, color1, anticolor1,
+                                 pquark, m1);
+
+    const int status2 = 1, color2 = 0, anticolor2 = 1;
+    pquark = set_Vec4(E2, direction * pCMquark);
+    pSum += pquark;
+    pythia_hadron_->event.append(idqIn[1], status2, color2, anticolor2,
+                                 pquark, m2);
+  }
 
   // implement PYTHIA fragmentation
   pythia_hadron_->event[0].p(pSum);
