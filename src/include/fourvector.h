@@ -451,7 +451,14 @@ double inline FourVector::sqr() const {
   return x_[0] * x_[0] - x_[1] * x_[1] - x_[2] * x_[2] - x_[3] * x_[3];
 }
 
-double inline FourVector::abs() const { return std::sqrt(std::abs(this->sqr())); }
+double inline FourVector::abs() const {
+  if (this->sqr() > -really_small) {
+    return std::sqrt(std::abs(this->sqr()));}
+  else {
+    throw std::runtime_error("Absolute value of 4-vector could not be "
+                    "determined, taking sqrt of negative value.");
+  };
+}
 
 double inline FourVector::sqr3() const { return this->threevec().sqr(); }
 
