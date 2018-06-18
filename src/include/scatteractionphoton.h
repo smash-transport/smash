@@ -12,7 +12,7 @@
 
 #include <utility>
 
-#include "scatteraction.h"
+#include "include/scatteraction.h"
 
 namespace smash {
 

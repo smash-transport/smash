@@ -35,8 +35,7 @@ ScatterActionPhoton::ScatterActionPhoton(const ParticleList &in,
       number_of_fractional_photons_(n_frac_photons),
       hadron_out_t_(outgoing_hadron_type(in)),
       hadron_out_mass_(sample_out_hadron_mass(hadron_out_t_)),
-      hadronic_cross_section_(hadronic_cross_section_input) {
-      }
+      hadronic_cross_section_(hadronic_cross_section_input) {}
 
 ScatterActionPhoton::ReactionType ScatterActionPhoton::photon_reaction_type(
     const ParticleList &in) {
