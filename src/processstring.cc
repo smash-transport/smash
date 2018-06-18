@@ -125,17 +125,6 @@ void StringProcess::common_setup_pythia(Pythia8::Pythia *pythia_in,
 int StringProcess::append_final_state(ParticleList &intermediate_particles,
                                       const FourVector &uString,
                                       const ThreeVector &evecLong) {
-  struct fragment_type {
-    FourVector momentum;
-    double pparallel;  // longitudinal component of momentum
-    double y;          // momentum rapidity
-    double xtotfac;    // cross-section scaling factor
-    PdgCode pdg;
-    bool is_leading;  // is leading hadron or not
-  };
-
-  std::vector<fragment_type> fragments;
-
   // sort outgoing particles according to z-velocity
   std::sort(intermediate_particles.begin(), intermediate_particles.end(),
             [&](ParticleData i, ParticleData j) {
@@ -211,8 +200,8 @@ int StringProcess::append_final_state(ParticleList &intermediate_particles,
            intermediate_particles[i].pdgcode().baryon_number() == bstring) {
       i--;
     }
-    double xtotfac = intermediate_particles[i].pdgcode().is_baryon() ?
-                     1. / 3. : 0.5;
+    xtotfac = intermediate_particles[i].pdgcode().is_baryon() ?
+              1. / 3. : 0.5;
     xtotfac *= additional_xsec_supp_;
     intermediate_particles[i].set_cross_section_scaling_factor(xtotfac);
   } else {
@@ -970,7 +959,6 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
 
     bool found_leading_baryon = false;
     while (!found_leading_baryon) {
-
       int idnew_qqbar = 0;
       if (Random::uniform(0., 1. + ssbar_supp) < 1.) {
         if (Random::uniform_int(0, 1) == 0) {
@@ -993,7 +981,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
 
       std::array<int, 5> frag_net_q;
       for (int iq = 0; iq < 5; iq++) {
-        frag_net_q[iq] = (baryon > 0 ? 1 : -1) *
+        frag_net_q[iq] = (bstring > 0 ? 1 : -1) *
                          (pythia_hadron_->particleData.nQuarksInCode(
                           idnew_qqbar, iq + 1) +
                           pythia_hadron_->particleData.nQuarksInCode(
@@ -1011,7 +999,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
       weight_possible.clear();
       weight_summed.clear();
       for (auto &ptype : ParticleType::list_all()) {
-        const int pdgid = (baryon > 0 ? 1 : -1) *
+        const int pdgid = (bstring > 0 ? 1 : -1) *
                           std::abs(ptype.pdgcode().get_decimal());
         if ((pythia_hadron_->particleData.isParticle(pdgid)) &&
             (frag_iso3 == ptype.pdgcode().isospin3()) &&
