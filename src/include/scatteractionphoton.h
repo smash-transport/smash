@@ -12,7 +12,7 @@
 
 #include <utility>
 
-#include "include/scatteraction.h"
+#include "scatteraction.h"
 
 namespace smash {
 
@@ -180,7 +180,7 @@ class ScatterActionPhoton : public ScatterAction {
   CollisionBranchList collision_processes_photons_;
 
   /// Photonic process as determined from incoming particles.
-  ReactionType reac_;
+  const ReactionType reac_;
 
   /**
    * Number of photons created for each hadronic scattering, needed for correct
@@ -190,10 +190,10 @@ class ScatterActionPhoton : public ScatterAction {
   const int number_of_fractional_photons_;
 
   /// ParticlePtr to the outgoing hadron.
-  ParticleTypePtr hadron_out_t_;
+  const ParticleTypePtr hadron_out_t_;
 
   /// Mass of outgoing hadron
-  double hadron_out_mass_;
+  const double hadron_out_mass_;
 
   /**
    * Compile-time switch for setting the handling of processes which can happen
@@ -215,7 +215,7 @@ class ScatterActionPhoton : public ScatterAction {
   double cross_section_photons_ = 0.0;
 
   /// Total hadronic cross section
-  double hadronic_cross_section_ = 0.0;
+  const double hadronic_cross_section_;
 
   /**
    * Calculate the differential cross section of  photon process.
