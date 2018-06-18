@@ -110,8 +110,6 @@ class StringProcess {
   double time_formation_const_;
   /// time of collision in the computational frame [fm]
   double time_collision_;
-  /// Lorentz gamma factor of center of mass in the computational frame
-  double gamma_factor_com_;
   /// square root of 2 (\f$\sqrt{2}\f$)
   double sqrt2_;
 
@@ -296,9 +294,8 @@ class StringProcess {
    * mass.
    * \param[in] incoming is the list of initial state particles.
    * \param[in] tcoll is time of collision.
-   * \param[in] gamma gamma factor of the center of mass.
    */
-  void init(const ParticleList &incoming, double tcoll, double gamma);
+  void init(const ParticleList &incoming, double tcoll);
   /**
    * compute three orthonormal basis vectors from unit vector
    * in the longitudinal direction
@@ -497,6 +494,8 @@ class StringProcess {
    * \param[out] evecLong unit 3-vector specifying the direction of diquark or
    *                      anti-diquark.
    * \param[in] flip_string_ends is whether or not we randomly switch string ends.
+   * \param[in] separate_fragment_baryon is whether fragment leading baryon
+                (or anti-baryon) with separate fragmentation function.
    * \param[out] intermediate_particles list of fragmented particles
    * \return number of hadrons fragmented out of string.
    *
@@ -505,6 +504,7 @@ class StringProcess {
    */
   int fragment_string(int idq1, int idq2, double mString,
                       ThreeVector &evecLong, bool flip_string_ends,
+                      bool separate_fragment_baryon,
                       ParticleList &intermediate_particles);
 
   /**

@@ -31,8 +31,7 @@ StringProcess::StringProcess(double string_tension, double time_formation,
       kappa_tension_string_(string_tension),
       additional_xsec_supp_(0.7),
       time_formation_const_(time_formation),
-      time_collision_(0.),
-      gamma_factor_com_(1.) {
+      time_collision_(0.) {
   // setup and initialize pythia for hard string process
   pythia_parton_ = make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
   /* select only non-diffractive events
@@ -136,40 +135,31 @@ int StringProcess::append_final_state(ParticleList &intermediate_particles,
   };
 
   std::vector<fragment_type> fragments;
-  double p_pos_tot = 0.0, p_neg_tot = 0.0;
+
+  // sort outgoing particles according to z-velocity
+  std::sort(intermediate_particles.begin(), intermediate_particles.end(),
+            [&](ParticleData i, ParticleData j) {
+              return i.momentum().velocity() * evecLong >
+                     j.momentum().velocity() * evecLong;
+            });
+
+  int nfrag = 0;
   int bstring = 0;
+  double p_pos_tot = 0.0, p_neg_tot = 0.0;
 
-  intermediate_particles.clear();
+  for (ParticleData &data : intermediate_particles) {
+    nfrag += 1;
 
-  for (int ipyth = 0; ipyth < pythia_hadron_->event.size(); ipyth++) {
-    if (!pythia_hadron_->event[ipyth].isFinal()) {
-      continue;
-    }
-    int pythia_id = pythia_hadron_->event[ipyth].id();
-    /* K_short and K_long need are converted to K0 since SMASH only knows K0 */
-    convert_KaonLS(pythia_id);
-    PdgCode pdg = PdgCode::from_decimal(pythia_id);
-    if (!pdg.is_hadron()) {
-      throw std::invalid_argument(
-          "StringProcess::append_final_state warning :"
-          " particle is not meson or baryon.");
-    }
-    FourVector mom(
-        pythia_hadron_->event[ipyth].e(), pythia_hadron_->event[ipyth].px(),
-        pythia_hadron_->event[ipyth].py(), pythia_hadron_->event[ipyth].pz());
-    double pparallel = mom.threevec() * evecLong;
-    double y = 0.5 * std::log((mom.x0() + pparallel) / (mom.x0() - pparallel));
-    fragments.push_back({mom, pparallel, y, 0.0, pdg, false});
-    // total lightcone momentum
-    p_pos_tot += (mom.x0() + pparallel) / sqrt2_;
-    p_neg_tot += (mom.x0() - pparallel) / sqrt2_;
-    bstring += pythia_hadron_->particleData.baryonNumberType(pythia_id);
+    // Set each particle's cross section scaling factor to 0 first
+    data.set_cross_section_scaling_factor(0.0);
+
+    bstring += data.pdgcode().baryon_number();
+
+    const double pparallel = data.momentum().threevec() * evecLong;
+    p_pos_tot += (data.momentum().x0() + pparallel) / sqrt2_;
+    p_neg_tot += (data.momentum().x0() - pparallel) / sqrt2_;
   }
-  const int nfrag = fragments.size();
   assert(nfrag > 0);
-  // Sort the particles in descending order of momentum rapidity
-  std::sort(fragments.begin(), fragments.end(),
-            [&](fragment_type i, fragment_type j) { return i.y > j.y; });
 
   std::vector<double> xvertex_pos, xvertex_neg;
   xvertex_pos.resize(nfrag + 1);
@@ -177,46 +167,58 @@ int StringProcess::append_final_state(ParticleList &intermediate_particles,
   // x^{+} coordinates of the forward end
   xvertex_pos[0] = p_pos_tot / kappa_tension_string_;
   for (int i = 0; i < nfrag; i++) {
+    const double pparallel =
+        intermediate_particles[i].momentum().threevec() * evecLong;
     // recursively compute x^{+} coordinates of q-qbar formation vertex
-    xvertex_pos[i + 1] =
-        xvertex_pos[i] - (fragments[i].momentum.x0() + fragments[i].pparallel) /
-                             (kappa_tension_string_ * sqrt2_);
+    xvertex_pos[i + 1] = xvertex_pos[i] -
+                         (intermediate_particles[i].momentum().x0() +
+                          pparallel) /
+                         (kappa_tension_string_ * sqrt2_);
   }
   // x^{-} coordinates of the backward end
   xvertex_neg[nfrag] = p_neg_tot / kappa_tension_string_;
   for (int i = nfrag - 1; i >= 0; i--) {
+    const double pparallel =
+        intermediate_particles[i].momentum().threevec() * evecLong;
     // recursively compute x^{-} coordinates of q-qbar formation vertex
     xvertex_neg[i] = xvertex_neg[i + 1] -
-                     (fragments[i].momentum.x0() - fragments[i].pparallel) /
-                         (kappa_tension_string_ * sqrt2_);
+                     (intermediate_particles[i].momentum().x0() -
+                      pparallel) /
+                     (kappa_tension_string_ * sqrt2_);
   }
 
   /* compute the cross section suppression factor for leading hadrons
    * based on the number of valence quarks. */
   if (bstring == 0) {  // mesonic string
     for (int i : {0, nfrag - 1}) {
-      fragments[i].xtotfac = fragments[i].pdg.is_baryon() ? 1. / 3. : 0.5;
-      fragments[i].is_leading = true;
+      double xtotfac = intermediate_particles[i].pdgcode().is_baryon() ?
+                       1. / 3. : 0.5;
+      xtotfac *= additional_xsec_supp_;
+      intermediate_particles[i].set_cross_section_scaling_factor(xtotfac);
     }
-  } else if (bstring == 3 || bstring == -3) {  // baryonic string
+  } else if (bstring == 1 || bstring == -1) {  // baryonic string
     // The first baryon in forward direction
     int i = 0;
-    while (i < nfrag && 3 * fragments[i].pdg.baryon_number() != bstring) {
+    while (i < nfrag &&
+           intermediate_particles[i].pdgcode().baryon_number() != bstring) {
       i++;
     }
-    fragments[i].xtotfac = 2. / 3.;
-    fragments[i].is_leading = true;
+    double xtotfac = additional_xsec_supp_ * 2. / 3.;
+    intermediate_particles[i].set_cross_section_scaling_factor(xtotfac);
     // The most backward meson
     i = nfrag - 1;
-    while (i >= 0 && 3 * fragments[i].pdg.baryon_number() == bstring) {
+    while (i >= 0 &&
+           intermediate_particles[i].pdgcode().baryon_number() == bstring) {
       i--;
     }
-    fragments[i].xtotfac = fragments[i].pdg.is_baryon() ? 1. / 3. : 0.5;
-    fragments[i].is_leading = true;
+    double xtotfac = intermediate_particles[i].pdgcode().is_baryon() ?
+                     1. / 3. : 0.5;
+    xtotfac *= additional_xsec_supp_;
+    intermediate_particles[i].set_cross_section_scaling_factor(xtotfac);
   } else {
     throw std::invalid_argument(
         "StringProcess::append_final_state"
-        " encountered bstring != 0, 3, -3");
+        " encountered bstring != 0, 1, -1");
   }
 
   // Velocity three-vector to perform Lorentz boost.
@@ -229,31 +231,24 @@ int StringProcess::append_final_state(ParticleList &intermediate_particles,
     double t_prod = (xvertex_pos[i] + xvertex_neg[i + 1]) / sqrt2_;
     FourVector fragment_position = FourVector(
         t_prod, evecLong * (xvertex_pos[i] - xvertex_neg[i + 1]) / sqrt2_);
-    // boost into the center of mass frame
-    fragments[i].momentum = fragments[i].momentum.LorentzBoost(-vstring);
+    /* boost formation vertex into the center of mass frame
+     * and then into the lab frame */
     fragment_position = fragment_position.LorentzBoost(-vstring);
+    fragment_position = fragment_position.LorentzBoost(-vcomAB_);
     t_prod = fragment_position.x0();
+    intermediate_particles[i].set_formation_time(time_collision_ + t_prod);
+    // boost 4-momentum into the center of mass frame
+    FourVector momentum =
+        intermediate_particles[i].momentum().LorentzBoost(-vstring);
+    intermediate_particles[i].set_4momentum(momentum);
 
-    /* create new particle with specific PDG id
-     * and assign momentum. */
-    ParticleData new_particle(ParticleType::find(fragments[i].pdg));
-    new_particle.set_4momentum(fragments[i].momentum);
-
-    /* additional suppression factor to take
-     * the quantum coherence effect into account. */
-    new_particle.set_cross_section_scaling_factor(
-        fragments[i].is_leading ? additional_xsec_supp_ * fragments[i].xtotfac
-                                : 0.);
-    new_particle.set_formation_time(time_collision_ +
-                                    gamma_factor_com_ * t_prod);
-    final_state_.push_back(new_particle);
+    final_state_.push_back(intermediate_particles[i]);
   }
 
   return nfrag;
 }
 
-void StringProcess::init(const ParticleList &incoming, double tcoll,
-                         double gamma) {
+void StringProcess::init(const ParticleList &incoming, double tcoll) {
   PDGcodes_[0] = incoming[0].pdgcode();
   PDGcodes_[1] = incoming[1].pdgcode();
   massA_ = incoming[0].effective_mass();
@@ -277,7 +272,6 @@ void StringProcess::init(const ParticleList &incoming, double tcoll,
   compute_incoming_lightcone_momenta();
 
   time_collision_ = tcoll;
-  gamma_factor_com_ = gamma;
 }
 
 /* single diffractive
@@ -343,7 +337,7 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   ThreeVector evec = prs.threevec() / prs.threevec().abs();
   // perform fragmentation and add particles to final_state.
   ParticleList new_intermediate_particles;
-  int nfrag = fragment_string(idqX1, idqX2, massX, evec, true,
+  int nfrag = fragment_string(idqX1, idqX2, massX, evec, true, false,
                               new_intermediate_particles);
   if (nfrag < 1) {
     NpartString_[0] = 0;
@@ -415,7 +409,8 @@ bool StringProcess::make_final_state_2strings(
     ThreeVector evec = evec_str[i];
     // perform fragmentation and add particles to final_state.
     int nfrag = fragment_string(quarks[i][0], quarks[i][1], m_str[i], evec,
-                                flip_string_ends, new_intermediate_particles);
+                                flip_string_ends, false,
+                                new_intermediate_particles);
     if (nfrag <= 0) {
       NpartString_[i] = 0;
       return false;
@@ -816,7 +811,7 @@ bool StringProcess::next_BBbarAnn() {
     ThreeVector evec = pcom_[i].threevec() / pcom_[i].threevec().abs();
     const int nfrag = fragment_string(
         remaining_quarks[i], remaining_antiquarks[i],
-        mstr[i], evec, true, new_intermediate_particles);
+        mstr[i], evec, true, false, new_intermediate_particles);
     if (nfrag <= 0) {
       NpartString_[i] = 0;
       return false;
@@ -919,6 +914,7 @@ void StringProcess::make_string_ends(const PdgCode &pdg, int &idq1, int &idq2) {
 int StringProcess::fragment_string(int idq1, int idq2, double mString,
                                    ThreeVector &evecLong,
                                    bool flip_string_ends,
+                                   bool separate_fragment_baryon,
                                    ParticleList &intermediate_particles) {
   pythia_hadron_->event.reset();
   intermediate_particles.clear();
@@ -928,10 +924,13 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
   idqIn[1] = idq2;
 
   int bstring = 0;
+  std::array<double, 2> m_const;
 
   for (int i = 0; i < 2; i++) {
     // evaluate 3 times total baryon number of the string
     bstring += pythia_hadron_->particleData.baryonNumberType(idqIn[i]);
+
+    m_const[i] = pythia_hadron_->particleData.m0(idqIn[i]);
   }
 
   if (flip_string_ends && Random::uniform_int(0, 1) == 0) {
@@ -953,22 +952,26 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
     sign_direction = -1;
   }
 
-  const double m1 = pythia_hadron_->particleData.m0(idq1);
-  const double m2 = pythia_hadron_->particleData.m0(idq2);
-  if (m1 + m2 > mString) {
+  if (m_const[0] + m_const[1] > mString) {
     throw std::runtime_error("String fragmentation: m1 + m2 > mString");
   }
   Pythia8::Vec4 pSum = 0.;
 
-  if ((std::abs(bstring) == 3) && (mString > m1 + m2 + 1.)) {
+  if (separate_fragment_baryon &&
+      (std::abs(bstring) == 3) && (mString > m_const[0] + m_const[1] + 1.)) {
     const double ssbar_supp = pythia_hadron_->parm("StringFlav:probStoUD");
     std::array<ThreeVector, 3> evec_basis;
     make_orthonormal_basis(evecLong, evec_basis);
 
+    double QTrx, QTry, QTrn;
+    double ppos_string_new, pneg_string_new;
+    double mTrn_string_new;
+    std::array<double, 2> m_trans;
+
     bool found_leading_baryon = false;
     while (!found_leading_baryon) {
 
-      double idnew_qqbar = 0;
+      int idnew_qqbar = 0;
       if (Random::uniform(0., 1. + ssbar_supp) < 1.) {
         if (Random::uniform_int(0, 1) == 0) {
           idnew_qqbar = 1;
@@ -1017,7 +1020,8 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
             (frag_bottom == ptype.pdgcode().bottomness())) {
           const int spin_degeneracy = ptype.pdgcode().spin_degeneracy();
           const double mass_pole = ptype.mass();
-          const double weight = static_cast<double>(spin_degeneracy) / mass_pole;
+          const double weight = static_cast<double>(spin_degeneracy) /
+                                mass_pole;
           pdgid_possible.push_back(pdgid);
           weight_possible.push_back(weight);
         }
@@ -1038,37 +1042,93 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
       }
       const double mass_frag = pythia_hadron_->particleData.mSel(pdgid_frag);
 
-      const double QTrx = Random::normal(0., sigma_qperp_ / sqrt2_);
-      const double QTry = Random::normal(0., sigma_qperp_ / sqrt2_);
-      const double QTrn = std::sqrt(QTrx * QTrx + QTry * QTry);
+      QTrx = Random::normal(0., sigma_qperp_ / sqrt2_);
+      QTry = Random::normal(0., sigma_qperp_ / sqrt2_);
+      QTrn = std::sqrt(QTrx * QTrx + QTry * QTry);
       const double mTrn_frag = std::sqrt(QTrn * QTrn + mass_frag * mass_frag);
 
-      const double ppos_frag = 0.6 * mString / sqrt2_;
+      double xfrac = 0.6;
+      const double ppos_frag = xfrac * mString / sqrt2_;
       const double pneg_frag = 0.5 * mTrn_frag * mTrn_frag / ppos_frag;
-      const double ppos_string_new = mString / sqrt2_ - ppos_frag;
-      const double pneg_string_new = mString / sqrt2_ - pneg_frag;
-      const double mass_string_new = std::sqrt(std::max(0.,
-                                     2. * ppos_string_new * pneg_string_new -
-                                     QTrn * QTrn));
+      ppos_string_new = mString / sqrt2_ - ppos_frag;
+      pneg_string_new = mString / sqrt2_ - pneg_frag;
+      mTrn_string_new = std::sqrt(std::max(0.,
+                        2. * ppos_string_new * pneg_string_new));
 
-      double mass_min = 0.;
       for (int i = 0; i < 2; i++) {
-        mass_min += pythia_hadron_->particleData.m0(idqIn[i]);
+        m_const[i] = pythia_hadron_->particleData.m0(idqIn[i]);
       }
-      if (mass_string_new > mass_min) {
+      if (bstring > 0) {
+        m_trans[0] = m_const[0];
+        m_trans[1] = std::sqrt(m_const[1] * m_const[1] + QTrn * QTrn);
+      } else {
+        m_trans[0] = std::sqrt(m_const[0] * m_const[0] + QTrn * QTrn);
+        m_trans[1] = m_const[1];
+      }
+
+      if (mTrn_string_new > m_trans[0] + m_trans[1]) {
         found_leading_baryon = true;
 
         FourVector mom_frag((ppos_frag + pneg_frag) / sqrt2_,
-                            (ppos_frag - pneg_frag) * evec_basis[0] +
-                            QTrx * evec_basis[1] + QTry * evec_basis[2]);
+                            evec_basis[0] * (ppos_frag - pneg_frag) / sqrt2_ +
+                            evec_basis[1] * QTrx + evec_basis[2] * QTry);
         append_intermediate_list(pdgid_frag, mom_frag, intermediate_particles);
       }
     }
+
+    std::array<double, 2> ppos_parton;
+    std::array<double, 2> pneg_parton;
+
+    const double pb_const = (mTrn_string_new * mTrn_string_new +
+                            m_trans[0] * m_trans[0] - m_trans[1] * m_trans[1]) /
+                           (4. * pneg_string_new);
+    const double pc_const = 0.5 * m_trans[0] * m_trans[0] *
+                           ppos_string_new / pneg_string_new;
+    ppos_parton[0] = pb_const + (bstring > 0 ? -1. : 1.) *
+                     std::sqrt(pb_const * pb_const - pc_const);
+    ppos_parton[1] = ppos_string_new - ppos_parton[0];
+
+    for (int i = 0; i < 2; i++) {
+      pneg_parton[i] = 0.5 * m_trans[i] * m_trans[i] / ppos_parton[i];
+    }
+
+    const int status = 1;
+    int color, anticolor;
+    ThreeVector three_mom;
+    Pythia8::Vec4 pquark;
+
+    color = 1;
+    anticolor = 0;
+    if (bstring > 0) {
+      three_mom = evec_basis[0] * (ppos_parton[0] - pneg_parton[0]) / sqrt2_;
+    } else {
+      three_mom = evec_basis[0] * (ppos_parton[0] - pneg_parton[0]) / sqrt2_ -
+                  evec_basis[1] * QTrx - evec_basis[2] * QTry;
+    }
+    pquark = set_Vec4((ppos_parton[0] + pneg_parton[0]) / sqrt2_,
+                      three_mom);
+    pSum += pquark;
+    pythia_hadron_->event.append(idqIn[0], status, color, anticolor,
+                                 pquark, m_const[0]);
+
+    color = 0;
+    anticolor = 1;
+    if (bstring > 0) {
+      three_mom = evec_basis[0] * (ppos_parton[1] - pneg_parton[1]) / sqrt2_ -
+                  evec_basis[1] * QTrx - evec_basis[2] * QTry;
+    } else {
+      three_mom = evec_basis[0] * (ppos_parton[1] - pneg_parton[1]) / sqrt2_;
+    }
+    pquark = set_Vec4((ppos_parton[1] + pneg_parton[1]) / sqrt2_,
+                      three_mom);
+    pSum += pquark;
+    pythia_hadron_->event.append(idqIn[1], status, color, anticolor,
+                                 pquark, m_const[1]);
   } else {
     // evaluate momenta of quarks
-    const double pCMquark = pCM(mString, m1, m2);
-    const double E1 = std::sqrt(m1 * m1 + pCMquark * pCMquark);
-    const double E2 = std::sqrt(m2 * m2 + pCMquark * pCMquark);
+    const double pCMquark = pCM(mString, m_const[0], m_const[1]);
+    const double E1 = std::sqrt(m_const[0] * m_const[0] + pCMquark * pCMquark);
+    const double E2 = std::sqrt(m_const[1] * m_const[1] + pCMquark * pCMquark);
 
     ThreeVector direction = sign_direction * evecLong;
 
@@ -1077,13 +1137,13 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
     Pythia8::Vec4 pquark = set_Vec4(E1, -direction * pCMquark);
     pSum += pquark;
     pythia_hadron_->event.append(idqIn[0], status1, color1, anticolor1,
-                                 pquark, m1);
+                                 pquark, m_const[0]);
 
     const int status2 = 1, color2 = 0, anticolor2 = 1;
     pquark = set_Vec4(E2, direction * pCMquark);
     pSum += pquark;
     pythia_hadron_->event.append(idqIn[1], status2, color2, anticolor2,
-                                 pquark, m2);
+                                 pquark, m_const[1]);
   }
 
   // implement PYTHIA fragmentation
