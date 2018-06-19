@@ -55,10 +55,19 @@ class DecayAction : public Action {
    */
   void generate_final_state() override;
 
+  /**
+   * Sample the masses of the final particles
+   * \returns Pair of sampled masses of particle 1 and 2
+   */
   std::pair<double, double> sample_masses() const override;
 
+  /// Return the total width of the decay process. 
   double get_total_weight() const override { return total_width_; }
 
+  /** 
+   * Get partial width of chosen channel
+  * \return Partial width of chosen channel 
+  */
   double get_partial_weight() const override { return partial_width_; }
 
   /**
