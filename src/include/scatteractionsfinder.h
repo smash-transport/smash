@@ -39,29 +39,19 @@ class ScatterActionsFinder : public ActionFinderInterface {
    *            2) An option determining whether all the scatterings are
    *               isotropic
    *            3) Parameters of the string process
-   * \param[in] parameters Struct of parameteres determining whether to
+   * \param[in] parameters Struct of parameters determining whether to
    *            exclude some certain types of scatterings and switching
    *            among the methods to treat with the NNbar collisions.
    * \param[in] nucleon_has_interacted Flags to record whether an initial
    *            nucleon has interacted with another particle not from the
-   *            same nucleus. The flags are used if we'd like to exclude
+   *            same nucleus. The flags are used if we want to exclude
    *            the first collisions among the nucleons within the same
-   *            nucleus. If we wouldn't exclude these collisions, all the
-   *            flags will be set equal to true, then all the initial
-   *            nucleons can scatter freely since according to the record,
-   *            there will be no more "first" collisions to be excluded.
+   *            nucleus.
    * \param[in] N_tot Total number of the initial nucleons. This number,
    *            as well as the next parameter, will be used to determine
    *            whether two intial nucleons are within the same nucleus
-   *            if we'd like to exclude the firs collisions among them.
+   *            if we'd like to exclude the first collisions among them.
    * \param[in] N_proj Total projectile number
-   * \param[in] n_fractional_photons A number used to replace one outgoing
-   *            photon by a sequencies photons in the photon producing
-   *            scatterings.
-   * \todo (unused variable) assignee: Anna Schaefer
-   *       The value of n_fractional_photons is taken from experiment.cc
-   *       and passed to the private member n_fractional_photons_. However,
-   *       that private member is used nowhere.
    */
   ScatterActionsFinder(Configuration config,
                        const ExperimentParameters &parameters,
@@ -76,7 +66,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * \param[in] p2 Second incoming particle
    * \return How long does it take for the two incoming particles
    *         to propagate before scattering [fm/c]. It's set equal
-   *         to -1 if the two particles are stationary to each
+   *         to -1 if the two particles are not moving relative to each
    *         other.
    */
   static inline double collision_time(const ParticleData &p1,
@@ -145,7 +135,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
 
   /**
    * Find some final collisions at the end of the simulation.
-   * Currently does nothing.
+   * \todo Seems to do nothing.
    */
   ActionList find_final_actions(const Particles & /*search_list*/,
                                 bool /*only_res*/ = false) const override {
@@ -168,15 +158,13 @@ class ScatterActionsFinder : public ActionFinderInterface {
   }
 
   /**
-   * Calculate the maximum transvers distance as a preliminary criterion
-   * for the collisions.
+   * The maximal distance over which particles can interact, related to the
+   * number of test particles and the maximal cross section.
    *
-   * \param[in] testparticles Number of test particles. The cross sections, as
-   *            well as the maximual transverse distance square shall be scaled
-   *            by the inverse of Number of test particles.
+   * \param[in] testparticles Number of test particles.
    *
    * \return Maximal transverse distance squared. [fm\f$^{2}\f$]
-   *         Particle pairs whose transverse distance is larger then this
+   *         Particle pairs whose transverse distance is larger than this
    *         are not checked for collisions.
    */
   double max_transverse_distance_sqr(int testparticles) const {
@@ -197,10 +185,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
    *
    * \param[in] a The specie of the first incoming particle.
    * \param[in] b The specie of the second incoming particle.
-   * \param[in] m_a Mass of species a.
-   * \param[in] m_b Mass of species b.
-   * \todo (redundant) Are the masses redundant here since the pole mass
-   *                   is already included in the ParticleType.
+   * \param[in] m_a Mass of species a [GeV]
+   * \param[in] m_b Mass of species b [GeV]
    */
   void dump_cross_sections(const ParticleType &a, const ParticleType &b,
                            double m_a, double m_b) const;
