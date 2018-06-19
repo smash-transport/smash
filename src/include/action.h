@@ -391,7 +391,7 @@ class Action {
   const Branch *choose_channel(const ProcessBranchList<Branch> &subprocesses,
                                double total_weight) {
     const auto &log = logger<LogArea::Action>();
-    double random_weight = Random::uniform(0., total_weight);
+    double random_weight = random::uniform(0., total_weight);
     double weight_sum = 0.;
     /* Loop through all subprocesses and select one by Monte Carlo, based on
      * their weights.  */

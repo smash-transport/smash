@@ -2171,7 +2171,7 @@ bool CrossSections::decide_string(bool strings_switch,
       assert(x >= -0.5 && x <= 0.5);
       double prob_pythia = 0.5 * (std::sin(M_PI * x) + 1.0);
       assert(prob_pythia >= 0. && prob_pythia <= 1.);
-      return prob_pythia > Random::uniform(0., 1.);
+      return prob_pythia > random::uniform(0., 1.);
     }
   }
 }

@@ -341,7 +341,7 @@ class GrandCanThermalizer {
   ParticleData sample_in_random_cell_mode_algo(const double time,
                                                F&& condition) {
     // Choose random cell, probability = N_in_cell/N_total
-    double r = Random::uniform(0.0, N_total_in_cells_);
+    double r = random::uniform(0.0, N_total_in_cells_);
     double partial_sum = 0.0;
     int index_only_thermalized = -1;
     while (partial_sum < r) {
@@ -354,7 +354,7 @@ class GrandCanThermalizer {
     const double gamma = 1.0 / std::sqrt(1.0 - cell.v().sqr());
     const double N_in_cell = N_in_cells_[index_only_thermalized];
     // Which sort to sample - probability N_i/N_tot
-    r = Random::uniform(0.0, N_in_cell);
+    r = random::uniform(0.0, N_in_cell);
     double N_sum = 0.0;
     ParticleTypePtr type_to_sample;
     for (ParticleTypePtr i : eos_typelist_) {

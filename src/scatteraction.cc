@@ -288,12 +288,12 @@ void ScatterAction::sample_angles(std::pair<double, double> masses) {
       bb = std::max(Cugnon_bpp(plab), really_small);
       a = 1.;
     }
-    double t = Random::expo(bb, t_range[0], t_range[1]);
-    if (Random::canonical() > 1. / (1. + a)) {
+    double t = random::expo(bb, t_range[0], t_range[1]);
+    if (random::canonical() > 1. / (1. + a)) {
       t = t_range[0] + t_range[1] - t;
     }
     // determine scattering angles in center-of-mass frame
-    phitheta = Angles(2. * M_PI * Random::canonical(),
+    phitheta = Angles(2. * M_PI * random::canonical(),
                       1. - 2. * (t - t_range[0]) / (t_range[1] - t_range[0]));
   } else if (nn_scattering && p_a->pdgcode().is_Delta() &&
              p_b->pdgcode().is_nucleon() &&
@@ -305,11 +305,11 @@ void ScatterAction::sample_angles(std::pair<double, double> masses) {
      * elastic pp scattering, as suggested in \iref{Cugnon:1996kh}. */
     const double plab = plab_from_s(mandelstam_s());
     const double bb = std::max(Cugnon_bpp(plab), really_small);
-    double t = Random::expo(bb, t_range[0], t_range[1]);
-    if (Random::canonical() > 0.5) {
+    double t = random::expo(bb, t_range[0], t_range[1]);
+    if (random::canonical() > 0.5) {
       t = t_range[0] + t_range[1] - t;  // symmetrize
     }
-    phitheta = Angles(2. * M_PI * Random::canonical(),
+    phitheta = Angles(2. * M_PI * random::canonical(),
                       1. - 2. * (t - t_range[0]) / (t_range[1] - t_range[0]));
   } else if (nn_scattering && p_b->pdgcode().is_nucleon() && !isotropic_ &&
              (p_a->type().is_Nstar() || p_a->type().is_Deltastar())) {
@@ -321,12 +321,12 @@ void ScatterAction::sample_angles(std::pair<double, double> masses) {
      *  t_0 in such a case. */
     double t = t_range[0];
     if (a < 30) {
-      t = Random::power(-a, t_range[0], t_range[1]);
+      t = random::power(-a, t_range[0], t_range[1]);
     }
-    if (Random::canonical() > 0.5) {
+    if (random::canonical() > 0.5) {
       t = t_range[0] + t_range[1] - t;  // symmetrize
     }
-    phitheta = Angles(2. * M_PI * Random::canonical(),
+    phitheta = Angles(2. * M_PI * random::canonical(),
                       1. - 2. * (t - t_range[0]) / (t_range[1] - t_range[0]));
   } else {
     /* isotropic angular distribution */

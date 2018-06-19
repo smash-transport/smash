@@ -101,8 +101,8 @@ ThreeVector DeformedNucleus::distribute_nucleon() const {
   do {
     a_direction.distribute_isotropically();
     // sample r**2 dr
-    a_radius = radius_max * std::cbrt(Random::canonical());
-  } while (Random::canonical() >
+    a_radius = radius_max * std::cbrt(random::canonical());
+  } while (random::canonical() >
            deformed_woods_saxon(a_radius, a_direction.costheta()) /
                Nucleus::get_saturation_density());
 

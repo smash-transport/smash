@@ -29,7 +29,7 @@ std::ostream &operator<<(std::ostream &out, const Line &l) {
   return out;
 }
 
-auto ran = Random::uniform_dist<double>(0.0, 1.0);
+auto ran = random::uniform_dist<double>(0.0, 1.0);
 
 AdaptiveRejectionSampler::AdaptiveRejectionSampler(
     std::function<double(double)> func, double xmin, double xmax)
@@ -299,7 +299,7 @@ inline int AdaptiveRejectionSampler::sample_j() {
 }
 
 inline double AdaptiveRejectionSampler::sample_x(int j) {
-  double r = Random::canonical<double>();
+  double r = random::canonical<double>();
   double m = upper_bounds_.at(j).piecewise_linear_line.m;
   // m != 0, sample from piecewise exponential distribution
   if (m > std::numeric_limits<double>::min()) {
@@ -337,7 +337,7 @@ double AdaptiveRejectionSampler::get_one_sample() {
   while (true) {
     const int j = sample_j();
     const double x = sample_x(j);
-    const double rand = Random::canonical<double>();
+    const double rand = random::canonical<double>();
     if (squeezing_test(x, j, rand)) {
       return x;
     } else if (rejection_test(x, j, rand)) {

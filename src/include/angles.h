@@ -193,8 +193,8 @@ inline std::ostream &operator<<(std::ostream &out, const Angles &a) {
 
 void inline Angles::distribute_isotropically() {
   /* isotropic distribution: phi in [0, 2pi) and cos(theta) in [-1,1] */
-  phi_ = Random::uniform(0.0, twopi);
-  costheta_ = Random::uniform(-1.0, 1.0);
+  phi_ = random::uniform(0.0, twopi);
+  costheta_ = random::uniform(-1.0, 1.0);
 }
 
 void inline Angles::set_phi(const double newphi) {

@@ -18,10 +18,10 @@
 
 namespace smash {
 
-/** Namespace Random provides functions for Random Number Generation.
+/** Namespace random provides functions for random Number Generation.
  */
 
-namespace Random {
+namespace random {
 
 /// The random number engine used is the Mersenne Twister.
 using Engine = std::mt19937_64;
@@ -35,7 +35,7 @@ extern /*thread_local (see #3075)*/ Engine engine;
  * random numbers in the same interval. Example:
  *
  * \code
- *   using namespace Random;
+ *   using namespace random;
  *   double sum = 0.0;
  *   auto uniform_0_to_3 = uniform_dist(0., 3.);
  *   for (MANY_TIMES) {
@@ -192,7 +192,7 @@ int sgn(T val) {
  * \param n Exponent in power law (arbitrary real number).
  * \param xMin Minimum value.
  * \param xMax Maximum value.
- * \return Random number between xMin and xMax.
+ * \return random number between xMin and xMax.
  */
 template <typename T = double>
 T power(T n, T xMin, T xMax) {
@@ -352,7 +352,7 @@ T beta_a0(T xmin, T b) {
   return std::exp(-y);
 }
 
-}  // namespace Random
+}  // namespace random
 }  // namespace smash
 
 #endif  // SRC_INCLUDE_RANDOM_H_

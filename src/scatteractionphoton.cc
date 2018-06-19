@@ -203,14 +203,14 @@ void ScatterActionPhoton::generate_final_state() {
   const double pcm_in = cm_momentum();
   const double pcm_out = pCM(sqrts, m_out, 0.0);
 
-  const double t = Random::uniform(t1, t2);
+  const double t = random::uniform(t1, t2);
 
   double costheta = (t - pow_int(m2, 2) +
                      0.5 * (s + pow_int(m2, 2) - pow_int(m1, 2)) *
                          (s - pow_int(m_out, 2)) / s) /
                     (pcm_in * (s - pow_int(m_out, 2)) / sqrts);
 
-  Angles phitheta(Random::uniform(0.0, twopi), costheta);
+  Angles phitheta(random::uniform(0.0, twopi), costheta);
   outgoing_particles_[0].set_4momentum(hadron_out_mass_,
                                        phitheta.threevec() * pcm_out);
   outgoing_particles_[1].set_4momentum(0.0, -phitheta.threevec() * pcm_out);

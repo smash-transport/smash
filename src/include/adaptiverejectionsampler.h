@@ -116,7 +116,7 @@ class AdaptiveRejectionSampler {
   std::vector<double> areas_;
 
   /// areas_ list as weight for the discrete_distribution_.
-  Random::discrete_dist<double> discrete_distribution_;
+  random::discrete_dist<double> discrete_distribution_;
 
   AdaptiveRejectionSampler() = default;
 
