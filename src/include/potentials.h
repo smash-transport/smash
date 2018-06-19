@@ -39,7 +39,7 @@ class Potentials {
   /**
    * Potentials constructor.
    *
-   * \param[in] conf Configuration which contains the booleans
+   * \param[in] conf Configuration which contains the switches
    *            determining whether to turn on the Skyrme or the
    *            symmetry potentials, and the coefficents controlling
    *            how strong the potentials are.
@@ -49,10 +49,11 @@ class Potentials {
    */
   Potentials(Configuration conf, const DensityParameters &parameters);
   VIRTUAL_FOR_TESTS
+  /// Standard destructor
   ~Potentials();
 
   /**
-   * Evaluates skyrme potential given baryon density.
+   * Evaluates skyrme potential given a baryon density.
    *
    * \param[in] baryon_density Baryon density \f$\rho\f$ evaluated in the
    *            local rest frame in fm\f$^{-3}\f$.
@@ -83,7 +84,7 @@ class Potentials {
    * \param[in] acts_on Type of particle on which potential is going to act.
    *            It gives the charges (or more precisely, the scaling factors)
    *		of the particle moving in the potential field.
-   * \return Total potential energe acting on the particle: \f[U_{\rm tot}
+   * \return Total potential energy acting on the particle: \f[U_{\rm tot}
    *         =Q_BU_B+2I_3U_I\f] in GeV, where \f$Q_B\f$ is the baryon charge
    *	     scaled by the ratio of the light (u, d) quark to the total quark
    *         number and \f$I_3\f$ is the third compnent of the isospin.
