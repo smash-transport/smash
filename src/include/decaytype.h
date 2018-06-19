@@ -42,7 +42,7 @@ class DecayType {
   /**
    * \return if the final state consists of the given particle list.
    *
-   * \param list Final state particle types to be checked.
+   * \param[in] list Final state particle types to be checked.
    */
   virtual bool has_particles(ParticleTypePtrList list) const = 0;
   /**
@@ -149,8 +149,7 @@ class TwoBodyDecayStable : public TwoBodyDecay {
 
 /**
  * TwoBodyDecaySemistable represents a decay type with two final-state
- * particles,
- * one of which is stable and the other is unstable.
+ * particles, one of which is stable and the other is unstable. 
  */
 class TwoBodyDecaySemistable : public TwoBodyDecay {
  public:
