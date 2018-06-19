@@ -114,7 +114,7 @@ class Actions {
    *
    * \param[in] a First action
    * \param[in] b Second action
-   * \return Whether the first action will be exetuted later than the second.
+   * \return Whether the first action will be executed later than the second.
    */
   static bool cmp(const ActionPtr& a, const ActionPtr& b) {
     return a->time_of_execution() > b->time_of_execution();

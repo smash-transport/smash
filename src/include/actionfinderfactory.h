@@ -33,7 +33,7 @@ class ActionFinderInterface {
    *
    * \param[in] search_list a list of particles where each pair needs to be
    *                  tested  for possible interaction
-   * \param[in] dt duration of the current time step in fm/c
+   * \param[in] dt duration of the current time step [fm]
    * \return The function returns a list (std::vector) of Action objects that
    *         could possibly be executed in this time step.
    */
@@ -47,7 +47,7 @@ class ActionFinderInterface {
    *                  be tested for possible interactions with the neighbors
    * \param[in] neighbors_list a list of particles that need to be tested
    *                  against particles in search_list for possible interaction
-   * \param[in] dt duration of the current time step in fm/c
+   * \param[in] dt duration of the current time step [fm]
    * \return The function returns a list (std::vector) of Action objects that
    *         could possibly be executed in this time step.
    */
@@ -66,7 +66,7 @@ class ActionFinderInterface {
    *                    particles
    * \param[in] surrounding_list a list of particles that need to be tested
    *                  against particles in search_list for possible interaction
-   * \param[in] dt duration of the current time step in fm/c
+   * \param[in] dt duration of the current time step [fm]
    * \return The function returns a list (std::vector) of Action objects that
    *         could possibly be executed in this time step.
    */
