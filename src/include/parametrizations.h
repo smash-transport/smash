@@ -396,10 +396,10 @@ struct pair_hash {
     auto h1 = std::hash<uint64_t>{}(p.first);
     auto h2 = std::hash<uint64_t>{}(p.second);
 
-    // In our case the integers are PDG codes. We know they are different
-    // and their order is defined, so we can simply combine the hashes
-    // using XOR. Note that this yields 0 for h1 == h2. Also,
-    // std::swap(h1, h2) does not not change the final hash.
+    /* In our case the integers are PDG codes. We know they are different
+     * and their order is defined, so we can simply combine the hashes
+     * using XOR. Note that this yields 0 for h1 == h2. Also,
+     * std::swap(h1, h2) does not not change the final hash. */
     assert(h1 != h2);
     return h1 ^ h2;
   }
