@@ -63,7 +63,13 @@ YAML::Node remove_empty_maps(YAML::Node root) {
   return root;
 }
 
-/// \todo(unused)
+/**
+ * Merge two YAML::Nodes
+ *
+ * \param[in] a YAML::Node into which b is merged.
+ * \param[in] b YAML::Node that is merged into a.
+ * \return YAML::Node which is the merge of a and b.
+ */
 YAML::Node operator|=(YAML::Node a, const YAML::Node &b) {
   if (b.IsMap()) {
     for (auto n0 : b) {

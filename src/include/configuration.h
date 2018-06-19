@@ -23,12 +23,32 @@
 #include "forwarddeclarations.h"
 
 namespace YAML {
+
+  /**
+   * Convert from YAML::Node to SMASH-readable (C++) format and vice versa.
+   *
+   * \tparam T Type of the values (could be any data type that
+   * needs conversion).
+   */
 template <typename T>
-/// \todo(warnings) Needs documentation, if actually used
 struct convert {
-  /// \todo (unused)
+  /**
+   * Serialization: Converts x (of any type) to a YAML::Node. To do this,
+   * the type of x needs first be cast to a string.
+   *
+   * \param[in] x Value that is to be converted to a YAML::Node.
+   * \return YAML node
+   */
   static Node encode(const T &x) { return Node{static_cast<std::string>(x)}; }
-  /// \todo (unused)
+
+  /**
+   * Deserialization: Converts a YAML::Node to any SMASH-readable data type and
+   * returns whether or not this operation was successful.
+   *
+   * \param[in] node YAML::Node that is to be converted.
+   * \param[in] x Value that the YAML:Node is cast to.
+   * \return True in case conversion was successful.
+   */
   static bool decode(const Node &node, T &x) {
     if (!node.IsScalar()) {
       return false;
@@ -38,7 +58,7 @@ struct convert {
     }
   }
 };
-}  // namespace YAML
+} // namespace YAML
 
 namespace smash {
 /*!\Userguide
@@ -110,22 +130,22 @@ namespace smash {
  * maps (normally a tree, but YAML allows it to be cyclic - even though we don't
  * want that feature).
  *
- * Typical usage in SMASH needs to read the value once. In that case use the
- * Configuration::take function:
+ * For the typical usage in SMASH one needs to read the value once. In that
+ * case, use the Configuration::take function:
  * \code
  * double sigma = config.take({"General", "SIGMA"});
  * \endcode
- * Note the curly braces in the function call. It's a std::initializer_list of
- * strings. This allows an arbitrary nesting depth in all via the same function.
+ * Note the curly braces in the function call. It is a std::initializer_list of
+ * strings. This allows an arbitrary nesting depth via the same function.
  * But as a consequence the keys must all be given as constant strings at
  * compile time.
  *
- * If you need to access configuration values from a run-time string you can use
- * Configuration::operator[]. This returns a Configuration object that
+ * If you need to access the configuration values from a run-time string you can
+ * use Configuration::operator[]. This returns a Configuration object that
  * references the respective sub-tree.
  *
  * By taking values (instead of just reading), the configuration object should
- * be empty at the end of initialization. If the object is not empty then SMASH
+ * be empty at the end of the initialization. If the object is not empty, SMASH
  * will print a warning (using Configuration::unused_values_report). This can be
  * important for the user to discover typos in his configuration file (or
  * command line parameters).
@@ -141,7 +161,7 @@ class Configuration {
   };
   /**
    * \ingroup exception
-   * Thrown for YAML parse errors
+   * Thrown for YAML parse errors.
    */
   struct ParseError : public std::runtime_error {
     using std::runtime_error::runtime_error;
@@ -149,7 +169,7 @@ class Configuration {
 
   /**
    * \ingroup exception
-   * Thrown if the file does not exist
+   * Thrown if the file does not exist.
    */
   struct FileDoesNotExist : public std::runtime_error {
     using std::runtime_error::runtime_error;
@@ -228,6 +248,7 @@ class Configuration {
      *
      * This makes reading values more convenient than calling as<type>()
      * explicitly.
+     * \throw IncorrectTypeInAssignment
      */
     template <typename T>
     operator T() const {
@@ -241,8 +262,9 @@ class Configuration {
     }
 
     /**
-     * \todo(warning) Is it okay to leave the following list of self-explanatory
-     * operators undocumented?
+     * Check conversion exceptions.
+     *
+     * \throw IncorrectTypeInAssignment in case type conversion failed.
      */
     template <typename T>
     operator std::vector<T>() const {
@@ -263,6 +285,13 @@ class Configuration {
       }
     }
 
+    /**
+     * Cast array of keys to a std::array of length N.
+     *
+     * \return Array of std::array type.
+     * \throw IncorrectTypeInAssignment in case the number of keys does not
+     * match the length of the newly generated array.
+     */
     template <typename T, size_t N>
     operator std::array<T, N>() const {
       const std::vector<T> vec = operator std::vector<T>();
@@ -281,6 +310,13 @@ class Configuration {
       return arr;
     }
 
+    /**
+     * Set ReactionBitSet from configuration values.
+     *
+     * \return ReactionBitSet with all included reaction types.
+     * \throw IncorrectTypeInAssignment in case a reaction type that is not
+     * available is provided as a configuration value.
+     */
     operator ReactionsBitSet() const {
       const std::vector<std::string> v = operator std::vector<std::string>();
       ReactionsBitSet s;
@@ -311,6 +347,13 @@ class Configuration {
       return s;
     }
 
+    /**
+     * Set thermodynamic quantity from configuration values.
+     *
+     * \return Set of thermodynamic quantity.
+     * \throw IncorrectTypeInAssignment in case a thermodynamic quantity that is
+     * not available is provided as a configuration value.
+     */
     operator std::set<ThermodynamicQuantity>() const {
       const std::vector<std::string> v = operator std::vector<std::string>();
       std::set<ThermodynamicQuantity> s;
@@ -333,6 +376,13 @@ class Configuration {
       return s;
     }
 
+    /**
+     * Set calculation frame from configuration values.
+     *
+     * \return string of calculation frame.
+     * \throw IncorrectTypeInAssignment in case a calculation frame that is
+     * not available is provided as a configuration value.
+     */
     operator CalculationFrame() const {
       const std::string s = operator std::string();
       if (s == "center of velocity") {
@@ -350,6 +400,13 @@ class Configuration {
           "or \"fixed target\".");
     }
 
+    /**
+     * (De-)Activate Fermi motion from configuration values.
+     *
+     * \return Fermi motion setup.
+     * \throw IncorrectTypeInAssignment in case a Fermi motion value that is
+     * not available is provided as a configuration value.
+     */
     operator FermiMotion() const {
       const std::string s = operator std::string();
       if (s == "off") {
@@ -366,6 +423,13 @@ class Configuration {
           "\" should be \"off\" or \"on\" or \"frozen\".");
     }
 
+    /**
+     * Set density type from configuration values.
+     *
+     * \return Density type.
+     * \throw IncorrectTypeInAssignment in case a density type that is
+     * not available is provided as a configuration value.
+     */
     operator DensityType() const {
       const std::string s = operator std::string();
       if (s == "hadron") {
@@ -390,6 +454,13 @@ class Configuration {
                                       "or \"none\".");
     }
 
+    /**
+     * Set expansion mode from configuration values.
+     *
+     * \return Expansion mode.
+     * \throw IncorrectTypeInAssignment in case an expansion mode that is
+     * not available is provided as a configuration value.
+     */
     operator ExpansionMode() const {
       const std::string s = operator std::string();
       if (s == "NoExpansion") {
@@ -410,6 +481,13 @@ class Configuration {
           "\"MassiveFRW\" or \"Exponential\".");
     }
 
+    /**
+     * Set time step mode from configuration values.
+     *
+     * \return time step mode.
+     * \throw IncorrectTypeInAssignment in case a time step mode that is
+     * not available is provided as a configuration value.
+     */
     operator TimeStepMode() const {
       const std::string s = operator std::string();
       if (s == "None") {
@@ -426,6 +504,13 @@ class Configuration {
           "\" should be \"None\", \"Fixed\" or \"Adaptive\".");
     }
 
+    /**
+     * Set initial condition for box setup from configuration values.
+     *
+     * \return Initial condition for box setup.
+     * \throw IncorrectTypeInAssignment in case an initial conditions that is
+     * not available is provided as a configuration value.
+     */
     operator BoxInitialCondition() const {
       const std::string s = operator std::string();
       if (s == "thermal momenta") {
@@ -439,6 +524,13 @@ class Configuration {
           "\" should be \"thermal momenta\" or \"peaked momenta\".");
     }
 
+    /**
+     * Set initial condition for sphere setup from configuration values.
+     *
+     * \return Initial condition for sphere setup.
+     * \throw IncorrectTypeInAssignment in case an initial conditions that is
+     * not available is provided as a configuration value.
+     */
     operator SphereInitialCondition() const {
       const std::string s = operator std::string();
       if (s == "thermal momenta") {
@@ -462,6 +554,13 @@ class Configuration {
           "\"IC_1M\", \"IC_2M\" or" + "\"IC_Massive\".");
     }
 
+    /**
+     * Set treatment of N-Nbar reactions from configuration values.
+     *
+     * \return N-Nbar treatment.
+     * \throw IncorrectTypeInAssignment in case an N-Nbar treatment that is
+     * not available is provided as a configuration value.
+     */
     operator NNbarTreatment() const {
       const std::string s = operator std::string();
       if (s == "no annihilation") {
@@ -478,6 +577,13 @@ class Configuration {
           "\"no annihilation\", \"detailed balance\", or \"strings\".");
     }
 
+    /**
+     * Set cross-section sampling method from configuration values.
+     *
+     * \return Sampling method of cross-section.
+     * \throw IncorrectTypeInAssignment in case a sampling method that is
+     * not available is provided as a configuration value.
+     */
     operator Sampling() const {
       const std::string s = operator std::string();
       if (s == "quadratic") {
@@ -494,6 +600,13 @@ class Configuration {
           "\" should be \"quadratic\", \"uniform\" or \"custom\".");
     }
 
+    /**
+     * Set algorithm for forced thermalization from configuration values.
+     *
+     * \return Algorithm for forced thermalization.
+     * \throw IncorrectTypeInAssignment in case a thermalization algorithm that
+     * is not available is provided as a configuration value.
+     */
     operator ThermalizationAlgorithm() const {
       const std::string s = operator std::string();
       if (s == "mode sampling") {
@@ -561,7 +674,7 @@ class Configuration {
    */
   void merge_yaml(const std::string &yaml);
 
-  /// \todo(warning) I have no idea what this is doing (petersen)
+  /// Lists all YAML::Nodes from the configuration setup.
   std::vector<std::string> list_upmost_nodes();
 
   /**
