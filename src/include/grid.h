@@ -49,12 +49,15 @@ enum class CellSizeStrategy : char {
  */
 class GridBase {
  public:
+  /// A type to store the sizes
   typedef int SizeType;
 
  protected:
   /**
-   * Returns the minimum x,y,z coordinates and the largest dx,dy,dz distances of
+   * \return the minimum x,y,z coordinates and the largest dx,dy,dz distances of
    * the particles in \p particles.
+   *
+   * \param[in] particles Particles in the system
    */
   static std::pair<std::array<double, 3>, std::array<double, 3>>
   find_min_and_length(const Particles &particles);
@@ -80,9 +83,9 @@ class Grid : public GridBase {
    * automatically determines the necessary size for the grid from the positions
    * of the particles.
    *
-   * \param particles The particles to place onto the grid.
-   * \param min_cell_length The minimal length a cell must have.
-   * \param strategy The strategy for determining the cell size
+   * \param[in] particles The particles to place onto the grid.
+   * \param[in] min_cell_length The minimal length a cell must have.
+   * \param[in] strategy The strategy for determining the cell size
    */
   Grid(const Particles &particles, double min_cell_length,
        CellSizeStrategy strategy = CellSizeStrategy::Optimal)
@@ -94,11 +97,11 @@ class Grid : public GridBase {
    * If you need periodic boundaries you have to use this constructor to set the
    * correct length to use for wrapping particles around the borders.
    *
-   * \param min_and_length A pair consisting of the three min coordinates and
-   * the three lengths.
-   * \param particles The particles to place onto the grid.
-   * \param min_cell_length The minimal length a cell must have.
-   * \param strategy The strategy for determining the cell size
+   * \param[in] min_and_length A pair consisting of the three min coordinates
+   * and the three lengths.
+   * \param[in] particles The particles to place onto the grid.
+   * \param[in] min_cell_length The minimal length a cell must have.
+   * \param[in] strategy The strategy for determining the cell size
    */
   Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
            &min_and_length,
@@ -106,20 +109,20 @@ class Grid : public GridBase {
        CellSizeStrategy strategy = CellSizeStrategy::Optimal);
 
   /**
-   * Iterates over all cells in the grid and calls the callback arguments with a
-   * search cell and 0 to 13 neighbor cells.
+   * Iterates over all cells in the grid and calls the callback arguments with
+   * a search cell and 0 to 13 neighbor cells.
    *
    * The neighbor cells are constructed like this:
    * - one cell at x+1
    * - three cells (x-1,x,x+1) at y+1
    * - nine cells (x-1, y-1)...(x+1, y+1) at z+1
    *
-   * \param search_cell_callback A callable called for/with every non-empty cell
-   *                             in the grid.
-   * \param neighbor_cell_callback A callable called for/with every non-empty
-   *                               cell and adjacent cell combination. For a
-   *                               periodic grid, the first argument will be
-   *                               adjusted to wrap around the grid.
+   * \param[in] search_cell_callback A callable called for/with every non-empty
+   *                                 cell in the grid.
+   * \param[in] neighbor_cell_callback A callable called for/with every
+   *                              non-empty cell and adjacent cell combination.
+   *                              For a periodic grid, the first argument will
+   *                              be adjusted to wrap around the grid.
    */
   void iterate_cells(
       const std::function<void(const ParticleList &)> &search_cell_callback,
@@ -128,13 +131,13 @@ class Grid : public GridBase {
 
  private:
   /**
-   * Returns the one-dimensional cell-index from the 3-dim index \p x, \p y, \p
+   * \return the one-dimensional cell-index from the 3-dim index \p x, \p y, \p
    * z.
    */
   SizeType make_index(SizeType x, SizeType y, SizeType z) const;
 
   /**
-   * Returns the one-dimensional cell-index from the 3-dim index \p idx.
+   * \return the one-dimensional cell-index from the 3-dim index \p idx.
    * This is a convenience overload for the above function.
    */
   SizeType make_index(std::array<SizeType, 3> idx) const {

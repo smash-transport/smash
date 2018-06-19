@@ -97,8 +97,8 @@ class Clock {
   /**
    * Initialize with base time and time step size.
    *
-   * \param time base time
-   * \param dt step size
+   * \param[in] time base time
+   * \param[in] dt step size
    */
   Clock(const double time, const double dt)
       : timestep_duration_(convert(dt)), reset_time_(convert(time)) {
@@ -106,12 +106,12 @@ class Clock {
       throw std::range_error("No negative time increment allowed");
     }
   }
-  /// Returns the current time.
+  /// \return the current time.
   double current_time() const {
     return convert(reset_time_ + timestep_duration_ * counter_);
   }
   /**
-   * Returns the time in the next tick.
+   * \return the time in the next tick.
    *
    * This function is needed, because current_time() + timestep_duration()
    * is not the same as the next tick (numerically; this is due to
@@ -124,12 +124,12 @@ class Clock {
     }
     return convert(reset_time_ + timestep_duration_ * (counter_ + 1));
   }
-  /// Returns the time step size.
+  /// \return the time step size.
   double timestep_duration() const { return convert(timestep_duration_); }
   /**
    * Sets the time step size (and resets the counter).
    *
-   * \param dt new time step size
+   * \param[in] dt new time step size
    */
   void set_timestep_duration(const double dt) {
     if (dt < 0.) {
@@ -143,7 +143,7 @@ class Clock {
    * Checks if a multiple of a given interval is reached within the
    * next tick.
    *
-   * \param interval The interval \f$t_i\f$ at which, for instance,
+   * \param[in] interval The interval \f$t_i\f$ at which, for instance,
    * output is expected to happen
    *
    * \return is there a natural number n so that \f$n \cdot t_i\f$ is
@@ -174,7 +174,7 @@ class Clock {
   /**
    * Returns the next multiple of a given interval.
    *
-   * \param interval the interval in question
+   * \param[in] interval the given interval
    *
    * \return The smallest multiple of \p interval that is larger than
    * the current time.
@@ -211,8 +211,8 @@ class Clock {
    * that the time can be adjusted after initialization (different
    * initial conditions may require different starting times).
    *
-   * \param reset_time New time
-   **/
+   * \param[in] reset_time New time
+   */
   void reset(const double reset_time) {
     if (reset_time < current_time()) {
       logger<LogArea::Clock>().debug("Resetting clock from", current_time(),
@@ -239,7 +239,8 @@ class Clock {
   /**
    * Advances the clock by an arbitrary timestep (multiple of 0.000001 fm/c).
    *
-   * \param big_timestep Timestep by which the clock is advanced.
+   * \tparam T type of the timestep
+   * \param[in] big_timestep Timestep by which the clock is advanced.
    * \note It uses a template parameter only for disambiguation with the
    * overload below.
    */
@@ -252,7 +253,14 @@ class Clock {
     reset_time_ += convert(big_timestep);
     return *this;
   }
-  /// advances the clock by an arbitrary number of ticks.
+  /**
+   * advances the clock by an arbitrary number of ticks.
+   *
+   * \param[in] advance_several_timesteps Number of the timesteps added
+   *                                      to the clock
+   * \throw OverflowError if the number of the added timesteps exceeds
+   *                      the maximum value.
+   */
   Clock& operator+=(Representation advance_several_timesteps) {
     if (counter_ >= std::numeric_limits<Representation>::max() -
                         advance_several_timesteps) {
@@ -261,9 +269,10 @@ class Clock {
     counter_ += advance_several_timesteps;
     return *this;
   }
-  /** Compares the times between two clocks.
+  /**
+   * Compares the times between two clocks.
    *
-   * \param rhs The other clock.
+   * \param[in] rhs The other clock.
    */
   bool operator<(const Clock& rhs) const {
     return (reset_time_ + timestep_duration_ * counter_) <
@@ -272,18 +281,20 @@ class Clock {
   /**
    * Compares the time of the clock against a fixed time.
    *
-   * \param time The other time.
+   * \param[in] time The other time.
    */
   bool operator<(double time) const { return current_time() < time; }
   /**
    * Compares the time of the clock against a fixed time.
    *
-   * \param time The other time.
+   * \param[in] time The other time.
    */
   bool operator>(double time) const { return current_time() > time; }
 
  private:
+  /// A multiplier transfering the internal integer to the real time. 
   static constexpr double to_double = resolution;
+  /// A multiplier transfering the real time to the internal integer.
   static constexpr double from_double = 1. / resolution;
 
   /// Convert a double \p x into the internal int representation.
@@ -293,8 +304,10 @@ class Clock {
   /// Convert an internal int value \p x into the double representation.
   static double convert(Representation x) { return x * to_double; }
 
-  /// Clock tick. This is purely internal and will be reset when the
-  /// timestep size is changed.
+  /**
+   * Clock tick. This is purely internal and will be reset when the
+   * timestep size is changed.
+   */
   Representation counter_ = 0;
   /// The time step size \f$\Delta t\f$ in $10^{-3}$ fm.
   Representation timestep_duration_ = 0u;

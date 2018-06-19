@@ -247,6 +247,7 @@ inline typename Grid<Options>::SizeType Grid<Options>::make_index(
 }
 
 template <>
+/// Specialization of iterate_cells
 void Grid<GridOptions::Normal>::iterate_cells(
     const std::function<void(const ParticleList &)> &search_cell_callback,
     const std::function<void(const ParticleList &, const ParticleList &)>
@@ -297,13 +298,26 @@ void Grid<GridOptions::Normal>::iterate_cells(
   }
 }
 
+/**
+ * The options determining what to do if a particle flies out of the grids
+ * PlusLength:  Used if a periodic boundary condition is applied and a
+ *              particle passes through the lower bound of the grid.
+ * No:          Used if the boundary condition is not periodic.
+ * MinusLength: Used if a periodic boundary condition is applied and a
+ *              particle passes through the upper bound of the grid.
+ */
 enum class NeedsToWrap { PlusLength, No, MinusLength };
+
+/// A strust containing the informations needed to search the neighboring cell
 struct NeighborLookup {
+  /// Index of the cell
   typename Grid<GridOptions::PeriodicBoundaries>::SizeType index = 0;
+  /// Option to determine the neighbors of the cells on the boundary
   NeedsToWrap wrap = NeedsToWrap::No;
 };
 
 template <>
+/// Specialization of iterate_cells
 void Grid<GridOptions::PeriodicBoundaries>::iterate_cells(
     const std::function<void(const ParticleList &)> &search_cell_callback,
     const std::function<void(const ParticleList &, const ParticleList &)>
