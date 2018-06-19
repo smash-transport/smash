@@ -102,7 +102,7 @@ const std::initializer_list<double> KMINUSP_ELASTIC_SIG = {
     3.6200, 4.2300, 3.9500, 3.2400, 2.9600, 3.0100, 2.4600, 2.5600, 2.3300,
     2.5400, 2.5300, 2.5100, 2.5200, 2.7400, 2.5900};
 
-/// A null interpolation that gets filled using the KMINUSP_ELASTIC data
+/// An interpolation that gets lazily filled using the KMINUSP_ELASTIC data.
 static std::unique_ptr<InterpolateDataLinear<double>>
     kminusp_elastic_interpolation = nullptr;
 
@@ -243,7 +243,7 @@ const std::initializer_list<double> KMINUSP_RES_SIG = {
     1.56038155638,  1.27216056674, 1.03167072054,  0.85006416230,
     0.39627220898,  0.57172926654, 0.51129452389,  0.44626386026};
 
-/// A null interpolation that gets filled using the KMINUSP_RES data
+/// An interpolation that gets lazily filled using the KMINUSP_RES data.
 static std::unique_ptr<InterpolateDataSpline>
     kminusp_elastic_res_interpolation = nullptr;
 
@@ -287,7 +287,7 @@ const std::initializer_list<double> KPLUSN_TOT_SIG = {
     18.30, 18.66, 18.56, 18.02, 18.43, 18.60, 19.04, 18.99, 19.23,
     19.63, 19.55, 19.74, 19.72, 19.82, 20.37, 20.61, 20.80};
 
-/// A null interpolation that gets filled using the KPLUSN_TOT data
+/// An interpolation that gets lazily filled using the KPLUSN_TOT data.
 static std::unique_ptr<InterpolateDataLinear<double>>
     kplusn_total_interpolation = nullptr;
 
@@ -342,7 +342,7 @@ const std::initializer_list<double> KPLUSP_TOT_SIG = {
     18.06, 18.03, 18.37, 18.28, 18.17, 18.52, 18.40, 18.88, 18.70, 18.85, 19.14,
     19.52, 19.36, 19.33, 19.64, 18.20, 19.91, 19.84, 20.22, 20.45, 20.67};
 
-/// A null interpolation that gets filled using the KPLUSP_TOT data
+/// An interpolation that gets lazily filled using the KPLUSP_TOT data.
 static std::unique_ptr<InterpolateDataLinear<double>>
     kplusp_total_interpolation = nullptr;
 
@@ -383,7 +383,7 @@ const std::initializer_list<double> PIMINUSP_ELASTIC_SIG = {
     11.1,   9.69,   9.3,    8.91,   8.5,    7.7,    7.2,    7.2,    7.8,
     7.57,   6.1};
 
-/// A null interpolation that gets filled using the PIMINUSP_ELASTIC data
+/// An interpolation that gets lazily filled using the PIMINUSP_ELASTIC data.
 static std::unique_ptr<InterpolateDataLinear<double>>
     piminusp_elastic_interpolation = nullptr;
 
@@ -400,7 +400,7 @@ const std::initializer_list<double> PIMINUSP_RES_SQRTS = {
  *
  * These need to be subtracted from the interpolation of the PDG data on
  * elastic cross sections. This data was generated using the SMASH analysis
- * suite and should be updated when strange resonances are changed or added.
+ * suite and should be updated when nucleon resonances are changed or added.
  */
 const std::initializer_list<double> PIMINUSP_RES_SIG = {
     0.132595,  0.40252,   1.178451,  2.760204,  5.730226,  10.782558, 17.245252,
@@ -413,7 +413,7 @@ const std::initializer_list<double> PIMINUSP_RES_SIG = {
     2.56838,   1.975527,  1.434032,  0.958996,  0.554314,  0.243301,  0.0644,
     0.};
 
-/// A null interpolation that gets filled using the PIMINUSP_RES data
+/// An interpolation that gets lazily filled using the PIMINUSP_RES data.
 static std::unique_ptr<InterpolateDataSpline>
     piminusp_elastic_res_interpolation = nullptr;
 
@@ -452,7 +452,7 @@ const std::initializer_list<double> PIPLUSP_ELASTIC_SIG = {
     4.75,  4.2,   4.54,  4.46,  4.21,  4.21,  3.98,  3.19,  3.37,  3.16,  3.29,
     3.1,   3.35,  3.3,   3.39,  3.24,  3.37,  3.17,  3.3};
 
-/// A null interpolation that gets filled using the PIPLUSP_ELASTIC_SIG data
+/// An interpolation that gets lazily filled using the PIPLUSP_ELASTIC_SIG data.
 static std::unique_ptr<InterpolateDataLinear<double>>
     piplusp_elastic_interpolation = nullptr;
 
@@ -469,7 +469,7 @@ const std::initializer_list<double> PIPLUSP_RES_SQRTS = {
  *
  * These need to be subtracted from the interpolation of the PDG data on
  * elastic cross sections. This data was generated using the SMASH analysis
- * suite and should be updated when strange resonances are changed or added.
+ * suite and should be updated when nucleon resonances are changed or added.
  */
 const std::initializer_list<double> PIPLUSP_RES_SIG = {
     0.138618,   2.13515,    8.158391,   20.991292,  45.854734, 89.292892,
