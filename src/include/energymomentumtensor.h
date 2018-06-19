@@ -50,8 +50,7 @@ class EnergyMomentumTensor {
     }
   }
 
-  /// \todo(oliiny) What do these operators do? Please add documentation
-  const double &operator[](std::size_t i) { return Tmn_[i]; }
+  /// Return ith component of the tensor.
   double operator[](std::size_t i) const { return Tmn_[i]; }
 
   /**
