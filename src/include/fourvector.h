@@ -21,8 +21,8 @@ namespace smash {
  * The FourVector class holds relevant values in Minkowski spacetime
  * with (+, −, −, −) metric signature.
  *
- * The overloaded operators are build according to Andrew Koenig
- * recommendations where  the compound assignment operators is used as a
+ * The overloaded operators are built according to Andrew Koenig
+ * recommendations where the compound assignment operators is used as a
  * base for their non-compound counterparts. This means that the
  * operator + is implemented in terms of +=. The operator+ returns
  * a copy of its result. + and friends are non-members, while
@@ -198,7 +198,7 @@ class FourVector {
   bool inline operator!=(const FourVector &a) const;
 
   /**
-   * checks if \f$x^\mu > a^\mu\f$ for all \f$\mu\f$
+   * checks if \f$x^\mu < a^\mu\f$ for all \f$\mu\f$
    * (all four vector components are below comparison vector)
    *
    * \param[in] a The FourVector to compare to
@@ -409,6 +409,13 @@ inline FourVector operator*(FourVector a, double b) {
   a *= b;
   return a;
 }
+/**
+ * multiply a vector with a scalar
+ *
+ * \param[in] b The value with which to multiply
+ * \param[in] a The FourVector to multiply
+ * \return \f$x^\mu = b \cdot a^\mu\f$
+ */
 inline FourVector operator*(double b, FourVector a) {
   a *= b;
   return a;
