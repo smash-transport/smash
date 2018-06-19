@@ -261,7 +261,7 @@ class Action {
   /**
    * Determine the total energy in the center-of-mass frame [GeV]
    *
-   * \return \f \sqrt{s}\f of incoming particles
+   * \return \f$ \sqrt{s}\f$ of incoming particles
    */
   double sqrt_s() const { return total_momentum().abs(); }
 
@@ -493,8 +493,10 @@ class Action {
 
  private:
   /**
+   * Get the type of a given particle
    * 
-   *
+   * \param[in] p_out particle of which the type will be returned
+   * \return type of given particle
    */
   const ParticleType &type_of_pout(const ParticleData &p_out) const {
     return p_out.type();
