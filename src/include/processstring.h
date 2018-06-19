@@ -495,7 +495,7 @@ class StringProcess {
    *                      anti-diquark.
    * \param[in] flip_string_ends is whether or not we randomly switch string ends.
    * \param[in] separate_fragment_baryon is whether fragment leading baryon
-                (or anti-baryon) with separate fragmentation function.
+   *            (or anti-baryon) with separate fragmentation function.
    * \param[out] intermediate_particles list of fragmented particles
    * \return number of hadrons fragmented out of string.
    *

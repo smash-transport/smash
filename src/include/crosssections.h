@@ -316,9 +316,11 @@ class CrossSections {
    * Determine the (parametrized) hard non-diffractive string cross section
    * for this collision.
    *
-   * \return Parametrized cross section without AQM scaling.
+   * \param[in] use_AQM Whether the cross section is rescaled according to
+   *            the additive quark model.
+   * \return Parametrized cross section with AQM scaling.
    */
-  double string_hard_cross_section() const;
+  double string_hard_cross_section(bool use_AQM) const;
 
   /**
    * Calculate cross sections for resonance absorption
