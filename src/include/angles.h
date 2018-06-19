@@ -40,6 +40,8 @@ namespace smash {
  * // new_azimuthal_angle == 0.
  * \endcode
  *
+ */
+/*
  * Internals
  * ---------
  *
@@ -48,20 +50,21 @@ namespace smash {
  * on this never changing, though; the interface user should be totally
  * oblivious to this.
  *
- *
  * Possible future improvements
  * ----------------------------
  *
  * More distributions need to be implemented once there is a physics
  * case to use them.
  */
-
 class Angles {
  public:
-  /// Standard initializer, points in x-direction.
+  /**
+   * Default constructor.
+   * \return Angles pointing in x-direction.
+   */
   Angles() : phi_(0), costheta_(0) {}
   /**
-   * initializer with given phi and cos(theta)
+   * \return Angles with given phi and cos(theta).
    * \param[in] ph the azimuthal angle
    * \param[in] cost cosine of the polar angle
    */
@@ -70,116 +73,107 @@ class Angles {
     set_costheta(cost);
   }
   /**
-   * populate the object with a new direction
+   * Populate the object with a new direction.
    *
    * the direction is taken randomly from a homogeneous distribution,
    * i.e., each point on a unit sphere is equally likely.
    */
   void distribute_isotropically();
   /**
-   * update azimuthal angle
+   * Sets the azimuthal angle.
    *
-   * sets the azimuthal angle and leaves the polar angle untouched.
-   *
-   * \param[in] phi any real number to set the azimuthal angle \f$\varphi\f$
+   * \param[in] phi Any real number to set the azimuthal angle \f$\varphi\f$
    * to.
    */
   void set_phi(const double phi);
   /**
-   * update polar angle from its cosine.
+   * Set the polar angle from its cosine.
    *
-   * sets the polar angle and leaves the azimuthal angle untouched.
    * This is the preferred way of setting the polar information.
    *
-   * \param[in] cos cosine of the polar angle \f$\cos\vartheta\f$. Must be
-   * in range [-1 .. 1], else an Exception is thrown.
+   * \param[in] cos Cosine of the polar angle \f$\cos\vartheta\f$.
+   * \throws InvalidTheta If cos is not in range [-1 .. 1].
    */
   void set_costheta(const double cos);
   /**
-   * update polar angle from itself
-   *
-   * sets the polar angle and leaves the azimuthal angle untouched.
-   * In the interface (public functions) we don't specify if theta or
-   * costheta is actually stored inside the object, so we don't name the
-   * functions to indicate the internals.
+   * Set the polar angle.
    *
    * In the current implementation, costheta is stored inside the
    * object. Don't convert the angle to and from cosine, use the
-   * set-function for the thing you have at hand. Accepts any real
-   * number.
+   * set-function for the thing you have at hand.
    *
-   * \param[in] theta any real number to set the polar angle \f$\vartheta\f$
+   * \param[in] theta Any real number to set the polar angle \f$\vartheta\f$
    * to.
    */
   void set_theta(const double theta);
   /**
-   * advance polar angle
+   * Advance polar angle.
    *
-   * polar angle is advanced. A positive addition means that we go
-   * towards the southpole.
+   * A positive addition means that we go towards the southpole.
    *
    * \see add_to_theta(const double& delta, const bool& reverse)
    *
-   * \param[in] delta angle increment
+   * \param[in] delta Angle increment.
    * \return true if pole has been crossed.
+   * \throws InvalidTheta If delta is not in [\f$-\pi\f$ .. \f$\pi\f$].
    */
   bool add_to_theta(const double delta);
   /**
-   * advance polar angle
+   * Advance polar angle
    *
-   * polar angle is advanced. When crossing a pole, azimuthal angle is
-   * changed by 180 degrees.
+   * When crossing a pole, azimuthal angle is changed by 180 degrees.
    *
-   * \param[in] delta angle increment. Must not be outside [\f$-\pi\f$ ..
-   * \f$\pi\f$].
-   * \param[in] reverse if true, we start in the "far" hemisphere, meaning a
+   * \param[in] delta Angle increment.
+   * \param[in] reverse If true, we start in the "far" hemisphere, meaning a
    * positive delta will shift the object towards the north pole.
    *
    * \return true if we end up in the far hemisphere, false if
    * we end up in the original hemisphere.
+   * \throws InvalidTheta If delta is not in [\f$-\pi\f$ .. \f$\pi\f$].
+
    */
   bool add_to_theta(const double delta, const bool reverse);
-  /// \return azimuthal angle
+  /// \return Azimuthal angle.
   double phi() const;
-  /// \return cosine of polar angle
+  /// \return Cosine of polar angle.
   double costheta() const;
-  /// \return sine of polar angle
+  /// \return Sine of polar angle.
   double sintheta() const;
   /**
-   * \return \f$x\f$ projection of the direction
+   * \return \f$x\f$ projection of the direction.
    *
    * \f$x = \sin\vartheta \cos\varphi\f$
    */
   double x() const;
   /**
-   * \return \f$y\f$ projection of the direction
+   * \return \f$y\f$ projection of the direction.
    *
    * \f$y = \sin\vartheta \sin\varphi\f$
    */
   double y() const;
   /**
-   * \return \f$z\f$ projection of the direction
+   * \return \f$z\f$ projection of the direction.
    *
    * \f$z = \cos\vartheta\f$
    **/
   double z() const;
-  /// \return the three-vector
+  /// \return The unit three-vector corresponding to the angles.
   ThreeVector inline threevec() const;
-  /// \return the polar angle
+  /// \return The polar angle.
   double theta() const;
 
   /**
    * \ingroup exception
-   * thrown for invalid values for theta
+   * Thrown for invalid values for theta.
    */
   struct InvalidTheta : public std::invalid_argument {
     using std::invalid_argument::invalid_argument;
   };
 
  private:
-  /// azimuthal angle \f$\varphi\f$
+  /// Azimuthal angle \f$\varphi\f$.
   double phi_;
-  /// cosine of polar angle \f$\cos\vartheta\f$
+  /// Cosine of polar angle \f$\cos\vartheta\f$.
   double costheta_;
 };
 
@@ -192,7 +186,7 @@ inline std::ostream &operator<<(std::ostream &out, const Angles &a) {
 }
 
 void inline Angles::distribute_isotropically() {
-  /* isotropic distribution: phi in [0, 2pi) and cos(theta) in [-1,1] */
+  /* Isotropic distribution: phi in [0, 2pi) and cos(theta) in [-1,1]. */
   phi_ = random::uniform(0.0, twopi);
   costheta_ = random::uniform(-1.0, 1.0);
 }
