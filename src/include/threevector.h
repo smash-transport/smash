@@ -263,12 +263,12 @@ double inline ThreeVector::get_theta() const {
 
 void inline ThreeVector::rotate(double phi, double theta, double psi) {
   // Compute the cosine and sine for each angle.
-  double cos_phi = std::cos(phi);
-  double sin_phi = std::sin(phi);
-  double cos_theta = std::cos(theta);
-  double sin_theta = std::sin(theta);
-  double cos_psi = std::cos(psi);
-  double sin_psi = std::sin(psi);
+  const double cos_phi = std::cos(phi);
+  const double sin_phi = std::sin(phi);
+  const double cos_theta = std::cos(theta);
+  const double sin_theta = std::sin(theta);
+  const double cos_psi = std::cos(psi);
+  const double sin_psi = std::sin(psi);
   // Get original coordinates.
   std::array<double, 3> x_old = x_;
   // Compute new coordinates.
@@ -283,8 +283,8 @@ void inline ThreeVector::rotate(double phi, double theta, double psi) {
 }
 
 void inline ThreeVector::rotate_around_y(double theta) {
-  double cost = std::cos(theta);
-  double sint = std::sin(theta);
+  const double cost = std::cos(theta);
+  const double sint = std::sin(theta);
   // Get original coordinates.
   std::array<double, 3> x_old = x_;
   // Compute new coordinates.
@@ -294,8 +294,8 @@ void inline ThreeVector::rotate_around_y(double theta) {
 }
 
 void inline ThreeVector::rotate_around_z(double theta) {
-  double cost = std::cos(theta);
-  double sint = std::sin(theta);
+  const double cost = std::cos(theta);
+  const double sint = std::sin(theta);
   // Get original coordinates.
   std::array<double, 3> x_old = x_;
   // Compute new coordinates.

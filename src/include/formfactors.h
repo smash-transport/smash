@@ -19,12 +19,14 @@ namespace smash {
  * \return the squared Blatt-Weisskopf functions, which influence the mass
  * dependence of the decay widths. See e.g. \iref{Effenberger:1999wlg}, page 28.
  *
- * \param p_ab Momentum of outgoing particles A and B in center-of-mass frame.
+ * \param p_ab Momentum of outgoing particles A and B in center-of-mass frame [GeV]
  * \param L Angular momentum of outgoing particles A and B.
  *
  * This is used as a standard form factor for all hadronic decays. Note that all
  * the Blatt-Weisskopf functions approach one for large p_ab and behave like
  * p_ab**L for small \p p_ab. They are increasing monotonically with \p p_ab.
+ *
+ * \throws invalid_argument if L > 4
  */
 inline double blatt_weisskopf_sqr(const double p_ab, const int L)
 #ifdef NDEBUG
@@ -71,7 +73,7 @@ inline double blatt_weisskopf_sqr(const double p_ab, const int L)
  *
  * \return The squared value of the form factor (dimensionless).
  *
- * \note This form factor is equal to one at m=M0 and m=srts0. For decreasing
+ * This form factor is equal to one at m=M0 and m=srts0. For decreasing
  * values of L, the form factor results in a stronger and stronger suppression
  * of the high-mass tail (m > M0) and a corresponding enhancement of the
  * low-mass tail (m < M0).

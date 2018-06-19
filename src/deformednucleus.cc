@@ -77,9 +77,6 @@ namespace smash {
  \endverbatim
  */
 
-DeformedNucleus::DeformedNucleus(const std::map<PdgCode, int> &particle_list,
-                                 int nTest)
-    : Nucleus(particle_list, nTest) {}
 
 DeformedNucleus::DeformedNucleus(Configuration &config, int nTest)
     : Nucleus(config, nTest) {}
