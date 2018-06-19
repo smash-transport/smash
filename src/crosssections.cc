@@ -187,7 +187,7 @@ CollisionBranchList CrossSections::generate_collision_list(
   if (nnbar_treatment == NNbarTreatment::Resonances) {
     if (t1.is_nucleon() && t2.pdgcode() == t1.get_antiparticle()->pdgcode()) {
       /* Has to be called after the other processes are already determined,
-       *  so that the sum of the cross sections includes all other processes. */
+       * so that the sum of the cross sections includes all other processes. */
       process_list.emplace_back(NNbar_annihilation(sum_xs_of(process_list)));
     }
     if ((t1.pdgcode() == pdg::rho_z && t2.pdgcode() == pdg::h1) ||
@@ -1634,7 +1634,6 @@ CollisionBranchList CrossSections::string_excitation(
     } else if (pdg.baryon_number() == -1) {
       pdgid[i] = -pdg::p_decimal;
     } else {
-      // FIXME: What about dileptons and photons?
       pdgid[i] = pdg::pi_p_decimal;
     }
     AQM_factor *= (1. - 0.4 * pdg.frac_strange());
@@ -2177,7 +2176,7 @@ bool CrossSections::decide_string(bool strings_switch,
       assert(x >= -0.5 && x <= 0.5);
       double prob_pythia = 0.5 * (std::sin(M_PI * x) + 1.0);
       assert(prob_pythia >= 0. && prob_pythia <= 1.);
-      return prob_pythia > Random::uniform(0., 1.);
+      return prob_pythia > random::uniform(0., 1.);
     }
   }
 }

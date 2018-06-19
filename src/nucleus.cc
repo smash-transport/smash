@@ -205,7 +205,7 @@ ThreeVector Nucleus::distribute_nucleon() const {
   dir.distribute_isotropically();
   // diffusiveness_ zero or negative? Use hard sphere.
   if (almost_equal(diffusiveness_, 0.)) {
-    return dir.threevec() * nuclear_radius_ * std::cbrt(Random::canonical());
+    return dir.threevec() * nuclear_radius_ * std::cbrt(random::canonical());
   }
   if (almost_equal(nuclear_radius_, 0.)) {
     return smash::ThreeVector();
@@ -219,15 +219,15 @@ ThreeVector Nucleus::distribute_nucleon() const {
   double t;
   /// \li Decide which branch \f$\tilde p^{({\rm I - IV})}\f$ to go into
   do {
-    double which_range = Random::uniform(-prob_range1, ranges234);
+    double which_range = random::uniform(-prob_range1, ranges234);
     if (which_range < 0.0) {
-      t = radius_scaled * (std::cbrt(Random::canonical()) - 1.);
+      t = radius_scaled * (std::cbrt(random::canonical()) - 1.);
     } else {
-      t = -std::log(Random::canonical());
+      t = -std::log(random::canonical());
       if (which_range >= prob_range2) {
-        t -= std::log(Random::canonical());
+        t -= std::log(random::canonical());
         if (which_range >= prob_range2 + prob_range3) {
-          t -= std::log(Random::canonical());
+          t -= std::log(random::canonical());
         }
       }
     }
@@ -238,7 +238,7 @@ ThreeVector Nucleus::distribute_nucleon() const {
      * \f$1-(1+\exp(-|t|))^{-1}\f$ (the efficiency of this should be
      * \f$\gg \frac{1}{2}\f$)
      */
-  } while (Random::canonical() > 1. / (1. + std::exp(-std::abs(t))));
+  } while (random::canonical() > 1. / (1. + std::exp(-std::abs(t))));
   /// \li Shift and rescale \f$t\f$ to \f$r = d\cdot t + r_0\f$
   double position_scaled = t + radius_scaled;
   double position = position_scaled * diffusiveness_;
@@ -362,7 +362,7 @@ void Nucleus::generate_fermi_momenta() {
       rho = rho * N_n / A;
     }
     const double p =
-        hbarc * std::pow(pi2_3 * rho * Random::uniform(0.0, 1.0), 1.0 / 3.0);
+        hbarc * std::pow(pi2_3 * rho * random::uniform(0.0, 1.0), 1.0 / 3.0);
     Angles phitheta;
     phitheta.distribute_isotropically();
     const ThreeVector ith_3momentum = phitheta.threevec() * p;

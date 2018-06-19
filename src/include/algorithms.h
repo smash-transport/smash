@@ -42,11 +42,12 @@ namespace smash {
  * The implementation therefore assumes that the values are at most one \p
  * length away from the 0 to \p length range.
  *
+ * \tparam Iterator Type of the iterator.
  * \param begin Iterator pointing to the first value to check.
  * \param end End iterator.
  * \param length The length of the valid interval.
  *
- * \return whether a correction was done
+ * \return Whether a correction was done.
  */
 template <typename Iterator>
 static bool enforce_periodic_boundaries(
@@ -69,9 +70,11 @@ static bool enforce_periodic_boundaries(
 /**
  * Convenience wrapper for \c std::all_of that operates on a complete container.
  *
+ * \tparam Container Type of the container.
+ * \tparam UnaryPredicate Type of the predicate.
  * \param c A container of elements to examine.
- * \param p unary predicate.
- * \return whether all elements in \p c return \c true when passed to \p p.
+ * \param p Unary predicate.
+ * \return Whether all elements in \p c return \c true when passed to \p p.
  */
 template <typename Container, typename UnaryPredicate>
 inline bool all_of(Container &&c, UnaryPredicate &&p) {
@@ -83,8 +86,11 @@ inline bool all_of(Container &&c, UnaryPredicate &&p) {
  * Convenience wrapper for \c std::for_each that operates on a complete
  * container.
  *
+ * \tparam Container Type of the container.
+ * \tparam UnaryFunction Type of the function.
  * \param c A container of elements on which to perform the function f
  * \param f A function to apply on all elements of the container c
+ * \return The function that was applied to all elements.
  */
 template <typename Container, typename UnaryFunction>
 inline UnaryFunction for_each(Container &&c, UnaryFunction &&f) {

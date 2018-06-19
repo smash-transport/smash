@@ -407,7 +407,7 @@ TEST(string_scaling_factors) {
   constexpr double coherence_factor = 0.7;
   ThreeVector evec_coll = ThreeVector(0., 0., 1.);
   int baryon_string =
-      incoming[Random::uniform_int(0, 1)].type().baryon_number();
+      incoming[random::uniform_int(0, 1)].type().baryon_number();
   StringProcess::assign_all_scaling_factors(baryon_string, outgoing, evec_coll,
                                             coherence_factor);
   // outgoing list is now assumed to be sorted by z-velocity (so c,d,e,f)

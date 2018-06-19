@@ -440,7 +440,7 @@ class StringProcess {
    */
   static void convert_KaonLS(int &pythia_id) {
     if (pythia_id == 310 || pythia_id == 130) {
-      pythia_id = (Random::uniform_int(0, 1) == 0) ? 311 : -311;
+      pythia_id = (random::uniform_int(0, 1) == 0) ? 311 : -311;
     }
   }
 

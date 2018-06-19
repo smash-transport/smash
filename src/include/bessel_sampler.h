@@ -91,7 +91,7 @@ class BesselSampler {
    */
   std::pair<int, int> sample() {
     const int N_smaller = (m_ >= m_switch_method_)
-                              ? std::round(Random::normal(mu_, sigma_))
+                              ? std::round(random::normal(mu_, sigma_))
                               : dist_();
     return N_is_positive_ ? std::make_pair(N_smaller + N_, N_smaller)
                           : std::make_pair(N_smaller, N_smaller + N_);
@@ -123,7 +123,7 @@ class BesselSampler {
     return res;
   }
   /// Vector to store tabulated values of probabilities for small m case
-  Random::discrete_dist<double> dist_;
+  random::discrete_dist<double> dist_;
   // Parameters of the Bessel distribution.
   double m_;
   const double a_;

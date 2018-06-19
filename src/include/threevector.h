@@ -131,7 +131,7 @@ class ThreeVector {
   /**
    * \return an iterator starting at the 0th component.
    *
-   * The iterator implements the RandomIterator concept. Thus, you can simply
+   * The iterator implements the randomIterator concept. Thus, you can simply
    * write `begin() + 1` to get an iterator that points to the 1st component.
    */
   iterator begin() { return x_.begin(); }

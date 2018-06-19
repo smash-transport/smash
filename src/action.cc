@@ -45,7 +45,7 @@ bool Action::is_pauli_blocked(const Particles &particles,
       const auto f =
           p_bl.phasespace_dens(p.position().threevec(), p.momentum().threevec(),
                                particles, p.pdgcode(), incoming_particles_);
-      if (f > Random::uniform(0., 1.)) {
+      if (f > random::uniform(0., 1.)) {
         log.debug("Action ", *this, " is pauli-blocked with f = ", f);
         return true;
       }

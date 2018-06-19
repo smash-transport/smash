@@ -201,7 +201,7 @@ class Integrator1dMonte {
         number_of_calls_(num_calls) {
     gsl_monte_plain_init(state_);
     // initialize the GSL RNG with a random seed
-    const uint32_t seed = Random::uniform_int(0ul, ULONG_MAX);
+    const uint32_t seed = random::uniform_int(0ul, ULONG_MAX);
     gsl_rng_set(rng_, seed);
   }
 
@@ -302,7 +302,7 @@ class Integrator2d {
         number_of_calls_(num_calls) {
     gsl_monte_plain_init(state_);
     // initialize the GSL RNG with a random seed
-    const uint32_t seed = Random::uniform_int(0ul, ULONG_MAX);
+    const uint32_t seed = random::uniform_int(0ul, ULONG_MAX);
     gsl_rng_set(rng_, seed);
   }
 
