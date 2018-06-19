@@ -43,15 +43,16 @@ class DecayActionsFinderDilepton {
              double dt) const;
 
   /**
-   * Shine dileptons from resonances at the end of the simulation. This is
-   * special, because the shining time is now until the resonance would decay
-   * and not for some fixed dt interval.
+   * Shine dileptons from resonances at the end of the simulation.
+   *
+   * This is special, because the shining time is now until the resonance would
+   * decay and not for some fixed dt interval.
    *
    * \param[in] search_list List of all particles.
    * \param[in] output Pointer to the dilepton output.
    * \param[in] only_res optional parameter that requests that only actions
    *                     regarding resonances are considered (disregarding
-   * stable particles)
+   *                     stable particles)
    */
   void shine_final(const Particles& search_list, OutputInterface* output,
                    bool only_res = false) const;
