@@ -929,7 +929,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
     m_const[i] = pythia_hadron_->particleData.m0(idqIn[i]);
   }
 
-  if (flip_string_ends && Random::uniform_int(0, 1) == 0) {
+  if (flip_string_ends && random::uniform_int(0, 1) == 0) {
     /* in the case where we flip the string ends,
      * we need to flip the longitudinal unit vector itself
      * since it is set to be direction of diquark (anti-quark)
@@ -967,8 +967,8 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
     bool found_leading_baryon = false;
     while (!found_leading_baryon) {
       int idnew_qqbar = 0;
-      if (Random::uniform(0., 1. + ssbar_supp) < 1.) {
-        if (Random::uniform_int(0, 1) == 0) {
+      if (random::uniform(0., 1. + ssbar_supp) < 1.) {
+        if (random::uniform_int(0, 1) == 0) {
           idnew_qqbar = 1;
         } else {
           idnew_qqbar = 2;
@@ -1028,7 +1028,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
       }
 
       int pdgid_frag = 0;
-      const double uspc = Random::uniform(0., weight_summed[n_possible]);
+      const double uspc = random::uniform(0., weight_summed[n_possible]);
       for (int i = 0; i < n_possible; i++) {
         if ((uspc >= weight_summed[i]) && (uspc < weight_summed[i + 1])) {
           pdgid_frag = pdgid_possible[i];
@@ -1037,8 +1037,8 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
       }
       const double mass_frag = pythia_hadron_->particleData.mSel(pdgid_frag);
 
-      QTrx = Random::normal(0., sigma_qperp_ / sqrt2_);
-      QTry = Random::normal(0., sigma_qperp_ / sqrt2_);
+      QTrx = random::normal(0., sigma_qperp_ / sqrt2_);
+      QTry = random::normal(0., sigma_qperp_ / sqrt2_);
       QTrn = std::sqrt(QTrx * QTrx + QTry * QTry);
       const double mTrn_frag = std::sqrt(QTrn * QTrn + mass_frag * mass_frag);
 
