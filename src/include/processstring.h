@@ -332,6 +332,8 @@ class StringProcess {
    * \param[in] m_str masses of strings [GeV]
    * \param[out] evec_str are directions in which strings are stretched.
    * \param[in] flip_string_ends is whether or not we randomly switch string ends.
+   * \param[in] separate_fragment_baryon is whether fragment leading baryon
+   *            (or anti-baryon) with separate fragmentation function.
    * \return whether fragmentations and final state creation was successful
    */
   bool make_final_state_2strings(
@@ -339,7 +341,7 @@ class StringProcess {
       const std::array<FourVector, 2> &pstr_com,
       const std::array<double, 2> &m_str,
       const std::array<ThreeVector, 2> &evec_str,
-      bool flip_string_ends);
+      bool flip_string_ends, bool separate_fragment_baryon);
 
   /**
    * Single-diffractive process

@@ -326,7 +326,9 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   ThreeVector evec = prs.threevec() / prs.threevec().abs();
   // perform fragmentation and add particles to final_state.
   ParticleList new_intermediate_particles;
-  int nfrag = fragment_string(idqX1, idqX2, massX, evec, true, false,
+  bool separate_fragment_baryon = true;
+  int nfrag = fragment_string(idqX1, idqX2, massX, evec, true,
+                              separate_fragment_baryon,
                               new_intermediate_particles);
   if (nfrag < 1) {
     NpartString_[0] = 0;
@@ -388,7 +390,8 @@ bool StringProcess::make_final_state_2strings(
     const std::array<std::array<int, 2>, 2> &quarks,
     const std::array<FourVector, 2> &pstr_com,
     const std::array<double, 2> &m_str,
-    const std::array<ThreeVector, 2> &evec_str, bool flip_string_ends) {
+    const std::array<ThreeVector, 2> &evec_str,
+    bool flip_string_ends, bool separate_fragment_baryon) {
   const std::array<FourVector, 2> ustr_com = {pstr_com[0] / m_str[0],
                                               pstr_com[1] / m_str[1]};
   for (int i = 0; i < 2; i++) {
@@ -398,7 +401,7 @@ bool StringProcess::make_final_state_2strings(
     ThreeVector evec = evec_str[i];
     // perform fragmentation and add particles to final_state.
     int nfrag = fragment_string(quarks[i][0], quarks[i][1], m_str[i], evec,
-                                flip_string_ends, false,
+                                flip_string_ends, separate_fragment_baryon,
                                 new_intermediate_particles);
     if (nfrag <= 0) {
       NpartString_[i] = 0;
@@ -461,8 +464,10 @@ bool StringProcess::next_DDiff() {
     return false;
   }
   const bool flip_string_ends = true;
+  const bool separate_fragment_baryon = true;
   const bool success = make_final_state_2strings(quarks, pstr_com, m_str,
-                                                 evec_str, flip_string_ends);
+                                                 evec_str, flip_string_ends,
+                                                 separate_fragment_baryon);
   return success;
 }
 
@@ -536,8 +541,10 @@ bool StringProcess::next_NDiffSoft() {
     return false;
   }
   const bool flip_string_ends = false;
+  const bool separate_fragment_baryon = true;
   const bool success = make_final_state_2strings(quarks, pstr_com, m_str,
-                                                 evec_str, flip_string_ends);
+                                                 evec_str, flip_string_ends,
+                                                 separate_fragment_baryon);
   return success;
 }
 
