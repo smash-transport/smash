@@ -285,7 +285,7 @@ class Action {
    * This function is used to determine whether an action is
    * kinematically feasible.
    *
-   * \tparam outs 
+   * \tparam outs Type of outgoing particles
    * \param[in] potentials skyrme and asymmetry potential for particle [GeV]
    * \param[in] p_out_types outgoing particle types
    * \return total kinetic energy of the outgoing particles in
