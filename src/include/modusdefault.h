@@ -25,7 +25,7 @@ namespace smash {
 
 /**
  * \ingroup modus
- * Baseclass for Modus classes that provides default function implementations.
+ * Base class for Modus classes that provides default function implementations.
  *
  * This is only a base class for actual Modus classes. Meaning there will never
  * be objects, references, or pointers to ModusDefault. Therefore, it does not
@@ -37,13 +37,16 @@ namespace smash {
  *   one subclass.
  * - Code that is common to all goes into ExperimentImplementation.
  *
- * \todo JB: many of these functions could/should be virtual
+ * \todo JB: many of these functions could/should be virtual (contradicts
+ * description given above, Vinzent says (in a nice way): does not make any
+ * sense whatsoever anyway)
  */
 class ModusDefault {
  public:
-  // never needs a virtual destructor
+  // Never needs a virtual destructor.
 
   // Missing functions for concrete Modus implementations:
+  // \todo(JB): Why is the function below commented out?
   // double initial_conditions(Particles *particles);
 
   /** Enforces sensible positions for the particles.
@@ -151,15 +154,18 @@ class ModusDefault {
     return make_unique<GrandCanThermalizer>(conf, l, origin, periodicity);
   }
 
-  /** \ingroup exception
+  /**
+   * \ingroup exception
    *  BadInput is an error to throw if the configuration options are invalid.
-   **/
+   */
   struct BadInput : public std::invalid_argument {
     using std::invalid_argument::invalid_argument;
   };
-  /// \ingroup exception
-  /// Thrown when the requested energy is smaller than the masses
-  /// of two particles.
+  /**
+   * \ingroup exception
+   * Thrown when the requested energy is smaller than the masses
+   * of two particles.
+   */
   struct InvalidEnergy : public BadInput {
     using BadInput::BadInput;
   };

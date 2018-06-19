@@ -78,7 +78,8 @@ class ScatterAction : public Action {
    * Generate the final-state of the scattering process.
    * Performs either elastic or inelastic scattering.
    *
-   * \throws InvalidResonanceFormation
+   * \throw InvalidScatterAction
+
    */
   void generate_final_state() override;
 
@@ -90,7 +91,7 @@ class ScatterAction : public Action {
   double get_total_weight() const override;
 
   /**
-   * Get the partial cross section of the choosen channel.
+   * Get the partial cross section of the chosen channel.
    *
    * \return partial cross section.
    */
@@ -98,17 +99,16 @@ class ScatterAction : public Action {
 
   /**
    * Sample final-state angles in a 2->2 collision (possibly anisotropic).
-   *
-   * \throws InvalidResonanceFormation
    */
   void sample_angles(std::pair<double, double> masses) override;
 
-  /** Add all possible scattering subprocesses for this action object.
+  /**
+   * Add all possible scattering subprocesses for this action object.
    *
    * \param[in] elastic_parameter If non-zero, given global
    *            elastic cross section.
    * \param[in] two_to_one  2->1 reactions enabled?
-   * \param[in] included_2to2 Which 2->2 ractions are enabled?
+   * \param[in] included_2to2 Which 2->2 reactions are enabled?
    * \param[in] low_snn_cut Elastic collisions with CME below are forbidden.
    * \param[in] strings_switch Are string processes enabled?
    * \param[in] use_AQM use elastic cross sections via AQM?
@@ -235,11 +235,14 @@ class ScatterAction : public Action {
   /**
    * Check if the scattering is elastic.
    *
-   * \return whether the scattering is elsatic.
+   * \return whether the scattering is elastic.
    */
   bool is_elastic() const;
 
-  /// Perform a 2->1 resonance-formation process.
+  /**
+   * Perform a 2->1 resonance-formation process.
+   * \throw InvalidResonanceFormation
+   */
   void resonance_formation();
 
   /// Pointer to interface class for strings

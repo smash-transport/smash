@@ -133,7 +133,7 @@ class PdgCode {
   }
 
   /**
-   * receive a signed integer and process it into a PDG Code. The sign
+   * Receive a signed integer and process it into a PDG Code. The sign
    * is taken as antiparticle boolean, while the absolute value of the
    * integer is used as hexdigits.
    * \param[in] codenumber a signed integer which represent the PDG code
@@ -456,7 +456,7 @@ class PdgCode {
   /**
    * The charge of the particle.
    * The charge is calculated from the quark content (for hadrons) or
-   * basically tabellized; currently leptons, neutrinos and the standard
+   * basically tabulated; currently leptons, neutrinos and the standard
    * model gauge bosons are known; unknown particles return a charge of
    * 0.
    * \return charge of the particle
@@ -605,7 +605,7 @@ class PdgCode {
    ****************************************************************************/
 
   /**
-   * sorts PDG Codes according to their numeric value.
+   * Sorts PDG Codes according to their numeric value.
    * This is used by std::map
    */
   inline bool operator<(const PdgCode rhs) const {
@@ -678,7 +678,7 @@ class PdgCode {
   }
 
   /**
-   * returns the net number of quarks with given flavour number
+   * Returns the net number of quarks with given flavour number
    * For public use, see strangeness(), charmness(), bottomness() and
    * isospin3().
    * \param[in] quark PDG Code of quark: (1..6) = (d,u,s,c,b,t)
@@ -705,13 +705,13 @@ class PdgCode {
 #error "Please determine the correct bit-field order for your target/compiler"
 #endif
   /**
-   * the union holds the data; either as a single integer dump_, as a
+   * The union holds the data; either as a single integer dump_, as a
    * single-digit bitfield digits_ or as a multiple-digits bitfield
    * chunks_.
    */
   union {
     /**
-     * the single digits collection of the code. Here, every PDG code
+     * The single digits collection of the code. Here, every PDG code
      * digits is directly accessible.
      */
     struct {
@@ -747,27 +747,27 @@ class PdgCode {
 #endif
     } digits_;
     /**
-     * the bitfield dumped into a single integer. Please note that the
+     * The bitfield dumped into a single integer. Please note that the
      * 2nd, 3rd and 4th highest bits are possibly undefined.
      */
     std::uint32_t dump_;
     /**
-     * chunk collection: here, the chunks with \f$nn_Rn_L\f$ and
+     * Chunk collection: here, the chunks with \f$nn_Rn_L\f$ and
      * \f$n_{q_1}n_{q_2}n_{q_3}\f$ are directly accessible.
      */
     struct {
 #if SMASH_BITFIELD_ORDER_ == 1
       std::uint32_t : 4;
-      /// the quark digits n_q{1,2,3}_
+      /// The quark digits n_q{1,2,3}_
       std::uint32_t quarks_ : 12;
-      /// the excitation digits n_, n_R_, n_L_
+      /// The excitation digits n_, n_R_, n_L_
       std::uint32_t excitation_ : 12, : 4;
-#else  /// reverse ordering
+#else  /// Reverse ordering
       std::uint32_t : 4, excitation_ : 12;
       std::uint32_t quarks_ : 12, : 4;
 #endif
     } chunks_;
-    /// structure for the nuclei
+    /// Structure for the nuclei
     struct {
 #if SMASH_BITFIELD_ORDER_ == 1
       std::uint32_t n_Lambda_ : 6;
@@ -776,7 +776,7 @@ class PdgCode {
       std::uint32_t I_ : 4;
       bool is_nucleus_ : 1;
       bool antiparticle_ : 1;
-#else  // reverse ordering
+#else  // Reverse ordering
       bool antiparticle_ : 1;
       bool is_nucleus_ : 1;
       std::uint32_t I_ : 4;
@@ -800,15 +800,15 @@ class PdgCode {
    * \throw InvalidPdgCode if character does not correspond to digit
    */
   inline std::uint32_t get_digit_from_char(const char inp) const {
-    // decimal digit
+    // Decimal digit
     if (48 <= inp && inp <= 57) {
       return inp - 48;
     }
-    // hexdecimal digit, uppercase
+    // Hexdecimal digit, uppercase
     if (65 <= inp && inp <= 70) {
       return inp - 65 + 10;
     }
-    // hexdecimal digit, lowercase
+    // Hexdecimal digit, lowercase
     if (97 <= inp && inp <= 102) {
       return inp - 97 + 10;
     }
@@ -839,7 +839,7 @@ class PdgCode {
    */
   inline void set_from_string(const std::string& codestring) {
     dump_ = 0;
-    // implicit with the above: digits_.antiparticle_ = false;
+    // Implicit with the above: digits_.antiparticle_ = false;
     digits_.n_ = digits_.n_R_ = digits_.n_L_ = digits_.n_q1_ = digits_.n_q2_ =
         digits_.n_q3_ = digits_.n_J_ = digits_.is_nucleus_ = 0;
     size_t length = codestring.size();
@@ -847,7 +847,7 @@ class PdgCode {
       throw InvalidPdgCode("Empty string does not contain PDG Code\n");
     }
     int c = 0;
-    /* look at current character; if it is a + or minus sign, read it
+    /* Look at current character; if it is a + or minus sign, read it
      * and advance to next char. */
     if (codestring[c] == '-') {
       digits_.antiparticle_ = true;
@@ -856,7 +856,7 @@ class PdgCode {
       digits_.antiparticle_ = false;
       ++c;
     }
-    // save if the first character was a sign:
+    // Save if the first character was a sign:
     unsigned int sign = c;
 
     // Nucleus
@@ -879,21 +879,21 @@ class PdgCode {
       return;
     }
 
-    // codestring shouldn't be longer than 8 + sign, except for nuclei
+    // Codestring shouldn't be longer than 8 + sign, except for nuclei
     if (length > 8 + sign) {
       throw InvalidPdgCode("String \"" + codestring +
                            "\" too long for PDG Code\n");
     }
-    /* please note that in what follows, we actually need c++, not ++c.
+    /* Please note that in what follows, we actually need c++, not ++c.
      * first digit is used for n_J if the last digit is not enough. */
     if (length > 7 + sign) {
       digits_.n_J_ += get_digit_from_char(codestring[c++]);
     }
-    // codestring has 7 digits? 7th from last goes in n_.
+    // Codestring has 7 digits? 7th from last goes in n_.
     if (length > 6 + sign) {
       digits_.n_ = get_digit_from_char(codestring[c++]);
     }
-    // it has 6 or 7 digits? 6th from last is n_R_.
+    // It has 6 or 7 digits? 6th from last is n_R_.
     if (length > 5 + sign) {
       digits_.n_R_ = get_digit_from_char(codestring[c++]);
     }
@@ -915,14 +915,14 @@ class PdgCode {
         throw InvalidPdgCode("Invalid PDG code " + codestring + " (n_q2>6)");
       }
     }
-    // next to last is n_q3_.
+    // Next to last is n_q3_.
     if (length > 1 + sign) {
       digits_.n_q3_ = get_digit_from_char(codestring[c++]);
       if (digits_.n_q3_ > 6) {
         throw InvalidPdgCode("Invalid PDG code " + codestring + " (n_q3>6)");
       }
     }
-    // last digit is the spin degeneracy.
+    // Last digit is the spin degeneracy.
     if (length > sign) {
       digits_.n_J_ += get_digit_from_char(codestring[c++]);
     } else {
@@ -959,6 +959,12 @@ class PdgCode {
 
 static_assert(sizeof(PdgCode) == 4, "should fit into 32 bit integer");
 
+/**
+ * Sets the PDG code from the textual representation
+ * in the input stream.
+ * \param[in] is input string
+ * \param[out] code PdgCode to be set
+ */
 std::istream& operator>>(std::istream& is, PdgCode& code);
 /**
  * \ingroup logging

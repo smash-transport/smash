@@ -10,7 +10,8 @@
 #ifndef SRC_INCLUDE_DEPRECATE_C_FUNCTIONS_H_
 #define SRC_INCLUDE_DEPRECATE_C_FUNCTIONS_H_
 
-/**\file
+/**
+ * \file
  * This file should only be included to find deprecated calls to the C library.
  * It should not be included in default builds since it slows down compilation.
  */
