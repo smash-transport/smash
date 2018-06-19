@@ -22,7 +22,7 @@
 #include "include/quantumnumbers.h"
 
 namespace smash {
-
+/// Destructor
 Action::~Action() = default;
 
 bool Action::is_valid(const Particles &particles) const {
