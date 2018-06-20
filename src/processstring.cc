@@ -664,6 +664,8 @@ bool StringProcess::next_NDiffHard() {
        * transverse directions evecBasisAB_[1] and evecBasisAB_[2]. */
       FourVector momentum = reorient(event[i], evecBasisAB_);
       log.debug("4-momentum from Pythia: ", momentum);
+      log.debug("appending the particle ", pythia_id,
+                " to the intermediate particle list.");
       if (event[i].isHadron()) {
         append_intermediate_list(pythia_id, momentum,
                                  new_intermediate_particles);
@@ -916,8 +918,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
   pythia_hadron_->event.reset();
   intermediate_particles.clear();
 
-  log.info("initial quark content for fragment_string : ",
-           idq1, ", ", idq2);
+  log.debug("initial quark content for fragment_string : ", idq1, ", ", idq2);
   std::array<int, 2> idqIn;
   idqIn[0] = idq1;
   idqIn[1] = idq2;
@@ -931,7 +932,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
 
     m_const[i] = pythia_hadron_->particleData.m0(idqIn[i]);
   }
-  log.info("3 times baryon number of string : ", bstring);
+  log.debug("3 times baryon number of string : ", bstring);
 
   if (flip_string_ends && random::uniform_int(0, 1) == 0) {
     /* in the case where we flip the string ends,
@@ -989,8 +990,8 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
         id_diquark = std::abs(idq1);
         idqIn[0] = idnew_qqbar;
       }
-      log.info("quark constituents for leading baryon : ",
-               idnew_qqbar, ", ", id_diquark);
+      log.debug("quark constituents for leading baryon : ",
+                idnew_qqbar, ", ", id_diquark);
 
       std::array<int, 5> frag_net_q;
       for (int iq = 0; iq < 5; iq++) {
@@ -1004,10 +1005,10 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
       const int frag_strange = -frag_net_q[2];
       const int frag_charm = frag_net_q[3];
       const int frag_bottom = -frag_net_q[4];
-      log.info("  conserved charges of leading baryon : iso3 = ", frag_iso3,
-               ", strangeness = ", frag_strange,
-               ", charmness = ", frag_charm,
-               ", bottomness = ", frag_bottom);
+      log.debug("  conserved charges of leading baryon : iso3 = ", frag_iso3,
+                ", strangeness = ", frag_strange,
+                ", charmness = ", frag_charm,
+                ", bottomness = ", frag_bottom);
 
       std::vector<int> pdgid_possible;
       std::vector<double> weight_possible;
@@ -1031,7 +1032,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
           pdgid_possible.push_back(pdgid);
           weight_possible.push_back(weight);
 
-          log.info("  PDG id ", pdgid, " acceped with weight ", weight);
+          log.debug("  PDG id ", pdgid, " is possible with weight ", weight);
         }
       }
       const int n_possible = pdgid_possible.size();
@@ -1045,7 +1046,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
       for (int i = 0; i < n_possible; i++) {
         if ((uspc >= weight_summed[i]) && (uspc < weight_summed[i + 1])) {
           pdgid_frag = pdgid_possible[i];
-          log.info("PDG id ", pdgid_frag, " selected for leading baryon.");
+          log.debug("PDG id ", pdgid_frag, " selected for leading baryon.");
           break;
         }
       }
@@ -1081,10 +1082,10 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
         FourVector mom_frag((ppos_frag + pneg_frag) / sqrt2_,
                             evec_basis[0] * (ppos_frag - pneg_frag) / sqrt2_ +
                             evec_basis[1] * QTrx + evec_basis[2] * QTry);
-        log.info("appending the leading baryon ", pdgid_frag,
-                 " to the intermediate particle list.");
+        log.debug("appending the leading baryon ", pdgid_frag,
+                  " to the intermediate particle list.");
         append_intermediate_list(pdgid_frag, mom_frag, intermediate_particles);
-        log.info("proceed to the next step");
+        log.debug("proceed to the next step");
       }
     }
 
@@ -1158,7 +1159,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
                                  pquark, m_const[1]);
   }
 
-  log.info("fragmenting a string with ", idqIn[0], ", ", idqIn[1]);
+  log.debug("fragmenting a string with ", idqIn[0], ", ", idqIn[1]);
   // implement PYTHIA fragmentation
   pythia_hadron_->event[0].p(pSum);
   pythia_hadron_->event[0].m(pSum.mCalc());
@@ -1176,8 +1177,8 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
       FourVector momentum(
           pythia_hadron_->event[ipyth].e(), pythia_hadron_->event[ipyth].px(),
           pythia_hadron_->event[ipyth].py(), pythia_hadron_->event[ipyth].pz());
-      log.info("appending the fragmented hadron ", pythia_id,
-               " to the intermediate particle list.");
+      log.debug("appending the fragmented hadron ", pythia_id,
+                " to the intermediate particle list.");
       append_intermediate_list(pythia_id, momentum, intermediate_particles);
 
       number_of_fragments++;
