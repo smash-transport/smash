@@ -26,6 +26,8 @@ namespace smash {
 
 class DeformedNucleus : public Nucleus {
  public:
+  /// \todo unused or default constructor?
+  DeformedNucleus(const std::map<PdgCode, int> &particle_list, int nTest);
   /**
    * Constructor for DeformedNucleus, that needs the configuration parameters
    * from the inputfile and the number of testparticles
