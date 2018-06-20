@@ -292,7 +292,7 @@ class Clock {
   bool operator>(double time) const { return current_time() > time; }
 
  private:
-  /// A multiplier transfering the internal integer to the real time. 
+  /// A multiplier transfering the internal integer to the real time.
   static constexpr double to_double = resolution;
   /// A multiplier transfering the real time to the internal integer.
   static constexpr double from_double = 1. / resolution;
