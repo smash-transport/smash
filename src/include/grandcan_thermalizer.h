@@ -155,25 +155,6 @@ enum class HadronClass {
   ZeroQZeroSMeson = 6,
 };
 
-/**
- * The GrandCanThermalizer class implements the following functionality:
- *  1. Create a lattice and find the local rest frame energy density in each
- *     cell from the particles.
- *  2. Remove particles from the cells, where the energy density is high enough.
- *     Save the energy, momentum and quantum numbers of the removed particles.
- *  3. Sample new particles instead of the removed ones according to the
- *     grand-canonical thermal distribution, but with an additional constraint:
- *     the energy, momentum and quantum numbers should be the same as those of
- *     the removed particles.
- *
- *  The step 3. is a challenging task, so several algorithms are implemented
- *  that try to fulfil the requirements. The algorithms are a trade-off between
- *  mathematical rigour and computational speed. All of them are shown
- *  to reproduce the mean values of multiplicities correctly. However, this
- *  is not the case for multiplicity fluctuations. For details see
- *  \iref{Oliinychenko:2016vkg}.
- */
-
 /*!\Userguide
  * \page input_forced_thermalization_ Forced Thermalization
  *
@@ -199,6 +180,26 @@ enum class HadronClass {
  * \li \key "mode sampling" - fastest, but least robust
  *
  */
+
+/**
+ * The GrandCanThermalizer class implements the following functionality:
+ *  1. Create a lattice and find the local rest frame energy density in each
+ *     cell from the particles.
+ *  2. Remove particles from the cells, where the energy density is high enough.
+ *     Save the energy, momentum and quantum numbers of the removed particles.
+ *  3. Sample new particles instead of the removed ones according to the
+ *     grand-canonical thermal distribution, but with an additional constraint:
+ *     the energy, momentum and quantum numbers should be the same as those of
+ *     the removed particles.
+ *
+ *  The step 3. is a challenging task, so several algorithms are implemented
+ *  that try to fulfil the requirements. The algorithms are a trade-off between
+ *  mathematical rigour and computational speed. All of them are shown
+ *  to reproduce the mean values of multiplicities correctly. However, this
+ *  is not the case for multiplicity fluctuations. For details see
+ *  \iref{Oliinychenko:2016vkg}.
+ */
+
 class GrandCanThermalizer {
  public:
   /**

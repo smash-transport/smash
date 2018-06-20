@@ -40,16 +40,17 @@ class IsoParticleType {
    * or ParticleTypePtr (as returned from operator&).
    */
   IsoParticleType(const IsoParticleType &) = delete;
-  /// assignment is not allowed, see copy constructor above
+  /// Assignment is not allowed, see copy constructor above
   IsoParticleType &operator=(const IsoParticleType &) = delete;
 
-  // move ctors are needed for std::sort
+  /// Move constructor of IsoParticleType (needed for std::sort)
   IsoParticleType(IsoParticleType &&) = default;
+  /// Move constructor of IsoParticleType "="-operator (needed for std::sort)
   IsoParticleType &operator=(IsoParticleType &&) = default;
 
   /**
    * Returns whether the two IsoParticleType objects have the same PDG code for
-   * their first state; if it is, it is the same iso multiplet.
+   * their first state; if so, it is the same iso multiplet.
    *
    * \param rhs The other multiplet.
    */
@@ -66,7 +67,7 @@ class IsoParticleType {
   /// Returns the (average) multiplet width.
   double width() const { return width_; }
 
-  /// Returns twice the total isospin of the multiplet
+  /// Returns twice the total isospin of the multiplet.
   int isospin() const { return states_.size() - 1; }
 
   /**
@@ -75,6 +76,7 @@ class IsoParticleType {
    */
   unsigned int spin() const { return spin_; }
 
+  /// Returns list of states that form part of the multiplet.
   ParticleTypePtrList get_states() const { return states_; }
 
   /**
@@ -91,9 +93,7 @@ class IsoParticleType {
    */
   bool has_anti_multiplet() const;
 
-  /**
-   * Returns a list of all IsoParticleTypes.
-   */
+  /// Returns a list of all IsoParticleTypes.
   static const IsoParticleTypeList &list_all();
 
   /**
@@ -101,7 +101,7 @@ class IsoParticleType {
    * If the particle type is not found, an invalid pointer is returned.
    * You can convert the pointer to a bool to check whether it is valid.
    *
-   * \param name The name of the of the particle type.
+   * \param name The name of the particle type.
    * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
    */
   static const IsoParticleType *try_find(const std::string &name);
@@ -124,7 +124,10 @@ class IsoParticleType {
    */
   static IsoParticleType *find(const ParticleType &type);
 
-  /// \ingroup exception
+  /** \ingroup exception
+   *
+   * Throw when requested particle could not be found.
+   */
   struct ParticleNotFoundFailure : public std::runtime_error {
     using std::runtime_error::runtime_error;
   };
@@ -132,7 +135,7 @@ class IsoParticleType {
   /**
    * Returns whether the ParticleType with the given \p pdgcode exists.
    *
-   * \param name The name of the of the particle type to be found.
+   * \param name The name of the particle type to be found.
    * \note The complexity of the search is \f$\mathcal O(\log N)\f$.
    */
   static bool exists(const std::string &name);
@@ -141,7 +144,7 @@ class IsoParticleType {
    * Returns the ParticleType object for the given \p name, by first finding the
    * correct multiplet and then looking for the desired state.
    *
-   * \param name The name of the of the particle state to be found.
+   * \param name The name of the particle state to be found.
    * \throw std::runtime_error if \p name is not found.
    */
   static const ParticleTypePtr find_state(const std::string &name);
@@ -208,10 +211,15 @@ class IsoParticleType {
   /// A tabulation of the spectral integral for the NK -> RK cross sections.
   TabulationPtr XS_RK_tabulation_;
   /**
-   * A tabulation for the NN -> NR and NN -> DR cross sections,
+   * A tabulation for the NN -> NR cross sections,
    * where R is a resonance from this multiplet.
    */
-  TabulationPtr XS_NR_tabulation_, XS_DR_tabulation_;
+  TabulationPtr XS_NR_tabulation_;
+  /**
+   * A tabulation for the NN -> DR cross sections,
+   * where R is a resonance from this multiplet.
+   */
+  TabulationPtr XS_DR_tabulation_;
   /**
    * A tabulation list for the NN -> RR' cross sections,
    * where R is this multiplet and R' is a baryon resonance, associated
@@ -222,6 +230,9 @@ class IsoParticleType {
 
   /**
    * Private version of the 'find' method that returns a non-const reference.
+   *
+   * \param[in] name The name of the of the particle type to be found.
+   * \throw ParticleNotFoundFailure if \p name not found.
    */
   static IsoParticleType &find_private(const std::string &name);
 };
