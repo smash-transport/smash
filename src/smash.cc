@@ -430,12 +430,12 @@ int main(int argc, char *argv[]) {
     create_all_loggers(configuration["Logging"]);
     log.info(progname, " (", VERSION_MAJOR, ')');
 
-    int64_t seed = configuration.read({"General", "randomseed"});
+    int64_t seed = configuration.read({"General", "Randomseed"});
     if (seed < 0) {
       // Seed with a real random value, if available
       std::random_device rd;
       seed = rd();
-      configuration["General"]["randomseed"] = seed;
+      configuration["General"]["Randomseed"] = seed;
     }
 
     // Check output path
