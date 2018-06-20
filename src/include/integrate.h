@@ -47,9 +47,12 @@ struct GslWorkspaceDeleter {
   }
 };
 
-/** The result type returned from integrations,
- * containing the value and an error. */
+/**
+ * The result type returned from integrations,
+ * containing the value and an error.
+ */
 class Result : public std::pair<double, double> {
+  /// The data type to store the value and the error of the integration
   using Base = std::pair<double, double>;
 
  public:

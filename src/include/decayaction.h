@@ -61,13 +61,13 @@ class DecayAction : public Action {
    */
   std::pair<double, double> sample_masses() const override;
 
-  /// Return the total width of the decay process. 
+  /// Return the total width of the decay process.
   double get_total_weight() const override { return total_width_; }
 
-  /** 
+  /**
    * Get partial width of chosen channel
-  * \return Partial width of chosen channel 
-  */
+   * \return Partial width of chosen channel
+   */
   double get_partial_weight() const override { return partial_width_; }
 
   /**

@@ -15,13 +15,15 @@ namespace smash {
 
 namespace utf8 {
 
-/// Adjust filling width by taking the size of unicode characters into account.
-/// This is necessary, because UTF-8 characters can be represented by more than
-/// byte.
-///
-/// \param s String to be filled.
-/// \param width Width (in bytes) to be adjusted.
-/// \return Adjusted width.
+/**
+ * Adjust filling width by taking the size of unicode characters into account.
+ * This is necessary, because UTF-8 characters can be represented by more than
+ * byte.
+ *
+ * \param[in] s String to be filled.
+ * \param[in] width Width (in bytes) to be adjusted.
+ * \return Adjusted width.
+ */
 inline static size_t adjust(const std::string &s, size_t width) {
   for (unsigned char c : s) {
     if (c >= 0xFC) {
@@ -93,13 +95,15 @@ void isoclean(std::string &s) {
   remove_substr(s, "⁰");
 }
 
-/// Split string by delimiter.
-///
-/// \param[in] s String to be split.
-/// \param[in] delim Splitting delimiter.
-/// \param[out] result Split string as iterator.
-//
-// Necessary for the next function
+/**
+ * Split string by delimiter.
+ *
+ * \param[in] s String to be split.
+ * \param[in] delim Splitting delimiter.
+ * \param[out] result Split string as iterator.
+ *
+ * Necessary for the next function
+ */
 template <typename Out>
 void split(const std::string &s, char delim, Out result);
 

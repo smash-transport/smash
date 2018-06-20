@@ -217,7 +217,7 @@ ThreeVector Nucleus::distribute_nucleon() const {
   double prob_range4 = 1. * prob_range3 / radius_scaled;
   double ranges234 = prob_range2 + prob_range3 + prob_range4;
   double t;
-  /// \li Decide which branch \f$\tilde p^{({\rm I - IV})}\f$ to go into
+  // Decide which branch \f$\tilde p^{({\rm I - IV})}\f$ to go into
   do {
     double which_range = random::uniform(-prob_range1, ranges234);
     if (which_range < 0.0) {
@@ -231,15 +231,14 @@ ThreeVector Nucleus::distribute_nucleon() const {
         }
       }
     }
-    /**
-     * \li Generate \f$t\f$ from the distribution in the respective
+    /* Generate \f$t\f$ from the distribution in the respective
      * branches
-     * \li \a Reject that number with a probability
+     * Reject that number with a probability
      * \f$1-(1+\exp(-|t|))^{-1}\f$ (the efficiency of this should be
      * \f$\gg \frac{1}{2}\f$)
      */
   } while (random::canonical() > 1. / (1. + std::exp(-std::abs(t))));
-  /// \li Shift and rescale \f$t\f$ to \f$r = d\cdot t + r_0\f$
+  // Shift and rescale \f$t\f$ to \f$r = d\cdot t + r_0\f$
   double position_scaled = t + radius_scaled;
   double position = position_scaled * diffusiveness_;
   return dir.threevec() * position;
@@ -266,10 +265,6 @@ void Nucleus::arrange_nucleons() {
   rotate();
 }
 
-/**
- * \todo Issue #4743 covers the update of this part with references; Also
- * the Hirano-Nara correction should be an option
- */
 void Nucleus::set_parameters_automatic() {
   int A = Nucleus::number_of_particles();
   switch (A) {
@@ -460,7 +455,6 @@ FourVector Nucleus::center() const {
   return centerpoint;
 }
 
-/// \todo(warning) this friend is documented in .h file
 std::ostream &operator<<(std::ostream &out, const Nucleus &n) {
   return out << "  #particles   #testparticles   mass [GeV]   "
                 "radius [fm]  diffusiveness [fm]\n"
