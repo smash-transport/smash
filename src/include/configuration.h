@@ -58,7 +58,7 @@ struct convert {
     }
   }
 };
-} // namespace YAML
+}  // namespace YAML
 
 namespace smash {
 /*!\Userguide

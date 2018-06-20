@@ -145,7 +145,7 @@ class BesselSampler {
    */
   static constexpr double m_switch_method_ = 6.0;
 
-  /// Probabilities smaller than negligibly_probability are neglected. 
+  /// Probabilities smaller than negligibly_probability are neglected.
   static constexpr double negligible_probability_ = 1.e-12;
 
   /// Mean of the Bessel distribution.
