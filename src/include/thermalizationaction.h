@@ -19,15 +19,15 @@ namespace smash {
  * \ingroup action
  * ThermalizationAction implements forced thermalization as an Action class.
  * Particles before thermalization are treated as incoming, after
- * thermalization - as outgoing. This is a N->M action.
+ * thermalization as outgoing. This is an N->M action.
  */
 class ThermalizationAction : public Action {
  public:
   /**
    * The inherited class
    * \param[in] gct The thermalization object taking care of removing and
-   * sampling new particles \see GrandCanThermalizer
-   * \param[in] absolute_labframe_time Current time in the computational frame
+   * sampling new particles \see GrandCanThermalizer.
+   * \param[in] absolute_labframe_time Current time in the computational frame.
    */
   ThermalizationAction(const GrandCanThermalizer& gct,
                        double absolute_labframe_time);
