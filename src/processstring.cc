@@ -942,17 +942,6 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
     evecLong = -evecLong;
   }
 
-  /* diquark (anti-quark) with PDG id idq2 is going in the direction of
-   * evecLong.
-   * quark with PDG id idq1 is going in the direction opposite to evecLong. */
-  double sign_direction = 1.;
-  if (bstring == -3) {  // anti-baryonic string
-    /* anti-diquark with PDG id idq1 is going in the direction of evecLong.
-     * anti-quark with PDG id idq2 is going in the direction
-     * opposite to evecLong. */
-    sign_direction = -1;
-  }
-
   if (m_const[0] + m_const[1] > mString) {
     throw std::runtime_error("String fragmentation: m1 + m2 > mString");
   }
@@ -1057,7 +1046,24 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
       QTrn = std::sqrt(QTrx * QTrx + QTry * QTry);
       const double mTrn_frag = std::sqrt(QTrn * QTrn + mass_frag * mass_frag);
 
-      double xfrac = 0.6;
+      double xfrac = 0.;
+      const double xf_const_A = 0.275;
+      const double xf_const_B = 0.42;
+      bool xfrac_accepted = false;
+      while (!xfrac_accepted) {
+        const double angle = M_PI * (random::uniform(0., 1.) - 0.5);
+        xfrac = xf_const_B + 2. * xf_const_A * std::tan(angle);
+
+        const double xf_tmp = (xfrac - xf_const_B) * (xfrac - xf_const_B) /
+                              (xf_const_A * xf_const_A);
+        xf_env = (1. + really_small) / (1. + xf_tmp / 4.);
+        xf_pdf = std::exp(-xf_tmp / 2.);
+        if (random::uniform(0., xf_env) < xf_pdf &&
+            xfrac > 0. && xfrac < 1.) {
+          xfrac_accepted = true;
+        }
+      }
+
       const double ppos_frag = xfrac * mString / sqrt2_;
       const double pneg_frag = 0.5 * mTrn_frag * mTrn_frag / ppos_frag;
       ppos_string_new = mString / sqrt2_ - ppos_frag;
@@ -1138,6 +1144,17 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
     pythia_hadron_->event.append(idqIn[1], status, color, anticolor,
                                  pquark, m_const[1]);
   } else {
+    /* diquark (anti-quark) with PDG id idq2 is going in the direction of
+     * evecLong.
+     * quark with PDG id idq1 is going in the direction opposite to evecLong. */
+    double sign_direction = 1.;
+    if (bstring == -3) {  // anti-baryonic string
+      /* anti-diquark with PDG id idq1 is going in the direction of evecLong.
+       * anti-quark with PDG id idq2 is going in the direction
+       * opposite to evecLong. */
+      sign_direction = -1;
+    }
+
     // evaluate momenta of quarks
     const double pCMquark = pCM(mString, m_const[0], m_const[1]);
     const double E1 = std::sqrt(m_const[0] * m_const[0] + pCMquark * pCMquark);
