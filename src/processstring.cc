@@ -1056,8 +1056,8 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
 
         const double xf_tmp = (xfrac - xf_const_B) * (xfrac - xf_const_B) /
                               (xf_const_A * xf_const_A);
-        xf_env = (1. + really_small) / (1. + xf_tmp / 4.);
-        xf_pdf = std::exp(-xf_tmp / 2.);
+        const double xf_env = (1. + really_small) / (1. + xf_tmp / 4.);
+        const double xf_pdf = std::exp(-xf_tmp / 2.);
         if (random::uniform(0., xf_env) < xf_pdf &&
             xfrac > 0. && xfrac < 1.) {
           xfrac_accepted = true;
