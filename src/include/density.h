@@ -73,17 +73,6 @@ inline double smearing_factor_norm(const double two_sigma_sqr) {
   return tmp * std::sqrt(tmp);
 }
 
-/**
- * Norm of the gradient of the Gaussian smearing factor
- *
- * \param[in] two_sigma_sqr \f$2 \sigma^2 \f$ [fm\f$^2\f$],
- *            \f$ \sigma \f$ - width of gaussian smearing
- * \return \f$ (2 \pi \sigma^2)^{3/2} \cdot  * (2 \sigma^2) \f$ [fm\f$^5\f$]
- */
-inline double smearing_factor_grad_norm(const double two_sigma_sqr) {
-  const double tmp = two_sigma_sqr * M_PI;
-  return tmp * std::sqrt(tmp) * 0.5 * two_sigma_sqr;
-}
 
 /**
  * Gaussians used for smearing are cut at radius \f$r_{cut} = a \sigma \f$
@@ -128,12 +117,10 @@ class DensityParameters {
     r_cut_sqr_ = r_cut_ * r_cut_;
     const double two_sig_sqr = 2 * sig_ * sig_;
     two_sig_sqr_inv_ = 1. / two_sig_sqr;
-    const double norm1 = smearing_factor_norm(two_sig_sqr);
-    const double norm2 = smearing_factor_grad_norm(two_sig_sqr);
+    const double norm = smearing_factor_norm(two_sig_sqr);
     const double corr_factor =
         smearing_factor_rcut_correction(par.gauss_cutoff_in_sigma);
-    norm_factor_sf_ = 1. / (norm1 * ntest_ * corr_factor);
-    norm_factor_sf_grad_ = 1. / (norm2 * ntest_ * corr_factor);
+    norm_factor_sf_ = 1. / (norm * ntest_ * corr_factor);
   }
   /// \return Testparticle number
   int ntest() const { return ntest_; }
@@ -149,8 +136,6 @@ class DensityParameters {
    *         \f$ \int d^3r \, sf(\vec{r}) = 1 \f$.
    */
   double norm_factor_sf() const { return norm_factor_sf_; }
-  /// \return Normalization for the gradient of the smearing factor
-  double norm_factor_sf_grad() const { return norm_factor_sf_grad_; }
 
  private:
   /// Gaussian smearing width [fm]
@@ -163,8 +148,6 @@ class DensityParameters {
   double two_sig_sqr_inv_;
   /// Normalization for smearing factor
   double norm_factor_sf_;
-  /// Normalization for the gradient of the smearing factor
-  double norm_factor_sf_grad_;
   /// Testparticle number
   const int ntest_;
 };
@@ -191,7 +174,8 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
     const DensityParameters &dens_par, const bool compute_gradient = false);
 
 /**
- * Calculates Eckart rest frame density and optionally its gradient.
+ * Calculates Eckart rest frame density and optionally its gradient, curl
+ * and time derivatives.
  * \f[j^{\mu} = (\sqrt{2\pi} \sigma )^{-3} \sum_{i=1}^N C_i u^{\mu}_i
  * exp \left(- \frac{(\vec r -\vec r_i + \frac{\gamma_i^2}{1 + \gamma_i}
  * \vec \beta_i (\vec \beta_i, \vec r - \vec r_i))^2}{2\sigma^2} \right)\f]
@@ -200,10 +184,6 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
  * current option is selected then \f$ C_i \f$ is 1 for baryons,
  * -1 for antibaryons and 0 otherwise. For proton/neutron
  * current \f$ C_i = 1\f$ for proton/neutron and 0 otherwise.
- *
- * For gradient:
- * \f[ \frac{d\rho_{Eck}}{d \vec r} = \frac{\frac{dj^{\mu}}{d \vec r}
- * j_{\mu}}{\sqrt{j^{\mu}j_{\mu}}} \f]
  *
  * To avoid the problems with Eckart frame definition, densities for
  * positive and negative charges, \f$\rho_+ \f$ and \f$ \rho_-\f$,
@@ -229,7 +209,9 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
  *   Density itself is double for uniformity: if gradient is double,
  *   density should also be.
  * \return (density in the local Eckart frame [fm\$f^{-3}\$f],
- *          the gradient of the density or a 0 3-vector)
+ *          \f$ \nabla\cdots\rho \f$ or a 0 3-vector,
+ *          \f$ \partial_t \vec j\f$ or a 0 3-vector,
+ *          \f$ \nabla \times \vec j \f$ or a 0 3-vector).
  */
 std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart(
                                           const ThreeVector &r,
@@ -247,33 +229,48 @@ std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart(
 
 /**
  * A class for time-efficient (time-memory trade-off) calculation of density
- * on the lattice. It holds two FourVectors - positive and negative
- * summands of 4-current, and the density itself. Four-currents are
- * additive by particles, density is not. That is why such structure is
- * used. It is efficient to calculate additive jmu's in one loop over
- * particles and then calculate density from jmu's. Splitting into
- * positive and negative parts of jmu is necessary to avoid
+ * on the lattice. It holds six FourVectors - positive and negative
+ * summands of 4-current, and the time and spatial derivatives of the compound
+ * current. These Four-vectors are  additive by particles.
+ * It is efficient to calculate additive jmu and \f$ \partial_\nu jmu \f$ in
+ * one loop over particles and then calculate the Eckart density, the gradient
+ * of the density, the curl and the time derivative of the current accordingly.
+ * Splitting into  positive and negative parts of jmu is necessary to avoid
  * problems with the definition of Eckart rest frame.
  *
  * Intended usage of the class:
  * -# Add particles from some list using add_particle(...). This sets
- *    jmu_pos and jmu_neg
- * -# Compute density from jmus using compute_density(...).
+ *    jmu_pos, jmu_neg, and djmu_dx.
  * -# Get jmus and density whenever necessary via density(),
  *    jmu_pos(), jmu_neg()
+ * -# Get \f$\nabla \cdot \rho$ via grad_rho()
+ * -# Get \f$\nabla \times \vec j\f$ via rot_j()
+ * -# Get \f$\partial_t \vec j\f$ via dj_dt()
  */
 class DensityOnLattice {
  public:
   /// Default constructor
   DensityOnLattice()
       : jmu_pos_(FourVector()), jmu_neg_(FourVector()),
-      djmu_dx_({FourVector(), FourVector(), FourVector(), FourVector()}) {}
+      djmu_dx_({FourVector(), FourVector(), FourVector(), FourVector()}),
+      n_(0) {}
 
   /**
    * Adds particle to 4-current: \f$j^{\mu} += p^{\mu}/p^0 \cdot factor \f$
+   * and to the time and spatial derivatives of the 4-current.
    * Two private class members jmu_pos_ and jmu_neg_ indicating the 4-current
-   * of the positively and negatively charged particles are updated by this
-   * function
+   * of the positively and negatively charged particles, and an array of four
+   * private 4-vectors djmu_dx_ indicating the derivatives of the compound
+   * current are updated by this function. A private integer n_ indicating the
+   * number of the test particles affiliated to each node is also updated here.
+   * The forces will only be calculated if n is larger than 5. This is because
+   * the force acting on each particle should be in principle contributed by
+   * the other particles. If the number of the test particles is too small,
+   * the unphysical self contribution will be prominant. In the extreme case,
+   * a single particle can be pushed by itself since its Gaussian wave package
+   * always contributes non-zero gradient to its nearest node, which leads to
+   * a non-zero force acting on itself. So the forces at the nodes with too
+   * fiew particles should be neglected.
    *
    * \param[in] part Particle would be added to the current density
    *            on the lattice.
@@ -299,6 +296,7 @@ class DensityOnLattice {
            djmu_dx_[0] -= factor * PartFourVelocity * sf_grad[k-1]
                          * part.velocity()[k-1];
        }
+       if (n_ < 6) { n_ += 1;}
     }
   }
 
@@ -319,11 +317,14 @@ class DensityOnLattice {
    * \return \f$\nabla\times\j\f$ [fm \f$^{-4}\f$]
    */
   ThreeVector rot_j(const double norm_factor = 1.0) {
-    ThreeVector j_rot;
-    j_rot.set_x1(djmu_dx_[2].x3() - djmu_dx_[3].x2());
-    j_rot.set_x2(djmu_dx_[3].x1() - djmu_dx_[1].x3());
-    j_rot.set_x3(djmu_dx_[1].x2() - djmu_dx_[2].x1());
-    j_rot *= norm_factor;
+    ThreeVector j_rot = ThreeVector();
+    // enough particle affiliated to the node.
+    if (n_ > 5) {
+      j_rot.set_x1(djmu_dx_[2].x3() - djmu_dx_[3].x2());
+      j_rot.set_x2(djmu_dx_[3].x1() - djmu_dx_[1].x3());
+      j_rot.set_x3(djmu_dx_[1].x2() - djmu_dx_[2].x1());
+      j_rot *= norm_factor;
+    }
     return j_rot;
   }
 
@@ -334,9 +335,12 @@ class DensityOnLattice {
    * \return \f$\nabla\rho\f$ [fm \f$^{-4}\f$]
    */
   ThreeVector grad_rho(const double norm_factor = 1.0) {
-    ThreeVector rho_grad;
-    for (int i = 1; i < 4; i++) {
-        rho_grad[i - 1] = djmu_dx_[i].x0() * norm_factor;
+    ThreeVector rho_grad = ThreeVector();
+    // enough particle affiliated to the node.
+    if (n_ > 5) {
+      for (int i = 1; i < 4; i++) {
+          rho_grad[i - 1] = djmu_dx_[i].x0() * norm_factor;
+      }
     }
     return rho_grad;
   }
@@ -348,7 +352,7 @@ class DensityOnLattice {
    * \return \f$\partial_t \vec j\f$ [fm \f$^{-4}\f$]
    */
   ThreeVector dj_dt(const double norm_factor = 1.0) {
-    return djmu_dx_[0].threevec() * norm_factor;
+    return (n_ > 5) ? djmu_dx_[0].threevec() * norm_factor : ThreeVector();
   }
 
   /// \return Current density of the positively charged particle
@@ -363,6 +367,8 @@ class DensityOnLattice {
   FourVector jmu_neg_;
   /// \f$\partial_\nu j^\mu \f$
   std::array<FourVector, 4> djmu_dx_;
+  /// Number of  particles counted at the node.
+  short int n_;
 };
 
 /// Conveniency typedef for lattice of density

@@ -49,6 +49,7 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
   const double sf = std::exp(-r_rest_sqr * dens_par.two_sig_sqr_inv()) * u.x0();
   const ThreeVector sf_grad = compute_gradient
                                   ? sf * (r + u.threevec() * u_r_scalar)
+                                    * dens_par.two_sig_sqr_inv() * 2.0
                                   : ThreeVector(0.0, 0.0, 0.0);
 
   return std::make_pair(sf, sf_grad);
@@ -222,10 +223,12 @@ void update_density_lattice(RectangularLattice<DensityOnLattice> *lat,
           const ThreeVector r = lat->cell_center(ix, iy, iz);
           const double sf =
               norm_factor *
-              unnormalized_smearing_factor(pos - r, p, m_inv, par).first;
+              unnormalized_smearing_factor(pos - r, p, m_inv,
+                                           par, compute_gradient).first;
           const ThreeVector sf_grad =
               norm_factor *
-              unnormalized_smearing_factor(pos - r, p, m_inv, par).second;
+              unnormalized_smearing_factor(pos - r, p, m_inv,
+                                           par, compute_gradient).second;
           if (sf > really_small) {
             node.add_particle(part, dens_factor, sf, compute_gradient, sf_grad);
           }

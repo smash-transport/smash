@@ -111,7 +111,7 @@ class Potentials {
   std::pair<double, int> force_scale(const ParticleType &data) const;
 
   /**
-   * Evaluates the electro and magnetic components of the skyrme force.
+   * Evaluates the electrical and magnetic components of the skyrme force.
    *
    * \param[in] density Eckart density [fm\f$^{-3}\f$].
    * \param[in] grad_rho Gradient of density [fm\f$^{-4}\f$]. This density is
@@ -119,9 +119,10 @@ class Potentials {
    * \param[in] dj_dt Time derivative of the current density [fm\f$^{-4}\f$
    * \param[in] rot_j Curl of the current density [fm\f$^{-4}\f$
    * \return (\f$E_B, B_B\f$), where
-   *         \f[E_B = -V_B^\prime(\rho^\ast)(\nabla\rho + \partial_t \vec j)\f]
+   *         \f[E_B = -V_B^\prime(\rho^\ast)(\nabla\rho_B
+   *                   + \partial_t \vec j_B)\f]
    *         is the electro component of Skyrme force and
-   *         \f[B_B = V_B^\prime(\rho^\ast) \nabla\times\vec j\f]
+   *         \f[B_B = V_B^\prime(\rho^\ast) \nabla\times\vec j_B\f]
    *         is the magnetic component of the Skyrme force
    *         with \f$\rho^\ast\f$ being the Eckart density.
    */
@@ -130,17 +131,17 @@ class Potentials {
       const ThreeVector rot_j) const;
 
   /**
-   * Evaluates the electro and magnetic components of the symmetry force.
+   * Evaluates the electrical and magnetic components of the symmetry force.
    *
-   * \param[in] density Eckart density [fm\f$^{-3}\f$].
    * \param[in] grad_rho Gradient of density [fm\f$^{-4}\f$]. This density is
    *            evaluated in the computational frame.
    * \param[in] dj_dt Time derivative of the current density [fm\f$^{-4}\f$
    * \param[in] rot_j Curl of the current density [fm\f$^{-4}\f$
-   * \return (\f$E_I, B_I\f$) [GeV/fm], where
-   *         \f[E_I = -V_I^\prime(\rho^\ast)(\nabla\rho + \partial_t \vec j)\f]
-   *         is the electro component of symmetry force and
-   *         \f[B_I = V_I^\prime(\rho^\ast) \nabla\times\vec j\f]
+   * \return (\f$E_I3, B_I3\f$) [GeV/fm], where
+   *         \f[E_{I3} = -V_{I3}^\prime(\rho^\ast)(\nabla\rho_{I3}
+   *                    + \partial_t \vec j_{I3})\f]
+   *         is the electrical component of symmetry force and
+   *         \f[B_{I3} = V_I^\prime(\rho^\ast) \nabla\times\vec j_{I3}\f]
    *         is the magnetic component of the symmetry force
    *         with \f$\rho^\ast\f$ being the Eckart density.
    */
@@ -149,7 +150,7 @@ class Potentials {
       const ThreeVector rot_j) const;
 
   /**
-   * Evaluates the electro and magnetic components of the forces at point r.
+   * Evaluates the electrical and magnetic components of the forces at point r.
    * Point r is in the computational frame.
    *
    * \param[in] r Arbitrary space point where potential gradient is calculated
@@ -157,7 +158,7 @@ class Potentials {
    *            calculation. If the distance between particle and calculation
    *            point r, \f$ |r-r_i| > r_{cut} \f$ then particle input
    *            to density will be ignored.
-   * \return (\f$E_B, B_B, E_I, B_I\f$) [GeV/fm]
+   * \return (\f$E_B, B_B, E_{I3}, B_{I3}\f$) [GeV/fm]
    */
   VIRTUAL_FOR_TESTS
   std::tuple<ThreeVector, ThreeVector, ThreeVector, ThreeVector> force(

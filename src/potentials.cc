@@ -206,7 +206,7 @@ std::tuple<ThreeVector, ThreeVector, ThreeVector, ThreeVector>
     const ThreeVector grad_rho = std::get<1>(density_and_gradient);
     const ThreeVector dj_dt = std::get<2>(density_and_gradient);
     const ThreeVector rot_j = std::get<3>(density_and_gradient);
-    F_skyrme = symmetry_force(grad_rho, dj_dt, rot_j);
+    F_symmetry = symmetry_force(grad_rho, dj_dt, rot_j);
   }
 
   return std::make_tuple(F_skyrme.first, F_skyrme.second,
