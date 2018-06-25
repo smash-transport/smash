@@ -174,8 +174,9 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
     const DensityParameters &dens_par, const bool compute_gradient = false);
 
 /**
- * Calculates Eckart rest frame density and optionally its gradient, curl
- * and time derivatives.
+ * Calculates Eckart rest frame density and optionally the gradient of the
+ * density in an arbitary frame, the curl of the 3-currrent and the time
+ * derivative of the 3-current.
  * \f[j^{\mu} = (\sqrt{2\pi} \sigma )^{-3} \sum_{i=1}^N C_i u^{\mu}_i
  * exp \left(- \frac{(\vec r -\vec r_i + \frac{\gamma_i^2}{1 + \gamma_i}
  * \vec \beta_i (\vec \beta_i, \vec r - \vec r_i))^2}{2\sigma^2} \right)\f]

@@ -56,7 +56,9 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
 }
 
 /**
- * Calculates Eckart rest frame density and optionally its gradient.
+ * Calculates Eckart rest frame density and optionally the gradient of the
+ * density in an arbitary frame, the curl of the 3-currrent and the time
+ * derivative of the 3-current.
  * \f[j^{\mu} = (\sqrt{2\pi} \sigma )^{-3} \sum_{i=1}^N C_i u^{\mu}_i
  * exp \left(- \frac{(\vec r -\vec r_i + \frac{\gamma_i^2}{1 + \gamma_i}
  * \vec \beta_i (\vec \beta_i, \vec r - \vec r_i))^2}{2\sigma^2} \right)\f]
@@ -65,10 +67,6 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
  * current option is selected then \f$ C_i \f$ is 1 for baryons,
  * -1 for antibaryons and 0 otherwise. For proton/neutron
  * current \f$ C_i = 1\f$ for proton/neutron and 0 otherwise.
- *
- * For gradient:
- * \f[ \frac{d\rho_{Eck}}{d \vec r} = \frac{\frac{dj^{\mu}}{d \vec r}
- * j_{\mu}}{\sqrt{j^{\mu}j_{\mu}}} \f]
  *
  * To avoid the problems with Eckart frame definition, densities for
  * positive and negative charges, \f$\rho_+ \f$ and \f$ \rho_-\f$,
@@ -94,7 +92,9 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
  *   Density itself is double for uniformity: if gradient is double,
  *   density should also be.
  * \return (density in the local Eckart frame [fm\$f^{-3}\$f],
- *          the gradient of the density or a 0 3-vector)
+ *          \f$ \nabla\cdots\rho \f$ or a 0 3-vector,
+ *          \f$ \partial_t \vec j\f$ or a 0 3-vector,
+ *          \f$ \nabla \times \vec j \f$ or a 0 3-vector).
  */
 template <typename /*ParticlesContainer*/ T>
 std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart_impl(
