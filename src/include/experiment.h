@@ -441,7 +441,7 @@ class Experiment : public ExperimentBase {
    */
   uint64_t total_pauli_blocked_ = 0;
 
-  /// Random seed for the next event.
+  /// random seed for the next event.
   int64_t seed_ = -1;
 
   /**

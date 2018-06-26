@@ -486,7 +486,7 @@ void ColliderModus::sample_impact() {
       // the correct distribution (however canonical() = 0 is then the
       // upper end, not the lower).
       impact_ = std::sqrt(imp_min_ * imp_min_ +
-                          Random::canonical() *
+                          random::canonical() *
                               (imp_max_ * imp_max_ - imp_min_ * imp_min_));
     } break;
     case Sampling::Custom: {
@@ -496,16 +496,16 @@ void ColliderModus::sample_impact() {
       double probability = 0;
       double b;
       while (probability_random > probability) {
-        b = Random::uniform(imp_min_, imp_max_);
+        b = random::uniform(imp_min_, imp_max_);
         probability = (*impact_interpolation_)(b) / yield_max_;
         assert(probability < 1.);
-        probability_random = Random::uniform(0., 1.);
+        probability_random = random::uniform(0., 1.);
       }
       impact_ = b;
     } break;
     case Sampling::Uniform: {
       // linear sampling. Still, min > max works fine.
-      impact_ = Random::uniform(imp_min_, imp_max_);
+      impact_ = random::uniform(imp_min_, imp_max_);
     }
   }
 }

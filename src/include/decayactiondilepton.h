@@ -16,7 +16,7 @@ namespace smash {
 
 /**
  * \ingroup action
- * DecayActionDilepton is special action create for particles
+ * DecayActionDilepton is special action created for particles
  * that can decay into dileptons. Such actions are never actually
  * performed, but only written into the dilepton output according to
  * our perturbative treatment.
@@ -31,8 +31,9 @@ class DecayActionDilepton : public DecayAction {
    *
    * \param[in] p The particle that should decay if the action is performed.
    * \param[in] time_of_execution Time at which the action is supposed to take
-   * place \param[in] shining_weight The weight of the dilepton decay accroding
-   * to the shining method.
+   *                              place 
+   * \param[in] shining_weight The weight of the dilepton decay accroding
+   *                           to the shining method.
    */
   DecayActionDilepton(const ParticleData &p, double time_of_execution,
                       double shining_weight);
@@ -45,7 +46,7 @@ class DecayActionDilepton : public DecayAction {
 
  private:
   /**
-   * The shining weight is a weight you apply to every Dilepton Decay. Because
+   * The shining weight is a weight you apply to every dilepton decay. Because
    * we radiate dileptons at every timestep to increase statistics, we
    * afterwards weight them to correct the dilepton decay yields.
    */

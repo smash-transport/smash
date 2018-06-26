@@ -69,7 +69,7 @@ void BinaryOutputCollisions::at_eventend(const Particles &particles,
   write(event_number);
   write(impact_parameter);
 
-  /* Flush to disk */
+  // Flush to disk
   std::fflush(file_.get());
 }
 

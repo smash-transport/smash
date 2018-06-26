@@ -37,9 +37,11 @@ struct FileDeleter {
   /// The class has no members, so this is a noop.
   constexpr FileDeleter() = default;
 
-  /// Frees the std::FILE resource if it is non-zero.
-  ///
-  /// \param[in] f File resource.
+  /** Frees the std::FILE resource if it is non-zero.
+   *
+   * \param[in] f File resource.
+   * \throws runtime_error if the file could not get closed.
+   */
   void operator()(std::FILE* f) const {
     if (f == nullptr) {
       return;
@@ -81,6 +83,7 @@ class RenamingFilePtr {
   RenamingFilePtr(const bf::path& filename, const std::string& mode);
   /// Get the underlying `FILE*` pointer.
   FILE* get();
+  /// Close the file and rename it.
   ~RenamingFilePtr();
 
  private:

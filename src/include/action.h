@@ -88,7 +88,11 @@ class Action {
    */
   virtual ~Action();
 
-  /// For sorting by time of execution.
+  /**
+   * Determine whether one action takes place before another in time
+   *
+   * \return if the first argument action takes place before the other
+   */
   bool operator<(const Action &rhs) const {
     return time_of_execution_ < rhs.time_of_execution_;
   }
@@ -102,6 +106,8 @@ class Action {
    *
    * Prefer to use a more specific function. If there is no weight for the
    * action type, 0 should be returned.
+   *
+   * \return total cross section, decay width or shining weight
    */
   virtual double get_total_weight() const = 0;
 
@@ -112,10 +118,16 @@ class Action {
    * decay width.
    *
    * If there is no weight for the action type, 0 should be returned.
+   *
+   * \return specific weight for the chosen output channel.
    */
   virtual double get_partial_weight() const = 0;
 
-  /// Return the process type.
+  /**
+   * Get the process type.
+   *
+   * \return type of the process
+   */
   virtual ProcessType get_type() const { return process_type_; }
 
   /**
@@ -189,7 +201,7 @@ class Action {
    * apply anymore and should be discarded.
 
    * \param[in] particles current particle list
-   * \return true, if action still applies; falso otherwise
+   * \return true, if action still applies; false otherwise
    */
   bool is_valid(const Particles &particles) const;
 
@@ -197,9 +209,9 @@ class Action {
    * Check if the action is Pauli-blocked.
    *
    * If there are baryons in the final
-   * state then blocking probability is \f$ 1 - \Pi (1-f_i) \f$, where
+   * state then blocking probability is \f$ 1 - \Pi (1-f_i) \f$, where the
    * product is taken by all fermions in the final state and \f$ f_i \f$
-   * denotes phase-space density at the position of i-th final-state
+   * denotes the phase-space density at the position of i-th final-state
    * fermion.
    *
    * \param[in] particles current particle list
@@ -210,7 +222,11 @@ class Action {
   bool is_pauli_blocked(const Particles &particles,
                         const PauliBlocker &p_bl) const;
 
-  /// Return the list of particles that go into the interaction.
+  /**
+   * Get the list of particles that go into the action.
+   *
+   * \return a list of incoming particles
+   */
   const ParticleList &incoming_particles() const;
 
   /**
@@ -221,28 +237,42 @@ class Action {
    */
   void update_incoming(const Particles &particles);
 
-  /// Return the list of particles that resulted from the interaction.
+  /**
+   * Get the list of particles that resulted from the action.
+   *
+   * \return list of outgoing particles
+   */
   const ParticleList &outgoing_particles() const { return outgoing_particles_; }
 
   /**
-   * Return the time at which the action is supposed to be performed
-   * (absolute time in the lab frame in fm/c).
+   * Get the time at which the action is supposed to be performed
+   *
+   * \return absolute time in the calculation frame in fm/c 
    */
   double time_of_execution() const { return time_of_execution_; }
 
-  /** Check various conservation laws.
+  /**
+   * Check various conservation laws.
    *
-   * `id_process` is only used for debugging output. */
+   * \param[in] id_process process id only used for debugging output
+   */
   void check_conservation(const uint32_t id_process) const;
 
-  /// determine the total energy in the center-of-mass frame [GeV]
+  /**
+   * Determine the total energy in the center-of-mass frame [GeV]
+   *
+   * \return \f$ \sqrt{s}\f$ of incoming particles
+   */
   double sqrt_s() const { return total_momentum().abs(); }
 
   /**
    * Calculate the total kinetic energy of the outgoing particles in
    * the center of mass frame in the presence (or absence) of the mean field
-   * potentials. This function is used when the species of the outgoing
+   * potentials.
+   *
+   * This function is used when the species of the outgoing
    * particles are already determined.
+   *
    * \return total kinetic energy of the outgoing particles [GeV]
    */
   double kinetic_energy_cms() const;
@@ -250,9 +280,12 @@ class Action {
   /**
    * Calculate the total kinetic energy of the outgoing particles in
    * the center of mass frame in the presence (or absence) of the mean field
-   * potentials. This function is used to determine whether an action is
+   * potentials.
+   *
+   * This function is used to determine whether an action is
    * kinematically feasible.
    *
+   * \tparam outs Type of outgoing particles
    * \param[in] potentials skyrme and asymmetry potential for particle [GeV]
    * \param[in] p_out_types outgoing particle types
    * \return total kinetic energy of the outgoing particles in
@@ -268,7 +301,7 @@ class Action {
      * potential between the initial and final states. */
     double scale_I3 = 0.0;
     for (const auto &p_in : incoming_particles_) {
-      /* Get the force scale of the incoming particle. */
+      // Get the force scale of the incoming particle.
       const auto scale =
           ((pot_pointer != nullptr) ? pot_pointer->force_scale(p_in.type())
                                     : std::make_pair(0.0, 0));
@@ -291,12 +324,14 @@ class Action {
 
   /**
    * Get the interaction point
+   *
    * \return four vector of interaction point
    */
   FourVector get_interaction_point() const;
 
   /**
-   * Get the potential at the interaction point
+   * Get the skyrme and asymmetry potential at the interaction point
+   *
    * \return skyrme and asymmetry potential [GeV]
    */
   std::pair<double, double> get_potential_at_interaction_point() const;
@@ -355,6 +390,8 @@ class Action {
 
   /**
    * Remove the sub-threshold processes from the list of sub processes.
+   * 
+   * \tparam Branch Type of the processbranch
    * \param[out] subprocesses list of processes that are possible
    * \param[out] total_weight summed weight of all subprocess (after filtering)
    */
@@ -383,6 +420,8 @@ class Action {
   /**
    * Decide for a particular final-state channel via Monte-Carlo
    * and return it as a ProcessBranch
+
+   * \tparam Branch Type of processbranch
    * \param[in] subprocesses list of possible processes
    * \param[in] total_weight summed weight of all processes
    * \return ProcessBranch that is sampled
@@ -391,7 +430,7 @@ class Action {
   const Branch *choose_channel(const ProcessBranchList<Branch> &subprocesses,
                                double total_weight) {
     const auto &log = logger<LogArea::Action>();
-    double random_weight = Random::uniform(0., total_weight);
+    double random_weight = random::uniform(0., total_weight);
     double weight_sum = 0.;
     /* Loop through all subprocesses and select one by Monte Carlo, based on
      * their weights.  */
@@ -438,6 +477,8 @@ class Action {
   /**
    * \ingroup logging
    * Writes information about this action to the \p out stream.
+   *
+   * \param[out] out out stream to be written to
    */
   virtual void format_debug_output(std::ostream &out) const = 0;
 
@@ -451,11 +492,23 @@ class Action {
   }
 
  private:
-  /// Helper function for kinetic_energy_cms
+  /**
+   * Get the type of a given particle
+   * 
+   * \param[in] p_out particle of which the type will be returned
+   * \return type of given particle
+   */
   const ParticleType &type_of_pout(const ParticleData &p_out) const {
     return p_out.type();
   }
-  /// Helper function for kinetic_energy_cms
+  /**
+   * Get the particle type for given pointer to a particle type.
+   *
+   * Helper function for kinetic_energy_cms
+   *
+   * \param[in] p_out pointer to a particle type
+   * \return particle type
+   */
   const ParticleType &type_of_pout(const ParticleTypePtr &p_out) const {
     return *p_out;
   }
@@ -463,6 +516,7 @@ class Action {
 
 /**
  * Append vector of action pointers
+ *
  * \param[in] lhs vector of action pointers that is appended to
  * \param[in] rhs vector of action pointers that is appended
  * \return vector of action pointers containing lhs and rhs

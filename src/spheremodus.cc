@@ -165,7 +165,7 @@ double SphereModus::initial_conditions(Particles *particles,
     }
     double nb_init = 0.0, ns_init = 0.0;
     for (const auto &mult : average_multipl_) {
-      const int thermal_mult_int = Random::poisson(mult.second);
+      const int thermal_mult_int = random::poisson(mult.second);
       particles->create(thermal_mult_int, mult.first);
       nb_init += mult.second * mult.first.baryon_number();
       ns_init += mult.second * mult.first.strangeness();
@@ -211,7 +211,7 @@ double SphereModus::initial_conditions(Particles *particles,
     momentum_total += data.momentum();
     /* uniform sampling in a sphere with radius r */
     double position_radial;
-    position_radial = std::cbrt(Random::canonical()) * radius_;
+    position_radial = std::cbrt(random::canonical()) * radius_;
     Angles pos_phitheta;
     pos_phitheta.distribute_isotropically();
     data.set_4position(

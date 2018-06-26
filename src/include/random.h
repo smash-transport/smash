@@ -18,10 +18,10 @@
 
 namespace smash {
 
-/** Namespace Random provides functions for Random Number Generation.
+/** Namespace random provides functions for random Number Generation.
  */
 
-namespace Random {
+namespace random {
 
 /// The random number engine used is the Mersenne Twister.
 using Engine = std::mt19937_64;
@@ -35,7 +35,7 @@ extern /*thread_local (see #3075)*/ Engine engine;
  * random numbers in the same interval. Example:
  *
  * \code
- *   using namespace Random;
+ *   using namespace random;
  *   double sum = 0.0;
  *   auto uniform_0_to_3 = uniform_dist(0., 3.);
  *   for (MANY_TIMES) {
@@ -73,7 +73,7 @@ void set_seed(T &&seed) {
 inline Engine::result_type advance() { return engine(); }
 
 /**
- * Returns a uniformly distributed random real number \f$\chi \in [{\rm
+ * \returns A uniformly distributed random real number \f$\chi \in [{\rm
  * min}, {\rm max})\f$
  *
  * \param min Minimal sampled value.
@@ -85,7 +85,7 @@ T uniform(T min, T max) {
 }
 
 /**
- * Returns a uniformly distributed random integer number \f$\chi \in [{\rm
+ * \return A uniformly distributed random integer number \f$\chi \in [{\rm
  * min}, {\rm max})\f$
  *
  * \param min Minimal sampled value.
@@ -97,7 +97,7 @@ T uniform_int(T min, T max) {
 }
 
 /**
- * Returns a uniformly distributed random number \f$\chi \in [0,1)\f$.
+ * \return a uniformly distributed random number \f$\chi \in [0,1)\f$.
  *
  * Note that the popular implementations in GCC and clang may return 1:
  *
@@ -111,7 +111,7 @@ T canonical() {
 }
 
 /**
- * Returns a uniformly distributed random number \f$\chi \in (0,1]\f$.
+ * \return A uniformly distributed random number \f$\chi \in (0,1]\f$.
  */
 template <typename T = double>
 T canonical_nonzero() {
@@ -192,7 +192,7 @@ int sgn(T val) {
  * \param n Exponent in power law (arbitrary real number).
  * \param xMin Minimum value.
  * \param xMax Maximum value.
- * \return Random number between xMin and xMax.
+ * \return random number between xMin and xMax.
  */
 template <typename T = double>
 T power(T n, T xMin, T xMax) {
@@ -258,18 +258,26 @@ class discrete_dist {
    */
   discrete_dist() : distribution({1.0}) {}
 
-  /** Construct from probability vector. */
+  /** Construct from probability vector. 
+   * \param plist Vector with probabilities such that P(i) = vec[i]
+   */
   explicit discrete_dist(const std::vector<T> &plist)
       : distribution(plist.begin(), plist.end()) {}
 
-  /** Construct from probability list. */
+  /** Construct from probability list. 
+   * \param l Initializer list with probabilities such that P(i) = l[i]
+   */
   explicit discrete_dist(std::initializer_list<T> l) : distribution(l) {}
 
-  /** Reset the discrete distribution from a new probability list. */
+  /** Reset the discrete distribution from a new probability list.
+   * \param plist Vector with probabilities such that P(i) = vec[i]
+   */
   void reset_weights(const std::vector<T> &plist) {
     distribution = std::discrete_distribution<>(plist.begin(), plist.end());
   }
-  /** Draw a random number from the discrete distribution. */
+  /** Draw a random number from the discrete distribution. 
+  * \return Sampled value
+  */
   int operator()() { return distribution(engine); }
 
  private:
@@ -344,7 +352,7 @@ T beta_a0(T xmin, T b) {
   return std::exp(-y);
 }
 
-}  // namespace Random
+}  // namespace random
 }  // namespace smash
 
 #endif  // SRC_INCLUDE_RANDOM_H_

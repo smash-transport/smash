@@ -80,6 +80,7 @@ class DeformedNucleus : public Nucleus {
 
   /**
    * Does not allow to generate Fermi-momenta for a deformed nucleus.
+   * \throws domain_error if this function is ever called
    */
   void generate_fermi_momenta() override;
 
@@ -88,6 +89,7 @@ class DeformedNucleus : public Nucleus {
    * \param[in] l Angular momentum value (2 and 4 are supported)
    * \param[in] cosx Cosine of the polar angle
    * \return Value of the corresponding spherical harmonic
+   * \throws domain_error if unsupported l is encountered
    */
   double y_l_0(int l, double cosx) const;
 

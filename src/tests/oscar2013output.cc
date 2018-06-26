@@ -32,7 +32,7 @@ static const double accuracy = 1.0e-4;
 static const int data_elements = 12;
 static const int data_elements_extended = 20;
 static const bf::path testoutputpath = bf::absolute(SMASH_TEST_OUTPUT_PATH);
-static auto random_value = Random::make_uniform_distribution(-15.0, +15.0);
+static auto random_value = random::make_uniform_distribution(-15.0, +15.0);
 
 TEST(directory_is_created) {
   bf::create_directories(testoutputpath);

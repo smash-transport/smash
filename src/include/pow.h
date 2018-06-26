@@ -14,6 +14,7 @@ namespace smash {
 
 /**
  * Efficient template for calculating integer powers using squaring.
+ * \tparam T Type that implements multiplication.
  * \param[in] base
  * \param[in] exponent
  * \return base^exponent
@@ -29,6 +30,7 @@ inline constexpr T pow_int(const T base, unsigned const exponent) {
 
 /**
  * Efficient template for calculating the square.
+ * \tparam T Type that implements multiplication.
  * \param[in] base value that gets squared
  * \return result of squaring base
  */

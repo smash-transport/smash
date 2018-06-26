@@ -57,6 +57,7 @@ class Tabulation {
 
   /**
    * Look up a value from the tabulation using linear interpolation.
+   * If \par x is below the lower bound we return 0.
    * If x is above the upper bound, then by default we use linear extrapolation
    * of the two highest tabulated points. Optionally one can also extrapolate
    * with rightmost value or zero. Linear extrapolation is not an arbitrary
@@ -72,13 +73,13 @@ class Tabulation {
       double x, Extrapolation extrapolation = Extrapolation::Linear) const;
 
  protected:
-  // vector for storing tabulated values
+  /// vector for storing tabulated values
   std::vector<double> values_;
 
-  // lower bound for tabulation
+  /// lower bound for tabulation
   const double x_min_;
 
-  // upper bound for tabulation
+  /// upper bound for tabulation
   const double x_max_;
 
   /// inverse step size 1/dx
@@ -165,7 +166,8 @@ inline std::unique_ptr<Tabulation> spectral_integral_semistable(
       });
 }
 
-/** Create a table for the spectral integral of two resonances.
+/** 
+ * Create a table for the spectral integral of two resonances.
  *
  * \param[inout] integrate2d Numerical integrator.
  * \param[in] res1 Type of the first resonance particle.
