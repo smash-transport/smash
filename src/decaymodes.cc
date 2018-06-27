@@ -95,7 +95,7 @@ DecayType *DecayModes::get_decay_type(ParticleTypePtr mother,
   return all_decay_types->back().get();
 }
 
-void DecayModes::renormalize(std::string name) {
+void DecayModes::renormalize(const std::string& name) {
   const auto &log = logger<LogArea::DecayModes>();
   double sum = 0.;
   for (auto &mode : decay_modes_) {
