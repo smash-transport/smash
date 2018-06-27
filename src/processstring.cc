@@ -28,12 +28,12 @@ StringProcess::StringProcess(double string_tension, double time_formation,
       pow_fquark_alpha_(quark_alpha),
       pow_fquark_beta_(quark_beta),
       sigma_qperp_(sigma_perp),
+      leading_frag_mean_(0.7),
+      leading_frag_width_(0.275),
       kappa_tension_string_(string_tension),
       additional_xsec_supp_(0.7),
       time_formation_const_(time_formation),
-      time_collision_(0.),
-      leading_frag_mean_(0.7),
-      leading_frag_width_(0.275) {
+      time_collision_(0.) {
   // setup and initialize pythia for hard string process
   pythia_parton_ = make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
   /* select only non-diffractive events
