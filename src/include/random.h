@@ -66,6 +66,8 @@ class uniform_dist {
 /** Sets the seed of the random number engine. */
 template <typename T>
 void set_seed(T &&seed) {
+  static_assert(std::is_same<Engine::result_type, uint64_t>::value,
+                "experiment.cc needs the seed to be 64 bits");
   engine.seed(std::forward<T>(seed));
 }
 

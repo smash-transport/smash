@@ -38,14 +38,7 @@ class ScatterActionPhoton : public ScatterAction {
 
   ScatterActionPhoton(const ParticleList &in, const double time,
                       const int n_frac_photons,
-                      const double hadronic_cross_section_input)
-      : ScatterAction(in[0], in[1], time),
-        number_of_fractional_photons_(n_frac_photons),
-        hadron_out_t_(outgoing_hadron_type(in)),
-        hadronic_cross_section_(hadronic_cross_section_input) {
-    reac_ = photon_reaction_type(in);
-    hadron_out_mass_ = sample_out_hadron_mass(hadron_out_t_);
-  }
+                      const double hadronic_cross_section_input);
 
   /**
    * Create the photon final state and write to output.
@@ -73,7 +66,7 @@ class ScatterActionPhoton : public ScatterAction {
    *
    * \return total cross-section [mb]
    */
-  double hadronic_cross_section() const { return total_cross_section_; }
+  double hadronic_cross_section() const { return hadronic_cross_section_; }
 
   /**
    * Sample the mass of the outgoing hadron. Returns the pole mass if
@@ -187,7 +180,7 @@ class ScatterActionPhoton : public ScatterAction {
   CollisionBranchList collision_processes_photons_;
 
   /// Photonic process as determined from incoming particles.
-  ReactionType reac_;
+  const ReactionType reac_;
 
   /**
    * Number of photons created for each hadronic scattering, needed for correct
@@ -197,10 +190,10 @@ class ScatterActionPhoton : public ScatterAction {
   const int number_of_fractional_photons_;
 
   /// ParticlePtr to the outgoing hadron.
-  ParticleTypePtr hadron_out_t_;
+  const ParticleTypePtr hadron_out_t_;
 
   /// Mass of outgoing hadron
-  double hadron_out_mass_;
+  const double hadron_out_mass_;
 
   /**
    * Compile-time switch for setting the handling of processes which can happen
@@ -222,7 +215,7 @@ class ScatterActionPhoton : public ScatterAction {
   double cross_section_photons_ = 0.0;
 
   /// Total hadronic cross section
-  double hadronic_cross_section_ = 0.0;
+  const double hadronic_cross_section_;
 
   /**
    * Calculate the differential cross section of  photon process.
