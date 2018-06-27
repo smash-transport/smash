@@ -31,7 +31,9 @@ StringProcess::StringProcess(double string_tension, double time_formation,
       kappa_tension_string_(string_tension),
       additional_xsec_supp_(0.7),
       time_formation_const_(time_formation),
-      time_collision_(0.) {
+      time_collision_(0.),
+      leading_frag_mean_(0.7),
+      leading_frag_width_(0.275) {
   // setup and initialize pythia for hard string process
   pythia_parton_ = make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
   /* select only non-diffractive events
@@ -1047,17 +1049,19 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
       const double mTrn_frag = std::sqrt(QTrn * QTrn + mass_frag * mass_frag);
 
       double xfrac = 0.;
-      const double xf_const_A = 0.275;
-      const double xf_const_B = 0.42;
+      const double xf_const_A = leading_frag_width_;
+      const double xf_const_B = leading_frag_mean_;
       bool xfrac_accepted = false;
       while (!xfrac_accepted) {
-        const double angle = M_PI * (random::uniform(0., 1.) - 0.5);
+        const double angle = random::uniform(0., 1.) *
+                             (std::atan(0.5 * (1. - xf_const_B) / xf_const_A) +
+                              std::atan(0.5 * xf_const_B / xf_const_A)) -
+                             std::atan(0.5 * xf_const_B / xf_const_A);
         xfrac = xf_const_B + 2. * xf_const_A * std::tan(angle);
 
-        const double xf_tmp = (xfrac - xf_const_B) * (xfrac - xf_const_B) /
-                              (xf_const_A * xf_const_A);
-        const double xf_env = (1. + really_small) / (1. + xf_tmp / 4.);
-        const double xf_pdf = std::exp(-xf_tmp / 2.);
+        const double xf_tmp = std::abs(xfrac - xf_const_B) / xf_const_A;
+        const double xf_env = (1. + really_small) / (1. + xf_tmp * xf_tmp / 4.);
+        const double xf_pdf = std::exp(-xf_tmp * xf_tmp / 2.);
         if (random::uniform(0., xf_env) < xf_pdf &&
             xfrac > 0. && xfrac < 1.) {
           xfrac_accepted = true;
