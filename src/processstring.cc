@@ -605,7 +605,7 @@ bool StringProcess::next_NDiffHard() {
   pythia_parton_->rndm.init(random::uniform_int(1, maxint));
 
   // Short notation for Pythia event
-  Pythia8::Event &event = pythia_hadron_->event;
+  Pythia8::Event &event_hadron = pythia_hadron_->event;
   log.debug("Pythia hard event created");
   bool final_state_success = false;
   while (!final_state_success) {
@@ -613,11 +613,12 @@ bool StringProcess::next_NDiffHard() {
     log.debug("Pythia final state computed, success = ", final_state_success);
   }
 
+  Pythia8::Event event_intermediate;
   ParticleList new_intermediate_particles;
   ParticleList new_non_hadron_particles;
 
   Pythia8::Vec4 pSum = 0.;
-  pythia_hadron_->event.reset();
+  event_intermediate.reset();
   for (int i = 0; i < pythia_parton_->event.size(); i++) {
     if (pythia_parton_->event[i].isFinal()) {
       const int pdgid = pythia_parton_->event[i].id();
@@ -631,8 +632,8 @@ bool StringProcess::next_NDiffHard() {
         const int anticolor = pythia_parton_->event[i].acol();
 
         pSum += pquark;
-        pythia_hadron_->event.append(pdgid, status,
-                                     color, anticolor, pquark, mass);
+        event_intermediate.append(pdgid, status,
+                                  color, anticolor, pquark, mass);
       } else {
         FourVector momentum = reorient(pythia_parton_->event[i], evecBasisAB_);
         log.debug("4-momentum from Pythia: ", momentum);
@@ -641,64 +642,126 @@ bool StringProcess::next_NDiffHard() {
       }
     }
   }
-  pythia_hadron_->event[0].p(pSum);
-  pythia_hadron_->event[0].m(pSum.mCalc());
+  event_intermediate[0].p(pSum);
+  event_intermediate[0].m(pSum.mCalc());
 
-  bool hadronize_success = false;
-  while (!hadronize_success) {
-    hadronize_success = pythia_hadron_->forceHadronLevel();
-    log.debug("Pythia hadronized, success = ", hadronize_success);
-  }
-
-  for (int i = 0; i < event.size(); i++) {
-    if (event[i].isFinal()) {
-      int pythia_id = event[i].id();
-      log.debug("PDG ID from Pythia:", pythia_id);
-      /* K_short and K_long need to be converted to K0
-       * since SMASH only knows K0 */
-      convert_KaonLS(pythia_id);
-
-      /* evecBasisAB_[0] is a unit 3-vector in the collision axis,
-       * while evecBasisAB_[1] and evecBasisAB_[2] spans the transverse plane.
-       * Given that PYTHIA assumes z-direction to be the collision axis,
-       * pz from PYTHIA should be the momentum compoment in evecBasisAB_[0].
-       * px and py are respectively the momentum components in two
-       * transverse directions evecBasisAB_[1] and evecBasisAB_[2]. */
-      FourVector momentum = reorient(event[i], evecBasisAB_);
-      log.debug("4-momentum from Pythia: ", momentum);
-      log.debug("appending the particle ", pythia_id,
-                " to the intermediate particle list.");
-      if (event[i].isHadron()) {
-        append_intermediate_list(pythia_id, momentum,
-                                 new_intermediate_particles);
-      } else {
-        append_intermediate_list(pythia_id, momentum,
-                                 new_non_hadron_particles);
+  bool find_forward_string = true;
+  log.debug("Hard non-diffractive: partonic process gives ",
+            event_intermediate.size(), " partons.");
+  while (event_intermediate.size() > 0) {
+    pSum = 0.;
+    pythia_hadron_->event.reset();
+    int iforward = 0;
+    for (int i = 1; i < event_intermediate.size(); i++) {
+      if ((find_forward_string &&
+           event_intermediate[i].pz() > event_intermediate[iforward].pz()) ||
+          (!find_forward_string &&
+           event_intermediate[i].pz() < event_intermediate[iforward].pz())) {
+        iforward = i;
       }
     }
-  }
 
-  /* Additional suppression factor to mimic coherence taken as 0.7
-   * from UrQMD (CTParam(59) */
-  const int baryon_string =
-      PDGcodes_[random::uniform_int(0, 1)].baryon_number();
-  assign_all_scaling_factors(baryon_string, new_intermediate_particles,
-                             evecBasisAB_[0], additional_xsec_supp_);
-  for (ParticleData data : new_intermediate_particles) {
-    log.debug("Particle momenta after sorting: ", data.momentum());
-    /* The hadrons are not immediately formed, currently a formation time of
-     * 1 fm is universally applied and cross section is reduced to zero and
-     * to a fraction corresponding to the valence quark content. Hadrons
-     * containing a valence quark are determined by highest z-momentum. */
-    log.debug("The formation time is: ", time_formation_const_, "fm/c.");
-    ThreeVector v_calc =
-        (data.momentum().LorentzBoost(-1.0 * vcomAB_)).velocity();
-    /* Set formation time: actual time of collision + time to form the
-     * particle */
-    double gamma_factor = 1.0 / std::sqrt(1 - (v_calc).sqr());
-    data.set_formation_time(time_formation_const_ * gamma_factor +
-                            time_collision_);
-    final_state_.push_back(data);
+    pSum += event_intermediate[iforward].p();
+    pythia_hadron_->event.append(event_intermediate[iforward]);
+
+    int col_to_find = event_intermediate[iforward].acol();
+    int acol_to_find = event_intermediate[iforward].col();
+    event_intermediate.remove(iforward, iforward);
+    log.debug("Hard non-diffractive: event_intermediate reduces in size to ",
+              event_intermediate.size());
+
+    while (col_to_find != 0 || acol_to_find != 0) {
+      int ifound = -1;
+      for (int i = 0; i < event_intermediate.size(); i++) {
+        bool found_col = col_to_find != 0 &&
+                         col_to_find == event_intermediate[i].col();
+        bool found_acol = acol_to_find != 0 &&
+                          acol_to_find == event_intermediate[i].acol();
+
+        if (found_col && !found_acol) {
+          ifound = i;
+          col_to_find = event_intermediate[i].acol();
+        } else if (!found_col && found_acol) {
+          ifound = i;
+          acol_to_find = event_intermediate[i].col();
+        } else if (found_col && found_acol) {
+          ifound = i;
+          col_to_find = 0;
+          acol_to_find = 0;
+        }
+      }
+
+      if (ifound < 0) {
+        throw std::runtime_error("Hard string could not be identified.");
+      }
+      pSum += event_intermediate[ifound].p();
+      pythia_hadron_->event.append(event_intermediate[ifound]);
+      event_intermediate.remove(ifound, ifound);
+      log.debug("Hard non-diffractive: event_intermediate reduces in size to ",
+                event_intermediate.size());
+    }
+
+    pythia_hadron_->event[0].p(pSum);
+    pythia_hadron_->event[0].m(pSum.mCalc());
+
+    bool hadronize_success = false;
+    while (!hadronize_success) {
+      hadronize_success = pythia_hadron_->forceHadronLevel();
+      log.debug("Pythia hadronized, success = ", hadronize_success);
+    }
+
+    for (int i = 0; i < event_hadron.size(); i++) {
+      if (event_hadron[i].isFinal()) {
+        int pythia_id = event_hadron[i].id();
+        log.debug("PDG ID from Pythia:", pythia_id);
+        /* K_short and K_long need to be converted to K0
+         * since SMASH only knows K0 */
+        convert_KaonLS(pythia_id);
+
+        /* evecBasisAB_[0] is a unit 3-vector in the collision axis,
+         * while evecBasisAB_[1] and evecBasisAB_[2] spans the transverse plane.
+         * Given that PYTHIA assumes z-direction to be the collision axis,
+         * pz from PYTHIA should be the momentum compoment in evecBasisAB_[0].
+         * px and py are respectively the momentum components in two
+         * transverse directions evecBasisAB_[1] and evecBasisAB_[2]. */
+        FourVector momentum = reorient(event_hadron[i], evecBasisAB_);
+        log.debug("4-momentum from Pythia: ", momentum);
+        log.debug("appending the particle ", pythia_id,
+                  " to the intermediate particle list.");
+        if (event_hadron[i].isHadron()) {
+          append_intermediate_list(pythia_id, momentum,
+                                   new_intermediate_particles);
+        } else {
+          append_intermediate_list(pythia_id, momentum,
+                                   new_non_hadron_particles);
+        }
+      }
+    }
+
+    /* Additional suppression factor to mimic coherence taken as 0.7
+     * from UrQMD (CTParam(59) */
+    const int baryon_string =
+        PDGcodes_[random::uniform_int(0, 1)].baryon_number();
+    assign_all_scaling_factors(baryon_string, new_intermediate_particles,
+                               evecBasisAB_[0], additional_xsec_supp_);
+    for (ParticleData data : new_intermediate_particles) {
+      log.debug("Particle momenta after sorting: ", data.momentum());
+      /* The hadrons are not immediately formed, currently a formation time of
+       * 1 fm is universally applied and cross section is reduced to zero and
+       * to a fraction corresponding to the valence quark content. Hadrons
+       * containing a valence quark are determined by highest z-momentum. */
+      log.debug("The formation time is: ", time_formation_const_, "fm/c.");
+      ThreeVector v_calc =
+          (data.momentum().LorentzBoost(-1.0 * vcomAB_)).velocity();
+      /* Set formation time: actual time of collision + time to form the
+       * particle */
+      double gamma_factor = 1.0 / std::sqrt(1 - (v_calc).sqr());
+      data.set_formation_time(time_formation_const_ * gamma_factor +
+                              time_collision_);
+      final_state_.push_back(data);
+    }
+
+    find_forward_string = !find_forward_string;
   }
 
   for (ParticleData data : new_non_hadron_particles) {
