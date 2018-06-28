@@ -618,6 +618,8 @@ bool StringProcess::next_NDiffHard() {
   ParticleList new_non_hadron_particles;
 
   Pythia8::Vec4 pSum = 0.;
+  event_intermediate.init("intermediate partons",
+                          &pythia_parton_->particleData);
   event_intermediate.reset();
   for (int i = 0; i < pythia_parton_->event.size(); i++) {
     if (pythia_parton_->event[i].isFinal()) {
