@@ -646,15 +646,17 @@ bool StringProcess::next_NDiffHard() {
   }
   event_intermediate[0].p(pSum);
   event_intermediate[0].m(pSum.mCalc());
+  //event_intermediate.list();
+  //event_intermediate.listJunctions();
 
   bool find_forward_string = true;
   log.debug("Hard non-diffractive: partonic process gives ",
             event_intermediate.size(), " partons.");
-  while (event_intermediate.size() > 0) {
+  while (event_intermediate.size() > 1) {
     pSum = 0.;
     pythia_hadron_->event.reset();
-    int iforward = 0;
-    for (int i = 1; i < event_intermediate.size(); i++) {
+    int iforward = 1;
+    for (int i = 2; i < event_intermediate.size(); i++) {
       if ((find_forward_string &&
            event_intermediate[i].pz() > event_intermediate[iforward].pz()) ||
           (!find_forward_string &&
@@ -662,6 +664,8 @@ bool StringProcess::next_NDiffHard() {
         iforward = i;
       }
     }
+    log.debug("Hard non-diffractive: iforward = ", iforward,
+              "(", event_intermediate[iforward].id(), ")");
 
     pSum += event_intermediate[iforward].p();
     pythia_hadron_->event.append(event_intermediate[iforward]);
@@ -673,27 +677,44 @@ bool StringProcess::next_NDiffHard() {
               event_intermediate.size());
 
     while (col_to_find != 0 || acol_to_find != 0) {
+      log.debug("  col_to_find = ", col_to_find,
+                ", acol_to_find = ", acol_to_find);
+
       int ifound = -1;
-      for (int i = 0; i < event_intermediate.size(); i++) {
+      for (int i = 1; i < event_intermediate.size(); i++) {
+        const int pdgid = event_intermediate[i].id();
         bool found_col = col_to_find != 0 &&
                          col_to_find == event_intermediate[i].col();
         bool found_acol = acol_to_find != 0 &&
                           acol_to_find == event_intermediate[i].acol();
+        if (found_col) {
+          log.debug("  col_to_find ", col_to_find,
+                    " from i ", i, "(", pdgid, ") found");
+        }
+        if (found_acol) {
+          log.debug("  acol_to_find ", acol_to_find,
+                    " from i ", i, "(", pdgid, ") found");
+        }
 
         if (found_col && !found_acol) {
           ifound = i;
           col_to_find = event_intermediate[i].acol();
+          break;
         } else if (!found_col && found_acol) {
           ifound = i;
           acol_to_find = event_intermediate[i].col();
+          break;
         } else if (found_col && found_acol) {
           ifound = i;
           col_to_find = 0;
           acol_to_find = 0;
+          break;
         }
       }
 
       if (ifound < 0) {
+        event_intermediate.list();
+        event_intermediate.listJunctions();
         throw std::runtime_error("Hard string could not be identified.");
       }
       pSum += event_intermediate[ifound].p();
@@ -712,6 +733,7 @@ bool StringProcess::next_NDiffHard() {
       log.debug("Pythia hadronized, success = ", hadronize_success);
     }
 
+    new_intermediate_particles.clear();
     for (int i = 0; i < event_hadron.size(); i++) {
       if (event_hadron[i].isFinal()) {
         int pythia_id = event_hadron[i].id();
