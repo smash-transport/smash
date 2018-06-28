@@ -28,6 +28,8 @@ StringProcess::StringProcess(double string_tension, double time_formation,
       pow_fquark_alpha_(quark_alpha),
       pow_fquark_beta_(quark_beta),
       sigma_qperp_(sigma_perp),
+      leading_frag_mean_(0.7),
+      leading_frag_width_(0.275),
       kappa_tension_string_(string_tension),
       additional_xsec_supp_(0.7),
       time_formation_const_(time_formation),
@@ -947,6 +949,8 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
   }
   Pythia8::Vec4 pSum = 0.;
 
+  int number_of_fragments = 0;
+
   if (separate_fragment_baryon &&
       (std::abs(bstring) == 3) && (mString > m_const[0] + m_const[1] + 1.)) {
     const double ssbar_supp = pythia_hadron_->parm("StringFlav:probStoUD");
@@ -958,6 +962,8 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
     double mTrn_string_new;
     std::array<double, 2> m_trans;
 
+    const int niter_max = 10000;
+    int iiter = 0;
     bool found_leading_baryon = false;
     while (!found_leading_baryon) {
       int idnew_qqbar = 0;
@@ -1047,17 +1053,19 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
       const double mTrn_frag = std::sqrt(QTrn * QTrn + mass_frag * mass_frag);
 
       double xfrac = 0.;
-      const double xf_const_A = 0.275;
-      const double xf_const_B = 0.42;
+      const double xf_const_A = leading_frag_width_;
+      const double xf_const_B = leading_frag_mean_;
       bool xfrac_accepted = false;
       while (!xfrac_accepted) {
-        const double angle = M_PI * (random::uniform(0., 1.) - 0.5);
+        const double angle = random::uniform(0., 1.) *
+                             (std::atan(0.5 * (1. - xf_const_B) / xf_const_A) +
+                              std::atan(0.5 * xf_const_B / xf_const_A)) -
+                             std::atan(0.5 * xf_const_B / xf_const_A);
         xfrac = xf_const_B + 2. * xf_const_A * std::tan(angle);
 
-        const double xf_tmp = (xfrac - xf_const_B) * (xfrac - xf_const_B) /
-                              (xf_const_A * xf_const_A);
-        const double xf_env = (1. + really_small) / (1. + xf_tmp / 4.);
-        const double xf_pdf = std::exp(-xf_tmp / 2.);
+        const double xf_tmp = std::abs(xfrac - xf_const_B) / xf_const_A;
+        const double xf_env = (1. + really_small) / (1. + xf_tmp * xf_tmp / 4.);
+        const double xf_pdf = std::exp(-xf_tmp * xf_tmp / 2.);
         if (random::uniform(0., xf_env) < xf_pdf &&
             xfrac > 0. && xfrac < 1.) {
           xfrac_accepted = true;
@@ -1091,8 +1099,14 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
         log.debug("appending the leading baryon ", pdgid_frag,
                   " to the intermediate particle list.");
         append_intermediate_list(pdgid_frag, mom_frag, intermediate_particles);
+        number_of_fragments++;
         log.debug("proceed to the next step");
       }
+
+      if (iiter == niter_max) {
+        return 0;
+      }
+      iiter += 1;
     }
 
     std::array<double, 2> ppos_parton;
@@ -1181,7 +1195,6 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
   pythia_hadron_->event[0].p(pSum);
   pythia_hadron_->event[0].m(pSum.mCalc());
   const bool successful_hadronization = pythia_hadron_->forceHadronLevel();
-  int number_of_fragments = 0;
   if (successful_hadronization) {
     for (int ipyth = 0; ipyth < pythia_hadron_->event.size(); ipyth++) {
       if (!pythia_hadron_->event[ipyth].isFinal()) {

@@ -99,6 +99,10 @@ class StringProcess {
    * distribution with width sigma_qperp_
    */
   double sigma_qperp_;
+  /// mean value of the fragmentation function for the leading baryons
+  double leading_frag_mean_;
+  /// width of the fragmentation function for the leading baryons
+  double leading_frag_width_;
   /// string tension [GeV/fm]
   double kappa_tension_string_;
   /**
