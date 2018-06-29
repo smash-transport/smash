@@ -429,22 +429,41 @@ void ScatterActionsFinder::dump_reactions() const {
   }
 }
 
+/// Node of a decay tree.
 struct Node {
  public:
+  /// Name for printing.
   std::string name_;
+  /// Weight (cross section or branching ratio).
   double weight_;
+  /// Possible decays of this node.
   std::vector<Node> children_;
+  /// Particle types in this node.
   std::vector<ParticleTypePtr> particles_;
 
+  /**
+   * \return A new decay tree node.
+   *
+   * \param name Name.for printing.
+   * \param weight Cross section or branching ratio.
+   * \param children Possible decays.
+   * \param particles Particle types in this node.
+   */
   Node(const std::string& name, double weight, std::vector<Node>&& children,
        std::vector<ParticleTypePtr>&& particles)
       : name_(name), weight_(weight), children_(children), particles_(particles) {}
 
+  /// Print the decay tree starting with this node.
   void print() const {
     print_helper(0);
   }
 
  private:
+  /**
+   * Internal helper function.
+   *
+   * \param depth Recursive call depth.
+   */
   void print_helper(uint64_t depth) const {
     for (uint64_t i = 0; i < depth; i++) {
       std::cout << " ";
@@ -456,7 +475,12 @@ struct Node {
   }
 };
 
-/// Add nodes for all decays.
+/**
+ * Add nodes for all decays.
+ *
+ * \param node Starting node.
+ * \param ptype Particle type of the starting node.
+ */
 static void add_decays(Node& node, const ParticleType& ptype) {
   for (const auto& decay : ptype.decay_modes().decay_mode_list()) {
     std::stringstream name;
