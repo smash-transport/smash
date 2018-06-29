@@ -185,11 +185,13 @@ class ScatterActionsFinder : public ActionFinderInterface {
    *
    * \param[in] a The specie of the first incoming particle.
    * \param[in] b The specie of the second incoming particle.
-   * \param[in] m_a Mass of species a [GeV]
-   * \param[in] m_b Mass of species b [GeV]
+   * \param[in] m_a Mass of species a [GeV].
+   * \param[in] m_b Mass of species b [GeV].
+   * \param[in] final_state Whether the final state cross sections should be
+   *                        printed.
    */
   void dump_cross_sections(const ParticleType &a, const ParticleType &b,
-                           double m_a, double m_b) const;
+                           double m_a, double m_b, bool final_state) const;
 
  private:
   /**

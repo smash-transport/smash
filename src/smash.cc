@@ -129,6 +129,9 @@ void usage(const int rc, const std::string &progname) {
       "  -s, --cross-sections    <pdg1>,<pdg2>[,mass1,mass2] \n"
       "                          dump all partial cross-sections of "
       "pdg1 + pdg2 reactions versus sqrt(s).\n"
+      "  -S, --cross-sections-fs <pdg1>,<pdg2>[,mass1,mass2] \n"
+      "                          dump all partial final-state cross-sections of "
+      "pdg1 + pdg2 reactions versus sqrt(s).\n"
       "                          Masses are optional, by default pole masses"
       " are used.\n"
       "                          Note the required comma and no spaces.\n"
@@ -265,6 +268,7 @@ int main(int argc, char *argv[]) {
                                  {"list-2-to-n", no_argument, 0, 'l'},
                                  {"resonance", required_argument, 0, 'r'},
                                  {"cross-sections", required_argument, 0, 's'},
+                                 {"cross-sections-fs", required_argument, 0, 'S'},
                                  {"version", no_argument, 0, 'v'},
                                  {nullptr, 0, 0, 0}};
 
@@ -280,10 +284,11 @@ int main(int argc, char *argv[]) {
     bool list2n_activated = false;
     bool resonance_dump_activated = false;
     bool cross_section_dump_activated = false;
+    bool final_state_cross_sections = false;
 
     // parse command-line arguments
     int opt;
-    while ((opt = getopt_long(argc, argv, "c:d:e:fhi:m:p:o:lr:s:v", longopts,
+    while ((opt = getopt_long(argc, argv, "c:d:e:fhi:m:p:o:lr:s:S:v", longopts,
                               nullptr)) != -1) {
       switch (opt) {
         case 'c':
@@ -320,6 +325,8 @@ int main(int argc, char *argv[]) {
           resonance_dump_activated = true;
           pdg_string = optarg;
           break;
+        case 'S':
+          final_state_cross_sections = true;
         case 's':
           cross_section_dump_activated = true;
           cs_string = optarg;
@@ -421,7 +428,7 @@ int main(int argc, char *argv[]) {
                   << b.name() << " instead of " << args[3] << std::endl;
       }
       auto scat_finder = actions_finder_for_dump(configuration);
-      scat_finder.dump_cross_sections(a, b, ma, mb);
+      scat_finder.dump_cross_sections(a, b, ma, mb, final_state_cross_sections);
       std::exit(EXIT_SUCCESS);
     }
     if (modus) {

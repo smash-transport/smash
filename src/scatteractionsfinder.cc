@@ -429,9 +429,95 @@ void ScatterActionsFinder::dump_reactions() const {
   }
 }
 
+struct Node {
+ public:
+  std::string name_;
+  double weight_;
+  std::vector<Node> children_;
+
+  Node(const std::string& name, double weight, std::vector<Node>&& children)
+      : name_(name), weight_(weight), children_(children) {
+    /*
+    if (name.empty()) {
+      throw std::runtime_error("WHY?!");
+    }
+    */
+  }
+
+  /*
+  void walk() const {
+      std::vector<Node> stack;
+      for (const auto child : children_) {
+          stack.push_back(child);
+      }
+      while (true) {
+          if (stack.empty()) {
+              break;
+          }
+          const Node current = stack.back();
+          std::cout << "stack size: " << stack.size()
+                    << "  name: " << current.name_
+                    << "  weight: " << current.weight_
+                    << "  chidren size: " << current.children_.size()
+                    << std::endl;
+          stack.pop_back();
+          for (Node child : current.children_) {
+              child.name_ += current.name_;
+              child.weight_ *= current.weight_;
+              stack.push_back(child);
+          }
+          if (current.children_.empty()) {
+              std::cout << current.name_ << " " << current.weight_ << std::endl;
+          }
+      }
+  }
+  */
+  void print() const {
+    print_helper(0);
+  }
+
+  void walk() const {
+    walk_helper("", 1., 0);
+  }
+
+ private:
+  void print_helper(uint64_t depth) const {
+    for (uint64_t i = 0; i < depth; i++) {
+      std::cout << " ";
+    }
+    std::cout << name_ << " " << weight_ << std::endl;
+    for (const auto& child : children_) {
+      child.print_helper(depth + 1);
+    }
+  }
+
+  void walk_helper(std::string name, double weight, uint64_t depth) const {
+    const bool first_call = depth == 0;
+    for (uint64_t i = 0; i < depth; i++) {
+      std::cout << " ";
+    }
+    std::cout << name_ << " " << weight_ << std::endl;
+    /*
+    if (!first_call && children_.empty()) {
+      std::cout << name << " " << weight << std::endl;
+      return;
+    }
+    */
+    for (Node child : children_) {
+      if (!first_call) {
+        name += "->" + name_;
+        weight *= weight_;
+      }
+      child.walk_helper(name, weight, depth + 1);
+    }
+  }
+};
+
+
 void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
                                                const ParticleType &b,
-                                               double m_a, double m_b) const {
+                                               double m_a, double m_b,
+                                               bool final_state) const {
   typedef std::vector<std::pair<double, double>> xs_saver;
   std::map<std::string, xs_saver> xs_dump;
   std::map<std::string, double> outgoing_total_mass;
@@ -445,7 +531,6 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
     b_data.set_4momentum(m_b, -momentum, 0.0, 0.0);
     const double sqrts = (a_data.momentum() + b_data.momentum()).abs();
     const ParticleList incoming = {a_data, b_data};
-    // Create ScatterAction object.
     ScatterActionPtr act = make_unique<ScatterAction>(
         a_data, b_data, 0., isotropic_, string_formation_time_);
     if (strings_switch_) {
@@ -453,31 +538,61 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
     }
     act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
                              low_snn_cut_, strings_switch_, use_AQM_,
-                             strings_with_probability_, nnbar_treatment_);
-    const CollisionBranchList &processes = act->collision_channels();
+                             strings_with_probability_,
+                             nnbar_treatment_);
+    Node decaytree(a.name() + b.name(), act->cross_section(), {});
+    const CollisionBranchList& processes = act->collision_channels();
     for (const auto &process : processes) {
       const double xs = process->weight();
       if (xs <= 0.0) {
         continue;
       }
-      std::stringstream process_description_stream;
-      process_description_stream << *process;
-      std::string description = process_description_stream.str();
-      double m_tot = 0.0;
-      for (const auto ptype : process->particle_types()) {
-        m_tot += ptype->mass();
-      }
-      outgoing_total_mass[description] = m_tot;
-      if (!xs_dump[description].empty() &&
-          std::abs(xs_dump[description].back().first - sqrts) < really_small) {
-        xs_dump[description].back().second += xs;
+      if (!final_state) {
+        std::stringstream process_description_stream;
+        process_description_stream << *process;
+        const std::string& description = process_description_stream.str();
+        double m_tot = 0.0;
+        for (const auto& ptype : process->particle_types()) {
+          m_tot += ptype->mass();
+        }
+        outgoing_total_mass[description] = m_tot;
+        if (!xs_dump[description].empty() &&
+            std::abs(xs_dump[description].back().first - sqrts) < really_small) {
+          xs_dump[description].back().second += xs;
+        } else {
+          xs_dump[description].push_back(std::make_pair(sqrts, xs));
+        }
       } else {
-        xs_dump[description].push_back(std::make_pair(sqrts, xs));
+        std::stringstream process_description_stream;
+        process_description_stream << *process;
+        //for (const auto& p : process->particle_types()) {
+        //  process_description_stream << p->name();
+        //}
+        const std::string& description = process_description_stream.str();
+        //std::cout << "description: " << description << std::endl;
+        decaytree.children_.emplace_back(Node(description, xs, {}));
+        // Find possible decays
+        auto add_decays = [&] (const ParticleType& ptype) {
+          for (const auto& decay : ptype.decay_modes().decay_mode_list()) {
+            std::stringstream name;
+            name << "(" << ptype.name() << "->";
+            for (const auto& p : decay->particle_types()) {
+              name << p->name();
+            }
+            name << ")";
+            decaytree.children_.back().children_.emplace_back(
+                Node(name.str(), decay->weight(), {}));
+          }
+        };
+        for (const auto& ptype : process->particle_types()) {
+          add_decays(*ptype);
+        }
       }
     }
     xs_dump["total"].push_back(std::make_pair(sqrts, act->cross_section()));
     // Total cross-section should be the first in the list -> negative mass
     outgoing_total_mass["total"] = -1.0;
+    decaytree.walk();
   }
 
   // Nice ordering of channels by summed pole mass of products
