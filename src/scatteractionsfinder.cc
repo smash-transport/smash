@@ -526,11 +526,7 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
       } else {
         std::stringstream process_description_stream;
         process_description_stream << *process;
-        //for (const auto& p : process->particle_types()) {
-        //  process_description_stream << p->name();
-        //}
         const std::string& description = process_description_stream.str();
-        //std::cout << "description: " << description << std::endl;
         decaytree.children_.emplace_back(Node(description, xs, {}, {}));
         auto& process_node = decaytree.children_.back();
         // Find possible decays
