@@ -449,8 +449,9 @@ void OscarOutput<Format, Contents>::write_particledata(
 namespace {
 /**
  * Helper function that creates the oscar output with the format selected by
- * create_oscar_output (except for Ddleptons and photons).
+ * create_oscar_output (except for dileptons and photons).
  *
+ * \tparam Contents Determines what infomration will be written to the output
  * \param[in] modern_format Use the 1999 or 2013 format
  * \param[in] path Path of output
  * \param[in] out_par Output parameters that hold the output configuration

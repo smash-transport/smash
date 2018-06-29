@@ -22,8 +22,8 @@ namespace smash {
 /**
  * A class that stores parameters needed for Pauli blocking,
  * tabulates necessary integrals and computes phase-space
- * density. Pauli blocking is the way to go from classical
- * Boltzmann equation to quantum one, effectively reducing
+ * density. Pauli blocking is the way to go from the classical
+ * Boltzmann equation to the quantum one, effectively reducing
  * cross-sections by \f$1 - f(r,p) \f$ factors, where
  * \f$f(r,p)\f$ is a phase-space density at coordinate
  * and momentum of a final-state fermion. Effective reduction
@@ -37,8 +37,11 @@ class PauliBlocker {
  public:
   /**
    * PauliBlocker constructor. Gets parameters from configuration and
-   * experiment. Tabulates necessary integrals. \param[in] conf Configurations
-   * from config.yaml. \param[in] parameters Parameters given by Experiment.
+   * experiment. Tabulates necessary integrals.
+
+   * \param[in] conf Configurations from config.yaml. 
+   * \param[in] parameters Parameters given by Experiment.
+   * \return The constructed object.
    */
   PauliBlocker(Configuration conf, const ExperimentParameters &parameters);
 
@@ -46,15 +49,16 @@ class PauliBlocker {
   ~PauliBlocker();
 
   /**
-   * Calculate phase-space density of particle pdg at the point (r,p).
+   * Calculate phase-space density of a particle species at the point (r,p).
    *
-   * \param[in] r Position vector.
-   * \param[in] p Momentum vector.
+   * \param[in] r Position vector of the particle.
+   * \param[in] p Momentum vector of the particle.
    * \param[in] particles List of all current particles.
    * \param[in] pdg PDG number of species for which density to be calculated.
    * \param[in] disregard Do not count particles that should be disregarded.
-   * This is intended to avoid counting incoming particles when the phase-space
-   * density for outgoing ones is estimated.
+   *                       This is intended to avoid counting incoming 
+   *                       particles when the phase-space density for outgoing
+   *                       ones is estimated.
    * \return Phase-space density
    */
   double phasespace_dens(const ThreeVector &r, const ThreeVector &p,
@@ -68,7 +72,7 @@ class PauliBlocker {
   /// Analytical calculation of weights
   void init_weights_analytical();
 
-  /// Sigma of the gaussian used for smearing
+  /// Standard deviation of the gaussian used for smearing
   double sig_;
 
   /// Radius, after which gaussians (used for averaging) are cut, fm

@@ -25,8 +25,8 @@ class DecayType {
   /**
    * Construct a \ref DecayType.
    *
-   * \param part_types Final-state particles of the decay.
-   * \param l Angular momentum of the decay.
+   * \param[in] part_types Final-state particles of the decay.
+   * \param[in] l Angular momentum of the decay.
    * \return The constructed object.
    */
   DecayType(ParticleTypePtrList part_types, int l)
@@ -49,7 +49,7 @@ class DecayType {
    * \return if this decay type has the right mother
    * (most decays do not depend on the mother type).
    *
-   * \param mother Particle type to be checked.
+   * \param[in] mother Particle type to be checked.
    */
   virtual bool has_mother(ParticleTypePtr mother) const {
     SMASH_UNUSED(mother);
@@ -62,19 +62,19 @@ class DecayType {
   /**
    * \return the mass-dependent width of the decay.
    *
-   * \param m0 Pole mass of the decaying particle [GeV].
-   * \param G0 Partial width at the pole mass [GeV].
-   * \param m Actual mass of the decaying particle [GeV].
+   * \param[in] m0 Pole mass of the decaying particle [GeV].
+   * \param[in] G0 Partial width at the pole mass [GeV].
+   * \param[in] m Actual mass of the decaying particle [GeV].
    */
   virtual double width(double m0, double G0, double m) const = 0;
   /**
-   * \return the mass-dependent in-width for a resonance formation process.
+   * \return The mass-dependent in-width for a resonance formation process.
    *
-   * \param m0 Pole mass of the produced resonance [GeV].
-   * \param G0 Partial width at the pole mass [GeV].
-   * \param m Actual mass of the produced resonance [GeV].
-   * \param m1 Actual mass of the first incoming particle [GeV].
-   * \param m2 Actual mass of the second incoming particle [GeV].
+   * \param[in] m0 Pole mass of the produced resonance [GeV].
+   * \param[in] G0 Partial width at the pole mass [GeV].
+   * \param[in] m Actual mass of the produced resonance [GeV].
+   * \param[in] m1 Actual mass of the first incoming particle [GeV].
+   * \param[in] m2 Actual mass of the second incoming particle [GeV].
    */
   virtual double in_width(double m0, double G0, double m, double m1,
                           double m2) const = 0;
@@ -94,8 +94,8 @@ class TwoBodyDecay : public DecayType {
   /**
    * Construct a \ref TwoBodyDecay.
    *
-   * \param part_types Final-state particles of the decay.
-   * \param l Angular momentum of the decay.
+   * \param[in] part_types Final-state particles of the decay.
+   * \param[in] l Angular momentum of the decay.
    * \return The constructed object.
    */
   TwoBodyDecay(ParticleTypePtrList part_types, int l);
@@ -114,7 +114,7 @@ class TwoBodyDecay : public DecayType {
    * properly normalized at the pole mass to Gamma(m_0) = Gamma_0.
    * By default rho simply equals one, which corresponds to a constant width.
    *
-   * \param mass Resonance mass of the decay.
+   * \param[in] mass Resonance mass of the decay.
    * \return Width of the decay at the given \p mass.
    * */
   virtual double rho(double mass) const {
@@ -132,8 +132,8 @@ class TwoBodyDecayStable : public TwoBodyDecay {
   /**
    * Construct a \ref TwoBodyDecayStable.
    *
-   * \param part_types Final-state particles of the decay.
-   * \param l Angular momentum of the decay.
+   * \param[in] part_types Final-state particles of the decay.
+   * \param[in] l Angular momentum of the decay.
    * \return The constructed object.
    */
   TwoBodyDecayStable(ParticleTypePtrList part_types, int l);
@@ -156,8 +156,8 @@ class TwoBodyDecaySemistable : public TwoBodyDecay {
   /**
    * Construct a \ref TwoBodyDecaySemistable.
    *
-   * \param part_types Final-state particles of the decay.
-   * \param l Angular momentum of the decay.
+   * \param[in] part_types Final-state particles of the decay.
+   * \param[in] l Angular momentum of the decay.
    * \return The constructed object.
    */
   TwoBodyDecaySemistable(ParticleTypePtrList part_types, int l);
@@ -200,8 +200,8 @@ class TwoBodyDecayUnstable : public TwoBodyDecay {
   /**
    * Construct a \ref TwoBodyDecayUnstable.
    *
-   * \param part_types Final-state particles of the decay.
-   * \param l Angular momentum of the decay.
+   * \param[in] part_types Final-state particles of the decay.
+   * \param[in] l Angular momentum of the decay.
    * \return The constructed object.
    */
   TwoBodyDecayUnstable(ParticleTypePtrList part_types, int l);
@@ -233,8 +233,8 @@ class TwoBodyDecayDilepton : public TwoBodyDecayStable {
   /**
    * Construct a \ref TwoBodyDecayDilepton.
    *
-   * \param part_types Final-state particles of the decay.
-   * \param l Angular momentum of the decay.
+   * \param[in] part_types Final-state particles of the decay.
+   * \param[in] l Angular momentum of the decay.
    * \return The constructed object.
    */
   TwoBodyDecayDilepton(ParticleTypePtrList part_types, int l);
@@ -250,8 +250,8 @@ class ThreeBodyDecay : public DecayType {
   /**
    * Construct a \ref ThreeBodyDecay.
    *
-   * \param part_types Final-state particles of the decay.
-   * \param l Angular momentum of the decay.
+   * \param[in] part_types Final-state particles of the decay.
+   * \param[in] l Angular momentum of the decay.
    * \return The constructed object.
    */
   ThreeBodyDecay(ParticleTypePtrList part_types, int l);
@@ -272,9 +272,9 @@ class ThreeBodyDecayDilepton : public ThreeBodyDecay {
   /**
    * Construct a \ref ThreeBodyDecayDilepton.
    *
-   * \param mother Type of the mother particle.
-   * \param part_types Final-state particles of the decay.
-   * \param l Angular momentum of the decay.
+   * \param[in] mother Type of the mother particle.
+   * \param[in] part_types Final-state particles of the decay.
+   * \param[in] l Angular momentum of the decay.
    * \return The constructed object.
    */
   ThreeBodyDecayDilepton(ParticleTypePtr mother, ParticleTypePtrList part_types,
@@ -285,16 +285,19 @@ class ThreeBodyDecayDilepton : public ThreeBodyDecay {
   /**
    * Get the mass-differential width \f$ d\Gamma / dm \f$ for a dilepton Dalitz
    * decay, where \f$ m \f$ is the invariant mass of the lepton pair.
+   *
    * This differential width is used directly for the dilepton shining weights.
    * It is calculated according to \iref{Weil:2013mya}, eq. (30)-(36).
    *
    * \todo{Cite SMASH dilepton paper.}
    *
-   * \param m_par Mass of the parent.
-   * \param m_l Mass of the lepton species.
-   * \param m_dil Invariant mass of the dilepton pair [GeV].
-   * \param m_other Mass of the third, non-leptonic particle
-   * \param t Type of the parent particle.
+   * \param[in] m_par Mass of the parent.
+   * \param[in] m_l Mass of the lepton species.
+   * \param[in] m_dil Invariant mass of the dilepton pair [GeV].
+   * \param[in] m_other Mass of the third, non-leptonic, particle.
+   * \param[in] other Type of the third  particle.
+   * \param[in] t Type of the parent particle.
+   * \return Mass differential width.
    */
   static double diff_width(double m_par, double m_l, double m_dil,
                            double m_other, ParticleTypePtr other,

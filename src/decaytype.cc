@@ -84,7 +84,7 @@ TwoBodyDecayStable::TwoBodyDecayStable(ParticleTypePtrList part_types, int l)
 }
 
 double TwoBodyDecayStable::rho(double m) const {
-  // Determine momentum of outgoing particles in rest frame of resonance
+  // Determine momentum of outgoing particles in rest frame of the resonance
   const double p_ab =
       pCM(m, particle_types_[0]->mass(), particle_types_[1]->mass());
   // determine rho(m)
