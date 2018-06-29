@@ -515,7 +515,7 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
         decaytree.children_.emplace_back(Node(description, xs, {}, {}));
         auto& process_node = decaytree.children_.back();
         // Find possible decays
-        auto add_decays = [&] (const ParticleType& ptype) {
+        auto add_decays = [] (Node& node, const ParticleType& ptype) {
           for (const auto& decay : ptype.decay_modes().decay_mode_list()) {
             std::stringstream name;
             name << "(" << ptype.name() << "->";
@@ -525,12 +525,12 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
               parts.push_back(p);
             }
             name << ")";
-            process_node.children_.emplace_back(
+            node.children_.emplace_back(
                 Node(name.str(), decay->weight(), {}, std::move(parts)));
           }
         };
         for (const auto& ptype : process->particle_types()) {
-          add_decays(*ptype);
+          add_decays(process_node, *ptype);
         }
       }
     }
