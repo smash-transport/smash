@@ -607,10 +607,10 @@ bool StringProcess::next_NDiffHard() {
   // Short notation for Pythia event
   Pythia8::Event &event_hadron = pythia_hadron_->event;
   log.debug("Pythia hard event created");
-  bool final_state_success = false;
-  while (!final_state_success) {
-    final_state_success = pythia_parton_->next();
-    log.debug("Pythia final state computed, success = ", final_state_success);
+  bool final_state_success = pythia_parton_->next();
+  log.debug("Pythia final state computed, success = ", final_state_success);
+  if (!final_state_success) {
+    return false;
   }
 
   Pythia8::Event event_intermediate;
@@ -644,13 +644,22 @@ bool StringProcess::next_NDiffHard() {
       }
     }
   }
+  event_intermediate.clearJunctions();
+  for (int i = 0; i < pythia_parton_->event.sizeJunction(); i++) {
+    const int kind = pythia_parton_->event.kindJunction(i);
+    const int col0 = pythia_parton_->event.colJunction(i, 0);
+    const int col1 = pythia_parton_->event.colJunction(i, 1);
+    const int col2 = pythia_parton_->event.colJunction(i, 2);
+    event_intermediate.appendJunction(kind, col0, col1, col2);
+  }
   event_intermediate[0].p(pSum);
   event_intermediate[0].m(pSum.mCalc());
-  //event_intermediate.list();
-  //event_intermediate.listJunctions();
+  // pythia_parton_->event.list();
+  // pythia_parton_->event.listJunctions();
 
+  bool hadronize_success = false;
   bool find_forward_string = true;
-  log.debug("Hard non-diffractive: partonic process gives ",
+  log.debug("Hard non-diff: partonic process gives ",
             event_intermediate.size(), " partons.");
   while (event_intermediate.size() > 1) {
     pSum = 0.;
@@ -664,7 +673,7 @@ bool StringProcess::next_NDiffHard() {
         iforward = i;
       }
     }
-    log.debug("Hard non-diffractive: iforward = ", iforward,
+    log.debug("Hard non-diff: iforward = ", iforward,
               "(", event_intermediate[iforward].id(), ")");
 
     pSum += event_intermediate[iforward].p();
@@ -673,7 +682,7 @@ bool StringProcess::next_NDiffHard() {
     int col_to_find = event_intermediate[iforward].acol();
     int acol_to_find = event_intermediate[iforward].col();
     event_intermediate.remove(iforward, iforward);
-    log.debug("Hard non-diffractive: event_intermediate reduces in size to ",
+    log.debug("Hard non-diff: event_intermediate reduces in size to ",
               event_intermediate.size());
 
     while (col_to_find != 0 || acol_to_find != 0) {
@@ -716,21 +725,23 @@ bool StringProcess::next_NDiffHard() {
         event_intermediate.list();
         event_intermediate.listJunctions();
         throw std::runtime_error("Hard string could not be identified.");
+      } else {
+        pSum += event_intermediate[ifound].p();
+        pythia_hadron_->event.append(event_intermediate[ifound]);
+        event_intermediate.remove(ifound, ifound);
+        log.debug("Hard non-diff: event_intermediate reduces in size to ",
+                  event_intermediate.size());
       }
-      pSum += event_intermediate[ifound].p();
-      pythia_hadron_->event.append(event_intermediate[ifound]);
-      event_intermediate.remove(ifound, ifound);
-      log.debug("Hard non-diffractive: event_intermediate reduces in size to ",
-                event_intermediate.size());
     }
 
     pythia_hadron_->event[0].p(pSum);
     pythia_hadron_->event[0].m(pSum.mCalc());
 
-    bool hadronize_success = false;
-    while (!hadronize_success) {
-      hadronize_success = pythia_hadron_->forceHadronLevel();
-      log.debug("Pythia hadronized, success = ", hadronize_success);
+    hadronize_success = pythia_hadron_->forceHadronLevel();
+    log.debug("Pythia hadronized, success = ", hadronize_success);
+    if (!hadronize_success) {
+      event_intermediate.reset();
+      pythia_hadron_->event.reset();
     }
 
     new_intermediate_particles.clear();
@@ -794,7 +805,7 @@ bool StringProcess::next_NDiffHard() {
     final_state_.push_back(data);
   }
 
-  return final_state_success;
+  return hadronize_success;
 }
 
 // baryon-antibaryon annihilation
