@@ -456,6 +456,25 @@ struct Node {
   }
 };
 
+/// Add nodes for all decays.
+static void add_decays(Node& node, const ParticleType& ptype) {
+  for (const auto& decay : ptype.decay_modes().decay_mode_list()) {
+    std::stringstream name;
+    name << "(" << ptype.name() << "->";
+    std::vector<ParticleTypePtr> parts;
+    for (const auto& p : decay->particle_types()) {
+      name << p->name();
+      parts.push_back(p);
+    }
+    name << ")";
+    auto new_node = Node(name.str(), decay->weight(), {}, std::move(parts));
+    for (const auto& p : new_node.particles_) {
+      add_decays(new_node, *p);
+    }
+    node.children_.emplace_back(new_node);
+  }
+}
+
 void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
                                                const ParticleType &b,
                                                double m_a, double m_b,
@@ -515,20 +534,6 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
         decaytree.children_.emplace_back(Node(description, xs, {}, {}));
         auto& process_node = decaytree.children_.back();
         // Find possible decays
-        auto add_decays = [] (Node& node, const ParticleType& ptype) {
-          for (const auto& decay : ptype.decay_modes().decay_mode_list()) {
-            std::stringstream name;
-            name << "(" << ptype.name() << "->";
-            std::vector<ParticleTypePtr> parts;
-            for (const auto& p : decay->particle_types()) {
-              name << p->name();
-              parts.push_back(p);
-            }
-            name << ")";
-            node.children_.emplace_back(
-                Node(name.str(), decay->weight(), {}, std::move(parts)));
-          }
-        };
         for (const auto& ptype : process->particle_types()) {
           add_decays(process_node, *ptype);
         }
