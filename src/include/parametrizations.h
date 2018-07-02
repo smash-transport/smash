@@ -26,15 +26,15 @@ namespace smash {
  *
  * This function is a utility function called from specific parametrizations.
  *
- * \param[in] mandelstam_s the rest frame total energy squared
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
  * \param[in] is_opposite_charge whether the particles being collided have
  *                               opposite charges
- * \param[in] ma mass of first particle
- * \param[in] mb mass of second particle
- * \param[in] P Pomeranchuk's constant term
- * \param[in] R1 intensity of the first Regge pole contribution
- * \param[in] R2 intensity of the second Regge pole contribution
- * \return the parametrized cross-section
+ * \param[in] ma mass of first particle [GeV]
+ * \param[in] mb mass of second particle [GeV]
+ * \param[in] P Pomeranchuk's constant term [mb]
+ * \param[in] R1 intensity of the first Regge pole contribution [mb]
+ * \param[in] R2 intensity of the second Regge pole contribution [mb]
+ * \return the parametrized cross-section [mb]
  */
 double xs_high_energy(double mandelstam_s, bool is_opposite_charge, double ma,
                       double mb, double P, double R1, double R2);
@@ -43,8 +43,8 @@ double xs_high_energy(double mandelstam_s, bool is_opposite_charge, double ma,
  * pp total cross section at high energies
  * \see xs_high_energy
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
  */
 double pp_high_energy(double mandelstam_s);
 
@@ -52,8 +52,8 @@ double pp_high_energy(double mandelstam_s);
  * ppbar total cross section at high energies
  * \see xs_high_energy
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
  */
 double ppbar_high_energy(double mandelstam_s);
 
@@ -61,8 +61,8 @@ double ppbar_high_energy(double mandelstam_s);
  * np total cross section at high energies
  * \see xs_high_energy
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
  */
 double np_high_energy(double mandelstam_s);
 
@@ -70,8 +70,8 @@ double np_high_energy(double mandelstam_s);
  * npbar total cross section at high energies
  * \see xs_high_energy
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
  */
 double npbar_high_energy(double mandelstam_s);
 
@@ -79,8 +79,8 @@ double npbar_high_energy(double mandelstam_s);
  * pi+p total cross section at high energies
  * \see xs_high_energy
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
  */
 double piplusp_high_energy(double mandelstam_s);
 
@@ -88,8 +88,8 @@ double piplusp_high_energy(double mandelstam_s);
  * pi-p total cross section at high energies
  * \see xs_high_energy
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
  */
 double piminusp_high_energy(double mandelstam_s);
 
@@ -97,8 +97,8 @@ double piminusp_high_energy(double mandelstam_s);
  * parametrized cross-section for proton-antiproton annihilation
  * used in the UrQMD model
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
  */
 double xs_ppbar_annihilation(double mandelstam_s);
 
@@ -108,11 +108,11 @@ double xs_ppbar_annihilation(double mandelstam_s);
  * This parametrization is a direct fit to cross sections in PYTHIA
  * See \iref{Sjostrand:1987su}
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \param[in] xs_0 a fit parameter
- * \param[in] e_0 a fit parameter
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \param[in] xs_0 a fit parameter [mb]
+ * \param[in] e_0 a fit parameter [GeV]
  * \param[in] lambda_pow a fit parameter
- * \return the parametrized cross-section
+ * \return the parametrized cross-section [mb]
  */
 double xs_string_hard(double mandelstam_s, double xs_0, double e_0,
                       double lambda_pow);
@@ -120,24 +120,30 @@ double xs_string_hard(double mandelstam_s, double xs_0, double e_0,
 /**
  * nucleon-nucleon hard scattering cross section (with partonic scattering)
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
+ *
+ * \see xs_string_hard
  */
 double NN_string_hard(double mandelstam_s);
 
 /**
  * nucleon-pion hard scattering cross section (with partonic scattering)
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
+ *
+ * \see xs_string_hard
  */
 double Npi_string_hard(double mandelstam_s);
 
 /**
  * pion-pion hard scattering cross section (with partonic scattering)
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
+ *
+ * \see xs_string_hard
  */
 double pipi_string_hard(double mandelstam_s);
 
@@ -147,10 +153,10 @@ double pipi_string_hard(double mandelstam_s);
  * Elastic contributions from decays are not subtracted, high energy
  * parametrization used at all energies (useful for AQM)
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \param[in] m1 the mass of the first particle
- * \param[in] m2 the mass of the second particle
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \param[in] m1 the mass of the first particle [GeV]
+ * \param[in] m2 the mass of the second particle [GeV]
+ * \return the parametrized cross-section [mb]
  */
 double piplusp_elastic_high_energy(double mandelstam_s, double m1, double m2);
 
@@ -165,8 +171,8 @@ double piplusp_elastic_high_energy(double mandelstam_s, double m1, double m2);
  * the parametrization at p_lab = 8 GeV, which correspons to square
  * root of s equal to 4 GeV.
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
  */
 double piplusp_elastic(double mandelstam_s);
 
@@ -174,8 +180,8 @@ double piplusp_elastic(double mandelstam_s);
  * pi-p elastic cross section parametrization
  * Source: GiBUU:parametrizationBarMes_HighEnergy.f90
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
  */
 double piminusp_elastic(double mandelstam_s);
 
@@ -183,8 +189,8 @@ double piminusp_elastic(double mandelstam_s);
  * pp elastic cross section parametrization
  * Source: \iref{Weil:2013mya}, eq. (44)
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
  */
 double pp_elastic(double mandelstam_s);
 
@@ -193,10 +199,10 @@ double pp_elastic(double mandelstam_s);
  * energy part generalized to all energy regimes (used for AQM)
  * Source: \iref{Weil:2013mya}, eq. (44)
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \param[in] m1 the mass of the first particle
- * \param[in] m2 the mass of the second particle
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \param[in] m1 the mass of the first particle [GeV]
+ * \param[in] m2 the mass of the second particle [GeV]
+ * \return the parametrized cross-section [mb]
  */
 double pp_elastic_high_energy(double mandelstam_s, double m1, double m2);
 
@@ -206,8 +212,8 @@ double pp_elastic_high_energy(double mandelstam_s, double m1, double m2);
  * low-p: \iref{Cugnon:1996kh}
  * highest-p: \iref{Buss:2011mx}
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
  */
 double pp_total(double mandelstam_s);
 
@@ -215,8 +221,8 @@ double pp_total(double mandelstam_s);
  * np elastic cross section parametrization
  * Source: \iref{Weil:2013mya}, eq. (45)
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
  */
 double np_elastic(double mandelstam_s);
 
@@ -226,8 +232,8 @@ double np_elastic(double mandelstam_s);
  * low-p: \iref{Cugnon:1996kh}
  * highest-p: \iref{Buss:2011mx}
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
  */
 double np_total(double mandelstam_s);
 
@@ -235,8 +241,8 @@ double np_total(double mandelstam_s);
  * ppbar elastic cross section parametrization
  * Source: \iref{Bass:1998ca}
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
  */
 double ppbar_elastic(double mandelstam_s);
 
@@ -244,8 +250,8 @@ double ppbar_elastic(double mandelstam_s);
  * ppbar total cross section parametrization
  * Source: \iref{Bass:1998ca}
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
  */
 double ppbar_total(double mandelstam_s);
 
@@ -266,8 +272,8 @@ double ppbar_total(double mandelstam_s, double m_proj, double m_target);
  * to fit pi-d elastic scattering data (the data collection
  * was be obtained from SAID data base, gwdac.phys.gwu.edu)
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
  */
 double deuteron_pion_elastic(double mandelstam_s);
 
@@ -275,8 +281,8 @@ double deuteron_pion_elastic(double mandelstam_s);
  * Deuteron nucleon elastic cross-section [mb] parametrized
  * by \iref{Oh:2009gx}.
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
  */
 double deuteron_nucleon_elastic(double mandelstam_s);
 
@@ -285,8 +291,8 @@ double deuteron_nucleon_elastic(double mandelstam_s);
  * sigma(K+n->K+n) = sigma(K+n->K0p) = 0.5 * sigma(K+p->K+p)
  * Source: \iref{Buss:2011mx}, B.3.8
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
  */
 double kplusp_elastic_background(double mandelstam_s);
 
@@ -295,8 +301,8 @@ double kplusp_elastic_background(double mandelstam_s);
  * sigma(K+n->K+n) = sigma(K+n->K0p) = 0.5 * sigma(K+p->K+p)
  * Source: \iref{Buss:2011mx}, B.3.8
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
  */
 double kplusn_elastic_background(double mandelstam_s);
 
@@ -305,8 +311,8 @@ double kplusn_elastic_background(double mandelstam_s);
  * sigma(K+n->K+n) = sigma(K+n->K0p) = 0.5 * sigma(K+p->K+p)
  * Source: \iref{Buss:2011mx}, B.3.8
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
  */
 double kplusn_k0p(double mandelstam_s);
 
@@ -314,8 +320,8 @@ double kplusn_k0p(double mandelstam_s);
  * K- p elastic background cross section parametrization
  * Source: \iref{Buss:2011mx}, B.3.9
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
  */
 double kminusp_elastic_background(double mandelstam_s);
 
@@ -323,8 +329,8 @@ double kminusp_elastic_background(double mandelstam_s);
  * K- n elastic background cross section parametrization
  * Source: \iref{Buss:2011mx}, B.3.9
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
  */
 double kminusn_elastic_background(double mandelstam_s);
 
@@ -332,8 +338,8 @@ double kminusn_elastic_background(double mandelstam_s);
  * K0 p elastic background cross section parametrization
  * Source: \iref{Buss:2011mx}, B.3.9
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
  */
 double k0p_elastic_background(double mandelstam_s);
 
@@ -341,8 +347,8 @@ double k0p_elastic_background(double mandelstam_s);
  * K0 n elastic background cross section parametrization
  * Source: \iref{Buss:2011mx}, B.3.9
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
  */
 double k0n_elastic_background(double mandelstam_s);
 
@@ -350,8 +356,8 @@ double k0n_elastic_background(double mandelstam_s);
  * Kbar0 p elastic background cross section parametrization
  * Source: \iref{Buss:2011mx}, B.3.9
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
  */
 double kbar0p_elastic_background(double mandelstam_s);
 
@@ -359,8 +365,8 @@ double kbar0p_elastic_background(double mandelstam_s);
  * Kbar0 n elastic background cross section parametrization
  * Source: \iref{Buss:2011mx}, B.3.9
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
  */
 double kbar0n_elastic_background(double mandelstam_s);
 
@@ -368,8 +374,8 @@ double kbar0n_elastic_background(double mandelstam_s);
  * K+ p inelastic background cross section parametrization
  * Source: \iref{Buss:2011mx}, B.3.8
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
  */
 double kplusp_inelastic_background(double mandelstam_s);
 
@@ -380,8 +386,8 @@ double kplusp_inelastic_background(double mandelstam_s);
  * This interpolates the experimental data of the total cross section and
  * subtracts the elastic and charge exchange cross section.
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
  */
 double kplusn_inelastic_background(double mandelstam_s);
 
@@ -438,8 +444,8 @@ extern /*thread_local (see #3075)*/ KaonNucleonRatios kaon_nucleon_ratios;
  * K- p <-> Kbar0 n cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.9
  *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \return the parametrized cross-section
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
  */
 double kminusp_kbar0n(double mandelstam_s);
 
@@ -447,8 +453,8 @@ double kminusp_kbar0n(double mandelstam_s);
  * K- p <-> pi- Sigma+ cross section parametrization
  * Taken from UrQMD (\iref{Graef:2014mra}).
  *
- * \param[in] sqrts the rest frame total energy
- * \return the parametrized cross-section
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
  */
 double kminusp_piminussigmaplus(double sqrts);
 
@@ -456,8 +462,8 @@ double kminusp_piminussigmaplus(double sqrts);
  * K- p <-> pi+ Sigma- cross section parametrization
  * Taken from UrQMD (\iref{Graef:2014mra}).
  *
- * \param[in] sqrts the rest frame total energy
- * \return the parametrized cross-section
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
  */
 double kminusp_piplussigmaminus(double sqrts);
 
@@ -465,8 +471,8 @@ double kminusp_piplussigmaminus(double sqrts);
  * K- p <-> pi0 Sigma0 cross section parametrization
  * Fit to Landolt-Börnstein instead of UrQMD values
  *
- * \param[in] sqrts the rest frame total energy
- * \return the parametrized cross-section
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
  */
 double kminusp_pi0sigma0(double sqrts);
 
@@ -475,8 +481,8 @@ double kminusp_pi0sigma0(double sqrts);
  * Fit to Landolt-Börnstein instead of UrQMD values
  * \todo clarify this
  *
- * \param[in] sqrts the rest frame total energy
- * \return the parametrized cross-section
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
  */
 double kminusp_pi0lambda(double sqrts);
 
@@ -485,8 +491,8 @@ double kminusp_pi0lambda(double sqrts);
  * Follow from the parametrization with the same strange
  * product via isospin symmetry.
  *
- * \param[in] sqrts the rest frame total energy
- * \return the parametrized cross-section
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
  */
 double kminusn_piminussigma0(double sqrts);
 
@@ -495,8 +501,8 @@ double kminusn_piminussigma0(double sqrts);
  * Follow from the parametrization with the same strange
  * product via isospin symmetry.
  *
- * \param[in] sqrts the rest frame total energy
- * \return the parametrized cross-section
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
  */
 double kminusn_pi0sigmaminus(double sqrts);
 
@@ -505,8 +511,8 @@ double kminusn_pi0sigmaminus(double sqrts);
  * Follow from the parametrization with the same strange
  * product via isospin symmetry.
  *
- * \param[in] sqrts the rest frame total energy
- * \return the parametrized cross-section
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
  */
 double kminusn_piminuslambda(double sqrts);
 
@@ -515,10 +521,11 @@ double kminusn_piminuslambda(double sqrts);
  * Two hyperon exchange, based on effective model by Feng Li,
  * as in UrQMD (\iref{Graef:2014mra}).
  *
- * \param[in] sqrts_sqrts0 the rest frame total energy minus threshold energy
- * \param[in] p_N momentum of outgoing nucleon in center of mass frame
- * \param[in] p_lambda momentum of incoming lambda in center of mass frame
- * \return the parametrized cross-section
+ * \param[in] sqrts_sqrts0 the rest frame total energy
+ *            minus threshold energy [GeV]
+ * \param[in] p_N momentum of outgoing nucleon in center of mass frame [GeV]
+ * \param[in] p_lambda momentum of incoming lambda in center of mass frame [GeV]
+ * \return the parametrized cross-section [mb]
  */
 double lambdalambda_ximinusp(double sqrts_sqrts0, double p_N, double p_lambda);
 
@@ -527,10 +534,11 @@ double lambdalambda_ximinusp(double sqrts_sqrts0, double p_N, double p_lambda);
  * Two hyperon exchange, based on effective model by Feng Li,
  * as in UrQMD (\iref{Graef:2014mra}).
  *
- * \param[in] sqrts_sqrts0 the rest frame total energy minus threshold energy
- * \param[in] p_N momentum of outgoing nucleon in center of mass frame
- * \param[in] p_lambda momentum of incoming lambda in center of mass frame
- * \return the parametrized cross-section
+ * \param[in] sqrts_sqrts0 the rest frame total energy
+ *            minus threshold energy [GeV]
+ * \param[in] p_N momentum of outgoing nucleon in center of mass frame [GeV]
+ * \param[in] p_lambda momentum of incoming lambda in center of mass frame [GeV]
+ * \return the parametrized cross-section [mb]
  */
 double lambdalambda_xi0n(double sqrts_sqrts0, double p_N, double p_lambda);
 
@@ -539,8 +547,9 @@ double lambdalambda_xi0n(double sqrts_sqrts0, double p_N, double p_lambda);
  * Two hyperon exchange, based on effective model by Feng Li,
  * as in UrQMD (\iref{Graef:2014mra}).
  *
- * \param[in] sqrts_sqrts0 the rest frame total energy minus threshold energy
- * \return the parametrized cross-section
+ * \param[in] sqrts_sqrts0 the rest frame total energy
+ *            minus threshold energy [GeV]
+ * \return the parametrized cross-section [mb]
  */
 double lambdasigmaplus_xi0p(double sqrts_sqrts0);
 
@@ -549,8 +558,9 @@ double lambdasigmaplus_xi0p(double sqrts_sqrts0);
  * Two hyperon exchange, based on effective model by Feng Li,
  * as in UrQMD (\iref{Graef:2014mra}).
  *
- * \param[in] sqrts_sqrts0 the rest frame total energy minus threshold energy
- * \return the parametrized cross-section
+ * \param[in] sqrts_sqrts0 the rest frame total energy
+ *            minus threshold energy [GeV]
+ * \return the parametrized cross-section [mb]
  */
 double lambdasigmaminus_ximinusn(double sqrts_sqrts0);
 
@@ -559,8 +569,9 @@ double lambdasigmaminus_ximinusn(double sqrts_sqrts0);
  * Two hyperon exchange, based on effective model by Feng Li,
  * as in UrQMD (\iref{Graef:2014mra}).
  *
- * \param[in] sqrts_sqrts0 the rest frame total energy minus threshold energy
- * \return the parametrized cross-section
+ * \param[in] sqrts_sqrts0 the rest frame total energy
+ *            minus threshold energy [GeV]
+ * \return the parametrized cross-section [mb]
  */
 double lambdasigma0_ximinusp(double sqrts_sqrts0);
 
@@ -569,8 +580,9 @@ double lambdasigma0_ximinusp(double sqrts_sqrts0);
  * Two hyperon exchange, based on effective model by Feng Li,
  * as in UrQMD (\iref{Graef:2014mra}).
  *
- * \param[in] sqrts_sqrts0 the rest frame total energy minus threshold energy
- * \return the parametrized cross-section
+ * \param[in] sqrts_sqrts0 the rest frame total energy
+ *            minus threshold energy [GeV]
+ * \return the parametrized cross-section [mb]
  */
 double lambdasigma0_xi0n(double sqrts_sqrts0);
 
@@ -579,8 +591,9 @@ double lambdasigma0_xi0n(double sqrts_sqrts0);
  * Two hyperon exchange, based on effective model by Feng Li,
  * as in UrQMD (\iref{Graef:2014mra}).
  *
- * \param[in] sqrts_sqrts0 the rest frame total energy minus threshold energy
- * \return the parametrized cross-section
+ * \param[in] sqrts_sqrts0 the rest frame total energy
+ *            minus threshold energy [GeV]
+ * \return the parametrized cross-section [mb]
  */
 double sigma0sigma0_ximinusp(double sqrts_sqrts0);
 
@@ -592,8 +605,9 @@ double sigma0sigma0_ximinusp(double sqrts_sqrts0);
  * Note that there is a typo in the paper in equation (6):
  * "Lambda Sigma0 -> Xi0 n" should be "Sigma0 Sigma0 -> Xi0 n".
  *
- * \param[in] sqrts_sqrts0 the rest frame total energy minus threshold energy
- * \return the parametrized cross-section
+ * \param[in] sqrts_sqrts0 the rest frame total energy
+ *            minus threshold energy [GeV]
+ * \return the parametrized cross-section [mb]
  */
 double sigma0sigma0_xi0n(double sqrts_sqrts0);
 
@@ -602,8 +616,9 @@ double sigma0sigma0_xi0n(double sqrts_sqrts0);
  * Two hyperon exchange, based on effective model by Feng Li,
  * as in UrQMD (\iref{Graef:2014mra}).
  *
- * \param[in] sqrts_sqrts0 the rest frame total energy minus threshold energy
- * \return the parametrized cross-section
+ * \param[in] sqrts_sqrts0 the rest frame total energy
+ *            minus threshold energy [GeV]
+ * \return the parametrized cross-section [mb]
  */
 double sigmaplussigmaminus_xi0p(double sqrts_sqrts0);
 
@@ -612,8 +627,9 @@ double sigmaplussigmaminus_xi0p(double sqrts_sqrts0);
  * Two hyperon exchange, based on effective model by Feng Li,
  * as in UrQMD (\iref{Graef:2014mra}).
  *
- * \param[in] sqrts_sqrts0 the rest frame total energy minus threshold energy
- * \return the parametrized cross-section
+ * \param[in] sqrts_sqrts0 the rest frame total energy
+ *            minus threshold energy [GeV]
+ * \return the parametrized cross-section [mb]
  */
 double sigma0sigmaminus_ximinusn(double sqrts_sqrts0);
 
@@ -622,8 +638,9 @@ double sigma0sigmaminus_ximinusn(double sqrts_sqrts0);
  * Two hyperon exchange, based on effective model by Feng Li,
  * as in UrQMD (\iref{Graef:2014mra}).
  *
- * \param[in] sqrts_sqrts0 the rest frame total energy minus threshold energy
- * \return the parametrized cross-section
+ * \param[in] sqrts_sqrts0 the rest frame total energy
+ *            minus threshold energy [GeV]
+ * \return the parametrized cross-section [mb]
  */
 double sigmaplussigmaminus_ximinusp(double sqrts_sqrts0);
 
@@ -632,8 +649,9 @@ double sigmaplussigmaminus_ximinusp(double sqrts_sqrts0);
  * Two hyperon exchange, based on effective model by Feng Li,
  * as in UrQMD (\iref{Graef:2014mra}).
  *
- * \param[in] sqrts_sqrts0 the rest frame total energy minus threshold energy
- * \return the parametrized cross-section
+ * \param[in] sqrts_sqrts0 the rest frame total energy
+ *            minus threshold energy [GeV]
+ * \return the parametrized cross-section [mb]
  */
 double sigmaplussigmaminus_xi0n(double sqrts_sqrts0);
 

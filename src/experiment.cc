@@ -1361,7 +1361,6 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
     if (!performed) {
       continue;
     }
-    const auto particles_before_actions = particles_.copy_to_vector();
 
     /* (3) Update actions for newly-produced particles. */
 

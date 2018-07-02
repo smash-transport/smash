@@ -27,70 +27,70 @@ namespace smash {
 class Particles;
 
 /**
-  * \ingroup output
-  *
-  * \brief SMASH output to ROOT file
-  * ----------------------------------------------------------------------------
-  * SMASH supports ROOT output as an option (see http://root.cern.ch).
-  * The ROOT framework needs to be installed when building SMASH, otherwise
-  * ROOT support will be disabled.
-  *
-  * This class produces file smash_run.root, which contains a
-  * ROOT TTree. TTree contains information about particles
-  * during simulation from all SMASH events.
-  * Output is happening in blocks. All particles in a block
-  * are at the same time and in the same event. However, it is possible that
-  * different blocks are at the same time and from the same event.
-  * Particle information is stored in TBranches.
-  * For each particle characteristic there is a separate branch.
-  * Currently these are t,x,y,z (coordinates), p0,px,py,pz (4-momentum),
-  * pdgid - PDG code of particle, that characterizes its sort,
-  * ev - number of event particle encountered in,
-  * tcounter - number of output block in a given event,
-  * npart - number of particles and
-  * impact_b - impact parameter.
-  *
-  * Here is an example of ROOT macro to read the ROOT output of SMASH:
-  * \code
-  * int rootfile_analysis_example() {
-  *   // open SMASH output file to be read in
-  *   TFile *input_file = TFile::Open("../build/data/0/smash_run.root");
-  *   if (input_file->IsOpen()) {
-  *     printf("Successfully opened file %s\n", input_file->GetName());
-  *   } else {
-  *     printf("Error at opening file %s\n", input_file->GetName());
-  *   }
-  *
-  *   // Get a tree from file
-  *   TTree *tree = static_cast<TTree*>(input_file->Get("particles"));
-  *
-  *   // Get number of entries in a tree
-  *   Int_t nentries = tree->GetEntries();
-  *   printf("Number of entries in a tree is %d\n", nentries);
-  *
-  *   // This draws p_T distribution at initialization
-  *   // tree->Draw("sqrt(px*px + py*py)","tcounter==0");
-
-  *   // This draws 3D momentum space distribution at initialization
-  *   tree->Draw("px:py:pz","tcounter==0");
-  *
-  *   return 0;
-  * }
-  * \endcode
-  * For examples of extracting info from .root file see root.cern.ch
-  * To view ROOT file use TBrowser:
-  * \code
-  * root -l
-  * new TBrowser
-  * \endcode
-  * If option write_collisions is set True, then in addition to particles
-  * TTree a collision TTree is created. Information about each collision is
-  * written as one leaf: nin, nout - number of incoming and outgoing particles,
-  * ev - event number, weight - total weight of the collision (wgt),
-  * partial_weight - partial weight of the collision (par_wgt), (t,x,y,z),
-  (p0,px,py,pz) - arrays of dimension nin+nout
-  * that contain coordinates and momenta.
-  **/
+ * \ingroup output
+ *
+ * \brief SMASH output to ROOT file
+ * ----------------------------------------------------------------------------
+ * SMASH supports ROOT output as an option (see http://root.cern.ch).
+ * The ROOT framework needs to be installed when building SMASH, otherwise
+ * ROOT support will be disabled.
+ *
+ * This class produces file smash_run.root, which contains a
+ * ROOT TTree. TTree contains information about particles
+ * during simulation from all SMASH events.
+ * Output is happening in blocks. All particles in a block
+ * are at the same time and in the same event. However, it is possible that
+ * different blocks are at the same time and from the same event.
+ * Particle information is stored in TBranches.
+ * For each particle characteristic there is a separate branch.
+ * Currently these are t,x,y,z (coordinates), p0,px,py,pz (4-momentum),
+ * pdgid - PDG code of particle, that characterizes its sort,
+ * ev - number of event particle encountered in,
+ * tcounter - number of output block in a given event,
+ * npart - number of particles and
+ * impact_b - impact parameter.
+ *
+ * Here is an example of ROOT macro to read the ROOT output of SMASH:
+ * \code
+ * int rootfile_analysis_example() {
+ *   // open SMASH output file to be read in
+ *   TFile *input_file = TFile::Open("../build/data/0/smash_run.root");
+ *   if (input_file->IsOpen()) {
+ *     printf("Successfully opened file %s\n", input_file->GetName());
+ *   } else {
+ *     printf("Error at opening file %s\n", input_file->GetName());
+ *   }
+ *
+ *   // Get a tree from file
+ *   TTree *tree = static_cast<TTree*>(input_file->Get("particles"));
+ *
+ *   // Get number of entries in a tree
+ *   Int_t nentries = tree->GetEntries();
+ *   printf("Number of entries in a tree is %d\n", nentries);
+ *
+ *   // This draws p_T distribution at initialization
+ *   // tree->Draw("sqrt(px*px + py*py)","tcounter==0");
+ *
+ *   // This draws 3D momentum space distribution at initialization
+ *   tree->Draw("px:py:pz","tcounter==0");
+ *
+ *   return 0;
+ * }
+ * \endcode
+ * For examples of extracting info from .root file see root.cern.ch
+ * To view ROOT file use TBrowser:
+ * \code
+ * root -l
+ * new TBrowser
+ * \endcode
+ * If option write_collisions is set True, then in addition to particles
+ * TTree a collision TTree is created. Information about each collision is
+ * written as one leaf: nin, nout - number of incoming and outgoing particles,
+ * ev - event number, weight - total weight of the collision (wgt),
+ * partial_weight - partial weight of the collision (par_wgt), (t,x,y,z),
+ * (p0,px,py,pz) - arrays of dimension nin+nout
+ * that contain coordinates and momenta.
+ */
 class RootOutput : public OutputInterface {
  public:
   /**
@@ -106,12 +106,34 @@ class RootOutput : public OutputInterface {
   /// Destructor
   ~RootOutput();
 
+  /**
+   * update event number and writes intermediate particles to a tree.
+   * \param[in] particles Particles to be written to output.
+   * \param[in] event_number event number to be used in ROOT output.
+   */
   void at_eventstart(const Particles &particles,
                      const int event_number) override;
+  /**
+   * update event number and impact parameter,
+   * and writes intermediate particles to a tree.
+   * \param[in] particles Particles to be written to output.
+   * \param[in] event_number event number to be used in ROOT output.
+   * \param[in] impact_parameter event number to be used in ROOT output. [fm]
+   */
   void at_eventend(const Particles &particles, const int event_number,
                    double impact_parameter) override;
+  /**
+   * Writes intermediate particles to a tree defined by treename,
+   * if it is allowed (i.e., particles_only_final_ is false).
+   * \param[in] particles Particles to be written to output.
+   */
   void at_intermediate_time(const Particles &particles, const Clock &clock,
                             const DensityParameters &dens_param) override;
+  /**
+   * Writes collisions to a tree defined by treename.
+   * \param[in] action an Action object containing incoming, outgoing particles
+   *            and type of interactions.
+   */
   void at_interaction(const Action &action, const double density) override;
 
  private:

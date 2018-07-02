@@ -45,16 +45,18 @@ namespace smash {
 class StringProcess {
  private:
   // The following 4 variables are in the center of mass frame
-  /// forward lightcone momentum p^{+} of incoming particle A [GeV]
+  /// forward lightcone momentum p^{+} of incoming particle A in CM-frame [GeV]
   double PPosA_;
-  /// forward lightcone momentum p^{+} of incoming particle B [GeV]
+  /// forward lightcone momentum p^{+} of incoming particle B in CM-frame [GeV]
   double PPosB_;
-  /// backward lightcone momentum p^{-} of incoming particle A [GeV]
+  /// backward lightcone momentum p^{-} of incoming particle A in CM-frame [GeV]
   double PNegA_;
-  /// backward lightcone momentum p^{-} of incoming particle B [GeV]
+  /// backward lightcone momentum p^{-} of incoming particle B in CM-frame [GeV]
   double PNegB_;
-  /// masses of incoming particles [GeV]
-  double massA_, massB_;
+  /// mass of incoming particle A [GeV]
+  double massA_;
+  /// mass of incoming particle B [GeV]
+  double massB_;
   /// sqrt of Mandelstam variable s of collision [GeV]
   double sqrtsAB_;
   /// PdgCodes of incoming particles
@@ -76,7 +78,7 @@ class StringProcess {
   int NpartFinal_;
   /// number of particles fragmented from strings
   std::array<int, 2> NpartString_;
-  /// the minimum lightcone momentum scale carried by gluon [GeV]
+  /// the minimum lightcone momentum scale carried by a gluon [GeV]
   double pmin_gluon_lightcone_;
   /**
    * parameter \f$\beta\f$ for the gluon distribution function
@@ -140,17 +142,17 @@ class StringProcess {
 
   /**
    * Constructor, initializes pythia. Should only be called once.
-   * \param[in] string_tension value of kappa_tension_string_ [GeV/fm]
-   * \param[in] time_formation value of time_formation_const_ [fm]
-   * \param[in] gluon_beta value of pow_fgluon_beta_
-   * \param[in] gluon_pmin value of pmin_gluon_lightcone_
-   * \param[in] quark_alpha value of pow_fquark_alpha_
-   * \param[in] quark_beta value of pow_fquark_beta_
+   * \param[in] string_tension value of #kappa_tension_string_ [GeV/fm]
+   * \param[in] time_formation value of #time_formation_const_ [fm]
+   * \param[in] gluon_beta value of #pow_fgluon_beta_
+   * \param[in] gluon_pmin value of #pmin_gluon_lightcone_
+   * \param[in] quark_alpha value of #pow_fquark_alpha_
+   * \param[in] quark_beta value of #pow_fquark_beta_
    * \param[in] strange_supp strangeness suppression factor
    *        (StringFlav:probStoUD) in fragmentation
    * \param[in] diquark_supp diquark suppression factor
    *        (StringFlav:probQQtoQ) in fragmentation
-   * \param[in] sigma_perp value of sigma_qperp_ [GeV]
+   * \param[in] sigma_perp value of #sigma_qperp_ [GeV]
    * \param[in] stringz_a parameter (StringZ:aLund)
    *        for the fragmentation function
    * \param[in] stringz_b parameter (StringZ:bLund)
@@ -160,14 +162,7 @@ class StringProcess {
    *
    * \see StringProcess::common_setup_pythia(Pythia8::Pythia *,
    *                     double, double, double, double, double)
-   * \see StringProcess::kappa_tension_string_
-   * \see StringProcess::time_formation_const_
-   * \see StringProcess::pow_fgluon_beta_
-   * \see StringProcess::pmin_gluon_lightcone_
-   * \see StringProcess::pow_fquark_alpha_
-   * \see StringProcess::pow_fquark_beta_
-   * \see StringProcess::sigma_qperp_
-   * \see 3rdparty/pythia8230/share/Pythia8/xmldoc/FlavourSelection.xml
+   * \see .3rdparty/pythia8230/share/Pythia8/xmldoc/FlavourSelection.xml
    * \see 3rdparty/pythia8230/share/Pythia8/xmldoc/Fragmentation.xml
    * \see 3rdparty/pythia8230/share/Pythia8/xmldoc/MasterSwitches.xml
    * \see 3rdparty/pythia8230/share/Pythia8/xmldoc/MultipartonInteractions.xml
