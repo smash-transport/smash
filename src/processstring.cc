@@ -629,7 +629,7 @@ bool StringProcess::next_NDiffHard() {
         Pythia8::Vec4 pquark = pythia_parton_->event[i].p();
         const double mass = pythia_parton_->particleData.m0(pdgid);
 
-        const int status = 1;
+        const int status = pythia_parton_->event[i].status();
         const int color = pythia_parton_->event[i].col();
         const int anticolor = pythia_parton_->event[i].acol();
 
@@ -647,10 +647,11 @@ bool StringProcess::next_NDiffHard() {
   event_intermediate.clearJunctions();
   for (int i = 0; i < pythia_parton_->event.sizeJunction(); i++) {
     const int kind = pythia_parton_->event.kindJunction(i);
-    const int col0 = pythia_parton_->event.colJunction(i, 0);
-    const int col1 = pythia_parton_->event.colJunction(i, 1);
-    const int col2 = pythia_parton_->event.colJunction(i, 2);
-    event_intermediate.appendJunction(kind, col0, col1, col2);
+    std::array<int, 3> col;
+    for (int j = 0; j < 3; j++) {
+      col[j] = pythia_parton_->event.colJunction(i, j);
+    }
+    event_intermediate.appendJunction(kind, col[0], col[1], col[2]);
   }
   event_intermediate[0].p(pSum);
   event_intermediate[0].m(pSum.mCalc());
@@ -662,80 +663,9 @@ bool StringProcess::next_NDiffHard() {
   log.debug("Hard non-diff: partonic process gives ",
             event_intermediate.size(), " partons.");
   while (event_intermediate.size() > 1) {
-    pSum = 0.;
-    pythia_hadron_->event.reset();
-    int iforward = 1;
-    for (int i = 2; i < event_intermediate.size(); i++) {
-      if ((find_forward_string &&
-           event_intermediate[i].pz() > event_intermediate[iforward].pz()) ||
-          (!find_forward_string &&
-           event_intermediate[i].pz() < event_intermediate[iforward].pz())) {
-        iforward = i;
-      }
-    }
-    log.debug("Hard non-diff: iforward = ", iforward,
-              "(", event_intermediate[iforward].id(), ")");
-
-    pSum += event_intermediate[iforward].p();
-    pythia_hadron_->event.append(event_intermediate[iforward]);
-
-    int col_to_find = event_intermediate[iforward].acol();
-    int acol_to_find = event_intermediate[iforward].col();
-    event_intermediate.remove(iforward, iforward);
-    log.debug("Hard non-diff: event_intermediate reduces in size to ",
-              event_intermediate.size());
-
-    while (col_to_find != 0 || acol_to_find != 0) {
-      log.debug("  col_to_find = ", col_to_find,
-                ", acol_to_find = ", acol_to_find);
-
-      int ifound = -1;
-      for (int i = 1; i < event_intermediate.size(); i++) {
-        const int pdgid = event_intermediate[i].id();
-        bool found_col = col_to_find != 0 &&
-                         col_to_find == event_intermediate[i].col();
-        bool found_acol = acol_to_find != 0 &&
-                          acol_to_find == event_intermediate[i].acol();
-        if (found_col) {
-          log.debug("  col_to_find ", col_to_find,
-                    " from i ", i, "(", pdgid, ") found");
-        }
-        if (found_acol) {
-          log.debug("  acol_to_find ", acol_to_find,
-                    " from i ", i, "(", pdgid, ") found");
-        }
-
-        if (found_col && !found_acol) {
-          ifound = i;
-          col_to_find = event_intermediate[i].acol();
-          break;
-        } else if (!found_col && found_acol) {
-          ifound = i;
-          acol_to_find = event_intermediate[i].col();
-          break;
-        } else if (found_col && found_acol) {
-          ifound = i;
-          col_to_find = 0;
-          acol_to_find = 0;
-          break;
-        }
-      }
-
-      if (ifound < 0) {
-        event_intermediate.list();
-        event_intermediate.listJunctions();
-        throw std::runtime_error("Hard string could not be identified.");
-      } else {
-        pSum += event_intermediate[ifound].p();
-        pythia_hadron_->event.append(event_intermediate[ifound]);
-        event_intermediate.remove(ifound, ifound);
-        log.debug("Hard non-diff: event_intermediate reduces in size to ",
-                  event_intermediate.size());
-      }
-    }
-
-    pythia_hadron_->event[0].p(pSum);
-    pythia_hadron_->event[0].m(pSum.mCalc());
+    compose_string_parton(find_forward_string,
+                          event_intermediate, pythia_hadron_->event);
+    compose_string_junction(event_intermediate, pythia_hadron_->event);
 
     hadronize_success = pythia_hadron_->forceHadronLevel();
     log.debug("Pythia hadronized, success = ", hadronize_success);
@@ -795,17 +725,230 @@ bool StringProcess::next_NDiffHard() {
                               time_collision_);
       final_state_.push_back(data);
     }
-
-    find_forward_string = !find_forward_string;
   }
 
-  for (ParticleData data : new_non_hadron_particles) {
-    data.set_cross_section_scaling_factor(1.);
-    data.set_formation_time(time_collision_);
-    final_state_.push_back(data);
+  if (hadronize_success) {
+    for (ParticleData data : new_non_hadron_particles) {
+      data.set_cross_section_scaling_factor(1.);
+      data.set_formation_time(time_collision_);
+      final_state_.push_back(data);
+    }
+  } else {
+    final_state_.clear();
   }
 
   return hadronize_success;
+}
+
+void StringProcess::compose_string_parton(bool &find_forward_string,
+                                          Pythia8::Event &event_intermediate,
+                                          Pythia8::Event &event_hadronize) {
+  const auto &log = logger<LogArea::Pythia>();
+
+  if (event_intermediate.sizeJunction() > 0) {
+    return;
+  }
+
+  Pythia8::Vec4 pSum = 0.;
+  event_hadronize.reset();
+
+  int iforward = 1;
+  for (int i = 2; i < event_intermediate.size(); i++) {
+    if ((find_forward_string &&
+         event_intermediate[i].pz() > event_intermediate[iforward].pz()) ||
+        (!find_forward_string &&
+         event_intermediate[i].pz() < event_intermediate[iforward].pz())) {
+      iforward = i;
+    }
+  }
+  log.debug("Hard non-diff: iforward = ", iforward,
+            "(", event_intermediate[iforward].id(), ")");
+
+  pSum += event_intermediate[iforward].p();
+  event_hadronize.append(event_intermediate[iforward]);
+
+  int col_to_find = event_intermediate[iforward].acol();
+  int acol_to_find = event_intermediate[iforward].col();
+  event_intermediate.remove(iforward, iforward);
+  log.debug("Hard non-diff: event_intermediate reduces in size to ",
+            event_intermediate.size());
+
+  while (col_to_find != 0 || acol_to_find != 0) {
+    log.debug("  col_to_find = ", col_to_find,
+              ", acol_to_find = ", acol_to_find);
+
+    int ifound = -1;
+    for (int i = 1; i < event_intermediate.size(); i++) {
+      const int pdgid = event_intermediate[i].id();
+      bool found_col = col_to_find != 0 &&
+                       col_to_find == event_intermediate[i].col();
+      bool found_acol = acol_to_find != 0 &&
+                        acol_to_find == event_intermediate[i].acol();
+      if (found_col) {
+        log.debug("  col_to_find ", col_to_find,
+                  " from i ", i, "(", pdgid, ") found");
+      }
+      if (found_acol) {
+        log.debug("  acol_to_find ", acol_to_find,
+                  " from i ", i, "(", pdgid, ") found");
+      }
+
+      if (found_col && !found_acol) {
+        ifound = i;
+        col_to_find = event_intermediate[i].acol();
+        break;
+      } else if (!found_col && found_acol) {
+        ifound = i;
+        acol_to_find = event_intermediate[i].col();
+        break;
+      } else if (found_col && found_acol) {
+        ifound = i;
+        col_to_find = 0;
+        acol_to_find = 0;
+        break;
+      }
+    }
+
+    if (ifound < 0) {
+      event_intermediate.list();
+      event_intermediate.listJunctions();
+      throw std::runtime_error("Hard string could not be identified.");
+    } else {
+      pSum += event_intermediate[ifound].p();
+      event_hadronize.append(event_intermediate[ifound]);
+      event_intermediate.remove(ifound, ifound);
+      log.debug("Hard non-diff: event_intermediate reduces in size to ",
+                event_intermediate.size());
+    }
+  }
+
+  event_hadronize[0].p(pSum);
+  event_hadronize[0].m(pSum.mCalc());
+  find_forward_string = !find_forward_string;
+}
+
+void StringProcess::compose_string_junction(Pythia8::Event &event_intermediate,
+                                            Pythia8::Event &event_hadronize) {
+  const auto &log = logger<LogArea::Pythia>();
+
+  if (event_intermediate.sizeJunction() == 0) {
+    return;
+  }
+
+  Pythia8::Vec4 pSum = 0.;
+  event_hadronize.reset();
+
+  const int kind = event_intermediate.kindJunction(0);
+  bool sign_color = kind % 2 == 1;
+  std::vector<int> col;
+  col.clear();
+  for (int j = 0; j < 3; j++) {
+    col.push_back(event_intermediate.colJunction(0, j));
+  }
+  event_hadronize.appendJunction(kind, col[0], col[1], col[2]);
+  event_intermediate.eraseJunction(0);
+
+  bool found_string = false;
+  while (!found_string) {
+    find_junction_leg(sign_color, col, event_intermediate, event_hadronize);
+    found_string = true;
+    for (int j = 0; j < col.size(); j++) {
+      found_string = found_string && col[j] == 0;
+    }
+    if (!found_string) {
+      sign_color = !sign_color;
+      std::vector<int> junction_to_remove;
+      junction_to_remove.clear();
+      for (int i = 0; i < event_intermediate.sizeJunction(); i++) {
+        const int kind_new = event_intermediate.kindJunction(i);
+        if (sign_color != kind_new % 2 == 1) {
+          continue;
+        }
+
+        std::array<int, 3> col_new;
+        for (int k = 0; k < 3; k++) {
+          col_new[k] = event_intermediate.colJunction(i, k);
+        }
+
+        int n_legs_connected = 0;
+        for (int j = 0; j < col.size(); j++) {
+          if (col[j] == 0) {
+            continue;
+          }
+          for (int k = 0; k < 3; k++) {
+            if (col[j] == col_new[k]) {
+              n_legs_connected += 1;
+              col[j] = 0;
+              col_new[k] = 0;
+            }
+          }
+        }
+
+        if (n_legs_connected > 0) {
+          for (int k = 0; k < 3; k++) {
+            if (col_new[k] != 0) {
+              col.push_back(col_new[k]);
+            }
+          }
+          junction_to_remove.push_back(i);
+        }
+      }
+
+      for (int i = 0; i < junction_to_remove.size(); i++) {
+        junction_to_remove[i] = junction_to_remove[i] - i;
+        event_intermediate.eraseJunction(junction_to_remove[i]);
+      }
+    }
+  }
+}
+
+void StringProcess::find_junction_leg(bool sign_color, std::vector<int> &col,
+                                      Pythia8::Event &event_intermediate,
+                                      Pythia8::Event &event_hadronize) {
+  const auto &log = logger<LogArea::Pythia>();
+
+  Pythia8::Vec4 pSum = event_hadronize[0].p();
+  for (int j = 0; j < col.size(); j++) {
+    if (col[j] == 0) {
+      continue;
+    }
+    bool found_leg = false;
+    while (!found_leg) {
+      int ifound = -1;
+      for (int i = 1; i < event_intermediate.size(); i++) {
+        if (sign_color && col[j] == event_intermediate[i].col()) {
+          ifound = i;
+          col[j] = event_intermediate[i].acol();
+          break;
+        } else if (!sign_color && col[j] == event_intermediate[i].acol()) {
+          ifound = i;
+          col[j] = event_intermediate[i].col();
+          break;
+        }
+      }
+
+      if (ifound < 0) {
+        found_leg = true;
+        if (event_intermediate.sizeJunction() == 0) {
+          event_intermediate.list();
+          event_intermediate.listJunctions();
+          throw std::runtime_error("Hard string could not be identified.");
+        }
+      } else {
+        pSum += event_intermediate[ifound].p();
+        event_hadronize.append(event_intermediate[ifound]);
+        event_intermediate.remove(ifound, ifound);
+        log.debug("Hard non-diff: event_intermediate reduces in size to ",
+                  event_intermediate.size());
+        if (col[j] == 0) {
+          found_leg = true;
+        }
+      }
+    }
+  }
+
+  event_hadronize[0].p(pSum);
+  event_hadronize[0].m(pSum.mCalc());
 }
 
 // baryon-antibaryon annihilation

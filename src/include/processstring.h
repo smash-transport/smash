@@ -394,6 +394,17 @@ class StringProcess {
    */
   bool next_BBbarAnn();
 
+  void compose_string_parton(bool &find_forward_string,
+                             Pythia8::Event &event_intermediate,
+                             Pythia8::Event &event_hadronize);
+
+  void compose_string_junction(Pythia8::Event &event_intermediate,
+                               Pythia8::Event &event_hadronize);
+
+  void find_junction_leg(bool sign_color, std::vector<int> &col,
+                         Pythia8::Event &event_intermediate,
+                         Pythia8::Event &event_hadronize);
+
   /**
    * a function to get the final state particle list
    * which is called after the collision
