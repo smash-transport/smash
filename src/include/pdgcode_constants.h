@@ -26,6 +26,7 @@ constexpr int photon = 0x22;
 
 /// Proton.
 constexpr int p = 0x2212;
+/// Proton in decimal digits.
 constexpr int p_decimal = 2212;
 /// Neutron.
 constexpr int n = 0x2112;
@@ -61,6 +62,7 @@ constexpr int Omega_m = 0x3334;
 
 /// π⁺.
 constexpr int pi_p = 0x211;
+/// π⁺ in decimal digits.
 constexpr int pi_p_decimal = 211;
 /// π⁰.
 constexpr int pi_z = 0x111;
@@ -91,17 +93,21 @@ constexpr int rho_m = -0x213;
 /// h₁(1170).
 constexpr int h1 = 0x10223;
 
+/// Deuteron in decimal digits.
 constexpr int decimal_d = 1000010020;
+/// Anti-deuteron in decimal digits.
 constexpr int decimal_antid = -1000010020;
 
 }  // namespace pdg
 
-/// Pack two int32_t into an uint64_t.
-/// This is useful for switch statements on pairs.
-///
-/// \param x First integer to be packed.
-/// \param y Second integer to be packed.
-/// \return Combined integer.
+/**
+ * Pack two int32_t into an uint64_t.
+ * This is useful for switch statements on pairs.
+ *
+ * \param x First integer to be packed.
+ * \param y Second integer to be packed.
+ * \return Combined integer.
+ */
 constexpr uint64_t pack(int32_t x, int32_t y) {
   return (static_cast<uint64_t>(static_cast<uint32_t>(x)) << 32) |
          static_cast<uint64_t>(static_cast<uint32_t>(y));

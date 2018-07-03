@@ -140,28 +140,28 @@ class ProcessBranch {
    */
   inline void set_weight(double process_weight);
 
-  /// Return the process type
+  /// \return the process type
   virtual ProcessType get_type() const = 0;
 
-  /// Return the particle types associated with this branch.
+  /// \return the particle types associated with this branch.
   virtual const ParticleTypePtrList &particle_types() const = 0;
 
   /**
-   * Return a list of ParticleData initialized with the stored ParticleType
+   * \return a list of ParticleData initialized with the stored ParticleType
    * objects.
    */
   ParticleList particle_list() const;
 
-  /// Return the branch weight.
+  /// \return the branch weight.
   inline double weight() const;
 
   /**
-   * Determine the threshold for this branch, i.e. the minimum energy that is
+   * \return the threshold for this branch, i.e. the minimum energy that is
    * required to produce all final-state particles.
    */
   double threshold() const;
 
-  /// Return the number of particles in the final state.
+  /// \return the number of particles in the final state.
   virtual unsigned int particle_number() const = 0;
 
  protected:
@@ -181,13 +181,14 @@ inline void ProcessBranch::set_weight(double process_weight) {
   branch_weight_ = process_weight;
 }
 
-/// Return the branch weight
+/// \return the branch weight
 inline double ProcessBranch::weight() const { return branch_weight_; }
 
 /**
  * \relates ProcessBranch
- * Calculates the total weight by summing all weights of the ProcessBranch
- * objects in the list \p l.
+ * \param[in] l The list of all the processes that would be summed.
+ * \return the total weight calculated by summing all weights of the
+ * ProcessBranch objects in the list \p l.
  */
 template <typename Branch>
 inline double total_weight(const ProcessBranchList<Branch> &l) {
@@ -256,9 +257,15 @@ class CollisionBranch : public ProcessBranch {
   const ParticleTypePtrList &particle_types() const override {
     return particle_types_;
   }
-  /// Set the process type
+  /**
+   * Set the process type
+   *
+   * \param[in] p_type The new value of the process type
+   */
   inline void set_type(ProcessType p_type) { process_type_ = p_type; }
+  /// \return type of the process
   inline ProcessType get_type() const override { return process_type_; }
+  /// \return number of particles involved in the process
   unsigned int particle_number() const override {
     return particle_types_.size();
   }
@@ -304,7 +311,7 @@ class DecayBranch : public ProcessBranch {
   /// The move constructor efficiently moves the particle-type list member.
   DecayBranch(DecayBranch &&rhs)
       : ProcessBranch(rhs.branch_weight_), type_(rhs.type_) {}
-  /// Get the angular momentum of this branch.
+  /// \return the quantized angular momentum of this branch.
   inline int angular_momentum() const { return type_.angular_momentum(); }
   const ParticleTypePtrList &particle_types() const override {
     return type_.particle_types();
@@ -312,8 +319,9 @@ class DecayBranch : public ProcessBranch {
   unsigned int particle_number() const override {
     return type_.particle_number();
   }
-  /// Return the DecayType of the branch.
+  /// \return the DecayType of the branch.
   inline const DecayType &type() const { return type_; }
+  /// \return "Decay" to the process type.
   inline ProcessType get_type() const override { return ProcessType::Decay; }
 
  private:

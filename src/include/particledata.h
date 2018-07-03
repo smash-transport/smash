@@ -53,7 +53,7 @@ class ParticleData {
    * Create a new particle with the given \p particle_type and optionally a
    * specific \p unique_id.
    *
-   * All other values are initialized to improbable values.
+   * All other values are initialized to unphysical values.
    *
    * \param[in] particle_type Type of particle to be created
    * \param[in] unique_id id of particle to be created
@@ -97,11 +97,11 @@ class ParticleData {
    *
    * Determined from the 4-momentum \f$m=\sqrt{p_\mu p^\mu}\f$.
    * Possibly "off-shell".
-   * \return particle's effective mass
+   * \return Effective mass [GeV]
    */
   double effective_mass() const;
   /**
-   * Get the Type of the particle
+   * Get the type of the particle
    * \return ParticleType object associated to this particle.
    */
   const ParticleType &type() const { return *type_; }
@@ -113,14 +113,14 @@ class ParticleData {
   uint32_t id_process() const { return history_.id_process; }
   /**
    * Get history information
-   * \return particle's history
+   * \return particle history struct 
    */
   HistoryData get_history() const { return history_; }
   /**
    * Store history information
    *
    * The history contains the type of process and possibly the
-   * PdgCodes of the parent particles (\p plist). Note, history is not set
+   * PdgCodes of the parent particles (\p plist). Note that  history is not set
    * for dileptons and photons.
    * \param[in] ncoll particle's number of collisions
    * \param[in] pid id of the particle's latest process
@@ -145,10 +145,10 @@ class ParticleData {
   }
 
   /**
-   * Set the momentum of the particle.
+   * Set the momentum of the particle given its mass and momentum three-vector.
    *
-   * \param[in] mass the mass of the particle (without E_kin contribution)
-   * \param[in] mom the three-momentum of the particle
+   * \param[in] mass the mass of the particle (without E_kin contribution) [GeV]
+   * \param[in] mom the three-momentum of the particle [GeV]
    *
    * \fpPrecision The momentum FourVector requires double-precision.
    */
@@ -159,10 +159,10 @@ class ParticleData {
   /**
    * Set the momentum of the particle.
    *
-   * \param[in] mass the mass of the particle (without E_kin contribution)
-   * \param[in] px x-component of the momentum
-   * \param[in] py y-component of the momentum
-   * \param[in] pz z-component of the momentum
+   * \param[in] mass the mass of the particle (without E_kin contribution) [GeV]
+   * \param[in] px x-component of the momentum [GeV]
+   * \param[in] py y-component of the momentum [GeV]
+   * \param[in] pz z-component of the momentum [GeV]
    *
    * \fpPrecision The momentum FourVector requires double-precision.
    */
@@ -174,7 +174,7 @@ class ParticleData {
    * Set the momentum of the particle without modifying the energy.
    *
    * WARNING: Mass gets modified.
-   * \param[in] mom momentum 3-vector
+   * \param[in] mom momentum 3-vector [GeV]
    */
   void set_3momentum(const ThreeVector &mom) {
     momentum_ = FourVector(momentum_.x0(), mom);
@@ -193,7 +193,7 @@ class ParticleData {
   /**
    * Set particle's 3-position
    *
-   * the time component is not changed
+   * The time component is not changed
    * \param[in] pos position 3-vector
    */
   void set_3position(const ThreeVector &pos) {

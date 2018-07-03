@@ -22,7 +22,8 @@ StringProcess::StringProcess(double string_tension, double time_formation,
                              double quark_alpha, double quark_beta,
                              double strange_supp, double diquark_supp,
                              double sigma_perp, double stringz_a,
-                             double stringz_b, double string_sigma_T)
+                             double stringz_b, double string_sigma_T,
+                             double factor_t_form)
     : pmin_gluon_lightcone_(gluon_pmin),
       pow_fgluon_beta_(gluon_beta),
       pow_fquark_alpha_(quark_alpha),
@@ -31,6 +32,7 @@ StringProcess::StringProcess(double string_tension, double time_formation,
       kappa_tension_string_(string_tension),
       additional_xsec_supp_(0.7),
       time_formation_const_(time_formation),
+      soft_t_form_(factor_t_form),
       time_collision_(0.),
       gamma_factor_com_(1.) {
   // setup and initialize pythia for hard string process
@@ -240,8 +242,8 @@ int StringProcess::append_final_state(const FourVector &uString,
     new_particle.set_cross_section_scaling_factor(
         fragments[i].is_leading ? additional_xsec_supp_ * fragments[i].xtotfac
                                 : 0.);
-    new_particle.set_slow_formation_times(
-        time_collision_, time_collision_ + gamma_factor_com_ * t_prod);
+    new_particle.set_formation_time(time_collision_ +
+                                    soft_t_form_ * gamma_factor_com_ * t_prod);
     final_state_.push_back(new_particle);
   }
 
@@ -300,12 +302,12 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
     return false;
   }
   // sample the transverse momentum transfer
-  QTrx = Random::normal(0., sigma_qperp_ / sqrt2_);
-  QTry = Random::normal(0., sigma_qperp_ / sqrt2_);
+  QTrx = random::normal(0., sigma_qperp_ / sqrt2_);
+  QTry = random::normal(0., sigma_qperp_ / sqrt2_);
   QTrn = std::sqrt(QTrx * QTrx + QTry * QTry);
   /* sample the string mass and
    * evaluate the three-momenta of hadron and string. */
-  massX = Random::power(-1.0, mstrMin, mstrMax);
+  massX = random::power(-1.0, mstrMin, mstrMax);
   pabscomHX_sqr = pCM_sqr(sqrtsAB_, massH, massX);
   /* magnitude of the three momentum must be larger
    * than the transverse momentum. */
@@ -437,12 +439,12 @@ bool StringProcess::next_DDiff() {
   // sample the lightcone momentum fraction carried by gluons
   const double xmin_gluon_fraction = pmin_gluon_lightcone_ / sqrtsAB_;
   const double xfracA =
-      Random::beta_a0(xmin_gluon_fraction, pow_fgluon_beta_ + 1.);
+      random::beta_a0(xmin_gluon_fraction, pow_fgluon_beta_ + 1.);
   const double xfracB =
-      Random::beta_a0(xmin_gluon_fraction, pow_fgluon_beta_ + 1.);
+      random::beta_a0(xmin_gluon_fraction, pow_fgluon_beta_ + 1.);
   // sample the transverse momentum transfer
-  const double QTrx = Random::normal(0., sigma_qperp_ / sqrt2_);
-  const double QTry = Random::normal(0., sigma_qperp_ / sqrt2_);
+  const double QTrx = random::normal(0., sigma_qperp_ / sqrt2_);
+  const double QTry = random::normal(0., sigma_qperp_ / sqrt2_);
   const double QTrn = std::sqrt(QTrx * QTrx + QTry * QTry);
   // evaluate the lightcone momentum transfer
   const double QPos = -QTrn * QTrn / (2. * xfracB * PNegB_);
@@ -509,11 +511,11 @@ bool StringProcess::next_NDiffSoft() {
     throw std::runtime_error(ss.str());
   }
   // sample the lightcone momentum fraction carried by quarks
-  const double xfracA = Random::beta(pow_fquark_alpha_, pow_fquark_beta_);
-  const double xfracB = Random::beta(pow_fquark_alpha_, pow_fquark_beta_);
+  const double xfracA = random::beta(pow_fquark_alpha_, pow_fquark_beta_);
+  const double xfracB = random::beta(pow_fquark_alpha_, pow_fquark_beta_);
   // sample the transverse momentum transfer
-  const double QTrx = Random::normal(0., sigma_qperp_ / sqrt2_);
-  const double QTry = Random::normal(0., sigma_qperp_ / sqrt2_);
+  const double QTrx = random::normal(0., sigma_qperp_ / sqrt2_);
+  const double QTry = random::normal(0., sigma_qperp_ / sqrt2_);
   const double QTrn = std::sqrt(QTrx * QTrx + QTry * QTry);
   // evaluate the lightcone momentum transfer
   const double QPos = -QTrn * QTrn / (2. * xfracB * PNegB_);
@@ -552,9 +554,9 @@ bool StringProcess::next_NDiffHard() {
   std::array<bool, 2> accepted_by_pythia;
   for (int i = 0; i < 2; i++) {
     int pdgid = PDGcodes_[i].get_decimal();
-    accepted_by_pythia[i] = pdgid == 2212 || pdgid == -2212 ||
-                            pdgid == 2112 || pdgid == -2112 ||
-                            pdgid == 211 || pdgid == 111 || pdgid == -211;
+    accepted_by_pythia[i] = pdgid == 2212 || pdgid == -2212 || pdgid == 2112 ||
+                            pdgid == -2112 || pdgid == 211 || pdgid == 111 ||
+                            pdgid == -211;
   }
   if (!accepted_by_pythia[0] || !accepted_by_pythia[1]) {
     for (int i = 0; i < 2; i++) {
@@ -591,12 +593,12 @@ bool StringProcess::next_NDiffHard() {
       throw std::runtime_error("Pythia failed to initialize.");
     }
   }
-  /* Set the random seed of the Pythia Random Number Generator.
+  /* Set the random seed of the Pythia random Number Generator.
    * Pythia's random is controlled by SMASH in every single collision.
    * In this way we ensure that the results are reproducible
    * for every event if one knows SMASH random seed. */
   const int maxint = std::numeric_limits<int>::max();
-  pythia_parton_->rndm.init(Random::uniform_int(1, maxint));
+  pythia_parton_->rndm.init(random::uniform_int(1, maxint));
 
   // Short notation for Pythia event
   Pythia8::Event &event = pythia_parton_->event;
@@ -642,7 +644,7 @@ bool StringProcess::next_NDiffHard() {
   /* Additional suppression factor to mimic coherence taken as 0.7
    * from UrQMD (CTParam(59) */
   const int baryon_string =
-      PDGcodes_[Random::uniform_int(0, 1)].baryon_number();
+      PDGcodes_[random::uniform_int(0, 1)].baryon_number();
   assign_all_scaling_factors(baryon_string, new_intermediate_particles,
                              evecBasisAB_[0], additional_xsec_supp_);
   for (ParticleData data : new_intermediate_particles) {
@@ -726,7 +728,7 @@ bool StringProcess::next_BBbarAnn() {
   }
 
   // Select qqbar pair to annihilate and remove it away
-  auto discrete_distr = Random::discrete_dist<int>(n_combinations);
+  auto discrete_distr = random::discrete_dist<int>(n_combinations);
   const int q_annihilate = discrete_distr() + 1;
   qcount_bar[q_annihilate - 1]--;
   qcount_antibar[q_annihilate - 1]--;
@@ -746,11 +748,11 @@ bool StringProcess::next_BBbarAnn() {
 
   const std::array<double, 2> mstr = {0.5 * sqrtsAB_, 0.5 * sqrtsAB_};
 
-  // Randomly select two quark-antiquark pairs
-  if (Random::uniform_int(0, 1) == 0) {
+  // randomly select two quark-antiquark pairs
+  if (random::uniform_int(0, 1) == 0) {
     std::swap(remaining_quarks[0], remaining_quarks[1]);
   }
-  if (Random::uniform_int(0, 1) == 0) {
+  if (random::uniform_int(0, 1) == 0) {
     std::swap(remaining_antiquarks[0], remaining_antiquarks[1]);
   }
   // Make sure it satisfies kinematical threshold constraint
@@ -841,7 +843,7 @@ int StringProcess::diquark_from_quarks(int q1, int q2) {
   /* Adding spin degeneracy = 2S+1. For identical quarks spin cannot be 0
    * because of Pauli exclusion principle, so spin 1 is assumed. Otherwise
    * S = 0 with probability 1/4 and S = 1 with probability 3/4. */
-  diquark += (q1 != q2 && Random::uniform_int(0, 3) == 0) ? 1 : 3;
+  diquark += (q1 != q2 && random::uniform_int(0, 3) == 0) ? 1 : 3;
   return (q1 < 0) ? -diquark : diquark;
 }
 
@@ -853,14 +855,14 @@ void StringProcess::make_string_ends(const PdgCode &pdg, int &idq1, int &idq2) {
     idq2 = quarks[2];
     /* Some mesons with PDG id 11X are actually mixed state of uubar and ddbar.
      * have a random selection whether we have uubar or ddbar in this case. */
-    if (idq1 == 1 && idq2 == -1 && Random::uniform_int(0, 1) == 0) {
+    if (idq1 == 1 && idq2 == -1 && random::uniform_int(0, 1) == 0) {
       idq1 = 2;
       idq2 = -2;
     }
   } else {
     assert(pdg.is_baryon());
     // Get random quark to position 0
-    std::swap(quarks[Random::uniform_int(0, 2)], quarks[0]);
+    std::swap(quarks[random::uniform_int(0, 2)], quarks[0]);
     idq1 = quarks[0];
     idq2 = diquark_from_quarks(quarks[1], quarks[2]);
   }
@@ -899,7 +901,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
   const double E1 = std::sqrt(m1 * m1 + pCMquark * pCMquark);
   const double E2 = std::sqrt(m2 * m2 + pCMquark * pCMquark);
 
-  if (flip_string_ends && Random::uniform_int(0, 1) == 0) {
+  if (flip_string_ends && random::uniform_int(0, 1) == 0) {
     /* in the case where we flip the string ends,
      * we need to flip the longitudinal unit vector itself
      * since it is set to be direction of diquark (anti-quark)

@@ -200,7 +200,7 @@ TEST(pythia_running) {
   act = make_unique<ScatterAction>(p1_copy, p2_copy, 0.2, false, 1.0);
   std::unique_ptr<StringProcess> string_process_interface =
       make_unique<StringProcess>(1.0, 1.0, 0.5, 0.001, 1.0, 2.5, 0.217, 0.081,
-                                 0.7, 0.68, 0.98, 0.25);
+                                 0.7, 0.68, 0.98, 0.25, 1.0);
   act->set_string_interface(string_process_interface.get());
   VERIFY(act != nullptr);
   COMPARE(p2_copy.type(), ParticleType::find(0x2212));
@@ -389,7 +389,7 @@ TEST(string_scaling_factors) {
   constexpr double coherence_factor = 0.7;
   ThreeVector evec_coll = ThreeVector(0., 0., 1.);
   int baryon_string =
-      incoming[Random::uniform_int(0, 1)].type().baryon_number();
+      incoming[random::uniform_int(0, 1)].type().baryon_number();
   StringProcess::assign_all_scaling_factors(baryon_string, outgoing, evec_coll,
                                             coherence_factor);
   // outgoing list is now assumed to be sorted by z-velocity (so c,d,e,f)

@@ -20,29 +20,28 @@ namespace smash {
 
 /**
  * \ingroup modus
- * ListModus: Provides a modus for running SMASH on any external particle list,
- * for example as an afterburner calculations for hybrid codes.
+ * ListModus: Provides a modus for running SMASH on an external particle list,
+ * for example as an afterburner calculation.
  *
  * To use this modus, choose
     Modus:         List
  * \code
  * General:
- *      Modus: Box
+ *      Modus: List
  * \endcode
  * in the configuration file.
  *
- * Options for BoxModus go in the "Modi"→"Box" section of the
+ * Options for ListModus go in the "Modi"→"List" section of the
  * configuration:
  *
  * \code
  * Modi:
- *      Box:
- *              # definitions here
+ *      List:
+ *              # options here
  * \endcode
 
  * For configuring see \ref input_modi_list_.
  *
- *#!OSCAR2013 particle_lists SMASH-githash t x y z mass p0 px py pz pdg
  *
  * Since SMASH is searching for collisions in computational frame time 't',
  * all particles need to be at the same time. If this is not the case in
@@ -71,7 +70,7 @@ class ListModus : public ModusDefault {
                      const ExperimentParameters &parameters);
 
   /**
-   * Generates initial state of the particles in the system according to list.
+   * Generates initial state of the particles in the system according to a list.
    *
    * \param[out] particles An empty list that gets filled up by this function
    * \param[in] parameters Unused, but necessary because of templated use of
@@ -121,8 +120,8 @@ class ListModus : public ModusDefault {
 
   /**
    * Judge whether formation times are the same for all the particles;
-   * Don't do anti-freestreaming if start with the same formation time.
-   * if needed, calculates earliest formation time as start_time_
+   * Don't do anti-freestreaming if all particles start with the same formation
+   * time. If needed, calculates earliest formation time as start_time_
    *
    * \param[in] particle_list The list of particles to be checked
    * \return A pair <bool, double> where the boolean is whether or not
@@ -132,17 +131,37 @@ class ListModus : public ModusDefault {
   std::pair<bool, double> check_formation_time_(
       const std::string &particle_list);
 
-  /// check if file given by filepath has events left after streampos
-  /// last_position
+  /** Check if the file given by filepath has events left after streampos
+   * last_position
+   *
+   * \param[in] filepath Path to file to be checked.
+   * \param[in] last_position Streamposition in file after which check is
+   * performed
+   * \return True if there is at least one event left, false otherwise
+   * \throws runtime_error If file could not be read for whatever reason.
+   */
   bool file_has_events_(bf::path filepath, std::streampos last_position);
 
   /// last read position in current file
   std::streampos last_read_position_;
 
-  /// Return file path based on integer
+  /** Return the absolute file path based on given integer. The filename
+   * is assumed to have the form (particle_list_prefix)_(file_id)
+   *
+   * \param[in] file_id integer of wanted file
+   * \return Absolute file path to file
+   * \throws
+   * runtime_error if file does not exist.
+   */
   bf::path file_path_(const int file_id);
 
-  /// Read the next event. Either from the current file or from the next.
+  /**  Read the next event. Either from the current file if it has more events
+   * or from the next file (with file_id += 1)
+   *
+   * \returns
+   *  One event as string.
+   *  \throws runtime_error If file could not be read for whatever reason.
+   */
   std::string next_event_();
 
   /**\ingroup logging

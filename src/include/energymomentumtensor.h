@@ -50,8 +50,7 @@ class EnergyMomentumTensor {
     }
   }
 
-  /// \todo(oliiny) What do these operators do? Please add documentation
-  const double &operator[](std::size_t i) { return Tmn_[i]; }
+  /// Return ith component of the tensor.
   double operator[](std::size_t i) const { return Tmn_[i]; }
 
   /**
@@ -119,7 +118,7 @@ class EnergyMomentumTensor {
   /**
    * Returns an iterator starting at the (0,0) component.
    *
-   * The iterator implements the RandomIterator concept. Thus, you can simply
+   * The iterator implements the randomIterator concept. Thus, you can simply
    * write `begin() + 1` to get an iterator that points to the 1st component.
    */
   iterator begin() { return Tmn_.begin(); }

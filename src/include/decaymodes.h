@@ -49,7 +49,7 @@ class DecayModes {
   }
 
   /**
-   * Make sure branching ratios add up to 1.
+   * Renormalize the branching ratios to add up to 1.
    *
    * \param[in] name the name of the decaying particle
    */

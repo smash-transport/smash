@@ -48,7 +48,7 @@ ActionList DecayActionsFinder::find_actions_in_cell(
      * timestep, it can be proven that this still overall obeys
      * the exponential decay law.
      */
-    const double decay_time = Random::exponential<double>(
+    const double decay_time = random::exponential<double>(
         /* The clock goes slower in the rest
          * frame of the resonance */
         one_over_hbarc * p.inverse_gamma() * width);

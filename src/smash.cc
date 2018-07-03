@@ -157,7 +157,7 @@ struct OutputDirectoryOutOfIds : public std::runtime_error {
   using std::runtime_error::runtime_error;
 };
 
-/// Returns the default path for output.
+/// \return the default path for output.
 bf::path default_output_path() {
   const bf::path p = bf::absolute("data");
   if (!bf::exists(p)) {
@@ -177,7 +177,9 @@ bf::path default_output_path() {
 }
 
 /**
- * Ensures the output path is valid (throws if not)
+ * Ensures the output path is valid.
+ *
+ * \throw OutputDirectoryExists if the Output directory already exists.
  * \param[in] path The output path to be written to
  */
 void ensure_path_is_valid(const bf::path &path) {
@@ -197,16 +199,18 @@ void ensure_path_is_valid(const bf::path &path) {
 }
 
 /**
- * Prepares ActionsFinder for cross-section and reaction dumps
+ * Prepares ActionsFinder for cross-section and reaction dumps.
+ *
  * \param[in] configuration Necessary parameters to switch reactions on/off
+ * \return The constructed Scatteractionsfinder.
  */
 ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
   std::vector<bool> nucleon_has_interacted = {};
   ReactionsBitSet included_2to2 = configuration.take(
       {"Collision_Term", "Included_2to2"}, ReactionsBitSet().set());
-  // Since it will be used solely for cross-section dump, most of
-  // parameters do not play any role here and are set arbitrarily.
-  // Only parameters, that switch reactions on/off matter.
+  /* Since it will be used solely for cross-section dump, most of
+   * parameters do not play any role here and are set arbitrarily.
+   *  Only parameters, that switch reactions on/off matter. */
   bool two_to_one = configuration.take({"Collision_Term", "Two_to_One"});
   ExperimentParameters params = ExperimentParameters{
       {0., 1.},
@@ -236,9 +240,12 @@ ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
 /**
  * Main program
  * Smashes Many Accelerated Strongly-Interacting Hadrons :-)
- * do command line parsing and hence decides modus
+ *
+ * Do command line parsing and hence decides modus
+ *
  * \param[in] argc Number of arguments on command-line
  * \param[in] argv List of arguments on command-line
+ * \return Either 0 or EXIT_FAILURE.
  */
 int main(int argc, char *argv[]) {
   using namespace smash;  // NOLINT(build/namespaces)
@@ -432,9 +439,14 @@ int main(int argc, char *argv[]) {
 
     int64_t seed = configuration.read({"General", "Randomseed"});
     if (seed < 0) {
-      // Seed with a real random value, if available
+      // Seed with a truly random 63-bit value, if possible
       std::random_device rd;
-      seed = rd();
+      static_assert(std::is_same<decltype(rd()), uint32_t>::value,
+                    "random_device is assumed to generate uint32_t");
+      uint64_t unsigned_seed = (static_cast<uint64_t>(rd()) << 32) |
+                                static_cast<uint64_t>(rd());
+      // Discard the highest bit to make sure it fits into a positive int64_t
+      seed = static_cast<int64_t>(unsigned_seed >> 1);
       configuration["General"]["Randomseed"] = seed;
     }
 

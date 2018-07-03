@@ -47,9 +47,12 @@ struct GslWorkspaceDeleter {
   }
 };
 
-/** The result type returned from integrations,
- * containing the value and an error. */
+/**
+ * The result type returned from integrations,
+ * containing the value and an error.
+ */
 class Result : public std::pair<double, double> {
+  /// The data type to store the value and the error of the integration
   using Base = std::pair<double, double>;
 
  public:
@@ -65,11 +68,14 @@ class Result : public std::pair<double, double> {
   /// Access the second entry in the pair as the absolute error.
   double error() const { return Base::second; }
 
-  /// Check whether the error is small and alert if it is not.
-  ///
-  /// \param integration_name Name of the integration used for error message.
-  /// \param relative_tolerance Relative error tolerance.
-  /// \param absolute_tolerance Absolute error tolerance.
+  /**
+   * Check whether the error is small and alert if it is not.
+   *
+   * \param[in] integration_name Name of the integration used
+   *            for error message.
+   * \param[in] relative_tolerance Relative error tolerance.
+   * \param[in] absolute_tolerance Absolute error tolerance.
+   */
   void check_error(const std::string &integration_name,
                    double relative_tolerance = 5e-4,
                    double absolute_tolerance = 1e-9) const {
@@ -119,22 +125,22 @@ class Integrator {
   /**
    * The function call operator implements the integration functionality.
    *
-   * \param a The lower limit of the integral.
-   * \param b The upper limit of the integral.
+   * \param[in] a The lower limit of the integral.
+   * \param[in] b The upper limit of the integral.
    * \tparam F Type of the integrand function.
-   * \param fun The callable to integrate over. This callable may be a function
-   *            pointer, lambda, or a functor object. In any case, the callable
-   *            must return a `double` and take a single `double` argument. If
-   *            you want to pass additional data to the callable you can e.g.
-   *            use lambda captures.
+   * \param[in] fun The callable to integrate over. This callable may be a
+   *            function pointer, lambda, or a functor object. In any case, the
+   *            callable must return a `double` and take a single `double`
+   *            argument. If you want to pass additional data to the callable
+   *            you can e.g. use lambda captures.
    * \return Pair of integral value and absolute error estimate.
    */
   template <typename F>
   Result operator()(double a, double b, F &&fun) {
     Result result;
     const gsl_function gslfun{
-        // important! The lambda cannot use captures, otherwise the
-        // conversion to a function pointer type is impossible.
+        /* important! The lambda cannot use captures, otherwise the
+         * conversion to a function pointer type is impossible. */
         [](double x, void *type_erased) -> double {
           auto &&f = *static_cast<F *>(type_erased);
           return f(x);
@@ -184,7 +190,7 @@ class Integrator1dMonte {
   /**
    * Construct an integration functor.
    *
-   * \param num_calls The desired number of calls to the integrand function
+   * \param[in] num_calls The desired number of calls to the integrand function
    *                  (defaults to 1E6 if omitted), i.e. how often the integrand
    *                  is sampled in the Monte-Carlo integration. Larger numbers
    *                  lead to a more precise result, but also to increased
@@ -201,13 +207,11 @@ class Integrator1dMonte {
         number_of_calls_(num_calls) {
     gsl_monte_plain_init(state_);
     // initialize the GSL RNG with a random seed
-    const uint32_t seed = Random::uniform_int(0ul, ULONG_MAX);
+    const uint32_t seed = random::uniform_int(0ul, ULONG_MAX);
     gsl_rng_set(rng_, seed);
   }
 
-  /**
-   * Destructor: Clean up internal state and RNG.
-   */
+  /// Destructor: Clean up internal state and RNG.
   ~Integrator1dMonte() {
     gsl_monte_plain_free(state_);
     gsl_rng_free(rng_);
@@ -216,10 +220,11 @@ class Integrator1dMonte {
   /**
    * The function call operator implements the integration functionality.
    *
-   * \param min The lower limit of the integration.
-   * \param max The upper limit of the integration.
+   * \param[in] min The lower limit of the integration.
+   * \param[in] max The upper limit of the integration.
    * \tparam F Type of the integrand function.
-   * \param fun The callable to integrate over. This callable may be a function
+   * \param[in] fun
+   *            The callable to integrate over. This callable may be a function
    *            pointer, lambda, or a functor object. In any case, the callable
    *            must return a `double` and take two `double` arguments. If you
    *            want to pass additional data to the callable you can e.g. use
@@ -285,7 +290,7 @@ class Integrator2d {
   /**
    * Construct an integration functor.
    *
-   * \param num_calls The desired number of calls to the integrand function
+   * \param[in] num_calls The desired number of calls to the integrand function
    *                  (defaults to 1E6 if omitted), i.e. how often the integrand
    *                  is sampled in the Monte-Carlo integration. Larger numbers
    *                  lead to a more precise result, but also to increased
@@ -302,13 +307,11 @@ class Integrator2d {
         number_of_calls_(num_calls) {
     gsl_monte_plain_init(state_);
     // initialize the GSL RNG with a random seed
-    const uint32_t seed = Random::uniform_int(0ul, ULONG_MAX);
+    const uint32_t seed = random::uniform_int(0ul, ULONG_MAX);
     gsl_rng_set(rng_, seed);
   }
 
-  /**
-   * Destructor: Clean up internal state and RNG.
-   */
+  /// Destructor: Clean up internal state and RNG.
   ~Integrator2d() {
     gsl_monte_plain_free(state_);
     gsl_rng_free(rng_);
@@ -317,12 +320,13 @@ class Integrator2d {
   /**
    * The function call operator implements the integration functionality.
    *
-   * \param min1 The lower limit in the first dimension.
-   * \param max1 The upper limit in the first dimension.
-   * \param min2 The lower limit in the second dimension.
-   * \param max2 The upper limit in the second dimension.
+   * \param[in] min1 The lower limit in the first dimension.
+   * \param[in] max1 The upper limit in the first dimension.
+   * \param[in] min2 The lower limit in the second dimension.
+   * \param[in] max2 The upper limit in the second dimension.
    * \tparam F Type of the integrand function.
-   * \param fun The callable to integrate over. This callable may be a function
+   * \param[in] fun
+   *            The callable to integrate over. This callable may be a function
    *            pointer, lambda, or a functor object. In any case, the callable
    *            must return a `double` and take two `double` arguments. If you
    *            want to pass additional data to the callable you can e.g. use
@@ -373,10 +377,15 @@ class Integrator2d {
  */
 template <typename F>
 struct Integrand2d {
+  /// the lower bound of the first integrated variable
   double min1;
+  /// the integration range of the first integrated variable
   double diff1;
+  /// the lower bound of the second integrated variable
   double min2;
+  /// the integration range of the second integrated variable
   double diff2;
+  /// the integrated function
   F f;
 };
 
@@ -399,13 +408,13 @@ class Integrator2dCuhre {
   /**
    * Construct an integration functor.
    *
-   * \param num_calls The maximum number of calls to the integrand function
+   * \param[in] num_calls The maximum number of calls to the integrand function
    *                  (defaults to 1E6 if omitted), i.e. how often the integrand
    *                  can be sampled in the integration. Larger numbers lead to
    * a
    *                  more precise result, but possibly to increased runtime.
-   * \param epsrel    The desired relative accuracy (1E-3 by default).
-   * \param epsabs    The desired absolute accuracy (1E-3 by default).
+   * \param[in] epsrel    The desired relative accuracy (1E-3 by default).
+   * \param[in] epsabs    The desired absolute accuracy (1E-3 by default).
    */
   explicit Integrator2dCuhre(int num_calls = 1e6, double epsrel = 5e-4,
                              double epsabs = 1e-9)
@@ -414,12 +423,13 @@ class Integrator2dCuhre {
   /**
    * The function call operator implements the integration functionality.
    *
-   * \param min1 The lower limit in the first dimension.
-   * \param max1 The upper limit in the first dimension.
-   * \param min2 The lower limit in the second dimension.
-   * \param max2 The upper limit in the second dimension.
+   * \param[in] min1 The lower limit in the first dimension.
+   * \param[in] max1 The upper limit in the first dimension.
+   * \param[in] min2 The lower limit in the second dimension.
+   * \param[in] max2 The upper limit in the second dimension.
    * \tparam F Type of the integrand function.
-   * \param fun The callable to integrate over. This callable may be a function
+   * \param[in] fun
+   *            The callable to integrate over. This callable may be a function
    *            pointer, lambda, or a functor object. In any case, the callable
    *            must return a `double` and take two `double` arguments. If you
    *            want to pass additional data to the callable you can e.g. use
@@ -447,8 +457,8 @@ class Integrator2dCuhre {
                                    const int * /* ncomp */, cubareal ff[],
                                    void *userdata) -> int {
       auto i = static_cast<Integrand2d<F> *>(userdata);
-      // We have to transform the integrand to the unit cube.
-      // This is what Cuba expects.
+      /* We have to transform the integrand to the unit cube.
+       * This is what Cuba expects. */
       ff[0] = (i->f)(i->min1 + i->diff1 * xx[0], i->min2 + i->diff2 * xx[1]) *
               i->diff1 * i->diff2;
       return 0;
@@ -491,14 +501,18 @@ class Integrator2dCuhre {
   int nregions_;
   /// Actual number of integrand evaluations needed.
   int neval_;
-  /// An error flag.
-  ///
-  /// 0 if the desired accuracy was reached, -1 if the dimension is out of
-  /// range, larger than 0 if the accuracy goal was not met within the maximum
-  /// number of evaluations.
+  /** 
+   * An error flag.
+   *
+   * 0 if the desired accuracy was reached, -1 if the dimension is out of
+   * range, larger than 0 if the accuracy goal was not met within the maximum
+   * number of evaluations.
+   */
   int fail_;
-  /// The chi^2 probability that the error is not a reliable estimate of the
-  /// true integration error.
+  /**
+   * The chi^2 probability that the error is not a reliable estimate of the
+   * true integration error.
+   */
   double prob_;
 };
 

@@ -84,29 +84,28 @@ class ColliderModus : public ModusDefault {
   /// \return The number of test particles in the projectile nucleus
   int proj_N_number() const { return projectile_->size(); }
   /**
-   * \return the beam velocity of the projectile, which will be
-   *         used to calculate the beam momenta in experiment.cc if Fermi
-   *         motion is frozen.
+   * \return the beam velocity of the projectile, which will be used to
+   *         calculate the beam momenta in experiment.cc if Fermi motion is
+   *         frozen.
    */
   double velocity_projectile() const { return velocity_projectile_; }
   /**
-   * \return the beam velocity of the target, which will be
-   *         used to calculate the beam momenta in experiment.cc if fermi
-   *         motion is frozen.
+   * \return the beam velocity of the target, which will be used to calculate
+   *         the beam momenta in experiment.cc if Fermi motion is frozen.
    */
   double velocity_target() const { return velocity_target_; }
   /**
-   * \return A flag: whether to allow first collisions within the same
-   *  nucleus.
+   * \return A flag: whether to allow first collisions within the same nucleus.
    */
   bool cll_in_nucleus() { return cll_in_nucleus_; }
-  /// \return The fermi motion type
+  /// \return The Fermi motion type
   FermiMotion fermi_motion() { return fermi_motion_; }
   /// \return whether the modus is collider (which is, yes, trivially true)
   bool is_collider() const { return true; }
   /// \return impact parameter of the collision
   double impact_parameter() const { return impact_; }
-  /** \ingroup exception
+  /**
+   * \ingroup exception
    *  Thrown when either \a projectile_ or \a target_ nuclei are empty.
    */
   struct ColliderEmpty : public ModusDefault::BadInput {
@@ -132,19 +131,19 @@ class ColliderModus : public ModusDefault {
   /**
    * Center-of-mass energy squared of the nucleus-nucleus collision.
    *
-   * needs to be double to allow for calculations at LHC energies
+   * Needs to be double to allow for calculations at LHC energies
    * **/
   double total_s_;
   /**
    * Center-of-mass energy of a nucleon-nucleon collision.
    *
-   * needs to be double to allow for calculations at LHC energies
+   * Needs to be double to allow for calculations at LHC energies
    * **/
   double sqrt_s_NN_;
   /**
    * Impact parameter.
    *
-   * The nuclei projectile_ and target_ will be shifted along the x axis
+   * The nuclei projectile_ and target_ will be shifted along the x-axis
    * so that their centers move on antiparallel lines that are this
    * distance apart from each other.
    **/
@@ -171,7 +170,7 @@ class ColliderModus : public ModusDefault {
    *
    **/
   void sample_impact();
-  /** Initial z displacement of nuclei.
+  /** Initial z-displacement of nuclei.
    *
    * Projectile is shifted on -(this value) in z-direction
    * and target on +(this value)*v_target/v_projectile. In this way
@@ -194,11 +193,11 @@ class ColliderModus : public ModusDefault {
    */
   bool cll_in_nucleus_;
   /**
-   * beam velocity of the projectile
+   * Beam velocity of the projectile
    */
   double velocity_projectile_ = 0.0;
   /**
-   * beam velocity of the target
+   * Beam velocity of the target
    */
   double velocity_target_ = 0.0;
   /**

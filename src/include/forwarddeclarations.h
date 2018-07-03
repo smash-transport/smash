@@ -120,7 +120,7 @@ enum class TimeStepMode : char {
  * Initial condition for a particle in a box.
  *
  * If PeakedMomenta is used, all particles have the same momentum
- * \f$p = 3 \cdot T\f$ with T the temperature.
+ * \f$p = 3 \cdot T\f$ with T being the temperature.
  *
  * Else, a thermalized ensemble is generated (the momenta are sampled
  * from a Maxwell-Boltzmann distribution).
@@ -156,10 +156,10 @@ enum class SphereInitialCondition {
 /**
  * Defines properties of expansion for the metric (e.g. FRW)
  *
- *  If anything else than NoExpansion is used, then a non-zero
- *  Hubble parameter is computed and corrections are brought to the
- *  propagation of all particles according to selected expanding
- *  metric.
+ * If anything else than NoExpansion is used, then a non-zero
+ * Hubble parameter is computed and corrections are brought to the
+ * propagation of all particles according to selected expanding
+ * metric.
  */
 enum class ExpansionMode {
   NoExpansion,

@@ -14,84 +14,78 @@
 /**
  * \file
  *
- * Collection of useful constants that are know at compile time.
+ * Collection of useful constants that are known at compile time.
  */
 
 namespace smash {
 
 /**
- * GeV <-> fm conversion factor
- *
- * \fpPrecision  This is \c double to make sure to always have sufficient
- * precision.
+ * GeV <-> fm conversion factor.
  */
 constexpr double hbarc = 0.197327053;
 
-/// mb <-> fm^2 conversion factor
+/// mb <-> fm^2 conversion factor.
 constexpr double fm2_mb = 0.1;
 
-/// GeV^-2 <-> mb conversion factor
+/// GeV^-2 <-> mb conversion factor.
 constexpr double gev2_mb = hbarc * hbarc / fm2_mb;
 
-// Numerical error tolerance
+/// Numerical error tolerance.
 constexpr double really_small = 1.0e-6;
 
 /**
- * \f$ 2\pi \f$
- *
- * \fpPrecision  This is \c double to make sure to always have sufficient
- * precision.
+ * \f$ 2\pi \f$.
  */
 constexpr double twopi = 2. * M_PI;
 
-/// Ground state density of symmetric nuclear matter, fm^-3
+/// Ground state density of symmetric nuclear matter [fm^-3].
 constexpr double nuclear_density = 0.168;
 
-/// Physical error tolerance
+/// Physical error tolerance.
 constexpr double small_number = 1.0e-4;
 
 /**
- * nucleon mass in GeV
+ * Nucleon mass in GeV.
  *
  * Note that this should be the same as in particles.txt.
  */
 constexpr double nucleon_mass = 0.938;
 
 /**
- * pion mass in GeV
+ * Pion mass in GeV.
  *
  * Note that this should be the same as in particles.txt.
  */
 constexpr double pion_mass = 0.138;
 
 /**
- * kaon mass in GeV
+ * Kaon mass in GeV.
  *
  * Note that this should be the same as in particles.txt.
  */
 constexpr double kaon_mass = 0.494;
 
 /**
- * omega mass in GeV
+ * omega mass in GeV.
  *
  * Note that this should be the same as in particles.txt.
  */
 constexpr double omega_mass = 0.783;
 
 /**
- * a1 mass in GeV
+ * a1 mass in GeV.
  *
  * Note that this should be the same as in particles.txt.
  */
 constexpr double a1_mass = 1.26;
 /**
- * Delta mass in GeV
+ * Delta mass in GeV.
  *
  * Note that this should be the same as in particles.txt.
  */
 constexpr double delta_mass = 1.232;
 
-/// Fine-struture constant, approximately 1/137
+/// Fine-struture constant, approximately 1/137.
 constexpr double alpha = 7.2973525698e-3;
 
 /**
@@ -103,7 +97,7 @@ constexpr double alpha = 7.2973525698e-3;
  *
  * This maximum occurs in the Delta peak of the pi+p cross section.
  * The only exception of physical cross sections going above 200 mb are the
- * elastic NN cross sections, which diverge at threshold.
+ * elastic NN and KN cross sections, which diverge at threshold.
  */
 constexpr double maximum_cross_section = 200.;  // mb
 

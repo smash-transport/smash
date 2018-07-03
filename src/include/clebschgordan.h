@@ -90,8 +90,10 @@ class I_tot_range {
 
  public:
   /**
-   * Get the allowed range of total isospin for a collision a + b. Returns
-   * maximum and minimum of allowed values.
+   * Get the allowed range of total isospin for a collision a + b.
+   * \param a Particle a.
+   * \param a Particle b.
+   * \return Maximum and minimum of allowed values.
    */
   I_tot_range(const ParticleType &p_a, const ParticleType &p_b) {
     // Compute total isospin range with given particles.
@@ -102,7 +104,11 @@ class I_tot_range {
 
   /**
    * Get the allowed range of total isospin for a collision a + b <-> c + d.
-   * Returns maximum and minimum of allowed values or empty range, if reaction
+   * \param a Particle a.
+   * \param a Particle b.
+   * \param a Particle c.
+   * \param a Particle d.
+   * \return Maximum and minimum of allowed values or empty range, if reaction
    * is forbidden due to isospin.
    */
   I_tot_range(const ParticleType &p_a, const ParticleType &p_b,
@@ -123,29 +129,47 @@ class I_tot_range {
     I_min_ = std::max(I_min_, std::abs(I_z));
   }
 
-  /// Iterator class for determination of total isospin
-  /// \todo (warnings) add detailed documentation on all parameters etc
+  /// Iterator class for determination of total isospin.
   class iterator : public std::iterator<std::forward_iterator_tag, int> {
    private:
     int c_;
     I_tot_range &parent_;
 
    public:
+    /**
+     * Construct an iterator.
+     * \param start Initial value.
+     * \param parent Parent class giving the total isospin range.
+     * \return The constructed iterator.
+     */
     iterator(int start, I_tot_range &parent) : c_(start), parent_(parent) {}
+    /// \return Current element of the iterator.
     int operator*() { return c_; }
+    /// \return Next element of the iterator.
     const iterator *operator++() {
       c_ -= 2;
       return this;
     }
+    /// \return Next element of the iterator.
     iterator operator++(int) {
       c_ -= 2;
       return iterator(c_ + 2, parent_);
     }
+    /**
+     * \param other Other iterator.
+     * \return Whether both iterators are equal.
+     */
     bool operator==(const iterator &other) { return c_ == other.c_; }
+    /**
+     * \param other Other iterator.
+     * \return Whether both iterators are not equal.
+     */
     bool operator!=(const iterator &other) { return c_ != other.c_; }
   };
 
+  /// \return Beginning of iterator.
   iterator begin() { return iterator(I_max_, *this); }
+  /// \return End of iterator.
   iterator end() {
     if (I_min_ > I_max_) {
       return begin();

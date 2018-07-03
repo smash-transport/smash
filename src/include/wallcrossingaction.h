@@ -28,7 +28,7 @@ class WallcrossingAction : public Action {
    * \param[in] out_part Data of outgoing particle. Same as in_part, but with
    * updated position.
    * \param[in] time_until Time when the crossing takes place (relative to
-   * current time). Usually no delay therefore optional.
+   * current time). Usually no delay therefore optional. [fm]
    */
   WallcrossingAction(const ParticleData &in_part, const ParticleData &out_part,
                      const double time_until = 0.0)
@@ -51,14 +51,14 @@ class WallCrossActionsFinder : public ActionFinderInterface {
  public:
   /**
    * Construct wallcrossing actionfinder.
-   * \param[in] l Box edge length. Box is assumbed to be a cube.
+   * \param[in] l Box edge length. Box is assumbed to be a cube. [fm]
    */
   explicit WallCrossActionsFinder(double l) : l_{l, l, l} {};
 
   /**
    * Find the next wall crossings for every particle before time t_max.
    * \param[in] plist List of all particles.
-   * \param[in] t_max Time until crossing can appear.
+   * \param[in] t_max Time until crossing can appear. [fm]
    * \return List of all found wall crossings.
    */
   ActionList find_actions_in_cell(const ParticleList &plist,
