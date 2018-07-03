@@ -24,8 +24,11 @@
 
 namespace smash {
 /**
- * checks two numbers for relative approximate equality.
+ * Checks two numbers for relative approximate equality.
  *
+ * \tparam N Number type.
+ * \param x Left-hand side.
+ * \param y Right-hand side.
  * \return true if the difference between x and y is less than or equal to
  * \f$\delta = \f$smash::really_small or that times the average of
  * \f$|x|\f$ and \f$|y|\f$:
@@ -45,6 +48,9 @@ bool almost_equal(const N x, const N y) {
  * Same as smash::almost_equal, but for physical checks like energy-momentum
  * conservation small_number is enough precision-wise
  *
+ * \tparam N Number type.
+ * \param x Left-hand side.
+ * \param y Right-hand side.
  * \return true if the difference between x and y is less than or equal to
  * \f$\delta = \f$smash::small_number or that times the average of
  * \f$|x|\f$ and \f$|y|\f$:

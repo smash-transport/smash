@@ -205,7 +205,7 @@ ThreeVector Nucleus::distribute_nucleon() const {
   dir.distribute_isotropically();
   // diffusiveness_ zero or negative? Use hard sphere.
   if (almost_equal(diffusiveness_, 0.)) {
-    return dir.threevec() * nuclear_radius_ * std::cbrt(Random::canonical());
+    return dir.threevec() * nuclear_radius_ * std::cbrt(random::canonical());
   }
   if (almost_equal(nuclear_radius_, 0.)) {
     return smash::ThreeVector();
@@ -217,29 +217,28 @@ ThreeVector Nucleus::distribute_nucleon() const {
   double prob_range4 = 1. * prob_range3 / radius_scaled;
   double ranges234 = prob_range2 + prob_range3 + prob_range4;
   double t;
-  /// \li Decide which branch \f$\tilde p^{({\rm I - IV})}\f$ to go into
+  // Decide which branch \f$\tilde p^{({\rm I - IV})}\f$ to go into
   do {
-    double which_range = Random::uniform(-prob_range1, ranges234);
+    double which_range = random::uniform(-prob_range1, ranges234);
     if (which_range < 0.0) {
-      t = radius_scaled * (std::cbrt(Random::canonical()) - 1.);
+      t = radius_scaled * (std::cbrt(random::canonical()) - 1.);
     } else {
-      t = -std::log(Random::canonical());
+      t = -std::log(random::canonical());
       if (which_range >= prob_range2) {
-        t -= std::log(Random::canonical());
+        t -= std::log(random::canonical());
         if (which_range >= prob_range2 + prob_range3) {
-          t -= std::log(Random::canonical());
+          t -= std::log(random::canonical());
         }
       }
     }
-    /**
-     * \li Generate \f$t\f$ from the distribution in the respective
+    /* Generate \f$t\f$ from the distribution in the respective
      * branches
-     * \li \a Reject that number with a probability
+     * Reject that number with a probability
      * \f$1-(1+\exp(-|t|))^{-1}\f$ (the efficiency of this should be
      * \f$\gg \frac{1}{2}\f$)
      */
-  } while (Random::canonical() > 1. / (1. + std::exp(-std::abs(t))));
-  /// \li Shift and rescale \f$t\f$ to \f$r = d\cdot t + r_0\f$
+  } while (random::canonical() > 1. / (1. + std::exp(-std::abs(t))));
+  // Shift and rescale \f$t\f$ to \f$r = d\cdot t + r_0\f$
   double position_scaled = t + radius_scaled;
   double position = position_scaled * diffusiveness_;
   return dir.threevec() * position;
@@ -266,10 +265,6 @@ void Nucleus::arrange_nucleons() {
   rotate();
 }
 
-/**
- * \todo Issue #4743 covers the update of this part with references; Also
- * the Hirano-Nara correction should be an option
- */
 void Nucleus::set_parameters_automatic() {
   int A = Nucleus::number_of_particles();
   switch (A) {
@@ -362,7 +357,7 @@ void Nucleus::generate_fermi_momenta() {
       rho = rho * N_n / A;
     }
     const double p =
-        hbarc * std::pow(pi2_3 * rho * Random::uniform(0.0, 1.0), 1.0 / 3.0);
+        hbarc * std::pow(pi2_3 * rho * random::uniform(0.0, 1.0), 1.0 / 3.0);
     Angles phitheta;
     phitheta.distribute_isotropically();
     const ThreeVector ith_3momentum = phitheta.threevec() * p;
@@ -460,7 +455,6 @@ FourVector Nucleus::center() const {
   return centerpoint;
 }
 
-/// \todo(warning) this friend is documented in .h file
 std::ostream &operator<<(std::ostream &out, const Nucleus &n) {
   return out << "  #particles   #testparticles   mass [GeV]   "
                 "radius [fm]  diffusiveness [fm]\n"

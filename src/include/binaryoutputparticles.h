@@ -21,18 +21,19 @@ namespace smash {
 /**
  * \ingroup output
  *
- * \brief Writes the particle list at specific times to binary file
+ * \brief Writes the particle list at specific times to the binary file
  *
  * This class writes the current particle list at a specific time t
- * to the binary output file. These specific time can
- * be: event start, event end, every next time interval \f$\Delta t \f$.
- * Writing (or not writing) output at these moments is controlled by options.
- * Time interval \f$\Delta t \f$ is also regulated by an option.
- * Output file is binary and has a block structure.
+ * to the binary output file. This specific time can
+ * be: event start, event end or every next time interval \f$\Delta t \f$.
+ * Writing (or not writing) the output at these moments is controlled by
+ * different options. The time interval \f$\Delta t \f$ is also regulated by an
+ * option. The output file is binary and has a block structure.
  *
  * Details of the output format can be found
- * on the wiki in User Guide section, look for binary output.
+ * on the wiki in the User Guide section, look for binary output.
  */
+
 class BinaryOutputParticles : public BinaryOutputBase {
  public:
   /**
@@ -40,7 +41,7 @@ class BinaryOutputParticles : public BinaryOutputBase {
    *
    * \param[in] path Output path.
    * \param[in] name Name of the ouput.
-   * \param[in] out_par A structure containing parameters of the output.
+   * \param[in] out_par A structure containing the parameters of the output.
    */
   BinaryOutputParticles(const bf::path &path, std::string name,
                         const OutputParameters &out_par);
@@ -63,7 +64,7 @@ class BinaryOutputParticles : public BinaryOutputBase {
                    double impact_parameter) override;
 
   /**
-   * writes particles every time interval fixed by option OUTPUT_INTERVAL
+   * Writes particles at each time interval; fixed by option OUTPUT_INTERVAL.
    * \param[in] particles Current list of particles.
    * \param[in] clock Unused, needed since inherited.
    * \param[in] dens_param Unused, needed since inherited.

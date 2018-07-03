@@ -39,13 +39,13 @@ double breit_wigner_nonrel(double m, double pole, double width);
  * The normalization is such that integrating over x from -infinity to
  * +infinity yields one.
  *
- * \param x Argument of the Cauchy function.
- * \param pole Pole parameter \f$ m_0 \f$ of the Cauchy function, i.e. location
- * of the peak.
- * \param width Width parameter \f$ \Gamma \f$ of the Cauchy function,
+ * \param x Argument of the Cauchy function in GeV.
+ * \param pole Pole parameter \f$ m_0 \f$ of the Cauchy function in GeV,
+ *  i.e. location of the peak.
+ * \param width Width parameter \f$ \Gamma \f$ of the Cauchy function in GeV,
  * determining the sharpness of the peak.
  *
- * \return \f$ \frac{\Gamma}{\pi ((m-m_0)^2+\Gamma^2)}\f$
+ * \return \f$ \frac{\Gamma}{\pi ((x-m_0)^2+\Gamma^2)}\f$
  */
 double cauchy(double x, double pole, double width);
 
@@ -80,6 +80,7 @@ double density_integrand(const double energy, const double momentum_sqr,
 /**
  * density_integrand_mass - off_equilibrium distribution for massive
  * particles
+ *
  * \param[in] energy \f$E\f$ (in GeV)
  * \param[in] momentum_sqr squared \f$p\f$ (in GeV\f$^2\f$)
  * \param[in] temperature \f$T\f$ (in GeV)
@@ -90,6 +91,7 @@ double density_integrand_mass(const double energy, const double momentum_sqr,
 /**
  * density integrand - 1M_IC massless particles for expanding metric
  * initialization, see \iref{Bazow:2016oky}
+ *
  * \param[in] energy \f$E\f$ (in GeV)
  * \param[in] momentum_sqr squared \f$p\f$ (in GeV\f$^2\f$)
  * \param[in] temperature \f$T\f$ (in GeV)
@@ -101,6 +103,7 @@ double density_integrand_1M_IC(const double energy, const double momentum_sqr,
 /**
  * density integrand - 2M_IC massless particles for expanding metric
  * initialization, see \iref{Bazow:2016oky}
+ *
  * \param[in] energy \f$E\f$ (in GeV)
  * \param[in] momentum_sqr squared \f$p\f$ (in GeV\f$^2\f$)
  * \param[in] temperature \f$T\f$ (in GeV)
@@ -111,6 +114,7 @@ double density_integrand_2M_IC(const double energy, const double momentum_sqr,
 
 /**
  * Relativistic Juttner distribution function
+ *
  * \param[in] momentum_radial \f$|\vec{p}|\f$ in units of [GeV]
  * \param[in] mass Mass of the particle: in units of [GeV]
  * \param[in] temperature Temperature of the system \f$T\f$ in units of [GeV]
@@ -132,8 +136,8 @@ double juttner_distribution_func(const double momentum_radial,
  * \f[f=pe^{-\frac{\sqrt{m^2+p^2}}{T_0}}\f]
  *
  * \see density_integrand_mass
- * \param[in] temperature Temperature \f$T\f$
- * \param[in] mass Mass of the particle: \f$m = \sqrt{E^2 - p^2}\f$
+ * \param[in] temperature Temperature \f$T\f$ [GeV]
+ * \param[in] mass Mass of the particle: \f$m = \sqrt{E^2 - p^2}\f$ [GeV]
  *
  * \return one possible momentum between mass and 50 GeV
  */
@@ -144,8 +148,8 @@ double sample_momenta_non_eq_mass(const double temperature, const double mass);
  * 1M_IC from \iref{Bazow:2016oky}
  *
  * \see density_integrand_1M_IC
- * \param[in] temperature Temperature \f$T\f$
- * \param[in] mass Mass of the particle: \f$m = \sqrt{E^2 - p^2}\f$
+ * \param[in] temperature Temperature \f$T\f$ [GeV]
+ * \param[in] mass Mass of the particle: \f$m = \sqrt{E^2 - p^2}\f$ [GeV]
  *
  * \return one possible momentum between mass and 50 GeV
  */
@@ -156,8 +160,8 @@ double sample_momenta_1M_IC(const double temperature, const double mass);
  * 2M_IC from \iref{Bazow:2016oky}
  *
  * \see density_integrand_2M_IC
- * \param[in] temperature Temperature \f$T\f$
- * \param[in] mass Mass of the particle: \f$m = \sqrt{E^2 - p^2}\f$
+ * \param[in] temperature Temperature \f$T\f$ [GeV]
+ * \param[in] mass Mass of the particle: \f$m = \sqrt{E^2 - p^2}\f$ [GeV]
  *
  * \return one possible momentum between mass and 50 GeV
  */
@@ -167,8 +171,8 @@ double sample_momenta_2M_IC(const double temperature, const double mass);
  * Samples a momentum from the Maxwell-Boltzmann (thermal) distribution
  * in a faster way, given by Scott Pratt
  *
- * \param[in] temperature Temperature \f$T\f$
- * \param[in] mass Mass of the particle: \f$m = \sqrt{E^2 - p^2}\f$
+ * \param[in] temperature Temperature \f$T\f$ [GeV]
+ * \param[in] mass Mass of the particle: \f$m = \sqrt{E^2 - p^2}\f$ [GeV]
  *
  * \return one possible momentum
  */
@@ -177,7 +181,8 @@ double sample_momenta_from_thermal(const double temperature, const double mass);
 /**
  * Sample momenta according to the momentum distribution
  * in \iref{Bazow:2016oky}
- * \param[in] temperature The temperature for the distribution
+ *
+ * \param[in] temperature The temperature for the distribution [GeV]
  * \return Radial momentum
  */
 double sample_momenta_IC_ES(const double temperature);

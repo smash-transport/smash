@@ -44,14 +44,14 @@ namespace smash {
  * The list modus provides a modus for hydro afterburner calculations. It takes
  * files with a list of particles in \ref oscar2013_format "Oscar 2013 format"
  * as an input. These particles are treated as a starting setup. Multiple events
- per file are supported. The input
+ * per file are supported. The input
  * parameters are:
  *
  * \key File_Directory (string, required):\n
- * Directory for the external particle lists
+ * Directory for the external particle lists.
  *
  * \key File_Prefix    (string, required):\n
- * Prefix for the external particle lists file
+ * Prefix for the external particle lists file.
  *
  * \key Start_Time (double, required):\n
  * Starting time of List calculation.
@@ -65,7 +65,7 @@ namespace smash {
  * The following example sets up an afterburner simulation for a set of particle
  * files located in "particle_lists_in". The files are named as
  * "event{event_id}". SMASH is run once for each event in the folder.
- *\verbatim
+ * \verbatim
  Modi:
      List:
          File_Directory: "particle_lists_in"

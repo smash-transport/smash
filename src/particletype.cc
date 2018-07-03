@@ -633,7 +633,7 @@ double ParticleType::sample_resonance_mass(const double mass_stable,
     // inner loop: rejection sampling
     do {
       // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
-      mass_res = Random::cauchy(this->mass(), this->width_at_pole() / 2.,
+      mass_res = random::cauchy(this->mass(), this->width_at_pole() / 2.,
                                 this->min_mass_spectral(), max_mass);
       // determine cm momentum for this case
       const double pcm = pCM(cms_energy, mass_stable, mass_res);
@@ -642,7 +642,7 @@ double ParticleType::sample_resonance_mass(const double mass_stable,
       const double q = this->spectral_function(mass_res) /
                        this->spectral_function_simple(mass_res);
       val = q * blw;
-    } while (val < Random::uniform(0., max));
+    } while (val < random::uniform(0., max));
 
     // check that we are using the proper maximum value
     if (val > max) {
@@ -682,9 +682,9 @@ std::pair<double, double> ParticleType::sample_resonance_masses(
     // inner loop: rejection sampling
     do {
       // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
-      mass_1 = Random::cauchy(t1.mass(), t1.width_at_pole() / 2.,
+      mass_1 = random::cauchy(t1.mass(), t1.width_at_pole() / 2.,
                               t1.min_mass_spectral(), max_mass_1);
-      mass_2 = Random::cauchy(t2.mass(), t2.width_at_pole() / 2.,
+      mass_2 = random::cauchy(t2.mass(), t2.width_at_pole() / 2.,
                               t2.min_mass_spectral(), max_mass_2);
       // determine cm momentum for this case
       const double pcm = pCM(cms_energy, mass_1, mass_2);
@@ -695,7 +695,7 @@ std::pair<double, double> ParticleType::sample_resonance_masses(
       const double q2 =
           t2.spectral_function(mass_2) / t2.spectral_function_simple(mass_2);
       val = q1 * q2 * blw;
-    } while (val < Random::uniform(0., max));
+    } while (val < random::uniform(0., max));
 
     if (val > max) {
       const auto &log = logger<LogArea::Resonances>();

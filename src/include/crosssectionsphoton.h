@@ -115,6 +115,7 @@ class CrosssectionsPhoton<ComputationMethod::Analytic> {
   constexpr static double C4 = -0.14095;
   constexpr static double Gammaa1 = 0.4;
   ///@}
+  /// Value of \f$ \pi \f$
   constexpr static double Pi = M_PI;
 };
 

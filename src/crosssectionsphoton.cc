@@ -16,14 +16,20 @@
 
 namespace {
 
-// Necessary for the implementation of a non-stable rho meson in the
-// pi0 + rho0 -> omega -> pi0 + gamma and pi + pi0 -> rho + gamma channel.
-// For these specific scattering processes, there are s and t channels with
-// different thresholds. While the t-channel can always be performed, the
-// s-channel is kinematically only accessible if sqrt(s) >= mass of the exchange
-// particle. The corresponding s-channels need to be excluded from the
-// cross sections below their specific thresholds.
+/* Necessary for the implementation of a non-stable rho meson in the
+ * pi0 + rho0 -> omega -> pi0 + gamma and pi + pi0 -> rho + gamma channel.
+ * For these specific scattering processes, there are s and t channels with
+ * different thresholds. While the t-channel can always be performed, the
+ * s-channel is kinematically only accessible if sqrt(s) >= mass of the exchange
+ * particle. The corresponding s-channels need to be excluded from the
+ * cross sections below their specific thresholds. */
 
+/**
+ * Heavyside step function
+ *
+ * \param[in] x value to be compared to zero
+ * \return 0 if x is smaller than 0, else 1
+ */
 double HeavisideTheta(double x) {
   if (x >= 0.0) {
     return 1.0;
@@ -32,6 +38,16 @@ double HeavisideTheta(double x) {
   }
 }
 
+/**
+ * Cross section after cut off
+ *
+ * Cross sections larger than a certain value are cut off in smash. Either the
+ * cross section is returned or, if the cross section is larger than the cut
+ * off, the cut off value is returned
+ *
+ * \param[in] sigma_mb cross section before cut off [mb]
+ * \return Cross section after cut off [mb]
+ */
 double cut_off(const double sigma_mb) {
   return (sigma_mb > smash::maximum_cross_section)
              ? smash::maximum_cross_section

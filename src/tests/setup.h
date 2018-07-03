@@ -134,7 +134,7 @@ inline ParticleData smashon(const Momentum &momentum, const Position &position,
  * given \p id.
  */
 inline ParticleData smashon_random(int id = -1) {
-  auto random_value = Random::make_uniform_distribution(-15.0, +15.0);
+  auto random_value = random::make_uniform_distribution(-15.0, +15.0);
   ParticleData p{ParticleType::find(0x661), id};
   p.set_4position(
       {random_value(), random_value(), random_value(), random_value()});

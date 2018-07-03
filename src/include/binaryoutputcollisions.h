@@ -51,8 +51,8 @@ class BinaryOutputBase : public OutputInterface {
   void write(const double x);
 
   /**
-   * Write four vector to binary output.
-   * \param[in] v Four vector to be written.
+   * Write four-vector to binary output.
+   * \param[in] v Four-vector to be written.
    */
   void write(const FourVector &v);
 
@@ -87,14 +87,14 @@ class BinaryOutputBase : public OutputInterface {
   void write(const size_t x) { write(boost::numeric_cast<uint32_t>(x)); }
 
   /**
-   * Write particle data of every particle in particles to binary output.
-   * \param[in] particles List of particles, which data is to be written.
+   * Write particle data of each particle in particles to binary output.
+   * \param[in] particles List of particles, whose data is to be written.
    */
   void write(const Particles &particles);
 
   /**
-   * Write every particle data entry to binary output.
-   * \param[in] particles List of particle data to be written.
+   * Write each particle data entry to binary output.
+   * \param[in] particles List of particles, whose data is to be written.
    */
   void write(const ParticleList &particles);
 
@@ -118,13 +118,13 @@ class BinaryOutputBase : public OutputInterface {
  * \ingroup output
  * \brief Saves SMASH collision history to binary file.
  *
- * This class writes every collision, decay and box wall crossing
- * to the output file. Optionally one can also write
+ * This class writes each collision, decay and box wall crossing
+ * to the output file. Optionally, one can also write the
  * initial and final particle lists to the same file.
- * Output file is binary and has a block structure.
+ * The output file is binary and has a block structure.
  *
  * Details of the output format can be found
- * on the wiki in User Guide section, look for binary output.
+ * on the wiki in the User Guide section, look for binary output.
  */
 class BinaryOutputCollisions : public BinaryOutputBase {
  public:
@@ -132,7 +132,7 @@ class BinaryOutputCollisions : public BinaryOutputBase {
    * Create binary particle output.
    *
    * \param[in] path Output path.
-   * \param[in] name Name of the ouput.
+   * \param[in] name Name of the output.
    * \param[in] out_par A structure containing parameters of the output.
    */
   BinaryOutputCollisions(const bf::path &path, std::string name,
@@ -158,8 +158,8 @@ class BinaryOutputCollisions : public BinaryOutputBase {
                    double impact_parameter) override;
 
   /**
-   * Writes a interaction block, including information about the incoming and
-   * outgoing particles to the binary output.
+   * Writes an interaction block, including information about the incoming and
+   * outgoing particles, to the binary output.
    * \param[in] action Action that holds the information of the interaction.
    * \param[in] density Density at the interaction point.
    */

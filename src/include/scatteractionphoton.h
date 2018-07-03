@@ -32,26 +32,21 @@ class ScatterActionPhoton : public ScatterAction {
    * \param[in] in ParticleList of incoming particles.
    * \param[in] time Time relative to underlying hadronic action.
    * \param[in] n_frac_photons Number of photons to produce for each hadronic
-   * scattering. \param[in] hadronic_cross_section_input Cross-section of
-   * underlying hadronic cross-section.
+   *                            scattering. 
+   * \param[in] hadronic_cross_section_input Cross-section of
+   *                                          underlying hadronic cross-section.
+   * \return The constructed object.
    */
 
   ScatterActionPhoton(const ParticleList &in, const double time,
                       const int n_frac_photons,
-                      const double hadronic_cross_section_input)
-      : ScatterAction(in[0], in[1], time),
-        number_of_fractional_photons_(n_frac_photons),
-        hadron_out_t_(outgoing_hadron_type(in)),
-        hadronic_cross_section_(hadronic_cross_section_input) {
-    reac_ = photon_reaction_type(in);
-    hadron_out_mass_ = sample_out_hadron_mass(hadron_out_t_);
-  }
+                      const double hadronic_cross_section_input);
 
   /**
    * Create the photon final state and write to output.
    *
    * \param[in] outputs List of all outputs. Does not have to be a specific
-   * photon output, the function will take care of this.
+   *                     photon output, the function will take care of this.
    */
   void perform_photons(const OutputsList &outputs);
 
@@ -64,7 +59,7 @@ class ScatterActionPhoton : public ScatterAction {
   /**
    * Return the weight of the last created photon.
    *
-   * \return total weight
+   * \return The total weight.
    */
   double get_total_weight() const override { return weight_; }
 
@@ -73,7 +68,7 @@ class ScatterActionPhoton : public ScatterAction {
    *
    * \return total cross-section [mb]
    */
-  double hadronic_cross_section() const { return total_cross_section_; }
+  double hadronic_cross_section() const { return hadronic_cross_section_; }
 
   /**
    * Sample the mass of the outgoing hadron. Returns the pole mass if
@@ -87,12 +82,14 @@ class ScatterActionPhoton : public ScatterAction {
   double sample_out_hadron_mass(const ParticleTypePtr out_type);
 
   /**
-   * Adds one hadronic process with a given cross-section. The intended use is
-   * to add the hadronic cross-section from the already performed hadronic
+   * Adds one hadronic process with a given cross-section.
+   *
+   * The intended use is to add the hadronic cross-section from the already
+   * performed hadronic
    * action without recomputing it.
    *
    * \param[in] reaction_cross_section Total cross-section of underlying
-   * hadronic process [mb]
+   *                                    hadronic process [mb]
    */
   void add_dummy_hadronic_process(double reaction_cross_section);
 
@@ -100,7 +97,6 @@ class ScatterActionPhoton : public ScatterAction {
    * Add the photonic process. Also compute the total cross section as a side
    * effect.
    */
-
   void add_single_process() {
     add_processes<CollisionBranch>(photon_cross_sections(),
                                    collision_processes_photons_,
@@ -113,7 +109,6 @@ class ScatterActionPhoton : public ScatterAction {
    * Incoming_1__Incoming_2__Outgoing_hadron. The photon is omitted in the
    * naming.
    */
-
   enum class ReactionType {
     no_reaction,
     pi_z_pi_p_rho_p,
@@ -129,9 +124,10 @@ class ScatterActionPhoton : public ScatterAction {
   };
 
   /**
-   * Determine photon process from incoming particles. If
-   * incoming particles are not part of any implemented photonic process, return
-   * no_reaction.
+   * Determine photon process from incoming particles.
+   *
+   * If incoming particles are not part of any implemented photonic process,
+   * return no_reaction.
    *
    * \param[in] in ParticleList of incoming particles.
    * \return ReactionType enum-member
@@ -139,8 +135,9 @@ class ScatterActionPhoton : public ScatterAction {
   static ReactionType photon_reaction_type(const ParticleList &in);
 
   /**
-   * Check if particles can undergo an implemented photon process. This function
-   * does not check the involved kinematics.
+   * Check if particles can undergo an implemented photon process.
+   * 
+   * This function does not check the involved kinematics.
    *
    * \param[in] in ParticleList of incoming particles.
    * \return bool if photon reaction implemented.
@@ -151,18 +148,22 @@ class ScatterActionPhoton : public ScatterAction {
 
   /**
    * Return ParticleTypePtr of hadron in the out channel, given the incoming
-   * particles. This function is overloaded since we need the hadron type in
-   * different places.
+   * particles.
+   *
+   * This function is overloaded since we need the hadron type in different
+   * places.
    *
    * \param [in] in ParticleList of incoming particles.
-   * \returns ParticeTypePtr to hadron in outgoing channel.
+   * \return ParticeTypePtr to hadron in outgoing channel.
    */
   static ParticleTypePtr outgoing_hadron_type(const ParticleList &in);
 
   /**
    * Return ParticleTypePtr of hadron in the out channel,
-   * given the ReactionType. This function is overloaded since we need the
-   * hadron type in different places.
+   * given the ReactionType. 
+   *
+   * This function is overloaded since we need the hadron type in different
+   * places.
    *
    * \param [in] reaction ReactionType, determined from incoming particles.
    * \returns ParticeTypePtr to hadron in outgoing channel.
@@ -174,7 +175,7 @@ class ScatterActionPhoton : public ScatterAction {
    *
    *  \param [in] s_sqrt CM-energy [GeV]
    *  \param [in] in ParticleList of incoming hadrons
-   *  \returns true if particles can get produced.
+   *  \returns true if particles can be produced.
    */
   static bool is_kinematically_possible(const double s_sqrt,
                                         const ParticleList &in);
@@ -187,7 +188,7 @@ class ScatterActionPhoton : public ScatterAction {
   CollisionBranchList collision_processes_photons_;
 
   /// Photonic process as determined from incoming particles.
-  ReactionType reac_;
+  const ReactionType reac_;
 
   /**
    * Number of photons created for each hadronic scattering, needed for correct
@@ -196,11 +197,11 @@ class ScatterActionPhoton : public ScatterAction {
    */
   const int number_of_fractional_photons_;
 
-  /// ParticlePtr to the outgoing hadron.
-  ParticleTypePtr hadron_out_t_;
+  /// ParticleTypePtr to the type of the outgoing hadron.
+  const ParticleTypePtr hadron_out_t_;
 
   /// Mass of outgoing hadron
-  double hadron_out_mass_;
+  const double hadron_out_mass_;
 
   /**
    * Compile-time switch for setting the handling of processes which can happen
@@ -211,8 +212,8 @@ class ScatterActionPhoton : public ScatterAction {
    * If MediatorType::PION/ OMEGA is set, only the respective processes are
    * computed.
    */
-
   enum class MediatorType { SUM, PION, OMEGA };
+  /// Value used for default exchange particle. See MediatorType.
   static constexpr MediatorType default_mediator_ = MediatorType::SUM;
 
   /// Weight of the produced photon.
@@ -222,7 +223,7 @@ class ScatterActionPhoton : public ScatterAction {
   double cross_section_photons_ = 0.0;
 
   /// Total hadronic cross section
-  double hadronic_cross_section_ = 0.0;
+  const double hadronic_cross_section_;
 
   /**
    * Calculate the differential cross section of  photon process.
@@ -232,17 +233,18 @@ class ScatterActionPhoton : public ScatterAction {
    * \param[in] m_rho Mass of the incoming or outgoing rho-particle [GeV]
    * \param[in] mediator Switch for determing which mediating particle to use
    *
-   * \returns differential cross section. [mb/\f$GeV^2\f$]
+   * \return Differential cross section. [mb/\f$GeV^2\f$]
    */
   double diff_cross_section(const double t, const double m_rho,
                             MediatorType mediator = default_mediator_) const;
 
   /**
-   * Find the mass of the participating rho-particle. In case of
-   * a rho in the incoming channel it is the mass of the incoming rho, in case
-   * of an rho in the outgoing channel it is the mass sampled in the
-   * constructor. When an rho acts in addition as a mediator, its mass is the
-   * same as the incoming / outgoing rho. This function returns the alrady
+   * Find the mass of the participating rho-particle. 
+   *
+   * In case of a rho in the incoming channel it is the mass of the incoming 
+   * rho, in case of an rho in the outgoing channel it is the mass sampled in
+   * the constructor. When an rho acts in addition as a mediator, its mass is 
+   * the same as the incoming / outgoing rho. This function returns the alrady
    * sampled mass or the mass of the incoming rho, depending on the process.
    *
    * \returns mass of participating rho [GeV]
@@ -268,7 +270,7 @@ class ScatterActionPhoton : public ScatterAction {
    * \param[in] m_rho Mass of the incoming or outgoing rho-particle [GeV]
    *
    * \returns diff. cross section for (pi,a1,rho) in the first argument,
-   * for omega in the second.
+   *           for omega in the second.
    */
   std::pair<double, double> diff_cross_section_single(const double t,
                                                       const double m_rho);
@@ -279,16 +281,18 @@ class ScatterActionPhoton : public ScatterAction {
    * the first argument, for the omega process in the second. If only
    * one process exists, both values are the same.
    *
-   * \param[in] E_photon Energy of photon [GeV]
+   * \param[in] E_photon Energy of the photon [GeV]
    *
-   * \returns Form factor for (pi,a1,rho) in the first argument,
+   * \return Form factor for (pi,a1,rho) in the first argument,
    * for omega in the second.
    */
   std::pair<double, double> form_factor_single(const double E_photon);
 
   /**
    * Compute the form factor for a process with a pion as the lightest exchange
-   * particle See wiki for details how form factors are handled.
+   * particle.
+   *
+   * See wiki for details how form factors are handled.
    *
    * \param[in] E_photon Energy of photon [GeV]
    * \returns form factor
@@ -297,7 +301,9 @@ class ScatterActionPhoton : public ScatterAction {
 
   /**
    * Compute the form factor for a process with a omega as the lightest exchange
-   * particle See wiki for details how form factors are handled.
+   * particle.
+   *
+   * See wiki for details how form factors are handled.
    *
    * \param[in] E_photon Energy of photon [GeV]
    * \returns form factor
@@ -306,6 +312,7 @@ class ScatterActionPhoton : public ScatterAction {
 
   /**
    * Compute the differential cross section with form factors included.
+   *
    * Takes care of correct handling of reactions with multiple processes by
    * reading the default_mediator_ member variable.
    *

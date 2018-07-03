@@ -24,25 +24,25 @@ namespace smash {
  * \mathrm{Poi}(\nu_2) \delta(N_1 - N_2 = N)\f$, where \f$\mathrm{Poi}(\nu)\f$
  * denotes Poisson distribution with mean \f$\nu\f$. In other words, this
  * class samples two Poisson numbers with a given mean and a fixed difference.
- * The intended use is to sample number of baryons and antibaryons, given
+ * The intended use is to sample the number of baryons and antibaryons, given
  * their means and net baryon number.
  *
- * The distribution of \f$ min(N_1,N_2) \f$ is so-called Bessel distribution.
+ * The distribution of \f$ min(N_1,N_2) \f$ is a so-called Bessel distribution.
  * Denoting \f$ a = \sqrt{\nu_1 \nu_2}\f$, \f$ p(N_{smaller} = k) =
  * \frac{(a/2)^{2k+N}}{I_N(a) k! (N+k)!} \f$. We sample this distribution using
  * the method suggested by Yuan and Kalbfleisch \iref{Yuan2000}: if
- * \f$ m = \frac{1}{2} (\sqrt{a^2 + N^2} - N) > 6\f$ then the distribution is
- * approximated well by gaussian, else probabilities are computed explicitely
- * and table sampling is applied.
+ * \f$ m = \frac{1}{2} (\sqrt{a^2 + N^2} - N) > 6\f$, then the distribution is
+ * approximated well by a Gaussian, else probabilities are computed explicitely
+ * and a table sampling is applied.
  */
 class BesselSampler {
  public:
   /**
    * Construct a \ref BesselSampler.
    *
-   * \param poisson_mean1 Mean of the first number's Poisson distribution.
-   * \param poisson_mean2 Mean of the second number's Poisson distribution.
-   * \param fixed_difference Difference between the sampled numbers.
+   * \param[in] poisson_mean1 Mean of the first number's Poisson distribution.
+   * \param[in] poisson_mean2 Mean of the second number's Poisson distribution.
+   * \param[in] fixed_difference Difference between the sampled numbers.
    * \return Constructed sampler.
    */
   BesselSampler(const double poisson_mean1, const double poisson_mean2,
@@ -85,13 +85,13 @@ class BesselSampler {
   }
 
   /**
-   * Sample two numbers from given Poissonians with fixed difference.
+   * Sample two numbers from given Poissonians with a fixed difference.
    *
    * \return Pair of first and second sampled number.
    */
   std::pair<int, int> sample() {
     const int N_smaller = (m_ >= m_switch_method_)
-                              ? std::round(Random::normal(mu_, sigma_))
+                              ? std::round(random::normal(mu_, sigma_))
                               : dist_();
     return N_is_positive_ ? std::make_pair(N_smaller + N_, N_smaller)
                           : std::make_pair(N_smaller, N_smaller + N_);
@@ -99,11 +99,12 @@ class BesselSampler {
 
  private:
   /**
-   * Compute ratio of Bessel functions r(n,a) = bessel_I(n+1,a)/bessel_I(n,a)
-   * using continued fraction representation (see \iref{Yuan2000}).
+   * Compute the ratio of two Bessel functions
+   * r(n,a) = bessel_I(n+1,a)/bessel_I(n,a) using the continued fraction
+   * representation (see \iref{Yuan2000}).
    *
-   * \param n First Bessel parameter.
-   * \param a Second Bessel parameter.
+   * \param[in] n First Bessel parameter.
+   * \param[in] a Second Bessel parameter.
    * \return Ratio bessel_I(n+1,a)/bessel_I(n,a).
    */
   static double r(int n, double a) {
@@ -122,17 +123,34 @@ class BesselSampler {
     assert(res <= a / (std::sqrt(a * a + n * n) + n));
     return res;
   }
-  /// Vector to store tabulated values of probabilities for small m case
-  Random::discrete_dist<double> dist_;
-  // Parameters of the Bessel distribution.
+  /// Vector to store tabulated values of probabilities for small m case (m <6).
+  random::discrete_dist<double> dist_;
+
+  /// Mode of the Bessel function, see \iref{Yuan2000} for details.
   double m_;
+
+  /// Second parameter of Bessel distribution, see \iref{Yuan2000} for details.
   const double a_;
+
+  /// First parameter of Bessel distribution (= \f$ \nu \f$ in \iref{Yuan2000}).
   const int N_;
+
+  /// Boolean variable to verify that N > 0.
   const bool N_is_positive_;
+
+  /**
+   * Switching mode to normal approximation.
+   * \note Normal approximation of Bessel functions is possible for modes >= 6.
+   * See \iref{Yuan2000} for details.
+   */
   static constexpr double m_switch_method_ = 6.0;
+
+  /// Probabilities smaller than negligibly_probability are neglected.
   static constexpr double negligible_probability_ = 1.e-12;
+
   /// Mean of the Bessel distribution.
   double mu_;
+
   /// Standard deviation of the Bessel distribution.
   double sigma_;
 };

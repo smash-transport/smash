@@ -150,7 +150,7 @@ double BoxModus::initial_conditions(Particles *particles,
   double momentum_radial = 0, mass;
   Angles phitheta;
   FourVector momentum_total(0, 0, 0, 0);
-  auto uniform_length = Random::make_uniform_distribution(0.0, this->length_);
+  auto uniform_length = random::make_uniform_distribution(0.0, this->length_);
   const double T = this->temperature_;
   /* Create NUMBER OF PARTICLES according to configuration, or thermal case */
   if (use_thermal_) {
@@ -165,7 +165,7 @@ double BoxModus::initial_conditions(Particles *particles,
     }
     double nb_init = 0.0, ns_init = 0.0;
     for (const auto &mult : average_multipl_) {
-      const int thermal_mult_int = Random::poisson(mult.second);
+      const int thermal_mult_int = random::poisson(mult.second);
       particles->create(thermal_mult_int, mult.first);
       nb_init += mult.second * mult.first.baryon_number();
       ns_init += mult.second * mult.first.strangeness();

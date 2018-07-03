@@ -25,10 +25,11 @@
 
 namespace smash {
 
-/*
- * Linear interpolation.
+/**
+ * Represent a linear interpolation.
+ *
+ * \param T Type of interpolated values.
  */
-
 template <typename T>
 class InterpolateLinear {
  public:
@@ -36,39 +37,54 @@ class InterpolateLinear {
   T slope_;
   /// y-axis intercept of the linear interpolation.
   T yintercept_;
-  /// Linear interpolation given two points (x0, y0) and (x1, y1).
-  ///
-  /// \return The interpolation function.
+  /**
+   * Linear interpolation given two points (x0, y0) and (x1, y1).
+   *
+   * \return The interpolation function.
+   */
   InterpolateLinear(T x0, T y0, T x1, T y1);
 
-  /// Calculate linear interpolation at x.
-  ///
-  /// \param x Interpolation argument.
-  /// \return Interpolated value.
+  /**
+   * Calculate spline interpolation at x.
+   *
+   *  \param x Interpolation argument.
+   *  \return Interpolated value.
+   */
   T operator()(T x) const;
 };
 
+/**
+ * Represent a piecewise linear interpolation.
+ *
+ * \param T Type of interpolated values.
+ */
 template <typename T>
 class InterpolateDataLinear {
  public:
-  /// Interpolate function f given discrete samples f(x_i) = y_i.
-  ///
-  /// \param x x-values.
-  /// \param y y-values.
-  /// \return The interpolation function.
-  ///
-  /// Piecewise linear interpolation is used.
-  /// Values outside the given samples will use the outmost linear
-  /// interpolation.
+  /**
+   * Interpolate function f given discrete samples f(x_i) = y_i.
+   *
+   * \param x x-values.
+   * \param y y-values.
+   * \return The interpolation function.
+   *
+   * Piecewise linear interpolation is used.
+   * Values outside the given samples will use the outmost linear
+   * interpolation.
+   */
   InterpolateDataLinear(const std::vector<T>& x, const std::vector<T>& y);
-  /// Calculate interpolation of f at x.
-  ///
-  /// \param x Interpolation argument.
-  /// \return Interpolated value.
+  /**
+   * Calculate spline interpolation at x.
+   *
+   *  \param x Interpolation argument.
+   *  \return Interpolated value.
+   */
   T operator()(T x) const;
 
  private:
+  /// x_i
   std::vector<T> x_;
+  /// Piecewise linear interpolation using f(x_i)
   std::vector<InterpolateLinear<T>> f_;
 };
 
@@ -84,13 +100,17 @@ T InterpolateLinear<T>::operator()(T x) const {
   return slope_ * x + yintercept_;
 }
 
+/// Represent a permutation.
 using Permutation = std::vector<size_t>;
 
-/// Calculate the permutations necessary for sorting a vector.
-///
-/// \param v Vector to be sorted.
-/// \param compare Comparison function (see `std::sort`).
-/// \return Vector of indices into the original vector.
+/**
+ * Calculate the permutations necessary for sorting a vector.
+ *
+ * \tparam Cmp Type of comparison function.
+ * \param v Vector to be sorted.
+ * \param compare Comparison function (see `std::sort`).
+ * \return Vector of indices into the original vector.
+ */
 template <typename T, typename Cmp>
 Permutation generate_sort_permutation(std::vector<T> const& v, Cmp compare) {
   Permutation p(v.size());
@@ -100,11 +120,14 @@ Permutation generate_sort_permutation(std::vector<T> const& v, Cmp compare) {
   return p;
 }
 
-/// Apply a permutation to a vector.
-///
-/// \param v Vector to be permuted.
-/// \param p Permutation to be applied.
-/// \return Permuted vector.
+/**
+ * Apply a permutation to a vector.
+ *
+ * \tparam T Type of values to be permuted.
+ * \param v Vector to be permuted.
+ * \param p Permutation to be applied.
+ * \return Permuted vector.
+ */
 template <typename T>
 std::vector<T> apply_permutation(const std::vector<T>& v,
                                  const Permutation& p) {
@@ -114,13 +137,15 @@ std::vector<T> apply_permutation(const std::vector<T>& v,
   return copied_v;
 }
 
-/// Check whether two components have the same value in a sorted vector x.
-///
-/// Throws an exception if duplicates are encountered.
-///
-/// \param x Vector to be checked for duplicates.
-/// \param error_position String used in the error message, indicating where
-///                       the error originated.
+/** Check whether two components have the same value in a sorted vector x.
+ *
+ * Throws an exception if duplicates are encountered.
+ *
+ * \tparam T Type of values to be checked for duplicates.
+ * \param x Vector to be checked for duplicates.
+ * \param error_position String used in the error message, indicating where
+ *                       the error originated.
+ */
 template <typename T>
 void check_duplicates(const std::vector<T>& x,
                       const std::string& error_position) {
@@ -150,21 +175,24 @@ InterpolateDataLinear<T>::InterpolateDataLinear(const std::vector<T>& x,
   }
 }
 
-/// Find the index in v that corresponds to the last value strictly smaller
-/// than x. If no such value exists, the first value is returned.
-///
-/// This assumes v is sorted and uses a binary search.
-///
-/// \param v Vector to be searched.
-/// \param x Upper bound for indexed value.
-/// \return Largest index corresponding to value below upper bound.
-///
-/// Example:
-/// >>> std::vector<int> x = { 0, 2, 4, 6, 8, 10 };
-/// >>> find_index(x, 2)
-/// 0
-/// >>> find_index(x, 3)
-/// 1
+/**
+ * Find the index in v that corresponds to the last value strictly smaller
+ * than x. If no such value exists, the first value is returned.
+ *
+ * This assumes v is sorted and uses a binary search.
+ *
+ * \tparam T Type of values to be compared to x.
+ * \param v Vector to be searched.
+ * \param x Upper bound for indexed value.
+ * \return Largest index corresponding to value below upper bound.
+ *
+ * Example:
+ * >>> std::vector<int> x = { 0, 2, 4, 6, 8, 10 };
+ * >>> find_index(x, 2)
+ * 0
+ * >>> find_index(x, 3)
+ * 1
+ */
 template <typename T>
 size_t find_index(const std::vector<T>& v, T x) {
   const auto it = std::lower_bound(v.begin(), v.end(), x);
@@ -187,32 +215,44 @@ T InterpolateDataLinear<T>::operator()(T x0) const {
   return f_[i](x0);
 }
 
-/*
- * Spline interpolation.
- */
-
+/// Represent a cubic spline interpolation.
 class InterpolateDataSpline {
  public:
-  /// Interpolate function f given discrete samples f(x_i) = y_i.
-  ///
-  /// \param x x-values.
-  /// \param y y-values.
-  /// \return The interpolation function.
-  ///
-  /// Cubic spline interpolation is used.
-  /// Values outside the given samples will use the outmost sample
-  /// as a constant extrapolation.
+  /** Interpolate function f given discrete samples f(x_i) = y_i.
+   *
+   * \param x x-values.
+   * \param y y-values.
+   * \return The interpolation function.
+   *
+   * Cubic spline interpolation is used.
+   * Values outside the given samples will use the outmost sample
+   * as a constant extrapolation.
+   */
   InterpolateDataSpline(const std::vector<double>& x,
                         const std::vector<double>& y);
+
   ~InterpolateDataSpline();
+
+  /**
+   * Calculate spline interpolation at x.
+   *
+   *  \param x Interpolation argument.
+   *  \return Interpolated value.
+   */
   double operator()(double x) const;
 
  private:
+  /// First x value.
   double first_x_;
+  /// Last x value.
   double last_x_;
+  /// First y value.
   double first_y_;
+  /// Last y value.
   double last_y_;
+  /// GSL iterator for interpolation lookups.
   gsl_interp_accel* acc_;
+  /// GSL spline.
   gsl_spline* spline_;
 };
 

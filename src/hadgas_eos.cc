@@ -352,12 +352,12 @@ double HadronGasEos::sample_mass_thermal(const ParticleType &ptype,
     do {
       // sample mass from A(m)
       do {
-        m = Random::cauchy(m0, 0.5 * w0, mth, max_mass);
+        m = random::cauchy(m0, 0.5 * w0, mth, max_mass);
         const double thermal_factor = m * m * std::exp(- beta * m) *
                           gsl_sf_bessel_Kn_scaled(2, m * beta);
         q = ptype.spectral_function(m) * thermal_factor /
             ptype.spectral_function_simple(m);
-      } while (q < Random::uniform(0., max_ratio));
+      } while (q < random::uniform(0., max_ratio));
       if (q > max_ratio) {
         const auto &log = logger<LogArea::Resonances>();
         log.warn(ptype.name(), " - maximum increased in",

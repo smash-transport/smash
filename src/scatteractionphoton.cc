@@ -26,6 +26,17 @@
 
 namespace smash {
 
+ScatterActionPhoton::ScatterActionPhoton(const ParticleList &in,
+                    const double time,
+                    const int n_frac_photons,
+                    const double hadronic_cross_section_input)
+    : ScatterAction(in[0], in[1], time),
+      reac_(photon_reaction_type(in)),
+      number_of_fractional_photons_(n_frac_photons),
+      hadron_out_t_(outgoing_hadron_type(in)),
+      hadron_out_mass_(sample_out_hadron_mass(hadron_out_t_)),
+      hadronic_cross_section_(hadronic_cross_section_input) {}
+
 ScatterActionPhoton::ReactionType ScatterActionPhoton::photon_reaction_type(
     const ParticleList &in) {
   if (in.size() != 2) {
@@ -203,14 +214,14 @@ void ScatterActionPhoton::generate_final_state() {
   const double pcm_in = cm_momentum();
   const double pcm_out = pCM(sqrts, m_out, 0.0);
 
-  const double t = Random::uniform(t1, t2);
+  const double t = random::uniform(t1, t2);
 
   double costheta = (t - pow_int(m2, 2) +
                      0.5 * (s + pow_int(m2, 2) - pow_int(m1, 2)) *
                          (s - pow_int(m_out, 2)) / s) /
                     (pcm_in * (s - pow_int(m_out, 2)) / sqrts);
 
-  Angles phitheta(Random::uniform(0.0, twopi), costheta);
+  Angles phitheta(random::uniform(0.0, twopi), costheta);
   outgoing_particles_[0].set_4momentum(hadron_out_mass_,
                                        phitheta.threevec() * pcm_out);
   outgoing_particles_[1].set_4momentum(0.0, -phitheta.threevec() * pcm_out);
@@ -233,9 +244,9 @@ void ScatterActionPhoton::generate_final_state() {
   // Weighing of the fractional photons
   if (number_of_fractional_photons_ > 1) {
     weight_ = diff_xs * (t2 - t1) /
-              (number_of_fractional_photons_ * hadronic_cross_section_);
+              (number_of_fractional_photons_ * hadronic_cross_section());
   } else {
-    weight_ = proc->weight() / hadronic_cross_section_;
+    weight_ = proc->weight() / hadronic_cross_section();
   }
   // Photons are not really part of the normal processes, so we have to set a
   // constant arbitrary number.

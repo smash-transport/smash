@@ -19,7 +19,7 @@ namespace smash {
 /**
  * \ingroup data
  *
- * QuantumNumbers - a container for storing conserved values
+ * A container for storing conserved values.
  *
  * QuantumNumbers can be used to compare all values that should be
  * conserved during the evolution, in particular for the whole system at
@@ -52,7 +52,7 @@ namespace smash {
  */
 class QuantumNumbers {
  public:
-  /// construct QuantumNumbers collection with all fields 0.
+  /// Construct QuantumNumbers collection with all fields 0.
   QuantumNumbers()
       : momentum_(0., 0., 0., 0.),
         charge_(0),
@@ -63,7 +63,7 @@ class QuantumNumbers {
         baryon_number_(0) {}
 
   /**
-   * construct QuantumNumbers collection
+   * \return Constructed QuantumNumbers.
    * \param[in] m Momentum FourVector [GeV]
    * \param[in] q Charge
    * \param[in] i3 Isospin
@@ -87,6 +87,7 @@ class QuantumNumbers {
    * found in a set of particles.
    * \param[in] particles set of particles for which
    *            quantum numbers are calculated and constructed
+   * \return Constructed object.
    */
   explicit QuantumNumbers(const Particles& particles) : QuantumNumbers() {
     for (const ParticleData& data : particles) {
@@ -98,6 +99,7 @@ class QuantumNumbers {
    * Construct QuantumNumbers collection from a particle list.
    * \param[in] part list of particles for which
    *            quantum numbers are calculated and constructed
+   * \return Constructed object.
    */
   explicit QuantumNumbers(const ParticleList& part) : QuantumNumbers() {
     for (const auto& p : part) {
@@ -120,7 +122,7 @@ class QuantumNumbers {
   }
 
   /**
-   * \return the total momentum four-vector
+   * \return The total momentum four-vector.
    * \f$P^\mu = \sum_{i \in \mbox{particles}} (E_i, \vec p_i)\f$ [GeV]
    *
    * \see QuantumNumbers::momentum_
@@ -129,7 +131,7 @@ class QuantumNumbers {
   FourVector momentum() const { return momentum_; }
 
   /**
-   * \return the total electric charge
+   * \return The total electric charge.
    * \f$Q = \sum_{i \in \mbox{particles}} q_i\f$
    *
    * \see QuantumNumbers::charge_
@@ -137,7 +139,7 @@ class QuantumNumbers {
    */
   int charge() const { return charge_; }
   /**
-   * \return twice the total isospin-3 component (twice)
+   * \return Twice the total isospin-3 component.
    * \f$I = \sum_{i \in \mbox{particles}} 2{I_3}_i\f$
    *
    * \see QuantumNumbers::isospin3_
@@ -145,7 +147,7 @@ class QuantumNumbers {
    */
   int isospin3() const { return isospin3_; }
   /**
-   * \return the total strangeness
+   * \return The total strangeness.
    * \f$S = \sum_{i \in \mbox{particles}} S_i\f$
    *
    * \see QuantumNumbers::strangeness_
@@ -153,7 +155,7 @@ class QuantumNumbers {
    */
   int strangeness() const { return strangeness_; }
   /**
-   * \return the total charm
+   * \return The total charm.
    * \f$C = \sum_{i \in \mbox{particles}} C_i\f$
    *
    * \see QuantumNumbers::charmness_
@@ -161,7 +163,7 @@ class QuantumNumbers {
    */
   int charmness() const { return charmness_; }
   /**
-   * \return the total bottom
+   * \return The total bottom.
    * \f$b = \sum_{i \in \mbox{particles}} b_i\f$
    *
    * \see QuantumNumbers::bottomness_
@@ -169,7 +171,7 @@ class QuantumNumbers {
    */
   int bottomness() const { return bottomness_; }
   /**
-   * \return the total baryon number
+   * \return The total baryon number.
    * \f$B = \sum_{i \in \mbox{particles}} B_i\f$
    *
    * \see QuantumNumbers::baryon_number_
@@ -179,6 +181,7 @@ class QuantumNumbers {
 
   /**
    * \return true if all members compare true.
+   * \param rhs Right-hand side.
    *
    * In the comparison of FourVectors, a little leeway is built-in, so
    * this does not rely on an exact comparison of floating point values.
@@ -196,11 +199,12 @@ class QuantumNumbers {
             baryon_number_ == rhs.baryon_number_);
     // clang-format on
   }
-  /// logical complement of QuantumNumbers::operator==
+  /// Logical complement of QuantumNumbers::operator==.
   bool operator!=(const QuantumNumbers& rhs) const { return !(*this == rhs); }
 
   /**
-   * entry-wise subtract of two sets of QuantumNumbers
+   * \return Entry-wise difference of two sets of QuantumNumbers.
+   * \param rhs Right-hand side.
    *
    * If everything is conserved, all entries of the result should be
    * zero.
@@ -213,9 +217,10 @@ class QuantumNumbers {
   }
 
   /**
-   * checks if the current particle list has still the same values and
+   * Checks if the current particle list has still the same values and
    * reports about differences.
-   * \param[in] particles set of particles whose quantum number is compared
+   * \param[in] particles Set of particles whose quantum number is compared
+   * \return String reporting the deviations.
    *
    * \see QuantumNumbers::report_deviations(const QuantumNumbers&) const
    */
@@ -225,10 +230,10 @@ class QuantumNumbers {
   }
 
   /**
-   * reports on deviations between two QuantumNumbers collections.
+   * Reports on deviations between two QuantumNumbers collections.
    *
-   * \param[in] rhs other QuantumNumbers collection
-   * \return a string with information about the differences.
+   * \param[in] rhs Other QuantumNumbers collection.
+   * \return A string with information about the differences.
    *
    * If there are no differences, the returned string is empty; else, a
    * descriptive warning message is returned, e.g.
@@ -246,44 +251,44 @@ class QuantumNumbers {
 
  private:
   /**
-   * total momentum four-vector [GeV]
+   * Total momentum four-vector [GeV].
    *
    * \see QuantumNumbers::momentum()
    */
   FourVector momentum_;
 
   /**
-   * total charge
+   * Total charge.
    *
    * \see QuantumNumbers::charge()
    */
   int charge_;
   /**
-   * total isospin-3
+   * Total isospin-3.
    *
    * \see QuantumNumbers::isospin3()
    */
   int isospin3_;
   /**
-   * total strangeness
+   * Total strangeness.
    *
    * \see QuantumNumbers::strangeness()
    */
   int strangeness_;
   /**
-   * total charm
+   * Total charm.
    *
    * \see QuantumNumbers::charmness()
    */
   int charmness_;
   /**
-   * total bottom
+   * Total bottom.
    *
    * \see QuantumNumbers::bottomness()
    */
   int bottomness_;
   /**
-   * total baryon number
+   * Total baryon number.
    *
    * \see QuantumNumbers::baryon_number()
    */

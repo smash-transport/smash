@@ -44,7 +44,7 @@ void DecayActionDilepton::one_to_three() {
 
   // randomly select a dilepton mass
   const double dil_mass =
-      Random::uniform(mass_l1 + mass_l2, cms_energy - mass_nl);
+      random::uniform(mass_l1 + mass_l2, cms_energy - mass_nl);
   const double delta_m = cms_energy - mass_nl - mass_l1 - mass_l2;
 
   const double diff_width = ThreeBodyDecayDilepton::diff_width(
