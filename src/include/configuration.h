@@ -185,7 +185,7 @@ class Configuration {
   class Value {
     friend class Configuration;
 
-    /// a YAML leaf node \todo What is that?
+    /// a YAML leaf node \todo(steinberg) What is that?
     const YAML::Node node_;
     /// The key to be interpreted
     const char *const key_;
