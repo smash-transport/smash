@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2017
+ *    Copyright (c) 2015-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -37,29 +37,40 @@ class ScatterAction : public Action {
    * \param[in] in_part2 second scattering partner
    * \param[in] time Time at which the action is supposed to take place
    * \param[in] isotropic if true, do the collision isotropically
-   * \param[in] string_formation_time the time a string takes to form
+   * \param[in] string_formation_time Time string fragments take to form
    */
   ScatterAction(const ParticleData& in_part1, const ParticleData& in_part2,
                 double time, bool isotropic = false,
                 double string_formation_time = 1.0);
 
-  /** Add a new collision channel. */
+  /**
+   * Add a new collision channel.
+   *
+   * \param[in] p Channel to be added.
+   */
   void add_collision(CollisionBranchPtr p);
-  /** Add several new collision channels at once. */
+
+  /**
+   * Add several new collision channels at once.
+   *
+   * \param[in] pv list of channels to be added.
+   */
   void add_collisions(CollisionBranchList pv);
 
   /**
    * Calculate the transverse distance of the two incoming particles in their
    * local rest frame.
-   * 
+   *
    * According to UrQMD criterion
    * position of particle a: x_a \n
    * position of particle b: x_b \n
    * momentum of particle a: p_a \n
    * momentum of particle b: p_b \n
-   * \f[d^2_{coll} = (\vec{x_a} - \vec{x_b})^2 - \frac{((\vec{x_a} - \vec{x_b}) \cdot (\vec{p_a} - \vec{p_b}))^2 } {(\vec{p_a} - \vec{p_b})^2}\f]
+   * \f[d^2_\mathrm{coll} = (\vec{x_a} - \vec{x_b})^2 - \frac{((\vec{x_a} -
+   * \vec{x_b}) \cdot (\vec{p_a} - \vec{p_b}))^2 } {(\vec{p_a} -
+   * \vec{p_b})^2}\f]
    *
-   * \return  squared distance.
+   * \return  squared distance \f$d^2_\mathrm{coll}\f$.
    */
   double transverse_distance_sqr() const;
 
@@ -71,9 +82,19 @@ class ScatterAction : public Action {
    */
   void generate_final_state() override;
 
-  double raw_weight_value() const override;
+  /**
+   * Get the total cross section of scattering particles.
+   *
+   * \return total cross section.
+   */
+  double get_total_weight() const override;
 
-  double partial_weight() const override;
+  /**
+   * Get the partial cross section of the choosen channel.
+   *
+   * \return partial cross section.
+   */
+  double get_partial_weight() const override;
 
   /**
    * Sample final-state angles in a 2->2 collision (possibly anisotropic).
@@ -82,30 +103,31 @@ class ScatterAction : public Action {
    */
   void sample_angles(std::pair<double, double> masses) override;
 
-  /** Add all possible scattering subprocesses for this action object. */
+  /** Add all possible scattering subprocesses for this action object.
+   *
+   * \param[in] elastic_parameter If non-zero, given global
+   *            elastic cross section.
+   * \param[in] two_to_one  2->1 reactions enabled?
+   * \param[in] included_2to2 Which 2->2 ractions are enabled?
+   * \param[in] low_snn_cut Elastic collisions with CME below are forbidden.
+   * \param[in] strings_switch Are string processes enabled?
+   * \param[in] use_AQM use elastic cross sections via AQM?
+   * \param[in] strings_with_probability Are string processes triggered
+   *            according to a probability?
+   * \param[in] nnbar_treatment NNbar treatment through resonance, strings or
+   *                                                        none
+   */
   void add_all_scatterings(double elastic_parameter, bool two_to_one,
                            ReactionsBitSet included_2to2, double low_snn_cut,
-                           bool strings_switch, NNbarTreatment nnbar_treatment);
+                           bool strings_switch, bool use_AQM,
+                           bool strings_with_probability,
+                           NNbarTreatment nnbar_treatment);
 
   /**
-   * Assign a cross section scaling factor to all outgoing particles.
+   * Get list of possible collision channels.
    *
-   * The factor is only non-zero, when the outgoing particle carries
-   * a valence quark from the excited hadron. The assigned cross section 
-   * scaling factor is equal to the number of the valence quarks from the
-   * fragmented hadron contained in the fragment divided by the total number
-   * of valence quarks of that fragment multiplied by a coherence factor 
-   * \param[in] incoming_particles list of colliding particles to form a string
-   * \param[out] outgoing_particles list of string fragments to which scaling 
-   * factors are assigned
-   * \param[in] suppression_factor additional coherence factor to be 
-   * multiplied with scaling factor
+   * \return list of possible collision channels.
    */
-  static void assign_all_scaling_factors(ParticleList& incoming_particles,
-                                         ParticleList& outgoing_particles,
-                                         double suppression_factor);
-
-  /// Returns list of possible collision channels
   const CollisionBranchList& collision_channels() {
     return collision_channels_;
   }
@@ -118,42 +140,75 @@ class ScatterAction : public Action {
     using std::invalid_argument::invalid_argument;
   };
 
+  /**
+   * Set the StringProcess object to be used.
+   *
+   * The StringProcess object is used to handle string excitation and to
+   * generate final state particles.
+   *
+   * \param[in] str_proc String process object to be used.
+   */
   void set_string_interface(StringProcess* str_proc) {
     string_process_ = str_proc;
   }
 
+  /**
+   * Get the total cross section of the scattering particles.
+   *
+   * \return total cross section.
+   */
   virtual double cross_section() const { return total_cross_section_; }
 
  protected:
-  /** Determine the Mandelstam s variable,
-   * s = (p_a + p_b)^2 = square of CMS energy.
+  /**
+   * Determine the Mandelstam s variable,
+   *
+   * \f[s = (p_a + p_b)^2\f]
+   * Equal to the square of CMS energy.
+   *
+   * \return Mandelstam s
    */
   double mandelstam_s() const;
-  /** Determine the momenta of the incoming particles in the
-   * center-of-mass system.
+  /**
+   * Get the momentum of the center of mass of the incoming particles
+   * in the calculation frame.
+   *
+   * \return center of mass momentum.
    */
   double cm_momentum() const;
-  /** Determine the squared momenta of the incoming particles in the
-   * center-of-mass system.
+  /**
+   * Get the squared momentum of the center of mass of the incoming
+   * particles in the calculation frame.
+   *
+   * \return center of mass momentum squared.
    */
   double cm_momentum_squared() const;
-  /// determine the velocity of the center-of-mass frame in the lab
+  /**
+   * Get the velocity of the center of mass of the scattering particles
+   * in the calculation frame.
+   *
+   * \return boost velocity between center of mass and calculation frame.
+   */
   ThreeVector beta_cm() const;
-  /// determine the corresponding gamma factor
+  /**
+   * Get the gamma factor corresponding to a boost to the center of mass frame
+   * of the colliding particles.
+   *
+   * \return gamma factor.
+   */
   double gamma_cm() const;
 
-  /** Perform an elastic two-body scattering, i.e. just exchange momentum. */
+  /// Perform an elastic two-body scattering, i.e. just exchange momentum.
   void elastic_scattering();
 
-  /** Perform an inelastic two-body scattering, i.e. new particles are formed*/
+  /// Perform an inelastic two-body scattering, i.e. new particles are formed
   void inelastic_scattering();
 
-  /** Todo(ryu): document better - it is not really UrQMD-based, isn't it?
-   *  Perform the UrQMD-based string excitation and decay */
-  void string_excitation_soft();
-
-  /** Perform the string excitation and decay via Pythia. */
-  void string_excitation_pythia();
+  /**
+   * Todo(ryu): document better - it is not really UrQMD-based, isn't it?
+   * Perform the UrQMD-based string excitation and decay
+   */
+  void string_excitation();
 
   /**
    * \ingroup logging
@@ -161,60 +216,33 @@ class ScatterAction : public Action {
    */
   void format_debug_output(std::ostream& out) const override;
 
-  /** List of possible collisions  */
+  /// List of possible collisions
   CollisionBranchList collision_channels_;
 
-  /** Total cross section */
+  /// Total hadronic cross section
   double total_cross_section_;
 
-  /** Partial cross-section to the chosen outgoing channel */
+  /// Partial cross-section to the chosen outgoing channel
   double partial_cross_section_;
 
-  /** Do this collision isotropically. */
+  /// Do this collision isotropically?
   bool isotropic_ = false;
 
-  /** Formation time parameter for string fragmentation*/
+  /// Time fragments take to be fully formed in hard string excitation.
   double string_formation_time_ = 1.0;
 
  private:
-  /** Check if the scattering is elastic. */
+  /**
+   * Check if the scattering is elastic.
+   *
+   * \return whether the scattering is elsatic.
+   */
   bool is_elastic() const;
 
-  /** Perform a 2->1 resonance-formation process. */
+  /// Perform a 2->1 resonance-formation process.
   void resonance_formation();
 
-  /**
-   * Find the leading string fragments 
-   *
-   * Find the first particle, which can carry nq1, and the last particle,
-   * which can carry nq2 valence quarks and return their indices in
-   * the given list.
-   *
-   * \param[in] nq1 number of valence quarks from excited hadron at forward
-   * end of the string
-   * \param[in] nq2 number of valance quarks from excited hadron at backward
-   * end of the string
-   * \param[in] list list of string fragments
-   * \return indices of the leading hadrons in \p list
-   */
-  static std::pair<int, int> find_leading(int nq1, int nq2, ParticleList& list);
-
-  /**
-   * Assign a cross section scaling factor to the given particle.
-   *
-   * The scaling factor is the number of quarks from the excited hadron,
-   * that the fragment carries devided by the total number of quarks in
-   * this fragment multiplied by coherence factor.
-   *
-   * \param[in] nquark number of valence quarks from the excited hadron
-   * contained in the given string fragment \p data
-   * \param[out] data particle to assign a scaling factor to
-   * \param[in] suppression_factor coherence factor to decrease scaling factor
-   */
-  static void assign_scaling_factor(int nquark, ParticleData& data,
-                                    double suppression_factor);
-
-  /** Pointer to interface class for strings */
+  /// Pointer to interface class for strings
   StringProcess* string_process_ = nullptr;
 };
 

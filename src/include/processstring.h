@@ -11,28 +11,15 @@
 #define SRC_INCLUDE_PROCESSSTRING_H_
 
 #include <memory>
+#include <utility>
 #include <vector>
+
 #include "Pythia8/Pythia.h"
 
+#include "constants.h"
 #include "particledata.h"
 
 namespace smash {
-
-/**
- * StringSoft Types are used to identify the type of the soft string subprocess
- * (-1) nothing (None)
- * (0)  single diffractive A+B to A+X (SingleDiffAX)
- * (1)  single diffractive A+B to X+B (SingleDiffXB)
- * (2)  double diffractive (DoubleDiff)
- * (3)  soft non-diffractive (NonDiff)
- */
-enum class StringSoftType {
-  None = -1,
-  SingleDiffAX = 0,
-  SingleDiffXB = 1,
-  DoubleDiff = 2,
-  NonDiff = 3
-};
 
 // \todo Sangwook: make file (processstring) and class (StringProcess) name
 // consistent
@@ -86,8 +73,6 @@ class StringProcess {
   std::array<ThreeVector, 3> evecBasisAB_;
   /// total number of final state particles
   int NpartFinal_;
-  /// soft subprocess identifier
-  StringSoftType subproc_;
   /// number of particles fragmented from strings
   std::array<int, 2> NpartString_;
   /// the minimum lightcone momentum scale carried by gluon [GeV]
@@ -115,12 +100,22 @@ class StringProcess {
   double sigma_qperp_;
   /// string tension [GeV/fm]
   double kappa_tension_string_;
+  /**
+   * additional cross-section suppression factor
+   * to take coherence effect into account.
+   */
+  double additional_xsec_supp_;
+  /// constant proper time in the case of constant formation time [fm]
+  double time_formation_const_;
   /// time of collision in the computational frame [fm]
   double time_collision_;
   /// Lorentz gamma factor of center of mass in the computational frame
   double gamma_factor_com_;
   /// square root of 2 (\f$\sqrt{2}\f$)
   double sqrt2_;
+
+  /// Remembers if Pythia is initialized or not
+  bool pythia_parton_initialized_ = false;
 
   /**
    * final state array
@@ -143,6 +138,7 @@ class StringProcess {
   /**
    * Constructor, initializes pythia. Should only be called once.
    * \param[in] string_tension value of kappa_tension_string_ [GeV/fm]
+   * \param[in] time_formation value of time_formation_const_ [fm]
    * \param[in] gluon_beta value of pow_fgluon_beta_
    * \param[in] gluon_pmin value of pmin_gluon_lightcone_
    * \param[in] quark_alpha value of pow_fquark_alpha_
@@ -162,6 +158,7 @@ class StringProcess {
    * \see StringProcess::common_setup_pythia(Pythia8::Pythia *,
    *                     double, double, double, double, double)
    * \see StringProcess::kappa_tension_string_
+   * \see StringProcess::time_formation_const_
    * \see StringProcess::pow_fgluon_beta_
    * \see StringProcess::pmin_gluon_lightcone_
    * \see StringProcess::pow_fquark_alpha_
@@ -172,10 +169,13 @@ class StringProcess {
    * \see 3rdparty/pythia8230/share/Pythia8/xmldoc/MasterSwitches.xml
    * \see 3rdparty/pythia8230/share/Pythia8/xmldoc/MultipartonInteractions.xml
    */
-  StringProcess(double string_tension, double gluon_beta, double gluon_pmin,
-                double quark_alpha, double quark_beta, double strange_supp,
-                double diquark_supp, double sigma_perp, double stringz_a,
-                double stringz_b, double string_sigma_T);
+  StringProcess(double string_tension, double time_formation,
+                double gluon_beta, double gluon_pmin,
+                double quark_alpha, double quark_beta,
+                double strange_supp, double diquark_supp,
+                double sigma_perp,
+                double stringz_a, double stringz_b,
+                double string_sigma_T);
 
   /**
    * Common setup of PYTHIA objects for soft and hard string routines
@@ -290,13 +290,6 @@ class StringProcess {
   // clang-format off
 
   /**
-   * Set the soft subprocess identifier
-   * \param[in] iproc soft string subprocess that will be implemented
-   */
-  void set_subproc(StringSoftType iproc) { subproc_ = iproc; }
-  /// \return the soft subprocess identifier
-  StringSoftType get_subproc() { return subproc_; }
-  /**
    * initialization
    * feed intial particles, time of collision and gamma factor of the center of
    * mass.
@@ -380,6 +373,12 @@ class StringProcess {
    */
   bool next_NDiffSoft();
   /**
+   * Hard Non-diffractive process
+   * is based on PYTHIA 8 with partonic showers and interactions.
+   * \return whether the process is successfully implemented.
+   */
+  bool next_NDiffHard();
+  /**
    * Baryon-antibaryon annihilation process
    * Based on what UrQMD \iref{Bass:1998ca}, \iref{Bleicher:1999xi} does,
    * it create two mesonic strings after annihilating one quark-antiquark pair.
@@ -410,6 +409,17 @@ class StringProcess {
    */
   int append_final_state(const FourVector &uString,
                          const ThreeVector &evecLong);
+
+  /**
+   * convert Kaon-L or Kaon-S into K0 or Anti-K0
+   * \param[out] pythia_id is PDG id to be converted.
+   */
+  static void convert_KaonLS(int &pythia_id) {
+    if (pythia_id == 310 || pythia_id == 130) {
+      pythia_id = (Random::uniform_int(0, 1) == 0) ? 311 : -311;
+    }
+  }
+
   /**
    * Construct diquark from two quarks. Order does not matter.
    * \param[in] q1 PDG code of quark 1
@@ -452,6 +462,57 @@ class StringProcess {
    */
   int fragment_string(int idq1, int idq2, double mString,
                       ThreeVector &evecLong, bool flip_string_ends);
+
+  /**
+   * Assign a cross section scaling factor to all outgoing particles.
+   *
+   * The factor is only non-zero, when the outgoing particle carries
+   * a valence quark from the excited hadron. The assigned cross section
+   * scaling factor is equal to the number of the valence quarks from the
+   * fragmented hadron contained in the fragment divided by the total number
+   * of valence quarks of that fragment multiplied by a coherence factor
+   * \param[in] baryon_string baryon number of the string
+   * \param[out] outgoing_particles list of string fragments to which scaling
+   *             factors are assigned
+   * \param[in] evec_coll direction in which the string is stretched
+   * \param[in] suppression_factor additional coherence factor to be
+   *            multiplied with scaling factor
+   */
+  static void assign_all_scaling_factors(int baryon_string,
+                                         ParticleList& outgoing_particles,
+                                         ThreeVector &evec_coll,
+                                         double suppression_factor);
+
+  /**
+   * Find the leading string fragments
+   *
+   * Find the first particle, which can carry nq1, and the last particle,
+   * which can carry nq2 valence quarks and return their indices in
+   * the given list.
+   *
+   * \param[in] nq1 number of valence quarks from excited hadron at forward
+   *                end of the string
+   * \param[in] nq2 number of valance quarks from excited hadron at backward
+   *                end of the string
+   * \param[in] list list of string fragments
+   * \return indices of the leading hadrons in \p list
+   */
+  static std::pair<int, int> find_leading(int nq1, int nq2, ParticleList& list);
+
+  /**
+   * Assign a cross section scaling factor to the given particle.
+   *
+   * The scaling factor is the number of quarks from the excited hadron,
+   * that the fragment carries devided by the total number of quarks in
+   * this fragment multiplied by coherence factor.
+   *
+   * \param[in] nquark number of valence quarks from the excited hadron
+   *            contained in the given string fragment \p data
+   * \param[out] data particle to assign a scaling factor to
+   * \param[in] suppression_factor coherence factor to decrease scaling factor
+   */
+  static void assign_scaling_factor(int nquark, ParticleData& data,
+                                    double suppression_factor);
 
   // clang-format on
 };

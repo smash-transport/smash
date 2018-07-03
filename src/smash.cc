@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2012-2017
+ *    Copyright (c) 2012-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -217,13 +217,16 @@ ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
       two_to_one,
       included_2to2,
       configuration.take({"Collision_Term", "Strings"}, true),
+      configuration.take({"Collision_Term", "Use_AQM"}, true),
+      configuration.take({"Collision_Term",
+                          "Strings_with_Probability"}, true),
       configuration.take({"Collision_Term", "NNbar_Treatment"},
-                         NNbarTreatment::NoAnnihilation),
+                         NNbarTreatment::Strings),
       false,
       0.0,
       false};
   return ScatterActionsFinder(configuration, params, nucleon_has_interacted, 0,
-                              0, 1);
+                              0);
 }
 
 }  // unnamed namespace
@@ -367,6 +370,7 @@ int main(int argc, char *argv[]) {
       configuration.merge_yaml("{Collision_Term: {Two_to_One: False}}");
       ParticleType::create_type_list(configuration.take({"particles"}));
       DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
+      ParticleType::check_consistency();
       auto scat_finder = actions_finder_for_dump(configuration);
       scat_finder.dump_reactions();
       std::exit(EXIT_SUCCESS);
@@ -374,6 +378,7 @@ int main(int argc, char *argv[]) {
     if (resonance_dump_activated) {
       ParticleType::create_type_list(configuration.take({"particles"}));
       DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
+      ParticleType::check_consistency();
       PdgCode pdg(pdg_string);
       const ParticleType &res = ParticleType::find(pdg);
       res.dump_width_and_spectral_function();
@@ -382,6 +387,7 @@ int main(int argc, char *argv[]) {
     if (cross_section_dump_activated) {
       ParticleType::create_type_list(configuration.take({"particles"}));
       DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
+      ParticleType::check_consistency();
       configuration.merge_yaml("{Collision_Term: {Two_to_One: True}}");
       std::string arg_string(cs_string);
       std::vector<std::string> args = split(arg_string, ',');

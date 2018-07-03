@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2017
+ *    Copyright (c) 2015-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -38,7 +38,7 @@ static ScatterAction *set_up_action(const ParticleData &proj,
                                     CollisionBranchList &proc_list) {
   ScatterAction *act;
   act = new ScatterAction(proj, targ, 0.);
-  cross_sections xs(act->incoming_particles(), act->sqrt_s());
+  CrossSections xs(act->incoming_particles(), act->sqrt_s());
   proc_list = xs.two_to_two(Test::all_reactions_included());
   //   act->add_processes(proc_list);
 

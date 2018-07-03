@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -223,11 +223,12 @@ void Action::check_conservation(const uint32_t id_process) const {
     log.error() << particle_names.str() << err_msg;
     /* Pythia does not conserve energy and momentum at high energy, so we just
      * print the error and continue. */
-    if ((process_type_ == ProcessType::StringSoft) ||
+    if ((is_string_soft_process(process_type_)) ||
         (process_type_ == ProcessType::StringHard)) {
       return;
     }
     if (id_process == ID_PROCESS_PHOTON) {
+      abort();
       throw std::runtime_error("Conservation laws violated in photon process");
     } else {
       throw std::runtime_error("Conservation laws violated in process " +

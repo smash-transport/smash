@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -32,8 +32,8 @@ class BinaryOutputBase : public OutputInterface {
    *
    * \param[in] path Output path.
    * \param[in] mode Is used to determine the file access mode.
-   * \param[in] name Name of the ouput.
-   * \param[in] extended_format Is the written ouput extended.
+   * \param[in] name Name of the output.
+   * \param[in] extended_format Is the written output extended.
    */
   explicit BinaryOutputBase(const bf::path &path, const std::string &mode,
                             const std::string &name, bool extended_format);

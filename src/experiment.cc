@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2012-2017
+ *    Copyright (c) 2012-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -77,13 +77,10 @@ ExperimentPtr ExperimentBase::create(Configuration config,
    * will be configured in \ref input_modi_. Recognized values are:
    * \li \key Collider - For collisions of nuclei or compound objects. See \ref
    *     \ColliderModus
-   * \li \key Sphere - For calculations of the expansion of a thermalized sphere.
-   * See
-   *     \ref \SphereModus
-   * \li \key Box - For infinite matter calculation in a rectangular box. See \ref
-   *     \BoxModus
-   * \li \key List - For given external particle list. See \ref
-   *     \ListModus
+   * \li \key Sphere - For calculations of the expansion of a thermalized
+   * sphere. See \ref \SphereModus \li \key Box - For infinite matter
+   * calculation in a rectangular box. See \ref \BoxModus \li \key List - For
+   * given external particle list. See \ref \ListModus
    */
 
   /*!\Userguide
@@ -130,6 +127,12 @@ namespace {
  *
  * Description of options
  * ---------------------
+ * To produce a certain output content it is necessary to explicitly configure
+ * it in the Output section of the configuration file. This means, that the
+ * Output section needs to contain a subsection for the desired output.
+ * Aditionally, there are general output configuration parameters. \n
+ * \n
+ * ### General output configuration parameters:
  * \key Output_Interval (double, optional, default = End_Time): \n
  * Defines the period of intermediate output of the status of the simulated
  * system in Standard Output and other output formats which support this
@@ -143,29 +146,24 @@ namespace {
  * \li \key "baryon" - Net baryon density
  * \li \key "baryonic isospin" - Baryonic isospin density
  * \li \key "pion" - Pion density
- * \li \key "none" - D
- o not calculate density, print 0.0
+ * \li \key "none" - Do not calculate density, print 0.0
  *
- * Further options are defined for every single output \b content
+ * \n
+ * ### Format configuration independently of the specific output content
+ * Further options are defined for every single output content
  * (see \ref output_contents_ "output contents" for the list of
- * possible contents) in the following way:
- * \code
- * Content:
- *     Format: ["format1", "format2", ...]
- *     Option1: Value  # Content-specific options
- *     Option2: Value
- *     ...
- * \endcode
- *
- * To disable a certain output content,  remove or comment out the
- * corresponding section. Every output can be printed in several formats
- * simultaneously. The following option chooses list of formats:
+ * possible contents). Independently of the content, it is always necessary
+ * to provide the format in which the output should be generated.
  *
  * \key Format (list of formats, optional, default = [ ]):\n
  * List of formats for writing particular content.
  * Possible formats for every content are listed and described in
  * \ref output_contents_ "output contents". List of available formats is
  * \ref list_of_output_formats "here".
+ * \n
+ * Besides the universal \key Format option, there are also content-specific
+ output
+ * options that are listed below.
  *
  * ### Content-specific output options
  * \anchor output_content_specific_options_
@@ -201,18 +199,22 @@ namespace {
  * \anchor Thermodynamics
  * - \b Thermodynamics \n
  *   The user can print thermodynamical quantities on the spatial lattice to
- *   vtk output. The lattice for the output is regulated by the options of
+ *   vtk output. Note, that the Thermodynamics output requires a lattice.
+ *   This lattice needs to be enabled in the conguration file and is regulated
+ *   by the options of
  *   \ref input_lattice_. \n
  * \n
  *  \key Type (string, optional, default = \key "baryon"): \n
- *  Particle type taken into consideration, "baryon" corresponds to "net baryon".
+ *  Particle type taken into consideration, "baryon" corresponds to "net
+ baryon".
  *   \li \key "hadron"
  *   \li \key "baryon"
  *   \li \key "baryonic isospin"
  *   \li \key "pion"
  *   \li \key "none"
  *
- *   \key Quantities (list of thermodynamic quantities, optional, default = [ ]):\n
+ *   \key Quantities (list of thermodynamic quantities, optional, default = [
+ ]):\n
  *   List of thermodynamic quantities that are printed to the output. Possible
  *   quantities are:
  *   \li \key "rho_eckart" - Eckart rest frame density
@@ -240,36 +242,57 @@ namespace {
  *
  * \n
  * \anchor configuring_output_
- * Example: Configuring SMASH output
+ * Example: Configuring the SMASH Output
  * --------------
- * As an example, if one wants to have all of the following simultaneously:
- * \li particles at the end of event printed out in binary and Root formats
- * \li dileptons printed in Oscar2013 format
- * \li net baryon density at point (0, 0, 0) printed as a table
- *     against time every 1 fm/c
+ * The following example configures the output to be printed in an interval of
+ * 1 fm and with the net baryon density being printed to the header.
+ * The particles output is generated in "Oscar1999", VTK and "Root" format,
+ * generating output for each time step. The collisions output is formatted
+ * according to an extended "Oscar2013" format and the initial and final
+ * particle lists are printed as well.
+ *\verbatim
+ Output:
+     Output_Interval: 1.0
+     Density_Type: "baryon"
+     Particles:
+         Format:    ["Oscar1999", "VTK", "Root"]
+         Extended: False
+         Only_Final: False
+     Collisions:
+         Format:    ["Oscar2013"]
+         Extended: True
+         Print_Start_End: True
+ \endverbatim
  *
- * then the output section of configuration will be the following.
+ * To further activate photons and dileptons in the SMASH simulation and to also
+ * generate the output, the corresponding subsections need to be present in the
+ * configuration file. In the following example, the dilepton output is
+ * generated in extended "Oscar2013" and "Binary" format. The photon output
+ * is printed in "Oscar2013" format while the calculation is performed with
+ * 100 fractional photons.
+ *\verbatim
+     Dileptons:
+         Format:    ["Oscar2013", "Binary"]
+         Extended: True
+     Photons:
+         Format:    ["Oscar2013"]
+         Fractions: 100
+ \endverbatim
  *
- * \code
- * Output:
- *     Output_Interval:  1.0
- *     Particles:
- *         Format:          ["Binary", "Root"]
- *         Only_Final:      True
- *     Dileptons:
- *         Format:          ["Oscar2013"]
- *     Thermodynamics:
- *         Format:          ["ASCII"]
- *         Type:            "baryon"
- *         Quantities:      ["rho_eckart"]
- *         Position:        [0.0, 0.0, 0.0]
- *         Smearing:        True
- * \endcode
- *
- * \page input_lattice_ Lattice
- * \key Potentials_Affect_Thresholds (bool, optional, default = false): \n
- * Include potential effects, since mean field potentials change the threshold
- * energies of the actions.
+ * Additionally, the thermodynsamics output can be activated. In this example,
+ * thermodynamic output is activated for hadrons. The quanities that are printed
+ * are the density in the Eckart rest frame and the energy momentum tensor in
+ * the Landau rest frame. These quantities are printed at each time step for the
+ * position (0,0,0). Gaussian smearing is not applied. The output is provided
+ * in "ASCII" and "VTK" format.
+ *\verbatim
+     Thermodynamics:
+         Format:    ["ASCII", "VTK"]
+         Type: "hadron"
+         Quantities:    ["rho_eckart", "tmn_landau"]
+         Position:    [0.0, 0.0, 0.0]
+         Smearing: False
+ \endverbatim
  */
 
 /** Gathers all general Experiment parameters
@@ -298,22 +321,11 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   const double dt = config.take({"General", "Delta_Time"}, 1.);
   const double t_end = config.read({"General", "End_Time"});
   const double output_dt = config.take({"Output", "Output_Interval"}, t_end);
-  const bool two_to_one = config.take({"Collision_Term", "Two_to_One"}, true);
-  ReactionsBitSet included_2to2 =
-      config.take({"Collision_Term", "Included_2to2"}, ReactionsBitSet().set());
-  bool strings_switch_default = true;
-  if (modus_chooser == "Box") {
-    strings_switch_default = false;
-  }
-  const bool strings_switch =
-      config.take({"Collision_Term", "Strings"}, strings_switch_default);
-  const NNbarTreatment nnbar_treatment = config.take(
-      {"Collision_Term", "NNbar_Treatment"}, NNbarTreatment::NoAnnihilation);
-  const bool photons_switch = config.has_value({"Output", "Photons"});
+  auto config_coll = config["Collision_Term"];
   /* Elastic collisions between the nucleons with the square root s
    * below low_snn_cut are excluded. */
   const double low_snn_cut =
-      config.take({"Collision_Term", "Elastic_NN_Cutoff_Sqrts"}, 1.98);
+      config_coll.take({"Elastic_NN_Cutoff_Sqrts"}, 1.98);
   const auto proton = ParticleType::try_find(pdg::p);
   const auto pion = ParticleType::try_find(pdg::pi_z);
   if (proton && pion &&
@@ -322,19 +334,19 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
              " of the process: NN to NNpi");
   }
   const bool potential_affect_threshold =
-      (config.has_value({"Lattice", "Potentials_Affect_Thresholds"})
-           ? config.take({"Lattice", "Potentials_Affect_Thresholds"})
-           : false);
+           config.take({"Lattice", "Potentials_Affect_Thresholds"}, false);
   return {{0., dt},
           {0.0, output_dt},
           ntest,
           config.take({"General", "Gaussian_Sigma"}, 1.),
           config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.),
-          two_to_one,
-          included_2to2,
-          strings_switch,
-          nnbar_treatment,
-          photons_switch,
+          config_coll.take({"Two_to_One"}, true),
+          config_coll.take({"Included_2to2"}, ReactionsBitSet().set()),
+          config_coll.take({"Strings"}, modus_chooser != "Box"),
+          config_coll.take({"Use_AQM"}, true),
+          config_coll.take({"Strings_with_Probability"}, true),
+          config_coll.take({"NNbar_Treatment"}, NNbarTreatment::Strings),
+          config.has_value({"Output", "Photons"}),
           low_snn_cut,
           potential_affect_threshold};
 }
@@ -362,7 +374,8 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
 }
 
 template <typename Modus>
-void Experiment<Modus>::create_output(std::string format, std::string content,
+void Experiment<Modus>::create_output(const std::string &format,
+                                      const std::string &content,
                                       const bf::path &output_path,
                                       const OutputParameters &out_par) {
   const auto &log = logger<LogArea::Experiment>();
@@ -416,8 +429,8 @@ void Experiment<Modus>::create_output(std::string format, std::string content,
  * Number of events to calculate.
  *
  * \key Use_Grid (bool, optional, default = true): \n
- * \li \key true - A grid is used to reduce the combinatorics of interaction lookup \n
- * \li \key false - No grid is used.
+ * \li \key true - A grid is used to reduce the combinatorics of interaction
+ * lookup \n \li \key false - No grid is used.
  *
  * \key Time_Step_Mode (string, optional, default = Fixed): \n
  * The mode of time stepping. Possible values: \n
@@ -445,8 +458,17 @@ void Experiment<Modus>::create_output(std::string format, std::string content,
  * \key Two_to_One (bool, optional, default = \key true) \n
  * Enable 2 <--> 1 processes (resonance formation and decays).
  *
- * \key Two_to_Two (bool, optional, default = \key true) \n
- * Enable 2 <--> 2 collisions.
+ * \key Included_2to2 (list of 2 <--> 2 reactions,
+ * optional, default = ["All"]) \n
+ * List that contains all possible 2 <--> 2 process categories. Each process of
+ * the listed category can be performed within the simulation. Possible
+ * categories are: \li \key "Elastic" - elastic binary scatterings \li \key
+ * "NN_to_NR" - nucleon + nucleon <--> nucleon + resonance \li \key "NN_to_DR" -
+ * nucleon + nucleon <--> delta + resonance \li \key "KN_to_KN" - kaon + nucleon
+ * <--> kaon + nucleon \li \key "KN_to_KDelta" - kaon + nucleon <--> kaon + dela
+ * \li \key "Strangeness_exchange" - processes with strangeness exchange
+ * \li \key "All" - include all binary processes, no necessity to list each
+ * single category
  *
  * \key Force_Decays_At_End (bool, optional, default = \key true): \n
  * \li \key true - Force all resonances to decay after last timestep \n
@@ -458,11 +480,49 @@ void Experiment<Modus>::create_output(std::string format, std::string content,
  * as a decay afterburner, but not recommended in general, because
  * it breaks the detailed balance.
  *
- * \key NNbar_Treatment (string, optional, default = "no annihilation")
+ * \key NNbar_Treatment (string, optional, default = "strings")
  * \li \key "no annihilation" - No annihilation of NNbar is performed.
  * \li \key "resonances" - Annhilation through NNbar → ρh₁(1170); combined with
  *  ρ → ππ and h₁(1170) → πρ, which gives 5 pions on average.
  * \li \key "strings" - Annihilation throug string fragmentation.
+ *
+ * \key Use_AQM (bool, optional, default = \key true) \n
+ * Turn on AQM cross-sections for exotic combination of particles
+ * (baryon-baryon cross-sections are scaled from proton-proton high energy
+ * parametrization, for example). This includes both elastic and non-elastic
+ * contributions; non-elastic contributions go through string fragmentation.
+ * Turning off strings or elastic collisions while leaving this on will
+ * result in the corresponding part of the AQM cross-sections to also be off.
+ * Cross-sections parametrization are scaled according to 
+ * \f[ \frac{\sigma^{AQM}_{process}}{\sigma^{AQM}_{ref_process}}
+ * \sigma^{param}_{ref_process}\f]
+ * where \f$ \sigma^{AQM}_x = 40 \left( \frac{2}{3} \right)^{n_{meson}}
+ * (1 - 0.4 x^s_1) (1 - 0.4 x^s_2) \f$, with \f$n_{meson}\f$ being the number
+ * of mesons in the process, \f$x^s_{1,2}\f$ the fraction of strange quarks in
+ * the participant. "process" is then a generic process and "ref_process" a
+ * reference process such as PP for which solid parametrizations exist.
+ * (\iref{Bass:1998ca})
+ *
+ * \key Strings_with_Probability (bool, optional, default = \key true): \n
+ * \li \key true - String processes are triggered according to a probability
+ *                 increasing smoothly with the collisional energy from 0 to 1
+ *                 in a certain energy window. At energies beyond that window,
+ *                 all the inelastic scatterings are via strings, while at the
+ *                 energies below that window, all the scatterings are via
+ *                 non-string processes. One should be careful that in this
+ *                 approach, the scatterings via resoances are also suppressed
+ *                 in the intermediate energy region, and vanishes at high
+ *                 energies, e.g. pπ→Δ→ΣK can't happen at a collisional energy
+ *                 beyond 2.2 GeV in this approach. Therefore, the cross
+ *                 sections of the scatterings to the certain final states,
+ *                 which might be crucial for the production of the rare
+ *                 species, will be reduced at the high energies. \n
+ * \li \key false - String processes always happen as long as the collisional
+ *                  energy exceeds the threshold value by 0.9 GeV, and the
+ *                  parametrized total cross section is larger than the sum of
+ *                  cross sections contributed by the non-string processes. The
+ *                  string cross section is thus obtained by taking the
+ *                  difference between them.
  *
  * \subpage pauliblocker
  */
@@ -500,10 +560,11 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   }
   bool no_coll = config.take({"Collision_Term", "No_Collisions"}, false);
   if ((parameters_.two_to_one || parameters_.included_2to2.any() ||
-      parameters_.strings_switch) && !no_coll) {
+       parameters_.strings_switch) &&
+      !no_coll) {
     auto scat_finder = make_unique<ScatterActionsFinder>(
         config, parameters_, nucleon_has_interacted_, modus_.total_N_number(),
-        modus_.proj_N_number(), n_fractional_photons_);
+        modus_.proj_N_number());
     max_transverse_distance_sqr_ =
         scat_finder->max_transverse_distance_sqr(parameters_.testparticles);
     action_finders_.emplace_back(std::move(scat_finder));
@@ -538,8 +599,50 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * \key Allowed_Deviation (double, optional, default = 2.5) \n
    * Limit by how much the target can be exceeded before the time step is
    * aborted.
+   **/
+
+  /*!\Userguide
+   * \page input_general_
+   *
+   * \n
+   * Example: Configuring General Properties
+   * --------------
+   * The following example provides a possibility for the \key General
+   * configuration.
+   *
+   *\verbatim
+   General:
+       Modus: Collider
+       Delta_Time: 0.1
+       Testparticles: 1
+       Gaussian_Sigma: 1.0
+       Gauss_Cutoff_In_Sigma: 3.0
+       End_Time: 100.0
+       Randomseed: -1
+       Nevents: 20
+       Use_Grid: True
+       Time_Step_Mode: Fixed
+   \endverbatim
+   * For the use of adaptive timesteps, change the \key Time_Step_Mode and
+   * include the corresponding additional parameters:
+   *\verbatim
+       Time_Step_Mode: Adaptive
+       Adaptive_Time_Step:
+           Smoothing_Factor: 0.1
+           Target_Missed_Actions: 0.01
+           Allowed_Deviation: 2.5
+   \endverbatim
+   *
+   * In the case of an expanding sphere setup, change the \key Modus and provide
+   * further information about the expansion.
+   *\verbatim
+       Modus: Sphere
+       MetricType: MasslessFRW
+       Expansion_Rate: 0.1
+   \endverbatim
    *
    **/
+
   if (time_step_mode_ == TimeStepMode::Adaptive) {
     adaptive_parameters_ = make_unique<AdaptiveParameters>(
         config["General"]["Adaptive_Time_Step"], delta_time_startup_);
@@ -716,9 +819,30 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *      Use periodic continuation or not. With periodic continuation
    *      x + i * lx is equivalent to x, same for y, z.
    *
+   * \key Potentials_Affect_Thresholds (bool, optional, default = false): \n
+   * Include potential effects, since mean field potentials change the threshold
+   * energies of the actions.
+   *
    * For format of lattice output see \ref output_vtk_lattice_. To configure
    * output of the quantities on the lattice to vtk files see
    * \ref input_output_options_.
+   *
+   * \n
+   * Examples: Configuring the Lattice
+   * --------------
+   * The following example configures the lattice with the origin in (0,0,0),
+   * 20 cells of 10 fm size in each direction and with periodic boundary
+   * conditions. The potential effects on the thresholds are taken into
+   * consideration.
+   *
+   *\verbatim
+   Lattice:
+       Origin:    [0.0, 0.0, 0.0]
+       Sizes:    [10.0, 10.0, 10.0]
+       Cell_Number:    [20, 20, 20]
+       Periodic: True
+       Potentials_Affect_Thresholds: True
+   \endverbatim
    */
 
   // Create lattices
@@ -985,29 +1109,37 @@ bool Experiment<Modus>::perform_action(
   }
 
   // At every collision photons can be produced.
+  // Note: We rely here on the lazy evaluation of the arguments to if.
+  // It may happen that in a wall-crossing-action sqrt_s raises an exception.
+  // Therefore we first have to check if the incoming particles can undergo
+  // an em-interaction.
   if (photons_switch_ &&
-      (ScatterActionPhoton::is_photon_reaction(action.incoming_particles()) !=
-       ScatterActionPhoton::ReactionType::no_reaction)) {
+      ScatterActionPhoton::is_photon_reaction(action.incoming_particles()) &&
+      ScatterActionPhoton::is_kinematically_possible(
+          action.sqrt_s(), action.incoming_particles())) {
     /* Time in the action constructor is relative to
      * current time of incoming */
     constexpr double action_time = 0.;
     ScatterActionPhoton photon_act(action.incoming_particles(), action_time,
-                                   n_fractional_photons_);
-    /* Add a completely dummy process to photon action.  The only important
-     * thing is that its cross-section is equal to cross-section of action.
-     * This can be done, because photon action is never performed, only
-     * final state is generated and printed to photon output. */
-    photon_act.add_dummy_hadronic_channels(action.raw_weight_value());
-    // Now add the actual photon reaction channel
-    photon_act.add_single_channel();
-    for (int i = 0; i < n_fractional_photons_; i++) {
-      photon_act.generate_final_state();
-      for (const auto &output : outputs_) {
-        if (output->is_photon_output()) {
-          output->at_interaction(photon_act, rho);
-        }
-      }
-    }
+                                   n_fractional_photons_,
+                                   action.get_total_weight());
+
+    /**
+     * Add a completely dummy process to the photon action. The only important
+     * thing is that its cross-section is equal to the cross-section of the
+     * hadronic action. This can be done, because the photon action is never
+     * actually performed, only the final state is generated and printed to
+     * the photon output.
+     * Note: The cross_section_scaling_factor can be neglected here, since it
+     * cancels out for the weighting, where a ratio of (unscaled) photon
+     * cross section and (unscaled) hadronic cross section is taken.
+     */
+    photon_act.add_dummy_hadronic_process(action.get_total_weight());
+
+    // Now add the actual photon reaction channel.
+    photon_act.add_single_process();
+
+    photon_act.perform_photons(outputs_);
   }
   log.debug(~einhard::Green(), "✔ ", action);
   return true;

@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -130,8 +130,14 @@ ParticleType::ParticleType(std::string n, double m, double w, PdgCode id)
       isospin_(-1),
       I3_(pdgcode_.isospin3()) {}
 
-/* Construct an antiparticle name-string from the given name-string for the
- * particle and its PDG code. */
+/**
+ * Construct an antiparticle name-string from the given name-string for the
+ * particle and its PDG code.
+ *
+ * \param[in] name the name-string of the particle to convert
+ * \param[in] code the pdgcode of the particle to convert
+ * \return the name-string of the converted antiparticle
+ */
 static std::string antiname(const std::string &name, PdgCode code) {
   std::string basename, charge;
 
@@ -164,7 +170,13 @@ static std::string antiname(const std::string &name, PdgCode code) {
   return basename + charge;
 }
 
-/* Construct a charge string, given the charge as integer. */
+/**
+ * Construct a charge string, given the charge as integer.
+ *
+ * \param[in] charge charge of a particle
+ * \return the corresponding string to write out this charge
+ * \throw runtime_error if the charge is not an integer between -2 and 2
+ */
 static std::string chargestr(int charge) {
   switch (charge) {
     case 2:
@@ -723,7 +735,7 @@ void ParticleType::dump_width_and_spectral_function() const {
             << " spectral function(m^2)*m [GeV^-1] of " << *this << std::endl;
   constexpr double m_step = 0.02;
   const double m_min = min_mass_spectral();
-  // An emprical value used to stop the printout. Assumes that spectral
+  // An empirical value used to stop the printout. Assumes that spectral
   // function decays at high mass, which is true for all known resonances.
   constexpr double spectral_function_threshold = 8.e-3;
   std::cout << std::fixed << std::setprecision(5);

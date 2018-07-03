@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2017
+ * Copyright (c) 2013-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -29,11 +29,11 @@ std::istream& operator>>(std::istream& is, PdgCode& code) {
 }
 
 int PdgCode::net_quark_number(const int quark) const {
-  // input sanitization: Only quark numbers 1 through 8 are allowed.
-  if (quark < 1 || quark > 8) {
+  // input sanitization: Only quark numbers 1 through 6 are allowed.
+  if (quark < 1 || quark > 6) {
     throw std::invalid_argument(
         std::string("PdgCode::net_quark_number(): ") +
-        std::string("Quark number must be in [1..8], received ") +
+        std::string("Quark number must be in [1..6], received ") +
         std::to_string(quark));
   }
   if (is_nucleus()) {
@@ -99,7 +99,7 @@ bool PdgCode::contains_enough_valence_quarks(
       return valence_quarks_required == 1 || valence_quarks_required == 2;
     }
     if (baryon_number() == -1) {
-      return valence_quarks_required == -1 || valence_quarks_required == -1;
+      return valence_quarks_required == -1 || valence_quarks_required == -2;
     }
   }
   throw std::runtime_error("String fragment is neither baryon nor meson");

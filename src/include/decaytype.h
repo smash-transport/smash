@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2015-2017
+ *    Copyright (c) 2015-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -298,8 +298,8 @@ class ThreeBodyDecayDilepton : public ThreeBodyDecay {
    * \param t Type of the parent particle.
    */
   static double diff_width(double m_par, double m_l, double m_dil,
-                           double m_other, ParticleTypePtr t);
-
+                           double m_other, ParticleTypePtr other,
+                           ParticleTypePtr t);
   double width(double m0, double G0, double m) const override;
 
  protected:

@@ -45,7 +45,7 @@ class EosTable {
    * \param[in] de step in energy density [GeV/fm^4]
    * \param[in] dnb step in net baryon density [GeV/fm^3]
    * \param[in] n_e number of steps in energy density
-   * \param[in] n_e number of steps in net baryon density
+   * \param[in] n_b number of steps in net baryon density
    *
    * Entry at (ie, inb) corresponds to energy density and net baryon density
    * (e, nb) = (ie*de, inb*dnb) [GeV/fm^4, GeV/fm^3].
@@ -199,7 +199,17 @@ class HadronGasEos {
    */
   static double partial_density(const ParticleType& ptype, double T, double mub,
                                 double mus);
-
+  /**
+   * \brief Sample resonance mass in a thermal medium
+   *
+   * Samples mass from the distribution
+   * \f[ dN/dm \sim A(m) m^2 K_2\left( \frac{m}{T}\right) \f]
+   * For stable particles always returns pole mass.
+   * \param[in] ptype the hadron sort, for which mass is sampled
+   * \param[in] beta inverse temperature 1/T [1/GeV]
+   * \return sampled mass
+   */
+  static double sample_mass_thermal(const ParticleType &ptype, double beta);
   /**
    * Compute temperature and chemical potentials given energy-,
    * net baryon-, net strangeness density and an inital approximation.
@@ -279,7 +289,15 @@ class HadronGasEos {
   };
 
   /**
-   * Compute (unnormalized) density of one hadron sort - helper function
+   * Function used to avoid duplications in density calculations.
+   * \param[in] m_over_T mass to temperature ratio \f$ m/T \f$
+   * \param[in] mu_over_T chemical potential to temperature ratio \f$ \mu/T \f$
+   * \return calculated \f$ (m/T)^2 exp(\mu/T) K_2(m/T) \f$
+   */
+  static double scaled_partial_density_auxiliary(double m_over_T,
+                                                 double mu_over_T);
+  /**
+   * Compute (unnormalized) density of one hadron sort - helper functions
    * used to reduce code duplication.
    *
    * \param[in] ptype the hadron sort, for which partial density is computed

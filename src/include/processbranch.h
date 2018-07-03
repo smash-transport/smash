@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2017
+ *    Copyright (c) 2013-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -18,32 +18,72 @@
 
 namespace smash {
 
-/** Process Types are used to identify the type of the process,
- * currently we have 12 of these:
- * (0) nothing (None)
- * (1) elastic (Elastic)
- * (2) resonance formation (2->1) (TwoToOne)
- * (3) 2->2 (inelastic) (TwoToTwo)
- * (4) string excitation by PYTHIA (String)
- * (5) resonance decays (Decay)
- * (6) Wall transition (Wall)
- * (7) Forces thermalization
- * (41) Soft string excitation
- * (42) Hard string process involving 2->2 QCD process by PYTHIA
+/**
+ * Process Types are used to identify the type of the process. Corresponding
+ * integer numbers are given explicitly, because they appear in the output.
  */
 enum class ProcessType {
+  /// nothing
   None = 0,
+  /// elastic scattering: particles remain the same, only momenta change
   Elastic = 1,
+  /// resonance formation (2->1)
   TwoToOne = 2,
+  /// 2->2 inelastic scattering
   TwoToTwo = 3,
-  // String = 4,
+  /// resonance decays
   Decay = 5,
+  /// box wall crossing
   Wall = 6,
+  /**
+   *  forced thermalization, many particles are replaced
+   *  by a thermalized ensemble
+   */
   Thermalization = 7,
-  StringSoft = 41,
-  StringHard = 42
+  /**
+   * (41-45) soft string excitations. Here "soft" means that the process does
+   *         not involve quark or gluon scattering. A string is formed by quark
+   *         and antiquark, or quark and diquark, in its ends. Then this
+   *         string decays. Depending on which quark and anti- (or di-)quarks
+   *         are selected for string formation, the process has one of the
+   *         following types.
+   */
+  /// single diffractive AB->AX. Both quark and anti-/di-quark taken from B.
+  StringSoftSingleDiffractiveAX = 41,
+  /**
+   *  single diffractive AB->XB. Both quark and anti-/di-quark taken from A.
+   *  It makes sense to distinguish it from AB->AX, because A and B can be
+   *  particles of different types, for example, a pion and a proton.
+   *  It matters then, whether the pion creates a string or the proton.
+   */
+  StringSoftSingleDiffractiveXB = 42,
+  /// double diffractive. Two strings are formed, one from A and one from B.
+  StringSoftDoubleDiffractive   = 43,
+  /**
+   * a special case of baryon-antibaryon annihilation. One pair qqbar
+   * annihilates immediately and then two strings are formed.
+   */
+  StringSoftAnnihilation        = 44,
+  /// non-diffractive. Two strings are formed both have ends in A and B.
+  StringSoftNonDiffractive      = 45,
+  /**
+   *  hard string process involving 2->2 QCD process by PYTHIA. Here quarks
+   *  do not simply form a string. They actually scatter on parton level first.
+   */
+  StringHard = 46
 };
 
+/**
+ * Check if a given process type is a soft string excitation
+ * \param[in] p The process type
+ */
+bool is_string_soft_process(ProcessType p);
+
+/**
+ * \ingroup logging
+ * Writes the textual representation of the \p process_type
+ * to the output stream \p os.
+ */
 std::ostream &operator<<(std::ostream &os, ProcessType process_type);
 
 /**
@@ -74,14 +114,20 @@ std::ostream &operator<<(std::ostream &os, ProcessType process_type);
  */
 class ProcessBranch {
  public:
-  /// Create a ProcessBranch without final states
+  /// Create a ProcessBranch without final states and weight.
   ProcessBranch() : branch_weight_(0.) {}
+
+  /**
+   * Create a ProcessBranch with with weight but without final states.
+   * \param[in] w Weight of new branch.
+   */
   explicit ProcessBranch(double w) : branch_weight_(w) {}
 
   /// Copying is disabled. Use std::move or create a new object.
   ProcessBranch(const ProcessBranch &) = delete;
 
-  /** Virtual Destructor.
+  /**
+   * Virtual Destructor.
    * The declaration of the destructor is necessary to make it virtual.
    */
   virtual ~ProcessBranch() = default;
@@ -89,9 +135,11 @@ class ProcessBranch {
   /**
    * Set the weight of the branch.
    * In other words, how probable this branch is
-   * compared to other branches
+   * compared to other branches.
+   * \param[in] process_weight Weight of the process.
    */
   inline void set_weight(double process_weight);
+
   /// Return the process type
   virtual ProcessType get_type() const = 0;
 
@@ -104,7 +152,7 @@ class ProcessBranch {
    */
   ParticleList particle_list() const;
 
-  /// Return the branch weight
+  /// Return the branch weight.
   inline double weight() const;
 
   /**
@@ -113,6 +161,7 @@ class ProcessBranch {
    */
   double threshold() const;
 
+  /// Return the number of particles in the final state.
   virtual unsigned int particle_number() const = 0;
 
  protected:
@@ -125,7 +174,8 @@ class ProcessBranch {
 /**
  * Set the weight of the branch.
  * In other words, how probable this branch is
- * compared to other branches
+ * compared to other branches.
+ * \param[in] process_weight weight of the branch
  */
 inline void ProcessBranch::set_weight(double process_weight) {
   branch_weight_ = process_weight;
@@ -134,7 +184,8 @@ inline void ProcessBranch::set_weight(double process_weight) {
 /// Return the branch weight
 inline double ProcessBranch::weight() const { return branch_weight_; }
 
-/** \relates ProcessBranch
+/**
+ * \relates ProcessBranch
  * Calculates the total weight by summing all weights of the ProcessBranch
  * objects in the list \p l.
  */
@@ -155,15 +206,31 @@ inline double total_weight(const ProcessBranchList<Branch> &l) {
  */
 class CollisionBranch : public ProcessBranch {
  public:
+  /**
+   * Construct collision branch with empty final state.
+   * \param[in] w Weight of created branch.
+   * \param[in] p_type Process type of created branch.
+   */
   CollisionBranch(double w, ProcessType p_type)
       : ProcessBranch(w), process_type_(p_type) {}
-  /// Constructor with 1 particle
+  /**
+   * Construct collision branch with 1 particle in final state.
+   * \param[in] type Particle type of final state particle.
+   * \param[in] w Weight of created branch.
+   * \param[in] p_type Process type of created branch.
+   */
   CollisionBranch(const ParticleType &type, double w, ProcessType p_type)
       : ProcessBranch(w), process_type_(p_type) {
     particle_types_.reserve(1);
     particle_types_.push_back(&type);
   }
-  /// Constructor with 2 particles
+  /**
+   * Construct collision branch with 2 particles in final state.
+   * \param[in] type_a Particle types of one final state particle.
+   * \param[in] type_b Particle types of other final state particle.
+   * \param[in] w Weight of created branch.
+   * \param[in] p_type Process type of created branch.
+   */
   CollisionBranch(const ParticleType &type_a, const ParticleType &type_b,
                   double w, ProcessType p_type)
       : ProcessBranch(w), process_type_(p_type) {
@@ -171,7 +238,12 @@ class CollisionBranch : public ProcessBranch {
     particle_types_.push_back(&type_a);
     particle_types_.push_back(&type_b);
   }
-  /// Constructor with a list of particles
+  /**
+   * Construct collision branch with a list of particles in final state.
+   * \param[in] new_types List of particle types of final state particles.
+   * \param[in] w Weight of created branch.
+   * \param[in] p_type Process type of created branch.
+   */
   CollisionBranch(ParticleTypePtrList new_types, double w, ProcessType p_type)
       : ProcessBranch(w),
         particle_types_(std::move(new_types)),
@@ -181,13 +253,11 @@ class CollisionBranch : public ProcessBranch {
       : ProcessBranch(rhs.branch_weight_),
         particle_types_(std::move(rhs.particle_types_)),
         process_type_(rhs.process_type_) {}
-  /// Return the particle types associated with this branch.
   const ParticleTypePtrList &particle_types() const override {
     return particle_types_;
   }
   /// Set the process type
   inline void set_type(ProcessType p_type) { process_type_ = p_type; }
-  /// Return the process type
   inline ProcessType get_type() const override { return process_type_; }
   unsigned int particle_number() const override {
     return particle_types_.size();
@@ -205,11 +275,15 @@ class CollisionBranch : public ProcessBranch {
   /**
    * Process type are used to distinguish different types of processes,
    * e.g. string formation, resonance formation, elastic scattering and so on.
-   *
    */
   ProcessType process_type_;
 };
 
+/**
+ * \ingroup logging
+ * Writes the textual representation of the Collision Branch \p cbranch
+ * to the output stream \p os.
+ */
 std::ostream &operator<<(std::ostream &os, const CollisionBranch &cbranch);
 
 /**
@@ -221,25 +295,29 @@ std::ostream &operator<<(std::ostream &os, const CollisionBranch &cbranch);
  */
 class DecayBranch : public ProcessBranch {
  public:
+  /**
+   * Construct decay branch.
+   * \param[in] t DecayType of branch.
+   * \param[in] w Weight of created branch.
+   */
   DecayBranch(const DecayType &t, double w) : ProcessBranch(w), type_(t) {}
   /// The move constructor efficiently moves the particle-type list member.
   DecayBranch(DecayBranch &&rhs)
       : ProcessBranch(rhs.branch_weight_), type_(rhs.type_) {}
   /// Get the angular momentum of this branch.
   inline int angular_momentum() const { return type_.angular_momentum(); }
-  /// Return the particle types associated with this branch.
   const ParticleTypePtrList &particle_types() const override {
     return type_.particle_types();
   }
   unsigned int particle_number() const override {
     return type_.particle_number();
   }
+  /// Return the DecayType of the branch.
   inline const DecayType &type() const { return type_; }
-  /// Return the process type
   inline ProcessType get_type() const override { return ProcessType::Decay; }
 
  private:
-  // decay type (including final-state particles and angular momentum
+  /// Decay type (including final-state particles and angular momentum)
   const DecayType &type_;
 };
 

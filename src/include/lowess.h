@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2015-2017
+ *    Copyright (c) 2015-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -233,7 +233,15 @@ void lowess(const T *x, const T *y, size_t n, T *ys, T span, size_t iter,
     const auto c9 = 0.999 * cmad;
     const auto c1 = 0.001 * cmad;
     for (i = 0; i < n; i++) {
+      if (cmad == 0.) {
+        // In this case, `r` cannot really be smaller than `c1` or `c2`, so we
+        // would set `rw[i] = 0` anyway. To avoid divisions by zero, we do this
+        // already here.
+        rw[i] = 0;
+        continue;
+      }
       const auto r = std::abs(res[i]);
+
       if (r <= c1)
         rw[i] = 1.;
       else if (r <= c9)

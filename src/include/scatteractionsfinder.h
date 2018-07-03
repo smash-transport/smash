@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -66,7 +66,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
   ScatterActionsFinder(Configuration config,
                        const ExperimentParameters &parameters,
                        const std::vector<bool> &nucleon_has_interacted,
-                       int N_tot, int N_proj, int n_fractional_photons);
+                       int N_tot, int N_proj);
 
   /**
    * Determine the collision time of the two particles.
@@ -238,6 +238,10 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const double low_snn_cut_;
   /// Switch to turn off string excitation.
   const bool strings_switch_;
+  /// Switch to control whether to use AQM or not
+  const bool use_AQM_;
+  /// Decide whether to implement string fragmentation based on a probability
+  const bool strings_with_probability_;
   /// Switch for NNbar reactions
   const NNbarTreatment nnbar_treatment_;
   /**
@@ -251,11 +255,6 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const int N_proj_;
   /// Parameter for formation time
   const double string_formation_time_;
-  /// Photons switch
-  const bool photons_;
-  /// Number of fractional photons
-  /// \todo (not used) asignee: Anna Schaefer
-  const bool n_fractional_photons_;
   /**
    * The cross section scaling factor increases with this power in time.
    * A step function is used if this is not lager than 0.
