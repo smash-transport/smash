@@ -55,6 +55,13 @@ StringProcess::StringProcess(double string_tension, double time_formation,
 
   /* initialize PYTHIA */
   pythia_hadron_->init();
+  /* Set the random seed of the Pythia random Number Generator.
+   * Pythia's random is controlled by SMASH in every single collision.
+   * In this way we ensure that the results are reproducible
+   * for every event if one knows SMASH random seed. */
+  const int maxint = std::numeric_limits<int>::max();
+  pythia_hadron_->rndm.init(random::uniform_int(1, maxint));
+
   pythia_sigmatot_.init(&pythia_hadron_->info, pythia_hadron_->settings,
                         &pythia_hadron_->particleData);
 
@@ -598,13 +605,13 @@ bool StringProcess::next_NDiffHard() {
     if (!pythia_parton_initialized_) {
       throw std::runtime_error("Pythia failed to initialize.");
     }
+    /* Set the random seed of the Pythia random Number Generator.
+     * Pythia's random is controlled by SMASH in every single collision.
+     * In this way we ensure that the results are reproducible
+     * for every event if one knows SMASH random seed. */
+    const int maxint = std::numeric_limits<int>::max();
+    pythia_parton_->rndm.init(random::uniform_int(1, maxint));
   }
-  /* Set the random seed of the Pythia random Number Generator.
-   * Pythia's random is controlled by SMASH in every single collision.
-   * In this way we ensure that the results are reproducible
-   * for every event if one knows SMASH random seed. */
-  const int maxint = std::numeric_limits<int>::max();
-  pythia_parton_->rndm.init(random::uniform_int(1, maxint));
 
   // Short notation for Pythia event
   Pythia8::Event &event_hadron = pythia_hadron_->event;
@@ -641,10 +648,19 @@ bool StringProcess::next_NDiffHard() {
       } else {
         FourVector momentum = reorient(pythia_parton_->event[i], evecBasisAB_);
         log.debug("4-momentum from Pythia: ", momentum);
-        append_intermediate_list(pdgid, momentum,
-                                 new_non_hadron_particles);
+        bool found_ptype = append_intermediate_list(pdgid, momentum,
+                                                    new_non_hadron_particles);
+        if (!found_ptype) {
+          log.warn("PDG ID ", pdgid,
+                   " does not exist in ParticleType - start over.");
+          final_state_success = false;
+        }
       }
     }
+  }
+  if (!final_state_success) {
+    event_intermediate.reset();
+    return false;
   }
   event_intermediate.clearJunctions();
   for (int i = 0; i < pythia_parton_->event.sizeJunction(); i++) {
@@ -671,38 +687,49 @@ bool StringProcess::next_NDiffHard() {
 
     hadronize_success = pythia_hadron_->forceHadronLevel();
     log.debug("Pythia hadronized, success = ", hadronize_success);
+
+    new_intermediate_particles.clear();
+    if (hadronize_success) {
+      for (int i = 0; i < event_hadron.size(); i++) {
+        if (event_hadron[i].isFinal()) {
+          int pythia_id = event_hadron[i].id();
+          log.debug("PDG ID from Pythia:", pythia_id);
+          /* K_short and K_long need to be converted to K0
+           * since SMASH only knows K0 */
+          convert_KaonLS(pythia_id);
+
+          /* evecBasisAB_[0] is a unit 3-vector in the collision axis,
+           * while evecBasisAB_[1] and evecBasisAB_[2] spans the transverse plane.
+           * Given that PYTHIA assumes z-direction to be the collision axis,
+           * pz from PYTHIA should be the momentum compoment in evecBasisAB_[0].
+           * px and py are respectively the momentum components in two
+           * transverse directions evecBasisAB_[1] and evecBasisAB_[2]. */
+          FourVector momentum = reorient(event_hadron[i], evecBasisAB_);
+          log.debug("4-momentum from Pythia: ", momentum);
+          log.debug("appending the particle ", pythia_id,
+                    " to the intermediate particle list.");
+          bool found_ptype = false;
+          if (event_hadron[i].isHadron()) {
+            found_ptype = append_intermediate_list(pythia_id, momentum,
+                                                   new_intermediate_particles);
+          } else {
+            found_ptype = append_intermediate_list(pythia_id, momentum,
+                                                   new_non_hadron_particles);
+          }
+          if (!found_ptype) {
+            log.warn("PDG ID ", pythia_id,
+                     " does not exist in ParticleType - start over.");
+            hadronize_success = false;
+          }
+        }
+      }
+    }
+
     if (!hadronize_success) {
       event_intermediate.reset();
       pythia_hadron_->event.reset();
-    }
-
-    new_intermediate_particles.clear();
-    for (int i = 0; i < event_hadron.size(); i++) {
-      if (event_hadron[i].isFinal()) {
-        int pythia_id = event_hadron[i].id();
-        log.debug("PDG ID from Pythia:", pythia_id);
-        /* K_short and K_long need to be converted to K0
-         * since SMASH only knows K0 */
-        convert_KaonLS(pythia_id);
-
-        /* evecBasisAB_[0] is a unit 3-vector in the collision axis,
-         * while evecBasisAB_[1] and evecBasisAB_[2] spans the transverse plane.
-         * Given that PYTHIA assumes z-direction to be the collision axis,
-         * pz from PYTHIA should be the momentum compoment in evecBasisAB_[0].
-         * px and py are respectively the momentum components in two
-         * transverse directions evecBasisAB_[1] and evecBasisAB_[2]. */
-        FourVector momentum = reorient(event_hadron[i], evecBasisAB_);
-        log.debug("4-momentum from Pythia: ", momentum);
-        log.debug("appending the particle ", pythia_id,
-                  " to the intermediate particle list.");
-        if (event_hadron[i].isHadron()) {
-          append_intermediate_list(pythia_id, momentum,
-                                   new_intermediate_particles);
-        } else {
-          append_intermediate_list(pythia_id, momentum,
-                                   new_non_hadron_particles);
-        }
-      }
+      new_intermediate_particles.clear();
+      break;
     }
 
     /* Additional suppression factor to mimic coherence taken as 0.7
@@ -1360,7 +1387,12 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
                             evec_basis[1] * QTrx + evec_basis[2] * QTry);
         log.debug("appending the leading baryon ", pdgid_frag,
                   " to the intermediate particle list.");
-        append_intermediate_list(pdgid_frag, mom_frag, intermediate_particles);
+        bool found_ptype = append_intermediate_list(pdgid_frag, mom_frag,
+                                                    intermediate_particles);
+        if (!found_ptype) {
+          log.error("PDG ID ", pdgid_frag, " should exist in ParticleType.");
+          throw std::runtime_error("string fragmentation failed.");
+        }
         number_of_fragments++;
         log.debug("proceed to the next step");
       }
@@ -1471,7 +1503,14 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
           pythia_hadron_->event[ipyth].py(), pythia_hadron_->event[ipyth].pz());
       log.debug("appending the fragmented hadron ", pythia_id,
                 " to the intermediate particle list.");
-      append_intermediate_list(pythia_id, momentum, intermediate_particles);
+      bool found_ptype = append_intermediate_list(pythia_id, momentum,
+                                                  intermediate_particles);
+      if (!found_ptype) {
+        log.warn("PDG ID ", pythia_id,
+                 " does not exist in ParticleType - start over.");
+        intermediate_particles.clear();
+        return 0;
+      }
 
       number_of_fragments++;
     }
