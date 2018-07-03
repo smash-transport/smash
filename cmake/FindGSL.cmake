@@ -36,16 +36,71 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #=============================================================================
 
+
 include(FindPackageHandleStandardArgs)
 
-find_path(GSL_INCLUDES gsl/gsl_sf_bessel.h)
+# first check if GSL_ROOT_DIR is set. If so, use it
+if (EXISTS "$ENV{GSL_ROOT_DIR}" )
+  message("GSL_ROOT_DIR set to $ENV{GSL_ROOT_DIR}")
+  file( TO_CMAKE_PATH "${ENV{GSL_ROOT_DIR}" GSL_ROOT_DIR )
+endif()
+if ( NOT EXISTS "${GSL_ROOT_DIR}" )
+  set( GSL_USE_PKGCONFIG ON )
+endif()
 
-find_library(GSL_LIBRARY gsl)
-find_library(GSL_CBLAS_LIBRARY gslcblas)
+if (GSL_USE_PKGCONFIG)
+  find_package(PkgConfig)
+  message("Using PkgConfig")
+  pkg_check_modules( GSL gsl )
+  if (EXISTS "${GSL_INCLUDEDIR}")
+    get_filename_component( GSL_ROOT_DIR "${GSL_INCLUDEDIR}" PATH CACHE )
+  endif()
+endif()
+
+message(${GSL_ROOT_DIR})
+
+find_path( GSL_INCLUDE_DIR
+  NAMES gsl
+  HINTS ${GSL_ROOT_DIR}/include ${GSL_INCLUDEDIR}
+  )
+
+find_library( GSL_LIBRARY
+  NAMES gsld gsl
+  HINTS ${GSL_ROOT_DIR}/lib ${GSL_LIBDIR}
+  )
+
+find_library( GSL_CBLAS_LIBRARY
+  NAMES gslcblas cblas
+  HINTS ${GSL_ROOT_DIR}/lib ${GSL_LIBDIR}
+  )
+
+set (GSL_INCLUDE_DIRS ${GSL_INCLUDE_DIR})
+set (GSL_LIBRARIES ${GSL_LIBRARY} ${GSL_CBLAS_LIBRARY})
+
+if (NOT GSL_VERSION)
+  find_program( GSL_CONFIG_EXE
+    NAMES gsl-config
+    HINTS ${GSL_ROOT_DIR}/bin
+    )
+  message("${GSL_CONFIG_EXE}")
+  if (EXISTS ${GSL_CONFIG_EXE})
+    execute_process(
+      COMMAND "${GSL_CONFIG_EXE} --version"
+      OUTPUT_VARIABLE GSL_VERSION
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
+  endif()
+endif()
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GSL
-   REQUIRED_VARS GSL_LIBRARY GSL_INCLUDES GSL_CBLAS_LIBRARY
-   FAIL_MESSAGE "SMASH requires the GNU Scientific Library (GSL) to build."
+  FOUND_VAR GSL_FOUND
+  REQUIRED_VARS 
+    GSL_INCLUDE_DIR
+    GSL_LIBRARY
+    GSL_CBLAS_LIBRARY
+  VERSION_VAR
+    GSL_VERSION
    )
 
 mark_as_advanced(GSL_INCLUDES GSL_CBLAS_LIBRARY GSL_LIBRARY)
+
