@@ -680,9 +680,13 @@ bool StringProcess::next_NDiffHard() {
   bool find_forward_string = true;
   log.debug("Hard non-diff: partonic process gives ",
             event_intermediate.size(), " partons.");
+  // identify and fragment strings until there is no parton left.
   while (event_intermediate.size() > 1) {
+    /* identify string from a most forward or backward parton.
+     * if there is no junction. */
     compose_string_parton(find_forward_string,
                           event_intermediate, pythia_hadron_->event);
+    // identify string from a junction if there is any.
     compose_string_junction(event_intermediate, pythia_hadron_->event);
 
     hadronize_success = pythia_hadron_->forceHadronLevel();
@@ -725,6 +729,8 @@ bool StringProcess::next_NDiffHard() {
       }
     }
 
+    /* if hadronization is not successful,
+     * reset the event records and return false. */
     if (!hadronize_success) {
       event_intermediate.reset();
       pythia_hadron_->event.reset();
@@ -750,13 +756,15 @@ bool StringProcess::next_NDiffHard() {
       /* Set formation time: actual time of collision + time to form the
        * particle */
       double gamma_factor = 1.0 / std::sqrt(1 - (v_calc).sqr());
-      data.set_formation_time(time_formation_const_ * gamma_factor +
-                              time_collision_);
+      data.set_slow_formation_times(
+          time_collision_,
+          time_formation_const_ * gamma_factor + time_collision_);
       final_state_.push_back(data);
     }
   }
 
   if (hadronize_success) {
+    // add the final state particles, which are not hadron.
     for (ParticleData data : new_non_hadron_particles) {
       data.set_cross_section_scaling_factor(1.);
       data.set_formation_time(time_collision_);
@@ -774,6 +782,7 @@ void StringProcess::compose_string_parton(bool &find_forward_string,
                                           Pythia8::Event &event_hadronize) {
   const auto &log = logger<LogArea::Pythia>();
 
+  // if there is a junction, process it first.
   if (event_intermediate.sizeJunction() > 0) {
     return;
   }
@@ -782,6 +791,7 @@ void StringProcess::compose_string_parton(bool &find_forward_string,
   event_hadronize.reset();
 
   int iforward = 1;
+  // select the most forward or backward parton.
   for (int i = 2; i < event_intermediate.size(); i++) {
     if ((find_forward_string &&
          event_intermediate[i].pz() > event_intermediate[iforward].pz()) ||
@@ -802,6 +812,7 @@ void StringProcess::compose_string_parton(bool &find_forward_string,
   log.debug("Hard non-diff: event_intermediate reduces in size to ",
             event_intermediate.size());
 
+  // trace color and anti-color indices and find corresponding partons.
   while (col_to_find != 0 || acol_to_find != 0) {
     log.debug("  col_to_find = ", col_to_find,
               ", acol_to_find = ", acol_to_find);
@@ -844,7 +855,9 @@ void StringProcess::compose_string_parton(bool &find_forward_string,
       throw std::runtime_error("Hard string could not be identified.");
     } else {
       pSum += event_intermediate[ifound].p();
+      // add a parton to the new event record.
       event_hadronize.append(event_intermediate[ifound]);
+      // then remove from the original event record.
       event_intermediate.remove(ifound, ifound);
       log.debug("Hard non-diff: event_intermediate reduces in size to ",
                 event_intermediate.size());
@@ -880,12 +893,15 @@ void StringProcess::compose_string_junction(Pythia8::Event &event_intermediate,
 
   bool found_string = false;
   while (!found_string) {
+    // trace color or anti-color indices and find corresponding partons.
     find_junction_leg(sign_color, col, event_intermediate, event_hadronize);
     found_string = true;
     for (unsigned int j = 0; j < col.size(); j++) {
       found_string = found_string && col[j] == 0;
     }
     if (!found_string) {
+      /* if there is any leg which is not associated with parton,
+       * find another junction(s) connected. */
       log.debug("  still has leg(s) unfinished.");
       sign_color = !sign_color;
       std::vector<int> junction_to_move;
@@ -937,8 +953,10 @@ void StringProcess::compose_string_junction(Pythia8::Event &event_intermediate,
         for (int k = 0; k < 3; k++) {
           col_add[k] = event_intermediate.colJunction(imove, k);
         }
+        // add a junction to the new event record.
         event_hadronize.appendJunction(kind_add,
                                        col_add[0], col_add[1], col_add[2]);
+        // then remove from the original event record.
         event_intermediate.eraseJunction(imove);
       }
     }
@@ -984,7 +1002,9 @@ void StringProcess::find_junction_leg(bool sign_color, std::vector<int> &col,
         }
       } else {
         pSum += event_intermediate[ifound].p();
+        // add a parton to the new event record.
         event_hadronize.append(event_intermediate[ifound]);
+        // then remove from the original event record.
         event_intermediate.remove(ifound, ifound);
         log.debug("Hard non-diff: event_intermediate reduces in size to ",
                   event_intermediate.size());

@@ -397,13 +397,58 @@ class StringProcess {
    */
   bool next_BBbarAnn();
 
+  /**
+   * Identify set of partons, which are connected
+   * to form a color-neutral string, from a given PYTHIA event record.
+   * All partons found are moved into a new event record for the further
+   * hadronization process.
+   * This function begins with the most forward (or backward) parton.
+   * \param[out] find_forward_string If it is set to be true (false),
+   *                                 it begins with forward (backward) parton.
+   *                                 Flipped in the end of the function call.
+   * \param[out] event_intermediate PYTHIA event record
+   *                                from which a string is identified.
+   *                                All partons found here are removed.
+   * \param[out] event_hadronize PYTHIA event record
+   *                             to which partons in a string are added.
+   */
   void compose_string_parton(bool &find_forward_string,
                              Pythia8::Event &event_intermediate,
                              Pythia8::Event &event_hadronize);
-
+  /**
+   * Identify set of partons and junction(s), which are connected
+   * to form a color-neutral string, from a given PYTHIA event record.
+   * All partons found are moved into a new event record for the further
+   * hadronization process.
+   * This function begins with a junction.
+   * \param[out] event_intermediate PYTHIA event record
+   *                                from which a string is identified.
+   *                                All partons and junction(s) found here
+   *                                are removed.
+   * \param[out] event_hadronize PYTHIA event record
+   *                             to which partons in a string are added.
+   */
   void compose_string_junction(Pythia8::Event &event_intermediate,
                                Pythia8::Event &event_hadronize);
 
+  /**
+   * Identify partions, which are associated with junction legs,
+   * from a given PYTHIA event record.
+   * All partons found are moved into a new event record for the further
+   * hadronization process.
+   * \param[in] sign_color true (false) if the junction is associated with
+   *                       color (anti-color) indices, corresponding
+   *                       baryonic (anti-baryonic) string
+   * \param[out] col set of color indices that need to be found.
+   *                 The value is set to be zero
+   *                 if corresponding partons are found.
+   * \param[out] event_intermediate PYTHIA event record
+   *                                from which a string is identified.
+   *                                All partons and junction(s) found here
+   *                                are removed.
+   * \param[out] event_hadronize PYTHIA event record
+   *                             to which partons in a string are added.
+   */
   void find_junction_leg(bool sign_color, std::vector<int> &col,
                          Pythia8::Event &event_intermediate,
                          Pythia8::Event &event_hadronize);
@@ -437,6 +482,7 @@ class StringProcess {
    * \param[in] momentum four-momentum of particle
    * \param[out] intermediate_particles particle list to which
    *             the new particle is added.
+   * \return whether PDG id exists in ParticleType table.
    */
   static bool append_intermediate_list(int pdgid, FourVector momentum,
                                        ParticleList &intermediate_particles) {

@@ -217,10 +217,36 @@ class ParticleData {
    * \return particle's formation time
    */
   double formation_time() const { return formation_time_; }
-  /** Set the absolute formation time
+  /**
+   * Get the absolute time, where the cross section scaling factor slowly
+   * starts increasing from the given scaling factor to 1
+   * \return time, when scaling factor starts increasing
+   */
+  double begin_formation_time() const { return begin_formation_time_; }
+
+  /**
+   * Set the absolute formation time
+   *
+   * The particle's cross section scaling factor will be a Heavyside fuction
+   * of time.
    * \param[in] form_time absolute formation time
    */
   void set_formation_time(const double &form_time) {
+    formation_time_ = form_time;
+    // cross section scaling factor will be a step function in time
+    begin_formation_time_ = form_time;
+  }
+  /**
+   * Set the time, when the cross section scaling factor begins, and finishes
+   * to increase from the given cross section scaling factor to 1.
+   *
+   * The cross section will only grow slowly, if the option is used.
+   *
+   * \param[in] begin_form_time time when the cross section starts to increase
+   * \param[in] from_time time when the crosss ection reaches 1
+   */
+  void set_slow_formation_times(double begin_form_time, double form_time) {
+    begin_formation_time_ = begin_form_time;
     formation_time_ = form_time;
   }
 
@@ -323,6 +349,10 @@ class ParticleData {
   ParticleData(const ParticleType &ptype, int uid, int index)
       : id_(uid), index_(index), type_(&ptype) {}
 
+  /// Return the cross section scaling factor at the time of collision
+  double current_xsec_scaling_factor(double time_until_collision,
+                                     double power) const;
+
  private:
   friend class Particles;
   ParticleData() = default;
@@ -339,6 +369,7 @@ class ParticleData {
     dst.position_ = position_;
     dst.formation_time_ = formation_time_;
     dst.cross_section_scaling_factor_ = cross_section_scaling_factor_;
+    dst.begin_formation_time_ = begin_formation_time_;
   }
 
   /**
@@ -389,6 +420,8 @@ class ParticleData {
    *  given as an absolute value in the computational frame
    */
   double formation_time_ = 0.0;
+  /// time when the cross section scaling factor starts to increase to 1
+  double begin_formation_time_ = 0.0;
   /// cross section scaling factor for unformed particles
   double cross_section_scaling_factor_ = 1.0;
   /// history information

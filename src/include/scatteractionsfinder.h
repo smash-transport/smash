@@ -241,6 +241,11 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const int N_proj_;
   /// Parameter for formation time
   const double string_formation_time_;
+  /**
+   * The cross section scaling factor increases with this power in time.
+   * A step function is used if this is not lager than 0.
+   */
+  const double particle_formation_power_;
 };
 
 }  // namespace smash
