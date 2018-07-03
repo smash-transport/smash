@@ -35,8 +35,7 @@ StringProcess::StringProcess(double string_tension, double time_formation,
       additional_xsec_supp_(0.7),
       time_formation_const_(time_formation),
       soft_t_form_(factor_t_form),
-      time_collision_(0.),
-      gamma_factor_com_(1.) {
+      time_collision_(0.) {
   // setup and initialize pythia for hard string process
   pythia_parton_ = make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
   /* select only non-diffractive events
@@ -838,7 +837,6 @@ void StringProcess::compose_string_junction(Pythia8::Event &event_intermediate,
     return;
   }
 
-  Pythia8::Vec4 pSum = 0.;
   event_hadronize.reset();
 
   const int kind = event_intermediate.kindJunction(0);
@@ -850,21 +848,24 @@ void StringProcess::compose_string_junction(Pythia8::Event &event_intermediate,
   }
   event_hadronize.appendJunction(kind, col[0], col[1], col[2]);
   event_intermediate.eraseJunction(0);
+  log.debug("junction (", col[0], ", ", col[1], ", ", col[2],
+            ") with kind ", kind, " will be handled.");
 
   bool found_string = false;
   while (!found_string) {
     find_junction_leg(sign_color, col, event_intermediate, event_hadronize);
     found_string = true;
-    for (int j = 0; j < col.size(); j++) {
+    for (unsigned int j = 0; j < col.size(); j++) {
       found_string = found_string && col[j] == 0;
     }
     if (!found_string) {
+      log.debug("  still has leg(s) unfinished.");
       sign_color = !sign_color;
-      std::vector<int> junction_to_remove;
-      junction_to_remove.clear();
+      std::vector<int> junction_to_move;
+      junction_to_move.clear();
       for (int i = 0; i < event_intermediate.sizeJunction(); i++) {
         const int kind_new = event_intermediate.kindJunction(i);
-        if (sign_color != kind_new % 2 == 1) {
+        if (sign_color != (kind_new % 2 == 1)) {
           continue;
         }
 
@@ -874,7 +875,7 @@ void StringProcess::compose_string_junction(Pythia8::Event &event_intermediate,
         }
 
         int n_legs_connected = 0;
-        for (int j = 0; j < col.size(); j++) {
+        for (unsigned int j = 0; j < col.size(); j++) {
           if (col[j] == 0) {
             continue;
           }
@@ -893,13 +894,25 @@ void StringProcess::compose_string_junction(Pythia8::Event &event_intermediate,
               col.push_back(col_new[k]);
             }
           }
-          junction_to_remove.push_back(i);
+          log.debug("  junction ", i, " (",
+                    event_intermediate.colJunction(i, 0), ", ",
+                    event_intermediate.colJunction(i, 1), ", ",
+                    event_intermediate.colJunction(i, 2),
+                    ") with kind ", kind_new, " will be added.");
+          junction_to_move.push_back(i);
         }
       }
 
-      for (int i = 0; i < junction_to_remove.size(); i++) {
-        junction_to_remove[i] = junction_to_remove[i] - i;
-        event_intermediate.eraseJunction(junction_to_remove[i]);
+      for (unsigned int i = 0; i < junction_to_move.size(); i++) {
+        unsigned int imove = junction_to_move[i] - i;
+        const int kind_add = event_intermediate.kindJunction(imove);
+        std::array<int, 3> col_add;
+        for (int k = 0; k < 3; k++) {
+          col_add[k] = event_intermediate.colJunction(imove, k);
+        }
+        event_hadronize.appendJunction(kind_add,
+                                       col_add[0], col_add[1], col_add[2]);
+        event_intermediate.eraseJunction(imove);
       }
     }
   }
@@ -911,7 +924,7 @@ void StringProcess::find_junction_leg(bool sign_color, std::vector<int> &col,
   const auto &log = logger<LogArea::Pythia>();
 
   Pythia8::Vec4 pSum = event_hadronize[0].p();
-  for (int j = 0; j < col.size(); j++) {
+  for (unsigned int j = 0; j < col.size(); j++) {
     if (col[j] == 0) {
       continue;
     }
@@ -919,11 +932,16 @@ void StringProcess::find_junction_leg(bool sign_color, std::vector<int> &col,
     while (!found_leg) {
       int ifound = -1;
       for (int i = 1; i < event_intermediate.size(); i++) {
+        const int pdgid = event_intermediate[i].id();
         if (sign_color && col[j] == event_intermediate[i].col()) {
+          log.debug("  col[", j, "] = ", col[j],
+                    " from i ", i, "(", pdgid, ") found");
           ifound = i;
           col[j] = event_intermediate[i].acol();
           break;
         } else if (!sign_color && col[j] == event_intermediate[i].acol()) {
+          log.debug("  acol[", j, "] = ", col[j],
+                    " from i ", i, "(", pdgid, ") found");
           ifound = i;
           col[j] = event_intermediate[i].col();
           break;
