@@ -107,6 +107,10 @@ namespace smash {
  * Standard deviation in Gaussian for transverse momentum distributed to
  * string fragments during fragmentation.
  *
+ * \key Form_Time_Factor (double, optional, default = 1.0) \n
+ * Factor to be multiplied with the formation time of string fragments from
+ * the soft string routine.
+ *
  * \page input_collision_term_ Collision_Term
  * \n
  * Example: Configuring the Collision Term
