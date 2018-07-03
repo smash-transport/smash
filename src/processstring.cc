@@ -23,7 +23,7 @@ StringProcess::StringProcess(double string_tension, double time_formation,
                              double strange_supp, double diquark_supp,
                              double sigma_perp, double stringz_a,
                              double stringz_b, double string_sigma_T,
-                             double factor_t_form)
+                             double factor_t_form, bool use_yoyo_model)
     : pmin_gluon_lightcone_(gluon_pmin),
       pow_fgluon_beta_(gluon_beta),
       pow_fquark_alpha_(quark_alpha),
@@ -34,7 +34,8 @@ StringProcess::StringProcess(double string_tension, double time_formation,
       time_formation_const_(time_formation),
       soft_t_form_(factor_t_form),
       time_collision_(0.),
-      gamma_factor_com_(1.) {
+      gamma_factor_com_(1.),
+      use_yoyo_model_(use_yoyo_model) {
   // setup and initialize pythia for hard string process
   pythia_parton_ = make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
   /* select only non-diffractive events
@@ -223,18 +224,10 @@ int StringProcess::append_final_state(const FourVector &uString,
   /* compute the formation times of hadrons
    * from the lightcone coordinates of q-qbar formation vertices. */
   for (int i = 0; i < nfrag; i++) {
-    // set the formation time and position in the rest frame of string
-    double t_prod = (xvertex_pos[i] + xvertex_neg[i + 1]) / sqrt2_;
-    FourVector fragment_position = FourVector(
-        t_prod, evecLong * (xvertex_pos[i] - xvertex_neg[i + 1]) / sqrt2_);
-    // boost into the center of mass frame
-    fragments[i].momentum = fragments[i].momentum.LorentzBoost(-vstring);
-    fragment_position = fragment_position.LorentzBoost(-vstring);
-    t_prod = fragment_position.x0();
-
     /* create new particle with specific PDG id
      * and assign momentum. */
     ParticleData new_particle(ParticleType::find(fragments[i].pdg));
+    fragments[i].momentum = fragments[i].momentum.LorentzBoost(-vstring);
     new_particle.set_4momentum(fragments[i].momentum);
 
     /* additional suppression factor to take
@@ -242,8 +235,24 @@ int StringProcess::append_final_state(const FourVector &uString,
     new_particle.set_cross_section_scaling_factor(
         fragments[i].is_leading ? additional_xsec_supp_ * fragments[i].xtotfac
                                 : 0.);
-    new_particle.set_formation_time(time_collision_ +
-                                    soft_t_form_ * gamma_factor_com_ * t_prod);
+
+    if (use_yoyo_model_) {
+      // set the formation time and position in the rest frame of string
+      double t_prod = (xvertex_pos[i] + xvertex_neg[i + 1]) / sqrt2_;
+      FourVector fragment_position = FourVector(
+          t_prod, evecLong * (xvertex_pos[i] - xvertex_neg[i + 1]) / sqrt2_);
+      // boost into the center of mass frame
+      fragment_position = fragment_position.LorentzBoost(-vstring);
+      t_prod = fragment_position.x0();
+      new_particle.set_formation_time(time_collision_ + soft_t_form_ *
+                                      gamma_factor_com_ * t_prod);
+    }
+    else {
+      ThreeVector v_calc = new_particle.momentum().LorentzBoost(-vcomAB_).velocity();
+      double gamma_factor = 1.0 / std::sqrt(1 - (v_calc).sqr());
+      new_particle.set_formation_time(time_formation_const_ * gamma_factor +
+                              time_collision_);
+    }
     final_state_.push_back(new_particle);
   }
 

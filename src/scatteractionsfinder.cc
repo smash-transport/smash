@@ -111,6 +111,10 @@ namespace smash {
  * Factor to be multiplied with the formation time of string fragments from
  * the soft string routine.
  *
+ * \key Use_Yoyo_Model (bool, optional, default = true)
+ * Calculate the string fragments' formation times from the yoyo-model if
+ * enabled. Else constant proper time defined by Formation_Time is used.
+ *
  * \page input_collision_term_ Collision_Term
  * \n
  * Example: Configuring the Collision Term
@@ -204,7 +208,8 @@ ScatterActionsFinder::ScatterActionsFinder(
         subconfig.take({"Sigma_Perp"}, 0.4),
         subconfig.take({"StringZ_A"}, 0.68), subconfig.take({"StringZ_B"}, 0.5),
         subconfig.take({"String_Sigma_T"}, 0.5),
-        subconfig.take({"Form_Time_Factor"}, 1.0));
+        subconfig.take({"Form_Time_Factor"}, 1.0),
+        subconfig.take({"Use_Yoyo_Model"}, true));
   }
 }
 
