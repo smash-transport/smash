@@ -44,7 +44,7 @@ void usage(const int rc, const std::string &progname) {
    *
    * SMASH can be run simply by executing the binary without any options (i.e.
    * there are no required arguments). It does require an input file, though
-   * (see \ref inputoptions).
+   * (see \ref inputconfig).
    * Per default, the input file is expected in the current working directory
    * with the name '`config.yaml`'.
    *

@@ -62,7 +62,18 @@ struct convert {
 
 namespace smash {
 /*!\Userguide
- * \page inputoptions Input file Options
+ * \page input Input
+ *
+ * There are three input files used by SMASH:
+ *
+ * - `config.yaml` for configuring the simulation. This file is required. See
+ *   \subpage inputconfig.
+ * - `particles.txt` for defining the particles used by SMASH. This file is
+ *   optional. See \subpage inputparticles.
+ * - `decaymodes.txt` for defining the decays possible in SMASH. This file is
+ *   optional. See \subpage inputdecaymodes.
+ *
+ * \page inputconfig Configuration
  *
  * SMASH is configured via an input file in YAML format. Typically you will
  * start from the supplied `config.yaml` file and modify it according to your
@@ -149,6 +160,52 @@ namespace smash {
  * will print a warning (using Configuration::unused_values_report). This can be
  * important for the user to discover typos in his configuration file (or
  * command line parameters).
+ */
+
+/*!\Userguide
+ * \page inputparticles Particles
+ *
+ * The particles available to SMASH are defined in `particles.txt`. They are
+ * given as a table with the particles properties separated by an arbitrary
+ * number of spaces:
+ * ```
+ * <name> <mass in GeV> <width in GeV> <PDG codes>
+ * ```
+ *
+ * The name has to be a unique UTF-8 string. Conventionally, unicode names are
+ * used in SMASH to make the file more readable and generate prettier output. It
+ * is possible to only specify the isospin multiplet and SMASH will fill in the
+ * properties of the components of the multiplet assuming isospin symmetry. This
+ * is appropriate for almost all particles. Anti particles don't have to be
+ * specified explicitely.
+ *
+ * The mass and the width of the particle or multiplet have to be specified as
+ * floating point numbers in GeV.
+ *
+ * The PDG codes are using the [numbering
+ * scheme](http://pdg.lbl.gov/2018/mcdata/mc_particle_id_contents.html)
+ * specified by the PDG, which depends on the quantum numbers of the particles.
+ * For SMASH, it is important that the quark content in the PDG code is
+ * correctly specified. Other than that deviations from the numbering scheme
+ * have no effect in SMASH. If the name represents a multiplet, there has to be
+ * a PDG code for all multiplet members, except for anti particles.
+ *
+ * For example, to define all three pions (π⁻, π⁰, π⁺), it is sufficient to
+ * specify π multiplet using the following line in `particles.txt`:
+ * ```
+ * π  0.138  7.7e-9  111  211
+ * ```
+ *
+ * It is also possible to only specify a specific member of the multiplet. The
+ * charge has to be given as a suffix in the name using the UTF-8 unicode
+ * characters `⁻`, `⁰` and `⁺`. For example, the properties of the electron can
+ * be specified like this:
+ * ```
+ * e⁻  0.000511  0  11
+ * ```
+ *
+ * It is possible to add comments to `particles.txt` using the `#` character.
+ * Everything after `#` until the end of the line is ignored.
  */
 class Configuration {
  public:
