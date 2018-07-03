@@ -194,24 +194,24 @@ namespace smash {
  *
  * For example, to define all three pions (π⁻, π⁰, π⁺), it is sufficient to
  * specify the π multiplet using the following line in `particles.txt`, where
- * the 4th column contains the PDG number to the neutral and the 5th PDG number
+ * the 4th column contains the PDG number of the neutral and the 5th PDG number
  * of the charged state:
  * ```
  * π  0.138  7.7e-9  111  211
  * ```
  *
  * It is also possible to only specify a specific member of the multiplet. In
- * this case, the charge has to be given as a suffix in the name using the
- * UTF-8 unicode characters `⁻`, `⁰` and `⁺`. For example, the properties of the
+ * this case, the charge has to be given as a suffix in the name using the UTF-8
+ * unicode characters `⁻`, `⁰` and `⁺`. For example, the properties of the
  * electron can be specified like this:
  * ```
  * e⁻  0.000511  0  11
  * ```
  *
- * It is further possible to add comments to `particles.txt` using the `#`
- * character. Everything after `#` until the end of the line is ignored.
+ * Comments can be added to `particles.txt` using the `#` character. Everything
+ * after `#` until the end of the line is ignored.
  *
- * Note, that some reactions in SMASH are parametrized and require specific
+ * Note that some reactions in SMASH are parametrized and require specific
  * particles in the final state. When such a reaction happens and the required
  * particle is not defined, SMASH will crash.
  */
@@ -243,7 +243,7 @@ namespace smash {
  * Note that the SMASH defaults avoid three-body decays, because they break
  * detailed balance due to the lack of 3-to-1 reactions in SMASH.
  *
- * It is possible to add comments to `particles.txt` using the `#` character.
+ * It is possible to add comments to `decaymodes.txt` using the `#` character.
  * Everything after `#` until the end of the line is ignored.
  *
  * Note that SMASH has an internal width cut-off, below which particles cannot
