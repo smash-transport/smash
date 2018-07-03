@@ -114,6 +114,8 @@ class StringProcess {
   double additional_xsec_supp_;
   /// constant proper time in the case of constant formation time [fm]
   double time_formation_const_;
+  /// factor to be multiplied to formation times in soft strings
+  double soft_t_form_;
   /// time of collision in the computational frame [fm]
   double time_collision_;
   /// square root of 2 (\f$\sqrt{2}\f$)
@@ -159,6 +161,7 @@ class StringProcess {
    *        for the fragmentation function
    * \param[in] string_sigma_T transverse momentum spread (StringPT:sigma)
    *        in fragmentation [GeV]
+   * \param[in] factor_t_form to be multiplied to soft string formation times
    *
    * \see StringProcess::common_setup_pythia(Pythia8::Pythia *,
    *                     double, double, double, double, double)
@@ -173,7 +176,7 @@ class StringProcess {
                 double strange_supp, double diquark_supp,
                 double sigma_perp,
                 double stringz_a, double stringz_b,
-                double string_sigma_T);
+                double string_sigma_T, double factor_t_form);
 
   /**
    * Common setup of PYTHIA objects for soft and hard string routines
