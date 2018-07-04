@@ -181,8 +181,8 @@ namespace smash {
  * using the unicode characters `⁻`, `⁰` and `⁺`. This is appropriate for almost
  * all particles. Anti particles do not have to be specified explicitely.
  *
- * The mass and the width of the particle or multiplet have to be specified as
- * floating point numbers in GeV.
+ * The pole mass and the on-shell width of the particle or multiplet have to be
+ * specified as floating point numbers in GeV.
  *
  * The PDG codes are following the [numbering
  * scheme](http://pdg.lbl.gov/2018/mcdata/mc_particle_id_contents.html)
@@ -243,11 +243,27 @@ namespace smash {
  * Note that the SMASH defaults avoid three-body decays, because they break
  * detailed balance due to the lack of 3-to-1 reactions in SMASH.
  *
+ * For example, the following lines are enough to specify all possible decays of
+ * the N(1440) resonance multiplet:
+ * ```
+ * N(1440)
+ * 0.60   1  N π
+ * 0.24   1  Δ π
+ * 0.16   0  N σ
+ * ```
+ * For decays violating isospin symmetry, it is possible to specify the members
+ * of the multiplets in the final state explicitely:
+ * ```
+ * φ
+ * 0.489   1  K⁺ K̅⁻
+ * 0.342   1  K⁰ K̅⁰
+ * ```
+ *
  * It is possible to add comments to `decaymodes.txt` using the `#` character.
  * Everything after `#` until the end of the line is ignored.
  *
- * Note that SMASH has an internal width cut-off, below which particles cannot
- * decay, even if decays are specified in `decaymodes.txt`.
+ * Note that SMASH has an internal width cut-off (currently 10 keV), below which
+ * particles cannot decay, even if decays are specified in `decaymodes.txt`.
  */
 class Configuration {
  public:
