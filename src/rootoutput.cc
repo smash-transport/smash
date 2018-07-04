@@ -17,8 +17,7 @@
 
 namespace smash {
 
-/**
- * \Userguide
+/*!\Userguide
  * \page format_root ROOT format
  * SMASH ROOT output has the same functionality as OSCAR output, but ROOT
  * files are faster to read and write and they need less disk space for the
