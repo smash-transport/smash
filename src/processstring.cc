@@ -634,7 +634,8 @@ bool StringProcess::next_NDiffHard() {
     if (pythia_parton_->event[i].isFinal()) {
       const int pdgid = pythia_parton_->event[i].id();
 
-      if (pythia_parton_->event[i].isParton()) {
+      if (pythia_parton_->event[i].isParton() ||
+          pythia_parton_->particleData.isOctetHadron(pdgid)) {
         Pythia8::Vec4 pquark = pythia_parton_->event[i].p();
         const double mass = pythia_parton_->particleData.m0(pdgid);
 
