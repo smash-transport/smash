@@ -40,7 +40,8 @@ class ParticleType {
    * We currently regard a particle type as stable if its on-shell width is less
    * than 10 keV. The cutoff is chosen such that the η and the η' are stable.
    */
-  // If this is changed, make sure to update the userguide in `include/configuration.h`.
+  // If this is changed, make sure to update the userguide in
+  // `include/configuration.h`.
   static constexpr double width_cutoff = 1e-5;
 
   /**
