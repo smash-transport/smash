@@ -118,6 +118,8 @@ class StringProcess {
   double soft_t_form_;
   /// time of collision in the computational frame [fm]
   double time_collision_;
+  /// maximum integer
+  int maxint_;
   /// square root of 2 (\f$\sqrt{2}\f$)
   double sqrt2_;
 
@@ -138,6 +140,12 @@ class StringProcess {
 
   /// An object to compute cross-sections
   Pythia8::SigmaTotal pythia_sigmatot_;
+
+  /**
+   * event record for intermediate partonic state
+   * in the hard string routine
+   */
+  Pythia8::Event event_intermediate_;
 
  public:
   // clang-format off

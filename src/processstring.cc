@@ -55,16 +55,12 @@ StringProcess::StringProcess(double string_tension, double time_formation,
 
   /* initialize PYTHIA */
   pythia_hadron_->init();
-  /* Set the random seed of the Pythia random Number Generator.
-   * Pythia's random is controlled by SMASH in every single collision.
-   * In this way we ensure that the results are reproducible
-   * for every event if one knows SMASH random seed. */
-  const int maxint = std::numeric_limits<int>::max();
-  pythia_hadron_->rndm.init(random::uniform_int(1, maxint));
-
   pythia_sigmatot_.init(&pythia_hadron_->info, pythia_hadron_->settings,
                         &pythia_hadron_->particleData);
+  event_intermediate_.init("intermediate partons",
+                           &pythia_hadron_->particleData);
 
+  maxint_ = std::numeric_limits<int>::max();
   sqrt2_ = std::sqrt(2.);
 
   for (int imu = 0; imu < 3; imu++) {
@@ -605,13 +601,12 @@ bool StringProcess::next_NDiffHard() {
     if (!pythia_parton_initialized_) {
       throw std::runtime_error("Pythia failed to initialize.");
     }
-    /* Set the random seed of the Pythia random Number Generator.
-     * Pythia's random is controlled by SMASH in every single collision.
-     * In this way we ensure that the results are reproducible
-     * for every event if one knows SMASH random seed. */
-    const int maxint = std::numeric_limits<int>::max();
-    pythia_parton_->rndm.init(random::uniform_int(1, maxint));
   }
+  /* Set the random seed of the Pythia random Number Generator.
+   * Pythia's random is controlled by SMASH in every single collision.
+   * In this way we ensure that the results are reproducible
+   * for every event if one knows SMASH random seed. */
+  pythia_parton_->rndm.init(random::uniform_int(1, maxint_));
 
   // Short notation for Pythia event
   Pythia8::Event &event_hadron = pythia_hadron_->event;
@@ -622,14 +617,11 @@ bool StringProcess::next_NDiffHard() {
     return false;
   }
 
-  Pythia8::Event event_intermediate;
   ParticleList new_intermediate_particles;
   ParticleList new_non_hadron_particles;
 
   Pythia8::Vec4 pSum = 0.;
-  event_intermediate.init("intermediate partons",
-                          &pythia_parton_->particleData);
-  event_intermediate.reset();
+  event_intermediate_.reset();
   for (int i = 0; i < pythia_parton_->event.size(); i++) {
     if (pythia_parton_->event[i].isFinal()) {
       const int pdgid = pythia_parton_->event[i].id();
@@ -644,8 +636,8 @@ bool StringProcess::next_NDiffHard() {
         const int anticolor = pythia_parton_->event[i].acol();
 
         pSum += pquark;
-        event_intermediate.append(pdgid, status,
-                                  color, anticolor, pquark, mass);
+        event_intermediate_.append(pdgid, status,
+                                   color, anticolor, pquark, mass);
       } else {
         FourVector momentum = reorient(pythia_parton_->event[i], evecBasisAB_);
         log.debug("4-momentum from Pythia: ", momentum);
@@ -660,36 +652,37 @@ bool StringProcess::next_NDiffHard() {
     }
   }
   if (!final_state_success) {
-    event_intermediate.reset();
+    event_intermediate_.reset();
     return false;
   }
-  event_intermediate.clearJunctions();
+  event_intermediate_.clearJunctions();
   for (int i = 0; i < pythia_parton_->event.sizeJunction(); i++) {
     const int kind = pythia_parton_->event.kindJunction(i);
     std::array<int, 3> col;
     for (int j = 0; j < 3; j++) {
       col[j] = pythia_parton_->event.colJunction(i, j);
     }
-    event_intermediate.appendJunction(kind, col[0], col[1], col[2]);
+    event_intermediate_.appendJunction(kind, col[0], col[1], col[2]);
   }
-  event_intermediate[0].p(pSum);
-  event_intermediate[0].m(pSum.mCalc());
+  event_intermediate_[0].p(pSum);
+  event_intermediate_[0].m(pSum.mCalc());
   // pythia_parton_->event.list();
   // pythia_parton_->event.listJunctions();
 
   bool hadronize_success = false;
   bool find_forward_string = true;
   log.debug("Hard non-diff: partonic process gives ",
-            event_intermediate.size(), " partons.");
+            event_intermediate_.size(), " partons.");
   // identify and fragment strings until there is no parton left.
-  while (event_intermediate.size() > 1) {
+  while (event_intermediate_.size() > 1) {
     /* identify string from a most forward or backward parton.
      * if there is no junction. */
     compose_string_parton(find_forward_string,
-                          event_intermediate, pythia_hadron_->event);
+                          event_intermediate_, pythia_hadron_->event);
     // identify string from a junction if there is any.
-    compose_string_junction(event_intermediate, pythia_hadron_->event);
+    compose_string_junction(event_intermediate_, pythia_hadron_->event);
 
+    pythia_hadron_->rndm.init(random::uniform_int(1, maxint_));
     hadronize_success = pythia_hadron_->forceHadronLevel();
     log.debug("Pythia hadronized, success = ", hadronize_success);
 
@@ -733,7 +726,7 @@ bool StringProcess::next_NDiffHard() {
     /* if hadronization is not successful,
      * reset the event records and return false. */
     if (!hadronize_success) {
-      event_intermediate.reset();
+      event_intermediate_.reset();
       pythia_hadron_->event.reset();
       new_intermediate_particles.clear();
       break;
@@ -1509,6 +1502,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
   // implement PYTHIA fragmentation
   pythia_hadron_->event[0].p(pSum);
   pythia_hadron_->event[0].m(pSum.mCalc());
+  pythia_hadron_->rndm.init(random::uniform_int(1, maxint_));
   const bool successful_hadronization = pythia_hadron_->forceHadronLevel();
   if (successful_hadronization) {
     for (int ipyth = 0; ipyth < pythia_hadron_->event.size(); ipyth++) {
