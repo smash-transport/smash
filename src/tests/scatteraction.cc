@@ -209,9 +209,8 @@ TEST(pythia_running) {
   constexpr double elastic_parameter = 0.;  // don't include elastic scattering
   constexpr bool strings_switch = true;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
-  act->add_all_scatterings(elastic_parameter, false,
-                           ReactionsBitSet(), 0., strings_switch,
-                           false, false, nnbar_treatment);
+  act->add_all_scatterings(elastic_parameter, false, ReactionsBitSet(), 0.,
+                           strings_switch, false, false, nnbar_treatment);
 
   VERIFY(act->cross_section() > 0.);
 

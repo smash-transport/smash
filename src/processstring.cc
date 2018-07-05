@@ -244,14 +244,14 @@ int StringProcess::append_final_state(const FourVector &uString,
       // boost into the center of mass frame
       fragment_position = fragment_position.LorentzBoost(-vstring);
       t_prod = fragment_position.x0();
-      new_particle.set_formation_time(time_collision_ + soft_t_form_ *
-                                      gamma_factor_com_ * t_prod);
-    }
-    else {
-      ThreeVector v_calc = new_particle.momentum().LorentzBoost(-vcomAB_).velocity();
+      new_particle.set_formation_time(
+          time_collision_ + soft_t_form_ * gamma_factor_com_ * t_prod);
+    } else {
+      ThreeVector v_calc =
+          new_particle.momentum().LorentzBoost(-vcomAB_).velocity();
       double gamma_factor = 1.0 / std::sqrt(1 - (v_calc).sqr());
       new_particle.set_formation_time(time_formation_const_ * gamma_factor +
-                              time_collision_);
+                                      time_collision_);
     }
     final_state_.push_back(new_particle);
   }
