@@ -115,8 +115,8 @@ class StringProcess {
   double time_collision_;
   /// Lorentz gamma factor of center of mass in the computational frame
   double gamma_factor_com_;
-  /// Whether to calculate the string formation times from th yoyo-model.
-  double use_yoyo_model_;
+  /// Whether to calculate the string formation times from the yoyo-model.
+  bool use_yoyo_model_;
   /// square root of 2 (\f$\sqrt{2}\f$)
   double sqrt2_;
 
