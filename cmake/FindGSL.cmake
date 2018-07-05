@@ -5,9 +5,13 @@
 #  GSL_INCLUDES
 #  GSL_LIBRARY
 #  GSL_CBLAS_LIBRARY
+# 
+#  This module is based on the module provided by cmake starting with version 3.2
+#  See https://cmake.org/licensing for copyright info.
+  
 
 #=============================================================================
-# Copyright © 2014  SMASH Team
+# Copyright © 2018  SMASH Team
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -39,16 +43,13 @@
 
 include(FindPackageHandleStandardArgs)
 
-message(STATUS "GSL_ROOT_DIR set to ${GSL_ROOT_DIR}")
 # first check if GSL_ROOT_DIR is set (either as environment variable or 
 # supplied as cmake-option. If so, use it
 if (EXISTS "$ENV{GSL_ROOT_DIR}")
-  #message("Using env. variable, set to $ENV{GSL_ROOT_DIR}")
   file( TO_CMAKE_PATH "$ENV{GSL_ROOT_DIR}" GSL_ROOT_DIR )
   set( GSL_ROOT_DIR "${GSL_ROOT_DIR}" CACHE PATH "Prefix for GSL installation")
   
  elseif (EXISTS "${GSL_ROOT_DIR}" ) 
-	#message("using user supplied var. set to ${GSL_ROOT_DIR}")
   file( TO_CMAKE_PATH ${GSL_ROOT_DIR} GSL_ROOT_DIR )
   set( GSL_ROOT_DIR "${GSL_ROOT_DIR}" CACHE PATH "Prefix for GSL installation")
 endif()
@@ -58,11 +59,9 @@ if ( NOT EXISTS "${GSL_ROOT_DIR}" )
   set( GSL_USE_PKGCONFIG ON )
 endif()
 
-#message("GSL INCLUDE DIR before GSL_USE_OKGCONFIG ${GSL_INCLUDE_DIR}")
 
 if (GSL_USE_PKGCONFIG)
   find_package(PkgConfig)
-  #message("Using PkgConfig")
   pkg_check_modules( GSL gsl )
   if (EXISTS "${GSL_INCLUDE_DIR}")
     get_filename_component( GSL_ROOT_DIR "${GSL_INCLUDE_DIR}" PATH CACHE )
@@ -74,7 +73,6 @@ find_path( GSL_INCLUDE_DIR
   HINTS ${GSL_ROOT_DIR}/include ${GSL_INCLUDE_DIR}
   )
 
-message("gsl include dir actually used: ${GSL_INCLUDE_DIR}")
 
 find_library( GSL_LIBRARY
   NAMES gsld gsl
