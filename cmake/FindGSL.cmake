@@ -45,12 +45,12 @@ message(STATUS "GSL_ROOT_DIR set to ${GSL_ROOT_DIR}")
 if (EXISTS "$ENV{GSL_ROOT_DIR}")
   #message("Using env. variable, set to $ENV{GSL_ROOT_DIR}")
   file( TO_CMAKE_PATH "$ENV{GSL_ROOT_DIR}" GSL_ROOT_DIR )
+  set( GSL_ROOT_DIR "${GSL_ROOT_DIR}" CACHE PATH "Prefix for GSL installation")
   
  elseif (EXISTS "${GSL_ROOT_DIR}" ) 
 	#message("using user supplied var. set to ${GSL_ROOT_DIR}")
-	file( TO_CMAKE_PATH ${GSL_ROOT_DIR} GSL_ROOT_DIR )
-	 # remove the include directory from the cache to avoid conflicts
-	 unset(GSL_INCLUDE_DIR CACHE)
+  file( TO_CMAKE_PATH ${GSL_ROOT_DIR} GSL_ROOT_DIR )
+  set( GSL_ROOT_DIR "${GSL_ROOT_DIR}" CACHE PATH "Prefix for GSL installation")
 endif()
 
 # no user supplied path. Try to find gsl on our own.
@@ -69,15 +69,11 @@ if (GSL_USE_PKGCONFIG)
   endif()
 endif()
 
-#message("gsl root dir set to ${GSL_ROOT_DIR}")
-#message("gsl include dir set to ${GSL_INCLUDE_DIR}")
-
 find_path( GSL_INCLUDE_DIR
   NAMES gsl
   HINTS ${GSL_ROOT_DIR}/include ${GSL_INCLUDE_DIR}
   )
 
-#message("gsl include dir actually used: ${GSL_INCLUDE_DIR}")
 
 find_library( GSL_LIBRARY
   NAMES gsld gsl
@@ -92,12 +88,12 @@ find_library( GSL_CBLAS_LIBRARY
 set (GSL_INCLUDE_DIRS ${GSL_INCLUDE_DIR} )
 set (GSL_LIBRARIES ${GSL_LIBRARY} ${GSL_CBLAS_LIBRARY} )
 
+# we could probably also search in the filepath for the version.
 if (NOT GSL_VERSION)
   find_program( GSL_CONFIG_EXE
     NAMES gsl-config
     HINTS ${GSL_ROOT_DIR}/bin ${GSL_ROOT_DIR}
     )
-  message("${GSL_CONFIG_EXE}")
   if (EXISTS ${GSL_CONFIG_EXE})
     execute_process(
       COMMAND "${GSL_CONFIG_EXE}" "--version"
@@ -105,9 +101,7 @@ if (NOT GSL_VERSION)
       OUTPUT_VARIABLE GSL_VERSION
       OUTPUT_STRIP_TRAILING_WHITESPACE
       )
-  #message("GSL VERSION found to be ${GSL_VERSION}")
-  #message("STATUS: ${GSL_PROC_STATUS}")
-  endif()
+   endif()
 endif()
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GSL
