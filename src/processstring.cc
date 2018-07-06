@@ -578,7 +578,7 @@ bool StringProcess::next_NDiffHard() {
     if (!accepted_by_pythia[i]) {
       int baryon_incoming = PDGcodes_[i].baryon_number();
       int charge_incoming = PDGcodes_[i].charge();
-      if (baryon_incoming == 0) { // mesons
+      if (baryon_incoming == 0) {  // mesons
         if (charge_incoming == 0) {
           // Neutral mesons are mapped into pi0.
           pdg_for_pythia[i] = 111;
@@ -588,11 +588,11 @@ bool StringProcess::next_NDiffHard() {
           pdg_for_pythia[i] = charge_incoming > 0 ? 211 : -211;
         }
       } else {
-        if (baryon_incoming > 0) { // baryons
+        if (baryon_incoming > 0) {  // baryons
           /* Baryons with positive charge are mapped into proton.
            * Others are mapped into neutron. */
           pdg_for_pythia[i] = charge_incoming > 0 ? 2212 : 2112;
-        } else { //anti-baryons
+        } else {  // anti-baryons
           /* Anti-baryons with negative charge are mapped into antiproton.
            * Others are mapped into antineutron. */
           pdg_for_pythia[i] = charge_incoming < 0 ? -2212 : -2112;
@@ -613,8 +613,8 @@ bool StringProcess::next_NDiffHard() {
       previous_idB = pythia_parton_->mode("Beams:idB");
   double previous_eCM = pythia_parton_->parm("Beams:eCM");
 
-  bool same_initial_state = previous_idA == pdg_for_pythia[i] &&
-                            previous_idB == pdg_for_pythia[i] &&
+  bool same_initial_state = previous_idA == pdg_for_pythia[0] &&
+                            previous_idB == pdg_for_pythia[1] &&
                             std::abs(previous_eCM - sqrtsAB_) < really_small;
 
   /* Perform PYTHIA initialization if it was not previously initialized
@@ -842,7 +842,8 @@ void StringProcess::replace_constituent(Pythia8::Particle &particle,
     return;
   }
 
-  if (excess_constituent == {0, 0, 0, 0, 0}) {
+  std::array<int, 5> excess_null = {0, 0, 0, 0, 0};
+  if (excess_constituent == excess_null) {
     return;
   }
 
@@ -858,7 +859,7 @@ void StringProcess::replace_constituent(Pythia8::Particle &particle,
     quarks_from_diquark(particle.id(), pdgid[0], pdgid[1], spin_deg);
   }
 
-  int (iq = 0; iq < nq; iq++) {
+  for (int iq = 0; iq < nq; iq++) {
     int jq = std::abs(pdgid[iq]) - 1;
     int k_select = 0;
     std::vector<int> k_found;
@@ -872,7 +873,8 @@ void StringProcess::replace_constituent(Pythia8::Particle &particle,
     }
 
     if (k_found.size() > 0) {
-      const int l = random::uniform_int(0, k_found.size() - 1);
+      const int l = random::uniform_int(0,
+                        static_cast<int>(k_found.size()) - 1);
       k_select = k_found[l];
       pdgid[iq] = pdgid[iq] > 0 ? k_select + 1 : -(k_select + 1);
       excess_constituent[jq] += 1;
@@ -915,8 +917,9 @@ void StringProcess::restore_constituent(Pythia8::Event &event_intermediate,
   std::array<bool, 2> find_forward = {true, false};
   for (int ih = 0; ih < 2; ih++) {
     while (true) {
-      bool no_excess_quark = excess_quark[ih] == {0, 0, 0, 0, 0};
-      bool no_excess_antiq = excess_antiq[ih] == {0, 0, 0, 0, 0};
+      std::array<int, 5> excess_null = {0, 0, 0, 0, 0};
+      bool no_excess_quark = excess_quark[ih] == excess_null;
+      bool no_excess_antiq = excess_antiq[ih] == excess_null;
       if (no_excess_quark && no_excess_antiq) {
         break;
       }
@@ -934,7 +937,7 @@ void StringProcess::restore_constituent(Pythia8::Event &event_intermediate,
       }
       pSum -= event_intermediate[iforward].p();
 
-      if (event_intermediate[ip].id() > 0) {
+      if (event_intermediate[iforward].id() > 0) {
         replace_constituent(event_intermediate[iforward], excess_quark[ih]);
       } else {
         replace_constituent(event_intermediate[iforward], excess_antiq[ih]);
@@ -964,7 +967,7 @@ void StringProcess::restore_constituent(Pythia8::Event &event_intermediate,
       break;
     }
 
-    energy_current = pSum.e();
+    double energy_current = pSum.e();
     double slope = 0.;
     for (int i = 1; i < event_intermediate.size(); i++) {
       slope += event_intermediate[i].pAbs2() / event_intermediate[i].e();
