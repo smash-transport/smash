@@ -338,6 +338,81 @@ TEST(string_orthonormal_basis) {
   VERIFY(std::abs(evec_basis[2].x3()) < really_small);
 }
 
+TEST(string_find_excess_constituent) {
+  std::array<int, 5> excess_quark;
+  std::array<int, 5> excess_antiq;
+
+  PdgCode pdg_piplus = PdgCode(0x211);
+  PdgCode pdg_Kplus = PdgCode(0x321);
+  StringProcess::find_excess_constituent(pdg_Kplus, pdg_piplus,
+                                         excess_quark, excess_antiq);
+  VERIFY(excess_quark[0] == 0);
+  VERIFY(excess_quark[1] == 0);
+  VERIFY(excess_quark[2] == 0);
+  VERIFY(excess_quark[3] == 0);
+  VERIFY(excess_quark[4] == 0);
+  VERIFY(excess_antiq[0] == -1);
+  VERIFY(excess_antiq[1] == 0);
+  VERIFY(excess_antiq[2] == 1);
+  VERIFY(excess_antiq[3] == 0);
+  VERIFY(excess_antiq[4] == 0);
+
+  PdgCode pdg_neutron = PdgCode(0x2112);
+  PdgCode pdg_Omega = PdgCode(0x3334);
+  StringProcess::find_excess_constituent(pdg_Omega, pdg_neutron,
+                                         excess_quark, excess_antiq);
+  VERIFY(excess_quark[0] == -2);
+  VERIFY(excess_quark[1] == -1);
+  VERIFY(excess_quark[2] == 3);
+  VERIFY(excess_quark[3] == 0);
+  VERIFY(excess_quark[4] == 0);
+  VERIFY(excess_antiq[0] == 0);
+  VERIFY(excess_antiq[1] == 0);
+  VERIFY(excess_antiq[2] == 0);
+  VERIFY(excess_antiq[3] == 0);
+  VERIFY(excess_antiq[4] == 0);
+
+  PdgCode pdg_anti_neutron = PdgCode(-0x2112);
+  PdgCode pdg_anti_Xi0 = PdgCode(-0x3322);
+  StringProcess::find_excess_constituent(pdg_anti_Xi0, pdg_anti_neutron,
+                                         excess_quark, excess_antiq);
+  VERIFY(excess_quark[0] == 0);
+  VERIFY(excess_quark[1] == 0);
+  VERIFY(excess_quark[2] == 0);
+  VERIFY(excess_quark[3] == 0);
+  VERIFY(excess_quark[4] == 0);
+  VERIFY(excess_antiq[0] == -2);
+  VERIFY(excess_antiq[1] == 0);
+  VERIFY(excess_antiq[2] == 2);
+  VERIFY(excess_antiq[3] == 0);
+  VERIFY(excess_antiq[4] == 0);
+}
+
+TEST(string_quarks_from_diquark) {
+  int id_diquark;
+  int id1, id2, deg_spin;
+
+  id1 = 0;
+  id2 = 0;
+  deg_spin = 0;
+  // ud-diquark
+  id_diquark = 2103;
+  StringProcess::quarks_from_diquark(id_diquark, id1, id2, deg_spin);
+  VERIFY(id1 == 2);
+  VERIFY(id2 == 1);
+  VERIFY(deg_spin == 3);
+
+  id1 = 0;
+  id2 = 0;
+  deg_spin = 0;
+  // ud-antidiquark
+  id_diquark = -2101;
+  StringProcess::quarks_from_diquark(id_diquark, id1, id2, deg_spin);
+  VERIFY(id1 == -2);
+  VERIFY(id2 == -1);
+  VERIFY(deg_spin == 1);
+}
+
 TEST(string_diquark_from_quarks) {
   // ud-diquark
   int id1 = 1;

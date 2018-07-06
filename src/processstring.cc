@@ -818,7 +818,7 @@ void StringProcess::find_excess_constituent(PdgCode &pdg_actual,
     }
 
     if (qcontent_mapped[i] > 0) {
-      int j = qcontent_actual[i] - 1;
+      int j = qcontent_mapped[i] - 1;
       excess_quark[j] -= 1;
     }
 
@@ -828,7 +828,7 @@ void StringProcess::find_excess_constituent(PdgCode &pdg_actual,
     }
 
     if (qcontent_mapped[i] < 0) {
-      int j = std::abs(qcontent_actual[i]) - 1;
+      int j = std::abs(qcontent_mapped[i]) - 1;
       excess_antiq[j] -= 1;
     }
   }
