@@ -405,6 +405,15 @@ class StringProcess {
    */
   bool next_BBbarAnn();
 
+  static void find_excess_constituent(PdgCode &pdg_actual, PdgCode &pdg_mapped,
+                                      std::array<int, 5> &excess_quark,
+                                      std::array<int, 5> &excess_antiq);
+  void replace_constituent(Pythia8::Particle &particle,
+                           std::array<int, 5> &excess_constituent);
+  void restore_constituent(Pythia8::Event &event_intermediate,
+                           std::array<std::array<int, 5>, 2> &excess_quark,
+                           std::array<std::array<int, 5>, 2> &excess_antiq);
+
   /**
    * Identify set of partons, which are connected
    * to form a color-neutral string, from a given PYTHIA event record.
@@ -515,6 +524,15 @@ class StringProcess {
       pythia_id = (random::uniform_int(0, 1) == 0) ? 311 : -311;
     }
   }
+
+  /**
+   * find two quarks from a diquark. Order does not matter.
+   * \param[in] diquark PDG code of diquark
+   * \param[out] q1 PDG code of quark 1
+   * \param[out] q2 PDG code of quark 2
+   * \param[out] deg_spin spin degeneracy
+   */
+  static void quarks_from_diquark(int diquark, int &q1, int &q2, int &deg_spin);
 
   /**
    * Construct diquark from two quarks. Order does not matter.

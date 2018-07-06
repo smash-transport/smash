@@ -561,43 +561,72 @@ bool StringProcess::next_NDiffHard() {
   final_state_.clear();
 
   std::array<bool, 2> accepted_by_pythia;
+  std::array<int, 2> pdg_for_pythia;
+  std::array<std::array<int, 5>, 2> excess_quark;
+  std::array<std::array<int, 5>, 2> excess_antiq;
   for (int i = 0; i < 2; i++) {
     int pdgid = PDGcodes_[i].get_decimal();
+    pdg_for_pythia[i] = pdgid;
     accepted_by_pythia[i] = pdgid == 2212 || pdgid == -2212 || pdgid == 2112 ||
                             pdgid == -2112 || pdgid == 211 || pdgid == 111 ||
                             pdgid == -211;
-  }
-  if (!accepted_by_pythia[0] || !accepted_by_pythia[1]) {
-    for (int i = 0; i < 2; i++) {
-      NpartString_[i] = 1;
-      ParticleData new_particle(ParticleType::find(PDGcodes_[i]));
-      new_particle.set_4momentum(pcom_[i]);
-      new_particle.set_cross_section_scaling_factor(1.);
-      new_particle.set_formation_time(time_collision_);
-      final_state_.push_back(new_particle);
+    for (int j = 0; j < 5; j++) {
+      excess_quark[i][j] = 0;
+      excess_antiq[i][j] = 0;
     }
-    NpartFinal_ = NpartString_[0] + NpartString_[1];
-    return true;
+
+    if (!accepted_by_pythia[i]) {
+      int baryon_incoming = PDGcodes_[i].baryon_number();
+      int charge_incoming = PDGcodes_[i].charge();
+      if (baryon_incoming == 0) { // mesons
+        if (charge_incoming == 0) {
+          // Neutral mesons are mapped into pi0.
+          pdg_for_pythia[i] = 111;
+        } else {
+          /* Mesons with positive and negative charges are respectively
+           * mapped into pi+ and pi-. */
+          pdg_for_pythia[i] = charge_incoming > 0 ? 211 : -211;
+        }
+      } else {
+        if (baryon_incoming > 0) { // baryons
+          /* Baryons with positive charge are mapped into proton.
+           * Others are mapped into neutron. */
+          pdg_for_pythia[i] = charge_incoming > 0 ? 2212 : 2112;
+        } else { //anti-baryons
+          /* Anti-baryons with negative charge are mapped into antiproton.
+           * Others are mapped into antineutron. */
+          pdg_for_pythia[i] = charge_incoming < 0 ? -2212 : -2112;
+        }
+      }
+
+      const std::string s = std::to_string(pdg_for_pythia[i]);
+      PdgCode pdgcode_for_pythia(s);
+      find_excess_constituent(PDGcodes_[i], pdgcode_for_pythia,
+                              excess_quark[i], excess_antiq[i]);
+    }
   }
+
+  log.debug("Hard non-diff. with ", PDGcodes_[0], " + ",
+            PDGcodes_[1], " at CM energy [GeV] ", sqrtsAB_);
 
   int previous_idA = pythia_parton_->mode("Beams:idA"),
       previous_idB = pythia_parton_->mode("Beams:idB");
   double previous_eCM = pythia_parton_->parm("Beams:eCM");
 
-  bool same_initial_state = previous_idA == PDGcodes_[0].get_decimal() &&
-                            previous_idB == PDGcodes_[1].get_decimal() &&
+  bool same_initial_state = previous_idA == pdg_for_pythia[i] &&
+                            previous_idB == pdg_for_pythia[i] &&
                             std::abs(previous_eCM - sqrtsAB_) < really_small;
 
   /* Perform PYTHIA initialization if it was not previously initialized
    * or the initial state changed. */
   if (!pythia_parton_initialized_ || !same_initial_state) {
-    pythia_parton_->settings.mode("Beams:idA", PDGcodes_[0].get_decimal());
-    pythia_parton_->settings.mode("Beams:idB", PDGcodes_[1].get_decimal());
+    pythia_parton_->settings.mode("Beams:idA", pdg_for_pythia[0]);
+    pythia_parton_->settings.mode("Beams:idB", pdg_for_pythia[1]);
     pythia_parton_->settings.parm("Beams:eCM", sqrtsAB_);
 
     pythia_parton_initialized_ = pythia_parton_->init();
-    log.info("Pythia initialized with ", PDGcodes_[0], "+", PDGcodes_[1],
-             " at CM energy [GeV] ", sqrtsAB_);
+    log.info("Pythia initialized with ", pdg_for_pythia[0], " + ",
+             pdg_for_pythia[1], " at CM energy [GeV] ", sqrtsAB_);
     if (!pythia_parton_initialized_) {
       throw std::runtime_error("Pythia failed to initialize.");
     }
@@ -668,6 +697,8 @@ bool StringProcess::next_NDiffHard() {
   event_intermediate_[0].m(pSum.mCalc());
   // pythia_parton_->event.list();
   // pythia_parton_->event.listJunctions();
+
+  restore_constituent(event_intermediate_, excess_quark, excess_antiq);
 
   bool hadronize_success = false;
   bool find_forward_string = true;
@@ -769,6 +800,197 @@ bool StringProcess::next_NDiffHard() {
   }
 
   return hadronize_success;
+}
+
+void StringProcess::find_excess_constituent(PdgCode &pdg_actual,
+                                            PdgCode &pdg_mapped,
+                                            std::array<int, 5> &excess_quark,
+                                            std::array<int, 5> &excess_antiq) {
+  std::array<int, 3> qcontent_actual = pdg_actual.quark_content();
+  std::array<int, 3> qcontent_mapped = pdg_mapped.quark_content();
+
+  excess_quark = {0, 0, 0, 0, 0};
+  excess_antiq = {0, 0, 0, 0, 0};
+  for (int i = 0; i < 3; i++) {
+    if (qcontent_actual[i] > 0) {
+      int j = qcontent_actual[i] - 1;
+      excess_quark[j] += 1;
+    }
+
+    if (qcontent_mapped[i] > 0) {
+      int j = qcontent_actual[i] - 1;
+      excess_quark[j] -= 1;
+    }
+
+    if (qcontent_actual[i] < 0) {
+      int j = std::abs(qcontent_actual[i]) - 1;
+      excess_antiq[j] += 1;
+    }
+
+    if (qcontent_mapped[i] < 0) {
+      int j = std::abs(qcontent_actual[i]) - 1;
+      excess_antiq[j] -= 1;
+    }
+  }
+}
+
+void StringProcess::replace_constituent(Pythia8::Particle &particle,
+                        std::array<int, 5> &excess_constituent) {
+  const auto &log = logger<LogArea::Pythia>();
+
+  if (!particle.isQuark() && !particle.isDiquark()) {
+    return;
+  }
+
+  if (excess_constituent == {0, 0, 0, 0, 0}) {
+    return;
+  }
+
+  int nq = 0;
+  std::array<int, 2> pdgid = {0, 0};
+  int spin_deg = 0;
+  int pdgid_new = 0;
+  if (particle.isQuark()) {
+    nq = 1;
+    pdgid[0] = particle.id();
+  } else if (particle.isDiquark()) {
+    nq = 2;
+    quarks_from_diquark(particle.id(), pdgid[0], pdgid[1], spin_deg);
+  }
+
+  int (iq = 0; iq < nq; iq++) {
+    int jq = std::abs(pdgid[iq]) - 1;
+    int k_select = 0;
+    std::vector<int> k_found;
+    k_found.clear();
+    if (excess_constituent[jq] < 0) {
+      for (int k = 0; k < 5; k++) {
+        if (k != jq && excess_constituent[k] > 0) {
+          k_found.push_back(k);
+        }
+      }
+    }
+
+    if (k_found.size() > 0) {
+      const int l = random::uniform_int(0, k_found.size() - 1);
+      k_select = k_found[l];
+      pdgid[iq] = pdgid[iq] > 0 ? k_select + 1 : -(k_select + 1);
+      excess_constituent[jq] += 1;
+      excess_constituent[k_select] -= 1;
+    }
+  }
+
+  if (particle.isQuark()) {
+    pdgid_new = pdgid[0];
+  } else if (particle.isDiquark()) {
+    if (std::abs(pdgid[0]) < std::abs(pdgid[1])) {
+      std::swap(pdgid[0], pdgid[1]);
+    }
+    pdgid_new = std::abs(pdgid[0]) * 1000 + std::abs(pdgid[1]) * 100 +
+                spin_deg;
+    if (particle.id() < 0) {
+      pdgid_new *= -1;
+    }
+  }
+  log.debug("  parton id = ", particle.id(), " is converted to ", pdgid_new);
+
+  Pythia8::Vec4 pquark = particle.p();
+  double mass_new = pythia_hadron_->particleData.m0(pdgid_new);
+  double e_new = std::sqrt(mass_new * mass_new + pquark.pAbs() * pquark.pAbs());
+
+  particle.id(pdgid_new);
+  particle.e(e_new);
+  particle.m(mass_new);
+}
+
+void StringProcess::restore_constituent(Pythia8::Event &event_intermediate,
+                        std::array<std::array<int, 5>, 2> &excess_quark,
+                        std::array<std::array<int, 5>, 2> &excess_antiq) {
+  const auto &log = logger<LogArea::Pythia>();
+
+  Pythia8::Vec4 pSum = event_intermediate[0].p();
+  const double energy_init = pSum.e();
+  log.debug("  initial total energy [GeV] : ", energy_init);
+
+  std::array<bool, 2> find_forward = {true, false};
+  for (int ih = 0; ih < 2; ih++) {
+    while (true) {
+      bool no_excess_quark = excess_quark[ih] == {0, 0, 0, 0, 0};
+      bool no_excess_antiq = excess_antiq[ih] == {0, 0, 0, 0, 0};
+      if (no_excess_quark && no_excess_antiq) {
+        break;
+      }
+
+      int np_end = 0;
+      int iforward = 1;
+      // select the most forward or backward parton.
+      for (int ip = 2; ip < event_intermediate.size() - np_end; ip++) {
+        if ((find_forward[ih] &&
+            event_intermediate[ip].pz() > event_intermediate[iforward].pz()) ||
+            (!find_forward[ih] &&
+            event_intermediate[ip].pz() < event_intermediate[iforward].pz())) {
+          iforward = ip;
+        }
+      }
+      pSum -= event_intermediate[iforward].p();
+
+      if (event_intermediate[ip].id() > 0) {
+        replace_constituent(event_intermediate[iforward], excess_quark[ih]);
+      } else {
+        replace_constituent(event_intermediate[iforward], excess_antiq[ih]);
+      }
+
+      const int pdgid = event_intermediate[iforward].id();
+      Pythia8::Vec4 pquark = event_intermediate[iforward].p();
+      const double mass = pythia_hadron_->particleData.m0(pdgid);
+
+      const int status = event_intermediate[iforward].status();
+      const int color = event_intermediate[iforward].col();
+      const int anticolor = event_intermediate[iforward].acol();
+
+      np_end += 1;
+      pSum += pquark;
+      event_intermediate.append(pdgid, status,
+                                color, anticolor, pquark, mass);
+
+      event_intermediate.remove(iforward, iforward);
+    }
+    log.debug("  valence quark content of hadon ", ih, "are recovered.");
+  }
+
+  log.debug("  current total energy [GeV] : ", pSum.e());
+  while (true) {
+    if (std::abs(pSum.e() - energy_init) < really_small * energy_init) {
+      break;
+    }
+
+    energy_current = pSum.e();
+    double slope = 0.;
+    for (int i = 1; i < event_intermediate.size(); i++) {
+      slope += event_intermediate[i].pAbs2() / event_intermediate[i].e();
+    }
+
+    const double rescale_factor = 1. + (energy_init - energy_current) / slope;
+    pSum = 0.;
+    for (int i = 1; i < event_intermediate.size(); i++) {
+      const double px = rescale_factor * event_intermediate[i].px();
+      const double py = rescale_factor * event_intermediate[i].py();
+      const double pz = rescale_factor * event_intermediate[i].pz();
+      const double pabs = rescale_factor * event_intermediate[i].pAbs();
+      const double mass = event_intermediate[i].m();
+
+      event_intermediate[i].px(px);
+      event_intermediate[i].py(py);
+      event_intermediate[i].pz(pz);
+      event_intermediate[i].e(std::sqrt(mass * mass + pabs * pabs));
+      pSum += event_intermediate[i].p();
+    }
+    log.debug("  parton momenta are rescaled by factor of ", rescale_factor);
+  }
+
+  log.debug("  final total energy [GeV] : ", pSum.e());
+  event_intermediate[0].p(pSum);
+  event_intermediate[0].m(pSum.mCalc());
 }
 
 void StringProcess::compose_string_parton(bool &find_forward_string,
@@ -1174,6 +1396,18 @@ void StringProcess::compute_incoming_lightcone_momenta() {
   PNegA_ = (pcom_[0].x0() - evecBasisAB_[0] * pcom_[0].threevec()) / sqrt2_;
   PPosB_ = (pcom_[1].x0() + evecBasisAB_[0] * pcom_[1].threevec()) / sqrt2_;
   PNegB_ = (pcom_[1].x0() - evecBasisAB_[0] * pcom_[1].threevec()) / sqrt2_;
+}
+
+void StringProcess::quarks_from_diquark(int diquark,
+                                        int &q1, int &q2, int &deg_spin) {
+  assert((std::abs(diquark) > 1000) && (std::abs(diquark) < 5510) &&
+         (std::abs(diquark) % 100 < 10));
+
+  deg_spin = std::abs(diquark) % 10;
+  const int sign_anti = diquark > 0 ? 1 : -1;
+
+  q1 = sign_anti * (std::abs(diquark) - (std::abs(diquark) % 1000)) / 1000;
+  q2 = sign_anti * (std::abs(diquark) % 1000 - deg_spin) / 100;
 }
 
 int StringProcess::diquark_from_quarks(int q1, int q2) {
