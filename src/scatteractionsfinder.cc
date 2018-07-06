@@ -444,7 +444,7 @@ struct Node {
   /**
    * \return A new decay tree node.
    *
-   * \param name Name.for printing.
+   * \param name Name for printing.
    * \param weight Cross section or branching ratio.
    * \param children Possible decays.
    * \param particles Particle types in this node.
