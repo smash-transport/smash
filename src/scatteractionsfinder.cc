@@ -458,6 +458,13 @@ struct Node {
     print_helper(0);
   }
 
+  /// Find final state cross sections.
+  std::vector<std::pair<std::string, double>> final_state_cross_sections() const {
+    std::vector<std::pair<std::string, double>> result;
+    final_state_cross_sections_helper(0, result, "", 1.);
+    return result;
+  }
+
  private:
   /**
    * Internal helper function.
@@ -473,6 +480,34 @@ struct Node {
       child.print_helper(depth + 1);
     }
   }
+
+  /**
+   * Internal helper function.
+   *
+   * \param depth Recursive call depth.
+   * \param result Pairs of process names and exclusive cross sections.
+   * \param name Current name.
+   * \param current weight/cross section.
+   */
+  void final_state_cross_sections_helper(uint64_t depth,
+      std::vector<std::pair<std::string, double>>& result,
+      std::string name, double weight) const {
+    if (!name.empty()) {
+      name += "->";
+    }
+    name += name_;
+    if (depth > 0) {
+      weight *= weight_;
+    }
+    if (children_.empty()) {
+        result.emplace_back(std::make_pair(name, weight));
+        return;
+    }
+    for (const auto& child : children_) {
+      child.final_state_cross_sections_helper(
+        depth + 1, result, name, weight);
+    }
+  }
 };
 
 /**
@@ -482,6 +517,10 @@ struct Node {
  * \param ptype Particle type of the starting node.
  */
 static void add_decays(Node& node, const ParticleType& ptype) {
+  if (ptype.width_at_pole() < ParticleType::width_cutoff) {
+    // Such particles are considered stable by SMASH.
+    return;
+  }
   for (const auto& decay : ptype.decay_modes().decay_mode_list()) {
     std::stringstream name;
     name << "(" << ptype.name() << "->";
@@ -510,7 +549,7 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
   ParticleData a_data(a), b_data(b);
   constexpr int n_momentum_points = 200;
   constexpr double momentum_step = 0.02;
-  for (int i = 1; i < n_momentum_points; i++) {
+  for (int i = 1; i < n_momentum_points + 1; i++) {
     const double momentum = momentum_step * i;
     a_data.set_4momentum(m_a, momentum, 0.0, 0.0);
     b_data.set_4momentum(m_b, -momentum, 0.0, 0.0);
@@ -562,7 +601,13 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
     xs_dump["total"].push_back(std::make_pair(sqrts, act->cross_section()));
     // Total cross-section should be the first in the list -> negative mass
     outgoing_total_mass["total"] = -1.0;
-    decaytree.print();
+    //decaytree.print();
+    //const auto final_state_xs = decaytree.final_state_cross_sections();
+    //std::cout << "vvvvvvvvv\nfinal state cross sections:" << std::endl;
+    //for (const auto& p : final_state_xs) {
+    //    std::cout << p.first << " " << p.second << std::endl;
+    //}
+    //std::cout << "^^^^^^^^^" << std::endl;
   }
 
   // Nice ordering of channels by summed pole mass of products
