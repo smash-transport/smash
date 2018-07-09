@@ -257,7 +257,7 @@ This creates a folder named "gsl-[version_number]" called $GSL here.
 Here N is the number of cores to use in the "make" command. When compiling
 SMASH, run cmake with
 
-    cmake -DCMAKE_PREFIX_PATH=$GSL ..
+    cmake -DGSL_ROOT_DIR=$GSL ..
 
 Note: In case of problems, make sure to start with a clean build folder.
 */
