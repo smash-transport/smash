@@ -7,30 +7,30 @@
  *
  */
 
-#include "include/particletype.h"
+#include "smash/particletype.h"
 
 #include <assert.h>
 #include <algorithm>
 #include <map>
 #include <vector>
 
-#include "include/constants.h"
-#include "include/cxx14compat.h"
-#include "include/decaymodes.h"
-#include "include/distributions.h"
-#include "include/formfactors.h"
-#include "include/inputfunctions.h"
-#include "include/integrate.h"
-#include "include/iomanipulators.h"
-#include "include/isoparticletype.h"
-#include "include/kinematics.h"
-#include "include/logging.h"
-#include "include/numerics.h"
-#include "include/particledata.h"
-#include "include/pdgcode.h"
-#include "include/pow.h"
-#include "include/processbranch.h"
-#include "include/stringfunctions.h"
+#include "smash/constants.h"
+#include "smash/cxx14compat.h"
+#include "smash/decaymodes.h"
+#include "smash/distributions.h"
+#include "smash/formfactors.h"
+#include "smash/inputfunctions.h"
+#include "smash/integrate.h"
+#include "smash/iomanipulators.h"
+#include "smash/isoparticletype.h"
+#include "smash/kinematics.h"
+#include "smash/logging.h"
+#include "smash/numerics.h"
+#include "smash/particledata.h"
+#include "smash/pdgcode.h"
+#include "smash/pow.h"
+#include "smash/processbranch.h"
+#include "smash/stringfunctions.h"
 
 namespace smash {
 

@@ -11,20 +11,20 @@
 
 #include "setup.h"
 
-#include <include/config.h>
+#include <smash/config.h>
 #include <array>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <string>
 #include <vector>
 
-#include "../include/configuration.h"
-#include "../include/oscaroutput.h"
-#include "../include/outputinterface.h"
-#include "../include/particles.h"
-#include "../include/processbranch.h"
-#include "../include/random.h"
-#include "../include/scatteraction.h"
+#include "../include/smash/configuration.h"
+#include "../include/smash/oscaroutput.h"
+#include "../include/smash/outputinterface.h"
+#include "../include/smash/particles.h"
+#include "../include/smash/processbranch.h"
+#include "../include/smash/random.h"
+#include "../include/smash/scatteraction.h"
 
 using namespace smash;
 

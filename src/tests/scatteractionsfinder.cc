@@ -13,11 +13,11 @@
 
 #include <cstdio>
 
-#include "../include/action.h"
-#include "../include/constants.h"
-#include "../include/particledata.h"
-#include "../include/pdgcode.h"
-#include "../include/scatteractionsfinder.h"
+#include "../include/smash/action.h"
+#include "../include/smash/constants.h"
+#include "../include/smash/particledata.h"
+#include "../include/smash/pdgcode.h"
+#include "../include/smash/scatteractionsfinder.h"
 
 using namespace smash;
 

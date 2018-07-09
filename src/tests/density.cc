@@ -17,14 +17,14 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
-#include "../include/boxmodus.h"
-#include "../include/configuration.h"
-#include "../include/cxx14compat.h"
-#include "../include/density.h"
-#include "../include/experiment.h"
-#include "../include/modusdefault.h"
-#include "../include/nucleus.h"
-#include "../include/thermodynamicoutput.h"
+#include "../include/smash/boxmodus.h"
+#include "../include/smash/configuration.h"
+#include "../include/smash/cxx14compat.h"
+#include "../include/smash/density.h"
+#include "../include/smash/experiment.h"
+#include "../include/smash/modusdefault.h"
+#include "../include/smash/nucleus.h"
+#include "../include/smash/thermodynamicoutput.h"
 
 using namespace smash;
 

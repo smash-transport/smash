@@ -11,13 +11,13 @@
 
 #include "setup.h"
 
-#include "../include/boxmodus.h"
-#include "../include/configuration.h"
-#include "../include/cxx14compat.h"
-#include "../include/experiment.h"
-#include "../include/nucleus.h"
-#include "../include/pauliblocking.h"
-#include "../include/potentials.h"
+#include "../include/smash/boxmodus.h"
+#include "../include/smash/configuration.h"
+#include "../include/smash/cxx14compat.h"
+#include "../include/smash/experiment.h"
+#include "../include/smash/nucleus.h"
+#include "../include/smash/pauliblocking.h"
+#include "../include/smash/potentials.h"
 
 #include <boost/filesystem.hpp>
 

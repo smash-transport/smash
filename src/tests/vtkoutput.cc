@@ -11,19 +11,19 @@
 
 #include "setup.h"
 
-#include <include/config.h>
+#include <smash/config.h>
 #include <array>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <iostream>
 #include <vector>
 
-#include "../include/clock.h"
-#include "../include/configuration.h"
-#include "../include/outputinterface.h"
-#include "../include/particles.h"
-#include "../include/random.h"
-#include "../include/vtkoutput.h"
+#include "../include/smash/clock.h"
+#include "../include/smash/configuration.h"
+#include "../include/smash/outputinterface.h"
+#include "../include/smash/particles.h"
+#include "../include/smash/random.h"
+#include "../include/smash/vtkoutput.h"
 
 using namespace smash;
 

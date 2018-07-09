@@ -15,9 +15,9 @@
 #include <boost/filesystem/fstream.hpp>
 #include <string>
 
-#include "../include/listmodus.h"
-#include "../include/oscaroutput.h"
-#include "../include/particles.h"
+#include "../include/smash/listmodus.h"
+#include "../include/smash/oscaroutput.h"
+#include "../include/smash/particles.h"
 
 using namespace smash;
 static const double accuracy = 5.e-4;

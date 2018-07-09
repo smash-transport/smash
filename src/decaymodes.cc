@@ -7,17 +7,17 @@
  *
  */
 
-#include "include/decaymodes.h"
+#include "smash/decaymodes.h"
 
 #include <vector>
 
-#include "include/clebschgordan.h"
-#include "include/constants.h"
-#include "include/cxx14compat.h"
-#include "include/inputfunctions.h"
-#include "include/isoparticletype.h"
-#include "include/logging.h"
-#include "include/stringfunctions.h"
+#include "smash/clebschgordan.h"
+#include "smash/constants.h"
+#include "smash/cxx14compat.h"
+#include "smash/inputfunctions.h"
+#include "smash/isoparticletype.h"
+#include "smash/logging.h"
+#include "smash/stringfunctions.h"
 
 namespace smash {
 

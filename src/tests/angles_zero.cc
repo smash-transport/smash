@@ -7,7 +7,7 @@
  *
  */
 
-#include "../include/angles.h"
+#include "../include/smash/angles.h"
 
 // tests if the angles add up to zero.
 

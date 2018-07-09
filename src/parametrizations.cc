@@ -7,8 +7,8 @@
  *
  */
 
-#include "include/parametrizations.h"
-#include "include/parametrizations_data.h"
+#include "smash/parametrizations.h"
+#include "smash/parametrizations_data.h"
 
 #include <cmath>
 #include <initializer_list>
@@ -16,14 +16,14 @@
 #include <memory>
 #include <vector>
 
-#include "include/average.h"
-#include "include/clebschgordan.h"
-#include "include/constants.h"
-#include "include/cxx14compat.h"
-#include "include/interpolation.h"
-#include "include/kinematics.h"
-#include "include/lowess.h"
-#include "include/pow.h"
+#include "smash/average.h"
+#include "smash/clebschgordan.h"
+#include "smash/constants.h"
+#include "smash/cxx14compat.h"
+#include "smash/interpolation.h"
+#include "smash/kinematics.h"
+#include "smash/lowess.h"
+#include "smash/pow.h"
 
 namespace smash {
 

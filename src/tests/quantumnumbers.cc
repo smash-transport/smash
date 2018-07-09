@@ -9,7 +9,7 @@
 
 #include "unittest.h"  // This include has to be first
 
-#include "../include/quantumnumbers.h"
+#include "../include/smash/quantumnumbers.h"
 
 using namespace smash;
 

@@ -7,15 +7,15 @@
  *
  */
 
-#include "include/crosssections.h"
+#include "smash/crosssections.h"
 
-#include "include/clebschgordan.h"
-#include "include/constants.h"
-#include "include/kinematics.h"
-#include "include/logging.h"
-#include "include/parametrizations.h"
-#include "include/particletype.h"
-#include "include/pow.h"
+#include "smash/clebschgordan.h"
+#include "smash/constants.h"
+#include "smash/kinematics.h"
+#include "smash/logging.h"
+#include "smash/parametrizations.h"
+#include "smash/particletype.h"
+#include "smash/pow.h"
 
 namespace smash {
 

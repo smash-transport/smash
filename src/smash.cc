@@ -13,16 +13,16 @@
 
 #include <boost/filesystem/fstream.hpp>
 
-#include "include/cxx14compat.h"
-#include "include/decaymodes.h"
-#include "include/experiment.h"
-#include "include/filelock.h"
-#include "include/inputfunctions.h"
-#include "include/random.h"
-#include "include/scatteractionsfinder.h"
-#include "include/stringfunctions.h"
+#include "smash/cxx14compat.h"
+#include "smash/decaymodes.h"
+#include "smash/experiment.h"
+#include "smash/filelock.h"
+#include "smash/inputfunctions.h"
+#include "smash/random.h"
+#include "smash/scatteractionsfinder.h"
+#include "smash/stringfunctions.h"
 /* build dependent variables */
-#include "include/config.h"
+#include "smash/config.h"
 
 namespace smash {
 

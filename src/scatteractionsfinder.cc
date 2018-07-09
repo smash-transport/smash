@@ -7,25 +7,25 @@
  *
  */
 
-#include "include/scatteractionsfinder.h"
+#include "smash/scatteractionsfinder.h"
 
 #include <algorithm>
 #include <map>
 #include <vector>
 
-#include "include/configuration.h"
-#include "include/constants.h"
-#include "include/crosssections.h"
-#include "include/cxx14compat.h"
-#include "include/decaymodes.h"
-#include "include/experimentparameters.h"
-#include "include/isoparticletype.h"
-#include "include/logging.h"
-#include "include/macros.h"
-#include "include/particles.h"
-#include "include/scatteraction.h"
-#include "include/scatteractionphoton.h"
-#include "include/stringfunctions.h"
+#include "smash/configuration.h"
+#include "smash/constants.h"
+#include "smash/crosssections.h"
+#include "smash/cxx14compat.h"
+#include "smash/decaymodes.h"
+#include "smash/experimentparameters.h"
+#include "smash/isoparticletype.h"
+#include "smash/logging.h"
+#include "smash/macros.h"
+#include "smash/particles.h"
+#include "smash/scatteraction.h"
+#include "smash/scatteractionphoton.h"
+#include "smash/stringfunctions.h"
 
 namespace smash {
 /*!\Userguide

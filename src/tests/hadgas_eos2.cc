@@ -14,8 +14,8 @@
 #include "histogram.h"
 #include "setup.h"
 
-#include "../include/constants.h"
-#include "../include/hadgas_eos.h"
+#include "../include/smash/constants.h"
+#include "../include/smash/hadgas_eos.h"
 
 using namespace smash;
 

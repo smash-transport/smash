@@ -7,7 +7,7 @@
  *
  */
 
-#include "include/wallcrossingaction.h"
+#include "smash/wallcrossingaction.h"
 
 namespace smash {
 

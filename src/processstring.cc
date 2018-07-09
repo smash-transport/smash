@@ -9,11 +9,11 @@
 
 #include <array>
 
-#include "include/angles.h"
-#include "include/kinematics.h"
-#include "include/logging.h"
-#include "include/processstring.h"
-#include "include/random.h"
+#include "smash/angles.h"
+#include "smash/kinematics.h"
+#include "smash/logging.h"
+#include "smash/processstring.h"
+#include "smash/random.h"
 
 namespace smash {
 

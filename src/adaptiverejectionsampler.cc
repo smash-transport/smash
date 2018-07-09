@@ -11,10 +11,10 @@
 #include <exception>
 #include <iostream>
 
-#include "include/adaptiverejectionsampler.h"
-#include "include/constants.h"
-#include "include/fpenvironment.h"
-#include "include/logging.h"
+#include "smash/adaptiverejectionsampler.h"
+#include "smash/constants.h"
+#include "smash/fpenvironment.h"
+#include "smash/logging.h"
 
 namespace smash {
 

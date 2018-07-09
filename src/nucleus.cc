@@ -4,7 +4,7 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-#include "include/nucleus.h"
+#include "smash/nucleus.h"
 
 #include <fstream>
 #include <iostream>
@@ -12,14 +12,14 @@
 #include <map>
 #include <string>
 
-#include "include/angles.h"
-#include "include/constants.h"
-#include "include/fourvector.h"
-#include "include/logging.h"
-#include "include/numerics.h"
-#include "include/particles.h"
-#include "include/pdgcode.h"
-#include "include/threevector.h"
+#include "smash/angles.h"
+#include "smash/constants.h"
+#include "smash/fourvector.h"
+#include "smash/logging.h"
+#include "smash/numerics.h"
+#include "smash/particles.h"
+#include "smash/pdgcode.h"
+#include "smash/threevector.h"
 
 namespace smash {
 

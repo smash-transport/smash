@@ -9,8 +9,8 @@
 
 #include "unittest.h"  // This include has to be first
 
-#include "../include/constants.h"
-#include "../include/kinematics.h"
+#include "../include/smash/constants.h"
+#include "../include/smash/kinematics.h"
 
 using namespace smash;
 

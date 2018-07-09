@@ -6,19 +6,19 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
-#include "include/oscaroutput.h"
+#include "smash/oscaroutput.h"
 
 #include <string>
 
 #include <boost/filesystem.hpp>
 
-#include "include/action.h"
-#include "include/clock.h"
-#include "include/config.h"
-#include "include/configuration.h"
-#include "include/cxx14compat.h"
-#include "include/forwarddeclarations.h"
-#include "include/particles.h"
+#include "smash/action.h"
+#include "smash/clock.h"
+#include "smash/config.h"
+#include "smash/configuration.h"
+#include "smash/cxx14compat.h"
+#include "smash/forwarddeclarations.h"
+#include "smash/particles.h"
 
 namespace smash {
 

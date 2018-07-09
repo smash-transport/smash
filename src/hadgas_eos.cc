@@ -15,14 +15,14 @@
 
 #include <boost/filesystem.hpp>
 
-#include "include/constants.h"
-#include "include/forwarddeclarations.h"
-#include "include/fpenvironment.h"
-#include "include/hadgas_eos.h"
-#include "include/integrate.h"
-#include "include/logging.h"
-#include "include/pow.h"
-#include "include/random.h"
+#include "smash/constants.h"
+#include "smash/forwarddeclarations.h"
+#include "smash/fpenvironment.h"
+#include "smash/hadgas_eos.h"
+#include "smash/integrate.h"
+#include "smash/logging.h"
+#include "smash/pow.h"
+#include "smash/random.h"
 
 namespace smash {
 

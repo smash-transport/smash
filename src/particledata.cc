@@ -7,14 +7,14 @@
  *
  */
 
-#include "include/particledata.h"
+#include "smash/particledata.h"
 
 #include <iomanip>
 #include <iostream>
 #include <vector>
 
-#include "include/constants.h"
-#include "include/iomanipulators.h"
+#include "smash/constants.h"
+#include "smash/iomanipulators.h"
 
 namespace smash {
 

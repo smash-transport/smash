@@ -5,12 +5,12 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#include "include/clebschgordan.h"
+#include "smash/clebschgordan.h"
 
 #include <gsl/gsl_sf_coupling.h>
 #include <numeric>
-#include "include/constants.h"
-#include "include/logging.h"
+#include "smash/constants.h"
+#include "smash/logging.h"
 
 namespace smash {
 

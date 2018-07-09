@@ -7,7 +7,7 @@
  *
  */
 
-#include "include/stringfunctions.h"
+#include "smash/stringfunctions.h"
 
 #include <sstream>
 

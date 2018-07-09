@@ -7,7 +7,7 @@
  *
  */
 
-#include "include/fpenvironment.h"
+#include "smash/fpenvironment.h"
 
 #if defined __SSE__
 #include <xmmintrin.h>
@@ -15,7 +15,7 @@
 
 #include <csignal>
 
-#include "include/logging.h"
+#include "smash/logging.h"
 
 namespace smash {
 

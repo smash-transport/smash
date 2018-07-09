@@ -7,13 +7,13 @@
  *
  */
 
-#include "include/rootoutput.h"
+#include "smash/rootoutput.h"
 #include "TFile.h"
 #include "TTree.h"
-#include "include/action.h"
-#include "include/clock.h"
-#include "include/forwarddeclarations.h"
-#include "include/particles.h"
+#include "smash/action.h"
+#include "smash/clock.h"
+#include "smash/forwarddeclarations.h"
+#include "smash/particles.h"
 
 namespace smash {
 

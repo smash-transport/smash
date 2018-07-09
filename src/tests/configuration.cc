@@ -11,9 +11,9 @@
 
 #include "setup.h"
 
-#include "../include/configuration.h"
-#include "../include/forwarddeclarations.h"
-#include "../include/macros.h"
+#include "../include/smash/configuration.h"
+#include "../include/smash/forwarddeclarations.h"
+#include "../include/smash/macros.h"
 
 #include <boost/filesystem.hpp>
 

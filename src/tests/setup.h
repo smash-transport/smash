@@ -10,13 +10,13 @@
 #ifndef SRC_TESTS_SETUP_H_
 #define SRC_TESTS_SETUP_H_
 
-#include "../include/cxx14compat.h"
-#include "../include/decaymodes.h"
-#include "../include/experiment.h"
-#include "../include/particledata.h"
-#include "../include/particles.h"
-#include "../include/particletype.h"
-#include "../include/random.h"
+#include "../include/smash/cxx14compat.h"
+#include "../include/smash/decaymodes.h"
+#include "../include/smash/experiment.h"
+#include "../include/smash/particledata.h"
+#include "../include/smash/particles.h"
+#include "../include/smash/particletype.h"
+#include "../include/smash/random.h"
 
 #include <boost/filesystem.hpp>
 
