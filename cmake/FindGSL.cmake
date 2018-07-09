@@ -2,7 +2,7 @@
 # This will define:
 #
 #  GSL_FOUND
-#  GSL_INCLUDES
+#  GSL_INCLUDE_DIR
 #  GSL_LIBRARY
 #  GSL_CBLAS_LIBRARY
 # 
@@ -93,7 +93,6 @@ if (NOT GSL_VERSION)
     NAMES gsl-config
     HINTS ${GSL_ROOT_DIR}/bin ${GSL_ROOT_DIR}
     )
-  message("${GSL_CONFIG_EXE}")
   if (EXISTS ${GSL_CONFIG_EXE})
     execute_process(
       COMMAND "${GSL_CONFIG_EXE}" "--version"
@@ -114,5 +113,5 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(GSL
     GSL_VERSION
    )
 
-mark_as_advanced(GSL_INCLUDES GSL_CBLAS_LIBRARY GSL_LIBRARY)
+ mark_as_advanced(GSL_CBLAS_LIBRARY GSL_CONFIG_EXE GSL_INCLUDE_DIRS GSL_LIBRARIES )
 

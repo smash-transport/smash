@@ -57,6 +57,7 @@ include_directories(SYSTEM
     ${EIGEN3_INCLUDE_DIR}
     )
 
+
 # set default libraries for linking
 set(SMASH_LIBRARIES ${SMASH_LIBRARIES}
    ${GSL_LIBRARY}
