@@ -44,7 +44,7 @@ to build Pythia with similar flags as used for SMASH:
     wget http://home.thep.lu.se/~torbjorn/pythia8/pythia8230.tgz
     tar xf pythia8230.tgz && rm pythia8230.tgz
     cd pythia8230
-    ./configure --cxx-common='-std=c++11 -march=native -mfpmath=sse -O3'
+    ./configure --cxx-common='-std=c++11 -march=native -mfpmath=sse -O3 -fPIC'
     make
 
 To tell cmake where to find Pythia, pass the path to the pythia8-config

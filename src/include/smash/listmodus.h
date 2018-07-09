@@ -68,6 +68,10 @@ class ListModus : public ModusDefault {
   explicit ListModus(Configuration modus_config,
                      const ExperimentParameters &parameters);
 
+  /// Construct an empty list. Useful for convenient JetScape connection.
+  ListModus() :
+    shift_id_(0) {}
+
   /**
    * Generates initial state of the particles in the system according to a list.
    *
@@ -137,6 +141,10 @@ class ListModus : public ModusDefault {
     using std::runtime_error::runtime_error;
   };
 
+ protected:
+  /// Starting time for the List; changed to the earliest formation time
+  double start_time_ = 0.;
+
  private:
   /// File directory of the particle list
   std::string particle_list_file_directory_;
@@ -146,9 +154,6 @@ class ListModus : public ModusDefault {
 
   /// File name of current file
   std::string current_particle_list_file_;
-
-  /// Starting time for the List; changed to the earliest formation time
-  double start_time_ = 0.;
 
   /// shift_id is the start number of file_id_
   const int shift_id_;

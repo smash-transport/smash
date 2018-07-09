@@ -194,6 +194,10 @@ set_source_files_properties(experiment.cc PROPERTIES OBJECT_DEPENDS "${generated
 
 target_link_libraries(smash ${SMASH_LIBRARIES})
 
+# Create a shared library out of the whole SMASH
+add_library(SmashShared SHARED ${smash_src})
+target_link_libraries(SmashShared ${SMASH_LIBRARIES})
+
 # tests:
 if(BUILD_TESTING)
    # library for unit tests
