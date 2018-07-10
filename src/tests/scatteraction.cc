@@ -473,10 +473,10 @@ TEST(string_scaling_factors) {
   d.set_id(1);
   e.set_id(2);
   f.set_id(3);
-  c.set_4momentum(0.938, {0., 0., -0.5});
-  d.set_4momentum(0.938, {0., 0., 1.});
-  e.set_4momentum(0.138, {0., 0., 0.5});
-  f.set_4momentum(0.138, {0., 0., -1.});
+  c.set_4momentum(0.938, 0., 0., 1.);
+  d.set_4momentum(0.938, 0., 0., 0.5);
+  e.set_4momentum(0.138, 0., 0., -0.5);
+  f.set_4momentum(0.138, 0., 0., -1.);
   ParticleList outgoing = {e, d, c, f};  // here in random order
   constexpr double coherence_factor = 0.7;
   ThreeVector evec_coll = ThreeVector(0., 0., 1.);
@@ -485,25 +485,25 @@ TEST(string_scaling_factors) {
   StringProcess::assign_all_scaling_factors(baryon_string, outgoing, evec_coll,
                                             coherence_factor);
   // outgoing list is now assumed to be sorted by z-velocity (so c,d,e,f)
-  VERIFY(outgoing[0] == d);
-  VERIFY(outgoing[1] == e);
-  VERIFY(outgoing[2] == c);
+  VERIFY(outgoing[0] == c);
+  VERIFY(outgoing[1] == d);
+  VERIFY(outgoing[2] == e);
   VERIFY(outgoing[3] == f);
   // Since the string is baryonic,
   // the most forward proton has to carry the diquark,
   // which leads to a scaling factor of 0.7*2/3 and the most backward pion (f)
   // gets the other quark and a scaling factor of 0.7*1/2
-  COMPARE(outgoing[0].cross_section_scaling_factor(),
+  COMPARE(outgoing[0].cross_section_scaling_factor(), 0.);
+  COMPARE(outgoing[1].cross_section_scaling_factor(),
           coherence_factor * 2. / 3.);
-  COMPARE(outgoing[1].cross_section_scaling_factor(), 0.);
   COMPARE(outgoing[2].cross_section_scaling_factor(), 0.);
   COMPARE(outgoing[3].cross_section_scaling_factor(), coherence_factor / 2.0);
 
   incoming = {e, f};  // Mesonic string
-  e.set_4momentum(0.138, {0., 0., -1.0});
-  f.set_4momentum(0.138, {0., 0., -0.5});
-  c.set_4momentum(0.938, {0., 0., 0.5});
-  d.set_4momentum(0.938, {0., 0., 1.0});
+  e.set_4momentum(0.138, {0., 0., 1.0});
+  f.set_4momentum(0.138, {0., 0., 0.5});
+  c.set_4momentum(0.938, {0., 0., -0.5});
+  d.set_4momentum(0.938, {0., 0., -1.0});
   outgoing = {f, c, d, e};  // again in random order
   // Since it is a Mesonic string, the valence quarks to distribute are
   // a quark and an anti-quark. Particle d will carry the quark and is assigned
@@ -522,8 +522,8 @@ TEST(string_scaling_factors) {
   // momenta of d and c, particle c will be assigned the scaling factor.
   // Even though particle c is an anti-baryon, this is correct, since the meson
   // on the other end of the string can also carry the quark instead.
-  c.set_4momentum(0.938, {0., 0., 1.0});
-  d.set_4momentum(0.938, {0., 0., 0.5});
+  c.set_4momentum(0.938, {0., 0., -1.0});
+  d.set_4momentum(0.938, {0., 0., -0.5});
   outgoing = {c, d, e, f};
   StringProcess::assign_all_scaling_factors(baryon_string, outgoing, evec_coll,
                                             coherence_factor);

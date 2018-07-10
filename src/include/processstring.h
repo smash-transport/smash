@@ -624,7 +624,7 @@ class StringProcess {
    */
   static void assign_all_scaling_factors(int baryon_string,
                                          ParticleList& outgoing_particles,
-                                         ThreeVector &evecLong,
+                                         const ThreeVector &evecLong,
                                          double suppression_factor);
 
   /**

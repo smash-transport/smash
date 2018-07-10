@@ -737,7 +737,7 @@ bool StringProcess::next_NDiffHard() {
 
     FourVector uString = FourVector(1., 0., 0., 0.);
     ThreeVector evec = find_forward_string ? evecBasisAB_[0] : -evecBasisAB_[0];
-    int nfrag = append_final_state(intermediate_particles, uString, evec);
+    int nfrag = append_final_state(new_intermediate_particles, uString, evec);
     NpartFinal_ += nfrag;
 
     find_forward_string = !find_forward_string;
@@ -1782,7 +1782,7 @@ std::pair<int, int> StringProcess::find_leading(int nq1, int nq2,
 
 void StringProcess::assign_all_scaling_factors(int baryon_string,
                                                ParticleList &outgoing_particles,
-                                               ThreeVector &evecLong,
+                                               const ThreeVector &evecLong,
                                                double suppression_factor) {
   // Set each particle's cross section scaling factor to 0 first
   for (ParticleData &data : outgoing_particles) {
