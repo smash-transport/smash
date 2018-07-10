@@ -5,10 +5,10 @@
 #  GSL_INCLUDE_DIR
 #  GSL_LIBRARY
 #  GSL_CBLAS_LIBRARY
-# 
+#
 #  This module is based on the module provided by cmake starting with version 3.2
 #  See https://cmake.org/licensing for copyright info.
-  
+
 
 #=============================================================================
 # Copyright © 2018  SMASH Team
@@ -43,13 +43,13 @@
 
 include(FindPackageHandleStandardArgs)
 
-# first check if GSL_ROOT_DIR is set (either as environment variable or 
+# first check if GSL_ROOT_DIR is set (either as environment variable or
 # supplied as cmake-option. If so, use it
 if (EXISTS "$ENV{GSL_ROOT_DIR}")
   file( TO_CMAKE_PATH "$ENV{GSL_ROOT_DIR}" GSL_ROOT_DIR )
   set( GSL_ROOT_DIR "${GSL_ROOT_DIR}" CACHE PATH "Prefix for GSL installation")
-  
- elseif (EXISTS "${GSL_ROOT_DIR}" ) 
+
+ elseif (EXISTS "${GSL_ROOT_DIR}" )
   file( TO_CMAKE_PATH ${GSL_ROOT_DIR} GSL_ROOT_DIR )
   set( GSL_ROOT_DIR "${GSL_ROOT_DIR}" CACHE PATH "Prefix for GSL installation")
 endif()
@@ -105,7 +105,7 @@ endif()
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GSL
   FOUND_VAR GSL_FOUND
-  REQUIRED_VARS 
+  REQUIRED_VARS
     GSL_INCLUDE_DIR
     GSL_LIBRARY
     GSL_CBLAS_LIBRARY
