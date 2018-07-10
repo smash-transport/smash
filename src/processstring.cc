@@ -133,23 +133,12 @@ void StringProcess::common_setup_pythia(Pythia8::Pythia *pythia_in,
 int StringProcess::append_final_state(ParticleList &intermediate_particles,
                                       const FourVector &uString,
                                       const ThreeVector &evecLong) {
-  // sort outgoing particles according to z-velocity
-  std::sort(intermediate_particles.begin(), intermediate_particles.end(),
-            [&](ParticleData i, ParticleData j) {
-              return i.momentum().velocity() * evecLong >
-                     j.momentum().velocity() * evecLong;
-            });
-
   int nfrag = 0;
   int bstring = 0;
   double p_pos_tot = 0.0, p_neg_tot = 0.0;
 
   for (ParticleData &data : intermediate_particles) {
     nfrag += 1;
-
-    // Set each particle's cross section scaling factor to 0 first
-    data.set_cross_section_scaling_factor(0.0);
-
     bstring += data.pdgcode().baryon_number();
 
     const double pparallel = data.momentum().threevec() * evecLong;
@@ -157,6 +146,11 @@ int StringProcess::append_final_state(ParticleList &intermediate_particles,
     p_neg_tot += (data.momentum().x0() - pparallel) / sqrt2_;
   }
   assert(nfrag > 0);
+
+  /* compute the cross section suppression factor for leading hadrons
+   * based on the number of valence quarks. */
+  assign_all_scaling_factors(bstring, intermediate_particles,
+                             evecLong, additional_xsec_supp_);
 
   std::vector<double> xvertex_pos, xvertex_neg;
   xvertex_pos.resize(nfrag + 1);
@@ -182,40 +176,6 @@ int StringProcess::append_final_state(ParticleList &intermediate_particles,
                      (intermediate_particles[i].momentum().x0() -
                       pparallel) /
                      (kappa_tension_string_ * sqrt2_);
-  }
-
-  /* compute the cross section suppression factor for leading hadrons
-   * based on the number of valence quarks. */
-  if (bstring == 0) {  // mesonic string
-    for (int i : {0, nfrag - 1}) {
-      double xtotfac = intermediate_particles[i].pdgcode().is_baryon() ?
-                       1. / 3. : 0.5;
-      xtotfac *= additional_xsec_supp_;
-      intermediate_particles[i].set_cross_section_scaling_factor(xtotfac);
-    }
-  } else if (bstring == 1 || bstring == -1) {  // baryonic string
-    // The first baryon in forward direction
-    int i = 0;
-    while (i < nfrag &&
-           intermediate_particles[i].pdgcode().baryon_number() != bstring) {
-      i++;
-    }
-    double xtotfac = additional_xsec_supp_ * 2. / 3.;
-    intermediate_particles[i].set_cross_section_scaling_factor(xtotfac);
-    // The most backward meson
-    i = nfrag - 1;
-    while (i >= 0 &&
-           intermediate_particles[i].pdgcode().baryon_number() == bstring) {
-      i--;
-    }
-    xtotfac = intermediate_particles[i].pdgcode().is_baryon() ?
-              1. / 3. : 0.5;
-    xtotfac *= additional_xsec_supp_;
-    intermediate_particles[i].set_cross_section_scaling_factor(xtotfac);
-  } else {
-    throw std::invalid_argument(
-        "StringProcess::append_final_state"
-        " encountered bstring != 0, 1, -1");
   }
 
   // Velocity three-vector to perform Lorentz boost.
@@ -568,6 +528,7 @@ bool StringProcess::next_NDiffSoft() {
 // hard non-diffractive
 bool StringProcess::next_NDiffHard() {
   const auto &log = logger<LogArea::Pythia>();
+  NpartFinal_ = 0;
   final_state_.clear();
 
   std::array<bool, 2> accepted_by_pythia;
@@ -721,7 +682,8 @@ bool StringProcess::next_NDiffHard() {
     compose_string_parton(find_forward_string,
                           event_intermediate_, pythia_hadron_->event);
     // identify string from a junction if there is any.
-    compose_string_junction(event_intermediate_, pythia_hadron_->event);
+    compose_string_junction(find_forward_string,
+                            event_intermediate_, pythia_hadron_->event);
 
     pythia_hadron_->rndm.init(random::uniform_int(1, maxint_));
     hadronize_success = pythia_hadron_->forceHadronLevel();
@@ -773,29 +735,12 @@ bool StringProcess::next_NDiffHard() {
       break;
     }
 
-    /* Additional suppression factor to mimic coherence taken as 0.7
-     * from UrQMD (CTParam(59) */
-    const int baryon_string =
-        PDGcodes_[random::uniform_int(0, 1)].baryon_number();
-    assign_all_scaling_factors(baryon_string, new_intermediate_particles,
-                               evecBasisAB_[0], additional_xsec_supp_);
-    for (ParticleData data : new_intermediate_particles) {
-      log.debug("Particle momenta after sorting: ", data.momentum());
-      /* The hadrons are not immediately formed, currently a formation time of
-       * 1 fm is universally applied and cross section is reduced to zero and
-       * to a fraction corresponding to the valence quark content. Hadrons
-       * containing a valence quark are determined by highest z-momentum. */
-      log.debug("The formation time is: ", time_formation_const_, "fm/c.");
-      ThreeVector v_calc =
-          (data.momentum().LorentzBoost(-1.0 * vcomAB_)).velocity();
-      /* Set formation time: actual time of collision + time to form the
-       * particle */
-      double gamma_factor = 1.0 / std::sqrt(1 - (v_calc).sqr());
-      data.set_slow_formation_times(
-          time_collision_,
-          time_formation_const_ * gamma_factor + time_collision_);
-      final_state_.push_back(data);
-    }
+    FourVector uString = FourVector(1., 0., 0., 0.);
+    ThreeVector evec = find_forward_string ? evecBasisAB_[0] : -evecBasisAB_[0];
+    int nfrag = append_final_state(intermediate_particles, uString, evec);
+    NpartFinal_ += nfrag;
+
+    find_forward_string = !find_forward_string;
   }
 
   if (hadronize_success) {
@@ -852,7 +797,7 @@ void StringProcess::replace_constituent(Pythia8::Particle &particle,
     return;
   }
 
-  std::array<int, 5> excess_null = {0, 0, 0, 0, 0};
+  const std::array<int, 5> excess_null = {0, 0, 0, 0, 0};
   if (excess_constituent == excess_null) {
     return;
   }
@@ -924,7 +869,6 @@ void StringProcess::restore_constituent(Pythia8::Event &event_intermediate,
   const double energy_init = pSum.e();
   log.debug("  initial total energy [GeV] : ", energy_init);
 
-  std::array<bool, 2> find_forward = {true, false};
   for (int ih = 0; ih < 2; ih++) {
     while (true) {
       std::array<int, 5> excess_null = {0, 0, 0, 0, 0};
@@ -933,43 +877,61 @@ void StringProcess::restore_constituent(Pythia8::Event &event_intermediate,
       if (no_excess_quark && no_excess_antiq) {
         break;
       }
-
-      int np_end = 0;
-      int iforward = 1;
-      // select the most forward or backward parton.
-      for (int ip = 2; ip < event_intermediate.size() - np_end; ip++) {
-        if ((find_forward[ih] &&
-            event_intermediate[ip].pz() > event_intermediate[iforward].pz()) ||
-            (!find_forward[ih] &&
-            event_intermediate[ip].pz() < event_intermediate[iforward].pz())) {
-          iforward = ip;
-        }
-      }
-      pSum -= event_intermediate[iforward].p();
-
-      if (event_intermediate[iforward].id() > 0) {
-        replace_constituent(event_intermediate[iforward], excess_quark[ih]);
-      } else {
-        replace_constituent(event_intermediate[iforward], excess_antiq[ih]);
-      }
-
-      const int pdgid = event_intermediate[iforward].id();
-      Pythia8::Vec4 pquark = event_intermediate[iforward].p();
-      const double mass = pythia_hadron_->particleData.m0(pdgid);
-
-      const int status = event_intermediate[iforward].status();
-      const int color = event_intermediate[iforward].col();
-      const int anticolor = event_intermediate[iforward].acol();
-
-      np_end += 1;
-      pSum += pquark;
-      event_intermediate.append(pdgid, status,
-                                color, anticolor, pquark, mass);
-
-      event_intermediate.remove(iforward, iforward);
     }
-    log.debug("  valence quark content of hadon ", ih, "are recovered.");
   }
+
+  bool recovered_quarks = false;
+  while (!recovered_quarks) {
+    std::array<bool, 2> find_forward = {true, false};
+    const std::array<int, 5> excess_null = {0, 0, 0, 0, 0};
+    std::array<int, 5> excess_total = excess_null;
+
+    for (int ih = 0; ih < 2; ih++) {
+      int nfrag = event_intermediate.size();
+      for (int np_end = 0; np_end < nfrag - 2; np_end++) {
+        int iforward = 1;
+        // select the most forward or backward parton.
+        for (int ip = 2; ip < event_intermediate.size() - np_end; ip++) {
+          const double pz_quark_current = event_intermediate[ip].pz();
+          const double pz_quark_forward = event_intermediate[iforward].pz();
+          if ((find_forward[ih] &&
+              pz_quark_current > pz_quark_forward) ||
+              (!find_forward[ih] &&
+              pz_quark_current < pz_quark_forward)) {
+            iforward = ip;
+          }
+        }
+        pSum -= event_intermediate[iforward].p();
+
+        if (event_intermediate[iforward].id() > 0) {
+          replace_constituent(event_intermediate[iforward], excess_quark[ih]);
+        } else {
+          replace_constituent(event_intermediate[iforward], excess_antiq[ih]);
+        }
+
+        const int pdgid = event_intermediate[iforward].id();
+        Pythia8::Vec4 pquark = event_intermediate[iforward].p();
+        const double mass = pythia_hadron_->particleData.m0(pdgid);
+
+        const int status = event_intermediate[iforward].status();
+        const int color = event_intermediate[iforward].col();
+        const int anticolor = event_intermediate[iforward].acol();
+
+        pSum += pquark;
+        event_intermediate.append(pdgid, status,
+                                  color, anticolor, pquark, mass);
+
+        event_intermediate.remove(iforward, iforward);
+      }
+
+      for (int j = 0; j < 5; j++) {
+        excess_total[j] += (excess_quark[ih][j] - excess_antiq[ih][j]);
+      }
+    }
+
+    recovered_quarks = excess_total == excess_null;
+  }
+  log.debug("  valence quark contents of hadons are recovered.");
 
   log.debug("  current total energy [GeV] : ", pSum.e());
   while (true) {
@@ -1006,7 +968,7 @@ void StringProcess::restore_constituent(Pythia8::Event &event_intermediate,
   event_intermediate[0].m(pSum.mCalc());
 }
 
-void StringProcess::compose_string_parton(bool &find_forward_string,
+void StringProcess::compose_string_parton(bool find_forward_string,
                                           Pythia8::Event &event_intermediate,
                                           Pythia8::Event &event_hadronize) {
   const auto &log = logger<LogArea::Pythia>();
@@ -1095,10 +1057,10 @@ void StringProcess::compose_string_parton(bool &find_forward_string,
 
   event_hadronize[0].p(pSum);
   event_hadronize[0].m(pSum.mCalc());
-  find_forward_string = !find_forward_string;
 }
 
-void StringProcess::compose_string_junction(Pythia8::Event &event_intermediate,
+void StringProcess::compose_string_junction(bool &find_forward_string,
+                                            Pythia8::Event &event_intermediate,
                                             Pythia8::Event &event_hadronize) {
   const auto &log = logger<LogArea::Pythia>();
 
@@ -1190,6 +1152,9 @@ void StringProcess::compose_string_junction(Pythia8::Event &event_intermediate,
       }
     }
   }
+
+  Pythia8::Vec4 pSum = event_hadronize[0].p();
+  find_forward_string = pSum.pz() > 0.;
 }
 
 void StringProcess::find_junction_leg(bool sign_color, std::vector<int> &col,
@@ -1817,23 +1782,23 @@ std::pair<int, int> StringProcess::find_leading(int nq1, int nq2,
 
 void StringProcess::assign_all_scaling_factors(int baryon_string,
                                                ParticleList &outgoing_particles,
-                                               ThreeVector &evec_coll,
+                                               ThreeVector &evecLong,
                                                double suppression_factor) {
   // Set each particle's cross section scaling factor to 0 first
   for (ParticleData &data : outgoing_particles) {
     data.set_cross_section_scaling_factor(0.0);
   }
-  // sort outgoing particles according to z-velocity
+  // sort outgoing particles according to the longitudinal velocity
   std::sort(outgoing_particles.begin(), outgoing_particles.end(),
             [&](ParticleData i, ParticleData j) {
-              return i.momentum().velocity() * evec_coll <
-                     j.momentum().velocity() * evec_coll;
+              return i.momentum().velocity() * evecLong >
+                     j.momentum().velocity() * evecLong;
             });
   int nq1, nq2;  // number of quarks at both ends of the string
   switch (baryon_string) {
     case 0:
-      nq1 = 1;
-      nq2 = -1;
+      nq1 = -1;
+      nq2 = 1;
       break;
     case 1:
       nq1 = 2;
@@ -1851,13 +1816,13 @@ void StringProcess::assign_all_scaling_factors(int baryon_string,
   // the quarks are assumed to be distributed this way.
   std::pair<int, int> i = find_leading(nq1, nq2, outgoing_particles);
   std::pair<int, int> j = find_leading(nq2, nq1, outgoing_particles);
-  if (i.second - i.first > j.second - j.first) {
-    assign_scaling_factor(nq1, outgoing_particles[i.first], suppression_factor);
-    assign_scaling_factor(nq2, outgoing_particles[i.second],
-                          suppression_factor);
-  } else {
+  if (baryon_string == 0 && i.second - i.first < j.second - j.first) {
     assign_scaling_factor(nq2, outgoing_particles[j.first], suppression_factor);
     assign_scaling_factor(nq1, outgoing_particles[j.second],
+                          suppression_factor);
+  } else {
+    assign_scaling_factor(nq1, outgoing_particles[i.first], suppression_factor);
+    assign_scaling_factor(nq2, outgoing_particles[i.second],
                           suppression_factor);
   }
 }

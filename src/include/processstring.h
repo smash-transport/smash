@@ -425,16 +425,15 @@ class StringProcess {
    * All partons found are moved into a new event record for the further
    * hadronization process.
    * This function begins with the most forward (or backward) parton.
-   * \param[out] find_forward_string If it is set to be true (false),
-   *                                 it begins with forward (backward) parton.
-   *                                 Flipped in the end of the function call.
+   * \param[in] find_forward_string If it is set to be true (false),
+   *                                it begins with forward (backward) parton.
    * \param[out] event_intermediate PYTHIA event record
    *                                from which a string is identified.
    *                                All partons found here are removed.
    * \param[out] event_hadronize PYTHIA event record
    *                             to which partons in a string are added.
    */
-  void compose_string_parton(bool &find_forward_string,
+  void compose_string_parton(bool find_forward_string,
                              Pythia8::Event &event_intermediate,
                              Pythia8::Event &event_hadronize);
   /**
@@ -443,6 +442,9 @@ class StringProcess {
    * All partons found are moved into a new event record for the further
    * hadronization process.
    * This function begins with a junction.
+   * \param[out] find_forward_string If it is set to be true (false),
+   *                                 it is a string in the forward (backward)
+   *                                 direction.
    * \param[out] event_intermediate PYTHIA event record
    *                                from which a string is identified.
    *                                All partons and junction(s) found here
@@ -450,7 +452,8 @@ class StringProcess {
    * \param[out] event_hadronize PYTHIA event record
    *                             to which partons in a string are added.
    */
-  void compose_string_junction(Pythia8::Event &event_intermediate,
+  void compose_string_junction(bool &find_forward_string,
+                               Pythia8::Event &event_intermediate,
                                Pythia8::Event &event_hadronize);
 
   /**
@@ -615,13 +618,13 @@ class StringProcess {
    * \param[in] baryon_string baryon number of the string
    * \param[out] outgoing_particles list of string fragments to which scaling
    *             factors are assigned
-   * \param[in] evec_coll direction in which the string is stretched
+   * \param[in] evecLong direction in which the string is stretched
    * \param[in] suppression_factor additional coherence factor to be
    *            multiplied with scaling factor
    */
   static void assign_all_scaling_factors(int baryon_string,
                                          ParticleList& outgoing_particles,
-                                         ThreeVector &evec_coll,
+                                         ThreeVector &evecLong,
                                          double suppression_factor);
 
   /**
