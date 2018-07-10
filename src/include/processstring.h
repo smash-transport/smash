@@ -118,6 +118,8 @@ class StringProcess {
   double soft_t_form_;
   /// time of collision in the computational frame [fm]
   double time_collision_;
+  /// Whether to calculate the string formation times from the yoyo-model.
+  bool use_yoyo_model_;
   /// maximum integer
   int maxint_;
   /// square root of 2 (\f$\sqrt{2}\f$)
@@ -170,6 +172,8 @@ class StringProcess {
    * \param[in] string_sigma_T transverse momentum spread (StringPT:sigma)
    *        in fragmentation [GeV]
    * \param[in] factor_t_form to be multiplied to soft string formation times
+   * \param[in] use_yoyo_model Whether to calculate formation times from the
+                               yoyo-model.
    *
    * \see StringProcess::common_setup_pythia(Pythia8::Pythia *,
    *                     double, double, double, double, double)
@@ -184,7 +188,8 @@ class StringProcess {
                 double strange_supp, double diquark_supp,
                 double sigma_perp,
                 double stringz_a, double stringz_b,
-                double string_sigma_T, double factor_t_form);
+                double string_sigma_T, double factor_t_form,
+                bool use_yoyo_model);
 
   /**
    * Common setup of PYTHIA objects for soft and hard string routines

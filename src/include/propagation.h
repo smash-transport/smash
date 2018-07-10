@@ -17,7 +17,7 @@
 namespace smash {
 
 /**
- * Struct containing the type of the metric and the expansion parameter in
+ * Struct containing the type of the metric and the expansion parameter of
  * the metric. These elements shall be used in the Expansion Mode, which is
  * implemented in SMASH to compare with the analytical solution
  * \iref{Bazow:2015dha} to the Boltzmann equation with a Hubble expansion.
@@ -25,7 +25,7 @@ namespace smash {
 struct ExpansionProperties {
   /// Type of metric used
   ExpansionMode mode_;
-  /// Expansion parameter in the metric(faster expansion for larger values)
+  /// Expansion parameter in the metric (faster expansion for larger values)
   double b_;
   /**
    * Constructor of ExpansionProperties
@@ -37,7 +37,7 @@ struct ExpansionProperties {
 };
 
 /**
- * Calculate the Hubble parameter \f$H(t)\f$, which discribes how large
+ * Calculate the Hubble parameter \f$H(t)\f$, which describes how large
  * the expansion flow is. The flow \f$\vec v=H(t) \vec x\f$
  * \iref{Tindall:2016try}
  *

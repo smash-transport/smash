@@ -62,7 +62,7 @@ class BoxModus : public ModusDefault {
   /**
    * Generates initial state of the particles in the system according to
    * specified parameters: number of particles of each species, momentum
-   * and coordinate space distributions. Susbsequently makes the total
+   * and coordinate space distributions. Subsequently makes the total
    * 3-momentum 0.
    *
    * \param[out] particles An empty list that gets filled up by this function
@@ -97,7 +97,12 @@ class BoxModus : public ModusDefault {
             strategy};
   }
 
-  /// \copydoc smash::ModusDefault::create_grandcan_thermalizer
+  /**
+   * Creates GrandCanThermalizer. (Special Box implementation.)
+   *
+   * \param[in] conf configuration object
+   * \return unique pointer to created thermalizer class
+   */
   std::unique_ptr<GrandCanThermalizer> create_grandcan_thermalizer(
       Configuration &conf) const {
     const std::array<double, 3> lat_size = {length_, length_, length_};
@@ -116,13 +121,13 @@ class BoxModus : public ModusDefault {
   double length() const { return length_; }
 
  private:
-  /// initial momenta distribution: thermal or peaked momenta
+  /// Initial momenta distribution: thermal or peaked momenta
   const BoxInitialCondition initial_condition_;
-  /// length of the cube's edge in fm/c
+  /// Length of the cube's edge in fm/c
   const double length_;
   /// Temperature of the Box in GeV
   const double temperature_;
-  /// initial time of the box
+  /// Initial time of the box
   const double start_time_ = 0.;
   /**
    *  Whether to use a thermal initialization for all particles
@@ -152,8 +157,8 @@ class BoxModus : public ModusDefault {
 
   /**
    * \ingroup logging
-   * console output on startup of box specific parameters;
-   * writes the initial state for the Box to the output stream.
+   * Console output on startup of box specific parameters;
+   * writes the initial state for the box to the output stream.
    *
    * \param[in] out The ostream into which to output
    * \param[in] m The BoxModus object to write into out

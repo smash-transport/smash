@@ -52,10 +52,11 @@ include_directories(
     "${CMAKE_CURRENT_BINARY_DIR}"
     )
 include_directories(SYSTEM
-    "${GSL_INCLUDES}"
+    ${GSL_INCLUDE_DIR}
     ${Boost_INCLUDE_DIRS}
     ${EIGEN3_INCLUDE_DIR}
     )
+
 
 # set default libraries for linking
 set(SMASH_LIBRARIES ${SMASH_LIBRARIES}

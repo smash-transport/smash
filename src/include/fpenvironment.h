@@ -26,17 +26,17 @@ namespace smash {
  * optimizing. Currently floating-point traps are disabled for Clang, because
  * it does not support them.
  *
- * \param mask Bit mask representing the flags to set.
+ * \param mask A bitwise of the traps you want to keep enabled.
  * \return Whether the trap was successfully set.
  *
  * glibc specific implementation
  */
 inline bool enable_float_traps(int mask) { return -1 != feenableexcept(mask); }
 #elif defined __SSE__ && !defined __clang__
-// directly program the trap on the SSE unit
+/// Directly program the trap on the SSE unit
 bool enable_float_traps(int mask);
 #else
-// fallback that fails to set the trap
+/// Fallback that fails to set the trap
 inline bool enable_float_traps(int) { return false; }
 #endif
 
@@ -81,7 +81,7 @@ class DisableFloatTraps {
   /**
    * Constructs the guard object.
    *
-   * \param mask A bitwise or of the traps you want to keep enabled.
+   * \param mask A bitwise of the traps you want to keep enabled.
    * \return The constructed object.
    */
   explicit DisableFloatTraps(int mask = 0) {
@@ -91,12 +91,17 @@ class DisableFloatTraps {
     }
   }
 
-  /// When the guard goes out of scope the floating point environment is
-  /// restored.
+  /**
+   * When the guard goes out of scope the floating point environment is
+   * restored.
+   */
   ~DisableFloatTraps() { std::fesetenv(&environment_); }
 
  private:
-  /// Reenables the given traps.
+  /**
+   * Reenables the given traps.
+   * \param mask A bitwise of the traps you want to keep enabled.
+   */
   void reenable_traps(int mask);
 
   /// The stored environment that the destructor will restore.
@@ -118,6 +123,7 @@ class DisableFloatTraps {
  *
  * \param f A functor (e.g. lambda) that is executed in the cleared floating
  * point environment.
+ * \tparam F type of the functor
  */
 template <typename F>
 void without_float_traps(F &&f) {

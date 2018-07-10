@@ -108,7 +108,7 @@ inline double smearing_factor_rcut_correction(const double rcut_in_sigma) {
 }
 
 /**
- * A class to precalculate and store parameters relevant for density
+ * A class to pre-calculate and store parameters relevant for density
  * calculation. It has to be initialized only once per SMASH run.
  */
 class DensityParameters {
@@ -119,7 +119,7 @@ class DensityParameters {
    * \param[in] par Struct containing the Gaussian smearing width
    *             \f$\sigma\f$, the cutoff factor \f$a\f$ where the
    *             cutoff radius \f$r_{\rm cut}=a\sigma\f$, and the
-   *             testparticle number.
+   *             test-particle number.
    */
   DensityParameters(const ExperimentParameters &par)  // NOLINT
       : sig_(par.gaussian_sigma),
@@ -173,7 +173,7 @@ class DensityParameters {
  * Implements gaussian smearing for any quantity.
  * Computes smearing factor taking Lorentz contraction into account.
  * Integral of unnormalized smearing factor over space should be
- *  \f$ (2 \pi \sigma^2)^{3/2} \f$. Division over norm is splitted
+ *  \f$ (2 \pi \sigma^2)^{3/2} \f$. Division over norm is split
  *  for efficiency: it is not nice to recalculate the same constant
  *  norm at every call.
  *
@@ -236,7 +236,7 @@ std::pair<double, ThreeVector> rho_eckart(const ThreeVector &r,
                                           const DensityParameters &par,
                                           DensityType dens_type,
                                           bool compute_gradient);
-/// convenience overload of the above
+/// convenience overload of the above (ParticleList -> Particles)
 std::pair<double, ThreeVector> rho_eckart(const ThreeVector &r,
                                           const Particles &plist,
                                           const DensityParameters &par,
@@ -325,8 +325,9 @@ typedef RectangularLattice<DensityOnLattice> DensityLattice;
  * \param[in] par a structure containing testparticles number and gaussian
  *            smearing parameters.
  * \param[in] particles the particles vector
+ * \tparam T LatticeType
  */
-template <typename /*LatticeType*/ T>
+template <typename T>
 void update_general_lattice(RectangularLattice<T> *lat,
                             const LatticeUpdate update,
                             const DensityType dens_type,
@@ -376,7 +377,7 @@ void update_general_lattice(RectangularLattice<T> *lat,
  *            smearing parameters.
  * \param[in] particles the particles vector
  */
-void update_density_lattice(DensityLattice *lat, const LatticeUpdate update,
+void update_density_lattice(RectangularLattice<DensityOnLattice> *lat, const LatticeUpdate update,
                             const DensityType dens_type,
                             const DensityParameters &par,
                             const Particles &particles);

@@ -92,10 +92,11 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
  *   ThreeVector and ThreeVector currently comes only as double.
  *   Density itself is double for uniformity: if gradient is double,
  *   density should also be.
+ * \tparam T ParticlesContainer
  * \return (density in the local Eckart frame [fm\$f^{-3}\$f],
  *          the gradient of the density or a 0 3-vector)
  */
-template <typename /*ParticlesContainer*/ T>
+template <typename T>
 std::pair<double, ThreeVector> rho_eckart_impl(const ThreeVector &r,
                                                const T &plist,
                                                const DensityParameters &par,
