@@ -130,14 +130,14 @@ std::ostream &operator<<(std::ostream &out, const ListModus &m) {
   return out;
 }
 
-void ListModus::backpropagate_to_same_time(Particles* particles) {
+void ListModus::backpropagate_to_same_time(Particles& particles) {
   /* (1) If particles are already at the same time - don't touch them
          AND start at the start_time_ from the config. */
   double earliest_formation_time = DBL_MAX;
   double formation_time_difference = 0.0;
   double reference_formation_time = 0.0;  // avoid compiler warning
   bool first_particle = true;
-  for (const auto &particle : *particles) {
+  for (const auto &particle : particles) {
     const double t = particle.position().x0();
     if (t < earliest_formation_time) {
       earliest_formation_time = t;
@@ -154,7 +154,7 @@ void ListModus::backpropagate_to_same_time(Particles* particles) {
   bool anti_streaming_needed = (formation_time_difference > really_small);
   start_time_ = earliest_formation_time;
   if (anti_streaming_needed) {
-    for (auto &particle : *particles) {
+    for (auto &particle : particles) {
       /* for hydro output where formation time is different */
       const double t = particle.position().x0();
       const double delta_t = t - start_time_;
@@ -167,14 +167,14 @@ void ListModus::backpropagate_to_same_time(Particles* particles) {
   }
 }
 
-void ListModus::try_create_particle(Particles *particles,
+void ListModus::try_create_particle(Particles& particles,
     PdgCode pdgcode,
     double t, double x, double y, double z,
     double mass, double E, double px, double py, double pz) {
   constexpr int max_warns_precision = 10, max_warn_mass_consistency = 10;
   const auto &log = logger<LogArea::List>();
   try {
-    ParticleData &particle = particles->create(pdgcode);
+    ParticleData &particle = particles.create(pdgcode);
     // SMASH mass versus input mass consistency check
     if (particle.type().is_stable() &&
         std::abs(mass - particle.pole_mass()) > really_small) {
@@ -248,9 +248,9 @@ double ListModus::initial_conditions(Particles *particles,
       log.error() << "Charge of pdg = " << pdgcode << " != " << charge;
       throw std::invalid_argument("Inconsistent input (charge).");
     }
-    try_create_particle(particles, pdgcode, t, x, y, z, mass, E, px, py, pz);
+    try_create_particle(*particles, pdgcode, t, x, y, z, mass, E, px, py, pz);
   }
-  backpropagate_to_same_time(particles);
+  backpropagate_to_same_time(*particles);
   event_id_++;
 
   return start_time_;
