@@ -93,7 +93,7 @@ class ListModus : public ModusDefault {
    *
    * \param particles particles to be checked and possibly back-streamed
    */
-  void backpropagate_to_same_time(Particles& particles);
+  void backpropagate_to_same_time(Particles &particles);
 
   /**
    * Tries to add a new particle to particles and performs consistency checks:
@@ -126,9 +126,9 @@ class ListModus : public ModusDefault {
    * \param[in] pz      z-component of momentum of added particle
    * \param[out] particles structure, to which the particle is added
    */
-  void try_create_particle(Particles &particles,
-      PdgCode pdgcode, double t, double x, double y, double z,
-      double mass, double E, double px, double py, double pz);
+  void try_create_particle(Particles &particles, PdgCode pdgcode, double t,
+                           double x, double y, double z, double mass, double E,
+                           double px, double py, double pz);
 
   /** \ingroup exception
    * Used when external particle list cannot be found.

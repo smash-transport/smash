@@ -132,7 +132,7 @@ std::ostream &operator<<(std::ostream &out, const ListModus &m) {
   return out;
 }
 
-void ListModus::backpropagate_to_same_time(Particles& particles) {
+void ListModus::backpropagate_to_same_time(Particles &particles) {
   /* (1) If particles are already at the same time - don't touch them
          AND start at the start_time_ from the config. */
   double earliest_formation_time = DBL_MAX;
@@ -160,19 +160,19 @@ void ListModus::backpropagate_to_same_time(Particles& particles) {
       /* for hydro output where formation time is different */
       const double t = particle.position().x0();
       const double delta_t = t - start_time_;
-      const ThreeVector r = particle.position().threevec() -
-                            delta_t * particle.velocity();
-        particle.set_4position(FourVector(start_time_, r));
-        particle.set_formation_time(t);
-        particle.set_cross_section_scaling_factor(0.0);
+      const ThreeVector r =
+          particle.position().threevec() - delta_t * particle.velocity();
+      particle.set_4position(FourVector(start_time_, r));
+      particle.set_formation_time(t);
+      particle.set_cross_section_scaling_factor(0.0);
     }
   }
 }
 
-void ListModus::try_create_particle(Particles& particles,
-    PdgCode pdgcode,
-    double t, double x, double y, double z,
-    double mass, double E, double px, double py, double pz) {
+void ListModus::try_create_particle(Particles &particles, PdgCode pdgcode,
+                                    double t, double x, double y, double z,
+                                    double mass, double E, double px, double py,
+                                    double pz) {
   constexpr int max_warns_precision = 10, max_warn_mass_consistency = 10;
   const auto &log = logger<LogArea::List>();
   try {
@@ -198,11 +198,10 @@ void ListModus::try_create_particle(Particles& particles,
     // On-shell condition consistency check
     if (std::abs(particle.momentum().sqr() - mass * mass) > really_small) {
       if (n_warns_mass_consistency_ < max_warn_mass_consistency) {
-        log.warn()
-            << "Provided 4-momentum " << particle.momentum() << " and "
-            << " mass " << mass << " do not satisfy E^2 - p^2 = m^2."
-            << " This may originate from the lack of numerical"
-            << " precision in the input. Setting E to sqrt(p^2 + m^2).";
+        log.warn() << "Provided 4-momentum " << particle.momentum() << " and "
+                   << " mass " << mass << " do not satisfy E^2 - p^2 = m^2."
+                   << " This may originate from the lack of numerical"
+                   << " precision in the input. Setting E to sqrt(p^2 + m^2).";
         n_warns_mass_consistency_++;
       } else if (n_warns_mass_consistency_ == max_warn_mass_consistency) {
         log.warn(
