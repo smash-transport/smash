@@ -83,6 +83,39 @@ class ListModus : public ModusDefault {
    */
   double initial_conditions(Particles *particles,
                             const ExperimentParameters &parameters);
+  /**
+   * Judge whether formation times are the same for all the particles;
+   * Don't do anti-freestreaming if all particles start already at the same
+   * time.
+   *
+   * If particles are at different times, calculate earliest formation
+   * time as start_time_ and free-stream all particles back to this time.
+   *
+   * \param particles particles to be checked and possibly back-streamed
+   */
+  void backpropagate_to_same_time(Particles* particles);
+
+  /**
+   * Tries to add a new particle to particles and performs consistency checks:
+   * (i) pdg code is legal and exists in SMASH
+   * (ii) mass matches the pole mass of pdgcode in SMASH
+   * (iii) stable particle is on-shell, i.e. \f$ E^2 - p^2 = m^2 \f$.
+   * \param[in] pdgcode pdg code of added particle
+   * \param[in] pdgcode pdg code of added particle
+   * \param[in] t       time of added particle
+   * \param[in] x       x-coordinate of added particle
+   * \param[in] y       y-coordinate of added particle
+   * \param[in] z       z-coordinate of added particle
+   * \param[in] mass    mass of added particle
+   * \param[in] E       energy of added particle
+   * \param[in] px      x-component of momentum of added particle
+   * \param[in] py      y-component of momentum of added particle
+   * \param[in] pz      z-component of momentum of added particle
+   * \param[out] particles structure, to which the particle is added
+   */
+  void try_create_particle(Particles *particles,
+      PdgCode pdgcode, double t, double x, double y, double z,
+      double mass, double E, double px, double py, double pz);
 
   /** \ingroup exception
    * Used when external particle list cannot be found.
@@ -117,19 +150,6 @@ class ListModus : public ModusDefault {
   int n_warns_precision_ = 0;
   /// Counter for energy-momentum conservation warnings to avoid spamming
   int n_warns_mass_consistency_ = 0;
-
-  /**
-   * Judge whether formation times are the same for all the particles;
-   * Don't do anti-freestreaming if all particles start with the same formation
-   * time. If needed, calculates earliest formation time as start_time_
-   *
-   * \param[in] particle_list The list of particles to be checked
-   * \return A pair <bool, double> where the boolean is whether or not
-   *         anti-freestreaming is needed and the double is the earliest
-   *         formation time.
-   */
-  std::pair<bool, double> check_formation_time_(
-      const std::string &particle_list);
 
   /** Check if the file given by filepath has events left after streampos
    * last_position
