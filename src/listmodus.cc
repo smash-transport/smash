@@ -54,7 +54,9 @@ namespace smash {
  * Prefix for the external particle lists file.
  *
  * \key Start_Time (double, required):\n
- * Starting time of List calculation.
+ * Starting time of List calculation. The value provided by user is basically
+ * unused. When particles in the input file are at the same time t, they start
+ * at time t. When not at the same time they start at the earliest input time.
  *
  * \key Shift_Id (int, required):\n
  * Starting id for file_id_, i.e. the first file which is read.
