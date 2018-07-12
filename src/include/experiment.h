@@ -142,6 +142,20 @@ class Experiment : public ExperimentBase {
    */
   explicit Experiment(Configuration config, const bf::path &output_path);
 
+  /**
+   * Runs the time evolution of an event with fixed-sized time steps,
+   * adaptive time steps or without timesteps, from action to actions.
+   * Within one timestep (fixed or adaptive) evolution from action to action
+   * is invoked.
+   */
+  void run_time_evolution();
+
+  /// Performs the final decays of an event
+  void do_final_decays();
+
+  /// Provides external access to particles_
+  Particles* particles() { return &particles_; }
+
  private:
   /**
    * Reads particle type information and cross sections information and
@@ -184,14 +198,6 @@ class Experiment : public ExperimentBase {
   void propagate_and_shine(double to_time);
 
   /**
-   * Runs the time evolution of an event with fixed-sized time steps,
-   * adaptive time steps or without timesteps, from action to actions.
-   * Within one timestep (fixed or adaptive) evolution from action to action
-   * is invoked.
-   */
-  void run_time_evolution();
-
-  /**
    * Performs all the propagations and actions during a certain time interval
    * neglecting the influence of the potentials. This function is called in
    * either the time stepless cases or the cases with time steps. In a time
@@ -204,9 +210,6 @@ class Experiment : public ExperimentBase {
    *                 are updated during the time interval.
    */
   void run_time_evolution_timestepless(Actions &actions);
-
-  /// Performs the final decays of an event
-  void do_final_decays();
 
   /**
    * Output at the end of an event
