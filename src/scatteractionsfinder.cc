@@ -115,6 +115,12 @@ namespace smash {
  * Calculate the string fragments' formation times from the yoyo-model if
  * enabled. Else constant proper time defined by Formation_Time is used.
  *
+ * \key Prob_xi (double, optional, default = 1/3)
+ * Probability of a protons d-quark interacting. Defines the probability to
+ * split an excited proton into uu+d in the single- and double-diffractive
+ * subprocesses, as well as the probability for a proton to exchange its
+ * d-quark in the non-diffractive subprocess.
+ *
  * \page input_collision_term_ Collision_Term
  * \n
  * Example: Configuring the Collision Term
@@ -209,7 +215,8 @@ ScatterActionsFinder::ScatterActionsFinder(
         subconfig.take({"StringZ_A"}, 0.68), subconfig.take({"StringZ_B"}, 0.5),
         subconfig.take({"String_Sigma_T"}, 0.5),
         subconfig.take({"Form_Time_Factor"}, 1.0),
-        subconfig.take({"Use_Yoyo_Model"}, true));
+        subconfig.take({"Use_Yoyo_Model"}, true),
+        subconfig.take({"Prob_xi"}, 1. / 3.));
   }
 }
 

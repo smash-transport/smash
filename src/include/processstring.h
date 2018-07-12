@@ -117,6 +117,8 @@ class StringProcess {
   double gamma_factor_com_;
   /// Whether to calculate the string formation times from the yoyo-model.
   bool use_yoyo_model_;
+  /// Probability of a proton's d-quark interacting.
+  double prob_xi_;
   /// square root of 2 (\f$\sqrt{2}\f$)
   double sqrt2_;
 
@@ -162,7 +164,8 @@ class StringProcess {
    *        in fragmentation [GeV]
    * \param[in] factor_t_form to be multiplied to soft string formation times
    * \param[in] use_yoyo_model Whether to calculate formation times from the
-                               yoyo-model.
+   *                           yoyo-model.
+   * \param[in] prob_xi Probability of a proton's d-quark interacting. 
    *
    * \see StringProcess::common_setup_pythia(Pythia8::Pythia *,
    *                     double, double, double, double, double)
@@ -178,7 +181,8 @@ class StringProcess {
                 double sigma_perp,
                 double stringz_a, double stringz_b,
                 double string_sigma_T, double factor_t_form,
-                bool use_yoyo_model);
+                bool use_yoyo_model,
+                double prob_xi);
 
   /**
    * Common setup of PYTHIA objects for soft and hard string routines
@@ -437,7 +441,7 @@ class StringProcess {
    * \param[out] idq1 is PDG id of quark or anti-diquark.
    * \param[out] idq2 is PDG id of anti-quark or diquark.
    */
-  static void make_string_ends(const PdgCode &pdgcode_in, int &idq1, int &idq2);
+  static void make_string_ends(const PdgCode &pdgcode_in, int &idq1, int &idq2, double xi);
 
   /**
    * Easy setter of Pythia Vec4 from SMASH
