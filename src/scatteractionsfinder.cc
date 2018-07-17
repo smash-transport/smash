@@ -471,7 +471,9 @@ struct Node {
     print_helper(0);
   }
 
-  /// Find final state cross sections.
+  /**
+   * \return Final-state cross sections.
+   */
   std::vector<std::pair<std::string, double>> final_state_cross_sections() const {
     std::vector<std::pair<std::string, double>> result;
     std::vector<ParticleTypePtr> state = final_particles_;
@@ -481,7 +483,7 @@ struct Node {
 
  private:
   /**
-   * Internal helper function.
+   * Internal helper function for `print`.
    *
    * \param depth Recursive call depth.
    */
@@ -496,7 +498,7 @@ struct Node {
   }
 
   /**
-   * Internal helper function.
+   * Internal helper function for `final_state_cross_sections`.
    *
    * \param depth Recursive call depth.
    * \param result Pairs of process names and exclusive cross sections.
@@ -550,6 +552,26 @@ struct Node {
     }
   }
 };
+
+/**
+ * Deduplicate the final-state cross sections by summing.
+ *
+ * \param final_state_xs Final-state cross sections.
+ * \return Deduplicated final-state cross section.
+ */
+static std::map<std::string, double>
+deduplicate(const std::vector<std::pair<std::string, double>>& final_state_xs) {
+  std::map<std::string, double> deduplicated;
+  for (const auto& p : final_state_xs) {
+    const auto ret = deduplicated.insert(p);
+    if (!ret.second) {
+      // Insertion failed because element already existed.
+      const double xs = p.second;
+      ret.first->second += xs;
+    }
+  }
+  return deduplicated;
+}
 
 /**
  * Add nodes for all decays.
@@ -653,8 +675,9 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
     outgoing_total_mass["total"] = -1.0;
     //decaytree.print();
     const auto final_state_xs = decaytree.final_state_cross_sections();
+    const auto dedup_final_state_xs = deduplicate(final_state_xs);
     std::cout << "vvvvvvvvv\nfinal state cross sections:" << std::endl;
-    for (const auto& p : final_state_xs) {
+    for (const auto& p : dedup_final_state_xs) {
         std::cout << p.first << " " << p.second << std::endl;
     }
     std::cout << "^^^^^^^^^" << std::endl;
