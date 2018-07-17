@@ -434,10 +434,17 @@ struct Node {
  public:
   /// Name for printing.
   std::string name_;
+
   /// Weight (cross section or branching ratio).
   double weight_;
+
+  /// Particle type of the resonance corresponding to the node.
+  /// Invalid for non-resonances.
+  ParticleTypePtr resonance_;
+
   /// Possible decays of this node.
   std::vector<Node> children_;
+
   /// Particle types in this node.
   std::vector<ParticleTypePtr> particles_;
 
@@ -446,12 +453,14 @@ struct Node {
    *
    * \param name Name for printing.
    * \param weight Cross section or branching ratio.
+   * \param resonance Corresponding resonance or invalid pointer.
    * \param children Possible decays.
    * \param particles Particle types in this node.
    */
-  Node(const std::string& name, double weight, std::vector<Node>&& children,
-       std::vector<ParticleTypePtr>&& particles)
-      : name_(name), weight_(weight), children_(children), particles_(particles) {}
+  Node(const std::string& name, double weight, ParticleTypePtr resonance,
+       std::vector<Node>&& children, std::vector<ParticleTypePtr>&& particles)
+      : name_(name), weight_(weight), resonance_(resonance), children_(children),
+        particles_(particles) {}
 
   /// Print the decay tree starting with this node.
   void print() const {
@@ -496,6 +505,11 @@ struct Node {
       name += "->";
     }
     name += name_;
+    /*
+    for (const auto& p : particles_) {
+      name += p->name();
+    }
+    */
     if (depth > 0) {
       weight *= weight_;
     }
@@ -516,23 +530,27 @@ struct Node {
  * \param node Starting node.
  * \param ptype Particle type of the starting node.
  */
-static void add_decays(Node& node, const ParticleType& ptype) {
-  if (ptype.width_at_pole() < ParticleType::width_cutoff) {
+static void add_decays(Node& node, const ParticleTypePtr ptype) {
+  if (ptype->width_at_pole() < ParticleType::width_cutoff) {
     // Such particles are considered stable by SMASH.
     return;
   }
-  for (const auto& decay : ptype.decay_modes().decay_mode_list()) {
+  if (!ptype) {
+    throw std::runtime_error(
+        "decay tree nodes of resonances should have particle type");
+  }
+  for (const auto& decay : ptype->decay_modes().decay_mode_list()) {
     std::stringstream name;
-    name << "(" << ptype.name() << "->";
+    name << "[" << ptype->name() << "->";
     std::vector<ParticleTypePtr> parts;
     for (const auto& p : decay->particle_types()) {
       name << p->name();
       parts.push_back(p);
     }
-    name << ")";
-    auto new_node = Node(name.str(), decay->weight(), {}, std::move(parts));
+    name << "]";
+    auto new_node = Node(name.str(), decay->weight(), ptype, {}, std::move(parts));
     for (const auto& p : new_node.particles_) {
-      add_decays(new_node, *p);
+      add_decays(new_node, p);
     }
     node.children_.emplace_back(new_node);
   }
@@ -564,7 +582,8 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
                              low_snn_cut_, strings_switch_, use_AQM_,
                              strings_with_probability_,
                              nnbar_treatment_);
-    Node decaytree(a.name() + b.name(), act->cross_section(), {}, {&a, &b});
+    Node decaytree(a.name() + b.name(), act->cross_section(), ParticleTypePtr(),
+                   {}, {&a, &b});
     const CollisionBranchList& processes = act->collision_channels();
     for (const auto &process : processes) {
       const double xs = process->weight();
@@ -590,11 +609,11 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
         std::stringstream process_description_stream;
         process_description_stream << *process;
         const std::string& description = process_description_stream.str();
-        decaytree.children_.emplace_back(Node(description, xs, {}, {}));
+        decaytree.children_.emplace_back(Node(description, xs, ParticleTypePtr(), {}, {}));
         auto& process_node = decaytree.children_.back();
         // Find possible decays
         for (const auto& ptype : process->particle_types()) {
-          add_decays(process_node, *ptype);
+          add_decays(process_node, ptype);
         }
       }
     }
@@ -602,12 +621,12 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
     // Total cross-section should be the first in the list -> negative mass
     outgoing_total_mass["total"] = -1.0;
     //decaytree.print();
-    //const auto final_state_xs = decaytree.final_state_cross_sections();
-    //std::cout << "vvvvvvvvv\nfinal state cross sections:" << std::endl;
-    //for (const auto& p : final_state_xs) {
-    //    std::cout << p.first << " " << p.second << std::endl;
-    //}
-    //std::cout << "^^^^^^^^^" << std::endl;
+    const auto final_state_xs = decaytree.final_state_cross_sections();
+    std::cout << "vvvvvvvvv\nfinal state cross sections:" << std::endl;
+    for (const auto& p : final_state_xs) {
+        std::cout << p.first << " " << p.second << std::endl;
+    }
+    std::cout << "^^^^^^^^^" << std::endl;
   }
 
   // Nice ordering of channels by summed pole mass of products
