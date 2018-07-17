@@ -507,32 +507,34 @@ struct Node {
       std::vector<std::pair<std::string, double>>& result,
       std::string name, double weight,
       std::vector<ParticleTypePtr> state) const {
-    if (!name.empty()) {
-      name += "->";
-    }
-    name += name_;
-    name += "{";
-    for (const auto& s : state) {
-      name += s->name();
-    }
-    name += "}";
-    /*
-    for (const auto& p : particles_) {
-      name += p->name();
-    }
-    */
     if (depth > 0) {
       weight *= weight_;
     }
-    if (children_.empty()) {
-        result.emplace_back(std::make_pair(name, weight));
-        return;
-    }
+
     for (const auto& p : initial_particles_) {
       state.erase(std::find(state.begin(), state.end(), p));
     }
     for (const auto& p : final_particles_) {
       state.push_back(p);
+    }
+
+    if (!name.empty()) {
+      name += "->";
+    }
+    name += name_;
+    name += "{";
+    std::sort(state.begin(), state.end(),
+        [](ParticleTypePtr a, ParticleTypePtr b) {
+          return a->name() < b->name();
+        });
+    for (const auto& s : state) {
+      name += s->name();
+    }
+    name += "}";
+
+    if (children_.empty()) {
+        result.emplace_back(std::make_pair(name, weight));
+        return;
     }
     for (const auto& child : children_) {
       child.final_state_cross_sections_helper(
