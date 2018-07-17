@@ -610,8 +610,6 @@ class ParticleTypePtr {
   /**
    * \param[in] rhs the ParticleTypePtr to compare to
    * \return whether the two objects reference the same ParticleType object.
-   *
-   * \todo JB:should this not compare pdgcodes or something?
    */
   bool operator==(const ParticleTypePtr &rhs) const {
     return index_ == rhs.index_;
@@ -635,7 +633,6 @@ class ParticleTypePtr {
   }
 
   /// \return whether the objects stores a valid ParticleType reference.
-  /// \todo unused
   operator bool() const { return index_ != 0xffff; }
 
  private:
