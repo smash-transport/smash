@@ -574,14 +574,36 @@ deduplicate(const std::vector<std::pair<std::string, double>>& final_state_xs) {
 }
 
 /**
+ * Generate name for decay and update final state.
+ *
+ * \param[in] res_name Name of resonance.
+ * \param[in] decay Decay branch.
+ * \param[out] final_state Final state of decay.
+ * \return Name of decay.
+ */
+static std::string make_decay_name(
+    const std::string& res_name, const DecayBranchPtr& decay,
+    std::vector<ParticleTypePtr>& final_state) {
+  std::stringstream name;
+  name << "[" << res_name << "->";
+  for (const auto& p : decay->particle_types()) {
+    name << p->name();
+    final_state.push_back(p);
+  }
+  name << "]";
+  return name.str();
+}
+
+/**
  * Add nodes for all decays.
  *
  * \param node Starting node.
  * \param ptype Particle type of the starting node.
  */
 static void add_decays(Node& node) {
-  std::vector<ParticleTypePtr> unstable(2);
-  for (const auto ptype : node.final_particles_) {
+  std::vector<ParticleTypePtr> unstable;
+  unstable.reserve(2);
+  for (const ParticleTypePtr ptype : node.final_particles_) {
     if (ptype->width_at_pole() > ParticleType::width_cutoff) {
       // Such particles are considered unstable by SMASH.
       unstable.push_back(ptype);
@@ -593,18 +615,32 @@ static void add_decays(Node& node) {
   if (unstable.size() == 1) {
     const auto res = unstable[0];
     for (const auto& decay : res->decay_modes().decay_mode_list()) {
-      std::stringstream name;
-      name << "[" << res->name() << "->";
       std::vector<ParticleTypePtr> parts;
-      for (const auto& p : decay->particle_types()) {
-        name << p->name();
-        parts.push_back(p);
-      }
-      name << "]";
-      auto new_node = Node(name.str(), decay->weight(), {res}, std::move(parts), {});
+      const auto name = make_decay_name(res->name(), decay, parts);
+      auto new_node = Node(name, decay->weight(), {res}, std::move(parts), {});
       add_decays(new_node);
       node.children_.emplace_back(new_node);
     }
+    return;
+  }
+  if (unstable.size() == 2) {
+    const auto res1 = unstable.at(0);
+    const auto res2 = unstable.at(1);
+    for (const auto& decay1 : res1->decay_modes().decay_mode_list()) {
+      std::vector<ParticleTypePtr> parts1;
+      const auto name1 = make_decay_name(res1->name(), decay1, parts1);
+      auto new_node = Node(name1, decay1->weight(), {res1}, std::move(parts1), {});
+      for (const auto& decay2 : res2->decay_modes().decay_mode_list()) {
+        std::vector<ParticleTypePtr> parts2;
+        const auto name2 = make_decay_name(res2->name(), decay2, parts2);
+        auto new_subnode = Node(name2, decay2->weight(), {res2}, std::move(parts2), {});
+        add_decays(new_subnode);
+        new_node.children_.emplace_back(new_subnode);
+      }
+      add_decays(new_node);
+      node.children_.emplace_back(new_node);
+    }
+    return;
   }
   throw std::runtime_error("not implemented");
 }
