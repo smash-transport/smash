@@ -510,7 +510,7 @@ struct Node {
       std::vector<std::pair<std::string, double>>& result,
       std::string name, double weight,
       std::vector<ParticleTypePtr> state,
-      bool show_intermediate_states=false) const {
+      bool show_intermediate_states=true) const {
     if (depth > 0) {
       weight *= weight_;
     }
@@ -579,30 +579,34 @@ deduplicate(const std::vector<std::pair<std::string, double>>& final_state_xs) {
  * \param node Starting node.
  * \param ptype Particle type of the starting node.
  */
-static void add_decays(Node& node, const ParticleTypePtr ptype) {
-  if (ptype->width_at_pole() < ParticleType::width_cutoff) {
-    // Such particles are considered stable by SMASH.
+static void add_decays(Node& node) {
+  std::vector<ParticleTypePtr> unstable(2);
+  for (const auto ptype : node.final_particles_) {
+    if (ptype->width_at_pole() > ParticleType::width_cutoff) {
+      // Such particles are considered unstable by SMASH.
+      unstable.push_back(ptype);
+    }
+  }
+  if (unstable.empty()) {
     return;
   }
-  if (!ptype) {
-    throw std::runtime_error(
-        "add_decays: decay tree nodes of resonances should have particle type");
-  }
-  for (const auto& decay : ptype->decay_modes().decay_mode_list()) {
-    std::stringstream name;
-    name << "[" << ptype->name() << "->";
-    std::vector<ParticleTypePtr> parts;
-    for (const auto& p : decay->particle_types()) {
-      name << p->name();
-      parts.push_back(p);
+  if (unstable.size() == 1) {
+    const auto res = unstable[0];
+    for (const auto& decay : res->decay_modes().decay_mode_list()) {
+      std::stringstream name;
+      name << "[" << res->name() << "->";
+      std::vector<ParticleTypePtr> parts;
+      for (const auto& p : decay->particle_types()) {
+        name << p->name();
+        parts.push_back(p);
+      }
+      name << "]";
+      auto new_node = Node(name.str(), decay->weight(), {res}, std::move(parts), {});
+      add_decays(new_node);
+      node.children_.emplace_back(new_node);
     }
-    name << "]";
-    auto new_node = Node(name.str(), decay->weight(), {ptype}, std::move(parts), {});
-    for (const auto& p : new_node.final_particles_) {
-      add_decays(new_node, p);
-    }
-    node.children_.emplace_back(new_node);
   }
+  throw std::runtime_error("not implemented");
 }
 
 void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
@@ -664,10 +668,7 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
             Node(description, xs,
                  std::move(initial_particles), std::move(final_particles), {}));
         auto& process_node = decaytree.children_.back();
-        // Find possible decays
-        for (const auto& ptype : process->particle_types()) {
-          add_decays(process_node, ptype);
-        }
+        add_decays(process_node);
       }
     }
     xs_dump["total"].push_back(std::make_pair(sqrts, act->cross_section()));
