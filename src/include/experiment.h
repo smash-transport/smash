@@ -143,6 +143,14 @@ class Experiment : public ExperimentBase {
   explicit Experiment(Configuration config, const bf::path &output_path);
 
   /**
+   * Reads particle type information and cross sections information and
+   * does the initialization of the system
+   *
+   * This is called in the beginning of each event.
+   */
+  void initialize_new_event();
+
+  /**
    * Runs the time evolution of an event with fixed-sized time steps,
    * adaptive time steps or without timesteps, from action to actions.
    * Within one timestep (fixed or adaptive) evolution from action to action
@@ -153,18 +161,20 @@ class Experiment : public ExperimentBase {
   /// Performs the final decays of an event
   void do_final_decays();
 
+  /**
+   * Output at the end of an event
+   *
+   * \param[in] evt_num Number of the event
+   */
+  void final_output(const int evt_num);
+
   /// Provides external access to particles_
   Particles* particles() { return &particles_; }
 
- private:
-  /**
-   * Reads particle type information and cross sections information and
-   * does the initialization of the system
-   *
-   * This is called in the beginning of each event.
-   */
-  void initialize_new_event();
+  /// Provides external access to modus_
+  Modus* modus() { return &modus_; }
 
+ private:
   /**
    * Perform the given action.
    *
@@ -210,13 +220,6 @@ class Experiment : public ExperimentBase {
    *                 are updated during the time interval.
    */
   void run_time_evolution_timestepless(Actions &actions);
-
-  /**
-   * Output at the end of an event
-   *
-   * \param[in] evt_num Number of the event
-   */
-  void final_output(const int evt_num);
 
   /// Intermediate output during an event
   void intermediate_output();
