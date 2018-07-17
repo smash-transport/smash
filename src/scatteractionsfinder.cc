@@ -501,12 +501,14 @@ struct Node {
    * \param depth Recursive call depth.
    * \param result Pairs of process names and exclusive cross sections.
    * \param name Current name.
-   * \param current weight/cross section.
+   * \param current Weight/cross section.
+   * \param show_intermediate_states Whether intermediate states should be shown.
    */
   void final_state_cross_sections_helper(uint64_t depth,
       std::vector<std::pair<std::string, double>>& result,
       std::string name, double weight,
-      std::vector<ParticleTypePtr> state) const {
+      std::vector<ParticleTypePtr> state,
+      bool show_intermediate_states=false) const {
     if (depth > 0) {
       weight *= weight_;
     }
@@ -518,11 +520,15 @@ struct Node {
       state.push_back(p);
     }
 
-    if (!name.empty()) {
-      name += "->";
+    if (show_intermediate_states) {
+      if (!name.empty()) {
+        name += "->";
+      }
+      name += name_;
+      name += "{";
+    } else {
+      name = "";
     }
-    name += name_;
-    name += "{";
     std::sort(state.begin(), state.end(),
         [](ParticleTypePtr a, ParticleTypePtr b) {
           return a->name() < b->name();
@@ -530,7 +536,9 @@ struct Node {
     for (const auto& s : state) {
       name += s->name();
     }
-    name += "}";
+    if (show_intermediate_states) {
+      name += "}";
+    }
 
     if (children_.empty()) {
         result.emplace_back(std::make_pair(name, weight));
@@ -538,7 +546,7 @@ struct Node {
     }
     for (const auto& child : children_) {
       child.final_state_cross_sections_helper(
-        depth + 1, result, name, weight, state);
+        depth + 1, result, name, weight, state, show_intermediate_states);
     }
   }
 };
