@@ -438,29 +438,33 @@ struct Node {
   /// Weight (cross section or branching ratio).
   double weight_;
 
-  /// Particle type of the resonance corresponding to the node.
-  /// Invalid for non-resonances.
-  ParticleTypePtr resonance_;
+  /// Initial-state particle types in this node.
+  std::vector<ParticleTypePtr> initial_particles_;
+
+  /// Final-state particle types in this node.
+  std::vector<ParticleTypePtr> final_particles_;
 
   /// Possible decays of this node.
   std::vector<Node> children_;
-
-  /// Particle types in this node.
-  std::vector<ParticleTypePtr> particles_;
 
   /**
    * \return A new decay tree node.
    *
    * \param name Name for printing.
    * \param weight Cross section or branching ratio.
+   * \param initial_particles Initial-state particle types in this node.
+   * \param final_particles Final-state particle types in this node.
    * \param resonance Corresponding resonance or invalid pointer.
    * \param children Possible decays.
-   * \param particles Particle types in this node.
    */
-  Node(const std::string& name, double weight, ParticleTypePtr resonance,
-       std::vector<Node>&& children, std::vector<ParticleTypePtr>&& particles)
-      : name_(name), weight_(weight), resonance_(resonance), children_(children),
-        particles_(particles) {}
+  Node(const std::string& name, double weight,
+       std::vector<ParticleTypePtr>&& initial_particles,
+       std::vector<ParticleTypePtr>&& final_particles,
+       std::vector<Node>&& children)
+      : name_(name), weight_(weight),
+        initial_particles_(initial_particles),
+        final_particles_(final_particles),
+        children_(children) {}
 
   /// Print the decay tree starting with this node.
   void print() const {
@@ -470,7 +474,8 @@ struct Node {
   /// Find final state cross sections.
   std::vector<std::pair<std::string, double>> final_state_cross_sections() const {
     std::vector<std::pair<std::string, double>> result;
-    final_state_cross_sections_helper(0, result, "", 1.);
+    std::vector<ParticleTypePtr> state = final_particles_;
+    final_state_cross_sections_helper(0, result, "", 1., state);
     return result;
   }
 
@@ -500,11 +505,17 @@ struct Node {
    */
   void final_state_cross_sections_helper(uint64_t depth,
       std::vector<std::pair<std::string, double>>& result,
-      std::string name, double weight) const {
+      std::string name, double weight,
+      std::vector<ParticleTypePtr> state) const {
     if (!name.empty()) {
       name += "->";
     }
     name += name_;
+    name += "{";
+    for (const auto& s : state) {
+      name += s->name();
+    }
+    name += "}";
     /*
     for (const auto& p : particles_) {
       name += p->name();
@@ -517,9 +528,15 @@ struct Node {
         result.emplace_back(std::make_pair(name, weight));
         return;
     }
+    for (const auto& p : initial_particles_) {
+      state.erase(std::find(state.begin(), state.end(), p));
+    }
+    for (const auto& p : final_particles_) {
+      state.push_back(p);
+    }
     for (const auto& child : children_) {
       child.final_state_cross_sections_helper(
-        depth + 1, result, name, weight);
+        depth + 1, result, name, weight, state);
     }
   }
 };
@@ -537,7 +554,7 @@ static void add_decays(Node& node, const ParticleTypePtr ptype) {
   }
   if (!ptype) {
     throw std::runtime_error(
-        "decay tree nodes of resonances should have particle type");
+        "add_decays: decay tree nodes of resonances should have particle type");
   }
   for (const auto& decay : ptype->decay_modes().decay_mode_list()) {
     std::stringstream name;
@@ -548,8 +565,8 @@ static void add_decays(Node& node, const ParticleTypePtr ptype) {
       parts.push_back(p);
     }
     name << "]";
-    auto new_node = Node(name.str(), decay->weight(), ptype, {}, std::move(parts));
-    for (const auto& p : new_node.particles_) {
+    auto new_node = Node(name.str(), decay->weight(), {ptype}, std::move(parts), {});
+    for (const auto& p : new_node.final_particles_) {
       add_decays(new_node, p);
     }
     node.children_.emplace_back(new_node);
@@ -582,8 +599,8 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
                              low_snn_cut_, strings_switch_, use_AQM_,
                              strings_with_probability_,
                              nnbar_treatment_);
-    Node decaytree(a.name() + b.name(), act->cross_section(), ParticleTypePtr(),
-                   {}, {&a, &b});
+    Node decaytree(a.name() + b.name(), act->cross_section(), {&a, &b},
+                   {&a, &b}, {});
     const CollisionBranchList& processes = act->collision_channels();
     for (const auto &process : processes) {
       const double xs = process->weight();
@@ -609,7 +626,11 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
         std::stringstream process_description_stream;
         process_description_stream << *process;
         const std::string& description = process_description_stream.str();
-        decaytree.children_.emplace_back(Node(description, xs, ParticleTypePtr(), {}, {}));
+        std::vector<ParticleTypePtr> initial_particles = {&a, &b};
+        std::vector<ParticleTypePtr> final_particles = process->particle_types();
+        decaytree.children_.emplace_back(
+            Node(description, xs,
+                 std::move(initial_particles), std::move(final_particles), {}));
         auto& process_node = decaytree.children_.back();
         // Find possible decays
         for (const auto& ptype : process->particle_types()) {
