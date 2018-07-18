@@ -444,6 +444,9 @@ struct Node {
   /// Final-state particle types in this node.
   std::vector<ParticleTypePtr> final_particles_;
 
+  /// Particle types corresponding to the global state after this interaction.
+  std::vector<ParticleTypePtr> state_;
+
   /// Possible decays of this node.
   std::vector<Node> children_;
 
@@ -454,17 +457,52 @@ struct Node {
    * \param weight Cross section or branching ratio.
    * \param initial_particles Initial-state particle types in this node.
    * \param final_particles Final-state particle types in this node.
-   * \param resonance Corresponding resonance or invalid pointer.
+   * \param state Curent particle types of the system.
    * \param children Possible decays.
    */
   Node(const std::string& name, double weight,
        std::vector<ParticleTypePtr>&& initial_particles,
        std::vector<ParticleTypePtr>&& final_particles,
+       std::vector<ParticleTypePtr>&& state,
        std::vector<Node>&& children)
       : name_(name), weight_(weight),
         initial_particles_(initial_particles),
         final_particles_(final_particles),
+        state_(state),
         children_(children) {}
+
+  /**
+   * Add an action to the children of this node.
+   *
+   * The current particle state of the new action is automatically calculated.
+   *
+   * \param name Name of the action used for output.
+   * \param weight Cross section/branching ratio of the action.
+   * \param initial_particles Initial-state particle types of the action.
+   * \param final_particles Final-state particle types of the action.
+   */
+  void add_action(const std::string name, double weight,
+       std::vector<ParticleTypePtr>&& initial_particles,
+       std::vector<ParticleTypePtr>&& final_particles) {
+    // Copy parent state and update it.
+    std::vector<ParticleTypePtr> state(state_);
+    for (const auto& p : initial_particles) {
+      state.erase(std::find(state.begin(), state.end(), p));
+    }
+    for (const auto& p : final_particles) {
+      state.push_back(p);
+    }
+    // Sort the state to normalize the output.
+    std::sort(state.begin(), state.end(),
+        [](ParticleTypePtr a, ParticleTypePtr b) {
+          return a->name() < b->name();
+        }
+    );
+    // Push new node to children.
+    Node new_node(name, weight, std::move(initial_particles),
+                  std::move(final_particles), std::move(state), {});
+    children_.emplace_back(std::move(new_node));
+  }
 
   /// Print the decay tree starting with this node.
   void print() const {
@@ -476,8 +514,7 @@ struct Node {
    */
   std::vector<std::pair<std::string, double>> final_state_cross_sections() const {
     std::vector<std::pair<std::string, double>> result;
-    std::vector<ParticleTypePtr> state = final_particles_;
-    final_state_cross_sections_helper(0, result, "", 1., state);
+    final_state_cross_sections_helper(0, result, "", 1.);
     return result;
   }
 
@@ -509,17 +546,9 @@ struct Node {
   void final_state_cross_sections_helper(uint64_t depth,
       std::vector<std::pair<std::string, double>>& result,
       std::string name, double weight,
-      std::vector<ParticleTypePtr> state,
       bool show_intermediate_states=true) const {
     if (depth > 0) {
       weight *= weight_;
-    }
-
-    for (const auto& p : initial_particles_) {
-      state.erase(std::find(state.begin(), state.end(), p));
-    }
-    for (const auto& p : final_particles_) {
-      state.push_back(p);
     }
 
     if (show_intermediate_states) {
@@ -531,11 +560,7 @@ struct Node {
     } else {
       name = "";
     }
-    std::sort(state.begin(), state.end(),
-        [](ParticleTypePtr a, ParticleTypePtr b) {
-          return a->name() < b->name();
-        });
-    for (const auto& s : state) {
+    for (const auto& s : state_) {
       name += s->name();
     }
     if (show_intermediate_states) {
@@ -548,7 +573,7 @@ struct Node {
     }
     for (const auto& child : children_) {
       child.final_state_cross_sections_helper(
-        depth + 1, result, name, weight, state, show_intermediate_states);
+        depth + 1, result, name, weight, show_intermediate_states);
     }
   }
 };
@@ -595,6 +620,33 @@ static std::string make_decay_name(
 }
 
 /**
+ * \return Whether a particle type is unstable.
+ * \param ptype The particle type.
+ */
+static bool is_unstable(const ParticleTypePtr& ptype) {
+  return ptype->width_at_pole() > ParticleType::width_cutoff;
+}
+
+/*
+static bool has_unresolved_decay(const Node& node) {
+  if (node.children_.empty()) {
+    for (const auto ptype : node.final_particles_) {
+      if (is_unstable(ptype)) {
+        return true;
+      }
+    }
+    return false;
+  }
+  for (const auto& child : node.children_) {
+    if (has_unresolved_decay(child)) {
+      return true;
+    };
+  }
+  return false;
+}
+*/
+
+/**
  * Add nodes for all decays.
  *
  * \param node Starting node.
@@ -602,47 +654,15 @@ static std::string make_decay_name(
  */
 static void add_decays(Node& node) {
   std::vector<ParticleTypePtr> unstable;
-  unstable.reserve(2);
   for (const ParticleTypePtr ptype : node.final_particles_) {
-    if (ptype->width_at_pole() > ParticleType::width_cutoff) {
-      // Such particles are considered unstable by SMASH.
-      unstable.push_back(ptype);
-    }
-  }
-  if (unstable.empty()) {
-    return;
-  }
-  if (unstable.size() == 1) {
-    const auto res = unstable[0];
-    for (const auto& decay : res->decay_modes().decay_mode_list()) {
-      std::vector<ParticleTypePtr> parts;
-      const auto name = make_decay_name(res->name(), decay, parts);
-      auto new_node = Node(name, decay->weight(), {res}, std::move(parts), {});
-      add_decays(new_node);
-      node.children_.emplace_back(new_node);
-    }
-    return;
-  }
-  if (unstable.size() == 2) {
-    const auto res1 = unstable.at(0);
-    const auto res2 = unstable.at(1);
-    for (const auto& decay1 : res1->decay_modes().decay_mode_list()) {
-      std::vector<ParticleTypePtr> parts1;
-      const auto name1 = make_decay_name(res1->name(), decay1, parts1);
-      auto new_node = Node(name1, decay1->weight(), {res1}, std::move(parts1), {});
-      for (const auto& decay2 : res2->decay_modes().decay_mode_list()) {
-        std::vector<ParticleTypePtr> parts2;
-        const auto name2 = make_decay_name(res2->name(), decay2, parts2);
-        auto new_subnode = Node(name2, decay2->weight(), {res2}, std::move(parts2), {});
-        add_decays(new_subnode);
-        new_node.children_.emplace_back(new_subnode);
+    if (is_unstable(ptype)) {
+      for (const auto& decay : ptype->decay_modes().decay_mode_list()) {
+        std::vector<ParticleTypePtr> parts;
+        const auto name = make_decay_name(ptype->name(), decay, parts);
+        node.add_action(name, decay->weight(), {ptype}, std::move(parts));
       }
-      add_decays(new_node);
-      node.children_.emplace_back(new_node);
     }
-    return;
   }
-  throw std::runtime_error("not implemented");
 }
 
 void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
@@ -672,7 +692,7 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
                              strings_with_probability_,
                              nnbar_treatment_);
     Node decaytree(a.name() + b.name(), act->cross_section(), {&a, &b},
-                   {&a, &b}, {});
+                   {&a, &b}, {&a, &b}, {});
     const CollisionBranchList& processes = act->collision_channels();
     for (const auto &process : processes) {
       const double xs = process->weight();
@@ -700,9 +720,8 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
         const std::string& description = process_description_stream.str();
         std::vector<ParticleTypePtr> initial_particles = {&a, &b};
         std::vector<ParticleTypePtr> final_particles = process->particle_types();
-        decaytree.children_.emplace_back(
-            Node(description, xs,
-                 std::move(initial_particles), std::move(final_particles), {}));
+        decaytree.add_action(description, xs, std::move(initial_particles),
+            std::move(final_particles));
         auto& process_node = decaytree.children_.back();
         add_decays(process_node);
       }
