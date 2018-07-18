@@ -790,7 +790,7 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
   std::cout << "# Dumping partial cross-sections in mb" << std::endl;
   std::cout << "# sqrt(s) [GeV], " << a.name() << b.name() << "→ ";
   for (const auto channel : all_channels) {
-    std::cout << utf8::fill_left(channel, 12, ' ');
+    std::cout << utf8::fill_left(channel, 20, ' ');
   }
   std::cout << std::endl;
 
@@ -811,7 +811,7 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
           std::abs(energy_and_xs[j].first - sqrts) < really_small) {
         xs = energy_and_xs[j].second;
       }
-      printf("%12.6f", xs);
+      printf("%20.6f", xs);
     }
     printf("\n");
   }
