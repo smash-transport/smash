@@ -429,6 +429,24 @@ void ScatterActionsFinder::dump_reactions() const {
   }
 }
 
+/// Represent a final-state cross section.
+struct FinalStateCrossSection {
+  /// Name of the final state.
+  std::string name_;
+  /// Corresponding cross section in mb.
+  double cross_section_;
+
+  /**
+   * Construct a final-state cross section.
+   *
+   * \param name Name of the final state.
+   * \param cross_section Corresponding cross section in mb.
+   * \return Constructed object.
+   */
+  FinalStateCrossSection(const std::string& name, double cross_section)
+    : name_(name), cross_section_(cross_section) {}
+};
+
 /// Node of a decay tree.
 struct Node {
  public:
@@ -517,8 +535,8 @@ struct Node {
   /**
    * \return Final-state cross sections.
    */
-  std::vector<std::pair<std::string, double>> final_state_cross_sections() const {
-    std::vector<std::pair<std::string, double>> result;
+  std::vector<FinalStateCrossSection> final_state_cross_sections() const {
+    std::vector<FinalStateCrossSection> result;
     final_state_cross_sections_helper(0, result, "", 1.);
     return result;
   }
@@ -549,7 +567,7 @@ struct Node {
    * \param show_intermediate_states Whether intermediate states should be shown.
    */
   void final_state_cross_sections_helper(uint64_t depth,
-      std::vector<std::pair<std::string, double>>& result,
+      std::vector<FinalStateCrossSection>& result,
       std::string name, double weight,
       bool show_intermediate_states=false) const {
     if (depth > 0) {
@@ -573,7 +591,7 @@ struct Node {
     }
 
     if (children_.empty()) {
-        result.emplace_back(std::make_pair(name, weight));
+        result.emplace_back(FinalStateCrossSection(name, weight));
         return;
     }
     for (const auto& child : children_) {
@@ -586,21 +604,27 @@ struct Node {
 /**
  * Deduplicate the final-state cross sections by summing.
  *
- * \param final_state_xs Final-state cross sections.
- * \return Deduplicated final-state cross section.
+ * \param[inout] final_state_xs Final-state cross sections.
  */
-static std::map<std::string, double>
-deduplicate(const std::vector<std::pair<std::string, double>>& final_state_xs) {
-  std::map<std::string, double> deduplicated;
-  for (const auto& p : final_state_xs) {
-    const auto ret = deduplicated.insert(p);
-    if (!ret.second) {
-      // Insertion failed because element already existed.
-      const double xs = p.second;
-      ret.first->second += xs;
+static void deduplicate(std::vector<FinalStateCrossSection>& final_state_xs) {
+  std::sort(final_state_xs.begin(), final_state_xs.end(),
+    [](const FinalStateCrossSection& a, const FinalStateCrossSection& b) {
+      return a.name_ < b.name_;
+    }
+  );
+  auto current = final_state_xs.begin();
+  while (current != final_state_xs.end()) {
+    auto adjacent = std::adjacent_find(current, final_state_xs.end(),
+      [](const FinalStateCrossSection& a, const FinalStateCrossSection& b) {
+        return a.name_ == b.name_;
+      }
+    );
+    current = adjacent;
+    if (adjacent != final_state_xs.end()) {
+      adjacent->cross_section_ += (adjacent + 1)->cross_section_;
+      final_state_xs.erase(adjacent + 1);
     }
   }
-  return deduplicated;
 }
 
 /**
@@ -735,11 +759,11 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
     // Total cross-section should be the first in the list -> negative mass
     outgoing_total_mass["total"] = -1.0;
     //decaytree.print();
-    const auto final_state_xs = decaytree.final_state_cross_sections();
-    const auto dedup_final_state_xs = deduplicate(final_state_xs);
+    auto final_state_xs = decaytree.final_state_cross_sections();
+    deduplicate(final_state_xs);
     std::cout << "vvvvvvvvv\nfinal state cross sections:" << std::endl;
-    for (const auto& p : dedup_final_state_xs) {
-        std::cout << p.first << " " << p.second << std::endl;
+    for (const auto& p : final_state_xs) {
+        std::cout << p.name_ << " " << p.cross_section_ << std::endl;
     }
     std::cout << "^^^^^^^^^" << std::endl;
   }
