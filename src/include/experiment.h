@@ -172,13 +172,13 @@ class Experiment : public ExperimentBase {
    * Provides external access to SMASH particles. This is helpful if SMASH
    * is used as a 3rd-party library.
    */
-  Particles* particles() { return &particles_; }
+  Particles *particles() { return &particles_; }
 
   /**
    * Provides external access to SMASH calculation modus. This is helpful if
    * SMASH is used as a 3rd-party library.
    */
-  Modus* modus() { return &modus_; }
+  Modus *modus() { return &modus_; }
 
  private:
   /**
