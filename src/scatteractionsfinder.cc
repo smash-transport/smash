@@ -433,18 +433,24 @@ void ScatterActionsFinder::dump_reactions() const {
 struct FinalStateCrossSection {
   /// Name of the final state.
   std::string name_;
+
   /// Corresponding cross section in mb.
   double cross_section_;
+
+  /// Total mass of final state particles.
+  double mass_;
 
   /**
    * Construct a final-state cross section.
    *
    * \param name Name of the final state.
    * \param cross_section Corresponding cross section in mb.
+   * \param mass Total mass of final state particles.
    * \return Constructed object.
    */
-  FinalStateCrossSection(const std::string& name, double cross_section)
-    : name_(name), cross_section_(cross_section) {}
+  FinalStateCrossSection(const std::string& name, double cross_section,
+                         double mass)
+    : name_(name), cross_section_(cross_section), mass_(mass) {}
 };
 
 /// Node of a decay tree.
@@ -574,6 +580,8 @@ struct Node {
       weight *= weight_;
     }
 
+    double mass = 0.;
+
     if (show_intermediate_states) {
       if (!name.empty()) {
         name += "->";
@@ -585,13 +593,14 @@ struct Node {
     }
     for (const auto& s : state_) {
       name += s->name();
+      mass += s->mass();
     }
     if (show_intermediate_states) {
       name += "}";
     }
 
     if (children_.empty()) {
-        result.emplace_back(FinalStateCrossSection(name, weight));
+        result.emplace_back(FinalStateCrossSection(name, weight, mass));
         return;
     }
     for (const auto& child : children_) {
@@ -761,11 +770,10 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
     //decaytree.print();
     auto final_state_xs = decaytree.final_state_cross_sections();
     deduplicate(final_state_xs);
-    std::cout << "vvvvvvvvv\nfinal state cross sections:" << std::endl;
     for (const auto& p : final_state_xs) {
-        std::cout << p.name_ << " " << p.cross_section_ << std::endl;
+      outgoing_total_mass[p.name_] = p.mass_;
+      xs_dump[p.name_].push_back(std::make_pair(sqrts, p.cross_section_));
     }
-    std::cout << "^^^^^^^^^" << std::endl;
   }
 
   // Nice ordering of channels by summed pole mass of products
