@@ -168,10 +168,16 @@ class Experiment : public ExperimentBase {
    */
   void final_output(const int evt_num);
 
-  /// Provides external access to particles_
+  /**
+   * Provides external access to SMASH particles. This is helpful if SMASH
+   * is used as a 3rd-party library.
+   */
   Particles* particles() { return &particles_; }
 
-  /// Provides external access to modus_
+  /**
+   * Provides external access to SMASH calculation modus. This is helpful if
+   * SMASH is used as a 3rd-party library.
+   */
   Modus* modus() { return &modus_; }
 
  private:
