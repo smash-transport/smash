@@ -480,8 +480,9 @@ struct Node {
    * \param weight Cross section/branching ratio of the action.
    * \param initial_particles Initial-state particle types of the action.
    * \param final_particles Final-state particle types of the action.
+   * \return Newly added node by reference.
    */
-  void add_action(const std::string name, double weight,
+  Node& add_action(const std::string name, double weight,
        std::vector<ParticleTypePtr>&& initial_particles,
        std::vector<ParticleTypePtr>&& final_particles) {
     // Copy parent state and update it.
@@ -502,6 +503,7 @@ struct Node {
     Node new_node(name, weight, std::move(initial_particles),
                   std::move(final_particles), std::move(state), {});
     children_.emplace_back(std::move(new_node));
+    return children_.back();
   }
 
   /// Print the decay tree starting with this node.
@@ -720,9 +722,8 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
         const std::string& description = process_description_stream.str();
         std::vector<ParticleTypePtr> initial_particles = {&a, &b};
         std::vector<ParticleTypePtr> final_particles = process->particle_types();
-        decaytree.add_action(description, xs, std::move(initial_particles),
-            std::move(final_particles));
-        auto& process_node = decaytree.children_.back();
+        auto process_node = decaytree.add_action(description, xs,
+            std::move(initial_particles), std::move(final_particles));
         add_decays(process_node);
       }
     }
