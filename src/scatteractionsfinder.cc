@@ -450,6 +450,9 @@ struct Node {
   /// Possible decays of this node.
   std::vector<Node> children_;
 
+  Node(const Node&) = delete;
+  Node(Node&&) = default;
+
   /**
    * \return A new decay tree node.
    *
@@ -466,10 +469,10 @@ struct Node {
        std::vector<ParticleTypePtr>&& state,
        std::vector<Node>&& children)
       : name_(name), weight_(weight),
-        initial_particles_(initial_particles),
-        final_particles_(final_particles),
-        state_(state),
-        children_(children) {}
+        initial_particles_(std::move(initial_particles)),
+        final_particles_(std::move(final_particles)),
+        state_(std::move(state)),
+        children_(std::move(children)) {}
 
   /**
    * Add an action to the children of this node.
@@ -548,7 +551,7 @@ struct Node {
   void final_state_cross_sections_helper(uint64_t depth,
       std::vector<std::pair<std::string, double>>& result,
       std::string name, double weight,
-      bool show_intermediate_states=true) const {
+      bool show_intermediate_states=false) const {
     if (depth > 0) {
       weight *= weight_;
     }
@@ -655,13 +658,14 @@ static bool has_unresolved_decay(const Node& node) {
  * \param ptype Particle type of the starting node.
  */
 static void add_decays(Node& node) {
-  std::vector<ParticleTypePtr> unstable;
-  for (const ParticleTypePtr ptype : node.final_particles_) {
+  for (const ParticleTypePtr ptype : node.state_) {
     if (is_unstable(ptype)) {
       for (const auto& decay : ptype->decay_modes().decay_mode_list()) {
         std::vector<ParticleTypePtr> parts;
         const auto name = make_decay_name(ptype->name(), decay, parts);
-        node.add_action(name, decay->weight(), {ptype}, std::move(parts));
+        auto& new_node = node.add_action(name, decay->weight(), {ptype},
+                                        std::move(parts));
+        add_decays(new_node);
       }
     }
   }
@@ -722,7 +726,7 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
         const std::string& description = process_description_stream.str();
         std::vector<ParticleTypePtr> initial_particles = {&a, &b};
         std::vector<ParticleTypePtr> final_particles = process->particle_types();
-        auto process_node = decaytree.add_action(description, xs,
+        auto& process_node = decaytree.add_action(description, xs,
             std::move(initial_particles), std::move(final_particles));
         add_decays(process_node);
       }
