@@ -142,7 +142,6 @@ class Experiment : public ExperimentBase {
    */
   explicit Experiment(Configuration config, const bf::path &output_path);
 
- private:
   /**
    * Reads particle type information and cross sections information and
    * does the initialization of the system
@@ -151,6 +150,37 @@ class Experiment : public ExperimentBase {
    */
   void initialize_new_event();
 
+  /**
+   * Runs the time evolution of an event with fixed-sized time steps,
+   * adaptive time steps or without timesteps, from action to actions.
+   * Within one timestep (fixed or adaptive) evolution from action to action
+   * is invoked.
+   */
+  void run_time_evolution();
+
+  /// Performs the final decays of an event
+  void do_final_decays();
+
+  /**
+   * Output at the end of an event
+   *
+   * \param[in] evt_num Number of the event
+   */
+  void final_output(const int evt_num);
+
+  /**
+   * Provides external access to SMASH particles. This is helpful if SMASH
+   * is used as a 3rd-party library.
+   */
+  Particles *particles() { return &particles_; }
+
+  /**
+   * Provides external access to SMASH calculation modus. This is helpful if
+   * SMASH is used as a 3rd-party library.
+   */
+  Modus *modus() { return &modus_; }
+
+ private:
   /**
    * Perform the given action.
    *
@@ -184,14 +214,6 @@ class Experiment : public ExperimentBase {
   void propagate_and_shine(double to_time);
 
   /**
-   * Runs the time evolution of an event with fixed-sized time steps,
-   * adaptive time steps or without timesteps, from action to actions.
-   * Within one timestep (fixed or adaptive) evolution from action to action
-   * is invoked.
-   */
-  void run_time_evolution();
-
-  /**
    * Performs all the propagations and actions during a certain time interval
    * neglecting the influence of the potentials. This function is called in
    * either the time stepless cases or the cases with time steps. In a time
@@ -204,16 +226,6 @@ class Experiment : public ExperimentBase {
    *                 are updated during the time interval.
    */
   void run_time_evolution_timestepless(Actions &actions);
-
-  /// Performs the final decays of an event
-  void do_final_decays();
-
-  /**
-   * Output at the end of an event
-   *
-   * \param[in] evt_num Number of the event
-   */
-  void final_output(const int evt_num);
 
   /// Intermediate output during an event
   void intermediate_output();
