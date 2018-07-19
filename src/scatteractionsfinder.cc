@@ -665,25 +665,6 @@ static bool is_unstable(const ParticleTypePtr& ptype) {
   return ptype->width_at_pole() > ParticleType::width_cutoff;
 }
 
-/*
-static bool has_unresolved_decay(const Node& node) {
-  if (node.children_.empty()) {
-    for (const auto ptype : node.final_particles_) {
-      if (is_unstable(ptype)) {
-        return true;
-      }
-    }
-    return false;
-  }
-  for (const auto& child : node.children_) {
-    if (has_unresolved_decay(child)) {
-      return true;
-    };
-  }
-  return false;
-}
-*/
-
 /**
  * Add nodes for all decays.
  *
