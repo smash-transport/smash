@@ -100,8 +100,9 @@ class ListModus : public ModusDefault {
    * (i) pdg code is legal and exists in SMASH. In case it fails, a warning is
    *     printed and the particle is ignored.
    * (ii) mass matches the pole mass of pdgcode in SMASH. If it does not, then
-   *      a warning is printed, SMASH mass is set to particle and it's energy
-   *      is recomputed as \f$ E^2 = p^2 + m^2 \f$
+   *      a warning is printed, Pole mass of the particle is set equal to the
+   *      corresponding mass from SMASH particle table and it's energy
+   *      is recomputed as \f$ E^2 = p^2 + m^2 \f$.
    * (iii) stable particle is on-shell, i.e. \f$ E^2 - p^2 = m^2 \f$. If it is
    *      not, then a warning is printed and the energy is set to
    *      \f$ E^2 = p^2 + m^2 \f$.
