@@ -772,10 +772,13 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
             });
 
   // Print header
-  std::cout << "# Dumping partial cross-sections in mb" << std::endl;
-  std::cout << "# sqrt(s) [GeV], " << a.name() << b.name() << "→ ";
+  std::cout << "# Dumping partial " << a.name() << b.name()
+            << " cross-sections in mb, energies in GeV" << std::endl;
+  std::cout << "   sqrt_s";
+  // Align everything to 16 unicode characters.
+  // This should be enough for the longest channel name (7 final-state particles).
   for (const auto channel : all_channels) {
-    std::cout << utf8::fill_left(channel, 20, ' ');
+    std::cout << utf8::fill_left(channel, 16, ' ');
   }
   std::cout << std::endl;
 
@@ -785,7 +788,7 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
     a_data.set_4momentum(m_a, momentum, 0.0, 0.0);
     b_data.set_4momentum(m_b, -momentum, 0.0, 0.0);
     const double sqrts = (a_data.momentum() + b_data.momentum()).abs();
-    printf("%17.5f      ", sqrts);
+    printf("%9.5f", sqrts);
     for (const auto channel : all_channels) {
       const xs_saver energy_and_xs = xs_dump[channel];
       size_t j = 0;
@@ -796,7 +799,7 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
           std::abs(energy_and_xs[j].first - sqrts) < really_small) {
         xs = energy_and_xs[j].second;
       }
-      printf("%20.6f", xs);
+      printf("%16.6f", xs);  // Same alignment as in the header.
     }
     printf("\n");
   }
