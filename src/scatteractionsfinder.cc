@@ -453,6 +453,8 @@ struct FinalStateCrossSection {
     : name_(name), cross_section_(cross_section), mass_(mass) {}
 };
 
+namespace decaytree {
+
 /// Node of a decay tree.
 struct Node {
  public:
@@ -611,32 +613,6 @@ struct Node {
 };
 
 /**
- * Deduplicate the final-state cross sections by summing.
- *
- * \param[inout] final_state_xs Final-state cross sections.
- */
-static void deduplicate(std::vector<FinalStateCrossSection>& final_state_xs) {
-  std::sort(final_state_xs.begin(), final_state_xs.end(),
-    [](const FinalStateCrossSection& a, const FinalStateCrossSection& b) {
-      return a.name_ < b.name_;
-    }
-  );
-  auto current = final_state_xs.begin();
-  while (current != final_state_xs.end()) {
-    auto adjacent = std::adjacent_find(current, final_state_xs.end(),
-      [](const FinalStateCrossSection& a, const FinalStateCrossSection& b) {
-        return a.name_ == b.name_;
-      }
-    );
-    current = adjacent;
-    if (adjacent != final_state_xs.end()) {
-      adjacent->cross_section_ += (adjacent + 1)->cross_section_;
-      final_state_xs.erase(adjacent + 1);
-    }
-  }
-}
-
-/**
  * Generate name for decay and update final state.
  *
  * \param[in] res_name Name of resonance.
@@ -685,6 +661,34 @@ static void add_decays(Node& node) {
   }
 }
 
+}  // namespace decaytree
+
+/**
+ * Deduplicate the final-state cross sections by summing.
+ *
+ * \param[inout] final_state_xs Final-state cross sections.
+ */
+static void deduplicate(std::vector<FinalStateCrossSection>& final_state_xs) {
+  std::sort(final_state_xs.begin(), final_state_xs.end(),
+    [](const FinalStateCrossSection& a, const FinalStateCrossSection& b) {
+      return a.name_ < b.name_;
+    }
+  );
+  auto current = final_state_xs.begin();
+  while (current != final_state_xs.end()) {
+    auto adjacent = std::adjacent_find(current, final_state_xs.end(),
+      [](const FinalStateCrossSection& a, const FinalStateCrossSection& b) {
+        return a.name_ == b.name_;
+      }
+    );
+    current = adjacent;
+    if (adjacent != final_state_xs.end()) {
+      adjacent->cross_section_ += (adjacent + 1)->cross_section_;
+      final_state_xs.erase(adjacent + 1);
+    }
+  }
+}
+
 void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
                                                const ParticleType &b,
                                                double m_a, double m_b,
@@ -711,8 +715,8 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
                              low_snn_cut_, strings_switch_, use_AQM_,
                              strings_with_probability_,
                              nnbar_treatment_);
-    Node decaytree(a.name() + b.name(), act->cross_section(), {&a, &b},
-                   {&a, &b}, {&a, &b}, {});
+    decaytree::Node tree(a.name() + b.name(), act->cross_section(),
+                         {&a, &b}, {&a, &b}, {&a, &b}, {});
     const CollisionBranchList& processes = act->collision_channels();
     for (const auto &process : processes) {
       const double xs = process->weight();
@@ -740,16 +744,16 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType &a,
         const std::string& description = process_description_stream.str();
         std::vector<ParticleTypePtr> initial_particles = {&a, &b};
         std::vector<ParticleTypePtr> final_particles = process->particle_types();
-        auto& process_node = decaytree.add_action(description, xs,
+        auto& process_node = tree.add_action(description, xs,
             std::move(initial_particles), std::move(final_particles));
-        add_decays(process_node);
+        decaytree::add_decays(process_node);
       }
     }
     xs_dump["total"].push_back(std::make_pair(sqrts, act->cross_section()));
     // Total cross-section should be the first in the list -> negative mass
     outgoing_total_mass["total"] = -1.0;
-    //decaytree.print();
-    auto final_state_xs = decaytree.final_state_cross_sections();
+    //tree.print();
+    auto final_state_xs = tree.final_state_cross_sections();
     deduplicate(final_state_xs);
     for (const auto& p : final_state_xs) {
       outgoing_total_mass[p.name_] = p.mass_;
