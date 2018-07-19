@@ -511,7 +511,7 @@ struct Node {
    * \param final_particles Final-state particle types of the action.
    * \return Newly added node by reference.
    */
-  Node& add_action(const std::string name, double weight,
+  Node& add_action(const std::string& name, double weight,
        std::vector<ParticleTypePtr>&& initial_particles,
        std::vector<ParticleTypePtr>&& final_particles) {
     // Copy parent state and update it.
@@ -576,38 +576,40 @@ struct Node {
    */
   void final_state_cross_sections_helper(uint64_t depth,
       std::vector<FinalStateCrossSection>& result,
-      std::string name, double weight,
+      const std::string& name, double weight,
       bool show_intermediate_states=false) const {
     if (depth > 0) {
       weight *= weight_;
     }
 
+    std::string new_name;
     double mass = 0.;
 
     if (show_intermediate_states) {
-      if (!name.empty()) {
-        name += "->";
+      new_name = name;
+      if (!new_name.empty()) {
+        new_name += "->";
       }
-      name += name_;
-      name += "{";
+      new_name += name_;
+      new_name += "{";
     } else {
-      name = "";
+      new_name = "";
     }
     for (const auto& s : state_) {
-      name += s->name();
+      new_name += s->name();
       mass += s->mass();
     }
     if (show_intermediate_states) {
-      name += "}";
+      new_name += "}";
     }
 
     if (children_.empty()) {
-        result.emplace_back(FinalStateCrossSection(name, weight, mass));
+        result.emplace_back(FinalStateCrossSection(new_name, weight, mass));
         return;
     }
     for (const auto& child : children_) {
       child.final_state_cross_sections_helper(
-        depth + 1, result, name, weight, show_intermediate_states);
+        depth + 1, result, new_name, weight, show_intermediate_states);
     }
   }
 };
