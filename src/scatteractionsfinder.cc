@@ -455,7 +455,17 @@ struct FinalStateCrossSection {
 
 namespace decaytree {
 
-/// Node of a decay tree.
+/**
+ * Node of a decay tree, representing a possible action (2-to-2 or 1-to-2).
+ *
+ * This data structure can be used to build a tree going from the initial state
+ * (a collision of two particles) to all possible final states by recursively
+ * performing all possible decays. The tree can be used to calculate the final
+ * state cross sections.
+ *
+ * The initial actions are 2-to-2 scatterings, all other actions are 1-to-2
+ * decays.
+ */
 struct Node {
  public:
   /// Name for printing.
@@ -464,16 +474,16 @@ struct Node {
   /// Weight (cross section or branching ratio).
   double weight_;
 
-  /// Initial-state particle types in this node.
+  /// Initial-state particle types in this action.
   ParticleTypePtrList initial_particles_;
 
-  /// Final-state particle types in this node.
+  /// Final-state particle types in this action.
   ParticleTypePtrList final_particles_;
 
-  /// Particle types corresponding to the global state after this interaction.
+  /// Particle types corresponding to the global state after this action.
   ParticleTypePtrList state_;
 
-  /// Possible decays of this node.
+  /// Possible actions after this action.
   std::vector<Node> children_;
 
   Node(const Node&) = delete;
@@ -487,7 +497,7 @@ struct Node {
    * \param initial_particles Initial-state particle types in this node.
    * \param final_particles Final-state particle types in this node.
    * \param state Curent particle types of the system.
-   * \param children Possible decays.
+   * \param children Possible actions after this action.
    */
   Node(const std::string& name, double weight,
        ParticleTypePtrList&& initial_particles,
@@ -548,7 +558,8 @@ struct Node {
 
  private:
   /**
-   * Internal helper function for `print`.
+   * Internal helper function for `print`, to be called recursively to print all
+   * nodes.
    *
    * \param depth Recursive call depth.
    */
@@ -563,7 +574,8 @@ struct Node {
   }
 
   /**
-   * Internal helper function for `final_state_cross_sections`.
+   * Internal helper function for `final_state_cross_sections`, to be called
+   * recursively to calculate all final-state cross sections.
    *
    * \param depth Recursive call depth.
    * \param result Pairs of process names and exclusive cross sections.
