@@ -97,15 +97,15 @@ class ListModus : public ModusDefault {
 
   /**
    * Tries to add a new particle to particles and performs consistency checks:
-   * (i) pdg code is legal and exists in SMASH. In case it fails, a warning is
-   *     printed and the particle is ignored.
-   * (ii) mass matches the pole mass of pdgcode in SMASH. If it does not, then
-   *      a warning is printed, Pole mass of the particle is set equal to the
-   *      corresponding mass from SMASH particle table and it's energy
+   * (i) The PDG code is legal and exists in SMASH. If not, a warning is printed
+   *     and the particle is ignored.
+   * (ii) The mass matches the pole mass of `pdgcode` in SMASH. If it does not,
+   *      then a warning is printed, the pole mass of the particle is set equal
+   *      to the corresponding mass from SMASH particle table and it's energy
    *      is recomputed as \f$ E^2 = p^2 + m^2 \f$.
-   * (iii) stable particle is on-shell, i.e. \f$ E^2 - p^2 = m^2 \f$. If it is
-   *      not, then a warning is printed and the energy is set to
-   *      \f$ E^2 = p^2 + m^2 \f$.
+   * (iii) Any stable particle is on-shell, i.e. \f$ E^2 - p^2 = m^2 \f$. If it
+   *       is not, then a warning is printed and the energy is set to
+   *       \f$ E^2 = p^2 + m^2 \f$.
    * This very tolerant behaviour is justified by the practical usage of SMASH
    * as afterburner. Usually particles unknown to SMASH are rare resonances,
    * which do not play a large role. Mass mismatch is typically less than 1%
