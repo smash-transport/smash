@@ -465,13 +465,13 @@ struct Node {
   double weight_;
 
   /// Initial-state particle types in this node.
-  std::vector<ParticleTypePtr> initial_particles_;
+  ParticleTypePtrList initial_particles_;
 
   /// Final-state particle types in this node.
-  std::vector<ParticleTypePtr> final_particles_;
+  ParticleTypePtrList final_particles_;
 
   /// Particle types corresponding to the global state after this interaction.
-  std::vector<ParticleTypePtr> state_;
+  ParticleTypePtrList state_;
 
   /// Possible decays of this node.
   std::vector<Node> children_;
@@ -490,9 +490,9 @@ struct Node {
    * \param children Possible decays.
    */
   Node(const std::string& name, double weight,
-       std::vector<ParticleTypePtr>&& initial_particles,
-       std::vector<ParticleTypePtr>&& final_particles,
-       std::vector<ParticleTypePtr>&& state, std::vector<Node>&& children)
+       ParticleTypePtrList&& initial_particles,
+       ParticleTypePtrList&& final_particles,
+       ParticleTypePtrList&& state, std::vector<Node>&& children)
       : name_(name),
         weight_(weight),
         initial_particles_(std::move(initial_particles)),
@@ -512,10 +512,10 @@ struct Node {
    * \return Newly added node by reference.
    */
   Node& add_action(const std::string& name, double weight,
-                   std::vector<ParticleTypePtr>&& initial_particles,
-                   std::vector<ParticleTypePtr>&& final_particles) {
+                   ParticleTypePtrList&& initial_particles,
+                   ParticleTypePtrList&& final_particles) {
     // Copy parent state and update it.
-    std::vector<ParticleTypePtr> state(state_);
+    ParticleTypePtrList state(state_);
     for (const auto& p : initial_particles) {
       state.erase(std::find(state.begin(), state.end(), p));
     }
@@ -622,7 +622,7 @@ struct Node {
  */
 static std::string make_decay_name(const std::string& res_name,
                                    const DecayBranchPtr& decay,
-                                   std::vector<ParticleTypePtr>& final_state) {
+                                   ParticleTypePtrList& final_state) {
   std::stringstream name;
   name << "[" << res_name << "->";
   for (const auto& p : decay->particle_types()) {
@@ -643,7 +643,7 @@ static void add_decays(Node& node) {
   for (const ParticleTypePtr ptype : node.state_) {
     if (!ptype->is_stable()) {
       for (const auto& decay : ptype->decay_modes().decay_mode_list()) {
-        std::vector<ParticleTypePtr> parts;
+        ParticleTypePtrList parts;
         const auto name = make_decay_name(ptype->name(), decay, parts);
         auto& new_node =
             node.add_action(name, decay->weight(), {ptype}, std::move(parts));
@@ -732,8 +732,8 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType& a,
         std::stringstream process_description_stream;
         process_description_stream << *process;
         const std::string& description = process_description_stream.str();
-        std::vector<ParticleTypePtr> initial_particles = {&a, &b};
-        std::vector<ParticleTypePtr> final_particles =
+        ParticleTypePtrList initial_particles = {&a, &b};
+        ParticleTypePtrList final_particles =
             process->particle_types();
         auto& process_node =
             tree.add_action(description, xs, std::move(initial_particles),
