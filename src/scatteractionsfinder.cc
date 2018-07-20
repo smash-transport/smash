@@ -634,14 +634,6 @@ static std::string make_decay_name(const std::string& res_name,
 }
 
 /**
- * \return Whether a particle type is unstable.
- * \param ptype The particle type.
- */
-static bool is_unstable(const ParticleTypePtr& ptype) {
-  return ptype->width_at_pole() > ParticleType::width_cutoff;
-}
-
-/**
  * Add nodes for all decays.
  *
  * \param node Starting node.
@@ -649,7 +641,7 @@ static bool is_unstable(const ParticleTypePtr& ptype) {
  */
 static void add_decays(Node& node) {
   for (const ParticleTypePtr ptype : node.state_) {
-    if (is_unstable(ptype)) {
+    if (!ptype->is_stable()) {
       for (const auto& decay : ptype->decay_modes().decay_mode_list()) {
         std::vector<ParticleTypePtr> parts;
         const auto name = make_decay_name(ptype->name(), decay, parts);
