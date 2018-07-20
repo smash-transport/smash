@@ -463,8 +463,8 @@ namespace decaytree {
  * performing all possible decays. The tree can be used to calculate the final
  * state cross sections.
  *
- * The initial actions are 2-to-2 scatterings, all other actions are 1-to-2
- * decays.
+ * The initial actions are 2-to-2 or 2-to-1 scatterings, all other actions are
+ * 1-to-2 decays.
  */
 struct Node {
  public:
