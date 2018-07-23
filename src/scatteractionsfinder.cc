@@ -649,19 +649,52 @@ static std::string make_decay_name(const std::string& res_name,
 }
 
 /**
- * Add nodes for all decays.
+ * \param x Positive integer.
+ * \return Factorial of `x`.
+ */
+static uint32_t factorial(uint32_t x) {
+  if ((x == 0) | (x == 1)) {
+    return 1;
+  }
+  auto result = x;
+  while (x != 2) {
+    x -= 1;
+    result *= x;
+  }
+  return result;
+}
+
+/**
+ * Add nodes for all decays possible from the given node and all of its
+ * children.
  *
  * \param node Starting node.
- * \param ptype Particle type of the starting node.
  */
 static void add_decays(Node& node) {
+  // If there is more than one unstable particle in the current state, then
+  // there will be redundant paths in the decay tree, corresponding to
+  // reorderings of the decays. To avoid double counting, we normalize by the
+  // number of possible decay orderings.
+  //
+  // Ideally, the redundant paths should never be added to the decay tree, but
+  // we never have more than two redundant paths, so it probably does not matter
+  // much.
+  uint32_t n_unstable = 0;
+  for (const ParticleTypePtr ptype : node.state_) {
+    if (!ptype->is_stable()) {
+      n_unstable += 1;
+    }
+  }
+  const double norm = 1. / static_cast<double>(factorial(n_unstable));
+
   for (const ParticleTypePtr ptype : node.state_) {
     if (!ptype->is_stable()) {
       for (const auto& decay : ptype->decay_modes().decay_mode_list()) {
         ParticleTypePtrList parts;
         const auto name = make_decay_name(ptype->name(), decay, parts);
         auto& new_node =
-            node.add_action(name, decay->weight(), {ptype}, std::move(parts));
+            node.add_action(name, norm * decay->weight(), {ptype},
+                            std::move(parts));
         add_decays(new_node);
       }
     }
