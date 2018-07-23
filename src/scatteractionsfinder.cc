@@ -588,6 +588,9 @@ struct Node {
       uint64_t depth, std::vector<FinalStateCrossSection>& result,
       const std::string& name, double weight,
       bool show_intermediate_states = false) const {
+    // The first node corresponds to the total cross section and has to be
+    // ignored. The second node corresponds to the partial cross section. All
+    // further nodes correspond to branching ratios.
     if (depth > 0) {
       weight *= weight_;
     }
