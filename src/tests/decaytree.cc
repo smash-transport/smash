@@ -32,7 +32,8 @@ TEST(init_decay_channels) {
       "1.\t1\tπ π\n \n"
       "f₂\n"
       "0.50\t0\tπ π\n"
-      "0.45\t0\tρ ρ\n"
+      "0.25\t0\tρ ρ\n"
+      "0.20\t0\tρ ρ ρ\n"
       "0.05\t0\tK K̅\n");
   DecayModes::load_decaymodes(decays_input);
   ParticleType::check_consistency();
@@ -70,7 +71,7 @@ TEST(decaytree_correctness) {
   auto final_state_xs = tree.final_state_cross_sections();
   deduplicate(final_state_xs);
 
-  UnitTest::setFuzzyness<double>(2);
+  UnitTest::setFuzzyness<double>(4);
   double xs_partial_sum = 0.0;
   for (const auto& p : final_state_xs) {
     if (p.name_ == a->name() + b->name()) {

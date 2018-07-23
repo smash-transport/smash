@@ -649,22 +649,6 @@ static std::string make_decay_name(const std::string& res_name,
 }
 
 /**
- * \param x Positive integer.
- * \return Factorial of `x`.
- */
-static uint32_t factorial(uint32_t x) {
-  if ((x == 0) | (x == 1)) {
-    return 1;
-  }
-  auto result = x;
-  while (x != 2) {
-    x -= 1;
-    result *= x;
-  }
-  return result;
-}
-
-/**
  * Add nodes for all decays possible from the given node and all of its
  * children.
  *
@@ -674,7 +658,9 @@ static void add_decays(Node& node) {
   // If there is more than one unstable particle in the current state, then
   // there will be redundant paths in the decay tree, corresponding to
   // reorderings of the decays. To avoid double counting, we normalize by the
-  // number of possible decay orderings.
+  // number of possible decay orderings. Normalizing by the number of unstable
+  // particles recursively corresponds to normalizing by the factorial that
+  // gives the number of reorderings.
   //
   // Ideally, the redundant paths should never be added to the decay tree, but
   // we never have more than two redundant paths, so it probably does not matter
@@ -685,7 +671,8 @@ static void add_decays(Node& node) {
       n_unstable += 1;
     }
   }
-  const double norm = 1. / static_cast<double>(factorial(n_unstable));
+  const double norm = n_unstable != 0 ?
+    1. / static_cast<double>(n_unstable) : 1.;
 
   for (const ParticleTypePtr ptype : node.state_) {
     if (!ptype->is_stable()) {
