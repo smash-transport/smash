@@ -480,3 +480,72 @@ TEST(multiple_events_in_file) {
     }
   }
 }
+
+TEST(try_create_particle_func) {
+  // Create list modus
+  std::string list_conf_str = "List:\n";
+  list_conf_str += "    File_Directory: \"";
+  list_conf_str += testoutputpath.native() + "\"\n";
+  list_conf_str += "    File_Prefix: \"event\"\n";
+  list_conf_str += "    Shift_Id: 0\n";
+  list_conf_str += "    Start_Time: 0.0\n";
+  auto config = Configuration(list_conf_str.c_str());
+  auto par = Test::default_parameters();
+  ListModus list_modus(config, par);
+
+
+  Particles particles;
+  ParticleList plist_init, plist_fin;
+  const int npart = 10;
+  const double m0 = Test::smashon_mass;
+
+  for (int i = 0; i < npart; i++) {
+    ParticleData smashon = Test::smashon_random();
+    plist_init.push_back(smashon);
+    FourVector r = smashon.position(), p = smashon.momentum();
+    PdgCode pdg = smashon.pdgcode();
+    list_modus.try_create_particle(particles, pdg,
+                        r.x0(), r.x1(), r.x2(), r.x3(),
+                        m0, p.x0(), p.x1(), p.x2(), p.x3());
+  }
+  plist_fin = particles.copy_to_vector();
+  for (int i = 0; i < npart; i++) {
+    ParticleData a = plist_init.back();
+    ParticleData b = plist_fin.back();
+    plist_init.pop_back();
+    plist_fin.pop_back();
+    compare_fourvector(a.momentum(), b.momentum());
+    compare_fourvector(a.position(), b.position());
+    COMPARE_ABSOLUTE_ERROR(b.formation_time(), a.position().x0(), accuracy);
+    COMPARE(a.pdgcode(), b.pdgcode());
+  }
+
+  // Create smashons off-shell and check if they are returned on-shell
+  particles.reset();
+  plist_init.clear();
+  plist_fin.clear();
+  for (int i = 0; i < npart; i++) {
+    ParticleData smashon = Test::smashon_random();
+    plist_init.push_back(smashon);
+    FourVector r = smashon.position(), p = smashon.momentum();
+    PdgCode pdg = smashon.pdgcode();
+    list_modus.try_create_particle(particles, pdg,
+                        r.x0(), r.x1(), r.x2(), r.x3(),
+                        m0 + 0.1, p.x0(), p.x1(), p.x2(), p.x3());
+  }
+  plist_fin = particles.copy_to_vector();
+  for (int i = 0; i < npart; i++) {
+    ParticleData a = plist_init.back();
+    ParticleData b = plist_fin.back();
+    plist_init.pop_back();
+    plist_fin.pop_back();
+    // Test smashon should be on mass shell with pole mass
+    COMPARE_ABSOLUTE_ERROR(a.momentum().abs(), m0, accuracy);
+    // The smashon read from the list should have the mass m created by user,
+    // but still obey E^2 - p^2 = m^2.
+    COMPARE_ABSOLUTE_ERROR(b.momentum().abs(), m0 + 0.1, accuracy);
+    compare_fourvector(a.position(), b.position());
+    COMPARE_ABSOLUTE_ERROR(b.formation_time(), a.position().x0(), accuracy);
+    COMPARE(a.pdgcode(), b.pdgcode());
+  }
+}
