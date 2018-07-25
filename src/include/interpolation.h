@@ -137,7 +137,8 @@ std::vector<T> apply_permutation(const std::vector<T>& v,
   return copied_v;
 }
 
-/** Check whether two components have the same value in a sorted vector x.
+/**
+ * Check whether two components have the same value in a sorted vector x.
  *
  * Throws an exception if duplicates are encountered.
  *
@@ -218,7 +219,8 @@ T InterpolateDataLinear<T>::operator()(T x0) const {
 /// Represent a cubic spline interpolation.
 class InterpolateDataSpline {
  public:
-  /** Interpolate function f given discrete samples f(x_i) = y_i.
+  /**
+   * Interpolate function f given discrete samples f(x_i) = y_i.
    *
    * \param x x-values.
    * \param y y-values.
@@ -231,6 +233,7 @@ class InterpolateDataSpline {
   InterpolateDataSpline(const std::vector<double>& x,
                         const std::vector<double>& y);
 
+  /// Destructor
   ~InterpolateDataSpline();
 
   /**
