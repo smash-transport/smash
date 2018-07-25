@@ -144,10 +144,8 @@ class Experiment : public ExperimentBase {
 
  private:
   /**
-   * Reads particle type information and cross sections information and
-   * does the initialization of the system
-   *
-   * This is called in the beginning of each event.
+   * This is called in the beginning of each event and does the initialization
+   * of the system (fill the particles map).
    */
   void initialize_new_event();
 
