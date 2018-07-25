@@ -25,10 +25,9 @@
 
 namespace smash {
 
-/*
+/**
  * Linear interpolation.
  */
-
 template <typename T>
 class InterpolateLinear {
  public:
@@ -36,15 +35,19 @@ class InterpolateLinear {
   T slope_;
   /// y-axis intercept of the linear interpolation.
   T yintercept_;
-  /// Linear interpolation given two points (x0, y0) and (x1, y1).
-  ///
-  /// \return The interpolation function.
+  /**
+   * Linear interpolation given two points (x0, y0) and (x1, y1).
+   *
+   * \return The interpolation function.
+   */
   InterpolateLinear(T x0, T y0, T x1, T y1);
 
-  /// Calculate linear interpolation at x.
-  ///
-  /// \param x Interpolation argument.
-  /// \return Interpolated value.
+  /**
+   * Calculate linear interpolation at x.
+   *
+   * \param x Interpolation argument.
+   * \return Interpolated value.
+   */
   T operator()(T x) const;
 };
 
@@ -187,10 +190,9 @@ T InterpolateDataLinear<T>::operator()(T x0) const {
   return f_[i](x0);
 }
 
-/*
+/**
  * Spline interpolation.
  */
-
 class InterpolateDataSpline {
  public:
   /// Interpolate function f given discrete samples f(x_i) = y_i.

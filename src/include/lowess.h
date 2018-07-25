@@ -24,9 +24,11 @@
 namespace smash {
 
 namespace lowess {
-/// Fit value at x[i]
-///  Based on R function lowest: Translated to C++ by C. Stratowa
-///  (R source file: lowess.c by R Development Core Team (C) 1999-2001)
+/**
+ * Fit value at x[i]
+ * Based on R function lowest: Translated to C++ by C. Stratowa
+ * (R source file: lowess.c by R Development Core Team (C) 1999-2001)
+ */
 template <typename T>
 void lowest(const T *x, const T *y, size_t n, T xs, T &ys, size_t nleft,
             size_t nright, T *w, bool userw, T *rw, bool &ok) {
@@ -95,9 +97,11 @@ void lowest(const T *x, const T *y, size_t n, T xs, T &ys, size_t nleft,
   }
 }
 
-/// Partial sort.
-/// based on R function rPsort: adapted to C++ by Christian Stratowa
-/// (R source file: R_sort.c by R Development Core Team (C) 1999-2001)
+/**
+ * Partial sort.
+ * based on R function rPsort: adapted to C++ by Christian Stratowa
+ * (R source file: R_sort.c by R Development Core Team (C) 1999-2001)
+ */
 template <typename T>
 void psort(T *x, size_t n, size_t k) {
   for (size_t pL = 0, pR = n - 1; pL < pR;) {
@@ -126,9 +130,11 @@ void psort(T *x, size_t n, size_t k) {
   }
 }
 
-/// Lowess regression smoother.
-/// Based on R function clowess: Translated to C++ by C. Stratowa
-/// (R source file: lowess.c by R Development Core Team (C) 1999-2001)
+/**
+ * Lowess regression smoother.
+ * Based on R function clowess: Translated to C++ by C. Stratowa
+ * (R source file: lowess.c by R Development Core Team (C) 1999-2001)
+ */
 template <typename T>
 void lowess(const T *x, const T *y, size_t n, T *ys, T span, size_t iter,
             T delta, T *rw, T *res) {
@@ -255,28 +261,30 @@ void lowess(const T *x, const T *y, size_t n, T *ys, T span, size_t iter,
 
 }  // namespace lowess
 
-/// Apply the LOWESS smoother (see the reference below) to the given data
-/// (x, y).
-///
-/// \returns Smoothed y-values.
-/// \param x x-values.
-/// \param y y-values.
-/// \param span The smoother span. This gives the proportion of points in
-///     the plot which influence the smoothness at each value. Larger values
-///     give more smoothness.
-/// \param iter The number of robustifying iterations which should be
-///     performed. Using smaller values of iter will make lowess run faster.
-/// \param delta Values of x which lie within delta of each other replaced
-///     by a single value in the output from lowess.
-///     For delta = 0, delta will be calculated.
-///
-/// References:
-///
-/// - Cleveland, W. S. (1979) Robust locally weighted regression and smoothing
-///        scatterplots. J. Amer. Statist. Assoc. 74, 829-836.
-/// - Cleveland, W. S. (1981) LOWESS: A program for smoothing scatterplots
-///        by robust locally weighted regression.
-///        The American Statistician, 35, 54.
+/**
+ * Apply the LOWESS smoother (see the reference below) to the given data
+ * (x, y).
+ *
+ * \param x x-values.
+ * \param y y-values.
+ * \param span The smoother span. This gives the proportion of points in
+ *     the plot which influence the smoothness at each value. Larger values
+ *     give more smoothness.
+ * \param iter The number of robustifying iterations which should be
+ *     performed. Using smaller values of iter will make lowess run faster.
+ * \param delta Values of x which lie within delta of each other replaced
+ *     by a single value in the output from lowess.
+ *     For delta = 0, delta will be calculated.
+ * \return Smoothed y-values.
+ *
+ * References:
+ *
+ * - Cleveland, W. S. (1979) Robust locally weighted regression and smoothing
+ *        scatterplots. J. Amer. Statist. Assoc. 74, 829-836.
+ * - Cleveland, W. S. (1981) LOWESS: A program for smoothing scatterplots
+ *        by robust locally weighted regression.
+ *        The American Statistician, 35, 54.
+ */
 template <typename T>
 std::vector<T> smooth(const std::vector<T> &x, const std::vector<T> &y,
                       T span = 2. / 3, size_t iter = 3, T delta = 0) {

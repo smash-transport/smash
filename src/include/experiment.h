@@ -154,10 +154,11 @@ class Experiment : public ExperimentBase {
   /**
    * Perform the given action.
    *
+   * \tparam Container type that holds the particles before the action.
    * \param[in] action The action to perform. If it performs, it'll modify
-   *                   the private member particles_
+   *                   the private member particles_.
    * \param[in] particles_before_actions A container with the ParticleData
-   *                 from this time step before any actions were performed
+   *                 from this time step before any actions were performed.
    * \return False if the action is rejected either due to invalidity or
    *         Pauli-blocking, or true if it's accepted and performed.
    */
@@ -254,7 +255,7 @@ class Experiment : public ExperimentBase {
    */
   Modus modus_;
 
-  /// The particles interacting in the experiment.
+  /// Complete particle list
   Particles particles_;
 
   /**
@@ -424,16 +425,28 @@ class Experiment : public ExperimentBase {
   std::unique_ptr<AdaptiveParameters> adaptive_parameters_ = nullptr;
 
   /**
-   *  Total number of interactions for current and for previous timestep.
+   *  Total number of interactions for current timestep.
    *  For timestepless mode the whole run time is considered as one timestep.
    */
-  uint64_t interactions_total_ = 0, previous_interactions_total_ = 0;
+  uint64_t interactions_total_ = 0;
 
   /**
-   *  Total number of wall-crossings for current and for previous timestep.
+   *  Total number of interactions for previous timestep.
    *  For timestepless mode the whole run time is considered as one timestep.
    */
-  uint64_t wall_actions_total_ = 0, previous_wall_actions_total_ = 0;
+  uint64_t previous_interactions_total_ = 0;
+
+  /**
+   *  Total number of wall-crossings for current timestep.
+   *  For timestepless mode the whole run time is considered as one timestep.
+   */
+  uint64_t wall_actions_total_ = 0;
+
+  /**
+   *  Total number of wall-crossings for previous timestep.
+   *  For timestepless mode the whole run time is considered as one timestep.
+   */
+  uint64_t previous_wall_actions_total_ = 0;
 
   /**
    *  Total number of Pauli-blockings for current timestep.
