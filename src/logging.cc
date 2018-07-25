@@ -35,6 +35,16 @@ einhard::Logger<> &retrieve_logger_impl(int id) {
   return global_logger_collection[id];
 }
 
+/**
+ * \internal
+ * Recursively find the longest logger name at compile time.
+ *
+ * Beginning of the recursion.
+ *
+ * \tparam index Recursion index.
+ * \tparam stop Stopping index.
+ * \return Current maximal logger name length.
+ */
 template <int index, int stop = 0>
 constexpr typename std::enable_if<(index == stop), int>::type
 find_longest_logger_name() {
@@ -42,6 +52,18 @@ find_longest_logger_name() {
       std::get<index>(std::declval<LogArea::AreaTuple &>()))>::type;
   return LogAreaTag::textual_length();
 }
+
+/**
+ * \internal
+ * Recursively find the longest logger name at compile time.
+ *
+ * All cases except for the beginning of the recursion.
+ *
+ * \tparam index Recursion index.
+ * \tparam stop Stopping index.
+ * \tparam mid Middle index.
+ * \return Current maximal logger name length.
+ */
 template <int index, int stop = 0, int mid = (index + stop) / 2>
 constexpr typename std::enable_if<(index > stop), int>::type
 find_longest_logger_name() {
