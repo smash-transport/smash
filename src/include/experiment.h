@@ -144,8 +144,9 @@ class Experiment : public ExperimentBase {
 
  private:
   /**
-   * This is called in the beginning of each event and does the initialization
-   * of the system (fill the particles map).
+   * This is called in the beginning of each event. It initializes particles
+   * according to selected modus, resets the clock and saves the initial
+   * conserved quantities for subsequent sanity checks.
    */
   void initialize_new_event();
 
