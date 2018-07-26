@@ -377,8 +377,7 @@ void update_general_lattice(RectangularLattice<T> *lat,
  *            smearing parameters.
  * \param[in] particles the particles vector
  */
-void update_density_lattice(RectangularLattice<DensityOnLattice> *lat,
-                            const LatticeUpdate update,
+void update_density_lattice(RectangularLattice<DensityOnLattice> *lat, const LatticeUpdate update,
                             const DensityType dens_type,
                             const DensityParameters &par,
                             const Particles &particles);
