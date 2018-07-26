@@ -145,7 +145,7 @@ void Particles::reset() {
   dirty_.clear();
 }
 
-std::ostream &operator<<(std::ostream &out, const Particles &p) {
+std::ostream &operator<<(std::ostream &out, const Particles &particles) {
   out << particles.size() << " Particles:\n";
   for (unsigned i = 0; i < particles.data_size_; ++i) {
     const auto &p = particles.data_[i];
