@@ -113,7 +113,7 @@ class ParticleData {
   uint32_t id_process() const { return history_.id_process; }
   /**
    * Get history information
-   * \return particle history struct 
+   * \return particle history struct
    */
   HistoryData get_history() const { return history_; }
   /**

@@ -149,7 +149,7 @@ class TwoBodyDecayStable : public TwoBodyDecay {
 
 /**
  * TwoBodyDecaySemistable represents a decay type with two final-state
- * particles, one of which is stable and the other is unstable. 
+ * particles, one of which is stable and the other is unstable.
  */
 class TwoBodyDecaySemistable : public TwoBodyDecay {
  public:

@@ -57,7 +57,7 @@ class DecayActionsFinder : public ActionFinderInterface {
    * \param[in] search_list All particles at the end of simulation.
    * \param[in] only_res optional parameter that requests that only actions
    *                     regarding resonances are considered (disregarding
-   *                     stable particles) 
+   *                     stable particles)
    * \return List with the found (Decay)Action objects.
    */
   ActionList find_final_actions(const Particles &search_list,
