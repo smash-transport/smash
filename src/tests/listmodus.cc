@@ -120,7 +120,6 @@ TEST(list_from_non_oscar_output) {
   list_conf_str += testoutputpath.native() + "\"\n";
   list_conf_str += "    File_Prefix: \"event\"\n";
   list_conf_str += "    Shift_Id: 0\n";
-  list_conf_str += "    Start_Time: 0.0\n";
   auto config = Configuration(list_conf_str.c_str());
   auto par = Test::default_parameters();
   ListModus list_modus(config, par);
@@ -173,7 +172,6 @@ TEST(multiple_file_non_oscar_output) {
   list_conf_str += testoutputpath.native() + "\"\n";
   list_conf_str += "    File_Prefix: \"event\"\n";
   list_conf_str += "    Shift_Id: 0\n";
-  list_conf_str += "    Start_Time: 0.0\n";
   auto config = Configuration(list_conf_str.c_str());
   auto par = Test::default_parameters();
   ListModus list_modus(config, par);
@@ -245,7 +243,6 @@ TEST(list_from_oscar2013_output) {
   list_conf_str += testoutputpath.native() + "\"\n";
   list_conf_str += "    File_Prefix: \"event\"\n";
   list_conf_str += "    Shift_Id: 0\n";
-  list_conf_str += "    Start_Time: 0.0\n";
   auto config = Configuration(list_conf_str.c_str());
   auto par = Test::default_parameters();
   ListModus list_modus(config, par);
@@ -311,7 +308,6 @@ TEST(multiple_files_one_event) {
   list_conf_str += testoutputpath.native() + "\"\n";
   list_conf_str += "    File_Prefix: \"event\"\n";
   list_conf_str += "    Shift_Id: 0\n";
-  list_conf_str += "    Start_Time: 0.0\n";
   auto config = Configuration(list_conf_str.c_str());
   auto par = Test::default_parameters();
   ListModus list_modus(config, par);
@@ -372,7 +368,6 @@ TEST(multiple_files_multiple_events) {
   list_conf_str += testoutputpath.native() + "\"\n";
   list_conf_str += "    File_Prefix: \"event\"\n";
   list_conf_str += "    Shift_Id: 0\n";
-  list_conf_str += "    Start_Time: 0.0\n";
   auto config = Configuration(list_conf_str.c_str());
   auto par = Test::default_parameters();
   ListModus list_modus(config, par);
@@ -432,7 +427,6 @@ TEST(multiple_events_in_file) {
   list_conf_str += testoutputpath.native() + "\"\n";
   list_conf_str += "    File_Prefix: \"event\"\n";
   list_conf_str += "    Shift_Id: 0\n";
-  list_conf_str += "    Start_Time: 0.0\n";
   auto config = Configuration(list_conf_str.c_str());
   auto par = Test::default_parameters();
   ListModus list_modus(config, par);
@@ -488,7 +482,6 @@ TEST(try_create_particle_func) {
   list_conf_str += testoutputpath.native() + "\"\n";
   list_conf_str += "    File_Prefix: \"event\"\n";
   list_conf_str += "    Shift_Id: 0\n";
-  list_conf_str += "    Start_Time: 0.0\n";
   auto config = Configuration(list_conf_str.c_str());
   auto par = Test::default_parameters();
   ListModus list_modus(config, par);
