@@ -486,7 +486,6 @@ TEST(try_create_particle_func) {
   auto par = Test::default_parameters();
   ListModus list_modus(config, par);
 
-
   Particles particles;
   ParticleList plist_init, plist_fin;
   const int npart = 10;
@@ -497,9 +496,8 @@ TEST(try_create_particle_func) {
     plist_init.push_back(smashon);
     FourVector r = smashon.position(), p = smashon.momentum();
     PdgCode pdg = smashon.pdgcode();
-    list_modus.try_create_particle(particles, pdg,
-                        r.x0(), r.x1(), r.x2(), r.x3(),
-                        m0, p.x0(), p.x1(), p.x2(), p.x3());
+    list_modus.try_create_particle(particles, pdg, r.x0(), r.x1(), r.x2(),
+                                   r.x3(), m0, p.x0(), p.x1(), p.x2(), p.x3());
   }
   plist_fin = particles.copy_to_vector();
   for (int i = 0; i < npart; i++) {
@@ -522,9 +520,9 @@ TEST(try_create_particle_func) {
     plist_init.push_back(smashon);
     FourVector r = smashon.position(), p = smashon.momentum();
     PdgCode pdg = smashon.pdgcode();
-    list_modus.try_create_particle(particles, pdg,
-                        r.x0(), r.x1(), r.x2(), r.x3(),
-                        m0 + 0.1, p.x0(), p.x1(), p.x2(), p.x3());
+    list_modus.try_create_particle(particles, pdg, r.x0(), r.x1(), r.x2(),
+                                   r.x3(), m0 + 0.1, p.x0(), p.x1(), p.x2(),
+                                   p.x3());
   }
   plist_fin = particles.copy_to_vector();
   for (int i = 0; i < npart; i++) {
