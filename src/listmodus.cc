@@ -71,8 +71,7 @@ namespace smash {
  \endverbatim
  *
  * It might for some reason be necessary to not run SMASH starting with the
- * first file. In this case, the file_id can be shifted. Additionally, the
- * start time can be manually adjusted.
+ * first file. In this case, the file_id can be shifted.
  *\verbatim
  Modi:
      List:
