@@ -53,11 +53,6 @@ namespace smash {
  * \key File_Prefix    (string, required):\n
  * Prefix for the external particle lists file.
  *
- * \key Start_Time (double, required):\n
- * Starting time of List calculation. The value provided by user is basically
- * unused. When particles in the input file are at the same time t, they start
- * at time t. When not at the same time they start at the earliest input time.
- *
  * \key Shift_Id (int, required):\n
  * Starting id for file_id_, i.e. the first file which is read.
  *
@@ -82,7 +77,6 @@ namespace smash {
  Modi:
      List:
          Shift_Id: 10
-         Start_Time: 0.0
  \endverbatim
  *
  * \n
@@ -112,8 +106,7 @@ namespace smash {
  */
 
 ListModus::ListModus(Configuration modus_config, const ExperimentParameters &)
-    : start_time_(modus_config.take({"List", "Start_Time"})),
-      shift_id_(modus_config.take({"List", "Shift_Id"})) {
+    : shift_id_(modus_config.take({"List", "Shift_Id"})) {
   std::string fd = modus_config.take({"List", "File_Directory"});
   particle_list_file_directory_ = fd;
 
