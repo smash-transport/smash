@@ -1,0 +1,28 @@
+Logging:
+    default: INFO
+
+General:
+    Modus:         Box
+    Time_Step_Mode: Fixed
+    Delta_Time:    0.1
+    End_Time:      200.0
+    Randomseed:    -1
+    Nevents:       1
+
+Output:
+    Output_Interval:  5.0
+    Particles:
+        Format:          ["Oscar2013"]
+
+Modi:
+    Box:
+        Length: 10.0
+        Temperature: 0.15
+        Initial_Condition: "thermal momenta"
+        Start_Time: 0.0
+        Init_Multiplicities:
+            211:    35
+            111:    35
+            -211:   35
+            2212:   10
+            2112:   10
