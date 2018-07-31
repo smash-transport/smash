@@ -16,6 +16,7 @@
 
 namespace smash {
 
+/// The default logging level is ALL.
 static einhard::LogLevel global_default_loglevel = einhard::ALL;
 
 einhard::LogLevel default_loglevel() { return global_default_loglevel; }
@@ -35,6 +36,16 @@ einhard::Logger<> &retrieve_logger_impl(int id) {
   return global_logger_collection[id];
 }
 
+/**
+ * \internal
+ * Recursively find the longest logger name at compile time.
+ *
+ * Beginning of the recursion.
+ *
+ * \tparam index Recursion index.
+ * \tparam stop Stopping index.
+ * \return Current maximal logger name length.
+ */
 template <int index, int stop = 0>
 constexpr typename std::enable_if<(index == stop), int>::type
 find_longest_logger_name() {
@@ -42,6 +53,18 @@ find_longest_logger_name() {
       std::get<index>(std::declval<LogArea::AreaTuple &>()))>::type;
   return LogAreaTag::textual_length();
 }
+
+/**
+ * \internal
+ * Recursively find the longest logger name at compile time.
+ *
+ * All cases except for the beginning of the recursion.
+ *
+ * \tparam index Recursion index.
+ * \tparam stop Stopping index.
+ * \tparam mid Middle index.
+ * \return Current maximal logger name length.
+ */
 template <int index, int stop = 0, int mid = (index + stop) / 2>
 constexpr typename std::enable_if<(index > stop), int>::type
 find_longest_logger_name() {
@@ -51,9 +74,14 @@ find_longest_logger_name() {
              : find_longest_logger_name<mid, stop>();
 }
 
+/**
+ * \internal
+ * Recurse over the log areas in the LogArea::AreaTuple type. Do nothing
+ * here to end the recursion (see also below).
+ */
 template <std::size_t index, int>
 inline typename std::enable_if<(index == 0)>::type create_all_loggers_impl(
-    Configuration &) {}  // do nothing to end the recursion
+    Configuration &) {}
 
 /**
  * \internal

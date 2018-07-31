@@ -952,8 +952,6 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 /// String representing a horizontal line.
 const std::string hline(80, '-');
 
-/* This method reads the particle type and cross section information
- * and does the initialization of the system (fill the particles map) */
 template <typename Modus>
 void Experiment<Modus>::initialize_new_event() {
   const auto &log = logger<LogArea::Experiment>();

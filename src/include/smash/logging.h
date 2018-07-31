@@ -198,8 +198,10 @@ DECLARE_LOGAREA(25, Pythia);
 DECLARE_LOGAREA(26, GrandcanThermalizer);
 DECLARE_LOGAREA(27, CrossSections);
 
-/// This type collects all existing log areas so they will be created with the
-/// correct log level automatically.
+/**
+ * This type collects all existing log areas so they will be created with the
+ * correct log level automatically.
+ */
 using AreaTuple =
     std::tuple<Main, Experiment, Box, Collider, Sphere, Action, InputParser,
                ParticleType, FindScatter, Clock, DecayModes, Resonances,
@@ -265,10 +267,19 @@ void set_default_loglevel(einhard::LogLevel level);
  */
 template <typename T>
 struct FormattingHelper {
+  /// Value that is being formatted
   const T &value;
+  /// Output width
   const int width;
+  /// Precision that value is being formatted with
   const int precision;
+  /// Unit that is attached at the end of value
   const char *const unit;
+  /**
+   * Nicely formatted output.
+   * \param out Output stream
+   * \param h FormattingHelper with given output parameters.
+   */
   friend std::ostream &operator<<(std::ostream &out,
                                   const FormattingHelper &h) {
     if (h.width > 0) {

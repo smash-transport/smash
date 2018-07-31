@@ -501,7 +501,7 @@ class Integrator2dCuhre {
   int nregions_;
   /// Actual number of integrand evaluations needed.
   int neval_;
-  /** 
+  /**
    * An error flag.
    *
    * 0 if the desired accuracy was reached, -1 if the dimension is out of

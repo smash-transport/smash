@@ -24,12 +24,12 @@
 
 namespace YAML {
 
-  /**
-   * Convert from YAML::Node to SMASH-readable (C++) format and vice versa.
-   *
-   * \tparam T Type of the values (could be any data type that
-   * needs conversion).
-   */
+/**
+ * Convert from YAML::Node to SMASH-readable (C++) format and vice versa.
+ *
+ * \tparam T Type of the values (could be any data type that
+ * needs conversion).
+ */
 template <typename T>
 struct convert {
   /**

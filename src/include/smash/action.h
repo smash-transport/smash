@@ -247,7 +247,7 @@ class Action {
   /**
    * Get the time at which the action is supposed to be performed
    *
-   * \return absolute time in the calculation frame in fm/c 
+   * \return absolute time in the calculation frame in fm/c
    */
   double time_of_execution() const { return time_of_execution_; }
 
@@ -390,7 +390,7 @@ class Action {
 
   /**
    * Remove the sub-threshold processes from the list of sub processes.
-   * 
+   *
    * \tparam Branch Type of the processbranch
    * \param[out] subprocesses list of processes that are possible
    * \param[out] total_weight summed weight of all subprocess (after filtering)
@@ -494,7 +494,7 @@ class Action {
  private:
   /**
    * Get the type of a given particle
-   * 
+   *
    * \param[in] p_out particle of which the type will be returned
    * \return type of given particle
    */

@@ -32,7 +32,7 @@ class ScatterActionPhoton : public ScatterAction {
    * \param[in] in ParticleList of incoming particles.
    * \param[in] time Time relative to underlying hadronic action.
    * \param[in] n_frac_photons Number of photons to produce for each hadronic
-   *                            scattering. 
+   *                            scattering.
    * \param[in] hadronic_cross_section_input Cross-section of
    *                                          underlying hadronic cross-section.
    * \return The constructed object.
@@ -136,7 +136,7 @@ class ScatterActionPhoton : public ScatterAction {
 
   /**
    * Check if particles can undergo an implemented photon process.
-   * 
+   *
    * This function does not check the involved kinematics.
    *
    * \param[in] in ParticleList of incoming particles.
@@ -160,7 +160,7 @@ class ScatterActionPhoton : public ScatterAction {
 
   /**
    * Return ParticleTypePtr of hadron in the out channel,
-   * given the ReactionType. 
+   * given the ReactionType.
    *
    * This function is overloaded since we need the hadron type in different
    * places.
@@ -239,11 +239,11 @@ class ScatterActionPhoton : public ScatterAction {
                             MediatorType mediator = default_mediator_) const;
 
   /**
-   * Find the mass of the participating rho-particle. 
+   * Find the mass of the participating rho-particle.
    *
-   * In case of a rho in the incoming channel it is the mass of the incoming 
+   * In case of a rho in the incoming channel it is the mass of the incoming
    * rho, in case of an rho in the outgoing channel it is the mass sampled in
-   * the constructor. When an rho acts in addition as a mediator, its mass is 
+   * the constructor. When an rho acts in addition as a mediator, its mass is
    * the same as the incoming / outgoing rho. This function returns the alrady
    * sampled mass or the mass of the incoming rho, depending on the process.
    *
