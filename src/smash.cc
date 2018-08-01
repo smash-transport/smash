@@ -72,19 +72,19 @@ void usage(const int rc, const std::string &progname) {
    *     options from the input file (`-i`). Multiple `-c` arguments are
    *     supported. (Later settings may override preceding settings.) This can
    *     be a handy way to test different scenarios from a script.
-   * <tr><td>`-m <modus>` <td>`--modus <modus>`
-   * <td>This is a shortcut for `-c 'General: { Modus: <modus> }'`. Note that
+   * <tr><td>`-m \<modus\>` <td>`--modus \<modus\>`
+   * <td>This is a shortcut for `-c 'General: { Modus: \<modus\> }'`. Note that
    *     `-m` always overrides `-c`.
-   * <tr><td>`-e <time>` <td>`--endtime <time>`
-   * <td>This is a shortcut for `-c 'General: { End_Time: <time> }'`. Note that
+   * <tr><td>`-e \<time\>` <td>`--endtime \<time\>`
+   * <td>This is a shortcut for `-c 'General: { End_Time: \<time\> }'`. Note that
    *     `-e` always overrides `-c`.
-   * <tr><td>`-o <dir>` <td>`--output <dir>`
+   * <tr><td>`-o \<dir\>` <td>`--output \<dir\>`
    * <td>Sets the output directory. The default output directory is
    *     `./data/<runid>`, where `<rundid>` is an automatically incrementing
    *     integer. Note that this might cause races if several instances of SMASH
    *     run in parallel. In that case, make sure to specify a different output
    *     directory for every instance of SMASH.
-   * <tr><td>`-l <dir>` <td>`--list-2-to-n <dir>`
+   * <tr><td>`-l \<dir\>` <td>`--list-2-to-n \<dir\>`
    * <td>Dumps the list of all possible 2->n reactions (n > 1). Note that
    *     resonance decays and formations are NOT dumped. Every particle
    *     available in SMASH is collided against every and reactions with
