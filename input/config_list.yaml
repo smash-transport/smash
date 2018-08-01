@@ -1,0 +1,21 @@
+Logging:
+    default: INFO
+
+General:
+    Modus:         List
+    Time_Step_Mode: Fixed
+    Delta_Time:    0.1
+    End_Time:      50.0
+    Randomseed:    -1
+    Nevents:       10
+
+Output:
+    Output_Interval:  5.0
+    Particles:
+        Format:          ["Oscar2013"]
+
+Modi:
+    List:
+        File_Directory: "../input/"
+        File_Prefix: "example_list"
+        Shift_Id: 0
