@@ -52,13 +52,16 @@ Run SMASH with different input files
 SMASH is installed with example configuration files for the collider, box and
 sphere modus. These configuration files are located in smash/input. By default,
 e.g. by executing ./smash, the simulation is set up by means of the collider
-configuration file, called "config.yaml". The box and sphere configuration files
-are named "config_box.yaml" and "config_sphere.yaml". It is possible to manually
-specify the configuration file, by using the "-i" option, so that e.g.
+configuration file, called "config.yaml". The box, sphere and list configuration
+files are named "config_box.yaml", "config_sphere.yaml" and "config_list.yaml".
+It is possible to manually specify the configuration file, by using the "-i"
+option, so that e.g.
 
     ./smash -i ../input/config_box.yaml
 
-can be used to configure a box simulation with the provided configuration file. 
+can be used to configure a box simulation with the provided configuration file.
+Note, that for the list modus example, the file "example_list0", located in the
+input directory, is read in.
 
 
 Size of the code
