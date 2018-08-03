@@ -3,7 +3,7 @@ Logging:
 
 General:
     Modus:         List
-    Time_Step_Mode: Fixed
+    Time_Step_Mode: None
     Delta_Time:    0.1
     End_Time:      50.0
     Randomseed:    -1
