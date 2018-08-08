@@ -349,9 +349,17 @@ class ParticleData {
   ParticleData(const ParticleType &ptype, int uid, int index)
       : id_(uid), index_(index), type_(&ptype) {}
 
-  /// Return the cross section scaling factor at the time of collision
-  double current_xsec_scaling_factor(double time_until_collision,
-                                     double power) const;
+  /** 
+   * Return the cross section scaling factor at the time of collision
+   * 
+   * \param[in] time_until_collision scaling factor at current time plus 
+   *            this time will be returned.
+   * \return the cross section scaling factor at a specified time.
+   */
+  double current_xsec_scaling_factor(double time_until_collision) const;
+
+  /// Power with which the cross section scaling factor grows in time.
+  static double formation_power_;
 
  private:
   friend class Particles;

@@ -187,9 +187,7 @@ ScatterActionsFinder::ScatterActionsFinder(
       N_tot_(N_tot),
       N_proj_(N_proj),
       string_formation_time_(config.take(
-          {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.)),
-      particle_formation_power_(
-          config.take({"Collision_Term", "Power_Particle_Formation"}, 0.)) {
+          {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.)) {
   if (is_constant_elastic_isotropic()) {
     const auto& log = logger<LogArea::FindScatter>();
     log.info("Constant elastic isotropic cross-section mode:", " using ",
@@ -276,9 +274,9 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData& data_a,
                                    static_cast<double>(testparticles_);
   // Take cross section scaling factors into account
   cross_section_criterion *= data_a.current_xsec_scaling_factor(
-      time_until_collision, particle_formation_power_);
+                                time_until_collision);
   cross_section_criterion *= data_b.current_xsec_scaling_factor(
-      time_until_collision, particle_formation_power_);
+                                time_until_collision);
 
   // distance criterion according to cross_section
   if (distance_squared >= cross_section_criterion) {

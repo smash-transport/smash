@@ -66,10 +66,10 @@ void ParticleData::set_history(int ncoll, uint32_t pid, ProcessType pt,
   }
 }
 
-double ParticleData::current_xsec_scaling_factor(double time_until_collision,
-                                                 double power) const {
+double ParticleData::current_xsec_scaling_factor(
+                            double time_until_collision) const {
   double total_time = position_.x0() + time_until_collision;
-  if (power <= 0.) {
+  if (formation_power_ <= 0.) {
     // use a step function to form particles
     if (total_time < formation_time_) {
       return cross_section_scaling_factor_;
@@ -86,7 +86,7 @@ double ParticleData::current_xsec_scaling_factor(double time_until_collision,
          (1. - cross_section_scaling_factor_) *
              std::pow((total_time - begin_formation_time_) /
                           (formation_time_ - begin_formation_time_),
-                      power);
+                      formation_power_);
 }
 
 std::ostream &operator<<(std::ostream &out, const ParticleData &p) {
@@ -134,5 +134,7 @@ std::ostream &operator<<(std::ostream &out,
   }
   return out << ']';
 }
+
+double ParticleData::formation_power_ = 0.0;
 
 }  // namespace smash

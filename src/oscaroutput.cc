@@ -435,7 +435,7 @@ void OscarOutput<Format, Contents>::write_particledata(
         pos.x0(), pos.x1(), pos.x2(), pos.x3(), data.effective_mass(), mom.x0(),
         mom.x1(), mom.x2(), mom.x3(), data.pdgcode().string().c_str(),
         data.id(), data.type().charge(), h.collisions_per_particle,
-        data.formation_time(), data.cross_section_scaling_factor(),
+        data.formation_time(), data.current_xsec_scaling_factor(0.),
         h.id_process, static_cast<int>(h.process_type), h.time_last_collision,
         h.p1.string().c_str(), h.p2.string().c_str());
   } else {
