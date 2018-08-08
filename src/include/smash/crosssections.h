@@ -101,8 +101,8 @@ class CrossSections {
    * \return The cross section for the process
    * [initial particle a] + [initial particle b] -> resonance.
    */
-  double formation(const ParticleType& type_resonance, double cm_momentum_sqr)
-  const;
+  double formation(const ParticleType& type_resonance,
+                   double cm_momentum_sqr) const;
 
   /**
    * Find all inelastic 2->2 processes for the given scattering.
