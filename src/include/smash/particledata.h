@@ -258,10 +258,15 @@ class ParticleData {
     return initial_xsec_scaling_factor_;
   }
   /**
-   * Set the particle's cross_section_scaling_factor
+   * Set the particle's initial cross_section_scaling_factor
    *
    * All cross sections of this particle are scaled down by this factor until
    * the formation time is over.
+   *
+   * If the particle formation power is set to be positive, this will only be
+   * the initial scaling factor, while the actual scaling factor grows with
+   * time
+   *
    * \param[in] xsec_scal cross section scaling factor
    */
   void set_cross_section_scaling_factor(const double &xsec_scal) {
@@ -430,7 +435,7 @@ class ParticleData {
   double formation_time_ = 0.0;
   /// time when the cross section scaling factor starts to increase to 1
   double begin_formation_time_ = 0.0;
-  /// cross section scaling factor for unformed particles
+  /// Initial cross section scaling factor.
   double initial_xsec_scaling_factor_ = 1.0;
   /// history information
   HistoryData history_;
