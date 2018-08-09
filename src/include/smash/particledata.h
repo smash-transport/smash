@@ -254,8 +254,8 @@ class ParticleData {
    * Get the cross section scaling factor
    * \return particle's crosss section scaling factor
    */
-  const double &cross_section_scaling_factor() const {
-    return cross_section_scaling_factor_;
+  const double &initial_xsec_scaling_factor() const {
+    return initial_xsec_scaling_factor_;
   }
   /**
    * Set the particle's cross_section_scaling_factor
@@ -265,7 +265,7 @@ class ParticleData {
    * \param[in] xsec_scal cross section scaling factor
    */
   void set_cross_section_scaling_factor(const double &xsec_scal) {
-    cross_section_scaling_factor_ = xsec_scal;
+    initial_xsec_scaling_factor_ = xsec_scal;
   }
 
   /**
@@ -376,7 +376,7 @@ class ParticleData {
     dst.momentum_ = momentum_;
     dst.position_ = position_;
     dst.formation_time_ = formation_time_;
-    dst.cross_section_scaling_factor_ = cross_section_scaling_factor_;
+    dst.initial_xsec_scaling_factor_ = initial_xsec_scaling_factor_;
     dst.begin_formation_time_ = begin_formation_time_;
   }
 
@@ -431,7 +431,7 @@ class ParticleData {
   /// time when the cross section scaling factor starts to increase to 1
   double begin_formation_time_ = 0.0;
   /// cross section scaling factor for unformed particles
-  double cross_section_scaling_factor_ = 1.0;
+  double initial_xsec_scaling_factor_ = 1.0;
   /// history information
   HistoryData history_;
 };

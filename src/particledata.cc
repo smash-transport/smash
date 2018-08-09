@@ -72,7 +72,7 @@ double ParticleData::current_xsec_scaling_factor(
   if (formation_power_ <= 0.) {
     // use a step function to form particles
     if (total_time < formation_time_) {
-      return cross_section_scaling_factor_;
+      return initial_xsec_scaling_factor_;
     }
     return 1.;
   }
@@ -80,10 +80,10 @@ double ParticleData::current_xsec_scaling_factor(
     return 1.;
   }
   if (begin_formation_time_ >= total_time) {
-    return cross_section_scaling_factor_;
+    return initial_xsec_scaling_factor_;
   }
-  return cross_section_scaling_factor_ +
-         (1. - cross_section_scaling_factor_) *
+  return initial_xsec_scaling_factor_ +
+         (1. - initial_xsec_scaling_factor_) *
              std::pow((total_time - begin_formation_time_) /
                           (formation_time_ - begin_formation_time_),
                       formation_power_);
@@ -102,7 +102,7 @@ std::ostream &operator<<(std::ostream &out, const ParticleData &p) {
          << ", pos [fm]:" << p.position() << ", mom [GeV]:" << p.momentum()
          << ", formation time [fm]:" << p.formation_time()
          << ", cross section scaling factor:"
-         << p.cross_section_scaling_factor() << "}";
+         << p.current_xsec_scaling_factor(0.) << "}";
 }
 
 std::ostream &operator<<(std::ostream &out, const ParticleList &particle_list) {
