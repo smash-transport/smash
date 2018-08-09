@@ -136,16 +136,15 @@ void ScatterAction::add_all_scatterings(
 }
 
 double ScatterAction::get_total_weight() const {
-  return total_cross_section_ 
-              * incoming_particles_[0].current_xsec_scaling_factor(0.)
-              * incoming_particles_[1].current_xsec_scaling_factor(0.);
+  return total_cross_section_ *
+         incoming_particles_[0].current_xsec_scaling_factor(0.) *
+         incoming_particles_[1].current_xsec_scaling_factor(0.);
 }
 
 double ScatterAction::get_partial_weight() const {
-  return partial_cross_section_
-              * incoming_particles_[0].current_xsec_scaling_factor(0.)
-              * incoming_particles_[1].current_xsec_scaling_factor(0.);
-
+  return partial_cross_section_ *
+         incoming_particles_[0].current_xsec_scaling_factor(0.) *
+         incoming_particles_[1].current_xsec_scaling_factor(0.);
 }
 
 ThreeVector ScatterAction::beta_cm() const {

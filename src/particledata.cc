@@ -67,7 +67,7 @@ void ParticleData::set_history(int ncoll, uint32_t pid, ProcessType pt,
 }
 
 double ParticleData::current_xsec_scaling_factor(
-                            double time_until_collision) const {
+    double time_until_collision) const {
   double total_time = position_.x0() + time_until_collision;
   if (formation_power_ <= 0.) {
     // use a step function to form particles

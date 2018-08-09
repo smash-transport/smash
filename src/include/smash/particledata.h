@@ -349,10 +349,10 @@ class ParticleData {
   ParticleData(const ParticleType &ptype, int uid, int index)
       : id_(uid), index_(index), type_(&ptype) {}
 
-  /** 
+  /**
    * Return the cross section scaling factor at the time of collision
-   * 
-   * \param[in] time_until_collision scaling factor at current time plus 
+   *
+   * \param[in] time_until_collision scaling factor at current time plus
    *            this time will be returned.
    * \return the cross section scaling factor at a specified time.
    */

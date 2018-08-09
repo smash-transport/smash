@@ -334,7 +334,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
              " of the process: NN to NNpi");
   }
   const bool potential_affect_threshold =
-           config.take({"Lattice", "Potentials_Affect_Thresholds"}, false);
+      config.take({"Lattice", "Potentials_Affect_Thresholds"}, false);
   return {{0., dt},
           {0.0, output_dt},
           ntest,
@@ -581,8 +581,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     pauli_blocker_ = make_unique<PauliBlocker>(
         config["Collision_Term"]["Pauli_Blocking"], parameters_);
   }
-  ParticleData::formation_power_ = config.take({"Collision_Term", 
-                        "String_Parameters","Power_Particle_Formation"}, -1.);
+  ParticleData::formation_power_ = config.take(
+      {"Collision_Term", "String_Parameters", "Power_Particle_Formation"}, -1.);
 
   /*!\Userguide
    * \page input_general_ General
@@ -792,8 +792,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * yield useful results. Alternatively, it it possible to use fractional
    * photons. This means that for each produced photon, \f$ N_{\text{Frac}} \f$
    * photons are actually sampled with different kinematic properties so that
-   * more phase space is covered. See \ref input_output_options_ on how to set the
-   * flag.
+   * more phase space is covered. See \ref input_output_options_ on how to set
+   *the flag.
    **/
 
   dens_type_ = config.take({"Output", "Density_Type"}, DensityType::None);
