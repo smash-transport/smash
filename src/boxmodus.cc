@@ -94,6 +94,16 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
  * Strangeness chemical potential \f$ \mu_S \f$ used in case if
  * Use_Thermal_Multiplicities is true to compute thermal densities \f$ n_i \f$.
  *
+ * \note
+ * The box modus is most useful for infinite matter simulations which
+ * rely on thermal and chemical equilibrium, implying detailed balance. This can
+ * however not be conserved if there are 3-body decays (or higher) performed.
+ * To yield useful results applying a SMASH box simulation, it is
+ * therefore necessary to modify the provided default particles.txt and
+ * decaymodes.txt files by removing all 3-body and higher order decays from
+ * the decaymodes file and all corresponding particles that can no longer be
+ * produced from the particles file.
+ *
  * \n
  * Examples: Configuring a Box Simulation
  * --------------

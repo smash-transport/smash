@@ -28,3 +28,6 @@ Modi:
             -211:   35
             2212:   10
             2112:   10
+
+Collision_Term:
+    Elastic_NN_Cutoff_Sqrts: 1.8
