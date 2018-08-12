@@ -254,18 +254,23 @@ class ParticleData {
    * Get the cross section scaling factor
    * \return particle's crosss section scaling factor
    */
-  const double &cross_section_scaling_factor() const {
-    return cross_section_scaling_factor_;
+  const double &initial_xsec_scaling_factor() const {
+    return initial_xsec_scaling_factor_;
   }
   /**
-   * Set the particle's cross_section_scaling_factor
+   * Set the particle's initial cross_section_scaling_factor
    *
    * All cross sections of this particle are scaled down by this factor until
    * the formation time is over.
+   *
+   * If the particle formation power is set to be positive, this will only be
+   * the initial scaling factor, while the actual scaling factor grows with
+   * time
+   *
    * \param[in] xsec_scal cross section scaling factor
    */
   void set_cross_section_scaling_factor(const double &xsec_scal) {
-    cross_section_scaling_factor_ = xsec_scal;
+    initial_xsec_scaling_factor_ = xsec_scal;
   }
 
   /**
@@ -349,10 +354,10 @@ class ParticleData {
   ParticleData(const ParticleType &ptype, int uid, int index)
       : id_(uid), index_(index), type_(&ptype) {}
 
-  /** 
+  /**
    * Return the cross section scaling factor at the time of collision
-   * 
-   * \param[in] time_until_collision scaling factor at current time plus 
+   *
+   * \param[in] time_until_collision scaling factor at current time plus
    *            this time will be returned.
    * \return the cross section scaling factor at a specified time.
    */
@@ -376,7 +381,7 @@ class ParticleData {
     dst.momentum_ = momentum_;
     dst.position_ = position_;
     dst.formation_time_ = formation_time_;
-    dst.cross_section_scaling_factor_ = cross_section_scaling_factor_;
+    dst.initial_xsec_scaling_factor_ = initial_xsec_scaling_factor_;
     dst.begin_formation_time_ = begin_formation_time_;
   }
 
@@ -430,8 +435,8 @@ class ParticleData {
   double formation_time_ = 0.0;
   /// time when the cross section scaling factor starts to increase to 1
   double begin_formation_time_ = 0.0;
-  /// cross section scaling factor for unformed particles
-  double cross_section_scaling_factor_ = 1.0;
+  /// Initial cross section scaling factor.
+  double initial_xsec_scaling_factor_ = 1.0;
   /// history information
   HistoryData history_;
 };

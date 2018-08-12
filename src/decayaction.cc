@@ -195,7 +195,7 @@ void DecayAction::generate_final_state() {
         incoming_particles_[0].begin_formation_time(),
         std::max(time_of_execution_, incoming_particles_[0].formation_time()));
     p.set_cross_section_scaling_factor(
-        incoming_particles_[0].cross_section_scaling_factor());
+        incoming_particles_[0].initial_xsec_scaling_factor());
     log.debug("particle momenta in comp ", p);
   }
 }
