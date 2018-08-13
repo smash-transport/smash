@@ -7,8 +7,8 @@
 
 #include "unittest.h"  // This include has to be first
 
-#include "../include/angles.h"
-#include "../include/fourvector.h"
+#include "../include/smash/angles.h"
+#include "../include/smash/fourvector.h"
 
 using namespace smash;
 

@@ -11,9 +11,9 @@
 
 #include "setup.h"
 
-#include "../include/action.h"
-#include "../include/crosssections.h"
-#include "../include/scatteraction.h"
+#include "../include/smash/action.h"
+#include "../include/smash/crosssections.h"
+#include "../include/smash/scatteraction.h"
 
 using namespace smash;
 

@@ -7,16 +7,16 @@
  *
  */
 
-#include "include/binaryoutputcollisions.h"
+#include "smash/binaryoutputcollisions.h"
 
 #include <string>
 
 #include <boost/filesystem.hpp>
 
-#include "include/action.h"
-#include "include/clock.h"
-#include "include/config.h"
-#include "include/particles.h"
+#include "smash/action.h"
+#include "smash/clock.h"
+#include "smash/config.h"
+#include "smash/particles.h"
 
 namespace smash {
 

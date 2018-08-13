@@ -7,15 +7,15 @@
  *
  */
 
-#include "include/grid.h"
+#include "smash/grid.h"
 
 #include <stdexcept>
 
-#include "include/algorithms.h"
-#include "include/fourvector.h"
-#include "include/logging.h"
-#include "include/particledata.h"
-#include "include/threevector.h"
+#include "smash/algorithms.h"
+#include "smash/fourvector.h"
+#include "smash/logging.h"
+#include "smash/particledata.h"
+#include "smash/threevector.h"
 
 namespace std {
 template <typename T>

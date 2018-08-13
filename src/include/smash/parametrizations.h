@@ -414,10 +414,10 @@ struct pair_hash {
 /**
  * Calculate and store isospin ratios for K N -> K Delta reactions.
  *
- * The ratios are given by the squared Clebsch-Gordan coefficient for the respective
- * reaction, divided by the sum of the squared coefficients of all possible
- * isospin-symmetric reactions. They are used when calculating the corresponding
- * cross sections from the parametrizations of experimental data.
+ * The ratios are given by the squared Clebsch-Gordan coefficient for the
+ * respective reaction, divided by the sum of the squared coefficients of all
+ * possible isospin-symmetric reactions. They are used when calculating the
+ * corresponding cross sections from the parametrizations of experimental data.
  */
 class KaonNucleonRatios {
  private:

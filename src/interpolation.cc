@@ -5,7 +5,7 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#include "include/interpolation.h"
+#include "smash/interpolation.h"
 
 #include <iostream>
 

@@ -7,14 +7,14 @@
  *
  */
 
-#include "include/decayaction.h"
+#include "smash/decayaction.h"
 
-#include "include/action_globals.h"
-#include "include/angles.h"
-#include "include/decaymodes.h"
-#include "include/kinematics.h"
-#include "include/logging.h"
-#include "include/pdgcode.h"
+#include "smash/action_globals.h"
+#include "smash/angles.h"
+#include "smash/decaymodes.h"
+#include "smash/kinematics.h"
+#include "smash/logging.h"
+#include "smash/pdgcode.h"
 
 namespace smash {
 

@@ -7,9 +7,9 @@
  *
  */
 
-#include "include/pauliblocking.h"
-#include "include/constants.h"
-#include "include/logging.h"
+#include "smash/pauliblocking.h"
+#include "smash/constants.h"
+#include "smash/logging.h"
 
 namespace smash {
 

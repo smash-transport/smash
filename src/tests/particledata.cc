@@ -11,7 +11,7 @@
 
 #include "setup.h"
 
-#include "../include/pdgcode.h"
+#include "../include/smash/pdgcode.h"
 
 using namespace smash;
 

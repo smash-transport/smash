@@ -7,7 +7,7 @@
  *
  */
 
-#include "include/listmodus.h"
+#include "smash/listmodus.h"
 
 #include <cmath>
 #include <cstdio>
@@ -22,19 +22,19 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
-#include "include/algorithms.h"
-#include "include/angles.h"
-#include "include/configuration.h"
-#include "include/constants.h"
-#include "include/distributions.h"
-#include "include/experimentparameters.h"
-#include "include/fourvector.h"
-#include "include/inputfunctions.h"
-#include "include/logging.h"
-#include "include/macros.h"
-#include "include/particles.h"
-#include "include/random.h"
-#include "include/threevector.h"
+#include "smash/algorithms.h"
+#include "smash/angles.h"
+#include "smash/configuration.h"
+#include "smash/constants.h"
+#include "smash/distributions.h"
+#include "smash/experimentparameters.h"
+#include "smash/fourvector.h"
+#include "smash/inputfunctions.h"
+#include "smash/logging.h"
+#include "smash/macros.h"
+#include "smash/particles.h"
+#include "smash/random.h"
+#include "smash/threevector.h"
 
 namespace smash {
 
@@ -52,11 +52,6 @@ namespace smash {
  *
  * \key File_Prefix    (string, required):\n
  * Prefix for the external particle lists file.
- *
- * \key Start_Time (double, required):\n
- * Starting time of List calculation. The value provided by user is basically
- * unused. When particles in the input file are at the same time t, they start
- * at time t. When not at the same time they start at the earliest input time.
  *
  * \key Shift_Id (int, required):\n
  * Starting id for file_id_, i.e. the first file which is read.
@@ -76,13 +71,11 @@ namespace smash {
  \endverbatim
  *
  * It might for some reason be necessary to not run SMASH starting with the
- * first file. In this case, the file_id can be shifted. Additionally, the
- * start time can be manually adjusted.
+ * first file. In this case, the file_id can be shifted.
  *\verbatim
  Modi:
      List:
          Shift_Id: 10
-         Start_Time: 0.0
  \endverbatim
  *
  * \n
@@ -112,8 +105,7 @@ namespace smash {
  */
 
 ListModus::ListModus(Configuration modus_config, const ExperimentParameters &)
-    : start_time_(modus_config.take({"List", "Start_Time"})),
-      shift_id_(modus_config.take({"List", "Shift_Id"})) {
+    : shift_id_(modus_config.take({"List", "Shift_Id"})) {
   std::string fd = modus_config.take({"List", "File_Directory"});
   particle_list_file_directory_ = fd;
 

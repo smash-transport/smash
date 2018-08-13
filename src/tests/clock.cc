@@ -9,7 +9,7 @@
 
 #include "unittest.h"  // This include has to be first
 
-#include "../include/clock.h"
+#include "../include/smash/clock.h"
 
 using namespace smash;
 

@@ -260,13 +260,13 @@ class discrete_dist {
    */
   discrete_dist() : distribution({1.0}) {}
 
-  /** Construct from probability vector. 
+  /** Construct from probability vector.
    * \param plist Vector with probabilities such that P(i) = vec[i]
    */
   explicit discrete_dist(const std::vector<T> &plist)
       : distribution(plist.begin(), plist.end()) {}
 
-  /** Construct from probability list. 
+  /** Construct from probability list.
    * \param l Initializer list with probabilities such that P(i) = l[i]
    */
   explicit discrete_dist(std::initializer_list<T> l) : distribution(l) {}
@@ -277,9 +277,9 @@ class discrete_dist {
   void reset_weights(const std::vector<T> &plist) {
     distribution = std::discrete_distribution<>(plist.begin(), plist.end());
   }
-  /** Draw a random number from the discrete distribution. 
-  * \return Sampled value
-  */
+  /** Draw a random number from the discrete distribution.
+   * \return Sampled value
+   */
   int operator()() { return distribution(engine); }
 
  private:

@@ -7,7 +7,7 @@
  *
  */
 
-#include "include/random.h"
+#include "smash/random.h"
 #include <random>
 
 namespace smash {

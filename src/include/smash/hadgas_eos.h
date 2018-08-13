@@ -51,10 +51,15 @@ class EosTable {
    * (e, nb) = (ie*de, inb*dnb) [GeV/fm^4, GeV/fm^3].
    */
   EosTable(double de, double dnb, size_t n_e, size_t n_b);
+  /// Define the data structure for one element of the table.
   struct table_element {
+    /// Pressure
     double p;
+    /// Temperature
     double T;
+    /// Net baryochemical potential
     double mub;
+    /// Net strangeness potential
     double mus;
   };
   /**
@@ -82,9 +87,13 @@ class EosTable {
   size_t index(size_t ie, size_t inb) const { return ie * n_nb_ + inb; }
   /// Storage for the tabulated equation of state
   std::vector<table_element> table_;
+  /// Step in energy density
   double de_;
+  /// Step in net-baryon density
   double dnb_;
+  /// Number of steps in energy density
   size_t n_e_;
+  /// Number of steos in net-baryon density
   size_t n_nb_;
 };
 
@@ -102,6 +111,7 @@ class EosTable {
  */
 class HadronGasEos {
  public:
+  /// Constructor of HadronGasEos
   explicit HadronGasEos(const bool tabulate = false);
   ~HadronGasEos();
 
@@ -209,7 +219,7 @@ class HadronGasEos {
    * \param[in] beta inverse temperature 1/T [1/GeV]
    * \return sampled mass
    */
-  static double sample_mass_thermal(const ParticleType &ptype, double beta);
+  static double sample_mass_thermal(const ParticleType& ptype, double beta);
   /**
    * Compute temperature and chemical potentials given energy-,
    * net baryon-, net strangeness density and an inital approximation.

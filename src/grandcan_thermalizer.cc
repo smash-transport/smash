@@ -5,19 +5,19 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#include "include/grandcan_thermalizer.h"
+#include "smash/grandcan_thermalizer.h"
 
 #include <time.h>
 
-#include "include/angles.h"
-#include "include/bessel_sampler.h"
-#include "include/cxx14compat.h"
-#include "include/distributions.h"
-#include "include/forwarddeclarations.h"
-#include "include/logging.h"
-#include "include/particles.h"
-#include "include/quantumnumbers.h"
-#include "include/random.h"
+#include "smash/angles.h"
+#include "smash/bessel_sampler.h"
+#include "smash/cxx14compat.h"
+#include "smash/distributions.h"
+#include "smash/forwarddeclarations.h"
+#include "smash/logging.h"
+#include "smash/particles.h"
+#include "smash/quantumnumbers.h"
+#include "smash/random.h"
 
 namespace smash {
 

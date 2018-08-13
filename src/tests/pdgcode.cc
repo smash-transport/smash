@@ -9,8 +9,8 @@
 
 #include "unittest.h"  // This include has to be first
 
-#include "../include/pdgcode.h"
-#include "../include/pdgcode_constants.h"
+#include "../include/smash/pdgcode.h"
+#include "../include/smash/pdgcode_constants.h"
 
 using namespace smash;
 

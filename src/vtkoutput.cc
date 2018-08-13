@@ -10,12 +10,12 @@
 #include <fstream>
 #include <memory>
 
-#include "include/clock.h"
-#include "include/config.h"
-#include "include/file.h"
-#include "include/forwarddeclarations.h"
-#include "include/particles.h"
-#include "include/vtkoutput.h"
+#include "smash/clock.h"
+#include "smash/config.h"
+#include "smash/file.h"
+#include "smash/forwarddeclarations.h"
+#include "smash/particles.h"
+#include "smash/vtkoutput.h"
 
 namespace smash {
 

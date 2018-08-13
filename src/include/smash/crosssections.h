@@ -60,7 +60,7 @@ class CrossSections {
       double elastic_parameter, bool two_to_one_switch,
       ReactionsBitSet included_2to2, double low_snn_cut, bool strings_switch,
       bool use_AQM, bool strings_with_probability,
-      NNbarTreatment nnbar_treatment, StringProcess* string_process);
+      NNbarTreatment nnbar_treatment, StringProcess* string_process) const;
 
   /**
    * Determine the elastic cross section for this collision. If elastic_par is
@@ -74,7 +74,7 @@ class CrossSections {
    * \return A ProcessBranch object containing the cross section and
    * final-state IDs.
    */
-  CollisionBranchPtr elastic(double elast_par, bool use_AQM);
+  CollisionBranchPtr elastic(double elast_par, bool use_AQM) const;
 
   /**
    * Find all resonances that can be produced in a 2->1 collision of the two
@@ -88,7 +88,7 @@ class CrossSections {
    * Each element in the list contains the type of the final-state particle
    * and the cross section for that particular process.
    */
-  CollisionBranchList two_to_one();
+  CollisionBranchList two_to_one() const;
 
   /**
    * Return the 2-to-1 resonance production cross section for a given resonance.
@@ -101,7 +101,8 @@ class CrossSections {
    * \return The cross section for the process
    * [initial particle a] + [initial particle b] -> resonance.
    */
-  double formation(const ParticleType& type_resonance, double cm_momentum_sqr);
+  double formation(const ParticleType& type_resonance,
+                   double cm_momentum_sqr) const;
 
   /**
    * Find all inelastic 2->2 processes for the given scattering.
@@ -112,7 +113,7 @@ class CrossSections {
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
    * \return List of all possibe inelastic 2->2 processes.
    */
-  CollisionBranchList two_to_two(ReactionsBitSet included_2to2);
+  CollisionBranchList two_to_two(ReactionsBitSet included_2to2) const;
 
   /**
    * Determine the cross section for string excitations, which is given by the
@@ -136,7 +137,7 @@ class CrossSections {
    */
   CollisionBranchList string_excitation(double total_string_xs,
                                         StringProcess* string_process,
-                                        bool use_AQM);
+                                        bool use_AQM) const;
 
   /**
    * Determine the cross section for NNbar annihilation, which is given by the
@@ -151,7 +152,7 @@ class CrossSections {
    * have been determined.
    * \todo Same assumption made by string_excitation. Resolve.
    */
-  CollisionBranchPtr NNbar_annihilation(const double current_xs);
+  CollisionBranchPtr NNbar_annihilation(const double current_xs) const;
 
   /**
    * Determine the cross section for NNbar creation, which is given by
@@ -160,7 +161,7 @@ class CrossSections {
    * \return Collision Branch with NNbar creation process and its cross
    * section
    */
-  CollisionBranchList NNbar_creation();
+  CollisionBranchList NNbar_creation() const;
 
   /**
    * Determine the parametrized total cross section at high energies
@@ -233,7 +234,7 @@ class CrossSections {
    * \param[in] use_AQM whether AQM is activated
    * \return Elastic cross section
    */
-  double elastic_parametrization(bool use_AQM);
+  double elastic_parametrization(bool use_AQM) const;
 
   /**
    * Determine the (parametrized) elastic cross section for a
@@ -243,7 +244,7 @@ class CrossSections {
    * \throw std::runtime_error
    *        if positive cross section cannot be specified.
    */
-  double nn_el();
+  double nn_el() const;
 
   /**
    * Determine the elastic cross section for a nucleon-pion (Npi) collision.
@@ -255,7 +256,7 @@ class CrossSections {
    * \throw std::runtime_error
    *        if positive cross section cannot be specified.
    */
-  double npi_el();
+  double npi_el() const;
 
   /**
    * Determine the elastic cross section for a nucleon-kaon (NK) collision.
@@ -267,7 +268,7 @@ class CrossSections {
    * \throw std::runtime_error
    *        if positive cross section cannot be specified.
    */
-  double nk_el();
+  double nk_el() const;
 
   /**
    * Find all inelastic 2->2 processes for Baryon-Baryon (BB) Scattering
@@ -275,7 +276,7 @@ class CrossSections {
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
    * \return List of all possible BB reactions with their cross sections
    */
-  CollisionBranchList bb_xx_except_nn(ReactionsBitSet included_2to2);
+  CollisionBranchList bb_xx_except_nn(ReactionsBitSet included_2to2) const;
 
   /**
    * Find all inelastic 2->2 processes for Nucelon-Nucelon Scattering.
@@ -293,7 +294,7 @@ class CrossSections {
    * of the two nucleons. Each element in the list contains the type(s) of the
    * final state particle(s) and the cross section for that particular process.
    */
-  CollisionBranchList nn_xx(ReactionsBitSet included_2to2);
+  CollisionBranchList nn_xx(ReactionsBitSet included_2to2) const;
 
   /**
    * Find all inelastic 2->2 background processes for Nucleon-Kaon (NK)
@@ -301,21 +302,21 @@ class CrossSections {
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
    * \return List of all possible NK reactions with their cross sections
    */
-  CollisionBranchList nk_xx(ReactionsBitSet included_2to2);
+  CollisionBranchList nk_xx(ReactionsBitSet included_2to2) const;
 
   /**
    * Find all inelastic 2->2 processes for Delta-Kaon (DeltaK) Scattering.
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
    * \return List of all possible DeltaK reactions with their cross sections
    * */
-  CollisionBranchList deltak_xx(ReactionsBitSet included_2to2);
+  CollisionBranchList deltak_xx(ReactionsBitSet included_2to2) const;
 
   /**
    * Find all inelastic 2->2 processes for Hyperon-Pion (Ypi) Scattering.
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
    * \return List of all possible Ypi reactions with their cross sections
    */
-  CollisionBranchList ypi_xx(ReactionsBitSet included_2to2);
+  CollisionBranchList ypi_xx(ReactionsBitSet included_2to2) const;
 
   /**
    * Find all inelastic 2->2 processes involving Pion and (anti-) Deuteron
@@ -324,7 +325,7 @@ class CrossSections {
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
    * \return List of all possible dpi reactions with their cross sections
    */
-  CollisionBranchList dpi_xx(ReactionsBitSet included_2to2);
+  CollisionBranchList dpi_xx(ReactionsBitSet included_2to2) const;
 
   /**
    * Find all inelastic 2->2 processes involving Nucleon and (anti-) Deuteron
@@ -333,7 +334,7 @@ class CrossSections {
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
    * \return List of all possible dN reactions with their cross sections
    */
-  CollisionBranchList dn_xx(ReactionsBitSet included_2to2);
+  CollisionBranchList dn_xx(ReactionsBitSet included_2to2) const;
 
   /**
    * Determine the (parametrized) hard non-diffractive string cross section
@@ -356,7 +357,7 @@ class CrossSections {
    * the list contains the types of the final-state particles and the cross
    * section for that particular process.
    */
-  CollisionBranchList bar_bar_to_nuc_nuc(const bool is_anti_particles);
+  CollisionBranchList bar_bar_to_nuc_nuc(const bool is_anti_particles) const;
 
   /**
    * Scattering matrix amplitude squared (divided by 16π) for resonance
@@ -388,7 +389,7 @@ class CrossSections {
   CollisionBranchList find_nn_xsection_from_type(
       const ParticleTypePtrList& type_res_1,
       const ParticleTypePtrList& type_res_2,
-      const IntegrationMethod integrator);
+      const IntegrationMethod integrator) const;
 
   /**
    * Determine the momenta of the incoming particles in the
@@ -402,10 +403,10 @@ class CrossSections {
   }
 
   /// List with data of scattering particles.
-  ParticleList incoming_particles_;
+  const ParticleList incoming_particles_;
 
   /// Total energy in the center-of-mass frame.
-  double sqrt_s_;
+  const double sqrt_s_;
 
   /// Whether incoming particles are a baryon-antibaryon pair
   const bool is_BBbar_pair_;

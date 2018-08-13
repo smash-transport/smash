@@ -13,9 +13,9 @@
 
 #include <typeinfo>
 
-#include "../include/cxx14compat.h"
-#include "../include/decayaction.h"
-#include "../include/decaymodes.h"
+#include "../include/smash/cxx14compat.h"
+#include "../include/smash/decayaction.h"
+#include "../include/smash/decaymodes.h"
 
 using namespace smash;
 

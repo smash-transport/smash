@@ -11,7 +11,7 @@
 
 #include "histogram.h"
 
-#include "../include/random.h"
+#include "../include/smash/random.h"
 
 using namespace smash;
 

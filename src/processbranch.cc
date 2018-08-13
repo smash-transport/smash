@@ -7,11 +7,11 @@
  *
  */
 
-#include "include/processbranch.h"
+#include "smash/processbranch.h"
 
 #include <limits>
 
-#include "include/particledata.h"
+#include "smash/particledata.h"
 
 namespace smash {
 

@@ -11,8 +11,8 @@
 
 #include "setup.h"
 
-#include "../include/angles.h"
-#include "../include/scatteraction.h"
+#include "../include/smash/angles.h"
+#include "../include/smash/scatteraction.h"
 #include "Pythia8/Pythia.h"
 
 using namespace smash;

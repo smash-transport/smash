@@ -7,22 +7,22 @@
  *
  */
 
-#include "include/scatteractionphoton.h"
+#include "smash/scatteractionphoton.h"
 
 #include <algorithm>
 
-#include "include/angles.h"
-#include "include/constants.h"
-#include "include/crosssectionsphoton.h"
-#include "include/cxx14compat.h"
-#include "include/forwarddeclarations.h"
-#include "include/kinematics.h"
-#include "include/outputinterface.h"
-#include "include/particletype.h"
-#include "include/pdgcode.h"
-#include "include/pow.h"
-#include "include/random.h"
-#include "include/tabulation.h"
+#include "smash/angles.h"
+#include "smash/constants.h"
+#include "smash/crosssectionsphoton.h"
+#include "smash/cxx14compat.h"
+#include "smash/forwarddeclarations.h"
+#include "smash/kinematics.h"
+#include "smash/outputinterface.h"
+#include "smash/particletype.h"
+#include "smash/pdgcode.h"
+#include "smash/pow.h"
+#include "smash/random.h"
+#include "smash/tabulation.h"
 
 namespace smash {
 

@@ -4,18 +4,18 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-#include "include/deformednucleus.h"
+#include "smash/deformednucleus.h"
 
 #include <cmath>
 #include <stdexcept>
 
-#include "include/angles.h"
-#include "include/configuration.h"
-#include "include/constants.h"
-#include "include/fourvector.h"
-#include "include/particledata.h"
-#include "include/random.h"
-#include "include/threevector.h"
+#include "smash/angles.h"
+#include "smash/configuration.h"
+#include "smash/constants.h"
+#include "smash/fourvector.h"
+#include "smash/particledata.h"
+#include "smash/random.h"
+#include "smash/threevector.h"
 
 namespace smash {
 

@@ -166,7 +166,7 @@ inline std::unique_ptr<Tabulation> spectral_integral_semistable(
       });
 }
 
-/** 
+/**
  * Create a table for the spectral integral of two resonances.
  *
  * \param[inout] integrate2d Numerical integrator.

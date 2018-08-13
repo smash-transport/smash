@@ -11,7 +11,7 @@
 
 #include "setup.h"
 
-#include "../include/clebschgordan.h"
+#include "../include/smash/clebschgordan.h"
 
 using namespace smash;
 

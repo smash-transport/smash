@@ -11,7 +11,7 @@
 
 #include "setup.h"
 
-#include <include/config.h>
+#include <smash/config.h>
 #include <array>
 #include <cstdio>
 #include <cstring>
@@ -20,13 +20,13 @@
 #include <string>
 #include <vector>
 
-#include "../include/binaryoutputcollisions.h"
-#include "../include/binaryoutputparticles.h"
-#include "../include/clock.h"
-#include "../include/file.h"
-#include "../include/outputinterface.h"
-#include "../include/processbranch.h"
-#include "../include/scatteraction.h"
+#include "../include/smash/binaryoutputcollisions.h"
+#include "../include/smash/binaryoutputparticles.h"
+#include "../include/smash/clock.h"
+#include "../include/smash/file.h"
+#include "../include/smash/outputinterface.h"
+#include "../include/smash/processbranch.h"
+#include "../include/smash/scatteraction.h"
 
 using namespace smash;
 

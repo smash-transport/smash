@@ -9,7 +9,7 @@
 
 #include "unittest.h"  // This include has to be first
 
-#include "../include/threevector.h"
+#include "../include/smash/threevector.h"
 
 using namespace smash;
 

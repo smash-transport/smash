@@ -9,12 +9,12 @@
 
 #include "unittest.h"  // This include has to be first
 
-#include "../include/constants.h"
-#include "../include/deformednucleus.h"
-#include "../include/fourvector.h"
-#include "../include/nucleus.h"
-#include "../include/particledata.h"
-#include "../include/pdgcode.h"
+#include "../include/smash/constants.h"
+#include "../include/smash/deformednucleus.h"
+#include "../include/smash/fourvector.h"
+#include "../include/smash/nucleus.h"
+#include "../include/smash/particledata.h"
+#include "../include/smash/pdgcode.h"
 
 #include <map>
 #include <vector>

@@ -11,8 +11,8 @@
 
 #include "setup.h"
 
-#include "../include/grid.h"
-#include "../include/logging.h"
+#include "../include/smash/grid.h"
+#include "../include/smash/logging.h"
 
 #include <set>
 #include <unordered_set>

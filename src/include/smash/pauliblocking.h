@@ -39,7 +39,7 @@ class PauliBlocker {
    * PauliBlocker constructor. Gets parameters from configuration and
    * experiment. Tabulates necessary integrals.
 
-   * \param[in] conf Configurations from config.yaml. 
+   * \param[in] conf Configurations from config.yaml.
    * \param[in] parameters Parameters given by Experiment.
    * \return The constructed object.
    */
@@ -56,7 +56,7 @@ class PauliBlocker {
    * \param[in] particles List of all current particles.
    * \param[in] pdg PDG number of species for which density to be calculated.
    * \param[in] disregard Do not count particles that should be disregarded.
-   *                       This is intended to avoid counting incoming 
+   *                       This is intended to avoid counting incoming
    *                       particles when the phase-space density for outgoing
    *                       ones is estimated.
    * \return Phase-space density

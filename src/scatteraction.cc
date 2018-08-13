@@ -7,25 +7,25 @@
  *
  */
 
-#include "include/scatteraction.h"
+#include "smash/scatteraction.h"
 
 #include <cmath>
 
 #include "Pythia8/Pythia.h"
 
-#include "include/action_globals.h"
-#include "include/angles.h"
-#include "include/constants.h"
-#include "include/crosssections.h"
-#include "include/cxx14compat.h"
-#include "include/fpenvironment.h"
-#include "include/kinematics.h"
-#include "include/logging.h"
-#include "include/parametrizations.h"
-#include "include/pdgcode.h"
-#include "include/pow.h"
-#include "include/processstring.h"
-#include "include/random.h"
+#include "smash/action_globals.h"
+#include "smash/angles.h"
+#include "smash/constants.h"
+#include "smash/crosssections.h"
+#include "smash/cxx14compat.h"
+#include "smash/fpenvironment.h"
+#include "smash/kinematics.h"
+#include "smash/logging.h"
+#include "smash/parametrizations.h"
+#include "smash/pdgcode.h"
+#include "smash/pow.h"
+#include "smash/processstring.h"
+#include "smash/random.h"
 
 namespace smash {
 

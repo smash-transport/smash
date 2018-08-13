@@ -5,18 +5,18 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#include "include/decaytype.h"
+#include "smash/decaytype.h"
 
 #include <algorithm>
 #include <cmath>
 
-#include "include/constants.h"
-#include "include/cxx14compat.h"
-#include "include/formfactors.h"
-#include "include/integrate.h"
-#include "include/kinematics.h"
-#include "include/pdgcode_constants.h"
-#include "include/pow.h"
+#include "smash/constants.h"
+#include "smash/cxx14compat.h"
+#include "smash/formfactors.h"
+#include "smash/integrate.h"
+#include "smash/kinematics.h"
+#include "smash/pdgcode_constants.h"
+#include "smash/pow.h"
 
 namespace smash {
 

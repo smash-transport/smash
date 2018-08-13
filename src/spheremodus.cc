@@ -15,20 +15,20 @@
 #include <utility>
 #include <vector>
 
-#include "include/algorithms.h"
-#include "include/angles.h"
-#include "include/configuration.h"
-#include "include/constants.h"
-#include "include/distributions.h"
-#include "include/experimentparameters.h"
-#include "include/fourvector.h"
-#include "include/hadgas_eos.h"
-#include "include/logging.h"
-#include "include/macros.h"
-#include "include/particles.h"
-#include "include/random.h"
-#include "include/spheremodus.h"
-#include "include/threevector.h"
+#include "smash/algorithms.h"
+#include "smash/angles.h"
+#include "smash/configuration.h"
+#include "smash/constants.h"
+#include "smash/distributions.h"
+#include "smash/experimentparameters.h"
+#include "smash/fourvector.h"
+#include "smash/hadgas_eos.h"
+#include "smash/logging.h"
+#include "smash/macros.h"
+#include "smash/particles.h"
+#include "smash/random.h"
+#include "smash/spheremodus.h"
+#include "smash/threevector.h"
 
 namespace smash {
 

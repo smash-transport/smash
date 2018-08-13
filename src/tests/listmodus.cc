@@ -15,9 +15,9 @@
 #include <boost/filesystem/fstream.hpp>
 #include <string>
 
-#include "../include/listmodus.h"
-#include "../include/oscaroutput.h"
-#include "../include/particles.h"
+#include "../include/smash/listmodus.h"
+#include "../include/smash/oscaroutput.h"
+#include "../include/smash/particles.h"
 
 using namespace smash;
 static const double accuracy = 5.e-4;
@@ -120,7 +120,6 @@ TEST(list_from_non_oscar_output) {
   list_conf_str += testoutputpath.native() + "\"\n";
   list_conf_str += "    File_Prefix: \"event\"\n";
   list_conf_str += "    Shift_Id: 0\n";
-  list_conf_str += "    Start_Time: 0.0\n";
   auto config = Configuration(list_conf_str.c_str());
   auto par = Test::default_parameters();
   ListModus list_modus(config, par);
@@ -173,7 +172,6 @@ TEST(multiple_file_non_oscar_output) {
   list_conf_str += testoutputpath.native() + "\"\n";
   list_conf_str += "    File_Prefix: \"event\"\n";
   list_conf_str += "    Shift_Id: 0\n";
-  list_conf_str += "    Start_Time: 0.0\n";
   auto config = Configuration(list_conf_str.c_str());
   auto par = Test::default_parameters();
   ListModus list_modus(config, par);
@@ -245,7 +243,6 @@ TEST(list_from_oscar2013_output) {
   list_conf_str += testoutputpath.native() + "\"\n";
   list_conf_str += "    File_Prefix: \"event\"\n";
   list_conf_str += "    Shift_Id: 0\n";
-  list_conf_str += "    Start_Time: 0.0\n";
   auto config = Configuration(list_conf_str.c_str());
   auto par = Test::default_parameters();
   ListModus list_modus(config, par);
@@ -311,7 +308,6 @@ TEST(multiple_files_one_event) {
   list_conf_str += testoutputpath.native() + "\"\n";
   list_conf_str += "    File_Prefix: \"event\"\n";
   list_conf_str += "    Shift_Id: 0\n";
-  list_conf_str += "    Start_Time: 0.0\n";
   auto config = Configuration(list_conf_str.c_str());
   auto par = Test::default_parameters();
   ListModus list_modus(config, par);
@@ -372,7 +368,6 @@ TEST(multiple_files_multiple_events) {
   list_conf_str += testoutputpath.native() + "\"\n";
   list_conf_str += "    File_Prefix: \"event\"\n";
   list_conf_str += "    Shift_Id: 0\n";
-  list_conf_str += "    Start_Time: 0.0\n";
   auto config = Configuration(list_conf_str.c_str());
   auto par = Test::default_parameters();
   ListModus list_modus(config, par);
@@ -432,7 +427,6 @@ TEST(multiple_events_in_file) {
   list_conf_str += testoutputpath.native() + "\"\n";
   list_conf_str += "    File_Prefix: \"event\"\n";
   list_conf_str += "    Shift_Id: 0\n";
-  list_conf_str += "    Start_Time: 0.0\n";
   auto config = Configuration(list_conf_str.c_str());
   auto par = Test::default_parameters();
   ListModus list_modus(config, par);
@@ -488,11 +482,9 @@ TEST(try_create_particle_func) {
   list_conf_str += testoutputpath.native() + "\"\n";
   list_conf_str += "    File_Prefix: \"event\"\n";
   list_conf_str += "    Shift_Id: 0\n";
-  list_conf_str += "    Start_Time: 0.0\n";
   auto config = Configuration(list_conf_str.c_str());
   auto par = Test::default_parameters();
   ListModus list_modus(config, par);
-
 
   Particles particles;
   ParticleList plist_init, plist_fin;
@@ -504,9 +496,8 @@ TEST(try_create_particle_func) {
     plist_init.push_back(smashon);
     FourVector r = smashon.position(), p = smashon.momentum();
     PdgCode pdg = smashon.pdgcode();
-    list_modus.try_create_particle(particles, pdg,
-                        r.x0(), r.x1(), r.x2(), r.x3(),
-                        m0, p.x0(), p.x1(), p.x2(), p.x3());
+    list_modus.try_create_particle(particles, pdg, r.x0(), r.x1(), r.x2(),
+                                   r.x3(), m0, p.x0(), p.x1(), p.x2(), p.x3());
   }
   plist_fin = particles.copy_to_vector();
   for (int i = 0; i < npart; i++) {
@@ -529,9 +520,9 @@ TEST(try_create_particle_func) {
     plist_init.push_back(smashon);
     FourVector r = smashon.position(), p = smashon.momentum();
     PdgCode pdg = smashon.pdgcode();
-    list_modus.try_create_particle(particles, pdg,
-                        r.x0(), r.x1(), r.x2(), r.x3(),
-                        m0 + 0.1, p.x0(), p.x1(), p.x2(), p.x3());
+    list_modus.try_create_particle(particles, pdg, r.x0(), r.x1(), r.x2(),
+                                   r.x3(), m0 + 0.1, p.x0(), p.x1(), p.x2(),
+                                   p.x3());
   }
   plist_fin = particles.copy_to_vector();
   for (int i = 0; i < npart; i++) {

@@ -9,7 +9,7 @@
 
 #include "unittest.h"  // This include has to be first
 
-#include "../include/lowess.h"
+#include "../include/smash/lowess.h"
 
 #include <numeric>
 

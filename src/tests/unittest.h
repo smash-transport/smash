@@ -35,7 +35,7 @@
 #include <typeinfo>
 #include <vector>
 
-#include "../include/fpenvironment.h"
+#include "../include/smash/fpenvironment.h"
 
 #if defined(__GNUC__) && !defined(_WIN32) && defined(_GLIBCXX_OSTREAM)
 #define HACK_OSTREAM_FOR_TTY 1
