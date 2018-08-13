@@ -869,17 +869,6 @@ void StringProcess::restore_constituent(Pythia8::Event &event_intermediate,
   const double energy_init = pSum.e();
   log.debug("  initial total energy [GeV] : ", energy_init);
 
-  for (int ih = 0; ih < 2; ih++) {
-    while (true) {
-      std::array<int, 5> excess_null = {0, 0, 0, 0, 0};
-      bool no_excess_quark = excess_quark[ih] == excess_null;
-      bool no_excess_antiq = excess_antiq[ih] == excess_null;
-      if (no_excess_quark && no_excess_antiq) {
-        break;
-      }
-    }
-  }
-
   bool recovered_quarks = false;
   while (!recovered_quarks) {
     std::array<bool, 2> find_forward = {true, false};
