@@ -59,6 +59,7 @@ StringProcess::StringProcess(double string_tension, double time_formation,
   pythia_sigmatot_.init(&pythia_hadron_->info, pythia_hadron_->settings,
                         &pythia_hadron_->particleData);
 
+  maxint_ = std::numeric_limits<int>::max();
   sqrt2_ = std::sqrt(2.);
 
   for (int imu = 0; imu < 3; imu++) {
@@ -613,16 +614,15 @@ bool StringProcess::next_NDiffHard() {
    * Pythia's random is controlled by SMASH in every single collision.
    * In this way we ensure that the results are reproducible
    * for every event if one knows SMASH random seed. */
-  const int maxint = std::numeric_limits<int>::max();
-  pythia_parton_->rndm.init(random::uniform_int(1, maxint));
+  pythia_parton_->rndm.init(random::uniform_int(1, maxint_));
 
   // Short notation for Pythia event
   Pythia8::Event &event = pythia_hadron_->event;
   log.debug("Pythia hard event created");
-  bool final_state_success = false;
-  while (!final_state_success) {
-    final_state_success = pythia_parton_->next();
-    log.debug("Pythia final state computed, success = ", final_state_success);
+  bool final_state_success = pythia_parton_->next();
+  log.debug("Pythia final state computed, success = ", final_state_success);
+  if (!final_state_success) {
+    return false;
   }
 
   ParticleList new_intermediate_particles;
@@ -656,10 +656,11 @@ bool StringProcess::next_NDiffHard() {
   pythia_hadron_->event[0].p(pSum);
   pythia_hadron_->event[0].m(pSum.mCalc());
 
-  bool hadronize_success = false;
-  while (!hadronize_success) {
-    hadronize_success = pythia_hadron_->forceHadronLevel();
-    log.debug("Pythia hadronized, success = ", hadronize_success);
+  pythia_hadron_->rndm.init(random::uniform_int(1, maxint_));
+  bool hadronize_success = pythia_hadron_->forceHadronLevel();
+  log.debug("Pythia hadronized, success = ", hadronize_success);
+  if (!hadronize_success) {
+    return false;
   }
 
   for (int i = 0; i < event.size(); i++) {
@@ -720,7 +721,7 @@ bool StringProcess::next_NDiffHard() {
     final_state_.push_back(data);
   }
 
-  return final_state_success;
+  return hadronize_success;
 }
 
 // baryon-antibaryon annihilation
@@ -1207,6 +1208,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
   // implement PYTHIA fragmentation
   pythia_hadron_->event[0].p(pSum);
   pythia_hadron_->event[0].m(pSum.mCalc());
+  pythia_hadron_->rndm.init(random::uniform_int(1, maxint_));
   const bool successful_hadronization = pythia_hadron_->forceHadronLevel();
   if (successful_hadronization) {
     for (int ipyth = 0; ipyth < pythia_hadron_->event.size(); ipyth++) {
