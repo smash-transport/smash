@@ -7,14 +7,14 @@
  *
  */
 
-#include "include/particledata.h"
+#include "smash/particledata.h"
 
 #include <iomanip>
 #include <iostream>
 #include <vector>
 
-#include "include/constants.h"
-#include "include/iomanipulators.h"
+#include "smash/constants.h"
+#include "smash/iomanipulators.h"
 
 namespace smash {
 
@@ -64,6 +64,29 @@ void ParticleData::set_history(int ncoll, uint32_t pid, ProcessType pt,
       history_.p2 = 0x0;
       break;
   }
+}
+
+double ParticleData::current_xsec_scaling_factor(double time_until_collision,
+                                                 double power) const {
+  double total_time = position_.x0() + time_until_collision;
+  if (power <= 0.) {
+    // use a step function to form particles
+    if (total_time < formation_time_) {
+      return cross_section_scaling_factor_;
+    }
+    return 1.;
+  }
+  if (formation_time_ <= total_time) {
+    return 1.;
+  }
+  if (begin_formation_time_ >= total_time) {
+    return cross_section_scaling_factor_;
+  }
+  return cross_section_scaling_factor_ +
+         (1. - cross_section_scaling_factor_) *
+             std::pow((total_time - begin_formation_time_) /
+                          (formation_time_ - begin_formation_time_),
+                      power);
 }
 
 std::ostream &operator<<(std::ostream &out, const ParticleData &p) {

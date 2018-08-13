@@ -7,15 +7,15 @@
  *
  */
 
-#include "include/decayactionsfinder.h"
+#include "smash/decayactionsfinder.h"
 
-#include "include/constants.h"
-#include "include/cxx14compat.h"
-#include "include/decayaction.h"
-#include "include/experimentparameters.h"
-#include "include/fourvector.h"
-#include "include/particles.h"
-#include "include/random.h"
+#include "smash/constants.h"
+#include "smash/cxx14compat.h"
+#include "smash/decayaction.h"
+#include "smash/experimentparameters.h"
+#include "smash/fourvector.h"
+#include "smash/particles.h"
+#include "smash/random.h"
 
 namespace smash {
 

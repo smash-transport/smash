@@ -9,7 +9,7 @@
 
 #include "setup.h"
 
-#include "../include/scatteractionphoton.h"
+#include "../include/smash/scatteractionphoton.h"
 
 using namespace smash;
 

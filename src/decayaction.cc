@@ -7,14 +7,14 @@
  *
  */
 
-#include "include/decayaction.h"
+#include "smash/decayaction.h"
 
-#include "include/action_globals.h"
-#include "include/angles.h"
-#include "include/decaymodes.h"
-#include "include/kinematics.h"
-#include "include/logging.h"
-#include "include/pdgcode.h"
+#include "smash/action_globals.h"
+#include "smash/angles.h"
+#include "smash/decaymodes.h"
+#include "smash/kinematics.h"
+#include "smash/logging.h"
+#include "smash/pdgcode.h"
 
 namespace smash {
 
@@ -191,7 +191,8 @@ void DecayAction::generate_final_state() {
   for (auto &p : outgoing_particles_) {
     log.debug("particle momenta in lrf ", p);
     p.boost_momentum(-velocity_CM);
-    p.set_formation_time(
+    p.set_slow_formation_times(
+        incoming_particles_[0].begin_formation_time(),
         std::max(time_of_execution_, incoming_particles_[0].formation_time()));
     p.set_cross_section_scaling_factor(
         incoming_particles_[0].cross_section_scaling_factor());

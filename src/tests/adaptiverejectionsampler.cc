@@ -13,8 +13,8 @@
 #include <iostream>
 #include <map>
 
-#include "../include/adaptiverejectionsampler.h"
-#include "../include/distributions.h"
+#include "../include/smash/adaptiverejectionsampler.h"
+#include "../include/smash/distributions.h"
 
 using namespace smash;
 

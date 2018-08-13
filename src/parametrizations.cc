@@ -7,8 +7,8 @@
  *
  */
 
-#include "include/parametrizations.h"
-#include "include/parametrizations_data.h"
+#include "smash/parametrizations.h"
+#include "smash/parametrizations_data.h"
 
 #include <cmath>
 #include <initializer_list>
@@ -16,14 +16,14 @@
 #include <memory>
 #include <vector>
 
-#include "include/average.h"
-#include "include/clebschgordan.h"
-#include "include/constants.h"
-#include "include/cxx14compat.h"
-#include "include/interpolation.h"
-#include "include/kinematics.h"
-#include "include/lowess.h"
-#include "include/pow.h"
+#include "smash/average.h"
+#include "smash/clebschgordan.h"
+#include "smash/constants.h"
+#include "smash/cxx14compat.h"
+#include "smash/interpolation.h"
+#include "smash/kinematics.h"
+#include "smash/lowess.h"
+#include "smash/pow.h"
 
 namespace smash {
 
@@ -100,12 +100,11 @@ double pipi_string_hard(double mandelstam_s) {
   return xs_string_hard(mandelstam_s, 0.013, 2.3, 4.7);
 }
 
-/** pi+ p elastic cross section parametrization, PDG data.
+/* pi+ p elastic cross section parametrization, PDG data.
  *
  * The PDG data is smoothed using the LOWESS algorithm. If more than one
  * cross section was given for one p_lab value, the corresponding cross sections
- * are averaged.
- */
+ * are averaged. */
 static double piplusp_elastic_pdg(double mandelstam_s) {
   if (piplusp_elastic_interpolation == nullptr) {
     std::vector<double> x = PIPLUSP_ELASTIC_P_LAB;
@@ -160,12 +159,11 @@ double piplusp_elastic(double mandelstam_s) {
   return sigma;
 }
 
-/** pi- p elastic cross section parametrization, PDG data.
+/* pi- p elastic cross section parametrization, PDG data.
  *
  * The PDG data is smoothed using the LOWESS algorithm. If more than one
  * cross section was given for one p_lab value, the corresponding cross sections
- * are averaged.
- */
+ * are averaged. */
 static double piminusp_elastic_pdg(double mandelstam_s) {
   if (piminusp_elastic_interpolation == nullptr) {
     std::vector<double> x = PIMINUSP_ELASTIC_P_LAB;
@@ -192,11 +190,11 @@ double piminusp_elastic(double mandelstam_s) {
   } else {
     sigma = piminusp_elastic_pdg(mandelstam_s);
   }
-  // Tune down the elastic cross section when sqrt s is between 1.8 GeV
-  // and 1.97 GeV so that the total cross section can fit the data. The
-  // scaling factor is chosen so that the it's equal to one and its
-  // derivate vanishes at the both ends. The minimum scaling factor in this
-  // region is 0.88-0.12=0.76.
+  /* Tune down the elastic cross section when sqrt s is between 1.8 GeV
+   * and 1.97 GeV so that the total cross section can fit the data. The
+   * scaling factor is chosen so that the it's equal to one and its
+   * derivate vanishes at the both ends. The minimum scaling factor in this
+   * region is 0.88-0.12=0.76. */
   if (mandelstam_s > 3.24 && mandelstam_s < 3.8809) {
     sigma *= (0.12 * cos(2 * M_PI * (sqrt(mandelstam_s) - 1.8) / (1.97 - 1.8)) +
               0.88);
@@ -360,12 +358,11 @@ double kplusn_k0p(double mandelstam_s) {
   return 0.25 * kplusp_elastic_background(mandelstam_s);
 }
 
-/** K- p elastic cross section parametrization, PDG data.
+/* K- p elastic cross section parametrization, PDG data.
  *
  * The PDG data is smoothed using the LOWESS algorithm. If more than one
  * cross section was given for one p_lab value, the corresponding cross sections
- * are averaged.
- */
+ * are averaged. */
 static double kminusp_elastic_pdg(double mandelstam_s) {
   if (kminusp_elastic_interpolation == nullptr) {
     std::vector<double> x = KMINUSP_ELASTIC_P_LAB;
@@ -385,11 +382,11 @@ double kminusp_elastic_background(double mandelstam_s) {
   const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
   double sigma;
   if (std::sqrt(mandelstam_s) < 1.68) {
-    // The parametrization here also works for anti-K0 n, Lambda pi0,
-    // Sigma+ pi-, Sigma- pi+, Sigma0 pi0 with different parameters a0, a1, a2.
-    //
-    // The values of the parameters are *not* taken from the source above,
-    // they come from a fit to PDG data.
+    /* The parametrization here also works for anti-K0 n, Lambda pi0,
+     * Sigma+ pi-, Sigma- pi+, Sigma0 pi0 with different parameters a0, a1, a2.
+     *
+     * The values of the parameters are *not* taken from the source above,
+     * they come from a fit to PDG data. */
     constexpr double a0 = 186.03567644;  // mb GeV^2
     constexpr double a1 = 0.22002795;    // Gev
     constexpr double a2 = 0.64907116;
@@ -485,7 +482,7 @@ double kplusn_inelastic_background(double mandelstam_s) {
  *
  * See the documentation of `KaonNucleonRatios` for details.
  *
- * \param[inout] ratios An empty map where the ratios for K N -> K Delta
+ * \param[in] ratios An empty map where the ratios for K N -> K Delta
  *                      reactions are stored.
  */
 static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>, double,
@@ -499,8 +496,8 @@ static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>, double,
   const auto& type_Delta_z = ParticleType::find(pdg::Delta_z);
   const auto& type_Delta_m = ParticleType::find(pdg::Delta_m);
 
-  /// Store the isospin ratio of the given reaction relative to all other
-  /// possible isospin-symmetric reactions.
+  /* Store the isospin ratio of the given reaction relative to all other
+   * possible isospin-symmetric reactions. */
   auto add_to_ratios = [&](const ParticleType& a, const ParticleType& b,
                            const ParticleType& c, const ParticleType& d,
                            double weight_numerator, double weight_other) {
@@ -512,10 +509,11 @@ static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>, double,
     ratios[key] = ratio;
   };
 
-  // All inelastic channels are K N -> K Delta -> K pi N or charge exchange,
-  // with identical cross section, weighted by the isospin factor.
-  //
-  // For charge exchange, the isospin factors are 1, so they are excluded here.
+  /* All inelastic channels are K N -> K Delta -> K pi N or charge exchange,
+   * with identical cross section, weighted by the isospin factor.
+   *
+   * For charge exchange, the isospin factors are 1,
+   * so they are excluded here. */
   {
     const auto weight1 = isospin_clebsch_gordan_sqr_2to2(
         type_p, type_K_p, type_K_z, type_Delta_pp);
@@ -534,8 +532,8 @@ static void initialize(std::unordered_map<std::pair<uint64_t, uint64_t>, double,
     add_to_ratios(type_n, type_K_p, type_K_z, type_Delta_p, weight1, weight2);
     add_to_ratios(type_n, type_K_p, type_K_p, type_Delta_z, weight2, weight1);
   }
-  // K+ and K0 have the same mass and spin, their cross sections are assumed to
-  // only differ in isospin factors.
+  /* K+ and K0 have the same mass and spin, their cross sections are assumed to
+   * only differ in isospin factors. */
   {
     const auto weight1 = isospin_clebsch_gordan_sqr_2to2(
         type_p, type_K_z, type_K_z, type_Delta_p);

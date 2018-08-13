@@ -11,7 +11,7 @@
 
 #include "setup.h"
 
-#include "../include/integrate.h"
+#include "../include/smash/integrate.h"
 
 using namespace smash;
 

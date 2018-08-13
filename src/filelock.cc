@@ -7,7 +7,7 @@
  *
  */
 
-#include "include/filelock.h"
+#include "smash/filelock.h"
 
 #include <fcntl.h>
 #include <sys/stat.h>

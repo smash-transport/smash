@@ -11,8 +11,8 @@
 
 #include "setup.h"
 
-#include "../include/scatteraction.h"
-#include "../include/scatteractionsfinder.h"
+#include "../include/smash/scatteraction.h"
+#include "../include/smash/scatteractionsfinder.h"
 
 using namespace smash;
 using smash::Test::Momentum;

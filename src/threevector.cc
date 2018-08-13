@@ -7,9 +7,9 @@
  *
  */
 
-#include "include/threevector.h"
+#include "smash/threevector.h"
 
-#include "include/iomanipulators.h"
+#include "smash/iomanipulators.h"
 
 namespace smash {
 

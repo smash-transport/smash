@@ -11,8 +11,8 @@
 
 #include "setup.h"
 
-#include "../include/clebschgordan.h"
-#include "../include/parametrizations.h"
+#include "../include/smash/clebschgordan.h"
+#include "../include/smash/parametrizations.h"
 
 using namespace smash;
 

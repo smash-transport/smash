@@ -9,7 +9,7 @@
 
 #include "unittest.h"  // This include has to be first
 
-#include "../include/average.h"
+#include "../include/smash/average.h"
 
 using namespace smash;
 

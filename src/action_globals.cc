@@ -7,8 +7,8 @@
  *
  */
 
-#include "include/lattice.h"
-#include "include/potentials.h"
+#include "smash/lattice.h"
+#include "smash/potentials.h"
 
 namespace smash {
 

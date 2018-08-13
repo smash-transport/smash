@@ -7,12 +7,12 @@
  *
  */
 
-#include "include/crosssectionsphoton.h"
+#include "smash/crosssectionsphoton.h"
 #include <memory>
-#include "include/constants.h"
-#include "include/logging.h"
-#include "include/particletype.h"
-#include "include/pdgcode.h"
+#include "smash/constants.h"
+#include "smash/logging.h"
+#include "smash/particletype.h"
+#include "smash/pdgcode.h"
 
 namespace {
 

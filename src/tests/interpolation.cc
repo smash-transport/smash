@@ -9,7 +9,7 @@
 
 #include "unittest.h"  // This include has to be first
 
-#include "../include/interpolation.h"
+#include "../include/smash/interpolation.h"
 
 #include <vector>
 

@@ -7,16 +7,16 @@
  *
  */
 
-#include "include/binaryoutputcollisions.h"
+#include "smash/binaryoutputcollisions.h"
 
 #include <string>
 
 #include <boost/filesystem.hpp>
 
-#include "include/action.h"
-#include "include/clock.h"
-#include "include/config.h"
-#include "include/particles.h"
+#include "smash/action.h"
+#include "smash/clock.h"
+#include "smash/config.h"
+#include "smash/particles.h"
 
 namespace smash {
 
@@ -36,8 +36,13 @@ BinaryOutputCollisions::BinaryOutputCollisions(const bf::path &path,
  * Written to \c collisions_binary.bin file. Contains interactions
  * (collisions, decays, box wall crossings) and optionally initial
  * and final configuration. Interactions are written in comp. frame
- * time-ordered fashion, in 'i' blocks. Initial and final states
- * are written as 'p' blocks. For options of this output see
+ * time-ordered fashion, in 'i' blocks, which includes the informations
+ * of the incoming and the outgoing particles of each reaction written
+ * in the 'incoming' and 'outgoing' blocks respectively.
+ * Initial and final states are written as 'p' blocks. The process IDs
+ * indicating the types of the reaction, such as resonance decay,
+ * elastic scattering, soft string process, hard string process, etc.,
+ * are written in the 'process_type' blocks. For options of this output see
  * \ref output_content_specific_options_ "content-specific output options".
  *
  * See also \ref collisions_output_in_box_modus_.

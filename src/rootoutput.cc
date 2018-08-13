@@ -7,17 +7,17 @@
  *
  */
 
-#include "include/rootoutput.h"
+#include "smash/rootoutput.h"
 #include "TFile.h"
 #include "TTree.h"
-#include "include/action.h"
-#include "include/clock.h"
-#include "include/forwarddeclarations.h"
-#include "include/particles.h"
+#include "smash/action.h"
+#include "smash/clock.h"
+#include "smash/forwarddeclarations.h"
+#include "smash/particles.h"
 
 namespace smash {
 
-/**\Userguide
+/*!\Userguide
  * \page format_root ROOT format
  * SMASH ROOT output has the same functionality as OSCAR output, but ROOT
  * files are faster to read and write and they need less disk space for the
@@ -56,7 +56,7 @@ namespace smash {
  *
  * \li \c ev is event number
  * \li \c tcounter is number of output block in a given event in terms of
- *OSCAR
+ * OSCAR
  * \li \c npart is number of particles in the block
  * \li \c impact_b is the impact parameter of the event
  * \li \c pdgcode is PDG id array
@@ -75,7 +75,7 @@ namespace smash {
  * not supported.
  *
  * See also \ref collisions_output_in_box_modus_.
- **/
+ */
 RootOutput::RootOutput(const bf::path &path, const std::string &name,
                        const OutputParameters &out_par)
     : OutputInterface(name),
@@ -246,10 +246,10 @@ void RootOutput::collisions_to_tree(const ParticleList &incoming,
 
   int i = 0;
 
-  // It is assumed that nin + nout < max_buffer_size_
-  // This is true for any possible reaction for current buffer size: 10000
-  // But if one wants initial/final particles written to collisions
-  // then implementation should be updated.
+  /* It is assumed that nin + nout < max_buffer_size_
+   * This is true for any possible reaction for current buffer size: 10000
+   * But if one wants initial/final particles written to collisions
+   * then implementation should be updated. */
 
   for (const auto &p : incoming) {
     t[i] = p.position().x0();

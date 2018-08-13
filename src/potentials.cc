@@ -7,10 +7,10 @@
  *
  */
 
-#include "include/potentials.h"
+#include "smash/potentials.h"
 
-#include "include/constants.h"
-#include "include/density.h"
+#include "smash/constants.h"
+#include "smash/density.h"
 
 namespace smash {
 

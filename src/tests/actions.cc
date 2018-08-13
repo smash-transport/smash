@@ -13,8 +13,8 @@
 
 #include <algorithm>
 
-#include "../include/actions.h"
-#include "../include/decayaction.h"
+#include "../include/smash/actions.h"
+#include "../include/smash/decayaction.h"
 
 using namespace smash;
 

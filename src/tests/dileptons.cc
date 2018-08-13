@@ -9,7 +9,7 @@
 
 #include "setup.h"
 
-#include "../include/decayactiondilepton.h"
+#include "../include/smash/decayactiondilepton.h"
 
 using namespace smash;
 

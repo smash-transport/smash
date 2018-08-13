@@ -9,9 +9,9 @@
 
 #include "unittest.h"  // This include has to be first
 
-#include "../include/configuration.h"
-#include "../include/logging.h"
-#include "../include/particletype.h"
+#include "../include/smash/configuration.h"
+#include "../include/smash/logging.h"
+#include "../include/smash/particletype.h"
 
 using namespace smash;
 

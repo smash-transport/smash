@@ -7,7 +7,7 @@
 
 #include <istream>
 
-#include "include/pdgcode.h"
+#include "smash/pdgcode.h"
 
 namespace smash {
 

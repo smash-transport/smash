@@ -7,31 +7,31 @@
  *
  */
 
-#include "include/experiment.h"
+#include "smash/experiment.h"
 
 #include <cstdint>
 
-#include "include/actions.h"
-#include "include/boxmodus.h"
-#include "include/collidermodus.h"
-#include "include/cxx14compat.h"
-#include "include/decayactionsfinder.h"
-#include "include/decayactionsfinderdilepton.h"
-#include "include/fourvector.h"
-#include "include/listmodus.h"
-#include "include/scatteractionphoton.h"
-#include "include/scatteractionsfinder.h"
-#include "include/spheremodus.h"
+#include "smash/actions.h"
+#include "smash/boxmodus.h"
+#include "smash/collidermodus.h"
+#include "smash/cxx14compat.h"
+#include "smash/decayactionsfinder.h"
+#include "smash/decayactionsfinderdilepton.h"
+#include "smash/fourvector.h"
+#include "smash/listmodus.h"
+#include "smash/scatteractionphoton.h"
+#include "smash/scatteractionsfinder.h"
+#include "smash/spheremodus.h"
 // Output
-#include "include/binaryoutputcollisions.h"
-#include "include/binaryoutputparticles.h"
-#include "include/oscaroutput.h"
-#include "include/thermodynamicoutput.h"
+#include "smash/binaryoutputcollisions.h"
+#include "smash/binaryoutputparticles.h"
+#include "smash/oscaroutput.h"
+#include "smash/thermodynamicoutput.h"
 #ifdef SMASH_USE_ROOT
-#include "include/rootoutput.h"
+#include "smash/rootoutput.h"
 #endif
-#include "include/vtkoutput.h"
-#include "include/wallcrossingaction.h"
+#include "smash/vtkoutput.h"
+#include "smash/wallcrossingaction.h"
 
 namespace std {
 /**
@@ -952,8 +952,6 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 /// String representing a horizontal line.
 const std::string hline(80, '-');
 
-/* This method reads the particle type and cross section information
- * and does the initialization of the system (fill the particles map) */
 template <typename Modus>
 void Experiment<Modus>::initialize_new_event() {
   const auto &log = logger<LogArea::Experiment>();
@@ -1361,7 +1359,6 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
     if (!performed) {
       continue;
     }
-    const auto particles_before_actions = particles_.copy_to_vector();
 
     /* (3) Update actions for newly-produced particles. */
 

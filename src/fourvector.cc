@@ -7,9 +7,9 @@
 #include <cmath>
 #include <iostream>
 
-#include "include/fourvector.h"
-#include "include/iomanipulators.h"
-#include "include/numerics.h"
+#include "smash/fourvector.h"
+#include "smash/iomanipulators.h"
+#include "smash/numerics.h"
 
 namespace smash {
 

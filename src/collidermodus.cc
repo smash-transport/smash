@@ -5,7 +5,7 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#include "include/collidermodus.h"
+#include "smash/collidermodus.h"
 
 #include <algorithm>
 #include <cmath>
@@ -16,18 +16,18 @@
 #include <tuple>
 #include <utility>
 
-#include "include/angles.h"
-#include "include/configuration.h"
-#include "include/cxx14compat.h"
-#include "include/experimentparameters.h"
-#include "include/fourvector.h"
-#include "include/interpolation.h"
-#include "include/kinematics.h"
-#include "include/logging.h"
-#include "include/numerics.h"
-#include "include/particles.h"
-#include "include/pdgcode.h"
-#include "include/random.h"
+#include "smash/angles.h"
+#include "smash/configuration.h"
+#include "smash/cxx14compat.h"
+#include "smash/experimentparameters.h"
+#include "smash/fourvector.h"
+#include "smash/interpolation.h"
+#include "smash/kinematics.h"
+#include "smash/logging.h"
+#include "smash/numerics.h"
+#include "smash/particles.h"
+#include "smash/pdgcode.h"
+#include "smash/random.h"
 
 namespace smash {
 

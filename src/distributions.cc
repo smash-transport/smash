@@ -6,16 +6,16 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
-#include "include/distributions.h"
+#include "smash/distributions.h"
 
 #include <gsl/gsl_sf_bessel.h>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
 
-#include "include/constants.h"
-#include "include/logging.h"
-#include "include/random.h"
+#include "smash/constants.h"
+#include "smash/logging.h"
+#include "smash/random.h"
 
 namespace smash {
 

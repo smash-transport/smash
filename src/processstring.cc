@@ -9,11 +9,11 @@
 
 #include <array>
 
-#include "include/angles.h"
-#include "include/kinematics.h"
-#include "include/logging.h"
-#include "include/processstring.h"
-#include "include/random.h"
+#include "smash/angles.h"
+#include "smash/kinematics.h"
+#include "smash/logging.h"
+#include "smash/processstring.h"
+#include "smash/random.h"
 
 namespace smash {
 
@@ -22,7 +22,8 @@ StringProcess::StringProcess(double string_tension, double time_formation,
                              double quark_alpha, double quark_beta,
                              double strange_supp, double diquark_supp,
                              double sigma_perp, double stringz_a,
-                             double stringz_b, double string_sigma_T)
+                             double stringz_b, double string_sigma_T,
+                             double factor_t_form, bool use_yoyo_model)
     : pmin_gluon_lightcone_(gluon_pmin),
       pow_fgluon_beta_(gluon_beta),
       pow_fquark_alpha_(quark_alpha),
@@ -33,7 +34,9 @@ StringProcess::StringProcess(double string_tension, double time_formation,
       kappa_tension_string_(string_tension),
       additional_xsec_supp_(0.7),
       time_formation_const_(time_formation),
-      time_collision_(0.) {
+      soft_t_form_(factor_t_form),
+      time_collision_(0.),
+      use_yoyo_model_(use_yoyo_model) {
   // setup and initialize pythia for hard string process
   pythia_parton_ = make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
   /* select only non-diffractive events
@@ -218,20 +221,29 @@ int StringProcess::append_final_state(ParticleList &intermediate_particles,
   /* compute the formation times of hadrons
    * from the lightcone coordinates of q-qbar formation vertices. */
   for (int i = 0; i < nfrag; i++) {
-    // set the formation time and position in the rest frame of string
-    double t_prod = (xvertex_pos[i] + xvertex_neg[i + 1]) / sqrt2_;
-    FourVector fragment_position = FourVector(
-        t_prod, evecLong * (xvertex_pos[i] - xvertex_neg[i + 1]) / sqrt2_);
-    /* boost formation vertex into the center of mass frame
-     * and then into the lab frame */
-    fragment_position = fragment_position.LorentzBoost(-vstring);
-    fragment_position = fragment_position.LorentzBoost(-vcomAB_);
-    t_prod = fragment_position.x0();
-    intermediate_particles[i].set_formation_time(time_collision_ + t_prod);
     // boost 4-momentum into the center of mass frame
     FourVector momentum =
         intermediate_particles[i].momentum().LorentzBoost(-vstring);
     intermediate_particles[i].set_4momentum(momentum);
+
+    if (use_yoyo_model_) {
+      // set the formation time and position in the rest frame of string
+      double t_prod = (xvertex_pos[i] + xvertex_neg[i + 1]) / sqrt2_;
+      FourVector fragment_position = FourVector(
+          t_prod, evecLong * (xvertex_pos[i] - xvertex_neg[i + 1]) / sqrt2_);
+      /* boost formation vertex into the center of mass frame
+       * and then into the lab frame */
+      fragment_position = fragment_position.LorentzBoost(-vstring);
+      fragment_position = fragment_position.LorentzBoost(-vcomAB_);
+      intermediate_particles[i].set_formation_time(
+          soft_t_form_ * fragment_position.x0() + time_collision_);
+    } else {
+      ThreeVector v_calc =
+          new_particle.momentum().LorentzBoost(-vcomAB_).velocity();
+      double gamma_factor = 1.0 / std::sqrt(1 - (v_calc).sqr());
+      intermediate_particles[i].set_formation_time(
+          time_formation_const_ * gamma_factor + time_collision_);
+    }
 
     final_state_.push_back(intermediate_particles[i]);
   }
@@ -558,9 +570,9 @@ bool StringProcess::next_NDiffHard() {
   std::array<bool, 2> accepted_by_pythia;
   for (int i = 0; i < 2; i++) {
     int pdgid = PDGcodes_[i].get_decimal();
-    accepted_by_pythia[i] = pdgid == 2212 || pdgid == -2212 ||
-                            pdgid == 2112 || pdgid == -2112 ||
-                            pdgid == 211 || pdgid == 111 || pdgid == -211;
+    accepted_by_pythia[i] = pdgid == 2212 || pdgid == -2212 || pdgid == 2112 ||
+                            pdgid == -2112 || pdgid == 211 || pdgid == 111 ||
+                            pdgid == -211;
   }
   if (!accepted_by_pythia[0] || !accepted_by_pythia[1]) {
     for (int i = 0; i < 2; i++) {
@@ -696,8 +708,9 @@ bool StringProcess::next_NDiffHard() {
     /* Set formation time: actual time of collision + time to form the
      * particle */
     double gamma_factor = 1.0 / std::sqrt(1 - (v_calc).sqr());
-    data.set_formation_time(time_formation_const_ * gamma_factor +
-                            time_collision_);
+    data.set_slow_formation_times(
+        time_collision_,
+        time_formation_const_ * gamma_factor + time_collision_);
     final_state_.push_back(data);
   }
 
