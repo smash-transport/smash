@@ -843,8 +843,14 @@ void StringProcess::replace_constituent(Pythia8::Particle &particle,
     if (std::abs(pdgid[0]) < std::abs(pdgid[1])) {
       std::swap(pdgid[0], pdgid[1]);
     }
-    pdgid_new = std::abs(pdgid[0]) * 1000 + std::abs(pdgid[1]) * 100 +
-                spin_deg;
+
+    pdgid_new = std::abs(pdgid[0]) * 1000 + std::abs(pdgid[1]) * 100;
+    if (std::abs(pdgid[0]) == std::abs(pdgid[1])) {
+      pdgid_new += 3;
+    } else {
+      pdgid_new += spin_deg;
+    }
+
     if (particle.id() < 0) {
       pdgid_new *= -1;
     }
