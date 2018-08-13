@@ -240,7 +240,7 @@ int StringProcess::append_final_state(ParticleList &intermediate_particles,
           soft_t_form_ * fragment_position.x0() + time_collision_);
     } else {
       ThreeVector v_calc =
-          new_particle.momentum().LorentzBoost(-vcomAB_).velocity();
+          momentum.LorentzBoost(-vcomAB_).velocity();
       double gamma_factor = 1.0 / std::sqrt(1 - (v_calc).sqr());
       intermediate_particles[i].set_formation_time(
           time_formation_const_ * gamma_factor + time_collision_);
