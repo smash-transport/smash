@@ -410,11 +410,39 @@ class StringProcess {
    */
   bool next_BBbarAnn();
 
+  /**
+   * Compare the valence quark contents of actual and mapped hadrons and
+   * evaluate how many actual hadron has more constituents than mapped one.
+   * \param[in] pdg_actual PDG code of actual incoming particle.
+   * \param[in] pdg_mapped PDG code of mapped particles used in PYTHIA
+   *            event generation.
+   * \param[out] excess_quark excess of quarks.
+   * \param[out] excess_antiq excess of anti-quarks.
+   */
   static void find_excess_constituent(PdgCode &pdg_actual, PdgCode &pdg_mapped,
                                       std::array<int, 5> &excess_quark,
                                       std::array<int, 5> &excess_antiq);
+  /**
+   * Convert a partonic PYTHIA partice into the desired species
+   * according to the excess of constituents.
+   * \param[out] particle PYTHIA particle object to be converted.
+   * \param[out] excess_constituent excess in the number of quark constituents.
+   *             If the particle has positive (negative) quark number,
+   *             excess of quarks (anti-quarks) should be used.
+   */
   void replace_constituent(Pythia8::Particle &particle,
                            std::array<int, 5> &excess_constituent);
+  /**
+   * Take the intermediate partonic state from PYTHIA event with mapped hadrons
+   * and convert constituents into the desired ones according to the excess of
+   * quarks and anti-quarks.
+   * \param[out] event_intermediate PYTHIA partonic event record to be updated
+   *             according to the valence quark contents of incoming hadrons.
+   * \param[out] excess_quark excess of quarks
+   *             in incoming particles, compared to the mapped ones.
+   * \param[out] excess_antiq excess of anti-quarks
+   *             in incoming particles, compared to the mapped ones.
+   */
   void restore_constituent(Pythia8::Event &event_intermediate,
                            std::array<std::array<int, 5>, 2> &excess_quark,
                            std::array<std::array<int, 5>, 2> &excess_antiq);

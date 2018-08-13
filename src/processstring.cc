@@ -819,14 +819,17 @@ void StringProcess::replace_constituent(Pythia8::Particle &particle,
     int k_select = 0;
     std::vector<int> k_found;
     k_found.clear();
+    // check if the constituent needs to be converted.
     if (excess_constituent[jq] < 0) {
       for (int k = 0; k < 5; k++) {
+        // check which specie it can be converted into.
         if (k != jq && excess_constituent[k] > 0) {
           k_found.push_back(k);
         }
       }
     }
 
+    // make a random selection of specie and update the excess of constituent.
     if (k_found.size() > 0) {
       const int l = random::uniform_int(0,
                         static_cast<int>(k_found.size()) - 1);
@@ -837,6 +840,7 @@ void StringProcess::replace_constituent(Pythia8::Particle &particle,
     }
   }
 
+  // determine PDG id of the converted parton.
   if (particle.isQuark()) {
     pdgid_new = pdgid[0];
   } else if (particle.isDiquark()) {
@@ -857,10 +861,11 @@ void StringProcess::replace_constituent(Pythia8::Particle &particle,
   }
   log.debug("  parton id = ", particle.id(), " is converted to ", pdgid_new);
 
+  // update the constituent mass and energy.
   Pythia8::Vec4 pquark = particle.p();
   double mass_new = pythia_hadron_->particleData.m0(pdgid_new);
   double e_new = std::sqrt(mass_new * mass_new + pquark.pAbs() * pquark.pAbs());
-
+  // update the particle object.
   particle.id(pdgid_new);
   particle.e(e_new);
   particle.m(mass_new);
@@ -885,7 +890,7 @@ void StringProcess::restore_constituent(Pythia8::Event &event_intermediate,
       int nfrag = event_intermediate.size();
       for (int np_end = 0; np_end < nfrag - 2; np_end++) {
         int iforward = 1;
-        // select the most forward or backward parton.
+        // select the most forward or backward parton and change its specie.
         for (int ip = 2; ip < event_intermediate.size() - np_end; ip++) {
           const double pz_quark_current = event_intermediate[ip].pz();
           const double pz_quark_forward = event_intermediate[iforward].pz();
@@ -919,16 +924,21 @@ void StringProcess::restore_constituent(Pythia8::Event &event_intermediate,
         event_intermediate.remove(iforward, iforward);
       }
 
+      // Compute the excess of net quark numbers.
       for (int j = 0; j < 5; j++) {
         excess_total[j] += (excess_quark[ih][j] - excess_antiq[ih][j]);
       }
     }
 
+    /* If there is no excess of net quark numbers,
+     * quark content is considered to be correct. */
     recovered_quarks = excess_total == excess_null;
   }
   log.debug("  valence quark contents of hadons are recovered.");
 
   log.debug("  current total energy [GeV] : ", pSum.e());
+  /* rescale momenta of all partons by a constant factor
+   * to conserve the total energy. */
   while (true) {
     if (std::abs(pSum.e() - energy_init) < really_small * energy_init) {
       break;
