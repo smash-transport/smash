@@ -303,7 +303,7 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   ThreeVector evec = prs.threevec() / prs.threevec().abs();
   // perform fragmentation and add particles to final_state.
   ParticleList new_intermediate_particles;
-  bool separate_fragment_baryon = true;
+  bool separate_fragment_baryon = false;
   int nfrag = fragment_string(idqX1, idqX2, massX, evec, true,
                               separate_fragment_baryon,
                               new_intermediate_particles);
