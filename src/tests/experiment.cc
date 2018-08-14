@@ -13,7 +13,6 @@
 
 #include "../include/smash/collidermodus.h"
 #include "setup.h"
-#include "../experiment.cc"
 
 using namespace smash;
 
