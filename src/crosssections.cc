@@ -1619,10 +1619,12 @@ CollisionBranchList CrossSections::string_excitation(
     return channel_list;
   }
 
-  /* Get PDG id for evaluation of the parametrized cross sections
+  /* Get mapped PDG id for evaluation of the parametrized cross sections
    * for diffractive processes.
-   * (anti-)proton is used for (anti-)baryons and
-   * pion is used for mesons.
+   * Positively charged baryons are mapped onto proton and other baryons are
+   * mapped onto neutrons. Same rule applies for anti-baryons.
+   * Positively (negatively) charged mesons are mapped onto pi+ (pi-).
+   * Neutral mesons are mapped onto pi0.
    * This must be rescaled according to additive quark model
    * in the case of exotic hadrons.
    * Also calculate the multiplicative factor for AQM
@@ -1631,13 +1633,26 @@ CollisionBranchList CrossSections::string_excitation(
   double AQM_factor = 1.;
   for (int i = 0; i < 2; i++) {
     PdgCode pdg = incoming_particles_[i].type().pdgcode();
-    // FIXME: What about charge?
     if (pdg.baryon_number() == 1) {
-      pdgid[i] = pdg::p_decimal;
+      if (pdg.charge() > 0) {
+        pdgid[i] = pdg::p_decimal;
+      } else {
+        pdgid[i] = pdg::n_decimal;
+      }
     } else if (pdg.baryon_number() == -1) {
-      pdgid[i] = -pdg::p_decimal;
+      if (pdg.charge() < 0) {
+        pdgid[i] = -pdg::p_decimal;
+      } else {
+        pdgid[i] = -pdg::n_decimal;
+      }
     } else {
-      pdgid[i] = pdg::pi_p_decimal;
+      if (pdg.charge() > 0) {
+        pdgid[i] = pdg::pi_p_decimal;
+      } else if (pdg.charge() == 0) {
+        pdgid[i] = pdg::pi_z_decimal;
+      } else {
+        pdgid[i] = pdg::pi_m_decimal;
+      }
     }
     AQM_factor *= (1. - 0.4 * pdg.frac_strange());
   }
@@ -1714,7 +1729,10 @@ CollisionBranchList CrossSections::string_excitation(
     /* Hard string process is added by hard cross section
      * in conjunction with multipartion interaction picture
      * \iref{Sjostrand:1987su}. */
-    const double hard_xsec = string_hard_cross_section();
+    double hard_xsec = string_hard_cross_section();
+    if (use_AQM) {
+      hard_xsec *= AQM_factor;
+    }
     nondiffractive_soft =
         nondiffractive_all * std::exp(-hard_xsec / nondiffractive_all);
     nondiffractive_hard = nondiffractive_all - nondiffractive_soft;
@@ -1774,12 +1792,27 @@ double CrossSections::high_energy() const {
   if (pdg_a.is_baryon() && pdg_b.is_baryon()) {
     if (pdg_a == pdg_b) {
       xs = pp_high_energy(s);  // pp, nn
-    } else if (pdg_a.is_antiparticle_of(pdg_b)) {
-      xs = ppbar_high_energy(s);  // ppbar, nnbar
     } else if (pdg_a.antiparticle_sign() * pdg_b.antiparticle_sign() == 1) {
       xs = np_high_energy(s);  // np, nbarpbar
-    } else {
-      xs = npbar_high_energy(s);  // npbar, nbarp
+    } else if (pdg_a.antiparticle_sign() * pdg_b.antiparticle_sign() == -1) {
+      /* In the case of baryon-antibaryon interactions,
+       * the low-energy cross section must be involved
+       * due to annihilation processes (via strings). */
+      double xs_l = ppbar_total(s);
+      double xs_h = 0.;
+      if (pdg_a.is_antiparticle_of(pdg_b)) {
+        xs_h = ppbar_high_energy(s);  // ppbar, nnbar
+      } else {
+        xs_h = npbar_high_energy(s);  // npbar, nbarp
+      }
+      /* Transition between low and high energy is set to be consistent with
+       * that defined in decide_string(). */
+      const double region_lower = 4.0;
+      const double region_upper = 5.0;
+      double x = (sqrt_s_ - 0.5 * (region_lower + region_upper)) /
+                 (region_upper - region_lower);
+      double prob_high = 0.5 * (std::sin(M_PI * x) + 1.0);
+      xs = xs_l * (1. - prob_high) + xs_h * prob_high;
     }
   }
 
@@ -1818,19 +1851,14 @@ double CrossSections::string_hard_cross_section() const {
   const ParticleData& data_a = incoming_particles_[0];
   const ParticleData& data_b = incoming_particles_[1];
   if (data_a.is_baryon() && data_b.is_baryon()) {
-    /* Currently nucleon-nucleon cross section is used for all baryon-baryon
-     * casees. This will be changed later by applying additive quark model.
-     */
+    /* Currently nucleon-nucleon cross section is used for
+     * all baryon-baryon casees. */
     cross_sec = NN_string_hard(sqrt_s_ * sqrt_s_);
   } else if (data_a.is_baryon() || data_b.is_baryon()) {
-    /* Currently nucleon-pion cross section is used for all baryon-meson cases.
-     * This will be changed later by applying additive quark model.
-     */
+    // Currently nucleon-pion cross section is used for all baryon-meson cases.
     cross_sec = Npi_string_hard(sqrt_s_ * sqrt_s_);
   } else {
-    /* Currently pion-pion cross section is used for all meson-meson cases.
-     * This will be changed later by applying additive quark model.
-     */
+    // Currently pion-pion cross section is used for all meson-meson cases.
     cross_sec = pipi_string_hard(sqrt_s_ * sqrt_s_);
   }
   return cross_sec;
