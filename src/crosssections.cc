@@ -167,8 +167,9 @@ CollisionBranchList CrossSections::generate_collision_list(
     /* String-excitation cross section =
      * Parametrized total cross - the contributions
      * from all other present channels. */
+    const double sig_current = sum_xs_of(process_list);
     const double sig_string =
-        std::max(0., high_energy() - elastic_parametrization(use_AQM));
+        std::max(0., high_energy() - sig_current);
     append_list(process_list,
                 string_excitation(sig_string, string_process, use_AQM));
   } else {
@@ -229,6 +230,10 @@ double CrossSections::elastic_parametrization(bool use_AQM) const {
              pdg_a.antiparticle_sign() == pdg_b.antiparticle_sign()) {
     // Elastic Nucleon Nucleon Scattering
     elastic_xs = nn_el();
+  } else if (pdg_a.is_nucleon() && pdg_b.is_nucleon() &&
+             pdg_a.antiparticle_sign() == -pdg_b.antiparticle_sign()) {
+    // Elastic Nucleon anti-Nucleon Scattering
+    elastic_xs = ppbar_elastic(s);
   } else if (pdg_a.is_nucleus() || pdg_b.is_nucleus()) {
     const PdgCode& pdg_nucleus = pdg_a.is_nucleus() ? pdg_a : pdg_b;
     const PdgCode& pdg_other = pdg_a.is_nucleus() ? pdg_b : pdg_a;
@@ -268,7 +273,7 @@ double CrossSections::nn_el() const {
 
   // Use parametrized cross sections.
   double sig_el = -1.;
-  if (pdg_a.is_antiparticle_of(pdg_b)) {
+  if (pdg_a.antiparticle_sign() == -pdg_b.antiparticle_sign()) {
     sig_el = ppbar_elastic(s);
   } else if (pdg_a.is_nucleon() && pdg_b.is_nucleon()) {
     sig_el = (pdg_a == pdg_b) ? pp_elastic(s) : np_elastic(s);
