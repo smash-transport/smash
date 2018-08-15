@@ -58,8 +58,8 @@ Additionally, example configuration files for the box, sphere and list modus can
 be found in the respective directories /input/{box,sphere,list}. In case
 of a box simulation, the default particles and decaymodes files need to be
 modified to allow for equilibration. These are also stored in
-smash/input/box. For the list modus, an input list file to be read in is
-required. This file, "example_list0", is located in smash/input/list.
+/input/box. For the list modus, an input list file to be read in is
+required. This file, "example_list0", is located in /input/list.
 
 To run SMASH with a manually specified configuration file, use the "-i" command.
 For example, for the sphere or list example file:

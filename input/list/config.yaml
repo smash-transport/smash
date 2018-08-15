@@ -15,6 +15,11 @@ Output:
 
 Modi:
     List:
+        # If the build directory is not located in the smash directory anymore,
+        # the absolute path specified below will not work anymore.
+        # You can alternatively pass the path directly from the command line
+        # with the "-c" command:
+        # ./smash -i <path to config file> -c 'Modi: { List: { File_Directory: <path to file that is read in> } }
         File_Directory: "../input/list"
         File_Prefix: "example_list"
         Shift_Id: 0
