@@ -233,7 +233,7 @@ double CrossSections::elastic_parametrization(bool use_AQM) const {
   } else if (pdg_a.is_nucleon() && pdg_b.is_nucleon() &&
              pdg_a.antiparticle_sign() == -pdg_b.antiparticle_sign()) {
     // Elastic Nucleon anti-Nucleon Scattering
-    elastic_xs = ppbar_elastic(s);
+    elastic_xs = ppbar_elastic(sqrt_s_ * sqrt_s_);
   } else if (pdg_a.is_nucleus() || pdg_b.is_nucleus()) {
     const PdgCode& pdg_nucleus = pdg_a.is_nucleus() ? pdg_a : pdg_b;
     const PdgCode& pdg_other = pdg_a.is_nucleus() ? pdg_b : pdg_a;
