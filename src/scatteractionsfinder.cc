@@ -110,6 +110,10 @@ namespace smash {
  * \key Form_Time_Factor (double, optional, default = 1.0) \n
  * Factor to be multiplied with the formation time of string fragments from
  * the soft string routine.
+ * \key Power_Particle_Formation (double, optional, default = -1.0) \n
+ * If positive, the power with which the cross section scaling factor of
+ * string fragments grows in time until it reaches 1. If negative, the scaling
+ * factor will be constant and jump to 1 once the particle forms.
  *
  * \key Use_Yoyo_Model (bool, optional, default = true)
  * Calculate the string fragments' formation times from the yoyo-model if
