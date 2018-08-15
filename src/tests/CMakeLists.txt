@@ -304,17 +304,17 @@ if(CTEST_MEMORYCHECK_COMMAND)
    message(STATUS "valgrind found at ${CTEST_MEMORYCHECK_COMMAND}")
    set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v" "--error-exitcode=1")
    add_custom_target(memcheck_collider
-                     COMMAND ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS} ${PROJECT_BINARY_DIR}/smash -c "General: {End_Time: 5.0, Delta_Time: 0.1}" -m Collider -o "${PROJECT_BINARY_DIR}/test_output/memcheck_collider" -f
+                     COMMAND ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS} ${PROJECT_BINARY_DIR}/smash -c "General: {End_Time: 5.0, Delta_Time: 0.1}" -o "${PROJECT_BINARY_DIR}/test_output/memcheck_collider" -f
                      DEPENDS smash
                      COMMENT "Executing test memcheck_collider"
                      VERBATIM)
    add_custom_target(memcheck_box
-                     COMMAND ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS} ${PROJECT_BINARY_DIR}/smash -c "General: {End_Time: 1.0, Delta_Time: 0.1}" -m Box -o "${PROJECT_BINARY_DIR}/test_output/memcheck_box" -f
+                     COMMAND ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS} ${PROJECT_BINARY_DIR}/smash -c "General: {End_Time: 5.0, Delta_Time: 0.1}" -i ${PROJECT_SOURCE_DIR}/input/box/config.yaml -p ${PROJECT_SOURCE_DIR}/input/box/particles.txt -d ${PROJECT_SOURCE_DIR}/input/box/decaymodes.txt  -o "${PROJECT_BINARY_DIR}/test_output/memcheck_box" -f
                      DEPENDS smash
                      COMMENT "Executing test memcheck_box"
                      VERBATIM)
    add_custom_target(memcheck_sphere
-                     COMMAND ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS} ${PROJECT_BINARY_DIR}/smash -c "General: {End_Time: 5.0, Delta_Time: 0.1}" -m Sphere -o "${PROJECT_BINARY_DIR}/test_output/memcheck_sphere" -f
+                     COMMAND ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS} ${PROJECT_BINARY_DIR}/smash -c "General: {End_Time: 5.0, Delta_Time: 0.1}" -i ${PROJECT_SOURCE_DIR}/input/sphere/config.yaml -o "${PROJECT_BINARY_DIR}/test_output/memcheck_sphere" -f
                      DEPENDS smash
                      COMMENT "Executing test memcheck_sphere"
                      VERBATIM)
