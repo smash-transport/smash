@@ -306,15 +306,18 @@ if(CTEST_MEMORYCHECK_COMMAND)
    add_custom_target(memcheck_collider
                      COMMAND ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS} ${PROJECT_BINARY_DIR}/smash -c "General: {End_Time: 5.0, Delta_Time: 0.1}" -m Collider -o "${PROJECT_BINARY_DIR}/test_output/memcheck_collider" -f
                      DEPENDS smash
-                     COMMENT "Executing test memcheck_collider")
+                     COMMENT "Executing test memcheck_collider"
+                     VERBATIM)
    add_custom_target(memcheck_box
                      COMMAND ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS} ${PROJECT_BINARY_DIR}/smash -c "General: {End_Time: 1.0, Delta_Time: 0.1}" -m Box -o "${PROJECT_BINARY_DIR}/test_output/memcheck_box" -f
                      DEPENDS smash
-                     COMMENT "Executing test memcheck_box")
+                     COMMENT "Executing test memcheck_box"
+                     VERBATIM)
    add_custom_target(memcheck_sphere
                      COMMAND ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS} ${PROJECT_BINARY_DIR}/smash -c "General: {End_Time: 5.0, Delta_Time: 0.1}" -m Sphere -o "${PROJECT_BINARY_DIR}/test_output/memcheck_sphere" -f
                      DEPENDS smash
-                     COMMENT "Executing test memcheck_sphere")
+                     COMMENT "Executing test memcheck_sphere"
+                     VERBATIM)
 else()
    message(STATUS "valgrind not found. Memcheck tests are disabled!")
 endif()
