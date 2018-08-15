@@ -709,8 +709,15 @@ CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) const {
   const auto sigma_kplusp = kplusp_inelastic_background(s);
   const auto sigma_kplusn = kplusn_inelastic_background(s);
 
+  /* At high energy, the parametrization we use diverges from experimental
+   * data. This cutoff represents an the point where the AQM cross section
+   * becomes smaller than this parametrization, so we cut it here, and fully
+   * switch to AQM beyond this point. */
+  const double KN_to_KDelta_cutoff = 16.58;
+
   bool incl_KN_to_KN = included_2to2[IncludedReactions::KN_to_KN] == 1;
-  bool incl_KN_to_KDelta = included_2to2[IncludedReactions::KN_to_KDelta] == 1;
+  bool incl_KN_to_KDelta = included_2to2[IncludedReactions::KN_to_KDelta] == 1
+                        && sqrt_s_ < KN_to_KDelta_cutoff;
   bool incl_Strangeness_exchange =
       included_2to2[IncludedReactions::Strangeness_exchange] == 1;
 
@@ -1756,17 +1763,6 @@ double CrossSections::high_energy() const {
   const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
 
-  // Disable AQM cross section for KN, because it destroys the total cross
-  // section. This is only a temporary fix, see #6262.
-  if (((pdg_a == pdg::K_p || pdg_a == pdg::K_z) && pdg_b.is_nucleon()) ||
-      ((pdg_b == pdg::K_p || pdg_b == pdg::K_z) && pdg_a.is_nucleon()) ||
-      ((pdg_a == -pdg::K_p || pdg_a == -pdg::K_z) &&
-       pdg_b.get_antiparticle().is_nucleon()) ||
-      ((pdg_b == -pdg::K_p || pdg_b == -pdg::K_z) &&
-       pdg_a.get_antiparticle().is_nucleon())) {
-    return 0.;
-  }
-
   const double s = sqrt_s_ * sqrt_s_;
   double xs = 0.;
 
@@ -2140,10 +2136,28 @@ bool CrossSections::decide_string(bool strings_switch,
     // BBbar only goes through strings, so there are no "window" considerations
     return true;
   } else {
+    /* true for K+ p and K0 p (+ antiparticles), which have special treatment
+     * to fit data */
+    const bool is_KplusP =
+       ((t1.pdgcode() == pdg::K_p || t1.pdgcode() == pdg::K_z) &&
+        (t2.pdgcode() == pdg::p)) ||
+       ((t2.pdgcode() == pdg::K_p || t2.pdgcode() == pdg::K_z) &&
+        (t1.pdgcode() == pdg::p)) ||
+       ((t1.pdgcode() == -pdg::K_p || t1.pdgcode() == -pdg::K_z) &&
+        (t2.pdgcode() == -pdg::p)) ||
+       ((t2.pdgcode() == -pdg::K_p || t2.pdgcode() == -pdg::K_z) &&
+        (t1.pdgcode() == -pdg::p));
+    double aqm_offset = 0.9;  // where to start the AQM strings above mass sum
+    if (is_KplusP) {
+      /* for this specific case we have data. This corresponds to the point
+       * where the AQM parametrization is smaller than the current 2to2
+       * parametrization, which starts growing and diverges from exp. data */
+      aqm_offset = 15.15;
+    }
     /* if we do not use the probability transition algorithm, this is always a
      * string contribution if the energy is large enough */
     if (!use_transition_probability) {
-      return (sqrt_s_ > mass_sum + 0.9);
+      return (sqrt_s_ > mass_sum + aqm_offset);
     }
     /* No strings at low energy, only strings at high energy and
      * a transition region in the middle. Determine transition region: */
@@ -2157,8 +2171,8 @@ bool CrossSections::decide_string(bool strings_switch,
     } else {  // AQM - Additive Quark Model
       /* Transition region around 0.9 larger than the sum of pole masses;
        * highly arbitrary, feel free to improve */
-      region_lower = mass_sum + 0.9;
-      region_upper = mass_sum + 1.9;
+      region_lower = mass_sum + aqm_offset;
+      region_upper = mass_sum + aqm_offset + 1.0;
     }
 
     if (sqrt_s_ > region_upper) {
