@@ -303,15 +303,18 @@ find_program(CTEST_MEMORYCHECK_COMMAND valgrind)
 if(CTEST_MEMORYCHECK_COMMAND)
    message(STATUS "valgrind found at ${CTEST_MEMORYCHECK_COMMAND}")
    set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v" "--error-exitcode=1")
-   smash_add_runtest(memcheck_box smash ${CTEST_MEMORYCHECK_COMMAND}
-      ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
-      ${PROJECT_BINARY_DIR}/smash -c "General: {End_Time: 1.0, Modus: Box}")
-   smash_add_runtest(memcheck_collider smash ${CTEST_MEMORYCHECK_COMMAND}
-      ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
-      ${PROJECT_BINARY_DIR}/smash -c "General: {End_Time: 5.0, Delta_Time: 0.1}" -m Collider)
-   smash_add_runtest(memcheck_sphere smash ${CTEST_MEMORYCHECK_COMMAND}
-      ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
-      ${PROJECT_BINARY_DIR}/smash -c "General: {End_Time: 5.0, Delta_Time: 0.1}" -m Sphere)
+   add_custom_target(memcheck_collider
+                     COMMAND ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS} ${PROJECT_BINARY_DIR}/smash -c "General: {End_Time: 5.0, Delta_Time: 0.1}" -m Collider -o "${PROJECT_BINARY_DIR}/test_output/memcheck_collider" -f
+                     DEPENDS smash
+                     COMMENT "Executing test memcheck_collider")
+   add_custom_target(memcheck_box
+                     COMMAND ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS} ${PROJECT_BINARY_DIR}/smash -c "General: {End_Time: 1.0, Delta_Time: 0.1}" -m Box -o "${PROJECT_BINARY_DIR}/test_output/memcheck_box" -f
+                     DEPENDS smash
+                     COMMENT "Executing test memcheck_box")
+   add_custom_target(memcheck_sphere
+                     COMMAND ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS} ${PROJECT_BINARY_DIR}/smash -c "General: {End_Time: 5.0, Delta_Time: 0.1}" -m Sphere -o "${PROJECT_BINARY_DIR}/test_output/memcheck_sphere" -f
+                     DEPENDS smash
+                     COMMENT "Executing test memcheck_sphere")
 else()
    message(STATUS "valgrind not found. Memcheck tests are disabled!")
 endif()
