@@ -49,19 +49,33 @@ Run it with specific settings:
 Run SMASH with different input files
 ------------------------------------
 
-SMASH is installed with example configuration files for the collider, box and
-sphere modus. These configuration files are located in smash/input. By default,
-e.g. by executing ./smash, the simulation is set up by means of the collider
-configuration file, called "config.yaml". The box, sphere and list configuration
-files are named "config_box.yaml", "config_sphere.yaml" and "config_list.yaml".
-It is possible to manually specify the configuration file, by using the "-i"
-option, so that e.g.
+SMASH is installed with example configuration files for the collider, box,
+sphere and list modus. By default, e.g. by executing ./smash, the simulation is
+set up by means of the collider configuration file, called "config.yaml" and
+the default particles and decaymodes files, "particles.txt" and
+"decaymodes.txt". They are located in smash/input.
+Additionally, example configuration files for the box, sphere and list modus can
+be found in the respective directories smash/input/(box,sphere or list). In case
+of a box simulation, the default particles and decaymodes files need to be
+modified to allow for thermal equilibration. These files are also stored in
+smash/input/box. For the list modus, an input file to be read in is required.
+This file, "example_list0", is also located in smash/input/list.
 
-    ./smash -i ../input/config_box.yaml
+To run SMASH with a manually specified configuration file, use the "-i" command
+to e.g. set up a simulation with the sphere or list example file:
 
-can be used to configure a box simulation with the provided configuration file.
-Note, that for the list modus example, the file "example_list0", located in the
-input directory, is read in.
+    ./smash -i ../input/sphere/config.yaml
+
+    ./smash -i ../input/list/config.yaml
+
+
+To further manually provide the used particles and decaymodes files, the "-p"
+and "-d" commands are useful:
+
+    ./smash -i .. input/box/config.yaml -p ../input/box/particles.txt
+    -d ../input/box/decaymodes.txt
+
+sets up a SMASH box simulation with adjusted particles and decaymodes files.
 
 
 Size of the code

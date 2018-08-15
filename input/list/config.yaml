@@ -15,6 +15,6 @@ Output:
 
 Modi:
     List:
-        File_Directory: "../input/"
+        File_Directory: "../input/list"
         File_Prefix: "example_list"
         Shift_Id: 0
