@@ -26,9 +26,9 @@ TEST(create_part_list) {
      the system to be solved.
    */
   ParticleType::create_type_list(
-      "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "N⁺ 0.938 0.0       2212\n"
-      "K⁰ 0.494 0.0        311\n");
+      "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
+      "N⁺ 0.938 0.0 + 2212\n"
+      "K⁰ 0.494 0.0 -  311\n");
 }
 
 static BoxModus create_box_for_tests() {

@@ -15,9 +15,9 @@ using namespace smash;
 
 TEST(init_particle_types) {
   ParticleType::create_type_list(
-      "σ 0.123 -.0 123\n"
-      "σ3 0.123 -.0 -1234568\n"
-      "σ2 0.245 2.3 2346\n");
+      "σ 0.123 -.0 + 123\n"
+      "σ3 0.123 -.0 + -1234568\n"
+      "σ2 0.245 2.3 + 2346\n");
 }
 
 TEST(size) { COMPARE(sizeof(QuantumNumbers), 56u); }

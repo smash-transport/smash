@@ -19,6 +19,37 @@
 namespace smash {
 
 /**
+ * Represent the parity of a particle type.
+ */
+enum class Parity {
+  /// Positive parity.
+  Pos,
+  /// Negative parity.
+  Neg
+};
+
+/**
+ * \param p Given parity.
+ * \return Inverted parity.
+ */
+inline Parity invert_parity(Parity p) {
+  // GCC complains about a code path that does not return.
+  // However, this is a false positive, since we are using a compiler check to
+  // make sure the switch is exhaustive.
+  // This should silence the warnings, but it does not work due to a bug in GCC.
+  // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53431
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wreturn-type"
+  switch (p) {
+    case Parity::Pos:
+      return Parity::Neg;
+    case Parity::Neg:
+      return Parity::Pos;
+  }
+  #pragma GCC diagnostic pop
+}
+
+/**
  * \ingroup data
  *
  * Particle type contains the static properties of a particle species
@@ -50,13 +81,14 @@ class ParticleType {
    * \param[in] n The name of the particle.
    * \param[in] m The mass of the particle.
    * \param[in] w The width of the particle.
+   * \param[in] p The parity of the particle.
    * \param[in] id The PDG code of the particle.
    *
    * \note The remaining properties ParticleType provides are derived from the
    *       PDG code and therefore cannot be set explicitly (this avoids the
    *       chance of introducing inconsistencies).
    */
-  ParticleType(std::string n, double m, double w, PdgCode id);
+  ParticleType(std::string n, double m, double w, Parity p, PdgCode id);
 
   /**
    * Copies are not allowed as they break intended use. Instead use a const-ref
@@ -84,6 +116,9 @@ class ParticleType {
 
   /// \return the particle width (at the mass pole).
   double width_at_pole() const { return width_; }
+
+  /// \return the parity of the particle.
+  Parity parity() const { return parity_; }
 
   /// \return the PDG code of the particle.
   PdgCode pdgcode() const { return pdgcode_; }
@@ -542,6 +577,8 @@ class ParticleType {
   double mass_;
   /// width of the particle
   double width_;
+  /// Parity of the particle
+  Parity parity_;
   /// PDG Code of the particle
   PdgCode pdgcode_;
   /**
