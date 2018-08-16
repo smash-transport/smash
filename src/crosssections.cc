@@ -21,6 +21,12 @@ namespace smash {
 
 /// Constant offset as to where to shift from 2to2 to string processes (in GeV)
 const double KN_offset = 15.15;
+/**
+ * Constant offset as to where to turn on the strings and elastic processes
+ * for pi pi reactions (this is an exception because the normal AQM behavior
+ * destroys the cross-section at very low sqrt_s and around the f2 peak)
+ */
+const double pipi_offset = 1.12;
 
 /**
  * Helper function:
@@ -254,8 +260,15 @@ double CrossSections::elastic_parametrization(bool use_AQM) const {
                (pdg_b.is_meson() && pdg_a.is_baryon())) {
       elastic_xs = piplusp_elastic_high_energy(s, m1, m2);
     } else if (pdg_a.is_meson() && pdg_b.is_meson()) {
-      // meson-meson goes through scaling from π+p parametrization
-      elastic_xs = 2. / 3. * piplusp_elastic_high_energy(s, m1, m2);
+      /* Special case: the pion elastic cross-section goes through resonances
+       * at low sqrt_s, so we turn it off for this region */
+      if (pdg_a.is_pion() && pdg_b.is_pion() &&
+            (m1 + m2 + pipi_offset) > sqrt_s_) {
+        elastic_xs = 0.0;
+      } else {
+        // meson-meson goes through scaling from π+p parametrization
+        elastic_xs = 2. / 3. * piplusp_elastic_high_energy(s, m1, m2);
+      }
     }
     elastic_xs *=
         (1. - 0.4 * pdg_a.frac_strange()) * (1. - 0.4 * pdg_b.frac_strange());
@@ -2155,6 +2168,8 @@ bool CrossSections::decide_string(bool strings_switch,
        * where the AQM parametrization is smaller than the current 2to2
        * parametrization, which starts growing and diverges from exp. data */
       aqm_offset = KN_offset;
+    } else if (pdg1.is_pion() && pdg2.is_pion()) {
+      aqm_offset = pipi_offset;
     }
     /* if we do not use the probability transition algorithm, this is always a
      * string contribution if the energy is large enough */
