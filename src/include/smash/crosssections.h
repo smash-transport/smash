@@ -17,6 +17,16 @@
 
 namespace smash {
 
+namespace transit_high_energy {
+  const std::array<double, 2> sqrts_range_Npi = {1.9, 2.2};
+
+  const std::array<double, 2> sqrts_range_NN = {4., 5.};
+
+  const double sqrts_add_lower = 0.9;
+
+  const double sqrts_add_upper = 1.9;
+}
+
 /**
  * The cross section class assembels everything that is needed to
  * calculate the cross section and returns a list of all possible reactions

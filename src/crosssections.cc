@@ -1788,8 +1788,8 @@ double CrossSections::high_energy() const {
       }
       /* Transition between low and high energy is set to be consistent with
        * that defined in decide_string(). */
-      const double region_lower = 4.0;
-      const double region_upper = 5.0;
+      const double region_lower = transit_high_energy::sqrts_range_NN[0];
+      const double region_upper = transit_high_energy::sqrts_range_NN[1];
       double x = (sqrt_s_ - 0.5 * (region_lower + region_upper)) /
                  (region_upper - region_lower);
       double prob_high = 0.5 * (std::sin(M_PI * x) + 1.0);
@@ -2152,22 +2152,22 @@ bool CrossSections::decide_string(bool strings_switch,
     /* if we do not use the probability transition algorithm, this is always a
      * string contribution if the energy is large enough */
     if (!use_transition_probability) {
-      return (sqrt_s_ > mass_sum + 0.9);
+      return (sqrt_s_ > mass_sum + transit_high_energy::sqrts_add_lower);
     }
     /* No strings at low energy, only strings at high energy and
      * a transition region in the middle. Determine transition region: */
     double region_lower, region_upper;
     if (is_Npi_scattering) {
-      region_lower = 1.9;
-      region_upper = 2.2;
+      region_lower = transit_high_energy::sqrts_range_Npi[0];
+      region_upper = transit_high_energy::sqrts_range_Npi[1];
     } else if (is_NN_scattering) {
-      region_lower = 4.0;
-      region_upper = 5.0;
+      region_lower = transit_high_energy::sqrts_range_NN[0];
+      region_upper = transit_high_energy::sqrts_range_NN[1];
     } else {  // AQM - Additive Quark Model
       /* Transition region around 0.9 larger than the sum of pole masses;
        * highly arbitrary, feel free to improve */
-      region_lower = mass_sum + 0.9;
-      region_upper = mass_sum + 1.9;
+      region_lower = mass_sum + transit_high_energy::sqrts_add_lower;
+      region_upper = mass_sum + transit_high_energy::sqrts_add_upper;
     }
 
     if (sqrt_s_ > region_upper) {
