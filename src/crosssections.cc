@@ -19,6 +19,9 @@
 
 namespace smash {
 
+/// Constant offset as to where to shift from 2to2 to string processes (in GeV)
+const double KN_offset = 15.15;
+
 /**
  * Helper function:
  * Calculate the detailed balance factor R such that
@@ -710,10 +713,12 @@ CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) const {
   const auto sigma_kplusn = kplusn_inelastic_background(s);
 
   /* At high energy, the parametrization we use diverges from experimental
-   * data. This cutoff represents an the point where the AQM cross section
+   * data. This cutoff represents the point where the AQM cross section
    * becomes smaller than this parametrization, so we cut it here, and fully
    * switch to AQM beyond this point. */
-  const double KN_to_KDelta_cutoff = 16.58;
+  const double KN_to_KDelta_cutoff = KN_offset
+                                   + incoming_particles_[0].pole_mass()
+                                   + incoming_particles_[1].pole_mass();
 
   bool incl_KN_to_KN = included_2to2[IncludedReactions::KN_to_KN] == 1;
   bool incl_KN_to_KDelta = included_2to2[IncludedReactions::KN_to_KDelta] == 1
@@ -2138,21 +2143,18 @@ bool CrossSections::decide_string(bool strings_switch,
   } else {
     /* true for K+ p and K0 p (+ antiparticles), which have special treatment
      * to fit data */
+    const PdgCode pdg1 = t1.pdgcode(), pdg2 = t2.pdgcode();
     const bool is_KplusP =
-       ((t1.pdgcode() == pdg::K_p || t1.pdgcode() == pdg::K_z) &&
-        (t2.pdgcode() == pdg::p)) ||
-       ((t2.pdgcode() == pdg::K_p || t2.pdgcode() == pdg::K_z) &&
-        (t1.pdgcode() == pdg::p)) ||
-       ((t1.pdgcode() == -pdg::K_p || t1.pdgcode() == -pdg::K_z) &&
-        (t2.pdgcode() == -pdg::p)) ||
-       ((t2.pdgcode() == -pdg::K_p || t2.pdgcode() == -pdg::K_z) &&
-        (t1.pdgcode() == -pdg::p));
+       ((pdg1 ==  pdg::K_p || pdg1 ==  pdg::K_z) && (pdg2 ==  pdg::p)) ||
+       ((pdg2 ==  pdg::K_p || pdg2 ==  pdg::K_z) && (pdg1 ==  pdg::p)) ||
+       ((pdg1 == -pdg::K_p || pdg1 == -pdg::K_z) && (pdg2 == -pdg::p)) ||
+       ((pdg2 == -pdg::K_p || pdg2 == -pdg::K_z) && (pdg1 == -pdg::p));
     double aqm_offset = 0.9;  // where to start the AQM strings above mass sum
     if (is_KplusP) {
       /* for this specific case we have data. This corresponds to the point
        * where the AQM parametrization is smaller than the current 2to2
        * parametrization, which starts growing and diverges from exp. data */
-      aqm_offset = 15.15;
+      aqm_offset = KN_offset;
     }
     /* if we do not use the probability transition algorithm, this is always a
      * string contribution if the energy is large enough */
