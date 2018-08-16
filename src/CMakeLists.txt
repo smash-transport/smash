@@ -48,14 +48,16 @@ add_definitions(
 )
 
 # set up include paths
+include_directories(include)
 include_directories(
-    "${CMAKE_CURRENT_BINARY_DIR}"
+    "${CMAKE_CURRENT_BINARY_DIR}/include"
     )
 include_directories(SYSTEM
-    "${GSL_INCLUDES}"
+    ${GSL_INCLUDE_DIR}
     ${Boost_INCLUDE_DIRS}
     ${EIGEN3_INCLUDE_DIR}
     )
+
 
 # set default libraries for linking
 set(SMASH_LIBRARIES ${SMASH_LIBRARIES}
@@ -142,8 +144,8 @@ add_executable(smash smash.cc ${smash_src})
 # configure a header file to pass some of the CMake settings
 # to the source code
 configure_file (
-  "${CMAKE_CURRENT_SOURCE_DIR}/include/config.h.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/include/config.h"
+  "${CMAKE_CURRENT_SOURCE_DIR}/include/smash/config.h.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/include/smash/config.h"
 )
 
 # copy config file to build directory
@@ -154,19 +156,19 @@ configure_file(${CMAKE_SOURCE_DIR}/input/config.yaml
 set(generated_headers)
 macro(generate_headers)
    foreach(filename ${ARGN})
-      list(APPEND generated_headers "${CMAKE_CURRENT_BINARY_DIR}/${filename}.h")
+      list(APPEND generated_headers "${CMAKE_CURRENT_BINARY_DIR}/include/${filename}.h")
       add_custom_command(
-         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${filename}.h
+         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/include/${filename}.h
          COMMAND ${CMAKE_COMMAND}
          -D INPUT_FILE=${CMAKE_SOURCE_DIR}/input/${filename}
-         -D OUTPUT_FILE=${CMAKE_CURRENT_BINARY_DIR}/${filename}.h
+         -D OUTPUT_FILE=${CMAKE_CURRENT_BINARY_DIR}/include/${filename}.h
          -D NAME=data
          -P ${PROJECT_SOURCE_DIR}/cmake/copy_file_contents_to_string.cmake
          DEPENDS ${CMAKE_SOURCE_DIR}/input/${filename}
-         COMMENT "Convert ${CMAKE_SOURCE_DIR}/input/${filename} to ${CMAKE_CURRENT_BINARY_DIR}/${filename}.h"
+         COMMENT "Convert ${CMAKE_SOURCE_DIR}/input/${filename} to ${CMAKE_CURRENT_BINARY_DIR}/include/${filename}.h"
          VERBATIM)
       add_custom_target(generate_${filename}.h ALL DEPENDS
-         ${CMAKE_CURRENT_BINARY_DIR}/${filename}.h)
+         ${CMAKE_CURRENT_BINARY_DIR}/include/${filename}.h)
    endforeach()
 endmacro()
 generate_headers(particles.txt decaymodes.txt)

@@ -7,7 +7,7 @@
  *
  */
 
-#include "include/configuration.h"
+#include "smash/configuration.h"
 
 #include <cstdio>
 #include <string>
@@ -16,14 +16,21 @@
 #include <yaml-cpp/yaml.h>  // NOLINT(build/include_order)
 #include <boost/filesystem.hpp>
 
-#include "include/forwarddeclarations.h"
-
-/// \todo(warning) Internal helper functions have no documentation
+#include "smash/forwarddeclarations.h"
 
 namespace smash {
 
 // internal helper functions
 namespace {
+/**
+ * Finds a node, copies its structure and replaces the previous keys by
+ * the newly provided keys.
+ *
+ * \param[in] node YAML::node whose structure will be copied and whose key
+ * values will be replaced.
+ * \param[in] keys Keys that will replace the previous keys in the copied node.
+ * \return Node with the same structure as the input node but with updated keys.
+ */
 YAML::Node find_node_at(YAML::Node node,
                         std::initializer_list<const char *> keys) {
   assert(keys.size() > 0);
@@ -34,6 +41,12 @@ YAML::Node find_node_at(YAML::Node node,
   return node;
 }
 
+/**
+ * Removes all empty maps of a YAML::Node.
+ *
+ * \param[in] root YAML::Node that contains empty maps.
+ * \return YAML::Node from above without empty maps.
+ */
 YAML::Node remove_empty_maps(YAML::Node root) {
   if (root.IsMap()) {
     std::vector<std::string> to_remove(root.size());
@@ -50,6 +63,13 @@ YAML::Node remove_empty_maps(YAML::Node root) {
   return root;
 }
 
+/**
+ * Merge two YAML::Nodes
+ *
+ * \param[in] a YAML::Node into which b is merged.
+ * \param[in] b YAML::Node that is merged into a.
+ * \return YAML::Node which is the merge of a and b.
+ */
 YAML::Node operator|=(YAML::Node a, const YAML::Node &b) {
   if (b.IsMap()) {
     for (auto n0 : b) {

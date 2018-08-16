@@ -9,9 +9,9 @@
 
 #include "unittest.h"  // This include has to be first
 
-#include "../include/cxx14compat.h"
-#include "../include/fourvector.h"
-#include "../include/lattice.h"
+#include "../include/smash/cxx14compat.h"
+#include "../include/smash/fourvector.h"
+#include "../include/smash/lattice.h"
 
 using namespace smash;
 

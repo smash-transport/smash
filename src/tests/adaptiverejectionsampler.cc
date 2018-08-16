@@ -13,15 +13,15 @@
 #include <iostream>
 #include <map>
 
-#include "../include/adaptiverejectionsampler.h"
-#include "../include/distributions.h"
+#include "../include/smash/adaptiverejectionsampler.h"
+#include "../include/smash/distributions.h"
 
 using namespace smash;
 
 TEST(woods_saxon_distribution_adaptive_rejection_sampling) {
   double radius = 6.4;
   double diffusiveness = 0.54;
-  Rejection::AdaptiveRejectionSampler woods_saxon_sampler(
+  rejection::AdaptiveRejectionSampler woods_saxon_sampler(
       [&](double x) {
         return x * x * woods_saxon_dist_func(x, radius, diffusiveness);
       },
@@ -71,7 +71,7 @@ TEST(juttner_distribution_adaptive_rejection_sampling) {
 
   double lowlim = 0.0;
   double highlim = 15.0;
-  Rejection::AdaptiveRejectionSampler juttner_sampler(
+  rejection::AdaptiveRejectionSampler juttner_sampler(
       [&](double x) {
         return x * x *
                juttner_distribution_func(x, mass, temperature,

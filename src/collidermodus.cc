@@ -5,7 +5,7 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#include "include/collidermodus.h"
+#include "smash/collidermodus.h"
 
 #include <algorithm>
 #include <cmath>
@@ -16,18 +16,18 @@
 #include <tuple>
 #include <utility>
 
-#include "include/angles.h"
-#include "include/configuration.h"
-#include "include/cxx14compat.h"
-#include "include/experimentparameters.h"
-#include "include/fourvector.h"
-#include "include/interpolation.h"
-#include "include/kinematics.h"
-#include "include/logging.h"
-#include "include/numerics.h"
-#include "include/particles.h"
-#include "include/pdgcode.h"
-#include "include/random.h"
+#include "smash/angles.h"
+#include "smash/configuration.h"
+#include "smash/cxx14compat.h"
+#include "smash/experimentparameters.h"
+#include "smash/fourvector.h"
+#include "smash/interpolation.h"
+#include "smash/kinematics.h"
+#include "smash/logging.h"
+#include "smash/numerics.h"
+#include "smash/particles.h"
+#include "smash/pdgcode.h"
+#include "smash/random.h"
 
 namespace smash {
 
@@ -486,7 +486,7 @@ void ColliderModus::sample_impact() {
       // the correct distribution (however canonical() = 0 is then the
       // upper end, not the lower).
       impact_ = std::sqrt(imp_min_ * imp_min_ +
-                          Random::canonical() *
+                          random::canonical() *
                               (imp_max_ * imp_max_ - imp_min_ * imp_min_));
     } break;
     case Sampling::Custom: {
@@ -496,16 +496,16 @@ void ColliderModus::sample_impact() {
       double probability = 0;
       double b;
       while (probability_random > probability) {
-        b = Random::uniform(imp_min_, imp_max_);
+        b = random::uniform(imp_min_, imp_max_);
         probability = (*impact_interpolation_)(b) / yield_max_;
         assert(probability < 1.);
-        probability_random = Random::uniform(0., 1.);
+        probability_random = random::uniform(0., 1.);
       }
       impact_ = b;
     } break;
     case Sampling::Uniform: {
       // linear sampling. Still, min > max works fine.
-      impact_ = Random::uniform(imp_min_, imp_max_);
+      impact_ = random::uniform(imp_min_, imp_max_);
     }
   }
 }

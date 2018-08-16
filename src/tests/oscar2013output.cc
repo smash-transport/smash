@@ -11,7 +11,7 @@
 
 #include "setup.h"
 
-#include <include/config.h>
+#include <smash/config.h>
 #include <array>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -19,12 +19,12 @@
 #include <string>
 #include <vector>
 
-#include "../include/oscaroutput.h"
-#include "../include/outputinterface.h"
-#include "../include/particles.h"
-#include "../include/processbranch.h"
-#include "../include/random.h"
-#include "../include/scatteraction.h"
+#include "../include/smash/oscaroutput.h"
+#include "../include/smash/outputinterface.h"
+#include "../include/smash/particles.h"
+#include "../include/smash/processbranch.h"
+#include "../include/smash/random.h"
+#include "../include/smash/scatteraction.h"
 
 using namespace smash;
 
@@ -32,7 +32,7 @@ static const double accuracy = 1.0e-4;
 static const int data_elements = 12;
 static const int data_elements_extended = 20;
 static const bf::path testoutputpath = bf::absolute(SMASH_TEST_OUTPUT_PATH);
-static auto random_value = Random::make_uniform_distribution(-15.0, +15.0);
+static auto random_value = random::make_uniform_distribution(-15.0, +15.0);
 
 TEST(directory_is_created) {
   bf::create_directories(testoutputpath);

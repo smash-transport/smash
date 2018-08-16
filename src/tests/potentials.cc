@@ -14,15 +14,15 @@
 #include <fstream>
 #include <map>
 
-#include "../include/collidermodus.h"
-#include "../include/configuration.h"
-#include "../include/cxx14compat.h"
-#include "../include/experiment.h"
-#include "../include/modusdefault.h"
-#include "../include/nucleus.h"
-#include "../include/potentials.h"
-#include "../include/propagation.h"
-#include "../include/spheremodus.h"
+#include "../include/smash/collidermodus.h"
+#include "../include/smash/configuration.h"
+#include "../include/smash/cxx14compat.h"
+#include "../include/smash/experiment.h"
+#include "../include/smash/modusdefault.h"
+#include "../include/smash/nucleus.h"
+#include "../include/smash/potentials.h"
+#include "../include/smash/propagation.h"
+#include "../include/smash/spheremodus.h"
 
 #include <boost/filesystem.hpp>
 

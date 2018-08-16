@@ -7,7 +7,7 @@
  *
  */
 
-#include "include/particles.h"
+#include "smash/particles.h"
 
 #include <iomanip>
 #include <iostream>

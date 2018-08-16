@@ -15,14 +15,14 @@
 
 #include <boost/filesystem.hpp>
 
-#include "include/constants.h"
-#include "include/forwarddeclarations.h"
-#include "include/fpenvironment.h"
-#include "include/hadgas_eos.h"
-#include "include/integrate.h"
-#include "include/logging.h"
-#include "include/pow.h"
-#include "include/random.h"
+#include "smash/constants.h"
+#include "smash/forwarddeclarations.h"
+#include "smash/fpenvironment.h"
+#include "smash/hadgas_eos.h"
+#include "smash/integrate.h"
+#include "smash/logging.h"
+#include "smash/pow.h"
+#include "smash/random.h"
 
 namespace smash {
 
@@ -352,12 +352,12 @@ double HadronGasEos::sample_mass_thermal(const ParticleType &ptype,
     do {
       // sample mass from A(m)
       do {
-        m = Random::cauchy(m0, 0.5 * w0, mth, max_mass);
+        m = random::cauchy(m0, 0.5 * w0, mth, max_mass);
         const double thermal_factor = m * m * std::exp(- beta * m) *
                           gsl_sf_bessel_Kn_scaled(2, m * beta);
         q = ptype.spectral_function(m) * thermal_factor /
             ptype.spectral_function_simple(m);
-      } while (q < Random::uniform(0., max_ratio));
+      } while (q < random::uniform(0., max_ratio));
       if (q > max_ratio) {
         const auto &log = logger<LogArea::Resonances>();
         log.warn(ptype.name(), " - maximum increased in",

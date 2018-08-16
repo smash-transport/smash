@@ -11,12 +11,12 @@
 
 #include "setup.h"
 
-#include "../include/boxmodus.h"
-#include "../include/collidermodus.h"
-#include "../include/modusdefault.h"
-#include "../include/potentials.h"
-#include "../include/propagation.h"
-#include "../include/spheremodus.h"
+#include "../include/smash/boxmodus.h"
+#include "../include/smash/collidermodus.h"
+#include "../include/smash/modusdefault.h"
+#include "../include/smash/potentials.h"
+#include "../include/smash/propagation.h"
+#include "../include/smash/spheremodus.h"
 
 using namespace smash;
 using smash::Test::Momentum;

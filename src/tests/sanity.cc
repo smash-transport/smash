@@ -11,12 +11,12 @@
 
 #include "setup.h"
 
-#include "../include/boxmodus.h"
-#include "../include/collidermodus.h"
-#include "../include/configuration.h"
-#include "../include/experimentparameters.h"
-#include "../include/modusdefault.h"
-#include "../include/spheremodus.h"
+#include "../include/smash/boxmodus.h"
+#include "../include/smash/collidermodus.h"
+#include "../include/smash/configuration.h"
+#include "../include/smash/experimentparameters.h"
+#include "../include/smash/modusdefault.h"
+#include "../include/smash/spheremodus.h"
 
 #include <boost/filesystem.hpp>
 

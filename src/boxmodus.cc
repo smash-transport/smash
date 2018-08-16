@@ -12,24 +12,24 @@
 #include <utility>
 #include <vector>
 
-#include "include/algorithms.h"
-#include "include/angles.h"
-#include "include/boxmodus.h"
-#include "include/configuration.h"
-#include "include/constants.h"
-#include "include/cxx14compat.h"
-#include "include/distributions.h"
-#include "include/experimentparameters.h"
-#include "include/hadgas_eos.h"
-#include "include/logging.h"
-#include "include/macros.h"
-#include "include/outputinterface.h"
-#include "include/particles.h"
-#include "include/processbranch.h"
-#include "include/quantumnumbers.h"
-#include "include/random.h"
-#include "include/threevector.h"
-#include "include/wallcrossingaction.h"
+#include "smash/algorithms.h"
+#include "smash/angles.h"
+#include "smash/boxmodus.h"
+#include "smash/configuration.h"
+#include "smash/constants.h"
+#include "smash/cxx14compat.h"
+#include "smash/distributions.h"
+#include "smash/experimentparameters.h"
+#include "smash/hadgas_eos.h"
+#include "smash/logging.h"
+#include "smash/macros.h"
+#include "smash/outputinterface.h"
+#include "smash/particles.h"
+#include "smash/processbranch.h"
+#include "smash/quantumnumbers.h"
+#include "smash/random.h"
+#include "smash/threevector.h"
+#include "smash/wallcrossingaction.h"
 
 namespace smash {
 
@@ -94,6 +94,16 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
  * Strangeness chemical potential \f$ \mu_S \f$ used in case if
  * Use_Thermal_Multiplicities is true to compute thermal densities \f$ n_i \f$.
  *
+ * \note
+ * The box modus is most useful for infinite matter simulations
+ * with thermal and chemical equilibration and detailed balance. Detailed
+ * balance can however not be conserved if 3-body decays (or higher) are
+ * performed. To yield useful results applying a SMASH box simulation, it is
+ * therefore necessary to modify the provided default particles.txt and
+ * decaymodes.txt by removing 3-body and higher order decays from
+ * the decaymodes file and all corresponding particles that can no longer be
+ * produced from the particles file.
+ *
  * \n
  * Examples: Configuring a Box Simulation
  * --------------
@@ -150,7 +160,7 @@ double BoxModus::initial_conditions(Particles *particles,
   double momentum_radial = 0, mass;
   Angles phitheta;
   FourVector momentum_total(0, 0, 0, 0);
-  auto uniform_length = Random::make_uniform_distribution(0.0, this->length_);
+  auto uniform_length = random::make_uniform_distribution(0.0, this->length_);
   const double T = this->temperature_;
   /* Create NUMBER OF PARTICLES according to configuration, or thermal case */
   if (use_thermal_) {
@@ -165,7 +175,7 @@ double BoxModus::initial_conditions(Particles *particles,
     }
     double nb_init = 0.0, ns_init = 0.0;
     for (const auto &mult : average_multipl_) {
-      const int thermal_mult_int = Random::poisson(mult.second);
+      const int thermal_mult_int = random::poisson(mult.second);
       particles->create(thermal_mult_int, mult.first);
       nb_init += mult.second * mult.first.baryon_number();
       ns_init += mult.second * mult.first.strangeness();

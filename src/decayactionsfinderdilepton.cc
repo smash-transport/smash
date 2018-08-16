@@ -7,13 +7,13 @@
  *
  */
 
-#include "include/decayactionsfinderdilepton.h"
+#include "smash/decayactionsfinderdilepton.h"
 
-#include "include/constants.h"
-#include "include/cxx14compat.h"
-#include "include/decayactiondilepton.h"
-#include "include/decaymodes.h"
-#include "include/particles.h"
+#include "smash/constants.h"
+#include "smash/cxx14compat.h"
+#include "smash/decayactiondilepton.h"
+#include "smash/decaymodes.h"
+#include "smash/particles.h"
 
 namespace smash {
 

@@ -5,19 +5,19 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#include "include/grandcan_thermalizer.h"
+#include "smash/grandcan_thermalizer.h"
 
 #include <time.h>
 
-#include "include/angles.h"
-#include "include/bessel_sampler.h"
-#include "include/cxx14compat.h"
-#include "include/distributions.h"
-#include "include/forwarddeclarations.h"
-#include "include/logging.h"
-#include "include/particles.h"
-#include "include/quantumnumbers.h"
-#include "include/random.h"
+#include "smash/angles.h"
+#include "smash/bessel_sampler.h"
+#include "smash/cxx14compat.h"
+#include "smash/distributions.h"
+#include "smash/forwarddeclarations.h"
+#include "smash/logging.h"
+#include "smash/particles.h"
+#include "smash/quantumnumbers.h"
+#include "smash/random.h"
 
 namespace smash {
 
@@ -140,11 +140,11 @@ void GrandCanThermalizer::update_lattice(const Particles &particles,
 }
 
 ThreeVector GrandCanThermalizer::uniform_in_cell() const {
-  return ThreeVector(Random::uniform(-0.5 * lat_->cell_sizes()[0],
+  return ThreeVector(random::uniform(-0.5 * lat_->cell_sizes()[0],
                                      +0.5 * lat_->cell_sizes()[0]),
-                     Random::uniform(-0.5 * lat_->cell_sizes()[1],
+                     random::uniform(-0.5 * lat_->cell_sizes()[1],
                                      +0.5 * lat_->cell_sizes()[1]),
-                     Random::uniform(-0.5 * lat_->cell_sizes()[2],
+                     random::uniform(-0.5 * lat_->cell_sizes()[2],
                                      +0.5 * lat_->cell_sizes()[2]));
 }
 
@@ -226,7 +226,7 @@ void GrandCanThermalizer::sample_multinomial(HadronClass particle_class,
       continue;
     }
     const double p = mult_sort_[i_type] / sum;
-    mult_int_[i_type] = Random::binomial(N_to_sample, p);
+    mult_int_[i_type] = random::binomial(N_to_sample, p);
     /// \todo (oliiny) what to do with this output?
     /*std::cout << eos_typelist_[i_type]->name() <<
              ": mult_sort = " << mult_sort_[i_type] <<
@@ -257,7 +257,7 @@ void GrandCanThermalizer::sample_in_random_cell_BF_algo(ParticleList &plist,
 
   for (int i = 0; i < mult_int_[type_index]; i++) {
     // Choose random cell, probability = N_in_cell/N_total
-    double r = Random::uniform(0.0, N_total_in_cells_);
+    double r = random::uniform(0.0, N_total_in_cells_);
     double partial_sum = 0.0;
     int index_only_thermalized = -1;
     while (partial_sum < r) {
@@ -333,8 +333,8 @@ void GrandCanThermalizer::thermalize_BF_algo(QuantumNumbers &conserved_initial,
       NS_antiS = bessel_sampler_S.sample();
     } else if (algorithm_ == ThermalizationAlgorithm::UnbiasedBF) {
       NS_antiS = std::make_pair(
-          Random::poisson(mult_class(HadronClass::PositiveSMeson)),
-          Random::poisson(mult_class(HadronClass::NegativeSMeson)));
+          random::poisson(mult_class(HadronClass::PositiveSMeson)),
+          random::poisson(mult_class(HadronClass::NegativeSMeson)));
       if (NS_antiS.first - NS_antiS.second !=
           conserved_initial.strangeness() - S_sampled) {
         continue;
@@ -358,8 +358,8 @@ void GrandCanThermalizer::thermalize_BF_algo(QuantumNumbers &conserved_initial,
       NC_antiC = bessel_sampler_C.sample();
     } else if (algorithm_ == ThermalizationAlgorithm::UnbiasedBF) {
       NC_antiC = std::make_pair(
-          Random::poisson(mult_class(HadronClass::PositiveQZeroSMeson)),
-          Random::poisson(mult_class(HadronClass::NegativeQZeroSMeson)));
+          random::poisson(mult_class(HadronClass::PositiveQZeroSMeson)),
+          random::poisson(mult_class(HadronClass::NegativeQZeroSMeson)));
       if (NC_antiC.first - NC_antiC.second !=
           conserved_initial.charge() - ch_sampled) {
         continue;
@@ -370,7 +370,7 @@ void GrandCanThermalizer::thermalize_BF_algo(QuantumNumbers &conserved_initial,
     sample_multinomial(HadronClass::NegativeQZeroSMeson, NC_antiC.second);
     sample_multinomial(
         HadronClass::ZeroQZeroSMeson,
-        Random::poisson(mult_class(HadronClass::ZeroQZeroSMeson)));
+        random::poisson(mult_class(HadronClass::ZeroQZeroSMeson)));
 
     for (size_t itype = 0; itype < N_sorts_; itype++) {
       sample_in_random_cell_BF_algo(sampled_list_, time, itype);

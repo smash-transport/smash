@@ -7,13 +7,13 @@
  *
  */
 
-#include "include/inputfunctions.h"
+#include "smash/inputfunctions.h"
 
 #include <sstream>
 #include <vector>
 
-#include "include/logging.h"
-#include "include/stringfunctions.h"
+#include "smash/logging.h"
+#include "smash/stringfunctions.h"
 
 namespace smash {
 

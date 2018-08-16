@@ -7,10 +7,10 @@
  *
  */
 
-#include "include/density.h"
-#include "include/constants.h"
-#include "include/logging.h"
-#include "include/particles.h"
+#include "smash/density.h"
+#include "smash/constants.h"
+#include "smash/logging.h"
+#include "smash/particles.h"
 
 namespace smash {
 
@@ -91,6 +91,7 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
  *   ThreeVector and ThreeVector currently comes only as double.
  *   Density itself is double for uniformity: if gradient is double,
  *   density should also be.
+ * \tparam T ParticlesContainer
  * \return (density in the local Eckart frame [fm\$f^{-3}\$f],
  *          \f$ \nabla\cdots\rho \f$ or a 0 3-vector,
  *          \f$ \partial_t \vec j\f$ or a 0 3-vector,

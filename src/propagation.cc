@@ -7,13 +7,13 @@
  *
  */
 
-#include "include/propagation.h"
+#include "smash/propagation.h"
 
-#include "include/boxmodus.h"
-#include "include/collidermodus.h"
-#include "include/listmodus.h"
-#include "include/logging.h"
-#include "include/spheremodus.h"
+#include "smash/boxmodus.h"
+#include "smash/collidermodus.h"
+#include "smash/listmodus.h"
+#include "smash/logging.h"
+#include "smash/spheremodus.h"
 
 namespace smash {
 

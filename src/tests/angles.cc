@@ -9,7 +9,7 @@
 
 #include "unittest.h"  // This include has to be first
 
-#include "../include/angles.h"
+#include "../include/smash/angles.h"
 
 using namespace smash;
 

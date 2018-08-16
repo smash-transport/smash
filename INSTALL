@@ -12,9 +12,9 @@ required C++11 features):
 - clang >= 3.2
 
 It requires the following tools & libraries:
-- cmake
-- the GNU Scientific Library
-- the Eigen library for linear algebra (see http://eigen.tuxfamily.org)
+- cmake >= 2.8.11
+- the GNU Scientific Library >= 1.15
+- the Eigen3 library for linear algebra (see http://eigen.tuxfamily.org)
 - boost filesystem >= 1.49
 
 Further tools that can be helpful (mainly for development):
@@ -44,6 +44,40 @@ Run it with specific settings:
 
     vi config.yaml
     ./smash
+
+
+Run SMASH with example input files
+------------------------------------
+
+SMASH ships with example configuration files for the collider, box,
+sphere and list modus. By default, i.e. by running ./smash, the simulation is
+set up by means of a collider configuration file, called "config.yaml" and
+the default particles and decaymodes files, "particles.txt" and
+"decaymodes.txt". They are located in /input.
+Additionally, example configuration files for the box, sphere and list modus can
+be found in the respective directories /input/{box,sphere,list}. In case
+of a box simulation, the default particles and decaymodes files need to be
+modified to allow for equilibration. These are also stored in
+/input/box. For the list modus, an input list file to be read in is
+required. This file, "example_list0", is located in /input/list.
+
+To run SMASH with a manually specified configuration file, use the "-i" command.
+For example, for the sphere or list example file:
+
+    ./smash -i ../input/sphere/config.yaml
+
+    ./smash -i ../input/list/config.yaml
+
+
+To further use non-default particles and decaymodes files, the "-p"
+and "-d" options are necessary. For the default box, this means:
+
+    ./smash -i ../input/box/config.yaml -p ../input/box/particles.txt
+    -d ../input/box/decaymodes.txt
+
+All command line options can be viewed with
+
+    ./smash -h
 
 
 Size of the code
@@ -257,7 +291,7 @@ This creates a folder named "gsl-[version_number]" called $GSL here.
 Here N is the number of cores to use in the "make" command. When compiling
 SMASH, run cmake with
 
-    cmake -DCMAKE_PREFIX_PATH=$GSL ..
+    cmake -DGSL_ROOT_DIR=$GSL ..
 
 Note: In case of problems, make sure to start with a clean build folder.
 */

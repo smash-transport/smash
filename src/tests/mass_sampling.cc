@@ -10,11 +10,11 @@
 #include "histogram.h"
 #include "setup.h"
 
-#include "../include/decayaction.h"
-#include "../include/decaymodes.h"
-#include "../include/formfactors.h"
-#include "../include/kinematics.h"
-#include "../include/particletype.h"
+#include "../include/smash/decayaction.h"
+#include "../include/smash/decaymodes.h"
+#include "../include/smash/formfactors.h"
+#include "../include/smash/kinematics.h"
+#include "../include/smash/particletype.h"
 
 using namespace smash;
 

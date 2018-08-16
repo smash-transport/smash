@@ -7,24 +7,35 @@
  *
  */
 
-#include "include/scatteractionphoton.h"
+#include "smash/scatteractionphoton.h"
 
 #include <algorithm>
 
-#include "include/angles.h"
-#include "include/constants.h"
-#include "include/crosssectionsphoton.h"
-#include "include/cxx14compat.h"
-#include "include/forwarddeclarations.h"
-#include "include/kinematics.h"
-#include "include/outputinterface.h"
-#include "include/particletype.h"
-#include "include/pdgcode.h"
-#include "include/pow.h"
-#include "include/random.h"
-#include "include/tabulation.h"
+#include "smash/angles.h"
+#include "smash/constants.h"
+#include "smash/crosssectionsphoton.h"
+#include "smash/cxx14compat.h"
+#include "smash/forwarddeclarations.h"
+#include "smash/kinematics.h"
+#include "smash/outputinterface.h"
+#include "smash/particletype.h"
+#include "smash/pdgcode.h"
+#include "smash/pow.h"
+#include "smash/random.h"
+#include "smash/tabulation.h"
 
 namespace smash {
+
+ScatterActionPhoton::ScatterActionPhoton(const ParticleList &in,
+                    const double time,
+                    const int n_frac_photons,
+                    const double hadronic_cross_section_input)
+    : ScatterAction(in[0], in[1], time),
+      reac_(photon_reaction_type(in)),
+      number_of_fractional_photons_(n_frac_photons),
+      hadron_out_t_(outgoing_hadron_type(in)),
+      hadron_out_mass_(sample_out_hadron_mass(hadron_out_t_)),
+      hadronic_cross_section_(hadronic_cross_section_input) {}
 
 ScatterActionPhoton::ReactionType ScatterActionPhoton::photon_reaction_type(
     const ParticleList &in) {
@@ -188,6 +199,15 @@ void ScatterActionPhoton::generate_final_state() {
 
   FourVector middle_point = get_interaction_point();
 
+  // t is defined to be the momentum exchanged between the rho meson and the
+  // photon in pi + rho -> pi + photon channel. Therefore,
+  // get_t_range needs to be called with m2 being the rho mass instead of the
+  // pion mass. So, particles 1 and 2 are swapped if necessary.
+
+  if (!incoming_particles_[0].pdgcode().is_pion()) {
+    std::swap(incoming_particles_[0], incoming_particles_[1]);
+  }
+
   // 2->2 inelastic scattering
   // Sample the particle momenta in CM system
   const double m1 = incoming_particles_[0].effective_mass();
@@ -203,14 +223,14 @@ void ScatterActionPhoton::generate_final_state() {
   const double pcm_in = cm_momentum();
   const double pcm_out = pCM(sqrts, m_out, 0.0);
 
-  const double t = Random::uniform(t1, t2);
+  const double t = random::uniform(t1, t2);
 
   double costheta = (t - pow_int(m2, 2) +
                      0.5 * (s + pow_int(m2, 2) - pow_int(m1, 2)) *
                          (s - pow_int(m_out, 2)) / s) /
                     (pcm_in * (s - pow_int(m_out, 2)) / sqrts);
 
-  Angles phitheta(Random::uniform(0.0, twopi), costheta);
+  Angles phitheta(random::uniform(0.0, twopi), costheta);
   outgoing_particles_[0].set_4momentum(hadron_out_mass_,
                                        phitheta.threevec() * pcm_out);
   outgoing_particles_[1].set_4momentum(0.0, -phitheta.threevec() * pcm_out);
@@ -233,9 +253,9 @@ void ScatterActionPhoton::generate_final_state() {
   // Weighing of the fractional photons
   if (number_of_fractional_photons_ > 1) {
     weight_ = diff_xs * (t2 - t1) /
-              (number_of_fractional_photons_ * hadronic_cross_section_);
+              (number_of_fractional_photons_ * hadronic_cross_section());
   } else {
-    weight_ = proc->weight() / hadronic_cross_section_;
+    weight_ = proc->weight() / hadronic_cross_section();
   }
   // Photons are not really part of the normal processes, so we have to set a
   // constant arbitrary number.

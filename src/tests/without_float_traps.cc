@@ -11,7 +11,7 @@
 
 // FPE does not work with clang, so don't test it
 #if !defined __clang__
-#include "../include/fpenvironment.h"
+#include "../include/smash/fpenvironment.h"
 
 #include <csetjmp>
 #include <csignal>

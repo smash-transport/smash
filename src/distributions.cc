@@ -6,16 +6,16 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
-#include "include/distributions.h"
+#include "smash/distributions.h"
 
 #include <gsl/gsl_sf_bessel.h>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
 
-#include "include/constants.h"
-#include "include/logging.h"
-#include "include/random.h"
+#include "smash/constants.h"
+#include "smash/logging.h"
+#include "smash/random.h"
 
 namespace smash {
 
@@ -106,12 +106,12 @@ double sample_momenta_non_eq_mass(const double temperature, const double mass) {
   double energy, momentum_radial, probability;
   do {
     // sample uniformly in momentum, DONT sample uniformly in energy!
-    momentum_radial = Random::uniform(mom_min, mom_max);
+    momentum_radial = random::uniform(mom_min, mom_max);
     // Energy by on-shell condition
     energy = std::sqrt(momentum_radial * momentum_radial + mass * mass);
     probability = density_integrand_mass(
         energy, momentum_radial * momentum_radial, temperature);
-  } while (Random::uniform(0., probability_max) > probability);
+  } while (random::uniform(0., probability_max) > probability);
 
   return momentum_radial;
 }
@@ -144,11 +144,11 @@ double sample_momenta_1M_IC(const double temperature, const double mass) {
    * random momenta and random probability need to be below the distribution */
   double momentum_radial_sqr, probability;
   do {
-    double energy = Random::uniform(energy_min, energy_max);
+    double energy = random::uniform(energy_min, energy_max);
     momentum_radial_sqr = (energy - mass) * (energy + mass);
     probability =
         density_integrand_1M_IC(energy, momentum_radial_sqr, temperature);
-  } while (Random::uniform(0., probability_max) > probability);
+  } while (random::uniform(0., probability_max) > probability);
 
   return std::sqrt(momentum_radial_sqr);
 }
@@ -181,11 +181,11 @@ double sample_momenta_2M_IC(const double temperature, const double mass) {
    * random momenta and random probability need to be below the distribution */
   double momentum_radial_sqr, probability;
   do {
-    double energy = Random::uniform(energy_min, energy_max);
+    double energy = random::uniform(energy_min, energy_max);
     momentum_radial_sqr = (energy - mass) * (energy + mass);
     probability =
         density_integrand_2M_IC(energy, momentum_radial_sqr, temperature);
-  } while (Random::uniform(0., probability_max) > probability);
+  } while (random::uniform(0., probability_max) > probability);
 
   return std::sqrt(momentum_radial_sqr);
 }
@@ -213,39 +213,39 @@ double sample_momenta_from_thermal(const double temperature,
   // when temperature/mass
   if (temperature > 0.6 * mass) {
     while (true) {
-      const double a = -std::log(Random::canonical_nonzero());
-      const double b = -std::log(Random::canonical_nonzero());
-      const double c = -std::log(Random::canonical_nonzero());
+      const double a = -std::log(random::canonical_nonzero());
+      const double b = -std::log(random::canonical_nonzero());
+      const double c = -std::log(random::canonical_nonzero());
       momentum_radial = temperature * (a + b + c);
       energy = sqrt(momentum_radial * momentum_radial + mass * mass);
-      if (Random::canonical() < exp((momentum_radial - energy) / temperature)) {
+      if (random::canonical() < exp((momentum_radial - energy) / temperature)) {
         break;
       }
     }
   } else {
     while (true) {
-      const double r0 = Random::canonical();
+      const double r0 = random::canonical();
       const double I1 = mass * mass;
       const double I2 = 2.0 * mass * temperature;
       const double I3 = 2.0 * temperature * temperature;
       const double Itot = I1 + I2 + I3;
       double K;
       if (r0 < I1 / Itot) {
-        const double r1 = Random::canonical_nonzero();
+        const double r1 = random::canonical_nonzero();
         K = -temperature * std::log(r1);
       } else if (r0 < (I1 + I2) / Itot) {
-        const double r1 = Random::canonical_nonzero();
-        const double r2 = Random::canonical_nonzero();
+        const double r1 = random::canonical_nonzero();
+        const double r2 = random::canonical_nonzero();
         K = -temperature * std::log(r1 * r2);
       } else {
-        const double r1 = Random::canonical_nonzero();
-        const double r2 = Random::canonical_nonzero();
-        const double r3 = Random::canonical_nonzero();
+        const double r1 = random::canonical_nonzero();
+        const double r2 = random::canonical_nonzero();
+        const double r3 = random::canonical_nonzero();
         K = -temperature * std::log(r1 * r2 * r3);
       }
       energy = K + mass;
       momentum_radial = sqrt((energy + mass) * (energy - mass));
-      if (Random::canonical() < momentum_radial / energy) {
+      if (random::canonical() < momentum_radial / energy) {
         break;
       }
     }
@@ -255,10 +255,10 @@ double sample_momenta_from_thermal(const double temperature,
 
 double sample_momenta_IC_ES(const double temperature) {
   double momentum_radial;
-  const double a = -std::log(Random::canonical_nonzero());
-  const double b = -std::log(Random::canonical_nonzero());
-  const double c = -std::log(Random::canonical_nonzero());
-  const double d = -std::log(Random::canonical_nonzero());
+  const double a = -std::log(random::canonical_nonzero());
+  const double b = -std::log(random::canonical_nonzero());
+  const double c = -std::log(random::canonical_nonzero());
+  const double d = -std::log(random::canonical_nonzero());
   momentum_radial = (3.0 / 4.0) * temperature * (a + b + c + d);
 
   return momentum_radial;

@@ -7,7 +7,7 @@
  *
  */
 
-#include "include/fpenvironment.h"
+#include "smash/fpenvironment.h"
 
 #if defined __SSE__
 #include <xmmintrin.h>
@@ -15,7 +15,7 @@
 
 #include <csignal>
 
-#include "include/logging.h"
+#include "smash/logging.h"
 
 namespace smash {
 
@@ -50,8 +50,8 @@ bool enable_float_traps(int femask) {
   // the SSE CSR has the bit positions 7 bit positions further to the left
   femask <<= 7;
 
-  // get the current CSR, mask of the relevant bits, and load it back into the
-  // SSE CSR
+  /* Get the current CSR, mask of the relevant bits, and load it back into the
+   * SSE CSR.*/
   _mm_setcsr(_mm_getcsr() & ~femask);
 
   // we did something, so return true
@@ -80,27 +80,27 @@ void setup_default_float_traps() {
       log.warn("Failed to setup trap on domain error.");
     }
 
-    // the result of the earlier floating-point operation was too large to be
-    // representable:
+    /* The result of the earlier floating-point operation was too large to be
+     * representable: */
     if (!enable_float_traps(FE_OVERFLOW)) {
       log.warn("Failed to setup trap on overflow.");
     }
 
-    // There's also FE_UNDERFLOW, where the result of the earlier
-    // floating-point operation was subnormal with a loss of precision.
-    // We do not consider this an error by default.
-    // Furthermore, there's FE_INEXACT, but this traps if "rounding was
-    // necessary to store the result of an earlier floating-point
-    // operation". This is common and not really an error condition.
+    /* There's also FE_UNDERFLOW, where the result of the earlier
+     * floating-point operation was subnormal with a loss of precision.
+     * We do not consider this an error by default.
+     * Furthermore, there's FE_INEXACT, but this traps if "rounding was
+     * necessary to store the result of an earlier floating-point
+     * operation". This is common and not really an error condition. */
   }
 
 // Install the signal handler if we have the functionality.
 #if (defined _POSIX_C_SOURCE && _POSIX_C_SOURCE >= 199309L) || \
     (defined _XOPEN_SOURCE && _XOPEN_SOURCE) ||                \
     (defined _POSIX_SOURCE && _POSIX_SOURCE)
-// The missing-fields-initializers warning says that not all fields of this
-// struct were explicitly initialized. That's exactly what is the intention
-// here, because then they are default-initialized, which is zero.
+/* The missing-fields-initializers warning says that not all fields of this
+ * struct were explicitly initialized. That's exactly what is the intention
+ * here, because then they are default-initialized, which is zero. */
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
   struct sigaction action = {};
   action.sa_flags = SA_SIGINFO;

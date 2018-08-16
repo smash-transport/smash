@@ -6,19 +6,19 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
-#include "include/oscaroutput.h"
+#include "smash/oscaroutput.h"
 
 #include <string>
 
 #include <boost/filesystem.hpp>
 
-#include "include/action.h"
-#include "include/clock.h"
-#include "include/config.h"
-#include "include/configuration.h"
-#include "include/cxx14compat.h"
-#include "include/forwarddeclarations.h"
-#include "include/particles.h"
+#include "smash/action.h"
+#include "smash/clock.h"
+#include "smash/config.h"
+#include "smash/configuration.h"
+#include "smash/cxx14compat.h"
+#include "smash/forwarddeclarations.h"
+#include "smash/particles.h"
 
 namespace smash {
 
@@ -223,7 +223,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
 }
 
 /*!\Userguide
- * \page format_oscar_particlelist Oscar particles format
+ * \page format_oscar_particlelist OSCAR particles format
  * The format follows general block structure of OSCAR format:
  * \ref oscar_general_. There are two kinds of this format -
  * OSCAR2013 and OSCAR1999. Information about OSCAR standard can be found at
@@ -332,7 +332,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * # event ev_num end 0 impact impact_parameter
  * \endcode
  *
- * \page format_oscar_collisions Oscar collisions format
+ * \page format_oscar_collisions OSCAR collisions format
  * The format follows general block structure of OSCAR format:
  * \ref oscar_general_. There are two kinds of this format -
  * OSCAR2013 and OSCAR1999. Information about OSCAR standard can be found at
@@ -449,8 +449,9 @@ void OscarOutput<Format, Contents>::write_particledata(
 namespace {
 /**
  * Helper function that creates the oscar output with the format selected by
- * create_oscar_output (except for Ddleptons and photons).
+ * create_oscar_output (except for dileptons and photons).
  *
+ * \tparam Contents Determines what infomration will be written to the output
  * \param[in] modern_format Use the 1999 or 2013 format
  * \param[in] path Path of output
  * \param[in] out_par Output parameters that hold the output configuration

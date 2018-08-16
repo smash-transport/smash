@@ -7,25 +7,25 @@
  *
  */
 
-#include "include/scatteraction.h"
+#include "smash/scatteraction.h"
 
 #include <cmath>
 
 #include "Pythia8/Pythia.h"
 
-#include "include/action_globals.h"
-#include "include/angles.h"
-#include "include/constants.h"
-#include "include/crosssections.h"
-#include "include/cxx14compat.h"
-#include "include/fpenvironment.h"
-#include "include/kinematics.h"
-#include "include/logging.h"
-#include "include/parametrizations.h"
-#include "include/pdgcode.h"
-#include "include/pow.h"
-#include "include/processstring.h"
-#include "include/random.h"
+#include "smash/action_globals.h"
+#include "smash/angles.h"
+#include "smash/constants.h"
+#include "smash/crosssections.h"
+#include "smash/cxx14compat.h"
+#include "smash/fpenvironment.h"
+#include "smash/kinematics.h"
+#include "smash/logging.h"
+#include "smash/parametrizations.h"
+#include "smash/pdgcode.h"
+#include "smash/pow.h"
+#include "smash/processstring.h"
+#include "smash/random.h"
 
 namespace smash {
 
@@ -288,12 +288,12 @@ void ScatterAction::sample_angles(std::pair<double, double> masses) {
       bb = std::max(Cugnon_bpp(plab), really_small);
       a = 1.;
     }
-    double t = Random::expo(bb, t_range[0], t_range[1]);
-    if (Random::canonical() > 1. / (1. + a)) {
+    double t = random::expo(bb, t_range[0], t_range[1]);
+    if (random::canonical() > 1. / (1. + a)) {
       t = t_range[0] + t_range[1] - t;
     }
     // determine scattering angles in center-of-mass frame
-    phitheta = Angles(2. * M_PI * Random::canonical(),
+    phitheta = Angles(2. * M_PI * random::canonical(),
                       1. - 2. * (t - t_range[0]) / (t_range[1] - t_range[0]));
   } else if (nn_scattering && p_a->pdgcode().is_Delta() &&
              p_b->pdgcode().is_nucleon() &&
@@ -305,11 +305,11 @@ void ScatterAction::sample_angles(std::pair<double, double> masses) {
      * elastic pp scattering, as suggested in \iref{Cugnon:1996kh}. */
     const double plab = plab_from_s(mandelstam_s());
     const double bb = std::max(Cugnon_bpp(plab), really_small);
-    double t = Random::expo(bb, t_range[0], t_range[1]);
-    if (Random::canonical() > 0.5) {
+    double t = random::expo(bb, t_range[0], t_range[1]);
+    if (random::canonical() > 0.5) {
       t = t_range[0] + t_range[1] - t;  // symmetrize
     }
-    phitheta = Angles(2. * M_PI * Random::canonical(),
+    phitheta = Angles(2. * M_PI * random::canonical(),
                       1. - 2. * (t - t_range[0]) / (t_range[1] - t_range[0]));
   } else if (nn_scattering && p_b->pdgcode().is_nucleon() && !isotropic_ &&
              (p_a->type().is_Nstar() || p_a->type().is_Deltastar())) {
@@ -321,12 +321,12 @@ void ScatterAction::sample_angles(std::pair<double, double> masses) {
      *  t_0 in such a case. */
     double t = t_range[0];
     if (a < 30) {
-      t = Random::power(-a, t_range[0], t_range[1]);
+      t = random::power(-a, t_range[0], t_range[1]);
     }
-    if (Random::canonical() > 0.5) {
+    if (random::canonical() > 0.5) {
       t = t_range[0] + t_range[1] - t;  // symmetrize
     }
-    phitheta = Angles(2. * M_PI * Random::canonical(),
+    phitheta = Angles(2. * M_PI * random::canonical(),
                       1. - 2. * (t - t_range[0]) / (t_range[1] - t_range[0]));
   } else {
     /* isotropic angular distribution */
@@ -371,11 +371,15 @@ void ScatterAction::inelastic_scattering() {
   const double t1 = incoming_particles_[1].formation_time();
 
   const size_t index_tmax = (t0 > t1) ? 0 : 1;
+  const double form_time_begin =
+      incoming_particles_[index_tmax].begin_formation_time();
   const double sc =
       incoming_particles_[index_tmax].cross_section_scaling_factor();
   if (t0 > time_of_execution_ || t1 > time_of_execution_) {
-    outgoing_particles_[0].set_formation_time(std::max(t0, t1));
-    outgoing_particles_[1].set_formation_time(std::max(t0, t1));
+    outgoing_particles_[0].set_slow_formation_times(form_time_begin,
+                                                    std::max(t0, t1));
+    outgoing_particles_[1].set_slow_formation_times(form_time_begin,
+                                                    std::max(t0, t1));
     outgoing_particles_[0].set_cross_section_scaling_factor(sc);
     outgoing_particles_[1].set_cross_section_scaling_factor(sc);
   } else {
@@ -409,10 +413,13 @@ void ScatterAction::resonance_formation() {
   const double t1 = incoming_particles_[1].formation_time();
 
   const size_t index_tmax = (t0 > t1) ? 0 : 1;
+  const double begin_form_time =
+      incoming_particles_[index_tmax].begin_formation_time();
   const double sc =
       incoming_particles_[index_tmax].cross_section_scaling_factor();
   if (t0 > time_of_execution_ || t1 > time_of_execution_) {
-    outgoing_particles_[0].set_formation_time(std::max(t0, t1));
+    outgoing_particles_[0].set_slow_formation_times(begin_form_time,
+                                                    std::max(t0, t1));
     outgoing_particles_[0].set_cross_section_scaling_factor(sc);
   } else {
     outgoing_particles_[0].set_formation_time(time_of_execution_);
@@ -501,7 +508,8 @@ void ScatterAction::string_excitation() {
            * the current outgoing particle's formation time, then the latter
            * is overwritten by the former*/
           if (tform_in > tform_out) {
-            outgoing_particles_[i].set_formation_time(tform_in);
+            outgoing_particles_[i].set_slow_formation_times(time_of_execution_,
+                                                            tform_in);
           }
         }
       }

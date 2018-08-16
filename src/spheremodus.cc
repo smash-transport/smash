@@ -15,20 +15,20 @@
 #include <utility>
 #include <vector>
 
-#include "include/algorithms.h"
-#include "include/angles.h"
-#include "include/configuration.h"
-#include "include/constants.h"
-#include "include/distributions.h"
-#include "include/experimentparameters.h"
-#include "include/fourvector.h"
-#include "include/hadgas_eos.h"
-#include "include/logging.h"
-#include "include/macros.h"
-#include "include/particles.h"
-#include "include/random.h"
-#include "include/spheremodus.h"
-#include "include/threevector.h"
+#include "smash/algorithms.h"
+#include "smash/angles.h"
+#include "smash/configuration.h"
+#include "smash/constants.h"
+#include "smash/distributions.h"
+#include "smash/experimentparameters.h"
+#include "smash/fourvector.h"
+#include "smash/hadgas_eos.h"
+#include "smash/logging.h"
+#include "smash/macros.h"
+#include "smash/particles.h"
+#include "smash/random.h"
+#include "smash/spheremodus.h"
+#include "smash/threevector.h"
 
 namespace smash {
 
@@ -165,7 +165,7 @@ double SphereModus::initial_conditions(Particles *particles,
     }
     double nb_init = 0.0, ns_init = 0.0;
     for (const auto &mult : average_multipl_) {
-      const int thermal_mult_int = Random::poisson(mult.second);
+      const int thermal_mult_int = random::poisson(mult.second);
       particles->create(thermal_mult_int, mult.first);
       nb_init += mult.second * mult.first.baryon_number();
       ns_init += mult.second * mult.first.strangeness();
@@ -211,7 +211,7 @@ double SphereModus::initial_conditions(Particles *particles,
     momentum_total += data.momentum();
     /* uniform sampling in a sphere with radius r */
     double position_radial;
-    position_radial = std::cbrt(Random::canonical()) * radius_;
+    position_radial = std::cbrt(random::canonical()) * radius_;
     Angles pos_phitheta;
     pos_phitheta.distribute_isotropically();
     data.set_4position(

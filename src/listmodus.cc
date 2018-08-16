@@ -7,7 +7,7 @@
  *
  */
 
-#include "include/listmodus.h"
+#include "smash/listmodus.h"
 
 #include <cmath>
 #include <cstdio>
@@ -22,19 +22,19 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
-#include "include/algorithms.h"
-#include "include/angles.h"
-#include "include/configuration.h"
-#include "include/constants.h"
-#include "include/distributions.h"
-#include "include/experimentparameters.h"
-#include "include/fourvector.h"
-#include "include/inputfunctions.h"
-#include "include/logging.h"
-#include "include/macros.h"
-#include "include/particles.h"
-#include "include/random.h"
-#include "include/threevector.h"
+#include "smash/algorithms.h"
+#include "smash/angles.h"
+#include "smash/configuration.h"
+#include "smash/constants.h"
+#include "smash/distributions.h"
+#include "smash/experimentparameters.h"
+#include "smash/fourvector.h"
+#include "smash/inputfunctions.h"
+#include "smash/logging.h"
+#include "smash/macros.h"
+#include "smash/particles.h"
+#include "smash/random.h"
+#include "smash/threevector.h"
 
 namespace smash {
 
@@ -44,17 +44,14 @@ namespace smash {
  * The list modus provides a modus for hydro afterburner calculations. It takes
  * files with a list of particles in \ref oscar2013_format "Oscar 2013 format"
  * as an input. These particles are treated as a starting setup. Multiple events
- per file are supported. The input
+ * per file are supported. The input
  * parameters are:
  *
  * \key File_Directory (string, required):\n
- * Directory for the external particle lists
+ * Directory for the external particle lists.
  *
  * \key File_Prefix    (string, required):\n
- * Prefix for the external particle lists file
- *
- * \key Start_Time (double, required):\n
- * Starting time of List calculation.
+ * Prefix for the external particle lists file.
  *
  * \key Shift_Id (int, required):\n
  * Starting id for file_id_, i.e. the first file which is read.
@@ -65,7 +62,7 @@ namespace smash {
  * The following example sets up an afterburner simulation for a set of particle
  * files located in "particle_lists_in". The files are named as
  * "event{event_id}". SMASH is run once for each event in the folder.
- *\verbatim
+ * \verbatim
  Modi:
      List:
          File_Directory: "particle_lists_in"
@@ -74,13 +71,11 @@ namespace smash {
  \endverbatim
  *
  * It might for some reason be necessary to not run SMASH starting with the
- * first file. In this case, the file_id can be shifted. Additionally, the
- * start time can be manually adjusted.
+ * first file. In this case, the file_id can be shifted.
  *\verbatim
  Modi:
      List:
          Shift_Id: 10
-         Start_Time: 0.0
  \endverbatim
  *
  * \n
@@ -110,8 +105,7 @@ namespace smash {
  */
 
 ListModus::ListModus(Configuration modus_config, const ExperimentParameters &)
-    : start_time_(modus_config.take({"List", "Start_Time"})),
-      shift_id_(modus_config.take({"List", "Shift_Id"})) {
+    : shift_id_(modus_config.take({"List", "Shift_Id"})) {
   std::string fd = modus_config.take({"List", "File_Directory"});
   particle_list_file_directory_ = fd;
 
@@ -130,43 +124,101 @@ std::ostream &operator<<(std::ostream &out, const ListModus &m) {
   return out;
 }
 
-std::pair<bool, double> ListModus::check_formation_time_(
-    const std::string &particle_list) {
+void ListModus::backpropagate_to_same_time(Particles &particles) {
+  /* (1) If particles are already at the same time - don't touch them
+         AND start at the start_time_ from the config. */
   double earliest_formation_time = DBL_MAX;
   double formation_time_difference = 0.0;
   double reference_formation_time = 0.0;  // avoid compiler warning
-  for (const Line &line : line_parser(particle_list)) {
-    std::istringstream lineinput(line.text);
-    double t;
-    lineinput >> t;
+  bool first_particle = true;
+  for (const auto &particle : particles) {
+    const double t = particle.position().x0();
     if (t < earliest_formation_time) {
       earliest_formation_time = t;
     }
-
-    if (line.number == 0) {
+    if (first_particle) {
       reference_formation_time = t;
+      first_particle = false;
     } else {
       formation_time_difference += std::abs(t - reference_formation_time);
     }
   }
+  /* (2) If particles are NOT at the same time -> anti-stream them to
+         the earliest time (Note: not to the start_time_ set by config) */
+  bool anti_streaming_needed = (formation_time_difference > really_small);
+  start_time_ = earliest_formation_time;
+  if (anti_streaming_needed) {
+    for (auto &particle : particles) {
+      /* for hydro output where formation time is different */
+      const double t = particle.position().x0();
+      const double delta_t = t - start_time_;
+      const ThreeVector r =
+          particle.position().threevec() - delta_t * particle.velocity();
+      particle.set_4position(FourVector(start_time_, r));
+      particle.set_formation_time(t);
+      particle.set_cross_section_scaling_factor(0.0);
+    }
+  }
+}
 
-  bool anti_streaming_needed =
-      (formation_time_difference > really_small) ? true : false;
-  return std::make_pair(anti_streaming_needed, earliest_formation_time);
+void ListModus::try_create_particle(Particles &particles, PdgCode pdgcode,
+                                    double t, double x, double y, double z,
+                                    double mass, double E, double px, double py,
+                                    double pz) {
+  constexpr int max_warns_precision = 10, max_warn_mass_consistency = 10;
+  const auto &log = logger<LogArea::List>();
+  try {
+    ParticleData &particle = particles.create(pdgcode);
+    // SMASH mass versus input mass consistency check
+    if (particle.type().is_stable() &&
+        std::abs(mass - particle.pole_mass()) > really_small) {
+      if (n_warns_precision_ < max_warns_precision) {
+        log.warn() << "Provided mass of " << particle.type().name() << " = "
+                   << mass << " [GeV] is inconsistent with SMASH value = "
+                   << particle.pole_mass() << ". Forcing E = sqrt(p^2 + m^2)"
+                   << ", where m is SMASH mass.";
+        n_warns_precision_++;
+      } else if (n_warns_precision_ == max_warns_precision) {
+        log.warn(
+            "Further warnings about SMASH mass versus input mass"
+            " inconsistencies will be suppressed.");
+        n_warns_precision_++;
+      }
+      particle.set_4momentum(mass, ThreeVector(px, py, pz));
+    }
+    particle.set_4momentum(FourVector(E, px, py, pz));
+    // On-shell condition consistency check
+    if (std::abs(particle.momentum().sqr() - mass * mass) > really_small) {
+      if (n_warns_mass_consistency_ < max_warn_mass_consistency) {
+        log.warn() << "Provided 4-momentum " << particle.momentum() << " and "
+                   << " mass " << mass << " do not satisfy E^2 - p^2 = m^2."
+                   << " This may originate from the lack of numerical"
+                   << " precision in the input. Setting E to sqrt(p^2 + m^2).";
+        n_warns_mass_consistency_++;
+      } else if (n_warns_mass_consistency_ == max_warn_mass_consistency) {
+        log.warn(
+            "Further warnings about E != sqrt(p^2 + m^2) will"
+            " be suppressed.");
+        n_warns_mass_consistency_++;
+      }
+      particle.set_4momentum(mass, ThreeVector(px, py, pz));
+    }
+    // Set spatial coordinates, they will later be backpropagated if needed
+    particle.set_4position(FourVector(t, x, y, z));
+    particle.set_formation_time(t);
+    particle.set_cross_section_scaling_factor(1.0);
+  } catch (ParticleType::PdgNotFoundFailure) {
+    log.warn() << "While loading external particle lists data, "
+               << "PDG code not found for the particle:\n"
+               << pdgcode << std::endl;
+  }
 }
 
 /* initial_conditions - sets particle data for @particles */
 double ListModus::initial_conditions(Particles *particles,
                                      const ExperimentParameters &) {
   const auto &log = logger<LogArea::List>();
-
   std::string particle_list = next_event_();
-
-  auto check = check_formation_time_(particle_list);
-  bool anti_streaming_needed = std::get<0>(check);
-  start_time_ = std::get<1>(check);
-
-  constexpr int max_warns_precision = 10, max_warn_mass_consistency = 10;
 
   for (const Line &line : line_parser(particle_list)) {
     std::istringstream lineinput(line.text);
@@ -175,7 +227,6 @@ double ListModus::initial_conditions(Particles *particles,
     PdgCode pdgcode;
     lineinput >> t >> x >> y >> z >> mass >> E >> px >> py >> pz >> pdgcode >>
         id >> charge;
-
     if (lineinput.fail()) {
       throw LoadFailure(
           build_error_string("While loading external particle lists data:\n"
@@ -183,72 +234,16 @@ double ListModus::initial_conditions(Particles *particles,
                              "expected data types.",
                              line));
     }
-
     log.debug("Particle ", pdgcode, " (x,y,z)= (", x, ", ", y, ", ", z, ")");
 
-    try {
-      ParticleData &particle = particles->create(pdgcode);
-      // Charge consistency check
-      if (pdgcode.charge() != charge) {
-        log.error() << "Charge of pdg = " << pdgcode << " != " << charge;
-        throw std::invalid_argument("Inconsistent input (charge).");
-      }
-      // SMASH mass versus input mass consistency check
-      if (particle.type().is_stable() &&
-          std::abs(mass - particle.pole_mass()) > really_small) {
-        if (n_warns_precision_ < max_warns_precision) {
-          log.warn() << "Provided mass of " << particle.type().name() << " = "
-                     << mass << " [GeV] is inconsistent with SMASH value = "
-                     << particle.pole_mass() << ". Forcing E = sqrt(p^2 + m^2)"
-                     << ", where m is SMASH mass.";
-          n_warns_precision_++;
-        } else if (n_warns_precision_ == max_warns_precision) {
-          log.warn(
-              "Further warnings about SMASH mass versus input mass"
-              " inconsistencies will be suppressed.");
-          n_warns_precision_++;
-        }
-        particle.set_4momentum(mass, ThreeVector(px, py, pz));
-      }
-      particle.set_4momentum(FourVector(E, px, py, pz));
-      // On-shell condition consistency check
-      if (std::abs(particle.momentum().sqr() - mass * mass) > really_small) {
-        if (n_warns_mass_consistency_ < max_warn_mass_consistency) {
-          log.warn()
-              << "Provided 4-momentum " << particle.momentum() << " and "
-              << " mass " << mass << " do not satisfy E^2 - p^2 = m^2."
-              << " This may originate from the lack of numerical"
-              << " precision in the input. Setting E to sqrt(p^2 + m^2).";
-          n_warns_mass_consistency_++;
-        } else if (n_warns_mass_consistency_ == max_warn_mass_consistency) {
-          log.warn(
-              "Further warnings about E != sqrt(p^2 + m^2) will"
-              " be suppressed.");
-          n_warns_mass_consistency_++;
-        }
-        particle.set_4momentum(mass, ThreeVector(px, py, pz));
-      }
-      if (anti_streaming_needed) {
-        /* for hydro output where formation time is different */
-        double delta_t = t - start_time_;
-        FourVector start_timespace =
-            FourVector(t, x, y, z) - delta_t * FourVector(E, px, py, pz) / E;
-        particle.set_4position(start_timespace);
-        particle.set_formation_time(t);
-        particle.set_cross_section_scaling_factor(0.0);
-      } else {
-        /* for smash output where formation time is the same */
-        particle.set_4position(FourVector(t, x, y, z));
-        particle.set_formation_time(t);
-        particle.set_cross_section_scaling_factor(1.0);
-      }
-    } catch (ParticleType::PdgNotFoundFailure) {
-      log.warn() << "While loading external particle lists data, "
-                 << "PDG code not found for the particle:\n"
-                 << line.text << std::endl;
+    // Charge consistency check
+    if (pdgcode.charge() != charge) {
+      log.error() << "Charge of pdg = " << pdgcode << " != " << charge;
+      throw std::invalid_argument("Inconsistent input (charge).");
     }
+    try_create_particle(*particles, pdgcode, t, x, y, z, mass, E, px, py, pz);
   }
-
+  backpropagate_to_same_time(*particles);
   event_id_++;
 
   return start_time_;

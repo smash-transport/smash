@@ -11,8 +11,8 @@
 
 #include "setup.h"
 
-#include "../include/grid.h"
-#include "../include/logging.h"
+#include "../include/smash/grid.h"
+#include "../include/smash/logging.h"
 
 #include <set>
 #include <unordered_set>
@@ -197,7 +197,7 @@ TEST(periodic_grid) {
       const double min_cell_length = minimal_cell_length(testparticles);
       constexpr double length = 10;
       Particles list;
-      auto random_value = Random::make_uniform_distribution(0., 9.99);
+      auto random_value = random::make_uniform_distribution(0., 9.99);
       for (auto n = nparticles; n; --n) {
         list.insert(Test::smashon(
             Position{0., random_value(), random_value(), random_value()},
