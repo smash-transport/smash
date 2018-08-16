@@ -186,10 +186,10 @@ class StringProcess {
                 double gluon_beta, double gluon_pmin,
                 double quark_alpha, double quark_beta,
                 double strange_supp, double diquark_supp,
-                double sigma_perp,
-                double stringz_a, double stringz_b,
-                double string_sigma_T, double factor_t_form,
-                bool use_yoyo_model);
+                double sigma_perp, double leading_frag_mean,
+                double leading_frag_width, double stringz_a,
+                double stringz_b,  double string_sigma_T,
+                double factor_t_form, bool use_yoyo_model);
 
   /**
    * Common setup of PYTHIA objects for soft and hard string routines
