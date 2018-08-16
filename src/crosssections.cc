@@ -1626,10 +1626,6 @@ CollisionBranchList CrossSections::string_excitation(
 
   /* Get mapped PDG id for evaluation of the parametrized cross sections
    * for diffractive processes.
-   * Positively charged baryons are mapped onto proton and other baryons are
-   * mapped onto neutrons. Same rule applies for anti-baryons.
-   * Positively (negatively) charged mesons are mapped onto pi+ (pi-).
-   * Neutral mesons are mapped onto pi0.
    * This must be rescaled according to additive quark model
    * in the case of exotic hadrons.
    * Also calculate the multiplicative factor for AQM
@@ -1638,27 +1634,7 @@ CollisionBranchList CrossSections::string_excitation(
   double AQM_factor = 1.;
   for (int i = 0; i < 2; i++) {
     PdgCode pdg = incoming_particles_[i].type().pdgcode();
-    if (pdg.baryon_number() == 1) {
-      if (pdg.charge() > 0) {
-        pdgid[i] = pdg::p_decimal;
-      } else {
-        pdgid[i] = pdg::n_decimal;
-      }
-    } else if (pdg.baryon_number() == -1) {
-      if (pdg.charge() < 0) {
-        pdgid[i] = -pdg::p_decimal;
-      } else {
-        pdgid[i] = -pdg::n_decimal;
-      }
-    } else {
-      if (pdg.charge() > 0) {
-        pdgid[i] = pdg::pi_p_decimal;
-      } else if (pdg.charge() == 0) {
-        pdgid[i] = pdg::pi_z_decimal;
-      } else {
-        pdgid[i] = pdg::pi_m_decimal;
-      }
-    }
+    pdgid[i] = StringProcess::pdg_map_for_pythia(pdg);
     AQM_factor *= (1. - 0.4 * pdg.frac_strange());
   }
 

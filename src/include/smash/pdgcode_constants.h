@@ -26,12 +26,8 @@ constexpr int photon = 0x22;
 
 /// Proton.
 constexpr int p = 0x2212;
-/// Proton in decimal digits.
-constexpr int p_decimal = 2212;
 /// Neutron.
 constexpr int n = 0x2112;
-/// Neutron in decimal digits.
-constexpr int n_decimal = 2112;
 
 /// N(1535)⁺.
 constexpr int N1535_p = 0x22212;
@@ -64,16 +60,10 @@ constexpr int Omega_m = 0x3334;
 
 /// π⁺.
 constexpr int pi_p = 0x211;
-/// π⁺ in decimal digits.
-constexpr int pi_p_decimal = 211;
 /// π⁰.
 constexpr int pi_z = 0x111;
-/// π⁰ in decimal digits.
-constexpr int pi_z_decimal = 111;
 /// π⁻.
 constexpr int pi_m = -0x211;
-/// π⁻ in decimal digits.
-constexpr int pi_m_decimal = -211;
 
 /// K⁺.
 constexpr int K_p = 0x321;
