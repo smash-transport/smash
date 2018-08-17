@@ -1788,11 +1788,10 @@ double CrossSections::high_energy() const {
       }
       /* Transition between low and high energy is set to be consistent with
        * that defined in decide_string(). */
-      const double region_lower = transit_high_energy::sqrts_range_NN[0];
-      const double region_upper = transit_high_energy::sqrts_range_NN[1];
-      double x = (sqrt_s_ - 0.5 * (region_lower + region_upper)) /
-                 (region_upper - region_lower);
-      double prob_high = 0.5 * (std::sin(M_PI * x) + 1.0);
+      double region_lower = transit_high_energy::sqrts_range_NN[0];
+      double region_upper = transit_high_energy::sqrts_range_NN[1];
+      double prob_high =
+          probability_transit_high(region_lower, region_upper);
       xs = xs_l * (1. - prob_high) + xs_h * prob_high;
     }
   }
@@ -2176,14 +2175,30 @@ bool CrossSections::decide_string(bool strings_switch,
       return false;
     } else {
       // Rescale transition region to [-1, 1]
-      double x = (sqrt_s_ - (region_lower + region_upper) / 2.) /
-                 (region_upper - region_lower);
-      assert(x >= -0.5 && x <= 0.5);
-      double prob_pythia = 0.5 * (std::sin(M_PI * x) + 1.0);
-      assert(prob_pythia >= 0. && prob_pythia <= 1.);
+      double prob_pythia =
+          probability_transit_high(region_lower, region_upper);
       return prob_pythia > random::uniform(0., 1.);
     }
   }
+}
+
+double CrossSections::probability_transit_high(
+    const double region_lower, const double region_upper) const {
+  if (sqrt_s_ < region_lower) {
+    return 0.;
+  }
+
+  if (sqrt_s_ > region_upper) {
+    return 1.;
+  }
+
+  double x = (sqrt_s_ - 0.5 * (region_lower + region_upper)) /
+                   (region_upper - region_lower);
+  assert(x >= -0.5 && x <= 0.5);
+  double prob = 0.5 * (std::sin(M_PI * x) + 1.0);
+  assert(prob >= 0. && prob <= 1.);
+
+  return prob;
 }
 
 }  // namespace smash

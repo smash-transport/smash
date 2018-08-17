@@ -17,13 +17,21 @@
 
 namespace smash {
 
+/// constants related to transition between low and high collision energies
 namespace transit_high_energy {
+  /// transition range in N-pi collisions
   const std::array<double, 2> sqrts_range_Npi = {1.9, 2.2};
-
+  /// transition range in N-N collisions
   const std::array<double, 2> sqrts_range_NN = {4., 5.};
-
+  /**
+   * constant for the lower end of transition region in the case of AQM
+   * this is added to the sum of masses
+   */
   const double sqrts_add_lower = 0.9;
-
+  /**
+   * constant for the upper end of transition region in the case of AQM
+   * this is added to the sum of masses
+   */
   const double sqrts_add_upper = 1.9;
 }
 
@@ -228,6 +236,14 @@ class CrossSections {
    */
   bool decide_string(bool strings_switch, bool use_transition_probability,
                      bool use_AQM, bool treat_nnbar_with_strings) const;
+
+  /**
+   * \param[in] region_lower the lowest sqrts in the transition region [GeV]
+   * \param[in] region_upper the highest sqrts in the transition region [GeV]
+   * \return probability to have the high energy interaction (via string)
+   */
+  double probability_transit_high(
+      const double region_lower, const double region_upper) const;
 
   /**
    * \return if the species of the two incoming particles are allowed to
