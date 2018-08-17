@@ -401,6 +401,10 @@ CollisionBranchList CrossSections::npi_yk() const {
 
   const double s = sqrt_s_ * sqrt_s_;
 
+  /* The cross sections are paramectrized for four isospin channels. The
+   * cross sections of the rest isospin channels are obtained using
+   * Clebsch-Gordan coefficients */
+
   CollisionBranchList process_list;
   switch (pdg_nucleon) {
     case pdg::p: {
