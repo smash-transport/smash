@@ -215,8 +215,8 @@ namespace smash {
  * particles in the final state. When such a reaction happens and the required
  * particle is not defined, SMASH will crash.
  *
- * If you specify an incorrect value (for example an invalid PDG code), SMASH
- * will print an error similar to the following:
+ * If you specify an incorrect value, SMASH will print an error similar to the
+ * following:
  * ```
  * Failed to convert the input string to the expected data types.
  * ```
