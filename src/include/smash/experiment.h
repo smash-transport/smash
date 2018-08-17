@@ -1088,6 +1088,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       if (potentials_->use_symmetry()) {
         jmu_I3_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
                                                   LatticeUpdate::EveryTimestep);
+        UI3_lat_ = make_unique<RectangularLattice<double>>(
+            l, n, origin, periodic, LatticeUpdate::EveryTimestep);
         FI3_lat_ = make_unique<RectangularLattice<std::pair<ThreeVector,
                   ThreeVector>>>(l, n, origin, periodic,
                   LatticeUpdate::EveryTimestep);
