@@ -33,20 +33,15 @@ enum class Parity {
  * \return Inverted parity.
  */
 inline Parity invert_parity(Parity p) {
-  // GCC complains about a code path that does not return.
-  // However, this is a false positive, since we are using a compiler check to
-  // make sure the switch is exhaustive.
-  // This should silence the warnings, but it does not work due to a bug in GCC.
-  // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53431
-  #pragma GCC diagnostic push
-  #pragma GCC diagnostic ignored "-Wreturn-type"
   switch (p) {
     case Parity::Pos:
       return Parity::Neg;
     case Parity::Neg:
       return Parity::Pos;
   }
-  #pragma GCC diagnostic pop
+  // This is unreachable and should be optimized away.
+  // It is required to silence a compiler warning.
+  throw std::runtime_error("unreachable");
 }
 
 /**
