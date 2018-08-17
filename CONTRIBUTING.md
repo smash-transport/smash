@@ -30,6 +30,7 @@ to obtain the files in `doc/user/index.html`
 ### What to document in the code
 
 Code documentation has two important purposes:
+
 * Documenting how interfaces are supposed to be used. Doxygen creates all the boilerplate for this task by parsing the class inheritance and function signatures into nice HTML pages. Via special comments this can be completed to full API documentation.
 * Documenting why things are as they are. Often the how code works is more obvious than why it was done this way and not differently. This information can be very useful to understand design choices and follow along original ideas.
 

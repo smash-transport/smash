@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2017
+ *    Copyright (c) 2015-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -11,8 +11,8 @@
 
 #include "setup.h"
 
-#include "../include/angles.h"
-#include "../include/scatteraction.h"
+#include "../include/smash/angles.h"
+#include "../include/smash/scatteraction.h"
 #include "Pythia8/Pythia.h"
 
 using namespace smash;
@@ -75,7 +75,7 @@ TEST(elastic_collision) {
   constexpr bool strings_switch = false;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act.add_all_scatterings(sigma, true, Test::all_reactions_included(), 0.,
-                          strings_switch, false, nnbar_treatment);
+                          strings_switch, false, false, nnbar_treatment);
 
   // check cross section
   COMPARE(act.cross_section(), sigma);
@@ -150,7 +150,7 @@ TEST(outgoing_valid) {
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act->add_all_scatterings(elastic_parameter, true,
                            Test::all_reactions_included(), 0., strings_switch,
-                           false, nnbar_treatment);
+                           false, false, nnbar_treatment);
 
   VERIFY(act->cross_section() > 0.);
 
@@ -200,7 +200,7 @@ TEST(pythia_running) {
   act = make_unique<ScatterAction>(p1_copy, p2_copy, 0.2, false, 1.0);
   std::unique_ptr<StringProcess> string_process_interface =
       make_unique<StringProcess>(1.0, 1.0, 0.5, 0.001, 1.0, 2.5, 0.217, 0.081,
-                                 0.7, 0.68, 0.98, 0.25);
+                                 0.7, 0.68, 0.98, 0.25, 1.0, true);
   act->set_string_interface(string_process_interface.get());
   VERIFY(act != nullptr);
   COMPARE(p2_copy.type(), ParticleType::find(0x2212));
@@ -209,9 +209,8 @@ TEST(pythia_running) {
   constexpr double elastic_parameter = 0.;  // don't include elastic scattering
   constexpr bool strings_switch = true;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
-  act->add_all_scatterings(elastic_parameter, false,
-                           Test::all_reactions_included(), 0., strings_switch,
-                           false, nnbar_treatment);
+  act->add_all_scatterings(elastic_parameter, false, ReactionsBitSet(), 0.,
+                           strings_switch, false, false, nnbar_treatment);
 
   VERIFY(act->cross_section() > 0.);
 
@@ -219,7 +218,7 @@ TEST(pythia_running) {
   VERIFY(act->is_valid(particles));
   act->generate_final_state();
   VERIFY(act->get_type() != ProcessType::Elastic);
-  VERIFY(act->get_type() == ProcessType::StringSoft);
+  COMPARE(is_string_soft_process(act->get_type()), true) << act->get_type();
   const uint32_t id_process = 1;
   act->perform(&particles, id_process);
   COMPARE(id_process, 1u);
@@ -258,7 +257,6 @@ TEST(no_strings) {
 
   // construct action
   ScatterActionPtr act;
-  ReactionsBitSet incl_2to2;
   act = make_unique<ScatterAction>(p1_copy, p2_copy, 0.2, false, 1.0);
   VERIFY(act != nullptr);
   COMPARE(p2_copy.type(), ParticleType::find(0x2212));
@@ -269,7 +267,7 @@ TEST(no_strings) {
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act->add_all_scatterings(elastic_parameter, false,
                            Test::all_reactions_included(), 0., strings_switch,
-                           false, nnbar_treatment);
+                           false, false, nnbar_treatment);
 
   VERIFY(act->cross_section() > 0.);
 
@@ -310,7 +308,7 @@ TEST(update_incoming) {
   bool string_switch = true;
   NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act.add_all_scatterings(sigma, true, Test::all_reactions_included(), 0.,
-                          string_switch, false, nnbar_treatment);
+                          string_switch, false, false, nnbar_treatment);
 
   // change the position of one of the particles
   const FourVector new_position(0.1, 0., 0., 0.);
@@ -390,7 +388,7 @@ TEST(string_scaling_factors) {
   constexpr double coherence_factor = 0.7;
   ThreeVector evec_coll = ThreeVector(0., 0., 1.);
   int baryon_string =
-      incoming[Random::uniform_int(0, 1)].type().baryon_number();
+      incoming[random::uniform_int(0, 1)].type().baryon_number();
   StringProcess::assign_all_scaling_factors(baryon_string, outgoing, evec_coll,
                                             coherence_factor);
   // outgoing list is now assumed to be sorted by z-velocity (so c,d,e,f)

@@ -7,19 +7,19 @@
 
 #include "unittest.h"  // This include has to be first
 
-#include "../include/angles.h"
-#include "../include/fourvector.h"
+#include "../include/smash/angles.h"
+#include "../include/smash/fourvector.h"
 
 using namespace smash;
 
 constexpr double accuracy = 4e-9;
 Angles dir;
-auto cos_like = Random::make_uniform_distribution(-1.0, +1.0);
+auto cos_like = random::make_uniform_distribution(-1.0, +1.0);
 
 ThreeVector random_velocity();
 ThreeVector random_velocity() {
   dir.distribute_isotropically();
-  double beta = Random::canonical();
+  double beta = random::canonical();
   return dir.threevec() * beta;
 }
 

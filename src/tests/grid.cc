@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2017
+ *    Copyright (c) 2015-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -11,8 +11,8 @@
 
 #include "setup.h"
 
-#include "../include/grid.h"
-#include "../include/logging.h"
+#include "../include/smash/grid.h"
+#include "../include/smash/logging.h"
 
 #include <set>
 #include <unordered_set>
@@ -197,7 +197,7 @@ TEST(periodic_grid) {
       const double min_cell_length = minimal_cell_length(testparticles);
       constexpr double length = 10;
       Particles list;
-      auto random_value = Random::make_uniform_distribution(0., 9.99);
+      auto random_value = random::make_uniform_distribution(0., 9.99);
       for (auto n = nparticles; n; --n) {
         list.insert(Test::smashon(
             Position{0., random_value(), random_value(), random_value()},
@@ -299,7 +299,7 @@ TEST(periodic_grid) {
 
       // Now search through the original list to verify the grid search found
       // everything.
-      auto &&wrap = [&length](ParticleData p, int i) {
+      auto &&wrap = [](ParticleData p, int i) {
         auto pos = p.position();
         if (i > 0) {
           pos[i] += length;

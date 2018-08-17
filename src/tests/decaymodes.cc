@@ -11,9 +11,9 @@
 
 #include "setup.h"
 
-#include "../include/decaymodes.h"
-#include "../include/isoparticletype.h"
-#include "../include/particletype.h"
+#include "../include/smash/decaymodes.h"
+#include "../include/smash/isoparticletype.h"
+#include "../include/smash/particletype.h"
 
 using namespace smash;
 

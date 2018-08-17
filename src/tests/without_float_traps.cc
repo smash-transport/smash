@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2017
+ *    Copyright (c) 2015-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -9,7 +9,9 @@
 
 #include "unittest.h"  // This include has to be first
 
-#include "../include/fpenvironment.h"
+// FPE does not work with clang, so don't test it
+#if !defined __clang__
+#include "../include/smash/fpenvironment.h"
 
 #include <csetjmp>
 #include <csignal>
@@ -70,3 +72,6 @@ TEST(without_float_traps) {
       FE_DIVBYZERO));  // flag must not be set because it trapped
   VERIFY(got_exception);
 }
+#else
+TEST(unsupported) {}
+#endif

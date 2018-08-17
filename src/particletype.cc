@@ -1,36 +1,36 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include "include/particletype.h"
+#include "smash/particletype.h"
 
 #include <assert.h>
 #include <algorithm>
 #include <map>
 #include <vector>
 
-#include "include/constants.h"
-#include "include/cxx14compat.h"
-#include "include/decaymodes.h"
-#include "include/distributions.h"
-#include "include/formfactors.h"
-#include "include/inputfunctions.h"
-#include "include/integrate.h"
-#include "include/iomanipulators.h"
-#include "include/isoparticletype.h"
-#include "include/kinematics.h"
-#include "include/logging.h"
-#include "include/numerics.h"
-#include "include/particledata.h"
-#include "include/pdgcode.h"
-#include "include/pow.h"
-#include "include/processbranch.h"
-#include "include/stringfunctions.h"
+#include "smash/constants.h"
+#include "smash/cxx14compat.h"
+#include "smash/decaymodes.h"
+#include "smash/distributions.h"
+#include "smash/formfactors.h"
+#include "smash/inputfunctions.h"
+#include "smash/integrate.h"
+#include "smash/iomanipulators.h"
+#include "smash/isoparticletype.h"
+#include "smash/kinematics.h"
+#include "smash/logging.h"
+#include "smash/numerics.h"
+#include "smash/particledata.h"
+#include "smash/pdgcode.h"
+#include "smash/pow.h"
+#include "smash/processbranch.h"
+#include "smash/stringfunctions.h"
 
 namespace smash {
 
@@ -633,7 +633,7 @@ double ParticleType::sample_resonance_mass(const double mass_stable,
     // inner loop: rejection sampling
     do {
       // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
-      mass_res = Random::cauchy(this->mass(), this->width_at_pole() / 2.,
+      mass_res = random::cauchy(this->mass(), this->width_at_pole() / 2.,
                                 this->min_mass_spectral(), max_mass);
       // determine cm momentum for this case
       const double pcm = pCM(cms_energy, mass_stable, mass_res);
@@ -642,7 +642,7 @@ double ParticleType::sample_resonance_mass(const double mass_stable,
       const double q = this->spectral_function(mass_res) /
                        this->spectral_function_simple(mass_res);
       val = q * blw;
-    } while (val < Random::uniform(0., max));
+    } while (val < random::uniform(0., max));
 
     // check that we are using the proper maximum value
     if (val > max) {
@@ -682,9 +682,9 @@ std::pair<double, double> ParticleType::sample_resonance_masses(
     // inner loop: rejection sampling
     do {
       // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
-      mass_1 = Random::cauchy(t1.mass(), t1.width_at_pole() / 2.,
+      mass_1 = random::cauchy(t1.mass(), t1.width_at_pole() / 2.,
                               t1.min_mass_spectral(), max_mass_1);
-      mass_2 = Random::cauchy(t2.mass(), t2.width_at_pole() / 2.,
+      mass_2 = random::cauchy(t2.mass(), t2.width_at_pole() / 2.,
                               t2.min_mass_spectral(), max_mass_2);
       // determine cm momentum for this case
       const double pcm = pCM(cms_energy, mass_1, mass_2);
@@ -695,7 +695,7 @@ std::pair<double, double> ParticleType::sample_resonance_masses(
       const double q2 =
           t2.spectral_function(mass_2) / t2.spectral_function_simple(mass_2);
       val = q1 * q2 * blw;
-    } while (val < Random::uniform(0., max));
+    } while (val < random::uniform(0., max));
 
     if (val > max) {
       const auto &log = logger<LogArea::Resonances>();

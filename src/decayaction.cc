@@ -1,20 +1,20 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include "include/decayaction.h"
+#include "smash/decayaction.h"
 
-#include "include/action_globals.h"
-#include "include/angles.h"
-#include "include/decaymodes.h"
-#include "include/kinematics.h"
-#include "include/logging.h"
-#include "include/pdgcode.h"
+#include "smash/action_globals.h"
+#include "smash/angles.h"
+#include "smash/decaymodes.h"
+#include "smash/kinematics.h"
+#include "smash/logging.h"
+#include "smash/pdgcode.h"
 
 namespace smash {
 
@@ -59,8 +59,8 @@ void DecayAction::one_to_three() {
   double dalitz_bc_max = 0.0, dalitz_bc_min = 1.0;
   double s_ab = 0.0, s_bc = 0.5;
   while (s_bc > dalitz_bc_max || s_bc < dalitz_bc_min) {
-    s_ab = Random::uniform(s_ab_min, s_ab_max);
-    s_bc = Random::uniform(s_bc_min, s_bc_max);
+    s_ab = random::uniform(s_ab_min, s_ab_max);
+    s_bc = random::uniform(s_bc_min, s_bc_max);
     const double e_b_rest =
         (s_ab - mass_a * mass_a + mass_b * mass_b) / (2 * std::sqrt(s_ab));
     const double e_c_rest =
@@ -151,7 +151,7 @@ void DecayAction::generate_final_state() {
   log.debug("Process: Resonance decay. ");
   /* Execute a decay process for the selected particle.
    *
-   * Randomly select one of the decay modes of the particle
+   * randomly select one of the decay modes of the particle
    * according to their relative weights. Then decay the particle
    * by calling function one_to_two or one_to_three.
    */
@@ -191,7 +191,8 @@ void DecayAction::generate_final_state() {
   for (auto &p : outgoing_particles_) {
     log.debug("particle momenta in lrf ", p);
     p.boost_momentum(-velocity_CM);
-    p.set_formation_time(
+    p.set_slow_formation_times(
+        incoming_particles_[0].begin_formation_time(),
         std::max(time_of_execution_, incoming_particles_[0].formation_time()));
     p.set_cross_section_scaling_factor(
         incoming_particles_[0].cross_section_scaling_factor());

@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2017
+ *    Copyright (c) 2015-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -11,8 +11,8 @@
 
 #include "setup.h"
 
-#include "../include/scatteraction.h"
-#include "../include/scatteractionsfinder.h"
+#include "../include/smash/scatteraction.h"
+#include "../include/smash/scatteractionsfinder.h"
 
 using namespace smash;
 using smash::Test::Momentum;

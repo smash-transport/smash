@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -11,7 +11,7 @@
 
 #include "setup.h"
 
-#include <include/config.h>
+#include <smash/config.h>
 #include <array>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -19,12 +19,12 @@
 #include <string>
 #include <vector>
 
-#include "../include/oscaroutput.h"
-#include "../include/outputinterface.h"
-#include "../include/particles.h"
-#include "../include/processbranch.h"
-#include "../include/random.h"
-#include "../include/scatteraction.h"
+#include "../include/smash/oscaroutput.h"
+#include "../include/smash/outputinterface.h"
+#include "../include/smash/particles.h"
+#include "../include/smash/processbranch.h"
+#include "../include/smash/random.h"
+#include "../include/smash/scatteraction.h"
 
 using namespace smash;
 
@@ -32,7 +32,7 @@ static const double accuracy = 1.0e-4;
 static const int data_elements = 12;
 static const int data_elements_extended = 20;
 static const bf::path testoutputpath = bf::absolute(SMASH_TEST_OUTPUT_PATH);
-static auto random_value = Random::make_uniform_distribution(-15.0, +15.0);
+static auto random_value = random::make_uniform_distribution(-15.0, +15.0);
 
 TEST(directory_is_created) {
   bf::create_directories(testoutputpath);
@@ -105,7 +105,7 @@ TEST(full2013_format) {
   const ParticleData p2 = particles.insert(Test::smashon_random());
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
-                              true, false, NNbarTreatment::NoAnnihilation);
+                          true, false, false, NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
   ParticleList final_particles = action->outgoing_particles();
   const double impact_parameter = 1.783;
@@ -227,7 +227,7 @@ TEST(final2013_format) {
   /* Create interaction ("elastic scattering") */
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
-                              true, false, NNbarTreatment::NoAnnihilation);
+                          true, false, false, NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
 
   const bf::path outputfilename = "particle_lists.oscar";
@@ -307,7 +307,7 @@ TEST(full_extended_oscar) {
   const ParticleData p2 = particles.insert(Test::smashon_random());
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
-                              true, false, NNbarTreatment::NoAnnihilation);
+                          true, false, false, NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
   ParticleList final_particles = action->outgoing_particles();
   const int event_id = 0;

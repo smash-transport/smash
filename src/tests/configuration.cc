@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -11,9 +11,9 @@
 
 #include "setup.h"
 
-#include "../include/configuration.h"
-#include "../include/forwarddeclarations.h"
-#include "../include/macros.h"
+#include "../include/smash/configuration.h"
+#include "../include/smash/forwarddeclarations.h"
+#include "../include/smash/macros.h"
 
 #include <boost/filesystem.hpp>
 

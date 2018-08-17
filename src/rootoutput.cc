@@ -1,23 +1,23 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include "include/rootoutput.h"
+#include "smash/rootoutput.h"
 #include "TFile.h"
 #include "TTree.h"
-#include "include/action.h"
-#include "include/clock.h"
-#include "include/forwarddeclarations.h"
-#include "include/particles.h"
+#include "smash/action.h"
+#include "smash/clock.h"
+#include "smash/forwarddeclarations.h"
+#include "smash/particles.h"
 
 namespace smash {
 
-/**\Userguide
+/*!\Userguide
  * \page format_root ROOT format
  * SMASH ROOT output has the same functionality as OSCAR output, but ROOT
  * files are faster to read and write and they need less disk space for the
@@ -56,7 +56,7 @@ namespace smash {
  *
  * \li \c ev is event number
  * \li \c tcounter is number of output block in a given event in terms of
- *OSCAR
+ * OSCAR
  * \li \c npart is number of particles in the block
  * \li \c impact_b is the impact parameter of the event
  * \li \c pdgcode is PDG id array
@@ -75,7 +75,7 @@ namespace smash {
  * not supported.
  *
  * See also \ref collisions_output_in_box_modus_.
- **/
+ */
 RootOutput::RootOutput(const bf::path &path, const std::string &name,
                        const OutputParameters &out_par)
     : OutputInterface(name),
@@ -149,9 +149,6 @@ RootOutput::~RootOutput() {
   bf::rename(filename_unfinished_, filename_);
 }
 
-/**
- * Writes to tree "at_eventstart".
- */
 void RootOutput::at_eventstart(const Particles &particles,
                                const int event_number) {
   // save event number
@@ -166,9 +163,6 @@ void RootOutput::at_eventstart(const Particles &particles,
   }
 }
 
-/**
- * Writes to tree "at_tstep_N", where N is timestep number counting from 1.
- */
 void RootOutput::at_intermediate_time(const Particles &particles, const Clock &,
                                       const DensityParameters &) {
   if (write_particles_ && !particles_only_final_) {
@@ -177,9 +171,6 @@ void RootOutput::at_intermediate_time(const Particles &particles, const Clock &,
   }
 }
 
-/**
- * Writes to tree "at_eventend".
- */
 void RootOutput::at_eventend(const Particles &particles,
                              const int /*event_number*/,
                              double impact_parameter) {
@@ -187,8 +178,8 @@ void RootOutput::at_eventend(const Particles &particles,
   if (write_particles_) {
     particles_to_tree(particles);
   }
-  // Forced regular dump from operational memory to disk. Very demanding!
-  // If program crashes written data will NOT be lost
+  /* Forced regular dump from operational memory to disk. Very demanding!
+   * If program crashes written data will NOT be lost. */
   if (current_event_ > 0 && current_event_ % autosave_frequency_ == 0) {
     if (write_particles_) {
       particles_tree_->AutoSave("SaveSelf");
@@ -199,9 +190,6 @@ void RootOutput::at_eventend(const Particles &particles,
   }
 }
 
-/**
- * Writes interactions to ROOT-file
- */
 void RootOutput::at_interaction(const Action &action,
                                 const double /*density*/) {
   if (write_collisions_) {
@@ -210,9 +198,6 @@ void RootOutput::at_interaction(const Action &action,
   }
 }
 
-/**
- * Writes particles to a tree defined by treename.
- */
 void RootOutput::particles_to_tree(const Particles &particles) {
   int i = 0;
 
@@ -261,10 +246,10 @@ void RootOutput::collisions_to_tree(const ParticleList &incoming,
 
   int i = 0;
 
-  // It is assumed that nin + nout < max_buffer_size_
-  // This is true for any possible reaction for current buffer size: 10000
-  // But if one wants initial/final particles written to collisions
-  // then implementation should be updated.
+  /* It is assumed that nin + nout < max_buffer_size_
+   * This is true for any possible reaction for current buffer size: 10000
+   * But if one wants initial/final particles written to collisions
+   * then implementation should be updated. */
 
   for (const auto &p : incoming) {
     t[i] = p.position().x0();

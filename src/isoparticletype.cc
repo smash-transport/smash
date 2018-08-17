@@ -1,15 +1,15 @@
 /*
- *    Copyright (c) 2015-2017
+ *    Copyright (c) 2015-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  */
 
-#include "include/isoparticletype.h"
+#include "smash/isoparticletype.h"
 
-#include "include/integrate.h"
-#include "include/kinematics.h"
-#include "include/logging.h"
+#include "smash/integrate.h"
+#include "smash/kinematics.h"
+#include "smash/logging.h"
 
 namespace smash {
 
@@ -60,8 +60,13 @@ bool IsoParticleType::exists(const std::string &name) {
   return found;
 }
 
-/* Construct the name-string for an isospin multiplet from the given
- * name-string for the particle. */
+/**
+ * Construct the name-string for an isospin multiplet from the given
+ * name-string for the particle.
+ *
+ * \param[in] name name-string of the particle
+ * \return the name-string for an isospin multiplet
+ */
 static std::string multiplet_name(std::string name) {
   if (name.find("⁺⁺") != std::string::npos) {
     return name.substr(0, name.length() - sizeof("⁺⁺") + 1);

@@ -11,10 +11,10 @@
 
 #include "setup.h"
 
-#include "../include/formfactors.h"
-#include "../include/isoparticletype.h"
-#include "../include/kinematics.h"
-#include "../include/particletype.h"
+#include "../include/smash/formfactors.h"
+#include "../include/smash/isoparticletype.h"
+#include "../include/smash/kinematics.h"
+#include "../include/smash/particletype.h"
 
 using namespace smash;
 

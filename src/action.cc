@@ -1,28 +1,28 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include "include/action.h"
+#include "smash/action.h"
 
 #include <assert.h>
 #include <algorithm>
 #include <sstream>
 
-#include "include/angles.h"
-#include "include/constants.h"
-#include "include/kinematics.h"
-#include "include/logging.h"
-#include "include/pauliblocking.h"
-#include "include/processbranch.h"
-#include "include/quantumnumbers.h"
+#include "smash/angles.h"
+#include "smash/constants.h"
+#include "smash/kinematics.h"
+#include "smash/logging.h"
+#include "smash/pauliblocking.h"
+#include "smash/processbranch.h"
+#include "smash/quantumnumbers.h"
 
 namespace smash {
-
+/// Destructor
 Action::~Action() = default;
 
 bool Action::is_valid(const Particles &particles) const {
@@ -45,7 +45,7 @@ bool Action::is_pauli_blocked(const Particles &particles,
       const auto f =
           p_bl.phasespace_dens(p.position().threevec(), p.momentum().threevec(),
                                particles, p.pdgcode(), incoming_particles_);
-      if (f > Random::uniform(0., 1.)) {
+      if (f > random::uniform(0., 1.)) {
         log.debug("Action ", *this, " is pauli-blocked with f = ", f);
         return true;
       }
@@ -223,11 +223,12 @@ void Action::check_conservation(const uint32_t id_process) const {
     log.error() << particle_names.str() << err_msg;
     /* Pythia does not conserve energy and momentum at high energy, so we just
      * print the error and continue. */
-    if ((process_type_ == ProcessType::StringSoft) ||
+    if ((is_string_soft_process(process_type_)) ||
         (process_type_ == ProcessType::StringHard)) {
       return;
     }
     if (id_process == ID_PROCESS_PHOTON) {
+      abort();
       throw std::runtime_error("Conservation laws violated in photon process");
     } else {
       throw std::runtime_error("Conservation laws violated in process " +

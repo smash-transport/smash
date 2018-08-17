@@ -7,13 +7,13 @@
  *
  */
 
-#include "include/inputfunctions.h"
+#include "smash/inputfunctions.h"
 
 #include <sstream>
 #include <vector>
 
-#include "include/logging.h"
-#include "include/stringfunctions.h"
+#include "smash/logging.h"
+#include "smash/stringfunctions.h"
 
 namespace smash {
 
@@ -30,11 +30,11 @@ std::vector<Line> line_parser(const std::string &input) {
     ++line_number;
     const auto hash_pos = line.find('#');
     if (hash_pos != std::string::npos) {
-      // found a comment, remove it from the line and look further
+      // Found a comment, remove it from the line and look further
       line = line.substr(0, hash_pos);
     }
     if (line.find_first_not_of(" \t") == std::string::npos) {
-      // only whitespace (or nothing) on this line. Next, please.
+      // Only whitespace (or nothing) on this line. Next, please.
       continue;
     }
     line = trim(line);

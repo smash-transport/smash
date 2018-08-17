@@ -11,7 +11,7 @@
 
 #include "setup.h"
 
-#include "../include/filelock.h"
+#include "../include/smash/filelock.h"
 
 using namespace smash;
 

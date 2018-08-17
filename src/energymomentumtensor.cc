@@ -1,21 +1,21 @@
 /*
  *
- *    Copyright (c) 2015-2017
+ *    Copyright (c) 2015-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include "include/energymomentumtensor.h"
+#include "smash/energymomentumtensor.h"
 
 #include <iomanip>
 #include <iostream>
 
 #include <Eigen/Dense>  // NOLINT(build/include_order)
 
-#include "include/logging.h"
-#include "include/numerics.h"
+#include "smash/logging.h"
+#include "smash/numerics.h"
 
 namespace smash {
 

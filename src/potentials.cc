@@ -1,16 +1,16 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include "include/potentials.h"
+#include "smash/potentials.h"
 
-#include "include/constants.h"
-#include "include/density.h"
+#include "smash/constants.h"
+#include "smash/density.h"
 
 namespace smash {
 
@@ -55,7 +55,8 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
    *
    * The following extract from the configuration file configures SMASH such
    * that the Skyrme as well as the Symmetry potential are activated for the
-   * simulation. There is however no necessity to include both simultaneously. They
+   * simulation. There is however no necessity to include both simultaneously.
+   They
    * can be switched on and off individually.
    * \n
    *\verbatim

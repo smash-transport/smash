@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2017
+ *    Copyright (c) 2015-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -12,10 +12,10 @@
 #include "histogram.h"
 #include "setup.h"
 
-#include "../include/formfactors.h"
-#include "../include/integrate.h"
-#include "../include/kinematics.h"
-#include "../include/stringfunctions.h"
+#include "../include/smash/formfactors.h"
+#include "../include/smash/integrate.h"
+#include "../include/smash/kinematics.h"
+#include "../include/smash/stringfunctions.h"
 
 using namespace smash;
 using namespace UnitTest;

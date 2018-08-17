@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2016-2017
+ *    Copyright (c) 2016-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -9,7 +9,7 @@
 
 #include "setup.h"
 
-#include "../include/scatteractionphoton.h"
+#include "../include/smash/scatteractionphoton.h"
 
 using namespace smash;
 
@@ -34,17 +34,17 @@ TEST(pi_rho0_pi_gamma) {
   const int number_of_photons = 10000;
   ParticleList in{pi, rho0};
   const auto act =
-      make_unique<ScatterActionPhoton>(in, 0.05, number_of_photons);
-  act->add_single_channel();
+      make_unique<ScatterActionPhoton>(in, 0.05, number_of_photons, 5.0);
+  act->add_single_process();
   double tot_weight = 0.0;
   for (int i = 0; i < number_of_photons; i++) {
     act->generate_final_state();
     tot_weight += act->get_total_weight();
   }
-  COMPARE_RELATIVE_ERROR(tot_weight, 1.0, 0.08);
+  COMPARE_RELATIVE_ERROR(tot_weight, 0.000722419008, 0.08);
 }
 
-TEST(is_photon_reaction_function) {
+TEST(photon_reaction_type_function) {
   const ParticleData pip{ParticleType::find(0x211)};
   const ParticleData pim{ParticleType::find(-0x211)};
   const ParticleData piz{ParticleType::find(0x111)};
@@ -56,12 +56,12 @@ TEST(is_photon_reaction_function) {
 
   const ParticleList l1{pip, pim}, l2{rhop, pim}, l3{p, pim}, l4{pip, eta};
 
-  VERIFY(ScatterActionPhoton::is_photon_reaction(l1) !=
+  VERIFY(ScatterActionPhoton::photon_reaction_type(l1) !=
          ScatterActionPhoton::ReactionType::no_reaction);
-  VERIFY(ScatterActionPhoton::is_photon_reaction(l2) !=
+  VERIFY(ScatterActionPhoton::photon_reaction_type(l2) !=
          ScatterActionPhoton::ReactionType::no_reaction);
-  VERIFY(ScatterActionPhoton::is_photon_reaction(l3) ==
+  VERIFY(ScatterActionPhoton::photon_reaction_type(l3) ==
          ScatterActionPhoton::ReactionType::no_reaction);
-  VERIFY(ScatterActionPhoton::is_photon_reaction(l4) !=
+  VERIFY(ScatterActionPhoton::photon_reaction_type(l4) ==
          ScatterActionPhoton::ReactionType::no_reaction);
 }

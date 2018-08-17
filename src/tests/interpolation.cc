@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -9,7 +9,7 @@
 
 #include "unittest.h"  // This include has to be first
 
-#include "../include/interpolation.h"
+#include "../include/smash/interpolation.h"
 
 #include <vector>
 

@@ -11,9 +11,9 @@
 
 #include "setup.h"
 
-#include "../include/particledata.h"
-#include "../include/particles.h"
-#include "../include/pdgcode.h"
+#include "../include/smash/particledata.h"
+#include "../include/smash/particles.h"
+#include "../include/smash/pdgcode.h"
 
 using namespace smash;
 

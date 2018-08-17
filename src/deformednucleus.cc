@@ -1,21 +1,21 @@
 /*
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  */
-#include "include/deformednucleus.h"
+#include "smash/deformednucleus.h"
 
 #include <cmath>
 #include <stdexcept>
 
-#include "include/angles.h"
-#include "include/configuration.h"
-#include "include/constants.h"
-#include "include/fourvector.h"
-#include "include/particledata.h"
-#include "include/random.h"
-#include "include/threevector.h"
+#include "smash/angles.h"
+#include "smash/configuration.h"
+#include "smash/constants.h"
+#include "smash/fourvector.h"
+#include "smash/particledata.h"
+#include "smash/random.h"
+#include "smash/threevector.h"
 
 namespace smash {
 
@@ -104,8 +104,8 @@ ThreeVector DeformedNucleus::distribute_nucleon() const {
   do {
     a_direction.distribute_isotropically();
     // sample r**2 dr
-    a_radius = radius_max * std::cbrt(Random::canonical());
-  } while (Random::canonical() >
+    a_radius = radius_max * std::cbrt(random::canonical());
+  } while (random::canonical() >
            deformed_woods_saxon(a_radius, a_direction.costheta()) /
                Nucleus::get_saturation_density());
 

@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2017
+ *    Copyright (c) 2015-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -10,8 +10,8 @@
 #include <map>
 #include <string>
 
-#include "../include/file.h"
-#include "../include/integrate.h"
+#include "../include/smash/file.h"
+#include "../include/smash/integrate.h"
 
 namespace smash {
 

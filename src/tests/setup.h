@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2017
+ *    Copyright (c) 2015-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -10,13 +10,13 @@
 #ifndef SRC_TESTS_SETUP_H_
 #define SRC_TESTS_SETUP_H_
 
-#include "../include/cxx14compat.h"
-#include "../include/decaymodes.h"
-#include "../include/experiment.h"
-#include "../include/particledata.h"
-#include "../include/particles.h"
-#include "../include/particletype.h"
-#include "../include/random.h"
+#include "../include/smash/cxx14compat.h"
+#include "../include/smash/decaymodes.h"
+#include "../include/smash/experiment.h"
+#include "../include/smash/particledata.h"
+#include "../include/smash/particles.h"
+#include "../include/smash/particletype.h"
+#include "../include/smash/random.h"
 
 #include <boost/filesystem.hpp>
 
@@ -134,7 +134,7 @@ inline ParticleData smashon(const Momentum &momentum, const Position &position,
  * given \p id.
  */
 inline ParticleData smashon_random(int id = -1) {
-  auto random_value = Random::make_uniform_distribution(-15.0, +15.0);
+  auto random_value = random::make_uniform_distribution(-15.0, +15.0);
   ParticleData p{ParticleType::find(0x661), id};
   p.set_4position(
       {random_value(), random_value(), random_value(), random_value()});
@@ -247,6 +247,7 @@ inline ExperimentParameters default_parameters(int testparticles = 1,
                               4.0,
                               true,
                               all_reactions_included(),
+                              false,
                               false,
                               false,
                               NNbarTreatment::NoAnnihilation,

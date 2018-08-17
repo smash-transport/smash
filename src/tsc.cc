@@ -1,13 +1,13 @@
 /*
  *
- *    Copyright (c) 2014
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include "include/tsc.h"
+#include "smash/tsc.h"
 
 #include <cmath>
 #include <iomanip>

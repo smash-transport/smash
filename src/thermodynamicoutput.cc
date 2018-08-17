@@ -1,27 +1,27 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include "include/thermodynamicoutput.h"
+#include "smash/thermodynamicoutput.h"
 
 #include <fstream>
 #include <memory>
 
 #include <boost/filesystem.hpp>
 
-#include "include/clock.h"
-#include "include/config.h"
-#include "include/density.h"
-#include "include/energymomentumtensor.h"
-#include "include/experimentparameters.h"
-#include "include/forwarddeclarations.h"
-#include "include/particles.h"
-#include "include/vtkoutput.h"
+#include "smash/clock.h"
+#include "smash/config.h"
+#include "smash/density.h"
+#include "smash/energymomentumtensor.h"
+#include "smash/experimentparameters.h"
+#include "smash/forwarddeclarations.h"
+#include "smash/particles.h"
+#include "smash/vtkoutput.h"
 
 namespace smash {
 

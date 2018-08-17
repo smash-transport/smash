@@ -1,31 +1,31 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include "include/scatteraction.h"
+#include "smash/scatteraction.h"
 
 #include <cmath>
 
 #include "Pythia8/Pythia.h"
 
-#include "include/action_globals.h"
-#include "include/angles.h"
-#include "include/constants.h"
-#include "include/crosssections.h"
-#include "include/cxx14compat.h"
-#include "include/fpenvironment.h"
-#include "include/kinematics.h"
-#include "include/logging.h"
-#include "include/parametrizations.h"
-#include "include/pdgcode.h"
-#include "include/pow.h"
-#include "include/processstring.h"
-#include "include/random.h"
+#include "smash/action_globals.h"
+#include "smash/angles.h"
+#include "smash/constants.h"
+#include "smash/crosssections.h"
+#include "smash/cxx14compat.h"
+#include "smash/fpenvironment.h"
+#include "smash/kinematics.h"
+#include "smash/logging.h"
+#include "smash/parametrizations.h"
+#include "smash/pdgcode.h"
+#include "smash/pow.h"
+#include "smash/processstring.h"
+#include "smash/random.h"
 
 namespace smash {
 
@@ -81,13 +81,13 @@ void ScatterAction::generate_final_state() {
       /* Sample the particle momenta in CM system. */
       inelastic_scattering();
       break;
-    case ProcessType::StringSoft:
-      /* soft string excitation */
-      string_excitation(true);
-      break;
+    case ProcessType::StringSoftSingleDiffractiveAX:
+    case ProcessType::StringSoftSingleDiffractiveXB:
+    case ProcessType::StringSoftDoubleDiffractive:
+    case ProcessType::StringSoftAnnihilation:
+    case ProcessType::StringSoftNonDiffractive:
     case ProcessType::StringHard:
-      /* hard string excitation */
-      string_excitation(false);
+      string_excitation();
       break;
     default:
       throw InvalidScatterAction(
@@ -107,16 +107,14 @@ void ScatterAction::generate_final_state() {
   }
 }
 
-void ScatterAction::add_all_scatterings(double elastic_parameter,
-                                        bool two_to_one,
-                                        ReactionsBitSet included_2to2,
-                                        double low_snn_cut, bool strings_switch,
-                                        bool strings_with_probability,
-                                        NNbarTreatment nnbar_treatment) {
+void ScatterAction::add_all_scatterings(
+    double elastic_parameter, bool two_to_one, ReactionsBitSet included_2to2,
+    double low_snn_cut, bool strings_switch, bool use_AQM,
+    bool strings_with_probability, NNbarTreatment nnbar_treatment) {
   CrossSections xs(incoming_particles_, sqrt_s());
   CollisionBranchList processes = xs.generate_collision_list(
       elastic_parameter, two_to_one, included_2to2, low_snn_cut, strings_switch,
-      strings_with_probability, nnbar_treatment, string_process_);
+      use_AQM, strings_with_probability, nnbar_treatment, string_process_);
 
   /* Add various subprocesses.*/
   add_collisions(std::move(processes));
@@ -127,12 +125,13 @@ void ScatterAction::add_all_scatterings(double elastic_parameter,
    * square root s exceeds the threshold by at least 0.9 GeV. The cross section
    * of the string processes are counted by taking the difference between the
    * parametrized total and the sum of the non-strings. */
-  if (strings_switch && !strings_with_probability && xs.included_in_string()
-      && xs.high_energy() > cross_section() && sqrt_s() >
-      incoming_particles_[0].pole_mass() +
-      incoming_particles_[1].pole_mass() + 0.9) {
-    add_collisions(xs.string_excitation(xs.high_energy() - cross_section(),
-                                                           string_process_));
+  if (!strings_with_probability &&
+      xs.decide_string(strings_switch, strings_with_probability, use_AQM,
+                       nnbar_treatment == NNbarTreatment::Strings)) {
+    const double xs_diff = xs.high_energy() - cross_section();
+    if (xs_diff > 0.) {
+      add_collisions(xs.string_excitation(xs_diff, string_process_, use_AQM));
+    }
   }
 }
 
@@ -203,12 +202,16 @@ double ScatterAction::transverse_distance_sqr() const {
 
 /**
  * Computes the B coefficients from the Cugnon parametrization of the angular
- * distribution in elastic pp scattering, see equation (8) in
- * \iref{Cugnon:1996kh}.
+ * distribution in elastic pp scattering.
+ *
+ * See equation (8) in \iref{Cugnon:1996kh}.
  * Note: The original Cugnon parametrization is only applicable for
  * plab < 6 GeV and keeps rising above that. We add an upper limit of b <= 9,
  * in order to be compatible with high-energy data (up to plab ~ 25 GeV).
+ *
  * \param[in] plab Lab momentum in GeV.
+ *
+ * \return Cugnon B coefficient for elatic proton-proton scatterings.
  */
 static double Cugnon_bpp(double plab) {
   if (plab < 2.) {
@@ -221,9 +224,13 @@ static double Cugnon_bpp(double plab) {
 
 /**
  * Computes the B coefficients from the Cugnon parametrization of the angular
- * distribution in elastic np scattering, see equation (10) in
- * \iref{Cugnon:1996kh}.
+ * distribution in elastic np scattering.
+ *
+ * See equation (10) in \iref{Cugnon:1996kh}.
+ *
  * \param[in] plab Lab momentum in GeV.
+ *
+ * \return Cugnon B coefficient for elastic proton-neutron scatterings.
  */
 static double Cugnon_bnp(double plab) {
   if (plab < 0.225) {
@@ -238,7 +245,7 @@ static double Cugnon_bnp(double plab) {
 }
 
 void ScatterAction::sample_angles(std::pair<double, double> masses) {
-  if ((process_type_ == ProcessType::StringSoft) ||
+  if (is_string_soft_process(process_type_) ||
       (process_type_ == ProcessType::StringHard)) {
     // We potentially have more than two particles, so the following angular
     // distributions don't work. Instead we just keep the angular
@@ -281,12 +288,12 @@ void ScatterAction::sample_angles(std::pair<double, double> masses) {
       bb = std::max(Cugnon_bpp(plab), really_small);
       a = 1.;
     }
-    double t = Random::expo(bb, t_range[0], t_range[1]);
-    if (Random::canonical() > 1. / (1. + a)) {
+    double t = random::expo(bb, t_range[0], t_range[1]);
+    if (random::canonical() > 1. / (1. + a)) {
       t = t_range[0] + t_range[1] - t;
     }
     // determine scattering angles in center-of-mass frame
-    phitheta = Angles(2. * M_PI * Random::canonical(),
+    phitheta = Angles(2. * M_PI * random::canonical(),
                       1. - 2. * (t - t_range[0]) / (t_range[1] - t_range[0]));
   } else if (nn_scattering && p_a->pdgcode().is_Delta() &&
              p_b->pdgcode().is_nucleon() &&
@@ -298,11 +305,11 @@ void ScatterAction::sample_angles(std::pair<double, double> masses) {
      * elastic pp scattering, as suggested in \iref{Cugnon:1996kh}. */
     const double plab = plab_from_s(mandelstam_s());
     const double bb = std::max(Cugnon_bpp(plab), really_small);
-    double t = Random::expo(bb, t_range[0], t_range[1]);
-    if (Random::canonical() > 0.5) {
+    double t = random::expo(bb, t_range[0], t_range[1]);
+    if (random::canonical() > 0.5) {
       t = t_range[0] + t_range[1] - t;  // symmetrize
     }
-    phitheta = Angles(2. * M_PI * Random::canonical(),
+    phitheta = Angles(2. * M_PI * random::canonical(),
                       1. - 2. * (t - t_range[0]) / (t_range[1] - t_range[0]));
   } else if (nn_scattering && p_b->pdgcode().is_nucleon() && !isotropic_ &&
              (p_a->type().is_Nstar() || p_a->type().is_Deltastar())) {
@@ -314,12 +321,12 @@ void ScatterAction::sample_angles(std::pair<double, double> masses) {
      *  t_0 in such a case. */
     double t = t_range[0];
     if (a < 30) {
-      t = Random::power(-a, t_range[0], t_range[1]);
+      t = random::power(-a, t_range[0], t_range[1]);
     }
-    if (Random::canonical() > 0.5) {
+    if (random::canonical() > 0.5) {
       t = t_range[0] + t_range[1] - t;  // symmetrize
     }
-    phitheta = Angles(2. * M_PI * Random::canonical(),
+    phitheta = Angles(2. * M_PI * random::canonical(),
                       1. - 2. * (t - t_range[0]) / (t_range[1] - t_range[0]));
   } else {
     /* isotropic angular distribution */
@@ -364,11 +371,15 @@ void ScatterAction::inelastic_scattering() {
   const double t1 = incoming_particles_[1].formation_time();
 
   const size_t index_tmax = (t0 > t1) ? 0 : 1;
+  const double form_time_begin =
+      incoming_particles_[index_tmax].begin_formation_time();
   const double sc =
       incoming_particles_[index_tmax].cross_section_scaling_factor();
   if (t0 > time_of_execution_ || t1 > time_of_execution_) {
-    outgoing_particles_[0].set_formation_time(std::max(t0, t1));
-    outgoing_particles_[1].set_formation_time(std::max(t0, t1));
+    outgoing_particles_[0].set_slow_formation_times(form_time_begin,
+                                                    std::max(t0, t1));
+    outgoing_particles_[1].set_slow_formation_times(form_time_begin,
+                                                    std::max(t0, t1));
     outgoing_particles_[0].set_cross_section_scaling_factor(sc);
     outgoing_particles_[1].set_cross_section_scaling_factor(sc);
   } else {
@@ -402,10 +413,13 @@ void ScatterAction::resonance_formation() {
   const double t1 = incoming_particles_[1].formation_time();
 
   const size_t index_tmax = (t0 > t1) ? 0 : 1;
+  const double begin_form_time =
+      incoming_particles_[index_tmax].begin_formation_time();
   const double sc =
       incoming_particles_[index_tmax].cross_section_scaling_factor();
   if (t0 > time_of_execution_ || t1 > time_of_execution_) {
-    outgoing_particles_[0].set_formation_time(std::max(t0, t1));
+    outgoing_particles_[0].set_slow_formation_times(begin_form_time,
+                                                    std::max(t0, t1));
     outgoing_particles_[0].set_cross_section_scaling_factor(sc);
   } else {
     outgoing_particles_[0].set_formation_time(time_of_execution_);
@@ -417,7 +431,7 @@ void ScatterAction::resonance_formation() {
 /* This function will generate outgoing particles in CM frame
  * from a hard process.
  * The way to excite soft strings is based on the UrQMD model */
-void ScatterAction::string_excitation(bool is_soft_proc) {
+void ScatterAction::string_excitation() {
   assert(incoming_particles_.size() == 2);
   const auto &log = logger<LogArea::Pythia>();
   // Disable floating point exception trap for Pythia
@@ -427,70 +441,86 @@ void ScatterAction::string_excitation(bool is_soft_proc) {
     string_process_->init(incoming_particles_, time_of_execution_, gamma_cm());
     /* implement collision */
     bool success = false;
-    StringSoftType iproc = string_process_->get_subproc();
     int ntry = 0;
     const int ntry_max = 10000;
     while (!success && ntry < ntry_max) {
       ntry++;
-      if (is_soft_proc) {
-        switch (iproc) {
-          case StringSoftType::SingleDiffAX:
-            /* single diffractive to A+X */
-            success = string_process_->next_SDiff(true);
-            break;
-          case StringSoftType::SingleDiffXB:
-            /* single diffractive to X+B */
-            success = string_process_->next_SDiff(false);
-            break;
-          case StringSoftType::DoubleDiff:
-            /* double diffractive */
-            success = string_process_->next_DDiff();
-            break;
-          case StringSoftType::NonDiff:
-            /* soft non-diffractive */
-            success = string_process_->next_NDiffSoft();
-            break;
-          case StringSoftType::None:
-            success = false;
-        }
-      } else {
-        success = string_process_->next_NDiffHard();
+      switch (process_type_) {
+        case ProcessType::StringSoftSingleDiffractiveAX:
+          /* single diffractive to A+X */
+          success = string_process_->next_SDiff(true);
+          break;
+        case ProcessType::StringSoftSingleDiffractiveXB:
+          /* single diffractive to X+B */
+          success = string_process_->next_SDiff(false);
+          break;
+        case ProcessType::StringSoftDoubleDiffractive:
+          /* double diffractive */
+          success = string_process_->next_DDiff();
+          break;
+        case ProcessType::StringSoftNonDiffractive:
+          /* soft non-diffractive */
+          success = string_process_->next_NDiffSoft();
+          break;
+        case ProcessType::StringSoftAnnihilation:
+          /* soft BBbar 2 mesonic annihilation */
+          success = string_process_->next_BBbarAnn();
+          break;
+        case ProcessType::StringHard:
+          success = string_process_->next_NDiffHard();
+          break;
+        default:
+          log.error("Unknown string process required.");
+          success = false;
       }
     }
     if (ntry == ntry_max) {
-      throw std::runtime_error("too many tries in string_excitation().");
-    }
-    outgoing_particles_ = string_process_->get_final_state();
-    /* If the incoming particles already were unformed, the formation
-     * times and cross section scaling factors need to be adjusted */
-    const double tform_in = std::max(incoming_particles_[0].formation_time(),
-                                     incoming_particles_[1].formation_time());
-    if (tform_in > time_of_execution_) {
-      const double fin =
-          (incoming_particles_[0].formation_time() >
-           incoming_particles_[1].formation_time())
-              ? incoming_particles_[0].cross_section_scaling_factor()
-              : incoming_particles_[1].cross_section_scaling_factor();
-      for (size_t i = 0; i < outgoing_particles_.size(); i++) {
-        const double tform_out = outgoing_particles_[i].formation_time();
-        const double fout =
-            outgoing_particles_[i].cross_section_scaling_factor();
-        outgoing_particles_[i].set_cross_section_scaling_factor(fin * fout);
-        /* If the unformed incoming particles' formation time is larger than
-         * the current outgoing particle's formation time, then the latter
-         * is overwritten by the former*/
-        if (tform_in > tform_out) {
-          outgoing_particles_[i].set_formation_time(tform_in);
+      /* If pythia fails to form a string, it is usually because the energy
+       * is not large enough. In this case, an elastic scattering happens.
+       *
+       * Since particles are normally added after process selection for
+       * strings, outgoing_particles is still uninitialized, and memory
+       * needs to be allocated. We also shift the process_type_ to elastic
+       * so that sample_angles does a proper treatment. */
+      outgoing_particles_.reserve(2);
+      outgoing_particles_.push_back(ParticleData{incoming_particles_[0]});
+      outgoing_particles_.push_back(ParticleData{incoming_particles_[1]});
+      process_type_ = ProcessType::Elastic;
+      elastic_scattering();
+    } else {
+      outgoing_particles_ = string_process_->get_final_state();
+      /* If the incoming particles already were unformed, the formation
+       * times and cross section scaling factors need to be adjusted */
+      const double tform_in = std::max(incoming_particles_[0].formation_time(),
+                                       incoming_particles_[1].formation_time());
+      if (tform_in > time_of_execution_) {
+        const double fin =
+            (incoming_particles_[0].formation_time() >
+             incoming_particles_[1].formation_time())
+                ? incoming_particles_[0].cross_section_scaling_factor()
+                : incoming_particles_[1].cross_section_scaling_factor();
+        for (size_t i = 0; i < outgoing_particles_.size(); i++) {
+          const double tform_out = outgoing_particles_[i].formation_time();
+          const double fout =
+              outgoing_particles_[i].cross_section_scaling_factor();
+          outgoing_particles_[i].set_cross_section_scaling_factor(fin * fout);
+          /* If the unformed incoming particles' formation time is larger than
+           * the current outgoing particle's formation time, then the latter
+           * is overwritten by the former*/
+          if (tform_in > tform_out) {
+            outgoing_particles_[i].set_slow_formation_times(time_of_execution_,
+                                                            tform_in);
+          }
         }
       }
+      /* Check momentum difference for debugging */
+      FourVector out_mom;
+      for (ParticleData data : outgoing_particles_) {
+        out_mom += data.momentum();
+      }
+      log.debug("Incoming momenta string:", total_momentum());
+      log.debug("Outgoing momenta string:", out_mom);
     }
-    /* Check momentum difference for debugging */
-    FourVector out_mom;
-    for (ParticleData data : outgoing_particles_) {
-      out_mom += data.momentum();
-    }
-    log.debug("Incoming momenta string:", total_momentum());
-    log.debug("Outgoing momenta string:", out_mom);
   }
 }
 
