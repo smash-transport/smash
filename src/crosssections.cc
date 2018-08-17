@@ -214,7 +214,6 @@ CollisionBranchPtr CrossSections::elastic(double elast_par,
                                       ProcessType::Elastic);
 }
 
-<<<<<<< HEAD
 CollisionBranchList CrossSections::rare_two_to_two() {
   CollisionBranchList process_list;
   const ParticleData& data_a = incoming_particles_[0];
@@ -230,10 +229,7 @@ CollisionBranchList CrossSections::rare_two_to_two() {
   return process_list;
 }
 
-double CrossSections::elastic_parametrization(bool use_AQM) {
-=======
 double CrossSections::elastic_parametrization(bool use_AQM) const {
->>>>>>> master
   const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
   double elastic_xs = 0.0;
@@ -394,8 +390,7 @@ double CrossSections::npi_el() const {
   }
 }
 
-<<<<<<< HEAD
-CollisionBranchList CrossSections::npi_yk() {
+CollisionBranchList CrossSections::npi_yk() const {
   const ParticleType& a = incoming_particles_[0].type();
   const ParticleType& b = incoming_particles_[1].type();
   const ParticleType& type_nucleon = a.pdgcode().is_nucleon() ? a : b;
@@ -609,10 +604,7 @@ CollisionBranchList CrossSections::npi_yk() {
   return process_list;
 }
 
-double CrossSections::nk_el() {
-=======
 double CrossSections::nk_el() const {
->>>>>>> master
   const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
 
