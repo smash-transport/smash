@@ -214,7 +214,7 @@ CollisionBranchPtr CrossSections::elastic(double elast_par,
                                       ProcessType::Elastic);
 }
 
-CollisionBranchList CrossSections::rare_two_to_two() {
+CollisionBranchList CrossSections::rare_two_to_two() const {
   CollisionBranchList process_list;
   const ParticleData& data_a = incoming_particles_[0];
   const ParticleData& data_b = incoming_particles_[1];

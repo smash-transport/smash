@@ -115,7 +115,7 @@ class CrossSections {
    *
    * \return List of all possibe rare 2->2 processes.
    */
-  CollisionBranchList rare_two_to_two();
+  CollisionBranchList rare_two_to_two() const;
 
   /**
    * Find all inelastic 2->2 processes for the given scattering.
@@ -291,7 +291,7 @@ class CrossSections {
    * \return List of all possible Npi -> YK reactions
    *          with their cross sections
    */
-  CollisionBranchList npi_yk();
+  CollisionBranchList npi_yk() const;
 
   /**
    * Find all inelastic 2->2 processes for Baryon-Baryon (BB) Scattering
