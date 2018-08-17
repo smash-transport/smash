@@ -1,4 +1,4 @@
-# SMASH
+# SMASH README
 
 This is the repository for the development of a new transport
 approach for the dynamical description of heavy ion reactions:
@@ -10,9 +10,7 @@ If Pythia is used, please cite the following references:
 
 * T. Sjöstrand, S. Mrenna and P. Skands, JHEP05 (2006) 026, Comput. Phys. Comm. 178 (2008) 852.
 
-\page install Installation
-
-## Instructions how to build smash.
+## Instructions how to build smash
 
 ### Prerequisites
 
