@@ -251,8 +251,12 @@ class ParticleData {
   }
 
   /**
-   * Get the cross section scaling factor
-   * \return particle's crosss section scaling factor
+   * Get the initially assigned cross section scaling factor.
+   *
+   * Depending on the config, the cross section scaling factor might change
+   * with time, while this value will not be updated.
+   *
+   * \return particle's initially assigned cross section scaling factor
    */
   const double &initial_xsec_scaling_factor() const {
     return initial_xsec_scaling_factor_;
@@ -265,7 +269,7 @@ class ParticleData {
    *
    * If the particle formation power is set to be positive, this will only be
    * the initial scaling factor, while the actual scaling factor grows with
-   * time
+   * time.
    *
    * \param[in] xsec_scal cross section scaling factor
    */
@@ -355,7 +359,7 @@ class ParticleData {
       : id_(uid), index_(index), type_(&ptype) {}
 
   /**
-   * Return the cross section scaling factor at the time of collision
+   * Return the cross section scaling factor at a given time.
    *
    * \param[in] time_until_collision scaling factor at current time plus
    *            this time will be returned.
@@ -435,7 +439,10 @@ class ParticleData {
   double formation_time_ = 0.0;
   /// time when the cross section scaling factor starts to increase to 1
   double begin_formation_time_ = 0.0;
-  /// Initial cross section scaling factor.
+  /**
+   * Initial cross section scaling factor.
+   * 1 by default, since a particle is fully formed in this case.
+   */
   double initial_xsec_scaling_factor_ = 1.0;
   /// history information
   HistoryData history_;
