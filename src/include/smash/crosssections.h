@@ -123,6 +123,19 @@ class CrossSections {
                    double cm_momentum_sqr) const;
 
   /**
+   * Find all 2->2 processes which are suppressed at high energies when
+   * strings are turned on with probabilites, but important for the
+   * production of rare species such as strange particles.
+   *
+   * This function should call the different, more specific functions for
+   * the different scatterings. But so far, only Nucleon-Pion to Hyperon-
+   * Kaon scattering is implemented.
+   *
+   * \return List of all possibe rare 2->2 processes.
+   */
+  CollisionBranchList rare_two_to_two() const;
+
+  /**
    * Find all inelastic 2->2 processes for the given scattering.
    *
    * This function calls the different, more specific functions for
@@ -295,6 +308,16 @@ class CrossSections {
    *        if positive cross section cannot be specified.
    */
   double nk_el() const;
+
+  /**
+   * Find all processes for Nucleon-Pion to Hyperon-Kaon Scattering.
+   * These scatterings are suppressed at high energies when strings are
+   * turned on with probabilities, so they need to be added back manually.
+   *
+   * \return List of all possible Npi -> YK reactions
+   *          with their cross sections
+   */
+  CollisionBranchList npi_yk() const;
 
   /**
    * Find all inelastic 2->2 processes for Baryon-Baryon (BB) Scattering
