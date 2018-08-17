@@ -267,11 +267,11 @@ class DensityOnLattice {
    * The forces will only be calculated if n is larger than 5. This is because
    * the force acting on each particle should be in principle contributed by
    * the other particles. If the number of the test particles is too small,
-   * the unphysical self contribution will be prominant. In the extreme case,
+   * the unphysical self contribution will be prominent. In the extreme case,
    * a single particle can be pushed by itself since its Gaussian wave package
    * always contributes non-zero gradient to its nearest node, which leads to
    * a non-zero force acting on itself. So the forces at the nodes with too
-   * fiew particles should be neglected.
+   * few particles should be neglected.
    *
    * \param[in] part Particle would be added to the current density
    *            on the lattice.
@@ -347,7 +347,7 @@ class DensityOnLattice {
   }
 
   /**
-   * Compute time direvative of the current density on the local lattice
+   * Compute time derivative of the current density on the local lattice
    *
    * \param[in] norm_factor Normalization factor
    * \return \f$\partial_t \vec j\f$ [fm \f$^{-4}\f$]

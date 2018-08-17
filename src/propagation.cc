@@ -147,14 +147,14 @@ void update_momenta(Particles *particles, double dt, const Potentials &pot,
       FI3 = std::make_pair(ThreeVector(0., 0., 0.), ThreeVector(0., 0., 0.));
     }
     if (!use_lattice) {
-      const auto tmp = pot.force(r, plist);
+      const auto tmp = pot.all_forces(r, plist);
       FB = std::make_pair(std::get<0>(tmp), std::get<1>(tmp));
       FI3 = std::make_pair(std::get<2>(tmp), std::get<3>(tmp));
     }
-    const ThreeVector Force =
-        scale.first * (FB.first + (data.momentum().velocity() ^ FB.second))
+    const ThreeVector Force = scale.first
+        * (FB.first + CrossProduct(data.momentum().velocity(), FB.second))
         + scale.second * data.type().isospin3_rel()
-        * (FI3.first + (data.momentum().velocity() ^ FI3.second));
+        * (FI3.first + CrossProduct(data.momentum().velocity(), FI3.second));
     log.debug("Update momenta: F [GeV/fm] = ", Force);
     data.set_4momentum(data.effective_mass(),
                        data.momentum().threevec() + Force * dt);

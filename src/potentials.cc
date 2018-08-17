@@ -182,7 +182,8 @@ std::pair<ThreeVector, ThreeVector> Potentials::symmetry_force(
 
 
 std::tuple<ThreeVector, ThreeVector, ThreeVector, ThreeVector>
-  Potentials::force(const ThreeVector &r, const ParticleList &plist) const {
+  Potentials::all_forces(const ThreeVector &r, const ParticleList &plist)
+  const {
   const bool compute_gradient = true;
   auto F_skyrme = std::make_pair(ThreeVector(0., 0., 0.),
                                  ThreeVector(0., 0., 0.));

@@ -234,7 +234,7 @@ inline double operator*(ThreeVector a, const ThreeVector &b) {
  * \return cross product of two three-vectors
  * \f$ \vec{a} \times \vec{b} \f$
  */
-inline ThreeVector operator^(ThreeVector a, const ThreeVector &b) {
+inline ThreeVector CrossProduct(const ThreeVector &a, const ThreeVector &b) {
   return ThreeVector(a.x2() * b.x3() - a.x3() * b.x2(),
                      a.x3() * b.x1() - a.x1() * b.x3(),
                      a.x1() * b.x2() - a.x2() * b.x1());

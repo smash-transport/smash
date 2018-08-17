@@ -169,7 +169,7 @@ std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart_impl(
     j_rot.set_x3(djmu_dx[1].x2() - djmu_dx[2].x1());
     j_rot *= par.norm_factor_sf();
     for (int i = 1; i < 4; i++) {
-        rho_grad[i - 1] += djmu_dx[i].x0() * par.norm_factor_sf();
+      rho_grad[i - 1] += djmu_dx[i].x0() * par.norm_factor_sf();
     }
   }
   return std::make_tuple(rho_eck, rho_grad, dj_dt, j_rot);

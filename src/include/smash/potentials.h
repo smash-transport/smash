@@ -159,10 +159,14 @@ class Potentials {
    *            calculation. If the distance between particle and calculation
    *            point r, \f$ |r-r_i| > r_{cut} \f$ then particle input
    *            to density will be ignored.
-   * \return (\f$E_B, B_B, E_{I3}, B_{I3}\f$) [GeV/fm]
+   * \return (\f$E_B, B_B, E_{I3}, B_{I3}\f$) [GeV/fm], where
+   *          \f$E_B\f$: the electric component of the Skyrme force
+   *          \f$B_B\f$: the magnetic component of the Skyrme force
+   *          \f$E_{I3}\f$: the electric component of the symmetry force
+   *          \f$B_{I3}\f$: the magnetic component of the symmetry force
    */
   VIRTUAL_FOR_TESTS
-  std::tuple<ThreeVector, ThreeVector, ThreeVector, ThreeVector> force(
+  std::tuple<ThreeVector, ThreeVector, ThreeVector, ThreeVector> all_forces(
       const ThreeVector &r, const ParticleList &plist) const;
 
   /// \return Is Skyrme potential on?
