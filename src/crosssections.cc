@@ -171,7 +171,7 @@ CollisionBranchList CrossSections::generate_collision_list(
         std::max(0., high_energy() - elastic_parametrization(use_AQM));
     append_list(process_list,
         string_excitation(sig_string, string_process, use_AQM));
-        append_list(process_list, rare_two_to_two());
+    append_list(process_list, rare_two_to_two());
   } else {
     if (two_to_one_switch) {
       // resonance formation (2->1)

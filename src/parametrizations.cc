@@ -171,7 +171,7 @@ double piplusp_sigmapluskplus_pdg(double mandelstam_s) {
     std::vector<double> dedup_x;
     std::vector<double> dedup_y;
     std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
-    dedup_y = smooth(dedup_x, dedup_y, 0.1, 5);
+    dedup_y = smooth(dedup_x, dedup_y, 0.2, 5);
     piplusp_sigmapluskplus_interpolation =
         make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
@@ -251,7 +251,7 @@ double piminusp_lambdak0_pdg(double mandelstam_s) {
     std::vector<double> dedup_x;
     std::vector<double> dedup_y;
     std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
-    dedup_y = smooth(dedup_x, dedup_y, 0.03, 6);
+    dedup_y = smooth(dedup_x, dedup_y, 0.2, 6);
     piminusp_lambdak0_interpolation =
         make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
@@ -271,7 +271,7 @@ double piminusp_sigmaminuskplus_pdg(double mandelstam_s) {
     std::vector<double> dedup_x;
     std::vector<double> dedup_y;
     std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
-    dedup_y = smooth(dedup_x, dedup_y, 0.03, 6);
+    dedup_y = smooth(dedup_x, dedup_y, 0.2, 6);
     piminusp_sigmaminuskplus_interpolation =
         make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
