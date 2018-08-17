@@ -133,18 +133,18 @@ static double sum_xs_of(CollisionBranchList& list) {
 
 CrossSections::CrossSections(const ParticleList& incoming_particles,
                              const double sqrt_s)
-    : incoming_particles_(incoming_particles), sqrt_s_(sqrt_s),
+    : incoming_particles_(incoming_particles),
+      sqrt_s_(sqrt_s),
       is_BBbar_pair_(incoming_particles_[0].type().is_baryon() &&
                      incoming_particles_[1].type().is_baryon() &&
                      incoming_particles_[0].type().antiparticle_sign() ==
-                     -incoming_particles_[1].type().antiparticle_sign()) {
-}
+                         -incoming_particles_[1].type().antiparticle_sign()) {}
 
 CollisionBranchList CrossSections::generate_collision_list(
     double elastic_parameter, bool two_to_one_switch,
     ReactionsBitSet included_2to2, double low_snn_cut, bool strings_switch,
     bool use_AQM, bool strings_with_probability, NNbarTreatment nnbar_treatment,
-    StringProcess* string_process) {
+    StringProcess* string_process) const {
   CollisionBranchList process_list;
   const ParticleType& t1 = incoming_particles_[0].type();
   const ParticleType& t2 = incoming_particles_[1].type();
@@ -170,7 +170,7 @@ CollisionBranchList CrossSections::generate_collision_list(
     const double sig_string =
         std::max(0., high_energy() - elastic_parametrization(use_AQM));
     append_list(process_list,
-        string_excitation(sig_string, string_process, use_AQM));
+                string_excitation(sig_string, string_process, use_AQM));
     append_list(process_list, rare_two_to_two());
   } else {
     if (two_to_one_switch) {
@@ -199,7 +199,8 @@ CollisionBranchList CrossSections::generate_collision_list(
   return process_list;
 }
 
-CollisionBranchPtr CrossSections::elastic(double elast_par, bool use_AQM) {
+CollisionBranchPtr CrossSections::elastic(double elast_par,
+                                          bool use_AQM) const {
   double elastic_xs = 0.;
   if (elast_par >= 0.) {
     // use constant elastic cross section from config file
@@ -213,6 +214,7 @@ CollisionBranchPtr CrossSections::elastic(double elast_par, bool use_AQM) {
                                       ProcessType::Elastic);
 }
 
+<<<<<<< HEAD
 CollisionBranchList CrossSections::rare_two_to_two() {
   CollisionBranchList process_list;
   const ParticleData& data_a = incoming_particles_[0];
@@ -229,6 +231,9 @@ CollisionBranchList CrossSections::rare_two_to_two() {
 }
 
 double CrossSections::elastic_parametrization(bool use_AQM) {
+=======
+double CrossSections::elastic_parametrization(bool use_AQM) const {
+>>>>>>> master
   const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
   double elastic_xs = 0.0;
@@ -275,7 +280,7 @@ double CrossSections::elastic_parametrization(bool use_AQM) {
   return elastic_xs;
 }
 
-double CrossSections::nn_el() {
+double CrossSections::nn_el() const {
   const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
 
@@ -286,8 +291,7 @@ double CrossSections::nn_el() {
   if (pdg_a.is_antiparticle_of(pdg_b)) {
     sig_el = ppbar_elastic(s);
   } else if (pdg_a.is_nucleon() && pdg_b.is_nucleon()) {
-    sig_el = (pdg_a == pdg_b) ? pp_elastic(s)
-                              : np_elastic(s);
+    sig_el = (pdg_a == pdg_b) ? pp_elastic(s) : np_elastic(s);
   } else {
     // AQM - Additive Quark Model
     const double m1 = incoming_particles_[0].effective_mass();
@@ -307,7 +311,7 @@ double CrossSections::nn_el() {
   }
 }
 
-double CrossSections::npi_el() {
+double CrossSections::npi_el() const {
   const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
 
@@ -390,6 +394,7 @@ double CrossSections::npi_el() {
   }
 }
 
+<<<<<<< HEAD
 CollisionBranchList CrossSections::npi_yk() {
   const ParticleType& a = incoming_particles_[0].type();
   const ParticleType& b = incoming_particles_[1].type();
@@ -605,6 +610,9 @@ CollisionBranchList CrossSections::npi_yk() {
 }
 
 double CrossSections::nk_el() {
+=======
+double CrossSections::nk_el() const {
+>>>>>>> master
   const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
 
@@ -699,7 +707,7 @@ double CrossSections::nk_el() {
   }
 }
 
-CollisionBranchList CrossSections::two_to_one() {
+CollisionBranchList CrossSections::two_to_one() const {
   const auto& log = logger<LogArea::CrossSections>();
   CollisionBranchList resonance_process_list;
   const ParticleType& type_particle_a = incoming_particles_[0].type();
@@ -740,7 +748,7 @@ CollisionBranchList CrossSections::two_to_one() {
 }
 
 double CrossSections::formation(const ParticleType& type_resonance,
-                                double cm_momentum_sqr) {
+                                double cm_momentum_sqr) const {
   const ParticleType& type_particle_a = incoming_particles_[0].type();
   const ParticleType& type_particle_b = incoming_particles_[1].type();
   // Check for charge conservation.
@@ -776,7 +784,8 @@ double CrossSections::formation(const ParticleType& type_resonance,
          hbarc / fm2_mb;
 }
 
-CollisionBranchList CrossSections::two_to_two(ReactionsBitSet included_2to2) {
+CollisionBranchList CrossSections::two_to_two(
+    ReactionsBitSet included_2to2) const {
   CollisionBranchList process_list;
   const ParticleData& data_a = incoming_particles_[0];
   const ParticleData& data_b = incoming_particles_[1];
@@ -826,7 +835,7 @@ CollisionBranchList CrossSections::two_to_two(ReactionsBitSet included_2to2) {
 }
 
 CollisionBranchList CrossSections::bb_xx_except_nn(
-    ReactionsBitSet included_2to2) {
+    ReactionsBitSet included_2to2) const {
   CollisionBranchList process_list;
   const ParticleType& type_a = incoming_particles_[0].type();
   const ParticleType& type_b = incoming_particles_[1].type();
@@ -852,7 +861,7 @@ CollisionBranchList CrossSections::bb_xx_except_nn(
   return process_list;
 }
 
-CollisionBranchList CrossSections::nn_xx(ReactionsBitSet included_2to2) {
+CollisionBranchList CrossSections::nn_xx(ReactionsBitSet included_2to2) const {
   CollisionBranchList process_list, channel_list;
 
   const double sqrts = sqrt_s_;
@@ -923,7 +932,7 @@ CollisionBranchList CrossSections::nn_xx(ReactionsBitSet included_2to2) {
   return process_list;
 }
 
-CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) {
+CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) const {
   const ParticleType& a = incoming_particles_[0].type();
   const ParticleType& b = incoming_particles_[1].type();
   const ParticleType& type_nucleon = a.pdgcode().is_nucleon() ? a : b;
@@ -1316,7 +1325,8 @@ CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) {
   return process_list;
 }
 
-CollisionBranchList CrossSections::deltak_xx(ReactionsBitSet included_2to2) {
+CollisionBranchList CrossSections::deltak_xx(
+    ReactionsBitSet included_2to2) const {
   CollisionBranchList process_list;
   if (included_2to2[IncludedReactions::KN_to_KDelta] == 0) {
     return process_list;
@@ -1464,7 +1474,7 @@ CollisionBranchList CrossSections::deltak_xx(ReactionsBitSet included_2to2) {
   return process_list;
 }
 
-CollisionBranchList CrossSections::ypi_xx(ReactionsBitSet included_2to2) {
+CollisionBranchList CrossSections::ypi_xx(ReactionsBitSet included_2to2) const {
   CollisionBranchList process_list;
   if (included_2to2[IncludedReactions::Strangeness_exchange] == 0) {
     return process_list;
@@ -1663,7 +1673,7 @@ CollisionBranchList CrossSections::ypi_xx(ReactionsBitSet included_2to2) {
 }
 
 CollisionBranchList CrossSections::dpi_xx(ReactionsBitSet
-                                          /*included_2to2*/) {
+                                          /*included_2to2*/) const {
   const auto& log = logger<LogArea::ScatterAction>();
   CollisionBranchList process_list;
   const double sqrts = sqrt_s_;
@@ -1775,7 +1785,8 @@ CollisionBranchList CrossSections::dpi_xx(ReactionsBitSet
   return process_list;
 }
 
-CollisionBranchList CrossSections::dn_xx(ReactionsBitSet /*included_2to2*/) {
+CollisionBranchList CrossSections::dn_xx(
+    ReactionsBitSet /*included_2to2*/) const {
   const ParticleType& type_a = incoming_particles_[0].type();
   const ParticleType& type_b = incoming_particles_[1].type();
   const ParticleType& type_N = type_a.is_nucleon() ? type_a : type_b;
@@ -1834,7 +1845,7 @@ CollisionBranchList CrossSections::dn_xx(ReactionsBitSet /*included_2to2*/) {
 }
 
 CollisionBranchList CrossSections::string_excitation(
-    double total_string_xs, StringProcess* string_process, bool use_AQM) {
+    double total_string_xs, StringProcess* string_process, bool use_AQM) const {
   const auto& log = logger<LogArea::CrossSections>();
 
   if (!string_process) {
@@ -1904,8 +1915,7 @@ CollisionBranchList CrossSections::string_excitation(
       xs[ip] *= AQM_factor;
     }
   }
-  double single_diffr_AX = xs[0], single_diffr_XB = xs[1],
-         double_diffr = xs[2];
+  double single_diffr_AX = xs[0], single_diffr_XB = xs[1], double_diffr = xs[2];
   double single_diffr = single_diffr_AX + single_diffr_XB;
   double diffractive = single_diffr + double_diffr;
 
@@ -1961,11 +1971,9 @@ CollisionBranchList CrossSections::string_excitation(
   /* fill the list of process channels */
   if (sig_string_soft > 0.) {
     channel_list.push_back(make_unique<CollisionBranch>(
-        single_diffr_AX,
-        ProcessType::StringSoftSingleDiffractiveAX));
+        single_diffr_AX, ProcessType::StringSoftSingleDiffractiveAX));
     channel_list.push_back(make_unique<CollisionBranch>(
-        single_diffr_XB,
-        ProcessType::StringSoftSingleDiffractiveXB));
+        single_diffr_XB, ProcessType::StringSoftSingleDiffractiveXB));
     channel_list.push_back(make_unique<CollisionBranch>(
         double_diffr, ProcessType::StringSoftDoubleDiffractive));
     channel_list.push_back(make_unique<CollisionBranch>(
@@ -2066,7 +2074,8 @@ double CrossSections::string_hard_cross_section() const {
   return cross_sec;
 }
 
-CollisionBranchPtr CrossSections::NNbar_annihilation(const double current_xs) {
+CollisionBranchPtr CrossSections::NNbar_annihilation(
+    const double current_xs) const {
   const auto& log = logger<LogArea::CrossSections>();
   /* Calculate NNbar cross section:
    * Parametrized total minus all other present channels.*/
@@ -2079,7 +2088,7 @@ CollisionBranchPtr CrossSections::NNbar_annihilation(const double current_xs) {
                                       nnbar_xsec, ProcessType::TwoToTwo);
 }
 
-CollisionBranchList CrossSections::NNbar_creation() {
+CollisionBranchList CrossSections::NNbar_creation() const {
   const auto& log = logger<LogArea::CrossSections>();
   CollisionBranchList channel_list;
   /* Calculate NNbar reverse cross section:
@@ -2109,7 +2118,7 @@ CollisionBranchList CrossSections::NNbar_creation() {
 }
 
 CollisionBranchList CrossSections::bar_bar_to_nuc_nuc(
-    const bool is_anti_particles) {
+    const bool is_anti_particles) const {
   const ParticleType& type_a = incoming_particles_[0].type();
   const ParticleType& type_b = incoming_particles_[1].type();
   CollisionBranchList process_list;
@@ -2261,7 +2270,8 @@ double CrossSections::nn_to_resonance_matrix_element(double sqrts,
 template <class IntegrationMethod>
 CollisionBranchList CrossSections::find_nn_xsection_from_type(
     const ParticleTypePtrList& list_res_1,
-    const ParticleTypePtrList& list_res_2, const IntegrationMethod integrator) {
+    const ParticleTypePtrList& list_res_2,
+    const IntegrationMethod integrator) const {
   const ParticleType& type_particle_a = incoming_particles_[0].type();
   const ParticleType& type_particle_b = incoming_particles_[1].type();
 
@@ -2347,8 +2357,7 @@ bool CrossSections::decide_string(bool strings_switch,
   const bool is_NN_scattering =
       t1.is_nucleon() && t2.is_nucleon() &&
       t1.antiparticle_sign() == t2.antiparticle_sign();
-  const bool is_BBbar_scattering =
-      treat_BBbar_with_strings && is_BBbar_pair_;
+  const bool is_BBbar_scattering = treat_BBbar_with_strings && is_BBbar_pair_;
   const bool is_Npi_scattering = (t1.pdgcode().is_pion() && t2.is_nucleon()) ||
                                  (t1.is_nucleon() && t2.pdgcode().is_pion());
   /* True for baryon-baryon, anti-baryon-anti-baryon, baryon-meson,

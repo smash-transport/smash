@@ -214,6 +214,10 @@ namespace smash {
  * Note that some reactions in SMASH are parametrized and require specific
  * particles in the final state. When such a reaction happens and the required
  * particle is not defined, SMASH will crash.
+ *
+ * Note further, that the particles file will need to be modified when running
+ * a box simlation in which detailed balance is expected to be conserved. See
+ * \ref input_modi_box_ for further information.
  */
 
 /*!\Userguide
@@ -264,6 +268,10 @@ namespace smash {
  *
  * Note that SMASH has an internal width cut-off (currently 10 keV), below which
  * particles cannot decay, even if decays are specified in `decaymodes.txt`.
+ *
+ * Note further, that the decaymodes file will need to be modified when running
+ * a box simlation in which detailed balance is expected to be conserved. See
+ * \ref input_modi_box_ for further information.
  */
 class Configuration {
  public:

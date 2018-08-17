@@ -1,0 +1,25 @@
+Logging:
+    default: INFO
+
+General:
+    Modus:         List
+    Time_Step_Mode: None
+    Delta_Time:    0.1
+    End_Time:      50.0
+    Randomseed:    -1
+    Nevents:       10
+
+Output:
+    Particles:
+        Format:          ["Oscar2013"]
+
+Modi:
+    List:
+        # If the build directory is not located in the smash directory anymore,
+        # the absolute path specified below will not work anymore.
+        # You can alternatively pass the path directly from the command line
+        # with the "-c" command:
+        # ./smash -i <path to config file> -c 'Modi: { List: { File_Directory: <path to file that is read in> } }
+        File_Directory: "../input/list"
+        File_Prefix: "example_list"
+        Shift_Id: 0
