@@ -148,7 +148,7 @@ int StringProcess::append_final_state(ParticleList &intermediate_particles,
   }
   assert(nfrag > 0);
 
-  /* compute the cross section suppression factor for leading hadrons
+  /* compute the cross section scaling factor for leading hadrons
    * based on the number of valence quarks. */
   assign_all_scaling_factors(bstring, intermediate_particles,
                              evecLong, additional_xsec_supp_);
@@ -667,8 +667,6 @@ bool StringProcess::next_NDiffHard() {
   }
   event_intermediate_[0].p(pSum);
   event_intermediate_[0].m(pSum.mCalc());
-  // pythia_parton_->event.list();
-  // pythia_parton_->event.listJunctions();
 
   restore_constituent(event_intermediate_, excess_quark, excess_antiq);
 

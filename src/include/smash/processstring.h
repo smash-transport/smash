@@ -347,8 +347,8 @@ class StringProcess {
    * \param[in] m_str masses of strings [GeV]
    * \param[out] evec_str are directions in which strings are stretched.
    * \param[in] flip_string_ends is whether or not we randomly switch string ends.
-   * \param[in] separate_fragment_baryon is whether fragment leading baryon
-   *            (or anti-baryon) with separate fragmentation function.
+   * \param[in] separate_fragment_baryon is whether to fragment leading baryons
+   *            (or anti-baryons) with a separate fragmentation function.
    * \return whether fragmentations and final state creation was successful
    */
   bool make_final_state_2strings(
@@ -411,8 +411,9 @@ class StringProcess {
   bool next_BBbarAnn();
 
   /**
-   * Compare the valence quark contents of actual and mapped hadrons and
-   * evaluate how many actual hadron has more constituents than mapped one.
+   * Compare the valence quark contents of the actual and mapped hadrons and
+   * evaluate how many more constituents the actual hadron has compared to the
+   * mapped one.
    * \param[in] pdg_actual PDG code of actual incoming particle.
    * \param[in] pdg_mapped PDG code of mapped particles used in PYTHIA
    *            event generation.
@@ -448,7 +449,7 @@ class StringProcess {
                            std::array<std::array<int, 5>, 2> &excess_antiq);
 
   /**
-   * Identify set of partons, which are connected
+   * Identify a set of partons, which are connected
    * to form a color-neutral string, from a given PYTHIA event record.
    * All partons found are moved into a new event record for the further
    * hadronization process.
@@ -465,7 +466,7 @@ class StringProcess {
                              Pythia8::Event &event_intermediate,
                              Pythia8::Event &event_hadronize);
   /**
-   * Identify set of partons and junction(s), which are connected
+   * Identify a set of partons and junction(s), which are connected
    * to form a color-neutral string, from a given PYTHIA event record.
    * All partons found are moved into a new event record for the further
    * hadronization process.
