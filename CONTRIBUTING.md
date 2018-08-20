@@ -212,7 +212,9 @@ class Something {
 };
 ```
 
-Doxygen has a lot of commands for markup. For all the connection to code and
+Doxygen has a lot of commands for markup. Most importantly it uses special
+comment formatting. Comments meant for the documentation are either prefixed
+with `///` or wraped with `/** ... */`. For all the connection to code and
 some special layout commands, refer to the [Special Commands in
 Doxygen](http://www.stack.nl/~dimitri/doxygen/manual/commands.html).
 
@@ -305,13 +307,9 @@ Doxygen tree. Currently, the cmake script processes all `src/include/*.h` and
 
 ## Coding Rules
 
-There are two parts:
-* [ALICE O² C++ Coding
-  Guidelines](https://fias.uni-frankfurt.de/~smash/extra/code_guidelines/cppguide.xml)
-  - These guidelines are concerned with the language conventions we follow.
 * [Google Naming & Formatting
-  Rules](https://fias.uni-frankfurt.de/~smash/extra/code_guidelines/cppnaming.xml)
-  - The rules enforce consistent coding style throughout our code base.
+Rules](https://fias.uni-frankfurt.de/~smash/extra/code_guidelines/cppnaming.xml) -
+  The rules enforce consistent coding style throughout our code base.
 
 It can be very instructive to study the [CERT Coding
 Standards](https://www.securecoding.cert.org/confluence/display/seccode/CERT+Coding+Standards)
