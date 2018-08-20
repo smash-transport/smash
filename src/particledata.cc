@@ -66,40 +66,40 @@ void ParticleData::set_history(int ncoll, uint32_t pid, ProcessType pt,
   }
 }
 
-double ParticleData::current_xsec_scaling_factor(
-    double time_until_collision) const {
-  double time_of_collision = position_.x0() + time_until_collision;
-  double scaling_factor_at_collision;
+double ParticleData::xsec_scaling_factor(double delta_time) const {
+  double time_of_interest = position_.x0() + delta_time;
+  // cross section scaling factor at the time_of_interest
+  double scaling_factor;
 
   if (formation_power_ <= 0.) {
     // use a step function to form particles
-    if (time_of_collision < formation_time_) {
-      // particles will not be fully formed at time of collision
-      scaling_factor_at_collision = initial_xsec_scaling_factor_;
+    if (time_of_interest < formation_time_) {
+      // particles will not be fully formed at time of interest
+      scaling_factor = initial_xsec_scaling_factor_;
     } else {
-      // particles are fully formed at time of collision
-      scaling_factor_at_collision = 1.;
+      // particles are fully formed at time of interest
+      scaling_factor = 1.;
     }
   } else {
     // use smooth function to scale cross section (unless particles are already
-    // fully formed at collision or will start to form after collision)
-    if (formation_time_ <= time_of_collision) {
+    // fully formed at desired time or will start to form after later)
+    if (formation_time_ <= time_of_interest) {
       // particles are fully formed when colliding
-      scaling_factor_at_collision = 1.;
-    } else if (begin_formation_time_ >= time_of_collision) {
-      // particles will start formimg after the collision
-      scaling_factor_at_collision = initial_xsec_scaling_factor_;
+      scaling_factor = 1.;
+    } else if (begin_formation_time_ >= time_of_interest) {
+      // particles will start formimg later
+      scaling_factor = initial_xsec_scaling_factor_;
     } else {
-      // particles are in the process of formation at time of collision
-      scaling_factor_at_collision =
+      // particles are in the process of formation at the given time
+      scaling_factor =
           initial_xsec_scaling_factor_ +
           (1. - initial_xsec_scaling_factor_) *
-              std::pow((time_of_collision - begin_formation_time_) /
+              std::pow((time_of_interest - begin_formation_time_) /
                            (formation_time_ - begin_formation_time_),
                        formation_power_);
     }
   }
-  return scaling_factor_at_collision;
+  return scaling_factor;
 }
 
 std::ostream &operator<<(std::ostream &out, const ParticleData &p) {
@@ -114,8 +114,7 @@ std::ostream &operator<<(std::ostream &out, const ParticleData &p) {
          << ", process:" << field<4> << p.id_process()
          << ", pos [fm]:" << p.position() << ", mom [GeV]:" << p.momentum()
          << ", formation time [fm]:" << p.formation_time()
-         << ", cross section scaling factor:"
-         << p.current_xsec_scaling_factor(0.) << "}";
+         << ", cross section scaling factor:" << p.xsec_scaling_factor() << "}";
 }
 
 std::ostream &operator<<(std::ostream &out, const ParticleList &particle_list) {

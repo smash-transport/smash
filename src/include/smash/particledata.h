@@ -361,11 +361,11 @@ class ParticleData {
   /**
    * Return the cross section scaling factor at a given time.
    *
-   * \param[in] time_until_collision scaling factor at current time plus
+   * \param[in] delta_time scaling factor at current time plus
    *            this time will be returned.
    * \return the cross section scaling factor at a specified time.
    */
-  double current_xsec_scaling_factor(double time_until_collision) const;
+  double xsec_scaling_factor(double delta_time = 0.) const;
 
   /// Power with which the cross section scaling factor grows in time.
   static double formation_power_;

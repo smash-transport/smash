@@ -277,10 +277,8 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData& data_a,
   double cross_section_criterion = act->cross_section() * fm2_mb * M_1_PI /
                                    static_cast<double>(testparticles_);
   // Take cross section scaling factors into account
-  cross_section_criterion *=
-      data_a.current_xsec_scaling_factor(time_until_collision);
-  cross_section_criterion *=
-      data_b.current_xsec_scaling_factor(time_until_collision);
+  cross_section_criterion *= data_a.xsec_scaling_factor(time_until_collision);
+  cross_section_criterion *= data_b.xsec_scaling_factor(time_until_collision);
 
   // distance criterion according to cross_section
   if (distance_squared >= cross_section_criterion) {

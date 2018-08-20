@@ -86,8 +86,7 @@ static void compare_extended_particledata(
   const auto h = particle.get_history();
   COMPARE(std::atoi(datastring.at(12).c_str()), h.collisions_per_particle);
   COMPARE(std::atoi(datastring.at(13).c_str()), particle.formation_time());
-  COMPARE(std::atoi(datastring.at(14).c_str()),
-          particle.current_xsec_scaling_factor(0.));
+  COMPARE(std::atoi(datastring.at(14).c_str()), particle.xsec_scaling_factor());
   COMPARE(std::atoi(datastring.at(15).c_str()), static_cast<int>(h.id_process));
   COMPARE(std::atoi(datastring.at(16).c_str()),
           static_cast<int>(h.process_type));

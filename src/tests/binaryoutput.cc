@@ -98,7 +98,7 @@ static void compare_particle_extended(const ParticleData &p,
   read_binary(p2pdg, file);
   COMPARE(collisions_per_particle, h.collisions_per_particle);
   COMPARE(formation_time, p.formation_time());
-  COMPARE(xs_scaling_factor, p.current_xsec_scaling_factor(0.));
+  COMPARE(xs_scaling_factor, p.xsec_scaling_factor());
   COMPARE(id_process, static_cast<int>(h.id_process));
   COMPARE(process_type, static_cast<int>(h.process_type));
   COMPARE(time_last_collision, h.time_last_collision);

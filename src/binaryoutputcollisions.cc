@@ -146,7 +146,7 @@ void BinaryOutputBase::write_particledata(const ParticleData &p) {
     const auto history = p.get_history();
     write(history.collisions_per_particle);
     write(p.formation_time());
-    write(p.current_xsec_scaling_factor(0.));
+    write(p.xsec_scaling_factor());
     write(history.id_process);
     write(static_cast<uint32_t>(history.process_type));
     write(history.time_last_collision);
