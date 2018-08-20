@@ -165,18 +165,18 @@ class ParticleType {
            pdgcode_.strangeness() == 0 && pdgcode_.charmness() == 0;
   }
 
-  /// \return true if the particle is stable
+  /// \return whether the particle is stable
   inline bool is_stable() const { return width_ < width_cutoff; }
 
-  /// Check if particle is a nucleus
+  /// \return whether the particle is a nucleus
   inline bool is_nucleus() const { return pdgcode_.is_nucleus(); }
 
-  /// Check if particle is an (anti-)deuteron
+  /// \return whether the particle is an (anti-)deuteron
   inline bool is_deuteron() const {
     return is_nucleus() && std::abs(pdgcode_.get_decimal()) == 1000010020;
   }
 
-  /// Check if particle is an artificial d' resonance
+  /// \return whether the particle is an artificial d' resonance
   inline bool is_dprime() const {
     return is_nucleus() && std::abs(pdgcode_.get_decimal()) == 1000010021;
   }
@@ -365,7 +365,7 @@ class ParticleType {
   void dump_width_and_spectral_function() const;
 
   /**
-   * Returns a list of all ParticleType objects.
+   * \return a list of all ParticleType objects.
    *
    * \note This list is currently sorted, but do not rely on it.
    */
