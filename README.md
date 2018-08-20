@@ -169,3 +169,9 @@ and `-d` options are necessary. For the default box, this means:
 All command line options can be viewed with
 
     ./smash -h
+
+## License
+
+SMASH is licensed under the terms of the GNU General Public License, Version 3
+or above. The build scripts are licensed under terms of the BSD 3-clause
+license. See [LICENSE](LICENSE).

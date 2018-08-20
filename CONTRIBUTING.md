@@ -1,9 +1,12 @@
-# CONTRIBUTING
+# Contributing to SMASH
 
 If you are reading this, it is probable that you are going to contribute to
 SMASH. First of all, we welcome your interest and thank you for your work.
 Hopefully, you find what you need in the following. Otherwise feel free to
 contact the development team.
+
+Note that any contributions must be licensed under the same terms as SMASH, see
+[LICENSE](LICENSE).
 
 ## Testing
 
