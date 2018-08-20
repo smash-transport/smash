@@ -375,6 +375,7 @@ typedef RectangularLattice<DensityOnLattice> DensityLattice;
  * \param[in] par a structure containing testparticles number and gaussian
  *            smearing parameters.
  * \param[in] particles the particles vector
+ * \param[in] compute_gradient Whether to compute the gradients
  * \tparam T LatticeType
  */
 template <typename T>
