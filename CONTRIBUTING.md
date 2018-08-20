@@ -45,7 +45,8 @@ Alternatively, the binary can be checked manually via:
 
     valgrind -v ./smash
 
-Note: There is known bug with `valgrind-3.11` that leads to an error about an unrecognized instruction. The memchecks will not run with his version.
+Note: There is known bug with `valgrind-3.11` that leads to an error about an
+unrecognized instruction. The memchecks will not run with his version.
 
 ## Development Tools
 
@@ -112,8 +113,8 @@ as a user".
 
 ### Installing cppcheck
 
-You can use cppcheck to find some problems in the code, but beware has quite a
-few false positives. Download and compile the latest version:
+You can use cppcheck to find some problems in the code, but beware it has quite
+a few false positives. Download and compile the latest version:
 
     git clone git://github.com/danmar/cppcheck.git
     cd cppcheck

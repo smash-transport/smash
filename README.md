@@ -1,4 +1,4 @@
-# SMASH
+# SMASH README
 
 This is the repository for the development of the SMASH (Simulating Many
 Accelerated Strongly-interacting Hadrons) transport approach for the dynamical
@@ -167,6 +167,7 @@ and `-d` options are necessary. For the default box, this means:
 All command line options can be viewed with
 
     ./smash -h
+
 
 ## License
 
