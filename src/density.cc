@@ -197,44 +197,9 @@ void update_density_lattice(RectangularLattice<DensityOnLattice> *lat,
                             const DensityType dens_type,
                             const DensityParameters &par,
                             const Particles &particles,
-                            bool compute_gradient) {
-  // Do not proceed if lattice does not exists/update not required
-  if (lat == nullptr || lat->when_update() != update) {
-    return;
-  }
-  lat->reset();
-  const double norm_factor = par.norm_factor_sf();
-  for (const auto &part : particles) {
-    const double dens_factor = density_factor(part.type(), dens_type);
-    if (std::abs(dens_factor) < really_small) {
-      continue;
-    }
-    const FourVector p = part.momentum();
-    const double m = p.abs();
-    if (unlikely(m < really_small)) {
-      const auto &log = logger<LogArea::Density>();
-      log.warn("Gaussian smearing is undefined for momentum ", p);
-      continue;
-    }
-    const double m_inv = 1.0 / m;
-
-    const ThreeVector pos = part.position().threevec();
-    lat->iterate_in_radius(
-        pos, par.r_cut(), [&](DensityOnLattice &node, int ix, int iy, int iz) {
-          const ThreeVector r = lat->cell_center(ix, iy, iz);
-          const double sf =
-              norm_factor *
-              unnormalized_smearing_factor(pos - r, p, m_inv,
-                                           par, compute_gradient).first;
-          const ThreeVector sf_grad =
-              norm_factor *
-              unnormalized_smearing_factor(pos - r, p, m_inv,
-                                           par, compute_gradient).second;
-          if (sf > really_small) {
-            node.add_particle(part, dens_factor, sf, compute_gradient, sf_grad);
-          }
-        });
-  }
+                            const bool compute_gradient) {
+  update_general_lattice(lat, update, dens_type, par, particles,
+                         compute_gradient);
 }
 
 void update_Tmn_lattice(RectangularLattice<EnergyMomentumTensor> *lat,

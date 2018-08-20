@@ -123,6 +123,12 @@ class ThreeVector {
   /// \return whether the vector is different from another vector
   bool operator!=(const ThreeVector &rhs) const { return x_ != rhs.x_; }
 
+
+  /**
+   * \return cross product of this vector and another vector
+   * \f$ \vec{this} \times \vec{b} \f$
+   */
+  ThreeVector inline CrossProduct(const ThreeVector &b) const;
   /// iterates over the components
   using iterator = std::array<double, 3>::iterator;
   /// iterates over the components
@@ -234,10 +240,10 @@ inline double operator*(ThreeVector a, const ThreeVector &b) {
  * \return cross product of two three-vectors
  * \f$ \vec{a} \times \vec{b} \f$
  */
-inline ThreeVector CrossProduct(const ThreeVector &a, const ThreeVector &b) {
-  return ThreeVector(a.x2() * b.x3() - a.x3() * b.x2(),
-                     a.x3() * b.x1() - a.x1() * b.x3(),
-                     a.x1() * b.x2() - a.x2() * b.x1());
+ThreeVector inline ThreeVector::CrossProduct(const ThreeVector &b) const {
+  return ThreeVector(x_[1] * b.x3() - x_[2] * b.x2(),
+                     x_[2] * b.x1() - x_[0] * b.x3(),
+                     x_[0] * b.x2() - x_[1] * b.x1());
 }
 
 ThreeVector inline ThreeVector::operator/=(const double &a) {
