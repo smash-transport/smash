@@ -246,7 +246,7 @@ std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart(
  *    jmu_pos and jmu_neg, the next sets djmu_dx.
  * -# Get jmus and density whenever necessary via density(),
  *    jmu_pos(), jmu_neg()
- * -# Get \f$\nabla \cdot \rho$ via grad_rho()
+ * -# Get \f$\nabla \cdot \rho\f$ via grad_rho()
  * -# Get \f$\nabla \times \vec j\f$ via rot_j()
  * -# Get \f$\partial_t \vec j\f$ via dj_dt()
  */
@@ -375,6 +375,7 @@ typedef RectangularLattice<DensityOnLattice> DensityLattice;
  * \param[in] par a structure containing testparticles number and gaussian
  *            smearing parameters.
  * \param[in] particles the particles vector
+ * \param[in] compute_gradient Whether to compute the gradients
  * \tparam T LatticeType
  */
 template <typename T>

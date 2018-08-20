@@ -93,8 +93,9 @@ class ParticleType {
   /// assignment is not allowed, see copy constructor above
   ParticleType &operator=(const ParticleType &) = delete;
 
-  // move ctors are needed for std::sort
+  /// move ctors are needed for std::sort
   ParticleType(ParticleType &&) = default;
+  /// move ctors are needed for std::sort
   ParticleType &operator=(ParticleType &&) = default;
 
   /// \return the DecayModes object for this particle type.

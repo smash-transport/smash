@@ -219,8 +219,6 @@ CollisionBranchList CrossSections::rare_two_to_two() const {
   CollisionBranchList process_list;
   const ParticleData& data_a = incoming_particles_[0];
   const ParticleData& data_b = incoming_particles_[1];
-  const ParticleType& type_a = data_a.type();
-  const ParticleType& type_b = data_b.type();
   const auto& pdg_a = data_a.pdgcode();
   const auto& pdg_b = data_b.pdgcode();
   if ((pdg_a.is_nucleon() && pdg_b.is_pion()) ||

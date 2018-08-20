@@ -116,16 +116,11 @@ ThreeVector DeformedNucleus::distribute_nucleon() const {
 void DeformedNucleus::set_parameters_automatic() {
   // Initialize the inherited attributes.
   Nucleus::set_parameters_automatic();
-  /// \todo In issue #4743 the corrected values should be optional
-  // Set the deformation parameters.
+  // Set the deformation parameters extracted from \iref{Moller:1993ed}.
   switch (Nucleus::number_of_particles()) {
     case 238:  // Uranium
-      // default: Moeller
-      set_beta_2(0.215);
+      set_beta_2(0.28);
       set_beta_4(0.093);
-      // correction: Kuhlman, Heinz
-      // set_beta_2(0.28);
-      // set_beta_4(0.093);
       break;
     case 208:  // Lead
       set_beta_2(0.0);

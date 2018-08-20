@@ -420,9 +420,10 @@ class Particles {
    * \ingroup logging
    * Print effective mass and type name for all particles to the stream.
    * \param[in] out The ostream into which to output
-   * \param[in] p The Particles object to write into out
+   * \param[in] particles The Particles object to write into out
    */
-  friend std::ostream &operator<<(std::ostream &out, const Particles &p);
+  friend std::ostream &operator<<(std::ostream &out,
+                                  const Particles &particles);
 
  private:
   /**

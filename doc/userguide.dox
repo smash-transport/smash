@@ -1,5 +1,5 @@
 /**
-\mainpage SMASH User Guide
+\mainpage SMASH USER GUIDE
 
 SMASH (Simulating Many Accelerated Strongly-interacting Hadrons) is a
 next-generation hadronic transport code. It can do hadron-hadron and
@@ -7,7 +7,7 @@ nucleus-nucleus collisions as well as box-mode simulations.
 
 Quick Links:
 - \subpage authors
-- \subpage install
+- [Installation](README.md)
 - \subpage page_smash_invocation
 - \subpage input
 - \subpage output_general_

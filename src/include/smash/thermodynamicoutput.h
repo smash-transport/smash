@@ -36,6 +36,12 @@ namespace smash {
  **/
 class ThermodynamicOutput : public OutputInterface {
  public:
+  /**
+   * Construct Output
+   * param[in] path Path to output
+   * param[in] name Filename
+   * param[in] out_par Parameters of output
+   */
   ThermodynamicOutput(const bf::path &path, const std::string &name,
                       const OutputParameters &out_par);
   ~ThermodynamicOutput();
@@ -52,7 +58,8 @@ class ThermodynamicOutput : public OutputInterface {
   void at_intermediate_time(const Particles &particles, const Clock &clock,
                             const DensityParameters &dens_param) override;
 
-  /** Prints density along the specified line. Useful to make 1D plots of
+  /**
+   * Prints density along the specified line. Useful to make 1D plots of
    * density profiles.
    */
   void density_along_line(const char *file_name, const ParticleList &plist,
@@ -61,8 +68,9 @@ class ThermodynamicOutput : public OutputInterface {
                           const ThreeVector &line_end, int n_points);
 
  private:
+  /// Pointer to output file
   RenamingFilePtr file_;
-  // Structure that holds all the information about what to printout
+  /// Structure that holds all the information about what to printout
   const OutputParameters out_par_;
 };
 

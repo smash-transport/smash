@@ -2,18 +2,19 @@
 \mainpage SMASH Development Documentation
 
 \par Important entry points
+- [Contributing](CONTRIBUTING.md)
 - \ref smash::Experiment
 - \ref smash::Configuration
 
 \par Configuration options
-- \ref inputoptions
+- \ref input
 
 \par Unit Testing
 - \ref unittest_page
 
 */
 
-// define all the groups/moduls
+// define all the groups/modules
 /// \defgroup unittest Unit Test Macros and Functions
 /// \defgroup output Output Classes
 /// \defgroup modus Experiment Modi Classes
