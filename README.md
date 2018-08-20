@@ -104,16 +104,13 @@ In order to disable it, one can do the follwoing:
 
 ### Including Eigen header files from custom location
 
-Let's assume Eigen headers will be unpacked in $HOME.
+Let's assume Eigen headers will be unpacked in `$HOME`.
 
-1. Download latest package [latest-eigen].tar.gz from http://eigen.tuxfamily.org
+1. Download latest package `[latest-eigen].tar.gz` from http://eigen.tuxfamily.org
 
-2. unpack: tar -xf [latest-eigen].tar.gz -C $HOME
+2. unpack: `tar -xf [latest-eigen].tar.gz -C $HOME`
 
-3. in smash/build/, create build files with
-
-
-    cmake -DCMAKE_INSTALL_PREFIX=$HOME/[latest-eigen]/ ..
+3. in `smash/build/`, create build files with `cmake -DCMAKE_INSTALL_PREFIX=$HOME/[latest-eigen]/ ..`
 
 
 ### Using a custom GSL build
@@ -123,7 +120,7 @@ Run the following:
     wget ftp://ftp.gnu.org/gnu/gsl/gsl-latest.tar.gz
     tar -zxvf gsl-latest.tar.gz
 
-This creates a folder named `gsl-[version_number]` called $GSL here.
+This creates a folder named `gsl-[version_number]` called `$GSL` here.
 
     cd $GSL
     ./configure --prefix $GSL

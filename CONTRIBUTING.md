@@ -36,6 +36,7 @@ Alternatively, the binary can be checked manually via:
 
     valgrind -v ./smash
 
+Note: There is known bug with `valgrind-3.11` that leads to an error about an unrecognized instruction. The memchecks will not run with his version.
 
 ## Development Tools
 
