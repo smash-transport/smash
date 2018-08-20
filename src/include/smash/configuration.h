@@ -217,9 +217,15 @@ namespace smash {
  * particles in the final state. When such a reaction happens and the required
  * particle is not defined, SMASH will crash.
  *
- * Note further, that the particles file will need to be modified when running
- * a box simlation in which detailed balance is expected to be conserved. See
- * \ref input_modi_box_ for further information.
+ * If you specify an incorrect value, SMASH will print an error similar to the
+ * following:
+ * ```
+ * Failed to convert the input string to the expected data types.
+ * ```
+ *
+ * When running a box simulation in which detailed balance is expected to be
+ * conserved, the particles file will need to be modified. See \ref
+ * input_modi_box_ for further information.
  */
 
 /*!\Userguide
@@ -272,7 +278,7 @@ namespace smash {
  * particles cannot decay, even if decays are specified in `decaymodes.txt`.
  *
  * Note further, that the decaymodes file will need to be modified when running
- * a box simlation in which detailed balance is expected to be conserved. See
+ * a box simulation in which detailed balance is expected to be conserved. See
  * \ref input_modi_box_ for further information.
  */
 class Configuration {

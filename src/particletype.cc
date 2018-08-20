@@ -206,8 +206,10 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
     std::string name;
     double mass, width;
     std::string parity_string;
-    std::array<PdgCode, 4> pdgcode;
-    lineinput >> name >> mass >> width >> parity_string >> pdgcode[0];
+    std::vector<std::string> pdgcode_strings;
+    // We expect at most 4 PDG codes per multiplet.
+    pdgcode_strings.reserve(4);
+    lineinput >> name >> mass >> width >> parity_string;
     Parity parity;
     bool fail = false;
     if (parity_string == "+") {
@@ -224,9 +226,9 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
           line));
     }
     // read additional PDG codes (if present)
-    unsigned int n = 1;  // number of PDG codes found
-    while (!lineinput.eof() && n < pdgcode.size()) {
-      lineinput >> pdgcode[n++];
+    while (!lineinput.eof()) {
+      pdgcode_strings.push_back("");
+      lineinput >> pdgcode_strings.back();
       if (lineinput.fail()) {
         throw ParticleType::LoadFailure(build_error_string(
             "While loading the ParticleType data:\nFailed to convert the input "
@@ -234,6 +236,17 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
             line));
       }
     }
+    if (pdgcode_strings.size() < 1) {
+      throw ParticleType::LoadFailure(build_error_string(
+          "While loading the ParticleType data:\nFailed to convert the input "
+          "string due to missing PDG code.",
+          line));
+    }
+    std::vector<PdgCode> pdgcode;
+    pdgcode.resize(pdgcode_strings.size());
+    std::transform(pdgcode_strings.begin(), pdgcode_strings.end(),
+                   pdgcode.begin(),
+                   [] (const std::string& s) { return PdgCode(s); });
     ensure_all_read(lineinput, line);
 
     /* Check if nucleon, kaon, and delta masses are
@@ -250,9 +263,9 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
     }
 
     // add all states to type list
-    for (unsigned int i = 0; i < n; i++) {
+    for (size_t i = 0; i < pdgcode.size(); i++) {
       std::string full_name = name;
-      if (n > 1) {
+      if (pdgcode.size() > 1) {
         // for multiplets: add charge string to name
         full_name += chargestr(pdgcode[i].charge());
       }
