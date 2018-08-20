@@ -40,11 +40,17 @@ const ParticleTypeList *all_particle_types = nullptr;
 namespace {
 /// Global pointer to the Particle Type list.
 const ParticleTypeList *all_particle_types = nullptr;
+/// Global pointer to the Particle Type list of nucleons
 ParticleTypePtrList nucleons_list;
+/// Global pointer to the Particle Type list of anti-nucleons
 ParticleTypePtrList anti_nucs_list;
+/// Global pointer to the Particle Type list of deltas
 ParticleTypePtrList deltas_list;
+/// Global pointer to the Particle Type list of anti-deltas
 ParticleTypePtrList anti_deltas_list;
+/// Global pointer to the Particle Type list of baryon resonances
 ParticleTypePtrList baryon_resonances_list;
+/// Global pointer to the Particle Type list of light nuclei
 ParticleTypePtrList light_nuclei_list;
 }  // unnamed namespace
 

@@ -91,8 +91,8 @@ class I_tot_range {
  public:
   /**
    * Get the allowed range of total isospin for a collision a + b.
-   * \param a Particle a.
-   * \param a Particle b.
+   * \param p_a Particle a.
+   * \param p_b Particle b.
    * \return Maximum and minimum of allowed values.
    */
   I_tot_range(const ParticleType &p_a, const ParticleType &p_b) {
@@ -104,10 +104,10 @@ class I_tot_range {
 
   /**
    * Get the allowed range of total isospin for a collision a + b <-> c + d.
-   * \param a Particle a.
-   * \param a Particle b.
-   * \param a Particle c.
-   * \param a Particle d.
+   * \param p_a Particle a.
+   * \param p_b Particle b.
+   * \param p_c Particle c.
+   * \param p_d Particle d.
    * \return Maximum and minimum of allowed values or empty range, if reaction
    * is forbidden due to isospin.
    */
@@ -132,7 +132,9 @@ class I_tot_range {
   /// Iterator class for determination of total isospin.
   class iterator : public std::iterator<std::forward_iterator_tag, int> {
    private:
+    /// Element of the iterator
     int c_;
+    /// Parent class giving the total isospin range.
     I_tot_range &parent_;
 
    public:

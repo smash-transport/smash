@@ -35,8 +35,10 @@ struct HistoryData {
    * The full coordinate space 4-vector can be obtained by back-propagation
    */
   double time_last_collision = 0.0;
-  /// PdgCodes of the parent particles
-  PdgCode p1 = 0x0, p2 = 0x0;
+  /// PdgCode of the first parent particles
+  PdgCode p1 = 0x0;
+  /// PdgCode of the second parent particles
+  PdgCode p2 = 0x0;
 };
 
 /**
@@ -243,7 +245,7 @@ class ParticleData {
    * The cross section will only grow slowly, if the option is used.
    *
    * \param[in] begin_form_time time when the cross section starts to increase
-   * \param[in] from_time time when the crosss ection reaches 1
+   * \param[in] form_time time when the cross section reaches 1
    */
   void set_slow_formation_times(double begin_form_time, double form_time) {
     begin_formation_time_ = begin_form_time;
@@ -447,10 +449,11 @@ std::ostream &operator<<(std::ostream &out, const ParticleList &particle_list);
  * Helper type to attach the request for detailed printing to the type.
  */
 struct PrintParticleListDetailed {
+  /// Particle list
   const ParticleList &list;
 };
 /**
- * \ingroup loggingk
+ * \ingroup logging
  * Request the ParticleList to be printed in full detail (i.e. one full
  * ParticleData printout per line).
  */
@@ -462,7 +465,7 @@ inline PrintParticleListDetailed detailed(const ParticleList &list) {
  * \ingroup logging
  * Writes a detailed overview over the particles in the \p particle_list
  * argument
- * to the stream. This overload is selected via the function \ref detailed.
+ * to the stream. This overload is selected via the function detailed.
  */
 std::ostream &operator<<(std::ostream &out,
                          const PrintParticleListDetailed &particle_list);

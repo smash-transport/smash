@@ -65,7 +65,7 @@ class Tabulation {
    * asymptotics, e.g. rho(m) functions.
    *
    * \param x Argument to tabulated function.
-   * \param extrapolation \ref Extrapolation that should be used for values
+   * \param extrapolation Extrapolation that should be used for values
    * outside the tabulation.
    * \return Tabulated value using linear interpolation.
    */

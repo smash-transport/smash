@@ -170,7 +170,7 @@ inline Configuration configuration(std::string overrides = {}) {
  * Create an experiment.
  *
  * If you want a specific configuration you can pass it as parameter, otherwise
- * it will use the result from \ref configuration above.
+ * it will use the result from configuration above.
  */
 inline std::unique_ptr<ExperimentBase> experiment(
     const Configuration &c = configuration()) {

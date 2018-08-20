@@ -434,6 +434,7 @@ double kplusn_inelastic_background(double mandelstam_s);
  * implementation.
  */
 struct pair_hash {
+  /// Hashing is done by this operator
   std::size_t operator()(const std::pair<uint64_t, uint64_t>& p) const {
     auto h1 = std::hash<uint64_t>{}(p.first);
     auto h2 = std::hash<uint64_t>{}(p.second);
