@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2016-2017
+ *    Copyright (c) 2016-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -18,10 +18,10 @@ using namespace smash;
 
 TEST(td_simple_gas) {
   ParticleType::create_type_list(
-      "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "π⁰ 0.138 7.7e-9     111\n"
-      "K⁰ 0.494 0.0        311\n"
-      "N⁺ 0.938 0.0       2212\n");
+      "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
+      "π⁰ 0.138 7.7e-9 -   111\n"
+      "K⁰ 0.494 0.0    -   311\n"
+      "N⁺ 0.938 0.0    +  2212\n");
   // Note that antiparticles are also created!
   const double T = 0.1;
   const double mub = 0.8;

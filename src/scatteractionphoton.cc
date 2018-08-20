@@ -199,6 +199,15 @@ void ScatterActionPhoton::generate_final_state() {
 
   FourVector middle_point = get_interaction_point();
 
+  // t is defined to be the momentum exchanged between the rho meson and the
+  // photon in pi + rho -> pi + photon channel. Therefore,
+  // get_t_range needs to be called with m2 being the rho mass instead of the
+  // pion mass. So, particles 1 and 2 are swapped if necessary.
+
+  if (!incoming_particles_[0].pdgcode().is_pion()) {
+    std::swap(incoming_particles_[0], incoming_particles_[1]);
+  }
+
   // 2->2 inelastic scattering
   // Sample the particle momenta in CM system
   const double m1 = incoming_particles_[0].effective_mass();

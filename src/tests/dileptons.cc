@@ -18,11 +18,11 @@ TEST(init_particle_types) {
   create_all_loggers(Configuration(""));
 
   ParticleType::create_type_list(
-      "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "π  0.138    7.7e-9 111 211\n"
-      "η  0.548 1.31e-6    221\n"
-      "e⁻ 0.000511 0      11\n"
-      "γ  0        0      22\n");
+      "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
+      "π  0.138  7.7e-9 - 111 211\n"
+      "η  0.548 1.31e-6 - 221\n"
+      "e⁻ 0.000511 0    +  11\n"
+      "γ  0        0    +  22\n");
 }
 
 TEST(init_decay_modes) {

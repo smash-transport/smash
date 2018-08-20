@@ -64,7 +64,6 @@ class ListModus : public ModusDefault {
    *                         initial conditions of the experiment.
    * \param[in] parameters Unused, but necessary because of templated
    *                       initialization
-   * \todo JB:remove the second parameter?
    */
   explicit ListModus(Configuration modus_config,
                      const ExperimentParameters &parameters);
