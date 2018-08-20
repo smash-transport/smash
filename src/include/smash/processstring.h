@@ -517,6 +517,19 @@ class StringProcess {
   static void assign_scaling_factor(int nquark, ParticleData& data,
                                     double suppression_factor);
 
+  /**
+   * Take pdg code and map onto particle specie
+   * which can be handled by PYTHIA.
+   * Positively charged baryons are mapped onto proton and other baryons are
+   * mapped onto neutrons. Same rule applies for anti-baryons.
+   * Positively (negatively) charged mesons are mapped onto pi+ (pi-).
+   * Neutral mesons are mapped onto pi0.
+   *
+   * \param[in] pdg PdgCode that will be mapped
+   * \return mapped PDG id to be used in PYTHIA
+   */
+  static int pdg_map_for_pythia(PdgCode &pdg);
+
   // clang-format on
 };
 
