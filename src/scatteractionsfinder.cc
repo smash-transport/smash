@@ -486,7 +486,9 @@ struct Node {
   /// Possible actions after this action.
   std::vector<Node> children_;
 
+  /// Cannot be copied
   Node(const Node&) = delete;
+  /// Move constructor
   Node(Node&&) = default;
 
   /**
@@ -580,7 +582,7 @@ struct Node {
    * \param depth Recursive call depth.
    * \param result Pairs of process names and exclusive cross sections.
    * \param name Current name.
-   * \param current Weight/cross section.
+   * \param weight current Weight/cross section.
    * \param show_intermediate_states Whether intermediate states should be
    * shown.
    */

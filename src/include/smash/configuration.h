@@ -135,34 +135,6 @@ namespace smash {
  * belongs to the Output category, whereas Particles is a subcategory.
  */
 
-/**
- * Interface to the SMASH configuration files.
- *
- * The configuration is created from a YAML file and then stores a nested map of
- * maps (normally a tree, but YAML allows it to be cyclic - even though we don't
- * want that feature).
- *
- * For the typical usage in SMASH one needs to read the value once. In that
- * case, use the Configuration::take function:
- * \code
- * double sigma = config.take({"General", "SIGMA"});
- * \endcode
- * Note the curly braces in the function call. It is a std::initializer_list of
- * strings. This allows an arbitrary nesting depth via the same function.
- * But as a consequence the keys must all be given as constant strings at
- * compile time.
- *
- * If you need to access the configuration values from a run-time string you can
- * use Configuration::operator[]. This returns a Configuration object that
- * references the respective sub-tree.
- *
- * By taking values (instead of just reading), the configuration object should
- * be empty at the end of the initialization. If the object is not empty, SMASH
- * will print a warning (using Configuration::unused_values_report). This can be
- * important for the user to discover typos in his configuration file (or
- * command line parameters).
- */
-
 /*!\Userguide
  * \page inputparticles Particles
  *
@@ -280,6 +252,34 @@ namespace smash {
  * Note further, that the decaymodes file will need to be modified when running
  * a box simulation in which detailed balance is expected to be conserved. See
  * \ref input_modi_box_ for further information.
+ */
+
+/**
+ * Interface to the SMASH configuration files.
+ *
+ * The configuration is created from a YAML file and then stores a nested map of
+ * maps (normally a tree, but YAML allows it to be cyclic - even though we don't
+ * want that feature).
+ *
+ * For the typical usage in SMASH one needs to read the value once. In that
+ * case, use the Configuration::take function:
+ * \code
+ * double sigma = config.take({"General", "SIGMA"});
+ * \endcode
+ * Note the curly braces in the function call. It is a std::initializer_list of
+ * strings. This allows an arbitrary nesting depth via the same function.
+ * But as a consequence the keys must all be given as constant strings at
+ * compile time.
+ *
+ * If you need to access the configuration values from a run-time string you can
+ * use Configuration::operator[]. This returns a Configuration object that
+ * references the respective sub-tree.
+ *
+ * By taking values (instead of just reading), the configuration object should
+ * be empty at the end of the initialization. If the object is not empty, SMASH
+ * will print a warning (using Configuration::unused_values_report). This can be
+ * important for the user to discover typos in his configuration file (or
+ * command line parameters).
  */
 class Configuration {
  public:
