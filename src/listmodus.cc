@@ -224,9 +224,9 @@ double ListModus::initial_conditions(Particles *particles,
     std::istringstream lineinput(line.text);
     double t, x, y, z, mass, E, px, py, pz;
     int id, charge;
-    PdgCode pdgcode;
-    lineinput >> t >> x >> y >> z >> mass >> E >> px >> py >> pz >> pdgcode >>
-        id >> charge;
+    std::string pdg_string;
+    lineinput >> t >> x >> y >> z >> mass >> E >> px >> py >> pz >> pdg_string
+              >> id >> charge;
     if (lineinput.fail()) {
       throw LoadFailure(
           build_error_string("While loading external particle lists data:\n"
@@ -234,6 +234,7 @@ double ListModus::initial_conditions(Particles *particles,
                              "expected data types.",
                              line));
     }
+    PdgCode pdgcode(pdg_string);
     log.debug("Particle ", pdgcode, " (x,y,z)= (", x, ", ", y, ", ", z, ")");
 
     // Charge consistency check
