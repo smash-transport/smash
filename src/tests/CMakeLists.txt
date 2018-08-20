@@ -302,6 +302,7 @@ smash_add_runtest(sphere_steps smash smash -e 2.0
 find_program(CTEST_MEMORYCHECK_COMMAND valgrind)
 if(CTEST_MEMORYCHECK_COMMAND)
    message(STATUS "valgrind found at ${CTEST_MEMORYCHECK_COMMAND}")
+   set(KNOWN_BUG "\n       Note: Known bug with valgrind 3.11 - unrecognised instruction.")
    set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v" "--error-exitcode=1")
    add_custom_target(memcheck_collider
                      COMMAND ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
@@ -310,7 +311,7 @@ if(CTEST_MEMORYCHECK_COMMAND)
                              -o "${PROJECT_BINARY_DIR}/test_output/memcheck_collider"
                              -f
                      DEPENDS smash
-                     COMMENT "Executing test memcheck_collider"
+                     COMMENT "Executing test memcheck_collider. ${KNOWN_BUG}"
                      VERBATIM)
    add_custom_target(memcheck_box
                      COMMAND ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
@@ -322,7 +323,7 @@ if(CTEST_MEMORYCHECK_COMMAND)
                              -o "${PROJECT_BINARY_DIR}/test_output/memcheck_box"
                              -f
                      DEPENDS smash
-                     COMMENT "Executing test memcheck_box"
+                     COMMENT "Executing test memcheck_box. ${KNOWN_BUG}"
                      VERBATIM)
    add_custom_target(memcheck_sphere
                      COMMAND ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
@@ -331,7 +332,7 @@ if(CTEST_MEMORYCHECK_COMMAND)
                      -i ${PROJECT_SOURCE_DIR}/input/sphere/config.yaml
                      -o "${PROJECT_BINARY_DIR}/test_output/memcheck_sphere" -f
                      DEPENDS smash
-                     COMMENT "Executing test memcheck_sphere"
+                     COMMENT "Executing test memcheck_sphere. ${KNOWN_BUG}"
                      VERBATIM)
 else()
    message(STATUS "valgrind not found. Memcheck tests are disabled!")
