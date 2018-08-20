@@ -352,8 +352,8 @@ make_unique<ThermodynamicOutput>(testoutputpath, std::move(conf));
 
 /*TEST(box_density) {
 ParticleType::create_type_list(
-    "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-    "proton 0.938 0.0 2212\n");
+    "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
+    "proton 0.938 0.0 + 2212\n");
 const int Ntest = 1000;
 const double L = 10.0;
 Configuration conf(TEST_CONFIG_PATH);

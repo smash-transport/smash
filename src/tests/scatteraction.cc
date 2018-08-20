@@ -399,11 +399,11 @@ TEST(string_scaling_factors) {
   // Since the string is baryonic, the proton has to carry the diquark,
   // which leads to a scaling factor of 0.7*2/3 and the faster pion (f)
   // gets the other quark and a scaling factor of 0.7*1/2
-  COMPARE(outgoing[0].cross_section_scaling_factor(), 0.);
-  COMPARE(outgoing[1].cross_section_scaling_factor(),
+  COMPARE(outgoing[0].initial_xsec_scaling_factor(), 0.);
+  COMPARE(outgoing[1].initial_xsec_scaling_factor(),
           coherence_factor * 2. / 3.);
-  COMPARE(outgoing[2].cross_section_scaling_factor(), 0.);
-  COMPARE(outgoing[3].cross_section_scaling_factor(), coherence_factor / 2.0);
+  COMPARE(outgoing[2].initial_xsec_scaling_factor(), 0.);
+  COMPARE(outgoing[3].initial_xsec_scaling_factor(), coherence_factor / 2.0);
 
   incoming = {e, f};  // Mesonic string
   e.set_4momentum(0.138, {0., 0., -1.0});
@@ -419,10 +419,10 @@ TEST(string_scaling_factors) {
   baryon_string = 0;
   StringProcess::assign_all_scaling_factors(baryon_string, outgoing, evec_coll,
                                             coherence_factor);
-  COMPARE(outgoing[0].cross_section_scaling_factor(), 0.5 * coherence_factor);
-  COMPARE(outgoing[1].cross_section_scaling_factor(), 0);
-  COMPARE(outgoing[2].cross_section_scaling_factor(), 0);
-  COMPARE(outgoing[3].cross_section_scaling_factor(), coherence_factor / 3.);
+  COMPARE(outgoing[0].initial_xsec_scaling_factor(), 0.5 * coherence_factor);
+  COMPARE(outgoing[1].initial_xsec_scaling_factor(), 0);
+  COMPARE(outgoing[2].initial_xsec_scaling_factor(), 0);
+  COMPARE(outgoing[3].initial_xsec_scaling_factor(), coherence_factor / 3.);
   VERIFY(outgoing[3] == d);
   // While partile d was now the last particle in the list, if we exchange the
   // momenta of d and c, particle c will be assigned the scaling factor.
@@ -433,10 +433,10 @@ TEST(string_scaling_factors) {
   outgoing = {c, d, e, f};
   StringProcess::assign_all_scaling_factors(baryon_string, outgoing, evec_coll,
                                             coherence_factor);
-  COMPARE(outgoing[0].cross_section_scaling_factor(), 0.5 * coherence_factor);
-  COMPARE(outgoing[1].cross_section_scaling_factor(), 0.);
-  COMPARE(outgoing[2].cross_section_scaling_factor(), 0.);
-  COMPARE(outgoing[3].cross_section_scaling_factor(), coherence_factor / 3.);
+  COMPARE(outgoing[0].initial_xsec_scaling_factor(), 0.5 * coherence_factor);
+  COMPARE(outgoing[1].initial_xsec_scaling_factor(), 0.);
+  COMPARE(outgoing[2].initial_xsec_scaling_factor(), 0.);
+  COMPARE(outgoing[3].initial_xsec_scaling_factor(), coherence_factor / 3.);
   VERIFY(outgoing[3] == c);
 }
 

@@ -79,11 +79,6 @@ double propagate_straight_line(Particles *particles, double to_time,
     FourVector position = data.position() + distance;
     position.set_x0(to_time);
     data.set_4position(position);
-
-    // If particle is formed reset cross_section_scaling_factor
-    if (data.formation_time() < to_time) {
-      data.set_cross_section_scaling_factor(1.0);
-    }
   }
   return dt;
 }

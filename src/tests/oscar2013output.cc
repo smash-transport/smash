@@ -86,8 +86,7 @@ static void compare_extended_particledata(
   const auto h = particle.get_history();
   COMPARE(std::atoi(datastring.at(12).c_str()), h.collisions_per_particle);
   COMPARE(std::atoi(datastring.at(13).c_str()), particle.formation_time());
-  COMPARE(std::atoi(datastring.at(14).c_str()),
-          particle.cross_section_scaling_factor());
+  COMPARE(std::atoi(datastring.at(14).c_str()), particle.xsec_scaling_factor());
   COMPARE(std::atoi(datastring.at(15).c_str()), static_cast<int>(h.id_process));
   COMPARE(std::atoi(datastring.at(16).c_str()),
           static_cast<int>(h.process_type));
@@ -105,7 +104,8 @@ TEST(full2013_format) {
   const ParticleData p2 = particles.insert(Test::smashon_random());
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
-                          true, false, false, NNbarTreatment::NoAnnihilation);
+                              true, false, false,
+                              NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
   ParticleList final_particles = action->outgoing_particles();
   const double impact_parameter = 1.783;
@@ -227,7 +227,8 @@ TEST(final2013_format) {
   /* Create interaction ("elastic scattering") */
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
-                          true, false, false, NNbarTreatment::NoAnnihilation);
+                              true, false, false,
+                              NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
 
   const bf::path outputfilename = "particle_lists.oscar";
@@ -307,7 +308,8 @@ TEST(full_extended_oscar) {
   const ParticleData p2 = particles.insert(Test::smashon_random());
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
-                          true, false, false, NNbarTreatment::NoAnnihilation);
+                              true, false, false,
+                              NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
   ParticleList final_particles = action->outgoing_particles();
   const int event_id = 0;
