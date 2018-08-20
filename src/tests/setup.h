@@ -64,7 +64,7 @@ static constexpr const char smashon_pdg_string[] = "661";
  */
 inline void create_smashon_particletypes() {
   ParticleType::create_type_list(
-      "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
+      "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
       "σ " +
       std::to_string(smashon_mass) + " " + std::to_string(smashon_width) +
       " + 661\n");

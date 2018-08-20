@@ -142,7 +142,7 @@ namespace smash {
  * given as a table with the particles properties in different columns. Note,
  * that these columns may be separated by an arbitrary number of spaces:
  * ```
- * <name> <mass in GeV> <width in GeV> <PDG codes>
+ * <name> <mass in GeV> <width in GeV> <parity> <PDG codes>
  * ```
  *
  * The name has to be a unique UTF-8 string. Conventionally, unicode names are
@@ -155,6 +155,8 @@ namespace smash {
  *
  * The pole mass and the on-shell width of the particle or multiplet have to be
  * specified as floating point numbers in GeV.
+ *
+ * The parity has to be either `+` or `-`.
  *
  * The PDG codes are following the [numbering
  * scheme](http://pdg.lbl.gov/2018/mcdata/mc_particle_id_contents.html)
@@ -187,9 +189,15 @@ namespace smash {
  * particles in the final state. When such a reaction happens and the required
  * particle is not defined, SMASH will crash.
  *
- * Note further, that the particles file will need to be modified when running
- * a box simlation in which detailed balance is expected to be conserved. See
- * \ref input_modi_box_ for further information.
+ * If you specify an incorrect value, SMASH will print an error similar to the
+ * following:
+ * ```
+ * Failed to convert the input string to the expected data types.
+ * ```
+ *
+ * When running a box simulation in which detailed balance is expected to be
+ * conserved, the particles file will need to be modified. See \ref
+ * input_modi_box_ for further information.
  */
 
 /*!\Userguide
@@ -242,7 +250,7 @@ namespace smash {
  * particles cannot decay, even if decays are specified in `decaymodes.txt`.
  *
  * Note further, that the decaymodes file will need to be modified when running
- * a box simlation in which detailed balance is expected to be conserved. See
+ * a box simulation in which detailed balance is expected to be conserved. See
  * \ref input_modi_box_ for further information.
  */
 
