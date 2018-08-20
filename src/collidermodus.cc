@@ -126,11 +126,12 @@ namespace smash {
  * impact parameter distribution and use rejection sampling.
  *
  * Values (doubles, optional, default = 0.0): \n
- * Values of the impact parameter, corresponding to \key Yields. Must be same
+ * Values of the impact parameter, with corresponding \key Yields. Must be same
  * length as \key Yields. Required for \key Sample = "custom".
  *
  * \key Yields (doubles, optional): \n
- * Values of the particle yields, corresponding to \key Values. Must be same
+ * Values of the particle yields, corresponding to \key Values, i.e. the value
+ * of the custom distribution at this Value. Must be same
  * length as \key Values. Required for \key Sample = "custom".
  *
  * \key Range (double, double, optional, default = 0.):\n
