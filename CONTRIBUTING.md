@@ -1,32 +1,41 @@
-# CONTRIBUTING
+# Contributing to SMASH
 
-If you are reading this, it is probable that you are going to contribute to SMASH. First of all, we welcome your interest and thank you for your work. Hopefully, you find what you need in the following. Otherwise feel free to contact the development team.
+If you are reading this, it is probable that you are going to contribute to
+SMASH. First of all, we welcome your interest and thank you for your work.
+Hopefully, you find what you need in the following. Otherwise feel free to
+contact the development team.
+
+Note that any contributions must be licensed under the same terms as SMASH, see
+[LICENSE](LICENSE).
 
 ## Testing
 
 ### Running Tests
 
-Run the various unit tests:
+To run the various unit tests, use the following:
 
     make test
 
-Another way to do this is:
+Another way to do this is to use the CMake test runner:
 
     ctest
 
-This has the advantage that it can also be used for running tests in parallel on a multicore machine, e.g. via
+This has the advantage that it can also be used for running tests in parallel on
+a multicore machine, e.g. via
 
     ctest -j4
 
 (on a quad-core machine).
 
 If a test crashes, there might be some leftover in the `test_output` folder,
-causing the test to always fail when run again. To fix this problem, just remove the folder.
+causing the test to always fail when run again. To fix this problem, just remove
+the folder.
 
 
 ### Runtime memory checking with valgrind
 
-The SMASH binary memory usage can be checked for the different modi by the pre-made cmake targets:
+The SMASH binary memory usage can be checked for the different modi with the the
+following cmake targets:
 
     make memcheck_collider
     make memcheck_box
@@ -40,7 +49,7 @@ Note: There is known bug with `valgrind-3.11` that leads to an error about an un
 
 ## Development Tools
 
-Tools that can be helpful for development:
+The following tools can be helpful for development:
 - clang-format = 6.0
 - doxygen >= 1.8.4
 - valgrind
@@ -103,8 +112,8 @@ as a user".
 
 ### Installing cppcheck
 
-You can use cppcheck to find some problems in the code, it has quite a few
-false positives though. Download and compile the latest version:
+You can use cppcheck to find some problems in the code, but beware has quite a
+few false positives. Download and compile the latest version:
 
     git clone git://github.com/danmar/cppcheck.git
     cd cppcheck
@@ -126,7 +135,9 @@ It is the same as installing cpplint.
 
 ## Code Documentation
 
-We use [doxygen](http://doxygen.org) for generating documentation from our code. The online version of the code documentation is found [here](https://fias.uni-frankfurt.de/~smash/extra/doc/).
+We use [doxygen](http://doxygen.org) for generating documentation from our code.
+The online version of the code documentation is found
+[here](https://fias.uni-frankfurt.de/~smash/extra/doc/).
 
 
 ### How to build docs with doxygen yourself
@@ -139,12 +150,16 @@ and you'll find `doc/html/index.html` in your build directory. Open e.g. with
 
     firefox doc/html/index.html
 
-Additionally, there are two more targets that can be used to test the completeness of the documentation:
+Additionally, there are two more targets that can be used to test the
+completeness of the documentation:
 
     make undocumented
     make undocumented_count
 
-The first target outputs all doxygen warnings about missing documentation and the second one only counts (and outputs) the number of warnings. Both are building the doxygen documentation only for completely documented entities, but the main purpose of both is that all warnings are displayed when running.
+The first target outputs all doxygen warnings about missing documentation and
+the second one only counts (and outputs) the number of warnings. Both are
+building the doxygen documentation only for completely documented entities, but
+the main purpose of both is that all warnings are displayed when running.
 
 
 #### Building the User Guide
@@ -160,13 +175,22 @@ to obtain the files in `doc/user/index.html`
 
 Code documentation has two important purposes:
 
-* Documenting how interfaces are supposed to be used. Doxygen creates all the boilerplate for this task by parsing the class inheritance and function signatures into nice HTML pages. Via special comments this can be completed to full API documentation.
-* Documenting why things are as they are. Often the how code works is more obvious than why it was done this way and not differently. This information can be very useful to understand design choices and follow along original ideas.
+* Documenting how interfaces are supposed to be used. Doxygen creates all the
+  boilerplate for this task by parsing the class inheritance and function
+  signatures into nice HTML pages. Via special comments this can be completed to
+  full API documentation.
+* Documenting why things are as they are. Often the how code works is more
+  obvious than why it was done this way and not differently. This information
+  can be very useful to understand design choices and follow along original
+  ideas.
 
 
 ### How to write good doxygen comments
 
-Doxygen is very flexible in the [comments it accepts for documentation generation](http://www.stack.nl/~dimitri/doxygen/manual/docblocks.html). In general, it uses both comments and the source code itself to generate the documentation. In general documentation should look like this:
+Doxygen is very flexible in the [comments it accepts for documentation
+generation](http://www.stack.nl/~dimitri/doxygen/manual/docblocks.html). In
+general, it uses both comments and the source code itself to generate the
+documentation. In general documentation should look like this:
 
 ``` cpp
 /**
@@ -187,19 +211,26 @@ class Something {
 };
 ```
 
-Doxygen has a lot of commands for markup. For all the connection to code and some special layout commands, refer to the [Special Commands in Doxygen](http://www.stack.nl/~dimitri/doxygen/manual/commands.html).
+Doxygen has a lot of commands for markup. For all the connection to code and
+some special layout commands, refer to the [Special Commands in
+Doxygen](http://www.stack.nl/~dimitri/doxygen/manual/commands.html).
 
 #### Rules
 
-The code documentation follows a few rules concerning the formatting and the question what should be documented:
+The code documentation follows a few rules concerning the formatting and the
+question what should be documented:
 
 * The general rule is that all functions need to be documented.
-* All parameters (if important also the parameter ranges), the return value and exceptions that are thrown by the function  need to be documented.
-* Use `\param[in]` for input parameters; `\param[out]` for input parameters that get modified within the function; `\return` for what is returned; `\throw` for exception that are thrown
+* All parameters (if important also the parameter ranges), the return value and
+  exceptions that are thrown by the function  need to be documented.
+* Use `\param[in]` for input parameters; `\param[out]` for input parameters that
+  get modified within the function; `\return` for what is returned; `\throw` for
+  exception that are thrown
 * Template parameters are documented with `\tparam`
 * Syntax for inline math is `\f$ <math expression> \f$`
 * Use square brackets for units `[...]`
-* Check if the documentation is properly parsed by doxygen with `make doc` (see below)
+* Check if the documentation is properly parsed by doxygen with `make doc` (see
+  below)
 * Doxygen comment formatting:
   * 1-line
 ```
@@ -225,26 +256,38 @@ The code documentation follows a few rules concerning the formatting and the que
 
 ### How to insert references to publications
 
-In order to refer to a paper inside a doxygen comment, the `iref` command should be used:
+In order to refer to a paper inside a doxygen comment, the `iref` command should
+be used:
 
 ```
 /** ... this function implements ... as described in \iref{XXX}. */
 int fun int(x);
 ```
 
-Here, `XXX` should be the BibTex key for the paper from Inspire e.g. `Weil:2016zrk`. In order to find it, search for the paper on http://inspirehep.net and then click on 'BibTex', which will show the complete BibTex entry (you only need the key, which is in the first line). Doxygen will automatically translate `\iref{XXX}` into a link to the paper on Inspire.
+Here, `XXX` should be the BibTex key for the paper from Inspire e.g.
+`Weil:2016zrk`. In order to find it, search for the paper on
+http://inspirehep.net and then click on 'BibTex', which will show the complete
+BibTex entry (you only need the key, which is in the first line). Doxygen will
+automatically translate `\iref{XXX}` into a link to the paper on Inspire.
 
-After adding a new reference, you should run the script `doc/get_bibtex.sh`, which will update the file [smash.bib](https://fias.uni-frankfurt.de/pm/projects/smash/repository/revisions/master/entry/doc/smash.bib) by fetching the BibTex entries of all `iref` references from Inspire.
+After adding a new reference, you should run the script `doc/get_bibtex.sh`,
+which will update the file
+[smash.bib](https://fias.uni-frankfurt.de/pm/projects/smash/repository/revisions/master/entry/doc/smash.bib)
+by fetching the BibTex entries of all `iref` references from Inspire.
 
 
 ### User Guide
 
-The User Guide will be written in the code base, i.e., documentation of configuration options are described where they are used. Comments that are in normal doxygen format do not appear in the User Guide. Instead only multi-line comments of the form `/*!\Userguide ... */` will be used. Example:
+The User Guide will be written in the code base, i.e., documentation of
+configuration options are described where they are used. Comments that are in
+normal doxygen format do not appear in the User Guide. Instead only multi-line
+comments of the form `/*!\Userguide ... */` will be used. Example:
 
 ``` cpp
 /*!\Userguide
  * \if user
- * This text ONLY appears in the User Guide (useful for a headline that the normal documentation already has in the preceeding section)
+ * This text ONLY appears in the User Guide (useful for a headline that the
+   normal documentation already has in the preceeding section)
  * \endif
  * \ifnot user
  * This text will appear only in the Developer Docs
@@ -254,21 +297,37 @@ The User Guide will be written in the code base, i.e., documentation of configur
  */
 ```
 
-The workflow is that `doc/CMakeLists.txt` extracts all `/*!\Userguide ... */` Sections into `doc/userguide.dox` which is then included into the User Guide Doxygen tree. Currently, the cmake script processes all `src/include/*.h` and `src/*.cc` files.
+The workflow is that `doc/CMakeLists.txt` extracts all `/*!\Userguide ... */`
+Sections into `doc/userguide.dox` which is then included into the User Guide
+Doxygen tree. Currently, the cmake script processes all `src/include/*.h` and
+`src/*.cc` files.
 
 ## Coding Rules
 
 There are two parts:
-* [ALICE O² C++ Coding Guidelines](https://fias.uni-frankfurt.de/~smash/extra/code_guidelines/cppguide.xml) - These guidelines are concerned with the language conventions we follow.
-* [Google Naming & Formatting Rules](https://fias.uni-frankfurt.de/~smash/extra/code_guidelines/cppnaming.xml) - The rules enforce consistent coding style throughout our code base.
+* [ALICE O² C++ Coding
+  Guidelines](https://fias.uni-frankfurt.de/~smash/extra/code_guidelines/cppguide.xml)
+  - These guidelines are concerned with the language conventions we follow.
+* [Google Naming & Formatting
+  Rules](https://fias.uni-frankfurt.de/~smash/extra/code_guidelines/cppnaming.xml)
+  - The rules enforce consistent coding style throughout our code base.
 
-It can be very instructive to study the [CERT Coding Standards](https://www.securecoding.cert.org/confluence/display/seccode/CERT+Coding+Standards) as well. Secure coding is not as important for SMASH as for most other projects. However, secure coding basically is a strategy for avoiding program errors, and as such it is interesting for every C++ project.
+It can be very instructive to study the [CERT Coding
+Standards](https://www.securecoding.cert.org/confluence/display/seccode/CERT+Coding+Standards)
+as well. Secure coding is not as important for SMASH as for most other projects.
+However, secure coding basically is a strategy for avoiding program errors, and
+as such it is interesting for every C++ project.
 
-Our Naming & Formatting Rules follow the Google Styleguide. We keep a copy of the relevant sections to be able to make small adjustments and hide the C++ Coding Guidelines sections.
+Our Naming & Formatting Rules follow the Google Styleguide. We keep a copy of
+the relevant sections to be able to make small adjustments and hide the C++
+Coding Guidelines sections.
 
-Note that we use `clang-format` for formatting (see README for installation, usage explained below), so you can just use that instead of having to worry about formatting by hand in accordance with the style guide.
+Note that we use `clang-format` for formatting (see README for installation,
+usage explained below), so you can just use that instead of having to worry
+about formatting by hand in accordance with the style guide.
 
-A notable naming rule is that class member variables have to end in an underscore (`_`).
+A notable naming rule is that class member variables have to end in an
+underscore (`_`).
 
 
 ### Specific Naming Conventions for SMASH
@@ -308,7 +367,8 @@ enum class MyEnum {
 
 ### How to add an enum for a new configuration value
 
-If a new option is added to the `config.yaml`, it should be done in the following way:
+If a new option is added to the `config.yaml`, it should be done in the
+following way:
 
 * Add `enum class` to `forwarddeclarations.h`.
 * Add `Configuration::Value` cast operator overload.
@@ -317,11 +377,14 @@ If a new option is added to the `config.yaml`, it should be done in the followin
 
 ### Code formatting with `clang-format`
 
-All code has to be formatted by running `clang-format`. This automatically formats the code in SMASH correctly. Use the following command in the SMASH root directory:
+All code has to be formatted by running `clang-format`. This automatically
+formats the code in SMASH correctly. Use the following command in the SMASH root
+directory:
 
     for i in src/*.cc src/include/*.h src/tests/*.cc src/tests/*.h; do clang-format -i $i; done;
 
-If clang-format does changes that don't look good, you can disable it locally using comments like this:
+If clang-format does changes that don't look good, you can disable it locally
+using comments like this:
 
 
     // clang-format off
@@ -335,14 +398,17 @@ The SMASH source code can be checked via:
 
     make cpplint 2>&1 | grep -v 'Done processing'
 
-`cpplint` checks the formatting of the code and is also part of the unit tests. `cppcheck` is a static code analyzer that can be run additionally, but yields a lot of false positives:
+`cpplint` checks the formatting of the code and is also part of the unit tests.
+`cppcheck` is a static code analyzer that can be run additionally, but yields a
+lot of false positives:
 
     make cppcheck
 
 
 ## Profiling and benchmarking
 
-In the following, tools that are used to measure the source code's performance are collected.
+This section discusses tools that can be used to measure the SMASH's
+performance.
 
 ### GPROF
 
