@@ -121,7 +121,7 @@ void VtkOutput::write(const Particles &particles) {
   std::fprintf(file_.get(), "SCALARS cross_section_scaling_factor double 1\n");
   std::fprintf(file_.get(), "LOOKUP_TABLE default\n");
   for (const auto &p : particles) {
-    std::fprintf(file_.get(), "%g\n", p.cross_section_scaling_factor());
+    std::fprintf(file_.get(), "%g\n", p.xsec_scaling_factor());
   }
 
   std::fprintf(file_.get(), "VECTORS momentum double\n");

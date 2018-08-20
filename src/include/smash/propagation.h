@@ -89,17 +89,19 @@ void expand_space_time(Particles *particles,
  * Updates the momenta of all particles at the current
  * time step according to the equations of motion:
  *
- * \f[ \frac{dp}{dt} = -dU(r)/dr \f]
+ * \f[ \frac{dp}{dt} = \vec E + \vec v \times \vec B \f]
  *
  * \param[out] particles The particle list in the event
  * \param[in] dt timestep
  * \param[in] pot The potentials in the system
- * \param[in] UB_grad_lat Lattice for Skyrme potential gradient
- * \param[in] UI3_grad_lat Lattice for symmetry potential gradient
+ * \param[in] FB_lat Lattice for the electric and magnetic
+ *            components of the Skyrme force
+ * \param[in] FI3_lat Lattice for the electric and magnetic
+ *            components of the symmetry force
  */
 void update_momenta(Particles *particles, double dt, const Potentials &pot,
-                    RectangularLattice<ThreeVector> *UB_grad_lat,
-                    RectangularLattice<ThreeVector> *UI3_grad_lat);
+           RectangularLattice<std::pair<ThreeVector, ThreeVector>> *FB_lat,
+           RectangularLattice<std::pair<ThreeVector, ThreeVector>> *FI3_lat);
 
 }  // namespace smash
 #endif  // SRC_INCLUDE_PROPAGATION_H_
