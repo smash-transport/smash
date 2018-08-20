@@ -21,7 +21,8 @@ StringProcess::StringProcess(double string_tension, double time_formation,
                              double gluon_beta, double gluon_pmin,
                              double quark_alpha, double quark_beta,
                              double strange_supp, double diquark_supp,
-                             double sigma_perp, double stringz_a,
+                             double sigma_perp, double leading_frag_mean,
+                             double leading_frag_width, double stringz_a,
                              double stringz_b, double string_sigma_T,
                              double factor_t_form, bool use_yoyo_model)
     : pmin_gluon_lightcone_(gluon_pmin),
@@ -29,8 +30,8 @@ StringProcess::StringProcess(double string_tension, double time_formation,
       pow_fquark_alpha_(quark_alpha),
       pow_fquark_beta_(quark_beta),
       sigma_qperp_(sigma_perp),
-      leading_frag_mean_(0.7),
-      leading_frag_width_(0.275),
+      leading_frag_mean_(leading_frag_mean),
+      leading_frag_width_(leading_frag_width),
       kappa_tension_string_(string_tension),
       additional_xsec_supp_(0.7),
       time_formation_const_(time_formation),
@@ -147,7 +148,7 @@ int StringProcess::append_final_state(ParticleList &intermediate_particles,
   }
   assert(nfrag > 0);
 
-  /* compute the cross section suppression factor for leading hadrons
+  /* compute the cross section scaling factor for leading hadrons
    * based on the number of valence quarks. */
   assign_all_scaling_factors(bstring, intermediate_particles,
                              evecLong, additional_xsec_supp_);
@@ -666,8 +667,6 @@ bool StringProcess::next_NDiffHard() {
   }
   event_intermediate_[0].p(pSum);
   event_intermediate_[0].m(pSum.mCalc());
-  // pythia_parton_->event.list();
-  // pythia_parton_->event.listJunctions();
 
   restore_constituent(event_intermediate_, excess_quark, excess_antiq);
 
