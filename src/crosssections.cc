@@ -167,8 +167,9 @@ CollisionBranchList CrossSections::generate_collision_list(
     /* String-excitation cross section =
      * Parametrized total cross - the contributions
      * from all other present channels. */
+    const double sig_current = sum_xs_of(process_list);
     const double sig_string =
-        std::max(0., high_energy() - elastic_parametrization(use_AQM));
+        std::max(0., high_energy() - sig_current);
     append_list(process_list,
                 string_excitation(sig_string, string_process, use_AQM));
     append_list(process_list, rare_two_to_two());
@@ -245,6 +246,10 @@ double CrossSections::elastic_parametrization(bool use_AQM) const {
              pdg_a.antiparticle_sign() == pdg_b.antiparticle_sign()) {
     // Elastic Nucleon Nucleon Scattering
     elastic_xs = nn_el();
+  } else if (pdg_a.is_nucleon() && pdg_b.is_nucleon() &&
+             pdg_a.antiparticle_sign() == -pdg_b.antiparticle_sign()) {
+    // Elastic Nucleon anti-Nucleon Scattering
+    elastic_xs = ppbar_elastic(sqrt_s_ * sqrt_s_);
   } else if (pdg_a.is_nucleus() || pdg_b.is_nucleus()) {
     const PdgCode& pdg_nucleus = pdg_a.is_nucleus() ? pdg_a : pdg_b;
     const PdgCode& pdg_other = pdg_a.is_nucleus() ? pdg_b : pdg_a;
@@ -267,8 +272,15 @@ double CrossSections::elastic_parametrization(bool use_AQM) const {
                (pdg_b.is_meson() && pdg_a.is_baryon())) {
       elastic_xs = piplusp_elastic_high_energy(s, m1, m2);
     } else if (pdg_a.is_meson() && pdg_b.is_meson()) {
-      // meson-meson goes through scaling from π+p parametrization
-      elastic_xs = 2. / 3. * piplusp_elastic_high_energy(s, m1, m2);
+      /* Special case: the pion elastic cross-section goes through resonances
+       * at low sqrt_s, so we turn it off for this region */
+      if (pdg_a.is_pion() && pdg_b.is_pion() &&
+            (m1 + m2 + transit_high_energy::pipi_offset) > sqrt_s_) {
+        elastic_xs = 0.0;
+      } else {
+        // meson-meson goes through scaling from π+p parametrization
+        elastic_xs = 2. / 3. * piplusp_elastic_high_energy(s, m1, m2);
+      }
     }
     elastic_xs *=
         (1. - 0.4 * pdg_a.frac_strange()) * (1. - 0.4 * pdg_b.frac_strange());
@@ -284,7 +296,7 @@ double CrossSections::nn_el() const {
 
   // Use parametrized cross sections.
   double sig_el = -1.;
-  if (pdg_a.is_antiparticle_of(pdg_b)) {
+  if (pdg_a.antiparticle_sign() == -pdg_b.antiparticle_sign()) {
     sig_el = ppbar_elastic(s);
   } else if (pdg_a.is_nucleon() && pdg_b.is_nucleon()) {
     sig_el = (pdg_a == pdg_b) ? pp_elastic(s) : np_elastic(s);
@@ -943,8 +955,17 @@ CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) const {
   const auto sigma_kplusp = kplusp_inelastic_background(s);
   const auto sigma_kplusn = kplusn_inelastic_background(s);
 
+  /* At high energy, the parametrization we use diverges from experimental
+   * data. This cutoff represents the point where the AQM cross section
+   * becomes smaller than this parametrization, so we cut it here, and fully
+   * switch to AQM beyond this point. */
+  const double KN_to_KDelta_cutoff = transit_high_energy::KN_offset
+                                   + incoming_particles_[0].pole_mass()
+                                   + incoming_particles_[1].pole_mass();
+
   bool incl_KN_to_KN = included_2to2[IncludedReactions::KN_to_KN] == 1;
-  bool incl_KN_to_KDelta = included_2to2[IncludedReactions::KN_to_KDelta] == 1;
+  bool incl_KN_to_KDelta = included_2to2[IncludedReactions::KN_to_KDelta] == 1
+                        && sqrt_s_ < KN_to_KDelta_cutoff;
   bool incl_Strangeness_exchange =
       included_2to2[IncludedReactions::Strangeness_exchange] == 1;
 
@@ -1853,10 +1874,8 @@ CollisionBranchList CrossSections::string_excitation(
     return channel_list;
   }
 
-  /* Get PDG id for evaluation of the parametrized cross sections
+  /* Get mapped PDG id for evaluation of the parametrized cross sections
    * for diffractive processes.
-   * (anti-)proton is used for (anti-)baryons and
-   * pion is used for mesons.
    * This must be rescaled according to additive quark model
    * in the case of exotic hadrons.
    * Also calculate the multiplicative factor for AQM
@@ -1865,14 +1884,7 @@ CollisionBranchList CrossSections::string_excitation(
   double AQM_factor = 1.;
   for (int i = 0; i < 2; i++) {
     PdgCode pdg = incoming_particles_[i].type().pdgcode();
-    // FIXME: What about charge?
-    if (pdg.baryon_number() == 1) {
-      pdgid[i] = pdg::p_decimal;
-    } else if (pdg.baryon_number() == -1) {
-      pdgid[i] = -pdg::p_decimal;
-    } else {
-      pdgid[i] = pdg::pi_p_decimal;
-    }
+    pdgid[i] = StringProcess::pdg_map_for_pythia(pdg);
     AQM_factor *= (1. - 0.4 * pdg.frac_strange());
   }
 
@@ -1990,17 +2002,6 @@ double CrossSections::high_energy() const {
   const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
 
-  // Disable AQM cross section for KN, because it destroys the total cross
-  // section. This is only a temporary fix, see #6262.
-  if (((pdg_a == pdg::K_p || pdg_a == pdg::K_z) && pdg_b.is_nucleon()) ||
-      ((pdg_b == pdg::K_p || pdg_b == pdg::K_z) && pdg_a.is_nucleon()) ||
-      ((pdg_a == -pdg::K_p || pdg_a == -pdg::K_z) &&
-       pdg_b.get_antiparticle().is_nucleon()) ||
-      ((pdg_b == -pdg::K_p || pdg_b == -pdg::K_z) &&
-       pdg_a.get_antiparticle().is_nucleon())) {
-    return 0.;
-  }
-
   const double s = sqrt_s_ * sqrt_s_;
   double xs = 0.;
 
@@ -2008,12 +2009,26 @@ double CrossSections::high_energy() const {
   if (pdg_a.is_baryon() && pdg_b.is_baryon()) {
     if (pdg_a == pdg_b) {
       xs = pp_high_energy(s);  // pp, nn
-    } else if (pdg_a.is_antiparticle_of(pdg_b)) {
-      xs = ppbar_high_energy(s);  // ppbar, nnbar
     } else if (pdg_a.antiparticle_sign() * pdg_b.antiparticle_sign() == 1) {
       xs = np_high_energy(s);  // np, nbarpbar
-    } else {
-      xs = npbar_high_energy(s);  // npbar, nbarp
+    } else if (pdg_a.antiparticle_sign() * pdg_b.antiparticle_sign() == -1) {
+      /* In the case of baryon-antibaryon interactions,
+       * the low-energy cross section must be involved
+       * due to annihilation processes (via strings). */
+      double xs_l = ppbar_total(s);
+      double xs_h = 0.;
+      if (pdg_a.is_antiparticle_of(pdg_b)) {
+        xs_h = ppbar_high_energy(s);  // ppbar, nnbar
+      } else {
+        xs_h = npbar_high_energy(s);  // npbar, nbarp
+      }
+      /* Transition between low and high energy is set to be consistent with
+       * that defined in decide_string(). */
+      double region_lower = transit_high_energy::sqrts_range_NN[0];
+      double region_upper = transit_high_energy::sqrts_range_NN[1];
+      double prob_high =
+          probability_transit_high(region_lower, region_upper);
+      xs = xs_l * (1. - prob_high) + xs_h * prob_high;
     }
   }
 
@@ -2062,13 +2077,14 @@ double CrossSections::string_hard_cross_section(bool use_AQM) const {
   }
 
   if (data_a.is_baryon() && data_b.is_baryon()) {
-    // nucleon-nucleon cross section is used for all baryon-baryon casees.
+    /* Currently nucleon-nucleon cross section is used for
+     * all baryon-baryon casees. */
     cross_sec = NN_string_hard(sqrt_s_ * sqrt_s_);
   } else if (data_a.is_baryon() || data_b.is_baryon()) {
-    // nucleon-pion cross section is used for all baryon-meson cases.
+    // Currently nucleon-pion cross section is used for all baryon-meson cases.
     cross_sec = Npi_string_hard(sqrt_s_ * sqrt_s_);
   } else {
-    // pion-pion cross section is used for all meson-meson cases.
+    // Currently pion-pion cross section is used for all meson-meson cases.
     cross_sec = pipi_string_hard(sqrt_s_ * sqrt_s_);
   }
   // apply additive quark model and return
@@ -2379,25 +2395,43 @@ bool CrossSections::decide_string(bool strings_switch,
     // BBbar only goes through strings, so there are no "window" considerations
     return true;
   } else {
+    /* true for K+ p and K0 p (+ antiparticles), which have special treatment
+     * to fit data */
+    const PdgCode pdg1 = t1.pdgcode(), pdg2 = t2.pdgcode();
+    const bool is_KplusP =
+       ((pdg1 ==  pdg::K_p || pdg1 ==  pdg::K_z) && (pdg2 ==  pdg::p)) ||
+       ((pdg2 ==  pdg::K_p || pdg2 ==  pdg::K_z) && (pdg1 ==  pdg::p)) ||
+       ((pdg1 == -pdg::K_p || pdg1 == -pdg::K_z) && (pdg2 == -pdg::p)) ||
+       ((pdg2 == -pdg::K_p || pdg2 == -pdg::K_z) && (pdg1 == -pdg::p));
+    // where to start the AQM strings above mass sum
+    double aqm_offset = transit_high_energy::sqrts_add_lower;
+    if (is_KplusP) {
+      /* for this specific case we have data. This corresponds to the point
+       * where the AQM parametrization is smaller than the current 2to2
+       * parametrization, which starts growing and diverges from exp. data */
+      aqm_offset = transit_high_energy::KN_offset;
+    } else if (pdg1.is_pion() && pdg2.is_pion()) {
+      aqm_offset = transit_high_energy::pipi_offset;
+    }
     /* if we do not use the probability transition algorithm, this is always a
      * string contribution if the energy is large enough */
     if (!use_transition_probability) {
-      return (sqrt_s_ > mass_sum + 0.9);
+      return (sqrt_s_ > mass_sum + aqm_offset);
     }
     /* No strings at low energy, only strings at high energy and
      * a transition region in the middle. Determine transition region: */
     double region_lower, region_upper;
     if (is_Npi_scattering) {
-      region_lower = 1.9;
-      region_upper = 2.2;
+      region_lower = transit_high_energy::sqrts_range_Npi[0];
+      region_upper = transit_high_energy::sqrts_range_Npi[1];
     } else if (is_NN_scattering) {
-      region_lower = 4.0;
-      region_upper = 5.0;
+      region_lower = transit_high_energy::sqrts_range_NN[0];
+      region_upper = transit_high_energy::sqrts_range_NN[1];
     } else {  // AQM - Additive Quark Model
       /* Transition region around 0.9 larger than the sum of pole masses;
        * highly arbitrary, feel free to improve */
-      region_lower = mass_sum + 0.9;
-      region_upper = mass_sum + 1.9;
+      region_lower = mass_sum + aqm_offset;
+      region_upper = mass_sum + aqm_offset + transit_high_energy::sqrts_range;
     }
 
     if (sqrt_s_ > region_upper) {
@@ -2406,14 +2440,30 @@ bool CrossSections::decide_string(bool strings_switch,
       return false;
     } else {
       // Rescale transition region to [-1, 1]
-      double x = (sqrt_s_ - (region_lower + region_upper) / 2.) /
-                 (region_upper - region_lower);
-      assert(x >= -0.5 && x <= 0.5);
-      double prob_pythia = 0.5 * (std::sin(M_PI * x) + 1.0);
-      assert(prob_pythia >= 0. && prob_pythia <= 1.);
+      double prob_pythia =
+          probability_transit_high(region_lower, region_upper);
       return prob_pythia > random::uniform(0., 1.);
     }
   }
+}
+
+double CrossSections::probability_transit_high(
+    const double region_lower, const double region_upper) const {
+  if (sqrt_s_ < region_lower) {
+    return 0.;
+  }
+
+  if (sqrt_s_ > region_upper) {
+    return 1.;
+  }
+
+  double x = (sqrt_s_ - 0.5 * (region_lower + region_upper)) /
+                   (region_upper - region_lower);
+  assert(x >= -0.5 && x <= 0.5);
+  double prob = 0.5 * (std::sin(M_PI * x) + 1.0);
+  assert(prob >= 0. && prob <= 1.);
+
+  return prob;
 }
 
 }  // namespace smash

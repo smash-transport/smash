@@ -17,6 +17,37 @@
 
 namespace smash {
 
+/// constants related to transition between low and high collision energies
+namespace transit_high_energy {
+  /// transition range in N-pi collisions
+  const std::array<double, 2> sqrts_range_Npi = {1.9, 2.2};
+  /// transition range in N-N collisions
+  const std::array<double, 2> sqrts_range_NN = {4., 5.};
+  /**
+   * constant for the lower end of transition region in the case of AQM
+   * this is added to the sum of masses
+   */
+  const double sqrts_add_lower = 0.9;
+  /**
+   * constant for the range of transition region in the case of AQM
+   * this is added to the sum of masses + sqrts_add_lower
+   */
+  const double sqrts_range = 1.0;
+
+  /**
+   * Constant offset as to where to turn on the strings and elastic processes
+   * for pi pi reactions (this is an exception because the normal AQM behavior
+   * destroys the cross-section at very low sqrt_s and around the f2 peak)
+   */
+  const double pipi_offset = 1.12;
+
+  /**
+   * Constant offset as to where to shift from 2to2 to string
+   * processes (in GeV) in the case of KN reactions
+   */
+  const double KN_offset = 15.15;
+}
+
 /**
  * The cross section class assembels everything that is needed to
  * calculate the cross section and returns a list of all possible reactions
@@ -231,6 +262,14 @@ class CrossSections {
    */
   bool decide_string(bool strings_switch, bool use_transition_probability,
                      bool use_AQM, bool treat_nnbar_with_strings) const;
+
+  /**
+   * \param[in] region_lower the lowest sqrts in the transition region [GeV]
+   * \param[in] region_upper the highest sqrts in the transition region [GeV]
+   * \return probability to have the high energy interaction (via string)
+   */
+  double probability_transit_high(
+      const double region_lower, const double region_upper) const;
 
   /**
    * \return if the species of the two incoming particles are allowed to

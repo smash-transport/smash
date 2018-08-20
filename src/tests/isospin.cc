@@ -19,15 +19,15 @@ using namespace smash;
 
 TEST(init_particle_types) {
   ParticleType::create_type_list(
-      "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "π⁺  0.138 0.0   211\n"
-      "π⁰  0.138 0.0   111\n"
-      "N⁺  0.938 0.0   2212\n"
-      "N⁰  0.938 0.0   2112\n"
-      "Δ⁺⁺ 1.232 0.117 2224\n"
-      "Δ⁺  1.232 0.117 2214\n"
-      "Δ⁰  1.232 0.117 2114\n"
-      "Δ⁻  1.232 0.117 1114\n");
+      "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
+      "π⁺  0.138 0.0   - 211\n"
+      "π⁰  0.138 0.0   - 111\n"
+      "N⁺  0.938 0.0   + 2212\n"
+      "N⁰  0.938 0.0   + 2112\n"
+      "Δ⁺⁺ 1.232 0.117 + 2224\n"
+      "Δ⁺  1.232 0.117 + 2214\n"
+      "Δ⁰  1.232 0.117 + 2114\n"
+      "Δ⁻  1.232 0.117 + 1114\n");
   DecayModes::load_decaymodes(
       "Δ          \n"
       "1.  1  N π \n");
