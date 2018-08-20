@@ -29,10 +29,23 @@ namespace transit_high_energy {
    */
   const double sqrts_add_lower = 0.9;
   /**
-   * constant for the upper end of transition region in the case of AQM
-   * this is added to the sum of masses
+   * constant for the range of transition region in the case of AQM
+   * this is added to the sum of masses + sqrts_add_lower
    */
-  const double sqrts_add_upper = 1.9;
+  const double sqrts_range = 1.0;
+
+  /**
+   * Constant offset as to where to turn on the strings and elastic processes
+   * for pi pi reactions (this is an exception because the normal AQM behavior
+   * destroys the cross-section at very low sqrt_s and around the f2 peak)
+   */
+  const double pipi_offset = 1.12;
+
+  /**
+   * Constant offset as to where to shift from 2to2 to string
+   * processes (in GeV) in the case of KN reactions
+   */
+  const double KN_offset = 15.15;
 }
 
 /**
