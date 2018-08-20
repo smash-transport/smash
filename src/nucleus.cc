@@ -267,11 +267,6 @@ void Nucleus::arrange_nucleons() {
   rotate();
 }
 
-/**
- *\The values are taken from \iref{DeJager:1987qc}. They are in
- agreement with MC-Glauber models such as GLISSANDO (see
- \iref{Rybczynski:2013yba}) and TGlauber MC (see \iref{Loizides:2017ack})
- */
 void Nucleus::set_parameters_automatic() {
   int A = Nucleus::number_of_particles();
   switch (A) {
