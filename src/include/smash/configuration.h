@@ -170,7 +170,7 @@ namespace smash {
  * given as a table with the particles properties in different columns. Note,
  * that these columns may be separated by an arbitrary number of spaces:
  * ```
- * <name> <mass in GeV> <width in GeV> <PDG codes>
+ * <name> <mass in GeV> <width in GeV> <parity> <PDG codes>
  * ```
  *
  * The name has to be a unique UTF-8 string. Conventionally, unicode names are
@@ -183,6 +183,8 @@ namespace smash {
  *
  * The pole mass and the on-shell width of the particle or multiplet have to be
  * specified as floating point numbers in GeV.
+ *
+ * The parity has to be either `+` or `-`.
  *
  * The PDG codes are following the [numbering
  * scheme](http://pdg.lbl.gov/2018/mcdata/mc_particle_id_contents.html)
