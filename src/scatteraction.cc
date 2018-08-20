@@ -383,9 +383,10 @@ void ScatterAction::inelastic_scattering() {
   if (t0 > time_of_execution_ || t1 > time_of_execution_) {
     /* The newly produced particles are supposed to continue forming exactly
      * like the latest forming ingoing particle. Therefore the details on the
-     * formation are adopted. The cross section scaling factor as a function
-     * of time looks different when using the cross section scaling factor
-     * at the time of collision in combination with the collision time. */
+     * formation are adopted. The initial cross section scaling factor of the
+     * incoming particles is considered to also be the scaling factor of the
+     * newly produced outgoing particles.
+     */
     outgoing_particles_[0].set_slow_formation_times(form_time_begin,
                                                     std::max(t0, t1));
     outgoing_particles_[1].set_slow_formation_times(form_time_begin,
@@ -514,9 +515,9 @@ void ScatterAction::string_excitation() {
           const double fout =
               outgoing_particles_[i].initial_xsec_scaling_factor();
           /* The new cross section scaling factor will be the product of the
-           * cross section scaling factor of the ingoing particle and the
-           * additional factor, because of the new particles being string
-           * fragments, which take time to form. */
+           * cross section scaling factor of the ingoing particles and of the
+           * outgoing ones (since the outgoing ones are also string fragments
+           * and thus take time to form). */
           outgoing_particles_[i].set_cross_section_scaling_factor(fin * fout);
           /* If the unformed incoming particles' formation time is larger than
            * the current outgoing particle's formation time, then the latter
