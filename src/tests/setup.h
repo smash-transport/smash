@@ -56,6 +56,7 @@ inline void create_actual_decaymodes() {
 static constexpr double smashon_mass = 0.123;
 /// The decay width of the smashon particle.
 static constexpr double smashon_width = 1.2;
+/// The PDG code of the smashon particle.
 static constexpr const char smashon_pdg_string[] = "661";
 
 /**
@@ -66,7 +67,7 @@ inline void create_smashon_particletypes() {
       "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
       "σ " +
       std::to_string(smashon_mass) + " " + std::to_string(smashon_width) +
-      " 661\n");
+      " + 661\n");
 }
 
 /// A FourVector that is marked as a position vector.
