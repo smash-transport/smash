@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -15,9 +15,9 @@ using namespace smash;
 
 TEST(init_particle_types) {
   ParticleType::create_type_list(
-      "σ 0.123 -.0 123\n"
-      "σ3 0.123 -.0 -1234568\n"
-      "σ2 0.245 2.3 2346\n");
+      "σ 0.123 -.0 + 123\n"
+      "σ3 0.123 -.0 + -1234568\n"
+      "σ2 0.245 2.3 + 2346\n");
 }
 
 TEST(size) { COMPARE(sizeof(QuantumNumbers), 56u); }

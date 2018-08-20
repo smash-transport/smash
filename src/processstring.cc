@@ -1027,4 +1027,26 @@ void StringProcess::assign_all_scaling_factors(int baryon_string,
   }
 }
 
+int StringProcess::pdg_map_for_pythia(PdgCode &pdg) {
+  PdgCode pdg_mapped(0x0);
+
+  if (pdg.baryon_number() == 1) {
+    pdg_mapped = pdg.charge() > 0 ?
+                 PdgCode(pdg::p) : PdgCode(pdg::n);
+  } else if (pdg.baryon_number() == -1) {
+    pdg_mapped = pdg.charge() < 0 ?
+                 PdgCode(-pdg::p) : PdgCode(-pdg::n);
+  } else {
+    if (pdg.charge() > 0) {
+      pdg_mapped = PdgCode(pdg::pi_p);
+    } else if (pdg.charge() < 0) {
+      pdg_mapped = PdgCode(pdg::pi_m);
+    } else {
+      pdg_mapped = PdgCode(pdg::pi_z);
+    }
+  }
+
+  return pdg_mapped.get_decimal();
+}
+
 }  // namespace smash

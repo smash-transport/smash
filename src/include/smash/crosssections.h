@@ -17,6 +17,37 @@
 
 namespace smash {
 
+/// constants related to transition between low and high collision energies
+namespace transit_high_energy {
+  /// transition range in N-pi collisions
+  const std::array<double, 2> sqrts_range_Npi = {1.9, 2.2};
+  /// transition range in N-N collisions
+  const std::array<double, 2> sqrts_range_NN = {4., 5.};
+  /**
+   * constant for the lower end of transition region in the case of AQM
+   * this is added to the sum of masses
+   */
+  const double sqrts_add_lower = 0.9;
+  /**
+   * constant for the range of transition region in the case of AQM
+   * this is added to the sum of masses + sqrts_add_lower
+   */
+  const double sqrts_range = 1.0;
+
+  /**
+   * Constant offset as to where to turn on the strings and elastic processes
+   * for pi pi reactions (this is an exception because the normal AQM behavior
+   * destroys the cross-section at very low sqrt_s and around the f2 peak)
+   */
+  const double pipi_offset = 1.12;
+
+  /**
+   * Constant offset as to where to shift from 2to2 to string
+   * processes (in GeV) in the case of KN reactions
+   */
+  const double KN_offset = 15.15;
+}
+
 /**
  * The cross section class assembels everything that is needed to
  * calculate the cross section and returns a list of all possible reactions
@@ -103,6 +134,19 @@ class CrossSections {
    */
   double formation(const ParticleType& type_resonance,
                    double cm_momentum_sqr) const;
+
+  /**
+   * Find all 2->2 processes which are suppressed at high energies when
+   * strings are turned on with probabilites, but important for the
+   * production of rare species such as strange particles.
+   *
+   * This function should call the different, more specific functions for
+   * the different scatterings. But so far, only Nucleon-Pion to Hyperon-
+   * Kaon scattering is implemented.
+   *
+   * \return List of all possibe rare 2->2 processes.
+   */
+  CollisionBranchList rare_two_to_two() const;
 
   /**
    * Find all inelastic 2->2 processes for the given scattering.
@@ -220,6 +264,14 @@ class CrossSections {
                      bool use_AQM, bool treat_nnbar_with_strings) const;
 
   /**
+   * \param[in] region_lower the lowest sqrts in the transition region [GeV]
+   * \param[in] region_upper the highest sqrts in the transition region [GeV]
+   * \return probability to have the high energy interaction (via string)
+   */
+  double probability_transit_high(
+      const double region_lower, const double region_upper) const;
+
+  /**
    * \return if the species of the two incoming particles are allowed to
    * interact via string fragmentation. Currently, only nucleon-nucleon
    * and nucleon-pion can interact via string.
@@ -269,6 +321,16 @@ class CrossSections {
    *        if positive cross section cannot be specified.
    */
   double nk_el() const;
+
+  /**
+   * Find all processes for Nucleon-Pion to Hyperon-Kaon Scattering.
+   * These scatterings are suppressed at high energies when strings are
+   * turned on with probabilities, so they need to be added back manually.
+   *
+   * \return List of all possible Npi -> YK reactions
+   *          with their cross sections
+   */
+  CollisionBranchList npi_yk() const;
 
   /**
    * Find all inelastic 2->2 processes for Baryon-Baryon (BB) Scattering

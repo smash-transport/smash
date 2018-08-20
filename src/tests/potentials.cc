@@ -30,10 +30,10 @@ using namespace smash;
 
 TEST(init_particle_types) {
   ParticleType::create_type_list(
-      "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "N+ 0.938 0.0 2212\n"
-      "N0 0.938 0.0 2112\n"
-      "π+  0.138 0.0 211\n");
+      "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
+      "N+ 0.938 0.0 + 2212\n"
+      "N0 0.938 0.0 + 2112\n"
+      "π+ 0.138 0.0 - 211\n");
 }
 /*
 static ParticleData create_proton(int id = -1) {
