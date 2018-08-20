@@ -1,9 +1,0 @@
-This is the repository for the development of a new transport
-approach for the dynamical description of heavy ion reactions:
-SMASH (Simulating Many Accelerated Strongly-interacting Hadrons).
-
-See INSTALL on how to compile it and DEBUG for development hints.
-
- *    If Pythia cite
- *    T. Sjöstrand, S. Mrenna and P. Skands, JHEP05 (2006) 026,
- *                          Comput. Phys. Comm. 178 (2008) 852.
