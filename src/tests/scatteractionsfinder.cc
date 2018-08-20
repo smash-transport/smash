@@ -253,20 +253,15 @@ TEST(increasing_scaling_factors) {
   // Set up scatter actions finder
   Configuration config = Test::configuration(
       "Collision_Term: {Elastic_Cross_Section: " + std::to_string(xsec) + "}");
-  // For a power of larger than alpha, the particles should collide
-  config.merge_yaml("Collision_Term: {Power_Particle_Formation: " +
-                    std::to_string(alpha - 0.1) + "}");
+  // For a power of larger than alpha, the particles should collide.
+  ParticleData::formation_power_ = alpha - 0.1;
   ExperimentParameters exp_par = Test::default_parameters();
   const std::vector<bool> has_interacted = {};
   ScatterActionsFinder finder(config, exp_par, has_interacted, 0, 0);
   COMPARE(finder.find_actions_in_cell({p_a, p_b}, 2. * delta_t_coll).size(),
           1u);
-  // Set up a scatter actions finder so that the particles shouldn't collide
-  Configuration config2 = Test::configuration(
-      "Collision_Term: {Elastic_Cross_Section: " + std::to_string(xsec) + "}");
-  config2.merge_yaml("Collision_Term: {Power_Particle_Formation: " +
-                     std::to_string(alpha + 0.1) + "}");
-  ScatterActionsFinder finder2(config2, exp_par, has_interacted, 0, 0);
-  COMPARE(finder2.find_actions_in_cell({p_a, p_b}, 2. * delta_t_coll).size(),
+  // For a Power smaller than alpha, the particles should not collide.
+  ParticleData::formation_power_ = alpha + 0.1;
+  COMPARE(finder.find_actions_in_cell({p_a, p_b}, 2. * delta_t_coll).size(),
           0u);
 }
