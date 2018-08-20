@@ -82,7 +82,7 @@ double ParticleData::xsec_scaling_factor(double delta_time) const {
     }
   } else {
     // use smooth function to scale cross section (unless particles are already
-    // fully formed at desired time or will start to form after later)
+    // fully formed at desired time or will start to form later)
     if (formation_time_ <= time_of_interest) {
       // particles are fully formed when colliding
       scaling_factor = 1.;

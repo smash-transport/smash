@@ -581,7 +581,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     pauli_blocker_ = make_unique<PauliBlocker>(
         config["Collision_Term"]["Pauli_Blocking"], parameters_);
   }
-  ParticleData::formation_power_ = config.take({"Collision_Term", 
+  ParticleData::formation_power_ = config.take({"Collision_Term",
                                               "Power_Particle_Formation"}, 1.);
 
   /*!\Userguide
