@@ -55,7 +55,7 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
   return std::make_pair(sf, sf_grad);
 }
 
-/// \copydoc smash::rho_eckart 
+/// \copydoc smash::rho_eckart
 template <typename /*ParticlesContainer*/ T>
 std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart_impl(
                                                const ThreeVector &r,
@@ -149,23 +149,6 @@ std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart(
                                           DensityType dens_type,
                                           bool compute_gradient) {
   return rho_eckart_impl(r, plist, par, dens_type, compute_gradient);
-}
-
-void update_density_lattice(RectangularLattice<DensityOnLattice> *lat,
-                            const LatticeUpdate update,
-                            const DensityType dens_type,
-                            const DensityParameters &par,
-                            const Particles &particles,
-                            const bool compute_gradient) {
-  update_general_lattice(lat, update, dens_type, par, particles,
-                         compute_gradient);
-}
-
-void update_Tmn_lattice(RectangularLattice<EnergyMomentumTensor> *lat,
-                        const LatticeUpdate update, const DensityType dens_type,
-                        const DensityParameters &par,
-                        const Particles &particles) {
-  update_general_lattice(lat, update, dens_type, par, particles);
 }
 
 std::ostream &operator<<(std::ostream &os, DensityType dens_type) {

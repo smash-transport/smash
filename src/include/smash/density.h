@@ -379,7 +379,7 @@ typedef RectangularLattice<DensityOnLattice> DensityLattice;
  * \tparam T LatticeType
  */
 template <typename T>
-void update_general_lattice(RectangularLattice<T> *lat,
+void update_lattice(RectangularLattice<T> *lat,
                             const LatticeUpdate update,
                             const DensityType dens_type,
                             const DensityParameters &par,
@@ -421,40 +421,6 @@ void update_general_lattice(RectangularLattice<T> *lat,
         });
   }
 }
-
-/**
- * Calculates density on the lattice in an time-efficient way.
- *
- * \param[out] lat The lattice on which the density will be updated
- * \param[in] update tells if called for update at printout or at timestep
- * \param[in] dens_type density type to be computed on the lattice
- * \param[in] par a structure containing testparticles number and gaussian
- *            smearing parameters.
- * \param[in] particles the particles vector
- * \param[in] compute_gradient Whether to compute the gradients
- */
-void update_density_lattice(RectangularLattice<DensityOnLattice> *lat,
-                            const LatticeUpdate update,
-                            const DensityType dens_type,
-                            const DensityParameters &par,
-                            const Particles &particles,
-                            bool compute_gradient);
-
-/**
- * Calculates energy-momentum tensor on the lattice in an time-efficient way.
- *
- * \param[out] lat The lattice on which the energy-momentum tensor
- *             will be updated.
- * \param[in] update tells if called for update at printout or at timestep
- * \param[in] dens_type density type to be computed on the lattice
- * \param[in] par a structure containing testparticles number and gaussian
- *            smearing parameters.
- * \param[in] particles the particles vector
- */
-void update_Tmn_lattice(RectangularLattice<EnergyMomentumTensor> *lat,
-                        const LatticeUpdate update, const DensityType dens_type,
-                        const DensityParameters &par,
-                        const Particles &particles);
 
 }  // namespace smash
 

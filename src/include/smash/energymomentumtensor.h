@@ -114,7 +114,7 @@ class EnergyMomentumTensor {
    * \param[in] factor Usually a smearing factor
    */
   void add_particle(const ParticleData &p, double factor);
-  /// Dummy function need for update_general_lattice
+  /// Dummy function need for update_lattice
   void add_particle_for_derivatives(const ParticleData &, double, ThreeVector) {};
 
   /**

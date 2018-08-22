@@ -1361,7 +1361,7 @@ void Experiment<Modus>::run_time_evolution() {
     if (thermalizer_ &&
         thermalizer_->is_time_to_thermalize(parameters_.labclock)) {
       const bool ignore_cells_under_treshold = true;
-      thermalizer_->update_lattice(particles_, density_param_,
+      thermalizer_->update_thermalizer_lattice(particles_, density_param_,
                                    ignore_cells_under_treshold);
       const double current_t = parameters_.labclock.current_time();
       thermalizer_->thermalize(particles_, current_t,
@@ -1576,7 +1576,7 @@ void Experiment<Modus>::intermediate_output() {
   /** \todo (Dima) is this part of the code still useful?
    *
    * if (thermalizer_) {
-   *  thermalizer_->update_lattice(particles_, density_param_);
+   *  thermalizer_->update_thermalizer_lattice(particles_, density_param_);
    *  thermalizer_->print_statistics(parameters_.labclock);
   }*/
   // save evolution data
@@ -1590,13 +1590,13 @@ void Experiment<Modus>::intermediate_output() {
     // Thermodynamic output on the lattice versus time
     switch (dens_type_lattice_printout_) {
       case DensityType::Baryon:
-        update_density_lattice(jmu_B_lat_.get(), lat_upd, DensityType::Baryon,
+        update_lattice(jmu_B_lat_.get(), lat_upd, DensityType::Baryon,
                                density_param_, particles_, false);
         output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                       DensityType::Baryon, *jmu_B_lat_);
         break;
       case DensityType::BaryonicIsospin:
-        update_density_lattice(jmu_I3_lat_.get(), lat_upd,
+        update_lattice(jmu_I3_lat_.get(), lat_upd,
                                DensityType::BaryonicIsospin, density_param_,
                                particles_, false);
         output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
@@ -1606,7 +1606,7 @@ void Experiment<Modus>::intermediate_output() {
       case DensityType::None:
         break;
       default:
-        update_density_lattice(jmu_custom_lat_.get(), lat_upd,
+        update_lattice(jmu_custom_lat_.get(), lat_upd,
                                dens_type_lattice_printout_, density_param_,
                                particles_, false);
         output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
@@ -1614,7 +1614,7 @@ void Experiment<Modus>::intermediate_output() {
                                       *jmu_custom_lat_);
     }
     if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
-      update_Tmn_lattice(Tmn_.get(), lat_upd, dens_type_lattice_printout_,
+      update_lattice(Tmn_.get(), lat_upd, dens_type_lattice_printout_,
                          density_param_, particles_);
       if (printout_tmn_) {
         output->thermodynamics_output(ThermodynamicQuantity::Tmn,
@@ -1640,7 +1640,7 @@ template <typename Modus>
 void Experiment<Modus>::update_potentials() {
   if (potentials_) {
     if (potentials_->use_skyrme() && jmu_B_lat_ != nullptr) {
-      update_density_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
+      update_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
                        DensityType::Baryon, density_param_, particles_, true);
       const size_t UBlattice_size = UB_lat_->size();
       for (size_t i = 0; i < UBlattice_size; i++) {
@@ -1653,7 +1653,7 @@ void Experiment<Modus>::update_potentials() {
       }
     }
     if (potentials_->use_symmetry() && jmu_I3_lat_ != nullptr) {
-      update_density_lattice(jmu_I3_lat_.get(), LatticeUpdate::EveryTimestep,
+      update_lattice(jmu_I3_lat_.get(), LatticeUpdate::EveryTimestep,
                              DensityType::BaryonicIsospin, density_param_,
                              particles_, true);
       const size_t UI3lattice_size = UI3_lat_->size();
