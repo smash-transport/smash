@@ -1719,7 +1719,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
   pythia_hadron_->event[0].p(pSum);
   pythia_hadron_->event[0].m(pSum.mCalc());
   pythia_hadron_->rndm.init(random::uniform_int(1, maxint_));
-  const bool successful_hadronization = pythia_hadron_->forceHadronLevel();
+  const bool successful_hadronization = pythia_hadron_->next();
   if (successful_hadronization) {
     for (int ipyth = 0; ipyth < pythia_hadron_->event.size(); ipyth++) {
       if (!pythia_hadron_->event[ipyth].isFinal()) {
