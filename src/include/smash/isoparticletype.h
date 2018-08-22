@@ -83,6 +83,11 @@ class IsoParticleType {
    */
   Parity parity() const { return parity_; }
 
+  /**
+   * \return Is this a hadron multiplet?
+   */
+  bool is_hadron() const { return states_[0]->is_hadron(); }
+
   /// Returns list of states that form part of the multiplet.
   ParticleTypePtrList get_states() const { return states_; }
 

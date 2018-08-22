@@ -256,6 +256,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
         lineinput >> name;
       }
       Parity parity;
+      bool is_strong_decay;
       if (multi) {
         /* References to isospin multiplets: Automatically determine all valid
          * combinations and calculate Clebsch-Gordan factors */
@@ -266,6 +267,9 @@ void DecayModes::load_decaymodes(const std::string &input) {
             const IsoParticleType &isotype_daughter_2 =
                 IsoParticleType::find(decay_particles[1]);
             parity = isotype_daughter_1.parity() * isotype_daughter_2.parity();
+            is_strong_decay =
+                isotype_daughter_1.is_hadron() &&
+                isotype_daughter_2.is_hadron();
             // loop through multiplets
             bool forbidden_by_isospin = true;
             for (size_t m = 0; m < mother_states.size(); m++) {
@@ -309,6 +313,10 @@ void DecayModes::load_decaymodes(const std::string &input) {
             parity = isotype_daughter_1.parity() *
                      isotype_daughter_2.parity() *
                      isotype_daughter_3.parity();
+            is_strong_decay =
+                isotype_daughter_1.is_hadron() &&
+                isotype_daughter_2.is_hadron() &&
+                isotype_daughter_3.is_hadron();
             // loop through multiplets
             for (size_t m = 0; m < mother_states.size(); m++) {
               for (const auto &daughter1 : isotype_daughter_1.get_states()) {
@@ -347,6 +355,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
         ParticleTypePtrList types;
         int charge = 0;
         parity = Parity::Pos;
+        is_strong_decay = true;
         for (auto part : decay_particles) {
           try {
             types.push_back(IsoParticleType::find_state(part));
@@ -357,6 +366,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
           }
           charge += types.back()->charge();
           parity *= types.back()->parity();
+          is_strong_decay &= types.back()->is_hadron();
         }
         bool no_decays = true;
         for (size_t m = 0; m < mother_states.size(); m++) {
@@ -379,7 +389,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
         parity = -parity;
       }
       // Make sure the decay has the correct parity.
-      if (parity != mother_states[0]->parity()) {
+      if (is_strong_decay && parity != mother_states[0]->parity()) {
           throw InvalidDecay(mother_states[0]->name() +
                              " decay mode violates parity conservation " +
                              "(line " + std::to_string(linenumber) + ": \"" +
