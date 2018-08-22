@@ -117,3 +117,14 @@ TEST(translation) {
   COMPARE(p.translated({1, 2, 0}).position(), FourVector(0, 1, 2, 0));
   COMPARE(p.translated({1, 2, 3}).position(), FourVector(0, 1, 2, 3));
 }
+
+TEST(parity) {
+  const auto p = Parity::Pos;
+  const auto n = Parity::Neg;
+  COMPARE(-p, n);
+  COMPARE(-n, p);
+  COMPARE(n * p, n);
+  COMPARE(p * n, n);
+  COMPARE(p * p, p);
+  COMPARE(n * n, p);
+}
