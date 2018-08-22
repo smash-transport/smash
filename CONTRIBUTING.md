@@ -380,7 +380,7 @@ All code has to be formatted by running `clang-format`. This automatically
 formats the code in SMASH correctly. Use the following command in the SMASH root
 directory:
 
-    for i in src/*.cc src/include/*.h src/tests/*.cc src/tests/*.h; do clang-format -i $i; done;
+    for i in src/*.cc src/include/smash/*.h src/tests/*.cc src/tests/*.h; do clang-format -i $i; done;
 
 If clang-format does changes that don't look good, you can disable it locally
 using comments like this:

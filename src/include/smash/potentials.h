@@ -127,8 +127,8 @@ class Potentials {
    *         is the magnetic component of the Skyrme force
    *         with \f$\rho^\ast\f$ being the Eckart density.
    */
-  std::pair<ThreeVector, ThreeVector> skyrme_force(const double density,
-      const ThreeVector grad_rho, const ThreeVector dj_dt,
+  std::pair<ThreeVector, ThreeVector> skyrme_force(
+      const double density, const ThreeVector grad_rho, const ThreeVector dj_dt,
       const ThreeVector rot_j) const;
 
   /**

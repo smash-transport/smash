@@ -53,7 +53,7 @@ class DecayModes {
    *
    * \param[in] name the name of the decaying particle
    */
-  void renormalize(const std::string& name);
+  void renormalize(const std::string &name);
 
   /// \return true if empty (i.e. no decay modes)
   bool is_empty() const { return decay_modes_.empty(); }

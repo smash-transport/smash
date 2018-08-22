@@ -33,7 +33,7 @@ void remove_substr(std::string &s, const std::string &p);
 
 /**
  * Remove ⁺, ⁻, ⁰ from string.
- * 
+ *
  * \param[inout] s String to be cleaned.
  */
 void isoclean(std::string &s);

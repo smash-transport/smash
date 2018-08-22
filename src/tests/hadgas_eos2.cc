@@ -24,7 +24,7 @@ TEST(create_particles_table) {
   Test::create_actual_decaymodes();
 }
 
-TEST(partial_density){
+TEST(partial_density) {
   const ParticleType& pip = ParticleType::find(0x211);
   const ParticleType& rhop = ParticleType::find(0x213);
   const double T = 0.15, mub = 0.0, mus = 0.0;
@@ -47,9 +47,10 @@ TEST(sample_mass_thermal) {
   hist.populate(N_TEST, [&]() {
     return HadronGasEos::sample_mass_thermal(rhop, 1.0 / T);
   });
-  hist.test([&](double m) {
-    return rhop.spectral_function(m) *
-           m * m * gsl_sf_bessel_Kn(2, m / T) *
-           HadronGasEos::partial_density(rhop, T, 0.0, 0.0);
-  }, "mass_sampling.dat");
+  hist.test(
+      [&](double m) {
+        return rhop.spectral_function(m) * m * m * gsl_sf_bessel_Kn(2, m / T) *
+               HadronGasEos::partial_density(rhop, T, 0.0, 0.0);
+      },
+      "mass_sampling.dat");
 }

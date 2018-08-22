@@ -179,4 +179,3 @@ TEST(iterate_in_radius) {
         }
       });
 }
-
