@@ -120,15 +120,14 @@ double Potentials::potential(const ThreeVector &r, const ParticleList &plist,
 
   if (use_skyrme_) {
     const double rho_eck =
-        rho_eckart(r, plist, param_, DensityType::Baryon, compute_gradient)
-            .first;
+        std::get<0>(rho_eckart(r, plist, param_,
+         DensityType::Baryon, compute_gradient));
     total_potential += scale.first * skyrme_pot(rho_eck);
   }
   if (use_symmetry_) {
     const double rho_iso =
-        rho_eckart(r, plist, param_, DensityType::BaryonicIsospin,
-                   compute_gradient)
-            .first;
+        std::get<0>(rho_eckart(r, plist, param_, DensityType::BaryonicIsospin,
+                   compute_gradient));
     const double sym_pot = symmetry_pot(rho_iso) * acts_on.isospin3_rel();
     total_potential += scale.second * sym_pot;
   }
@@ -153,32 +152,66 @@ std::pair<double, int> Potentials::force_scale(const ParticleType &data) const {
   return std::make_pair(skyrme_scale, symmetry_scale);
 }
 
-std::pair<ThreeVector, ThreeVector> Potentials::potential_gradient(
-    const ThreeVector &r, const ParticleList &plist) const {
-  const bool compute_gradient = true;
+std::pair<ThreeVector, ThreeVector> Potentials::skyrme_force(
+  const double density, const ThreeVector grad_rho, const ThreeVector dj_dt,
+  const ThreeVector rot_j) const {
   const double MeV_to_GeV = 1.0e-3;
-  ThreeVector dUB_dr(0.0, 0.0, 0.0);
+  ThreeVector E_component(0.0, 0.0, 0.0), B_component(0.0, 0.0, 0.0);
+  if (use_skyrme_) {
+     const double dV_drho = (skyrme_a_ + skyrme_b_ * skyrme_tau_
+                         * std::pow(density / nuclear_density, skyrme_tau_ -1))
+                         * MeV_to_GeV / nuclear_density;
+     E_component -= dV_drho * (grad_rho + dj_dt);
+     B_component += dV_drho * rot_j;
+  }
+  return std::make_pair(E_component, B_component);
+}
+
+std::pair<ThreeVector, ThreeVector> Potentials::symmetry_force(
+  const ThreeVector grad_rho, const ThreeVector dj_dt,
+  const ThreeVector rot_j) const {
+  const double MeV_to_GeV = 1.0e-3;
+  ThreeVector E_component(0.0, 0.0, 0.0), B_component(0.0, 0.0, 0.0);
+  if (use_symmetry_) {
+     const double dV_drho = MeV_to_GeV * 2. * symmetry_s_ / nuclear_density;
+     E_component -= dV_drho * (grad_rho + dj_dt);
+     B_component += dV_drho * rot_j;
+  }
+  return std::make_pair(E_component, B_component);
+}
+
+
+std::tuple<ThreeVector, ThreeVector, ThreeVector, ThreeVector>
+  Potentials::all_forces(const ThreeVector &r, const ParticleList &plist)
+  const {
+  const bool compute_gradient = true;
+  auto F_skyrme = std::make_pair(ThreeVector(0., 0., 0.),
+                                 ThreeVector(0., 0., 0.));
+  auto F_symmetry = std::make_pair(ThreeVector(0., 0., 0.),
+                                   ThreeVector(0., 0., 0.));
+
   if (use_skyrme_) {
     const auto density_and_gradient =
         rho_eckart(r, plist, param_, DensityType::Baryon, compute_gradient);
-    const double rho = density_and_gradient.first;
-    const ThreeVector drho_dr = density_and_gradient.second;
-
-    // Derivative of potential with respect to density
-    double tmp = skyrme_tau_ * std::pow(rho / nuclear_density, skyrme_tau_ - 1);
-    dUB_dr =
-        MeV_to_GeV * drho_dr * (skyrme_a_ + skyrme_b_ * tmp) / nuclear_density;
+    const double rho = std::get<0>(density_and_gradient);
+    const ThreeVector grad_rho = std::get<1>(density_and_gradient);
+    const ThreeVector dj_dt = std::get<2>(density_and_gradient);
+    const ThreeVector rot_j = std::get<3>(density_and_gradient);
+    F_skyrme = skyrme_force(rho, grad_rho, dj_dt, rot_j);
   }
 
-  ThreeVector dUsym_dr(0.0, 0.0, 0.0);
   if (use_symmetry_) {
-    const ThreeVector p_iso =
+    const auto density_and_gradient =
         rho_eckart(r, plist, param_, DensityType::BaryonicIsospin,
-                   compute_gradient)
-            .second;
-    dUsym_dr = MeV_to_GeV * 2. * symmetry_s_ * p_iso / nuclear_density;
+                   compute_gradient);
+    const ThreeVector grad_rho = std::get<1>(density_and_gradient);
+    const ThreeVector dj_dt = std::get<2>(density_and_gradient);
+    const ThreeVector rot_j = std::get<3>(density_and_gradient);
+    F_symmetry = symmetry_force(grad_rho, dj_dt, rot_j);
   }
-  return std::make_pair(dUB_dr, dUsym_dr);
+
+  return std::make_tuple(F_skyrme.first, F_skyrme.second,
+                         F_symmetry.first, F_symmetry.second);
 }
 
 }  // namespace smash

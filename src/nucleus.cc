@@ -19,6 +19,7 @@
 #include "smash/numerics.h"
 #include "smash/particles.h"
 #include "smash/pdgcode.h"
+#include "smash/random.h"
 #include "smash/threevector.h"
 
 namespace smash {
@@ -217,7 +218,7 @@ ThreeVector Nucleus::distribute_nucleon() const {
   double prob_range4 = 1. * prob_range3 / radius_scaled;
   double ranges234 = prob_range2 + prob_range3 + prob_range4;
   double t;
-  // Decide which branch \f$\tilde p^{({\rm I - IV})}\f$ to go into
+  /// \li Decide which branch \f$\tilde p^{({\rm I - IV})}\f$ to go into
   do {
     double which_range = random::uniform(-prob_range1, ranges234);
     if (which_range < 0.0) {
@@ -231,14 +232,15 @@ ThreeVector Nucleus::distribute_nucleon() const {
         }
       }
     }
-    /* Generate \f$t\f$ from the distribution in the respective
+    /**
+     * \li Generate \f$t\f$ from the distribution in the respective
      * branches
-     * Reject that number with a probability
+     * \li \a Reject that number with a probability
      * \f$1-(1+\exp(-|t|))^{-1}\f$ (the efficiency of this should be
      * \f$\gg \frac{1}{2}\f$)
      */
   } while (random::canonical() > 1. / (1. + std::exp(-std::abs(t))));
-  // Shift and rescale \f$t\f$ to \f$r = d\cdot t + r_0\f$
+  /// \li Shift and rescale \f$t\f$ to \f$r = d\cdot t + r_0\f$
   double position_scaled = t + radius_scaled;
   double position = position_scaled * diffusiveness_;
   return dir.threevec() * position;
@@ -277,9 +279,6 @@ void Nucleus::set_parameters_automatic() {
       set_diffusiveness(0.556);
       set_nuclear_radius(6.86);
       set_saturation_density(0.166);
-      // Hirano, Huovinen, Nara - Corrections.
-      // set_diffusiveness(0.44);
-      // set_nuclear_radius(6.86);
       break;
     case 208:  // Lead
       // Default values.
@@ -292,23 +291,25 @@ void Nucleus::set_parameters_automatic() {
       set_diffusiveness(0.535);
       set_nuclear_radius(6.38);
       set_saturation_density(0.1695);
-      // Hirano, Nara - Corrections.
-      // set_diffusiveness(0.44);
-      // set_nuclear_radius(6.42);
       break;
     case 63:  // Copper
       // Default values.
-      set_diffusiveness(0.597);
+      set_diffusiveness(0.5977);
       set_nuclear_radius(4.20641);
       set_saturation_density(0.1686);
-      // Hirano, Nara - Corrections.
-      // set_diffusiveness(0.50);
-      // set_nuclear_radius(4.28);
       break;
     default:
-      // radius: rough guess for all nuclei not listed explicitly
-      set_nuclear_radius(1.2 * std::cbrt(A));
-      // diffusiveness and saturation density already have reasonable defaults
+      if (A < 16) {
+        // radius: rough guess for all nuclei not listed explicitly with A < 16
+        set_nuclear_radius(1.2 * std::cbrt(A));
+        // diffusiveness and saturation density already have reasonable defaults
+      }
+      if (A > 16) {
+        // radius and diffusiveness taken from \iref{Rybczynski:2013yba}
+        set_diffusiveness(0.54);
+        set_nuclear_radius(1.12 * pow(std::cbrt(A), 1.0 / 3.0) -
+                           0.86 * pow(std::cbrt(A), -1.0 / 3.0));
+      }
   }
 }
 

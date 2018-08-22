@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2017
+ *    Copyright (c) 2015-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -21,11 +21,11 @@ using namespace smash;
 
 TEST(init_particle_types) {
   ParticleType::create_type_list(
-      "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "Λ 3.000 0.3 50661\n"
-      "η1⁰ 0.400 -1.0 10661\n"
-      "η2⁰ 0.600 -1.0 20661\n"
-      "η3⁰ 1.200 0.2 30661");
+      "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
+      "Λ 3.000 0.3 + 50661\n"
+      "η1⁰ 0.400 -1.0 - 10661\n"
+      "η2⁰ 0.600 -1.0 - 20661\n"
+      "η3⁰ 1.200 0.2 - 30661");
 }
 
 TEST(init_decay_channels) {

@@ -159,6 +159,26 @@ double piplusp_elastic(double mandelstam_s) {
   return sigma;
 }
 
+/* pi+ p to Sigma+ K+ cross section parametrization, PDG data.
+ *
+ * The PDG data is smoothed using the LOWESS algorithm. If more than one
+ * cross section was given for one p_lab value, the corresponding cross sections
+ * are averaged. */
+double piplusp_sigmapluskplus_pdg(double mandelstam_s) {
+  if (piplusp_sigmapluskplus_interpolation == nullptr) {
+    std::vector<double> x = PIPLUSP_SIGMAPLUSKPLUS_P_LAB;
+    std::vector<double> y = PIPLUSP_SIGMAPLUSKPLUS_SIG;
+    std::vector<double> dedup_x;
+    std::vector<double> dedup_y;
+    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    dedup_y = smooth(dedup_x, dedup_y, 0.2, 5);
+    piplusp_sigmapluskplus_interpolation =
+        make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
+  }
+  const double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
+  return (*piplusp_sigmapluskplus_interpolation)(p_lab);
+}
+
 /* pi- p elastic cross section parametrization, PDG data.
  *
  * The PDG data is smoothed using the LOWESS algorithm. If more than one
@@ -217,6 +237,66 @@ double piminusp_elastic(double mandelstam_s) {
     sigma = really_small;
   }
   return sigma;
+}
+
+/* pi- p -> Lambda K0 cross section parametrization, PDG data.
+ *
+ * The PDG data is smoothed using the LOWESS algorithm. If more than one
+ * cross section was given for one p_lab value, the corresponding cross sections
+ * are averaged. */
+double piminusp_lambdak0_pdg(double mandelstam_s) {
+  if (piminusp_lambdak0_interpolation == nullptr) {
+    std::vector<double> x = PIMINUSP_LAMBDAK0_P_LAB;
+    std::vector<double> y = PIMINUSP_LAMBDAK0_SIG;
+    std::vector<double> dedup_x;
+    std::vector<double> dedup_y;
+    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    dedup_y = smooth(dedup_x, dedup_y, 0.2, 6);
+    piminusp_lambdak0_interpolation =
+        make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
+  }
+  const double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
+  return (*piminusp_lambdak0_interpolation)(p_lab);
+}
+
+/* pi- p -> Sigma- K+ cross section parametrization, PDG data.
+ *
+ * The PDG data is smoothed using the LOWESS algorithm. If more than one
+ * cross section was given for one p_lab value, the corresponding cross sections
+ * are averaged. */
+double piminusp_sigmaminuskplus_pdg(double mandelstam_s) {
+  if (piminusp_sigmaminuskplus_interpolation == nullptr) {
+    std::vector<double> x = PIMINUSP_SIGMAMINUSKPLUS_P_LAB;
+    std::vector<double> y = PIMINUSP_SIGMAMINUSKPLUS_SIG;
+    std::vector<double> dedup_x;
+    std::vector<double> dedup_y;
+    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    dedup_y = smooth(dedup_x, dedup_y, 0.2, 6);
+    piminusp_sigmaminuskplus_interpolation =
+        make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
+  }
+  const double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
+  return (*piminusp_sigmaminuskplus_interpolation)(p_lab);
+}
+
+/* pi- p -> Sigma0 K0 cross section parametrization, resonance contribution.
+ *
+ * The data is smoothed using the LOWESS algorithm. If more than one
+ * cross section was given for one sqrts value, the corresponding cross sections
+ * are averaged. */
+double piminusp_sigma0k0_res(double mandelstam_s) {
+  if (piminusp_sigma0k0_interpolation == nullptr) {
+    std::vector<double> x = PIMINUSP_SIGMA0K0_RES_SQRTS;
+    std::vector<double> y = PIMINUSP_SIGMA0K0_RES_SIG;
+    std::vector<double> dedup_x;
+    std::vector<double> dedup_y;
+    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    dedup_y = smooth(dedup_x, dedup_y, 0.03, 6);
+    piminusp_sigma0k0_interpolation =
+        make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
+  }
+  const double sqrts = sqrt(mandelstam_s);
+  return (*piminusp_sigma0k0_interpolation)(sqrts);
 }
 
 double pp_elastic(double mandelstam_s) {

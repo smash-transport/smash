@@ -126,6 +126,8 @@ class RootOutput : public OutputInterface {
    * Writes intermediate particles to a tree defined by treename,
    * if it is allowed (i.e., particles_only_final_ is false).
    * \param[in] particles Particles to be written to output.
+   * \param[in] clock Unused, needed since inherited.
+   * \param[in] dens_param Unused, needed since inherited.
    */
   void at_intermediate_time(const Particles &particles, const Clock &clock,
                             const DensityParameters &dens_param) override;
@@ -133,6 +135,7 @@ class RootOutput : public OutputInterface {
    * Writes collisions to a tree defined by treename.
    * \param[in] action an Action object containing incoming, outgoing particles
    *            and type of interactions.
+   * \param[in] density Unused, needed since inherited.
    */
   void at_interaction(const Action &action, const double density) override;
 

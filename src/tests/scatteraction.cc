@@ -399,11 +399,11 @@ TEST(string_scaling_factors) {
   // Since the string is baryonic, the proton has to carry the diquark,
   // which leads to a scaling factor of 0.7*2/3 and the faster pion (f)
   // gets the other quark and a scaling factor of 0.7*1/2
-  COMPARE(outgoing[0].cross_section_scaling_factor(), 0.);
-  COMPARE(outgoing[1].cross_section_scaling_factor(),
+  COMPARE(outgoing[0].initial_xsec_scaling_factor(), 0.);
+  COMPARE(outgoing[1].initial_xsec_scaling_factor(),
           coherence_factor * 2. / 3.);
-  COMPARE(outgoing[2].cross_section_scaling_factor(), 0.);
-  COMPARE(outgoing[3].cross_section_scaling_factor(), coherence_factor / 2.0);
+  COMPARE(outgoing[2].initial_xsec_scaling_factor(), 0.);
+  COMPARE(outgoing[3].initial_xsec_scaling_factor(), coherence_factor / 2.0);
 
   incoming = {e, f};  // Mesonic string
   e.set_4momentum(0.138, {0., 0., -1.0});
@@ -419,10 +419,10 @@ TEST(string_scaling_factors) {
   baryon_string = 0;
   StringProcess::assign_all_scaling_factors(baryon_string, outgoing, evec_coll,
                                             coherence_factor);
-  COMPARE(outgoing[0].cross_section_scaling_factor(), 0.5 * coherence_factor);
-  COMPARE(outgoing[1].cross_section_scaling_factor(), 0);
-  COMPARE(outgoing[2].cross_section_scaling_factor(), 0);
-  COMPARE(outgoing[3].cross_section_scaling_factor(), coherence_factor / 3.);
+  COMPARE(outgoing[0].initial_xsec_scaling_factor(), 0.5 * coherence_factor);
+  COMPARE(outgoing[1].initial_xsec_scaling_factor(), 0);
+  COMPARE(outgoing[2].initial_xsec_scaling_factor(), 0);
+  COMPARE(outgoing[3].initial_xsec_scaling_factor(), coherence_factor / 3.);
   VERIFY(outgoing[3] == d);
   // While partile d was now the last particle in the list, if we exchange the
   // momenta of d and c, particle c will be assigned the scaling factor.
@@ -433,9 +433,63 @@ TEST(string_scaling_factors) {
   outgoing = {c, d, e, f};
   StringProcess::assign_all_scaling_factors(baryon_string, outgoing, evec_coll,
                                             coherence_factor);
-  COMPARE(outgoing[0].cross_section_scaling_factor(), 0.5 * coherence_factor);
-  COMPARE(outgoing[1].cross_section_scaling_factor(), 0.);
-  COMPARE(outgoing[2].cross_section_scaling_factor(), 0.);
-  COMPARE(outgoing[3].cross_section_scaling_factor(), coherence_factor / 3.);
+  COMPARE(outgoing[0].initial_xsec_scaling_factor(), 0.5 * coherence_factor);
+  COMPARE(outgoing[1].initial_xsec_scaling_factor(), 0.);
+  COMPARE(outgoing[2].initial_xsec_scaling_factor(), 0.);
+  COMPARE(outgoing[3].initial_xsec_scaling_factor(), coherence_factor / 3.);
   VERIFY(outgoing[3] == c);
+}
+
+TEST(pdg_map_for_pythia) {
+  int pdgid_mapped = 0;
+
+  // pi+ is mapped onto pi+
+  PdgCode pdg_piplus = PdgCode(0x211);
+  pdgid_mapped = StringProcess::pdg_map_for_pythia(pdg_piplus);
+  VERIFY(pdgid_mapped == 211);
+
+  // pi0 is mapped onto pi0
+  PdgCode pdg_pi0 = PdgCode(0x111);
+  pdgid_mapped = StringProcess::pdg_map_for_pythia(pdg_pi0);
+  VERIFY(pdgid_mapped == 111);
+
+  // pi- is mapped onto pi-
+  PdgCode pdg_piminus = PdgCode(-0x211);
+  pdgid_mapped = StringProcess::pdg_map_for_pythia(pdg_piminus);
+  VERIFY(pdgid_mapped == -211);
+
+  // proton is mapped onto proton
+  PdgCode pdg_proton = PdgCode(0x2212);
+  pdgid_mapped = StringProcess::pdg_map_for_pythia(pdg_proton);
+  VERIFY(pdgid_mapped == 2212);
+
+  // neutron is mapped onto neutron
+  PdgCode pdg_neutron = PdgCode(0x2112);
+  pdgid_mapped = StringProcess::pdg_map_for_pythia(pdg_neutron);
+  VERIFY(pdgid_mapped == 2112);
+
+  // antiproton is mapped onto antiproton
+  PdgCode pdg_antip = PdgCode(-0x2212);
+  pdgid_mapped = StringProcess::pdg_map_for_pythia(pdg_antip);
+  VERIFY(pdgid_mapped == -2212);
+
+  // K+ is mapped onto pi+
+  PdgCode pdg_Kplus = PdgCode(0x321);
+  pdgid_mapped = StringProcess::pdg_map_for_pythia(pdg_Kplus);
+  VERIFY(pdgid_mapped == 211);
+
+  // K- is mapped onto pi-
+  PdgCode pdg_Kminus = PdgCode(-0x321);
+  pdgid_mapped = StringProcess::pdg_map_for_pythia(pdg_Kminus);
+  VERIFY(pdgid_mapped == -211);
+
+  // Lambda is mapped onto neutron
+  PdgCode pdg_Lambda = PdgCode(0x3122);
+  pdgid_mapped = StringProcess::pdg_map_for_pythia(pdg_Lambda);
+  VERIFY(pdgid_mapped == 2112);
+
+  // anti-Lambda is mapped onto anti-neutron
+  PdgCode pdg_antiL = PdgCode(-0x3122);
+  pdgid_mapped = StringProcess::pdg_map_for_pythia(pdg_antiL);
+  VERIFY(pdgid_mapped == -2112);
 }

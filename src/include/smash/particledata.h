@@ -35,8 +35,10 @@ struct HistoryData {
    * The full coordinate space 4-vector can be obtained by back-propagation
    */
   double time_last_collision = 0.0;
-  /// PdgCodes of the parent particles
-  PdgCode p1 = 0x0, p2 = 0x0;
+  /// PdgCode of the first parent particles
+  PdgCode p1 = 0x0;
+  /// PdgCode of the second parent particles
+  PdgCode p2 = 0x0;
 };
 
 /**
@@ -243,7 +245,7 @@ class ParticleData {
    * The cross section will only grow slowly, if the option is used.
    *
    * \param[in] begin_form_time time when the cross section starts to increase
-   * \param[in] from_time time when the crosss ection reaches 1
+   * \param[in] form_time time when the cross section reaches 1
    */
   void set_slow_formation_times(double begin_form_time, double form_time) {
     begin_formation_time_ = begin_form_time;
@@ -251,21 +253,30 @@ class ParticleData {
   }
 
   /**
-   * Get the cross section scaling factor
-   * \return particle's crosss section scaling factor
+   * Get the initially assigned cross section scaling factor.
+   *
+   * Depending on the config, the cross section scaling factor might change
+   * with time, while this value will not be updated.
+   *
+   * \return particle's initially assigned cross section scaling factor
    */
-  const double &cross_section_scaling_factor() const {
-    return cross_section_scaling_factor_;
+  const double &initial_xsec_scaling_factor() const {
+    return initial_xsec_scaling_factor_;
   }
   /**
-   * Set the particle's cross_section_scaling_factor
+   * Set the particle's initial cross_section_scaling_factor
    *
    * All cross sections of this particle are scaled down by this factor until
    * the formation time is over.
+   *
+   * If the particle formation power is set to be positive, this will only be
+   * the initial scaling factor, while the actual scaling factor grows with
+   * time.
+   *
    * \param[in] xsec_scal cross section scaling factor
    */
   void set_cross_section_scaling_factor(const double &xsec_scal) {
-    cross_section_scaling_factor_ = xsec_scal;
+    initial_xsec_scaling_factor_ = xsec_scal;
   }
 
   /**
@@ -349,9 +360,17 @@ class ParticleData {
   ParticleData(const ParticleType &ptype, int uid, int index)
       : id_(uid), index_(index), type_(&ptype) {}
 
-  /// Return the cross section scaling factor at the time of collision
-  double current_xsec_scaling_factor(double time_until_collision,
-                                     double power) const;
+  /**
+   * Return the cross section scaling factor at a given time.
+   *
+   * \param[in] delta_time scaling factor at current time plus
+   *            this time will be returned.
+   * \return the cross section scaling factor at a specified time.
+   */
+  double xsec_scaling_factor(double delta_time = 0.) const;
+
+  /// Power with which the cross section scaling factor grows in time.
+  static double formation_power_;
 
  private:
   friend class Particles;
@@ -368,7 +387,7 @@ class ParticleData {
     dst.momentum_ = momentum_;
     dst.position_ = position_;
     dst.formation_time_ = formation_time_;
-    dst.cross_section_scaling_factor_ = cross_section_scaling_factor_;
+    dst.initial_xsec_scaling_factor_ = initial_xsec_scaling_factor_;
     dst.begin_formation_time_ = begin_formation_time_;
   }
 
@@ -422,8 +441,11 @@ class ParticleData {
   double formation_time_ = 0.0;
   /// time when the cross section scaling factor starts to increase to 1
   double begin_formation_time_ = 0.0;
-  /// cross section scaling factor for unformed particles
-  double cross_section_scaling_factor_ = 1.0;
+  /**
+   * Initial cross section scaling factor.
+   * 1 by default, since a particle is fully formed in this case.
+   */
+  double initial_xsec_scaling_factor_ = 1.0;
   /// history information
   HistoryData history_;
 };
@@ -447,10 +469,11 @@ std::ostream &operator<<(std::ostream &out, const ParticleList &particle_list);
  * Helper type to attach the request for detailed printing to the type.
  */
 struct PrintParticleListDetailed {
+  /// Particle list
   const ParticleList &list;
 };
 /**
- * \ingroup loggingk
+ * \ingroup logging
  * Request the ParticleList to be printed in full detail (i.e. one full
  * ParticleData printout per line).
  */
@@ -462,7 +485,7 @@ inline PrintParticleListDetailed detailed(const ParticleList &list) {
  * \ingroup logging
  * Writes a detailed overview over the particles in the \p particle_list
  * argument
- * to the stream. This overload is selected via the function \ref detailed.
+ * to the stream. This overload is selected via the function detailed.
  */
 std::ostream &operator<<(std::ostream &out,
                          const PrintParticleListDetailed &particle_list);

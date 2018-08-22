@@ -177,6 +177,15 @@ double piplusp_elastic_high_energy(double mandelstam_s, double m1, double m2);
 double piplusp_elastic(double mandelstam_s);
 
 /**
+ *  pi+ p to Sigma+ K+ cross section parametrization, PDG data.
+ *
+ * The PDG data is smoothed using the LOWESS algorithm. If more than one
+ * cross section was given for one p_lab value, the corresponding cross sections
+ * are averaged.
+ */
+double piplusp_sigmapluskplus_pdg(double mandelstam_s);
+
+/**
  * pi-p elastic cross section parametrization
  * Source: GiBUU:parametrizationBarMes_HighEnergy.f90
  *
@@ -184,6 +193,33 @@ double piplusp_elastic(double mandelstam_s);
  * \return the parametrized cross-section [mb]
  */
 double piminusp_elastic(double mandelstam_s);
+
+/**
+ * pi- p -> Lambda K0 cross section parametrization, PDG data.
+ *
+ * The PDG data is smoothed using the LOWESS algorithm. If more than one
+ * cross section was given for one p_lab value, the corresponding cross sections
+ * are averaged.
+ */
+double piminusp_lambdak0_pdg(double mandelstam_s);
+
+/**
+ * pi- p -> Sigma- K+ cross section parametrization, PDG data.
+ *
+ * The PDG data is smoothed using the LOWESS algorithm. If more than one
+ * cross section was given for one p_lab value, the corresponding cross sections
+ * are averaged.
+ */
+double piminusp_sigmaminuskplus_pdg(double mandelstam_s);
+
+/**
+ * pi- p -> Sigma0 K0 cross section parametrization, resonance contribution.
+ *
+ * The data is smoothed using the LOWESS algorithm. If more than one
+ * cross section was given for one sqrts value, the corresponding cross sections
+ * are averaged.
+ */
+double piminusp_sigma0k0_res(double mandelstam_s);
 
 /**
  * pp elastic cross section parametrization
@@ -398,6 +434,7 @@ double kplusn_inelastic_background(double mandelstam_s);
  * implementation.
  */
 struct pair_hash {
+  /// Hashing is done by this operator
   std::size_t operator()(const std::pair<uint64_t, uint64_t>& p) const {
     auto h1 = std::hash<uint64_t>{}(p.first);
     auto h2 = std::hash<uint64_t>{}(p.second);

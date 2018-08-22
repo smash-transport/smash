@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -17,16 +17,16 @@ using namespace smash;
 
 TEST(init_particle_types) {
   ParticleType::create_type_list(
-      "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "σ  0.123  1.2    661\n"
-      "π⁰ 0.1350 0      111\n"
-      "π⁺ 0.1396 0      211\n"
-      "ρ  0.7755 0.149  113 213\n"
-      "η  0.5479 1.3e-6 221\n"
-      "ω  0.7827 0.0085 223\n"
-      "N⁺ 0.938 0     2212\n"
-      "N⁰ 0.938 0     2112\n"
-      "Δ  1.232  0.117 2224 2214 2114 1114\n");
+      "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
+      "σ  0.123  1.2    +  661\n"
+      "π⁰ 0.1350 0      -  111\n"
+      "π⁺ 0.1396 0      -  211\n"
+      "ρ  0.7755 0.149  -  113 213\n"
+      "η  0.5479 1.3e-6 -  221\n"
+      "ω  0.7827 0.0085 -  223\n"
+      "N⁺ 0.938  0      + 2212\n"
+      "N⁰ 0.938  0      + 2112\n"
+      "Δ  1.232  0.117  + 2224 2214 2114 1114\n");
 }
 
 TEST(create_particledata_piplus) {

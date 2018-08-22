@@ -56,6 +56,7 @@ inline void create_actual_decaymodes() {
 static constexpr double smashon_mass = 0.123;
 /// The decay width of the smashon particle.
 static constexpr double smashon_width = 1.2;
+/// The PDG code of the smashon particle.
 static constexpr const char smashon_pdg_string[] = "661";
 
 /**
@@ -63,10 +64,10 @@ static constexpr const char smashon_pdg_string[] = "661";
  */
 inline void create_smashon_particletypes() {
   ParticleType::create_type_list(
-      "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
+      "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
       "σ " +
       std::to_string(smashon_mass) + " " + std::to_string(smashon_width) +
-      " 661\n");
+      " + 661\n");
 }
 
 /// A FourVector that is marked as a position vector.
@@ -169,7 +170,7 @@ inline Configuration configuration(std::string overrides = {}) {
  * Create an experiment.
  *
  * If you want a specific configuration you can pass it as parameter, otherwise
- * it will use the result from \ref configuration above.
+ * it will use the result from configuration above.
  */
 inline std::unique_ptr<ExperimentBase> experiment(
     const Configuration &c = configuration()) {

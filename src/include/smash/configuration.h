@@ -135,34 +135,6 @@ namespace smash {
  * belongs to the Output category, whereas Particles is a subcategory.
  */
 
-/**
- * Interface to the SMASH configuration files.
- *
- * The configuration is created from a YAML file and then stores a nested map of
- * maps (normally a tree, but YAML allows it to be cyclic - even though we don't
- * want that feature).
- *
- * For the typical usage in SMASH one needs to read the value once. In that
- * case, use the Configuration::take function:
- * \code
- * double sigma = config.take({"General", "SIGMA"});
- * \endcode
- * Note the curly braces in the function call. It is a std::initializer_list of
- * strings. This allows an arbitrary nesting depth via the same function.
- * But as a consequence the keys must all be given as constant strings at
- * compile time.
- *
- * If you need to access the configuration values from a run-time string you can
- * use Configuration::operator[]. This returns a Configuration object that
- * references the respective sub-tree.
- *
- * By taking values (instead of just reading), the configuration object should
- * be empty at the end of the initialization. If the object is not empty, SMASH
- * will print a warning (using Configuration::unused_values_report). This can be
- * important for the user to discover typos in his configuration file (or
- * command line parameters).
- */
-
 /*!\Userguide
  * \page inputparticles Particles
  *
@@ -170,7 +142,7 @@ namespace smash {
  * given as a table with the particles properties in different columns. Note,
  * that these columns may be separated by an arbitrary number of spaces:
  * ```
- * <name> <mass in GeV> <width in GeV> <PDG codes>
+ * <name> <mass in GeV> <width in GeV> <parity> <PDG codes>
  * ```
  *
  * The name has to be a unique UTF-8 string. Conventionally, unicode names are
@@ -183,6 +155,8 @@ namespace smash {
  *
  * The pole mass and the on-shell width of the particle or multiplet have to be
  * specified as floating point numbers in GeV.
+ *
+ * The parity has to be either `+` or `-`.
  *
  * The PDG codes are following the [numbering
  * scheme](http://pdg.lbl.gov/2018/mcdata/mc_particle_id_contents.html)
@@ -214,6 +188,16 @@ namespace smash {
  * Note that some reactions in SMASH are parametrized and require specific
  * particles in the final state. When such a reaction happens and the required
  * particle is not defined, SMASH will crash.
+ *
+ * If you specify an incorrect value, SMASH will print an error similar to the
+ * following:
+ * ```
+ * Failed to convert the input string to the expected data types.
+ * ```
+ *
+ * When running a box simulation in which detailed balance is expected to be
+ * conserved, the particles file will need to be modified. See \ref
+ * input_modi_box_ for further information.
  */
 
 /*!\Userguide
@@ -264,6 +248,38 @@ namespace smash {
  *
  * Note that SMASH has an internal width cut-off (currently 10 keV), below which
  * particles cannot decay, even if decays are specified in `decaymodes.txt`.
+ *
+ * Note further, that the decaymodes file will need to be modified when running
+ * a box simulation in which detailed balance is expected to be conserved. See
+ * \ref input_modi_box_ for further information.
+ */
+
+/**
+ * Interface to the SMASH configuration files.
+ *
+ * The configuration is created from a YAML file and then stores a nested map of
+ * maps (normally a tree, but YAML allows it to be cyclic - even though we don't
+ * want that feature).
+ *
+ * For the typical usage in SMASH one needs to read the value once. In that
+ * case, use the Configuration::take function:
+ * \code
+ * double sigma = config.take({"General", "SIGMA"});
+ * \endcode
+ * Note the curly braces in the function call. It is a std::initializer_list of
+ * strings. This allows an arbitrary nesting depth via the same function.
+ * But as a consequence the keys must all be given as constant strings at
+ * compile time.
+ *
+ * If you need to access the configuration values from a run-time string you can
+ * use Configuration::operator[]. This returns a Configuration object that
+ * references the respective sub-tree.
+ *
+ * By taking values (instead of just reading), the configuration object should
+ * be empty at the end of the initialization. If the object is not empty, SMASH
+ * will print a warning (using Configuration::unused_values_report). This can be
+ * important for the user to discover typos in his configuration file (or
+ * command line parameters).
  */
 class Configuration {
  public:

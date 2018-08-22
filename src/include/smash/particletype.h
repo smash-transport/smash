@@ -19,6 +19,32 @@
 namespace smash {
 
 /**
+ * Represent the parity of a particle type.
+ */
+enum class Parity {
+  /// Positive parity.
+  Pos,
+  /// Negative parity.
+  Neg
+};
+
+/**
+ * \param p Given parity.
+ * \return Inverted parity.
+ */
+inline Parity invert_parity(Parity p) {
+  switch (p) {
+    case Parity::Pos:
+      return Parity::Neg;
+    case Parity::Neg:
+      return Parity::Pos;
+  }
+  // This is unreachable and should be optimized away.
+  // It is required to silence a compiler warning.
+  throw std::runtime_error("unreachable");
+}
+
+/**
  * \ingroup data
  *
  * Particle type contains the static properties of a particle species
@@ -50,13 +76,14 @@ class ParticleType {
    * \param[in] n The name of the particle.
    * \param[in] m The mass of the particle.
    * \param[in] w The width of the particle.
+   * \param[in] p The parity of the particle.
    * \param[in] id The PDG code of the particle.
    *
    * \note The remaining properties ParticleType provides are derived from the
    *       PDG code and therefore cannot be set explicitly (this avoids the
    *       chance of introducing inconsistencies).
    */
-  ParticleType(std::string n, double m, double w, PdgCode id);
+  ParticleType(std::string n, double m, double w, Parity p, PdgCode id);
 
   /**
    * Copies are not allowed as they break intended use. Instead use a const-ref
@@ -66,8 +93,9 @@ class ParticleType {
   /// assignment is not allowed, see copy constructor above
   ParticleType &operator=(const ParticleType &) = delete;
 
-  // move ctors are needed for std::sort
+  /// move ctors are needed for std::sort
   ParticleType(ParticleType &&) = default;
+  /// move ctors are needed for std::sort
   ParticleType &operator=(ParticleType &&) = default;
 
   /// \return the DecayModes object for this particle type.
@@ -84,6 +112,9 @@ class ParticleType {
 
   /// \return the particle width (at the mass pole).
   double width_at_pole() const { return width_; }
+
+  /// \return the parity of the particle.
+  Parity parity() const { return parity_; }
 
   /// \return the PDG code of the particle.
   PdgCode pdgcode() const { return pdgcode_; }
@@ -165,18 +196,18 @@ class ParticleType {
            pdgcode_.strangeness() == 0 && pdgcode_.charmness() == 0;
   }
 
-  /// \return true if the particle is stable
+  /// \return whether the particle is stable
   inline bool is_stable() const { return width_ < width_cutoff; }
 
-  /// Check if particle is a nucleus
+  /// \return whether the particle is a nucleus
   inline bool is_nucleus() const { return pdgcode_.is_nucleus(); }
 
-  /// Check if particle is an (anti-)deuteron
+  /// \return whether the particle is an (anti-)deuteron
   inline bool is_deuteron() const {
     return is_nucleus() && std::abs(pdgcode_.get_decimal()) == 1000010020;
   }
 
-  /// Check if particle is an artificial d' resonance
+  /// \return whether the particle is an artificial d' resonance
   inline bool is_dprime() const {
     return is_nucleus() && std::abs(pdgcode_.get_decimal()) == 1000010021;
   }
@@ -365,7 +396,7 @@ class ParticleType {
   void dump_width_and_spectral_function() const;
 
   /**
-   * Returns a list of all ParticleType objects.
+   * \return a list of all ParticleType objects.
    *
    * \note This list is currently sorted, but do not rely on it.
    */
@@ -542,6 +573,8 @@ class ParticleType {
   double mass_;
   /// width of the particle
   double width_;
+  /// Parity of the particle
+  Parity parity_;
   /// PDG Code of the particle
   PdgCode pdgcode_;
   /**

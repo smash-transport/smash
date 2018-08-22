@@ -110,6 +110,10 @@ namespace smash {
  * \key Form_Time_Factor (double, optional, default = 1.0) \n
  * Factor to be multiplied with the formation time of string fragments from
  * the soft string routine.
+ * \key Power_Particle_Formation (double, optional, default = -1.0) \n
+ * If positive, the power with which the cross section scaling factor of
+ * string fragments grows in time until it reaches 1. If negative, the scaling
+ * factor will be constant and jump to 1 once the particle forms.
  *
  * \key Use_Yoyo_Model (bool, optional, default = true)
  * Calculate the string fragments' formation times from the yoyo-model if
@@ -187,9 +191,7 @@ ScatterActionsFinder::ScatterActionsFinder(
       N_tot_(N_tot),
       N_proj_(N_proj),
       string_formation_time_(config.take(
-          {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.)),
-      particle_formation_power_(
-          config.take({"Collision_Term", "Power_Particle_Formation"}, 0.)) {
+          {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.)) {
   if (is_constant_elastic_isotropic()) {
     const auto& log = logger<LogArea::FindScatter>();
     log.info("Constant elastic isotropic cross-section mode:", " using ",
@@ -275,10 +277,8 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData& data_a,
   double cross_section_criterion = act->cross_section() * fm2_mb * M_1_PI /
                                    static_cast<double>(testparticles_);
   // Take cross section scaling factors into account
-  cross_section_criterion *= data_a.current_xsec_scaling_factor(
-      time_until_collision, particle_formation_power_);
-  cross_section_criterion *= data_b.current_xsec_scaling_factor(
-      time_until_collision, particle_formation_power_);
+  cross_section_criterion *= data_a.xsec_scaling_factor(time_until_collision);
+  cross_section_criterion *= data_b.xsec_scaling_factor(time_until_collision);
 
   // distance criterion according to cross_section
   if (distance_squared >= cross_section_criterion) {
@@ -486,7 +486,9 @@ struct Node {
   /// Possible actions after this action.
   std::vector<Node> children_;
 
+  /// Cannot be copied
   Node(const Node&) = delete;
+  /// Move constructor
   Node(Node&&) = default;
 
   /**
@@ -501,8 +503,8 @@ struct Node {
    */
   Node(const std::string& name, double weight,
        ParticleTypePtrList&& initial_particles,
-       ParticleTypePtrList&& final_particles,
-       ParticleTypePtrList&& state, std::vector<Node>&& children)
+       ParticleTypePtrList&& final_particles, ParticleTypePtrList&& state,
+       std::vector<Node>&& children)
       : name_(name),
         weight_(weight),
         initial_particles_(std::move(initial_particles)),
@@ -580,7 +582,7 @@ struct Node {
    * \param depth Recursive call depth.
    * \param result Pairs of process names and exclusive cross sections.
    * \param name Current name.
-   * \param current Weight/cross section.
+   * \param weight current Weight/cross section.
    * \param show_intermediate_states Whether intermediate states should be
    * shown.
    */
@@ -671,17 +673,16 @@ static void add_decays(Node& node) {
       n_unstable += 1;
     }
   }
-  const double norm = n_unstable != 0 ?
-    1. / static_cast<double>(n_unstable) : 1.;
+  const double norm =
+      n_unstable != 0 ? 1. / static_cast<double>(n_unstable) : 1.;
 
   for (const ParticleTypePtr ptype : node.state_) {
     if (!ptype->is_stable()) {
       for (const auto& decay : ptype->decay_modes().decay_mode_list()) {
         ParticleTypePtrList parts;
         const auto name = make_decay_name(ptype->name(), decay, parts);
-        auto& new_node =
-            node.add_action(name, norm * decay->weight(), {ptype},
-                            std::move(parts));
+        auto& new_node = node.add_action(name, norm * decay->weight(), {ptype},
+                                         std::move(parts));
         add_decays(new_node);
       }
     }
@@ -768,8 +769,7 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType& a,
         process_description_stream << *process;
         const std::string& description = process_description_stream.str();
         ParticleTypePtrList initial_particles = {&a, &b};
-        ParticleTypePtrList final_particles =
-            process->particle_types();
+        ParticleTypePtrList final_particles = process->particle_types();
         auto& process_node =
             tree.add_action(description, xs, std::move(initial_particles),
                             std::move(final_particles));

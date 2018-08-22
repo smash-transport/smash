@@ -40,11 +40,17 @@ const ParticleTypeList *all_particle_types = nullptr;
 namespace {
 /// Global pointer to the Particle Type list.
 const ParticleTypeList *all_particle_types = nullptr;
+/// Global pointer to the Particle Type list of nucleons
 ParticleTypePtrList nucleons_list;
+/// Global pointer to the Particle Type list of anti-nucleons
 ParticleTypePtrList anti_nucs_list;
+/// Global pointer to the Particle Type list of deltas
 ParticleTypePtrList deltas_list;
+/// Global pointer to the Particle Type list of anti-deltas
 ParticleTypePtrList anti_deltas_list;
+/// Global pointer to the Particle Type list of baryon resonances
 ParticleTypePtrList baryon_resonances_list;
+/// Global pointer to the Particle Type list of light nuclei
 ParticleTypePtrList light_nuclei_list;
 }  // unnamed namespace
 
@@ -119,10 +125,12 @@ bool ParticleType::exists(const std::string &name) {
   return true;
 }
 
-ParticleType::ParticleType(std::string n, double m, double w, PdgCode id)
+ParticleType::ParticleType(std::string n, double m, double w, Parity p,
+                           PdgCode id)
     : name_(n),
       mass_(m),
       width_(w),
+      parity_(p),
       pdgcode_(id),
       min_mass_kinematic_(-1.),
       min_mass_spectral_(-1.),
@@ -203,18 +211,30 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
     std::istringstream lineinput(line.text);
     std::string name;
     double mass, width;
-    std::array<PdgCode, 4> pdgcode;
-    lineinput >> name >> mass >> width >> pdgcode[0];
-    if (lineinput.fail()) {
+    std::string parity_string;
+    std::vector<std::string> pdgcode_strings;
+    // We expect at most 4 PDG codes per multiplet.
+    pdgcode_strings.reserve(4);
+    lineinput >> name >> mass >> width >> parity_string;
+    Parity parity;
+    bool fail = false;
+    if (parity_string == "+") {
+      parity = Parity::Pos;
+    } else if (parity_string == "-") {
+      parity = Parity::Neg;
+    } else {
+      fail = true;
+    }
+    if (lineinput.fail() || fail) {
       throw ParticleType::LoadFailure(build_error_string(
           "While loading the ParticleType data:\nFailed to convert the input "
           "string to the expected data types.",
           line));
     }
     // read additional PDG codes (if present)
-    unsigned int n = 1;  // number of PDG codes found
-    while (!lineinput.eof() && n < pdgcode.size()) {
-      lineinput >> pdgcode[n++];
+    while (!lineinput.eof()) {
+      pdgcode_strings.push_back("");
+      lineinput >> pdgcode_strings.back();
       if (lineinput.fail()) {
         throw ParticleType::LoadFailure(build_error_string(
             "While loading the ParticleType data:\nFailed to convert the input "
@@ -222,6 +242,17 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
             line));
       }
     }
+    if (pdgcode_strings.size() < 1) {
+      throw ParticleType::LoadFailure(build_error_string(
+          "While loading the ParticleType data:\nFailed to convert the input "
+          "string due to missing PDG code.",
+          line));
+    }
+    std::vector<PdgCode> pdgcode;
+    pdgcode.resize(pdgcode_strings.size());
+    std::transform(pdgcode_strings.begin(), pdgcode_strings.end(),
+                   pdgcode.begin(),
+                   [] (const std::string& s) { return PdgCode(s); });
     ensure_all_read(lineinput, line);
 
     /* Check if nucleon, kaon, and delta masses are
@@ -238,19 +269,22 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
     }
 
     // add all states to type list
-    for (unsigned int i = 0; i < n; i++) {
+    for (size_t i = 0; i < pdgcode.size(); i++) {
       std::string full_name = name;
-      if (n > 1) {
+      if (pdgcode.size() > 1) {
         // for multiplets: add charge string to name
         full_name += chargestr(pdgcode[i].charge());
       }
-      type_list.emplace_back(full_name, mass, width, pdgcode[i]);
+      type_list.emplace_back(full_name, mass, width, parity, pdgcode[i]);
       log.debug() << "Setting     particle type: " << type_list.back();
       if (pdgcode[i].has_antiparticle()) {
         /* add corresponding antiparticle */
         PdgCode anti = pdgcode[i].get_antiparticle();
+        // For bosons the parity does not change, for fermions it gets inverted.
+        const auto anti_parity
+            = (anti.spin() % 2 == 0) ? parity : invert_parity(parity);
         full_name = antiname(full_name, pdgcode[i]);
-        type_list.emplace_back(full_name, mass, width, anti);
+        type_list.emplace_back(full_name, mass, width, anti_parity, anti);
         log.debug() << "Setting antiparticle type: " << type_list.back();
       }
     }

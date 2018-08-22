@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -193,7 +193,7 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
     cells_.front().reserve(particles.size());
     std::copy_if(particles.begin(), particles.end(),
                  std::back_inserter(cells_.front()), [](const ParticleData &p) {
-                   return p.cross_section_scaling_factor() > 0.0;
+                   return p.xsec_scaling_factor() > 0.0;
                  });  // filter out the particles that can not interact
   } else {
     // construct a normal grid
@@ -217,7 +217,7 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
     };
 
     for (const auto &p : particles) {
-      if (p.cross_section_scaling_factor() > 0.0) {
+      if (p.xsec_scaling_factor() > 0.0) {
         const auto idx = cell_index_for(p);
 #ifndef NDEBUG
         if (idx >= SizeType(cells_.size())) {

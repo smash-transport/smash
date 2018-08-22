@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2016-2017
+ *    Copyright (c) 2016-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -26,9 +26,9 @@ TEST(create_part_list) {
      the system to be solved.
    */
   ParticleType::create_type_list(
-      "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "N⁺ 0.938 0.0       2212\n"
-      "K⁰ 0.494 0.0        311\n");
+      "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
+      "N⁺ 0.938 0.0 + 2212\n"
+      "K⁰ 0.494 0.0 -  311\n");
 }
 
 static BoxModus create_box_for_tests() {

@@ -49,10 +49,17 @@ class TimeStampCounter {
   uint64_t cycles() const;
 
  private:
+  /// Union that stores cycles, \todo Why this data type?
   union Data {
+    /// Either one 64-bit integer
     uint64_t a;
+    /// Or two 32-bit integers
     unsigned int b[2];
-  } m_start, m_end;
+  };
+  /// Stores start of benchmarking
+  Data m_start;
+  /// Stores end of benchmarking
+  Data m_end;
 };
 
 inline void TimeStampCounter::start() {
