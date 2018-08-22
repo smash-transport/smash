@@ -255,6 +255,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
         multi &= is_hadronic_multiplet;
         lineinput >> name;
       }
+      Parity parity;
       if (multi) {
         /* References to isospin multiplets: Automatically determine all valid
          * combinations and calculate Clebsch-Gordan factors */
@@ -264,6 +265,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
                 IsoParticleType::find(decay_particles[0]);
             const IsoParticleType &isotype_daughter_2 =
                 IsoParticleType::find(decay_particles[1]);
+            parity = isotype_daughter_1.parity() * isotype_daughter_2.parity();
             // loop through multiplets
             bool forbidden_by_isospin = true;
             for (size_t m = 0; m < mother_states.size(); m++) {
@@ -304,6 +306,9 @@ void DecayModes::load_decaymodes(const std::string &input) {
                 IsoParticleType::find(decay_particles[1]);
             const IsoParticleType &isotype_daughter_3 =
                 IsoParticleType::find(decay_particles[2]);
+            parity = isotype_daughter_1.parity() *
+                     isotype_daughter_2.parity() *
+                     isotype_daughter_3.parity();
             // loop through multiplets
             for (size_t m = 0; m < mother_states.size(); m++) {
               for (const auto &daughter1 : isotype_daughter_1.get_states()) {
@@ -341,6 +346,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
          * Loop over all mother states and check charge conservation. */
         ParticleTypePtrList types;
         int charge = 0;
+        parity = Parity::Pos;
         for (auto part : decay_particles) {
           try {
             types.push_back(IsoParticleType::find_state(part));
@@ -350,6 +356,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
                                      trimmed + "\")");
           }
           charge += types.back()->charge();
+          parity *= types.back()->parity();
         }
         bool no_decays = true;
         for (size_t m = 0; m < mother_states.size(); m++) {
@@ -367,6 +374,18 @@ void DecayModes::load_decaymodes(const std::string &input) {
                              std::to_string(linenumber) + ": \"" + trimmed +
                              "\"");
         }
+      }
+      // Take angular momentum into account.
+      if (L % 2 == 1) {
+        parity = -parity;
+      }
+      // Make sure the decay has the correct parity.
+      if (parity != mother_states[0]->parity()) {
+          throw InvalidDecay(mother_states[0]->name() +
+                             " decay mode violates parity conservation: \"" +
+                             line.text + "\" (line " +
+                             std::to_string(linenumber) + ": \"" + trimmed +
+                             "\"");
       }
     }
     linenumber++;

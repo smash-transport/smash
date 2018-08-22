@@ -81,7 +81,7 @@ class IsoParticleType {
   /**
    * \return The parity of the multiplet.
    */
-  Parity parity() { return parity_; }
+  Parity parity() const { return parity_; }
 
   /// Returns list of states that form part of the multiplet.
   ParticleTypePtrList get_states() const { return states_; }

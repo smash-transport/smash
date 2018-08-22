@@ -58,6 +58,19 @@ inline Parity operator*(Parity x, Parity y) {
 }
 
 /**
+ * \param x Left-hand parity
+ * \param y Right-hand parity
+ * \return Product of `x` and `y`.
+ */
+inline void operator*=(Parity& x, Parity y) {
+  if (x == y) {
+    x = Parity::Pos;
+  } else {
+    x = Parity::Neg;
+  }
+}
+
+/**
  * \ingroup data
  *
  * Particle type contains the static properties of a particle species
