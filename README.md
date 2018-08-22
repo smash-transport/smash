@@ -107,6 +107,8 @@ In order to disable it, one can do the follwoing:
     make
 
 
+### Including Eigen header files from custom location
+
 Let's assume Eigen headers will be unpacked in `$HOME`.
 
 1. Download latest package `[latest-eigen].tar.gz` from http://eigen.tuxfamily.org
