@@ -8168,10 +8168,16 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                       (C4 * (4. - 2. * delta) * pow(m_rho, 6) +
                        delta * (-3. + 1.5 * delta) * pow(s, 2) +
                        pow(m_rho, 2) *
-                           s * (2. - 1.5 * pow(delta, 2) + 4. * C4 * s + delta * (2. - 2. * C4 * s)) +
+                           s * (2. - 1.5 * pow(delta, 2) + 4. * C4 * s +
+                                delta * (2. - 2. * C4 * s)) +
                        pow(m_rho, 4) *
                            (-2. - 8. * C4 * s + delta * (1. + 4. * C4 * s))) +
-                  s * ((0.5 - 0.25 * delta) * pow(m_rho, 4) + 0.12500000000000003 * pow(2. - 1. * delta, 2) * pow(m_rho, 2) * s + (-0.25 + 0.125 * delta) * delta * pow(s, 2) + pow(pion_mass, 2) * ((-4. + 2. * delta) * pow(m_rho, 2) + (2. - 1. * delta) * delta * s)) *
+                  s * ((0.5 - 0.25 * delta) * pow(m_rho, 4) +
+                       0.12500000000000003 * pow(2. - 1. * delta, 2)
+                       * pow(m_rho, 2) * s + (-0.25 + 0.125 * delta) *
+                       delta * pow(s, 2) + pow(pion_mass, 2) *
+                       ((-4. + 2. * delta) * pow(m_rho, 2) +
+                        (2. - 1. * delta) * delta * s)) *
                       HeavisideTheta(-m_rho + sqrt(s))) *
                  log(fabs(-1. * pow(pion_mass, 2) + tmin))) /
                 (pow(m_rho, 4) * (pow(m_rho, 2) - 1. * s)) +
@@ -8579,7 +8585,11 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                             delta * (2. - 2. * C4 * s)) +
                        pow(m_rho, 4) *
                            (-2. - 8. * C4 * s + delta * (1. + 4. * C4 * s))) +
-                  s * ((0.5 - 0.25 * delta) * pow(m_rho, 4) + 0.12500000000000003 * pow(2. - 1. * delta, 2) * pow(m_rho, 2) * s + (-0.25 + 0.125 * delta) * delta * pow(s, 2) + pow(pion_mass, 2) * ((-4. + 2. * delta) * pow(m_rho, 2) + (2. - 1. * delta) * delta * s)) *
+                  s * ((0.5 - 0.25 * delta) * pow(m_rho, 4) +
+                       0.12500000000000003 * pow(2. - 1. * delta, 2) *
+                       pow(m_rho, 2) * s + (-0.25 + 0.125 * delta) * delta *
+                       pow(s, 2) + pow(pion_mass, 2) * ((-4. + 2. * delta) *
+                      pow(m_rho, 2) + (2. - 1. * delta) * delta * s)) *
                       HeavisideTheta(-m_rho + sqrt(s))) *
                  log(fabs(-1. * pow(pion_mass, 2) + tmax))) /
                 (pow(m_rho, 4) * (pow(m_rho, 2) - 1. * s)))) /
