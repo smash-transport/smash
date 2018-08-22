@@ -532,54 +532,27 @@ bool StringProcess::next_NDiffHard() {
   NpartFinal_ = 0;
   final_state_.clear();
 
-  std::array<bool, 2> accepted_by_pythia;
+  log.debug("Hard non-diff. with ", PDGcodes_[0], " + ",
+            PDGcodes_[1], " at CM energy [GeV] ", sqrtsAB_);
+
   std::array<int, 2> pdg_for_pythia;
   std::array<std::array<int, 5>, 2> excess_quark;
   std::array<std::array<int, 5>, 2> excess_antiq;
   for (int i = 0; i < 2; i++) {
-    int pdgid = PDGcodes_[i].get_decimal();
-    pdg_for_pythia[i] = pdgid;
-    accepted_by_pythia[i] = pdgid == 2212 || pdgid == -2212 || pdgid == 2112 ||
-                            pdgid == -2112 || pdgid == 211 || pdgid == 111 ||
-                            pdgid == -211;
     for (int j = 0; j < 5; j++) {
       excess_quark[i][j] = 0;
       excess_antiq[i][j] = 0;
     }
 
-    if (!accepted_by_pythia[i]) {
-      int baryon_incoming = PDGcodes_[i].baryon_number();
-      int charge_incoming = PDGcodes_[i].charge();
-      if (baryon_incoming == 0) {  // mesons
-        if (charge_incoming == 0) {
-          // Neutral mesons are mapped into pi0.
-          pdg_for_pythia[i] = 111;
-        } else {
-          /* Mesons with positive and negative charges are respectively
-           * mapped into pi+ and pi-. */
-          pdg_for_pythia[i] = charge_incoming > 0 ? 211 : -211;
-        }
-      } else {
-        if (baryon_incoming > 0) {  // baryons
-          /* Baryons with positive charge are mapped into proton.
-           * Others are mapped into neutron. */
-          pdg_for_pythia[i] = charge_incoming > 0 ? 2212 : 2112;
-        } else {  // anti-baryons
-          /* Anti-baryons with negative charge are mapped into antiproton.
-           * Others are mapped into antineutron. */
-          pdg_for_pythia[i] = charge_incoming < 0 ? -2212 : -2112;
-        }
-      }
+    pdg_for_pythia[i] = pdg_map_for_pythia(PDGcodes_[i]);
+    log.debug("  incoming particle ", i, " : ",
+              PDGcodes_[i], " is mapped onto ", pdg_for_pythia[i]);
 
-      const std::string s = std::to_string(pdg_for_pythia[i]);
-      PdgCode pdgcode_for_pythia(s);
-      find_excess_constituent(PDGcodes_[i], pdgcode_for_pythia,
-                              excess_quark[i], excess_antiq[i]);
-    }
+    const std::string s = std::to_string(pdg_for_pythia[i]);
+    PdgCode pdgcode_for_pythia(s);
+    find_excess_constituent(PDGcodes_[i], pdgcode_for_pythia,
+                            excess_quark[i], excess_antiq[i]);
   }
-
-  log.debug("Hard non-diff. with ", PDGcodes_[0], " + ",
-            PDGcodes_[1], " at CM energy [GeV] ", sqrtsAB_);
 
   int previous_idA = pythia_parton_->mode("Beams:idA"),
       previous_idB = pythia_parton_->mode("Beams:idB");
