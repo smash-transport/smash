@@ -369,10 +369,9 @@ void DecayModes::load_decaymodes(const std::string &input) {
         }
         if (no_decays) {
           throw InvalidDecay(isotype_mother->name() +
-                             " decay mode violates charge conservation: \"" +
-                             line.text + "\" (line " +
-                             std::to_string(linenumber) + ": \"" + trimmed +
-                             "\"");
+                             " decay mode violates charge conservation " +
+                             "(line " + std::to_string(linenumber) + ": \"" +
+                             trimmed + "\")");
         }
       }
       // Take angular momentum into account.
@@ -382,10 +381,9 @@ void DecayModes::load_decaymodes(const std::string &input) {
       // Make sure the decay has the correct parity.
       if (parity != mother_states[0]->parity()) {
           throw InvalidDecay(mother_states[0]->name() +
-                             " decay mode violates parity conservation: \"" +
-                             line.text + "\" (line " +
-                             std::to_string(linenumber) + ": \"" + trimmed +
-                             "\"");
+                             " decay mode violates parity conservation " +
+                             "(line " + std::to_string(linenumber) + ": \"" +
+                             trimmed + "\")");
       }
     }
     linenumber++;
