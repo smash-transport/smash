@@ -251,6 +251,30 @@ ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
  */
 int main(int argc, char *argv[]) {
   using namespace smash;  // NOLINT(build/namespaces)
+  
+  // Print a disclaimer to screen
+  /** \todo: Fill in logo in ASCII, webpage and bug report information
+   * properly
+   */
+  std::cout << "###########################################################"
+    << "###################" << "\n"
+    << "      This is SMASH version: " << VERSION_MAJOR << "\n"
+    << " Webpage: gsi.de/theory/transportsimulations/smash" << "\n"
+    << " For the full list of contributors see AUTHORS." << "\n"
+    << " Report issues at https://github.com/smash/issues" << "\n"
+    << " or via email to smash-user@..." << "\n" << "\n"
+    << " Distributed under the GNU General Public License 3.0"
+    << " (GPLv3 or later)." << "\n"
+    << " See LICENSE for details." << "\n" << "\n"
+    << " Please cite" << "\n"
+    << "      J. Weil et al., Phys.Rev. C94 (2016) no.5, 054905" << "\n"
+    << " If Pythia is used cite" << "\n"
+    << "      T. Sjöstrand, S. Mrenna and P. Skands, JHEP05 (2006) 026," << "\n"
+    << "              Comput. Phys. Comm. 178 (2008) 852." << "\n" << "\n"
+    << " display logo in ASCII" << "\n"
+    << "###################################################################"
+    << "############" << "\n";
+    
   setup_default_float_traps();
 
   const auto &log = logger<LogArea::Main>();
@@ -437,13 +461,12 @@ int main(int argc, char *argv[]) {
     if (end_time) {
       configuration["General"]["End_Time"] = std::abs(std::atof(end_time));
     }
-
+      
     // Set up logging
     set_default_loglevel(
         configuration.take({"Logging", "default"}, einhard::ALL));
     create_all_loggers(configuration["Logging"]);
-    log.info(progname, " (", VERSION_MAJOR, ')');
-
+    
     int64_t seed = configuration.read({"General", "Randomseed"});
     if (seed < 0) {
       // Seed with a truly random 63-bit value, if possible
@@ -491,25 +514,6 @@ int main(int argc, char *argv[]) {
     DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
     ParticleType::check_consistency();
 
-    // Print a disclaimer to screen
-    ///\todo: Fill in logo in ASCII, webpage and bug report information properly
-      log.info("##############################################################################","\n",
-             "      This is SMASH version: ", VERSION_MAJOR,"\n",
-             "\n",
-             " Webpage: gsi.de/theory/transportsimulations/smash","\n",
-             " For the full list of contributors see AUTHORS.","\n",
-             " Report issues at https://github.com/smash/issues","\n",
-             " or via email to smash-user@...","\n","\n",
-             " Distributed under the GNU General Public License 3.0 (GPLv3 or later).","\n",
-             " See LICENSE for details.","\n","\n",
-             " Please cite","\n",
-             "      J. Weil et al., Phys.Rev. C94 (2016) no.5, 054905","\n",
-             " If Pythia is used cite","\n",
-             "      T. Sjöstrand, S. Mrenna and P. Skands, JHEP05 (2006) 026,","\n",
-             "              Comput. Phys. Comm. 178 (2008) 852.","\n","\n",
-             " display logo in ASCII","\n",
-             "################################################################################");
-      
     // Create an experiment
     log.trace(source_location, " create Experiment");
     auto experiment = ExperimentBase::create(configuration, output_path);
