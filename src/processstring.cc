@@ -544,12 +544,15 @@ bool StringProcess::next_NDiffHard() {
       excess_antiq[i][j] = 0;
     }
 
+    // get PDG id used in PYTHIA event generation
     pdg_for_pythia[i] = pdg_map_for_pythia(PDGcodes_[i]);
     log.debug("  incoming particle ", i, " : ",
               PDGcodes_[i], " is mapped onto ", pdg_for_pythia[i]);
 
     const std::string s = std::to_string(pdg_for_pythia[i]);
     PdgCode pdgcode_for_pythia(s);
+    /* evaluate how many more constituents incoming hadron has
+     * compared to the mapped one. */
     find_excess_constituent(PDGcodes_[i], pdgcode_for_pythia,
                             excess_quark[i], excess_antiq[i]);
   }
@@ -557,7 +560,7 @@ bool StringProcess::next_NDiffHard() {
   int previous_idA = pythia_parton_->mode("Beams:idA"),
       previous_idB = pythia_parton_->mode("Beams:idB");
   double previous_eCM = pythia_parton_->parm("Beams:eCM");
-
+  // check if the initial state for PYTHIA remains same.
   bool same_initial_state = previous_idA == pdg_for_pythia[0] &&
                             previous_idB == pdg_for_pythia[1] &&
                             std::abs(previous_eCM - sqrtsAB_) < really_small;
@@ -596,12 +599,16 @@ bool StringProcess::next_NDiffHard() {
 
   Pythia8::Vec4 pSum = 0.;
   event_intermediate_.reset();
+  /* Update the partonic intermediate state from PYTHIA output.
+   * Note that hadronization will be performed separately,
+   * after identification of strings and replacement of constituents. */
   for (int i = 0; i < pythia_parton_->event.size(); i++) {
     if (pythia_parton_->event[i].isFinal()) {
       const int pdgid = pythia_parton_->event[i].id();
 
       if (pythia_parton_->event[i].isParton() ||
           pythia_parton_->particleData.isOctetHadron(pdgid)) {
+        // quarks (diquarks), antiquarks and gluons
         Pythia8::Vec4 pquark = pythia_parton_->event[i].p();
         const double mass = pythia_parton_->particleData.m0(pdgid);
 
@@ -613,6 +620,7 @@ bool StringProcess::next_NDiffHard() {
         event_intermediate_.append(pdgid, status,
                                    color, anticolor, pquark, mass);
       } else {
+        // other types (photons and leptons)
         FourVector momentum = reorient(pythia_parton_->event[i], evecBasisAB_);
         log.debug("4-momentum from Pythia: ", momentum);
         bool found_ptype = append_intermediate_list(pdgid, momentum,
@@ -629,6 +637,7 @@ bool StringProcess::next_NDiffHard() {
     event_intermediate_.reset();
     return false;
   }
+  // add junctions to the intermediate state if there is any.
   event_intermediate_.clearJunctions();
   for (int i = 0; i < pythia_parton_->event.sizeJunction(); i++) {
     const int kind = pythia_parton_->event.kindJunction(i);
@@ -641,6 +650,9 @@ bool StringProcess::next_NDiffHard() {
   event_intermediate_[0].p(pSum);
   event_intermediate_[0].m(pSum.mCalc());
 
+  /* Replace quark constituents according to the excess of valence quarks
+   * and then rescale momenta of partons by constant factor
+   * to fulfill the energy-momentum conservation. */
   restore_constituent(event_intermediate_, excess_quark, excess_antiq);
 
   bool hadronize_success = false;
@@ -658,6 +670,7 @@ bool StringProcess::next_NDiffHard() {
                             event_intermediate_, pythia_hadron_->event);
 
     pythia_hadron_->rndm.init(random::uniform_int(1, maxint_));
+    // fragment the (identified) string into hadrons.
     hadronize_success = pythia_hadron_->next();
     log.debug("Pythia hadronized, success = ", hadronize_success);
 
@@ -699,7 +712,7 @@ bool StringProcess::next_NDiffHard() {
     }
 
     /* if hadronization is not successful,
-     * reset the event records and return false. */
+     * reset the event records, return false and then start over. */
     if (!hadronize_success) {
       event_intermediate_.reset();
       pythia_hadron_->event.reset();
@@ -733,28 +746,30 @@ void StringProcess::find_excess_constituent(PdgCode &pdg_actual,
                                             PdgCode &pdg_mapped,
                                             std::array<int, 5> &excess_quark,
                                             std::array<int, 5> &excess_antiq) {
+  /* decompose PDG id of the actual hadron and mapped one
+   * to get the valence quark constituents */
   std::array<int, 3> qcontent_actual = pdg_actual.quark_content();
   std::array<int, 3> qcontent_mapped = pdg_mapped.quark_content();
 
   excess_quark = {0, 0, 0, 0, 0};
   excess_antiq = {0, 0, 0, 0, 0};
   for (int i = 0; i < 3; i++) {
-    if (qcontent_actual[i] > 0) {
+    if (qcontent_actual[i] > 0) {  // quark content of the actual hadron
       int j = qcontent_actual[i] - 1;
       excess_quark[j] += 1;
     }
 
-    if (qcontent_mapped[i] > 0) {
+    if (qcontent_mapped[i] > 0) {  // quark content of the mapped hadron
       int j = qcontent_mapped[i] - 1;
       excess_quark[j] -= 1;
     }
 
-    if (qcontent_actual[i] < 0) {
+    if (qcontent_actual[i] < 0) {  // antiquark content of the actual hadron
       int j = std::abs(qcontent_actual[i]) - 1;
       excess_antiq[j] += 1;
     }
 
-    if (qcontent_mapped[i] < 0) {
+    if (qcontent_mapped[i] < 0) {  // antiquark content of the mapped hadron
       int j = std::abs(qcontent_mapped[i]) - 1;
       excess_antiq[j] -= 1;
     }
@@ -765,10 +780,12 @@ void StringProcess::replace_constituent(Pythia8::Particle &particle,
                         std::array<int, 5> &excess_constituent) {
   const auto &log = logger<LogArea::Pythia>();
 
+  // If the particle is neither quark nor diquark, nothing to do.
   if (!particle.isQuark() && !particle.isDiquark()) {
     return;
   }
 
+  // If there is no excess of constituents, nothing to do.
   const std::array<int, 5> excess_null = {0, 0, 0, 0, 0};
   if (excess_constituent == excess_null) {
     return;
@@ -875,9 +892,9 @@ void StringProcess::restore_constituent(Pythia8::Event &event_intermediate,
         }
         pSum -= event_intermediate[iforward].p();
 
-        if (event_intermediate[iforward].id() > 0) {
+        if (event_intermediate[iforward].id() > 0) {  // quark and diquark
           replace_constituent(event_intermediate[iforward], excess_quark[ih]);
-        } else {
+        } else {  // antiquark and anti-diquark
           replace_constituent(event_intermediate[iforward], excess_antiq[ih]);
         }
 
@@ -1807,13 +1824,13 @@ void StringProcess::assign_all_scaling_factors(int baryon_string,
 int StringProcess::pdg_map_for_pythia(PdgCode &pdg) {
   PdgCode pdg_mapped(0x0);
 
-  if (pdg.baryon_number() == 1) {
+  if (pdg.baryon_number() == 1) {  // baryon
     pdg_mapped = pdg.charge() > 0 ?
                  PdgCode(pdg::p) : PdgCode(pdg::n);
-  } else if (pdg.baryon_number() == -1) {
+  } else if (pdg.baryon_number() == -1) {  // antibaryon
     pdg_mapped = pdg.charge() < 0 ?
                  PdgCode(-pdg::p) : PdgCode(-pdg::n);
-  } else {
+  } else {  // meson
     if (pdg.charge() > 0) {
       pdg_mapped = PdgCode(pdg::pi_p);
     } else if (pdg.charge() < 0) {

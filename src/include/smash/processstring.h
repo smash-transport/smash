@@ -453,6 +453,14 @@ class StringProcess {
    * to form a color-neutral string, from a given PYTHIA event record.
    * All partons found are moved into a new event record for the further
    * hadronization process.
+   * Note that col and acol of Pythia8::Particle contain information
+   * on the color flow.
+   * For example,
+   * quark (col = 1, acol = 0), gluon (col = 2, acol = 1)
+   * and antiquark (col = 0, acol = 2) correspond to
+   * a \f$ \bar{q} \, g \, q \f$ mesonic string.
+   * quark (col = 1, acol = 0) and diquark (col = 0, acol = 1) correspond to
+   * a \f$ qq \, q\f$ baryonic string.
    * This function begins with the most forward (or backward) parton.
    * \param[in] find_forward_string If it is set to be true (false),
    *                                it begins with forward (backward) parton.
@@ -470,6 +478,10 @@ class StringProcess {
    * to form a color-neutral string, from a given PYTHIA event record.
    * All partons found are moved into a new event record for the further
    * hadronization process.
+   * Junction topology in PYTHIA combines three quarks (antiquarks)
+   * to make a color-neutral baryonic (anti-baryonic) configuration.
+   * A junction (anti-junction) carries three color (anti-color) indices
+   * which are connected with quarks (antiquarks).
    * This function begins with a junction.
    * \param[out] find_forward_string If it is set to be true (false),
    *                                 it is a string in the forward (backward)
