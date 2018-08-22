@@ -658,7 +658,7 @@ bool StringProcess::next_NDiffHard() {
                             event_intermediate_, pythia_hadron_->event);
 
     pythia_hadron_->rndm.init(random::uniform_int(1, maxint_));
-    hadronize_success = pythia_hadron_->forceHadronLevel();
+    hadronize_success = pythia_hadron_->next();
     log.debug("Pythia hadronized, success = ", hadronize_success);
 
     new_intermediate_particles.clear();
