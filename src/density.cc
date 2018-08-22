@@ -55,48 +55,7 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
   return std::make_pair(sf, sf_grad);
 }
 
-/**
- * Calculates Eckart rest frame density and optionally the gradient of the
- * density in an arbitary frame, the curl of the 3-currrent and the time
- * derivative of the 3-current.
- * \f[j^{\mu} = (\sqrt{2\pi} \sigma )^{-3} \sum_{i=1}^N C_i u^{\mu}_i
- * exp \left(- \frac{(\vec r -\vec r_i + \frac{\gamma_i^2}{1 + \gamma_i}
- * \vec \beta_i (\vec \beta_i, \vec r - \vec r_i))^2}{2\sigma^2} \right)\f]
- * \f[ \rho^{Eckart} = \sqrt{j^{\mu} j_{\mu}} \f]
- * Here \f$ C_i \f$ is a corresponding value of "charge". If baryon
- * current option is selected then \f$ C_i \f$ is 1 for baryons,
- * -1 for antibaryons and 0 otherwise. For proton/neutron
- * current \f$ C_i = 1\f$ for proton/neutron and 0 otherwise.
- *
- * To avoid the problems with Eckart frame definition, densities for
- * positive and negative charges, \f$\rho_+ \f$ and \f$ \rho_-\f$,
- * are computed separately and result is \f$\rho_+ - \rho_-\f$.
- *
- * \param[in] r Arbitrary space point where 4-current is calculated [fm]
- * \param[in] plist List of all particles to be used in \f$j^{\mu}\f$
- *            calculation. If the distance between particle and calculation
- *            point r, \f$ |r-r_i| > r_{cut} \f$ then particle input
- *            to density will be ignored.
- *
- * Next three values are taken from ExperimentalParameters structure:
- *
- * \param[in] par Set of parameters packed in one structure.
- *            From them the cutting radius r_cut \f$ r_{cut} / \sigma \f$,
- *            number of test-particles ntest and the gaussian width
- *            gs_sigma are needed.
- * \param[in] dens_type type of four-currect to be calculated:
- *            baryon, proton or neutron options are currently available
- * \param[in] compute_gradient true - compute gradient, false - no
- * \fpPrecision Density gradient is returned as double, because it is
- *   ThreeVector and ThreeVector currently comes only as double.
- *   Density itself is double for uniformity: if gradient is double,
- *   density should also be.
- * \tparam T ParticlesContainer
- * \return (density in the local Eckart frame [fm\$f^{-3}\$f],
- *          \f$ \nabla\cdots\rho \f$ or a 0 3-vector,
- *          \f$ \partial_t \vec j\f$ or a 0 3-vector,
- *          \f$ \nabla \times \vec j \f$ or a 0 3-vector).
- */
+/// \copydoc smash::rho_eckart 
 template <typename /*ParticlesContainer*/ T>
 std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart_impl(
                                                const ThreeVector &r,
