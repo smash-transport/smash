@@ -225,8 +225,8 @@ double ListModus::initial_conditions(Particles *particles,
     double t, x, y, z, mass, E, px, py, pz;
     int id, charge;
     std::string pdg_string;
-    lineinput >> t >> x >> y >> z >> mass >> E >> px >> py >> pz >> pdg_string
-              >> id >> charge;
+    lineinput >> t >> x >> y >> z >> mass >> E >> px >> py >> pz >>
+        pdg_string >> id >> charge;
     if (lineinput.fail()) {
       throw LoadFailure(
           build_error_string("While loading external particle lists data:\n"

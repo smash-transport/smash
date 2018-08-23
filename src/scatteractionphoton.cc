@@ -26,10 +26,9 @@
 
 namespace smash {
 
-ScatterActionPhoton::ScatterActionPhoton(const ParticleList &in,
-                    const double time,
-                    const int n_frac_photons,
-                    const double hadronic_cross_section_input)
+ScatterActionPhoton::ScatterActionPhoton(
+    const ParticleList &in, const double time, const int n_frac_photons,
+    const double hadronic_cross_section_input)
     : ScatterAction(in[0], in[1], time),
       reac_(photon_reaction_type(in)),
       number_of_fractional_photons_(n_frac_photons),

@@ -193,7 +193,7 @@ void DecayAction::generate_final_state() {
     p.boost_momentum(-velocity_CM);
     // assuming decaying particles are always fully formed
     p.set_formation_time(time_of_execution_);
-        log.debug("particle momenta in comp ", p);
+    log.debug("particle momenta in comp ", p);
   }
 }
 

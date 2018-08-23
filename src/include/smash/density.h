@@ -74,7 +74,6 @@ inline double smearing_factor_norm(const double two_sigma_sqr) {
   return tmp * std::sqrt(tmp);
 }
 
-
 /**
  * Gaussians used for smearing are cut at radius \f$r_{cut} = a \sigma \f$
  * for calculation speed-up. In the limit of \f$a \to \infty \f$ smearing
@@ -216,18 +215,12 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
  *          \f$ \nabla \times \vec j \f$ or a 0 3-vector).
  */
 std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart(
-                                          const ThreeVector &r,
-                                          const ParticleList &plist,
-                                          const DensityParameters &par,
-                                          DensityType dens_type,
-                                          bool compute_gradient);
+    const ThreeVector &r, const ParticleList &plist,
+    const DensityParameters &par, DensityType dens_type, bool compute_gradient);
 /// convenience overload of the above (ParticleList -> Particles)
 std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart(
-                                          const ThreeVector &r,
-                                          const Particles &plist,
-                                          const DensityParameters &par,
-                                          DensityType dens_type,
-                                          bool compute_gradient);
+    const ThreeVector &r, const Particles &plist, const DensityParameters &par,
+    DensityType dens_type, bool compute_gradient);
 
 /**
  * A class for time-efficient (time-memory trade-off) calculation of density
@@ -254,8 +247,9 @@ class DensityOnLattice {
  public:
   /// Default constructor
   DensityOnLattice()
-      : jmu_pos_(FourVector()), jmu_neg_(FourVector()),
-      djmu_dx_({FourVector(), FourVector(), FourVector(), FourVector()}) {}
+      : jmu_pos_(FourVector()),
+        jmu_neg_(FourVector()),
+        djmu_dx_({FourVector(), FourVector(), FourVector(), FourVector()}) {}
 
   /**
    * Adds particle to 4-current: \f$j^{\mu} += p^{\mu}/p^0 \cdot factor \f$.
@@ -291,12 +285,12 @@ class DensityOnLattice {
    * \param[in] sf_grad Smearing factor of the gradients
    */
   void add_particle_for_derivatives(const ParticleData &part, double factor,
-       ThreeVector sf_grad) {
+                                    ThreeVector sf_grad) {
     const FourVector PartFourVelocity = FourVector(1.0, part.velocity());
     for (int k = 1; k <= 3; k++) {
-        djmu_dx_[k] += factor * PartFourVelocity * sf_grad[k-1];
-        djmu_dx_[0] -= factor * PartFourVelocity * sf_grad[k-1]
-                      * part.velocity()[k-1];
+      djmu_dx_[k] += factor * PartFourVelocity * sf_grad[k - 1];
+      djmu_dx_[0] -=
+          factor * PartFourVelocity * sf_grad[k - 1] * part.velocity()[k - 1];
     }
   }
 
@@ -334,7 +328,7 @@ class DensityOnLattice {
   ThreeVector grad_rho(const double norm_factor = 1.0) {
     ThreeVector rho_grad = ThreeVector();
     for (int i = 1; i < 4; i++) {
-        rho_grad[i - 1] = djmu_dx_[i].x0() * norm_factor;
+      rho_grad[i - 1] = djmu_dx_[i].x0() * norm_factor;
     }
     return rho_grad;
   }
@@ -409,8 +403,8 @@ void update_general_lattice(RectangularLattice<T> *lat,
     lat->iterate_in_radius(
         pos, par.r_cut(), [&](T &node, int ix, int iy, int iz) {
           const ThreeVector r = lat->cell_center(ix, iy, iz);
-          const auto sf = unnormalized_smearing_factor(pos - r, p, m_inv,
-                                                    par, compute_gradient);
+          const auto sf = unnormalized_smearing_factor(pos - r, p, m_inv, par,
+                                                       compute_gradient);
           if (sf.first * norm_factor > really_small) {
             node.add_particle(part, sf.first * norm_factor * dens_factor);
           }
@@ -437,8 +431,7 @@ void update_density_lattice(RectangularLattice<DensityOnLattice> *lat,
                             const LatticeUpdate update,
                             const DensityType dens_type,
                             const DensityParameters &par,
-                            const Particles &particles,
-                            bool compute_gradient);
+                            const Particles &particles, bool compute_gradient);
 
 /**
  * Calculates energy-momentum tensor on the lattice in an time-efficient way.
