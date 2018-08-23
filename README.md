@@ -179,10 +179,10 @@ license. See [LICENSE](LICENSE).
 
 ### Projects using SMASH
 
-SMASH source and documentation are provided freely for the purpose of checking and
-reproducing published results of the authors. Cooperation and joint projects with outside
-researchers are encouraged and comparisons of results by experimental collaborations
+SMASH source and documentation are provided to check and
+reproduce published results of the authors. Cooperation and joint projects with outside
+researchers are encouraged and comparison to results by experimental collaborations
 is supported. If you are interested in starting a project, please contact us to avoid
-interference with running thesis topics. If your project involves changes to the code,
+interference with current thesis topics. If your project involves changes to the code,
 please refer to [CONTRIBUTING.md](CONTRIBUTING.md) for coding guidelines and
-helpful tools. 
+helpful tools.

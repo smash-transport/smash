@@ -258,6 +258,7 @@ int main(int argc, char *argv[]) {
    * properly
    */
   std::cout
+      << "\n"
       << "###########################################################"
       << "###################"
       << "\n"
@@ -277,11 +278,11 @@ int main(int argc, char *argv[]) {
       << " For the full list of contributors see AUTHORS."
       << "\n"
       << "\n"
-      << " Please cite"
+      << " When using SMASH, please cite"
       << "\n"
       << "      J. Weil et al., Phys.Rev. C94 (2016) no.5, 054905"
       << "\n"
-      << " If Pythia is used cite"
+      << " and in addition, if Pythia is used please cite"
       << "\n"
       << "      T. Sjöstrand, S. Mrenna and P. Skands, JHEP05 (2006) 026,"
       << "\n"
@@ -298,7 +299,7 @@ int main(int argc, char *argv[]) {
       << "\n"
       << "###################################################################"
       << "############"
-      << "\n";
+      << "\n" << "\n";
 
   setup_default_float_traps();
 
