@@ -380,10 +380,16 @@ class Experiment : public ExperimentBase {
   /// Type of density for lattice printout
   DensityType dens_type_lattice_printout_ = DensityType::None;
 
-  /// Lattices for Skyme potentials
+  /**
+   * Lattices for Skyme potentials (evaluated in the local rest frame) times
+   * the baryon flow 4-velocity
+   */
   std::unique_ptr<RectangularLattice<FourVector>> UB_lat_ = nullptr;
 
-  /// Lattices for symmetry potentials
+  /**
+   * Lattices for symmetry potentials (evaluated in the local rest frame) times
+   * the isospin flow 4-velocity
+   */
   std::unique_ptr<RectangularLattice<FourVector>> UI3_lat_ = nullptr;
 
   /// Lattices for the electric and magnetic components of the Skyme force
