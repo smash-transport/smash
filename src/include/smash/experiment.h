@@ -381,10 +381,10 @@ class Experiment : public ExperimentBase {
   DensityType dens_type_lattice_printout_ = DensityType::None;
 
   /// Lattices for Skyme potentials
-  std::unique_ptr<RectangularLattice<double>> UB_lat_ = nullptr;
+  std::unique_ptr<RectangularLattice<FourVector>> UB_lat_ = nullptr;
 
   /// Lattices for symmetry potentials
-  std::unique_ptr<RectangularLattice<double>> UI3_lat_ = nullptr;
+  std::unique_ptr<RectangularLattice<FourVector>> UI3_lat_ = nullptr;
 
   /// Lattices for the electric and magnetic components of the Skyme force
   std::unique_ptr<RectangularLattice<std::pair<ThreeVector, ThreeVector>>>
@@ -1079,7 +1079,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       if (potentials_->use_skyrme()) {
         jmu_B_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
                                                  LatticeUpdate::EveryTimestep);
-        UB_lat_ = make_unique<RectangularLattice<double>>(
+        UB_lat_ = make_unique<RectangularLattice<FourVector>>(
             l, n, origin, periodic, LatticeUpdate::EveryTimestep);
         FB_lat_ = make_unique<
             RectangularLattice<std::pair<ThreeVector, ThreeVector>>>(
@@ -1088,7 +1088,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       if (potentials_->use_symmetry()) {
         jmu_I3_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
                                                   LatticeUpdate::EveryTimestep);
-        UI3_lat_ = make_unique<RectangularLattice<double>>(
+        UI3_lat_ = make_unique<RectangularLattice<FourVector>>(
             l, n, origin, periodic, LatticeUpdate::EveryTimestep);
         FI3_lat_ = make_unique<
             RectangularLattice<std::pair<ThreeVector, ThreeVector>>>(
@@ -1641,10 +1641,12 @@ void Experiment<Modus>::update_potentials() {
                              true);
       const size_t UBlattice_size = UB_lat_->size();
       for (size_t i = 0; i < UBlattice_size; i++) {
-        (*UB_lat_)[i] = potentials_->skyrme_pot((*jmu_B_lat_)[i].density());
-        (*FB_lat_)[i] = potentials_->skyrme_force(
-            (*jmu_B_lat_)[i].density(), (*jmu_B_lat_)[i].grad_rho(),
-            (*jmu_B_lat_)[i].dj_dt(), (*jmu_B_lat_)[i].rot_j());
+        auto jB = (*jmu_B_lat_)[i];
+        const FourVector flow_four_velocity = jB.jmu_net() / jB.density();
+        (*UB_lat_)[i] = flow_four_velocity
+                        * potentials_->skyrme_pot(jB.density());
+        (*FB_lat_)[i] = potentials_->skyrme_force(jB.density(),
+                                   jB.grad_rho(), jB.dj_dt(), jB.rot_j());
       }
     }
     if (potentials_->use_symmetry() && jmu_I3_lat_ != nullptr) {
@@ -1653,10 +1655,12 @@ void Experiment<Modus>::update_potentials() {
                              particles_, true);
       const size_t UI3lattice_size = UI3_lat_->size();
       for (size_t i = 0; i < UI3lattice_size; i++) {
-        (*UI3_lat_)[i] = potentials_->symmetry_pot((*jmu_I3_lat_)[i].density());
+        auto jI3 = (*jmu_I3_lat_)[i];
+        const FourVector flow_four_velocity = jI3.jmu_net() / jI3.density();
+        (*UI3_lat_)[i] = flow_four_velocity
+                         * potentials_->symmetry_pot(jI3.density());
         (*FI3_lat_)[i] = potentials_->symmetry_force(
-            (*jmu_I3_lat_)[i].grad_rho(), (*jmu_I3_lat_)[i].dj_dt(),
-            (*jmu_I3_lat_)[i].rot_j());
+                                  jI3.grad_rho(), jI3.dj_dt(), jI3.rot_j());
       }
     }
   }

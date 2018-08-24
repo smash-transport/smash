@@ -73,7 +73,6 @@ void ScatterAction::generate_final_state() {
       break;
     case ProcessType::TwoToOne:
       /* resonance formation */
-      /* processes computed in the center of momenta */
       resonance_formation();
       break;
     case ProcessType::TwoToTwo:
@@ -102,8 +101,6 @@ void ScatterAction::generate_final_state() {
     if (proc->get_type() != ProcessType::Elastic) {
       new_particle.set_4position(middle_point);
     }
-    /* Set momenta & boost to computational frame. */
-    new_particle.boost_momentum(-beta_cm());
   }
 }
 
@@ -248,7 +245,8 @@ static double Cugnon_bnp(double plab) {
   }
 }
 
-void ScatterAction::sample_angles(std::pair<double, double> masses) {
+void ScatterAction::sample_angles(std::pair<double, double> masses,
+     double kinetic_energy_cm, ThreeVector beta_cms) {
   if (is_string_soft_process(process_type_) ||
       (process_type_ == ProcessType::StringHard)) {
     // We potentially have more than two particles, so the following angular
@@ -269,10 +267,8 @@ void ScatterAction::sample_angles(std::pair<double, double> masses) {
   const double mass_a = masses.first;
   const double mass_b = masses.second;
 
-  const double cms_energy = kinetic_energy_cms();
-
   const std::array<double, 2> t_range = get_t_range<double>(
-      cms_energy, nucleon_mass, nucleon_mass, mass_a, mass_b);
+      kinetic_energy_cm, nucleon_mass, nucleon_mass, mass_a, mass_b);
   Angles phitheta;
   if (nn_scattering && p_a->pdgcode().is_nucleon() &&
       p_b->pdgcode().is_nucleon() &&
@@ -344,13 +340,15 @@ void ScatterAction::sample_angles(std::pair<double, double> masses) {
   pscatt.rotate_z_axis_to(pcm);
 
   // final-state CM momentum
-  const double p_f = pCM(cms_energy, mass_a, mass_b);
+  const double p_f = pCM(kinetic_energy_cm, mass_a, mass_b);
   if (!(p_f > 0.0)) {
     log.warn("Particle: ", p_a->pdgcode(), " radial momentum: ", p_f);
-    log.warn("Etot: ", cms_energy, " m_a: ", mass_a, " m_b: ", mass_b);
+    log.warn("Etot: ", kinetic_energy_cm, " m_a: ", mass_a, " m_b: ", mass_b);
   }
   p_a->set_4momentum(mass_a, pscatt * p_f);
   p_b->set_4momentum(mass_b, -pscatt * p_f);
+  p_a->boost_momentum(-beta_cms);
+  p_b->boost_momentum(-beta_cms);
 
   log.debug("p_a: ", *p_a, "\np_b: ", *p_b);
 }
@@ -361,7 +359,8 @@ void ScatterAction::elastic_scattering() {
   outgoing_particles_[1] = incoming_particles_[1];
   // resample momenta
   sample_angles({outgoing_particles_[0].effective_mass(),
-                 outgoing_particles_[1].effective_mass()});
+                 outgoing_particles_[1].effective_mass()},
+                sqrt_s(), beta_cm());
 }
 
 void ScatterAction::inelastic_scattering() {
@@ -410,10 +409,7 @@ void ScatterAction::resonance_formation() {
     throw InvalidResonanceFormation(s);
   }
 
-  const double cms_kin_energy = kinetic_energy_cms();
-  /* 1 particle in final state: Center-of-momentum frame of initial particles
-   * is the rest frame of the resonance.  */
-  outgoing_particles_[0].set_4momentum(FourVector(cms_kin_energy, 0., 0., 0.));
+  outgoing_particles_[0].set_4momentum(total_momentum_of_outgoing_particles());
 
   /* Set the formation time of the resonance to the larger formation time of the
    * incoming particles, if it is larger than the execution time; execution time

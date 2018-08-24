@@ -343,10 +343,8 @@ class DensityOnLattice {
     return djmu_dx_[0].threevec() * norm_factor;
   }
 
-  /// \return Current density of the positively charged particle
-  FourVector jmu_pos() const { return jmu_pos_; }
-  /// \return Current density of the negatively charged particle
-  FourVector jmu_neg() const { return jmu_neg_; }
+  /// \return Net current density
+  FourVector jmu_net() const { return jmu_pos_ + jmu_neg_; }
 
  private:
   /// Four-current density of the positively charged particle.
