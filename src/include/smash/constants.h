@@ -86,7 +86,7 @@ constexpr double a1_mass = 1.26;
 constexpr double delta_mass = 1.232;
 
 /// Fine-struture constant, approximately 1/137.
-constexpr double alpha = 7.2973525698e-3;
+constexpr double fine_structure = 7.2973525698e-3;
 
 /**
  * The maximal cross section (in mb) for which it is guaranteed that all

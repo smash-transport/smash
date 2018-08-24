@@ -364,7 +364,7 @@ double ThreeBodyDecayDilepton::diff_width(double m_par, double m_l,
         const double gamma_2g = t->get_partial_width(m_par, photon, photon);
         double ff = em_form_factor_ps(pdg, m_dil);  // form factor
         /// see \iref{Landsberg:1986fd}, equation (3.8)
-        return (4. * alpha / (3. * M_PI)) * gamma_2g / m_dil *
+        return (4. * fine_structure / (3. * M_PI)) * gamma_2g / m_dil *
                pow_int(1. - m_dil / m_par * m_dil / m_par, 3) * ff * ff *
                ph_sp_factor;
       }
@@ -381,7 +381,7 @@ double ThreeBodyDecayDilepton::diff_width(double m_par, double m_l,
           assert(rad > -1E-5);
           return 0.;
         } else {
-          return (2. * alpha / (3. * M_PI)) * gamma_pg / m_dil *
+          return (2. * fine_structure / (3. * M_PI)) * gamma_pg / m_dil *
                  std::pow(rad, 3. / 2.) * ff_sqr * ph_sp_factor;
         }
       }
@@ -405,13 +405,14 @@ double ThreeBodyDecayDilepton::diff_width(double m_par, double m_l,
           assert(rad2 > -1E-5);
           return 0.;
         } else {
-          const double t1 = alpha / 16. * (m_par + m_other) *
+          const double t1 = fine_structure / 16. * (m_par + m_other) *
                             (m_par + m_other) / (m_par_cubed * m_other_sqr) *
                             std::sqrt(rad1);
           const double t2 = pow_int(std::sqrt(rad2), 3);
           const double ff = form_factor_delta(m_dil);
           const double gamma_vi = t1 * t2 * ff * ff;
-          return 2. * alpha / (3. * M_PI) * gamma_vi / m_dil * ph_sp_factor;
+          return 2. * fine_structure / (3. * M_PI) * gamma_vi / m_dil
+              * ph_sp_factor;
         }
       }
       default:
