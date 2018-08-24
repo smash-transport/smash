@@ -14,6 +14,14 @@ include(FindPkgConfig)
 include(GetGitRevisionDescription)
 git_describe(VERSION_MAJOR)
 
+# Enable warnings
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Wmissing-declarations -Wpointer-arith -Wshadow -Wuninitialized -Winit-self -Wundef -Wcast-align -Wformat=2 -Wold-style-cast -Werror=switch")
+# Other interesting warnings:
+# -Wnull-dereference (GCC 6)
+# -Wrestrict (GCC 7)
+# -Wduplicated-branches (GCC 7)
+# -Wduplicated-cond (GCC 6)
+
 find_package (Git)
 if(GIT_FOUND)
   #message("git found: ${GIT_EXECUTABLE} in version ${GIT_VERSION_STRING}")
