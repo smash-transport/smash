@@ -158,25 +158,25 @@ int StringProcess::append_final_state(ParticleList &intermediate_particles,
   xvertex_neg.resize(nfrag + 1);
   // x^{+} coordinates of the forward end
   xvertex_pos[0] = p_pos_tot / kappa_tension_string_;
+  // x^{-} coordinates of the backward end
+  xvertex_neg[nfrag] = p_neg_tot / kappa_tension_string_;
+
   for (int i = 0; i < nfrag; i++) {
     const double pparallel =
         intermediate_particles[i].momentum().threevec() * evecLong;
+
     // recursively compute x^{+} coordinates of q-qbar formation vertex
     xvertex_pos[i + 1] = xvertex_pos[i] -
                          (intermediate_particles[i].momentum().x0() +
                           pparallel) /
                          (kappa_tension_string_ * sqrt2_);
-  }
-  // x^{-} coordinates of the backward end
-  xvertex_neg[nfrag] = p_neg_tot / kappa_tension_string_;
-  for (int i = nfrag - 1; i >= 0; i--) {
-    const double pparallel =
-        intermediate_particles[i].momentum().threevec() * evecLong;
+
     // recursively compute x^{-} coordinates of q-qbar formation vertex
-    xvertex_neg[i] = xvertex_neg[i + 1] -
-                     (intermediate_particles[i].momentum().x0() -
-                      pparallel) /
-                     (kappa_tension_string_ * sqrt2_);
+    const int ineg = nfrag - i - 1;
+    xvertex_neg[ineg] = xvertex_neg[ineg + 1] -
+                        (intermediate_particles[ineg].momentum().x0() -
+                         pparallel) /
+                        (kappa_tension_string_ * sqrt2_);
   }
 
   // Velocity three-vector to perform Lorentz boost.
@@ -605,32 +605,16 @@ bool StringProcess::next_NDiffHard() {
   for (int i = 0; i < pythia_parton_->event.size(); i++) {
     if (pythia_parton_->event[i].isFinal()) {
       const int pdgid = pythia_parton_->event[i].id();
+      Pythia8::Vec4 pquark = pythia_parton_->event[i].p();
+      const double mass = pythia_parton_->particleData.m0(pdgid);
 
-      if (pythia_parton_->event[i].isParton() ||
-          pythia_parton_->particleData.isOctetHadron(pdgid)) {
-        // quarks (diquarks), antiquarks and gluons
-        Pythia8::Vec4 pquark = pythia_parton_->event[i].p();
-        const double mass = pythia_parton_->particleData.m0(pdgid);
+      const int status = pythia_parton_->event[i].status();
+      const int color = pythia_parton_->event[i].col();
+      const int anticolor = pythia_parton_->event[i].acol();
 
-        const int status = pythia_parton_->event[i].status();
-        const int color = pythia_parton_->event[i].col();
-        const int anticolor = pythia_parton_->event[i].acol();
-
-        pSum += pquark;
-        event_intermediate_.append(pdgid, status,
-                                   color, anticolor, pquark, mass);
-      } else {
-        // other types (photons and leptons)
-        FourVector momentum = reorient(pythia_parton_->event[i], evecBasisAB_);
-        log.debug("4-momentum from Pythia: ", momentum);
-        bool found_ptype = append_intermediate_list(pdgid, momentum,
-                                                    new_non_hadron_particles);
-        if (!found_ptype) {
-          log.warn("PDG ID ", pdgid,
-                   " does not exist in ParticleType - start over.");
-          final_state_success = false;
-        }
-      }
+      pSum += pquark;
+      event_intermediate_.append(pdgid, status,
+                                 color, anticolor, pquark, mass);
     }
   }
   if (!final_state_success) {
@@ -654,6 +638,29 @@ bool StringProcess::next_NDiffHard() {
    * and then rescale momenta of partons by constant factor
    * to fulfill the energy-momentum conservation. */
   restore_constituent(event_intermediate_, excess_quark, excess_antiq);
+
+  int npart = event_intermediate_.size();
+  int ipart = 0;
+  while (ipart < npart) {
+    const int pdgid = event_intermediate_[ipart].id();
+    if (event_intermediate_[ipart].isFinal() &&
+        !event_intermediate_[ipart].isParton() &&
+        !pythia_parton_->particleData.isOctetHadron(pdgid)) {
+      FourVector momentum = reorient(event_intermediate_[ipart], evecBasisAB_);
+      log.debug("4-momentum from Pythia: ", momentum);
+      bool found_ptype = append_intermediate_list(pdgid, momentum,
+                                                  new_non_hadron_particles);
+      if (!found_ptype) {
+        log.warn("PDG ID ", pdgid,
+                 " does not exist in ParticleType - start over.");
+        final_state_success = false;
+      }
+      event_intermediate_.remove(ipart, ipart);
+      npart -= 1;
+    } else {
+      ipart += 1;
+    }
+  }
 
   bool hadronize_success = false;
   bool find_forward_string = true;
@@ -881,12 +888,12 @@ void StringProcess::restore_constituent(Pythia8::Event &event_intermediate,
         int iforward = 1;
         // select the most forward or backward parton and change its specie.
         for (int ip = 2; ip < event_intermediate.size() - np_end; ip++) {
-          const double pz_quark_current = event_intermediate[ip].pz();
-          const double pz_quark_forward = event_intermediate[iforward].pz();
+          const double y_quark_current = event_intermediate[ip].y();
+          const double y_quark_forward = event_intermediate[iforward].y();
           if ((find_forward[ih] &&
-              pz_quark_current > pz_quark_forward) ||
+              y_quark_current > y_quark_forward) ||
               (!find_forward[ih] &&
-              pz_quark_current < pz_quark_forward)) {
+              y_quark_current < y_quark_forward)) {
             iforward = ip;
           }
         }
@@ -979,9 +986,9 @@ void StringProcess::compose_string_parton(bool find_forward_string,
   // select the most forward or backward parton.
   for (int i = 2; i < event_intermediate.size(); i++) {
     if ((find_forward_string &&
-         event_intermediate[i].pz() > event_intermediate[iforward].pz()) ||
+         event_intermediate[i].y() > event_intermediate[iforward].y()) ||
         (!find_forward_string &&
-         event_intermediate[i].pz() < event_intermediate[iforward].pz())) {
+         event_intermediate[i].y() < event_intermediate[iforward].y())) {
       iforward = i;
     }
   }
