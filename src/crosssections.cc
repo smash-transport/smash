@@ -1954,7 +1954,7 @@ CollisionBranchList CrossSections::string_excitation(
     /* Hard string process is added by hard cross section
      * in conjunction with multipartion interaction picture
      * \iref{Sjostrand:1987su}. */
-    const double hard_xsec = string_hard_cross_section(use_AQM);
+    const double hard_xsec = AQM_factor * string_hard_cross_section();
     nondiffractive_soft =
         nondiffractive_all * std::exp(-hard_xsec / nondiffractive_all);
     nondiffractive_hard = nondiffractive_all - nondiffractive_soft;
@@ -2055,19 +2055,10 @@ double CrossSections::high_energy() const {
   return xs;
 }
 
-double CrossSections::string_hard_cross_section(bool use_AQM) const {
+double CrossSections::string_hard_cross_section() const {
   double cross_sec = 0.;
   const ParticleData& data_a = incoming_particles_[0];
   const ParticleData& data_b = incoming_particles_[1];
-
-  // compute the multiplicative factor based on the additive quark model.
-  double AQM_factor = 1.;
-  if (use_AQM) {
-    for (int i = 0; i < 2; i++) {
-      PdgCode pdg = incoming_particles_[i].type().pdgcode();
-      AQM_factor *= (1. - 0.4 * pdg.frac_strange());
-    }
-  }
 
   if (data_a.is_baryon() && data_b.is_baryon()) {
     /* Currently nucleon-nucleon cross section is used for
@@ -2080,8 +2071,8 @@ double CrossSections::string_hard_cross_section(bool use_AQM) const {
     // Currently pion-pion cross section is used for all meson-meson cases.
     cross_sec = pipi_string_hard(sqrt_s_ * sqrt_s_);
   }
-  // apply additive quark model and return
-  return AQM_factor * cross_sec;
+
+  return cross_sec;
 }
 
 CollisionBranchPtr CrossSections::NNbar_annihilation(
