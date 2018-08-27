@@ -120,8 +120,6 @@ class StringProcess {
   double time_collision_;
   /// Whether to calculate the string formation times from the yoyo-model.
   bool use_yoyo_model_;
-  /// maximum integer
-  int maxint_;
   /// square root of 2 (\f$\sqrt{2}\f$)
   double sqrt2_;
 

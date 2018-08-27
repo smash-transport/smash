@@ -62,7 +62,6 @@ StringProcess::StringProcess(double string_tension, double time_formation,
   event_intermediate_.init("intermediate partons",
                            &pythia_hadron_->particleData);
 
-  maxint_ = std::numeric_limits<int>::max();
   sqrt2_ = std::sqrt(2.);
 
   for (int imu = 0; imu < 3; imu++) {
@@ -583,7 +582,8 @@ bool StringProcess::next_NDiffHard() {
    * Pythia's random is controlled by SMASH in every single collision.
    * In this way we ensure that the results are reproducible
    * for every event if one knows SMASH random seed. */
-  pythia_parton_->rndm.init(random::uniform_int(1, maxint_));
+  pythia_parton_->rndm.init(random::uniform_int(1,
+                                std::numeric_limits<int>::max()));
 
   // Short notation for Pythia event
   Pythia8::Event &event_hadron = pythia_hadron_->event;
@@ -676,7 +676,8 @@ bool StringProcess::next_NDiffHard() {
     compose_string_junction(find_forward_string,
                             event_intermediate_, pythia_hadron_->event);
 
-    pythia_hadron_->rndm.init(random::uniform_int(1, maxint_));
+    pythia_hadron_->rndm.init(random::uniform_int(1,
+                                  std::numeric_limits<int>::max()));
     // fragment the (identified) string into hadrons.
     hadronize_success = pythia_hadron_->next();
     log.debug("Pythia hadronized, success = ", hadronize_success);
@@ -1715,7 +1716,8 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
   // implement PYTHIA fragmentation
   pythia_hadron_->event[0].p(pSum);
   pythia_hadron_->event[0].m(pSum.mCalc());
-  pythia_hadron_->rndm.init(random::uniform_int(1, maxint_));
+  pythia_hadron_->rndm.init(random::uniform_int(1,
+                                std::numeric_limits<int>::max()));
   const bool successful_hadronization = pythia_hadron_->next();
   if (successful_hadronization) {
     for (int ipyth = 0; ipyth < pythia_hadron_->event.size(); ipyth++) {
