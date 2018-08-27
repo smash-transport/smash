@@ -17,7 +17,6 @@
 #include "chrono.h"
 #include "decayactionsfinder.h"
 #include "decayactionsfinderdilepton.h"
-#include "decayactionsfinderdilepton.h"
 #include "energymomentumtensor.h"
 #include "fourvector.h"
 #include "grandcan_thermalizer.h"
@@ -389,11 +388,11 @@ class Experiment : public ExperimentBase {
 
   /// Lattices for the electric and magnetic components of the Skyme force
   std::unique_ptr<RectangularLattice<std::pair<ThreeVector, ThreeVector>>>
-  FB_lat_;
+      FB_lat_;
 
   /// Lattices for the electric and magnetic component of the symmetry force
   std::unique_ptr<RectangularLattice<std::pair<ThreeVector, ThreeVector>>>
-  FI3_lat_;
+      FI3_lat_;
 
   /// Lattices of energy-momentum tensors for printout
   std::unique_ptr<RectangularLattice<EnergyMomentumTensor>> Tmn_;
@@ -760,8 +759,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     pauli_blocker_ = make_unique<PauliBlocker>(
         config["Collision_Term"]["Pauli_Blocking"], parameters_);
   }
-  ParticleData::formation_power_ = config.take({"Collision_Term",
-                                              "Power_Particle_Formation"}, 1.);
+  ParticleData::formation_power_ =
+      config.take({"Collision_Term", "Power_Particle_Formation"}, 1.);
 
   /*!\Userguide
    * \page input_general_ General
@@ -971,8 +970,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * yield useful results. Alternatively, it it possible to use fractional
    * photons. This means that for each produced photon, \f$ N_{\text{Frac}} \f$
    * photons are actually sampled with different kinematic properties so that
-   * more phase space is covered. See \ref input_output_options_ on how to set the
-   * flag.
+   * more phase space is covered. See \ref input_output_options_ on how to set
+   *the flag.
    **/
 
   dens_type_ = config.take({"Output", "Density_Type"}, DensityType::None);
@@ -1082,20 +1081,18 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
                                                  LatticeUpdate::EveryTimestep);
         UB_lat_ = make_unique<RectangularLattice<double>>(
             l, n, origin, periodic, LatticeUpdate::EveryTimestep);
-        FB_lat_ = make_unique<RectangularLattice<std::pair<ThreeVector,
-                  ThreeVector>>>(l, n, origin, periodic,
-                  LatticeUpdate::EveryTimestep);
-
+        FB_lat_ = make_unique<
+            RectangularLattice<std::pair<ThreeVector, ThreeVector>>>(
+            l, n, origin, periodic, LatticeUpdate::EveryTimestep);
       }
       if (potentials_->use_symmetry()) {
         jmu_I3_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
                                                   LatticeUpdate::EveryTimestep);
         UI3_lat_ = make_unique<RectangularLattice<double>>(
             l, n, origin, periodic, LatticeUpdate::EveryTimestep);
-        FI3_lat_ = make_unique<RectangularLattice<std::pair<ThreeVector,
-                  ThreeVector>>>(l, n, origin, periodic,
-                  LatticeUpdate::EveryTimestep);
-
+        FI3_lat_ = make_unique<
+            RectangularLattice<std::pair<ThreeVector, ThreeVector>>>(
+            l, n, origin, periodic, LatticeUpdate::EveryTimestep);
       }
     } else {
       if (dens_type_lattice_printout_ == DensityType::Baryon) {
@@ -1250,8 +1247,8 @@ bool Experiment<Modus>::perform_action(
     const FourVector r_interaction = action.get_interaction_point();
     constexpr bool compute_grad = false;
     rho = std::get<0>(rho_eckart(r_interaction.threevec(),
-                      particles_before_actions,
-                      density_param_, dens_type_, compute_grad));
+                                 particles_before_actions, density_param_,
+                                 dens_type_, compute_grad));
   }
   /*!\Userguide
    * \page collisions_output_in_box_modus_ Collision output in box modus
@@ -1334,11 +1331,10 @@ bool Experiment<Modus>::perform_action(
  *          'Computing time consumed'
  */
 std::string format_measurements(const Particles &particles,
-                                       uint64_t scatterings_total,
-                                       uint64_t scatterings_this_interval,
-                                       const QuantumNumbers &conserved_initial,
-                                       SystemTimePoint time_start,
-                                       double time);
+                                uint64_t scatterings_total,
+                                uint64_t scatterings_this_interval,
+                                const QuantumNumbers &conserved_initial,
+                                SystemTimePoint time_start, double time);
 
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution() {
@@ -1641,15 +1637,14 @@ void Experiment<Modus>::update_potentials() {
   if (potentials_) {
     if (potentials_->use_skyrme() && jmu_B_lat_ != nullptr) {
       update_density_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
-                       DensityType::Baryon, density_param_, particles_, true);
+                             DensityType::Baryon, density_param_, particles_,
+                             true);
       const size_t UBlattice_size = UB_lat_->size();
       for (size_t i = 0; i < UBlattice_size; i++) {
         (*UB_lat_)[i] = potentials_->skyrme_pot((*jmu_B_lat_)[i].density());
-        (*FB_lat_)[i] = potentials_->skyrme_force((*jmu_B_lat_)[i].density(),
-                                                  (*jmu_B_lat_)[i].grad_rho(),
-                                                  (*jmu_B_lat_)[i].dj_dt(),
-                                                  (*jmu_B_lat_)[i].rot_j());
-
+        (*FB_lat_)[i] = potentials_->skyrme_force(
+            (*jmu_B_lat_)[i].density(), (*jmu_B_lat_)[i].grad_rho(),
+            (*jmu_B_lat_)[i].dj_dt(), (*jmu_B_lat_)[i].rot_j());
       }
     }
     if (potentials_->use_symmetry() && jmu_I3_lat_ != nullptr) {
@@ -1658,13 +1653,10 @@ void Experiment<Modus>::update_potentials() {
                              particles_, true);
       const size_t UI3lattice_size = UI3_lat_->size();
       for (size_t i = 0; i < UI3lattice_size; i++) {
-        (*UI3_lat_)[i] = potentials_->symmetry_pot(
-                                     (*jmu_I3_lat_)[i].density());
+        (*UI3_lat_)[i] = potentials_->symmetry_pot((*jmu_I3_lat_)[i].density());
         (*FI3_lat_)[i] = potentials_->symmetry_force(
-                                     (*jmu_I3_lat_)[i].grad_rho(),
-                                     (*jmu_I3_lat_)[i].dj_dt(),
-                                     (*jmu_I3_lat_)[i].rot_j());
-
+            (*jmu_I3_lat_)[i].grad_rho(), (*jmu_I3_lat_)[i].dj_dt(),
+            (*jmu_I3_lat_)[i].rot_j());
       }
     }
   }

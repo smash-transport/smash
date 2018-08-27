@@ -121,8 +121,8 @@ static double piplusp_elastic_pdg(double mandelstam_s) {
 }
 
 double piplusp_elastic_high_energy(double mandelstam_s, double m1, double m2) {
-  const double p_lab = (m1 > m2) ? plab_from_s(mandelstam_s, m2, m1) :
-                                   plab_from_s(mandelstam_s, m1, m2);
+  const double p_lab = (m1 > m2) ? plab_from_s(mandelstam_s, m2, m1)
+                                 : plab_from_s(mandelstam_s, m1, m2);
   const auto logp = std::log(p_lab);
   return 11.4 * std::pow(p_lab, -0.4) + 0.079 * logp * logp;
 }
@@ -306,8 +306,7 @@ double pp_elastic(double mandelstam_s) {
                (mandelstam_s - 4 * nucleon_mass * nucleon_mass) +
            1.67;
   } else if (p_lab < 0.8) {
-    return 23.5 +
-           1000 * pow_int(p_lab - 0.7, 4);
+    return 23.5 + 1000 * pow_int(p_lab - 0.7, 4);
   } else if (p_lab < 2.0) {
     return 1250 / (p_lab + 50) - 4 * (p_lab - 1.3) * (p_lab - 1.3);
   } else if (p_lab < 2.776) {
@@ -320,8 +319,8 @@ double pp_elastic(double mandelstam_s) {
 }
 
 double pp_elastic_high_energy(double mandelstam_s, double m1, double m2) {
-  const double p_lab = (m1 > m2) ? plab_from_s(mandelstam_s, m2, m1) :
-                                   plab_from_s(mandelstam_s, m1, m2);
+  const double p_lab = (m1 > m2) ? plab_from_s(mandelstam_s, m2, m1)
+                                 : plab_from_s(mandelstam_s, m1, m2);
   const auto logp = std::log(p_lab);
   return 11.9 + 26.9 * std::pow(p_lab, -1.21) + 0.169 * logp * logp -
          1.85 * logp;
@@ -332,8 +331,7 @@ double pp_total(double mandelstam_s) {
   if (p_lab < 0.4) {
     return 34 * std::pow(p_lab / 0.4, -2.104);
   } else if (p_lab < 0.8) {
-    return 23.5 +
-           1000 * pow_int(p_lab - 0.7, 4);
+    return 23.5 + 1000 * pow_int(p_lab - 0.7, 4);
   } else if (p_lab < 1.5) {
     return 23.5 + 24.6 / (1 + std::exp(-(p_lab - 1.2) / 0.1));
   } else if (p_lab < 5.0) {
@@ -412,9 +410,8 @@ double deuteron_pion_elastic(double mandelstam_s) {
 
 double deuteron_nucleon_elastic(double mandelstam_s) {
   const double s = mandelstam_s;
-  return 2500.0 * std::exp(- smash::square(s - 7.93) / 0.003) +
-         600.0  * std::exp(- smash::square(s - 7.93) / 0.1) +
-         10.0;
+  return 2500.0 * std::exp(-smash::square(s - 7.93) / 0.003) +
+         600.0 * std::exp(-smash::square(s - 7.93) / 0.1) + 10.0;
 }
 
 double kplusp_elastic_background(double mandelstam_s) {

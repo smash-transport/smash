@@ -5,8 +5,8 @@ Accelerated Strongly-interacting Hadrons) transport approach for the dynamical
 description of heavy ion reactions. See [Phys. Rev. C 94, 054905
 (2016)](https://arxiv.org/abs/1606.06642) for details.
 
-See CONTRIBUTING.md for development hints. A complete User Guide is found
-[here](https://fias.uni-frankfurt.de/~smash/extra/user/).
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development hints. A complete User
+Guide is found [here](https://fias.uni-frankfurt.de/~smash/extra/user/).
 
 If Pythia is used, please cite the following references:
 
@@ -107,6 +107,8 @@ In order to disable it, one can do the follwoing:
     make
 
 
+### Including Eigen header files from custom location
+
 Let's assume Eigen headers will be unpacked in `$HOME`.
 
 1. Download latest package `[latest-eigen].tar.gz` from http://eigen.tuxfamily.org
@@ -174,3 +176,13 @@ All command line options can be viewed with
 SMASH is licensed under the terms of the GNU General Public License, Version 3
 or above. The build scripts are licensed under terms of the BSD 3-clause
 license. See [LICENSE](LICENSE).
+
+### Projects using SMASH
+
+SMASH source and documentation are provided to check and
+reproduce published results of the authors. Cooperation and joint projects with outside
+researchers are encouraged and comparison to results by experimental collaborations
+is supported. If you are interested in starting a project, please contact us to avoid
+interference with current thesis topics. If your project involves changes to the code,
+please refer to [CONTRIBUTING.md](CONTRIBUTING.md) for coding guidelines and
+helpful tools.

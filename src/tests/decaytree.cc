@@ -47,24 +47,24 @@ TEST(decaytree_correctness) {
   const ParticleTypePtr f2 = &ParticleType::find(0x225);
 
   const double total_cross_section = 100.0;  // = 30 + 45 + 25
-  decaytree::Node tree(a->name() + b->name(), total_cross_section,
-                       {a, b}, {a, b}, {a, b}, {});
-  ParticleTypePtrList initial_particles1 = {a, b},
-                      initial_particles2 = {a, b},
-                      initial_particles3 = {a, b},
-                      final_particles1 = {rho0},
-                      final_particles2 = {f2},
-                      final_particles3 = {a, b};
-  auto& process_node1 = tree.add_action(rho0->name(), 30.0,
-      std::move(initial_particles1), std::move(final_particles1));
+  decaytree::Node tree(a->name() + b->name(), total_cross_section, {a, b},
+                       {a, b}, {a, b}, {});
+  ParticleTypePtrList initial_particles1 = {a, b}, initial_particles2 = {a, b},
+                      initial_particles3 = {a, b}, final_particles1 = {rho0},
+                      final_particles2 = {f2}, final_particles3 = {a, b};
+  auto& process_node1 =
+      tree.add_action(rho0->name(), 30.0, std::move(initial_particles1),
+                      std::move(final_particles1));
   decaytree::add_decays(process_node1);
 
-  auto& process_node2 = tree.add_action(f2->name(), 45.0,
-      std::move(initial_particles2), std::move(final_particles2));
+  auto& process_node2 =
+      tree.add_action(f2->name(), 45.0, std::move(initial_particles2),
+                      std::move(final_particles2));
   decaytree::add_decays(process_node2);
 
   auto& process_node3 = tree.add_action(a->name() + b->name(), 25.0,
-      std::move(initial_particles3), std::move(final_particles3));
+                                        std::move(initial_particles3),
+                                        std::move(final_particles3));
   decaytree::add_decays(process_node3);
 
   tree.print();

@@ -123,7 +123,6 @@ class ThreeVector {
   /// \return whether the vector is different from another vector
   bool operator!=(const ThreeVector &rhs) const { return x_ != rhs.x_; }
 
-
   /**
    * \return cross product of this vector and another vector
    * \f$ \vec{this} \times \vec{b} \f$

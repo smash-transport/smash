@@ -168,8 +168,7 @@ CollisionBranchList CrossSections::generate_collision_list(
      * Parametrized total cross - the contributions
      * from all other present channels. */
     const double sig_current = sum_xs_of(process_list);
-    const double sig_string =
-        std::max(0., high_energy() - sig_current);
+    const double sig_string = std::max(0., high_energy() - sig_current);
     append_list(process_list,
                 string_excitation(sig_string, string_process, use_AQM));
     append_list(process_list, rare_two_to_two());
@@ -273,7 +272,7 @@ double CrossSections::elastic_parametrization(bool use_AQM) const {
       /* Special case: the pion elastic cross-section goes through resonances
        * at low sqrt_s, so we turn it off for this region */
       if (pdg_a.is_pion() && pdg_b.is_pion() &&
-            (m1 + m2 + transit_high_energy::pipi_offset) > sqrt_s_) {
+          (m1 + m2 + transit_high_energy::pipi_offset) > sqrt_s_) {
         elastic_xs = 0.0;
       } else {
         // meson-meson goes through scaling from π+p parametrization
@@ -423,8 +422,8 @@ CollisionBranchList CrossSections::npi_yk() const {
           const auto& type_Sigma_p = ParticleType::find(pdg::Sigma_p);
           const auto& type_K_p = ParticleType::find(pdg::K_p);
           add_channel(process_list,
-                        [&] { return piplusp_sigmapluskplus_pdg(s); },
-                        sqrt_s_, type_K_p, type_Sigma_p);
+                      [&] { return piplusp_sigmapluskplus_pdg(s); }, sqrt_s_,
+                      type_K_p, type_Sigma_p);
           break;
         }
         case pdg::pi_m: {
@@ -434,14 +433,12 @@ CollisionBranchList CrossSections::npi_yk() const {
           const auto& type_K_p = ParticleType::find(pdg::K_p);
           const auto& type_K_z = ParticleType::find(pdg::K_z);
           add_channel(process_list,
-                        [&] { return piminusp_sigmaminuskplus_pdg(s); },
-                        sqrt_s_, type_K_p, type_Sigma_m);
-          add_channel(process_list,
-                        [&] { return piminusp_sigma0k0_res(s); },
-                        sqrt_s_, type_K_z, type_Sigma_z);
-          add_channel(process_list,
-                        [&] { return piminusp_lambdak0_pdg(s); },
-                        sqrt_s_, type_K_z, type_Lambda);
+                      [&] { return piminusp_sigmaminuskplus_pdg(s); }, sqrt_s_,
+                      type_K_p, type_Sigma_m);
+          add_channel(process_list, [&] { return piminusp_sigma0k0_res(s); },
+                      sqrt_s_, type_K_z, type_Sigma_z);
+          add_channel(process_list, [&] { return piminusp_lambdak0_pdg(s); },
+                      sqrt_s_, type_K_z, type_Lambda);
           break;
         }
         case pdg::pi_z: {
@@ -451,16 +448,17 @@ CollisionBranchList CrossSections::npi_yk() const {
           const auto& type_K_p = ParticleType::find(pdg::K_p);
           const auto& type_K_z = ParticleType::find(pdg::K_z);
           add_channel(process_list,
-                        [&] { return 0.5 * (piplusp_sigmapluskplus_pdg(s)
-                                  - piminusp_sigma0k0_res(s)
-                                  + piminusp_sigmaminuskplus_pdg(s)); },
-                        sqrt_s_, type_K_p, type_Sigma_z);
+                      [&] {
+                        return 0.5 * (piplusp_sigmapluskplus_pdg(s) -
+                                      piminusp_sigma0k0_res(s) +
+                                      piminusp_sigmaminuskplus_pdg(s));
+                      },
+                      sqrt_s_, type_K_p, type_Sigma_z);
+          add_channel(process_list, [&] { return piminusp_sigma0k0_res(s); },
+                      sqrt_s_, type_K_z, type_Sigma_p);
           add_channel(process_list,
-                        [&] { return piminusp_sigma0k0_res(s); },
-                        sqrt_s_, type_K_z, type_Sigma_p);
-          add_channel(process_list,
-                        [&] { return 0.5 * piminusp_lambdak0_pdg(s); },
-                        sqrt_s_, type_K_p, type_Lambda);
+                      [&] { return 0.5 * piminusp_lambdak0_pdg(s); }, sqrt_s_,
+                      type_K_p, type_Lambda);
           break;
         }
       }
@@ -475,22 +473,20 @@ CollisionBranchList CrossSections::npi_yk() const {
           const auto& type_K_p = ParticleType::find(pdg::K_p);
           const auto& type_K_z = ParticleType::find(pdg::K_z);
           add_channel(process_list,
-                        [&] { return piminusp_sigmaminuskplus_pdg(s); },
-                        sqrt_s_, type_K_z, type_Sigma_p);
-          add_channel(process_list,
-                        [&] { return piminusp_sigma0k0_res(s); },
-                        sqrt_s_, type_K_p, type_Sigma_z);
-          add_channel(process_list,
-                        [&] { return piminusp_lambdak0_pdg(s); },
-                        sqrt_s_, type_K_p, type_Lambda);
+                      [&] { return piminusp_sigmaminuskplus_pdg(s); }, sqrt_s_,
+                      type_K_z, type_Sigma_p);
+          add_channel(process_list, [&] { return piminusp_sigma0k0_res(s); },
+                      sqrt_s_, type_K_p, type_Sigma_z);
+          add_channel(process_list, [&] { return piminusp_lambdak0_pdg(s); },
+                      sqrt_s_, type_K_p, type_Lambda);
           break;
         }
         case pdg::pi_m: {
           const auto& type_Sigma_m = ParticleType::find(pdg::Sigma_m);
           const auto& type_K_z = ParticleType::find(pdg::K_z);
           add_channel(process_list,
-                        [&] { return piplusp_sigmapluskplus_pdg(s); },
-                        sqrt_s_, type_K_z, type_Sigma_m);
+                      [&] { return piplusp_sigmapluskplus_pdg(s); }, sqrt_s_,
+                      type_K_z, type_Sigma_m);
           break;
         }
         case pdg::pi_z: {
@@ -500,16 +496,17 @@ CollisionBranchList CrossSections::npi_yk() const {
           const auto& type_K_p = ParticleType::find(pdg::K_p);
           const auto& type_K_z = ParticleType::find(pdg::K_z);
           add_channel(process_list,
-                        [&] { return 0.5 * (piplusp_sigmapluskplus_pdg(s)
-                                  - piminusp_sigma0k0_res(s)
-                                  + piminusp_sigmaminuskplus_pdg(s)); },
-                        sqrt_s_, type_K_z, type_Sigma_z);
+                      [&] {
+                        return 0.5 * (piplusp_sigmapluskplus_pdg(s) -
+                                      piminusp_sigma0k0_res(s) +
+                                      piminusp_sigmaminuskplus_pdg(s));
+                      },
+                      sqrt_s_, type_K_z, type_Sigma_z);
+          add_channel(process_list, [&] { return piminusp_sigma0k0_res(s); },
+                      sqrt_s_, type_K_p, type_Sigma_m);
           add_channel(process_list,
-                        [&] { return piminusp_sigma0k0_res(s); },
-                        sqrt_s_, type_K_p, type_Sigma_m);
-          add_channel(process_list,
-                        [&] { return 0.5 * piminusp_lambdak0_pdg(s); },
-                        sqrt_s_, type_K_z, type_Lambda);
+                      [&] { return 0.5 * piminusp_lambdak0_pdg(s); }, sqrt_s_,
+                      type_K_z, type_Lambda);
           break;
         }
       }
@@ -524,22 +521,20 @@ CollisionBranchList CrossSections::npi_yk() const {
           const auto& type_K_m = ParticleType::find(-pdg::K_p);
           const auto& type_Kbar_z = ParticleType::find(-pdg::K_z);
           add_channel(process_list,
-                        [&] { return piminusp_sigmaminuskplus_pdg(s); },
-                        sqrt_s_, type_K_m, type_Sigma_m_bar);
-          add_channel(process_list,
-                        [&] { return piminusp_sigma0k0_res(s); },
-                        sqrt_s_, type_Kbar_z, type_Sigma_z_bar);
-          add_channel(process_list,
-                        [&] { return piminusp_lambdak0_pdg(s); },
-                        sqrt_s_, type_Kbar_z, type_Lambda_bar);
+                      [&] { return piminusp_sigmaminuskplus_pdg(s); }, sqrt_s_,
+                      type_K_m, type_Sigma_m_bar);
+          add_channel(process_list, [&] { return piminusp_sigma0k0_res(s); },
+                      sqrt_s_, type_Kbar_z, type_Sigma_z_bar);
+          add_channel(process_list, [&] { return piminusp_lambdak0_pdg(s); },
+                      sqrt_s_, type_Kbar_z, type_Lambda_bar);
           break;
         }
         case pdg::pi_m: {
           const auto& type_Sigma_p_bar = ParticleType::find(-pdg::Sigma_p);
           const auto& type_K_m = ParticleType::find(-pdg::K_p);
           add_channel(process_list,
-                        [&] { return piplusp_sigmapluskplus_pdg(s); },
-                        sqrt_s_, type_K_m, type_Sigma_p_bar);
+                      [&] { return piplusp_sigmapluskplus_pdg(s); }, sqrt_s_,
+                      type_K_m, type_Sigma_p_bar);
           break;
         }
         case pdg::pi_z: {
@@ -549,16 +544,17 @@ CollisionBranchList CrossSections::npi_yk() const {
           const auto& type_K_m = ParticleType::find(-pdg::K_p);
           const auto& type_Kbar_z = ParticleType::find(-pdg::K_z);
           add_channel(process_list,
-                        [&] { return 0.5 * (piplusp_sigmapluskplus_pdg(s)
-                                  - piminusp_sigma0k0_res(s)
-                                  + piminusp_sigmaminuskplus_pdg(s)); },
-                        sqrt_s_, type_K_m, type_Sigma_z_bar);
+                      [&] {
+                        return 0.5 * (piplusp_sigmapluskplus_pdg(s) -
+                                      piminusp_sigma0k0_res(s) +
+                                      piminusp_sigmaminuskplus_pdg(s));
+                      },
+                      sqrt_s_, type_K_m, type_Sigma_z_bar);
+          add_channel(process_list, [&] { return piminusp_sigma0k0_res(s); },
+                      sqrt_s_, type_Kbar_z, type_Sigma_p_bar);
           add_channel(process_list,
-                        [&] { return piminusp_sigma0k0_res(s); },
-                        sqrt_s_, type_Kbar_z, type_Sigma_p_bar);
-          add_channel(process_list,
-                        [&] { return 0.5 * piminusp_lambdak0_pdg(s); },
-                        sqrt_s_, type_K_m, type_Lambda_bar);
+                      [&] { return 0.5 * piminusp_lambdak0_pdg(s); }, sqrt_s_,
+                      type_K_m, type_Lambda_bar);
           break;
         }
       }
@@ -570,8 +566,8 @@ CollisionBranchList CrossSections::npi_yk() const {
           const auto& type_Sigma_m_bar = ParticleType::find(-pdg::Sigma_m);
           const auto& type_Kbar_z = ParticleType::find(-pdg::K_p);
           add_channel(process_list,
-                        [&] { return piplusp_sigmapluskplus_pdg(s); },
-                        sqrt_s_, type_Kbar_z, type_Sigma_m_bar);
+                      [&] { return piplusp_sigmapluskplus_pdg(s); }, sqrt_s_,
+                      type_Kbar_z, type_Sigma_m_bar);
           break;
         }
         case pdg::pi_m: {
@@ -581,14 +577,12 @@ CollisionBranchList CrossSections::npi_yk() const {
           const auto& type_K_m = ParticleType::find(-pdg::K_p);
           const auto& type_Kbar_z = ParticleType::find(-pdg::K_z);
           add_channel(process_list,
-                        [&] { return piminusp_sigmaminuskplus_pdg(s); },
-                        sqrt_s_, type_Kbar_z, type_Sigma_p_bar);
-          add_channel(process_list,
-                        [&] { return piminusp_sigma0k0_res(s); },
-                        sqrt_s_, type_K_m, type_Sigma_z_bar);
-          add_channel(process_list,
-                        [&] { return piminusp_lambdak0_pdg(s); },
-                        sqrt_s_, type_K_m, type_Lambda_bar);
+                      [&] { return piminusp_sigmaminuskplus_pdg(s); }, sqrt_s_,
+                      type_Kbar_z, type_Sigma_p_bar);
+          add_channel(process_list, [&] { return piminusp_sigma0k0_res(s); },
+                      sqrt_s_, type_K_m, type_Sigma_z_bar);
+          add_channel(process_list, [&] { return piminusp_lambdak0_pdg(s); },
+                      sqrt_s_, type_K_m, type_Lambda_bar);
           break;
         }
         case pdg::pi_z: {
@@ -598,16 +592,17 @@ CollisionBranchList CrossSections::npi_yk() const {
           const auto& type_K_m = ParticleType::find(-pdg::K_p);
           const auto& type_Kbar_z = ParticleType::find(-pdg::K_z);
           add_channel(process_list,
-                        [&] { return 0.5 * (piplusp_sigmapluskplus_pdg(s)
-                                  - piminusp_sigma0k0_res(s)
-                                  + piminusp_sigmaminuskplus_pdg(s)); },
-                        sqrt_s_, type_Kbar_z, type_Sigma_z_bar);
+                      [&] {
+                        return 0.5 * (piplusp_sigmapluskplus_pdg(s) -
+                                      piminusp_sigma0k0_res(s) +
+                                      piminusp_sigmaminuskplus_pdg(s));
+                      },
+                      sqrt_s_, type_Kbar_z, type_Sigma_z_bar);
+          add_channel(process_list, [&] { return piminusp_sigma0k0_res(s); },
+                      sqrt_s_, type_K_m, type_Sigma_m_bar);
           add_channel(process_list,
-                        [&] { return piminusp_sigma0k0_res(s); },
-                        sqrt_s_, type_K_m, type_Sigma_m_bar);
-          add_channel(process_list,
-                        [&] { return 0.5 * piminusp_lambdak0_pdg(s); },
-                        sqrt_s_, type_Kbar_z, type_Lambda_bar);
+                      [&] { return 0.5 * piminusp_lambdak0_pdg(s); }, sqrt_s_,
+                      type_Kbar_z, type_Lambda_bar);
           break;
         }
       }
@@ -957,13 +952,14 @@ CollisionBranchList CrossSections::nk_xx(ReactionsBitSet included_2to2) const {
    * data. This cutoff represents the point where the AQM cross section
    * becomes smaller than this parametrization, so we cut it here, and fully
    * switch to AQM beyond this point. */
-  const double KN_to_KDelta_cutoff = transit_high_energy::KN_offset
-                                   + incoming_particles_[0].pole_mass()
-                                   + incoming_particles_[1].pole_mass();
+  const double KN_to_KDelta_cutoff = transit_high_energy::KN_offset +
+                                     incoming_particles_[0].pole_mass() +
+                                     incoming_particles_[1].pole_mass();
 
   bool incl_KN_to_KN = included_2to2[IncludedReactions::KN_to_KN] == 1;
-  bool incl_KN_to_KDelta = included_2to2[IncludedReactions::KN_to_KDelta] == 1
-                        && sqrt_s_ < KN_to_KDelta_cutoff;
+  bool incl_KN_to_KDelta =
+      included_2to2[IncludedReactions::KN_to_KDelta] == 1 &&
+      sqrt_s_ < KN_to_KDelta_cutoff;
   bool incl_Strangeness_exchange =
       included_2to2[IncludedReactions::Strangeness_exchange] == 1;
 
@@ -2024,8 +2020,7 @@ double CrossSections::high_energy() const {
        * that defined in decide_string(). */
       double region_lower = transit_high_energy::sqrts_range_NN[0];
       double region_upper = transit_high_energy::sqrts_range_NN[1];
-      double prob_high =
-          probability_transit_high(region_lower, region_upper);
+      double prob_high = probability_transit_high(region_lower, region_upper);
       xs = xs_l * (1. - prob_high) + xs_h * prob_high;
     }
   }
@@ -2397,10 +2392,10 @@ bool CrossSections::decide_string(bool strings_switch,
      * to fit data */
     const PdgCode pdg1 = t1.pdgcode(), pdg2 = t2.pdgcode();
     const bool is_KplusP =
-       ((pdg1 ==  pdg::K_p || pdg1 ==  pdg::K_z) && (pdg2 ==  pdg::p)) ||
-       ((pdg2 ==  pdg::K_p || pdg2 ==  pdg::K_z) && (pdg1 ==  pdg::p)) ||
-       ((pdg1 == -pdg::K_p || pdg1 == -pdg::K_z) && (pdg2 == -pdg::p)) ||
-       ((pdg2 == -pdg::K_p || pdg2 == -pdg::K_z) && (pdg1 == -pdg::p));
+        ((pdg1 == pdg::K_p || pdg1 == pdg::K_z) && (pdg2 == pdg::p)) ||
+        ((pdg2 == pdg::K_p || pdg2 == pdg::K_z) && (pdg1 == pdg::p)) ||
+        ((pdg1 == -pdg::K_p || pdg1 == -pdg::K_z) && (pdg2 == -pdg::p)) ||
+        ((pdg2 == -pdg::K_p || pdg2 == -pdg::K_z) && (pdg1 == -pdg::p));
     // where to start the AQM strings above mass sum
     double aqm_offset = transit_high_energy::sqrts_add_lower;
     if (is_KplusP) {
@@ -2438,8 +2433,7 @@ bool CrossSections::decide_string(bool strings_switch,
       return false;
     } else {
       // Rescale transition region to [-1, 1]
-      double prob_pythia =
-          probability_transit_high(region_lower, region_upper);
+      double prob_pythia = probability_transit_high(region_lower, region_upper);
       return prob_pythia > random::uniform(0., 1.);
     }
   }
@@ -2456,7 +2450,7 @@ double CrossSections::probability_transit_high(
   }
 
   double x = (sqrt_s_ - 0.5 * (region_lower + region_upper)) /
-                   (region_upper - region_lower);
+             (region_upper - region_lower);
   assert(x >= -0.5 && x <= 0.5);
   double prob = 0.5 * (std::sin(M_PI * x) + 1.0);
   assert(prob >= 0. && prob <= 1.);

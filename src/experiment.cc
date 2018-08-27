@@ -304,8 +304,7 @@ std::string format_measurements(const Particles &particles,
                                 uint64_t scatterings_total,
                                 uint64_t scatterings_this_interval,
                                 const QuantumNumbers &conserved_initial,
-                                SystemTimePoint time_start,
-                                double time) {
+                                SystemTimePoint time_start, double time) {
   const SystemTimeSpan elapsed_seconds = SystemClock::now() - time_start;
 
   const QuantumNumbers current_values(particles);

@@ -76,7 +76,8 @@ void usage(const int rc, const std::string &progname) {
    * <td>This is a shortcut for `-c 'General: { Modus: \<modus\> }'`. Note that
    *     `-m` always overrides `-c`.
    * <tr><td>`-e \<time\>` <td>`--endtime \<time\>`
-   * <td>This is a shortcut for `-c 'General: { End_Time: \<time\> }'`. Note that
+   * <td>This is a shortcut for `-c 'General: { End_Time: \<time\> }'`. Note
+   * that
    *     `-e` always overrides `-c`.
    * <tr><td>`-o \<dir\>` <td>`--output \<dir\>`
    * <td>Sets the output directory. The default output directory is
@@ -251,6 +252,55 @@ ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
  */
 int main(int argc, char *argv[]) {
   using namespace smash;  // NOLINT(build/namespaces)
+
+  // Print a disclaimer to screen
+  /** \todo: Fill in logo in ASCII, webpage and bug report information
+   * properly
+   */
+  std::cout
+      << "\n"
+      << "###########################################################"
+      << "###################"
+      << "\n"
+      << "\n"
+      << " display logo in ASCII"
+      << "\n"
+      << "\n"
+      << " This is SMASH version: " << VERSION_MAJOR << "\n"
+      << " Simulating Many Accelerated Strongly-interacting Hadrons"
+      << "\n"
+      << "\n"
+      << " Distributed under the GNU General Public License 3.0"
+      << " (GPLv3 or later)."
+      << "\n"
+      << " See LICENSE for details."
+      << "\n"
+      << " For the full list of contributors see AUTHORS."
+      << "\n"
+      << "\n"
+      << " When using SMASH, please cite"
+      << "\n"
+      << "      J. Weil et al., Phys.Rev. C94 (2016) no.5, 054905"
+      << "\n"
+      << " and in addition, if Pythia is used please cite"
+      << "\n"
+      << "      T. Sjöstrand, S. Mrenna and P. Skands, JHEP05 (2006) 026,"
+      << "\n"
+      << "              Comput. Phys. Comm. 178 (2008) 852."
+      << "\n"
+      << "\n"
+      << " Webpage: gsi.de/theory/transportsimulations/smash"
+      << "\n"
+      << "\n"
+      << " Report issues at https://github.com/smash/issues"
+      << "\n"
+      << " or via email to smash-user@..."
+      << "\n"
+      << "\n"
+      << "###################################################################"
+      << "############"
+      << "\n" << "\n";
+
   setup_default_float_traps();
 
   const auto &log = logger<LogArea::Main>();
@@ -442,7 +492,6 @@ int main(int argc, char *argv[]) {
     set_default_loglevel(
         configuration.take({"Logging", "default"}, einhard::ALL));
     create_all_loggers(configuration["Logging"]);
-    log.info(progname, " (", VERSION_MAJOR, ')');
 
     int64_t seed = configuration.read({"General", "Randomseed"});
     if (seed < 0) {

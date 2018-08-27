@@ -1825,11 +1825,9 @@ int StringProcess::pdg_map_for_pythia(PdgCode &pdg) {
   PdgCode pdg_mapped(0x0);
 
   if (pdg.baryon_number() == 1) {  // baryon
-    pdg_mapped = pdg.charge() > 0 ?
-                 PdgCode(pdg::p) : PdgCode(pdg::n);
+    pdg_mapped = pdg.charge() > 0 ? PdgCode(pdg::p) : PdgCode(pdg::n);
   } else if (pdg.baryon_number() == -1) {  // antibaryon
-    pdg_mapped = pdg.charge() < 0 ?
-                 PdgCode(-pdg::p) : PdgCode(-pdg::n);
+    pdg_mapped = pdg.charge() < 0 ? PdgCode(-pdg::p) : PdgCode(-pdg::n);
   } else {  // meson
     if (pdg.charge() > 0) {
       pdg_mapped = PdgCode(pdg::pi_p);
