@@ -496,7 +496,7 @@ class StringProcess {
                                Pythia8::Event &event_hadronize);
 
   /**
-   * Identify partions, which are associated with junction legs,
+   * Identify partons, which are associated with junction legs,
    * from a given PYTHIA event record.
    * All partons found are moved into a new event record for the further
    * hadronization process.
@@ -574,9 +574,9 @@ class StringProcess {
 
   /**
    * find two quarks from a diquark. Order does not matter.
-   * \param[in] diquark PDG code of diquark
-   * \param[out] q1 PDG code of quark 1
-   * \param[out] q2 PDG code of quark 2
+   * \param[in] diquark PDG id of diquark
+   * \param[out] q1 PDG id of quark 1
+   * \param[out] q2 PDG id of quark 2
    * \param[out] deg_spin spin degeneracy
    */
   static void quarks_from_diquark(int diquark, int &q1, int &q2, int &deg_spin);
@@ -608,7 +608,9 @@ class StringProcess {
   }
 
   /**
-   * compute the four-momentum properly oriented in the lab frame
+   * compute the four-momentum properly oriented in the lab frame.
+   * While PYTHIA assumes that the collision axis is in z-direction,
+   * this is not necessarly the case in SMASH.
    * \param[in] particle particle object from PYTHIA event generation
    *            where z-axis is set to be the collision axis
    * \param[in] evec_basis three basis vectors in the lab frame

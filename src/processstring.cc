@@ -548,8 +548,7 @@ bool StringProcess::next_NDiffHard() {
     log.debug("  incoming particle ", i, " : ",
               PDGcodes_[i], " is mapped onto ", pdg_for_pythia[i]);
 
-    const std::string s = std::to_string(pdg_for_pythia[i]);
-    PdgCode pdgcode_for_pythia(s);
+    PdgCode pdgcode_for_pythia(std::to_string(pdg_for_pythia[i]));
     /* evaluate how many more constituents incoming hadron has
      * compared to the mapped one. */
     find_excess_constituent(PDGcodes_[i], pdgcode_for_pythia,
@@ -1380,12 +1379,16 @@ void StringProcess::compute_incoming_lightcone_momenta() {
 
 void StringProcess::quarks_from_diquark(int diquark,
                                         int &q1, int &q2, int &deg_spin) {
+  // The 4-digit pdg id should be diquark.
   assert((std::abs(diquark) > 1000) && (std::abs(diquark) < 5510) &&
          (std::abs(diquark) % 100 < 10));
 
+  // The fourth digit corresponds to the spin degeneracy.
   deg_spin = std::abs(diquark) % 10;
+  // Diquark (anti-diquark) is decomposed into two quarks (antiquarks).
   const int sign_anti = diquark > 0 ? 1 : -1;
 
+  // Obtain two quarks (or antiquarks) from the first and second digit.
   q1 = sign_anti * (std::abs(diquark) - (std::abs(diquark) % 1000)) / 1000;
   q2 = sign_anti * (std::abs(diquark) % 1000 - deg_spin) / 100;
 }
