@@ -1648,7 +1648,9 @@ void Experiment<Modus>::update_potentials() {
       const size_t UBlattice_size = UB_lat_->size();
       for (size_t i = 0; i < UBlattice_size; i++) {
         auto jB = (*jmu_B_lat_)[i];
-        const FourVector flow_four_velocity = jB.jmu_net() / jB.density();
+        const FourVector flow_four_velocity = abs(jB.density()) > really_small
+                                            ? jB.jmu_net() / jB.density()
+                                            : FourVector();
         (*UB_lat_)[i] = flow_four_velocity
                         * potentials_->skyrme_pot(jB.density());
         (*FB_lat_)[i] = potentials_->skyrme_force(jB.density(),
@@ -1662,7 +1664,9 @@ void Experiment<Modus>::update_potentials() {
       const size_t UI3lattice_size = UI3_lat_->size();
       for (size_t i = 0; i < UI3lattice_size; i++) {
         auto jI3 = (*jmu_I3_lat_)[i];
-        const FourVector flow_four_velocity = jI3.jmu_net() / jI3.density();
+        const FourVector flow_four_velocity = abs(jI3.density()) > really_small
+                                            ? jI3.jmu_net() / jI3.density()
+                                            : FourVector();
         (*UI3_lat_)[i] = flow_four_velocity
                          * potentials_->symmetry_pot(jI3.density());
         (*FI3_lat_)[i] = potentials_->symmetry_force(
