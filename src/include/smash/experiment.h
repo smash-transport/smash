@@ -381,7 +381,7 @@ class Experiment : public ExperimentBase {
   DensityType dens_type_lattice_printout_ = DensityType::None;
 
   /**
-   * Lattices for Skyme potentials (evaluated in the local rest frame) times
+   * Lattices for Skyrme potentials (evaluated in the local rest frame) times
    * the baryon flow 4-velocity
    */
   std::unique_ptr<RectangularLattice<FourVector>> UB_lat_ = nullptr;
@@ -392,7 +392,7 @@ class Experiment : public ExperimentBase {
    */
   std::unique_ptr<RectangularLattice<FourVector>> UI3_lat_ = nullptr;
 
-  /// Lattices for the electric and magnetic components of the Skyme force
+  /// Lattices for the electric and magnetic components of the Skyrme force
   std::unique_ptr<RectangularLattice<std::pair<ThreeVector, ThreeVector>>>
       FB_lat_;
 
