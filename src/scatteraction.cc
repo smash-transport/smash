@@ -347,10 +347,14 @@ void ScatterAction::sample_angles(std::pair<double, double> masses,
   }
   p_a->set_4momentum(mass_a, pscatt * p_f);
   p_b->set_4momentum(mass_b, -pscatt * p_f);
+
+  /* Debug message is printed before boost, so that p_a and p_b are
+   * the momenta in the center of mass frame and thus opposite to
+   * each other.*/
+  log.debug("p_a: ", *p_a, "\np_b: ", *p_b);
+
   p_a->boost_momentum(-beta_cms);
   p_b->boost_momentum(-beta_cms);
-
-  log.debug("p_a: ", *p_a, "\np_b: ", *p_b);
 }
 
 void ScatterAction::elastic_scattering() {
@@ -429,11 +433,12 @@ void ScatterAction::resonance_formation() {
   } else {
     outgoing_particles_[0].set_formation_time(time_of_execution_);
   }
+  /* this momentum is evaluated in the computational frame. */
   log.debug("Momentum of the new particle: ",
             outgoing_particles_[0].momentum());
 }
 
-/* This function will generate outgoing particles in CM frame
+/* This function will generate outgoing particles in computational frame
  * from a hard process.
  * The way to excite soft strings is based on the UrQMD model */
 void ScatterAction::string_excitation() {
@@ -520,6 +525,8 @@ void ScatterAction::string_excitation() {
             outgoing_particles_[i].set_slow_formation_times(time_of_execution_,
                                                             tform_in);
           }
+          // boost to the computational frame
+          outgoing_particles_[i].boost_momentum(-beta_cm());
         }
       }
       /* Check momentum difference for debugging */

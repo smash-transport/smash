@@ -181,10 +181,12 @@ void Action::sample_angles(std::pair<double, double> masses,
 
   p_a->set_4momentum(masses.first, phitheta.threevec() * pcm);
   p_b->set_4momentum(masses.second, -phitheta.threevec() * pcm);
+  /* Debug message is printed before boost, so that p_a and p_b are
+   * the momenta in the center of mass frame and thus opposite to
+   * each other.*/
+  log.debug("p_a: ", *p_a, "\np_b: ", *p_b);
   p_a->boost_momentum(-beta_cms);
   p_b->boost_momentum(-beta_cms);
-
-  log.debug("p_a: ", *p_a, "\np_b: ", *p_b);
 }
 
 void Action::sample_2body_phasespace() {
