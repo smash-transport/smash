@@ -171,11 +171,11 @@ class StringProcess {
    *        in fragmentation [GeV]
    * \param[in] factor_t_form to be multiplied to soft string formation times
    * \param[in] use_yoyo_model Whether to calculate formation times from the
-                               yoyo-model.
+   *                           yoyo-model.
    *
    * \see StringProcess::common_setup_pythia(Pythia8::Pythia *,
    *                     double, double, double, double, double)
-   * \see .3rdparty/pythia8230/share/Pythia8/xmldoc/FlavourSelection.xml
+   * \see 3rdparty/pythia8230/share/Pythia8/xmldoc/FlavourSelection.xml
    * \see 3rdparty/pythia8230/share/Pythia8/xmldoc/Fragmentation.xml
    * \see 3rdparty/pythia8230/share/Pythia8/xmldoc/MasterSwitches.xml
    * \see 3rdparty/pythia8230/share/Pythia8/xmldoc/MultipartonInteractions.xml
@@ -412,6 +412,11 @@ class StringProcess {
    * Compare the valence quark contents of the actual and mapped hadrons and
    * evaluate how many more constituents the actual hadron has compared to the
    * mapped one.
+   * excess_quark[i - 1] is how many more quarks with flavor i (PDG id i)
+   * pdg_actual has compared to pdg_mapped.
+   * excess_antiq[i - 1] is how many more antiquarks with flavor i (PDG id -i)
+   * pdg_actual has compared to pdg_mapped.
+   *
    * \param[in] pdg_actual PDG code of actual incoming particle.
    * \param[in] pdg_mapped PDG code of mapped particles used in PYTHIA
    *            event generation.
@@ -423,7 +428,16 @@ class StringProcess {
                                       std::array<int, 5> &excess_antiq);
   /**
    * Convert a partonic PYTHIA partice into the desired species
-   * according to the excess of constituents.
+   * and update the excess of constituents.
+   * If the quark flavor i is converted into another flavor j,
+   * excess_constituent[i - 1] increases by 1 and
+   * excess_constituent[j - 1] decreases by 1.
+   * Note that this happens only if
+   * excess_constituent[i - 1] < 0 and excess_constituent[j - 1] > 0
+   * (i.e., the incoming hadron has more constituents with flavor j
+   *  and less constituents with flavor i, compared to the mapped hadron),
+   * so they get closer to 0 after the function call.
+   *
    * \param[out] particle PYTHIA particle object to be converted.
    * \param[out] excess_constituent excess in the number of quark constituents.
    *             If the particle has positive (negative) quark number,
@@ -435,6 +449,12 @@ class StringProcess {
    * Take the intermediate partonic state from PYTHIA event with mapped hadrons
    * and convert constituents into the desired ones according to the excess of
    * quarks and anti-quarks.
+   * Quark (antiquark) flavor is changed and excess of quark (antiquark)
+   * is also updated by calling StringProcess::replace_constituent.
+   * Beginning with the most forward (or backward) constituent,
+   * conversion is done until the total net quark number of each flavor
+   * is same with that of incoming hadrons.
+   *
    * \param[out] event_intermediate PYTHIA partonic event record to be updated
    *             according to the valence quark contents of incoming hadrons.
    * \param[out] excess_quark excess of quarks

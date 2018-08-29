@@ -829,6 +829,8 @@ void StringProcess::replace_constituent(Pythia8::Particle &particle,
       const int l = random::uniform_int(0,
                         static_cast<int>(k_found.size()) - 1);
       k_select = k_found[l];
+      /* flavor jq + 1 is converted into k_select + 1
+       * and excess_constituent is updated. */
       pdgid[iq] = pdgid[iq] > 0 ? k_select + 1 : -(k_select + 1);
       excess_constituent[jq] += 1;
       excess_constituent[k_select] -= 1;
@@ -877,15 +879,20 @@ void StringProcess::restore_constituent(Pythia8::Event &event_intermediate,
 
   bool recovered_quarks = false;
   while (!recovered_quarks) {
+    /* Flavor conversion begins with the most forward and backward parton
+     * respectively for incoming_particles_[0] and incoming_particles_[1]. */
     std::array<bool, 2> find_forward = {true, false};
     const std::array<int, 5> excess_null = {0, 0, 0, 0, 0};
     std::array<int, 5> excess_total = excess_null;
 
-    for (int ih = 0; ih < 2; ih++) {
+    for (int ih = 0; ih < 2; ih++) {  // loop over incoming hadrons
       int nfrag = event_intermediate.size();
-      for (int np_end = 0; np_end < nfrag - 2; np_end++) {
+      for (int np_end = 0; np_end < nfrag - 2; np_end++) {  // constituent loop
         int iforward = 1;
-        // select the most forward or backward parton and change its specie.
+        /* select the np_end-th most forward or backward parton and
+         * change its specie.
+         * np_end = 0 corresponds to the most forward,
+         * np_end = 1 corresponds to the second most forward and so on. */
         for (int ip = 2; ip < event_intermediate.size() - np_end; ip++) {
           const double y_quark_current = event_intermediate[ip].y();
           const double y_quark_forward = event_intermediate[iforward].y();
@@ -917,6 +924,8 @@ void StringProcess::restore_constituent(Pythia8::Event &event_intermediate,
                                   color, anticolor, pquark, mass);
 
         event_intermediate.remove(iforward, iforward);
+        /* Now the last np_end + 1 entries in event_intermediate
+         * are np_end + 1 most forward (or backward) partons. */
       }
 
       // Compute the excess of net quark numbers.
