@@ -1,5 +1,7 @@
 add_subdirectory(einhard)
-set(YAML_CPP_BUILD_TESTS OFF)
+set(YAML_CPP_BUILD_TESTS OFF CACHE INTERNAL "")
+set(YAML_CPP_BUILD_TOOLS OFF CACHE INTERNAL "")
+set(YAML_CPP_BUILD_CONTRIB OFF CACHE INTERNAL "")
 add_subdirectory(yaml-cpp-0.6.2)
 add_subdirectory(pythia8230)
 add_subdirectory(Cuba-4.2)

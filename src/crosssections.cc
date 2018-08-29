@@ -564,7 +564,7 @@ CollisionBranchList CrossSections::npi_yk() const {
       switch (pdg_pion) {
         case pdg::pi_p: {
           const auto& type_Sigma_m_bar = ParticleType::find(-pdg::Sigma_m);
-          const auto& type_Kbar_z = ParticleType::find(-pdg::K_p);
+          const auto& type_Kbar_z = ParticleType::find(-pdg::K_z);
           add_channel(process_list,
                       [&] { return piplusp_sigmapluskplus_pdg(s); }, sqrt_s_,
                       type_Kbar_z, type_Sigma_m_bar);
