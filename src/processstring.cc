@@ -204,7 +204,7 @@ int StringProcess::append_final_state(ParticleList &intermediate_particles,
       ThreeVector v_calc =
           momentum.LorentzBoost(-vcomAB_).velocity();
       double gamma_factor = 1.0 / std::sqrt(1 - (v_calc).sqr());
-      intermediate_particles[i].set_formation_time(
+      intermediate_particles[i].set_slow_formation_times(time_collision_,
           time_formation_const_ * gamma_factor + time_collision_);
     }
 
