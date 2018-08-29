@@ -552,10 +552,6 @@ class StringProcess {
                                        ParticleList &intermediate_particles) {
     const std::string s = std::to_string(pdgid);
     PdgCode pythia_code(s);
-    bool found = ParticleType::exists(pythia_code);
-    if (!found) {
-      return false;
-    }
     ParticleData new_particle(ParticleType::find(pythia_code));
     new_particle.set_4momentum(momentum);
     intermediate_particles.push_back(new_particle);
