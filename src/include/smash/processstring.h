@@ -706,9 +706,14 @@ class StringProcess {
    * mapped onto neutrons. Same rule applies for anti-baryons.
    * Positively (negatively) charged mesons are mapped onto pi+ (pi-).
    * Neutral mesons are mapped onto pi0.
+   * Negatively and positively charged leptons are mapped respectivly onto
+   * electron and positron.
    *
    * \param[in] pdg PdgCode that will be mapped
    * \return mapped PDG id to be used in PYTHIA
+   *
+   * \throw std::runtime_error
+   *        if the incoming particle is neither hadron nor lepton.
    */
   static int pdg_map_for_pythia(PdgCode &pdg);
 

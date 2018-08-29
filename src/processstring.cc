@@ -441,7 +441,7 @@ bool StringProcess::next_DDiff() {
     return false;
   }
   const bool flip_string_ends = true;
-  const bool separate_fragment_baryon = true;
+  const bool separate_fragment_baryon = false;
   const bool success = make_final_state_2strings(quarks, pstr_com, m_str,
                                                  evec_str, flip_string_ends,
                                                  separate_fragment_baryon);
@@ -617,7 +617,6 @@ bool StringProcess::next_NDiffHard() {
     }
   }
   if (!final_state_success) {
-    event_intermediate_.reset();
     return false;
   }
   // add junctions to the intermediate state if there is any.
@@ -1840,7 +1839,7 @@ int StringProcess::pdg_map_for_pythia(PdgCode &pdg) {
     pdg_mapped = pdg.charge() > 0 ? PdgCode(pdg::p) : PdgCode(pdg::n);
   } else if (pdg.baryon_number() == -1) {  // antibaryon
     pdg_mapped = pdg.charge() < 0 ? PdgCode(-pdg::p) : PdgCode(-pdg::n);
-  } else {  // meson
+  } else if (pdg.is_hadron()) {  // meson
     if (pdg.charge() > 0) {
       pdg_mapped = PdgCode(pdg::pi_p);
     } else if (pdg.charge() < 0) {
@@ -1848,6 +1847,12 @@ int StringProcess::pdg_map_for_pythia(PdgCode &pdg) {
     } else {
       pdg_mapped = PdgCode(pdg::pi_z);
     }
+  } else if (pdg.is_lepton()) {  // lepton
+    pdg_mapped = pdg.charge() < 0 ? PdgCode(0x11) : PdgCode(-0x11);
+  } else {
+    log.error("PdgCode", pdg,
+              " could not be mapped onto appropriate PDG id for PYTHIA.");
+    throw std::runtime_error("StringProcess::pdg_map_for_pythia failed.");
   }
 
   return pdg_mapped.get_decimal();
