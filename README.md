@@ -5,7 +5,7 @@ Accelerated Strongly-interacting Hadrons) transport approach for the dynamical
 description of heavy ion reactions. See [Phys. Rev. C 94, 054905
 (2016)](https://arxiv.org/abs/1606.06642) for details.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development hints. A complete User
+See [CONTRIBUTING](CONTRIBUTING.md) for development hints. A complete User
 Guide is found [here](https://fias.uni-frankfurt.de/~smash/extra/user/).
 
 If Pythia is used, please cite the following references:
@@ -62,7 +62,7 @@ which will only compile the SMASH binary. By default, the unit tests are also
 compiled which requires a lot of the disk space. It is still recommended to run
 the unit tests at least once when compiling in a new environment to ensure that
 everything works as expected. To see how to run the tests see
-[CONTRIBUTING.md](CONTRIBUTING.md).
+[CONTRIBUTING](CONTRIBUTING.md).
 
 
 ### Changing the compiler
@@ -184,5 +184,5 @@ reproduce published results of the authors. Cooperation and joint projects with 
 researchers are encouraged and comparison to results by experimental collaborations
 is supported. If you are interested in starting a project, please contact us to avoid
 interference with current thesis topics. If your project involves changes to the code,
-please refer to [CONTRIBUTING.md](CONTRIBUTING.md) for coding guidelines and
+please refer to [CONTRIBUTING](CONTRIBUTING.md) for coding guidelines and
 helpful tools.
