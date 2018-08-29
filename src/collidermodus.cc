@@ -232,7 +232,7 @@ namespace smash {
  * /input. Note though that these files were previously copied to the build
  * directory, so changng the ones in the /input directory will not affect the
  * default SMASH run. To run SMASH
- * in the default setup, execute \n
+ * in the (default) collider setup, execute \n
  * \n
  * \verbatim
     ./smash

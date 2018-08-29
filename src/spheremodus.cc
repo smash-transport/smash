@@ -125,7 +125,7 @@ namespace smash {
  \endverbatim
  * \n
  * Where 'INPUT_DIR' needs to be replaced by the path to the input directory
- * ('..', if the build directory is located in the smash
+ * ('../input', if the build directory is located in the smash
  * folder).
  *
  */

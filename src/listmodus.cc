@@ -107,7 +107,7 @@ namespace smash {
  * SMASH is shipped with an example configuration file to set up an afterburner
  * simulation by means of the list modus. This also requires a particle list to
  * be read in. Both, the configuration file and the particle list, are located
- * in /input/sphere. To run SMASH with the provided example configuration and
+ * in /input/list. To run SMASH with the provided example configuration and
  * particle list, execute \n
  * \n
  * \verbatim
@@ -115,7 +115,7 @@ namespace smash {
  \endverbatim
  * \n
  * Where 'INPUT_DIR' needs to be replaced by the path to the input directory
- * ('..', if the build directory is located in the smash
+ * ('../input', if the build directory is located in the smash
  * folder).
  */
 

@@ -150,7 +150,7 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
  \endverbatim
  * \n
  * Where 'INPUT_DIR' needs to be replaced by the path to the input directory
- * ('..', if the build directory is located in the smash
+ * ('../input', if the build directory is located in the smash
  * folder).
  */
 BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
