@@ -1084,9 +1084,15 @@ void StringProcess::compose_string_junction(bool &find_forward_string,
 
   event_hadronize.reset();
 
+  /* Move the first junction to the event record for hadronization
+   * and specify color or anti-color indices to be found.
+   * If junction kind is an odd number, it connects three quarks
+   * to make a color-neutral baryonic configuration.
+   * Otherwise, it connects three antiquarks
+   * to make a color-neutral anti-baryonic configuration. */
   const int kind = event_intermediate.kindJunction(0);
   bool sign_color = kind % 2 == 1;
-  std::vector<int> col;
+  std::vector<int> col;  // color or anti-color indices of the junction legs
   for (int j = 0; j < 3; j++) {
     col.push_back(event_intermediate.colJunction(0, j));
   }
@@ -1104,13 +1110,16 @@ void StringProcess::compose_string_junction(bool &find_forward_string,
       found_string = found_string && col[j] == 0;
     }
     if (!found_string) {
-      /* if there is any leg which is not associated with parton,
-       * find another junction(s) connected. */
+      /* if there is any leg which is not closed with parton,
+       * look over junctions and find connected ones. */
       log.debug("  still has leg(s) unfinished.");
       sign_color = !sign_color;
       std::vector<int> junction_to_move;
       for (int i = 0; i < event_intermediate.sizeJunction(); i++) {
         const int kind_new = event_intermediate.kindJunction(i);
+        /* If the original junction is associated with positive baryon number,
+         * it looks for anti-junctions whose legs are connected with
+         * anti-quarks (anti-colors in general). */
         if (sign_color != (kind_new % 2 == 1)) {
           continue;
         }
@@ -1121,6 +1130,7 @@ void StringProcess::compose_string_junction(bool &find_forward_string,
         }
 
         int n_legs_connected = 0;
+        // loop over remaining legs
         for (unsigned int j = 0; j < col.size(); j++) {
           if (col[j] == 0) {
             continue;
@@ -1134,6 +1144,7 @@ void StringProcess::compose_string_junction(bool &find_forward_string,
           }
         }
 
+        // specify which junction is connected to the original one.
         if (n_legs_connected > 0) {
           for (int k = 0; k < 3; k++) {
             if (col_new[k] != 0) {
@@ -1149,6 +1160,8 @@ void StringProcess::compose_string_junction(bool &find_forward_string,
         }
       }
 
+      /* If there is any connected junction,
+       * move it to the event record for hadronization. */
       for (unsigned int i = 0; i < junction_to_move.size(); i++) {
         unsigned int imove = junction_to_move[i] - i;
         const int kind_add = event_intermediate.kindJunction(imove);

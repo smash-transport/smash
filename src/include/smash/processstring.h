@@ -473,13 +473,15 @@ class StringProcess {
    * hadronization process.
    * Note that col and acol of Pythia8::Particle contain information
    * on the color flow.
+   * This function begins with the most forward (or backward) parton.
+   *
    * For example,
    * quark (col = 1, acol = 0), gluon (col = 2, acol = 1)
    * and antiquark (col = 0, acol = 2) correspond to
    * a \f$ \bar{q} \, g \, q \f$ mesonic string.
    * quark (col = 1, acol = 0) and diquark (col = 0, acol = 1) correspond to
    * a \f$ qq \, q\f$ baryonic string.
-   * This function begins with the most forward (or backward) parton.
+   *
    * \param[in] find_forward_string If it is set to be true (false),
    *                                it begins with forward (backward) parton.
    * \param[out] event_intermediate PYTHIA event record
@@ -500,7 +502,15 @@ class StringProcess {
    * to make a color-neutral baryonic (anti-baryonic) configuration.
    * A junction (anti-junction) carries three color (anti-color) indices
    * which are connected with quarks (antiquarks).
-   * This function begins with a junction.
+   * This function begins with the first junction.
+   *
+   * For example,
+   * if there is a kind-1 junction with legs (col = 1, 2 and 3),
+   * it will first look for three partons with color indices col = 1, 2 and 3
+   * and trace color indices until each leg is ``closed'' with quark.
+   * If there is no quark in the end, there should be an anti-junction
+   * and its legs are connected to partons with corresponding anti-colors.
+   *
    * \param[out] find_forward_string If it is set to be true (false),
    *                                 it is a string in the forward (backward)
    *                                 direction.
@@ -525,7 +535,7 @@ class StringProcess {
    *                       baryonic (anti-baryonic) string
    * \param[out] col set of color indices that need to be found.
    *                 The value is set to be zero
-   *                 if corresponding partons are found.
+   *                 once the corresponding partons are found.
    * \param[out] event_intermediate PYTHIA event record
    *                                from which a string is identified.
    *                                All partons and junction(s) found here
