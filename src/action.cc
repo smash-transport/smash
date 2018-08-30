@@ -163,7 +163,7 @@ std::pair<double, double> Action::sample_masses(const double kinetic_energy_cm)
 }
 
 void Action::sample_angles(std::pair<double, double> masses,
-     const double kinetic_energy_cm, const ThreeVector beta_cms) {
+     const double kinetic_energy_cm) {
   const auto &log = logger<LogArea::Action>();
 
   ParticleData *p_a = &outgoing_particles_[0];
@@ -185,8 +185,6 @@ void Action::sample_angles(std::pair<double, double> masses,
    * the momenta in the center of mass frame and thus opposite to
    * each other.*/
   log.debug("p_a: ", *p_a, "\np_b: ", *p_b);
-  p_a->boost_momentum(-beta_cms);
-  p_b->boost_momentum(-beta_cms);
 }
 
 void Action::sample_2body_phasespace() {
@@ -194,11 +192,10 @@ void Action::sample_2body_phasespace() {
   assert(outgoing_particles_.size() == 2);
   const FourVector p_tot = total_momentum_of_outgoing_particles();
   const double cm_kin_energy = p_tot.abs();
-  const ThreeVector beta_cms = p_tot.velocity();
   // first sample the masses
   const std::pair<double, double> masses = sample_masses(cm_kin_energy);
   // after the masses are fixed (and thus also pcm), sample the angles
-  sample_angles(masses, cm_kin_energy, beta_cms);
+  sample_angles(masses, cm_kin_energy);
 }
 
 void Action::check_conservation(const uint32_t id_process) const {

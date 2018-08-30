@@ -191,6 +191,8 @@ void DecayAction::generate_final_state() {
     log.debug("particle momenta in lrf ", p);
     // assuming decaying particles are always fully formed
     p.set_formation_time(time_of_execution_);
+    // Boost to the computational frame
+    p.boost_momentum(-total_momentum_of_outgoing_particles().velocity());
     log.debug("particle momenta in comp ", p);
   }
 }

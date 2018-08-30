@@ -97,6 +97,9 @@ void ScatterAction::generate_final_state() {
   }
 
   for (ParticleData &new_particle : outgoing_particles_) {
+    // Boost to the computational frame
+    new_particle.boost_momentum(-total_momentum_of_outgoing_particles()
+                                                           .velocity());
     /* Set positions of the outgoing particles */
     if (proc->get_type() != ProcessType::Elastic) {
       new_particle.set_4position(middle_point);
@@ -246,7 +249,7 @@ static double Cugnon_bnp(double plab) {
 }
 
 void ScatterAction::sample_angles(std::pair<double, double> masses,
-     double kinetic_energy_cm, ThreeVector beta_cms) {
+     double kinetic_energy_cm) {
   if (is_string_soft_process(process_type_) ||
       (process_type_ == ProcessType::StringHard)) {
     // We potentially have more than two particles, so the following angular
@@ -352,9 +355,6 @@ void ScatterAction::sample_angles(std::pair<double, double> masses,
    * the momenta in the center of mass frame and thus opposite to
    * each other.*/
   log.debug("p_a: ", *p_a, "\np_b: ", *p_b);
-
-  p_a->boost_momentum(-beta_cms);
-  p_b->boost_momentum(-beta_cms);
 }
 
 void ScatterAction::elastic_scattering() {
@@ -364,7 +364,7 @@ void ScatterAction::elastic_scattering() {
   // resample momenta
   sample_angles({outgoing_particles_[0].effective_mass(),
                  outgoing_particles_[1].effective_mass()},
-                sqrt_s(), beta_cm());
+                sqrt_s());
 }
 
 void ScatterAction::inelastic_scattering() {
@@ -412,9 +412,9 @@ void ScatterAction::resonance_formation() {
     s += incoming_particles_[1].pdgcode().string() + ")";
     throw InvalidResonanceFormation(s);
   }
-
-  outgoing_particles_[0].set_4momentum(total_momentum_of_outgoing_particles());
-
+  // Set the momentum of the formed resonance in its rest frame.
+  outgoing_particles_[0].set_4momentum(total_momentum_of_outgoing_particles()
+                                                          .abs(), 0., 0., 0.);
   /* Set the formation time of the resonance to the larger formation time of the
    * incoming particles, if it is larger than the execution time; execution time
    * is otherwise taken to be the formation time */
@@ -525,8 +525,6 @@ void ScatterAction::string_excitation() {
             outgoing_particles_[i].set_slow_formation_times(time_of_execution_,
                                                             tform_in);
           }
-          // boost to the computational frame
-          outgoing_particles_[i].boost_momentum(-beta_cm());
         }
       }
       /* Check momentum difference for debugging */

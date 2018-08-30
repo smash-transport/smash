@@ -473,7 +473,7 @@ class Action {
    * \param[in] masses masses of each of the final state particles
    */
   virtual void sample_angles(std::pair<double, double> masses,
-          double kinetic_energy_cm, ThreeVector beta_cms);
+          double kinetic_energy_cm);
 
   /**
    * Sample the full 2-body phase-space (masses, momenta, angles)
