@@ -666,13 +666,16 @@ bool StringProcess::next_NDiffHard() {
             event_intermediate_.size(), " partons.");
   // identify and fragment strings until there is no parton left.
   while (event_intermediate_.size() > 1) {
-    /* identify string from a most forward or backward parton.
-     * if there is no junction. */
-    compose_string_parton(find_forward_string,
-                          event_intermediate_, pythia_hadron_->event);
-    // identify string from a junction if there is any.
-    compose_string_junction(find_forward_string,
+    if (event_intermediate_.sizeJunction() > 0) {
+      // identify string from a junction if there is any.
+      compose_string_junction(find_forward_string,
+                              event_intermediate_, pythia_hadron_->event);
+    } else {
+      /* identify string from a most forward or backward parton.
+       * if there is no junction. */
+      compose_string_parton(find_forward_string,
                             event_intermediate_, pythia_hadron_->event);
+    }
 
     pythia_hadron_->rndm.init(random::uniform_int(1,
                                   std::numeric_limits<int>::max()));
@@ -982,11 +985,6 @@ void StringProcess::compose_string_parton(bool find_forward_string,
                                           Pythia8::Event &event_hadronize) {
   const auto &log = logger<LogArea::Pythia>();
 
-  // if there is a junction, process it first.
-  if (event_intermediate.sizeJunction() > 0) {
-    return;
-  }
-
   Pythia8::Vec4 pSum = 0.;
   event_hadronize.reset();
 
@@ -1072,10 +1070,6 @@ void StringProcess::compose_string_junction(bool &find_forward_string,
                                             Pythia8::Event &event_intermediate,
                                             Pythia8::Event &event_hadronize) {
   const auto &log = logger<LogArea::Pythia>();
-
-  if (event_intermediate.sizeJunction() == 0) {
-    return;
-  }
 
   event_hadronize.reset();
 
@@ -1859,8 +1853,6 @@ int StringProcess::pdg_map_for_pythia(PdgCode &pdg) {
   } else if (pdg.is_lepton()) {  // lepton
     pdg_mapped = pdg.charge() < 0 ? PdgCode(0x11) : PdgCode(-0x11);
   } else {
-    log.error("PdgCode", pdg,
-              " could not be mapped onto appropriate PDG id for PYTHIA.");
     throw std::runtime_error("StringProcess::pdg_map_for_pythia failed.");
   }
 
