@@ -305,6 +305,10 @@ Sections into `doc/userguide.dox` which is then included into the User Guide
 Doxygen tree. Currently, the cmake script processes all `src/include/*.h` and
 `src/*.cc` files.
 
+### Markdown Documents
+
+The markdown documents included in the repository follow the Markdown dialect of Github that is specified [here](https://github.github.com/gfm/).
+
 ## Coding Rules
 
 * [Google Naming & Formatting
@@ -321,7 +325,7 @@ Our Naming & Formatting Rules follow the Google Styleguide. We keep a copy of
 the relevant sections to be able to make small adjustments and hide the C++
 Coding Guidelines sections.
 
-Note that we use `clang-format` for formatting (see README for installation,
+Note that we use `clang-format` for formatting (see [README](README.md) for installation,
 usage explained below), so you can just use that instead of having to worry
 about formatting by hand in accordance with the style guide.
 
