@@ -1503,6 +1503,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
 
   if (separate_fragment_baryon &&
       (std::abs(bstring) == 3) && (mString > m_const[0] + m_const[1] + 1.)) {
+    // in the case of separate fragmentation function for leading baryons
     const double ssbar_supp = pythia_hadron_->parm("StringFlav:probStoUD");
     std::array<ThreeVector, 3> evec_basis;
     make_orthonormal_basis(evecLong, evec_basis);
@@ -1517,21 +1518,29 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
     bool found_leading_baryon = false;
     while (!found_leading_baryon) {
       int idnew_qqbar = 0;
+      /* Determine flavor of the new qqbar pair
+       * based on the strangeness suppression factor specifed in config. */
       if (random::uniform(0., 1. + ssbar_supp) < 1.) {
         if (random::uniform_int(0, 1) == 0) {
-          idnew_qqbar = 1;
+          idnew_qqbar = 1;  // ddbar pair
         } else {
-          idnew_qqbar = 2;
+          idnew_qqbar = 2;  // uubar pair
         }
       } else {
-        idnew_qqbar = 3;
+        idnew_qqbar = 3;  // ssbar pair
       }
 
       int id_diquark = 0;
       if (bstring > 0) {
+        /* q(idq1) + diquark(idq2) baryonic string fragments into
+         * q(idq1) + qbar(-idnew_qqbar) mesonic string and
+         * q(idnew_qqbar) + diquark(idq2) baryon. */
         id_diquark = std::abs(idq2);
         idqIn[1] = -idnew_qqbar;
       } else {
+        /* anti-diquark(idq1) + qbar(idq2) anti-baryonic string fragments into
+         * q(idnew_qqbar) + qbar(idq2) mesonic string and
+         * anti-diquark(idq1) + qbar(-idnew_qqbar) antibaryon. */
         id_diquark = std::abs(idq1);
         idqIn[0] = idnew_qqbar;
       }
@@ -1539,6 +1548,8 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
                 idnew_qqbar, ", ", id_diquark);
 
       std::array<int, 5> frag_net_q;
+      /* Evaluate total net quark number of baryon (antibaryon)
+       * from the valence quark constituents. */
       for (int iq = 0; iq < 5; iq++) {
         frag_net_q[iq] = (bstring > 0 ? 1 : -1) *
                          (pythia_hadron_->particleData.nQuarksInCode(
@@ -1558,9 +1569,9 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
       std::vector<int> pdgid_possible;
       std::vector<double> weight_possible;
       std::vector<double> weight_summed;
-      pdgid_possible.clear();
-      weight_possible.clear();
-      weight_summed.clear();
+      /* loop over hadronic species
+       * Any hadron with the same valence quark contents is allowed and
+       * the probability goes like spin degeneracy over mass. */
       for (auto &ptype : ParticleType::list_all()) {
         const int pdgid = (bstring > 0 ? 1 : -1) *
                           std::abs(ptype.pdgcode().get_decimal());
@@ -1586,6 +1597,8 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
         weight_summed.push_back(weight_summed[i] + weight_possible[i]);
       }
 
+      /* Sample baryon (antibaryon) specie,
+       * which is fragmented from the leading diquark (anti-diquark). */
       int pdgid_frag = 0;
       const double uspc = random::uniform(0., weight_summed[n_possible]);
       for (int i = 0; i < n_possible; i++) {
@@ -1595,13 +1608,16 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
           break;
         }
       }
+      // Sample mass.
       const double mass_frag = pythia_hadron_->particleData.mSel(pdgid_frag);
 
+      // Sample transverse momentum carried by baryon (antibaryon).
       QTrx = random::normal(0., sigma_qperp_ / sqrt2_);
       QTry = random::normal(0., sigma_qperp_ / sqrt2_);
       QTrn = std::sqrt(QTrx * QTrx + QTry * QTry);
       const double mTrn_frag = std::sqrt(QTrn * QTrn + mass_frag * mass_frag);
 
+      // Sample lightcone momentum fraction carried by the baryon (antibaryon).
       double xfrac = 0.;
       const double xf_const_A = leading_frag_width_;
       const double xf_const_B = leading_frag_mean_;
@@ -1613,6 +1629,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
                              std::atan(0.5 * xf_const_B / xf_const_A);
         xfrac = xf_const_B + 2. * xf_const_A * std::tan(angle);
 
+        // The separate fragmentation function has a gaussian shape.
         const double xf_tmp = std::abs(xfrac - xf_const_B) / xf_const_A;
         const double xf_env = (1. + really_small) / (1. + xf_tmp * xf_tmp / 4.);
         const double xf_pdf = std::exp(-xf_tmp * xf_tmp / 2.);
@@ -1622,6 +1639,8 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
         }
       }
 
+      /* Determine kinematics of the fragmented baryon (antibaryon) and
+       * remaining (mesonic) string. */
       const double ppos_frag = xfrac * mString / sqrt2_;
       const double pneg_frag = 0.5 * mTrn_frag * mTrn_frag / ppos_frag;
       ppos_string_new = mString / sqrt2_ - ppos_frag;
@@ -1648,6 +1667,8 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
                             evec_basis[1] * QTrx + evec_basis[2] * QTry);
         log.debug("appending the leading baryon ", pdgid_frag,
                   " to the intermediate particle list.");
+        /* If the remaining string has enough transverse mass,
+         * add fragmented baryon (antibaryon) to the intermediate list. */
         bool found_ptype = append_intermediate_list(pdgid_frag, mom_frag,
                                                     intermediate_particles);
         if (!found_ptype) {
@@ -1667,6 +1688,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
     std::array<double, 2> ppos_parton;
     std::array<double, 2> pneg_parton;
 
+    // lightcone momenta of the string ends (quark and antiquark)
     const double pb_const = (mTrn_string_new * mTrn_string_new +
                             m_trans[0] * m_trans[0] - m_trans[1] * m_trans[1]) /
                            (4. * pneg_string_new);
@@ -1685,6 +1707,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
     ThreeVector three_mom;
     Pythia8::Vec4 pquark;
 
+    // quark end of the remaining (mesonic) string
     color = 1;
     anticolor = 0;
     if (bstring > 0) {
@@ -1699,6 +1722,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
     pythia_hadron_->event.append(idqIn[0], status, color, anticolor,
                                  pquark, m_const[0]);
 
+    // antiquark end of the remaining (mesonic) string
     color = 0;
     anticolor = 1;
     if (bstring > 0) {
