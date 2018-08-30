@@ -629,6 +629,8 @@ bool StringProcess::next_NDiffHard() {
     }
     event_intermediate_.appendJunction(kind, col[0], col[1], col[2]);
   }
+  /* The zeroth entry of event record is supposed to have the information
+   * on the whole system. Specify the total momentum and invariant mass. */
   event_intermediate_[0].p(pSum);
   event_intermediate_[0].m(pSum.mCalc());
 
@@ -723,9 +725,6 @@ bool StringProcess::next_NDiffHard() {
     /* if hadronization is not successful,
      * reset the event records, return false and then start over. */
     if (!hadronize_success) {
-      event_intermediate_.reset();
-      pythia_hadron_->event.reset();
-      new_intermediate_particles.clear();
       break;
     }
 
@@ -976,6 +975,8 @@ void StringProcess::restore_constituent(Pythia8::Event &event_intermediate,
   }
 
   log.debug("  final total energy [GeV] : ", pSum.e());
+  /* The zeroth entry of event record is supposed to have the information
+   * on the whole system. Specify the total momentum and invariant mass. */
   event_intermediate[0].p(pSum);
   event_intermediate[0].m(pSum.mCalc());
 }
@@ -1050,6 +1051,14 @@ void StringProcess::compose_string_parton(bool find_forward_string,
     if (ifound < 0) {
       event_intermediate.list();
       event_intermediate.listJunctions();
+      event_hadronize.list();
+      event_hadronize.listJunctions();
+      if (col_to_find != 0) {
+        log.error("No parton with col = ", col_to_find);
+      }
+      if (acol_to_find != 0) {
+        log.error("No parton with acol = ", acol_to_find);
+      }
       throw std::runtime_error("Hard string could not be identified.");
     } else {
       pSum += event_intermediate[ifound].p();
@@ -1062,6 +1071,8 @@ void StringProcess::compose_string_parton(bool find_forward_string,
     }
   }
 
+  /* The zeroth entry of event record is supposed to have the information
+   * on the whole system. Specify the total momentum and invariant mass. */
   event_hadronize[0].p(pSum);
   event_hadronize[0].m(pSum.mCalc());
 }
@@ -1076,7 +1087,6 @@ void StringProcess::compose_string_junction(bool &find_forward_string,
   const int kind = event_intermediate.kindJunction(0);
   bool sign_color = kind % 2 == 1;
   std::vector<int> col;
-  col.clear();
   for (int j = 0; j < 3; j++) {
     col.push_back(event_intermediate.colJunction(0, j));
   }
@@ -1099,7 +1109,6 @@ void StringProcess::compose_string_junction(bool &find_forward_string,
       log.debug("  still has leg(s) unfinished.");
       sign_color = !sign_color;
       std::vector<int> junction_to_move;
-      junction_to_move.clear();
       for (int i = 0; i < event_intermediate.sizeJunction(); i++) {
         const int kind_new = event_intermediate.kindJunction(i);
         if (sign_color != (kind_new % 2 == 1)) {
@@ -1195,6 +1204,10 @@ void StringProcess::find_junction_leg(bool sign_color, std::vector<int> &col,
         if (event_intermediate.sizeJunction() == 0) {
           event_intermediate.list();
           event_intermediate.listJunctions();
+          event_hadronize.list();
+          event_hadronize.listJunctions();
+          log.error("No parton with col = ", col[j],
+                    " connected with junction leg ", j);
           throw std::runtime_error("Hard string could not be identified.");
         }
       } else {
@@ -1212,6 +1225,8 @@ void StringProcess::find_junction_leg(bool sign_color, std::vector<int> &col,
     }
   }
 
+  /* The zeroth entry of event record is supposed to have the information
+   * on the whole system. Specify the total momentum and invariant mass. */
   event_hadronize[0].p(pSum);
   event_hadronize[0].m(pSum.mCalc());
 }
@@ -1451,12 +1466,12 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
   std::array<double, 2> m_const;
 
   for (int i = 0; i < 2; i++) {
-    // evaluate 3 times total baryon number of the string
+    // evaluate total baryon number of the string times 3
     bstring += pythia_hadron_->particleData.baryonNumberType(idqIn[i]);
 
     m_const[i] = pythia_hadron_->particleData.m0(idqIn[i]);
   }
-  log.debug("3 times baryon number of string : ", bstring);
+  log.debug("baryon number of string times 3 : ", bstring);
 
   if (flip_string_ends && random::uniform_int(0, 1) == 0) {
     /* in the case where we flip the string ends,
