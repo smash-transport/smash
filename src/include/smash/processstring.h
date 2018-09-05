@@ -442,6 +442,10 @@ class StringProcess {
    * \param[out] excess_constituent excess in the number of quark constituents.
    *             If the particle has positive (negative) quark number,
    *             excess of quarks (anti-quarks) should be used.
+   *
+   * \see StringProcess::restore_constituent(Pythia8::Event &,
+   *                         std::array<std::array<int, 5>, 2> &,
+   *                         std::array<std::array<int, 5>, 2> &)
    */
   void replace_constituent(Pythia8::Particle &particle,
                            std::array<int, 5> &excess_constituent);
@@ -454,6 +458,7 @@ class StringProcess {
    * Beginning with the most forward (or backward) constituent,
    * conversion is done until the total net quark number of each flavor
    * is same with that of incoming hadrons.
+   * (i.e., excess_quark minus excess_antiq of incoming hadrons becomes zero.)
    *
    * \param[out] event_intermediate PYTHIA partonic event record to be updated
    *             according to the valence quark contents of incoming hadrons.
@@ -461,6 +466,9 @@ class StringProcess {
    *             in incoming particles, compared to the mapped ones.
    * \param[out] excess_antiq excess of anti-quarks
    *             in incoming particles, compared to the mapped ones.
+   *
+   * \see StringProcess::replace_constituent(Pythia8::Particle &,
+   *                                         std::array<int, 5> &)
    */
   void restore_constituent(Pythia8::Event &event_intermediate,
                            std::array<std::array<int, 5>, 2> &excess_quark,
@@ -520,6 +528,9 @@ class StringProcess {
    *                                are removed.
    * \param[out] event_hadronize PYTHIA event record
    *                             to which partons in a string are added.
+   *
+   * \see StringProcess::find_junction_leg(bool, std::vector<int> &,
+   *                                       Pythia8::Event &, Pythia8::Event &)
    */
   void compose_string_junction(bool &find_forward_string,
                                Pythia8::Event &event_intermediate,
@@ -542,6 +553,9 @@ class StringProcess {
    *                                are removed.
    * \param[out] event_hadronize PYTHIA event record
    *                             to which partons in a string are added.
+   *
+   * \see StringProcess::compose_string_junction(bool &,
+   *                         Pythia8::Event &, Pythia8::Event &)
    */
   void find_junction_leg(bool sign_color, std::vector<int> &col,
                          Pythia8::Event &event_intermediate,
