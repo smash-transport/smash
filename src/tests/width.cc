@@ -77,8 +77,8 @@ static void compare_in_vs_out_width(const ParticleType &t,
                                   });
 
   std::printf("width comparison at m=%5.3f: %8.6f %8.6f %8.6f %8.6f \n", m_R,
-              Gam_out, Gam_in, std::abs(Gam_out - Gam_in), Gam_out / Gam_in);
-  COMPARE_ABSOLUTE_ERROR(Gam_out, Gam_in, 5E-4);
+         Gam_out, Gam_in, std::abs(Gam_out - Gam_in), Gam_out / Gam_in);
+  COMPARE_ABSOLUTE_ERROR(Gam_out, Gam_in, 7E-4);
 }
 
 TEST(Roper_in_vs_out_width) {
