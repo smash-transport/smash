@@ -77,7 +77,7 @@ namespace smash {
  * \li \key IC_Massive - off-equilibrium distribution
  *
  * See \iref{Bazow:2016oky} and \iref{Tindall:2016try} for further explanations
- * about the different distribution functions..
+ * about the different distribution functions.
  *
  * \n
  * Examples: Configuring a Sphere Simulation
@@ -112,6 +112,22 @@ namespace smash {
          Temperature: 0.2
          Use_Thermal_Multiplicities: True
  \endverbatim
+ *
+ * \n
+ * \note
+ * SMASH is shipped with an example configuration file to set up an expanding
+ * sphere simulation initialized with predefined initial particle
+ * multiplicities. This file is located in /input/sphere. To run SMASH
+ * with the provided example configuration for the sphere, execute \n
+ * \n
+ * \verbatim
+    ./smash -i INPUT_DIR/sphere/config.yaml
+ \endverbatim
+ * \n
+ * Where 'INPUT_DIR' needs to be replaced by the path to the input directory
+ * ('../input', if the build directory is located in the smash
+ * folder).
+ *
  */
 
 SphereModus::SphereModus(Configuration modus_config,
