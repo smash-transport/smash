@@ -745,7 +745,6 @@ class StringProcess {
    * Positively charged baryons are mapped onto proton and other baryons are
    * mapped onto neutrons. Same rule applies for anti-baryons.
    * Positively (negatively) charged mesons are mapped onto pi+ (pi-).
-   * Neutral mesons are mapped onto pi0.
    * Negatively and positively charged leptons are mapped respectivly onto
    * electron and positron.
    *
