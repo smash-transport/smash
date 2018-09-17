@@ -94,16 +94,6 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
  * Strangeness chemical potential \f$ \mu_S \f$ used in case if
  * Use_Thermal_Multiplicities is true to compute thermal densities \f$ n_i \f$.
  *
- * \note
- * The box modus is most useful for infinite matter simulations
- * with thermal and chemical equilibration and detailed balance. Detailed
- * balance can however not be conserved if 3-body decays (or higher) are
- * performed. To yield useful results applying a SMASH box simulation, it is
- * therefore necessary to modify the provided default particles.txt and
- * decaymodes.txt by removing 3-body and higher order decays from
- * the decaymodes file and all corresponding particles that can no longer be
- * produced from the particles file.
- *
  * \n
  * Examples: Configuring a Box Simulation
  * --------------
@@ -139,6 +129,29 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
          Baryon_Chemical_Potential: 0.0
          Strange_Chemical_Potential: 0.0
  \endverbatim
+ * \n
+ *
+ * \note
+ * The box modus is most useful for infinite matter simulations
+ * with thermal and chemical equilibration and detailed balance. Detailed
+ * balance can however not be conserved if 3-body decays (or higher) are
+ * performed. To yield useful results applying a SMASH box simulation, it is
+ * therefore necessary to modify the provided default particles.txt and
+ * decaymodes.txt by removing 3-body and higher order decays from
+ * the decaymodes file and all corresponding particles that can no longer be
+ * produced from the particles file. \n
+ * SMASH is shipped with example files (config.yaml, particles.txt,
+ * decaymodes.txt) meeting the above mentioned requirements to set up an
+ * infinite matter simulation. They are located in /input/box. To run SMASH
+ * with the provided example files, execute \n
+ * \n
+ * \verbatim
+    ./smash -i INPUT_DIR/box/config.yaml -p INPUT_DIR/box/particles.txt -d INPUT_DIR/box/decaymodes.txt
+ \endverbatim
+ * \n
+ * Where 'INPUT_DIR' needs to be replaced by the path to the input directory
+ * ('../input', if the build directory is located in the smash
+ * folder).
  */
 BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
     : initial_condition_(modus_config.take({"Box", "Initial_Condition"})),

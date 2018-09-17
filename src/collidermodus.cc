@@ -224,6 +224,20 @@ namespace smash {
  * Additionally, the impact parameter may be specified manually. See
  * \ref input_impact_parameter_ for an example.
  *
+ * \n
+ * \note
+ * By default, executing SMASH without further specifying the configuration,
+ * particles or decaymodes, a collider simulation is set up according to the
+ * default 'config.yaml', 'particles.txt' and 'decaymodes.txt' files located in
+ * /input. Note though that these files were previously copied to the build
+ * directory, so changng the ones in the /input directory will not affect the
+ * default SMASH run. To run SMASH
+ * in the (default) collider setup, execute \n
+ * \n
+ * \verbatim
+    ./smash
+ \endverbatim
+ *
  */
 
 ColliderModus::ColliderModus(Configuration modus_config,
