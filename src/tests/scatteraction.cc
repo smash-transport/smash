@@ -542,10 +542,10 @@ TEST(pdg_map_for_pythia) {
   pdgid_mapped = StringProcess::pdg_map_for_pythia(pdg_piplus);
   VERIFY(pdgid_mapped == 211);
 
-  // pi0 is mapped onto pi0
+  // pi0 is mapped onto pi+
   PdgCode pdg_pi0 = PdgCode(0x111);
   pdgid_mapped = StringProcess::pdg_map_for_pythia(pdg_pi0);
-  VERIFY(pdgid_mapped == 111);
+  VERIFY(pdgid_mapped == 211);
 
   // pi- is mapped onto pi-
   PdgCode pdg_piminus = PdgCode(-0x211);
