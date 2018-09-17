@@ -1,5 +1,7 @@
 # SMASH README
 
+[![Build Status](https://travis-ci.com/smash-transport/smash-devel.svg?token=6MyxHigvN4vzHpS29fsG&branch=master)](https://travis-ci.com/smash-transport/smash-devel)
+
 This is the repository for the development of the SMASH (Simulating Many
 Accelerated Strongly-interacting Hadrons) transport approach for the dynamical
 description of heavy ion reactions. See [Phys. Rev. C 94, 054905

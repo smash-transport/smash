@@ -1,0 +1,35 @@
+language: cpp
+
+sudo: required
+
+compiler: gcc
+
+before_install:
+  - export SMASH_ROOT=$(pwd)
+  - wget http://ftpmirror.gnu.org/gsl/gsl-1.15.tar.gz &&
+    tar -zxf gsl-1.15.tar.gz &&
+    export GSL=$(pwd)/gsl-1.15 &&
+    cd $GSL &&
+    ./configure --prefix $GSL &&
+    make --silent &&
+    make install --silent &&
+    cd $SMASH_ROOT
+  - wget http://bitbucket.org/eigen/eigen/get/3.3.5.tar.gz &&
+    tar -xf 3.3.5.tar.gz -C $HOME
+  - sudo apt-get install libboost-all-dev -q
+  - pip install --user cpplint
+
+install:
+  - cd $SMASH_ROOT
+  - mkdir build
+  - cd build
+  - cmake -DCMAKE_INSTALL_PREFIX=$HOME/eigen-eigen-b3f3d4950030/ -DGSL_ROOT_DIR=$GSL ..
+  - make
+
+script:
+  - make run_isospin
+  - ctest
+
+notifications:
+  email:
+    - staudenmaier@fias.uni-frankfurt.de
