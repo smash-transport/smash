@@ -1898,7 +1898,7 @@ int StringProcess::pdg_map_for_pythia(PdgCode &pdg) {
     if (pdg.charge() >= 0) {
       pdg_mapped = PdgCode(pdg::pi_p);
     } else {
-      pdg_mapped = PdgCode(pdg::pi_z);
+      pdg_mapped = PdgCode(pdg::pi_m);
     }
   } else if (pdg.is_lepton()) {  // lepton
     pdg_mapped = pdg.charge() < 0 ? PdgCode(0x11) : PdgCode(-0x11);
