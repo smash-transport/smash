@@ -4,6 +4,10 @@ sudo: required
 
 compiler: gcc
 
+branches:
+  only:
+  - master
+
 before_install:
   - export SMASH_ROOT=$(pwd)
   - wget http://ftpmirror.gnu.org/gsl/gsl-1.15.tar.gz &&
