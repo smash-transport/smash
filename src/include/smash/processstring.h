@@ -562,6 +562,36 @@ class StringProcess {
                          Pythia8::Event &event_hadronize);
 
   /**
+   * Obtain index of the most forward or backward particle
+   * in a given PYTHIA event record.
+   * \param[in] find_forward if it looks for the most forward
+   *                         or backward particle.
+   * \param[in] np_end number of the last particle entries to be excluded
+   *                   in lookup. In other words, it finds the most forward
+   *                   (or backward) particle among
+   *                   event[1, ... , event.size() - 1 - np_end].
+   * \param[in] event PYTHIA event record which contains particle entries.
+   *                  Note that event[0] is reserved for information
+   *                  on the entire system.
+   * \return index of the selected particle,
+   *         which is used to access the specific particle entry
+   *         in the event record.
+   */
+  int get_index_forward(bool find_forward, int np_end,
+                        Pythia8::Event &event) {
+    int iforward = 1;
+    for (int ip = 2; ip < event.size() - np_end; ip++) {
+      const double y_quark_current = event[ip].y();
+      const double y_quark_forward = event[iforward].y();
+      if ((find_forward && y_quark_current > y_quark_forward) ||
+          (!find_forward && y_quark_current < y_quark_forward)) {
+        iforward = ip;
+      }
+    }
+    return iforward;
+  }
+
+  /**
    * a function to get the final state particle list
    * which is called after the collision
    * \return ParticleList filled with the final state particles.

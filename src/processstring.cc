@@ -890,21 +890,12 @@ void StringProcess::restore_constituent(Pythia8::Event &event_intermediate,
     for (int ih = 0; ih < 2; ih++) {  // loop over incoming hadrons
       int nfrag = event_intermediate.size();
       for (int np_end = 0; np_end < nfrag - 2; np_end++) {  // constituent loop
-        int iforward = 1;
         /* select the np_end-th most forward or backward parton and
          * change its specie.
          * np_end = 0 corresponds to the most forward,
          * np_end = 1 corresponds to the second most forward and so on. */
-        for (int ip = 2; ip < event_intermediate.size() - np_end; ip++) {
-          const double y_quark_current = event_intermediate[ip].y();
-          const double y_quark_forward = event_intermediate[iforward].y();
-          if ((find_forward[ih] &&
-              y_quark_current > y_quark_forward) ||
-              (!find_forward[ih] &&
-              y_quark_current < y_quark_forward)) {
-            iforward = ip;
-          }
-        }
+        int iforward =
+            get_index_forward(find_forward[ih], np_end, event_intermediate);
         pSum -= event_intermediate[iforward].p();
 
         if (event_intermediate[iforward].id() > 0) {  // quark and diquark
@@ -989,16 +980,9 @@ void StringProcess::compose_string_parton(bool find_forward_string,
   Pythia8::Vec4 pSum = 0.;
   event_hadronize.reset();
 
-  int iforward = 1;
   // select the most forward or backward parton.
-  for (int i = 2; i < event_intermediate.size(); i++) {
-    if ((find_forward_string &&
-         event_intermediate[i].y() > event_intermediate[iforward].y()) ||
-        (!find_forward_string &&
-         event_intermediate[i].y() < event_intermediate[iforward].y())) {
-      iforward = i;
-    }
-  }
+  int iforward =
+      get_index_forward(find_forward_string, 0, event_intermediate);
   log.debug("Hard non-diff: iforward = ", iforward,
             "(", event_intermediate[iforward].id(), ")");
 
