@@ -2062,16 +2062,20 @@ double CrossSections::string_hard_cross_section() const {
   double cross_sec = 0.;
   const ParticleData& data_a = incoming_particles_[0];
   const ParticleData& data_b = incoming_particles_[1];
-  if (data_a.is_baryon() && data_b.is_baryon()) {
-    /* Currently nucleon-nucleon cross section is used for
-     * all baryon-baryon casees. */
-    cross_sec = NN_string_hard(sqrt_s_ * sqrt_s_);
-  } else if (data_a.is_baryon() || data_b.is_baryon()) {
-    // Currently nucleon-pion cross section is used for all baryon-meson cases.
-    cross_sec = Npi_string_hard(sqrt_s_ * sqrt_s_);
-  } else {
-    // Currently pion-pion cross section is used for all meson-meson cases.
-    cross_sec = pipi_string_hard(sqrt_s_ * sqrt_s_);
+  /* Hard strings can only be excited if the lower cutoff by
+   * Pythia is fulfilled */
+  if (sqrt_s_ > 10.) {
+   if (data_a.is_baryon() && data_b.is_baryon()) {
+     /* Currently nucleon-nucleon cross section is used for
+      * all baryon-baryon casees. */
+     cross_sec = NN_string_hard(sqrt_s_ * sqrt_s_);
+   } else if (data_a.is_baryon() || data_b.is_baryon()) {
+     // Currently nucleon-pion cross section is used for all baryon-meson cases.
+     cross_sec = Npi_string_hard(sqrt_s_ * sqrt_s_);
+   } else {
+     // Currently pion-pion cross section is used for all meson-meson cases.
+     cross_sec = pipi_string_hard(sqrt_s_ * sqrt_s_);
+   }
   }
   return cross_sec;
 }
