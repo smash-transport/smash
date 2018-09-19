@@ -142,23 +142,6 @@ std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart(
   return rho_eckart_impl(r, plist, par, dens_type, compute_gradient);
 }
 
-void update_density_lattice(RectangularLattice<DensityOnLattice> *lat,
-                            const LatticeUpdate update,
-                            const DensityType dens_type,
-                            const DensityParameters &par,
-                            const Particles &particles,
-                            const bool compute_gradient) {
-  update_general_lattice(lat, update, dens_type, par, particles,
-                         compute_gradient);
-}
-
-void update_Tmn_lattice(RectangularLattice<EnergyMomentumTensor> *lat,
-                        const LatticeUpdate update, const DensityType dens_type,
-                        const DensityParameters &par,
-                        const Particles &particles) {
-  update_general_lattice(lat, update, dens_type, par, particles);
-}
-
 std::ostream &operator<<(std::ostream &os, DensityType dens_type) {
   switch (dens_type) {
     case DensityType::Hadron:

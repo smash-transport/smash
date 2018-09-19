@@ -16,7 +16,7 @@
 TEST(one_dim_no_arguments) {
   // The used algorithm sometimes underestimates the true error by a few bits
   // of precision.
-  constexpr double eps = std::numeric_limits<double>::epsilon() * 4;
+  constexpr double eps = std::numeric_limits<double>::epsilon() * 5;
   smash::Integrator integrate;
   for (int i = 0; i < 10; ++i) {
     const auto result = integrate(0, i, [](double) { return 1.; });
