@@ -553,6 +553,14 @@ bool StringProcess::next_NDiffHard() {
      * compared to the mapped one. */
     find_excess_constituent(PDGcodes_[i], pdgcode_for_pythia,
                             excess_quark[i], excess_antiq[i]);
+    log.debug("    excess_quark[", i, "] = (",
+              excess_quark[i][0], ", ", excess_quark[i][1], ", ",
+              excess_quark[i][2], ", ", excess_quark[i][3], ", ",
+              excess_quark[i][4], ")");
+    log.debug("    excess_antiq[", i, "] = (",
+              excess_antiq[i][0], ", ", excess_antiq[i][1], ", ",
+              excess_antiq[i][2], ", ", excess_antiq[i][3], ", ",
+              excess_antiq[i][4], ")");
   }
 
   int previous_idA = pythia_parton_->mode("Beams:idA"),
@@ -615,9 +623,6 @@ bool StringProcess::next_NDiffHard() {
       event_intermediate_.append(pdgid, status,
                                  color, anticolor, pquark, mass);
     }
-  }
-  if (!final_state_success) {
-    return false;
   }
   // add junctions to the intermediate state if there is any.
   event_intermediate_.clearJunctions();
@@ -889,7 +894,7 @@ void StringProcess::restore_constituent(Pythia8::Event &event_intermediate,
 
     for (int ih = 0; ih < 2; ih++) {  // loop over incoming hadrons
       int nfrag = event_intermediate.size();
-      for (int np_end = 0; np_end < nfrag - 2; np_end++) {  // constituent loop
+      for (int np_end = 0; np_end < nfrag - 1; np_end++) {  // constituent loop
         /* select the np_end-th most forward or backward parton and
          * change its specie.
          * np_end = 0 corresponds to the most forward,
@@ -900,8 +905,16 @@ void StringProcess::restore_constituent(Pythia8::Event &event_intermediate,
 
         if (event_intermediate[iforward].id() > 0) {  // quark and diquark
           replace_constituent(event_intermediate[iforward], excess_quark[ih]);
+          log.debug("    excess_quark[", ih, "] = (",
+                    excess_quark[ih][0], ", ", excess_quark[ih][1], ", ",
+                    excess_quark[ih][2], ", ", excess_quark[ih][3], ", ",
+                    excess_quark[ih][4], ")");
         } else {  // antiquark and anti-diquark
           replace_constituent(event_intermediate[iforward], excess_antiq[ih]);
+          log.debug("    excess_antiq[", ih, "] = (",
+                    excess_antiq[ih][0], ", ", excess_antiq[ih][1], ", ",
+                    excess_antiq[ih][2], ", ", excess_antiq[ih][3], ", ",
+                    excess_antiq[ih][4], ")");
         }
 
         const int pdgid = event_intermediate[iforward].id();
