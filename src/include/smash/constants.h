@@ -102,6 +102,14 @@ constexpr double fine_structure = 7.2973525698e-3;
 constexpr double maximum_cross_section = 200.;  // mb
 
 /**
+ * Energy in GeV, below which hard reactions via pythia are possible.
+ * This constraint it technical and comes from the pythia model itself.
+ * At the same time, physics-wise, hard cross-sections at the low
+ * energies are so small, that this constrant is well justified.
+ */
+constexpr double minimum_sqrts_pythia_can_handle = 10.0;  // GeV
+
+/**
  * Process ID for any photon process.
  *
  * It is chosen such that it will not conflict with any other process.
