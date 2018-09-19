@@ -84,6 +84,12 @@ constexpr double a1_mass = 1.26;
  * Note that this should be the same as in particles.txt.
  */
 constexpr double delta_mass = 1.232;
+/**
+ * Deuteron mass in GeV.
+ *
+ * Note that this should be the same as in particles.txt.
+ */
+constexpr double deuteron_mass = 1.8756;
 
 /// Fine-struture constant, approximately 1/137.
 constexpr double fine_structure = 7.2973525698e-3;
