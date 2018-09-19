@@ -13,6 +13,7 @@
 #include "forwarddeclarations.h"
 #include "isoparticletype.h"
 #include "particles.h"
+#include "potential_globals.h"
 #include "processstring.h"
 
 namespace smash {
@@ -61,8 +62,11 @@ class CrossSections {
    *
    * \param[in] incoming_particles Particles that are reacting.
    * \param[in] sqrt_s Center-of-mass energy of the reaction.
+   * \param[in] potentials Potentials at the interacting point. they are
+   *            used to calculate the corrections on the thresholds.
    */
-  CrossSections(const ParticleList& incoming_particles, const double sqrt_s);
+  CrossSections(const ParticleList& incoming_particles, const double sqrt_s,
+                const std::pair<FourVector, FourVector> potentials);
 
   /**
    * Generate a list of all possible collisions between the incoming particles
@@ -271,13 +275,6 @@ class CrossSections {
   double probability_transit_high(const double region_lower,
                                   const double region_upper) const;
 
-  /**
-   * \return if the species of the two incoming particles are allowed to
-   * interact via string fragmentation. Currently, only nucleon-nucleon
-   * and nucleon-pion can interact via string.
-   */
-  bool included_in_string() const;
-
  private:
   /**
    * Choose the appropriate parametrizations for given incoming particles and
@@ -468,8 +465,60 @@ class CrossSections {
   /// Total energy in the center-of-mass frame.
   const double sqrt_s_;
 
+  /**
+   * Potentials at the interacting point.
+   * They are used to calculate the corrections on the threshold energies.
+   */
+  const std::pair<FourVector, FourVector> potentials_;
+
   /// Whether incoming particles are a baryon-antibaryon pair
   const bool is_BBbar_pair_;
+
+  /**
+   * Helper function:
+   * Add a 2-to-2 channel to a collision branch list given a cross section.
+   *
+   * The cross section is only calculated if there is enough energy
+   * for the process. If the cross section is small, the branch is not added.
+   */
+  template <typename F>
+  void add_channel(CollisionBranchList& process_list, F&& get_xsection,
+                   double sqrts, const ParticleType& type_a,
+                   const ParticleType& type_b) const {
+    const double sqrt_s_min =
+        type_a.min_mass_spectral() + type_b.min_mass_spectral();
+    /* Determine wether the process is below the threshold. */
+    double scale_B = 0.0;
+    double scale_I3 =0.0;
+    bool is_below_threshold;
+    FourVector incoming_momentum = FourVector();
+    if (pot_pointer != nullptr) {
+      for (const auto p : incoming_particles_) {
+        incoming_momentum += p.momentum();
+        scale_B += pot_pointer->force_scale(p.type()).first;
+        scale_I3 += pot_pointer->force_scale(p.type()).second
+                    * p.type().isospin3_rel();
+      }
+      scale_B -= pot_pointer->force_scale(type_a).first;
+      scale_I3 -= pot_pointer->force_scale(type_a).second
+                  * type_a.isospin3_rel();
+      scale_B -= pot_pointer->force_scale(type_b).first;
+      scale_I3 -= pot_pointer->force_scale(type_b).second
+                  * type_b.isospin3_rel();
+      is_below_threshold = (incoming_momentum + potentials_.first * scale_B
+                         + potentials_.second * scale_I3).abs() <= sqrt_s_min;
+    } else {
+      is_below_threshold = (sqrts <= sqrt_s_min);
+    }
+    if (is_below_threshold) {
+      return;
+    }
+    const auto xsection = get_xsection();
+    if (xsection > really_small) {
+      process_list.push_back(make_unique<CollisionBranch>(
+          type_a, type_b, xsection, ProcessType::TwoToTwo));
+    }
+  }
 };
 
 }  // namespace smash

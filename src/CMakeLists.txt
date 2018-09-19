@@ -74,7 +74,6 @@ set(SMASH_LIBRARIES ${SMASH_LIBRARIES}
 # list the source files
 set(smash_src
         action.cc
-        action_globals.cc
         adaptiverejectionsampler.cc
         boxmodus.cc
         binaryoutputcollisions.cc
@@ -116,6 +115,7 @@ set(smash_src
         particletype.cc
         pdgcode.cc
         potentials.cc
+        potential_globals.cc
         processbranch.cc
         processstring.cc
         propagation.cc

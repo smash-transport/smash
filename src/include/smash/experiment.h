@@ -23,6 +23,7 @@
 #include "grid.h"
 #include "outputparameters.h"
 #include "pauliblocking.h"
+#include "potential_globals.h"
 #include "potentials.h"
 #include "propagation.h"
 #include "quantumnumbers.h"
@@ -1123,7 +1124,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   // Store pointers to potential and lattice accessible for Action
   if (parameters_.potential_affect_threshold) {
-    Action::input_potential(UB_lat_.get(), UI3_lat_.get(), potentials_.get());
+    UB_lat_pointer = UB_lat_.get();
+    UI3_lat_pointer = UI3_lat_.get();
+    pot_pointer = potentials_.get();
   }
 
   // Create forced thermalizer

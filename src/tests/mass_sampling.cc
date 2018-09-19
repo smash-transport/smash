@@ -47,7 +47,8 @@ TEST(omega_decay) {
                       ThreeVector(0., 0., 0.));  // at rest
   const auto act = make_unique<DecayAction>(omega, 0.);
   const auto srts = omega.effective_mass();
-  act->add_decays(type_omega.get_partial_widths_hadronic(srts));
+  act->add_decays(type_omega.get_partial_widths_hadronic(
+                  FourVector(srts, 0., 0., 0.), ThreeVector()));
 
   const double dm = 0.001;       // bin size
   Histogram1d hist_charged(dm);  // histogram for charged rhos

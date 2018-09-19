@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_ACTION_GLOBALS_H_
-#define SRC_INCLUDE_ACTION_GLOBALS_H_
+#ifndef SRC_INCLUDE_POTENTIAL_GLOBALS_H_
+#define SRC_INCLUDE_POTENTIAL_GLOBALS_H_
 
 #include "lattice.h"
 #include "potentials.h"
@@ -32,4 +32,4 @@ extern Potentials *pot_pointer;
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_ACTION_GLOBALS_H_
+#endif  // SRC_INCLUDE_POTENTIAL_GLOBALS_H_

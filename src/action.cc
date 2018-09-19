@@ -18,6 +18,7 @@
 #include "smash/kinematics.h"
 #include "smash/logging.h"
 #include "smash/pauliblocking.h"
+#include "smash/potential_globals.h"
 #include "smash/processbranch.h"
 #include "smash/quantumnumbers.h"
 
@@ -90,14 +91,6 @@ std::pair<FourVector, FourVector> Action::get_potential_at_interaction_point()
   return std::make_pair(UB, UI3);
 }
 
-void Action::input_potential(RectangularLattice<FourVector> *UB_lat,
-                             RectangularLattice<FourVector> *UI3_lat,
-                             Potentials *pot) {
-  UB_lat_pointer = UB_lat;
-  UI3_lat_pointer = UI3_lat;
-  pot_pointer = pot;
-}
-
 void Action::perform(Particles *particles, uint32_t id_process) {
   assert(id_process != 0);
   const auto &log = logger<LogArea::Action>();
@@ -129,8 +122,33 @@ void Action::perform(Particles *particles, uint32_t id_process) {
 
 FourVector Action::total_momentum_of_outgoing_particles() const {
   const auto potentials = get_potential_at_interaction_point();
-  return total_momentum_of_outgoing_particles<ParticleList>(potentials,
-                                                        outgoing_particles_);
+  /* scale_B returns the difference of the total force scales of the skyrme
+   * potential between the initial and final states. */
+  double scale_B = 0.0;
+  /* scale_I3 returns the difference of the total force scales of the symmetry
+   * potential between the initial and final states. */
+  double scale_I3 = 0.0;
+  for (const auto &p_in : incoming_particles_) {
+    // Get the force scale of the incoming particle.
+    const auto scale =
+        ((pot_pointer != nullptr) ? pot_pointer->force_scale(p_in.type())
+                                  : std::make_pair(0.0, 0));
+    scale_B += scale.first;
+    scale_I3 += scale.second * p_in.type().isospin3_rel();
+  }
+  for (const auto &p_out : outgoing_particles_) {
+    // Get the force scale of the outgoing particle.
+    const auto scale = ((pot_pointer != nullptr)
+                            ? pot_pointer->force_scale(type_of_pout(p_out))
+                            : std::make_pair(0.0, 0));
+    scale_B -= scale.first;
+    scale_I3 -= scale.second * type_of_pout(p_out).isospin3_rel();
+  }
+  /* Rescale to get the potential difference between the
+   * initial and final state, and thus get the total momentum
+   * of the outgoing particles*/
+  return total_momentum() + potentials.first * scale_B
+                          + potentials.second * scale_I3;
 }
 
 std::pair<double, double> Action::sample_masses(const double kinetic_energy_cm)

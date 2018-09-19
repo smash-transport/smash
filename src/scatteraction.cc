@@ -13,7 +13,6 @@
 
 #include "Pythia8/Pythia.h"
 
-#include "smash/action_globals.h"
 #include "smash/angles.h"
 #include "smash/constants.h"
 #include "smash/crosssections.h"
@@ -23,6 +22,7 @@
 #include "smash/logging.h"
 #include "smash/parametrizations.h"
 #include "smash/pdgcode.h"
+#include "smash/potential_globals.h"
 #include "smash/pow.h"
 #include "smash/processstring.h"
 #include "smash/random.h"
@@ -51,9 +51,6 @@ void ScatterAction::generate_final_state() {
 
   log.debug("Incoming particles: ", incoming_particles_);
 
-  if (pot_pointer != nullptr) {
-    filter_channel(collision_channels_, total_cross_section_);
-  }
   /* Decide for a particular final state. */
   const CollisionBranch *proc = choose_channel<CollisionBranch>(
       collision_channels_, total_cross_section_);
@@ -111,7 +108,8 @@ void ScatterAction::add_all_scatterings(
     double elastic_parameter, bool two_to_one, ReactionsBitSet included_2to2,
     double low_snn_cut, bool strings_switch, bool use_AQM,
     bool strings_with_probability, NNbarTreatment nnbar_treatment) {
-  CrossSections xs(incoming_particles_, sqrt_s());
+  CrossSections xs(incoming_particles_, sqrt_s(),
+                   get_potential_at_interaction_point());
   CollisionBranchList processes = xs.generate_collision_list(
       elastic_parameter, two_to_one, included_2to2, low_snn_cut, strings_switch,
       use_AQM, strings_with_probability, nnbar_treatment, string_process_);

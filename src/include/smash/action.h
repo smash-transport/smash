@@ -14,7 +14,6 @@
 #include <utility>
 #include <vector>
 
-#include "action_globals.h"
 #include "lattice.h"
 #include "particles.h"
 #include "pauliblocking.h"
@@ -276,49 +275,6 @@ class Action {
   FourVector total_momentum_of_outgoing_particles() const;
 
   /**
-   * Calculate the total (kinetic) momentum of the outgoing particles
-   *
-   * This function is used to determine whether an action is
-   * kinematically feasible.
-   *
-   * \tparam outs Type of outgoing particles
-   * \param[in] potentials skyrme and asymmetry potential for particle [GeV]
-   * \param[in] p_out_types outgoing particle types
-   * \return total kinetic momentum of the outgoing particles [GeV]
-   */
-  template <typename outs>
-  FourVector total_momentum_of_outgoing_particles(
-    std::pair<FourVector, FourVector> potentials, outs p_out_types) const {
-    /* scale_B returns the difference of the total force scales of the skyrme
-     * potential between the initial and final states. */
-    double scale_B = 0.0;
-    /* scale_I3 returns the difference of the total force scales of the symmetry
-     * potential between the initial and final states. */
-    double scale_I3 = 0.0;
-    for (const auto &p_in : incoming_particles_) {
-      // Get the force scale of the incoming particle.
-      const auto scale =
-          ((pot_pointer != nullptr) ? pot_pointer->force_scale(p_in.type())
-                                    : std::make_pair(0.0, 0));
-      scale_B += scale.first;
-      scale_I3 += scale.second * p_in.type().isospin3_rel();
-    }
-    for (const auto &p_out : p_out_types) {
-      // Get the force scale of the outgoing particle.
-      const auto scale = ((pot_pointer != nullptr)
-                              ? pot_pointer->force_scale(type_of_pout(p_out))
-                              : std::make_pair(0.0, 0));
-      scale_B -= scale.first;
-      scale_I3 -= scale.second * type_of_pout(p_out).isospin3_rel();
-    }
-    /* Rescale to get the potential difference between the
-     * initial and final state, and thus get the total momentum
-     * of the outgoing particles*/
-    return total_momentum() + potentials.first * scale_B
-                            + potentials.second * scale_I3;
-  }
-
-  /**
    * Get the interaction point
    *
    * \return four vector of interaction point
@@ -331,18 +287,6 @@ class Action {
    * \return skyrme and asymmetry potential [GeV]
    */
   std::pair<FourVector, FourVector> get_potential_at_interaction_point() const;
-
-  /**
-   * Input the information on the potentials and store in global variables
-   * defined in action_globals.
-   *
-   * \param[in] UB_lat skyrme potential on lattice
-   * \param[in] UI3_lat symmmetry potential on lattice
-   * \param[in] pot potential class
-   */
-  static void input_potential(RectangularLattice<FourVector> *UB_lat,
-                              RectangularLattice<FourVector> *UI3_lat,
-                              Potentials *pot);
 
   /**
    * \ingroup exception
@@ -382,35 +326,6 @@ class Action {
       mom += p.momentum();
     }
     return mom;
-  }
-
-  /**
-   * Remove the sub-threshold processes from the list of sub processes.
-   *
-   * \tparam Branch Type of the processbranch
-   * \param[out] subprocesses list of processes that are possible
-   * \param[out] total_weight summed weight of all subprocess (after filtering)
-   */
-  template <typename Branch>
-  void filter_channel(ProcessBranchList<Branch> &subprocesses,
-                      double &total_weight) {
-    const auto potentials = get_potential_at_interaction_point();
-    /* Loop through all subprocesses and remove sub-threshold ones.*/
-    for (auto proc = subprocesses.begin(); proc != subprocesses.end();) {
-      /* Evaluate the total kinentic energy of the final state particles
-       * of this new subprocess. */
-      const auto out_particle_types = (*proc)->particle_types();
-      const double kin_energy_cm = total_momentum_of_outgoing_particles
-                   <ParticleTypePtrList>(potentials, out_particle_types).abs();
-      /* Reject the process if the total kinetic energy is smaller than the
-       * threshold. */
-      if (kin_energy_cm < (*proc)->threshold()) {
-        total_weight -= (*proc)->weight();
-        proc = subprocesses.erase(proc);
-      } else {
-        ++proc;
-      }
-    }
   }
 
   /**
