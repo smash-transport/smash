@@ -267,7 +267,7 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
     if (pdgcode[0].is_Delta() && !almost_equal(mass, delta_mass)) {
       throw std::runtime_error("Delta mass in input file different from 1.232");
     }
-    if (this->is_deuteron() && !almost_equal(mass, deuteron_mass)) {
+    if (pdgcode[0].is_deuteron() && !almost_equal(mass, deuteron_mass)) {
       throw std::runtime_error("d mass in input file different from 1.8756");
     }
 
