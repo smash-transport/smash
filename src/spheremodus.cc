@@ -160,7 +160,7 @@ std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
   }
   out << "Boltzmann momentum distribution with T = "
       << m.sphere_temperature_ << " GeV.\n";
- return out;
+  return out;
 }
 
 /* initial_conditions - sets particle data for @particles */

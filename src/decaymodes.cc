@@ -172,7 +172,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
       /* Add the list of decay modes for this particle type */
       decaymodes[find_offset(pdgcode)] = std::move(decay_modes_to_add[m]);
     }
-   if (isotype_mother->has_anti_multiplet()) {
+    if (isotype_mother->has_anti_multiplet()) {
       /* Construct the decay modes for the anti-multiplet.  */
       log.debug("generating decay modes for anti-multiplet: " +
                 isotype_mother->name());
@@ -400,7 +400,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
   }
   if (total_large_renormalized > 0) {
     log.warn("Branching ratios of ", total_large_renormalized,
-            " hadrons were renormalized by more than 1\% to have sum 1.");
+            " hadrons were renormalized by more than 1% to have sum 1.");
   }
 }
 

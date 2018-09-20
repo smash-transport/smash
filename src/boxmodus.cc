@@ -51,7 +51,7 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
     out << "Boltzmann momentum distribution with T = "
         << m.temperature_ << " GeV.\n";
   }
- return out;
+  return out;
 }
 
 /*!\Userguide
