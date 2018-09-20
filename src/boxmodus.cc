@@ -157,7 +157,7 @@ BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
     : initial_condition_(modus_config.take({"Box", "Initial_Condition"})),
       length_(modus_config.take({"Box", "Length"})),
       temperature_(modus_config.take({"Box", "Temperature"})),
-      start_time_(modus_config.take({"Box", "Start_Time"})),
+      start_time_(modus_config.take({"Box", "Start_Time"}, 0.)),
       use_thermal_(
           modus_config.take({"Box", "Use_Thermal_Multiplicities"}, false)),
       mub_(modus_config.take({"Box", "Baryon_Chemical_Potential"}, 0.)),
