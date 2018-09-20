@@ -70,8 +70,9 @@ class VtkOutput : public OutputInterface {
   /**
    * Prints the density lattice in VTK format on a grid.
    *
-   * \param tq The quantity whose density should be written.
-   * \param dt The type of the density.
+   * \param tq The quantity whose density should be written,
+   *           see ThermodynamicQuantity.
+   * \param dt The type of the density, see DensityType.
    * \param lattice The lattice from which the quantity is taken.
    */
   void thermodynamics_output(
@@ -81,8 +82,9 @@ class VtkOutput : public OutputInterface {
   /**
    * Prints the energy-momentum-tensor lattice in VTK format on a grid.
    *
-   * \param tq The quantity whose density should be written.
-   * \param dt The type of the density.
+   * \param tq The quantity whose density should be written,
+               see ThermodynamicQuantity.
+   * \param dt The type of the density, see DensityType
    * \param lattice The lattice from which the quantity is taken.
    */
   void thermodynamics_output(
