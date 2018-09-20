@@ -148,18 +148,20 @@ SphereModus::SphereModus(Configuration modus_config,
 
 /* console output on startup of sphere specific parameters */
 std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
-  out << "-- Sphere Modus:\nRadius of the sphere: " << m.radius_ << " [fm]"
-      << "\nTemperature for momentum sampling: " << m.sphere_temperature_
-      << "\nStarting time for Sphere calculation: " << m.start_time_ << '\n';
+  out << "-- Sphere Modus:\nRadius of the sphere: " << m.radius_ << " [fm]\n";
   if (m.use_thermal_) {
-    out << "Thermal multiplicities\n";
+    out << "Thermal multiplicities (T = " << m.sphere_temperature_
+        << " GeV, muB = " << m.mub_ << " GeV, muS = " << m.mus_ << " GeV)\n";
   } else {
     for (const auto &p : m.init_multipl_) {
-      out << "Particle " << p.first << " initial multiplicity " << p.second
-          << '\n';
+      ParticleTypePtr ptype = &ParticleType::find(p.first);
+      out << "Particle " << ptype->name() << " initial multiplicity "
+          << p.second << '\n';
     }
   }
-  return out;
+  out << "Boltzmann momentum distribution with T = "
+      << m.sphere_temperature_ << " GeV.\n";
+ return out;
 }
 
 /* initial_conditions - sets particle data for @particles */
@@ -249,7 +251,7 @@ double SphereModus::initial_conditions(Particles *particles,
     log.debug() << data;
   }
   /* allows to check energy conservation */
-  log.info() << "Sphere initial total 4-momentum [GeV]: " << momentum_total;
+  log.debug() << "Sphere initial total 4-momentum [GeV]: " << momentum_total;
   return start_time_;
 }
 }  // namespace smash

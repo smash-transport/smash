@@ -400,7 +400,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
   }
   if (total_large_renormalized > 0) {
     log.warn("Branching ratios of ", total_large_renormalized,
-            " multiplets were renormalized by more than 1\% to have sum 1.");
+            " hadrons were renormalized by more than 1\% to have sum 1.");
   }
 }
 

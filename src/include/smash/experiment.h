@@ -524,19 +524,6 @@ class Experiment : public ExperimentBase {
 /// Creates a verbose textual description of the setup of the Experiment.
 template <typename Modus>
 std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
-  switch (e.time_step_mode_) {
-    case TimeStepMode::None:
-      out << "Not using time steps\n";
-      break;
-    case TimeStepMode::Fixed:
-      out << "Using fixed time step size: "
-          << e.parameters_.labclock.timestep_duration() << " fm/c\n";
-      break;
-    case TimeStepMode::Adaptive:
-      out << "Using adaptive time steps, starting with: "
-          << e.parameters_.labclock.timestep_duration() << " fm/c\n";
-      break;
-  }
   out << "End time: " << e.end_time_ << " fm/c\n";
   out << e.modus_;
   return out;
@@ -975,7 +962,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    **/
 
   dens_type_ = config.take({"Output", "Density_Type"}, DensityType::None);
-  log.info() << "Density type printed to headers: " << dens_type_;
+  log.debug() << "Density type printed to headers: " << dens_type_;
 
   const OutputParameters output_parameters(std::move(output_conf));
 
@@ -1007,7 +994,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
           "Can't use potentials "
           "with frozen Fermi momenta!");
     }
-    log.info() << "Potentials are ON.";
+    log.info() << "Potentials are ON. Integration timestep is"
+               << parameters_.labclock.timestep_duration();
     // potentials need testparticles and gaussian sigma from parameters_
     potentials_ = make_unique<Potentials>(config["Potentials"], parameters_);
   }

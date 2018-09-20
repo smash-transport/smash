@@ -48,7 +48,7 @@ ExperimentPtr ExperimentBase::create(Configuration config,
    * \li \subpage input_modi_list_
    */
   const std::string modus_chooser = config.read({"General", "Modus"});
-  log.info() << "Modus for this calculation: " << modus_chooser;
+  log.debug() << "Modus for this calculation: " << modus_chooser;
 
   if (modus_chooser == "Box") {
     return make_unique<Experiment<BoxModus>>(config, output_path);
