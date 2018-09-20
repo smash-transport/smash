@@ -133,7 +133,7 @@ ListModus::ListModus(Configuration modus_config, const ExperimentParameters &)
 
 /* console output on startup of List specific parameters */
 std::ostream &operator<<(std::ostream &out, const ListModus &m) {
-  out << "\nInput directory for external particle lists:\n"
+  out << "-- List Modus\nInput directory for external particle lists:\n"
       << m.particle_list_file_directory_ << "\n";
   return out;
 }
