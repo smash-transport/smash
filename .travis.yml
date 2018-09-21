@@ -2,11 +2,34 @@ language: cpp
 
 sudo: required
 
-compiler: gcc
-
 branches:
   only:
   - master
+  - devel
+  - staudenmaier/travis-ci-refine
+
+os:
+  - linux
+  - osx
+
+compiler:
+  - gcc
+  - clang
+
+matrix:
+  exclude:
+  - os: osx
+    compiler: gcc
+  allow_failures:
+  - os: osx
+
+addons:
+  apt:
+    packages:
+    - libboost-all-dev
+  homebrew:
+    packages:
+    - boost
 
 before_install:
   - export SMASH_ROOT=$(pwd)
@@ -15,12 +38,11 @@ before_install:
     export GSL=$(pwd)/gsl-1.15 &&
     cd $GSL &&
     ./configure --prefix $GSL &&
-    make --silent &&
+    make -j2 --silent &&
     make install --silent &&
     cd $SMASH_ROOT
   - wget http://bitbucket.org/eigen/eigen/get/3.3.5.tar.gz &&
     tar -xf 3.3.5.tar.gz -C $HOME
-  - sudo apt-get install libboost-all-dev -q
   - pip install --user cpplint
 
 install:
@@ -28,12 +50,19 @@ install:
   - mkdir build
   - cd build
   - cmake -DCMAKE_INSTALL_PREFIX=$HOME/eigen-eigen-b3f3d4950030/ -DGSL_ROOT_DIR=$GSL ..
-  - make
+  - make -j2
 
 script:
-  - make run_isospin
-  - ctest
+  - ctest -j2
 
 notifications:
+  # for testing
   email:
-    - staudenmaier@fias.uni-frankfurt.de
+  - staudenmaier@fias.uni-frankfurt.de
+
+# proposal for when development is actually moved to Github:
+# notifications:
+#   email:
+#   - smash-devel@lists.fias.science
+#   on_failure: always  # if one of our main branches fails everyone gets a mail
+#   on_success: change  # if it is back to normal, this will also be sent to eyo
