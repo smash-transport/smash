@@ -20,8 +20,6 @@ matrix:
   exclude:
   - os: osx
     compiler: gcc
-  allow_failures:
-  - os: osx
 
 addons:
   apt:
@@ -55,14 +53,7 @@ install:
 script:
   - ctest -j2
 
+# only for testing
 notifications:
-  # for testing
   email:
   - staudenmaier@fias.uni-frankfurt.de
-
-# proposal for when development is actually moved to Github:
-# notifications:
-#   email:
-#   - smash-devel@lists.fias.science
-#   on_failure: always  # if one of our main branches fails everyone gets a mail
-#   on_success: change  # if it is back to normal, this will also be sent to eyo
