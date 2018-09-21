@@ -25,6 +25,16 @@
 
 namespace smash {
 
+/*!\Userguide
+ * \page thermodyn_output_user_guide_ ASCII thermodynamics output
+ *
+ * Text
+ *
+ *
+ *
+ *
+ */
+
 ThermodynamicOutput::ThermodynamicOutput(const bf::path &path,
                                          const std::string &name,
                                          const OutputParameters &out_par)
