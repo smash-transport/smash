@@ -373,12 +373,10 @@ typedef RectangularLattice<DensityOnLattice> DensityLattice;
  * \tparam T LatticeType
  */
 template <typename T>
-void update_lattice(RectangularLattice<T> *lat,
-                            const LatticeUpdate update,
-                            const DensityType dens_type,
-                            const DensityParameters &par,
-                            const Particles &particles,
-                            const bool compute_gradient = false) {
+void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
+                    const DensityType dens_type, const DensityParameters &par,
+                    const Particles &particles,
+                    const bool compute_gradient = false) {
   // Do not proceed if lattice does not exists/update not required
   if (lat == nullptr || lat->when_update() != update) {
     return;

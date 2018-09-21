@@ -146,8 +146,8 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
  * with the provided example files, execute \n
  * \n
  * \verbatim
-    ./smash -i INPUT_DIR/box/config.yaml -p INPUT_DIR/box/particles.txt -d INPUT_DIR/box/decaymodes.txt
- \endverbatim
+    ./smash -i INPUT_DIR/box/config.yaml -p INPUT_DIR/box/particles.txt -d
+ INPUT_DIR/box/decaymodes.txt \endverbatim
  * \n
  * Where 'INPUT_DIR' needs to be replaced by the path to the input directory
  * ('../input', if the build directory is located in the smash
