@@ -133,8 +133,7 @@ ListModus::ListModus(Configuration modus_config, const ExperimentParameters &)
 
 /* console output on startup of List specific parameters */
 std::ostream &operator<<(std::ostream &out, const ListModus &m) {
-  out << "\nStarting time for List calculation: " << m.start_time_ << '\n';
-  out << "\nInput directory for external particle lists:"
+  out << "-- List Modus\nInput directory for external particle lists:\n"
       << m.particle_list_file_directory_ << "\n";
   return out;
 }
@@ -223,9 +222,8 @@ void ListModus::try_create_particle(Particles &particles, PdgCode pdgcode,
     particle.set_formation_time(t);
     particle.set_cross_section_scaling_factor(1.0);
   } catch (ParticleType::PdgNotFoundFailure) {
-    log.warn() << "While loading external particle lists data, "
-               << "PDG code not found for the particle:\n"
-               << pdgcode << std::endl;
+    log.warn() << "SMASH does not recognize pdg code " << pdgcode
+               << " loaded from file. This particle will be ignored.\n";
   }
 }
 
