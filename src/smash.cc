@@ -289,18 +289,17 @@ int main(int argc, char *argv[]) {
       << "              Comput. Phys. Comm. 178 (2008) 852."
       << "\n"
       << "\n"
-      << " Webpage: gsi.de/theory/transportsimulations/smash"
+      << " Webpage: https://smash-transport.github.io"
       << "\n"
       << "\n"
-      << " Report issues at https://github.com/smash/issues"
+      << " Report issues at https://github.com/smash-transport/smash"
       << "\n"
-      << " or via email to smash-user@..."
+      << " or contact us by email at h.elfner@gsi.de"
       << "\n"
       << "\n"
       << "###################################################################"
       << "############"
-      << "\n"
-      << "\n";
+      << "\n" << "\n";
 
   setup_default_float_traps();
 
