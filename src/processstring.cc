@@ -596,7 +596,7 @@ bool StringProcess::next_NDiffHard() {
     pythia_parton_->settings.parm("Beams:eCM", sqrtsAB_);
 
     pythia_parton_initialized_ = pythia_parton_->init();
-    log.info("Pythia initialized with ", PDGcodes_[0], "+", PDGcodes_[1],
+    log.debug("Pythia initialized with ", PDGcodes_[0], "+", PDGcodes_[1],
              " at CM energy [GeV] ", sqrtsAB_);
     if (!pythia_parton_initialized_) {
       throw std::runtime_error("Pythia failed to initialize.");
