@@ -48,7 +48,7 @@ ExperimentPtr ExperimentBase::create(Configuration config,
    * \li \subpage input_modi_list_
    */
   const std::string modus_chooser = config.read({"General", "Modus"});
-  log.info() << "Modus for this calculation: " << modus_chooser;
+  log.debug() << "Modus for this calculation: " << modus_chooser;
 
   if (modus_chooser == "Box") {
     return make_unique<Experiment<BoxModus>>(config, output_path);
@@ -301,7 +301,6 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
 }
 
 std::string format_measurements(const Particles &particles,
-                                uint64_t scatterings_total,
                                 uint64_t scatterings_this_interval,
                                 const QuantumNumbers &conserved_initial,
                                 SystemTimePoint time_start, double time) {
@@ -312,13 +311,9 @@ std::string format_measurements(const Particles &particles,
 
   std::ostringstream ss;
   // clang-format off
-  ss << field<5> << time << field<12, 3> << difference.momentum().x0()
-     << field<12, 3> << difference.momentum().abs3()
-     << field<12, 3> << (time > really_small
-                           ? 2.0 * scatterings_total / (particles.size() * time)
-                           : 0.)
-     << field<10, 3> << scatterings_this_interval
-     << field<12, 3> << particles.size() << field<10, 3> << elapsed_seconds;
+  ss << field<5> << time << field<11, 3> << difference.momentum().x0()
+     << field<14, 3> << scatterings_this_interval
+     << field<14, 3> << particles.size() << field<12, 3> << elapsed_seconds;
   // clang-format on
   return ss.str();
 }

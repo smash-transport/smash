@@ -524,19 +524,6 @@ class Experiment : public ExperimentBase {
 /// Creates a verbose textual description of the setup of the Experiment.
 template <typename Modus>
 std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
-  switch (e.time_step_mode_) {
-    case TimeStepMode::None:
-      out << "Not using time steps\n";
-      break;
-    case TimeStepMode::Fixed:
-      out << "Using fixed time step size: "
-          << e.parameters_.labclock.timestep_duration() << " fm/c\n";
-      break;
-    case TimeStepMode::Adaptive:
-      out << "Using adaptive time steps, starting with: "
-          << e.parameters_.labclock.timestep_duration() << " fm/c\n";
-      break;
-  }
   out << "End time: " << e.end_time_ << " fm/c\n";
   out << e.modus_;
   return out;
@@ -975,7 +962,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    **/
 
   dens_type_ = config.take({"Output", "Density_Type"}, DensityType::None);
-  log.info() << "Density type printed to headers: " << dens_type_;
+  log.debug() << "Density type printed to headers: " << dens_type_;
 
   const OutputParameters output_parameters(std::move(output_conf));
 
@@ -1007,7 +994,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
           "Can't use potentials "
           "with frozen Fermi momenta!");
     }
-    log.info() << "Potentials are ON.";
+    log.info() << "Potentials are ON. Timestep is "
+               << parameters_.labclock.timestep_duration();
     // potentials need testparticles and gaussian sigma from parameters_
     potentials_ = make_unique<Potentials>(config["Potentials"], parameters_);
   }
@@ -1132,7 +1120,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 }
 
 /// String representing a horizontal line.
-const std::string hline(80, '-');
+const std::string hline(67, '-');
 
 template <typename Modus>
 void Experiment<Modus>::initialize_new_event() {
@@ -1202,8 +1190,8 @@ void Experiment<Modus>::initialize_new_event() {
   total_pauli_blocked_ = 0;
   // Print output headers
   log.info() << hline;
-  log.info() << " Time       <Ediff>      <pdiff>  <scattrate>    <scatt>  "
-                "<particles>   <timing>";
+  log.info() << " Time       <Ediff>    <scatt./decays>  "
+                "<particles>     <timing>";
   log.info() << hline;
 }
 
@@ -1316,8 +1304,6 @@ bool Experiment<Modus>::perform_action(
  *            used to check the conservation of the total energy and momentum.
  *	      the total number of the particles will be used and printed as
  *	      well.
- * \param[in] scatterings_total Total number of the scatterings from the
- *            beginning to the current time step.
  * \param[in] scatterings_this_interval Number of the scatterings occur within
  *            the current timestep.
  * \param[in] conserved_initial Initial quantum numbers needed to check the
@@ -1331,7 +1317,6 @@ bool Experiment<Modus>::perform_action(
  *          'Computing time consumed'
  */
 std::string format_measurements(const Particles &particles,
-                                uint64_t scatterings_total,
                                 uint64_t scatterings_this_interval,
                                 const QuantumNumbers &conserved_initial,
                                 SystemTimePoint time_start, double time);
@@ -1344,7 +1329,7 @@ void Experiment<Modus>::run_time_evolution() {
   const auto &log_ad_ts = logger<LogArea::AdaptiveTS>();
 
   log.info() << format_measurements(
-      particles_, interactions_total_ - wall_actions_total_, 0u,
+      particles_, 0u,
       conserved_initial_, time_start_, parameters_.labclock.current_time());
 
   while (parameters_.labclock.current_time() < end_time_) {
@@ -1565,8 +1550,7 @@ void Experiment<Modus>::intermediate_output() {
                                               wall_actions_this_interval;
   previous_interactions_total_ = interactions_total_;
   log.info() << format_measurements(
-      particles_, interactions_total_ - wall_actions_total_,
-      interactions_this_interval, conserved_initial_, time_start_,
+      particles_, interactions_this_interval, conserved_initial_, time_start_,
       parameters_.outputclock.current_time());
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
   /** \todo (Dima) is this part of the code still useful?
@@ -1709,18 +1693,10 @@ void Experiment<Modus>::final_output(const int evt_num) {
                                                 previous_interactions_total_ -
                                                 wall_actions_this_interval;
     log.info() << format_measurements(
-        particles_, interactions_total_ - wall_actions_total_,
-        interactions_this_interval, conserved_initial_, time_start_,
+        particles_, interactions_this_interval, conserved_initial_, time_start_,
         parameters_.outputclock.current_time());
     log.info() << hline;
     log.info() << "Time real: " << SystemClock::now() - time_start_;
-    // if there are no particles no interactions happened
-    log.info() << "Final scattering rate: "
-               << (particles_.is_empty()
-                       ? 0
-                       : (2.0 * (interactions_total_ - wall_actions_total_) /
-                          particles_.time() / particles_.size()))
-               << " [fm-1]";
     log.info() << "Final interaction number: "
                << interactions_total_ - wall_actions_total_;
     // Check if there are unformed particles
