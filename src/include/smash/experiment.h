@@ -994,7 +994,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
           "Can't use potentials "
           "with frozen Fermi momenta!");
     }
-    log.info() << "Potentials are ON. Integration timestep is"
+    log.info() << "Potentials are ON. Timestep is "
                << parameters_.labclock.timestep_duration();
     // potentials need testparticles and gaussian sigma from parameters_
     potentials_ = make_unique<Potentials>(config["Potentials"], parameters_);
