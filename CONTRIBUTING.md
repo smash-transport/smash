@@ -438,7 +438,7 @@ A different method for profiling SMASH uses performance counters and the `perf`
 tool on Linux. `perf` uses a feature of the CPU (and OS support) to count
 performance relevant events in the normal execution of the program. Therefore,
 SMASH should execute as "normal as possible", but with meta information about
-the program to improve the reporting capabilities of \c perf. To get useful
+the program to improve the reporting capabilities of `perf`. To get useful
 results compile SMASH in `RelWithDebInfo` mode, i.e. via
 
 
