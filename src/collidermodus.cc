@@ -411,7 +411,7 @@ std::ostream &operator<<(std::ostream &out, const ColliderModus &m) {
              << "sqrt(S) (nucleus-nucleus) = "
              << format(std::sqrt(m.total_s_), "GeV\n")
              << "sqrt(S) (nucleon-nucleon) = " << format(m.sqrt_s_NN_, "GeV\n")
-             << "\nProjectile:\n"
+             << "Projectile:\n"
              << *m.projectile_ << "\nTarget:\n"
              << *m.target_;
 }
