@@ -31,6 +31,13 @@ addons:
 
 before_install:
   - export SMASH_ROOT=$(pwd)
+  - echo $PATH  # debugging
+  # on mac clang-format has to be installed manually
+  - if [ $TRAVIS_OS_NAME = osx ]; then curl -# -o clang6_0_0.tar.xz http://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-apple-darwin.tar.xz;
+    else  curl -# -o clang6_0_0.tar.xz http://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz; fi
+  - mkdir clang6_0_0 && tar -xf clang6_0_0.tar.xz -C clang6_0_0 --strip-components=1
+  - export PATH=$SMASH_ROOT/clang6_0_0/bin/:$PATH
+  - echo $PATH  # debugging
   - wget http://ftpmirror.gnu.org/gsl/gsl-1.15.tar.gz &&
     tar -zxf gsl-1.15.tar.gz &&
     export GSL=$(pwd)/gsl-1.15 &&
@@ -44,6 +51,7 @@ before_install:
   - pip install --user cpplint
 
 install:
+  - clang-format --version
   - cd $SMASH_ROOT
   - mkdir build
   - cd build
@@ -52,6 +60,8 @@ install:
 
 script:
   - ctest -j2
+  - cd ../bin && ./clang-format-helper.sh -t
+
 
 # only for testing
 notifications:
