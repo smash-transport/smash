@@ -64,7 +64,7 @@ class ThermLatticeNode {
    */
   void add_particle(const ParticleData& p, double factor);
   /// dummy function for update_lattice
-  void add_particle_for_derivatives(const ParticleData&, double, ThreeVector) {};
+  void add_particle_for_derivatives(const ParticleData&, double, ThreeVector){};
   /**
    * Temperature, chemical potentials and rest frame velocity are
    * calculated given the hadron gas equation of state object
@@ -250,8 +250,9 @@ class GrandCanThermalizer {
    * \see DensityParameters
    * \param[in] ignore_cells_under_threshold Boolean that is true by default
    */
-  void update_thermalizer_lattice(const Particles& particles, const DensityParameters& par,
-                      bool ignore_cells_under_threshold = true);
+  void update_thermalizer_lattice(const Particles& particles,
+                                  const DensityParameters& par,
+                                  bool ignore_cells_under_threshold = true);
   /// \return 3 vector uniformly sampled from the rectangular cell.
   ThreeVector uniform_in_cell() const;
   /**

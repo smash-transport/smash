@@ -35,19 +35,21 @@ namespace smash {
 
 /* console output on startup of box specific parameters */
 std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
-  out << "-- Box Modus:\nSize of the box: (" << m.length_ << " fm)³"
-      << "\nInitial temperature: " << m.temperature_ << " GeV"
-      << "\nInitial condition type " << static_cast<int>(m.initial_condition_)
-      << "\n";
+  out << "-- Box Modus:\nSize of the box: (" << m.length_ << " fm)³\n";
   if (m.use_thermal_) {
-    out << "Using thermal initialization instead of initial multiplicities\n";
-    out << "Baryon chemical potential: " << m.mub_ << "\n"
-        << "Strange chemical potential: " << m.mus_ << "\n";
+    out << "Thermal multiplicities " << "(T = " << m.temperature_
+        << " GeV, muB = " << m.mub_ << " GeV, muS = " << m.mus_ << " GeV)\n";
   } else {
     for (const auto &p : m.init_multipl_) {
-      out << "Particle " << p.first << " initial multiplicity " << p.second
-          << '\n';
+      ParticleTypePtr ptype = &ParticleType::find(p.first);
+      out << ptype->name() << " initial multiplicity " << p.second << '\n';
     }
+  }
+  if (m.initial_condition_ == BoxInitialCondition::PeakedMomenta) {
+    out << "All initial momenta = 3T = " << 3*m.temperature_ << " GeV\n";
+  } else {
+    out << "Boltzmann momentum distribution with T = "
+        << m.temperature_ << " GeV.\n";
   }
   return out;
 }
@@ -146,8 +148,8 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
  * with the provided example files, execute \n
  * \n
  * \verbatim
-    ./smash -i INPUT_DIR/box/config.yaml -p INPUT_DIR/box/particles.txt -d INPUT_DIR/box/decaymodes.txt
- \endverbatim
+    ./smash -i INPUT_DIR/box/config.yaml -p INPUT_DIR/box/particles.txt -d
+ INPUT_DIR/box/decaymodes.txt \endverbatim
  * \n
  * Where 'INPUT_DIR' needs to be replaced by the path to the input directory
  * ('../input', if the build directory is located in the smash
@@ -157,7 +159,7 @@ BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
     : initial_condition_(modus_config.take({"Box", "Initial_Condition"})),
       length_(modus_config.take({"Box", "Length"})),
       temperature_(modus_config.take({"Box", "Temperature"})),
-      start_time_(modus_config.take({"Box", "Start_Time"})),
+      start_time_(modus_config.take({"Box", "Start_Time"}, 0.)),
       use_thermal_(
           modus_config.take({"Box", "Use_Thermal_Multiplicities"}, false)),
       mub_(modus_config.take({"Box", "Baryon_Chemical_Potential"}, 0.)),
@@ -242,7 +244,7 @@ double BoxModus::initial_conditions(Particles *particles,
     log.debug() << data;
   }
   /* allows to check energy conservation */
-  log.info() << "Initial total 4-momentum [GeV]: " << momentum_total;
+  log.debug() << "Initial total 4-momentum [GeV]: " << momentum_total;
   return start_time_;
 }
 

@@ -20,7 +20,6 @@ Modi:
         Length: 10.0
         Temperature: 0.15
         Initial_Condition: "thermal momenta"
-        Start_Time: 0.0
         # The box is initialized with the particles listed in particles.txt
         # according to their expected thermal multiplicities at the termperature
         # specified above.
