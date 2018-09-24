@@ -1502,6 +1502,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
       (std::abs(bstring) == 3) && (mString > m_const[0] + m_const[1] + 1.)) {
     // in the case of separate fragmentation function for leading baryons
     const double ssbar_supp = pythia_hadron_->parm("StringFlav:probStoUD");
+    const double sigma_qt_frag = pythia_hadron_->parm("StringPT:sigma");
     std::array<ThreeVector, 3> evec_basis;
     make_orthonormal_basis(evecLong, evec_basis);
 
@@ -1609,8 +1610,10 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
       const double mass_frag = pythia_hadron_->particleData.mSel(pdgid_frag);
 
       // Sample transverse momentum carried by baryon (antibaryon).
-      QTrx = random::normal(0., sigma_qperp_ / sqrt2_);
-      QTry = random::normal(0., sigma_qperp_ / sqrt2_);
+      QTrx = random::normal(0., sigma_qt_frag / sqrt2_);
+      QTry = random::normal(0., sigma_qt_frag / sqrt2_);
+      log.debug("Transverse momentum (", QTrx, ", ", QTry,
+                ") GeV selected for the leading baryon.");
       QTrn = std::sqrt(QTrx * QTrx + QTry * QTry);
       const double mTrn_frag = std::sqrt(QTrn * QTrn + mass_frag * mass_frag);
 
