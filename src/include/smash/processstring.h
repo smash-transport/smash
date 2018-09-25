@@ -222,12 +222,12 @@ class StringProcess {
                                                    double sqrt_s) {
     // This threshold magic is following Pythia. Todo(ryu): take care of this.
     double sqrts_threshold = 2. * (1. + 1.0e-6);
-    pdg_a = std::abs(pdg_a);
-    pdg_b = std::abs(pdg_b);
     /* In the case of mesons, the corresponding vector meson masses
      * are used to evaluate the energy threshold. */
-    const int pdg_a_mod = (pdg_a > 1000) ? pdg_a : 10 * (pdg_a / 10) + 3;
-    const int pdg_b_mod = (pdg_b > 1000) ? pdg_b : 10 * (pdg_b / 10) + 3;
+    const int pdg_a_mod = (std::abs(pdg_a) > 1000) ?
+                              pdg_a : 10 * (std::abs(pdg_a) / 10) + 3;
+    const int pdg_b_mod = (std::abs(pdg_b) > 1000) ?
+                              pdg_b : 10 * (std::abs(pdg_b) / 10) + 3;
     sqrts_threshold += pythia_hadron_->particleData.m0(pdg_a_mod) +
                        pythia_hadron_->particleData.m0(pdg_b_mod);
     /* Constant cross-section for sub-processes below threshold equal to
@@ -235,6 +235,8 @@ class StringProcess {
     if (sqrt_s < sqrts_threshold) {
       sqrt_s = sqrts_threshold;
     }
+    pythia_hadron_->rndm.init(random::uniform_int(1,
+                                  std::numeric_limits<int>::max()));
     pythia_sigmatot_.calc(pdg_a, pdg_b, sqrt_s);
     return {pythia_sigmatot_.sigmaAX(), pythia_sigmatot_.sigmaXB(),
             pythia_sigmatot_.sigmaXX()};

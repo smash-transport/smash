@@ -55,7 +55,8 @@ StringProcess::StringProcess(double string_tension, double time_formation,
   /* initialize PYTHIA */
   pythia_hadron_->init();
   pythia_sigmatot_.init(&pythia_hadron_->info, pythia_hadron_->settings,
-                        &pythia_hadron_->particleData);
+                        &pythia_hadron_->particleData,
+                        &pythia_hadron_->rndm);
 
   sqrt2_ = std::sqrt(2.);
 
