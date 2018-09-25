@@ -5,6 +5,8 @@ fail() {
   exit 1
 }
 
+BASEDIR=$(dirname $BASH_SOURCE)
+
 type clang-format >/dev/null 2>&1 || fail "Clang-format not found"
 
 VER_NUM=`echo $(clang-format -version) | sed -ne "s/[^0-9]*\(\([0-9]\.\)\{0,4\}[0-9][^.]\).*/\1/p"`
@@ -12,10 +14,10 @@ if [ "$VER_NUM" != "6.0.0 " ]; then
     fail "Wrong clang-format version: $VER_NUM (6.0.0 is required)"
 fi;
 
-FILES_TO_FORMAT="../src/*.cc ../src/include/smash/*.h ../src/tests/*.cc ../src/tests/*.h"
+FILES_TO_FORMAT="${BASEDIR}/../src/*.cc ${BASEDIR}/../src/include/smash/*.h ${BASEDIR}/../src/tests/*.cc ${BASEDIR}/../src/tests/*.h"
 
 if [ "$1" = "-p" ]; then
-    echo "Running clang-format ... [perform from within the /bin directory]"
+    echo "Running clang-format ..."
     for i in $FILES_TO_FORMAT;
     do
         clang-format --verbose -i $i;
@@ -35,6 +37,5 @@ Little helper script that wraps clang-format
 Usage: ./clang-format-helper
   -p perform automatic formatting (for developers)
   -t test that automatic formatting has been performed (for CI builds)
-Note: Run from within the /bin directory (uses relative paths).
 EOF
 fi

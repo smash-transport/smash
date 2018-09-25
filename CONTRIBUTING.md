@@ -387,8 +387,9 @@ directory to format the source code:
     cd bin
     ./clang-format-helper -p
 
-If clang-format does changes that don't look good, you can disable it locally
-using comments like this:
+This potentially changes the formatting of the source files in your working
+directory. Review and commit them afterwards. clang-format does changes that 
+don't look good, you can disable it locally using comments like this:
 
 
     // clang-format off
