@@ -384,11 +384,9 @@ All code has to be formatted by running `clang-format`. This automatically
 formats the code in SMASH correctly. Use the helper script in SMASH's /bin
 directory to format the source code:
 
-    cd bin
     ./clang-format-helper -p
 
-This potentially changes the formatting of the source files in your working
-directory. Review and commit them afterwards. clang-format does changes that 
+Review and commit changes afterwards. clang-format does changes that 
 don't look good, you can disable it locally using comments like this:
 
 
