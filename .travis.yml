@@ -53,17 +53,18 @@ matrix:
     env:
       - MATRIX_EVAL="CC=clang && CXX=clang++"
   allow_failures:
+    # tests currently fail for mac, see redmine issue 6256
     - os: osx
 
 before_install:
   - export SMASH_ROOT=$(pwd)
   # pythia
-  - wget http://home.thep.lu.se/~torbjorn/pythia8/pythia8230.tgz
-  - tar xf pythia8230.tgz && rm pythia8230.tgz
-  - cd pythia8230
-  - ./configure --cxx-common='-std=c++11 -march=native -mfpmath=sse -O3'
-  - make -j2
-  - cd ..
+  - wget http://home.thep.lu.se/~torbjorn/pythia8/pythia8230.tgz &&
+    tar xf pythia8230.tgz && rm pythia8230.tgz &&
+    cd pythia8230 &&
+    ./configure --cxx-common='-std=c++11 -march=native -mfpmath=sse -O3' &&
+    make -j2 &&
+    cd ..
   # clang-format
   - if [ $TRAVIS_OS_NAME = osx ]; then curl -# -o clang6_0_0.tar.xz http://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-apple-darwin.tar.xz;
     else  curl -# -o clang6_0_0.tar.xz http://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz; fi &&
