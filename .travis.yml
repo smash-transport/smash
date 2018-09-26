@@ -63,6 +63,8 @@ matrix:
         - boost
     env:
       - MATRIX_EVAL="CC=clang && CXX=clang++"
+  allow_failures:
+    - os: osx
 
 before_install:
   - export SMASH_ROOT=$(pwd)
@@ -71,7 +73,7 @@ before_install:
   - tar xf pythia8230.tgz && rm pythia8230.tgz
   - cd pythia8230
   - ./configure --cxx-common='-std=c++11 -march=native -mfpmath=sse -O3'
-  - make
+  - make -j2
   - cd ..
   # clang-format
   - if [ $TRAVIS_OS_NAME = osx ]; then curl -# -o clang6_0_0.tar.xz http://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-apple-darwin.tar.xz;
@@ -80,7 +82,7 @@ before_install:
     export PATH=$SMASH_ROOT/clang6_0_0/bin/:$PATH
   # gsl
   - wget http://ftpmirror.gnu.org/gsl/gsl-1.15.tar.gz &&
-    tar -zxf gsl-1.15.tar.gz &&
+    tar -zxf gsl-1.15.tar.gz && rm gsl-1.15.tar.gz &&
     export GSL=$(pwd)/gsl-1.15 &&
     cd $GSL &&
     ./configure --prefix $GSL &&
