@@ -29,7 +29,7 @@ It requires the following tools & libraries:
 - the GNU Scientific Library >= 1.15
 - the Eigen3 library for linear algebra (see http://eigen.tuxfamily.org)
 - boost filesystem >= 1.49
-- Pythia = 8.230
+- Pythia = 8.235
 
 Support for ROOT output is automatically enabled if a suitable version of ROOT
 (>= 5.34) is found on the system.
