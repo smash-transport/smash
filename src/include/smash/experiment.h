@@ -25,6 +25,7 @@
 #include "pauliblocking.h"
 #include "potential_globals.h"
 #include "potentials.h"
+#include "processstring.h"
 #include "propagation.h"
 #include "quantumnumbers.h"
 #include "scatteractionphoton.h"
@@ -419,6 +420,8 @@ class Experiment : public ExperimentBase {
   /// Instance of class used for forced thermalization
   std::unique_ptr<GrandCanThermalizer> thermalizer_;
 
+  StringProcess *process_string_ptr_;
+
   /**
    * Number of events.
    *
@@ -739,6 +742,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
         modus_.proj_N_number());
     max_transverse_distance_sqr_ =
         scat_finder->max_transverse_distance_sqr(parameters_.testparticles);
+    process_string_ptr_ =
+        scat_finder->get_process_string_ptr();
     action_finders_.emplace_back(std::move(scat_finder));
   } else {
     max_transverse_distance_sqr_ = maximum_cross_section / M_PI * fm2_mb;
@@ -1147,6 +1152,12 @@ void Experiment<Modus>::initialize_new_event() {
     r = random::advance();
   }
   seed_ = std::abs(r);
+  /* Set the random seed used in PYTHIA to be same with the SMASH one.
+   * In this way we ensure that the results are reproducible
+   * for every event if one knows SMASH random seed. */
+  if (process_string_ptr_ != NULL) {
+    process_string_ptr_->set_seed_pythia_rndm(seed_);
+  }
 
   particles_.reset();
 

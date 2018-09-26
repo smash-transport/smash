@@ -11,7 +11,6 @@
 
 #include "smash/angles.h"
 #include "smash/kinematics.h"
-#include "smash/logging.h"
 #include "smash/processstring.h"
 #include "smash/random.h"
 
@@ -99,6 +98,8 @@ void StringProcess::common_setup_pythia(Pythia8::Pythia *pythia_in,
   pythia_in->readString("Beams:idB = 2212");
   pythia_in->readString("Beams:eCM = 10.");
 
+  // set PYTHIA random seed from outside
+  pythia_in->readString("Random:setSeed = on");
   // suppress unnecessary output
   pythia_in->readString("Print:quiet = on");
   // No resonance decays, since the resonances will be handled by SMASH
@@ -603,12 +604,6 @@ bool StringProcess::next_NDiffHard() {
       throw std::runtime_error("Pythia failed to initialize.");
     }
   }
-  /* Set the random seed of the Pythia random Number Generator.
-   * Pythia's random is controlled by SMASH in every single collision.
-   * In this way we ensure that the results are reproducible
-   * for every event if one knows SMASH random seed. */
-  const int maxint = std::numeric_limits<int>::max();
-  pythia_parton_->rndm.init(random::uniform_int(1, maxint));
 
   // Short notation for Pythia event
   Pythia8::Event &event = pythia_parton_->event;

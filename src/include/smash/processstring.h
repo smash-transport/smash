@@ -17,6 +17,7 @@
 #include "Pythia8/Pythia.h"
 
 #include "constants.h"
+#include "logging.h"
 #include "particledata.h"
 
 namespace smash {
@@ -201,6 +202,19 @@ class StringProcess {
                            double diquark_supp, double stringz_a,
                            double stringz_b, double string_sigma_T);
 
+  void set_seed_pythia_rndm(int64_t seed) {
+    const auto &log = logger<LogArea::Pythia>();
+    int seed_new = seed % maximum_rndm_seed_in_pythia;
+    seed_new += 1;
+
+    pythia_parton_->settings.mode("Random:seed", seed_new);
+    log.debug("pythia_parton_ : random seed is set to be ",
+              pythia_parton_->settings.mode("Random:seed"));
+
+    pythia_hadron_->rndm.init(seed_new);
+    log.debug("pythia_hadron_ : rndm is initialized with seed ", seed_new);
+  }
+
   // clang-format on
 
   /**
@@ -235,8 +249,6 @@ class StringProcess {
     if (sqrt_s < sqrts_threshold) {
       sqrt_s = sqrts_threshold;
     }
-    pythia_hadron_->rndm.init(random::uniform_int(1,
-                                  std::numeric_limits<int>::max()));
     pythia_sigmatot_.calc(pdg_a, pdg_b, sqrt_s);
     return {pythia_sigmatot_.sigmaAX(), pythia_sigmatot_.sigmaXB(),
             pythia_sigmatot_.sigmaXX()};
