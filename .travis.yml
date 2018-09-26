@@ -20,7 +20,7 @@ matrix:
           - g++-4.8
     env:
       - MATRIX_EVAL="CC=gcc-4.8 && CXX=g++-4.8"
-  # more recent gcc
+  # more recent gcc (most recent on loewe)
   - os: linux
     addons:
       apt:
@@ -31,6 +31,17 @@ matrix:
           - g++-5
     env:
       - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+  # new gcc version
+  - os: linux
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+        packages:
+          - libboost-all-dev
+          - g++-8
+    env:
+      - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
   # clang on linux
   - os: linux
     addons:
@@ -84,4 +95,4 @@ install:
 
 script:
   - ctest -j2
-  - ./bin/clang-format-helper.sh -t
+  - ./../bin/clang-format-helper.sh -t
