@@ -286,8 +286,6 @@ ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
 int main(int argc, char *argv[]) {
   using namespace smash;  // NOLINT(build/namespaces)
 
-  setup_default_float_traps();
-
   const auto &log = logger<LogArea::Main>();
 
   constexpr option longopts[] = {
@@ -393,6 +391,8 @@ int main(int argc, char *argv[]) {
     if (!suppress_disclaimer) {
       print_disclaimer();
     }
+
+    setup_default_float_traps();
 
     // Read in config file
     Configuration configuration(input_path.parent_path(),
