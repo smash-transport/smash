@@ -420,6 +420,10 @@ class Experiment : public ExperimentBase {
   /// Instance of class used for forced thermalization
   std::unique_ptr<GrandCanThermalizer> thermalizer_;
 
+  /**
+   * Pointer to the string process class object,
+   * which is used to set the random seed for PYTHIA objects in each event.
+   */
   StringProcess *process_string_ptr_;
 
   /**

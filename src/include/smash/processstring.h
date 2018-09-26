@@ -202,6 +202,13 @@ class StringProcess {
                            double diquark_supp, double stringz_a,
                            double stringz_b, double string_sigma_T);
 
+  /**
+   * Set PYTHIA random seeds to be desired values.
+   * The value is recalculated such that it is allowed by PYTHIA.
+   * \param[in] seed value of the random seed to be used in PYTHIA.
+   *
+   * \see smash::maximum_rndm_seed_in_pythia
+   */
   void set_seed_pythia_rndm(int64_t seed) {
     const auto &log = logger<LogArea::Pythia>();
     int seed_new = seed % maximum_rndm_seed_in_pythia;
