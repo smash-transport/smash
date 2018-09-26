@@ -286,8 +286,6 @@ ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
 int main(int argc, char *argv[]) {
   using namespace smash;  // NOLINT(build/namespaces)
 
-  print_disclaimer();
-
   setup_default_float_traps();
 
   const auto &log = logger<LogArea::Main>();
@@ -325,6 +323,7 @@ int main(int argc, char *argv[]) {
 
     // parse command-line arguments
     int opt;
+    bool suppress_disclaimer = false;
     while ((opt = getopt_long(argc, argv, "c:d:e:fhi:m:p:o:lr:s:S:v", longopts,
                               nullptr)) != -1) {
       switch (opt) {
@@ -357,16 +356,19 @@ int main(int argc, char *argv[]) {
           break;
         case 'l':
           list2n_activated = true;
+          suppress_disclaimer = true;
           break;
         case 'r':
           resonance_dump_activated = true;
           pdg_string = optarg;
+          suppress_disclaimer = true;
           break;
         case 'S':
           final_state_cross_sections = true;
         case 's':
           cross_section_dump_activated = true;
           cs_string = optarg;
+          suppress_disclaimer = true;
           break;
         case 'v':
           std::printf(
@@ -386,6 +388,10 @@ int main(int argc, char *argv[]) {
       std::cout << argv[0] << ": invalid argument -- '" << argv[optind]
                 << "'\n";
       usage(EXIT_FAILURE, progname);
+    }
+
+    if (!suppress_disclaimer) {
+      print_disclaimer();
     }
 
     // Read in config file
