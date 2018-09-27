@@ -59,6 +59,8 @@ StringProcess::StringProcess(double string_tension, double time_formation,
 
   sqrt2_ = std::sqrt(2.);
 
+  seed_pythia_rndm_ = 0;
+
   for (int imu = 0; imu < 3; imu++) {
     evecBasisAB_[imu] = ThreeVector(0., 0., 0.);
   }
@@ -604,6 +606,9 @@ bool StringProcess::next_NDiffHard() {
       throw std::runtime_error("Pythia failed to initialize.");
     }
   }
+  pythia_parton_->rndm.init(seed_pythia_rndm_);
+  log.debug("pythia_parton_ : rndm is initialized with seed ",
+            seed_pythia_rndm_);
 
   // Short notation for Pythia event
   Pythia8::Event &event = pythia_parton_->event;
