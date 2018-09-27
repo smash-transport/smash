@@ -39,10 +39,10 @@ VtkOutput::~VtkOutput() {}
  * a separate VTK file is written. File names are constructed as follows:
  * pos_ev<event>_tstep<output_number>.vtk.
  *
- * Files contain particle coordinates, momenta and PDG codes. VTK output is
- * known to work with paraview, a free visualization and data analysis
- * software. Files of this format are supposed to be used as a black box
- * and opened with paraview, but at the same time they are
+ * Files contain particle coordinates, momenta and PDG codes and masses. VTK
+ * output is known to work with paraview, a free visualization and data
+ * analysis software. Files of this format are supposed to be used as a black
+ * box and opened with paraview, but at the same time they are
  * human-readable text files.
  *
  * There is also a possibility to print a lattice with thermodynamical
@@ -122,6 +122,11 @@ void VtkOutput::write(const Particles &particles) {
   std::fprintf(file_.get(), "LOOKUP_TABLE default\n");
   for (const auto &p : particles) {
     std::fprintf(file_.get(), "%g\n", p.xsec_scaling_factor());
+  }
+  std::fprintf(file_.get(), "SCALARS mass double 1\n");
+  std::fprintf(file_.get(), "LOOKUP_TABLE default\n");
+  for (const auto &p : particles) {
+    std::fprintf(file_.get(), "%g\n", p.effective_mass());
   }
 
   std::fprintf(file_.get(), "VECTORS momentum double\n");
