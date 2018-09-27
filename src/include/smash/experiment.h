@@ -1156,11 +1156,12 @@ void Experiment<Modus>::initialize_new_event() {
     r = random::advance();
   }
   seed_ = std::abs(r);
-  /* Set the random seed used in PYTHIA to be same with the SMASH one.
+  /* Set the random seed used in PYTHIA hadronization
+   * to be same with the SMASH one.
    * In this way we ensure that the results are reproducible
    * for every event if one knows SMASH random seed. */
   if (process_string_ptr_ != NULL) {
-    process_string_ptr_->set_seed_pythia_rndm(seed_);
+    process_string_ptr_->init_pythia_hadron_rndm();
   }
 
   particles_.reset();

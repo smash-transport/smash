@@ -124,9 +124,6 @@ class StringProcess {
   /// Remembers if Pythia is initialized or not
   bool pythia_parton_initialized_ = false;
 
-  /// random seed to be used in pythia
-  int seed_pythia_rndm_;
-
   /**
    * final state array
    * which must be accessed after the collision
@@ -212,14 +209,13 @@ class StringProcess {
    *
    * \see smash::maximum_rndm_seed_in_pythia
    */
-  void set_seed_pythia_rndm(int64_t seed) {
+  void init_pythia_hadron_rndm() {
     const auto &log = logger<LogArea::Pythia>();
-    seed_pythia_rndm_ = seed % maximum_rndm_seed_in_pythia;
-    seed_pythia_rndm_ += 1;
+    const int seed_new =
+        random::uniform_int(1, maximum_rndm_seed_in_pythia);
 
-    pythia_hadron_->rndm.init(seed_pythia_rndm_);
-    log.debug("pythia_hadron_ : rndm is initialized with seed ",
-              seed_pythia_rndm_);
+    pythia_hadron_->rndm.init(seed_new);
+    log.debug("pythia_hadron_ : rndm is initialized with seed ", seed_new);
   }
 
   // clang-format on

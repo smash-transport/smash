@@ -59,8 +59,6 @@ StringProcess::StringProcess(double string_tension, double time_formation,
 
   sqrt2_ = std::sqrt(2.);
 
-  seed_pythia_rndm_ = 0;
-
   for (int imu = 0; imu < 3; imu++) {
     evecBasisAB_[imu] = ThreeVector(0., 0., 0.);
   }
@@ -606,9 +604,14 @@ bool StringProcess::next_NDiffHard() {
       throw std::runtime_error("Pythia failed to initialize.");
     }
   }
-  pythia_parton_->rndm.init(seed_pythia_rndm_);
-  log.debug("pythia_parton_ : rndm is initialized with seed ",
-            seed_pythia_rndm_);
+  /* Set the random seed of the Pythia random Number Generator.
+   * Pythia's random is controlled by SMASH in every single collision.
+   * In this way we ensure that the results are reproducible
+   * for every event if one knows SMASH random seed. */
+  const int seed_new =
+      random::uniform_int(1, maximum_rndm_seed_in_pythia);
+  pythia_parton_->rndm.init(seed_new);
+  log.debug("pythia_parton_ : rndm is initialized with seed ", seed_new);
 
   // Short notation for Pythia event
   Pythia8::Event &event = pythia_parton_->event;
