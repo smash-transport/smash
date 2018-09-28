@@ -166,7 +166,7 @@ class StringProcess {
    *
    * \see StringProcess::common_setup_pythia(Pythia8::Pythia *,
    *                     double, double, double, double, double)
-   * \see .3rdparty/pythia8230/share/Pythia8/xmldoc/FlavourSelection.xml
+   * \see 3rdparty/pythia8230/share/Pythia8/xmldoc/FlavourSelection.xml
    * \see 3rdparty/pythia8230/share/Pythia8/xmldoc/Fragmentation.xml
    * \see 3rdparty/pythia8230/share/Pythia8/xmldoc/MasterSwitches.xml
    * \see 3rdparty/pythia8230/share/Pythia8/xmldoc/MultipartonInteractions.xml

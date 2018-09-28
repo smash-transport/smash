@@ -455,8 +455,9 @@ double inline FourVector::abs() const {
   if (this->sqr() > -really_small) {
     return std::sqrt(std::abs(this->sqr()));
   } else {
-    throw std::runtime_error("Absolute value of 4-vector could not be "
-                    "determined, taking sqrt of negative value.");
+    throw std::runtime_error(
+        "Absolute value of 4-vector could not be "
+        "determined, taking sqrt of negative value.");
   }
 }
 

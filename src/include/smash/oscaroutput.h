@@ -134,7 +134,7 @@ class OscarOutput : public OutputInterface {
  * \param[in] path The path to the output directory where the file(s) will be
  *             placed.
  * \param[in] out_par A structure containing parameters of the output, in
- *             particular if it is extended or not, if printing only final 
+ *             particular if it is extended or not, if printing only final
  *             particles in event, etc.
  */
 std::unique_ptr<OutputInterface> create_oscar_output(

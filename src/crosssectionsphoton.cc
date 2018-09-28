@@ -91,6 +91,7 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_rho0_pi(
 
   const double spin_deg_factor = 3.0;
 
+  // clang-format off
   const double xs =
       (pow(Const, 2) * pow(ghat, 4) *
        ((pow(eta1 - eta2, 2) *
@@ -1325,6 +1326,7 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_rho0_pi(
             (pow(m_rho, 2) * (pow(pion_mass, 4) + pow(pow(m_rho, 2) - s, 2) -
                               2 * pow(pion_mass, 2) * (pow(m_rho, 2) + s))))) /
       (512. * Pi);
+  // clang-format on
 
   return cut_off(xs * gev2_mb / spin_deg_factor);
 }
@@ -1338,6 +1340,7 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi_rho0_pi(
   using std::pow;
   using std::sqrt;
 
+  // clang-format off
   const double diff_xs =
       (pow(Const, 2) * pow(ghat, 4) *
        ((-8 * pow(-2 + delta, 2) * pow(pion_mass, 2)) /
@@ -1593,6 +1596,7 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi_rho0_pi(
              2 * pow(pion_mass, 2) * (pow(m_rho, 2) + s)))) /
       (512. * Pi);
 
+  // clang-format on
   return cut_off(gev2_mb * diff_xs / spin_deg_factor);
 }
 
@@ -1610,6 +1614,7 @@ CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi0_rho_pi_rho_mediated(
   const double &tmax = t_mandelstam[0];
   const double spin_deg_factor = 3.0;
 
+  // clang-format off
   const double xs =
       (pow(Const, 2) * pow(ghat, 4) *
        (0. -
@@ -2456,6 +2461,7 @@ CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi0_rho_pi_rho_mediated(
            (pow(pion_mass, 4) + pow(pow(m_rho, 2) - s, 2) -
             2 * pow(pion_mass, 2) * (pow(m_rho, 2) + s)));
 
+  // clang-format on
   return cut_off(xs * gev2_mb / spin_deg_factor);
 }
 
@@ -2464,6 +2470,7 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::
                                     const double m_rho) {
   const double spin_deg_factor = 3.0;
 
+  // clang-format off
   const double diff_xs =
       (pow(Const, 2) * pow(ghat, 4) *
        ((-0.25 * pow(-2 + delta, 2) * pow(pion_mass, 2) *
@@ -2656,6 +2663,7 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::
        (pow(pion_mass, 4) + pow(pow(m_rho, 2) - s, 2) -
         2 * pow(pion_mass, 2) * (pow(m_rho, 2) + s)));
 
+  // clang-format on
   return cut_off(gev2_mb * diff_xs / spin_deg_factor);
 }
 
@@ -2673,6 +2681,7 @@ CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_rho_pi0_rho_mediated(
   const double &tmin = t_mandelstam[1];
   const double spin_deg_factor = 3.0;
 
+  // clang-format off
   const double xs =
       (pow(Const, 2) * pow(ghat, 4) *
        (0. +
@@ -3771,6 +3780,7 @@ CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_rho_pi0_rho_mediated(
            (pow(pion_mass, 4) + pow(pow(m_rho, 2) - s, 2) -
             2 * pow(pion_mass, 2) * (pow(m_rho, 2) + s)));
 
+  // clang-format on
   return cut_off(xs * gev2_mb / spin_deg_factor);
 }
 
@@ -3784,6 +3794,7 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::
   using std::pow;
   using std::sqrt;
 
+  // clang-format off
   const double diff_xs =
       ((pow(Const, 2) * pow(ghat, 4) *
         ((-0.25 * pow(-2 + delta, 2) * pow(pion_mass, 2) *
@@ -3983,6 +3994,7 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::
         (pow(pion_mass, 4) + pow(pow(m_rho, 2) - s, 2) -
          2 * pow(pion_mass, 2) * (pow(m_rho, 2) + s))));
 
+  // clang-format on
   return cut_off(gev2_mb * diff_xs / spin_deg_factor);
 }
 /*----------------------------------------------------------------------------*/
@@ -4002,6 +4014,7 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi0_rho0_pi0(
   const double tmax = t_mandelstam[0];
   const double spin_deg_factor = 3.0;
 
+  // clang-format off
   const double xs =
       ((pow(Const, 2) * pow(g_POR, 4) *
         ((-0.125 * pow(omega_mass, 8) - 0.125 * pow(pion_mass, 8) +
@@ -4164,6 +4177,7 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi0_rho0_pi0(
         (pow(pion_mass, 4) + pow(pow(m_rho, 2) - s, 2) -
          2 * pow(pion_mass, 2) * (pow(m_rho, 2) + s))));
 
+  // clang-format on
   return cut_off(xs * gev2_mb / spin_deg_factor);
 }
 
@@ -4179,6 +4193,7 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi0_rho0_pi0(
   using std::pow;
   using std::sqrt;
 
+  // clang-format off
   double diff_xs =
       ((pow(Const, 2) * pow(g_POR, 4) *
         ((0.125 * (pow(pion_mass, 8) - 2 * pow(pion_mass, 6) * pow(m_rho, 2) +
@@ -4211,6 +4226,7 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi0_rho0_pi0(
         (pow(pion_mass, 4) + pow(pow(m_rho, 2) - s, 2) -
          2 * pow(pion_mass, 2) * (pow(m_rho, 2) + s))));
 
+  // clang-format on
   return cut_off(gev2_mb * diff_xs / spin_deg_factor);
 }
 
@@ -4232,6 +4248,7 @@ CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_rho_pi0_omega_mediated(
   const double &tmin = t_mandelstam[1];
   const double spin_deg_factor = 3.0;
 
+  // clang-format off
   const double xs =
       (0.0024867959858108648 * pow(Const, 2) * pow(g_POR, 4) *
        (pow(pion_mass, 8) * (1. * tmax - 1. * tmin) +
@@ -4257,6 +4274,7 @@ CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_rho_pi0_omega_mediated(
          pow(pion_mass, 2) * (-2. * pow(m_rho, 2) - 2. * s) -
          2. * pow(m_rho, 2) * s + pow(s, 2))));
 
+  // clang-format on
   return cut_off(xs * gev2_mb / spin_deg_factor);
 }
 
@@ -4274,6 +4292,7 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::
   if (sqrt(s) < omega_mass)
     return 0.0;
 
+  // clang-format off
   const double diff_xs =
       (0.0024867959858108648 * pow(Const, 2) * pow(g_POR, 4) *
        (pow(pion_mass, 8) - 2 * pow(pion_mass, 6) * pow(m_rho, 2) +
@@ -4286,6 +4305,7 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::
         (pow(pion_mass, 4) + pow(pow(m_rho, 2) - s, 2) -
          2 * pow(pion_mass, 2) * (pow(m_rho, 2) + s))));
 
+  // clang-format on
   return cut_off(gev2_mb * diff_xs / spin_deg_factor);
 }
 
@@ -4303,6 +4323,7 @@ CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi0_rho_pi_omega_mediated(
   const double &tmax = t_mandelstam[0];
   const double spin_deg_factor = 3.0;
 
+  // clang-format off
   const double xs =
       (0.0024868 * pow(Const, 2) * pow(g_POR, 4) *
        ((pow(omega_mass, 8) +
@@ -4366,6 +4387,7 @@ CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi0_rho_pi_omega_mediated(
       ((pow(pion_mass, 4) + pow(pow(m_rho, 2) - s, 2) -
         2 * pow(pion_mass, 2) * (pow(m_rho, 2) + s)));
 
+  // clang-format on
   return cut_off(xs * gev2_mb / spin_deg_factor);
 }
 
@@ -4374,6 +4396,7 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::
                                       const double m_rho) {
   const double spin_deg_factor = 3.0;
 
+  // clang-format off
   const double diff_xs =
       (0.0024867959858108648 * pow(Const, 2) * pow(g_POR, 4) *
        (pow(pion_mass, 8) - 2 * pow(pion_mass, 6) * pow(m_rho, 2) +
@@ -4386,6 +4409,7 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::
         2 * pow(pion_mass, 2) * (pow(m_rho, 2) + s)) *
        pow(pow(omega_mass, 2) - t, 2));
 
+  // clang-format on
   return cut_off(gev2_mb * diff_xs / spin_deg_factor);
 }
 
@@ -4441,6 +4465,7 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_pi_rho0(
   double tmax = mandelstam_t[0];
   double tmin = mandelstam_t[1];
 
+  // clang-format off
   const double xs =
       (-(pow(Const, 2) * pow(ghat, 4) *
          (0. +
@@ -6740,6 +6765,7 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_pi_rho0(
                   (-8. * pow(pion_mass, 2) - 4. * pow(m_rho, 2) + 4. * s)))) /
            (16. * Pi * s * (-4 * pow(pion_mass, 2) + s)));
 
+  // clang-format on
   return cut_off(xs * gev2_mb / spin_deg_factor);
 }
 
@@ -6752,6 +6778,7 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi_pi_rho0(
   using std::pow;
   using std::sqrt;
 
+  // clang-format off
   const double diff_xs =
       ((pow(Const, 2) * pow(ghat, 4) *
         ((0.25 *
@@ -7017,6 +7044,7 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi_pi_rho0(
                                    2))))) /
        (16. * Pi * s * (-4 * pow(pion_mass, 2) + s)));
 
+  // clang-format on
   return cut_off(gev2_mb * diff_xs / spin_deg_factor);
 }
 
@@ -7034,6 +7062,7 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_pi0_rho(
   const double tmin = t_mandelstam[1];
   const double tmax = t_mandelstam[0];
 
+  // clang-format off
   const double
       xs =
           (pow(Const, 2) * pow(ghat, 4) *
@@ -8594,6 +8623,7 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_pi0_rho(
                 (pow(m_rho, 4) * (pow(m_rho, 2) - 1. * s)))) /
           (16. * Pi * s * (-4 * pow(pion_mass, 2) + s));
 
+  // clang-format on
   return cut_off(xs * gev2_mb / spin_deg_factor);
 }
 
@@ -8606,6 +8636,7 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi_pi0_rho(
   using std::pow;
   using std::sqrt;
 
+  // clang-format off
   const double diff_xs =
       (pow(Const, 2) * pow(ghat, 4) *
        (0.75 +
@@ -8767,6 +8798,7 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi_pi0_rho(
             pow(m_rho, 4))) /
       (16. * Pi * s * (-4 * pow(pion_mass, 2) + s));
 
+  // clang-format on
   return cut_off(gev2_mb * diff_xs / spin_deg_factor);
 }
 

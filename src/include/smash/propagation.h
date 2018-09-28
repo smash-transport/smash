@@ -99,9 +99,10 @@ void expand_space_time(Particles *particles,
  * \param[in] FI3_lat Lattice for the electric and magnetic
  *            components of the symmetry force
  */
-void update_momenta(Particles *particles, double dt, const Potentials &pot,
-           RectangularLattice<std::pair<ThreeVector, ThreeVector>> *FB_lat,
-           RectangularLattice<std::pair<ThreeVector, ThreeVector>> *FI3_lat);
+void update_momenta(
+    Particles *particles, double dt, const Potentials &pot,
+    RectangularLattice<std::pair<ThreeVector, ThreeVector>> *FB_lat,
+    RectangularLattice<std::pair<ThreeVector, ThreeVector>> *FI3_lat);
 
 }  // namespace smash
 #endif  // SRC_INCLUDE_PROPAGATION_H_

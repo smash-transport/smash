@@ -380,6 +380,12 @@ class PdgCode {
     return (c == pdg::rho_z) || (c == pdg::rho_p) || (c == pdg::rho_m);
   }
 
+  /// \return whether this is (anti-)deuteron
+  inline bool is_deuteron() const {
+    const int dec = get_decimal();
+    return is_nucleus() && (dec == pdg::decimal_d || dec == pdg::decimal_antid);
+  }
+
   /**
    * \return whether a particle has a distinct antiparticle
    * (or whether it is its own antiparticle).
@@ -415,7 +421,7 @@ class PdgCode {
    */
   inline double frac_strange() const {
     /* The quarkonium state has 0 net strangeness
-    *  but there are actually 2 strange quarks out of 2 total */
+     *  but there are actually 2 strange quarks out of 2 total */
     if (is_hadron() && digits_.n_q3_ == 3 && digits_.n_q2_ == 3) {
       return 1.;
     } else {

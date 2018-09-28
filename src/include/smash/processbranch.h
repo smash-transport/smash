@@ -58,14 +58,14 @@ enum class ProcessType {
    */
   StringSoftSingleDiffractiveXB = 42,
   /// double diffractive. Two strings are formed, one from A and one from B.
-  StringSoftDoubleDiffractive   = 43,
+  StringSoftDoubleDiffractive = 43,
   /**
    * a special case of baryon-antibaryon annihilation. One pair qqbar
    * annihilates immediately and then two strings are formed.
    */
-  StringSoftAnnihilation        = 44,
+  StringSoftAnnihilation = 44,
   /// non-diffractive. Two strings are formed both have ends in A and B.
-  StringSoftNonDiffractive      = 45,
+  StringSoftNonDiffractive = 45,
   /**
    *  hard string process involving 2->2 QCD process by PYTHIA. Here quarks
    *  do not simply form a string. They actually scatter on parton level first.

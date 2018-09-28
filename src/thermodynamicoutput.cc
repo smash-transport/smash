@@ -25,6 +25,16 @@
 
 namespace smash {
 
+/*!\Userguide
+ * \page thermodyn_output_user_guide_ ASCII thermodynamics output
+ *
+ * Text
+ *
+ *
+ *
+ *
+ */
+
 ThermodynamicOutput::ThermodynamicOutput(const bf::path &path,
                                          const std::string &name,
                                          const OutputParameters &out_par)
@@ -75,9 +85,9 @@ void ThermodynamicOutput::at_intermediate_time(
   std::fprintf(file_.get(), "%6.2f ", clock.current_time());
   constexpr bool compute_gradient = false;
   if (out_par_.td_rho_eckart) {
-    const double rho = std::get<0>(rho_eckart(out_par_.td_position,
-                       particles, dens_param,
-                       out_par_.td_dens_type, compute_gradient));
+    const double rho =
+        std::get<0>(rho_eckart(out_par_.td_position, particles, dens_param,
+                               out_par_.td_dens_type, compute_gradient));
     std::fprintf(file_.get(), "%7.4f ", rho);
   }
   if (out_par_.td_tmn || out_par_.td_tmn_landau || out_par_.td_v_landau) {
@@ -133,8 +143,8 @@ void ThermodynamicOutput::density_along_line(
 
   for (int i = 0; i <= n_points; i++) {
     r = line_start + (line_end - line_start) * (1.0 * i / n_points);
-    double rho_eck = std::get<0>(
-        rho_eckart(r, plist, param, dens_type, compute_gradient));
+    double rho_eck =
+        std::get<0>(rho_eckart(r, plist, param, dens_type, compute_gradient));
     a_file << r.x1() << " " << r.x2() << " " << r.x3() << " " << rho_eck
            << "\n";
   }

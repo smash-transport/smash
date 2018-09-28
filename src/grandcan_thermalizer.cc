@@ -118,12 +118,12 @@ GrandCanThermalizer::GrandCanThermalizer(const std::array<double, 3> lat_sizes,
   mult_int_.resize(N_sorts_);
 }
 
-void GrandCanThermalizer::update_lattice(const Particles &particles,
-                                         const DensityParameters &dens_par,
-                                         bool ignore_cells_under_treshold) {
+void GrandCanThermalizer::update_thermalizer_lattice(
+    const Particles &particles, const DensityParameters &dens_par,
+    bool ignore_cells_under_treshold) {
   const DensityType dens_type = DensityType::Hadron;
   const LatticeUpdate update = LatticeUpdate::EveryFixedInterval;
-  update_general_lattice(lat_.get(), update, dens_type, dens_par, particles);
+  update_lattice(lat_.get(), update, dens_type, dens_par, particles);
   for (auto &node : *lat_) {
     /* If energy density is definitely below e_crit -
        no need to find T, mu, etc. So if e = T00 - T0i*vi <=

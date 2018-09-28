@@ -252,7 +252,7 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
     pdgcode.resize(pdgcode_strings.size());
     std::transform(pdgcode_strings.begin(), pdgcode_strings.end(),
                    pdgcode.begin(),
-                   [] (const std::string& s) { return PdgCode(s); });
+                   [](const std::string &s) { return PdgCode(s); });
     ensure_all_read(lineinput, line);
 
     /* Check if nucleon, kaon, and delta masses are
@@ -266,6 +266,9 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
     }
     if (pdgcode[0].is_Delta() && !almost_equal(mass, delta_mass)) {
       throw std::runtime_error("Delta mass in input file different from 1.232");
+    }
+    if (pdgcode[0].is_deuteron() && !almost_equal(mass, deuteron_mass)) {
+      throw std::runtime_error("d mass in input file different from 1.8756");
     }
 
     // add all states to type list
@@ -281,8 +284,8 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
         /* add corresponding antiparticle */
         PdgCode anti = pdgcode[i].get_antiparticle();
         // For bosons the parity does not change, for fermions it gets inverted.
-        const auto anti_parity
-            = (anti.spin() % 2 == 0) ? parity : invert_parity(parity);
+        const auto anti_parity =
+            (anti.spin() % 2 == 0) ? parity : invert_parity(parity);
         full_name = antiname(full_name, pdgcode[i]);
         type_list.emplace_back(full_name, mass, width, anti_parity, anti);
         log.debug() << "Setting antiparticle type: " << type_list.back();

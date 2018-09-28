@@ -48,21 +48,18 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
   }
   const double sf = std::exp(-r_rest_sqr * dens_par.two_sig_sqr_inv()) * u.x0();
   const ThreeVector sf_grad = compute_gradient
-                                  ? sf * (r + u.threevec() * u_r_scalar)
-                                    * dens_par.two_sig_sqr_inv() * 2.0
+                                  ? sf * (r + u.threevec() * u_r_scalar) *
+                                        dens_par.two_sig_sqr_inv() * 2.0
                                   : ThreeVector(0.0, 0.0, 0.0);
 
   return std::make_pair(sf, sf_grad);
 }
 
-/// \copydoc smash::rho_eckart 
+/// \copydoc smash::rho_eckart
 template <typename /*ParticlesContainer*/ T>
 std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart_impl(
-                                               const ThreeVector &r,
-                                               const T &plist,
-                                               const DensityParameters &par,
-                                               DensityType dens_type,
-                                               bool compute_gradient) {
+    const ThreeVector &r, const T &plist, const DensityParameters &par,
+    DensityType dens_type, bool compute_gradient) {
   /* The current density of the positively and negatively charged particles.
    * Division into positive and negative charges is necessary to avoid
    * problems with the Eckart frame definition. Example of problem:
@@ -103,20 +100,19 @@ std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart_impl(
     if (compute_gradient) {
       for (int k = 1; k <= 3; k++) {
         djmu_dx[k] += tmp * sf_and_grad.second[k - 1];
-        djmu_dx[0] -= tmp * sf_and_grad.second[k - 1]
-                      * tmp.threevec()[k-1] / dens_factor;
+        djmu_dx[0] -= tmp * sf_and_grad.second[k - 1] * tmp.threevec()[k - 1] /
+                      dens_factor;
       }
     }
   }
 
   // Eckart density
-  const double rho_eck =
-      (jmu_pos.abs() - jmu_neg.abs()) * par.norm_factor_sf();
+  const double rho_eck = (jmu_pos.abs() - jmu_neg.abs()) * par.norm_factor_sf();
 
   // $\partial_t \vec j$
   const ThreeVector dj_dt = compute_gradient
-                 ? djmu_dx[0].threevec() * par.norm_factor_sf()
-                 : ThreeVector(0.0, 0.0, 0.0);
+                                ? djmu_dx[0].threevec() * par.norm_factor_sf()
+                                : ThreeVector(0.0, 0.0, 0.0);
 
   // Gradient of density
   ThreeVector rho_grad;
@@ -135,37 +131,15 @@ std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart_impl(
 }
 
 std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart(
-                                          const ThreeVector &r,
-                                          const ParticleList &plist,
-                                          const DensityParameters &par,
-                                          DensityType dens_type,
-                                          bool compute_gradient) {
+    const ThreeVector &r, const ParticleList &plist,
+    const DensityParameters &par, DensityType dens_type,
+    bool compute_gradient) {
   return rho_eckart_impl(r, plist, par, dens_type, compute_gradient);
 }
 std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart(
-                                          const ThreeVector &r,
-                                          const Particles &plist,
-                                          const DensityParameters &par,
-                                          DensityType dens_type,
-                                          bool compute_gradient) {
+    const ThreeVector &r, const Particles &plist, const DensityParameters &par,
+    DensityType dens_type, bool compute_gradient) {
   return rho_eckart_impl(r, plist, par, dens_type, compute_gradient);
-}
-
-void update_density_lattice(RectangularLattice<DensityOnLattice> *lat,
-                            const LatticeUpdate update,
-                            const DensityType dens_type,
-                            const DensityParameters &par,
-                            const Particles &particles,
-                            const bool compute_gradient) {
-  update_general_lattice(lat, update, dens_type, par, particles,
-                         compute_gradient);
-}
-
-void update_Tmn_lattice(RectangularLattice<EnergyMomentumTensor> *lat,
-                        const LatticeUpdate update, const DensityType dens_type,
-                        const DensityParameters &par,
-                        const Particles &particles) {
-  update_general_lattice(lat, update, dens_type, par, particles);
 }
 
 std::ostream &operator<<(std::ostream &os, DensityType dens_type) {

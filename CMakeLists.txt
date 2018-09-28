@@ -38,8 +38,10 @@ endif(NOT CMAKE_BUILD_TYPE)
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/Cuba-4.2")
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/einhard")
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/yaml-cpp-0.6.2/include")
-include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/pythia8230/include")
 add_subdirectory(3rdparty)
+
+# Set compiler flags
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -mfpmath=sse")
 
 # RelWithDebInfo is just like Release, it only adds -g to add debug symbols
 # (useful for better debug and profiling information on Release builds)
@@ -54,14 +56,8 @@ set(CMAKE_C_FLAGS_PROFILING "-O3 -DNDEBUG -pg" CACHE STRING "Flags used by the c
 set(CMAKE_EXE_LINKER_FLAGS_PROFILING "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -pg" CACHE STRING "Flags used by the compiler during profile builds." FORCE)
 mark_as_advanced(CMAKE_CXX_FLAGS_PROFILING CMAKE_C_FLAGS_PROFILING CMAKE_EXE_LINKER_FLAGS_RELEASE)
 
-# Set the relevant generic compiler flags (optimisation + warnings)
+# Set the relevant generic compiler flags (optimisations)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Wmissing-declarations -Wpointer-arith -Wshadow -Wuninitialized -Winit-self -Wundef -Wcast-align -Wformat=2 -Wold-style-cast -Werror=switch -std=c++11 -mfpmath=sse")
-# Other interesting warnings:
-# -Wnull-dereference (GCC 6)
-# -Wrestrict (GCC 7)
-# -Wduplicated-branches (GCC 7)
-# -Wduplicated-cond (GCC 6)
 
 # Tell the compiler to ignore errno setting of math functions. This can help the compiler
 # considerably in optimizing mathematical expressions.

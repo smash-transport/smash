@@ -14,6 +14,15 @@ include(FindPkgConfig)
 include(GetGitRevisionDescription)
 git_describe(VERSION_MAJOR)
 
+# Enable warnings
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Wmissing-declarations -Wpointer-arith -Wshadow -Wuninitialized -Winit-self -Wundef -Wcast-align -Wformat=2 -Wold-style-cast -Werror=switch")
+if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 6.0)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnull-dereference -Wduplicated-cond")
+endif()
+if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 7.0)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wrestrict -Wduplicated-branches")
+endif()
+
 find_package (Git)
 if(GIT_FOUND)
   #message("git found: ${GIT_EXECUTABLE} in version ${GIT_VERSION_STRING}")
@@ -41,11 +50,21 @@ if(USE_ROOT)
   endif()
 endif()
 
-# set up Pythia
-get_filename_component(xmldoc "../3rdparty/pythia8215/share/Pythia8/xmldoc" ABSOLUTE)
-add_definitions(
-    "-DPYTHIA_XML_DIR=\"${xmldoc}\""
-)
+# find Pythia
+find_package(Pythia REQUIRED)
+if(Pythia_FOUND)
+  include_directories(SYSTEM
+     "${Pythia_INCLUDE_DIRS}"
+  )
+  set(SMASH_LIBRARIES
+     ${SMASH_LIBRARIES}
+     ${Pythia_LIBRARIES} -ldl
+  )
+  add_definitions(
+  "-DPYTHIA_XML_DIR=\"${Pythia_xmldoc_PATH}\""
+  -DPYTHIA_FOUND
+  )
+endif()
 
 # set up include paths
 include_directories(include)
@@ -66,8 +85,6 @@ set(SMASH_LIBRARIES ${SMASH_LIBRARIES}
    ${Boost_LIBRARIES}
    einhard
    yaml-cpp
-   pythia
-   -ldl  # required by pythia
    cuhre suave divonne vegas  # Cuba multidimensional integration
    )
 
