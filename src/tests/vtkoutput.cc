@@ -183,7 +183,7 @@ TEST(vtkoutputfile) {
         outputfile >> item;
         COMPARE(item, "1");
       }
-      /* Cheack SCALARS mass */
+      /* Check SCALARS mass */
       outputfile >> item;
       COMPARE(item, "SCALARS");
       outputfile >> item;
