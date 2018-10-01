@@ -383,8 +383,7 @@ class PdgCode {
   /// \return whether this is (anti-)deuteron
   inline bool is_deuteron() const {
     const int dec = get_decimal();
-    return is_nucleus() &&
-           (dec == pdg::decimal_d || dec == pdg::decimal_antid);
+    return is_nucleus() && (dec == pdg::decimal_d || dec == pdg::decimal_antid);
   }
 
   /**

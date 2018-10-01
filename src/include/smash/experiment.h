@@ -1328,9 +1328,9 @@ void Experiment<Modus>::run_time_evolution() {
   const auto &log = logger<LogArea::Experiment>();
   const auto &log_ad_ts = logger<LogArea::AdaptiveTS>();
 
-  log.info() << format_measurements(
-      particles_, 0u,
-      conserved_initial_, time_start_, parameters_.labclock.current_time());
+  log.info() << format_measurements(particles_, 0u, conserved_initial_,
+                                    time_start_,
+                                    parameters_.labclock.current_time());
 
   while (parameters_.labclock.current_time() < end_time_) {
     const double t = parameters_.labclock.current_time();
@@ -1549,9 +1549,9 @@ void Experiment<Modus>::intermediate_output() {
                                               previous_interactions_total_ -
                                               wall_actions_this_interval;
   previous_interactions_total_ = interactions_total_;
-  log.info() << format_measurements(
-      particles_, interactions_this_interval, conserved_initial_, time_start_,
-      parameters_.outputclock.current_time());
+  log.info() << format_measurements(particles_, interactions_this_interval,
+                                    conserved_initial_, time_start_,
+                                    parameters_.outputclock.current_time());
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
   /** \todo (Dima) is this part of the code still useful?
    *
@@ -1692,9 +1692,9 @@ void Experiment<Modus>::final_output(const int evt_num) {
     const uint64_t interactions_this_interval = interactions_total_ -
                                                 previous_interactions_total_ -
                                                 wall_actions_this_interval;
-    log.info() << format_measurements(
-        particles_, interactions_this_interval, conserved_initial_, time_start_,
-        parameters_.outputclock.current_time());
+    log.info() << format_measurements(particles_, interactions_this_interval,
+                                      conserved_initial_, time_start_,
+                                      parameters_.outputclock.current_time());
     log.info() << hline;
     log.info() << "Time real: " << SystemClock::now() - time_start_;
     log.info() << "Final interaction number: "
