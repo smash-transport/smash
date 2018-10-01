@@ -117,7 +117,10 @@ class StringProcess {
   double gamma_factor_com_;
   /// Whether to calculate the string formation times from the yoyo-model.
   bool use_yoyo_model_;
-  /// Probability of a proton's d-quark interacting.
+  /**
+   *Probability of splitting a nucleon into the quark flavour it has only
+   * once and a diquark it has twice.
+   */
   double prob_xi_;
   /// square root of 2 (\f$\sqrt{2}\f$)
   double sqrt2_;

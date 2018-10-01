@@ -120,10 +120,9 @@ namespace smash {
  * enabled. Else constant proper time defined by Formation_Time is used.
  *
  * \key Prob_xi (double, optional, default = 1/3)
- * Probability of a protons d-quark interacting. Defines the probability to
- * split an excited proton into uu+d in the single- and double-diffractive
- * subprocesses, as well as the probability for a proton to exchange its
- * d-quark in the non-diffractive subprocess.
+ * Probability of splitting an (anti)nucleon into quark it has only once and
+ * the diquark it contains twice in terms of flavour in the soft string 
+ * routine.
  *
  * \page input_collision_term_ Collision_Term
  * \n
