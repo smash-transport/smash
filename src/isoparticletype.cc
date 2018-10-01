@@ -5,11 +5,11 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#include "include/isoparticletype.h"
+#include "smash/isoparticletype.h"
 
-#include "include/integrate.h"
-#include "include/kinematics.h"
-#include "include/logging.h"
+#include "smash/integrate.h"
+#include "smash/kinematics.h"
+#include "smash/logging.h"
 
 namespace smash {
 

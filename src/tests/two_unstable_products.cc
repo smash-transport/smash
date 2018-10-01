@@ -11,21 +11,21 @@
 
 #include "setup.h"
 
-#include "../include/formfactors.h"
-#include "../include/isoparticletype.h"
-#include "../include/kinematics.h"
-#include "../include/particletype.h"
+#include "../include/smash/formfactors.h"
+#include "../include/smash/isoparticletype.h"
+#include "../include/smash/kinematics.h"
+#include "../include/smash/particletype.h"
 
 using namespace smash;
 
 TEST(init_particle_types) {
   ParticleType::create_type_list(
-      "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "π               0.138   7.7e-9      111     211\n"
-      "ρ               0.776   0.149       113     213\n"
-      "f₂              1.275   0.185       225\n"
-      "N               0.938   0          2112    2212\n"
-      "Δ       1.232 0.117    1114    2114    2214    2224\n");
+      "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
+      "π       0.138   7.7e-9  -   111     211\n"
+      "ρ       0.776   0.149   -   113     213\n"
+      "f₂      1.275   0.185   +   225\n"
+      "N       0.938   0       +  2112    2212\n"
+      "Δ       1.232   0.117   +  1114    2114    2214    2224\n");
 }
 
 TEST(init_decay_channels) {

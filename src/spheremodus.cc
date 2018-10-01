@@ -15,20 +15,20 @@
 #include <utility>
 #include <vector>
 
-#include "include/algorithms.h"
-#include "include/angles.h"
-#include "include/configuration.h"
-#include "include/constants.h"
-#include "include/distributions.h"
-#include "include/experimentparameters.h"
-#include "include/fourvector.h"
-#include "include/hadgas_eos.h"
-#include "include/logging.h"
-#include "include/macros.h"
-#include "include/particles.h"
-#include "include/random.h"
-#include "include/spheremodus.h"
-#include "include/threevector.h"
+#include "smash/algorithms.h"
+#include "smash/angles.h"
+#include "smash/configuration.h"
+#include "smash/constants.h"
+#include "smash/distributions.h"
+#include "smash/experimentparameters.h"
+#include "smash/fourvector.h"
+#include "smash/hadgas_eos.h"
+#include "smash/logging.h"
+#include "smash/macros.h"
+#include "smash/particles.h"
+#include "smash/random.h"
+#include "smash/spheremodus.h"
+#include "smash/threevector.h"
 
 namespace smash {
 
@@ -77,7 +77,7 @@ namespace smash {
  * \li \key IC_Massive - off-equilibrium distribution
  *
  * See \iref{Bazow:2016oky} and \iref{Tindall:2016try} for further explanations
- * about the different distribution functions..
+ * about the different distribution functions.
  *
  * \n
  * Examples: Configuring a Sphere Simulation
@@ -112,13 +112,29 @@ namespace smash {
          Temperature: 0.2
          Use_Thermal_Multiplicities: True
  \endverbatim
+ *
+ * \n
+ * \note
+ * SMASH is shipped with an example configuration file to set up an expanding
+ * sphere simulation initialized with predefined initial particle
+ * multiplicities. This file is located in /input/sphere. To run SMASH
+ * with the provided example configuration for the sphere, execute \n
+ * \n
+ * \verbatim
+    ./smash -i INPUT_DIR/sphere/config.yaml
+ \endverbatim
+ * \n
+ * Where 'INPUT_DIR' needs to be replaced by the path to the input directory
+ * ('../input', if the build directory is located in the smash
+ * folder).
+ *
  */
 
 SphereModus::SphereModus(Configuration modus_config,
                          const ExperimentParameters &)
     : radius_(modus_config.take({"Sphere", "Radius"})),
       sphere_temperature_(modus_config.take({"Sphere", "Sphere_Temperature"})),
-      start_time_(modus_config.take({"Sphere", "Start_Time"})),
+      start_time_(modus_config.take({"Sphere", "Start_Time"}, 0.)),
       use_thermal_(
           modus_config.take({"Sphere", "Use_Thermal_Multiplicities"}, false)),
       mub_(modus_config.take({"Sphere", "Baryon_Chemical_Potential"}, 0.)),
@@ -132,17 +148,18 @@ SphereModus::SphereModus(Configuration modus_config,
 
 /* console output on startup of sphere specific parameters */
 std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
-  out << "-- Sphere Modus:\nRadius of the sphere: " << m.radius_ << " [fm]"
-      << "\nTemperature for momentum sampling: " << m.sphere_temperature_
-      << "\nStarting time for Sphere calculation: " << m.start_time_ << '\n';
+  out << "-- Sphere Modus:\nRadius of the sphere: " << m.radius_ << " fm\n";
   if (m.use_thermal_) {
-    out << "Thermal multiplicities\n";
+    out << "Thermal multiplicities (T = " << m.sphere_temperature_
+        << " GeV, muB = " << m.mub_ << " GeV, muS = " << m.mus_ << " GeV)\n";
   } else {
     for (const auto &p : m.init_multipl_) {
-      out << "Particle " << p.first << " initial multiplicity " << p.second
-          << '\n';
+      ParticleTypePtr ptype = &ParticleType::find(p.first);
+      out << ptype->name() << " initial multiplicity " << p.second << '\n';
     }
   }
+  out << "Boltzmann momentum distribution with T = " << m.sphere_temperature_
+      << " GeV.\n";
   return out;
 }
 
@@ -233,7 +250,7 @@ double SphereModus::initial_conditions(Particles *particles,
     log.debug() << data;
   }
   /* allows to check energy conservation */
-  log.info() << "Sphere initial total 4-momentum [GeV]: " << momentum_total;
+  log.debug() << "Sphere initial total 4-momentum [GeV]: " << momentum_total;
   return start_time_;
 }
 }  // namespace smash

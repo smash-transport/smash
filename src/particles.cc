@@ -1,13 +1,13 @@
 /*
  *
- *    Copyright (c) 2013-2017
+ *    Copyright (c) 2013-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include "include/particles.h"
+#include "smash/particles.h"
 
 #include <iomanip>
 #include <iostream>

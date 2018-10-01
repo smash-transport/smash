@@ -7,10 +7,10 @@
  *
  */
 
-#include "include/decayactiondilepton.h"
+#include "smash/decayactiondilepton.h"
 
-#include "include/angles.h"
-#include "include/kinematics.h"
+#include "smash/angles.h"
+#include "smash/kinematics.h"
 
 namespace smash {
 

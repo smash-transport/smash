@@ -10,12 +10,12 @@
 #include <fstream>
 #include <memory>
 
-#include "include/clock.h"
-#include "include/config.h"
-#include "include/file.h"
-#include "include/forwarddeclarations.h"
-#include "include/particles.h"
-#include "include/vtkoutput.h"
+#include "smash/clock.h"
+#include "smash/config.h"
+#include "smash/file.h"
+#include "smash/forwarddeclarations.h"
+#include "smash/particles.h"
+#include "smash/vtkoutput.h"
 
 namespace smash {
 
@@ -121,7 +121,7 @@ void VtkOutput::write(const Particles &particles) {
   std::fprintf(file_.get(), "SCALARS cross_section_scaling_factor double 1\n");
   std::fprintf(file_.get(), "LOOKUP_TABLE default\n");
   for (const auto &p : particles) {
-    std::fprintf(file_.get(), "%g\n", p.cross_section_scaling_factor());
+    std::fprintf(file_.get(), "%g\n", p.xsec_scaling_factor());
   }
 
   std::fprintf(file_.get(), "VECTORS momentum double\n");

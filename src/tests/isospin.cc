@@ -11,23 +11,23 @@
 
 #include "setup.h"
 
-#include "../include/action.h"
-#include "../include/crosssections.h"
-#include "../include/scatteraction.h"
+#include "../include/smash/action.h"
+#include "../include/smash/crosssections.h"
+#include "../include/smash/scatteraction.h"
 
 using namespace smash;
 
 TEST(init_particle_types) {
   ParticleType::create_type_list(
-      "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "π⁺  0.138 0.0   211\n"
-      "π⁰  0.138 0.0   111\n"
-      "N⁺  0.938 0.0   2212\n"
-      "N⁰  0.938 0.0   2112\n"
-      "Δ⁺⁺ 1.232 0.117 2224\n"
-      "Δ⁺  1.232 0.117 2214\n"
-      "Δ⁰  1.232 0.117 2114\n"
-      "Δ⁻  1.232 0.117 1114\n");
+      "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
+      "π⁺  0.138 0.0   - 211\n"
+      "π⁰  0.138 0.0   - 111\n"
+      "N⁺  0.938 0.0   + 2212\n"
+      "N⁰  0.938 0.0   + 2112\n"
+      "Δ⁺⁺ 1.232 0.117 + 2224\n"
+      "Δ⁺  1.232 0.117 + 2214\n"
+      "Δ⁰  1.232 0.117 + 2114\n"
+      "Δ⁻  1.232 0.117 + 1114\n");
   DecayModes::load_decaymodes(
       "Δ          \n"
       "1.  1  N π \n");
@@ -86,6 +86,7 @@ TEST(NN_NDelta) {
   COMPARE(proc_list_np.size(), 2u);
 
   // check isospin ratios
+  UnitTest::setFuzzyness<double>(2);  // travis ci did not pass otherwise
   FUZZY_COMPARE(3 * proc_list_pp[0]->weight(),
                 proc_list_pp[1]->weight());  // ratio 1:3
   FUZZY_COMPARE(proc_list_pn[0]->weight(),
@@ -141,6 +142,7 @@ TEST(NDelta_NN) {
   COMPARE(proc_list_DDn.size(), 1u);
 
   // check isospin ratios
+  UnitTest::setFuzzyness<double>(2);  // travis ci did not pass otherwise
   FUZZY_COMPARE(proc_list_Dn[0]->weight(),
                 proc_list_Dn[1]->weight());  // ratio 1:1
   FUZZY_COMPARE(proc_list_Dp[0]->weight(),

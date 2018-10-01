@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -11,13 +11,13 @@
 
 #include "setup.h"
 
-#include "../include/boxmodus.h"
-#include "../include/configuration.h"
-#include "../include/cxx14compat.h"
-#include "../include/experiment.h"
-#include "../include/nucleus.h"
-#include "../include/pauliblocking.h"
-#include "../include/potentials.h"
+#include "../include/smash/boxmodus.h"
+#include "../include/smash/configuration.h"
+#include "../include/smash/cxx14compat.h"
+#include "../include/smash/experiment.h"
+#include "../include/smash/nucleus.h"
+#include "../include/smash/pauliblocking.h"
+#include "../include/smash/potentials.h"
 
 #include <boost/filesystem.hpp>
 
@@ -25,9 +25,9 @@ using namespace smash;
 
 TEST(init_particle_types) {
   ParticleType::create_type_list(
-      "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "N+ 0.938 0.0 2212\n"
-      "N0 0.938 0.0 2112\n");
+      "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
+      "N+ 0.938 0.0 + 2212\n"
+      "N0 0.938 0.0 + 2112\n");
 }
 
 /* Checks if phase space density gives correct result

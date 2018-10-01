@@ -7,8 +7,8 @@
  *
  */
 
-#include "include/parametrizations.h"
-#include "include/parametrizations_data.h"
+#include "smash/parametrizations.h"
+#include "smash/parametrizations_data.h"
 
 #include <cmath>
 #include <initializer_list>
@@ -16,14 +16,14 @@
 #include <memory>
 #include <vector>
 
-#include "include/average.h"
-#include "include/clebschgordan.h"
-#include "include/constants.h"
-#include "include/cxx14compat.h"
-#include "include/interpolation.h"
-#include "include/kinematics.h"
-#include "include/lowess.h"
-#include "include/pow.h"
+#include "smash/average.h"
+#include "smash/clebschgordan.h"
+#include "smash/constants.h"
+#include "smash/cxx14compat.h"
+#include "smash/interpolation.h"
+#include "smash/kinematics.h"
+#include "smash/lowess.h"
+#include "smash/pow.h"
 
 namespace smash {
 
@@ -121,8 +121,8 @@ static double piplusp_elastic_pdg(double mandelstam_s) {
 }
 
 double piplusp_elastic_high_energy(double mandelstam_s, double m1, double m2) {
-  const double p_lab = (m1 > m2) ? plab_from_s(mandelstam_s, m2, m1) :
-                                   plab_from_s(mandelstam_s, m1, m2);
+  const double p_lab = (m1 > m2) ? plab_from_s(mandelstam_s, m2, m1)
+                                 : plab_from_s(mandelstam_s, m1, m2);
   const auto logp = std::log(p_lab);
   return 11.4 * std::pow(p_lab, -0.4) + 0.079 * logp * logp;
 }
@@ -157,6 +157,26 @@ double piplusp_elastic(double mandelstam_s) {
     sigma = really_small;
   }
   return sigma;
+}
+
+/* pi+ p to Sigma+ K+ cross section parametrization, PDG data.
+ *
+ * The PDG data is smoothed using the LOWESS algorithm. If more than one
+ * cross section was given for one p_lab value, the corresponding cross sections
+ * are averaged. */
+double piplusp_sigmapluskplus_pdg(double mandelstam_s) {
+  if (piplusp_sigmapluskplus_interpolation == nullptr) {
+    std::vector<double> x = PIPLUSP_SIGMAPLUSKPLUS_P_LAB;
+    std::vector<double> y = PIPLUSP_SIGMAPLUSKPLUS_SIG;
+    std::vector<double> dedup_x;
+    std::vector<double> dedup_y;
+    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    dedup_y = smooth(dedup_x, dedup_y, 0.2, 5);
+    piplusp_sigmapluskplus_interpolation =
+        make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
+  }
+  const double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
+  return (*piplusp_sigmapluskplus_interpolation)(p_lab);
 }
 
 /* pi- p elastic cross section parametrization, PDG data.
@@ -219,6 +239,66 @@ double piminusp_elastic(double mandelstam_s) {
   return sigma;
 }
 
+/* pi- p -> Lambda K0 cross section parametrization, PDG data.
+ *
+ * The PDG data is smoothed using the LOWESS algorithm. If more than one
+ * cross section was given for one p_lab value, the corresponding cross sections
+ * are averaged. */
+double piminusp_lambdak0_pdg(double mandelstam_s) {
+  if (piminusp_lambdak0_interpolation == nullptr) {
+    std::vector<double> x = PIMINUSP_LAMBDAK0_P_LAB;
+    std::vector<double> y = PIMINUSP_LAMBDAK0_SIG;
+    std::vector<double> dedup_x;
+    std::vector<double> dedup_y;
+    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    dedup_y = smooth(dedup_x, dedup_y, 0.2, 6);
+    piminusp_lambdak0_interpolation =
+        make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
+  }
+  const double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
+  return (*piminusp_lambdak0_interpolation)(p_lab);
+}
+
+/* pi- p -> Sigma- K+ cross section parametrization, PDG data.
+ *
+ * The PDG data is smoothed using the LOWESS algorithm. If more than one
+ * cross section was given for one p_lab value, the corresponding cross sections
+ * are averaged. */
+double piminusp_sigmaminuskplus_pdg(double mandelstam_s) {
+  if (piminusp_sigmaminuskplus_interpolation == nullptr) {
+    std::vector<double> x = PIMINUSP_SIGMAMINUSKPLUS_P_LAB;
+    std::vector<double> y = PIMINUSP_SIGMAMINUSKPLUS_SIG;
+    std::vector<double> dedup_x;
+    std::vector<double> dedup_y;
+    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    dedup_y = smooth(dedup_x, dedup_y, 0.2, 6);
+    piminusp_sigmaminuskplus_interpolation =
+        make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
+  }
+  const double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
+  return (*piminusp_sigmaminuskplus_interpolation)(p_lab);
+}
+
+/* pi- p -> Sigma0 K0 cross section parametrization, resonance contribution.
+ *
+ * The data is smoothed using the LOWESS algorithm. If more than one
+ * cross section was given for one sqrts value, the corresponding cross sections
+ * are averaged. */
+double piminusp_sigma0k0_res(double mandelstam_s) {
+  if (piminusp_sigma0k0_interpolation == nullptr) {
+    std::vector<double> x = PIMINUSP_SIGMA0K0_RES_SQRTS;
+    std::vector<double> y = PIMINUSP_SIGMA0K0_RES_SIG;
+    std::vector<double> dedup_x;
+    std::vector<double> dedup_y;
+    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    dedup_y = smooth(dedup_x, dedup_y, 0.03, 6);
+    piminusp_sigma0k0_interpolation =
+        make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
+  }
+  const double sqrts = sqrt(mandelstam_s);
+  return (*piminusp_sigma0k0_interpolation)(sqrts);
+}
+
 double pp_elastic(double mandelstam_s) {
   const double p_lab = plab_from_s(mandelstam_s);
   if (p_lab < 0.435) {
@@ -226,8 +306,7 @@ double pp_elastic(double mandelstam_s) {
                (mandelstam_s - 4 * nucleon_mass * nucleon_mass) +
            1.67;
   } else if (p_lab < 0.8) {
-    return 23.5 +
-           1000 * pow_int(p_lab - 0.7, 4);
+    return 23.5 + 1000 * pow_int(p_lab - 0.7, 4);
   } else if (p_lab < 2.0) {
     return 1250 / (p_lab + 50) - 4 * (p_lab - 1.3) * (p_lab - 1.3);
   } else if (p_lab < 2.776) {
@@ -240,8 +319,8 @@ double pp_elastic(double mandelstam_s) {
 }
 
 double pp_elastic_high_energy(double mandelstam_s, double m1, double m2) {
-  const double p_lab = (m1 > m2) ? plab_from_s(mandelstam_s, m2, m1) :
-                                   plab_from_s(mandelstam_s, m1, m2);
+  const double p_lab = (m1 > m2) ? plab_from_s(mandelstam_s, m2, m1)
+                                 : plab_from_s(mandelstam_s, m1, m2);
   const auto logp = std::log(p_lab);
   return 11.9 + 26.9 * std::pow(p_lab, -1.21) + 0.169 * logp * logp -
          1.85 * logp;
@@ -252,8 +331,7 @@ double pp_total(double mandelstam_s) {
   if (p_lab < 0.4) {
     return 34 * std::pow(p_lab / 0.4, -2.104);
   } else if (p_lab < 0.8) {
-    return 23.5 +
-           1000 * pow_int(p_lab - 0.7, 4);
+    return 23.5 + 1000 * pow_int(p_lab - 0.7, 4);
   } else if (p_lab < 1.5) {
     return 23.5 + 24.6 / (1 + std::exp(-(p_lab - 1.2) / 0.1));
   } else if (p_lab < 5.0) {
@@ -332,9 +410,8 @@ double deuteron_pion_elastic(double mandelstam_s) {
 
 double deuteron_nucleon_elastic(double mandelstam_s) {
   const double s = mandelstam_s;
-  return 2500.0 * std::exp(- smash::square(s - 7.93) / 0.003) +
-         600.0  * std::exp(- smash::square(s - 7.93) / 0.1) +
-         10.0;
+  return 2500.0 * std::exp(-smash::square(s - 7.93) / 0.003) +
+         600.0 * std::exp(-smash::square(s - 7.93) / 0.1) + 10.0;
 }
 
 double kplusp_elastic_background(double mandelstam_s) {

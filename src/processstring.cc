@@ -9,11 +9,11 @@
 
 #include <array>
 
-#include "include/angles.h"
-#include "include/kinematics.h"
-#include "include/logging.h"
-#include "include/processstring.h"
-#include "include/random.h"
+#include "smash/angles.h"
+#include "smash/kinematics.h"
+#include "smash/logging.h"
+#include "smash/processstring.h"
+#include "smash/random.h"
 
 namespace smash {
 
@@ -960,7 +960,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
   // implement PYTHIA fragmentation
   pythia_hadron_->event[0].p(pSum);
   pythia_hadron_->event[0].m(pSum.mCalc());
-  const bool successful_hadronization = pythia_hadron_->forceHadronLevel();
+  const bool successful_hadronization = pythia_hadron_->next();
   int number_of_fragments = 0;
   if (successful_hadronization) {
     for (int ipart = 0; ipart < pythia_hadron_->event.size(); ipart++) {
@@ -1050,6 +1050,26 @@ void StringProcess::assign_all_scaling_factors(int baryon_string,
     assign_scaling_factor(nq1, outgoing_particles[j.second],
                           suppression_factor);
   }
+}
+
+int StringProcess::pdg_map_for_pythia(PdgCode &pdg) {
+  PdgCode pdg_mapped(0x0);
+
+  if (pdg.baryon_number() == 1) {
+    pdg_mapped = pdg.charge() > 0 ? PdgCode(pdg::p) : PdgCode(pdg::n);
+  } else if (pdg.baryon_number() == -1) {
+    pdg_mapped = pdg.charge() < 0 ? PdgCode(-pdg::p) : PdgCode(-pdg::n);
+  } else {
+    if (pdg.charge() > 0) {
+      pdg_mapped = PdgCode(pdg::pi_p);
+    } else if (pdg.charge() < 0) {
+      pdg_mapped = PdgCode(pdg::pi_m);
+    } else {
+      pdg_mapped = PdgCode(pdg::pi_z);
+    }
+  }
+
+  return pdg_mapped.get_decimal();
 }
 
 }  // namespace smash

@@ -14,6 +14,15 @@ include(FindPkgConfig)
 include(GetGitRevisionDescription)
 git_describe(VERSION_MAJOR)
 
+# Enable warnings
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Wmissing-declarations -Wpointer-arith -Wshadow -Wuninitialized -Winit-self -Wundef -Wcast-align -Wformat=2 -Wold-style-cast -Werror=switch")
+if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 6.0)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnull-dereference -Wduplicated-cond")
+endif()
+if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 7.0)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wrestrict -Wduplicated-branches")
+endif()
+
 find_package (Git)
 if(GIT_FOUND)
   #message("git found: ${GIT_EXECUTABLE} in version ${GIT_VERSION_STRING}")
@@ -41,15 +50,26 @@ if(USE_ROOT)
   endif()
 endif()
 
-# set up Pythia
-get_filename_component(xmldoc "../3rdparty/pythia8215/share/Pythia8/xmldoc" ABSOLUTE)
-add_definitions(
-    "-DPYTHIA_XML_DIR=\"${xmldoc}\""
-)
+# find Pythia
+find_package(Pythia REQUIRED)
+if(Pythia_FOUND)
+  include_directories(SYSTEM
+     "${Pythia_INCLUDE_DIRS}"
+  )
+  set(SMASH_LIBRARIES
+     ${SMASH_LIBRARIES}
+     ${Pythia_LIBRARIES} -ldl
+  )
+  add_definitions(
+  "-DPYTHIA_XML_DIR=\"${Pythia_xmldoc_PATH}\""
+  -DPYTHIA_FOUND
+  )
+endif()
 
 # set up include paths
+include_directories(include)
 include_directories(
-    "${CMAKE_CURRENT_BINARY_DIR}"
+    "${CMAKE_CURRENT_BINARY_DIR}/include"
     )
 include_directories(SYSTEM
     ${GSL_INCLUDE_DIR}
@@ -65,8 +85,6 @@ set(SMASH_LIBRARIES ${SMASH_LIBRARIES}
    ${Boost_LIBRARIES}
    einhard
    yaml-cpp
-   pythia
-   -ldl  # required by pythia
    cuhre suave divonne vegas  # Cuba multidimensional integration
    )
 
@@ -143,8 +161,8 @@ add_executable(smash smash.cc ${smash_src})
 # configure a header file to pass some of the CMake settings
 # to the source code
 configure_file (
-  "${CMAKE_CURRENT_SOURCE_DIR}/include/config.h.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/include/config.h"
+  "${CMAKE_CURRENT_SOURCE_DIR}/include/smash/config.h.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/include/smash/config.h"
 )
 
 # copy config file to build directory
@@ -155,19 +173,19 @@ configure_file(${CMAKE_SOURCE_DIR}/input/config.yaml
 set(generated_headers)
 macro(generate_headers)
    foreach(filename ${ARGN})
-      list(APPEND generated_headers "${CMAKE_CURRENT_BINARY_DIR}/${filename}.h")
+      list(APPEND generated_headers "${CMAKE_CURRENT_BINARY_DIR}/include/${filename}.h")
       add_custom_command(
-         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${filename}.h
+         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/include/${filename}.h
          COMMAND ${CMAKE_COMMAND}
          -D INPUT_FILE=${CMAKE_SOURCE_DIR}/input/${filename}
-         -D OUTPUT_FILE=${CMAKE_CURRENT_BINARY_DIR}/${filename}.h
+         -D OUTPUT_FILE=${CMAKE_CURRENT_BINARY_DIR}/include/${filename}.h
          -D NAME=data
          -P ${PROJECT_SOURCE_DIR}/cmake/copy_file_contents_to_string.cmake
          DEPENDS ${CMAKE_SOURCE_DIR}/input/${filename}
-         COMMENT "Convert ${CMAKE_SOURCE_DIR}/input/${filename} to ${CMAKE_CURRENT_BINARY_DIR}/${filename}.h"
+         COMMENT "Convert ${CMAKE_SOURCE_DIR}/input/${filename} to ${CMAKE_CURRENT_BINARY_DIR}/include/${filename}.h"
          VERBATIM)
       add_custom_target(generate_${filename}.h ALL DEPENDS
-         ${CMAKE_CURRENT_BINARY_DIR}/${filename}.h)
+         ${CMAKE_CURRENT_BINARY_DIR}/include/${filename}.h)
    endforeach()
 endmacro()
 generate_headers(particles.txt decaymodes.txt)

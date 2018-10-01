@@ -7,16 +7,16 @@
  *
  */
 
-#include "include/binaryoutputcollisions.h"
+#include "smash/binaryoutputcollisions.h"
 
 #include <string>
 
 #include <boost/filesystem.hpp>
 
-#include "include/action.h"
-#include "include/clock.h"
-#include "include/config.h"
-#include "include/particles.h"
+#include "smash/action.h"
+#include "smash/clock.h"
+#include "smash/config.h"
+#include "smash/particles.h"
 
 namespace smash {
 
@@ -146,7 +146,7 @@ void BinaryOutputBase::write_particledata(const ParticleData &p) {
     const auto history = p.get_history();
     write(history.collisions_per_particle);
     write(p.formation_time());
-    write(p.cross_section_scaling_factor());
+    write(p.xsec_scaling_factor());
     write(history.id_process);
     write(static_cast<uint32_t>(history.process_type));
     write(history.time_last_collision);

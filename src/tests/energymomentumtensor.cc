@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2017
+ *    Copyright (c) 2015-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -9,8 +9,8 @@
 
 #include "unittest.h"  // This include has to be first
 
-#include "../include/energymomentumtensor.h"
-#include "../include/fourvector.h"
+#include "../include/smash/energymomentumtensor.h"
+#include "../include/smash/fourvector.h"
 
 using namespace smash;
 

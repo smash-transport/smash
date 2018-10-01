@@ -40,7 +40,7 @@ if(DOXYGEN)
    endif()
    find_program(GREP grep)
    if(SED)
-      file(GLOB files_with_input "${PROJECT_SOURCE_DIR}/src/include/*.h" "${PROJECT_SOURCE_DIR}/src/*.cc"
+      file(GLOB files_with_input "${PROJECT_SOURCE_DIR}/src/include/smash/*.h" "${PROJECT_SOURCE_DIR}/src/*.cc"
                                  "${PROJECT_SOURCE_DIR}/AUTHORS" "${PROJECT_SOURCE_DIR}/INSTALL")
       add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/userguide.dox
          COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/generateuserdocs.sh ${SED}

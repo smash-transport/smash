@@ -6,19 +6,19 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
-#include "include/oscaroutput.h"
+#include "smash/oscaroutput.h"
 
 #include <string>
 
 #include <boost/filesystem.hpp>
 
-#include "include/action.h"
-#include "include/clock.h"
-#include "include/config.h"
-#include "include/configuration.h"
-#include "include/cxx14compat.h"
-#include "include/forwarddeclarations.h"
-#include "include/particles.h"
+#include "smash/action.h"
+#include "smash/clock.h"
+#include "smash/config.h"
+#include "smash/configuration.h"
+#include "smash/cxx14compat.h"
+#include "smash/forwarddeclarations.h"
+#include "smash/particles.h"
 
 namespace smash {
 
@@ -435,8 +435,8 @@ void OscarOutput<Format, Contents>::write_particledata(
         pos.x0(), pos.x1(), pos.x2(), pos.x3(), data.effective_mass(), mom.x0(),
         mom.x1(), mom.x2(), mom.x3(), data.pdgcode().string().c_str(),
         data.id(), data.type().charge(), h.collisions_per_particle,
-        data.formation_time(), data.cross_section_scaling_factor(),
-        h.id_process, static_cast<int>(h.process_type), h.time_last_collision,
+        data.formation_time(), data.xsec_scaling_factor(), h.id_process,
+        static_cast<int>(h.process_type), h.time_last_collision,
         h.p1.string().c_str(), h.p2.string().c_str());
   } else {
     std::fprintf(file_.get(), "%i %s %i %g %g %g %g %g %g %g %g %g\n",

@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -11,8 +11,8 @@
 
 #include <map>
 #include <string>
-#include "../include/nucleus.h"
-#include "../include/pdgcode.h"
+#include "../include/smash/nucleus.h"
+#include "../include/smash/pdgcode.h"
 
 using namespace smash;
 

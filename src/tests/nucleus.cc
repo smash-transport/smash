@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -11,10 +11,10 @@
 
 #include <map>
 
-#include "../include/nucleus.h"
-#include "../include/particles.h"
-#include "../include/pdgcode.h"
-#include "../include/threevector.h"
+#include "../include/smash/nucleus.h"
+#include "../include/smash/particles.h"
+#include "../include/smash/pdgcode.h"
+#include "../include/smash/threevector.h"
 
 namespace particles_txt {
 #include <particles.txt.h>

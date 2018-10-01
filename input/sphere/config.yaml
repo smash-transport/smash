@@ -1,0 +1,32 @@
+Logging:
+    default: INFO
+
+General:
+    Modus:         Sphere
+    Time_Step_Mode: None
+    Delta_Time:    0.1
+    End_Time:      200.0
+    Randomseed:    -1
+    Nevents:       1
+
+Output:
+    Particles:
+        Format:          ["Oscar2013"]
+
+Modi:
+    Sphere:
+        Radius: 5.0
+        Sphere_Temperature: 0.15
+        Initial_Condition: "thermal momenta"
+        # The sphere is initialized with 35 pions of each charge state,
+        # 10 protons and 10 neutrons. All other particles listed in
+        # particles.txt can potentially be formed through interactions.
+        Init_Multiplicities:
+            211:    35
+            111:    35
+            -211:   35
+            2212:   10
+            2112:   10
+
+Collision_Term:
+    Elastic_NN_Cutoff_Sqrts: 1.8

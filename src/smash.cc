@@ -13,16 +13,16 @@
 
 #include <boost/filesystem/fstream.hpp>
 
-#include "include/cxx14compat.h"
-#include "include/decaymodes.h"
-#include "include/experiment.h"
-#include "include/filelock.h"
-#include "include/inputfunctions.h"
-#include "include/random.h"
-#include "include/scatteractionsfinder.h"
-#include "include/stringfunctions.h"
+#include "smash/cxx14compat.h"
+#include "smash/decaymodes.h"
+#include "smash/experiment.h"
+#include "smash/filelock.h"
+#include "smash/inputfunctions.h"
+#include "smash/random.h"
+#include "smash/scatteractionsfinder.h"
+#include "smash/stringfunctions.h"
 /* build dependent variables */
-#include "include/config.h"
+#include "smash/config.h"
 
 namespace smash {
 
@@ -72,19 +72,20 @@ void usage(const int rc, const std::string &progname) {
    *     options from the input file (`-i`). Multiple `-c` arguments are
    *     supported. (Later settings may override preceding settings.) This can
    *     be a handy way to test different scenarios from a script.
-   * <tr><td>`-m <modus>` <td>`--modus <modus>`
-   * <td>This is a shortcut for `-c 'General: { Modus: <modus> }'`. Note that
+   * <tr><td>`-m \<modus\>` <td>`--modus \<modus\>`
+   * <td>This is a shortcut for `-c 'General: { Modus: \<modus\> }'`. Note that
    *     `-m` always overrides `-c`.
-   * <tr><td>`-e <time>` <td>`--endtime <time>`
-   * <td>This is a shortcut for `-c 'General: { End_Time: <time> }'`. Note that
+   * <tr><td>`-e \<time\>` <td>`--endtime \<time\>`
+   * <td>This is a shortcut for `-c 'General: { End_Time: \<time\> }'`. Note
+   * that
    *     `-e` always overrides `-c`.
-   * <tr><td>`-o <dir>` <td>`--output <dir>`
+   * <tr><td>`-o \<dir\>` <td>`--output \<dir\>`
    * <td>Sets the output directory. The default output directory is
    *     `./data/<runid>`, where `<rundid>` is an automatically incrementing
    *     integer. Note that this might cause races if several instances of SMASH
    *     run in parallel. In that case, make sure to specify a different output
    *     directory for every instance of SMASH.
-   * <tr><td>`-l <dir>` <td>`--list-2-to-n <dir>`
+   * <tr><td>`-l \<dir\>` <td>`--list-2-to-n \<dir\>`
    * <td>Dumps the list of all possible 2->n reactions (n > 1). Note that
    *     resonance decays and formations are NOT dumped. Every particle
    *     available in SMASH is collided against every and reactions with
@@ -129,6 +130,9 @@ void usage(const int rc, const std::string &progname) {
       "  -s, --cross-sections    <pdg1>,<pdg2>[,mass1,mass2] \n"
       "                          dump all partial cross-sections of "
       "pdg1 + pdg2 reactions versus sqrt(s).\n"
+      "  -S, --cross-sections-fs <pdg1>,<pdg2>[,mass1,mass2] \n"
+      "                          dump all partial final-state cross-sections "
+      "of pdg1 + pdg2 reactions versus sqrt(s).\n"
       "                          Masses are optional, by default pole masses"
       " are used.\n"
       "                          Note the required comma and no spaces.\n"
@@ -137,6 +141,39 @@ void usage(const int rc, const std::string &progname) {
       "\n"
       "  -v, --version\n\n");
   std::exit(rc);
+}
+
+/// Print the disclaimer.
+void print_disclaimer() {
+  /** \todo: Fill in logo in ASCII, webpage and bug report information
+   * properly
+   */
+  std::cout
+      << "\n"
+      << "###################################################################\n"
+      << "\n"
+      << " display logo in ASCII\n"
+      << "\n"
+      << " This is SMASH version: " << VERSION_MAJOR << "\n"
+      << " Simulating Many Accelerated Strongly-interacting Hadrons\n"
+      << "\n"
+      << " Distributed under the GNU General Public License 3.0\n"
+      << " (GPLv3 or later). See LICENSE for details.\n"
+      << " For the full list of contributors, see AUTHORS.\n"
+      << "\n"
+      << " When using SMASH, please cite\n"
+      << "      J. Weil et al., Phys.Rev. C94 (2016) no.5, 054905\n"
+      << " and in addition, if Pythia is used, please cite\n"
+      << "      T. Sjöstrand, S. Mrenna and P. Skands, JHEP05 (2006) 026,\n"
+      << "              Comput. Phys. Comm. 178 (2008) 852.\n"
+      << "\n"
+      << " Webpage: gsi.de/theory/transportsimulations/smash\n"
+      << "\n"
+      << " Report issues at https://github.com/smash-transport/smash/issues\n"
+      << " or via email to smash-user@...\n"
+      << "\n"
+      << "###################################################################\n"
+      << std::endl;
 }
 
 /**
@@ -222,8 +259,7 @@ ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
       included_2to2,
       configuration.take({"Collision_Term", "Strings"}, true),
       configuration.take({"Collision_Term", "Use_AQM"}, true),
-      configuration.take({"Collision_Term",
-                          "Strings_with_Probability"}, true),
+      configuration.take({"Collision_Term", "Strings_with_Probability"}, true),
       configuration.take({"Collision_Term", "NNbar_Treatment"},
                          NNbarTreatment::Strings),
       false,
@@ -249,24 +285,25 @@ ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
  */
 int main(int argc, char *argv[]) {
   using namespace smash;  // NOLINT(build/namespaces)
-  setup_default_float_traps();
 
   const auto &log = logger<LogArea::Main>();
 
-  constexpr option longopts[] = {{"config", required_argument, 0, 'c'},
-                                 {"decaymodes", required_argument, 0, 'd'},
-                                 {"endtime", required_argument, 0, 'e'},
-                                 {"force", no_argument, 0, 'f'},
-                                 {"help", no_argument, 0, 'h'},
-                                 {"inputfile", required_argument, 0, 'i'},
-                                 {"modus", required_argument, 0, 'm'},
-                                 {"particles", required_argument, 0, 'p'},
-                                 {"output", required_argument, 0, 'o'},
-                                 {"list-2-to-n", no_argument, 0, 'l'},
-                                 {"resonance", required_argument, 0, 'r'},
-                                 {"cross-sections", required_argument, 0, 's'},
-                                 {"version", no_argument, 0, 'v'},
-                                 {nullptr, 0, 0, 0}};
+  constexpr option longopts[] = {
+      {"config", required_argument, 0, 'c'},
+      {"decaymodes", required_argument, 0, 'd'},
+      {"endtime", required_argument, 0, 'e'},
+      {"force", no_argument, 0, 'f'},
+      {"help", no_argument, 0, 'h'},
+      {"inputfile", required_argument, 0, 'i'},
+      {"modus", required_argument, 0, 'm'},
+      {"particles", required_argument, 0, 'p'},
+      {"output", required_argument, 0, 'o'},
+      {"list-2-to-n", no_argument, 0, 'l'},
+      {"resonance", required_argument, 0, 'r'},
+      {"cross-sections", required_argument, 0, 's'},
+      {"cross-sections-fs", required_argument, 0, 'S'},
+      {"version", no_argument, 0, 'v'},
+      {nullptr, 0, 0, 0}};
 
   // strip any path to progname
   const std::string progname = bf::path(argv[0]).filename().native();
@@ -280,10 +317,12 @@ int main(int argc, char *argv[]) {
     bool list2n_activated = false;
     bool resonance_dump_activated = false;
     bool cross_section_dump_activated = false;
+    bool final_state_cross_sections = false;
 
     // parse command-line arguments
     int opt;
-    while ((opt = getopt_long(argc, argv, "c:d:e:fhi:m:p:o:lr:s:v", longopts,
+    bool suppress_disclaimer = false;
+    while ((opt = getopt_long(argc, argv, "c:d:e:fhi:m:p:o:lr:s:S:v", longopts,
                               nullptr)) != -1) {
       switch (opt) {
         case 'c':
@@ -315,14 +354,19 @@ int main(int argc, char *argv[]) {
           break;
         case 'l':
           list2n_activated = true;
+          suppress_disclaimer = true;
           break;
         case 'r':
           resonance_dump_activated = true;
           pdg_string = optarg;
+          suppress_disclaimer = true;
           break;
+        case 'S':
+          final_state_cross_sections = true;
         case 's':
           cross_section_dump_activated = true;
           cs_string = optarg;
+          suppress_disclaimer = true;
           break;
         case 'v':
           std::printf(
@@ -343,6 +387,12 @@ int main(int argc, char *argv[]) {
                 << "'\n";
       usage(EXIT_FAILURE, progname);
     }
+
+    if (!suppress_disclaimer) {
+      print_disclaimer();
+    }
+
+    setup_default_float_traps();
 
     // Read in config file
     Configuration configuration(input_path.parent_path(),
@@ -421,7 +471,7 @@ int main(int argc, char *argv[]) {
                   << b.name() << " instead of " << args[3] << std::endl;
       }
       auto scat_finder = actions_finder_for_dump(configuration);
-      scat_finder.dump_cross_sections(a, b, ma, mb);
+      scat_finder.dump_cross_sections(a, b, ma, mb, final_state_cross_sections);
       std::exit(EXIT_SUCCESS);
     }
     if (modus) {
@@ -435,7 +485,6 @@ int main(int argc, char *argv[]) {
     set_default_loglevel(
         configuration.take({"Logging", "default"}, einhard::ALL));
     create_all_loggers(configuration["Logging"]);
-    log.info(progname, " (", VERSION_MAJOR, ')');
 
     int64_t seed = configuration.read({"General", "Randomseed"});
     if (seed < 0) {
@@ -443,8 +492,8 @@ int main(int argc, char *argv[]) {
       std::random_device rd;
       static_assert(std::is_same<decltype(rd()), uint32_t>::value,
                     "random_device is assumed to generate uint32_t");
-      uint64_t unsigned_seed = (static_cast<uint64_t>(rd()) << 32) |
-                                static_cast<uint64_t>(rd());
+      uint64_t unsigned_seed =
+          (static_cast<uint64_t>(rd()) << 32) | static_cast<uint64_t>(rd());
       // Discard the highest bit to make sure it fits into a positive int64_t
       seed = static_cast<int64_t>(unsigned_seed >> 1);
       configuration["General"]["Randomseed"] = seed;

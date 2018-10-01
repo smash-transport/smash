@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2017
+ *    Copyright (c) 2015-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -9,21 +9,22 @@
 
 #include "unittest.h"  // This include has to be first
 
-#include "../include/integrate.h"
+#include "../include/smash/integrate.h"
 
 // test one-dimensional integration
 
 TEST(one_dim_no_arguments) {
   // The used algorithm sometimes underestimates the true error by a few bits
   // of precision.
+  constexpr double eps = std::numeric_limits<double>::epsilon() * 5;
   smash::Integrator integrate;
   for (int i = 0; i < 10; ++i) {
     const auto result = integrate(0, i, [](double) { return 1.; });
-    COMPARE_ABSOLUTE_ERROR(result.value(), double(i), 1.1 * result.error());
+    COMPARE_ABSOLUTE_ERROR(result.value(), double(i), result.error() + eps);
   }
   for (int i = 0; i < 10; ++i) {
     const auto result = integrate(0, i, [](double x) { return x; });
-    COMPARE_ABSOLUTE_ERROR(result.value(), i * i * 0.5, 1.2 * result.error());
+    COMPARE_ABSOLUTE_ERROR(result.value(), i * i * 0.5, result.error() + eps);
   }
 }
 
@@ -31,7 +32,7 @@ TEST(one_dim_with_lambda_captures) {
   smash::Integrator integrate;
   for (int i = 0; i < 10; ++i) {
     const auto result = integrate(0, i, [i](double x) { return x + i; });
-    COMPARE_ABSOLUTE_ERROR(result.value(), i * i * 1.5, result.error())
+    COMPARE_ABSOLUTE_ERROR(result.value(), i * i * 1.5, 1.2 * result.error())
         << "i = " << i;
   }
   for (int i = 0; i < 10; ++i) {

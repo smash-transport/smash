@@ -11,20 +11,20 @@
 
 #include "setup.h"
 
-#include <include/config.h>
+#include <smash/config.h>
 #include <array>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <string>
 #include <vector>
 
-#include "../include/configuration.h"
-#include "../include/oscaroutput.h"
-#include "../include/outputinterface.h"
-#include "../include/particles.h"
-#include "../include/processbranch.h"
-#include "../include/random.h"
-#include "../include/scatteraction.h"
+#include "../include/smash/configuration.h"
+#include "../include/smash/oscaroutput.h"
+#include "../include/smash/outputinterface.h"
+#include "../include/smash/particles.h"
+#include "../include/smash/processbranch.h"
+#include "../include/smash/random.h"
+#include "../include/smash/scatteraction.h"
 
 using namespace smash;
 
@@ -75,7 +75,8 @@ TEST(fullhistory_format) {
   const ParticleData p2 = particles.insert(Test::smashon_random());
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
-                          true, false, false, NNbarTreatment::NoAnnihilation);
+                              true, false, false,
+                              NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
   const ParticleList final_particles = action->outgoing_particles();
 
@@ -203,7 +204,8 @@ TEST(particlelist_format) {
   /* Create interaction ("elastic scattering") */
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
-                          true, false, false, NNbarTreatment::NoAnnihilation);
+                              true, false, false,
+                              NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
   const int event_id = 0;
   double impact_parameter = 2.4;

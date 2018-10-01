@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -9,16 +9,16 @@
 
 #include "unittest.h"  // This include has to be first
 
-#include "../include/particledata.h"
-#include "../include/processbranch.h"
+#include "../include/smash/particledata.h"
+#include "../include/smash/processbranch.h"
 
 using namespace smash;
 
 TEST(init_particle_types) {
   ParticleType::create_type_list(
-      "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "σ    1.1 1.1 9876542\n"
-      "σino 1.1 1.1 1234568\n");
+      "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
+      "σ    1.1 1.1 + 9876542\n"
+      "σino 1.1 1.1 + 1234568\n");
 }
 
 TEST(assign_default) {

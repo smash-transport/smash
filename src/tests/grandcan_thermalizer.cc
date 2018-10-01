@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2016-2017
+ *    Copyright (c) 2016-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -10,10 +10,10 @@
 
 #include "setup.h"
 
-#include "../include/boxmodus.h"
-#include "../include/grandcan_thermalizer.h"
-#include "../include/logging.h"
-#include "../include/thermalizationaction.h"
+#include "../include/smash/boxmodus.h"
+#include "../include/smash/grandcan_thermalizer.h"
+#include "../include/smash/logging.h"
+#include "../include/smash/thermalizationaction.h"
 
 using namespace smash;
 
@@ -26,9 +26,9 @@ TEST(create_part_list) {
      the system to be solved.
    */
   ParticleType::create_type_list(
-      "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "N⁺ 0.938 0.0       2212\n"
-      "K⁰ 0.494 0.0        311\n");
+      "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
+      "N⁺ 0.938 0.0 + 2212\n"
+      "K⁰ 0.494 0.0 -  311\n");
 }
 
 static BoxModus create_box_for_tests() {
@@ -106,7 +106,7 @@ TEST(thermalization_action) {
 
   const DensityParameters dens_par = DensityParameters(par);
   std::cout << "Updating lattice" << std::endl;
-  thermalizer->update_lattice(P, dens_par, true);
+  thermalizer->update_thermalizer_lattice(P, dens_par, true);
   std::cout << "Thermalizing" << std::endl;
   thermalizer->thermalize(P, 0.0, par.testparticles);
   ThermalizationAction th_act(*thermalizer, 0.0);

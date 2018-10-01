@@ -9,6 +9,9 @@
 
 #include "unittest.h"  // This include has to be first
 
+#include <boost/filesystem.hpp>
+
+#include "../include/smash/collidermodus.h"
 #include "setup.h"
 
 using namespace smash;
@@ -73,4 +76,14 @@ TEST(create_sphere) {
 
 TEST_CATCH(create_invalid, ExperimentBase::InvalidModusRequest) {
   Test::experiment("General: {Modus: Invalid}");
+}
+
+TEST(access_particles) {
+  Configuration config = Test::configuration();
+  boost::filesystem::path output_path(".");
+  auto exp = make_unique<Experiment<ColliderModus>>(config, output_path);
+  Particles* part = exp->particles();
+  part->create(0x211);
+  ParticleList part_list = part->copy_to_vector();
+  VERIFY(part_list.size() == 1);
 }

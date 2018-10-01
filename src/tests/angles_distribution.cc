@@ -1,13 +1,13 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include "../include/angles.h"
+#include "../include/smash/angles.h"
 
 // tests distributions for the angles.
 

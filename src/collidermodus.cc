@@ -5,7 +5,7 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#include "include/collidermodus.h"
+#include "smash/collidermodus.h"
 
 #include <algorithm>
 #include <cmath>
@@ -16,18 +16,18 @@
 #include <tuple>
 #include <utility>
 
-#include "include/angles.h"
-#include "include/configuration.h"
-#include "include/cxx14compat.h"
-#include "include/experimentparameters.h"
-#include "include/fourvector.h"
-#include "include/interpolation.h"
-#include "include/kinematics.h"
-#include "include/logging.h"
-#include "include/numerics.h"
-#include "include/particles.h"
-#include "include/pdgcode.h"
-#include "include/random.h"
+#include "smash/angles.h"
+#include "smash/configuration.h"
+#include "smash/cxx14compat.h"
+#include "smash/experimentparameters.h"
+#include "smash/fourvector.h"
+#include "smash/interpolation.h"
+#include "smash/kinematics.h"
+#include "smash/logging.h"
+#include "smash/numerics.h"
+#include "smash/particles.h"
+#include "smash/pdgcode.h"
+#include "smash/random.h"
 
 namespace smash {
 
@@ -126,11 +126,12 @@ namespace smash {
  * impact parameter distribution and use rejection sampling.
  *
  * Values (doubles, optional, default = 0.0): \n
- * Values of the impact parameter, corresponding to \key Yields. Must be same
+ * Values of the impact parameter, with corresponding \key Yields. Must be same
  * length as \key Yields. Required for \key Sample = "custom".
  *
  * \key Yields (doubles, optional): \n
- * Values of the particle yields, corresponding to \key Values. Must be same
+ * Values of the particle yields, corresponding to \key Values, i.e. the value
+ * of the custom distribution at this Value. Must be same
  * length as \key Values. Required for \key Sample = "custom".
  *
  * \key Range (double, double, optional, default = 0.):\n
@@ -222,6 +223,20 @@ namespace smash {
  *
  * Additionally, the impact parameter may be specified manually. See
  * \ref input_impact_parameter_ for an example.
+ *
+ * \n
+ * \note
+ * By default, executing SMASH without further specifying the configuration,
+ * particles or decaymodes, a collider simulation is set up according to the
+ * default 'config.yaml', 'particles.txt' and 'decaymodes.txt' files located in
+ * /input. Note though that these files were previously copied to the build
+ * directory, so changng the ones in the /input directory will not affect the
+ * default SMASH run. To run SMASH
+ * in the (default) collider setup, execute \n
+ * \n
+ * \verbatim
+    ./smash
+ \endverbatim
  *
  */
 

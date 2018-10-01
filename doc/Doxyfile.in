@@ -665,11 +665,11 @@ WARN_LOGFILE           =
 
 INPUT                  = \
                          doc/ \
-                         src/include/ \
+                         src/include/smash/ \
                          src/tests/unittest.h \
                          src/tests/setup.h \
                          src/ \
-                         DEBUG \
+                         CONTRIBUTING.md \
                          3rdparty/einhard/einhard.hpp
 
 # This tag can be used to specify the character encoding of the source files

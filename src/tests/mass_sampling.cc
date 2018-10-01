@@ -10,23 +10,23 @@
 #include "histogram.h"
 #include "setup.h"
 
-#include "../include/decayaction.h"
-#include "../include/decaymodes.h"
-#include "../include/formfactors.h"
-#include "../include/kinematics.h"
-#include "../include/particletype.h"
+#include "../include/smash/decayaction.h"
+#include "../include/smash/decaymodes.h"
+#include "../include/smash/formfactors.h"
+#include "../include/smash/kinematics.h"
+#include "../include/smash/particletype.h"
 
 using namespace smash;
 
 TEST(init_particle_types) {
   ParticleType::create_type_list(
-      "# NAME MASS[GEV] WIDTH[GEV] PDG\n"
-      "π⁰ 0.138 0.0 111\n"
-      "π⁺ 0.138 0.0 211\n"
-      "ρ⁰ 0.776 0.149 113\n"
-      "ρ⁺ 0.776 0.149 213\n"
-      "ω 0.783 0.0085 223\n"
-      "e⁻ 0.000511 0.0 11\n");
+      "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
+      "π⁰ 0.138 0.0 - 111\n"
+      "π⁺ 0.138 0.0 - 211\n"
+      "ρ⁰ 0.776 0.149 - 113\n"
+      "ρ⁺ 0.776 0.149 - 213\n"
+      "ω 0.783 0.0085 - 223\n"
+      "e⁻ 0.000511 0.0 + 11\n");
 }
 
 TEST(init_decay_modes) {

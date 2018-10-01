@@ -7,7 +7,7 @@
  *
  */
 
-#include "include/file.h"
+#include "smash/file.h"
 
 namespace smash {
 

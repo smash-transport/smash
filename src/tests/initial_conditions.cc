@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -11,14 +11,16 @@
 
 #include "setup.h"
 
-#include "../include/boxmodus.h"
-#include "../include/collidermodus.h"
-#include "../include/modusdefault.h"
-#include "../include/spheremodus.h"
+#include "../include/smash/boxmodus.h"
+#include "../include/smash/collidermodus.h"
+#include "../include/smash/modusdefault.h"
+#include "../include/smash/spheremodus.h"
 
 using namespace smash;
 
-TEST(init_particle_types) { ParticleType::create_type_list("σ 0.4 0.0 661\n"); }
+TEST(init_particle_types) {
+  ParticleType::create_type_list("σ 0.4 0.0 + 661\n");
+}
 
 TEST(initialize_box) {
   einhard::Logger<> log(einhard::ALL);

@@ -7,29 +7,28 @@
  *
  */
 
-#include "include/scatteractionphoton.h"
+#include "smash/scatteractionphoton.h"
 
 #include <algorithm>
 
-#include "include/angles.h"
-#include "include/constants.h"
-#include "include/crosssectionsphoton.h"
-#include "include/cxx14compat.h"
-#include "include/forwarddeclarations.h"
-#include "include/kinematics.h"
-#include "include/outputinterface.h"
-#include "include/particletype.h"
-#include "include/pdgcode.h"
-#include "include/pow.h"
-#include "include/random.h"
-#include "include/tabulation.h"
+#include "smash/angles.h"
+#include "smash/constants.h"
+#include "smash/crosssectionsphoton.h"
+#include "smash/cxx14compat.h"
+#include "smash/forwarddeclarations.h"
+#include "smash/kinematics.h"
+#include "smash/outputinterface.h"
+#include "smash/particletype.h"
+#include "smash/pdgcode.h"
+#include "smash/pow.h"
+#include "smash/random.h"
+#include "smash/tabulation.h"
 
 namespace smash {
 
-ScatterActionPhoton::ScatterActionPhoton(const ParticleList &in,
-                    const double time,
-                    const int n_frac_photons,
-                    const double hadronic_cross_section_input)
+ScatterActionPhoton::ScatterActionPhoton(
+    const ParticleList &in, const double time, const int n_frac_photons,
+    const double hadronic_cross_section_input)
     : ScatterAction(in[0], in[1], time),
       reac_(photon_reaction_type(in)),
       number_of_fractional_photons_(n_frac_photons),
@@ -198,6 +197,15 @@ void ScatterActionPhoton::generate_final_state() {
   outgoing_particles_ = proc->particle_list();
 
   FourVector middle_point = get_interaction_point();
+
+  // t is defined to be the momentum exchanged between the rho meson and the
+  // photon in pi + rho -> pi + photon channel. Therefore,
+  // get_t_range needs to be called with m2 being the rho mass instead of the
+  // pion mass. So, particles 1 and 2 are swapped if necessary.
+
+  if (!incoming_particles_[0].pdgcode().is_pion()) {
+    std::swap(incoming_particles_[0], incoming_particles_[1]);
+  }
 
   // 2->2 inelastic scattering
   // Sample the particle momenta in CM system

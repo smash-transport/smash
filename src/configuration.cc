@@ -7,7 +7,7 @@
  *
  */
 
-#include "include/configuration.h"
+#include "smash/configuration.h"
 
 #include <cstdio>
 #include <string>
@@ -16,7 +16,7 @@
 #include <yaml-cpp/yaml.h>  // NOLINT(build/include_order)
 #include <boost/filesystem.hpp>
 
-#include "include/forwarddeclarations.h"
+#include "smash/forwarddeclarations.h"
 
 namespace smash {
 

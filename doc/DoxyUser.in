@@ -663,7 +663,7 @@ WARN_LOGFILE           =
 # with spaces.
 
 INPUT                  = doc/ \
-                         AUTHORS INSTALL \
+                         AUTHORS README.md CONTRIBUTING.md \
                          @CMAKE_CURRENT_BINARY_DIR@/userguide.dox
 
 # This tag can be used to specify the character encoding of the source files

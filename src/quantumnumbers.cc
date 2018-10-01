@@ -7,11 +7,11 @@
  *
  */
 
-#include "include/quantumnumbers.h"
+#include "smash/quantumnumbers.h"
 
 #include <sstream>
 
-#include "include/numerics.h"
+#include "smash/numerics.h"
 
 namespace smash {
 

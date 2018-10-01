@@ -5,19 +5,19 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#include "include/grandcan_thermalizer.h"
+#include "smash/grandcan_thermalizer.h"
 
 #include <time.h>
 
-#include "include/angles.h"
-#include "include/bessel_sampler.h"
-#include "include/cxx14compat.h"
-#include "include/distributions.h"
-#include "include/forwarddeclarations.h"
-#include "include/logging.h"
-#include "include/particles.h"
-#include "include/quantumnumbers.h"
-#include "include/random.h"
+#include "smash/angles.h"
+#include "smash/bessel_sampler.h"
+#include "smash/cxx14compat.h"
+#include "smash/distributions.h"
+#include "smash/forwarddeclarations.h"
+#include "smash/logging.h"
+#include "smash/particles.h"
+#include "smash/quantumnumbers.h"
+#include "smash/random.h"
 
 namespace smash {
 
@@ -118,12 +118,12 @@ GrandCanThermalizer::GrandCanThermalizer(const std::array<double, 3> lat_sizes,
   mult_int_.resize(N_sorts_);
 }
 
-void GrandCanThermalizer::update_lattice(const Particles &particles,
-                                         const DensityParameters &dens_par,
-                                         bool ignore_cells_under_treshold) {
+void GrandCanThermalizer::update_thermalizer_lattice(
+    const Particles &particles, const DensityParameters &dens_par,
+    bool ignore_cells_under_treshold) {
   const DensityType dens_type = DensityType::Hadron;
   const LatticeUpdate update = LatticeUpdate::EveryFixedInterval;
-  update_general_lattice(lat_.get(), update, dens_type, dens_par, particles);
+  update_lattice(lat_.get(), update, dens_type, dens_par, particles);
   for (auto &node : *lat_) {
     /* If energy density is definitely below e_crit -
        no need to find T, mu, etc. So if e = T00 - T0i*vi <=

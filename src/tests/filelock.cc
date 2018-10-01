@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -11,7 +11,7 @@
 
 #include "setup.h"
 
-#include "../include/filelock.h"
+#include "../include/smash/filelock.h"
 
 using namespace smash;
 

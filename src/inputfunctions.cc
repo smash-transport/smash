@@ -1,19 +1,19 @@
 /*
  *
- *    Copyright (c) 2014-2017
+ *    Copyright (c) 2014-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#include "include/inputfunctions.h"
+#include "smash/inputfunctions.h"
 
 #include <sstream>
 #include <vector>
 
-#include "include/logging.h"
-#include "include/stringfunctions.h"
+#include "smash/logging.h"
+#include "smash/stringfunctions.h"
 
 namespace smash {
 

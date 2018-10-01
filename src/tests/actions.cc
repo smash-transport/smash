@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2017
+ *    Copyright (c) 2015-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -13,8 +13,8 @@
 
 #include <algorithm>
 
-#include "../include/actions.h"
-#include "../include/decayaction.h"
+#include "../include/smash/actions.h"
+#include "../include/smash/decayaction.h"
 
 using namespace smash;
 

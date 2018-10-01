@@ -11,7 +11,7 @@
 
 #include "setup.h"
 
-#include <include/config.h>
+#include <smash/config.h>
 #include <array>
 #include <cstdio>
 #include <cstring>
@@ -20,13 +20,13 @@
 #include <string>
 #include <vector>
 
-#include "../include/binaryoutputcollisions.h"
-#include "../include/binaryoutputparticles.h"
-#include "../include/clock.h"
-#include "../include/file.h"
-#include "../include/outputinterface.h"
-#include "../include/processbranch.h"
-#include "../include/scatteraction.h"
+#include "../include/smash/binaryoutputcollisions.h"
+#include "../include/smash/binaryoutputparticles.h"
+#include "../include/smash/clock.h"
+#include "../include/smash/file.h"
+#include "../include/smash/outputinterface.h"
+#include "../include/smash/processbranch.h"
+#include "../include/smash/scatteraction.h"
 
 using namespace smash;
 
@@ -98,7 +98,7 @@ static void compare_particle_extended(const ParticleData &p,
   read_binary(p2pdg, file);
   COMPARE(collisions_per_particle, h.collisions_per_particle);
   COMPARE(formation_time, p.formation_time());
-  COMPARE(xs_scaling_factor, p.cross_section_scaling_factor());
+  COMPARE(xs_scaling_factor, p.xsec_scaling_factor());
   COMPARE(id_process, static_cast<int>(h.id_process));
   COMPARE(process_type, static_cast<int>(h.process_type));
   COMPARE(time_last_collision, h.time_last_collision);
@@ -167,7 +167,8 @@ TEST(fullhistory_format) {
   const double impact_parameter = 1.473;
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
-                          true, false, false, NNbarTreatment::NoAnnihilation);
+                              true, false, false,
+                              NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
   ParticleList final_particles = action->outgoing_particles();
   const double rho = 0.123;
@@ -335,7 +336,8 @@ TEST(extended) {
   /* Create elastic interaction (smashon + smashon). */
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
-                          true, false, false, NNbarTreatment::NoAnnihilation);
+                              true, false, false,
+                              NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
   ParticleList final_particles = action->outgoing_particles();
   const double rho = 0.123;

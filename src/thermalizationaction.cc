@@ -5,7 +5,7 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#include "include/thermalizationaction.h"
+#include "smash/thermalizationaction.h"
 
 namespace smash {
 

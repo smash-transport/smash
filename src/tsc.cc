@@ -7,7 +7,7 @@
  *
  */
 
-#include "include/tsc.h"
+#include "smash/tsc.h"
 
 #include <cmath>
 #include <iomanip>
