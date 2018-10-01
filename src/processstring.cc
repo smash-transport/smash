@@ -861,17 +861,29 @@ int StringProcess::diquark_from_quarks(int q1, int q2) {
 
 void StringProcess::make_string_ends(const PdgCode &pdg, int &idq1, int &idq2,
                                      double xi) {
-  if (pdg.is_nucleon() && (pdg.charge() == 1)) {
-    if (random::uniform(0., 1.) < xi) {
-      idq1 = 1;
-      idq2 = diquark_from_quarks(2, 2);
-    } else {
-      idq1 = 2;
-      idq2 = diquark_from_quarks(1, 2);
+  std::array<int, 3> quarks = pdg.quark_content();
+  if (pdg.is_nucleon() {
+    // protons and neutrons treated seperately since single quarks is at a
+    // different position in the PDG code
+    if (pdg.charge == 0){ //(anti)neutron
+      if (random::uniform(0., 1.) < xi) {
+        idq1 = quarks[0];
+        idq2 = diquark_from_quarks(quarks[1], quarks[2]);
+      } else {
+        idq1 = quarks[1];
+        idq2 = diquark_from_quarks(quarks[0], quarks[2]);
+      }
+    } else { //(anti)proton
+      if (random::uniform(0., 1.) < xi) {
+        idq1 = quarks[2];
+        idq2 = diquarks_from_quarks(quarks[0],quarks[1]);
+      } else {
+        idq1 = quarks[0];
+        idq2 = diquarks_from_quarks(quarks[1], quarks[2]);
+      }
     }
     return;
   }
-  std::array<int, 3> quarks = pdg.quark_content();
   if (pdg.is_meson()) {
     idq1 = quarks[1];
     idq2 = quarks[2];
