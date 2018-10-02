@@ -5,6 +5,8 @@ fail() {
   exit 1
 }
 
+type perf >/dev/null 2>&1 || fail "Failed to find perf (This script only works on Linux)."
+
 # TODO:
 ######### "USER" INPUT FOR NOW #################
 smash_root_dir="../../.."
@@ -15,15 +17,11 @@ n_cores=8
 echo "Building SMASH ..."
 echo
 
-# TODO: remove it, just have /build
-# mkdir -p smash-benchmark
-# cd smash-benchmark
-
 mkdir -p build || fail "Failed to create $PWD/build directory."
 cd build || fail "Failed to change directory to $PWD/build."
 
-#cmake -DCMAKE_BUILD_perfYPE=Release $smash_root_dir || fail "Failed to configure the build system."
-#make -j${n_cores} || fail "Failed to build SMASH."
+cmake -DCMAKE_BUILD_perfYPE=Release $smash_root_dir || fail "Failed to configure the build system."
+make -j${n_cores} || fail "Failed to build SMASH."
 
 echo
 echo "Collecting System Information ..."
