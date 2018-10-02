@@ -1,5 +1,5 @@
 Logging:
-    default: INFO
+    default: OFF
 
 General:
     Modus:         Sphere
@@ -7,7 +7,7 @@ General:
     Delta_Time:    0.1
     End_Time:      200.0
     Randomseed:    -1
-    Nevents:       50
+    Nevents:       100
 
 Output:
     Particles:

@@ -1,13 +1,13 @@
 Logging:
-    default: INFO
+    default: OFF
 
 General:
     Modus:         Box
     Time_Step_Mode: Fixed
     Delta_Time:    0.1
-    End_Time:      20.0
+    End_Time:      100.0
     Randomseed:    -1
-    Nevents:       50
+    Nevents:       100
 
 Output:
     Output_Interval: 5.0
