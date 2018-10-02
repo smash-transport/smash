@@ -40,7 +40,7 @@ echo
 benchmark_run() {
   setup=$1
 
-  PERF_OUT=$(perf stat -B -r 3 ./smash -i ${configs_dir}/${setup}/config.yaml -d ${configs_dir}/${setup}/decaymodes.txt -p ${configs_dir}/${setup}/particles.txt 2>&1 >/dev/null)
+  PERF_OUT=$(perf stat -B ./smash -i ${configs_dir}/${setup}/config.yaml -d ${configs_dir}/${setup}/decaymodes.txt -p ${configs_dir}/${setup}/particles.txt 2>&1 >/dev/null)
 
   echo "$PERF_OUT"
 }
@@ -56,6 +56,10 @@ echo "$box_perf" | grep -E "time elapsed"
 echo "Started benchmark for sphere ..."
 sphere_perf=$(benchmark_run sphere)
 echo "$sphere_perf" | grep -E "time elapsed"
+
+echo "Started benchmark for dileptons ..."
+dilepton_perf=$(benchmark_run dileptons)
+echo "$dilepton_perf" | grep -E "time elapsed"
 
 
 OUTPUT_FILE_N=bm-results-${SMASH_VER_NUM}.md
@@ -99,6 +103,12 @@ $box_perf
 ### Sphere Run
 \`\`\`
 $sphere_perf
+\`\`\`
+
+### Dilepton Run
+Same setup as collider run, but with dileptons.
+\`\`\`
+$dilepton_perf
 \`\`\`
 EOF
 echo
