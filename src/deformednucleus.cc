@@ -83,13 +83,13 @@ DeformedNucleus::DeformedNucleus(const std::map<PdgCode, int> &particle_list,
 
 DeformedNucleus::DeformedNucleus(Configuration &config, int nTest)
     : Nucleus(config, nTest) {
-      if (config.has_value({"Automatic_Deformation"}) &&
-          config.take({"Automatic_Deformation"})) {
-        set_deformation_parameters_automatic();
-      } else {
-        set_deformation_parameters_from_config(config);
-      }
-    }
+  if (config.has_value({"Automatic_Deformation"}) &&
+      config.take({"Automatic_Deformation"})) {
+    set_deformation_parameters_automatic();
+  } else {
+    set_deformation_parameters_from_config(config);
+  }
+}
 
 double DeformedNucleus::deformed_woods_saxon(double r, double cosx) const {
   return Nucleus::get_saturation_density() /
@@ -150,7 +150,8 @@ void DeformedNucleus::set_deformation_parameters_automatic() {
   nuclear_orientation_.distribute_isotropically();
 }
 
-void DeformedNucleus::set_deformation_parameters_from_config(Configuration &config) {
+void DeformedNucleus::set_deformation_parameters_from_config(
+    Configuration &config) {
   // Deformation parameters.
   if (config.has_value({"Beta_2"})) {
     set_beta_2(static_cast<double>(config.take({"Beta_2"})));
