@@ -7,7 +7,7 @@ General:
     Delta_Time:    0.1
     End_Time:      200.0
     Randomseed:    -1
-    Nevents:       100
+    Nevents:        1 #100
 
 Output:
     Particles:
