@@ -22,9 +22,8 @@ namespace smash {
 /*!\Userguide
  * \page projectile_and_target Projectile and Target
  *
- * Additional Parameters to specify the shape of the modified Woods-Saxon
- * distribution, necessary to configure the deformation of the nucleus if
- * \key Deformed: True and \key Automatic: False.: \n
+ * Additional Parameters to specify the spherical shape of the deformed
+ * nucleus following \iref{Moller:1993ed}.
  *
  * \li \key Beta_2 (double, optional):\n
  * The deformation coefficient for the spherical harmonic Y_2_0 in the
@@ -33,11 +32,6 @@ namespace smash {
  *
  * \li \key Beta_4 (double, optional):\n
  * The deformation coefficient for the spherical harmonic Y_4_0. \n
- *
- * \li \key Saturation_Density (double, optional, default = .168)\n
- * The normalization coefficient in the Woods-Saxon distribution,
- * needed here (and not in nucleus) due to the accept/reject sampling used.
- * Default is given as the infinite nuclear matter value. \n
  *
  * \li \key Theta (double, optional): \n
  * The polar angle by which to rotate the nucleus. \n
@@ -49,29 +43,35 @@ namespace smash {
  * Example: Configuring a deformed nucleus
  * --------------
  * To configure a fixed target heavy-ion collision with deformed nuclei, whose
- * deformation is explicitly declared, it can be done according to the following
- * example:
+ * spherical deformation is explicitly declared, it can be done according to the
+ * following example. For explanatory (and not physics) reasons,
+ * the projectile's Woods Saxon distribution is initialized automatically and
+ * it's spherical deformation manually, while the target nucleus is configured
+ * just the opposite.
  *\verbatim
  Modi:
      Collider:
          Projectile:
-             Particles:    {2212: 29, 2112 :34}
+             Particles:    {2212: 29, 2112: 34}
+             # automatically set diffusiveness, radius and saturation density
+             Automatic_Woods_Saxon: True
              Deformed: True
-             Automatic: False
-             Beta_2: 0.0
-             Beta_4: 0.0
-             Saturation_Density: 0.168
-             Theta: 0.0
-             Phi: 0.0
+             # Manually set deformation parameters
+             Automatic_Deformation: False
+             Beta_2: 0.1
+             Beta_4: 0.3
+             Theta: 0.8
+             Phi: 0.02
          Target:
-             Particles:    {2212: 29, 2112 :34}
+             Particles:    {2212: 29, 2112: 34}
+             # manually set woods saxon parameters
+             Automatic_Woods_Saxon: False
+             Saturation_Density: 0.1968
+             Diffusiveness: 0.8
+             Radius: 2.0
              Deformed: True
-             Automatic: False
-             Beta_2: 0.0
-             Beta_4: 0.0
-             Saturation_Density: 0.168
-             Theta: 0.0
-             Phi: 0.0
+             # Automatically set deformation parameters
+             Automatic_Deformation: True
          E_kin: 1.2
          Calculation_Frame: "fixed target"
  \endverbatim

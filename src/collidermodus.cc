@@ -96,10 +96,21 @@ namespace smash {
  * `Particles: {2212: 1, 2112: 1, 3122: 1}` for Hyper-Triton (one
  * proton, one neutron and one Lambda).
  *
- * \li \key Automatic (bool, optional, default = true): \n
- * true - sets all necessary parameters for a deformed nucleus based on the
- * atomic number of the input nucleus \n
- * false - manual values according to deformed nucleus (see below)
+ * \li \key Automatic_Woods_Saxon (bool, optional, no default): \n
+ * true - sets all necessary parameters for the Woods Saxon distribution based
+ * on the atomic number of the input nucleus \n
+ * false - manually specified values for \key Diffusiveness, \key Radius and
+ * \key Saturation_Density are emploied
+ *
+ * \li \key Diffusiveness (double, optional, default = 0.545): \n
+ * Diffusiveness of the Woods Saxon distribution for the nucleus in fm.
+ *
+ * \li \key Radius (double, optional, default = proton_rad * A^(1/3)): \n
+ * Radius of nucleus in fm. The default radius is calculated as the proton
+ * radius times the third root of the number of nucleons.
+ *
+ * \li \key Saturation_Density (double, optional, default = 0.168): \n
+ * Saturation density of the nucleus in 1/fm^3.
  *
  * \li \key Deformed (bool, optional, default = false): \n
  * true - deformed nucleus is initialized \n
