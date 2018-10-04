@@ -264,6 +264,14 @@ smash_add_runtest(dilepton_run smash smash
                   -d ${CMAKE_CURRENT_SOURCE_DIR}/decaymodes_incl_dileptons.txt
                   -c "Output: {Dileptons: {Format: [Oscar2013]}}")
 
+# Test the shipped config files for potentials and deformed nuclei by verifing
+# the binary runs with them.
+smash_add_runtest(potentials_run smash smash
+                  -i ${PROJECT_SOURCE_DIR}/input/potentials/config.yaml)
+smash_add_runtest(deformednucleus_run smash smash
+                  -i ${PROJECT_SOURCE_DIR}/input/deformed_nucleus/config.yaml)
+
+
 # verify that binary runs certain time (this corresponds to 20 steps)
 smash_add_runtest(box_steps smash smash -e 2.0 -c "General: {Delta_Time: 0.1}"
                   -m Box -c "Modi: {Box: {Initial_Condition: thermal momenta}}"
