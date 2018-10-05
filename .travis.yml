@@ -52,9 +52,6 @@ matrix:
         - boost
     env:
       - MATRIX_EVAL="CC=clang && CXX=clang++"
-  allow_failures:
-    # tests currently fail for mac, see redmine issue 6256
-    - os: osx
 
 before_install:
   - export SMASH_ROOT=$(pwd)
