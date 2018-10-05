@@ -13,7 +13,7 @@ version you want to benchmark.
 
 The benchmarks are run by executing the shell script.
 
-    ./benchmark.sh
+    ./benchmark.sh PREPARED_BUILD_DIR
 
 First the benchmark collects system information and then runs the different
 SMASH setups. The measurement is done with `perf` and performed a few times to
