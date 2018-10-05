@@ -224,20 +224,25 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
 
 /*!\Userguide
  * \page format_oscar_particlelist OSCAR particles format
- * The format follows general block structure of OSCAR format:
- * \ref oscar_general_. There are two kinds of this format -
+ * The OSCAR particles format follows the general block structure of the OSCAR
+ * format: \ref oscar_general_. We distinguish between two versions -
  * OSCAR2013 and OSCAR1999. Information about OSCAR standard can be found at
  * https://karman.physics.purdue.edu/OSCAR and
- * http://phy.duke.edu/~jeb65/oscar2013. SMASH OSCAR particles output
- * produces \c particle_lists.oscar file. Format is flexible, options that
- * regulate output can be found at
- * \ref output_content_specific_options_ "content-specific output options".
- * and at \ref input_general_. **Particle output always gives
- * the current particle list at a specific time.**
+ * http://phy.duke.edu/~jeb65/oscar2013. \n
+ * Enabling the OSCAR output for particles in the config.yaml file
+ * (see \ref input_output_options_), a so-called \c particle_lists.oscar file is
+ * produced when executing SMASH. It allows for a certain degree of flexibility,
+ * see \ref output_content_specific_options_ "Content-specific output options"
+ * for further details. \n
+ * **The Particle output always provides the current particle list at a
+ * specific time.** \n
+ * \n
  * Oscar1999
  * ---------
- * This is ASCII (text) human-readable output according to OSCAR 1999
- * standard. Format specifics are the following:\n
+ * Oscar1999 is ASCII (text) human-readable output following the OSCAR 1999
+ * standard. The format specifics are the following:
+ *
+ * \n
  * **Header**
  * \code
  * # OSC1999A
@@ -249,34 +254,57 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * # End of event: 0 0 event_number impact_parameter
  * #
  * \endcode
+ * The header consists of 7 lines starting with '#', followed by an empty line.
+ * They contain the following information:
+ * -# The specific OSCAR1999 version the formatting follows - OSCAR1999A
+ * -# The substructure of each particle line: (id - momentum - coordinates)
+ * -# The SMASH version with which the oputput was generated
+ * -# - 7. Info on the block structure
  *
- * **Output block header**
+ * \n
+ * **Output block header** \n
+ * Each output block starts with a line indicating the numbers of ingoing and
+ * outgoing particles as well the number of the event.
  * \code
  * nin nout /(not guaranteed) event_number/
  * \endcode
+ * With
+ * \li \key nin: Number of ingoing particles [int]
+ * \li \key nout: Number of outgoing particles [int]
+ * \li \key event_number: Number of the event
  *
- * For initial particles block (nin, nout) = (0, npart), for intermediate
- * and final - (nin, nout) = (npart, 0). Here npart - total number of
- * particles. Output block header is followed by npart particle lines.
+ * For initial timesteps, (nin, nout) = (0, npart), while (nin, nout) =
+ * (npart, 0) for intermediate and final timesteps. npart is the total number
+ * of particles at the specific timestep. It may differ from one timestep to
+ * another if the test case allows more interactions than only elastic
+ * scattering. The output block header is followed by npart particle lines.
  *
- * **Particle line**
+ * **Particle line** \n
+ * The particle lines are formatted as follows:
  * \code
  * id pdg 0 px py pz p0 mass x y z t
  * \endcode
  *
- * \li \c id is an integer particle identifier.
+ * Where
+ * \li \key id: Particle identifier in terms of an integer.
  *     It is unique for every particle in event.
- * \li \c pdg is a PDG code of the particle (see http://pdg.lbl.gov/).
- * It contains all the quantum numbers of the particle and uniquely
- * identifies its type.
- * \li \c px \c py \c pz \c p0 - 3-momentum and energy
- * \li \c x \c y \c z \c t - coordinates and time
+ * \li \key pdg: PDG code of the particle (see http://pdg.lbl.gov/).
+ * It contains all quantum numbers and uniquely identifies its type.
+ * \li \key px, \key py, \key pz, \key p0: 3-momentum and energy
+ * \li \key mass: Particle's rest-mass
+ * \li \key x, \key y, \key z, \key t: space-time coordinates
  *
- * **Event end line**
+ * \n
+ * **Event end line** \n
+ * The end of an event is indicated by the following line:
  * \code
  * 0 0 event_number impact_parameter
  * \endcode
  *
+ * With
+ * \li \key event_number: Number of the event
+ * \li \key impact_parameter: Impact parameter of the collisions. In case of
+ * a box or sphere setup, this value is 0.0. \n
  * \anchor oscar2013_format
  * Oscar2013
  * ---------
@@ -289,6 +317,9 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * # Units: fm fm fm fm GeV GeV GeV GeV GeV none none none
  * # SMASH_version
  * \endcode
+ * The different entries for the particle line remain the same as above, the
+ * only additional one is:
+ * \li \key charge [integer] the electric charge of the particle.
  *
  * For the extended version of this output the header is modified to read:\n
  * **Header**
@@ -302,6 +333,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *   none none none fm none none none fm none none</span></div>
  * <div class="line"><span class="preprocessor">\# SMASH_version</span></div>
  * </div>
+ * Where the
  *
  * **Output block header**\n
  * At start of event:
