@@ -89,6 +89,10 @@ echo "   Started benchmark for dileptons ..."
 dilepton_perf=$(benchmark_run collider dileptons $PART_DEF 'Output: { Dileptons: {Format: ["Binary"], Extended: True} }')
 echo "$dilepton_perf" | grep -E "time elapsed"
 
+echo "   Started benchmark for photons ..."
+photons_perf=$(benchmark_run photons photons photons)
+echo "$photons_perf" | grep -E "time elapsed"
+
 echo "   Started benchmark for testparticles ..."
 testp_perf=$(benchmark_run testparticles $DECAYM_DEF $PART_DEF)
 echo "$testp_perf" | grep -E "time elapsed"
@@ -156,6 +160,12 @@ $sphere_perf
 Same setup as collider run, but with dileptons.
 \`\`\`
 $dilepton_perf
+\`\`\`
+
+### Photons Run
+Rho Pi Box with elastic cross section.
+\`\`\`
+$photons_perf
 \`\`\`
 
 ### Collider Run with Testparticles (CuCu@1.23)

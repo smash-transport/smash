@@ -1,0 +1,27 @@
+Logging:
+    default: INFO
+
+General:
+    Modus:         Box
+    Time_Step_Mode: Fixed
+    Delta_Time:    0.1
+    End_Time:      200.0
+    Randomseed:    -1
+    Nevents:       10
+
+Output:
+    Photons:
+        Format: ["Oscar2013"]
+        Fractions: 100
+
+Modi:
+    Box:
+        Length: 10.0
+        Temperature: 0.15
+        Initial_Condition: "thermal momenta"
+        Use_Thermal_Multiplicities: True
+
+Collision_Term:
+    Force_Decays_At_End: False
+    Strings: False
+    Elastic_Cross_Section:  30.0
