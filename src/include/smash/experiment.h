@@ -907,11 +907,29 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   /*!\Userguide
    * \page input_dileptons Dileptons
-   * Enables dilepton output together with DecayActionsFinderDilepton.
-   * By default, the extended OSCAR output is enabled. The dilepton output
-   * format is identical to the collision output, it does however only contain
-   * information about the dilepton decays at every timestep.
+   * Enables the dilepton output together with the possible dilepton decay
+   * channels.
+   * If dileptons are enabled, the output file named Dileptons (followed by the
+   * appropriate suffix) is generated when SMASH is executed. It's format is
+   * identical to the collision output (see \ref format_oscar_collisions),
+   * it does however only contain information about the dilepton decays
+   * at every timestep. \n
+   * Further, the block headers differ from the usual collision output:
+   * \code
+   * # interaction in nin out nout rho density weight shining_weight partial part_weight type proc_type
+   * \endcode
+   * where
+   * \li \key nin: Number of ingoing particles (initial state particles)
+   * \li \key nout: Number of outgoing particles (finalstate particles)
+   * \li \key density: Density at the interaction point
+   * \li \key shining_weight: Shining weight of the interaction. Explanation
+   * follows below.
+   * \li \key part_weight: The partial weight of the interaction. For the
+   * dileptons, this coincides with the branching ratio.
+   * \li \key proc_type: The process type of the underlying process. See
+   * \subpage process_type for possible types.
    *
+   * \n
    * The treatment of Dilepton Decays is special:
    *
    * \li Dileptons are treated via the time integration method, also called
