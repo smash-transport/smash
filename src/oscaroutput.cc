@@ -32,13 +32,13 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
   /*!\Userguide
    * \page oscar_general_ OSCAR block structure
    * OSCAR outputs are a family of ASCII and binary formats that follow
-   * OSCAR format conventions. \n
-   * **All OSCAR outputs have the same general structure: header and arbitrary
-   * number of event blocks.** Each event block consists of arbitrary number of
-   * output blocks and special event end line that marks the end of event. One
-   * output block consists of output block header and N particle lines, N is
-   * specified in the output block  header. \n
-   * File structure can be visualized in the following way:
+   * the OSCAR format conventions. \n
+   * **All OSCAR outputs have the same general structure: a header and an
+   * arbitrary number of event blocks.** Each event block consists of an
+   * arbitrary number of output blocks and special event end lines that mark the
+   * end of event. One output block consists of an output block header and N
+   * particle lines, where N is specified in the output block header. \n
+   * The file structure can be visualized in the following way:
    * \code
    * Header
    * Event block 1
@@ -62,20 +62,21 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
    * \li particle line
    * \li event end line
    *
-   * Every OSCAR output can produce two types of files: collisions output and
-   * particles output. In collisions output file and in particles output file
-   * the above structure is the same, but meaning of blocks is different.
-   * **In collision file one output block typically corresponds to one collision
-   * / decay / box wall crossing, while in particles output one block
+   * Each OSCAR output can produce two types of files: collisions output (see
+   * \ref format_oscar_collisions) and particles output (see \ref
+   * format_oscar_particlelist). In bouth output types, the above structure is
+   * the same, however the meaning of the blocks is different. **In the
+   * collision file one output block typically corresponds to one collision
+   * / decay / box wall crossing, while in the particles output one block
    * corresponds to the current particle list at one moment of time.**
-   * Particles output may contain the particle list at event start
-   * immediately after initialization, at event end (which is reached when
+   * The particles output may contain the particle list at event start
+   * (immediately after initialization), at event end (which is reached when
    * time is larger or equal than \c End_Time in configuration file) and
-   * periodically during evolution, period is defined by \c Output_Interval
-   * option in configuration file, see
+   * periodically during the evolution, the output period is defined by
+   * the \c Output_Interval option in the configuration file, see
    * \ref output_content_specific_options_ "content-specific output options".
-   * Collisions output contains all collisions / decays / box wall crossings
-   * and optionally initial and final configuration.
+   * The collisions output contains all collisions / decays / box wall crossings
+   * and optionally the initial and final configuration.
    */
   if (Format == OscarFormat2013) {
     std::fprintf(file_.get(),
