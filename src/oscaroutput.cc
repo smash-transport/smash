@@ -407,7 +407,8 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key proc_id_origin: ID of the process of the particle's last interaction
  * \li \key proc_type_origin: Type of the last process the particle has
  * undergone. The possible process types are listed in \subpage process_type.
- * \li \key t_last_coll: time of the particle's last collision
+ * \li \key t_last_coll: time of the particle's last interaction (except wall
+ * crossings)
  * \li \key pdg_mother1: PDG code of the 1st mother particle
  * \li \key pdg_mother2: PDG code of the 2nd mother particle (0 in case the
  * particle results from the decay of a resonance, then \key pdg_mother1 is
@@ -633,7 +634,8 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key proc_id_origin: ID of the process of the particle's last interaction
  * \li \key proc_type_origin: Type of the last process the particle has
  * undergone. The possible process types are listed in \subpage process_type.
- * \li \key t_last_coll: time of the particle's last collision
+ * \li \key t_last_coll: time of the particle's last interaction (except wall
+ * crossings)
  * \li \key pdg_mother1: PDG code of the 1st mother particle
  * \li \key pdg_mother2: PDG code of the 2nd mother particle (0 in case the
  * particle results from the decay of a resonance, then \key pdg_mother1 is
