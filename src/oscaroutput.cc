@@ -84,7 +84,7 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
                  name.c_str());
     std::fprintf(file_.get(),
                  "# Units: fm fm fm fm "
-                 "GeV GeV GeV GeV GeV none none none\n");
+                 "GeV GeV GeV GeV GeV none none e\n");
     std::fprintf(file_.get(), "# %s\n", VERSION_MAJOR);
   } else if (Format == OscarFormat2013Extended) {
     std::fprintf(file_.get(),
@@ -94,7 +94,7 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
                  name.c_str());
     std::fprintf(file_.get(),
                  "# Units: fm fm fm fm GeV GeV GeV GeV GeV"
-                 " none none none none fm none none none fm none none\n");
+                 " none none e none fm none none none fm none none\n");
     std::fprintf(file_.get(), "# %s\n", VERSION_MAJOR);
   } else {
     const std::string &oscar_name =
@@ -269,8 +269,8 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * nin nout /(not guaranteed) event_number/
  * \endcode
  * With
- * \li \key nin: Number of ingoing particles [int]
- * \li \key nout: Number of outgoing particles [int]
+ * \li \key nin: Number of ingoing particles
+ * \li \key nout: Number of outgoing particles
  * \li \key event_number: Number of the event
  *
  * For initial timesteps, (nin, nout) = (0, npart), while (nin, nout) =
@@ -279,6 +279,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * another if the test case allows more interactions than only elastic
  * scattering. The output block header is followed by npart particle lines.
  *
+ * \n
  * **Particle line** \n
  * The particle lines are formatted as follows:
  * \code
@@ -304,52 +305,88 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * With
  * \li \key event_number: Number of the event
  * \li \key impact_parameter: Impact parameter of the collisions. In case of
- * a box or sphere setup, this value is 0.0. \n
+ * a box or sphere setup, this value is 0.0.
+ *
+ * \n
  * \anchor oscar2013_format
  * Oscar2013
  * ---------
  *
- * This is ASCII (text) human-readable output according to OSCAR 2013
- * standard. Format specifics are the following:\n
+ * Oscar2013 is ASCII (text) human-readable output following the OSCAR 2013
+ * standard. The format specifics are the following:\n
+ * \n
  * **Header**
  * \code
  * #!OSCAR2013 particle_lists t x y z mass p0 px py pz pdg ID charge
- * # Units: fm fm fm fm GeV GeV GeV GeV GeV none none none
+ * # Units: fm fm fm fm GeV GeV GeV GeV GeV none none e
  * # SMASH_version
  * \endcode
- * The different entries for the particle line remain the same as above, the
- * only additional one is:
- * \li \key charge [integer] the electric charge of the particle.
+ * The header consists of 3 lines starting with '#'. They contain the following
+ * information:
+ * -# Output version (OSCAR2013) and the type of output (particle_lists),
+ * followed by the substructure of the particle lines.
+ * -# Units of the quantities in the particle lines
+ * -# SMASH version
  *
- * For the extended version of this output the header is modified to read:\n
- * **Header**
+ * \n
+ * **Extended Output: Header** \n
+ * If desired, the OSCAR2013 output can be extended
+ * by additional particle properties. This requires enabling the extended
+ * output in the configuration file, see the \key Extended switch in
+ * \ref output_content_specific_options_ "content-specific output options" for
+ * further details. The header of the extended OSCAR output is structured
+ * identically to the non-extended version, but simply contains more columns
+ * because of the additional entries:
  * <div class="fragment">
  * <div class="line"><span class="preprocessor">#!OSCAR2013 particle_lists
  *   t x y z mass p0 px py pz pdg
  *   ID charge ncoll form_time xsecfac proc_id_origin proc_type_origin
  *   t_last_coll pdg_mother1 pdg_mother2</span></div>
- * <div class="line"><span class="preprocessor">\# Units: fm fm fm fm
- *   GeV GeV GeV GeV GeV
- *   none none none fm none none none fm none none</span></div>
+ * <div class="line"><span class="preprocessor">\# Units: fm fm fm fm GeV GeV
+ * GeV GeV GeV none none e none fm none none none fm none none</span></div>
  * <div class="line"><span class="preprocessor">\# SMASH_version</span></div>
  * </div>
- * Where the
  *
+ * \n
  * **Output block header**\n
- * At start of event:
+ * Just as the OSCAR1999 format, the OSCAR2013 format is based on a block
+ * structure. The beginning of a new block is marked by either the start of a
+ * new event or a new intermediate output (at the next timestep). \n
+ * \n
+ * Output block header for a new event:
  * \code
  * # event ev_num in npart
  * \endcode
- * At end of event or intermediate particle list output:
+ * Where
+ * \li \key ev_num: Event number
+ * \li \key npart: Number of particles initialized at the beginning of the event
+ *
+ * Note that 'event' and 'in' are no variables, but words that are printed in
+ * the header. \n
+ * \n
+ * Output block header for an intermediate output:
  * \code
  * # event ev_num out npart
  * \endcode
+ * Where
+ * \li \key ev_num: Event number
+ * \li \key npart: Number of particles at the end of the timestep
  *
- * **Particle line**
+ * Note that 'event' and 'out' are no variables, but words that are printed in
+ * the header. \n
+ * \n
+ *
+ * **Particle line**\n
+ * The particle lines are formatted as follows:
  * \code
- * t x y z mass p0 px py pz pdg ID
+ * t x y z mass p0 px py pz pdg ID charge
  * \endcode
+ * Apart from the order, the entries are identical to those of the OSCAR1999
+ * output, the only additional one is:
+ * \li \key charge: the electric charge of the particle in units of the
+ * elementary charge e.
  *
+ * \n
  * For the extended version the particle line contains
  *
  * <div class="fragment">
@@ -359,11 +396,54 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *  PDG_mother1 PDG_mother2</span></div>
  * </div>
  *
- * **Event end line**
+ * The additional particle properties available in the extended output format
+ * are:
+ * \li \key ncoll: Number of collisions the particle has undergone
+ * \li \key form_time: Formation time of the particle
+ * \li \key xsecfac: Cross section scaling factor (if the particles are
+ * not yet fully formed at the time of interaction, the cross section for the
+ * underlying process is scaled down by the cross section scaling factor)
+ * \li \key proc_id_origin: ID of the process of the particle's last interaction
+ * \li \key proc_type_origin: Type of the last process the particle has
+ * undergone. The possible process types are listed below.
+ * \li \key t_last_coll: time of the particle's last collision
+ * \li \key pdg_mother1: PDG code of the 1st mother particle
+ * \li \key pdg_mother2: PDG code of the 2nd mother particle (0 in case the
+ * particle results from the decay of a resonance, then \key pdg_mother1 is
+ * the PDG code of this resonance)
+ *
+ * The mother particles are also set in case of an elastic scattering process.
+ *
+ * There are 13 process types in SMASH:
+ * \li \key 0: No previous process yet, particle was created at initialization
+ * \li \key 1: Elastic scattering
+ * \li \key 2: Resonance formation (2 -> 1)
+ * \li \key 3: Inelastic binary scattering (2 -> 2)
+ * \li \key 5: Resonance decay
+ * \li \key 6: Box wall crossing (due to periodic boundary conditions)
+ * \li \key 7: Forced thermalization
+ * \li \key 41: Soft string excitation, single diffractive AB -> AX
+ * \li \key 42: Soft string excitation, single diffractive AB -> XB
+ * \li \key 43: Soft string excitation, double diffractive
+ * \li \key 44: Soft string N-Nbar annihilation
+ * \li \key 45: Soft sring excitation, non-diffractive
+ * \li \key 46: Hard string excitation
+ *
+ * \n
+ * **Event end line**\n
+ * The end of an event is indicated by the following line:
  * \code
  * # event ev_num end 0 impact impact_parameter
  * \endcode
+ * Where
+ * \li \key ev_num: Event number
+ * \li \key npart: Number of particles at the end of the timestep
+ * \li \key impact_parameter: Impact parameter of the collision in case of a
+ * collider setup, else 0.0
  *
+ * Note that 'event', 'end' and 'impact' are no variables, but words that are
+ * printed in the header. \n
+ * \n
  * \page format_oscar_collisions OSCAR collisions format
  * The format follows general block structure of OSCAR format:
  * \ref oscar_general_. There are two kinds of this format -
