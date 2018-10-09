@@ -59,11 +59,11 @@ class ThermLatticeNode {
   /**
    *  Add particle contribution to Tmu0, nb and ns
    *  May look like unused at first glance, but it is actually used
-   *  by update_general_lattice, where the node type of the lattice
+   *  by update_lattice, where the node type of the lattice
    *  is templated.
    */
   void add_particle(const ParticleData& p, double factor);
-  /// dummy function for update_general_lattice
+  /// dummy function for update_lattice
   void add_particle_for_derivatives(const ParticleData&, double, ThreeVector){};
   /**
    * Temperature, chemical potentials and rest frame velocity are
@@ -250,8 +250,9 @@ class GrandCanThermalizer {
    * \see DensityParameters
    * \param[in] ignore_cells_under_threshold Boolean that is true by default
    */
-  void update_lattice(const Particles& particles, const DensityParameters& par,
-                      bool ignore_cells_under_threshold = true);
+  void update_thermalizer_lattice(const Particles& particles,
+                                  const DensityParameters& par,
+                                  bool ignore_cells_under_threshold = true);
   /// \return 3 vector uniformly sampled from the rectangular cell.
   ThreeVector uniform_in_cell() const;
   /**

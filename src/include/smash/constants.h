@@ -84,9 +84,15 @@ constexpr double a1_mass = 1.26;
  * Note that this should be the same as in particles.txt.
  */
 constexpr double delta_mass = 1.232;
+/**
+ * Deuteron mass in GeV.
+ *
+ * Note that this should be the same as in particles.txt.
+ */
+constexpr double deuteron_mass = 1.8756;
 
 /// Fine-struture constant, approximately 1/137.
-constexpr double alpha = 7.2973525698e-3;
+constexpr double fine_structure = 7.2973525698e-3;
 
 /**
  * The maximal cross section (in mb) for which it is guaranteed that all
@@ -100,6 +106,14 @@ constexpr double alpha = 7.2973525698e-3;
  * elastic NN and KN cross sections, which diverge at threshold.
  */
 constexpr double maximum_cross_section = 200.;  // mb
+
+/**
+ * Energy in GeV, below which hard reactions via pythia are impossible.
+ * This constraint is technical and comes from the pythia model itself.
+ * At the same time, physics-wise, hard cross-sections at the low
+ * energies are so small, that this constrant is well justified.
+ */
+constexpr double minimum_sqrts_pythia_can_handle = 10.0;  // GeV
 
 /**
  * Process ID for any photon process.

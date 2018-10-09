@@ -305,6 +305,10 @@ Sections into `doc/userguide.dox` which is then included into the User Guide
 Doxygen tree. Currently, the cmake script processes all `src/include/*.h` and
 `src/*.cc` files.
 
+### Markdown Documents
+
+The markdown documents included in the repository follow the Markdown dialect of Github that is specified [here](https://github.github.com/gfm/).
+
 ## Coding Rules
 
 * [Google Naming & Formatting
@@ -321,7 +325,7 @@ Our Naming & Formatting Rules follow the Google Styleguide. We keep a copy of
 the relevant sections to be able to make small adjustments and hide the C++
 Coding Guidelines sections.
 
-Note that we use `clang-format` for formatting (see README for installation,
+Note that we use `clang-format` for formatting (see [README](README.md) for installation,
 usage explained below), so you can just use that instead of having to worry
 about formatting by hand in accordance with the style guide.
 
@@ -377,13 +381,13 @@ following way:
 ### Code formatting with `clang-format`
 
 All code has to be formatted by running `clang-format`. This automatically
-formats the code in SMASH correctly. Use the following command in the SMASH root
-directory:
+formats the code in SMASH correctly. Use the helper script in SMASH's /bin
+directory to format the source code:
 
-    for i in src/*.cc src/include/*.h src/tests/*.cc src/tests/*.h; do clang-format -i $i; done;
+    ./clang-format-helper -p
 
-If clang-format does changes that don't look good, you can disable it locally
-using comments like this:
+Review and commit changes afterwards. clang-format does changes that 
+don't look good, you can disable it locally using comments like this:
 
 
     // clang-format off
@@ -434,7 +438,7 @@ A different method for profiling SMASH uses performance counters and the `perf`
 tool on Linux. `perf` uses a feature of the CPU (and OS support) to count
 performance relevant events in the normal execution of the program. Therefore,
 SMASH should execute as "normal as possible", but with meta information about
-the program to improve the reporting capabilities of \c perf. To get useful
+the program to improve the reporting capabilities of `perf`. To get useful
 results compile SMASH in `RelWithDebInfo` mode, i.e. via
 
 

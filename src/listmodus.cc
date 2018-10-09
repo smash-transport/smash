@@ -100,8 +100,23 @@ namespace smash {
  * and 4-momenta (p0, px, py, pz) =
  * (0.232871, 0.116953, -0.115553, 0.090303) GeV,
  * with mass = 0.138 GeV, pdg = 111, id = 0 and charge 0 will be initialized for
- the first event (and also for the second event).
+ * the first event (and also for the second event).
  *
+ * \n
+ * \note
+ * SMASH is shipped with an example configuration file to set up an afterburner
+ * simulation by means of the list modus. This also requires a particle list to
+ * be read in. Both, the configuration file and the particle list, are located
+ * in /input/list. To run SMASH with the provided example configuration and
+ * particle list, execute \n
+ * \n
+ * \verbatim
+    ./smash -i INPUT_DIR/list/config.yaml
+ \endverbatim
+ * \n
+ * Where 'INPUT_DIR' needs to be replaced by the path to the input directory
+ * ('../input', if the build directory is located in the smash
+ * folder).
  */
 
 ListModus::ListModus(Configuration modus_config, const ExperimentParameters &)
@@ -118,8 +133,7 @@ ListModus::ListModus(Configuration modus_config, const ExperimentParameters &)
 
 /* console output on startup of List specific parameters */
 std::ostream &operator<<(std::ostream &out, const ListModus &m) {
-  out << "\nStarting time for List calculation: " << m.start_time_ << '\n';
-  out << "\nInput directory for external particle lists:"
+  out << "-- List Modus\nInput directory for external particle lists:\n"
       << m.particle_list_file_directory_ << "\n";
   return out;
 }
@@ -208,9 +222,8 @@ void ListModus::try_create_particle(Particles &particles, PdgCode pdgcode,
     particle.set_formation_time(t);
     particle.set_cross_section_scaling_factor(1.0);
   } catch (ParticleType::PdgNotFoundFailure) {
-    log.warn() << "While loading external particle lists data, "
-               << "PDG code not found for the particle:\n"
-               << pdgcode << std::endl;
+    log.warn() << "SMASH does not recognize pdg code " << pdgcode
+               << " loaded from file. This particle will be ignored.\n";
   }
 }
 

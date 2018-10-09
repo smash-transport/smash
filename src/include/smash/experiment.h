@@ -531,19 +531,6 @@ class Experiment : public ExperimentBase {
 /// Creates a verbose textual description of the setup of the Experiment.
 template <typename Modus>
 std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
-  switch (e.time_step_mode_) {
-    case TimeStepMode::None:
-      out << "Not using time steps\n";
-      break;
-    case TimeStepMode::Fixed:
-      out << "Using fixed time step size: "
-          << e.parameters_.labclock.timestep_duration() << " fm/c\n";
-      break;
-    case TimeStepMode::Adaptive:
-      out << "Using adaptive time steps, starting with: "
-          << e.parameters_.labclock.timestep_duration() << " fm/c\n";
-      break;
-  }
   out << "End time: " << e.end_time_ << " fm/c\n";
   out << e.modus_;
   return out;
@@ -982,7 +969,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    **/
 
   dens_type_ = config.take({"Output", "Density_Type"}, DensityType::None);
-  log.info() << "Density type printed to headers: " << dens_type_;
+  log.debug() << "Density type printed to headers: " << dens_type_;
 
   const OutputParameters output_parameters(std::move(output_conf));
 
@@ -1014,7 +1001,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
           "Can't use potentials "
           "with frozen Fermi momenta!");
     }
-    log.info() << "Potentials are ON.";
+    log.info() << "Potentials are ON. Timestep is "
+               << parameters_.labclock.timestep_duration();
     // potentials need testparticles and gaussian sigma from parameters_
     potentials_ = make_unique<Potentials>(config["Potentials"], parameters_);
   }
@@ -1141,7 +1129,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 }
 
 /// String representing a horizontal line.
-const std::string hline(80, '-');
+const std::string hline(67, '-');
 
 template <typename Modus>
 void Experiment<Modus>::initialize_new_event() {
@@ -1211,8 +1199,8 @@ void Experiment<Modus>::initialize_new_event() {
   total_pauli_blocked_ = 0;
   // Print output headers
   log.info() << hline;
-  log.info() << " Time       <Ediff>      <pdiff>  <scattrate>    <scatt>  "
-                "<particles>   <timing>";
+  log.info() << " Time       <Ediff>    <scatt./decays>  "
+                "<particles>     <timing>";
   log.info() << hline;
 }
 
@@ -1325,8 +1313,6 @@ bool Experiment<Modus>::perform_action(
  *            used to check the conservation of the total energy and momentum.
  *	      the total number of the particles will be used and printed as
  *	      well.
- * \param[in] scatterings_total Total number of the scatterings from the
- *            beginning to the current time step.
  * \param[in] scatterings_this_interval Number of the scatterings occur within
  *            the current timestep.
  * \param[in] conserved_initial Initial quantum numbers needed to check the
@@ -1340,7 +1326,6 @@ bool Experiment<Modus>::perform_action(
  *          'Computing time consumed'
  */
 std::string format_measurements(const Particles &particles,
-                                uint64_t scatterings_total,
                                 uint64_t scatterings_this_interval,
                                 const QuantumNumbers &conserved_initial,
                                 SystemTimePoint time_start, double time);
@@ -1352,9 +1337,9 @@ void Experiment<Modus>::run_time_evolution() {
   const auto &log = logger<LogArea::Experiment>();
   const auto &log_ad_ts = logger<LogArea::AdaptiveTS>();
 
-  log.info() << format_measurements(
-      particles_, interactions_total_ - wall_actions_total_, 0u,
-      conserved_initial_, time_start_, parameters_.labclock.current_time());
+  log.info() << format_measurements(particles_, 0u, conserved_initial_,
+                                    time_start_,
+                                    parameters_.labclock.current_time());
 
   while (parameters_.labclock.current_time() < end_time_) {
     const double t = parameters_.labclock.current_time();
@@ -1366,8 +1351,8 @@ void Experiment<Modus>::run_time_evolution() {
     if (thermalizer_ &&
         thermalizer_->is_time_to_thermalize(parameters_.labclock)) {
       const bool ignore_cells_under_treshold = true;
-      thermalizer_->update_lattice(particles_, density_param_,
-                                   ignore_cells_under_treshold);
+      thermalizer_->update_thermalizer_lattice(particles_, density_param_,
+                                               ignore_cells_under_treshold);
       const double current_t = parameters_.labclock.current_time();
       thermalizer_->thermalize(particles_, current_t,
                                parameters_.testparticles);
@@ -1573,15 +1558,14 @@ void Experiment<Modus>::intermediate_output() {
                                               previous_interactions_total_ -
                                               wall_actions_this_interval;
   previous_interactions_total_ = interactions_total_;
-  log.info() << format_measurements(
-      particles_, interactions_total_ - wall_actions_total_,
-      interactions_this_interval, conserved_initial_, time_start_,
-      parameters_.outputclock.current_time());
+  log.info() << format_measurements(particles_, interactions_this_interval,
+                                    conserved_initial_, time_start_,
+                                    parameters_.outputclock.current_time());
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
   /** \todo (Dima) is this part of the code still useful?
    *
    * if (thermalizer_) {
-   *  thermalizer_->update_lattice(particles_, density_param_);
+   *  thermalizer_->update_thermalizer_lattice(particles_, density_param_);
    *  thermalizer_->print_statistics(parameters_.labclock);
   }*/
   // save evolution data
@@ -1595,15 +1579,14 @@ void Experiment<Modus>::intermediate_output() {
     // Thermodynamic output on the lattice versus time
     switch (dens_type_lattice_printout_) {
       case DensityType::Baryon:
-        update_density_lattice(jmu_B_lat_.get(), lat_upd, DensityType::Baryon,
-                               density_param_, particles_, false);
+        update_lattice(jmu_B_lat_.get(), lat_upd, DensityType::Baryon,
+                       density_param_, particles_, false);
         output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                       DensityType::Baryon, *jmu_B_lat_);
         break;
       case DensityType::BaryonicIsospin:
-        update_density_lattice(jmu_I3_lat_.get(), lat_upd,
-                               DensityType::BaryonicIsospin, density_param_,
-                               particles_, false);
+        update_lattice(jmu_I3_lat_.get(), lat_upd, DensityType::BaryonicIsospin,
+                       density_param_, particles_, false);
         output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                       DensityType::BaryonicIsospin,
                                       *jmu_I3_lat_);
@@ -1611,16 +1594,16 @@ void Experiment<Modus>::intermediate_output() {
       case DensityType::None:
         break;
       default:
-        update_density_lattice(jmu_custom_lat_.get(), lat_upd,
-                               dens_type_lattice_printout_, density_param_,
-                               particles_, false);
+        update_lattice(jmu_custom_lat_.get(), lat_upd,
+                       dens_type_lattice_printout_, density_param_, particles_,
+                       false);
         output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                       dens_type_lattice_printout_,
                                       *jmu_custom_lat_);
     }
     if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
-      update_Tmn_lattice(Tmn_.get(), lat_upd, dens_type_lattice_printout_,
-                         density_param_, particles_);
+      update_lattice(Tmn_.get(), lat_upd, dens_type_lattice_printout_,
+                     density_param_, particles_);
       if (printout_tmn_) {
         output->thermodynamics_output(ThermodynamicQuantity::Tmn,
                                       dens_type_lattice_printout_, *Tmn_);
@@ -1645,9 +1628,8 @@ template <typename Modus>
 void Experiment<Modus>::update_potentials() {
   if (potentials_) {
     if (potentials_->use_skyrme() && jmu_B_lat_ != nullptr) {
-      update_density_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
-                             DensityType::Baryon, density_param_, particles_,
-                             true);
+      update_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
+                     DensityType::Baryon, density_param_, particles_, true);
       const size_t UBlattice_size = UB_lat_->size();
       for (size_t i = 0; i < UBlattice_size; i++) {
         auto jB = (*jmu_B_lat_)[i];
@@ -1661,9 +1643,9 @@ void Experiment<Modus>::update_potentials() {
       }
     }
     if (potentials_->use_symmetry() && jmu_I3_lat_ != nullptr) {
-      update_density_lattice(jmu_I3_lat_.get(), LatticeUpdate::EveryTimestep,
-                             DensityType::BaryonicIsospin, density_param_,
-                             particles_, true);
+      update_lattice(jmu_I3_lat_.get(), LatticeUpdate::EveryTimestep,
+                     DensityType::BaryonicIsospin, density_param_, particles_,
+                     true);
       const size_t UI3lattice_size = UI3_lat_->size();
       for (size_t i = 0; i < UI3lattice_size; i++) {
         auto jI3 = (*jmu_I3_lat_)[i];
@@ -1727,19 +1709,11 @@ void Experiment<Modus>::final_output(const int evt_num) {
     const uint64_t interactions_this_interval = interactions_total_ -
                                                 previous_interactions_total_ -
                                                 wall_actions_this_interval;
-    log.info() << format_measurements(
-        particles_, interactions_total_ - wall_actions_total_,
-        interactions_this_interval, conserved_initial_, time_start_,
-        parameters_.outputclock.current_time());
+    log.info() << format_measurements(particles_, interactions_this_interval,
+                                      conserved_initial_, time_start_,
+                                      parameters_.outputclock.current_time());
     log.info() << hline;
     log.info() << "Time real: " << SystemClock::now() - time_start_;
-    // if there are no particles no interactions happened
-    log.info() << "Final scattering rate: "
-               << (particles_.is_empty()
-                       ? 0
-                       : (2.0 * (interactions_total_ - wall_actions_total_) /
-                          particles_.time() / particles_.size()))
-               << " [fm-1]";
     log.info() << "Final interaction number: "
                << interactions_total_ - wall_actions_total_;
     // Check if there are unformed particles

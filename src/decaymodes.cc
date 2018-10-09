@@ -95,9 +95,10 @@ DecayType *DecayModes::get_decay_type(ParticleTypePtr mother,
   return all_decay_types->back().get();
 }
 
-void DecayModes::renormalize(const std::string &name) {
+bool DecayModes::renormalize(const std::string &name) {
   const auto &log = logger<LogArea::DecayModes>();
   double sum = 0.;
+  bool is_large_renormalization = false;
   for (auto &mode : decay_modes_) {
     sum += mode->weight();
   }
@@ -106,12 +107,8 @@ void DecayModes::renormalize(const std::string &name) {
               ": Extremely small renormalization constant: ", sum,
               "\n=> Skipping the renormalization.");
   } else {
-    if (std::abs(sum - 1.) < 0.01) {
-      // Reasonably small correction: do not warn, only give a debug message
-      log.debug("Particle ", name, ": Renormalizing decay modes with ", sum);
-    } else {
-      log.warn("Particle ", name, ": Renormalizing decay modes with ", sum);
-    }
+    is_large_renormalization = (std::abs(sum - 1.) > 0.01);
+    log.debug("Particle ", name, ": Renormalizing decay modes with ", sum);
     double new_sum = 0.0;
     for (auto &mode : decay_modes_) {
       mode->set_weight(mode->weight() / sum);
@@ -119,6 +116,7 @@ void DecayModes::renormalize(const std::string &name) {
     }
     log.debug("After renormalization sum of ratios is ", new_sum);
   }
+  return is_large_renormalization;
 }
 
 /* unnamed namespace; its content is accessible only in this file.
@@ -155,6 +153,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
   const IsoParticleType *isotype_mother = nullptr;
   ParticleTypePtrList mother_states;
   std::vector<DecayModes> decay_modes_to_add;  // one for each mother state
+  int total_large_renormalized = 0;
 
   const auto end_of_decaymodes = [&]() {
     if (isotype_mother == nullptr) {  // at the start of the file
@@ -166,7 +165,9 @@ void DecayModes::load_decaymodes(const std::string &input) {
         throw MissingDecays("No decay modes found for particle " +
                             mother_states[m]->name());
       }
-      decay_modes_to_add[m].renormalize(mother_states[m]->name());
+      bool is_large_renorm =
+          decay_modes_to_add[m].renormalize(mother_states[m]->name());
+      total_large_renormalized += is_large_renorm;
       PdgCode pdgcode = mother_states[m]->pdgcode();
       /* Add the list of decay modes for this particle type */
       decaymodes[find_offset(pdgcode)] = std::move(decay_modes_to_add[m]);
@@ -396,6 +397,10 @@ void DecayModes::load_decaymodes(const std::string &input) {
             s.str());
       }
     }
+  }
+  if (total_large_renormalized > 0) {
+    log.warn("Branching ratios of ", total_large_renormalized,
+             " hadrons were renormalized by more than 1% to have sum 1.");
   }
 }
 

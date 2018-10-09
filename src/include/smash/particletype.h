@@ -203,9 +203,7 @@ class ParticleType {
   inline bool is_nucleus() const { return pdgcode_.is_nucleus(); }
 
   /// \return whether the particle is an (anti-)deuteron
-  inline bool is_deuteron() const {
-    return is_nucleus() && std::abs(pdgcode_.get_decimal()) == 1000010020;
-  }
+  inline bool is_deuteron() const { return pdgcode_.is_deuteron(); }
 
   /// \return whether the particle is an artificial d' resonance
   inline bool is_dprime() const {

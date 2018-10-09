@@ -106,7 +106,7 @@ TEST(thermalization_action) {
 
   const DensityParameters dens_par = DensityParameters(par);
   std::cout << "Updating lattice" << std::endl;
-  thermalizer->update_lattice(P, dens_par, true);
+  thermalizer->update_thermalizer_lattice(P, dens_par, true);
   std::cout << "Thermalizing" << std::endl;
   thermalizer->thermalize(P, 0.0, par.testparticles);
   ThermalizationAction th_act(*thermalizer, 0.0);

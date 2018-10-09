@@ -52,8 +52,9 @@ class DecayModes {
    * Renormalize the branching ratios to add up to 1.
    *
    * \param[in] name the name of the decaying particle
+   * \return if the branching ratios were renormalized by more than 1%
    */
-  void renormalize(const std::string &name);
+  bool renormalize(const std::string &name);
 
   /// \return true if empty (i.e. no decay modes)
   bool is_empty() const { return decay_modes_.empty(); }
