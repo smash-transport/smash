@@ -69,8 +69,7 @@ class ListModus : public ModusDefault {
                      const ExperimentParameters &parameters);
 
   /// Construct an empty list. Useful for convenient JetScape connection.
-  ListModus() :
-    shift_id_(0) {}
+  ListModus() : shift_id_(0) {}
 
   /**
    * Generates initial state of the particles in the system according to a list.

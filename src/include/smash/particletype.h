@@ -276,7 +276,7 @@ class ParticleType {
    * \throw runtime_error if a decay has less than 2 or more than 3 products
    */
   DecayBranchList get_partial_widths_hadronic(const FourVector p,
-    const ThreeVector x) const;
+                                              const ThreeVector x) const;
 
   /**
    * Get the mass-dependent dilepton partial decay widths

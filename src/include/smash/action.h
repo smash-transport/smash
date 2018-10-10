@@ -372,8 +372,8 @@ class Action {
    * \throws InvalidResonanceFormation
    * \return masses of final state particles
    */
-  virtual std::pair<double, double> sample_masses(double
-          kinetic_energy_cm) const;
+  virtual std::pair<double, double> sample_masses(
+      double kinetic_energy_cm) const;
 
   /**
    * Sample final-state momenta in general X->2 processes
@@ -388,7 +388,7 @@ class Action {
    * \param[in] masses masses of each of the final state particles
    */
   virtual void sample_angles(std::pair<double, double> masses,
-          double kinetic_energy_cm);
+                             double kinetic_energy_cm);
 
   /**
    * Sample the full 2-body phase-space (masses, momenta, angles)

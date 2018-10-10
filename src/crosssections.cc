@@ -110,7 +110,7 @@ static double sum_xs_of(CollisionBranchList& list) {
 
 CrossSections::CrossSections(const ParticleList& incoming_particles,
                              const double sqrt_s,
-                          const std::pair<FourVector, FourVector> potentials)
+                             const std::pair<FourVector, FourVector> potentials)
     : incoming_particles_(incoming_particles),
       sqrt_s_(sqrt_s),
       potentials_(potentials),
@@ -1833,7 +1833,7 @@ CollisionBranchList CrossSections::dn_xx(
 }
 
 CollisionBranchList CrossSections::string_excitation(
-  double total_string_xs, StringProcess* string_process, bool use_AQM) const {
+    double total_string_xs, StringProcess* string_process, bool use_AQM) const {
   const auto& log = logger<LogArea::CrossSections>();
 
   if (!string_process) {

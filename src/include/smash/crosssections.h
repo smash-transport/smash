@@ -489,24 +489,25 @@ class CrossSections {
         type_a.min_mass_spectral() + type_b.min_mass_spectral();
     /* Determine wether the process is below the threshold. */
     double scale_B = 0.0;
-    double scale_I3 =0.0;
+    double scale_I3 = 0.0;
     bool is_below_threshold;
     FourVector incoming_momentum = FourVector();
     if (pot_pointer != nullptr) {
       for (const auto p : incoming_particles_) {
         incoming_momentum += p.momentum();
         scale_B += pot_pointer->force_scale(p.type()).first;
-        scale_I3 += pot_pointer->force_scale(p.type()).second
-                    * p.type().isospin3_rel();
+        scale_I3 +=
+            pot_pointer->force_scale(p.type()).second * p.type().isospin3_rel();
       }
       scale_B -= pot_pointer->force_scale(type_a).first;
-      scale_I3 -= pot_pointer->force_scale(type_a).second
-                  * type_a.isospin3_rel();
+      scale_I3 -=
+          pot_pointer->force_scale(type_a).second * type_a.isospin3_rel();
       scale_B -= pot_pointer->force_scale(type_b).first;
-      scale_I3 -= pot_pointer->force_scale(type_b).second
-                  * type_b.isospin3_rel();
-      is_below_threshold = (incoming_momentum + potentials_.first * scale_B
-                         + potentials_.second * scale_I3).abs() <= sqrt_s_min;
+      scale_I3 -=
+          pot_pointer->force_scale(type_b).second * type_b.isospin3_rel();
+      is_below_threshold = (incoming_momentum + potentials_.first * scale_B +
+                            potentials_.second * scale_I3)
+                               .abs() <= sqrt_s_min;
     } else {
       is_below_threshold = (sqrts <= sqrt_s_min);
     }

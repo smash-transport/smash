@@ -196,8 +196,8 @@ void DecayAction::generate_final_state() {
 
 /* This is overridden from the Action class in order to
  * take care of the angular momentum L_. */
-std::pair<double, double> DecayAction::sample_masses(double kinetic_energy_cm)
-  const {
+std::pair<double, double> DecayAction::sample_masses(
+    double kinetic_energy_cm) const {
   const ParticleType &t_a = outgoing_particles_[0].type();
   const ParticleType &t_b = outgoing_particles_[1].type();
 
@@ -217,8 +217,8 @@ std::pair<double, double> DecayAction::sample_masses(double kinetic_energy_cm)
   if (!t_a.is_stable() && t_b.is_stable()) {
     masses.first = t_a.sample_resonance_mass(t_b.mass(), kinetic_energy_cm, L_);
   } else if (!t_b.is_stable() && t_a.is_stable()) {
-    masses.second = t_b.sample_resonance_mass(t_a.mass(), kinetic_energy_cm,
-                                              L_);
+    masses.second =
+        t_b.sample_resonance_mass(t_a.mass(), kinetic_energy_cm, L_);
   } else if (!t_a.is_stable() && !t_b.is_stable()) {
     // two resonances in final state
     masses = t_a.sample_resonance_masses(t_b, kinetic_energy_cm, L_);

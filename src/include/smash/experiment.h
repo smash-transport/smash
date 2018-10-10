@@ -1634,12 +1634,12 @@ void Experiment<Modus>::update_potentials() {
       for (size_t i = 0; i < UBlattice_size; i++) {
         auto jB = (*jmu_B_lat_)[i];
         const FourVector flow_four_velocity = abs(jB.density()) > really_small
-                                            ? jB.jmu_net() / jB.density()
-                                            : FourVector();
-        (*UB_lat_)[i] = flow_four_velocity
-                        * potentials_->skyrme_pot(jB.density());
-        (*FB_lat_)[i] = potentials_->skyrme_force(jB.density(),
-                                   jB.grad_rho(), jB.dj_dt(), jB.rot_j());
+                                                  ? jB.jmu_net() / jB.density()
+                                                  : FourVector();
+        (*UB_lat_)[i] =
+            flow_four_velocity * potentials_->skyrme_pot(jB.density());
+        (*FB_lat_)[i] = potentials_->skyrme_force(jB.density(), jB.grad_rho(),
+                                                  jB.dj_dt(), jB.rot_j());
       }
     }
     if (potentials_->use_symmetry() && jmu_I3_lat_ != nullptr) {
@@ -1649,13 +1649,13 @@ void Experiment<Modus>::update_potentials() {
       const size_t UI3lattice_size = UI3_lat_->size();
       for (size_t i = 0; i < UI3lattice_size; i++) {
         auto jI3 = (*jmu_I3_lat_)[i];
-        const FourVector flow_four_velocity = abs(jI3.density()) > really_small
-                                            ? jI3.jmu_net() / jI3.density()
-                                            : FourVector();
-        (*UI3_lat_)[i] = flow_four_velocity
-                         * potentials_->symmetry_pot(jI3.density());
-        (*FI3_lat_)[i] = potentials_->symmetry_force(
-                                  jI3.grad_rho(), jI3.dj_dt(), jI3.rot_j());
+        const FourVector flow_four_velocity =
+            abs(jI3.density()) > really_small ? jI3.jmu_net() / jI3.density()
+                                              : FourVector();
+        (*UI3_lat_)[i] =
+            flow_four_velocity * potentials_->symmetry_pot(jI3.density());
+        (*FI3_lat_)[i] = potentials_->symmetry_force(jI3.grad_rho(),
+                                                     jI3.dj_dt(), jI3.rot_j());
       }
     }
   }

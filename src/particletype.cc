@@ -500,15 +500,15 @@ DecayBranchList ParticleType::get_partial_widths_hadronic(
     /* Calculate the sqare root s of the final state particles. */
     const auto FinalTypes = decay_mode_list[i]->type().particle_types();
     double scale_B = 0.0;
-    double scale_I3 =0.0;
+    double scale_I3 = 0.0;
     if (pot_pointer != nullptr) {
-       scale_B += pot_pointer->force_scale(*this).first;
-       scale_I3 += pot_pointer->force_scale(*this).second * isospin3_rel();
-       for (const auto finaltype : FinalTypes) {
-         scale_B -= pot_pointer->force_scale(*finaltype).first;
-         scale_I3 -= pot_pointer->force_scale(*finaltype).second
-                     * finaltype->isospin3_rel();
-       }
+      scale_B += pot_pointer->force_scale(*this).first;
+      scale_I3 += pot_pointer->force_scale(*this).second * isospin3_rel();
+      for (const auto finaltype : FinalTypes) {
+        scale_B -= pot_pointer->force_scale(*finaltype).first;
+        scale_I3 -= pot_pointer->force_scale(*finaltype).second *
+                    finaltype->isospin3_rel();
+      }
     }
     double sqrt_s = (p + UB * scale_B + UI3 * scale_I3).abs();
     /* Add 1->2 and 1->3 decay channels. */
@@ -525,10 +525,9 @@ DecayBranchList ParticleType::get_partial_widths_hadronic(
         break;
       }
       case 3: {
-        if (!(has_lepton_pair(
-                FinalTypes[0]->pdgcode(),
-                FinalTypes[1]->pdgcode(),
-                FinalTypes[2]->pdgcode()))) {
+        if (!(has_lepton_pair(FinalTypes[0]->pdgcode(),
+                              FinalTypes[1]->pdgcode(),
+                              FinalTypes[2]->pdgcode()))) {
           const double w = partial_width(sqrt_s, decay_mode_list[i].get());
           if (w > 0.) {
             partial.push_back(

@@ -76,7 +76,7 @@ FourVector Action::get_interaction_point() const {
 }
 
 std::pair<FourVector, FourVector> Action::get_potential_at_interaction_point()
-  const {
+    const {
   const ThreeVector r = get_interaction_point().threevec();
   FourVector UB = FourVector();
   FourVector UI3 = FourVector();
@@ -147,12 +147,12 @@ FourVector Action::total_momentum_of_outgoing_particles() const {
   /* Rescale to get the potential difference between the
    * initial and final state, and thus get the total momentum
    * of the outgoing particles*/
-  return total_momentum() + potentials.first * scale_B
-                          + potentials.second * scale_I3;
+  return total_momentum() + potentials.first * scale_B +
+         potentials.second * scale_I3;
 }
 
-std::pair<double, double> Action::sample_masses(const double kinetic_energy_cm)
-  const {
+std::pair<double, double> Action::sample_masses(
+    const double kinetic_energy_cm) const {
   const ParticleType &t_a = outgoing_particles_[0].type();
   const ParticleType &t_b = outgoing_particles_[1].type();
   // start with pole masses
@@ -181,7 +181,7 @@ std::pair<double, double> Action::sample_masses(const double kinetic_energy_cm)
 }
 
 void Action::sample_angles(std::pair<double, double> masses,
-     const double kinetic_energy_cm) {
+                           const double kinetic_energy_cm) {
   const auto &log = logger<LogArea::Action>();
 
   ParticleData *p_a = &outgoing_particles_[0];

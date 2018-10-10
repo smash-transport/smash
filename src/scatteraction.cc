@@ -95,8 +95,8 @@ void ScatterAction::generate_final_state() {
 
   for (ParticleData &new_particle : outgoing_particles_) {
     // Boost to the computational frame
-    new_particle.boost_momentum(-total_momentum_of_outgoing_particles()
-                                                           .velocity());
+    new_particle.boost_momentum(
+        -total_momentum_of_outgoing_particles().velocity());
     /* Set positions of the outgoing particles */
     if (proc->get_type() != ProcessType::Elastic) {
       new_particle.set_4position(middle_point);
@@ -247,7 +247,7 @@ static double Cugnon_bnp(double plab) {
 }
 
 void ScatterAction::sample_angles(std::pair<double, double> masses,
-     double kinetic_energy_cm) {
+                                  double kinetic_energy_cm) {
   if (is_string_soft_process(process_type_) ||
       (process_type_ == ProcessType::StringHard)) {
     // We potentially have more than two particles, so the following angular
@@ -411,8 +411,8 @@ void ScatterAction::resonance_formation() {
     throw InvalidResonanceFormation(s);
   }
   // Set the momentum of the formed resonance in its rest frame.
-  outgoing_particles_[0].set_4momentum(total_momentum_of_outgoing_particles()
-                                                          .abs(), 0., 0., 0.);
+  outgoing_particles_[0].set_4momentum(
+      total_momentum_of_outgoing_particles().abs(), 0., 0., 0.);
   /* Set the formation time of the resonance to the larger formation time of the
    * incoming particles, if it is larger than the execution time; execution time
    * is otherwise taken to be the formation time */

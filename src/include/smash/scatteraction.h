@@ -101,7 +101,7 @@ class ScatterAction : public Action {
    * Sample final-state angles in a 2->2 collision (possibly anisotropic).
    */
   void sample_angles(std::pair<double, double> masses,
-       double kinetic_energy_cm) override;
+                     double kinetic_energy_cm) override;
 
   /**
    * Add all possible scattering subprocesses for this action object.
