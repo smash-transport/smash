@@ -23,6 +23,7 @@
 #include "grid.h"
 #include "outputparameters.h"
 #include "pauliblocking.h"
+#include "potential_globals.h"
 #include "potentials.h"
 #include "propagation.h"
 #include "quantumnumbers.h"
@@ -380,13 +381,19 @@ class Experiment : public ExperimentBase {
   /// Type of density for lattice printout
   DensityType dens_type_lattice_printout_ = DensityType::None;
 
-  /// Lattices for Skyme potentials
-  std::unique_ptr<RectangularLattice<double>> UB_lat_ = nullptr;
+  /**
+   * Lattices for Skyrme potentials (evaluated in the local rest frame) times
+   * the baryon flow 4-velocity
+   */
+  std::unique_ptr<RectangularLattice<FourVector>> UB_lat_ = nullptr;
 
-  /// Lattices for symmetry potentials
-  std::unique_ptr<RectangularLattice<double>> UI3_lat_ = nullptr;
+  /**
+   * Lattices for symmetry potentials (evaluated in the local rest frame) times
+   * the isospin flow 4-velocity
+   */
+  std::unique_ptr<RectangularLattice<FourVector>> UI3_lat_ = nullptr;
 
-  /// Lattices for the electric and magnetic components of the Skyme force
+  /// Lattices for the electric and magnetic components of the Skyrme force
   std::unique_ptr<RectangularLattice<std::pair<ThreeVector, ThreeVector>>>
       FB_lat_;
 
@@ -1067,7 +1074,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       if (potentials_->use_skyrme()) {
         jmu_B_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
                                                  LatticeUpdate::EveryTimestep);
-        UB_lat_ = make_unique<RectangularLattice<double>>(
+        UB_lat_ = make_unique<RectangularLattice<FourVector>>(
             l, n, origin, periodic, LatticeUpdate::EveryTimestep);
         FB_lat_ = make_unique<
             RectangularLattice<std::pair<ThreeVector, ThreeVector>>>(
@@ -1076,7 +1083,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       if (potentials_->use_symmetry()) {
         jmu_I3_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
                                                   LatticeUpdate::EveryTimestep);
-        UI3_lat_ = make_unique<RectangularLattice<double>>(
+        UI3_lat_ = make_unique<RectangularLattice<FourVector>>(
             l, n, origin, periodic, LatticeUpdate::EveryTimestep);
         FI3_lat_ = make_unique<
             RectangularLattice<std::pair<ThreeVector, ThreeVector>>>(
@@ -1105,7 +1112,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   // Store pointers to potential and lattice accessible for Action
   if (parameters_.potential_affect_threshold) {
-    Action::input_potential(UB_lat_.get(), UI3_lat_.get(), potentials_.get());
+    UB_lat_pointer = UB_lat_.get();
+    UI3_lat_pointer = UI3_lat_.get();
+    pot_pointer = potentials_.get();
   }
 
   // Create forced thermalizer
@@ -1623,10 +1632,14 @@ void Experiment<Modus>::update_potentials() {
                      DensityType::Baryon, density_param_, particles_, true);
       const size_t UBlattice_size = UB_lat_->size();
       for (size_t i = 0; i < UBlattice_size; i++) {
-        (*UB_lat_)[i] = potentials_->skyrme_pot((*jmu_B_lat_)[i].density());
-        (*FB_lat_)[i] = potentials_->skyrme_force(
-            (*jmu_B_lat_)[i].density(), (*jmu_B_lat_)[i].grad_rho(),
-            (*jmu_B_lat_)[i].dj_dt(), (*jmu_B_lat_)[i].rot_j());
+        auto jB = (*jmu_B_lat_)[i];
+        const FourVector flow_four_velocity = abs(jB.density()) > really_small
+                                                  ? jB.jmu_net() / jB.density()
+                                                  : FourVector();
+        (*UB_lat_)[i] =
+            flow_four_velocity * potentials_->skyrme_pot(jB.density());
+        (*FB_lat_)[i] = potentials_->skyrme_force(jB.density(), jB.grad_rho(),
+                                                  jB.dj_dt(), jB.rot_j());
       }
     }
     if (potentials_->use_symmetry() && jmu_I3_lat_ != nullptr) {
@@ -1635,10 +1648,14 @@ void Experiment<Modus>::update_potentials() {
                      true);
       const size_t UI3lattice_size = UI3_lat_->size();
       for (size_t i = 0; i < UI3lattice_size; i++) {
-        (*UI3_lat_)[i] = potentials_->symmetry_pot((*jmu_I3_lat_)[i].density());
-        (*FI3_lat_)[i] = potentials_->symmetry_force(
-            (*jmu_I3_lat_)[i].grad_rho(), (*jmu_I3_lat_)[i].dj_dt(),
-            (*jmu_I3_lat_)[i].rot_j());
+        auto jI3 = (*jmu_I3_lat_)[i];
+        const FourVector flow_four_velocity =
+            abs(jI3.density()) > really_small ? jI3.jmu_net() / jI3.density()
+                                              : FourVector();
+        (*UI3_lat_)[i] =
+            flow_four_velocity * potentials_->symmetry_pot(jI3.density());
+        (*FI3_lat_)[i] = potentials_->symmetry_force(jI3.grad_rho(),
+                                                     jI3.dj_dt(), jI3.rot_j());
       }
     }
   }

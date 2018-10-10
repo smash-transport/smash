@@ -18,6 +18,7 @@
 #include "smash/kinematics.h"
 #include "smash/logging.h"
 #include "smash/pauliblocking.h"
+#include "smash/potential_globals.h"
 #include "smash/processbranch.h"
 #include "smash/quantumnumbers.h"
 
@@ -74,38 +75,20 @@ FourVector Action::get_interaction_point() const {
   return interaction_point;
 }
 
-std::pair<double, double> Action::get_potential_at_interaction_point() const {
+std::pair<FourVector, FourVector> Action::get_potential_at_interaction_point()
+    const {
   const ThreeVector r = get_interaction_point().threevec();
-  double UB = 0.;
-  double UI3 = 0.;
+  FourVector UB = FourVector();
+  FourVector UI3 = FourVector();
   /* Check:
    * Lattice is turned on. */
   if (UB_lat_pointer != nullptr) {
-    /** \todo TODO(fengli):
-     * A Lorentz transformation from the local rest frame to the
-     * center of mass frame of the incoming particles is missing here. Since all
-     * the actions take place in the center of mass frame of the incoming
-     * particles, particles should see potentials different from UB_lat_ or
-     * UI3_lat_ which are obtained in the local rest frame. But I don't think
-     * the Lorentz transformation is important in the low energy heavy-ion
-     * collisions, and turning on potentials violates the Lorentz covariance in
-     * the current SMASH version anyway, so I'd like to leave it to another
-     * issue in the future.
-     */
     UB_lat_pointer->value_at(r, UB);
   }
   if (UI3_lat_pointer != nullptr) {
     UI3_lat_pointer->value_at(r, UI3);
   }
   return std::make_pair(UB, UI3);
-}
-
-void Action::input_potential(RectangularLattice<double> *UB_lat,
-                             RectangularLattice<double> *UI3_lat,
-                             Potentials *pot) {
-  UB_lat_pointer = UB_lat;
-  UI3_lat_pointer = UI3_lat;
-  pot_pointer = pot;
 }
 
 void Action::perform(Particles *particles, uint32_t id_process) {
@@ -137,53 +120,77 @@ void Action::perform(Particles *particles, uint32_t id_process) {
   }
 }
 
-double Action::kinetic_energy_cms() const {
+FourVector Action::total_momentum_of_outgoing_particles() const {
   const auto potentials = get_potential_at_interaction_point();
-  return kinetic_energy_cms<ParticleList>(potentials, outgoing_particles_);
+  /* scale_B returns the difference of the total force scales of the skyrme
+   * potential between the initial and final states. */
+  double scale_B = 0.0;
+  /* scale_I3 returns the difference of the total force scales of the symmetry
+   * potential between the initial and final states. */
+  double scale_I3 = 0.0;
+  for (const auto &p_in : incoming_particles_) {
+    // Get the force scale of the incoming particle.
+    const auto scale =
+        ((pot_pointer != nullptr) ? pot_pointer->force_scale(p_in.type())
+                                  : std::make_pair(0.0, 0));
+    scale_B += scale.first;
+    scale_I3 += scale.second * p_in.type().isospin3_rel();
+  }
+  for (const auto &p_out : outgoing_particles_) {
+    // Get the force scale of the outgoing particle.
+    const auto scale = ((pot_pointer != nullptr)
+                            ? pot_pointer->force_scale(type_of_pout(p_out))
+                            : std::make_pair(0.0, 0));
+    scale_B -= scale.first;
+    scale_I3 -= scale.second * type_of_pout(p_out).isospin3_rel();
+  }
+  /* Rescale to get the potential difference between the
+   * initial and final state, and thus get the total momentum
+   * of the outgoing particles*/
+  return total_momentum() + potentials.first * scale_B +
+         potentials.second * scale_I3;
 }
 
-std::pair<double, double> Action::sample_masses() const {
+std::pair<double, double> Action::sample_masses(
+    const double kinetic_energy_cm) const {
   const ParticleType &t_a = outgoing_particles_[0].type();
   const ParticleType &t_b = outgoing_particles_[1].type();
   // start with pole masses
   std::pair<double, double> masses = {t_a.mass(), t_b.mass()};
 
-  const double cms_kin_energy = kinetic_energy_cms();
-
-  if (cms_kin_energy < t_a.min_mass_kinematic() + t_b.min_mass_kinematic()) {
+  if (kinetic_energy_cm < t_a.min_mass_kinematic() + t_b.min_mass_kinematic()) {
     const std::string reaction = incoming_particles_[0].type().name() +
                                  incoming_particles_[1].type().name() + "→" +
                                  t_a.name() + t_b.name();
     throw InvalidResonanceFormation(
-        reaction + ": not enough energy, " + std::to_string(cms_kin_energy) +
+        reaction + ": not enough energy, " + std::to_string(kinetic_energy_cm) +
         " < " + std::to_string(t_a.min_mass_kinematic()) + " + " +
         std::to_string(t_b.min_mass_kinematic()));
   }
 
   /* If one of the particles is a resonance, sample its mass. */
   if (!t_a.is_stable() && t_b.is_stable()) {
-    masses.first = t_a.sample_resonance_mass(t_b.mass(), cms_kin_energy);
+    masses.first = t_a.sample_resonance_mass(t_b.mass(), kinetic_energy_cm);
   } else if (!t_b.is_stable() && t_a.is_stable()) {
-    masses.second = t_b.sample_resonance_mass(t_a.mass(), cms_kin_energy);
+    masses.second = t_b.sample_resonance_mass(t_a.mass(), kinetic_energy_cm);
   } else if (!t_a.is_stable() && !t_b.is_stable()) {
     // two resonances in final state
-    masses = t_a.sample_resonance_masses(t_b, cms_kin_energy);
+    masses = t_a.sample_resonance_masses(t_b, kinetic_energy_cm);
   }
   return masses;
 }
 
-void Action::sample_angles(std::pair<double, double> masses) {
+void Action::sample_angles(std::pair<double, double> masses,
+                           const double kinetic_energy_cm) {
   const auto &log = logger<LogArea::Action>();
 
   ParticleData *p_a = &outgoing_particles_[0];
   ParticleData *p_b = &outgoing_particles_[1];
 
-  const double cms_kin_energy = kinetic_energy_cms();
-
-  const double pcm = pCM(cms_kin_energy, masses.first, masses.second);
+  const double pcm = pCM(kinetic_energy_cm, masses.first, masses.second);
   if (!(pcm > 0.0)) {
     log.warn("Particle: ", p_a->pdgcode(), " radial momentum: ", pcm);
-    log.warn("Ektot: ", cms_kin_energy, " m_a: ", masses.first,
+    log.warn("Ektot: ", kinetic_energy_cm, " m_a: ", masses.first,
              " m_b: ", masses.second);
   }
   /* Here we assume an isotropic angular distribution. */
@@ -192,17 +199,21 @@ void Action::sample_angles(std::pair<double, double> masses) {
 
   p_a->set_4momentum(masses.first, phitheta.threevec() * pcm);
   p_b->set_4momentum(masses.second, -phitheta.threevec() * pcm);
-
+  /* Debug message is printed before boost, so that p_a and p_b are
+   * the momenta in the center of mass frame and thus opposite to
+   * each other.*/
   log.debug("p_a: ", *p_a, "\np_b: ", *p_b);
 }
 
 void Action::sample_2body_phasespace() {
   /* This function only operates on 2-particle final states. */
   assert(outgoing_particles_.size() == 2);
+  const FourVector p_tot = total_momentum_of_outgoing_particles();
+  const double cm_kin_energy = p_tot.abs();
   // first sample the masses
-  const std::pair<double, double> masses = sample_masses();
+  const std::pair<double, double> masses = sample_masses(cm_kin_energy);
   // after the masses are fixed (and thus also pcm), sample the angles
-  sample_angles(masses);
+  sample_angles(masses, cm_kin_energy);
 }
 
 void Action::check_conservation(const uint32_t id_process) const {

@@ -31,8 +31,8 @@ ActionList DecayActionsFinder::find_actions_in_cell(
       continue;  // particle doesn't decay
     }
 
-    DecayBranchList processes =
-        p.type().get_partial_widths_hadronic(p.effective_mass());
+    DecayBranchList processes = p.type().get_partial_widths_hadronic(
+        p.momentum(), p.position().threevec());
     // total decay width (mass-dependent)
     const double width = total_weight<DecayBranch>(processes);
 
