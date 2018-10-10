@@ -1760,10 +1760,9 @@ CollisionBranchList CrossSections::dpi_xx(ReactionsBitSet
         continue;
       }
       // same matrix element for πd and πd̅
-      const double tmp =
-          sqrts - type_a.min_mass_kinematic() - type_b.min_mass_kinematic();
-      /* Matrix element is fit to match the inelastic pi+ d -> pi+ n p
-       * cross-section from the Fig. 5 of [\iref{Arndt:1994bs}]. */
+      const double tmp = sqrts - pion_mass - deuteron_mass;
+      // Matrix element is fit to match the inelastic pi+ d -> pi+ n p
+      // cross-section from the Fig. 5 of [\iref{Arndt:1994bs}].
       const double matrix_element =
           295.5 + 2.862 / (0.00283735 + pow_int(sqrts - 2.181, 2)) +
           0.0672 / pow_int(tmp, 2) - 6.61753 / tmp;
@@ -1815,12 +1814,11 @@ CollisionBranchList CrossSections::dn_xx(
       continue;
     }
     double matrix_element = 0.0;
+    double tmp = sqrts - nucleon_mass - deuteron_mass;
+    assert(tmp >= 0.0);
     if (std::signbit(type_N.baryon_number()) ==
         std::signbit(type_nucleus.baryon_number())) {
       // Nd → Nd', N̅d̅→ N̅d̅' and reverse
-      const double tmp = sqrts - type_N.min_mass_kinematic() -
-                         type_nucleus.min_mass_kinematic();
-      assert(tmp >= 0.0);
       /* Fit to match experimental cross-section Nd -> Nnp from
        * [\iref{Carlson1973}] */
       matrix_element = 79.0474 / std::pow(tmp, 0.7897) + 654.596 * tmp;
@@ -1828,7 +1826,7 @@ CollisionBranchList CrossSections::dn_xx(
       /* N̅d →  N̅d', Nd̅→ Nd̅' and reverse
        * Fit to roughly match experimental cross-section N̅d -> N̅ np from
        * [\iref{Bizzarri:1973sp}]. */
-      matrix_element = 681.4;
+      matrix_element = 342.572 / std::pow(tmp, 0.6);
     }
     const double spin_factor =
         (produced_nucleus->spin() + 1) * (type_N.spin() + 1);

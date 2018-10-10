@@ -381,13 +381,13 @@ following way:
 ### Code formatting with `clang-format`
 
 All code has to be formatted by running `clang-format`. This automatically
-formats the code in SMASH correctly. Use the following command in the SMASH root
-directory:
+formats the code in SMASH correctly. Use the helper script in SMASH's /bin
+directory to format the source code:
 
-    for i in src/*.cc src/include/smash/*.h src/tests/*.cc src/tests/*.h; do clang-format -i $i; done;
+    ./clang-format-helper -p
 
-If clang-format does changes that don't look good, you can disable it locally
-using comments like this:
+Review and commit changes afterwards. clang-format does changes that 
+don't look good, you can disable it locally using comments like this:
 
 
     // clang-format off

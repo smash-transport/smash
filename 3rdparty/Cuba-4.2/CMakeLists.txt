@@ -4,7 +4,7 @@ project(Cuba)
 include(CheckFunctionExists)
 include(CheckIncludeFile)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fomit-frame-pointer -Wall -DNOUNDERSCORE -DREALSIZE=8 -march=native -mfpmath=sse")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fomit-frame-pointer -Wall -DNOUNDERSCORE -DREALSIZE=8 -march=native -mfpmath=sse -fPIC")
 
 set(CMAKE_REQUIRED_INCLUDES "unistd.h" "sys/ipc.h" "sys/shm.h" "math.h" "stdlib.h")
 

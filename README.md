@@ -1,5 +1,7 @@
 # SMASH README
 
+[![Build Status](https://travis-ci.com/smash-transport/smash-devel.svg?token=6MyxHigvN4vzHpS29fsG&branch=master)](https://travis-ci.com/smash-transport/smash-devel)
+
 This is the repository for the development of the SMASH (Simulating Many
 Accelerated Strongly-interacting Hadrons) transport approach for the dynamical
 description of heavy ion reactions. See [Phys. Rev. C 94, 054905
@@ -27,18 +29,38 @@ It requires the following tools & libraries:
 - the GNU Scientific Library >= 1.15
 - the Eigen3 library for linear algebra (see http://eigen.tuxfamily.org)
 - boost filesystem >= 1.49
+- Pythia = 8.230
 
 Support for ROOT output is automatically enabled if a suitable version of ROOT
 (>= 5.34) is found on the system.
 
 
+### Building Pythia
+
+SMASH is tightly coupled to Pythia and thus requires a specific version. Using
+a different version than specified above may or may not work. It is recommended
+to build Pythia with similar flags as used for SMASH:
+
+    wget http://home.thep.lu.se/~torbjorn/pythia8/pythia8230.tgz
+    tar xf pythia8230.tgz && rm pythia8230.tgz
+    cd pythia8230
+    ./configure --cxx-common='-std=c++11 -march=native -mfpmath=sse -O3 -fPIC'
+    make
+
+To tell cmake where to find Pythia, pass the path to the pythia8-config
+executable as shown in the next section.
+
+Note that although Pythia is statically linked into SMASH, access to
+`share/Pythia8/xmldoc` is required at runtime.
+
+
 ### Building SMASH
 
-Use the following commands too build SMASH in a separate directory:
+Use the following commands to build SMASH in a separate directory:
 
     mkdir build
     cd build
-    cmake ..
+    cmake .. -DPythia_CONFIG_EXECUTABLE=[...]/pythia8230/bin/pythia8-config
     make
 
 To build in parallel on N cores:

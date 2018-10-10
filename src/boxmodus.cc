@@ -37,8 +37,9 @@ namespace smash {
 std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
   out << "-- Box Modus:\nSize of the box: (" << m.length_ << " fm)³\n";
   if (m.use_thermal_) {
-    out << "Thermal multiplicities " << "(T = " << m.temperature_
-        << " GeV, muB = " << m.mub_ << " GeV, muS = " << m.mus_ << " GeV)\n";
+    out << "Thermal multiplicities "
+        << "(T = " << m.temperature_ << " GeV, muB = " << m.mub_
+        << " GeV, muS = " << m.mus_ << " GeV)\n";
   } else {
     for (const auto &p : m.init_multipl_) {
       ParticleTypePtr ptype = &ParticleType::find(p.first);
@@ -46,10 +47,10 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
     }
   }
   if (m.initial_condition_ == BoxInitialCondition::PeakedMomenta) {
-    out << "All initial momenta = 3T = " << 3*m.temperature_ << " GeV\n";
+    out << "All initial momenta = 3T = " << 3 * m.temperature_ << " GeV\n";
   } else {
-    out << "Boltzmann momentum distribution with T = "
-        << m.temperature_ << " GeV.\n";
+    out << "Boltzmann momentum distribution with T = " << m.temperature_
+        << " GeV.\n";
   }
   return out;
 }
