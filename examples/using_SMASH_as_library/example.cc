@@ -46,10 +46,11 @@ int main(int argc, char *argv[]) {
               << mean_exp << ": " 
               << random::exponential(1.0 / mean_exp) << std::endl;
   }
+  std::string smash_dir(std::getenv("SMASH_DIR"));
   if (example_number > 1) {
     std::cout << "\nExample 2\n---------\n" << std::endl;
     std::cout << "Loading SMASH particle types and decay modes" << std::endl;
-    std::ifstream particles_input_file("../particles.txt");
+    std::ifstream particles_input_file(smash_dir + "/input/particles.txt");
     std::stringstream buffer;
     if (particles_input_file) {
       buffer << particles_input_file.rdbuf();
@@ -58,7 +59,7 @@ int main(int argc, char *argv[]) {
       std::cout << "File with SMASH particle list not found." << std::endl;
       return 1;
     }
-    std::ifstream decaymodes_input_file("../decaymodes.txt");
+    std::ifstream decaymodes_input_file(smash_dir + "/input/decaymodes.txt");
     if (decaymodes_input_file) {
       buffer.clear();
       buffer.str(std::string());
