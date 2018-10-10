@@ -170,6 +170,8 @@ void print_disclaimer() {
     << " Distributed under the GNU General Public License 3.0"
     << " (GPLv3 or later)."
     << "\n"
+    << " See LICENSE for details."
+    << "\n"
     << " For the full list of contributors see AUTHORS."
     << "\n"
     << "\n"
