@@ -24,7 +24,7 @@ StringProcess::StringProcess(double string_tension, double time_formation,
                              double sigma_perp, double stringz_a,
                              double stringz_b, double string_sigma_T,
                              double factor_t_form, bool use_yoyo_model,
-                             double prob_xi)
+                             double prob_proton_to_d_uu)
     : pmin_gluon_lightcone_(gluon_pmin),
       pow_fgluon_beta_(gluon_beta),
       pow_fquark_alpha_(quark_alpha),
@@ -37,7 +37,7 @@ StringProcess::StringProcess(double string_tension, double time_formation,
       time_collision_(0.),
       gamma_factor_com_(1.),
       use_yoyo_model_(use_yoyo_model),
-      prob_xi_(prob_xi) {
+      prob_proton_to_d_uu_(prob_proton_to_d_uu) {
   // setup and initialize pythia for hard string process
   pythia_parton_ = make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
   /* select only non-diffractive events
@@ -305,7 +305,7 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
 
   // decompose hadron into quarks
   make_string_ends(is_AB_to_AX ? PDGcodes_[1] : PDGcodes_[0], idqX1, idqX2,
-                   prob_xi_);
+                   prob_proton_to_d_uu_);
   // string mass must be larger than threshold set by PYTHIA.
   mstrMin = pythia_hadron_->particleData.m0(idqX1) +
             pythia_hadron_->particleData.m0(idqX2);
@@ -446,8 +446,10 @@ bool StringProcess::next_DDiff() {
   ThreeVector threeMomentum;
 
   // decompose hadron into quark (and diquark) contents
-  make_string_ends(PDGcodes_[0], quarks[0][0], quarks[0][1], prob_xi_);
-  make_string_ends(PDGcodes_[1], quarks[1][0], quarks[1][1], prob_xi_);
+  make_string_ends(PDGcodes_[0], quarks[0][0], quarks[0][1],
+                   prob_proton_to_d_uu_);
+  make_string_ends(PDGcodes_[1], quarks[1][0], quarks[1][1],
+                   prob_proton_to_d_uu_);
   // sample the lightcone momentum fraction carried by gluons
   const double xmin_gluon_fraction = pmin_gluon_lightcone_ / sqrtsAB_;
   const double xfracA =
@@ -497,8 +499,8 @@ bool StringProcess::next_NDiffSoft() {
 
   // decompose hadron into quark (and diquark) contents
   int idqA1, idqA2, idqB1, idqB2;
-  make_string_ends(PDGcodes_[0], idqA1, idqA2, prob_xi_);
-  make_string_ends(PDGcodes_[1], idqB1, idqB2, prob_xi_);
+  make_string_ends(PDGcodes_[0], idqA1, idqA2, prob_proton_to_d_uu_);
+  make_string_ends(PDGcodes_[1], idqB1, idqB2, prob_proton_to_d_uu_);
 
   const int bar_a = PDGcodes_[0].baryon_number(),
             bar_b = PDGcodes_[1].baryon_number();
