@@ -203,9 +203,7 @@ class ParticleType {
   inline bool is_nucleus() const { return pdgcode_.is_nucleus(); }
 
   /// \return whether the particle is an (anti-)deuteron
-  inline bool is_deuteron() const {
-    return is_nucleus() && std::abs(pdgcode_.get_decimal()) == 1000010020;
-  }
+  inline bool is_deuteron() const { return pdgcode_.is_deuteron(); }
 
   /// \return whether the particle is an artificial d' resonance
   inline bool is_dprime() const {
@@ -268,14 +266,17 @@ class ParticleType {
   /**
    * Get the mass-dependent hadronic partial decay widths
    * of a particle with mass m.
+   * This function needs to know the 4-momentum and the position of the decaying
+   * particle to calculate the square root of s of the final state particles.
    * \todo lots of code duplication with get_partial_widths_dilepton
-   *
-   * \param[in] m Invariant mass of the decaying particle.
+   * \param[in] p 4-momentum of the decaying particle.
+   * \param[in] x position of the decaying particle.
    * \return a list of process branches, whose weights correspond to the
    *         actual partial widths. The list contains only hadronic branches.
    * \throw runtime_error if a decay has less than 2 or more than 3 products
    */
-  DecayBranchList get_partial_widths_hadronic(const double m) const;
+  DecayBranchList get_partial_widths_hadronic(const FourVector p,
+                                              const ThreeVector x) const;
 
   /**
    * Get the mass-dependent dilepton partial decay widths

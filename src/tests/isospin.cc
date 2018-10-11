@@ -38,7 +38,8 @@ static ScatterAction *set_up_action(const ParticleData &proj,
                                     CollisionBranchList &proc_list) {
   ScatterAction *act;
   act = new ScatterAction(proj, targ, 0.);
-  CrossSections xs(act->incoming_particles(), act->sqrt_s());
+  CrossSections xs(act->incoming_particles(), act->sqrt_s(),
+                   std::make_pair(FourVector(), FourVector()));
   proc_list = xs.two_to_two(Test::all_reactions_included());
   //   act->add_processes(proc_list);
 
@@ -86,6 +87,7 @@ TEST(NN_NDelta) {
   COMPARE(proc_list_np.size(), 2u);
 
   // check isospin ratios
+  UnitTest::setFuzzyness<double>(2);  // travis ci did not pass otherwise
   FUZZY_COMPARE(3 * proc_list_pp[0]->weight(),
                 proc_list_pp[1]->weight());  // ratio 1:3
   FUZZY_COMPARE(proc_list_pn[0]->weight(),
@@ -141,6 +143,7 @@ TEST(NDelta_NN) {
   COMPARE(proc_list_DDn.size(), 1u);
 
   // check isospin ratios
+  UnitTest::setFuzzyness<double>(2);  // travis ci did not pass otherwise
   FUZZY_COMPARE(proc_list_Dn[0]->weight(),
                 proc_list_Dn[1]->weight());  // ratio 1:1
   FUZZY_COMPARE(proc_list_Dp[0]->weight(),

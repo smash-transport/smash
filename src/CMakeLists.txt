@@ -50,11 +50,21 @@ if(USE_ROOT)
   endif()
 endif()
 
-# set up Pythia
-get_filename_component(xmldoc "../3rdparty/pythia8215/share/Pythia8/xmldoc" ABSOLUTE)
-add_definitions(
-    "-DPYTHIA_XML_DIR=\"${xmldoc}\""
-)
+# find Pythia
+find_package(Pythia REQUIRED)
+if(Pythia_FOUND)
+  include_directories(SYSTEM
+     "${Pythia_INCLUDE_DIRS}"
+  )
+  set(SMASH_LIBRARIES
+     ${SMASH_LIBRARIES}
+     ${Pythia_LIBRARIES} -ldl
+  )
+  add_definitions(
+  "-DPYTHIA_XML_DIR=\"${Pythia_xmldoc_PATH}\""
+  -DPYTHIA_FOUND
+  )
+endif()
 
 # set up include paths
 include_directories(include)
@@ -75,15 +85,12 @@ set(SMASH_LIBRARIES ${SMASH_LIBRARIES}
    ${Boost_LIBRARIES}
    einhard
    yaml-cpp
-   pythia
-   -ldl  # required by pythia
    cuhre suave divonne vegas  # Cuba multidimensional integration
    )
 
 # list the source files
 set(smash_src
         action.cc
-        action_globals.cc
         adaptiverejectionsampler.cc
         boxmodus.cc
         binaryoutputcollisions.cc
@@ -125,6 +132,7 @@ set(smash_src
         particletype.cc
         pdgcode.cc
         potentials.cc
+        potential_globals.cc
         processbranch.cc
         processstring.cc
         propagation.cc
@@ -148,7 +156,14 @@ if(USE_ROOT AND ROOT_FOUND)
   set(smash_src ${smash_src} rootoutput.cc)
 endif()
 
-add_executable(smash smash.cc ${smash_src})
+# this is the "object library" target: compiles the sources only once
+# see stackoverflow.com/questions/2152077/is-it-possible-to-get-cmake-to
+# -build-both-a-static-and-shared-version-of-the-sam
+add_library(objlib OBJECT ${smash_src})
+# shared libraries need PIC
+set_property(TARGET objlib PROPERTY POSITION_INDEPENDENT_CODE 1)
+
+add_executable(smash smash.cc $<TARGET_OBJECTS:objlib>)
 
 # configure a header file to pass some of the CMake settings
 # to the source code
@@ -186,11 +201,17 @@ set_source_files_properties(experiment.cc PROPERTIES OBJECT_DEPENDS "${generated
 
 target_link_libraries(smash ${SMASH_LIBRARIES})
 
+
+# Create a shared library out of the whole SMASH
+add_library(smash_shared SHARED $<TARGET_OBJECTS:objlib>)
+target_link_libraries(smash_shared ${SMASH_LIBRARIES})
+set_target_properties(smash_shared PROPERTIES OUTPUT_NAME smash)
+
 # tests:
 if(BUILD_TESTING)
    # library for unit tests
-   add_library(smash_lib STATIC ${smash_src})
-
+   add_library(smash_static STATIC $<TARGET_OBJECTS:objlib>)
+   set_target_properties(smash_static PROPERTIES OUTPUT_NAME smash)
    # Look for sanitizers supported by the compiler. Sanitizers add
    # instrumentation code to the executable that test correctness of the code:
    # * address: looks for use-after-free and out-of-bounds like errors
@@ -221,11 +242,11 @@ if(BUILD_TESTING)
       set(USE_SANITIZER FALSE)
    endif()
 
-   # define BUILD_TESTS for smash_lib in order to enable small code changes for the unit tests.
+   # define BUILD_TESTS for smash_static in order to enable small code changes for the unit tests.
    # It is an unfortunate side effect that the sanitzer build now also compiles to slightly different code.
    # To fix this we'd have to compile all source files a third time... not sure we prefer that.
    if(USE_SANITIZER)
-      set_target_properties(smash_lib PROPERTIES
+      set_target_properties(smash_static PROPERTIES
          COMPILE_FLAGS "${SANITIZER_FLAG} -DBUILD_TESTS"
          LINK_FLAGS ${SANITIZER_FLAG}
          )
@@ -235,9 +256,9 @@ if(BUILD_TESTING)
          COMPILE_FLAGS "${SANITIZER_FLAG} -DBUILD_TESTS"
          LINK_FLAGS ${SANITIZER_FLAG}
          )
-      target_link_libraries(smash_sanitizer smash_lib ${SMASH_LIBRARIES})
+      target_link_libraries(smash_sanitizer smash_static ${SMASH_LIBRARIES})
    else()
-      set_target_properties(smash_lib PROPERTIES COMPILE_FLAGS "-DBUILD_TESTS")
+      set_target_properties(smash_static PROPERTIES COMPILE_FLAGS "-DBUILD_TESTS")
    endif()
 
    add_subdirectory(tests)

@@ -193,6 +193,18 @@ class ScatterActionsFinder : public ActionFinderInterface {
   void dump_cross_sections(const ParticleType &a, const ParticleType &b,
                            double m_a, double m_b, bool final_state) const;
 
+  /**
+   * \return Pointer to the string process class object.
+   *         If string is turned off, the null pointer is returned.
+   */
+  StringProcess* get_process_string_ptr() {
+    if (strings_switch_) {
+      return string_process_interface_.get();
+    } else {
+      return NULL;
+    }
+  }
+
  private:
   /**
    * Check for a single pair of particles (id_a, id_b) if a collision will

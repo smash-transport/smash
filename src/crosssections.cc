@@ -86,29 +86,6 @@ static double detailed_balance_factor_RR(double sqrts, double pcm,
 
 /**
  * Helper function:
- * Add a 2-to-2 channel to a collision branch list given a cross section.
- *
- * The cross section is only calculated if there is enough energy
- * for the process. If the cross section is small, the branch is not added.
- */
-template <typename F>
-void add_channel(CollisionBranchList& process_list, F get_xsection,
-                 double sqrts, const ParticleType& type_a,
-                 const ParticleType& type_b) {
-  const double sqrt_s_min =
-      type_a.min_mass_spectral() + type_b.min_mass_spectral();
-  if (sqrts <= sqrt_s_min) {
-    return;
-  }
-  const auto xsection = get_xsection();
-  if (xsection > really_small) {
-    process_list.push_back(make_unique<CollisionBranch>(
-        type_a, type_b, xsection, ProcessType::TwoToTwo));
-  }
-}
-
-/**
- * Helper function:
  * Append a list of processes to another (main) list of processes.
  */
 static void append_list(CollisionBranchList& main_list,
@@ -132,9 +109,11 @@ static double sum_xs_of(CollisionBranchList& list) {
 }
 
 CrossSections::CrossSections(const ParticleList& incoming_particles,
-                             const double sqrt_s)
+                             const double sqrt_s,
+                             const std::pair<FourVector, FourVector> potentials)
     : incoming_particles_(incoming_particles),
       sqrt_s_(sqrt_s),
+      potentials_(potentials),
       is_BBbar_pair_(incoming_particles_[0].type().is_baryon() &&
                      incoming_particles_[1].type().is_baryon() &&
                      incoming_particles_[0].type().antiparticle_sign() ==
@@ -1760,10 +1739,9 @@ CollisionBranchList CrossSections::dpi_xx(ReactionsBitSet
         continue;
       }
       // same matrix element for πd and πd̅
-      const double tmp =
-          sqrts - type_a.min_mass_kinematic() - type_b.min_mass_kinematic();
-      /* Matrix element is fit to match the inelastic pi+ d -> pi+ n p
-       * cross-section from the Fig. 5 of [\iref{Arndt:1994bs}]. */
+      const double tmp = sqrts - pion_mass - deuteron_mass;
+      // Matrix element is fit to match the inelastic pi+ d -> pi+ n p
+      // cross-section from the Fig. 5 of [\iref{Arndt:1994bs}].
       const double matrix_element =
           295.5 + 2.862 / (0.00283735 + pow_int(sqrts - 2.181, 2)) +
           0.0672 / pow_int(tmp, 2) - 6.61753 / tmp;
@@ -1815,12 +1793,11 @@ CollisionBranchList CrossSections::dn_xx(
       continue;
     }
     double matrix_element = 0.0;
+    double tmp = sqrts - nucleon_mass - deuteron_mass;
+    assert(tmp >= 0.0);
     if (std::signbit(type_N.baryon_number()) ==
         std::signbit(type_nucleus.baryon_number())) {
       // Nd → Nd', N̅d̅→ N̅d̅' and reverse
-      const double tmp = sqrts - type_N.min_mass_kinematic() -
-                         type_nucleus.min_mass_kinematic();
-      assert(tmp >= 0.0);
       /* Fit to match experimental cross-section Nd -> Nnp from
        * [\iref{Carlson1973}] */
       matrix_element = 79.0474 / std::pow(tmp, 0.7897) + 654.596 * tmp;
@@ -1828,7 +1805,7 @@ CollisionBranchList CrossSections::dn_xx(
       /* N̅d →  N̅d', Nd̅→ Nd̅' and reverse
        * Fit to roughly match experimental cross-section N̅d -> N̅ np from
        * [\iref{Bizzarri:1973sp}]. */
-      matrix_element = 681.4;
+      matrix_element = 342.572 / std::pow(tmp, 0.6);
     }
     const double spin_factor =
         (produced_nucleus->spin() + 1) * (type_N.spin() + 1);

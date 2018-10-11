@@ -14,7 +14,6 @@
 #include <utility>
 #include <vector>
 
-#include "action_globals.h"
 #include "lattice.h"
 #include "particles.h"
 #include "pauliblocking.h"
@@ -266,61 +265,14 @@ class Action {
   double sqrt_s() const { return total_momentum().abs(); }
 
   /**
-   * Calculate the total kinetic energy of the outgoing particles in
-   * the center of mass frame in the presence (or absence) of the mean field
-   * potentials.
+   * Calculate the total kinetic momentum of the outgoing particles
    *
    * This function is used when the species of the outgoing
    * particles are already determined.
    *
-   * \return total kinetic energy of the outgoing particles [GeV]
+   * \return total kinetic momentum of the outgoing particles [GeV]
    */
-  double kinetic_energy_cms() const;
-
-  /**
-   * Calculate the total kinetic energy of the outgoing particles in
-   * the center of mass frame in the presence (or absence) of the mean field
-   * potentials.
-   *
-   * This function is used to determine whether an action is
-   * kinematically feasible.
-   *
-   * \tparam outs Type of outgoing particles
-   * \param[in] potentials skyrme and asymmetry potential for particle [GeV]
-   * \param[in] p_out_types outgoing particle types
-   * \return total kinetic energy of the outgoing particles in
-   *                                           the center of mass frame [GeV]
-   */
-  template <typename outs>
-  double kinetic_energy_cms(std::pair<double, double> potentials,
-                            outs p_out_types) const {
-    /* scale_B returns the difference of the total force scales of the skyrme
-     * potential between the initial and final states. */
-    double scale_B = 0.0;
-    /* scale_I3 returns the difference of the total force scales of the symmetry
-     * potential between the initial and final states. */
-    double scale_I3 = 0.0;
-    for (const auto &p_in : incoming_particles_) {
-      // Get the force scale of the incoming particle.
-      const auto scale =
-          ((pot_pointer != nullptr) ? pot_pointer->force_scale(p_in.type())
-                                    : std::make_pair(0.0, 0));
-      scale_B += scale.first;
-      scale_I3 += scale.second * p_in.type().isospin3_rel();
-    }
-    for (const auto &p_out : p_out_types) {
-      const auto scale = ((pot_pointer != nullptr)
-                              ? pot_pointer->force_scale(type_of_pout(p_out))
-                              : std::make_pair(0.0, 0));
-      scale_B -= scale.first;
-      scale_I3 -= scale.second * type_of_pout(p_out).isospin3_rel();
-    }
-    /* Rescale to get the potential difference between the
-     * initial and final state.*/
-    const double B_pot_diff = potentials.first * scale_B;
-    const double I3_pot_diff = potentials.second * scale_I3;
-    return sqrt_s() + B_pot_diff + I3_pot_diff;
-  }
+  FourVector total_momentum_of_outgoing_particles() const;
 
   /**
    * Get the interaction point
@@ -334,19 +286,7 @@ class Action {
    *
    * \return skyrme and asymmetry potential [GeV]
    */
-  std::pair<double, double> get_potential_at_interaction_point() const;
-
-  /**
-   * Input the information on the potentials and store in global variables
-   * defined in action_globals.
-   *
-   * \param[in] UB_lat skyrme potential on lattice
-   * \param[in] UI3_lat symmmetry potential on lattice
-   * \param[in] pot potential class
-   */
-  static void input_potential(RectangularLattice<double> *UB_lat,
-                              RectangularLattice<double> *UI3_lat,
-                              Potentials *pot);
+  std::pair<FourVector, FourVector> get_potential_at_interaction_point() const;
 
   /**
    * \ingroup exception
@@ -389,35 +329,6 @@ class Action {
   }
 
   /**
-   * Remove the sub-threshold processes from the list of sub processes.
-   *
-   * \tparam Branch Type of the processbranch
-   * \param[out] subprocesses list of processes that are possible
-   * \param[out] total_weight summed weight of all subprocess (after filtering)
-   */
-  template <typename Branch>
-  void filter_channel(ProcessBranchList<Branch> &subprocesses,
-                      double &total_weight) {
-    const auto potentials = get_potential_at_interaction_point();
-    /* Loop through all subprocesses and remove sub-threshold ones.*/
-    for (auto proc = subprocesses.begin(); proc != subprocesses.end();) {
-      /* Evaluate the total kinentic energy of the final state particles
-       * of this new subprocess. */
-      const auto out_particle_types = (*proc)->particle_types();
-      const double kin_energy_cms = kinetic_energy_cms<ParticleTypePtrList>(
-          potentials, out_particle_types);
-      /* Reject the process if the total kinetic energy is smaller than the
-       * threshold. */
-      if (kin_energy_cms < (*proc)->threshold()) {
-        total_weight -= (*proc)->weight();
-        proc = subprocesses.erase(proc);
-      } else {
-        ++proc;
-      }
-    }
-  }
-
-  /**
    * Decide for a particular final-state channel via Monte-Carlo
    * and return it as a ProcessBranch
 
@@ -455,18 +366,29 @@ class Action {
    * Sample final-state masses in general X->2 processes
    * (thus also fixing the absolute c.o.m. momentum).
    *
+   * \param[in] kinetic_energy_cm total kinetic energy of
+   *            the outgoing particles in their center of
+   *            mass frame [GeV]
    * \throws InvalidResonanceFormation
    * \return masses of final state particles
    */
-  virtual std::pair<double, double> sample_masses() const;
+  virtual std::pair<double, double> sample_masses(
+      double kinetic_energy_cm) const;
 
   /**
-   * Sample final-state angles in general X->2 processes
+   * Sample final-state momenta in general X->2 processes
    * (here: using an isotropical angular distribution).
    *
+   * \param[in] kinetic_energy_cm total kinetic energy of
+   *            the outgoing particles in their center of
+   *            mass frame [GeV]
+   * \param[in] beta_cms beta factor used for boosting from
+   *            the computational frame to the center of mass frame
+   *            of the outgoing particles
    * \param[in] masses masses of each of the final state particles
    */
-  virtual void sample_angles(std::pair<double, double> masses);
+  virtual void sample_angles(std::pair<double, double> masses,
+                             double kinetic_energy_cm);
 
   /**
    * Sample the full 2-body phase-space (masses, momenta, angles)
@@ -504,7 +426,7 @@ class Action {
   /**
    * Get the particle type for given pointer to a particle type.
    *
-   * Helper function for kinetic_energy_cms
+   * Helper function for total_momentum_of_outgoing_particles
    *
    * \param[in] p_out pointer to a particle type
    * \return particle type

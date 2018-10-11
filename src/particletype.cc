@@ -28,6 +28,7 @@
 #include "smash/numerics.h"
 #include "smash/particledata.h"
 #include "smash/pdgcode.h"
+#include "smash/potential_globals.h"
 #include "smash/pow.h"
 #include "smash/processbranch.h"
 #include "smash/stringfunctions.h"
@@ -267,6 +268,9 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
     if (pdgcode[0].is_Delta() && !almost_equal(mass, delta_mass)) {
       throw std::runtime_error("Delta mass in input file different from 1.232");
     }
+    if (pdgcode[0].is_deuteron() && !almost_equal(mass, deuteron_mass)) {
+      throw std::runtime_error("d mass in input file different from 1.8756");
+    }
 
     // add all states to type list
     for (size_t i = 0; i < pdgcode.size(); i++) {
@@ -459,7 +463,6 @@ DecayBranchList ParticleType::get_partial_widths(const double m) const {
   if (decay_mode_list.size() == 0) {
     return {};
   }
-
   /* Loop over decay modes and calculate all partial widths. */
   DecayBranchList partial;
   partial.reserve(decay_mode_list.size());
@@ -474,21 +477,46 @@ DecayBranchList ParticleType::get_partial_widths(const double m) const {
 }
 
 DecayBranchList ParticleType::get_partial_widths_hadronic(
-    const double m) const {
+    const FourVector p, const ThreeVector x) const {
   if (is_stable()) {
     return {};
+  }
+  /* Determine whether the decay is affected by the potentials. If it's
+   * affected, read the values of the potentials at the position of the
+   * particle */
+  FourVector UB = FourVector();
+  FourVector UI3 = FourVector();
+  if (UB_lat_pointer != nullptr) {
+    UB_lat_pointer->value_at(x, UB);
+  }
+  if (UI3_lat_pointer != nullptr) {
+    UI3_lat_pointer->value_at(x, UI3);
   }
   /* Loop over decay modes and calculate all partial widths. */
   const auto &decay_mode_list = decay_modes().decay_mode_list();
   DecayBranchList partial;
   partial.reserve(decay_mode_list.size());
   for (unsigned int i = 0; i < decay_mode_list.size(); i++) {
+    /* Calculate the sqare root s of the final state particles. */
+    const auto FinalTypes = decay_mode_list[i]->type().particle_types();
+    double scale_B = 0.0;
+    double scale_I3 = 0.0;
+    if (pot_pointer != nullptr) {
+      scale_B += pot_pointer->force_scale(*this).first;
+      scale_I3 += pot_pointer->force_scale(*this).second * isospin3_rel();
+      for (const auto finaltype : FinalTypes) {
+        scale_B -= pot_pointer->force_scale(*finaltype).first;
+        scale_I3 -= pot_pointer->force_scale(*finaltype).second *
+                    finaltype->isospin3_rel();
+      }
+    }
+    double sqrt_s = (p + UB * scale_B + UI3 * scale_I3).abs();
+    /* Add 1->2 and 1->3 decay channels. */
     switch (decay_mode_list[i]->type().particle_number()) {
       case 2: {
-        if (!(is_dilepton(
-                decay_mode_list[i]->type().particle_types()[0]->pdgcode(),
-                decay_mode_list[i]->type().particle_types()[1]->pdgcode()))) {
-          const double w = partial_width(m, decay_mode_list[i].get());
+        if (!(is_dilepton(FinalTypes[0]->pdgcode(),
+                          FinalTypes[1]->pdgcode()))) {
+          const double w = partial_width(sqrt_s, decay_mode_list[i].get());
           if (w > 0.) {
             partial.push_back(
                 make_unique<DecayBranch>(decay_mode_list[i]->type(), w));
@@ -497,11 +525,10 @@ DecayBranchList ParticleType::get_partial_widths_hadronic(
         break;
       }
       case 3: {
-        if (!(has_lepton_pair(
-                decay_mode_list[i]->type().particle_types()[0]->pdgcode(),
-                decay_mode_list[i]->type().particle_types()[1]->pdgcode(),
-                decay_mode_list[i]->type().particle_types()[2]->pdgcode()))) {
-          const double w = partial_width(m, decay_mode_list[i].get());
+        if (!(has_lepton_pair(FinalTypes[0]->pdgcode(),
+                              FinalTypes[1]->pdgcode(),
+                              FinalTypes[2]->pdgcode()))) {
+          const double w = partial_width(sqrt_s, decay_mode_list[i].get());
           if (w > 0.) {
             partial.push_back(
                 make_unique<DecayBranch>(decay_mode_list[i]->type(), w));

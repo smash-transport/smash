@@ -84,6 +84,12 @@ constexpr double a1_mass = 1.26;
  * Note that this should be the same as in particles.txt.
  */
 constexpr double delta_mass = 1.232;
+/**
+ * Deuteron mass in GeV.
+ *
+ * Note that this should be the same as in particles.txt.
+ */
+constexpr double deuteron_mass = 1.8756;
 
 /// Fine-struture constant, approximately 1/137.
 constexpr double fine_structure = 7.2973525698e-3;
@@ -100,6 +106,11 @@ constexpr double fine_structure = 7.2973525698e-3;
  * elastic NN and KN cross sections, which diverge at threshold.
  */
 constexpr double maximum_cross_section = 200.;  // mb
+
+/**
+ * The maximum value of the random seed used in PYTHIA.
+ */
+constexpr int maximum_rndm_seed_in_pythia = 900000000;
 
 /**
  * Energy in GeV, below which hard reactions via pythia are impossible.

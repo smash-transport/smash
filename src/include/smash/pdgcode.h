@@ -380,6 +380,12 @@ class PdgCode {
     return (c == pdg::rho_z) || (c == pdg::rho_p) || (c == pdg::rho_m);
   }
 
+  /// \return whether this is (anti-)deuteron
+  inline bool is_deuteron() const {
+    const int dec = get_decimal();
+    return is_nucleus() && (dec == pdg::decimal_d || dec == pdg::decimal_antid);
+  }
+
   /**
    * \return whether a particle has a distinct antiparticle
    * (or whether it is its own antiparticle).

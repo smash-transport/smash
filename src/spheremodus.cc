@@ -158,8 +158,8 @@ std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
       out << ptype->name() << " initial multiplicity " << p.second << '\n';
     }
   }
-  out << "Boltzmann momentum distribution with T = "
-      << m.sphere_temperature_ << " GeV.\n";
+  out << "Boltzmann momentum distribution with T = " << m.sphere_temperature_
+      << " GeV.\n";
   return out;
 }
 
