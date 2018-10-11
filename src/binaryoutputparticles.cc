@@ -59,9 +59,9 @@ BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
  * At start of event, end of event or any other particle output:
  * \code
  * char uint32_t
- * 'p'  npart
+ * 'p'  n_part_lines
  * \endcode
- * \li \c npart is number of particle lines in the block that follows
+ * \li \c n_part_lines is the number of particle lines in the block that follows
  *
  * At interaction:
  * \code
@@ -86,9 +86,8 @@ BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
  *     double        int         int
  * </div>
  * <div class="line">
- * t x y z mass p0 px py pz pdg ID charge Ncoll formation_time
- * xs_scaling_factor process_ID_origin process_type_origin
- * time_of_origin PDG_mother1 PDG_mother2
+ * t x y z mass p0 px py pz pdg ID charge ncoll form_time xsecfac
+ * proc_id_origin proc_type_origin time_last_coll pdg_mother1 pdg_mother2
  * </div></div>
  *
  * **Event end line**

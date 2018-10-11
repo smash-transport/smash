@@ -36,7 +36,7 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
    * **All OSCAR outputs have the same general structure: a header and an
    * arbitrary number of event blocks.** Each event block consists of an
    * arbitrary number of output blocks and special event end lines that mark the
-   * end of event. One output block consists of an output block header and N
+   * end of an event. One output block consists of an output block header and N
    * particle lines, where N is specified in the output block header. \n
    * The file structure can be visualized in the following way:
    * \code
@@ -64,7 +64,7 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
    *
    * Each OSCAR output can produce two types of files: collisions output (see
    * \ref format_oscar_collisions) and particles output (see \ref
-   * format_oscar_particlelist). In bouth output types, the above structure is
+   * format_oscar_particlelist). In both output types, the above structure is
    * the same, however the meaning of the blocks is different. **In the
    * collision file one output block typically corresponds to one collision
    * / decay / box wall crossing, while in the particles output one block
@@ -240,7 +240,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \n
  * Oscar1999
  * ---------
- * Oscar1999 is ASCII (text) human-readable output following the OSCAR 1999
+ * Oscar1999 an is ASCII (text) human-readable output following the OSCAR 1999
  * standard. The format specifics are the following:
  *
  * \n
@@ -255,7 +255,8 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * # End of event: 0 0 event_number impact_parameter
  * #
  * \endcode
- * The header consists of 7 lines starting with '#', followed by an empty line.
+ * The header consists of 8 lines starting with '#', of which the last one
+ * does not contain text.
  * They contain the following information:
  * -# The specific OSCAR1999 version the formatting follows - OSCAR1999A
  * -# The substructure of each particle line: (id - momentum - coordinates)
@@ -267,18 +268,19 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * Each output block starts with a line indicating the numbers of ingoing and
  * outgoing particles as well the number of the event.
  * \code
- * nin nout /(not guaranteed) event_number/
+ * nin nout event_number
  * \endcode
  * With
  * \li \key nin: Number of ingoing particles
  * \li \key nout: Number of outgoing particles
  * \li \key event_number: Number of the event
  *
- * For initial timesteps, (nin, nout) = (0, npart), while (nin, nout) =
- * (npart, 0) for intermediate and final timesteps. npart is the total number
- * of particles at the specific timestep. It may differ from one timestep to
- * another if the test case allows more interactions than only elastic
- * scattering. The output block header is followed by npart particle lines.
+ * For initial timesteps, (nin, nout) = (0, part_at_tstep), while (nin, nout) =
+ * (part_at_tstep, 0) for intermediate and final timesteps. part_at_tstep is the
+ * total number of particles at the specific timestep. It may differ from one
+ * timestep to another if the test case allows more interactions than only
+ * elastic scatterings. The output block header is followed by part_at_tstep
+ * particle lines.
  *
  * \n
  * **Particle line** \n
@@ -289,12 +291,12 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *
  * Where
  * \li \key id: Particle identifier in terms of an integer.
- *     It is unique for every particle in event.
+ *     It is unique for every particle in the event.
  * \li \key pdg: PDG code of the particle (see http://pdg.lbl.gov/).
  * It contains all quantum numbers and uniquely identifies its type.
  * \li \key px, \key py, \key pz, \key p0: 3-momentum and energy
  * \li \key mass: Particle's rest-mass
- * \li \key x, \key y, \key z, \key t: space-time coordinates
+ * \li \key x, \key y, \key z, \key t: Space-time coordinates
  *
  * \n
  * **Event end line** \n
@@ -356,22 +358,23 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \n
  * Output block header for a new event:
  * \code
- * # event ev_num in npart
+ * # event ev_num in part_at_tstep
  * \endcode
  * Where
  * \li \key ev_num: Event number
- * \li \key npart: Number of particles initialized at the beginning of the event
+ * \li \key part_at_tstep: Number of particles initialized at the beginning of
+ * the event
  *
  * Note that 'event' and 'in' are no variables, but words that are printed in
  * the header. \n
  * \n
  * Output block header for an intermediate output:
  * \code
- * # event ev_num out npart
+ * # event ev_num out part_at_tstep
  * \endcode
  * Where
  * \li \key ev_num: Event number
- * \li \key npart: Number of particles at the end of the timestep
+ * \li \key part_at_tstep: Number of particles at the end of the timestep
  *
  * Note that 'event' and 'out' are no variables, but words that are printed in
  * the header. \n
@@ -391,10 +394,9 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * For the extended version the particle line contains
  *
  * <div class="fragment">
- * <div class="line"><span class="preprocessor">t x y z
- *  mass p0 px py pz pdg ID charge Ncoll formation_time
- *  xsecfac process_ID_origin process_type_origin t_last_coll
- *  PDG_mother1 PDG_mother2</span></div>
+ * <div class="line"><span class="preprocessor">t x y z mass p0 px py pz pdg
+ * ID charge ncoll form_time xsecfac proc_id_origin proc_type_origin
+ * time_last_coll pdg_mother1 pdg_mother2</span></div>
  * </div>
  *
  * The additional particle properties available in the extended output format
@@ -441,7 +443,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \endcode
  * Where
  * \li \key ev_num: Event number
- * \li \key npart: Number of particles at the end of the timestep
+ * \li \key part_at_tstep: Number of particles at the end of the timestep
  * \li \key impact_parameter: Impact parameter of the collision in case of a
  * collider setup, else 0.0
  *
@@ -467,7 +469,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *
  * Oscar1999
  * ---------
- * Oscar1999 is ASCII (text) human-readable output following the OSCAR 1999
+ * Oscar1999 an is ASCII (text) human-readable output following the OSCAR 1999
  * standard. The format specifics are the following: \n
  * \n
  * **Header**
@@ -481,7 +483,8 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * # End of event: 0 0 event_number
  * #
  * \endcode
- * The header consists of 7 lines starting with '#', followed by an empty line.
+ * The header consists of 8 lines starting with '#', of which the last one
+ * does not contain text.
  * They contain the following information:
  * -# The specific OSCAR1999 version the formatting follows - OSC1999A
  * -# The filename
@@ -496,7 +499,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \endcode
  * With
  * \li \key nin: Number of ingoing particles (initial state particles)
- * \li \key nout: Number of outgoing particles (finalstate particles)
+ * \li \key nout: Number of outgoing particles (final state particles)
  * \li \key density: Density at the interaction point
  * \li \key tot_weight: Total weight of the interaction. This is the total cross
  * section in case of a scattering and the total decay width in case of a decay.
@@ -504,13 +507,13 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * value is 0.0.
  * \li \key part_weight: The partial weight of the interaction. This is the
  * specific weight for the chosen final state.
- * \li \key proc_type: The process type of the underlying process. See
- * \subpage process_type for possible types.
+ * \li \key proc_type: The type of the underlying process. See
+ * \ref process_type for possible types.
  *
  * If the \key Print_Start_End option is set (see \ref
  * output_content_specific_options_ "content-specific output options" for
- * details), (nin, nout) = (0, npart) in the
- * initial timestep and (nin, nout) = (npart, 0) in the final timestep.
+ * details), (nin, nout) = (0, part_at_tstep) in the
+ * initial timestep and (nin, nout) = (part_at_tstep, 0) in the final timestep.
  *
  * \n
  * **Particle line**\n
@@ -521,12 +524,12 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *
  * Where
  * \li \key id: Particle identifier in terms of an integer.
- *     It is unique for every particle in event.
+ *     It is unique for every particle in the event.
  * \li \key pdg: PDG code of the particle (see http://pdg.lbl.gov/).
  * It contains all quantum numbers and uniquely identifies its type.
  * \li \key px, \key py, \key pz, \key p0: 3-momentum and energy
  * \li \key mass: Particle's rest-mass
- * \li \key x, \key y, \key z, \key t: space-time coordinates
+ * \li \key x, \key y, \key z, \key t: Space-time coordinates
  *
  * \n
  * **Event end line** \n
@@ -589,7 +592,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \endcode
  * where
  * \li \key nin: Number of ingoing particles (initial state particles)
- * \li \key nout: Number of outgoing particles (finalstate particles)
+ * \li \key nout: Number of outgoing particles (final state particles)
  * \li \key density: Density at the interaction point
  * \li \key tot_weight: Total weight of the interaction. This is the total cross
  * section in case of a scattering and the total decay width in case of a decay.
@@ -597,8 +600,8 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * value is 0.0.
  * \li \key part_weight: The partial weight of the interaction. This is the
  * specific weight for the chosen final state.
- * \li \key proc_type: The process type of the underlying process. See
- * \subpage process_type for possible types.
+ * \li \key proc_type: The type of the underlying process. See
+ * \ref process_type for possible types.
  *
  * Note, that "interaction", "in", "out", "rho", "weight", "partial" and "type"
  * are no variables, but words that are printed.\n
@@ -633,7 +636,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * underlying process is scaled down by the cross section scaling factor)
  * \li \key proc_id_origin: ID of the process of the particle's last interaction
  * \li \key proc_type_origin: Type of the last process the particle has
- * undergone. The possible process types are listed in \subpage process_type.
+ * undergone. The possible process types are listed in \ref process_type.
  * \li \key t_last_coll: time of the particle's last interaction (except wall
  * crossings)
  * \li \key pdg_mother1: PDG code of the 1st mother particle

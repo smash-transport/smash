@@ -926,8 +926,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * follows below.
    * \li \key part_weight: The partial weight of the interaction. For the
    * dileptons, this coincides with the branching ratio.
-   * \li \key proc_type: The process type of the underlying process. See
-   * \subpage process_type for possible types.
+   * \li \key proc_type: The type of the underlying process. See
+   * process_type for possible types.
    *
    * \n
    * The treatment of Dilepton Decays is special:
