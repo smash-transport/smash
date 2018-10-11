@@ -777,6 +777,8 @@ class StringProcess {
    * Positively (negatively) charged mesons are mapped onto pi+ (pi-).
    * Negatively and positively charged leptons are mapped respectivly onto
    * electron and positron.
+   * Currently, we do not have cross sections for leptons and photons
+   * with high energy, so such collisions should not happen.
    *
    * \param[in] pdg PdgCode that will be mapped
    * \return mapped PDG id to be used in PYTHIA
