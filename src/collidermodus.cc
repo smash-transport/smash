@@ -113,8 +113,9 @@ namespace smash {
  * straight lines that the center of masses of the nuclei travel on).
  *
  * \key Value (double, optional, optional, default = 0.0): \n
- * fixed value for
- * the impact parameter. No other \key Impact: directive is looked at.
+ * Fixed value for
+ * the impact parameter (in fm). No other \key Impact: directive is
+ * looked at.
  *
  * \key Sample (string, optional, default = \key quadratic): \n
  * \li \key "uniform" - use uniform sampling of the impact parameter
@@ -125,8 +126,9 @@ namespace smash {
  * \li \key "custom" - use \key Values and \key Yields to interpolate the
  * impact parameter distribution and use rejection sampling.
  *
- * Values (doubles, optional, default = 0.0): \n
- * Values of the impact parameter, with corresponding \key Yields. Must be same
+ * \key Values (doubles, optional, default = 0.0): \n
+ * Values of the impact parameter (entries in
+ * fm), with corresponding \key Yields. Must be same
  * length as \key Yields. Required for \key Sample = "custom".
  *
  * \key Yields (doubles, optional): \n
@@ -135,7 +137,7 @@ namespace smash {
  * length as \key Values. Required for \key Sample = "custom".
  *
  * \key Range (double, double, optional, default = 0.):\n
- * A vector of minimal and maximal impact parameters
+ * A vector of minimal and maximal impact parameters (entries in fm)
  * between which b should be chosen. (The order of these is not
  * important.)
  *

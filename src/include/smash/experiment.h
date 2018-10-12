@@ -597,7 +597,7 @@ ExperimentParameters create_experiment_parameters(Configuration config);
 /*!\Userguide
  * \page input_general_
  * \key End_Time (double, required): \n
- * The time after which the evolution is stopped. Note
+ * The time (in fm) after which the evolution is stopped. Note
  * that the starting time depends on the chosen Modus.
  *
  * \key Randomseed (int, required): \n
@@ -673,8 +673,8 @@ ExperimentParameters create_experiment_parameters(Configuration config);
  * Turning off strings or elastic collisions while leaving this on will
  * result in the corresponding part of the AQM cross-sections to also be off.
  * Cross-sections parametrization are scaled according to
- * \f[ \frac{\sigma^{AQM}_{process}}{\sigma^{AQM}_{ref_process}}
- * \sigma^{param}_{ref_process}\f]
+ * \f[ \frac{\sigma^{AQM}_{\mathrm{process}}}{\sigma^{AQM}_\mathrm{ref\_process}}
+ * \sigma^{param}_\mathrm{ref\_process}\f]
  * where \f$ \sigma^{AQM}_x = 40 \left( \frac{2}{3} \right)^{n_{meson}}
  * (1 - 0.4 x^s_1) (1 - 0.4 x^s_2) \f$, with \f$n_{meson}\f$ being the number
  * of mesons in the process, \f$x^s_{1,2}\f$ the fraction of strange quarks in
@@ -886,7 +886,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * - \b Thermodynamics This output allows to print out thermodynamic
    *          quantities such as density, energy-momentum tensor,
    *          Landau velocity, etc at one selected point versus time
-   *          and on a spatial lattice  versus time \ref Thermodynamics.
+   *          and on a spatial lattice versus time. See \ref Thermodynamics
+   *         for output options and \subpage thermodyn_output_user_guide_ for
+   * general format information.
    * \anchor list_of_output_formats
    * Output formats
    * --------------
@@ -913,7 +915,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *   - For "Particles" content \subpage format_vtk
    *   - For "Thermodynamics" content \subpage output_vtk_lattice_
    * - \b "ASCII" - a human-readable text-format table of values
-   *   - Used only for "Thermodynamics", see \ref Thermodynamics
+   *   - Used only for "Thermodynamics", see
+   *     \ref thermodyn_output_user_guide_
    *
    * \note Output of coordinates for the "Collisions" content in
    *       the periodic box has a feature:
@@ -1032,6 +1035,18 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   /*!\Userguide
    * \page input_lattice_ Lattice
+   * It is possible to configure a Lattice for the 3D space, which can be
+   * useful to speed up the computation of the potentials. Note though, that
+   * this goes in hand with a loss of accuracy: If the lattice is
+   * applied, the evaluation of the potentials is carried out only on the nodes
+   * of the lattice. Intermediate values are interpolated. \n
+   * The configuration of a lattice is usually not necessary, it is however
+   * required if the Thermodynamic VTK Output (see
+   * \ref output_vtk_lattice_) or the \key Potentials_Affect_Thresholds option
+   * is enabled. \n
+   * The following parameters are only required, if the \key Lattice section is
+   * used in the configuration file. Otherwise, no lattice will be used at all.
+   *
    *
    * \key Sizes (array<double,3>, required, no default): \n
    *      Sizes of lattice in x, y, z directions in fm.
@@ -1050,9 +1065,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * Include potential effects, since mean field potentials change the threshold
    * energies of the actions.
    *
-   * For format of lattice output see \ref output_vtk_lattice_. To configure
-   * output of the quantities on the lattice to vtk files see
-   * \ref input_output_options_.
+   * For information on the format of the lattice output see
+   * \ref output_vtk_lattice_. To configure the
+   * thermodynamic output, see \ref input_output_options_.
    *
    * \n
    * Examples: Configuring the Lattice
