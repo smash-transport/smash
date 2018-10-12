@@ -138,7 +138,8 @@ namespace smash {
 /*!\Userguide
  * \page inputparticles Particles
  *
- * The particles available to SMASH are defined in `particles.txt`. They are
+ * The particles available to SMASH are defined in `particles.txt`, which is
+ * located in '$SMASH_SRC_DIRECTORY/input'. They are
  * given as a table with the particles properties in different columns. Note,
  * that these columns may be separated by an arbitrary number of spaces:
  * ```
@@ -204,7 +205,8 @@ namespace smash {
  * \page inputdecaymodes Decay Modes
  *
  * All possible decays and resonance formations in SMASH are provided by the
- * `decaymodes.txt` file by blocks of the following format:
+ * `decaymodes.txt` file, which is
+ * located in '$SMASH_SRC_DIRECTORY/input', by blocks of the following format:
  * ```
  * <name of decaying particle>
  * <branching ratio> <angular momentum L> <names of decay products>

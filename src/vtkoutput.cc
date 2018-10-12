@@ -223,7 +223,7 @@ void VtkOutput::thermodynamics_output(
 }
 
 /*!\Userguide
- * \page output_vtk_lattice_ Thermodynamics VTK output
+ * \page output_vtk_lattice_
  * Additionally to density, energy-momentum tensor \f$T^{\mu\nu} \f$,
  * energy-momentum tensor in Landau rest frame \f$T^{\mu\nu}_L \f$ and
  * velocity of Landau rest frame \f$v_L\f$ on the lattice can be printed out

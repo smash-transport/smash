@@ -883,12 +883,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * - \b Photons    Special photon output, see \subpage input_photons.
    *   - Available formats: \ref format_oscar_collisions,
    *                   \ref format_binary_ and \ref format_root.
-   * - \b Thermodynamics This output allows to print out thermodynamic
-   *          quantities such as density, energy-momentum tensor,
-   *          Landau velocity, etc at one selected point versus time
-   *          and on a spatial lattice versus time. See \ref Thermodynamics
-   *         for output options and \subpage thermodyn_output_user_guide_ for
-   *         general format information.
+   * - \b Thermodynamics   This output allows to print out thermodynamic
+   *          quantities, see \ref Thermodynamics.
+   *    - Available formats: \ref thermodyn_output_user_guide_,
+   *      \ref output_vtk_lattice_
    *
    * \n
    * \anchor list_of_output_formats
@@ -917,8 +915,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *   - For "Particles" content \subpage format_vtk
    *   - For "Thermodynamics" content \subpage output_vtk_lattice_
    * - \b "ASCII" - a human-readable text-format table of values
-   *   - Used only for "Thermodynamics", see
-   *     \ref thermodyn_output_user_guide_
+   *   - Used only for "Thermodynamics", see \subpage thermodyn_output_user_guide_
    *
    * \note Output of coordinates for the "Collisions" content in
    *       the periodic box has a feature:
