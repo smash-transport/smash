@@ -17,6 +17,7 @@
 #include "Pythia8/Pythia.h"
 
 #include "constants.h"
+#include "logging.h"
 #include "particledata.h"
 
 namespace smash {
@@ -166,10 +167,10 @@ class StringProcess {
    *
    * \see StringProcess::common_setup_pythia(Pythia8::Pythia *,
    *                     double, double, double, double, double)
-   * \see 3rdparty/pythia8230/share/Pythia8/xmldoc/FlavourSelection.xml
-   * \see 3rdparty/pythia8230/share/Pythia8/xmldoc/Fragmentation.xml
-   * \see 3rdparty/pythia8230/share/Pythia8/xmldoc/MasterSwitches.xml
-   * \see 3rdparty/pythia8230/share/Pythia8/xmldoc/MultipartonInteractions.xml
+   * \see pythia8235/share/Pythia8/xmldoc/FlavourSelection.xml
+   * \see pythia8235/share/Pythia8/xmldoc/Fragmentation.xml
+   * \see pythia8235/share/Pythia8/xmldoc/MasterSwitches.xml
+   * \see pythia8235/share/Pythia8/xmldoc/MultipartonInteractions.xml
    */
   StringProcess(double string_tension, double time_formation,
                 double gluon_beta, double gluon_pmin,
@@ -194,12 +195,28 @@ class StringProcess {
    * \param[in] string_sigma_T transverse momentum spread (StringPT:sigma)
    *        in fragmentation [GeV]
    *
-   * \see 3rdparty/pythia8230/share/Pythia8/xmldoc/FlavourSelection.xml
-   * \see 3rdparty/pythia8230/share/Pythia8/xmldoc/Fragmentation.xml
+   * \see pythia8235/share/Pythia8/xmldoc/FlavourSelection.xml
+   * \see pythia8235/share/Pythia8/xmldoc/Fragmentation.xml
    */
   void common_setup_pythia(Pythia8::Pythia *pythia_in, double strange_supp,
                            double diquark_supp, double stringz_a,
                            double stringz_b, double string_sigma_T);
+
+  /**
+   * Set PYTHIA random seeds to be desired values.
+   * The value is recalculated such that it is allowed by PYTHIA.
+   * \param[in] seed value of the random seed to be used in PYTHIA.
+   *
+   * \see smash::maximum_rndm_seed_in_pythia
+   */
+  void init_pythia_hadron_rndm() {
+    const auto &log = logger<LogArea::Pythia>();
+    const int seed_new =
+        random::uniform_int(1, maximum_rndm_seed_in_pythia);
+
+    pythia_hadron_->rndm.init(seed_new);
+    log.debug("pythia_hadron_ : rndm is initialized with seed ", seed_new);
+  }
 
   // clang-format on
 
@@ -222,12 +239,12 @@ class StringProcess {
                                                    double sqrt_s) {
     // This threshold magic is following Pythia. Todo(ryu): take care of this.
     double sqrts_threshold = 2. * (1. + 1.0e-6);
-    pdg_a = std::abs(pdg_a);
-    pdg_b = std::abs(pdg_b);
     /* In the case of mesons, the corresponding vector meson masses
      * are used to evaluate the energy threshold. */
-    const int pdg_a_mod = (pdg_a > 1000) ? pdg_a : 10 * (pdg_a / 10) + 3;
-    const int pdg_b_mod = (pdg_b > 1000) ? pdg_b : 10 * (pdg_b / 10) + 3;
+    const int pdg_a_mod = (std::abs(pdg_a) > 1000) ?
+                              pdg_a : 10 * (std::abs(pdg_a) / 10) + 3;
+    const int pdg_b_mod = (std::abs(pdg_b) > 1000) ?
+                              pdg_b : 10 * (std::abs(pdg_b) / 10) + 3;
     sqrts_threshold += pythia_hadron_->particleData.m0(pdg_a_mod) +
                        pythia_hadron_->particleData.m0(pdg_b_mod);
     /* Constant cross-section for sub-processes below threshold equal to

@@ -42,7 +42,7 @@ endmacro()
 
 macro(smash_add_exe name)
   add_executable(${name} ${name}.cc)
-  target_link_libraries(${name} smash_lib ${SMASH_LIBRARIES})
+  target_link_libraries(${name} smash_static ${SMASH_LIBRARIES})
   if(USE_SANITIZER)
       set_target_properties(${name} PROPERTIES
          COMPILE_FLAGS "${SANITIZER_FLAG} -DSMASH_TEST_OUTPUT_PATH=\\\"${PROJECT_BINARY_DIR}/test_output/${name}\\\""

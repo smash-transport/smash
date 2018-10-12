@@ -19,12 +19,6 @@
 #include "particledata.h"
 #include "threevector.h"
 
-#ifdef BUILD_TESTS
-#define VIRTUAL_FOR_TESTS virtual
-#else
-#define VIRTUAL_FOR_TESTS
-#endif
-
 namespace smash {
 
 /**
@@ -48,7 +42,6 @@ class Potentials {
    *            the testparticle number needed for the density calculation.
    */
   Potentials(Configuration conf, const DensityParameters &parameters);
-  VIRTUAL_FOR_TESTS
   /// Standard destructor
   ~Potentials();
 
@@ -89,7 +82,6 @@ class Potentials {
    *	     scaled by the ratio of the light (u, d) quark to the total quark
    *         number and \f$I_3\f$ is the third compnent of the isospin.
    */
-  VIRTUAL_FOR_TESTS
   double potential(const ThreeVector &r, const ParticleList &plist,
                    const ParticleType &acts_on) const;
 
@@ -165,15 +157,12 @@ class Potentials {
    *          \f$E_{I3}\f$: the electric component of the symmetry force
    *          \f$B_{I3}\f$: the magnetic component of the symmetry force
    */
-  VIRTUAL_FOR_TESTS
   std::tuple<ThreeVector, ThreeVector, ThreeVector, ThreeVector> all_forces(
       const ThreeVector &r, const ParticleList &plist) const;
 
   /// \return Is Skyrme potential on?
-  VIRTUAL_FOR_TESTS
   bool use_skyrme() const { return use_skyrme_; }
   /// \return Is symmetry potential on?
-  VIRTUAL_FOR_TESTS
   bool use_symmetry() const { return use_symmetry_; }
 
  private:

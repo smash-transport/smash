@@ -38,7 +38,8 @@ static ScatterAction *set_up_action(const ParticleData &proj,
                                     CollisionBranchList &proc_list) {
   ScatterAction *act;
   act = new ScatterAction(proj, targ, 0.);
-  CrossSections xs(act->incoming_particles(), act->sqrt_s());
+  CrossSections xs(act->incoming_particles(), act->sqrt_s(),
+                   std::make_pair(FourVector(), FourVector()));
   proc_list = xs.two_to_two(Test::all_reactions_included());
   //   act->add_processes(proc_list);
 
