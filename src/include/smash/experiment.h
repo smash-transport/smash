@@ -888,7 +888,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *          Landau velocity, etc at one selected point versus time
    *          and on a spatial lattice versus time. See \ref Thermodynamics
    *         for output options and \subpage thermodyn_output_user_guide_ for
-   * general format information.
+   *         general format information.
+   *
+   * \n
    * \anchor list_of_output_formats
    * Output formats
    * --------------
