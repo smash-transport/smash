@@ -54,8 +54,7 @@ StringProcess::StringProcess(double string_tension, double time_formation,
   /* initialize PYTHIA */
   pythia_hadron_->init();
   pythia_sigmatot_.init(&pythia_hadron_->info, pythia_hadron_->settings,
-                        &pythia_hadron_->particleData,
-                        &pythia_hadron_->rndm);
+                        &pythia_hadron_->particleData, &pythia_hadron_->rndm);
 
   sqrt2_ = std::sqrt(2.);
 
@@ -608,8 +607,7 @@ bool StringProcess::next_NDiffHard() {
    * Pythia's random is controlled by SMASH in every single collision.
    * In this way we ensure that the results are reproducible
    * for every event if one knows SMASH random seed. */
-  const int seed_new =
-      random::uniform_int(1, maximum_rndm_seed_in_pythia);
+  const int seed_new = random::uniform_int(1, maximum_rndm_seed_in_pythia);
   pythia_parton_->rndm.init(seed_new);
   log.debug("pythia_parton_ : rndm is initialized with seed ", seed_new);
 

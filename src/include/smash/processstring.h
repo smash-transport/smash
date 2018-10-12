@@ -241,10 +241,10 @@ class StringProcess {
     double sqrts_threshold = 2. * (1. + 1.0e-6);
     /* In the case of mesons, the corresponding vector meson masses
      * are used to evaluate the energy threshold. */
-    const int pdg_a_mod = (std::abs(pdg_a) > 1000) ?
-                              pdg_a : 10 * (std::abs(pdg_a) / 10) + 3;
-    const int pdg_b_mod = (std::abs(pdg_b) > 1000) ?
-                              pdg_b : 10 * (std::abs(pdg_b) / 10) + 3;
+    const int pdg_a_mod =
+        (std::abs(pdg_a) > 1000) ? pdg_a : 10 * (std::abs(pdg_a) / 10) + 3;
+    const int pdg_b_mod =
+        (std::abs(pdg_b) > 1000) ? pdg_b : 10 * (std::abs(pdg_b) / 10) + 3;
     sqrts_threshold += pythia_hadron_->particleData.m0(pdg_a_mod) +
                        pythia_hadron_->particleData.m0(pdg_b_mod);
     /* Constant cross-section for sub-processes below threshold equal to

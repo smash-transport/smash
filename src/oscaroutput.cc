@@ -588,20 +588,17 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * structure, where each block corresponds to one interaction. Each block starts
  * with a line formatted as follows:
  * \code
- * # interaction in nin out nout rho density weight tot_weight partial part_weight type proc_type
- * \endcode
- * where
- * \li \key nin: Number of ingoing particles (initial state particles)
- * \li \key nout: Number of outgoing particles (final state particles)
- * \li \key density: Density at the interaction point
- * \li \key tot_weight: Total weight of the interaction. This is the total cross
- * section in case of a scattering and the total decay width in case of a decay.
- * If there is no weight for the specific process, e.g. a wall crossing, it's
- * value is 0.0.
- * \li \key part_weight: The partial weight of the interaction. This is the
- * specific weight for the chosen final state.
- * \li \key proc_type: The type of the underlying process. See
- * \ref process_type for possible types.
+ * # interaction in nin out nout rho density weight tot_weight partial
+ *part_weight type proc_type \endcode where \li \key nin: Number of ingoing
+ *particles (initial state particles) \li \key nout: Number of outgoing
+ *particles (final state particles) \li \key density: Density at the interaction
+ *point \li \key tot_weight: Total weight of the interaction. This is the total
+ *cross section in case of a scattering and the total decay width in case of a
+ *decay. If there is no weight for the specific process, e.g. a wall crossing,
+ *it's value is 0.0. \li \key part_weight: The partial weight of the
+ *interaction. This is the specific weight for the chosen final state. \li \key
+ *proc_type: The type of the underlying process. See \ref process_type for
+ *possible types.
  *
  * Note, that "interaction", "in", "out", "rho", "weight", "partial" and "type"
  * are no variables, but words that are printed.\n

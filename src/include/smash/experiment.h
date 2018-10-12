@@ -746,8 +746,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
         modus_.proj_N_number());
     max_transverse_distance_sqr_ =
         scat_finder->max_transverse_distance_sqr(parameters_.testparticles);
-    process_string_ptr_ =
-        scat_finder->get_process_string_ptr();
+    process_string_ptr_ = scat_finder->get_process_string_ptr();
     action_finders_.emplace_back(std::move(scat_finder));
   } else {
     max_transverse_distance_sqr_ = maximum_cross_section / M_PI * fm2_mb;
@@ -932,17 +931,14 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * at every timestep. \n
    * Further, the block headers differ from the usual collision output:
    * \code
-   * # interaction in nin out nout rho density weight shining_weight partial part_weight type proc_type
-   * \endcode
-   * where
-   * \li \key nin: Number of ingoing particles (initial state particles)
-   * \li \key nout: Number of outgoing particles (finalstate particles)
-   * \li \key density: Density at the interaction point
-   * \li \key shining_weight: Shining weight of the interaction. Explanation
-   * follows below.
-   * \li \key part_weight: The partial weight of the interaction. For the
-   * dileptons, this coincides with the branching ratio.
-   * \li \key proc_type: The type of the underlying process. See
+   * # interaction in nin out nout rho density weight shining_weight partial
+   *part_weight type proc_type \endcode where \li \key nin: Number of ingoing
+   *particles (initial state particles) \li \key nout: Number of outgoing
+   *particles (finalstate particles) \li \key density: Density at the
+   *interaction point \li \key shining_weight: Shining weight of the
+   *interaction. Explanation follows below. \li \key part_weight: The partial
+   *weight of the interaction. For the dileptons, this coincides with the
+   *branching ratio. \li \key proc_type: The type of the underlying process. See
    * process_type for possible types.
    *
    * \n
