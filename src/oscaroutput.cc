@@ -256,7 +256,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * #
  * \endcode
  * The header consists of 8 lines starting with '#', of which the last one
- * does not contain text.
+ * is basically empty.
  * They contain the following information:
  * -# The specific OSCAR1999 version the formatting follows - OSCAR1999A
  * -# The substructure of each particle line: (id - momentum - coordinates)
@@ -275,11 +275,11 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key nout: Number of outgoing particles
  * \li \key event_number: Number of the event
  *
- * For initial timesteps, (nin, nout) = (0, part_at_tstep), while (nin, nout) =
- * (part_at_tstep, 0) for intermediate and final timesteps. part_at_tstep is the
+ * For initial timesteps, (nin, nout) = (0, Nparticles), while (nin, nout) =
+ * (Nparticles, 0) for intermediate and final timesteps. Nparticles is the
  * total number of particles at the specific timestep. It may differ from one
  * timestep to another if the test case allows more interactions than only
- * elastic scatterings. The output block header is followed by part_at_tstep
+ * elastic scatterings. The output block header is followed by Nparticles
  * particle lines.
  *
  * \n
@@ -358,11 +358,11 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \n
  * Output block header for a new event:
  * \code
- * # event ev_num in part_at_tstep
+ * # event ev_num in Nparticles
  * \endcode
  * Where
  * \li \key ev_num: Event number
- * \li \key part_at_tstep: Number of particles initialized at the beginning of
+ * \li \key Nparticles: Number of particles initialized at the beginning of
  * the event
  *
  * Note that 'event' and 'in' are no variables, but words that are printed in
@@ -370,11 +370,11 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \n
  * Output block header for an intermediate output:
  * \code
- * # event ev_num out part_at_tstep
+ * # event ev_num out Nparticles
  * \endcode
  * Where
  * \li \key ev_num: Event number
- * \li \key part_at_tstep: Number of particles at the end of the timestep
+ * \li \key Nparticles: Number of particles at the end of the timestep
  *
  * Note that 'event' and 'out' are no variables, but words that are printed in
  * the header. \n
@@ -443,7 +443,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \endcode
  * Where
  * \li \key ev_num: Event number
- * \li \key part_at_tstep: Number of particles at the end of the timestep
+ * \li \key Nparticles: Number of particles at the end of the timestep
  * \li \key impact_parameter: Impact parameter of the collision in case of a
  * collider setup, else 0.0
  *
@@ -484,7 +484,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * #
  * \endcode
  * The header consists of 8 lines starting with '#', of which the last one
- * does not contain text.
+ * is basically empty.
  * They contain the following information:
  * -# The specific OSCAR1999 version the formatting follows - OSC1999A
  * -# The filename
@@ -512,8 +512,8 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *
  * If the \key Print_Start_End option is set (see \ref
  * output_content_specific_options_ "content-specific output options" for
- * details), (nin, nout) = (0, part_at_tstep) in the
- * initial timestep and (nin, nout) = (part_at_tstep, 0) in the final timestep.
+ * details), (nin, nout) = (0, Nparticles) in the
+ * initial timestep and (nin, nout) = (Nparticles, 0) in the final timestep.
  *
  * \n
  * **Particle line**\n
