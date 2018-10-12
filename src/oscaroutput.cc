@@ -315,7 +315,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * Oscar2013
  * ---------
  *
- * Oscar2013 is ASCII (text) human-readable output following the OSCAR 2013
+ * Oscar2013 is an ASCII (text) human-readable output following the OSCAR 2013
  * standard. The format specifics are the following:\n
  * \n
  * **Header**
@@ -546,7 +546,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \n
  * Oscar2013
  * ---------
- *  Oscar2013 is ASCII (text) human-readable output following the OSCAR 2013
+ *  Oscar2013 is an ASCII (text) human-readable output following the OSCAR 2013
  * standard. The format specifics are the following:\n
  * \n
  * **Header**
