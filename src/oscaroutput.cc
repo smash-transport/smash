@@ -240,7 +240,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \n
  * Oscar1999
  * ---------
- * Oscar1999 an is ASCII (text) human-readable output following the OSCAR 1999
+ * Oscar1999 is an ASCII (text) human-readable output following the OSCAR 1999
  * standard. The format specifics are the following:
  *
  * \n
@@ -469,7 +469,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *
  * Oscar1999
  * ---------
- * Oscar1999 an is ASCII (text) human-readable output following the OSCAR 1999
+ * Oscar1999 is an ASCII (text) human-readable output following the OSCAR 1999
  * standard. The format specifics are the following: \n
  * \n
  * **Header**
