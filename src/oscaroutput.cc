@@ -742,12 +742,15 @@ std::unique_ptr<OutputInterface> create_oscar_output(
           modern_format, path, out_par, "full_event_history");
     }
   } else if (content == "Dileptons") {
-    if (out_par.dil_extended) {
+    if (modern_format && out_par.dil_extended) {
       return make_unique<
           OscarOutput<OscarFormat2013Extended, OscarInteractions>>(path,
                                                                    "Dileptons");
-    } else {
+    } else if (modern_format && !out_par.dil_extended) {
       return make_unique<OscarOutput<OscarFormat2013, OscarInteractions>>(
+          path, "Dileptons");
+    } else {
+      return make_unique<OscarOutput<OscarFormat1999, OscarInteractions>>(
           path, "Dileptons");
     }
   } else if (content == "Photons") {
