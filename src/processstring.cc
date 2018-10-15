@@ -1468,11 +1468,13 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
   intermediate_particles.clear();
 
   log.debug("initial quark content for fragment_string : ", idq1, ", ", idq2);
+  // PDG id of quark constituents of string ends
   std::array<int, 2> idqIn;
   idqIn[0] = idq1;
   idqIn[1] = idq2;
 
   int bstring = 0;
+  // constituent masses of the string
   std::array<double, 2> m_const;
 
   for (int i = 0; i < 2; i++) {
@@ -1500,15 +1502,24 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
 
   if (separate_fragment_baryon &&
       (std::abs(bstring) == 3) && (mString > m_const[0] + m_const[1] + 1.)) {
-    // in the case of separate fragmentation function for leading baryons
+    /* In the case of separate fragmentation function for leading baryons,
+     * the leading baryon (antibaryon) is fragmented from the original string
+     * with a gaussian fragmentation function.
+     * It is then followed by fragmentation of the remaining mesonic string. */
     const double ssbar_supp = pythia_hadron_->parm("StringFlav:probStoUD");
     const double sigma_qt_frag = pythia_hadron_->parm("StringPT:sigma");
     std::array<ThreeVector, 3> evec_basis;
     make_orthonormal_basis(evecLong, evec_basis);
 
+    /* transverse momentum (and magnitude) acquired by the qqbar pair
+     * created in the middle of string */
     double QTrx, QTry, QTrn;
+    /* lightcone momenta p^+ and p^- of the remaining (mesonic) string
+     * p^{\pm} is defined as (E \pm p_{longitudinal}) / sqrts{2}. */
     double ppos_string_new, pneg_string_new;
+    // transverse mass of the remaining (mesonic) string
     double mTrn_string_new;
+    // transverse masses of quark constituents of string ends
     std::array<double, 2> m_trans;
 
     const int niter_max = 10000;
@@ -1545,6 +1556,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
       log.debug("quark constituents for leading baryon : ",
                 idnew_qqbar, ", ", id_diquark);
 
+      // net quark number of d, u, s, c and b flavors
       std::array<int, 5> frag_net_q;
       /* Evaluate total net quark number of baryon (antibaryon)
        * from the valence quark constituents. */
@@ -1615,9 +1627,15 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
       log.debug("Transverse momentum (", QTrx, ", ", QTry,
                 ") GeV selected for the leading baryon.");
       QTrn = std::sqrt(QTrx * QTrx + QTry * QTry);
+      // transverse mass of the fragmented leading hadron
       const double mTrn_frag = std::sqrt(QTrn * QTrn + mass_frag * mass_frag);
 
-      // Sample lightcone momentum fraction carried by the baryon (antibaryon).
+      /* Sample lightcone momentum fraction carried by the baryon (antibaryon).
+       * The corresponding fragmentation function has gaussian shape
+       * i.e., exp( - (x - leading_frag_mean_)^2 / (2 leading_frag_width_^2) ).
+       * This is done using the rejection method with an Lorentzian
+       * envelop function, which is
+       * 1 / (1 + (x - leading_frag_mean_)^2 / (4 leading_frag_width_^2) ). */
       double xfrac = 0.;
       bool xfrac_accepted = false;
       while (!xfrac_accepted) {
@@ -1625,10 +1643,12 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
             (std::atan(0.5 * (1. - leading_frag_mean_) / leading_frag_width_) +
              std::atan(0.5 * leading_frag_mean_ / leading_frag_width_)) -
             std::atan(0.5 * leading_frag_mean_ / leading_frag_width_);
+        // lightcone momentum fraction sampled from the envelop function
         xfrac = leading_frag_mean_ +
                     2. * leading_frag_width_ * std::tan(angle);
 
-        // The separate fragmentation function has a gaussian shape.
+        /* The rejection method is applied to sample
+         * according to the real fragmentation function. */
         const double xf_tmp =
             std::abs(xfrac - leading_frag_mean_) / leading_frag_width_;
         const double xf_env =
@@ -1641,7 +1661,8 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
       }
 
       /* Determine kinematics of the fragmented baryon (antibaryon) and
-       * remaining (mesonic) string. */
+       * remaining (mesonic) string.
+       * It begins with the lightcone momentum, p^+ (ppos) and p^- (pneg). */
       const double ppos_frag = xfrac * mString / sqrt2_;
       const double pneg_frag = 0.5 * mTrn_frag * mTrn_frag / ppos_frag;
       ppos_string_new = mString / sqrt2_ - ppos_frag;
@@ -1649,14 +1670,27 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
       mTrn_string_new = std::sqrt(std::max(0.,
                         2. * ppos_string_new * pneg_string_new));
 
+      /* Quark (antiquark) constituents of the remaining string are
+       * different from those of the original string.
+       * Therefore, the constituent masses have to be updated. */
       for (int i = 0; i < 2; i++) {
         m_const[i] = pythia_hadron_->particleData.m0(idqIn[i]);
       }
-      if (bstring > 0) {
+      if (bstring > 0) {  // in the case of baryonic string
+        /* Quark is coming from the original string
+         * and therefore has zero transverse momentum. */
         m_trans[0] = m_const[0];
+        /* Antiquark is coming from the newly produced qqbar pair
+         * and therefore has transverse momentum, which is opposite to
+         * that of the fragmented (leading) antibaryon. */
         m_trans[1] = std::sqrt(m_const[1] * m_const[1] + QTrn * QTrn);
-      } else {
+      } else {  // in the case of anti-baryonic string
+        /* Quark is coming from the newly produced qqbar pair
+         * and therefore has transverse momentum, which is opposite to
+         * that of the fragmented (leading) baryon. */
         m_trans[0] = std::sqrt(m_const[0] * m_const[0] + QTrn * QTrn);
+        /* Antiquark is coming from the original string
+         * and therefore has zero transverse momentum. */
         m_trans[1] = m_const[1];
       }
 
@@ -1686,10 +1720,17 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
       iiter += 1;
     }
 
+    // lightcone momentum p^+ of the quark constituents on the string ends
     std::array<double, 2> ppos_parton;
+    // lightcone momentum p^- of the quark constituents on the string ends
     std::array<double, 2> pneg_parton;
 
-    // lightcone momenta of the string ends (quark and antiquark)
+    /* lightcone momenta of the string ends (quark and antiquark)
+     * First, obtain ppos_parton[0] and ppos_parton[1]
+     * (p^+ of quark and antiquark) by solving the following equations.
+     * ppos_string_new = ppos_parton[0] + ppos_parton[1]
+     * pneg_string_new = 0.5 * m_trans[0] * m_trans[0] / ppos_parton[0] +
+     *                   0.5 * m_trans[1] * m_trans[1] / ppos_parton[1] */
     const double pb_const = (mTrn_string_new * mTrn_string_new +
                             m_trans[0] * m_trans[0] - m_trans[1] * m_trans[1]) /
                            (4. * pneg_string_new);
@@ -1698,7 +1739,9 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
     ppos_parton[0] = pb_const + (bstring > 0 ? -1. : 1.) *
                      std::sqrt(pb_const * pb_const - pc_const);
     ppos_parton[1] = ppos_string_new - ppos_parton[0];
-
+    /* Then, compute pneg_parton[0] and pneg_parton[1]
+     * (p^- of quark and antiquark) from the dispersion relation.
+     * 2 p^+ p^- = m_transverse^2 */
     for (int i = 0; i < 2; i++) {
       pneg_parton[i] = 0.5 * m_trans[i] * m_trans[i] / ppos_parton[i];
     }
@@ -1711,9 +1754,14 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
     // quark end of the remaining (mesonic) string
     color = 1;
     anticolor = 0;
-    if (bstring > 0) {
+    if (bstring > 0) {  // in the case of baryonic string
+      /* Quark is coming from the original string
+       * and therefore has zero transverse momentum. */
       three_mom = evec_basis[0] * (ppos_parton[0] - pneg_parton[0]) / sqrt2_;
-    } else {
+    } else {  // in the case of anti-baryonic string
+      /* Quark is coming from the newly produced qqbar pair
+       * and therefore has transverse momentum, which is opposite to
+       * that of the fragmented (leading) baryon. */
       three_mom = evec_basis[0] * (ppos_parton[0] - pneg_parton[0]) / sqrt2_ -
                   evec_basis[1] * QTrx - evec_basis[2] * QTry;
     }
@@ -1726,10 +1774,15 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
     // antiquark end of the remaining (mesonic) string
     color = 0;
     anticolor = 1;
-    if (bstring > 0) {
+    if (bstring > 0) {  // in the case of baryonic string
+      /* Antiquark is coming from the newly produced qqbar pair
+       * and therefore has transverse momentum, which is opposite to
+       * that of the fragmented (leading) antibaryon. */
       three_mom = evec_basis[0] * (ppos_parton[1] - pneg_parton[1]) / sqrt2_ -
                   evec_basis[1] * QTrx - evec_basis[2] * QTry;
-    } else {
+    } else {  // in the case of anti-baryonic string
+      /* Antiquark is coming from the original string
+       * and therefore has zero transverse momentum. */
       three_mom = evec_basis[0] * (ppos_parton[1] - pneg_parton[1]) / sqrt2_;
     }
     pquark = set_Vec4((ppos_parton[1] + pneg_parton[1]) / sqrt2_,
