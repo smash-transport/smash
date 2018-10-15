@@ -197,7 +197,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * \return Pointer to the string process class object.
    *         If string is turned off, the null pointer is returned.
    */
-  StringProcess* get_process_string_ptr() {
+  StringProcess *get_process_string_ptr() {
     if (strings_switch_) {
       return string_process_interface_.get();
     } else {

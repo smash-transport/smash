@@ -79,7 +79,7 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * \key Gauss_Cutoff_In_Sigma (double, optional, default = 4.0): \n
  * Distance in sigma at which gaussian is considered 0.
  *
- * \page input_output_options_ Output
+ * \page input_output_options_ Output Configuration
  *
  * Description of options
  * ---------------------
