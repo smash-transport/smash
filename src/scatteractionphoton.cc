@@ -195,6 +195,7 @@ void ScatterActionPhoton::generate_final_state() {
   auto *proc = collision_processes_photons_[0].get();
 
   outgoing_particles_ = proc->particle_list();
+  process_type_ = proc->get_type();
 
   FourVector middle_point = get_interaction_point();
 

@@ -924,17 +924,20 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   /*!\Userguide
    * \page input_dileptons Dileptons
-   * Enables the dilepton output together with the possible dilepton decay
-   * channels.
-   * If dileptons are enabled, the output file named Dileptons (followed by the
+   * The existance of a dilepton subsection in the output section of the
+   * configuration file enables the dilepton output.
+   * The output file named Dileptons (followed by the
    * appropriate suffix) is generated when SMASH is executed. It's format is
    * identical to the collision output (see \ref format_oscar_collisions),
    * it does however only contain information about the dilepton decays
    * at every timestep. \n
    * Further, the block headers differ from the usual collision output:
-   * \code
-   * # interaction in nin out nout rho density weight shining_weight partial
-   *part_weight type proc_type \endcode where \li \key nin: Number of ingoing
+   * <div class="fragment">
+   * <div class="line"> <span class="preprocessor">
+   *  \# interaction in nin out nout rho density weight shining_weight partial
+   *  part_weight type proc_type </span></div>
+   * </div>
+   *where \li \key nin: Number of ingoing
    *particles (initial state particles) \li \key nout: Number of outgoing
    *particles (finalstate particles) \li \key density: Density at the
    *interaction point \li \key shining_weight: Shining weight of the
@@ -942,6 +945,11 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *weight of the interaction. For the dileptons, this coincides with the
    *branching ratio. \li \key proc_type: The type of the underlying process. See
    * process_type for possible types.
+   *
+   * Note, that "interaction", "in", "out", "rho", "weight", "partial" and
+   * "type" are no variables, but words that are printed. \n
+   * The dilepton output is available in binary, OSCAR1999, OSCAR2013 and
+   * OSCAR2013 extended format. \n
    *
    * \n
    * The treatment of Dilepton Decays is special:
@@ -956,41 +964,87 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * \li The shining method is implemented in the DecayActionsFinderDilepton,
    * which is enabled together with the dilepton output.
    *
-   * \note If you want dilepton decays, you also have to modify decaymodes.txt.
+   * \n
+   * \note If you want dilepton decays, you also have to modify decaymodes.txt
+   * file located in '$SMASH_SRC_DIRECTORY/input'.
    * Dilepton decays are commented out by default.
+   *
+   * \n
+   * \note
+   * As dileptons are treated perturbatively, the produced dileptons are
+   * only  written to the dilepton output, but neither to the usual collision
+   * output, nor to the particle lists.
    **/
 
   /*!\Userguide
    * \page input_photons Photons
-   * Enables the photon output together with the correpsoning
-   * ScatterActionPhoton.
+   * The existance of a photon subsection in the output section of the
+   * configuration file enables the photon output together with the possible
+   * photon producing scattering processes.
+   * If photons are enabled, the output file named Photons (followed by the
+   * appropriate suffix) is generated when SMASH is executed. It's format is
+   * identical to the collision output (see \ref format_oscar_collisions),
+   * it does however only contain information about all particles participating
+   * in the photon producing interactions at each timestep. \n
+   * Further, the block headers differ from the usual collision output:
+   * <div class="fragment">
+   * <div class="line"> <span class="preprocessor">
+   *  \# interaction in nin out nout rho density weight photon_weight partial
+   *  part_weight type proc_type </span></div>
+   * </div>
+   * where
+   * \li \key density: Density at the interaction point
+   * \li \key photon_weight: Weight of the photon process relative to the
+   * underlying hadonic interaction. Make sure to weigh each photon in your
+   * analysis with this value. Otherwise the photon production is highly
+   * overestimated.
+   * \li \key part_weight: Always 0.0 for photon processes, as they
+   * are hardcoded.
+   * \li \key proc_type: The type of the underlying process. See
+   * \ref process_type for possible types.
    *
+   * Note, that "interaction", "in", "out", "rho", "weight", "partial" and
+   * "type" are no variables, but words that are printed. \n
+   * The photon output is available in binary, OSCAR1999, OSCAR2013 and
+   * OSCAR2013 extended format. \n
+   *
+   * \n
+   * ### Photon production in SMASH
    * Photons are treated perturbatively and are produced from binary
    * scattering processes. Their production follows the framework from Turbide
    * et al. described in \iref{Turbide:2006}. Following the perturbative
    * treatment, the produced photons do not contribute to the evolution of the
    * hadronic system. They are rather direcly printed to the photon output.
    * The mechanism for photon production is the following:
-   * \li Look for hadronic interactions of particles that are also incoming
+   * -# Look for hadronic interactions of particles that are also incoming
    * particles of a photon process. Currently, the latter include binary
    * scatterings of \f$ \pi \f$ and \f$ \rho \f$ mesons.
-   * \li Perform the photon action and write the results to the photon output.
-   * The final state particles are not of interested anymore as they are not
-   * propagated further in the evolution. To account for the probabiity that
+   * -# Perform the photon action and write the results to the photon output.
+   * The final state particles are not of interest anymore as they are not
+   * propagated further in the evolution. To account for the probability that
    * photon processes are significantly less likely than hadronic processes,
    * the produced photons are weighted according to the ratio of the photon
-   * cross section to the hadronic cross section used the find the interaction.
-   * This weight can be found in the weight element of the photon output.
-   * \li Perform the original hadronic action based on which the photon action
+   * cross section to the hadronic cross section used to find the interaction,
+   * \f$  W = \frac{\sigma_\gamma}{\sigma_\mathrm{hadronic}}\f$.
+   * This weight can be found in the weight element of the photon output, denoted
+   * as \key photon_weight in the above.
+   * -# Perform the original hadronic action based on which the photon action
    * was found. Propagate all final states particles throughout the hadronic
    * evolution as if no photon action had occured.
    *
    * As photons are produced very rarely, a lot of statistics is necessery to
    * yield useful results. Alternatively, it it possible to use fractional
-   * photons. This means that for each produced photon, \f$ N_{\text{Frac}} \f$
+   * photons (see \ref output_content_specific_options_
+   * "Content-specific output options" on how to activate them).
+   * This means that for each produced photon, \f$ N_{\text{Frac}} \f$
    * photons are actually sampled with different kinematic properties so that
-   * more phase space is covered. See \ref input_output_options_ on how to set
-   *the flag.
+   * more phase space is covered. In case fractional photons are used, the
+   * weight es redefined as
+   *\f$ W = \frac{\frac{\mathrm{d}\sigma_\gamma}{\mathrm{d}t} \ (t_2 - t_1)}{
+	 *			  N_\mathrm{frac} \ \sigma_{\mathrm{had}}} \f$.
+   * \note As photons are treated perturbatively, the produced photons are only
+   * written to the photon output, but neither to the usual collision output,
+   * nor to the particle lists.
    **/
 
   dens_type_ = config.take({"Output", "Density_Type"}, DensityType::None);
