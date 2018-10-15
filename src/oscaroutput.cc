@@ -758,8 +758,9 @@ std::unique_ptr<OutputInterface> create_oscar_output(
       return make_unique<OscarOutput<OscarFormat2013, OscarInteractions>>(
           path, "Photons");
     } else if (modern_format && out_par.photons_extended) {
-      return make_unique<OscarOutput<OscarFormat2013Extended,
-          OscarInteractions>>(path, "Photons");
+      return make_unique<
+          OscarOutput<OscarFormat2013Extended, OscarInteractions>>(path,
+                                                                   "Photons");
     } else {
       return make_unique<OscarOutput<OscarFormat1999, OscarInteractions>>(
           path, "Photons");
