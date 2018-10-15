@@ -686,8 +686,6 @@ bool StringProcess::next_NDiffHard() {
                             event_intermediate_, pythia_hadron_->event);
     }
 
-    pythia_hadron_->rndm.init(random::uniform_int(1,
-                                  std::numeric_limits<int>::max()));
     // fragment the (identified) string into hadrons.
     hadronize_success = pythia_hadron_->next();
     log.debug("Pythia hadronized, success = ", hadronize_success);
@@ -1776,8 +1774,6 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
   // implement PYTHIA fragmentation
   pythia_hadron_->event[0].p(pSum);
   pythia_hadron_->event[0].m(pSum.mCalc());
-  pythia_hadron_->rndm.init(random::uniform_int(1,
-                                std::numeric_limits<int>::max()));
   const bool successful_hadronization = pythia_hadron_->next();
   if (successful_hadronization) {
     for (int ipyth = 0; ipyth < pythia_hadron_->event.size(); ipyth++) {
