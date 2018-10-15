@@ -673,7 +673,8 @@ ExperimentParameters create_experiment_parameters(Configuration config);
  * Turning off strings or elastic collisions while leaving this on will
  * result in the corresponding part of the AQM cross-sections to also be off.
  * Cross-sections parametrization are scaled according to
- * \f[ \frac{\sigma^{AQM}_{\mathrm{process}}}{\sigma^{AQM}_\mathrm{ref\_process}}
+ * \f[
+ * \frac{\sigma^{AQM}_{\mathrm{process}}}{\sigma^{AQM}_\mathrm{ref\_process}}
  * \sigma^{param}_\mathrm{ref\_process}\f]
  * where \f$ \sigma^{AQM}_x = 40 \left( \frac{2}{3} \right)^{n_{meson}}
  * (1 - 0.4 x^s_1) (1 - 0.4 x^s_2) \f$, with \f$n_{meson}\f$ being the number
@@ -915,7 +916,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *   - For "Particles" content \subpage format_vtk
    *   - For "Thermodynamics" content \subpage output_vtk_lattice_
    * - \b "ASCII" - a human-readable text-format table of values
-   *   - Used only for "Thermodynamics", see \subpage thermodyn_output_user_guide_
+   *   - Used only for "Thermodynamics", see \subpage
+   * thermodyn_output_user_guide_
    *
    * \note Output of coordinates for the "Collisions" content in
    *       the periodic box has a feature:
@@ -1026,8 +1028,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * the produced photons are weighted according to the ratio of the photon
    * cross section to the hadronic cross section used to find the interaction,
    * \f$  W = \frac{\sigma_\gamma}{\sigma_\mathrm{hadronic}}\f$.
-   * This weight can be found in the weight element of the photon output, denoted
-   * as \key photon_weight in the above.
+   * This weight can be found in the weight element of the photon output,
+   *denoted as \key photon_weight in the above.
    * -# Perform the original hadronic action based on which the photon action
    * was found. Propagate all final states particles throughout the hadronic
    * evolution as if no photon action had occured.
@@ -1041,7 +1043,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * more phase space is covered. In case fractional photons are used, the
    * weight es redefined as
    *\f$ W = \frac{\frac{\mathrm{d}\sigma_\gamma}{\mathrm{d}t} \ (t_2 - t_1)}{
-	 *			  N_\mathrm{frac} \ \sigma_{\mathrm{had}}} \f$.
+   *			  N_\mathrm{frac} \ \sigma_{\mathrm{had}}} \f$.
    * \note As photons are treated perturbatively, the produced photons are only
    * written to the photon output, but neither to the usual collision output,
    * nor to the particle lists.
