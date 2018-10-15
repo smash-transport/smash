@@ -157,13 +157,13 @@ class Potentials {
    *          \f$E_{I3}\f$: the electric component of the symmetry force
    *          \f$B_{I3}\f$: the magnetic component of the symmetry force
    */
-  std::tuple<ThreeVector, ThreeVector, ThreeVector, ThreeVector> all_forces(
-      const ThreeVector &r, const ParticleList &plist) const;
+  virtual std::tuple<ThreeVector, ThreeVector, ThreeVector, ThreeVector>
+  all_forces(const ThreeVector &r, const ParticleList &plist) const;
 
   /// \return Is Skyrme potential on?
-  bool use_skyrme() const { return use_skyrme_; }
+  virtual bool use_skyrme() const { return use_skyrme_; }
   /// \return Is symmetry potential on?
-  bool use_symmetry() const { return use_symmetry_; }
+  virtual bool use_symmetry() const { return use_symmetry_; }
 
  private:
   /**
