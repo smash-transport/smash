@@ -19,7 +19,7 @@ using namespace smash;
 TEST(init_particle_types) { Test::create_actual_particletypes(); }
 
 constexpr double tolerance = 1.0e-7;
-
+/*
 TEST(clebsch_strangeness_exchange) {
   const auto& proton = ParticleType::find(0x2212);
   const auto& neutron = ParticleType::find(0x2112);
@@ -56,7 +56,7 @@ TEST(clebsch_strangeness_exchange) {
     COMPARE_ABSOLUTE_ERROR(ratio, expected_ratio, tolerance);
   }
 }
-
+*/
 TEST(clebsch_kaon_charge_exchange) {
   const auto& proton = ParticleType::find(0x2212);
   const auto& neutron = ParticleType::find(0x2112);

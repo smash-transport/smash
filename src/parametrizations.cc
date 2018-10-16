@@ -689,15 +689,12 @@ double kminusp_pi0lambda(double sqrts) {
 }
 
 double kminusn_piminussigma0(double sqrts) {
-  return 1. / 6 * 2 * kminusp_pi0sigma0(sqrts);
-}
-
-double kminusn_pi0sigmaminus(double sqrts) {
-  return (0.25 + 1. / 6) * 2 * kminusp_piplussigmaminus(sqrts);
+  return kminusp_piminussigmaplus(sqrts) + kminusp_piplussigmaminus(sqrts) -
+         2. * kminusp_pi0sigma0(sqrts);
 }
 
 double kminusn_piminuslambda(double sqrts) {
-  return 0.5 * kminusp_pi0lambda(sqrts);
+  return 2. * kminusp_pi0lambda(sqrts);
 }
 
 // All K+ p and K+ n channels are forbidden by isospin.
