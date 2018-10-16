@@ -104,12 +104,12 @@ TEST(sanity_box) {
 }
 
 TEST(sanity_collider) {
-  Configuration conf = Test::configuration();
-  conf.take({"Modi", "Collider", "Projectile"});
-  conf.take({"Modi", "Collider", "Target"});
+  Configuration conf = Test::configuration(
+      "Modi: {Collider: {Projectile: }} \n"
+      "Modi: {Collider: {Target: }}");
   conf["Modi"]["Collider"]["Projectile"]["Particles"]["661"] = 1;
   conf["Modi"]["Collider"]["Target"]["Particles"]["661"] = 1;
-  conf["Modi"]["Collider"]["Ekin"] = 1.0;
+  conf["Modi"]["Collider"]["E_Kin"] = 1.0;
   ExperimentParameters param = smash::Test::default_parameters();
   ColliderModus n(conf["Modi"], param);
   Particles P;
