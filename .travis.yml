@@ -59,7 +59,7 @@ before_install:
   - wget http://home.thep.lu.se/~torbjorn/pythia8/pythia8235.tgz &&
     tar xf pythia8235.tgz && rm pythia8235.tgz &&
     cd pythia8235 &&
-    ./configure --cxx-common='-std=c++11 -march=native -mfpmath=sse -O3' &&
+    ./configure --cxx-common='-std=c++11 -march=native -mfpmath=sse -O3 -fPIC' &&
     make -j2 &&
     cd ..
   # clang-format
