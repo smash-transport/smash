@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
               << ": " << r << std::endl;
     const double mean_exp = 2.0;
     std::cout << "Drawing random number from exponential distribution of mean "
-              << mean_exp << ": " 
+              << mean_exp << ": "
               << random::exponential(1.0 / mean_exp) << std::endl;
   }
   std::string smash_dir(std::getenv("SMASH_DIR"));
@@ -99,11 +99,11 @@ int main(int argc, char *argv[]) {
               std::cout << decay_product->name();
             }
             std::cout << " " << decay_branch->weight() << std::endl;
-        
+
           }
         }
       }
     }
   }
-  
+
 }

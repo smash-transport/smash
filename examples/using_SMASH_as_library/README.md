@@ -19,5 +19,5 @@ This example assumes that SMASH is installed and compiled, therefore, all the li
 - Do the coding for your project (an example is given here) and run
 
       mkdir build && cd build
-      cmake $MY_PROJECT_DIR -DPythia_CONFIG_EXECUTABLE=[...]/pythia8230/bin/pythia8-config
+      cmake $MY_PROJECT_DIR -DPythia_CONFIG_EXECUTABLE=[...]/pythia8235/bin/pythia8-config
       make
