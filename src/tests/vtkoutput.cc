@@ -183,6 +183,23 @@ TEST(vtkoutputfile) {
         outputfile >> item;
         COMPARE(item, "1");
       }
+      /* Check SCALARS mass */
+      outputfile >> item;
+      COMPARE(item, "SCALARS");
+      outputfile >> item;
+      COMPARE(item, "mass");
+      outputfile >> item;
+      COMPARE(item, "double");
+      outputfile >> item;
+      COMPARE(item, "1");
+      outputfile >> item;
+      COMPARE(item, "LOOKUP_TABLE");
+      outputfile >> item;
+      COMPARE(item, "default");
+      for (int i = 0; i < number_of_particles; i++) {
+        outputfile >> item;
+        COMPARE(item, "0.123");
+      }
       /* Check momentum vectors */
       outputfile >> item;
       COMPARE(item, "VECTORS");

@@ -9,12 +9,12 @@
 
 #include "smash/decayaction.h"
 
-#include "smash/action_globals.h"
 #include "smash/angles.h"
 #include "smash/decaymodes.h"
 #include "smash/kinematics.h"
 #include "smash/logging.h"
 #include "smash/pdgcode.h"
+#include "smash/potential_globals.h"
 
 namespace smash {
 
@@ -155,9 +155,6 @@ void DecayAction::generate_final_state() {
    * according to their relative weights. Then decay the particle
    * by calling function one_to_two or one_to_three.
    */
-  if (pot_pointer != nullptr) {
-    filter_channel(decay_channels_, total_width_);
-  }
   const DecayBranch *proc =
       choose_channel<DecayBranch>(decay_channels_, total_width_);
   outgoing_particles_ = proc->particle_list();
@@ -186,45 +183,45 @@ void DecayAction::generate_final_state() {
           std::to_string(incoming_particles_[0].effective_mass()) + ")");
   }
 
-  // Set formation time and boost back.
-  ThreeVector velocity_CM = incoming_particles_[0].velocity();
+  // Set formation time.
   for (auto &p : outgoing_particles_) {
     log.debug("particle momenta in lrf ", p);
-    p.boost_momentum(-velocity_CM);
     // assuming decaying particles are always fully formed
     p.set_formation_time(time_of_execution_);
+    // Boost to the computational frame
+    p.boost_momentum(-total_momentum_of_outgoing_particles().velocity());
     log.debug("particle momenta in comp ", p);
   }
 }
 
 /* This is overridden from the Action class in order to
  * take care of the angular momentum L_. */
-std::pair<double, double> DecayAction::sample_masses() const {
+std::pair<double, double> DecayAction::sample_masses(
+    double kinetic_energy_cm) const {
   const ParticleType &t_a = outgoing_particles_[0].type();
   const ParticleType &t_b = outgoing_particles_[1].type();
 
   // start with pole masses
   std::pair<double, double> masses = {t_a.mass(), t_b.mass()};
 
-  const double cms_energy = kinetic_energy_cms();
-
-  if (cms_energy < t_a.min_mass_kinematic() + t_b.min_mass_kinematic()) {
+  if (kinetic_energy_cm < t_a.min_mass_kinematic() + t_b.min_mass_kinematic()) {
     const std::string reaction =
         incoming_particles_[0].type().name() + "→" + t_a.name() + t_b.name();
     throw InvalidResonanceFormation(
-        reaction + ": not enough energy, " + std::to_string(cms_energy) +
+        reaction + ": not enough energy, " + std::to_string(kinetic_energy_cm) +
         " < " + std::to_string(t_a.min_mass_kinematic()) + " + " +
         std::to_string(t_b.min_mass_kinematic()));
   }
 
   // If one of the particles is a resonance, sample its mass.
   if (!t_a.is_stable() && t_b.is_stable()) {
-    masses.first = t_a.sample_resonance_mass(t_b.mass(), cms_energy, L_);
+    masses.first = t_a.sample_resonance_mass(t_b.mass(), kinetic_energy_cm, L_);
   } else if (!t_b.is_stable() && t_a.is_stable()) {
-    masses.second = t_b.sample_resonance_mass(t_a.mass(), cms_energy, L_);
+    masses.second =
+        t_b.sample_resonance_mass(t_a.mass(), kinetic_energy_cm, L_);
   } else if (!t_a.is_stable() && !t_b.is_stable()) {
     // two resonances in final state
-    masses = t_a.sample_resonance_masses(t_b, cms_energy, L_);
+    masses = t_a.sample_resonance_masses(t_b, kinetic_energy_cm, L_);
   }
 
   return masses;

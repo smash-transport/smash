@@ -11,7 +11,6 @@
 
 #include "smash/angles.h"
 #include "smash/kinematics.h"
-#include "smash/logging.h"
 #include "smash/processstring.h"
 #include "smash/random.h"
 
@@ -57,7 +56,7 @@ StringProcess::StringProcess(double string_tension, double time_formation,
   /* initialize PYTHIA */
   pythia_hadron_->init();
   pythia_sigmatot_.init(&pythia_hadron_->info, pythia_hadron_->settings,
-                        &pythia_hadron_->particleData);
+                        &pythia_hadron_->particleData, &pythia_hadron_->rndm);
 
   sqrt2_ = std::sqrt(2.);
 
@@ -100,6 +99,8 @@ void StringProcess::common_setup_pythia(Pythia8::Pythia *pythia_in,
   pythia_in->readString("Beams:idB = 2212");
   pythia_in->readString("Beams:eCM = 10.");
 
+  // set PYTHIA random seed from outside
+  pythia_in->readString("Random:setSeed = on");
   // suppress unnecessary output
   pythia_in->readString("Print:quiet = on");
   // No resonance decays, since the resonances will be handled by SMASH
@@ -601,8 +602,8 @@ bool StringProcess::next_NDiffHard() {
     pythia_parton_->settings.parm("Beams:eCM", sqrtsAB_);
 
     pythia_parton_initialized_ = pythia_parton_->init();
-    log.info("Pythia initialized with ", PDGcodes_[0], "+", PDGcodes_[1],
-             " at CM energy [GeV] ", sqrtsAB_);
+    log.debug("Pythia initialized with ", PDGcodes_[0], "+", PDGcodes_[1],
+              " at CM energy [GeV] ", sqrtsAB_);
     if (!pythia_parton_initialized_) {
       throw std::runtime_error("Pythia failed to initialize.");
     }
@@ -611,8 +612,9 @@ bool StringProcess::next_NDiffHard() {
    * Pythia's random is controlled by SMASH in every single collision.
    * In this way we ensure that the results are reproducible
    * for every event if one knows SMASH random seed. */
-  const int maxint = std::numeric_limits<int>::max();
-  pythia_parton_->rndm.init(random::uniform_int(1, maxint));
+  const int seed_new = random::uniform_int(1, maximum_rndm_seed_in_pythia);
+  pythia_parton_->rndm.init(seed_new);
+  log.debug("pythia_parton_ : rndm is initialized with seed ", seed_new);
 
   // Short notation for Pythia event
   Pythia8::Event &event = pythia_parton_->event;

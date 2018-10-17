@@ -13,7 +13,6 @@
 
 #include "Pythia8/Pythia.h"
 
-#include "smash/action_globals.h"
 #include "smash/angles.h"
 #include "smash/constants.h"
 #include "smash/crosssections.h"
@@ -23,6 +22,7 @@
 #include "smash/logging.h"
 #include "smash/parametrizations.h"
 #include "smash/pdgcode.h"
+#include "smash/potential_globals.h"
 #include "smash/pow.h"
 #include "smash/processstring.h"
 #include "smash/random.h"
@@ -51,9 +51,6 @@ void ScatterAction::generate_final_state() {
 
   log.debug("Incoming particles: ", incoming_particles_);
 
-  if (pot_pointer != nullptr) {
-    filter_channel(collision_channels_, total_cross_section_);
-  }
   /* Decide for a particular final state. */
   const CollisionBranch *proc = choose_channel<CollisionBranch>(
       collision_channels_, total_cross_section_);
@@ -73,7 +70,6 @@ void ScatterAction::generate_final_state() {
       break;
     case ProcessType::TwoToOne:
       /* resonance formation */
-      /* processes computed in the center of momenta */
       resonance_formation();
       break;
     case ProcessType::TwoToTwo:
@@ -98,12 +94,13 @@ void ScatterAction::generate_final_state() {
   }
 
   for (ParticleData &new_particle : outgoing_particles_) {
+    // Boost to the computational frame
+    new_particle.boost_momentum(
+        -total_momentum_of_outgoing_particles().velocity());
     /* Set positions of the outgoing particles */
     if (proc->get_type() != ProcessType::Elastic) {
       new_particle.set_4position(middle_point);
     }
-    /* Set momenta & boost to computational frame. */
-    new_particle.boost_momentum(-beta_cm());
   }
 }
 
@@ -111,7 +108,8 @@ void ScatterAction::add_all_scatterings(
     double elastic_parameter, bool two_to_one, ReactionsBitSet included_2to2,
     double low_snn_cut, bool strings_switch, bool use_AQM,
     bool strings_with_probability, NNbarTreatment nnbar_treatment) {
-  CrossSections xs(incoming_particles_, sqrt_s());
+  CrossSections xs(incoming_particles_, sqrt_s(),
+                   get_potential_at_interaction_point());
   CollisionBranchList processes = xs.generate_collision_list(
       elastic_parameter, two_to_one, included_2to2, low_snn_cut, strings_switch,
       use_AQM, strings_with_probability, nnbar_treatment, string_process_);
@@ -248,7 +246,8 @@ static double Cugnon_bnp(double plab) {
   }
 }
 
-void ScatterAction::sample_angles(std::pair<double, double> masses) {
+void ScatterAction::sample_angles(std::pair<double, double> masses,
+                                  double kinetic_energy_cm) {
   if (is_string_soft_process(process_type_) ||
       (process_type_ == ProcessType::StringHard)) {
     // We potentially have more than two particles, so the following angular
@@ -269,10 +268,8 @@ void ScatterAction::sample_angles(std::pair<double, double> masses) {
   const double mass_a = masses.first;
   const double mass_b = masses.second;
 
-  const double cms_energy = kinetic_energy_cms();
-
   const std::array<double, 2> t_range = get_t_range<double>(
-      cms_energy, nucleon_mass, nucleon_mass, mass_a, mass_b);
+      kinetic_energy_cm, nucleon_mass, nucleon_mass, mass_a, mass_b);
   Angles phitheta;
   if (nn_scattering && p_a->pdgcode().is_nucleon() &&
       p_b->pdgcode().is_nucleon() &&
@@ -344,14 +341,17 @@ void ScatterAction::sample_angles(std::pair<double, double> masses) {
   pscatt.rotate_z_axis_to(pcm);
 
   // final-state CM momentum
-  const double p_f = pCM(cms_energy, mass_a, mass_b);
+  const double p_f = pCM(kinetic_energy_cm, mass_a, mass_b);
   if (!(p_f > 0.0)) {
     log.warn("Particle: ", p_a->pdgcode(), " radial momentum: ", p_f);
-    log.warn("Etot: ", cms_energy, " m_a: ", mass_a, " m_b: ", mass_b);
+    log.warn("Etot: ", kinetic_energy_cm, " m_a: ", mass_a, " m_b: ", mass_b);
   }
   p_a->set_4momentum(mass_a, pscatt * p_f);
   p_b->set_4momentum(mass_b, -pscatt * p_f);
 
+  /* Debug message is printed before boost, so that p_a and p_b are
+   * the momenta in the center of mass frame and thus opposite to
+   * each other.*/
   log.debug("p_a: ", *p_a, "\np_b: ", *p_b);
 }
 
@@ -361,7 +361,8 @@ void ScatterAction::elastic_scattering() {
   outgoing_particles_[1] = incoming_particles_[1];
   // resample momenta
   sample_angles({outgoing_particles_[0].effective_mass(),
-                 outgoing_particles_[1].effective_mass()});
+                 outgoing_particles_[1].effective_mass()},
+                sqrt_s());
 }
 
 void ScatterAction::inelastic_scattering() {
@@ -409,12 +410,9 @@ void ScatterAction::resonance_formation() {
     s += incoming_particles_[1].pdgcode().string() + ")";
     throw InvalidResonanceFormation(s);
   }
-
-  const double cms_kin_energy = kinetic_energy_cms();
-  /* 1 particle in final state: Center-of-momentum frame of initial particles
-   * is the rest frame of the resonance.  */
-  outgoing_particles_[0].set_4momentum(FourVector(cms_kin_energy, 0., 0., 0.));
-
+  // Set the momentum of the formed resonance in its rest frame.
+  outgoing_particles_[0].set_4momentum(
+      total_momentum_of_outgoing_particles().abs(), 0., 0., 0.);
   /* Set the formation time of the resonance to the larger formation time of the
    * incoming particles, if it is larger than the execution time; execution time
    * is otherwise taken to be the formation time */
@@ -433,11 +431,12 @@ void ScatterAction::resonance_formation() {
   } else {
     outgoing_particles_[0].set_formation_time(time_of_execution_);
   }
+  /* this momentum is evaluated in the computational frame. */
   log.debug("Momentum of the new particle: ",
             outgoing_particles_[0].momentum());
 }
 
-/* This function will generate outgoing particles in CM frame
+/* This function will generate outgoing particles in computational frame
  * from a hard process.
  * The way to excite soft strings is based on the UrQMD model */
 void ScatterAction::string_excitation() {

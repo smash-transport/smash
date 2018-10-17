@@ -29,7 +29,7 @@ It requires the following tools & libraries:
 - the GNU Scientific Library >= 1.15
 - the Eigen3 library for linear algebra (see http://eigen.tuxfamily.org)
 - boost filesystem >= 1.49
-- Pythia = 8.230
+- Pythia = 8.235
 
 Support for ROOT output is automatically enabled if a suitable version of ROOT
 (>= 5.34) is found on the system.
@@ -41,10 +41,10 @@ SMASH is tightly coupled to Pythia and thus requires a specific version. Using
 a different version than specified above may or may not work. It is recommended
 to build Pythia with similar flags as used for SMASH:
 
-    wget http://home.thep.lu.se/~torbjorn/pythia8/pythia8230.tgz
-    tar xf pythia8230.tgz && rm pythia8230.tgz
-    cd pythia8230
-    ./configure --cxx-common='-std=c++11 -march=native -mfpmath=sse -O3'
+    wget http://home.thep.lu.se/~torbjorn/pythia8/pythia8235.tgz
+    tar xf pythia8235.tgz && rm pythia8235.tgz
+    cd pythia8235
+    ./configure --cxx-common='-std=c++11 -march=native -mfpmath=sse -O3 -fPIC'
     make
 
 To tell cmake where to find Pythia, pass the path to the pythia8-config
@@ -60,7 +60,7 @@ Use the following commands to build SMASH in a separate directory:
 
     mkdir build
     cd build
-    cmake .. -DPythia_CONFIG_EXECUTABLE=[...]/pythia8230/bin/pythia8-config
+    cmake .. -DPythia_CONFIG_EXECUTABLE=[...]/pythia8235/bin/pythia8-config
     make
 
 To build in parallel on N cores:

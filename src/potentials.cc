@@ -133,7 +133,7 @@ double Potentials::potential(const ThreeVector &r, const ParticleList &plist,
 }
 
 std::pair<double, int> Potentials::force_scale(const ParticleType &data) const {
-  double skyrme_scale = 1.0;
+  double skyrme_scale = data.is_baryon() ? 1.0 : 0.0;
   if (data.pdgcode().is_hyperon()) {
     if (data.pdgcode().is_Xi()) {
       skyrme_scale = 1. / 3.;
@@ -144,9 +144,7 @@ std::pair<double, int> Potentials::force_scale(const ParticleType &data) const {
     }
   }
   skyrme_scale = skyrme_scale * data.pdgcode().baryon_number();
-  // Symmetry force acts only on the neutron and proton.
-  const int symmetry_scale =
-      data.pdgcode().is_nucleon() ? data.pdgcode().baryon_number() : 0;
+  const int symmetry_scale = data.pdgcode().baryon_number();
   return std::make_pair(skyrme_scale, symmetry_scale);
 }
 

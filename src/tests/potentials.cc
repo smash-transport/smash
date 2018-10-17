@@ -71,8 +71,7 @@ TEST(nucleus_potential_profile) {
   conf["Potentials"]["Skyrme"]["Skyrme_A"] = -209.2;
   conf["Potentials"]["Skyrme"]["Skyrme_B"] = 156.4;
   conf["Potentials"]["Skyrme"]["Skyrme_Tau"] = 1.35;
-  std::unique_ptr<Potentials> pot =
-      make_unique<Potentials>(conf["Potentials"], param);
+  Potentials pot = Potentials(conf["Potentials"], param);
 
   // Write potential XY map in a vtk output
   ThreeVector r;
@@ -104,7 +103,7 @@ TEST(nucleus_potential_profile) {
       for (auto iy = -ny; iy <= ny; iy++) {
         for (auto ix = -nx; ix <= nx; ix++) {
           r = ThreeVector(ix * dx, iy * dy, 8.0);
-          pot_value = pot->potential(r, plist, proton);
+          pot_value = pot.potential(r, plist, proton);
           a_file << pot_value << " ";
         }
         a_file << "\n";
@@ -114,7 +113,7 @@ TEST(nucleus_potential_profile) {
     for (auto i = 0; i < 50; i++) {
       const double time_to = 5.0 * it + i * timestep;
       const double dt = propagate_straight_line(&P, time_to, {});
-      update_momenta(&P, dt, *pot, nullptr, nullptr);
+      update_momenta(&P, dt, pot, nullptr, nullptr);
     }
   }
 }

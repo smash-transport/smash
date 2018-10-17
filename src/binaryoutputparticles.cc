@@ -29,20 +29,21 @@ BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
 
 /*!\Userguide
  * \page format_binary_ Binary format
- * SMASH supports a binary version of output similar to OSCAR 2013 standard.
+ * SMASH supports a binary output version similar to the OSCAR 2013 standard.
  * It is faster to read and write and theoretically needs less disk space.
- * However, currently in ASCII OSCAR 2013 only 5 digits after comma are
- * written for any real number, while binary saves the whole double
- * (16 digits). By accident this makes sizes of binary output files
- * approximately the same as OSCAR ASCII files.
- * **The format follows general block structure of OSCAR format:**
- * \ref oscar_general_. However, for binary specification is stricter.
- * Types used for output are 4 bytes signed integers, 8 bytes doubles and
- * 1 byte chars.
+ * However, currently in ASCII OSCAR 2013 only 5 digits after the comma are
+ * written for any real number, while the binary saves the whole double
+ * (16 digits). By accident, this makes the sizes of the binary output files
+ * approximately the same as the OSCAR ASCII files.
+ * **The binary format follows the general block structure of the OSCAR
+ * format:**
+ * \ref oscar_general_. However, for the binary format, the data type
+ * specification is stricter. The types used for the output are 4 bytes signed
+ * integers, 8 bytes doubles and 1 byte chars.
  *
  * As for OSCAR ASCII output there are two kinds of binary output:
  * particles and collisions.
- * Specifics for both particles and collisions output are the following:\n
+ * The specifics for both particles and collisions output are the following:\n
  * **Header**
  * \code
  * 4*char        uint16_t        uint16_t        uint32_t  len*char
@@ -52,15 +53,15 @@ BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
  * \li Format version is an integer number, currently it is 4.
  * \li Format variant is an integer number: 0 for default, 1 for extended.
  * \li len is the length of smash version string
- * \li smash_version is len chars that give information about SMASH version.
+ * \li smash_version is len chars that give information about the SMASH version.
  *
  * **Output block header**\n
  * At start of event, end of event or any other particle output:
  * \code
  * char uint32_t
- * 'p'  npart
+ * 'p'  n_part_lines
  * \endcode
- * \li \c npart is number of particle lines in the block that follows
+ * \li \c n_part_lines is the number of particle lines in the block that follows
  *
  * At interaction:
  * \code
@@ -85,9 +86,8 @@ BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
  *     double        int         int
  * </div>
  * <div class="line">
- * t x y z mass p0 px py pz pdg ID charge Ncoll formation_time
- * xs_scaling_factor process_ID_origin process_type_origin
- * time_of_origin PDG_mother1 PDG_mother2
+ * t x y z mass p0 px py pz pdg ID charge ncoll form_time xsecfac
+ * proc_id_origin proc_type_origin time_last_coll pdg_mother1 pdg_mother2
  * </div></div>
  *
  * **Event end line**
@@ -98,10 +98,26 @@ BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
  *
  * Particles output
  * ----------------
- * Written to \c particles_binary.bin file. Contains the current particle
- * list at specific moments of time. Every moment of time
- * is written as a 'p' block. For options of this output see
+ * The particles output is Written to the \c particles_binary.bin file.
+ * It contains the current particle list at specific moments of time. Every
+ * moment of time is written as a 'p' block. For options of this output see
  * \ref output_content_specific_options_ "content-specific output options".
+ *
+ * Collisions output
+ * -----------------
+ * The collisions output is Written to the \c collisions_binary.bin file.
+ * It contains interactions (collisions, decays, box wall crossings) and
+ * optionally the initial and final configuration. The interactions are written
+ * in computational frame time-ordered fashion, in 'i' blocks, which contains
+ * the information of the incoming and the outgoing particles of each reaction
+ * written in the 'incoming' and 'outgoing' blocks respectively.
+ * Initial and final states are written as 'p' blocks. The process IDs
+ * indicating the types of the reaction, such as resonance decay,
+ * elastic scattering, soft string process, hard string process, etc.,
+ * are written in the 'process_type' blocks. For options of this output see
+ * \ref output_content_specific_options_ "content-specific output options".
+ *
+ * See also \ref collisions_output_in_box_modus_.
  **/
 
 void BinaryOutputParticles::at_eventstart(const Particles &particles,
