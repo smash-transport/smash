@@ -297,6 +297,17 @@ class DensityOnLattice {
   /**
    * Compute the net Eckart density on the local lattice
    *
+   * Note that the net Eckart density is calculated by taking the difference
+   * between the Eckart density of the positively charged particles and that
+   * of the negatively charged particles, which are, in general, defined in
+   * different frames. So the net Eckart density is not the net density in the
+   * Eckart local rest frame. However, this is the only way we can think of
+   * to be applied to the case where the density current is space-like. And
+   * fortunately, the net eckart densities are only used for calculating the
+   * potentials which are valid only in the low-energy collisions where the
+   * amount of the negatively charged particles are negligible. May be in the
+   * future, the net Eckart density can be calculated in a smarter way.
+   *
    * \param[in] norm_factor Normalization factor
    * \return Net Eckart density on the local lattice [fm\f$^{-3}\f$]
    */
@@ -343,10 +354,13 @@ class DensityOnLattice {
     return djmu_dx_[0].threevec() * norm_factor;
   }
 
-  /// \return Current density of the positively charged particle
-  FourVector jmu_pos() const { return jmu_pos_; }
-  /// \return Current density of the negatively charged particle
-  FourVector jmu_neg() const { return jmu_neg_; }
+  /**
+   * \return Net current density
+   *
+   * There is a "+" operator in between, because the negative symbol
+   * of the charge has already be included in FactorTimesSF.
+   */
+  FourVector jmu_net() const { return jmu_pos_ + jmu_neg_; }
 
  private:
   /// Four-current density of the positively charged particle.

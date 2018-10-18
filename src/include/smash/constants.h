@@ -108,6 +108,11 @@ constexpr double fine_structure = 7.2973525698e-3;
 constexpr double maximum_cross_section = 200.;  // mb
 
 /**
+ * The maximum value of the random seed used in PYTHIA.
+ */
+constexpr int maximum_rndm_seed_in_pythia = 900000000;
+
+/**
  * Energy in GeV, below which hard reactions via pythia are impossible.
  * This constraint is technical and comes from the pythia model itself.
  * At the same time, physics-wise, hard cross-sections at the low

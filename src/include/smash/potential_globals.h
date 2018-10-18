@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_ACTION_GLOBALS_H_
-#define SRC_INCLUDE_ACTION_GLOBALS_H_
+#ifndef SRC_INCLUDE_POTENTIAL_GLOBALS_H_
+#define SRC_INCLUDE_POTENTIAL_GLOBALS_H_
 
 #include "lattice.h"
 #include "potentials.h"
@@ -21,10 +21,10 @@ namespace smash {
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
 /// Pointer to the skyrme potential on the lattice
-extern RectangularLattice<double> *UB_lat_pointer;
+extern RectangularLattice<FourVector> *UB_lat_pointer;
 
 /// Pointer to the symmmetry potential on the lattice
-extern RectangularLattice<double> *UI3_lat_pointer;
+extern RectangularLattice<FourVector> *UI3_lat_pointer;
 
 /// Pointer to a Potential class
 extern Potentials *pot_pointer;
@@ -32,4 +32,4 @@ extern Potentials *pot_pointer;
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_ACTION_GLOBALS_H_
+#endif  // SRC_INCLUDE_POTENTIAL_GLOBALS_H_

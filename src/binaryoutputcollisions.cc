@@ -28,25 +28,8 @@ BinaryOutputCollisions::BinaryOutputCollisions(const bf::path &path,
           "wb", name, out_par.get_coll_extended(name)),
       print_start_end_(out_par.coll_printstartend) {}
 
-/*!\Userguide
- * \page format_binary_ Binary format
- *
- * Collisions output
- * -----------------
- * Written to \c collisions_binary.bin file. Contains interactions
- * (collisions, decays, box wall crossings) and optionally initial
- * and final configuration. Interactions are written in comp. frame
- * time-ordered fashion, in 'i' blocks, which includes the informations
- * of the incoming and the outgoing particles of each reaction written
- * in the 'incoming' and 'outgoing' blocks respectively.
- * Initial and final states are written as 'p' blocks. The process IDs
- * indicating the types of the reaction, such as resonance decay,
- * elastic scattering, soft string process, hard string process, etc.,
- * are written in the 'process_type' blocks. For options of this output see
- * \ref output_content_specific_options_ "content-specific output options".
- *
- * See also \ref collisions_output_in_box_modus_.
- **/
+/* The userguide info about the binary collisions format can be found in
+binaryoutputparticles.cc, to ensure readability of the user guide. */
 
 void BinaryOutputCollisions::at_eventstart(const Particles &particles,
                                            const int) {

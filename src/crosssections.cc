@@ -86,29 +86,6 @@ static double detailed_balance_factor_RR(double sqrts, double pcm,
 
 /**
  * Helper function:
- * Add a 2-to-2 channel to a collision branch list given a cross section.
- *
- * The cross section is only calculated if there is enough energy
- * for the process. If the cross section is small, the branch is not added.
- */
-template <typename F>
-void add_channel(CollisionBranchList& process_list, F get_xsection,
-                 double sqrts, const ParticleType& type_a,
-                 const ParticleType& type_b) {
-  const double sqrt_s_min =
-      type_a.min_mass_spectral() + type_b.min_mass_spectral();
-  if (sqrts <= sqrt_s_min) {
-    return;
-  }
-  const auto xsection = get_xsection();
-  if (xsection > really_small) {
-    process_list.push_back(make_unique<CollisionBranch>(
-        type_a, type_b, xsection, ProcessType::TwoToTwo));
-  }
-}
-
-/**
- * Helper function:
  * Append a list of processes to another (main) list of processes.
  */
 static void append_list(CollisionBranchList& main_list,
@@ -132,9 +109,11 @@ static double sum_xs_of(CollisionBranchList& list) {
 }
 
 CrossSections::CrossSections(const ParticleList& incoming_particles,
-                             const double sqrt_s)
+                             const double sqrt_s,
+                             const std::pair<FourVector, FourVector> potentials)
     : incoming_particles_(incoming_particles),
       sqrt_s_(sqrt_s),
+      potentials_(potentials),
       is_BBbar_pair_(incoming_particles_[0].type().is_baryon() &&
                      incoming_particles_[1].type().is_baryon() &&
                      incoming_particles_[0].type().antiparticle_sign() ==

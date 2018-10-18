@@ -23,7 +23,9 @@
 #include "grid.h"
 #include "outputparameters.h"
 #include "pauliblocking.h"
+#include "potential_globals.h"
 #include "potentials.h"
+#include "processstring.h"
 #include "propagation.h"
 #include "quantumnumbers.h"
 #include "scatteractionphoton.h"
@@ -380,13 +382,19 @@ class Experiment : public ExperimentBase {
   /// Type of density for lattice printout
   DensityType dens_type_lattice_printout_ = DensityType::None;
 
-  /// Lattices for Skyme potentials
-  std::unique_ptr<RectangularLattice<double>> UB_lat_ = nullptr;
+  /**
+   * Lattices for Skyrme potentials (evaluated in the local rest frame) times
+   * the baryon flow 4-velocity
+   */
+  std::unique_ptr<RectangularLattice<FourVector>> UB_lat_ = nullptr;
 
-  /// Lattices for symmetry potentials
-  std::unique_ptr<RectangularLattice<double>> UI3_lat_ = nullptr;
+  /**
+   * Lattices for symmetry potentials (evaluated in the local rest frame) times
+   * the isospin flow 4-velocity
+   */
+  std::unique_ptr<RectangularLattice<FourVector>> UI3_lat_ = nullptr;
 
-  /// Lattices for the electric and magnetic components of the Skyme force
+  /// Lattices for the electric and magnetic components of the Skyrme force
   std::unique_ptr<RectangularLattice<std::pair<ThreeVector, ThreeVector>>>
       FB_lat_;
 
@@ -411,6 +419,12 @@ class Experiment : public ExperimentBase {
 
   /// Instance of class used for forced thermalization
   std::unique_ptr<GrandCanThermalizer> thermalizer_;
+
+  /**
+   * Pointer to the string process class object,
+   * which is used to set the random seed for PYTHIA objects in each event.
+   */
+  StringProcess *process_string_ptr_;
 
   /**
    * Number of events.
@@ -732,6 +746,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
         modus_.proj_N_number());
     max_transverse_distance_sqr_ =
         scat_finder->max_transverse_distance_sqr(parameters_.testparticles);
+    process_string_ptr_ = scat_finder->get_process_string_ptr();
     action_finders_.emplace_back(std::move(scat_finder));
   } else {
     max_transverse_distance_sqr_ = maximum_cross_section / M_PI * fm2_mb;
@@ -907,11 +922,26 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   /*!\Userguide
    * \page input_dileptons Dileptons
-   * Enables dilepton output together with DecayActionsFinderDilepton.
-   * By default, the extended OSCAR output is enabled. The dilepton output
-   * format is identical to the collision output, it does however only contain
-   * information about the dilepton decays at every timestep.
+   * Enables the dilepton output together with the possible dilepton decay
+   * channels.
+   * If dileptons are enabled, the output file named Dileptons (followed by the
+   * appropriate suffix) is generated when SMASH is executed. It's format is
+   * identical to the collision output (see \ref format_oscar_collisions),
+   * it does however only contain information about the dilepton decays
+   * at every timestep. \n
+   * Further, the block headers differ from the usual collision output:
+   * \code
+   * # interaction in nin out nout rho density weight shining_weight partial
+   *part_weight type proc_type \endcode where \li \key nin: Number of ingoing
+   *particles (initial state particles) \li \key nout: Number of outgoing
+   *particles (finalstate particles) \li \key density: Density at the
+   *interaction point \li \key shining_weight: Shining weight of the
+   *interaction. Explanation follows below. \li \key part_weight: The partial
+   *weight of the interaction. For the dileptons, this coincides with the
+   *branching ratio. \li \key proc_type: The type of the underlying process. See
+   * process_type for possible types.
    *
+   * \n
    * The treatment of Dilepton Decays is special:
    *
    * \li Dileptons are treated via the time integration method, also called
@@ -1067,7 +1097,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       if (potentials_->use_skyrme()) {
         jmu_B_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
                                                  LatticeUpdate::EveryTimestep);
-        UB_lat_ = make_unique<RectangularLattice<double>>(
+        UB_lat_ = make_unique<RectangularLattice<FourVector>>(
             l, n, origin, periodic, LatticeUpdate::EveryTimestep);
         FB_lat_ = make_unique<
             RectangularLattice<std::pair<ThreeVector, ThreeVector>>>(
@@ -1076,7 +1106,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       if (potentials_->use_symmetry()) {
         jmu_I3_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
                                                   LatticeUpdate::EveryTimestep);
-        UI3_lat_ = make_unique<RectangularLattice<double>>(
+        UI3_lat_ = make_unique<RectangularLattice<FourVector>>(
             l, n, origin, periodic, LatticeUpdate::EveryTimestep);
         FI3_lat_ = make_unique<
             RectangularLattice<std::pair<ThreeVector, ThreeVector>>>(
@@ -1105,7 +1135,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   // Store pointers to potential and lattice accessible for Action
   if (parameters_.potential_affect_threshold) {
-    Action::input_potential(UB_lat_.get(), UI3_lat_.get(), potentials_.get());
+    UB_lat_pointer = UB_lat_.get();
+    UI3_lat_pointer = UI3_lat_.get();
+    pot_pointer = potentials_.get();
   }
 
   // Create forced thermalizer
@@ -1138,6 +1170,13 @@ void Experiment<Modus>::initialize_new_event() {
     r = random::advance();
   }
   seed_ = std::abs(r);
+  /* Set the random seed used in PYTHIA hadronization
+   * to be same with the SMASH one.
+   * In this way we ensure that the results are reproducible
+   * for every event if one knows SMASH random seed. */
+  if (process_string_ptr_ != NULL) {
+    process_string_ptr_->init_pythia_hadron_rndm();
+  }
 
   particles_.reset();
 
@@ -1623,10 +1662,14 @@ void Experiment<Modus>::update_potentials() {
                      DensityType::Baryon, density_param_, particles_, true);
       const size_t UBlattice_size = UB_lat_->size();
       for (size_t i = 0; i < UBlattice_size; i++) {
-        (*UB_lat_)[i] = potentials_->skyrme_pot((*jmu_B_lat_)[i].density());
-        (*FB_lat_)[i] = potentials_->skyrme_force(
-            (*jmu_B_lat_)[i].density(), (*jmu_B_lat_)[i].grad_rho(),
-            (*jmu_B_lat_)[i].dj_dt(), (*jmu_B_lat_)[i].rot_j());
+        auto jB = (*jmu_B_lat_)[i];
+        const FourVector flow_four_velocity = abs(jB.density()) > really_small
+                                                  ? jB.jmu_net() / jB.density()
+                                                  : FourVector();
+        (*UB_lat_)[i] =
+            flow_four_velocity * potentials_->skyrme_pot(jB.density());
+        (*FB_lat_)[i] = potentials_->skyrme_force(jB.density(), jB.grad_rho(),
+                                                  jB.dj_dt(), jB.rot_j());
       }
     }
     if (potentials_->use_symmetry() && jmu_I3_lat_ != nullptr) {
@@ -1635,10 +1678,14 @@ void Experiment<Modus>::update_potentials() {
                      true);
       const size_t UI3lattice_size = UI3_lat_->size();
       for (size_t i = 0; i < UI3lattice_size; i++) {
-        (*UI3_lat_)[i] = potentials_->symmetry_pot((*jmu_I3_lat_)[i].density());
-        (*FI3_lat_)[i] = potentials_->symmetry_force(
-            (*jmu_I3_lat_)[i].grad_rho(), (*jmu_I3_lat_)[i].dj_dt(),
-            (*jmu_I3_lat_)[i].rot_j());
+        auto jI3 = (*jmu_I3_lat_)[i];
+        const FourVector flow_four_velocity =
+            abs(jI3.density()) > really_small ? jI3.jmu_net() / jI3.density()
+                                              : FourVector();
+        (*UI3_lat_)[i] =
+            flow_four_velocity * potentials_->symmetry_pot(jI3.density());
+        (*FI3_lat_)[i] = potentials_->symmetry_force(jI3.grad_rho(),
+                                                     jI3.dj_dt(), jI3.rot_j());
       }
     }
   }

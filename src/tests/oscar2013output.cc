@@ -145,7 +145,7 @@ TEST(full2013_format) {
               "#!OSCAR2013 full_event_history t x y z mass p0 px py pz"
               " pdg ID charge");
       std::getline(outputfile, line);
-      COMPARE(line, "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none none");
+      COMPARE(line, "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none e");
       std::getline(outputfile, line);
       COMPARE(line, "# " VERSION_MAJOR);
       /* Check initial particle list description line */
@@ -269,7 +269,7 @@ TEST(final2013_format) {
               "#!OSCAR2013 particle_lists t x y z mass p0 px py pz"
               " pdg ID charge");
       std::getline(outputfile, line);
-      COMPARE(line, "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none none");
+      COMPARE(line, "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none e");
       std::getline(outputfile, line);
       COMPARE(line, "# " VERSION_MAJOR);
       /* Check final particle list */
@@ -350,7 +350,7 @@ TEST(full_extended_oscar) {
     std::getline(outputfile, line);
     COMPARE(line,
             "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none"
-            " none none fm none none none fm none none");
+            " e none fm none none none fm none none");
     std::getline(outputfile, line);
     COMPARE(line, "# " VERSION_MAJOR);
     /* Check initial particle list description line */
