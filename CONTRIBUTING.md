@@ -407,6 +407,24 @@ lot of false positives:
 
     make cppcheck
 
+## General policies
+
+### Input and output compatibility
+
+In general, input and output interfaces should be backwards compatible, when
+introducing changes. If there are changes that affect the config.yaml or the
+binary output, the associated version numbers need to be increased. Such
+changes can only occur, when major versions of SMASH are released. In addition,
+the Changelog needs be updated with a prominent mention of the changes.
+
+### Third party codes
+
+In general, the usage of third party codes is discouraged. If there is a scientific necessity
+or a major performance gain or time saving by using third party libraries, they can be linked
+to SMASH. For the common ones, a description on how to install them in the README file
+is sufficient whereas for the less common ones, including them in the thirdparty folder and
+shipping them with SMASH is the better solution. Of course, this involves ensuring the proper
+copyright.
 
 ## Profiling and benchmarking
 
