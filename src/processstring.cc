@@ -47,7 +47,7 @@ StringProcess::StringProcess(double string_tension, double time_formation,
                       stringz_a, stringz_b, string_sigma_T);
 
   // setup and initialize pythia for fragmentation
-  pythia_hadron_ = make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
+  pythia_hadron_ = make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, true);
   /* turn off all parton-level processes to implement only hadronization */
   pythia_hadron_->readString("ProcessLevel:all = off");
   common_setup_pythia(pythia_hadron_.get(), strange_supp, diquark_supp,
