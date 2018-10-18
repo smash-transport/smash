@@ -23,7 +23,8 @@ StringProcess::StringProcess(double string_tension, double time_formation,
                              double sigma_perp, double leading_frag_mean,
                              double leading_frag_width, double stringz_a,
                              double stringz_b, double string_sigma_T,
-                             double factor_t_form, bool use_yoyo_model)
+                             double factor_t_form, bool use_yoyo_model,
+                             double prob_proton_to_d_uu)
     : pmin_gluon_lightcone_(gluon_pmin),
       pow_fgluon_beta_(gluon_beta),
       pow_fquark_alpha_(quark_alpha),
@@ -36,7 +37,8 @@ StringProcess::StringProcess(double string_tension, double time_formation,
       time_formation_const_(time_formation),
       soft_t_form_(factor_t_form),
       time_collision_(0.),
-      use_yoyo_model_(use_yoyo_model) {
+      use_yoyo_model_(use_yoyo_model),
+      prob_proton_to_d_uu_(prob_proton_to_d_uu) {
   // setup and initialize pythia for hard string process
   pythia_parton_ = make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
   /* select only non-diffractive events
@@ -259,7 +261,8 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   double pabscomHX_sqr, massX;
 
   // decompose hadron into quarks
-  make_string_ends(is_AB_to_AX ? PDGcodes_[1] : PDGcodes_[0], idqX1, idqX2);
+  make_string_ends(is_AB_to_AX ? PDGcodes_[1] : PDGcodes_[0], idqX1, idqX2,
+                   prob_proton_to_d_uu_);
   // string mass must be larger than threshold set by PYTHIA.
   mstrMin = pythia_hadron_->particleData.m0(idqX1) +
             pythia_hadron_->particleData.m0(idqX2);
@@ -410,8 +413,10 @@ bool StringProcess::next_DDiff() {
   ThreeVector threeMomentum;
 
   // decompose hadron into quark (and diquark) contents
-  make_string_ends(PDGcodes_[0], quarks[0][0], quarks[0][1]);
-  make_string_ends(PDGcodes_[1], quarks[1][0], quarks[1][1]);
+  make_string_ends(PDGcodes_[0], quarks[0][0], quarks[0][1],
+                   prob_proton_to_d_uu_);
+  make_string_ends(PDGcodes_[1], quarks[1][0], quarks[1][1],
+                   prob_proton_to_d_uu_);
   // sample the lightcone momentum fraction carried by gluons
   const double xmin_gluon_fraction = pmin_gluon_lightcone_ / sqrtsAB_;
   const double xfracA =
@@ -463,8 +468,8 @@ bool StringProcess::next_NDiffSoft() {
 
   // decompose hadron into quark (and diquark) contents
   int idqA1, idqA2, idqB1, idqB2;
-  make_string_ends(PDGcodes_[0], idqA1, idqA2);
-  make_string_ends(PDGcodes_[1], idqB1, idqB2);
+  make_string_ends(PDGcodes_[0], idqA1, idqA2, prob_proton_to_d_uu_);
+  make_string_ends(PDGcodes_[1], idqB1, idqB2, prob_proton_to_d_uu_);
 
   const int bar_a = PDGcodes_[0].baryon_number(),
             bar_b = PDGcodes_[1].baryon_number();
@@ -1433,24 +1438,47 @@ int StringProcess::diquark_from_quarks(int q1, int q2) {
   return (q1 < 0) ? -diquark : diquark;
 }
 
-void StringProcess::make_string_ends(const PdgCode &pdg, int &idq1, int &idq2) {
+void StringProcess::make_string_ends(const PdgCode &pdg, int &idq1, int &idq2,
+                                     double xi) {
   std::array<int, 3> quarks = pdg.quark_content();
-
-  if (pdg.is_meson()) {
-    idq1 = quarks[1];
-    idq2 = quarks[2];
-    /* Some mesons with PDG id 11X are actually mixed state of uubar and ddbar.
-     * have a random selection whether we have uubar or ddbar in this case. */
-    if (idq1 == 1 && idq2 == -1 && random::uniform_int(0, 1) == 0) {
-      idq1 = 2;
-      idq2 = -2;
+  if (pdg.is_nucleon()) {
+    // protons and neutrons treated seperately since single quarks is at a
+    // different position in the PDG code
+    if (pdg.charge() == 0) {  // (anti)neutron
+      if (random::uniform(0., 1.) < xi) {
+        idq1 = quarks[0];
+        idq2 = diquark_from_quarks(quarks[1], quarks[2]);
+      } else {
+        idq1 = quarks[1];
+        idq2 = diquark_from_quarks(quarks[0], quarks[2]);
+      }
+    } else {  // (anti)proton
+      if (random::uniform(0., 1.) < xi) {
+        idq1 = quarks[2];
+        idq2 = diquark_from_quarks(quarks[0], quarks[1]);
+      } else {
+        idq1 = quarks[0];
+        idq2 = diquark_from_quarks(quarks[1], quarks[2]);
+      }
     }
   } else {
-    assert(pdg.is_baryon());
-    // Get random quark to position 0
-    std::swap(quarks[random::uniform_int(0, 2)], quarks[0]);
-    idq1 = quarks[0];
-    idq2 = diquark_from_quarks(quarks[1], quarks[2]);
+    if (pdg.is_meson()) {
+      idq1 = quarks[1];
+      idq2 = quarks[2];
+      /* Some mesons with PDG id 11X are actually mixed state of uubar and
+       * ddbar. have a random selection whether we have uubar or ddbar in this
+       * case. */
+      if (idq1 == 1 && idq2 == -1 && random::uniform_int(0, 1) == 0) {
+        idq1 = 2;
+        idq2 = -2;
+      }
+    } else {
+      assert(pdg.is_baryon());
+      // Get random quark to position 0
+      std::swap(quarks[random::uniform_int(0, 2)], quarks[0]);
+      idq1 = quarks[0];
+      idq2 = diquark_from_quarks(quarks[1], quarks[2]);
+    }
   }
   // Fulfil the convention: idq1 should be quark or anti-diquark
   if (idq1 < 0) {

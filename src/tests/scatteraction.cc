@@ -200,7 +200,8 @@ TEST(pythia_running) {
   act = make_unique<ScatterAction>(p1_copy, p2_copy, 0.2, false, 1.0);
   std::unique_ptr<StringProcess> string_process_interface =
       make_unique<StringProcess>(1.0, 1.0, 0.5, 0.001, 1.0, 2.5, 0.217, 0.081,
-                                 0.7, 0.7, 0.25, 0.68, 0.98, 0.25, 1.0, true);
+                                 0.7, 0.7, 0.25, 0.68, 0.98, 0.25, 1.0, true,
+                                 1. / 3.);
   act->set_string_interface(string_process_interface.get());
   VERIFY(act != nullptr);
   COMPARE(p2_copy.type(), ParticleType::find(0x2212));
@@ -428,19 +429,19 @@ TEST(string_make_string_ends) {
   int id1, id2;
   // decompose pion+ into u, dbar
   PdgCode pdg_piplus = PdgCode(0x211);
-  StringProcess::make_string_ends(pdg_piplus, id1, id2);
+  StringProcess::make_string_ends(pdg_piplus, id1, id2, 1. / 3.);
   VERIFY(id1 == 2 && id2 == -1);
   // decompose pion- into d, ubar
   PdgCode pdg_piminus = PdgCode(-0x211);
-  StringProcess::make_string_ends(pdg_piminus, id1, id2);
+  StringProcess::make_string_ends(pdg_piminus, id1, id2, 1. / 3.);
   VERIFY(id1 == 1 && id2 == -2);
   // decompose proton into u, ud-diquark or d, uu-diquark
   PdgCode pdg_proton = PdgCode(0x2212);
-  StringProcess::make_string_ends(pdg_proton, id1, id2);
+  StringProcess::make_string_ends(pdg_proton, id1, id2, 1. / 3.);
   VERIFY((id1 == 1 && id2 == 2203) || (id1 == 2 && (id2 == 2101 || 2103)));
   // decompose anti-proton ubar, ud-antidiquark or dbar, uu-antidiquark
   PdgCode pdg_antip = PdgCode(-0x2212);
-  StringProcess::make_string_ends(pdg_antip, id1, id2);
+  StringProcess::make_string_ends(pdg_antip, id1, id2, 1. / 3.);
   VERIFY((id2 == -1 && id1 == -2203) || (id2 == -2 && (id1 == -2101 || -2103)));
 }
 

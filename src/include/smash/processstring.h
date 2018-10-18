@@ -121,6 +121,11 @@ class StringProcess {
   double time_collision_;
   /// Whether to calculate the string formation times from the yoyo-model.
   bool use_yoyo_model_;
+  /**
+   * Probability of splitting a nucleon into the quark flavour it has only
+   * once and a diquark it has twice.
+   */
+  double prob_proton_to_d_uu_;
   /// square root of 2 (\f$\sqrt{2}\f$)
   double sqrt2_;
 
@@ -173,6 +178,8 @@ class StringProcess {
    * \param[in] factor_t_form to be multiplied to soft string formation times
    * \param[in] use_yoyo_model Whether to calculate formation times from the
    *                           yoyo-model.
+   * \param[in] prob_proton_to_d_uu Probability of a nucleon to be split into
+   *            the quark it contains once and a diquark another flavour.
    *
    * \see StringProcess::common_setup_pythia(Pythia8::Pythia *,
    *                     double, double, double, double, double)
@@ -188,7 +195,8 @@ class StringProcess {
                 double sigma_perp, double leading_frag_mean,
                 double leading_frag_width, double stringz_a,
                 double stringz_b,  double string_sigma_T,
-                double factor_t_form, bool use_yoyo_model);
+                double factor_t_form, bool use_yoyo_model,
+                double prob_proton_to_d_uu);
 
   /**
    * Common setup of PYTHIA objects for soft and hard string routines
@@ -681,8 +689,9 @@ class StringProcess {
    * \param[in] pdgcode_in is PdgCode of hadron which transforms into a string.
    * \param[out] idq1 is PDG id of quark or anti-diquark.
    * \param[out] idq2 is PDG id of anti-quark or diquark.
+   * \param[in] xi probability to split a nucleon into the quark it has only once and a diquark of another flavour.
    */
-  static void make_string_ends(const PdgCode &pdgcode_in, int &idq1, int &idq2);
+  static void make_string_ends(const PdgCode &pdgcode_in, int &idq1, int &idq2, double xi);
 
   /**
    * Easy setter of Pythia Vec4 from SMASH

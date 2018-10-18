@@ -125,6 +125,11 @@ namespace smash {
  * Calculate the string fragments' formation times from the yoyo-model if
  * enabled. Else constant proper time defined by Formation_Time is used.
  *
+ * \key Prob_proton_to_d_uu (double, optional, default = 1/3)
+ * Probability of splitting an (anti)nucleon into the quark it has only once 
+ * and the diquark it contains twice in terms of flavour in the soft string 
+ * routine.
+ *
  * \page input_collision_term_ Collision_Term
  * \n
  * Example: Configuring the Collision Term
@@ -170,6 +175,7 @@ namespace smash {
          StringZ_A: 0.68
          StringZ_B: 0.98
          String_Sigma_T: 0.25
+         Prob_proton_to_d_uu: 0.33
  \endverbatim
  *
  * Pauli Blocking can further be activated by means of the following subsection
@@ -221,7 +227,8 @@ ScatterActionsFinder::ScatterActionsFinder(
         subconfig.take({"StringZ_A"}, 0.68), subconfig.take({"StringZ_B"}, 0.5),
         subconfig.take({"String_Sigma_T"}, 0.5),
         subconfig.take({"Form_Time_Factor"}, 1.0),
-        subconfig.take({"Use_Yoyo_Model"}, true));
+        subconfig.take({"Use_Yoyo_Model"}, true),
+        subconfig.take({"Prob_proton_to_d_uu"}, 1. / 3.));
   }
 }
 
