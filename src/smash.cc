@@ -101,6 +101,13 @@ void usage(const int rc, const std::string &progname) {
    *     masses mass1 and mass2. Masses are optional, default values are pole
    *     masses.
    * <tr><td>`-f` <td>`--force`
+   * <tr><td>`-S <pdg1>,<pdg2>[,mass1,mass2]`
+   * <td>`--cross-sections-fs <pdg1>,<pdg2>[,mass1,mass2]`
+   * <td> Dumps all final-state cross-sections of pdg1 + pdg2 with
+   *     masses mass1 and mass2. Masses are optional, default values are pole
+   *     masses. If strings are enabled, the results are non-deterministic for
+   *     some final states.
+   * <tr><td>`-f` <td>`--force`
    * <td>Forces overwriting files in the output directory. Normally, if you
    *     specifiy an output directory with `-o`, the directory must be empty.
    *     With `-f` this check is skipped.
@@ -132,7 +139,8 @@ void usage(const int rc, const std::string &progname) {
       "pdg1 + pdg2 reactions versus sqrt(s).\n"
       "  -S, --cross-sections-fs <pdg1>,<pdg2>[,mass1,mass2] \n"
       "                          dump all partial final-state cross-sections "
-      "of pdg1 + pdg2 reactions versus sqrt(s).\n"
+      "of pdg1 + pdg2 reactions versus sqrt(s). Non-deterministic if strings "
+      "are enabled.\n"
       "                          Masses are optional, by default pole masses"
       " are used.\n"
       "                          Note the required comma and no spaces.\n"
