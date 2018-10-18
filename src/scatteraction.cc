@@ -446,7 +446,7 @@ void ScatterAction::string_excitation() {
   {
     DisableFloatTraps guard;
     /* initialize the string_process_ object for this particular collision */
-    string_process_->init(incoming_particles_, time_of_execution_, gamma_cm());
+    string_process_->init(incoming_particles_, time_of_execution_);
     /* implement collision */
     bool success = false;
     int ntry = 0;

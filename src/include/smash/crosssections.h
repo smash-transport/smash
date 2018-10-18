@@ -399,7 +399,7 @@ class CrossSections {
    * Determine the (parametrized) hard non-diffractive string cross section
    * for this collision.
    *
-   * \return Parametrized cross section without AQM scaling.
+   * \return Parametrized cross section (without AQM scaling).
    */
   double string_hard_cross_section() const;
 

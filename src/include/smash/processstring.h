@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_PROCESSSTRING_H_
 
 #include <memory>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -101,6 +102,10 @@ class StringProcess {
    * distribution with width sigma_qperp_
    */
   double sigma_qperp_;
+  /// mean value of the fragmentation function for the leading baryons
+  double leading_frag_mean_;
+  /// width of the fragmentation function for the leading baryons
+  double leading_frag_width_;
   /// string tension [GeV/fm]
   double kappa_tension_string_;
   /**
@@ -114,8 +119,6 @@ class StringProcess {
   double soft_t_form_;
   /// time of collision in the computational frame [fm]
   double time_collision_;
-  /// Lorentz gamma factor of center of mass in the computational frame
-  double gamma_factor_com_;
   /// Whether to calculate the string formation times from the yoyo-model.
   bool use_yoyo_model_;
   /**
@@ -144,6 +147,12 @@ class StringProcess {
   /// An object to compute cross-sections
   Pythia8::SigmaTotal pythia_sigmatot_;
 
+  /**
+   * event record for intermediate partonic state
+   * in the hard string routine
+   */
+  Pythia8::Event event_intermediate_;
+
  public:
   // clang-format off
 
@@ -170,7 +179,7 @@ class StringProcess {
    * \param[in] use_yoyo_model Whether to calculate formation times from the
    *                           yoyo-model.
    * \param[in] prob_proton_to_d_uu Probability of a nucleon to be split into
-                the quark it contains once and a diquark another flavour. 
+   *            the quark it contains once and a diquark another flavour.
    *
    * \see StringProcess::common_setup_pythia(Pythia8::Pythia *,
    *                     double, double, double, double, double)
@@ -183,10 +192,10 @@ class StringProcess {
                 double gluon_beta, double gluon_pmin,
                 double quark_alpha, double quark_beta,
                 double strange_supp, double diquark_supp,
-                double sigma_perp,
-                double stringz_a, double stringz_b,
-                double string_sigma_T, double factor_t_form,
-                bool use_yoyo_model,
+                double sigma_perp, double leading_frag_mean,
+                double leading_frag_width, double stringz_a,
+                double stringz_b,  double string_sigma_T,
+                double factor_t_form, bool use_yoyo_model,
                 double prob_proton_to_d_uu);
 
   /**
@@ -323,14 +332,18 @@ class StringProcess {
    * mass.
    * \param[in] incoming is the list of initial state particles.
    * \param[in] tcoll is time of collision.
-   * \param[in] gamma gamma factor of the center of mass.
    */
-  void init(const ParticleList &incoming, double tcoll, double gamma);
+  void init(const ParticleList &incoming, double tcoll);
   /**
-   * compute three orthonormal basis vectors in the center of mass frame
-   * such that one vector is parallel with the three-momentum of particle A.
+   * compute three orthonormal basis vectors from unit vector
+   * in the longitudinal direction
+   * \param[in] evec_polar unit three-vector in the longitudinal direction
+   * \param[out] evec_basis orthonormal basis vectors of which
+   *             evec_basis[0] is in the longitudinal direction while
+   *             evec_basis[1] and evec_basis[2] span the transverse plane.
    */
-  void make_orthonormal_basis();
+  static void make_orthonormal_basis(ThreeVector &evec_polar,
+                                     std::array<ThreeVector, 3> &evec_basis);
   /**
    * compute the lightcone momenta of incoming particles
    * where the longitudinal direction is set to be same
@@ -357,6 +370,8 @@ class StringProcess {
    * \param[in] m_str masses of strings [GeV]
    * \param[out] evec_str are directions in which strings are stretched.
    * \param[in] flip_string_ends is whether or not we randomly switch string ends.
+   * \param[in] separate_fragment_baryon is whether to fragment leading baryons
+   *            (or anti-baryons) with a separate fragmentation function.
    * \return whether fragmentations and final state creation was successful
    */
   bool make_final_state_2strings(
@@ -364,7 +379,7 @@ class StringProcess {
       const std::array<FourVector, 2> &pstr_com,
       const std::array<double, 2> &m_str,
       const std::array<ThreeVector, 2> &evec_str,
-      bool flip_string_ends);
+      bool flip_string_ends, bool separate_fragment_baryon);
 
   /**
    * Single-diffractive process
@@ -419,6 +434,189 @@ class StringProcess {
   bool next_BBbarAnn();
 
   /**
+   * Compare the valence quark contents of the actual and mapped hadrons and
+   * evaluate how many more constituents the actual hadron has compared to the
+   * mapped one.
+   * excess_quark[i - 1] is how many more quarks with flavor i (PDG id i)
+   * pdg_actual has compared to pdg_mapped.
+   * excess_antiq[i - 1] is how many more antiquarks with flavor i (PDG id -i)
+   * pdg_actual has compared to pdg_mapped.
+   *
+   * \param[in] pdg_actual PDG code of actual incoming particle.
+   * \param[in] pdg_mapped PDG code of mapped particles used in PYTHIA
+   *            event generation.
+   * \param[out] excess_quark excess of quarks.
+   * \param[out] excess_antiq excess of anti-quarks.
+   */
+  static void find_excess_constituent(PdgCode &pdg_actual, PdgCode &pdg_mapped,
+                                      std::array<int, 5> &excess_quark,
+                                      std::array<int, 5> &excess_antiq);
+  /**
+   * Convert a partonic PYTHIA partice into the desired species
+   * and update the excess of constituents.
+   * If the quark flavor i is converted into another flavor j,
+   * excess_constituent[i - 1] increases by 1 and
+   * excess_constituent[j - 1] decreases by 1.
+   * Note that this happens only if
+   * excess_constituent[i - 1] < 0 and excess_constituent[j - 1] > 0
+   * (i.e., the incoming hadron has more constituents with flavor j
+   *  and less constituents with flavor i, compared to the mapped hadron),
+   * so they get closer to 0 after the function call.
+   *
+   * \param[out] particle PYTHIA particle object to be converted.
+   * \param[out] excess_constituent excess in the number of quark constituents.
+   *             If the particle has positive (negative) quark number,
+   *             excess of quarks (anti-quarks) should be used.
+   *
+   * \see StringProcess::restore_constituent(Pythia8::Event &,
+   *                         std::array<std::array<int, 5>, 2> &,
+   *                         std::array<std::array<int, 5>, 2> &)
+   */
+  void replace_constituent(Pythia8::Particle &particle,
+                           std::array<int, 5> &excess_constituent);
+  /**
+   * Take the intermediate partonic state from PYTHIA event with mapped hadrons
+   * and convert constituents into the desired ones according to the excess of
+   * quarks and anti-quarks.
+   * Quark (antiquark) flavor is changed and excess of quark (antiquark)
+   * is also updated by calling StringProcess::replace_constituent.
+   * Beginning with the most forward (or backward) constituent,
+   * conversion is done until the total net quark number of each flavor
+   * is same with that of incoming hadrons.
+   * (i.e., excess_quark minus excess_antiq of incoming hadrons becomes zero.)
+   *
+   * \param[out] event_intermediate PYTHIA partonic event record to be updated
+   *             according to the valence quark contents of incoming hadrons.
+   * \param[out] excess_quark excess of quarks
+   *             in incoming particles, compared to the mapped ones.
+   * \param[out] excess_antiq excess of anti-quarks
+   *             in incoming particles, compared to the mapped ones.
+   *
+   * \see StringProcess::replace_constituent(Pythia8::Particle &,
+   *                                         std::array<int, 5> &)
+   */
+  void restore_constituent(Pythia8::Event &event_intermediate,
+                           std::array<std::array<int, 5>, 2> &excess_quark,
+                           std::array<std::array<int, 5>, 2> &excess_antiq);
+
+  /**
+   * Identify a set of partons, which are connected
+   * to form a color-neutral string, from a given PYTHIA event record.
+   * All partons found are moved into a new event record for the further
+   * hadronization process.
+   * Note that col and acol of Pythia8::Particle contain information
+   * on the color flow.
+   * This function begins with the most forward (or backward) parton.
+   *
+   * For example,
+   * quark (col = 1, acol = 0), gluon (col = 2, acol = 1)
+   * and antiquark (col = 0, acol = 2) correspond to
+   * a \f$ \bar{q} \, g \, q \f$ mesonic string.
+   * quark (col = 1, acol = 0) and diquark (col = 0, acol = 1) correspond to
+   * a \f$ qq \, q\f$ baryonic string.
+   *
+   * \param[in] find_forward_string If it is set to be true (false),
+   *                                it begins with forward (backward) parton.
+   * \param[out] event_intermediate PYTHIA event record
+   *                                from which a string is identified.
+   *                                All partons found here are removed.
+   * \param[out] event_hadronize PYTHIA event record
+   *                             to which partons in a string are added.
+   */
+  void compose_string_parton(bool find_forward_string,
+                             Pythia8::Event &event_intermediate,
+                             Pythia8::Event &event_hadronize);
+  /**
+   * Identify a set of partons and junction(s), which are connected
+   * to form a color-neutral string, from a given PYTHIA event record.
+   * All partons found are moved into a new event record for the further
+   * hadronization process.
+   * Junction topology in PYTHIA combines three quarks (antiquarks)
+   * to make a color-neutral baryonic (anti-baryonic) configuration.
+   * A junction (anti-junction) carries three color (anti-color) indices
+   * which are connected with quarks (antiquarks).
+   * This function begins with the first junction.
+   *
+   * For example,
+   * if there is a kind-1 junction with legs (col = 1, 2 and 3),
+   * it will first look for three partons with color indices col = 1, 2 and 3
+   * and trace color indices until each leg is ``closed'' with quark.
+   * If there is no quark in the end, there should be an anti-junction
+   * and its legs are connected to partons with corresponding anti-colors.
+   *
+   * \param[out] find_forward_string If it is set to be true (false),
+   *                                 it is a string in the forward (backward)
+   *                                 direction.
+   * \param[out] event_intermediate PYTHIA event record
+   *                                from which a string is identified.
+   *                                All partons and junction(s) found here
+   *                                are removed.
+   * \param[out] event_hadronize PYTHIA event record
+   *                             to which partons in a string are added.
+   *
+   * \see StringProcess::find_junction_leg(bool, std::vector<int> &,
+   *                                       Pythia8::Event &, Pythia8::Event &)
+   */
+  void compose_string_junction(bool &find_forward_string,
+                               Pythia8::Event &event_intermediate,
+                               Pythia8::Event &event_hadronize);
+
+  /**
+   * Identify partons, which are associated with junction legs,
+   * from a given PYTHIA event record.
+   * All partons found are moved into a new event record for the further
+   * hadronization process.
+   * \param[in] sign_color true (false) if the junction is associated with
+   *                       color (anti-color) indices, corresponding
+   *                       baryonic (anti-baryonic) string
+   * \param[out] col set of color indices that need to be found.
+   *                 The value is set to be zero
+   *                 once the corresponding partons are found.
+   * \param[out] event_intermediate PYTHIA event record
+   *                                from which a string is identified.
+   *                                All partons and junction(s) found here
+   *                                are removed.
+   * \param[out] event_hadronize PYTHIA event record
+   *                             to which partons in a string are added.
+   *
+   * \see StringProcess::compose_string_junction(bool &,
+   *                         Pythia8::Event &, Pythia8::Event &)
+   */
+  void find_junction_leg(bool sign_color, std::vector<int> &col,
+                         Pythia8::Event &event_intermediate,
+                         Pythia8::Event &event_hadronize);
+
+  /**
+   * Obtain index of the most forward or backward particle
+   * in a given PYTHIA event record.
+   * \param[in] find_forward if it looks for the most forward
+   *                         or backward particle.
+   * \param[in] np_end number of the last particle entries to be excluded
+   *                   in lookup. In other words, it finds the most forward
+   *                   (or backward) particle among
+   *                   event[1, ... , event.size() - 1 - np_end].
+   * \param[in] event PYTHIA event record which contains particle entries.
+   *                  Note that event[0] is reserved for information
+   *                  on the entire system.
+   * \return index of the selected particle,
+   *         which is used to access the specific particle entry
+   *         in the event record.
+   */
+  int get_index_forward(bool find_forward, int np_end,
+                        Pythia8::Event &event) {
+    int iforward = 1;
+    for (int ip = 2; ip < event.size() - np_end; ip++) {
+      const double y_quark_current = event[ip].y();
+      const double y_quark_forward = event[iforward].y();
+      if ((find_forward && y_quark_current > y_quark_forward) ||
+          (!find_forward && y_quark_current < y_quark_forward)) {
+        iforward = ip;
+      }
+    }
+    return iforward;
+  }
+
+  /**
    * a function to get the final state particle list
    * which is called after the collision
    * \return ParticleList filled with the final state particles.
@@ -428,6 +626,8 @@ class StringProcess {
   /**
    * compute the formation time and fill the arrays with final-state particles
    * as described in \iref{Andersson:1983ia}.
+   * \param[out] intermediate_particles list of fragmented particles
+                 to be appended
    * \param[in] uString is velocity four vector of the string.
    * \param[in] evecLong is unit 3-vector in which string is stretched.
    * \return number of hadrons fragmented out of string.
@@ -435,8 +635,27 @@ class StringProcess {
    * \throw std::invalid_argument if fragmented particle is not hadron
    * \throw std::invalid_argument if string is neither mesonic nor baryonic
    */
-  int append_final_state(const FourVector &uString,
+  int append_final_state(ParticleList &intermediate_particles,
+                         const FourVector &uString,
                          const ThreeVector &evecLong);
+
+  /**
+   * append new particle from PYTHIA to a specific particle list
+   * \param[in] pdgid PDG id of particle
+   * \param[in] momentum four-momentum of particle
+   * \param[out] intermediate_particles particle list to which
+   *             the new particle is added.
+   * \return whether PDG id exists in ParticleType table.
+   */
+  static bool append_intermediate_list(int pdgid, FourVector momentum,
+                                       ParticleList &intermediate_particles) {
+    const std::string s = std::to_string(pdgid);
+    PdgCode pythia_code(s);
+    ParticleData new_particle(ParticleType::find(pythia_code));
+    new_particle.set_4momentum(momentum);
+    intermediate_particles.push_back(new_particle);
+    return true;
+  }
 
   /**
    * convert Kaon-L or Kaon-S into K0 or Anti-K0
@@ -447,6 +666,15 @@ class StringProcess {
       pythia_id = (random::uniform_int(0, 1) == 0) ? 311 : -311;
     }
   }
+
+  /**
+   * find two quarks from a diquark. Order does not matter.
+   * \param[in] diquark PDG id of diquark
+   * \param[out] q1 PDG id of quark 1
+   * \param[out] q2 PDG id of quark 2
+   * \param[out] deg_spin spin degeneracy
+   */
+  static void quarks_from_diquark(int diquark, int &q1, int &q2, int &deg_spin);
 
   /**
    * Construct diquark from two quarks. Order does not matter.
@@ -476,6 +704,25 @@ class StringProcess {
   }
 
   /**
+   * compute the four-momentum properly oriented in the lab frame.
+   * While PYTHIA assumes that the collision axis is in z-direction,
+   * this is not necessarly the case in SMASH.
+   * \param[in] particle particle object from PYTHIA event generation
+   *            where z-axis is set to be the collision axis
+   * \param[in] evec_basis three basis vectors in the lab frame
+   *            evec_basis[0] is unit vector in the collision axis and
+   *            other two span the transverse plane
+   * \return four-momentum of particle in the lab frame
+   */
+  static FourVector reorient(Pythia8::Particle &particle,
+                             std::array<ThreeVector, 3> &evec_basis) {
+    ThreeVector three_momentum = evec_basis[0] * particle.pz() +
+                                 evec_basis[1] * particle.px() +
+                                 evec_basis[2] * particle.py();
+    return FourVector(particle.e(), three_momentum);
+  }
+
+  /**
    * perform string fragmentation to determine species and momenta of hadrons
    * by implementing PYTHIA 8.2 \iref{Andersson:1983ia}, \iref{Sjostrand:2014zea}.
    * \param[in] idq1 PDG id of quark or anti-diquark (carrying color index).
@@ -484,13 +731,18 @@ class StringProcess {
    * \param[out] evecLong unit 3-vector specifying the direction of diquark or
    *                      anti-diquark.
    * \param[in] flip_string_ends is whether or not we randomly switch string ends.
+   * \param[in] separate_fragment_baryon is whether fragment leading baryon
+   *            (or anti-baryon) with separate fragmentation function.
+   * \param[out] intermediate_particles list of fragmented particles
    * \return number of hadrons fragmented out of string.
    *
    * \throw std::runtime_error
    *        if string mass is lower than threshold set by PYTHIA
    */
   int fragment_string(int idq1, int idq2, double mString,
-                      ThreeVector &evecLong, bool flip_string_ends);
+                      ThreeVector &evecLong, bool flip_string_ends,
+                      bool separate_fragment_baryon,
+                      ParticleList &intermediate_particles);
 
   /**
    * Assign a cross section scaling factor to all outgoing particles.
@@ -503,13 +755,13 @@ class StringProcess {
    * \param[in] baryon_string baryon number of the string
    * \param[out] outgoing_particles list of string fragments to which scaling
    *             factors are assigned
-   * \param[in] evec_coll direction in which the string is stretched
+   * \param[in] evecLong direction in which the string is stretched
    * \param[in] suppression_factor additional coherence factor to be
    *            multiplied with scaling factor
    */
   static void assign_all_scaling_factors(int baryon_string,
                                          ParticleList& outgoing_particles,
-                                         ThreeVector &evec_coll,
+                                         const ThreeVector &evecLong,
                                          double suppression_factor);
 
   /**
@@ -549,10 +801,16 @@ class StringProcess {
    * Positively charged baryons are mapped onto proton and other baryons are
    * mapped onto neutrons. Same rule applies for anti-baryons.
    * Positively (negatively) charged mesons are mapped onto pi+ (pi-).
-   * Neutral mesons are mapped onto pi0.
+   * Negatively and positively charged leptons are mapped respectivly onto
+   * electron and positron.
+   * Currently, we do not have cross sections for leptons and photons
+   * with high energy, so such collisions should not happen.
    *
    * \param[in] pdg PdgCode that will be mapped
    * \return mapped PDG id to be used in PYTHIA
+   *
+   * \throw std::runtime_error
+   *        if the incoming particle is neither hadron nor lepton.
    */
   static int pdg_map_for_pythia(PdgCode &pdg);
 

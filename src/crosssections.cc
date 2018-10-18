@@ -1931,10 +1931,7 @@ CollisionBranchList CrossSections::string_excitation(
     /* Hard string process is added by hard cross section
      * in conjunction with multipartion interaction picture
      * \iref{Sjostrand:1987su}. */
-    double hard_xsec = string_hard_cross_section();
-    if (use_AQM) {
-      hard_xsec *= AQM_factor;
-    }
+    const double hard_xsec = AQM_factor * string_hard_cross_section();
     nondiffractive_soft =
         nondiffractive_all * std::exp(-hard_xsec / nondiffractive_all);
     nondiffractive_hard = nondiffractive_all - nondiffractive_soft;
@@ -2044,6 +2041,7 @@ double CrossSections::string_hard_cross_section() const {
   }
   const ParticleData& data_a = incoming_particles_[0];
   const ParticleData& data_b = incoming_particles_[1];
+
   if (data_a.is_baryon() && data_b.is_baryon()) {
     // Nucleon-nucleon cross section is used for all baryon-baryon cases.
     cross_sec = NN_string_hard(sqrt_s_ * sqrt_s_);
@@ -2054,6 +2052,7 @@ double CrossSections::string_hard_cross_section() const {
     // Pion-pion cross section is used for all meson-meson cases.
     cross_sec = pipi_string_hard(sqrt_s_ * sqrt_s_);
   }
+
   return cross_sec;
 }
 
