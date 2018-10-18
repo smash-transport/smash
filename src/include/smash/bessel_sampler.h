@@ -51,8 +51,8 @@ class BesselSampler {
         N_(std::abs(fixed_difference)),
         N_is_positive_(fixed_difference >= 0) {
     const auto &log = logger<LogArea::GrandcanThermalizer>();
-    assert(poisson_mean1 > 0.0);
-    assert(poisson_mean2 > 0.0);
+    assert(poisson_mean1 >= 0.0);
+    assert(poisson_mean2 >= 0.0);
     log.debug("Bessel sampler", ": Poisson mean N1 = ", poisson_mean1,
               ", Poisson mean N2 = ", poisson_mean2, ", N1 - N2 fixed to ",
               fixed_difference);
