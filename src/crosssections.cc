@@ -89,9 +89,11 @@ static double detailed_balance_factor_RR(double sqrts, double pcm,
  * Append a list of processes to another (main) list of processes.
  */
 static void append_list(CollisionBranchList& main_list,
-                        CollisionBranchList in_list) {
+                        CollisionBranchList in_list,
+                        double weight=1.) {
   main_list.reserve(main_list.size() + in_list.size());
   for (auto& proc : in_list) {
+    proc->set_weight(proc->weight() * weight);
     main_list.emplace_back(std::move(proc));
   }
 }
@@ -128,11 +130,12 @@ CollisionBranchList CrossSections::generate_collision_list(
   const ParticleType& t1 = incoming_particles_[0].type();
   const ParticleType& t2 = incoming_particles_[1].type();
 
-  const bool is_pythia =
-      strings_with_probability &&
-      string_probability(strings_switch, strings_with_probability, use_AQM,
-                         nnbar_treatment == NNbarTreatment::Strings) >
-      random::uniform(0., 1.);
+  double p_pythia = 0.;
+  if (strings_with_probability) {
+    p_pythia = string_probability(strings_switch, strings_with_probability,
+                                  use_AQM,
+                                  nnbar_treatment == NNbarTreatment::Strings);
+  }
 
   /* Elastic collisions between two nucleons with sqrt_s below
    * low_snn_cut can not happen. */
@@ -143,23 +146,25 @@ CollisionBranchList CrossSections::generate_collision_list(
   if (incl_elastic && !reject_by_nucleon_elastic_cutoff) {
     process_list.emplace_back(elastic(elastic_parameter, use_AQM));
   }
-  if (is_pythia) {
+  if (p_pythia > 0.) {
     /* String-excitation cross section =
      * Parametrized total cross - the contributions
      * from all other present channels. */
     const double sig_current = sum_xs_of(process_list);
     const double sig_string = std::max(0., high_energy() - sig_current);
     append_list(process_list,
-                string_excitation(sig_string, string_process, use_AQM));
-    append_list(process_list, rare_two_to_two());
-  } else {
+                string_excitation(sig_string, string_process, use_AQM),
+                p_pythia);
+    append_list(process_list, rare_two_to_two(), p_pythia);
+  }
+  if (p_pythia < 1.) {
     if (two_to_one_switch) {
       // resonance formation (2->1)
-      append_list(process_list, two_to_one());
+      append_list(process_list, two_to_one(), 1. - p_pythia);
     }
     if (included_2to2.any()) {
       // 2->2 (inelastic)
-      append_list(process_list, two_to_two(included_2to2));
+      append_list(process_list, two_to_two(included_2to2), 1. - p_pythia);
     }
   }
   /* NNbar annihilation thru NNbar → ρh₁(1170); combined with the decays
