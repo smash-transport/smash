@@ -124,8 +124,8 @@ void ScatterAction::add_all_scatterings(
    * of the string processes are counted by taking the difference between the
    * parametrized total and the sum of the non-strings. */
   if (!strings_with_probability &&
-      xs.decide_string(strings_switch, strings_with_probability, use_AQM,
-                       nnbar_treatment == NNbarTreatment::Strings)) {
+      xs.string_probability(strings_switch, strings_with_probability, use_AQM,
+                            nnbar_treatment == NNbarTreatment::Strings) == 1.) {
     const double xs_diff = xs.high_energy() - cross_section();
     if (xs_diff > 0.) {
       add_collisions(xs.string_excitation(xs_diff, string_process_, use_AQM));

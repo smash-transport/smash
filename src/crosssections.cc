@@ -130,8 +130,9 @@ CollisionBranchList CrossSections::generate_collision_list(
 
   const bool is_pythia =
       strings_with_probability &&
-      decide_string(strings_switch, strings_with_probability, use_AQM,
-                    nnbar_treatment == NNbarTreatment::Strings);
+      string_probability(strings_switch, strings_with_probability, use_AQM,
+                         nnbar_treatment == NNbarTreatment::Strings) >
+      random::uniform(0., 1.);
 
   /* Elastic collisions between two nucleons with sqrt_s below
    * low_snn_cut can not happen. */
@@ -1994,7 +1995,7 @@ double CrossSections::high_energy() const {
         xs_h = npbar_high_energy(s);  // npbar, nbarp
       }
       /* Transition between low and high energy is set to be consistent with
-       * that defined in decide_string(). */
+       * that defined in string_probability(). */
       double region_lower = transit_high_energy::sqrts_range_NN[0];
       double region_upper = transit_high_energy::sqrts_range_NN[1];
       double prob_high = probability_transit_high(region_lower, region_upper);
@@ -2324,9 +2325,10 @@ CollisionBranchList CrossSections::find_nn_xsection_from_type(
   return channel_list;
 }
 
-bool CrossSections::decide_string(bool strings_switch,
-                                  bool use_transition_probability, bool use_AQM,
-                                  bool treat_BBbar_with_strings) const {
+double CrossSections::string_probability(bool strings_switch,
+                                         bool use_transition_probability,
+                                         bool use_AQM,
+                                         bool treat_BBbar_with_strings) const {
   /* string fragmentation is enabled when strings_switch is on and the process
    * is included in pythia. */
   if (!strings_switch) {
@@ -2355,10 +2357,10 @@ bool CrossSections::decide_string(bool strings_switch,
 
   if (!is_NN_scattering && !is_BBbar_scattering && !is_Npi_scattering &&
       !is_AQM_scattering) {
-    return false;
+    return 0.;
   } else if (is_BBbar_scattering) {
     // BBbar only goes through strings, so there are no "window" considerations
-    return true;
+    return 1.;
   } else {
     /* true for K+ p and K0 p (+ antiparticles), which have special treatment
      * to fit data */
@@ -2381,7 +2383,7 @@ bool CrossSections::decide_string(bool strings_switch,
     /* if we do not use the probability transition algorithm, this is always a
      * string contribution if the energy is large enough */
     if (!use_transition_probability) {
-      return (sqrt_s_ > mass_sum + aqm_offset);
+      return static_cast<double>(sqrt_s_ > mass_sum + aqm_offset);
     }
     /* No strings at low energy, only strings at high energy and
      * a transition region in the middle. Determine transition region: */
@@ -2400,13 +2402,12 @@ bool CrossSections::decide_string(bool strings_switch,
     }
 
     if (sqrt_s_ > region_upper) {
-      return true;
+      return 1.;
     } else if (sqrt_s_ < region_lower) {
-      return false;
+      return 0.;
     } else {
       // Rescale transition region to [-1, 1]
-      double prob_pythia = probability_transit_high(region_lower, region_upper);
-      return prob_pythia > random::uniform(0., 1.);
+      return probability_transit_high(region_lower, region_upper);
     }
   }
 }
