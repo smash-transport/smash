@@ -126,8 +126,8 @@ namespace smash {
  * enabled. Else constant proper time defined by Formation_Time is used.
  *
  * \key Prob_proton_to_d_uu (double, optional, default = 1/3)
- * Probability of splitting an (anti)nucleon into the quark it has only once 
- * and the diquark it contains twice in terms of flavour in the soft string 
+ * Probability of splitting an (anti)nucleon into the quark it has only once
+ * and the diquark it contains twice in terms of flavour in the soft string
  * routine.
  *
  * \page input_collision_term_ Collision_Term
