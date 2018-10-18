@@ -187,9 +187,11 @@ For example, for the sphere or list example file:
     ./smash -i ../input/list/config.yaml
 
 To further use non-default particles and decaymodes files, the `-p`
-and `-d` options are necessary. For the default box, this means:
+and `-d` options are necessary. For the default box or the dileptons example,
+this means:
 
     ./smash -i ../input/box/config.yaml -p ../input/box/particles.txt -d ../input/box/decaymodes.txt
+    ./smash -i ../input/dileptons/config.yaml -d ../input/dileptons/decaymodes.txt
 
 All command line options can be viewed with
 
