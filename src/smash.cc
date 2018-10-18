@@ -8,6 +8,7 @@
  */
 #include <getopt.h>
 
+#include <set>
 #include <sstream>
 #include <vector>
 
@@ -299,6 +300,46 @@ ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
                               0);
 }
 
+/** Checks if the SMASH version is compatible with the version of the
+ * configuration file
+ *
+ * \param[in] configuration The configuration object
+ *
+ * \throws Runtime error if versions do not match or if config version is
+ * invalid
+ */
+void check_config_version_is_compatible(Configuration configuration) {
+  const std::set<std::string> config_1_5_compatible = {"1.4", "1.5"};
+
+  const std::string config_version = configuration.take({"Version"});
+  // extract tagged SMASH major version from CMAKE variable
+  const std::string smash_major_version = std::string(VERSION_MAJOR);
+  const std::string smash_tagged_version = smash_major_version.substr(6, 3);
+
+  std::set<std::string> container;
+  if (config_version == "1.5") {
+    container = config_1_5_compatible;
+  } else {
+    std::stringstream err;
+    err << "Invalid configuration version " << config_version << std::endl;
+    throw std::runtime_error(err.str());
+  }
+
+  if (container.find(smash_tagged_version) == container.end()) {
+    std::stringstream err;
+    err << "The version of the configuration file is not compatible with the "
+           "SMASH version. \nSMASH-version is "
+        << smash_tagged_version << ". Configuration version is "
+        << config_version
+        << ". \nSMASH versions compatible with this version are \n";
+    for (auto it : container) {
+      err << "SMASH-" << it << "\n";
+    }
+
+    throw std::runtime_error(err.str());
+  }
+}
+
 }  // unnamed namespace
 
 }  // namespace smash
@@ -430,6 +471,10 @@ int main(int argc, char *argv[]) {
     for (const auto &config : extra_config) {
       configuration.merge_yaml(config);
     }
+
+    // check if version matches before doing anything else
+    check_config_version_is_compatible(configuration);
+
     if (particles) {
       if (!bf::exists(particles)) {
         std::stringstream err;

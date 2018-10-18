@@ -91,6 +91,7 @@ namespace smash {
  * \par The available keys are documented on the following pages:
  * \li \subpage input_general_
  * \li \subpage input_logging_
+ * \li \subpage input_version_
  * \li \subpage input_collision_term_
  * \li \subpage input_modi_
  * \li \subpage input_output_options_
@@ -119,6 +120,15 @@ namespace smash {
  *
  * Available Settings
  * ------------------
+ */
+
+/*!\Userguide
+ * \page input_version_ Version
+ * This entry in the `config.yaml` file sets the version number of the configuration file. Users should not change this value.  
+ * Its intent is to ensure compability with the SMASH version used. If the config file version and the SMASH version are incompatible, a runtime error is thrown. 
+ *
+ * 
+ * 
  */
 
 /*!\Userguide
