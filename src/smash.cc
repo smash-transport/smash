@@ -437,7 +437,14 @@ int main(int argc, char *argv[]) {
             << "', but the file does not exist.";
         throw std::runtime_error(err.str());
       }
-      configuration["particles"] = read_all(bf::ifstream{particles});
+      std::string particle_string = read_all(bf::ifstream{particles});
+      if (has_crlf_line_ending(particle_string)) {
+        std::stringstream err;
+        err << "The particles file has CRLF line endings. Please use a proper "
+               "UNIX file.";
+        throw std::runtime_error(err.str());
+      }
+      configuration["particles"] = particle_string;
     }
     if (decaymodes) {
       if (!bf::exists(decaymodes)) {
@@ -446,7 +453,14 @@ int main(int argc, char *argv[]) {
             << "', but the file does not exist.";
         throw std::runtime_error(err.str());
       }
-      configuration["decaymodes"] = read_all(bf::ifstream{decaymodes});
+      std::string decay_string = read_all(bf::ifstream{decaymodes});
+      if (has_crlf_line_ending(decay_string)) {
+        std::stringstream err;
+        err << "The decay modes file has CRLF line endings. Please use a "
+               "proper UNIX file.";
+        throw std::runtime_error(err.str());
+      }
+      configuration["decaymodes"] = decay_string;
     }
     if (list2n_activated) {
       // Do not make all elastic cross-sections a fixed number

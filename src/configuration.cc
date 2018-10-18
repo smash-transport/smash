@@ -17,6 +17,7 @@
 #include <boost/filesystem.hpp>
 
 #include "smash/forwarddeclarations.h"
+#include "smash/inputfunctions.h"
 
 namespace smash {
 
@@ -103,6 +104,11 @@ Configuration::Configuration(const bf::path &path, const bf::path &filename) {
     throw FileDoesNotExist("The configuration file was expected at '" +
                            file_path.native() +
                            "', but the file does not exist.");
+  }
+  if (has_crlf_line_ending(read_all(bf::ifstream({file_path})))) {
+    throw std::runtime_error(
+        "The configuration file has CRLF line endings. Please use a proper "
+        "UNIX file.");
   }
   try {
     root_node_ = YAML::LoadFile(file_path.native());
