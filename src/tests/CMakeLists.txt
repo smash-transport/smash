@@ -275,8 +275,9 @@ smash_add_runtest(sphere_run smash smash -m Sphere -e 100.0
                   -c "Modi: {Sphere: {Init_Multiplicities: {111: 100}}}"
                   -c "Modi: {Sphere: {Init_Multiplicities: {2212: 50}}}"
                   -c "Modi: {Sphere: {Init_Multiplicities: {2112: 50}}}")
-smash_add_runtest(dilepton_run smash smash -d ${CMAKE_CURRENT_SOURCE_DIR}/decaymodes_incl_dileptons.txt
-                  -c "Output: {Dileptons: {Format: [Oscar2013]}}")
+smash_add_runtest(dilepton_run smash smash
+                  -i ${PROJECT_SOURCE_DIR}/input/dileptons/config.yaml
+                  -d ${PROJECT_SOURCE_DIR}/input/dileptons/decaymodes.txt)
 
 # verify that binary runs certain time (this corresponds to 20 steps)
 smash_add_runtest(box_steps smash smash -e 2.0 -c "General: {Delta_Time: 0.1}"
