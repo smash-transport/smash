@@ -926,27 +926,26 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   /*!\Userguide
    * \page input_dileptons Dileptons
-   * The existance of a dilepton subsection in the output section of the
+   * The existence of a dilepton subsection in the output section of the
    * configuration file enables the dilepton output.
    * The output file named Dileptons (followed by the
    * appropriate suffix) is generated when SMASH is executed. It's format is
    * identical to the collision output (see \ref format_oscar_collisions),
-   * it does however only contain information about the dilepton decays
-   * at every timestep. \n
+   * it does however only contain information about the dilepton decays. \n
    * Further, the block headers differ from the usual collision output:
    * <div class="fragment">
    * <div class="line"> <span class="preprocessor">
    *  \# interaction in nin out nout rho density weight shining_weight partial
    *  part_weight type proc_type </span></div>
    * </div>
-   *where \li \key nin: Number of ingoing
-   *particles (initial state particles) \li \key nout: Number of outgoing
-   *particles (finalstate particles) \li \key density: Density at the
-   *interaction point \li \key shining_weight: Shining weight of the
-   *interaction. Explanation follows below. \li \key part_weight: The partial
-   *weight of the interaction. For the dileptons, this coincides with the
-   *branching ratio. \li \key proc_type: The type of the underlying process. See
-   * process_type for possible types.
+   * where \li \key nin: Number of ingoing
+   * particles (initial state particles) \li \key nout: Number of outgoing
+   * particles (finalstate particles) \li \key density: Density at the
+   * interaction point \li \key shining_weight: Shining weight of the
+   * interaction. Explanation follows below. \li \key part_weight: The partial
+   * weight of the interaction. For the dileptons, this coincides with the
+   * branching ratio. \li \key proc_type: The type of the underlying process.
+   * See process_type for possible types.
    *
    * Note, that "interaction", "in", "out", "rho", "weight", "partial" and
    * "type" are no variables, but words that are printed. \n
@@ -957,24 +956,26 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * The treatment of Dilepton Decays is special:
    *
    * \li Dileptons are treated via the time integration method, also called
-   * 'shining', as described in \iref{Schmidt:2008hm}, chapter 2D.
+   * 'shining', as e.g. described in \iref{Schmidt:2008hm}, chapter 2D.
    * This means that, because dilepton decays are so rare, possible decays are
    * written in the output at every hadron propagation without ever performing
    * them. The are weighted with a "shining weight" to compensate for the
    * over-production.
    * \li The shining weight can be found in the weight element of the output.
    * \li The shining method is implemented in the DecayActionsFinderDilepton,
-   * which is enabled together with the dilepton output.
+   * which is automatically enabled together with the dilepton output.
    *
    * \n
-   * \note If you want dilepton decays, you also have to modify decaymodes.txt
-   * file located in '$SMASH_SRC_DIRECTORY/input'.
-   * Dilepton decays are commented out by default.
+   * \note If you want dilepton decays, you have to modify decaymodes.txt
+   * file located in '$SMASH_SRC_DIRECTORY/input' otherwise the output will be
+   * empty.
+   * Dilepton decays are commented out by default. You therefore need to
+   * to uncomment them.
    *
    * \n
    * \note
    * As dileptons are treated perturbatively, the produced dileptons are
-   * only  written to the dilepton output, but neither to the usual collision
+   * only written to the dilepton output, but neither to the usual collision
    * output, nor to the particle lists.
    **/
 
