@@ -13,6 +13,7 @@ General:
 
 
 Output:
+    Output_Interval: 5.0
     Particles:
         Format:          ["Oscar2013"]
 
