@@ -159,7 +159,9 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *       a lattice. This lattice needs to be enabled in the conguration file
  *       and is regulated by the options of \ref input_lattice_. See
  *       \ref output_vtk_lattice_ for further information.
- *   \li At a given point or averaged over all particles to ASCII output. See
+ *   \li At a given point to ASCII output. See
+ *       \ref thermodyn_output_user_guide_ for further information.
+ *   \li Averaged over all particles to ASCII output. See
  *       \ref thermodyn_output_user_guide_ for further information.
  *
  *  \key Type (string, optional, default = \key "baryon"): \n
@@ -190,6 +192,8 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *
  *   \key Smearing (bool, optional, default = true): \n
  *   Using Gaussian smearing for computing thermodynamic quantities or not.
+ *   This triggers whether thermodynamic quantities are evaluated at a fixed
+ *   point (\key true) or on the whole lattice (\key false).
  *   \li \key true - smearing applied
  *   \li \key false - smearing not applied
  *

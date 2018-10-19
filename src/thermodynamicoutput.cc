@@ -29,26 +29,27 @@ namespace smash {
  * \page thermodyn_output_user_guide_ ASCII thermodynamics output
  *
  * The thermodynamics output (thermodynamics.dat) is used to output either:
- * \li thermodynamic quantities at one point (if smearing is on)
+ * \li thermodynamic quantities at one point (\key Smearing: on)
  * \li thermodynamic quantities averaged over every particle
- *     in SMASH (if smearing is off - mostly useful for box setups).
- * Smearing can be switched on or off with [Output][Thermodynamics][Smearing]
- * in the config file.
+ *     in SMASH (\key Smearing: off - mostly useful for box setups).
+ *
+ * Smearing can be switched on or off in the configuration file, see
+ * \ref output_content_specific_options_ "content-specific output options".
  *
  * The calculated quantities of the file can include: the Eckart density, the
  * energy-momentum tensor in the lab and/or Landau frame, and the
  * Landau velocity (they will also be outputted in this order); note that the
- * the Eckart density is currently not affected by turning smearing off, and
- * will always return the density at a point. Which of these
- * are outputted needs to be specified using the
- * [Output][Thermodynamics][Quantities] option in the config file. These
- * quantities will be calculated using **one** of the following density types:
- * hadron, baryon, baryonic isospin, pion, or none, as specified from the
- * [Output][Thermodynamics][Type] option of the config file (see input
- * \ref input_output_options_ for more info).
+ * Eckart density is currently not affected by turning smearing off, and
+ * will always return the density at a point.
+ * \n
+ * Which of these quantities are outputted needs to be specified in the config
+ * file. They will be calculated using **one** of the following density types:
+ * hadron, baryon, baryonic isospin, pion, or none.
  *
- * The format of the file is the following:
- * **Header**
+ * The format of the file is the following: \n
+ *
+ * \n
+ * **Header in case of evaluation at one point**
  * \code
  * # **smash_version** thermodynamics output
  * # @ point ( **position** ) [fm]
@@ -56,16 +57,52 @@ namespace smash {
  * # time [fm/c], ** a list of all columns that will be printed, + units **
  * \endcode
  *
- * **Event Header**
+ * The header consists of 4 lines starting with a '#', containing the following
+ * information:
+ * -# SMASH-version and the information, that 'thermodynamic output' is provided
+ * -# The point of evaluation
+ * -# The density type, as specified in the config file
+ * -# The header with all column names
+ *
+ * \n
+ * **Header in case of average over the entire volume**
  * \code
- * # event **number**
+ * # **smash_version** thermodynamics output
+ * # averaged over the entire volume
+ * # **density_type**
+ * # time [fm/c], ** a list of all columns that will be printed, + units **
  * \endcode
  *
- * **Data line*
+ * The header consists of 4 lines starting with a '#', containing the following
+ * information:
+ * -# SMASH-version and the information, that 'thermodynamic output' is provided
+ * -# The info that the quantities are 'averaged over the entire volume'
+ * -# The density type, as specified in the config file
+ * -# The header with all column names
+ *
+ * \n
+ * **Event Header** \n
+ * Each event is indicated with an event starting line:
  * \code
- * time [density] [10 cols Tmunu_lab] [10 cols Tmunu_Landau] [3 cols v_landau]
+ * # event number
  * \endcode
- * Note that the number of columns depends on what was specified in the config,
+ * where
+ * \li \key number: Event number
+ *
+ * Note, that 'event' is not a variable but a word that is printed. \n
+ *
+ * The event indication line is followed by the data lines formatted as:
+ * \code
+ * time [density] [10 cols Tmunu_Lab] [10 cols Tmunu_Landau] [3 cols v_Landau]
+ * \endcode
+ * where
+ * \li \key density: The density specified in the configuration file.
+ * \li \key Tmunu_Lab: Energy-momentum tensor in the lab frame (10 columns).
+ * \li \key Tmunu_Landau: Energy-momentum tensor in the Landau frame
+ *          (10 columns).
+ * \li \key v_Landau: The velocity in Landau frame (3 columns).
+ * Note that the number of columns depends on what was specified in the
+ * configuration file,
  * i.e. all quantities in brackets will only be there if specifically asked for.
  */
 
@@ -77,8 +114,12 @@ ThermodynamicOutput::ThermodynamicOutput(const bf::path &path,
       out_par_(out_par) {
   std::fprintf(file_.get(), "# %s thermodynamics output\n", VERSION_MAJOR);
   const ThreeVector r = out_par.td_position;
-  std::fprintf(file_.get(), "# @ point (%6.2f, %6.2f, %6.2f) [fm]\n", r.x1(),
-               r.x2(), r.x3());
+  if (out_par_.td_smearing) {
+    std::fprintf(file_.get(), "# @ point (%6.2f, %6.2f, %6.2f) [fm]\n", r.x1(),
+                 r.x2(), r.x3());
+  } else {
+    std::fprintf(file_.get(), "# averaged over the entire volume\n");
+  }
   std::fprintf(file_.get(), "# %s\n", to_string(out_par.td_dens_type));
   std::fprintf(file_.get(), "# time [fm/c], ");
   if (out_par_.td_rho_eckart) {
@@ -98,9 +139,9 @@ ThermodynamicOutput::ThermodynamicOutput(const bf::path &path,
     if (out_par_.td_smearing) {
       std::fprintf(file_.get(), "%s [GeV/fm^3] 00 01 02 03 11 12 13 22 23 33, ",
                    to_string(ThermodynamicQuantity::TmnLandau));
-    } else
+    } else {
       std::fprintf(file_.get(), "%s [GeV] 00 01 02 03 11 12 13 22 23 33, ",
-                   to_string(ThermodynamicQuantity::Tmn));
+                   to_string(ThermodynamicQuantity::TmnLandau));
     }
   }
   if (out_par_.td_v_landau) {
