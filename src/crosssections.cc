@@ -89,9 +89,11 @@ static double detailed_balance_factor_RR(double sqrts, double pcm,
  * Append a list of processes to another (main) list of processes.
  */
 static void append_list(CollisionBranchList& main_list,
-                        CollisionBranchList in_list) {
+                        CollisionBranchList in_list,
+                        double weight=1.) {
   main_list.reserve(main_list.size() + in_list.size());
   for (auto& proc : in_list) {
+    proc->set_weight(proc->weight() * weight);
     main_list.emplace_back(std::move(proc));
   }
 }
@@ -128,10 +130,12 @@ CollisionBranchList CrossSections::generate_collision_list(
   const ParticleType& t1 = incoming_particles_[0].type();
   const ParticleType& t2 = incoming_particles_[1].type();
 
-  const bool is_pythia =
-      strings_with_probability &&
-      decide_string(strings_switch, strings_with_probability, use_AQM,
-                    nnbar_treatment == NNbarTreatment::Strings);
+  double p_pythia = 0.;
+  if (strings_with_probability) {
+    p_pythia = string_probability(strings_switch, strings_with_probability,
+                                  use_AQM,
+                                  nnbar_treatment == NNbarTreatment::Strings);
+  }
 
   /* Elastic collisions between two nucleons with sqrt_s below
    * low_snn_cut can not happen. */
@@ -142,23 +146,25 @@ CollisionBranchList CrossSections::generate_collision_list(
   if (incl_elastic && !reject_by_nucleon_elastic_cutoff) {
     process_list.emplace_back(elastic(elastic_parameter, use_AQM));
   }
-  if (is_pythia) {
+  if (p_pythia > 0.) {
     /* String-excitation cross section =
      * Parametrized total cross - the contributions
      * from all other present channels. */
     const double sig_current = sum_xs_of(process_list);
     const double sig_string = std::max(0., high_energy() - sig_current);
     append_list(process_list,
-                string_excitation(sig_string, string_process, use_AQM));
-    append_list(process_list, rare_two_to_two());
-  } else {
+                string_excitation(sig_string, string_process, use_AQM),
+                p_pythia);
+    append_list(process_list, rare_two_to_two(), p_pythia);
+  }
+  if (p_pythia < 1.) {
     if (two_to_one_switch) {
       // resonance formation (2->1)
-      append_list(process_list, two_to_one());
+      append_list(process_list, two_to_one(), 1. - p_pythia);
     }
     if (included_2to2.any()) {
       // 2->2 (inelastic)
-      append_list(process_list, two_to_two(included_2to2));
+      append_list(process_list, two_to_two(included_2to2), 1. - p_pythia);
     }
   }
   /* NNbar annihilation thru NNbar → ρh₁(1170); combined with the decays
@@ -1931,10 +1937,7 @@ CollisionBranchList CrossSections::string_excitation(
     /* Hard string process is added by hard cross section
      * in conjunction with multipartion interaction picture
      * \iref{Sjostrand:1987su}. */
-    double hard_xsec = string_hard_cross_section();
-    if (use_AQM) {
-      hard_xsec *= AQM_factor;
-    }
+    const double hard_xsec = AQM_factor * string_hard_cross_section();
     nondiffractive_soft =
         nondiffractive_all * std::exp(-hard_xsec / nondiffractive_all);
     nondiffractive_hard = nondiffractive_all - nondiffractive_soft;
@@ -1997,7 +2000,7 @@ double CrossSections::high_energy() const {
         xs_h = npbar_high_energy(s);  // npbar, nbarp
       }
       /* Transition between low and high energy is set to be consistent with
-       * that defined in decide_string(). */
+       * that defined in string_probability(). */
       double region_lower = transit_high_energy::sqrts_range_NN[0];
       double region_upper = transit_high_energy::sqrts_range_NN[1];
       double prob_high = probability_transit_high(region_lower, region_upper);
@@ -2044,6 +2047,7 @@ double CrossSections::string_hard_cross_section() const {
   }
   const ParticleData& data_a = incoming_particles_[0];
   const ParticleData& data_b = incoming_particles_[1];
+
   if (data_a.is_baryon() && data_b.is_baryon()) {
     // Nucleon-nucleon cross section is used for all baryon-baryon cases.
     cross_sec = NN_string_hard(sqrt_s_ * sqrt_s_);
@@ -2054,6 +2058,7 @@ double CrossSections::string_hard_cross_section() const {
     // Pion-pion cross section is used for all meson-meson cases.
     cross_sec = pipi_string_hard(sqrt_s_ * sqrt_s_);
   }
+
   return cross_sec;
 }
 
@@ -2325,9 +2330,10 @@ CollisionBranchList CrossSections::find_nn_xsection_from_type(
   return channel_list;
 }
 
-bool CrossSections::decide_string(bool strings_switch,
-                                  bool use_transition_probability, bool use_AQM,
-                                  bool treat_BBbar_with_strings) const {
+double CrossSections::string_probability(bool strings_switch,
+                                         bool use_transition_probability,
+                                         bool use_AQM,
+                                         bool treat_BBbar_with_strings) const {
   /* string fragmentation is enabled when strings_switch is on and the process
    * is included in pythia. */
   if (!strings_switch) {
@@ -2356,10 +2362,10 @@ bool CrossSections::decide_string(bool strings_switch,
 
   if (!is_NN_scattering && !is_BBbar_scattering && !is_Npi_scattering &&
       !is_AQM_scattering) {
-    return false;
+    return 0.;
   } else if (is_BBbar_scattering) {
     // BBbar only goes through strings, so there are no "window" considerations
-    return true;
+    return 1.;
   } else {
     /* true for K+ p and K0 p (+ antiparticles), which have special treatment
      * to fit data */
@@ -2382,7 +2388,7 @@ bool CrossSections::decide_string(bool strings_switch,
     /* if we do not use the probability transition algorithm, this is always a
      * string contribution if the energy is large enough */
     if (!use_transition_probability) {
-      return (sqrt_s_ > mass_sum + aqm_offset);
+      return static_cast<double>(sqrt_s_ > mass_sum + aqm_offset);
     }
     /* No strings at low energy, only strings at high energy and
      * a transition region in the middle. Determine transition region: */
@@ -2401,13 +2407,12 @@ bool CrossSections::decide_string(bool strings_switch,
     }
 
     if (sqrt_s_ > region_upper) {
-      return true;
+      return 1.;
     } else if (sqrt_s_ < region_lower) {
-      return false;
+      return 0.;
     } else {
       // Rescale transition region to [-1, 1]
-      double prob_pythia = probability_transit_high(region_lower, region_upper);
-      return prob_pythia > random::uniform(0., 1.);
+      return probability_transit_high(region_lower, region_upper);
     }
   }
 }

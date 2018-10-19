@@ -14,6 +14,9 @@ If Pythia is used, please cite the following references:
 
 * T. Sjöstrand, S. Mrenna and P. Skands, JHEP05 (2006) 026,
   Comput. Phys. Comm. 178 (2008) 852.
+  
+Report issues at https://github.com/smash-transport/smash
+or contact us by email at h.elfner@gsi.de.
 
 ## How to build SMASH
 
@@ -191,6 +194,11 @@ and `-d` options are necessary. For the default box, this means:
 All command line options can be viewed with
 
     ./smash -h
+
+To run SMASH completely silently for production runs, we recommend to pipe
+stdout to /dev/null, warnings and error messages will still be displayed.
+
+    ./smash > /dev/null
 
 
 ## License

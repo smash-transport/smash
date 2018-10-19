@@ -104,12 +104,16 @@ TEST(sanity_box) {
 }
 
 TEST(sanity_collider) {
-  Configuration conf = Test::configuration();
-  conf.take({"Modi", "Collider", "Projectile"});
-  conf.take({"Modi", "Collider", "Target"});
+  // Remove the particles from the default configuration. The
+  // Test::configuration needs to be called with an empty particle list,
+  // otherwise the new particles would just be appended to the existing ones.
+  Configuration conf = Test::configuration(
+      "Modi: {Collider: {Projectile: }} \n"
+      "Modi: {Collider: {Target: }}");
+  // Specify the new particles after the old ones were removed
   conf["Modi"]["Collider"]["Projectile"]["Particles"]["661"] = 1;
   conf["Modi"]["Collider"]["Target"]["Particles"]["661"] = 1;
-  conf["Modi"]["Collider"]["Ekin"] = 1.0;
+  conf["Modi"]["Collider"]["E_Kin"] = 1.0;
   ExperimentParameters param = smash::Test::default_parameters();
   ColliderModus n(conf["Modi"], param);
   Particles P;
