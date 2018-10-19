@@ -154,11 +154,11 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * \n
  * \anchor Thermodynamics
  * - \b Thermodynamics \n
- *   The user can print thermodynamical quantities on the spatial lattice to
- *   vtk output. Note, that the Thermodynamics output requires a lattice.
- *   This lattice needs to be enabled in the conguration file and is regulated
- *   by the options of
- *   \ref input_lattice_. \n
+ *   The user can print thermodynamical quantities:
+ *   \li on the spatial lattice to vtk output. Note, that this output requires
+ *       a lattice. This lattice needs to be enabled in the conguration file
+ *       and is regulated by the options of \ref input_lattice_.
+ *   \li at a given point or averaged over all particles to ASCII output.
  * \n
  *  \key Type (string, optional, default = \key "baryon"): \n
  *  Particle type taken into consideration, "baryon" corresponds to "net
