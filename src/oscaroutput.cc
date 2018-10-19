@@ -708,10 +708,13 @@ std::unique_ptr<OutputInterface> create_select_format(
   if (modern_format && extended_format) {
     return make_unique<OscarOutput<OscarFormat2013Extended, Contents>>(path,
                                                                        name);
-  } else if (modern_format) {
+  } else if (modern_format && !extended_format) {
     return make_unique<OscarOutput<OscarFormat2013, Contents>>(path, name);
-  } else {
+  } else if (!modern_format && !extended_format) {
     return make_unique<OscarOutput<OscarFormat1999, Contents>>(path, name);
+  } else if (!modern_format && extended_format) {
+    throw std::invalid_argument(
+        "Creating Oscar output: There is no extended Oscar1999 format.");
   }
 }
 }  // unnamed namespace
@@ -742,21 +745,36 @@ std::unique_ptr<OutputInterface> create_oscar_output(
           modern_format, path, out_par, "full_event_history");
     }
   } else if (content == "Dileptons") {
-    if (out_par.dil_extended) {
+    if (modern_format && out_par.dil_extended) {
       return make_unique<
           OscarOutput<OscarFormat2013Extended, OscarInteractions>>(path,
                                                                    "Dileptons");
-    } else {
+    } else if (modern_format && !out_par.dil_extended) {
       return make_unique<OscarOutput<OscarFormat2013, OscarInteractions>>(
           path, "Dileptons");
+    } else if (!modern_format && !out_par.dil_extended) {
+      return make_unique<OscarOutput<OscarFormat1999, OscarInteractions>>(
+          path, "Dileptons");
+    } else if (!modern_format && out_par.dil_extended) {
+      throw std::invalid_argument(
+          "Creating Oscar output: There is no extended Oscar1999 (dileptons) "
+          "format.");
     }
   } else if (content == "Photons") {
-    if (modern_format) {
+    if (modern_format && !out_par.photons_extended) {
       return make_unique<OscarOutput<OscarFormat2013, OscarInteractions>>(
           path, "Photons");
-    } else {
+    } else if (modern_format && out_par.photons_extended) {
+      return make_unique<
+          OscarOutput<OscarFormat2013Extended, OscarInteractions>>(path,
+                                                                   "Photons");
+    } else if (!modern_format && !out_par.photons_extended) {
       return make_unique<OscarOutput<OscarFormat1999, OscarInteractions>>(
           path, "Photons");
+    } else if (!modern_format && out_par.photons_extended) {
+      throw std::invalid_argument(
+          "Creating Oscar output: There is no extended Oscar1999 (photons) "
+          "format.");
     }
   }
 
