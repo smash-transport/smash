@@ -229,6 +229,18 @@ void ScatterActionPhoton::generate_final_state() {
                          (s - pow_int(m_out, 2)) / s) /
                     (pcm_in * (s - pow_int(m_out, 2)) / sqrts);
 
+  // on very rare occasions near the kinematic threshold numerical issues give
+  // unphysical angles.
+  if (costheta > 1 || costheta < -1) {
+    const auto &log = logger<LogArea::ScatterAction>();
+    log.warn() << "Cos(theta)of photon scattering out of physical bounds in "
+                  "the following scattering: "
+               << incoming_particles_ << "Clamping to [-1,1].";
+    if (costheta > 1.0)
+      costheta = 1.0;
+    if (costheta < -1.0)
+      costheta = -1.0;
+  }
   Angles phitheta(random::uniform(0.0, twopi), costheta);
   outgoing_particles_[0].set_4momentum(hadron_out_mass_,
                                        phitheta.threevec() * pcm_out);
