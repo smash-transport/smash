@@ -968,11 +968,13 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * \n
    * \note If you want dilepton decays, you have to modify decaymodes.txt
    * file located in '$SMASH_SRC_DIRECTORY/input' otherwise the output will be
-   * empty.
+   * empty. \n
    * Dilepton decays are commented out by default. You therefore need to
-   * to uncomment them. Note, you cannot easily add new decay channels only in
-   * decaymodes.txt as usual. Additionally, you have to add the decay width
-   * formula to the dilepton decaytypes.
+   * uncomment them. Note, that for dilepton decays, new decay channels can
+   * \b not simply be added to the decaymodes.txt file. You also have to modify
+   * the decay width formulas \key TwoBodyDecayDilepton::width and
+   * \key ThreeBodyDecayDilepton::diff_width in
+   * '$SMASH_SRC_DIRECTORY/src/decaytype.cc'.
    *
    * \n
    * \note
