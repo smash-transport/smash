@@ -28,11 +28,45 @@ namespace smash {
 /*!\Userguide
  * \page thermodyn_output_user_guide_ ASCII thermodynamics output
  *
- * Text
+ * The thermodynamics output (thermodynamics.dat) is used to output either:
+ * \li thermodynamic quantities at one point (if smearing is on)
+ * \li thermodynamic quantities averaged over every particle
+ *     in SMASH (if smearing is off - mostly useful for box setups).
+ * Smearing can be switched on or off with [Output][Thermodynamics][Smearing]
+ * in the config file.
  *
+ * The calculated quantities of the file can include: the Eckart density, the
+ * energy-momentum tensor in the lab and/or Landau frame, and the
+ * Landau velocity (they will also be outputted in this order); note that the
+ * the Eckart density is currently not affected by turning smearing off, and
+ * will always return the density at a point. Which of these
+ * are outputted needs to be specified using the
+ * [Output][Thermodynamics][Quantities] option in the config file. These
+ * quantities will be calculated using **one** of the following density types:
+ * hadron, baryon, baryonic isospin, pion, or none, as specified from the
+ * [Output][Thermodynamics][Type] option of the config file (see input
+ * \ref input_output_options_ for more info).
  *
+ * The format of the file is the following:
+ * **Header**
+ * \code
+ * # **smash_version** thermodynamics output
+ * # @ point ( **position** ) [fm]
+ * # **density_type**
+ * # time [fm/c], ** a list of all columns that will be printed, + units **
+ * \endcode
  *
+ * **Event Header**
+ * \code
+ * # event **number**
+ * \endcode
  *
+ * **Data line*
+ * \code
+ * time [density] [10 cols Tmunu_lab] [10 cols Tmunu_Landau] [3 cols v_landau]
+ * \endcode
+ * Note that the number of columns depends on what was specified in the config,
+ * i.e. all quantities in brackets will only be there if specifically asked for.
  */
 
 ThermodynamicOutput::ThermodynamicOutput(const bf::path &path,
@@ -52,12 +86,22 @@ ThermodynamicOutput::ThermodynamicOutput(const bf::path &path,
                  to_string(ThermodynamicQuantity::EckartDensity));
   }
   if (out_par_.td_tmn) {
-    std::fprintf(file_.get(), "%s [GeV/fm^-3] 00 01 02 03 11 12 13 22 23 33, ",
-                 to_string(ThermodynamicQuantity::Tmn));
+    if (out_par_.td_smearing) {
+      std::fprintf(file_.get(), "%s [GeV/fm^3] 00 01 02 03 11 12 13 22 23 33, ",
+                   to_string(ThermodynamicQuantity::Tmn));
+    } else {
+      std::fprintf(file_.get(), "%s [GeV] 00 01 02 03 11 12 13 22 23 33, ",
+                   to_string(ThermodynamicQuantity::Tmn));
+    }
   }
   if (out_par_.td_tmn_landau) {
-    std::fprintf(file_.get(), "%s [GeV/fm^-3] 00 01 02 03 11 12 13 22 23 33, ",
-                 to_string(ThermodynamicQuantity::TmnLandau));
+    if (out_par_.td_smearing) {
+      std::fprintf(file_.get(), "%s [GeV/fm^3] 00 01 02 03 11 12 13 22 23 33, ",
+                   to_string(ThermodynamicQuantity::TmnLandau));
+    } else
+      std::fprintf(file_.get(), "%s [GeV] 00 01 02 03 11 12 13 22 23 33, ",
+                   to_string(ThermodynamicQuantity::Tmn));
+    }
   }
   if (out_par_.td_v_landau) {
     std::fprintf(file_.get(), "%s x y z ",
