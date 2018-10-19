@@ -252,7 +252,7 @@ void ScatterActionPhoton::generate_final_state() {
     new_particle.boost_momentum(-beta_cm());
   }
 
-  double E_Photon = outgoing_particles_[1].momentum()[0];
+  const double E_Photon = outgoing_particles_[1].momentum()[0];
 
   // if rho in final state take already sampled mass (same as m_out). If rho is
   // incoming take the mass of the incoming particle
@@ -518,7 +518,6 @@ double ScatterActionPhoton::diff_cross_section_w_ff(const double t,
       const double xs = diff_cross_section(t, m_rho);
       const double xs_ff = pow_int(FF, 4) * xs;
       return xs_ff;
-      break;
     }
 
     case ReactionType::pi_z_rho_z_pi_z: {

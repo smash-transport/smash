@@ -82,11 +82,11 @@ inline std::string read_all(std::istream &&input) {
           std::istreambuf_iterator<char>{}};
 }
 
-/** Check if a line in the string ends with \r\n. This may happen when a file
+/** Check if a line in the string ends with \\r\\n. This may happen when a file
  * was edited on Windows.
  *
  * \param[in] in Input string
- * \returns True if \r\n was found, else false
+ * \returns True if \\r\\n was found, else false
  */
 inline bool has_crlf_line_ending(const std::string in) {
   if (in.find("\r\n") != std::string::npos) {

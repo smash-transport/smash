@@ -664,9 +664,6 @@ class PdgCode {
     if (n_J_2 > 9) {
       n_J_1 = n_J_2 - 9;
       n_J_2 = 9;
-      if (n_J_2 > 9) {
-        throw InvalidPdgCode("n_J is too large\n");
-      }
     }
     return antiparticle_sign() *
            (n_J_2 + digits_.n_q3_ * 10 + digits_.n_q2_ * 100 +
