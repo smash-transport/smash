@@ -344,8 +344,8 @@ TEST(string_find_excess_constituent) {
 
   PdgCode pdg_piplus = PdgCode(0x211);
   PdgCode pdg_Kplus = PdgCode(0x321);
-  StringProcess::find_excess_constituent(pdg_Kplus, pdg_piplus,
-                                         excess_quark, excess_antiq);
+  StringProcess::find_excess_constituent(pdg_Kplus, pdg_piplus, excess_quark,
+                                         excess_antiq);
   VERIFY(excess_quark[0] == 0);
   VERIFY(excess_quark[1] == 0);
   VERIFY(excess_quark[2] == 0);
@@ -359,8 +359,8 @@ TEST(string_find_excess_constituent) {
 
   PdgCode pdg_neutron = PdgCode(0x2112);
   PdgCode pdg_Omega = PdgCode(0x3334);
-  StringProcess::find_excess_constituent(pdg_Omega, pdg_neutron,
-                                         excess_quark, excess_antiq);
+  StringProcess::find_excess_constituent(pdg_Omega, pdg_neutron, excess_quark,
+                                         excess_antiq);
   VERIFY(excess_quark[0] == -2);
   VERIFY(excess_quark[1] == -1);
   VERIFY(excess_quark[2] == 3);

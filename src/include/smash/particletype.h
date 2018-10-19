@@ -400,6 +400,8 @@ class ParticleType {
    * \return a list of all ParticleType objects.
    *
    * \note This list is currently sorted, but do not rely on it.
+   * \note It might make sense to inline this function to optimize runtime
+   * performance.
    */
   static const ParticleTypeList &list_all();
 
@@ -556,6 +558,9 @@ class ParticleType {
    * ParticleType over node / NUMA boundaries (an actual pointer would not work,
    * though).
    *
+   * \note It might make sense to inline this function to optimize runtime
+   * performance.
+   *
    * \return A pointer-like object referencing this ParticleType object.
    *
    * \see ParticleTypePtr
@@ -706,20 +711,6 @@ class ParticleTypePtr {
    */
   std::uint16_t index_ = 0xffff;
 };
-
-// #define some global variables and functions
-#ifdef SMASH_INLINE_LIST_ALL
-extern const ParticleTypeList *all_particle_types;
-inline const ParticleTypeList &ParticleType::list_all() {
-  assert(all_particle_types);
-  return *all_particle_types;
-}
-inline ParticleTypePtr ParticleType::operator&() const {
-  const auto offset = this - std::addressof(list_all()[0]);
-  assert(offset >= 0 && offset < 0xffff);
-  return {static_cast<uint16_t>(offset)};
-}
-#endif
 
 inline ParticleTypePtr ParticleType::get_antiparticle() const {
   assert(has_antiparticle());
