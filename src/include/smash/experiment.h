@@ -970,7 +970,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * file located in '$SMASH_SRC_DIRECTORY/input' otherwise the output will be
    * empty.
    * Dilepton decays are commented out by default. You therefore need to
-   * to uncomment them.
+   * to uncomment them. Note, you cannot easily add new decay channels only in
+   * decaymodes.txt as usual. Additionally, you have to add the decay width
+   * formula to the dilepton decaytypes.
    *
    * \n
    * \note
