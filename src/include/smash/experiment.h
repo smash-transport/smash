@@ -597,7 +597,7 @@ ExperimentParameters create_experiment_parameters(Configuration config);
 /*!\Userguide
  * \page input_general_
  * \key End_Time (double, required): \n
- * The time after which the evolution is stopped. Note
+ * The time in fm after which the evolution is stopped. Note
  * that the starting time depends on the chosen Modus.
  *
  * \key Randomseed (int, required): \n
@@ -673,8 +673,9 @@ ExperimentParameters create_experiment_parameters(Configuration config);
  * Turning off strings or elastic collisions while leaving this on will
  * result in the corresponding part of the AQM cross-sections to also be off.
  * Cross-sections parametrization are scaled according to
- * \f[ \frac{\sigma^{AQM}_{process}}{\sigma^{AQM}_{ref_process}}
- * \sigma^{param}_{ref_process}\f]
+ * \f[
+ * \frac{\sigma^{AQM}_{\mathrm{process}}}{\sigma^{AQM}_\mathrm{ref\_process}}
+ * \sigma^{param}_\mathrm{ref\_process}\f]
  * where \f$ \sigma^{AQM}_x = 40 \left( \frac{2}{3} \right)^{n_{meson}}
  * (1 - 0.4 x^s_1) (1 - 0.4 x^s_2) \f$, with \f$n_{meson}\f$ being the number
  * of mesons in the process, \f$x^s_{1,2}\f$ the fraction of strange quarks in
@@ -884,10 +885,12 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * - \b Photons    Special photon output, see \subpage input_photons.
    *   - Available formats: \ref format_oscar_collisions,
    *                   \ref format_binary_ and \ref format_root.
-   * - \b Thermodynamics This output allows to print out thermodynamic
-   *          quantities such as density, energy-momentum tensor,
-   *          Landau velocity, etc at one selected point versus time
-   *          and on a spatial lattice  versus time \ref Thermodynamics.
+   * - \b Thermodynamics   This output allows to print out thermodynamic
+   *          quantities, see \ref Thermodynamics.
+   *    - Available formats: \ref thermodyn_output_user_guide_,
+   *      \ref output_vtk_lattice_
+   *
+   * \n
    * \anchor list_of_output_formats
    * Output formats
    * --------------
@@ -914,7 +917,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *   - For "Particles" content \subpage format_vtk
    *   - For "Thermodynamics" content \subpage output_vtk_lattice_
    * - \b "ASCII" - a human-readable text-format table of values
-   *   - Used only for "Thermodynamics", see \ref Thermodynamics
+   *   - Used only for "Thermodynamics", see
+   * \subpage thermodyn_output_user_guide_
    *
    * \note Output of coordinates for the "Collisions" content in
    *       the periodic box has a feature:
@@ -923,73 +927,132 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   /*!\Userguide
    * \page input_dileptons Dileptons
-   * Enables the dilepton output together with the possible dilepton decay
-   * channels.
-   * If dileptons are enabled, the output file named Dileptons (followed by the
+   * The existence of a dilepton subsection in the output section of the
+   * configuration file enables the dilepton output.
+   * The output file named Dileptons (followed by the
    * appropriate suffix) is generated when SMASH is executed. It's format is
    * identical to the collision output (see \ref format_oscar_collisions),
-   * it does however only contain information about the dilepton decays
-   * at every timestep. \n
+   * it does however only contain information about the dilepton decays. \n
    * Further, the block headers differ from the usual collision output:
-   * \code
-   * # interaction in nin out nout rho density weight shining_weight partial
-   *part_weight type proc_type \endcode where \li \key nin: Number of ingoing
-   *particles (initial state particles) \li \key nout: Number of outgoing
-   *particles (finalstate particles) \li \key density: Density at the
-   *interaction point \li \key shining_weight: Shining weight of the
-   *interaction. Explanation follows below. \li \key part_weight: The partial
-   *weight of the interaction. For the dileptons, this coincides with the
-   *branching ratio. \li \key proc_type: The type of the underlying process. See
-   * process_type for possible types.
+   * <div class="fragment">
+   * <div class="line"> <span class="preprocessor">
+   *  \# interaction in nin out nout rho density weight shining_weight partial
+   *  part_weight type proc_type </span></div>
+   * </div>
+   * where \li \key nin: Number of ingoing
+   * particles (initial state particles) \li \key nout: Number of outgoing
+   * particles (finalstate particles) \li \key density: Density at the
+   * interaction point \li \key shining_weight: Shining weight of the
+   * interaction. Explanation follows below. \li \key part_weight: The partial
+   * weight of the interaction. For the dileptons, this coincides with the
+   * branching ratio. \li \key proc_type: The type of the underlying process.
+   * See process_type for possible types.
+   *
+   * Note, that "interaction", "in", "out", "rho", "weight", "partial" and
+   * "type" are no variables, but words that are printed. \n
+   * The dilepton output is available in binary, OSCAR1999, OSCAR2013 and
+   * OSCAR2013 extended format. \n
    *
    * \n
    * The treatment of Dilepton Decays is special:
    *
    * \li Dileptons are treated via the time integration method, also called
-   * 'shining', as described in \iref{Schmidt:2008hm}, chapter 2D.
+   * 'shining', as e.g. described in \iref{Schmidt:2008hm}, chapter 2D.
    * This means that, because dilepton decays are so rare, possible decays are
    * written in the output at every hadron propagation without ever performing
    * them. The are weighted with a "shining weight" to compensate for the
    * over-production.
    * \li The shining weight can be found in the weight element of the output.
    * \li The shining method is implemented in the DecayActionsFinderDilepton,
-   * which is enabled together with the dilepton output.
+   * which is automatically enabled together with the dilepton output.
    *
-   * \note If you want dilepton decays, you also have to modify decaymodes.txt.
-   * Dilepton decays are commented out by default.
+   * \n
+   * \note If you want dilepton decays, you have to modify decaymodes.txt
+   * file located in '$SMASH_SRC_DIRECTORY/input' otherwise the output will be
+   * empty. \n
+   * Dilepton decays are commented out by default. You therefore need to
+   * uncomment them. Note, that for dilepton decays, new decay channels can
+   * \b not simply be added to the decaymodes.txt file. You also have to modify
+   * the decay width formulas \key TwoBodyDecayDilepton::width and
+   * \key ThreeBodyDecayDilepton::diff_width in
+   * '$SMASH_SRC_DIRECTORY/src/decaytype.cc'.
+   *
+   * \n
+   * \note
+   * As dileptons are treated perturbatively, the produced dileptons are
+   * only written to the dilepton output, but neither to the usual collision
+   * output, nor to the particle lists.
    **/
 
   /*!\Userguide
    * \page input_photons Photons
-   * Enables the photon output together with the correpsoning
-   * ScatterActionPhoton.
+   * The existance of a photon subsection in the output section of the
+   * configuration file enables the photon output together with the possible
+   * photon producing scattering processes.
+   * If photons are enabled, the output file named Photons (followed by the
+   * appropriate suffix) is generated when SMASH is executed. It's format is
+   * identical to the collision output (see \ref format_oscar_collisions),
+   * it does however only contain information about all particles participating
+   * in the photon producing interactions at each timestep. \n
+   * Further, the block headers differ from the usual collision output:
+   * <div class="fragment">
+   * <div class="line"> <span class="preprocessor">
+   *  \# interaction in nin out nout rho density weight photon_weight partial
+   *  part_weight type proc_type </span></div>
+   * </div>
+   * where
+   * \li \key density: Density at the interaction point
+   * \li \key photon_weight: Weight of the photon process relative to the
+   * underlying hadonic interaction. Make sure to weigh each photon in your
+   * analysis with this value. Otherwise the photon production is highly
+   * overestimated.
+   * \li \key part_weight: Always 0.0 for photon processes, as they
+   * are hardcoded.
+   * \li \key proc_type: The type of the underlying process. See
+   * \ref process_type for possible types.
    *
+   * Note, that "interaction", "in", "out", "rho", "weight", "partial" and
+   * "type" are no variables, but words that are printed. \n
+   * The photon output is available in binary, OSCAR1999, OSCAR2013 and
+   * OSCAR2013 extended format. \n
+   *
+   * \n
+   * ### Photon production in SMASH
    * Photons are treated perturbatively and are produced from binary
    * scattering processes. Their production follows the framework from Turbide
    * et al. described in \iref{Turbide:2006}. Following the perturbative
    * treatment, the produced photons do not contribute to the evolution of the
    * hadronic system. They are rather direcly printed to the photon output.
    * The mechanism for photon production is the following:
-   * \li Look for hadronic interactions of particles that are also incoming
+   * -# Look for hadronic interactions of particles that are also incoming
    * particles of a photon process. Currently, the latter include binary
    * scatterings of \f$ \pi \f$ and \f$ \rho \f$ mesons.
-   * \li Perform the photon action and write the results to the photon output.
-   * The final state particles are not of interested anymore as they are not
-   * propagated further in the evolution. To account for the probabiity that
+   * -# Perform the photon action and write the results to the photon output.
+   * The final state particles are not of interest anymore as they are not
+   * propagated further in the evolution. To account for the probability that
    * photon processes are significantly less likely than hadronic processes,
    * the produced photons are weighted according to the ratio of the photon
-   * cross section to the hadronic cross section used the find the interaction.
-   * This weight can be found in the weight element of the photon output.
-   * \li Perform the original hadronic action based on which the photon action
+   * cross section to the hadronic cross section used to find the interaction,
+   * \f$  W = \frac{\sigma_\gamma}{\sigma_\mathrm{hadronic}}\f$.
+   * This weight can be found in the weight element of the photon output,
+   *denoted as \key photon_weight in the above.
+   * -# Perform the original hadronic action based on which the photon action
    * was found. Propagate all final states particles throughout the hadronic
    * evolution as if no photon action had occured.
    *
    * As photons are produced very rarely, a lot of statistics is necessery to
    * yield useful results. Alternatively, it it possible to use fractional
-   * photons. This means that for each produced photon, \f$ N_{\text{Frac}} \f$
+   * photons (see \ref output_content_specific_options_
+   * "Content-specific output options" on how to activate them).
+   * This means that for each produced photon, \f$ N_{\text{Frac}} \f$
    * photons are actually sampled with different kinematic properties so that
-   * more phase space is covered. See \ref input_output_options_ on how to set
-   *the flag.
+   * more phase space is covered. In case fractional photons are used, the
+   * weight es redefined as
+   *\f$ W = \frac{\frac{\mathrm{d}\sigma_\gamma}{\mathrm{d}t} \ (t_2 - t_1)}{
+   *			  N_\mathrm{frac} \ \sigma_{\mathrm{had}}} \f$.
+   * \note As photons are treated perturbatively, the produced photons are only
+   * written to the photon output, but neither to the usual collision output,
+   * nor to the particle lists.
    **/
 
   dens_type_ = config.take({"Output", "Density_Type"}, DensityType::None);
@@ -1033,6 +1096,18 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   /*!\Userguide
    * \page input_lattice_ Lattice
+   * It is possible to configure a Lattice for the 3D space, which can be
+   * useful to speed up the computation of the potentials. Note though, that
+   * this goes in hand with a loss of accuracy: If the lattice is
+   * applied, the evaluation of the potentials is carried out only on the nodes
+   * of the lattice. Intermediate values are interpolated. \n
+   * The configuration of a lattice is usually not necessary, it is however
+   * required if the Thermodynamic VTK Output (see
+   * \ref output_vtk_lattice_) or the \key Potentials_Affect_Thresholds option
+   * is enabled. \n
+   * The following parameters are only required, if the \key Lattice section is
+   * used in the configuration file. Otherwise, no lattice will be used at all.
+   *
    *
    * \key Sizes (array<double,3>, required, no default): \n
    *      Sizes of lattice in x, y, z directions in fm.
@@ -1051,9 +1126,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * Include potential effects, since mean field potentials change the threshold
    * energies of the actions.
    *
-   * For format of lattice output see \ref output_vtk_lattice_. To configure
-   * output of the quantities on the lattice to vtk files see
-   * \ref input_output_options_.
+   * For information on the format of the lattice output see
+   * \ref output_vtk_lattice_. To configure the
+   * thermodynamic output, see \ref input_output_options_.
    *
    * \n
    * Examples: Configuring the Lattice
