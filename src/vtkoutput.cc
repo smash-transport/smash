@@ -39,7 +39,8 @@ VtkOutput::~VtkOutput() {}
  * a separate VTK file is written. File names are constructed as follows:
  * pos_ev<event>_tstep<output_number>.vtk.
  *
- * Files contain particle coordinates, momenta and PDG codes and masses. VTK
+ * Files contain particle coordinates, momenta, PDG codes, cross-section
+ * scaling factors and masses. VTK
  * output is known to work with paraview, a free visualization and data
  * analysis software. Files of this format are supposed to be used as a black
  * box and opened with paraview, but at the same time they are

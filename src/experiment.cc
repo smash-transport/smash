@@ -125,16 +125,19 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * \anchor output_content_specific_options_
  *
  * - \b Particles \n
- *   \key Extended (bool, optional, default = false): \n
+ *   \key Extended (bool, optional, default = false, incompatible with
+ *                  Oscar1999, VTK and ROOT formats): \n
  *   \li \key true - Print extended information for each particle \n
  *   \li \key false - Regular output for each particle
  *
- *   \key Only_Final (bool, optional, default = true): \n
+ *   \key Only_Final (bool, optional, default = true, incompatible with
+                      VTK format): \n
  *   \li \key true - Print only final particle list \n
  *   \li \key false - Particle list at output interval including initial time \n
  * \n
  * - \b Collisions \n
- *   \key Extended (bool, optional, default = false): \n
+ *   \key Extended (bool, optional, default = false, incompatible with
+ *                  Oscar1999, VTK and ROOT formats): \n
  *   \li \key true - Print extended information for each particle \n
  *   \li \key false - Regular output for each particle
  *
@@ -143,11 +146,14 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *   \li \key false - Initial and final particle list is not printed out \n
  * \n
  * - \b Dileptons \n
- *   \key Extended (bool, optional, default = false): \n
+ *   \key Extended (bool, optional, default = false, only compatible with
+ *                  Oscar2013 format): \n
  *   \li \key true - Print extended information for each particle \n
  *   \li \key false - Regular output for each particle \n
  * \n
  * - \b Photons \n
+ *   \key Extended (bool, optional, default = false, only compatible with
+ *                  Oscar2013 format): \n
  *   \key Fractions (int, required): \n
  *   Number of fractional photons sampled per single perturbatively produced
  *   photon. See \ref input_photons for further information. \n
