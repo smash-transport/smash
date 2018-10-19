@@ -35,7 +35,8 @@ struct OutputParameters {
         part_only_final(true),
         coll_extended(false),
         coll_printstartend(false),
-        dil_extended(false) {}
+        dil_extended(false),
+        photons_extended(false) {}
 
   /// Constructor from configuration
   explicit OutputParameters(Configuration&& conf) : OutputParameters() {
@@ -75,6 +76,10 @@ struct OutputParameters {
     if (conf.has_value({"Dileptons"})) {
       dil_extended = conf.take({"Dileptons", "Extended"}, false);
     }
+
+    if (conf.has_value({"Photons"})) {
+      photons_extended = conf.take({"Photons", "Extended"}, false);
+    }
   }
 
   /**
@@ -87,6 +92,8 @@ struct OutputParameters {
       return coll_extended;
     } else if (name == "Dileptons") {
       return dil_extended;
+    } else if (name == "Photons") {
+      return photons_extended;
     } else {
       return false;  // error
     }
@@ -133,6 +140,9 @@ struct OutputParameters {
 
   /// Extended format for dilepton output
   bool dil_extended;
+
+  /// Extended format for photon output
+  bool photons_extended;
 };
 
 }  // namespace smash
