@@ -193,7 +193,7 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *   \key Smearing (bool, optional, default = true): \n
  *   Using Gaussian smearing for computing thermodynamic quantities or not.
  *   This triggers whether thermodynamic quantities are evaluated at a fixed
- *   point (\key true) or on the whole lattice (\key false).
+ *   point (\key true) or averaged over all particles (\key false).
  *   \li \key true - smearing applied
  *   \li \key false - smearing not applied
  *
