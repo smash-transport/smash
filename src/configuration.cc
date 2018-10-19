@@ -15,6 +15,7 @@
 
 #include <yaml-cpp/yaml.h>  // NOLINT(build/include_order)
 #include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 #include "smash/forwarddeclarations.h"
 #include "smash/inputfunctions.h"
