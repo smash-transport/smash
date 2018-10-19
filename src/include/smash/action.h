@@ -359,7 +359,6 @@ class Action {
               //          random_weight, "\n", *this);
               random_weight, "\n");
     abort();
-    throw std::runtime_error("problem in choose_channel");
   }
 
   /**
