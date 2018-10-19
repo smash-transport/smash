@@ -148,9 +148,13 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *   \li \key false - Regular output for each particle \n
  * \n
  * - \b Photons \n
- *   \key Fractions (int, required): \n
+ *   \key Fractions (int, required):
  *   Number of fractional photons sampled per single perturbatively produced
  *   photon. See \ref input_photons for further information. \n
+ *
+ *   \key Extended (bool, optional, default = false): \n
+ *   \li \key true - Print extended information for each particle \n
+ *   \li \key false - Regular output for each particle \n
  * \n
  * \anchor Thermodynamics
  * - \b Thermodynamics \n
