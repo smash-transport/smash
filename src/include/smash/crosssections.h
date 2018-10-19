@@ -261,8 +261,9 @@ class CrossSections {
    * \param[in] use_AQM whether AQM is activated
    * \param[in] treat_nnbar_with_strings use strings for nnbar treatment?
    */
-  double string_probability(bool strings_switch, bool use_transition_probability,
-                            bool use_AQM, bool treat_nnbar_with_strings) const;
+  double string_probability(bool strings_switch,
+                            bool use_transition_probability, bool use_AQM,
+                            bool treat_nnbar_with_strings) const;
 
   /**
    * \param[in] region_lower the lowest sqrts in the transition region [GeV]

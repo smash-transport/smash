@@ -89,8 +89,7 @@ static double detailed_balance_factor_RR(double sqrts, double pcm,
  * Append a list of processes to another (main) list of processes.
  */
 static void append_list(CollisionBranchList& main_list,
-                        CollisionBranchList in_list,
-                        double weight=1.) {
+                        CollisionBranchList in_list, double weight = 1.) {
   main_list.reserve(main_list.size() + in_list.size());
   for (auto& proc : in_list) {
     proc->set_weight(proc->weight() * weight);
@@ -132,9 +131,9 @@ CollisionBranchList CrossSections::generate_collision_list(
 
   double p_pythia = 0.;
   if (strings_with_probability) {
-    p_pythia = string_probability(strings_switch, strings_with_probability,
-                                  use_AQM,
-                                  nnbar_treatment == NNbarTreatment::Strings);
+    p_pythia =
+        string_probability(strings_switch, strings_with_probability, use_AQM,
+                           nnbar_treatment == NNbarTreatment::Strings);
   }
 
   /* Elastic collisions between two nucleons with sqrt_s below
