@@ -440,8 +440,8 @@ int main(int argc, char *argv[]) {
       std::string particle_string = read_all(bf::ifstream{particles});
       if (has_crlf_line_ending(particle_string)) {
         std::stringstream err;
-        err << "The particles file has CRLF line endings. Please use a proper "
-               "UNIX file.";
+        err << "The particles file has CR LF line endings. Please use LF"
+               " line endings.";
         throw std::runtime_error(err.str());
       }
       configuration["particles"] = particle_string;
@@ -456,8 +456,8 @@ int main(int argc, char *argv[]) {
       std::string decay_string = read_all(bf::ifstream{decaymodes});
       if (has_crlf_line_ending(decay_string)) {
         std::stringstream err;
-        err << "The decay modes file has CRLF line endings. Please use a "
-               "proper UNIX file.";
+        err << "The decay mode file has CR LF line endings. Please use LF"
+               " line endings.";
         throw std::runtime_error(err.str());
       }
       configuration["decaymodes"] = decay_string;

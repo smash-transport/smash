@@ -107,8 +107,8 @@ Configuration::Configuration(const bf::path &path, const bf::path &filename) {
   }
   if (has_crlf_line_ending(read_all(bf::ifstream({file_path})))) {
     throw std::runtime_error(
-        "The configuration file has CRLF line endings. Please use a proper "
-        "UNIX file.");
+        "The configuration file has CR LF line endings. Please use LF "
+        "line endings.");
   }
   try {
     root_node_ = YAML::LoadFile(file_path.native());
