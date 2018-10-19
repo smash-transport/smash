@@ -597,7 +597,7 @@ ExperimentParameters create_experiment_parameters(Configuration config);
 /*!\Userguide
  * \page input_general_
  * \key End_Time (double, required): \n
- * The time (in fm) after which the evolution is stopped. Note
+ * The time in fm after which the evolution is stopped. Note
  * that the starting time depends on the chosen Modus.
  *
  * \key Randomseed (int, required): \n
