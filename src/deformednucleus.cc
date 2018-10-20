@@ -22,7 +22,7 @@ namespace smash {
 /*!\Userguide
  * \page projectile_and_target Projectile and Target
  *
- * Additional Parameters to specify the spherical shape of the deformed
+ * Additional parameters to specify the spherical shape of the deformed
  * nucleus following \iref{Moller:1993ed}.
  *
  * \li \key Beta_2 (double, optional):\n

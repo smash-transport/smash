@@ -97,10 +97,10 @@ namespace smash {
  * proton, one neutron and one Lambda).
  *
  * \li \key Automatic_Woods_Saxon (bool, optional, no default): \n
- * true - sets all necessary parameters for the Woods Saxon distribution based
+ * true - Sets all necessary parameters for the Woods Saxon distribution based
  * on the atomic number of the input nucleus \n
- * false - manually specified values for \key Diffusiveness, \key Radius and
- * \key Saturation_Density are emploied
+ * false - Manually specified values for \key Diffusiveness, \key Radius and
+ * \key Saturation_Density are employed
  *
  * \li \key Diffusiveness (double, optional, default = 0.545): \n
  * Diffusiveness of the Woods Saxon distribution for the nucleus in fm.
@@ -113,8 +113,15 @@ namespace smash {
  * Saturation density of the nucleus in 1/fm^3.
  *
  * \li \key Deformed (bool, optional, default = false): \n
- * true - deformed nucleus is initialized \n
- * false - spherical nucleus is initialized
+ * true - Deformed nucleus is initialized \n
+ * false - Spherical nucleus is initialized
+ *
+ * \li \key Automatic_Deformation (bool, optional, no default): \n
+ * true - Set parameters of spherical deformation based on mass number of the
+ * nucleus.\n
+ * flase - Manually set parameters of spherical deformation. This requires the
+ * additional specification of \key Beta_2, \key Beta_4, \key Theata and
+ * \key Phi.
  *
  * \page input_modi_collider_ Collider
  * \subpage input_impact_parameter_
