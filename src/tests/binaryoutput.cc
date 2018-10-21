@@ -318,7 +318,10 @@ TEST(particles_format) {
     VERIFY(compare_particles_block_header(npart, binF));
     VERIFY(compare_particle(final_particles[0], binF));
 
-    // paricles at event end: nothing expected, because only_final option is off
+    // particles at event end
+    npart = 1;
+    VERIFY(compare_particles_block_header(npart, binF));
+    VERIFY(compare_particle(final_particles[0], binF));
 
     // after end of event
     VERIFY(compare_final_block_header(event_id, impact_parameter, binF));
