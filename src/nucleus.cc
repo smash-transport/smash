@@ -409,9 +409,9 @@ void Nucleus::boost(double beta_scalar) {
      * in the JAM code \iref{Nara:1999dz}: p' = p_beam + gamma*p_F.
      * This formula is derived under assumption that all nucleons have
      * the same binding energy. */
-    ThreeVector mom_i = i->momentum().threevec();
+    FourVector mom_i = i->momentum();
     i->set_4momentum(i->pole_mass(), mom_i.x1(), mom_i.x2(),
-                     gamma * (beta_scalar * i->pole_mass() + mom_i.x3()));
+                     gamma * (beta_scalar * mom_i.x0() + mom_i.x3()));
   }
 }
 

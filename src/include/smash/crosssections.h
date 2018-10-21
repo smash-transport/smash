@@ -221,8 +221,8 @@ class CrossSections {
   double high_energy() const;
 
   /**
-   * Return, if the scattering between the incoming particles are scattering
-   * via string fragmentation or not.
+   * \return the probability whether the scattering between the incoming
+   * particles is via string fragmentation or not.
    *
    * If use_transition_probability is true:
    * The string fragmentation is implemented in the same way in GiBUU (Physics
@@ -248,24 +248,22 @@ class CrossSections {
    * Both of these methods are initially implemented for NN and Npi cross-
    * sections, and extended using the AQM to all BB, BM and MM interactions.
    *
-   * Baryon-antibaryon annihilation also uses this function to decide
-   * whether to produce strings or not.
-   * Since there are no other contributions for this process,
-   * there are no cutoffs or gradual increase in the probability of this process
-   * happening or not, it just requires the proper combination of incoming
-   * particles and config parameters.
+   * Baryon-antibaryon annihilation also uses this function to decide whether to
+   * produce strings or not.
+   * Since there are no other contributions for this process, there are no
+   * cutoffs or gradual increase in the probability of this process happening or
+   * not, it just requires the proper combination of incoming particles and
+   * config parameters.
    *
    * \param[in] strings_switch Is string fragmentation enabled?
    * \param[in] use_transition_probability which algorithm to use for string
    *                         treatment (see Switch_on_String_with_Probability)
    * \param[in] use_AQM whether AQM is activated
    * \param[in] treat_nnbar_with_strings use strings for nnbar treatment?
-   *
-   * \return Is the scattering between the incoming particles done via string·
-   * fragmentation or not?
    */
-  bool decide_string(bool strings_switch, bool use_transition_probability,
-                     bool use_AQM, bool treat_nnbar_with_strings) const;
+  double string_probability(bool strings_switch,
+                            bool use_transition_probability, bool use_AQM,
+                            bool treat_nnbar_with_strings) const;
 
   /**
    * \param[in] region_lower the lowest sqrts in the transition region [GeV]
@@ -399,7 +397,7 @@ class CrossSections {
    * Determine the (parametrized) hard non-diffractive string cross section
    * for this collision.
    *
-   * \return Parametrized cross section without AQM scaling.
+   * \return Parametrized cross section (without AQM scaling).
    */
   double string_hard_cross_section() const;
 

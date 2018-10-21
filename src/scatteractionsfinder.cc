@@ -103,6 +103,12 @@ namespace smash {
  * \key StringZ_B (double, optional, default = 0.5) \n
  * Parameter \f$b\f$ in pythia fragmentation function shown above.
  *
+ * \key Leading_Frag_Mean (double, optional, default = 0.7) \n
+ * Mean of Gaussian used as fragmentation function for leading hadrons.
+ *
+ * \key Leading_Frag_Width (double, optional, default = 0.25) \n
+ * Width of Gaussian used as fragmentation function for leading hadrons.
+ *
  * \key String_Sigma_T (double, optional, default = 0.5)
  * Standard deviation in Gaussian for transverse momentum distributed to
  * string fragments during fragmentation.
@@ -118,6 +124,11 @@ namespace smash {
  * \key Use_Yoyo_Model (bool, optional, default = true)
  * Calculate the string fragments' formation times from the yoyo-model if
  * enabled. Else constant proper time defined by Formation_Time is used.
+ *
+ * \key Prob_proton_to_d_uu (double, optional, default = 1/3)
+ * Probability of splitting an (anti)nucleon into the quark it has only once
+ * and the diquark it contains twice in terms of flavour in the soft string
+ * routine.
  *
  * \page input_collision_term_ Collision_Term
  * \n
@@ -156,12 +167,15 @@ namespace smash {
          Gluon_Pmin: 0.001
          Quark_Alpha: 1.0
          Quark_Beta: 2.5
-         Strange_Supp: 0.217
-         Diquark_Supp: 0.081
-         Sigma_Perp: 0.7
+         Strange_Supp: 0.12
+         Diquark_Supp: 0.03
+         Sigma_Perp: 0.42
+         Leading_Frag_Mean: 1.0
+         Leading_Frag_Width: 0.6
          StringZ_A: 0.68
-         StringZ_B: 0.98
-         String_Sigma_T: 0.25
+         StringZ_B: 0.3
+         String_Sigma_T: 0.5
+         Prob_proton_to_d_uu: 0.33
  \endverbatim
  *
  * Pauli Blocking can further be activated by means of the following subsection
@@ -205,13 +219,16 @@ ScatterActionsFinder::ScatterActionsFinder(
         subconfig.take({"Gluon_Pmin"}, 0.001),
         subconfig.take({"Quark_Alpha"}, 2.0),
         subconfig.take({"Quark_Beta"}, 5.0),
-        subconfig.take({"Strange_Supp"}, 0.165),
-        subconfig.take({"Diquark_Supp"}, 0.042),
-        subconfig.take({"Sigma_Perp"}, 0.4),
-        subconfig.take({"StringZ_A"}, 0.68), subconfig.take({"StringZ_B"}, 0.5),
+        subconfig.take({"Strange_Supp"}, 0.12),
+        subconfig.take({"Diquark_Supp"}, 0.03),
+        subconfig.take({"Sigma_Perp"}, 0.42),
+        subconfig.take({"Leading_Frag_Mean"}, 1.0),
+        subconfig.take({"Leading_Frag_Width"}, 0.6),
+        subconfig.take({"StringZ_A"}, 0.68), subconfig.take({"StringZ_B"}, 0.3),
         subconfig.take({"String_Sigma_T"}, 0.5),
         subconfig.take({"Form_Time_Factor"}, 1.0),
-        subconfig.take({"Use_Yoyo_Model"}, true));
+        subconfig.take({"Use_Yoyo_Model"}, true),
+        subconfig.take({"Prob_proton_to_d_uu"}, 1. / 3.));
   }
 }
 

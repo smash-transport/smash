@@ -35,9 +35,6 @@
 
 namespace smash {
 
-#ifdef SMASH_INLINE_LIST_ALL
-const ParticleTypeList *all_particle_types = nullptr;
-#else
 namespace {
 /// Global pointer to the Particle Type list.
 const ParticleTypeList *all_particle_types = nullptr;
@@ -60,6 +57,7 @@ const ParticleTypeList &ParticleType::list_all() {
   return *all_particle_types;
 }
 
+// For performance reasonce one might want to inline this function.
 ParticleTypePtr ParticleType::operator&() const {
   // Calculate the offset via pointer subtraction:
   const auto offset = this - std::addressof(list_all()[0]);
@@ -71,7 +69,6 @@ ParticleTypePtr ParticleType::operator&() const {
   // After the assertion above the down-cast to uint16_t is safe:
   return ParticleTypePtr(static_cast<uint16_t>(offset));
 }
-#endif
 
 ParticleTypePtrList &ParticleType::list_nucleons() { return nucleons_list; }
 
