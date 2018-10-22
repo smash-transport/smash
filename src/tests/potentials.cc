@@ -115,11 +115,15 @@ TEST(nucleus_potential_profile) {
 }
 
 TEST(propagation_in_test_potential) {
-  /* A dummy potential is created: U(x) = U_0/(1 + exp(x/d))
-     A particle is propagated through this potential and
-     it's momentum and energy are checked against analytically expected
-     from conservation laws.
-   */
+  /* Two dummy potentials are created:
+   * One has only the time component: U(x) = U_0/(1 + exp(x/d))
+   * A particle is propagated through this stationary potential and
+   * its momentum and energy are checked against analytically expected
+   * from conservation laws.
+   * The other gives rise to a constant magnetic field along z-axis.
+   * A particle is expected to do a circular motion with a constant
+   * speed in the magnetic field. Its final speed is compared with
+   * the initial value.*/
 
   // Create a dummy potential
   class Dummy_Pot : public Potentials {
