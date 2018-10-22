@@ -16,7 +16,9 @@ if [[ "$#" -ne 1 ]]; then
     exit 1
 fi
 
-type perf >/dev/null 2>&1 || fail "Failed to find perf (This script only works on Linux)."
+type perf  >/dev/null 2>&1 || fail "Failed to find perf (This script only works on Linux)."
+type uname >/dev/null 2>&1 || fail "Failed to find uname."
+type lshw  >/dev/null 2>&1 || fail "Failed to find lshw."
 
 BUILD_DIR=$1
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd )"
