@@ -587,9 +587,13 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * Just as the OSCAR1999 format, the OSCAR2013 format is based on a block
  * structure, where each block corresponds to one interaction. Each block starts
  * with a line formatted as follows:
- * \code
- * # interaction in nin out nout rho density weight tot_weight partial
- *part_weight type proc_type \endcode where \li \key nin: Number of ingoing
+ * <div class="fragment">
+ * <div class="line"> <span class="preprocessor">
+ *  \# interaction in nin out nout rho density weight tot_weight partial
+ *part_weight type proc_type </span></div>
+ * </div>
+ * where
+ * \li \key nin: Number of ingoing
  *particles (initial state particles) \li \key nout: Number of outgoing
  *particles (final state particles) \li \key density: Density at the interaction
  *point \li \key tot_weight: Total weight of the interaction. This is the total
@@ -654,6 +658,9 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key ev_num: The event's number
  * \li \key impact_parameter: impact parameter of the collision in case of a
  * collider setup, otherwise 0.0.
+ *
+ * Note, that "event", "end" and "impact" are no variables, but words
+ * that are printed.
  **/
 
 template <OscarOutputFormat Format, int Contents>
@@ -708,10 +715,14 @@ std::unique_ptr<OutputInterface> create_select_format(
   if (modern_format && extended_format) {
     return make_unique<OscarOutput<OscarFormat2013Extended, Contents>>(path,
                                                                        name);
-  } else if (modern_format) {
+  } else if (modern_format && !extended_format) {
     return make_unique<OscarOutput<OscarFormat2013, Contents>>(path, name);
-  } else {
+  } else if (!modern_format && !extended_format) {
     return make_unique<OscarOutput<OscarFormat1999, Contents>>(path, name);
+  } else {
+    // Only remaining possibility: (!modern_format && extended_format)
+    throw std::invalid_argument(
+        "Creating Oscar output: There is no extended Oscar1999 format.");
   }
 }
 }  // unnamed namespace
@@ -742,21 +753,36 @@ std::unique_ptr<OutputInterface> create_oscar_output(
           modern_format, path, out_par, "full_event_history");
     }
   } else if (content == "Dileptons") {
-    if (out_par.dil_extended) {
+    if (modern_format && out_par.dil_extended) {
       return make_unique<
           OscarOutput<OscarFormat2013Extended, OscarInteractions>>(path,
                                                                    "Dileptons");
-    } else {
+    } else if (modern_format && !out_par.dil_extended) {
       return make_unique<OscarOutput<OscarFormat2013, OscarInteractions>>(
           path, "Dileptons");
+    } else if (!modern_format && !out_par.dil_extended) {
+      return make_unique<OscarOutput<OscarFormat1999, OscarInteractions>>(
+          path, "Dileptons");
+    } else if (!modern_format && out_par.dil_extended) {
+      throw std::invalid_argument(
+          "Creating Oscar output: There is no extended Oscar1999 (dileptons) "
+          "format.");
     }
   } else if (content == "Photons") {
-    if (modern_format) {
+    if (modern_format && !out_par.photons_extended) {
       return make_unique<OscarOutput<OscarFormat2013, OscarInteractions>>(
           path, "Photons");
-    } else {
+    } else if (modern_format && out_par.photons_extended) {
+      return make_unique<
+          OscarOutput<OscarFormat2013Extended, OscarInteractions>>(path,
+                                                                   "Photons");
+    } else if (!modern_format && !out_par.photons_extended) {
       return make_unique<OscarOutput<OscarFormat1999, OscarInteractions>>(
           path, "Photons");
+    } else if (!modern_format && out_par.photons_extended) {
+      throw std::invalid_argument(
+          "Creating Oscar output: There is no extended Oscar1999 (photons) "
+          "format.");
     }
   }
 

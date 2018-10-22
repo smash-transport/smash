@@ -10,6 +10,7 @@ General:
     Nevents:       1
 
 Output:
+    Output_Interval: 20.0
     Particles:
         Format:          ["Oscar2013"]
 

@@ -14,6 +14,9 @@ If Pythia is used, please cite the following references:
 
 * T. Sjöstrand, S. Mrenna and P. Skands, JHEP05 (2006) 026,
   Comput. Phys. Comm. 178 (2008) 852.
+  
+Report issues at https://github.com/smash-transport/smash
+or contact us by email at h.elfner@gsi.de.
 
 ## How to build SMASH
 
@@ -184,13 +187,20 @@ For example, for the sphere or list example file:
     ./smash -i ../input/list/config.yaml
 
 To further use non-default particles and decaymodes files, the `-p`
-and `-d` options are necessary. For the default box, this means:
+and `-d` options are necessary. For the default box or the dileptons example,
+this means:
 
     ./smash -i ../input/box/config.yaml -p ../input/box/particles.txt -d ../input/box/decaymodes.txt
+    ./smash -i ../input/dileptons/config.yaml -d ../input/dileptons/decaymodes.txt
 
 All command line options can be viewed with
 
     ./smash -h
+
+To run SMASH completely silently for production runs, we recommend to pipe
+stdout to /dev/null, warnings and error messages will still be displayed.
+
+    ./smash > /dev/null
 
 
 ## License

@@ -200,7 +200,8 @@ TEST(pythia_running) {
   act = make_unique<ScatterAction>(p1_copy, p2_copy, 0.2, false, 1.0);
   std::unique_ptr<StringProcess> string_process_interface =
       make_unique<StringProcess>(1.0, 1.0, 0.5, 0.001, 1.0, 2.5, 0.217, 0.081,
-                                 0.7, 0.68, 0.98, 0.25, 1.0, true, 1. / 3.);
+                                 0.7, 0.7, 0.25, 0.68, 0.98, 0.25, 1.0, true,
+                                 1. / 3.);
   act->set_string_interface(string_process_interface.get());
   VERIFY(act != nullptr);
   COMPARE(p2_copy.type(), ParticleType::find(0x2212));
@@ -319,6 +320,99 @@ TEST(update_incoming) {
   COMPARE(act.incoming_particles()[0].position(), new_position);
 }
 
+TEST(string_orthonormal_basis) {
+  ThreeVector evec_polar = ThreeVector(0., 1., 0.);
+  std::array<ThreeVector, 3> evec_basis;
+  StringProcess::make_orthonormal_basis(evec_polar, evec_basis);
+
+  VERIFY(std::abs(evec_basis[0].x1()) < really_small);
+  VERIFY(std::abs(evec_basis[0].x2() - 1.) < really_small);
+  VERIFY(std::abs(evec_basis[0].x3()) < really_small);
+
+  VERIFY(std::abs(evec_basis[1].x1()) < really_small);
+  VERIFY(std::abs(evec_basis[1].x2()) < really_small);
+  VERIFY(std::abs(evec_basis[1].x3() + 1.) < really_small);
+
+  VERIFY(std::abs(evec_basis[2].x1() + 1.) < really_small);
+  VERIFY(std::abs(evec_basis[2].x2()) < really_small);
+  VERIFY(std::abs(evec_basis[2].x3()) < really_small);
+}
+
+TEST(string_find_excess_constituent) {
+  std::array<int, 5> excess_quark;
+  std::array<int, 5> excess_antiq;
+
+  PdgCode pdg_piplus = PdgCode(0x211);
+  PdgCode pdg_Kplus = PdgCode(0x321);
+  StringProcess::find_excess_constituent(pdg_Kplus, pdg_piplus, excess_quark,
+                                         excess_antiq);
+  VERIFY(excess_quark[0] == 0);
+  VERIFY(excess_quark[1] == 0);
+  VERIFY(excess_quark[2] == 0);
+  VERIFY(excess_quark[3] == 0);
+  VERIFY(excess_quark[4] == 0);
+  VERIFY(excess_antiq[0] == -1);
+  VERIFY(excess_antiq[1] == 0);
+  VERIFY(excess_antiq[2] == 1);
+  VERIFY(excess_antiq[3] == 0);
+  VERIFY(excess_antiq[4] == 0);
+
+  PdgCode pdg_neutron = PdgCode(0x2112);
+  PdgCode pdg_Omega = PdgCode(0x3334);
+  StringProcess::find_excess_constituent(pdg_Omega, pdg_neutron, excess_quark,
+                                         excess_antiq);
+  VERIFY(excess_quark[0] == -2);
+  VERIFY(excess_quark[1] == -1);
+  VERIFY(excess_quark[2] == 3);
+  VERIFY(excess_quark[3] == 0);
+  VERIFY(excess_quark[4] == 0);
+  VERIFY(excess_antiq[0] == 0);
+  VERIFY(excess_antiq[1] == 0);
+  VERIFY(excess_antiq[2] == 0);
+  VERIFY(excess_antiq[3] == 0);
+  VERIFY(excess_antiq[4] == 0);
+
+  PdgCode pdg_anti_neutron = PdgCode(-0x2112);
+  PdgCode pdg_anti_Xi0 = PdgCode(-0x3322);
+  StringProcess::find_excess_constituent(pdg_anti_Xi0, pdg_anti_neutron,
+                                         excess_quark, excess_antiq);
+  VERIFY(excess_quark[0] == 0);
+  VERIFY(excess_quark[1] == 0);
+  VERIFY(excess_quark[2] == 0);
+  VERIFY(excess_quark[3] == 0);
+  VERIFY(excess_quark[4] == 0);
+  VERIFY(excess_antiq[0] == -2);
+  VERIFY(excess_antiq[1] == 0);
+  VERIFY(excess_antiq[2] == 2);
+  VERIFY(excess_antiq[3] == 0);
+  VERIFY(excess_antiq[4] == 0);
+}
+
+TEST(string_quarks_from_diquark) {
+  int id_diquark;
+  int id1, id2, deg_spin;
+
+  id1 = 0;
+  id2 = 0;
+  deg_spin = 0;
+  // ud-diquark
+  id_diquark = 2103;
+  StringProcess::quarks_from_diquark(id_diquark, id1, id2, deg_spin);
+  VERIFY(id1 == 2);
+  VERIFY(id2 == 1);
+  VERIFY(deg_spin == 3);
+
+  id1 = 0;
+  id2 = 0;
+  deg_spin = 0;
+  // ud-antidiquark
+  id_diquark = -2101;
+  StringProcess::quarks_from_diquark(id_diquark, id1, id2, deg_spin);
+  VERIFY(id1 == -2);
+  VERIFY(id2 == -1);
+  VERIFY(deg_spin == 1);
+}
+
 TEST(string_diquark_from_quarks) {
   // ud-diquark
   int id1 = 1;
@@ -380,10 +474,10 @@ TEST(string_scaling_factors) {
   d.set_id(1);
   e.set_id(2);
   f.set_id(3);
-  c.set_4momentum(0.938, {0., 0., -1.});
-  d.set_4momentum(0.938, {0., 0., -0.5});
-  e.set_4momentum(0.138, {0., 0., 0.5});
-  f.set_4momentum(0.138, {0., 0., 1.});
+  c.set_4momentum(0.938, 0., 0., 1.);
+  d.set_4momentum(0.938, 0., 0., 0.5);
+  e.set_4momentum(0.138, 0., 0., -0.5);
+  f.set_4momentum(0.138, 0., 0., -1.);
   ParticleList outgoing = {e, d, c, f};  // here in random order
   constexpr double coherence_factor = 0.7;
   ThreeVector evec_coll = ThreeVector(0., 0., 1.);
@@ -396,8 +490,9 @@ TEST(string_scaling_factors) {
   VERIFY(outgoing[1] == d);
   VERIFY(outgoing[2] == e);
   VERIFY(outgoing[3] == f);
-  // Since the string is baryonic, the proton has to carry the diquark,
-  // which leads to a scaling factor of 0.7*2/3 and the faster pion (f)
+  // Since the string is baryonic,
+  // the most forward proton has to carry the diquark,
+  // which leads to a scaling factor of 0.7*2/3 and the most backward pion (f)
   // gets the other quark and a scaling factor of 0.7*1/2
   COMPARE(outgoing[0].initial_xsec_scaling_factor(), 0.);
   COMPARE(outgoing[1].initial_xsec_scaling_factor(),
@@ -406,10 +501,10 @@ TEST(string_scaling_factors) {
   COMPARE(outgoing[3].initial_xsec_scaling_factor(), coherence_factor / 2.0);
 
   incoming = {e, f};  // Mesonic string
-  e.set_4momentum(0.138, {0., 0., -1.0});
-  f.set_4momentum(0.138, {0., 0., -0.5});
-  c.set_4momentum(0.938, {0., 0., 0.5});
-  d.set_4momentum(0.938, {0., 0., 1.0});
+  e.set_4momentum(0.138, {0., 0., 1.0});
+  f.set_4momentum(0.138, {0., 0., 0.5});
+  c.set_4momentum(0.938, {0., 0., -0.5});
+  d.set_4momentum(0.938, {0., 0., -1.0});
   outgoing = {f, c, d, e};  // again in random order
   // Since it is a Mesonic string, the valence quarks to distribute are
   // a quark and an anti-quark. Particle d will carry the quark and is assigned
@@ -428,8 +523,8 @@ TEST(string_scaling_factors) {
   // momenta of d and c, particle c will be assigned the scaling factor.
   // Even though particle c is an anti-baryon, this is correct, since the meson
   // on the other end of the string can also carry the quark instead.
-  c.set_4momentum(0.938, {0., 0., 1.0});
-  d.set_4momentum(0.938, {0., 0., 0.5});
+  c.set_4momentum(0.938, {0., 0., -1.0});
+  d.set_4momentum(0.938, {0., 0., -0.5});
   outgoing = {c, d, e, f};
   StringProcess::assign_all_scaling_factors(baryon_string, outgoing, evec_coll,
                                             coherence_factor);
@@ -448,10 +543,10 @@ TEST(pdg_map_for_pythia) {
   pdgid_mapped = StringProcess::pdg_map_for_pythia(pdg_piplus);
   VERIFY(pdgid_mapped == 211);
 
-  // pi0 is mapped onto pi0
+  // pi0 is mapped onto pi+
   PdgCode pdg_pi0 = PdgCode(0x111);
   pdgid_mapped = StringProcess::pdg_map_for_pythia(pdg_pi0);
-  VERIFY(pdgid_mapped == 111);
+  VERIFY(pdgid_mapped == 211);
 
   // pi- is mapped onto pi-
   PdgCode pdg_piminus = PdgCode(-0x211);

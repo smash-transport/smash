@@ -266,8 +266,9 @@ smash_add_runtest(list_run smash smash
                   -i ${PROJECT_SOURCE_DIR}/input/list/config.yaml
                 -c "Modi: {List: {File_Directory: ${PROJECT_SOURCE_DIR}/input/list}}")
 smash_add_runtest(dilepton_run smash smash
-                  -d ${CMAKE_CURRENT_SOURCE_DIR}/decaymodes_incl_dileptons.txt
-                  -c "Output: {Dileptons: {Format: [Oscar2013]}}")
+                  -i ${PROJECT_SOURCE_DIR}/input/dileptons/config.yaml
+                  -d ${PROJECT_SOURCE_DIR}/input/dileptons/decaymodes.txt)
+
 
 # Test the shipped config files for potentials and deformed nuclei by verifying
 # the binary runs with them.

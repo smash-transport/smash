@@ -3,7 +3,8 @@
 If you are reading this, it is probable that you are going to contribute to
 SMASH. First of all, we welcome your interest and thank you for your work.
 Hopefully, you find what you need in the following. Otherwise feel free to
-contact the development team.
+contact the development team by reporting issues at
+https://github.com/smash-transport/smash or contact us by email at h.elfner@gsi.de.
 
 Note that any contributions must be licensed under the same terms as SMASH, see
 [LICENSE](LICENSE).
@@ -47,6 +48,32 @@ Alternatively, the binary can be checked manually via:
 
 Note: There is known bug with `valgrind-3.11` that leads to an error about an
 unrecognized instruction. The memchecks will not run with his version.
+
+
+## Choosing a build type
+
+There are different build types available, which compile the SMASH code for different situations.
+
+For a debug build (with all warnings, but no optimization) use:
+
+    cmake .. -DCMAKE_BUILD_TYPE=Debug
+
+For a release build (full optimization and no warnings) use:
+
+    cmake .. -DCMAKE_BUILD_TYPE=Release
+
+For a profiling build use:
+
+    cmake .. -DCMAKE_BUILD_TYPE=Profiling
+
+The default build type is 'RelWithDebInfo', which provides both optimization and debug info.
+
+### Enhancing build verbosity
+
+To find cmake build errors (best debugged with full compiler output) use:
+
+    make VERBOSE=1
+
 
 ## Development Tools
 
@@ -386,7 +413,7 @@ directory to format the source code:
 
     ./clang-format-helper -p
 
-Review and commit changes afterwards. clang-format does changes that 
+Review and commit changes afterwards. clang-format does changes that
 don't look good, you can disable it locally using comments like this:
 
 
@@ -407,6 +434,24 @@ lot of false positives:
 
     make cppcheck
 
+## General policies
+
+### Input and output compatibility
+
+In general, input and output interfaces should be backwards compatible, when
+introducing changes. If there are changes that affect the config.yaml or the
+binary output, the associated version numbers need to be increased. Such
+changes can only occur, when major versions of SMASH are released. In addition,
+the Changelog needs be updated with a prominent mention of the changes.
+
+### Third party codes
+
+In general, the usage of third party codes is discouraged. If there is a scientific necessity
+or a major performance gain or time saving by using third party libraries, they can be linked
+to SMASH. For the common ones, a description on how to install them in the README file
+is sufficient whereas for the less common ones, including them in the thirdparty folder and
+shipping them with SMASH is the better solution. Of course, this involves ensuring the proper
+copyright.
 
 ## Profiling and benchmarking
 
