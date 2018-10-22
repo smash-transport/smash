@@ -28,6 +28,7 @@ Nucleus::Nucleus(const std::map<PdgCode, int> &particle_list, int nTest) {
   fill_from_list(particle_list, nTest);
 }
 
+
 Nucleus::Nucleus(Configuration &config, int nTest) {
   // Fill nuclei with particles.
   std::map<PdgCode, int> part = config.take({"Particles"});

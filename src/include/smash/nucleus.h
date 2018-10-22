@@ -26,8 +26,6 @@ namespace smash {
  */
 class Nucleus {
  public:
-  /// \todo unused or default constructor?
-  Nucleus(const std::map<PdgCode, int> &particle_list, int nTest);
   /**
    * Constructor for Nucleus, that needs the configuration parameters from
    * the inputfile and the number of testparticles
@@ -38,6 +36,7 @@ class Nucleus {
    */
   Nucleus(Configuration &config, int nTest);
 
+  Nucleus(const std::map<PdgCode, int> &particle_list, int nTest);
   virtual ~Nucleus() = default;
 
   /**
