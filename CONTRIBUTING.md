@@ -47,7 +47,7 @@ Alternatively, the binary can be checked manually via:
     valgrind -v ./smash
 
 Note: There is known bug with `valgrind-3.11` that leads to an error about an
-unrecognized instruction. The memchecks will not run with his version.
+unrecognized instruction. The memchecks will not run with this version.
 
 
 ## Choosing a build type
@@ -85,10 +85,11 @@ The following tools can be helpful for development:
 - cppcheck
 - codespell
 
+Note: The above mentioned clang-format version is enforced at each merge to master.
 
 ### Installing binaries as a user
 
-If you don't have administrator privileges on the machine you are using, you can
+If you do not have administrator privileges on the machine you are using, you can
 still install software locally. Just copy the binary (in this example
 `clang-format`) to a local folder and update your path:
 
@@ -455,7 +456,7 @@ copyright.
 
 ## Profiling and benchmarking
 
-This section discusses tools that can be used to measure the SMASH's
+This section discusses tools that can be used to measure the
 performance.
 
 ### Benchmarks
