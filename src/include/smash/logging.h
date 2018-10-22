@@ -57,6 +57,7 @@ class Configuration;
  * \li \key Pythia
  * \li \key GrandcanThermalizer
  * \li \key CrossSections
+ * \li \key Output
  *
  * Each key can have one of the following values:
  * \li ALL   - Log all messages (default)
@@ -197,6 +198,7 @@ DECLARE_LOGAREA(24, AdaptiveTS);
 DECLARE_LOGAREA(25, Pythia);
 DECLARE_LOGAREA(26, GrandcanThermalizer);
 DECLARE_LOGAREA(27, CrossSections);
+DECLARE_LOGAREA(28, Output);
 
 /**
  * This type collects all existing log areas so they will be created with the
