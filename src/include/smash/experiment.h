@@ -1593,12 +1593,6 @@ void Experiment<Modus>::intermediate_output() {
                                     conserved_initial_, time_start_,
                                     parameters_.outputclock.current_time());
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
-  /** \todo (Dima) is this part of the code still useful?
-   *
-   * if (thermalizer_) {
-   *  thermalizer_->update_thermalizer_lattice(particles_, density_param_);
-   *  thermalizer_->print_statistics(parameters_.labclock);
-  }*/
   // save evolution data
   for (const auto &output : outputs_) {
     if (output->is_dilepton_output() || output->is_photon_output()) {
