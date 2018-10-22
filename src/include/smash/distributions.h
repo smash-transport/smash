@@ -124,7 +124,6 @@ double density_integrand_2M_IC(const double energy, const double momentum_sqr,
  * lam=-1, for Bose-Einstein distribution
  * lam=1,  for Fermi-Dirac distribution
  * \return Unnormalized probability of relativistic Juttner distribution
- * \todo(unused) this is only used in the test of adaptive rejection sampler
  */
 double juttner_distribution_func(const double momentum_radial,
                                  const double mass, const double temperature,
