@@ -613,8 +613,11 @@ ExperimentParameters create_experiment_parameters(Configuration config);
  *
  * \key Time_Step_Mode (string, optional, default = Fixed): \n
  * The mode of time stepping. Possible values: \n
- * \li \key None - No time steps are used. Cannot be used with potentials \n
- * \li \key Fixed - Fixed-sized time steps \n
+ * \li \key None - No time steps and no collision-finding grid are used.
+ * Cannot be used with potentials. \n
+ * \li \key Fixed - Fixed-sized time steps at
+ * which collision-finding grid is used. More efficient for systems with many
+ * particles. \n
  * \li \key Adaptive - Time steps with adaptive sizes.
  *
  * \key Metric_Type (string, optional, default = NoExpansion): \n
