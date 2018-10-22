@@ -2345,7 +2345,10 @@ double CrossSections::string_probability(bool strings_switch,
   const bool is_NN_scattering =
       t1.is_nucleon() && t2.is_nucleon() &&
       t1.antiparticle_sign() == t2.antiparticle_sign();
-  const bool is_BBbar_scattering = treat_BBbar_with_strings && is_BBbar_pair_;
+  const bool is_BBbar_scattering =
+      (treat_BBbar_with_strings && is_BBbar_pair_ && use_AQM) ||
+      (t1.is_nucleon() && t2.is_nucleon() &&
+       t1.antiparticle_sign() != t2.antiparticle_sign());
   const bool is_Npi_scattering = (t1.pdgcode().is_pion() && t2.is_nucleon()) ||
                                  (t1.is_nucleon() && t2.pdgcode().is_pion());
   /* True for baryon-baryon, anti-baryon-anti-baryon, baryon-meson,
