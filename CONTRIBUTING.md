@@ -458,6 +458,13 @@ copyright.
 This section discusses tools that can be used to measure the SMASH's
 performance.
 
+### Benchmarks
+
+A basic benchmark script for linux machines is included in the `bin` directory.
+It runs different common setups of SMASH and measures them with `perf` (see
+below). Usage instructions can be found in the corresponding
+[README](bin/benchmarks/README.md).
+
 ### GPROF
 
 You can tell cmake to create a build for profiling with the `Profiling` build
