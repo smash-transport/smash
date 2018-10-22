@@ -131,7 +131,7 @@ void usage(const int rc, const std::string &progname) {
       "\n"
       "\n"
       "  -o, --output <dir>      output directory (default: ./data/<runid>)\n"
-      "  -l, --list-2-to-n       list all possible 2->2 reactions\n"
+      "  -l, --list-2-to-n       list all possible 2->n reactions (with n>1)\n"
       "  -r, --resonance <pdg>   dump width(m) and m*spectral function(m^2)"
       " for resonance pdg\n"
       "  -s, --cross-sections    <pdg1>,<pdg2>[,mass1,mass2] \n"
@@ -281,28 +281,7 @@ void ensure_path_is_valid(const bf::path &path) {
  */
 ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
   std::vector<bool> nucleon_has_interacted = {};
-  ReactionsBitSet included_2to2 = configuration.take(
-      {"Collision_Term", "Included_2to2"}, ReactionsBitSet().set());
-  /* Since it will be used solely for cross-section dump, most of
-   * parameters do not play any role here and are set arbitrarily.
-   *  Only parameters, that switch reactions on/off matter. */
-  bool two_to_one = configuration.take({"Collision_Term", "Two_to_One"});
-  ExperimentParameters params = ExperimentParameters{
-      {0., 1.},
-      {0., 1.},
-      1,
-      1.0,
-      4.,
-      two_to_one,
-      included_2to2,
-      configuration.take({"Collision_Term", "Strings"}, true),
-      configuration.take({"Collision_Term", "Use_AQM"}, true),
-      configuration.take({"Collision_Term", "Strings_with_Probability"}, true),
-      configuration.take({"Collision_Term", "NNbar_Treatment"},
-                         NNbarTreatment::Strings),
-      false,
-      0.0,
-      false};
+  ExperimentParameters params = create_experiment_parameters(configuration);
   return ScatterActionsFinder(configuration, params, nucleon_has_interacted, 0,
                               0);
 }
@@ -471,9 +450,6 @@ int main(int argc, char *argv[]) {
       configuration["decaymodes"] = decay_string;
     }
     if (list2n_activated) {
-      // Do not make all elastic cross-sections a fixed number
-      configuration.merge_yaml(
-          "{Collision_Term: {Elastic_Cross_Section: -1.0}}");
       /* Print only 2->n, n > 1. Do not dump decays, which can be found in
        * decaymodes.txt anyway */
       configuration.merge_yaml("{Collision_Term: {Two_to_One: False}}");
@@ -497,7 +473,6 @@ int main(int argc, char *argv[]) {
       ParticleType::create_type_list(configuration.take({"particles"}));
       DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
       ParticleType::check_consistency();
-      configuration.merge_yaml("{Collision_Term: {Two_to_One: True}}");
       std::string arg_string(cs_string);
       std::vector<std::string> args = split(arg_string, ',');
       const unsigned int n_arg = args.size();
