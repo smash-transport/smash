@@ -105,13 +105,6 @@ class Nucleus {
    */
   void boost(double beta_scalar);
 
-  /**
-   * Adds a particle to the nucleus
-   *
-   * \param pdgcode PDG code of the particle.
-   * \todo unused?
-   */
-  void add_particle(int pdgcode);
 
   /**
    * Adds particles from a map PDG code =>
