@@ -613,8 +613,11 @@ ExperimentParameters create_experiment_parameters(Configuration config);
  *
  * \key Time_Step_Mode (string, optional, default = Fixed): \n
  * The mode of time stepping. Possible values: \n
- * \li \key None - No time steps are used. Cannot be used with potentials \n
- * \li \key Fixed - Fixed-sized time steps \n
+ * \li \key None - No time steps and no collision-finding grid are used.
+ * Cannot be used with potentials. \n
+ * \li \key Fixed - Fixed-sized time steps at
+ * which collision-finding grid is used. More efficient for systems with many
+ * particles. \n
  * \li \key Adaptive - Time steps with adaptive sizes.
  *
  * \key Metric_Type (string, optional, default = NoExpansion): \n
@@ -625,7 +628,7 @@ ExperimentParameters create_experiment_parameters(Configuration config);
  * \li \key MassiveFRW - FRW expansion going as t^(2/3)
  * \li \key Exponential - FRW expansion going as e^(t/2)
  *
- * \key Expansion_Rate (double, optional, default = 0.1) \n
+ * \key Expansion_Rate (double, optional, default = 0.1): \n
  * Corresponds to the speed of expansion of the universe in non minkowski
  * metrics if MetricType is any other than \key NoExpansion. \n
  * It corresponds to \f$b_r/l_0\f$ if the metric type is \key MasslessFRW or
@@ -704,7 +707,6 @@ ExperimentParameters create_experiment_parameters(Configuration config);
  *                  string cross section is thus obtained by taking the
  *                  difference between them.
  *
- * \subpage pauliblocker
  */
 template <typename Modus>
 Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
@@ -768,11 +770,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   /*!\Userguide
    * \page input_general_ General
-   * \subpage input_general_adaptive_
-   * (optional)
    *
-   * \page input_general_adaptive_ Adaptive_Time_Step
-   * Additional parameters for the adaptive time step mode.
+   * \page input_general_adaptive_ Adaptive Time Steps
+   * Additional parameters to configure the adaptive time step mode.
    *
    * \key Smoothing_Factor (double, optional, default = 0.1) \n
    * Parameter of the exponential smoothing of the rate estimate.

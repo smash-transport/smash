@@ -53,9 +53,11 @@ namespace smash {
  * \key String_Formation_Time (double, optional, default = 1.0): \n
  * Parameter for formation time in string fragmentation, in fm/c.
  *
- * \subpage string_parameters
+ * To further configure Pauli blocking and the string parameters, see \n
+ * \li \subpage pauliblocker
+ * \li \subpage string_parameters
  *
- * \page string_parameters String_Parameters
+ * \page string_parameters String Parameters
  * A set of parameters with which the string fragmentation can be modified.
  *
  * \key String_Tension (double, optional, default = 1.0 GeV/fm) \n

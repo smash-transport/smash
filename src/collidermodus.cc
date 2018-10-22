@@ -75,7 +75,9 @@ namespace smash {
  * \li \key true - First collisions within the same nucleus allowed
  * \li \key false - First collisions within the same nucleus forbidden
  *
- * \subpage projectile_and_target
+ * To further configure the projectile, target and the impact parameter, see \n
+ * \li \subpage projectile_and_target
+ * \li \subpage input_impact_parameter_
  * \page projectile_and_target Projectile and Target
  *
  * \key Projectile: \n
@@ -96,17 +98,33 @@ namespace smash {
  * `Particles: {2212: 1, 2112: 1, 3122: 1}` for Hyper-Triton (one
  * proton, one neutron and one Lambda).
  *
- * \li \key Automatic (bool, optional, default = true): \n
- * true - sets all necessary parameters for a deformed nucleus based on the
- * atomic number of the input nucleus \n
- * false - manual values according to deformed nucleus (see below)
+ * \li \key Automatic_Woods_Saxon (bool, optional, no default): \n
+ * true - Sets all necessary parameters for the Woods Saxon distribution based
+ * on the atomic number of the input nucleus \n
+ * false - Manually specified values for \key Diffusiveness, \key Radius and
+ * \key Saturation_Density are employed
+ *
+ * \li \key Diffusiveness (double, optional, default = 0.545): \n
+ * Diffusiveness of the Woods Saxon distribution for the nucleus in fm.
+ *
+ * \li \key Radius (double, optional, default = proton_rad * A^(1/3)): \n
+ * Radius of nucleus in fm. The default radius is calculated as the proton
+ * radius times the third root of the number of nucleons.
+ *
+ * \li \key Saturation_Density (double, optional, default = 0.168): \n
+ * Saturation density of the nucleus in 1/fm^3.
  *
  * \li \key Deformed (bool, optional, default = false): \n
- * true - deformed nucleus is initialized \n
- * false - spherical nucleus is initialized
+ * true - Deformed nucleus is initialized \n
+ * false - Spherical nucleus is initialized
  *
- * \page input_modi_collider_ Collider
- * \subpage input_impact_parameter_
+ * \li \key Automatic_Deformation (bool, optional, no default): \n
+ * true - Set parameters of spherical deformation based on mass number of the
+ * nucleus.\n
+ * flase - Manually set parameters of spherical deformation. This requires the
+ * additional specification of \key Beta_2, \key Beta_4, \key Theata and
+ * \key Phi.
+ *
  * \page input_impact_parameter_ Impact Parameter
  * \key Impact: \n
  * A section for the impact parameter (= distance in fm of the two

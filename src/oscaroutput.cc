@@ -719,7 +719,8 @@ std::unique_ptr<OutputInterface> create_select_format(
     return make_unique<OscarOutput<OscarFormat2013, Contents>>(path, name);
   } else if (!modern_format && !extended_format) {
     return make_unique<OscarOutput<OscarFormat1999, Contents>>(path, name);
-  } else if (!modern_format && extended_format) {
+  } else {
+    // Only remaining possibility: (!modern_format && extended_format)
     throw std::invalid_argument(
         "Creating Oscar output: There is no extended Oscar1999 format.");
   }
