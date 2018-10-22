@@ -53,9 +53,11 @@ namespace smash {
  * \key String_Formation_Time (double, optional, default = 1.0): \n
  * Parameter for formation time in string fragmentation, in fm/c.
  *
- * \subpage string_parameters
+ * To further configure Pauli blocking and the string parameters, see \n
+ * \li \subpage pauliblocker
+ * \li \subpage string_parameters
  *
- * \page string_parameters String_Parameters
+ * \page string_parameters String Parameters
  * A set of parameters with which the string fragmentation can be modified.
  *
  * \key String_Tension (double, optional, default = 1.0 GeV/fm) \n
@@ -120,8 +122,8 @@ namespace smash {
  * enabled. Else constant proper time defined by Formation_Time is used.
  *
  * \key Prob_proton_to_d_uu (double, optional, default = 1/3)
- * Probability of splitting an (anti)nucleon into the quark it has only once 
- * and the diquark it contains twice in terms of flavour in the soft string 
+ * Probability of splitting an (anti)nucleon into the quark it has only once
+ * and the diquark it contains twice in terms of flavour in the soft string
  * routine.
  *
  * \page input_collision_term_ Collision_Term

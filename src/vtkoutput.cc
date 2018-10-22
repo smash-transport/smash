@@ -27,7 +27,7 @@ VtkOutput::VtkOutput(const bf::path &path, const std::string &name)
 VtkOutput::~VtkOutput() {}
 
 /*!\Userguide
- * \page format_vtk Vtk format
+ * \page format_vtk VTK format
  * In general VTK is a very versatile format, which allows many possible
  * structures. For generic VTK format one can see http://vtk.org. Here only
  * SMASH-specific VTK format is described.
