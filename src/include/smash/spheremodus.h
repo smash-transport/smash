@@ -56,7 +56,6 @@ class SphereModus : public ModusDefault {
    *                         initial conditions of the experiment.
    * \param[in] parameters Unused, but necessary because of templated
    *                       initialization
-   * \todo JB:remove the second parameter?
    */
   explicit SphereModus(Configuration modus_config,
                        const ExperimentParameters &parameters);

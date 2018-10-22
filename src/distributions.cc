@@ -37,10 +37,6 @@ double cauchy(double x, double pole, double width) {
   return width / (M_PI * (dm * dm + width * width));
 }
 
-double woods_saxon_dist_func(const double r, const double radius,
-                             const double diffusion) {
-  return 1.0 / (std::exp((r - radius) / diffusion) + 1.0);
-}
 
 // density_integrand - Maxwell-Boltzmann distribution
 double density_integrand(const double energy, const double momentum_sqr,

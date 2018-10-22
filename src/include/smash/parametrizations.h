@@ -291,17 +291,6 @@ double ppbar_elastic(double mandelstam_s);
  */
 double ppbar_total(double mandelstam_s);
 
-/**
- * ppbar total cross section parametrization;
- * Used for reverse cross-section from detailed balance (JB: no it's not ಠ_ಠ )
- * \todo unused (also not even defined)
- *
- * \param[in] mandelstam_s the rest frame total energy squared
- * \param[in] m_proj mass of projectile?
- * \param[in] m_target mass of target?
- * \return the parametrized cross-section
- */
-double ppbar_total(double mandelstam_s, double m_proj, double m_target);
 
 /**
  * Deuteron pion elastic cross-section [mb] parametrized

@@ -246,9 +246,11 @@ ThreeVector Nucleus::distribute_nucleon() const {
   return dir.threevec() * position;
 }
 
+
 double Nucleus::woods_saxon(double r) {
   return r * r / (std::exp((r - nuclear_radius_) / diffusiveness_) + 1);
 }
+
 
 void Nucleus::arrange_nucleons() {
   for (auto i = begin(); i != end(); i++) {
