@@ -2336,7 +2336,7 @@ double CrossSections::string_probability(bool strings_switch,
   /* string fragmentation is enabled when strings_switch is on and the process
    * is included in pythia. */
   if (!strings_switch) {
-    return false;
+    return 0.;
   }
 
   const ParticleType& t1 = incoming_particles_[0].type();
