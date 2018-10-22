@@ -585,7 +585,7 @@ N(2250)
 
 Σ(1660)  # 1(0.5+)
 0.35 1  N K̅  # 0.1-0.3
-0.25 1  Λ π  # >0, tuned for K- n -> Lambda pi- cross section
+0.15 1  Λ π  # >0, tuned for K- n -> Lambda pi- cross section
 0.15 1  Σ π  # >0, tuned for K- n -> Sigma- pi0 cross section
 0.10  0   Σ(1385) π   # not measured
 0.15  1   Λ(1520) π   # not measured
