@@ -28,7 +28,7 @@ BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
       only_final_(out_par.part_only_final) {}
 
 /*!\Userguide
- * \page format_binary_ Binary format
+ * \page format_binary_ Binary Format
  * SMASH supports a binary output version similar to the OSCAR 2013 standard.
  * It is faster to read and write and theoretically needs less disk space.
  * However, currently in ASCII OSCAR 2013 only 5 digits after the comma are

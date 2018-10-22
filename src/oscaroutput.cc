@@ -30,7 +30,7 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
                 (name + ".oscar" + ((Format == OscarFormat1999) ? "1999" : "")),
             "w"} {
   /*!\Userguide
-   * \page oscar_general_ OSCAR block structure
+   * \page oscar_general_ OSCAR Block Structure
    * OSCAR outputs are a family of ASCII and binary formats that follow
    * the OSCAR format conventions. \n
    * **All OSCAR outputs have the same general structure: a header and an
@@ -224,7 +224,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
 }
 
 /*!\Userguide
- * \page format_oscar_particlelist OSCAR particles format
+ * \page format_oscar_particlelist OSCAR Particles Format
  * The OSCAR particles format follows the general block structure of the OSCAR
  * format: \ref oscar_general_. We distinguish between two versions -
  * OSCAR2013 and OSCAR1999. Information about OSCAR standard can be found at
@@ -450,7 +450,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * Note that 'event', 'end' and 'impact' are no variables, but words that are
  * printed in the header. \n
  * \n
- * \page format_oscar_collisions OSCAR collisions format
+ * \page format_oscar_collisions OSCAR Collisions Format
  * The OSCAR particles format follows the general block structure of the OSCAR
  * format: \ref oscar_general_. We distinguish between two versions -
  * OSCAR2013 and OSCAR1999. Information about OSCAR standard can be found at

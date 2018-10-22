@@ -27,7 +27,7 @@ VtkOutput::VtkOutput(const bf::path &path, const std::string &name)
 VtkOutput::~VtkOutput() {}
 
 /*!\Userguide
- * \page format_vtk VTK format
+ * \page format_vtk VTK Format
  * In general VTK is a very versatile format, which allows many possible
  * structures. For generic VTK format one can see http://vtk.org. Here only
  * SMASH-specific VTK format is described.
@@ -137,7 +137,7 @@ void VtkOutput::write(const Particles &particles) {
 }
 
 /*!\Userguide
- * \page output_vtk_lattice_ Thermodynamics VTK output
+ * \page output_vtk_lattice_ Thermodynamics VTK Output
  * Density on the lattice can be printed out in the VTK format of
  * structured grid. At every output moment a new vtk file is created.
  * The name format is

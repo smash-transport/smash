@@ -635,7 +635,7 @@ ExperimentParameters create_experiment_parameters(Configuration config);
  * \key MassiveFRW, and to the parameter b in the Exponential expansion where
  * \f$a(t) ~ e^{bt/2}\f$. \n
  *
- * \page input_collision_term_ Collision_Term
+ * \page input_collision_term_ Collision Term
  *
  * \key Two_to_One (bool, optional, default = \key true) \n
  * Enable 2 <--> 1 processes (resonance formation and decays).
@@ -865,7 +865,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * formats _simultaneously_.
    *
    * For an example of choosing specific output contents see
-   * \ref configuring_output_ "Configuring SMASH output".
+   * \subpage configuring_output_.
    *
    * The list of possible contents follows:
    *
@@ -896,7 +896,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * --------------
    *
    * For choosing output formats see
-   * \ref configuring_output_ "Configuring SMASH output".
+   * \ref configuring_output_.
    * Every output content can be printed out in several formats:
    * - \b "Oscar1999", \b "Oscar2013" - human-readable text output\n
    *   - For "Particles" content: \subpage format_oscar_particlelist
@@ -1354,7 +1354,7 @@ bool Experiment<Modus>::perform_action(
                                  dens_type_, compute_grad));
   }
   /*!\Userguide
-   * \page collisions_output_in_box_modus_ Collision output in box modus
+   * \page collisions_output_in_box_modus_ Collision Output in Box Modus
    * \note When SMASH is running in the box modus, particle coordinates
    * in the collision output can be out of the box. This is not an error.  Box
    * boundary conditions are intentionally not imposed before collision output

@@ -1,4 +1,4 @@
-# SMASH README
+# Readme
 
 [![Build Status](https://travis-ci.com/smash-transport/smash-devel.svg?token=6MyxHigvN4vzHpS29fsG&branch=master)](https://travis-ci.com/smash-transport/smash-devel)
 

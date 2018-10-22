@@ -207,7 +207,7 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *   would correspond to \key "Smearing: false".
  *
  * \n
- * \anchor configuring_output_
+ * \page configuring_output_ Output Configuration
  * Example: Configuring the SMASH Output
  * --------------
  * The following example configures the output to be printed in an interval of
