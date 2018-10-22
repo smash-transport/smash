@@ -75,7 +75,9 @@ namespace smash {
  * \li \key true - First collisions within the same nucleus allowed
  * \li \key false - First collisions within the same nucleus forbidden
  *
- * \subpage projectile_and_target
+ * To further configure the projectile, target and the impact parameter, see \n
+ * \li \subpage projectile_and_target
+ * \li \subpage input_impact_parameter_
  * \page projectile_and_target Projectile and Target
  *
  * \key Projectile: \n
@@ -123,8 +125,6 @@ namespace smash {
  * additional specification of \key Beta_2, \key Beta_4, \key Theata and
  * \key Phi.
  *
- * \page input_modi_collider_ Collider
- * \subpage input_impact_parameter_
  * \page input_impact_parameter_ Impact Parameter
  * \key Impact: \n
  * A section for the impact parameter (= distance in fm of the two
