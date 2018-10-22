@@ -7,7 +7,7 @@
  *
  */
 
-#include "smash/binaryoutputcollisions.h"
+#include "smash/binaryoutput.h"
 
 #include <string>
 

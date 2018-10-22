@@ -7,7 +7,7 @@
  *
  */
 
-#include "smash/binaryoutputparticles.h"
+#include "smash/binaryoutput.h"
 
 #include <string>
 

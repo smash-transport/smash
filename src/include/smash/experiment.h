@@ -32,8 +32,7 @@
 #include "scatteractionsfinder.h"
 #include "thermalizationaction.h"
 // Output
-#include "binaryoutputcollisions.h"
-#include "binaryoutputparticles.h"
+#include "binaryoutput.h"
 #include "oscaroutput.h"
 #include "thermodynamicoutput.h"
 #ifdef SMASH_USE_ROOT
