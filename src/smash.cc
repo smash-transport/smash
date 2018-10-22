@@ -131,7 +131,7 @@ void usage(const int rc, const std::string &progname) {
       "\n"
       "\n"
       "  -o, --output <dir>      output directory (default: ./data/<runid>)\n"
-      "  -l, --list-2-to-n       list all possible 2->2 reactions\n"
+      "  -l, --list-2-to-n       list all possible 2->n reactions (with n>1)\n"
       "  -r, --resonance <pdg>   dump width(m) and m*spectral function(m^2)"
       " for resonance pdg\n"
       "  -s, --cross-sections    <pdg1>,<pdg2>[,mass1,mass2] \n"
