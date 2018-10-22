@@ -34,9 +34,8 @@ It requires the following tools & libraries:
 - boost filesystem >= 1.49
 - Pythia = 8.235
 
-Support for ROOT output is automatically enabled if a suitable version of ROOT
+Support for ROOT output is automatically enabled, if a suitable version of ROOT
 (>= 5.34) is found on the system.
-
 
 ### Building Pythia
 
@@ -55,6 +54,17 @@ executable as shown in the next section.
 
 Note that although Pythia is statically linked into SMASH, access to
 `share/Pythia8/xmldoc` is required at runtime.
+
+### Including Eigen header files from custom location
+
+Let's assume Eigen headers will be unpacked in `$HOME`.
+
+1. Download latest package from http://eigen.tuxfamily.org
+
+       [latest-eigen].tar.gz
+       tar -xf [latest-eigen].tar.gz -C $HOME`
+
+2. in `smash/build/`, create build files with `cmake -DCMAKE_INSTALL_PREFIX=$HOME/[latest-eigen]/ ..`
 
 
 ### Building SMASH
@@ -76,6 +86,7 @@ To run it with specific settings:
     ./smash
 
 
+
 ### Size of the code
 
 Please note that after compilation the `smash` directory (including `build`)
@@ -84,9 +95,9 @@ has a size of about 4GB. If disk space is restricted, consider to just run
     make smash
 
 which will only compile the SMASH binary. By default, the unit tests are also
-compiled which requires a lot of the disk space. It is still recommended to run
-the unit tests at least once when compiling in a new environment to ensure that
-everything works as expected. To see how to run the tests see
+compiled, which require a lot of the disk space. It is still recommended to run
+the unit tests at least once, when compiling in a new environment to ensure that
+everything works as expected. To see how to run the tests, see
 [CONTRIBUTING](CONTRIBUTING.md).
 
 
@@ -132,17 +143,6 @@ In order to disable it, one can do the follwoing:
     make
 
 
-### Including Eigen header files from custom location
-
-Let's assume Eigen headers will be unpacked in `$HOME`.
-
-1. Download latest package `[latest-eigen].tar.gz` from http://eigen.tuxfamily.org
-
-2. unpack: `tar -xf [latest-eigen].tar.gz -C $HOME`
-
-3. in `smash/build/`, create build files with `cmake -DCMAKE_INSTALL_PREFIX=$HOME/[latest-eigen]/ ..`
-
-
 ### Using a custom GSL build
 
 Download and unpack GSL:
@@ -164,7 +164,6 @@ SMASH, run `cmake` with
 
 Note: In case of problems, make sure to start with a clean build folder.
 
-
 ## Running SMASH with example input files
 
 SMASH ships with example configuration files for the collider, box, sphere and
@@ -183,24 +182,24 @@ is located in `/input/list`.
 To run SMASH with a manually specified configuration file, use the `-i` command.
 For example, for the sphere or list example file:
 
-    ./smash -i ../input/sphere/config.yaml
-    ./smash -i ../input/list/config.yaml
+./smash -i ../input/sphere/config.yaml
+./smash -i ../input/list/config.yaml
 
 To further use non-default particles and decaymodes files, the `-p`
 and `-d` options are necessary. For the default box or the dileptons example,
 this means:
 
-    ./smash -i ../input/box/config.yaml -p ../input/box/particles.txt -d ../input/box/decaymodes.txt
-    ./smash -i ../input/dileptons/config.yaml -d ../input/dileptons/decaymodes.txt
+./smash -i ../input/box/config.yaml -p ../input/box/particles.txt -d ../input/box/decaymodes.txt
+./smash -i ../input/dileptons/config.yaml -d ../input/dileptons/decaymodes.txt
 
 All command line options can be viewed with
 
-    ./smash -h
+./smash -h
 
 To run SMASH completely silently for production runs, we recommend to pipe
 stdout to /dev/null, warnings and error messages will still be displayed.
 
-    ./smash > /dev/null
+./smash > /dev/null
 
 
 ## License
