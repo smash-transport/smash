@@ -205,8 +205,8 @@ using AreaTuple =
     std::tuple<Main, Experiment, Box, Collider, Sphere, Action, InputParser,
                ParticleType, FindScatter, Clock, DecayModes, Resonances,
                ScatterAction, Distributions, Propagation, Grid, List, Nucleus,
-               Density, PauliBlocking, Tmn, Fpe, Lattice, Sampling,
-               Pythia, GrandcanThermalizer, CrossSections, Output>;
+               Density, PauliBlocking, Tmn, Fpe, Lattice, Sampling, Pythia,
+               GrandcanThermalizer, CrossSections, Output>;
 }  // namespace LogArea
 
 /**

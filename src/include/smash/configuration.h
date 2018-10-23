@@ -656,9 +656,9 @@ class Configuration {
       if (s == "Fixed") {
         return TimeStepMode::Fixed;
       }
-      throw IncorrectTypeInAssignment(
-          "The value for key \"" + std::string(key_) +
-          "\" should be \"None\" or \"Fixed\".");
+      throw IncorrectTypeInAssignment("The value for key \"" +
+                                      std::string(key_) +
+                                      "\" should be \"None\" or \"Fixed\".");
     }
 
     /**

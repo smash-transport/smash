@@ -765,7 +765,6 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   ParticleData::formation_power_ =
       config.take({"Collision_Term", "Power_Particle_Formation"}, 1.);
 
-
   /*!\Userguide
    * \page input_general_
    *
@@ -1541,7 +1540,7 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
     }
     if (act->time_of_execution() > end_time) {
       log.error(act, " scheduled later than end time: t_action[fm/c] = ",
-                  act->time_of_execution(), ", t_end[fm/c] = ", end_time);
+                act->time_of_execution(), ", t_end[fm/c] = ", end_time);
     }
     log.debug(~einhard::Green(), "✔ ", act);
 
