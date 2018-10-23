@@ -317,14 +317,14 @@ void check_config_version_is_compatible(Configuration configuration) {
   if (compatible_config_versions.find(config_version) ==
       compatible_config_versions.end()) {
     std::stringstream err;
-    err << "The version of the configuration file is not compatible with the "
-           "SMASH-version. \nSMASH-version is "
-        << smash_version << ". Configuration-version is "
-        << config_version
-        << ". \nConfig-versions compatible with this SMASH-version are \n";
+    err << "The version of the configuration file (" << config_version
+        << ") is not compatible with the SMASH version (" << smash_version
+        << ").\nThe following config versions are supported:\n";
     for (auto it : compatible_config_versions) {
-      err << it << "\n";
+      err << it << " ";
     }
+    err << "\nPlease consider updating your config or using a compatible SMASH"
+           " version.";
     throw std::runtime_error(err.str());
   }
 }
