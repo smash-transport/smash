@@ -1,3 +1,4 @@
+Version: 1.5
 # change together with potentials config
 Logging:
     default: OFF
