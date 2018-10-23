@@ -91,7 +91,6 @@ set(SMASH_LIBRARIES ${SMASH_LIBRARIES}
 # list the source files
 set(smash_src
         action.cc
-        adaptiverejectionsampler.cc
         boxmodus.cc
         binaryoutput.cc
         clebschgordan.cc

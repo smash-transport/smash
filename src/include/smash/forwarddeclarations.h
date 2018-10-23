@@ -10,12 +10,12 @@
 #ifndef SRC_INCLUDE_FORWARDDECLARATIONS_H_
 #define SRC_INCLUDE_FORWARDDECLARATIONS_H_
 
+/// @cond
+// exclude most content here from documentation
+
 #include <iosfwd>
 #include <memory>
 #include <vector>
-
-// the forward declarations should not appear in doxygen output
-#ifndef DOXYGEN
 
 #ifdef _LIBCPP_BEGIN_NAMESPACE_STD
 _LIBCPP_BEGIN_NAMESPACE_STD
@@ -78,6 +78,8 @@ class CollisionBranch;
 class Tabulation;
 class ExperimentBase;
 struct ExperimentParameters;
+
+/// @endcond
 
 /// The calculation frame
 enum class CalculationFrame {
@@ -213,6 +215,7 @@ enum class ThermalizationAlgorithm {
   UnbiasedBF,
 };
 
+/// @cond
 using ActionPtr = build_unique_ptr_<Action>;
 using ScatterActionPtr = build_unique_ptr_<ScatterAction>;
 using ActionList = build_vector_<ActionPtr>;
@@ -239,8 +242,8 @@ using ExperimentPtr = build_unique_ptr_<ExperimentBase>;
 using DecayTypePtr = build_unique_ptr_<DecayType>;
 
 namespace bf = boost::filesystem;
+/// @endcond
 
 }  // namespace smash
 
-#endif  // DOXYGEN
 #endif  // SRC_INCLUDE_FORWARDDECLARATIONS_H_

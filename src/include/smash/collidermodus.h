@@ -60,7 +60,6 @@ class ColliderModus : public ModusDefault {
    *                     input energy options is specified, or if custom
    *                     impact parameter Values and Yields are improperly
    *                     supplied
-   * \todo JB:remove the second parameter?
    **/
   explicit ColliderModus(Configuration modus_config,
                          const ExperimentParameters &parameters);
@@ -180,9 +179,6 @@ class ColliderModus : public ModusDefault {
   /**
    * Reference frame for the system, as specified from config
    */
-  /// \todo enum classes do not appear in doxygen, since they are
-  /// defined in fowarddeclarations which is intentionally neglected
-  /// from doxygen (s. fowarddeclerations.h)
   CalculationFrame frame_ = CalculationFrame::CenterOfVelocity;
   /**
    * An option to include Fermi motion ("off", "on", "frozen")

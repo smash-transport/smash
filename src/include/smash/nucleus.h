@@ -26,8 +26,6 @@ namespace smash {
  */
 class Nucleus {
  public:
-  /// \todo unused or default constructor?
-  Nucleus(const std::map<PdgCode, int> &particle_list, int nTest);
   /**
    * Constructor for Nucleus, that needs the configuration parameters from
    * the inputfile and the number of testparticles
@@ -38,6 +36,7 @@ class Nucleus {
    */
   Nucleus(Configuration &config, int nTest);
 
+  Nucleus(const std::map<PdgCode, int> &particle_list, int nTest);
   virtual ~Nucleus() = default;
 
   /**
@@ -104,14 +103,6 @@ class Nucleus {
    * \param[in] beta_scalar velocity in z-direction used for boost.
    */
   void boost(double beta_scalar);
-
-  /**
-   * Adds a particle to the nucleus
-   *
-   * \param pdgcode PDG code of the particle.
-   * \todo unused?
-   */
-  void add_particle(int pdgcode);
 
   /**
    * Adds particles from a map PDG code =>
