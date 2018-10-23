@@ -56,9 +56,12 @@ TEST(vtkoutputfile) {
     particles.insert(Test::smashon_random());
   }
 
+  OutputParameters out_par = OutputParameters();
+  out_par.part_extended = false;
+
   /* Create output object */
   std::unique_ptr<VtkOutput> vtkop =
-      make_unique<VtkOutput>(testoutputpath, "Particles");
+      make_unique<VtkOutput>(testoutputpath, "Particles", out_par);
   int event_id = 0;
   /* Initial output */
   vtkop->at_eventstart(particles, event_id);

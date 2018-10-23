@@ -85,6 +85,10 @@ RootOutput::RootOutput(const bf::path &path, const std::string &name,
       write_particles_(name == "Particles"),
       particles_only_final_(out_par.part_only_final),
       autosave_frequency_(1000) {
+  const auto &log = logger<LogArea::Output>();
+  if (out_par.part_extended || out_par.coll_extended) {
+    log.warn() << "Creating Root output: There is no extended Root format.";
+  }
   filename_unfinished_ = filename_;
   filename_unfinished_ += ".unfinished";
   root_out_file_ =

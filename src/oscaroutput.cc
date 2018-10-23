@@ -710,6 +710,7 @@ template <int Contents>
 std::unique_ptr<OutputInterface> create_select_format(
     bool modern_format, const bf::path &path, const OutputParameters &out_par,
     const std::string &name) {
+  const auto &log = logger<LogArea::Output>();
   bool extended_format = (Contents & OscarInteractions) ? out_par.coll_extended
                                                         : out_par.part_extended;
   if (modern_format && extended_format) {
@@ -721,8 +722,9 @@ std::unique_ptr<OutputInterface> create_select_format(
     return make_unique<OscarOutput<OscarFormat1999, Contents>>(path, name);
   } else {
     // Only remaining possibility: (!modern_format && extended_format)
-    throw std::invalid_argument(
-        "Creating Oscar output: There is no extended Oscar1999 format.");
+    log.warn() << "Creating Oscar output: "
+               << "There is no extended Oscar1999 format.";
+    return make_unique<OscarOutput<OscarFormat1999, Contents>>(path, name);;
   }
 }
 }  // unnamed namespace
@@ -730,6 +732,7 @@ std::unique_ptr<OutputInterface> create_select_format(
 std::unique_ptr<OutputInterface> create_oscar_output(
     const std::string &format, const std::string &content, const bf::path &path,
     const OutputParameters &out_par) {
+  const auto &log = logger<LogArea::Output>();
   if (format != "Oscar2013" && format != "Oscar1999") {
     throw std::invalid_argument("Creating Oscar output: unknown format");
   }
@@ -764,9 +767,8 @@ std::unique_ptr<OutputInterface> create_oscar_output(
       return make_unique<OscarOutput<OscarFormat1999, OscarInteractions>>(
           path, "Dileptons");
     } else if (!modern_format && out_par.dil_extended) {
-      throw std::invalid_argument(
-          "Creating Oscar output: There is no extended Oscar1999 (dileptons) "
-          "format.");
+      log.warn() << "Creating Oscar output: "
+                 << "There is no extended Oscar1999 (dileptons) format.";
     }
   } else if (content == "Photons") {
     if (modern_format && !out_par.photons_extended) {
@@ -780,9 +782,8 @@ std::unique_ptr<OutputInterface> create_oscar_output(
       return make_unique<OscarOutput<OscarFormat1999, OscarInteractions>>(
           path, "Photons");
     } else if (!modern_format && out_par.photons_extended) {
-      throw std::invalid_argument(
-          "Creating Oscar output: There is no extended Oscar1999 (photons) "
-          "format.");
+      log.warn() << "Creating Oscar output: "
+                 << "There is no extended Oscar1999 (photons) format.";
     }
   }
 

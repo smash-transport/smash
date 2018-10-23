@@ -125,34 +125,39 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * \anchor output_content_specific_options_
  *
  * - \b Particles \n
- *   \key Extended (bool, optional, default = false): \n
+ *   \key Extended (bool, optional, default = false, incompatible with
+ *                  Oscar1999, VTK and Root formats): \n
  *   \li \key true - Print extended information for each particle \n
  *   \li \key false - Regular output for each particle
  *
- *   \key Only_Final (bool, optional, default = true): \n
+ *   \key Only_Final (bool, optional, default = true, incompatible with
+                      VTK format): \n
  *   \li \key true - Print only final particle list \n
  *   \li \key false - Particle list at output interval including initial time \n
  * \n
- * - \b Collisions \n
- *   \key Extended (bool, optional, default = false): \n
+ * - \b Collisions (VTK not available) \n
+ *   \key Extended (bool, optional, default = false, incompatible with
+ *                  Oscar1999 and Root formats): \n
  *   \li \key true - Print extended information for each particle \n
  *   \li \key false - Regular output for each particle
  *
- *   \key Print_Start_End (bool, optional, default = false): \n
+ *   \key Print_Start_End (bool, optional, default = false, incompatible with
+ *                  Root format): \n
  *   \li \key true - Initial and final particle list is printed out \n
  *   \li \key false - Initial and final particle list is not printed out \n
  * \n
- * - \b Dileptons \n
- *   \key Extended (bool, optional, default = false): \n
+ * - \b Dileptons (Only Oscar1999, Oscar2013 and binary formats) \n
+ *   \key Extended (bool, optional, default = false, incompatible with
+ *                  Oscar1999 format): \n
  *   \li \key true - Print extended information for each particle \n
  *   \li \key false - Regular output for each particle \n
  * \n
- * - \b Photons \n
+ * - \b Photons (Only Oscar1999, Oscar2013 and binary formats) \n
  *   \key Fractions (int, required):
  *   Number of fractional photons sampled per single perturbatively produced
  *   photon. See \ref input_photons for further information. \n
- *
- *   \key Extended (bool, optional, default = false): \n
+ *   \key Extended (bool, optional, default = false, incompatible with
+ *                  Oscar1999 format): \n
  *   \li \key true - Print extended information for each particle \n
  *   \li \key false - Regular output for each particle \n
  * \n

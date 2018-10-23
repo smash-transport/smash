@@ -19,10 +19,16 @@
 
 namespace smash {
 
-VtkOutput::VtkOutput(const bf::path &path, const std::string &name)
+VtkOutput::VtkOutput(const bf::path &path, const std::string &name,
+                     const OutputParameters &out_par)
     : OutputInterface(name),
       base_path_(std::move(path)),
-      is_thermodynamics_output_(name == "Thermodynamics") {}
+      is_thermodynamics_output_(name == "Thermodynamics") {
+  const auto &log = logger<LogArea::Output>();
+  if (out_par.part_extended) {
+    log.warn() << "Creating VTK output: There is no extended VTK format.";
+  }
+}
 
 VtkOutput::~VtkOutput() {}
 
@@ -39,7 +45,8 @@ VtkOutput::~VtkOutput() {}
  * a separate VTK file is written. File names are constructed as follows:
  * pos_ev<event>_tstep<output_number>.vtk.
  *
- * Files contain particle coordinates, momenta and PDG codes and masses. VTK
+ * Files contain particle coordinates, momenta, PDG codes, cross-section
+ * scaling factors and masses. VTK
  * output is known to work with paraview, a free visualization and data
  * analysis software. Files of this format are supposed to be used as a black
  * box and opened with paraview, but at the same time they are

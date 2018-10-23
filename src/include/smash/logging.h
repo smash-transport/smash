@@ -56,6 +56,7 @@ class Configuration;
  * \li \key Pythia
  * \li \key GrandcanThermalizer
  * \li \key CrossSections
+ * \li \key Output
  *
  * Each key can have one of the following values:
  * \li ALL   - Log all messages (default)
@@ -194,6 +195,7 @@ DECLARE_LOGAREA(23, Sampling);
 DECLARE_LOGAREA(24, Pythia);
 DECLARE_LOGAREA(25, GrandcanThermalizer);
 DECLARE_LOGAREA(26, CrossSections);
+DECLARE_LOGAREA(27, Output);
 
 /**
  * This type collects all existing log areas so they will be created with the
@@ -204,7 +206,7 @@ using AreaTuple =
                ParticleType, FindScatter, Clock, DecayModes, Resonances,
                ScatterAction, Distributions, Propagation, Grid, List, Nucleus,
                Density, PauliBlocking, Tmn, Fpe, Lattice, Sampling,
-               Pythia, GrandcanThermalizer, CrossSections>;
+               Pythia, GrandcanThermalizer, CrossSections, Output>;
 }  // namespace LogArea
 
 /**

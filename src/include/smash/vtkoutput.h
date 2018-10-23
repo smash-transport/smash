@@ -17,6 +17,7 @@
 #include "density.h"
 #include "forwarddeclarations.h"
 #include "outputinterface.h"
+#include "outputparameters.h"
 
 namespace smash {
 
@@ -32,7 +33,8 @@ class VtkOutput : public OutputInterface {
    * \param path Path to the output file.
    * \param name Name of the output.
    */
-  VtkOutput(const bf::path &path, const std::string &name);
+  VtkOutput(const bf::path &path, const std::string &name,
+            const OutputParameters &out_par);
   ~VtkOutput();
 
   /**
