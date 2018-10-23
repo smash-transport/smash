@@ -298,8 +298,10 @@ void ScatterAction::sample_angles(std::pair<double, double> masses,
           4. * std::sqrt(pcm_now * pcm_now + nucleon_mass * nucleon_mass);
     }
     double bb, a, plab = plab_from_s(mandelstam_s_new);
-    if (nn_scattering && p_a->type().charge() + p_b->type().charge() == 1) {
-      // pn
+    if (nn_scattering && p_a->pdgcode().antiparticle_sign() ==
+            p_b->pdgcode().antiparticle_sign() &&
+        std::abs(p_a->type().charge() + p_b->type().charge()) == 1) {
+      // proton-neutron and antiproton-antineutron
       bb = std::max(Cugnon_bnp(plab), really_small);
       a = (plab < 0.8) ? 1. : 0.64 / (plab * plab);
     } else {
