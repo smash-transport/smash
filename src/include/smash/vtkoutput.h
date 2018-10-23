@@ -17,6 +17,7 @@
 #include "density.h"
 #include "forwarddeclarations.h"
 #include "outputinterface.h"
+#include "outputparameters.h"
 
 namespace smash {
 

@@ -209,7 +209,7 @@ using AreaTuple =
                ParticleType, FindScatter, Clock, DecayModes, Resonances,
                ScatterAction, Distributions, Propagation, Grid, List, Nucleus,
                Density, PauliBlocking, Tmn, Fpe, Lattice, Sampling, AdaptiveTS,
-               Pythia, GrandcanThermalizer, CrossSections>;
+               Pythia, GrandcanThermalizer, CrossSections, Output>;
 }  // namespace LogArea
 
 /**
