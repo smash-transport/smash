@@ -798,12 +798,14 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType& a,
     xs_dump["total"].push_back(std::make_pair(sqrts, act->cross_section()));
     // Total cross-section should be the first in the list -> negative mass
     outgoing_total_mass["total"] = -1.0;
-    // tree.print();
-    auto final_state_xs = tree.final_state_cross_sections();
-    deduplicate(final_state_xs);
-    for (const auto& p : final_state_xs) {
-      outgoing_total_mass[p.name_] = p.mass_;
-      xs_dump[p.name_].push_back(std::make_pair(sqrts, p.cross_section_));
+    if (final_state) {
+      // tree.print();
+      auto final_state_xs = tree.final_state_cross_sections();
+      deduplicate(final_state_xs);
+      for (const auto& p : final_state_xs) {
+        outgoing_total_mass[p.name_] = p.mass_;
+        xs_dump[p.name_].push_back(std::make_pair(sqrts, p.cross_section_));
+      }
     }
   }
 

@@ -91,6 +91,7 @@ namespace smash {
  * \par The available keys are documented on the following pages:
  * \li \subpage input_general_
  * \li \subpage input_logging_
+ * \li \subpage input_version_
  * \li \subpage input_collision_term_
  * \li \subpage input_modi_
  * \li \subpage input_output_options_
@@ -119,6 +120,16 @@ namespace smash {
  *
  * Available Settings
  * ------------------
+ */
+
+/*!\Userguide
+ * \page input_version_ Version
+ * This entry in the `config.yaml` file sets the version number of the
+ * configuration file. Its intent is to ensure compability with the SMASH
+ * version used. If the config file version and the SMASH version are
+ * incompatible, a runtime error is thrown.
+ * Users should only change this value when updating their configuration file to
+ * work with a newer SMASH version.
  */
 
 /*!\Userguide
@@ -645,12 +656,9 @@ class Configuration {
       if (s == "Fixed") {
         return TimeStepMode::Fixed;
       }
-      if (s == "Adaptive") {
-        return TimeStepMode::Adaptive;
-      }
       throw IncorrectTypeInAssignment(
           "The value for key \"" + std::string(key_) +
-          "\" should be \"None\", \"Fixed\" or \"Adaptive\".");
+          "\" should be \"None\" or \"Fixed\".");
     }
 
     /**

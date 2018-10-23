@@ -80,6 +80,7 @@ class ThermodynamicOutput : public OutputInterface {
    * Prints density along the specified line. Useful to make 1D plots of
    * density profiles.
    * \param[in] file_name name of the file to print out
+   * \param[in] param Parameters for density calculation
    * \param[in] plist particles, from which density is computed
    * \param[in] dens_type type of density, see ::DensityType
    * \param[in] line_start starting point of the line

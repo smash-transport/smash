@@ -185,7 +185,6 @@ smash_add_exe(woods-saxon)
 # unit tests for classes:
 smash_add_unittest(action)
 smash_add_unittest(actions)
-smash_add_unittest(adaptiverejectionsampler)
 smash_add_unittest(angles)
 smash_add_unittest(average)
 smash_add_unittest(binaryoutput)

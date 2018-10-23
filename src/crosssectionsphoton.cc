@@ -4427,23 +4427,11 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi0_rho_pi(
                  xs_pi0_rho_pi_omega_mediated(s, m_rho));
 }
 
-double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi0_rho_pi(
-    const double s, const double t, const double m_rho) {
-  return cut_off(xs_diff_pi0_rho_pi_rho_mediated(s, t, m_rho) +
-                 xs_diff_pi0_rho_pi_omega_mediated(s, t, m_rho));
-}
-
 // C13 + C15
 double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_rho_pi0(
     const double s, const double m_rho) {
   return cut_off(xs_pi_rho_pi0_rho_mediated(s, m_rho) +
                  xs_pi_rho_pi0_omega_mediated(s, m_rho));
-}
-
-double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi_rho_pi0(
-    const double s, const double t, const double m_rho) {
-  return cut_off(xs_diff_pi_rho_pi0_rho_mediated(s, t, m_rho) +
-                 xs_diff_pi_rho_pi0_omega_mediated(s, t, m_rho));
 }
 
 /*----------------------------------------------------------------------------*/

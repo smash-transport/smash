@@ -20,8 +20,7 @@
 #include <string>
 #include <vector>
 
-#include "../include/smash/binaryoutputcollisions.h"
-#include "../include/smash/binaryoutputparticles.h"
+#include "../include/smash/binaryoutput.h"
 #include "../include/smash/clock.h"
 #include "../include/smash/file.h"
 #include "../include/smash/outputinterface.h"

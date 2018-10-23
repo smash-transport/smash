@@ -50,20 +50,6 @@ double breit_wigner_nonrel(double m, double pole, double width);
 double cauchy(double x, double pole, double width);
 
 /**
- * 1D Woods-Saxon distribution function
- * \todo(duplicate) Check nucleus and remove one of the Woods-Saxon
- * implementations, this one is actually only used in the test of the
- * adaptive rejection sampler
- * \param[in] r Radial coordinates in the nucleus in units of [fm]
- * \param[in] radius Radius parameter of the nucleus in units of [fm]
- * \param[in] diffusion Diffusiveness parameter of the nucleus in units of [fm]
- * \return Unnormalized nucleon density in units [fm^{-3}]
- * in the nucleus at r
- */
-double woods_saxon_dist_func(const double r, const double radius,
-                             const double diffusion);
-
-/**
  * Returns the Maxwell-Boltzmann distribution
  *
  * \todo rename the following 4 functions to make clear what they are
@@ -124,7 +110,6 @@ double density_integrand_2M_IC(const double energy, const double momentum_sqr,
  * lam=-1, for Bose-Einstein distribution
  * lam=1,  for Fermi-Dirac distribution
  * \return Unnormalized probability of relativistic Juttner distribution
- * \todo(unused) this is only used in the test of adaptive rejection sampler
  */
 double juttner_distribution_func(const double momentum_radial,
                                  const double mass, const double temperature,
