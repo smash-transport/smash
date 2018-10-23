@@ -286,9 +286,13 @@ void ScatterAction::sample_angles(std::pair<double, double> masses,
       mandelstam_s_new = mandelstam_s();
     } else {
       /* In the case of elastic collisions other than NN collisions,
-       * the lab-frame momentum is evaluated from the mandelstam s,
+       * there is an ambiguity on how to get the lab-frame momentum (plab),
+       * since the incoming particles can have different masses.
+       * Right now, we first obtain the center-of-mass momentum
+       * of the collision (pcom_now).
+       * Then, the lab-frame momentum is evaluated from the mandelstam s,
        * which yields the original center-of-mass momentum
-       * with nucleon mass. */
+       * when nucleon mass is assumed. */
       const double pcm_now = pCM_from_s(mandelstam_s(), mass_in_a, mass_in_b);
       mandelstam_s_new =
           4. * std::sqrt(pcm_now * pcm_now + nucleon_mass * nucleon_mass);
@@ -299,7 +303,9 @@ void ScatterAction::sample_angles(std::pair<double, double> masses,
       bb = std::max(Cugnon_bnp(plab), really_small);
       a = (plab < 0.8) ? 1. : 0.64 / (plab * plab);
     } else {
-      // all others including pp and nn
+      /* all others including pp, nn and AQM elastic processes
+       * This is applied for all particle pairs, which are allowed to
+       * interact elastically. */
       bb = std::max(Cugnon_bpp(plab), really_small);
       a = 1.;
     }
