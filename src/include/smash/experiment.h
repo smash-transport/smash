@@ -1449,7 +1449,7 @@ void Experiment<Modus>::run_time_evolution() {
           }
         });
 
-    /* \todo (optimizations) Adapt timestep size here
+    /* \todo (optimizations) Adapt timestep size here */
 
     /* (2) Propagation from action to action until the end of timestep */
     run_time_evolution_timestepless(actions);
