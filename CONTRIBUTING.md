@@ -195,7 +195,7 @@ In the `build` directory, run
 
     make user
 
-to obtain the files in `doc/user/index.html`, that can be viewed in your favorite
+to obtain the files in `doc/user/`. Open 'index.html' in your favourite
 browser. 
 
 
