@@ -26,8 +26,7 @@ VtkOutput::VtkOutput(const bf::path &path, const std::string &name,
       is_thermodynamics_output_(name == "Thermodynamics") {
   const auto &log = logger<LogArea::Output>();
   if (out_par.part_extended) {
-    log.warn() <<
-        "Creating VTK output: There is no extended VTK format.";
+    log.warn() << "Creating VTK output: There is no extended VTK format.";
   }
 }
 
