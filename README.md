@@ -4,22 +4,19 @@
 
 This is the repository for the development of the SMASH (Simulating Many
 Accelerated Strongly-interacting Hadrons) transport approach for the dynamical
-description of heavy ion reactions. Please see
-* [Phys. Rev. C 94, 054905
-(2016)](https://arxiv.org/abs/1606.06642)
+description of heavy ion reactions. Please see [Phys. Rev. C 94, 054905
+(2016)](https://arxiv.org/abs/1606.06642) for details and cite this reference,
+if you are using SMASH.
 
-for details and cite this reference, if you are using SMASH.
+See [CONTRIBUTING](CONTRIBUTING.md) for development hints. A complete User Guide
+is found [here](https://fias.uni-frankfurt.de/~smash/extra/user/).
 
-See [CONTRIBUTING](CONTRIBUTING.md) for development hints. A complete User
-Guide is found [here](https://fias.uni-frankfurt.de/~smash/extra/user/).
+If Pythia is used, please cite the following references: T. Sjöstrand, S. Mrenna
+and P. Skands, [JHEP05 (2006) 026, Comput. Phys. Comm. 178
+(2008)](https://arxiv.org/abs/0710.3820)
 
-If Pythia is used, please cite the following references:
-
-* T. Sjöstrand, S. Mrenna and P. Skands, JHEP05 (2006) 026,
-  Comput. Phys. Comm. 178 (2008) 852.
-  
-Report issues at https://github.com/smash-transport/smash
-or contact us by email at h.elfner@gsi.de.
+Report issues at https://github.com/smash-transport/smash or contact us by email
+at h.elfner@gsi.de.
 
 ## How to build SMASH
 
