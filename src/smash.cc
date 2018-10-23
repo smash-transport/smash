@@ -309,13 +309,13 @@ ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
  * invalid
  */
 void check_config_version_is_compatible(Configuration configuration) {
-
   const std::string smash_version = "1.5";
   const std::set<std::string> compatible_config_versions = {"1.5"};
 
   const std::string config_version = configuration.take({"Version"});
 
-  if (compatible_config_versions.find(config_version) == compatible_config_versions.end()) {
+  if (compatible_config_versions.find(config_version) ==
+      compatible_config_versions.end()) {
     std::stringstream err;
     err << "The version of the configuration file is not compatible with the "
            "SMASH-version. \nSMASH-version is "

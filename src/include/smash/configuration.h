@@ -125,11 +125,11 @@ namespace smash {
 /*!\Userguide
  * \page input_version_ Version
  * This entry in the `config.yaml` file sets the version number of the
- * configuration file.  Its intent is to
- * ensure compability with the SMASH version used. If the config file version
- * and the SMASH version are incompatible, a runtime error is thrown.
- * Users should only change this value when updating their configuration file
- * to work with a newer SMASH version.
+ * configuration file. Its intent is to ensure compability with the SMASH
+ * version used. If the config file version and the SMASH version are
+ * incompatible, a runtime error is thrown.
+ * Users should only change this value when updating their configuration file to
+ * work with a newer SMASH version.
  */
 
 /*!\Userguide
