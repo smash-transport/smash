@@ -309,33 +309,22 @@ ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
  * invalid
  */
 void check_config_version_is_compatible(Configuration configuration) {
-  const std::set<std::string> config_1_5_compatible = {"1.4", "1.5"};
+
+  const std::string smash_version = "1.5";
+  const std::set<std::string> compatible_config_versions = {"1.5"};
 
   const std::string config_version = configuration.take({"Version"});
-  // extract tagged SMASH major version from CMAKE variable
-  const std::string smash_major_version = std::string(VERSION_MAJOR);
-  const std::string smash_tagged_version = smash_major_version.substr(6, 3);
 
-  std::set<std::string> container;
-  if (config_version == "1.5") {
-    container = config_1_5_compatible;
-  } else {
-    std::stringstream err;
-    err << "Invalid configuration version " << config_version << std::endl;
-    throw std::runtime_error(err.str());
-  }
-
-  if (container.find(smash_tagged_version) == container.end()) {
+  if (compatible_config_versions.find(config_version) == compatible_config_versions.end()) {
     std::stringstream err;
     err << "The version of the configuration file is not compatible with the "
-           "SMASH version. \nSMASH-version is "
-        << smash_tagged_version << ". Configuration version is "
+           "SMASH-version. \nSMASH-version is "
+        << smash_version << ". Configuration-version is "
         << config_version
-        << ". \nSMASH versions compatible with this version are \n";
-    for (auto it : container) {
-      err << "SMASH-" << it << "\n";
+        << ". \nConfig-versions compatible with this SMASH-version are \n";
+    for (auto it : compatible_config_versions) {
+      err << it << "\n";
     }
-
     throw std::runtime_error(err.str());
   }
 }
