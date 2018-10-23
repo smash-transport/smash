@@ -4,8 +4,11 @@
 
 This is the repository for the development of the SMASH (Simulating Many
 Accelerated Strongly-interacting Hadrons) transport approach for the dynamical
-description of heavy ion reactions. See [Phys. Rev. C 94, 054905
-(2016)](https://arxiv.org/abs/1606.06642) for details.
+description of heavy ion reactions. Please see
+* [Phys. Rev. C 94, 054905
+(2016)](https://arxiv.org/abs/1606.06642)
+
+for details and cite this reference, if you are using SMASH.
 
 See [CONTRIBUTING](CONTRIBUTING.md) for development hints. A complete User
 Guide is found [here](https://fias.uni-frankfurt.de/~smash/extra/user/).
@@ -84,7 +87,6 @@ To run it with specific settings:
 
     vi config.yaml
     ./smash
-
 
 
 ### Size of the code
@@ -182,24 +184,24 @@ is located in `/input/list`.
 To run SMASH with a manually specified configuration file, use the `-i` command.
 For example, for the sphere or list example file:
 
-./smash -i ../input/sphere/config.yaml
-./smash -i ../input/list/config.yaml
+    ./smash -i ../input/sphere/config.yaml
+    ./smash -i ../input/list/config.yaml
 
 To further use non-default particles and decaymodes files, the `-p`
 and `-d` options are necessary. For the default box or the dileptons example,
 this means:
 
-./smash -i ../input/box/config.yaml -p ../input/box/particles.txt -d ../input/box/decaymodes.txt
-./smash -i ../input/dileptons/config.yaml -d ../input/dileptons/decaymodes.txt
+    ./smash -i ../input/box/config.yaml -p ../input/box/particles.txt -d ../input/box/decaymodes.txt
+    ./smash -i ../input/dileptons/config.yaml -d ../input/dileptons/decaymodes.txt
 
 All command line options can be viewed with
 
-./smash -h
+    ./smash -h
 
 To run SMASH completely silently for production runs, we recommend to pipe
 stdout to /dev/null, warnings and error messages will still be displayed.
 
-./smash > /dev/null
+    ./smash > /dev/null
 
 
 ## License
