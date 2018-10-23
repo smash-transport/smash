@@ -258,9 +258,15 @@ void ScatterAction::sample_angles(std::pair<double, double> masses,
   assert(outgoing_particles_.size() == 2);
   const auto &log = logger<LogArea::ScatterAction>();
 
-  // only NN scattering is anisotropic currently
+  // NN scattering is anisotropic currently
   const bool nn_scattering = incoming_particles_[0].type().is_nucleon() &&
                              incoming_particles_[1].type().is_nucleon();
+  /* Elastic process is anisotropic and
+   * the angular distribution is based on the NN elastic scattering. */
+  const bool el_scattering = process_type_ == ProcessType::Elastic;
+
+  const double mass_in_a = incoming_particles_[0].effective_mass();
+  const double mass_in_b = incoming_particles_[1].effective_mass();
 
   ParticleData *p_a = &outgoing_particles_[0];
   ParticleData *p_b = &outgoing_particles_[1];
@@ -269,23 +275,39 @@ void ScatterAction::sample_angles(std::pair<double, double> masses,
   const double mass_b = masses.second;
 
   const std::array<double, 2> t_range = get_t_range<double>(
-      kinetic_energy_cm, nucleon_mass, nucleon_mass, mass_a, mass_b);
+      kinetic_energy_cm, mass_in_a, mass_in_b, mass_a, mass_b);
   Angles phitheta;
-  if (nn_scattering && p_a->pdgcode().is_nucleon() &&
-      p_b->pdgcode().is_nucleon() &&
-      p_a->pdgcode().antiparticle_sign() ==
-          p_b->pdgcode().antiparticle_sign() &&
-      !isotropic_) {
+  if (el_scattering && !isotropic_) {
     /** NN → NN: Choose angular distribution according to Cugnon
      * parametrization,
      * see \iref{Cugnon:1996kh}. */
-    double bb, a, plab = plab_from_s(mandelstam_s());
-    if (p_a->type().charge() + p_b->type().charge() == 1) {
-      // pn
+    double mandelstam_s_new = 0.;
+    if (nn_scattering) {
+      mandelstam_s_new = mandelstam_s();
+    } else {
+      /* In the case of elastic collisions other than NN collisions,
+       * there is an ambiguity on how to get the lab-frame momentum (plab),
+       * since the incoming particles can have different masses.
+       * Right now, we first obtain the center-of-mass momentum
+       * of the collision (pcom_now).
+       * Then, the lab-frame momentum is evaluated from the mandelstam s,
+       * which yields the original center-of-mass momentum
+       * when nucleon mass is assumed. */
+      const double pcm_now = pCM_from_s(mandelstam_s(), mass_in_a, mass_in_b);
+      mandelstam_s_new =
+          4. * std::sqrt(pcm_now * pcm_now + nucleon_mass * nucleon_mass);
+    }
+    double bb, a, plab = plab_from_s(mandelstam_s_new);
+    if (nn_scattering && p_a->pdgcode().antiparticle_sign() ==
+            p_b->pdgcode().antiparticle_sign() &&
+        std::abs(p_a->type().charge() + p_b->type().charge()) == 1) {
+      // proton-neutron and antiproton-antineutron
       bb = std::max(Cugnon_bnp(plab), really_small);
       a = (plab < 0.8) ? 1. : 0.64 / (plab * plab);
     } else {
-      // pp or nn
+      /* all others including pp, nn and AQM elastic processes
+       * This is applied for all particle pairs, which are allowed to
+       * interact elastically. */
       bb = std::max(Cugnon_bpp(plab), really_small);
       a = 1.;
     }
