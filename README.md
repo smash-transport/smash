@@ -12,8 +12,8 @@ See [CONTRIBUTING](CONTRIBUTING.md) for development hints. A complete User Guide
 is found [here](https://fias.uni-frankfurt.de/~smash/extra/user/).
 
 If Pythia is used, please cite the following references: T. Sjöstrand, S. Mrenna
-and P. Skands, [JHEP05 (2006) 026, Comput. Phys. Comm. 178
-(2008)](https://arxiv.org/abs/0710.3820)
+and P. Skands, [JHEP05 (2006) 026](https://arxiv.org/abs/hep-ph/0603175),
+[Comput. Phys. Comm. 178 (2008)](https://arxiv.org/abs/0710.3820)
 
 Report issues at https://github.com/smash-transport/smash or contact us by email
 at h.elfner@gsi.de.
