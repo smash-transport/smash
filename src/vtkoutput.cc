@@ -33,7 +33,7 @@ VtkOutput::VtkOutput(const bf::path &path, const std::string &name,
 VtkOutput::~VtkOutput() {}
 
 /*!\Userguide
- * \page format_vtk Vtk format
+ * \page format_vtk VTK format
  * In general VTK is a very versatile format, which allows many possible
  * structures. For generic VTK format one can see http://vtk.org. Here only
  * SMASH-specific VTK format is described.
@@ -144,7 +144,7 @@ void VtkOutput::write(const Particles &particles) {
 }
 
 /*!\Userguide
- * \page output_vtk_lattice_ Thermodynamics vtk output
+ * \page output_vtk_lattice_ Thermodynamics VTK output
  * Density on the lattice can be printed out in the VTK format of
  * structured grid. At every output moment a new vtk file is created.
  * The name format is
@@ -230,7 +230,7 @@ void VtkOutput::thermodynamics_output(
 }
 
 /*!\Userguide
- * \page output_vtk_lattice_ Thermodynamics VTK output
+ * \page output_vtk_lattice_
  * Additionally to density, energy-momentum tensor \f$T^{\mu\nu} \f$,
  * energy-momentum tensor in Landau rest frame \f$T^{\mu\nu}_L \f$ and
  * velocity of Landau rest frame \f$v_L\f$ on the lattice can be printed out

@@ -21,7 +21,7 @@ PauliBlocker::PauliBlocker(Configuration conf,
       rp_(conf.take({"Momentum_Averaging_Radius"}, 0.08)),
       ntest_(param.testparticles) {
   /*!\Userguide
-   * \page pauliblocker Pauli_Blocking
+   * \page pauliblocker Pauli Blocking
    *
    * \key Spatial_Averaging_Radius (double, optional, default = 1.86): \n
    * Radius [fm] of sphere for averaging in the coordinate space

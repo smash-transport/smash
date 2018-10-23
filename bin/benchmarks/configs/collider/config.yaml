@@ -1,5 +1,5 @@
 Logging:
-    default: INFO
+    default: OFF
 
 General:
     Modus:         Collider
@@ -7,10 +7,9 @@ General:
     Delta_Time:    0.1
     End_Time:      200.0
     Randomseed:    -1
-    Nevents:       1
+    Nevents:        100
 
 Output:
-    Output_Interval: 10.0
     Particles:
         Format:          ["Oscar2013"]
 

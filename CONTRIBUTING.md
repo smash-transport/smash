@@ -49,6 +49,32 @@ Alternatively, the binary can be checked manually via:
 Note: There is known bug with `valgrind-3.11` that leads to an error about an
 unrecognized instruction. The memchecks will not run with his version.
 
+
+## Choosing a build type
+
+There are different build types available, which compile the SMASH code for different situations.
+
+For a debug build (with all warnings, but no optimization) use:
+
+    cmake .. -DCMAKE_BUILD_TYPE=Debug
+
+For a release build (full optimization and no warnings) use:
+
+    cmake .. -DCMAKE_BUILD_TYPE=Release
+
+For a profiling build use:
+
+    cmake .. -DCMAKE_BUILD_TYPE=Profiling
+
+The default build type is 'RelWithDebInfo', which provides both optimization and debug info.
+
+### Enhancing build verbosity
+
+To find cmake build errors (best debugged with full compiler output) use:
+
+    make VERBOSE=1
+
+
 ## Development Tools
 
 The following tools can be helpful for development:
@@ -387,7 +413,7 @@ directory to format the source code:
 
     ./clang-format-helper -p
 
-Review and commit changes afterwards. clang-format does changes that 
+Review and commit changes afterwards. clang-format does changes that
 don't look good, you can disable it locally using comments like this:
 
 
@@ -431,6 +457,13 @@ copyright.
 
 This section discusses tools that can be used to measure the SMASH's
 performance.
+
+### Benchmarks
+
+A basic benchmark script for linux machines is included in the `bin` directory.
+It runs different common setups of SMASH and measures them with `perf` (see
+below). Usage instructions can be found in the corresponding
+[README](bin/benchmarks/README.md).
 
 ### GPROF
 

@@ -587,9 +587,13 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * Just as the OSCAR1999 format, the OSCAR2013 format is based on a block
  * structure, where each block corresponds to one interaction. Each block starts
  * with a line formatted as follows:
- * \code
- * # interaction in nin out nout rho density weight tot_weight partial
- *part_weight type proc_type \endcode where \li \key nin: Number of ingoing
+ * <div class="fragment">
+ * <div class="line"> <span class="preprocessor">
+ *  \# interaction in nin out nout rho density weight tot_weight partial
+ *part_weight type proc_type </span></div>
+ * </div>
+ * where
+ * \li \key nin: Number of ingoing
  *particles (initial state particles) \li \key nout: Number of outgoing
  *particles (final state particles) \li \key density: Density at the interaction
  *point \li \key tot_weight: Total weight of the interaction. This is the total
@@ -654,6 +658,9 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key ev_num: The event's number
  * \li \key impact_parameter: impact parameter of the collision in case of a
  * collider setup, otherwise 0.0.
+ *
+ * Note, that "event", "end" and "impact" are no variables, but words
+ * that are printed.
  **/
 
 template <OscarOutputFormat Format, int Contents>
@@ -713,9 +720,11 @@ std::unique_ptr<OutputInterface> create_select_format(
     return make_unique<OscarOutput<OscarFormat2013, Contents>>(path, name);
   } else if (!modern_format && !extended_format) {
     return make_unique<OscarOutput<OscarFormat1999, Contents>>(path, name);
-  } else if (!modern_format && extended_format) {
+  } else {
+    // Only remaining possibility: (!modern_format && extended_format)
     log.warn() << "Creating Oscar output: "
                << "There is no extended Oscar1999 format.";
+    return make_unique<OscarOutput<OscarFormat1999, Contents>>(path, name);;
   }
 }
 }  // unnamed namespace

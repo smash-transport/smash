@@ -22,9 +22,8 @@ namespace smash {
 /*!\Userguide
  * \page projectile_and_target Projectile and Target
  *
- * Additional Parameters to specify the shape of the modified Woods-Saxon
- * distribution, necessary to configure the deformation of the nucleus if
- * \key Deformed: True and \key Automatic: False.: \n
+ * Additional parameters to specify the spherical shape of the deformed
+ * nucleus following \iref{Moller:1993ed}.
  *
  * \li \key Beta_2 (double, optional):\n
  * The deformation coefficient for the spherical harmonic Y_2_0 in the
@@ -33,11 +32,6 @@ namespace smash {
  *
  * \li \key Beta_4 (double, optional):\n
  * The deformation coefficient for the spherical harmonic Y_4_0. \n
- *
- * \li \key Saturation_Density (double, optional, default = .168)\n
- * The normalization coefficient in the Woods-Saxon distribution,
- * needed here (and not in nucleus) due to the accept/reject sampling used.
- * Default is given as the infinite nuclear matter value. \n
  *
  * \li \key Theta (double, optional): \n
  * The polar angle by which to rotate the nucleus. \n
@@ -49,29 +43,35 @@ namespace smash {
  * Example: Configuring a deformed nucleus
  * --------------
  * To configure a fixed target heavy-ion collision with deformed nuclei, whose
- * deformation is explicitly declared, it can be done according to the following
- * example:
+ * spherical deformation is explicitly declared, it can be done according to the
+ * following example. For explanatory (and not physics) reasons,
+ * the projectile's Woods Saxon distribution is initialized automatically and
+ * it's spherical deformation manually, while the target nucleus is configured
+ * just the opposite.
  *\verbatim
  Modi:
      Collider:
          Projectile:
-             Particles:    {2212: 29, 2112 :34}
+             Particles:    {2212: 29, 2112: 34}
+             # automatically set diffusiveness, radius and saturation density
+             Automatic_Woods_Saxon: True
              Deformed: True
-             Automatic: False
-             Beta_2: 0.0
-             Beta_4: 0.0
-             Saturation_Density: 0.168
-             Theta: 0.0
-             Phi: 0.0
+             # Manually set deformation parameters
+             Automatic_Deformation: False
+             Beta_2: 0.1
+             Beta_4: 0.3
+             Theta: 0.8
+             Phi: 0.02
          Target:
-             Particles:    {2212: 29, 2112 :34}
+             Particles:    {2212: 29, 2112: 34}
+             # manually set woods saxon parameters
+             Automatic_Woods_Saxon: False
+             Saturation_Density: 0.1968
+             Diffusiveness: 0.8
+             Radius: 2.0
              Deformed: True
-             Automatic: False
-             Beta_2: 0.0
-             Beta_4: 0.0
-             Saturation_Density: 0.168
-             Theta: 0.0
-             Phi: 0.0
+             # Automatically set deformation parameters
+             Automatic_Deformation: True
          E_kin: 1.2
          Calculation_Frame: "fixed target"
  \endverbatim
@@ -82,7 +82,14 @@ DeformedNucleus::DeformedNucleus(const std::map<PdgCode, int> &particle_list,
     : Nucleus(particle_list, nTest) {}
 
 DeformedNucleus::DeformedNucleus(Configuration &config, int nTest)
-    : Nucleus(config, nTest) {}
+    : Nucleus(config, nTest) {
+  if (config.has_value({"Automatic_Deformation"}) &&
+      config.take({"Automatic_Deformation"})) {
+    set_deformation_parameters_automatic();
+  } else {
+    set_deformation_parameters_from_config(config);
+  }
+}
 
 double DeformedNucleus::deformed_woods_saxon(double r, double cosx) const {
   return Nucleus::get_saturation_density() /
@@ -113,9 +120,7 @@ ThreeVector DeformedNucleus::distribute_nucleon() const {
   return a_direction.threevec() * a_radius;
 }
 
-void DeformedNucleus::set_parameters_automatic() {
-  // Initialize the inherited attributes.
-  Nucleus::set_parameters_automatic();
+void DeformedNucleus::set_deformation_parameters_automatic() {
   // Set the deformation parameters extracted from \iref{Moller:1993ed}.
   switch (Nucleus::number_of_particles()) {
     case 238:  // Uranium
@@ -136,28 +141,23 @@ void DeformedNucleus::set_parameters_automatic() {
       break;
     default:
       throw std::domain_error(
-          "Mass number not listed in"
-          " DeformedNucleus::set_parameters_automatic.");
+          "Mass number not listed for automatically setting deformation "
+          "parameters. Please specify at least \"Beta_2\" and \"Beta_4\" "
+          "manually and set \"Automatic_Deformation: False.\" ");
   }
 
   // Set a random nuclear rotation.
   nuclear_orientation_.distribute_isotropically();
 }
 
-void DeformedNucleus::set_parameters_from_config(Configuration &config) {
-  // Inherited nucleus parameters.
-  Nucleus::set_parameters_from_config(config);
+void DeformedNucleus::set_deformation_parameters_from_config(
+    Configuration &config) {
   // Deformation parameters.
   if (config.has_value({"Beta_2"})) {
     set_beta_2(static_cast<double>(config.take({"Beta_2"})));
   }
   if (config.has_value({"Beta_4"})) {
     set_beta_4(static_cast<double>(config.take({"Beta_4"})));
-  }
-  // Saturation density (normalization for accept/reject sampling)
-  if (config.has_value({"Saturation_Density"})) {
-    Nucleus::set_saturation_density(
-        static_cast<double>(config.take({"Saturation_Density"})));
   }
   if (config.has_value({"Theta"})) {
     set_polar_angle(static_cast<double>(config.take({"Theta"})));

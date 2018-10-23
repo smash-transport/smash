@@ -153,20 +153,26 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *   \li \key false - Regular output for each particle \n
  * \n
  * - \b Photons (Only Oscar1999, Oscar2013 and binary formats) \n
- *   \key Extended (bool, optional, default = false, incompatible with
- *                  Oscar1999 format): \n
- *   \key Fractions (int, required): \n
+ *   \key Fractions (int, required):
  *   Number of fractional photons sampled per single perturbatively produced
  *   photon. See \ref input_photons for further information. \n
+ *   \key Extended (bool, optional, default = false, incompatible with
+ *                  Oscar1999 format): \n
+ *   \li \key true - Print extended information for each particle \n
+ *   \li \key false - Regular output for each particle \n
  * \n
  * \anchor Thermodynamics
  * - \b Thermodynamics \n
- *   The user can print thermodynamical quantities on the spatial lattice to
- *   vtk output. Note, that the Thermodynamics output requires a lattice.
- *   This lattice needs to be enabled in the conguration file and is regulated
- *   by the options of
- *   \ref input_lattice_. \n
- * \n
+ *   The user can print thermodynamical quantities:
+ *   \li On the spatial lattice to vtk output. Note, that this output requires
+ *       a lattice. This lattice needs to be enabled in the conguration file
+ *       and is regulated by the options of \ref input_lattice_. See
+ *       \ref output_vtk_lattice_ for further information.
+ *   \li At a given point to ASCII output. See
+ *       \ref thermodyn_output_user_guide_ for further information.
+ *   \li Averaged over all particles to ASCII output. See
+ *       \ref thermodyn_output_user_guide_ for further information.
+ *
  *  \key Type (string, optional, default = \key "baryon"): \n
  *  Particle type taken into consideration, "baryon" corresponds to "net
  baryon".
@@ -195,6 +201,8 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *
  *   \key Smearing (bool, optional, default = true): \n
  *   Using Gaussian smearing for computing thermodynamic quantities or not.
+ *   This triggers whether thermodynamic quantities are evaluated at a fixed
+ *   point (\key true) or averaged over all particles (\key false).
  *   \li \key true - smearing applied
  *   \li \key false - smearing not applied
  *

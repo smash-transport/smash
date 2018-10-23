@@ -1,0 +1,45 @@
+Logging:
+    default: INFO
+
+General:
+    Modus:         Collider
+    Time_Step_Mode: Fixed
+    Delta_Time:    0.1
+    End_Time:      200.0
+    Randomseed:    -1
+    Nevents:       1
+
+Output:
+    Output_Interval: 10.0
+    Particles:
+        Format:          ["Oscar2013"]
+
+Modi:
+    Collider:
+        Projectile:
+            Particles: {2212: 79, 2112: 118} #Gold197
+            Automatic_Woods_Saxon: False
+            Saturation_Density: 0.1968
+            Diffusiveness: 0.8
+            Radius: 2.0
+            Deformed: True
+            Automatic_Deformation: False
+            Beta_2: 2.0
+            Beta_4: 8.0
+            Theta: 0.8
+            Phi: 0.02
+
+        Target:
+            Particles: {2212: 79, 2112: 118} #Gold197
+            Automatic_Woods_Saxon: False
+            Saturation_Density: 0.1968
+            Diffusiveness: 0.8
+            Radius: 2.0
+            Deformed: True
+            Automatic_Deformation: False
+            Beta_2: 2.0
+            Beta_4: 8.0
+            Theta: 0.8
+            Phi: 0.02
+
+        E_Kin: 1.23

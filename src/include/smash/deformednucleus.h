@@ -60,22 +60,25 @@ class DeformedNucleus : public Nucleus {
   ThreeVector distribute_nucleon() const override;
 
   /**
-   * Sets the deformation parameters of the Woods-Saxon distribution
-   * according to the current mass number.
+   * Sets the deformation parameters of the radius according to the current
+   * mass number.
    *
    * The deformation parameters are taken from \iref{Moller:1993ed}.
    * Corrections to the deformation parameter beta2 in Uranium come from
    * \iref{Kuhlman:2005ts}. For finite nucleon size corrections to the nuclear
-   * density and radius, see \iref{Hirano:2009ah} for copper and gold,
+   * density and radius for copper and gold, see \iref{Hirano:2009ah},
    * and \iref{Hirano:2010jg} for uranium.
    */
-  void set_parameters_automatic() override;
+  void set_deformation_parameters_automatic();
 
   /**
-   * Set parameters for Woods-Saxon by hand using the configuration file.
-   * \see Nucleus::set_parameters_from_config
+   * Set parameters for spherical deformation of the nucleus from the values
+   * specified in the configuration file.
+   *
+   * \param config The configuration for the deformation of this nucleus
+   *        (projectile or target).
    */
-  void set_parameters_from_config(Configuration &config) override;
+  void set_deformation_parameters_from_config(Configuration &config);
 
   /**
    * Rotates the nucleus according to members nucleus_polar_angle_
