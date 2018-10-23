@@ -8,6 +8,7 @@
  */
 #include <getopt.h>
 
+#include <set>
 #include <sstream>
 #include <vector>
 
@@ -286,6 +287,35 @@ ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
                               0);
 }
 
+/** Checks if the SMASH version is compatible with the version of the
+ * configuration file
+ *
+ * \param[in] configuration The configuration object
+ *
+ * \throws Runtime error if versions do not match or if config version is
+ * invalid
+ */
+void check_config_version_is_compatible(Configuration configuration) {
+  const std::string smash_version = "1.5";
+  const std::set<std::string> compatible_config_versions = {"1.5"};
+
+  const std::string config_version = configuration.take({"Version"});
+
+  if (compatible_config_versions.find(config_version) ==
+      compatible_config_versions.end()) {
+    std::stringstream err;
+    err << "The version of the configuration file (" << config_version
+        << ") is not compatible with the SMASH version (" << smash_version
+        << ").\nThe following config versions are supported:\n";
+    for (auto it : compatible_config_versions) {
+      err << it << " ";
+    }
+    err << "\nPlease consider updating your config or using a compatible SMASH"
+           " version.";
+    throw std::runtime_error(err.str());
+  }
+}
+
 }  // unnamed namespace
 
 }  // namespace smash
@@ -417,6 +447,10 @@ int main(int argc, char *argv[]) {
     for (const auto &config : extra_config) {
       configuration.merge_yaml(config);
     }
+
+    // check if version matches before doing anything else
+    check_config_version_is_compatible(configuration);
+
     if (particles) {
       if (!bf::exists(particles)) {
         std::stringstream err;
