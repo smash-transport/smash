@@ -106,9 +106,7 @@ executable with `chmod u+x ~/bin/my-binary`.
 ### Installing clang-format
 
 clang-format is a part of the clang compiler. You can download the most recent
-binaries here:
-
-   http://releases.llvm.org/download.html
+binaries here http://releases.llvm.org/download.html.
 
 Make sure to pick a pre-built binary for your system. For example, for Ubuntu
 you could run:
@@ -193,11 +191,12 @@ the main purpose of both is that all warnings are displayed when running.
 
 #### Building the User Guide
 
-Call
+In the `build` directory, run
 
     make user
 
-to obtain the files in `doc/user/index.html`
+to obtain the files in `doc/user/index.html`, that can be viewed in your favorite
+browser. 
 
 
 ### What to document in the code
