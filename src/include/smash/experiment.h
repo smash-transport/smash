@@ -13,7 +13,7 @@
 #include <vector>
 
 #include "actionfinderfactory.h"
-#include "adaptiveparameters.h"
+#include "actions.h"
 #include "chrono.h"
 #include "decayactionsfinder.h"
 #include "decayactionsfinderdilepton.h"
@@ -194,9 +194,9 @@ class Experiment : public ExperimentBase {
   void initialize_new_event();
 
   /**
-   * Runs the time evolution of an event with fixed-sized time steps,
-   * adaptive time steps or without timesteps, from action to actions.
-   * Within one timestep (fixed or adaptive) evolution from action to action
+   * Runs the time evolution of an event with fixed-sized time steps or without
+   * timesteps, from action to actions.
+   * Within one timestep (fixed) evolution from action to action
    * is invoked.
    */
   void run_time_evolution();
@@ -490,9 +490,6 @@ class Experiment : public ExperimentBase {
   /// Type of density to be written to collision headers
   DensityType dens_type_ = DensityType::None;
 
-  /// Pointer to additional parameters that are needed for adaptive time steps.
-  std::unique_ptr<AdaptiveParameters> adaptive_parameters_ = nullptr;
-
   /**
    *  Total number of interactions for current timestep.
    *  For timestepless mode the whole run time is considered as one timestep.
@@ -617,7 +614,6 @@ ExperimentParameters create_experiment_parameters(Configuration config);
  * \li \key Fixed - Fixed-sized time steps at
  * which collision-finding grid is used. More efficient for systems with many
  * particles. \n
- * \li \key Adaptive - Time steps with adaptive sizes.
  *
  * \key Metric_Type (string, optional, default = NoExpansion): \n
  * Select which kind of expansion the metric should have. This needs only be
@@ -767,22 +763,6 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   ParticleData::formation_power_ =
       config.take({"Collision_Term", "Power_Particle_Formation"}, 1.);
 
-  /*!\Userguide
-   * \page input_general_ General
-   *
-   * \page input_general_adaptive_ Adaptive Time Steps
-   * Additional parameters to configure the adaptive time step mode.
-   *
-   * \key Smoothing_Factor (double, optional, default = 0.1) \n
-   * Parameter of the exponential smoothing of the rate estimate.
-   *
-   * \key Target_Missed_Actions (double, optional, default = 0.01) \n
-   * The fraction of missed actions that is targeted by the algorithm.
-   *
-   * \key Allowed_Deviation (double, optional, default = 2.5) \n
-   * Limit by how much the target can be exceeded before the time step is
-   * aborted.
-   **/
 
   /*!\Userguide
    * \page input_general_
@@ -806,15 +786,6 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
        Use_Grid: True
        Time_Step_Mode: Fixed
    \endverbatim
-   * For the use of adaptive timesteps, change the \key Time_Step_Mode and
-   * include the corresponding additional parameters:
-   *\verbatim
-       Time_Step_Mode: Adaptive
-       Adaptive_Time_Step:
-           Smoothing_Factor: 0.1
-           Target_Missed_Actions: 0.01
-           Allowed_Deviation: 2.5
-   \endverbatim
    *
    * In the case of an expanding sphere setup, change the \key Modus and provide
    * further information about the expansion.
@@ -825,12 +796,6 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    \endverbatim
    *
    **/
-
-  if (time_step_mode_ == TimeStepMode::Adaptive) {
-    adaptive_parameters_ = make_unique<AdaptiveParameters>(
-        config["General"]["Adaptive_Time_Step"], delta_time_startup_);
-    log.info() << *adaptive_parameters_;
-  }
 
   // create outputs
   log.trace(source_location, " create OutputInterface objects");
@@ -1267,9 +1232,6 @@ void Experiment<Modus>::initialize_new_event() {
   switch (time_step_mode_) {
     case TimeStepMode::Fixed:
       break;
-    case TimeStepMode::Adaptive:
-      adaptive_parameters_->initialize(timestep);
-      break;
     case TimeStepMode::None:
       timestep = end_time_ - start_time;
       // Take care of the box modus + timestepless propagation
@@ -1440,7 +1402,6 @@ void Experiment<Modus>::run_time_evolution() {
   Actions actions;
 
   const auto &log = logger<LogArea::Experiment>();
-  const auto &log_ad_ts = logger<LogArea::AdaptiveTS>();
 
   log.info() << format_measurements(particles_, 0u, conserved_initial_,
                                     time_start_,
@@ -1490,20 +1451,12 @@ void Experiment<Modus>::run_time_evolution() {
           }
         });
 
-    /* (2) In case of adaptive timesteps adapt timestep size */
-    if (time_step_mode_ == TimeStepMode::Adaptive && actions.size() > 0u) {
-      double new_timestep = parameters_.labclock.timestep_duration();
-      if (adaptive_parameters_->update_timestep(actions, particles_.size(),
-                                                &new_timestep)) {
-        parameters_.labclock.set_timestep_duration(new_timestep);
-        log_ad_ts.info("New timestep is set to ", new_timestep);
-      }
-    }
+    /* \todo (optimizations) Adapt timestep size here */
 
-    /* (3) Propagation from action to action until the end of timestep */
+    /* (2) Propagation from action to action until the end of timestep */
     run_time_evolution_timestepless(actions);
 
-    /* (4) Update potentials (if computed on the lattice) and
+    /* (3) Update potentials (if computed on the lattice) and
      *     compute new momenta according to equations of motion */
     if (potentials_) {
       update_potentials();
@@ -1511,7 +1464,7 @@ void Experiment<Modus>::run_time_evolution() {
                      *potentials_, FB_lat_.get(), FI3_lat_.get());
     }
 
-    /* (5) Expand universe if non-minkowskian metric; updates
+    /* (4) Expand universe if non-minkowskian metric; updates
      *     positions and momenta according to the selected expansion */
     if (metric_.mode_ != ExpansionMode::NoExpansion) {
       expand_space_time(&particles_, parameters_, metric_);
@@ -1519,7 +1472,7 @@ void Experiment<Modus>::run_time_evolution() {
 
     ++parameters_.labclock;
 
-    /* (6) Check conservation laws.
+    /* (5) Check conservation laws.
      *
      * Check conservation of conserved quantities if potentials and string
      * fragmentation are off.  If potentials are on then momentum is conserved
@@ -1585,14 +1538,8 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
       continue;
     }
     if (act->time_of_execution() > end_time) {
-      if (time_step_mode_ == TimeStepMode::Adaptive) {
-        log.debug(~einhard::DRed(), "✘ ", act,
-                  " (discarded: adaptive timestep"
-                  " mode decreased timestep and this action is too late)");
-      } else {
-        log.error(act, " scheduled later than end time: t_action[fm/c] = ",
+      log.error(act, " scheduled later than end time: t_action[fm/c] = ",
                   act->time_of_execution(), ", t_end[fm/c] = ", end_time);
-      }
     }
     log.debug(~einhard::Green(), "✔ ", act);
 

@@ -53,7 +53,6 @@ class Configuration;
  * \li \key Tmn
  * \li \key Fpe
  * \li \key Lattice
- * \li \key AdaptiveTS
  * \li \key Pythia
  * \li \key GrandcanThermalizer
  * \li \key CrossSections
@@ -104,7 +103,6 @@ class Configuration;
      Tmn: INFO
      Fpe: INFO
      Lattice: INFO
-     AdaptiveTS: INFO
      GrandcanThermalizer: INFO
      CrossSections: INFO
  \endverbatim
@@ -193,10 +191,9 @@ DECLARE_LOGAREA(20, Tmn);
 DECLARE_LOGAREA(21, Fpe);
 DECLARE_LOGAREA(22, Lattice);
 DECLARE_LOGAREA(23, Sampling);
-DECLARE_LOGAREA(24, AdaptiveTS);
-DECLARE_LOGAREA(25, Pythia);
-DECLARE_LOGAREA(26, GrandcanThermalizer);
-DECLARE_LOGAREA(27, CrossSections);
+DECLARE_LOGAREA(24, Pythia);
+DECLARE_LOGAREA(25, GrandcanThermalizer);
+DECLARE_LOGAREA(26, CrossSections);
 
 /**
  * This type collects all existing log areas so they will be created with the
@@ -206,7 +203,7 @@ using AreaTuple =
     std::tuple<Main, Experiment, Box, Collider, Sphere, Action, InputParser,
                ParticleType, FindScatter, Clock, DecayModes, Resonances,
                ScatterAction, Distributions, Propagation, Grid, List, Nucleus,
-               Density, PauliBlocking, Tmn, Fpe, Lattice, Sampling, AdaptiveTS,
+               Density, PauliBlocking, Tmn, Fpe, Lattice, Sampling,
                Pythia, GrandcanThermalizer, CrossSections>;
 }  // namespace LogArea
 
