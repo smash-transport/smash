@@ -10,14 +10,12 @@
 #ifndef SRC_INCLUDE_FORWARDDECLARATIONS_H_
 #define SRC_INCLUDE_FORWARDDECLARATIONS_H_
 
-/// @cond 
+/// @cond
 // exclude most content here from documentation
 
 #include <iosfwd>
 #include <memory>
 #include <vector>
-
-
 
 #ifdef _LIBCPP_BEGIN_NAMESPACE_STD
 _LIBCPP_BEGIN_NAMESPACE_STD

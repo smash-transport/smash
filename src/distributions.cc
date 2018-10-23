@@ -37,7 +37,6 @@ double cauchy(double x, double pole, double width) {
   return width / (M_PI * (dm * dm + width * width));
 }
 
-
 // density_integrand - Maxwell-Boltzmann distribution
 double density_integrand(const double energy, const double momentum_sqr,
                          const double temperature) {

@@ -206,7 +206,6 @@ const std::initializer_list<double> KMINUSP_TOT_SIG = {
     20.23,  20.38, 20.80, 20.45, 20.41, 20.59, 21.50, 20.60, 20.57, 20.65,
     21.40,  20.79, 20.84, 21.30, 21.32, 21.45};
 
-
 /// Center-of-mass energy list for K̅⁻ N⁺
 const std::initializer_list<double> KMINUSP_RES_SQRTS = {
     1.4355, 1.4530, 1.4730, 1.4929, 1.5129, 1.5329, 1.5529, 1.5729,

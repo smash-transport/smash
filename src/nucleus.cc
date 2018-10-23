@@ -28,7 +28,6 @@ Nucleus::Nucleus(const std::map<PdgCode, int> &particle_list, int nTest) {
   fill_from_list(particle_list, nTest);
 }
 
-
 Nucleus::Nucleus(Configuration &config, int nTest) {
   // Fill nuclei with particles.
   std::map<PdgCode, int> part = config.take({"Particles"});
@@ -247,11 +246,9 @@ ThreeVector Nucleus::distribute_nucleon() const {
   return dir.threevec() * position;
 }
 
-
 double Nucleus::woods_saxon(double r) {
   return r * r / (std::exp((r - nuclear_radius_) / diffusiveness_) + 1);
 }
-
 
 void Nucleus::arrange_nucleons() {
   for (auto i = begin(); i != end(); i++) {

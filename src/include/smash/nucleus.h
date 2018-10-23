@@ -104,7 +104,6 @@ class Nucleus {
    */
   void boost(double beta_scalar);
 
-
   /**
    * Adds particles from a map PDG code =>
    * Number_of_particles_with_that_PDG_code to the nucleus. E.g., the map [2212:

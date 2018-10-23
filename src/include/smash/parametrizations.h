@@ -291,7 +291,6 @@ double ppbar_elastic(double mandelstam_s);
  */
 double ppbar_total(double mandelstam_s);
 
-
 /**
  * Deuteron pion elastic cross-section [mb] parametrized
  * to fit pi-d elastic scattering data (the data collection
