@@ -28,7 +28,7 @@ namespace smash {
  * The resolution of the clock is 0.000001 fm/c. I.e. only multiples of 0.000001
  * fm/c are representable internally.
  *
- * Usage:
+ * Potential usage for adapting time steps:
  * ------
  * \code
  *   Clock labtime(0., 0.1);
