@@ -181,7 +181,6 @@ BinaryOutputCollisions::BinaryOutputCollisions(const bf::path &path,
           "wb", name, out_par.get_coll_extended(name)),
       print_start_end_(out_par.coll_printstartend) {}
 
-
 void BinaryOutputCollisions::at_eventstart(const Particles &particles,
                                            const int) {
   char pchar = 'p';
@@ -235,8 +234,6 @@ BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
     : BinaryOutputBase(path / "particles_binary.bin", "wb", name,
                        out_par.part_extended),
       only_final_(out_par.part_only_final) {}
-
-
 
 void BinaryOutputParticles::at_eventstart(const Particles &particles,
                                           const int) {
