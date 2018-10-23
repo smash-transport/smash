@@ -291,7 +291,7 @@ void ScatterAction::sample_angles(std::pair<double, double> masses,
        * with nucleon mass. */
       const double pcm_now = pCM_from_s(mandelstam_s(), mass_in_a, mass_in_b);
       mandelstam_s_new =
-          2. * std::sqrt(pcm_now * pcm_now + nucleon_mass * nucleon_mass);
+          4. * std::sqrt(pcm_now * pcm_now + nucleon_mass * nucleon_mass);
     }
     double bb, a, plab = plab_from_s(mandelstam_s_new);
     if (nn_scattering && p_a->type().charge() + p_b->type().charge() == 1) {
