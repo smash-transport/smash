@@ -106,7 +106,7 @@ Configuration::Configuration(const bf::path &path, const bf::path &filename) {
                            file_path.native() +
                            "', but the file does not exist.");
   }
-  if (has_crlf_line_ending(read_all(bf::ifstream({file_path})))) {
+  if (has_crlf_line_ending(read_all(bf::ifstream((file_path))))) {
     throw std::runtime_error(
         "The configuration file has CR LF line endings. Please use LF "
         "line endings.");
