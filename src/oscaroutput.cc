@@ -725,7 +725,6 @@ std::unique_ptr<OutputInterface> create_select_format(
     log.warn() << "Creating Oscar output: "
                << "There is no extended Oscar1999 format.";
     return make_unique<OscarOutput<OscarFormat1999, Contents>>(path, name);
-    ;
   }
 }
 }  // unnamed namespace
