@@ -37,7 +37,7 @@ It requires the following tools & libraries:
 - boost filesystem >= 1.49
 - Pythia = 8.235
 
-Support for ROOT output is automatically enabled, if a suitable version of ROOT
+Support for ROOT output is automatically enabled if a suitable version of ROOT
 (>= 5.34) is found on the system.
 
 ### Building Pythia
