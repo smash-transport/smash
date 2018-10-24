@@ -4,19 +4,19 @@
 
 This is the repository for the development of the SMASH (Simulating Many
 Accelerated Strongly-interacting Hadrons) transport approach for the dynamical
-description of heavy ion reactions. See [Phys. Rev. C 94, 054905
-(2016)](https://arxiv.org/abs/1606.06642) for details.
+description of heavy ion reactions. Please see [Phys. Rev. C 94, 054905
+(2016)](https://arxiv.org/abs/1606.06642) for details and cite this reference,
+if you are using SMASH.
 
-See [CONTRIBUTING](CONTRIBUTING.md) for development hints. A complete User
-Guide is found [here](https://fias.uni-frankfurt.de/~smash/extra/user/).
+See [CONTRIBUTING](CONTRIBUTING.md) for development hints. A complete User Guide
+is found [here](https://fias.uni-frankfurt.de/~smash/extra/user/).
 
-If Pythia is used, please cite the following references:
+If Pythia is used, please cite the following references: T. Sjöstrand, S. Mrenna
+and P. Skands, [JHEP05 (2006) 026](https://arxiv.org/abs/hep-ph/0603175),
+[Comput. Phys. Comm. 178 (2008)](https://arxiv.org/abs/0710.3820)
 
-* T. Sjöstrand, S. Mrenna and P. Skands, JHEP05 (2006) 026,
-  Comput. Phys. Comm. 178 (2008) 852.
-  
-Report issues at https://github.com/smash-transport/smash
-or contact us by email at h.elfner@gsi.de.
+Report issues at https://github.com/smash-transport/smash or contact us by email
+at h.elfner@gsi.de.
 
 ## How to build SMASH
 
@@ -37,7 +37,6 @@ It requires the following tools & libraries:
 Support for ROOT output is automatically enabled if a suitable version of ROOT
 (>= 5.34) is found on the system.
 
-
 ### Building Pythia
 
 SMASH is tightly coupled to Pythia and thus requires a specific version. Using
@@ -55,6 +54,17 @@ executable as shown in the next section.
 
 Note that although Pythia is statically linked into SMASH, access to
 `share/Pythia8/xmldoc` is required at runtime.
+
+### Including Eigen header files from custom location
+
+Let's assume Eigen headers will be unpacked in `$HOME`.
+
+1. Download latest package from http://eigen.tuxfamily.org
+
+       [latest-eigen].tar.gz
+       tar -xf [latest-eigen].tar.gz -C $HOME`
+
+2. in `smash/build/`, create build files with `cmake -DCMAKE_INSTALL_PREFIX=$HOME/[latest-eigen]/ ..`
 
 
 ### Building SMASH
@@ -84,9 +94,9 @@ has a size of about 4GB. If disk space is restricted, consider to just run
     make smash
 
 which will only compile the SMASH binary. By default, the unit tests are also
-compiled which requires a lot of the disk space. It is still recommended to run
-the unit tests at least once when compiling in a new environment to ensure that
-everything works as expected. To see how to run the tests see
+compiled, which require a lot of the disk space. It is still recommended to run
+the unit tests at least once, when compiling in a new environment to ensure that
+everything works as expected. To see how to run the tests, see
 [CONTRIBUTING](CONTRIBUTING.md).
 
 
@@ -132,17 +142,6 @@ In order to disable it, one can do the follwoing:
     make
 
 
-### Including Eigen header files from custom location
-
-Let's assume Eigen headers will be unpacked in `$HOME`.
-
-1. Download latest package `[latest-eigen].tar.gz` from http://eigen.tuxfamily.org
-
-2. unpack: `tar -xf [latest-eigen].tar.gz -C $HOME`
-
-3. in `smash/build/`, create build files with `cmake -DCMAKE_INSTALL_PREFIX=$HOME/[latest-eigen]/ ..`
-
-
 ### Using a custom GSL build
 
 Download and unpack GSL:
@@ -163,7 +162,6 @@ SMASH, run `cmake` with
     cmake -DGSL_ROOT_DIR=$GSL ..
 
 Note: In case of problems, make sure to start with a clean build folder.
-
 
 ## Running SMASH with example input files
 
