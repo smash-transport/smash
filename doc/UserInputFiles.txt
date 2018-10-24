@@ -7,7 +7,7 @@ set(files_with_input
  ${PROJECT_SOURCE_DIR}/src/include/smash/boxmodus.h
  ${PROJECT_SOURCE_DIR}/src/include/smash/grandcan_thermalizer.h
  ${PROJECT_SOURCE_DIR}/src/include/smash/modusdefault.h
- ${PROJECT_SOURCE_DIR}/src/binaryoutputparticles.cc
+ ${PROJECT_SOURCE_DIR}/src/binaryoutput.cc
  ${PROJECT_SOURCE_DIR}/src/thermodynamicoutput.cc
  ${PROJECT_SOURCE_DIR}/src/smash.cc
  ${PROJECT_SOURCE_DIR}/src/pauliblocking.cc
