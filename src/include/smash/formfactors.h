@@ -17,7 +17,10 @@ namespace smash {
 
 /**
  * \return the squared Blatt-Weisskopf functions, which influence the mass
- * dependence of the decay widths. See e.g. \iref{Effenberger:1999wlg}, page 28.
+ * dependence of the decay widths. See e.g. \iref{Effenberger:1999wlg}, page 28
+ * and
+ * https://physique.cuso.ch/fileadmin/physique/document/2015_chung_brfactor1.pdf
+ * where a recursive formula is given.
  *
  * \param p_ab Momentum of outgoing particles A and B in center-of-mass frame
  * [GeV] \param L Angular momentum of outgoing particles A and B.
@@ -26,29 +29,50 @@ namespace smash {
  * the Blatt-Weisskopf functions approach one for large p_ab and behave like
  * p_ab**L for small \p p_ab. They are increasing monotonically with \p p_ab.
  *
- * \throws invalid_argument if L > 4
+ * \throws invalid_argument if L > 5
  */
 inline double blatt_weisskopf_sqr(const double p_ab, const int L)
 #ifdef NDEBUG
     noexcept
 #endif
 {
-  const double R = 1. / hbarc; /* interaction radius = 1 fm */
-  const auto x = p_ab * R;
-  const auto x2 = x * x;
-  const auto x4 = x2 * x2;
+  constexpr double R = 1. / hbarc; /* interaction radius = 1 fm */
   switch (L) {
     case 0:
       return 1.;
-    case 1:
+    case 1: {
+      const auto x = p_ab * R;
+      const auto x2 = x * x;
       return x2 / (1. + x2);
-    case 2:
+    }
+    case 2: {
+      const auto x = p_ab * R;
+      const auto x2 = x * x;
+      const auto x4 = x2 * x2;
       return x4 / (9. + 3. * x2 + x4);
-    case 3:
+    }
+    case 3: {
+      const auto x = p_ab * R;
+      const auto x2 = x * x;
+      const auto x4 = x2 * x2;
       return x4 * x2 / (225. + 45. * x2 + 6. * x4 + x4 * x2);
-    case 4:
-      return x4 * x4 /
-             (11025. + 1575. * x2 + 135. * x4 + 10. * x2 * x4 + x4 * x4);
+    }
+    case 4: {
+      const auto x = p_ab * R;
+      const auto x2 = x * x;
+      const auto x4 = x2 * x2;
+      const auto x8 = x4 * x4;
+      return x8 / (11025. + 1575. * x2 + 135. * x4 + 10. * x2 * x4 + x8);
+    }
+    case 5: {
+      const auto x = p_ab * R;
+      const auto x2 = x * x;
+      const auto x4 = x2 * x2;
+      const auto x8 = x4 * x4;
+      return x8 * x2 /
+             (893025. + 99225. * x2 + 6300. * x4 + 315. * x4 * x2 + 15. * x8 +
+              x8 * x2);
+    }
 // See also input sanitization in load_decaymodes in decaymodes.cc.
 #ifndef NDEBUG
     default:
