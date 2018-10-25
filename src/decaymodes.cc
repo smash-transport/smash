@@ -245,8 +245,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
 
       int L;
       lineinput >> L;
-      if (L < 0 || L > 5) {  // at some point we might need to support L > 5 ?
-                             // (cf. blatt_weisskopf_sqr in formfactors.h)
+      if (L < 0) {
         throw LoadFailure("Invalid angular momentum '" + std::to_string(L) +
                           "' in decaymodes.txt:" + std::to_string(line.number) +
                           ": '" + line.text + "'");
