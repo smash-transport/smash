@@ -142,7 +142,8 @@ static double min_angular_momentum(int s0, int s1, int s2) {
 }
 
 static double min_angular_momentum(int s0, int s1, int s2, int s3) {
-  int min_L = std::min(std::abs(s0 - s1 + s2 + s3), std::abs(s0 + s1 - s2 + s3));
+  int min_L =
+      std::min(std::abs(s0 - s1 + s2 + s3), std::abs(s0 + s1 - s2 + s3));
   min_L = std::min(min_L, std::abs(s0 + s1 + s2 - s3));
   min_L = std::min(min_L, std::abs(s0 - s1 - s2 + s3));
   min_L = std::min(min_L, std::abs(s0 - s1 + s2 - s3));
@@ -285,9 +286,8 @@ void DecayModes::load_decaymodes(const std::string &input) {
             const IsoParticleType &isotype_daughter_2 =
                 IsoParticleType::find(decay_particles[1]);
             parity = isotype_daughter_1.parity() * isotype_daughter_2.parity();
-            is_strong_decay =
-                isotype_daughter_1.is_hadron() &&
-                isotype_daughter_2.is_hadron();
+            is_strong_decay = isotype_daughter_1.is_hadron() &&
+                              isotype_daughter_2.is_hadron();
             const int s1 = isotype_daughter_1.spin();
             const int s2 = isotype_daughter_2.spin();
             min_L = min_angular_momentum(s0, s1, s2);
@@ -332,13 +332,11 @@ void DecayModes::load_decaymodes(const std::string &input) {
                 IsoParticleType::find(decay_particles[1]);
             const IsoParticleType &isotype_daughter_3 =
                 IsoParticleType::find(decay_particles[2]);
-            parity = isotype_daughter_1.parity() *
-                     isotype_daughter_2.parity() *
+            parity = isotype_daughter_1.parity() * isotype_daughter_2.parity() *
                      isotype_daughter_3.parity();
-            is_strong_decay =
-                isotype_daughter_1.is_hadron() &&
-                isotype_daughter_2.is_hadron() &&
-                isotype_daughter_3.is_hadron();
+            is_strong_decay = isotype_daughter_1.is_hadron() &&
+                              isotype_daughter_2.is_hadron() &&
+                              isotype_daughter_3.is_hadron();
             const int s1 = isotype_daughter_1.spin();
             const int s2 = isotype_daughter_2.spin();
             const int s3 = isotype_daughter_2.spin();
@@ -407,8 +405,9 @@ void DecayModes::load_decaymodes(const std::string &input) {
           min_L = min_angular_momentum(s0, s1, s2, s3);
           max_L = static_cast<double>(s0 + s1 + s2 + s3) / 2.;
         } else {
-            throw InvalidDecay(isotype_mother->name() +
-                             " decay mode has an invalid number of particles in the final state " +
+          throw InvalidDecay(isotype_mother->name() +
+                             " decay mode has an invalid number of particles"
+                             " in the final state " +
                              "(line " + std::to_string(linenumber) + ": \"" +
                              trimmed + "\")");
         }
@@ -434,19 +433,21 @@ void DecayModes::load_decaymodes(const std::string &input) {
       }
       // Make sure the decay has the correct parity.
       if (is_strong_decay && parity != mother_states[0]->parity()) {
-          throw InvalidDecay(mother_states[0]->name() +
-                             " decay mode violates parity conservation " +
-                             "(line " + std::to_string(linenumber) + ": \"" +
-                             trimmed + "\")");
+        throw InvalidDecay(mother_states[0]->name() +
+                           " decay mode violates parity conservation " +
+                           "(line " + std::to_string(linenumber) + ": \"" +
+                           trimmed + "\")");
       }
       // Make sure the decay has a correct angular momentum.
       if (L < min_L || L > max_L) {
-          throw InvalidDecay(mother_states[0]->name() +
-                             " decay mode violates angular momentum conservation: " +
-                             std::to_string(L) + " not in [" + std::to_string(min_L) +
-                             ", " + std::to_string(max_L) + "] "
-                             "(line " + std::to_string(linenumber) + ": \"" +
-                             trimmed + "\")");
+        throw InvalidDecay(
+            mother_states[0]->name() +
+            " decay mode violates angular momentum conservation: " +
+            std::to_string(L) + " not in [" + std::to_string(min_L) + ", " +
+            std::to_string(max_L) +
+            "] "
+            "(line " +
+            std::to_string(linenumber) + ": \"" + trimmed + "\")");
       }
     }
     linenumber++;
