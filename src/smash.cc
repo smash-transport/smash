@@ -600,8 +600,7 @@ int main(int argc, char *argv[]) {
     const std::string report = configuration.unused_values_report();
     if (report != "{}") {
       throw std::runtime_error(
-          "The following configuration values were not used:\n"
-          + report);
+          "The following configuration values were not used:\n" + report);
     }
 
     // Run the experiment
