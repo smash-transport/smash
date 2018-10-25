@@ -599,8 +599,9 @@ int main(int argc, char *argv[]) {
     auto experiment = ExperimentBase::create(configuration, output_path);
     const std::string report = configuration.unused_values_report();
     if (report != "{}") {
-      log.warn() << "The following configuration values were not used:\n"
-                 << report;
+      throw std::runtime_error(
+          "The following configuration values were not used:\n"
+          + report);
     }
 
     // Run the experiment
