@@ -282,8 +282,7 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
         /* add corresponding antiparticle */
         PdgCode anti = pdgcode[i].get_antiparticle();
         // For bosons the parity does not change, for fermions it gets inverted.
-        const auto anti_parity =
-            (anti.spin() % 2 == 0) ? parity : -parity;
+        const auto anti_parity = (anti.spin() % 2 == 0) ? parity : -parity;
         full_name = antiname(full_name, pdgcode[i]);
         type_list.emplace_back(full_name, mass, width, anti_parity, anti);
         log.debug() << "Setting antiparticle type: " << type_list.back();

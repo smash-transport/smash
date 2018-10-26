@@ -34,8 +34,8 @@ class IsoParticleType {
    * \param s Twice the spin of the multiplet.
    * \param p Parity of the multiplet.
    */
-  IsoParticleType(
-    const std::string &n, double m, double w, unsigned int s, Parity p);
+  IsoParticleType(const std::string &n, double m, double w, unsigned int s,
+                  Parity p);
 
   /**
    * Copies are not allowed as they break intended use. Instead use a const-ref

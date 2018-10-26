@@ -30,8 +30,7 @@ namespace smash {
  * the Blatt-Weisskopf functions approach one for large p_ab and behave like
  * p_ab**L for small \p p_ab. They are increasing monotonically with \p p_ab.
  */
-inline double blatt_weisskopf_sqr(const double p_ab, const int L)
-{
+inline double blatt_weisskopf_sqr(const double p_ab, const int L) {
   if (L == 0) {
     return 1.;
   }
@@ -46,7 +45,8 @@ inline double blatt_weisskopf_sqr(const double p_ab, const int L)
   double numer = x2;
   for (int l = 1; l < L; l++) {
     numer *= x2;
-    const auto new_g = static_cast<double>(2*l + 1) * g_prev - x2 * g_prevprev;
+    const auto new_g =
+        static_cast<double>(2 * l + 1) * g_prev - x2 * g_prevprev;
     g_prevprev = g_prev;
     g_prev = new_g;
   }

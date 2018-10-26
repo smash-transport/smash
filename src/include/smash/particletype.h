@@ -62,7 +62,7 @@ inline Parity operator*(Parity x, Parity y) {
  * \param y Right-hand parity
  * \return Product of `x` and `y`.
  */
-inline void operator*=(Parity& x, Parity y) {
+inline void operator*=(Parity &x, Parity y) {
   if (x == y) {
     x = Parity::Pos;
   } else {
