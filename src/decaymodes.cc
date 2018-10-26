@@ -401,7 +401,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
         } else if (types.size() == 3) {
           const int s1 = types[0]->spin();
           const int s2 = types[1]->spin();
-          const int s3 = types[1]->spin();
+          const int s3 = types[2]->spin();
           min_L = min_angular_momentum(s0, s1, s2, s3);
           max_L = static_cast<double>(s0 + s1 + s2 + s3) / 2.;
         } else {
