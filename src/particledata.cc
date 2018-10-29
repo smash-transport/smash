@@ -105,11 +105,8 @@ double ParticleData::xsec_scaling_factor(double delta_time) const {
 std::ostream &operator<<(std::ostream &out, const ParticleData &p) {
   out.fill(' ');
   return out
-#ifdef NDEBUG
-         << std::setw(5) << p.type().pdgcode()
-#else
          << p.type().name()
-#endif
+         << " (" << std::setw(5) << p.type().pdgcode() << ")"
          << std::right << "{id:" << field<6> << p.id()
          << ", process:" << field<4> << p.id_process()
          << ", pos [fm]:" << p.position() << ", mom [GeV]:" << p.momentum()
