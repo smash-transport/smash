@@ -374,6 +374,7 @@ class ParticleData {
 
  private:
   friend class Particles;
+  /// Default constructor.
   ParticleData() = default;
 
   /**
