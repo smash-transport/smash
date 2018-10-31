@@ -142,7 +142,9 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
  * therefore necessary to modify the provided default particles.txt and
  * decaymodes.txt by removing 3-body and higher order decays from
  * the decaymodes file and all corresponding particles that can no longer be
- * produced from the particles file. \n
+ * produced from the particles file. In addtion, strings need to be
+ * turned off, since they also break detailed balance due to lacking
+ * backreactions. \n
  * SMASH is shipped with example files (config.yaml, particles.txt,
  * decaymodes.txt) meeting the above mentioned requirements to set up an
  * infinite matter simulation. They are located in /input/box. To run SMASH
