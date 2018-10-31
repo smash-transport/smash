@@ -104,14 +104,13 @@ double ParticleData::xsec_scaling_factor(double delta_time) const {
 
 std::ostream &operator<<(std::ostream &out, const ParticleData &p) {
   out.fill(' ');
-  return out
-         << p.type().name()
-         << " (" << std::setw(5) << p.type().pdgcode() << ")"
-         << std::right << "{id:" << field<6> << p.id()
-         << ", process:" << field<4> << p.id_process()
-         << ", pos [fm]:" << p.position() << ", mom [GeV]:" << p.momentum()
-         << ", formation time [fm]:" << p.formation_time()
-         << ", cross section scaling factor:" << p.xsec_scaling_factor() << "}";
+  return out << p.type().name() << " (" << std::setw(5) << p.type().pdgcode()
+             << ")" << std::right << "{id:" << field<6> << p.id()
+             << ", process:" << field<4> << p.id_process()
+             << ", pos [fm]:" << p.position() << ", mom [GeV]:" << p.momentum()
+             << ", formation time [fm]:" << p.formation_time()
+             << ", cross section scaling factor:" << p.xsec_scaling_factor()
+             << "}";
 }
 
 std::ostream &operator<<(std::ostream &out, const ParticleList &particle_list) {

@@ -239,15 +239,9 @@ TEST(no_strings) {
   const auto& pi_p = ParticleType::find(pdg::pi_p);
   const auto& K_p = ParticleType::find(pdg::K_p);
   const auto& K_m = ParticleType::find(pdg::K_m);
-  const std::vector<std::pair<const ParticleType&, const ParticleType&>> pairs = {
-    {proton, proton},
-    {proton, pi_z},
-    {proton, pi_m},
-    {proton, pi_p},
-    {pi_p, pi_m},
-    {proton, K_m},
-    {proton, K_p}
-  };
+  const std::vector<std::pair<const ParticleType&, const ParticleType&>> pairs =
+      {{proton, proton}, {proton, pi_z}, {proton, pi_m}, {proton, pi_p},
+       {pi_p, pi_m},     {proton, K_m},  {proton, K_p}};
   for (const auto& p : pairs) {
     ParticleData p1{p.first};
     ParticleData p2{p.second};
@@ -281,12 +275,13 @@ TEST(no_strings) {
     VERIFY(act != nullptr);
 
     // add processes
-    constexpr double elastic_parameter = 0.;  // don't include elastic scattering
+    constexpr double elastic_parameter =
+        0.;  // don't include elastic scattering
     constexpr bool strings_switch = false;
     constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
     act->add_all_scatterings(elastic_parameter, true,
-                           Test::all_reactions_included(), 0., strings_switch,
-                           false, false, nnbar_treatment);
+                             Test::all_reactions_included(), 0., strings_switch,
+                             false, false, nnbar_treatment);
 
     VERIFY(act->cross_section() > 0.);
 
