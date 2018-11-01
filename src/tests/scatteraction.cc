@@ -251,6 +251,8 @@ TEST(no_strings) {
     p2.set_4position(pos_b);
     const double m1 = p1.pole_mass();
     const double m2 = p2.pole_mass();
+    // 0.2 GeV above the threshold, the cross section should be non-zero without
+    // strings. At much higher energies, it is expected to be zero.
     const double sqrts = m1 + m2 + 0.2;
     const double p_x = plab_from_s(sqrts * sqrts, m1, m2);
     p1.set_4momentum(p1.pole_mass(), p_x, 0., 0.);
