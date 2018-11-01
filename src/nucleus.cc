@@ -33,8 +33,7 @@ Nucleus::Nucleus(Configuration &config, int nTest) {
   std::map<PdgCode, int> part = config.take({"Particles"});
   fill_from_list(part, nTest);
   // Look for user-defined values or take the default parameters.
-  if (config.has_value({"Automatic_Woods_Saxon"}) &&
-      config.take({"Automatic_Woods_Saxon"})) {
+  if (config.take({"Automatic_Woods_Saxon"}, true)) {
     set_parameters_automatic();
   } else {
     set_parameters_from_config(config);
