@@ -431,7 +431,7 @@ N(2220)
 0.22   3  N ρ
 0.17   4  N σ
 0.20   3  Δ π
-#0.000  3  Λ K  # tuned for Nπ->ΛK, FIXME: should be 5
+#0.000  5  Λ K  # tuned for Nπ->ΛK
 0.005  3  N φ  # tuned for p Nb dileptons and pp -> ppKK
 0.001  4  N f₀(980)  # tuned for pp -> ppKK
 # From UrQMD
