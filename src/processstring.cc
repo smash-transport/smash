@@ -655,6 +655,7 @@ bool StringProcess::next_NDiffHard() {
     if (event_intermediate_[ipart].isFinal() &&
         !event_intermediate_[ipart].isParton() &&
         !pythia_parton_->particleData.isOctetHadron(pdgid)) {
+      log.debug("PDG ID from Pythia: ", pdgid);
       FourVector momentum = reorient(event_intermediate_[ipart], evecBasisAB_);
       log.debug("4-momentum from Pythia: ", momentum);
       bool found_ptype =
@@ -677,6 +678,14 @@ bool StringProcess::next_NDiffHard() {
             event_intermediate_.size(), " partons.");
   // identify and fragment strings until there is no parton left.
   while (event_intermediate_.size() > 1) {
+    // dummy event to initialize the internal variables of PYTHIA.
+    pythia_hadron_->event.reset();
+    if (!pythia_hadron_->next()) {
+      log.debug("  Dummy event in hard string routine failed.");
+      hadronize_success = false;
+      break;
+    }
+
     if (event_intermediate_.sizeJunction() > 0) {
       // identify string from a junction if there is any.
       compose_string_junction(find_forward_string, event_intermediate_,
@@ -689,7 +698,7 @@ bool StringProcess::next_NDiffHard() {
     }
 
     // fragment the (identified) string into hadrons.
-    hadronize_success = pythia_hadron_->next();
+    hadronize_success = pythia_hadron_->forceHadronLevel(false);
     log.debug("Pythia hadronized, success = ", hadronize_success);
 
     new_intermediate_particles.clear();
@@ -697,7 +706,7 @@ bool StringProcess::next_NDiffHard() {
       for (int i = 0; i < event_hadron.size(); i++) {
         if (event_hadron[i].isFinal()) {
           int pythia_id = event_hadron[i].id();
-          log.debug("PDG ID from Pythia:", pythia_id);
+          log.debug("PDG ID from Pythia: ", pythia_id);
           /* K_short and K_long need to be converted to K0
            * since SMASH only knows K0 */
           convert_KaonLS(pythia_id);
