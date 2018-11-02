@@ -82,17 +82,17 @@ namespace smash {
  * \key Quark_Beta (double, optional, default = 5.0) \n
  * Parameter \f$\beta\f$ in PDF for quarks shown above.
  *
- * \key Strange_Supp (double, optional, default = 0.165) \n
+ * \key Strange_Supp (double, optional, default = 0.12) \n
  * Strangeness suppression factor \f$\lambda\f$:
  * \f[\lambda=\frac{P(s\bar{s})}{P(u\bar{u})}=\frac{P(s\bar{s})}{P(d\bar{d})}\f]
  * Defines the probability to produce a \f$s\bar{s}\f$ pair relative to produce
  * a light \f$q\bar{q}\f$ pair
  *
- * \key Diquark_Supp (double, optional, default = 0.042) \n
+ * \key Diquark_Supp (double, optional, default = 0.03) \n
  * Diquark suppression factor. Defines the probability to produce a diquark
  * antidiquark pair relative to producing a qurk antiquark pair.
  *
- * \key Sigma_Perp (double, optional, default = 0.4) \n
+ * \key Sigma_Perp (double, optional, default = 0.42) \n
  * Parameter \f$\sigma_\perp\f$ in distribution for transverse momentum
  * transfer between colliding hadrons \f$p_\perp\f$ and string mass \f$M_X\f$:
  * \f[\frac{d^3N}{dM^2_Xd^2\mathbf{p_\perp}}\propto \frac{1}{M_X^2}
@@ -105,10 +105,10 @@ namespace smash {
  * \key StringZ_B (double, optional, default = 0.5) \n
  * Parameter \f$b\f$ in pythia fragmentation function shown above.
  *
- * \key Leading_Frag_Mean (double, optional, default = 0.7) \n
+ * \key Leading_Frag_Mean (double, optional, default = 1.0) \n
  * Mean of Gaussian used as fragmentation function for leading hadrons.
  *
- * \key Leading_Frag_Width (double, optional, default = 0.25) \n
+ * \key Leading_Frag_Width (double, optional, default = 0.6) \n
  * Width of Gaussian used as fragmentation function for leading hadrons.
  *
  * \key String_Sigma_T (double, optional, default = 0.5)

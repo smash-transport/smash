@@ -90,5 +90,6 @@ install:
   - make -j2
 
 script:
-  - ctest -j2
   - ./../bin/clang-format-helper.sh -t
+  - ctest -j2
+

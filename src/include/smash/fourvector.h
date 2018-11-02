@@ -30,7 +30,7 @@ namespace smash {
  * argument, are a member of the FourVector class.
  *
  * \fpPrecision
- * \li The \c FourVector class uses \c double for storage, calculations, and in
+ * The \c FourVector class uses \c double for storage, calculations, and in
  * the interface. This is necessary because most particles are close to light
  * speed and thus the low-order bits in the mantissa of the momentum make large
  * differences in energy. If they are discarded by rounding to single-precision,
