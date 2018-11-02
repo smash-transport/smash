@@ -37,6 +37,8 @@ UNAME_INFO=$(uname -a)
 
 
 echo "Running Benchmarks for ${SMASH_VER_NUM} ..."
+echo "(Runs for roughly 2h.)"
+
 
 benchmark_run() {
   YAML_DIR=$1
@@ -45,7 +47,7 @@ benchmark_run() {
   if [ "$#" -eq 4 ]
   then
     CONFIG_OPT=$4
-    PERF_OUT=$(perf stat -B -r1 \
+    PERF_OUT=$(perf stat -B -r3 \
                ./smash \
                -i ${CONFIGS_DIR}/${YAML_DIR}/config.yaml \
                -d ${CONFIGS_DIR}/${DECAYM_DIR}/decaymodes.txt \
@@ -53,7 +55,7 @@ benchmark_run() {
                -c "$CONFIG_OPT" \
                2>&1 >/dev/null)
   else
-    PERF_OUT=$(perf stat -B -r1 \
+    PERF_OUT=$(perf stat -B -r3 \
                ./smash \
                -i ${CONFIGS_DIR}/${YAML_DIR}/config.yaml \
                -d ${CONFIGS_DIR}/${DECAYM_DIR}/decaymodes.txt \
@@ -138,12 +140,6 @@ Same setup as collider run, but without timesteps.
 $nots_perf
 \`\`\`
 
-### Collider Run with Adaptive Timesteps
-Same setup as collider run, but without timesteps.
-\`\`\`
-$adts_perf
-\`\`\`
-
 ### Box Run
 \`\`\`
 $box_perf
@@ -167,7 +163,7 @@ $photons_perf
 \`\`\`
 
 ### Collider Run with Testparticles (CuCu@1.23)
-Baseline for Potentials Run.
+Baseline for Potentials Run. 20 testparticles.
 \`\`\`
 $testp_perf
 \`\`\`
