@@ -205,10 +205,6 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
  * \param[in] dens_type type of four-currect to be calculated:
  *            baryon, proton or neutron options are currently available
  * \param[in] compute_gradient true - compute gradient, false - no
- * \fpPrecision Density gradient is returned as double, because it is
- *   ThreeVector and ThreeVector currently comes only as double.
- *   Density itself is double for uniformity: if gradient is double,
- *   density should also be.
  * \return (density in the local Eckart frame [fm\$f^{-3}\$f],
  *          \f$ \nabla\cdots\rho \f$ or a 0 3-vector,
  *          \f$ \partial_t \vec j\f$ or a 0 3-vector,

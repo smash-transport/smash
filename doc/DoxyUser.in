@@ -202,7 +202,6 @@ ALIASES                = "NucleusModus=input_modi_nucleus_" \
                          "BoxModus=input_modi_box_" \
                          "ColliderModus=input_modi_collider_" \
                          "ListModus=input_modi_list_" \
-                         "fpPrecision=\par Floating-Point Precision" \
                          "key=\c" \
                          "Userguide=" \
                          "iref{1}=<a href="http://inspirehep.net/search?p=\1&of=hd">\1</a>"
