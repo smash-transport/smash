@@ -75,10 +75,6 @@ echo "   Started benchmark for timestepless ..."
 nots_perf=$(benchmark_run collider $DECAYM_DEF $PART_DEF 'General: { Time_Step_Mode: None }')
 echo "$nots_perf" | grep -E "time elapsed"
 
-echo "   Started benchmark for adaptive ..."
-adts_perf=$(benchmark_run collider $DECAYM_DEF $PART_DEF 'General: { Time_Step_Mode: Adaptive }')
-echo "$adts_perf" | grep -E "time elapsed"
-
 echo "   Started benchmark for box ..."
 box_perf=$(benchmark_run box box box)
 echo "$box_perf" | grep -E "time elapsed"
