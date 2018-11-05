@@ -434,6 +434,10 @@ lot of false positives:
 
     make cppcheck
 
+### Floating-Point Precision
+
+All floating point numbers are represented using doubles.
+
 ## General policies
 
 ### Input and output compatibility
