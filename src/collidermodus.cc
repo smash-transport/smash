@@ -98,12 +98,6 @@ namespace smash {
  * `Particles: {2212: 1, 2112: 1, 3122: 1}` for Hyper-Triton (one
  * proton, one neutron and one Lambda).
  *
- * \li \key Automatic_Woods_Saxon (bool, optional, default = true): \n
- * true - Sets all necessary parameters for the Woods Saxon distribution based
- * on the atomic number of the input nucleus \n
- * false - Manually specified values for \key Diffusiveness, \key Radius and
- * \key Saturation_Density are employed
- *
  * \li \key Diffusiveness (double, optional, default = 0.545): \n
  * Diffusiveness of the Woods Saxon distribution for the nucleus in fm.
  *

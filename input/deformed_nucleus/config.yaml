@@ -19,7 +19,6 @@ Modi:
     Collider:
         Projectile:
             Particles: {2212: 79, 2112: 118} #Gold197
-            Automatic_Woods_Saxon: False
             Saturation_Density: 0.1968
             Diffusiveness: 0.8
             Radius: 2.0
@@ -32,7 +31,6 @@ Modi:
 
         Target:
             Particles: {2212: 79, 2112: 118} #Gold197
-            Automatic_Woods_Saxon: False
             Saturation_Density: 0.1968
             Diffusiveness: 0.8
             Radius: 2.0

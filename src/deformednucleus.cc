@@ -53,8 +53,6 @@ namespace smash {
      Collider:
          Projectile:
              Particles:    {2212: 29, 2112: 34}
-             # automatically set diffusiveness, radius and saturation density
-             Automatic_Woods_Saxon: True
              Deformed: True
              # Manually set deformation parameters
              Automatic_Deformation: False
@@ -65,7 +63,6 @@ namespace smash {
          Target:
              Particles:    {2212: 29, 2112: 34}
              # manually set woods saxon parameters
-             Automatic_Woods_Saxon: False
              Saturation_Density: 0.1968
              Diffusiveness: 0.8
              Radius: 2.0
