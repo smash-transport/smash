@@ -897,12 +897,43 @@ void StringProcess::restore_constituent(
   const double energy_init = pSum.e();
   log.debug("  initial total energy [GeV] : ", energy_init);
 
+  const std::array<int, 5> excess_null = {0, 0, 0, 0, 0};
+  // total number of quarks and antiquarks, respectively.
+  std::array<int, 5> nquark_total = excess_null;
+  std::array<int, 5> nantiq_total = excess_null;
+  /* compute total number of quark and antiquark constituents
+   * in the whole system. */
+  for (int ip = 1; ip < event_intermediate.size(); ip++) {
+    const int pdgid = event_intermediate[ip].id();
+    if (pdgid > 0) {
+      for (int iflav = 0; iflav < 5; iflav++) {
+        nquark_total[iflav] += pythia_hadron_->particleData.nQuarksInCode(
+            pdgid, iflav + 1);
+      }
+    } else {
+      for (int iflav = 0; iflav < 5; iflav++) {
+        nantiq_total[iflav] += pythia_hadron_->particleData.nQuarksInCode(
+            std::abs(pdgid), iflav + 1);
+      }
+    }
+  }
+
+  rearrange_excess(nquark_total, excess_quark, excess_antiq);
+  rearrange_excess(nantiq_total, excess_antiq, excess_quark);
+  for (int ih = 0; ih < 2; ih++) {
+    log.debug("  initial excess_quark[", ih, "] = (", excess_quark[ih][0], ", ",
+              excess_quark[ih][1], ", ", excess_quark[ih][2], ", ",
+              excess_quark[ih][3], ", ", excess_quark[ih][4], ")");
+    log.debug("  initial excess_antiq[", ih, "] = (", excess_antiq[ih][0], ", ",
+              excess_antiq[ih][1], ", ", excess_antiq[ih][2], ", ",
+              excess_antiq[ih][3], ", ", excess_antiq[ih][4], ")");
+  }
+
   bool recovered_quarks = false;
   while (!recovered_quarks) {
     /* Flavor conversion begins with the most forward and backward parton
      * respectively for incoming_particles_[0] and incoming_particles_[1]. */
     std::array<bool, 2> find_forward = {true, false};
-    const std::array<int, 5> excess_null = {0, 0, 0, 0, 0};
     std::array<int, 5> excess_total = excess_null;
 
     for (int ih = 0; ih < 2; ih++) {  // loop over incoming hadrons

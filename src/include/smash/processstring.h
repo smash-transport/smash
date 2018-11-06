@@ -477,6 +477,45 @@ class StringProcess {
    */
   void replace_constituent(Pythia8::Particle &particle,
                            std::array<int, 5> &excess_constituent);
+
+  /**
+   * \param[in] nquark_total total number of quarks (antiquarks)
+   *            in the system.
+   * \param[out] excess_quark excess of quarks (antiquarks)
+   *             in incoming particles, compared to the mapped ones.
+   * \param[out] excess_antiq excess of anti-quarks (quarks)
+   *             in incoming particles, compared to the mapped ones.
+   */
+  void rearrange_excess(std::array<int, 5> &nquark_total,
+                        std::array<std::array<int, 5>, 2> &excess_quark,
+                        std::array<std::array<int, 5>, 2> &excess_antiq) {
+    for(int iflav = 0; iflav < 5; iflav++) {
+      int nquark_final = nquark_total[iflav] +
+                         excess_quark[0][iflav] + excess_quark[1][iflav];
+      bool convertable_quark = nquark_final >= 0;
+      if (!convertable_quark) {
+        for (int ip = 0; ip < std::abs(nquark_final); ip++) {
+          int ih_mod = -1;
+          if (excess_quark[0][iflav] < 0) {
+            ih_mod = 0;
+          } else {
+            ih_mod = 1;
+          }
+          excess_quark[ih_mod][iflav] += 1;
+          excess_antiq[ih_mod][iflav] += 1;
+
+          for (int jflav = 0; jflav < 5; jflav++) {
+            if (jflav != iflav && excess_quark[ih_mod][jflav] > 0) {
+              excess_quark[ih_mod][jflav] -= 1;
+              excess_antiq[ih_mod][jflav] -= 1;
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
+
   /**
    * Take the intermediate partonic state from PYTHIA event with mapped hadrons
    * and convert constituents into the desired ones according to the excess of
@@ -497,6 +536,9 @@ class StringProcess {
    *
    * \see StringProcess::replace_constituent(Pythia8::Particle &,
    *                                         std::array<int, 5> &)
+   * \see StringProcess::rearrange_excess(std::array<int, 5> &,
+   *                                      std::array<std::array<int, 5>, 2> &,
+   *                                      std::array<std::array<int, 5>, 2> &)
    */
   void restore_constituent(Pythia8::Event &event_intermediate,
                            std::array<std::array<int, 5>, 2> &excess_quark,
