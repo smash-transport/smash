@@ -33,7 +33,7 @@ causing the test to always fail when run again. To fix this problem, just remove
 the folder.
 
 
-### Runtime Memory Checking with Valgrind
+### Runtime Memory Checking with valgrind
 
 The SMASH binary memory usage can be checked for the different modi with the the
 following cmake targets:
@@ -103,7 +103,7 @@ also works for other exectuables like cpplint. You might have to set them to be
 executable with `chmod u+x ~/bin/my-binary`.
 
 
-### Installing Clang-Format
+### Installing clang-format
 
 clang-format is a part of the clang compiler. You can download the most recent
 binaries here http://releases.llvm.org/download.html.
@@ -126,7 +126,7 @@ binary you need (`clang-format` in the `bin` folder of the archive), see
 "Installing binaries as a user" above.
 
 
-### Installing Cpplint
+### Installing cpplint
 
 We use cpplint to enforce some of our style guide lines as part of our tests.
 You can install it like this:
@@ -137,7 +137,7 @@ You might have to add `~/.local/bin` to your `$PATH`, see "Installing binaries
 as a user".
 
 
-### Installing Cppcheck
+### Installing cppcheck
 
 You can use cppcheck to find some problems in the code, but beware it has quite
 a few false positives. Download and compile the latest version:
@@ -150,7 +150,7 @@ You can then copy it to your local binary folder, see "Installing binaries
 as a user".
 
 
-### Installing Codespell
+### Installing codespell
 
 If you want to check the spelling in comments, try codespell. You can install
 it like this:
@@ -167,7 +167,7 @@ The online version of the code documentation is found
 [here](https://fias.uni-frankfurt.de/~smash/extra/doc/).
 
 
-### How to Build Docs with Doxygen Yourself
+### How to Build Docs with doxygen Yourself
 
 You need to have doxygen installed. Then just call:
 
@@ -213,7 +213,7 @@ Code documentation has two important purposes:
   ideas.
 
 
-### How to Write Good Doxygen Comments
+### How to Write Good doxygen Comments
 
 Doxygen is very flexible in the [comments it accepts for documentation
 generation](http://www.stack.nl/~dimitri/doxygen/manual/docblocks.html). In
@@ -395,7 +395,7 @@ enum class MyEnum {
 ```
 
 
-### How to Add an Enum for a New Configuration Value
+### How to Add an enum for a new Configuration Value
 
 If a new option is added to the `config.yaml`, it should be done in the
 following way:
