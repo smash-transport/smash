@@ -381,9 +381,6 @@ class Action {
    * \param[in] kinetic_energy_cm total kinetic energy of
    *            the outgoing particles in their center of
    *            mass frame [GeV]
-   * \param[in] beta_cms beta factor used for boosting from
-   *            the computational frame to the center of mass frame
-   *            of the outgoing particles
    * \param[in] masses masses of each of the final state particles
    */
   virtual void sample_angles(std::pair<double, double> masses,

@@ -169,10 +169,14 @@ class StringProcess {
    * \param[in] diquark_supp diquark suppression factor
    *        (StringFlav:probQQtoQ) in fragmentation
    * \param[in] sigma_perp value of #sigma_qperp_ [GeV]
+   * \param[in] leading_frag_mean Mean of the Gaussian used as fragmentation
+   *            function for leading baryons.
+   * \param[in] leading_frag_width Width of the Gaussian used as fragmentation
+   *            function for leading baryons.
    * \param[in] stringz_a parameter (StringZ:aLund)
    *        for the fragmentation function
    * \param[in] stringz_b parameter (StringZ:bLund)
-   *        for the fragmentation function
+   *        for the fragmentation function [GeV^-2]
    * \param[in] string_sigma_T transverse momentum spread (StringPT:sigma)
    *        in fragmentation [GeV]
    * \param[in] factor_t_form to be multiplied to soft string formation times
@@ -222,7 +226,6 @@ class StringProcess {
   /**
    * Set PYTHIA random seeds to be desired values.
    * The value is recalculated such that it is allowed by PYTHIA.
-   * \param[in] seed value of the random seed to be used in PYTHIA.
    *
    * \see smash::maximum_rndm_seed_in_pythia
    */
