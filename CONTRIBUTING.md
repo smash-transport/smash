@@ -33,7 +33,7 @@ causing the test to always fail when run again. To fix this problem, just remove
 the folder.
 
 
-### Runtime memory checking with valgrind
+### Runtime Memory Checking with Valgrind
 
 The SMASH binary memory usage can be checked for the different modi with the the
 following cmake targets:
@@ -50,7 +50,7 @@ Note: There is known bug with `valgrind-3.11` that leads to an error about an
 unrecognized instruction. The memchecks will not run with this version.
 
 
-## Choosing a build type
+## Choosing a Build Type
 
 There are different build types available, which compile the SMASH code for different situations.
 
@@ -68,7 +68,7 @@ For a profiling build use:
 
 The default build type is 'RelWithDebInfo', which provides both optimization and debug info.
 
-### Enhancing build verbosity
+### Enhancing Build Verbosity
 
 To find cmake build errors (best debugged with full compiler output) use:
 
@@ -87,7 +87,7 @@ The following tools can be helpful for development:
 
 Note: The above mentioned clang-format version is enforced at each merge to master.
 
-### Installing binaries as a user
+### Installing Binaries as a User
 
 If you do not have administrator privileges on the machine you are using, you can
 still install software locally. Just copy the binary (in this example
@@ -103,7 +103,7 @@ also works for other exectuables like cpplint. You might have to set them to be
 executable with `chmod u+x ~/bin/my-binary`.
 
 
-### Installing clang-format
+### Installing Clang-Format
 
 clang-format is a part of the clang compiler. You can download the most recent
 binaries here http://releases.llvm.org/download.html.
@@ -126,7 +126,7 @@ binary you need (`clang-format` in the `bin` folder of the archive), see
 "Installing binaries as a user" above.
 
 
-### Installing cpplint
+### Installing Cpplint
 
 We use cpplint to enforce some of our style guide lines as part of our tests.
 You can install it like this:
@@ -137,7 +137,7 @@ You might have to add `~/.local/bin` to your `$PATH`, see "Installing binaries
 as a user".
 
 
-### Installing cppcheck
+### Installing Cppcheck
 
 You can use cppcheck to find some problems in the code, but beware it has quite
 a few false positives. Download and compile the latest version:
@@ -150,7 +150,7 @@ You can then copy it to your local binary folder, see "Installing binaries
 as a user".
 
 
-### Installing codespell
+### Installing Codespell
 
 If you want to check the spelling in comments, try codespell. You can install
 it like this:
@@ -167,7 +167,7 @@ The online version of the code documentation is found
 [here](https://fias.uni-frankfurt.de/~smash/extra/doc/).
 
 
-### How to build docs with doxygen yourself
+### How to Build Docs with Doxygen Yourself
 
 You need to have doxygen installed. Then just call:
 
@@ -199,7 +199,7 @@ to obtain the files in `doc/user/`. Open 'index.html' in your favourite
 browser. 
 
 
-### What to document in the code
+### What to Document in the Code
 
 Code documentation has two important purposes:
 
@@ -213,7 +213,7 @@ Code documentation has two important purposes:
   ideas.
 
 
-### How to write good doxygen comments
+### How to Write Good Doxygen Comments
 
 Doxygen is very flexible in the [comments it accepts for documentation
 generation](http://www.stack.nl/~dimitri/doxygen/manual/docblocks.html). In
@@ -284,7 +284,7 @@ question what should be documented:
 ```
 
 
-### How to insert references to publications
+### How to Insert References to Publications
 
 In order to refer to a paper inside a doxygen comment, the `iref` command should
 be used:
@@ -395,7 +395,7 @@ enum class MyEnum {
 ```
 
 
-### How to add an enum for a new configuration value
+### How to Add an Enum for a New Configuration Value
 
 If a new option is added to the `config.yaml`, it should be done in the
 following way:
@@ -405,7 +405,7 @@ following way:
 * Document possible strings in `config.yaml` and User Guide.
 
 
-### Code formatting with `clang-format`
+### Code Formatting with `clang-format`
 
 All code has to be formatted by running `clang-format`. This automatically
 formats the code in SMASH correctly. Use the helper script in SMASH's /bin
@@ -438,9 +438,9 @@ lot of false positives:
 
 All floating point numbers are represented using doubles.
 
-## General policies
+## General Policies
 
-### Input and output compatibility
+### Input and Output Compatibility
 
 In general, input and output interfaces should be backwards compatible, when
 introducing changes. If there are changes that affect the config.yaml or the
@@ -448,7 +448,7 @@ binary output, the associated version numbers need to be increased. Such
 changes can only occur, when major versions of SMASH are released. In addition,
 the Changelog needs be updated with a prominent mention of the changes.
 
-### Third party codes
+### Third Party Codes
 
 In general, the usage of third party codes is discouraged. If there is a scientific necessity
 or a major performance gain or time saving by using third party libraries, they can be linked
@@ -457,7 +457,7 @@ is sufficient whereas for the less common ones, including them in the thirdparty
 shipping them with SMASH is the better solution. Of course, this involves ensuring the proper
 copyright.
 
-## Profiling and benchmarking
+## Profiling and Benchmarking
 
 This section discusses tools that can be used to measure the
 performance.
