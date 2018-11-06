@@ -22,10 +22,8 @@ to a markdown formatted file named `bm-results-SMASH-VERSION.md`.
 
 ## Results from tagged version
 
-For comparison, results from previous tagged versions are kept in the `results`
-directory. The directory is reserved for benchmarks done during the tagging
-procedure.
-
+For comparison, results from previous tagged versions are attached to the
+corresponding github releases.
 
 ## Adding other setups
 
