@@ -25,13 +25,6 @@ namespace smash {
  *
  * The EnergyMomentumTensor class represents a symmetric positive
  * semi-definite energy-momentum tensor \f$ T^{\mu \nu}\f$.
- *
- * \fpPrecision
- * Energy-momentum tensor is basically constructed from particle
- * momenta, which are instances of the \c FourVector class, their
- * components being \c double. Also boosting and going to Landau frame
- * require good precision, if the Landau frame velocity of the system
- * is close to the speed of light.
  */
 class EnergyMomentumTensor {
  public:
