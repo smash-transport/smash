@@ -918,6 +918,8 @@ void StringProcess::restore_constituent(
     }
   }
 
+  /* modify excess_quark and excess_antiq if we do not have enough constituents
+   * to be converted in the system. */
   rearrange_excess(nquark_total, excess_quark, excess_antiq);
   rearrange_excess(nantiq_total, excess_antiq, excess_quark);
   for (int ih = 0; ih < 2; ih++) {

@@ -479,6 +479,25 @@ class StringProcess {
                            std::array<int, 5> &excess_constituent);
 
   /**
+   * Take total number of quarks and check if the system has
+   * enough constitents that need to be converted into other flavors.
+   * If that is not the case, excesses of quarks and antiquarks are
+   * modified such that the net quark number of each flavor is
+   * conserved.
+   * For example, if there is no antiquark in the system and we have
+   * excess_antiq = (1, -1, 0, 0, 0)
+   * (i.e., one ubar has to be converted into dbar),
+   * excess_antiq will be changed into (0, 0, 0, 0, 0) and
+   * (-1, 1, 0, 0, 0) will be added to excess_quark
+   * (i.e., one d quark has to be converted into u quark instead).
+   *
+   * Number of quarks is checked if the first argument is
+   * the total number of quarks, and the second and third arguments are
+   * respectively excesses of quarks and antiquarks.
+   * Number of antiquarks is checked if the first argument is
+   * the total number of antiquarks, and the second and third arguments are
+   * respectively excesses of antiquarks and quarks.
+   *
    * \param[in] nquark_total total number of quarks (antiquarks)
    *            in the system.
    * \param[out] excess_quark excess of quarks (antiquarks)
