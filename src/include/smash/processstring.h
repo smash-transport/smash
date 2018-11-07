@@ -478,6 +478,15 @@ class StringProcess {
   void replace_constituent(Pythia8::Particle &particle,
                            std::array<int, 5> &excess_constituent);
 
+  void find_total_number_constituent(Pythia8::Event &event_intermediate,
+                                     std::array<int, 5> &nquark_total,
+                                     std::array<int, 5> &nantiq_total);
+
+  bool splitting_gluon_qqbar(Pythia8::Event &event_intermediate,
+      std::array<int, 5> &nquark_total, std::array<int, 5> &nantiq_total,
+      bool sign_constituent,
+      std::array<std::array<int, 5>, 2> &excess_constituent);
+
   /**
    * Take total number of quarks and check if the system has
    * enough constitents that need to be converted into other flavors.
@@ -507,33 +516,7 @@ class StringProcess {
    */
   void rearrange_excess(std::array<int, 5> &nquark_total,
                         std::array<std::array<int, 5>, 2> &excess_quark,
-                        std::array<std::array<int, 5>, 2> &excess_antiq) {
-    for (int iflav = 0; iflav < 5; iflav++) {
-      int nquark_final = nquark_total[iflav] +
-                         excess_quark[0][iflav] + excess_quark[1][iflav];
-      bool convertable_quark = nquark_final >= 0;
-      if (!convertable_quark) {
-        for (int ip = 0; ip < std::abs(nquark_final); ip++) {
-          int ih_mod = -1;
-          if (excess_quark[0][iflav] < 0) {
-            ih_mod = 0;
-          } else {
-            ih_mod = 1;
-          }
-          excess_quark[ih_mod][iflav] += 1;
-          excess_antiq[ih_mod][iflav] += 1;
-
-          for (int jflav = 0; jflav < 5; jflav++) {
-            if (jflav != iflav && excess_quark[ih_mod][jflav] > 0) {
-              excess_quark[ih_mod][jflav] -= 1;
-              excess_antiq[ih_mod][jflav] -= 1;
-              break;
-            }
-          }
-        }
-      }
-    }
-  }
+                        std::array<std::array<int, 5>, 2> &excess_antiq);
 
   /**
    * Take the intermediate partonic state from PYTHIA event with mapped hadrons
@@ -559,7 +542,7 @@ class StringProcess {
    *                                      std::array<std::array<int, 5>, 2> &,
    *                                      std::array<std::array<int, 5>, 2> &)
    */
-  void restore_constituent(Pythia8::Event &event_intermediate,
+  bool restore_constituent(Pythia8::Event &event_intermediate,
                            std::array<std::array<int, 5>, 2> &excess_quark,
                            std::array<std::array<int, 5>, 2> &excess_antiq);
 
