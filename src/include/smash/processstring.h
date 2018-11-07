@@ -508,7 +508,7 @@ class StringProcess {
   void rearrange_excess(std::array<int, 5> &nquark_total,
                         std::array<std::array<int, 5>, 2> &excess_quark,
                         std::array<std::array<int, 5>, 2> &excess_antiq) {
-    for(int iflav = 0; iflav < 5; iflav++) {
+    for (int iflav = 0; iflav < 5; iflav++) {
       int nquark_final = nquark_total[iflav] +
                          excess_quark[0][iflav] + excess_quark[1][iflav];
       bool convertable_quark = nquark_final >= 0;

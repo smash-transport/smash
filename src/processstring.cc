@@ -907,8 +907,8 @@ void StringProcess::restore_constituent(
     const int pdgid = event_intermediate[ip].id();
     if (pdgid > 0) {
       for (int iflav = 0; iflav < 5; iflav++) {
-        nquark_total[iflav] += pythia_hadron_->particleData.nQuarksInCode(
-            pdgid, iflav + 1);
+        nquark_total[iflav] +=
+            pythia_hadron_->particleData.nQuarksInCode(pdgid, iflav + 1);
       }
     } else {
       for (int iflav = 0; iflav < 5; iflav++) {
