@@ -54,6 +54,7 @@ matrix:
       - MATRIX_EVAL="CC=clang && CXX=clang++"
 
 before_install:
+  - eval "${MATRIX_EVAL}"
   - export SMASH_ROOT=$(pwd)
   # pythia
   - wget http://home.thep.lu.se/~torbjorn/pythia8/pythia8235.tgz &&
@@ -92,4 +93,3 @@ install:
 script:
   - ./../bin/clang-format-helper.sh -t
   - ctest -j2
-
