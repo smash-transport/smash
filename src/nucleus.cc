@@ -315,8 +315,7 @@ void Nucleus::set_parameters_automatic() {
         // saturation density already has reasonable default
         set_nuclear_radius(1.2 * std::cbrt(A));
         set_diffusiveness(0.545);
-      }
-      if (A > 16) {
+      } else {
         // radius and diffusiveness taken from \iref{Rybczynski:2013yba}
         set_diffusiveness(0.54);
         set_nuclear_radius(1.12 * pow(std::cbrt(A), 1.0 / 3.0) -

@@ -109,16 +109,14 @@ namespace smash {
  * \li \key Saturation_Density (double, optional, default = 0.168): \n
  * Saturation density of the nucleus in 1/fm^3.
  *
- * \li \key Deformed (bool, optional, default = false): \n
- * true - Deformed nucleus is initialized \n
- * false - Spherical nucleus is initialized
- *
- * \li \key Automatic_Deformation (bool, optional, no default): \n
+ * - \key Deformed: \n
+ *    \li \key Automatic (bool, required if \key Deformed exists, no default):
+ \n
  * true - Set parameters of spherical deformation based on mass number of the
- * nucleus.\n
+ * nucleus. \n
  * flase - Manually set parameters of spherical deformation. This requires the
- * additional specification of \key Beta_2, \key Beta_4, \key Theata and
- * \key Phi.
+ * additional specification of \key Beta_2, \key Beta_4, \key Theta and
+ * \key Phi, which follow \iref{Moller:1993ed}. \n
  *
  * \page input_impact_parameter_ Impact Parameter
  * \key Impact: \n
@@ -271,8 +269,21 @@ ColliderModus::ColliderModus(Configuration modus_config,
 
   // Set up the projectile nucleus
   Configuration proj_cfg = modus_cfg["Projectile"];
-  if (proj_cfg.has_value({"Deformed"}) && proj_cfg.take({"Deformed"})) {
-    projectile_ = make_unique<DeformedNucleus>(proj_cfg, params.testparticles);
+  if (proj_cfg.has_value({"Deformed"})) {
+    bool auto_deform = proj_cfg.take({"Deformed", "Automatic"});
+    bool is_beta2 = proj_cfg.has_value({"Deformed", "Beta_2"}) ? true : false;
+    bool is_beta4 = proj_cfg.has_value({"Deformed", "Beta_4"}) ? true : false;
+
+    if ((auto_deform && (!is_beta2 && !is_beta4)) ||
+        (!auto_deform && (is_beta2 && is_beta4))) {
+      projectile_ =
+          make_unique<DeformedNucleus>(proj_cfg, params.testparticles);
+    } else {
+      throw std::domain_error(
+          "Deformation of projectile nucleus not configured "
+          "properly, please check whether all necessary "
+          "parameters are set.");
+    }
   } else {
     projectile_ = make_unique<Nucleus>(proj_cfg, params.testparticles);
   }
@@ -282,8 +293,20 @@ ColliderModus::ColliderModus(Configuration modus_config,
 
   // Set up the target nucleus
   Configuration targ_cfg = modus_cfg["Target"];
-  if (targ_cfg.has_value({"Deformed"}) && targ_cfg.take({"Deformed"})) {
-    target_ = make_unique<DeformedNucleus>(targ_cfg, params.testparticles);
+  if (targ_cfg.has_value({"Deformed"})) {
+    bool auto_deform = targ_cfg.take({"Deformed", "Automatic"});
+    bool is_beta2 = targ_cfg.has_value({"Deformed", "Beta_2"}) ? true : false;
+    bool is_beta4 = targ_cfg.has_value({"Deformed", "Beta_4"}) ? true : false;
+
+    if ((auto_deform && (!is_beta2 && !is_beta4)) ||
+        (!auto_deform && (is_beta2 && is_beta4))) {
+      target_ = make_unique<DeformedNucleus>(targ_cfg, params.testparticles);
+    } else {
+      throw std::domain_error(
+          "Deformation of target nucleus not configured "
+          "properly, please check whether all necessary "
+          "parameters are set.");
+    }
   } else {
     target_ = make_unique<Nucleus>(targ_cfg, params.testparticles);
   }
