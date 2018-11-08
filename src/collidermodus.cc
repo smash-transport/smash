@@ -98,7 +98,8 @@ namespace smash {
  * `Particles: {2212: 1, 2112: 1, 3122: 1}` for Hyper-Triton (one
  * proton, one neutron and one Lambda).
  *
- * \li \key Diffusiveness (double, optional, default = 0.545): \n
+ * \li \key Diffusiveness (double, optional,
+ * default = (0.545 for A <= 16; 0.54 for A > 16)): \n
  * Diffusiveness of the Woods Saxon distribution for the nucleus in fm.
  *
  * \li \key Radius (double, optional, default = proton_rad * A^(1/3)): \n

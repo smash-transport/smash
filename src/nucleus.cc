@@ -310,10 +310,11 @@ void Nucleus::set_parameters_automatic() {
       set_saturation_density(0.1686);
       break;
     default:
-      if (A < 16) {
-        // radius: rough guess for all nuclei not listed explicitly with A < 16
+      if (A <= 16) {
+        // radius: rough guess for all nuclei not listed explicitly with A <= 16
+        // saturation density already has reasonable default
         set_nuclear_radius(1.2 * std::cbrt(A));
-        // diffusiveness and saturation density already have reasonable defaults
+        set_diffusiveness(0.545);
       }
       if (A > 16) {
         // radius and diffusiveness taken from \iref{Rybczynski:2013yba}
