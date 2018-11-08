@@ -497,7 +497,7 @@ class StringProcess {
 
   /**
    * Take total number of quarks and check if the system has
-   * enough constitents that need to be converted into other flavors.
+   * enough constituents that need to be converted into other flavors.
    * If that is not the case, a gluon is splitted into a quark-antiquark pair
    * with desired flavor, so that their flavor can be changed afterwards.
    * For example, if there is no antiquark in the system and we have

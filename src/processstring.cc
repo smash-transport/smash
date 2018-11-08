@@ -1124,35 +1124,35 @@ bool StringProcess::restore_constituent(
   const double energy_init = pSum.e();
   log.debug("  initial total energy [GeV] : ", energy_init);
 
-  // total number of quarks and antiquarks, respectively.
+  // Total number of quarks and antiquarks, respectively.
   std::array<int, 5> nquark_total;
   std::array<int, 5> nantiq_total;
 
-  /* split a gluon into qqbar if we do not have enough constituents
+  /* Split a gluon into qqbar if we do not have enough constituents
    * to be converted in the system. */
   bool split_for_quark = splitting_gluon_qqbar(
       event_intermediate, nquark_total, nantiq_total, true, excess_quark);
   bool split_for_antiq = splitting_gluon_qqbar(
       event_intermediate, nquark_total, nantiq_total, false, excess_antiq);
 
-  /* modify excess_quark and excess_antiq if we do not have enough constituents
+  /* Modify excess_quark and excess_antiq if we do not have enough constituents
    * to be converted in the system. */
   if (!split_for_quark || !split_for_antiq) {
     rearrange_excess(nquark_total, excess_quark, excess_antiq);
     rearrange_excess(nantiq_total, excess_antiq, excess_quark);
   }
 
-  // final check if there is enough consituents.
+  // Final check if there are enough constituents.
   for (int iflav = 0; iflav < 5; iflav++) {
     if (nquark_total[iflav] + excess_quark[0][iflav] + excess_quark[1][iflav] <
         0) {
-      log.debug("Not enough quark constituent of flavor ", iflav + 1);
+      log.debug("Not enough quark constituents of flavor ", iflav + 1);
       return false;
     }
 
     if (nantiq_total[iflav] + excess_antiq[0][iflav] + excess_antiq[1][iflav] <
         0) {
-      log.debug("Not enough antiquark constituent of flavor ", -(iflav + 1));
+      log.debug("Not enough antiquark constituents of flavor ", -(iflav + 1));
       return false;
     }
   }
