@@ -270,8 +270,8 @@ ColliderModus::ColliderModus(Configuration modus_config,
   // Set up the projectile nucleus
   Configuration proj_cfg = modus_cfg["Projectile"];
   if (proj_cfg.has_value({"Deformed"})) {
-    projectile_ = create_deformed_nucleus(proj_cfg, params.testparticles,
-                                             "projectile");
+    projectile_ =
+        create_deformed_nucleus(proj_cfg, params.testparticles, "projectile");
   } else {
     projectile_ = make_unique<Nucleus>(proj_cfg, params.testparticles);
   }
@@ -282,8 +282,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
   // Set up the target nucleus
   Configuration targ_cfg = modus_cfg["Target"];
   if (targ_cfg.has_value({"Deformed"})) {
-    target_ = create_deformed_nucleus(targ_cfg, params.testparticles,
-                                         "target");
+    target_ = create_deformed_nucleus(targ_cfg, params.testparticles, "target");
   } else {
     target_ = make_unique<Nucleus>(targ_cfg, params.testparticles);
   }
@@ -443,10 +442,10 @@ std::unique_ptr<DeformedNucleus> ColliderModus::create_deformed_nucleus(
     nucleus = make_unique<DeformedNucleus>(nucleus_cfg, ntest);
     return nucleus;
   } else {
-    throw std::domain_error(
-        "Deformation of " + nucleus_type + " nucleus not configured "
-        "properly, please check whether all necessary "
-        "parameters are set.");
+    throw std::domain_error("Deformation of " + nucleus_type +
+                            " nucleus not configured "
+                            "properly, please check whether all necessary "
+                            "parameters are set.");
   }
 }
 
