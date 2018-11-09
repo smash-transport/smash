@@ -150,8 +150,8 @@ class ColliderModus : public ModusDefault {
    * appropriate error message.
    * \return Pointer to the created deformed nucleus object.
    * **/
-  std::unique_ptr<DeformedNucleus> create_deformed_nucleus(
-      Configuration &nucleus_cfg, int ntest, std::string nucleus_type);
+  static std::unique_ptr<DeformedNucleus> create_deformed_nucleus(
+      Configuration &nucleus_cfg, const int ntest, std::string nucleus_type);
   /**
    * Impact parameter.
    *
