@@ -267,8 +267,8 @@ class PdgCode {
    * \param[in] pdgcode_decimal decimal integer representing the PDG code
    */
   static PdgCode from_decimal(const int pdgcode_decimal) {
-    // Nucleus
-    if (std::abs(pdgcode_decimal) > 1E9) {
+    // Nucleus and special codes with 2J+1 > 9
+    if (std::abs(pdgcode_decimal) > 1E7) {
       return PdgCode(std::to_string(pdgcode_decimal));
     }
     int a = pdgcode_decimal;
