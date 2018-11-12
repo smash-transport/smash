@@ -431,7 +431,7 @@ std::ostream &operator<<(std::ostream &out, const ColliderModus &m) {
 }
 
 std::unique_ptr<DeformedNucleus> ColliderModus::create_deformed_nucleus(
-    Configuration &nucleus_cfg, int ntest, const std::string nucleus_type) {
+    Configuration &nucleus_cfg, int ntest, const std::string &nucleus_type) {
   bool auto_deform = nucleus_cfg.take({"Deformed", "Automatic"});
   bool is_beta2 = nucleus_cfg.has_value({"Deformed", "Beta_2"}) ? true : false;
   bool is_beta4 = nucleus_cfg.has_value({"Deformed", "Beta_4"}) ? true : false;
