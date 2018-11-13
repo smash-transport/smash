@@ -92,4 +92,4 @@ install:
 
 script:
   - ./../bin/clang-format-helper.sh -t
-  - ctest -j2
+  - CTEST_OUTPUT_ON_FAILURE=1 ctest -j2
