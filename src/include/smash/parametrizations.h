@@ -161,6 +161,18 @@ double pipi_string_hard(double mandelstam_s);
 double piplusp_elastic_high_energy(double mandelstam_s, double m1, double m2);
 
 /**
+ * An overload of piplusp_elastic_high_energy in which the very low
+ * part is replaced by a flat 5 mb cross section; used for meson-meson
+ * interactions.
+ *
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \param[in] m1 the mass of the first particle [GeV]
+ * \param[in] m2 the mass of the second particle [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+double piplusp_elastic_AQM(double mandelstam_s, double m1, double m2);
+
+/**
  * pi+p elastic cross section parametrization, PDG data.
  * Source: GiBUU:parametrizationBarMes_HighEnergy.f90
  *

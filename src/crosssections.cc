@@ -253,14 +253,17 @@ double CrossSections::elastic_parametrization(bool use_AQM) const {
                (pdg_b.is_meson() && pdg_a.is_baryon())) {
       elastic_xs = piplusp_elastic_high_energy(s, m1, m2);
     } else if (pdg_a.is_meson() && pdg_b.is_meson()) {
-      /* Special case: the pion elastic cross-section goes through resonances
-       * at low sqrt_s, so we turn it off for this region */
-      if (pdg_a.is_pion() && pdg_b.is_pion() &&
+      /* Special case: the pi+pi- elastic cross-section goes through resonances
+       * at low sqrt_s, so we turn it off for this region so as not to destroy
+       * the agreement with experimental data; this does not
+       * apply to other pi pi cross-sections, which do not have any data */
+      if (((pdg_a == pdg::pi_p && pdg_b == pdg::pi_m) ||
+           (pdg_a == pdg::pi_m && pdg_b == pdg::pi_p)) &&
           (m1 + m2 + transit_high_energy::pipi_offset) > sqrt_s_) {
         elastic_xs = 0.0;
       } else {
         // meson-meson goes through scaling from π+p parametrization
-        elastic_xs = 2. / 3. * piplusp_elastic_high_energy(s, m1, m2);
+        elastic_xs = 2. / 3. * piplusp_elastic_AQM(s, m1, m2);
       }
     }
     elastic_xs *=

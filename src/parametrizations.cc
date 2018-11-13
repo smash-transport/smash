@@ -127,6 +127,16 @@ double piplusp_elastic_high_energy(double mandelstam_s, double m1, double m2) {
   return 11.4 * std::pow(p_lab, -0.4) + 0.079 * logp * logp;
 }
 
+double piplusp_elastic_AQM(double mandelstam_s, double m1, double m2) {
+  const double p_lab = (m1 > m2) ? plab_from_s(mandelstam_s, m2, m1)
+                                 : plab_from_s(mandelstam_s, m1, m2);
+  if (p_lab < 3.05) {  // the plab from which the param starts to explode
+    return 7.5;        // this will be scaled down by 2/3 for meson-meson
+  } else {
+    return piplusp_elastic_high_energy(mandelstam_s, m1, m2);
+  }
+}
+
 double piplusp_elastic(double mandelstam_s) {
   double sigma;
   const double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
