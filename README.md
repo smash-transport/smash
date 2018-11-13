@@ -11,8 +11,12 @@ if you are using SMASH.
 See [CONTRIBUTING](CONTRIBUTING.md) for development hints. A complete User Guide
 is found [here](https://fias.uni-frankfurt.de/~smash/extra/user/).
 
-If Pythia is used, please cite the following references: T. Sjöstrand, S. Mrenna
-and P. Skands, [JHEP05 (2006) 026](https://arxiv.org/abs/hep-ph/0603175),
+When using SMASH, please cite J. Weil et al., 
+[Phys.Rev. C94 (2016) no.5, 054905](https://arxiv.org/abs/1606.06642)
+
+In addition, if Pythia is used, please cite the following references: 
+T. Sjöstrand, S. Mrenna and P. Skands, 
+[JHEP05 (2006) 026](https://arxiv.org/abs/hep-ph/0603175),
 [Comput. Phys. Comm. 178 (2008)](https://arxiv.org/abs/0710.3820)
 
 Report issues at https://github.com/smash-transport/smash or contact us by email
@@ -194,9 +198,10 @@ license. See [LICENSE](LICENSE).
 ### Projects Using SMASH
 
 SMASH source and documentation are provided to check and
-reproduce published results of the authors. Cooperation and joint projects with outside
-researchers are encouraged and comparison to results by experimental collaborations
-is supported. If you are interested in starting a project, please contact us to avoid
-interference with current thesis topics. If your project involves changes to the code,
-please refer to [CONTRIBUTING](CONTRIBUTING.md) for coding guidelines and
+reproduce published results of the authors. Cooperation and joint projects with
+outside researchers are encouraged and comparison to results by experimental
+collaborations is supported. SMASH can be used as a 3rd party library. If you
+are interested in starting a project, please contact us to avoid interference
+with current thesis topics. If your project involves changes to the code, 
+please refer to [CONTRIBUTING](CONTRIBUTING.md) for coding guidelines and 
 helpful tools.
