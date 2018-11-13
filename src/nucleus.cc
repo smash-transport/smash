@@ -33,11 +33,21 @@ Nucleus::Nucleus(Configuration &config, int nTest) {
   std::map<PdgCode, int> part = config.take({"Particles"});
   fill_from_list(part, nTest);
   // Look for user-defined values or take the default parameters.
-  if (config.has_value({"Automatic_Woods_Saxon"}) &&
-      config.take({"Automatic_Woods_Saxon"})) {
+  if (config.has_value({"Diffusiveness"}) && config.has_value({"Radius"}) &&
+      config.has_value({"Saturation_Density"})) {
+    set_parameters_from_config(config);
+  } else if (!config.has_value({"Diffusiveness"}) &&
+             !config.has_value({"Radius"}) &&
+             !config.has_value({"Saturation_Density"})) {
     set_parameters_automatic();
   } else {
-    set_parameters_from_config(config);
+    throw std::invalid_argument(
+        "Diffussiveness, Radius and Saturation_Density "
+        "required to manually configure the Woods-Saxon"
+        " distribution. Only one/two were provided. \n"
+        "Providing none of the above mentioned "
+        "parameters automatically configures the "
+        "distribution based on the atomic number.");
   }
 }
 
@@ -300,12 +310,12 @@ void Nucleus::set_parameters_automatic() {
       set_saturation_density(0.1686);
       break;
     default:
-      if (A < 16) {
-        // radius: rough guess for all nuclei not listed explicitly with A < 16
+      if (A <= 16) {
+        // radius: rough guess for all nuclei not listed explicitly with A <= 16
+        // saturation density already has reasonable default
         set_nuclear_radius(1.2 * std::cbrt(A));
-        // diffusiveness and saturation density already have reasonable defaults
-      }
-      if (A > 16) {
+        set_diffusiveness(0.545);
+      } else {
         // radius and diffusiveness taken from \iref{Rybczynski:2013yba}
         set_diffusiveness(0.54);
         set_nuclear_radius(1.12 * pow(std::cbrt(A), 1.0 / 3.0) -
@@ -315,19 +325,11 @@ void Nucleus::set_parameters_automatic() {
 }
 
 void Nucleus::set_parameters_from_config(Configuration &config) {
-  if (config.has_value({"Diffusiveness"})) {
-    set_diffusiveness(static_cast<double>(config.take({"Diffusiveness"})));
-  }
-  if (config.has_value({"Radius"})) {
-    set_nuclear_radius(static_cast<double>(config.take({"Radius"})));
-  } else {
-    set_nuclear_radius(default_nuclear_radius());
-  }
+  set_diffusiveness(static_cast<double>(config.take({"Diffusiveness"})));
+  set_nuclear_radius(static_cast<double>(config.take({"Radius"})));
   // Saturation density (normalization for accept/reject sampling)
-  if (config.has_value({"Saturation_Density"})) {
-    set_saturation_density(
-        static_cast<double>(config.take({"Saturation_Density"})));
-  }
+  set_saturation_density(
+      static_cast<double>(config.take({"Saturation_Density"})));
 }
 
 void Nucleus::generate_fermi_momenta() {
