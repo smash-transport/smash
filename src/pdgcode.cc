@@ -21,7 +21,7 @@ std::istream& operator>>(std::istream& is, PdgCode& code) {
   try {
     // set the fields from the string:
     code.set_from_string(codestring);
-  } catch (PdgCode::InvalidPdgCode) {
+  } catch (PdgCode::InvalidPdgCode&) {
     is.setstate(std::ios::failbit);
     code = PdgCode::invalid();
   }

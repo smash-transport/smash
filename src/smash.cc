@@ -410,6 +410,7 @@ int main(int argc, char *argv[]) {
           break;
         case 'S':
           final_state_cross_sections = true;
+          [[gnu::fallthrough]];
         case 's':
           cross_section_dump_activated = true;
           cs_string = optarg;

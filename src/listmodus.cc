@@ -221,7 +221,7 @@ void ListModus::try_create_particle(Particles &particles, PdgCode pdgcode,
     particle.set_4position(FourVector(t, x, y, z));
     particle.set_formation_time(t);
     particle.set_cross_section_scaling_factor(1.0);
-  } catch (ParticleType::PdgNotFoundFailure) {
+  } catch (ParticleType::PdgNotFoundFailure&) {
     log.warn() << "SMASH does not recognize pdg code " << pdgcode
                << " loaded from file. This particle will be ignored.\n";
   }
