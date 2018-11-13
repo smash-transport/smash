@@ -32,8 +32,10 @@ class IsoParticleType {
    * \param m The (average) mass of the multiplet.
    * \param w The (average) width of the multiplet.
    * \param s Twice the spin of the multiplet.
+   * \param p Parity of the multiplet.
    */
-  IsoParticleType(const std::string &n, double m, double w, unsigned int s);
+  IsoParticleType(const std::string &n, double m, double w, unsigned int s,
+                  Parity p);
 
   /**
    * Copies are not allowed as they break intended use. Instead use a const-ref
@@ -75,6 +77,16 @@ class IsoParticleType {
    * are required to have the same spin.
    */
   unsigned int spin() const { return spin_; }
+
+  /**
+   * \return The parity of the multiplet.
+   */
+  Parity parity() const { return parity_; }
+
+  /**
+   * \return Is this a hadron multiplet?
+   */
+  bool is_hadron() const { return states_[0]->is_hadron(); }
 
   /// Returns list of states that form part of the multiplet.
   ParticleTypePtrList get_states() const { return states_; }
@@ -203,6 +215,8 @@ class IsoParticleType {
   double width_;
   /// twice the spin of the multiplet
   unsigned int spin_;
+  /// parity of the multiplet
+  Parity parity_;
   /// list of states that are contained in the multiplet
   ParticleTypePtrList states_;
 

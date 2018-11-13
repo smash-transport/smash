@@ -26,7 +26,7 @@ TEST(spectral_functions) {
 
   Integrator integrate;
   // error tolerance (max. deviation from one)
-  const double error_tolerance_no_norm = 0.55;
+  const double error_tolerance_no_norm = 0.57;
   const double warning_level = 0.21;
   // error tolerance (max. deviation from one) for constant-width SF
   const double error_tolerance_const = 0.0032;

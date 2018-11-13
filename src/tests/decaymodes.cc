@@ -70,7 +70,7 @@ const std::string decays_input(
     "\n"
     "\n"
     "ω      # omega\n"
-    "1. 0 π ρ   # pi rho\n"
+    "1. 1 π ρ   # pi rho\n"
     "\n"
     "Δ\n"
     "1.  1  N π\n"

@@ -8,6 +8,7 @@
 #ifndef SRC_INCLUDE_FORMFACTORS_H_
 #define SRC_INCLUDE_FORMFACTORS_H_
 
+#include <complex>
 #include <string>
 
 #include "constants.h"
@@ -17,7 +18,10 @@ namespace smash {
 
 /**
  * \return the squared Blatt-Weisskopf functions, which influence the mass
- * dependence of the decay widths. See e.g. \iref{Effenberger:1999wlg}, page 28.
+ * dependence of the decay widths. See e.g. \iref{Effenberger:1999wlg}, page 28
+ * and
+ * https://physique.cuso.ch/fileadmin/physique/document/2015_chung_brfactor1.pdf
+ * where the recursive formula used here is given.
  *
  * \param p_ab Momentum of outgoing particles A and B in center-of-mass frame
  * [GeV] \param L Angular momentum of outgoing particles A and B.
@@ -25,39 +29,29 @@ namespace smash {
  * This is used as a standard form factor for all hadronic decays. Note that all
  * the Blatt-Weisskopf functions approach one for large p_ab and behave like
  * p_ab**L for small \p p_ab. They are increasing monotonically with \p p_ab.
- *
- * \throws invalid_argument if L > 4
  */
-inline double blatt_weisskopf_sqr(const double p_ab, const int L)
-#ifdef NDEBUG
-    noexcept
-#endif
-{
-  const double R = 1. / hbarc; /* interaction radius = 1 fm */
-  const auto x = p_ab * R;
-  const auto x2 = x * x;
-  const auto x4 = x2 * x2;
-  switch (L) {
-    case 0:
-      return 1.;
-    case 1:
-      return x2 / (1. + x2);
-    case 2:
-      return x4 / (9. + 3. * x2 + x4);
-    case 3:
-      return x4 * x2 / (225. + 45. * x2 + 6. * x4 + x4 * x2);
-    case 4:
-      return x4 * x4 /
-             (11025. + 1575. * x2 + 135. * x4 + 10. * x2 * x4 + x4 * x4);
-// See also input sanitization in load_decaymodes in decaymodes.cc.
-#ifndef NDEBUG
-    default:
-      throw std::invalid_argument(
-          std::string("Wrong angular momentum in BlattWeisskopf: ") +
-          std::to_string(L));
-#endif
+inline double blatt_weisskopf_sqr(const double p_ab, const int L) {
+  if (L == 0) {
+    return 1.;
   }
-  return 0.;
+  constexpr double R = 1. / hbarc; /* interaction radius = 1 fm */
+  const double x = p_ab * R;
+  const double x2 = x * x;
+  if (L == 1) {
+    return x2 / (1. + x2);
+  }
+  std::complex<double> g_prevprev(1, 0);
+  std::complex<double> g_prev(1, -x);
+  double numer = x2;
+  for (int l = 1; l < L; l++) {
+    numer *= x2;
+    const auto new_g =
+        static_cast<double>(2 * l + 1) * g_prev - x2 * g_prevprev;
+    g_prevprev = g_prev;
+    g_prev = new_g;
+  }
+  const double denom = std::norm(g_prev);
+  return numer / denom;
 }
 
 /**
