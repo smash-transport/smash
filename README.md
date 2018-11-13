@@ -1,14 +1,19 @@
-# SMASH version 1.5
+# SMASH
 
-[![Build Status](https://travis-ci.com/smash-transport/smash-devel.svg?token=6MyxHigvN4vzHpS29fsG&branch=master)](https://travis-ci.com/smash-transport/smash-devel)
+[![Build
+Status](https://travis-ci.com/smash-transport/smash-devel.svg?token=6MyxHigvN4vzHpS29fsG&branch=master)](https://travis-ci.com/smash-transport/smash-devel)
 
-SMASH (Simulating Many Accelerated Strongly-interacting Hadrons) is a relativistic hadronic transport approach for the dynamical description of heavy ion reactions.  
+SMASH (Simulating Many Accelerated Strongly-interacting Hadrons) is a
+relativistic hadronic transport approach for the dynamical description of heavy
+ion reactions.
 Please see [Phys. Rev. C 94, 054905
 (2016)](https://arxiv.org/abs/1606.06642) for details and cite this reference,
 if you are using SMASH.
 
 See [CONTRIBUTING](CONTRIBUTING.md) for development hints. A complete User Guide
-is found [here](https://theory.gsi.de/~smash/userguide/1.5rc). For a more detailed development documentation, see [here](http://theory.gsi.de/~smash/doc/1.5rc/).
+is found [here](https://theory.gsi.de/~smash/userguide/1.5rc). For a more
+detailed development documentation, see
+[here](http://theory.gsi.de/~smash/doc/1.5rc/).
 
 
 If Pythia is used, please cite the following references: T. Sjöstrand, S. Mrenna

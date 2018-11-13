@@ -1,10 +1,13 @@
 /**
 \mainpage User Guide
 
-Welcome to the SMASH user guide. Here you will find information about \ref README.md "installation", \ref page_smash_invocation "invocation"
-and supported \ref input "input" and \ref output_general_ "output" options. 
-For a more detailed development documentation, have a look <a href="http://theory.gsi.de/~smash/userguide/1.5rc/"> here</a>. 
+Welcome to the SMASH user guide. Here you will find information about \ref
+README.md "installation", \ref page_smash_invocation "invocation"
+and supported \ref input "input" and \ref output_general_ "output" options.
+For a more detailed development documentation, have a look <a
+href="http://theory.gsi.de/~smash/userguide/1.5rc/"> here</a>.
 
-The source code for this version can be found <a href="https://github.com/smash-transport/smash-devel"> here</a>.
+The source code can be found <a
+href="https://github.com/smash-transport/smash-devel"> here</a>.
 
 */
