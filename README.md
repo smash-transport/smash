@@ -16,7 +16,7 @@ and P. Skands, [JHEP05 (2006) 026](https://arxiv.org/abs/hep-ph/0603175),
 [Comput. Phys. Comm. 178 (2008)](https://arxiv.org/abs/0710.3820)
 
 Report issues at https://github.com/smash-transport/smash or contact us by email
-at h.elfner@gsi.de.
+at elfner@th.physik.uni-frankfurt.de.
 
 ## How to Build SMASH
 
