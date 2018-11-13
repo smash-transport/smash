@@ -477,6 +477,85 @@ class StringProcess {
    */
   void replace_constituent(Pythia8::Particle &particle,
                            std::array<int, 5> &excess_constituent);
+
+  /**
+   * Compute how many quarks and antiquarks we have in the system,
+   * and update the correspoing arrays with size 5.
+   * Note that elements of the array (0, 1, 2, 3, 4) correspond
+   * to d, u, s, c, b flavors.
+   *
+   * \param[in] event_intermediate PYTHIA partonic event record
+   *            which contains output from PYTHIA (hard) event generation.
+   * \param[out] nquark_total total number of quarks in the system.
+   *             This is computed based on event_intermediate.
+   * \param[out] nantiq_total total number of antiquarks in the system.
+   *             This is computed based on event_intermediate.
+   */
+  void find_total_number_constituent(Pythia8::Event &event_intermediate,
+                                     std::array<int, 5> &nquark_total,
+                                     std::array<int, 5> &nantiq_total);
+
+  /**
+   * Take total number of quarks and check if the system has
+   * enough constituents that need to be converted into other flavors.
+   * If that is not the case, a gluon is splitted into a quark-antiquark pair
+   * with desired flavor, so that their flavor can be changed afterwards.
+   * For example, if there is no antiquark in the system and we have
+   * excess_antiq = (1, -1, 0, 0, 0)
+   * (i.e., one ubar has to be converted into dbar),
+   * a gluon will be splitted into u-ubar pair.
+   *
+   * \param[out] event_intermediate PYTHIA partonic event record to be updated
+   *             when a gluon happens to split into a qqbar pair.
+   * \param[out] nquark_total total number of quarks in the system.
+   *             This is computed based on event_intermediate.
+   * \param[out] nantiq_total total number of antiquarks in the system.
+   *             This is computed based on event_intermediate.
+   * \param[in] sign_constituent true (false)
+   *            if want to check quarks (antiquarks) and their excesses.
+   * \param[in] excess_constituent excess in the number of quark constituents.
+   *            If sign_constituent is true (false),
+   *            excess of quarks (anti-quarks) should be used.
+   * \return false if there are not enough constituents and there is no gluon
+   *         to split into desired quark-antiquark pair.
+   *         Otherwise, it gives true.
+   */
+  bool splitting_gluon_qqbar(Pythia8::Event &event_intermediate,
+      std::array<int, 5> &nquark_total, std::array<int, 5> &nantiq_total,
+      bool sign_constituent,
+      std::array<std::array<int, 5>, 2> &excess_constituent);
+
+  /**
+   * Take total number of quarks and check if the system has
+   * enough constitents that need to be converted into other flavors.
+   * If that is not the case, excesses of quarks and antiquarks are
+   * modified such that the net quark number of each flavor is
+   * conserved.
+   * For example, if there is no antiquark in the system and we have
+   * excess_antiq = (1, -1, 0, 0, 0)
+   * (i.e., one ubar has to be converted into dbar),
+   * excess_antiq will be changed into (0, 0, 0, 0, 0) and
+   * (-1, 1, 0, 0, 0) will be added to excess_quark
+   * (i.e., one d quark has to be converted into u quark instead).
+   *
+   * Number of quarks is checked if the first argument is
+   * the total number of quarks, and the second and third arguments are
+   * respectively excesses of quarks and antiquarks.
+   * Number of antiquarks is checked if the first argument is
+   * the total number of antiquarks, and the second and third arguments are
+   * respectively excesses of antiquarks and quarks.
+   *
+   * \param[in] nquark_total total number of quarks (antiquarks)
+   *            in the system.
+   * \param[out] excess_quark excess of quarks (antiquarks)
+   *             in incoming particles, compared to the mapped ones.
+   * \param[out] excess_antiq excess of anti-quarks (quarks)
+   *             in incoming particles, compared to the mapped ones.
+   */
+  void rearrange_excess(std::array<int, 5> &nquark_total,
+                        std::array<std::array<int, 5>, 2> &excess_quark,
+                        std::array<std::array<int, 5>, 2> &excess_antiq);
+
   /**
    * Take the intermediate partonic state from PYTHIA event with mapped hadrons
    * and convert constituents into the desired ones according to the excess of
@@ -488,6 +567,16 @@ class StringProcess {
    * is same with that of incoming hadrons.
    * (i.e., excess_quark minus excess_antiq of incoming hadrons becomes zero.)
    *
+   * However, note that there are some circumstances where
+   * this procedure is not directly carried out.
+   * For example, a proton-kaon(+) collision mapped onto a proton-pion(+)
+   * might be an issue if it involves d + dbar -> g g partonic interaction,
+   * given that we anticipate to change dbar to sbar.
+   * If such case occurs, we first try to split gluon into
+   * quark-antiquark pair with desired flavor.
+   * If there are not enough gluons to split, we try to modify the excesses
+   * of constituents such that the net quark number is conserved.
+   *
    * \param[out] event_intermediate PYTHIA partonic event record to be updated
    *             according to the valence quark contents of incoming hadrons.
    * \param[out] excess_quark excess of quarks
@@ -497,8 +586,14 @@ class StringProcess {
    *
    * \see StringProcess::replace_constituent(Pythia8::Particle &,
    *                                         std::array<int, 5> &)
+   * \see StringProcess::splitting_gluon_qqbar(Pythia8::Event &,
+   *     std::array<int, 5> &, std::array<int, 5> &,
+   *     bool, std::array<std::array<int, 5>, 2> &)
+   * \see StringProcess::rearrange_excess(std::array<int, 5> &,
+   *                                      std::array<std::array<int, 5>, 2> &,
+   *                                      std::array<std::array<int, 5>, 2> &)
    */
-  void restore_constituent(Pythia8::Event &event_intermediate,
+  bool restore_constituent(Pythia8::Event &event_intermediate,
                            std::array<std::array<int, 5>, 2> &excess_quark,
                            std::array<std::array<int, 5>, 2> &excess_antiq);
 
