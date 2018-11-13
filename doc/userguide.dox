@@ -7,7 +7,7 @@ and supported \ref input "input" and \ref output_general_ "output" options.
 For a more detailed development documentation, have a look <a
 href="http://theory.gsi.de/~smash/doc/1.5rc/"> here</a>.
 
-The source code can be found <a
-href="https://github.com/smash-transport/smash-devel"> here</a>.
+The source code for this version can be found <a
+href="https://github.com/smash-transport/smash-devel/tree/SMASH-1.5rc"> here</a>.
 
 */
