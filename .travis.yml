@@ -28,9 +28,9 @@ matrix:
           - ubuntu-toolchain-r-test
         packages:
           - libboost-all-dev
-          - g++-8
+          - g++-7
     env:
-      - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+      - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
   # clang on linux
   - os: linux
     addons:
