@@ -28,7 +28,7 @@ DOXYFILE_ENCODING      = UTF-8
 # identify the project. Note that if you do not use Doxywizard you need
 # to put quotes around the project name if it contains spaces.
 
-PROJECT_NAME           = "SMASH"
+PROJECT_NAME           = SMASH
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number.
 # This could be handy for archiving the generated documentation or
@@ -47,7 +47,7 @@ PROJECT_BRIEF          =
 # exceed 55 pixels and the maximum width should not exceed 200 pixels.
 # Doxygen will copy the logo to the output directory.
 
-PROJECT_LOGO           =
+PROJECT_LOGO           = @CMAKE_CURRENT_SOURCE_DIR@/smash_logo.png
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute)
 # base path where the generated documentation will be put.
@@ -202,7 +202,6 @@ ALIASES                = "NucleusModus=input_modi_nucleus_" \
                          "BoxModus=input_modi_box_" \
                          "ColliderModus=input_modi_collider_" \
                          "ListModus=input_modi_list_" \
-                         "fpPrecision=\par Floating-Point Precision" \
                          "key=\c" \
                          "Userguide=" \
                          "iref{1}=<a href="http://inspirehep.net/search?p=\1&of=hd">\1</a>"
@@ -589,7 +588,7 @@ FILE_VERSION_FILTER    =
 # You can optionally specify a file name after the option, if omitted
 # DoxygenLayout.xml will be used as the name of the layout file.
 
-LAYOUT_FILE            = doc/UserLayout.xml
+LAYOUT_FILE            = @CMAKE_CURRENT_SOURCE_DIR@/UserLayout.xml
 
 # The CITE_BIB_FILES tag can be used to specify one or more bib files
 # containing the references data. This must be a list of .bib files. The
@@ -902,13 +901,13 @@ HTML_FILE_EXTENSION    = .html
 # have to redo this when upgrading to a newer version of doxygen or when
 # changing the value of configuration settings such as GENERATE_TREEVIEW!
 
-HTML_HEADER            =
+HTML_HEADER            = @CMAKE_CURRENT_SOURCE_DIR@/header_doc.html
 
 # The HTML_FOOTER tag can be used to specify a personal HTML footer for
 # each generated HTML page. If it is left blank doxygen will generate a
 # standard footer.
 
-HTML_FOOTER            =
+HTML_FOOTER            = @CMAKE_CURRENT_SOURCE_DIR@/footer_doc.html
 
 # The HTML_STYLESHEET tag can be used to specify a user-defined cascading
 # style sheet that is used by each HTML page. It can be used to

@@ -10,7 +10,6 @@
 #include <time.h>
 
 #include "smash/angles.h"
-#include "smash/bessel_sampler.h"
 #include "smash/cxx14compat.h"
 #include "smash/distributions.h"
 #include "smash/forwarddeclarations.h"
@@ -306,9 +305,9 @@ void GrandCanThermalizer::thermalize_BF_algo(QuantumNumbers &conserved_initial,
     mult_classes_[static_cast<size_t>(get_class(i))] += mult_sort_[i];
   }
 
-  BesselSampler bessel_sampler_B(mult_class(HadronClass::Baryon),
-                                 mult_class(HadronClass::Antibaryon),
-                                 conserved_initial.baryon_number());
+  random::BesselSampler bessel_sampler_B(mult_class(HadronClass::Baryon),
+                                         mult_class(HadronClass::Antibaryon),
+                                         conserved_initial.baryon_number());
 
   while (true) {
     sampled_list_.clear();
@@ -326,7 +325,7 @@ void GrandCanThermalizer::thermalize_BF_algo(QuantumNumbers &conserved_initial,
 
     std::pair<int, int> NS_antiS;
     if (algorithm_ == ThermalizationAlgorithm::BiasedBF) {
-      BesselSampler bessel_sampler_S(
+      random::BesselSampler bessel_sampler_S(
           mult_class(HadronClass::PositiveSMeson),
           mult_class(HadronClass::NegativeSMeson),
           conserved_initial.strangeness() - S_sampled);
@@ -351,7 +350,7 @@ void GrandCanThermalizer::thermalize_BF_algo(QuantumNumbers &conserved_initial,
 
     std::pair<int, int> NC_antiC;
     if (algorithm_ == ThermalizationAlgorithm::BiasedBF) {
-      BesselSampler bessel_sampler_C(
+      random::BesselSampler bessel_sampler_C(
           mult_class(HadronClass::PositiveQZeroSMeson),
           mult_class(HadronClass::NegativeQZeroSMeson),
           conserved_initial.charge() - ch_sampled);

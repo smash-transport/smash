@@ -8,7 +8,7 @@ General:
     Delta_Time:    0.1
     End_Time:      200.0
     Randomseed:    -1
-    Nevents:       10
+    Nevents:       30
 
 Output:
     Photons:

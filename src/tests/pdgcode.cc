@@ -11,6 +11,7 @@
 
 #include "../include/smash/pdgcode.h"
 #include "../include/smash/pdgcode_constants.h"
+#include "setup.h"
 
 using namespace smash;
 
@@ -632,6 +633,14 @@ TEST(from_decimal) {
   COMPARE(antideutron, PdgCode::from_decimal(-1000010020));
 }
 
+TEST(decimal_from_decimal_consistency) {
+  Test::create_actual_particletypes();
+  for (const ParticleType& t : ParticleType::list_all()) {
+    int dec = t.pdgcode().get_decimal();
+    COMPARE(dec, PdgCode::from_decimal(dec).get_decimal());
+  }
+}
+
 TEST(antiparticles) {
   COMPARE(pion.has_antiparticle(), true);
   COMPARE(pinull.has_antiparticle(), false);
@@ -743,7 +752,7 @@ TEST(net_quark_number) {
 
 TEST(deexcite) {
   std::vector<PdgCode> pdg_codes = {0x321, 0x100323, -0x9902214};
-  for (auto &pdg : pdg_codes) {
+  for (auto& pdg : pdg_codes) {
     pdg.deexcite();
   }
   COMPARE(pdg_codes[0], 0x321);

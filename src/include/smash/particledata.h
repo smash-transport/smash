@@ -151,8 +151,6 @@ class ParticleData {
    *
    * \param[in] mass the mass of the particle (without E_kin contribution) [GeV]
    * \param[in] mom the three-momentum of the particle [GeV]
-   *
-   * \fpPrecision The momentum FourVector requires double-precision.
    */
   void set_4momentum(double mass, const ThreeVector &mom) {
     momentum_ = FourVector(std::sqrt(mass * mass + mom * mom), mom);
@@ -165,8 +163,6 @@ class ParticleData {
    * \param[in] px x-component of the momentum [GeV]
    * \param[in] py y-component of the momentum [GeV]
    * \param[in] pz z-component of the momentum [GeV]
-   *
-   * \fpPrecision The momentum FourVector requires double-precision.
    */
   void set_4momentum(double mass, double px, double py, double pz) {
     momentum_ = FourVector(std::sqrt(mass * mass + px * px + py * py + pz * pz),
@@ -296,10 +292,6 @@ class ParticleData {
    * divisions (for every space component of the momentum vector).
    *
    * \returns inverse gamma factor
-   *
-   * \fpPrecision This function must use double-precision for the calculation of
-   * \f$ \beta \f$ and \f$ 1-\beta \f$ as the latter results in a value close to
-   * zero and thus exhibits catastrophic cancellation.
    */
   double inverse_gamma() const {
     return std::sqrt(1. - momentum_.sqr3() / (momentum_.x0() * momentum_.x0()));

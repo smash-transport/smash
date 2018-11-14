@@ -28,9 +28,9 @@ matrix:
           - ubuntu-toolchain-r-test
         packages:
           - libboost-all-dev
-          - g++-8
+          - g++-7
     env:
-      - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+      - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
   # clang on linux
   - os: linux
     addons:
@@ -54,6 +54,7 @@ matrix:
       - MATRIX_EVAL="CC=clang && CXX=clang++"
 
 before_install:
+  - eval "${MATRIX_EVAL}"
   - export SMASH_ROOT=$(pwd)
   # pythia
   - wget http://home.thep.lu.se/~torbjorn/pythia8/pythia8235.tgz &&
@@ -91,5 +92,4 @@ install:
 
 script:
   - ./../bin/clang-format-helper.sh -t
-  - ctest -j2
-
+  - CTEST_OUTPUT_ON_FAILURE=1 ctest -j2

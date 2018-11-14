@@ -32,6 +32,7 @@ class VtkOutput : public OutputInterface {
    *
    * \param path Path to the output file.
    * \param name Name of the output.
+   * \param out_par Additional information on the configured output.
    */
   VtkOutput(const bf::path &path, const std::string &name,
             const OutputParameters &out_par);

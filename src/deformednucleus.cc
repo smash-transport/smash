@@ -22,9 +22,6 @@ namespace smash {
 /*!\Userguide
  * \page projectile_and_target Projectile and Target
  *
- * Additional parameters to specify the spherical shape of the deformed
- * nucleus following \iref{Moller:1993ed}.
- *
  * \li \key Beta_2 (double, optional):\n
  * The deformation coefficient for the spherical harmonic Y_2_0 in the
  * beta decomposition of the nuclear radius in the deformed woods-saxon
@@ -53,25 +50,22 @@ namespace smash {
      Collider:
          Projectile:
              Particles:    {2212: 29, 2112: 34}
-             # automatically set diffusiveness, radius and saturation density
-             Automatic_Woods_Saxon: True
-             Deformed: True
-             # Manually set deformation parameters
-             Automatic_Deformation: False
-             Beta_2: 0.1
-             Beta_4: 0.3
-             Theta: 0.8
-             Phi: 0.02
+             Deformed:
+                 # Manually set deformation parameters
+                 Automatic: False
+                 Beta_2: 0.1
+                 Beta_4: 0.3
+                 Theta: 0.8
+                 Phi: 0.02
          Target:
              Particles:    {2212: 29, 2112: 34}
              # manually set woods saxon parameters
-             Automatic_Woods_Saxon: False
              Saturation_Density: 0.1968
              Diffusiveness: 0.8
              Radius: 2.0
-             Deformed: True
-             # Automatically set deformation parameters
-             Automatic_Deformation: True
+             Deformed:
+                 # Automatically set deformation parameters
+                 Automatic: True
          E_kin: 1.2
          Calculation_Frame: "fixed target"
  \endverbatim
@@ -83,8 +77,8 @@ DeformedNucleus::DeformedNucleus(const std::map<PdgCode, int> &particle_list,
 
 DeformedNucleus::DeformedNucleus(Configuration &config, int nTest)
     : Nucleus(config, nTest) {
-  if (config.has_value({"Automatic_Deformation"}) &&
-      config.take({"Automatic_Deformation"})) {
+  if (config.has_value({"Deformed", "Automatic"}) &&
+      config.take({"Deformed", "Automatic"})) {
     set_deformation_parameters_automatic();
   } else {
     set_deformation_parameters_from_config(config);
@@ -143,7 +137,7 @@ void DeformedNucleus::set_deformation_parameters_automatic() {
       throw std::domain_error(
           "Mass number not listed for automatically setting deformation "
           "parameters. Please specify at least \"Beta_2\" and \"Beta_4\" "
-          "manually and set \"Automatic_Deformation: False.\" ");
+          "manually and set \"Automatic: False.\" ");
   }
 
   // Set a random nuclear rotation.
@@ -153,17 +147,17 @@ void DeformedNucleus::set_deformation_parameters_automatic() {
 void DeformedNucleus::set_deformation_parameters_from_config(
     Configuration &config) {
   // Deformation parameters.
-  if (config.has_value({"Beta_2"})) {
-    set_beta_2(static_cast<double>(config.take({"Beta_2"})));
+  if (config.has_value({"Deformed", "Beta_2"})) {
+    set_beta_2(static_cast<double>(config.take({"Deformed", "Beta_2"})));
   }
-  if (config.has_value({"Beta_4"})) {
-    set_beta_4(static_cast<double>(config.take({"Beta_4"})));
+  if (config.has_value({"Deformed", "Beta_4"})) {
+    set_beta_4(static_cast<double>(config.take({"Deformed", "Beta_4"})));
   }
-  if (config.has_value({"Theta"})) {
-    set_polar_angle(static_cast<double>(config.take({"Theta"})));
+  if (config.has_value({"Deformed", "Theta"})) {
+    set_polar_angle(static_cast<double>(config.take({"Deformed", "Theta"})));
   }
-  if (config.has_value({"Phi"})) {
-    set_azimuthal_angle(static_cast<double>(config.take({"Phi"})));
+  if (config.has_value({"Deformed", "Phi"})) {
+    set_azimuthal_angle(static_cast<double>(config.take({"Deformed", "Phi"})));
   }
 }
 

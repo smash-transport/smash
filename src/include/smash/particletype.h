@@ -32,7 +32,7 @@ enum class Parity {
  * \param p Given parity.
  * \return Inverted parity.
  */
-inline Parity invert_parity(Parity p) {
+inline Parity operator-(Parity p) {
   switch (p) {
     case Parity::Pos:
       return Parity::Neg;
@@ -42,6 +42,32 @@ inline Parity invert_parity(Parity p) {
   // This is unreachable and should be optimized away.
   // It is required to silence a compiler warning.
   throw std::runtime_error("unreachable");
+}
+
+/**
+ * \param x Left-hand parity
+ * \param y Right-hand parity
+ * \return Product of `x` and `y`.
+ */
+inline Parity operator*(Parity x, Parity y) {
+  if (x == y) {
+    return Parity::Pos;
+  } else {
+    return Parity::Neg;
+  }
+}
+
+/**
+ * \param x Left-hand parity
+ * \param y Right-hand parity
+ * \return Product of `x` and `y`.
+ */
+inline void operator*=(Parity &x, Parity y) {
+  if (x == y) {
+    x = Parity::Pos;
+  } else {
+    x = Parity::Neg;
+  }
 }
 
 /**

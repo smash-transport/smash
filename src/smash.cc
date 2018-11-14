@@ -206,7 +206,7 @@ void print_disclaimer() {
       << "\n"
       << " Report issues at https://github.com/smash-transport/smash"
       << "\n"
-      << " or contact us by email at h.elfner@gsi.de"
+      << " or contact us by email at elfner@th.physik.uni-frankfurt.de"
       << "\n"
       << "\n"
       << "###################################################################"
@@ -410,6 +410,7 @@ int main(int argc, char *argv[]) {
           break;
         case 'S':
           final_state_cross_sections = true;
+          // fallthrough
         case 's':
           cross_section_dump_activated = true;
           cs_string = optarg;

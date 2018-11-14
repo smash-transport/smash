@@ -1267,8 +1267,8 @@ void Experiment<Modus>::initialize_new_event() {
   total_pauli_blocked_ = 0;
   // Print output headers
   log.info() << hline;
-  log.info() << " Time       <Ediff>    <scatt./decays>  "
-                "<particles>     <timing>";
+  log.info() << "Time [fm]   Ediff [GeV]    Scatt.|Decays   "
+                "Particles    Timing ";
   log.info() << hline;
 }
 

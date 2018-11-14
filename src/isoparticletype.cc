@@ -16,8 +16,8 @@ namespace smash {
 static IsoParticleTypeList iso_type_list;
 
 IsoParticleType::IsoParticleType(const std::string &n, double m, double w,
-                                 unsigned int s)
-    : name_(n), mass_(m), width_(w), spin_(s) {}
+                                 unsigned int s, Parity p)
+    : name_(n), mass_(m), width_(w), spin_(s), parity_(p) {}
 
 const IsoParticleTypeList &IsoParticleType::list_all() { return iso_type_list; }
 
@@ -134,7 +134,7 @@ void IsoParticleType::create_multiplet(const ParticleType &type) {
   std::string multiname = multiplet_name(type.name());
   if (!exists(multiname)) {
     iso_type_list.emplace_back(multiname, type.mass(), type.width_at_pole(),
-                               type.spin());
+                               type.spin(), type.parity());
     log.debug() << "Creating isospin multiplet " << multiname
                 << " [ m = " << type.mass() << ", Γ = " << type.width_at_pole()
                 << " ]";
