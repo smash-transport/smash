@@ -1,14 +1,13 @@
 /**
 \mainpage User Guide
 
-SMASH (Simulating Many Accelerated Strongly-interacting Hadrons) is a
-relativistic hadronic transport code. It can do hadron-hadron and
-nucleus-nucleus collisions as well as box-mode simulations.
+Welcome to the SMASH user guide. Here you will find information about \ref
+README.md "installation", \ref page_smash_invocation "invocation"
+and supported \ref input "input" and \ref output_general_ "output" options.
+For a more detailed development documentation, have a look <a
+href="http://theory.gsi.de/~smash/doc/1.5rc/"> here</a>.
 
-Quick Links:
-- \subpage authors
-- [Installation](README.md)
-- \subpage page_smash_invocation
-- \subpage input
-- \subpage output_general_
+The source code for this version can be found <a
+href="https://github.com/smash-transport/smash-devel/tree/SMASH-1.5rc"> here</a>.
+
 */

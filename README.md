@@ -1,23 +1,26 @@
-# Readme
+# SMASH
 
-[![Build Status](https://travis-ci.com/smash-transport/smash-devel.svg?token=6MyxHigvN4vzHpS29fsG&branch=master)](https://travis-ci.com/smash-transport/smash-devel)
+[![Build
+Status](https://travis-ci.com/smash-transport/smash-devel.svg?token=6MyxHigvN4vzHpS29fsG&branch=master)](https://travis-ci.com/smash-transport/smash-devel)
 
-This is the repository for the development of the SMASH (Simulating Many
-Accelerated Strongly-interacting Hadrons) transport approach for the dynamical
-description of heavy ion reactions. Please see [Phys. Rev. C 94, 054905
+SMASH (Simulating Many Accelerated Strongly-interacting Hadrons) is a
+relativistic hadronic transport approach for the dynamical description of heavy
+ion reactions.
+Please see [Phys. Rev. C 94, 054905
 (2016)](https://arxiv.org/abs/1606.06642) for details and cite this reference,
 if you are using SMASH.
 
 See [CONTRIBUTING](CONTRIBUTING.md) for development hints. A complete User Guide
-is found [here](https://fias.uni-frankfurt.de/~smash/extra/user/).
+is found [here](https://theory.gsi.de/~smash/userguide/1.5rc). For a more
+detailed development documentation, see
+[here](http://theory.gsi.de/~smash/doc/1.5rc/).
 
-When using SMASH, please cite J. Weil et al., 
-[Phys.Rev. C94 (2016) no.5, 054905](https://arxiv.org/abs/1606.06642)
 
-In addition, if Pythia is used, please cite the following references: 
+If Pythia is used, please cite the following references: 
 T. Sjöstrand, S. Mrenna and P. Skands, 
 [JHEP05 (2006) 026](https://arxiv.org/abs/hep-ph/0603175),
 [Comput. Phys. Comm. 178 (2008)](https://arxiv.org/abs/0710.3820)
+
 
 Report issues at https://github.com/smash-transport/smash or contact us by email
 at elfner@th.physik.uni-frankfurt.de.
