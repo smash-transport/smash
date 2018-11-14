@@ -9,7 +9,7 @@ description of heavy ion reactions. Please see [Phys. Rev. C 94, 054905
 if you are using SMASH.
 
 See [CONTRIBUTING](CONTRIBUTING.md) for development hints. A complete User Guide
-is found [here](https://fias.uni-frankfurt.de/~smash/extra/user/).
+can be found [here](https://fias.uni-frankfurt.de/~smash/extra/user/).
 
 If Pythia is used, please cite the following references: T. Sjöstrand, S. Mrenna
 and P. Skands, [JHEP05 (2006) 026](https://arxiv.org/abs/hep-ph/0603175),
@@ -89,12 +89,12 @@ To run it with specific settings:
 ### Size of the code
 
 Please note that after compilation the `smash` directory (including `build`)
-has a size of about 4GB. If disk space is restricted, consider to just run
+has a size of about 4GB. By default, the unit tests are always compiled, which
+requires a lot of the disk space. If disk space is restricted, consider to just run
 
     make smash
 
-which will only compile the SMASH binary. By default, the unit tests are also
-compiled, which require a lot of the disk space. It is still recommended to run
+which will only compile the SMASH binary. It is still recommended to run
 the unit tests at least once, when compiling in a new environment to ensure that
 everything works as expected. To see how to run the tests, see
 [CONTRIBUTING](CONTRIBUTING.md).
@@ -120,7 +120,7 @@ from floating point traps with clang.
 
 Producing ROOT output requires ROOT installed (see http://root.cern.ch).
 If ROOT is found, the support for ROOT output is automatically enabled.
-In order to disable it, one can do the follwoing:
+In order to disable it, one can do the following:
 
     cmake -DUSE_ROOT=OFF <source_dir>
     make
@@ -149,27 +149,27 @@ Note: In case of problems, make sure to start with a clean build folder.
 
 ## Running SMASH with example input files
 
-SMASH ships with example configuration files for the collider, box, sphere and
-list modus. By default, i.e. by running `./smash`, the simulation is set up by
-means of a collider configuration file, called `config.yaml` and the default
+SMASH ships with example configuration files for the collider, box, sphere, and
+list modus. By default, i.e. by running `./smash`, the simulation is set up from
+the collider configuration file, called `config.yaml`, and the default
 particles and decaymodes files, `particles.txt` and `decaymodes.txt`. They are
 located in `/input`.
 
 Additionally, example configuration files for the box, sphere and list modus can
-be found in the respective directories `/input/{box,sphere,list}`. In case of a
-box simulation, the default particles and decaymodes files need to be modified
-to allow for equilibration. These are also stored in `/input/box`. For the list
+be found in the respective directories `/input/{box,sphere,list}`. In case of the
+box simulation, in order to allow for equilibration, different default particles and decaymodes files
+need to be used. These files are also provided in `/input/box`. For the list
 modus, an input list file to be read in is required. This file, `example_list0`,
 is located in `/input/list`.
 
-To run SMASH with a manually specified configuration file, use the `-i` command.
+To run SMASH with a non-default configuration file, use the `-i` command.
 For example, for the sphere or list example file:
 
     ./smash -i ../input/sphere/config.yaml
     ./smash -i ../input/list/config.yaml
 
-To further use non-default particles and decaymodes files, the `-p`
-and `-d` options are necessary. For the default box or the dileptons example,
+Further, using non-default particles and decaymodes files is necessary, and these
+can be specified through the `-p` and `-d` options. In the box and the dileptons example,
 this means:
 
     ./smash -i ../input/box/config.yaml -p ../input/box/particles.txt -d ../input/box/decaymodes.txt
