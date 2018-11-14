@@ -206,7 +206,7 @@ void print_disclaimer() {
       << "\n"
       << " Report issues at https://github.com/smash-transport/smash"
       << "\n"
-      << " or contact us by email at h.elfner@gsi.de"
+      << " or contact us by email at elfner@th.physik.uni-frankfurt.de"
       << "\n"
       << "\n"
       << "###################################################################"

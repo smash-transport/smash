@@ -646,7 +646,12 @@ bool StringProcess::next_NDiffHard() {
   /* Replace quark constituents according to the excess of valence quarks
    * and then rescale momenta of partons by constant factor
    * to fulfill the energy-momentum conservation. */
-  restore_constituent(event_intermediate_, excess_quark, excess_antiq);
+  bool correct_constituents =
+      restore_constituent(event_intermediate_, excess_quark, excess_antiq);
+  if (!correct_constituents) {
+    log.debug("failed to find correct partonic constituents.");
+    return false;
+  }
 
   int npart = event_intermediate_.size();
   int ipart = 0;
@@ -887,7 +892,229 @@ void StringProcess::replace_constituent(
   particle.m(mass_new);
 }
 
-void StringProcess::restore_constituent(
+void StringProcess::find_total_number_constituent(
+    Pythia8::Event &event_intermediate, std::array<int, 5> &nquark_total,
+    std::array<int, 5> &nantiq_total) {
+  for (int iflav = 0; iflav < 5; iflav++) {
+    nquark_total[iflav] = 0;
+    nantiq_total[iflav] = 0;
+  }
+
+  for (int ip = 1; ip < event_intermediate.size(); ip++) {
+    if (!event_intermediate[ip].isFinal()) {
+      continue;
+    }
+    const int pdgid = event_intermediate[ip].id();
+    if (pdgid > 0) {
+      // quarks
+      for (int iflav = 0; iflav < 5; iflav++) {
+        nquark_total[iflav] +=
+            pythia_hadron_->particleData.nQuarksInCode(pdgid, iflav + 1);
+      }
+    } else {
+      // antiquarks
+      for (int iflav = 0; iflav < 5; iflav++) {
+        nantiq_total[iflav] += pythia_hadron_->particleData.nQuarksInCode(
+            std::abs(pdgid), iflav + 1);
+      }
+    }
+  }
+}
+
+bool StringProcess::splitting_gluon_qqbar(
+    Pythia8::Event &event_intermediate, std::array<int, 5> &nquark_total,
+    std::array<int, 5> &nantiq_total, bool sign_constituent,
+    std::array<std::array<int, 5>, 2> &excess_constituent) {
+  const auto &log = logger<LogArea::Pythia>();
+
+  Pythia8::Vec4 pSum = event_intermediate[0].p();
+
+  /* compute total number of quark and antiquark constituents
+   * in the whole system. */
+  find_total_number_constituent(event_intermediate, nquark_total, nantiq_total);
+
+  for (int iflav = 0; iflav < 5; iflav++) {
+    /* Find how many constituent will be in the system after
+     * changing the flavors.
+     * Note that nquark_total is number of constituent right after
+     * the pythia event (with mapped incoming hadrons), while the excess
+     * shows how many constituents we have more or less that nquark_total. */
+    int nquark_final =
+        excess_constituent[0][iflav] + excess_constituent[1][iflav];
+    if (sign_constituent) {
+      nquark_final += nquark_total[iflav];
+    } else {
+      nquark_final += nantiq_total[iflav];
+    }
+    /* Therefore, nquark_final should not be negative.
+     * negative nquark_final means that it will not be possible to
+     * find a constituent to change the flavor. */
+    bool enough_quark = nquark_final >= 0;
+    /* If that is the case, a gluon will be splitted into
+     * a quark-antiquark pair with the desired flavor. */
+    if (!enough_quark) {
+      log.debug("  not enough constituents with flavor ", iflav + 1,
+                " : try to split a gluon to qqbar.");
+      for (int ic = 0; ic < std::abs(nquark_final); ic++) {
+        /* Since each incoming hadron has its own count of the excess,
+         * it is necessary to find which one is problematic. */
+        int ih_mod = -1;
+        if (excess_constituent[0][iflav] < 0) {
+          ih_mod = 0;
+        } else {
+          ih_mod = 1;
+        }
+
+        /* find the most forward or backward gluon
+         * depending on which incoming hadron is found to be an issue. */
+        int iforward = 1;
+        for (int ip = 2; ip < event_intermediate.size(); ip++) {
+          if (!event_intermediate[ip].isFinal() ||
+              !event_intermediate[ip].isGluon()) {
+            continue;
+          }
+
+          const double y_gluon_current = event_intermediate[ip].y();
+          const double y_gluon_forward = event_intermediate[iforward].y();
+          if ((ih_mod == 0 && y_gluon_current > y_gluon_forward) ||
+              (ih_mod == 1 && y_gluon_current < y_gluon_forward)) {
+            iforward = ip;
+          }
+        }
+
+        if (!event_intermediate[iforward].isGluon()) {
+          log.debug("There is no gluon to split into qqbar.");
+          return false;
+        }
+
+        // four momentum of the original gluon
+        Pythia8::Vec4 pgluon = event_intermediate[iforward].p();
+
+        const int pdgid = iflav + 1;
+        const double mass = pythia_hadron_->particleData.m0(pdgid);
+        const int status = event_intermediate[iforward].status();
+        /* color and anticolor indices.
+         * the color index of gluon goes to the quark, while
+         * the anticolor index goes to the antiquark */
+        const int col = event_intermediate[iforward].col();
+        const int acol = event_intermediate[iforward].acol();
+
+        // three momenta of quark and antiquark
+        std::array<double, 2> px_quark;
+        std::array<double, 2> py_quark;
+        std::array<double, 2> pz_quark;
+        // energies of quark and antiquark
+        std::array<double, 2> e_quark;
+        // four momenta of quark and antiquark
+        std::array<Pythia8::Vec4, 2> pquark;
+        // transverse momentum scale of string fragmentation
+        const double sigma_qt_frag = pythia_hadron_->parm("StringPT:sigma");
+        // sample relative transverse momentum between quark and antiquark
+        const double qx = random::normal(0., sigma_qt_frag / sqrt2_);
+        const double qy = random::normal(0., sigma_qt_frag / sqrt2_);
+        // setup kinematics
+        for (int isign = 0; isign < 2; isign++) {
+          /* As the simplest assumption, the three momentum of gluon
+           * is equally distributed to quark and antiquark.
+           * Then, they have a relative transverse momentum. */
+          px_quark[isign] = 0.5 * pgluon.px() + (isign == 0 ? 1. : -1.) * qx;
+          py_quark[isign] = 0.5 * pgluon.py() + (isign == 0 ? 1. : -1.) * qy;
+          pz_quark[isign] = 0.5 * pgluon.pz();
+          e_quark[isign] =
+              std::sqrt(mass * mass + px_quark[isign] * px_quark[isign] +
+                        py_quark[isign] * py_quark[isign] +
+                        pz_quark[isign] * pz_quark[isign]);
+          pquark[isign] = Pythia8::Vec4(px_quark[isign], py_quark[isign],
+                                        pz_quark[isign], e_quark[isign]);
+        }
+
+        /* Total energy is not conserved at this point,
+         * but this will be cured later. */
+        pSum += pquark[0] + pquark[1] - pgluon;
+        // add quark and antiquark to the event record
+        event_intermediate.append(pdgid, status, col, 0, pquark[0], mass);
+        event_intermediate.append(-pdgid, status, 0, acol, pquark[1], mass);
+        // then remove the gluon from the record
+        event_intermediate.remove(iforward, iforward);
+
+        log.debug("  gluon at iforward = ", iforward, " is splitted into ",
+                  pdgid, ",", -pdgid, " qqbar pair.");
+        /* Increase the total number of quarks and antiquarks by 1,
+         * as we have extra ones from a gluon. */
+        nquark_total[iflav] += 1;
+        nantiq_total[iflav] += 1;
+      }
+    }
+  }
+
+  /* The zeroth entry of event record is supposed to have the information
+   * on the whole system. Specify the total momentum and invariant mass. */
+  event_intermediate[0].p(pSum);
+  event_intermediate[0].m(pSum.mCalc());
+
+  return true;
+}
+
+void StringProcess::rearrange_excess(
+    std::array<int, 5> &nquark_total,
+    std::array<std::array<int, 5>, 2> &excess_quark,
+    std::array<std::array<int, 5>, 2> &excess_antiq) {
+  const auto &log = logger<LogArea::Pythia>();
+
+  for (int iflav = 0; iflav < 5; iflav++) {
+    /* Find how many constituent will be in the system after
+     * changing the flavors.
+     * Note that nquark_total is number of constituent right after
+     * the pythia event (with mapped incoming hadrons), while the excess
+     * shows how many constituents we have more or less that nquark_total. */
+    int nquark_final =
+        nquark_total[iflav] + excess_quark[0][iflav] + excess_quark[1][iflav];
+    /* Therefore, nquark_final should not be negative.
+     * negative nquark_final means that it will not be possible to
+     * find a constituent to change the flavor. */
+    bool enough_quark = nquark_final >= 0;
+    // If that is the case, excess of constituents will be modified
+    if (!enough_quark) {
+      log.debug("  not enough constituents with flavor ", iflav + 1,
+                " : try to modify excess of constituents.");
+      for (int ic = 0; ic < std::abs(nquark_final); ic++) {
+        /* Since each incoming hadron has its own count of the excess,
+         * it is necessary to find which one is problematic. */
+        int ih_mod = -1;
+        if (excess_quark[0][iflav] < 0) {
+          ih_mod = 0;
+        } else {
+          ih_mod = 1;
+        }
+        /* Increase the excess of both quark and antiquark
+         * with corresponding flavor (iflav + 1) by 1.
+         * This is for conservation of the net quark number. */
+        excess_quark[ih_mod][iflav] += 1;
+        excess_antiq[ih_mod][iflav] += 1;
+
+        /* Since incoming hadrons are mapped onto ones with
+         * the same baryon number (or quark number),
+         * summation of the excesses over all flavors should be zero.
+         * Therefore, we need to find another flavor which has
+         * a positive excess and subtract by 1. */
+        for (int jflav = 0; jflav < 5; jflav++) {
+          // another flavor with positive excess of constituents
+          if (jflav != iflav && excess_quark[ih_mod][jflav] > 0) {
+            /* Decrease the excess of both quark and antiquark
+             * with corresponding flavor (jflav + 1) by 1. */
+            excess_quark[ih_mod][jflav] -= 1;
+            excess_antiq[ih_mod][jflav] -= 1;
+            /* We only need to find one (another) flavor to subtract.
+             * No more! */
+            break;
+          }
+        }
+      }
+    }
+  }
+}
+
+bool StringProcess::restore_constituent(
     Pythia8::Event &event_intermediate,
     std::array<std::array<int, 5>, 2> &excess_quark,
     std::array<std::array<int, 5>, 2> &excess_antiq) {
@@ -896,6 +1123,48 @@ void StringProcess::restore_constituent(
   Pythia8::Vec4 pSum = event_intermediate[0].p();
   const double energy_init = pSum.e();
   log.debug("  initial total energy [GeV] : ", energy_init);
+
+  // Total number of quarks and antiquarks, respectively.
+  std::array<int, 5> nquark_total;
+  std::array<int, 5> nantiq_total;
+
+  /* Split a gluon into qqbar if we do not have enough constituents
+   * to be converted in the system. */
+  bool split_for_quark = splitting_gluon_qqbar(
+      event_intermediate, nquark_total, nantiq_total, true, excess_quark);
+  bool split_for_antiq = splitting_gluon_qqbar(
+      event_intermediate, nquark_total, nantiq_total, false, excess_antiq);
+
+  /* Modify excess_quark and excess_antiq if we do not have enough constituents
+   * to be converted in the system. */
+  if (!split_for_quark || !split_for_antiq) {
+    rearrange_excess(nquark_total, excess_quark, excess_antiq);
+    rearrange_excess(nantiq_total, excess_antiq, excess_quark);
+  }
+
+  // Final check if there are enough constituents.
+  for (int iflav = 0; iflav < 5; iflav++) {
+    if (nquark_total[iflav] + excess_quark[0][iflav] + excess_quark[1][iflav] <
+        0) {
+      log.debug("Not enough quark constituents of flavor ", iflav + 1);
+      return false;
+    }
+
+    if (nantiq_total[iflav] + excess_antiq[0][iflav] + excess_antiq[1][iflav] <
+        0) {
+      log.debug("Not enough antiquark constituents of flavor ", -(iflav + 1));
+      return false;
+    }
+  }
+
+  for (int ih = 0; ih < 2; ih++) {
+    log.debug("  initial excess_quark[", ih, "] = (", excess_quark[ih][0], ", ",
+              excess_quark[ih][1], ", ", excess_quark[ih][2], ", ",
+              excess_quark[ih][3], ", ", excess_quark[ih][4], ")");
+    log.debug("  initial excess_antiq[", ih, "] = (", excess_antiq[ih][0], ", ",
+              excess_antiq[ih][1], ", ", excess_antiq[ih][2], ", ",
+              excess_antiq[ih][3], ", ", excess_antiq[ih][4], ")");
+  }
 
   bool recovered_quarks = false;
   while (!recovered_quarks) {
@@ -994,6 +1263,8 @@ void StringProcess::restore_constituent(
    * on the whole system. Specify the total momentum and invariant mass. */
   event_intermediate[0].p(pSum);
   event_intermediate[0].m(pSum.mCalc());
+
+  return true;
 }
 
 void StringProcess::compose_string_parton(bool find_forward_string,

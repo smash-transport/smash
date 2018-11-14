@@ -16,20 +16,22 @@ detailed development documentation, see
 [here](http://theory.gsi.de/~smash/doc/1.5rc/).
 
 
-If Pythia is used, please cite the following references: T. Sjöstrand, S. Mrenna
-and P. Skands, [JHEP05 (2006) 026](https://arxiv.org/abs/hep-ph/0603175),
-[Comput. Phys. Comm. 178 (2008)](https://arxiv.org/abs/0710.3820).
+If Pythia is used, please cite the following references: 
+T. Sjöstrand, S. Mrenna and P. Skands, 
+[JHEP05 (2006) 026](https://arxiv.org/abs/hep-ph/0603175),
+[Comput. Phys. Comm. 178 (2008)](https://arxiv.org/abs/0710.3820)
+
 
 Report issues at https://github.com/smash-transport/smash or contact us by email
-at h.elfner@gsi.de.
+at elfner@th.physik.uni-frankfurt.de.
 
-## How to build SMASH
+## How to Build SMASH
 
 ### Prerequisites
 
 SMASH is known to compile and work with one of these compilers (which have the
 required C++11 features):
-- gcc >= 4.8
+- gcc >= 4.8 and < 8.0
 - clang >= 3.2
 
 It requires the following tools & libraries:
@@ -60,7 +62,7 @@ executable as shown in the next section.
 Note that although Pythia is statically linked into SMASH, access to
 `share/Pythia8/xmldoc` is required at runtime.
 
-### Including Eigen header files from custom location
+### Including Eigen Header Files from Custom Location
 
 Let's assume Eigen headers will be unpacked in `$HOME`.
 
@@ -91,7 +93,7 @@ To run it with specific settings:
     ./smash
 
 
-### Size of the code
+### Size of the Code
 
 Please note that after compilation the `smash` directory (including `build`)
 has a size of about 4GB. If disk space is restricted, consider to just run
@@ -105,7 +107,7 @@ everything works as expected. To see how to run the tests, see
 [CONTRIBUTING](CONTRIBUTING.md).
 
 
-### Changing the compiler
+### Changing the Compiler
 
 In order to use a particular compiler, you can set the following environment
 variables:
@@ -121,7 +123,7 @@ Note: The FPE environment only works with gcc, so e.g. you won't get backtraces
 from floating point traps with clang.
 
 
-### Disabling ROOT support
+### Disabling ROOT Support
 
 Producing ROOT output requires ROOT installed (see http://root.cern.ch).
 If ROOT is found, the support for ROOT output is automatically enabled.
@@ -131,7 +133,7 @@ In order to disable it, one can do the follwoing:
     make
 
 
-### Using a custom GSL build
+### Using a Custom GSL Build
 
 Download and unpack GSL:
 
@@ -152,7 +154,7 @@ SMASH, run `cmake` with
 
 Note: In case of problems, make sure to start with a clean build folder.
 
-## Running SMASH with example input files
+## Running SMASH with Example Input Files
 
 SMASH ships with example configuration files for the collider, box, sphere and
 list modus. By default, i.e. by running `./smash`, the simulation is set up by
@@ -196,12 +198,13 @@ SMASH is licensed under the terms of the GNU General Public License, Version 3
 or above. The build scripts are licensed under terms of the BSD 3-clause
 license. See [LICENSE](LICENSE).
 
-### Projects using SMASH
+### Projects Using SMASH
 
 SMASH source and documentation are provided to check and
-reproduce published results of the authors. Cooperation and joint projects with outside
-researchers are encouraged and comparison to results by experimental collaborations
-is supported. If you are interested in starting a project, please contact us to avoid
-interference with current thesis topics. If your project involves changes to the code,
-please refer to [CONTRIBUTING](CONTRIBUTING.md) for coding guidelines and
+reproduce published results of the authors. Cooperation and joint projects with
+outside researchers are encouraged and comparison to results by experimental
+collaborations is supported. SMASH can be used as a 3rd party library. If you
+are interested in starting a project, please contact us to avoid interference
+with current thesis topics. If your project involves changes to the code, 
+please refer to [CONTRIBUTING](CONTRIBUTING.md) for coding guidelines and 
 helpful tools.

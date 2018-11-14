@@ -4,7 +4,7 @@ If you are reading this, it is probable that you are going to contribute to
 SMASH. First of all, we welcome your interest and thank you for your work.
 Hopefully, you find what you need in the following. Otherwise feel free to
 contact the development team by reporting issues at
-https://github.com/smash-transport/smash or contact us by email at h.elfner@gsi.de.
+https://github.com/smash-transport/smash or contact us by email at elfner@th.physik.uni-frankfurt.de.
 
 Note that any contributions must be licensed under the same terms as SMASH, see
 [LICENSE](LICENSE).
@@ -33,7 +33,7 @@ causing the test to always fail when run again. To fix this problem, just remove
 the folder.
 
 
-### Runtime memory checking with valgrind
+### Runtime Memory Checking with valgrind
 
 The SMASH binary memory usage can be checked for the different modi with the the
 following cmake targets:
@@ -50,7 +50,7 @@ Note: There is known bug with `valgrind-3.11` that leads to an error about an
 unrecognized instruction. The memchecks will not run with this version.
 
 
-## Choosing a build type
+## Choosing a Build Type
 
 There are different build types available, which compile the SMASH code for different situations.
 
@@ -68,7 +68,7 @@ For a profiling build use:
 
 The default build type is 'RelWithDebInfo', which provides both optimization and debug info.
 
-### Enhancing build verbosity
+### Enhancing Build Verbosity
 
 To find cmake build errors (best debugged with full compiler output) use:
 
@@ -87,7 +87,7 @@ The following tools can be helpful for development:
 
 Note: The above mentioned clang-format version is enforced at each merge to master.
 
-### Installing binaries as a user
+### Installing Binaries as a User
 
 If you do not have administrator privileges on the machine you are using, you can
 still install software locally. Just copy the binary (in this example
@@ -167,7 +167,7 @@ The online version of the code documentation is found
 [here](https://fias.uni-frankfurt.de/~smash/extra/doc/).
 
 
-### How to build docs with doxygen yourself
+### How to Build Docs with doxygen Yourself
 
 You need to have doxygen installed. Then just call:
 
@@ -199,7 +199,7 @@ to obtain the files in `doc/user/`. Open 'index.html' in your favourite
 browser. 
 
 
-### What to document in the code
+### What to Document in the Code
 
 Code documentation has two important purposes:
 
@@ -213,7 +213,7 @@ Code documentation has two important purposes:
   ideas.
 
 
-### How to write good doxygen comments
+### How to Write Good doxygen Comments
 
 Doxygen is very flexible in the [comments it accepts for documentation
 generation](http://www.stack.nl/~dimitri/doxygen/manual/docblocks.html). In
@@ -284,7 +284,7 @@ question what should be documented:
 ```
 
 
-### How to insert references to publications
+### How to Insert References to Publications
 
 In order to refer to a paper inside a doxygen comment, the `iref` command should
 be used:
@@ -395,7 +395,7 @@ enum class MyEnum {
 ```
 
 
-### How to add an enum for a new configuration value
+### How to Add an enum for a new Configuration Value
 
 If a new option is added to the `config.yaml`, it should be done in the
 following way:
@@ -405,7 +405,7 @@ following way:
 * Document possible strings in `config.yaml` and User Guide.
 
 
-### Code formatting with `clang-format`
+### Code Formatting with `clang-format`
 
 All code has to be formatted by running `clang-format`. This automatically
 formats the code in SMASH correctly. Use the helper script in SMASH's /bin
@@ -434,9 +434,13 @@ lot of false positives:
 
     make cppcheck
 
-## General policies
+### Floating-Point Precision
 
-### Input and output compatibility
+All floating point numbers are represented using doubles.
+
+## General Policies
+
+### Input and Output Compatibility
 
 In general, input and output interfaces should be backwards compatible, when
 introducing changes. If there are changes that affect the config.yaml or the
@@ -444,7 +448,7 @@ binary output, the associated version numbers need to be increased. Such
 changes can only occur, when major versions of SMASH are released. In addition,
 the Changelog needs be updated with a prominent mention of the changes.
 
-### Third party codes
+### Third Party Codes
 
 In general, the usage of third party codes is discouraged. If there is a scientific necessity
 or a major performance gain or time saving by using third party libraries, they can be linked
@@ -453,7 +457,7 @@ is sufficient whereas for the less common ones, including them in the thirdparty
 shipping them with SMASH is the better solution. Of course, this involves ensuring the proper
 copyright.
 
-## Profiling and benchmarking
+## Profiling and Benchmarking
 
 This section discusses tools that can be used to measure the
 performance.

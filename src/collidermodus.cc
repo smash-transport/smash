@@ -98,13 +98,8 @@ namespace smash {
  * `Particles: {2212: 1, 2112: 1, 3122: 1}` for Hyper-Triton (one
  * proton, one neutron and one Lambda).
  *
- * \li \key Automatic_Woods_Saxon (bool, optional, no default): \n
- * true - Sets all necessary parameters for the Woods Saxon distribution based
- * on the atomic number of the input nucleus \n
- * false - Manually specified values for \key Diffusiveness, \key Radius and
- * \key Saturation_Density are employed
- *
- * \li \key Diffusiveness (double, optional, default = 0.545): \n
+ * \li \key Diffusiveness (double, optional,
+ * default = (0.545 for A <= 16; 0.54 for A > 16)): \n
  * Diffusiveness of the Woods Saxon distribution for the nucleus in fm.
  *
  * \li \key Radius (double, optional, default = proton_rad * A^(1/3)): \n
@@ -114,16 +109,14 @@ namespace smash {
  * \li \key Saturation_Density (double, optional, default = 0.168): \n
  * Saturation density of the nucleus in 1/fm^3.
  *
- * \li \key Deformed (bool, optional, default = false): \n
- * true - Deformed nucleus is initialized \n
- * false - Spherical nucleus is initialized
- *
- * \li \key Automatic_Deformation (bool, optional, no default): \n
+ * - \key Deformed: \n
+ *    \li \key Automatic (bool, required if \key Deformed exists, no default):
+ \n
  * true - Set parameters of spherical deformation based on mass number of the
- * nucleus.\n
+ * nucleus. \n
  * flase - Manually set parameters of spherical deformation. This requires the
- * additional specification of \key Beta_2, \key Beta_4, \key Theata and
- * \key Phi.
+ * additional specification of \key Beta_2, \key Beta_4, \key Theta and
+ * \key Phi, which follow \iref{Moller:1993ed}. \n
  *
  * \page input_impact_parameter_ Impact Parameter
  * \key Impact: \n
@@ -276,8 +269,9 @@ ColliderModus::ColliderModus(Configuration modus_config,
 
   // Set up the projectile nucleus
   Configuration proj_cfg = modus_cfg["Projectile"];
-  if (proj_cfg.has_value({"Deformed"}) && proj_cfg.take({"Deformed"})) {
-    projectile_ = make_unique<DeformedNucleus>(proj_cfg, params.testparticles);
+  if (proj_cfg.has_value({"Deformed"})) {
+    projectile_ =
+        create_deformed_nucleus(proj_cfg, params.testparticles, "projectile");
   } else {
     projectile_ = make_unique<Nucleus>(proj_cfg, params.testparticles);
   }
@@ -287,8 +281,8 @@ ColliderModus::ColliderModus(Configuration modus_config,
 
   // Set up the target nucleus
   Configuration targ_cfg = modus_cfg["Target"];
-  if (targ_cfg.has_value({"Deformed"}) && targ_cfg.take({"Deformed"})) {
-    target_ = make_unique<DeformedNucleus>(targ_cfg, params.testparticles);
+  if (targ_cfg.has_value({"Deformed"})) {
+    target_ = create_deformed_nucleus(targ_cfg, params.testparticles, "target");
   } else {
     target_ = make_unique<Nucleus>(targ_cfg, params.testparticles);
   }
@@ -434,6 +428,25 @@ std::ostream &operator<<(std::ostream &out, const ColliderModus &m) {
              << "Projectile:\n"
              << *m.projectile_ << "\nTarget:\n"
              << *m.target_;
+}
+
+std::unique_ptr<DeformedNucleus> ColliderModus::create_deformed_nucleus(
+    Configuration &nucleus_cfg, int ntest, const std::string &nucleus_type) {
+  bool auto_deform = nucleus_cfg.take({"Deformed", "Automatic"});
+  bool is_beta2 = nucleus_cfg.has_value({"Deformed", "Beta_2"}) ? true : false;
+  bool is_beta4 = nucleus_cfg.has_value({"Deformed", "Beta_4"}) ? true : false;
+  std::unique_ptr<DeformedNucleus> nucleus;
+
+  if ((auto_deform && (!is_beta2 && !is_beta4)) ||
+      (!auto_deform && (is_beta2 && is_beta4))) {
+    nucleus = make_unique<DeformedNucleus>(nucleus_cfg, ntest);
+    return nucleus;
+  } else {
+    throw std::domain_error("Deformation of " + nucleus_type +
+                            " nucleus not configured "
+                            "properly, please check whether all necessary "
+                            "parameters are set.");
+  }
 }
 
 double ColliderModus::initial_conditions(Particles *particles,

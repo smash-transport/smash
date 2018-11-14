@@ -182,7 +182,10 @@ TEST(woods_saxon) {
   // the nucleus. Fill it from list with 1 testparticle.
   Nucleus projectile(list, 1);
   double R = projectile.default_nuclear_radius();
+  // default for A <= 16:
+  double diffusiveness = 0.545;
   projectile.set_nuclear_radius(R);
+  projectile.set_diffusiveness(diffusiveness);
   // this is the number of times we access the distribution.
   constexpr int N_TEST = 10000000;
   // fill the histogram

@@ -31,10 +31,10 @@ TEST(init_decay_channels) {
       "ρ\n"
       "1.\t1\tπ π\n \n"
       "f₂\n"
-      "0.50\t0\tπ π\n"
+      "0.50\t2\tπ π\n"
       "0.25\t0\tρ ρ\n"
-      "0.20\t0\tρ ρ ρ\n"
-      "0.05\t0\tK K̅\n");
+      "0.20\t1\tρ ρ ρ\n"
+      "0.05\t2\tK K̅\n");
   DecayModes::load_decaymodes(decays_input);
   ParticleType::check_consistency();
 }

@@ -139,6 +139,20 @@ class ColliderModus : public ModusDefault {
    * Needs to be double to allow for calculations at LHC energies
    * **/
   double sqrt_s_NN_;
+  /** Configure Deformed Nucleus
+   *
+   * Sets up a deformed nucleus object based on the input parameters in the
+   * configuration file.
+   * \param[in] nucleus_cfg Subset of configuration, projectile or target
+   * section.
+   * \param[in] ntest Number of test particles
+   * \param[in] nucleus_type String 'projectile' or 'target'. To display an
+   * appropriate error message.
+   * \return Pointer to the created deformed nucleus object.
+   * **/
+  static std::unique_ptr<DeformedNucleus> create_deformed_nucleus(
+      Configuration &nucleus_cfg, const int ntest,
+      const std::string &nucleus_type);
   /**
    * Impact parameter.
    *
