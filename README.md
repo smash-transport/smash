@@ -59,7 +59,7 @@ to build Pythia with similar flags as used for SMASH:
 To tell cmake where to find Pythia, pass the path to the pythia8-config
 executable as shown in the next section.
 
-Note that although Pythia is statically linked into SMASH, access to
+Note that although Pythia is dynamically linked into SMASH, access to
 `share/Pythia8/xmldoc` is required at runtime.
 
 ### Including Eigen Header Files from Custom Location
@@ -164,10 +164,10 @@ located in `/input`.
 
 Additionally, example configuration files for the box, sphere and list modus can
 be found in the respective directories `/input/{box,sphere,list}`. In case of the
-box simulation, in order to allow for equilibration, different default particles and decaymodes files
-need to be used. These files are also provided in `/input/box`. For the list
-modus, an input list file to be read in is required. This file, `example_list0`,
-is located in `/input/list`.
+box simulation, in order to allow for equilibration, different default particles
+and decaymodes files need to be used. These files are also provided in
+`/input/box`. For the list modus, an input list file to be read in is required.
+This file, `example_list0`, is located in `/input/list`.
 
 To run SMASH with a non-default configuration file, use the `-i` command.
 For example, for the sphere or list example file:
@@ -176,7 +176,8 @@ For example, for the sphere or list example file:
     ./smash -i ../input/list/config.yaml
 
 Further, using non-default particles and decaymodes files is necessary, and these
-can be specified through the `-p` and `-d` options. In the box and the dileptons example,
+can be specified through the `-p` and `-d` options. In the box and the dileptons
+example,
 this means:
 
     ./smash -i ../input/box/config.yaml -p ../input/box/particles.txt -d ../input/box/decaymodes.txt
@@ -203,8 +204,8 @@ license. See [LICENSE](LICENSE).
 SMASH source and documentation are provided to check and
 reproduce published results of the authors. Cooperation and joint projects with
 outside researchers are encouraged and comparison to results by experimental
-collaborations is supported. SMASH can be used as a 3rd party library. If you
-are interested in starting a project, please contact us to avoid interference
-with current thesis topics. If your project involves changes to the code, 
-please refer to [CONTRIBUTING](CONTRIBUTING.md) for coding guidelines and 
-helpful tools.
+collaborations is supported. SMASH can be used as a 3rd party library, for
+examples see ${SMASH_DIR}/examples/ folder. If you are interested in starting a
+project, please contact us to avoid interference with current thesis topics.
+If your project involves changes to the code, please refer to
+[CONTRIBUTING](CONTRIBUTING.md) for coding guidelines and helpful tools.
