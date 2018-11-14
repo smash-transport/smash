@@ -399,7 +399,7 @@ class Configuration {
      */
     template <typename T>
     T convert_for(const T &) const {
-      return operator T();
+      return *this;
     }
 
     /**
@@ -861,7 +861,7 @@ class Configuration {
   template <typename T>
   T take(std::initializer_list<const char *> keys, T default_value) {
     if (has_value(keys)) {
-      return take(keys).operator T();
+      return take(keys);
     }
     return default_value;
   }
@@ -886,7 +886,7 @@ class Configuration {
   template <typename T>
   T read(std::initializer_list<const char *> keys, T default_value) {
     if (has_value(keys)) {
-      return read(keys).operator T();
+      return read(keys);
     }
     return default_value;
   }
