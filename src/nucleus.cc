@@ -26,6 +26,7 @@ namespace smash {
 
 Nucleus::Nucleus(const std::map<PdgCode, int> &particle_list, int nTest) {
   fill_from_list(particle_list, nTest);
+  set_parameters_automatic();
 }
 
 Nucleus::Nucleus(Configuration &config, int nTest) {
