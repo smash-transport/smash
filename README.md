@@ -59,7 +59,7 @@ to build Pythia with similar flags as used for SMASH:
 To tell cmake where to find Pythia, pass the path to the pythia8-config
 executable as shown in the next section.
 
-Note that although Pythia is dynamically linked into SMASH, access to
+Note that although Pythia is statically linked into SMASH, access to
 `share/Pythia8/xmldoc` is required at runtime.
 
 ### Including Eigen Header Files from Custom Location
