@@ -299,7 +299,7 @@ void check_config_version_is_compatible(Configuration configuration) {
   const std::string smash_version = "1.5";
   const std::set<std::string> compatible_config_versions = {"1.5"};
 
-  const std::string config_version = configuration.take({"Version"});
+  const std::string config_version = configuration.read({"Version"});
 
   if (compatible_config_versions.find(config_version) ==
       compatible_config_versions.end()) {
@@ -598,7 +598,12 @@ int main(int argc, char *argv[]) {
     // Create an experiment
     log.trace(source_location, " create Experiment");
     auto experiment = ExperimentBase::create(configuration, output_path);
+    //
+    // version value is not used in experiment. Get rid of it to prevent
+    // warning.
+    configuration.take({"Version"});
     const std::string report = configuration.unused_values_report();
+
     if (report != "{}") {
       throw std::runtime_error(
           "The following configuration values were not used:\n" + report);
