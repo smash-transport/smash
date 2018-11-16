@@ -39,7 +39,7 @@ double ProcessBranch::threshold() const {
      * smaller than the real sum would be without rounding. */
     double thr = 0.;
     for (const auto& type : particle_types()) {
-      thr += type->min_mass_spectral();
+      thr += type->min_mass_kinematic();
     }
     /* This may round up or down. Up is good. If down
      * we must add one ULP via 'nextafter'. */

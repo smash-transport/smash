@@ -204,7 +204,7 @@ std::pair<double, double> DecayAction::sample_masses(
   // start with pole masses
   std::pair<double, double> masses = {t_a.mass(), t_b.mass()};
 
-  if (kinetic_energy_cm < t_a.min_mass_spectral() + t_b.min_mass_spectral()) {
+  if (kinetic_energy_cm < t_a.min_mass_kinematic() + t_b.min_mass_kinematic()) {
     const std::string reaction =
         incoming_particles_[0].type().name() + "→" + t_a.name() + t_b.name();
     throw InvalidResonanceFormation(
