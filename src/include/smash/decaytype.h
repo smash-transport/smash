@@ -103,8 +103,8 @@ class TwoBodyDecay : public DecayType {
   bool has_particles(ParticleTypePtrList list) const override;
   /// \return The kinematic energy threshold of the decay in GeV.
   double threshold() const {
-    return particle_types_[0]->min_mass_kinematic() +
-           particle_types_[1]->min_mass_kinematic();
+    return particle_types_[0]->min_mass_spectral() +
+           particle_types_[1]->min_mass_spectral();
   }
 
  protected:

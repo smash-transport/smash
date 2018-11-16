@@ -118,7 +118,7 @@ TEST(f2_width) {
       0.0000186238, 0.0000120054};
   for (size_t i = 0; i < f2mass_list.size(); i++) {
     const double f2width_m = f2.total_width(f2mass_list[i]);
-    double rel_err = 5.e-3;
+    double rel_err = 6.e-3;
     // Extrapolation leads to larger errors
     if (i > 10) {
       rel_err = 5.e-2;
