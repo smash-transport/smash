@@ -283,8 +283,8 @@ void Nucleus::set_parameters_automatic() {
   int A = Nucleus::number_of_particles();
   switch (A) {
     case 1:  // single particle
-      set_nuclear_radius(0.);
-      set_diffusiveness(-1.);
+      set_nuclear_radius((testparticles_ - 1.) * 0.2);
+      set_diffusiveness(testparticles_ == 1 ? -1. : 0.02);
       break;
     case 238:  // Uranium
       // Default values.
