@@ -259,7 +259,7 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData& data_a,
   assert(data_b.id() >= 0);
   if (data_a.id() < N_tot_ && data_b.id() < N_tot_ &&
       ((data_a.id() < N_proj_ && data_b.id() < N_proj_) ||
-       (data_a.id() > N_proj_ && data_b.id() > N_proj_)) &&
+       (data_a.id() >= N_proj_ && data_b.id() >= N_proj_)) &&
       !(nucleon_has_interacted_[data_a.id()] ||
         nucleon_has_interacted_[data_b.id()])) {
     return nullptr;
