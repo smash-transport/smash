@@ -164,7 +164,7 @@ It is the same as installing cpplint.
 
 We use [doxygen](http://doxygen.org) for generating documentation from our code.
 The online version of the code documentation is found
-[here](https://fias.uni-frankfurt.de/~smash/extra/doc/).
+[here](https://http://theory.gsi.de/~smash/doc/1.5/).
 
 
 ### How to Build Docs with doxygen Yourself
