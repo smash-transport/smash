@@ -283,6 +283,10 @@ void Nucleus::set_parameters_automatic() {
   int A = Nucleus::number_of_particles();
   switch (A) {
     case 1:  // single particle
+      /* In case of testparticles, an infinite reaction loop will be
+       * avoided by a small finite spread according to a single particles
+       * 'nucleus'. The proper solution will be to introduce parallel
+       * ensembles. */
       set_nuclear_radius(testparticles_ == 1
                              ? 0.
                              : 1. - std::exp(-(testparticles_ - 1.) * 0.1));
