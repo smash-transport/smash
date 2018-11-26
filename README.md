@@ -8,18 +8,18 @@ Please see [Phys. Rev. C 94, 054905
 if you are using SMASH.
 
 See [CONTRIBUTING](CONTRIBUTING.md) for development hints. A complete User Guide
-can be found [here](https://theory.gsi.de/~smash/userguide/1.5rc). For a more
+can be found [here](https://theory.gsi.de/~smash/userguide/1.5/). For a more
 detailed development documentation, see
-[here](http://theory.gsi.de/~smash/doc/1.5rc/).
+[here](http://theory.gsi.de/~smash/doc/1.5/).
 
 
-If Pythia is used, please cite the following references: 
-T. Sjöstrand, S. Mrenna and P. Skands, 
+If Pythia is used, please cite the following references:
+T. Sjöstrand, S. Mrenna and P. Skands,
 [JHEP05 (2006) 026](https://arxiv.org/abs/hep-ph/0603175),
-[Comput. Phys. Comm. 178 (2008)](https://arxiv.org/abs/0710.3820)
+[Comput. Phys. Comm. 178 (2008)](https://arxiv.org/abs/0710.3820).
 
 
-Report issues at https://github.com/smash-transport/smash or contact us by email
+Report issues at https://github.com/smash-transport/smash/issues or contact us by email
 at elfner@th.physik.uni-frankfurt.de.
 
 ## How to Build SMASH
