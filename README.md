@@ -1,8 +1,5 @@
 # SMASH
 
-[![Build
-Status](https://travis-ci.com/smash-transport/smash-devel.svg?token=6MyxHigvN4vzHpS29fsG&branch=master)](https://travis-ci.com/smash-transport/smash-devel)
-
 SMASH (Simulating Many Accelerated Strongly-interacting Hadrons) is a
 relativistic hadronic transport approach for the dynamical description of heavy
 ion reactions.
