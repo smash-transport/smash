@@ -19,7 +19,7 @@ T. Sjöstrand, S. Mrenna and P. Skands,
 [Comput. Phys. Comm. 178 (2008)](https://arxiv.org/abs/0710.3820).
 
 
-Report issues at https://github.com/smash-transport/smash or contact us by email
+Report issues at https://github.com/smash-transport/smash/issues or contact us by email
 at elfner@th.physik.uni-frankfurt.de.
 
 ## How to Build SMASH

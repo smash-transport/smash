@@ -4,7 +4,7 @@ If you are reading this, it is probable that you are going to contribute to
 SMASH. First of all, we welcome your interest and thank you for your work.
 Hopefully, you find what you need in the following. Otherwise feel free to
 contact the development team by reporting issues at
-https://github.com/smash-transport/smash or contact us by email at elfner@th.physik.uni-frankfurt.de.
+https://github.com/smash-transport/smash/issues or contact us by email at elfner@th.physik.uni-frankfurt.de.
 
 Note that any contributions must be licensed under the same terms as SMASH, see
 [LICENSE](LICENSE).
@@ -164,7 +164,7 @@ It is the same as installing cpplint.
 
 We use [doxygen](http://doxygen.org) for generating documentation from our code.
 The online version of the code documentation is found
-[here](https://http://theory.gsi.de/~smash/doc/1.5/).
+[here](https://theory.gsi.de/~smash/doc/1.5/).
 
 
 ### How to Build Docs with doxygen Yourself
@@ -302,7 +302,7 @@ automatically translate `\iref{XXX}` into a link to the paper on Inspire.
 
 After adding a new reference, you should run the script `doc/get_bibtex.sh`,
 which will update the file
-[smash.bib](https://fias.uni-frankfurt.de/pm/projects/smash/repository/revisions/master/entry/doc/smash.bib)
+"/doc/smash.bib"
 by fetching the BibTex entries of all `iref` references from Inspire.
 
 
@@ -339,14 +339,8 @@ The markdown documents included in the repository follow the Markdown dialect of
 ## Coding Rules
 
 * [Google Naming & Formatting
-Rules](https://fias.uni-frankfurt.de/~smash/extra/code_guidelines/cppnaming.xml) -
+Rules](https://theory.gsi.de/~smash/extra/code_guidelines/cppnaming.xml) -
   The rules enforce consistent coding style throughout our code base.
-
-It can be very instructive to study the [CERT Coding
-Standards](https://www.securecoding.cert.org/confluence/display/seccode/CERT+Coding+Standards)
-as well. Secure coding is not as important for SMASH as for most other projects.
-However, secure coding basically is a strategy for avoiding program errors, and
-as such it is interesting for every C++ project.
 
 Our Naming & Formatting Rules follow the Google Styleguide. We keep a copy of
 the relevant sections to be able to make small adjustments and hide the C++
