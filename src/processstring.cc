@@ -201,7 +201,8 @@ int StringProcess::append_final_state(ParticleList &intermediate_particles,
        * and then into the lab frame */
       fragment_position = fragment_position.LorentzBoost(-vstring);
       fragment_position = fragment_position.LorentzBoost(-vcomAB_);
-      intermediate_particles[i].set_formation_time(
+      intermediate_particles[i].set_slow_formation_times(
+          time_collision_,
           soft_t_form_ * fragment_position.x0() + time_collision_);
     } else {
       ThreeVector v_calc = momentum.LorentzBoost(-vcomAB_).velocity();
