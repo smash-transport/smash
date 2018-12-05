@@ -187,6 +187,9 @@ int StringProcess::append_final_state(ParticleList &intermediate_particles,
   /* compute the formation times of hadrons
    * from the lightcone coordinates of q-qbar formation vertices. */
   for (int i = 0; i < nfrag; i++) {
+    FourVector p = intermediate_particles[i].momentum();
+    ThreeVector transverse_velocity =
+        (p.threevec() - (p.threevec() * evecLong) * evecLong) / p.x0();
     // boost 4-momentum into the center of mass frame
     FourVector momentum =
         intermediate_particles[i].momentum().LorentzBoost(-vstring);
@@ -196,7 +199,8 @@ int StringProcess::append_final_state(ParticleList &intermediate_particles,
       // set the formation time and position in the rest frame of string
       double t_prod = (xvertex_pos[i] + xvertex_neg[i + 1]) / sqrt2_;
       FourVector fragment_position = FourVector(
-          t_prod, evecLong * (xvertex_pos[i] - xvertex_neg[i + 1]) / sqrt2_);
+          t_prod, evecLong * (xvertex_pos[i] - xvertex_neg[i + 1]) / sqrt2_ +
+                      transverse_velocity * t_prod);
       /* boost formation vertex into the center of mass frame
        * and then into the lab frame */
       fragment_position = fragment_position.LorentzBoost(-vstring);
