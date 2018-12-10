@@ -411,10 +411,13 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * undergone. The possible process types are listed in \subpage process_type.
  * \li \key t_last_coll: time of the particle's last interaction (except wall
  * crossings)
- * \li \key pdg_mother1: PDG code of the 1st mother particle
+ * \li \key pdg_mother1: PDG code of the 1st mother particle (0 in case the
+ * particle is sampled in a thermal bubble. It is not updated by elastic
+ * scatterings.)
  * \li \key pdg_mother2: PDG code of the 2nd mother particle (0 in case the
- * particle results from the decay of a resonance, then \key pdg_mother1 is
- * the PDG code of this resonance)
+ * particle results from the decay of a resonance or the appearance of a
+ * thermal bubble. In the former case, \key pdg_mother1 is the PDG code of this
+ * resonance. It is not updated by elastic scatterings.)
  *
  * The mother particles are also set in case of an elastic scattering process.
  *
