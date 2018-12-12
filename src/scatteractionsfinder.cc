@@ -50,9 +50,6 @@ namespace smash {
  * \n \li \key true - String excitation is enabled\n \li \key false - String
  * excitation is disabled
  *
- * \key String_Formation_Time (double, optional, default = 1.0): \n
- * Parameter for formation time in string fragmentation, in fm/c.
- *
  * To further configure Pauli blocking and the string parameters, see \n
  * \li \subpage pauliblocker
  * \li \subpage string_parameters
@@ -111,17 +108,21 @@ namespace smash {
  * \key Leading_Frag_Width (double, optional, default = 0.6) \n
  * Width of Gaussian used as fragmentation function for leading hadrons.
  *
- * \key String_Sigma_T (double, optional, default = 0.5)
+ * \key String_Sigma_T (double, optional, default = 0.5) \n
  * Standard deviation in Gaussian for transverse momentum distributed to
  * string fragments during fragmentation.
  *
  * \key Form_Time_Factor (double, optional, default = 1.0) \n
  * Factor to be multiplied with the formation time of string fragments from
  * the soft string routine.
+ *
  * \key Power_Particle_Formation (double, optional, default = -1.0) \n
  * If positive, the power with which the cross section scaling factor of
  * string fragments grows in time until it reaches 1. If negative, the scaling
  * factor will be constant and jump to 1 once the particle forms.
+ *
+ * \key Formation_Time (double, optional, default = 1.0): \n
+ * Parameter for formation time in string fragmentation, in fm/c.
  *
  * \key Use_Yoyo_Model (bool, optional, default = true)
  * Calculate the string fragments' formation times from the yoyo-model if

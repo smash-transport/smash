@@ -82,6 +82,17 @@ namespace smash {
  * t x y z mass p0 px py pz pdg ID charge ncoll form_time xsecfac
  * proc_id_origin proc_type_origin time_last_coll pdg_mother1 pdg_mother2
  * </div></div>
+ * \li \key proc_id_origin, \key proc_type_orgin record the id and type of
+ * the last reaction that the particle has experienced.
+ * \li \key time_last_coll records the time of the particle's last interaction
+ * (except wall crossing), from which we can calculate the position of this
+ * particle at kinetic freeze-out.
+ * \li \key pdg_mother1, \key pdg_mother2 record the pdg numbers of the
+ * incoming particles of the reaction where this particle is produced. If the
+ * particle is produced in a resonance decay, then pdg_mother2 is set equal
+ * to 0. If it is produced in a thermal bubble, then both the pdg_mother1 and
+ * pdg_mother2 are set equal to zero. Both the pdg numbers are not affected
+ * by elastic scatterings.
  *
  * **Event end line**
  * \code

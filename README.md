@@ -184,7 +184,7 @@ All command line options can be viewed with
 
     ./smash -h
 
-To run SMASH completely silently for production runs, we recommend to pipe
+To run SMASH completely silently for production runs, we recommend to redirect
 stdout to /dev/null, warnings and error messages will still be displayed.
 
     ./smash > /dev/null
