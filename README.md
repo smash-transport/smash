@@ -8,9 +8,9 @@ Please see [Phys. Rev. C 94, 054905
 if you are using SMASH.
 
 See [CONTRIBUTING](CONTRIBUTING.md) for development hints. A complete User Guide
-can be found [here](https://theory.gsi.de/~smash/userguide/1.5/). For a more
+can be found [here](https://theory.gsi.de/~smash/userguide/current/). For a more
 detailed development documentation, see
-[here](http://theory.gsi.de/~smash/doc/1.5/).
+[here](http://theory.gsi.de/~smash/doc/current/).
 
 
 If Pythia is used, please cite the following references:
