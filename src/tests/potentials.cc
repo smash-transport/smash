@@ -122,8 +122,8 @@ TEST(propagation_in_test_potential) {
    * from conservation laws.
    * The other gives rise to a constant magnetic field along z-axis.
    * A particle is expected to do a circular motion with a constant
-   * speed in the magnetic field. Its final speed is compared with
-   * the initial value.*/
+   * speed in the magnetic field. Its final velocity after one period is
+   * compared with the initial one.*/
 
   // Create a dummy potential
   class Dummy_Pot : public Potentials {
@@ -166,7 +166,7 @@ TEST(propagation_in_test_potential) {
   /* Create two particles: one flies in the pure electrical field, while
    * the other flies in the pure magnetical field. */
   ParticleData part1 = create_proton();
-  part1.set_4momentum(p_mass, ThreeVector(2.0, -1.0, 1.0));
+  part1.set_4momentum(p_mass, 2.0, -1.0, 1.0);
   part1.set_4position(FourVector(0.0, -20 * d, 0.0, 0.0));
   Particles P1;
   P1.insert(part1);
@@ -175,7 +175,7 @@ TEST(propagation_in_test_potential) {
   // This particle is expected to do circular motion with a constant speed.
   ParticleData part2 = create_proton();
   // The speed of the particle is 0.6
-  part2.set_4momentum(4., ThreeVector(3., 0., 0.));
+  part2.set_4momentum(4., 3., 0., 0.);
   part2.set_4position(FourVector(0.0, 0.0, 2.0, 0.0));
   Particles P2;
   P2.insert(part2);
@@ -183,7 +183,7 @@ TEST(propagation_in_test_potential) {
 
   /* Propagate the first particle, until particle1 is at x>>d,
    * where d is parameter of potential */
-  const double timestep = param.labclock.timestep_duration();
+  const double timestep = 0.01;
   double time_to = 0.0;
   while (P1.front().position().x1() < 20 * d) {
     time_to += timestep;
@@ -191,10 +191,10 @@ TEST(propagation_in_test_potential) {
     update_momenta(&P1, dt1, *pot1, nullptr, nullptr);
   }
 
-  // Propagate the second particle for two periods.
-  const double period = hbarc * twopi * 4. / B0;
+  // Propagate the second particle for one period.
+  const double period = twopi * 5. / B0;
   time_to = 0.0;
-  while (P2.front().position().x0() < 2. * period) {
+  while (P2.front().position().x0() < period) {
     time_to += timestep;
     const double dt2 = propagate_straight_line(&P2, time_to, {});
     update_momenta(&P2, dt2, *pot2, nullptr, nullptr);
@@ -206,19 +206,28 @@ TEST(propagation_in_test_potential) {
       pm.x0() + U0, std::sqrt(pm.x1() * pm.x1() + 2 * pm.x0() * U0 + U0 * U0),
       pm.x2(), pm.x3());
 
-  COMPARE_ABSOLUTE_ERROR(expected_p.x0(), P1.front().momentum().x0(), 1.e-4)
+  COMPARE_ABSOLUTE_ERROR(expected_p.x0(), P1.front().momentum().x0(), 1.e-6)
       << "Expected energy " << expected_p.x0() << ", obtained "
       << P1.front().momentum().x0();
-  COMPARE_ABSOLUTE_ERROR(expected_p.x1(), P1.front().momentum().x1(), 1.e-4)
+  COMPARE_ABSOLUTE_ERROR(expected_p.x1(), P1.front().momentum().x1(), 1.e-6)
       << "Expected px " << expected_p.x1() << ", obtained "
       << P1.front().momentum().x1();
   // y and z components did not have to change at all, so check is precise
   COMPARE(expected_p.x2(), P1.front().momentum().x2());
   COMPARE(expected_p.x3(), P1.front().momentum().x3());
 
-  /* compare the final speed of the second particle with its initial value,
-   * the test is passed if the error is within 1 percent. */
-  COMPARE_RELATIVE_ERROR(P2.front().momentum().velocity().abs(), 0.6, 0.01)
-      << "Expected speed " << 0.6 << ", obtained "
-      << P2.front().momentum().velocity().abs();
+  /* compare the final velocity of the second particle, component by component,
+   * with the initial values,
+   * the test is passed if the errors are within 0.003, which is 0.5 percent of
+   * the initial speed. */
+
+  COMPARE_ABSOLUTE_ERROR(P2.front().momentum().velocity().x1(), 0.6, 0.003)
+      << "Expected x-component of velocity " << 0.6 << ", obtained "
+      << P2.front().momentum().velocity().x1();
+  COMPARE_ABSOLUTE_ERROR(P2.front().momentum().velocity().x2(), 0.0, 0.003)
+      << "Expected y-component of velocity " << 0 << ", obtained "
+      << P2.front().momentum().velocity().x2();
+  COMPARE_ABSOLUTE_ERROR(P2.front().momentum().velocity().x3(), 0.0, 0.003)
+      << "Expected z-component of velocity " << 0 << ", obtained "
+      << P2.front().momentum().velocity().x3();
 }
