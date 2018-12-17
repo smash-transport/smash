@@ -527,12 +527,12 @@ int main(int argc, char *argv[]) {
       double mb = (args[3] == "") ? b.mass() : std::stod(args[3]);
       if (a.is_stable() && args[2] != "") {
         ma = a.mass();
-        std::cout << "Warning: pole mass is used for stable particle "
+        std::cerr << "Warning: pole mass is used for stable particle "
                   << a.name() << " instead of " << args[2] << std::endl;
       }
       if (b.is_stable() && args[3] != "") {
         mb = b.mass();
-        std::cout << "Warning: pole mass is used for stable particle "
+        std::cerr << "Warning: pole mass is used for stable particle "
                   << b.name() << " instead of " << args[3] << std::endl;
       }
       const size_t plab_size = n_arg <= 4 ? 0 : n_arg - 4;
