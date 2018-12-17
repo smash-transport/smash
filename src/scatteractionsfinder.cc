@@ -738,16 +738,26 @@ static void deduplicate(std::vector<FinalStateCrossSection>& final_state_xs) {
 void ScatterActionsFinder::dump_cross_sections(const ParticleType& a,
                                                const ParticleType& b,
                                                double m_a, double m_b,
-                                               bool final_state) const {
+                                               bool final_state,
+                                               const std::vector<double>& plab
+                                               ) const {
   typedef std::vector<std::pair<double, double>> xs_saver;
   std::map<std::string, xs_saver> xs_dump;
   std::map<std::string, double> outgoing_total_mass;
 
   ParticleData a_data(a), b_data(b);
-  constexpr int n_momentum_points = 200;
+  int n_momentum_points = 200;
   constexpr double momentum_step = 0.02;
-  for (int i = 1; i < n_momentum_points + 1; i++) {
-    const double momentum = momentum_step * i;
+  if (plab.size() > 0) {
+    n_momentum_points = plab.size();
+  }
+  for (int i = 0; i < n_momentum_points; i++) {
+    double momentum;
+    if (plab.size() > 0) {
+      momentum = plab.at(i);
+    } else {
+      momentum = momentum_step * (i + 1);
+    }
     a_data.set_4momentum(m_a, momentum, 0.0, 0.0);
     b_data.set_4momentum(m_b, -momentum, 0.0, 0.0);
     const double sqrts = (a_data.momentum() + b_data.momentum()).abs();
@@ -833,8 +843,13 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType& a,
   std::cout << std::endl;
 
   // Print out all partial cross-sections in mb
-  for (int i = 1; i < n_momentum_points; i++) {
-    const double momentum = momentum_step * i;
+  for (int i = 0; i < n_momentum_points; i++) {
+    double momentum;
+    if (plab.size() > 0) {
+      momentum = plab.at(i);
+    } else {
+      momentum = momentum_step * (i + 1);
+    }
     a_data.set_4momentum(m_a, momentum, 0.0, 0.0);
     b_data.set_4momentum(m_b, -momentum, 0.0, 0.0);
     const double sqrts = (a_data.momentum() + b_data.momentum()).abs();
