@@ -543,7 +543,7 @@ int main(int argc, char *argv[]) {
       }
       auto scat_finder = actions_finder_for_dump(configuration);
       scat_finder.dump_cross_sections(a, b, ma, mb, final_state_cross_sections,
-        plab);
+                                      plab);
       std::exit(EXIT_SUCCESS);
     }
     if (modus) {

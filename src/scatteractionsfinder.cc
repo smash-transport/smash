@@ -735,12 +735,9 @@ static void deduplicate(std::vector<FinalStateCrossSection>& final_state_xs) {
   }
 }
 
-void ScatterActionsFinder::dump_cross_sections(const ParticleType& a,
-                                               const ParticleType& b,
-                                               double m_a, double m_b,
-                                               bool final_state,
-                                               const std::vector<double>& plab
-                                               ) const {
+void ScatterActionsFinder::dump_cross_sections(
+    const ParticleType& a, const ParticleType& b, double m_a, double m_b,
+    bool final_state, const std::vector<double>& plab) const {
   typedef std::vector<std::pair<double, double>> xs_saver;
   std::map<std::string, xs_saver> xs_dump;
   std::map<std::string, double> outgoing_total_mass;
