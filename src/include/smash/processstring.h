@@ -123,6 +123,8 @@ class StringProcess {
    * Whether the formation time should depend on the mass of the fragment.
    *
    * \f$ \tau = \sqrt{2}\frac{m}{\kappa} \f$
+   *
+   * From \iref{Andersson:1983ia} eq. 2.45
    **/
   bool mass_dependent_formation_times_;
   /**
@@ -184,7 +186,7 @@ class StringProcess {
    * \param[in] string_sigma_T transverse momentum spread (StringPT:sigma)
    *        in fragmentation [GeV]
    * \param[in] factor_t_form to be multiplied to soft string formation times
-   * \param[in] mass_dependent_formation_times Whether The formation times of
+   * \param[in] mass_dependent_formation_times Whether the formation times of
    *            string fragments should depend on their mass.
    * \param[in] prob_proton_to_d_uu Probability of a nucleon to be split into
    *            the quark it contains once and a diquark another flavour.
