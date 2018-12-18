@@ -120,11 +120,15 @@ class StringProcess {
   /// time of collision in the computational frame [fm]
   double time_collision_;
   /**
-   * Whether the formation time should depend on the mass of the fragment.
+   * Whether the formation time should depend on the mass of the fragment
+   * according to \iref{Andersson:1983ia} eq. 2.45:
    *
    * \f$ \tau = \sqrt{2}\frac{m}{\kappa} \f$
    *
-   * From \iref{Andersson:1983ia} eq. 2.45
+   * The formation time and position is not calculated directly using the yoyo
+   * model because the spacetime rapidity where a string fragment forms is not
+   * equal to the fragment's momentum space rapidity. This cannot be easily
+   * combined with possible interactions before the formation time.
    **/
   bool mass_dependent_formation_times_;
   /**
