@@ -751,7 +751,7 @@ void ScatterActionsFinder::dump_cross_sections(
   for (int i = 0; i < n_momentum_points; i++) {
     double momentum;
     if (plab.size() > 0) {
-      momentum = plab.at(i);
+      momentum = pCM_from_s(s_from_plab(plab.at(i), m_a, m_b), m_a, m_b);
     } else {
       momentum = momentum_step * (i + 1);
     }
@@ -843,7 +843,7 @@ void ScatterActionsFinder::dump_cross_sections(
   for (int i = 0; i < n_momentum_points; i++) {
     double momentum;
     if (plab.size() > 0) {
-      momentum = plab.at(i);
+      momentum = pCM_from_s(s_from_plab(plab.at(i), m_a, m_b), m_a, m_b);
     } else {
       momentum = momentum_step * (i + 1);
     }
