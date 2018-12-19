@@ -676,7 +676,7 @@ static std::string make_decay_name(const std::string& res_name,
  *
  * \param node Starting node.
  */
-static void add_decays(Node& node) {
+static void add_decays(Node& node, double sqrts) {
   // If there is more than one unstable particle in the current state, then
   // there will be redundant paths in the decay tree, corresponding to
   // reorderings of the decays. To avoid double counting, we normalize by the
@@ -688,22 +688,36 @@ static void add_decays(Node& node) {
   // we never have more than two redundant paths, so it probably does not matter
   // much.
   uint32_t n_unstable = 0;
+  double sqrts_minus_masses = sqrts;
   for (const ParticleTypePtr ptype : node.state_) {
     if (!ptype->is_stable()) {
       n_unstable += 1;
     }
+    sqrts_minus_masses -= ptype->mass();
   }
   const double norm =
       n_unstable != 0 ? 1. / static_cast<double>(n_unstable) : 1.;
 
   for (const ParticleTypePtr ptype : node.state_) {
     if (!ptype->is_stable()) {
+      const double sqrts_decay = sqrts_minus_masses + ptype->mass();
       for (const auto& decay : ptype->decay_modes().decay_mode_list()) {
+        // Make sure to skip kinematically impossible decays.
+        // In principle, we would have to integrate over the mass of the
+        // resonance, but as an approximation we just assume it at its pole.
+        double final_state_mass = 0.;
+        for (const auto& p : decay->particle_types()) {
+          final_state_mass += p->mass();
+        }
+        if (final_state_mass > sqrts_decay) {
+          continue;
+        }
+
         ParticleTypePtrList parts;
         const auto name = make_decay_name(ptype->name(), decay, parts);
         auto& new_node = node.add_action(name, norm * decay->weight(), {ptype},
                                          std::move(parts));
-        add_decays(new_node);
+        add_decays(new_node, sqrts_decay);
       }
     }
   }
@@ -800,7 +814,7 @@ void ScatterActionsFinder::dump_cross_sections(
         auto& process_node =
             tree.add_action(description, xs, std::move(initial_particles),
                             std::move(final_particles));
-        decaytree::add_decays(process_node);
+        decaytree::add_decays(process_node, sqrts);
       }
     }
     xs_dump["total"].push_back(std::make_pair(sqrts, act->cross_section()));
