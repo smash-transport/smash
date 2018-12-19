@@ -811,6 +811,13 @@ void ScatterActionsFinder::dump_cross_sections(
       auto final_state_xs = tree.final_state_cross_sections();
       deduplicate(final_state_xs);
       for (const auto& p : final_state_xs) {
+        // Don't print empty columns.
+        //
+        // FIXME(steinberg): The better fix would be to not have them in the
+        // first place.
+        if (p.name_ == "") {
+          continue;
+        }
         outgoing_total_mass[p.name_] = p.mass_;
         xs_dump[p.name_].push_back(std::make_pair(sqrts, p.cross_section_));
       }
