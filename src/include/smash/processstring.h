@@ -136,8 +136,6 @@ class StringProcess {
    * once and a diquark it has twice.
    */
   double prob_proton_to_d_uu_;
-  /// square root of 2 (\f$\sqrt{2}\f$)
-  double sqrt2_;
 
   /// Remembers if Pythia is initialized or not
   bool pythia_parton_initialized_ = false;

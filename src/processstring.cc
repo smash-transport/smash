@@ -61,8 +61,6 @@ StringProcess::StringProcess(
   event_intermediate_.init("intermediate partons",
                            &pythia_hadron_->particleData);
 
-  sqrt2_ = std::sqrt(2.);
-
   for (int imu = 0; imu < 3; imu++) {
     evecBasisAB_[imu] = ThreeVector(0., 0., 0.);
   }
@@ -241,8 +239,8 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
     return false;
   }
   // sample the transverse momentum transfer
-  QTrx = random::normal(0., sigma_qperp_ / sqrt2_);
-  QTry = random::normal(0., sigma_qperp_ / sqrt2_);
+  QTrx = random::normal(0., sigma_qperp_ * M_SQRT1_2);
+  QTry = random::normal(0., sigma_qperp_ * M_SQRT1_2);
   QTrn = std::sqrt(QTrx * QTrx + QTry * QTry);
   /* sample the string mass and
    * evaluate the three-momenta of hadron and string. */
@@ -394,22 +392,24 @@ bool StringProcess::next_DDiff() {
   const double xfracB =
       random::beta_a0(xmin_gluon_fraction, pow_fgluon_beta_ + 1.);
   // sample the transverse momentum transfer
-  const double QTrx = random::normal(0., sigma_qperp_ / sqrt2_);
-  const double QTry = random::normal(0., sigma_qperp_ / sqrt2_);
+  const double QTrx = random::normal(0., sigma_qperp_ * M_SQRT1_2);
+  const double QTry = random::normal(0., sigma_qperp_ * M_SQRT1_2);
   const double QTrn = std::sqrt(QTrx * QTrx + QTry * QTry);
   // evaluate the lightcone momentum transfer
   const double QPos = -QTrn * QTrn / (2. * xfracB * PNegB_);
   const double QNeg = QTrn * QTrn / (2. * xfracA * PPosA_);
   // compute four-momentum of string 1
-  threeMomentum = evecBasisAB_[0] * (PPosA_ + QPos - PNegA_ - QNeg) / sqrt2_ +
-                  evecBasisAB_[1] * QTrx + evecBasisAB_[2] * QTry;
+  threeMomentum =
+      evecBasisAB_[0] * (PPosA_ + QPos - PNegA_ - QNeg) * M_SQRT1_2 +
+      evecBasisAB_[1] * QTrx + evecBasisAB_[2] * QTry;
   pstr_com[0] =
-      FourVector((PPosA_ + QPos + PNegA_ + QNeg) / sqrt2_, threeMomentum);
+      FourVector((PPosA_ + QPos + PNegA_ + QNeg) * M_SQRT1_2, threeMomentum);
   // compute four-momentum of string 2
-  threeMomentum = evecBasisAB_[0] * (PPosB_ - QPos - PNegB_ + QNeg) / sqrt2_ -
-                  evecBasisAB_[1] * QTrx - evecBasisAB_[2] * QTry;
+  threeMomentum =
+      evecBasisAB_[0] * (PPosB_ - QPos - PNegB_ + QNeg) * M_SQRT1_2 -
+      evecBasisAB_[1] * QTrx - evecBasisAB_[2] * QTry;
   pstr_com[1] =
-      FourVector((PPosB_ - QPos + PNegB_ - QNeg) / sqrt2_, threeMomentum);
+      FourVector((PPosB_ - QPos + PNegB_ - QNeg) * M_SQRT1_2, threeMomentum);
 
   const bool found_masses =
       set_mass_and_direction_2strings(quarks, pstr_com, m_str, evec_str);
@@ -467,8 +467,8 @@ bool StringProcess::next_NDiffSoft() {
   const double xfracA = random::beta(pow_fquark_alpha_, pow_fquark_beta_);
   const double xfracB = random::beta(pow_fquark_alpha_, pow_fquark_beta_);
   // sample the transverse momentum transfer
-  const double QTrx = random::normal(0., sigma_qperp_ / sqrt2_);
-  const double QTry = random::normal(0., sigma_qperp_ / sqrt2_);
+  const double QTrx = random::normal(0., sigma_qperp_ * M_SQRT1_2);
+  const double QTry = random::normal(0., sigma_qperp_ * M_SQRT1_2);
   const double QTrn = std::sqrt(QTrx * QTrx + QTry * QTry);
   // evaluate the lightcone momentum transfer
   const double QPos = -QTrn * QTrn / (2. * xfracB * PNegB_);
@@ -477,16 +477,17 @@ bool StringProcess::next_NDiffSoft() {
   const double dPNeg = xfracB * PNegB_ - QNeg;
   // compute four-momentum of string 1
   ThreeVector threeMomentum =
-      evecBasisAB_[0] * (PPosA_ + dPPos - PNegA_ - dPNeg) / sqrt2_ +
+      evecBasisAB_[0] * (PPosA_ + dPPos - PNegA_ - dPNeg) * M_SQRT1_2 +
       evecBasisAB_[1] * QTrx + evecBasisAB_[2] * QTry;
   pstr_com[0] =
-      FourVector((PPosA_ + dPPos + PNegA_ + dPNeg) / sqrt2_, threeMomentum);
+      FourVector((PPosA_ + dPPos + PNegA_ + dPNeg) * M_SQRT1_2, threeMomentum);
   m_str[0] = pstr_com[0].sqr();
   // compute four-momentum of string 2
-  threeMomentum = evecBasisAB_[0] * (PPosB_ - dPPos - PNegB_ + dPNeg) / sqrt2_ -
-                  evecBasisAB_[1] * QTrx - evecBasisAB_[2] * QTry;
+  threeMomentum =
+      evecBasisAB_[0] * (PPosB_ - dPPos - PNegB_ + dPNeg) * M_SQRT1_2 -
+      evecBasisAB_[1] * QTrx - evecBasisAB_[2] * QTry;
   pstr_com[1] =
-      FourVector((PPosB_ - dPPos + PNegB_ - dPNeg) / sqrt2_, threeMomentum);
+      FourVector((PPosB_ - dPPos + PNegB_ - dPNeg) * M_SQRT1_2, threeMomentum);
 
   const bool found_masses =
       set_mass_and_direction_2strings(quarks, pstr_com, m_str, evec_str);
@@ -980,8 +981,8 @@ bool StringProcess::splitting_gluon_qqbar(
         // transverse momentum scale of string fragmentation
         const double sigma_qt_frag = pythia_hadron_->parm("StringPT:sigma");
         // sample relative transverse momentum between quark and antiquark
-        const double qx = random::normal(0., sigma_qt_frag / sqrt2_);
-        const double qy = random::normal(0., sigma_qt_frag / sqrt2_);
+        const double qx = random::normal(0., sigma_qt_frag * M_SQRT1_2);
+        const double qy = random::normal(0., sigma_qt_frag * M_SQRT1_2);
         // setup kinematics
         for (int isign = 0; isign < 2; isign++) {
           /* As the simplest assumption, the three momentum of gluon
@@ -1649,10 +1650,10 @@ void StringProcess::make_orthonormal_basis(
 }
 
 void StringProcess::compute_incoming_lightcone_momenta() {
-  PPosA_ = (pcom_[0].x0() + evecBasisAB_[0] * pcom_[0].threevec()) / sqrt2_;
-  PNegA_ = (pcom_[0].x0() - evecBasisAB_[0] * pcom_[0].threevec()) / sqrt2_;
-  PPosB_ = (pcom_[1].x0() + evecBasisAB_[0] * pcom_[1].threevec()) / sqrt2_;
-  PNegB_ = (pcom_[1].x0() - evecBasisAB_[0] * pcom_[1].threevec()) / sqrt2_;
+  PPosA_ = (pcom_[0].x0() + evecBasisAB_[0] * pcom_[0].threevec()) * M_SQRT1_2;
+  PNegA_ = (pcom_[0].x0() - evecBasisAB_[0] * pcom_[0].threevec()) * M_SQRT1_2;
+  PPosB_ = (pcom_[1].x0() + evecBasisAB_[0] * pcom_[1].threevec()) * M_SQRT1_2;
+  PNegB_ = (pcom_[1].x0() - evecBasisAB_[0] * pcom_[1].threevec()) * M_SQRT1_2;
 }
 
 void StringProcess::quarks_from_diquark(int diquark, int &q1, int &q2,
@@ -1893,8 +1894,8 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
       const double mass_frag = pythia_hadron_->particleData.mSel(pdgid_frag);
 
       // Sample transverse momentum carried by baryon (antibaryon).
-      QTrx = random::normal(0., sigma_qt_frag / sqrt2_);
-      QTry = random::normal(0., sigma_qt_frag / sqrt2_);
+      QTrx = random::normal(0., sigma_qt_frag * M_SQRT1_2);
+      QTry = random::normal(0., sigma_qt_frag * M_SQRT1_2);
       log.debug("Transverse momentum (", QTrx, ", ", QTry,
                 ") GeV selected for the leading baryon.");
       QTrn = std::sqrt(QTrx * QTrx + QTry * QTry);
@@ -1933,10 +1934,10 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
       /* Determine kinematics of the fragmented baryon (antibaryon) and
        * remaining (mesonic) string.
        * It begins with the lightcone momentum, p^+ (ppos) and p^- (pneg). */
-      const double ppos_frag = xfrac * mString / sqrt2_;
+      const double ppos_frag = xfrac * mString * M_SQRT1_2;
       const double pneg_frag = 0.5 * mTrn_frag * mTrn_frag / ppos_frag;
-      ppos_string_new = mString / sqrt2_ - ppos_frag;
-      pneg_string_new = mString / sqrt2_ - pneg_frag;
+      ppos_string_new = mString * M_SQRT1_2 - ppos_frag;
+      pneg_string_new = mString * M_SQRT1_2 - pneg_frag;
       mTrn_string_new =
           std::sqrt(std::max(0., 2. * ppos_string_new * pneg_string_new));
 
@@ -1967,9 +1968,10 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
       if (mTrn_string_new > m_trans[0] + m_trans[1]) {
         found_leading_baryon = true;
 
-        FourVector mom_frag((ppos_frag + pneg_frag) / sqrt2_,
-                            evec_basis[0] * (ppos_frag - pneg_frag) / sqrt2_ +
-                                evec_basis[1] * QTrx + evec_basis[2] * QTry);
+        FourVector mom_frag(
+            (ppos_frag + pneg_frag) * M_SQRT1_2,
+            evec_basis[0] * (ppos_frag - pneg_frag) * M_SQRT1_2 +
+                evec_basis[1] * QTrx + evec_basis[2] * QTry);
         log.debug("appending the leading baryon ", pdgid_frag,
                   " to the intermediate particle list.");
         /* If the remaining string has enough transverse mass,
@@ -2028,15 +2030,16 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
     if (bstring > 0) {  // in the case of baryonic string
       /* Quark is coming from the original string
        * and therefore has zero transverse momentum. */
-      three_mom = evec_basis[0] * (ppos_parton[0] - pneg_parton[0]) / sqrt2_;
+      three_mom = evec_basis[0] * (ppos_parton[0] - pneg_parton[0]) * M_SQRT1_2;
     } else {  // in the case of anti-baryonic string
       /* Quark is coming from the newly produced qqbar pair
        * and therefore has transverse momentum, which is opposite to
        * that of the fragmented (leading) baryon. */
-      three_mom = evec_basis[0] * (ppos_parton[0] - pneg_parton[0]) / sqrt2_ -
-                  evec_basis[1] * QTrx - evec_basis[2] * QTry;
+      three_mom =
+          evec_basis[0] * (ppos_parton[0] - pneg_parton[0]) * M_SQRT1_2 -
+          evec_basis[1] * QTrx - evec_basis[2] * QTry;
     }
-    pquark = set_Vec4((ppos_parton[0] + pneg_parton[0]) / sqrt2_, three_mom);
+    pquark = set_Vec4((ppos_parton[0] + pneg_parton[0]) * M_SQRT1_2, three_mom);
     pSum += pquark;
     pythia_hadron_->event.append(idqIn[0], status, color, anticolor, pquark,
                                  m_const[0]);
@@ -2048,14 +2051,15 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
       /* Antiquark is coming from the newly produced qqbar pair
        * and therefore has transverse momentum, which is opposite to
        * that of the fragmented (leading) antibaryon. */
-      three_mom = evec_basis[0] * (ppos_parton[1] - pneg_parton[1]) / sqrt2_ -
-                  evec_basis[1] * QTrx - evec_basis[2] * QTry;
+      three_mom =
+          evec_basis[0] * (ppos_parton[1] - pneg_parton[1]) * M_SQRT1_2 -
+          evec_basis[1] * QTrx - evec_basis[2] * QTry;
     } else {  // in the case of anti-baryonic string
       /* Antiquark is coming from the original string
        * and therefore has zero transverse momentum. */
-      three_mom = evec_basis[0] * (ppos_parton[1] - pneg_parton[1]) / sqrt2_;
+      three_mom = evec_basis[0] * (ppos_parton[1] - pneg_parton[1]) * M_SQRT1_2;
     }
-    pquark = set_Vec4((ppos_parton[1] + pneg_parton[1]) / sqrt2_, three_mom);
+    pquark = set_Vec4((ppos_parton[1] + pneg_parton[1]) * M_SQRT1_2, three_mom);
     pSum += pquark;
     pythia_hadron_->event.append(idqIn[1], status, color, anticolor, pquark,
                                  m_const[1]);
