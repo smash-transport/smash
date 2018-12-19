@@ -124,9 +124,10 @@ namespace smash {
  * \key Formation_Time (double, optional, default = 1.0): \n
  * Parameter for formation time in string fragmentation, in fm/c.
  *
- * \key Use_Yoyo_Model (bool, optional, default = true)
- * Calculate the string fragments' formation times from the yoyo-model if
- * enabled. Else constant proper time defined by Formation_Time is used.
+ * \key Mass_Dependent_Formation_Times (bool, optional, default = true)
+ * Whether the formation time of string fragments should depend on their mass.
+ * If it is set to true, the formation time is calculated as
+ * \f$ \tau = \sqrt{2}\frac{m}{\kappa} \f$.
  *
  * \key Prob_proton_to_d_uu (double, optional, default = 1/3)
  * Probability of splitting an (anti)nucleon into the quark it has only once
@@ -230,7 +231,7 @@ ScatterActionsFinder::ScatterActionsFinder(
         subconfig.take({"StringZ_A"}, 0.68), subconfig.take({"StringZ_B"}, 0.3),
         subconfig.take({"String_Sigma_T"}, 0.5),
         subconfig.take({"Form_Time_Factor"}, 1.0),
-        subconfig.take({"Use_Yoyo_Model"}, true),
+        subconfig.take({"Mass_Dependent_Formation_Times"}, true),
         subconfig.take({"Prob_proton_to_d_uu"}, 1. / 3.));
   }
 }

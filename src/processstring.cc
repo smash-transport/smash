@@ -16,15 +16,13 @@
 
 namespace smash {
 
-StringProcess::StringProcess(double string_tension, double time_formation,
-                             double gluon_beta, double gluon_pmin,
-                             double quark_alpha, double quark_beta,
-                             double strange_supp, double diquark_supp,
-                             double sigma_perp, double leading_frag_mean,
-                             double leading_frag_width, double stringz_a,
-                             double stringz_b, double string_sigma_T,
-                             double factor_t_form, bool use_yoyo_model,
-                             double prob_proton_to_d_uu)
+StringProcess::StringProcess(
+    double string_tension, double time_formation, double gluon_beta,
+    double gluon_pmin, double quark_alpha, double quark_beta,
+    double strange_supp, double diquark_supp, double sigma_perp,
+    double leading_frag_mean, double leading_frag_width, double stringz_a,
+    double stringz_b, double string_sigma_T, double factor_t_form,
+    bool mass_dependent_formation_times, double prob_proton_to_d_uu)
     : pmin_gluon_lightcone_(gluon_pmin),
       pow_fgluon_beta_(gluon_beta),
       pow_fquark_alpha_(quark_alpha),
@@ -37,7 +35,7 @@ StringProcess::StringProcess(double string_tension, double time_formation,
       time_formation_const_(time_formation),
       soft_t_form_(factor_t_form),
       time_collision_(0.),
-      use_yoyo_model_(use_yoyo_model),
+      mass_dependent_formation_times_(mass_dependent_formation_times),
       prob_proton_to_d_uu_(prob_proton_to_d_uu) {
   // setup and initialize pythia for hard string process
   pythia_parton_ = make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
@@ -138,15 +136,10 @@ int StringProcess::append_final_state(ParticleList &intermediate_particles,
                                       const ThreeVector &evecLong) {
   int nfrag = 0;
   int bstring = 0;
-  double p_pos_tot = 0.0, p_neg_tot = 0.0;
 
   for (ParticleData &data : intermediate_particles) {
     nfrag += 1;
     bstring += data.pdgcode().baryon_number();
-
-    const double pparallel = data.momentum().threevec() * evecLong;
-    p_pos_tot += (data.momentum().x0() + pparallel) / sqrt2_;
-    p_neg_tot += (data.momentum().x0() - pparallel) / sqrt2_;
   }
   assert(nfrag > 0);
 
@@ -155,53 +148,25 @@ int StringProcess::append_final_state(ParticleList &intermediate_particles,
   assign_all_scaling_factors(bstring, intermediate_particles, evecLong,
                              additional_xsec_supp_);
 
-  std::vector<double> xvertex_pos, xvertex_neg;
-  xvertex_pos.resize(nfrag + 1);
-  xvertex_neg.resize(nfrag + 1);
-  // x^{+} coordinates of the forward end
-  xvertex_pos[0] = p_pos_tot / kappa_tension_string_;
-  // x^{-} coordinates of the backward end
-  xvertex_neg[nfrag] = p_neg_tot / kappa_tension_string_;
-
-  for (int i = 0; i < nfrag; i++) {
-    const double pparallel =
-        intermediate_particles[i].momentum().threevec() * evecLong;
-
-    // recursively compute x^{+} coordinates of q-qbar formation vertex
-    xvertex_pos[i + 1] =
-        xvertex_pos[i] -
-        (intermediate_particles[i].momentum().x0() + pparallel) /
-            (kappa_tension_string_ * sqrt2_);
-
-    // recursively compute x^{-} coordinates of q-qbar formation vertex
-    const int ineg = nfrag - i - 1;
-    xvertex_neg[ineg] =
-        xvertex_neg[ineg + 1] -
-        (intermediate_particles[ineg].momentum().x0() - pparallel) /
-            (kappa_tension_string_ * sqrt2_);
-  }
-
   // Velocity three-vector to perform Lorentz boost.
   const ThreeVector vstring = uString.velocity();
 
-  /* compute the formation times of hadrons
-   * from the lightcone coordinates of q-qbar formation vertices. */
+  // compute the formation times of hadrons
   for (int i = 0; i < nfrag; i++) {
-    FourVector p = intermediate_particles[i].momentum();
-    ThreeVector transverse_velocity =
-        (p.threevec() - (p.threevec() * evecLong) * evecLong) / p.x0();
+    ThreeVector velocity = intermediate_particles[i].momentum().velocity();
+    double gamma = 1. / intermediate_particles[i].inverse_gamma();
     // boost 4-momentum into the center of mass frame
     FourVector momentum =
         intermediate_particles[i].momentum().LorentzBoost(-vstring);
     intermediate_particles[i].set_4momentum(momentum);
 
-    if (use_yoyo_model_) {
+    if (mass_dependent_formation_times_) {
       // set the formation time and position in the rest frame of string
-      double t_prod = (xvertex_pos[i] + xvertex_neg[i + 1]) / sqrt2_;
-      FourVector fragment_position = FourVector(
-          t_prod, evecLong * (xvertex_pos[i] - xvertex_neg[i + 1]) / sqrt2_ +
-                      transverse_velocity * t_prod);
-      /* boost formation vertex into the center of mass frame
+      double tau_prod = M_SQRT2 * intermediate_particles[i].effective_mass() /
+                        kappa_tension_string_;
+      double t_prod = tau_prod * gamma;
+      FourVector fragment_position = FourVector(t_prod, t_prod * velocity);
+      /* boost formation position into the center of mass frame
        * and then into the lab frame */
       fragment_position = fragment_position.LorentzBoost(-vstring);
       fragment_position = fragment_position.LorentzBoost(-vcomAB_);
