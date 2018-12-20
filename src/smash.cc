@@ -100,14 +100,19 @@ void usage(const int rc, const std::string &progname) {
    * <td>`--cross-sections <pdg1>,<pdg2>[,mass1,mass2[,plab1,...]]`
    * <td> Dumps all the partial cross-sections of pdg1 + pdg2 with
    *     masses mass1 and mass2. Masses are optional, default values are pole
-   *     masses. Optionally, the lab frame momenta in GeV can be specified.
+   *     masses. Optionally, the lab frame momenta (fixed target) in GeV can be
+   *     specified. (The value of plab depends on the order of the particles.
+   *     The first particle is considered to be the projectile, the second one
+   *     the target.)
    * <tr><td>`-f` <td>`--force`
    * <tr><td>`-S <pdg1>,<pdg2>[,mass1,mass2]`
    * <td>`--cross-sections-fs <pdg1>,<pdg2>[,mass1,mass2[,plab1,...]]`
    * <td> Dumps all final-state cross-sections of pdg1 + pdg2 with
    *     masses mass1 and mass2. Masses are optional, default values are pole
-   *     masses. Optionally, the lab frame momenta in GeV can be specified.
-   *     If strings are enabled, the results are non-deterministic for
+   *     masses. Optionally, the lab frame momenta (fixed target) in GeV can be
+   *     specified. (The value of plab depends on the order of the particles.
+   *     The first is considered to be the projectile, the second one the
+   *     target.) If strings are enabled, the results are non-deterministic for
    *     some final states.
    * <tr><td>`-f` <td>`--force`
    * <td>Forces overwriting files in the output directory. Normally, if you
