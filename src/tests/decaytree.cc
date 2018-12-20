@@ -52,20 +52,22 @@ TEST(decaytree_correctness) {
   ParticleTypePtrList initial_particles1 = {a, b}, initial_particles2 = {a, b},
                       initial_particles3 = {a, b}, final_particles1 = {rho0},
                       final_particles2 = {f2}, final_particles3 = {a, b};
+  const double sqrts = 3.;
+
   auto& process_node1 =
       tree.add_action(rho0->name(), 30.0, std::move(initial_particles1),
                       std::move(final_particles1));
-  decaytree::add_decays(process_node1);
+  decaytree::add_decays(process_node1, sqrts);
 
   auto& process_node2 =
       tree.add_action(f2->name(), 45.0, std::move(initial_particles2),
                       std::move(final_particles2));
-  decaytree::add_decays(process_node2);
+  decaytree::add_decays(process_node2, sqrts);
 
   auto& process_node3 = tree.add_action(a->name() + b->name(), 25.0,
                                         std::move(initial_particles3),
                                         std::move(final_particles3));
-  decaytree::add_decays(process_node3);
+  decaytree::add_decays(process_node3, sqrts);
 
   tree.print();
   auto final_state_xs = tree.final_state_cross_sections();
