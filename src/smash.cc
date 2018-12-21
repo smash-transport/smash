@@ -97,16 +97,22 @@ void usage(const int rc, const std::string &progname) {
    * <td> Dumps the width(m) and m * spectral function(m^2) versus resonance
    *     mass m.
    * <tr><td>`-s <pdg1>,<pdg2>[,mass1,mass2]`
-   * <td>`--cross-sections <pdg1>,<pdg2>[,mass1,mass2]`
+   * <td>`--cross-sections <pdg1>,<pdg2>[,mass1,mass2[,plab1,...]]`
    * <td> Dumps all the partial cross-sections of pdg1 + pdg2 with
    *     masses mass1 and mass2. Masses are optional, default values are pole
-   *     masses.
+   *     masses. Optionally, the lab frame momenta (fixed target) in GeV can be
+   *     specified. (The value of plab depends on the order of the particles.
+   *     The first particle is considered to be the projectile, the second one
+   *     the target.)
    * <tr><td>`-f` <td>`--force`
    * <tr><td>`-S <pdg1>,<pdg2>[,mass1,mass2]`
-   * <td>`--cross-sections-fs <pdg1>,<pdg2>[,mass1,mass2]`
+   * <td>`--cross-sections-fs <pdg1>,<pdg2>[,mass1,mass2[,plab1,...]]`
    * <td> Dumps all final-state cross-sections of pdg1 + pdg2 with
    *     masses mass1 and mass2. Masses are optional, default values are pole
-   *     masses. If strings are enabled, the results are non-deterministic for
+   *     masses. Optionally, the lab frame momenta (fixed target) in GeV can be
+   *     specified. (The value of plab depends on the order of the particles.
+   *     The first is considered to be the projectile, the second one the
+   *     target.) If strings are enabled, the results are non-deterministic for
    *     some final states.
    * <tr><td>`-f` <td>`--force`
    * <td>Forces overwriting files in the output directory. Normally, if you
@@ -135,10 +141,10 @@ void usage(const int rc, const std::string &progname) {
       "  -l, --list-2-to-n       list all possible 2->n reactions (with n>1)\n"
       "  -r, --resonance <pdg>   dump width(m) and m*spectral function(m^2)"
       " for resonance pdg\n"
-      "  -s, --cross-sections    <pdg1>,<pdg2>[,mass1,mass2] \n"
+      "  -s, --cross-sections    <pdg1>,<pdg2>[,mass1,mass2[,plab1,...]] \n"
       "                          dump all partial cross-sections of "
       "pdg1 + pdg2 reactions versus sqrt(s).\n"
-      "  -S, --cross-sections-fs <pdg1>,<pdg2>[,mass1,mass2] \n"
+      "  -S, --cross-sections-fs <pdg1>,<pdg2>[,mass1,mass2[,plab1,...]] \n"
       "                          dump all partial final-state cross-sections "
       "of pdg1 + pdg2 reactions versus sqrt(s). Non-deterministic if strings "
       "are enabled.\n"
@@ -511,29 +517,38 @@ int main(int argc, char *argv[]) {
       std::string arg_string(cs_string);
       std::vector<std::string> args = split(arg_string, ',');
       const unsigned int n_arg = args.size();
-      if (n_arg < 2 || n_arg > 4) {
-        throw std::invalid_argument("-s usage: pdg1,pdg2[,m1][,m2]");
+      if (n_arg != 2 && n_arg != 4 && n_arg < 5) {
+        throw std::invalid_argument("-s usage: pdg1,pdg2[,m1,m2[,sqrts1,...]]");
       }
       PdgCode pdg_a(args[0]), pdg_b(args[1]);
       const ParticleType &a = ParticleType::find(pdg_a);
       const ParticleType &b = ParticleType::find(pdg_b);
-      for (unsigned int i = 0; i < 4 - n_arg; i++) {
-        args.push_back("");
+      if (n_arg < 4) {
+        for (unsigned int i = 0; i < 4 - n_arg; i++) {
+          args.push_back("");
+        }
       }
       double ma = (args[2] == "") ? a.mass() : std::stod(args[2]);
       double mb = (args[3] == "") ? b.mass() : std::stod(args[3]);
       if (a.is_stable() && args[2] != "") {
         ma = a.mass();
-        std::cout << "Warning: pole mass is used for stable particle "
+        std::cerr << "Warning: pole mass is used for stable particle "
                   << a.name() << " instead of " << args[2] << std::endl;
       }
       if (b.is_stable() && args[3] != "") {
         mb = b.mass();
-        std::cout << "Warning: pole mass is used for stable particle "
+        std::cerr << "Warning: pole mass is used for stable particle "
                   << b.name() << " instead of " << args[3] << std::endl;
       }
+      const size_t plab_size = n_arg <= 4 ? 0 : n_arg - 4;
+      std::vector<double> plab;
+      plab.reserve(plab_size);
+      for (size_t i = 4; i < n_arg; i++) {
+        plab.push_back(std::stod(args.at(i)));
+      }
       auto scat_finder = actions_finder_for_dump(configuration);
-      scat_finder.dump_cross_sections(a, b, ma, mb, final_state_cross_sections);
+      scat_finder.dump_cross_sections(a, b, ma, mb, final_state_cross_sections,
+                                      plab);
       std::exit(EXIT_SUCCESS);
     }
     if (modus) {

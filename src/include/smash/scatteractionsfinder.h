@@ -189,9 +189,12 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * \param[in] m_b Mass of species b [GeV].
    * \param[in] final_state Whether the final state cross sections should be
    *                        printed.
+   * \param[in] plab Optional momenta in lab frame to be evaluated [GeV].
+   *                 Ignored if empty.
    */
   void dump_cross_sections(const ParticleType &a, const ParticleType &b,
-                           double m_a, double m_b, bool final_state) const;
+                           double m_a, double m_b, bool final_state,
+                           const std::vector<double> &plab) const;
 
   /**
    * \return Pointer to the string process class object.

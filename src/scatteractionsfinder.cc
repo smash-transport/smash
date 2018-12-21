@@ -677,7 +677,7 @@ static std::string make_decay_name(const std::string& res_name,
  *
  * \param node Starting node.
  */
-static void add_decays(Node& node) {
+static void add_decays(Node& node, double sqrts) {
   // If there is more than one unstable particle in the current state, then
   // there will be redundant paths in the decay tree, corresponding to
   // reorderings of the decays. To avoid double counting, we normalize by the
@@ -689,22 +689,36 @@ static void add_decays(Node& node) {
   // we never have more than two redundant paths, so it probably does not matter
   // much.
   uint32_t n_unstable = 0;
+  double sqrts_minus_masses = sqrts;
   for (const ParticleTypePtr ptype : node.state_) {
     if (!ptype->is_stable()) {
       n_unstable += 1;
     }
+    sqrts_minus_masses -= ptype->mass();
   }
   const double norm =
       n_unstable != 0 ? 1. / static_cast<double>(n_unstable) : 1.;
 
   for (const ParticleTypePtr ptype : node.state_) {
     if (!ptype->is_stable()) {
+      const double sqrts_decay = sqrts_minus_masses + ptype->mass();
       for (const auto& decay : ptype->decay_modes().decay_mode_list()) {
+        // Make sure to skip kinematically impossible decays.
+        // In principle, we would have to integrate over the mass of the
+        // resonance, but as an approximation we just assume it at its pole.
+        double final_state_mass = 0.;
+        for (const auto& p : decay->particle_types()) {
+          final_state_mass += p->mass();
+        }
+        if (final_state_mass > sqrts_decay) {
+          continue;
+        }
+
         ParticleTypePtrList parts;
         const auto name = make_decay_name(ptype->name(), decay, parts);
         auto& new_node = node.add_action(name, norm * decay->weight(), {ptype},
                                          std::move(parts));
-        add_decays(new_node);
+        add_decays(new_node, sqrts_decay);
       }
     }
   }
@@ -736,19 +750,26 @@ static void deduplicate(std::vector<FinalStateCrossSection>& final_state_xs) {
   }
 }
 
-void ScatterActionsFinder::dump_cross_sections(const ParticleType& a,
-                                               const ParticleType& b,
-                                               double m_a, double m_b,
-                                               bool final_state) const {
+void ScatterActionsFinder::dump_cross_sections(
+    const ParticleType& a, const ParticleType& b, double m_a, double m_b,
+    bool final_state, const std::vector<double>& plab) const {
   typedef std::vector<std::pair<double, double>> xs_saver;
   std::map<std::string, xs_saver> xs_dump;
   std::map<std::string, double> outgoing_total_mass;
 
   ParticleData a_data(a), b_data(b);
-  constexpr int n_momentum_points = 200;
+  int n_momentum_points = 200;
   constexpr double momentum_step = 0.02;
-  for (int i = 1; i < n_momentum_points + 1; i++) {
-    const double momentum = momentum_step * i;
+  if (plab.size() > 0) {
+    n_momentum_points = plab.size();
+  }
+  for (int i = 0; i < n_momentum_points; i++) {
+    double momentum;
+    if (plab.size() > 0) {
+      momentum = pCM_from_s(s_from_plab(plab.at(i), m_a, m_b), m_a, m_b);
+    } else {
+      momentum = momentum_step * (i + 1);
+    }
     a_data.set_4momentum(m_a, momentum, 0.0, 0.0);
     b_data.set_4momentum(m_b, -momentum, 0.0, 0.0);
     const double sqrts = (a_data.momentum() + b_data.momentum()).abs();
@@ -794,7 +815,7 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType& a,
         auto& process_node =
             tree.add_action(description, xs, std::move(initial_particles),
                             std::move(final_particles));
-        decaytree::add_decays(process_node);
+        decaytree::add_decays(process_node, sqrts);
       }
     }
     xs_dump["total"].push_back(std::make_pair(sqrts, act->cross_section()));
@@ -805,6 +826,13 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType& a,
       auto final_state_xs = tree.final_state_cross_sections();
       deduplicate(final_state_xs);
       for (const auto& p : final_state_xs) {
+        // Don't print empty columns.
+        //
+        // FIXME(steinberg): The better fix would be to not have them in the
+        // first place.
+        if (p.name_ == "") {
+          continue;
+        }
         outgoing_total_mass[p.name_] = p.mass_;
         xs_dump[p.name_].push_back(std::make_pair(sqrts, p.cross_section_));
       }
@@ -834,8 +862,13 @@ void ScatterActionsFinder::dump_cross_sections(const ParticleType& a,
   std::cout << std::endl;
 
   // Print out all partial cross-sections in mb
-  for (int i = 1; i < n_momentum_points; i++) {
-    const double momentum = momentum_step * i;
+  for (int i = 0; i < n_momentum_points; i++) {
+    double momentum;
+    if (plab.size() > 0) {
+      momentum = pCM_from_s(s_from_plab(plab.at(i), m_a, m_b), m_a, m_b);
+    } else {
+      momentum = momentum_step * (i + 1);
+    }
     a_data.set_4momentum(m_a, momentum, 0.0, 0.0);
     b_data.set_4momentum(m_b, -momentum, 0.0, 0.0);
     const double sqrts = (a_data.momentum() + b_data.momentum()).abs();
