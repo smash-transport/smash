@@ -24,6 +24,10 @@ double density_factor(const ParticleType &type, DensityType dens_type) {
       return type.is_baryon() ? type.isospin3_rel() : 0.;
     case DensityType::Pion:
       return type.pdgcode().is_pion() ? 1. : 0.;
+
+    case DensityType::Isospin3_tot:
+      return type.is_hadron() ? type.isospin3() : 0.;
+
     default:
       return 0.;
   }
@@ -156,6 +160,11 @@ std::ostream &operator<<(std::ostream &os, DensityType dens_type) {
     case DensityType::Pion:
       os << "pion density";
       break;
+
+    case DensityType::Isospin3_tot:
+      os << "total isospin3 density";
+      break;
+
     case DensityType::None:
       os << "none";
       break;
