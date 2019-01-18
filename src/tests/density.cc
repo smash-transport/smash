@@ -182,7 +182,6 @@ TEST(smearing_factor_rcut_correction) {
   FUZZY_COMPARE(smearing_factor_rcut_correction(4.0), 0.99886601571021467);
 }
 
-/*
 // check that analytical and numerical results for gradient of density coincide
 TEST(density_gradient) {
   // create two protons
@@ -190,10 +189,10 @@ TEST(density_gradient) {
   ParticleData part2 = create_proton();
   double mass = 0.938;
   // set momenta (just randomly):
-  part1.set_4momentum(mass, ThreeVector(1.0, 4.0, 3.0));
-  part2.set_4momentum(mass, ThreeVector(4.0, 2.0, 5.0));
+  part1.set_4momentum(mass, ThreeVector());
+  part2.set_4momentum(mass, ThreeVector());
   // set coordinates (not too far from each other)
-  part1.set_4position(FourVector(0.0, -0.5, 0.0, 0.0));
+  part1.set_4position(FourVector(0.0, 0.0, 0.0, 0.0));
   part2.set_4position(FourVector(0.0, 0.5, 0.0, 0.0));
   // make particle list out of them
   ParticleList P;
@@ -206,30 +205,123 @@ TEST(density_gradient) {
   DensityType dtype = DensityType::Baryon;
 
   ThreeVector num_grad, analit_grad;
-  r = ThreeVector(0.0, 0.0, 0.0);
-  auto rho_and_grad =
-      rho_eckart(r, P, par, dtype, true);
-  double rho_r = rho_and_grad.first;
+  r = ThreeVector(0.5, 0.3, 0.0);
+  auto rho_and_grad = rho_eckart(r, P, par, dtype, true);
+  double rho_r = std::get<0>(rho_and_grad);
 
   // analytical gradient
-  analit_grad = rho_and_grad.second;
+  analit_grad = std::get<1>(rho_and_grad);
   // numerical gradient
   dr = ThreeVector(1.e-4, 0.0, 0.0);
-  double rho_rdr = rho_eckart(r + dr, P, par, dtype, false).first;
+  double rho_rdr = std::get<0>(rho_eckart(r + dr, P, par, dtype, false));
   num_grad.set_x1((rho_rdr - rho_r) / dr.x1());
   dr = ThreeVector(0.0, 1.e-4, 0.0);
-  rho_rdr = rho_eckart(r + dr, P, par, dtype, false).first;
+  rho_rdr = std::get<0>(rho_eckart(r + dr, P, par, dtype, false));
   num_grad.set_x2((rho_rdr - rho_r) / dr.x2());
   dr = ThreeVector(0.0, 0.0, 1.e-4);
-  rho_rdr = rho_eckart(r + dr, P, par, dtype, false).first;
+  rho_rdr = std::get<0>(rho_eckart(r + dr, P, par, dtype, false));
   num_grad.set_x3((rho_rdr - rho_r) / dr.x3());
   // compare them with: accuracy should not be worse than |dr|
-  std::cout << num_grad << analit_grad << std::endl;
   COMPARE_ABSOLUTE_ERROR(num_grad.x1(), analit_grad.x1(), 1.e-4);
   COMPARE_ABSOLUTE_ERROR(num_grad.x2(), analit_grad.x2(), 1.e-4);
   COMPARE_ABSOLUTE_ERROR(num_grad.x3(), analit_grad.x3(), 1.e-4);
 }
-*/
+
+TEST(density_gradient_in_linear_box) {
+  // set parameters fot the test
+  ExperimentParameters par = smash::Test::default_parameters();
+  par.testparticles = 10000;
+  par.gaussian_sigma = 0.5;
+  par.gauss_cutoff_in_sigma = 8.0;
+  DensityType dtype = DensityType::Baryon;
+  /* Prepare a box of protons whose density is linearly increasing
+   * along z-axis. The box is 2*2*2 fm^3 large. There're 10000000
+   * particles, including test particles, inside.*/
+  ParticleList P;
+  for (int i = 0; i < 100 * par.testparticles; i++) {
+    const double x = random::uniform(-2., 2.);
+    const double y = random::uniform(-2., 2.);
+    const double z = random::power(1., 0., 4.) - 2.;
+    ParticleData part = create_proton();
+    const double mass = 0.938;
+    part.set_4momentum(mass, ThreeVector());
+    part.set_4position(FourVector(0., x, y, z));
+    P.push_back(part);
+  }
+  // set the position where the gradient is measured.
+  const double x0 = random::uniform(-0.4, 0.4);
+  const double y0 = random::uniform(-0.4, 0.4);
+  const double z0 = random::uniform(-0.4, 0.4);
+  const ThreeVector r0 = ThreeVector(x0, y0, z0);
+  // calculate the gradients
+  const auto rho_and_grad = rho_eckart(r0, P, par, dtype, true);
+  const auto drho_dr = std::get<1>(rho_and_grad);
+  /* Theoretically, the gradient should be (0., 0., DU/Dz) at any
+   * point inside the box, where DU/Dz can be caluclated by taking
+   * the difference between the potentials evaluated at (0., 0., -0.4)
+   * and (0., 0., 0.4). Compare the z-component of the gradient with the
+   * theoretical value. */
+  const double theo_drho_dz =
+      (std::get<0>(rho_eckart(ThreeVector(0., 0., 0.4), P, par, dtype, false)) -
+       std::get<0>(
+           rho_eckart(ThreeVector(0., 0., -0.4), P, par, dtype, false))) /
+      0.8;
+  COMPARE_RELATIVE_ERROR(drho_dr.x3(), theo_drho_dz, 0.01);
+  /* Meanwhile, the gradient should be along z-axis, which means its
+   * transverse component should be much smaller than its longitudinal
+   * component*/
+  const double drho_T_over_z =
+      sqrt(drho_dr.x1() * drho_dr.x1() + drho_dr.x2() * drho_dr.x2()) /
+      drho_dr.x3();
+  COMPARE_ABSOLUTE_ERROR(drho_T_over_z, 0., 0.01);
+}
+
+TEST(current_curl_in_rotating_box) {
+  // set parameters fot the test
+  ExperimentParameters par = smash::Test::default_parameters();
+  par.testparticles = 10000;
+  par.gaussian_sigma = 0.65;
+  par.gauss_cutoff_in_sigma = 8.0;
+  DensityType dtype = DensityType::Baryon;
+  /* Prepare a box of uniformly distributed protons which are rotating about
+   * the z-axis with a constant angular velocity. The box is 2*2*2 fm^3 large.
+   * There're 10000000 particles, including test particles, inside.*/
+  ParticleList P;
+  const double omega = 0.2;
+  for (int i = 0; i < 100 * par.testparticles; i++) {
+    const double x = random::uniform(-2., 2.);
+    const double y = random::uniform(-2., 2.);
+    const double z = random::uniform(-2., 2.);
+    const double r2 = x * x + y * y + z * z;
+    const double gamma = 1. / sqrt(1. - omega * omega * r2);
+    ParticleData part = create_proton();
+    const double mass = 0.9;
+    part.set_4momentum(mass, -mass * omega * gamma * y,
+                       mass * omega * gamma * x, 0.);
+    part.set_4position(FourVector(0., x, y, z));
+    P.push_back(part);
+  }
+  // set the location where the curl is measured.
+  const double x0 = random::uniform(-0.4, 0.4);
+  const double y0 = random::uniform(-0.4, 0.4);
+  const double z0 = random::uniform(-0.4, 0.4);
+  const ThreeVector r0 = ThreeVector(x0, y0, z0);
+  // calculate the curl
+  const auto rho_and_grad = rho_eckart(r0, P, par, dtype, true);
+  const auto rot_j = std::get<3>(rho_and_grad);
+  /* Theoretically, the curl should be (0., 0., 2. * density * omega) at any
+   * point inside the box, Compare the z-component of the curl with the
+   * theoretical value. */
+  const double theo_rot_j_z = 2. * 1.5 * omega;
+  COMPARE_RELATIVE_ERROR(rot_j.x3(), theo_rot_j_z, 0.01);
+  /* Meanwhile, the curl should be along z-axis, which means its
+   * transverse component should be much smaller than its longitudinal
+   * component*/
+  const double rot_j_T_over_z =
+      sqrt(rot_j.x1() * rot_j.x1() + rot_j.x2() * rot_j.x2()) / rot_j.x3();
+  COMPARE_ABSOLUTE_ERROR(rot_j_T_over_z, 0., 0.01);
+}
+
 /*
    This test does not compare anything. It only prints density map versus
    time to vtk files, so that one can open it with paraview and make sure

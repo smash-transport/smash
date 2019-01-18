@@ -241,20 +241,20 @@ inline ReactionsBitSet all_reactions_included() {
  */
 inline ExperimentParameters default_parameters(int testparticles = 1,
                                                double dt = 0.1) {
-  return ExperimentParameters{{0., dt},
-                              {0., 1.},
-                              testparticles,
-                              1.0,
-                              4.0,
-                              true,
+  return ExperimentParameters{{0., dt},       // labclock
+                              {0., 1.},       // outputclock
+                              testparticles,  // testparticles
+                              1.0,            // Gaussian smearing width
+                              4.0,            // Gaussian smearing cut-off
+                              true,           // two_to_one
                               all_reactions_included(),
-                              false,
-                              false,
-                              false,
+                              false,  // strings switch
+                              false,  // use_AQM
+                              false,  // string_with_probability
                               NNbarTreatment::NoAnnihilation,
-                              false,
-                              0.,
-                              false};
+                              false,   // photons switch
+                              0.,      // low energy sigma_NN cut-off
+                              false};  // potential_affect_threshold
 }
 
 /**
