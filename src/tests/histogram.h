@@ -78,7 +78,7 @@ void Histogram1d::print_to_file(const std::string& fname) const {
  * Compare a histogram of a sampled distribution to an analytical function.
  *
  * The histogram 'hist' (populated with sampled distribution values) is
- * compared to the analytical function 'analyt' (whose normalization is
+ * compared to the analytical function 'analyt' (whotse normalization is
  * being determined automatically).
  */
 template <typename Analytical>
@@ -116,14 +116,14 @@ void Histogram1d::test(Analytical analyt, const std::string& dbg_file) const {
       // center of the bin
       const double x = (b.first + 0.5) * dx();
       // the number N of counts in that bin
-      const int counts = b.second;
-      // statistical error is sqrt(N)
-      const double stat_err = sqrt(counts);
+      const double counts = b.second;
+      // statistical error (variance of multinomial distribution)
+      const double stat_err = sqrt(counts * (1 - counts / num_entries()));
       // the analytical value times normalization times number of samples
       const double ana = analyt(x) * norm;
       // if we want to print the distribution, print!
       if (file) {
-        fprintf(file.get(), "%7.3f %7d %7.3f %7.3f\n", x, counts, stat_err,
+        fprintf(file.get(), "%7.3f %7d %7.3f %7.3f\n", x, b.second, stat_err,
                 ana);
       }
       const double diff = (counts - ana) / stat_err;  // normalized deviation
