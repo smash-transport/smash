@@ -54,7 +54,7 @@ class Histogram1d {
 
   // compare a histogram of a sampled distribution to an analytical function
   template <typename Analytical>
-  void test(Analytical analyt, std::string dbg_file = "") const;
+  void test(Analytical analyt, const std::string& dbg_file = "") const;
 
  private:
   double dx_;                          // bin size
@@ -82,7 +82,7 @@ void Histogram1d::print_to_file(const std::string& fname) const {
  * being determined automatically).
  */
 template <typename Analytical>
-void Histogram1d::test(Analytical analyt, std::string dbg_file) const {
+void Histogram1d::test(Analytical analyt, const std::string& dbg_file) const {
   // We will check that at least the following ratios of numbers of samples lie
   // within the corresponding sigma environment.
   constexpr int sigmabins = 4;
