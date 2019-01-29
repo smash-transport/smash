@@ -2440,7 +2440,7 @@ double CrossSections::nn_to_resonance_matrix_element(double sqrts,
              type_a.antiparticle_sign() == type_b.antiparticle_sign()) {
     // NN → NN*
     if (twoI == 2) {
-      return 7. / msqr;
+      return 4.5 / msqr;
     } else if (twoI == 0) {
       const double parametrization = 14. / msqr;
       /** pn → pnη cross section is known to be larger than the corresponding
