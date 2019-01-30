@@ -181,6 +181,7 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *   \li \key "baryonic isospin"
  *   \li \key "pion"
  *   \li \key "none"
+ *   \li \key "total isospin"
  *
  *   \key Quantities (list of thermodynamic quantities, optional, default = [
  ]):\n
