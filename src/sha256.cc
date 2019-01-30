@@ -33,6 +33,21 @@
     (y)[7] = (uint8_t)((x)&255);           \
   }
 
+#define Ch(x, y, z) (z ^ (x & (y ^ z)))
+#define Maj(x, y, z) (((x | y) & z) | (x & y))
+#define S(x, n) ror((x), (n))
+#define R(x, n) (((x)&0xFFFFFFFFUL) >> (n))
+#define Sigma0(x) (S(x, 2) ^ S(x, 13) ^ S(x, 22))
+#define Sigma1(x) (S(x, 6) ^ S(x, 11) ^ S(x, 25))
+#define Gamma0(x) (S(x, 7) ^ S(x, 18) ^ R(x, 3))
+#define Gamma1(x) (S(x, 17) ^ S(x, 19) ^ R(x, 10))
+
+#define Sha256Round(a, b, c, d, e, f, g, h, i)    \
+  t0 = h + Sigma1(e) + Ch(e, f, g) + K[i] + W[i]; \
+  t1 = Sigma0(a) + Maj(a, b, c);                  \
+  d += t0;                                        \
+  h = t0 + t1;
+
 // Constants
 
 /// The K array.
@@ -51,30 +66,18 @@ static const uint32_t K[64] = {
     0x682e6ff3UL, 0x748f82eeUL, 0x78a5636fUL, 0x84c87814UL, 0x8cc70208UL,
     0x90befffaUL, 0xa4506cebUL, 0xbef9a3f7UL, 0xc67178f2UL};
 
-#define BLOCK_SIZE 64
+
+namespace smash {
+namespace sha256 {
+
+constexpr size_t BLOCK_SIZE = 64;
 
 // Internal functions
-
-// Various logical functions
-#define Ch(x, y, z) (z ^ (x & (y ^ z)))
-#define Maj(x, y, z) (((x | y) & z) | (x & y))
-#define S(x, n) ror((x), (n))
-#define R(x, n) (((x)&0xFFFFFFFFUL) >> (n))
-#define Sigma0(x) (S(x, 2) ^ S(x, 13) ^ S(x, 22))
-#define Sigma1(x) (S(x, 6) ^ S(x, 11) ^ S(x, 25))
-#define Gamma0(x) (S(x, 7) ^ S(x, 18) ^ R(x, 3))
-#define Gamma1(x) (S(x, 17) ^ S(x, 19) ^ R(x, 10))
-
-#define Sha256Round(a, b, c, d, e, f, g, h, i)    \
-  t0 = h + Sigma1(e) + Ch(e, f, g) + K[i] + W[i]; \
-  t1 = Sigma0(a) + Maj(a, b, c);                  \
-  d += t0;                                        \
-  h = t0 + t1;
 
 /**
  *  Compress 512-bits
  */
-static void transform_function(Sha256Context* context, uint8_t const* buffer) {
+static void transform_function(Context* context, uint8_t const* buffer) {
   uint32_t S[8];
   uint32_t W[64];
   uint32_t t0;
@@ -119,8 +122,7 @@ static void transform_function(Sha256Context* context, uint8_t const* buffer) {
 
 // Public functions
 
-/// Initialises a SHA256 Context. Use this to initialise/reset a context.
-void sha256_initialize(Sha256Context* context) {
+void initialize(Context* context) {
   context->curlen = 0;
   context->length = 0;
   context->state[0] = 0x6A09E667UL;
@@ -133,13 +135,8 @@ void sha256_initialize(Sha256Context* context) {
   context->state[7] = 0x5BE0CD19UL;
 }
 
-/**
- * Adds data to the SHA256 context. This will process the data and update the
- * internal state of the context. Keep on calling this function until all the
- * data has been added. Then call sha256_finalize to calculate the hash.
- */
-void sha256_update(Sha256Context* context, uint8_t const* buffer,
-                  uint32_t buffer_size) {
+void update(Context* context, uint8_t const* buffer,
+            uint32_t buffer_size) {
   uint32_t n;
 
   if (context->curlen > sizeof(context->buf)) {
@@ -167,12 +164,7 @@ void sha256_update(Sha256Context* context, uint8_t const* buffer,
   }
 }
 
-/**
- *  Performs the final calculation of the hash and returns the digest (32 byte
- * buffer containing 256bit hash). After calling this, sha256_initialized must be
- * used to reuse the context.
- */
-void sha256_finalize(Sha256Context* context, SHA256_HASH* digest) {
+void finalize(Context* context, Hash* digest) {
   int i;
 
   if (context->curlen >= sizeof(context->buf)) {
@@ -211,15 +203,14 @@ void sha256_finalize(Sha256Context* context, SHA256_HASH* digest) {
   }
 }
 
-/**
- *  Combines sha256_initialize, sha256_update, and sha256_finalize into one
- * function. Calculates the SHA256 hash of the buffer.
- */
-void sha256_calculate(uint8_t const* buffer, uint32_t buffer_size,
-                      SHA256_HASH* digest) {
-  Sha256Context context;
+void calculate(uint8_t const* buffer, uint32_t buffer_size,
+               Hash* digest) {
+  Context context;
 
-  sha256_initialize(&context);
-  sha256_update(&context, buffer, buffer_size);
-  sha256_finalize(&context, digest);
+  initialize(&context);
+  update(&context, buffer, buffer_size);
+  finalize(&context, digest);
 }
+
+}  // namespace sha256
+}  // namespace smash

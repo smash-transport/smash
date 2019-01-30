@@ -15,7 +15,7 @@
 
 using namespace smash;
 
-static std::string hash_to_string(SHA256_HASH hash) {
+static std::string hash_to_string(sha256::Hash hash) {
   std::stringstream ss;
   ss << std::hex;
   for (uint16_t i : hash) {
@@ -36,8 +36,8 @@ static const std::vector<TestVector> test_vectors = {
 
 TEST(basic) {
   for (const auto& t : test_vectors) {
-    SHA256_HASH digest;
-    sha256_calculate(t.input.data(), t.input.size(), &digest);
+    sha256::Hash digest;
+    sha256::calculate(t.input.data(), t.input.size(), &digest);
     COMPARE(t.output, hash_to_string(digest));
   }
 }
