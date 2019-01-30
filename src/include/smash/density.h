@@ -37,7 +37,6 @@ enum class DensityType {
   Baryon = 2,
   BaryonicIsospin = 3,
   Pion = 4,
-
   Isospin3_tot = 5,
 };
 
