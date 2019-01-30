@@ -13,7 +13,7 @@ constexpr size_t HASH_SIZE = 256 / 8;
 struct Context {
   uint64_t length;
   uint32_t state[8];
-  uint32_t curlen;
+  size_t curlen;
   uint8_t buf[64];
 };
 
@@ -31,7 +31,7 @@ void initialize(Context* context);
  * data has been added. Then call finalize to calculate the hash.
  */
 void update(Context* context, uint8_t const* buffer,
-            uint32_t buffer_size);
+            size_t buffer_size);
 
 /**
  * Performs the final calculation of the hash and returns the digest (32 byte
@@ -43,7 +43,7 @@ void finalize(Context* context, Hash* digest);
 /**
  * Calculate the SHA256 hash of the buffer.
  */
-void calculate(uint8_t const* buffer, uint32_t buffer_size,
+void calculate(uint8_t const* buffer, size_t buffer_size,
                Hash* digest);
 
 }  // namespace sha256

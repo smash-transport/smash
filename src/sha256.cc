@@ -9,34 +9,34 @@
 
 #define STORE32H(x, y)                     \
   {                                        \
-    (y)[0] = (uint8_t)(((x) >> 24) & 255); \
-    (y)[1] = (uint8_t)(((x) >> 16) & 255); \
-    (y)[2] = (uint8_t)(((x) >> 8) & 255);  \
-    (y)[3] = (uint8_t)((x)&255);           \
+    (y)[0] = static_cast<uint8_t>(((x) >> 24) & 255); \
+    (y)[1] = static_cast<uint8_t>(((x) >> 16) & 255); \
+    (y)[2] = static_cast<uint8_t>(((x) >> 8) & 255);  \
+    (y)[3] = static_cast<uint8_t>((x) & 255);         \
   }
 
 #define LOAD32H(x, y)                                                         \
   {                                                                           \
-    x = ((uint32_t)((y)[0] & 255) << 24) | ((uint32_t)((y)[1] & 255) << 16) | \
-        ((uint32_t)((y)[2] & 255) << 8) | ((uint32_t)((y)[3] & 255));         \
+    x = (static_cast<uint32_t>((y)[0] & 255) << 24) | (static_cast<uint32_t>((y)[1] & 255) << 16) | \
+        (static_cast<uint32_t>((y)[2] & 255) << 8) | (static_cast<uint32_t>((y)[3] & 255));         \
   }
 
 #define STORE64H(x, y)                     \
   {                                        \
-    (y)[0] = (uint8_t)(((x) >> 56) & 255); \
-    (y)[1] = (uint8_t)(((x) >> 48) & 255); \
-    (y)[2] = (uint8_t)(((x) >> 40) & 255); \
-    (y)[3] = (uint8_t)(((x) >> 32) & 255); \
-    (y)[4] = (uint8_t)(((x) >> 24) & 255); \
-    (y)[5] = (uint8_t)(((x) >> 16) & 255); \
-    (y)[6] = (uint8_t)(((x) >> 8) & 255);  \
-    (y)[7] = (uint8_t)((x)&255);           \
+    (y)[0] = static_cast<uint8_t>(((x) >> 56) & 255); \
+    (y)[1] = static_cast<uint8_t>(((x) >> 48) & 255); \
+    (y)[2] = static_cast<uint8_t>(((x) >> 40) & 255); \
+    (y)[3] = static_cast<uint8_t>(((x) >> 32) & 255); \
+    (y)[4] = static_cast<uint8_t>(((x) >> 24) & 255); \
+    (y)[5] = static_cast<uint8_t>(((x) >> 16) & 255); \
+    (y)[6] = static_cast<uint8_t>(((x) >> 8) & 255);  \
+    (y)[7] = static_cast<uint8_t>((x) & 255);         \
   }
 
 #define Ch(x, y, z) (z ^ (x & (y ^ z)))
 #define Maj(x, y, z) (((x | y) & z) | (x & y))
 #define S(x, n) ror((x), (n))
-#define R(x, n) (((x)&0xFFFFFFFFUL) >> (n))
+#define R(x, n) (((x) & 0xFFFFFFFFUL) >> (n))
 #define Sigma0(x) (S(x, 2) ^ S(x, 13) ^ S(x, 22))
 #define Sigma1(x) (S(x, 6) ^ S(x, 11) ^ S(x, 25))
 #define Gamma0(x) (S(x, 7) ^ S(x, 18) ^ R(x, 3))
@@ -136,8 +136,8 @@ void initialize(Context* context) {
 }
 
 void update(Context* context, uint8_t const* buffer,
-            uint32_t buffer_size) {
-  uint32_t n;
+            size_t buffer_size) {
+  size_t n;
 
   if (context->curlen > sizeof(context->buf)) {
     return;
@@ -145,15 +145,15 @@ void update(Context* context, uint8_t const* buffer,
 
   while (buffer_size > 0) {
     if (context->curlen == 0 && buffer_size >= BLOCK_SIZE) {
-      transform_function(context, (uint8_t*)buffer);
+      transform_function(context, buffer);
       context->length += BLOCK_SIZE * 8;
-      buffer = (uint8_t*)buffer + BLOCK_SIZE;
+      buffer += BLOCK_SIZE;
       buffer_size -= BLOCK_SIZE;
     } else {
       n = MIN(buffer_size, (BLOCK_SIZE - context->curlen));
-      memcpy(context->buf + context->curlen, buffer, (size_t)n);
+      memcpy(context->buf + context->curlen, buffer, n);
       context->curlen += n;
-      buffer = (uint8_t*)buffer + n;
+      buffer += n;
       buffer_size -= n;
       if (context->curlen == BLOCK_SIZE) {
         transform_function(context, context->buf);
@@ -175,14 +175,14 @@ void finalize(Context* context, Hash* digest) {
   context->length += context->curlen * 8;
 
   // Append the '1' bit
-  context->buf[context->curlen++] = (uint8_t)0x80;
+  context->buf[context->curlen++] = 0x80;
 
   // if the length is currently above 56 bytes we append zeros
   // then compress.  Then we can fall back to padding zeros and length
   // encoding like normal.
   if (context->curlen > 56) {
     while (context->curlen < 64) {
-      context->buf[context->curlen++] = (uint8_t)0;
+      context->buf[context->curlen++] = 0;
     }
     transform_function(context, context->buf);
     context->curlen = 0;
@@ -190,7 +190,7 @@ void finalize(Context* context, Hash* digest) {
 
   // Pad up to 56 bytes of zeroes
   while (context->curlen < 56) {
-    context->buf[context->curlen++] = (uint8_t)0;
+    context->buf[context->curlen++] = 0;
   }
 
   // Store length
@@ -203,7 +203,7 @@ void finalize(Context* context, Hash* digest) {
   }
 }
 
-void calculate(uint8_t const* buffer, uint32_t buffer_size,
+void calculate(uint8_t const* buffer, size_t buffer_size,
                Hash* digest) {
   Context context;
 
