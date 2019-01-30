@@ -21,6 +21,7 @@
 #include "smash/random.h"
 #include "smash/scatteractionsfinder.h"
 #include "smash/setup_particles_decaymodes.h"
+#include "smash/sha256.h"
 #include "smash/stringfunctions.h"
 /* build dependent variables */
 #include "smash/config.h"
@@ -556,6 +557,17 @@ int main(int argc, char *argv[]) {
     ParticleType::create_type_list(configuration.read({"particles"}));
     DecayModes::load_decaymodes(configuration.read({"decaymodes"}));
     ParticleType::check_consistency();
+
+    // Calculate a hash of the SMASH version, the particles and decaymodes.
+    const std::string version(VERSION_MAJOR);
+    const std::string particle_string = configuration["particles"].to_string();
+    const std::string decay_string = configuration["decaymodes"].to_string();
+    sha256::Context hash_context;
+    hash_context.update(version);
+    hash_context.update(particle_string);
+    hash_context.update(decay_string);
+    const auto hash = hash_context.finalize();
+    std::cout << "config hash: " << sha256::hash_to_string(hash) << std::endl;
 
     if (list2n_activated) {
       /* Print only 2->n, n > 1. Do not dump decays, which can be found in

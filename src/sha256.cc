@@ -2,7 +2,11 @@
 // https://github.com/WaterJuice/WjCryptLib.
 
 #include "include/smash/sha256.h"
+
 #include <cstring>
+#include <iostream>
+#include <iomanip>
+#include <sstream>
 
 // Macros
 
@@ -166,6 +170,10 @@ void Context::update(uint8_t const* buffer, size_t buffer_size) {
   }
 }
 
+void Context::update(const std::string& buffer) {
+  update(reinterpret_cast<const uint8_t*>(buffer.c_str()), buffer.size());
+}
+
 Hash Context::finalize() {
   Hash digest {};
   if (curlen_ >= sizeof(buf_)) {
@@ -209,6 +217,15 @@ Hash calculate(uint8_t const* buffer, size_t buffer_size) {
   Context context;
   context.update(buffer, buffer_size);
   return context.finalize();
+}
+
+std::string hash_to_string(Hash hash) {
+  std::stringstream ss;
+  ss << std::hex;
+  for (uint16_t i : hash) {
+    ss << std::setw(2) << std::setfill('0') << i;
+  }
+  return ss.str();
 }
 
 }  // namespace sha256

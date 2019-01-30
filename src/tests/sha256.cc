@@ -15,15 +15,6 @@
 
 using namespace smash;
 
-static std::string hash_to_string(sha256::Hash hash) {
-  std::stringstream ss;
-  ss << std::hex;
-  for (uint16_t i : hash) {
-    ss << std::setw(2) << std::setfill('0') << i;
-  }
-  return ss.str();
-}
-
 struct TestVector {
   std::vector<uint8_t> input;
   std::string output;

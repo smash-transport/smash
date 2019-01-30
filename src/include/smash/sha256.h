@@ -43,6 +43,13 @@ class Context {
   void update(uint8_t const* buffer, size_t buffer_size);
 
   /**
+   * Add data to the SHA256 context. This will process the data and update the
+   * internal state of the context. Keep on calling this function until all the
+   * data has been added. Then call `finalize` to calculate the hash.
+   */
+  void update(const std::string& buffer);
+
+  /**
    * Performs the final calculation of the hash and returns the digest (32 byte
    * buffer containing 256bit hash). After calling this, `reset` must
    * be used to reuse the context.
@@ -54,6 +61,11 @@ class Context {
  * Calculate the SHA256 hash of the buffer.
  */
 Hash calculate(uint8_t const* buffer, size_t buffer_size);
+
+/**
+ * Convert a SHA256 hash to a hexadecimal string.
+ */
+std::string hash_to_string(Hash hash);
 
 }  // namespace sha256
 }  // namespace smash
