@@ -8,43 +8,52 @@
 namespace smash {
 namespace sha256 {
 
+/// Size of a SHA256 hash.
 constexpr size_t HASH_SIZE = 256 / 8;
 
-struct Context {
-  uint64_t length;
-  uint32_t state[8];
-  size_t curlen;
-  uint8_t buf[64];
-};
-
-
+/// A SHA256 hash.
 typedef std::array<uint8_t, HASH_SIZE> Hash;
 
-// Public functions
+/// A SHA256 context.
+class Context {
+ private:
+  uint64_t length_;
+  uint32_t state_[8];
+  size_t curlen_;
+  uint8_t buf_[64];
 
-/// Initializes a SHA256 Context. Use this to initialize/reset a context.
-void initialize(Context* context);
+  /**
+   *  Compress 512-bits
+   */
+  void transform_function(uint8_t const* buffer);
+ public:
+  /// Construct a SHA256 context.
+  Context() {
+    reset();
+  }
 
-/**
- * Adds data to the SHA256 context. This will process the data and update the
- * internal state of the context. Keep on calling this function until all the
- * data has been added. Then call finalize to calculate the hash.
- */
-void update(Context* context, uint8_t const* buffer,
-            size_t buffer_size);
+  /// Reset the SHA256 context.
+  void reset();
 
-/**
- * Performs the final calculation of the hash and returns the digest (32 byte
- * buffer containing 256bit hash). After calling this, initialize must
- * be used to reuse the context.
- */
-void finalize(Context* context, Hash* digest);
+  /**
+   * Add data to the SHA256 context. This will process the data and update the
+   * internal state of the context. Keep on calling this function until all the
+   * data has been added. Then call `finalize` to calculate the hash.
+   */
+  void update(uint8_t const* buffer, size_t buffer_size);
+
+  /**
+   * Performs the final calculation of the hash and returns the digest (32 byte
+   * buffer containing 256bit hash). After calling this, `reset` must
+   * be used to reuse the context.
+   */
+  Hash finalize();
+};
 
 /**
  * Calculate the SHA256 hash of the buffer.
  */
-void calculate(uint8_t const* buffer, size_t buffer_size,
-               Hash* digest);
+Hash calculate(uint8_t const* buffer, size_t buffer_size);
 
 }  // namespace sha256
 }  // namespace smash

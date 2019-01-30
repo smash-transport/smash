@@ -77,7 +77,7 @@ constexpr size_t BLOCK_SIZE = 64;
 /**
  *  Compress 512-bits
  */
-static void transform_function(Context* context, uint8_t const* buffer) {
+void Context::transform_function(uint8_t const* buffer) {
   uint32_t S[8];
   uint32_t W[64];
   uint32_t t0;
@@ -87,7 +87,7 @@ static void transform_function(Context* context, uint8_t const* buffer) {
 
   // Copy state into S
   for (i = 0; i < 8; i++) {
-    S[i] = context->state[i];
+    S[i] = state_[i];
   }
 
   // Copy the state into 512-bits into W[0..15]
@@ -116,100 +116,96 @@ static void transform_function(Context* context, uint8_t const* buffer) {
 
   // Feedback
   for (i = 0; i < 8; i++) {
-    context->state[i] = context->state[i] + S[i];
+    state_[i] += S[i];
   }
 }
 
 // Public functions
 
-void initialize(Context* context) {
-  context->curlen = 0;
-  context->length = 0;
-  context->state[0] = 0x6A09E667UL;
-  context->state[1] = 0xBB67AE85UL;
-  context->state[2] = 0x3C6EF372UL;
-  context->state[3] = 0xA54FF53AUL;
-  context->state[4] = 0x510E527FUL;
-  context->state[5] = 0x9B05688CUL;
-  context->state[6] = 0x1F83D9ABUL;
-  context->state[7] = 0x5BE0CD19UL;
+void Context::reset() {
+  curlen_ = 0;
+  length_ = 0;
+  state_[0] = 0x6A09E667UL;
+  state_[1] = 0xBB67AE85UL;
+  state_[2] = 0x3C6EF372UL;
+  state_[3] = 0xA54FF53AUL;
+  state_[4] = 0x510E527FUL;
+  state_[5] = 0x9B05688CUL;
+  state_[6] = 0x1F83D9ABUL;
+  state_[7] = 0x5BE0CD19UL;
 }
 
-void update(Context* context, uint8_t const* buffer,
-            size_t buffer_size) {
+void Context::update(uint8_t const* buffer, size_t buffer_size) {
   size_t n;
 
-  if (context->curlen > sizeof(context->buf)) {
+  if (curlen_ > sizeof(buf_)) {
     return;
   }
 
   while (buffer_size > 0) {
-    if (context->curlen == 0 && buffer_size >= BLOCK_SIZE) {
-      transform_function(context, buffer);
-      context->length += BLOCK_SIZE * 8;
+    if (curlen_ == 0 && buffer_size >= BLOCK_SIZE) {
+      transform_function(buffer);
+      length_ += BLOCK_SIZE * 8;
       buffer += BLOCK_SIZE;
       buffer_size -= BLOCK_SIZE;
     } else {
-      n = MIN(buffer_size, (BLOCK_SIZE - context->curlen));
-      memcpy(context->buf + context->curlen, buffer, n);
-      context->curlen += n;
+      n = MIN(buffer_size, (BLOCK_SIZE - curlen_));
+      memcpy(buf_ + curlen_, buffer, n);
+      curlen_ += n;
       buffer += n;
       buffer_size -= n;
-      if (context->curlen == BLOCK_SIZE) {
-        transform_function(context, context->buf);
-        context->length += 8 * BLOCK_SIZE;
-        context->curlen = 0;
+      if (curlen_ == BLOCK_SIZE) {
+        transform_function(buf_);
+        length_ += 8 * BLOCK_SIZE;
+        curlen_ = 0;
       }
     }
   }
 }
 
-void finalize(Context* context, Hash* digest) {
-  int i;
-
-  if (context->curlen >= sizeof(context->buf)) {
-    return;
+Hash Context::finalize() {
+  Hash digest {};
+  if (curlen_ >= sizeof(buf_)) {
+    return digest;
   }
 
   // Increase the length of the message
-  context->length += context->curlen * 8;
+  length_ += curlen_ * 8;
 
   // Append the '1' bit
-  context->buf[context->curlen++] = 0x80;
+  buf_[curlen_++] = 0x80;
 
   // if the length is currently above 56 bytes we append zeros
   // then compress.  Then we can fall back to padding zeros and length
   // encoding like normal.
-  if (context->curlen > 56) {
-    while (context->curlen < 64) {
-      context->buf[context->curlen++] = 0;
+  if (curlen_ > 56) {
+    while (curlen_ < 64) {
+      buf_[curlen_++] = 0;
     }
-    transform_function(context, context->buf);
-    context->curlen = 0;
+    transform_function(buf_);
+    curlen_ = 0;
   }
 
   // Pad up to 56 bytes of zeroes
-  while (context->curlen < 56) {
-    context->buf[context->curlen++] = 0;
+  while (curlen_ < 56) {
+    buf_[curlen_++] = 0;
   }
 
   // Store length
-  STORE64H(context->length, context->buf + 56);
-  transform_function(context, context->buf);
+  STORE64H(length_, buf_ + 56);
+  transform_function(buf_);
 
   // Copy output
-  for (i = 0; i < 8; i++) {
-    STORE32H(context->state[i], digest->data() + (4 * i));
+  for (int i = 0; i < 8; i++) {
+    STORE32H(state_[i], digest.data() + (4 * i));
   }
+  return digest;
 }
 
-void calculate(uint8_t const* buffer, size_t buffer_size,
-               Hash* digest) {
+Hash calculate(uint8_t const* buffer, size_t buffer_size) {
   Context context;
-
-  initialize(&context);
-  update(&context, buffer, buffer_size);
-  finalize(&context, digest);
+  context.update(buffer, buffer_size);
+  return context.finalize();
 }
 
 }  // namespace sha256
