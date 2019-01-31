@@ -8,6 +8,7 @@
 #ifndef SRC_INCLUDE_TABULATION_H_
 #define SRC_INCLUDE_TABULATION_H_
 
+#include <fstream>
 #include <functional>
 #include <map>
 #include <memory>
@@ -17,6 +18,7 @@
 #include "integrate.h"
 #include "kinematics.h"
 #include "particletype.h"
+#include "sha256.h"
 
 namespace smash {
 
@@ -71,6 +73,11 @@ class Tabulation {
    */
   double get_value_linear(
       double x, Extrapolation extrapolation = Extrapolation::Linear) const;
+
+  /**
+   * Write a binary representation of the tabulation to a stream.
+   */
+  void write(std::ofstream& stream, sha256::Hash hash);
 
  protected:
   /// vector for storing tabulated values

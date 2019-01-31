@@ -50,4 +50,35 @@ double Tabulation::get_value_linear(double x, Extrapolation extrapol) const {
   return values_[n] + (values_[n + 1] - values_[n]) * r;
 }
 
+static void swrite(std::ofstream& stream, double x) {
+  stream.write(reinterpret_cast<const char*>(&x), sizeof(x));
+}
+
+static void swrite(std::ofstream& stream, size_t x) {
+  // We want to support 32-bit and 64-bit platforms, so we store a 64-bit
+  // integer on all platforms.
+  const auto const_size_x = static_cast<uint64_t>(x);
+  stream.write(reinterpret_cast<const char*>(&const_size_x), sizeof(const_size_x));
+}
+
+static void swrite(std::ofstream& stream, const std::vector<double> x) {
+  swrite(stream, x.size());
+  if (x.size() > 0) {
+    stream.write(reinterpret_cast<const char*>(x.data()), sizeof(x[0]) * x.size());
+  }
+}
+
+static void swrite(std::ofstream& stream, sha256::Hash x) {
+  // The size is always the same, so there is no need to write it.
+  stream.write(reinterpret_cast<const char*>(x.data()), sizeof(x[0]) * x.size());
+}
+
+void Tabulation::write(std::ofstream& stream, sha256::Hash hash) {
+  swrite(stream, hash);
+  swrite(stream, x_min_);
+  swrite(stream, x_max_);
+  swrite(stream, inv_dx_);
+  swrite(stream, values_);
+}
+
 }  // namespace smash
