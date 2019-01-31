@@ -47,6 +47,11 @@ class Tabulation {
              std::function<double(double)> f);
 
   /**
+   * Construct a tabulation object by reading binary data from a stream.
+   */
+  Tabulation(std::ifstream& stream, sha256::Hash hash);
+
+  /**
    * Look up a value from the tabulation (without any interpolation, simply
    * using the closest tabulated value). If \par x is below the lower tabulation
    * bound we return 0, if it is above the upper bound we return the tabulated
@@ -84,13 +89,13 @@ class Tabulation {
   std::vector<double> values_;
 
   /// lower bound for tabulation
-  const double x_min_;
+  double x_min_;
 
   /// upper bound for tabulation
-  const double x_max_;
+  double x_max_;
 
   /// inverse step size 1/dx
-  const double inv_dx_;
+  double inv_dx_;
 };
 
 /**

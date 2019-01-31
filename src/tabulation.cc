@@ -54,11 +54,26 @@ static void swrite(std::ofstream& stream, double x) {
   stream.write(reinterpret_cast<const char*>(&x), sizeof(x));
 }
 
+static double sread_double(std::ifstream& stream) {
+  double x;
+  stream.read(reinterpret_cast<char*>(&x), sizeof(x));
+  return x;
+}
+
 static void swrite(std::ofstream& stream, size_t x) {
   // We want to support 32-bit and 64-bit platforms, so we store a 64-bit
   // integer on all platforms.
   const auto const_size_x = static_cast<uint64_t>(x);
   stream.write(reinterpret_cast<const char*>(&const_size_x), sizeof(const_size_x));
+}
+
+static size_t sread_size(std::ifstream& stream) {
+  uint64_t x;
+  stream.read(reinterpret_cast<char*>(&x), sizeof(x));
+  if (x > std::numeric_limits<size_t>::max()) {
+    throw std::runtime_error("trying to read vector larger than supported");
+  }
+  return x;
 }
 
 static void swrite(std::ofstream& stream, const std::vector<double> x) {
@@ -68,9 +83,23 @@ static void swrite(std::ofstream& stream, const std::vector<double> x) {
   }
 }
 
+static std::vector<double> sread_vector(std::ifstream& stream) {
+  const size_t n = sread_size(stream);
+  std::vector<double> x;
+  x.resize(n);
+  stream.read(reinterpret_cast<char*>(x.data()), sizeof(double) * n);
+  return x;
+}
+
 static void swrite(std::ofstream& stream, sha256::Hash x) {
   // The size is always the same, so there is no need to write it.
   stream.write(reinterpret_cast<const char*>(x.data()), sizeof(x[0]) * x.size());
+}
+
+static sha256::Hash sread_hash(std::ifstream& stream) {
+  sha256::Hash x;
+  stream.read(reinterpret_cast<char*>(x.data()), sizeof(double) * x.size());
+  return x;
 }
 
 void Tabulation::write(std::ofstream& stream, sha256::Hash hash) {
@@ -79,6 +108,17 @@ void Tabulation::write(std::ofstream& stream, sha256::Hash hash) {
   swrite(stream, x_max_);
   swrite(stream, inv_dx_);
   swrite(stream, values_);
+}
+
+Tabulation::Tabulation(std::ifstream& stream, sha256::Hash hash) {
+  sha256::Hash hash_from_stream = sread_hash(stream);
+  if (hash != hash_from_stream) {
+    throw std::runtime_error("tried to read cache with invalid hash");
+  }
+  x_min_ = sread_double(stream);
+  x_max_ = sread_double(stream);
+  inv_dx_ = sread_double(stream);
+  values_ = sread_vector(stream);
 }
 
 }  // namespace smash
