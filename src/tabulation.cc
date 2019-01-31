@@ -50,16 +50,34 @@ double Tabulation::get_value_linear(double x, Extrapolation extrapol) const {
   return values_[n] + (values_[n + 1] - values_[n]) * r;
 }
 
+/**
+ * Write binary representation to stream.
+ *
+ * \param stream Output stream.
+ * \param x Value to be written.
+ */
 static void swrite(std::ofstream& stream, double x) {
   stream.write(reinterpret_cast<const char*>(&x), sizeof(x));
 }
 
+/**
+ * Read binary representation of a double.
+ *
+ * \param Input stream.
+ * \return Read value.
+ */
 static double sread_double(std::ifstream& stream) {
   double x;
   stream.read(reinterpret_cast<char*>(&x), sizeof(x));
   return x;
 }
 
+/**
+ * Write binary representation to stream.
+ *
+ * \param stream Output stream.
+ * \param x Value to be written.
+ */
 static void swrite(std::ofstream& stream, size_t x) {
   // We want to support 32-bit and 64-bit platforms, so we store a 64-bit
   // integer on all platforms.
@@ -67,6 +85,12 @@ static void swrite(std::ofstream& stream, size_t x) {
   stream.write(reinterpret_cast<const char*>(&const_size_x), sizeof(const_size_x));
 }
 
+/**
+ * Read binary representation of a size_t.
+ *
+ * \param Input stream.
+ * \return Read value.
+ */
 static size_t sread_size(std::ifstream& stream) {
   uint64_t x;
   stream.read(reinterpret_cast<char*>(&x), sizeof(x));
@@ -76,6 +100,12 @@ static size_t sread_size(std::ifstream& stream) {
   return x;
 }
 
+/**
+ * Write binary representation to stream.
+ *
+ * \param stream Output stream.
+ * \param x Value to be written.
+ */
 static void swrite(std::ofstream& stream, const std::vector<double> x) {
   swrite(stream, x.size());
   if (x.size() > 0) {
@@ -83,6 +113,12 @@ static void swrite(std::ofstream& stream, const std::vector<double> x) {
   }
 }
 
+/**
+ * Read binary representation of a vector of doubles.
+ *
+ * \param Input stream.
+ * \return Read value.
+ */
 static std::vector<double> sread_vector(std::ifstream& stream) {
   const size_t n = sread_size(stream);
   std::vector<double> x;
@@ -91,11 +127,23 @@ static std::vector<double> sread_vector(std::ifstream& stream) {
   return x;
 }
 
+/**
+ * Write binary representation to stream.
+ *
+ * \param stream Output stream.
+ * \param x Value to be written.
+ */
 static void swrite(std::ofstream& stream, sha256::Hash x) {
   // The size is always the same, so there is no need to write it.
   stream.write(reinterpret_cast<const char*>(x.data()), sizeof(x[0]) * x.size());
 }
 
+/**
+ * Read binary representation of a SHA256 hash.
+ *
+ * \param Input stream.
+ * \return Read value.
+ */
 static sha256::Hash sread_hash(std::ifstream& stream) {
   sha256::Hash x;
   stream.read(reinterpret_cast<char*>(x.data()), sizeof(double) * x.size());

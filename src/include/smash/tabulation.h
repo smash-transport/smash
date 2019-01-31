@@ -48,6 +48,11 @@ class Tabulation {
 
   /**
    * Construct a tabulation object by reading binary data from a stream.
+   *
+   * \param stream Stream containing the binary representation of the tabulation.
+   * \param hash Hash corresponding to the particle properties for which the
+   *             tabulation was created.
+   * \throws If the given hash does not match the one given by the stream.
    */
   Tabulation(std::ifstream& stream, sha256::Hash hash);
 
@@ -81,6 +86,10 @@ class Tabulation {
 
   /**
    * Write a binary representation of the tabulation to a stream.
+   *
+   * \param stream Stream to which the binary representation is written.
+   * \param hash Hash corresponding to the particle properties for which the
+   *             tabulation was created.
    */
   void write(std::ofstream& stream, sha256::Hash hash);
 
