@@ -173,6 +173,8 @@ class OutputInterface {
         return "net_baryonI3";
       case DensityType::Pion:
         return "pion";
+      case DensityType::Isospin3_tot:
+        return "tot_isospin3";
       case DensityType::None:
         return "none";
     }
