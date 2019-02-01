@@ -28,6 +28,6 @@ static const std::vector<TestVector> test_vectors = {
 TEST(basic) {
   for (const auto& t : test_vectors) {
     const auto digest = sha256::calculate(t.input.data(), t.input.size());
-    COMPARE(t.output, hash_to_string(digest));
+    COMPARE(t.output, sha256::hash_to_string(digest));
   }
 }
