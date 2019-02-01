@@ -82,7 +82,7 @@ static double detailed_balance_factor_RR(double sqrts, double pcm,
   symmetry_factor /= (1 + (c == d));
   const double momentum_factor =
       pCM_sqr(sqrts, c.mass(), d.mass()) /
-      (pcm * a.iso_multiplet()->get_integral_RR(b, sqrts));
+      (pcm * a.iso_multiplet()->get_integral_RR(b.iso_multiplet(), sqrts));
   return spin_factor * symmetry_factor * momentum_factor;
 }
 
@@ -891,7 +891,8 @@ CollisionBranchList CrossSections::nn_xx(ReactionsBitSet included_2to2) const {
         ParticleType::list_baryon_resonances(), delta_or_anti_delta,
         [&sqrts](const ParticleType& type_res_1,
                  const ParticleType& type_res_2) {
-          return type_res_1.iso_multiplet()->get_integral_RR(type_res_2, sqrts);
+          return type_res_1.iso_multiplet()->get_integral_RR(
+                                  type_res_2.iso_multiplet(), sqrts);
         });
     process_list.reserve(process_list.size() + channel_list.size());
     std::move(channel_list.begin(), channel_list.end(),

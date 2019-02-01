@@ -183,7 +183,7 @@ class IsoParticleType {
    * \param type_res_2 Type of the two resonances in the final state.
    * \param sqrts The center-of-mass energy.
    */
-  double get_integral_RR(const ParticleType &type_res_2, double sqrts);
+  double get_integral_RR(IsoParticleType *type_res_2, double sqrts);
 
   /**
    * Utility function to help compute various XX->RR spectral integrals
