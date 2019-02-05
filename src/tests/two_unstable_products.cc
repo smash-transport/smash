@@ -38,6 +38,9 @@ TEST(init_decay_channels) {
       "1.0\t1\tN π\n");
   DecayModes::load_decaymodes(decays_input);
   ParticleType::check_consistency();
+  sha256::Hash hash;
+  hash.fill(0);
+  IsoParticleType::tabulate_integrals(hash);
 }
 
 TEST(pp_DeltaDelta_integral) {

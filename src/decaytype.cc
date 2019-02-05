@@ -142,8 +142,8 @@ double TwoBodyDecaySemistable::get_Lambda() {
   }
 }
 
-// number of tabulation points
-constexpr int num_tab_pts = 200;
+/// Number of tabulation points.
+constexpr size_t num_tab_pts = 200;
 static /*thread_local (see #3075)*/ Integrator integrate;
 
 double TwoBodyDecaySemistable::rho(double mass) const {

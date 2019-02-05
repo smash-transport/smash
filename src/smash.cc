@@ -381,11 +381,14 @@ void ignore_simulation_config_values(Configuration &configuration) {
 }
 
 /// Initialize the particles and decays from the configuration.
-void initialize_particles_and_decays(Configuration& configuration) {
+void initialize_particles_and_decays(Configuration &configuration,
+                                     sha256::Hash hash) {
+  const auto &log = logger<LogArea::Main>();
   ParticleType::create_type_list(configuration.take({"particles"}));
   DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
   ParticleType::check_consistency();
-  // TODO: integral tabulation
+  log.info("Tabulating cross section integrals...");
+  IsoParticleType::tabulate_integrals(hash);
 }
 
 }  // unnamed namespace
@@ -562,9 +565,6 @@ int main(int argc, char *argv[]) {
     if (!configuration.has_value({"decaymodes"}) || decaymodes) {
       configuration["decaymodes"] = particles_and_decays.second;
     }
-    ParticleType::create_type_list(configuration.read({"particles"}));
-    DecayModes::load_decaymodes(configuration.read({"decaymodes"}));
-    ParticleType::check_consistency();
 
     // Calculate a hash of the SMASH version, the particles and decaymodes.
     const std::string version(VERSION_MAJOR);
@@ -581,7 +581,7 @@ int main(int argc, char *argv[]) {
       /* Print only 2->n, n > 1. Do not dump decays, which can be found in
        * decaymodes.txt anyway */
       configuration.merge_yaml("{Collision_Term: {Two_to_One: False}}");
-      initialize_particles_and_decays(configuration);
+      initialize_particles_and_decays(configuration, hash);
       auto scat_finder = actions_finder_for_dump(configuration);
 
       ignore_simulation_config_values(configuration);
@@ -637,14 +637,14 @@ int main(int argc, char *argv[]) {
       ignore_simulation_config_values(configuration);
       check_for_unused_config_values(configuration);
 
-      initialize_particles_and_decays(configuration);
+      initialize_particles_and_decays(configuration, hash);
       PdgCode pdg(pdg_string);
       const ParticleType &res = ParticleType::find(pdg);
       res.dump_width_and_spectral_function();
       std::exit(EXIT_SUCCESS);
     }
     if (cross_section_dump_activated) {
-      initialize_particles_and_decays(configuration);
+      initialize_particles_and_decays(configuration, hash);
       std::string arg_string(cs_string);
       std::vector<std::string> args = split(arg_string, ',');
       const unsigned int n_arg = args.size();
@@ -726,10 +726,8 @@ int main(int argc, char *argv[]) {
         << "# Build    : " << CMAKE_BUILD_TYPE << '\n'
         << "# Date     : " << BUILD_DATE << '\n'
         << configuration.to_string() << '\n';
-    configuration.take({"particles"});
-    configuration.take({"decaymodes"});
     log.trace(source_location, " create ParticleType and DecayModes");
-    initialize_particles_and_decays(configuration);
+    initialize_particles_and_decays(configuration, hash);
 
     // Create an experiment
     logg[LMain].trace(source_location, " create Experiment");

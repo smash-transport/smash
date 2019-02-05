@@ -9,12 +9,15 @@
 
 namespace smash {
 
-Tabulation::Tabulation(double x_min, double range, int num,
+Tabulation::Tabulation(double x_min, double range, size_t num,
                        std::function<double(double)> f)
     : x_min_(x_min), x_max_(x_min + range), inv_dx_(num / range) {
+  if (num < 2) {
+    throw std::runtime_error("Tabulation needs at least two values");
+  }
   values_.resize(num + 1);
   const double dx = range / num;
-  for (int i = 0; i <= num; i++) {
+  for (size_t i = 0; i <= num; i++) {
     values_[i] = f(x_min_ + i * dx);
   }
 }
@@ -82,7 +85,8 @@ static void swrite(std::ofstream& stream, size_t x) {
   // We want to support 32-bit and 64-bit platforms, so we store a 64-bit
   // integer on all platforms.
   const auto const_size_x = static_cast<uint64_t>(x);
-  stream.write(reinterpret_cast<const char*>(&const_size_x), sizeof(const_size_x));
+  stream.write(reinterpret_cast<const char*>(&const_size_x),
+               sizeof(const_size_x));
 }
 
 /**
@@ -109,7 +113,8 @@ static size_t sread_size(std::ifstream& stream) {
 static void swrite(std::ofstream& stream, const std::vector<double> x) {
   swrite(stream, x.size());
   if (x.size() > 0) {
-    stream.write(reinterpret_cast<const char*>(x.data()), sizeof(x[0]) * x.size());
+    stream.write(reinterpret_cast<const char*>(x.data()),
+                 sizeof(x[0]) * x.size());
   }
 }
 
@@ -135,7 +140,8 @@ static std::vector<double> sread_vector(std::ifstream& stream) {
  */
 static void swrite(std::ofstream& stream, sha256::Hash x) {
   // The size is always the same, so there is no need to write it.
-  stream.write(reinterpret_cast<const char*>(x.data()), sizeof(x[0]) * x.size());
+  stream.write(reinterpret_cast<const char*>(x.data()),
+               sizeof(x[0]) * x.size());
 }
 
 /**

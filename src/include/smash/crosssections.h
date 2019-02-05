@@ -209,7 +209,7 @@ class CrossSections {
   /**
    * Determine the cross section for NNbar creation, which is given by
    * detailed balance from the reverse reaction. See
-   * NNbar_annihilation_cross_section
+   * NNbar_annihilation.
    * \return Collision Branch with NNbar creation process and its cross
    * section
    */

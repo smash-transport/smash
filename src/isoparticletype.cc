@@ -15,6 +15,22 @@ namespace smash {
 static constexpr int LParticleType = LogArea::ParticleType::id;
 
 static IsoParticleTypeList iso_type_list;
+static std::vector<const IsoParticleType *> iso_baryon_resonances;
+
+const std::vector<const IsoParticleType *>
+IsoParticleType::list_baryon_resonances() {
+  if (iso_baryon_resonances.empty()) {
+    // Initialize.
+    for (const auto &res : IsoParticleType::list_all()) {
+      if (res.states_[0]->is_stable() ||
+          res.states_[0]->pdgcode().baryon_number() != 1) {
+        continue;
+      }
+      iso_baryon_resonances.push_back(&res);
+    }
+  }
+  return iso_baryon_resonances;
+}
 
 IsoParticleType::IsoParticleType(const std::string &n, double m, double w,
                                  unsigned int s, Parity p)
@@ -84,13 +100,21 @@ static std::string multiplet_name(std::string name) {
   }
 }
 
-bool IsoParticleType::has_anti_multiplet() const {
+const IsoParticleType* IsoParticleType::anti_multiplet() const {
   if (states_[0]->has_antiparticle()) {
     ParticleTypePtr anti = states_[0]->get_antiparticle();
-    return multiplet_name(states_[0]->name()) != multiplet_name(anti->name());
+    if (states_[0]->name() != multiplet_name(anti->name())) {
+      return anti->iso_multiplet();
+    } else {
+      return nullptr;
+    };
   } else {
-    return false;
+    return nullptr;
   }
+}
+
+bool IsoParticleType::has_anti_multiplet() const {
+  return anti_multiplet() != nullptr;
 }
 
 const ParticleTypePtr IsoParticleType::find_state(const std::string &n) {
@@ -152,61 +176,156 @@ void IsoParticleType::create_multiplet(const ParticleType &type) {
   multiplet.add_state(type);
 }
 
-static /*thread_local (see #3075)*/ Integrator integrate;
+static Integrator integrate;
+static Integrator2dCuhre integrate2d;
+
+/**
+ * Tabulation of all N R integrals.
+ *
+ * Keys are the multiplet names (which are unique).
+ */
+static std::unordered_map<std::string, Tabulation> NR_tabulations;
+
+/**
+ * Tabulation of all pi R integrals.
+ *
+ * Keys are the multiplet names (which are unique).
+ */
+static std::unordered_map<std::string, Tabulation> piR_tabulations;
+
+/**
+ * Tabulation of all K R integrals.
+ *
+ * Keys are the multiplet names (which are unique).
+ */
+static std::unordered_map<std::string, Tabulation> RK_tabulations;
+
+/**
+ * Tabulation of all Delta R integrals.
+ *
+ * Keys are the pairs of multiplet names (which are unique).
+ */
+static std::unordered_map<std::string, Tabulation> DeltaR_tabulations;
+
+/**
+ * Tabulation of all rho rho integrals.
+ *
+ * Keys are the pairs of multiplet names (which are unique).
+ */
+static std::unordered_map<std::string, Tabulation> rhoR_tabulations;
+
+void IsoParticleType::tabulate_integrals(sha256::Hash hash) {
+  const auto nuc = IsoParticleType::try_find("N");
+  const auto pion = IsoParticleType::try_find("π");
+  const auto kaon = IsoParticleType::try_find("K");
+  const auto delta = IsoParticleType::try_find("Δ");
+  const auto rho = IsoParticleType::try_find("ρ");
+  const auto h1 = IsoParticleType::try_find("h₁(1170)");
+  constexpr double spacing = 2.0;
+  constexpr double spacing2d = 3.0;
+  for (const auto &res : IsoParticleType::list_baryon_resonances()) {
+    const auto antires = res->anti_multiplet();
+    ParticleTypePtr res_ptype = res->states_[0];
+    if (nuc) {
+      const auto integral = spectral_integral_semistable(integrate, *res_ptype, *nuc->get_states()[0], spacing);
+      NR_tabulations.emplace(std::make_pair(res->name(), integral));
+      if (antires != nullptr) {
+        NR_tabulations.emplace(std::make_pair(antires->name(), integral));
+      }
+    }
+    if (pion) {
+      const auto integral = spectral_integral_semistable(integrate, *res_ptype, *pion->get_states()[0], spacing);
+      piR_tabulations.emplace(std::make_pair(res->name(), integral));
+      if (antires != nullptr) {
+        piR_tabulations.emplace(std::make_pair(antires->name(), integral));
+      }
+    }
+    if (kaon) {
+      const auto integral = spectral_integral_semistable(integrate, *res_ptype, *kaon->get_states()[0], spacing);
+      RK_tabulations.emplace(std::make_pair(res->name(), integral));
+      if (antires != nullptr) {
+        RK_tabulations.emplace(std::make_pair(antires->name(), integral));
+      }
+    }
+    if (delta) {
+      const auto integral = spectral_integral_unstable(integrate2d, *res_ptype, *delta->get_states()[0], spacing2d);
+      DeltaR_tabulations.emplace(std::make_pair(res->name(), integral));
+      if (antires != nullptr) {
+        DeltaR_tabulations.emplace(std::make_pair(antires->name(), integral));
+      }
+    }
+  }
+  if (rho) {
+    rhoR_tabulations.emplace(std::make_pair(
+        "ρ",
+        spectral_integral_unstable(integrate2d, *rho->get_states()[0], *rho->get_states()[0], spacing2d)));
+  }
+  if (rho && h1) {
+    rhoR_tabulations.emplace(std::make_pair(
+        h1->name(),
+        spectral_integral_unstable(integrate2d, *h1->get_states()[0], *rho->get_states()[0], spacing2d)));
+  }
+}
 
 double IsoParticleType::get_integral_NR(double sqrts) {
   if (XS_NR_tabulation_ == nullptr) {
-    // initialize tabulation
-    /* TODO(weil): Move this lazy init to a global initialization function,
-     * in order to avoid race conditions in multi-threading. */
-    ParticleTypePtr type_res = states_[0];
-    ParticleTypePtr nuc = IsoParticleType::find("N").get_states()[0];
-    XS_NR_tabulation_ =
-        spectral_integral_semistable(integrate, *type_res, *nuc, 2.0);
+    const auto res = states_[0]->iso_multiplet();
+    XS_NR_tabulation_ = &NR_tabulations.at(res->name());
   }
   return XS_NR_tabulation_->get_value_linear(sqrts);
 }
 
 double IsoParticleType::get_integral_piR(double sqrts) {
   if (XS_piR_tabulation_ == nullptr) {
-    // initialize tabulation
-    /* TODO(weil): Move this lazy init to a global initialization function,
-     * in order to avoid race conditions in multi-threading. */
-    ParticleTypePtr type_res = states_[0];
-    ParticleTypePtr pion = IsoParticleType::find("π").get_states()[0];
-    XS_piR_tabulation_ =
-        spectral_integral_semistable(integrate, *type_res, *pion, 2.0);
+    const auto res = states_[0]->iso_multiplet();
+    XS_piR_tabulation_ = &piR_tabulations.at(res->name());
   }
   return XS_piR_tabulation_->get_value_linear(sqrts);
 }
 
 double IsoParticleType::get_integral_RK(double sqrts) {
   if (XS_RK_tabulation_ == nullptr) {
-    // initialize tabulation
-    /* TODO(weil): Move this lazy init to a global initialization function,
-     * in order to avoid race conditions in multi-threading. */
-    ParticleTypePtr type_res = states_[0];
-    ParticleTypePtr kaon = IsoParticleType::find("K").get_states()[0];
-    XS_RK_tabulation_ =
-        spectral_integral_semistable(integrate, *type_res, *kaon, 2.0);
+    const auto res = states_[0]->iso_multiplet();
+    XS_RK_tabulation_ = &RK_tabulations.at(res->name());
   }
   return XS_RK_tabulation_->get_value_linear(sqrts);
 }
 
-static /*thread_local (see #3075)*/ Integrator2dCuhre integrate2d;
-
-double IsoParticleType::get_integral_RR(IsoParticleType* type_res_2,
-                                        double sqrts) {
-  auto search = XS_RR_tabulations.find(type_res_2);
-  if (search != XS_RR_tabulations.end()) {
-    return search->second->get_value_linear(sqrts);
+double IsoParticleType::get_integral_rhoR(double sqrts) {  // TODO
+  if (XS_rhoR_tabulation_ == nullptr) {
+    const auto res = states_[0]->iso_multiplet();
+    XS_rhoR_tabulation_ = &rhoR_tabulations.at(res->name());
   }
-  XS_RR_tabulations.emplace(type_res_2,
-                            integrate_RR(type_res_2->get_states()[0]));
-  return XS_RR_tabulations.at(type_res_2)->get_value_linear(sqrts);
+  return XS_rhoR_tabulation_->get_value_linear(sqrts);
 }
 
-TabulationPtr IsoParticleType::integrate_RR(ParticleTypePtr &res2) {
+double IsoParticleType::get_integral_RR(IsoParticleType *type_res_2,
+                                        double sqrts) {
+  const auto res = states_[0]->iso_multiplet();
+  if (type_res_2->states_[0]->is_Delta()) {
+    if (XS_DeltaR_tabulation_ == nullptr) {
+      XS_DeltaR_tabulation_ = &DeltaR_tabulations.at(res->name());
+    }
+    return XS_DeltaR_tabulation_->get_value_linear(sqrts);
+  }
+  if (type_res_2->name() == "ρ") {
+    if (XS_rhoR_tabulation_ == nullptr) {
+      XS_rhoR_tabulation_ = &rhoR_tabulations.at(res->name());
+    }
+    return XS_rhoR_tabulation_->get_value_linear(sqrts);
+  }
+  if (type_res_2->name() == "h₁(1170)") {
+    if (XS_rhoR_tabulation_ == nullptr) {
+      XS_rhoR_tabulation_ = &rhoR_tabulations.at(res->name());
+    }
+    return XS_rhoR_tabulation_->get_value_linear(sqrts);
+  }
+  std::stringstream err; 
+  err << "RR=" << name() << type_res_2->name() << " is not implemented";
+  throw std::runtime_error(err.str());
+}
+
+Tabulation IsoParticleType::integrate_RR(ParticleTypePtr &res2) {
   ParticleTypePtr res1 = states_[0];
   return spectral_integral_unstable(integrate2d, *res1, *res2, 3.);
 }

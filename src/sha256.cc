@@ -1,11 +1,18 @@
+/*
+ *    Copyright (c) 2019
+ *      SMASH Team
+ *
+ *    GNU General Public License (GPLv3 or later)
+ */
+
 // This is based on the public-domain implementation from
 // https://github.com/WaterJuice/WjCryptLib.
 
 #include "include/smash/sha256.h"
 
 #include <cstring>
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 #include <sstream>
 
 // Macros
@@ -14,22 +21,24 @@
 
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 
-#define STORE32H(x, y)                     \
-  {                                        \
+#define STORE32H(x, y)                                \
+  {                                                   \
     (y)[0] = static_cast<uint8_t>(((x) >> 24) & 255); \
     (y)[1] = static_cast<uint8_t>(((x) >> 16) & 255); \
     (y)[2] = static_cast<uint8_t>(((x) >> 8) & 255);  \
-    (y)[3] = static_cast<uint8_t>((x) & 255);         \
+    (y)[3] = static_cast<uint8_t>((x)&255);           \
   }
 
-#define LOAD32H(x, y)                                                         \
-  {                                                                           \
-    x = (static_cast<uint32_t>((y)[0] & 255) << 24) | (static_cast<uint32_t>((y)[1] & 255) << 16) | \
-        (static_cast<uint32_t>((y)[2] & 255) << 8) | (static_cast<uint32_t>((y)[3] & 255));         \
+#define LOAD32H(x, y)                                 \
+  {                                                   \
+    x = (static_cast<uint32_t>((y)[0] & 255) << 24) | \
+        (static_cast<uint32_t>((y)[1] & 255) << 16) | \
+        (static_cast<uint32_t>((y)[2] & 255) << 8) |  \
+        (static_cast<uint32_t>((y)[3] & 255));        \
   }
 
-#define STORE64H(x, y)                     \
-  {                                        \
+#define STORE64H(x, y)                                \
+  {                                                   \
     (y)[0] = static_cast<uint8_t>(((x) >> 56) & 255); \
     (y)[1] = static_cast<uint8_t>(((x) >> 48) & 255); \
     (y)[2] = static_cast<uint8_t>(((x) >> 40) & 255); \
@@ -37,13 +46,13 @@
     (y)[4] = static_cast<uint8_t>(((x) >> 24) & 255); \
     (y)[5] = static_cast<uint8_t>(((x) >> 16) & 255); \
     (y)[6] = static_cast<uint8_t>(((x) >> 8) & 255);  \
-    (y)[7] = static_cast<uint8_t>((x) & 255);         \
+    (y)[7] = static_cast<uint8_t>((x)&255);           \
   }
 
 #define Ch(x, y, z) (z ^ (x & (y ^ z)))
 #define Maj(x, y, z) (((x | y) & z) | (x & y))
 #define S(x, n) ror((x), (n))
-#define R(x, n) (((x) & 0xFFFFFFFFUL) >> (n))
+#define R(x, n) (((x)&0xFFFFFFFFUL) >> (n))
 #define Sigma0(x) (S(x, 2) ^ S(x, 13) ^ S(x, 22))
 #define Sigma1(x) (S(x, 6) ^ S(x, 11) ^ S(x, 25))
 #define Gamma0(x) (S(x, 7) ^ S(x, 18) ^ R(x, 3))
@@ -72,7 +81,6 @@ static const uint32_t K[64] = {
     0x2748774cUL, 0x34b0bcb5UL, 0x391c0cb3UL, 0x4ed8aa4aUL, 0x5b9cca4fUL,
     0x682e6ff3UL, 0x748f82eeUL, 0x78a5636fUL, 0x84c87814UL, 0x8cc70208UL,
     0x90befffaUL, 0xa4506cebUL, 0xbef9a3f7UL, 0xc67178f2UL};
-
 
 namespace smash {
 namespace sha256 {
@@ -175,7 +183,7 @@ void Context::update(const std::string& buffer) {
 }
 
 Hash Context::finalize() {
-  Hash digest {};
+  Hash digest{};
   if (curlen_ >= sizeof(buf_)) {
     return digest;
   }
