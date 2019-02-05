@@ -201,7 +201,7 @@ inline std::unique_ptr<Tabulation> spectral_integral_unstable(
     const ParticleType& res2, double range) {
   const double m1_min = res1.min_mass_kinematic();
   const double m2_min = res2.min_mass_kinematic();
-  return make_unique<Tabulation>(m1_min + m2_min, range, 100, [&](double srts) {
+  return make_unique<Tabulation>(m1_min + m2_min, range, 125, [&](double srts) {
     const double m1_max = srts - m2_min;
     const double m2_max = srts - m1_min;
     return integrate2d(

@@ -208,17 +208,7 @@ double IsoParticleType::get_integral_RR(IsoParticleType* type_res_2,
 
 TabulationPtr IsoParticleType::integrate_RR(ParticleTypePtr &res2) {
   ParticleTypePtr res1 = states_[0];
-  const double m1_min = res1->min_mass_kinematic();
-  const double m2_min = res2->min_mass_kinematic();
-  return make_unique<Tabulation>(m1_min + m2_min, 3., 125, [&](double srts) {
-    const double m1_max = srts - m2_min;
-    const double m2_max = srts - m1_min;
-    const auto result =
-        integrate2d(m1_min, m1_max, m2_min, m2_max, [&](double m1, double m2) {
-          return spec_func_integrand_2res(srts, m1, m2, *res1, *res2);
-        });
-    return result.value();
-  });
+  return spectral_integral_unstable(integrate2d, *res1, *res2, 3.);
 }
 
 }  // namespace smash
