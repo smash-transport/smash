@@ -466,9 +466,6 @@ int main(int argc, char *argv[]) {
     log.trace(source_location, " create ParticleType and DecayModes");
     auto particles_and_decays = load_particles_and_decaymodes(particles,
                                                               decaymodes);
-    configuration["particles"] = particles_and_decays.first;
-    configuration["decaymodes"] = particles_and_decays.second;
-
     if (list2n_activated) {
       /* Print only 2->n, n > 1. Do not dump decays, which can be found in
        * decaymodes.txt anyway */
@@ -560,7 +557,9 @@ int main(int argc, char *argv[]) {
         << CMAKE_CXX_COMPILER_VERSION << '\n'
         << "# Build    : " << CMAKE_BUILD_TYPE << '\n'
         << "# Date     : " << BUILD_DATE << '\n'
-        << configuration.to_string() << '\n';
+        << configuration.to_string() << '\n'
+        << particles_and_decays.first << '\n'
+        << particles_and_decays.second;
 
     // Create an experiment
     log.trace(source_location, " create Experiment");
