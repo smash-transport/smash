@@ -63,6 +63,9 @@ class uniform_dist {
   std::uniform_real_distribution<T> distribution;
 };
 
+/** Generates a seed with a truly random 63-bit value, if possible */
+int64_t generate_63bit_seed();
+
 /** Sets the seed of the random number engine. */
 template <typename T>
 void set_seed(T &&seed) {

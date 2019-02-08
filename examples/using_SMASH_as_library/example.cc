@@ -15,25 +15,13 @@ using namespace smash;
 
 static Integrator integrate;
 
-void initialize_random_number_generator() {
-  // Seed with a truly random 63-bit value, if possible
-  std::random_device rd;
-  static_assert(std::is_same<decltype(rd()), uint32_t>::value,
-               "random_device is assumed to generate uint32_t");
-  uint64_t unsigned_seed = (static_cast<uint64_t>(rd()) << 32) |
-                            static_cast<uint64_t>(rd());
-  // Discard the highest bit to make sure it fits into a positive int64_t
-  int64_t seed = static_cast<int64_t>(unsigned_seed >> 1);
-  random::set_seed(seed);
-}
-
 int main(int argc, char *argv[]) {
   const int example_number = (argc > 1) ? std::stoi(argv[1]) : 1000;
 
   if (example_number > 0) {
     std::cout << "\nExample 1\n---------\n" << std::endl;
     std::cout << "Using SMASH wrapper of random number generator" << std::endl;
-    initialize_random_number_generator();
+    random::set_seed(random::generate_63bit_seed());
 
     Angles phitheta;
     phitheta.distribute_isotropically();
