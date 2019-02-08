@@ -139,6 +139,7 @@ set(smash_src
         scatteraction.cc
         scatteractionphoton.cc
         scatteractionsfinder.cc
+        setup_particles_decaymodes.cc
         spheremodus.cc
         stringfunctions.cc
         tabulation.cc
