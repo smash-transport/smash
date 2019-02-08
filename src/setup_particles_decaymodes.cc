@@ -30,7 +30,6 @@ namespace smash {
 
 std::pair<std::string, std::string> load_particles_and_decaymodes(
     char *particles_file, char *decaymodes_file) {
-  std::cout << particles_file << " " << decaymodes_file << std::endl;
   std::string particle_string, decay_string;
   if (particles_file) {
     if (!boost::filesystem::exists(particles_file)) {
