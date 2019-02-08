@@ -565,15 +565,7 @@ int main(int argc, char *argv[]) {
 
     int64_t seed = configuration.read({"General", "Randomseed"});
     if (seed < 0) {
-      // Seed with a truly random 63-bit value, if possible
-      std::random_device rd;
-      static_assert(std::is_same<decltype(rd()), uint32_t>::value,
-                    "random_device is assumed to generate uint32_t");
-      uint64_t unsigned_seed =
-          (static_cast<uint64_t>(rd()) << 32) | static_cast<uint64_t>(rd());
-      // Discard the highest bit to make sure it fits into a positive int64_t
-      seed = static_cast<int64_t>(unsigned_seed >> 1);
-      configuration["General"]["Randomseed"] = seed;
+      configuration["General"]["Randomseed"] = random::generate_63bit_seed();
     }
 
     // Check output path
