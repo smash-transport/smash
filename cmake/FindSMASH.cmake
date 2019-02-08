@@ -14,7 +14,7 @@ message(STATUS "Looking for SMASH ...")
 find_package(GSL 1.15 REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(Boost 1.49.0 REQUIRED COMPONENTS filesystem system)
-find_package(Pythia 8.235 REQUIRED)
+find_package(Pythia 8.235 EXACT REQUIRED)
 
 set(SMASH_LIBRARIES ${GSL_LIBRARY} ${GSL_CBLAS_LIBRARY} ${Boost_LIBRARIES} ${Pythia_LIBRARIES} -ldl)
 
