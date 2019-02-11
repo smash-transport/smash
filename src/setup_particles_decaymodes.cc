@@ -29,7 +29,7 @@ namespace decaymodes_txt {
 namespace smash {
 
 std::pair<std::string, std::string> load_particles_and_decaymodes(
-    char *particles_file, char *decaymodes_file) {
+    const char *particles_file, const char *decaymodes_file) {
   std::string particle_string, decay_string;
   if (particles_file) {
     if (!boost::filesystem::exists(particles_file)) {
@@ -66,14 +66,14 @@ std::pair<std::string, std::string> load_particles_and_decaymodes(
   } else {
     decay_string = decaymodes_txt::data;
   }
-  ParticleType::create_type_list(particle_string);
-  DecayModes::load_decaymodes(decay_string);
-  ParticleType::check_consistency();
   return std::make_pair(particle_string, decay_string);
 }
 
 void load_default_particles_and_decaymodes() {
-  const auto dummy = load_particles_and_decaymodes(nullptr, nullptr);
+  const auto pd = load_particles_and_decaymodes(nullptr, nullptr);
+  ParticleType::create_type_list(pd.first);
+  DecayModes::load_decaymodes(pd.second);
+  ParticleType::check_consistency();
 }
 
 }  // namespace smash

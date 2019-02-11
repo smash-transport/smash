@@ -464,8 +464,31 @@ int main(int argc, char *argv[]) {
     check_config_version_is_compatible(configuration);
 
     log.trace(source_location, " create ParticleType and DecayModes");
+
     auto particles_and_decays = load_particles_and_decaymodes(particles,
                                                               decaymodes);
+    /* For particles and decaymodes: external file is superior to config.
+     * Hovever, warn in case of conflict.
+     */
+    if (configuration.has_value({"particles"}) and particles) {
+      log.warn("Ambiguity. Particles from external file ", particles,
+             " will be used. But there is also particle list in the config.");
+    }
+    if (!configuration.has_value({"particles"}) or particles) {
+      configuration["particles"] = particles_and_decays.first;
+    }
+
+    if (configuration.has_value({"decaymodes"}) and decaymodes) {
+        log.warn("Ambiguity. Decaymodes from external file ", decaymodes,
+            " will be used. But there is also decaymodes list in the config.");
+    }
+    if (!configuration.has_value({"decaymodes"}) or decaymodes) {
+      configuration["decaymodes"] = particles_and_decays.second;
+    }
+    ParticleType::create_type_list(configuration.read({"particles"}));
+    DecayModes::load_decaymodes(configuration.read({"decaymodes"}));
+    ParticleType::check_consistency();
+
     if (list2n_activated) {
       /* Print only 2->n, n > 1. Do not dump decays, which can be found in
        * decaymodes.txt anyway */
@@ -557,9 +580,9 @@ int main(int argc, char *argv[]) {
         << CMAKE_CXX_COMPILER_VERSION << '\n'
         << "# Build    : " << CMAKE_BUILD_TYPE << '\n'
         << "# Date     : " << BUILD_DATE << '\n'
-        << configuration.to_string() << '\n'
-        << particles_and_decays.first << '\n'
-        << particles_and_decays.second;
+        << configuration.to_string() << '\n';
+    configuration.take({"particles"});
+    configuration.take({"decaymodes"});
 
     // Create an experiment
     log.trace(source_location, " create Experiment");
