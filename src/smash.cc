@@ -465,22 +465,23 @@ int main(int argc, char *argv[]) {
 
     log.trace(source_location, " create ParticleType and DecayModes");
 
-    auto particles_and_decays = load_particles_and_decaymodes(particles,
-                                                              decaymodes);
+    auto particles_and_decays =
+        load_particles_and_decaymodes(particles, decaymodes);
     /* For particles and decaymodes: external file is superior to config.
      * Hovever, warn in case of conflict.
      */
     if (configuration.has_value({"particles"}) and particles) {
       log.warn("Ambiguity. Particles from external file ", particles,
-             " will be used. But there is also particle list in the config.");
+               " will be used. But there is also particle list in the config.");
     }
     if (!configuration.has_value({"particles"}) or particles) {
       configuration["particles"] = particles_and_decays.first;
     }
 
     if (configuration.has_value({"decaymodes"}) and decaymodes) {
-        log.warn("Ambiguity. Decaymodes from external file ", decaymodes,
-            " will be used. But there is also decaymodes list in the config.");
+      log.warn(
+          "Ambiguity. Decaymodes from external file ", decaymodes,
+          " will be used. But there is also decaymodes list in the config.");
     }
     if (!configuration.has_value({"decaymodes"}) or decaymodes) {
       configuration["decaymodes"] = particles_and_decays.second;

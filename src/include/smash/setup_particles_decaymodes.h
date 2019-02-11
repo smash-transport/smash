@@ -26,7 +26,7 @@ namespace smash {
  *             and decaymode files.
  */
 std::pair<std::string, std::string> load_particles_and_decaymodes(
-  const char *particles_file, const char *decaymodes_file);
+    const char *particles_file, const char *decaymodes_file);
 /// Loads default smash particle list and decaymodes
 void load_default_particles_and_decaymodes();
 

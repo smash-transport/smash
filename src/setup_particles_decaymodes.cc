@@ -12,8 +12,8 @@
 #include "smash/decaymodes.h"
 #include "smash/inputfunctions.h"
 
-#include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 namespace {
 #ifndef DOXYGEN
