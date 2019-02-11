@@ -26,6 +26,20 @@ ELSE()
   EXEC_PROGRAM(${Pythia_CONFIG_EXECUTABLE} ARGS "--libdir" OUTPUT_VARIABLE Pythia_LIBDIR)
   EXEC_PROGRAM(${Pythia_CONFIG_EXECUTABLE} ARGS "--includedir" OUTPUT_VARIABLE Pythia_INCLUDE_DIR)
   EXEC_PROGRAM(${Pythia_CONFIG_EXECUTABLE} ARGS "--xmldoc" OUTPUT_VARIABLE Pythia_xmldoc_PATH)
+  EXEC_PROGRAM(${Pythia_CONFIG_EXECUTABLE} ARGS "--prefix" OUTPUT_VARIABLE Pythia_prefix)
+  STRING(REGEX MATCH "pythia([0-9])([0-9][0-9][0-9])" _ ${Pythia_prefix})
+  SET(Pythia_VERSION_MAJOR ${CMAKE_MATCH_1})
+  SET(Pythia_VERSION_MINOR ${CMAKE_MATCH_2})
+  SET(Pythia_VERSION ${Pythia_VERSION_MAJOR}.${Pythia_VERSION_MINOR})
+  if(NOT(${Pythia_VERSION} VERSION_EQUAL ${Pythia_FIND_VERSION}))
+    MESSAGE( STATUS "** WRONG Pythia version: ${Pythia_VERSION},"
+                    " required ${Pythia_FIND_VERSION}." )
+    set(Pythia_VERSION_OK FALSE)
+  else(${Pythia_VERSION} VERSION_LESS ${Pythia_FIND_VERSION})
+    MESSAGE( STATUS "** Pythia version ok: ${Pythia_VERSION},"
+                    " required ${Pythia_FIND_VERSION}.")
+    set(Pythia_VERSION_OK TRUE)
+  endif()
 ENDIF()
 
 FIND_LIBRARY( Pythia_LIBRARY
@@ -58,7 +72,10 @@ IF( Pythia_FOUND )
   MESSAGE( STATUS "** Pythia 8 library: ${Pythia_LIBRARIES}" )
   MESSAGE( STATUS "** Pythia 8 include: ${Pythia_INCLUDE_DIRS}" )
   MESSAGE( STATUS "** Pythia 8 xmldoc:  ${Pythia_xmldoc_PATH}" )
-ENDIF( Pythia_FOUND )
+ENDIF()
+IF (NOT Pythia_VERSION_OK)
+  SET( Pythia_FOUND FALSE)
+ENDIF ()
 
 # the variables will only show up in the GUI in the "advanced" view
 MARK_AS_ADVANCED(Pythia_INCLUDE_DIR Pythia_LIBRARY Pythia_LHAPDFDummy_LIBRARY Pythia_xmldoc_PATH)
