@@ -470,20 +470,20 @@ int main(int argc, char *argv[]) {
     /* For particles and decaymodes: external file is superior to config.
      * Hovever, warn in case of conflict.
      */
-    if (configuration.has_value({"particles"}) and particles) {
+    if (configuration.has_value({"particles"}) && particles) {
       log.warn("Ambiguity. Particles from external file ", particles,
                " will be used. But there is also particle list in the config.");
     }
-    if (!configuration.has_value({"particles"}) or particles) {
+    if (!configuration.has_value({"particles"}) || particles) {
       configuration["particles"] = particles_and_decays.first;
     }
 
-    if (configuration.has_value({"decaymodes"}) and decaymodes) {
+    if (configuration.has_value({"decaymodes"}) && decaymodes) {
       log.warn(
           "Ambiguity. Decaymodes from external file ", decaymodes,
           " will be used. But there is also decaymodes list in the config.");
     }
-    if (!configuration.has_value({"decaymodes"}) or decaymodes) {
+    if (!configuration.has_value({"decaymodes"}) || decaymodes) {
       configuration["decaymodes"] = particles_and_decays.second;
     }
     ParticleType::create_type_list(configuration.read({"particles"}));
