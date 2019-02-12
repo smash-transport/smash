@@ -12,62 +12,148 @@
 
 using namespace smash;
 
-double costheta_12(FourVector p1, FourVector p2) {
-  double tmp = p1.threevec() * p2.threevec();
-  return tmp / (p1.abs3() * p2.abs3());
+double costheta_12(FourVector f1, FourVector f2) { return 2.0; }
+
+double kinematic_g(const double x, const double y, const double z,
+                   const double u, const double v, const double w) {
+  // equation IV.5.25 in TODO
+  return (-2 * u * v * w + 2 * v * v * w + 2 * v * w * w + 2 * u * v * x -
+          2 * v * w * x + 2 * u * w * y - 2 * v * w * y - 2 * u * x * y -
+          2 * v * x * y - 2 * w * x * y + 2 * x * x * y + 2 * x * y * y +
+          2 * u * u * z - 2 * u * v * z - 2 * u * w * z - 2 * v * w * z -
+          2 * u * x * z + 2 * w * x * z - 2 * u * y * z + 2 * v * y * z -
+          2 * x * y * z + 2 * u * z * z) /
+         2.;
 }
 
-double kinematic_g_function(x, y, z, u, v, w) {
-  // check this with mathematica
-
-  return 2.0;
+double kinematic_l_sqrt(const double x, const double y, const double z) {
+  return std::sqrt(std::pow(x - y - z, 2) - 4 * y * z);
 }
 
-ParticleList sample_3body_phase_space_jonas(const double sqrts,
-                                            const ParticleList &outgoing) {
+ParticleList sample_3body_phase_space_jonas(const ParticleData &in,
+                                            const ParticleList &out) {
+  ParticleData incoming = in;
+  // create particledata for now with bogus id. set it later in production code
 
-  // general considerations: 
-  // we work in the R23 frame, i.e. the rest frame of particles 2 and 3. 
-  // we will use relations relating s1, s2 to the energy of the 
-  // mother particle in this frame. from there we know how to boost in the 
-  // lab system. 
-  
-  // sample s1 and s2
-  // check that they are in bounds
-  // sample Omega1 and phi3. Think about their significance
-  // construct 4 vectors
+  ParticleList outgoing = out;
 
-  const double m1 = outgoing[0].type().mass();
-  const double m2 = outgoing[1].type().mass();
-  const double m3 = outgoing[2].type().mass();
+  const double sqrts = incoming.effective_mass();
+  std::cout << sqrts << std::endl;
+  const double s = sqrts * sqrts;
+  const double m1 = out[0].type().mass();
+  const double m2 = out[1].type().mass();
+  const double m3 = out[2].type().mass();
 
-  const double s1_min =
-      pow(outgoing[0].type().mass() + outgoing[1].type().mass(), 2);
-  const double s1_max = pow(sqrts - outgoing[2].type().mass(), 2);
-  const double s2_min =
-      pow(outgoing[1].type().mass() + outgoing[2].type().mass(), 2);
-  const double s2_max = pow(sqrts - outgoing[0].type().mass(), 2);
-
+  const double s1_min = std::pow(m1 + m2, 2);
+  const double s1_max = std::pow(sqrts - m3, 2);
+  const double s2_min = std::pow(m2 + m3, 2);
+  const double s2_max = std::pow(sqrts - m3, 2);
+  std::cout << "Limits for s1 ";
+  std::cout << s1_min << " " << s1_max << std::endl;
   bool done = false;
+  double s1, s2;
   while (!done) {
-    double s1 = random::uniform(s1_min, s1_max);
-    double s2 = random::uniform(s2_min, s2_max);
+    s1 = random::uniform(s1_min, s1_max);
+    s2 = random::uniform(s2_min, s2_max);
 
-    if (kinematic_g_function(s1, s2, sqrts * sqrts, m2 * m2, m1 * m1, m3 * m3) <
-        0)
+    if (kinematic_g(s1, s2, sqrts * sqrts, m2 * m2, m1 * m1, m3 * m3) < 0)
       done = true;
   }
 
-  // from now on work in R23. here p2 = -p3, p1 = p
+  const double s3 = s + m1 * m1 + m2 * m2 + m3 * m3 - s1 - s2;
 
-  Angles phi_theta1;
-  phi_theta1.distribute_isotropically();
-  2
+  // work in R23. Transform incoming particle to frame where 2, 3 are at rest.
+  // Its energy in this frame is known, therefore we can boost in z direction
 
+  // first transform incoming particle to frame where p = (px, 0, 0).
+  // this is not necessary, but makes the math a bit easier.
+
+  double t1, t2;
+  auto vec = incoming.momentum().threevec();
+  std::cout << "p0 before rotation: " << incoming.momentum() << std::endl;
+  if (vec[0] != 0) {
+    t1 = std::atan(vec[2] / vec[0]);
+  } else
+    t1 = 0;  // ???
+  std::cout << t1 << std::endl;
+  vec.rotate_around_y(t1);
+  if (vec[0] != 0) {
+    t2 = std::atan(-vec[1] / vec[0]);
+  } else
+    t2 = 0;  // ??
+  vec.rotate_around_z(t2);
+  incoming.set_3momentum(vec);
+  std::cout << "p0 after rotation: " << incoming.momentum() << std::endl;
+
+  // boost to rest frame of particle 2 and 3. See eq. V.1.7
+  const double E23 = (s + s2 - m1 * m1) / (2 * std::sqrt(s2));
+  const double E = incoming.momentum()[0];
+  const double beta =
+      (E * incoming.momentum()[1] +
+       std::sqrt(-(std::pow(E, 2) * std::pow(E23, 2)) + std::pow(E23, 4) +
+                 std::pow(E23, 2) * std::pow(incoming.momentum()[1], 2))) /
+      (std::pow(E23, 2) + std::pow(incoming.momentum()[1], 2));
+  incoming.boost_momentum(ThreeVector(beta, 0, 0));
+  std::cout << "p0 after boost: " << incoming.momentum() << std::endl;
+
+  // for testing
+  const double E23_expected = (s + s2 - m1 * m1) / std::sqrt(4 * s2);
+  std::cout << "Expected energy: " << E23_expected << std::endl;
+  const double P23_expected =
+      kinematic_l_sqrt(s, s2, m1 * m1) / std::sqrt(4 * s2);
+  const double P23_actual = incoming.momentum().abs3();
+  std::cout << "P0 difference " << P23_expected - P23_actual << std::endl;
+
+  // particle energies
+  const double E23_1 = (s - s2 - m1 * m1) / std::sqrt(4 * s2);
+  const double E23_2 = (s2 + m2 * m2 - m3 * m3) / std::sqrt(4 * s2);
+  const double E23_3 = (s2 + m3 * m3 - m2 * m2) / std::sqrt(4 * s2);
+  // particle three-momenta magnitudes
+  const double p23_1 = kinematic_l_sqrt(s, s2, m1 * m1) / std::sqrt(4 * s2);
+  const double p23_2 =
+      kinematic_l_sqrt(s2, m2 * m2, m3 * m3) / std::sqrt(4 * s2);
+
+  // now calculate angle between p1 and p2
+  const double cos_theta_12 = ((s - s2 - m1 * m1) * (s2 + m2 * m2 - m3 * m3) +
+                               2 * s2 * (m1 * m1 + m2 * m2 - s1)) /
+                              (kinematic_l_sqrt(s, s2, m1 * m1) *
+                               kinematic_l_sqrt(s2, m2 * m2, m3 * m3));
+
+  Angles phitheta;
+  phitheta.distribute_isotropically();
+  phitheta.set_costheta(cos_theta_12);
+
+  outgoing[0].set_4momentum(E23_1, incoming.momentum().threevec());
+  outgoing[1].set_4momentum(E23_2, phitheta.threevec() * p23_2);
+  outgoing[2].set_4momentum(E23_3, -phitheta.threevec() * p23_2);
+
+  std::cout << "Momenta of outgoing particles: " << std::endl;
+  for (auto &out: outgoing) { 
+    std::cout << out.momentum() << std::endl;
+  }
+
+  // still in r23. check momenta
+  //
+  // TODO: Energy is not conserved. 
+  std::cout << "p0 + p1 " << outgoing[0].momentum() - incoming.momentum()
+            << std::endl;
+  std::cout << "p2 + p3 " << outgoing[1].momentum() + outgoing[2].momentum()
+            << std::endl;
+  std::cout << "p0 + p1 + p2 + p3 "
+            << incoming.momentum() - outgoing[0].momentum() -
+                   outgoing[1].momentum() - outgoing[2].momentum()
+            << std::endl;
+
+  // rotate back (should not matter, since theta is sampled uniformly) and boost
+  // back to lab system
+  for (auto &out : outgoing) {
+    out.momentum().threevec().rotate_around_z(-t2);
+    out.momentum().threevec().rotate_around_y(-t1);
+    out.boost_momentum(ThreeVector(-beta, 0, 0));
+  }
+
+  return outgoing;
 }
-
-
-
 
 void sample_3body_phase_space_dima(double srts, ParticleData &a,
                                    ParticleData &b, ParticleData &c) {
@@ -224,12 +310,13 @@ ParticleList one_to_three(ParticleList incoming_particles_,
             "\noutgoing_c: ", outgoing_c.momentum());
 
   // sanity check that we are really working with references.
-  assert(outgoing_a.momentum[1] == outgoing_particles_[0].momentum[0]);
+  //  assert(outgoing_a.momentum[1] == outgoing_particles_[0].momentum[0]);
   return {outgoing_a, outgoing_b, outgoing_c};
 }
 
 TEST(init_particle_types) { Test::create_actual_particletypes(); }
 
+/*
 TEST(three_body_dima) {
   ParticleData kaon{ParticleType::find(0x311)};
   ParticleData pi1{ParticleType::find(0x111)};
@@ -263,6 +350,8 @@ TEST(three_body_dima) {
 
   fs.close();
 }
+ */
+/*
 TEST(three_body_decay) {
   // K -> Pi+ Pi- Pi0
   ParticleData kaon{ParticleType::find(0x311)};
@@ -294,6 +383,53 @@ TEST(three_body_decay) {
        << costheta_12(products[0].momentum(), products[1].momentum()) << '\t'
        << costheta_12(products[1].momentum(), products[2].momentum()) << '\t'
        << '\n';
+  }
+
+  fs.close();
+}
+ */
+
+ThreeVector random_vector() {
+  const double x = random::uniform(0.0, 5.0);
+  const double y = random::uniform(0.0, 5.0);
+  const double z = random::uniform(0.0, 5.0);
+  return ThreeVector(x, y, z);
+}
+TEST(three_body_jonas) {
+  ParticleData kaon{ParticleType::find(0x311)};
+  ParticleData pi1{ParticleType::find(0x111)};
+  ParticleData pi2{ParticleType::find(0x211)};
+  ParticleData pi3{ParticleType::find(0x211)};
+  ThreeVector vec = random_vector();
+  const double energy =
+      std::sqrt(std::pow(kaon.type().mass(), 2) + std::pow(vec.abs(), 2));
+  kaon.set_4momentum(energy, vec);
+  ParticleList incoming{kaon};
+  ParticleList outgoing{pi1, pi2, pi3};
+
+  constexpr int N = 1;
+
+  std::fstream fs;
+  fs.open("/home/rothermel/Work/three_body/dalitz_results/v_jonas.txt",
+          std::fstream::out);
+  for (int i = 0; i < N; i++) {
+    ParticleList products = sample_3body_phase_space_jonas(kaon, outgoing);
+
+    FourVector s12_temp = products[0].momentum() + products[1].momentum();
+    FourVector s23_temp = products[1].momentum() + products[2].momentum();
+
+    const double s12 = s12_temp.sqr();
+    const double s23 = s23_temp.sqr();
+    // std::cout << "s12: " << s12 << "\t s23: " << s23 << std::endl;
+    // std::cout << s12 << std::endl;
+    // std::cout << s23 << std::endl;
+
+    fs << s12 << '\t' << s23 << '\t';
+    for (auto &out : products) {
+      fs << out.momentum().threevec().get_phi() << '\t'
+         << out.momentum().threevec().get_theta() << '\t';
+    }
+    fs << '\n';
   }
 
   fs.close();
