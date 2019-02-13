@@ -82,7 +82,7 @@ if(CPPLINT)
    # make sure we always run cpplint as a test
    add_test(NAME cpplint
             COMMAND ${CPPLINT} ${CPPLINT_ARGS} ${CPPLINT_FILES}
-            WORKINNG_DIRECTORY ${PROJECT_SOURCE_DIR})
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
    add_custom_target(cpplint_build
                      COMMAND ${CPPLINT} ${CPPLINT_ARGS} --filter=-build/c++11,-build/include,-readability,-runtime,-whitespace ${CPPLINT_FILES}
                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
