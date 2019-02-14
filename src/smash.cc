@@ -471,8 +471,9 @@ int main(int argc, char *argv[]) {
      * Hovever, warn in case of conflict.
      */
     if (configuration.has_value({"particles"}) && particles) {
-      log.warn("Ambiguity. Particles from external file ", particles,
-               " will be used. But there is also particle list in the config.");
+      log.warn("Ambiguity: particles from external file ", particles,
+               " requested, but there is also particle list in the config."
+               " Using particles from ", particles);
     }
     if (!configuration.has_value({"particles"}) || particles) {
       configuration["particles"] = particles_and_decays.first;
@@ -480,8 +481,9 @@ int main(int argc, char *argv[]) {
 
     if (configuration.has_value({"decaymodes"}) && decaymodes) {
       log.warn(
-          "Ambiguity. Decaymodes from external file ", decaymodes,
-          " will be used. But there is also decaymodes list in the config.");
+          "Ambiguity: decaymodes from external file ", decaymodes,
+          " requested, but there is also decaymodes list in the config."
+          " Using decaymodes from", decaymodes);
     }
     if (!configuration.has_value({"decaymodes"}) || decaymodes) {
       configuration["decaymodes"] = particles_and_decays.second;
