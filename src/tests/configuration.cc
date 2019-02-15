@@ -121,8 +121,6 @@ TEST(check_unused_report) {
   std::string reference;
   Configuration conf = make_test_configuration();
   Configuration modi = conf["tamer"];
-  conf.take({"particles"});
-  conf.take({"decaymodes"});
   conf.take({"fireballs", "extorting"});
   conf.take({"fireballs", "infection"});
   conf.take({"fireballs", "arena"});
