@@ -473,17 +473,18 @@ int main(int argc, char *argv[]) {
     if (configuration.has_value({"particles"}) && particles) {
       log.warn("Ambiguity: particles from external file ", particles,
                " requested, but there is also particle list in the config."
-               " Using particles from ", particles);
+               " Using particles from ",
+               particles);
     }
     if (!configuration.has_value({"particles"}) || particles) {
       configuration["particles"] = particles_and_decays.first;
     }
 
     if (configuration.has_value({"decaymodes"}) && decaymodes) {
-      log.warn(
-          "Ambiguity: decaymodes from external file ", decaymodes,
-          " requested, but there is also decaymodes list in the config."
-          " Using decaymodes from", decaymodes);
+      log.warn("Ambiguity: decaymodes from external file ", decaymodes,
+               " requested, but there is also decaymodes list in the config."
+               " Using decaymodes from",
+               decaymodes);
     }
     if (!configuration.has_value({"decaymodes"}) || decaymodes) {
       configuration["decaymodes"] = particles_and_decays.second;
