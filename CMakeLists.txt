@@ -8,7 +8,7 @@
 ######################################################### 
 
 # The name of our project
-project(smash)
+project(smash CXX)
 
 # Fail if cmake is called in the source directory
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
