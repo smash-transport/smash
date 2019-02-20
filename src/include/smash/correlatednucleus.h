@@ -55,7 +55,7 @@ class CorrelatedNucleus : public Nucleus {
     std::string particle_list_file_name_;
     /** Number of Nucleons per Nucleus
      *  Set initally to zero to be modified in the constructor.
-     *  Number is obtained by adding the proton and neutron numbers 
+     *  Number is obtained by adding the proton and neutron numbers
      *  specified in the config.yaml
      */
     int number_of_nucleons_ = 0;
@@ -65,18 +65,18 @@ class CorrelatedNucleus : public Nucleus {
     size_t index = 0;
   private:
     /// reads in filepath and gives back a stream from the file
-    static std::ifstream streamfile(std::string file_directory, 
+    static std::ifstream streamfile(std::string file_directory,
                                     std::string file_name);
     /// Variable carrying the output of the streamfile function
     static std::ifstream filestream_;
     /** Bool variable to check if the file was already opened. It ensures
      *  to read in every nucleus configuration given only once. If the bool
-     *  is true the constructor uses the stream that was given the last time 
+     *  is true the constructor uses the stream that was given the last time
      *  the constructor was called.
      */
     static bool checkfileopen_;
     };
 
-    }  // namespace smash 
+    }  // namespace smash
 
     #endif  // SRC_INCLUDE_CORRELATEDNUCLEUS_H_
