@@ -28,7 +28,6 @@ if(GIT_FOUND)
   #message("git found: ${GIT_EXECUTABLE} in version ${GIT_VERSION_STRING}")
   get_filename_component(GIT_PARENT_DIR ${CMAKE_CURRENT_SOURCE_DIR} PATH)
   set(GIT_DIR "${GIT_PARENT_DIR}/.git")
-  message("git dir: ${GIT_DIR}")
   if(EXISTS "${GIT_DIR}")
     execute_process(
       COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
