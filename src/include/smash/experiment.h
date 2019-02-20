@@ -933,7 +933,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *
    * \n
    * \note If you want dilepton decays, you have to modify the decaymodes.txt
-   * file that is used. Otherwise, the output will be empty. \n
+   * of your choice, which you then specify as the input with the `-d` command
+   * line option. Without this decay modes modification the dilepton output will
+   * be empty.\n
    * Dilepton decays are commented out by default. You therefore need to
    * uncomment them. Note, that for dilepton decays, new decay channels can
    * \b not simply be added to the decaymodes.txt file. You also have to modify
