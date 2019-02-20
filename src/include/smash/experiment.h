@@ -932,9 +932,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * which is automatically enabled together with the dilepton output.
    *
    * \n
-   * \note If you want dilepton decays, you have to modify decaymodes.txt
-   * file located in '$SMASH_SRC_DIRECTORY/input' otherwise the output will be
-   * empty. \n
+   * \note If you want dilepton decays, you have to modify the decaymodes.txt
+   * of your choice, which you then specify as the input with the `-d` command
+   * line option. Without this decay modes modification the dilepton output will
+   * be empty.\n
    * Dilepton decays are commented out by default. You therefore need to
    * uncomment them. Note, that for dilepton decays, new decay channels can
    * \b not simply be added to the decaymodes.txt file. You also have to modify
