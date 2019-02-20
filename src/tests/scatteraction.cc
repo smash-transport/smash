@@ -175,14 +175,16 @@ TEST(outgoing_valid) {
 
 TEST(cross_sections_symmetric) {
   // create a list of all particles
-  const auto &all_types = ParticleType::list_all();
+  const auto& all_types = ParticleType::list_all();
   int ntypes = all_types.size();
-  for (int i=0; i<42; i++) {
+  int64_t seed = random::generate_63bit_seed();
+  random::set_seed(seed);
+  for (int i = 0; i < 42; i++) {
     // create a random pair of particles
     ParticleData p1{ParticleType::find(
-                        all_types[random::uniform_int(0, ntypes)].pdgcode())};
+        all_types[random::uniform_int(0, ntypes)].pdgcode())};
     ParticleData p2{ParticleType::find(
-                        all_types[random::uniform_int(0, ntypes)].pdgcode())};
+        all_types[random::uniform_int(0, ntypes)].pdgcode())};
     // set position
     constexpr double p_x = 3.0;
     p1.set_4position(pos_a);
@@ -210,7 +212,7 @@ TEST(cross_sections_symmetric) {
     VERIFY(act21 != nullptr);
 
     // add processes
-    constexpr double elastic_parameter = -10.; // no added elastic x-sections
+    constexpr double elastic_parameter = -10.;  // no added elastic x-sections
     constexpr bool two_to_one = true;
     const ReactionsBitSet included_2to2 = ReactionsBitSet().flip();
     constexpr double low_snn_cut = 0.;
@@ -232,7 +234,7 @@ TEST(cross_sections_symmetric) {
     FUZZY_COMPARE(act12->cross_section(), act21->cross_section())
         << "Colliding " << p1.pdgcode() << " with " << p2.pdgcode()
         << " does not yield the same cross-section as " << p2.pdgcode()
-        << " with " << p1.pdgcode();
+        << " with " << p1.pdgcode() << "\nRandom seed used for test: " << seed;
   }
 }
 
