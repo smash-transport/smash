@@ -11,6 +11,7 @@
 #include <memory>
 #include <utility>
 
+#include "correlatednucleus.h"
 #include "deformednucleus.h"
 #include "forwarddeclarations.h"
 #include "fourvector.h"
@@ -110,7 +111,6 @@ class ColliderModus : public ModusDefault {
   struct ColliderEmpty : public ModusDefault::BadInput {
     using ModusDefault::BadInput::BadInput;
   };
-
  private:
   /**
    * Projectile.

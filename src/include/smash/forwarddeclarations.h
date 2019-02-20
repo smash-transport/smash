@@ -78,6 +78,7 @@ class CollisionBranch;
 class Tabulation;
 class ExperimentBase;
 struct ExperimentParameters;
+struct Nucleoncorr;
 
 /// @endcond
 

@@ -1,0 +1,29 @@
+Version: 1.5 #minimal SMASH version to use with this config file
+
+Logging:
+  default: INFO
+
+General:
+  Modus:          Collider
+  Time_Step_Mode: Fixed
+  Delta_Time:     0.1
+  End_Time:       10.0
+  Randomseed:     -1
+  Nevents:        1
+
+Output:
+  Output_Interval: 10.0
+  Particles:
+    Format:          ["Oscar2013"]
+
+Modi:
+  Collider:
+    Projectile:
+      Particles: {2212: 79, 2112: 118}
+      Correlated: True
+      File_Name: Au197-correlated.dat
+    Target:
+      Particles: {2212: 79, 2112: 118}
+      Correlated: True
+      File_Name: Au197-correlated.dat
+    Sqrtsnn: 7.7

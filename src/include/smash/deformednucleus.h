@@ -57,7 +57,7 @@ class DeformedNucleus : public Nucleus {
    * \return Spatial position from uniformly sampling
    * the deformed woods-saxon distribution
    */
-  ThreeVector distribute_nucleon() const override;
+  ThreeVector distribute_nucleon() override;
 
   /**
    * Sets the deformation parameters of the radius according to the current
