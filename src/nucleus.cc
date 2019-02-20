@@ -15,6 +15,7 @@
 #include "smash/angles.h"
 #include "smash/constants.h"
 #include "smash/fourvector.h"
+#include "smash/inputfunctions.h"
 #include "smash/logging.h"
 #include "smash/numerics.h"
 #include "smash/particles.h"
@@ -212,7 +213,7 @@ double Nucleus::mass() const {
  *  So, the algorithm needs to do all this from the end:
  *
  */
-ThreeVector Nucleus::distribute_nucleon() const {
+ThreeVector Nucleus::distribute_nucleon() {
   // Get the solid angle of the nucleon.
   Angles dir;
   dir.distribute_isotropically();

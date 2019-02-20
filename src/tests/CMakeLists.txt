@@ -268,8 +268,10 @@ smash_add_runtest(list_run smash smash
 smash_add_runtest(dilepton_run smash smash
                   -i ${PROJECT_SOURCE_DIR}/input/dileptons/config.yaml
                   -d ${PROJECT_SOURCE_DIR}/input/dileptons/decaymodes.txt)
-
-
+smash_add_runtest(correlated_run smash smash
+                  -i ${PROJECT_SOURCE_DIR}/input/correlated/config.yaml
+                  -c "Modi: {Collider: {Projectile: {File_Directory: ${PROJECT_SOURCE_DIR}/input/correlated}}}"
+                  -c "Modi: {Collider: {Target: {File_Directory: ${PROJECT_SOURCE_DIR}/input/correlated}}}")
 # Test the shipped config files for potentials and deformed nuclei by verifying
 # the binary runs with them.
 smash_add_runtest(potentials_run smash smash

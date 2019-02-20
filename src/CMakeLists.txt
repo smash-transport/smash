@@ -96,6 +96,7 @@ set(smash_src
         clebschgordan.cc
         collidermodus.cc
         configuration.cc
+        correlatednucleus.cc
         crosssections.cc
         crosssectionsphoton.cc
         decayaction.cc

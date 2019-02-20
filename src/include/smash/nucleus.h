@@ -26,6 +26,9 @@ namespace smash {
  */
 class Nucleus {
  public:
+  /// default constructor
+  Nucleus() = default;
+  
   /**
    * Constructor for Nucleus, that needs the configuration parameters from
    * the inputfile and the number of testparticles
@@ -54,7 +57,7 @@ class Nucleus {
    *
    * \return  Woods-Saxon distributed position.
    */
-  virtual ThreeVector distribute_nucleon() const;
+  virtual ThreeVector distribute_nucleon();
 
   /**
    * Woods-Saxon distribution
@@ -201,9 +204,11 @@ class Nucleus {
   double proton_radius_ = 1.2;
   /// Number of testparticles per physical particle
   size_t testparticles_ = 1;
+
+
+ protected:
   /// Particles associated with this nucleus.
   std::vector<ParticleData> particles_;
-
  public:
   /// For iterators over the particle list:
   inline std::vector<ParticleData>::iterator begin() {
