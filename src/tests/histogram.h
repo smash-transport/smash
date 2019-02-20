@@ -141,7 +141,7 @@ void Histogram1d::test(Analytical analyt, const std::string& dbg_file) const {
   // divide chi^2 by d.o.f.
   chi_sqr = chi_sqr / data_.size();
   printf("chi_sqr per d.o.f: %f\n", chi_sqr);
-  VERIFY(chi_sqr < 1.4) << "Error: chi_squared is too large!";
+  VERIFY(chi_sqr < 2.0) << "Error: chi_squared is too large!";
 
   // the integral (in each loop, this holds how many particles have a
   // normalized deviation less than this).
