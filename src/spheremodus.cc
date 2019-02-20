@@ -44,7 +44,8 @@ namespace smash {
  * \key Start_Time (double, required):\n
  * Starting time of sphere calculation.
  *
- * \key Init_Multiplicities (int int, required):\n
+ * \key Init_Multiplicities
+ * (int int, required if Use_Thermal_Multiplicities is false):\n
  * Initial multiplicities per particle species.
  * Map of PDG number and quantity of this PDG number.
  * Controls how many particles of each species will be initialized.
@@ -75,6 +76,18 @@ namespace smash {
  * \li \key IC_1M - off-equilibrium distribution
  * \li \key IC_2M - off-equilibrium distribution
  * \li \key IC_Massive - off-equilibrium distribution
+ *
+ * \key Insert_Jet (bool, optional, default = false):\n
+ * If this option is set to true then a single high energy particle (a "jet")
+ * will be initialized in the center of the sphere, on an outbound trajectory
+ * along the x axis.
+ *
+ * \key Jet_PDG (int, required if Insert_Jet is true):\n
+ * The type of particle to be used as a jet, as given by its PDG code.
+ *
+ * \key Jet_Momentum (double, optional, default = 20.)
+ * The initial momentum to give to the jet particle (in GeV), only used
+ * if Insert_Jet is true
  *
  * See \iref{Bazow:2016oky} and \iref{Tindall:2016try} for further explanations
  * about the different distribution functions.
@@ -144,7 +157,13 @@ SphereModus::SphereModus(Configuration modus_config,
                         : modus_config.take({"Sphere", "Init_Multiplicities"})
                               .convert_for(init_multipl_)),
       init_distr_(modus_config.take({"Sphere", "Initial_Condition"},
-                                    SphereInitialCondition::ThermalMomenta)) {}
+                                    SphereInitialCondition::ThermalMomenta)),
+      insert_jet_(modus_config.take({"Sphere", "Insert_Jet"}, false)),
+      jet_pdg_(
+          insert_jet_
+              ? modus_config.take({"Sphere", "Jet_PDG"}).convert_for(jet_pdg_)
+              : pdg::p),
+      jet_mom_(modus_config.take({"Sphere", "Jet_Momentum"}, 20.)) {}
 
 /* console output on startup of sphere specific parameters */
 std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
@@ -240,6 +259,15 @@ double SphereModus::initial_conditions(Particles *particles,
     data.set_4momentum(data.momentum().abs(),
                        data.momentum().threevec() -
                            momentum_total.threevec() / particles->size());
+  }
+
+  /* Add a single highly energetic particle in the center of the sphere (jet) */
+  if (insert_jet_) {
+    auto &jet_particle = particles->create(jet_pdg_);
+    jet_particle.set_formation_time(start_time_);
+    jet_particle.set_4position(FourVector(start_time_, 0., 0., 0.));
+    jet_particle.set_4momentum(ParticleType::find(jet_pdg_).mass(),
+                               ThreeVector(jet_mom_, 0., 0.));
   }
 
   /* Recalculate total momentum */

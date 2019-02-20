@@ -110,6 +110,21 @@ class SphereModus : public ModusDefault {
    * used for expanding metric setup
    */
   const SphereInitialCondition init_distr_;
+  /**
+   * Whether to insert a single high energy particle at the center of the
+   * expanding sphere (0,0,0). This particle will initially be moving along the
+   * x axis, outwards from the sphere.
+   */
+  const bool insert_jet_ = false;
+  /**
+   * Pdg of the particle to use as a jet; necessary if insert_jet_ is true,
+   * unused otherwise
+   */
+  const PdgCode jet_pdg_;
+  /**
+   * Initial momentum of the jet particle; only used if insert_jet_ is true
+   */
+  const double jet_mom_;
   /**\ingroup logging
    * Writes the initial state for the Sphere to the output stream.
    *
