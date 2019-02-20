@@ -28,7 +28,7 @@ class Nucleus {
  public:
   /// default constructor
   Nucleus() = default;
-  
+
   /**
    * Constructor for Nucleus, that needs the configuration parameters from
    * the inputfile and the number of testparticles
