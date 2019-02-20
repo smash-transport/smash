@@ -51,7 +51,7 @@ if(USE_ROOT)
 endif()
 
 # find Pythia
-find_package(Pythia REQUIRED)
+find_package(Pythia 8.235 EXACT REQUIRED)
 if(Pythia_FOUND)
   include_directories(SYSTEM
      "${Pythia_INCLUDE_DIRS}"
@@ -139,6 +139,7 @@ set(smash_src
         scatteraction.cc
         scatteractionphoton.cc
         scatteractionsfinder.cc
+        setup_particles_decaymodes.cc
         spheremodus.cc
         stringfunctions.cc
         tabulation.cc

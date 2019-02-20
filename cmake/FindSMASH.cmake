@@ -14,7 +14,7 @@ message(STATUS "Looking for SMASH ...")
 find_package(GSL 1.15 REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(Boost 1.49.0 REQUIRED COMPONENTS filesystem system)
-find_package(Pythia REQUIRED)
+find_package(Pythia 8.235 EXACT REQUIRED)
 
 set(SMASH_LIBRARIES ${GSL_LIBRARY} ${GSL_CBLAS_LIBRARY} ${Boost_LIBRARIES} ${Pythia_LIBRARIES} -ldl)
 
@@ -22,7 +22,6 @@ set(SMASH_INCLUDE_DIR
    $ENV{SMASH_DIR}/3rdparty/Cuba-4.2
    $ENV{SMASH_DIR}/3rdparty/einhard
    $ENV{SMASH_DIR}/3rdparty/yaml-cpp-0.6.2/include
-   $ENV{SMASH_DIR}/3rdparty/pythia8230/include
    $ENV{SMASH_DIR}/src/include
    ${GSL_INCLUDE_DIR}
    ${Boost_INCLUDE_DIRS}

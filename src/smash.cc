@@ -18,9 +18,9 @@
 #include "smash/decaymodes.h"
 #include "smash/experiment.h"
 #include "smash/filelock.h"
-#include "smash/inputfunctions.h"
 #include "smash/random.h"
 #include "smash/scatteractionsfinder.h"
+#include "smash/setup_particles_decaymodes.h"
 #include "smash/stringfunctions.h"
 /* build dependent variables */
 #include "smash/config.h"
@@ -455,65 +455,59 @@ int main(int argc, char *argv[]) {
       configuration.merge_yaml(config);
     }
 
+    // Set up logging
+    set_default_loglevel(
+        configuration.take({"Logging", "default"}, einhard::ALL));
+    create_all_loggers(configuration["Logging"]);
+
     // check if version matches before doing anything else
     check_config_version_is_compatible(configuration);
 
-    if (particles) {
-      if (!bf::exists(particles)) {
-        std::stringstream err;
-        err << "The particles file was expected at '" << particles
-            << "', but the file does not exist.";
-        throw std::runtime_error(err.str());
-      }
-      std::string particle_string = read_all(bf::ifstream{particles});
-      if (has_crlf_line_ending(particle_string)) {
-        std::stringstream err;
-        err << "The particles file has CR LF line endings. Please use LF"
-               " line endings.";
-        throw std::runtime_error(err.str());
-      }
-      configuration["particles"] = particle_string;
+    log.trace(source_location, " create ParticleType and DecayModes");
+
+    auto particles_and_decays =
+        load_particles_and_decaymodes(particles, decaymodes);
+    /* For particles and decaymodes: external file is superior to config.
+     * Hovever, warn in case of conflict.
+     */
+    if (configuration.has_value({"particles"}) && particles) {
+      log.warn("Ambiguity: particles from external file ", particles,
+               " requested, but there is also particle list in the config."
+               " Using particles from ",
+               particles);
     }
-    if (decaymodes) {
-      if (!bf::exists(decaymodes)) {
-        std::stringstream err;
-        err << "The decay modes file was expected at '" << decaymodes
-            << "', but the file does not exist.";
-        throw std::runtime_error(err.str());
-      }
-      std::string decay_string = read_all(bf::ifstream{decaymodes});
-      if (has_crlf_line_ending(decay_string)) {
-        std::stringstream err;
-        err << "The decay mode file has CR LF line endings. Please use LF"
-               " line endings.";
-        throw std::runtime_error(err.str());
-      }
-      configuration["decaymodes"] = decay_string;
+    if (!configuration.has_value({"particles"}) || particles) {
+      configuration["particles"] = particles_and_decays.first;
     }
+
+    if (configuration.has_value({"decaymodes"}) && decaymodes) {
+      log.warn("Ambiguity: decaymodes from external file ", decaymodes,
+               " requested, but there is also decaymodes list in the config."
+               " Using decaymodes from",
+               decaymodes);
+    }
+    if (!configuration.has_value({"decaymodes"}) || decaymodes) {
+      configuration["decaymodes"] = particles_and_decays.second;
+    }
+    ParticleType::create_type_list(configuration.read({"particles"}));
+    DecayModes::load_decaymodes(configuration.read({"decaymodes"}));
+    ParticleType::check_consistency();
+
     if (list2n_activated) {
       /* Print only 2->n, n > 1. Do not dump decays, which can be found in
        * decaymodes.txt anyway */
       configuration.merge_yaml("{Collision_Term: {Two_to_One: False}}");
-      ParticleType::create_type_list(configuration.take({"particles"}));
-      DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
-      ParticleType::check_consistency();
       auto scat_finder = actions_finder_for_dump(configuration);
       scat_finder.dump_reactions();
       std::exit(EXIT_SUCCESS);
     }
     if (resonance_dump_activated) {
-      ParticleType::create_type_list(configuration.take({"particles"}));
-      DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
-      ParticleType::check_consistency();
       PdgCode pdg(pdg_string);
       const ParticleType &res = ParticleType::find(pdg);
       res.dump_width_and_spectral_function();
       std::exit(EXIT_SUCCESS);
     }
     if (cross_section_dump_activated) {
-      ParticleType::create_type_list(configuration.take({"particles"}));
-      DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
-      ParticleType::check_consistency();
       std::string arg_string(cs_string);
       std::vector<std::string> args = split(arg_string, ',');
       const unsigned int n_arg = args.size();
@@ -558,22 +552,9 @@ int main(int argc, char *argv[]) {
       configuration["General"]["End_Time"] = std::abs(std::atof(end_time));
     }
 
-    // Set up logging
-    set_default_loglevel(
-        configuration.take({"Logging", "default"}, einhard::ALL));
-    create_all_loggers(configuration["Logging"]);
-
     int64_t seed = configuration.read({"General", "Randomseed"});
     if (seed < 0) {
-      // Seed with a truly random 63-bit value, if possible
-      std::random_device rd;
-      static_assert(std::is_same<decltype(rd()), uint32_t>::value,
-                    "random_device is assumed to generate uint32_t");
-      uint64_t unsigned_seed =
-          (static_cast<uint64_t>(rd()) << 32) | static_cast<uint64_t>(rd());
-      // Discard the highest bit to make sure it fits into a positive int64_t
-      seed = static_cast<int64_t>(unsigned_seed >> 1);
-      configuration["General"]["Randomseed"] = seed;
+      configuration["General"]["Randomseed"] = random::generate_63bit_seed();
     }
 
     // Check output path
@@ -604,11 +585,8 @@ int main(int argc, char *argv[]) {
         << "# Build    : " << CMAKE_BUILD_TYPE << '\n'
         << "# Date     : " << BUILD_DATE << '\n'
         << configuration.to_string() << '\n';
-
-    log.trace(source_location, " create ParticleType and DecayModes");
-    ParticleType::create_type_list(configuration.take({"particles"}));
-    DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
-    ParticleType::check_consistency();
+    configuration.take({"particles"});
+    configuration.take({"decaymodes"});
 
     // Create an experiment
     log.trace(source_location, " create Experiment");

@@ -604,6 +604,9 @@ class Configuration {
       if (s == "pion") {
         return DensityType::Pion;
       }
+      if (s == "total isospin") {
+        return DensityType::Isospin3_tot;
+      }
       if (s == "none") {
         return DensityType::None;
       }

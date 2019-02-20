@@ -14,6 +14,17 @@
 namespace smash {
 /*thread_local (see #3075)*/ random::Engine random::engine;
 
+int64_t random::generate_63bit_seed() {
+  std::random_device rd;
+  static_assert(std::is_same<decltype(rd()), uint32_t>::value,
+                "random_device is assumed to generate uint32_t");
+  uint64_t unsigned_seed =
+      (static_cast<uint64_t>(rd()) << 32) | static_cast<uint64_t>(rd());
+  // Discard the highest bit to make sure it fits into a positive int64_t
+  const int64_t seed = static_cast<int64_t>(unsigned_seed >> 1);
+  return seed;
+}
+
 random::BesselSampler::BesselSampler(const double poisson_mean1,
                                      const double poisson_mean2,
                                      const int fixed_difference)

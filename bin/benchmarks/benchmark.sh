@@ -23,7 +23,6 @@ type lshw  >/dev/null 2>&1 || fail "Failed to find lshw."
 BUILD_DIR=$1
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd )"
 SMASH_ROOT="${SCRIPTPATH}/../.."
-CONFIGS_DIR="${SCRIPTPATH}/configs"
 
 cd $BUILD_DIR
 
@@ -49,25 +48,25 @@ benchmark_run() {
     CONFIG_OPT=$4
     PERF_OUT=$(perf stat -B -r3 \
                ./smash \
-               -i ${CONFIGS_DIR}/${YAML_DIR}/config.yaml \
-               -d ${CONFIGS_DIR}/${DECAYM_DIR}/decaymodes.txt \
-               -p ${CONFIGS_DIR}/${PART_DIR}/particles.txt \
+               -i ${SCRIPTPATH}/configs/${YAML_DIR}/config.yaml \
+               -d ${DECAYM_DIR}/decaymodes.txt \
+               -p ${PART_DIR}/particles.txt \
                -c "$CONFIG_OPT" \
                2>&1 >/dev/null)
   else
     PERF_OUT=$(perf stat -B -r3 \
                ./smash \
-               -i ${CONFIGS_DIR}/${YAML_DIR}/config.yaml \
-               -d ${CONFIGS_DIR}/${DECAYM_DIR}/decaymodes.txt \
-               -p ${CONFIGS_DIR}/${PART_DIR}/particles.txt \
+               -i ${SCRIPTPATH}/configs/${YAML_DIR}/config.yaml \
+               -d ${DECAYM_DIR}/decaymodes.txt \
+               -p ${PART_DIR}/particles.txt \
                2>&1 >/dev/null)
   fi
   echo "$PERF_OUT"
 }
 
 # Defaults
-PART_DEF="."
-DECAYM_DEF="."
+PART_DEF="${SMASH_ROOT}/input"
+DECAYM_DEF="${SMASH_ROOT}/input"
 
 echo "   Started benchmark for collider ..."
 coll_perf=$(benchmark_run collider $DECAYM_DEF $PART_DEF)
@@ -78,7 +77,7 @@ nots_perf=$(benchmark_run collider $DECAYM_DEF $PART_DEF 'General: { Time_Step_M
 echo "$nots_perf" | grep -E "time elapsed"
 
 echo "   Started benchmark for box ..."
-box_perf=$(benchmark_run box box box)
+box_perf=$(benchmark_run box "${SMASH_ROOT}/input/box" "${SMASH_ROOT}/input/box")
 echo "$box_perf" | grep -E "time elapsed"
 
 echo "   Started benchmark for sphere ..."
@@ -86,11 +85,11 @@ sphere_perf=$(benchmark_run sphere $DECAYM_DEF $PART_DEF)
 echo "$sphere_perf" | grep -E "time elapsed"
 
 echo "   Started benchmark for dileptons ..."
-dilepton_perf=$(benchmark_run collider dileptons $PART_DEF 'Output: { Dileptons: {Format: ["Binary"], Extended: True} }')
+dilepton_perf=$(benchmark_run collider "${SMASH_ROOT}/input/dileptons" $PART_DEF 'Output: { Dileptons: {Format: ["Binary"], Extended: True} }')
 echo "$dilepton_perf" | grep -E "time elapsed"
 
 echo "   Started benchmark for photons ..."
-photons_perf=$(benchmark_run photons photons photons)
+photons_perf=$(benchmark_run photons "${SCRIPTPATH}/configs/photons" "${SCRIPTPATH}/configs/photons")
 echo "$photons_perf" | grep -E "time elapsed"
 
 echo "   Started benchmark for testparticles ..."

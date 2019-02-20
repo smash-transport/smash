@@ -10,22 +10,11 @@
 #include "smash/random.h"
 #include "smash/decaymodes.h"
 #include "smash/angles.h"
+#include "smash/setup_particles_decaymodes.h"
 
 using namespace smash;
 
 static Integrator integrate;
-
-void initialize_random_number_generator() {
-  // Seed with a truly random 63-bit value, if possible
-  std::random_device rd;
-  static_assert(std::is_same<decltype(rd()), uint32_t>::value,
-               "random_device is assumed to generate uint32_t");
-  uint64_t unsigned_seed = (static_cast<uint64_t>(rd()) << 32) |
-                            static_cast<uint64_t>(rd());
-  // Discard the highest bit to make sure it fits into a positive int64_t
-  int64_t seed = static_cast<int64_t>(unsigned_seed >> 1);
-  random::set_seed(seed);
-}
 
 int main(int argc, char *argv[]) {
   const int example_number = (argc > 1) ? std::stoi(argv[1]) : 1000;
@@ -33,7 +22,7 @@ int main(int argc, char *argv[]) {
   if (example_number > 0) {
     std::cout << "\nExample 1\n---------\n" << std::endl;
     std::cout << "Using SMASH wrapper of random number generator" << std::endl;
-    initialize_random_number_generator();
+    random::set_seed(random::generate_63bit_seed());
 
     Angles phitheta;
     phitheta.distribute_isotropically();
@@ -46,30 +35,10 @@ int main(int argc, char *argv[]) {
               << mean_exp << ": "
               << random::exponential(1.0 / mean_exp) << std::endl;
   }
-  std::string smash_dir(std::getenv("SMASH_DIR"));
   if (example_number > 1) {
     std::cout << "\nExample 2\n---------\n" << std::endl;
     std::cout << "Loading SMASH particle types and decay modes" << std::endl;
-    std::ifstream particles_input_file(smash_dir + "/input/particles.txt");
-    std::stringstream buffer;
-    if (particles_input_file) {
-      buffer << particles_input_file.rdbuf();
-      ParticleType::create_type_list(buffer.str());
-    } else {
-      std::cout << "File with SMASH particle list not found." << std::endl;
-      return 1;
-    }
-    std::ifstream decaymodes_input_file(smash_dir + "/input/decaymodes.txt");
-    if (decaymodes_input_file) {
-      buffer.clear();
-      buffer.str(std::string());
-      buffer << decaymodes_input_file.rdbuf();
-      DecayModes::load_decaymodes(buffer.str());
-      ParticleType::check_consistency();
-    } else {
-      std::cout << "File with SMASH decaymodes not found." << std::endl;
-      return 1;
-    }
+    smash::load_default_particles_and_decaymodes();
     std::cout << "Print all strange mesons lighter than 1 GeV" << std::endl;
     for (const ParticleType &ptype : ParticleType::list_all()) {
       if (ptype.is_meson() && ptype.strangeness() != 0 && ptype.mass() < 1.0) {
