@@ -672,9 +672,7 @@ double ParticleType::sample_resonance_mass(const double mass_stable,
 
   // smallest possible mass to find non-zero spectral function contributions
   const double min_mass = this->min_mass_spectral();
-  if (min_mass > max_mass) {
-    throw std::runtime_error("Problem in sample_resonance_mass()");
-  }
+  assert(min_mass > max_mass);
 
   // largest possible cm momentum (from smallest mass)
   const double pcm_max = pCM(cms_energy, mass_stable, min_mass);
