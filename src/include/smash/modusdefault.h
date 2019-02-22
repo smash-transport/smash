@@ -101,8 +101,7 @@ class ModusDefault {
    * \see Grid::Grid
    */
   Grid<GridOptions::Normal> create_grid(
-      const Particles& particles, double min_cell_length,
-      double timestep,
+      const Particles& particles, double min_cell_length, double timestep,
       CellSizeStrategy strategy = CellSizeStrategy::Optimal) const {
     return {particles, min_cell_length, timestep, strategy};
   }
