@@ -524,12 +524,12 @@ int main(int argc, char *argv[]) {
       }
       double ma = (args[2] == "") ? a.mass() : std::stod(args[2]);
       double mb = (args[3] == "") ? b.mass() : std::stod(args[3]);
-      if (a.is_stable() && args[2] != "") {
+      if (a.is_stable() && args[2] != "" && std::stod(args[2]) != a.mass()) {
         ma = a.mass();
         std::cerr << "Warning: pole mass is used for stable particle "
                   << a.name() << " instead of " << args[2] << std::endl;
       }
-      if (b.is_stable() && args[3] != "") {
+      if (b.is_stable() && args[3] != "" && std::stod(args[3]) != b.mass()) {
         mb = b.mass();
         std::cerr << "Warning: pole mass is used for stable particle "
                   << b.name() << " instead of " << args[3] << std::endl;
