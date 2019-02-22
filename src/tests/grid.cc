@@ -461,5 +461,5 @@ TEST(max_positions_normal_grid) {
   // This grid construction uses fragile numbers in the z min/max coordinates,
   // which lead to an index_factor_ that even after one std::nextafter call
   // still generates an out-of-bounds cell index.
-  Grid<GridOptions::Normal> grid2(list, testparticles);
+  Grid<GridOptions::Normal> grid2(list, testparticles, 1.0);
 }
