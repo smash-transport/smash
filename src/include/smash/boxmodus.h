@@ -89,10 +89,12 @@ class BoxModus : public ModusDefault {
   /// \copydoc smash::ModusDefault::create_grid
   Grid<GridOptions::PeriodicBoundaries> create_grid(
       const Particles &particles, double min_cell_length,
+      double timestep_duration,
       CellSizeStrategy strategy = CellSizeStrategy::Optimal) const {
     return {{{0, 0, 0}, {length_, length_, length_}},
             particles,
             min_cell_length,
+            timestep_duration,
             strategy};
   }
 

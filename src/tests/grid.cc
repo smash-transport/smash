@@ -57,6 +57,11 @@ static inline double minimal_cell_length(int testparticles) {
   return 2.5 / std::sqrt(static_cast<double>(testparticles));
 }
 
+/* Timestep only matters if formation times are involved. Here they are not,
+ *  so it's just a dummy value.
+ */
+static constexpr double timestep = 10.0;
+
 TEST(init) {
   set_default_loglevel(einhard::WARN);
   // create_all_loggers("Grid: DEBUG");
@@ -145,7 +150,7 @@ TEST(grid_construction) {
         p.set_4position(min_cell_length * p.position());
         list.insert(p);
       }
-      Grid<GridOptions::Normal> grid(list, min_cell_length);
+      Grid<GridOptions::Normal> grid(list, min_cell_length, timestep);
       auto idsIt = param.ids.begin();
       auto neighbors = param.neighbors;
       grid.iterate_cells(
@@ -208,7 +213,7 @@ TEST(periodic_grid) {
       Grid<GridOptions::PeriodicBoundaries> grid(
           make_pair(std::array<double, 3>{0, 0, 0},
                     std::array<double, 3>{length, length, length}),
-          list, min_cell_length);
+          list, min_cell_length, timestep);
 
       // stores the neighbor pairs found via the grid:
       std::vector<std::pair<ParticleData, ParticleData>> neighbor_pairs;
@@ -439,7 +444,7 @@ TEST(max_positions_periodic_grid) {
   // the total length. Thus it would create a 2x2x2 grid and the last particle
   // might result in an out-of-bounds cell index. This constructor call ensures
   // that no assertion/exception in the construction code is hit.
-  Grid<GridOptions::PeriodicBoundaries> grid(list, min_cell_length);
+  Grid<GridOptions::PeriodicBoundaries> grid(list, min_cell_length, timestep);
 }
 
 TEST(max_positions_normal_grid) {
@@ -456,5 +461,5 @@ TEST(max_positions_normal_grid) {
   // This grid construction uses fragile numbers in the z min/max coordinates,
   // which lead to an index_factor_ that even after one std::nextafter call
   // still generates an out-of-bounds cell index.
-  Grid<GridOptions::Normal> grid2(list, testparticles);
+  Grid<GridOptions::Normal> grid2(list, testparticles, 1.0);
 }
