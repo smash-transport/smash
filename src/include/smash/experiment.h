@@ -1433,8 +1433,8 @@ void Experiment<Modus>::run_time_evolution() {
     double min_cell_length = compute_min_cell_length(dt);
     log.debug("Creating grid with minimal cell length ", min_cell_length);
     const auto &grid = use_grid_
-                           ? modus_.create_grid(particles_, min_cell_length)
-                           : modus_.create_grid(particles_, min_cell_length,
+                           ? modus_.create_grid(particles_, min_cell_length, dt)
+                           : modus_.create_grid(particles_, min_cell_length, dt,
                                                 CellSizeStrategy::Largest);
 
     /* (1.b) Iterate over cells and find actions. */
