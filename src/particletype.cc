@@ -669,9 +669,13 @@ double ParticleType::sample_resonance_mass(const double mass_stable,
   /* largest possible mass: Use 'nextafter' to make sure it is not above the
    * physical limit by numerical error. */
   const double max_mass = std::nextafter(cms_energy - mass_stable, 0.);
+
+  // smallest possible mass to find non-zero spectral function contributions
+  const double min_mass = this->min_mass_spectral();
+  assert(min_mass > max_mass);
+
   // largest possible cm momentum (from smallest mass)
-  const double pcm_max =
-      pCM(cms_energy, mass_stable, this->min_mass_spectral());
+  const double pcm_max = pCM(cms_energy, mass_stable, min_mass);
   const double blw_max = pcm_max * blatt_weisskopf_sqr(pcm_max, L);
   /* The maximum of the spectral-function ratio 'usually' happens at the
    * largest mass. However, this is not always the case, therefore we need
