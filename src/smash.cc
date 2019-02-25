@@ -287,10 +287,15 @@ void ensure_path_is_valid(const bf::path &path) {
  * \return The constructed Scatteractionsfinder.
  */
 ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
-  std::vector<bool> nucleon_has_interacted = {};
+  // The following parameters are only relevant for nucleus-nucleus collisions.
+  // Setting them to the valuing values makes sure they don't have any effect.
+  const std::vector<bool> nucleon_has_interacted = {};
+  const int N_tot = 0;
+  const int N_proj = 0;
+
   ExperimentParameters params = create_experiment_parameters(configuration);
-  return ScatterActionsFinder(configuration, params, nucleon_has_interacted, 0,
-                              0);
+  return ScatterActionsFinder(configuration, params, nucleon_has_interacted,
+                              N_tot, N_proj);
 }
 
 /** Checks if the SMASH version is compatible with the version of the
@@ -320,6 +325,45 @@ void check_config_version_is_compatible(Configuration configuration) {
            " version.";
     throw std::runtime_error(err.str());
   }
+}
+
+
+/**
+ * Checks if there are unused config values.
+ */
+void check_for_unused_config_values(const Configuration& configuration) {
+  const std::string report = configuration.unused_values_report();
+
+  if (report != "{}") {
+  throw std::runtime_error(
+      "The following configuration values were not used:\n" + report);
+  }
+}
+
+/**
+ * Remove all config values that are only needed for simulations.
+ *
+ * This is useful when checking for unused config value when SMASH only
+ * outputs cross sections, resonance properties or possible reactions.
+ */
+void ignore_simulation_config_values(Configuration& configuration) {
+      configuration.take({"Version"});
+      configuration.take({"particles"});
+      configuration.take({"decaymodes"});
+      configuration.take({"Modi"});
+      configuration.take({"General"});
+      if (configuration.has_value({"Output"})) {
+        configuration.take({"Output"});
+      }
+      if (configuration.has_value({"Lattice"})) {
+        configuration.take({"Lattice"});
+      }
+      if (configuration.has_value({"Potentials"})) {
+        configuration.take({"Potentials"});
+      }
+      if (configuration.has_value({"Forced_Thermalization"})) {
+        configuration.take({"Forced_Thermalization"});
+      }
 }
 
 }  // unnamed namespace
@@ -451,6 +495,7 @@ int main(int argc, char *argv[]) {
     // Read in config file
     Configuration configuration(input_path.parent_path(),
                                 input_path.filename());
+    // Merge config passed via command line
     for (const auto &config : extra_config) {
       configuration.merge_yaml(config);
     }
@@ -498,10 +543,19 @@ int main(int argc, char *argv[]) {
        * decaymodes.txt anyway */
       configuration.merge_yaml("{Collision_Term: {Two_to_One: False}}");
       auto scat_finder = actions_finder_for_dump(configuration);
+
+      ignore_simulation_config_values(configuration);
+      check_for_unused_config_values(configuration);
+
       scat_finder.dump_reactions();
       std::exit(EXIT_SUCCESS);
     }
     if (resonance_dump_activated) {
+      // Ignore config values that don't make sense.
+      const auto _dummy = ExperimentBase::create(configuration, output_path);
+      ignore_simulation_config_values(configuration);
+      check_for_unused_config_values(configuration);
+
       PdgCode pdg(pdg_string);
       const ParticleType &res = ParticleType::find(pdg);
       res.dump_width_and_spectral_function();
@@ -541,6 +595,10 @@ int main(int argc, char *argv[]) {
         plab.push_back(std::stod(args.at(i)));
       }
       auto scat_finder = actions_finder_for_dump(configuration);
+
+      ignore_simulation_config_values(configuration);
+      check_for_unused_config_values(configuration);
+
       scat_finder.dump_cross_sections(a, b, ma, mb, final_state_cross_sections,
                                       plab);
       std::exit(EXIT_SUCCESS);
@@ -591,16 +649,11 @@ int main(int argc, char *argv[]) {
     // Create an experiment
     log.trace(source_location, " create Experiment");
     auto experiment = ExperimentBase::create(configuration, output_path);
-    //
-    // version value is not used in experiment. Get rid of it to prevent
+
+    // Version value is not used in experiment. Get rid of it to prevent
     // warning.
     configuration.take({"Version"});
-    const std::string report = configuration.unused_values_report();
-
-    if (report != "{}") {
-      throw std::runtime_error(
-          "The following configuration values were not used:\n" + report);
-    }
+    check_for_unused_config_values(configuration);
 
     // Run the experiment
     log.trace(source_location, " run the Experiment");
