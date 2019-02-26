@@ -48,14 +48,16 @@ ActionList DecayActionsFinder::find_actions_in_cell(
      * timestep, it can be proven that this still overall obeys
      * the exponential decay law.
      */
-    const double decay_time = random::exponential<double>(
+    double decay_time = random::exponential<double>(
         /* The clock goes slower in the rest
          * frame of the resonance */
         one_over_hbarc * p.inverse_gamma() * width);
-    /* If the particle is not yet formed at the decay time,
-     * it should not be able to decay */
-    if (decay_time < dt &&
-        (p.formation_time() < (p.position().x0() + decay_time))) {
+    /* If the particle is not yet formed, shift the decay time by the time it
+     * takes the particle to form */
+    if (p.xsec_scaling_factor() < 1.0) {
+      decay_time += p.formation_time() - p.position().x0();
+    }
+    if (decay_time < dt) {
       /* => decay_time ∈ [0, dt[
        * => the particle decays in this timestep. */
       auto act = make_unique<DecayAction>(p, decay_time);
