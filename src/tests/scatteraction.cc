@@ -182,9 +182,9 @@ TEST(cross_sections_symmetric) {
   for (int i = 0; i < 42; i++) {
     // create a random pair of particles
     ParticleData p1{ParticleType::find(
-        all_types[random::uniform_int(0, ntypes)].pdgcode())};
+        all_types[random::uniform_int(0, ntypes - 1)].pdgcode())};
     ParticleData p2{ParticleType::find(
-        all_types[random::uniform_int(0, ntypes)].pdgcode())};
+        all_types[random::uniform_int(0, ntypes - 1)].pdgcode())};
     // set position
     constexpr double p_x = 3.0;
     p1.set_4position(pos_a);
@@ -229,6 +229,9 @@ TEST(cross_sections_symmetric) {
 
     VERIFY(act12->cross_section() >= 0.);
     VERIFY(act21->cross_section() >= 0.);
+
+    // fuzzyness needs to be slightly larger than 1 for some compilers
+    UnitTest::setFuzzyness<double>(5);
 
     // check symmetry of the cross-section, i.e. xsec_AB == xsec_BA
     FUZZY_COMPARE(act12->cross_section(), act21->cross_section())
