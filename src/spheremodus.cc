@@ -77,20 +77,20 @@ namespace smash {
  * \li \key IC_2M - off-equilibrium distribution
  * \li \key IC_Massive - off-equilibrium distribution
  *
- * \key Insert_Jet (bool, optional, default = false):\n
- * If this option is set to true then a single high energy particle (a "jet")
- * will be initialized in the center of the sphere, on an outbound trajectory
- * along the x axis.
- *
- * \key Jet_PDG (int, required if Insert_Jet is true):\n
- * The type of particle to be used as a jet, as given by its PDG code.
- *
- * \key Jet_Momentum (double, optional, default = 20.)
- * The initial momentum to give to the jet particle (in GeV), only used
- * if Insert_Jet is true
- *
  * See \iref{Bazow:2016oky} and \iref{Tindall:2016try} for further explanations
  * about the different distribution functions.
+ *
+ * \key Jet:\n
+ * This subset of config values is used to put a single high energy particle
+ * (a "jet") in the center of the sphere, on an outbound trajectory along
+ * the x axis; if no pdg is specified no jet is produced.
+ *
+ * \li \key Jet_PDG (int, optional):
+ * The type of particle to be used as a jet, as given by its PDG code;
+ * if none is provided no jet is initialized.
+ *
+ * \li \key Jet_Momentum (double, optional, default = 20.):
+ * The initial momentum to give to the jet particle (in GeV)
  *
  * \n
  * Examples: Configuring a Sphere Simulation
@@ -120,11 +120,24 @@ namespace smash {
  * thermal multiplicities. This is done via
  *\verbatim
  Modi:
-     Box:
-         Length: 10.0
+     Sphere:
+         Radius: 10.0
          Temperature: 0.2
          Use_Thermal_Multiplicities: True
  \endverbatim
+ *
+ * If one wants to simulate a jet in the hadronic medium, this can be done
+ * by using the following configuration setup:
+ *\verbatim
+ Modi:
+     Sphere:
+         Radius: 10.0
+         Temperature: 0.2
+         Use_Thermal_Multiplicities: True
+         Jet:
+             Jet_PDG: 211
+             Jet_Momentum: 100.0
+\endverbatim
  *
  * \n
  * \note
@@ -158,12 +171,11 @@ SphereModus::SphereModus(Configuration modus_config,
                               .convert_for(init_multipl_)),
       init_distr_(modus_config.take({"Sphere", "Initial_Condition"},
                                     SphereInitialCondition::ThermalMomenta)),
-      insert_jet_(modus_config.take({"Sphere", "Insert_Jet"}, false)),
-      jet_pdg_(
-          insert_jet_
-              ? modus_config.take({"Sphere", "Jet_PDG"}).convert_for(jet_pdg_)
-              : pdg::p),
-      jet_mom_(modus_config.take({"Sphere", "Jet_Momentum"}, 20.)) {}
+      insert_jet_(modus_config.has_value({"Sphere", "Jet", "Jet_PDG"})),
+      jet_pdg_(insert_jet_ ? modus_config.take({"Sphere", "Jet", "Jet_PDG"})
+                                 .convert_for(jet_pdg_)
+                           : pdg::p),
+      jet_mom_(modus_config.take({"Sphere", "Jet", "Jet_Momentum"}, 20.)) {}
 
 /* console output on startup of sphere specific parameters */
 std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
@@ -179,6 +191,11 @@ std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
   }
   out << "Boltzmann momentum distribution with T = " << m.sphere_temperature_
       << " GeV.\n";
+  if (m.insert_jet_) {
+    ParticleTypePtr ptype = &ParticleType::find(m.jet_pdg_);
+    out << "Adding a " << ptype->name() << " as a jet in the middle "
+        << "of the sphere with " << m.jet_mom_ << " GeV initial momentum\n";
+  }
   return out;
 }
 
