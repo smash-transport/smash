@@ -327,16 +327,15 @@ void check_config_version_is_compatible(Configuration configuration) {
   }
 }
 
-
 /**
  * Checks if there are unused config values.
  */
-void check_for_unused_config_values(const Configuration& configuration) {
+void check_for_unused_config_values(const Configuration &configuration) {
   const std::string report = configuration.unused_values_report();
 
   if (report != "{}") {
-  throw std::runtime_error(
-      "The following configuration values were not used:\n" + report);
+    throw std::runtime_error(
+        "The following configuration values were not used:\n" + report);
   }
 }
 
@@ -346,24 +345,24 @@ void check_for_unused_config_values(const Configuration& configuration) {
  * This is useful when checking for unused config value when SMASH only
  * outputs cross sections, resonance properties or possible reactions.
  */
-void ignore_simulation_config_values(Configuration& configuration) {
-      configuration.take({"Version"});
-      configuration.take({"particles"});
-      configuration.take({"decaymodes"});
-      configuration.take({"Modi"});
-      configuration.take({"General"});
-      if (configuration.has_value({"Output"})) {
-        configuration.take({"Output"});
-      }
-      if (configuration.has_value({"Lattice"})) {
-        configuration.take({"Lattice"});
-      }
-      if (configuration.has_value({"Potentials"})) {
-        configuration.take({"Potentials"});
-      }
-      if (configuration.has_value({"Forced_Thermalization"})) {
-        configuration.take({"Forced_Thermalization"});
-      }
+void ignore_simulation_config_values(Configuration &configuration) {
+  configuration.take({"Version"});
+  configuration.take({"particles"});
+  configuration.take({"decaymodes"});
+  configuration.take({"Modi"});
+  configuration.take({"General"});
+  if (configuration.has_value({"Output"})) {
+    configuration.take({"Output"});
+  }
+  if (configuration.has_value({"Lattice"})) {
+    configuration.take({"Lattice"});
+  }
+  if (configuration.has_value({"Potentials"})) {
+    configuration.take({"Potentials"});
+  }
+  if (configuration.has_value({"Forced_Thermalization"})) {
+    configuration.take({"Forced_Thermalization"});
+  }
 }
 
 }  // unnamed namespace
