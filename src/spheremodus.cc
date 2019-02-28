@@ -38,7 +38,7 @@ namespace smash {
  * \key Radius (double, required): \n
  * Radius of the Sphere, in fm.
  *
- * \key Sphere_Temperature (double, required):\n
+ * \key Temperature (double, required):\n
  * Temperature to sample momenta in the sphere, in GeV.
  *
  * \key Start_Time (double, required):\n
@@ -105,7 +105,7 @@ namespace smash {
  Modi:
      Sphere:
          Radius: 5.0
-         Sphere_Temperature: 0.2
+         Temperature: 0.2
          Initial_Condition: "thermal momenta"
          Start_Time: 0.0
          Init_Multiplicities:
@@ -159,7 +159,7 @@ namespace smash {
 SphereModus::SphereModus(Configuration modus_config,
                          const ExperimentParameters &)
     : radius_(modus_config.take({"Sphere", "Radius"})),
-      sphere_temperature_(modus_config.take({"Sphere", "Sphere_Temperature"})),
+      sphere_temperature_(modus_config.take({"Sphere", "Temperature"})),
       start_time_(modus_config.take({"Sphere", "Start_Time"}, 0.)),
       use_thermal_(
           modus_config.take({"Sphere", "Use_Thermal_Multiplicities"}, false)),
@@ -194,7 +194,7 @@ std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
   if (m.insert_jet_) {
     ParticleTypePtr ptype = &ParticleType::find(m.jet_pdg_);
     out << "Adding a " << ptype->name() << " as a jet in the middle "
-        << "of the sphere with " << m.jet_mom_ << " GeV initial momentum\n";
+        << "of the sphere with " << m.jet_mom_ << " GeV initial momentum.\n";
   }
   return out;
 }
