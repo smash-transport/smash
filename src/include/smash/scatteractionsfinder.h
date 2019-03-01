@@ -194,7 +194,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
    */
   void dump_cross_sections(const ParticleType &a, const ParticleType &b,
                            double m_a, double m_b, bool final_state,
-                           const std::vector<double> &plab) const;
+                           std::vector<double> &plab) const;
 
   /**
    * \return Pointer to the string process class object.
