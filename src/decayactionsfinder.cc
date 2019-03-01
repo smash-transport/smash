@@ -31,8 +31,8 @@ ActionList DecayActionsFinder::find_actions_in_cell(
       continue;  // particle doesn't decay
     }
 
-    DecayBranchList processes = p.type().get_partial_widths_hadronic(
-        p.momentum(), p.position().threevec());
+    DecayBranchList processes = p.type().get_partial_widths(
+        p.momentum(), p.position().threevec(), WhichDecaymodes::Hadronic);
     // total decay width (mass-dependent)
     const double width = total_weight<DecayBranch>(processes);
 
@@ -77,7 +77,8 @@ ActionList DecayActionsFinder::find_final_actions(const Particles &search_list,
       continue;  // particle doesn't decay
     }
     auto act = make_unique<DecayAction>(p, 0.);
-    act->add_decays(p.type().get_partial_widths(p.effective_mass()));
+    act->add_decays(p.type().get_partial_widths(
+        p.momentum(), p.position().threevec(), WhichDecaymodes::All));
     actions.emplace_back(std::move(act));
   }
   return actions;

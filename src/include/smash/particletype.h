@@ -28,6 +28,16 @@ enum class Parity {
   Neg
 };
 
+/// Decide which decay mode widths are returned in get partical widths.
+enum class WhichDecaymodes {
+  /// All decay mode widths
+  All,
+  /// Ignore dilepton decay modes widths
+  Hadronic,
+  /// Only return dilepton decays widths
+  Dileptons
+};
+
 /**
  * \param p Given parity.
  * \return Inverted parity.
@@ -280,41 +290,25 @@ class ParticleType {
   double total_width(const double m) const;
 
   /**
+   * Helper Function that containes the if-statement logic that decides if a
+   * decay mode is either a hadronic and dilepton decay mode.
+   * \param[in] t type of decay.
+   * \param[in] wh enum that decides which decay modes are wanted.
+   * \return true if a decay branch is wanted and false if not.
+   */
+  bool wanted_decaymode(const DecayType &t, WhichDecaymodes wh) const;
+
+  /**
    * Get all the mass-dependent partial decay widths of a particle with mass m.
-   * \todo lots of code duplication in general in these partial width functions
-   *
-   * \param[in] m Invariant mass of the decaying particle.
-   * \return a list of process branches, whose weights correspond to the
-   *         actual partial widths. The list contains all branches.
-   */
-  DecayBranchList get_partial_widths(const double m) const;
-
-  /**
-   * Get the mass-dependent hadronic partial decay widths
-   * of a particle with mass m.
    * This function needs to know the 4-momentum and the position of the decaying
-   * particle to calculate the square root of s of the final state particles.
-   * \todo lots of code duplication with get_partial_widths_dilepton
-   * \param[in] p 4-momentum of the decaying particle.
-   * \param[in] x position of the decaying particle.
-   * \return a list of process branches, whose weights correspond to the
-   *         actual partial widths. The list contains only hadronic branches.
-   * \throw runtime_error if a decay has less than 2 or more than 3 products
+   * particle to calculate the square root of s of the final state particles and
+   * mass \param[in] p 4-momentum of the decaying particle. \param[in] x
+   * position of the decaying particle. \param[in] wh enum that decides which
+   * decaymodes are returned. \return a list of process branches, whose weights
+   * correspond to the actual partial widths.
    */
-  DecayBranchList get_partial_widths_hadronic(const FourVector p,
-                                              const ThreeVector x) const;
-
-  /**
-   * Get the mass-dependent dilepton partial decay widths
-   * of a particle with mass m.
-   * \todo lots of code duplication with get_partial_widths_hadronic
-   *
-   * \param[in] m Invariant mass of the decaying particle.
-   * \return a list of process branches, whose weights correspond to the
-   *         actual partial widths. The list contains only dilepton branches.
-   * \throw runtime_error if a decay has less than 2 or more than 3 products
-   */
-  DecayBranchList get_partial_widths_dilepton(const double m) const;
+  DecayBranchList get_partial_widths(const FourVector p, const ThreeVector x,
+                                     WhichDecaymodes wh) const;
 
   /**
    * Get the mass-dependent partial width of a resonance with mass m,

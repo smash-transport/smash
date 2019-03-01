@@ -41,7 +41,8 @@ TEST(width_Roper) {
     double wtot = t.total_width(m);
     printf("%7.4f %7.4f ", m, wtot);
     /* Print all partial widths. */
-    ProcessBranchList<DecayBranch> partial = t.get_partial_widths(m);
+    ProcessBranchList<DecayBranch> partial = t.get_partial_widths(
+        FourVector(m, 0., 0., 0.), ThreeVector(), WhichDecaymodes::All);
     for (const auto &branch : partial) {
       printf("%7.4f ", branch->weight());
     }
