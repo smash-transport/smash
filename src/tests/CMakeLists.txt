@@ -268,6 +268,10 @@ smash_add_runtest(list_run smash smash
 smash_add_runtest(dilepton_run smash smash
                   -i ${PROJECT_SOURCE_DIR}/input/dileptons/config.yaml
                   -d ${PROJECT_SOURCE_DIR}/input/dileptons/decaymodes.txt)
+smash_add_runtest(light_nuclei_run smash smash
+                  -i ${PROJECT_SOURCE_DIR}/input/config.yaml
+                  -p ${PROJECT_SOURCE_DIR}/input/light_nuclei/particles.txt
+                  -d ${PROJECT_SOURCE_DIR}/input/light_nuclei/decaymodes.txt)
 
 
 # Test the shipped config files for potentials and deformed nuclei by verifying
