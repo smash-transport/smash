@@ -298,7 +298,7 @@ smash_add_runtest(collider_steps smash smash -e 2.0
 smash_add_runtest(sphere_steps smash smash -e 2.0
                   -c "General: {Delta_Time: 0.1}" -m Sphere
                   -c "Modi: {Sphere: {Radius: 5.0}}"
-                  -c "Modi: {Sphere: {Sphere_Temperature: 0.2}}"
+                  -c "Modi: {Sphere: {Temperature: 0.2}}"
                   -c "Modi: {Sphere: {Start_Time: 0.0}}"
                   -c "Modi: {Box: {Initial_Condition: thermal momenta}}"
                   -c "Modi: {Sphere: {Init_Multiplicities: {211: 100}}}"
@@ -363,7 +363,7 @@ if(USE_SANITIZER)
                     -c "Collision_Term: {Strings: false}")
    smash_add_runtest(sanitizer_sphere   smash_sanitizer smash_sanitizer -e 5.0
                     -m Sphere -c "Modi: {Sphere: {Radius: 5.0}}"
-                    -c "Modi: {Sphere: {Sphere_Temperature: 0.2}}"
+                    -c "Modi: {Sphere: {Temperature: 0.2}}"
                     -c "Modi: {Sphere: {Start_Time: 0.0}}"
                     -c "Modi: {Box: {Initial_Condition: thermal momenta}}"
                     -c "Modi: {Sphere: {Init_Multiplicities: {211: 100}}}"

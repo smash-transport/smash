@@ -68,7 +68,7 @@ TEST(create_sphere) {
                     "  Sphere:\n"
                     "    Initial_Condition: \"thermal momenta\"\n"
                     "    Radius: 5.0\n"
-                    "    Sphere_Temperature: 0.2\n"
+                    "    Temperature: 0.2\n"
                     "    Start_Time: 0.0\n"
                     "    Init_Multiplicities:\n"
                     "      661: 724\n")));

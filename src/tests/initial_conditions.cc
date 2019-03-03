@@ -130,7 +130,7 @@ TEST(initialize_sphere) {
                               "  Radius: 10\n"
                               "  Start_Time: 0.0\n"
                               "  Init_Multiplicities: {661: 500}\n"
-                              "  Sphere_Temperature: 0.2\n"),
+                              "  Temperature: 0.2\n"),
                 Test::default_parameters());
   Particles P;
   // Is the correct number of particles in the map?
