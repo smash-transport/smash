@@ -190,7 +190,28 @@ class QuantumNumbers {
    */
   bool operator==(const QuantumNumbers& rhs) const {
     // clang-format off
-    return (momentum_ == rhs.momentum_ &&
+    // invariant mass of the current momentum
+    const double m0_invariant = std::sqrt(std::fabs(momentum_.sqr()));
+    // invariant mass of the momentum to be compared
+    const double m1_invariant = std::sqrt(std::fabs(rhs.momentum_.sqr()));
+    // average invariant mass
+    const double avg_m_inv = 0.5 * (m0_invariant + m1_invariant);
+    /* precision used to check relative error
+     * 0.1 is multiplied to make the relative error check kicks in
+     * for collision energies beyond 10 GeV. */
+    const double precision_high = 0.1 * small_number;
+    // difference in the four-momentum
+    FourVector momentum_diff = momentum_ - rhs.momentum_;
+    /* Check whether momentum is conserved.
+     * Even if the absolute difference in each component is larger than
+     * small_number, momentum is still considered to be conserved when
+     * the deviation is small enough compared to the given invariant mass. */
+    bool momentum_conserved = momentum_ == rhs.momentum_ ||
+        (std::fabs(momentum_diff.x0()) < precision_high * avg_m_inv &&
+         std::fabs(momentum_diff.x1()) < precision_high * avg_m_inv &&
+         std::fabs(momentum_diff.x2()) < precision_high * avg_m_inv &&
+         std::fabs(momentum_diff.x3()) < precision_high * avg_m_inv);
+    return (momentum_conserved &&
             charge_ == rhs.charge_ &&
             isospin3_ == rhs.isospin3_ &&
             strangeness_ == rhs.strangeness_ &&
