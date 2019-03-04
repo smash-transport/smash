@@ -475,7 +475,8 @@ N(1990)
 0.05   3  N(1440) π
 0.04   3  Λ K  # tuned for Nπ->ΛK
 0.46   4  N σ  # σ and ππ combined
-# From UrQMD
+# From UrQMD, not yet confirmed by PDG
+# Could be removed
 # FIXME The UrQMD papers are ambigious whether this state produces φ
 
 N(2060)
@@ -502,7 +503,8 @@ N(2080)
 0.005  1  Λ K  # tuned for Nπ->ΛK
 0.005  1  N φ  # tuned for p Nb dileptons and pp -> ppKK
 0.001  2  N f₀(980)  # tuned for pp -> ppKK
-# From UrQMD
+# From UrQMD, not yet confirmed by PDG
+# Crucial for pi- p cross section
 
 N(2100)
 0.11   1  N π        #  8 - 18 %
@@ -546,10 +548,10 @@ N(2220)
 #0.000  5  Λ K  # tuned for Nπ->ΛK
 0.005  3  N φ  # tuned for p Nb dileptons and pp -> ppKK
 0.001  4  N f₀(980)  # tuned for pp -> ppKK
-# From UrQMD
+# From UrQMD, confirmed by PDG
 
 N(2250)
-0.15   4  N π  # 0.05 - 0.15, FIXME: should be 5
+0.15   4  N π  # 0.05 - 0.15
 0.25   4  N ρ
 0.20   5  N σ
 0.22   4  Δ π
@@ -557,7 +559,7 @@ N(2250)
 0.005  4  Λ K  # tuned for Nπ->ΛK
 0.005  4  N φ  # tuned for p Nb dileptons and pp -> ppKK
 0.001  5  N f₀(980)  # tuned for pp -> ppKK
-# From UrQMD
+# From UrQMD, confirmed by PDG
 
 #N(2600)
 #0.10   ?  N π  #  3 -  8 %
