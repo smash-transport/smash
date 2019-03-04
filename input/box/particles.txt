@@ -151,4 +151,4 @@ N(2250) 2.250 0.470 -  19932119 19932219
 # d  1.8756 0     +  1000010020
 # Fake dibaryon resonance
 # introduced to describe Xd <-> Xnp reactions via Xd <-> Xd' <->Xnp
-# d' 1.8856 0.100 +  1000010021
+# d' 1.8856 0.100 -  1000010021
