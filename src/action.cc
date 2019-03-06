@@ -216,6 +216,34 @@ void Action::sample_2body_phasespace() {
   sample_angles(masses, cm_kin_energy);
 }
 
+void Action::sample_3body_phasespace() {
+  assert(outgoing_particles_.size() == 3);
+  const double m_a = outgoing_particles_[0].type().mass(),
+               m_b = outgoing_particles_[1].type().mass(),
+               m_c = outgoing_particles_[2].type().mass();
+  const double sqrts = sqrt_s();
+  // sample mab from pCM(sqrt, mab, mc) pCM (mab, ma, mb) <= sqrts^2/4
+  double mab, r, probability, pcm_ab, pcm;
+  do {
+    mab = random::uniform(m_a + m_b, sqrts - m_c);
+    r = random::canonical();
+    pcm = pCM(sqrts, mab, m_c);
+    pcm_ab = pCM(mab, m_a, m_b);
+    probability = pcm * pcm_ab * 4 / (sqrts * sqrts);
+  } while (r > probability);
+  Angles phitheta;
+  phitheta.distribute_isotropically();
+  outgoing_particles_[2].set_4momentum(m_c, pcm * phitheta.threevec());
+  const ThreeVector beta_cm =
+      pcm * phitheta.threevec() / std::sqrt(pcm * pcm + mab * mab);
+
+  phitheta.distribute_isotropically();
+  outgoing_particles_[0].set_4momentum(m_a, pcm_ab * phitheta.threevec());
+  outgoing_particles_[1].set_4momentum(m_b, -pcm_ab * phitheta.threevec());
+  outgoing_particles_[0].boost_momentum(beta_cm);
+  outgoing_particles_[1].boost_momentum(beta_cm);
+}
+
 void Action::check_conservation(const uint32_t id_process) const {
   QuantumNumbers before(incoming_particles_);
   QuantumNumbers after(outgoing_particles_);

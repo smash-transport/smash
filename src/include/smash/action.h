@@ -393,6 +393,12 @@ class Action {
   void sample_2body_phasespace();
 
   /**
+   * Sample the full 3-body phase-space (masses, momenta, angles)
+   * in the center-of-mass frame for the final state particles.
+   */
+  virtual void sample_3body_phasespace();
+
+  /**
    * \ingroup logging
    * Writes information about this action to the \p out stream.
    *
