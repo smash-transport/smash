@@ -111,6 +111,7 @@ class ColliderModus : public ModusDefault {
   struct ColliderEmpty : public ModusDefault::BadInput {
     using ModusDefault::BadInput::BadInput;
   };
+
  private:
   /**
    * Projectile.
