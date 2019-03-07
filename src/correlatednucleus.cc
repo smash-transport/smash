@@ -46,7 +46,8 @@ CorrelatedNucleus::CorrelatedNucleus(Configuration& config, int testparticles) {
   for (const auto& particle : particle_list)
     number_of_nucleons_ += particle.second * testparticles;
   if (!checkfileopen_) {
-    filestream_ = make_unique<std::ifstream>(streamfile(particle_list_file_directory_, particle_list_file_name_));
+    filestream_ = make_unique<std::ifstream>(
+        streamfile(particle_list_file_directory_, particle_list_file_name_));
     // tracked that file was opened once
     checkfileopen_ = true;
   }
@@ -85,7 +86,7 @@ ThreeVector CorrelatedNucleus::distribute_nucleon() {
 }
 
 std::string CorrelatedNucleus::streamfile(const std::string& file_directory,
-                                            const std::string& file_name) {
+                                          const std::string& file_name) {
   if (file_directory.back() == '/') {
     return file_directory + file_name;
   } else {
