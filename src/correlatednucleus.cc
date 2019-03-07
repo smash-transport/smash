@@ -18,7 +18,7 @@
 
 namespace smash {
 
-std::ifstream CorrelatedNucleus::filestream_;
+std::unique_ptr<std::ifstream> CorrelatedNucleus::filestream_ = nullptr;
 bool CorrelatedNucleus::checkfileopen_ = false;
 
 CorrelatedNucleus::CorrelatedNucleus(Configuration& config, int testparticles) {
@@ -46,12 +46,11 @@ CorrelatedNucleus::CorrelatedNucleus(Configuration& config, int testparticles) {
   for (const auto& particle : particle_list)
     number_of_nucleons_ += particle.second * testparticles;
   if (!checkfileopen_) {
-    filestream_ = std::move(
-        streamfile(particle_list_file_directory_, particle_list_file_name_));
+    filestream_ = make_unique<std::ifstream>(streamfile(particle_list_file_directory_, particle_list_file_name_));
     // tracked that file was opened once
     checkfileopen_ = true;
   }
-  corr_nucleon_ = readfile(filestream_, number_of_nucleons_);
+  corr_nucleon_ = readfile(*filestream_, number_of_nucleons_);
 
   fill_from_list(corr_nucleon_);
   // Inherited from nucleus class (see nucleus.h)
@@ -76,7 +75,7 @@ void CorrelatedNucleus::fill_from_list(const std::vector<Nucleoncorr>& vec) {
 
 ThreeVector CorrelatedNucleus::distribute_nucleon() {
   if (index >= corr_nucleon_.size()) {
-    corr_nucleon_ = readfile(filestream_, number_of_nucleons_);
+    corr_nucleon_ = readfile(*filestream_, number_of_nucleons_);
 
     fill_from_list(corr_nucleon_);
   }
@@ -85,15 +84,13 @@ ThreeVector CorrelatedNucleus::distribute_nucleon() {
   return ThreeVector(pos.x, pos.y, pos.z);
 }
 
-std::ifstream CorrelatedNucleus::streamfile(std::string file_directory,
-                                            std::string file_name) {
-  std::string filename;
-  if (file_directory.back() == '/')
-    filename = file_directory + file_name;
-  else
-    filename = file_directory + '/' + file_name;
-  std::ifstream infile(filename);
-  return infile;
+std::string CorrelatedNucleus::streamfile(const std::string& file_directory,
+                                            const std::string& file_name) {
+  if (file_directory.back() == '/') {
+    return file_directory + file_name;
+  } else {
+    return file_directory + '/' + file_name;
+  }
 }
 
 std::vector<Nucleoncorr> CorrelatedNucleus::readfile(

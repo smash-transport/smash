@@ -65,11 +65,17 @@ class CorrelatedNucleus : public Nucleus {
   size_t index = 0;
 
  private:
-  /// reads in filepath and gives back a stream from the file
-  static std::ifstream streamfile(std::string file_directory,
-                                  std::string file_name);
+  /// Generate the name of the stream file.
+  static std::string streamfile(const std::string& file_directory,
+                                const std::string& file_name);
   /// Variable carrying the output of the streamfile function
-  static std::ifstream filestream_;
+  /*
+   * The unique_ptr is only required to work around a bug in GCC 4.8, because it
+   * seems to be trying to use the non-existing copy-constructor of
+   * `std::ifstream`. Newer compilers don't require this unneccessary
+   * indirection.
+   */
+  static std::unique_ptr<std::ifstream> filestream_;
   /** Bool variable to check if the file was already opened. It ensures
    *  to read in every nucleus configuration given only once. If the bool
    *  is true the constructor uses the stream that was given the last time
