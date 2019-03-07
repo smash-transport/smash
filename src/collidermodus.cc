@@ -593,5 +593,4 @@ std::pair<double, double> ColliderModus::get_velocities(double s, double m_a,
   return std::make_pair(v_a, v_b);
 }
 
-
 }  // namespace smash

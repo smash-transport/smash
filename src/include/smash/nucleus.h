@@ -205,10 +205,10 @@ class Nucleus {
   /// Number of testparticles per physical particle
   size_t testparticles_ = 1;
 
-
  protected:
   /// Particles associated with this nucleus.
   std::vector<ParticleData> particles_;
+
  public:
   /// For iterators over the particle list:
   inline std::vector<ParticleData>::iterator begin() {
