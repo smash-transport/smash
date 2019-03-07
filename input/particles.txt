@@ -157,7 +157,7 @@ e⁻ 0.000511 0 + 11
 # d  1.8756 0     +  1000010020
 # Fake dibaryon resonance
 # introduced to describe Xd <-> Xnp reactions via Xd <-> Xd' <->Xnp
-# d' 1.8856 0.100 +  1000010021
+# d' 1.8856 0.100 -  1000010021
 
 ########## hadrons needed for Pythia #########################
 ########## (no cross sections and decay widths yet) ##########
