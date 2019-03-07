@@ -46,8 +46,8 @@ CorrelatedNucleus::CorrelatedNucleus(Configuration& config, int testparticles) {
   for (const auto& particle : particle_list)
     number_of_nucleons_ += particle.second * testparticles;
   if (!checkfileopen_) {
-    filestream_ =
-        streamfile(particle_list_file_directory_, particle_list_file_name_);
+    filestream_ = std::move(
+        streamfile(particle_list_file_directory_, particle_list_file_name_));
     // tracked that file was opened once
     checkfileopen_ = true;
   }
