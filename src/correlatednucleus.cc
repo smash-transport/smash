@@ -73,7 +73,7 @@ void CorrelatedNucleus::fill_from_list(const std::vector<Nucleoncorr>& vec) {
     else {
       throw std::runtime_error(
         "Your particles charges are not 1 = proton or 0 = neutron."
-        "Check whether your list is correct or there is an error.")
+        "Check whether your list is correct or there is an error.");
     }
     // setting parameters for the particles in the particlelist in smash
     const ParticleType& current_type = ParticleType::find(pdgcode);

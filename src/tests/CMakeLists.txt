@@ -268,13 +268,10 @@ smash_add_runtest(list_run smash smash
 smash_add_runtest(dilepton_run smash smash
                   -i ${PROJECT_SOURCE_DIR}/input/dileptons/config.yaml
                   -d ${PROJECT_SOURCE_DIR}/input/dileptons/decaymodes.txt)
-<<<<<<< HEAD
-=======
 smash_add_runtest(light_nuclei_run smash smash
                   -i ${PROJECT_SOURCE_DIR}/input/config.yaml
                   -p ${PROJECT_SOURCE_DIR}/input/light_nuclei/particles.txt
                   -d ${PROJECT_SOURCE_DIR}/input/light_nuclei/decaymodes.txt)
->>>>>>> 076ac2f5519bfd9166ec258ebf4b8fca10cb9b86
 smash_add_runtest(correlated_run smash smash
                   -i ${PROJECT_SOURCE_DIR}/input/correlated/config.yaml
                   -c "Modi: {Collider: {Projectile: {File_Directory: ${PROJECT_SOURCE_DIR}/input/correlated}}}"
