@@ -61,19 +61,17 @@ CorrelatedNucleus::CorrelatedNucleus(Configuration& config, int testparticles) {
 void CorrelatedNucleus::fill_from_list(const std::vector<Nucleoncorr>& vec) {
   particles_.clear();
   index = 0;
-  //checking if particle is proton or neutron
+  // checking if particle is proton or neutron
   for (const auto& it : vec) {
     PdgCode pdgcode;
     if (it.isospin == 1) {
       pdgcode = pdg::p;
-    }
-    else if (it.isospin == 0) {
+    } else if (it.isospin == 0) {
       pdgcode = pdg::n;
-    }
-    else {
+    } else {
       throw std::runtime_error(
-        "Your particles charges are not 1 = proton or 0 = neutron."
-        "Check whether your list is correct or there is an error.");
+          "Your particles charges are not 1 = proton or 0 = neutron."
+          "Check whether your list is correct or there is an error.");
     }
     // setting parameters for the particles in the particlelist in smash
     const ParticleType& current_type = ParticleType::find(pdgcode);
@@ -98,8 +96,7 @@ std::string CorrelatedNucleus::streamfile(const std::string& file_directory,
                                           const std::string& file_name) {
   if (file_directory.back() == '/') {
     return file_directory + file_name;
-  } 
-  else {
+  } else {
     return file_directory + '/' + file_name;
   }
 }
@@ -122,7 +119,7 @@ std::vector<Nucleoncorr> CorrelatedNucleus::readfile(
       break;
     }
     nucleon.push_back(nuc);
-    //ensuring that only A particles are read in for one nucleus
+    // ensuring that only A particles are read in for one nucleus
     if (++i == A) {
       break;
     }

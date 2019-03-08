@@ -39,12 +39,12 @@ struct Nucleoncorr {
  */
 class CorrelatedNucleus : public Nucleus {
  public:
-  /** 
+  /**
    * Constructor that needs configuration parameters from input file
    * and the number of testparticles
    *
    * \param[in] config contains the parameters from the inputfile on the
-   * numbers of particles with a certain PDG code and also the path where 
+   * numbers of particles with a certain PDG code and also the path where
    * the external particle list is located
    * \param[in] number of testparticles
    */
@@ -52,18 +52,19 @@ class CorrelatedNucleus : public Nucleus {
   /**
    * Fills Particlelist from vector containing data for one nucleus.
    * The data contains everything that is written in struct Nucleoncorr.
-   * 
+   *
    * \param[in] vector containing data from external list for one nucleus
    */
   void fill_from_list(const std::vector<Nucleoncorr>& vec);
   /// Returns position of a nucleon as given in the external file
   ThreeVector distribute_nucleon() override;
   /**
-   * The returned vector contains Data for one nucleus given in the particlelist.
-   * 
+   * The returned vector contains Data for one nucleus given in the
+   * particlelist.
+   *
    * \param[in] infile is needed to read in from the external file
    * \param[in] particle_number ensures that only as many lines are read in
-   * as the nucleus contains nucleons. 
+   * as the nucleus contains nucleons.
    */
   std::vector<Nucleoncorr> readfile(std::ifstream& infile,
                                     int particle_number) const;
@@ -72,12 +73,12 @@ class CorrelatedNucleus : public Nucleus {
    * Name is read in from manual input in the config.yaml
    */
   std::string particle_list_file_directory_;
-  /** 
+  /**
    * File name of the nucleon configurations.
    * Name is read in from manual input in the config.yaml
    */
   std::string particle_list_file_name_;
-  /** 
+  /**
    * Number of Nucleons per Nucleus
    * Set initally to zero to be modified in the constructor.
    * Number is obtained by adding the proton and neutron numbers
@@ -90,7 +91,7 @@ class CorrelatedNucleus : public Nucleus {
   size_t index = 0;
 
  private:
-  /** 
+  /**
    * Generates the name of the stream file.
    * \param[in] file_directory is the path to the external file
    * \param[in] file_name is the name of the external file
