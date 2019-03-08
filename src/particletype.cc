@@ -454,27 +454,41 @@ void ParticleType::check_consistency() {
   }
 }
 
-DecayBranchList ParticleType::get_partial_widths(const double m) const {
-  const auto &decay_mode_list = decay_modes().decay_mode_list();
-  if (decay_mode_list.size() == 0) {
-    return {};
-  }
-  /* Loop over decay modes and calculate all partial widths. */
-  DecayBranchList partial;
-  partial.reserve(decay_mode_list.size());
-  for (unsigned int i = 0; i < decay_mode_list.size(); i++) {
-    const double w = partial_width(m, decay_mode_list[i].get());
-    if (w > 0.) {
-      partial.push_back(
-          make_unique<DecayBranch>(decay_mode_list[i]->type(), w));
+bool ParticleType::wanted_decaymode(const DecayType &t,
+                                    WhichDecaymodes wh) const {
+  const auto FinalTypes = t.particle_types();
+  switch (wh) {
+    case WhichDecaymodes::All: {
+      return true;
+    }
+    case WhichDecaymodes::Hadronic: {
+      // No dileptons in final state particles for 2 or 3-body decays
+      return (
+          (t.particle_number() == 2 &&
+           !(is_dilepton(FinalTypes[0]->pdgcode(),
+                         FinalTypes[1]->pdgcode()))) ||
+          (t.particle_number() == 3 &&
+           !(has_lepton_pair(FinalTypes[0]->pdgcode(), FinalTypes[1]->pdgcode(),
+                             FinalTypes[2]->pdgcode()))));
+    }
+    case WhichDecaymodes::Dileptons: {
+      // Lepton pair in final state particles for 2 or 3-body decays
+      return (
+          (t.particle_number() == 2 &&
+           is_dilepton(FinalTypes[0]->pdgcode(), FinalTypes[1]->pdgcode())) ||
+          (t.particle_number() == 3 &&
+           has_lepton_pair(FinalTypes[0]->pdgcode(), FinalTypes[1]->pdgcode(),
+                           FinalTypes[2]->pdgcode())));
     }
   }
-  return partial;
 }
 
-DecayBranchList ParticleType::get_partial_widths_hadronic(
-    const FourVector p, const ThreeVector x) const {
-  if (is_stable()) {
+DecayBranchList ParticleType::get_partial_widths(const FourVector p,
+                                                 const ThreeVector x,
+                                                 WhichDecaymodes wh) const {
+  const auto &decay_mode_list = decay_modes().decay_mode_list();
+  if (decay_mode_list.size() == 0 ||
+      (wh == WhichDecaymodes::Hadronic && is_stable())) {
     return {};
   }
   /* Determine whether the decay is affected by the potentials. If it's
@@ -489,7 +503,6 @@ DecayBranchList ParticleType::get_partial_widths_hadronic(
     UI3_lat_pointer->value_at(x, UI3);
   }
   /* Loop over decay modes and calculate all partial widths. */
-  const auto &decay_mode_list = decay_modes().decay_mode_list();
   DecayBranchList partial;
   partial.reserve(decay_mode_list.size());
   for (unsigned int i = 0; i < decay_mode_list.size(); i++) {
@@ -507,76 +520,13 @@ DecayBranchList ParticleType::get_partial_widths_hadronic(
       }
     }
     double sqrt_s = (p + UB * scale_B + UI3 * scale_I3).abs();
-    /* Add 1->2 and 1->3 decay channels. */
-    switch (decay_mode_list[i]->type().particle_number()) {
-      case 2: {
-        if (!(is_dilepton(FinalTypes[0]->pdgcode(),
-                          FinalTypes[1]->pdgcode()))) {
-          const double w = partial_width(sqrt_s, decay_mode_list[i].get());
-          if (w > 0.) {
-            partial.push_back(
-                make_unique<DecayBranch>(decay_mode_list[i]->type(), w));
-          }
-        }
-        break;
-      }
-      case 3: {
-        if (!(has_lepton_pair(FinalTypes[0]->pdgcode(),
-                              FinalTypes[1]->pdgcode(),
-                              FinalTypes[2]->pdgcode()))) {
-          const double w = partial_width(sqrt_s, decay_mode_list[i].get());
-          if (w > 0.) {
-            partial.push_back(
-                make_unique<DecayBranch>(decay_mode_list[i]->type(), w));
-          }
-        }
-        break;
-      }
-      default:
-        throw std::runtime_error("Problem in get_partial_widths_hadronic()");
-    }
-  }
-  return partial;
-}
 
-DecayBranchList ParticleType::get_partial_widths_dilepton(
-    const double m) const {
-  const auto &decay_mode_list = decay_modes().decay_mode_list();
-  if (decay_mode_list.size() == 0) {
-    return {};
-  }
-  /* Loop over decay modes and calculate all partial widths. */
-  DecayBranchList partial;
-  partial.reserve(decay_mode_list.size());
-  for (unsigned int i = 0; i < decay_mode_list.size(); i++) {
-    switch (decay_mode_list[i]->type().particle_number()) {
-      case 2: {
-        if (is_dilepton(
-                decay_mode_list[i]->type().particle_types()[0]->pdgcode(),
-                decay_mode_list[i]->type().particle_types()[1]->pdgcode())) {
-          const double w = partial_width(m, decay_mode_list[i].get());
-          if (w > 0.) {
-            partial.push_back(
-                make_unique<DecayBranch>(decay_mode_list[i]->type(), w));
-          }
-        }
-        break;
+    const double w = partial_width(sqrt_s, decay_mode_list[i].get());
+    if (w > 0.) {
+      if (wanted_decaymode(decay_mode_list[i]->type(), wh)) {
+        partial.push_back(
+            make_unique<DecayBranch>(decay_mode_list[i]->type(), w));
       }
-      case 3: {
-        if (has_lepton_pair(
-                decay_mode_list[i]->type().particle_types()[0]->pdgcode(),
-                decay_mode_list[i]->type().particle_types()[1]->pdgcode(),
-                decay_mode_list[i]->type().particle_types()[2]->pdgcode())) {
-          const double w = partial_width(m, decay_mode_list[i].get());
-          if (w > 0.) {
-            partial.push_back(
-                make_unique<DecayBranch>(decay_mode_list[i]->type(), w));
-          }
-        }
-        break;
-      }
-      default:
-        throw std::runtime_error("Problem in get_partial_widths_dilepton()");
     }
   }
   return partial;
@@ -669,9 +619,13 @@ double ParticleType::sample_resonance_mass(const double mass_stable,
   /* largest possible mass: Use 'nextafter' to make sure it is not above the
    * physical limit by numerical error. */
   const double max_mass = std::nextafter(cms_energy - mass_stable, 0.);
+
+  // smallest possible mass to find non-zero spectral function contributions
+  const double min_mass = this->min_mass_spectral();
+  assert(min_mass > max_mass);
+
   // largest possible cm momentum (from smallest mass)
-  const double pcm_max =
-      pCM(cms_energy, mass_stable, this->min_mass_spectral());
+  const double pcm_max = pCM(cms_energy, mass_stable, min_mass);
   const double blw_max = pcm_max * blatt_weisskopf_sqr(pcm_max, L);
   /* The maximum of the spectral-function ratio 'usually' happens at the
    * largest mass. However, this is not always the case, therefore we need

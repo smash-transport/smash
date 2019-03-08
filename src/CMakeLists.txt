@@ -26,11 +26,17 @@ endif()
 find_package (Git)
 if(GIT_FOUND)
   #message("git found: ${GIT_EXECUTABLE} in version ${GIT_VERSION_STRING}")
-  execute_process(
-    COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    OUTPUT_VARIABLE GIT_BRANCH)
-  string(STRIP ${GIT_BRANCH} GIT_BRANCH)
+  get_filename_component(GIT_PARENT_DIR ${CMAKE_CURRENT_SOURCE_DIR} PATH)
+  set(GIT_DIR "${GIT_PARENT_DIR}/.git")
+  if(EXISTS "${GIT_DIR}")
+    execute_process(
+      COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+      OUTPUT_VARIABLE GIT_BRANCH)
+    string(STRIP ${GIT_BRANCH} GIT_BRANCH)
+  else()
+    set(GIT_BRANCH "UNKNOWN")
+  endif()
   #message("git branch: ${GIT_BRANCH}")
 endif (GIT_FOUND)
 

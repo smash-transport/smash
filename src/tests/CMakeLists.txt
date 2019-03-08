@@ -268,6 +268,13 @@ smash_add_runtest(list_run smash smash
 smash_add_runtest(dilepton_run smash smash
                   -i ${PROJECT_SOURCE_DIR}/input/dileptons/config.yaml
                   -d ${PROJECT_SOURCE_DIR}/input/dileptons/decaymodes.txt)
+<<<<<<< HEAD
+=======
+smash_add_runtest(light_nuclei_run smash smash
+                  -i ${PROJECT_SOURCE_DIR}/input/config.yaml
+                  -p ${PROJECT_SOURCE_DIR}/input/light_nuclei/particles.txt
+                  -d ${PROJECT_SOURCE_DIR}/input/light_nuclei/decaymodes.txt)
+>>>>>>> 076ac2f5519bfd9166ec258ebf4b8fca10cb9b86
 smash_add_runtest(correlated_run smash smash
                   -i ${PROJECT_SOURCE_DIR}/input/correlated/config.yaml
                   -c "Modi: {Collider: {Projectile: {File_Directory: ${PROJECT_SOURCE_DIR}/input/correlated}}}"
@@ -296,7 +303,7 @@ smash_add_runtest(collider_steps smash smash -e 2.0
 smash_add_runtest(sphere_steps smash smash -e 2.0
                   -c "General: {Delta_Time: 0.1}" -m Sphere
                   -c "Modi: {Sphere: {Radius: 5.0}}"
-                  -c "Modi: {Sphere: {Sphere_Temperature: 0.2}}"
+                  -c "Modi: {Sphere: {Temperature: 0.2}}"
                   -c "Modi: {Sphere: {Start_Time: 0.0}}"
                   -c "Modi: {Box: {Initial_Condition: thermal momenta}}"
                   -c "Modi: {Sphere: {Init_Multiplicities: {211: 100}}}"
@@ -361,7 +368,7 @@ if(USE_SANITIZER)
                     -c "Collision_Term: {Strings: false}")
    smash_add_runtest(sanitizer_sphere   smash_sanitizer smash_sanitizer -e 5.0
                     -m Sphere -c "Modi: {Sphere: {Radius: 5.0}}"
-                    -c "Modi: {Sphere: {Sphere_Temperature: 0.2}}"
+                    -c "Modi: {Sphere: {Temperature: 0.2}}"
                     -c "Modi: {Sphere: {Start_Time: 0.0}}"
                     -c "Modi: {Box: {Initial_Condition: thermal momenta}}"
                     -c "Modi: {Sphere: {Init_Multiplicities: {211: 100}}}"

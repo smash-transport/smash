@@ -92,15 +92,18 @@ class ModusDefault {
    * \param[in] particles The Particles object containing all particles of the
    *                  currently running Experiment.
    * \param[in] min_cell_length The minimal length of the grid cells.
+   * \param[in] timestep Duration of the timestep. It is necessary for formation
+   *                   times treatment: if particle is fully or partially formed
+   *                   before the end of the timestep, it has to be on the grid.
    * \param[in] strategy The strategy to determine the cell size
    * \return the Grid object
    *
    * \see Grid::Grid
    */
   Grid<GridOptions::Normal> create_grid(
-      const Particles& particles, double min_cell_length,
+      const Particles& particles, double min_cell_length, double timestep,
       CellSizeStrategy strategy = CellSizeStrategy::Optimal) const {
-    return {particles, min_cell_length, strategy};
+    return {particles, min_cell_length, timestep, strategy};
   }
 
   /**

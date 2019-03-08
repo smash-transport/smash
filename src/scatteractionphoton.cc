@@ -180,6 +180,11 @@ bool ScatterActionPhoton::is_kinematically_possible(const double s_sqrt,
   // state particle reject the collision.
   if (hadron->is_stable() && s_sqrt < hadron->mass()) {
     return false;
+    // Make sure energy is high enough to not only create final state particle,
+    // but to also assign momentum.
+  } else if (!hadron->is_stable() &&
+             s_sqrt < (hadron->min_mass_spectral() + really_small)) {
+    return false;
   } else {
     return true;
   }

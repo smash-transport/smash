@@ -11,7 +11,6 @@
 #include <memory>
 #include <utility>
 
-#include "correlatednucleus.h"
 #include "deformednucleus.h"
 #include "forwarddeclarations.h"
 #include "fourvector.h"

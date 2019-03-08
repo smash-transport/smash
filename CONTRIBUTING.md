@@ -52,21 +52,31 @@ unrecognized instruction. The memchecks will not run with this version.
 
 ## Choosing a Build Type
 
-There are different build types available, which compile the SMASH code for different situations.
+There are different build types available, which compile the SMASH code for
+different situations.
 
-For a debug build (with all warnings, but no optimization) use:
+To build a binary with debug symbols (which is useful to get stacktraces in case
+of errors), with support for `TRACE` and `DEBUG` logging output (which costs a
+lot of performance) and with internal consistency checks (which can be useful
+for finding and fixing bugs, but are expensive), use the `Debug` build type:
 
     cmake .. -DCMAKE_BUILD_TYPE=Debug
 
-For a release build (full optimization and no warnings) use:
+For a build with optimizations, without debug symbols, without support for
+`TRACE` or `DEBUG` logging and without internal consistency checks, use the
+`Release` build type:
 
     cmake .. -DCMAKE_BUILD_TYPE=Release
 
-For a profiling build use:
+For a profiling build, use the `Profiling` build type:
 
     cmake .. -DCMAKE_BUILD_TYPE=Profiling
 
-The default build type is 'RelWithDebInfo', which provides both optimization and debug info.
+The default build type is 'RelWithDebInfo', which is the same as the `Release`
+build type, except that it enables debug info for better stacktraces when SMASH
+crashes. The debug info makes the binaries larger, but only has a marginal
+performance impact.
+
 
 ### Enhancing Build Verbosity
 

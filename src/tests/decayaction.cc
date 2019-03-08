@@ -60,7 +60,8 @@ TEST(create_decayaction) {
   FUZZY_COMPARE(H.type().total_width(m0_H), G0_H);
 
   // Initialize decays of H and check their properties
-  DecayBranchList H_decays = H.type().get_partial_widths(m_H);
+  DecayBranchList H_decays = H.type().get_partial_widths(
+      H.momentum(), H.position().threevec(), WhichDecaymodes::All);
   COMPARE(H_decays.size(), 3u);
   double tmp1, tmp2, width_expected;
 

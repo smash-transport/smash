@@ -21,10 +21,15 @@ namespace smash {
  * Contains data for one nucleon that is read in from the list
  */
 struct Nucleoncorr {
-  double x;  // x-coordinate
-  double y;  // y-coordinate
-  double z;  // z-coordinate
+  /// x-coordinate
+  double x;
+  /// y-coordinate
+  double y;
+  /// z-coordinate
+  double z;
+  /// spinprojection of the nucleon
   bool spinprojection;
+  /// to differentiate between protons isospin=1 and neutrons isospin=0
   bool isospin;
 };
 
@@ -34,29 +39,49 @@ struct Nucleoncorr {
  */
 class CorrelatedNucleus : public Nucleus {
  public:
-  /// Constructor calling Collidermodus::readfile
+  /** 
+   * Constructor that needs configuration parameters from input file
+   * and the number of testparticles
+   *
+   * \param[in] config contains the parameters from the inputfile on the
+   * numbers of particles with a certain PDG code and also the path where 
+   * the external particle list is located
+   * \param[in] number of testparticles
+   */
   CorrelatedNucleus(Configuration& config, int testparticles);
-  /// fill Particlelist
+  /**
+   * Fills Particlelist from vector containing data for one nucleus.
+   * The data contains everything that is written in struct Nucleoncorr.
+   * 
+   * \param[in] vector containing data from external list for one nucleus
+   */
   void fill_from_list(const std::vector<Nucleoncorr>& vec);
-  /// returns position of a nucleus
+  /// Returns position of a nucleon as given in the external file
   ThreeVector distribute_nucleon() override;
   /**
-   * Contains Data for one nucleus given in the particlelist
+   * The returned vector contains Data for one nucleus given in the particlelist.
+   * 
+   * \param[in] infile is needed to read in from the external file
+   * \param[in] particle_number ensures that only as many lines are read in
+   * as the nucleus contains nucleons. 
    */
   std::vector<Nucleoncorr> readfile(std::ifstream& infile,
                                     int particle_number) const;
-  /** Directory where the nucleon configurations are located.
-   *  Name is read in from manual input in the config.yaml
+  /**
+   * Directory where the nucleon configurations are located.
+   * Name is read in from manual input in the config.yaml
    */
   std::string particle_list_file_directory_;
-  /** File name of the nucleon configurations.
-   *  Name is read in from manual input in the config.yaml
+  /** 
+   * File name of the nucleon configurations.
+   * Name is read in from manual input in the config.yaml
    */
   std::string particle_list_file_name_;
-  /** Number of Nucleons per Nucleus
-   *  Set initally to zero to be modified in the constructor.
-   *  Number is obtained by adding the proton and neutron numbers
-   *  specified in the config.yaml
+  /** 
+   * Number of Nucleons per Nucleus
+   * Set initally to zero to be modified in the constructor.
+   * Number is obtained by adding the proton and neutron numbers
+   * specified in the config.yaml
    */
   int number_of_nucleons_ = 0;
   /// Vector contianing Data for one nucleus given in the particlelist
@@ -65,11 +90,21 @@ class CorrelatedNucleus : public Nucleus {
   size_t index = 0;
 
  private:
-  /// reads in filepath and gives back a stream from the file
-  static std::ifstream streamfile(std::string file_directory,
-                                  std::string file_name);
+  /** 
+   * Generates the name of the stream file.
+   * \param[in] file_directory is the path to the external file
+   * \param[in] file_name is the name of the external file
+   */
+  static std::string streamfile(const std::string& file_directory,
+                                const std::string& file_name);
   /// Variable carrying the output of the streamfile function
-  static std::ifstream filestream_;
+  /*
+   * The unique_ptr is only required to work around a bug in GCC 4.8, because it
+   * seems to be trying to use the non-existing copy-constructor of
+   * `std::ifstream`. Newer compilers don't require this unneccessary
+   * indirection.
+   */
+  static std::unique_ptr<std::ifstream> filestream_;
   /** Bool variable to check if the file was already opened. It ensures
    *  to read in every nucleus configuration given only once. If the bool
    *  is true the constructor uses the stream that was given the last time

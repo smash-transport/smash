@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "smash/angles.h"
+#include "smash/correlatednucleus.h"
 #include "smash/configuration.h"
 #include "smash/cxx14compat.h"
 #include "smash/experimentparameters.h"

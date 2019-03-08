@@ -100,7 +100,7 @@ template <GridOptions O>
 Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
                   &min_and_length,
               const Particles &particles, double max_interaction_length,
-              CellSizeStrategy strategy)
+              double timestep_duration, CellSizeStrategy strategy)
     : length_(min_and_length.second) {
   const auto min_position = min_and_length.first;
   const SizeType particle_count = particles.size();
@@ -192,8 +192,9 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
     cells_.resize(1);
     cells_.front().reserve(particles.size());
     std::copy_if(particles.begin(), particles.end(),
-                 std::back_inserter(cells_.front()), [](const ParticleData &p) {
-                   return p.xsec_scaling_factor() > 0.0;
+                 std::back_inserter(cells_.front()),
+                 [&](const ParticleData &p) {
+                   return p.xsec_scaling_factor(timestep_duration) > 0.0;
                  });  // filter out the particles that can not interact
   } else {
     // construct a normal grid
@@ -217,7 +218,7 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
     };
 
     for (const auto &p : particles) {
-      if (p.xsec_scaling_factor() > 0.0) {
+      if (p.xsec_scaling_factor(timestep_duration) > 0.0) {
         const auto idx = cell_index_for(p);
 #ifndef NDEBUG
         if (idx >= SizeType(cells_.size())) {
@@ -447,10 +448,10 @@ template Grid<GridOptions::Normal>::Grid(
     const std::pair<std::array<double, 3>, std::array<double, 3>>
         &min_and_length,
     const Particles &particles, double max_interaction_length,
-    CellSizeStrategy strategy);
+    double timestep_duration, CellSizeStrategy strategy);
 template Grid<GridOptions::PeriodicBoundaries>::Grid(
     const std::pair<std::array<double, 3>, std::array<double, 3>>
         &min_and_length,
     const Particles &particles, double max_interaction_length,
-    CellSizeStrategy strategy);
+    double timestep_duration, CellSizeStrategy strategy);
 }  // namespace smash

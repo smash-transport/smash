@@ -45,13 +45,14 @@ TEST(pion_decay) {
   ParticleData piz{type_piz};
   piz.set_4momentum(type_piz.mass(),           // pole mass
                     ThreeVector(0., 0., 0.));  // at rest
-  const auto srts = piz.effective_mass();
 
   // Dalitz decay π⁰ -> e⁺ e⁻ γ
-  DecayBranchList dil_modes = type_piz.get_partial_widths_dilepton(srts);
+  DecayBranchList dil_modes = type_piz.get_partial_widths(
+      piz.momentum(), piz.position().threevec(), WhichDecaymodes::Dileptons);
   COMPARE(dil_modes.size(), 1u);
   const double piz_width =
-      total_weight<DecayBranch>(type_piz.get_partial_widths(srts));
+      total_weight<DecayBranch>(type_piz.get_partial_widths(
+          piz.momentum(), piz.position().threevec(), WhichDecaymodes::All));
   FUZZY_COMPARE(piz_width, 7.7e-9);
   DecayBranchPtr &mode = dil_modes[0];
   // π⁰ decay action
@@ -81,13 +82,14 @@ TEST(eta_decay) {
   ParticleData etaz{type_etaz};
   etaz.set_4momentum(type_etaz.mass(),          // pole mass
                      ThreeVector(0., 0., 0.));  // at rest
-  const auto srts = etaz.effective_mass();
 
   // Dalitz decay η -> e⁺ e⁻ γ
-  DecayBranchList dil_modes = type_etaz.get_partial_widths_dilepton(srts);
+  DecayBranchList dil_modes = type_etaz.get_partial_widths(
+      etaz.momentum(), etaz.position().threevec(), WhichDecaymodes::Dileptons);
   COMPARE(dil_modes.size(), 1u);
   const double etaz_width =
-      total_weight<DecayBranch>(type_etaz.get_partial_widths(srts));
+      total_weight<DecayBranch>(type_etaz.get_partial_widths(
+          etaz.momentum(), etaz.position().threevec(), WhichDecaymodes::All));
   FUZZY_COMPARE(etaz_width, 1.31e-6);
   DecayBranchPtr &mode = dil_modes[0];
   // π⁰ decay action

@@ -24,17 +24,20 @@ void DecayActionsFinderDilepton::shine(const Particles &search_list,
     return;
   }
   for (const auto &p : search_list) {
-    // effective mass of decaying particle
-    const double m_eff = p.effective_mass();
-    const auto n_all_modes = p.type().get_partial_widths(m_eff).size();
+    const auto n_all_modes =
+        p.type()
+            .get_partial_widths(p.momentum(), p.position().threevec(),
+                                WhichDecaymodes::All)
+            .size();
     if (n_all_modes == 0) {
       continue;
     }
 
     const double inv_gamma = p.inverse_gamma();
-    DecayBranchList dil_modes = p.type().get_partial_widths_dilepton(m_eff);
+    DecayBranchList dil_modes = p.type().get_partial_widths(
+        p.momentum(), p.position().threevec(), WhichDecaymodes::Dileptons);
 
-    /* if particle can only decay into dileptons or is stable, use shining only
+    /* If particle can only decay into dileptons or is stable, use shining only
      * in find_final_actions and ignore them here, also unformed
      * resonances cannot decay */
     if (dil_modes.size() == n_all_modes || p.type().is_stable() ||
@@ -69,13 +72,12 @@ void DecayActionsFinderDilepton::shine_final(const Particles &search_list,
       continue;
     }
 
-    // effective mass of decaying particle
-    const double m_eff = p.effective_mass();
-    DecayBranchList dil_modes = t.get_partial_widths_dilepton(m_eff);
+    DecayBranchList dil_modes = t.get_partial_widths(
+        p.momentum(), p.position().threevec(), WhichDecaymodes::Dileptons);
 
     // total decay width, also hadronic decays
-    const double width_tot =
-        total_weight<DecayBranch>(t.get_partial_widths(m_eff));
+    const double width_tot = total_weight<DecayBranch>(t.get_partial_widths(
+        p.momentum(), p.position().threevec(), WhichDecaymodes::All));
 
     for (DecayBranchPtr &mode : dil_modes) {
       const double shining_weight = mode->weight() / width_tot;

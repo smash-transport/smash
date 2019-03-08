@@ -124,7 +124,7 @@ TEST(sanity_collider) {
 TEST(sanity_sphere) {
   Configuration conf = Test::configuration();
   conf["Modi"]["Sphere"]["Radius"] = 10;
-  conf["Modi"]["Sphere"]["Sphere_Temperature"] = 0.2;
+  conf["Modi"]["Sphere"]["Temperature"] = 0.2;
   conf["Modi"]["Sphere"]["Start_Time"] = 0.0;
   conf["Modi"]["Sphere"]["Init_Multiplicities"]["661"] = 500;
   ExperimentParameters param = smash::Test::default_parameters();
