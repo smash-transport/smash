@@ -93,7 +93,7 @@ double DeformedNucleus::deformed_woods_saxon(double r, double cosx) const {
                                Nucleus::get_diffusiveness()));
 }
 
-ThreeVector DeformedNucleus::distribute_nucleon() const {
+ThreeVector DeformedNucleus::distribute_nucleon() {
   double a_radius;
   Angles a_direction;
   // Set a sensible maximum bound for radial sampling.
