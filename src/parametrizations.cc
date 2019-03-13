@@ -237,13 +237,13 @@ double piminusp_elastic(double mandelstam_s) {
       i = i * i;
     }
     std::vector<double> y = PIMINUSP_RES_SIG;
+    std::vector<double> dedup_x;
+    std::vector<double> dedup_y;
+    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
     piminusp_elastic_res_interpolation =
-        make_unique<InterpolateDataSpline>(x, y);
+        make_unique<InterpolateDataSpline>(dedup_x, dedup_y);
   }
-  // Interpolation may not be good if sqrts is beyond 2.2 GeV
-  if (mandelstam_s < 4.84) {
-    sigma -= (*piminusp_elastic_res_interpolation)(mandelstam_s);
-  }
+  sigma -= (*piminusp_elastic_res_interpolation)(mandelstam_s);
   if (sigma < 0) {
     sigma = really_small;
   }

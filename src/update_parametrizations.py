@@ -17,7 +17,7 @@ with open(source, 'r') as f:
     d = np.loadtxt(f)
 
 sqrts = d[:,0]
-elastic_contribution = d[:,2]
+elastic_contribution = d[:,3]
 
 # Close to the production threshold, there can be numerical issues when doing
 # the interpolation. To avoid these, it suffices to slightly modify the first
@@ -61,7 +61,9 @@ const std::initializer_list<double> {name}_RES_SQRTS = {{
 /// These need to be subtracted from the interpolation of the PDG data on
 /// elastic cross sections. This data was generated using the SMASH analysis
 /// suite and should be updated when strange resonances are changed or added.
-const std::initializer_list<double>{name} _RES_SIG = {{{elastic_contribution}}};
+const std::initializer_list<double> {name}_RES_SIG = {{
+{elastic_contribution}
+}};
 '''.format(name=name, reaction=reaction,
            sqrts=join_values(sqrts, 9, 0, 4),
            elastic_contribution=join_values(elastic_contribution, 4, 2, 11))
