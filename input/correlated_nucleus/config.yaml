@@ -20,10 +20,12 @@ Modi:
   Collider:
     Projectile:
       Particles: {2212: 79, 2112: 118}
-      Correlated: True
-      File_Name: Au197-correlated.dat
+      Correlated:
+        #File_Directory: enter absolute directory here
+        File_Name: Au197-correlated.dat
     Target:
       Particles: {2212: 79, 2112: 118}
-      Correlated: True
-      File_Name: Au197-correlated.dat
+      Correlated:
+        #File_Directory: enter absolute directory here
+        File_Name: Au197-correlated.dat
     Sqrtsnn: 7.7

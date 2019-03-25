@@ -46,14 +46,14 @@ class CorrelatedNucleus : public Nucleus {
    * \param[in] config contains the parameters from the inputfile on the
    * numbers of particles with a certain PDG code and also the path where
    * the external particle list is located
-   * \param[in] number of testparticles
+   * \param[in] testparticles represents the number of testparticles
    */
   CorrelatedNucleus(Configuration& config, int testparticles);
   /**
    * Fills Particlelist from vector containing data for one nucleus.
    * The data contains everything that is written in struct Nucleoncorr.
-   *
-   * \param[in] vector containing data from external list for one nucleus
+   * 
+   * \param[in] vec vector containing data from external list for one nucleus
    */
   void fill_from_list(const std::vector<Nucleoncorr>& vec);
   /// Returns position of a nucleon as given in the external file

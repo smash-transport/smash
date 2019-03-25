@@ -18,15 +18,49 @@
 
 namespace smash {
 
+/*!\Userguide
+ * \page projectile_and_target Projectile and Target
+ *
+ * \li \key File_Directory:
+ * The directory where the external list with the nucleon configurations
+ * is located. Please make sure to use an absolute path.
+ *
+ * \li \key File_Name:
+ * The file name of the external list with the nucleon configurations.
+ *
+ * \n
+ * Example: Configuring a correlated nucleus
+ * --------------
+ * The following example illustrates how to configure a COM 
+ * heavy-ion collision with correlated nuclei. The given path and name 
+ * of the external file are made up and should be defined by the user
+ * according to the used file.
+ *\verbatim
+ Modi:
+     Collider:
+         Projectile:
+             Particles:    {2212: 79, 2112: 118}
+             Correlated:
+                 File_Directory: /home/username/external_lists
+                 File_Name: Au197_correlated.txt
+         Target:
+             Particles:    {2212: 79, 2112: 118}
+             Correlated:
+                 File_Directory: /home/username/external_lists
+                 File_Name: Au197_correlated.txt
+         Sqrtsnn: 7.7
+ \endverbatim
+ */
+
 std::unique_ptr<std::ifstream> CorrelatedNucleus::filestream_ = nullptr;
 bool CorrelatedNucleus::checkfileopen_ = false;
 
 CorrelatedNucleus::CorrelatedNucleus(Configuration& config, int testparticles) {
   // Read in file directory from config
-  std::string fd = config.take({"File_Directory"});
+  std::string fd = config.take({"Correlated", "File_Directory"});
   particle_list_file_directory_ = fd;
   // Read in file name from config
-  std::string fn = config.take({"File_Name"});
+  std::string fn = config.take({"Correlated", "File_Name"});
   particle_list_file_name_ = fn;
 
   if (particles_.size() != 0) {
