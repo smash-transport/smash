@@ -159,10 +159,7 @@ double piplusp_elastic(double mandelstam_s) {
     piplusp_elastic_res_interpolation =
         make_unique<InterpolateDataSpline>(x, y);
   }
-  // Interpolation may not be good if sqrts is beyond 2.2 GeV
-  if (mandelstam_s < 4.84) {
-    sigma -= (*piplusp_elastic_res_interpolation)(mandelstam_s);
-  }
+  sigma -= (*piplusp_elastic_res_interpolation)(mandelstam_s);
   if (sigma < 0) {
     sigma = really_small;
   }
