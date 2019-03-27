@@ -36,7 +36,7 @@ matrix:
       apt:
         sources:
           - ubuntu-toolchain-r-test
-          - llvm-toolchain-precise-3.6
+          - llvm-toolchain-trusty-3.6
         packages:
           - libboost-all-dev
           - clang-3.6
