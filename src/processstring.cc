@@ -1628,12 +1628,12 @@ void StringProcess::make_orthonormal_basis(
 
     /* The transverse plane is spanned
      * by evec_basis[1] and evec_basis[2]. */
-    evec_basis[1].set_x1(cos(theta) * cos(phi));
-    evec_basis[1].set_x2(cos(theta) * sin(phi));
-    evec_basis[1].set_x3(-sin(theta));
+    evec_basis[1].set_x1(std::cos(theta) * std::cos(phi));
+    evec_basis[1].set_x2(std::cos(theta) * std::sin(phi));
+    evec_basis[1].set_x3(-std::sin(theta));
 
-    evec_basis[2].set_x1(-sin(phi));
-    evec_basis[2].set_x2(cos(phi));
+    evec_basis[2].set_x1(-std::sin(phi));
+    evec_basis[2].set_x2(std::cos(phi));
     evec_basis[2].set_x3(0.);
   } else {
     // if evec_polar is very close to the z axis

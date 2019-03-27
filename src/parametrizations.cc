@@ -226,7 +226,8 @@ double piminusp_elastic(double mandelstam_s) {
    * derivate vanishes at the both ends. The minimum scaling factor in this
    * region is 0.88-0.12=0.76. */
   if (mandelstam_s > 3.24 && mandelstam_s < 3.8809) {
-    sigma *= (0.12 * cos(2 * M_PI * (sqrt(mandelstam_s) - 1.8) / (1.97 - 1.8)) +
+    sigma *= (0.12 * std::cos(2 * M_PI * (std::sqrt(mandelstam_s) - 1.8) /
+                              (1.97 - 1.8)) +
               0.88);
   }
   // The elastic contributions from decays still need to be subtracted.
@@ -305,7 +306,7 @@ double piminusp_sigma0k0_res(double mandelstam_s) {
     piminusp_sigma0k0_interpolation =
         make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
-  const double sqrts = sqrt(mandelstam_s);
+  const double sqrts = std::sqrt(mandelstam_s);
   return (*piminusp_sigma0k0_interpolation)(sqrts);
 }
 

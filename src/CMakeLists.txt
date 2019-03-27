@@ -23,6 +23,12 @@ if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 7.0)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wrestrict -Wduplicated-branches")
 endif()
 
+# Enable warnings about deprecated C functions
+option(DEPRECATE_C_FNS "Turn this on to enable warning about deprecated C funtions in SMASH." OFF)
+if (DEPRECATE_C_FNS)
+   add_definitions(-include smash/deprecate_c_functions.h -DDONT_ASSERT_TEST)
+endif()
+
 find_package (Git)
 if(GIT_FOUND)
   #message("git found: ${GIT_EXECUTABLE} in version ${GIT_VERSION_STRING}")

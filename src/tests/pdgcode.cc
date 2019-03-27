@@ -63,59 +63,59 @@ PdgCode photon(0x22);
 PdgCode higgs(0x25);
 
 TEST(write_codes) {
-  printf("######################### Non-Hadrons:\n");
-  printf("e^-:       %8s %8x 0x%08x\n", electron.string().c_str(),
-         electron.code(), electron.dump());
-  printf("μ^+:       %8s %8x 0x%08x\n", antimu.string().c_str(), antimu.code(),
-         antimu.dump());
-  printf("γ:         %8s %8x 0x%08x\n", photon.string().c_str(), photon.code(),
-         photon.dump());
-  printf("############################## Mesons:\n");
-  printf("π^+:       %8s %8x 0x%08x\n", pion.string().c_str(), pion.code(),
-         pion.dump());
-  printf("K^0:       %8s %8x 0x%08x\n", K0.string().c_str(), K0.code(),
-         K0.dump());
-  printf("K^0L:      %8s %8x 0x%08x\n", K0L.string().c_str(), K0L.code(),
-         K0L.dump());
-  printf("K^0S:      %8s %8x 0x%08x\n", K0S.string().c_str(), K0S.code(),
-         K0S.dump());
-  printf("K^-:       %8s %8x 0x%08x\n", Kminus.string().c_str(), Kminus.code(),
-         Kminus.dump());
-  printf("D^-:       %8s %8x 0x%08x\n", dminus.string().c_str(), dminus.code(),
-         dminus.dump());
-  printf("B^0_s:     %8s %8x 0x%08x\n", bnulls.string().c_str(), bnulls.code(),
-         bnulls.dump());
-  printf("bar B^+_c: %8s %8x 0x%08x\n", bPcbar.string().c_str(), bPcbar.code(),
-         bPcbar.dump());
-  printf("η^-:       %8s %8x 0x%08x\n", eta_pr.string().c_str(), eta_pr.code(),
-         eta_pr.dump());
-  printf("J/Ψ:       %8s %8x 0x%08x\n", j_psi.string().c_str(), j_psi.code(),
-         j_psi.dump());
-  printf("############################# Baryons:\n");
-  printf("p:         %8s %8x 0x%08x\n", proton.string().c_str(), proton.code(),
-         proton.dump());
-  printf("bar Δ(1700)%8s %8x 0x%08x\n", antidelta.string().c_str(),
-         antidelta.code(), antidelta.dump());
-  printf("Σ:         %8s %8x 0x%08x\n", sigma.string().c_str(), sigma.code(),
-         sigma.dump());
-  printf("Λ:         %8s %8x 0x%08x\n", lambda.string().c_str(), lambda.code(),
-         lambda.dump());
-  printf("bar Ξ(1820)%8s %8x 0x%08x\n", antixi.string().c_str(), antixi.code(),
-         antixi.dump());
-  printf("bar Ω:     %8s %8x 0x%08x\n", omega_bar.string().c_str(),
-         omega_bar.code(), omega_bar.dump());
-  printf("Λ_c:       %8s %8x 0x%08x\n", lambda_c.string().c_str(),
-         lambda_c.code(), lambda_c.dump());
-  printf("bar Σ_c:   %8s %8x 0x%08x\n", sigma_c_bar.string().c_str(),
-         sigma_c_bar.code(), sigma_c_bar.dump());
-  printf("Ξ_c:       %8s %8x 0x%08x\n", xi_c.string().c_str(), xi_c.code(),
-         xi_c.dump());
-  printf("bar Ω_c:   %8s %8x 0x%08x\n", omega_c_bar.string().c_str(),
-         omega_c_bar.code(), omega_c_bar.dump());
-  printf("bar Ξ_cc:  %8s %8x 0x%08x\n", xi_cc_bar.string().c_str(),
-         xi_cc_bar.code(), xi_cc_bar.dump());
-  printf("Ω_bc:      %8s %8x 0x%08x\n", omega_bc.string().c_str(),
-         omega_bc.code(), omega_bc.dump());
+  std::printf("######################### Non-Hadrons:\n");
+  std::printf("e^-:       %8s %8x 0x%08x\n", electron.string().c_str(),
+              electron.code(), electron.dump());
+  std::printf("μ^+:       %8s %8x 0x%08x\n", antimu.string().c_str(),
+              antimu.code(), antimu.dump());
+  std::printf("γ:         %8s %8x 0x%08x\n", photon.string().c_str(),
+              photon.code(), photon.dump());
+  std::printf("############################## Mesons:\n");
+  std::printf("π^+:       %8s %8x 0x%08x\n", pion.string().c_str(), pion.code(),
+              pion.dump());
+  std::printf("K^0:       %8s %8x 0x%08x\n", K0.string().c_str(), K0.code(),
+              K0.dump());
+  std::printf("K^0L:      %8s %8x 0x%08x\n", K0L.string().c_str(), K0L.code(),
+              K0L.dump());
+  std::printf("K^0S:      %8s %8x 0x%08x\n", K0S.string().c_str(), K0S.code(),
+              K0S.dump());
+  std::printf("K^-:       %8s %8x 0x%08x\n", Kminus.string().c_str(),
+              Kminus.code(), Kminus.dump());
+  std::printf("D^-:       %8s %8x 0x%08x\n", dminus.string().c_str(),
+              dminus.code(), dminus.dump());
+  std::printf("B^0_s:     %8s %8x 0x%08x\n", bnulls.string().c_str(),
+              bnulls.code(), bnulls.dump());
+  std::printf("bar B^+_c: %8s %8x 0x%08x\n", bPcbar.string().c_str(),
+              bPcbar.code(), bPcbar.dump());
+  std::printf("η^-:       %8s %8x 0x%08x\n", eta_pr.string().c_str(),
+              eta_pr.code(), eta_pr.dump());
+  std::printf("J/Ψ:       %8s %8x 0x%08x\n", j_psi.string().c_str(),
+              j_psi.code(), j_psi.dump());
+  std::printf("############################# Baryons:\n");
+  std::printf("p:         %8s %8x 0x%08x\n", proton.string().c_str(),
+              proton.code(), proton.dump());
+  std::printf("bar Δ(1700)%8s %8x 0x%08x\n", antidelta.string().c_str(),
+              antidelta.code(), antidelta.dump());
+  std::printf("Σ:         %8s %8x 0x%08x\n", sigma.string().c_str(),
+              sigma.code(), sigma.dump());
+  std::printf("Λ:         %8s %8x 0x%08x\n", lambda.string().c_str(),
+              lambda.code(), lambda.dump());
+  std::printf("bar Ξ(1820)%8s %8x 0x%08x\n", antixi.string().c_str(),
+              antixi.code(), antixi.dump());
+  std::printf("bar Ω:     %8s %8x 0x%08x\n", omega_bar.string().c_str(),
+              omega_bar.code(), omega_bar.dump());
+  std::printf("Λ_c:       %8s %8x 0x%08x\n", lambda_c.string().c_str(),
+              lambda_c.code(), lambda_c.dump());
+  std::printf("bar Σ_c:   %8s %8x 0x%08x\n", sigma_c_bar.string().c_str(),
+              sigma_c_bar.code(), sigma_c_bar.dump());
+  std::printf("Ξ_c:       %8s %8x 0x%08x\n", xi_c.string().c_str(), xi_c.code(),
+              xi_c.dump());
+  std::printf("bar Ω_c:   %8s %8x 0x%08x\n", omega_c_bar.string().c_str(),
+              omega_c_bar.code(), omega_c_bar.dump());
+  std::printf("bar Ξ_cc:  %8s %8x 0x%08x\n", xi_cc_bar.string().c_str(),
+              xi_cc_bar.code(), xi_cc_bar.dump());
+  std::printf("Ω_bc:      %8s %8x 0x%08x\n", omega_bc.string().c_str(),
+              omega_bc.code(), omega_bc.dump());
 }
 TEST(code) {
   COMPARE(electron.code(), 0x11);

@@ -67,10 +67,10 @@ class Histogram1d {
 void Histogram1d::print_to_file(const std::string& fname) const {
   FilePtr file = fopen(fname, "w");
   for (auto b : data_) {
-    const double m = dx() * (b.first + 0.5);  // mass bin
-    const int result = b.second;              // number of counts
-    const double stat_err = sqrt(result);     // statistical error is sqrt(N)
-    fprintf(file.get(), "%7.3f %7d %7.3f\n", m, result, stat_err);
+    const double m = dx() * (b.first + 0.5);    // mass bin
+    const int result = b.second;                // number of counts
+    const double stat_err = std::sqrt(result);  // statistical error is sqrt(N)
+    std::fprintf(file.get(), "%7.3f %7d %7.3f\n", m, result, stat_err);
   }
 }
 
@@ -103,7 +103,7 @@ void Histogram1d::test(Analytical analyt, const std::string& dbg_file) const {
   /* The normalization factor also accounts for the bin width
    * and the total number of emtries in the histogram. */
   const double norm = dx() * num_entries() / itg;
-  printf("norm: %f %f %f %f\n", min, max, itg, norm);
+  std::printf("norm: %f %f %f %f\n", min, max, itg, norm);
 
   double chi_sqr = 0.;
   {
@@ -118,13 +118,13 @@ void Histogram1d::test(Analytical analyt, const std::string& dbg_file) const {
       // the number N of counts in that bin
       const double counts = b.second;
       // statistical error (variance of multinomial distribution)
-      const double stat_err = sqrt(counts * (1 - counts / num_entries()));
+      const double stat_err = std::sqrt(counts * (1 - counts / num_entries()));
       // the analytical value times normalization times number of samples
       const double ana = analyt(x) * norm;
       // if we want to print the distribution, print!
       if (file) {
-        fprintf(file.get(), "%7.3f %7d %7.3f %7.3f\n", x, b.second, stat_err,
-                ana);
+        std::fprintf(file.get(), "%7.3f %7d %7.3f %7.3f\n", x, b.second,
+                     stat_err, ana);
       }
       const double diff = (counts - ana) / stat_err;  // normalized deviation
       chi_sqr += diff * diff;                         // chi-squared
@@ -140,7 +140,7 @@ void Histogram1d::test(Analytical analyt, const std::string& dbg_file) const {
 
   // divide chi^2 by d.o.f.
   chi_sqr = chi_sqr / data_.size();
-  printf("chi_sqr per d.o.f: %f\n", chi_sqr);
+  std::printf("chi_sqr per d.o.f: %f\n", chi_sqr);
   VERIFY(chi_sqr < 2.0) << "Error: chi_squared is too large!";
 
   // the integral (in each loop, this holds how many particles have a

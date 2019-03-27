@@ -28,29 +28,29 @@ TEST(width_Delta) {
   for (int i = 0; i < 100; i++) {
     double m = 1. + i * 0.01;
     double w = t.total_width(m);
-    printf("%7.3f %7.3f \n", m, w);
+    std::printf("%7.3f %7.3f \n", m, w);
   }
 }
 
 TEST(width_Roper) {
   const ParticleType &t = ParticleType::find(0x12212);  // N(1440)
-  printf("%7.4f \n", t.min_mass_kinematic());
+  std::printf("%7.4f \n", t.min_mass_kinematic());
   const int nModes = t.decay_modes().decay_mode_list().size();
   for (int i = 0; i < 100; i++) {
     double m = 1. + i * 0.01;
     double wtot = t.total_width(m);
-    printf("%7.4f %7.4f ", m, wtot);
+    std::printf("%7.4f %7.4f ", m, wtot);
     /* Print all partial widths. */
     ProcessBranchList<DecayBranch> partial = t.get_partial_widths(
         FourVector(m, 0., 0., 0.), ThreeVector(), WhichDecaymodes::All);
     for (const auto &branch : partial) {
-      printf("%7.4f ", branch->weight());
+      std::printf("%7.4f ", branch->weight());
     }
     // print zeros for missing modes
     for (int j = partial.size(); j < nModes; j++) {
-      printf("%7.4f ", 0.);
+      std::printf("%7.4f ", 0.);
     }
-    printf("\n");
+    std::printf("\n");
   }
 }
 
@@ -76,8 +76,8 @@ static void compare_in_vs_out_width(const ParticleType &t,
                                            pt[1]->spectral_function(m);
                                   });
 
-  printf("width comparison at m=%5.3f: %8.6f %8.6f %8.6f %8.6f \n", m_R,
-         Gam_out, Gam_in, std::abs(Gam_out - Gam_in), Gam_out / Gam_in);
+  std::printf("width comparison at m=%5.3f: %8.6f %8.6f %8.6f %8.6f \n", m_R,
+              Gam_out, Gam_in, std::abs(Gam_out - Gam_in), Gam_out / Gam_in);
   COMPARE_ABSOLUTE_ERROR(Gam_out, Gam_in, 5E-4);
 }
 
@@ -92,8 +92,8 @@ TEST(Roper_in_vs_out_width) {
     const auto pt = mode->particle_types();
     if (!pt[1]->is_stable() && !pt[1]->is_baryon()) {
       the_branch = mode.get();
-      printf("found mode: %s %s \n", pt[0]->pdgcode().string().c_str(),
-             pt[1]->pdgcode().string().c_str());
+      std::printf("found mode: %s %s \n", pt[0]->pdgcode().string().c_str(),
+                  pt[1]->pdgcode().string().c_str());
     }
   }
 

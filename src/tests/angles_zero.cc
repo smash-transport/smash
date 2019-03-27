@@ -25,8 +25,8 @@ int main() {
     sumy += dir.y();
     sumz += dir.z();
   }
-  printf("%g %g %g\n", sumx / (NUMBER + 0.0), sumy / (NUMBER + 0.0),
-         sumz / (NUMBER + 0.0));
+  std::printf("%g %g %g\n", sumx / (NUMBER + 0.0), sumy / (NUMBER + 0.0),
+              sumz / (NUMBER + 0.0));
   // FIXME This test does not do anything
   return 0;
 }

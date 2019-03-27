@@ -544,9 +544,9 @@ double ScatterActionPhoton::form_factor_pion(const double E_photon) const {
   const double Lambda = 1.0;
   const double Lambda2 = Lambda * Lambda;
 
-  const double t_ff = 34.5096 * pow(E_photon, 0.737) -
-                      67.557 * pow(E_photon, 0.7584) +
-                      32.858 * pow(E_photon, 0.7806);
+  const double t_ff = 34.5096 * std::pow(E_photon, 0.737) -
+                      67.557 * std::pow(E_photon, 0.7584) +
+                      32.858 * std::pow(E_photon, 0.7806);
   const double ff = 2 * Lambda2 / (2 * Lambda2 - t_ff);
 
   return ff * ff;
@@ -556,9 +556,10 @@ double ScatterActionPhoton::form_factor_omega(const double E_photon) const {
   const double Lambda = 1.0;
   const double Lambda2 = Lambda * Lambda;
 
-  const double t_ff =
-      -61.595 * pow(E_photon, 0.9979) + 28.592 * pow(E_photon, 1.1579) +
-      37.738 * pow(E_photon, 0.9317) - 5.282 * pow(E_photon, 1.3686);
+  const double t_ff = -61.595 * std::pow(E_photon, 0.9979) +
+                      28.592 * std::pow(E_photon, 1.1579) +
+                      37.738 * std::pow(E_photon, 0.9317) -
+                      5.282 * std::pow(E_photon, 1.3686);
   const double ff = 2 * Lambda2 / (2 * Lambda2 - t_ff);
 
   return ff * ff;

@@ -25,6 +25,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <cwchar>
 #include <cwctype>
 
 #include "forwarddeclarations.h"

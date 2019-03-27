@@ -84,6 +84,22 @@ To find cmake build errors (best debugged with full compiler output) use:
 
     make VERBOSE=1
 
+### Find deprecated C library function calls
+
+If a call to a C function without explicit namespace qualification is made,
+a warning appears (if enabled) during compilation, if some code tries to use a C
+library function call. The only correct way to write C++ code is to use the C++
+interface by specfing the correct std namespace.
+
+This option is OFF by default and is checked from time to time. Enable it as
+follows
+
+    cmake .. -DDEPRECATE_C_FNS=ON
+    make
+
+Note: Do not use this as a default, since it increases compilation time. Use
+clang for compilation here, since gcc runs into an internal compiler error,
+warnings are however still reported. 
 
 ## Development Tools
 
@@ -206,7 +222,7 @@ In the `build` directory, run
     make user
 
 to obtain the files in `doc/user/`. Open 'index.html' in your favourite
-browser. 
+browser.
 
 
 ### What to Document in the Code

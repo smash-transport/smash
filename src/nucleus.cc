@@ -326,8 +326,8 @@ void Nucleus::set_parameters_automatic() {
       } else {
         // radius and diffusiveness taken from \iref{Rybczynski:2013yba}
         set_diffusiveness(0.54);
-        set_nuclear_radius(1.12 * pow(A, 1.0 / 3.0) -
-                           0.86 * pow(A, -1.0 / 3.0));
+        set_nuclear_radius(1.12 * std::pow(A, 1.0 / 3.0) -
+                           0.86 * std::pow(A, -1.0 / 3.0));
       }
   }
 }

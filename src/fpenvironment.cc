@@ -135,7 +135,7 @@ void setup_default_float_traps() {
       log.fatal("Unexpected Signal ", signal,
                 " received in the FPE signal handler. Aborting.");
     }
-    abort();
+    std::abort();
   };
   sigaction(SIGFPE, &action, nullptr);
 #endif

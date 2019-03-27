@@ -358,7 +358,7 @@ class Action {
               weight_sum, " ", total_weight, " ",
               //          random_weight, "\n", *this);
               random_weight, "\n");
-    abort();
+    std::abort();
   }
 
   /**

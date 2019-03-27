@@ -32,24 +32,26 @@ int main() {
 
     // print some of the vectors for plotting and visual checking:
     if (c % 500 == 0)
-      fprintf(stderr, "%8.5f %8.5f %8.5f\n", dir.x(), dir.y(), dir.z());
+      std::fprintf(stderr, "%8.5f %8.5f %8.5f\n", dir.x(), dir.y(), dir.z());
   }
-  printf("#%7s %8s %8s\n", "angle", "dN/dphi", "dN/dtheta");
+  std::printf("#%7s %8s %8s\n", "angle", "dN/dphi", "dN/dtheta");
 
   for (int p = 0; p < 180; p++) {
-    printf("%3d %8.6f %5.2f %8.5f %8.5f %8.5f\n", p, p * dangle,
-           p * dcosine - 1.0, (phi_histo[p] + 0.0) / dangle / (NUMBER + 0.0),
-           (cos_histo[p] + 0.0) / dcosine / (NUMBER + 0.0),
-           (theta_histo[p] + 0.0) / dangle / (NUMBER + 0.0));
+    std::printf("%3d %8.6f %5.2f %8.5f %8.5f %8.5f\n", p, p * dangle,
+                p * dcosine - 1.0,
+                (phi_histo[p] + 0.0) / dangle / (NUMBER + 0.0),
+                (cos_histo[p] + 0.0) / dcosine / (NUMBER + 0.0),
+                (theta_histo[p] + 0.0) / dangle / (NUMBER + 0.0));
   }
   for (int p = 180; p < 200; p++) {
-    printf("%3d %8.6f %5.2f %8.5f %8.5f\n", p, p * dangle, p * dcosine - 1.0,
-           (phi_histo[p] + 0.0) / dangle / (NUMBER + 0.0),
-           (cos_histo[p] + 0.0) / dcosine / (NUMBER + 0.0));
+    std::printf("%3d %8.6f %5.2f %8.5f %8.5f\n", p, p * dangle,
+                p * dcosine - 1.0,
+                (phi_histo[p] + 0.0) / dangle / (NUMBER + 0.0),
+                (cos_histo[p] + 0.0) / dcosine / (NUMBER + 0.0));
   }
   for (int p = 200; p < 360; p++) {
-    printf("%3d %8.6f  0.00 %8.5f\n", p, p * dangle,
-           (phi_histo[p] + 0.0) / dangle / (NUMBER + 0.0));
+    std::printf("%3d %8.6f  0.00 %8.5f\n", p, p * dangle,
+                (phi_histo[p] + 0.0) / dangle / (NUMBER + 0.0));
   }
   // FIXME this test does not do anything
 

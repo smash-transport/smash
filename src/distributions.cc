@@ -40,19 +40,20 @@ double cauchy(double x, double pole, double width) {
 // density_integrand - Maxwell-Boltzmann distribution
 double density_integrand(const double energy, const double momentum_sqr,
                          const double temperature) {
-  return 4.0 * M_PI * momentum_sqr * exp(-energy / temperature);
+  return 4.0 * M_PI * momentum_sqr * std::exp(-energy / temperature);
 }
 
 double density_integrand_mass(const double energy, const double momentum_sqr,
                               const double temperature) {
-  return momentum_sqr * std::sqrt(momentum_sqr) * exp(-energy / temperature);
+  return momentum_sqr * std::sqrt(momentum_sqr) *
+         std::exp(-energy / temperature);
 }
 
 double density_integrand_1M_IC(const double energy, const double momentum_sqr,
                                const double temperature) {
   return ((3.0 / 20.0) * (momentum_sqr / (temperature * temperature)) -
           (6.0 / 5.0) * (energy / temperature) + (14.0 / 5.0)) *
-         exp(-energy / temperature) * momentum_sqr;
+         std::exp(-energy / temperature) * momentum_sqr;
 }
 
 double density_integrand_2M_IC(const double energy, const double momentum_sqr,
@@ -63,7 +64,7 @@ double density_integrand_2M_IC(const double energy, const double momentum_sqr,
           (1.0 / 480.0) *
               (momentum_sqr * momentum_sqr /
                (temperature * temperature * temperature * temperature))) *
-         exp(-energy / temperature) * momentum_sqr;
+         std::exp(-energy / temperature) * momentum_sqr;
 }
 
 double juttner_distribution_func(const double momentum_radial,
@@ -71,7 +72,7 @@ double juttner_distribution_func(const double momentum_radial,
                                  const double baryon_chemical_potential,
                                  const double lam) {
   return 1.0 /
-         (std::exp((sqrt(momentum_radial * momentum_radial + mass * mass) -
+         (std::exp((std::sqrt(momentum_radial * momentum_radial + mass * mass) -
                     baryon_chemical_potential) /
                    temperature) +
           lam);
@@ -212,8 +213,9 @@ double sample_momenta_from_thermal(const double temperature,
       const double b = -std::log(random::canonical_nonzero());
       const double c = -std::log(random::canonical_nonzero());
       momentum_radial = temperature * (a + b + c);
-      energy = sqrt(momentum_radial * momentum_radial + mass * mass);
-      if (random::canonical() < exp((momentum_radial - energy) / temperature)) {
+      energy = std::sqrt(momentum_radial * momentum_radial + mass * mass);
+      if (random::canonical() <
+          std::exp((momentum_radial - energy) / temperature)) {
         break;
       }
     }
@@ -239,7 +241,7 @@ double sample_momenta_from_thermal(const double temperature,
         K = -temperature * std::log(r1 * r2 * r3);
       }
       energy = K + mass;
-      momentum_radial = sqrt((energy + mass) * (energy - mass));
+      momentum_radial = std::sqrt((energy + mass) * (energy - mass));
       if (random::canonical() < momentum_radial / energy) {
         break;
       }

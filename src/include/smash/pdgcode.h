@@ -427,9 +427,9 @@ class PdgCode {
     } else {
       // For all other cases, there isn't both a strange and anti-strange
       if (is_baryon()) {
-        return abs(strangeness()) / 3.;
+        return std::abs(strangeness()) / 3.;
       } else if (is_meson()) {
-        return abs(strangeness()) / 2.;
+        return std::abs(strangeness()) / 2.;
       } else {
         /* If not baryon or meson, this should be 0, as AQM does not
          * extend to non-hadrons */

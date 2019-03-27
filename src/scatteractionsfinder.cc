@@ -872,7 +872,7 @@ void ScatterActionsFinder::dump_cross_sections(
     a_data.set_4momentum(m_a, momentum, 0.0, 0.0);
     b_data.set_4momentum(m_b, -momentum, 0.0, 0.0);
     const double sqrts = (a_data.momentum() + b_data.momentum()).abs();
-    printf("%9.5f", sqrts);
+    std::printf("%9.5f", sqrts);
     for (const auto channel : all_channels) {
       const xs_saver energy_and_xs = xs_dump[channel];
       size_t j = 0;
@@ -883,9 +883,9 @@ void ScatterActionsFinder::dump_cross_sections(
           std::abs(energy_and_xs[j].first - sqrts) < really_small) {
         xs = energy_and_xs[j].second;
       }
-      printf("%16.6f", xs);  // Same alignment as in the header.
+      std::printf("%16.6f", xs);  // Same alignment as in the header.
     }
-    printf("\n");
+    std::printf("\n");
   }
 }
 

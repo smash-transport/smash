@@ -82,6 +82,7 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_rho0_pi(
     const double s, const double m_rho) {
   using std::abs;
   using std::atan;
+  using std::log;
   using std::pow;
   using std::sqrt;
 
@@ -1337,6 +1338,7 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi_rho0_pi(
 
   using std::abs;
   using std::atan;
+  using std::log;
   using std::pow;
   using std::sqrt;
 
@@ -1606,6 +1608,7 @@ CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi0_rho_pi_rho_mediated(
     const double s, const double m_rho) {
   using std::abs;
   using std::atan;
+  using std::log;
   using std::pow;
   using std::sqrt;
 
@@ -2470,6 +2473,8 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::
                                     const double m_rho) {
   const double spin_deg_factor = 3.0;
 
+  using std::pow;
+
   // clang-format off
   const double diff_xs =
       (pow(Const, 2) * pow(ghat, 4) *
@@ -2673,6 +2678,7 @@ CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_rho_pi0_rho_mediated(
     const double s, const double m_rho) {
   using std::abs;
   using std::atan;
+  using std::log;
   using std::pow;
   using std::sqrt;
 
@@ -4006,6 +4012,8 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi0_rho0_pi0(
     const double s, const double m_rho) {
   using std::abs;
   using std::atan;
+  using std::fabs;
+  using std::log;
   using std::pow;
   using std::sqrt;
 
@@ -4185,11 +4193,9 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi0_rho0_pi0(
     const double s, const double t, const double m_rho) {
   const double spin_deg_factor = 3.0;
 
-  using std::log;
-  using std::pow;
-
   using std::abs;
   using std::atan;
+  using std::log;
   using std::pow;
   using std::sqrt;
 
@@ -4315,6 +4321,7 @@ CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi0_rho_pi_omega_mediated(
     const double s, const double m_rho) {
   using std::abs;
   using std::atan;
+  using std::log;
   using std::pow;
   using std::sqrt;
 
@@ -4396,6 +4403,8 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::
                                       const double m_rho) {
   const double spin_deg_factor = 3.0;
 
+  using std::pow;
+
   // clang-format off
   const double diff_xs =
       (0.0024867959858108648 * pow(Const, 2) * pow(g_POR, 4) *
@@ -4443,6 +4452,7 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_pi_rho0(
     const double s, const double m_rho) {
   using std::abs;
   using std::atan;
+  using std::log;
   using std::pow;
   using std::sqrt;
 
@@ -7041,6 +7051,8 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_pi0_rho(
     const double s, const double m_rho) {
   using std::abs;
   using std::atan;
+  using std::fabs;
+  using std::log;
   using std::pow;
   using std::sqrt;
 
@@ -8621,6 +8633,7 @@ double CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi_pi0_rho(
 
   using std::abs;
   using std::atan;
+  using std::log;
   using std::pow;
   using std::sqrt;
 
