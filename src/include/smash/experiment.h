@@ -1269,7 +1269,7 @@ void Experiment<Modus>::initialize_new_event() {
   // Print output headers
   log.info() << hline;
   log.info() << "Time [fm]   Ediff [GeV]    Scatt.|Decays   "
-                "Particles    Timing ";
+                "Particles         Timing";
   log.info() << hline;
 }
 
