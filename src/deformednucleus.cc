@@ -37,6 +37,30 @@ namespace smash {
  * The azimuthal angle by which to rotate the nucleus.
  *
  * \n
+ */
+
+// For readability and layout issues parts of the correlatednucleus userguide
+// needs to be located here. The example configuration can however be found in
+// correlatednucleus.cc
+
+/*!\Userguide
+ * \page projectile_and_target Projectile and Target
+ *
+ * - \key Correlated: \n
+ *    \li \key File_Directory (path, required if \key Correlated exists,
+ * no default):
+ \n
+ * The directory where the external list with the nucleon configurations
+ * is located. Make sure to use an absolute path.\n
+ *
+ * \li \key File_Name (string, required if \key Correlated exists,
+ * no default): \n
+ * The file name of the external list with the nucleon configurations.
+ *
+ */
+
+ /*!\Userguide
+ * \n
  * Example: Configuring a deformed nucleus
  * --------------
  * To configure a fixed target heavy-ion collision with deformed nuclei, whose

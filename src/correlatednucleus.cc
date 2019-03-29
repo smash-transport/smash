@@ -20,19 +20,11 @@ namespace smash {
 
 /*!\Userguide
  * \page projectile_and_target Projectile and Target
- *
- * \li \key File_Directory:
- * The directory where the external list with the nucleon configurations
- * is located. Please make sure to use an absolute path.
- *
- * \li \key File_Name:
- * The file name of the external list with the nucleon configurations.
- *
  * \n
  * Example: Configuring a correlated nucleus
  * --------------
- * The following example illustrates how to configure a COM 
- * heavy-ion collision with correlated nuclei. The given path and name 
+ * The following example illustrates how to configure a center-of-mass
+ * heavy-ion collision with correlated nuclei. The given path and name
  * of the external file are made up and should be defined by the user
  * according to the used file.
  *\verbatim
@@ -41,13 +33,13 @@ namespace smash {
          Projectile:
              Particles:    {2212: 79, 2112: 118}
              Correlated:
-                 File_Directory: /home/username/external_lists
-                 File_Name: Au197_correlated.txt
+                 File_Directory: "/home/username/external_lists"
+                 File_Name: "Au197_correlated.txt"
          Target:
              Particles:    {2212: 79, 2112: 118}
              Correlated:
-                 File_Directory: /home/username/external_lists
-                 File_Name: Au197_correlated.txt
+                 File_Directory: "/home/username/external_lists"
+                 File_Name: "Au197_correlated.txt"
          Sqrtsnn: 7.7
  \endverbatim
  */
