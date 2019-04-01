@@ -67,16 +67,16 @@ namespace smash {
  *
  * **Particle line**
  * \code
- *     9*double             int int int
- * t x y z mass p0 px py pz pdg ID charge
+ *        9*double          int32_t int32_t int32_t
+ * t x y z mass p0 px py pz    pdg     ID      charge
  * \endcode
  *
  * **Extended Particle line**
  * <div class="fragment">
  * <div class="line">
- *   9*double        int int int int     double
- *     double                    uint32_t            uint32_t
- *     double        int         int
+ *   9*double       int32_t int32_t int32_t int32_t double
+ *     double                    int32_t            int32_t
+ *     double        int32_t         int32_t
  * </div>
  * <div class="line">
  * t x y z mass p0 px py pz pdg ID charge ncoll form_time xsecfac
@@ -96,7 +96,7 @@ namespace smash {
  *
  * **Event end line**
  * \code
- * char    int            int
+ * char    uint32_t      double
  * 'f' event_number impact_parameter
  * \endcode
  *
@@ -177,7 +177,7 @@ void BinaryOutputBase::write_particledata(const ParticleData &p) {
     write(p.formation_time());
     write(p.xsec_scaling_factor());
     write(history.id_process);
-    write(static_cast<uint32_t>(history.process_type));
+    write(static_cast<int32_t>(history.process_type));
     write(history.time_last_collision);
     write(history.p1.get_decimal());
     write(history.p2.get_decimal());
@@ -203,7 +203,7 @@ void BinaryOutputCollisions::at_eventstart(const Particles &particles,
 }
 
 void BinaryOutputCollisions::at_eventend(const Particles &particles,
-                                         const int event_number,
+                                         const int32_t event_number,
                                          double impact_parameter) {
   char pchar = 'p';
   if (print_start_end_) {
