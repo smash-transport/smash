@@ -327,9 +327,9 @@ std::string format_measurements(const Particles &particles,
 
   std::ostringstream ss;
   // clang-format off
-  ss << field<5> << time << field<11, 3> << difference.momentum().x0()
-     << field<14, 3> << scatterings_this_interval
-     << field<14, 3> << particles.size() << field<12, 3> << elapsed_seconds;
+  ss << field<8, 3> << time << field<13, 3> << difference.momentum().x0()
+     << field<16, 3> << scatterings_this_interval
+     << field<11, 3> << particles.size() << field<10, 3> << elapsed_seconds;
   // clang-format on
   return ss.str();
 }
