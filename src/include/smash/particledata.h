@@ -23,9 +23,9 @@ namespace smash {
  */
 struct HistoryData {
   /// Collision counter per particle, zero only for initially present particles
-  int collisions_per_particle = 0;
+  int32_t collisions_per_particle = 0;
   /// id of the last action
-  uint32_t id_process = 0;
+  int32_t id_process = 0;
   /// type of the last action
   ProcessType process_type = ProcessType::None;
   /**
@@ -67,7 +67,7 @@ class ParticleData {
    * Get the id of the particle
    * \return particle id
    */
-  int id() const { return id_; }
+  int32_t id() const { return id_; }
   /**
    * Set id of the particle
    * \param[in] i id to be assigned to the particle
@@ -392,7 +392,7 @@ class ParticleData {
    * particle. This is why the comparison operators depend only on the id_
    * member.
    */
-  int id_ = -1;
+  int32_t id_ = -1;
 
   /**
    * Internal index in the \ref Particles list. This number is used to find the

@@ -652,7 +652,7 @@ class PdgCode {
    *
    * \throw InvalidPdgCode if the spin degeneracy is larger than 9
    */
-  int get_decimal() const {
+  int32_t get_decimal() const {
     if (is_nucleus()) {
       // ±10LZZZAAAI
       return antiparticle_sign() *
