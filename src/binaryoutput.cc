@@ -67,16 +67,16 @@ namespace smash {
  *
  * **Particle line**
  * \code
- *     9*double             int int int
- * t x y z mass p0 px py pz pdg ID charge
+ *        9*double          uint32_t uint32_t uint32_t
+ * t x y z mass p0 px py pz    pdg     ID      charge
  * \endcode
  *
  * **Extended Particle line**
  * <div class="fragment">
  * <div class="line">
- *   9*double        int int int int     double
+ *   9*double       uint32_t uint32_t uint32_t uint32_t double
  *     double                    uint32_t            uint32_t
- *     double        int         int
+ *     double        uint32_t         uint32_t
  * </div>
  * <div class="line">
  * t x y z mass p0 px py pz pdg ID charge ncoll form_time xsecfac
@@ -96,7 +96,7 @@ namespace smash {
  *
  * **Event end line**
  * \code
- * char    int            int
+ * char    uint32_t      double
  * 'f' event_number impact_parameter
  * \endcode
  *
