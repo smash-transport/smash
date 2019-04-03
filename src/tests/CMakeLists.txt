@@ -272,10 +272,10 @@ smash_add_runtest(light_nuclei_run smash smash
                   -i ${PROJECT_SOURCE_DIR}/input/config.yaml
                   -p ${PROJECT_SOURCE_DIR}/input/light_nuclei/particles.txt
                   -d ${PROJECT_SOURCE_DIR}/input/light_nuclei/decaymodes.txt)
-smash_add_runtest(correlated_run smash smash
-                  -i ${PROJECT_SOURCE_DIR}/input/correlated_nucleus/config.yaml
-                  -c "Modi: {Collider: {Projectile: {Correlated: {File_Directory: ${PROJECT_SOURCE_DIR}/input/correlated_nucleus}}}}"
-                  -c "Modi: {Collider: {Target: {Correlated: {File_Directory: ${PROJECT_SOURCE_DIR}/input/correlated_nucleus}}}}")
+smash_add_runtest(custom_run smash smash
+                  -i ${PROJECT_SOURCE_DIR}/input/custom_nucleus/config.yaml
+                  -c "Modi: {Collider: {Projectile: {Custom: {File_Directory: ${PROJECT_SOURCE_DIR}/input/custom_nucleus}}}}"
+                  -c "Modi: {Collider: {Target: {Custom: {File_Directory: ${PROJECT_SOURCE_DIR}/input/custom_nucleus}}}}")
 
 # Test the shipped config files for potentials and deformed nuclei by verifying
 # the binary runs with them.

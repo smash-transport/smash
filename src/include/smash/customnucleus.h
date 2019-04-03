@@ -4,8 +4,8 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-#ifndef SRC_INCLUDE_CORRELATEDNUCLEUS_H_
-#define SRC_INCLUDE_CORRELATEDNUCLEUS_H_
+#ifndef SRC_INCLUDE_CUSTOMNUCLEUS_H_
+#define SRC_INCLUDE_CUSTOMNUCLEUS_H_
 
 #include <fstream>
 #include <map>
@@ -20,7 +20,7 @@ namespace smash {
 /**
  * Contains data for one nucleon that is read in from the list
  */
-struct Nucleoncorr {
+struct Nucleoncustom {
   /// x-coordinate
   double x;
   /// y-coordinate
@@ -37,7 +37,7 @@ struct Nucleoncorr {
  * Inheriting from Nucleus-Class using modified Nucleon configurations.
  * Configurations are read in from external lists.
  */
-class CorrelatedNucleus : public Nucleus {
+class CustomNucleus : public Nucleus {
  public:
   /**
    * Constructor that needs configuration parameters from input file
@@ -48,14 +48,14 @@ class CorrelatedNucleus : public Nucleus {
    * the external particle list is located
    * \param[in] testparticles represents the number of testparticles
    */
-  CorrelatedNucleus(Configuration& config, int testparticles);
+  CustomNucleus(Configuration& config, int testparticles);
   /**
    * Fills Particlelist from vector containing data for one nucleus.
-   * The data contains everything that is written in struct Nucleoncorr.
+   * The data contains everything that is written in struct Nucleon.
    * 
    * \param[in] vec vector containing data from external list for one nucleus
    */
-  void fill_from_list(const std::vector<Nucleoncorr>& vec);
+  void fill_from_list(const std::vector<Nucleoncustom>& vec);
   /// Returns position of a nucleon as given in the external file
   ThreeVector distribute_nucleon() override;
   /**
@@ -66,7 +66,7 @@ class CorrelatedNucleus : public Nucleus {
    * \param[in] particle_number ensures that only as many lines are read in
    * as the nucleus contains nucleons.
    */
-  std::vector<Nucleoncorr> readfile(std::ifstream& infile,
+  std::vector<Nucleoncustom> readfile(std::ifstream& infile,
                                     int particle_number) const;
   /**
    * Directory where the nucleon configurations are located.
@@ -79,14 +79,14 @@ class CorrelatedNucleus : public Nucleus {
    */
   std::string particle_list_file_name_;
   /**
-   * Number of Nucleons per Nucleus
+   *  of Nucleons per Nucleus
    * Set initally to zero to be modified in the constructor.
-   * Number is obtained by adding the proton and neutron numbers
+   *  is obtained by adding the proton and neutron numbers
    * specified in the config.yaml
    */
   int number_of_nucleons_ = 0;
   /// Vector contianing Data for one nucleus given in the particlelist
-  std::vector<Nucleoncorr> corr_nucleon_;
+  std::vector<Nucleoncustom> custom_nucleon_;
   /// Index needed to read out vector in distribute nucleon
   size_t index = 0;
 
@@ -116,4 +116,4 @@ class CorrelatedNucleus : public Nucleus {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_CORRELATEDNUCLEUS_H_
+#endif  // SRC_INCLUDE_CUSTOMNUCLEUS_H_

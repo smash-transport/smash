@@ -39,21 +39,21 @@ namespace smash {
  * \n
  */
 
-// For readability and layout issues parts of the correlatednucleus userguide
+// For readability and layout issues parts of the customnucleus userguide
 // needs to be located here. The example configuration can however be found in
-// correlatednucleus.cc
+// customnucleus.cc
 
 /*!\Userguide
  * \page projectile_and_target Projectile and Target
  *
- * - \key Correlated: \n
- *    \li \key File_Directory (path, required if \key Correlated exists,
+ * - \key Custom: \n
+ *    \li \key File_Directory (path, required if \key Custom exists,
  * no default):
  \n
  * The directory where the external list with the nucleon configurations
  * is located. Make sure to use an absolute path.\n
  *
- * \li \key File_Name (string, required if \key Correlated exists,
+ * \li \key File_Name (string, required if \key Custom exists,
  * no default): \n
  * The file name of the external list with the nucleon configurations.
  *

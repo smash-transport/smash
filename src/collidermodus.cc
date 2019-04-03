@@ -20,7 +20,7 @@
 
 #include "smash/angles.h"
 #include "smash/configuration.h"
-#include "smash/correlatednucleus.h"
+#include "smash/customnucleus.h"
 #include "smash/cxx14compat.h"
 #include "smash/experimentparameters.h"
 #include "smash/fourvector.h"
@@ -275,9 +275,9 @@ ColliderModus::ColliderModus(Configuration modus_config,
   if (proj_cfg.has_value({"Deformed"})) {
     projectile_ =
         create_deformed_nucleus(proj_cfg, params.testparticles, "projectile");
-  } else if (proj_cfg.has_value({"Correlated"})) {
+  } else if (proj_cfg.has_value({"Custom"})) {
     projectile_ =
-        make_unique<CorrelatedNucleus>(proj_cfg, params.testparticles);
+        make_unique<CustomNucleus>(proj_cfg, params.testparticles);
   } else {
     projectile_ = make_unique<Nucleus>(proj_cfg, params.testparticles);
   }
@@ -289,8 +289,8 @@ ColliderModus::ColliderModus(Configuration modus_config,
   Configuration targ_cfg = modus_cfg["Target"];
   if (targ_cfg.has_value({"Deformed"})) {
     target_ = create_deformed_nucleus(targ_cfg, params.testparticles, "target");
-  } else if (targ_cfg.has_value({"Correlated"})) {
-    target_ = make_unique<CorrelatedNucleus>(targ_cfg, params.testparticles);
+  } else if (targ_cfg.has_value({"Custom"})) {
+    target_ = make_unique<CustomNucleus>(targ_cfg, params.testparticles);
   } else {
     target_ = make_unique<Nucleus>(targ_cfg, params.testparticles);
   }
