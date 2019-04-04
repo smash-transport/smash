@@ -199,7 +199,7 @@ double ScatterAction::transverse_distance_sqr() const {
    * momentum of particle b: p_b
    * d^2_{coll} = (x_a - x_b)^2 - ((x_a - x_b) . (p_a - p_b))^2 / (p_a - p_b)^2
    */
-  const double result = dr2 - dpdr * dpdr / dp2
+  const double result = dr2 - dpdr * dpdr / dp2;
   return result > 0.0 ? result : 0.0;
 }
 
