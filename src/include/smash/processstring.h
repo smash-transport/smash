@@ -153,6 +153,8 @@ class StringProcess {
    */
   double prob_proton_to_d_uu_;
 
+  /// Whether to use a separate fragmentation function for leading baryons.
+  bool separate_fragment_baryon_;
   /// Remembers if Pythia is initialized or not
   bool pythia_parton_initialized_ = false;
 
@@ -214,6 +216,9 @@ class StringProcess {
    *            string fragments should depend on their mass.
    * \param[in] prob_proton_to_d_uu Probability of a nucleon to be split into
    *            the quark it contains once and a diquark another flavour.
+   * \param[in] separate_fragment_baryon whether to use a separate
+   *            fragmentation function for leading baryons in non-diffractive
+   *            string processes.
    * \param[in] popcorn_rate parameter (StringFlav:popcornRate)
    *        to determine the production rate of popcorn mesons from
    *        the diquark end of a string.
@@ -234,7 +239,8 @@ class StringProcess {
                 double stringz_b,  double string_sigma_T,
                 double factor_t_form,
                 bool mass_dependent_formation_times,
-                double prob_proton_to_d_uu, double popcorn_rate);
+                double prob_proton_to_d_uu,
+                bool separate_fragment_baryon, double popcorn_rate);
 
   /**
    * Common setup of PYTHIA objects for soft and hard string routines

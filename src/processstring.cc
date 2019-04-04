@@ -16,16 +16,14 @@
 
 namespace smash {
 
-StringProcess::StringProcess(double string_tension, double time_formation,
-                             double gluon_beta, double gluon_pmin,
-                             double quark_alpha, double quark_beta,
-                             double strange_supp, double diquark_supp,
-                             double sigma_perp, double stringz_a_leading,
-                             double stringz_b_leading, double stringz_a,
-                             double stringz_b, double string_sigma_T,
-                             double factor_t_form,
-                             bool mass_dependent_formation_times,
-                             double prob_proton_to_d_uu, double popcorn_rate)
+StringProcess::StringProcess(
+    double string_tension, double time_formation, double gluon_beta,
+    double gluon_pmin, double quark_alpha, double quark_beta,
+    double strange_supp, double diquark_supp, double sigma_perp,
+    double stringz_a_leading, double stringz_b_leading, double stringz_a,
+    double stringz_b, double string_sigma_T, double factor_t_form,
+    bool mass_dependent_formation_times, double prob_proton_to_d_uu,
+    bool separate_fragment_baryon, double popcorn_rate)
     : pmin_gluon_lightcone_(gluon_pmin),
       pow_fgluon_beta_(gluon_beta),
       pow_fquark_alpha_(quark_alpha),
@@ -41,7 +39,8 @@ StringProcess::StringProcess(double string_tension, double time_formation,
       soft_t_form_(factor_t_form),
       time_collision_(0.),
       mass_dependent_formation_times_(mass_dependent_formation_times),
-      prob_proton_to_d_uu_(prob_proton_to_d_uu) {
+      prob_proton_to_d_uu_(prob_proton_to_d_uu),
+      separate_fragment_baryon_(separate_fragment_baryon) {
   // setup and initialize pythia for hard string process
   pythia_parton_ = make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
   /* select only non-diffractive events
@@ -286,10 +285,8 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   ThreeVector evec = prs.threevec() / prs.threevec().abs();
   // perform fragmentation and add particles to final_state.
   ParticleList new_intermediate_particles;
-  bool separate_fragment_baryon = false;
-  int nfrag =
-      fragment_string(idqX1, idqX2, massX, evec, true, separate_fragment_baryon,
-                      new_intermediate_particles);
+  int nfrag = fragment_string(idqX1, idqX2, massX, evec, true, false,
+                              new_intermediate_particles);
   if (nfrag < 1) {
     NpartString_[0] = 0;
     return false;
@@ -428,10 +425,8 @@ bool StringProcess::next_DDiff() {
     return false;
   }
   const bool flip_string_ends = true;
-  const bool separate_fragment_baryon = false;
-  const bool success =
-      make_final_state_2strings(quarks, pstr_com, m_str, evec_str,
-                                flip_string_ends, separate_fragment_baryon);
+  const bool success = make_final_state_2strings(
+      quarks, pstr_com, m_str, evec_str, flip_string_ends, false);
   return success;
 }
 
@@ -506,10 +501,9 @@ bool StringProcess::next_NDiffSoft() {
     return false;
   }
   const bool flip_string_ends = false;
-  const bool separate_fragment_baryon = true;
   const bool success =
       make_final_state_2strings(quarks, pstr_com, m_str, evec_str,
-                                flip_string_ends, separate_fragment_baryon);
+                                flip_string_ends, separate_fragment_baryon_);
   return success;
 }
 

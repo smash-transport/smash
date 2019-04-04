@@ -102,6 +102,10 @@ namespace smash {
  * \key StringZ_B (double, optional, default = 0.5) \n
  * Parameter \f$b\f$ in pythia fragmentation function shown above.
  *
+ * \key Separate_Fragment_Baryon (bool, optional, default = True) \n
+ * Whether to use a separate fragmentation function for leading baryons in
+ * non-diffractive string processes.
+ *
  * \key StringZ_A_Leading (double, optional, default = 1.0) \n
  * Parameter a in Lund fragmentation function used to sample the light cone
  * momentum fraction of leading baryons in non-diffractive string processes.
@@ -188,6 +192,7 @@ namespace smash {
          StringZ_B: 0.35
          String_Sigma_T: 0.5
          Prob_proton_to_d_uu: 0.33
+         Separate_Fragment_Baryon: True
          Popcorn_Rate: 0.2
  \endverbatim
  *
@@ -243,6 +248,7 @@ ScatterActionsFinder::ScatterActionsFinder(
         subconfig.take({"Form_Time_Factor"}, 1.0),
         subconfig.take({"Mass_Dependent_Formation_Times"}, true),
         subconfig.take({"Prob_proton_to_d_uu"}, 1. / 3.),
+        subconfig.take({"Separate_Fragment_Baryon"}, true),
         subconfig.take({"Popcorn_Rate"}, 0.2));
   }
 }
