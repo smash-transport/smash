@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2018
+ *    Copyright (c) 2014-2019
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -652,7 +652,7 @@ class PdgCode {
    *
    * \throw InvalidPdgCode if the spin degeneracy is larger than 9
    */
-  int get_decimal() const {
+  int32_t get_decimal() const {
     if (is_nucleus()) {
       // ±10LZZZAAAI
       return antiparticle_sign() *

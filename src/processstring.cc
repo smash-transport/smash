@@ -20,23 +20,27 @@ StringProcess::StringProcess(
     double string_tension, double time_formation, double gluon_beta,
     double gluon_pmin, double quark_alpha, double quark_beta,
     double strange_supp, double diquark_supp, double sigma_perp,
-    double leading_frag_mean, double leading_frag_width, double stringz_a,
+    double stringz_a_leading, double stringz_b_leading, double stringz_a,
     double stringz_b, double string_sigma_T, double factor_t_form,
-    bool mass_dependent_formation_times, double prob_proton_to_d_uu)
+    bool mass_dependent_formation_times, double prob_proton_to_d_uu,
+    bool separate_fragment_baryon, double popcorn_rate)
     : pmin_gluon_lightcone_(gluon_pmin),
       pow_fgluon_beta_(gluon_beta),
       pow_fquark_alpha_(quark_alpha),
       pow_fquark_beta_(quark_beta),
       sigma_qperp_(sigma_perp),
-      leading_frag_mean_(leading_frag_mean),
-      leading_frag_width_(leading_frag_width),
+      stringz_a_leading_(stringz_a_leading),
+      stringz_b_leading_(stringz_b_leading),
+      stringz_a_produce_(stringz_a),
+      stringz_b_produce_(stringz_b),
       kappa_tension_string_(string_tension),
       additional_xsec_supp_(0.7),
       time_formation_const_(time_formation),
       soft_t_form_(factor_t_form),
       time_collision_(0.),
       mass_dependent_formation_times_(mass_dependent_formation_times),
-      prob_proton_to_d_uu_(prob_proton_to_d_uu) {
+      prob_proton_to_d_uu_(prob_proton_to_d_uu),
+      separate_fragment_baryon_(separate_fragment_baryon) {
   // setup and initialize pythia for hard string process
   pythia_parton_ = make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
   /* select only non-diffractive events
@@ -45,19 +49,22 @@ StringProcess::StringProcess(
   pythia_parton_->readString("MultipartonInteractions:pTmin = 1.5");
   pythia_parton_->readString("HadronLevel:all = off");
   common_setup_pythia(pythia_parton_.get(), strange_supp, diquark_supp,
-                      stringz_a, stringz_b, string_sigma_T);
+                      popcorn_rate, stringz_a, stringz_b, string_sigma_T);
 
   // setup and initialize pythia for fragmentation
   pythia_hadron_ = make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
   /* turn off all parton-level processes to implement only hadronization */
   pythia_hadron_->readString("ProcessLevel:all = off");
   common_setup_pythia(pythia_hadron_.get(), strange_supp, diquark_supp,
-                      stringz_a, stringz_b, string_sigma_T);
+                      popcorn_rate, stringz_a, stringz_b, string_sigma_T);
 
   /* initialize PYTHIA */
   pythia_hadron_->init();
   pythia_sigmatot_.init(&pythia_hadron_->info, pythia_hadron_->settings,
                         &pythia_hadron_->particleData, &pythia_hadron_->rndm);
+  pythia_stringflav_.init(pythia_hadron_->settings,
+                          &pythia_hadron_->particleData, &pythia_hadron_->rndm,
+                          &pythia_hadron_->info);
   event_intermediate_.init("intermediate partons",
                            &pythia_hadron_->particleData);
 
@@ -70,7 +77,8 @@ StringProcess::StringProcess(
 
 void StringProcess::common_setup_pythia(Pythia8::Pythia *pythia_in,
                                         double strange_supp,
-                                        double diquark_supp, double stringz_a,
+                                        double diquark_supp,
+                                        double popcorn_rate, double stringz_a,
                                         double stringz_b,
                                         double string_sigma_T) {
   // choose parametrization for mass-dependent width
@@ -87,6 +95,8 @@ void StringProcess::common_setup_pythia(Pythia8::Pythia *pythia_in,
   // strangeness suppression factor in string fragmentation
   pythia_in->readString("StringFlav:probStoUD = " +
                         std::to_string(strange_supp));
+  pythia_in->readString("StringFlav:popcornRate = " +
+                        std::to_string(popcorn_rate));
   // parameters for the fragmentation function
   pythia_in->readString("StringZ:aLund = " + std::to_string(stringz_a));
   pythia_in->readString("StringZ:bLund = " + std::to_string(stringz_b));
@@ -275,10 +285,8 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   ThreeVector evec = prs.threevec() / prs.threevec().abs();
   // perform fragmentation and add particles to final_state.
   ParticleList new_intermediate_particles;
-  bool separate_fragment_baryon = false;
-  int nfrag =
-      fragment_string(idqX1, idqX2, massX, evec, true, separate_fragment_baryon,
-                      new_intermediate_particles);
+  int nfrag = fragment_string(idqX1, idqX2, massX, evec, true, false,
+                              new_intermediate_particles);
   if (nfrag < 1) {
     NpartString_[0] = 0;
     return false;
@@ -417,10 +425,8 @@ bool StringProcess::next_DDiff() {
     return false;
   }
   const bool flip_string_ends = true;
-  const bool separate_fragment_baryon = false;
-  const bool success =
-      make_final_state_2strings(quarks, pstr_com, m_str, evec_str,
-                                flip_string_ends, separate_fragment_baryon);
+  const bool success = make_final_state_2strings(
+      quarks, pstr_com, m_str, evec_str, flip_string_ends, false);
   return success;
 }
 
@@ -495,10 +501,9 @@ bool StringProcess::next_NDiffSoft() {
     return false;
   }
   const bool flip_string_ends = false;
-  const bool separate_fragment_baryon = true;
   const bool success =
       make_final_state_2strings(quarks, pstr_com, m_str, evec_str,
-                                flip_string_ends, separate_fragment_baryon);
+                                flip_string_ends, separate_fragment_baryon_);
   return success;
 }
 
@@ -1608,6 +1613,8 @@ bool StringProcess::next_BBbarAnn() {
 
 void StringProcess::make_orthonormal_basis(
     ThreeVector &evec_polar, std::array<ThreeVector, 3> &evec_basis) {
+  assert(std::fabs(evec_polar.sqr() - 1.) < really_small);
+
   if (std::abs(evec_polar.x3()) < (1. - 1.0e-8)) {
     double ex, ey, et;
     double theta, phi;
@@ -1647,6 +1654,10 @@ void StringProcess::make_orthonormal_basis(
       evec_basis[0] = ThreeVector(0., 0., -1.);
     }
   }
+
+  assert(std::fabs(evec_basis[1] * evec_basis[2]) < really_small);
+  assert(std::fabs(evec_basis[2] * evec_basis[0]) < really_small);
+  assert(std::fabs(evec_basis[0] * evec_basis[1]) < really_small);
 }
 
 void StringProcess::compute_incoming_lightcone_momenta() {
@@ -1742,6 +1753,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
   intermediate_particles.clear();
 
   log.debug("initial quark content for fragment_string : ", idq1, ", ", idq2);
+  log.debug("initial string mass (GeV) for fragment_string : ", mString);
   // PDG id of quark constituents of string ends
   std::array<int, 2> idqIn;
   idqIn[0] = idq1;
@@ -1773,297 +1785,355 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
   Pythia8::Vec4 pSum = 0.;
 
   int number_of_fragments = 0;
+  bool do_string_fragmentation = false;
+
+  /* lightcone momenta p^+ and p^- of the string
+   * p^{\pm} is defined as (E \pm p_{longitudinal}) / sqrts{2}. */
+  double ppos_string_new, pneg_string_new;
+  /* transverse momentum (and magnitude) acquired
+   * by the the string to be fragmented */
+  double QTrx_string_new, QTry_string_new, QTrn_string_new;
+  // transverse mass of the string to be fragmented
+  double mTrn_string_new;
+  // mass of the string to be fragmented
+  double mass_string_new;
+
+  /* Transverse momentum to be added to the most forward hadron
+   * from PYTHIA fragmentation */
+  double QTrx_add_pos, QTry_add_pos;
+  /* Transverse momentum to be added to the most backward hadron
+   * from PYTHIA fragmentation */
+  double QTrx_add_neg, QTry_add_neg;
+
+  /* Set those transverse momenta to be zero.
+   * This is the case when we solely rely on the PYTHIA fragmentation
+   * procedure without separate fragmentation function.
+   * In the case of separate fragmentation function for the leading baryon,
+   * appropriate values will be assigned later. */
+  QTrx_add_pos = 0.;
+  QTry_add_pos = 0.;
+  QTrx_add_neg = 0.;
+  QTry_add_neg = 0.;
+
+  std::array<ThreeVector, 3> evec_basis;
+  make_orthonormal_basis(evecLong, evec_basis);
 
   if (separate_fragment_baryon && (std::abs(bstring) == 3) &&
       (mString > m_const[0] + m_const[1] + 1.)) {
-    /* In the case of separate fragmentation function for leading baryons,
-     * the leading baryon (antibaryon) is fragmented from the original string
-     * with a gaussian fragmentation function.
-     * It is then followed by fragmentation of the remaining mesonic string. */
-    const double ssbar_supp = pythia_hadron_->parm("StringFlav:probStoUD");
-    const double sigma_qt_frag = pythia_hadron_->parm("StringPT:sigma");
-    std::array<ThreeVector, 3> evec_basis;
-    make_orthonormal_basis(evecLong, evec_basis);
+    /* A separate fragmentation function will be used to the leading baryon,
+     * if we have a baryonic string and the corresponding option is turned on.
+     */
+    int n_frag_prior;
+    /* PDG id of fragmented hadrons
+     * before switching to the PYTHIA fragmentation */
+    std::vector<int> pdgid_frag_prior;
+    /* four-momenta of fragmented hadrons
+     * before switching to the PYTHIA fragmentation */
+    std::vector<FourVector> momentum_frag_prior;
 
-    /* transverse momentum (and magnitude) acquired by the qqbar pair
-     * created in the middle of string */
-    double QTrx, QTry, QTrn;
-    /* lightcone momenta p^+ and p^- of the remaining (mesonic) string
-     * p^{\pm} is defined as (E \pm p_{longitudinal}) / sqrts{2}. */
-    double ppos_string_new, pneg_string_new;
-    // transverse mass of the remaining (mesonic) string
-    double mTrn_string_new;
-    // transverse masses of quark constituents of string ends
+    // Transverse momentum px of the forward end of the string
+    double QTrx_string_pos;
+    // Transverse momentum px of the backward end of the string
+    double QTrx_string_neg;
+    // Transverse momentum py of the forward end of the string
+    double QTry_string_pos;
+    // Transverse momentum py of the backward end of the string
+    double QTry_string_neg;
+    /* Absolute value of the transverse momentum of
+     * the forward end of the string */
+    double QTrn_string_pos;
+    /* Absolute value of the transverse momentum of
+     * the backward end of the string */
+    double QTrn_string_neg;
+
     std::array<double, 2> m_trans;
 
+    // How many times we try to fragment leading baryon.
     const int niter_max = 10000;
-    int iiter = 0;
     bool found_leading_baryon = false;
-    while (!found_leading_baryon) {
-      int idnew_qqbar = 0;
-      /* Determine flavor of the new qqbar pair
-       * based on the strangeness suppression factor specifed in config. */
-      if (random::uniform(0., 1. + ssbar_supp) < 1.) {
-        if (random::uniform_int(0, 1) == 0) {
-          idnew_qqbar = 1;  // ddbar pair
-        } else {
-          idnew_qqbar = 2;  // uubar pair
-        }
-      } else {
-        idnew_qqbar = 3;  // ssbar pair
-      }
-
-      int id_diquark = 0;
-      if (bstring > 0) {
-        /* q(idq1) + diquark(idq2) baryonic string fragments into
-         * q(idq1) + qbar(-idnew_qqbar) mesonic string and
-         * q(idnew_qqbar) + diquark(idq2) baryon. */
-        id_diquark = std::abs(idq2);
-        idqIn[1] = -idnew_qqbar;
-      } else {
-        /* anti-diquark(idq1) + qbar(idq2) anti-baryonic string fragments into
-         * q(idnew_qqbar) + qbar(idq2) mesonic string and
-         * anti-diquark(idq1) + qbar(-idnew_qqbar) antibaryon. */
-        id_diquark = std::abs(idq1);
-        idqIn[0] = idnew_qqbar;
-      }
-      log.debug("quark constituents for leading baryon : ", idnew_qqbar, ", ",
-                id_diquark);
-
-      // net quark number of d, u, s, c and b flavors
-      std::array<int, 5> frag_net_q;
-      /* Evaluate total net quark number of baryon (antibaryon)
-       * from the valence quark constituents. */
-      for (int iq = 0; iq < 5; iq++) {
-        frag_net_q[iq] =
-            (bstring > 0 ? 1 : -1) *
-            (pythia_hadron_->particleData.nQuarksInCode(idnew_qqbar, iq + 1) +
-             pythia_hadron_->particleData.nQuarksInCode(id_diquark, iq + 1));
-      }
-      const int frag_iso3 = frag_net_q[1] - frag_net_q[0];
-      const int frag_strange = -frag_net_q[2];
-      const int frag_charm = frag_net_q[3];
-      const int frag_bottom = -frag_net_q[4];
-      log.debug("  conserved charges of leading baryon : iso3 = ", frag_iso3,
-                ", strangeness = ", frag_strange, ", charmness = ", frag_charm,
-                ", bottomness = ", frag_bottom);
-
-      std::vector<int> pdgid_possible;
-      std::vector<double> weight_possible;
-      std::vector<double> weight_summed;
-      /* loop over hadronic species
-       * Any hadron with the same valence quark contents is allowed and
-       * the probability goes like spin degeneracy over mass. */
-      for (auto &ptype : ParticleType::list_all()) {
-        const int pdgid =
-            (bstring > 0 ? 1 : -1) * std::abs(ptype.pdgcode().get_decimal());
-        if ((pythia_hadron_->particleData.isParticle(pdgid)) &&
-            (bstring == 3 * ptype.pdgcode().baryon_number()) &&
-            (frag_iso3 == ptype.pdgcode().isospin3()) &&
-            (frag_strange == ptype.pdgcode().strangeness()) &&
-            (frag_charm == ptype.pdgcode().charmness()) &&
-            (frag_bottom == ptype.pdgcode().bottomness())) {
-          const int spin_degeneracy = ptype.pdgcode().spin_degeneracy();
-          const double mass_pole = ptype.mass();
-          const double weight =
-              static_cast<double>(spin_degeneracy) / mass_pole;
-          pdgid_possible.push_back(pdgid);
-          weight_possible.push_back(weight);
-
-          log.debug("  PDG id ", pdgid, " is possible with weight ", weight);
-        }
-      }
-      const int n_possible = pdgid_possible.size();
-      weight_summed.push_back(0.);
-      for (int i = 0; i < n_possible; i++) {
-        weight_summed.push_back(weight_summed[i] + weight_possible[i]);
-      }
-
-      /* Sample baryon (antibaryon) specie,
-       * which is fragmented from the leading diquark (anti-diquark). */
-      int pdgid_frag = 0;
-      const double uspc = random::uniform(0., weight_summed[n_possible]);
-      for (int i = 0; i < n_possible; i++) {
-        if ((uspc >= weight_summed[i]) && (uspc < weight_summed[i + 1])) {
-          pdgid_frag = pdgid_possible[i];
-          log.debug("PDG id ", pdgid_frag, " selected for leading baryon.");
+    for (int iiter = 0; iiter < niter_max; iiter++) {
+      n_frag_prior = 0;
+      pdgid_frag_prior.clear();
+      momentum_frag_prior.clear();
+      int n_frag = 0;
+      std::vector<int> pdgid_frag;
+      std::vector<FourVector> momentum_frag;
+      // The original string is aligned in the logitudinal direction.
+      ppos_string_new = mString * M_SQRT1_2;
+      pneg_string_new = mString * M_SQRT1_2;
+      // There is no transverse momentum at the original string ends.
+      QTrx_string_pos = 0.;
+      QTrx_string_neg = 0.;
+      QTrx_string_new = 0.;
+      QTry_string_pos = 0.;
+      QTry_string_neg = 0.;
+      QTry_string_new = 0.;
+      // Constituent flavor at the forward (diquark) end of the string
+      Pythia8::FlavContainer flav_string_pos =
+          bstring > 0 ? Pythia8::FlavContainer(idq2)
+                      : Pythia8::FlavContainer(idq1);
+      // Constituent flavor at the backward (quark) end of the string
+      Pythia8::FlavContainer flav_string_neg =
+          bstring > 0 ? Pythia8::FlavContainer(idq1)
+                      : Pythia8::FlavContainer(idq2);
+      // Whether the first baryon from the forward end is fragmented
+      bool found_forward_baryon = false;
+      // Whether the first hadron from the forward end is fragmented
+      bool done_forward_end = false;
+      /* Whether energy of the string is depleted and the string
+       * breaks into final two hadrons. */
+      bool energy_used_up = false;
+      while (!found_forward_baryon && !energy_used_up) {
+        /* Keep fragmenting hadrons until
+         * the first baryon is fragmented from the forward (diquark) end or
+         * energy of the string is used up. */
+        // Randomly select the string end from which the hadron is fragmented.
+        bool from_forward = random::uniform_int(0, 1) == 0;
+        /* The separate fragmentation function for the leading baryon kicks in
+         * only if the first fragmented hadron from the forward (diquark) end
+         * is a baryon. */
+        n_frag = fragment_off_hadron(
+            from_forward,
+            separate_fragment_baryon && from_forward && !done_forward_end,
+            evec_basis, ppos_string_new, pneg_string_new, QTrx_string_pos,
+            QTrx_string_neg, QTry_string_pos, QTry_string_neg, flav_string_pos,
+            flav_string_neg, pdgid_frag, momentum_frag);
+        if (n_frag == 0) {
+          /* If it fails to fragment hadron, start over from
+           * the initial (baryonic) string configuration. */
           break;
+        } else {
+          QTrx_string_new = QTrx_string_pos + QTrx_string_neg;
+          QTry_string_new = QTry_string_pos + QTry_string_neg;
+          /* Quark (antiquark) constituents of the remaining string are
+           * different from those of the original string.
+           * Therefore, the constituent masses have to be updated. */
+          idqIn[0] = bstring > 0 ? flav_string_neg.id : flav_string_pos.id;
+          idqIn[1] = bstring > 0 ? flav_string_pos.id : flav_string_neg.id;
+          for (int i = 0; i < 2; i++) {
+            m_const[i] = pythia_hadron_->particleData.m0(idqIn[i]);
+          }
+          QTrn_string_pos = std::sqrt(QTrx_string_pos * QTrx_string_pos +
+                                      QTry_string_pos * QTry_string_pos);
+          QTrn_string_neg = std::sqrt(QTrx_string_neg * QTrx_string_neg +
+                                      QTry_string_neg * QTry_string_neg);
+          if (bstring > 0) {  // in the case of baryonic string
+            /* Quark is coming from the newly produced backward qqbar pair
+             * and therefore has transverse momentum, which is opposite to
+             * that of the fragmented (backward) meson. */
+            m_trans[0] = std::sqrt(m_const[0] * m_const[0] +
+                                   QTrn_string_neg * QTrn_string_neg);
+            /* Antiquark is coming from the newly produced forward qqbar pair
+             * and therefore has transverse momentum, which is opposite to
+             * that of the fragmented (leading) baryon. */
+            m_trans[1] = std::sqrt(m_const[1] * m_const[1] +
+                                   QTrn_string_pos * QTrn_string_pos);
+          } else {  // in the case of anti-baryonic string
+            /* Quark is coming from the newly produced forward qqbar pair
+             * and therefore has transverse momentum, which is opposite to
+             * that of the fragmented (leading) antibaryon. */
+            m_trans[0] = std::sqrt(m_const[0] * m_const[0] +
+                                   QTrn_string_pos * QTrn_string_pos);
+            /* Antiquark is coming from the newly produced backward qqbar pair
+             * and therefore has transverse momentum, which is opposite to
+             * that of the fragmented (backward) meson. */
+            m_trans[1] = std::sqrt(m_const[1] * m_const[1] +
+                                   QTrn_string_neg * QTrn_string_neg);
+          }
+          done_forward_end = done_forward_end || from_forward;
+          found_forward_baryon =
+              found_forward_baryon ||
+              (from_forward &&
+               pythia_hadron_->particleData.isBaryon(pdgid_frag[0]));
+        }
+        if (n_frag == 2) {
+          energy_used_up = true;
+        }
+        /* Add PDG id and four-momenta of fragmented hadrons
+         * to the list if fragmentation is successful. */
+        n_frag_prior += n_frag;
+        for (int i_frag = 0; i_frag < n_frag; i_frag++) {
+          pdgid_frag_prior.push_back(pdgid_frag[i_frag]);
+          momentum_frag_prior.push_back(momentum_frag[i_frag]);
         }
       }
-      // Sample mass.
-      const double mass_frag = pythia_hadron_->particleData.mSel(pdgid_frag);
-
-      // Sample transverse momentum carried by baryon (antibaryon).
-      QTrx = random::normal(0., sigma_qt_frag * M_SQRT1_2);
-      QTry = random::normal(0., sigma_qt_frag * M_SQRT1_2);
-      log.debug("Transverse momentum (", QTrx, ", ", QTry,
-                ") GeV selected for the leading baryon.");
-      QTrn = std::sqrt(QTrx * QTrx + QTry * QTry);
-      // transverse mass of the fragmented leading hadron
-      const double mTrn_frag = std::sqrt(QTrn * QTrn + mass_frag * mass_frag);
-
-      /* Sample lightcone momentum fraction carried by the baryon (antibaryon).
-       * The corresponding fragmentation function has gaussian shape
-       * i.e., exp( - (x - leading_frag_mean_)^2 / (2 leading_frag_width_^2) ).
-       * This is done using the rejection method with an Lorentzian
-       * envelop function, which is
-       * 1 / (1 + (x - leading_frag_mean_)^2 / (4 leading_frag_width_^2) ). */
-      double xfrac = 0.;
-      bool xfrac_accepted = false;
-      while (!xfrac_accepted) {
-        const double angle =
-            random::uniform(0., 1.) *
-                (std::atan(0.5 * (1. - leading_frag_mean_) /
-                           leading_frag_width_) +
-                 std::atan(0.5 * leading_frag_mean_ / leading_frag_width_)) -
-            std::atan(0.5 * leading_frag_mean_ / leading_frag_width_);
-        // lightcone momentum fraction sampled from the envelop function
-        xfrac = leading_frag_mean_ + 2. * leading_frag_width_ * std::tan(angle);
-
-        /* The rejection method is applied to sample
-         * according to the real fragmentation function. */
-        const double xf_tmp =
-            std::abs(xfrac - leading_frag_mean_) / leading_frag_width_;
-        const double xf_env = (1. + really_small) / (1. + xf_tmp * xf_tmp / 4.);
-        const double xf_pdf = std::exp(-xf_tmp * xf_tmp / 2.);
-        if (random::uniform(0., xf_env) < xf_pdf && xfrac > 0. && xfrac < 1.) {
-          xfrac_accepted = true;
+      if (n_frag == 0) {
+        continue;
+      } else {
+        if (n_frag == 1) {
+          // Compute transverse mass and momentum of the remaining string.
+          double mTsqr_string = 2. * ppos_string_new * pneg_string_new;
+          mTrn_string_new = std::sqrt(mTsqr_string);
+          QTrn_string_new = std::sqrt(QTrx_string_new * QTrx_string_new +
+                                      QTry_string_new * QTry_string_new);
+          if (mTrn_string_new < QTrn_string_new) {
+            /* If transverse mass is lower than transverse momentum,
+             * start over. */
+            found_leading_baryon = false;
+          } else {
+            // Compute mass of the remaining string.
+            mass_string_new =
+                std::sqrt(mTsqr_string - QTrn_string_new * QTrn_string_new);
+            /* Proceed only if the string mass is large enough to call
+             * PYTHIA fragmentation routine.
+             * Otherwise, start over. */
+            if (mass_string_new > m_const[0] + m_const[1]) {
+              do_string_fragmentation = true;
+              found_leading_baryon = true;
+              QTrx_add_pos = QTrx_string_pos;
+              QTry_add_pos = QTry_string_pos;
+              QTrx_add_neg = QTrx_string_neg;
+              QTry_add_neg = QTry_string_neg;
+            } else {
+              found_leading_baryon = false;
+            }
+          }
+        } else if (n_frag == 2) {
+          /* If the string ended up breaking into final two hadrons,
+           * there is no need to perform PYTHIA fragmentation. */
+          do_string_fragmentation = false;
+          found_leading_baryon = true;
         }
       }
 
-      /* Determine kinematics of the fragmented baryon (antibaryon) and
-       * remaining (mesonic) string.
-       * It begins with the lightcone momentum, p^+ (ppos) and p^- (pneg). */
-      const double ppos_frag = xfrac * mString * M_SQRT1_2;
-      const double pneg_frag = 0.5 * mTrn_frag * mTrn_frag / ppos_frag;
-      ppos_string_new = mString * M_SQRT1_2 - ppos_frag;
-      pneg_string_new = mString * M_SQRT1_2 - pneg_frag;
-      mTrn_string_new =
-          std::sqrt(std::max(0., 2. * ppos_string_new * pneg_string_new));
-
-      /* Quark (antiquark) constituents of the remaining string are
-       * different from those of the original string.
-       * Therefore, the constituent masses have to be updated. */
-      for (int i = 0; i < 2; i++) {
-        m_const[i] = pythia_hadron_->particleData.m0(idqIn[i]);
+      if (found_leading_baryon) {
+        break;
       }
-      if (bstring > 0) {  // in the case of baryonic string
-        /* Quark is coming from the original string
-         * and therefore has zero transverse momentum. */
-        m_trans[0] = m_const[0];
-        /* Antiquark is coming from the newly produced qqbar pair
-         * and therefore has transverse momentum, which is opposite to
-         * that of the fragmented (leading) antibaryon. */
-        m_trans[1] = std::sqrt(m_const[1] * m_const[1] + QTrn * QTrn);
-      } else {  // in the case of anti-baryonic string
-        /* Quark is coming from the newly produced qqbar pair
-         * and therefore has transverse momentum, which is opposite to
-         * that of the fragmented (leading) baryon. */
-        m_trans[0] = std::sqrt(m_const[0] * m_const[0] + QTrn * QTrn);
-        /* Antiquark is coming from the original string
-         * and therefore has zero transverse momentum. */
-        m_trans[1] = m_const[1];
-      }
-
-      if (mTrn_string_new > m_trans[0] + m_trans[1]) {
-        found_leading_baryon = true;
-
-        FourVector mom_frag(
-            (ppos_frag + pneg_frag) * M_SQRT1_2,
-            evec_basis[0] * (ppos_frag - pneg_frag) * M_SQRT1_2 +
-                evec_basis[1] * QTrx + evec_basis[2] * QTry);
-        log.debug("appending the leading baryon ", pdgid_frag,
+    }
+    if (found_leading_baryon) {
+      /* If the kinematics makes sense, add fragmented hadrons so far
+       * to the intermediate particle list. */
+      for (int i_frag = 0; i_frag < n_frag_prior; i_frag++) {
+        log.debug("appending the the fragmented hadron ",
+                  pdgid_frag_prior[i_frag],
                   " to the intermediate particle list.");
-        /* If the remaining string has enough transverse mass,
-         * add fragmented baryon (antibaryon) to the intermediate list. */
-        bool found_ptype = append_intermediate_list(pdgid_frag, mom_frag,
+
+        bool found_ptype = append_intermediate_list(pdgid_frag_prior[i_frag],
+                                                    momentum_frag_prior[i_frag],
                                                     intermediate_particles);
         if (!found_ptype) {
-          log.error("PDG ID ", pdgid_frag, " should exist in ParticleType.");
+          log.error("PDG ID ", pdgid_frag_prior[i_frag],
+                    " should exist in ParticleType.");
           throw std::runtime_error("string fragmentation failed.");
         }
         number_of_fragments++;
-        log.debug("proceed to the next step");
+      }
+    } else {
+      /* If it is not possible to find the leading baryon with appropriate
+       * kinematics after trying many times, return failure (no hadron). */
+      return 0;
+    }
+
+    if (do_string_fragmentation) {
+      mTrn_string_new = std::sqrt(2. * ppos_string_new * pneg_string_new);
+      // lightcone momentum p^+ of the quark constituents on the string ends
+      std::array<double, 2> ppos_parton;
+      // lightcone momentum p^- of the quark constituents on the string ends
+      std::array<double, 2> pneg_parton;
+
+      /* lightcone momenta of the string ends (quark and antiquark)
+       * First, obtain ppos_parton[0] and ppos_parton[1]
+       * (p^+ of quark and antiquark) by solving the following equations.
+       * ppos_string_new = ppos_parton[0] + ppos_parton[1]
+       * pneg_string_new = 0.5 * m_trans[0] * m_trans[0] / ppos_parton[0] +
+       *                   0.5 * m_trans[1] * m_trans[1] / ppos_parton[1] */
+      const double pb_const =
+          (mTrn_string_new * mTrn_string_new + m_trans[0] * m_trans[0] -
+           m_trans[1] * m_trans[1]) /
+          (4. * pneg_string_new);
+      const double pc_const =
+          0.5 * m_trans[0] * m_trans[0] * ppos_string_new / pneg_string_new;
+      ppos_parton[0] = pb_const + (bstring > 0 ? -1. : 1.) *
+                                      std::sqrt(pb_const * pb_const - pc_const);
+      ppos_parton[1] = ppos_string_new - ppos_parton[0];
+      /* Then, compute pneg_parton[0] and pneg_parton[1]
+       * (p^- of quark and antiquark) from the dispersion relation.
+       * 2 p^+ p^- = m_transverse^2 */
+      for (int i = 0; i < 2; i++) {
+        pneg_parton[i] = 0.5 * m_trans[i] * m_trans[i] / ppos_parton[i];
       }
 
-      if (iiter == niter_max) {
-        return 0;
-      }
-      iiter += 1;
-    }
+      const int status = 1;
+      int color, anticolor;
+      ThreeVector three_mom;
+      ThreeVector transverse_mom;
+      Pythia8::Vec4 pquark;
 
-    // lightcone momentum p^+ of the quark constituents on the string ends
-    std::array<double, 2> ppos_parton;
-    // lightcone momentum p^- of the quark constituents on the string ends
-    std::array<double, 2> pneg_parton;
-
-    /* lightcone momenta of the string ends (quark and antiquark)
-     * First, obtain ppos_parton[0] and ppos_parton[1]
-     * (p^+ of quark and antiquark) by solving the following equations.
-     * ppos_string_new = ppos_parton[0] + ppos_parton[1]
-     * pneg_string_new = 0.5 * m_trans[0] * m_trans[0] / ppos_parton[0] +
-     *                   0.5 * m_trans[1] * m_trans[1] / ppos_parton[1] */
-    const double pb_const =
-        (mTrn_string_new * mTrn_string_new + m_trans[0] * m_trans[0] -
-         m_trans[1] * m_trans[1]) /
-        (4. * pneg_string_new);
-    const double pc_const =
-        0.5 * m_trans[0] * m_trans[0] * ppos_string_new / pneg_string_new;
-    ppos_parton[0] = pb_const + (bstring > 0 ? -1. : 1.) *
-                                    std::sqrt(pb_const * pb_const - pc_const);
-    ppos_parton[1] = ppos_string_new - ppos_parton[0];
-    /* Then, compute pneg_parton[0] and pneg_parton[1]
-     * (p^- of quark and antiquark) from the dispersion relation.
-     * 2 p^+ p^- = m_transverse^2 */
-    for (int i = 0; i < 2; i++) {
-      pneg_parton[i] = 0.5 * m_trans[i] * m_trans[i] / ppos_parton[i];
-    }
-
-    const int status = 1;
-    int color, anticolor;
-    ThreeVector three_mom;
-    Pythia8::Vec4 pquark;
-
-    // quark end of the remaining (mesonic) string
-    color = 1;
-    anticolor = 0;
-    if (bstring > 0) {  // in the case of baryonic string
-      /* Quark is coming from the original string
-       * and therefore has zero transverse momentum. */
-      three_mom = evec_basis[0] * (ppos_parton[0] - pneg_parton[0]) * M_SQRT1_2;
-    } else {  // in the case of anti-baryonic string
-      /* Quark is coming from the newly produced qqbar pair
-       * and therefore has transverse momentum, which is opposite to
-       * that of the fragmented (leading) baryon. */
+      // quark end of the remaining (mesonic) string
+      color = 1;
+      anticolor = 0;
+      /* In the case of baryonic string,
+       * Quark is coming from the backward end of the remaining string.
+       * Transverse momentum of the backward end is subtracted
+       * at this point to keep the remaining string aligned in
+       * the original longitudinal direction.
+       * It will be added to the most backward hadron from
+       * PYTHIA fragmentation.
+       * In the case of anti-baryonic string,
+       * Quark is coming from the forward end of the remaining string.
+       * Transverse momentum of the forward end is subtracted
+       * at this point to keep the remaining string aligned in
+       * the original longitudinal direction.
+       * It will be added to the most forward hadron from
+       * PYTHIA fragmentation. */
+      transverse_mom =
+          bstring > 0 ? evec_basis[1] * (QTrx_string_neg - QTrx_add_neg) +
+                            evec_basis[2] * (QTry_string_neg - QTry_add_neg)
+                      : evec_basis[1] * (QTrx_string_pos - QTrx_add_pos) +
+                            evec_basis[2] * (QTry_string_pos - QTry_add_pos);
       three_mom =
-          evec_basis[0] * (ppos_parton[0] - pneg_parton[0]) * M_SQRT1_2 -
-          evec_basis[1] * QTrx - evec_basis[2] * QTry;
-    }
-    pquark = set_Vec4((ppos_parton[0] + pneg_parton[0]) * M_SQRT1_2, three_mom);
-    pSum += pquark;
-    pythia_hadron_->event.append(idqIn[0], status, color, anticolor, pquark,
-                                 m_const[0]);
+          evec_basis[0] * (ppos_parton[0] - pneg_parton[0]) * M_SQRT1_2 +
+          transverse_mom;
+      const double E_quark =
+          std::sqrt(m_const[0] * m_const[0] + three_mom.sqr());
+      pquark = set_Vec4(E_quark, three_mom);
+      pSum += pquark;
+      pythia_hadron_->event.append(idqIn[0], status, color, anticolor, pquark,
+                                   m_const[0]);
 
-    // antiquark end of the remaining (mesonic) string
-    color = 0;
-    anticolor = 1;
-    if (bstring > 0) {  // in the case of baryonic string
-      /* Antiquark is coming from the newly produced qqbar pair
-       * and therefore has transverse momentum, which is opposite to
-       * that of the fragmented (leading) antibaryon. */
+      // antiquark end of the remaining (mesonic) string
+      color = 0;
+      anticolor = 1;
+      /* In the case of baryonic string,
+       * Antiquark is coming from the forward end of the remaining string.
+       * Transverse momentum of the forward end is subtracted
+       * at this point to keep the remaining string aligned in
+       * the original longitudinal direction.
+       * It will be added to the most forward hadron from
+       * PYTHIA fragmentation.
+       * In the case of anti-baryonic string,
+       * Antiquark is coming from the backward end of the remaining string.
+       * Transverse momentum of the backward end is subtracted
+       * at this point to keep the remaining string aligned in
+       * the original longitudinal direction.
+       * It will be added to the most backward hadron from
+       * PYTHIA fragmentation. */
+      transverse_mom =
+          bstring > 0 ? evec_basis[1] * (QTrx_string_pos - QTrx_add_pos) +
+                            evec_basis[2] * (QTry_string_pos - QTry_add_pos)
+                      : evec_basis[1] * (QTrx_string_neg - QTrx_add_neg) +
+                            evec_basis[2] * (QTry_string_neg - QTry_add_neg);
       three_mom =
-          evec_basis[0] * (ppos_parton[1] - pneg_parton[1]) * M_SQRT1_2 -
-          evec_basis[1] * QTrx - evec_basis[2] * QTry;
-    } else {  // in the case of anti-baryonic string
-      /* Antiquark is coming from the original string
-       * and therefore has zero transverse momentum. */
-      three_mom = evec_basis[0] * (ppos_parton[1] - pneg_parton[1]) * M_SQRT1_2;
+          evec_basis[0] * (ppos_parton[1] - pneg_parton[1]) * M_SQRT1_2 +
+          transverse_mom;
+      const double E_antiq =
+          std::sqrt(m_const[1] * m_const[1] + three_mom.sqr());
+      pquark = set_Vec4(E_antiq, three_mom);
+      pSum += pquark;
+      pythia_hadron_->event.append(idqIn[1], status, color, anticolor, pquark,
+                                   m_const[1]);
     }
-    pquark = set_Vec4((ppos_parton[1] + pneg_parton[1]) * M_SQRT1_2, three_mom);
-    pSum += pquark;
-    pythia_hadron_->event.append(idqIn[1], status, color, anticolor, pquark,
-                                 m_const[1]);
   } else {
+    do_string_fragmentation = true;
+
+    ppos_string_new = mString * M_SQRT1_2;
+    pneg_string_new = mString * M_SQRT1_2;
+    QTrx_string_new = 0.;
+    QTry_string_new = 0.;
+    QTrn_string_new = 0.;
+    mTrn_string_new = mString;
+    mass_string_new = mString;
+
     /* diquark (anti-quark) with PDG id idq2 is going in the direction of
      * evecLong.
      * quark with PDG id idq1 is going in the direction opposite to evecLong. */
@@ -2096,12 +2166,26 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
                                  m_const[1]);
   }
 
-  log.debug("fragmenting a string with ", idqIn[0], ", ", idqIn[1]);
-  // implement PYTHIA fragmentation
-  pythia_hadron_->event[0].p(pSum);
-  pythia_hadron_->event[0].m(pSum.mCalc());
-  const bool successful_hadronization = pythia_hadron_->next();
-  if (successful_hadronization) {
+  if (do_string_fragmentation) {
+    log.debug("fragmenting a string with ", idqIn[0], ", ", idqIn[1]);
+    // implement PYTHIA fragmentation
+    pythia_hadron_->event[0].p(pSum);
+    pythia_hadron_->event[0].m(pSum.mCalc());
+    bool successful_hadronization = pythia_hadron_->next();
+    if (!successful_hadronization) {
+      return 0;
+    }
+
+    /* Add transverse momenta of string ends to the most forward and
+     * backward hadrons from PYTHIA fragmentation. */
+    bool successful_kinematics = remake_kinematics_fragments(
+        pythia_hadron_->event, evec_basis, ppos_string_new, pneg_string_new,
+        QTrx_string_new, QTry_string_new, QTrx_add_pos, QTry_add_pos,
+        QTrx_add_neg, QTry_add_neg);
+    if (!successful_kinematics) {
+      return 0;
+    }
+
     for (int ipyth = 0; ipyth < pythia_hadron_->event.size(); ipyth++) {
       if (!pythia_hadron_->event[ipyth].isFinal()) {
         continue;
@@ -2126,11 +2210,870 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
 
       number_of_fragments++;
     }
+  }
+  return number_of_fragments;
+}
 
-    return number_of_fragments;
+int StringProcess::fragment_off_hadron(
+    bool from_forward, bool separate_fragment_baryon,
+    std::array<ThreeVector, 3> &evec_basis, double &ppos_string,
+    double &pneg_string, double &QTrx_string_pos, double &QTrx_string_neg,
+    double &QTry_string_pos, double &QTry_string_neg,
+    Pythia8::FlavContainer &flav_string_pos,
+    Pythia8::FlavContainer &flav_string_neg, std::vector<int> &pdgid_frag,
+    std::vector<FourVector> &momentum_frag) {
+  const auto &log = logger<LogArea::Pythia>();
+  /* How many times we try to find flavor of qqbar pair and corresponding
+   * hadronic species */
+  const int n_try = 10;
+  pdgid_frag.clear();
+  momentum_frag.clear();
+
+  if (ppos_string < 0. || pneg_string < 0.) {
+    throw std::runtime_error("string has a negative lightcone momentum.");
+  }
+  double mTsqr_string = 2. * ppos_string * pneg_string;
+  // Transverse mass of the original string
+  double mTrn_string = std::sqrt(mTsqr_string);
+  // Total transverse momentum of the original string
+  double QTrx_string_tot = QTrx_string_pos + QTrx_string_neg;
+  double QTry_string_tot = QTry_string_pos + QTry_string_neg;
+  double QTsqr_string_tot = fabs(QTrx_string_tot * QTrx_string_tot) +
+                            fabs(QTry_string_tot * QTry_string_tot);
+  double QTrn_string_tot = std::sqrt(QTsqr_string_tot);
+  if (mTrn_string < QTrn_string_tot) {
+    return 0;
+  }
+  // Mass of the original string
+  double mass_string = std::sqrt(mTsqr_string - QTsqr_string_tot);
+  log.debug("  Fragment off one hadron from a string ( ", flav_string_pos.id,
+            " , ", flav_string_neg.id, " ) with mass ", mass_string, " GeV.");
+
+  // Take relevant parameters from PYTHIA.
+  const double sigma_qt_frag = pythia_hadron_->parm("StringPT:sigma");
+  const double stop_string_mass =
+      pythia_hadron_->parm("StringFragmentation:stopMass");
+  const double stop_string_smear =
+      pythia_hadron_->parm("StringFragmentation:stopSmear");
+
+  // Enhance the width of transverse momentum with certain probability
+  const double prob_enhance_qt =
+      pythia_hadron_->parm("StringPT:enhancedFraction");
+  double fac_enhance_qt;
+  if (random::uniform(0., 1.) < prob_enhance_qt) {
+    fac_enhance_qt = pythia_hadron_->parm("StringPT:enhancedWidth");
+  } else {
+    fac_enhance_qt = 1.;
+  }
+
+  /* Sample the transverse momentum of newly created quark-antiquark
+   * (or diquark-antidiquark) pair.
+   * Note that one constituent carries QT_new while -QT_new is carried by
+   * another.
+   * The former one is taken by the (first) fragmented hadron and
+   * the later one will be assigned to the remaining string or
+   * taken by the second fragmented hadron. */
+  double QTrx_new =
+      random::normal(0., fac_enhance_qt * sigma_qt_frag * M_SQRT1_2);
+  double QTry_new =
+      random::normal(0., fac_enhance_qt * sigma_qt_frag * M_SQRT1_2);
+  log.debug("  Transverse momentum (", QTrx_new, ", ", QTry_new,
+            ") GeV selected for the new qqbar pair.");
+
+  /* Determine the transverse momentum of the (first) fragmented hadron.
+   * Transverse momentum of hadron =
+   * QT_string (of the string end) +
+   * QT_new (of one of the quark-antiquark pair).
+   * If the first hadron is fragmented from the forward (backward) end
+   * of a string, then transverse momentum carried by the forward (backward)
+   * end is taken. */
+  double QTrx_had_1st =
+      from_forward ? QTrx_string_pos + QTrx_new : QTrx_string_neg + QTrx_new;
+  double QTry_had_1st =
+      from_forward ? QTry_string_pos + QTry_new : QTry_string_neg + QTry_new;
+  double QTrn_had_1st =
+      std::sqrt(QTrx_had_1st * QTrx_had_1st + QTry_had_1st * QTry_had_1st);
+
+  // PDG id of the (first) fragmented hadron
+  int pdgid_had_1st = 0;
+  // Mass of the (first) fragmented hadron
+  double mass_had_1st = 0.;
+  /* Constituent flavor of the original string end,
+   * at which the (first) hadron is fragmented. */
+  Pythia8::FlavContainer flav_old =
+      from_forward ? flav_string_pos : flav_string_neg;
+  /* Constituent flavor of newly created quark-antiquark pair,
+   * which is taken by the (first) fragmented hadron.
+   * Antiparticle of this flavor will be assigned to the remaining string,
+   * or taken by the second fragmented hadron. */
+  Pythia8::FlavContainer flav_new = Pythia8::FlavContainer(0);
+  /* Sample flavor of the quark-antiquark (or diquark-antidiquark) pair
+   * and combine with that of the original string end to find the hadronic
+   * species. */
+  for (int i_try = 0; i_try < n_try; i_try++) {
+    // Sample the new flavor.
+    flav_new = pythia_stringflav_.pick(flav_old);
+    // Combine to get the PDG id of hadron.
+    pdgid_had_1st = pythia_stringflav_.combine(flav_old, flav_new);
+    if (pdgid_had_1st != 0) {
+      // If the PDG id is found, determine mass.
+      mass_had_1st = pythia_hadron_->particleData.mSel(pdgid_had_1st);
+      log.debug("    number of tries of flavor selection : ", i_try + 1,
+                " in StringProcess::fragment_off_hadron.");
+      break;
+    }
+  }
+  if (pdgid_had_1st == 0) {
+    return 0;
+  }
+  log.debug("  New flavor ", flav_new.id, " selected for the string end with ",
+            flav_old.id);
+  log.debug("  PDG id ", pdgid_had_1st,
+            " selected for the (first) fragmented hadron.");
+  bool had_1st_baryon = pythia_hadron_->particleData.isBaryon(pdgid_had_1st);
+  // Transverse mass of the (first) fragmented hadron
+  double mTrn_had_1st =
+      std::sqrt(mass_had_1st * mass_had_1st + QTrn_had_1st * QTrn_had_1st);
+  log.debug("  Transverse momentum (", QTrx_had_1st, ", ", QTry_had_1st,
+            ") GeV selected for the (first) fragmented hadron.");
+
+  /* Compute the mass threshold to continue string fragmentation.
+   * This formula is taken from StringFragmentation::energyUsedUp
+   * in StringFragmentation.cc of PYTHIA 8. */
+  const double mass_min_to_continue =
+      (stop_string_mass + pythia_hadron_->particleData.m0(flav_new.id) +
+       pythia_hadron_->particleData.m0(flav_string_pos.id) +
+       pythia_hadron_->particleData.m0(flav_string_neg.id)) *
+      (1. + (2. * random::uniform(0., 1.) - 1.) * stop_string_smear);
+  /* If the string mass is lower than that threshold,
+   * the string breaks into the last two hadrons. */
+  bool string_into_final_two = mass_string < mass_min_to_continue;
+  if (string_into_final_two) {
+    log.debug("  The string mass is below the mass threshold ",
+              mass_min_to_continue, " GeV : finishing with two hadrons.");
+  }
+
+  // Lightcone momentum of the (first) fragmented hadron
+  double ppos_had_1st = 0.;
+  double pneg_had_1st = 0.;
+
+  /* Whether the string end, at which the (first) hadron is fragmented,
+   * had a diquark or antidiquark */
+  bool from_diquark_end =
+      from_forward ? pythia_hadron_->particleData.isDiquark(flav_string_pos.id)
+                   : pythia_hadron_->particleData.isDiquark(flav_string_neg.id);
+  // Whether the forward end of the string has a diquark
+  bool has_diquark_pos =
+      pythia_hadron_->particleData.isDiquark(flav_string_pos.id);
+
+  int n_frag = 0;
+  if (string_into_final_two) {
+    /* In the case of a string breaking into the last two hadrons,
+     * we determine species, mass and four-momentum of the second hadron. */
+    // PDG id of the second fragmented hadron
+    int pdgid_had_2nd = 0.;
+    // Mass of the second fragmented hadron
+    double mass_had_2nd = 0.;
+    /* Constituent flavor of newly created quark-antiquark pair,
+     * which is taken by the second fragmented hadron. */
+    Pythia8::FlavContainer flav_new2 = Pythia8::FlavContainer(0);
+    flav_new2.anti(flav_new);
+    /* Getting a hadron from diquark and antidiquark does not always work.
+     * So, if this is the case, start over. */
+    if (pythia_hadron_->particleData.isDiquark(flav_string_neg.id) &&
+        pythia_hadron_->particleData.isDiquark(flav_new2.id) && from_forward) {
+      return 0;
+    }
+    if (pythia_hadron_->particleData.isDiquark(flav_string_pos.id) &&
+        pythia_hadron_->particleData.isDiquark(flav_new2.id) && !from_forward) {
+      return 0;
+    }
+    for (int i_try = 0; i_try < n_try; i_try++) {
+      // Combine to get the PDG id of the second hadron.
+      pdgid_had_2nd =
+          from_forward ? pythia_stringflav_.combine(flav_string_neg, flav_new2)
+                       : pythia_stringflav_.combine(flav_string_pos, flav_new2);
+      if (pdgid_had_2nd != 0) {
+        // If the PDG id is found, determine mass.
+        mass_had_2nd = pythia_hadron_->particleData.mSel(pdgid_had_2nd);
+        break;
+      }
+    }
+    if (pdgid_had_2nd == 0) {
+      return 0;
+    }
+    log.debug("  PDG id ", pdgid_had_2nd,
+              " selected for the (second) fragmented hadron.");
+    bool had_2nd_baryon = pythia_hadron_->particleData.isBaryon(pdgid_had_2nd);
+
+    /* Determine transverse momentum carried by the second hadron.
+     * If the first hadron fragmented from the forward (backward) end
+     * of a string, transvere momentum at the backward (forward) end will
+     * contribute.
+     * Transverse momentum of newly created constituent
+     * must be added as well. */
+    double QTrx_had_2nd =
+        from_forward ? QTrx_string_neg - QTrx_new : QTrx_string_pos - QTrx_new;
+    double QTry_had_2nd =
+        from_forward ? QTry_string_neg - QTry_new : QTry_string_pos - QTry_new;
+    double QTrn_had_2nd =
+        std::sqrt(QTrx_had_2nd * QTrx_had_2nd + QTry_had_2nd * QTry_had_2nd);
+    double mTrn_had_2nd =
+        std::sqrt(mass_had_2nd * mass_had_2nd + QTrn_had_2nd * QTrn_had_2nd);
+    log.debug("  Transverse momentum (", QTrx_had_2nd, ", ", QTry_had_2nd,
+              ") GeV selected for the (second) fragmented hadron.");
+
+    double ppos_had_2nd = 0.;
+    double pneg_had_2nd = 0.;
+
+    /* Compute lightcone momenta of the final two hadrons.
+     * If the fragmentation begins at the forward (backward) end of a string,
+     * the first (second) hadron is the forward one and the second (first)
+     * hadron is the backward one. */
+    bool found_kinematics =
+        from_forward
+            ? make_lightcone_final_two(
+                  separate_fragment_baryon && has_diquark_pos && had_1st_baryon,
+                  ppos_string, pneg_string, mTrn_had_1st, mTrn_had_2nd,
+                  ppos_had_1st, ppos_had_2nd, pneg_had_1st, pneg_had_2nd)
+            : make_lightcone_final_two(
+                  separate_fragment_baryon && has_diquark_pos && had_2nd_baryon,
+                  ppos_string, pneg_string, mTrn_had_2nd, mTrn_had_1st,
+                  ppos_had_2nd, ppos_had_1st, pneg_had_2nd, pneg_had_1st);
+    if (!found_kinematics) {
+      return 0;
+    }
+
+    // The entire string breaks into hadrons, so there is no momentum left.
+    ppos_string = 0.;
+    pneg_string = 0.;
+    QTrx_string_pos = 0.;
+    QTry_string_pos = 0.;
+
+    // Add the first hadron to the list.
+    pdgid_frag.push_back(pdgid_had_1st);
+    FourVector mom_had_1st = FourVector(
+        (ppos_had_1st + pneg_had_1st) * M_SQRT1_2,
+        evec_basis[0] * (ppos_had_1st - pneg_had_1st) * M_SQRT1_2 +
+            evec_basis[1] * QTrx_had_1st + evec_basis[2] * QTry_had_1st);
+    momentum_frag.push_back(mom_had_1st);
+
+    // Add the second hadron to the list.
+    pdgid_frag.push_back(pdgid_had_2nd);
+    FourVector mom_had_2nd = FourVector(
+        (ppos_had_2nd + pneg_had_2nd) * M_SQRT1_2,
+        evec_basis[0] * (ppos_had_2nd - pneg_had_2nd) * M_SQRT1_2 +
+            evec_basis[1] * QTrx_had_2nd + evec_basis[2] * QTry_had_2nd);
+    momentum_frag.push_back(mom_had_2nd);
+
+    n_frag += 2;
+  } else {
+    /* If the string mass is large enough (larger than the threshold),
+     * perform the normal fragmentation.
+     * Different sets of parameters for the LUND fragmentation function
+     * are used, depending on whether the (first) fragmented hadrons is
+     * the leading baryon. */
+    double stringz_a_use, stringz_b_use;
+    /* If the firstly fragmented hadron from the diquark end is a baryon,
+     * it can be considered to be the leading baryon. */
+    if (separate_fragment_baryon && from_diquark_end && had_1st_baryon) {
+      stringz_a_use = stringz_a_leading_;
+      stringz_b_use = stringz_b_leading_;
+    } else {
+      stringz_a_use = stringz_a_produce_;
+      stringz_b_use = stringz_b_produce_;
+    }
+
+    /* Sample the lightcone momentum fraction from
+     * the LUND fragmentation function. */
+    double xfrac = sample_zLund(stringz_a_use, stringz_b_use, mTrn_had_1st);
+    if (from_forward) {
+      /* If the (first) hadron is fragmented from the forward end,
+       * it is the lightcone momentum fraction of p^+ */
+      ppos_had_1st = xfrac * ppos_string;
+      pneg_had_1st = 0.5 * mTrn_had_1st * mTrn_had_1st / ppos_had_1st;
+      if (pneg_had_1st > pneg_string) {
+        return 0;
+      }
+    } else {
+      /* If the (first) hadron is fragmented from the backward end,
+       * it is the lightcone momentum fraction of p^- */
+      pneg_had_1st = xfrac * pneg_string;
+      ppos_had_1st = 0.5 * mTrn_had_1st * mTrn_had_1st / pneg_had_1st;
+      if (ppos_had_1st > ppos_string) {
+        return 0;
+      }
+    }
+
+    // Add PDG id and four-momentum of the (first) hadron to the list.
+    pdgid_frag.push_back(pdgid_had_1st);
+    FourVector mom_had_1st = FourVector(
+        (ppos_had_1st + pneg_had_1st) * M_SQRT1_2,
+        evec_basis[0] * (ppos_had_1st - pneg_had_1st) * M_SQRT1_2 +
+            evec_basis[1] * QTrx_had_1st + evec_basis[2] * QTry_had_1st);
+    momentum_frag.push_back(mom_had_1st);
+
+    // Update lightcone momentum of the string.
+    ppos_string -= ppos_had_1st;
+    pneg_string -= pneg_had_1st;
+    /* Update flavor and transverse momentum of the string end,
+     * from which the (first) hadron is fragmented.
+     * Flavor of the new string end is antiparticle of
+     * the constituent taken by the hadron.
+     * Transverse momentum of the new string end is opposite to that
+     * of the constituent taken by the hadron. */
+    if (from_forward) {
+      /* Update the forward end of the string
+       * if hadron is fragmented from there. */
+      flav_string_pos.anti(flav_new);
+      QTrx_string_pos = -QTrx_new;
+      QTry_string_pos = -QTry_new;
+    } else {
+      /* Update the backward end of the string
+       * if hadron is fragmented from there. */
+      flav_string_neg.anti(flav_new);
+      QTrx_string_neg = -QTrx_new;
+      QTry_string_neg = -QTry_new;
+    }
+
+    n_frag += 1;
+  }
+
+  return n_frag;
+}
+
+int StringProcess::get_hadrontype_from_quark(int idq1, int idq2) {
+  const auto &log = logger<LogArea::Pythia>();
+
+  const int baryon_number =
+      pythia_hadron_->particleData.baryonNumberType(idq1) +
+      pythia_hadron_->particleData.baryonNumberType(idq2);
+
+  int pdgid_hadron = 0;
+  /* PDG id of the leading baryon from valence quark constituent.
+   * First, try with the PYTHIA machinary. */
+  Pythia8::FlavContainer flav1 = Pythia8::FlavContainer(idq1);
+  Pythia8::FlavContainer flav2 = Pythia8::FlavContainer(idq2);
+  const int n_try = 10;
+  for (int i_try = 0; i_try < n_try; i_try++) {
+    pdgid_hadron = pythia_stringflav_.combine(flav1, flav2);
+    if (pdgid_hadron != 0) {
+      return pdgid_hadron;
+    }
+  }
+
+  /* If PYTHIA machinary does not work, determine type of the leading baryon
+   * based on the quantum numbers and mass. */
+
+  // net quark number of d, u, s, c and b flavors
+  std::array<int, 5> frag_net_q;
+  /* Evaluate total net quark number of baryon (antibaryon)
+   * from the valence quark constituents. */
+  for (int iq = 0; iq < 5; iq++) {
+    int nq1 =
+        pythia_hadron_->particleData.nQuarksInCode(std::abs(idq1), iq + 1);
+    int nq2 =
+        pythia_hadron_->particleData.nQuarksInCode(std::abs(idq2), iq + 1);
+    nq1 = idq1 > 0 ? nq1 : -nq1;
+    nq2 = idq2 > 0 ? nq2 : -nq2;
+    frag_net_q[iq] = nq1 + nq2;
+  }
+  const int frag_iso3 = frag_net_q[1] - frag_net_q[0];
+  const int frag_strange = -frag_net_q[2];
+  const int frag_charm = frag_net_q[3];
+  const int frag_bottom = -frag_net_q[4];
+  log.debug("  conserved charges : iso3 = ", frag_iso3,
+            ", strangeness = ", frag_strange, ", charmness = ", frag_charm,
+            ", bottomness = ", frag_bottom);
+
+  std::vector<int> pdgid_possible;
+  std::vector<double> weight_possible;
+  std::vector<double> weight_summed;
+  /* loop over hadronic species
+   * Any hadron with the same valence quark contents is allowed and
+   * the probability goes like spin degeneracy over mass. */
+  for (auto &ptype : ParticleType::list_all()) {
+    if (!ptype.is_hadron()) {
+      continue;
+    }
+    const int pdgid = ptype.pdgcode().get_decimal();
+    if ((pythia_hadron_->particleData.isParticle(pdgid)) &&
+        (baryon_number == 3 * ptype.pdgcode().baryon_number()) &&
+        (frag_iso3 == ptype.pdgcode().isospin3()) &&
+        (frag_strange == ptype.pdgcode().strangeness()) &&
+        (frag_charm == ptype.pdgcode().charmness()) &&
+        (frag_bottom == ptype.pdgcode().bottomness())) {
+      const int spin_degeneracy = ptype.pdgcode().spin_degeneracy();
+      const double mass_pole = ptype.mass();
+      const double weight = static_cast<double>(spin_degeneracy) / mass_pole;
+      pdgid_possible.push_back(pdgid);
+      weight_possible.push_back(weight);
+
+      log.debug("  PDG id ", pdgid, " is possible with weight ", weight);
+    }
+  }
+  const int n_possible = pdgid_possible.size();
+  weight_summed.push_back(0.);
+  for (int i = 0; i < n_possible; i++) {
+    weight_summed.push_back(weight_summed[i] + weight_possible[i]);
+  }
+
+  /* Sample baryon (antibaryon) specie,
+   * which is fragmented from the leading diquark (anti-diquark). */
+  const double uspc = random::uniform(0., weight_summed[n_possible]);
+  for (int i = 0; i < n_possible; i++) {
+    if ((uspc >= weight_summed[i]) && (uspc < weight_summed[i + 1])) {
+      return pdgid_possible[i];
+    }
+  }
+
+  return 0;
+}
+
+int StringProcess::get_resonance_from_quark(int idq1, int idq2, double mass) {
+  const auto &log = logger<LogArea::Pythia>();
+
+  // if the mass is too low, return 0 (failure).
+  if (mass < pion_mass) {
+    return 0;
+  }
+
+  /* It checks whether one has a valid input
+   * the string ends. */
+
+  // idq1 is supposed to be a quark or anti-diquark.
+  bool end1_is_quark = idq1 > 0 && pythia_hadron_->particleData.isQuark(idq1);
+  bool end1_is_antidiq =
+      idq1 < 0 && pythia_hadron_->particleData.isDiquark(idq1);
+  // idq2 is supposed to be a anti-quark or diquark.
+  bool end2_is_antiq = idq2 < 0 && pythia_hadron_->particleData.isQuark(idq2);
+  bool end2_is_diquark =
+      idq2 > 0 && pythia_hadron_->particleData.isDiquark(idq2);
+
+  int baryon;
+  if (end1_is_quark) {
+    if (end2_is_antiq) {
+      // we have a mesonic resonance from a quark-antiquark pair.
+      baryon = 0;
+    } else if (end2_is_diquark) {
+      // we have a baryonic resonance from a quark-diquark pair.
+      baryon = 1;
+    } else {
+      return 0;
+    }
+  } else if (end1_is_antidiq) {
+    if (end2_is_antiq) {
+      // we have a antibaryonic resonance from a antiquark-antidiquark pair.
+      baryon = -1;
+    } else {
+      return 0;
+    }
   } else {
     return 0;
   }
+
+  /* array for the net quark numbers of the constituents.
+   * net_qnumber[0, 1, 2, 3 and 4] correspond respectively to
+   * d, u, s, c, b quark flavors. */
+  std::array<int, 5> net_qnumber;
+  for (int iflav = 0; iflav < 5; iflav++) {
+    net_qnumber[iflav] = 0;
+
+    int qnumber1 =
+        pythia_hadron_->particleData.nQuarksInCode(std::abs(idq1), iflav + 1);
+    if (idq1 < 0) {
+      // anti-diquark gets an extra minus sign.
+      qnumber1 = -qnumber1;
+    }
+    net_qnumber[iflav] += qnumber1;
+
+    int qnumber2 =
+        pythia_hadron_->particleData.nQuarksInCode(std::abs(idq2), iflav + 1);
+    if (idq2 < 0) {
+      // anti-quark gets an extra minus sign.
+      qnumber2 = -qnumber2;
+    }
+    net_qnumber[iflav] += qnumber2;
+  }
+
+  // List of PDG ids of resonances with the same quantum number.
+  std::vector<int> pdgid_possible;
+  // Corresponding mass differences.
+  std::vector<double> mass_diff;
+  for (auto &ptype : ParticleType::list_all()) {
+    if (!ptype.is_hadron() || ptype.is_stable() ||
+        ptype.pdgcode().baryon_number() != baryon) {
+      // Only resonances with the same baryon number are considered.
+      continue;
+    }
+    const int pdgid = ptype.pdgcode().get_decimal();
+    const double mass_min = ptype.min_mass_spectral();
+    if (mass < mass_min) {
+      // A resoance with mass lower than its minimum threshold is not allowed.
+      continue;
+    }
+
+    if (ptype.pdgcode().isospin3() != net_qnumber[1] - net_qnumber[0]) {
+      // check isospin3.
+      continue;
+    }
+    if (ptype.pdgcode().strangeness() != -net_qnumber[2]) {
+      // check strangeness.
+      continue;
+    }
+    if (ptype.pdgcode().charmness() != net_qnumber[3]) {
+      // check charmness.
+      continue;
+    }
+    if (ptype.pdgcode().bottomness() != -net_qnumber[4]) {
+      // check bottomness.
+      continue;
+    }
+
+    const double mass_pole = ptype.mass();
+    // Add the PDG id and mass difference to the vector array.
+    pdgid_possible.push_back(pdgid);
+    mass_diff.push_back(mass - mass_pole);
+  }
+
+  const int n_res = pdgid_possible.size();
+  if (n_res == 0) {
+    // If there is no possible resonance found, return 0 (failure).
+    return 0;
+  }
+
+  int ires_closest = 0;
+  double mass_diff_min = std::fabs(mass_diff[0]);
+  /* Find a resonance whose pole mass is closest to
+   * the input mass. */
+  for (int ires = 1; ires < n_res; ires++) {
+    if (std::fabs(mass_diff[ires]) < mass_diff_min) {
+      ires_closest = ires;
+      mass_diff_min = mass_diff[ires];
+    }
+  }
+  log.debug("Quark constituents ", idq1, " and ", idq2, " with mass ", mass,
+            " (GeV) turned into a resonance ", pdgid_possible[ires_closest]);
+  return pdgid_possible[ires_closest];
+}
+
+double StringProcess::sample_zLund(double a, double b, double mTrn) {
+  // the lightcone momentum fraction x
+  double xfrac = 0.;
+  bool xfrac_accepted = false;
+  /* First sample the inverse 1/x of the lightcone momentum fraction.
+   * Then, obtain x itself.
+   * The probability distribution function for the inverse of x is
+   * PDF(u = 1/x) = (1/u) * (1 - 1/u)^a * exp(-b * mTrn^2 * u)
+   * with 1 < u < infinity.
+   * The rejection method can be used with an envelop function
+   * ENV(u) = exp(-b * mTrn^2 * u). */
+  while (!xfrac_accepted) {
+    const double fac_env = b * mTrn * mTrn;
+    const double u_aux = random::uniform(0., 1.);
+    /* Sample u = 1/x according to the envelop function
+     * ENV(u) = exp(-b * mTrn^2 * u). */
+    const double xfrac_inv = 1. - std::log(u_aux) / fac_env;
+    assert(xfrac_inv >= 1.);
+    /* Evaluate the ratio of the real probability distribution function to
+     * the envelop function. */
+    const double xf_ratio = std::pow(1. - 1. / xfrac_inv, a) / xfrac_inv;
+    // Determine whether the sampled value will be accepted.
+    if (random::uniform(0., 1.) <= xf_ratio) {
+      /* If the sampled value of 1/x is accepted,
+       * obtain the value of x. */
+      xfrac = 1. / xfrac_inv;
+      xfrac_accepted = true;
+    }
+  }
+  return xfrac;
+}
+
+bool StringProcess::remake_kinematics_fragments(
+    Pythia8::Event &event_fragments, std::array<ThreeVector, 3> &evec_basis,
+    double ppos_string, double pneg_string, double QTrx_string,
+    double QTry_string, double QTrx_add_pos, double QTry_add_pos,
+    double QTrx_add_neg, double QTry_add_neg) {
+  const auto &log = logger<LogArea::Pythia>();
+  log.debug("Correcting the kinematics of fragmented hadrons...");
+
+  if (ppos_string < 0. || pneg_string < 0.) {
+    log.debug("  wrong lightcone momenta of string : ppos_string (GeV) = ",
+              ppos_string, " pneg_string (GeV) = ", pneg_string);
+    return false;
+  }
+  // Momentum rapidity of the final string
+  const double yrapid_string = 0.5 * std::log(ppos_string / pneg_string);
+  log.debug("Momentum-space rapidity of the string should be ", yrapid_string);
+
+  // Transverse mass of the final string
+  const double mTrn_string = std::sqrt(2. * ppos_string * pneg_string);
+  log.debug("Transvere mass (GeV) of the string should be ", mTrn_string);
+  // Transverse momentum of the final string
+  const double QTrn_string =
+      std::sqrt(QTrx_string * QTrx_string + QTry_string * QTry_string);
+  if (mTrn_string < QTrn_string) {
+    log.debug("  wrong transverse mass of string : mTrn_string (GeV) = ",
+              mTrn_string, " QTrn_string (GeV) = ", QTrn_string);
+    return false;
+  }
+  const double msqr_string =
+      mTrn_string * mTrn_string - QTrn_string * QTrn_string;
+  // Mass of the final string
+  const double mass_string = std::sqrt(msqr_string);
+  log.debug("The string mass (GeV) should be ", mass_string);
+
+  /* If there is no transverse momentum to be added to the string ends,
+   * skip the entire procedure and return. */
+  if (std::fabs(QTrx_add_pos) < small_number * mass_string &&
+      std::fabs(QTry_add_pos) < small_number * mass_string &&
+      std::fabs(QTrx_add_neg) < small_number * mass_string &&
+      std::fabs(QTry_add_neg) < small_number * mass_string) {
+    log.debug("  no need to add transverse momenta - skipping.");
+    return true;
+  }
+
+  FourVector ptot_string_ini = FourVector(0., 0., 0., 0.);
+  // Compute total four-momentum of the initial string.
+  for (int ipyth = 1; ipyth < event_fragments.size(); ipyth++) {
+    if (!event_fragments[ipyth].isFinal()) {
+      continue;
+    }
+
+    FourVector p_frag =
+        FourVector(event_fragments[ipyth].e(), event_fragments[ipyth].px(),
+                   event_fragments[ipyth].py(), event_fragments[ipyth].pz());
+    ptot_string_ini += p_frag;
+  }
+  const double E_string_ini = ptot_string_ini.x0();
+  const double pz_string_ini = ptot_string_ini.threevec() * evec_basis[0];
+  const double ppos_string_ini = (E_string_ini + pz_string_ini) * M_SQRT1_2;
+  const double pneg_string_ini = (E_string_ini - pz_string_ini) * M_SQRT1_2;
+  // Compute the momentum rapidity of the initial string.
+  const double yrapid_string_ini =
+      0.5 * std::log(ppos_string_ini / pneg_string_ini);
+  /* Then, boost into the frame in which string is at rest in the
+   * longitudinal direction. */
+  shift_rapidity_event(event_fragments, evec_basis, 1., -yrapid_string_ini);
+
+  int ip_forward = 0;
+  int ip_backward = 0;
+  double y_forward = 0.;
+  double y_backward = 0.;
+  ptot_string_ini = FourVector(0., 0., 0., 0.);
+  // Find the most forward and backward hadrons based on the momentum rapidity.
+  for (int ipyth = 1; ipyth < event_fragments.size(); ipyth++) {
+    if (!event_fragments[ipyth].isFinal()) {
+      continue;
+    }
+
+    FourVector p_frag =
+        FourVector(event_fragments[ipyth].e(), event_fragments[ipyth].px(),
+                   event_fragments[ipyth].py(), event_fragments[ipyth].pz());
+    ptot_string_ini += p_frag;
+
+    const double E_frag = p_frag.x0();
+    const double pl_frag = p_frag.threevec() * evec_basis[0];
+    double y_current = 0.5 * std::log((E_frag + pl_frag) / (E_frag - pl_frag));
+    if (y_current > y_forward) {
+      ip_forward = ipyth;
+      y_forward = y_current;
+    }
+    if (y_current < y_backward) {
+      ip_backward = ipyth;
+      y_backward = y_current;
+    }
+  }
+  log.debug("  The most forward hadron is ip_forward = ", ip_forward,
+            " with rapidity ", y_forward);
+  log.debug("  The most backward hadron is ip_backward = ", ip_backward,
+            " with rapidity ", y_backward);
+
+  const double px_string_ini = ptot_string_ini.threevec() * evec_basis[1];
+  const double py_string_ini = ptot_string_ini.threevec() * evec_basis[2];
+
+  /* Check if the transverse momentum px is conserved i.e.,
+   * px of the initial string + px to be added = px of the final string */
+  bool correct_px = std::fabs(px_string_ini + QTrx_add_pos + QTrx_add_neg -
+                              QTrx_string) < small_number * mass_string;
+  if (!correct_px) {
+    log.debug("  input transverse momenta in x-axis are not consistent.");
+    return false;
+  }
+  /* Check if the transverse momentum py is conserved i.e.,
+   * py of the initial string + py to be added = py of the final string */
+  bool correct_py = std::fabs(py_string_ini + QTry_add_pos + QTry_add_neg -
+                              QTry_string) < small_number * mass_string;
+  if (!correct_py) {
+    log.debug("  input transverse momenta in y-axis are not consistent.");
+    return false;
+  }
+
+  Pythia8::Vec4 pvec_string_now =
+      set_Vec4(ptot_string_ini.x0(), ptot_string_ini.threevec());
+
+  log.debug("  Adding transverse momentum to the most forward hadron.");
+  pvec_string_now -= event_fragments[ip_forward].p();
+  const double mass_frag_pos = event_fragments[ip_forward].p().mCalc();
+  // Four-momentum of the most forward hadron
+  FourVector p_old_frag_pos = FourVector(
+      event_fragments[ip_forward].e(), event_fragments[ip_forward].px(),
+      event_fragments[ip_forward].py(), event_fragments[ip_forward].pz());
+  // Add transverse momentum to it.
+  ThreeVector mom_new_frag_pos = p_old_frag_pos.threevec() +
+                                 QTrx_add_pos * evec_basis[1] +
+                                 QTry_add_pos * evec_basis[2];
+  // Re-calculate the energy.
+  double E_new_frag_pos =
+      std::sqrt(mom_new_frag_pos.sqr() + mass_frag_pos * mass_frag_pos);
+  Pythia8::Vec4 pvec_new_frag_pos = set_Vec4(E_new_frag_pos, mom_new_frag_pos);
+  pvec_string_now += pvec_new_frag_pos;
+  // Update the event record.
+  event_fragments[ip_forward].p(pvec_new_frag_pos);
+
+  log.debug("  Adding transverse momentum to the most backward hadron.");
+  pvec_string_now -= event_fragments[ip_backward].p();
+  const double mass_frag_neg = event_fragments[ip_backward].p().mCalc();
+  // Four-momentum of the most backward hadron
+  FourVector p_old_frag_neg = FourVector(
+      event_fragments[ip_backward].e(), event_fragments[ip_backward].px(),
+      event_fragments[ip_backward].py(), event_fragments[ip_backward].pz());
+  // Add transverse momentum to it.
+  ThreeVector mom_new_frag_neg = p_old_frag_neg.threevec() +
+                                 QTrx_add_neg * evec_basis[1] +
+                                 QTry_add_neg * evec_basis[2];
+  // Re-calculate the energy.
+  double E_new_frag_neg =
+      std::sqrt(mom_new_frag_neg.sqr() + mass_frag_neg * mass_frag_neg);
+  Pythia8::Vec4 pvec_new_frag_neg = set_Vec4(E_new_frag_neg, mom_new_frag_neg);
+  pvec_string_now += pvec_new_frag_neg;
+  // Update the event record.
+  event_fragments[ip_backward].p(pvec_new_frag_neg);
+
+  // Update the event record with total four-momentum of the current string.
+  event_fragments[0].p(pvec_string_now);
+  event_fragments[0].m(pvec_string_now.mCalc());
+
+  int n_frag = 0;
+  // Sum of transverse masses of all fragmented hadrons.
+  double mTrn_frag_all = 0.;
+  for (int ipyth = 1; ipyth < event_fragments.size(); ipyth++) {
+    if (!event_fragments[ipyth].isFinal()) {
+      continue;
+    }
+
+    n_frag += 1;
+    FourVector p_frag =
+        FourVector(event_fragments[ipyth].e(), event_fragments[ipyth].px(),
+                   event_fragments[ipyth].py(), event_fragments[ipyth].pz());
+    ptot_string_ini += p_frag;
+
+    const double E_frag = p_frag.x0();
+    const double pl_frag = p_frag.threevec() * evec_basis[0];
+    const double ppos_frag = (E_frag + pl_frag) * M_SQRT1_2;
+    const double pneg_frag = (E_frag - pl_frag) * M_SQRT1_2;
+    const double mTrn_frag = std::sqrt(2. * ppos_frag * pneg_frag);
+    mTrn_frag_all += mTrn_frag;
+  }
+  log.debug("Sum of transverse masses (GeV) of all fragmented hadrons : ",
+            mTrn_frag_all);
+  /* If the transverse mass of the (final) string is smaller than
+   * the sum of transverse masses, kinematics cannot be determined. */
+  if (mTrn_string < mTrn_frag_all) {
+    log.debug("  which is larger than mT of the actual string ", mTrn_string);
+    return false;
+  }
+
+  double mass_string_now = pvec_string_now.mCalc();
+  double msqr_string_now = mass_string_now * mass_string_now;
+  // Total four-momentum of the current string
+  FourVector p_string_now =
+      FourVector(pvec_string_now.e(), pvec_string_now.px(),
+                 pvec_string_now.py(), pvec_string_now.pz());
+  double E_string_now = p_string_now.x0();
+  double pz_string_now = p_string_now.threevec() * evec_basis[0];
+  log.debug("The string mass (GeV) at this point : ", mass_string_now);
+  double ppos_string_now = (E_string_now + pz_string_now) * M_SQRT1_2;
+  double pneg_string_now = (E_string_now - pz_string_now) * M_SQRT1_2;
+  // Momentum rapidity of the current string
+  double yrapid_string_now = 0.5 * std::log(ppos_string_now / pneg_string_now);
+  log.debug("The momentum-space rapidity of string at this point : ",
+            yrapid_string_now);
+  log.debug("The momentum-space rapidities of hadrons will be changed.");
+  const int niter_max = 10000;
+  bool accepted = false;
+  double fac_all_yrapid = 1.;
+  /* Rescale momentum rapidities of hadrons by replacing
+   * y_hadron with y_string_now + fac_yrapid * (y_hadron - y_string_now).
+   * This is done iteratively by finding the value of fac_yrapid which gives
+   * the correct string mass. */
+  for (int iiter = 0; iiter < niter_max; iiter++) {
+    if (std::fabs(mass_string_now - mass_string) < really_small * mass_string) {
+      accepted = true;
+      break;
+    }
+    double E_deriv = 0.;
+    double pz_deriv = 0.;
+
+    /* Have a Taylor series of mass square as a linear function
+     * of fac_yrapid and find a trial value of fac_yrapid. */
+    for (int ipyth = 1; ipyth < event_fragments.size(); ipyth++) {
+      if (!event_fragments[ipyth].isFinal()) {
+        continue;
+      }
+
+      FourVector p_frag =
+          FourVector(event_fragments[ipyth].e(), event_fragments[ipyth].px(),
+                     event_fragments[ipyth].py(), event_fragments[ipyth].pz());
+      const double E_frag = p_frag.x0();
+      const double pl_frag = p_frag.threevec() * evec_basis[0];
+      const double ppos_frag = (E_frag + pl_frag) * M_SQRT1_2;
+      const double pneg_frag = (E_frag - pl_frag) * M_SQRT1_2;
+      const double mTrn_frag = std::sqrt(2. * ppos_frag * pneg_frag);
+      const double y_frag = 0.5 * std::log(ppos_frag / pneg_frag);
+
+      E_deriv += mTrn_frag * (y_frag - yrapid_string_now) * std::sinh(y_frag);
+      pz_deriv += mTrn_frag * (y_frag - yrapid_string_now) * std::cosh(y_frag);
+    }
+    double slope = 2. * (E_string_now * E_deriv - pz_string_now * pz_deriv);
+    double fac_yrapid = 1. + std::tanh((msqr_string - msqr_string_now) / slope);
+    fac_all_yrapid *= fac_yrapid;
+
+    // Replace momentum rapidities of hadrons.
+    shift_rapidity_event(event_fragments, evec_basis, fac_yrapid,
+                         (1. - fac_yrapid) * yrapid_string_now);
+    // Update the four-momentum and mass of the current string
+    pvec_string_now = event_fragments[0].p();
+    mass_string_now = pvec_string_now.mCalc();
+    msqr_string_now = mass_string_now * mass_string_now;
+    p_string_now = FourVector(pvec_string_now.e(), pvec_string_now.px(),
+                              pvec_string_now.py(), pvec_string_now.pz());
+    E_string_now = p_string_now.x0();
+    pz_string_now = p_string_now.threevec() * evec_basis[0];
+    ppos_string_now = (E_string_now + pz_string_now) * M_SQRT1_2;
+    pneg_string_now = (E_string_now - pz_string_now) * M_SQRT1_2;
+    yrapid_string_now = 0.5 * std::log(ppos_string_now / pneg_string_now);
+    log.debug("  step ", iiter + 1, " : fac_yrapid = ", fac_yrapid,
+              " , string mass (GeV) = ", mass_string_now,
+              " , string rapidity = ", yrapid_string_now);
+  }
+
+  if (!accepted) {
+    log.debug("  Too many iterations in rapidity rescaling.");
+    return false;
+  }
+  log.debug("The overall factor multiplied to the rapidities of hadrons = ",
+            fac_all_yrapid);
+  log.debug("The momentum-space rapidity of string at this point : ",
+            yrapid_string_now);
+  const double y_diff = yrapid_string - yrapid_string_now;
+  log.debug("The hadrons will be boosted by rapidity ", y_diff,
+            " for the longitudinal momentum conservation.");
+
+  // Boost the hadrons back into the original frame.
+  shift_rapidity_event(event_fragments, evec_basis, 1., y_diff);
+
+  return true;
 }
 
 void StringProcess::assign_scaling_factor(int nquark, ParticleData &data,

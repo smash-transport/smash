@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2018
+ *    Copyright (c) 2013-2019
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -763,7 +763,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
         config["Collision_Term"]["Pauli_Blocking"], parameters_);
   }
   ParticleData::formation_power_ =
-      config.take({"Collision_Term", "Power_Particle_Formation"}, -1.);
+      config.take({"Collision_Term", "Power_Particle_Formation"}, 2.);
 
   /*!\Userguide
    * \page input_general_
@@ -1269,7 +1269,7 @@ void Experiment<Modus>::initialize_new_event() {
   // Print output headers
   log.info() << hline;
   log.info() << "Time [fm]   Ediff [GeV]    Scatt.|Decays   "
-                "Particles    Timing ";
+                "Particles         Timing";
   log.info() << hline;
 }
 

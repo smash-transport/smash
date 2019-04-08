@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2018
+ *    Copyright (c) 2014-2019
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -154,7 +154,7 @@ class BinaryOutputCollisions : public BinaryOutputBase {
    * \param[in] event_number Number of event.
    * \param[in] impact_parameter Impact parameter of this event.
    */
-  void at_eventend(const Particles &particles, const int event_number,
+  void at_eventend(const Particles &particles, const int32_t event_number,
                    double impact_parameter) override;
 
   /**

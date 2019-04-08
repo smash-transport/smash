@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2018
+ *    Copyright (c) 2014-2019
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -102,11 +102,17 @@ namespace smash {
  * \key StringZ_B (double, optional, default = 0.5) \n
  * Parameter \f$b\f$ in pythia fragmentation function shown above.
  *
- * \key Leading_Frag_Mean (double, optional, default = 1.0) \n
- * Mean of Gaussian used as fragmentation function for leading hadrons.
+ * \key Separate_Fragment_Baryon (bool, optional, default = True) \n
+ * Whether to use a separate fragmentation function for leading baryons in
+ * non-diffractive string processes.
  *
- * \key Leading_Frag_Width (double, optional, default = 0.6) \n
- * Width of Gaussian used as fragmentation function for leading hadrons.
+ * \key StringZ_A_Leading (double, optional, default = 1.0) \n
+ * Parameter a in Lund fragmentation function used to sample the light cone
+ * momentum fraction of leading baryons in non-diffractive string processes.
+ *
+ * \key StringZ_B_Leading (double, optional, default = 0.6) \n
+ * Parameter b in Lund fraghmentation function used to sample the light cone
+ * momentum fraction of leading baryons in non-diffractive string processes.
  *
  * \key String_Sigma_T (double, optional, default = 0.5) \n
  * Standard deviation in Gaussian for transverse momentum distributed to
@@ -116,7 +122,7 @@ namespace smash {
  * Factor to be multiplied with the formation time of string fragments from
  * the soft string routine.
  *
- * \key Power_Particle_Formation (double, optional, default = -1.0) \n
+ * \key Power_Particle_Formation (double, optional, default = 2.0) \n
  * If positive, the power with which the cross section scaling factor of
  * string fragments grows in time until it reaches 1. If negative, the scaling
  * factor will be constant and jump to 1 once the particle forms.
@@ -124,15 +130,21 @@ namespace smash {
  * \key Formation_Time (double, optional, default = 1.0): \n
  * Parameter for formation time in string fragmentation, in fm/c.
  *
- * \key Mass_Dependent_Formation_Times (bool, optional, default = true)
+ * \key Mass_Dependent_Formation_Times (bool, optional, default = true) \n
  * Whether the formation time of string fragments should depend on their mass.
  * If it is set to true, the formation time is calculated as
  * \f$ \tau = \sqrt{2}\frac{m}{\kappa} \f$.
  *
- * \key Prob_proton_to_d_uu (double, optional, default = 1/3)
+ * \key Prob_proton_to_d_uu (double, optional, default = 1/3) \n
  * Probability of splitting an (anti)nucleon into the quark it has only once
  * and the diquark it contains twice in terms of flavour in the soft string
  * routine.
+ *
+ * \key Popcorn_Rate (double, optional, default = 0.2) \n
+ * Parameter StringFlav:popcornRate, which determines production rate of
+ * popcorn mesons in string fragmentation.
+ * It is possible to produce a popcorn meson from the diquark end of a string
+ * with certain probability (i.e., diquark to meson + diquark).
  *
  * \page input_collision_term_ Collision_Term
  * \n
@@ -171,15 +183,17 @@ namespace smash {
          Gluon_Pmin: 0.001
          Quark_Alpha: 1.0
          Quark_Beta: 2.5
-         Strange_Supp: 0.12
-         Diquark_Supp: 0.03
+         Strange_Supp: 0.17
+         Diquark_Supp: 0.04
          Sigma_Perp: 0.42
-         Leading_Frag_Mean: 1.0
-         Leading_Frag_Width: 0.6
+         StringZ_A_Leading: 0.2
+         StringZ_B_Leading: 2.0
          StringZ_A: 0.68
-         StringZ_B: 0.3
+         StringZ_B: 0.35
          String_Sigma_T: 0.5
          Prob_proton_to_d_uu: 0.33
+         Separate_Fragment_Baryon: True
+         Popcorn_Rate: 0.2
  \endverbatim
  *
  * Pauli Blocking can further be activated by means of the following subsection
@@ -223,16 +237,19 @@ ScatterActionsFinder::ScatterActionsFinder(
         subconfig.take({"Gluon_Pmin"}, 0.001),
         subconfig.take({"Quark_Alpha"}, 2.0),
         subconfig.take({"Quark_Beta"}, 5.0),
-        subconfig.take({"Strange_Supp"}, 0.12),
-        subconfig.take({"Diquark_Supp"}, 0.03),
+        subconfig.take({"Strange_Supp"}, 0.17),
+        subconfig.take({"Diquark_Supp"}, 0.04),
         subconfig.take({"Sigma_Perp"}, 0.42),
-        subconfig.take({"Leading_Frag_Mean"}, 1.0),
-        subconfig.take({"Leading_Frag_Width"}, 0.6),
-        subconfig.take({"StringZ_A"}, 0.68), subconfig.take({"StringZ_B"}, 0.3),
+        subconfig.take({"StringZ_A_Leading"}, 0.2),
+        subconfig.take({"StringZ_B_Leading"}, 2.0),
+        subconfig.take({"StringZ_A"}, 0.68),
+        subconfig.take({"StringZ_B"}, 0.35),
         subconfig.take({"String_Sigma_T"}, 0.5),
         subconfig.take({"Form_Time_Factor"}, 1.0),
         subconfig.take({"Mass_Dependent_Formation_Times"}, true),
-        subconfig.take({"Prob_proton_to_d_uu"}, 1. / 3.));
+        subconfig.take({"Prob_proton_to_d_uu"}, 1. / 3.),
+        subconfig.take({"Separate_Fragment_Baryon"}, true),
+        subconfig.take({"Popcorn_Rate"}, 0.2));
   }
 }
 

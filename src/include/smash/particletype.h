@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2012-2018
+ *    Copyright (c) 2012-2019
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -185,7 +185,7 @@ class ParticleType {
   IsoParticleType *iso_multiplet() const { return iso_multiplet_; }
 
   /// \copydoc PdgCode::charge
-  int charge() const { return charge_; }
+  int32_t charge() const { return charge_; }
 
   /// \copydoc PdgCode::spin
   unsigned int spin() const { return pdgcode_.spin(); }
@@ -621,7 +621,7 @@ class ParticleType {
    * to unity, when integrated over its full domain. */
   mutable double norm_factor_ = -1.;
   /// Charge of the particle; filled automatically from pdgcode_.
-  int charge_;
+  int32_t charge_;
   /// Isospin of the particle; filled automatically from pdgcode_.
   mutable int isospin_;
   /// Isospin projection of the particle; filled automatically from pdgcode_.
