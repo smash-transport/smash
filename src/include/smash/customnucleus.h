@@ -51,8 +51,8 @@ class CustomNucleus : public Nucleus {
   CustomNucleus(Configuration& config, int testparticles);
   /**
    * Fills Particlelist from vector containing data for one nucleus.
-   * The data contains everything that is written in struct Nucleon.
-   * 
+   * The data contains everything that is written in struct Nucleoncustom.
+   *
    * \param[in] vec vector containing data from external list for one nucleus
    */
   void fill_from_list(const std::vector<Nucleoncustom>& vec);
@@ -67,7 +67,7 @@ class CustomNucleus : public Nucleus {
    * as the nucleus contains nucleons.
    */
   std::vector<Nucleoncustom> readfile(std::ifstream& infile,
-                                    int particle_number) const;
+                                      int particle_number) const;
   /**
    * Directory where the nucleon configurations are located.
    * Name is read in from manual input in the config.yaml

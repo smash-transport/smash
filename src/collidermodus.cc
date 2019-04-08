@@ -276,8 +276,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
     projectile_ =
         create_deformed_nucleus(proj_cfg, params.testparticles, "projectile");
   } else if (proj_cfg.has_value({"Custom"})) {
-    projectile_ =
-        make_unique<CustomNucleus>(proj_cfg, params.testparticles);
+    projectile_ = make_unique<CustomNucleus>(proj_cfg, params.testparticles);
   } else {
     projectile_ = make_unique<Nucleus>(proj_cfg, params.testparticles);
   }

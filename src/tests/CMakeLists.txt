@@ -272,7 +272,7 @@ smash_add_runtest(light_nuclei_run smash smash
                   -i ${PROJECT_SOURCE_DIR}/input/config.yaml
                   -p ${PROJECT_SOURCE_DIR}/input/light_nuclei/particles.txt
                   -d ${PROJECT_SOURCE_DIR}/input/light_nuclei/decaymodes.txt)
-smash_add_runtest(custom_run smash smash
+smash_add_runtest(custom_nucleus_run smash smash
                   -i ${PROJECT_SOURCE_DIR}/input/custom_nucleus/config.yaml
                   -c "Modi: {Collider: {Projectile: {Custom: {File_Directory: ${PROJECT_SOURCE_DIR}/input/custom_nucleus}}}}"
                   -c "Modi: {Collider: {Target: {Custom: {File_Directory: ${PROJECT_SOURCE_DIR}/input/custom_nucleus}}}}")

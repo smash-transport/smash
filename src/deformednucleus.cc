@@ -47,53 +47,51 @@ namespace smash {
  * \page projectile_and_target Projectile and Target
  *
  * - \key Custom: \n
- *    \li \key File_Directory (path, required if \key Custom exists,
- * no default):
- \n
+ *    \li \key File_Directory (path, required if \key Custom exists): \n
+ *
  * The directory where the external list with the nucleon configurations
  * is located. Make sure to use an absolute path.\n
  *
- * \li \key File_Name (string, required if \key Custom exists,
- * no default): \n
+ * \li \key File_Name (string, required if \key Custom exists): \n
  * The file name of the external list with the nucleon configurations.
  *
  */
 
- /*!\Userguide
- * \n
- * Example: Configuring a deformed nucleus
- * --------------
- * To configure a fixed target heavy-ion collision with deformed nuclei, whose
- * spherical deformation is explicitly declared, it can be done according to the
- * following example. For explanatory (and not physics) reasons,
- * the projectile's Woods Saxon distribution is initialized automatically and
- * it's spherical deformation manually, while the target nucleus is configured
- * just the opposite.
- *\verbatim
- Modi:
-     Collider:
-         Projectile:
-             Particles:    {2212: 29, 2112: 34}
-             Deformed:
-                 # Manually set deformation parameters
-                 Automatic: False
-                 Beta_2: 0.1
-                 Beta_4: 0.3
-                 Theta: 0.8
-                 Phi: 0.02
-         Target:
-             Particles:    {2212: 29, 2112: 34}
-             # manually set woods saxon parameters
-             Saturation_Density: 0.1968
-             Diffusiveness: 0.8
-             Radius: 2.0
-             Deformed:
-                 # Automatically set deformation parameters
-                 Automatic: True
-         E_kin: 1.2
-         Calculation_Frame: "fixed target"
- \endverbatim
- */
+/*!\Userguide
+* \n
+* Example: Configuring a deformed nucleus
+* --------------
+* To configure a fixed target heavy-ion collision with deformed nuclei, whose
+* spherical deformation is explicitly declared, it can be done according to the
+* following example. For explanatory (and not physics) reasons,
+* the projectile's Woods Saxon distribution is initialized automatically and
+* it's spherical deformation manually, while the target nucleus is configured
+* just the opposite.
+*\verbatim
+Modi:
+    Collider:
+        Projectile:
+            Particles:    {2212: 29, 2112: 34}
+            Deformed:
+                # Manually set deformation parameters
+                Automatic: False
+                Beta_2: 0.1
+                Beta_4: 0.3
+                Theta: 0.8
+                Phi: 0.02
+        Target:
+            Particles:    {2212: 29, 2112: 34}
+            # manually set woods saxon parameters
+            Saturation_Density: 0.1968
+            Diffusiveness: 0.8
+            Radius: 2.0
+            Deformed:
+                # Automatically set deformation parameters
+                Automatic: True
+        E_kin: 1.2
+        Calculation_Frame: "fixed target"
+\endverbatim
+*/
 
 DeformedNucleus::DeformedNucleus(const std::map<PdgCode, int> &particle_list,
                                  int nTest)

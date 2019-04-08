@@ -36,12 +36,12 @@ namespace smash {
              Particles:    {2212: 79, 2112: 118}
              Custom:
                  File_Directory: "/home/username/custom_lists"
-                 File_Name: "Au197_correlated.txt"
+                 File_Name: "Au197_custom.txt"
          Target:
              Particles:    {2212: 79, 2112: 118}
              Custom:
                  File_Directory: "/home/username/custom_lists"
-                 File_Name: "Au197_correlated.txt"
+                 File_Name: "Au197_custom.txt"
          Sqrtsnn: 7.7
  \endverbatim
  *
@@ -62,17 +62,17 @@ namespace smash {
  * protons and neutrons respectively. In the example given the first line
  * defines a neutron and the second one a proton. Please make sure that
  * your file contains as many particles as you specified in the configuration.
- * For the example configuration your file needs to contain 79 protons and 
+ * For the example configuration your file needs to contain 79 protons and
  * 118 neutrons in the first 197 lines. And the same number in the following
  * 197 lines. For every event you need to create 2 nuclei. It is crucial that
  * your file contains enough nucleons for the number of events you want to
  * simulate.
  *
  * \note
- * SMASH is shipped with an example configuration file to set up an collision 
+ * SMASH is shipped with an example configuration file to set up a collision
  * with externally generated nucleon positions. This requires a particle list to
  * be read in. Both, the configuration file and the particle list, are located
- * in /input/custom_nucleus. To run SMASH with the provided example 
+ * in /input/custom_nucleus. To run SMASH with the provided example
  * configuration and particle list, execute \n
  * \n
  * \verbatim
@@ -159,7 +159,7 @@ ThreeVector CustomNucleus::distribute_nucleon() {
 }
 
 std::string CustomNucleus::streamfile(const std::string& file_directory,
-                                          const std::string& file_name) {
+                                      const std::string& file_name) {
   if (file_directory.back() == '/') {
     return file_directory + file_name;
   } else {
@@ -167,8 +167,8 @@ std::string CustomNucleus::streamfile(const std::string& file_directory,
   }
 }
 
-std::vector<Nucleoncustom> CustomNucleus::readfile(
-    std::ifstream& infile, int particle_number) const {
+std::vector<Nucleoncustom> CustomNucleus::readfile(std::ifstream& infile,
+                                                   int particle_number) const {
   int A = particle_number;
   std::string line;
   std::vector<Nucleoncustom> nucleon;
