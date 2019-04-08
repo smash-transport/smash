@@ -188,5 +188,9 @@ std::vector<Nucleoncustom> CustomNucleus::readfile(
     // ensuring that only A particles are read in for one nucleus
     if (++i == A) {
       break;
+    }
+  }
+  return nucleon;
+}
 
 }  // namespace smash
