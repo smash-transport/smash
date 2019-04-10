@@ -288,7 +288,7 @@ void VtkOutput::thermodynamics_output(
     write_vtk_vector(file, Tmn_lattice, varname,
                      [&](EnergyMomentumTensor &node) {
                        const FourVector u = node.landau_frame_4velocity();
-                       return -u.threevec();
+                       return -u.velocity();
                      });
   }
 }
