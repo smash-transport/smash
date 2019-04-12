@@ -11,6 +11,7 @@
 
 #include "smash/angles.h"
 #include "smash/kinematics.h"
+#include "smash/pow.h"
 #include "smash/processstring.h"
 #include "smash/random.h"
 
@@ -2238,8 +2239,8 @@ int StringProcess::fragment_off_hadron(
   // Total transverse momentum of the original string
   double QTrx_string_tot = QTrx_string_pos + QTrx_string_neg;
   double QTry_string_tot = QTry_string_pos + QTry_string_neg;
-  double QTsqr_string_tot = fabs(QTrx_string_tot * QTrx_string_tot) +
-                            fabs(QTry_string_tot * QTry_string_tot);
+  double QTsqr_string_tot = std::fabs(QTrx_string_tot * QTrx_string_tot) +
+                            std::fabs(QTry_string_tot * QTry_string_tot);
   double QTrn_string_tot = std::sqrt(QTsqr_string_tot);
   if (mTrn_string < QTrn_string_tot) {
     return 0;
@@ -2755,6 +2756,72 @@ int StringProcess::get_resonance_from_quark(int idq1, int idq2, double mass) {
   log.debug("Quark constituents ", idq1, " and ", idq2, " with mass ", mass,
             " (GeV) turned into a resonance ", pdgid_possible[ires_closest]);
   return pdgid_possible[ires_closest];
+}
+
+bool StringProcess::make_lightcone_final_two(
+    bool separate_fragment_hadron,
+    double ppos_string, double pneg_string,
+    double mTrn_had_forward, double mTrn_had_backward,
+    double &ppos_had_forward, double &ppos_had_backward,
+    double &pneg_had_forward, double &pneg_had_backward) {
+  const double mTsqr_string = 2. * ppos_string * pneg_string;
+  if (mTsqr_string < 0.) {
+    return false;
+  }
+  const double mTrn_string = std::sqrt(mTsqr_string);
+  if (mTrn_string < mTrn_had_forward + mTrn_had_backward) {
+    return false;
+  }
+
+  // square of transvere mass of the forward hadron
+  const double mTsqr_had_forward = mTrn_had_forward * mTrn_had_forward;
+  // square of transvere mass of the backward hadron
+  const double mTsqr_had_backward = mTrn_had_backward * mTrn_had_backward;
+
+  /* The following part determines lightcone momentum fraction of p^+
+   * carried by each hadron.
+   * Lightcone momenta of the forward and backward hadrons are
+   * p^+ forward  = (xe_pos + xpz_pos) * p^+ string,
+   * p^- forward  = (xe_pos - xpz_pos) * p^- string,
+   * p^+ backward = (xe_neg - xpz_pos) * p^+ string and
+   * p^- backward = (xe_neg + xpz_pos) * p^- string.
+   * where xe_pos and xe_neg satisfy xe_pos + xe_neg = 1.
+   * Then evaluate xe_pos, xe_neg and xpz_pos in terms of
+   * the transverse masses of hadrons and string. */
+
+  // Express xe_pos and xe_neg in terms of the transverse masses.
+  const double xm_diff =
+      (mTsqr_had_forward - mTsqr_had_backward) / mTsqr_string;
+  const double xe_pos = 0.5 * (1. + xm_diff);
+  const double xe_neg = 0.5 * (1. - xm_diff);
+
+  // Express xpz_pos in terms of the transverse masses.
+  const double lambda_sqr =
+      pow_int(mTsqr_string - mTsqr_had_forward - mTsqr_had_backward, 2) -
+      4. * mTsqr_had_forward * mTsqr_had_backward;
+  if (lambda_sqr <= 0.) {
+    return false;
+  }
+  const double lambda = std::sqrt(lambda_sqr);
+  const double b_lund = separate_fragment_hadron ?
+      stringz_b_leading_ : stringz_b_produce_;
+  /* The probability to flip sign of xpz_pos is taken from
+   * StringFragmentation::finalTwo in StringFragmentation.cc
+   * of PYTHIA 8. */
+  const double prob_reverse =
+      std::exp(-b_lund * lambda) / (1. + std::exp(-b_lund * lambda));
+  double xpz_pos = 0.5 * lambda / mTsqr_string;
+  if (random::uniform(0., 1.) < prob_reverse) {
+    xpz_pos = -xpz_pos;
+  }
+
+  ppos_had_forward = (xe_pos + xpz_pos) * ppos_string;
+  ppos_had_backward = (xe_neg - xpz_pos) * ppos_string;
+
+  pneg_had_forward = 0.5 * mTsqr_had_forward / ppos_had_forward;
+  pneg_had_backward = 0.5 * mTsqr_had_backward / ppos_had_backward;
+
+  return true;
 }
 
 double StringProcess::sample_zLund(double a, double b, double mTrn) {
