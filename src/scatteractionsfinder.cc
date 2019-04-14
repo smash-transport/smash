@@ -777,6 +777,12 @@ void ScatterActionsFinder::dump_cross_sections(
   ParticleData a_data(a), b_data(b);
   int n_momentum_points = 200;
   constexpr double momentum_step = 0.02;
+  /*
+  // Round to output precision.
+  for (auto& p : plab) {
+    p = std::floor((p * 100000) + 0.5) / 100000;
+  }
+  */
   if (plab.size() > 0) {
     n_momentum_points = plab.size();
     // Remove duplicates.
@@ -892,7 +898,7 @@ void ScatterActionsFinder::dump_cross_sections(
     a_data.set_4momentum(m_a, momentum, 0.0, 0.0);
     b_data.set_4momentum(m_b, -momentum, 0.0, 0.0);
     const double sqrts = (a_data.momentum() + b_data.momentum()).abs();
-    std::printf("%9.5f", sqrts);
+    std::printf("%9.6f", sqrts);
     for (const auto channel : all_channels) {
       const xs_saver energy_and_xs = xs_dump[channel];
       size_t j = 0;

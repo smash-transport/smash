@@ -65,7 +65,7 @@ const std::initializer_list<double> {name}_RES_SIG = {{
 {elastic_contribution}
 }};
 '''.format(name=name, reaction=reaction,
-           sqrts=join_values(sqrts, 9, 0, 4),
+           sqrts=join_values(sqrts, 9, 0, 5),
            elastic_contribution=join_values(elastic_contribution, 4, 2, 11))
 
 print s.rstrip('\n')
