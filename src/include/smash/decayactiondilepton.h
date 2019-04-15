@@ -42,7 +42,7 @@ class DecayActionDilepton : public DecayAction {
     return shining_weight_ * branching_;
   }
 
-  void one_to_three() override;
+  void sample_3body_phasespace() override;
 
  private:
   /**

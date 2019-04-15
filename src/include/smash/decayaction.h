@@ -104,15 +104,6 @@ class DecayAction : public Action {
 
   /// Angular momentum of the decay
   int L_ = 0;
-
- protected:
-  /**
-   * Kinematics of a 1-to-3 decay process.
-   *
-   * Sample the masses and momenta of the decay products in the
-   * center-of-momentum frame.
-   */
-  virtual void one_to_three();
 };
 
 }  // namespace smash

@@ -18,7 +18,7 @@ DecayActionDilepton::DecayActionDilepton(const ParticleData &p, double time,
                                          double shining_weight)
     : DecayAction({p}, time), shining_weight_(shining_weight) {}
 
-void DecayActionDilepton::one_to_three() {
+void DecayActionDilepton::sample_3body_phasespace() {
   // find the non-lepton particle position
   int non_lepton_position = -1;
   for (int i = 0; i < 3; ++i) {
@@ -29,7 +29,8 @@ void DecayActionDilepton::one_to_three() {
   }
 
   if (non_lepton_position == -1) {
-    throw std::runtime_error("Error in DecayActionDilepton::one_to_three.");
+    throw std::runtime_error(
+        "Error in DecayActionDilepton::sample_3body_phasespace.");
   }
 
   ParticleData &nl = outgoing_particles_[non_lepton_position];
