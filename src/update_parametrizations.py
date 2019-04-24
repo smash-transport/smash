@@ -17,7 +17,7 @@ with open(source, 'r') as f:
     d = np.loadtxt(f)
 
 sqrts = d[:,0]
-elastic_contribution = d[:,3]
+elastic_contribution = d[:,2]
 
 # Close to the production threshold, there can be numerical issues when doing
 # the interpolation. To avoid these, it suffices to slightly modify the first
@@ -33,6 +33,12 @@ def join_values(values, max_values_per_line, padding, precision):
         left, right = value.split('.') if '.' in value else (value, '0')
         formatted_value = template.format(left=left, right=right)
         formatted_values.append(formatted_value)
+
+    # make sure there are no duplicates
+    duplicates = len(formatted_values) - len(set(formatted_values))
+    assert duplicates >= 0
+    if duplicates > 0:
+        raise ValueError('Got {} duplicates after rounding.'.format(duplicates))
 
     # arange values in table
     indent = '  '
@@ -65,7 +71,7 @@ const std::initializer_list<double> {name}_RES_SIG = {{
 {elastic_contribution}
 }};
 '''.format(name=name, reaction=reaction,
-           sqrts=join_values(sqrts, 9, 0, 5),
-           elastic_contribution=join_values(elastic_contribution, 4, 2, 11))
+           sqrts=join_values(sqrts, 9, 0, 7),
+           elastic_contribution=join_values(elastic_contribution, 4, 2, 6))
 
 print s.rstrip('\n')
