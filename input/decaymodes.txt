@@ -397,12 +397,12 @@ N(1700)
 
 N(1710)
 0.25   1  N π        #  5 - 20 %, tuned for Nπ->ΣK
-0.37   1  N η        # 10 - 50 %
+0.32   1  N η        # 10 - 50 %
 0.01   1  N ω        #  1 -  5 %, tuned for pp dileptons
 0.13   1  Λ K        #  5 - 25 %, HADES PWA 15 ± 10 %, tuned for Nπ->ΛK
 0.10   1  Σ K        # > 0, tuned for Nπ->ΣK and NN->ΣK
 0.07   1  Δ π        # > 0
-0.12   0  N(1535) π  #  9 - 21 %
+0.17   0  N(1535) π  #  9 - 21 %
 
 N(1720)
 0.15   1  N π    #  8 - 14 %
@@ -418,14 +418,16 @@ N(1720)
 
 N(1875)
 0.11   2  N π    #  3 - 11 %
-0.013  2  N η    #     < 1 %
+0.01   2  N η    #     < 1 %
 0.15   0  N ω    # 15 - 25 %, tuned for pp dileptons
-0.047  2  Σ K    # > 0, tuned for Nπ->ΣK and NN->ΣK
-0.02   2  Λ K    # > 0, HADES PWA 4 ± 2 %, tuned for Nπ->ΛK
-0.11   0  Δ π    #  7 - 21 %
-0.07   2  Δ π    #  2 - 12 %
+0.04   2  Σ K    # > 0, tuned for Nπ->ΣK and NN->ΣK
+0.05   2  Σ K*(892)  # for slower kaons and Sigmas
+0.04   2  Λ K    # > 0, HADES PWA 4 ± 2 %, tuned for Nπ->ΛK
+0.02   2  Λ K*(892)  # for slower kaons and Lambdas
+0.09   0  Δ π    #  7 - 21 %
+0.06   2  Δ π    #  2 - 12 %
 0.03   0  N ρ    # > 0
-0.33   1  N σ    # 30 - 60 %
+0.32   1  N σ    # 30 - 60 %
 0.04   2  N(1440) π    #  2 -  8 %
 0.01   1  N(1520) π    #     < 2 %
 
@@ -461,7 +463,9 @@ N(1900)
 0.04   1  N η'         #  4 -  8 %
 0.10   1  N ω          #  7 - 13 %
 0.02   1  Λ K          #  2 - 20 %, HADES PWA 5 ± 5
-0.04   1  Σ K          #  3 -  7 %, tuned for NN->ΣK
+0.01   1  Λ K*(892)    # for slower kaons and Lambdas
+0.03   1  Σ K          #  3 -  7 %, tuned for NN->ΣK
+0.01   1  Σ K*(892)    # for slower kaons and Sigmas
 0.10   1  Δ π          #  9 - 25 %
 0.24   3  Δ π          # 21 - 45 %
 0.05   2  N σ          #  1 -  7 %
@@ -471,10 +475,13 @@ N(1900)
 N(1990)
 0.06   3  N π  # tuned for p π-
 0.20   3  N ρ  # BR lowered to improve pp --> pp ρ cross section, shifted to N σ
-0.18   3  Δ π
+0.17   3  Δ π
 0.05   3  N(1440) π
-0.04   3  Λ K  # tuned for Nπ->ΛK
-0.46   4  N σ  # σ and ππ combined
+0.03   3  Λ K  # tuned for Nπ->ΛK
+0.03   3  Λ K*(892)    # for slower kaons and Lambdas
+0.03   3  Σ K  # tuned for Nπ->ΛK
+0.03   3  Σ K*(892)    # for slower kaons and Sigmas
+0.40   4  N σ  # σ and ππ combined
 # From UrQMD, not yet confirmed by PDG
 # Could be removed
 # FIXME The UrQMD papers are ambigious whether this state produces φ
@@ -511,11 +518,11 @@ N(2100)
 0.08   1  N π        #  8 - 18 %
 0.05   1  N η        # > 0
 0.05   1  N η'       #  5 - 11 %
-0.17   1  N ω        # 10 - 25 %
+0.13   1  N ω        # 10 - 25 %
 0.01   1  Λ K        # > 0
 0.09   1  Δ π        #  6 - 14 % | 20 - 40 % for N π π
 0.10   1  N ρ        # > 0       |
-0.07   1  Λ K*(892)  #  3 - 11 %
+0.11   1  Λ K*(892)  #  3 - 11 %, for slower kaons and Lambdas
 0.15   0  N σ        # 14 - 26 %
 0.23   2  N(1520) π  # 16 - 34 %
 
@@ -549,6 +556,7 @@ N(2220)
 0.20   3  Δ π
 0.14   4  N(1535) ρ
 #0.000  5  Λ K  # tuned for Nπ->ΛK
+# TODO: consider adding hyperon channels
 0.005  3  N φ  # tuned for p Nb dileptons and pp -> ppKK
 0.001  4  N f₀(980)  # tuned for pp -> ppKK
 # From UrQMD, confirmed by PDG
@@ -560,7 +568,8 @@ N(2250)
 0.22   4  Δ π
 0.05   4  N(1440) π
 0.10   5  N(1535) ρ
-0.005  4  Λ K  # tuned for Nπ->ΛK
+0.002  4  Λ K  # tuned for Nπ->ΛK
+0.003  4  Λ K*(892)  # for slower kaons and Lambdas
 0.005  4  N φ  # tuned for p Nb dileptons and pp -> ppKK
 0.001  5  N f₀(980)  # tuned for pp -> ppKK
 # From UrQMD, confirmed by PDG
@@ -600,8 +609,9 @@ N(2250)
 0.01   1  N(1535) π  # 0.5 - 1.5 %
 
 Δ(1900)
-0.12   0  N π        #  4 - 12 %
+0.11   0  N π        #  4 - 12 %
 0.01   0  Σ K        #      seen
+0.01   0  Σ K*(892)  # for slower kaons and Lambdas
 0.35   2  Δ π        # 30 - 70 %
 0.09   0  N ρ        #  8 - 16 %
 0.20   2  N ρ        # 18 - 28 %
@@ -621,33 +631,37 @@ N(2250)
 Δ(1910)
 0.30   1  N π        # 15 - 30 %, tuned for Nπ
 0.37   1  Δ π        # 34 - 66 %
-0.12   1  Σ K        #  4 - 14 %, tuned for Nπ->ΣK
-0.07   1  N(1440) π  #  3 -  9 %
-0.09   1  Δ η        #  5 - 13 %
+0.06   1  Σ K        #  4 - 14 %, tuned for Nπ->ΣK
+0.06   1  Σ K*(892)  # for slower kaons and Sigmas
+0.09   1  N(1440) π  #  3 -  9 %
+0.12   1  Δ η        #  5 - 13 %
 
 Δ(1920)
-0.20   1  N π        #  5 - 20 %
-0.06   1  Σ K        #  2 -  6 %
+0.17   1  N π        #  5 - 20 %
+0.02   1  Σ K        #  2 -  6 %
+0.05   1  Σ K*(892)  # for slower kaons and Sigmas
 0.10   1  Δ π        #  8 - 28 %
 0.47   3  Δ π        # 44 - 72 %
 0.03   1  N(1440) π  # < 4 %
 0.04   0  N(1520) π  # < 5 %
 0.01   2  N(1535) π  # < 2 %
 0.01   2  N a₀(980)  # > 0
-0.08   1  Δ η        #  5 - 17 %
+0.10   1  Δ η        #  5 - 17 %
 
 Δ(1930)
 0.15   2  N π        #  5 - 15 %, tuned for Nπ->ΣK
-0.45   2  Δ π
+0.43   2  Δ π
 0.38   2  N(1440) π
 0.02   2  Σ K        # tuned for Nπ->ΣK, NN->ΣK
+0.02   2  Σ K*(892)  # for slower kaons and Sigmas
 # From UrQMD
 
 Δ(1950)
 0.30   3  N π        # 35 - 45 %, tuned for Nπ total cross section
-0.004  3  Σ K        # 0.3 - 0.5 %, tuned for Nπ->ΣK, NN->ΣK
+0.005  3  Σ K        # 0.3 - 0.5 %, tuned for Nπ->ΣK, NN->ΣK
+0.005  3  Σ K*(892)  # for slower kaons and Sigmas
 0.09   3  Δ π        #  1 -  9 %
-0.506  3  N(1440) π  # Introduced to fill up missing branching ratio
+0.50   3  N(1440) π  # Introduced to fill up missing branching ratio
 0.09   1  N(1680) π  #  3 -  9 %
 0.01   3  Δ η        # < 0.6 %
 
