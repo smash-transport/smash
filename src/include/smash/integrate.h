@@ -441,7 +441,9 @@ class Integrator2dCuhre {
     Result result = {0., 0.};
 
     if (max1 < min1 || max2 < min2) {
-      bool tolerable = (max1 - min1 > -1.e-16) && (max2 - min2 > -1.e-16);
+      /* Tolerance chosen large enough for floating-point arithmetic error in
+       * chained decays, consider increasing if insufficient. */
+      bool tolerable = (max1 - min1 > -1.e-15) && (max2 - min2 > -1.e-15);
       if (tolerable) {
         return result;
       }
