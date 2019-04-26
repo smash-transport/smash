@@ -480,6 +480,9 @@ bool ParticleType::wanted_decaymode(const DecayType &t,
            has_lepton_pair(FinalTypes[0]->pdgcode(), FinalTypes[1]->pdgcode(),
                            FinalTypes[2]->pdgcode())));
     }
+    default:
+      throw std::runtime_error(
+          "Problem in selecting decaymodes in wanted_decaymode()");
   }
 }
 
