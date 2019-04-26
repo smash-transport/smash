@@ -552,8 +552,7 @@ const std::initializer_list<double> PIMINUSP_RES_SQRTS = {
     3.4435140, 3.4706390, 3.4868130, 3.4975540, 3.5507730, 3.6032070, 3.6548900,
     3.6574550, 3.7058520, 3.7310720, 3.7461230, 3.7955240, 3.9886240, 4.0003630,
     4.2614590, 4.4340360, 4.6809920, 4.7288360, 4.8386340};
-/// Elastic Dumping partial π⁻N⁺ cross-sections in mb, energies in GeV cross
-/// section contributions from decays.
+/// Elastic π⁻N⁺ cross section contributions from decays.
 ///
 /// These need to be subtracted from the interpolation of the PDG data on
 /// elastic cross sections. This data was generated using the SMASH analysis
@@ -750,8 +749,7 @@ const std::initializer_list<double> PIPLUSP_RES_SQRTS = {
     3.4161730, 3.4189170, 3.4435140, 3.4706390, 3.4868130, 3.4975540, 3.5242640,
     3.5507730, 3.6032070, 3.6548900, 3.7058520, 3.7461230, 3.9246250, 3.9886240,
     4.4000620, 4.4340360, 4.8192100, 4.8386340};
-/// Elastic Dumping partial π⁺N⁺ cross-sections in mb, energies in GeV cross
-/// section contributions from decays.
+/// Elastic π⁺N⁺ cross section contributions from decays.
 ///
 /// These need to be subtracted from the interpolation of the PDG data on
 /// elastic cross sections. This data was generated using the SMASH analysis

@@ -2759,11 +2759,10 @@ int StringProcess::get_resonance_from_quark(int idq1, int idq2, double mass) {
 }
 
 bool StringProcess::make_lightcone_final_two(
-    bool separate_fragment_hadron,
-    double ppos_string, double pneg_string,
-    double mTrn_had_forward, double mTrn_had_backward,
-    double &ppos_had_forward, double &ppos_had_backward,
-    double &pneg_had_forward, double &pneg_had_backward) {
+    bool separate_fragment_hadron, double ppos_string, double pneg_string,
+    double mTrn_had_forward, double mTrn_had_backward, double &ppos_had_forward,
+    double &ppos_had_backward, double &pneg_had_forward,
+    double &pneg_had_backward) {
   const double mTsqr_string = 2. * ppos_string * pneg_string;
   if (mTsqr_string < 0.) {
     return false;
@@ -2803,8 +2802,8 @@ bool StringProcess::make_lightcone_final_two(
     return false;
   }
   const double lambda = std::sqrt(lambda_sqr);
-  const double b_lund = separate_fragment_hadron ?
-      stringz_b_leading_ : stringz_b_produce_;
+  const double b_lund =
+      separate_fragment_hadron ? stringz_b_leading_ : stringz_b_produce_;
   /* The probability to flip sign of xpz_pos is taken from
    * StringFragmentation::finalTwo in StringFragmentation.cc
    * of PYTHIA 8. */
