@@ -2421,7 +2421,11 @@ double CrossSections::nn_to_resonance_matrix_element(double sqrts,
   const double msqr = 2. * (m_a * m_a + m_b * m_b);
   /* If the c.m. energy is larger than the sum of the pole masses of the
    * outgoing particles plus three times of the sum of the widths plus 3 GeV,
-   * the collision will be neglected.*/
+   * the collision will be neglected.
+   *
+   * This can be problematic for some final-state cross sections, but at
+   * energies that high strings are used anyway.
+   */
   const double w_a = type_a.width_at_pole();
   const double w_b = type_b.width_at_pole();
   const double uplmt = m_a + m_b + 3.0 * (w_a + w_b) + 3.0;
@@ -2440,7 +2444,7 @@ double CrossSections::nn_to_resonance_matrix_element(double sqrts,
              type_a.antiparticle_sign() == type_b.antiparticle_sign()) {
     // NN → NN*
     if (twoI == 2) {
-      return 7. / msqr;
+      return 4.5 / msqr;
     } else if (twoI == 0) {
       const double parametrization = 14. / msqr;
       /** pn → pnη cross section is known to be larger than the corresponding

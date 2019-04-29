@@ -159,10 +159,7 @@ double piplusp_elastic(double mandelstam_s) {
     piplusp_elastic_res_interpolation =
         make_unique<InterpolateDataSpline>(x, y);
   }
-  // Interpolation may not be good if sqrts is beyond 2.2 GeV
-  if (mandelstam_s < 4.84) {
-    sigma -= (*piplusp_elastic_res_interpolation)(mandelstam_s);
-  }
+  sigma -= (*piplusp_elastic_res_interpolation)(mandelstam_s);
   if (sigma < 0) {
     sigma = really_small;
   }
@@ -201,7 +198,7 @@ static double piminusp_elastic_pdg(double mandelstam_s) {
     std::vector<double> dedup_x;
     std::vector<double> dedup_y;
     std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
-    dedup_y = smooth(dedup_x, dedup_y, 0.03, 6);
+    dedup_y = smooth(dedup_x, dedup_y, 0.2, 6);
     piminusp_elastic_interpolation =
         make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
@@ -237,13 +234,13 @@ double piminusp_elastic(double mandelstam_s) {
       i = i * i;
     }
     std::vector<double> y = PIMINUSP_RES_SIG;
+    std::vector<double> dedup_x;
+    std::vector<double> dedup_y;
+    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
     piminusp_elastic_res_interpolation =
-        make_unique<InterpolateDataSpline>(x, y);
+        make_unique<InterpolateDataSpline>(dedup_x, dedup_y);
   }
-  // Interpolation may not be good if sqrts is beyond 2.2 GeV
-  if (mandelstam_s < 4.84) {
-    sigma -= (*piminusp_elastic_res_interpolation)(mandelstam_s);
-  }
+  sigma -= (*piminusp_elastic_res_interpolation)(mandelstam_s);
   if (sigma < 0) {
     sigma = really_small;
   }
@@ -302,7 +299,7 @@ double piminusp_sigma0k0_res(double mandelstam_s) {
     std::vector<double> dedup_x;
     std::vector<double> dedup_y;
     std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
-    dedup_y = smooth(dedup_x, dedup_y, 0.03, 6);
+    dedup_y = smooth(dedup_x, dedup_y, 0.2, 6);
     piminusp_sigma0k0_interpolation =
         make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }

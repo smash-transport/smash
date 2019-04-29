@@ -34,6 +34,12 @@ def join_values(values, max_values_per_line, padding, precision):
         formatted_value = template.format(left=left, right=right)
         formatted_values.append(formatted_value)
 
+    # make sure there are no duplicates
+    duplicates = len(formatted_values) - len(set(formatted_values))
+    assert duplicates >= 0
+    if duplicates > 0:
+        raise ValueError('Got {} duplicates after rounding.'.format(duplicates))
+
     # arange values in table
     indent = '  '
     values_per_line = 0
@@ -61,9 +67,11 @@ const std::initializer_list<double> {name}_RES_SQRTS = {{
 /// These need to be subtracted from the interpolation of the PDG data on
 /// elastic cross sections. This data was generated using the SMASH analysis
 /// suite and should be updated when strange resonances are changed or added.
-const std::initializer_list<double>{name} _RES_SIG = {{{elastic_contribution}}};
+const std::initializer_list<double> {name}_RES_SIG = {{
+{elastic_contribution}
+}};
 '''.format(name=name, reaction=reaction,
-           sqrts=join_values(sqrts, 9, 0, 4),
-           elastic_contribution=join_values(elastic_contribution, 4, 2, 11))
+           sqrts=join_values(sqrts, 9, 0, 7),
+           elastic_contribution=join_values(elastic_contribution, 4, 2, 6))
 
 print s.rstrip('\n')

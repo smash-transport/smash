@@ -78,7 +78,7 @@ static void compare_in_vs_out_width(const ParticleType &t,
 
   std::printf("width comparison at m=%5.3f: %8.6f %8.6f %8.6f %8.6f \n", m_R,
               Gam_out, Gam_in, std::abs(Gam_out - Gam_in), Gam_out / Gam_in);
-  COMPARE_ABSOLUTE_ERROR(Gam_out, Gam_in, 5E-4);
+  COMPARE_ABSOLUTE_ERROR(Gam_out, Gam_in, 7E-4);
 }
 
 TEST(Roper_in_vs_out_width) {
@@ -110,8 +110,8 @@ TEST(Roper_in_vs_out_width) {
 }
 
 TEST(photon_widths) {
-  // test the photon widths that are used as a baseline for the dilepton Dalitz
-  // widths
+  // Test the photon widths that are used as a baseline for the dilepton Dalitz
+  // widths.
   const ParticleType &photon = ParticleType::find(0x22);
   const ParticleType &pi0 = ParticleType::find(0x111);
   const ParticleType &eta = ParticleType::find(0x221);
@@ -121,15 +121,18 @@ TEST(photon_widths) {
 
   const double err = 1E-10;
 
+  // The partial widths should be given by the width of the resonance times the
+  // branching ratio. This test breaks whenever the branching ratios or width of
+  // the involved particles are changed.
   COMPARE_ABSOLUTE_ERROR(pi0.get_partial_width(pi0.mass(), photon, photon),
                          7.699999749e-09, err);
   COMPARE_ABSOLUTE_ERROR(eta.get_partial_width(eta.mass(), photon, photon),
-                         5.189818921e-07, err);
+                         5.203024193548386e-7, err);
   COMPARE_ABSOLUTE_ERROR(etap.get_partial_width(etap.mass(), photon, photon),
-                         4.393343261e-06, err);
+                         4.3889449263667536e-6, err);
 
   COMPARE_ABSOLUTE_ERROR(omega.get_partial_width(omega.mass(), pi0, photon),
-                         0.0007100010407, err);
+                         0.0007194189448, err);
   COMPARE_ABSOLUTE_ERROR(phi.get_partial_width(phi.mass(), pi0, photon),
-                         5.432298167e-06, err);
+                         5.4068538571729e-6, err);
 }
