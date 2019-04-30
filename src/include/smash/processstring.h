@@ -991,7 +991,7 @@ class StringProcess {
   double sample_zLund(double a, double b, double mTrn);
 
   /**
-   * \param[out] event event record which contains information of particles
+   * \param[out] event_fragments event record which contains information of particles
    * \param[in] evec_basis three orthonormal basis vectors of which
    *            evec_basis[0] is in the longitudinal direction while
    *            evec_basis[1] and evec_basis[2] span the transverse plane.

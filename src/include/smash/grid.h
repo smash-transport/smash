@@ -85,10 +85,10 @@ class Grid : public GridBase {
    *
    * \param[in] particles The particles to place onto the grid.
    * \param[in] min_cell_length The minimal length a cell must have.
-   * \param[in] timestep Duration of the timestep. It is necessary for formation
-   *                   times treatment: if particle is fully or partially formed
-   *                   before the end of the timestep, it has to be on the grid.
-   * \param[in] strategy The strategy for determining the cell size
+   * \param[in] timestep_duration Duration of the timestep. It is necessary for
+   * formation times treatment: if particle is fully or partially formed before
+   * the end of the timestep, it has to be on the grid. \param[in] strategy The
+   * strategy for determining the cell size
    */
   Grid(const Particles &particles, double min_cell_length,
        double timestep_duration,
