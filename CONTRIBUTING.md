@@ -464,9 +464,12 @@ All floating point numbers are represented using doubles.
 
 In general, input and output interfaces should be backwards compatible, when
 introducing changes. If there are changes that affect the config.yaml or the
-binary output, the associated version numbers need to be increased. Such
-changes can only occur, when major versions of SMASH are released. In addition,
-the Changelog needs be updated with a prominent mention of the changes.
+binary output, the associated version numbers need to be increased. Such changes
+can only occur, when major versions of SMASH are released. The new SMASH major
+version is used as the new config.yaml version. This way the config.yaml version
+always represents the minimal SMASH version to use with this config file. In
+addition, the Changelog needs be updated with a prominent mention of the
+changes.
 
 ### Third Party Codes
 
