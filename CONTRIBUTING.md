@@ -468,8 +468,7 @@ binary output, the associated version numbers need to be increased. Such changes
 can only occur, when major versions of SMASH are released. The new SMASH major
 version is used as the new config.yaml version. This way the config.yaml version
 always represents the minimal SMASH version to use with this config file. In
-addition, the Changelog needs be updated with a prominent mention of the
-changes.
+addition, the release notes need to include a prominent mention of the changes.
 
 ### Third Party Codes
 
