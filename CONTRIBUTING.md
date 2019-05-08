@@ -99,7 +99,7 @@ follows
 
 Note: Do not use this as a default, since it increases compilation time. Use
 clang for compilation here, since gcc runs into an internal compiler error,
-warnings are however still reported. 
+warnings are however still reported.
 
 ## Development Tools
 
@@ -463,12 +463,17 @@ All floating point numbers are represented using doubles.
 ### Input and Output Compatibility
 
 In general, input and output interfaces should be backwards compatible, when
-introducing changes. If there are changes that affect the config.yaml or the
-binary output, the associated version numbers need to be increased. Such changes
-can only occur, when major versions of SMASH are released. The new SMASH major
-version is used as the new config.yaml version. This way the config.yaml version
-always represents the minimal SMASH version to use with this config file. In
-addition, the release notes need to include a prominent mention of the changes.
+introducing changes. If there are backwards incompatible changes that affect the
+config.yaml or the binary output, the associated version numbers need to be
+increased at the next SMASH release.
+
+The new SMASH version is used as the new config.yaml version. This way the
+config.yaml version always represents the minimal SMASH version to use with this
+config file.
+
+The release notes need to include a prominent mention of **all** changes,
+backwards incompatible or not. In particular, newly introduced config parameters
+have to be mentioned.
 
 ### Third Party Codes
 
