@@ -109,10 +109,10 @@ DeformedNucleus::DeformedNucleus(Configuration &config, int nTest)
 
 double DeformedNucleus::deformed_woods_saxon(double r, double cosx) const {
   return Nucleus::get_saturation_density() /
-         (1 + std::exp(r - Nucleus::get_nuclear_radius() *
-                               (1 + beta2_ * y_l_0(2, cosx) +
-                                beta4_ * y_l_0(4, cosx)) /
-                               Nucleus::get_diffusiveness()));
+         (1 + std::exp((r - Nucleus::get_nuclear_radius() *
+                                (1 + beta2_ * y_l_0(2, cosx) +
+                                 beta4_ * y_l_0(4, cosx))) /
+                       Nucleus::get_diffusiveness()));
 }
 
 ThreeVector DeformedNucleus::distribute_nucleon() {
