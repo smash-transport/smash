@@ -297,7 +297,7 @@ std::vector<T> smooth(const std::vector<T> &x, const std::vector<T> &y,
   res.resize(x.size());
   lowess::lowess(&x.front(), &y.front(), x.size(), &result.front(), span, iter,
                  delta, &rw.front(), &res.front());
-  return std::move(result);
+  return result;
 }
 
 }  // namespace smash
