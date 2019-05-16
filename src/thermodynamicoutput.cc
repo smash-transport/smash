@@ -145,8 +145,15 @@ ThermodynamicOutput::ThermodynamicOutput(const bf::path &path,
     }
   }
   if (out_par_.td_v_landau) {
-    std::fprintf(file_.get(), "%s x y z ",
+    std::fprintf(file_.get(), "%s x y z, ",
                  to_string(ThermodynamicQuantity::LandauVelocity));
+  }
+  if (out_par_.td_jQBS) {
+    if (out_par_.td_smearing) {
+      std::fprintf(file_.get(), "j_QBS [(Q,B,S)/fm^3] (0 1 2 3)x3");
+    } else {
+      std::fprintf(file_.get(), "j_QBS [(Q,B,S)] (0 1 2 3)x3");
+    }
   }
   std::fprintf(file_.get(), "\n");
 }
@@ -170,9 +177,9 @@ void ThermodynamicOutput::at_intermediate_time(
   std::fprintf(file_.get(), "%6.2f ", clock.current_time());
   constexpr bool compute_gradient = false;
   if (out_par_.td_rho_eckart) {
-    const double rho =
-        std::get<0>(rho_eckart(out_par_.td_position, particles, dens_param,
-                               out_par_.td_dens_type, compute_gradient));
+    const double rho = std::get<0>(current_eckart(
+        out_par_.td_position, particles, dens_param, out_par_.td_dens_type,
+        compute_gradient, out_par_.td_smearing));
     std::fprintf(file_.get(), "%7.4f ", rho);
   }
   if (out_par_.td_tmn || out_par_.td_tmn_landau || out_par_.td_v_landau) {
@@ -210,9 +217,26 @@ void ThermodynamicOutput::at_intermediate_time(
       }
     }
     if (out_par_.td_v_landau) {
-      std::fprintf(file_.get(), "%7.4f %7.4f %7.4f", -u[1] / u[0], -u[2] / u[0],
-                   -u[3] / u[0]);
+      std::fprintf(file_.get(), "%7.4f %7.4f %7.4f ", -u[1] / u[0],
+                   -u[2] / u[0], -u[3] / u[0]);
     }
+  }
+  if (out_par_.td_jQBS) {
+    FourVector jQ = std::get<1>(current_eckart(
+        out_par_.td_position, particles, dens_param, DensityType::Charge,
+        compute_gradient, out_par_.td_smearing));
+    FourVector jB = std::get<1>(current_eckart(
+        out_par_.td_position, particles, dens_param, DensityType::Baryon,
+        compute_gradient, out_par_.td_smearing));
+    FourVector jS = std::get<1>(current_eckart(
+        out_par_.td_position, particles, dens_param, DensityType::Strangeness,
+        compute_gradient, out_par_.td_smearing));
+    std::fprintf(file_.get(), "%15.12f %15.12f %15.12f %15.12f ", jQ[0], jQ[1],
+                 jQ[2], jQ[3]);
+    std::fprintf(file_.get(), "%15.12f %15.12f %15.12f %15.12f ", jB[0], jB[1],
+                 jB[2], jB[3]);
+    std::fprintf(file_.get(), "%15.12f %15.12f %15.12f %15.12f ", jS[0], jS[1],
+                 jS[2], jS[3]);
   }
   std::fprintf(file_.get(), "\n");
 }
@@ -225,11 +249,12 @@ void ThermodynamicOutput::density_along_line(
   std::ofstream a_file;
   a_file.open(file_name, std::ios::out);
   const bool compute_gradient = false;
+  const bool smearing = true;
 
   for (int i = 0; i <= n_points; i++) {
     r = line_start + (line_end - line_start) * (1.0 * i / n_points);
-    double rho_eck =
-        std::get<0>(rho_eckart(r, plist, param, dens_type, compute_gradient));
+    double rho_eck = std::get<0>(
+        current_eckart(r, plist, param, dens_type, compute_gradient, smearing));
     a_file << r.x1() << " " << r.x2() << " " << r.x3() << " " << rho_eck
            << "\n";
   }

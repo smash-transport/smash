@@ -112,6 +112,7 @@ double Potentials::potential(const ThreeVector &r, const ParticleList &plist,
                              const ParticleType &acts_on) const {
   double total_potential = 0.0;
   const bool compute_gradient = false;
+  const bool smearing = true;
   const auto scale = force_scale(acts_on);
 
   if (!acts_on.is_baryon()) {
@@ -119,13 +120,14 @@ double Potentials::potential(const ThreeVector &r, const ParticleList &plist,
   }
 
   if (use_skyrme_) {
-    const double rho_eck = std::get<0>(
-        rho_eckart(r, plist, param_, DensityType::Baryon, compute_gradient));
+    const double rho_eck = std::get<0>(current_eckart(
+        r, plist, param_, DensityType::Baryon, compute_gradient, smearing));
     total_potential += scale.first * skyrme_pot(rho_eck);
   }
   if (use_symmetry_) {
-    const double rho_iso = std::get<0>(rho_eckart(
-        r, plist, param_, DensityType::BaryonicIsospin, compute_gradient));
+    const double rho_iso = std::get<0>(
+        current_eckart(r, plist, param_, DensityType::BaryonicIsospin,
+                       compute_gradient, smearing));
     const double sym_pot = symmetry_pot(rho_iso) * acts_on.isospin3_rel();
     total_potential += scale.second * sym_pot;
   }
@@ -180,27 +182,29 @@ std::pair<ThreeVector, ThreeVector> Potentials::symmetry_force(
 std::tuple<ThreeVector, ThreeVector, ThreeVector, ThreeVector>
 Potentials::all_forces(const ThreeVector &r, const ParticleList &plist) const {
   const bool compute_gradient = true;
+  const bool smearing = true;
   auto F_skyrme =
       std::make_pair(ThreeVector(0., 0., 0.), ThreeVector(0., 0., 0.));
   auto F_symmetry =
       std::make_pair(ThreeVector(0., 0., 0.), ThreeVector(0., 0., 0.));
 
   if (use_skyrme_) {
-    const auto density_and_gradient =
-        rho_eckart(r, plist, param_, DensityType::Baryon, compute_gradient);
+    const auto density_and_gradient = current_eckart(
+        r, plist, param_, DensityType::Baryon, compute_gradient, smearing);
     const double rho = std::get<0>(density_and_gradient);
-    const ThreeVector grad_rho = std::get<1>(density_and_gradient);
-    const ThreeVector dj_dt = std::get<2>(density_and_gradient);
-    const ThreeVector rot_j = std::get<3>(density_and_gradient);
+    const ThreeVector grad_rho = std::get<2>(density_and_gradient);
+    const ThreeVector dj_dt = std::get<3>(density_and_gradient);
+    const ThreeVector rot_j = std::get<4>(density_and_gradient);
     F_skyrme = skyrme_force(rho, grad_rho, dj_dt, rot_j);
   }
 
   if (use_symmetry_) {
-    const auto density_and_gradient = rho_eckart(
-        r, plist, param_, DensityType::BaryonicIsospin, compute_gradient);
-    const ThreeVector grad_rho = std::get<1>(density_and_gradient);
-    const ThreeVector dj_dt = std::get<2>(density_and_gradient);
-    const ThreeVector rot_j = std::get<3>(density_and_gradient);
+    const auto density_and_gradient =
+        current_eckart(r, plist, param_, DensityType::BaryonicIsospin,
+                       compute_gradient, smearing);
+    const ThreeVector grad_rho = std::get<2>(density_and_gradient);
+    const ThreeVector dj_dt = std::get<3>(density_and_gradient);
+    const ThreeVector rot_j = std::get<4>(density_and_gradient);
     F_symmetry = symmetry_force(grad_rho, dj_dt, rot_j);
   }
 

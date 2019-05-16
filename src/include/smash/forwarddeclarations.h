@@ -185,6 +185,7 @@ enum class ThermodynamicQuantity : char {
   Tmn,
   TmnLandau,
   LandauVelocity,
+  j_QBS
 };
 
 /// The different groups of 2 to 2 reactions that one can include

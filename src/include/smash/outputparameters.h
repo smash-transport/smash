@@ -30,6 +30,7 @@ struct OutputParameters {
         td_tmn(false),
         td_tmn_landau(false),
         td_v_landau(false),
+        td_jQBS(false),
         td_smearing(true),
         part_extended(false),
         part_only_final(true),
@@ -54,6 +55,7 @@ struct OutputParameters {
       td_tmn = (quan.count(ThermodynamicQuantity::Tmn) > 0);
       td_tmn_landau = (quan.count(ThermodynamicQuantity::TmnLandau) > 0);
       td_v_landau = (quan.count(ThermodynamicQuantity::LandauVelocity) > 0);
+      td_jQBS = (quan.count(ThermodynamicQuantity::j_QBS) > 0);
       td_dens_type = subcon.take({"Type"}, DensityType::Baryon);
       if (td_dens_type == DensityType::None &&
           (td_rho_eckart || td_tmn || td_tmn_landau || td_v_landau)) {
@@ -119,6 +121,9 @@ struct OutputParameters {
 
   /// Print out Landau velocity of type td_dens_type or not?
   bool td_v_landau;
+
+  /// Print out QBS 4-currents or not?
+  bool td_jQBS;
 
   /**
    * Whether smearing is on or off; WARNING : if smearing is off,

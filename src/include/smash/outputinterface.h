@@ -154,6 +154,8 @@ class OutputInterface {
         return "tmn_landau";
       case ThermodynamicQuantity::LandauVelocity:
         return "v_landau";
+      case ThermodynamicQuantity::j_QBS:
+        return "j_QBS";
     }
     throw std::invalid_argument("Unknown thermodynamic quantity.");
   }
@@ -175,6 +177,10 @@ class OutputInterface {
         return "pion";
       case DensityType::Isospin3_tot:
         return "tot_isospin3";
+      case DensityType::Charge:
+        return "charge";
+      case DensityType::Strangeness:
+        return "strangeness";
       case DensityType::None:
         return "none";
     }
