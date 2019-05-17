@@ -272,19 +272,19 @@ void Grid<GridOptions::Normal>::iterate_cells(
         const ParticleList &search = cells_[search_cell_index];
         search_cell_callback(search);
 
-        const auto& dz_list = z == number_of_cells_[2] - 1 ? ZERO : ZERO_ONE;
-        const auto& dy_list = number_of_cells_[1] == 1
-                                 ? ZERO
-                                 : y == 0 ? ZERO_ONE
-                                          : y == number_of_cells_[1] - 1
-                                                ? MINUS_ONE_ZERO
-                                                : MINUS_ONE_ZERO_ONE;
-        const auto& dx_list = number_of_cells_[0] == 1
-                                 ? ZERO
-                                 : x == 0 ? ZERO_ONE
-                                          : x == number_of_cells_[0] - 1
-                                                ? MINUS_ONE_ZERO
-                                                : MINUS_ONE_ZERO_ONE;
+        const auto &dz_list = z == number_of_cells_[2] - 1 ? ZERO : ZERO_ONE;
+        const auto &dy_list = number_of_cells_[1] == 1
+                                  ? ZERO
+                                  : y == 0 ? ZERO_ONE
+                                           : y == number_of_cells_[1] - 1
+                                                 ? MINUS_ONE_ZERO
+                                                 : MINUS_ONE_ZERO_ONE;
+        const auto &dx_list = number_of_cells_[0] == 1
+                                  ? ZERO
+                                  : x == 0 ? ZERO_ONE
+                                           : x == number_of_cells_[0] - 1
+                                                 ? MINUS_ONE_ZERO
+                                                 : MINUS_ONE_ZERO_ONE;
         for (SizeType dz : dz_list) {
           for (SizeType dy : dy_list) {
             for (SizeType dx : dx_list) {
