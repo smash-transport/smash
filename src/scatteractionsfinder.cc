@@ -328,6 +328,8 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData& data_a,
             "\n<-> ", data_b);
 #endif
 
+  // Using std::move here is redundant with newer compilers, but required for
+  // supporting GCC 4.8. Once we drop this support, std::move should be removed.
   return std::move(act);
 }
 

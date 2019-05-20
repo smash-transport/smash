@@ -247,6 +247,12 @@ inline typename Grid<Options>::SizeType Grid<Options>::make_index(
   return (z * number_of_cells_[1] + y) * number_of_cells_[0] + x;
 }
 
+static const std::initializer_list<GridBase::SizeType> ZERO{0};
+static const std::initializer_list<GridBase::SizeType> ZERO_ONE{0, 1};
+static const std::initializer_list<GridBase::SizeType> MINUS_ONE_ZERO{-1, 0};
+static const std::initializer_list<GridBase::SizeType> MINUS_ONE_ZERO_ONE{-1, 0,
+                                                                          1};
+
 template <>
 /// Specialization of iterate_cells
 void Grid<GridOptions::Normal>::iterate_cells(
@@ -267,23 +273,19 @@ void Grid<GridOptions::Normal>::iterate_cells(
         const ParticleList &search = cells_[search_cell_index];
         search_cell_callback(search);
 
-        const auto dz_list = z == number_of_cells_[2] - 1
-                                 ? std::initializer_list<SizeType>{0}
-                                 : std::initializer_list<SizeType>{0, 1};
-        const auto dy_list =
-            number_of_cells_[1] == 1
-                ? std::initializer_list<SizeType>{0}
-                : y == 0 ? std::initializer_list<SizeType>{0, 1}
-                         : y == number_of_cells_[1] - 1
-                               ? std::initializer_list<SizeType>{-1, 0}
-                               : std::initializer_list<SizeType>{-1, 0, 1};
-        const auto dx_list =
-            number_of_cells_[0] == 1
-                ? std::initializer_list<SizeType>{0}
-                : x == 0 ? std::initializer_list<SizeType>{0, 1}
-                         : x == number_of_cells_[0] - 1
-                               ? std::initializer_list<SizeType>{-1, 0}
-                               : std::initializer_list<SizeType>{-1, 0, 1};
+        const auto &dz_list = z == number_of_cells_[2] - 1 ? ZERO : ZERO_ONE;
+        const auto &dy_list = number_of_cells_[1] == 1
+                                  ? ZERO
+                                  : y == 0 ? ZERO_ONE
+                                           : y == number_of_cells_[1] - 1
+                                                 ? MINUS_ONE_ZERO
+                                                 : MINUS_ONE_ZERO_ONE;
+        const auto &dx_list = number_of_cells_[0] == 1
+                                  ? ZERO
+                                  : x == 0 ? ZERO_ONE
+                                           : x == number_of_cells_[0] - 1
+                                                 ? MINUS_ONE_ZERO
+                                                 : MINUS_ONE_ZERO_ONE;
         for (SizeType dz : dz_list) {
           for (SizeType dy : dy_list) {
             for (SizeType dx : dx_list) {
