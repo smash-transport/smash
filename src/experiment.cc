@@ -210,7 +210,7 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *   The contribution to the energy-momentum tensor and current (be it electric,
  *   baryonic or strange) from a single particle in its rest frame is:
  *   \f[\begin{eqnarray} j^{\mu} = B \frac{p_0^{\mu}}{p_0^0} W \\
- *   T^{\mu \nu} = \frac{p_0^{\mu}p_0^{\nu}}{p_0^0} W \f]
+ *   T^{\mu \nu} = \frac{p_0^{\mu}p_0^{\nu}}{p_0^0} W \end{eqnarray}\f]
  *   with B being the charge of interest and W being the weight given to this
  *   particle. Normally, if one computes thermodynamic quantities at a point,
  *   smearing should be applied, and then W takes on the following shape:
