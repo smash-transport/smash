@@ -247,10 +247,10 @@ inline typename Grid<Options>::SizeType Grid<Options>::make_index(
   return (z * number_of_cells_[1] + y) * number_of_cells_[0] + x;
 }
 
-static const std::initializer_list<int> ZERO{0};
-static const std::initializer_list<int> ZERO_ONE{0, 1};
-static const std::initializer_list<int> MINUS_ONE_ZERO{-1, 0};
-static const std::initializer_list<int> MINUS_ONE_ZERO_ONE{-1, 0, 1};
+static const std::initializer_list<GridBase::SizeType> ZERO{0};
+static const std::initializer_list<GridBase::SizeType> ZERO_ONE{0, 1};
+static const std::initializer_list<GridBase::SizeType> MINUS_ONE_ZERO{-1, 0};
+static const std::initializer_list<GridBase::SizeType> MINUS_ONE_ZERO_ONE{-1, 0, 1};
 
 template <>
 /// Specialization of iterate_cells
