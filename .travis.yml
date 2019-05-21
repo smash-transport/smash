@@ -19,7 +19,7 @@ matrix:
           - g++-4.8
     env:
       - MATRIX_EVAL="CC=gcc-4.8 && CXX=g++-4.8"
-  # new gcc version
+  # most recent gcc version
   - os: linux
     addons:
       apt:
@@ -27,16 +27,16 @@ matrix:
           - ubuntu-toolchain-r-test
         packages:
           - libboost-all-dev
-          - g++-7
+          - g++-8
     env:
-      - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+      - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
   # clang on linux
   - os: linux
     addons:
       apt:
         sources:
           - ubuntu-toolchain-r-test
-          - llvm-toolchain-precise-3.6
+          - llvm-toolchain-trusty-3.6
         packages:
           - libboost-all-dev
           - clang-3.6
