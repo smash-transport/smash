@@ -763,7 +763,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
         config["Collision_Term"]["Pauli_Blocking"], parameters_);
   }
   ParticleData::formation_power_ =
-      config.take({"Collision_Term", "Power_Particle_Formation"}, 2.);
+      config.take({"Collision_Term", "Power_Particle_Formation"}, 1.);
 
   /*!\Userguide
    * \page input_general_
