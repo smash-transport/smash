@@ -26,6 +26,10 @@ double density_factor(const ParticleType &type, DensityType dens_type) {
       return type.pdgcode().is_pion() ? 1. : 0.;
     case DensityType::Isospin3_tot:
       return type.is_hadron() ? type.isospin3() : 0.;
+    case DensityType::Charge:
+      return static_cast<double>(type.charge());
+    case DensityType::Strangeness:
+      return static_cast<double>(type.strangeness());
     default:
       return 0.;
   }
@@ -57,11 +61,12 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
   return std::make_pair(sf, sf_grad);
 }
 
-/// \copydoc smash::rho_eckart
+/// \copydoc smash::current_eckart
 template <typename /*ParticlesContainer*/ T>
-std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart_impl(
-    const ThreeVector &r, const T &plist, const DensityParameters &par,
-    DensityType dens_type, bool compute_gradient) {
+std::tuple<double, FourVector, ThreeVector, ThreeVector, ThreeVector>
+current_eckart_impl(const ThreeVector &r, const T &plist,
+                    const DensityParameters &par, DensityType dens_type,
+                    bool compute_gradient, bool smearing) {
   /* The current density of the positively and negatively charged particles.
    * Division into positive and negative charges is necessary to avoid
    * problems with the Eckart frame definition. Example of problem:
@@ -79,7 +84,7 @@ std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart_impl(
 
   for (const auto &p : plist) {
     const double dens_factor = density_factor(p.type(), dens_type);
-    if (std::abs(dens_factor) < really_small) {
+    if (std::fabs(dens_factor) < really_small) {
       continue;
     }
     const FourVector mom = p.momentum();
@@ -90,14 +95,22 @@ std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart_impl(
     const double m_inv = 1.0 / m;
     const auto sf_and_grad = unnormalized_smearing_factor(
         p.position().threevec() - r, mom, m_inv, par, compute_gradient);
-    if (sf_and_grad.first < really_small) {
+    if (smearing && sf_and_grad.first < really_small) {
       continue;
     }
     const FourVector tmp = mom * (dens_factor / mom.x0());
-    if (dens_factor > 0.) {
-      jmu_pos += tmp * sf_and_grad.first;
+    if (smearing) {
+      if (dens_factor > 0.) {
+        jmu_pos += tmp * sf_and_grad.first;
+      } else {
+        jmu_neg += tmp * sf_and_grad.first;
+      }
     } else {
-      jmu_neg += tmp * sf_and_grad.first;
+      if (dens_factor > 0.) {
+        jmu_pos += tmp;
+      } else {
+        jmu_neg += tmp;
+      }
     }
     if (compute_gradient) {
       for (int k = 1; k <= 3; k++) {
@@ -129,19 +142,22 @@ std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart_impl(
       rho_grad[i - 1] += djmu_dx[i].x0() * par.norm_factor_sf();
     }
   }
-  return std::make_tuple(rho_eck, rho_grad, dj_dt, j_rot);
+  return std::make_tuple(rho_eck, jmu_pos + jmu_neg, rho_grad, dj_dt, j_rot);
 }
 
-std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart(
-    const ThreeVector &r, const ParticleList &plist,
-    const DensityParameters &par, DensityType dens_type,
-    bool compute_gradient) {
-  return rho_eckart_impl(r, plist, par, dens_type, compute_gradient);
+std::tuple<double, FourVector, ThreeVector, ThreeVector, ThreeVector>
+current_eckart(const ThreeVector &r, const ParticleList &plist,
+               const DensityParameters &par, DensityType dens_type,
+               bool compute_gradient, bool smearing) {
+  return current_eckart_impl(r, plist, par, dens_type, compute_gradient,
+                             smearing);
 }
-std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart(
-    const ThreeVector &r, const Particles &plist, const DensityParameters &par,
-    DensityType dens_type, bool compute_gradient) {
-  return rho_eckart_impl(r, plist, par, dens_type, compute_gradient);
+std::tuple<double, FourVector, ThreeVector, ThreeVector, ThreeVector>
+current_eckart(const ThreeVector &r, const Particles &plist,
+               const DensityParameters &par, DensityType dens_type,
+               bool compute_gradient, bool smearing) {
+  return current_eckart_impl(r, plist, par, dens_type, compute_gradient,
+                             smearing);
 }
 
 std::ostream &operator<<(std::ostream &os, DensityType dens_type) {

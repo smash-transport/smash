@@ -203,14 +203,25 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *   \key Smearing (bool, optional, default = true): \n
  *   Using Gaussian smearing for computing thermodynamic quantities or not.
  *   This triggers whether thermodynamic quantities are evaluated at a fixed
- *   point (\key true) or averaged over all particles (\key false).
+ *   point (\key true) or summed over all particles (\key false).
  *   \li \key true - smearing applied
  *   \li \key false - smearing not applied
  *
- *   Normally, if one computes thermodynamic quantities at a fixed point,
- *   smearing should be applied. It can however be useful to compute the energy-
- *   energy-momentum tensor of all particles in a box with weights = 1, which
- *   would correspond to \key "Smearing: false".
+ *   The contribution to the energy-momentum tensor and current (be it electric,
+ *   baryonic or strange) from a single particle in its rest frame is:
+ *   \f[\begin{eqnarray} j^{\mu} = B \frac{p_0^{\mu}}{p_0^0} W \\
+ *   T^{\mu \nu} = \frac{p_0^{\mu}p_0^{\nu}}{p_0^0} W \end{eqnarray}\f]
+ *   with B being the charge of interest and W being the weight given to this
+ *   particle. Normally, if one computes thermodynamic quantities at a point,
+ *   smearing should be applied, and then W takes on the following shape:
+ *   \f[W = (2 \pi \sigma^2)^{-3/2} exp \left(- \frac{(\mathbf{r}
+ *   - \mathbf{r_0(t)})^2}{2\sigma^2} \right)\f]
+ *   It can however be useful to compute the thermo-
+ *   dynamic quantities of all particles in a box with W = 1, which
+ *   would correspond to \key "Smearing: false". Note that using this option
+ *   changes the units of the thermodynamic quantities, as they are no longer
+ *   spatially normalized. One should divide this quantity by
+ *   by the volume of the box to restore units to the correct ones.
  *
  * \n
  * \page configuring_output_ Output Configuration

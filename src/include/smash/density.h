@@ -38,6 +38,8 @@ enum class DensityType {
   BaryonicIsospin = 3,
   Pion = 4,
   Isospin3_tot = 5,
+  Charge = 6,
+  Strangeness = 7,
 };
 
 /**
@@ -175,9 +177,10 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
     const DensityParameters &dens_par, const bool compute_gradient = false);
 
 /**
- * Calculates Eckart rest frame density and optionally the gradient of the
- * density in an arbitary frame, the curl of the 3-currrent and the time
- * derivative of the 3-current.
+ * Calculates Eckart rest frame density and 4-current
+ * of a given density type and optionally
+ * the gradient of the density in an arbitary frame, the curl of the 3-current
+ * and the time derivative of the 3-current.
  * \f[j^{\mu} = (\sqrt{2\pi} \sigma )^{-3} \sum_{i=1}^N C_i u^{\mu}_i
  * exp \left(- \frac{(\vec r -\vec r_i + \frac{\gamma_i^2}{1 + \gamma_i}
  * \vec \beta_i (\vec \beta_i, \vec r - \vec r_i))^2}{2\sigma^2} \right)\f]
@@ -189,15 +192,17 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
  *
  * To avoid the problems with Eckart frame definition, densities for
  * positive and negative charges, \f$\rho_+ \f$ and \f$ \rho_-\f$,
- * are computed separately and result is \f$\rho_+ - \rho_-\f$.
+ * are computed separately and final density is \f$\rho_+ - \rho_-\f$.
  *
- * \param[in] r Arbitrary space point where 4-current is calculated [fm]
+ * \param[in] r Arbitrary space point where 4-current is calculated [fm];
+              ignored if smearing is false
  * \param[in] plist List of all particles to be used in \f$j^{\mu}\f$
- *            calculation. If the distance between particle and calculation
- *            point r, \f$ |r-r_i| > r_{cut} \f$ then particle input
+ *            calculation. If smearing is false or if the distance
+ *            between particle and calculation point r,
+ *            \f$ |r-r_i| > r_{cut} \f$ then particle input
  *            to density will be ignored.
  *
- * Next three values are taken from ExperimentalParameters structure:
+ * Next four values are taken from ExperimentalParameters structure:
  *
  * \param[in] par Set of parameters packed in one structure.
  *            From them the cutting radius r_cut \f$ r_{cut} / \sigma \f$,
@@ -206,18 +211,26 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
  * \param[in] dens_type type of four-currect to be calculated:
  *            baryon, proton or neutron options are currently available
  * \param[in] compute_gradient true - compute gradient, false - no
+ * \param[in] smearing whether to use gaussian smearing or not. If false,
+ *            this parameter will use ALL particles equally to calculate the
+ *            current, and that as such it will not be normalized wrt volume.
+ *            This should be true for any internal calculation of any quantity
+ *            and only makes sense to turn off for output purposes in a box.
  * \return (density in the local Eckart frame [fm\$f^{-3}\$f],
+ *          \f$ j_mu \f$ as a 4-vector,
  *          \f$ \nabla\cdots\rho \f$ or a 0 3-vector,
  *          \f$ \partial_t \vec j\f$ or a 0 3-vector,
  *          \f$ \nabla \times \vec j \f$ or a 0 3-vector).
  */
-std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart(
-    const ThreeVector &r, const ParticleList &plist,
-    const DensityParameters &par, DensityType dens_type, bool compute_gradient);
+std::tuple<double, FourVector, ThreeVector, ThreeVector, ThreeVector>
+current_eckart(const ThreeVector &r, const ParticleList &plist,
+               const DensityParameters &par, DensityType dens_type,
+               bool compute_gradient, bool smearing);
 /// convenience overload of the above (ParticleList -> Particles)
-std::tuple<double, ThreeVector, ThreeVector, ThreeVector> rho_eckart(
-    const ThreeVector &r, const Particles &plist, const DensityParameters &par,
-    DensityType dens_type, bool compute_gradient);
+std::tuple<double, FourVector, ThreeVector, ThreeVector, ThreeVector>
+current_eckart(const ThreeVector &r, const Particles &plist,
+               const DensityParameters &par, DensityType dens_type,
+               bool compute_gradient, bool smearing);
 
 /**
  * A class for time-efficient (time-memory trade-off) calculation of density

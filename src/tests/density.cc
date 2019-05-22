@@ -103,15 +103,15 @@ TEST(density_value) {
   const double f =
       1.0 / smearing_factor_rcut_correction(exp_par.gauss_cutoff_in_sigma);
   r = ThreeVector(1.0, 0.0, 0.0);
-  rho = std::get<0>(rho_eckart(r, P, par, bar_dens, false));
+  rho = std::get<0>(current_eckart(r, P, par, bar_dens, false, true));
   COMPARE_RELATIVE_ERROR(rho, 0.0003763388107782538 * f, 1.e-5);
 
   r = ThreeVector(0.0, 1.0, 0.0);
-  rho = std::get<0>(rho_eckart(r, P, par, bar_dens, false));
+  rho = std::get<0>(current_eckart(r, P, par, bar_dens, false, true));
   COMPARE_RELATIVE_ERROR(rho, 0.03851083689074894 * f, 1.e-5);
 
   r = ThreeVector(0.0, 0.0, 1.0);
-  rho = std::get<0>(rho_eckart(r, P, par, bar_dens, false));
+  rho = std::get<0>(current_eckart(r, P, par, bar_dens, false, true));
   COMPARE_RELATIVE_ERROR(rho, 0.03851083689074894 * f, 1.e-5);
 }
 
@@ -133,12 +133,14 @@ TEST(density_eckart_special_cases) {
   const DensityParameters par(exp_par);
   const double f =
       1.0 / smearing_factor_rcut_correction(exp_par.gauss_cutoff_in_sigma);
-  double rho = std::get<0>(rho_eckart(r, P, par, DensityType::Baryon, false));
+  double rho =
+      std::get<0>(current_eckart(r, P, par, DensityType::Baryon, false, true));
   COMPARE_ABSOLUTE_ERROR(rho, 0.0, 1.e-15) << rho;
 
   /* Now check for negative baryon density from antiproton */
   P.erase(P.begin());  // Remove proton
-  rho = std::get<0>(rho_eckart(r, P, par, DensityType::Baryon, false));
+  rho =
+      std::get<0>(current_eckart(r, P, par, DensityType::Baryon, false, true));
   COMPARE_RELATIVE_ERROR(rho, -0.0003763388107782538 * f, 1.e-5) << rho;
 }
 
@@ -206,20 +208,21 @@ TEST(density_gradient) {
 
   ThreeVector num_grad, analit_grad;
   r = ThreeVector(0.5, 0.3, 0.0);
-  auto rho_and_grad = rho_eckart(r, P, par, dtype, true);
+  auto rho_and_grad = current_eckart(r, P, par, dtype, true, true);
   double rho_r = std::get<0>(rho_and_grad);
 
   // analytical gradient
-  analit_grad = std::get<1>(rho_and_grad);
+  analit_grad = std::get<2>(rho_and_grad);
   // numerical gradient
   dr = ThreeVector(1.e-4, 0.0, 0.0);
-  double rho_rdr = std::get<0>(rho_eckart(r + dr, P, par, dtype, false));
+  double rho_rdr =
+      std::get<0>(current_eckart(r + dr, P, par, dtype, false, true));
   num_grad.set_x1((rho_rdr - rho_r) / dr.x1());
   dr = ThreeVector(0.0, 1.e-4, 0.0);
-  rho_rdr = std::get<0>(rho_eckart(r + dr, P, par, dtype, false));
+  rho_rdr = std::get<0>(current_eckart(r + dr, P, par, dtype, false, true));
   num_grad.set_x2((rho_rdr - rho_r) / dr.x2());
   dr = ThreeVector(0.0, 0.0, 1.e-4);
-  rho_rdr = std::get<0>(rho_eckart(r + dr, P, par, dtype, false));
+  rho_rdr = std::get<0>(current_eckart(r + dr, P, par, dtype, false, true));
   num_grad.set_x3((rho_rdr - rho_r) / dr.x3());
   // compare them with: accuracy should not be worse than |dr|
   COMPARE_ABSOLUTE_ERROR(num_grad.x1(), analit_grad.x1(), 1.e-4);
@@ -254,17 +257,18 @@ TEST(density_gradient_in_linear_box) {
   const double z0 = random::uniform(-0.4, 0.4);
   const ThreeVector r0 = ThreeVector(x0, y0, z0);
   // calculate the gradients
-  const auto rho_and_grad = rho_eckart(r0, P, par, dtype, true);
-  const auto drho_dr = std::get<1>(rho_and_grad);
+  const auto rho_and_grad = current_eckart(r0, P, par, dtype, true, true);
+  const auto drho_dr = std::get<2>(rho_and_grad);
   /* Theoretically, the gradient should be (0., 0., DU/Dz) at any
    * point inside the box, where DU/Dz can be caluclated by taking
    * the difference between the potentials evaluated at (0., 0., -0.4)
    * and (0., 0., 0.4). Compare the z-component of the gradient with the
    * theoretical value. */
   const double theo_drho_dz =
-      (std::get<0>(rho_eckart(ThreeVector(0., 0., 0.4), P, par, dtype, false)) -
-       std::get<0>(
-           rho_eckart(ThreeVector(0., 0., -0.4), P, par, dtype, false))) /
+      (std::get<0>(current_eckart(ThreeVector(0., 0., 0.4), P, par, dtype,
+                                  false, true)) -
+       std::get<0>(current_eckart(ThreeVector(0., 0., -0.4), P, par, dtype,
+                                  false, true))) /
       0.8;
   COMPARE_RELATIVE_ERROR(drho_dr.x3(), theo_drho_dz, 0.01);
   /* Meanwhile, the gradient should be along z-axis, which means its
@@ -307,8 +311,8 @@ TEST(current_curl_in_rotating_box) {
   const double z0 = random::uniform(-0.4, 0.4);
   const ThreeVector r0 = ThreeVector(x0, y0, z0);
   // calculate the curl
-  const auto rho_and_grad = rho_eckart(r0, P, par, dtype, true);
-  const auto rot_j = std::get<3>(rho_and_grad);
+  const auto rho_and_grad = current_eckart(r0, P, par, dtype, true, true);
+  const auto rot_j = std::get<4>(rho_and_grad);
   /* Theoretically, the curl should be (0., 0., 2. * density * omega) at any
    * point inside the box, Compare the z-component of the curl with the
    * theoretical value. */

@@ -1312,9 +1312,10 @@ bool Experiment<Modus>::perform_action(
   if (dens_type_ != DensityType::None) {
     const FourVector r_interaction = action.get_interaction_point();
     constexpr bool compute_grad = false;
-    rho = std::get<0>(rho_eckart(r_interaction.threevec(),
-                                 particles_before_actions, density_param_,
-                                 dens_type_, compute_grad));
+    const bool smearing = true;
+    rho = std::get<0>(current_eckart(r_interaction.threevec(),
+                                     particles_before_actions, density_param_,
+                                     dens_type_, compute_grad, smearing));
   }
   /*!\Userguide
    * \page collisions_output_in_box_modus_ Collision Output in Box Modus

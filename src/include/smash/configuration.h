@@ -526,11 +526,13 @@ class Configuration {
           s.insert(ThermodynamicQuantity::TmnLandau);
         } else if (x == "landau_velocity") {
           s.insert(ThermodynamicQuantity::LandauVelocity);
+        } else if (x == "j_QBS") {
+          s.insert(ThermodynamicQuantity::j_QBS);
         } else {
           throw IncorrectTypeInAssignment(
               "The value for key \"" + std::string(key_) +
               "\" should be \"rho_eckart\", \"tmn\""
-              ", \"tmn_landau\" or \"landau_velocity\".");
+              ", \"tmn_landau\", \"landau_velocity\" or \"j_QBS\".");
         }
       }
       return s;
