@@ -90,6 +90,12 @@ To run it with specific settings:
     ./smash
 
 
+### Troubleshooting
+
+If compilation fails (especially after changing a library), using a fresh build
+folder can sometimes fix the problem.
+
+
 ### Size of the Code
 
 Please note that after compilation the `smash` directory (including `build`)
