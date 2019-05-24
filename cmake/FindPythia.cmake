@@ -47,6 +47,25 @@ FIND_LIBRARY( Pythia_LIBRARY
   PATHS ${Pythia_LIBDIR}
   PATH_SUFFIXES PYTHIA pythia Pythia PYTHIA8 Pythia8 pythia8  # suggest some path suffixes in which the headers could be located
 )
+
+# Check that the actual found library is in the same directory as the config executable
+# first get directory from the lib-path 
+get_filename_component(Pythia_actual_dir ${Pythia_LIBRARY} DIRECTORY)
+
+# strip lib-component from actual found directory path
+string(FIND ${Pythia_actual_dir} "lib" Pythia_actual_dir_lib_pos REVERSE)
+
+string(SUBSTRING ${Pythia_actual_dir} 0 ${Pythia_actual_dir_lib_pos} Pythia_actual_lib_abs_path)
+
+# Now the same for the used config
+get_filename_component(Pythia_CONFIG_DIR ${Pythia_CONFIG_EXECUTABLE} DIRECTORY)
+string(FIND ${Pythia_CONFIG_DIR} "bin" Pythia_CONFIG_DIR_bin_pos REVERSE)
+string(SUBSTRING ${Pythia_CONFIG_DIR} 0 ${Pythia_CONFIG_DIR_bin_pos} Pythia_CONFIG_DIR_abs_path)
+
+if(NOT (${Pythia_CONFIG_DIR_abs_path} STREQUAL ${Pythia_actual_lib_abs_path}))
+  MESSAGE(WARNING "Path to Pythia library and config do not match. Consider cleaning your build-folder and run CMAKE again.")
+endif()
+
 # FIND_LIBRARY( Pythia_LHAPDFDummy_LIBRARY
 #   NAMES lhapdfdummy
 #   PATHS ${Pythia_LIBDIR}
