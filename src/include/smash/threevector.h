@@ -91,7 +91,7 @@ class ThreeVector {
   void inline rotate_around_z(double theta);
   /**
    * Rotate the z-axis onto the vector r.
-   * \param[in] r direction in which new new z-axis is aligned
+   * \param[in] r direction in which new z-axis is aligned
    */
   void inline rotate_z_axis_to(ThreeVector &r);
   /// negation: Returns \f$-\vec x\f$
