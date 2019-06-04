@@ -9,6 +9,11 @@ https://github.com/smash-transport/smash/issues or contact us by email at elfner
 Note that any contributions must be licensed under the same terms as SMASH, see
 [LICENSE](LICENSE).
 
+As an external contributor, go to https://github.com/smash-transport/smash, fork
+the repository, work on a topic branch and then create a pull request. Details
+on this workflow can be found e.g.
+[here](https://git-scm.com/book/en/v2/GitHub-Contributing-to-a-Project).
+
 ## Testing
 
 ### Running Tests
