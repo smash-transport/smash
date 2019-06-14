@@ -67,14 +67,22 @@ double isospin_clebsch_gordan_sqr_3to1(const ParticleType &p_a,
       allowed_I_ab.push_back(Iab);
     }
   }
-  if (allowed_I_ab.size() != 1) {
-    throw std::runtime_error(
-        "The coupled 3-body isospin state is not uniquely defined for " +
-        Res.name() + " -> " + p_a.name() + " " + p_b.name() + " " + p_c.name());
-  }
-  const auto I_ab = allowed_I_ab[0];
 
   const int I_abz = p_a.isospin3() + p_b.isospin3();
+
+  /* Following check needs to be commented out, since implementation does not
+   * work for N* Xi decays. It was tested that using any allowed I_ab is
+   * equal. So just use first entry (1S approximation). */
+
+  // if (allowed_I_ab.size() != 1) {
+  //   throw std::runtime_error(
+  //       "The coupled 3-body isospin state is not uniquely defined for " +
+  //       Res.name() + " -> " + p_a.name() + " " + p_b.name() + " " + p_c.name());
+  // }
+
+  const auto I_ab = allowed_I_ab[0];
+
+
   const double cg = clebsch_gordan(I_ab, p_c.isospin(), Res.isospin(), I_abz,
                                    p_c.isospin3(), Res.isospin3()) *
                     clebsch_gordan(p_a.isospin(), p_b.isospin(), I_ab,

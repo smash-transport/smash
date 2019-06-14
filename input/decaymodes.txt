@@ -549,7 +549,7 @@ N(2190)
 0.001  3  N f₀(980)  # tuned for pp -> ppKK
 # Similar to UrQMD
 
-N(2220)
+N(2350)
 0.15   5  N π  # 15 - 30 %
 0.22   3  N ρ
 0.17   4  N σ
@@ -558,10 +558,11 @@ N(2220)
 #0.000  5  Λ K  # tuned for Nπ->ΛK
 # TODO: consider adding hyperon channels
 0.010  3  N φ  # tuned for p Nb dileptons and pp -> ppKK
+0.50   4  Ξ K K # tuned for ...?
 0.001  4  N f₀(980)  # tuned for pp -> ppKK
 # From UrQMD, confirmed by PDG
 
-N(2250)
+N(2400)
 0.05   4  N π  # 0.05 - 0.15
 0.25   4  N ρ
 0.20   5  N σ
@@ -571,6 +572,7 @@ N(2250)
 0.002  4  Λ K  # tuned for Nπ->ΛK
 0.003  4  Λ K*(892)  # for slower kaons and Lambdas
 0.010  4  N φ  # tuned for p Nb dileptons and pp -> ppKK
+0.50   5  Ξ K K # tuned for ...?
 0.001  5  N f₀(980)  # tuned for pp -> ppKK
 # From UrQMD, confirmed by PDG
 
