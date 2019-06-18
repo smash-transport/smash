@@ -97,10 +97,10 @@ DeformedNucleus::DeformedNucleus(const std::map<PdgCode, int> &particle_list,
                                  int nTest)
     : Nucleus(particle_list, nTest) {}
 
-DeformedNucleus::DeformedNucleus(Configuration &config, int nTest)
+DeformedNucleus::DeformedNucleus(Configuration &config, int nTest,
+                                 bool auto_deformation)
     : Nucleus(config, nTest) {
-  if (config.has_value({"Deformed", "Automatic"}) &&
-      config.take({"Deformed", "Automatic"})) {
+  if (auto_deformation) {
     set_deformation_parameters_automatic();
   } else {
     set_deformation_parameters_from_config(config);
