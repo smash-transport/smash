@@ -446,7 +446,7 @@ std::unique_ptr<DeformedNucleus> ColliderModus::create_deformed_nucleus(
 
   if ((auto_deform && (!is_beta2 && !is_beta4)) ||
       (!auto_deform && (is_beta2 && is_beta4))) {
-    nucleus = make_unique<DeformedNucleus>(nucleus_cfg, ntest);
+    nucleus = make_unique<DeformedNucleus>(nucleus_cfg, ntest, auto_deform);
     return nucleus;
   } else {
     throw std::domain_error("Deformation of " + nucleus_type +

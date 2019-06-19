@@ -39,8 +39,10 @@ class DeformedNucleus : public Nucleus {
    * \param[in] config contains the parameters from the inputfile on the
    * numbers of particles with a certain PDG code
    * \param[in] nTest number of testparticles
+   * \param[in] auto_deformation whether or not deformation parameters
+   * should be set automatically
    */
-  DeformedNucleus(Configuration &config, int nTest);
+  DeformedNucleus(Configuration &config, int nTest, bool auto_deformation);
 
   /**
    * Return the deformed Woods-Saxon probability for the given position.
