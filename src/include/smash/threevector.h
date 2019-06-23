@@ -80,6 +80,19 @@ class ThreeVector {
    */
   void inline rotate(double phi, double theta, double psi);
   /**
+   * Rotation inverse to rotate using the same rotation matrix
+   * The Rotation by the Euler Angles is inverted correctly if one starts
+   * undoing the rotations one by one. So the third rotation about the z axis
+   * must be reversed first by rotating by the negative value of the angle psi
+   * before doing that with theta and finally with phi.
+   * \param[in] phi angle by which the first rotation was done about z axis.
+   * \param[in] theta angle by which the second rotation was done
+   *        about the rotated x axis.
+   * \param[in] psi angle by which the third rotation was done
+   *        about the rotated z axis.
+   */
+  void inline inverserotate(double phi, double theta, double psi);
+  /**
    * Rotate the vector around the y axis by the given angle theta.
    * \param[in] theta angle by which the rotation is done about y axis.
    */
@@ -282,6 +295,10 @@ void inline ThreeVector::rotate(double phi, double theta, double psi) {
           sin_theta * cos_psi * x_old[2];
   x_[2] = sin_phi * sin_theta * x_old[0] - cos_phi * sin_theta * x_old[1] +
           cos_theta * x_old[2];
+}
+
+void inline ThreeVector::inverserotate(double phi, double theta, double psi) {
+  rotate(-psi, -theta, -phi);
 }
 
 void inline ThreeVector::rotate_around_y(double theta) {

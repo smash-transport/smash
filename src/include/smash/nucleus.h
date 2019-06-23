@@ -76,7 +76,7 @@ class Nucleus {
   double woods_saxon(double x);
 
   /// Sets the positions of the nucleons inside a nucleus.
-  void arrange_nucleons();
+  virtual void arrange_nucleons();
 
   /**
    * Sets the deformation parameters of the Woods-Saxon distribution

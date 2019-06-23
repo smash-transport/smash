@@ -259,24 +259,28 @@ namespace smash {
 ColliderModus::ColliderModus(Configuration modus_config,
                              const ExperimentParameters &params) {
   Configuration modus_cfg = modus_config["Collider"];
-
   // Get the reference frame for the collision calculation.
   if (modus_cfg.has_value({"Calculation_Frame"})) {
-    frame_ = modus_cfg.take({"Calculation_Frame"});
+    frame_ = modus_cfg.read({"Calculation_Frame"});
   }
 
-  /// Determine whether to allow the first collisions within the same nucleus
+  // Determine whether to allow the first collisions within the same nucleus
   if (modus_cfg.has_value({"Collisions_Within_Nucleus"})) {
     cll_in_nucleus_ = modus_cfg.take({"Collisions_Within_Nucleus"});
   }
-
-  // Set up the projectile nucleus
   Configuration proj_cfg = modus_cfg["Projectile"];
+  Configuration targ_cfg = modus_cfg["Target"];
+  /* Needed to check if projectile and target in customnucleus are read from
+   * the same input file.*/
+  bool same_file = false;
+  // Set up the projectile nucleus
   if (proj_cfg.has_value({"Deformed"})) {
     projectile_ =
         create_deformed_nucleus(proj_cfg, params.testparticles, "projectile");
   } else if (proj_cfg.has_value({"Custom"})) {
-    projectile_ = make_unique<CustomNucleus>(proj_cfg, params.testparticles);
+    same_file = same_inputfile(proj_cfg, targ_cfg);
+    projectile_ =
+        make_unique<CustomNucleus>(proj_cfg, params.testparticles, same_file);
   } else {
     projectile_ = make_unique<Nucleus>(proj_cfg, params.testparticles);
   }
@@ -285,11 +289,11 @@ ColliderModus::ColliderModus(Configuration modus_config,
   }
 
   // Set up the target nucleus
-  Configuration targ_cfg = modus_cfg["Target"];
   if (targ_cfg.has_value({"Deformed"})) {
     target_ = create_deformed_nucleus(targ_cfg, params.testparticles, "target");
   } else if (targ_cfg.has_value({"Custom"})) {
-    target_ = make_unique<CustomNucleus>(targ_cfg, params.testparticles);
+    target_ =
+        make_unique<CustomNucleus>(targ_cfg, params.testparticles, same_file);
   } else {
     target_ = make_unique<Nucleus>(targ_cfg, params.testparticles);
   }
@@ -589,6 +593,42 @@ std::pair<double, double> ColliderModus::get_velocities(double s, double m_a,
           "ColliderModus::get_velocities.");
   }
   return std::make_pair(v_a, v_b);
+}
+
+std::string ColliderModus::custom_file_path(const std::string &file_directory,
+                                            const std::string &file_name) {
+  // make sure that path is correct even if the / at the end is missing
+  if (file_directory.back() == '/') {
+    return file_directory + file_name;
+  } else {
+    return file_directory + '/' + file_name;
+  }
+}
+
+bool ColliderModus::same_inputfile(Configuration &proj_config,
+                                   Configuration &targ_config) {
+  /* Check if both nuclei are custom
+   * Only check target as function is called after if statement for projectile.
+   */
+  if (!targ_config.has_value({"Custom"})) {
+    return false;
+  }
+  std::string projectile_file_directory =
+      proj_config.read({"Custom", "File_Directory"});
+  std::string target_file_directory =
+      targ_config.read({"Custom", "File_Directory"});
+  std::string projectile_file_name = proj_config.read({"Custom", "File_Name"});
+  std::string target_file_name = proj_config.read({"Custom", "File_Name"});
+  // Check if files are the same for projectile and target
+  std::string proj_path =
+      custom_file_path(projectile_file_directory, projectile_file_name);
+  std::string targ_path =
+      custom_file_path(target_file_directory, target_file_name);
+  if (proj_path == targ_path) {
+    return true;
+  } else {
+    return false;
+  }
 }
 
 }  // namespace smash
