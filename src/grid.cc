@@ -108,6 +108,7 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
   // very simple setup for non-periodic boundaries and largest cellsize strategy
   if (O == GridOptions::Normal && strategy == CellSizeStrategy::Largest) {
     number_of_cells_ = {1, 1, 1};
+    cell_volume_ = length_[0] * length_[1] * length_[2];
     cells_.clear();
     cells_.reserve(1);
     cells_.emplace_back(particles.copy_to_vector());
@@ -176,6 +177,10 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
     }
   }
 
+  cell_volume_ = (length_[0] / number_of_cells_[0]) *
+                 (length_[1] / number_of_cells_[1]) *
+                 (length_[2] / number_of_cells_[2]);
+
   const auto &log = logger<LogArea::Grid>();
   if (O == GridOptions::Normal &&
       all_of(number_of_cells_, [](SizeType n) { return n <= 2; })) {
@@ -189,6 +194,7 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
               " cells. Therefore the Grid falls back to a single cell / "
               "particle list.");
     number_of_cells_ = {1, 1, 1};
+    cell_volume_ = length_[0] * length_[1] * length_[2];
     cells_.resize(1);
     cells_.front().reserve(particles.size());
     std::copy_if(particles.begin(), particles.end(),
@@ -199,7 +205,8 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
   } else {
     // construct a normal grid
     log.debug("min: ", min_position, "\nlength: ", length_,
-              "\ncells: ", number_of_cells_, "\nindex_factor: ", index_factor);
+              "\ncell_volume: ", cell_volume_, "\ncells: ", number_of_cells_,
+              "\nindex_factor: ", index_factor);
 
     // After the grid parameters are determined, we can start placing the
     // particles in cells.

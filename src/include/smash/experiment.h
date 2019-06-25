@@ -1440,6 +1440,8 @@ void Experiment<Modus>::run_time_evolution() {
                     : modus_.create_grid(particles_, min_cell_length, dt,
                                          CellSizeStrategy::Largest);
 
+      const double cell_vol = grid.cell_volume();
+
       /* (1.b) Iterate over cells and find actions. */
       grid.iterate_cells(
           [&](const ParticleList &search_list) {
