@@ -62,7 +62,7 @@ class WallCrossActionsFinder : public ActionFinderInterface {
    * \return List of all found wall crossings.
    */
   ActionList find_actions_in_cell(const ParticleList &plist,
-                                  double t_max) const override;
+                                  double t_max, const double) const override;
 
   /// Ignore the neighbor searches for wall crossing
   ActionList find_actions_with_neighbors(const ParticleList &,

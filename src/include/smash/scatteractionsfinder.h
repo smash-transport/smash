@@ -100,11 +100,12 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * found since the scattered pairs cannot scatter again.)
    *
    * \param[in] search_list A list of particles within one cell
-   * \param[in] dt The maximum time interval at the current time step [fm/c]
+   * \param[in] dt The maximum time interval at the current time step [fm]
+   * \param[in] cell_vol Volume of searched grid cell [fm^3]
    * \return A list of possible scatter actions
    */
   ActionList find_actions_in_cell(const ParticleList &search_list,
-                                  double dt) const override;
+                                  double dt, const double cell_vol) const override;
 
   /**
    * Search for all the possible collisions among the neighboring cells. This
@@ -217,11 +218,16 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * \param[in] data_a First incoming particle
    * \param[in] data_b Second incoming particle
    * \param[in] dt Maximum time interval within which a collision can happen
+   * \param[in] cell_vol (optional) volume of grid cell in which the collision
+   *                                is checked
    * \return A null pointer if no collision happens or an action which contains
    *         the information of the outgoing particles.
+   *
+   * Note: cell_vol is optional, since only find_actions_in_cell has (and needs)
+   * this information for the stochastic collision criterion.
    */
   ActionPtr check_collision(const ParticleData &data_a,
-                            const ParticleData &data_b, double dt) const;
+                            const ParticleData &data_b, double dt, const double cell_vol = 0.0) const;
   /// Class that deals with strings, interfacing Pythia.
   std::unique_ptr<StringProcess> string_process_interface_;
   /// Elastic cross section parameter (in mb).
