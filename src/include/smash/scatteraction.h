@@ -75,6 +75,16 @@ class ScatterAction : public Action {
   double transverse_distance_sqr() const;
 
   /**
+   * Determine the Mandelstam s variable,
+   *
+   * \f[s = (p_a + p_b)^2\f]
+   * Equal to the square of CMS energy.
+   *
+   * \return Mandelstam s
+   */
+  double mandelstam_s() const;
+
+  /**
    * Generate the final-state of the scattering process.
    * Performs either elastic or inelastic scattering.
    *
@@ -161,15 +171,6 @@ class ScatterAction : public Action {
   virtual double cross_section() const { return total_cross_section_; }
 
  protected:
-  /**
-   * Determine the Mandelstam s variable,
-   *
-   * \f[s = (p_a + p_b)^2\f]
-   * Equal to the square of CMS energy.
-   *
-   * \return Mandelstam s
-   */
-  double mandelstam_s() const;
   /**
    * Get the momentum of the center of mass of the incoming particles
    * in the calculation frame.

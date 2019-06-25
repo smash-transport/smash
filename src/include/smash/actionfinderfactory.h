@@ -39,7 +39,8 @@ class ActionFinderInterface {
    *         could possibly be executed in this time step.
    */
   virtual ActionList find_actions_in_cell(const ParticleList &search_list,
-                                          double dt, const double cell_vol) const = 0;
+                                          double dt,
+                                          const double cell_vol) const = 0;
   /**
    * Abstract function for finding actions, given two lists of particles,
    * a search list and a neighbors list.

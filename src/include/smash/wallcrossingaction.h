@@ -61,8 +61,8 @@ class WallCrossActionsFinder : public ActionFinderInterface {
    * \param[in] t_max Time until crossing can appear. [fm]
    * \return List of all found wall crossings.
    */
-  ActionList find_actions_in_cell(const ParticleList &plist,
-                                  double t_max, const double) const override;
+  ActionList find_actions_in_cell(const ParticleList &plist, double t_max,
+                                  const double) const override;
 
   /// Ignore the neighbor searches for wall crossing
   ActionList find_actions_with_neighbors(const ParticleList &,

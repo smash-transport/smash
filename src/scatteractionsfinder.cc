@@ -210,7 +210,8 @@ namespace smash {
 ScatterActionsFinder::ScatterActionsFinder(
     Configuration config, const ExperimentParameters& parameters,
     const std::vector<bool>& nucleon_has_interacted, int N_tot, int N_proj)
-    : stochastic_collision_criterion_(config.take({"Collision_Term", "Stochastic_Collision_Criterion"}, false)),
+    : stochastic_collision_criterion_(config.take(
+          {"Collision_Term", "Stochastic_Collision_Criterion"}, false)),
       elastic_parameter_(
           config.take({"Collision_Term", "Elastic_Cross_Section"}, -1.)),
       testparticles_(parameters.testparticles),
@@ -263,15 +264,6 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData& data_a,
   const auto& log = logger<LogArea::FindScatter>();
 #endif
 
-  // just collided with this particle
-  if (data_a.id_process() > 0 && data_a.id_process() == data_b.id_process()) {
-#ifndef NDEBUG
-    log.debug("Skipping collided particles at time ", data_a.position().x0(),
-              " due to process ", data_a.id_process(), "\n    ", data_a,
-              "\n<-> ", data_b);
-#endif
-    return nullptr;
-  }
   /* If the two particles
    * 1) belong to the two colliding nuclei
    * 2) are within the same nucleus
@@ -288,7 +280,7 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData& data_a,
   }
 
   // Determine time of collision.
-  const double time_until_collision = collision_time(data_a, data_b);
+  const double time_until_collision = collision_time(data_a, data_b, dt);
 
   // Check that collision happens in this timestep.
   if (time_until_collision < 0. || time_until_collision >= dt) {
@@ -298,38 +290,101 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData& data_a,
   // Create ScatterAction object.
   ScatterActionPtr act = make_unique<ScatterAction>(
       data_a, data_b, time_until_collision, isotropic_, string_formation_time_);
+
   if (strings_switch_) {
     act->set_string_interface(string_process_interface_.get());
   }
 
-  const double distance_squared = act->transverse_distance_sqr();
+  if (stochastic_collision_criterion_) {
+    // No grid or search in cell
+    if (cell_vol < really_small) {
+      return nullptr;
+    }
 
-  // Don't calculate cross section if the particles are very far apart.
-  if (distance_squared >= max_transverse_distance_sqr(testparticles_)) {
-    return nullptr;
-  }
+    // Add various subprocesses.
+    act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
+                             low_snn_cut_, strings_switch_, use_AQM_,
+                             strings_with_probability_, nnbar_treatment_);
 
-  // Add various subprocesses.
-  act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
-                           low_snn_cut_, strings_switch_, use_AQM_,
-                           strings_with_probability_, nnbar_treatment_);
+    const double xs = act->cross_section() * fm2_mb;
 
-  // Cross section for collision criterion
-  double cross_section_criterion = act->cross_section() * fm2_mb * M_1_PI /
-                                   static_cast<double>(testparticles_);
-  // Take cross section scaling factors into account
-  cross_section_criterion *= data_a.xsec_scaling_factor(time_until_collision);
-  cross_section_criterion *= data_b.xsec_scaling_factor(time_until_collision);
+    // relative velocity calculation  TODO(stdnmr): REF?
+    // TODO(stdnmr): Make sure off-shell mass is meant here
+    const double m1 = act->incoming_particles()[0].effective_mass();
+    const double m1_sqr = m1 * m1;
+    const double m2 = act->incoming_particles()[1].effective_mass();
+    const double m2_sqr = m2 * m2;
+    const double e1 = act->incoming_particles()[0].momentum().x0();
+    const double e2 = act->incoming_particles()[1].momentum().x0();
+    const double m_s = act->mandelstam_s();
+    const double lambda = (m_s - m1_sqr - m2_sqr) * (m_s - m1_sqr - m2_sqr) -
+                          4. * m1_sqr * m2_sqr;
+    const double v_rel = std::sqrt(lambda) / (2. * e1 * e2);
 
-  // distance criterion according to cross_section
-  if (distance_squared >= cross_section_criterion) {
-    return nullptr;
-  }
+    // TODO(stdnmr): REF!
+    const double p_22 = xs * v_rel * dt / (cell_vol * testparticles_);
 
 #ifndef NDEBUG
-  log.debug("particle distance squared: ", distance_squared, "\n    ", data_a,
-            "\n<-> ", data_b);
+    log.debug("Stochastic collison criterion parameters:\np_22 = ", p_22,
+              ", xs = ", xs, ", v_rel = ", v_rel, ", dt = ", dt,
+              ", cell_vol = ", cell_vol, ", testparticles = ", testparticles_);
 #endif
+
+    if (p_22 > 1.) {
+      std::stringstream err;
+      err << "Probability larger than 1 for stochastic rates. ( P = " << p_22
+          << " )\nUse smaller timesteps.";
+      throw std::runtime_error(err.str());
+    }
+
+    // probability criterion
+    double random_no = random::uniform(0., 1.);
+    if (random_no > p_22) {
+      return nullptr;
+    }
+
+  } else {  // (default) geometric collision criterion
+
+    // just collided with this particle
+    if (data_a.id_process() > 0 && data_a.id_process() == data_b.id_process()) {
+#ifndef NDEBUG
+      log.debug("Skipping collided particles at time ", data_a.position().x0(),
+                " due to process ", data_a.id_process(), "\n    ", data_a,
+                "\n<-> ", data_b);
+#endif
+      return nullptr;
+    }
+
+    const double distance_squared = act->transverse_distance_sqr();
+
+    // Don't calculate cross section if the particles are very far apart.
+    if (distance_squared >= max_transverse_distance_sqr(testparticles_)) {
+      return nullptr;
+    }
+
+    // Add various subprocesses.
+    act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
+                             low_snn_cut_, strings_switch_, use_AQM_,
+                             strings_with_probability_, nnbar_treatment_);
+
+    // Cross section for collision criterion
+    double cross_section_criterion = act->cross_section() * fm2_mb * M_1_PI /
+                                     static_cast<double>(testparticles_);
+
+    // Take cross section scaling factors into account
+    cross_section_criterion *= data_a.xsec_scaling_factor(time_until_collision);
+    cross_section_criterion *= data_b.xsec_scaling_factor(time_until_collision);
+
+    // distance criterion according to cross_section
+    if (distance_squared >= cross_section_criterion) {
+      return nullptr;
+    }
+
+#ifndef NDEBUG
+    log.debug("particle distance squared: ", distance_squared, "\n    ", data_a,
+              "\n<-> ", data_b);
+#endif
+  }
 
   // Using std::move here is redundant with newer compilers, but required for
   // supporting GCC 4.8. Once we drop this support, std::move should be removed.
