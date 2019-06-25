@@ -230,6 +230,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
                             const ParticleData &data_b, double dt, const double cell_vol = 0.0) const;
   /// Class that deals with strings, interfacing Pythia.
   std::unique_ptr<StringProcess> string_process_interface_;
+  /// Enable alternative stochastic collision criterion
+  const bool stochastic_collision_criterion_;
   /// Elastic cross section parameter (in mb).
   const double elastic_parameter_;
   /// Number of test particles.

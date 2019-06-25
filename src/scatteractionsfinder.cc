@@ -30,6 +30,8 @@
 namespace smash {
 /*!\Userguide
  * \page input_collision_term_ Collision_Term
+ * \key Stochastic_Collision_Criterion (bool, optional, default = \key false) \n
+ * // TODO(stdnmr): Write documentation on criterion
  * \key Elastic_Cross_Section (double, optional, default = -1.0 [mb]) \n
  * If a non-negative value is given, it will override the parametrized
  * elastic cross sections (which are energy-dependent) with a constant value.
@@ -208,7 +210,8 @@ namespace smash {
 ScatterActionsFinder::ScatterActionsFinder(
     Configuration config, const ExperimentParameters& parameters,
     const std::vector<bool>& nucleon_has_interacted, int N_tot, int N_proj)
-    : elastic_parameter_(
+    : stochastic_collision_criterion_(config.take({"Collision_Term", "Stochastic_Collision_Criterion"}, false)),
+      elastic_parameter_(
           config.take({"Collision_Term", "Elastic_Cross_Section"}, -1.)),
       testparticles_(parameters.testparticles),
       isotropic_(config.take({"Collision_Term", "Isotropic"}, false)),
