@@ -413,7 +413,10 @@ ActionList ScatterActionsFinder::find_actions_with_neighbors(
     const ParticleList& search_list, const ParticleList& neighbors_list,
     double dt) const {
   std::vector<ActionPtr> actions;
-  // TODO(stdnmr): Optimisation - Skip pairing for stochastic crterion
+  if (stochastic_collision_criterion_) {
+    // Only search in cells
+    return actions;
+  }
   for (const ParticleData& p1 : search_list) {
     for (const ParticleData& p2 : neighbors_list) {
       assert(p1.id() != p2.id());
@@ -431,7 +434,10 @@ ActionList ScatterActionsFinder::find_actions_with_surrounding_particles(
     const ParticleList& search_list, const Particles& surrounding_list,
     double dt) const {
   std::vector<ActionPtr> actions;
-  // TODO(stdnmr): Optimisation - Skip pairing for stochastic crterion
+  if (stochastic_collision_criterion_) {
+    // Only search in cells
+    return actions;
+  }
   for (const ParticleData& p2 : surrounding_list) {
     /* don't look for collisions if the particle from the surrounding list is
      * also in the search list */
