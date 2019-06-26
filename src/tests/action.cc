@@ -28,7 +28,12 @@ TEST(impossible_collision) {
   const auto b =
       Test::smashon(Position{2., 2., 2., 2.}, Momentum{0.1, 0.3, -0.1, 0.2});
 
-  VERIFY(ScatterActionsFinder::collision_time(a, b) < 0.0);
+  Configuration config = Test::configuration("");
+  ExperimentParameters exp_par = Test::default_parameters();
+  const std::vector<bool> has_interacted = {};
+  ScatterActionsFinder finder(config, exp_par, has_interacted, 0, 0);
+
+  VERIFY(finder.collision_time(a, b, 0.0) < 0.0);
 }
 
 // test particle_distance:
