@@ -26,6 +26,7 @@ namespace smash {
  * \ingroup action
  * A simple scatter finder:
  * Just loops through all particles and checks each pair for a collision.
+ * It supports two collision criteria: a geometric and stochastic criterion.
  */
 class ScatterActionsFinder : public ActionFinderInterface {
  public:
@@ -62,7 +63,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * Determine the collision time of the two particles.
    * Time of the closest approach is taken as collision time, if the geometric
    * collision criterion is used. For stochastic criterion the time is
-   * distributed randomly within the timestep.
+   * distributed randomly within the timestep as in \iref{Xu:2004mz}.
    *
    * \param[in] p1 First incoming particle
    * \param[in] p2 Second incoming particle
@@ -75,9 +76,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
   inline double collision_time(const ParticleData &p1, const ParticleData &p2,
                                double dt) const {
     if (stochastic_collision_criterion_) {
-      // TODO(stdnmr): REF?
       return dt * random::uniform(0., 1.);
-
     } else {
       /**
        * UrQMD collision time in computational frame,
@@ -225,6 +224,18 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * happen in the next timestep and create a corresponding Action object
    * in that case.
    *
+   * Two criterion for the collision decision are supported: 1. The default
+   * geometric criterion from UrQMD \iref{Bass:1998ca} (3.27). 2. A stochastic
+   * collision criterion e.g. employed by BAMPS \iref{Xu:2004mz} (Sec.IIB).
+   * Note, the latter is currently only tested for a box with a fixed elastic
+   * cross section.
+   *
+   * More details on the stochastic collision criterion can be found here:
+   * - P. Danielewicz and G. F. Bertsch, Nucl. Phys. A533, 712 (1991).
+   * - A. Lang, H. Babovsky, W. Cassing, U. Mosel, H. G. Reusch, and K. Weber,
+   *   J. Comp. Phys. 106, 391 (1993).
+   * - W. Cassing, Nucl. Phys. A700, 618 (2002).
+   *
    * \param[in] data_a First incoming particle
    * \param[in] data_b Second incoming particle
    * \param[in] dt Maximum time interval within which a collision can happen
@@ -239,6 +250,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
   ActionPtr check_collision(const ParticleData &data_a,
                             const ParticleData &data_b, double dt,
                             const double cell_vol = 0.0) const;
+
   /// Class that deals with strings, interfacing Pythia.
   std::unique_ptr<StringProcess> string_process_interface_;
   /// Enable alternative stochastic collision criterion

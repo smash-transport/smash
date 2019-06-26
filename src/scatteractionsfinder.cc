@@ -31,7 +31,9 @@ namespace smash {
 /*!\Userguide
  * \page input_collision_term_ Collision_Term
  * \key Stochastic_Collision_Criterion (bool, optional, default = \key false) \n
- * // TODO(stdnmr): Write documentation on criterion
+ * Enable alternative stochastic collision criterion. Be aware that this is only
+ * tested for specific setups. Currently, only a box with constant elastic cross
+ * section is supported.
  * \key Elastic_Cross_Section (double, optional, default = -1.0 [mb]) \n
  * If a non-negative value is given, it will override the parametrized
  * elastic cross sections (which are energy-dependent) with a constant value.
@@ -308,8 +310,7 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData& data_a,
 
     const double xs = act->cross_section() * fm2_mb;
 
-    // relative velocity calculation  TODO(stdnmr): REF?
-    // TODO(stdnmr): Make sure off-shell mass is meant here
+    // Relative velocity calculation, see e.g. \iref{Seifert:2017oyb}, eq. (5)
     const double m1 = act->incoming_particles()[0].effective_mass();
     const double m1_sqr = m1 * m1;
     const double m2 = act->incoming_particles()[1].effective_mass();
@@ -321,7 +322,7 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData& data_a,
                           4. * m1_sqr * m2_sqr;
     const double v_rel = std::sqrt(lambda) / (2. * e1 * e2);
 
-    // TODO(stdnmr): REF!
+    // Collision probability, see e.g. \iref{Xu:2004mz}, eq. (11)
     const double p_22 = xs * v_rel * dt / (cell_vol * testparticles_);
 
 #ifndef NDEBUG
