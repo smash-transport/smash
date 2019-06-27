@@ -39,6 +39,15 @@ class Nucleus {
    */
   Nucleus(Configuration &config, int nTest);
 
+  /**
+   * Constructor which directly initializes the Nucleus with particles
+   * and respective counts.
+   * Only used for testing.
+   *
+   * \param[in] particle_list std::map, which maps PdgCode and count
+   * of this particle.
+   * \param[in] nTest Number of test particles.
+   */
   Nucleus(const std::map<PdgCode, int> &particle_list, int nTest);
   virtual ~Nucleus() = default;
 
