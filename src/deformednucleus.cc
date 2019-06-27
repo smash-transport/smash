@@ -137,7 +137,9 @@ ThreeVector DeformedNucleus::distribute_nucleon() {
 }
 
 void DeformedNucleus::set_deformation_parameters_automatic() {
-  // Set the deformation parameters extracted from \iref{Moller:1993ed}.
+  // Set the deformation parameters
+  // reference for U, Pb, Au, Cu: \iref{Moller:1993ed}
+  // reference for Zr and Ru: \iref{Schenke:2019ruo}
   switch (Nucleus::number_of_particles()) {
     case 238:  // Uranium
       set_beta_2(0.28);
@@ -155,6 +157,27 @@ void DeformedNucleus::set_deformation_parameters_automatic() {
       set_beta_2(0.162);
       set_beta_4(-0.006);
       break;
+    case 96: {
+      size_t n_protons = Nucleus::number_of_protons();
+      if (n_protons == 40) {  // Zirconium
+        set_beta_2(0.0);
+        set_beta_4(0.0);
+        break;
+      } else if (n_protons == 44) {  // Ruthenium
+        set_beta_2(0.158);
+        set_beta_4(0.0);
+        break;
+      } else {
+        throw std::domain_error(
+            "Number of protons for nuclei with mass number A = 96 does not "
+            "match that of Zirconium or Ruthenium. The deformation parameters "
+            "for additional isobars are currently not implemented."
+            " Please specify at least \"Beta_2\" and \"Beta_4\" "
+            "manually and set \"Automatic: False.\" ");
+        break;
+      }
+      break;
+    }
     default:
       throw std::domain_error(
           "Mass number not listed for automatically setting deformation "

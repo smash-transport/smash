@@ -116,8 +116,9 @@ namespace smash {
  *    \li \key Automatic (bool, required if \key Deformed exists, no default):
  \n
  * true - Set parameters of spherical deformation based on mass number of the
- * nucleus. \n
- * flase - Manually set parameters of spherical deformation. This requires the
+ * nucleus. Currently the following deformed nuclei are implemented: Cu, Zr, Ru,
+ Au, Pb, U. \n
+ * false - Manually set parameters of spherical deformation. This requires the
  * additional specification of \key Beta_2, \key Beta_4, \key Theta and
  * \key Phi, which follow \iref{Moller:1993ed}. \n
  *
