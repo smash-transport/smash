@@ -1431,28 +1431,30 @@ void Experiment<Modus>::run_time_evolution() {
       }
     }
 
-    /* (1.a) Create grid. */
-    double min_cell_length = compute_min_cell_length(dt);
-    log.debug("Creating grid with minimal cell length ", min_cell_length);
-    const auto &grid = use_grid_
+    if (particles_.size() > 0 && action_finders_.size() > 0) {
+      /* (1.a) Create grid. */
+      double min_cell_length = compute_min_cell_length(dt);
+      log.debug("Creating grid with minimal cell length ", min_cell_length);
+      const auto &grid = use_grid_
                            ? modus_.create_grid(particles_, min_cell_length, dt)
                            : modus_.create_grid(particles_, min_cell_length, dt,
                                                 CellSizeStrategy::Largest);
 
-    /* (1.b) Iterate over cells and find actions. */
-    grid.iterate_cells(
-        [&](const ParticleList &search_list) {
-          for (const auto &finder : action_finders_) {
-            actions.insert(finder->find_actions_in_cell(search_list, dt));
-          }
-        },
-        [&](const ParticleList &search_list,
-            const ParticleList &neighbors_list) {
-          for (const auto &finder : action_finders_) {
-            actions.insert(finder->find_actions_with_neighbors(
-                search_list, neighbors_list, dt));
-          }
-        });
+      /* (1.b) Iterate over cells and find actions. */
+      grid.iterate_cells(
+          [&](const ParticleList &search_list) {
+            for (const auto &finder : action_finders_) {
+              actions.insert(finder->find_actions_in_cell(search_list, dt));
+            }
+          },
+          [&](const ParticleList &search_list,
+              const ParticleList &neighbors_list) {
+            for (const auto &finder : action_finders_) {
+              actions.insert(finder->find_actions_with_neighbors(
+                  search_list, neighbors_list, dt));
+            }
+          });
+    }
 
     /* \todo (optimizations) Adapt timestep size here */
 

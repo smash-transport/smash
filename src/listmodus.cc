@@ -257,7 +257,11 @@ double ListModus::initial_conditions(Particles *particles,
     }
     try_create_particle(*particles, pdgcode, t, x, y, z, mass, E, px, py, pz);
   }
-  backpropagate_to_same_time(*particles);
+  if (particles->size() > 0) {
+    backpropagate_to_same_time(*particles);
+  } else {
+    start_time_ = 0.0;
+  }
   event_id_++;
 
   return start_time_;
