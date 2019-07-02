@@ -92,8 +92,33 @@ To run it with specific settings:
 
 ### Troubleshooting
 
+#### SMASH does not compile
+
 If compilation fails (especially after changing a library), using a fresh build
 folder can sometimes fix the problem.
+
+
+#### SMASH crashes with "illegal instruction"
+
+If running SMASH fails with "illegal instruction", it is likely due to running
+SMASH on a different platform than the one where it was compiled. By default,
+SMASH is compiled with platform-specific optimizations, implying that the binary
+only works on such platforms.
+
+There are three possible ways to fix this issue:
+
+1. Make sure to compile SMASH on the platform where you run it. When running
+   SMASH on a computing cluster, this requires making the compilation step part
+   of the job script.
+2. Only run SMASH on platforms similar to the one where it was compiled. When
+   running SMASH on a computing cluster, this requires restricting the jobs to
+   the correct platform.
+3. Compile SMASH without machine-specific optimizations by removing
+   `-march=native` from `CMakeLists.txt`. This is the easiest solution, however
+   it results in less efficient code.
+
+Note that the same applies to any other libraries you compile with
+`-march=native`, like for instance Pythia.
 
 
 ### Size of the Code
