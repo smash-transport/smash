@@ -154,7 +154,20 @@ double sample_momenta_2M_IC(const double temperature, const double mass);
 
 /**
  * Samples a momentum from the Maxwell-Boltzmann (thermal) distribution
- * in a faster way, given by Scott Pratt
+ * in a faster way, given by Scott Pratt (see \iref{Pratt:2014vja})
+ * APPENDIX: ALGORITHM FOR GENERATING PARTICLES
+ * math trick: for \f$ x^{n-1}e^{-x} \f$ distribution, sample x by:
+ * \f$ x = -ln(r_1 r_2 r_3 ... r_n) \f$
+ * where \f$ r_i \f$ are uniform random numbers between [0,1)
+ * for \f$ T/m > 0.6 \f$: \f$ p^2 e^{-E/T} = p^2 e^{-p/T} * e^{(p-E)/T} \f$,
+ * where \f$ e^{(p-E)/T}\f$ is used as rejection weight.
+ * Since \f$T/m > 0.6 \f$, \f$ e^{(p-E)/T}\f$ is close to 1.
+ * for \f$ T/m < 0.6 \f$, there are many rejections
+ * another manipulation is used:
+ * \f$ p^2 e^{-E/T} dp = dE \frac{E}{p} p^2 e^{-E/T} \f$
+ * \f$ = dK \frac{p}{E} (K+m)^2 e^{-K/T} e^{-m/T} \f$
+ * \f$ = dK (K^2 + 2mK + m^2) e^{-K/T} \frac{p}{E}\f$
+ *  where \frac{p}{E} is used as rejection weight.
  *
  * \param[in] temperature Temperature \f$T\f$ [GeV]
  * \param[in] mass Mass of the particle: \f$m = \sqrt{E^2 - p^2}\f$ [GeV]
