@@ -102,7 +102,7 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
  * Strangeness chemical potential \f$ \mu_S \f$ used in case if
  * Use_Thermal_Multiplicities is true to compute thermal densities \f$ n_i \f$.
  *
- * \key Jet:\n
+ * \key Jet: \n
  * This subset of config values is used to put a single high energy particle
  * (a "jet") in the center of the box, on an trajectory along
  * the x axis; if no pdg is specified no jet is produced.
@@ -204,7 +204,7 @@ BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
       insert_jet_(modus_config.has_value({"Box", "Jet", "Jet_PDG"})),
       jet_pdg_(insert_jet_ ? modus_config.take({"Box", "Jet", "Jet_PDG"})
                                  .convert_for(jet_pdg_)
-                           : pdg::p),
+                           : pdg::p), // dummy default; never used
       jet_mom_(modus_config.take({"Box", "Jet", "Jet_Momentum"}, 20.)) {}
 
 double BoxModus::initial_conditions(Particles *particles,
