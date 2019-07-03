@@ -157,6 +157,21 @@ class BoxModus : public ModusDefault {
   std::map<PdgCode, double> average_multipl_;
 
   /**
+   * Whether to insert a single high energy particle at the center of the
+   * box (0,0,0). This particle will initially be moving along the x-axis.
+   */
+  const bool insert_jet_ = false;
+  /**
+   * Pdg of the particle to use as a jet; necessary if insert_jet_ is true,
+   * unused otherwise
+   */
+  const PdgCode jet_pdg_;
+  /**
+   * Initial momentum of the jet particle; only used if insert_jet_ is true
+   */
+  const double jet_mom_;
+
+  /**
    * \ingroup logging
    * Console output on startup of box specific parameters;
    * writes the initial state for the box to the output stream.
