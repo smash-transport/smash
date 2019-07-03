@@ -551,7 +551,7 @@ int main(int argc, char *argv[]) {
     }
     if (resonance_dump_activated) {
       // Ignore config values that don't make sense.
-      const auto _dummy = ExperimentBase::create(configuration, output_path);
+      const auto _dummy = ExperimentBase::create(configuration, "");
       ignore_simulation_config_values(configuration);
       check_for_unused_config_values(configuration);
 
