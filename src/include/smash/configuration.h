@@ -784,6 +784,26 @@ class Configuration {
           "The value for key \"" + std::string(key_) +
           "\" should be \"mode sampling\", \"biased BF\" or \"unbiased BF\".");
     }
+
+    /**
+     * Set collision criterion from configuration values.
+     *
+     * \return CollisionCriterion.
+     * \throw IncorrectTypeInAssignment in case an collision criterion that is
+     * not available is provided as a configuration value.
+     */
+    operator CollisionCriterion() const {
+      const std::string s = operator std::string();
+      if (s == "Geometric") {
+        return CollisionCriterion::Geometric;
+      }
+      if (s == "Stochastic") {
+        return CollisionCriterion::Stochastic;
+      }
+      throw IncorrectTypeInAssignment("The value for key \"" +
+                                      std::string(key_) + "\" should be " +
+                                      "\"Geometric\" or \"Stochastic\".");
+    }
   };
 
   /**

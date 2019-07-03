@@ -188,6 +188,14 @@ enum class ThermodynamicQuantity : char {
   j_QBS
 };
 
+/// Criteria used to check collisions
+enum class CollisionCriterion {
+  /// (Default) geometric criterion.
+  Geometric,
+  /// Stochastic Criteiron.
+  Stochastic
+};
+
 /// The different groups of 2 to 2 reactions that one can include
 enum IncludedReactions {
   All = 50,

@@ -75,7 +75,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
    */
   inline double collision_time(const ParticleData &p1, const ParticleData &p2,
                                double dt) const {
-    if (stochastic_collision_criterion_) {
+    if (coll_crit_ == CollisionCriterion::Stochastic) {
       return dt * random::uniform(0., 1.);
     } else {
       /**
@@ -253,8 +253,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
 
   /// Class that deals with strings, interfacing Pythia.
   std::unique_ptr<StringProcess> string_process_interface_;
-  /// Enable alternative stochastic collision criterion
-  const bool stochastic_collision_criterion_;
+  /// Specifis which collision criterion is used
+  const CollisionCriterion coll_crit_;
   /// Elastic cross section parameter (in mb).
   const double elastic_parameter_;
   /// Number of test particles.

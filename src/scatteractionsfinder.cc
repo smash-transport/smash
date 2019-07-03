@@ -30,10 +30,16 @@
 namespace smash {
 /*!\Userguide
  * \page input_collision_term_ Collision_Term
- * \key Stochastic_Collision_Criterion (bool, optional, default = \key false) \n
- * Enable alternative stochastic collision criterion. Be aware that this is only
- * tested for specific setups. Currently, only a box with constant elastic cross
- * section is supported.
+ * \key Collision_Criterion (string, optional, default = "Geometric") \n
+ * Choose collision criterion. Be aware that the stochastic criterion is only
+ * tested for specific setups. Currently, only two-to-two reactions with
+ * constant elastic cross
+ * section are supported.
+ * \li \key "Geometric" - Geometric collision criterion
+ * \li \key "Stochastic" - Stochastic Collision criterion see e.g. A. Lang, H.
+ * Babovsky, W. Cassing, U. Mosel, H. G. Reusch, and K. Weber, J. Comp. Phys.
+ * 106, 391 (1993).
+ *
  * \key Elastic_Cross_Section (double, optional, default = -1.0 [mb]) \n
  * If a non-negative value is given, it will override the parametrized
  * elastic cross sections (which are energy-dependent) with a constant value.
@@ -212,8 +218,8 @@ namespace smash {
 ScatterActionsFinder::ScatterActionsFinder(
     Configuration config, const ExperimentParameters& parameters,
     const std::vector<bool>& nucleon_has_interacted, int N_tot, int N_proj)
-    : stochastic_collision_criterion_(config.take(
-          {"Collision_Term", "Stochastic_Collision_Criterion"}, false)),
+    : coll_crit_(config.take({"Collision_Term", "Collision_Criterion"},
+                             CollisionCriterion::Geometric)),
       elastic_parameter_(
           config.take({"Collision_Term", "Elastic_Cross_Section"}, -1.)),
       testparticles_(parameters.testparticles),
@@ -297,7 +303,7 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData& data_a,
     act->set_string_interface(string_process_interface_.get());
   }
 
-  if (stochastic_collision_criterion_) {
+  if (coll_crit_ == CollisionCriterion::Stochastic) {
     // No grid or search in cell
     if (cell_vol < really_small) {
       return nullptr;
@@ -344,8 +350,7 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData& data_a,
       return nullptr;
     }
 
-  } else {  // (default) geometric collision criterion
-
+  } else if (coll_crit_ == CollisionCriterion::Geometric) {
     // just collided with this particle
     if (data_a.id_process() > 0 && data_a.id_process() == data_b.id_process()) {
 #ifndef NDEBUG
@@ -413,7 +418,7 @@ ActionList ScatterActionsFinder::find_actions_with_neighbors(
     const ParticleList& search_list, const ParticleList& neighbors_list,
     double dt) const {
   std::vector<ActionPtr> actions;
-  if (stochastic_collision_criterion_) {
+  if (coll_crit_ == CollisionCriterion::Stochastic) {
     // Only search in cells
     return actions;
   }
@@ -434,7 +439,7 @@ ActionList ScatterActionsFinder::find_actions_with_surrounding_particles(
     const ParticleList& search_list, const Particles& surrounding_list,
     double dt) const {
   std::vector<ActionPtr> actions;
-  if (stochastic_collision_criterion_) {
+  if (coll_crit_ == CollisionCriterion::Stochastic) {
     // Only search in cells
     return actions;
   }
