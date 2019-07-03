@@ -236,6 +236,13 @@ ScatterActionsFinder::ScatterActionsFinder(
       N_proj_(N_proj),
       string_formation_time_(config.take(
           {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.)) {
+  if (coll_crit_ == CollisionCriterion::Stochastic &&
+      !(is_constant_elastic_isotropic())) {
+    throw std::invalid_argument(
+        "The stochastic collision criterion is only supported for elastic (and "
+        "isotropic)\n2-to-2 reactions of one particle species. Change you "
+        "config accordingly.");
+  }
   if (is_constant_elastic_isotropic()) {
     const auto& log = logger<LogArea::FindScatter>();
     log.info("Constant elastic isotropic cross-section mode:", " using ",
