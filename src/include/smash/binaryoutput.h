@@ -153,9 +153,11 @@ class BinaryOutputCollisions : public BinaryOutputBase {
    * \param[in] particles Current list of particles.
    * \param[in] event_number Number of event.
    * \param[in] impact_parameter Impact parameter of this event.
+   * \param[in] empty_event Whether there was no collision between target
+   *            and projectile
    */
   void at_eventend(const Particles &particles, const int32_t event_number,
-                   double impact_parameter) override;
+                   double impact_parameter, bool empty_event) override;
 
   /**
    * Writes an interaction block, including information about the incoming and
@@ -210,9 +212,11 @@ class BinaryOutputParticles : public BinaryOutputBase {
    * \param[in] particles Current list of particles.
    * \param[in] event_number Number of event.
    * \param[in] impact_parameter Impact parameter of this event.
+   * \param[in] empty_event Whether there was no collision between target
+   *            and projectile
    */
   void at_eventend(const Particles &particles, const int event_number,
-                   double impact_parameter) override;
+                   double impact_parameter, bool empty_event) override;
 
   /**
    * Writes particles at each time interval; fixed by option OUTPUT_INTERVAL.

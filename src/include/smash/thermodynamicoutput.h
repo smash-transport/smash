@@ -61,9 +61,10 @@ class ThermodynamicOutput : public OutputInterface {
    *  \param[in] particles Dummy, is just here to satisfy inheritance
    *  \param[in] event_number Dummy, is just here to satisfy inheritance
    *  \param[in] impact_parameter Dummy, is just here to satisfy inheritance
+   *  \param[in] empty_event Dummy, is just here to satisfy inheritance
    */
   void at_eventend(const Particles &particles, const int event_number,
-                   double impact_parameter) override;
+                   double impact_parameter, bool empty_event) override;
 
   /**
    *  Writes thermodynamics every fixed time interval. For configuring

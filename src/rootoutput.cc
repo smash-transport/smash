@@ -177,7 +177,7 @@ void RootOutput::at_intermediate_time(const Particles &particles, const Clock &,
 
 void RootOutput::at_eventend(const Particles &particles,
                              const int /*event_number*/,
-                             double impact_parameter) {
+                             double impact_parameter, bool /*empty_event*/) {
   impact_b = impact_parameter;
   if (write_particles_) {
     particles_to_tree(particles);

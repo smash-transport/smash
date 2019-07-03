@@ -81,9 +81,11 @@ class OscarOutput : public OutputInterface {
    * \param[in] particles Current list of particles.
    * \param[in] event_number Number of event.
    * \param[in] impact_parameter Impact parameter of this event.
+   * \param[in] empty_event Whether there was no interaction between the target
+   *            and the projectile.
    */
   void at_eventend(const Particles &particles, const int event_number,
-                   double impact_parameter) override;
+                   double impact_parameter, bool empty_event) override;
 
   /**
    * Writes a interaction prefix line and a line for every incoming and

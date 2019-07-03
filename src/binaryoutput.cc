@@ -96,8 +96,8 @@ namespace smash {
  *
  * **Event end line**
  * \code
- * char    uint32_t      double
- * 'f' event_number impact_parameter
+ * char    uint32_t      double      char
+ * 'f' event_number impact_parameter empty
  * \endcode
  *
  * Particles output
@@ -194,7 +194,7 @@ BinaryOutputCollisions::BinaryOutputCollisions(const bf::path &path,
 
 void BinaryOutputCollisions::at_eventstart(const Particles &particles,
                                            const int) {
-  char pchar = 'p';
+  const char pchar = 'p';
   if (print_start_end_) {
     std::fwrite(&pchar, sizeof(char), 1, file_.get());
     write(particles.size());
@@ -204,8 +204,9 @@ void BinaryOutputCollisions::at_eventstart(const Particles &particles,
 
 void BinaryOutputCollisions::at_eventend(const Particles &particles,
                                          const int32_t event_number,
-                                         double impact_parameter) {
-  char pchar = 'p';
+                                         double impact_parameter,
+                                         bool empty_event) {
+  const char pchar = 'p';
   if (print_start_end_) {
     std::fwrite(&pchar, sizeof(char), 1, file_.get());
     write(particles.size());
@@ -213,10 +214,12 @@ void BinaryOutputCollisions::at_eventend(const Particles &particles,
   }
 
   // Event end line
-  char fchar = 'f';
+  const char fchar = 'f';
   std::fwrite(&fchar, sizeof(char), 1, file_.get());
   write(event_number);
   write(impact_parameter);
+  const char empty = empty_event;
+  write(empty);
 
   // Flush to disk
   std::fflush(file_.get());
@@ -224,7 +227,7 @@ void BinaryOutputCollisions::at_eventend(const Particles &particles,
 
 void BinaryOutputCollisions::at_interaction(const Action &action,
                                             const double density) {
-  char ichar = 'i';
+  const char ichar = 'i';
   std::fwrite(&ichar, sizeof(char), 1, file_.get());
   write(action.incoming_particles().size());
   write(action.outgoing_particles().size());
@@ -248,7 +251,7 @@ BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
 
 void BinaryOutputParticles::at_eventstart(const Particles &particles,
                                           const int) {
-  char pchar = 'p';
+  const char pchar = 'p';
   if (!only_final_) {
     std::fwrite(&pchar, sizeof(char), 1, file_.get());
     write(particles.size());
@@ -258,17 +261,20 @@ void BinaryOutputParticles::at_eventstart(const Particles &particles,
 
 void BinaryOutputParticles::at_eventend(const Particles &particles,
                                         const int event_number,
-                                        double impact_parameter) {
-  char pchar = 'p';
+                                        double impact_parameter,
+                                        bool empty_event) {
+  const char pchar = 'p';
   std::fwrite(&pchar, sizeof(char), 1, file_.get());
   write(particles.size());
   write(particles);
 
   // Event end line
-  char fchar = 'f';
+  const char fchar = 'f';
   std::fwrite(&fchar, sizeof(char), 1, file_.get());
   write(event_number);
   write(impact_parameter);
+  const char empty = empty_event;
+  write(empty);
 
   // Flush to disk
   std::fflush(file_.get());
@@ -277,7 +283,7 @@ void BinaryOutputParticles::at_eventend(const Particles &particles,
 void BinaryOutputParticles::at_intermediate_time(const Particles &particles,
                                                  const Clock &,
                                                  const DensityParameters &) {
-  char pchar = 'p';
+  const char pchar = 'p';
   if (!only_final_) {
     std::fwrite(&pchar, sizeof(char), 1, file_.get());
     write(particles.size());
