@@ -34,7 +34,7 @@ elif [ "$1" = "-t" ]; then
 else
 cat <<EOF
 Little helper script that wraps clang-format
-Usage: ./clang-format-helper
+Usage: ./clang-format-helper.bash
   -p perform automatic formatting (for developers)
   -t test that automatic formatting has been performed (for CI builds)
 EOF
