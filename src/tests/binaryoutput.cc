@@ -243,7 +243,8 @@ TEST(fullhistory_format) {
     VERIFY(compare_particle(final_particles[1], binF));
 
     // event end line
-    VERIFY(compare_final_block_header(event_id, impact_parameter, empty_event, binF));
+    VERIFY(compare_final_block_header(event_id, impact_parameter, empty_event,
+                                      binF));
   }
 
   VERIFY(bf::remove(collisionsoutputfilepath));
@@ -283,7 +284,8 @@ TEST(particles_format) {
     bin_output->at_intermediate_time(*particles, clock, dens_par);
 
     /* Final state output */
-    bin_output->at_eventend(*particles, event_id, impact_parameter, empty_event);
+    bin_output->at_eventend(*particles, event_id, impact_parameter,
+                            empty_event);
   }
   const ParticleList final_particles = particles->copy_to_vector();
   VERIFY(!bf::exists(particleoutputpath_unfinished));
@@ -329,7 +331,8 @@ TEST(particles_format) {
     VERIFY(compare_particle(final_particles[0], binF));
 
     // after end of event
-    VERIFY(compare_final_block_header(event_id, impact_parameter, empty_event, binF));
+    VERIFY(compare_final_block_header(event_id, impact_parameter, empty_event,
+                                      binF));
   }
 
   VERIFY(bf::remove(particleoutputpath));
@@ -423,7 +426,8 @@ TEST(extended) {
     }
 
     // event end line
-    VERIFY(compare_final_block_header(event_id, impact_parameter, empty_event, binF));
+    VERIFY(compare_final_block_header(event_id, impact_parameter, empty_event,
+                                      binF));
   }
 
   VERIFY(bf::remove(collisionsoutputfilepath));

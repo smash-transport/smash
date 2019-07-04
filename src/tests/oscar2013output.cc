@@ -129,7 +129,8 @@ TEST(full2013_format) {
     osc2013full->at_eventstart(particles, event_id);
     osc2013full->at_interaction(*action, 0.);
     action->perform(&particles, 1);
-    osc2013full->at_eventend(particles, event_id, impact_parameter, empty_event);
+    osc2013full->at_eventend(particles, event_id, impact_parameter,
+                             empty_event);
   }
   VERIFY(!bf::exists(outputfilepath_unfinished));
   VERIFY(bf::exists(outputfilepath));
@@ -252,7 +253,8 @@ TEST(final2013_format) {
     osc2013final->at_interaction(*action, 0.);
     /* Final state output; this is the only thing we expect to find in file */
     action->perform(&particles, 1);
-    osc2013final->at_eventend(particles, event_id, impact_parameter, empty_event);
+    osc2013final->at_eventend(particles, event_id, impact_parameter,
+                              empty_event);
   }
   VERIFY(!bf::exists(outputfilepath_unfinished));
   VERIFY(bf::exists(outputfilepath));
@@ -333,7 +335,8 @@ TEST(full_extended_oscar) {
     osc2013full->at_interaction(*action, 0.);
     /* Final state output */
     action->perform(&particles, 1);
-    osc2013full->at_eventend(particles, event_id, impact_parameter, empty_event);
+    osc2013full->at_eventend(particles, event_id, impact_parameter,
+                             empty_event);
   }
   VERIFY(!bf::exists(outputfilepath_unfinished));
   VERIFY(bf::exists(outputfilepath));
