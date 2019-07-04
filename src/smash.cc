@@ -115,8 +115,9 @@ void usage(const int rc, const std::string &progname) {
    *     one the target.) After the initial collision, only decays are
    *     considered and all resonances are assumed to have their pole mass. This
    *     may yield different results than a full simulation with SMASH, where
-   *     the resonances masses are sampled from the spectral function. Also,
-   *     contributions from strings are not considered.
+   *     the resonances masses are sampled from the spectral function.
+   *     Typically, this results in errors of less than 1 mb in the worst case.
+   *     Also, contributions from strings are not considered.
    * <tr><td>`-f` <td>`--force`
    * <td>Forces overwriting files in the output directory. Normally, if you
    *     specifiy an output directory with `-o`, the directory must be empty.
