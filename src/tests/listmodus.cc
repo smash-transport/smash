@@ -52,7 +52,8 @@ static bf::path create_particlefile(
 
     // Print them to file in OSCAR 2013 format
     const double impact_parameter = 2.34;  // just a dummy value here
-    osc2013final->at_eventend(particles, event, impact_parameter);
+    const bool empty_event = false;  // just a dummy value as well
+    osc2013final->at_eventend(particles, event, impact_parameter, empty_event);
   }
 
   // release and let destructor rename the file

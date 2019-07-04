@@ -109,6 +109,7 @@ TEST(full2013_format) {
   action->generate_final_state();
   ParticleList final_particles = action->outgoing_particles();
   const double impact_parameter = 1.783;
+  const bool empty_event = false;
   const int event_id = 0;
 
   const bf::path outputfilename = "full_event_history.oscar";
@@ -128,7 +129,7 @@ TEST(full2013_format) {
     osc2013full->at_eventstart(particles, event_id);
     osc2013full->at_interaction(*action, 0.);
     action->perform(&particles, 1);
-    osc2013full->at_eventend(particles, event_id, impact_parameter);
+    osc2013full->at_eventend(particles, event_id, impact_parameter, empty_event);
   }
   VERIFY(!bf::exists(outputfilepath_unfinished));
   VERIFY(bf::exists(outputfilepath));
@@ -203,7 +204,7 @@ TEST(full2013_format) {
       /* Check for event end line */
       std::getline(outputfile, line);
       std::string end_line = "# event " + std::to_string(event_id + 1) +
-                             " end 0" + " impact   1.783";
+                             " end 0" + " impact   1.783 empty no";
       COMPARE(line, end_line);
     }
   }
@@ -223,6 +224,7 @@ TEST(final2013_format) {
   const ParticleData p2 = particles.insert(Test::smashon_random());
   const int event_id = 0;
   const double impact_parameter = 2.34;
+  const bool empty_event = true;
 
   /* Create interaction ("elastic scattering") */
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
@@ -250,7 +252,7 @@ TEST(final2013_format) {
     osc2013final->at_interaction(*action, 0.);
     /* Final state output; this is the only thing we expect to find in file */
     action->perform(&particles, 1);
-    osc2013final->at_eventend(particles, event_id, impact_parameter);
+    osc2013final->at_eventend(particles, event_id, impact_parameter, empty_event);
   }
   VERIFY(!bf::exists(outputfilepath_unfinished));
   VERIFY(bf::exists(outputfilepath));
@@ -289,7 +291,7 @@ TEST(final2013_format) {
       /* Check for event end line */
       std::getline(outputfile, line);
       std::string end_line = "# event " + std::to_string(event_id + 1) +
-                             " end 0" + " impact   2.340";
+                             " end 0" + " impact   2.340 empty yes";
       COMPARE(line, end_line);
     }
   }
@@ -314,6 +316,7 @@ TEST(full_extended_oscar) {
   ParticleList final_particles = action->outgoing_particles();
   const int event_id = 0;
   const double impact_parameter = 1.783;
+  const bool empty_event = false;
 
   {
     OutputParameters out_par = OutputParameters();
@@ -330,7 +333,7 @@ TEST(full_extended_oscar) {
     osc2013full->at_interaction(*action, 0.);
     /* Final state output */
     action->perform(&particles, 1);
-    osc2013full->at_eventend(particles, event_id, impact_parameter);
+    osc2013full->at_eventend(particles, event_id, impact_parameter, empty_event);
   }
   VERIFY(!bf::exists(outputfilepath_unfinished));
   VERIFY(bf::exists(outputfilepath));
@@ -408,7 +411,7 @@ TEST(full_extended_oscar) {
     /* Check for event end line */
     std::getline(outputfile, line);
     std::string end_line = "# event " + std::to_string(event_id + 1) +
-                           " end 0" + " impact   1.783";
+                           " end 0" + " impact   1.783 empty no";
     COMPARE(line, end_line);
   }
   VERIFY(bf::remove(outputfilepath));
