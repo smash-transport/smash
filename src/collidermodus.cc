@@ -120,7 +120,7 @@ namespace smash {
  Au, Pb, U. \n
  * false - Manually set parameters of spherical deformation. This requires the
  * additional specification of \key Beta_2, \key Beta_4, \key Theta and
- * \key Phi, which follow \iref{Moller:1993ed}. \n
+ * \key Phi, which follow \iref{Moller:1993ed} and \iref{Schenke:2019ruo}. \n
  *
  * \page input_impact_parameter_ Impact Parameter
  * \key Impact: \n
