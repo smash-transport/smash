@@ -257,6 +257,10 @@ smash_add_runtest(box_run smash smash
                   -i ${PROJECT_SOURCE_DIR}/input/box/config.yaml
                   -p ${PROJECT_SOURCE_DIR}/input/box/particles.txt
                   -d ${PROJECT_SOURCE_DIR}/input/box/decaymodes.txt)
+smash_add_runtest(stochastic_box_run smash smash
+                  -i ${PROJECT_SOURCE_DIR}/input/stochastic_box/config.yaml
+                  -p ${PROJECT_SOURCE_DIR}/input/stochastic_box/particles_only_pi0.txt
+                  -d ${PROJECT_SOURCE_DIR}/input/stochastic_box/decaymodes_all_off.txt)
 smash_add_runtest(collider_run smash smash -m Collider)
 smash_add_runtest(collider_frozen_fermi_run smash smash -m Collider
                   -c "Modi: {Collider: {Fermi_Motion: frozen}}")
