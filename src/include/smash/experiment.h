@@ -1676,36 +1676,41 @@ void Experiment<Modus>::intermediate_output() {
 template <typename Modus>
 void Experiment<Modus>::update_potentials() {
   if (potentials_) {
-    if (potentials_->use_skyrme() && jmu_B_lat_ != nullptr) {
-      update_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
-                     DensityType::Baryon, density_param_, particles_, true);
-      const size_t UBlattice_size = UB_lat_->size();
-      for (size_t i = 0; i < UBlattice_size; i++) {
-        auto jB = (*jmu_B_lat_)[i];
-        const FourVector flow_four_velocity =
-            std::abs(jB.density()) > really_small ? jB.jmu_net() / jB.density()
-                                                  : FourVector();
-        (*UB_lat_)[i] =
-            flow_four_velocity * potentials_->skyrme_pot(jB.density());
-        (*FB_lat_)[i] = potentials_->skyrme_force(jB.density(), jB.grad_rho(),
-                                                  jB.dj_dt(), jB.rot_j());
-      }
-    }
     if (potentials_->use_symmetry() && jmu_I3_lat_ != nullptr) {
       update_lattice(jmu_I3_lat_.get(), LatticeUpdate::EveryTimestep,
                      DensityType::BaryonicIsospin, density_param_, particles_,
                      true);
-      const size_t UI3lattice_size = UI3_lat_->size();
-      for (size_t i = 0; i < UI3lattice_size; i++) {
-        auto jI3 = (*jmu_I3_lat_)[i];
-        const FourVector flow_four_velocity =
-            std::abs(jI3.density()) > really_small
-                ? jI3.jmu_net() / jI3.density()
-                : FourVector();
-        (*UI3_lat_)[i] =
-            flow_four_velocity * potentials_->symmetry_pot(jI3.density());
-        (*FI3_lat_)[i] = potentials_->symmetry_force(jI3.grad_rho(),
-                                                     jI3.dj_dt(), jI3.rot_j());
+    }
+    if ((potentials_->use_skyrme() || potentials_->use_symmetry()) &&
+        jmu_B_lat_ != nullptr) {
+      update_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
+                     DensityType::Baryon, density_param_, particles_, true);
+      const size_t UBlattice_size = UB_lat_->size();
+      assert(UBlattice_size == UI3_lat_->size());
+      for (size_t i = 0; i < UBlattice_size; i++) {
+        auto jB = (*jmu_B_lat_)[i];
+        const FourVector flow_four_velocity_B =
+            std::abs(jB.density()) > really_small ? jB.jmu_net() / jB.density()
+                                                  : FourVector();
+        if (potentials_->use_skyrme()) {
+          (*UB_lat_)[i] =
+              flow_four_velocity_B * potentials_->skyrme_pot(jB.density());
+          (*FB_lat_)[i] = potentials_->skyrme_force(jB.density(), jB.grad_rho(),
+                                                    jB.dj_dt(), jB.rot_j());
+        }
+        if (potentials_->use_symmetry() && jmu_I3_lat_ != nullptr) {
+          auto jI3 = (*jmu_I3_lat_)[i];
+          const FourVector flow_four_velocity_I3 =
+              std::abs(jI3.density()) > really_small
+                  ? jI3.jmu_net() / jI3.density()
+                  : FourVector();
+          (*UI3_lat_)[i] =
+              flow_four_velocity_I3 *
+              potentials_->symmetry_pot(jI3.density(), jB.density());
+          (*FI3_lat_)[i] = potentials_->symmetry_force(
+              jI3.density(), jI3.grad_rho(), jI3.dj_dt(), jI3.rot_j(),
+              jB.density(), jB.grad_rho(), jB.dj_dt(), jB.rot_j());
+        }
       }
     }
   }

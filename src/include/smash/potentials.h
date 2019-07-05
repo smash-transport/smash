@@ -60,10 +60,21 @@ class Potentials {
    *
    * \param[in] baryon_isospin_density The difference between the proton and
    *            the neutron density in the local rest frame in fm\f$^{-3}\f$.
-   * \return Symmetry potential \f[U_I=2\times 10^{-3}S_{\rm sym}
+   * \param[in] baryon_density
+   * \return Symmetry potential \f[U_I=2\times 10^{-3}S_{\rm sym}(\rho_B)
    *         \frac{\rho_n-\rho_p}{\rho_0}\f] in GeV
    */
-  double symmetry_pot(const double baryon_isospin_density) const;
+  double symmetry_pot(const double baryon_isospin_density,
+                      const double baryon_density) const;
+
+  /**
+   * Calculate the factor \f$S(\rho)\f$ in the symmetry potential.
+   *
+   * If S_Pot is set in the config, \f$S(\rho)\f$ is set to be constant.
+   * \param[in] baryon_density baryon density
+   * \return Facxtor S in symmetry potenial
+   */
+  double symmetry_s(const double baryon_density) const;
 
   /**
    * Evaluates potential at point r. Potential is always taken in the local
@@ -126,22 +137,29 @@ class Potentials {
   /**
    * Evaluates the electrical and magnetic components of the symmetry force.
    *
-   * \param[in] grad_rho Gradient of density [fm\f$^{-4}\f$]. This density is
+   * \param[in] rhoI3 Relative isospin 3 density.
+   * \param[in] grad_rhoI3 Gradient of density [fm\f$^{-4}\f$]. This density is
    *            evaluated in the computational frame.
-   * \param[in] dj_dt Time derivative of the current density [fm\f$^{-4}\f$
-   * \param[in] rot_j Curl of the current density [fm\f$^{-4}\f$
+   * \param[in] djI3_dt Time derivative of the current density [fm\f$^{-4}\f$
+   * \param[in] rot_jI3 Curl of the current density [fm\f$^{-4}\f$
    * \return (\f$E_I3, B_I3\f$) [GeV/fm], where
-   *         \f[E_{I3} = -V_{I3}^\prime(\rho^\ast)(\nabla\rho_{I3}
-   *                    + \partial_t \vec j_{I3})\f]
+   *         \f[\vec{E} = - \frac{\partial V^\ast}{\partial\rho_{I_3}^\ast}
+   *         (\nabla\rho_{I_3} + \partial_t \vec j_{I_3})
+   *         - \frac{\partial V^\ast}{\partial\rho_B^\ast)(\nabla\rho_B
+   *         + \partial_t \vec j_B\f]
    *         is the electrical component of symmetry force and
-   *         \f[B_{I3} = V_I^\prime(\rho^\ast) \nabla\times\vec j_{I3}\f]
+   *         \f[\vec{B} = \frac{\partial V^\ast}{\rho_{I_3}^\ast}
+   *         \nabla\times\vec j_{I_3}\f]
+   *         + \frac{\partial V^\ast}{\rho_B^\ast}
+   *         \nabla\times\vec j_B
    *         is the magnetic component of the symmetry force
    *         with \f$\rho^\ast\f$ being the Eckart density.
    */
   std::pair<ThreeVector, ThreeVector> symmetry_force(
-      const ThreeVector grad_rho, const ThreeVector dj_dt,
-      const ThreeVector rot_j) const;
-
+      const double rhoI3, const ThreeVector grad_rhoI3,
+      const ThreeVector djI3_dt, const ThreeVector rot_jI3, const double rhoB,
+      const ThreeVector grad_rhoB, const ThreeVector djB_dt,
+      const ThreeVector rot_jB) const;
   /**
    * Evaluates the electrical and magnetic components of the forces at point r.
    * Point r is in the computational frame.
@@ -197,8 +215,21 @@ class Potentials {
    */
   double skyrme_tau_;
 
-  /// coefficent in front of the symmetry term.
-  double symmetry_s_;
+  /// Coefficent in front of the symmetry termin case it is set to be constant
+  double const_symmetry_s_;
+
+  /**
+   * Wheter the factor S in the symmetry potential depends on the baryon
+   * density
+   */
+  bool symmetry_s_is_density_dependent_;
+  /**
+   * Power \f$ \gamma \f$ in formula for \f$ S(\rho) \f$:
+   * \f[ S(\rho)=12.3\,\mathrm{MeV}\times
+   * (\frac{\rho}{\rho_0})^{2/3}+20\,\mathrm{MeV}\times
+   * (\frac{\rho}{\rho_0})^\gamma \f]
+   */
+  double symmetry_gamma_;
 };
 
 }  // namespace smash
