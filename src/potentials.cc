@@ -97,11 +97,10 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
     if (conf.has_value({"Symmetry", "S_Pot"})) {
       const_symmetry_s_ = conf.take({"Symmetry", "S_Pot"});
       symmetry_s_is_density_dependent_ = false;
-    } else
-      {
-        symmetry_gamma_ = conf.take({"Symmetry", "gamma"});
-        symmetry_s_is_density_dependent_ = true;
-      }
+    } else {
+      symmetry_gamma_ = conf.take({"Symmetry", "gamma"});
+      symmetry_s_is_density_dependent_ = true;
+    }
   }
 }
 
@@ -121,8 +120,9 @@ double Potentials::symmetry_s(const double baryon_density) const {
   if (symmetry_s_is_density_dependent_) {
     return 12.3 * std::pow(baryon_density / nuclear_density, 2. / 3.) +
            20.0 * std::pow(baryon_density / nuclear_density, symmetry_gamma_);
-  } else
-    { return const_symmetry_s_; }
+  } else {
+    return const_symmetry_s_;
+  }
 }
 double Potentials::symmetry_pot(const double baryon_isospin_density,
                                 const double baryon_density) const {
