@@ -204,7 +204,7 @@ BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
       insert_jet_(modus_config.has_value({"Box", "Jet", "Jet_PDG"})),
       jet_pdg_(insert_jet_ ? modus_config.take({"Box", "Jet", "Jet_PDG"})
                                  .convert_for(jet_pdg_)
-                           : pdg::p), // dummy default; never used
+                           : pdg::p),  // dummy default; never used
       jet_mom_(modus_config.take({"Box", "Jet", "Jet_Momentum"}, 20.)) {}
 
 double BoxModus::initial_conditions(Particles *particles,
