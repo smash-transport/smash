@@ -99,6 +99,12 @@ namespace smash {
  * char    uint32_t      double      char
  * 'f' event_number impact_parameter empty
  * \endcode
+ * Where
+ * \li \key event_number: Number of the event, starting with 0.
+ * \li \key impact_parameter: Impact parameter [fm] of the collision in case of
+ * a collider setup, 0.0 otherwise.
+ * \li \key empty: 0 if there was an interaction between the projectile
+ * and the target, 1 otherwise. For non-collider setups, this is always 0.
  *
  * Particles output
  * ----------------

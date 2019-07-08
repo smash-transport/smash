@@ -452,10 +452,11 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key impact_parameter: Impact parameter of the collision in case of a
  * collider setup, 0.0 otherwise.
  * \li \key yes_or_no: "no" if there was an interaction between the projectile
- * and the target, "yes" otherwise.
+ * and the target, "yes" otherwise. For non-collider setups, this is always
+ * "no".
  *
- * Note that 'event', 'end' and 'impact' are no variables, but words that are
- * printed in the header. \n
+ * Note that 'event', 'end', 'impact' and 'empty' are no variables, but words
+ * that are printed in the header. \n
  * \n
  * \page format_oscar_collisions OSCAR Collisions Format
  * The OSCAR particles format follows the general block structure of the OSCAR
