@@ -63,7 +63,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * Determine the collision time of the two particles.
    * Time of the closest approach is taken as collision time, if the geometric
    * collision criterion is used. For stochastic criterion the time is
-   * distributed randomly within the timestep as in \iref{Xu:2004mz}.
+   * distributed uniformly within the timestep as in \iref{Xu:2004mz}.
    *
    * \param[in] p1 First incoming particle
    * \param[in] p2 Second incoming particle
@@ -224,7 +224,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * happen in the next timestep and create a corresponding Action object
    * in that case.
    *
-   * Two criterion for the collision decision are supported: 1. The default
+   * Two criteria for the collision decision are supported: 1. The default
    * geometric criterion from UrQMD \iref{Bass:1998ca} (3.27). 2. A stochastic
    * collision criterion e.g. employed by BAMPS \iref{Xu:2004mz} (Sec.IIB).
    * Note, the latter is currently only tested for a box with a fixed elastic
@@ -253,7 +253,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
 
   /// Class that deals with strings, interfacing Pythia.
   std::unique_ptr<StringProcess> string_process_interface_;
-  /// Specifis which collision criterion is used
+  /// Specifies which collision criterion is used
   const CollisionCriterion coll_crit_;
   /// Elastic cross section parameter (in mb).
   const double elastic_parameter_;
