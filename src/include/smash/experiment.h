@@ -1692,11 +1692,15 @@ void Experiment<Modus>::update_potentials() {
         const FourVector flow_four_velocity_B =
             std::abs(jB.density()) > really_small ? jB.jmu_net() / jB.density()
                                                   : FourVector();
+        double baryon_density = jB.density();
+        ThreeVector baryon_grad_rho = jB.grad_rho();
+        ThreeVector baryon_dj_dt = jB.dj_dt();
+        ThreeVector baryon_rot_j = jB.rot_j();
         if (potentials_->use_skyrme()) {
           (*UB_lat_)[i] =
-              flow_four_velocity_B * potentials_->skyrme_pot(jB.density());
-          (*FB_lat_)[i] = potentials_->skyrme_force(jB.density(), jB.grad_rho(),
-                                                    jB.dj_dt(), jB.rot_j());
+              flow_four_velocity_B * potentials_->skyrme_pot(baryon_density);
+          (*FB_lat_)[i] = potentials_->skyrme_force(
+              baryon_density, baryon_grad_rho, baryon_dj_dt, baryon_rot_j);
         }
         if (potentials_->use_symmetry() && jmu_I3_lat_ != nullptr) {
           auto jI3 = (*jmu_I3_lat_)[i];
@@ -1706,10 +1710,10 @@ void Experiment<Modus>::update_potentials() {
                   : FourVector();
           (*UI3_lat_)[i] =
               flow_four_velocity_I3 *
-              potentials_->symmetry_pot(jI3.density(), jB.density());
+              potentials_->symmetry_pot(jI3.density(), baryon_density);
           (*FI3_lat_)[i] = potentials_->symmetry_force(
               jI3.density(), jI3.grad_rho(), jI3.dj_dt(), jI3.rot_j(),
-              jB.density(), jB.grad_rho(), jB.dj_dt(), jB.rot_j());
+              baryon_density, baryon_grad_rho, baryon_dj_dt, baryon_rot_j);
         }
       }
     }

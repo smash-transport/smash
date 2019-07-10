@@ -94,12 +94,10 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
    * depend on the baryon density. Otherwise it wil be constant.
    */
   if (use_symmetry_) {
-    if (conf.has_value({"Symmetry", "S_Pot"})) {
-      const_symmetry_s_ = conf.take({"Symmetry", "S_Pot"});
-      symmetry_s_is_density_dependent_ = false;
-    } else {
+    symmetry_S_Pot_ = conf.take({"Symmetry", "S_Pot"});
+    if (conf.has_value({"Symmetry", "gamma"})) {
       symmetry_gamma_ = conf.take({"Symmetry", "gamma"});
-      symmetry_s_is_density_dependent_ = true;
+      symmetry_is_rhoB_dependent_ = true;
     }
   }
 }
@@ -116,18 +114,23 @@ double Potentials::skyrme_pot(const double baryon_density) const {
          (skyrme_a_ * std::abs(tmp) +
           skyrme_b_ * std::pow(std::abs(tmp), skyrme_tau_));
 }
-double Potentials::symmetry_s(const double baryon_density) const {
-  if (symmetry_s_is_density_dependent_) {
+double Potentials::symmetry_S(const double baryon_density) const {
+  if (symmetry_is_rhoB_dependent_) {
     return 12.3 * std::pow(baryon_density / nuclear_density, 2. / 3.) +
            20.0 * std::pow(baryon_density / nuclear_density, symmetry_gamma_);
   } else {
-    return const_symmetry_s_;
+    return 0.;
   }
 }
 double Potentials::symmetry_pot(const double baryon_isospin_density,
                                 const double baryon_density) const {
-  return 1.0e-3 * 2. * symmetry_s(baryon_density) * baryon_isospin_density /
-         nuclear_density;
+  double potential =
+      1.0e-3 * 2. * symmetry_S_Pot_ * baryon_isospin_density / nuclear_density;
+  if (symmetry_is_rhoB_dependent_) {
+    potential += 1.0e-3 * symmetry_S(baryon_density) * baryon_isospin_density *
+                 baryon_isospin_density / (baryon_density * baryon_density);
+  }
+  return potential;
 }
 
 double Potentials::potential(const ThreeVector &r, const ParticleList &plist,
@@ -192,24 +195,37 @@ std::pair<ThreeVector, ThreeVector> Potentials::symmetry_force(
     const double rhoI3, const ThreeVector grad_rhoI3, const ThreeVector djI3_dt,
     const ThreeVector rot_jI3, const double rhoB, const ThreeVector grad_rhoB,
     const ThreeVector djB_dt, const ThreeVector rot_jB) const {
-  const double MeV_to_GeV = 1.0e-3;
   ThreeVector E_component(0.0, 0.0, 0.0), B_component(0.0, 0.0, 0.0);
   if (use_symmetry_) {
-    const double dV_drhoI3 =
-        MeV_to_GeV * 2. * symmetry_s(rhoB) / nuclear_density;
-    double dV_drhoB = 0.;
-    if (symmetry_s_is_density_dependent_) {
-      dV_drhoB = MeV_to_GeV * 2. * rhoI3 / nuclear_density *
-                 (24.6 / 3. * std::pow(rhoB / nuclear_density, -1. / 3.) +
-                  20. * symmetry_gamma_ *
-                      std::pow(rhoB / nuclear_density, symmetry_gamma_ - 1));
-    }
-
-    E_component -=
-        dV_drhoI3 * (grad_rhoI3 + djI3_dt) + dV_drhoB * (grad_rhoB + djB_dt);
-    B_component += dV_drhoI3 * rot_jI3 + dV_drhoB * rot_jB;
+    E_component -= dVsym_drhoI3(rhoB, rhoI3) * (grad_rhoI3 + djI3_dt) +
+                   dVsym_drhoB(rhoB, rhoI3) * (grad_rhoB + djB_dt);
+    B_component +=
+        dVsym_drhoI3(rhoB, rhoI3) * rot_jI3 + dVsym_drhoB(rhoB, rhoI3) * rot_jB;
   }
   return std::make_pair(E_component, B_component);
+}
+
+double Potentials::dVsym_drhoI3(const double rhoB, const double rhoI3) const {
+  double term1 = 2. * symmetry_S_Pot_ / nuclear_density;
+  if (symmetry_is_rhoB_dependent_) {
+    double term2 = 2. * rhoI3 * symmetry_S(rhoB) / (rhoB * rhoB);
+    return term1 + term2;
+  } else {
+    return term1;
+  }
+}
+
+double Potentials::dVsym_drhoB(const double rhoB, const double rhoI3) const {
+  if (symmetry_is_rhoB_dependent_) {
+    double rhoB_over_rho0 = rhoB / nuclear_density;
+    double term1 = 8.2 * std::pow(rhoB_over_rho0, -1. / 3.) / nuclear_density +
+                   20. * symmetry_gamma_ *
+                       std::pow(rhoB_over_rho0, symmetry_gamma_) / rhoB;
+    double term2 = -2. * symmetry_S(rhoB) / rhoB;
+    return 1.e-3 * (term1 + term2) * rhoI3 * rhoI3 / (rhoB * rhoB);
+  } else {
+    return 0.;
+  }
 }
 
 std::tuple<ThreeVector, ThreeVector, ThreeVector, ThreeVector>
