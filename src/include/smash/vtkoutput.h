@@ -56,9 +56,11 @@ class VtkOutput : public OutputInterface {
    * \param particles Unused. Current list of particles.
    * \param event_number Unused. Number of event.
    * \param impact_parameter Unused. Impact parameter of this event.
+   * \param empty_event Unused. Whether the projectile and target did not
+   *        collide.
    */
   void at_eventend(const Particles &particles, const int event_number,
-                   double impact_parameter) override;
+                   double impact_parameter, bool empty_event) override;
 
   /**
    * Writes out all current particles.

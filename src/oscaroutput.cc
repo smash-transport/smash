@@ -145,7 +145,8 @@ void OscarOutput<Format, Contents>::at_eventstart(const Particles &particles,
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
                                                 const int event_number,
-                                                double impact_parameter) {
+                                                double impact_parameter,
+                                                bool empty_event) {
   if (Format == OscarFormat2013 || Format == OscarFormat2013Extended) {
     if (Contents & OscarParticlesAtEventend) {
       std::fprintf(file_.get(), "# event %i out %zu\n", event_number + 1,
@@ -153,8 +154,9 @@ void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
       write(particles);
     }
     // Comment end of an event
-    std::fprintf(file_.get(), "# event %i end 0 impact %7.3f\n",
-                 event_number + 1, impact_parameter);
+    const char *empty_event_str = empty_event ? "yes" : "no";
+    std::fprintf(file_.get(), "# event %i end 0 impact %7.3f empty %s\n",
+                 event_number + 1, impact_parameter, empty_event_str);
   } else {
     /* OSCAR line prefix : initial particles; final particles; event id
      * Last block of an event: initial = number of particles, final = 0
@@ -442,16 +444,19 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * **Event end line**\n
  * The end of an event is indicated by the following line:
  * \code
- * # event ev_num end 0 impact impact_parameter
+ * # event ev_num end 0 impact impact_parameter empty yes_or_no
  * \endcode
  * Where
  * \li \key ev_num: Event number
  * \li \key Nparticles: Number of particles at the end of the timestep
  * \li \key impact_parameter: Impact parameter of the collision in case of a
- * collider setup, else 0.0
+ * collider setup, 0.0 otherwise.
+ * \li \key yes_or_no: "no" if there was an interaction between the projectile
+ * and the target, "yes" otherwise. For non-collider setups, this is always
+ * "no".
  *
- * Note that 'event', 'end' and 'impact' are no variables, but words that are
- * printed in the header. \n
+ * Note that 'event', 'end', 'impact' and 'empty' are no variables, but words
+ * that are printed in the header. \n
  * \n
  * \page format_oscar_collisions OSCAR Collisions Format
  * The OSCAR particles format follows the general block structure of the OSCAR

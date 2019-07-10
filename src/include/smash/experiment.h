@@ -343,6 +343,10 @@ class Experiment : public ExperimentBase {
    * the ColliderModus, so is set as an empty vector by default.
    */
   std::vector<bool> nucleon_has_interacted_ = {};
+  /**
+   * Whether the projectile and the target collided.
+   */
+  bool projectile_target_interact_ = false;
 
   /**
    * The initial nucleons in the ColliderModus propagate with
@@ -1292,11 +1296,24 @@ bool Experiment<Modus>::perform_action(
   if (modus_.is_collider()) {
     /* Mark incoming nucleons as interacted - now they are permitted
      * to collide with nucleons from their native nucleus */
+    bool incoming_projectile = false;
+    bool incoming_target = false;
     for (const auto &incoming : action.incoming_particles()) {
       assert(incoming.id() >= 0);
       if (incoming.id() < modus_.total_N_number()) {
         nucleon_has_interacted_[incoming.id()] = true;
       }
+      if (incoming.id() < modus_.proj_N_number()) {
+        incoming_projectile = true;
+      }
+      if (incoming.id() >= modus_.proj_N_number() &&
+          incoming.id() < modus_.total_N_number()) {
+        incoming_target = true;
+      }
+    }
+    // Check whether particles from different nuclei interacted.
+    if (incoming_projectile & incoming_target) {
+      projectile_target_interact_ = true;
     }
   }
   /* Make sure to pick a non-zero integer, because 0 is reserved for "no
@@ -1782,7 +1799,8 @@ void Experiment<Modus>::final_output(const int evt_num) {
   }
 
   for (const auto &output : outputs_) {
-    output->at_eventend(particles_, evt_num, modus_.impact_parameter());
+    output->at_eventend(particles_, evt_num, modus_.impact_parameter(),
+                        !projectile_target_interact_);
   }
 }
 
