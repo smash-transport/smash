@@ -33,6 +33,7 @@
 #include "thermalizationaction.h"
 // Output
 #include "binaryoutput.h"
+#include "icoutput.h"
 #include "oscaroutput.h"
 #include "thermodynamicoutput.h"
 #ifdef SMASH_USE_ROOT
@@ -581,6 +582,8 @@ void Experiment<Modus>::create_output(const std::string &format,
     printout_lattice_td_ = true;
     outputs_.emplace_back(
         make_unique<VtkOutput>(output_path, content, out_par));
+  } else if (content == "Initial_Conditions" && format == "ASCII") {
+    outputs_.emplace_back(make_unique<ICOutput>(output_path, content, out_par));
   } else {
     log.error() << "Unknown combination of format (" << format
                 << ") and content (" << content << "). Fix the config.";
@@ -1641,7 +1644,6 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
       intermediate_output();
     }
   }
-
   log.debug("Propagating to time ", end_time);
   propagate_and_shine(end_time);
 }
@@ -1664,6 +1666,28 @@ void Experiment<Modus>::intermediate_output() {
   for (const auto &output : outputs_) {
     if (output->is_dilepton_output() || output->is_photon_output()) {
       continue;
+    }
+
+    if (output->is_initial_condition_output()) {
+      Particles Particles_iso_tau;
+      const double t = parameters_.labclock.current_time();
+      for (auto &&particle : particles_) {
+        double z = particle.position()[3];
+        double tau = std::sqrt(t * t - z * z);
+
+        // 0.0001fm bin around tau = 0.5 fm
+        // make sure t>0, else this condition will already be fulfilled before
+        // nuclei interact.
+        if (t > 0.0 && 0.4999 < tau && tau < 0.5001) {
+          Particles_iso_tau.insert(particle);
+          particles_.remove(particle);
+        }
+      }
+      output->at_intermediate_time(Particles_iso_tau, parameters_.outputclock,
+                                   density_param_);
+      continue;
+      // Alternatively: Find time at which particle will have tau=0.5 and
+      // propagate to this time (timestepless).
     }
     output->at_intermediate_time(particles_, parameters_.outputclock,
                                  density_param_);

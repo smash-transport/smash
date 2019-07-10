@@ -104,5 +104,37 @@ void update_momenta(
     RectangularLattice<std::pair<ThreeVector, ThreeVector>> *FB_lat,
     RectangularLattice<std::pair<ThreeVector, ThreeVector>> *FI3_lat);
 
+/**
+ * Determine whether or not particle crosses hypersurface of given proper
+ * time during timestepless propagation.
+ *
+ * \param[in] pdata_before_propagation data of the particle of interest before
+ * it is propagated.
+ * \param[in] pdata_after_propagation data of the particle of interest after it
+ * was propagated.
+ * \param[in] tau Proper time of hypersurface
+ *
+ * \return Does particle cross hypersurface?
+ */
+
+bool crosses_hypersurface(ParticleData &pdata_before_propagation,
+                          ParticleData &pdata_after_propagation,
+                          const double tau);
+
+/**
+ * Find the coordinates at which a particle crosses a hypersurface of constant
+ * proper time during timestepless propagation.
+ *
+ * \param[in] pdata_before_propagation data of the particle of interest before
+ * it is propagated.
+ * \param[in] pdata_after_propagation data of the particle of interest after it
+ * was propagated.
+ * \param[in] tau Proper time of hypersurface
+ *
+ * \return Coordinates when crossing hypersurface
+ */
+FourVector coordinates_on_hypersurface(ParticleData &pdata_before_propagation,
+                                       ParticleData &pdata_after_propagation,
+                                       const double tau);
 }  // namespace smash
 #endif  // SRC_INCLUDE_PROPAGATION_H_

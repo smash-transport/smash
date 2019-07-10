@@ -46,7 +46,9 @@ double propagate_straight_line(Particles *particles, double to_time,
   bool negative_dt_error = false;
   double dt = 0.0;
   for (ParticleData &data : *particles) {
+    ParticleData data_before_prop = data;
     const double t0 = data.position().x0();
+
     dt = to_time - t0;
     if (dt < 0.0 && !negative_dt_error) {
       // Print error message once, not for every particle
@@ -76,9 +78,22 @@ double propagate_straight_line(Particles *particles, double to_time,
     }
     const FourVector distance = FourVector(0.0, v * dt);
     log.debug("Particle ", data, " motion: ", distance);
+
     FourVector position = data.position() + distance;
     position.set_x0(to_time);
     data.set_4position(position);
+
+    // Ensure t>0, else we would add the initial nucleons before the collision
+    //if (t0 > 0.0 && is_IC_output_) {
+    if (t0 > 0.0) {
+      bool hypersurface_is_crossed =
+          crosses_hypersurface(data_before_prop, data, 0.5);
+      if (hypersurface_is_crossed) {
+        // Get exact coordinates where hypersurface is crossed
+        FourVector crossing_position =
+            coordinates_on_hypersurface(data_before_prop, data, 0.5);
+      }
+    }
   }
   return dt;
 }
@@ -174,6 +189,64 @@ void update_momenta(
                << "with potentials. Maximum safe value: "
                << safety_factor * min_time_scale << " fm/c.";
   }
+}
+
+bool crosses_hypersurface(ParticleData &pdata_before_propagation,
+                          ParticleData &pdata_after_propagation,
+                          const double tau) {
+  bool hypersurface_is_crossed = false;
+  // find t and z at start of propagation
+  const double t1 = pdata_before_propagation.position().x0();
+  const double z1 = pdata_before_propagation.position().x3();
+
+  // find t and z after propagation
+  const double t2 = pdata_after_propagation.position().x0();
+  const double z2 = pdata_after_propagation.position().x3();
+
+  // find corresponding proper times before and after propagation
+  const double tau_before = std::sqrt(t1 * t1 - z1 * z1);
+  const double tau_after = std::sqrt(t2 * t2 - z2 * z2);
+
+  if (tau_before <= tau && tau <= tau_after) {
+    hypersurface_is_crossed = true;
+  }
+
+  return hypersurface_is_crossed;
+}
+
+FourVector coordinates_on_hypersurface(ParticleData &pdata_before_propagation,
+                                       ParticleData &pdata_after_propagation,
+                                       const double tau) {
+  // find t and z at start of propagation
+  const double t1 = pdata_before_propagation.position().x0();
+  const double z1 = pdata_before_propagation.position().x3();
+
+  // find t and z after propagation
+  const double t2 = pdata_after_propagation.position().x0();
+  const double z2 = pdata_after_propagation.position().x3();
+
+  // find slope and intercept of linear function
+  const double m = (z2 - z1) / (t2 - t1);
+  const double n = z1 - m * t1;
+
+  // The equation to solve is a quadratic equation which provides two solutions,
+  // the latter is usually out of the t-interval we are looking at.
+  const double sol1 = n * m / (1 - m * m) +
+                      std::sqrt((1 - m * m) * tau * tau + n * n) / (1 - m * m);
+  const double sol2 = n * m / (1 - m * m) -
+                      std::sqrt((1 - m * m) * tau * tau + n * n) / (1 - m * m);
+
+  SMASH_UNUSED(sol2);  //only used in DEBUG output
+  assert((sol1 >= t1 && sol1 <= t2));
+  assert(!(sol2 >= t1 && sol2 <= t2));
+
+  // Propagate to point where hypersurface is crossed
+  const ThreeVector v = pdata_before_propagation.velocity();
+  const FourVector distance = FourVector(0.0, v * (sol1 - t1));
+  FourVector crossing_position = pdata_before_propagation.position() + distance;
+  crossing_position.set_x0(sol1);
+
+  return crossing_position;
 }
 
 }  // namespace smash
