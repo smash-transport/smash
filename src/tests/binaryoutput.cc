@@ -159,6 +159,11 @@ static bool compare_final_block_header(const int ev,
          (empty_event_read == empty_event);
 }
 
+/* function to check we reached the end of the file */
+static bool check_end_of_file(const FilePtr &file) {
+  return std::feof(file.get()) == 0;
+}
+
 TEST(fullhistory_format) {
   /* create two smashon particles */
   Particles particles;
@@ -245,6 +250,7 @@ TEST(fullhistory_format) {
     // event end line
     VERIFY(compare_final_block_header(event_id, impact_parameter, empty_event,
                                       binF));
+    VERIFY(check_end_of_file(binF));
   }
 
   VERIFY(bf::remove(collisionsoutputfilepath));
@@ -333,6 +339,7 @@ TEST(particles_format) {
     // after end of event
     VERIFY(compare_final_block_header(event_id, impact_parameter, empty_event,
                                       binF));
+    VERIFY(check_end_of_file(binF));
   }
 
   VERIFY(bf::remove(particleoutputpath));
@@ -428,6 +435,7 @@ TEST(extended) {
     // event end line
     VERIFY(compare_final_block_header(event_id, impact_parameter, empty_event,
                                       binF));
+    VERIFY(check_end_of_file(binF));
   }
 
   VERIFY(bf::remove(collisionsoutputfilepath));
