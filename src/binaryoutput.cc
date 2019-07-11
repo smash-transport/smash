@@ -144,7 +144,7 @@ BinaryOutputBase::BinaryOutputBase(const bf::path &path,
 
 // write functions:
 void BinaryOutputBase::write(const char c) {
-    std::fwrite(&c, sizeof(char), 1, file_.get());
+  std::fwrite(&c, sizeof(char), 1, file_.get());
 }
 
 void BinaryOutputBase::write(const std::string &s) {
