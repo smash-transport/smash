@@ -39,6 +39,12 @@ class BinaryOutputBase : public OutputInterface {
                             const std::string &name, bool extended_format);
 
   /**
+   * Write byte to binary output.
+   * \param[in] x Value to be written.
+   */
+  void write(const char c);
+
+  /**
    * Write string to binary output.
    * \param[in] s String to be written.
    */
