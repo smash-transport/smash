@@ -1033,7 +1033,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   std::vector<std::string> output_contents = output_conf.list_upmost_nodes();
   for (const auto &content : output_contents) {
     auto this_output_conf = output_conf[content.c_str()];
-    std::vector<std::string> formats = this_output_conf.take({"Format"});
+    const std::vector<std::string> formats = this_output_conf.take({"Format"});
+    if (output_path == "") {
+      continue;
+    }
     for (const auto &format : formats) {
       create_output(format, content, output_path, output_parameters);
     }
