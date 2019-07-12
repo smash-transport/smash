@@ -1273,6 +1273,7 @@ void Experiment<Modus>::initialize_new_event() {
   interactions_total_ = 0;
   previous_interactions_total_ = 0;
   total_pauli_blocked_ = 0;
+  projectile_target_interact_ = false;
   // Print output headers
   log.info() << hline;
   log.info() << "Time [fm]   Ediff [GeV]    Scatt.|Decays   "
