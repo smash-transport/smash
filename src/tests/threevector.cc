@@ -173,7 +173,7 @@ TEST(rotations) {
   ThreeVector Zfixed(0.33, -2.1, 3.85);
   ThreeVector Z(0.33, -2.1, 3.85);
   Z.rotate(M_PI / 3, M_PI / 4, M_PI / 5);
-  Z.inverserotate(M_PI / 3, M_PI / 4, M_PI / 5);
+  Z.rotate(-M_PI / 5, -M_PI / 4, -M_PI / 3);
   COMPARE_ABSOLUTE_ERROR(Z.x1(), Zfixed.x1(), 1.e-15);
   COMPARE_ABSOLUTE_ERROR(Z.x2(), Zfixed.x2(), 1.e-15);
   COMPARE_ABSOLUTE_ERROR(Z.x3(), Zfixed.x3(), 1.e-15);

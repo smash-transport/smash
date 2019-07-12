@@ -102,8 +102,11 @@ class CustomNucleus : public Nucleus {
   double psi_;
 
  private:
-  /* Filestream variable used if projectile and target are read in from the
+  /**
+   * Filestream variable used if projectile and target are read in from the
    * same file and they use the same static stream.
+   */
+  /*
    * The unique_ptr is only required to work around a bug in GCC 4.8, because it
    * seems to be trying to use the non-existing copy-constructor of
    * `std::ifstream`. Newer compilers don't require this unneccessary

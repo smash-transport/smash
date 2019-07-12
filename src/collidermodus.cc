@@ -618,7 +618,7 @@ bool ColliderModus::same_inputfile(Configuration &proj_config,
   std::string target_file_directory =
       targ_config.read({"Custom", "File_Directory"});
   std::string projectile_file_name = proj_config.read({"Custom", "File_Name"});
-  std::string target_file_name = proj_config.read({"Custom", "File_Name"});
+  std::string target_file_name = targ_config.read({"Custom", "File_Name"});
   // Check if files are the same for projectile and target
   std::string proj_path =
       custom_file_path(projectile_file_directory, projectile_file_name);

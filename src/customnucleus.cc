@@ -117,7 +117,7 @@ CustomNucleus::CustomNucleus(Configuration& config, int testparticles,
    * "if" statement makes sure the streams to the file are initialized
    * properly.
    */
-  std::string path =
+  const std::string path =
       file_path(particle_list_file_directory, particle_list_file_name);
   if (same_file && !filestream_shared_) {
     filestream_shared_ = make_unique<std::ifstream>(path);
