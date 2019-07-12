@@ -63,7 +63,14 @@ class ColliderModus : public ModusDefault {
    **/
   explicit ColliderModus(Configuration modus_config,
                          const ExperimentParameters &parameters);
-
+  /**
+   * Creates full path string consisting of file_directory and file_name
+   * Needed to initialize a customnucleus.
+   * \param[in] file_directory is the path to the external file
+   * \param[in] file_name is the name of the external file
+   */
+  std::string custom_file_path(const std::string &file_directory,
+                               const std::string &file_name);
   /**
    * Generates initial state of the particles in the system.
    * In particular, it initializes the momenta and positions of nucleons
@@ -154,12 +161,20 @@ class ColliderModus : public ModusDefault {
       Configuration &nucleus_cfg, const int ntest,
       const std::string &nucleus_type);
   /**
+   * Checks if target and projectile are read from the same external file if
+   * they are both initialized as a customnucleus. Function is only called if,
+   * projectile is customnucleus.
+   * /param[in] proj_config Configuration of projectile nucleus
+   * /param[in] targ_config Configuration of target nucleus
+   **/
+  bool same_inputfile(Configuration &proj_config, Configuration &targ_config);
+  /**
    * Impact parameter.
    *
    * The nuclei projectile_ and target_ will be shifted along the x-axis
    * so that their centers move on antiparallel lines that are this
    * distance apart from each other.
-   **/
+   */
   double impact_ = 0.;
   /// Method used for sampling of impact parameter.
   Sampling sampling_ = Sampling::Quadratic;

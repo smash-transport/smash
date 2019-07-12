@@ -7,7 +7,7 @@ General:
   Modus:          Collider
   Time_Step_Mode: Fixed
   Delta_Time:     0.1
-  End_Time:       100.0
+  End_Time:       10.0
   Randomseed:     -1
   Nevents:        1
 
@@ -28,4 +28,4 @@ Modi:
       Custom:
         File_Directory: "../input/custom_nucleus"
         File_Name: "Au197-custom.dat"
-    Sqrtsnn: 7.7
+    Sqrtsnn: 2.0
