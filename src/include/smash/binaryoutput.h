@@ -40,7 +40,7 @@ class BinaryOutputBase : public OutputInterface {
 
   /**
    * Write byte to binary output.
-   * \param[in] x Value to be written.
+   * \param[in] c Value to be written.
    */
   void write(const char c);
 
