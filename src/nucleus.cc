@@ -332,15 +332,12 @@ void Nucleus::set_parameters_automatic() {
         set_saturation_density(0.1604);
         break;
       } else {
-        throw std::domain_error(
-            "Number of protons for nuclei with mass number A = 96 does not "
-            "match that of Zirconium or Ruthenium. The properties "
-            "of additional isobars are currently not implemented. "
-            "Please specify at least \"Beta_2\" and \"Beta_4\" "
-            "manually and set \"Automatic: False.\" ");
+        // radius and diffusiveness taken from \iref{Rybczynski:2013yba}
+        set_diffusiveness(0.54);
+        set_nuclear_radius(1.12 * std::pow(A, 1.0 / 3.0) -
+                           0.86 * std::pow(A, -1.0 / 3.0));
         break;
       }
-      break;
     }
 
     default:
